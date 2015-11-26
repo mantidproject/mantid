@@ -530,152 +530,191 @@ Mantid::API::Workspace_sptr
 ReflectometryReductionOneAuto::sumOverTransmissionGroup(
     WorkspaceGroup_sptr &transGroup) {
   // Handle transmission runs
-  auto transmissionRunSum = transGroup->getItem(0);
+
+  // we clone the first member of transmission group as to
+  // avoid addition in place which would affect the original
+  // workspace member.
+    Workspace_sptr transmissionRunSum = transGroup->getItem(0)->clone();
+  //make a variable to store the overall total of the summation
   MatrixWorkspace_sptr total;
+  // set up and initialize plus algorithm.
+  auto plusAlg = this->createChildAlgorithm("Plus");
+  plusAlg->setChild(true);
+  //plusAlg->setRethrows(true);
+  plusAlg->initialize();
+  // now accumalate the group members
+
+  auto saveNexusAlg = this->createChildAlgorithm("SaveNexus");
+  saveNexusAlg->setChild(true);
+  saveNexusAlg->initialize();
+
+
   for (size_t item = 1; item < transGroup->size(); ++item) {
-    auto plusAlg = this->createChildAlgorithm("Plus");
-    plusAlg->setChild(true);
-    plusAlg->initialize();
     plusAlg->setProperty("LHSWorkspace", transmissionRunSum);
     plusAlg->setProperty("RHSWorkspace", transGroup->getItem(item));
     plusAlg->setProperty("OutputWorkspace", transmissionRunSum);
+    /*
+    std::string filename = "C:\\Users\\UJO48515\\Documents\\MantidData\\offspec_polCorr_test\\testWithNoClone_" + boost::lexical_cast<std::string>(item)+".nxs";
+    saveNexusAlg->setProperty("filename", filename);
+    saveNexusAlg->setProperty("InputWorkspace", transmissionRunSum);
+    saveNexusAlg->execute();
+    */
     plusAlg->execute();
     total = plusAlg->getProperty("OutputWorkspace");
   }
+  /*std::string filename = "C:\\Users\\UJO48515\\Documents\\MantidData\\offspec_polCorr_test\\testWithNoClone_4.nxs";
+  saveNexusAlg->setProperty("filename", filename);
+  saveNexusAlg->setProperty("InputWorkspace", total);
+  saveNexusAlg->execute();
+  */
   return total;
+
 }
 
 bool ReflectometryReductionOneAuto::processGroups() {
-  // isPolarizationCorrectionOn is used to decide whether
-  // we should process our Transmission WorkspaceGroup members
-  // as individuals (not multiperiod) when PolarizationCorrection is off,
-  // or sum over all of the workspaces in the group
-  // and used that sum as our TransmissionWorkspace when PolarizationCorrection
-  // is on.
-  const bool isPolarizationCorrectionOn =
-      this->getPropertyValue("PolarizationAnalysis") !=
-      noPolarizationCorrectionMode();
-  // Get our input workspace group
-  auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      getPropertyValue("InputWorkspace"));
-  // Get name of IvsQ workspace
-  const std::string outputIvsQ = this->getPropertyValue("OutputWorkspace");
-  // Get name of IvsLam workspace
-  const std::string outputIvsLam =
-      this->getPropertyValue("OutputWorkspaceWavelength");
+    // isPolarizationCorrectionOn is used to decide whether
+    // we should process our Transmission WorkspaceGroup members
+    // as individuals (not multiperiod) when PolarizationCorrection is off,
+    // or sum over all of the workspaces in the group
+    // and used that sum as our TransmissionWorkspace when PolarizationCorrection
+    // is on.
+    const bool isPolarizationCorrectionOn =
+        this->getPropertyValue("PolarizationAnalysis") !=
+        noPolarizationCorrectionMode();
+    // Get our input workspace group
+    auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        getPropertyValue("InputWorkspace"));
+    // Get name of IvsQ workspace
+    const std::string outputIvsQ = this->getPropertyValue("OutputWorkspace");
+    // Get name of IvsLam workspace
+    const std::string outputIvsLam =
+        this->getPropertyValue("OutputWorkspaceWavelength");
 
-  // Create a copy of ourselves
-  Algorithm_sptr alg = this->createChildAlgorithm(
-      this->name(), -1, -1, this->isLogging(), this->version());
-  alg->setChild(false);
-  alg->setRethrows(true);
+    // Create a copy of ourselves
+    Algorithm_sptr alg = this->createChildAlgorithm(
+        this->name(), -1, -1, this->isLogging(), this->version());
+    alg->setChild(false);
+    alg->setRethrows(true);
 
-  // Copy all the non-workspace properties over
-  std::vector<Property *> props = this->getProperties();
-  for (auto prop = props.begin(); prop != props.end(); ++prop) {
-    if (*prop) {
-      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(*prop);
-      if (!wsProp)
-        alg->setPropertyValue((*prop)->name(), (*prop)->value());
+    // Copy all the non-workspace properties over
+    std::vector<Property *> props = this->getProperties();
+    for (auto prop = props.begin(); prop != props.end(); ++prop) {
+        if (*prop) {
+            IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(*prop);
+            if (!wsProp)
+                alg->setPropertyValue((*prop)->name(), (*prop)->value());
+        }
     }
-  }
 
-  // Check if the transmission runs are groups or not
-  const std::string firstTrans = this->getPropertyValue("FirstTransmissionRun");
-  WorkspaceGroup_sptr firstTransG;
-  if (!firstTrans.empty()) {
-    auto firstTransWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
-    firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
+    // Check if the transmission runs are groups or not
+    const std::string firstTrans = this->getPropertyValue("FirstTransmissionRun");
+    WorkspaceGroup_sptr firstTransG;
+    if (!firstTrans.empty()) {
+        auto firstTransWS =
+            AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
+        firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
 
-    if (!firstTransG) {
-      // we only have one transmission workspace, so we use it as it is.
-      alg->setProperty("FirstTransmissionRun", firstTrans);
-    } else if (group->size() != firstTransG->size() &&
-               !isPolarizationCorrectionOn) {
-      // if they are not the same size then we cannot associate a transmission
-      // group workspace member with every input group workpspace member.
-      throw std::runtime_error("FirstTransmissionRun WorkspaceGroup must be "
-                               "the same size as the InputWorkspace "
-                               "WorkspaceGroup");
+        if (!firstTransG) {
+            // we only have one transmission workspace, so we use it as it is.
+            alg->setProperty("FirstTransmissionRun", firstTrans);
+        }
+        else if (group->size() != firstTransG->size() &&
+            !isPolarizationCorrectionOn) {
+            // if they are not the same size then we cannot associate a transmission
+            // group workspace member with every input group workpspace member.
+            throw std::runtime_error("FirstTransmissionRun WorkspaceGroup must be "
+                "the same size as the InputWorkspace "
+                "WorkspaceGroup");
+        }
     }
-  }
 
-  const std::string secondTrans =
-      this->getPropertyValue("SecondTransmissionRun");
-  WorkspaceGroup_sptr secondTransG;
-  if (!secondTrans.empty()) {
-    auto secondTransWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
-    secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
+    const std::string secondTrans =
+        this->getPropertyValue("SecondTransmissionRun");
+    WorkspaceGroup_sptr secondTransG;
+    if (!secondTrans.empty()) {
+        auto secondTransWS =
+            AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
+        secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
 
-    if (!secondTransG)
-      // we only have one transmission workspace, so we use it as it is.
-      alg->setProperty("SecondTransmissionRun", secondTrans);
+        if (!secondTransG)
+            // we only have one transmission workspace, so we use it as it is.
+            alg->setProperty("SecondTransmissionRun", secondTrans);
 
-    else if (group->size() != secondTransG->size() &&
-             !isPolarizationCorrectionOn) {
-      // if they are not the same size then we cannot associate a transmission
-      // group workspace member with every input group workpspace member.
-      throw std::runtime_error("SecondTransmissionRun WorkspaceGroup must be "
-                               "the same size as the InputWorkspace "
-                               "WorkspaceGroup");
+        else if (group->size() != secondTransG->size() &&
+            !isPolarizationCorrectionOn) {
+            // if they are not the same size then we cannot associate a transmission
+            // group workspace member with every input group workpspace member.
+            throw std::runtime_error("SecondTransmissionRun WorkspaceGroup must be "
+                "the same size as the InputWorkspace "
+                "WorkspaceGroup");
+        }
     }
-  }
-  // If our transmission run is a group and PolarizationCorrection is on
-  // then we sum our transmission group members.
-  //
-  // Otherwise, if polarization correction is off, we process them
-  // using one transmission group member at a time.
+    // If our transmission run is a group and PolarizationCorrection is on
+    // then we sum our transmission group members.
+    //
+    // Otherwise, if polarization correction is off, we process them
+    // using one transmission group member at a time.
 
-  if (firstTransG && isPolarizationCorrectionOn) {
-    auto firstTransmissionSum = sumOverTransmissionGroup(firstTransG);
-    alg->setProperty("FirstTransmissionRun", firstTransmissionSum);
-  }
-  if (secondTransG && isPolarizationCorrectionOn) {
-    auto secondTransmissionSum = sumOverTransmissionGroup(secondTransG);
-    alg->setProperty("SecondTransmissionRun", secondTransmissionSum);
-  }
-  std::vector<std::string> IvsQGroup, IvsLamGroup;
+    if (firstTransG && isPolarizationCorrectionOn) {
+        auto firstTransmissionSum = sumOverTransmissionGroup(firstTransG);
+        alg->setProperty("FirstTransmissionRun", firstTransmissionSum);
+    }
+    if (secondTransG && isPolarizationCorrectionOn) {
+        auto secondTransmissionSum = sumOverTransmissionGroup(secondTransG);
+        alg->setProperty("SecondTransmissionRun", secondTransmissionSum);
+    }
+    std::vector<std::string> IvsQGroup, IvsLamGroup;
 
-  // Execute algorithm over each group member (or period, if this is
-  // multiperiod)
-  size_t numMembers = group->size();
-  for (size_t i = 0; i < numMembers; ++i) {
-    const std::string IvsQName =
-        outputIvsQ + "_" + boost::lexical_cast<std::string>(i + 1);
-    const std::string IvsLamName =
-        outputIvsLam + "_" + boost::lexical_cast<std::string>(i + 1);
-    if (firstTransG && !isPolarizationCorrectionOn) // polarization off
-      alg->setProperty("FirstTransmissionRun", firstTransG->getItem(i)->name());
-    if (secondTransG && !isPolarizationCorrectionOn) // polarization off
-      alg->setProperty("SecondTransmissionRun",
-                       secondTransG->getItem(i)->name());
-    alg->setProperty("InputWorkspace", group->getItem(i)->name());
-    alg->setProperty("OutputWorkspace", IvsQName);
-    alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
-    alg->execute();
+    // Execute algorithm over each group member (or period, if this is
+    // multiperiod)
+    size_t numMembers = group->size();
+    for (size_t i = 0; i < numMembers; ++i) {
+        const std::string IvsQName =
+            outputIvsQ + "_" + boost::lexical_cast<std::string>(i + 1);
+        const std::string IvsLamName =
+            outputIvsLam + "_" + boost::lexical_cast<std::string>(i + 1);
+        if (firstTransG && !isPolarizationCorrectionOn) // polarization off
+            alg->setProperty("FirstTransmissionRun", firstTransG->getItem(i)->name());
+        if (secondTransG && !isPolarizationCorrectionOn) // polarization off
+            alg->setProperty("SecondTransmissionRun",
+                secondTransG->getItem(i)->name());
+        alg->setProperty("InputWorkspace", group->getItem(i)->name());
+        alg->setProperty("OutputWorkspace", IvsQName);
+        alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
+        alg->execute();
 
-    IvsQGroup.push_back(IvsQName);
-    IvsLamGroup.push_back(IvsLamName);
+        IvsQGroup.push_back(IvsQName);
+        IvsLamGroup.push_back(IvsLamName);
 
-    // We use the first group member for our thetaout value
-    if (i == 0)
-      this->setPropertyValue("ThetaOut", alg->getPropertyValue("ThetaOut"));
-  }
+        // We use the first group member for our thetaout value
+        if (i == 0)
+            this->setPropertyValue("ThetaOut", alg->getPropertyValue("ThetaOut"));
+    }
 
-  // Group the IvsQ and IvsLam workspaces
-  Algorithm_sptr groupAlg = this->createChildAlgorithm("GroupWorkspaces");
-  groupAlg->setChild(false);
-  groupAlg->setRethrows(true);
+    // Group the IvsQ and IvsLam workspaces
+    Algorithm_sptr groupAlg = this->createChildAlgorithm("GroupWorkspaces");
+    groupAlg->setChild(false);
+    groupAlg->setRethrows(true);
 
-  groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
-  groupAlg->setProperty("OutputWorkspace", outputIvsLam);
-  groupAlg->execute();
+    groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
+    groupAlg->setProperty("OutputWorkspace", outputIvsLam);
+    groupAlg->execute();
 
-  groupAlg->setProperty("InputWorkspaces", IvsQGroup);
-  groupAlg->setProperty("OutputWorkspace", outputIvsQ);
-  groupAlg->execute();
+    groupAlg->setProperty("InputWorkspaces", IvsQGroup);
+    groupAlg->setProperty("OutputWorkspace", outputIvsQ);
+    groupAlg->execute();
+    if (alg->getPropertyValue("FirstTransmissionRun") != "") {
+    auto saveGroupNexusAlg = this->createChildAlgorithm("SaveNexus");
+    std::string filename = "C:\\Users\\UJO48515\\Documents\\MantidData\\offspec_polCorr_test\\IvsLam_WITH_CLONE_beforePolarizationCorrect.nxs";
+    saveGroupNexusAlg->setProperty("Filename", filename);
+    saveGroupNexusAlg->setProperty("InputWorkspace", outputIvsLam);
+    saveGroupNexusAlg->execute();
+
+    filename = "C:\\Users\\UJO48515\\Documents\\MantidData\\offspec_polCorr_test\\IvsQ_WITH_CLONE_beforePolarizationCorrect.nxs";
+    saveGroupNexusAlg->setProperty("Filename", filename);
+    saveGroupNexusAlg->setProperty("InputWorkspace", outputIvsQ);
+    saveGroupNexusAlg->execute();
+    }
 
   // If this is a multiperiod workspace and we have polarization corrections
   // enabled
