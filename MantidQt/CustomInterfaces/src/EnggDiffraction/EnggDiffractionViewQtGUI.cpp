@@ -52,10 +52,10 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
     "CustomInterfaces/EnggDiffractionView";
 
 /**
- * Default constructor.
- *
- * @param parent Parent window (most likely the Mantid main app window).
- */
+* Default constructor.
+*
+* @param parent Parent window (most likely the Mantid main app window).
+*/
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
       m_currentCalibFilename(""), m_presenter(NULL) {}
@@ -518,7 +518,8 @@ double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
-  std::string pyCode = "win = plotSpectrum('" + wsName + "', 0)";
+  std::string pyCode =
+      "win=plotSpectrum('" + wsName + "', 0, error_bars=False)";
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
@@ -530,8 +531,8 @@ void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
 void EnggDiffractionViewQtGUI::plotWaterfallSpectrum(
     const std::string &wsName) {
   // parameter of list ?
-  std::string pyCode =
-      "plotSpectrum('" + wsName + "', 0, waterfall = True, window = win)";
+  std::string pyCode = "plotSpectrum('" + wsName +
+                       "', 0, error_bars=False, waterfall=True, window=win)";
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
   m_logMsgs.push_back("Plotted output focused data, with status string " +
@@ -540,8 +541,8 @@ void EnggDiffractionViewQtGUI::plotWaterfallSpectrum(
 }
 
 void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName) {
-  std::string pyCode =
-      "plotSpectrum('" + wsName + "', 0, window = win, clearWindow = True)";
+  std::string pyCode = "plotSpectrum('" + wsName +
+                       "', 0, error_bars=False, window=win, clearWindow=True)";
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
 
