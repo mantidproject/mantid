@@ -7,6 +7,7 @@
 #include "MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h"
 
 #include <QObject>
+#include <QFileSystemWatcher>
 
 namespace MantidQt
 {
@@ -60,6 +61,9 @@ namespace CustomInterfaces
     /// Updates the list of logs and number of periods
     void updateAvailableInfo();
 
+    /// When directory contents change, updates files loaded
+    void updateFilesFromDirectory(const QString &path);
+
   signals:
     /// Signal emitted when data get changed
     void dataChanged();
@@ -73,6 +77,9 @@ namespace CustomInterfaces
 
     /// Last loaded data workspace
     MatrixWorkspace_const_sptr m_loadedData;
+
+    /// Watch a directory for changes
+    QFileSystemWatcher m_watcher;
   };
 
 

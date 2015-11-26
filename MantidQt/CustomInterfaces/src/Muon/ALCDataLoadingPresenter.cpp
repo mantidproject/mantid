@@ -29,9 +29,11 @@ namespace {
 std::string getMostRecentFile(const std::string &path) {
   Poco::Path latestPath(path);
   Poco::File latestFile(latestPath);
-  Poco::Timestamp lastModified = latestFile.getLastModified();
-  Poco::DirectoryIterator iter(latestPath.parent());
+  // Directory iterator - check if we were passed a file or a directory
+  Poco::DirectoryIterator iter(latestFile.isDirectory() ? latestPath
+                                                        : latestPath.parent());
   Poco::DirectoryIterator end; // the end iterator
+  Poco::Timestamp lastModified = iter->getLastModified();
   while (iter != end) {
     if (Poco::Path(iter->path()).getExtension() == "nxs") {
       if (iter->getLastModified() > lastModified) {
@@ -59,6 +61,8 @@ namespace CustomInterfaces
 
     connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
     connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableInfo()));
+    connect(&m_watcher, SIGNAL(directoryChanged(const QString &)),
+            SLOT(updateFilesFromDirectory(const QString &)));
   }
 
   /**
@@ -68,14 +72,29 @@ namespace CustomInterfaces
    */
   void ALCDataLoadingPresenter::handleLoadRequested() {
     std::string lastFile(m_view->lastRun());
-    // Check if it was "Auto"
+    // remove any directories the watcher is currently watching
+    if (!m_watcher.directories().empty()) {
+      m_watcher.removePaths(m_watcher.directories());
+    }
+    // Check if input was "Auto"
     if (0 == lastFile.compare(m_view->autoString())) {
-      // TODO: set up watcher etc
-
+      // Add path to watcher
+      Poco::Path path(m_view->firstRun());
+      m_watcher.addPath(QString(path.parent().toString().c_str()));
       // and get the most recent file in the directory to be lastFile
       lastFile = getMostRecentFile(m_view->firstRun());
     }
     // Now perform the load
+    load(lastFile);
+  }
+
+  /**
+   * The watched directory has been changed.
+   * Update files loaded from it.
+   * @param path :: [input] Path to directory modified
+   */
+  void ALCDataLoadingPresenter::updateFilesFromDirectory(const QString &path) {
+    std::string lastFile = getMostRecentFile(path.toStdString());
     load(lastFile);
   }
 
