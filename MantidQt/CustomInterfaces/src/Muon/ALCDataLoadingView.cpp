@@ -277,7 +277,7 @@ ALCDataLoadingView::~ALCDataLoadingView() {
   void ALCDataLoadingView::checkBoxAutoChanged(int state) {
     if (state == Qt::Checked) {
       m_ui.lastRun->setReadOnly(true);
-      m_ui.lastRun->setText("Auto");
+      m_ui.lastRun->setText(autoString().c_str());
     } else {
       m_ui.lastRun->setReadOnly(false);
       m_ui.lastRun->clear();

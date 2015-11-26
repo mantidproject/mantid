@@ -27,21 +27,27 @@ namespace {
  * @returns Path to most recently modified file
  */
 std::string getMostRecentFile(const std::string &path) {
-  Poco::Path latestPath(path);
-  Poco::File latestFile(latestPath);
-  // Directory iterator - check if we were passed a file or a directory
-  Poco::DirectoryIterator iter(latestFile.isDirectory() ? latestPath
-                                                        : latestPath.parent());
-  Poco::DirectoryIterator end; // the end iterator
-  Poco::Timestamp lastModified = iter->getLastModified();
-  while (iter != end) {
-    if (Poco::Path(iter->path()).getExtension() == "nxs") {
-      if (iter->getLastModified() > lastModified) {
-        latestFile = *iter;
-        lastModified = iter->getLastModified();
+  Poco::Path givenPath(path);
+  Poco::File latestFile(givenPath);
+  try {
+    // Directory iterator - check if we were passed a file or a directory
+    Poco::DirectoryIterator iter(latestFile.isDirectory() ? givenPath
+                                                          : givenPath.parent());
+    Poco::DirectoryIterator end; // the end iterator
+    Poco::Timestamp lastModified = iter->getLastModified();
+    while (iter != end) {
+      if (Poco::Path(iter->path()).getExtension() == "nxs") {
+        if (iter->getLastModified() > lastModified) {
+          latestFile = *iter;
+          lastModified = iter->getLastModified();
+        }
+        ++iter;
       }
-      ++iter;
     }
+  } catch (const Poco::Exception &) {
+    // There was some problem iterating through the directory.
+    // Return the file we were given.
+    return givenPath.toString();
   }
   return latestFile.path();
 }
