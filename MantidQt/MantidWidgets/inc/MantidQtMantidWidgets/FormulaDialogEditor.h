@@ -30,8 +30,7 @@ class FormulaDialogEditorFactory: public StringDialogEditorFactory
 public:
   FormulaDialogEditorFactory(QObject* parent):StringDialogEditorFactory(parent){}
 protected:
-  using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
-  QWidget *createEditor(QtStringPropertyManager *, QtProperty *property,QWidget *parent)
+  QWidget *createEditorForManager(QtStringPropertyManager *, QtProperty *property,QWidget *parent)
   {
     return new FormulaDialogEditor(property,parent);
   }

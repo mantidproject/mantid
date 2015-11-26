@@ -19,6 +19,7 @@ namespace MDF
 /// Constructor
 /// @param parent :: Parent widget.
 /// @param index :: Index of the spectrum which parameter is edited.
+/// @param value :: Current parameter value.
 /// @param fixed :: Is the parameter fixed initially?
 /// @param tie :: Parameter's current tie (or empty string).
 /// @param othersFixed :: True if some other local parameters are fixed.
