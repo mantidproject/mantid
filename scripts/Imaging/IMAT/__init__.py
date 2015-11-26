@@ -1,4 +1,4 @@
-# Copyright &copy; 2014-2015 ISIS Rutherford Appleton Laboratory, NScD
+# Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
 # This file is part of Mantid.
@@ -18,12 +18,5 @@
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 """
-Pre-processing operations and filters that are applied on stacks of images
-or individual images.
+3D Tomographic reconstruction being devepeloped for the IMAT instrument
 """
-
-try:
-    from . import filters
-except ImportError:
-    raise ImportError("Inconsistency found. Could not import filters which "
-                      "should be available in this package.")
