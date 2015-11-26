@@ -63,7 +63,7 @@ LoadISISNexus2::LoadISISNexus2()
 */
 int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
-    // Could be an Event Nexus file or a TOFRaw file, 
+    // Could be an Event Nexus file or a TOFRaw file,
     // so confidence is less than 80.
     return 75;
   }
