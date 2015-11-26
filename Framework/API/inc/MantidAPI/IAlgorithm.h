@@ -7,6 +7,8 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/IPropertyManager.h"
 
+#include <memory>
+
 namespace Poco {
 class AbstractObserver;
 template <class T> class ActiveResult;
@@ -177,8 +179,14 @@ public:
   virtual std::string toString() const = 0;
 };
 
+/// Typedef for shared_ptr to IAlgorithm
 typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
+/// Typedef for shared_ptr to IAlgorithm (const version)
 typedef boost::shared_ptr<const IAlgorithm> IAlgorithm_const_sptr;
+/// Typedef for unique_ptr to IAlgorithm
+typedef std::unique<IAlgorithm> IAlgorithm_uptr;
+/// Typedef for unique_ptr to IAlgorithm (const version)
+typedef std::unique_ptr<const IAlgorithm> IAlgorithm_const_uptr;
 
 } // namespace API
 } // namespace Mantid
