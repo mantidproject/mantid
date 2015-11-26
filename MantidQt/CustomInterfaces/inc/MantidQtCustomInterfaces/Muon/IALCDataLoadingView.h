@@ -131,6 +131,9 @@ namespace CustomInterfaces
     /// Enables all the widgets
     virtual void enableAll() = 0;
 
+    /// Toggles "auto" mode for last file
+    virtual void checkBoxAutoChanged(int state) = 0;
+
   signals:
     /// Request to load data
     void loadRequested();

@@ -83,6 +83,7 @@ namespace CustomInterfaces
     void help();
     void disableAll();
     void enableAll();
+    void checkBoxAutoChanged(int state) override;
 
     /// returns the string "Auto"
     std::string autoString() const { return g_autoString; }

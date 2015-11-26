@@ -34,6 +34,7 @@ ALCDataLoadingView::~ALCDataLoadingView() {
     connect(m_ui.firstRun, SIGNAL(fileFindingFinished()), SIGNAL(firstRunSelected()));
 
     connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
+    connect(m_ui.lastRunAuto, SIGNAL(stateChanged(int)), this, SLOT(checkBoxAutoChanged(int)));
 
     m_ui.dataPlot->setCanvasBackground(Qt::white);
     m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
@@ -269,5 +270,19 @@ ALCDataLoadingView::~ALCDataLoadingView() {
 
   }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+  /**
+   * Called when the check state of the "Auto" checkbox changes.
+   * @param state :: [input] Check state - member of Qt::CheckState enum
+   */
+  void ALCDataLoadingView::checkBoxAutoChanged(int state) {
+    if (state == Qt::Checked) {
+      m_ui.lastRun->setReadOnly(true);
+      m_ui.lastRun->setText("Auto");
+    } else {
+      m_ui.lastRun->setReadOnly(false);
+      m_ui.lastRun->clear();
+    }
+  }
+
+  } // namespace CustomInterfaces
+  } // namespace MantidQt

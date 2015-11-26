@@ -55,6 +55,7 @@ public:
   MOCK_METHOD0(disableAll, void());
   MOCK_METHOD0(enableAll, void());
   MOCK_METHOD0(help, void());
+  MOCK_METHOD0(checkBoxAutoChanged, void(int));
 
   void requestLoading() { emit loadRequested(); }
   void selectFirstRun() { emit firstRunSelected(); }

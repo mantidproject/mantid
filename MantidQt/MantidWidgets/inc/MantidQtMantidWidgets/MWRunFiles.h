@@ -214,6 +214,8 @@ public:
   QString getInstrumentOverride();
   /// Overrides the value of default instrument
   void setInstrumentOverride(const QString &instName);
+  /// Set the input read-only or not
+  void setReadOnly(bool readOnly);
 
 signals:
   /// Emitted when the file text changes

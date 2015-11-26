@@ -1113,3 +1113,13 @@ void MWRunFiles::dragEnterEvent(QDragEnterEvent *de) {
       de->acceptProposedAction();
   }
 }
+
+/**
+ * Sets the text read-only or editable
+ * and the Browse button disabled or enabled.
+ * @param readOnly :: [input] whether read-only or editable
+ */
+void MWRunFiles::setReadOnly(bool readOnly) {
+  m_uiForm.fileEditor->setReadOnly(readOnly);
+  m_uiForm.browseBtn->setEnabled(!readOnly);
+}
