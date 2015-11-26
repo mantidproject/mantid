@@ -26,14 +26,14 @@ public:
   ParDomain() : SeqDomain() {}
   /// Create and return i-th domain and i-th values, (i-1)th domain is released.
   void getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
-                          API::FunctionValues_sptr &values) const override;
-  /// Calculate the value of a least squares cost function
-  void leastSquaresVal(
-      const CostFunctions::CostFuncLeastSquares &leastSquares) override;
-  /// Calculate the value, first and second derivatives of a least squares cost
+                                  API::FunctionValues_sptr &values) const override;
+  /// Calculate the value of an additive cost function
+  void
+    additiveCostFunctionVal(const CostFunctions::CostFuncFitting &costFunction) override;
+  /// Calculate the value, first and second derivatives of an additive cost
   /// function
-  void leastSquaresValDerivHessian(
-      const CostFunctions::CostFuncLeastSquares &leastSquares, bool evalDeriv,
+  void additiveCostFunctionValDerivHessian(
+      const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
       bool evalHessian) override;
 };
 

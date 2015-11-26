@@ -75,8 +75,8 @@ SeqDomain *SeqDomain::create(API::IDomainCreator::DomainType type) {
  * Calculate the value of a least squares cost function
  * @param leastSquares :: The least squares cost func to calculate the value for
  */
-void SeqDomain::leastSquaresVal(
-    const CostFunctions::CostFuncLeastSquares &leastSquares) {
+void SeqDomain::additiveCostFunctionVal(
+    const CostFunctions::CostFuncFitting &costFunction) {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   const size_t n = getNDomains();
@@ -86,7 +86,7 @@ void SeqDomain::leastSquaresVal(
     if (!values) {
       throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
-    leastSquares.addVal(domain, values);
+    costFunction.addVal(domain, values);
   }
 }
 
@@ -116,8 +116,8 @@ void SeqDomain::rwpVal(const CostFunctions::CostFuncRwp &rwp) {
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
-void SeqDomain::leastSquaresValDerivHessian(
-    const CostFunctions::CostFuncLeastSquares &leastSquares, bool evalDeriv,
+void SeqDomain::additiveCostFunctionValDerivHessian(
+    const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
     bool evalHessian) {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
@@ -128,7 +128,7 @@ void SeqDomain::leastSquaresValDerivHessian(
     if (!values) {
       throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
-    leastSquares.addValDerivHessian(leastSquares.getFittingFunction(), domain,
+    costFunction.addValDerivHessian(costFunction.getFittingFunction(), domain,
                                     values, evalDeriv, evalHessian);
   }
 }

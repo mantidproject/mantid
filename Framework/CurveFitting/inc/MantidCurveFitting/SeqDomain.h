@@ -13,7 +13,7 @@
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IDomainCreator.h"
-#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncRwp.h"
 #include "MantidCurveFitting/DllConfig.h"
 
@@ -40,13 +40,12 @@ public:
                                   API::FunctionValues_sptr &values) const;
   /// Add new domain creator
   void addCreator(API::IDomainCreator_sptr creator);
-  /// Calculate the value of a least squares cost function
+  /// Calculate the value of an additive cost function
   virtual void
-  leastSquaresVal(const CostFunctions::CostFuncLeastSquares &leastSquares);
-  /// Calculate the value, first and second derivatives of a least squares cost
-  /// function
-  virtual void leastSquaresValDerivHessian(
-      const CostFunctions::CostFuncLeastSquares &leastSquares, bool evalDeriv,
+  additiveCostFunctionVal(const CostFunctions::CostFuncFitting &costFunction);
+  /// Calculate the value, first and second derivatives of an additive cost function.
+  virtual void additiveCostFunctionValDerivHessian(
+      const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
       bool evalHessian);
   /// Calculate the value of a Rwp cost function
   void rwpVal(const CostFunctions::CostFuncRwp &rwp);
