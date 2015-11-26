@@ -8,6 +8,7 @@ from mantid.simpleapi import *
 
 class ResNorm(PythonAlgorithm):
 
+    _res_clone = None
     _res_ws = None
     _van_ws = None
     _e_min = None
@@ -92,6 +93,10 @@ class ResNorm(PythonAlgorithm):
 
     def PyExec(self):
         from IndirectCommon import getWSprefix
+
+        res_clone_name = '__' + self._res_ws
+        res_clone_ws= CloneWorkspace(InputWorkspace=self._res_ws, OutputWorkspace=res_clone_name)
+
         if self._create_output:
             self._out_ws_table = self.getPropertyValue('OutputWorkspaceTable')
 
@@ -147,6 +152,10 @@ class ResNorm(PythonAlgorithm):
         if self._create_output:
             self.setProperty('OutputWorkspaceTable', fit_params)
 
+        prog_process.report('Add or replace Resolution workspace')
+        res_name = res_clone_name[2:]
+        RenameWorkspace(InputWorkspace=res_clone_name,OutputWorkspace=res_name)
+        mtd.addOrReplace(res_name, res_clone_ws)
 
     def _process_res_ws(self, num_hist):
         """
