@@ -534,7 +534,8 @@ ReflectometryReductionOneAuto::sumOverTransmissionGroup(
   // we clone the first member of transmission group as to
   // avoid addition in place which would affect the original
   // workspace member.
-  Workspace_sptr transmissionRunSum = transGroup->getItem(0)->clone();
+  Workspace_sptr transmissionRunSum(transGroup->getItem(0)->clone().release());
+
   // make a variable to store the overall total of the summation
   MatrixWorkspace_sptr total;
   // set up and initialize plus algorithm.
