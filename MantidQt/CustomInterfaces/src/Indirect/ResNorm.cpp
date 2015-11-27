@@ -103,14 +103,12 @@ bool ResNorm::validate() {
 void ResNorm::run() {
   QString vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
   QString resWsName(m_uiForm.dsResolution->getCurrentDataName());
-  std::string vanIn = vanWsName.toStdString();
-  std::string resIn = resWsName.toStdString();
 
   double eMin(m_dblManager->value(m_properties["EMin"]));
   double eMax(m_dblManager->value(m_properties["EMax"]));
 
-  QString outputWsName = getWorkspaceBasename(vanWsName) + "_ResNorm";
-  std::string outname = outputWsName.toStdString();
+  QString outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
+
 
   IAlgorithm_sptr resNorm = AlgorithmManager::Instance().create("ResNorm", 2);
   resNorm->initialize();
@@ -142,7 +140,7 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (error)
     return;
 
-  QString outputBase = (m_uiForm.dsVanadium->getCurrentDataName()).toLower();
+  QString outputBase = (m_uiForm.dsResolution->getCurrentDataName()).toLower();
   const int indexCut = outputBase.lastIndexOf("_");
   outputBase = outputBase.left(indexCut);
   outputBase += "_ResNorm";
