@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>943</width>
-    <height>462</height>
+    <height>466</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,44 +26,24 @@
          <property name="title">
           <string>Data</string>
          </property>
-         <layout class="QVBoxLayout" name="formLayout">
+         <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
-           <layout class="QHBoxLayout" name="firstLayout">
-            <item>
+           <layout class="QGridLayout" name="firstLastLayout">
+            <item row="0" column="0">
              <widget class="QLabel" name="label">
               <property name="text">
                <string>First</string>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="firstRun" native="true">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="label" stdset="0">
-               <string/>
-              </property>
-              <property name="multipleFiles" stdset="0">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="lastLayout">
-            <item>
+            <item row="1" column="0">
              <widget class="QLabel" name="label_2">
               <property name="text">
                <string>Last</string>
               </property>
              </widget>
             </item>
-            <item>
+            <item row="1" column="1">
              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lastRun" native="true">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -79,13 +59,29 @@
               </property>
              </widget>
             </item>
-            <item>
+            <item row="1" column="2">
              <widget class="QCheckBox" name="lastRunAuto">
               <property name="toolTip">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, loads all files in directory&lt;/p&gt;&lt;p&gt;and automatically updates as files are added&lt;/p&gt;&lt;p&gt;and removed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Auto</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="firstRun" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="label" stdset="0">
+               <string/>
+              </property>
+              <property name="multipleFiles" stdset="0">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
