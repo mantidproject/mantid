@@ -278,15 +278,20 @@ TMDE(signal_t MDEventWorkspace)::getSignalAtCoord(
   }
   // If you got here, then the point is in the workspace.
   const API::IMDNode *box = data->getBoxAtCoord(coords);
+  return getNormalizedSignal(box, normalization);
+}
+
+TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(const API::IMDNode *box,
+                                                     const Mantid::API::MDNormalization &normalization) const {
   if (box) {
     // What is our normalization factor?
     switch (normalization) {
-    case NoNormalization:
-      return box->getSignal();
-    case VolumeNormalization:
-      return box->getSignal() * box->getInverseVolume();
-    case NumEventsNormalization:
-      return box->getSignal() / double(box->getNPoints());
+      case NoNormalization:
+        return box->getSignal();
+      case VolumeNormalization:
+        return box->getSignal() * box->getInverseVolume();
+      case NumEventsNormalization:
+        return box->getSignal() / double(box->getNPoints());
     }
     // Should not reach here
     return box->getSignal();
@@ -322,7 +327,7 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(const coord_t *coords,
   if (box->getIsMasked()) {
     return std::numeric_limits<signal_t>::quiet_NaN();
   }
-  return getSignalAtCoord(coords, normalization);
+  return getNormalizedSignal(box, normalization);
 }
 
 //-----------------------------------------------------------------------------------------------
