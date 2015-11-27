@@ -83,9 +83,7 @@ public:
   virtual ~MatrixWorkspace();
 
   /// Returns a clone of the workspace
-  std::unique_ptr<MatrixWorkspace> clone() const {
-    return std::unique_ptr<MatrixWorkspace>(doClone());
-  }
+  MatrixWorkspace_uptr clone() const { return MatrixWorkspace_uptr(doClone()); }
 
   using IMDWorkspace::toString;
   /// String description of state

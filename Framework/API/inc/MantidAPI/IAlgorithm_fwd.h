@@ -1,5 +1,5 @@
-#ifndef MANTID_API_IPEAKWORKSPACE_FWD_H_
-#define MANTID_API_IPEAKWORKSPACE_FWD_H_
+#ifndef MANTID_API_IALGORITHM_FWD_H_
+#define MANTID_API_IALGORITHM_FWD_H_
 
 #include <boost/shared_ptr.hpp>
 #include <memory>
@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace API {
 /**
-  This file provides forward declarations for Mantid::API::IPeaksWorkspace
+  This file provides forward declarations for Mantid::API::IAlgorithm
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -31,16 +31,18 @@ namespace API {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/// forward declare of Mantid::API::IPeaksWorkspace
-class IPeaksWorkspace;
-/// shared pointer to Mantid::API::IPeaksWorkspace
-typedef boost::shared_ptr<IPeaksWorkspace> IPeaksWorkspace_sptr;
-/// shared pointer to Mantid::API::IPeaksWorkspace (const version)
-typedef boost::shared_ptr<const IPeaksWorkspace> IPeaksWorkspace_const_sptr;
-/// unique pointer to Mantid::API::IPeaksWorkspace
-typedef std::unique_ptr<IPeaksWorkspace> IPeaksWorkspace_uptr;
-/// unique pointer to Mantid::API::IPeaksWorkspace (const version)
-typedef std::unique_ptr<const IPeaksWorkspace> IPeaksWorkspace_const_uptr;
-}
-}
-#endif // MANTID_API_IPEAKWORKSPACE_FWD_H_
+/// forward declare of Mantid::API::IAlgorithm
+class IAlgorithm;
+/// shared pointer to Mantid::API::IAlgorithm
+typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
+/// shared pointer to Mantid::API::IAlgorithm (const version)
+typedef boost::shared_ptr<const IAlgorithm> IAlgorithm_const_sptr;
+/// unique pointer to Mantid::API::IAlgorithm
+typedef std::unique_ptr<IAlgorithm> IAlgorithm_uptr;
+/// unique pointer to Mantid::API::IAlgorithm (const version)
+typedef std::unique_ptr<const IAlgorithm> IAlgorithm_const_uptr;
+
+} // namespace API
+} // namespace Mantid
+
+#endif // MANTID_API_IALGORITHM_FWD_H_
