@@ -5,7 +5,7 @@ namespace MantidQt
 namespace MantidWidgets
 {
 
-QWidget* WorkspaceEditorFactory::createEditor(QtStringPropertyManager *, QtProperty *property,QWidget *parent)
+QWidget* WorkspaceEditorFactory::createEditorForManager(QtStringPropertyManager *, QtProperty *property,QWidget *parent)
 {
   return new WorkspaceEditor(property,parent);
 }

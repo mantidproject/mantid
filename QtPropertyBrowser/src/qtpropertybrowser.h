@@ -223,7 +223,7 @@ public:
         while (it.hasNext()) {
             PropertyManager *manager = it.next();
             if (manager == property->propertyManager()) {
-                return createEditor(manager, property, parent);
+                return createEditorForManager(manager, property, parent);
             }
         }
         return 0;
@@ -265,7 +265,7 @@ public:
 protected:
     friend class CompositeEditorFactory<PropertyManager>;
     virtual void connectPropertyManager(PropertyManager *manager) = 0;
-    virtual QWidget *createEditor(PropertyManager *manager, QtProperty *property,
+    virtual QWidget *createEditorForManager(PropertyManager *manager, QtProperty *property,
                 QWidget *parent) = 0;
     virtual void disconnectPropertyManager(PropertyManager *manager) = 0;
     void managerDestroyed(QObject *manager)
