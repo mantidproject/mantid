@@ -98,11 +98,14 @@ class WeigthedLSGaussPeaksEVSdataTest2(stresstesting.MantidStressTest):
         expected_errors = [0.00655660314595665, 3.021546058414827e-07, 3.0766264397350073e-07, 0.0023835827954566415,
                            5.996463420450547, 0.003059328883379551, 6.632752531256318e-07, 7.707070805005832e-07]
 
-        # osx exception
+        # osx and windows exception
         import sys
         if "darwin" == sys.platform:
+            # This is on osx; on win7-release, slightly different, see below
             expected_errors[2] = 3.027791099421756e-07
             expected_errors[7] = 7.797742226241165e-07
+        if "win32" == sys.platform:
+            expected_errors[2] = 3.0277910994217546e-07
 
         params, errors = run_fit(wks, function, 'Levenberg-Marquardt')
 

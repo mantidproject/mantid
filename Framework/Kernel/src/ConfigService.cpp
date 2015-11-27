@@ -107,7 +107,7 @@ public:
   /** Constructor with a class to wrap
    *  @param F :: The object to wrap
    */
-  template <typename Field> WrappedObject(Field &F) : T(F) {
+  template <typename Field> explicit WrappedObject(Field &F) : T(F) {
     m_pPtr = static_cast<T *>(this);
   }
 

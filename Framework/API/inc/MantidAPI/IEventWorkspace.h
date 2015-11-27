@@ -40,9 +40,7 @@ public:
   IEventWorkspace() : MatrixWorkspace() {}
 
   /// Returns a clone of the workspace
-  std::unique_ptr<IEventWorkspace> clone() const {
-    return std::unique_ptr<IEventWorkspace>(doClone());
-  }
+  IEventWorkspace_uptr clone() const { return IEventWorkspace_uptr(doClone()); }
 
   /// Return the workspace typeID
   virtual const std::string id() const { return "IEventWorkspace"; }

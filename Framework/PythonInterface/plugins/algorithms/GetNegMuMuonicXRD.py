@@ -28,15 +28,20 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
                             doc='The output workspace will always be a GroupWorkspaces '
                                 'that will have the workspaces of each'
                                   ' muonicXR workspace created')
+        #We sort the lists of x-values from the dictionary here
+        #so that mantid can plot the workspaces it produces.
+        for key in self.muonic_xr:
+            value = self.muonic_xr.get(key)
+            self.muonic_xr[key] = sorted(value)
 
     def get_muonic_xr(self, element):
         #retrieve peak values from dictionary Muonic_XR
         peak_values = self.muonic_xr[element]
         return peak_values
-        
+
     def validateInput(self):
         issues = dict()
-        
+
         elements = self.getProperty('Elements').value()
         if elements == "":
             issues["Elements"] = 'No elements have been selected from the periodic table'
@@ -46,7 +51,7 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
         outputworkspace_str = self.getProperty('OutputWorkspace').value()
         if outputworkspace_str == "":
             issues['OutputWorkspace'] = 'No output workspace name has been specified'
-            
+
         return issues
 
     def create_muonic_xr_ws(self, element, y_pos):

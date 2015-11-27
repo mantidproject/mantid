@@ -6,7 +6,7 @@ import cry_sample
 import cry_load
 
 
-def create_vana(EXPR_FILE, NoAbs=False):
+def create_vana(EXPR_FILE, NoAbs=False, write_existingv=True):
     # ==== Vana loading
     (dum, uampstotal) = cry_sample.get_data_sum(EXPR_FILE.VanFile, "Vanadium", EXPR_FILE)
     # Subtract the empty instrument ===
@@ -61,7 +61,7 @@ def create_vana(EXPR_FILE, NoAbs=False):
     SaveNexusProcessed(Filename=EXPR_FILE.CorrVanFile + "_unstripped.nxs", InputWorkspace="Vanadium")
     SaveFocusedXYE(Filename=EXPR_FILE.CorrVanFile + "_unstripped.dat", InputWorkspace="Vanadium", SplitFiles=True)
     strip_the_vana(EXPR_FILE)
-    if EXPR_FILE.ExistV == 'no' and EXPR_FILE.VGrpfocus == 'van':
+    if EXPR_FILE.ExistV == 'no' and EXPR_FILE.VGrpfocus == 'van' and write_existingv:
         EXPR_FILE.write_prefline("ExistingV", "yes")
         EXPR_FILE.ExistV = "yes"
     if not EXPR_FILE.debugMode:
@@ -73,7 +73,7 @@ def create_vana(EXPR_FILE, NoAbs=False):
 
 
 def strip_the_vana(EXPR_FILE, LoadUnstrip=""):
-    if not LoadUnstrip:
+    if LoadUnstrip:
         LoadNexusProcessed(Filename=LoadUnstrip, OutputWorkspace="Vanadium", EntryNumber=1)
     print EXPR_FILE.bankList
     cry_load.split_bank("Vanadium", bankList=EXPR_FILE.bankList, Del=True)

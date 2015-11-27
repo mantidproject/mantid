@@ -62,6 +62,7 @@ _translations = {
     'Gesner Passos'           : 'Passos, Gesner',
     'Pete Peterson'           : 'Peterson, Peter F.',
     'Peter Peterson'          : 'Peterson, Peter F.',
+    'Peter F. Peterson'       : 'Peterson, Peter F.',
     'Jay Rainey'              : 'Rainey, Jay',
     'Yannick Raoul'           : 'Raoul, Yannick',
     'Shelly Ren'              : 'Ren, Shelly',
@@ -104,7 +105,16 @@ _translations = {
     'jmborr'                  : 'Borreguero, Jose',
     'Tobias Richter'          : 'Richter, Tobias',
     'ianbush'                 : 'Bush, Ian',
-    'KarlPalmen'              : 'Palmen, Karl'
+    'KarlPalmen'              : 'Palmen, Karl',
+    'Matthew D Jones'         : 'Jones, Matthew D.',
+    'Matt King'               : 'King, Matt',
+    'Jiao Lin'                : 'Lin, Jiao',
+    'Simon Heybrock'          : 'Heybrock, Simon',
+    'Elliot Oram'             : 'Oram, Elliot',
+    'Dominic Oram'            : 'Oram, Dominic',
+    'Shahroz Ahmed'           : 'Ahmed, Shahroz',
+    'celinedurniak'           : 'Durniak, Celine',
+    'Celine Durniak'          : 'Durniak, Celine'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -116,6 +126,7 @@ _blacklist = [
     'Yao, Marie',
     'Utkarsh Ayachit',
     'Chris Kerr',
+    'Thomas Brooks'
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,

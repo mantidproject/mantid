@@ -49,7 +49,10 @@ class muParserScripting: public ScriptingEnv
 
   public:
     static const char *langName;
-    muParserScripting(ApplicationWindow *parent) : ScriptingEnv(parent, langName) { d_initialized=true; }
+    explicit muParserScripting(ApplicationWindow *parent)
+        : ScriptingEnv(parent, langName) {
+      d_initialized = true;
+    }
     static ScriptingEnv *constructor(ApplicationWindow *parent) { return new muParserScripting(parent); }
 
     /// Set the system arguments. Throws an exception as it is not supported

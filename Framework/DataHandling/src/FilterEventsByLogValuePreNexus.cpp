@@ -2327,7 +2327,7 @@ void FilterEventsByLogValuePreNexus::setProtonCharge(
 
   // Add the proton charge entries.
   TimeSeriesProperty<double> *log =
-      new TimeSeriesProperty<double>("m_protonCharge");
+      new TimeSeriesProperty<double>("proton_charge");
   log->setUnits("picoCoulombs");
 
   // Add the time and associated charge to the log
@@ -2335,8 +2335,9 @@ void FilterEventsByLogValuePreNexus::setProtonCharge(
 
   // TODO set the units for the log
   run.addLogData(log);
-  double integ = run.integrateProtonCharge();
-  // run.setProtonCharge(this->m_protonChargeTot); //This is now redundant
+  // Force re-integration
+  run.integrateProtonCharge();
+  double integ = run.getProtonCharge();
   this->g_log.information() << "Total proton charge of " << integ
                             << " microAmp*hours found by integrating.\n";
 

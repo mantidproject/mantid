@@ -110,6 +110,9 @@ bpl::list keys(Run &self) {
 }
 }
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(integrateProtonCharge_Overload,
+                                       integrateProtonCharge, 0, 1)
+
 void export_Run() {
   // Pointer
   register_ptr_to_python<Run *>();
@@ -119,8 +122,11 @@ void export_Run() {
       .def("getProtonCharge", &Run::getProtonCharge, arg("self"),
            "Return the total good proton charge for the run")
 
-      .def("integrateProtonCharge", &Run::integrateProtonCharge, arg("self"),
-           "Return the total good proton charge for the run")
+      .def("integrateProtonCharge", &Run::integrateProtonCharge,
+           integrateProtonCharge_Overload(
+               "Set the total good proton charge for the run, from the proton "
+               "charge log",
+               (arg("self"), arg("logname") = "proton_charge")))
 
       .def("hasProperty", &Run::hasProperty, (arg("self"), arg("name")),
            "Returns True if the given log value is contained within the run")

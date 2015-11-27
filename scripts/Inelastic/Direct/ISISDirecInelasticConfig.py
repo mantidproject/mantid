@@ -1,4 +1,5 @@
-﻿import os
+﻿#!/usr/bin/python
+import os
 import sys
 import platform
 import shutil
@@ -500,7 +501,7 @@ class MantidConfigDirectInelastic(object):
         os.chmod(output_file,0777)
 
         if platform.system() != 'Windows':
-            os.system("chown {0}:{0} {1}".format(self._fedid,output_file))
+            os.system("chown {0}:{1} {2}".format(self._user.userID,self._user.rb_id,output_file))
         # Set up the file creation and modification dates to the users start date
         start_date = self._user.start_date
         file_time = time.mktime(start_date.timetuple())

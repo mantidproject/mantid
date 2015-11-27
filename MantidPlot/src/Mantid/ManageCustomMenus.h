@@ -36,7 +36,8 @@ class ManageCustomMenus : public QDialog
 {
 	Q_OBJECT
 public:
-	ManageCustomMenus(QWidget *parent = 0);
+  explicit ManageCustomMenus(QWidget *parent = 0);
+
 private:
     void initLayout();
     void populateMenuTree();

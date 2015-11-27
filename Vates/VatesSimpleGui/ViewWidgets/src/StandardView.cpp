@@ -45,9 +45,7 @@ namespace SimpleGui
  */
 class QMenuWithToolTip: public QMenu {
 public:
-  QMenuWithToolTip(QWidget *parent): QMenu(parent)
-  {
-  }
+  explicit QMenuWithToolTip(QWidget *parent) : QMenu(parent) {}
 
   bool event(QEvent* e) {
     if (QEvent::ToolTip == e->type()) {

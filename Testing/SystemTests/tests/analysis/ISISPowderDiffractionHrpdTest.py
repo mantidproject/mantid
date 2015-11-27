@@ -1,15 +1,12 @@
-# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
+﻿# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
 
-from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, ITableWorkspace, FileFinder
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, ITableWorkspace
 from mantid.simpleapi import *
 from mantid import config
 import os.path
 import stresstesting
-import sys
 import unittest
 
-F_DIR = FileFinder.getFullPath("PowderISIS")
-sys.path.append(F_DIR)
 import cry_ini
 import cry_focus
 
@@ -17,12 +14,13 @@ DIFF_PLACES = 8
 DIRS = config['datasearch.directories'].split(';')
 
 
-class ISISPowderDiffraction(stresstesting.MantidStressTest):
+class ISISPowderDiffractionHrpd1(stresstesting.MantidStressTest):
     def requiredFiles(self):
         return set(["hrp39191.raw", "hrp39187.raw", "hrp43022.raw", "hrpd/test/GrpOff/hrpd_new_072_01.cal",
                     "hrpd/test/GrpOff/hrpd_new_072_01_corr.cal", "hrpd/test/cycle_09_2/Calibration/van_s1_old-0.nxs",
                     "hrpd/test/cycle_09_2/Calibration/van_s1_old-1.nxs",
-                    "hrpd/test/cycle_09_2/Calibration/van_s1_old-2.nxs", "hrpd/test/cycle_09_2/tester/mtd.pref"])
+                    "hrpd/test/cycle_09_2/Calibration/van_s1_old-2.nxs", "hrpd/test/cycle_09_2/tester/mtd.pref"
+					])
 
     def _clean_up_files(self, filenames, directories):
         try:
@@ -66,7 +64,6 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
                          'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_D.dat',
                          'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_TOF.dat',
                          'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal'])
-
         self._clean_up_files(filenames, DIRS)
 
 
@@ -85,21 +82,13 @@ class LoadTests(unittest.TestCase):
                 pass
         self.cleanup_names = []
 
-    # ============================ Success ==============================
-    def runTest(self):
-        expt = cry_ini.Files('hrpd', RawDir=(DIRS[0]), Analysisdir='test', forceRootDirFromScripts=False,
-                             inputInstDir=DIRS[0])
-        expt.initialize('cycle_09_2', user='tester', prefFile='mtd.pref')
-        expt.tell()
-        cry_focus.focus_all(expt, "43022")
-
     def test_calfile_with_workspace(self):
         self.wsname = "CalWorkspace1"
         calfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/hrpd_new_072_01_corr.cal')
         calfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal')
-        data1 = LoadCalFile(InstrumentName="ENGIN-X", CalFilename=calfile1,
+        data1 = LoadCalFile(InstrumentName="hrpd", CalFilename=calfile1,
                             WorkspaceName=self.wsname)
-        data2 = LoadCalFile(InstrumentName="ENGIN-X", CalFilename=calfile2,
+        data2 = LoadCalFile(InstrumentName="hrpd", CalFilename=calfile2,
                             WorkspaceName="CalWorkspace2")
 
         self.assertTrue(isinstance(data1[0], MatrixWorkspace))
@@ -201,3 +190,142 @@ class LoadTests(unittest.TestCase):
         self.assertEquals(1, data6.getNumberHistograms())
         self.assertEquals(23025, data6.blocksize())
         self.assertAlmostEqual(9782.63819, data6.readX(0)[0], places=DIFF_PLACES)
+
+# ================ Below test cases use different pref file ==================
+# =================== when 'ExistingV' = 'no' in pref file ===================
+
+
+class ISISPowderDiffractionHrpd2(stresstesting.MantidStressTest):
+    def requiredFiles(self):
+        return set(["hrp39191.raw", "hrp39187.raw", "hrp43022.raw", "hrpd/test/GrpOff/hrpd_new_072_01.cal",
+                    "hrpd/test/GrpOff/hrpd_new_072_01_corr.cal", "hrpd/test/cycle_09_2/tester/mtd2.pref"])
+
+    def _clean_up_files(self, filenames, directories):
+        try:
+            for files in filenames:
+                path = os.path.join(directories[0], files)
+                os.remove(path)
+        except OSError, ose:
+            print 'could not delete generated file : ', ose.filename
+
+    def runTest(self):
+        self._success = False
+        expt = cry_ini.Files('hrpd', RawDir=(DIRS[0]), Analysisdir='test', forceRootDirFromScripts=False,
+                             inputInstDir=DIRS[0])
+        expt.initialize('cycle_09_2', user='tester', prefFile='mtd2.pref')
+        expt.tell()
+        cry_focus.focus_all(expt, "43022", Write_ExtV=False)
+
+        # Custom code to create and run this single test suite
+        # and then mark as success or failure
+        suite = unittest.TestSuite()
+        suite.addTest(unittest.makeSuite(LoadTests, "test"))
+        runner = unittest.TextTestRunner()
+        # Run using either runner
+        res = runner.run(suite)
+        if res.wasSuccessful():
+            self._success = True
+        else:
+            self._success = False
+
+    def validate(self):
+        return self._success
+
+    def cleanup(self):
+        filenames = (["hrpd/test/cycle_09_2/Calibration/hrpd_new_072_01_corr.cal",
+                      "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.gss",
+                      "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.nxs",
+                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b1_D.dat',
+                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b1_TOF.dat',
+                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_D.dat',
+                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_TOF.dat',
+                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_D.dat',
+                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_TOF.dat',
+                      'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal',
+                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped.nxs',
+                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-0.dat',
+                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-1.dat',
+                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-2.dat',
+                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-0.nxs',
+                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-0_.dat',
+                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-1.nxs',
+                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-1_.dat',
+                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-2.nxs',
+                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-2_.dat'])
+        self._clean_up_files(filenames, DIRS)
+
+
+# ======================================================================
+# work horse
+class LoadTests2(unittest.TestCase):
+    wsname = "__LoadTest"
+    cleanup_names = []
+
+    def tearDown(self):
+        self.cleanup_names.append(self.wsname)
+        for name in self.cleanup_names:
+            try:
+                AnalysisDataService.remove(name)
+            except KeyError:
+                pass
+        self.cleanup_names = []
+
+    def test_upstripped_files(self):
+        diff_places = 3
+
+        nxsfile = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped.nxs')
+        datfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-0.dat')
+        datfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-1.dat')
+        datfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-2.dat')
+
+        nxsdata = LoadNexusProcessed(Filename=nxsfile, OutputWorkspace="nxs_workspace")
+        data1 = LoadAscii(Filename=datfile1, OutputWorkspace="dat_workspace1")
+        data2 = LoadAscii(Filename=datfile2, OutputWorkspace="dat_workspace2")
+        data3 = LoadAscii(Filename=datfile3, OutputWorkspace="dat_workspace3")
+
+        self.assertTrue(isinstance(nxsdata, MatrixWorkspace))
+        self.assertEquals(3, nxsdata.getNumberHistograms())
+        self.assertEquals(23987, nxsdata.blocksize())
+
+        self.assertAlmostEqual(nxsdata.readX(0)[0], data1.readX(0)[0], places=diff_places)
+        self.assertAlmostEqual(nxsdata.readX(0)[4500], data1.readX(0)[4500], places=diff_places)
+        self.assertAlmostEqual(nxsdata.readX(0)[17000], data1.readX(0)[17000], places=diff_places)
+        self.assertAlmostEqual(nxsdata.readX(0)[22000], data1.readX(0)[22000], places=diff_places)
+
+        self.assertAlmostEqual(nxsdata.readX(1)[0], data2.readX(0)[0], places=diff_places)
+        self.assertAlmostEqual(nxsdata.readX(1)[4500], data2.readX(0)[4500], places=diff_places)
+        self.assertAlmostEqual(nxsdata.readX(1)[17000], data2.readX(0)[17000], places=diff_places)
+        self.assertAlmostEqual(nxsdata.readX(1)[22000], data2.readX(0)[22000], places=diff_places)
+
+        self.assertAlmostEqual(nxsdata.readX(2)[0], data3.readX(0)[0], places=diff_places)
+        self.assertAlmostEqual(nxsdata.readX(2)[4500], data3.readX(0)[4500], places=diff_places)
+        self.assertAlmostEqual(nxsdata.readX(2)[17000], data3.readX(0)[17000], places=diff_places)
+        self.assertAlmostEqual(nxsdata.readX(2)[22000], data3.readX(0)[22000], places=diff_places)
+
+    def test_van_s1_files(self):
+        diff_places = 3
+
+        nxsfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-0.nxs')
+        nxsfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-1.nxs')
+        nxsfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-2.nxs')
+        datfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-0_.dat')
+        datfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-1_.dat')
+        datfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-2_.dat')
+
+        nxsdata1 = LoadNexusProcessed(Filename=nxsfile1, OutputWorkspace="nxs_workspace1")
+        nxsdata2 = LoadNexusProcessed(Filename=nxsfile2, OutputWorkspace="nxs_workspace2")
+        nxsdata3 = LoadNexusProcessed(Filename=nxsfile3, OutputWorkspace="nxs_workspace3")
+        data1 = LoadAscii(Filename=datfile1, OutputWorkspace="dat_workspace1")
+        data2 = LoadAscii(Filename=datfile2, OutputWorkspace="dat_workspace2")
+        data3 = LoadAscii(Filename=datfile3, OutputWorkspace="dat_workspace3")
+
+        self.assertTrue(isinstance(nxsdata1, MatrixWorkspace))
+        self.assertTrue(isinstance(nxsdata2, MatrixWorkspace))
+        self.assertTrue(isinstance(nxsdata3, MatrixWorkspace))
+
+        self.assertAlmostEqual(nxsdata1.readX(0)[0], data1.readX(0)[0], places=diff_places)
+        self.assertAlmostEqual(nxsdata2.readX(0)[4500], data2.readX(0)[4500], places=diff_places)
+        self.assertAlmostEqual(nxsdata3.readX(0)[17000], data3.readX(0)[17000], places=diff_places)
+        self.assertAlmostEqual(nxsdata3.readX(0)[22000], data3.readX(0)[22000], places=diff_places)
+        self.assertAlmostEqual(nxsdata2.readX(0)[0], data2.readX(0)[0], places=diff_places)
+        self.assertAlmostEqual(nxsdata1.readX(0)[4500], data1.readX(0)[4500], places=diff_places)

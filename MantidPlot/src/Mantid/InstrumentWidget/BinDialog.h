@@ -44,7 +44,7 @@ class BinDialog: public QDialog
   Q_OBJECT
 
 public:
-  BinDialog(QWidget *parent = 0);
+  explicit BinDialog(QWidget *parent = 0);
   ~BinDialog();
   void setIntegralMinMax(double,double,bool);
   signals:

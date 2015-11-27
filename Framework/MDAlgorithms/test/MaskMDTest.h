@@ -5,6 +5,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
+#include <stdexcept>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -148,7 +149,7 @@ public:
     alg.setPropertyValue(
         "Dimensions", "Axis0, Axis1"); // wrong number of dimenion ids provided.
     alg.setPropertyValue("Extents", "0,10,0,10,0,10");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute()); // fail input validators
   }
 
   void test_throw_if_extent_cardinality_wrong() {
@@ -160,9 +161,9 @@ public:
     alg.initialize();
     alg.setPropertyValue("Workspace", wsName);
     alg.setPropertyValue("Dimensions", "Axis0, Axis1, Axis2");
-    alg.setPropertyValue("Extents", "0,10"); // wrong number of extents
-                                             // provided.
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    alg.setPropertyValue("Extents", "0,10");  // wrong number of extents
+                                              // provided.
+    TS_ASSERT_THROWS_ANYTHING(alg.execute()); // fail input validators
   }
 
   void test_throw_if_min_greater_than_max_anywhere() {
@@ -175,7 +176,7 @@ public:
     alg.setPropertyValue("Workspace", wsName);
     alg.setPropertyValue("Dimensions", "Axis0, Axis1, Axis2");
     alg.setPropertyValue("Extents", "0,-10,0,-10,0,-10");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute()); // fail input validators
   }
 
   void test_fall_back_to_dimension_names() {
