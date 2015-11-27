@@ -265,10 +265,10 @@ void EnggDiffractionViewQtGUI::readSettings() {
           .toString());
 
   m_uiTabFocus.groupBox_cropped->setChecked(
-	  qs.value("user-params-focus-cropped-group-checkbox", true).toBool());
+	  qs.value("user-params-focus-cropped-group-checkbox", false).toBool());
 
   m_uiTabFocus.groupBox_texture->setChecked(
-	  qs.value("user-params-focus-texture-group-checkbox", true).toBool());
+	  qs.value("user-params-focus-texture-group-checkbox", false).toBool());
 
   m_uiTabFocus.checkBox_FocusedWS->setChecked(
       qs.value("user-params-focus-plot-ws", true).toBool());
@@ -572,6 +572,9 @@ void EnggDiffractionViewQtGUI::resetFocus() {
 
   m_uiTabFocus.lineEdit_cropped_run_num->setText("");
   m_uiTabFocus.lineEdit_cropped_spec_ids->setText("");
+
+  m_uiTabFocus.groupBox_cropped->setChecked(false);
+  m_uiTabFocus.groupBox_texture->setChecked(false);
 
   m_uiTabFocus.lineEdit_texture_run_num->setText("");
   m_uiTabFocus.lineEdit_texture_grouping_file->setText("");
