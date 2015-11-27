@@ -92,8 +92,6 @@ class ResNorm(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import getWSprefix
-
         res_clone_name = '__' + self._res_ws
         res_clone_ws= CloneWorkspace(InputWorkspace=self._res_ws, OutputWorkspace=res_clone_name)
 
