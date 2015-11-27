@@ -1,4 +1,5 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress, InstrumentValidator
+from mantid.simpleapi import FitGaussian
 from mantid.kernel import Direction
 import numpy as np
 from scipy import integrate
@@ -78,7 +79,6 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
     def PyExec(self):
         """ Main execution body
         """
-        from mantid.simpleapi import FitGaussian
 
         self.vanaws = self.getProperty("VanadiumWorkspace").value       # returns workspace instance
         outws_name = self.getPropertyValue("OutputWorkspace")           # returns workspace name (string)

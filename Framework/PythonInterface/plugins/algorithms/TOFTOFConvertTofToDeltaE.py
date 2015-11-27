@@ -95,8 +95,6 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
     def PyExec(self):
         """ Main execution body
         """
-        from mantid.simpleapi import CloneWorkspace, FitGaussian
-
         input_ws = self.getProperty("InputWorkspace").value
         choice_tof = self.getProperty("ChoiceElasticTof").value
 
@@ -118,16 +116,16 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
         if choice_tof == 'FitSample':
             prog_reporter.report("Fit function")
             for idx in range(nb_hist):
-                tof_elastic[idx] = FitGaussian(input_ws, idx)[0]
+                tof_elastic[idx] = api.FitGaussian(input_ws, idx)[0]
 
         if choice_tof == 'FitVanadium':
             vanaws = self.getProperty("VanadiumWorkspace").value
             prog_reporter.report("Fit function")
             for idx in range(nb_hist):
-                tof_elastic[idx] = FitGaussian(vanaws, idx)[0]
+                tof_elastic[idx] = api.FitGaussian(vanaws, idx)[0]
 
         self.log().debug("Tel = " + str(tof_elastic))
-        outws = CloneWorkspace(input_ws)
+        outws = api.CloneWorkspace(input_ws)
 
         # mask detectors with EPP=0
         zeros = np.where(tof_elastic == 0)[0]
