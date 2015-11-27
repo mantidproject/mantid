@@ -271,17 +271,21 @@ ALCDataLoadingView::~ALCDataLoadingView() {
 
   /**
    * Called when the check state of the "Auto" checkbox changes.
+   * Set text before setting read-only to validate the right text.
    * @param state :: [input] Check state - member of Qt::CheckState enum
    */
   void ALCDataLoadingView::checkBoxAutoChanged(int state) {
     // Tell the presenter about the change
     emit lastRunAutoCheckedChanged(state);
     if (state == Qt::Checked) {
-      m_ui.lastRun->setReadOnly(true);
+      // Auto mode on
       m_ui.lastRun->setText(autoString().c_str());
+      m_ui.lastRun->setReadOnly(true);
     } else {
+      // Replace "auto" with the currently loaded file
+      // The search is necessary to clear the validator
+      m_ui.lastRun->setFileTextWithSearch(m_currentAutoFile.c_str());
       m_ui.lastRun->setReadOnly(false);
-      m_ui.lastRun->setText(m_currentAutoFile.c_str());
     }
   }
 
