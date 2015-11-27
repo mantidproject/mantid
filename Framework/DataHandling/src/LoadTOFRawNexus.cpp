@@ -65,8 +65,8 @@ int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
   if (descriptor.pathOfTypeExists("/entry", "NXentry") ||
       descriptor.pathOfTypeExists("/entry-state0", "NXentry")) {
-	// descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) is also valid,
-	// but is currently taken to be ISIS Nexus, till issue #14614 is fixed.
+    // descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) is also valid,
+    // but is currently taken to be ISIS Nexus, till issue #14614 is fixed.
     const bool hasEventData = descriptor.classTypeExists("NXevent_data");
     const bool hasData = descriptor.classTypeExists("NXdata");
     if (hasData && hasEventData)
