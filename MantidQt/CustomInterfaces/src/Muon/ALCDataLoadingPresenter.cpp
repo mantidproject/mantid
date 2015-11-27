@@ -88,6 +88,7 @@ namespace CustomInterfaces
       m_watcher.addPath(QString(path.parent().toString().c_str()));
       // and get the most recent file in the directory to be lastFile
       lastFile = getMostRecentFile(m_view->firstRun());
+      m_view->setCurrentAutoFile(lastFile);
     }
     // Now perform the load
     load(lastFile);
@@ -101,6 +102,7 @@ namespace CustomInterfaces
   void ALCDataLoadingPresenter::updateFilesFromDirectory(const QString &path) {
     std::string lastFile = getMostRecentFile(path.toStdString());
     load(lastFile);
+    m_view->setCurrentAutoFile(lastFile);
   }
 
   /**

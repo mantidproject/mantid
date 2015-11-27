@@ -90,6 +90,10 @@ namespace CustomInterfaces
     /// @return The string "Auto"
     virtual std::string autoString() const = 0;
 
+    /// If Auto mode on, store name of currently loaded file
+    /// @param file :: [input] name of file loaded
+    virtual void setCurrentAutoFile(const std::string &file) = 0;
+
   public slots:
     /// Performs any necessary initialization
     virtual void initialize() = 0;

@@ -279,7 +279,7 @@ ALCDataLoadingView::~ALCDataLoadingView() {
       m_ui.lastRun->setText(autoString().c_str());
     } else {
       m_ui.lastRun->setReadOnly(false);
-      m_ui.lastRun->clear();
+      m_ui.lastRun->setText(m_currentAutoFile.c_str());
       // Tell the presenter to stop watching the directory
       emit lastRunAutoUnchecked();
     }

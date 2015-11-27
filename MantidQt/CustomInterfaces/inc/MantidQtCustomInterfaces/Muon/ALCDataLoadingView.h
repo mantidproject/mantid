@@ -88,6 +88,12 @@ namespace CustomInterfaces
     /// returns the string "Auto"
     std::string autoString() const override { return g_autoString; }
 
+    /// If Auto mode on, store name of currently loaded file
+    /// @param file :: [input] name of file loaded
+    void setCurrentAutoFile(const std::string &file) override {
+      m_currentAutoFile = file;
+    }
+
     // -- End of IALCDataLoadingView interface -----------------------------------------------------
 
   private:
@@ -106,6 +112,8 @@ namespace CustomInterfaces
     /// the string "Auto"
     static const std::string g_autoString;
 
+    /// If Auto in use, the file last loaded
+    std::string m_currentAutoFile;
   };
 
 } // namespace CustomInterfaces
