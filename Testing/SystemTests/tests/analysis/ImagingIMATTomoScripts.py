@@ -110,10 +110,12 @@ class ImagingIMATTomoTests(unittest.TestCase):
         cropped = iprep.filters.crop_vol(self._data_vol, coords)
 
         self.assertTrue(isinstance(self._data_vol, np.ndarray))
-        self.assertTrue(isinstance(cropped, np.ndarray))
+        self.assertTrue(isinstance(cropped, np.ndarray),
+                        msg="the result of cropping should be a numpy array")
 
         expected_shape = (self._data_vol.shape[0], coords[3]-coords[1], coords[2]-coords[0])
-        self.assertEqual(cropped.shape, expected_shape)
+        self.assertEqual(cropped.shape, expected_shape,
+                         msg="the result of cropping should have the appropriate dimensions")
 
         orig_cropped_equals = self._data_vol[:, coords[1]:coords[3], coords[0]:coords[2]] == cropped
         self.assertTrue(orig_cropped_equals.all())
@@ -169,28 +171,33 @@ class ImagingIMATTomoTests(unittest.TestCase):
     def test_remove_stripes_ok(self):
         import IMAT.prep as iprep
 
+        method = 'fourier-wavelet'
         stripped = iprep.filters.remove_stripes_ring_artifacts(self._data_vol,
-                                                               'fourier-wavelet')
+                                                               method)
 
         self.assertTrue(isinstance(self._data_vol, np.ndarray))
-        self.assertTrue(isinstance(stripped, np.ndarray))
-        self.assertEquals(stripped.shape, self._data_vol.shape)
-        self.assertAlmostEquals(stripped[0, 100, 123], 0.37813)
+        self.assertTrue(isinstance(stripped, np.ndarray),
+                        msg="the result of remove_stripes should be a numpy array")
+        self.assertEquals(stripped.shape, self._data_vol.shape,
+                          msg="the result of remove_stripes should be a numpy array")
+        self.assertAlmostEquals(stripped[0, 100, 123], 0.37813,
+                                msg="Expected the results of stripe removal (method {0} not to change "
+                                "with respect to previous executions".format(method))
 
     def test_remove_stripes_raises(self):
         import IMAT.prep as iprep
 
         with self.assertRaises(ValueError):
-            iprep.filters.circular_mask('fail!')
+            iprep.filters.remove_stripes_ring_artifacts('fail!')
 
         with self.assertRaises(ValueError):
-            iprep.filters.circular_mask(np.zeros((2,2,2)), 'fail-method')
+            iprep.filters.remove_stripes_ring_artifacts(np.zeros((2,2,2)), 'fail-method')
 
         with self.assertRaises(ValueError):
-            iprep.filters.circular_mask(np.zeros((3,3)))
+            iprep.filters.remove_stripes_ring_artifacts(np.zeros((3,3)))
 
         with self.assertRaises(ValueError):
-            iprep.filters.circular_mask(np.zeros((1,1,2,2)))
+            iprep.filters.remove_stripes_ring_artifacts(np.zeros((1,1,2,2)))
 
         with self.assertRaises(ValueError):
             iprep.filters.remove_stripes_ring_artifacts(self._data_vol, '')
