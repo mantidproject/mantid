@@ -107,19 +107,13 @@ void ResNorm::run() {
   double eMin(m_dblManager->value(m_properties["EMin"]));
   double eMax(m_dblManager->value(m_properties["EMax"]));
 
-  QString outputWsName = getWorkspaceBasename(vanWsName) + "_ResNorm";
-  QString resCloneName = "__" + resWsName + "_temp";
-  IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-  clone->initialize();
-  clone->setProperty("InputWorkspace", resWsName.toStdString());
-  clone->setProperty("OutputWorkspace", resCloneName.toStdString());
-  clone->execute();
+  QString outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
 
 
   IAlgorithm_sptr resNorm = AlgorithmManager::Instance().create("ResNorm", 2);
   resNorm->initialize();
   resNorm->setProperty("VanadiumWorkspace", vanWsName.toStdString());
-  resNorm->setProperty("ResolutionWorkspace", resCloneName.toStdString());
+  resNorm->setProperty("ResolutionWorkspace", resWsName.toStdString());
   resNorm->setProperty("EnergyMin", eMin);
   resNorm->setProperty("EnergyMax", eMax);
   resNorm->setProperty("CreateOutput", true);
@@ -135,7 +129,6 @@ void ResNorm::run() {
   m_pythonExportWsName = outputWsName.toStdString();
   m_batchAlgoRunner->executeBatchAsync();
 
-
 }
 
 /**
@@ -147,7 +140,7 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (error)
     return;
 
-  QString outputBase = (m_uiForm.dsVanadium->getCurrentDataName()).toLower();
+  QString outputBase = (m_uiForm.dsResolution->getCurrentDataName()).toLower();
   const int indexCut = outputBase.lastIndexOf("_");
   outputBase = outputBase.left(indexCut);
   outputBase += "_ResNorm";
