@@ -88,12 +88,12 @@ double QwtRasterDataMD::value(double x, double y) const
       && (y >= m_overlayYMin) && (y < m_overlayYMax))
   {
     // Point is in the overlaid workspace
-    value = m_overlayWS->getSignalAtCoord(lookPoint, m_normalization);
+    value = m_overlayWS->getSignalWithMaskAtCoord(lookPoint, m_normalization);
   }
   else
   {
     // No overlay, or not within range of that workspace
-    value = m_ws->getSignalAtCoord(lookPoint, m_normalization);
+    value = m_ws->getSignalWithMaskAtCoord(lookPoint, m_normalization);
   }
   delete [] lookPoint;
 

@@ -418,6 +418,10 @@ public:
   virtual signal_t
   getSignalAtCoord(const coord_t *coords,
                    const Mantid::API::MDNormalization &normalization) const;
+  /// Get the signal at a coordinate in the workspace
+  virtual signal_t
+    getSignalWithMaskAtCoord(const coord_t *coords,
+                             const Mantid::API::MDNormalization &normalization) const;
   /// Create iterators. Partitions the iterators according to the number of
   /// cores.
   virtual std::vector<IMDIterator *>

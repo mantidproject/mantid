@@ -368,9 +368,6 @@ signal_t MDHistoWorkspace::getSignalAtCoord(
     const coord_t *coords,
     const Mantid::API::MDNormalization &normalization) const {
   size_t linearIndex = this->getLinearIndexAtCoord(coords);
-  if (this->getIsMaskedAt(linearIndex)) {
-    return std::numeric_limits<signal_t>::quiet_NaN();
-  }
   if (linearIndex < m_length) {
     // What is our normalization factor?
     switch (normalization) {
@@ -385,6 +382,25 @@ signal_t MDHistoWorkspace::getSignalAtCoord(
     return m_signals[linearIndex];
   } else
     return std::numeric_limits<signal_t>::quiet_NaN();
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get the signal at a particular coordinate in the workspace
+ * or return NaN if masked
+ *
+ * @param coords :: numDimensions-sized array of the coordinates to look at
+ * @param normalization : Normalisation to use.
+ * @return the (normalized) signal at a given coordinates.
+ *         NaN if outside the range of this workspace
+ */
+signal_t
+MDHistoWorkspace::getSignalWithMaskAtCoord(const coord_t *coords,
+                           const Mantid::API::MDNormalization &normalization) const {
+  size_t linearIndex = this->getLinearIndexAtCoord(coords);
+  if (this->getIsMaskedAt(linearIndex)) {
+    return std::numeric_limits<signal_t>::quiet_NaN();
+  }
+  return getSignalAtCoord(coords, normalization);
 }
 
 //----------------------------------------------------------------------------------------------
