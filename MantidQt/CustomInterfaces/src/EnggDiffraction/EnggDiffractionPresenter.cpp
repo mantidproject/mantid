@@ -38,6 +38,8 @@ const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
     "engggui_vanadium_integration_ws";
 int EnggDiffractionPresenter::g_croppedCounter = 0;
 int EnggDiffractionPresenter::g_plottingCounter = 0;
+bool EnggDiffractionPresenter::g_abortThread = false;
+
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -129,6 +131,10 @@ void EnggDiffractionPresenter::notify(
   case IEnggDiffractionPresenter::ShutDown:
     processShutDown();
     break;
+
+  case IEnggDiffractionPresenter::StopFocus:
+	  processStopFocus();
+	  break;
   }
 }
 
@@ -366,6 +372,48 @@ void EnggDiffractionPresenter::processShutDown() {
   m_view->saveSettings();
   cleanup();
 }
+
+
+void EnggDiffractionPresenter::processStopFocus() {
+	// free(m_workerThread);
+
+	if (m_workerThread) {
+		g_log.error() << "m_workerThread is: " << true << std::endl;
+
+
+		if (m_workerThread->isRunning()) {
+			g_log.notice() << "A focus process is currently running, shutting "
+				"it down immediately..."
+				<< std::endl;
+
+			g_abortThread = true;
+
+			g_log.error() << "g_abortThread is: " << g_abortThread << std::endl;
+
+			// m_workerThread->wait();
+		}
+
+		//finished = m_workerThread->isFinished();
+
+	//	g_log.error() << "Finished is : " << finished << std::endl;
+
+		g_log.error() << "thread count: " << m_workerThread->idealThreadCount() << std::endl;
+
+		connect(m_workerThread, SIGNAL(finished()), m_workerThread, SLOT(terminate()),
+			Qt::UniqueConnection);
+
+
+		/*connect(m_workerThread, SIGNAL(finished()), m_workerThread,
+		SLOT(deleteLater()), Qt::DirectConnection);
+		*/
+		// m_workerThread->terminate();
+	}
+
+	// delete m_workerThread;
+	// m_workerThread = NULL;
+}
+
+
 
 /**
  * Check if an RB number is valid to work with it (retrieve data,

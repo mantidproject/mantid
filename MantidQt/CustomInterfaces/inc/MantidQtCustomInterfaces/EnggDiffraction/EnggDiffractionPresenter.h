@@ -105,6 +105,7 @@ protected:
   void processInstChange();
   void processRBNumberChange();
   void processShutDown();
+  void processStopFocus();
 
 protected slots:
   void calibrationFinished();
@@ -246,6 +247,9 @@ private:
 
   /// whether to allow users to give the output calibration filename
   const static bool g_askUserCalibFilename;
+
+  /// whether to break the thread
+  static bool g_abortThread;
 
   // name of the workspace with the vanadium integration (of spectra)
   static const std::string g_vanIntegrationWSName;
