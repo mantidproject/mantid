@@ -81,7 +81,7 @@ void SumRowColumn::exec() {
   MatrixWorkspace_sptr outputWS =
       WorkspaceFactory::Instance().create(integratedWS, 1, dim, dim);
   // Remove the unit
-  outputWS->getAxis(0)->unit().reset();
+  outputWS->getAxis(0)->unit().reset(new Mantid::Kernel::Units::Empty);
 
   // Get references to the vectors for the results
   MantidVec &X = outputWS->dataX(0);
