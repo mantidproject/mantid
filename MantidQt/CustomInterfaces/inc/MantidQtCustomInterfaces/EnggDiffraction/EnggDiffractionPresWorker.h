@@ -49,10 +49,10 @@ public:
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outDir,
                  const std::vector<std::string> &runNo,
                  const std::vector<bool> &banks, const std::string &specIDs,
-                 const std::string &dgFile)
+                 const std::string &dgFile, bool &abort)
       : m_pres(pres), m_outCalibFilename(), m_multiRunNo(runNo),
         m_outDir(outDir), m_banks(banks), m_specIDs(specIDs), m_dgFile(dgFile),
-        m_bin(.0), m_nperiods(0) {}
+        m_abort(abort), m_bin(.0), m_nperiods(0) {}
 
   // for rebinning (ToF)
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &runNo,
@@ -83,11 +83,14 @@ private slots:
    */
   void focus() {
 
-    for (size_t i = 0; i < m_multiRunNo.size(); ++i) {
-
-      auto runNo = m_multiRunNo[i];
-      m_pres->doFocusRun(m_outDir, runNo, m_banks, m_specIDs, m_dgFile);
-    }
+	  for (size_t i = 0; i < m_multiRunNo.size(); ++i) {
+		  if (m_abort)
+			  break;
+		  else {
+			  auto runNo = m_multiRunNo[i];
+			  m_pres->doFocusRun(m_outDir, runNo, m_banks, m_specIDs, m_dgFile);
+		  }
+	  }
     emit finished();
   }
 
@@ -124,6 +127,9 @@ private:
   // for focusing "texture"
   const std::string m_dgFile;
   // parameters for pre-processing/rebinning
+
+  bool m_abort; // shahroz
+
   const double m_bin;
   const size_t m_nperiods;
   const std::string m_outWSName;

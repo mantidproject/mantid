@@ -1091,8 +1091,8 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
-  EnggDiffWorker *worker =
-      new EnggDiffWorker(this, dir, multi_RunNo, banks, specNos, dgFile);
+  EnggDiffWorker *worker = new EnggDiffWorker(this, dir, multi_RunNo, banks,
+                                              specNos, dgFile, g_abortThread);
   worker->moveToThread(m_workerThread);
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(focus()));
   connect(worker, SIGNAL(finished()), this, SLOT(focusingFinished()));
