@@ -144,6 +144,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFocus() {
   connect(m_uiTabFocus.pushButton_reset, SIGNAL(released()), this,
           SLOT(focusResetClicked()));
 
+  connect(m_uiTabFocus.pushButton_stopFocus, SIGNAL(released()), this,
+	  SLOT(focusStopClicked()));
+
   connect(m_uiTabFocus.comboBox_PlotData, SIGNAL(currentIndexChanged(int)),
           this, SLOT(plotRepChanged(int)));
 
@@ -661,6 +664,10 @@ void EnggDiffractionViewQtGUI::focusTextureClicked() {
 
 void EnggDiffractionViewQtGUI::focusResetClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::ResetFocus);
+}
+
+void EnggDiffractionViewQtGUI::focusStopClicked() {
+	m_presenter->notify(IEnggDiffractionPresenter::StopFocus);
 }
 
 void EnggDiffractionViewQtGUI::rebinTimeClicked() {
