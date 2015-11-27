@@ -88,8 +88,9 @@ class FitGaussian(PythonAlgorithm):
         fit_success = ('success' == fit_result[0])
 
         if not fit_success:
-            self._error("For detector " + str(index) + " in workspace " + workspace.getName() +
-                        "fit was not successful. Input guess parameters are " + str(myfunc))
+            self._warning("For detector " + str(index) + " in workspace " + workspace.getName() +
+                          "fit was not successful. Input guess parameters are " + str(myfunc))
+            return
 
         fit_params = fit_result[3].column(1)
         self._setOutput(fit_params[1],fit_params[2]) # [peak centre,sigma]
