@@ -196,15 +196,9 @@ public:
     size_t my_discarded_events(0);
 
     prog->report(entry_name + ": precount");
-
     // ---- Pre-counting events per pixel ID ----
     auto &outputWS = *(alg->m_ws);
     if (alg->precount) {
-
-      if (alg->m_specMin != EMPTY_INT() && alg->m_specMax != EMPTY_INT()) {
-        m_min_id = alg->m_specMin;
-        m_max_id = alg->m_specMax;
-      }
 
       std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
       for (size_t i = 0; i < numEvents; i++) {
@@ -898,6 +892,41 @@ public:
       return;
     }
 
+    const auto bank_size = m_max_id - m_min_id;
+    const uint32_t minSpectraToLoad = static_cast<uint32_t>(alg->m_specMin);
+    const uint32_t maxSpectraToLoad = static_cast<uint32_t>(alg->m_specMax);
+    const uint32_t emptyInt = static_cast<uint32_t>(EMPTY_INT());
+    // check that if a range of spectra were requested that these fit within
+    // this bank
+    if (minSpectraToLoad != emptyInt && m_min_id < minSpectraToLoad) {
+      if (minSpectraToLoad > m_max_id) { // the minimum spectra to load is more
+                                         // than the max of this bank
+        return;
+      }
+      // the min spectra to load is higher than the min for this bank
+      m_min_id = minSpectraToLoad;
+    }
+    if (maxSpectraToLoad != emptyInt && m_max_id > maxSpectraToLoad) {
+      if (maxSpectraToLoad > m_min_id) {
+        // the maximum spectra to load is less than the minimum of this bank
+        return;
+      }
+      // the max spectra to load is lower than the max for this bank
+      m_max_id = maxSpectraToLoad;
+    }
+    if (m_min_id > m_max_id) {
+      // the min is now larger than the max, this means the entire block of
+      // spectra to load is outside this bank
+      return;
+    }
+
+    // schedule the job to generate the event lists
+    auto mid_id = m_max_id;
+    if (alg->splitProcessing && m_max_id > (m_min_id + (bank_size / 4)))
+      // only split if told to and the section to load is at least 1/4 the size
+      // of the whole bank
+      mid_id = (m_max_id + m_min_id) / 2;
+
     // No error? Launch a new task to process that data.
     size_t numEvents = m_loadSize[0];
     size_t startAt = m_loadStart[0];
@@ -909,17 +938,12 @@ public:
     boost::shared_array<float> event_weight_shrd(m_event_weight);
     boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index_ptr);
 
-    // schedule the job to generate the event lists
-    auto mid_id = m_max_id;
-    if (alg->splitProcessing)
-      mid_id = (m_max_id + m_min_id) / 2;
-
     ProcessBankData *newTask1 = new ProcessBankData(
         alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
         numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
         event_weight_shrd, m_min_id, mid_id);
     scheduler->push(newTask1);
-    if (alg->splitProcessing) {
+    if (alg->splitProcessing && (mid_id < m_max_id)) {
       ProcessBankData *newTask2 = new ProcessBankData(
           alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
           numEvents, startAt, event_index_shrd, thisBankPulseTimes,
