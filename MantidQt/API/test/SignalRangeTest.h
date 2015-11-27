@@ -24,6 +24,8 @@ private:
                        std::vector<Mantid::API::IMDIterator*>(size_t,Mantid::Geometry::MDImplicitFunction *));
     MOCK_CONST_METHOD2(getSignalAtCoord,
                        Mantid::signal_t(const Mantid::coord_t *, const Mantid::API::MDNormalization &));
+    MOCK_CONST_METHOD2(getSignalWithMaskAtCoord,
+      Mantid::signal_t(const Mantid::coord_t *, const Mantid::API::MDNormalization &));
     MOCK_CONST_METHOD6(getLinePlot,
                       void(const Mantid::Kernel::VMD &, const Mantid::Kernel::VMD &,
                            Mantid::API::MDNormalization, std::vector<Mantid::coord_t> &,

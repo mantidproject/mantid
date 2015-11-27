@@ -295,6 +295,51 @@ public:
   }
 
   //-------------------------------------------------------------------------------------
+  /** Get the signal at a given coord or NaN if masked */
+  void test_getSignalWithMaskAtCoord() {
+    MDEventWorkspace3Lean::sptr ew =
+      MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+    coord_t coords1[3] = {1.5, 1.5, 1.5};
+    coord_t coords2[3] = {2.5, 2.5, 2.5};
+    coord_t coords3[3] = {-0.1f, 2, 2};
+    coord_t coords4[3] = {2, 2, 4.1f};
+    ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
+
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+
+    // Make the box that covers a quarter the bins in the workspace.
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(2);
+    max.push_back(2);
+    max.push_back(0.99f);
+
+    // Create an function that encompases 1/4 of the total bins.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+
+    ew->setMDMasking(function);
+
+    ew->refreshCache();
+    TSM_ASSERT_DELTA(
+      "A regular box with a single event",
+      ew->getSignalWithMaskAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
+    TSM_ASSERT("Masked returns NAN",
+               boost::math::isnan(ew->getSignalWithMaskAtCoord(
+                 coords1, Mantid::API::NoNormalization)));
+    TSM_ASSERT_DELTA(
+      "The box with 2 events",
+      ew->getSignalAtCoord(coords2, Mantid::API::NoNormalization), 3.0, 1e-5);
+    TSM_ASSERT("Out of bounds returns NAN",
+               boost::math::isnan(ew->getSignalWithMaskAtCoord(
+                 coords3, Mantid::API::NoNormalization)));
+    TSM_ASSERT("Out of bounds returns NAN",
+               boost::math::isnan(ew->getSignalWithMaskAtCoord(
+                 coords4, Mantid::API::NoNormalization)));
+  }
+
+  //-------------------------------------------------------------------------------------
   void test_estimateResolution() {
     MDEventWorkspace2Lean::sptr b =
         MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);

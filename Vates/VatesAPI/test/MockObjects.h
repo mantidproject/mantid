@@ -105,6 +105,11 @@ public:
     return 0;
   }
 
+  virtual Mantid::signal_t getSignalWithMaskAtCoord(const Mantid::coord_t * , const Mantid::API::MDNormalization & ) const
+  {
+    return 0;
+  }
+
   MockIMDWorkspace()
   : IMDWorkspace()
   {
