@@ -86,7 +86,7 @@ namespace CustomInterfaces
     void checkBoxAutoChanged(int state) override;
 
     /// returns the string "Auto"
-    std::string autoString() const { return g_autoString; }
+    std::string autoString() const override { return g_autoString; }
 
     // -- End of IALCDataLoadingView interface -----------------------------------------------------
 

@@ -64,6 +64,9 @@ namespace CustomInterfaces
     /// When directory contents change, updates files loaded
     void updateFilesFromDirectory(const QString &path);
 
+    /// When "Auto" deselected, stop watching directory
+    void stopWatching();
+
   signals:
     /// Signal emitted when data get changed
     void dataChanged();

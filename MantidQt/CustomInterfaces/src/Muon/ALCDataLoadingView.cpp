@@ -280,6 +280,8 @@ ALCDataLoadingView::~ALCDataLoadingView() {
     } else {
       m_ui.lastRun->setReadOnly(false);
       m_ui.lastRun->clear();
+      // Tell the presenter to stop watching the directory
+      emit lastRunAutoUnchecked();
     }
   }
 

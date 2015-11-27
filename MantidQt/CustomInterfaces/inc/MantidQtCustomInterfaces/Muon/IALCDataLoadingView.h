@@ -144,6 +144,8 @@ namespace CustomInterfaces
     /// New data have been loaded
     void dataChanged();
 
+    /// "Auto" box has been unchecked
+    void lastRunAutoUnchecked();
   };
 
 } // namespace CustomInterfaces

@@ -69,6 +69,7 @@ namespace CustomInterfaces
     connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableInfo()));
     connect(&m_watcher, SIGNAL(directoryChanged(const QString &)),
             SLOT(updateFilesFromDirectory(const QString &)));
+    connect(m_view, SIGNAL(lastRunAutoUnchecked()), SLOT(stopWatching()));
   }
 
   /**
@@ -79,9 +80,7 @@ namespace CustomInterfaces
   void ALCDataLoadingPresenter::handleLoadRequested() {
     std::string lastFile(m_view->lastRun());
     // remove any directories the watcher is currently watching
-    if (!m_watcher.directories().empty()) {
-      m_watcher.removePaths(m_watcher.directories());
-    }
+    stopWatching();
     // Check if input was "Auto"
     if (0 == lastFile.compare(m_view->autoString())) {
       // Add path to watcher
@@ -102,6 +101,16 @@ namespace CustomInterfaces
   void ALCDataLoadingPresenter::updateFilesFromDirectory(const QString &path) {
     std::string lastFile = getMostRecentFile(path.toStdString());
     load(lastFile);
+  }
+
+  /**
+   * Stop watching directory for changes
+   * (called when Auto checkbox unchecked)
+   */
+  void ALCDataLoadingPresenter::stopWatching() {
+    if (!m_watcher.directories().empty()) {
+      m_watcher.removePaths(m_watcher.directories());
+    }
   }
 
   /**
