@@ -79,11 +79,9 @@ class DNSdata(object):
                 raise RuntimeError("The file %s does not contain valid DNS data format." % filename)
 
             res = parse_header(blocks[0])
-            # try to parse parameters, perform nothing if not successfull: they may be empty
-            if res.has_key('file'):
-                self.run_number = res['file']
-            if res.has_key('exp'):
-                self.experiment_number = res['exp']
+            # try to parse parameters, perform nothing if not successfull: sample and userid may be empty
+            self.run_number = res['file']
+            self.experiment_number = res['exp']
             if res.has_key('sample'):
                 self.sample_name = res['sample']
             if res.has_key('userid'):
