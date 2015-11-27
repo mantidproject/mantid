@@ -80,7 +80,6 @@ ALCDataLoadingView::~ALCDataLoadingView() {
 
     if (m_ui.lastRun->isValid()) {
       toReturn = m_ui.lastRun->getFirstFilename().toStdString();
-    } else {
       QString userInput = m_ui.lastRun->getText();
       if (0 ==
           userInput.compare(QString(autoString().c_str()),

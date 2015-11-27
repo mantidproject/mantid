@@ -274,6 +274,8 @@ private:
   void refreshValidator();
   /// Called asynchronously to check the availability of the live stream
   void checkLiveConnection();
+  /// Turn on/off display of validator red star (default is on)
+  void setValidatorDisplay(bool display);
 
 private slots:
   /// Browse clicked slot
@@ -310,6 +312,8 @@ private:
   LiveButtonOpts m_liveButtonState;
   /// Handle on a running instance of MonitorLiveData
   boost::shared_ptr<Mantid::API::IAlgorithm> m_monitorLiveData;
+  /// Whether validation red star is being shown
+  bool m_showValidator;
 
   /// The Ui form
   Ui::MWRunFiles m_uiForm;
