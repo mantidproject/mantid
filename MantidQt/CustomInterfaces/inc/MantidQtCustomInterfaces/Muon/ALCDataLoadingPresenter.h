@@ -64,8 +64,8 @@ namespace CustomInterfaces
     /// When directory contents change, updates files loaded
     void updateFilesFromDirectory(const QString &path);
 
-    /// When "Auto" deselected, stop watching directory
-    void stopWatching();
+    /// When "Auto" selected/deselected, start/stop watching directory
+    void changeWatchState(int state);
 
   signals:
     /// Signal emitted when data get changed
@@ -74,6 +74,9 @@ namespace CustomInterfaces
   private:
     /// Load new data and update the view accordingly
     void load(const std::string &lastFile);
+
+    /// Start/stop watching directory
+    void changeWatchState(bool watching);
 
     /// View which the object works with
     IALCDataLoadingView* const m_view;

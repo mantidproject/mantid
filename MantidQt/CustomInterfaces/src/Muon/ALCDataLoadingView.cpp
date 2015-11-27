@@ -274,14 +274,14 @@ ALCDataLoadingView::~ALCDataLoadingView() {
    * @param state :: [input] Check state - member of Qt::CheckState enum
    */
   void ALCDataLoadingView::checkBoxAutoChanged(int state) {
+    // Tell the presenter about the change
+    emit lastRunAutoCheckedChanged(state);
     if (state == Qt::Checked) {
       m_ui.lastRun->setReadOnly(true);
       m_ui.lastRun->setText(autoString().c_str());
     } else {
       m_ui.lastRun->setReadOnly(false);
       m_ui.lastRun->setText(m_currentAutoFile.c_str());
-      // Tell the presenter to stop watching the directory
-      emit lastRunAutoUnchecked();
     }
   }
 

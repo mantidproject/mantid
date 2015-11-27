@@ -69,7 +69,8 @@ namespace CustomInterfaces
     connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableInfo()));
     connect(&m_watcher, SIGNAL(directoryChanged(const QString &)),
             SLOT(updateFilesFromDirectory(const QString &)));
-    connect(m_view, SIGNAL(lastRunAutoUnchecked()), SLOT(stopWatching()));
+    connect(m_view, SIGNAL(lastRunAutoCheckedChanged(int)),
+            SLOT(changeWatchState(int)));
   }
 
   /**
@@ -80,12 +81,11 @@ namespace CustomInterfaces
   void ALCDataLoadingPresenter::handleLoadRequested() {
     std::string lastFile(m_view->lastRun());
     // remove any directories the watcher is currently watching
-    stopWatching();
+    changeWatchState(false);
     // Check if input was "Auto"
     if (0 == lastFile.compare(m_view->autoString())) {
       // Add path to watcher
-      Poco::Path path(m_view->firstRun());
-      m_watcher.addPath(QString(path.parent().toString().c_str()));
+      changeWatchState(true);
       // and get the most recent file in the directory to be lastFile
       lastFile = getMostRecentFile(m_view->firstRun());
       m_view->setCurrentAutoFile(lastFile);
@@ -106,12 +106,30 @@ namespace CustomInterfaces
   }
 
   /**
-   * Stop watching directory for changes
-   * (called when Auto checkbox unchecked)
+   * Start/stop watching directory for changes
+   * @param watching :: [input] True to start watching, false to stop
    */
-  void ALCDataLoadingPresenter::stopWatching() {
-    if (!m_watcher.directories().empty()) {
-      m_watcher.removePaths(m_watcher.directories());
+  void ALCDataLoadingPresenter::changeWatchState(bool watching) {
+    if (watching) {
+      Poco::Path path(m_view->firstRun());
+      m_watcher.addPath(QString(path.parent().toString().c_str()));
+    } else {
+      if (!m_watcher.directories().empty()) {
+        m_watcher.removePaths(m_watcher.directories());
+      }
+    }
+  }
+
+  /**
+   * Start/stop watching directory for changes
+   * (called when Auto checkbox checked/unchecked)
+   * @param state :: [input] Member of Qt::CheckState enum
+   */
+  void ALCDataLoadingPresenter::changeWatchState(int state) {
+    if (state == Qt::Checked) {
+      changeWatchState(true);
+    } else {
+      changeWatchState(false);
     }
   }
 
