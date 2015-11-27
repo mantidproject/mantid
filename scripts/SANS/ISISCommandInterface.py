@@ -1747,7 +1747,7 @@ def has_user_file_valid_extension(file_name):
     @returns true if it is valid else false
     '''
     is_valid = su.is_valid_user_file_extension(file_name)
-    print is_valid
+    print str(is_valid)
     return is_valid
 
 ###############################################################################

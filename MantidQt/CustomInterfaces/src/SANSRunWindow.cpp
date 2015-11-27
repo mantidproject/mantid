@@ -401,10 +401,17 @@ void SANSRunWindow::initLocalPython() {
   runPythonCode("import ISISCommandInterface as i\nimport copy");
   runPythonCode("import isis_instrument\nimport isis_reduction_steps");
 
-  loadUserFile();
-  handleInstrumentChange();
-  m_cfg_loaded = true;
+  // Make sure that user file is valid
+  if (!isUserFileValid()) {
+    m_cfg_loaded = false;
+  }
+  else {
+    loadUserFile();
+    handleInstrumentChange();
+    m_cfg_loaded = true;
+  }
 }
+
 /** Initialise some of the data and signal connections in the save box
 */
 void SANSRunWindow::setupSaveBox() {
