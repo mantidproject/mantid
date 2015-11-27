@@ -3,7 +3,6 @@ from mantid.kernel import Direction
 import numpy as np
 from scipy import integrate
 import scipy as sp
-import mlzutils
 
 
 class ComputeCalibrationCoefVan(PythonAlgorithm):
@@ -79,6 +78,8 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
     def PyExec(self):
         """ Main execution body
         """
+        from mantid.simpleapi import FitGaussian
+
         self.vanaws = self.getProperty("VanadiumWorkspace").value       # returns workspace instance
         outws_name = self.getPropertyValue("OutputWorkspace")           # returns workspace name (string)
         nhist = self.vanaws.getNumberHistograms()
@@ -103,7 +104,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                 coefE[idx] = 0.
             else:
                 dataE = self.vanaws.readE(idx)
-                peak_centre, sigma = mlzutils.do_fit_gaussian(self.vanaws, idx, self.log())
+                peak_centre, sigma = FitGaussian(self.vanaws, idx)
                 fwhm = sigma*2.*np.sqrt(2.*np.log(2.))
                 idxmin = (np.fabs(dataX-peak_centre+3.*fwhm)).argmin()
                 idxmax = (np.fabs(dataX-peak_centre-3.*fwhm)).argmin()
