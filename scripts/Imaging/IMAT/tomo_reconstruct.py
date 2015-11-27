@@ -22,25 +22,27 @@ Do a tomographic reconstruction, including:
 - Pre-processing of input raw images,
 - 3d volume reconstruction using a third party tomographic reconstruction tool
 - Post-processing of reconstructed volume
-- Saving reconstruction results (and pre-processing results)
+- Saving reconstruction results (and pre-processing results, and self-save this script and subpackages)
 
 Example command lines:
 
-ipython -- ../mantid-repos/mantid/scripts/Imaging/IMAT/tomo_reconstruct.py\
+ipython -- tomo_reconstruct.py --help
+
+ipython -- tomo_reconstruct.py\
  --input-path=stack_larmor_metals_summed_all_bands/ --output-path=recon_out_larmor_metals_fbp500\
  --tool tomopy --algorithm sirt --cor 129
 
-ipython -- ../mantid-repos/mantid/scripts/Imaging/IMAT/tomo_reconstruct.py\
+ipython -- tomo_reconstruct.py\
  --input-path=CannonTomo/SampleA/ --output-path=recon_out_canon_a\
  --tool tomopy --algorithm gridrec --cor 504
 
 
 # more up-to-date:
 
-/usr/bin/time ipython -- /home/fedemp/mantid-repos/mantid/scripts/Imaging/IMAT/tomo_reconstruct.py\
- --input-path=stack_sart/ --output-path=recon_SART_samples_larmor_metals_center123_test_REMOVE_iter1\
- --tool tomopy --algorithm sirt  --cor 123 --max-angle=352.5 --num-iter=1
-
+ipython -- /home/fedemp/mantid-repos/mantid-tomo/mantid/scripts/Imaging/IMAT/tomo_reconstruct.py\
+ --input-path=../tomography-tests/stack_larmor_metals_summed_all_bands/ --output-path=REMOVE_ME\
+ --tool tomopy --algorithm gridrec  --cor 123 --max-angle 360 --in-img-format=tiff\
+ --region-of-interest='[5, 252, 507, 507]'
 
 """
 import os
@@ -62,32 +64,23 @@ except ImportError:
     raise ImportError("Could not find the subpackage scipy.ndimage, required for image pre-/post-processing")
 
 
-# from scipy.io import netcdf_file
 
-import tomorec.tool_imports as tti
-astra = tti.import_tomo_tool('astra')
-tomopy = tti.import_tomo_tool('tomopy')
-#import tomorec.io as tio
 import tomorec.io as tomoio
+
+
+
 
 # run_reconstruct_3d( ... tool='astra' ...)
 
-# TODO:
+# TODO: air-region (normalize proton charge) <- address
 
-# URGENT: cli options: 0) rotate, 1) crop-coords, 2) air-region
-
-# Add: cut-off
-
-# The readers must take the prefix from the group of files with the largest number of files
+# TODO: The readers must take the prefix from the group of files with the largest number of files
 # DC_00...03, vs. tomo_00...tomo_600
 
 # formats converters (individual files, whole stacks), tiff->fits; fits->tiff
 
-# TODO:
+# defaults for MCP: median_filter=3, rotate=-1, crop=[0,  252, 0, 512], MCP correction: on
 
-# write_npy / write_hdf / write_netcdf --- Write: support output formats for images that are not image file formats: npy, hdf5
-
-#
 # MCP correction - horizontal line!!!
 #  normalize proton charge
 #
@@ -102,14 +95,6 @@ import tomorec.io as tomoio
 # TODO: change to command pattern
 # TODO: add save functionality
 
-
-# for i in `seq 115 135`; do ipython -- ~/mantid-repos/mantid/scripts/Imaging/IMAT/recon_tomopy.py
-# --input-path=stack_larmor_metals_summed_all_bands/data_metals/ --output-path=output_recon_tomopy_${i}
-# --cor=${i}; done
-
-# TODO: move to ./prep !!!
-
-# defaults for MCP: median_filter=3, rotate=-1, crop=[0,  252, 0, 512]
 def apply_prep_filters(data, median_filter_size=3, rotate=None, crop=None, air_region=None,
                        norm_flat_img=None, norm_dark_img=None, cut_off=None):
     """
@@ -157,7 +142,7 @@ def apply_prep_filters(data, median_filter_size=3, rotate=None, crop=None, air_r
         # for 16-bit depth images as we usually have.
         print " * Finished normalization by flat/dark images with pixel data type: {0}.".format(data.dtype)
     else:
-        print " * Note: not applying normalization by flat/dark images."        
+        print " * Note: not applying normalization by flat/dark images."
 
     # Apply cut-off for the normalization?
     if False and cut_off:
@@ -168,7 +153,7 @@ def apply_prep_filters(data, median_filter_size=3, rotate=None, crop=None, air_r
         data[data < rel_cut_off] = dmin
         print " * Finished cut-off stepa, with pixel data type: {0}".format(data.dtype)
     else:
-        print " * Note: not applying cut-off."        
+        print " * Note: not applying cut-off."
 
     # list with first-x, first-y, second-x, second-y
     if crop:
@@ -179,7 +164,7 @@ def apply_prep_filters(data, median_filter_size=3, rotate=None, crop=None, air_r
 
         print " * Finished crop step, with pixel data type: {0}.".format(data.dtype)
     else:
-        print " * Note: not applying crop."        
+        print " * Note: not applying crop."
 
 
     apply_median = True
@@ -191,7 +176,7 @@ def apply_prep_filters(data, median_filter_size=3, rotate=None, crop=None, air_r
 
         print " * Finished noise filter / median, with pixel data type: {0}.".format(data.dtype)
     else:
-        print " * Note: not applying noise filter /median."        
+        print " * Note: not applying noise filter /median."
 
     # rotate = None
     rotate = -1
@@ -345,11 +330,17 @@ def run_reconstruct_3d(proj_data, tool, algorithm, cor=None, max_angle=360, num_
 
     for slice_idx in [200]: # examples to check: [30, 130, 230, 330, 430]:
         print " > Finding center with tomopy find_center, slice_idx: {0}...".format(slice_idx)
-        tomopy_cor = tomopy.find_center(tomo=proj_data, theta=proj_angles, ind=slice_idx, emission=False)
-        print " > Center of rotation found:  {0}".format(tomopy_cor)
+        import tomorec.tool_imports as tti
+        try:
+            tomopy = tti.import_tomo_tool('tomopy')
+            tomopy_cor = tomopy.find_center(tomo=proj_data, theta=proj_angles, ind=slice_idx, emission=False)
+            if not cor:
+                cor = tomopy_cor
+            print " > Center of rotation found by tomopy.find_center:  {0}".format(tomopy_cor)
+        except ImportError as exc:
+            print(" * WARNING: could not import tomopy so could not use the tomopy method to find the center "
+                  "of rotation. Details: {0}".format(exc))
 
-    if not cor:
-        cor = tomopy_cor
 
     print "Using center of rotation: {0}".format(cor)
     start = time.time()
@@ -385,14 +376,12 @@ def _make_dirs_if_needed(dirname):
         os.makedirs(absname)
 
 
-def read_in_stack(sample_path):
-    # Note, not giving prefix. It will load all the files found
-    prefix='angle_agg_'
-    # Example prefixes are prefix = 'tomo_', prefix = 'LARMOR00'
+def read_in_stack(sample_path, img_format):
+    # Note, not giving prefix. It will load all the files found.
+    # Example prefixes are prefix = 'tomo_', prefix = 'LARMOR00', prefix = 'angle_agg'
 
-    sample, white, dark = tomoio.read_stack_of_images(sample_path)
+    sample, white, dark = tomoio.read_stack_of_images(sample_path, file_extension=img_format)
 
-    err_str = ''
     if not isinstance(sample, np.ndarray) or not sample.shape \
        or not isinstance(sample.shape, tuple) or 3 != len(sample.shape):
         raise RuntimeError("Error reading sample images. Could not produce a 3-dimensional array "
@@ -421,15 +410,17 @@ def apply_line_projection(data_vol):
 
     return data_vol
 
-def apply_final_preproc_corrections(preproc_data, remove_stripes='wf'):
+def apply_final_preproc_corrections(preproc_data, remove_stripes='wavelet-fourier'):
     """
     """
     # Remove stripes in sinograms / ring artefacts in reconstructed volume
     if remove_stripes:
-        if 'wf' == remove_stripes.lower():
+        import prep as iprep
+        if 'wavelet-fourier' == remove_stripes.lower():
             time1 = time.time()
             print " * Removing stripes/ring artifacts using the method '{0}'".format(remove_stripes)
-            preproc_data = tomopy.prep.stripe.remove_stripe_fw(preproc_data)
+            #preproc_data = tomopy.prep.stripe.remove_stripe_fw(preproc_data)
+            preproc_data = iprep.filters.remove_stripes_ring_artifacts(preproc_data, 'wavelet-fourier')
             time2 = time.time()
             print " * Removed stripes/ring artifacts. Time elapsed: {0:.3f}".format(time2 - time1)
         elif 'titarenko' == remove_stripes.lower():
@@ -441,7 +432,7 @@ def apply_final_preproc_corrections(preproc_data, remove_stripes='wf'):
         else:
             print " * WARNING: stripe removal method '{0}' is unknown. Not applying it.".format(remove_stripes)
     else:
-        print " * Note: not applying stripe removal."        
+        print " * Note: not applying stripe removal."
 
     if False:
         # preproc_data = tomopy.misc.corr.remove_outlier(preproc_data ...
@@ -490,14 +481,14 @@ def apply_postproc_filters(recon_data, cut_off=0.0, circular_mask=True, median_f
         recon_data = iprep.filters.circular_mask(recon_data, ratio=circular_mask)
         print " * Applied circular mask on reconstructed volume"
     else:
-        print " * Note: not applied circular mask on reconstructed volume"        
+        print " * Note: not applied circular mask on reconstructed volume"
 
     if False and median_filter_size:
         recon_data = scipy.ndimage.median_filter(recon_data, median_filter_size)
         print (" * Applied median_filter on reconstructed volume, with filtersize: {0}".
                format(median_filter_size))
     else:
-        print " * Note: not applied median_filter on reconstructed volume"        
+        print " * Note: not applied median_filter on reconstructed volume"
 
     if False:
         import scipy.signal
@@ -507,14 +498,15 @@ def apply_postproc_filters(recon_data, cut_off=0.0, circular_mask=True, median_f
         print(" * Applied N-dimensional median filter on reconstructed volume, with filter size: {0} ".
               format(kernel_size))
     else:
-        print " * Note: not applied N-dimensional median filter on reconstructed volume"        
+        print " * Note: not applied N-dimensional median filter on reconstructed volume"
 
 
 # cor for metals: 123
 def do_recon(input_dir, output_dir, cor, command_line=None, tool=None, algorithm=None, max_angle=360,
-             remove_stripes='wf',
+             remove_stripes='wavelet-fourier',
              rotate=None, crop_coords=None,
              circular_mask=None, cut_off=None, num_iter=None,
+             img_format='fits',
              cmd_line=None):
     """
     Run a reconstruction using a particular tool, algorithm and setup
@@ -532,19 +524,24 @@ def do_recon(input_dir, output_dir, cor, command_line=None, tool=None, algorithm
     be written in the output readme file(s) for reference.
     """
 
-    data, white, dark = read_in_stack(input_dir)
+    data, white, dark = read_in_stack(input_dir, img_format)
     print "Shape of raw data: {0}, dtype: {1}".format(data.shape, data.dtype)
 
     raw_data_dtype = data.dtype
     raw_data_shape = data.shape
 
-    border_pix = 5
-    crop_coords = [0+border_pix, 252, 512-border_pix, 512-border_pix]
     air_region  = [260, 5, 502, 250]
     rotation = -1
 
     # For Cannon. tompoy CoR: 470.8 / oct: 504
     #air_region = None
+
+    # These imports will raise appropriate exceptions in case of error
+    import tomorec.tool_imports as tti
+    if 'astra' == tool:
+        astra = tti.import_tomo_tool('astra')
+    elif 'tomopy' == tool:
+        tomopy = tti.import_tomo_tool('tomopy')
 
     median_filter_size = 3
 
@@ -584,7 +581,7 @@ def do_recon(input_dir, output_dir, cor, command_line=None, tool=None, algorithm
 
     tnow = time.time()
 
-    print("Reconstructed volume. Shape: {0}, and pixel data type: {0}".
+    print("Reconstructed volume. Shape: {0}, and pixel data type: {1}".
           format(recon_data.shape, recon_data.dtype))
 
     apply_postproc_filters(recon_data, cut_off, circular_mask=circular_mask,
@@ -639,12 +636,15 @@ def do_recon(input_dir, output_dir, cor, command_line=None, tool=None, algorithm
         print "Closing nc file... ", nc_path
         ncfile.close()
 
+
+    #run_summary_string = gen_txt_run_summary()
     out_readme_fname = '0.README_reconstruction.txt'
     # generate file with dos/windows line end for windoze users' convenience
     with open(os.path.join(output_dir, out_readme_fname), 'w') as oreadme:
         if None == tool:
             tool = 'tomopy'
-        oreadme.write('Tomographic reconstruction\r\n')
+        #oreadme.write(run_summary_string)
+        oreadme.write('Tomographic reconstruction. Summary of inputs, settings and outputs.\r\n')
         oreadme.write(time.strftime("%c") + "\r\n")
         oreadme.write("\r\n")
         oreadme.write("Dimensions of raw input sample data: {0}\r\n".format(raw_data_shape))
@@ -723,6 +723,7 @@ def self_save_zipped_scripts(output_path):
 
 if __name__=='__main__':
     import argparse
+    import ast
 
     arg_parser = argparse.ArgumentParser(description='Run tomographic reconstruction via third party tools')
 
@@ -751,6 +752,10 @@ if __name__=='__main__':
                            "is overriden by the angles found in the input FITS headers)")
 
     grp_pre = arg_parser.add_argument_group('Pre-processing of input raw images/projections')
+
+    grp_pre.add_argument("--in-img-format", required=False, default='fits',
+                         help="Format/file extension expected for the input images. Supported: {0}".
+                         format(['tiff', 'fits', 'tif', 'fit', 'png']))
 
     grp_pre.add_argument("--region-of-interest", required=False, help="Region of interest (crop original "
                          "images to these coordinates, given as comma separated values: x1,y1,x2,y2. If not "
@@ -816,10 +821,20 @@ if __name__=='__main__':
     if args.circular_mask:
         circular_mask = float(args.circular_mask)
 
+    roi = None
     if args.region_of_interest:
-        crop_coords = [0+border_pix, 252, 512-border_pix, 512-border_pix]
+        roi = ast.literal_eval(args.region_of_interest)
+    else:
+        border_pix = 5
+        roi = [0+border_pix, 252, 512-border_pix, 512-border_pix]
+
+    remove_stripes = None
+    if 'wf' == args.remove_stripes:
+        remove_stripes = 'wavelet-fourier'
 
     do_recon(input_dir=args.input_path, output_dir=args.output_path, cor=int(args.cor),
              tool=args.tool, algorithm=args.algorithm,
-             max_angle=max_angle,rotate=args.rotation, remove_stripes=args.remove_stripes,
-             circular_mask=circular_mask, cut_off=cut_off, num_iter=num_iter, cmd_line=cmd_line)
+             max_angle=max_angle,rotate=args.rotation, crop_coords=roi,
+             remove_stripes=remove_stripes,
+             circular_mask=circular_mask, cut_off=cut_off, num_iter=num_iter, img_format=args.in_img_format,
+             cmd_line=cmd_line)

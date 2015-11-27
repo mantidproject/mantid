@@ -24,6 +24,6 @@ or individual images.
 
 try:
     from . import filters
-except ImportError:
+except ImportError as exc:
     raise ImportError("Inconsistency found. Could not import filters which "
-                      "should be available in this package.")
+                      "should be available in this package. Details: {0}".format(exc))

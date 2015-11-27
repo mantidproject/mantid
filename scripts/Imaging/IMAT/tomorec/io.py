@@ -132,7 +132,7 @@ def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=No
     # freeimage plugin with use_plugin!
     _USING_PLUGIN_TIFFFILE = True
     if img_format == 'tiff' and _USING_PLUGIN_TIFFFILE:
-        skio.imsave(filename, img_data, plugin='tifffile')
+        skio.imsave(filename, img_data, plugin='tifffile', compress=9)
     else:
         skio.imsave(filename, img_data, plugin='freeimage')
 
@@ -260,13 +260,14 @@ def _read_img(filename, file_extension=None):
 
     return img_arr
 
-def _read_listed_files(files, slice_img_shape, dtype):
+def _read_listed_files(files, slice_img_shape, file_extension, dtype):
     """
     Read several images in a row into a 3d numpy array. Useful when reading all the sample
     images, or all the flat or dark images.
 
     @param files :: list of image file paths given as strings
     @param slice_img_shape :: shape of every image
+    @param file_extension :: file name extension if fixed (to set the expected image format)
     @param dtype :: data type for the output numpy array
 
     Returns:: a 3d data volume with the size of the first (outermost) dimension equal
@@ -276,7 +277,7 @@ def _read_listed_files(files, slice_img_shape, dtype):
     data = np.zeros((len(files), slice_img_shape[0], slice_img_shape[1]), dtype=dtype)
     for idx, in_file in enumerate(files):
         try:
-            data[idx, :, :] = _read_img(in_file, 'tiff')
+            data[idx, :, :] = _read_img(in_file, file_extension)
         except IOError as exc:
             raise RuntimeError("Could not load file {0} from {1}. Error details: {2}".
                                format(ifile, sample_path, str(exc)))
@@ -307,7 +308,7 @@ def get_flat_dark_stack(field_path, field_prefix, file_prefix, file_extension, i
             print("Could not find any flat field / open beam image files in: {0}".
                   format(flat_field_prefix))
         else:
-            imgs_stack = _read_listed_files(files_match, img_shape, data_dtype)
+            imgs_stack = _read_listed_files(files_match, img_shape, file_extension, data_dtype)
             avg = np.mean(imgs_stack, axis=0)
 
     return avg
@@ -367,7 +368,8 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
     files_match = glob.glob(os.path.join(sample_path,
                                          "{0}*.{1}".format(file_prefix, file_extension)))
     if len(files_match) <= 0:
-        raise RuntimeError("Could not find any image files in " + sample_path)
+        raise RuntimeError("Could not find any image files in {0}, with prefix: {1}, extension: {2}".
+                           format(sample_path, file_prefix, file_extension))
 
     files_match.sort(key=_alphanum_key_split)
 
@@ -388,7 +390,7 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
         data_dtype = np.uint16
 
     img_shape = first_img.shape
-    sample_data = _read_listed_files(files_match, img_shape, data_dtype)
+    sample_data = _read_listed_files(files_match, img_shape, file_extension, data_dtype)
 
     flat_avg = get_flat_dark_stack(flat_field_path, flat_field_prefix,
                                    flat_field_prefix, file_extension,

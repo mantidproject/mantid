@@ -94,13 +94,13 @@ def remove_stripes_ring_artifacts(data_vol, method='fourier-wavelet'):
     @param data_vol :: stack of projection images as 3d data (dimensions z, y, x), with
     z different projections angles, and y and x the rows and columns of individual images.
 
-    @param method :: 'fw': Fourier-Wavelet based method
+    @param method :: 'wf': Wavelet-Fourier based method
 
     Returns :: filtered data hopefully without stripes which should dramatically decrease
     ring artifacts after reconstruction and the effect of these on post-processing tasks
     such as segmentation of the reconstructed 3d data volume.
     """
-    supported_methods = ['fourier-wavelet']
+    supported_methods = ['wavelet-fourier']
 
     if not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
         raise ValueError("Wrong data volume when trying to filter stripes/ring artifacts: {0}".
@@ -110,7 +110,59 @@ def remove_stripes_ring_artifacts(data_vol, method='fourier-wavelet'):
         raise ValueError("The method to remove stripes and ring artifacts must be one of {0}. "
                          "Got unknown value: {1}".format(supported_methods, method))
 
-    raise RuntimeError("Not implemented. Data type: {0}".format(data_vol.dtype))
+    size = np.max(data_vol.shape)
+    wv_levels = int(np.ceil(np.log2(size)))
+    return _remove_sino_stripes_rings_fw(data_vol, wv_levels)
+
+# This is heavily based on the implementation of this method in tomopy
+def _remove_sino_stripes_rings_fw(data_vol, wv_levels=None, wavelet_name='db5', sigma=2, pad=True):
+    try:
+        import pywt
+    except ImportError as exc:
+        raise ImportError("pywt. Details: {0}".format(exc))
+
+    dimx, dimy, dimz = data_vol.shape
+    n_x = dimx
+    if pad:
+        n_x = dimx + dimx / 8
+    xshift = int((n_x - dimx) / 2.)
+
+    for sino_idx in range(0, dimy):
+        sli = np.zeros((n_x, dimz), dtype='float32')
+        sli[xshift:dimx + xshift] = data_vol[:, sino_idx, :]
+
+        # Wavelet decomposition
+        c_H = []
+        c_V = []
+        c_D = []
+        for _ in range(wv_levels):
+            sli, (cHt, cVt, cDt) = pywt.dwt2(sli, wavelet_name)
+            c_H.append(cHt)
+            c_V.append(cVt)
+            c_D.append(cDt)
+
+        # Fourier transform of horizontal frequency bands
+        for nlvl in range(wv_levels):
+            # FT
+            fcV = np.fft.fftshift(np.fft.fft(c_V[nlvl], axis=0))
+            m_y, m_x = fcV.shape
+
+            # Damping of ring artifact information
+            y_hat = (np.arange(-m_y, m_y, 2, dtype='float32') + 1) / 2
+            damp = 1 - np.exp(-np.power(y_hat, 2) / (2 * np.power(sigma, 2)))
+            fcV = np.multiply(fcV, np.transpose(np.tile(damp, (m_x, 1))))
+
+            # Inverse FT
+            c_V[nlvl] = np.real(np.fft.ifft(np.fft.ifftshift(fcV), axis=0))
+
+        # Wavelet reconstruction
+        for nlvl in range(wv_levels)[::-1]:
+            sli = sli[0:c_H[nlvl].shape[0], 0:c_H[nlvl].shape[1]]
+            sli = pywt.idwt2((sli, (c_H[nlvl], c_V[nlvl], c_D[nlvl])),
+                             wavelet_name)
+        data_vol[:, sino_idx, :] = sli[xshift:dimx + xshift, 0:dimz]
+
+    return data_vol
 
 def circular_mask(data_vol, ratio=1.0, mask_out_val=0.0):
     """
