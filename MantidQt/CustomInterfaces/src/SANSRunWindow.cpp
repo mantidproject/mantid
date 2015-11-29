@@ -402,7 +402,7 @@ void SANSRunWindow::initLocalPython() {
   runPythonCode("import isis_instrument\nimport isis_reduction_steps");
 
   // Make sure that user file is valid
-  if (!isUserFileValid()) {
+  if (!isValidUserFile()) {
     m_cfg_loaded = false;
   }
   else {
@@ -771,35 +771,12 @@ void SANSRunWindow::trimPyMarkers(QString &txt) {
 *  @return the output printed by the Python commands
 */
 bool SANSRunWindow::loadUserFile() {
-  // Make sure that user file is valid
-  if (!isUserFileValid()) {
-    m_cfg_loaded = false;
-    return false;
-  }
-
-  const std::string facility = ConfigService::Instance().getFacility().name();
-  if (facility != "ISIS") {
+  // Check the user file
+  if (!isValidUserFile()) {
     return false;
   }
 
   QString filetext = m_uiForm.userfile_edit->text().trimmed();
-  if (filetext.isEmpty()) {
-    QMessageBox::warning(this, "Error loading user file",
-                         "No user file has been specified");
-    m_cfg_loaded = false;
-    return false;
-  }
-
-  QFile user_file(filetext);
-  if (!user_file.open(QIODevice::ReadOnly)) {
-    QMessageBox::critical(this, "Error loading user file",
-                          "Could not open user file \"" + filetext + "\"");
-    m_cfg_loaded = false;
-    return false;
-  }
-
-  user_file.close();
-
   // Clear the def masking info table.
   int mask_table_count = m_uiForm.mask_table->rowCount();
   for (int i = mask_table_count - 1; i >= 0; --i) {
@@ -2677,7 +2654,7 @@ QString SANSRunWindow::getInstrumentClass() const {
 }
 void SANSRunWindow::handleRunFindCentre() {
   // Make sure that user file is valid
-  if (!isUserFileValid()) {
+  if (!hasUserFileValidFileExtension()) {
     return;
   }
 
@@ -4886,7 +4863,7 @@ void SANSRunWindow::initQResolutionSettings() {
 /**
  * Check if the user file has a valid extension
  */
-bool SANSRunWindow::isUserFileValid() {
+bool SANSRunWindow::hasUserFileValidFileExtension() {
   auto userFile = m_uiForm.userfile_edit->text().trimmed();
   QString checkValidity = "i.has_user_file_valid_extension('" + userFile +"')\n";
 
@@ -4906,6 +4883,43 @@ bool SANSRunWindow::isUserFileValid() {
 
   return isValid;
 }
+
+/**
+ * Check if the user file is valid.
+ @returns false if it is not valid else true
+ */
+bool SANSRunWindow::isValidUserFile() {
+  // Make sure that user file is valid
+  if (!hasUserFileValidFileExtension()) {
+    m_cfg_loaded = false;
+    return false;
+  }
+
+  const std::string facility = ConfigService::Instance().getFacility().name();
+  if (facility != "ISIS") {
+    return false;
+  }
+
+  QString filetext = m_uiForm.userfile_edit->text().trimmed();
+  if (filetext.isEmpty()) {
+    QMessageBox::warning(this, "Error loading user file",
+      "No user file has been specified");
+    m_cfg_loaded = false;
+    return false;
+  }
+
+  QFile user_file(filetext);
+  if (!user_file.open(QIODevice::ReadOnly)) {
+    QMessageBox::critical(this, "Error loading user file",
+      "Could not open user file \"" + filetext + "\"");
+    m_cfg_loaded = false;
+    return false;
+  }
+  user_file.close();
+
+  return true;
+}
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
