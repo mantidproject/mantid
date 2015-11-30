@@ -84,7 +84,7 @@ private:
                            int numentries,
                            std::vector<Kernel::DateAndTime> &times,
                            std::vector<double> values,
-                           const bool &epochtime, const double &timeunitfactor);
+                           const bool &epochtime);
 
   void setupWorkspace2D(const size_t &start_index,
                         const size_t &stop_index,

@@ -136,11 +136,11 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outws->dataX(0).size(), 21);
+    TS_ASSERT_EQUALS(outws->dataX(0).size(), 22);
 
-    TS_ASSERT_DELTA(outws->dataX(0)[0], 200000.*1.E-9, 100000.*1.E-10);
+    TS_ASSERT_DELTA(outws->dataX(0)[0], 175000.*1.E-9, 100000.*1.E-10);
 
-    for (size_t i = 1; i < 21; ++i) {
+    for (size_t i = 1; i < 22; ++i) {
       TS_ASSERT(outws->dataX(0)[i - 1] < outws->dataX(0)[i]);
     }
 
@@ -177,13 +177,13 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outws->dataX(0).size(), 21);
+    TS_ASSERT_EQUALS(outws->dataX(0).size(), 22);
 
-    for (size_t i = 1; i < 21; ++i) {
+    for (size_t i = 1; i < 22; ++i) {
       TS_ASSERT(outws->dataX(0)[i - 1] < outws->dataX(0)[i]);
     }
 
-    TS_ASSERT_DELTA(outws->dataX(0)[0], 200000, 10000);
+    TS_ASSERT_DELTA(outws->dataX(0)[0], 175000, 10000);
 
     // -1 Clean
     AnalysisDataService::Instance().remove("EventWorkspace");

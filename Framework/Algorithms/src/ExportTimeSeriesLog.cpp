@@ -195,7 +195,7 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname, const std::strin
 
   // Create otuput workspace
   if (outputeventws) {
-    setupEventWorkspace(i_start, i_stop, numentries, times, values, exportepoch, timeunitfactor);
+    setupEventWorkspace(i_start, i_stop, numentries, times, values, exportepoch);
   } else {
     setupWorkspace2D(i_start, i_stop, numentries, times, values, exportepoch, timeunitfactor);
   }
@@ -268,16 +268,19 @@ void ExportTimeSeriesLog::setupWorkspace2D(const size_t &start_index,
 
 //----------------------------------------------------------------------------------------------
 /** Set up an Event workspace
-  * @param numentries :: number of log entries to output
-  * @param times :: vector of Kernel::DateAndTime
-  * @param values :: vector of log value in double
-  */
+ * @brief ExportTimeSeriesLog::setupEventWorkspace
+ * @param start_index
+ * @param stop_index
+ * @param numentries :: number of log entries to output
+ * @param times :: vector of Kernel::DateAndTime
+ * @param values :: vector of log value in double
+ * @param epochtime :: boolean flag for output time is absolute time/epoch time.
+ */
 void ExportTimeSeriesLog::setupEventWorkspace(const size_t &start_index,
                                               const size_t &stop_index,
                                               int numentries,
                                               vector<DateAndTime> &times,
-                                              vector<double> values, const bool &epochtime,
-                                              const double &timeunitfactor) {
+                                              vector<double> values, const bool &epochtime) {
   Kernel::DateAndTime runstart(
       m_inputWS->run().getProperty("run_start")->value());
 
@@ -377,6 +380,10 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(std::vector<Kernel::Dat
     int64_t start_time_ns = run_start.totalNanoseconds() + static_cast<int64_t>(rel_start_time / time_factor);
     Kernel::DateAndTime start_time(start_time_ns);
     i_start = static_cast<size_t>(std::lower_bound(vec_times.begin(), vec_times.end(), start_time) - vec_times.begin());
+
+    // try to record the log value before starting time
+    if (i_start >= 1)
+      -- i_start;
   }
 
   if (rel_stop_time != EMPTY_DBL())
