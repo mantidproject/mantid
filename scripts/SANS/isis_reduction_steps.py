@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """
     This file defines what happens in each step in the data reduction, it's
@@ -25,7 +25,8 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra,
                          extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
                           MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
-                          can_load_as_event_workspace, is_convertible_to_float,correct_q_resolution_for_can)
+                          can_load_as_event_workspace, is_convertible_to_float,correct_q_resolution_for_can,
+                          is_valid_user_file_extension)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -2443,6 +2444,10 @@ class UserFile(ReductionStep):
         if self.filename is None:
             raise AttributeError('The user file must be set, use the function MaskFile')
         user_file = self.filename
+
+        # Check that the format is valid, ie txt or 099AA else raise
+        if not is_valid_user_file_extension(user_file):
+            raise RuntimeError("UseFile: The user file does not seem to be of the correct file type.")
 
         #Check that the file exists.
         if not os.path.isfile(user_file):
