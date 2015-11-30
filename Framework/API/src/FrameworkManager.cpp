@@ -8,6 +8,7 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/UsageService.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
@@ -112,9 +113,7 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
     g_log.information() << "Version check disabled." << std::endl;
   }
 
-  // the algorithm will see if it should run
-
-  SendStartupUsageInfo();
+  UsageService::Instance().registerStartup();
 }
 
 /// Update instrument definitions from github
@@ -139,27 +138,6 @@ void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
                      "check if a newer version is available." << std::endl;
-  }
-}
-
-/// Sends startup information about OS and Mantid version
-void FrameworkManagerImpl::SendStartupUsageInfo() {
-  // see whether or not to send
-  int sendStartupUsageInfo = 0;
-  int retVal = Kernel::ConfigService::Instance().getValue(
-      "usagereports.enabled", sendStartupUsageInfo);
-  if ((retVal == 0) || (sendStartupUsageInfo == 0)) {
-    return; // exit early
-  }
-
-  // do it
-  try {
-    IAlgorithm *algSendStartupUsage = this->createAlgorithm("SendUsage");
-    algSendStartupUsage->setAlgStartupLogging(false);
-    Poco::ActiveResult<bool> result = algSendStartupUsage->executeAsync();
-  } catch (Kernel::Exception::NotFoundError &) {
-    g_log.debug() << "SendUsage algorithm is not available - cannot update "
-                     "send usage information." << std::endl;
   }
 }
 

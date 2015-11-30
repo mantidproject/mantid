@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidAPI/UsageService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/EmptyValues.h"
@@ -603,6 +604,7 @@ bool Algorithm::execute() {
       if (!isChild() || m_alwaysStoreInADS)
         this->store();
 
+      UsageService::Instance().registerFeatureUsage(this, duration);
       // RJT, 19/3/08: Moved this up from below the catch blocks
       setExecuted(true);
 

@@ -123,8 +123,6 @@ private:
   void UpdateInstrumentDefinitions();
   /// check if a newer version of Mantid is available
   void CheckIfNewerVersionIsAvailable();
-  /// Sends startup usage information
-  void SendStartupUsageInfo();
 
 #ifdef MPI_BUILD
   /** Member variable that initialises the MPI environment on construction (in

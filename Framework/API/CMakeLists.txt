@@ -127,6 +127,7 @@ set ( SRC_FILES
 	src/TableRow.cpp
 	src/TextAxis.cpp
 	src/TransformScaleFactory.cpp
+	src/UsageService.cpp
 	src/Workspace.cpp
 	src/WorkspaceFactory.cpp
 	src/WorkspaceGroup.cpp
@@ -309,6 +310,7 @@ set ( INC_FILES
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/TransformScaleFactory.h
+	inc/MantidAPI/UsageService.h
 	inc/MantidAPI/VectorParameter.h
 	inc/MantidAPI/VectorParameterParser.h
 	inc/MantidAPI/Workspace.h
@@ -409,6 +411,7 @@ set ( TEST_FILES
 	SpectraAxisValidatorTest.h
 	SpectrumDetectorMappingTest.h
 	TextAxisTest.h
+	UsageServiceTest.h
 	VectorParameterParserTest.h
 	VectorParameterTest.h
 	WorkspaceFactoryTest.h
