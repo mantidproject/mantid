@@ -52,6 +52,10 @@ private:
   void exec();
   /// Validate the input properties
   std::map<std::string, std::string> validateInputs();
+  /// Transforms from image space to data space
+  std::vector<double> opus(const std::vector<double> &input);
+  /// Transforms from data space to image space
+  std::vector<double> tropus(const std::vector<double> &input);
 };
 
 } // namespace Algorithms

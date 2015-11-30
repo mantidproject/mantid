@@ -2,6 +2,9 @@
 
 #include "MantidKernel/BoundedValidator.h"
 
+#include <boost/shared_array.hpp>
+#include <gsl/gsl_fft_complex.h>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -186,5 +189,75 @@ void MaxEnt::exec() {
   setProperty("ReconstructedData", outDataWS);
 }
 
+//----------------------------------------------------------------------------------------------
+
+/**
+* Transforms from solution-space to data-space
+* @param input :: [input] An input vector in image space
+* @return :: The input vector transformed to data space
+*/
+std::vector<double> MaxEnt::opus(const std::vector<double> &input) {
+
+  /* Performs backward Fourier transform */
+
+  size_t n = input.size();
+
+  /* Prepare the data */
+  boost::shared_array<double> result(new double[2 * n]);
+  for (size_t i = 0; i < n; i++) {
+    result[2 * i] = input[i]; // Real part
+    result[2 * i + 1] = 0.;   // Imaginary part
+  }
+
+  /* Backward FT */
+  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n);
+  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n);
+  gsl_fft_complex_inverse(result.get(), 1, n, wavetable, workspace);
+  gsl_fft_complex_wavetable_free(wavetable);
+  gsl_fft_complex_workspace_free(workspace);
+
+  std::vector<double> output(n);
+  for (size_t i = 0; i < n; i++) {
+    output[i] = result[2 * i];
+  }
+
+  return output;
+}
+
+//----------------------------------------------------------------------------------------------
+
+/**
+* Transforms from data-space to solution-space
+* @param input :: [input] An input vector in data space
+* @return :: The input vector converted to image space
+*/
+std::vector<double> MaxEnt::tropus(const std::vector<double> &input) {
+
+  /* Performs forward Fourier transform */
+
+  size_t n = input.size();
+
+  /* Prepare the data */
+  boost::shared_array<double> result(new double[n * 2]);
+  for (size_t i = 0; i < n; i++) {
+    result[2 * i] = input[i]; // even indexes filled with the real part
+    result[2 * i + 1] = 0.;   // odd indexes filled with the imaginary part
+  }
+
+  /*  Fourier transofrm */
+  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n);
+  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n);
+  gsl_fft_complex_forward(result.get(), 1, n, wavetable, workspace);
+  gsl_fft_complex_wavetable_free(wavetable);
+  gsl_fft_complex_workspace_free(workspace);
+
+  /* Get the data */
+  std::vector<double> output(n);
+  for (size_t i = 0; i < n; i++) {
+    output[i] = result[2 * i];
+  }
+
+  return output;
+}
 } // namespace Algorithms
 } // namespace Mantid
