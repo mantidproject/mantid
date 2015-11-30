@@ -36,7 +36,8 @@ public:
                               const std::vector<int> summedPeriods,
                               const std::vector<int> subtractedPeriods,
                               const int firstPairIndex,
-                              const int secondPairIndex, const double alpha);
+                              const int secondPairIndex,
+                              const double alpha = 1);
   virtual ~MuonPairAsymmetryCalculator();
 
   /// Performs pair asymmetry calculation
