@@ -393,9 +393,9 @@ signal_t MDHistoWorkspace::getSignalAtCoord(
  * @return the (normalized) signal at a given coordinates.
  *         NaN if outside the range of this workspace
  */
-signal_t
-MDHistoWorkspace::getSignalWithMaskAtCoord(const coord_t *coords,
-                           const Mantid::API::MDNormalization &normalization) const {
+signal_t MDHistoWorkspace::getSignalWithMaskAtCoord(
+    const coord_t *coords,
+    const Mantid::API::MDNormalization &normalization) const {
   size_t linearIndex = this->getLinearIndexAtCoord(coords);
   if (this->getIsMaskedAt(linearIndex)) {
     return 0.0;

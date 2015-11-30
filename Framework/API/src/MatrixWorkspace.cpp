@@ -1609,9 +1609,9 @@ signal_t MatrixWorkspace::getSignalAtCoord(
 * @param normalization :: how to normalize the signal
 * @return normalized signal.
 */
-signal_t
-MatrixWorkspace::getSignalWithMaskAtCoord(const coord_t *coords,
-                           const Mantid::API::MDNormalization &normalization) const {
+signal_t MatrixWorkspace::getSignalWithMaskAtCoord(
+    const coord_t *coords,
+    const Mantid::API::MDNormalization &normalization) const {
   return getSignalAtCoord(coords, normalization);
 }
 
