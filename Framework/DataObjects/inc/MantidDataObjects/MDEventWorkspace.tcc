@@ -24,11 +24,10 @@
 #include "MantidKernel/Exception.h"
 
 // Test for gcc 4.4
-#if __GNUC__ > 4 || \
-    (__GNUC__ == 4 && (__GNUC_MINOR__ > 4 || \
-		       (__GNUC_MINOR__ == 4 && \
-			__GNUC_PATCHLEVEL__ > 0)))
-GCC_DIAG_OFF(strict-aliasing)
+#if __GNUC__ > 4 ||                                                            \
+    (__GNUC__ == 4 &&                                                          \
+     (__GNUC_MINOR__ > 4 || (__GNUC_MINOR__ == 4 && __GNUC_PATCHLEVEL__ > 0)))
+GCC_DIAG_OFF(strict - aliasing)
 #endif
 
 using namespace Mantid;
@@ -281,17 +280,18 @@ TMDE(signal_t MDEventWorkspace)::getSignalAtCoord(
   return getNormalizedSignal(box, normalization);
 }
 
-TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(const API::IMDNode *box,
-                                                     const Mantid::API::MDNormalization &normalization) const {
+TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(
+    const API::IMDNode *box,
+    const Mantid::API::MDNormalization &normalization) const {
   if (box) {
     // What is our normalization factor?
     switch (normalization) {
-      case NoNormalization:
-        return box->getSignal();
-      case VolumeNormalization:
-        return box->getSignal() * box->getInverseVolume();
-      case NumEventsNormalization:
-        return box->getSignal() / double(box->getNPoints());
+    case NoNormalization:
+      return box->getSignal();
+    case VolumeNormalization:
+      return box->getSignal() * box->getInverseVolume();
+    case NumEventsNormalization:
+      return box->getSignal() / double(box->getNPoints());
     }
     // Should not reach here
     return box->getSignal();
@@ -317,8 +317,9 @@ TMDE(bool MDEventWorkspace)::isInBounds(const coord_t *coords) const {
  * @return the (normalized) signal at a given coordinates.
  *         NaN if outside the range of this workspace
  */
-TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(const coord_t *coords,
-                                           const Mantid::API::MDNormalization &normalization) const {
+TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
+    const coord_t *coords,
+    const Mantid::API::MDNormalization &normalization) const {
   if (!isInBounds(coords)) {
     return std::numeric_limits<signal_t>::quiet_NaN();
   }
@@ -858,13 +859,13 @@ TMDE(void MDEventWorkspace)::setCoordinateSystem(
   m_coordSystem = coordSystem;
 }
 
-
 /**
   Set the display normalization for any subsequently generated histoworkspaces.
-  @param preferredNormalization : Display normalization preference to pass on to generated histo workspaces.
+  @param preferredNormalization : Display normalization preference to pass on to
+  generated histo workspaces.
 */
 TMDE(void MDEventWorkspace)::setDisplayNormalizationHisto(
-     const Mantid::API::MDNormalization preferredNormalizationHisto) {
+    const Mantid::API::MDNormalization preferredNormalizationHisto) {
   m_displayNormalizationHisto = preferredNormalizationHisto;
 }
 
@@ -875,25 +876,21 @@ TMDE(MDNormalization MDEventWorkspace)::displayNormalizationHisto() const {
   return m_displayNormalizationHisto;
 }
 
-
 /**
   Set the display normalization
   @param preferredNormalization : Display normalization preference.
 */
 TMDE(void MDEventWorkspace)::setDisplayNormalization(
-     const Mantid::API::MDNormalization preferredNormalization) {
+    const Mantid::API::MDNormalization preferredNormalization) {
   m_displayNormalization = preferredNormalization;
 }
-
 
 /**
 Return the preferred normalization to use for visualization.
 */
 TMDE(MDNormalization MDEventWorkspace)::displayNormalization() const {
-  return m_displayNormalization ;
+  return m_displayNormalization;
 }
-
-
 
 } // namespace DataObjects
 

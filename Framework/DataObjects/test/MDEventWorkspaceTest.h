@@ -298,7 +298,7 @@ public:
   /** Get the signal at a given coord or 0 if masked */
   void test_getSignalWithMaskAtCoord() {
     MDEventWorkspace3Lean::sptr ew =
-      MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     coord_t coords1[3] = {0.5, 0.5, 0.5};
     coord_t coords2[3] = {2.5, 2.5, 2.5};
     ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
@@ -319,11 +319,12 @@ public:
     ew->refreshCache();
 
     TSM_ASSERT_DELTA(
-      "Value ignoring mask is 1.0",
-      ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
+        "Value ignoring mask is 1.0",
+        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
     TSM_ASSERT_DELTA(
-      "Masked returns 0",
-      ew->getSignalWithMaskAtCoord(coords1, Mantid::API::NoNormalization), 0.0, 1e-5);
+        "Masked returns 0",
+        ew->getSignalWithMaskAtCoord(coords1, Mantid::API::NoNormalization),
+        0.0, 1e-5);
   }
 
   //-------------------------------------------------------------------------------------
