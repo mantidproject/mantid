@@ -146,7 +146,7 @@ void RemoveBins::exec() {
     }
 
     // Calculate the bin indices corresponding to the X range, if necessary
-    if (recalcRange || !i) {
+    if (recalcRange || singleSpectrum || !i) {
       start = this->findIndex(startX, X);
       end = this->findIndex(endX, X);
     }

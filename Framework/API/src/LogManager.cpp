@@ -4,13 +4,11 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/PropertyNexus.h"
 
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/VectorHelper.h"
 
-#include <boost/lexical_cast.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #include <algorithm>
 

@@ -532,11 +532,11 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
   int64_t ipk_int = static_cast<int64_t>(iPeak) -
                     im; //       ! peak position in internal array
   double hby2 = 0.5 * peak_y[ipk_int];
-  int64_t ip1(0), ip2(0);
   double xp_hh(0);
 
   int64_t nyvals = static_cast<int64_t>(peak_y.size());
   if (peak_y[nyvals - 1] < hby2) {
+    int64_t ip1(0), ip2(0);
     for (int64_t i = ipk_int; i < nyvals; ++i) {
       if (peak_y[i] < hby2) {
         // after this point the intensity starts to go below half-height
@@ -569,9 +569,9 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
     xp_hh = peak_x[nyvals - 1];
   }
 
-  int64_t im1(0), im2(0);
   double xm_hh(0);
   if (peak_y[0] < hby2) {
+    int64_t im1(0), im2(0);
     for (int64_t i = ipk_int; i >= 0; --i) {
       if (peak_y[i] < hby2) {
         im1 = i + 1; // ! after this point the intensity starts to go below

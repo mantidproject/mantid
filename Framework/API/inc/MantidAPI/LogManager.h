@@ -2,14 +2,15 @@
 #define MANTID_API_LOGMANAGER_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Cache.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/Matrix.h"
-#include <nexus/NeXusFile.hpp>
 #include <vector>
+
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
 namespace Kernel {

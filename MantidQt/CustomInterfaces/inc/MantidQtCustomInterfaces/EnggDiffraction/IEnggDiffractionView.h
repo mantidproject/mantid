@@ -125,6 +125,13 @@ public:
   virtual int currentPlotType() const = 0;
 
   /**
+  * Selected multi-run focus mode
+  *
+  * @return return integer to the presenter
+  */
+  virtual int currentMultiRunMode() const = 0;
+
+  /**
    * The Vanadium run number used in the current calibration
    *
    * @return Vanadium run number, as a string

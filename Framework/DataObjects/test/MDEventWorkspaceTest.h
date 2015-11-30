@@ -295,6 +295,39 @@ public:
   }
 
   //-------------------------------------------------------------------------------------
+  /** Get the signal at a given coord or 0 if masked */
+  void test_getSignalWithMaskAtCoord() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+    coord_t coords1[3] = {0.5, 0.5, 0.5};
+    coord_t coords2[3] = {2.5, 2.5, 2.5};
+    ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
+
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(1.5);
+    max.push_back(1.5);
+    max.push_back(1.5);
+
+    // Create an function to mask some of the workspace.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ew->setMDMasking(function);
+    ew->refreshCache();
+
+    TSM_ASSERT_DELTA(
+        "Value ignoring mask is 1.0",
+        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
+    TSM_ASSERT_DELTA(
+        "Masked returns 0",
+        ew->getSignalWithMaskAtCoord(coords1, Mantid::API::NoNormalization),
+        0.0, 1e-5);
+  }
+
+  //-------------------------------------------------------------------------------------
   void test_estimateResolution() {
     MDEventWorkspace2Lean::sptr b =
         MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);

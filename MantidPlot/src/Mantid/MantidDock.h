@@ -195,7 +195,7 @@ private:
 class MantidTreeWidgetItem : public QTreeWidgetItem
 {
 public:
-  MantidTreeWidgetItem(MantidTreeWidget*);
+  explicit MantidTreeWidgetItem(MantidTreeWidget *);
   MantidTreeWidgetItem(QStringList, MantidTreeWidget*);
   void disableIfNode(bool);
   void setSortPos(int o) {m_sortPos = o;}

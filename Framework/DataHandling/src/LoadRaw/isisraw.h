@@ -343,7 +343,7 @@ public:
   int size_check();
   ISISRAW();
   virtual ~ISISRAW();
-  ISISRAW(ISISCRPT_STRUCT *crpt);
+  explicit ISISRAW(ISISCRPT_STRUCT *crpt);
   ISISRAW(ISISCRPT_STRUCT *crpt, bool doUpdateFromCRPT);
   int updateFromCRPT();
 

@@ -187,11 +187,6 @@ void ConvFit::setup() {
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
 
-  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(extendResolutionWorkspace()));
-  connect(m_uiForm.dsResInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(extendResolutionWorkspace()));
-
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
   connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this,
@@ -223,11 +218,57 @@ void ConvFit::setup() {
 * algorithm
 */
 void ConvFit::run() {
+
   if (m_cfInputWS == NULL) {
     g_log.error("No workspace loaded");
     return;
   }
+  extendResolutionWorkspace();
+}
 
+/**
+* Create a resolution workspace with the same number of histograms as in the
+* sample.
+*
+* Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as
+* they need
+* to have the WorkspaceIndex attribute set.
+*/
+void ConvFit::extendResolutionWorkspace() {
+  if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
+    const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
+    appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
+
+    size_t numHist = m_cfInputWS->getNumberHistograms();
+    for (size_t i = 0; i < numHist; i++) {
+      IAlgorithm_sptr appendAlg =
+          AlgorithmManager::Instance().create("AppendSpectra");
+      appendAlg->initialize();
+      appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
+      appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
+
+      if (i == 0) {
+        appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
+        m_batchAlgoRunner->addAlgorithm(appendAlg);
+      } else {
+        m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
+      }
+    }
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+            SLOT(extensionComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+}
+
+void ConvFit::extensionComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(extensionComplete(bool)));
+
+  if (error)
+    return;
+
+  // Run Convolution Fit Sequetial algorithm
   QString fitType = fitTypeString();
   QString bgType = backgroundString();
 
@@ -481,40 +522,6 @@ void ConvFit::newDataLoaded(const QString wsName) {
   m_uiForm.spSpectraMax->setValue(maxSpecIndex);
 
   updatePlot();
-}
-
-/**
-* Create a resolution workspace with the same number of histograms as in the
-* sample.
-*
-* Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as
-* they need
-* to have the WorkspaceIndex attribute set.
-*/
-void ConvFit::extendResolutionWorkspace() {
-  if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
-    const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
-    API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
-    appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
-
-    size_t numHist = m_cfInputWS->getNumberHistograms();
-    for (size_t i = 0; i < numHist; i++) {
-      IAlgorithm_sptr appendAlg =
-          AlgorithmManager::Instance().create("AppendSpectra");
-      appendAlg->initialize();
-      appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
-      appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
-
-      if (i == 0) {
-        appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
-        m_batchAlgoRunner->addAlgorithm(appendAlg);
-      } else {
-        m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
-      }
-    }
-
-    m_batchAlgoRunner->executeBatchAsync();
-  }
 }
 
 namespace {
@@ -776,9 +783,10 @@ double ConvFit::getInstrumentResolution(std::string workspaceName) {
 
     // If the analyser component is not already in the data file then load it
     // from the parameter file
-    if (inst->getComponentByName(analyser)
-            ->getNumberParameter("resolution")
-            .size() == 0) {
+    if (inst->getComponentByName(analyser) == NULL ||
+        inst->getComponentByName(analyser)
+                ->getNumberParameter("resolution")
+                .size() == 0) {
       std::string reflection = inst->getStringParameter("reflection")[0];
 
       IAlgorithm_sptr loadParamFile =
@@ -800,9 +808,12 @@ double ConvFit::getInstrumentResolution(std::string workspaceName) {
                  .retrieveWS<MatrixWorkspace>(workspaceName)
                  ->getInstrument();
     }
-
-    resolution =
-        inst->getComponentByName(analyser)->getNumberParameter("resolution")[0];
+    if (inst->getComponentByName(analyser) != NULL) {
+      resolution = inst->getComponentByName(analyser)
+                       ->getNumberParameter("resolution")[0];
+    } else {
+      resolution = inst->getNumberParameter("resolution")[0];
+    }
   } catch (Mantid::Kernel::Exception::NotFoundError &e) {
     UNUSED_ARG(e);
 
@@ -1013,6 +1024,8 @@ void ConvFit::updatePlot() {
     m_uiForm.ppPlot->getRangeSelector("ConvFitRange")
         ->setRange(range.first, range.second);
     m_uiForm.ckPlotGuess->setChecked(plotGuess);
+    m_dblManager->setValue(m_properties["StartX"], range.first);
+    m_dblManager->setValue(m_properties["EndX"], range.second);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
@@ -1519,8 +1532,11 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
 * @param functionName Name of new fit function
 */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
-  double oneLValues[3] = {0.0, 0.0, 0.0};
+  double oneLValues[3] = {0.0, 0.0,
+                          0.0}; // previous values for one lorentzian fit
   bool previouslyOneL = false;
+  // If the previosu fit was One Lorentzian and the new fit is Two Lorentzian
+  // preserve the values of One Lorentzian Fit
   if (m_previousFit.compare("One Lorentzian") == 0 &&
       m_uiForm.cbFitType->currentText().compare("Two Lorentzians") == 0) {
     previouslyOneL = true;
@@ -1568,10 +1584,11 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         m_properties[name] = m_dblManager->addProperty(*it);
 
         if (QString(*it).compare("FWHM") == 0) {
+          double resolution = getInstrumentResolution(m_cfInputWS->getName());
           if (previouslyOneL && count < 3) {
             m_dblManager->setValue(m_properties[name], oneLValues[2]);
           } else {
-            m_dblManager->setValue(m_properties[name], 0.0175);
+            m_dblManager->setValue(m_properties[name], resolution);
           }
         } else if (QString(*it).compare("Amplitude") == 0) {
           if (previouslyOneL && count < 3) {
@@ -1608,7 +1625,8 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         m_properties[name] = m_dblManager->addProperty(*it);
 
         if (QString(*it).compare("FWHM") == 0) {
-          m_dblManager->setValue(m_properties[name], 0.0175);
+          double resolution = getInstrumentResolution(m_cfInputWS->getName());
+          m_dblManager->setValue(m_properties[name], resolution);
         } else if (QString(*it).compare("Amplitude") == 0 ||
                    QString(*it).compare("Intensity") == 0) {
           m_dblManager->setValue(m_properties[name], 1.0);

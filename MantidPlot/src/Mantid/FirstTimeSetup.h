@@ -14,7 +14,7 @@ class FirstTimeSetup : public QDialog
   Q_OBJECT
 
 public:
-  FirstTimeSetup(QWidget *parent=0);
+  explicit FirstTimeSetup(QWidget *parent = 0);
   ~FirstTimeSetup();
 
 private:

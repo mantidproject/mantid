@@ -6,6 +6,7 @@ set ( SRC_FILES
     src/CheckboxHeader.cpp
     src/DataSelector.cpp
     src/DiagResults.cpp
+    src/DoubleDialogEditor.cpp
     src/ErrorCurve.cpp
     src/FilenameDialogEditor.cpp
     src/FindDialog.cpp
@@ -56,6 +57,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/CheckboxHeader.h
     inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
+    inc/MantidQtMantidWidgets/DoubleDialogEditor.h
     inc/MantidQtMantidWidgets/FilenameDialogEditor.h
     inc/MantidQtMantidWidgets/FormulaDialogEditor.h
     inc/MantidQtMantidWidgets/FindReplaceDialog.h

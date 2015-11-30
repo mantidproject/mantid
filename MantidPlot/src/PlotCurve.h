@@ -50,7 +50,7 @@ class PlotCurve: public QObject, public QwtPlotCurve
 {
 Q_OBJECT
 public:
-  PlotCurve(const QString& name = QString());
+  explicit PlotCurve(const QString &name = QString());
   PlotCurve(const PlotCurve& c);
 
   virtual PlotCurve* clone(const Graph*)const = 0;
