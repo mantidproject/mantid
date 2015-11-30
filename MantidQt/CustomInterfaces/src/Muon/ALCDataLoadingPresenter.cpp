@@ -68,7 +68,7 @@ namespace CustomInterfaces
     connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
     connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableInfo()));
     connect(&m_watcher, SIGNAL(directoryChanged(const QString &)),
-            SLOT(updateFilesFromDirectory(const QString &)));
+            SLOT(updateDirectoryChangedFlag(const QString &)));
     connect(m_view, SIGNAL(lastRunAutoCheckedChanged(int)),
             SLOT(changeWatchState(int)));
   }
@@ -95,14 +95,30 @@ namespace CustomInterfaces
   }
 
   /**
-   * The watched directory has been changed.
-   * Update files loaded from it.
+   * The watched directory has been changed - update flag.
    * @param path :: [input] Path to directory modified
    */
-  void ALCDataLoadingPresenter::updateFilesFromDirectory(const QString &path) {
-    std::string lastFile = getMostRecentFile(path.toStdString());
-    load(lastFile);
-    m_view->setCurrentAutoFile(lastFile);
+  void ALCDataLoadingPresenter::updateDirectoryChangedFlag(const QString &path) {
+    m_directoryChanged = true;
+  }
+
+  /**
+   * This timer runs every second when we are watching a directory.
+   * If any changes have occurred in the meantime, reload.
+   * @param timeup :: [input] Qt timer event
+   */
+  void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
+    // Check flag for changes
+    if (m_directoryChanged.load() == true) {
+      // Most recent file in directory
+      Poco::Path filePath(m_view->firstRun());
+      std::string lastFile = getMostRecentFile(filePath.parent().toString());
+      // Load file and update view
+      load(lastFile);
+      m_view->setCurrentAutoFile(lastFile);
+      // Reset flag
+      m_directoryChanged = false;
+    }
   }
 
   /**
@@ -110,13 +126,16 @@ namespace CustomInterfaces
    * @param watching :: [input] True to start watching, false to stop
    */
   void ALCDataLoadingPresenter::changeWatchState(bool watching) {
+    m_directoryChanged = false;
     if (watching) {
       Poco::Path path(m_view->firstRun());
       m_watcher.addPath(QString(path.parent().toString().c_str()));
+      m_timerID = startTimer(1000); // 1-second timer
     } else {
       if (!m_watcher.directories().empty()) {
         m_watcher.removePaths(m_watcher.directories());
       }
+      killTimer(m_timerID);
     }
   }
 

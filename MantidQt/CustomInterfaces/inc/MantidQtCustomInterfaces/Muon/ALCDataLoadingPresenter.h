@@ -9,6 +9,8 @@
 #include <QObject>
 #include <QFileSystemWatcher>
 
+#include <atomic>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -61,8 +63,8 @@ namespace CustomInterfaces
     /// Updates the list of logs and number of periods
     void updateAvailableInfo();
 
-    /// When directory contents change, updates files loaded
-    void updateFilesFromDirectory(const QString &path);
+    /// When directory contents change, set flag
+    void updateDirectoryChangedFlag(const QString &path);
 
     /// When "Auto" selected/deselected, start/stop watching directory
     void changeWatchState(int state);
@@ -70,6 +72,10 @@ namespace CustomInterfaces
   signals:
     /// Signal emitted when data get changed
     void dataChanged();
+
+  protected:
+    /// Signal emitted when timer event occurs
+    void timerEvent(QTimerEvent *timeup) override;
 
   private:
     /// Load new data and update the view accordingly
@@ -86,6 +92,12 @@ namespace CustomInterfaces
 
     /// Watch a directory for changes
     QFileSystemWatcher m_watcher;
+
+    /// Flag to indicate directory has had changes since last load
+    std::atomic_bool m_directoryChanged;
+
+    /// ID of timer, if one is running
+    int m_timerID;
   };
 
 
