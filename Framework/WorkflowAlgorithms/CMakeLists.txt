@@ -20,9 +20,14 @@ set ( SRC_FILES
 	src/HFIRInstrument.cpp
 	src/HFIRLoad.cpp
 	src/HFIRSANSNormalise.cpp
+	src/IMuonAsymmetryCalculator.cpp
 	src/LoadEventAndCompress.cpp
 	src/MuonCalculateAsymmetry.cpp
+	src/MuonGroupAsymmetryCalculator.cpp
+	src/MuonGroupCalculator.cpp
+	src/MuonGroupCountsCalculator.cpp
 	src/MuonLoad.cpp
+	src/MuonPairAsymmetryCalculator.cpp
 	src/ProcessIndirectFitParameters.cpp
 	src/RefReduction.cpp
 	src/RefRoi.cpp
@@ -63,9 +68,14 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/HFIRInstrument.h
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h
 	inc/MantidWorkflowAlgorithms/HFIRSANSNormalise.h
+	inc/MantidWorkflowAlgorithms/IMuonAsymmetryCalculator.h
 	inc/MantidWorkflowAlgorithms/LoadEventAndCompress.h
 	inc/MantidWorkflowAlgorithms/MuonCalculateAsymmetry.h
+	inc/MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h
+	inc/MantidWorkflowAlgorithms/MuonGroupCalculator.h
+	inc/MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h
 	inc/MantidWorkflowAlgorithms/MuonLoad.h
+	inc/MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h
 	inc/MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h
 	inc/MantidWorkflowAlgorithms/RefReduction.h
 	inc/MantidWorkflowAlgorithms/RefRoi.h
@@ -82,7 +92,8 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-    ConvolutionFitSequentialTest.h
+	ConvolutionFitSequentialTest.h
+	IMuonAsymmetryCalculatorTest.h
 	LoadEventAndCompressTest.h
 	MuonCalculateAsymmetryTest.h
 	MuonLoadTest.h
