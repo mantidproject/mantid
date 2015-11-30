@@ -68,7 +68,7 @@ public:
       row << static_cast<int>(i) // detid
           << 0.                  // difc
           << 0.                  // difa
-          << 0.                 // tzero
+          << 0.                  // tzero
           << 0.;                 // tofmin
     }
     return wksp;
