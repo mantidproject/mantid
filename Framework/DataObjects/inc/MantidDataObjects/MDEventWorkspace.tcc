@@ -27,7 +27,9 @@
 #if __GNUC__ > 4 ||                                                            \
     (__GNUC__ == 4 &&                                                          \
      (__GNUC_MINOR__ > 4 || (__GNUC_MINOR__ == 4 && __GNUC_PATCHLEVEL__ > 0)))
-GCC_DIAG_OFF(strict - aliasing)
+// clang-format off
+GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 #endif
 
 using namespace Mantid;
