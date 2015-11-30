@@ -4,6 +4,7 @@
 
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_fft_complex.h>
+#include <gsl/gsl_linalg.h>
 
 namespace Mantid {
 namespace Algorithms {
@@ -129,7 +130,7 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 
   // Background (default level, sky background, etc)
-  double background = getProperty("DefaultLevel");
+  double background = getProperty("Background");
   // Chi target
   double chiTarget = getProperty("ChiTarget");
   // Required precision for Chi arget
@@ -184,16 +185,39 @@ void MaxEnt::exec() {
           calculateSearchDirections(data, error, newImage, background);
 
       // Calculate beta to contruct new image (SB eq. 25)
+      auto beta = move(dirs, chiTarget / dirs.chisq, chiEps, alphaIter);
 
       // Apply distance penalty (SB eq. 33)
+      double sum = 0.;
+      for (size_t i = 0; i < image.size(); i++)
+        sum += fabs(image[i]);
+
+      double dist = distance(dirs.s2, beta);
+      if (dist > distEps * sum / background) {
+        for (size_t k = 0; k < beta.size(); k++) {
+          beta[k] *= sqrt(sum / dist / background);
+        }
+      }
 
       // Calculate the new image
+      for (size_t i = 0; i < npoints; i++) {
+        for (size_t k = 0; k < beta.size(); k++) {
+          newImage[i] = newImage[i] + beta[k] * dirs.xi[k][i];
+        }
+      }
 
       // Calculate the new Chi-square
+      auto dataC = opus(newImage);
+      double chiSq = getChiSq(data, error, dataC);
 
       // Record the evolution of Chi-square and angle(S,C)
+      evolChi[it] = chiSq;
+      evolTest[it] = dirs.angle;
 
-      // Stop condition
+      // Stop condition, solution found
+      if ((std::abs(chiSq / chiTarget - 1.) < chiEps) && (dirs.angle < angle)) {
+        break;
+      }
 
       // Check for canceling the algorithm
       if (!(it % 1000)) {
@@ -204,9 +228,28 @@ void MaxEnt::exec() {
 
     } // iterations
 
+    // Get calculated data
+    std::vector<double> solutionData = opus(newImage);
+
     // Populate the output workspaces
+    // X values
+    outImageWS->dataX(s) = inWS->readX(s);
+    outDataWS->dataX(s) = inWS->readX(s);
+    // Y values
+    outDataWS->dataY(s).assign(solutionData.begin(), solutionData.end());
+    outImageWS->dataY(s).assign(newImage.begin(), newImage.end());
+    // No errors
 
     // Populate workspaces recording the evolution of Chi and Test
+    // X values
+    for (size_t it = 0; it < niter; it++) {
+      outEvolChi->dataX(s)[it] = static_cast<double>(it);
+      outEvolTest->dataX(s)[it] = static_cast<double>(it);
+    }
+    // Y values
+    outEvolChi->dataY(s).assign(evolChi.begin(), evolChi.end());
+    outEvolTest->dataY(s).assign(evolTest.begin(), evolTest.end());
+    // No errors
 
   } // Next spectrum
 
@@ -250,8 +293,6 @@ std::vector<double> MaxEnt::opus(const std::vector<double> &input) {
 
   return output;
 }
-
-//----------------------------------------------------------------------------------------------
 
 /**
 * Transforms from data-space to solution-space
@@ -483,6 +524,218 @@ std::vector<double> MaxEnt::getSGrad(const std::vector<double> &image,
   return sgrad;
 
 #undef S
+}
+
+/** Bisection method to move beta one step closer towards the solution
+* @param dirs :: [input] The current quadratic coefficients
+* @param chiTarget :: [input] The requested Chi target
+* @param chiEps :: [input] Precision required for Chi target
+* @param alphaIter :: [input] Maximum number of iterations in the bisection
+* method (alpha chop)
+*/
+std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
+                                 double chiEps, size_t alphaIter) {
+
+  double aMin = 0.; // Minimum alpha
+  double aMax = 1.; // Maximum alpha
+
+  // Dimension, number of search directions
+  size_t dim = dirs.c2.size().first;
+
+  std::vector<double> beta(dim, 0); // Solution
+
+  double chiMin = chiNow(dirs, aMin, beta); // Chi at alpha min
+  double chiMax = chiNow(dirs, aMax, beta); // Chi at alpha max
+
+  double dchiMin = chiMin - chiTarget; // Delta = max - target
+  double dchiMax = chiMax - chiTarget; // Delta = min - target
+
+  if (dchiMin * dchiMax > 0) {
+    // ChiTarget could be outside the range [chiMin, chiMax]
+
+    if (fabs(dchiMin) < fabs(dchiMax)) {
+      chiMin = chiNow(dirs, aMin, beta);
+    } else {
+      chiMax = chiNow(dirs, aMax, beta);
+    }
+    return beta;
+    //    throw std::runtime_error("Error in alpha chop\n");
+  }
+
+  // Initial values of eps and iter to start while loop
+  double eps = 2. * chiEps;
+  size_t iter = 0;
+
+  // Bisection method
+
+  while ((fabs(eps) > chiEps) && (iter < alphaIter)) {
+
+    double aMid = 0.5 * (aMin + aMax);
+    double chiMid = chiNow(dirs, aMid, beta);
+
+    eps = chiMid - chiTarget;
+
+    if (dchiMin * eps > 0) {
+      aMin = aMid;
+      dchiMin = eps;
+    }
+
+    if (dchiMax * eps > 0) {
+      aMax = aMid;
+      dchiMax = eps;
+    }
+
+    iter++;
+  }
+
+  // Check if move was successful
+  if ((fabs(eps) > chiEps) || (iter > alphaIter)) {
+
+    throw std::runtime_error("Error encountered when calculating solution "
+                             "image. No convergence in alpha chop.\n");
+  }
+
+  return beta;
+}
+
+/** Calculates Chi given the quadratic coefficients and an alpha value by
+* solving the matrix equation A*b = B
+* @param dirs :: [input] The quadratic coefficients
+* @param a :: [input] The alpha value
+* @param b :: [output] The solution
+* @return :: The calculated chi-square
+*/
+double MaxEnt::chiNow(const SearchDirections &dirs, double a,
+                      std::vector<double> &b) {
+
+  size_t dim = dirs.c2.size().first;
+
+  double ax = a;
+  double bx = 1 - ax;
+
+  Kernel::DblMatrix A(dim, dim);
+  Kernel::DblMatrix B(dim, 1);
+
+  // Construct the matrix A and vector B such that Ax=B
+  for (size_t k = 0; k < dim; k++) {
+    for (size_t l = 0; l < dim; l++) {
+      A[k][l] = bx * dirs.c2[k][l] - ax * dirs.s2[k][l];
+    }
+    B[k][0] = -bx * dirs.c1[k][0] + ax * dirs.s1[k][0];
+  }
+
+  // Alternatives I have tried:
+  // Gauss-Jordan
+  // LU
+  // SVD seems to work better
+
+  // Solve using SVD
+  DblMatrix u(dim, dim);
+  DblMatrix v(dim, dim);
+  DblMatrix w(dim, dim);
+
+  singularValueDecomposition(A, u, w, v);
+
+  // Now result
+  auto sol = v * w * u.Transpose() * B;
+
+  std::vector<double> beta(dim, 0.);
+  for (size_t i = 0; i < dim; i++)
+    b[i] = sol[i][0];
+
+  // Now compute Chi
+  double ww = 0.;
+  for (size_t k = 0; k < dim; k++) {
+    double z = 0.;
+    for (size_t l = 0; l < dim; l++) {
+      z += dirs.c2[k][l] * b[l];
+    }
+    ww += b[k] * (dirs.c1[k][0] + 0.5 * z);
+  }
+
+  // Return chi
+  return ww + 1.;
+}
+
+/** Factorizes a matrix A into the product A = U S V^T
+* @param A :: [input] The input matrix to factorize
+* @param uu :: [output] The matrix U
+* @param zz :: [output] The inverse of S
+* @param vv :: [output] The matrix V
+*/
+void MaxEnt::singularValueDecomposition(const DblMatrix &A, DblMatrix &uu,
+                                        DblMatrix &zz, DblMatrix &vv) {
+
+  size_t dim = A.size().first;
+
+  gsl_matrix *a = gsl_matrix_alloc(dim, dim);
+  gsl_matrix *v = gsl_matrix_alloc(dim, dim);
+  gsl_vector *s = gsl_vector_alloc(dim);
+  gsl_vector *w = gsl_vector_alloc(dim);
+
+  // Need to copy from DblMatrix to gsl matrix
+
+  for (size_t k = 0; k < dim; k++)
+    for (size_t l = 0; l < dim; l++)
+      gsl_matrix_set(a, k, l, A[k][l]);
+
+  gsl_linalg_SV_decomp(a, v, s, w);
+
+#define THRESHOLD 1E-6
+
+  // Now we have a, v, w
+
+  // If A is singular or ill-conditioned we use SVD to obtain a least squares
+  // solution as follows:
+
+  // 1. Find largest sing value
+  double max = gsl_vector_get(s, 0);
+  for (size_t i = 0; i < dim; i++) {
+    if (max < gsl_vector_get(s, i))
+      max = gsl_vector_get(s, i);
+  }
+  double threshold = THRESHOLD * max;
+
+  // 2. Apply a threshold to small singular values
+  for (size_t i = 0; i < dim; i++)
+    if (gsl_vector_get(s, i) > threshold)
+      zz[i][i] = 1 / gsl_vector_get(s, i);
+    else
+      zz[i][i] = 0;
+
+  // Now copy back from gsl to DblMatrix
+  for (size_t k = 0; k < dim; k++)
+    for (size_t l = 0; l < dim; l++) {
+      uu[k][l] = gsl_matrix_get(a, k, l);
+      vv[k][l] = gsl_matrix_get(v, k, l);
+    }
+
+#undef THRESHOLD
+
+  gsl_matrix_free(a);
+  gsl_matrix_free(v);
+  gsl_vector_free(s);
+  gsl_vector_free(w);
+}
+
+/** Calculates the distance of the current solution
+* @param s2 :: [input] The current quadratic coefficient for the entropy S
+* @param beta :: [input] The current beta vector
+* @return :: The distance
+*/
+double MaxEnt::distance(const DblMatrix &s2, const std::vector<double> &beta) {
+
+  size_t dim = s2.size().first;
+
+  double dist = 0.;
+
+  for (size_t k = 0; k < dim; k++) {
+    double sum = 0.0;
+    for (size_t l = 0; l < dim; l++)
+      sum -= s2[k][l] * beta[l];
+    dist += beta[k] * sum;
+  }
+  return dist;
 }
 
 } // namespace Algorithms

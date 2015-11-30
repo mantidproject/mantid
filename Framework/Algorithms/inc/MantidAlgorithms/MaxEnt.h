@@ -97,6 +97,18 @@ private:
                                              const std::vector<double> &error,
                                              const std::vector<double> &image,
                                              double background);
+  // Calculates chi-square by solving the matrix equation A*x = b
+  double chiNow(const SearchDirections &coeffs, double a,
+                std::vector<double> &beta);
+  // Calculates the SVD of the input matrix A
+  void singularValueDecomposition(const Kernel::DblMatrix &A,
+                                  Kernel::DblMatrix &aa, Kernel::DblMatrix &zz,
+                                  Kernel::DblMatrix &vv);
+  /// Moves the system one step closer towards the solution
+  std::vector<double> move(const SearchDirections &dirs, double chiTarget,
+                           double chiEps, size_t alphaIter);
+  /// Calculates the distance of the current solution
+  double distance(const Kernel::DblMatrix &s2, const std::vector<double> &beta);
 };
 
 } // namespace Algorithms
