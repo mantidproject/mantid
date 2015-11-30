@@ -29,19 +29,29 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL MaxEnt : public API::Algorithm {
+class DLLExport MaxEnt : public API::Algorithm {
 public:
+  /// Constructor
   MaxEnt();
+  /// Destructor
   virtual ~MaxEnt();
 
+  /// Algorithm's name
   virtual const std::string name() const;
+  /// Algorithm's version
   virtual int version() const;
+  /// Algorithm's category
   virtual const std::string category() const;
+  /// Algorithm's summary
   virtual const std::string summary() const;
 
 private:
+  /// Initialise the algorithm's properties
   void init();
+  /// Run the algorithm
   void exec();
+  /// Validate the input properties
+  std::map<std::string, std::string> validateInputs();
 };
 
 } // namespace Algorithms
