@@ -386,7 +386,7 @@ signal_t MDHistoWorkspace::getSignalAtCoord(
 
 //----------------------------------------------------------------------------------------------
 /** Get the signal at a particular coordinate in the workspace
- * or return NaN if masked
+ * or return 0 if masked
  *
  * @param coords :: numDimensions-sized array of the coordinates to look at
  * @param normalization : Normalisation to use.
@@ -398,7 +398,7 @@ MDHistoWorkspace::getSignalWithMaskAtCoord(const coord_t *coords,
                            const Mantid::API::MDNormalization &normalization) const {
   size_t linearIndex = this->getLinearIndexAtCoord(coords);
   if (this->getIsMaskedAt(linearIndex)) {
-    return std::numeric_limits<signal_t>::quiet_NaN();
+    return 0.0;
   }
   return getSignalAtCoord(coords, normalization);
 }

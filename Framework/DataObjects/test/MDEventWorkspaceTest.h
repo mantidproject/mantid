@@ -299,7 +299,7 @@ public:
   void test_getSignalWithMaskAtCoord() {
     MDEventWorkspace3Lean::sptr ew =
       MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
-    coord_t coords1[3] = {1.5, 1.5, 1.5};
+    coord_t coords1[3] = {0.5, 0.5, 0.5};
     coord_t coords2[3] = {2.5, 2.5, 2.5};
     coord_t coords3[3] = {-0.1f, 2, 2};
     coord_t coords4[3] = {2, 2, 4.1f};
@@ -314,17 +314,14 @@ public:
     min.push_back(0);
     max.push_back(2);
     max.push_back(2);
-    max.push_back(0.99f);
+    max.push_back(2);
 
-    // Create an function that encompases 1/4 of the total bins.
+    // Create an function that encompasses 1/4 of the total bins.
     MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
 
     ew->setMDMasking(function);
 
     ew->refreshCache();
-    TSM_ASSERT_DELTA(
-      "A regular box with a single event",
-      ew->getSignalWithMaskAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
     TSM_ASSERT("Masked returns NAN",
                boost::math::isnan(ew->getSignalWithMaskAtCoord(
                  coords1, Mantid::API::NoNormalization)));
