@@ -27,7 +27,7 @@
 #if __GNUC__ > 4 ||                                                            \
     (__GNUC__ == 4 &&                                                          \
      (__GNUC_MINOR__ > 4 || (__GNUC_MINOR__ == 4 && __GNUC_PATCHLEVEL__ > 0)))
-GCC_DIAG_OFF(strict - aliasing)
+GCC_DIAG_OFF(strict-aliasing)
 #endif
 
 using namespace Mantid;
