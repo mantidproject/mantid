@@ -54,20 +54,24 @@ void ExportTimeSeriesLog::init() {
   std::vector<std::string> units;
   units.push_back("Seconds");
   units.push_back("Nano Seconds");
-  declareProperty("UnitOfTime", "Seconds",
-                  boost::make_shared<Kernel::StringListValidator>(units),
-                  "StartTime, StopTime and DeltaTime can be given in various unit."
-                  "The unit can be 'Seconds' or 'Nanoseconds' from run start time."
-                  "They can also be defined as 'Percentage' of total run time.");
+  declareProperty(
+      "UnitOfTime", "Seconds",
+      boost::make_shared<Kernel::StringListValidator>(units),
+      "StartTime, StopTime and DeltaTime can be given in various unit."
+      "The unit can be 'Seconds' or 'Nanoseconds' from run start time."
+      "They can also be defined as 'Percentage' of total run time.");
 
-  declareProperty("StartTime", EMPTY_DBL(), "Relative starting time of the output series. "
+  declareProperty("StartTime", EMPTY_DBL(),
+                  "Relative starting time of the output series. "
                   "Its unit is determined by property UnitOfTime.");
 
-  declareProperty("StopTime", EMPTY_DBL(), "Relative stopping time of the output series."
+  declareProperty("StopTime", EMPTY_DBL(),
+                  "Relative stopping time of the output series."
                   "Its unit is determined by property UnitOfTime.");
 
-  declareProperty("OutputAbsoluteTime", false,
-                  "If true, the output times will be absolute time to 1990.01.01.");
+  declareProperty(
+      "OutputAbsoluteTime", false,
+      "If true, the output times will be absolute time to 1990.01.01.");
 
   declareProperty(
       "NumberEntriesExport", EMPTY_INT(),
@@ -122,8 +126,10 @@ void ExportTimeSeriesLog::exec() {
  * @param outputeventws :: boolean.  output workspace is event workspace if
  * @param numentries :: number of log entries to export
  */
-void ExportTimeSeriesLog::exportLog(const std::string &logname, const std::string timeunit,
-                                    const double &starttime, const double &stoptime,
+void ExportTimeSeriesLog::exportLog(const std::string &logname,
+                                    const std::string timeunit,
+                                    const double &starttime,
+                                    const double &stoptime,
                                     const bool exportepoch, bool outputeventws,
                                     int numentries) {
 
@@ -159,25 +165,25 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname, const std::strin
   size_t i_stop = times.size() - 1;
   // Rule out the case that start time is behind last log entry
   bool i_start_cal = false;
-  if (starttime != EMPTY_DBL())
-  {
-    int64_t timerangens = times.back().totalNanoseconds() - times.front().totalNanoseconds();
+  if (starttime != EMPTY_DBL()) {
+    int64_t timerangens =
+        times.back().totalNanoseconds() - times.front().totalNanoseconds();
     double timerange = static_cast<double>(timerangens) * timeunitfactor;
     g_log.debug() << "Time range is " << timerange << ", Start time is "
                   << starttime << "\n";
-    if (timerange < starttime)
-    {
-      i_start = times.size()-1;
+    if (timerange < starttime) {
+      i_start = times.size() - 1;
       i_start_cal = true;
     }
   }
 
-  if ((!i_start_cal) && (starttime != EMPTY_DBL() || stoptime != EMPTY_DBL()))
-  {
-    bool export_partial = calculateTimeSeriesRangeByTime(times, starttime, i_start, stoptime, i_stop, timeunitfactor);
+  if ((!i_start_cal) && (starttime != EMPTY_DBL() || stoptime != EMPTY_DBL())) {
+    bool export_partial = calculateTimeSeriesRangeByTime(
+        times, starttime, i_start, stoptime, i_stop, timeunitfactor);
     if (!export_partial)
-      throw std::runtime_error("Unable to find proton_charge for run start time. "
-                               "Failed to get partial time series.");
+      throw std::runtime_error(
+          "Unable to find proton_charge for run start time. "
+          "Failed to get partial time series.");
   }
 
   // Determine number of export log
@@ -195,9 +201,11 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname, const std::strin
 
   // Create otuput workspace
   if (outputeventws) {
-    setupEventWorkspace(i_start, i_stop, numentries, times, values, exportepoch);
+    setupEventWorkspace(i_start, i_stop, numentries, times, values,
+                        exportepoch);
   } else {
-    setupWorkspace2D(i_start, i_stop, numentries, times, values, exportepoch, timeunitfactor);
+    setupWorkspace2D(i_start, i_stop, numentries, times, values, exportepoch,
+                     timeunitfactor);
   }
 
   return;
@@ -208,23 +216,18 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname, const std::strin
   * @param times :: vector of Kernel::DateAndTime
   * @param values :: vector of log value in double
   */
-void ExportTimeSeriesLog::setupWorkspace2D(const size_t &start_index,
-                                           const size_t &stop_index,
-                                           int numentries,
-                                           vector<DateAndTime> &times,
-                                           vector<double> values,
-                                           const bool &epochtime,
-                                           const double &timeunitfactor) {
+void ExportTimeSeriesLog::setupWorkspace2D(
+    const size_t &start_index, const size_t &stop_index, int numentries,
+    vector<DateAndTime> &times, vector<double> values, const bool &epochtime,
+    const double &timeunitfactor) {
   // Determine time shift
   int64_t timeshift(0);
-  if (!epochtime)
-  {
+  if (!epochtime) {
     // relative time
     Kernel::DateAndTime runstart(
-          m_inputWS->run().getProperty("run_start")->value());
+        m_inputWS->run().getProperty("run_start")->value());
     timeshift = runstart.totalNanoseconds();
   }
-
 
   // Determine the size
   size_t outsize = stop_index - start_index + 1;
@@ -245,8 +248,7 @@ void ExportTimeSeriesLog::setupWorkspace2D(const size_t &start_index,
   for (size_t index = 0; index < outsize; ++index) {
     size_t i_time = index + start_index;
     // safety check
-    if (i_time >= times.size())
-    {
+    if (i_time >= times.size()) {
       std::stringstream errss;
       errss << "It shouldn't happen that the index is out of boundary."
             << "start index = " << start_index << ", output size = " << outsize
@@ -276,11 +278,9 @@ void ExportTimeSeriesLog::setupWorkspace2D(const size_t &start_index,
  * @param values :: vector of log value in double
  * @param epochtime :: boolean flag for output time is absolute time/epoch time.
  */
-void ExportTimeSeriesLog::setupEventWorkspace(const size_t &start_index,
-                                              const size_t &stop_index,
-                                              int numentries,
-                                              vector<DateAndTime> &times,
-                                              vector<double> values, const bool &epochtime) {
+void ExportTimeSeriesLog::setupEventWorkspace(
+    const size_t &start_index, const size_t &stop_index, int numentries,
+    vector<DateAndTime> &times, vector<double> values, const bool &epochtime) {
   Kernel::DateAndTime runstart(
       m_inputWS->run().getProperty("run_start")->value());
 
@@ -314,19 +314,19 @@ void ExportTimeSeriesLog::setupEventWorkspace(const size_t &start_index,
   outEL.clearDetectorIDs();
 
   int64_t time_shift_ns(0);
-  if (!epochtime)
-  {
+  if (!epochtime) {
     // relative time
     time_shift_ns = runstart.totalNanoseconds();
   }
 
   for (size_t i = 0; i < outsize; i++) {
-    Kernel::DateAndTime tnow = times[i+start_index];
+    Kernel::DateAndTime tnow = times[i + start_index];
     int64_t dt = tnow.totalNanoseconds() - time_shift_ns;
 
     // convert to microseconds
     double dtmsec = static_cast<double>(dt) / 1000.0;
-    outEL.addEventQuickly(WeightedEventNoTime(dtmsec, values[i+start_index], values[i+start_index]));
+    outEL.addEventQuickly(WeightedEventNoTime(dtmsec, values[i + start_index],
+                                              values[i + start_index]));
   }
   // Ensure thread-safety
   outEventWS->sortAll(TOF_SORT, NULL);
@@ -352,13 +352,13 @@ void ExportTimeSeriesLog::setupEventWorkspace(const size_t &start_index,
  * @param i_start
  * @param stop_time
  * @param i_stop
- * @param time_factor :: factor of time unit. for example, nanosecond is 1, second is 1E-9
+ * @param time_factor :: factor of time unit. for example, nanosecond is 1,
+ * second is 1E-9
  */
-bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(std::vector<Kernel::DateAndTime> &vec_times,
-                                                         const double &rel_start_time, size_t &i_start,
-                                                         const double &rel_stop_time,size_t &i_stop,
-                                                         const double &time_factor)
-{ 
+bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
+    std::vector<Kernel::DateAndTime> &vec_times, const double &rel_start_time,
+    size_t &i_start, const double &rel_stop_time, size_t &i_stop,
+    const double &time_factor) {
   // Initialize if there is something wrong.
   i_start = 0;
   i_stop = vec_times.size() - 1;
@@ -366,31 +366,37 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(std::vector<Kernel::Dat
   // Check existence of proton_charge as run start
   Kernel::DateAndTime run_start(0);
   if (m_inputWS->run().hasProperty("proton_charge"))
-    run_start = dynamic_cast<TimeSeriesProperty<double> *>(m_inputWS->run().getProperty("proton_charge"))->nthTime(0);
-  else
-  {
-    g_log.warning("Property proton_charge does not exist so it is unable to determine run start time. "
-                  "StartTime and StopTime are ignored.  TimeSeriesProperty is exported in full length.");
+    run_start = dynamic_cast<TimeSeriesProperty<double> *>(
+                    m_inputWS->run().getProperty("proton_charge"))->nthTime(0);
+  else {
+    g_log.warning("Property proton_charge does not exist so it is unable to "
+                  "determine run start time. "
+                  "StartTime and StopTime are ignored.  TimeSeriesProperty is "
+                  "exported in full length.");
     return false;
   }
 
   // Get time 0
-  if (rel_start_time != EMPTY_DBL())
-  {
-    int64_t start_time_ns = run_start.totalNanoseconds() + static_cast<int64_t>(rel_start_time / time_factor);
+  if (rel_start_time != EMPTY_DBL()) {
+    int64_t start_time_ns = run_start.totalNanoseconds() +
+                            static_cast<int64_t>(rel_start_time / time_factor);
     Kernel::DateAndTime start_time(start_time_ns);
-    i_start = static_cast<size_t>(std::lower_bound(vec_times.begin(), vec_times.end(), start_time) - vec_times.begin());
+    i_start = static_cast<size_t>(
+        std::lower_bound(vec_times.begin(), vec_times.end(), start_time) -
+        vec_times.begin());
 
     // try to record the log value before starting time
     if (i_start >= 1)
-      -- i_start;
+      --i_start;
   }
 
-  if (rel_stop_time != EMPTY_DBL())
-  {
-    int64_t stop_time_ns = run_start.totalNanoseconds() + static_cast<int64_t>(rel_stop_time / time_factor);
+  if (rel_stop_time != EMPTY_DBL()) {
+    int64_t stop_time_ns = run_start.totalNanoseconds() +
+                           static_cast<int64_t>(rel_stop_time / time_factor);
     Kernel::DateAndTime stop_time(stop_time_ns);
-    i_stop = static_cast<size_t>(std::lower_bound(vec_times.begin(), vec_times.end(), stop_time)-vec_times.begin());
+    i_stop = static_cast<size_t>(
+        std::lower_bound(vec_times.begin(), vec_times.end(), stop_time) -
+        vec_times.begin());
   }
 
   return true;
