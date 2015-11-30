@@ -1055,7 +1055,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
 */
 
 /**
-    \fn virtual QWidget *QtAbstractEditorFactory::createEditor(PropertyManager *manager, QtProperty *property,
+    \fn virtual QWidget *QtAbstractEditorFactory::createEditorForManager(PropertyManager *manager, QtProperty *property,
                 QWidget *parent) = 0
 
     Creates an editing widget with the given \a parent for the

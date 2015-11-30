@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 import mantid
 import isis_instrument as instruments
 import ISISCommandInterface as command_iface
@@ -8,6 +8,7 @@ from mantid.simpleapi import *
 from mantid.kernel import DateAndTime
 import random
 import math
+
 class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
     def test_that_gets_transmission_monitor(self):
         # Arrange
@@ -386,6 +387,16 @@ class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
         delta_r_expected = delta_r/1000.
         self.assertEqual(delta_r_stored, delta_r_expected)
 
+
+class TestMaskFile(unittest.TestCase):
+    def test_throws_for_user_file_with_invalid_extension(self):
+        # Arrange
+        file_name = "/path1/path2/user_file.abc"
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act + Assert
+        args = [file_name]
+        self.assertRaises(RuntimeError, command_iface.MaskFile, *args)
 
 if __name__ == "__main__":
     unittest.main()

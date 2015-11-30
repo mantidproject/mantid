@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -51,20 +52,45 @@ private:
 
   // Calculates raw counts
   API::MatrixWorkspace_sptr
-  calculateGroupCounts(const API::MatrixWorkspace_sptr &firstPeriodWS,
-                       const API::MatrixWorkspace_sptr &secondPeriodWS,
-                       int groupIndex, std::string op);
+  calculateGroupCounts(const API::WorkspaceGroup_const_sptr &inputWSGroup,
+                       int groupIndex, const std::vector<int> &summedPeriods,
+                       const std::vector<int> &subtractedPeriods);
   // Calculates asymmetry for specified spectrum
   API::MatrixWorkspace_sptr
-  calculateGroupAsymmetry(const API::MatrixWorkspace_sptr &firstPeriodWS,
-                          const API::MatrixWorkspace_sptr &secondPeriodWS,
-                          int groupIndex, std::string op);
+  calculateGroupAsymmetry(const API::WorkspaceGroup_const_sptr &inputWSGroup,
+                          int groupIndex, const std::vector<int> &summedPeriods,
+                          const std::vector<int> &subtractedPeriods);
   // Calculates asymmetry for a pair of spectra
   API::MatrixWorkspace_sptr
-  calculatePairAsymmetry(const API::MatrixWorkspace_sptr &firstPeriodWS,
-                         const API::MatrixWorkspace_sptr &secondPeriodWS,
+  calculatePairAsymmetry(const API::WorkspaceGroup_const_sptr &inputWSGroup,
                          int firstPairIndex, int secondPairIndex, double alpha,
-                         std::string op);
+                         const std::vector<int> &summedPeriods,
+                         const std::vector<int> &subtractedPeriods);
+  /// Checks if the supplied properties are valid or not
+  std::map<std::string, std::string> validateInputs() override;
+  /// Checks if periods in set are valid
+  std::vector<int> findInvalidPeriods(const std::vector<int> &periodSet) const;
+  /// Builds error string for invalid period numbers
+  std::string buildErrorString(const std::vector<int> &invalidPeriods) const;
+  /// Sums the specified periods in the supplied workspace group
+  API::MatrixWorkspace_sptr
+  sumPeriods(const API::WorkspaceGroup_const_sptr &inputWSGroup,
+             const std::vector<int> &periodsToSum);
+  /// Subtracts one workspace from another (lhs - rhs)
+  API::MatrixWorkspace_sptr
+  subtractWorkspaces(const API::MatrixWorkspace_sptr &lhs,
+                     const API::MatrixWorkspace_sptr &rhs);
+  /// Extracts a single spectrum from a workspace
+  API::MatrixWorkspace_sptr extractSpectrum(const API::Workspace_sptr &inputWS,
+                                            const int index);
+  /// Removes exponential decay from the workspace
+  API::MatrixWorkspace_sptr removeExpDecay(const API::Workspace_sptr &inputWS,
+                                           const int index);
+  /// Performs asymmetry calculation on the workspace
+  API::MatrixWorkspace_sptr asymmetryCalc(const API::Workspace_sptr &inputWS,
+                                          const int firstPairIndex,
+                                          const int secondPairIndex,
+                                          const double alpha);
 };
 
 } // namespace WorkflowAlgorithms
