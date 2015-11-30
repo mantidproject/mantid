@@ -20,10 +20,10 @@ else
     TCM_RELEASE=${TCMALLOC_RELEASE_RATE}
 fi
 
-if [ -n "$NXSESSIONID" ]; then
+if [ -n "${NXSESSIONID}" ]; then
   command -v vglrun >/dev/null 2>&1 || { echo >&2 "MantidPlot requires VirtualGL but it's not installed.  Aborting."; exit 1; }
   VGLRUN="vglrun "
-elif [ -n "$TLSESSIONDATA"]; then
+elif [ -n "${TLSESSIONDATA}"]; then
   command -v vglrun >/dev/null 2>&1 || { echo >&2 "MantidPlot requires VirtualGL but it's not installed.  Aborting."; exit 1; }
   VGLRUN="vglrun "
 fi
