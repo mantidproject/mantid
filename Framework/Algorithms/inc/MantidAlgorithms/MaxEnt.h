@@ -29,6 +29,31 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+/// Auxiliary class to store the search directions (xi), quadratic coefficients
+/// (c1, s1, c2, s2), angle and chi-sq
+class SearchDirections {
+  // SB eq. 21
+  // SB eq. 24
+public:
+  SearchDirections(size_t dim, size_t points) {
+    xi = Kernel::DblMatrix(dim, points);
+    eta = Kernel::DblMatrix(dim, points);
+    s1 = Kernel::DblMatrix(dim, 1);
+    c1 = Kernel::DblMatrix(dim, 1);
+    s2 = Kernel::DblMatrix(dim, dim);
+    c2 = Kernel::DblMatrix(dim, dim);
+  };
+  Kernel::DblMatrix xi;  // Image space
+  Kernel::DblMatrix eta; // Data space
+  Kernel::DblMatrix s1;  // S_mu
+  Kernel::DblMatrix c1;  // C_mu
+  Kernel::DblMatrix s2;  // g_mu_nu
+  Kernel::DblMatrix c2;  // M_mu_nu
+  double chisq;
+  double angle;
+};
+
 class DLLExport MaxEnt : public API::Algorithm {
 public:
   /// Constructor
@@ -56,6 +81,22 @@ private:
   std::vector<double> opus(const std::vector<double> &input);
   /// Transforms from data space to image space
   std::vector<double> tropus(const std::vector<double> &input);
+  /// Calculates chi-square
+  double getChiSq(const std::vector<double> &data,
+                  const std::vector<double> &errors,
+                  const std::vector<double> &dataCalc);
+  /// Calculates the gradient of Chi
+  std::vector<double> getCGrad(const std::vector<double> &data,
+                               const std::vector<double> &errors,
+                               const std::vector<double> &dataCalc);
+  /// Calculates the gradient of S (entropy)
+  std::vector<double> getSGrad(const std::vector<double> &image,
+                               double background);
+  /// Calculates the search directions and the quadratic coefficients
+  SearchDirections calculateSearchDirections(const std::vector<double> &data,
+                                             const std::vector<double> &error,
+                                             const std::vector<double> &image,
+                                             double background);
 };
 
 } // namespace Algorithms

@@ -162,11 +162,38 @@ void MaxEnt::exec() {
 
   for (size_t s = 0; s < nspec; s++) {
 
+    auto data = inWS->readY(s);
+    auto error = inWS->readE(s);
+
+    // To record the algorithm's progress
+    std::vector<double> evolChi(niter, 0.);
+    std::vector<double> evolTest(niter, 0.);
+
+    // Store image in successive iterations
+    std::vector<double> newImage = image;
+
     // Progress
     Progress progress(this, 0, 1, niter);
 
     // Run maxent algorithm
     for (size_t it = 0; it < niter; it++) {
+
+      // Calculate search directions and quadratic model coefficients (SB eq. 21
+      // and 24)
+      SearchDirections dirs =
+          calculateSearchDirections(data, error, newImage, background);
+
+      // Calculate beta to contruct new image (SB eq. 25)
+
+      // Apply distance penalty (SB eq. 33)
+
+      // Calculate the new image
+
+      // Calculate the new Chi-square
+
+      // Record the evolution of Chi-square and angle(S,C)
+
+      // Stop condition
 
       // Check for canceling the algorithm
       if (!(it % 1000)) {
@@ -259,5 +286,204 @@ std::vector<double> MaxEnt::tropus(const std::vector<double> &input) {
 
   return output;
 }
+
+/** Calculate the search directions and quadratic coefficients as described in
+* section 3.6 in SB
+* @param data :: [input] The experimental input data
+* @param error :: [input] The experimental input errors
+* @param image :: [input] The current image
+* @param background :: [input] The default or 'sky' background
+* @return :: Search directions as a SearchDirections object
+*/
+SearchDirections MaxEnt::calculateSearchDirections(
+    const std::vector<double> &data, const std::vector<double> &error,
+    const std::vector<double> &image, double background) {
+
+  // Two search directions
+  const size_t dim = 2;
+
+  // Some checks
+  if ((data.size() != error.size()) || (data.size() != image.size())) {
+
+    throw std::invalid_argument("Can't compute quadratic coefficients");
+  }
+
+  size_t npoints = data.size();
+
+  // Calculate data from start image
+  std::vector<double> dataC = opus(image);
+  // Calculate Chi-square
+  double chiSq = getChiSq(data, error, dataC);
+
+  // Gradient of C (Chi)
+  std::vector<double> cgrad = getCGrad(data, error, dataC);
+  cgrad = tropus(cgrad);
+  // Gradient of S (Entropy)
+  std::vector<double> sgrad = getSGrad(image, background);
+
+  SearchDirections dirs(dim, npoints);
+
+  dirs.chisq = chiSq;
+
+  double cnorm = 0.;
+  double snorm = 0.;
+  double csnorm = 0.;
+
+  // Here we calculate:
+  // SB. eq 22 -> |grad S|, |grad C|
+  // SB. eq 37 -> test
+  for (size_t i = 0; i < npoints; i++) {
+    cnorm += cgrad[i] * cgrad[i] * image[i] * image[i];
+    snorm += sgrad[i] * sgrad[i] * image[i] * image[i];
+    csnorm += cgrad[i] * sgrad[i] * image[i] * image[i];
+  }
+  cnorm = sqrt(cnorm);
+  snorm = sqrt(snorm);
+
+  dirs.angle = sqrt(0.5 * (1. - csnorm / snorm / cnorm));
+  // csnorm could be greater than snorm * cnorm due to rounding issues
+  // so check for nan
+  if (dirs.angle != dirs.angle)
+    dirs.angle = 0.;
+
+  // Calculate the search directions
+
+  // Temporary vectors (image space)
+  std::vector<double> xi0(npoints, 0.);
+  std::vector<double> xi1(npoints, 0.);
+
+  for (size_t i = 0; i < npoints; i++) {
+    xi0[i] = fabs(image[i]) * cgrad[i] / cnorm;
+    xi1[i] = fabs(image[i]) * sgrad[i] / snorm;
+    // xi1[i] = image[i] * (sgrad[i] / snorm - cgrad[i] / cnorm);
+  }
+
+  // Temporary vectors (data space)
+  std::vector<double> eta0 = opus(xi0);
+  std::vector<double> eta1 = opus(xi1);
+
+  // Store the search directions
+  dirs.xi.setRow(0, xi0);
+  dirs.xi.setRow(1, xi1);
+  dirs.eta.setRow(0, eta0);
+  dirs.eta.setRow(1, eta1);
+
+  // Now compute the quadratic coefficients SB. eq 24
+
+  // First compute s1, c1
+  for (size_t k = 0; k < dim; k++) {
+    dirs.c1[k][0] = dirs.s1[k][0] = 0.;
+    for (size_t i = 0; i < npoints; i++) {
+      dirs.s1[k][0] += dirs.xi[k][i] * sgrad[i];
+      dirs.c1[k][0] += dirs.xi[k][i] * cgrad[i];
+    }
+    // Note: the factor chiSQ has to go either here or in ChiNow
+    dirs.c1[k][0] /= chiSq;
+  }
+
+  // Then s2, c2
+  for (size_t k = 0; k < dim; k++) {
+    for (size_t l = 0; l < k + 1; l++) {
+      dirs.s2[k][l] = 0.;
+      dirs.c2[k][l] = 0.;
+      for (size_t i = 0; i < npoints; i++) {
+        dirs.c2[k][l] += dirs.eta[k][i] * dirs.eta[l][i] / error[i] / error[i];
+        dirs.s2[k][l] -= dirs.xi[k][i] * dirs.xi[l][i] / fabs(image[i]);
+      }
+      // Note: the factor chiSQ has to go either here or in ChiNow
+      dirs.c2[k][l] *= 2.0 / chiSq;
+      dirs.s2[k][l] *= 1.0 / background;
+    }
+  }
+  // Symmetrise s2, c2: reflect accross the diagonal
+  for (size_t k = 0; k < dim; k++) {
+    for (size_t l = k + 1; l < dim; l++) {
+      dirs.s2[k][l] = dirs.s2[l][k];
+      dirs.c2[k][l] = dirs.c2[l][k];
+    }
+  }
+
+  return dirs;
+}
+
+/** Calculates Chi-square
+* @param data :: [input] Data measured during the experiment
+* @param errors :: [input] Associated errors
+* @param dataCalc :: [input] Data calculated from image
+* @return :: The calculated Chi-square
+*/
+double MaxEnt::getChiSq(const std::vector<double> &data,
+                        const std::vector<double> &errors,
+                        const std::vector<double> &dataCalc) {
+
+  if ((data.size() != errors.size()) || (data.size() != dataCalc.size())) {
+    throw std::invalid_argument("Cannot compute Chi square");
+  }
+
+  size_t npoints = data.size();
+
+  // Calculate
+  // ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
+  double chiSq = 0;
+  for (size_t i = 0; i < npoints; i++) {
+    if (errors[i]) {
+      double term = (data[i] - dataCalc[i]) / errors[i];
+      chiSq += term * term;
+    }
+  }
+
+  return chiSq;
+}
+/** Calculates the gradient of C (Chi term)
+* @param data :: [input] Data measured during the experiment
+* @param errors :: [input] Associated errors
+* @param dataCalc :: [input] Data calculated from image
+* @return :: The calculated gradient of C
+*/
+std::vector<double> MaxEnt::getCGrad(const std::vector<double> &data,
+                                     const std::vector<double> &errors,
+                                     const std::vector<double> &dataCalc) {
+
+  if ((data.size() != errors.size()) || (data.size() != dataCalc.size())) {
+    throw std::invalid_argument("Cannot compute gradient of Chi");
+  }
+
+  size_t npoints = data.size();
+
+  // Calculate gradient of Chi
+  // CGrad_i = -2 * [ data_i - dataCalc_i ] / [ error_i ]^2
+  std::vector<double> cgrad(npoints, 0.);
+  for (size_t i = 0; i < npoints; i++) {
+    if (errors[i])
+      cgrad[i] = -2. * (data[i] - dataCalc[i]) / errors[i] / errors[i];
+  }
+
+  return cgrad;
+}
+
+/** Calculates the gradient of S (Entropy)
+* @param image :: [input] The current image
+* @param background :: [input] The background
+* @return :: The calculated gradient of S
+*/
+std::vector<double> MaxEnt::getSGrad(const std::vector<double> &image,
+                                     double background) {
+
+#define S(x) (-log(x + std::sqrt(x * x + 1)))
+  //#define S(x) (-log(x))
+
+  size_t npoints = image.size();
+
+  // Calculate gradient of S
+  std::vector<double> sgrad(npoints, 0.);
+  for (size_t i = 0; i < npoints; i++) {
+    sgrad[i] = S(image[i] / background);
+  }
+
+  return sgrad;
+
+#undef S
+}
+
 } // namespace Algorithms
 } // namespace Mantid
