@@ -333,7 +333,7 @@ class ReferenceEqual {
 public:
   /** Constructor
    */
-  ReferenceEqual(size_t i) : m_i(i) {}
+  explicit ReferenceEqual(size_t i) : m_i(i) {}
   /**Bracket operator
    * @param p :: the parameter you are looking for
    * @return True if found

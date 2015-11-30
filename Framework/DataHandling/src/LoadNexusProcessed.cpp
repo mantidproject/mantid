@@ -1044,7 +1044,6 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
   // Coordinates - Older versions did not have the separate field but used a log
   // value
-  uint32_t loadCoord(0);
   const std::string peaksWSName = "peaks_workspace";
   try {
     m_cppFile->openGroup(peaksWSName, "NXentry");
@@ -1055,6 +1054,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         peaksWSName + ". Lower level error description: " + re.what());
   }
   try {
+    uint32_t loadCoord(0);
     m_cppFile->readData("coordinate_system", loadCoord);
     peakWS->setCoordinateSystem(
         static_cast<Kernel::SpecialCoordinateSystem>(loadCoord));

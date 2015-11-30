@@ -18,7 +18,8 @@ using namespace Mantid::Geometry;
 */
 class CompareFailsException : public std::runtime_error {
 public:
-  CompareFailsException(const std::string &msg) : std::runtime_error(msg) {}
+  explicit CompareFailsException(const std::string &msg)
+      : std::runtime_error(msg) {}
   ~CompareFailsException() throw() {}
   std::string getMessage() const { return this->what(); }
 };

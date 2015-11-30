@@ -67,7 +67,8 @@ private:
   std::vector<int> m_indexes;
 
 public:
-  AdditionCommand(const std::vector<int> &indexes) : m_indexes(indexes) {}
+  explicit AdditionCommand(const std::vector<int> &indexes)
+      : m_indexes(indexes) {}
 
   virtual MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const {
     MatrixWorkspace_sptr outWS;
@@ -97,7 +98,7 @@ private:
   std::vector<int> m_indexes;
 
 public:
-  CropCommand(const std::vector<int> &indexes) : m_indexes(indexes) {}
+  explicit CropCommand(const std::vector<int> &indexes) : m_indexes(indexes) {}
 
   MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const {
 

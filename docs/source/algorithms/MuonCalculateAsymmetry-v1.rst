@@ -9,8 +9,8 @@
 Description
 -----------
 
-Converts loaded/prepared Muon data to a data suitable for analysis. Either one or two data acquisition period
-workspaces may be provided (only the first one is mandatory). When both of them are supplied, the algorithm merges the counts and
+Converts loaded/prepared Muon data to a data suitable for analysis. Either one or several data acquisition period
+workspaces may be provided (only the first one is mandatory). When more than one are supplied, the algorithm merges the counts and
 then calculates the asymmetry. PeriodOperation determines in which way period data will be
 merged before the asymmetry calculation.
 
@@ -36,9 +36,10 @@ Usage
 
    y = [1,2,3] + [4,5,6]
    x = [1,2,3] * 2
-   input = CreateWorkspace(x, y, NSpec=2)
+   first_period = CreateWorkspace(x, y, NSpec=2)
+   input = GroupWorkspaces(first_period)
 
-   output = MuonCalculateAsymmetry(FirstPeriodWorkspace = input,
+   output = MuonCalculateAsymmetry(InputWorkspace = input,
                                    OutputType = 'PairAsymmetry',
                                    PairFirstIndex = 1,
                                    PairSecondIndex = 0,
@@ -60,12 +61,13 @@ Output:
    y2 = [150,20,1]
    x = [1,2,3]
 
-   input1 = CreateWorkspace(x, y1)
-   input2 = CreateWorkspace(x, y2)
+   first_period = CreateWorkspace(x, y1)
+   second_period = CreateWorkspace(x, y2)
+   input = GroupWorkspaces([first_period, second_period])
 
-   output = MuonCalculateAsymmetry(FirstPeriodWorkspace = input1,
-                                   SecondPeriodWorkspace = input2,
-                                   PeriodOperation = '-',
+   output = MuonCalculateAsymmetry(InputWorkspace = input,
+                                   SummedPeriodSet = 1,
+				   SubtractedPeriodSet = 2,
                                    OutputType = 'GroupAsymmetry',
                                    GroupIndex = 0)
 

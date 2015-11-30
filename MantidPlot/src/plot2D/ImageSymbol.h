@@ -32,7 +32,7 @@
 class ImageSymbol: public QwtSymbol
 {
 public:
-  ImageSymbol(const QString& fileName);
+  explicit ImageSymbol(const QString &fileName);
   ImageSymbol(const QPixmap& pixmap, const QString& fileName = QString());
 
   virtual ImageSymbol *clone() const;

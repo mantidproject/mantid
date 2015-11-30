@@ -46,8 +46,8 @@ class QMenu;
 class LabelTool : public QObject, public QVector<QPoint>, public PlotToolInterface
 {
   Q_OBJECT
-public: 
- LabelTool(Graph *graph);
+public:
+  explicit LabelTool(Graph *graph);
  virtual ~LabelTool();
  virtual int rtti() const {return PlotToolInterface::Rtti_LabelTool;};
  

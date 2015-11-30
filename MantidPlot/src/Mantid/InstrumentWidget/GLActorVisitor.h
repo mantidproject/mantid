@@ -64,7 +64,7 @@ class SetVisibilityVisitor: public GLActorVisitor
 class SetAllVisibleVisitor: public SetVisibilityVisitor
 {
 public:
-    SetAllVisibleVisitor(bool showNonDet):m_showNonDet(showNonDet){}
+  explicit SetAllVisibleVisitor(bool showNonDet) : m_showNonDet(showNonDet) {}
     using GLActorVisitor::visit;
     bool visit(GLActor*);
     bool visit(ComponentActor *actor);

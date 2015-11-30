@@ -40,6 +40,7 @@
 #include <QUrl>
 
 #include <Poco/StringTokenizer.h>
+#include <Poco/Message.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -2662,6 +2663,15 @@ QString SANSRunWindow::getInstrumentClass() const {
   return instrum + "()";
 }
 void SANSRunWindow::handleRunFindCentre() {
+  // Set the log level of to at least notice:
+  const auto initialLogLevel = g_centreFinderLog.getLevel();
+  auto noticeLevelAsInt = static_cast<int>(Poco::Message::PRIO_NOTICE);
+  auto hasToBeSwapped = initialLogLevel < noticeLevelAsInt ? true : false;
+  if (hasToBeSwapped) {
+    // Set to a notice setting
+    g_centreFinderLog.setLevel(noticeLevelAsInt);
+  }
+
   QLineEdit *beam_x;
   QLineEdit *beam_y;
 
@@ -2832,6 +2842,11 @@ void SANSRunWindow::handleRunFindCentre() {
                               "ReductionSingleton())").trimmed();
 
   g_centreFinderLog.notice() << result.toStdString() << "\n";
+
+  // Set the centre logger back to the initial log level
+  if (hasToBeSwapped) {
+    g_centreFinderLog.setLevel(initialLogLevel);
+  }
 
   // Reenable stuff
   setProcessingState(Ready);

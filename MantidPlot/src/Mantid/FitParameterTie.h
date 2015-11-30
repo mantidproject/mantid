@@ -22,7 +22,8 @@ class FitParameterTie
 {
 public:
   /// Constructor
-  FitParameterTie(boost::shared_ptr<Mantid::API::CompositeFunction> cf);
+  explicit FitParameterTie(
+      boost::shared_ptr<Mantid::API::CompositeFunction> cf);
   /// Destructor
   ~FitParameterTie();
   /// Set the tying expression, e.g. "f1.Sigma = 2*f0.Sigma + 1"

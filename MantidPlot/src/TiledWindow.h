@@ -173,7 +173,7 @@ class Tile: public QFrame
 {
 public:
   /// Constructor
-  Tile(QWidget *parent);
+  explicit Tile(QWidget *parent);
   /// Destructor
   ~Tile();
   /// Set the widget.
