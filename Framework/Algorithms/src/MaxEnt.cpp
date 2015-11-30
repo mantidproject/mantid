@@ -148,10 +148,16 @@ void MaxEnt::exec() {
   size_t nspec = inWS->getNumberHistograms();
   // Number of data points
   size_t npoints = inWS->blocksize();
+  // Number of X bins
+  size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
+  // We need to handle complex data
+  npoints *= 2;
 
   // Create output workspaces
-  MatrixWorkspace_sptr outImageWS = WorkspaceFactory::Instance().create(inWS);
-  MatrixWorkspace_sptr outDataWS = WorkspaceFactory::Instance().create(inWS);
+  MatrixWorkspace_sptr outImageWS =
+      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
+  MatrixWorkspace_sptr outDataWS =
+      WorkspaceFactory::Instance().create(inWS, nspec, npointsX, npoints);
   // Create evol workspaces
   MatrixWorkspace_sptr outEvolChi =
       WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
@@ -163,8 +169,14 @@ void MaxEnt::exec() {
 
   for (size_t s = 0; s < nspec; s++) {
 
-    auto data = inWS->readY(s);
-    auto error = inWS->readE(s);
+    // Read data from the input workspace
+    // Only real part, complex part is zero
+    std::vector<double> data(npoints, 0.);
+    std::vector<double> error(npoints, 0.);
+    for (size_t i = 0; i < npoints / 2; i++) {
+      data[2 * i] = inWS->readY(s)[i];
+      error[2 * i] = inWS->readE(s)[i];
+    }
 
     // To record the algorithm's progress
     std::vector<double> evolChi(niter, 0.);
@@ -232,13 +244,8 @@ void MaxEnt::exec() {
     std::vector<double> solutionData = opus(newImage);
 
     // Populate the output workspaces
-    // X values
-    outImageWS->dataX(s) = inWS->readX(s);
-    outDataWS->dataX(s) = inWS->readX(s);
-    // Y values
-    outDataWS->dataY(s).assign(solutionData.begin(), solutionData.end());
-    outImageWS->dataY(s).assign(newImage.begin(), newImage.end());
-    // No errors
+    populateOutputWS(inWS, s, nspec, solutionData, newImage, outDataWS,
+                     outImageWS);
 
     // Populate workspaces recording the evolution of Chi and Test
     // X values
@@ -272,23 +279,26 @@ std::vector<double> MaxEnt::opus(const std::vector<double> &input) {
 
   size_t n = input.size();
 
+  if (n % 2) {
+    throw std::invalid_argument("Cannot transform to data space");
+  }
+
   /* Prepare the data */
-  boost::shared_array<double> result(new double[2 * n]);
+  boost::shared_array<double> result(new double[n]);
   for (size_t i = 0; i < n; i++) {
-    result[2 * i] = input[i]; // Real part
-    result[2 * i + 1] = 0.;   // Imaginary part
+    result[i] = input[i];
   }
 
   /* Backward FT */
-  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n);
-  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n);
-  gsl_fft_complex_inverse(result.get(), 1, n, wavetable, workspace);
+  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n / 2);
+  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n / 2);
+  gsl_fft_complex_inverse(result.get(), 1, n / 2, wavetable, workspace);
   gsl_fft_complex_wavetable_free(wavetable);
   gsl_fft_complex_workspace_free(workspace);
 
   std::vector<double> output(n);
   for (size_t i = 0; i < n; i++) {
-    output[i] = result[2 * i];
+    output[i] = result[i];
   }
 
   return output;
@@ -305,24 +315,27 @@ std::vector<double> MaxEnt::tropus(const std::vector<double> &input) {
 
   size_t n = input.size();
 
+  if (n % 2) {
+    throw std::invalid_argument("Cannot transform to data space");
+  }
+
   /* Prepare the data */
-  boost::shared_array<double> result(new double[n * 2]);
+  boost::shared_array<double> result(new double[n]);
   for (size_t i = 0; i < n; i++) {
-    result[2 * i] = input[i]; // even indexes filled with the real part
-    result[2 * i + 1] = 0.;   // odd indexes filled with the imaginary part
+    result[i] = input[i];
   }
 
   /*  Fourier transofrm */
-  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n);
-  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n);
-  gsl_fft_complex_forward(result.get(), 1, n, wavetable, workspace);
+  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n / 2);
+  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n / 2);
+  gsl_fft_complex_forward(result.get(), 1, n / 2, wavetable, workspace);
   gsl_fft_complex_wavetable_free(wavetable);
   gsl_fft_complex_workspace_free(workspace);
 
   /* Get the data */
   std::vector<double> output(n);
   for (size_t i = 0; i < n; i++) {
-    output[i] = result[2 * i];
+    output[i] = result[i];
   }
 
   return output;
@@ -428,7 +441,9 @@ SearchDirections MaxEnt::calculateSearchDirections(
       dirs.s2[k][l] = 0.;
       dirs.c2[k][l] = 0.;
       for (size_t i = 0; i < npoints; i++) {
-        dirs.c2[k][l] += dirs.eta[k][i] * dirs.eta[l][i] / error[i] / error[i];
+        if (error[i])
+          dirs.c2[k][l] +=
+              dirs.eta[k][i] * dirs.eta[l][i] / error[i] / error[i];
         dirs.s2[k][l] -= dirs.xi[k][i] * dirs.xi[l][i] / fabs(image[i]);
       }
       // Note: the factor chiSQ has to go either here or in ChiNow
@@ -736,6 +751,43 @@ double MaxEnt::distance(const DblMatrix &s2, const std::vector<double> &beta) {
     dist += beta[k] * sum;
   }
   return dist;
+}
+
+void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
+                              size_t nspec, const std::vector<double> &data,
+                              const std::vector<double> &image,
+                              MatrixWorkspace_sptr &outData,
+                              MatrixWorkspace_sptr &outImage) {
+
+  if (data.size() % 2)
+    throw std::invalid_argument("Cannot write results to output workspaces");
+
+  size_t npoints = data.size() / 2;
+  MantidVec Y(npoints);
+
+  // Reconstructed data
+  for (size_t i = 0; i < npoints; i++)
+    Y[i] = data[2 * i];
+  outData->dataX(spec) = inWS->readX(spec);
+  outData->dataY(spec).assign(Y.begin(), Y.end());
+
+  // Reconstructed image
+  // Real part
+  for (size_t i = 0; i < npoints; i++)
+    Y[i] = image[2 * i];
+  outImage->dataX(spec) = inWS->readX(spec);
+  outImage->dataY(spec).assign(Y.begin(), Y.end());
+  // Imaginary part
+  for (size_t i = 0; i < npoints; i++)
+    Y[i] = image[2 * i + 1];
+  outImage->dataX(nspec + spec) = inWS->readX(spec);
+  outImage->dataY(nspec + spec).assign(Y.begin(), Y.end());
+
+  // No errors
+  MantidVec E(npoints, 0.);
+  outData->dataE(spec).assign(E.begin(), E.end());
+  outImage->dataE(spec).assign(E.begin(), E.end());
+  outImage->dataE(spec + nspec).assign(E.begin(), E.end());
 }
 
 } // namespace Algorithms
