@@ -212,10 +212,15 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
 }
 
 /** Set up the output workspace in a Workspace2D
-  * @param numentries :: number of log entries to output
-  * @param times :: vector of Kernel::DateAndTime
-  * @param values :: vector of log value in double
-  */
+ * @brief ExportTimeSeriesLog::setupWorkspace2D
+ * @param start_index :: array index for the first log entry
+ * @param stop_index :: array index for the last log entry
+ * @param numentries :: number of log entries to output
+ * @param times :: vector of Kernel::DateAndTime
+ * @param values :: vector of log value in double
+ * @param epochtime :: flag to output time in epoch time/absolute time
+ * @param timeunitfactor :: conversion factor for various unit of time for output
+ */
 void ExportTimeSeriesLog::setupWorkspace2D(
     const size_t &start_index, const size_t &stop_index, int numentries,
     vector<DateAndTime> &times, vector<double> values, const bool &epochtime,
@@ -347,11 +352,11 @@ void ExportTimeSeriesLog::setupEventWorkspace(
 
 /** Calculate the range of time vector by start time and stop time
  * @brief calculateTimeSeriesRangeByTime
- * @param vec_times
- * @param start_time
- * @param i_start
- * @param stop_time
- * @param i_stop
+ * @param vec_times :: vector for time
+ * @param rel_start_time :: starting time relative to run start
+ * @param i_start :: output of the index of of first log entry
+ * @param rel_stop_time :: stopping time relative to run start
+ * @param i_stop :: output of the index of the last log entry
  * @param time_factor :: factor of time unit. for example, nanosecond is 1,
  * second is 1E-9
  */
