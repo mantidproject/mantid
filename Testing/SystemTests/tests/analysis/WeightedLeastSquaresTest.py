@@ -17,6 +17,7 @@
 #      fitting packages (to give this option for testing other minimizers/algorithms, which may following such tests be
 #      made available to Mantid users)
 #
+from abc import ABCMeta, abstractmethod
 
 import stresstesting
 from mantid.simpleapi import *
@@ -114,3 +115,193 @@ class WeigthedLSGaussPeaksEVSdataTest2(stresstesting.MantidStressTest):
 
         for val, expected in zip(params, expected_params):
             self.assertDelta(val / expected - 1.0, 0.0, 2e-5)
+
+
+# This defines a base class that can be used then in individual system tests (if we want every test
+# as an individual stresstesting.MantidStressTest). An alternative is to use Python unittest as for
+# example in LoadVesuvioTest. I find the second alternative a bit neater if we add several more
+# datasets and fit tests which tend to have a very repetitive structure.
+class WeightedLSSysTest(stresstesting.MantidStressTest):
+    """
+    Base class for fail/success tests of fitting for different input files (datasets).
+    """
+
+    __metaclass__ = ABCMeta # We don't want a test from this class
+
+    def __init__(self):
+        stresstesting.MantidStressTest.__init__(self)
+        self.tolerance = 1e-6
+        self.minimizer = 'Levenberg-Marquardt'
+        self.input_data_file = ''
+        self.function_definition = ''
+        self.fitted_params = []
+        self.expected_params = []
+
+    def requiredFiles(self):
+        return set([self.input_data_file])
+
+    def compare_relative_err(self, val, ref):
+        """
+        Checks that a value 'val' does not differ from a reference value 'ref' by a tolerance/threshold
+        or more. This method compares the relative error. An epsilon of 0.01 means a relative
+        difference of 1 % = 100*0.01 %. If the reference value is 0, checks that the difference
+        from 0 is less than the tolerance.
+
+        @param val :: value obtained from a calculation or algorithm (fitting for example)
+        @param ref :: (expected) reference value
+
+        @returns if val differs in relative terms from ref by less than epsilon
+        """
+        if 0 == ref:
+            logger.information("Trying to calculate relative error with respect to 0. "
+                               "Checking absolute difference from 0. Make sure this is the intended behavior!")
+            check = (abs(val - ref) < self.tolerance)
+        else:
+            check = (abs(val/ref - 1) < self.tolerance)
+
+        if not check:
+            print("Value '{0}' differs from reference '{1}' by more than required tolerance '{2}'".
+                  format(val, ref, self.tolerance))
+
+        return check
+
+    def validate(self):
+        if not self.input_data_file:
+            raise RuntimeError("The input data file cannot be empty.")
+
+        if not self.fitted_params:
+            raise RuntimeError("The fitted params have not been generated.")
+
+        if not self.expected_params:
+            raise RuntimeError("The expected parameters have not been set.")
+
+        if len(self.fitted_params) != len(self.expected_params):
+            raise RuntimeError("The number of fitted parameters does not match the number of "
+                               "expected parameters")
+
+        for idx, (val, expected) in enumerate(zip(self.fitted_params, self.expected_params)):
+            self.assertTrue(self.compare_relative_err(val, expected),
+                            "Relative error bigger than acceptable (tolerance: {0}) when "
+                            "comparing parameter number {1} against expected value. Got: {2}. "
+                            "Expected: {3}".format(self.tolerance, idx+1, val, expected))
+
+        return True
+
+    @abstractmethod
+    def runTest(self):
+        """This needs to be overriden in the concrete tests"""
+
+
+class WeightedLSSineLikeMuonExperimentAsymmetry(WeightedLSSysTest):
+    """
+    A base class for tests of the fitting of a function that resembles the
+    asymmetry from a muon experiment.
+
+    Tests the fitting of a simplified (and synthetic) sine function that looks
+    like the asymmetry functions that they usually fit when processing
+    data from muon experiments.
+
+    The motivation for this test is that the results seem to be very
+    poor unless you have a very good initial guess of the
+    frequency. Example: for a frequency 6, an initial guess of 5 or 7
+    will produce rubbish results. This happens even with 0 noise.
+
+    Initial values of w approximately <=5.25 or >=6.75 will make the minimizer fail.
+
+    To keep it simple there is 0 noise, and the phase is 0.
+    """
+
+    __metaclass__ = ABCMeta # We don't want a test from this class
+
+    def __init__(self):
+        WeightedLSSysTest.__init__(self)
+        self.input_data_file = 'sine_fitting_test_muon_asymmetry.txt'
+        self.sine_user_def_function = 'name=UserFunction, Formula=sin(w*x)'
+
+        self.workspace = LoadAscii(self.input_data_file, OutputWorkspace='fit_test_ws')
+
+    @abstractmethod
+    def runTest(self):
+        """This needs to be overriden in the concrete test classes"""
+
+
+class WeightedLSSineLikeMuonExperimentAsymmetry_Fails(WeightedLSSineLikeMuonExperimentAsymmetry):
+    """
+    This tests a fit failure. Initial guess of frequency not good enough (5.2 too far off 6)
+    """
+
+    def __init__(self):
+        WeightedLSSineLikeMuonExperimentAsymmetry.__init__(self)
+        self.function_definition = ("{0}, w=5.2".format(self.sine_user_def_function))
+        self.expected_params = [4.753040119492522]
+
+    def runTest(self):
+        # Note: ignoring parameter errors
+        self.fitted_params, _ = run_fit(self.workspace,
+                                        self.function_definition, self.minimizer)
+
+class WeightedLSSineLikeMuonExperimentAsymmetry_Good(WeightedLSSineLikeMuonExperimentAsymmetry):
+    """
+    This tests a fit that works. Initial guess of frequency close enough to real value.
+    """
+
+    def __init__(self):
+        WeightedLSSineLikeMuonExperimentAsymmetry.__init__(self)
+        self.function_definition = ("{0}, w=5.4".format(self.sine_user_def_function))
+        self.expected_params = [6.000000000717283]
+
+    def runTest(self):
+        # Note: ignoring parameter errors
+        self.fitted_params, _ = run_fit(self.workspace, self.function_definition, self.minimizer)
+
+
+class WeightedLSVanadiumPatternFromENGINXSmoothing(WeightedLSSysTest):
+    """
+    A base class for tests of the fitting of data from a Vanadium run on the instrument ENGIN-X.
+    This uses data collected for one bank.
+
+    In the new ENGIN-X algorithms/scripts/interface this pattern is usually smoothed with
+    a spline with 20-50 knots. This is used for calibration.
+    """
+
+    __metaclass__ = ABCMeta # We don't want a test from this class
+
+    def __init__(self):
+        WeightedLSSysTest.__init__(self)
+        self.input_data_file = 'fitting_test_vanadium_pattern_enginx236516_bank1.txt'
+        self.spline_user_def_function = 'name=BSpline,Uniform=true,Order=3, StartX=0, EndX=5.5'
+
+        self.workspace = LoadAscii(self.input_data_file, OutputWorkspace='fit_test_ws')
+
+    @abstractmethod
+    def runTest(self):
+        """This needs to be overriden in the concrete test classes"""
+
+class WeightedLSVanadiumPatternFromENGINXSmoothing_50(WeightedLSVanadiumPatternFromENGINXSmoothing):
+
+    """
+    This tests a normal fit with a spline with 50 knots. This is currently producing results that look
+    satisfactory to instrument scientists.
+
+    Note that the status returned by Fit is 'cannot reach the specified tolerance in X'
+    """
+
+    def __init__(self):
+        WeightedLSVanadiumPatternFromENGINXSmoothing.__init__(self)
+        self.tolerance = 1e-4
+        self.function_definition = ("{0}, NBreak=50".format(self.spline_user_def_function))
+        self.expected_params = [0.0, 0.0, -36.8891264687, 18.2621705377, -2.26934877029,
+                                74.1623483093, 489.805793426, 922.50307265, 1262.00262279, 1600.0337548,
+                                1968.43336803, 2139.75598267, 2193.84158372, 2147.43156063, 2024.21157276,
+                                1846.18150427, 1667.08750361, 1435.20910859, 1283.45295698, 1114.83687664,
+                                948.124414481, 795.827508616, 674.396619086, 566.73758527, 470.013330458,
+                                405.87940959, 343.150383227, 317.744533119, 287.247200073, 253.308328823,
+                                224.945339773, 197.474782309, 175.017313505, 158.65592759, 134.930581111,
+                                113.464625925, 103.075403043, 88.6933038825, 73.2454285003, 57.9475439827,
+                                46.1502382308, 33.4958056688, 27.023943173, 19.6592967824, 14.8481655913,
+                                9.65510062749, 5.73133751077, 1.94165179183, -0.908404460069, 8.86320436969,
+                                0.0]
+
+    def runTest(self):
+        # Note: ignoring parameter errors
+        self.fitted_params, _ = run_fit(self.workspace, self.function_definition, self.minimizer)
