@@ -87,13 +87,19 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
   // the destructor of vtkSMTransferFunctionPresets copies these colormaps to
   // the vtkSMSettings singleton.
   vtkNew<vtkSMTransferFunctionPresets> presets;
-  const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
-                                    "All_idl_cmaps.json", "All_mpl_cmaps.json"};
-  const std::string colorMapDirectory =
-      Kernel::ConfigService::Instance().getString("colormaps.directory");
-  for (const auto &baseName : filenames) {
-    std::string colorMap = colorMapDirectory + baseName;
-    presets->ImportPresets(colorMap.c_str());
+  // Check for colormap "Viridis". If preset, assume custom colormaps have
+  // already been loaded.
+  auto viridisColormap = presets->GetFirstPresetWithName("Viridis");
+  if (viridisColormap.empty()) {
+    const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
+                                      "All_idl_cmaps.json",
+                                      "All_mpl_cmaps.json"};
+    const std::string colorMapDirectory =
+        Kernel::ConfigService::Instance().getString("colormaps.directory");
+    for (const auto &baseName : filenames) {
+      std::string colorMap = colorMapDirectory + baseName;
+      presets->ImportPresets(colorMap.c_str());
+    }
   }
 }
 
