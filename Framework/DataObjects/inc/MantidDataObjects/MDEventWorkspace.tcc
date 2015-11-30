@@ -759,17 +759,8 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
     // const MDBoxBase<MDE,nd> * box = NULL;
     const IMDNode *box = NULL;
 
-    // Do an initial bounds check
-    bool outOfBounds = false;
-    for (size_t d = 0; d < nd; d++) {
-      if (data->getExtents(d).outside(coord[d])) {
-        outOfBounds = true;
-        break;
-      }
-    }
-
     // TODO: make the logic/reuse in the following nicer.
-    if (!outOfBounds) {
+    if (isInBounds(coord.getBareArray())) {
       box = this->data->getBoxAtCoord(coord.getBareArray());
 
       if (box != NULL) {

@@ -101,7 +101,7 @@ public:
   getSignalAtCoord(const coord_t *coords,
                    const Mantid::API::MDNormalization &normalization) const = 0;
 
-  /// Returns the (normalized) signal at a given coordinates or NaN if the value
+  /// Returns the (normalized) signal at a given coordinates or 0 if the value
   // is masked, used for plotting
   virtual signal_t getSignalWithMaskAtCoord(
       const coord_t *coords,
