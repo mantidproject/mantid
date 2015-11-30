@@ -159,7 +159,7 @@ void MaxEnt::exec() {
       WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
   // Start distribution (flat background)
-  std::vector<double> image(npoints, background * 1.01);
+  std::vector<double> image(npoints, background);
 
   for (size_t s = 0; s < nspec; s++) {
 
