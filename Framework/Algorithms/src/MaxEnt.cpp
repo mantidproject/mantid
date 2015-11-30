@@ -762,29 +762,42 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   if (data.size() % 2)
     throw std::invalid_argument("Cannot write results to output workspaces");
 
-  size_t npoints = data.size() / 2;
-  MantidVec Y(npoints);
+  int npoints = static_cast<int>(data.size() / 2);
+  int npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
+  MantidVec X(npointsX);
+  MantidVec YR(npoints);
+  MantidVec YI(npoints);
+  MantidVec E(npoints, 0.);
 
   // Reconstructed data
-  for (size_t i = 0; i < npoints; i++)
-    Y[i] = data[2 * i];
+
+  for (int i = 0; i < npoints; i++)
+    YR[i] = data[2 * i];
   outData->dataX(spec) = inWS->readX(spec);
-  outData->dataY(spec).assign(Y.begin(), Y.end());
+  outData->dataY(spec).assign(YR.begin(), YR.end());
 
   // Reconstructed image
-  // Real part
-  for (size_t i = 0; i < npoints; i++)
-    Y[i] = image[2 * i];
-  outImage->dataX(spec) = inWS->readX(spec);
-  outImage->dataY(spec).assign(Y.begin(), Y.end());
-  // Imaginary part
-  for (size_t i = 0; i < npoints; i++)
-    Y[i] = image[2 * i + 1];
-  outImage->dataX(nspec + spec) = inWS->readX(spec);
-  outImage->dataY(nspec + spec).assign(Y.begin(), Y.end());
+
+  double delta = inWS->readX(spec)[1] - inWS->readX(spec)[0];
+  delta *= npoints;
+  delta = 1. / delta;
+  int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
+
+  for (int i = 0; i < npoints; i++) {
+    int j = (npoints / 2 + i + isOdd) % npoints;
+    X[i] = delta * (-npoints / 2 + i);
+    YR[i] = image[2 * j] / npoints;
+    YI[i] = image[2 * j + 1] / npoints;
+  }
+  if (npointsX == npoints + 1)
+    X[npoints] = X[npoints - 1] + delta;
+
+  outImage->dataX(spec).assign(X.begin(), X.end());
+  outImage->dataY(spec).assign(YR.begin(), YR.end());
+  outImage->dataX(nspec + spec).assign(X.begin(), X.end());
+  outImage->dataY(nspec + spec).assign(YI.begin(), YI.end());
 
   // No errors
-  MantidVec E(npoints, 0.);
   outData->dataE(spec).assign(E.begin(), E.end());
   outImage->dataE(spec).assign(E.begin(), E.end());
   outImage->dataE(spec + nspec).assign(E.begin(), E.end());
