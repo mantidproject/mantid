@@ -1061,8 +1061,6 @@ PlotMarker::PlotMarker(int index, double angle)
 void PlotMarker::draw(QPainter *p, const QwtScaleMap &xMap,
                       const QwtScaleMap &yMap, const QRect &) const {
   p->save();
-  int x = xMap.transform(xValue());
-  int y = yMap.transform(yValue());
 
   p->rotate(-d_angle);
 
