@@ -5,6 +5,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h"
+#include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
+#include "MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h"
 
 // free functions
 namespace {
@@ -232,28 +236,26 @@ void MuonLoad::exec() {
   double loadedTimeZero = load->getProperty("TimeZero");
   allPeriodsWS = correctWorkspaces(allPeriodsWS, loadedTimeZero);
 
-  IAlgorithm_sptr calcAssym = createChildAlgorithm("MuonCalculateAsymmetry");
-
-  calcAssym->setProperty("InputWorkspace", allPeriodsWS);
-
-  // Copy similar properties over
-  calcAssym->setProperty("SummedPeriodSet", summedPeriods);
-  calcAssym->setProperty("SubtractedPeriodSet", subtractedPeriods);
-  calcAssym->setProperty("OutputType",
-                         static_cast<std::string>(getProperty("OutputType")));
-  calcAssym->setProperty("PairFirstIndex",
-                         static_cast<int>(getProperty("PairFirstIndex")));
-  calcAssym->setProperty("PairSecondIndex",
-                         static_cast<int>(getProperty("PairSecondIndex")));
-  calcAssym->setProperty("Alpha", static_cast<double>(getProperty("Alpha")));
-  calcAssym->setProperty("GroupIndex",
-                         static_cast<int>(getProperty("GroupIndex")));
-
+  // Perform appropriate calculation
+  std::string outputType = getProperty("OutputType");
+  int groupIndex = getProperty("GroupIndex");
+  std::unique_ptr<IMuonAsymmetryCalculator> asymCalc;
+  if (outputType == "GroupCounts") {
+    asymCalc = Mantid::Kernel::make_unique<MuonGroupCountsCalculator>(
+        allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
+  } else if (outputType == "GroupAsymmetry") {
+    asymCalc = Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
+        allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
+  } else if (outputType == "PairAsymmetry") {
+    int first = getProperty("PairFirstIndex");
+    int second = getProperty("PairSecondIndex");
+    double alpha = getProperty("Alpha");
+    asymCalc = Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
+        allPeriodsWS, summedPeriods, subtractedPeriods, first, second, alpha);
+  }
   progress.report();
+  MatrixWorkspace_sptr outWS = asymCalc->calculate();
 
-  calcAssym->execute();
-
-  MatrixWorkspace_sptr outWS = calcAssym->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outWS);
 }
 
