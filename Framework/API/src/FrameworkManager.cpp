@@ -16,8 +16,6 @@
 
 #include <Poco/ActiveResult.h>
 
-#include <json/json.h>
-
 #include <cstdarg>
 
 #ifdef _WIN32
@@ -112,9 +110,10 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
     g_log.information() << "Version check disabled." << std::endl;
   }
 
-  // the algorithm will see if it should run
 
+  // the algorithm will see if it should run
   SendStartupUsageInfo();
+
 }
 
 /// Update instrument definitions from github
@@ -241,6 +240,11 @@ void FrameworkManagerImpl::clear() {
   clearInstruments();
   clearData();
   clearPropertyManagers();
+}
+
+void FrameworkManagerImpl::shutdown()
+{
+  clear();
 }
 
 /**

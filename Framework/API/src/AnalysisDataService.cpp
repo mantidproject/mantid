@@ -261,6 +261,11 @@ AnalysisDataServiceImpl::topLevelItems() const {
   return topLevel;
 }
 
+
+void AnalysisDataServiceImpl::shutdown() {
+  clear();
+}
+
 //-------------------------------------------------------------------------
 // Private methods
 //-------------------------------------------------------------------------

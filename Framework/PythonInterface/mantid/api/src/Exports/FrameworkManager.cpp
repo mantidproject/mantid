@@ -1,4 +1,5 @@
 #include "MantidAPI/FrameworkManager.h"
+#include <MantidPythonInterface/kernel/TrackingInstanceMethod.h>
 
 #include <boost/python/class.hpp>
 #include <boost/python/return_value_policy.hpp>
@@ -9,7 +10,8 @@ using Mantid::API::FrameworkManager;
 using namespace boost::python;
 
 void export_FrameworkManager() {
-  class_<FrameworkManagerImpl, boost::noncopyable>("FrameworkManagerImpl",
+  typedef class_<FrameworkManagerImpl, boost::noncopyable> FrameworkManagerPythonType;
+  auto pythonClass = FrameworkManagerPythonType("FrameworkManagerImpl",
                                                    no_init)
       .def("setNumOMPThreadsToConfigValue",
            &FrameworkManagerImpl::setNumOMPThreadsToConfigValue, arg("self"),
@@ -47,5 +49,8 @@ void export_FrameworkManager() {
            "Returns a reference to the FrameworkManager singleton")
       .staticmethod("Instance")
 
-      ;
+      ;  
+  // Instance method
+  Mantid::PythonInterface::TrackingInstanceMethod<FrameworkManager, FrameworkManagerPythonType>::define(
+    pythonClass);
 }

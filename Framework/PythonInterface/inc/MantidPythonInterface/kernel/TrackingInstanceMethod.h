@@ -74,7 +74,7 @@ public:
   static void decref(InstanceType &self) {
     --g_py_instance_count;
     if (g_py_instance_count == 0) {
-      self.clear();
+      self.shutdown();
     }
   }
 
