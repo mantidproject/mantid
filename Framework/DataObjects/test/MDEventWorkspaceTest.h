@@ -568,6 +568,29 @@ public:
     }
   }
 
+  void test_getLinePlotWithMaskedData() {
+    MDEventWorkspace3Lean::sptr ew =
+      MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+
+    // Mask some of the workspace
+    std::vector<coord_t> min{0, 0, 0};
+    std::vector<coord_t> max{0.5, 0.5, 0.5};
+
+    // Create an function to mask some of the workspace.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ew->setMDMasking(function);
+    ew->refreshCache();
+
+    Mantid::Kernel::VMD start(0, 0, 0);
+    Mantid::Kernel::VMD end(2, 0, 0);
+    std::vector<coord_t> x;
+    std::vector<signal_t> y, e;
+    ew->getLinePlot(start, end, NoNormalization, x, y, e);
+    TS_ASSERT_EQUALS(y.size(), 200);
+    TS_ASSERT_EQUALS(y[60], 0.0); // Masked data is zero
+    TS_ASSERT_EQUALS(y[180], 3.0); // Unmasked data
+  }
+
   void test_that_sets_default_normalization_flags_to_volume_normalization() {
     // Arrange + Act
     MDEventWorkspace3Lean::sptr ew =
