@@ -120,6 +120,8 @@ void ChebfunBase::calcX() {
     size_t j = m_n - i;
     m_x[i] = x0 + b * cos(double(j) * pin);
   }
+  m_x.front() = m_start;
+  m_x.back() = m_end;
 }
 
 /**
@@ -226,13 +228,24 @@ double ChebfunBase::eval(double x, const std::vector<double> &p) const {
  */
 void ChebfunBase::evalVector(const std::vector<double> &x,
                              const std::vector<double> &p,
-                             std::vector<double> &res) const {
+                             std::vector<double> &res, size_t start,
+                             size_t end) const {
   if (x.empty()) {
     throw std::invalid_argument("Vector of x-values cannot be empty.");
   }
 
-  res.resize(x.size(), 0.0);
-  auto ix = std::lower_bound(m_x.begin(), m_x.end(), x.front());
+  if (end == 0) end = x.size();
+
+  if (start >= end) {
+    throw std::invalid_argument("Vector of x-values cannot be empty.");
+  }
+
+  size_t xSize = end - start;
+
+  res.resize(xSize, 0.0);
+  auto xBegin = x.begin() + start;
+  auto xEnd = x.begin() + end;
+  auto ix = std::lower_bound(m_x.begin(), m_x.end(), *xBegin);
   if (ix == m_x.end()) {
     return;
   }
@@ -242,13 +255,13 @@ void ChebfunBase::evalVector(const std::vector<double> &x,
   auto pBegin = p.begin();
   auto bwBegin = m_bw.begin();
 
-  size_t i = 0;
-  for (; i < x.size(); ++i) {
+  size_t i = start;
+  for (; i < end; ++i) {
     if (x[i] >= m_start)
       break;
   }
 
-  for (; i < x.size(); ++i) {
+  for (; i < end; ++i) {
     double xi = x[i];
     while (ix != mXEnd && xi > *ix)
       ++ix;
@@ -279,11 +292,11 @@ void ChebfunBase::evalVector(const std::vector<double> &x,
  * @param p :: The y-points of a function.
  * @return :: Output result. res.size() == x.size()
  */
-std::vector<double>
-ChebfunBase::evalVector(const std::vector<double> &x,
-                        const std::vector<double> &p) const {
+std::vector<double> ChebfunBase::evalVector(const std::vector<double> &x,
+                                            const std::vector<double> &p,
+                                            size_t start, size_t end) const {
   std::vector<double> res;
-  evalVector(x, p, res);
+  evalVector(x, p, res, start, end);
   return res;
 }
 

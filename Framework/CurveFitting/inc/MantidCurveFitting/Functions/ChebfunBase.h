@@ -100,10 +100,12 @@ public:
   double eval(double x, const std::vector<double> &p) const;
   /// Evaluate a function
   void evalVector(const std::vector<double> &x, const std::vector<double> &p,
-                  std::vector<double> &res) const;
+                  std::vector<double> &res, size_t start = 0,
+                  size_t end = 0) const;
   /// Evaluate a function
   std::vector<double> evalVector(const std::vector<double> &x,
-                                 const std::vector<double> &p) const;
+                                 const std::vector<double> &p, size_t start = 0,
+                                 size_t end = 0) const;
   /// Calculate the derivative
   void derivative(const std::vector<double> &a,
                   std::vector<double> &aout) const;
@@ -125,6 +127,8 @@ public:
           double tolerance = 0.0, size_t maxSize = 0);
   /// Tolerance for comparing doubles
   double tolerance() { return m_tolerance; }
+  /// Default tolerance for comparing doubles
+  static double defaultTolerance() { return g_tolerance; }
 
   /// Find best fit with highest possible tolerance (to be used with noisy
   /// data).

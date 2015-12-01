@@ -54,6 +54,7 @@ set(SRC_FILES
     src/Functions/BackgroundFunction.cpp
     src/Functions/BivariateNormal.cpp
     src/Functions/Bk2BkExpConvPV.cpp
+    src/Functions/Chebfun.cpp
     src/Functions/ChebfunBase.cpp
     src/Functions/Chebyshev.cpp
     src/Functions/ComptonPeakProfile.cpp
@@ -220,6 +221,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/BackgroundFunction.h
     inc/MantidCurveFitting/Functions/BivariateNormal.h
     inc/MantidCurveFitting/Functions/Bk2BkExpConvPV.h
+    inc/MantidCurveFitting/Functions/Chebfun.h
     inc/MantidCurveFitting/Functions/ChebfunBase.h
     inc/MantidCurveFitting/Functions/Chebyshev.h
     inc/MantidCurveFitting/Functions/ComptonPeakProfile.h
@@ -378,6 +380,7 @@ set(TEST_FILES
     Functions/BackToBackExponentialTest.h
     Functions/BivariateNormalTest.h
     Functions/Bk2BkExpConvPVTest.h
+    Functions/ChebfunTest.h
     Functions/ChebfunBaseTest.h
     Functions/ChebyshevTest.h
     Functions/ComptonPeakProfileTest.h

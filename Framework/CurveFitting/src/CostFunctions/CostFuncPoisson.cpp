@@ -34,7 +34,7 @@ void CostFuncPoisson::addVal(API::FunctionDomain_sptr domain,
     const double y = values->getCalculated(i);
     if (y <= 0.0)
     {
-      retVal = 1e10;
+      retVal = -y;
     }
     else
     {
@@ -89,9 +89,9 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
       if (calc <= 0.0)
       {
         if (iActiveP == 0) {
-          fVal += 1e10;
+          fVal += - calc;
         }
-        d += 1e10;
+        d += - jacobian.get(i, ip);
       }
       else
       {
@@ -153,7 +153,7 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
         double obs = values->getFitData(k);
         if (calc <= 0.0)
         {
-          d += 1e10;
+          d += - d2;
         }
         else
         {
