@@ -36,6 +36,8 @@
 #include "Mantid/ErrorBarSettings.h"
 #include "MantidAPI\AnalysisDataService.h"
 #include "MantidAPI\MatrixWorkspace.h"
+#include "MantidQtAPI\QwtWorkspaceSpectrumData.h"
+#include "MantidQtAPI\QwtWorkspaceBinData.h"
 #include <QDateTime>
 #include <QMessageBox>
 #include <QPainter>

@@ -32,8 +32,6 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot_marker.h>
 #include "Table.h"
-#include "MantidQtAPI\QwtWorkspaceSpectrumData.h"
-#include "MantidQtAPI\QwtWorkspaceBinData.h"
 
 class PlotMarker;
 class Graph;
