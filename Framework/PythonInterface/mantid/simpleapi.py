@@ -644,14 +644,21 @@ def _get_args_from_lhs(lhs, algm_obj):
     extra_args = {}
 
     output_props = [ algm_obj.getProperty(p) for p in algm_obj.outputProperties() ]
+
     nprops = len(output_props)
-    i = 0
-    while len(ret_names) > 0 and i < nprops:
-        p = output_props[i]
+
+    i = 0 # properties counter
+    id = 0 # unnamed workspace identifier
+    
+    for p in output_props:
         if _is_workspace_property(p):
-            extra_args[p.name] = ret_names[0]
-            ret_names = ret_names[1:]
+            if i<len(ret_names):
+                extra_args[p.name] = ret_names[i] # match argument to property name
+            else:
+                extra_args[p.name] = "outputWorkspace_"+str(id) # default workspace name if none provided
+            id += 1
         i += 1
+
     return extra_args
 
 def _merge_keywords_with_lhs(keywords, lhs_args):
