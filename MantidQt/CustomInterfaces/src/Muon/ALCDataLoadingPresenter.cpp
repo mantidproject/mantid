@@ -96,18 +96,21 @@ namespace CustomInterfaces
 
   /**
    * The watched directory has been changed - update flag.
-   * @param path :: [input] Path to directory modified
+   * @param path :: [input] Path to directory modified (not used)
    */
   void ALCDataLoadingPresenter::updateDirectoryChangedFlag(const QString &path) {
+    Q_UNUSED(path); // just set the flag, don't need the path
     m_directoryChanged = true;
   }
 
   /**
    * This timer runs every second when we are watching a directory.
    * If any changes have occurred in the meantime, reload.
-   * @param timeup :: [input] Qt timer event
+   * @param timeup :: [input] Qt timer event (not used)
    */
   void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
+    Q_UNUSED(timeup); // We only have one timer, so not necessary to use this
+
     // Check flag for changes
     if (m_directoryChanged.load() == true) {
       // Most recent file in directory
