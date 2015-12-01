@@ -21,8 +21,8 @@ Input and Output
 
 The input parameters are a histogram workspace and the index of the histogram.
 The ouput parameters are the fitted peak centre and sigma. If the data could not
-be fitted, 0.0 is returned as both the peak centre and sigma values. Errors in
-data raise RuntimeError.
+be fitted, 0.0 is returned as both the peak centre and sigma values and a warning
+message is logged. Errors in parameters raise RuntimeError.
 
 ChildAlgorithms used
 ####################

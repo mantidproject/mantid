@@ -24,23 +24,27 @@ class FitGaussianTest(unittest.TestCase):
 
     def _veryNarrowPeakWorkspace(self):
         self._gaussianWorkspace(5,1,.05)
-
+        
     def test_errors(self):
         """Conditions that raise RuntimeError.
         """
-        self._veryNarrowPeakWorkspace()
+        self._linearWorkspace(0)
         with self.assertRaises(RuntimeError):
             # bad index
             fitResult = FitGaussian(self.ws,1)
-
-        with self.assertRaises(RuntimeError):
-            # only one-sample peak
-            fitResult = FitGaussian(self.ws,0)
 
     def test_zeroSignal(self):
         """Non-positive signal -> returns (0.0,0.0)
         """
         self._linearWorkspace(0)
+        fitResult = FitGaussian(self.ws,0)
+        self.assertTupleEqual((0.0,0.0), fitResult)
+
+    def test_narrowPeak(self):
+        """When a peak is just a blip.
+        """
+        # only one-sample peak
+        self._veryNarrowPeakWorkspace()
         fitResult = FitGaussian(self.ws,0)
         self.assertTupleEqual((0.0,0.0), fitResult)
 
