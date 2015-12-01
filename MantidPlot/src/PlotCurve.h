@@ -106,15 +106,15 @@ protected:
 
   void computeWaterfallOffsets();
 
-  QString m_wksp_name;
-  int m_wksp_index;
-  int m_wksp_type;
-  bool m_wksp_dist;
   int d_type;
   double d_x_offset, d_y_offset;
   bool d_side_lines;
   int d_skip_symbols;
   bool m_isDistribution;
+  QString m_wksp_name;
+  int m_wksp_index;
+  int m_wksp_type;
+  bool m_wksp_dist;
   // x and y units
   boost::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
   boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;

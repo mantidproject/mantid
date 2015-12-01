@@ -326,11 +326,11 @@ void PlotCurve::computeWaterfallOffsets() {
 
       // Apply offsets; separate loops used since x width and y width are not
       // stricly identical
-      for (auto i = 0; i < x.size(); i++)
-        x[i] += x_offset;
+      for (size_t i = 0; i < x.size(); i++)
+        x[(int)i] += x_offset;
 
-      for (auto i = 0; i < y.size(); i++)
-        y[i] += y_offset;
+      for (size_t i = 0; i < y.size(); i++)
+        y[(int)i] += y_offset;
 
       // Update cloned workspace with offset data
       wksp.setX(m_wksp_index, x);
@@ -1063,6 +1063,9 @@ PlotMarker::PlotMarker(int index, double angle)
 void PlotMarker::draw(QPainter *p, const QwtScaleMap &xMap,
                       const QwtScaleMap &yMap, const QRect &) const {
   p->save();
+
+  xMap.transform(xValue());
+  yMap.transform(yValue());
 
   p->rotate(-d_angle);
 
