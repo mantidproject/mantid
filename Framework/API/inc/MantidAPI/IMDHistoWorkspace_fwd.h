@@ -2,6 +2,7 @@
 #define MANTID_API_IMDHISTOWORKSPACE_FWD_H_
 
 #include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -36,6 +37,10 @@ class IMDHistoWorkspace;
 typedef boost::shared_ptr<IMDHistoWorkspace> IMDHistoWorkspace_sptr;
 /// shared pointer to Mantid::API::IMDHistoWorkspace (const version)
 typedef boost::shared_ptr<const IMDHistoWorkspace> IMDHistoWorkspace_const_sptr;
+/// unique pointer to Mantid::API::IMDHistoWorkspace
+typedef std::unique_ptr<IMDHistoWorkspace> IMDHistoWorkspace_uptr;
+/// unique pointer to Mantid::API::IMDHistoWorkspace (const version)
+typedef std::unique_ptr<const IMDHistoWorkspace> IMDHistoWorkspace_const_uptr;
 
 } // namespace API
 } // namespace Mantid

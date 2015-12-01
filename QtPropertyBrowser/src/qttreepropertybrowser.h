@@ -161,6 +161,10 @@ Q_SIGNALS:
     void expanded(QtBrowserItem *item);
     void optionChanged(QtProperty*, const QString&, bool);
 
+public Q_SLOTS:
+
+  void closeEditor();
+
 protected:
     virtual void itemInserted(QtBrowserItem *item, QtBrowserItem *afterItem);
     virtual void itemRemoved(QtBrowserItem *item);

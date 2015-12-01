@@ -54,7 +54,7 @@ public:
   /// (Empty) Constructor
   CalculateFlatBackground()
       : API::Algorithm(), m_convertedFromRawCounts(false),
-        m_skipMonitors(false), m_progress(NULL) {}
+        m_skipMonitors(false), m_nullifyNegative(true), m_progress(NULL) {}
   /// Virtual destructor
   virtual ~CalculateFlatBackground() {
     if (m_progress)
@@ -97,6 +97,8 @@ private:
   /// the variable which specifies if background should be removed from monitors
   /// too.
   bool m_skipMonitors;
+  // if true, negative signals appearing after background removals are set to 0
+  bool m_nullifyNegative;
   /// Progress reporting
   API::Progress *m_progress;
 };

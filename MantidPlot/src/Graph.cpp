@@ -5743,6 +5743,10 @@ void Graph::checkValuesInAxisRange(MantidMatrixCurve* mc)
   auto* data = mc->mantidData();
   double xMin(data->x(0)); // Needs to be min of current graph (x-axis)
   double xMax(data->x(data->size()-1)); // Needs to be max of current graph (x-axis)
+  if (xMin > xMax)
+  {
+    std::swap(xMin, xMax);
+  }
   bool changed(false);
   for (size_t i = 1; i<data->size(); ++i)
   {

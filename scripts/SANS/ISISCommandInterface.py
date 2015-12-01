@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
@@ -206,8 +206,10 @@ def TransFit(mode,lambdamin=None,lambdamax=None, selector='BOTH'):
     """
     mode = str(mode).strip().upper()
     message = mode
-    if lambdamin: message += ', ' + str(lambdamin)
-    if lambdamax: message += ', ' + str(lambdamax)
+    if lambdamin:
+    	message += ', ' + str(lambdamin)
+    if lambdamax:
+    	message += ', ' + str(lambdamax)
     message += ', selector=' + selector
     _printMessage("TransFit(\"" + message + "\")")
 
@@ -1737,6 +1739,17 @@ def is_current_workspace_an_angle_workspace():
     except:
         is_angle = False
     return is_angle
+
+def has_user_file_valid_extension(file_name):
+    '''
+    Checks if the user file has a valid extension
+    @param file_name: the name of the user file
+    @returns true if it is valid else false
+    '''
+    is_valid = su.is_valid_user_file_extension(file_name)
+    print str(is_valid)
+    return is_valid
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

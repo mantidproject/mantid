@@ -187,11 +187,6 @@ void ConvFit::setup() {
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
 
-  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(extendResolutionWorkspace()));
-  connect(m_uiForm.dsResInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(extendResolutionWorkspace()));
-
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
   connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this,
@@ -223,11 +218,57 @@ void ConvFit::setup() {
 * algorithm
 */
 void ConvFit::run() {
+
   if (m_cfInputWS == NULL) {
     g_log.error("No workspace loaded");
     return;
   }
+  extendResolutionWorkspace();
+}
 
+/**
+* Create a resolution workspace with the same number of histograms as in the
+* sample.
+*
+* Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as
+* they need
+* to have the WorkspaceIndex attribute set.
+*/
+void ConvFit::extendResolutionWorkspace() {
+  if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
+    const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
+    appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
+
+    size_t numHist = m_cfInputWS->getNumberHistograms();
+    for (size_t i = 0; i < numHist; i++) {
+      IAlgorithm_sptr appendAlg =
+          AlgorithmManager::Instance().create("AppendSpectra");
+      appendAlg->initialize();
+      appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
+      appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
+
+      if (i == 0) {
+        appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
+        m_batchAlgoRunner->addAlgorithm(appendAlg);
+      } else {
+        m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
+      }
+    }
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+            SLOT(extensionComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+}
+
+void ConvFit::extensionComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(extensionComplete(bool)));
+
+  if (error)
+    return;
+
+  // Run Convolution Fit Sequetial algorithm
   QString fitType = fitTypeString();
   QString bgType = backgroundString();
 
@@ -481,40 +522,6 @@ void ConvFit::newDataLoaded(const QString wsName) {
   m_uiForm.spSpectraMax->setValue(maxSpecIndex);
 
   updatePlot();
-}
-
-/**
-* Create a resolution workspace with the same number of histograms as in the
-* sample.
-*
-* Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as
-* they need
-* to have the WorkspaceIndex attribute set.
-*/
-void ConvFit::extendResolutionWorkspace() {
-  if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
-    const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
-    API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
-    appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
-
-    size_t numHist = m_cfInputWS->getNumberHistograms();
-    for (size_t i = 0; i < numHist; i++) {
-      IAlgorithm_sptr appendAlg =
-          AlgorithmManager::Instance().create("AppendSpectra");
-      appendAlg->initialize();
-      appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
-      appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
-
-      if (i == 0) {
-        appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
-        m_batchAlgoRunner->addAlgorithm(appendAlg);
-      } else {
-        m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
-      }
-    }
-
-    m_batchAlgoRunner->executeBatchAsync();
-  }
 }
 
 namespace {
@@ -1017,8 +1024,8 @@ void ConvFit::updatePlot() {
     m_uiForm.ppPlot->getRangeSelector("ConvFitRange")
         ->setRange(range.first, range.second);
     m_uiForm.ckPlotGuess->setChecked(plotGuess);
-	m_dblManager->setValue(m_properties["StartX"], range.first);
-	m_dblManager->setValue(m_properties["EndX"], range.second);
+    m_dblManager->setValue(m_properties["StartX"], range.first);
+    m_dblManager->setValue(m_properties["EndX"], range.second);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }

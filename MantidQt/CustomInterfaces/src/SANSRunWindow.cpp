@@ -401,10 +401,17 @@ void SANSRunWindow::initLocalPython() {
   runPythonCode("import ISISCommandInterface as i\nimport copy");
   runPythonCode("import isis_instrument\nimport isis_reduction_steps");
 
-  loadUserFile();
-  handleInstrumentChange();
-  m_cfg_loaded = true;
+  // Make sure that user file is valid
+  if (!isValidUserFile()) {
+    m_cfg_loaded = false;
+  }
+  else {
+    loadUserFile();
+    handleInstrumentChange();
+    m_cfg_loaded = true;
+  }
 }
+
 /** Initialise some of the data and signal connections in the save box
 */
 void SANSRunWindow::setupSaveBox() {
@@ -764,29 +771,12 @@ void SANSRunWindow::trimPyMarkers(QString &txt) {
 *  @return the output printed by the Python commands
 */
 bool SANSRunWindow::loadUserFile() {
-  const std::string facility = ConfigService::Instance().getFacility().name();
-  if (facility != "ISIS") {
+  // Check the user file
+  if (!isValidUserFile()) {
     return false;
   }
 
   QString filetext = m_uiForm.userfile_edit->text().trimmed();
-  if (filetext.isEmpty()) {
-    QMessageBox::warning(this, "Error loading user file",
-                         "No user file has been specified");
-    m_cfg_loaded = false;
-    return false;
-  }
-
-  QFile user_file(filetext);
-  if (!user_file.open(QIODevice::ReadOnly)) {
-    QMessageBox::critical(this, "Error loading user file",
-                          "Could not open user file \"" + filetext + "\"");
-    m_cfg_loaded = false;
-    return false;
-  }
-
-  user_file.close();
-
   // Clear the def masking info table.
   int mask_table_count = m_uiForm.mask_table->rowCount();
   for (int i = mask_table_count - 1; i >= 0; --i) {
@@ -2663,6 +2653,11 @@ QString SANSRunWindow::getInstrumentClass() const {
   return instrum + "()";
 }
 void SANSRunWindow::handleRunFindCentre() {
+  // Make sure that user file is valid
+  if (!hasUserFileValidFileExtension()) {
+    return;
+  }
+
   // Set the log level of to at least notice:
   const auto initialLogLevel = g_centreFinderLog.getLevel();
   auto noticeLevelAsInt = static_cast<int>(Poco::Message::PRIO_NOTICE);
@@ -4864,6 +4859,67 @@ void SANSRunWindow::initQResolutionSettings() {
   m_uiForm.q_resolution_a2_h2_label->setToolTip(
       m_constants.getQResolutionA2ToolTipText());
 }
+
+/**
+ * Check if the user file has a valid extension
+ */
+bool SANSRunWindow::hasUserFileValidFileExtension() {
+  auto userFile = m_uiForm.userfile_edit->text().trimmed();
+  QString checkValidity = "i.has_user_file_valid_extension('" + userFile +"')\n";
+
+  QString resultCheckValidity(runPythonCode(checkValidity, false));
+  resultCheckValidity = resultCheckValidity.simplified();
+  auto isValid = false;
+  if (resultCheckValidity == m_constants.getPythonTrueKeyword()) {
+    isValid = true;
+  }
+
+  if (!isValid) {
+    QMessageBox::critical(this, "User File extension issue",
+                                "The specified user file does not seem to have a \n"
+				"valid file extension. Make sure that the user file \n" 
+				"has a .txt extension.");
+  }
+
+  return isValid;
+}
+
+/**
+ * Check if the user file is valid.
+ @returns false if it is not valid else true
+ */
+bool SANSRunWindow::isValidUserFile() {
+  // Make sure that user file is valid
+  if (!hasUserFileValidFileExtension()) {
+    m_cfg_loaded = false;
+    return false;
+  }
+
+  const std::string facility = ConfigService::Instance().getFacility().name();
+  if (facility != "ISIS") {
+    return false;
+  }
+
+  QString filetext = m_uiForm.userfile_edit->text().trimmed();
+  if (filetext.isEmpty()) {
+    QMessageBox::warning(this, "Error loading user file",
+      "No user file has been specified");
+    m_cfg_loaded = false;
+    return false;
+  }
+
+  QFile user_file(filetext);
+  if (!user_file.open(QIODevice::ReadOnly)) {
+    QMessageBox::critical(this, "Error loading user file",
+      "Could not open user file \"" + filetext + "\"");
+    m_cfg_loaded = false;
+    return false;
+  }
+  user_file.close();
+
+  return true;
+}
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
