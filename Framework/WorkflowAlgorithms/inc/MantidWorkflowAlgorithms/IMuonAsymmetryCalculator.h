@@ -57,6 +57,13 @@ protected:
   API::MatrixWorkspace_sptr extractSpectrum(const API::Workspace_sptr &inputWS,
                                             const int index) const;
 
+  /// Validates arguments given to the constructor and throws if wrong
+  void validateInputs() const;
+
+  /// Builds an error message from a list of invalid periods
+  std::string buildErrorString(const std::string &paramName,
+                               const std::vector<int> &invalidPeriods) const;
+
   /// Input workspace
   const API::WorkspaceGroup_sptr m_inputWS;
 
