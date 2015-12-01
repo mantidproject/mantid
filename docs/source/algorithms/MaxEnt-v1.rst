@@ -10,8 +10,10 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+The maximum entropy method (MEM) is used as a signal processing technique for reconstructing
+images from noisy data. The algorithm maximizes the entropy :math:`S` subject to the constraint:
 
+.. math:: \chi^2 = \sum_i \frac{\left(d_i - d_i^C\right)^2}{\sigma_i^2} \leq C_{target}
 
 Usage
 -----

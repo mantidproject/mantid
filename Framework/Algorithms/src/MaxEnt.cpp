@@ -778,16 +778,15 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
 
   // Reconstructed image
 
-  double delta = inWS->readX(spec)[1] - inWS->readX(spec)[0];
-  delta *= npoints;
-  delta = 1. / delta;
+  double dx = inWS->readX(spec)[1] - inWS->readX(spec)[0];
+  double delta = 1. / dx / npoints;
   int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
 
   for (int i = 0; i < npoints; i++) {
     int j = (npoints / 2 + i + isOdd) % npoints;
     X[i] = delta * (-npoints / 2 + i);
-    YR[i] = image[2 * j] / npoints;
-    YI[i] = image[2 * j + 1] / npoints;
+    YR[i] = image[2 * j] * dx;
+    YI[i] = image[2 * j + 1] * dx;
   }
   if (npointsX == npoints + 1)
     X[npoints] = X[npoints - 1] + delta;

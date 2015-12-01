@@ -6,7 +6,9 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxEnt : TODO: DESCRIPTION
+/** MaxEnt : Entropy maximization algorithm as described in the article by J.
+  Skilling and R. K. Bryan: "Maximum entropy image reconstruction: general
+  algorithm", Mon. Not. R. astr. Soc. (1984) 211, 111-124
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
