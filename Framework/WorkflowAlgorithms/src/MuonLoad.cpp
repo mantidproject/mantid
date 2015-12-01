@@ -58,8 +58,21 @@ const std::string MuonLoad::category() const { return "Workflow\\Muon"; }
  * Initialize the algorithm's properties.
  */
 void MuonLoad::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-                  "The name of the Nexus file to load");
+  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Mandatory),
+                  "Input workspace loaded from file (e.g. by LoadMuonNexus)");
+
+  std::vector<std::string> allowedModes;
+  allowedModes.push_back("CorrectAndGroup");
+  allowedModes.push_back("Analyse");
+  allowedModes.push_back("Combined");
+  declareProperty("Mode", "Combined",
+                  boost::make_shared<StringListValidator>(allowedModes),
+                  "Mode to run in. CorrectAndGroup applies dead time "
+                  "correction and grouping; Analyse changes bin offset, "
+                  "crops, rebins and calculates asymmetry; Combined does all "
+                  "of the above.");
 
   declareProperty(
       new ArrayProperty<int>(
@@ -76,19 +89,16 @@ void MuonLoad::init() {
   declareProperty(
       "ApplyDeadTimeCorrection", false,
       "Whether dead time correction should be applied to loaded workspace");
-  declareProperty(
-      new WorkspaceProperty<TableWorkspace>(
-          "CustomDeadTimeTable", "", Direction::Input, PropertyMode::Optional),
-      "Table with dead time information. See LoadMuonNexus for format expected."
-      "If not specified -- algorithm tries to use dead times stored in the "
-      "data file.");
-  declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable",
-                                                        "", Direction::Input,
+  declareProperty(new WorkspaceProperty<TableWorkspace>("DeadTimeTable", "",
+                                                        Direction::Input,
                                                         PropertyMode::Optional),
-                  "Table with detector grouping information. See LoadMuonNexus "
-                  "for format expected. "
-                  "If not specified -- algorithm tries to get grouping "
-                  "information from the data file.");
+                  "Table with dead time information, e.g. from LoadMuonNexus."
+                  "Must be specified if ApplyDeadTimeCorrection is set true.");
+  declareProperty(
+      new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable", "",
+                                            Direction::Input,
+                                            PropertyMode::Mandatory),
+      "Table with detector grouping information, e.g. from LoadMuonNexus.");
 
   declareProperty("TimeZero", EMPTY_DBL(),
                   "Value used for Time Zero correction.");
