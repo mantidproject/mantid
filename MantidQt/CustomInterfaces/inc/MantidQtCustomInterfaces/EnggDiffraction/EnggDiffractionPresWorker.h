@@ -82,7 +82,9 @@ private slots:
    * signal.
    */
   void focus() {
+
     for (size_t i = 0; i < m_multiRunNo.size(); ++i) {
+
       auto runNo = m_multiRunNo[i];
       m_pres->doFocusRun(m_outDir, runNo, m_banks, m_specIDs, m_dgFile);
     }

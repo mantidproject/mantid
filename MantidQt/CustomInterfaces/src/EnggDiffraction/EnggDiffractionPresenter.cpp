@@ -189,8 +189,6 @@ void EnggDiffractionPresenter::processFocusBasic() {
       isValidMultiRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
 
-  int focusMode = m_view->currentMultiRunMode();
-
   // reset global values
   g_abortThread = false;
   g_plottingCounter = 0;
@@ -229,8 +227,6 @@ void EnggDiffractionPresenter::processFocusCropped() {
   const std::vector<bool> banks = m_view->focusingBanks();
   const std::string specNos = m_view->focusingCroppedSpectrumIDs();
 
-  int focusMode = m_view->currentMultiRunMode();
-
   // reset global values
   g_abortThread = false;
   g_plottingCounter = 0;
@@ -264,8 +260,6 @@ void EnggDiffractionPresenter::processFocusTexture() {
   const std::vector<std::string> multi_RunNo =
       isValidMultiRunNumber(m_view->focusingTextureRunNo());
   const std::string dgFile = m_view->focusingTextureGroupingFile();
-
-  int focusMode = m_view->currentMultiRunMode();
 
   // reset global values
   g_abortThread = false;
