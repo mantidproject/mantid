@@ -25,6 +25,7 @@ namespace WorkflowAlgorithms {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using API::WorkspaceGroup_sptr;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MuonLoad)
@@ -100,8 +101,9 @@ void MuonLoad::init() {
                                             PropertyMode::Mandatory),
       "Table with detector grouping information, e.g. from LoadMuonNexus.");
 
-  declareProperty("TimeZero", EMPTY_DBL(),
-                  "Value used for Time Zero correction.");
+  declareProperty(
+      "TimeZero", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
+      "Value used for Time Zero correction, e.g. from LoadMuonNexus.");
   declareProperty(
       new ArrayProperty<double>("RebinParams"),
       "Params used for rebinning. If empty - rebinning is not done.");
@@ -124,8 +126,8 @@ void MuonLoad::init() {
 
   declareProperty("GroupIndex", EMPTY_INT(), "Workspace index of the group");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
+                                                   Direction::Output),
                   "An output workspace.");
 }
 
@@ -134,39 +136,18 @@ void MuonLoad::init() {
  * Execute the algorithm.
  */
 void MuonLoad::exec() {
-  Progress progress(this, 0, 1, 6);
+  Progress progress(this, 0, 1, 5);
 
-  const std::string filename = getProperty("Filename");
-
-  // Whether Dead Time Correction should be applied
-  bool applyDtc = getProperty("ApplyDeadTimeCorrection");
-
-  // If DetectorGropingTable not specified - use auto-grouping
-  bool autoGroup =
-      !static_cast<TableWorkspace_sptr>(getProperty("DetectorGroupingTable"));
-
-  // Load the file
-  IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
-  load->setProperty("Filename", filename);
-
-  if (applyDtc) // Load dead times as well, if needed
-    load->setProperty("DeadTimeTable", "__NotUsed");
-
-  if (autoGroup) // Load grouping as well, if needed
-    load->setProperty("DetectorGroupingTable", "__NotUsed");
-
-  progress.report();
-  load->execute();
-
-  Workspace_sptr loadedWS = load->getProperty("OutputWorkspace");
+  // Supplied input workspace
+  Workspace_sptr inputWS = getProperty("InputWorkspace");
 
   std::vector<int> summedPeriods = getProperty("SummedPeriodSet");
   std::vector<int> subtractedPeriods = getProperty("SubtractedPeriodSet");
-  WorkspaceGroup_sptr allPeriodsWS = boost::make_shared<WorkspaceGroup>();
+  auto allPeriodsWS = boost::make_shared<WorkspaceGroup>();
   progress.report();
 
   // Deal with single-period workspace
-  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
+  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     if (std::find_if_not(summedPeriods.begin(), summedPeriods.end(), isOne) !=
         summedPeriods.end()) {
       throw std::invalid_argument("Single period data but set of periods to "
@@ -180,91 +161,72 @@ void MuonLoad::exec() {
     allPeriodsWS->addWorkspace(ws);
   }
   // Deal with multi-period workspace
-  else if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS)) {
+  else if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
     allPeriodsWS = group;
   }
   // Unexpected workspace type
   else {
-    throw std::runtime_error("Loaded workspace is of invalid type");
+    throw std::runtime_error("Input workspace is of invalid type");
   }
 
   progress.report();
-  // Deal with dead time correction (if required)
-  if (applyDtc) {
-    TableWorkspace_sptr deadTimes = getProperty("CustomDeadTimeTable");
 
-    if (!deadTimes) {
-      // If no dead times specified - try to use ones from the file
-      Workspace_sptr loadedDeadTimes = load->getProperty("DeadTimeTable");
+  // Check mode
+  const std::string mode = getProperty("Mode");
 
-      if (auto table =
-              boost::dynamic_pointer_cast<TableWorkspace>(loadedDeadTimes)) {
-        deadTimes = table;
-      } else if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
-                     loadedDeadTimes)) {
-        // XXX: using first table only for now. Can use the one for appropriate
-        // period if necessary.
-        deadTimes =
-            boost::dynamic_pointer_cast<TableWorkspace>(group->getItem(0));
+  // Dead time correction and grouping
+  if (mode != "Analyse") {
+    bool applyDtc = getProperty("ApplyDeadTimeCorrection");
+    // Deal with dead time correction (if required)
+    if (applyDtc) {
+      TableWorkspace_sptr deadTimes = getProperty("DeadTimeTable");
+      if (!deadTimes) {
+        throw std::runtime_error(
+            "Cannot apply dead time correction as no dead times were supplied");
       }
-
-      if (!deadTimes)
-        throw std::runtime_error("File doesn't contain any dead times");
+      allPeriodsWS = applyDTC(allPeriodsWS, deadTimes);
     }
-
-    allPeriodsWS = applyDTC(allPeriodsWS, deadTimes);
-  }
-
-  TableWorkspace_sptr grouping;
-
-  progress.report();
-  if (autoGroup) {
-    Workspace_sptr loadedGrouping = load->getProperty("DetectorGroupingTable");
-
-    if (auto table =
-            boost::dynamic_pointer_cast<TableWorkspace>(loadedGrouping)) {
-      grouping = table;
-    } else if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
-                   loadedGrouping)) {
-      // XXX: using first table only for now. Can use the one for appropriate
-      // period if necessary.
-      grouping = boost::dynamic_pointer_cast<TableWorkspace>(group->getItem(0));
-    }
-
-    if (!grouping)
-      throw std::runtime_error("File doesn't contain grouping information");
-  } else {
+    progress.report();
+    TableWorkspace_sptr grouping;
     grouping = getProperty("DetectorGroupingTable");
+    progress.report();
+    // Deal with grouping
+    allPeriodsWS = groupWorkspaces(allPeriodsWS, grouping);
+  } else {
+    progress.report();
+    progress.report();
   }
 
-  progress.report();
+  // If not analysing, the present WS will be the output
+  Workspace_sptr outWS = allPeriodsWS;
 
-  // Deal with grouping
-  allPeriodsWS = groupWorkspaces(allPeriodsWS, grouping);
+  if (mode != "CorrectAndGroup") {
+    // Correct bin values
+    double loadedTimeZero = getProperty("TimeZero");
+    allPeriodsWS = correctWorkspaces(allPeriodsWS, loadedTimeZero);
 
-  // Correct bin values
-  double loadedTimeZero = load->getProperty("TimeZero");
-  allPeriodsWS = correctWorkspaces(allPeriodsWS, loadedTimeZero);
-
-  // Perform appropriate calculation
-  std::string outputType = getProperty("OutputType");
-  int groupIndex = getProperty("GroupIndex");
-  std::unique_ptr<IMuonAsymmetryCalculator> asymCalc;
-  if (outputType == "GroupCounts") {
-    asymCalc = Mantid::Kernel::make_unique<MuonGroupCountsCalculator>(
+    // Perform appropriate calculation
+    std::string outputType = getProperty("OutputType");
+    int groupIndex = getProperty("GroupIndex");
+    std::unique_ptr<IMuonAsymmetryCalculator> asymCalc;
+    if (outputType == "GroupCounts") {
+      asymCalc = Mantid::Kernel::make_unique<MuonGroupCountsCalculator>(
         allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
-  } else if (outputType == "GroupAsymmetry") {
-    asymCalc = Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
+    }
+    else if (outputType == "GroupAsymmetry") {
+      asymCalc = Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
         allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
-  } else if (outputType == "PairAsymmetry") {
-    int first = getProperty("PairFirstIndex");
-    int second = getProperty("PairSecondIndex");
-    double alpha = getProperty("Alpha");
-    asymCalc = Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
+    }
+    else if (outputType == "PairAsymmetry") {
+      int first = getProperty("PairFirstIndex");
+      int second = getProperty("PairSecondIndex");
+      double alpha = getProperty("Alpha");
+      asymCalc = Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
         allPeriodsWS, summedPeriods, subtractedPeriods, first, second, alpha);
+    }
+    progress.report();
+    outWS = asymCalc->calculate();
   }
-  progress.report();
-  MatrixWorkspace_sptr outWS = asymCalc->calculate();
 
   setProperty("OutputWorkspace", outWS);
 }
