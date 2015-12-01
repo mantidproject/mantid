@@ -46,10 +46,14 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         dark_run = self.getProperty("DarkRun").value
         dummy_output_ws_name = self.getPropertyValue("OutputWorkspace")
 
+        # Provide progress reporting
+        progress = Progress(self, 0, 1, 4)
+
         # Get other properties
         do_mean = self.getProperty("Mean").value
         do_uniform = self.getProperty("Uniform").value
         normalization_ratio = self.getProperty("NormalizationRatio").value
+        progress.report("SANSDarkRunBackgroundCorrection: Preparing the dark run for background correction...")
 
         dark_run_normalized = None
         # Apply normalization. Uniform means here that the time over which the data was measured is uniform, there are
@@ -64,9 +68,11 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
                                                                        dark_run = dark_run,
                                                                        normalization_ratio = normalization_ratio)
 
+        progress.report("SANSDarkRunBackgroundCorrection: Removing unwanted detectors...")
         # Remove the detectors which are unwanted
         dark_run_normalized = self._remove_unwanted_detectors_and_monitors(dark_run_normalized)
 
+        progress.report("SANSDarkRunBackgroundCorrection: Subtracting the background...")
         # Subtract the normalizaed dark run from the SANS workspace
         output_ws = self._subtract_dark_run_from_sans_data(workspace, dark_run_normalized)
 

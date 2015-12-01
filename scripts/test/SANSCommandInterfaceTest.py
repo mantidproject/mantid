@@ -388,7 +388,7 @@ class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
 class SANSCommandInterfaceGetAndSetBackgroundCorrectionSettings(unittest.TestCase):
     def _do_test_correct_setting(self, run_number, is_time, is_mon, is_mean, mon_numbers):
         # Assert that settings were set
-        setting = ReductionSingleton().event2hist.get_dark_run_setting(is_time, is_mon)
+        setting = ReductionSingleton().get_dark_run_setting(is_time, is_mon)
         self.assertEquals(setting.run_number, run_number)
         self.assertEquals(setting.time, is_time)
         self.assertEquals(setting.mean, is_mean)
@@ -402,7 +402,7 @@ class SANSCommandInterfaceGetAndSetBackgroundCorrectionSettings(unittest.TestCas
         combinations.remove(selected_combination)
 
         for combination in combinations:
-            self.assertTrue(ReductionSingleton().event2hist.get_dark_run_setting(combination[0], combination[1]) is None)
+            self.assertTrue(ReductionSingleton().get_dark_run_setting(combination[0], combination[1]) is None)
 
     def test_that_correct_setting_can_be_passed_in(self):
         # Arrange

@@ -25,7 +25,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra,
                          extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
                           MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
-                          can_load_as_event_workspace, is_convertible_to_float,correct_q_resolution_for_can)
+                          can_load_as_event_workspace, is_convertible_to_float,correct_q_resolution_for_can, ADD_TAG, ADD_MONITORS_TAG)
 import DarkRunCorrection as DarkCorr
 import isis_instrument
 import isis_reducer
@@ -1205,6 +1205,10 @@ class DarkRunSubtraction(object):
         self._dark_run_time_monitor_setting = None
         self._dark_run_uamp_monitor_setting = None
 
+        # Keeps a hold on the number of histograms in the monitor workspace associated
+        # with the scatter workspace
+        self._number_histograms_in_monitor_of_sample  = 0
+
     def add_setting(self, dark_run_setting):
         '''
         We add a dark run setting to our list of settings
@@ -1226,17 +1230,23 @@ class DarkRunSubtraction(object):
         self._dark_run_time_monitor_setting = None
         self._dark_run_uamp_monitor_setting = None
 
-    def execute(self, workspace):
+    def execute(self, workspace, monitor_workspace, start_spec_index, end_spec_index):
         '''
         Load the dark run. Cropt it to the current detector. Find out what kind of subtraction
-        to perform and subtract the dark run from the workspace. Delete the dark run workspace.
-        @param workspace: the workspace to alter
+        to perform and subtract the dark run from the workspace.
+        @param workspace: the original workspace
+        @param monitor_workspace: the associated monitor workspace
+        @param  start_spec_index: the start workspace index to consider
+        @param end_spec_index: the end workspace index to consider
         '''
         # The workspace signature of the execute method exists to make it an easy step
         # to convert to a full-grown reduction step for now we add it when converting
         # the data to histogram
         if not self.has_dark_runs():
             return workspace
+
+        # Set the number of histograms
+        self._number_histograms_in_monitor_of_sample = monitor_workspace.getNumberHistograms()
 
         # Get the time-based correction settings for detectors
         setting_time_detectors = self.get_time_based_setting_detectors()
@@ -1247,13 +1257,20 @@ class DarkRunSubtraction(object):
         # Get the uamp-based correction settings for monitors
         setting_uamp_monitors =  self.get_uamp_based_setting_monitors()
 
-        settings = [setting_time_detectors, setting_uamp_detectors, setting_time_monitors, setting_uamp_monitors]
+        monitor_settings = [setting_time_monitors, setting_uamp_monitors]
+        detector_settings =[setting_time_detectors, setting_uamp_detectors]
 
-        # Subtract the dark runs
-        for setting in settings:
+        # Subtract the dark runs for the monitors
+        for setting in monitor_settings:
             if setting is not None:
-                workspace = self._execute_dark_run_subtraction(workspace, setting)
-        return workspace
+                monitor_workspace = self._execute_dark_run_subtraction_monitors(monitor_workspace, setting)
+
+        # Subtract the dark runs for the detectors
+        for setting in detector_settings:
+            if setting is not None:
+                workspace = self._execute_dark_run_subtraction_detectors(workspace, setting, start_spec_index, end_spec_index)
+
+        return workspace, monitor_workspace
 
     def has_dark_runs(self):
         '''
@@ -1265,71 +1282,193 @@ class DarkRunSubtraction(object):
         else:
             return True
 
-    def _execute_dark_run_subtraction(self, workspace, setting):
+    def _execute_dark_run_subtraction_detectors(self, workspace, setting, start_spec_index, end_spec_index):
         '''
-        Apply one dark run setting to the workspace
-        @param worksapce: the SANS data set
+        Apply one dark run setting to a detector workspace
+        @param worksapce: the SANS data set with only detector data
         @param setting: a dark run settings tuple
+        @param  start_spec_index: the start spec number to consider
+        @param end_spec_index: the end spec number to consider
         '''
+        # Get the dark run name and path
+        dark_run_name, dark_run_file_path = self._get_dark_run_name_and_path(setting)
         # Load the dark run workspace is it has not already been loaded
-        dark_run_ws, dark_run_file_path = self._load_dark_run(setting)
-
-        # If the dark run workspace is an event workspace we need to rebin it to the original
-        # input workspace
-        if isinstance(dark_run_ws, IEventWorkspace):
-            dark_run_ws = self._bin_to_workspace(workspace, dark_run_ws, dark_run_file_path)
+        dark_run_ws = self._load_dark_run_detectors(workspace, dark_run_name, dark_run_file_path, start_spec_index, end_spec_index)
 
         # Subtract the dark run from the workspace
         return self._subtract_dark_run(workspace, dark_run_ws, setting)
 
-    def _bin_to_workspace(self, workspace, dark_run_ws, dark_run_file_path):
+    def _load_dark_run_detectors(self, workspace, dark_run_name, dark_run_file_path,
+                                 start_spec_index, end_spec_index):
         '''
-        We rebin the dark run workspace to the scatter workspace which at this point
-        is already a Workspace2D. For the operations to work they need to have the same form
+        Loads a dark run workspace for detector subtraction if it has not already been loaded
         @param workspace: the scatter workspace
-        @param dark_run_ws: the dark run workspace
-        @param dark_runfile_path: the path to the dark run file
-        @returns the rebinned dark run workspace
+        @param dark_run_name: the name of the dark run workspace
+        @param dark_run_file_path: the file path to the dark run
+        @param  start_spec_index: the start spec number to consider
+        @param end_spec_index: the end spec number to consider
+        @returns a dark run workspace
         '''
-        rebinned_name = workspace.name()+"_rebinned"
+        # Load the dark run workspace
+        dark_run = self._load_workspace(dark_run_name, dark_run_file_path,
+                                        start_spec_index, end_spec_index,
+                                        self._number_histograms_in_monitor_of_sample)
+        # Rebin to match the scatter workspace
+        return self._rebin_to_match(workspace, dark_run)
+
+    def _execute_dark_run_subtraction_monitors(self, monitor_workspace, setting):
+        '''
+        Apply one dark run setting to a monitor workspace
+        @param monitor_workspace: the monitor data set associated with the scatter data
+        @param setting: a dark run settings tuple
+        @returns a monitor for the dark run
+        '''
+        # Get the dark run name and path for the monitor 
+        dark_run_name, dark_run_file_path = self._get_dark_run_name_and_path(setting)
+        # Load the dark run workspace is it has not already been loaded
+        monitor_dark_run_ws = self._load_dark_run_monitors(dark_run_name, dark_run_file_path)
+        # Rebin to the dark run monitor workspace to the original monitor workspace
+        monitor_dark_run_ws = self._rebin_to_match(monitor_workspace, monitor_dark_run_ws)
+        return self._subtract_dark_run(monitor_workspace, monitor_dark_run_ws, setting)
+
+    def _load_dark_run_monitors(self, dark_run_name, dark_run_file_path):
+        '''
+        Loads the monitor dark run workspace.
+        @param dark_run_name: the name of the dark run workspace
+        @param dark_run_file_path: the file path to the dark run
+        @returns a monitor for the dark run
+        '''
+        # This is a bit tricky. There are several possibilities. Of loading the monitor data
+        # 1. The input is a standard workspace and we have to load via LoadNexusMonitor
+        # 2. The input is a -add file. Then we need to load the file and extract the monitor of the added data set
+        monitor_ws = None
+        monitors_name = dark_run_name + "_monitors"
+        # Check if the name ends with the  -add identifier. Then we know it has to be a group workspace
+        if ADD_TAG in dark_run_name:
+            alg_load_monitors = AlgorithmManager.createUnmanaged("LoadNexusProcessed")
+            alg_load_monitors.initialize()
+            alg_load_monitors.setChild(True)
+            alg_load_monitors.setProperty("Filename", dark_run_file_path)
+            alg_load_monitors.setProperty("EntryNumber", 2)
+            alg_load_monitors.setProperty("OutputWorkspace", monitors_name)
+            alg_load_monitors.execute()
+            monitor_ws = alg_load_monitors.getProperty("OutputWorkspace").value
+        else:
+            try:
+                alg_load_monitors = AlgorithmManager.createUnmanaged("LoadNexusMonitors")
+                alg_load_monitors.initialize()
+                alg_load_monitors.setChild(True)
+                alg_load_monitors.setProperty("Filename", dark_run_file_path)
+                alg_load_monitors.setProperty("MonitorsAsEvents", False)
+                alg_load_monitors.setProperty("OutputWorkspace", monitors_name)
+                alg_load_monitors.execute()
+                monitor_ws = alg_load_monitors.getProperty("OutputWorkspace").value
+            except:
+                raise RuntimeError("DarkRunSubtration: The monitor workspace for the specified dark run "
+                                   "file cannot be found or loaded. "
+                                   "Please make sure that that it exists in your search directory.")
+        return monitor_ws
+
+    def _get_dark_run_name_and_path(self, setting):
+        '''
+        @param settings: a dark run settings tuple
+        @returns a dark run workspace name and the dark run path
+        @raises RuntimeError: if there is an issue with loading the workspace 
+        '''
+        dark_run_ws_name = None
+        dark_run_file_path = None
+        try:
+            dark_run_file_path, dark_run_ws_name = getFileAndName(setting.run_number)
+            dark_run_file_path = dark_run_file_path.replace("\\", "/")
+        except:
+            raise RuntimeError("DarkRunSubtration: The specified dark run file cannot be found or loaded. "
+                               "Please make sure that that it exists in your search directory.")
+        return dark_run_ws_name, dark_run_file_path
+
+    def _load_workspace(self, dark_run_file_path, dark_run_ws_name, start_spec_index, end_spec_index, workspace_index_offset):
+        '''
+        Loads the dark run workspace
+        @param dark_run_file_path: file path to the dark run
+        @param dark_run_ws_name: the name of the dark run workspace
+        @param  start_spec_index: the start spec number to consider
+        @param end_spec_index: the end spec number to consider
+        @param workspace_index_offset: the number of monitors
+        @returns a dark run
+        @raises RuntimeError: if there is an issue with loading the workspace
+        '''
+        dark_run_ws = None
+        if ADD_TAG in dark_run_ws_name:
+            alg_load = AlgorithmManager.createUnmanaged("LoadNexusProcessed")
+            alg_load.initialize()
+            alg_load.setChild(True)
+            alg_load.setProperty("Filename", dark_run_file_path)
+            # We specifically grab the first entry here. When the Nexus file is a Group worspace (due
+            # to added files) then we specifically only want the first workspace.
+            alg_load.setProperty("EntryNumber", 1)
+            alg_load.setProperty("OutputWorkspace", dark_run_ws_name)
+            alg_load.execute()
+            dark_run_ws= alg_load.getProperty("OutputWorkspace").value
+        else:
+            try:
+                alg_load = AlgorithmManager.createUnmanaged("Load")
+                alg_load.initialize()
+                alg_load.setChild(True)
+                alg_load.setProperty("Filename", dark_run_file_path)
+                alg_load.setProperty("OutputWorkspace", dark_run_ws_name)
+                alg_load.execute()
+                dark_run_ws= alg_load.getProperty("OutputWorkspace").value
+            except:
+                raise RuntimeError("DarkRunSubtration: The specified dark run file cannot be found or loaded. "
+                                   "Please make sure that that it exists in your search directory.")
+
+        # Crop the workspace if this is required
+        if dark_run_ws.getNumberHistograms() != (end_spec_index - start_spec_index + 1):
+            start_ws_index, end_ws_index = self._get_start_and_end_ws_index(start_spec_index,
+                                                                            end_spec_index,
+                                                                             workspace_index_offset)
+            # Now crop the workspace to the correct size
+            cropped_name = dark_run_ws_name + "_cropped"
+            alg_crop = AlgorithmManager.createUnmanaged("CropWorkspace")
+            alg_crop.initialize()
+            alg_crop.setChild(True)
+            alg_crop.setProperty("InputWorkspace", dark_run_ws)
+            alg_crop.setProperty("OutputWorkspace", cropped_name)
+            alg_crop.setProperty("StartWorkspaceIndex", start_ws_index)
+            alg_crop.setProperty("EndWorkspaceIndex", end_ws_index)
+            alg_crop.execute()
+            dark_run_ws= alg_crop.getProperty("OutputWorkspace").value
+        return dark_run_ws
+
+    def _get_start_and_end_ws_index(self,start_spec_index, end_spec_index, workspace_index_offset):
+        '''
+        Get the start and stop index taking into account the monitor offset
+        in the original combined workspace. The start_ws_index and end_ws_index
+        are based on workspaces which contain the monitor data. Our loaded workspace
+        would not contain the monitor data. Also there is an offset of 1 between
+        the workspace index and the mon spectrum
+        @param start_spec_index: the start spec index
+        @param end_spec_index: the end spec index
+        @param workspace_index_offset: the workspaec index offset due to the monitors
+        '''
+        # Correct for the spec-ws_index offset and for the monitors
+        start_ws_index = start_spec_index - workspace_index_offset - 1
+        end_ws_index = end_spec_index - workspace_index_offset - 1
+        return start_ws_index, end_ws_index
+
+    def _rebin_to_match(self, workspace, to_rebin):
+        '''
+        Rebin too match the input workspace
+        '''
+        rebinned_name = to_rebin.name()+"_rebinned"
         alg_rebin = AlgorithmManager.createUnmanaged("RebinToWorkspace")
         alg_rebin.initialize()
         alg_rebin.setChild(True)
-        alg_rebin.setProperty("WorkspaceToRebin", dark_run_ws)
+        alg_rebin.setProperty("WorkspaceToRebin", to_rebin)
         alg_rebin.setProperty("WorkspaceToMatch", workspace)
         alg_rebin.setProperty("PreserveEvents", False)
         alg_rebin.setProperty("OutputWorkspace", rebinned_name)
         alg_rebin.execute()
-        event_rebinned_part = alg_rebin.getProperty("OutputWorkspace").value
-
-        # Load the Monitors of the event workspace
-        monitors_name = workspace.name() + "_monitors"
-        alg_load_monitors = AlgorithmManager.createUnmanaged("LoadNexusMonitors")
-        alg_load_monitors.initialize()
-        alg_load_monitors.setChild(True)
-        alg_load_monitors.setProperty("Filename", dark_run_file_path)
-        alg_load_monitors.setProperty("MonitorsAsEvents", False)
-        alg_load_monitors.setProperty("OutputWorkspace", monitors_name)
-        alg_load_monitors.execute()
-        monitors_part = alg_load_monitors.getProperty("OutputWorkspace").value
-
-        # Rebin the Monitors to scatter workspace
-        monitors_rebinned_name = workspace.name() + "_monitors_rebinned"
-        alg_rebin.setProperty("WorkspaceToRebin", monitors_part)
-        alg_rebin.setProperty("WorkspaceToMatch", workspace)
-        alg_rebin.setProperty("OutputWorkspace", monitors_rebinned_name)
-        alg_rebin.execute()
-        monitors_rebinned_part = alg_rebin.getProperty("OutputWorkspace").value
-
-        # Conjoin the monitors and the dark run workspace
-        alg_conjoin = AlgorithmManager.createUnmanaged("ConjoinWorkspaces")
-        alg_conjoin.initialize()
-        alg_conjoin.setChild(True)
-        alg_conjoin.setProperty("InputWorkspace1", event_rebinned_part)
-        alg_conjoin.setProperty("InputWorkspace2", monitors_rebinned_part)
-        alg_conjoin.setProperty("CheckOverlapping", True)
-        alg_conjoin.execute()
-        return alg_conjoin.getProperty("InputWorkspace1").value
+        return alg_rebin.getProperty("OutputWorkspace").value
 
     def _subtract_dark_run(self, workspace, dark_run, setting):
         '''
@@ -1346,29 +1485,6 @@ class DarkRunSubtraction(object):
         dark_run_correction.set_mon_numbers(setting.mon_numbers)
         return dark_run_correction.execute(scatter_workspace = workspace,
                                            dark_run = dark_run)
-
-    def _load_dark_run(self, setting):
-        '''
-        Loads a dark run workspace if it has not already been loaded
-        @param settings: a dark run settings tuple
-        @returns the workspace and the file path
-        @raise RuntimeError: If the dark run file cannot be found or loaded.
-        '''
-        dark_run_ws = None
-        try:
-            dark_run_file_path, dark_run_ws_name = getFileAndName(setting.run_number)
-            dark_run_file_path = dark_run_file_path.replace("\\", "/")
-            alg_load = AlgorithmManager.createUnmanaged("Load")
-            alg_load.initialize()
-            alg_load.setChild(True)
-            alg_load.setProperty("Filename", dark_run_file_path)
-            alg_load.setProperty("OutputWorkspace", dark_run_ws_name)
-            alg_load.execute()
-            dark_run_ws= alg_load.getProperty("OutputWorkspace").value
-        except:
-            raise RuntimeError("DarkRunSubtration: The specified dark run file cannot be found or loaded. "
-                               "Please make sure that that it exists in your search directory.")
-        return dark_run_ws, dark_run_file_path
 
     def get_time_based_setting_detectors(self):
         '''
@@ -1531,7 +1647,6 @@ class DarkRunSubtraction(object):
                                                                  mon = True,
                                                                  mon_numbers = monitor_mon_numbers)
 
-
 class CropDetBank(ReductionStep):
     """
         Takes the spectra range of the current detector from the instrument object
@@ -1549,6 +1664,25 @@ class CropDetBank(ReductionStep):
 
         # Get the detector bank that is to be used in this analysis leave the complete workspace
         reducer.instrument.cur_detector().crop_to_detector(in_wksp, workspace)
+
+        # If the workspace requires dark run subtraction for the detectors and monitors, then this will be performed here.
+        if self._dark_run_subtraction.has_dark_runs():
+            # Get the spectrum index range for spectra which are part of the current detector
+            start_spec_num = reducer.instrument.cur_detector().get_first_spec_num()
+            end_spec_num = reducer.instrument.cur_detector().last_spec_num
+
+            scatter_ws = getWorkspaceReference(workspace)
+            scatter_name = scatter_ws.name()
+
+            monitor_ws = reducer.get_sample().get_monitor()
+            monitor_name = monitor_ws.name()
+
+            # Run the subtraction
+            scatter_ws, monitor_ws = reducer.dark_run_subtractor.execute(scatter_ws, monitor_ws, start_spec_num, end_spec_num)
+
+            # We need to replace the workspaces in the ADS
+            mtd.addOrReplace(scatter_name, scatter_ws)
+            mtd.addOrReplace(monitor_name, monitor_ws)
 
 class NormalizeToMonitor(ReductionStep):
     """
@@ -2696,38 +2830,8 @@ class SliceEvent(ReductionStep):
         self.scale = 1
         self._dark_run_subtraction = DarkRunSubtraction()
 
-    def add_dark_run_setting(self, dark_run_setting):
-        '''
-        Adds a dark run setting to the dark run subtraction
-        @param dark_run_setting: a dark run setting
-        '''
-        self._dark_run_subtraction.add_setting(dark_run_setting)
-
-    def get_dark_run_setting(self, is_time, is_mon):
-        '''
-        Gets one of the four dark run setttings
-        @param is_time: is it time_based or not
-        @param is_mon: monitors or not
-        @returns the requested setting
-        '''
-        setting = None
-        if is_time and is_mon:
-            setting = self._dark_run_subtraction.get_time_based_setting_monitors()
-        elif is_time and not is_mon:
-            setting = self._dark_run_subtraction.get_time_based_setting_detectors()
-        elif not is_time and is_mon:
-            setting = self._dark_run_subtraction.get_uamp_based_setting_monitors()
-        elif not is_time and not is_mon:
-            setting = self._dark_run_subtraction.get_uamp_based_setting_detectors()
-        return setting
-
-    def clear_dark_run_settings(self):
-        self._dark_run_subtraction.clear_settings()
-
     def execute(self, reducer, workspace):
         ws_pointer = getWorkspaceReference(workspace)
-        ws_name = str(ws_pointer)
-        ws_for_dark_run = ws_pointer
         # it applies only for event workspace
         if not isinstance(ws_pointer, IEventWorkspace):
             self.scale = 1
@@ -2742,14 +2846,6 @@ class SliceEvent(ReductionStep):
                 binning = ""
             hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
             self.scale = part_c / tot_c
-            ws_for_dark_run = hist
-
-        # If the user has selected a dark run subtraction then it will be performed here
-        if self._dark_run_subtraction.has_dark_runs():
-            rebinned_ws = getWorkspaceReference(workspace)
-            ws_subtracted = self._dark_run_subtraction.execute(rebinned_ws)
-            # We need to replace the workspace in the ADS
-            mtd.addOrReplace(ws_name, ws_subtracted)
 
 class BaseBeamFinder(ReductionStep):
     """
@@ -3325,7 +3421,7 @@ class UserFile(ReductionStep):
         back_parser = UserFileParser.BackCommandParser()
         if back_parser.can_attempt_to_parse(arguments):
             dark_run_setting = back_parser.parse_and_set(arguments)
-            reducer.event2hist.add_dark_run_setting(dark_run_setting)
+            reducer.crop_detector.add_dark_run_setting(dark_run_setting)
         else:
             #a list of the key words this function can read and the functions it calls in response
             keys = ['MON/TIMES', 'M', 'TRANS']

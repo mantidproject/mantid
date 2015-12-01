@@ -223,6 +223,8 @@ class ISISReducer(Reducer):
         self._slices_def = []
         self._slice_index = 0
 
+        # As mentioned above, this is not a reductions step!
+        
 
     def _clean_loaded_data(self):
         self._sample_run = Sample()
@@ -259,6 +261,10 @@ class ISISReducer(Reducer):
         self.__transmission_can = ""
 
         self.settings = get_settings_object()
+
+        # Dark Run Subtraction handler. This is not a step but a utility class
+        # which gets used during cropping and Tranmission calculation
+        self.dark_run_subtraction = isis_reduction_steps.DarkRunSubtraction()
 
 
     def set_instrument(self, configuration):
@@ -704,4 +710,32 @@ class ISISReducer(Reducer):
         centre_pos1, centre_pos2 = self.instrument.get_updated_beam_centre_after_move()
         # Update the beam centre finder for the rear
         self._beam_finder.update_beam_center(centre_pos1, centre_pos2)
+
+    def add_dark_run_setting(self, dark_run_setting):
+        '''
+        Adds a dark run setting to the dark run subtraction
+        @param dark_run_setting: a dark run setting
+        '''
+        self.dark_run_subtraction.add_setting(dark_run_setting)
+
+    def get_dark_run_setting(self, is_time, is_mon):
+        '''
+        Gets one of the four dark run setttings
+        @param is_time: is it time_based or not
+        @param is_mon: monitors or not
+        @returns the requested setting
+        '''
+        setting = None
+        if is_time and is_mon:
+            setting = self.dark_run_subtraction.get_time_based_setting_monitors()
+        elif is_time and not is_mon:
+            setting = self.dark_run_subtraction.get_time_based_setting_detectors()
+        elif not is_time and is_mon:
+            setting = self.dark_run_subtraction.get_uamp_based_setting_monitors()
+        elif not is_time and not is_mon:
+            setting = self.dark_run_subtraction.get_uamp_based_setting_detectors()
+        return setting
+
+    def clear_dark_run_settings(self):
+        self.dark_run_subtraction.clear_settings()
 

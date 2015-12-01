@@ -49,6 +49,21 @@ def create_real_workspace_with_log(name, log_names, start_time, number_of_times)
             ws = add_log(ws, number_of_times, log_name, start_time)
         return ws
 
+def create_real_event_workspace_with_log(name, log_names, start_time, number_of_times):
+        filename = "CNCS_7860_event.nxs"
+        out_ws_name = name
+        alg_load  = AlgorithmManager.create("LoadNexusProcessed")
+        alg_load.initialize()
+        alg_load.setChild(True)
+        alg_load.setProperty("Filename", filename)
+        alg_load.setProperty("OutputWorkspace", out_ws_name)
+        alg_load.execute()
+        ws = alg_load.getProperty("OutputWorkspace").value
+
+        for log_name in log_names:
+            ws = add_log(ws, number_of_times, log_name, start_time)
+        return ws
+
 # ----- TESTS
 class DarkRunCorrectionTest(unittest.TestCase):
     def _do_test_dark_run_correction(self,  log_name, use_mean, use_time, use_detectors = True,

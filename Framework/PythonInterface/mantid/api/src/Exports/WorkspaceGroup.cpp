@@ -27,6 +27,8 @@ void export_WorkspaceGroup() {
            "Returns the number of workspaces contained in the group")
       .def("remove", &WorkspaceGroup::remove,
            (arg("self"), arg("workspace_name")), "Remove a name from the group")
+      .def("removeAll", &WorkspaceGroup::removeAll,
+           arg("self"), "Remove all names from the group")
       .def("getItem", (Workspace_sptr (WorkspaceGroup::*)(const size_t) const) &
                           WorkspaceGroup::getItem,
            (arg("self"), arg("workspace_name")),

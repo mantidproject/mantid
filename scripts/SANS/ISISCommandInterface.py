@@ -1740,8 +1740,6 @@ def is_current_workspace_an_angle_workspace():
     return is_angle
 
 
-
-
 ##################### Accesor functions for BackgroundCorrection
 def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_numbers=None):
     '''
@@ -1776,7 +1774,7 @@ def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_nu
                                              mean = is_mean,
                                              mon = is_mon,
                                              mon_number = mon_numbers_int)
-    ReductionSingleton().event2hist.add_dark_run_setting(setting)
+    ReductionSingleton().add_dark_run_setting(setting)
 
 def get_background_correction(is_time, is_mon, component):
     '''
@@ -1799,7 +1797,7 @@ def get_background_correction(is_time, is_mon, component):
             string_list = [str(element) for element in int_list]
             return su.convert_from_string_list(string_list)
 
-    setting = ReductionSingleton().event2hist.get_dark_run_setting(is_time, is_mon)
+    setting = ReductionSingleton().get_dark_run_setting(is_time, is_mon)
 
     value = None
     if setting is not None:
@@ -1820,7 +1818,7 @@ def clear_background_correction():
     '''
     Clears the background correction settings
     '''
-    ReductionSingleton().event2hist.clear_dark_run_settings()
+    ReductionSingleton().clear_dark_run_settings()
 
 
 ###############################################################################
