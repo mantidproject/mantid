@@ -452,6 +452,15 @@ private:
   /// Display normalization to use
   Mantid::API::MDNormalization m_displayNormalization;
 
+  // Get ordered list of boundaries in position-along-the-line coordinates
+  std::set<coord_t> getBinBoundariesOnLine(const Kernel::VMD &start,
+                                           const Kernel::VMD &end, size_t nd,
+                                           const Kernel::VMD &dir,
+                                           coord_t length) const;
+
+  signal_t getNormalizationFactor(const API::MDNormalization &normalize,
+                                  size_t linearIndex) const;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MDHistoWorkspace(const MDHistoWorkspace &other);
@@ -460,6 +469,7 @@ protected:
 
   /// Linear array of masks for each bin
   bool *m_masks;
+
 };
 
 /// A shared pointer to a MDHistoWorkspace

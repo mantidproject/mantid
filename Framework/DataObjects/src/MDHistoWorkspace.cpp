@@ -369,17 +369,8 @@ signal_t MDHistoWorkspace::getSignalAtCoord(
     const Mantid::API::MDNormalization &normalization) const {
   size_t linearIndex = this->getLinearIndexAtCoord(coords);
   if (linearIndex < m_length) {
-    // What is our normalization factor?
-    switch (normalization) {
-    case NoNormalization:
-      return m_signals[linearIndex];
-    case VolumeNormalization:
-      return m_signals[linearIndex] * m_inverseVolume;
-    case NumEventsNormalization:
-      return m_signals[linearIndex] / m_numEvents[linearIndex];
-    }
-    // Should not reach here
-    return m_signals[linearIndex];
+    signal_t normalizer = getNormalizationFactor(normalization, linearIndex);
+    return m_signals[linearIndex] * normalizer;
   } else
     return std::numeric_limits<signal_t>::quiet_NaN();
 }
@@ -556,37 +547,8 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
     numBins[d] = dim->getNBins();
   }
 
-  // Ordered list of boundaries in position-along-the-line coordinates
-  std::set<coord_t> boundaries;
-
-  // Start with the start/end points, if they are within range.
-  if (pointInWorkspace(this, start))
-    boundaries.insert(0.0f);
-  if (pointInWorkspace(this, end))
-    boundaries.insert(length);
-
-  // Next, we go through each dimension and see where the bin boundaries
-  // intersect the line.
-  for (size_t d = 0; d < nd; d++) {
-    IMDDimension_const_sptr dim = this->getDimension(d);
-    coord_t lineStartX = start[d];
-
-    if (dir[d] != 0.0) {
-      for (size_t i = 0; i <= dim->getNBins(); i++) {
-        // Position in this coordinate
-        coord_t thisX = dim->getX(i);
-        // Position along the line. Is this between the start and end of it?
-        coord_t linePos = (thisX - lineStartX) / dir[d];
-        if (linePos >= 0 && linePos <= length) {
-          // Full position
-          VMD pos = start + (dir * linePos);
-          // This is a boundary if the line point is inside the workspace
-          if (pointInWorkspace(this, pos))
-            boundaries.insert(linePos);
-        }
-      }
-    }
-  }
+  std::set<coord_t> boundaries =
+      getBinBoundariesOnLine(start, end, nd, dir, length);
 
   if (boundaries.empty()) {
     // Nothing at all!
@@ -627,18 +589,7 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
           y.push_back(0.0);
           e.push_back(0.0);
         } else {
-          // What is our normalization factor?
-          signal_t normalizer = 1.0;
-          switch (normalize) {
-          case NoNormalization:
-            break;
-          case VolumeNormalization:
-            normalizer = m_inverseVolume;
-            break;
-          case NumEventsNormalization:
-            normalizer = 1.0 / m_numEvents[linearIndex];
-            break;
-          }
+          signal_t normalizer = getNormalizationFactor(normalize, linearIndex);
           // And add the normalized signal/error to the list too
           auto signal = this->getSignalAt(linearIndex) * normalizer;
           if (boost::math::isinf(signal)) {
@@ -657,7 +608,69 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
       }
     } // for each unique boundary
   }   // if there is at least one point
-} // (end function)
+}
+
+signal_t
+MDHistoWorkspace::getNormalizationFactor(const MDNormalization &normalize,
+                                         size_t linearIndex) const {
+  signal_t normalizer = 1.0;
+  switch (normalize) {
+  case NoNormalization:
+    return normalizer;
+  case VolumeNormalization:
+    return m_inverseVolume;
+  case NumEventsNormalization:
+    return 1.0 / m_numEvents[linearIndex];
+  }
+  return normalizer;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get ordered list of boundaries in position-along-the-line coordinates
+ *
+ * @param start :: start of the line
+ * @param end :: end of the line
+ * @param nd :: number of dimensions
+ * @param dir :: vector of the direction
+ * @param length :: unit-vector of the direction
+ * @returns :: ordered list of boundaries
+ */
+std::set<coord_t>
+MDHistoWorkspace::getBinBoundariesOnLine(const VMD &start, const VMD &end,
+                                         size_t nd, const VMD &dir,
+                                         coord_t length) const {
+  std::set<coord_t> boundaries;
+
+  // Start with the start/end points, if they are within range.
+  if (pointInWorkspace(this, start))
+    boundaries.insert(0.0f);
+  if (pointInWorkspace(this, end))
+    boundaries.insert(length);
+
+  // Next, we go through each dimension and see where the bin boundaries
+  // intersect the line.
+  for (size_t d = 0; d < nd; d++) {
+    IMDDimension_const_sptr dim = getDimension(d);
+    coord_t lineStartX = start[d];
+
+    if (dir[d] != 0.0) {
+      for (size_t i = 0; i <= dim->getNBins(); i++) {
+        // Position in this coordinate
+        coord_t thisX = dim->getX(i);
+        // Position along the line. Is this between the start and end of it?
+        coord_t linePos = (thisX - lineStartX) / dir[d];
+        if (linePos >= 0 && linePos <= length) {
+          // Full position
+          VMD pos = start + (dir * linePos);
+          // This is a boundary if the line point is inside the workspace
+          if (pointInWorkspace(this, pos))
+            boundaries.insert(linePos);
+        }
+      }
+    }
+  }
+  return boundaries;
+}
 
 //==============================================================================================
 //============================== ARITHMETIC OPERATIONS
