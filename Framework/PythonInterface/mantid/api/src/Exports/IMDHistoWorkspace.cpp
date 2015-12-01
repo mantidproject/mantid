@@ -202,7 +202,8 @@ void export_IMDHistoWorkspace() {
            "Sets the signal from a numpy array. The sizes must match the "
            "current workspace sizes. A ValueError is thrown if not")
 
-      .def("setErrorSquaredArray", &setErrorSquaredArray, arg("self"),
+      .def("setErrorSquaredArray", &setErrorSquaredArray,
+           (arg("self"), arg("errorSquared")),
            "Sets the square of the errors from a numpy array. The sizes must "
            "match the current workspace sizes. A ValueError is thrown if not")
 

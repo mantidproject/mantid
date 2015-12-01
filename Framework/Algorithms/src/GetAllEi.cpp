@@ -238,7 +238,11 @@ void GetAllEi::exec() {
       (0.5 * 1.e+6) / chopSpeed; // 0.5 because some choppers open twice.
   // Would be nice to have it 1 or 0.5 depending on chopper type, but
   // it looks like not enough information on what chopper is available on ws;
+  double unused(0.0);
+  auto destUnit = Kernel::UnitFactory::Instance().create("Energy");
+
   std::vector<double> guess_opening;
+
   this->findGuessOpeningTimes(TOF_range, TOF0, Period, guess_opening);
   if (guess_opening.size() == 0) {
     throw std::runtime_error(
@@ -246,15 +250,10 @@ void GetAllEi::exec() {
         boost::lexical_cast<std::string>(TOF_range.first) + ':' +
         boost::lexical_cast<std::string>(TOF_range.second));
   } else {
-    g_log.debug() << "*Found : " << guess_opening.size()
-                  << " chopper prospective opening within time frame: "
-                  << TOF_range.first << " to: " << TOF_range.second
-                  << std::endl;
-    g_log.debug() << " Timings are:\n";
-    for (size_t i = 0; i < guess_opening.size(); i++) {
-      g_log.debug() << boost::str(boost::format(" %8.2f; ") % guess_opening[i]);
-    }
-    g_log.debug() << std::endl;
+    destUnit->initialize(mon1Distance, 0., 0.,
+                         static_cast<int>(Kernel::DeltaEMode::Elastic), 0.,
+                         unused);
+    printDebugModeInfo(guess_opening, TOF_range, destUnit);
   }
   std::pair<double, double> Mon1_Erange =
       monitorWS->getSpectrum(0)->getXDataRange();
@@ -270,8 +269,6 @@ void GetAllEi::exec() {
   // convert to energy
   std::vector<double> guess_ei;
   guess_ei.reserve(guess_opening.size());
-  double unused(0.0);
-  auto destUnit = Kernel::UnitFactory::Instance().create("Energy");
   destUnit->initialize(mon1Distance, 0., 0.,
                        static_cast<int>(Kernel::DeltaEMode::Elastic), 0.,
                        unused);
@@ -384,6 +381,34 @@ void GetAllEi::exec() {
   result_ws->setX(0, peaks_positions);
 
   setProperty("OutputWorkspace", result_ws);
+}
+/**Auxiliary method to print guess chopper energies in debug mode
+*
+* @param guess_opening -- vector witgh chopper opening times values
+* @param TOF_range     -- pair describing time interval the instrument
+*                         is recording the results
+* @param destUnit      -- pointer to initialized class, converting TOF
+*                         to energy in elastic mode using instrument
+*                         parameters.
+*/
+void GetAllEi::printDebugModeInfo(const std::vector<double> &guess_opening,
+                                  const std::pair<double, double> &TOF_range,
+                                  boost::shared_ptr<Kernel::Unit> &destUnit) {
+
+  g_log.debug() << "*Found : " << guess_opening.size()
+                << " chopper prospective opening within time frame: "
+                << TOF_range.first << " to: " << TOF_range.second << std::endl;
+  g_log.debug() << " Timings are:\n";
+  for (size_t i = 0; i < guess_opening.size(); i++) {
+    g_log.debug() << boost::str(boost::format(" %8.2f; ") % guess_opening[i]);
+  }
+  g_log.debug() << std::endl;
+  g_log.debug() << " Corresponding to energies:\n";
+  for (size_t i = 0; i < guess_opening.size(); i++) {
+    double ei = destUnit->singleFromTOF(guess_opening[i]);
+    g_log.debug() << boost::str(boost::format(" %8.2f; ") % ei);
+  }
+  g_log.debug() << std::endl;
 }
 
 // unnamed namespace for auxiliary file-based functions, converted from lambda

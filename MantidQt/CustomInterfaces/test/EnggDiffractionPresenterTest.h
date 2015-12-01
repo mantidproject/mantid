@@ -31,13 +31,16 @@ private:
   }
 
   void startAsyncFocusWorker(const std::string &dir,
-                             const std::vector<std::string> &outFilenames,
-                             const std::string &runNo,
+                             const std::vector<std::string> &multi_RunNo,
                              const std::vector<bool> &banks,
                              const std::string &specNos,
                              const std::string &dgFile) {
     std::cerr << "focus run " << std::endl;
-    doFocusRun(dir, outFilenames, runNo, banks, specNos, dgFile);
+
+    std::string runNo = multi_RunNo[0];
+
+    doFocusRun(dir, runNo, banks, specNos, dgFile);
+
     focusingFinished();
   }
 

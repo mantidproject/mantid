@@ -32,7 +32,7 @@ protected:
     // Do nothing
   }
 
-  QWidget *createEditor(DoubleManagerType *manager, QtProperty *property, QWidget *parent)
+  QWidget *createEditorForManager(DoubleManagerType *manager, QtProperty *property, QWidget *parent)
   {
     (void) manager; // Unused
 

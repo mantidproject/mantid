@@ -2,6 +2,7 @@
 #define MANTID_API_WORKSPACE_FWD_H_
 
 #include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -36,6 +37,10 @@ class Workspace;
 typedef boost::shared_ptr<Workspace> Workspace_sptr;
 /// shared pointer to Mantid::API::Workspace (const version)
 typedef boost::shared_ptr<const Workspace> Workspace_const_sptr;
+/// unique pointer to Mantid::API::Workspace
+typedef std::unique_ptr<Workspace> Workspace_uptr;
+/// unique pointer to Mantid::API::Workspace (const version)
+typedef std::unique_ptr<const Workspace> Workspace_const_uptr;
 
 } // namespace API
 } // namespace Mantid

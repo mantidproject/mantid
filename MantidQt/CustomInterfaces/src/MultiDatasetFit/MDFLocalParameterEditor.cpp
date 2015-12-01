@@ -19,11 +19,19 @@ namespace MDF
 /// Constructor
 /// @param parent :: Parent widget.
 /// @param index :: Index of the spectrum which parameter is edited.
+/// @param value :: Current parameter value.
 /// @param fixed :: Is the parameter fixed initially?
 /// @param tie :: Parameter's current tie (or empty string).
-LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixed, QString tie):
-  QWidget(parent), m_index(index),m_fixed(fixed), m_tie(tie)
-{
+/// @param othersFixed :: True if some other local parameters are fixed.
+/// @param allOthersFixed :: True if all other local parameters are fixed.
+/// @param othersTied :: True if there are other tied parameters.
+  LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
+                                           double value, bool fixed,
+                                           QString tie, bool othersFixed,
+                                           bool allOthersFixed, bool othersTied)
+    : QWidget(parent), m_index(index), m_value(QString::number(value,'g',16)),
+      m_fixed(fixed), m_tie(tie), m_othersFixed(othersFixed),
+      m_allOthersFixed(allOthersFixed), m_othersTied(othersTied) {
   auto layout = new QHBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(0);
@@ -31,28 +39,24 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
 
   m_editor = new QLineEdit(parent);
   m_editor->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-  auto validator = new QDoubleValidator(this);
-  validator->setDecimals(16);
-  m_editor->setValidator(validator);
-  m_editor->setToolTip("Edit local parameter value. Press F to fix/unfix it.");
+  this->setFocusPolicy(Qt::StrongFocus);
+  this->setFocusProxy(m_editor);
 
-  auto button = new QPushButton("&Set");
-  button->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Expanding);
+  m_button = new QPushButton("&Set");
+  m_button->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Expanding);
+  m_button->setFocusPolicy(Qt::NoFocus);
 
-  this->setFocusPolicy(Qt::NoFocus);
   layout->addWidget(m_editor);
-  layout->addWidget(button);
+  layout->addWidget(m_button);
   layout->setStretch(0,1);
   layout->setStretch(1,0);
-  this->setFocusProxy(m_editor);
-  this->setFocusPolicy(Qt::StrongFocus);
 
   auto setMenu = new QMenu(this);
 
-  QAction *action = new QAction("Set to all",this);
-  action->setToolTip("Set all parameters to this value");
-  connect(action,SIGNAL(activated()),this,SLOT(setAll()));
-  setMenu->addAction(action);
+  m_setAllAction = new QAction("Set to all",this);
+  m_setAllAction->setToolTip("Set all parameters to this value");
+  connect(m_setAllAction,SIGNAL(activated()),this,SLOT(setAll()));
+  setMenu->addAction(m_setAllAction);
 
   setMenu->addSeparator();
   m_fixAction = new QAction(m_fixed? "Unfix" : "Fix", this);
@@ -60,40 +64,42 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
   connect(m_fixAction,SIGNAL(activated()),this,SLOT(fixParameter()));
   setMenu->addAction(m_fixAction);
 
-  action = new QAction("Fix all",this);
-  action->setToolTip("Fix all parameters.");
-  connect(action,SIGNAL(activated()),this,SLOT(fixAll()));
-  setMenu->addAction(action);
+  m_fixAllAction = new QAction("Fix all",this);
+  m_fixAllAction->setToolTip("Fix all parameters.");
+  connect(m_fixAllAction,SIGNAL(activated()),this,SLOT(fixAll()));
+  setMenu->addAction(m_fixAllAction);
 
-  action = new QAction("Unfix all",this);
-  action->setToolTip("Unfix all parameters.");
-  connect(action,SIGNAL(activated()),this,SLOT(unfixAll()));
-  setMenu->addAction(action);
+  m_unfixAllAction = new QAction("Unfix all",this);
+  m_unfixAllAction->setToolTip("Unfix all parameters.");
+  connect(m_unfixAllAction,SIGNAL(activated()),this,SLOT(unfixAll()));
+  setMenu->addAction(m_unfixAllAction);
 
   setMenu->addSeparator();
-  action = new QAction("Set tie",this);
-  action->setToolTip("Set a tie for this parameter.");
-  connect(action,SIGNAL(activated()),this,SLOT(setTie()));
-  setMenu->addAction(action);
+  m_setTieAction = new QAction("Set tie",this);
+  m_setTieAction->setToolTip("Set a tie for this parameter.");
+  connect(m_setTieAction,SIGNAL(activated()),this,SLOT(setTie()));
+  setMenu->addAction(m_setTieAction);
 
-  action = new QAction("Remove tie",this);
-  action->setToolTip("Remove the tie for this parameter.");
-  connect(action,SIGNAL(activated()),this,SLOT(removeTie()));
-  setMenu->addAction(action);
+  m_removeTieAction = new QAction("Remove tie",this);
+  m_removeTieAction->setToolTip("Remove the tie for this parameter.");
+  connect(m_removeTieAction,SIGNAL(activated()),this,SLOT(removeTie()));
+  setMenu->addAction(m_removeTieAction);
 
-  action = new QAction("Set tie to all",this);
-  action->setToolTip("Set this tie for all parameters.");
-  connect(action,SIGNAL(activated()),this,SLOT(setTieAll()));
-  setMenu->addAction(action);
+  m_setTieToAllAction = new QAction("Set tie to all",this);
+  m_setTieToAllAction->setToolTip("Set this tie for all parameters.");
+  connect(m_setTieToAllAction,SIGNAL(activated()),this,SLOT(setTieAll()));
+  setMenu->addAction(m_setTieToAllAction);
 
-  action = new QAction("Remove all ties",this);
-  action->setToolTip("Remove ties for all parameters.");
-  connect(action,SIGNAL(activated()),this,SLOT(removeAllTies()));
-  setMenu->addAction(action);
+  m_removeAllTiesAction = new QAction("Remove all ties",this);
+  m_removeAllTiesAction->setToolTip("Remove ties for all parameters.");
+  connect(m_removeAllTiesAction,SIGNAL(activated()),this,SLOT(removeAllTies()));
+  setMenu->addAction(m_removeAllTiesAction);
 
-  button->setMenu(setMenu);
+  m_button->setMenu(setMenu);
 
   m_editor->installEventFilter(this);
+
+  setEditorState();
 }
 
 /// Send a signal to set all parameters to the value in the editor.
@@ -107,50 +113,68 @@ void LocalParameterEditor::setAll()
 void LocalParameterEditor::fixParameter()
 {
   m_fixed = !m_fixed;
-  m_fixAction->setText( m_fixed? "Unfix" : "Fix" );
+  setEditorState();
   emit fixParameter(m_index, m_fixed);
 }
 
 /// Send a signal to fix all parameters.
 void LocalParameterEditor::fixAll()
 {
+  m_fixed = true;
+  m_allOthersFixed = true;
+  m_othersFixed = true;
+  setEditorState();
   emit setAllFixed(true);
 }
 
 /// Send a signal to unfix all parameters.
 void LocalParameterEditor::unfixAll()
 {
+  m_fixed = false;
+  m_allOthersFixed = false;
+  m_othersFixed = false;
+  setEditorState();
   emit setAllFixed(false);
 }
 
 /// Send a signal to tie a parameter.
 void LocalParameterEditor::setTie()
 {
-  QInputDialog input;
-  input.setWindowTitle("Set a tie.");
-  input.setTextValue(m_tie);
-  if (input.exec() == QDialog::Accepted) {
-    auto tie = input.textValue();
-    emit setTie(m_index, tie);
+  auto tie = setTieDialog(m_tie);
+  if (!tie.isEmpty()) {
+    m_tie = tie;
+    emit setTie(m_index, m_tie);
   }
+  setEditorState();
 }
 
 /// Send a signal to remove a tie.
 void LocalParameterEditor::removeTie()
 {
+  m_tie = "";
   emit setTie(m_index, "");
+  setEditorState();
 }
 
 /// Set all ties for all parameters
 void LocalParameterEditor::setTieAll()
 {
-  emit setTieAll(m_tie);
+  auto tie = setTieDialog(m_tie);
+  if (!tie.isEmpty()) {
+    m_tie = tie;
+    m_othersTied = true;
+    emit setTieAll(m_tie);
+  }
+  setEditorState();
 }
 
 /// Remove ties form all parameters
 void LocalParameterEditor::removeAllTies()
 {
+  m_tie = "";
+  m_othersTied = false;
   emit setTieAll("");
+  setEditorState();
 }
 
 /// Filter events in the line editor to emulate a shortcut (F to fix/unfix).
@@ -159,13 +183,62 @@ bool LocalParameterEditor::eventFilter(QObject *, QEvent *evn)
   if ( evn->type() == QEvent::KeyPress )
   {
     auto keyEvent = static_cast<QKeyEvent*>(evn);
-    if ( keyEvent->key() == Qt::Key_F )
+    if (keyEvent->key() == Qt::Key_F &&
+        keyEvent->modifiers() == Qt::ControlModifier && m_tie.isEmpty()) 
     {
       fixParameter();
       return true;
     }
+    if (m_tie.isEmpty())
+    {
+      m_value = m_editor->text();
+    } else {
+      m_tie = m_editor->text();
+      emit setTie(m_index, m_tie);
+    }
   }
   return false;
+}
+
+/// Set the state of the editor elements (the line editor and the button)
+/// according to the state of the parameter (fixed, tied, etc)
+void LocalParameterEditor::setEditorState()
+{
+  bool isNumber = m_tie.isEmpty();
+  bool isTie = !isNumber;
+
+  m_setAllAction->setEnabled(isNumber);
+  m_fixAction->setText(m_fixed ? "Unfix" : "Fix");
+  m_fixAction->setEnabled(isNumber);
+  m_unfixAllAction->setEnabled(isNumber && (m_fixed || m_othersFixed));
+  m_fixAllAction->setEnabled(isNumber && (!m_fixed || !m_allOthersFixed));
+
+  m_removeTieAction->setEnabled(isTie);
+  m_removeAllTiesAction->setEnabled(isTie || m_othersTied);
+
+  if (isNumber) {
+    auto validator = new QDoubleValidator(this);
+    validator->setDecimals(16);
+    m_editor->setValidator(validator);
+    m_editor->setText(m_value);
+    m_editor->setToolTip("Edit local parameter value. Press Ctrl+F to fix/unfix it.");
+  } else {
+    m_editor->setValidator(nullptr);
+    m_editor->setText(m_tie);
+    m_editor->setToolTip("Edit local parameter tie.");
+  }
+}
+
+/// Open an input dialog to enter a tie expression.
+QString LocalParameterEditor::setTieDialog(QString tie)
+{
+  QInputDialog input;
+  input.setWindowTitle("Set a tie.");
+  input.setTextValue(tie);
+  if (input.exec() == QDialog::Accepted) {
+    return input.textValue();
+  }
+  return "";
 }
 
 } // MDF
