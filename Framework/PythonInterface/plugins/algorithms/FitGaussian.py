@@ -68,8 +68,10 @@ class FitGaussian(PythonAlgorithm):
         nentries = len(indices)
 
         if nentries < 3:
-            self._error("Spectrum " + str(index) + " in workspace " + workspace.getName() +
-                        " has a too narrow peak. Cannot guess sigma. Check your data.")
+            self._warning("Spectrum " + str(index) + " in workspace " + workspace.getName() +
+                          " has a too narrow peak. Cannot guess sigma. Check your data.")
+            return
+            
         minIndex = x_values[indices[0,0]]
         maxIndex = x_values[indices[-1,0]]
 
