@@ -9,14 +9,15 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidAPI/UsageService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/UsageReporter.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
@@ -604,7 +605,7 @@ bool Algorithm::execute() {
       if (!isChild() || m_alwaysStoreInADS)
         this->store();
 
-      UsageService::Instance().registerFeatureUsage(this, duration);
+      registerFeatureUsage(duration);
       // RJT, 19/3/08: Moved this up from below the catch blocks
       setExecuted(true);
 
@@ -821,19 +822,27 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
 
 /**
  * Serialize this object to a string. The format is
- * AlgorithmName.version(prop1=value1,prop2=value2,...)
+ * a json formatted string.
  * @returns This object serialized as a string
  */
 std::string Algorithm::toString() const {
-  ::Json::Value root;
   ::Json::FastWriter writer;
-  ::Json::Reader reader;
+
+  return writer.write(toJson());
+}
+
+/**
+* Serialize this object to a json object)
+* @returns This object serialized as a json object
+*/
+::Json::Value Algorithm::toJson() const {
+  ::Json::Value root;
 
   root["name"] = name();
   root["version"] = this->version();
   root["properties"] = Kernel::PropertyManagerOwner::asJson(false);
 
-  return writer.write(root);
+  return root;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -1566,6 +1575,30 @@ void Algorithm::reportCompleted(const double &duration,
                         << std::endl;
   }
   m_running = false;
+}
+
+/** Registers the usage of the algorithm with the UsageService
+@param enabled : true to enable logging, false to disable
+*/
+void Algorithm::registerFeatureUsage(const float &duration) const
+{
+  if (ConfigService::Instance().UsageReporter().isEnabled()) {
+    ::Json::FastWriter writer;
+    ::Json::Value algJson = toJson();
+    algJson["internal"] = isChild();
+    std::string details = writer.write(algJson);
+
+    //Limit details length for very long strings
+    const int STRING_SIZE_LIMIT = 60000;
+    if (details.size() > STRING_SIZE_LIMIT)
+      details.erase(STRING_SIZE_LIMIT, std::string::npos);
+
+    std::ostringstream oss;
+    oss << this->name() << ".v" << this->version();
+    ConfigService::Instance().UsageReporter().registerFeatureUsage("Algorithm", oss.str(),
+      DateAndTime::getCurrentTime(),
+      duration, details);
+  }
 }
 
 /** Enable or disable Logging of start and end messages

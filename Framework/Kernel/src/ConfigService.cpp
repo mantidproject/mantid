@@ -11,6 +11,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/NetworkProxy.h"
+#include "MantidKernel/UsageReporter.h"
 
 #include <Poco/Util/LoggingConfigurator.h>
 #include <Poco/Util/SystemConfiguration.h>
@@ -139,6 +140,20 @@ private:
 // Private member functions
 //-------------------------------
 
+void ConfigServiceImpl::setupUsageReporting() {
+  m_usage_reporter = new Mantid::Kernel::UsageReporter();
+
+  int enabled = 0;
+  int interval = 0;
+  int retVal = getValue("Usage.BufferCheckInterval", interval);
+  if ((retVal == 1) && (interval > 0)) {
+    m_usage_reporter->setInterval(interval);
+  }
+  retVal = getValue("usagereports.enabled", enabled);
+  m_usage_reporter->setEnabled((retVal == 0) || (enabled == 0));
+  m_usage_reporter->registerStartup();
+}
+
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl()
     : m_pConf(NULL), m_pSysConfig(NULL), m_changed_keys(), m_ConfigPaths(),
@@ -146,13 +161,14 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
       // Use a different user properties file for an mpi-enabled build to avoid
-      // confusion if both are used on the same filesystem
+      // confusion if both are used on the same file system
       m_user_properties_file_name("Mantid-mpi.user.properties"),
 #else
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
-      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
+      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false),
+      m_usage_reporter(NULL) {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
   m_pConf = 0;
@@ -278,12 +294,17 @@ ConfigServiceImpl::ConfigServiceImpl()
   }
   // must update the cache of instrument paths
   cacheInstrumentPaths();
+
+  // setup usage reporting
+  setupUsageReporting();
 }
 
 /** Private Destructor
  *  Prevents client from calling 'delete' on the pointer handed out by Instance
  */
 ConfigServiceImpl::~ConfigServiceImpl() {
+  //clear up the usage reporter first
+  delete m_usage_reporter;
   // std::cerr << "ConfigService destroyed." << std::endl;
   Kernel::Logger::shutdown();
   delete m_pSysConfig;
@@ -632,18 +653,22 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
         std::fstream::out);
 
     filestr << "# This file can be used to override any properties for this "
-               "installation." << std::endl;
+               "installation."
+            << std::endl;
     filestr << "# Any properties found in this file will override any that are "
-               "found in the Mantid.Properties file" << std::endl;
+               "found in the Mantid.Properties file"
+            << std::endl;
     filestr << "# As this file will not be replaced with futher installations "
-               "of Mantid it is a safe place to put " << std::endl;
+               "of Mantid it is a safe place to put "
+            << std::endl;
     filestr << "# properties that suit your particular installation."
             << std::endl;
     filestr << "#" << std::endl;
     filestr << "# See here for a list of possible options:" << std::endl;
     filestr << "# "
                "http://www.mantidproject.org/"
-               "Properties_File#Mantid.User.Properties" << std::endl;
+               "Properties_File#Mantid.User.Properties"
+            << std::endl;
     filestr << std::endl;
     filestr << "##" << std::endl;
     filestr << "## GENERAL" << std::endl;
@@ -678,11 +703,13 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "##" << std::endl;
     filestr << std::endl;
     filestr << "## Sets a list of directories (separated by semi colons) to "
-               "search for data" << std::endl;
+               "search for data"
+            << std::endl;
     filestr << "#datasearch.directories=../data;../isis/data" << std::endl;
     filestr << std::endl;
     filestr << "## Set a list (separated by semi colons) of directories to "
-               "look for additional Python scripts" << std::endl;
+               "look for additional Python scripts"
+            << std::endl;
     filestr << "#pythonscripts.directories=../scripts;../docs/MyScripts"
             << std::endl;
     filestr << std::endl;
@@ -723,7 +750,8 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "#MantidOptions.ReusePlotInstances=Off" << std::endl;
     filestr << std::endl;
     filestr << "## Uncomment to disable use of OpenGL to render unwrapped "
-               "instrument views" << std::endl;
+               "instrument views"
+            << std::endl;
     filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off" << std::endl;
 
     filestr.close();
@@ -1958,9 +1986,17 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   return m_proxyInfo;
 }
 
-/** Sets the log level priority for the File log channel
-* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+/** Gets a reference to the UsageReporter
+* @returns a reference to the UsageReporter class
 */
+UsageReporter& ConfigServiceImpl::UsageReporter()
+{
+  return *m_usage_reporter;
+}
+
+  /** Sets the log level priority for the File log channel
+  * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+  */
 void ConfigServiceImpl::setFileLogLevel(int logLevel) {
   setFilterChannelLogLevel("fileFilterChannel", logLevel);
 }

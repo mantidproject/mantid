@@ -1,28 +1,23 @@
-#ifndef MANTID_API_USAGESERVICE_H_
-#define MANTID_API_USAGESERVICE_H_
+#ifndef MANTID_KERNEL_USAGEREPORTER_H_
+#define MANTID_KERNEL_USAGEREPORTER_H_
 
-#include "MantidAPI/DllConfig.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <Poco/Timer.h>
+
 #include <json/value.h>
+
+#include <Poco/ActiveResult.h>
+#include <Poco/Timer.h>
+
 #include <queue>
 
-namespace Json
-{
-class Value;
-}
-
 namespace Mantid {
-namespace API {
+namespace Kernel {
 
-class Algorithm;
-
-/** UsageService : The Usage Service is responsible for collating, and sending
+/** UsageReporter : The Usage reporter is responsible for collating, and sending
   all usage data.
   This  centralizes all the logic covering Usage Reporting including:
-
     - Detecting if reporting is enabled
     - Registering the startup of Mantid
     - Sending Startup usage reports, immediately, and every 24 hours thereafter
@@ -56,7 +51,7 @@ class FeatureUsage {
 public:
   /// Constructor
   FeatureUsage(const std::string &type, const std::string &name,
-               const Kernel::DateAndTime &start, const float& duration,
+               const Kernel::DateAndTime &start, const float &duration,
                const std::string &details);
 
   ::Json::Value asJson() const;
@@ -69,46 +64,56 @@ public:
   std::string details;
 };
 
-class MANTID_API_DLL UsageServiceImpl {
+class MANTID_KERNEL_DLL UsageReporter {
 public:
+  /// Sets the interval that the timer checks for tasks
+  void setInterval(const uint32_t seconds = 60);
   /// Registers the Startup of Mantid
   void registerStartup();
   /// Registers the use of a feature in mantid
   void registerFeatureUsage(const std::string &type, const std::string &name,
                             const Kernel::DateAndTime &start,
-                            const float& duration, const std::string &details);
+                            const float &duration, const std::string &details);
   void registerFeatureUsage(const std::string &type, const std::string &name,
                             const std::string &details = "");
-  void registerFeatureUsage(const Algorithm* alg, const float& duration);
 
   /// Returns true if usage reporting is enabled
   bool isEnabled() const;
+  /// Sets whether the UsageReporter is enabled
+  void setEnabled(const bool enabled);
 
   /// flushes any buffers and sends any outstanding usage reports
   void flush();
 
-private:
-  friend struct Mantid::Kernel::CreateUsingNew<UsageServiceImpl>;
-
   /// Constructor
-  UsageServiceImpl();
-  /// Private, unimplemented copy constructor
-  UsageServiceImpl(const UsageServiceImpl &);
-  /// Private, unimplemented copy assignment operator
-  UsageServiceImpl &operator=(const UsageServiceImpl &);
+  UsageReporter();
   /// Destructor
-  ~UsageServiceImpl();
-
+  ~UsageReporter();
+private:
+  /// Private, unimplemented copy constructor
+  UsageReporter(const UsageReporter &);
+  /// Private, unimplemented copy assignment operator
+  UsageReporter &operator=(const UsageReporter &);
+  
   /// Send startup Report
   void sendStartupReport();
   /// Send featureUsageReport
-  void sendFeatureUsageReport();
+  void sendFeatureUsageReport(const bool synchronous);
 
   /// A method to handle the timerCallbacks
   void timerCallback(Poco::Timer &);
-  /// Generate jsonfor calls to usage service
+  /// Generate json for calls to usage service
   ::Json::Value generateHeader();
-
+  /// generates the message body for a startup message
+  std::string generateStartupMessage();
+  /// generates the message body for a feature usage message
+  std::string generateFeatureUsageMessage();
+  Poco::ActiveResult<int> sendStartupAsync(const std::string &message);
+  int sendStartupAsyncImpl(const std::string &message);
+  Poco::ActiveResult<int> sendFeatureAsync(const std::string &message);
+  int sendFeatureAsyncImpl(const std::string &message);
+  /// sends a report over the internet
+  int sendReport(const std::string &message, const std::string &url);
   /// a timer
   Poco::Timer m_timer;
 
@@ -119,22 +124,13 @@ private:
 
   std::queue<FeatureUsage> m_FeatureQueue;
   size_t m_FeatureQueueSizeThreshold;
+  bool m_isEnabled;
   mutable Kernel::Mutex m_mutex;
 
   ::Json::Value m_cachedHeader;
 };
 
-/// Forward declaration of a specialization of SingletonHolder for
-/// UsageServiceImpl (needed for dllexport/dllimport) and a typedef for
-/// it.
-#ifdef _WIN32
-// this breaks new namespace declaration rules; need to find a better fix
-template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
-#endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<UsageServiceImpl>
-    UsageService;
-
 } // namespace API
 } // namespace Mantid
 
-#endif /* MANTID_API_USAGESERVICE_H_ */
+#endif /* MANTID_KERNEL_USAGEREPORTER_H_ */
