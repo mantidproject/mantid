@@ -11,7 +11,7 @@ class FitGaussianTest(unittest.TestCase):
 
     def _workspace(self,userFun):
         if self.ws is not None: DeleteWorkspace(self.ws)
-                
+
         self.ws = CreateSampleWorkspace(OutputWorkspace="out",
             Function="User Defined",UserDefinedFunction=userFun,
             NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1)
@@ -21,10 +21,10 @@ class FitGaussianTest(unittest.TestCase):
 
     def _linearWorkspace(self,A0):
         self._workspace("name=LinearBackground,A0=%s;" % A0)
-            
+
     def _veryNarrowPeakWorkspace(self):
         self._gaussianWorkspace(5,1,.05)
-            
+
     def test_errors(self):
         """Conditions that raise RuntimeError.
         """
@@ -43,7 +43,7 @@ class FitGaussianTest(unittest.TestCase):
         self._linearWorkspace(0)
         fitResult = FitGaussian(self.ws,0)
         self.assertTupleEqual((0.0,0.0), fitResult)
-        
+
     def _guessPeak(self,peakCentre,height,sigma):
         """Test-fitting one generated Gaussian peak.
         """
