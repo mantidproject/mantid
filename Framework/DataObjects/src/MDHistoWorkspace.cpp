@@ -621,26 +621,34 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
       // Find the signal in this bin
       size_t linearIndex = this->getLinearIndexAtCoord(middle.getBareArray());
       if (linearIndex < m_length) {
-        // What is our normalization factor?
-        signal_t normalizer = 1.0;
-        switch (normalize) {
-        case NoNormalization:
-          break;
-        case VolumeNormalization:
-          normalizer = m_inverseVolume;
-          break;
-        case NumEventsNormalization:
-          normalizer = 1.0 / m_numEvents[linearIndex];
-          break;
+
+        // Is the signal here masked?
+        if (this->getIsMaskedAt(linearIndex)) {
+          y.push_back(0.0);
+          e.push_back(0.0);
         }
-        // And add the normalized signal/error to the list too
-        auto signal = this->getSignalAt(linearIndex) * normalizer;
-        if (boost::math::isinf(signal)) {
-          // The plotting library (qwt) doesn't like infs.
-          signal = std::numeric_limits<signal_t>::quiet_NaN();
+        else {
+          // What is our normalization factor?
+          signal_t normalizer = 1.0;
+          switch (normalize) {
+            case NoNormalization:
+              break;
+            case VolumeNormalization:
+              normalizer = m_inverseVolume;
+              break;
+            case NumEventsNormalization:
+              normalizer = 1.0 / m_numEvents[linearIndex];
+              break;
+          }
+          // And add the normalized signal/error to the list too
+          auto signal = this->getSignalAt(linearIndex) * normalizer;
+          if (boost::math::isinf(signal)) {
+            // The plotting library (qwt) doesn't like infs.
+            signal = std::numeric_limits<signal_t>::quiet_NaN();
+          }
+          y.push_back(signal);
+          e.push_back(this->getErrorAt(linearIndex) * normalizer);
         }
-        y.push_back(signal);
-        e.push_back(this->getErrorAt(linearIndex) * normalizer);
         // Save the position for next bin
         lastPos = pos;
       } else {
