@@ -39,6 +39,7 @@ const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
 int EnggDiffractionPresenter::g_croppedCounter = 0;
 int EnggDiffractionPresenter::g_plottingCounter = 0;
 bool EnggDiffractionPresenter::g_abortThread = false;
+std::string EnggDiffractionPresenter::g_lastValidRun = "";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -189,7 +190,10 @@ void EnggDiffractionPresenter::processFocusBasic() {
   const std::vector<bool> banks = m_view->focusingBanks();
 
   int focusMode = m_view->currentMultiRunMode();
+
+  // reset global values
   g_abortThread = false;
+  g_plottingCounter = 0;
 
   try {
     inputChecksBeforeFocusBasic(multi_RunNo, banks);
@@ -215,7 +219,10 @@ void EnggDiffractionPresenter::processFocusCropped() {
   const std::string specNos = m_view->focusingCroppedSpectrumIDs();
 
   int focusMode = m_view->currentMultiRunMode();
+
+  // reset global values
   g_abortThread = false;
+  g_plottingCounter = 0;
 
   try {
     inputChecksBeforeFocusCropped(multi_RunNo, banks, specNos);
@@ -240,7 +247,10 @@ void EnggDiffractionPresenter::processFocusTexture() {
   const std::string dgFile = m_view->focusingTextureGroupingFile();
 
   int focusMode = m_view->currentMultiRunMode();
+
+  // reset global values
   g_abortThread = false;
+  g_plottingCounter = 0;
 
   try {
     inputChecksBeforeFocusTexture(multi_RunNo, dgFile);
@@ -388,17 +398,6 @@ void EnggDiffractionPresenter::processStopFocus() {
                       << std::endl;
     }
   }
-
-  const std::string last_RunNo = isValidRunNumber(m_view->focusingRunNo());
-  double lastrun = boost::lexical_cast<double>(last_RunNo);
-  double lastSuccessful =
-      lastrun - (boost::lexical_cast<double>(g_plottingCounter) + 2);
-
-  g_log.warning() << "Focussing process will be stopped, last successful "
-                     "run number: "
-                  << lastSuccessful << " , total number of focus run that "
-                                       "could not be processed: "
-                  << (lastrun - lastSuccessful) << std::endl;
 }
 
 /**
@@ -1114,6 +1113,9 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
 
   while (!g_abortThread) {
 
+    // to track last valid run
+    g_lastValidRun = runNo;
+
     g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
                       "this directory: "
                    << dir << std::endl;
@@ -1275,6 +1277,23 @@ void EnggDiffractionPresenter::focusingFinished() {
   if (m_workerThread) {
     delete m_workerThread;
     m_workerThread = NULL;
+  }
+
+  // display warning and information to the users regarding Stop Focus
+  if (g_abortThread) {
+    // will get the last number in the list
+    std::string last_RunNo = isValidRunNumber(m_view->focusingRunNo());
+    double lastRun = boost::lexical_cast<double>(last_RunNo);
+    double lastValid = boost::lexical_cast<double>(g_lastValidRun);
+
+    if (lastRun != lastValid) {
+      g_log.warning()
+          << "Focussing process has been stopped, last successful "
+             "run number: "
+          << g_lastValidRun
+          << " , total number of focus run that could not be processed: "
+          << (lastRun - lastValid) << std::endl;
+    }
   }
 }
 

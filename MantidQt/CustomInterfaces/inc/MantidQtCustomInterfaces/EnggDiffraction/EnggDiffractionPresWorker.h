@@ -83,7 +83,6 @@ private slots:
    */
   void focus() {
     for (size_t i = 0; i < m_multiRunNo.size(); ++i) {
-
       auto runNo = m_multiRunNo[i];
       m_pres->doFocusRun(m_outDir, runNo, m_banks, m_specIDs, m_dgFile);
     }
@@ -123,7 +122,6 @@ private:
   // for focusing "texture"
   const std::string m_dgFile;
   // parameters for pre-processing/rebinning
-
   const double m_bin;
   const size_t m_nperiods;
   const std::string m_outWSName;
