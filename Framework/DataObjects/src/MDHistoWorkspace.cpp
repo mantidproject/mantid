@@ -610,6 +610,14 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
   }   // if there is at least one point
 }
 
+//----------------------------------------------------------------------------------------------
+/** Find the normalization factor
+ *
+ * @param normalize :: how to normalize the signal
+ * @param linearIndex :: the position in the workspace of the signal value to be
+ *normalized
+ * @returns :: the normalization factor
+ */
 signal_t
 MDHistoWorkspace::getNormalizationFactor(const MDNormalization &normalize,
                                          size_t linearIndex) const {
