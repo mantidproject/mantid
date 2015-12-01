@@ -389,29 +389,41 @@ def read_in_stack(sample_path, img_format):
 
     return (sample, white, dark)
 
-def apply_line_projection(data_vol):
+def apply_line_projection(imgs_angles):
     """
+    Transform pixel values as $- ln (Is/I0)$, where $Is$ is the pixel (intensity) value and $I0$ is a
+    reference value (pixel/intensity value for open beam, or maximum in the stack or the image).
+
+    This produces a projection image, $ p(s) = -ln\frac{I(s)}{I(0)} $,
+    with $ I(s) = I(0) e^{-\int_0^s \mu(x)dx} $
+    where:
+    $p(s)$ represents the sum of the density of objects along a line (pixel) of the beam
+    I(0) initital intensity of netron beam (white images)
+    I(s) neutron count measured by detector/camera
+
+    The integral is the density along the path through objects.
+    This is required for example when pixels have neutron count values.
+
+    @param imgs_angles :: stack of images (angular projections) as 3d numpy array. Every image will be
+    processed independently, using as reference intensity the maximum pixel value found across all the
+    images.
+
+    Returns :: projected data volume (image stack)
     """
-    # Line integral, yeah!  exp(integral) => - ln (Is/I0)
-    # produce projection image, $ p(s) = -ln\frac{I(s)}{I(0)} $,
-    # with $ I(s) = I(0) e^{-\int_0^s \mu(x)dx} $
-    # where $p(s)$ represents the sum of the density of objects along a line (pixel) of the beam
-    # I(0) initital intensity of netron beam (white images)
-    # I(s) neutron count measured by detector/camera
-    # the integral is the density along the path through objects
-    data_vol = data_vol.astype('float32')
-    for idx in range(0, data_vol.shape[0]):
-        max_img = np.amax(data_vol[idx, :, :])
-        to_log = np.true_divide(data_vol[idx, :, :], max_img)
+    imgs_angles = imgs_angles.astype('float32')
+    for idx in range(0, imgs_angles.shape[0]):
+        max_img = np.amax(imgs_angles[idx, :, :])
+        to_log = np.true_divide(imgs_angles[idx, :, :], max_img)
         if False:
             print("initial img max: {0}. transformed to log scale,  min: {1}, max: {2}".
                   format(max_img, np.amin(to_log), np.amax(to_log)))
-        data_vol[idx, :, :] = - np.log(to_log) # +0.001
+        imgs_angles[idx, :, :] = - np.log(to_log +1e-6)
 
-    return data_vol
+    return imgs_angles
 
 def apply_final_preproc_corrections(preproc_data, remove_stripes='wavelet-fourier'):
     """
+    Apply additional, optional, pre-processing steps/filters.
     """
     # Remove stripes in sinograms / ring artefacts in reconstructed volume
     if remove_stripes:

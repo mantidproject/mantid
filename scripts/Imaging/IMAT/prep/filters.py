@@ -110,25 +110,47 @@ def remove_stripes_ring_artifacts(data_vol, method='fourier-wavelet'):
         raise ValueError("The method to remove stripes and ring artifacts must be one of {0}. "
                          "Got unknown value: {1}".format(supported_methods, method))
 
-    size = np.max(data_vol.shape)
-    wv_levels = int(np.ceil(np.log2(size)))
-    return _remove_sino_stripes_rings_fw(data_vol, wv_levels)
+    try:
+        import tomopy
+        stripped_vol = tomopy.prep.stripe.remove_stripe_fw(data_vol)
+    except ImportError:
+        stripped_vol = remove_sino_stripes_rings_wf(data_vol)
+
+    return stripped_vol
+
+def remove_sino_stripes_rings_wf(data_vol, wv_levels=None):
+    if not wv_levels:
+        max_len = np.max(data_vol.shape)
+        wv_levels = int(np.ceil(np.log2(max_len)))
+
+    return _remove_sino_stripes_rings_wf(data_vol, wv_levels)
 
 # This is heavily based on the implementation of this method in tomopy
-def _remove_sino_stripes_rings_fw(data_vol, wv_levels=None, wavelet_name='db5', sigma=2, pad=True):
+def _remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=2, pad=True):
+    """
+    Removes horizontal stripes in sinograms (reducing ring artifacts in the reconstructed volume).
+    Implements a combined Wavelet-Fourier filter (wf) as described in:
+
+    Muench B, Trtrik P, Marone F, and Stampanoni M. 2009. Optics Express, 17(10):8567-8591.
+    Stripe and ring artifact removal with combined wavelet-fourier filtering. 2009.
+
+    This implementation is heavily based on the implementation from tomopy. This is not parallel
+    at the moment.
+    """
     try:
         import pywt
     except ImportError as exc:
         raise ImportError("pywt. Details: {0}".format(exc))
 
-    dimx, dimy, dimz = data_vol.shape
+
+    dimx = data_vol.shape[0]
     n_x = dimx
     if pad:
         n_x = dimx + dimx / 8
     xshift = int((n_x - dimx) / 2.)
 
-    for sino_idx in range(0, dimy):
-        sli = np.zeros((n_x, dimz), dtype='float32')
+    for sino_idx in range(0, data_vol.shape[1]):
+        sli = np.zeros((n_x, data_vol.shape[2]), dtype='float32')
         sli[xshift:dimx + xshift] = data_vol[:, sino_idx, :]
 
         # Wavelet decomposition
@@ -160,7 +182,7 @@ def _remove_sino_stripes_rings_fw(data_vol, wv_levels=None, wavelet_name='db5', 
             sli = sli[0:c_H[nlvl].shape[0], 0:c_H[nlvl].shape[1]]
             sli = pywt.idwt2((sli, (c_H[nlvl], c_V[nlvl], c_D[nlvl])),
                              wavelet_name)
-        data_vol[:, sino_idx, :] = sli[xshift:dimx + xshift, 0:dimz]
+        data_vol[:, sino_idx, :] = sli[xshift:dimx + xshift, 0:data_vol.shape[2]]
 
     return data_vol
 
