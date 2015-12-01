@@ -572,6 +572,35 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive */
+  void test_getLinePlot_horizontal_withMask() {
+    MDHistoWorkspace_sptr ws =
+      MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i = 0; i < 100; i++)
+      ws->setSignalAt(i, double(i));
+
+    std::vector<coord_t> min{0, 0};
+    std::vector<coord_t> max{5, 5};
+
+    // Mask part of the workspace
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ws->setMDMasking(function);
+
+    VMD start(0.5, 0.5);
+    VMD end(9.5, 0.5);
+    std::vector<coord_t> x;
+    std::vector<signal_t> y;
+    std::vector<signal_t> e;
+    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+
+    TS_ASSERT_EQUALS(y.size(), 10);
+    // Masked value should be zero
+    TS_ASSERT_DELTA(y[2], 0.0, 1e-5);
+    // Unmasked value
+    TS_ASSERT_DELTA(y[9], 9.0, 1e-5);
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  /** Line along X, going positive */
   void test_getLinePlot_3D() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 10);
