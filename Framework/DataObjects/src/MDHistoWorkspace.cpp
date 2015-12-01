@@ -626,19 +626,18 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
         if (this->getIsMaskedAt(linearIndex)) {
           y.push_back(0.0);
           e.push_back(0.0);
-        }
-        else {
+        } else {
           // What is our normalization factor?
           signal_t normalizer = 1.0;
           switch (normalize) {
-            case NoNormalization:
-              break;
-            case VolumeNormalization:
-              normalizer = m_inverseVolume;
-              break;
-            case NumEventsNormalization:
-              normalizer = 1.0 / m_numEvents[linearIndex];
-              break;
+          case NoNormalization:
+            break;
+          case VolumeNormalization:
+            normalizer = m_inverseVolume;
+            break;
+          case NumEventsNormalization:
+            normalizer = 1.0 / m_numEvents[linearIndex];
+            break;
           }
           // And add the normalized signal/error to the list too
           auto signal = this->getSignalAt(linearIndex) * normalizer;

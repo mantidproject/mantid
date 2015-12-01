@@ -574,7 +574,7 @@ public:
   /** Line along X, going positive */
   void test_getLinePlot_horizontal_withMask() {
     MDHistoWorkspace_sptr ws =
-      MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
 

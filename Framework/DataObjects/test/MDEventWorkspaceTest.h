@@ -570,7 +570,7 @@ public:
 
   void test_getLinePlotWithMaskedData() {
     MDEventWorkspace3Lean::sptr ew =
-      MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
 
     // Mask some of the workspace
     std::vector<coord_t> min{0, 0, 0};
@@ -587,7 +587,7 @@ public:
     std::vector<signal_t> y, e;
     ew->getLinePlot(start, end, NoNormalization, x, y, e);
     TS_ASSERT_EQUALS(y.size(), 200);
-    TS_ASSERT_EQUALS(y[60], 0.0); // Masked data is zero
+    TS_ASSERT_EQUALS(y[60], 0.0);  // Masked data is zero
     TS_ASSERT_EQUALS(y[180], 3.0); // Unmasked data
   }
 
