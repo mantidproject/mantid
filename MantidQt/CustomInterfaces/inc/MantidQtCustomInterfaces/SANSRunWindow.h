@@ -493,6 +493,7 @@ private:
                                   bool w1W2Disabled);
   /// Initialize the QResolution settings
   void initQResolutionSettings();
+  
   /// Gets the BackgroundCorrection settings
   void retrieveBackgroundCorrection();
   /// Get Background runner
@@ -506,7 +507,12 @@ private:
       QString &pythonCode,
       MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings setting,
       bool isTimeBased);
+  /// Check if the user file has a valid user file extension
+  bool hasUserFileValidFileExtension();
+  /// Check if the user file is valid
+  bool isValidUserFile();
 
+      
   UserSubWindow *slicingWindow;
 };
 }

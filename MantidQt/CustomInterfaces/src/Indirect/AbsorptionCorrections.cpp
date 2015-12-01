@@ -1,3 +1,4 @@
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
 
 #include "MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h"
@@ -237,6 +238,22 @@ bool AbsorptionCorrections::validate() {
                                m_uiForm.leSampleChemicalFormula))
     uiv.checkFieldIsValid("Sample Chamical Formula",
                           m_uiForm.leSampleChemicalFormula);
+  const auto sampleChem =
+      m_uiForm.leSampleChemicalFormula->text().toStdString();
+  const auto containerChem =
+      m_uiForm.leCanChemicalFormula->text().toStdString();
+  try {
+    Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
+  } catch (std::runtime_error &ex) {
+    UNUSED_ARG(ex);
+    uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
+  }
+  try {
+    Mantid::Kernel::Material::parseChemicalFormula(containerChem);
+  } catch (std::runtime_error &ex) {
+    UNUSED_ARG(ex);
+    uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
+  }
 
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {

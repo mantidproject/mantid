@@ -31,7 +31,7 @@ public:
   FilenameDialogEditorFactory(QObject* parent):StringDialogEditorFactory(parent){}
 protected:
   using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
-  QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
+  QWidget *createEditorForManager(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
   {
     (void) manager; //Avoid unused warning
     return new FilenameDialogEditor(property,parent);

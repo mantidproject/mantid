@@ -35,8 +35,8 @@ public:
   virtual ~IMDEventWorkspace() {}
 
   /// Returns a clone of the workspace
-  std::unique_ptr<IMDEventWorkspace> clone() const {
-    return std::unique_ptr<IMDEventWorkspace>(doClone());
+  IMDEventWorkspace_uptr clone() const {
+    return IMDEventWorkspace_uptr(doClone());
   }
 
   /// Perform initialization after dimensions (and others) have been set.

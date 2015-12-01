@@ -202,6 +202,7 @@ set ( INC_FILES
 	inc/MantidAPI/HistoryItem.h
 	inc/MantidAPI/HistoryView.h
 	inc/MantidAPI/IAlgorithm.h
+	inc/MantidAPI/IAlgorithm_fwd.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
 	inc/MantidAPI/IBoxControllerIO.h

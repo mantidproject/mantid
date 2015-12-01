@@ -51,26 +51,23 @@ private:
   // We dont' want processGroups to be called
   virtual bool checkGroups() { return false; }
 
-  /// Returns a workspace for the first period as specified using FirstPeriod
-  /// property.
-  API::MatrixWorkspace_sptr getFirstPeriodWS(API::WorkspaceGroup_sptr group);
+  /// Groups specified workspace group according to specified
+  /// DetectorGroupingTable.
+  API::WorkspaceGroup_sptr
+  groupWorkspaces(API::WorkspaceGroup_sptr wsGroup,
+                  DataObjects::TableWorkspace_sptr grouping);
 
-  /// Returns a workspace for the second period as specified using SecondPeriod
-  /// property.
-  API::MatrixWorkspace_sptr getSecondPeriodWS(API::WorkspaceGroup_sptr group);
-
-  /// Groups specified workspace according to specified DetectorGroupingTable.
-  API::MatrixWorkspace_sptr
-  groupWorkspace(API::MatrixWorkspace_sptr ws,
-                 DataObjects::TableWorkspace_sptr grouping);
-
-  /// Applies dead time correction to the workspace.
-  API::MatrixWorkspace_sptr applyDTC(API::MatrixWorkspace_sptr ws,
-                                     DataObjects::TableWorkspace_sptr dt);
+  /// Applies dead time correction to the workspace group.
+  API::WorkspaceGroup_sptr applyDTC(API::WorkspaceGroup_sptr wsGroup,
+                                    DataObjects::TableWorkspace_sptr dt);
 
   /// Applies offset, crops and rebin the workspace according to specified
   /// params
   API::MatrixWorkspace_sptr correctWorkspace(API::MatrixWorkspace_sptr ws,
+                                             double loadedTimeZero);
+
+  /// Applies offset, crops and rebins all workspaces in the group
+  API::WorkspaceGroup_sptr correctWorkspaces(API::WorkspaceGroup_sptr wsGroup,
                                              double loadedTimeZero);
 };
 

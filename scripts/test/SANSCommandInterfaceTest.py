@@ -384,6 +384,15 @@ class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
         delta_r_expected = delta_r/1000.
         self.assertEqual(delta_r_stored, delta_r_expected)
 
+class TestMaskFile(unittest.TestCase):
+    def test_throws_for_user_file_with_invalid_extension(self):
+        # Arrange
+        file_name = "/path1/path2/user_file.abc"
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act + Assert
+        args = [file_name]
+        self.assertRaises(RuntimeError, command_iface.MaskFile, *args)
 
 class SANSCommandInterfaceGetAndSetBackgroundCorrectionSettings(unittest.TestCase):
     def _do_test_correct_setting(self, run_number, is_time, is_mon, is_mean, mon_numbers):

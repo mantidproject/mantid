@@ -39,6 +39,7 @@ class ReduceMARIFromFile(ReductionWrapper):
         prop['hard_mask_file'] = "mar11015.msk"
         prop['det_cal_file'] = 11060
         prop['save_format'] = ''
+        prop['nullify_negative_signal']=True
         return prop
       #
     @iliad
@@ -135,6 +136,7 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
       # TODO: Why not workspace?
         prop['det_cal_file'] = "11060"
         prop['save_format'] = ''
+        prop['nullify_negative_signal']=True
         return prop
       #
     @iliad
@@ -166,7 +168,6 @@ class ReduceMARIMon2Norm(ReductionWrapper):
         prop['monovan_run'] = 11015 #Load(Filename='MAR11015.RAW',OutputWorkspace='MAR11015.RAW')
         prop['sample_mass'] = 10
         prop['sample_rmm'] = 435.96
-
         return prop
 
     @AdvancedProperties
@@ -187,6 +188,7 @@ class ReduceMARIMon2Norm(ReductionWrapper):
       # TODO: Why not workspace?, check it
         prop['det_cal_file'] = "MAR11060.raw"
         prop['save_format'] = []
+        prop['nullify_negative_signal']=True
         return prop
       #
     @iliad
@@ -231,6 +233,7 @@ class MARIReductionSum(ReductionWrapper):
         prop['hard_mask_file'] = "mar11015.msk"
       #prop['det_cal_file'] =11060
         prop['save_format'] = ''
+        prop['nullify_negative_signal']=True
         return prop
       #
     @iliad
@@ -281,6 +284,7 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
         prop['det_cal_file'] = "11060"
         prop['save_format'] = ''
         prop['load_monitors_with_workspace'] = False
+        prop['nullify_negative_signal']=False
         return prop
       #
     @iliad
@@ -337,7 +341,7 @@ class ReduceMARIAutoEi(ReductionWrapper):
         prop['det_cal_file'] = 11060
         prop['save_format'] = ''
         #prop['check_background'] = False
-
+        prop['nullify_negative_signal']=True
         return prop
       #
     @iliad

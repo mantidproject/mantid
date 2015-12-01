@@ -175,6 +175,12 @@ public:
   getSignalAtCoord(const coord_t *coords,
                    const Mantid::API::MDNormalization &normalization) const;
 
+  /// Returns the (normalized) signal at a given coordinates
+  // or 0 if masked
+  virtual signal_t getSignalWithMaskAtCoord(
+      const coord_t *coords,
+      const Mantid::API::MDNormalization &normalization) const;
+
   /// Sets the signal at the specified index.
   void setSignalAt(size_t index, signal_t value) { m_signals[index] = value; }
 
