@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/IPropertyManager.h"
 
 namespace Poco {
@@ -176,9 +177,6 @@ public:
   /// Serialize an algorithm
   virtual std::string toString() const = 0;
 };
-
-typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
-typedef boost::shared_ptr<const IAlgorithm> IAlgorithm_const_sptr;
 
 } // namespace API
 } // namespace Mantid

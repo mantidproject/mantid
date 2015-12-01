@@ -121,7 +121,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   initZoomer();
 
   // hide unused buttons
-  ui.btnZoom->hide();      // hidden for a long time
+  ui.btnZoom->hide(); // hidden for a long time
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
@@ -717,7 +717,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   if (!mess.str().empty()) {
     mess << "Bad ranges could cause memory allocation errors. Please fix the "
             "workspace.";
-    mess << std::endl << "You can continue using Mantid.";
+    mess << std::endl
+         << "You can continue using Mantid.";
     throw std::out_of_range(mess.str());
   }
 
@@ -1102,7 +1103,6 @@ void SliceViewer::RebinMode_toggled(bool checked) {
   this->updateDisplay();
 }
 
-
 //------------------------------------------------------------------------------
 /// Slot for zooming into
 void SliceViewer::zoomInSlot() { this->zoomBy(1.1); }
@@ -1357,7 +1357,7 @@ void SliceViewer::findRangeFull() {
   double minR = m_colorRangeFull.minValue();
   if (minR <= 0 && this->getColorScaleType() == 1) {
     double maxR = m_colorRangeFull.maxValue();
-    minR = pow(10., log10(maxR)-10.);
+    minR = pow(10., log10(maxR) - 10.);
     m_colorRangeFull = QwtDoubleInterval(minR, maxR);
   }
 }
@@ -1430,7 +1430,7 @@ void SliceViewer::showInfoAt(double x, double y) {
   coords[m_dimX] = VMD_t(x);
   coords[m_dimY] = VMD_t(y);
   signal_t signal =
-      m_ws->getSignalAtVMD(coords, this->m_data->getNormalization());
+      m_ws->getSignalWithMaskAtVMD(coords, this->m_data->getNormalization());
   ui.lblInfoX->setText(QString::number(x, 'g', 4));
   ui.lblInfoY->setText(QString::number(y, 'g', 4));
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));

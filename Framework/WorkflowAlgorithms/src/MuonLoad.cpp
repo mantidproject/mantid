@@ -4,6 +4,17 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/MandatoryValidator.h"
+
+// free functions
+namespace {
+/**
+ * Tests if argument is equal to one.
+ * @param i :: [input] integer to test
+ * @returns True if i == 1, else false.
+ */
+bool isOne(int i) { return (i == 1); }
+}
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -46,18 +57,17 @@ void MuonLoad::init() {
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
                   "The name of the Nexus file to load");
 
-  declareProperty("FirstPeriod", 0,
-                  "Group index of the first period workspace to use");
-  declareProperty("SecondPeriod", EMPTY_INT(),
-                  "Group index of the second period workspace to use");
+  declareProperty(
+      new ArrayProperty<int>(
+          "SummedPeriodSet", "1",
+          boost::make_shared<MandatoryValidator<std::vector<int>>>(),
+          Direction::Input),
+      "Comma-separated list of periods to be summed");
 
-  std::vector<std::string> allowedOperations;
-  allowedOperations.push_back("+");
-  allowedOperations.push_back("-");
-  declareProperty("PeriodOperation", "+",
-                  boost::make_shared<StringListValidator>(allowedOperations),
-                  "If two periods specified, what operation to apply to "
-                  "workspaces to get a final one.");
+  declareProperty(
+      new ArrayProperty<int>("SubtractedPeriodSet", Direction::Input),
+      "Comma-separated list of periods to be subtracted from the "
+      "SummedPeriodSet");
 
   declareProperty(
       "ApplyDeadTimeCorrection", false,
@@ -136,26 +146,28 @@ void MuonLoad::exec() {
 
   Workspace_sptr loadedWS = load->getProperty("OutputWorkspace");
 
-  MatrixWorkspace_sptr firstPeriodWS, secondPeriodWS;
-
+  std::vector<int> summedPeriods = getProperty("SummedPeriodSet");
+  std::vector<int> subtractedPeriods = getProperty("SubtractedPeriodSet");
+  WorkspaceGroup_sptr allPeriodsWS = boost::make_shared<WorkspaceGroup>();
   progress.report();
 
   // Deal with single-period workspace
   if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
-    if (static_cast<int>(getProperty("FirstPeriod")) != 0)
-      throw std::invalid_argument(
-          "Single period data but first period is not 0.");
+    if (std::find_if_not(summedPeriods.begin(), summedPeriods.end(), isOne) !=
+        summedPeriods.end()) {
+      throw std::invalid_argument("Single period data but set of periods to "
+                                  "sum contains invalid values.");
+    }
 
-    if (static_cast<int>(getProperty("SecondPeriod")) != EMPTY_INT())
+    if (!subtractedPeriods.empty())
       throw std::invalid_argument(
-          "Single period data but second period specified");
+          "Single period data but second set of periods specified");
 
-    firstPeriodWS = ws;
+    allPeriodsWS->addWorkspace(ws);
   }
   // Deal with multi-period workspace
   else if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS)) {
-    firstPeriodWS = getFirstPeriodWS(group);
-    secondPeriodWS = getSecondPeriodWS(group);
+    allPeriodsWS = group;
   }
   // Unexpected workspace type
   else {
@@ -186,10 +198,7 @@ void MuonLoad::exec() {
         throw std::runtime_error("File doesn't contain any dead times");
     }
 
-    firstPeriodWS = applyDTC(firstPeriodWS, deadTimes);
-
-    if (secondPeriodWS)
-      secondPeriodWS = applyDTC(secondPeriodWS, deadTimes);
+    allPeriodsWS = applyDTC(allPeriodsWS, deadTimes);
   }
 
   TableWorkspace_sptr grouping;
@@ -217,32 +226,19 @@ void MuonLoad::exec() {
   progress.report();
 
   // Deal with grouping
-  firstPeriodWS = groupWorkspace(firstPeriodWS, grouping);
-
-  if (secondPeriodWS)
-    secondPeriodWS = groupWorkspace(secondPeriodWS, grouping);
+  allPeriodsWS = groupWorkspaces(allPeriodsWS, grouping);
 
   // Correct bin values
   double loadedTimeZero = load->getProperty("TimeZero");
-
-  firstPeriodWS = correctWorkspace(firstPeriodWS, loadedTimeZero);
-
-  if (secondPeriodWS)
-    secondPeriodWS = correctWorkspace(secondPeriodWS, loadedTimeZero);
+  allPeriodsWS = correctWorkspaces(allPeriodsWS, loadedTimeZero);
 
   IAlgorithm_sptr calcAssym = createChildAlgorithm("MuonCalculateAsymmetry");
 
-  // Set first period workspace
-  calcAssym->setProperty("FirstPeriodWorkspace", firstPeriodWS);
-
-  // Set second period workspace, if have one
-  if (secondPeriodWS)
-    calcAssym->setProperty("SecondPeriodWorkspace", secondPeriodWS);
+  calcAssym->setProperty("InputWorkspace", allPeriodsWS);
 
   // Copy similar properties over
-  calcAssym->setProperty(
-      "PeriodOperation",
-      static_cast<std::string>(getProperty("PeriodOperation")));
+  calcAssym->setProperty("SummedPeriodSet", summedPeriods);
+  calcAssym->setProperty("SubtractedPeriodSet", subtractedPeriods);
   calcAssym->setProperty("OutputType",
                          static_cast<std::string>(getProperty("OutputType")));
   calcAssym->setProperty("PairFirstIndex",
@@ -262,87 +258,74 @@ void MuonLoad::exec() {
 }
 
 /**
- * Returns a workspace for the first period as specified using FirstPeriod
- * property.
- * @param group :: Loaded group of workspaces to use
- * @return Workspace for the period
- */
-MatrixWorkspace_sptr MuonLoad::getFirstPeriodWS(WorkspaceGroup_sptr group) {
-  int firstPeriod = getProperty("FirstPeriod");
-
-  MatrixWorkspace_sptr resultWS;
-
-  if (firstPeriod < 0 || firstPeriod >= static_cast<int>(group->size()))
-    throw std::invalid_argument(
-        "Workspace doesn't contain specified first period");
-
-  resultWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(firstPeriod));
-
-  if (!resultWS)
-    throw std::invalid_argument(
-        "First period workspace is not a MatrixWorkspace");
-
-  return resultWS;
-}
-
-/**
- * Returns a workspace for the second period as specified using SecondPeriod
- * property.
- * @param group :: Loaded group of workspaces to use
- * @return Workspace for the period
- */
-MatrixWorkspace_sptr MuonLoad::getSecondPeriodWS(WorkspaceGroup_sptr group) {
-  int secondPeriod = getProperty("SecondPeriod");
-
-  MatrixWorkspace_sptr resultWS;
-
-  if (secondPeriod != EMPTY_INT()) {
-    if (secondPeriod < 0 || secondPeriod >= static_cast<int>(group->size()))
-      throw std::invalid_argument(
-          "Workspace doesn't contain specified second period");
-
-    resultWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        group->getItem(secondPeriod));
-
-    if (!resultWS)
-      throw std::invalid_argument(
-          "Second period workspace is not a MatrixWorkspace");
-  }
-
-  return resultWS;
-}
-
-/**
- * Groups specified workspace according to specified DetectorGroupingTable.
- * @param ws :: Workspace to group
+ * Groups specified workspace group according to specified
+ * DetectorGroupingTable.
+ * @param wsGroup :: WorkspaceGroup to group
  * @param grouping :: Detector grouping table to use
- * @return Grouped workspace
+ * @return Grouped workspaces
  */
-MatrixWorkspace_sptr MuonLoad::groupWorkspace(MatrixWorkspace_sptr ws,
+WorkspaceGroup_sptr MuonLoad::groupWorkspaces(WorkspaceGroup_sptr wsGroup,
                                               TableWorkspace_sptr grouping) {
-  IAlgorithm_sptr group = createChildAlgorithm("MuonGroupDetectors");
-  group->setProperty("InputWorkspace", ws);
-  group->setProperty("DetectorGroupingTable", grouping);
-  group->execute();
-
-  return group->getProperty("OutputWorkspace");
+  WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
+  for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+    if (ws) {
+      MatrixWorkspace_sptr result;
+      IAlgorithm_sptr group = createChildAlgorithm("MuonGroupDetectors");
+      group->setProperty("InputWorkspace", ws);
+      group->setProperty("DetectorGroupingTable", grouping);
+      group->execute();
+      result = group->getProperty("OutputWorkspace");
+      outWS->addWorkspace(result);
+    }
+  }
+  return outWS;
 }
 
 /**
- * Applies dead time correction to the workspace.
- * @param ws :: Workspace to apply correction
+ * Applies dead time correction to the workspace group.
+ * @param wsGroup :: Workspace group to apply correction to
  * @param dt :: Dead time table to use
- * @return Corrected workspace
+ * @return Corrected workspace group
  */
-MatrixWorkspace_sptr MuonLoad::applyDTC(MatrixWorkspace_sptr ws,
-                                        TableWorkspace_sptr dt) {
-  IAlgorithm_sptr dtc = createChildAlgorithm("ApplyDeadTimeCorr");
-  dtc->setProperty("InputWorkspace", ws);
-  dtc->setProperty("DeadTimeTable", dt);
-  dtc->execute();
+WorkspaceGroup_sptr MuonLoad::applyDTC(WorkspaceGroup_sptr wsGroup,
+                                       TableWorkspace_sptr dt) {
+  WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
+  for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+    if (ws) {
+      MatrixWorkspace_sptr result;
+      IAlgorithm_sptr dtc = createChildAlgorithm("ApplyDeadTimeCorr");
+      dtc->setProperty("InputWorkspace", ws);
+      dtc->setProperty("DeadTimeTable", dt);
+      dtc->execute();
+      result = dtc->getProperty("OutputWorkspace");
+      outWS->addWorkspace(result);
+    }
+  }
+  return outWS;
+}
 
-  return dtc->getProperty("OutputWorkspace");
+/**
+ * Applies offset, crops and rebin the workspaces in the group according to
+ * specified params.
+ * @param wsGroup :: Workspaces to correct
+ * @param loadedTimeZero :: Time zero of the data, so we can calculate the
+ * offset
+ * @return Corrected workspaces
+ */
+WorkspaceGroup_sptr MuonLoad::correctWorkspaces(WorkspaceGroup_sptr wsGroup,
+                                                double loadedTimeZero) {
+  WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
+  for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+    if (ws) {
+      MatrixWorkspace_sptr result;
+      result = correctWorkspace(ws, loadedTimeZero);
+      outWS->addWorkspace(result);
+    }
+  }
+  return outWS;
 }
 
 /**

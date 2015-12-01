@@ -63,7 +63,9 @@ public:
     TS_ASSERT_EQUALS(output->readE(0)[1], 0)
     TS_ASSERT_EQUALS(output->readE(0)[9], 0)
 
-    TS_ASSERT(!output->getAxis(0)->unit())
+    TSM_ASSERT("Should have an empty unit",
+               boost::dynamic_pointer_cast<Mantid::Kernel::Units::Empty>(
+                   output->getAxis(0)->unit()))
   }
 
   void testVertical() {
