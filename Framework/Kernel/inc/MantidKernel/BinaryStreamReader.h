@@ -4,14 +4,20 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+
+#include <cstdint>
+#include <cfloat>
 #include <iosfwd>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
 
 /**
   * Assists with reading a binary file by providing standard overloads for the
-  * istream operators (>>) to given types (and vectors of those types)
+  * istream operators (>>) to given types (and vectors of those types). It
+  * only allows for reading fixed-width integer types to avoid cross-platform
+  * differences on the sizes of various types.
   *
   * Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   * National Laboratory & European Spallation Source
@@ -36,10 +42,25 @@ namespace Kernel {
   */
 class MANTID_KERNEL_DLL BinaryStreamReader {
 public:
-  BinaryStreamReader(std::istream & istrm);
+  BinaryStreamReader(std::istream &istrm);
   ~BinaryStreamReader();
+
+  ///@name Stream operators
+  /// @{
+  BinaryStreamReader &operator>>(int32_t &value);
+  BinaryStreamReader &operator>>(int64_t &value);
+  BinaryStreamReader &operator>>(float &value);
+  BinaryStreamReader &operator>>(double &value);
+  BinaryStreamReader &operator>>(std::string &value);
+  /// @}
+
 private:
-  std::istream & m_istrm;
+  /// Reference to the stream being read
+  std::istream &m_istrm;
+  /// The default size in bytes of the type used to encode the length
+  /// of a string in the file. Used by operator>>(std::string&). Use largest
+  /// fixed-width unsigned integer as sizeof(size_t) varies
+  uint64_t m_strLengthSize;
 };
 
 } // namespace Kernel
