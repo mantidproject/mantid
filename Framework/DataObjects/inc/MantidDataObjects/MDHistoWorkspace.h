@@ -469,7 +469,6 @@ protected:
 
   /// Linear array of masks for each bin
   bool *m_masks;
-
 };
 
 /// A shared pointer to a MDHistoWorkspace
