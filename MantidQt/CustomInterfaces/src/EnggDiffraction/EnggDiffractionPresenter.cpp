@@ -388,14 +388,18 @@ void EnggDiffractionPresenter::processStopFocus() {
                       << std::endl;
     }
   }
-}
 
-/*
-if (m_workerThread) {
-delete m_workerThread;
-m_workerThread = NULL;
+  const std::string last_RunNo = isValidRunNumber(m_view->focusingRunNo());
+  double lastrun = boost::lexical_cast<double>(last_RunNo);
+  double lastSuccessful =
+      lastrun - (boost::lexical_cast<double>(g_plottingCounter) + 2);
+
+  g_log.warning() << "Focussing process will be stopped, last successful "
+                     "run number: "
+                  << lastSuccessful << " , total number of focus run that "
+                                       "could not be processed: "
+                  << (lastrun - lastSuccessful) << std::endl;
 }
-*/
 
 /**
  * Check if an RB number is valid to work with it (retrieve data,
@@ -1184,10 +1188,10 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
                "did not execute correctly. See log messages for details."
             << std::endl;
       } catch (std::invalid_argument &ia) {
-        g_log.error()
-            << "The focusing failed. Some input properties were not valid. "
-               "See log messages for details. Error: "
-            << ia.what() << std::endl;
+        g_log.error() << "The focusing failed. Some input properties "
+                         "were not valid. "
+                         "See log messages for details. Error: "
+                      << ia.what() << std::endl;
       }
     }
 
