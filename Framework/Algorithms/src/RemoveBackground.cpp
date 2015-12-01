@@ -28,7 +28,7 @@ using namespace API;
 // Public methods
 //---------------------------------------------------------------------------------------------
 
-/** Initialisation method. Declares properties to be used in algorithm.
+/** Initialization method. Declares properties to be used in algorithm.
 *
 */
 void RemoveBackground::init() {
@@ -66,6 +66,14 @@ void RemoveBackground::init() {
                   "The energy conversion mode used to define the conversion "
                   "from the units of the InputWorkspace to TOF",
                   Direction::Input);
+  declareProperty("NullifyNegativeValues", false,
+                  "When background is subtracted, signals in some time "
+                  "channels may become negative.\n"
+                  "If this option is true, signal in such bins is nullified "
+                  "and the module of the removed signal"
+                  "is added to the error. If false, the negative signal and "
+                  "correspondent errors remain unchanged",
+                  Direction::Input);
 }
 
 /** Executes the rebin algorithm
@@ -80,6 +88,7 @@ void RemoveBackground::exec() {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   API::MatrixWorkspace_const_sptr bkgWksp = getProperty("BkgWorkspace");
+  bool nullifyNegative = getProperty("NullifyNegativeValues");
 
   // source workspace has to have full instrument defined to perform background
   // removal using this procedure.
@@ -118,7 +127,7 @@ void RemoveBackground::exec() {
   //
   int nThreads = PARALLEL_GET_MAX_THREADS;
   m_BackgroundHelper.initialize(bkgWksp, inputWS, eMode, &g_log, nThreads,
-                                inPlace);
+                                inPlace, nullifyNegative);
 
   Progress prog(this, 0.0, 1.0, histnumber);
   PARALLEL_FOR2(inputWS, outputWS)
@@ -151,8 +160,9 @@ void RemoveBackground::exec() {
 /// Constructor
 BackgroundHelper::BackgroundHelper()
     : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(NULL), m_inPlace(true),
-      m_singleValueBackground(false), m_NBg(0), m_dtBg(1), // m_ErrSq(0),
-      m_Emode(0), m_L1(0), m_Efix(0), m_Sample() {}
+      m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0),
+      m_Emode(0), m_L1(0), m_Efix(0), m_Sample(), m_nullifyNegative(false),
+      m_previouslyRemovedBkgMode(false) {}
 /// Destructor
 BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
 
@@ -167,24 +177,27 @@ void BackgroundHelper::deleteUnitsConverters() {
 }
 
 /** Initialization method:
-@param bkgWS    -- shared pointer to the workspace which contains background
-@param sourceWS -- shared pointer to the workspace to remove background from
-@param emode    -- energy conversion mode used during internal units conversion
-(0 -- elastic, 1-direct, 2 indirect, as defined in Units conversion
-@param pLog     -- pointer to the logger class which would report errors
-@param nThreads -- number of threads to be used for background removal
-@param inPlace  -- if the background removal occurs from the existing workspace
+*@param bkgWS    -- shared pointer to the workspace which contains background
+*@param sourceWS -- shared pointer to the workspace to remove background from
+*@param emode    -- energy conversion mode used during internal units conversion
+*           (0 -- elastic, 1-direct, 2 indirect, as defined in Units conversion
+*@param pLog     -- pointer to the logger class which would report errors
+*@param nThreads -- number of threads to be used for background removal
+*@param inPlace  -- if the background removal occurs from the existing workspace
+*@param nullifyNegative -- if true, negative signals are nullified and error is
+*                          modified appropriately
 or target workspace has to be cloned.
 */
 void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
                                   const API::MatrixWorkspace_sptr &sourceWS,
                                   int emode, Kernel::Logger *pLog, int nThreads,
-                                  bool inPlace) {
+                                  bool inPlace, bool nullifyNegative) {
   m_bgWs = bkgWS;
   m_wkWS = sourceWS;
   m_Emode = emode;
   m_pgLog = pLog;
   m_inPlace = inPlace;
+  m_nullifyNegative = nullifyNegative;
 
   std::string bgUnits = bkgWS->getAxis(0)->unit()->unitID();
   if (bgUnits != "TOF")
@@ -222,14 +235,21 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
   }
 
   m_singleValueBackground = false;
-  if (bkgWS->getNumberHistograms() == 0)
+  if (bkgWS->getNumberHistograms() <= 1)
     m_singleValueBackground = true;
-  const MantidVec &dataX = bkgWS->dataX(0);
-  const MantidVec &dataY = bkgWS->dataY(0);
-  // const MantidVec& dataE = bkgWS->dataE(0);
+
+  const MantidVec &dataX = bkgWS->readX(0);
+  const MantidVec &dataY = bkgWS->readY(0);
+  const MantidVec &dataE = bkgWS->readE(0);
   m_NBg = dataY[0];
   m_dtBg = dataX[1] - dataX[0];
-  // m_ErrSq  = dataE[0]*dataE[0]; // needs further clarification
+  m_ErrSq = dataE[0] * dataE[0]; // needs further clarification
+
+  m_previouslyRemovedBkgMode = false;
+  if (m_singleValueBackground) {
+    if (m_NBg < 1.e-7 && m_ErrSq < 1.e-7)
+      m_previouslyRemovedBkgMode = true;
+  }
 
   m_Efix = this->getEi(sourceWS);
 }
@@ -248,18 +268,18 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
                                         MantidVec &y_data, MantidVec &e_data,
                                         int threadNum) const {
 
-  double dtBg, IBg;
+  double dtBg, IBg, ErrBgSq;
   if (m_singleValueBackground) {
     dtBg = m_dtBg;
-    // ErrSq = m_ErrSq;
+    ErrBgSq = m_ErrSq;
     IBg = m_NBg;
   } else {
-    const MantidVec &dataX = m_bgWs->dataX(nHist);
-    const MantidVec &dataY = m_bgWs->dataY(nHist);
-    // const MantidVec& dataE = m_bgWs->dataX(nHist);
+    const MantidVec &dataX = m_bgWs->readX(nHist);
+    const MantidVec &dataY = m_bgWs->readY(nHist);
+    const MantidVec &dataE = m_bgWs->readE(nHist);
     dtBg = (dataX[1] - dataX[0]);
     IBg = dataY[0];
-    // ErrSq= dataE[0]*dataE[0]; // Needs further clarification
+    ErrBgSq = dataE[0] * dataE[0]; // Needs further clarification
   }
 
   try {
@@ -284,19 +304,32 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
       double tof2 = unitConv->singleToTOF(X);
       double Jack = std::fabs((tof2 - tof1) / dtBg);
       double normBkgrnd = IBg * Jack;
+      double errBkgSq = ErrBgSq * Jack * Jack;
       tof1 = tof2;
       if (m_inPlace) {
         y_data[i] -= normBkgrnd;
-        // e_data[i]  =std::sqrt((ErrSq*Jack*Jack+e_data[i]*e_data[i])/2.); //
+        // e_data[i]  =std::sqrt(ErrSq*Jack*Jack+e_data[i]*e_data[i]); //
         // needs further clarification -- Gaussian error summation?
         //--> assume error for background is sqrt(signal):
-        e_data[i] = std::sqrt(
-            (normBkgrnd + e_data[i] * e_data[i]) /
-            2.); // needs further clarification -- Gaussian error summation?
+        e_data[i] = std::sqrt((errBkgSq + e_data[i] * e_data[i]));
       } else {
         x_data[i + 1] = X;
         y_data[i] = YValues[i] - normBkgrnd;
-        e_data[i] = std::sqrt((normBkgrnd + YErrors[i] * YErrors[i]) / 2.);
+        e_data[i] = std::sqrt((errBkgSq + YErrors[i] * YErrors[i]));
+      }
+      if (m_nullifyNegative && y_data[i] < 0) {
+        if (m_previouslyRemovedBkgMode) {
+          // background have been removed
+          // and not we remove negative signal and estimate errors
+          double prev_rem_bkg = -y_data[i];
+          e_data[i] = e_data[i] > prev_rem_bkg ? e_data[i] : prev_rem_bkg;
+        } else {
+          /** The error estimate must go up in this nonideal situation and the
+              value of background is a good estimate for it. However, don't
+              reduce the error if it was already more than that */
+          e_data[i] = e_data[i] > normBkgrnd ? e_data[i] : normBkgrnd;
+        }
+        y_data[i] = 0;
       }
     }
 

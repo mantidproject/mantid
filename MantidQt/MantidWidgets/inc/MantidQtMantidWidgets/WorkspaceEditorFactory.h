@@ -17,7 +17,7 @@ public:
 protected:
   using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
   void connectPropertyManager(QtStringPropertyManager *){}
-  QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent);
+  QWidget *createEditorForManager(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent);
   void disconnectPropertyManager(QtStringPropertyManager *){}
 };
 

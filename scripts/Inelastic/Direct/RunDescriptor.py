@@ -561,6 +561,13 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     def is_monws_separate(self):
         """Is monitor workspace is separated from data workspace or not"""
+        try:
+            data_ws = self.get_workspace()
+            mon_ws = data_ws.getMonitorWorkspace()
+            return True
+        except:
+            pass
+        # lets go long but reliable way
         mon_ws = self.get_monitors_ws()
         if mon_ws:
             name = mon_ws.name()
@@ -904,11 +911,11 @@ class RunDescriptor(PropDescriptor):
                 continue
             try:
                 mon_ws.getIndexFromSpectrumNumber(int(monID))
-#pylint: disable=bare-except
+            #pylint: disable=bare-except
             except:
                 try:
                     monws_name = mon_ws.name()
-#pylint: disable=bare-except
+                #pylint: disable=bare-except
                 except:
                     monws_name = 'None'
                 RunDescriptor._logger('*** Monitor workspace {0} does not have spectra with ID {1}. Monitor workspace set to None'.\
