@@ -101,9 +101,11 @@ void MuonLoad::init() {
                                             PropertyMode::Mandatory),
       "Table with detector grouping information, e.g. from LoadMuonNexus.");
 
-  declareProperty(
-      "TimeZero", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
-      "Value used for Time Zero correction, e.g. from LoadMuonNexus.");
+  declareProperty("TimeZero", EMPTY_DBL(),
+                  "Value used for Time Zero correction");
+  declareProperty("LoadedTimeZero", EMPTY_DBL(),
+                  boost::make_shared<MandatoryValidator<double>>(),
+                  "Time Zero value loaded from file, e.g. from LoadMuonNexus.");
   declareProperty(
       new ArrayProperty<double>("RebinParams"),
       "Params used for rebinning. If empty - rebinning is not done.");
@@ -202,7 +204,7 @@ void MuonLoad::exec() {
 
   if (mode != "CorrectAndGroup") {
     // Correct bin values
-    double loadedTimeZero = getProperty("TimeZero");
+    double loadedTimeZero = getProperty("LoadedTimeZero");
     allPeriodsWS = correctWorkspaces(allPeriodsWS, loadedTimeZero);
 
     // Perform appropriate calculation
