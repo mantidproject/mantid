@@ -110,10 +110,8 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
     g_log.information() << "Version check disabled." << std::endl;
   }
 
-
   // the algorithm will see if it should run
   SendStartupUsageInfo();
-
 }
 
 /// Update instrument definitions from github
@@ -242,10 +240,7 @@ void FrameworkManagerImpl::clear() {
   clearPropertyManagers();
 }
 
-void FrameworkManagerImpl::shutdown()
-{
-  clear();
-}
+void FrameworkManagerImpl::shutdown() { clear(); }
 
 /**
  * Clear memory associated with the AlgorithmManager

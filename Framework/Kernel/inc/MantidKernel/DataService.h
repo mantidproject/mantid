@@ -352,9 +352,7 @@ public:
   }
 
   /// Prepare for shutdown
-  virtual void shutdown() {
-    clear();
-  }
+  virtual void shutdown() { clear(); }
 
   //--------------------------------------------------------------------------
   /** Get a shared pointer to a stored data object

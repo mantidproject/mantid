@@ -228,9 +228,6 @@ void AlgorithmManagerImpl::cancelAll() {
   }
 }
 
-void AlgorithmManagerImpl::shutdown()
-{
-  clear();
-}
+void AlgorithmManagerImpl::shutdown() { clear(); }
 } // namespace API
 } // namespace Mantid
