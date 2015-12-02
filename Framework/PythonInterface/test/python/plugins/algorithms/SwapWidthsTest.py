@@ -8,8 +8,7 @@ class SwapWidthsTest(unittest.TestCase):
 
 
     def setUp(self):
-        self._input_ws = Load(Filename='IN16B_125878_QLd_Result.nxs',
-                            OutputWorkspace='__SwapWidth_input'))
+        self._input_ws = Load(Filename='IN16B_125878_QLd_Result.nxs')
 
 
     def _validate_result(self, result):
