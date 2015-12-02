@@ -129,6 +129,8 @@ public:
   double tolerance() { return m_tolerance; }
   /// Default tolerance for comparing doubles
   static double defaultTolerance() { return g_tolerance; }
+  /// Get maximum possible size
+  static size_t maximumSize() { return g_maxNumberPoints; }
 
   /// Find best fit with highest possible tolerance (to be used with noisy
   /// data).

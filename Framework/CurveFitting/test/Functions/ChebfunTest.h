@@ -36,8 +36,30 @@ public:
     auto fun = [](double x) { return 2 * (x - 1.0 + log(1.0) - log(x)); };
     Chebfun cheb(fun, 0.0001, 3, 1e-15);
     //std::cerr << "\n\nSize " << cheb.numberOfParts() << ' ' << cheb.size() << ' ' << cheb.accuracy() << ' ' << cheb.isGood() << std::endl;
-    TS_ASSERT_EQUALS(cheb.numberOfParts(), 8);
-    TS_ASSERT_EQUALS(cheb.size(), 1844);
+    TS_ASSERT_EQUALS(cheb.numberOfParts(), 2);
+    TS_ASSERT_EQUALS(cheb.size(), 906);
+    TS_ASSERT_EQUALS(cheb.accuracy(), 1e-15);
+    TS_ASSERT(cheb.isGood());
+    auto y1 = fun(cheb.startX());
+    auto y2 = cheb(cheb.startX());
+    TS_ASSERT_DELTA(y1, y2, 4e-14);
+    for (double x = cheb.startX() + 1; x <= cheb.endX(); x += 0.1) {
+      auto y1 = fun(x);
+      auto y2 = cheb(x);
+      TS_ASSERT_DELTA(y1, y2, 2e-15);
+      //std::cerr << y1 << ' ' << y2 << ' ' << y1 - y2 << std::endl;
+    }
+    y1 = fun(cheb.endX());
+    y2 = cheb(cheb.endX());
+    TS_ASSERT_DELTA(y1, y2, 2e-15);
+  }
+
+  void test_abs()
+  {
+    auto fun = [](double x) { return fabs(x); };
+    Chebfun cheb(fun, -1.1, 1, 1e-15);
+    TS_ASSERT_EQUALS(cheb.numberOfParts(), 2);
+    TS_ASSERT_EQUALS(cheb.size(), 4);
     TS_ASSERT_EQUALS(cheb.accuracy(), 1e-15);
     TS_ASSERT(cheb.isGood());
     for (double x = cheb.startX(); x <= cheb.endX(); x += 0.1) {
@@ -45,12 +67,7 @@ public:
       auto y2 = cheb(x);
       TS_ASSERT_DELTA(y1, y2, 4e-14);
     }
-    auto y1 = fun(cheb.endX());
-    auto y2 = cheb(cheb.endX());
-    TS_ASSERT_DELTA(y1, y2, 4e-14);
   }
-
-
 };
 
 

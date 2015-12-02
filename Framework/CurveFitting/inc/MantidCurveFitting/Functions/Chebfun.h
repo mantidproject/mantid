@@ -51,6 +51,8 @@ public:
   double accuracy() const;
   /// Is approximation good?
   bool isGood() const;
+  /// Get all break points
+  std::vector<double> getBreakPoints() const;
 private:
   void bestFitAnyAccuracy(ChebfunFunctionType fun, double start, double end,
                           double accuracy = 0.0, size_t badSize = 10);
