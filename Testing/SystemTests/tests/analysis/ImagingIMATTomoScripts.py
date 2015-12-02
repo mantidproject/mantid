@@ -13,29 +13,32 @@ class ImagingIMATTomoTests(unittest.TestCase):
     methods of tomographic reconstruction scripts
     """
 
-    # example files to make a stack of images
-    _raw_files = ['LARMOR00005328_Metals_000_SummedImg_1.fits',
-                  'LARMOR00005329_Metals_000_SummedImg_2.fits',
-                  'LARMOR00005330_Metals_000_SummedImg_3.fits',
-                  'LARMOR00005331_Metals_000_SummedImg_4.fits',
-                  'LARMOR00005332_Metals_000_SummedImg_5.fits'
-                 ]
+    # group of image workspaces
+    data_wsg = None
 
     # data volume from a 'stack' of images
-    _data_wsname = 'small_img_stack'
-
-    # group of image workspaces
-    _data_wsg = None
+    data_vol = None
 
     # This should rather use setUpClass() - not supported in Python 2.6 (rhel6)
     def setUp(self):
-        if not self.__class__._data_wsg:
-            filename_string = ",".join(self.__class__._raw_files)
+        # example files to make a stack of images
+        _raw_files = ['LARMOR00005328_Metals_000_SummedImg_1.fits',
+                      'LARMOR00005329_Metals_000_SummedImg_2.fits',
+                      'LARMOR00005330_Metals_000_SummedImg_3.fits',
+                      'LARMOR00005331_Metals_000_SummedImg_4.fits',
+                      'LARMOR00005332_Metals_000_SummedImg_5.fits'
+                     ]
+
+        # a name for the stack / group of workspaces
+        _data_wsname = 'small_img_stack'
+
+        if not self.__class__.data_wsg:
+            filename_string = ",".join(self._raw_files)
             # Load all images into a workspace group, one matrix workspace per image
-            self.__class__._data_wsg = sapi.LoadFITS(Filename=filename_string,
-                                                     LoadAsRectImg=True,
-                                                     OutputWorkspace=self._data_wsname)
-            self.__class__._data_vol = self._ws_group_to_data_vol(self._data_wsg)
+            self.__class__.data_wsg = sapi.LoadFITS(Filename=filename_string,
+                                                    LoadAsRectImg=True,
+                                                    OutputWorkspace=self._data_wsname)
+            self.__class__.data_vol = self._ws_group_to_data_vol(self._data_wsg)
 
         # double-check before every test that the input workspaces are available and of the
         # correct types
