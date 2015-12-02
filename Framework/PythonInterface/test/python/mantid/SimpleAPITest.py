@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWorkspace, ITableWorkspace,
                         PythonAlgorithm, MatrixWorkspace, mtd, WorkspaceGroup)
 import mantid.simpleapi as simpleapi
@@ -186,6 +186,32 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
         # over the actual object name
         self.assertTrue('workspace' in mtd)
         self.assertTrue('raw' in mtd)
+
+    def test_alg_produces_correct_workspace_in_APS_from_python(self):
+
+        dataX=numpy.linspace(start=1,stop=3,num=11)
+        dataY=numpy.linspace(start=1,stop=3,num=10)
+        workspace1_test = simpleapi.CreateWorkspace(DataX=dataX, dataY=dataY, NSpec=1)
+        workspace2_test = simpleapi.CloneWorkspace(workspace1_test)
+
+        ws1_name = "workspace1_test"
+        ws2_name = "workspace2_test"
+
+        self.assertTrue(ws1_name in mtd)
+        self.assertTrue(ws2_name in mtd)
+
+        outputWs_name = "message"
+
+        if outputWs_name in mtd:
+            simpleapi.DeleteWorkspace(outputWs_name)
+
+        result, message = simpleapi.CompareWorkspaces(workspace1_test, workspace2_test)
+
+        self.assertTrue(outputWs_name in mtd)
+
+        simpleapi.DeleteWorkspace(message)
+        simpleapi.DeleteWorkspace(ws1_name)
+        simpleapi.DeleteWorkspace(ws2_name)
 
     def test_python_alg_can_use_other_python_alg_through_simple_api(self):
         class SimpleAPIPythonAlgorithm1(PythonAlgorithm):
