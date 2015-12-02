@@ -369,19 +369,32 @@ namespace MantidWidgets
       MatrixWorkspace_sptr ws;
 
       try {
-        auto load = AlgorithmManager::Instance().create("MuonLoad");
-        load->initialize();
-        load->setChild(true);
-        load->setRethrows(true);
-        load->updatePropertyValues(*m_loadAlg);
-        load->setPropertyValue("Filename", fileIt->toStdString());
-        load->setPropertyValue("OutputWorkspace", "__YouDontSeeMeIAmNinja");
+        // Use MuonLoadNexus to load the file
+        auto loadAlg = AlgorithmManager::Instance().create("LoadMuonNexus");
+        loadAlg->initialize();
+        loadAlg->setChild(true);
+        loadAlg->setRethrows(true);
+        loadAlg->setPropertyValue("Filename", fileIt->toStdString());
+        loadAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
+        loadAlg->execute();
+        Workspace_sptr loadedWS = loadAlg->getProperty("OutputWorkspace");
+        double loadedTimeZero = loadAlg->getProperty("TimeZero");
+
+        // then use MuonLoad to process it
+        auto process = AlgorithmManager::Instance().create("MuonLoad");
+        process->initialize();
+        process->setChild(true);
+        process->setRethrows(true);
+        process->updatePropertyValues(*m_loadAlg);
+        process->setProperty("InputWorkspace", loadedWS);
+        process->setProperty("LoadedTimeZero", loadedTimeZero);
+        process->setPropertyValue("OutputWorkspace", "__YouDontSeeMeIAmNinja");
         if (m_fitPropBrowser->rawData()) // TODO: or vice verca?
-          load->setPropertyValue("RebinParams", "");
+          process->setPropertyValue("RebinParams", "");
 
-        load->execute();
+        process->execute();
 
-        ws = load->getProperty("OutputWorkspace");
+        ws = process->getProperty("OutputWorkspace");
       } catch (...) {
         QMessageBox::critical(
             this, "Loading failed",
