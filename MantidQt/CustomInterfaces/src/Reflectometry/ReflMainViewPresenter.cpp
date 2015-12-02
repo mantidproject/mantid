@@ -1488,7 +1488,6 @@ void ReflMainViewPresenter::transfer() {
     searchResult.location = m_searchModel->data(m_searchModel->index(row, 2))
                                 .toString()
                                 .toStdString();
-
     runs[run] = searchResult;
   }
 
@@ -1497,6 +1496,43 @@ void ReflMainViewPresenter::transfer() {
                         this->m_progressView);
 
   TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
+
+  auto invalidRuns =
+      results.getErrorRuns(); // grab our invalid runs from the transfer
+
+  // iterate through invalidRuns to set the 'invalid transfers' in the search
+  // model
+  if (!invalidRuns.empty()) { // check if we have any invalid runs
+    for (auto invalidRowIt = invalidRuns.begin();
+         invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
+      auto &error = *invalidRowIt; // grab row from vector
+      // iterate over row containing run number and reason why it's invalid
+      for (auto errorRowIt = error.begin(); errorRowIt != error.end();
+           ++errorRowIt) {
+        const std::string runNumber = errorRowIt->first; // grab run number
+        const std::string whyUnusable =
+            errorRowIt->second; // grab reason why invalid
+
+        // iterate over rows that are selected in the search table
+        for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
+             ++rowIt) {
+          const int row = *rowIt;
+          // get the run number from that selected row
+          const auto searchRun =
+              m_searchModel->data(m_searchModel->index(row, 0))
+                  .toString()
+                  .toStdString();
+          if (searchRun == runNumber) { // if search run number is the same as
+                                        // our invalid run number
+
+            // add this error to the member of m_searchModel that holds errors.
+            m_searchModel->m_errors.push_back(error);
+          }
+        }
+      }
+    }
+  }
+
   auto newRows = results.getTransferRuns();
 
   std::map<std::string, int> groups;

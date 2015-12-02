@@ -71,10 +71,12 @@ namespace MantidQt
       TransferResults results(rows, errors);
       for(auto run = runsByDesc.begin(); run != runsByDesc.end(); ++run)
       {
+        //set up our successful run into table-ready format.
         std::map<std::string,std::string> row;
         row[ReflTableSchema::RUNS] = run->second;
         row[ReflTableSchema::ANGLE] = thetaByDesc[run->first];
         row[ReflTableSchema::GROUP] = groupsByDesc[run->first];
+        //add our successful row
         results.addTransferRow(row);
 
       }

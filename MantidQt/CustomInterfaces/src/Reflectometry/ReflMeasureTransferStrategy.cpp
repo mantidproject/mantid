@@ -47,9 +47,16 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
   typedef std::map<MeasurementItem::IDType, VecSameMeasurement>
       MapGroupedMeasurement;
 
+  // table-like output for successful runs
   std::vector<std::map<std::string, std::string>> runs;
+  // table-like output for unsuccessful runs containing
+  // row number and reason why unsuccessful.
+  // This will be used mainly for highlighting unsuccessful runs
+  // in a tooltip.
   std::vector<std::map<std::string, std::string>> errors;
 
+  // Create TransferResults as a holder for both successful/unsuccessful
+  // runs.
   TransferResults results(runs, errors);
   MapGroupedMeasurement mapOfMeasurements;
   for (auto it = searchResults.begin(); it != searchResults.end(); ++it) {
@@ -59,7 +66,8 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
     const auto definedPath = m_catInfo->transformArchivePath(location);
 
     // This is where we read the meta data.
-    MeasurementItem metaData = m_measurementItemSource->obtain(definedPath, fuzzyName);
+    MeasurementItem metaData =
+        m_measurementItemSource->obtain(definedPath, fuzzyName);
 
     // If the measurement information is not consistent, or could not be
     // obtained. skip this measurement.
@@ -74,6 +82,7 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
       }
     } else {
       it->second.issues = metaData.whyUnuseable();
+      // run was unsuccessful so add it to 'errors'
       results.addErrorRow(metaData.run(), metaData.whyUnuseable());
     }
 
@@ -81,8 +90,6 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
     progress.report();
   }
 
-  // Now flatten everything out into a table-like output
-  std::vector<std::map<std::string, std::string>> output;
   int nextGroupId = 0;
 
   for (auto group = mapOfMeasurements.begin(); group != mapOfMeasurements.end();
@@ -93,28 +100,33 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
     for (size_t i = 0; i < group->second.size(); ++i) {
       const MeasurementItem &measurementItem = group->second[i];
       if (subIdMap.find(measurementItem.subId()) != subIdMap.end()) {
-          // We already have that subid.
-          const size_t rowIndex = subIdMap[measurementItem.subId()];
-          std::string currentRuns = results.m_transferRuns[rowIndex][ReflTableSchema::RUNS];
-          results.m_transferRuns[rowIndex][ReflTableSchema::RUNS] =
-          currentRuns + "+" + measurementItem.run();
+        // We already have that subid.
+        const size_t rowIndex = subIdMap[measurementItem.subId()];
+        std::string currentRuns =
+            results.m_transferRuns[rowIndex][ReflTableSchema::RUNS];
+        results.m_transferRuns[rowIndex][ReflTableSchema::RUNS] =
+            currentRuns + "+" + measurementItem.run();
 
       } else {
+        // set up our successful run row
         std::map<std::string, std::string> row;
         row[ReflTableSchema::RUNS] = measurementItem.run();
         row[ReflTableSchema::ANGLE] = measurementItem.angleStr();
         std::stringstream buffer;
         buffer << nextGroupId;
         row[ReflTableSchema::GROUP] = buffer.str();
-       // output.push_back(row);
+        // run was successful so add it to 'runs'
         results.addTransferRow(row);
+        // get successful transfers to get size for subIdMap
         auto transRuns = results.getTransferRuns();
-        subIdMap.insert(std::make_pair(measurementItem.subId(), transRuns.size()-1 /*Record actual row index*/));
+        subIdMap.insert(
+            std::make_pair(measurementItem.subId(),
+                           transRuns.size() - 1 /*Record actual row index*/));
       }
     }
     ++nextGroupId;
   }
-
+  // return the TransferResults holder
   return results;
 }
 
@@ -122,8 +134,8 @@ ReflMeasureTransferStrategy *ReflMeasureTransferStrategy::clone() const {
   return new ReflMeasureTransferStrategy(*this);
 }
 
-bool
-ReflMeasureTransferStrategy::knownFileType(const std::string &filename) const {
+bool ReflMeasureTransferStrategy::knownFileType(
+    const std::string &filename) const {
 
   // TODO. I think this file type matching should be deferred to the
   // ReflMeasurementSource
