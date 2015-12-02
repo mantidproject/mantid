@@ -50,30 +50,38 @@ one step closer to the solution:
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
-**Example - MaxEnt**
+**Example - Reconstruct a cosine function**
 
-.. testcode:: MaxEntExample
+.. testcode:: MaxEntCosine
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+   from math import pi, cos
 
-   wsOut = MaxEnt()
+   # Create a workspace
+   X = []
+   Y = []
+   E = []
+   N = 50
+   w = 1.6
 
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+   for i in range(0,N):
+       x = 2*pi*i/N
+       X.append(x)
+       Y.append(cos(w*2*pi*i/N))
+       E.append(0.1)
+
+   ws = CreateWorkspace(DataX=X, DataY=Y, DataE=E)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', Background=0.01, ChiTarget=50)
+
+   print "Original data ", ws.readY(0)[25]
+   print "Reconstructed data ", data.readY(0)[25]
 
 Output:
 
-.. testoutput:: MaxEntExample
+.. testoutput:: MaxEntCosine
 
-  The output workspace has ?? spectra
+  Original data  0.309016994375
+  Reconstructed data  0.311217110008
 
 .. categories::
 
