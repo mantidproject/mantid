@@ -2955,20 +2955,6 @@ void MuonAnalysis::setFirstGoodDataState(int checkBoxState)
 
 /**
  * Groups detectors in the workspace
- * @param ws :: Workspace to group
- * @param grouping :: Grouping table to use
- * @return Grouped workspace
- */
-Workspace_sptr MuonAnalysis::groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping) const
-{
-   ScopedWorkspace wsEntry(ws);
-   ScopedWorkspace groupingEntry(grouping);
-
-   return groupWorkspace(wsEntry.name(), groupingEntry.name());
-}
-
-/**
- * Groups detectors in the workspace
  * @param wsName :: ADS name of the workspace to group
  * @param groupingName :: ADS name of the grouping table to use
  * @return Grouped workspace

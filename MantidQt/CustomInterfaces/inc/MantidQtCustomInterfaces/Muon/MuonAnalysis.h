@@ -471,9 +471,6 @@ private:
   void loadWidgetValue(QWidget* target, const QVariant& defaultValue);
 
   /// Groups the workspace
-  Workspace_sptr groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping) const;
-
-  /// Groups the workspace
   Workspace_sptr groupWorkspace(const std::string& wsName, const std::string& groupingName) const;
 
   /// Groups loaded workspace using information from Grouping Options tab
