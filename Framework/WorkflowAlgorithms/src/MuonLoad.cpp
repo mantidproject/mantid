@@ -75,12 +75,8 @@ void MuonLoad::init() {
                   "crops, rebins and calculates asymmetry; Combined does all "
                   "of the above.");
 
-  declareProperty(
-      new ArrayProperty<int>(
-          "SummedPeriodSet", "1",
-          boost::make_shared<MandatoryValidator<std::vector<int>>>(),
-          Direction::Input),
-      "Comma-separated list of periods to be summed");
+  declareProperty(new ArrayProperty<int>("SummedPeriodSet", Direction::Input),
+                  "Comma-separated list of periods to be summed");
 
   declareProperty(
       new ArrayProperty<int>("SubtractedPeriodSet", Direction::Input),
@@ -203,6 +199,12 @@ void MuonLoad::exec() {
   Workspace_sptr outWS = allPeriodsWS;
 
   if (mode != "CorrectAndGroup") {
+    // For these modes, SummedPeriodSet is mandatory
+    if (summedPeriods.empty()) {
+      throw std::invalid_argument(
+          "Cannot analyse: list of periods to sum was empty");
+    }
+
     // Correct bin values
     double loadedTimeZero = getProperty("LoadedTimeZero");
     allPeriodsWS = correctWorkspaces(allPeriodsWS, loadedTimeZero);
