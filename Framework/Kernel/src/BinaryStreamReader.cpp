@@ -16,11 +16,26 @@ namespace {
   * @param stream The open stream on which to perform the read
   * @param value An object of type T to fill with the value from the file
   */
-  template<typename T>
-  inline void readFromStream(std::istream & stream, T &value) {
-    stream.read(reinterpret_cast<char*>(&value), sizeof(T));
-  }
-  
+template <typename T>
+inline void readFromStream(std::istream &stream, T &value) {
+  stream.read(reinterpret_cast<char *>(&value), sizeof(T));
+}
+
+/**
+  * Overload to read an array of values from the stream based on the template
+  * type for the element of the array.
+  * @param stream The open stream on which to perform the read
+  * @param value An object of type std::vector<T> to fill with the value from
+  * the file
+  * @param nvals The number of values to read
+  */
+template <typename T>
+inline void readFromStream(std::istream &stream, std::vector<T> &value,
+                           size_t nvals) {
+  if (value.size() < nvals)
+    value.resize(nvals);
+  stream.read(reinterpret_cast<char *>(value.data()), nvals * sizeof(T));
+}
 }
 
 namespace Mantid {
@@ -106,6 +121,67 @@ BinaryStreamReader &BinaryStreamReader::operator>>(std::string &value) {
   // Now the value
   value.resize(static_cast<std::string::size_type>(length));
   m_istrm.read(const_cast<char *>(value.data()), static_cast<size_t>(length));
+  return *this;
+}
+
+/**
+ * Read an array of int32_t into the given vector.
+ * @param value The array to fill. Its size is increased if necessary
+ * @param nvals The number values to attempt to read from the stream
+ * @return A reference to the BinaryStreamReader object
+ */
+BinaryStreamReader &BinaryStreamReader::read(std::vector<int32_t> &value,
+                                             const size_t nvals) {
+  readFromStream(m_istrm, value, nvals);
+  return *this;
+}
+
+/**
+ * Read an array of int64_t into the given vector.
+ * @param value The array to fill. Its size is increased if necessary
+ * @param nvals The number values to attempt to read from the stream
+ * @return A reference to the BinaryStreamReader object
+ */
+BinaryStreamReader &BinaryStreamReader::read(std::vector<int64_t> &value,
+                                             const size_t nvals) {
+  readFromStream(m_istrm, value, nvals);
+  return *this;
+}
+
+/**
+ * Read an array of float balues into the given vector.
+ * @param value The array to fill. Its size is increased if necessary
+ * @param nvals The number values to attempt to read from the stream
+ * @return A reference to the BinaryStreamReader object
+ */
+BinaryStreamReader &BinaryStreamReader::read(std::vector<float> &value,
+                                             const size_t nvals) {
+  readFromStream(m_istrm, value, nvals);
+  return *this;
+}
+
+/**
+ * Read an array of double values into the given vector.
+ * @param value The array to fill. Its size is increased if necessary
+ * @param nvals The number values to attempt to read from the stream
+ * @return A reference to the BinaryStreamReader object
+ */
+BinaryStreamReader &BinaryStreamReader::read(std::vector<double> &value,
+                                             const size_t nvals) {
+  readFromStream(m_istrm, value, nvals);
+  return *this;
+}
+
+/**
+ * Read a series of characters into a string object.
+ * @param value The string to fill. Its size is increased if necessary
+ * @param nvals The number values to attempt to read from the stream
+ * @return A reference to the BinaryStreamReader object
+ */
+BinaryStreamReader &BinaryStreamReader::read(std::string &value,
+                                             const size_t length) {
+  value.resize(length);
+  m_istrm.read(const_cast<char *>(value.data()), length);
   return *this;
 }
 

@@ -9,6 +9,7 @@
 #include <cfloat>
 #include <iosfwd>
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -45,7 +46,7 @@ public:
   BinaryStreamReader(std::istream &istrm);
   ~BinaryStreamReader();
 
-  ///@name Stream operators
+  ///@name Single-value stream operators
   /// @{
   BinaryStreamReader &operator>>(int32_t &value);
   BinaryStreamReader &operator>>(int64_t &value);
@@ -54,6 +55,19 @@ public:
   BinaryStreamReader &operator>>(std::string &value);
   /// @}
 
+  ///@name std::vector-reader methods
+  /// @{
+  BinaryStreamReader & read(std::vector<int32_t> &value, const size_t nvals);
+  BinaryStreamReader & read(std::vector<int64_t> &value, const size_t nvals);
+  BinaryStreamReader & read(std::vector<float> &value, const size_t nvals);
+  BinaryStreamReader & read(std::vector<double> &value, const size_t nvals);
+  /// @}
+
+  ///@name std::string methods for specifying number of characters
+  /// @{
+  BinaryStreamReader & read(std::string &value, const size_t length);
+  /// @}
+  
 private:
   /// Reference to the stream being read
   std::istream &m_istrm;
