@@ -7,7 +7,7 @@ Engineering Diffraction
 Overview
 --------
 
-This custom interface integrates several tasks related to engineeering
+This custom interface integrates several tasks related to engineering
 diffraction. It provides functionality for calibration, focusing, and
 pre-processing of event mode data. Further extensions can be expected
 for next releases as it is under active development. Feedback is very
@@ -31,6 +31,12 @@ Close
 
 RB Number
   To enable the GUI specify a RB Number
+
+* Red Star Sign
+  If a red star sign is displayed next to the Browse Button, it is mostly
+  likely because the file specified has not been found. Error message
+  can be viewed by hovering over the red star sign.
+
 
 Calibration
 -----------
@@ -116,7 +122,7 @@ current focus run process has been completed. Inside the *Result Log*
 a warning message will be displayed with last successful run and total
 number of focus runs that could not be processed.
 
-Run-Number
+Run Number
 ^^^^^^^^^^
 The run provided to focus can be for example 228061-228063, this will
 run all the files within the given range as long as the file
@@ -128,6 +134,11 @@ The user may also provide an input of 228061-3 or 228061, 228062,
 If a red star sign is displayed next to the Browse Button, it is mostly
 likely because the file specified has not been found. Error message
 can be viewed by hovering over the red star sign.
+
+It is also possible sometimes that a file has not been found but
+the red star sign is only displayed once you have clicked outside the
+*Run #* text-field. If you manage to click Focus before red sign is
+displayed, the interface will process the last valid focus run instead.
 
 Output
 ^^^^^^
@@ -211,7 +222,7 @@ The calibration settings are organized in three blocks:
 3. Advanced settings
 
 The input directories will be used when looking for run files
-(Vanadium and Ceria). They effectivel ybecome part of the search path
+(Vanadium and Ceria). They effectively become part of the search path
 of Mantid when using this interface.
 
 The pixel calibration file contains the calibration of every pixel of
@@ -228,7 +239,7 @@ Force recalculate
   original Vanadium run file, or there is a change in the algorithms
   that calculate the corrections
 
-Tempalte .prm file
+Template .prm file
   By changing this option you can Use a different template file for the
   output GSAS IPAR that is generated in the Calibration tab.
 
