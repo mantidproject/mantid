@@ -22,7 +22,6 @@ set ( SRC_FILES
 	src/HFIRSANSNormalise.cpp
 	src/IMuonAsymmetryCalculator.cpp
 	src/LoadEventAndCompress.cpp
-	src/MuonCalculateAsymmetry.cpp
 	src/MuonGroupAsymmetryCalculator.cpp
 	src/MuonGroupCalculator.cpp
 	src/MuonGroupCountsCalculator.cpp
@@ -70,7 +69,6 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/HFIRSANSNormalise.h
 	inc/MantidWorkflowAlgorithms/IMuonAsymmetryCalculator.h
 	inc/MantidWorkflowAlgorithms/LoadEventAndCompress.h
-	inc/MantidWorkflowAlgorithms/MuonCalculateAsymmetry.h
 	inc/MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h
 	inc/MantidWorkflowAlgorithms/MuonGroupCalculator.h
 	inc/MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h
@@ -95,7 +93,6 @@ set ( TEST_FILES
 	ConvolutionFitSequentialTest.h
 	IMuonAsymmetryCalculatorTest.h
 	LoadEventAndCompressTest.h
-	MuonCalculateAsymmetryTest.h
 	MuonLoadTest.h
 	ProcessIndirectFitParametersTest.h
 	SANSSolidAngleCorrectionTest.h
