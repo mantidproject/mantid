@@ -251,7 +251,7 @@ private:
   /// whether to break the thread
   static bool g_abortThread;
 
-  static std::string EnggDiffractionPresenter::g_lastValidRun;
+  static std::string g_lastValidRun;
 
   // name of the workspace with the vanadium integration (of spectra)
   static const std::string g_vanIntegrationWSName;
