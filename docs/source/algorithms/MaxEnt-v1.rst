@@ -98,15 +98,15 @@ Usage
    ws = CreateWorkspace(DataX=X, DataY=Y, DataE=E)
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', Background=0.01, ChiTarget=50)
 
-   print "Original data ", ws.readY(0)[25]
-   print "Reconstructed data ", data.readY(0)[25]
+   print "Original data %.4f" % (ws.readY(0)[25])
+   print "Reconstructed data %.4f" % (data.readY(0)[25])
 
 Output:
 
 .. testoutput:: MaxEntCosine
 
-  Original data  0.309016994375
-  Reconstructed data  0.311217110008
+  Original data 0.3090
+  Reconstructed data 0.3112
 
 .. categories::
 

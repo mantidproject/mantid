@@ -106,9 +106,8 @@ private:
   double calculateChi(const SearchDirections &coeffs, double a,
                       std::vector<double> &beta);
   // Calculates the SVD of the input matrix A
-  void singularValueDecomposition(const Kernel::DblMatrix &A,
-                                  Kernel::DblMatrix &aa, Kernel::DblMatrix &zz,
-                                  Kernel::DblMatrix &vv);
+  std::vector<double> solveSVD(const Kernel::DblMatrix &A,
+                               const Kernel::DblMatrix &B);
   /// Moves the system one step closer towards the solution
   std::vector<double> move(const SearchDirections &dirs, double chiTarget,
                            double chiEps, size_t alphaIter);

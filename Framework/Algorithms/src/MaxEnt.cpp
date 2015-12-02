@@ -571,9 +571,9 @@ std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
     // ChiTarget could be outside the range [chiMin, chiMax]
 
     if (fabs(dchiMin) < fabs(dchiMax)) {
-      chiMin = calculateChi(dirs, aMin, beta);
+      double chi = calculateChi(dirs, aMin, beta);
     } else {
-      chiMax = calculateChi(dirs, aMax, beta);
+      double chi = calculateChi(dirs, aMax, beta);
     }
     return beta;
     //    throw std::runtime_error("Error in alpha chop\n");
@@ -647,18 +647,7 @@ double MaxEnt::calculateChi(const SearchDirections &dirs, double a,
   // SVD seems to work better
 
   // Solve using SVD
-  DblMatrix u(dim, dim);
-  DblMatrix v(dim, dim);
-  DblMatrix w(dim, dim);
-
-  singularValueDecomposition(A, u, w, v);
-
-  // Now result
-  auto sol = v * w * u.Transpose() * B;
-
-  std::vector<double> beta(dim, 0.);
-  for (size_t i = 0; i < dim; i++)
-    b[i] = sol[i][0];
+  b = solveSVD(A, B);
 
   // Now compute Chi
   double ww = 0.;
@@ -674,14 +663,12 @@ double MaxEnt::calculateChi(const SearchDirections &dirs, double a,
   return ww + 1.;
 }
 
-/** Factorizes a matrix A into the product A = U S V^T
-* @param A :: [input] The input matrix to factorize
-* @param uu :: [output] The matrix U
-* @param zz :: [output] The inverse of S
-* @param vv :: [output] The matrix V
+/** Solves A*x = B using SVD
+* @param A :: [input] The matrix A
+* @param B :: [input] The vector B
+* @return :: The solution x
 */
-void MaxEnt::singularValueDecomposition(const DblMatrix &A, DblMatrix &uu,
-                                        DblMatrix &zz, DblMatrix &vv) {
+std::vector<double> MaxEnt::solveSVD(const DblMatrix &A, const DblMatrix &B) {
 
   size_t dim = A.size().first;
 
@@ -689,50 +676,58 @@ void MaxEnt::singularValueDecomposition(const DblMatrix &A, DblMatrix &uu,
   gsl_matrix *v = gsl_matrix_alloc(dim, dim);
   gsl_vector *s = gsl_vector_alloc(dim);
   gsl_vector *w = gsl_vector_alloc(dim);
+  gsl_vector *x = gsl_vector_alloc(dim);
+  gsl_vector *b = gsl_vector_alloc(dim);
 
   // Need to copy from DblMatrix to gsl matrix
 
   for (size_t k = 0; k < dim; k++)
     for (size_t l = 0; l < dim; l++)
       gsl_matrix_set(a, k, l, A[k][l]);
+  for (size_t k = 0; k < dim; k++)
+    gsl_vector_set(b, k, B[k][0]);
 
+  // Singular value decomposition
   gsl_linalg_SV_decomp(a, v, s, w);
 
-#define THRESHOLD 1E-6
+  // A could be singular or ill-conditioned. We can use SVD to obtain a least
+  // squares
+  // solution by setting the small (compared to the maximum) singular values to
+  // zero
 
-  // Now we have a, v, w
-
-  // If A is singular or ill-conditioned we use SVD to obtain a least squares
-  // solution as follows:
-
-  // 1. Find largest sing value
+  // Find largest sing value
   double max = gsl_vector_get(s, 0);
   for (size_t i = 0; i < dim; i++) {
     if (max < gsl_vector_get(s, i))
       max = gsl_vector_get(s, i);
   }
+
+  // Apply a threshold to small singular values
+  const double THRESHOLD = 1E-6;
   double threshold = THRESHOLD * max;
 
-  // 2. Apply a threshold to small singular values
   for (size_t i = 0; i < dim; i++)
     if (gsl_vector_get(s, i) > threshold)
-      zz[i][i] = 1 / gsl_vector_get(s, i);
+      gsl_vector_set(s, i, gsl_vector_get(s, i));
     else
-      zz[i][i] = 0;
+      gsl_vector_set(s, i, 0);
 
-  // Now copy back from gsl to DblMatrix
+  // Solve A*x = B
+  gsl_linalg_SV_solve(a, v, s, b, x);
+
+  // From gsl_vector to vector
+  std::vector<double> beta(dim);
   for (size_t k = 0; k < dim; k++)
-    for (size_t l = 0; l < dim; l++) {
-      uu[k][l] = gsl_matrix_get(a, k, l);
-      vv[k][l] = gsl_matrix_get(v, k, l);
-    }
-
-#undef THRESHOLD
+    beta[k] = gsl_vector_get(x, k);
 
   gsl_matrix_free(a);
   gsl_matrix_free(v);
   gsl_vector_free(s);
   gsl_vector_free(w);
+  gsl_vector_free(x);
+  gsl_vector_free(b);
+
+  return beta;
 }
 
 /** Calculates the distance of the current solution

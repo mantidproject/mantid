@@ -95,7 +95,7 @@ public:
     // Frequency of the oscillations
     double w = 1.6;
     // Maximum time
-    int maxt = 50;
+    size_t maxt = 50;
 
     MantidVec X;
     MantidVec Y;
