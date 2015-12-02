@@ -716,7 +716,7 @@ void MultiDatasetFit::showParameterPlot()
   auto table = m_fitOptionsBrowser->getProperty("OutputWorkspace");
   auto logValue = m_fitOptionsBrowser->getProperty("LogValue");
   auto parName  = m_fitOptionsBrowser->getParameterToPlot();
-  if (table.isEmpty() || logValue.isEmpty() || parName.isEmpty()) return;
+  if (table.isEmpty() || parName.isEmpty()) return;
 
   auto pyInput = QString("table = importTableWorkspace('%1')\n"
                          "plotTableColumns(table, ('%2','%3_Err'))\n").arg(table, parName, parName);
