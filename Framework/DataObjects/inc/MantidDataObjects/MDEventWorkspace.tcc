@@ -326,7 +326,7 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
   // Check if masked
   const API::IMDNode *box = data->getBoxAtCoord(coords);
   if (box->getIsMasked()) {
-    return 0.0;
+    return m_maskValue;
   }
   return getNormalizedSignal(box, normalization);
 }
@@ -765,8 +765,8 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
 
       if (box != NULL) {
         if (box->getIsMasked()) {
-          y.push_back(0.0);
-          e.push_back(0.0);
+          y.push_back(m_maskValue);
+          e.push_back(m_maskValue);
         } else {
           // What is our normalization factor?
           signal_t normalizer = 1.0;

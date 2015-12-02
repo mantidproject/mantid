@@ -21,6 +21,9 @@ IMDWorkspace::IMDWorkspace(const IMDWorkspace &other)
 /// Destructor
 IMDWorkspace::~IMDWorkspace() {}
 
+// Value to be used for masked data in plots of MDWorkspaces
+const signal_t IMDWorkspace::m_maskValue = 0.0;
+
 /** Creates a single iterator and returns it.
  *
  * This calls createIterators(), a pure virtual method on IMDWorkspace which

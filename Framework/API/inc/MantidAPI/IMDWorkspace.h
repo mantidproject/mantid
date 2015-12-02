@@ -159,6 +159,9 @@ protected:
 
   virtual const std::string toString() const;
 
+  // Value to be used for masked data in plots of MDWorkspaces
+  static const signal_t m_maskValue;
+
 private:
   virtual IMDWorkspace *doClone() const = 0;
 };
