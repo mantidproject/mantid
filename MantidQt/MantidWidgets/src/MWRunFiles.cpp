@@ -191,8 +191,8 @@ MWRunFiles::MWRunFiles(QWidget *parent)
       m_allowMultipleFiles(false), m_isOptional(false), m_multiEntry(false),
       m_buttonOpt(Text), m_fileProblem(""), m_entryNumProblem(""),
       m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
-      m_liveButtonState(Hide), m_foundFiles(), m_lastFoundFiles(), m_lastDir(),
-      m_fileFilter() {
+      m_liveButtonState(Hide), m_showValidator(true), m_foundFiles(),
+      m_lastFoundFiles(), m_lastDir(), m_fileFilter() {
   m_thread = new FindFilesThread(this);
 
   m_uiForm.setupUi(this);
@@ -1024,16 +1024,20 @@ void MWRunFiles::setEntryNumProblem(const QString &message) {
 }
 
 /** Checks the data m_fileProblem and m_entryNumProblem to see if the validator
-* label
-*  needs to be displayed
+* label needs to be displayed. Validator always hidden if m_showValidator set
+* false.
 */
 void MWRunFiles::refreshValidator() {
-  if (!m_fileProblem.isEmpty()) {
-    m_uiForm.valid->setToolTip(m_fileProblem);
-    m_uiForm.valid->show();
-  } else if (!m_entryNumProblem.isEmpty() && m_multiEntry) {
-    m_uiForm.valid->setToolTip(m_entryNumProblem);
-    m_uiForm.valid->show();
+  if (m_showValidator) {
+    if (!m_fileProblem.isEmpty()) {
+      m_uiForm.valid->setToolTip(m_fileProblem);
+      m_uiForm.valid->show();
+    } else if (!m_entryNumProblem.isEmpty() && m_multiEntry) {
+      m_uiForm.valid->setToolTip(m_entryNumProblem);
+      m_uiForm.valid->show();
+    } else {
+      m_uiForm.valid->hide();
+    }
   } else {
     m_uiForm.valid->hide();
   }
@@ -1112,4 +1116,26 @@ void MWRunFiles::dragEnterEvent(QDragEnterEvent *de) {
     else
       de->acceptProposedAction();
   }
+}
+
+/**
+ * Sets the text read-only or editable
+ * and the Browse button disabled or enabled.
+ * If read-only, disable the red asterisk validator.
+ * @param readOnly :: [input] whether read-only or editable
+ */
+void MWRunFiles::setReadOnly(bool readOnly) {
+  m_uiForm.fileEditor->setReadOnly(readOnly);
+  m_uiForm.browseBtn->setEnabled(!readOnly);
+  setValidatorDisplay(!readOnly);
+  refreshValidator();
+}
+
+/**
+ * Turn on/off the display of the red validator star.
+ * Validation is still performed, this just controls the display of the result.
+ * @param display :: [input] whether to show validator result or not
+ */
+void MWRunFiles::setValidatorDisplay(bool display) {
+  m_showValidator = display;
 }
