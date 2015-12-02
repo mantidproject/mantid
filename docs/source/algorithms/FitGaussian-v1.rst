@@ -43,7 +43,7 @@ Usage
       NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1)
 
    # attempt the fit
-   fitResult = FitGaussian(ws,0)
+   fitResult = FitGaussian(wspace,0)
    if (0.0,0.0) == fitResult:
       print "the fit was not successful"
    else:

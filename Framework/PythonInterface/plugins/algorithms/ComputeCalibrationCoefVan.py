@@ -1,5 +1,5 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress, InstrumentValidator
-from mantid.simpleapi import FitGaussian
+import mantid.simpleapi as api
 from mantid.kernel import Direction
 import numpy as np
 from scipy import integrate
@@ -104,7 +104,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                 coefE[idx] = 0.
             else:
                 dataE = self.vanaws.readE(idx)
-                peak_centre, sigma = FitGaussian(self.vanaws, idx)
+                peak_centre, sigma = api.FitGaussian(self.vanaws, idx)
                 fwhm = sigma*2.*np.sqrt(2.*np.log(2.))
                 idxmin = (np.fabs(dataX-peak_centre+3.*fwhm)).argmin()
                 idxmax = (np.fabs(dataX-peak_centre-3.*fwhm)).argmin()

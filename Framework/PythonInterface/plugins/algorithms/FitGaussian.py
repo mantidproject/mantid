@@ -82,8 +82,8 @@ class FitGaussian(PythonAlgorithm):
 
         # pylint: disable = unpacking-non-sequence, assignment-from-none
         fitStatus, _, _, paramTable = Fit(
-            InputWorkspace=workspace, Function=fitFun,
-            CreateOutput=True, OutputParametersOnly=True,
+            InputWorkspace=workspace, WorkspaceIndex=index,
+            Function=fitFun, CreateOutput=True, OutputParametersOnly=True,
             StartX=startX, EndX=endX)
 
         if not 'success' == fitStatus:
