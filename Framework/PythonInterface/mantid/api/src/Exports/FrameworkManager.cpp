@@ -45,14 +45,7 @@ void export_FrameworkManager() {
 
           .def("clearPropertyManagers",
                &FrameworkManagerImpl::clearPropertyManagers, arg("self"),
-               "Clear memory held by the PropertyManagerDataService")
-
-          .def("Instance", &FrameworkManager::Instance,
-               return_value_policy<reference_existing_object>(),
-               "Returns a reference to the FrameworkManager singleton")
-          .staticmethod("Instance")
-
-      ;
+               "Clear memory held by the PropertyManagerDataService");
   // Instance method
   Mantid::PythonInterface::TrackingInstanceMethod<
       FrameworkManager, FrameworkManagerPythonType>::define(pythonClass);
