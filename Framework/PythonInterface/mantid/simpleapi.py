@@ -640,24 +640,26 @@ def _get_args_from_lhs(lhs, algm_obj):
         :param algm_obj: An initialised algorithm object
         :returns: A dictionary mapping property names to the values extracted from the lhs variables
     """
+
     ret_names = lhs[1]
     extra_args = {}
 
     output_props = [ algm_obj.getProperty(p) for p in algm_obj.outputProperties() ]
 
     nprops = len(output_props)
-
-    i = 0 # properties counter
-    id = 0 # unnamed workspace identifier
     
+    name = 0
+
     for p in output_props:
         if _is_workspace_property(p):
-            if i<len(ret_names):
-                extra_args[p.name] = ret_names[i] # match argument to property name
+            if len(ret_names) > 0 and nprops > len(ret_names):
+                extra_args[p.name] = ret_names[0] # match argument to property name
+                ret_names = ret_names[1:]
             elif len(ret_names) > 0:
-                extra_args[p.name] = ret_names[0]+"_Workspace_"+str(id) # default workspace name if none provided
-            id += 1
-        i += 1
+                extra_args[p.name] = ret_names[name]
+                ret_names = ret_names[name:]
+
+        name += 1
 
     return extra_args
 
