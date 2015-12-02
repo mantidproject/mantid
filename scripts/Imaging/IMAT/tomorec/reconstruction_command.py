@@ -28,6 +28,7 @@ class ToolAlgorithmConfig(object):
     (only for the iterative algorithms) the number of iterations
     (only for some algorithms) a regularization/smoothing parameter
     """
+
     DEF_TOOL = 'tomopy'
     DEF_ALGORITHM = 'gridrec'
 
@@ -37,6 +38,19 @@ class ToolAlgorithmConfig(object):
         self.num_iter = None
         self.regularization = None
 
+    def __str__(self):
+        mystr = "Tool: {0}\n".format(self.tool)
+        mystr += "Algorithm: {0}\n".format(self.algorithm)
+        if self.num_iter:
+            mystr += "Number of algorith iterations: {0}\n".format(self.num_iter)
+        else:
+            mystr += "(Algorithm iterations: not defined)\n"
+        if self.regularization:
+            mystr += "Regularization parameter: {0}\n".format(self.regularization)
+        else:
+            mystr += "(Regularization parameter: not defined)\n"
+
+        return mystr
 
 #pylint: disable=too-many-instance-attributes
 class PreProcConfig(object):
@@ -57,18 +71,39 @@ class PreProcConfig(object):
         self.in_img_format = 'tiff'
         # Center of rotation
         self.cor = None
-        self.normalize_proton_charge = False
         self.normalize_flat_dark = True
-        self.cut_off_level = 0
-        self.scale_down = 0
-        self.mcp_correction = True
-        self.stripe_removal_method = 'wavelet-fourier'
+        self.normalize_proton_charge = False
         # region of interest
         self.crop_coords = None
+        self.cut_off_level = 0
+        self.mcp_correction = True
+        self.scale_down = 0
         self.median_filter_size = 3
         self.rotation = -1
+        self.line_projection = 0
+        self.stripe_removal_method = 'wavelet-fourier'
         self.max_angle = 360
         self.save_preproc_imgs = True
+
+    def __str__(self):
+        import os
+
+        mystr = "Input path (absolute): {0}\n".format(os.path.abspath(self.input_dir))
+        mystr += "Input format: {0}\n".format(self.in_img_format)
+        mystr += "Center of rotation: {0}\n".format(self.cor)
+        mystr += "Region of interest (crop coordinates): {0}\n".format(self.crop_coords)
+        mystr += "Normalize by flat/dark images: {0}\n".format(self.normalize_flat_dark)
+        mystr += "Normalize by proton charge: {0}\n".format(self.normalize_proton_charge)
+        mystr += "Cut-off on normalized images: {0}\n".format(self.cut_off_level)
+        mystr += "Corrections for MCP detector: {0}\n".format(self.mcp_correction)
+        mystr += "Scale down factor for images: {0}\n".format(self.scale_down)
+        mystr += "Median filter width: {0}\n".format(self.median_filter_size)
+        mystr += "Rotation: {0}\n".format(self.rotation)
+        mystr += "Line projection (line integral/log re-scale): {0}\n".format(1)
+        mystr += "Sinogram stripes removal: {0}".format(self.stripe_removal_method)
+
+        return mystr
+
 
 class PostProcConfig(object):
     """
@@ -82,9 +117,19 @@ class PostProcConfig(object):
         self.output_dir = None
         self.circular_mask = 0.94
         self.cut_off_level = 0
+        self.gaussian_filter_par = 0
         self.median_filter_size = 0
         self.median_filter3d_size = 0
 
+    def __str__(self):
+        mystr = "Output path: {0}\n".format(self.output_dir)
+        mystr += "Circular mask: {0}\n".format(self.circular_mask)
+        mystr += "Cut-off on reconstructed volume: {0}\n".format(self.cut_off_level)
+        mystr += "Gaussian filter: {0}\n".format(self.gaussian_filter_par)
+        mystr += "Median filter size:: {0}\n".format(self.median_filter_size)
+        mystr += "Median filter (3d) size:: {0}\n".format(self.median_filter3d_size)
+
+        return mystr
 
 class ReconstructionCommand(object):
     """

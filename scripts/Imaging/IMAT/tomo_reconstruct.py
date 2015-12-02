@@ -89,6 +89,18 @@ def apply_prep_filters(data, cfg, white, dark):
 
             data[idx, :, :] = dmax*dmax - data[idx, :, :]*data[idx, :, :]
 
+    # list with first-x, first-y, second-x, second-y
+    if cfg.crop_coords:
+        if  isinstance(cfg.crop_coords, list) and 4 == len(cfg.crop_coords):
+            data = data[:, cfg.crop_coords[1]:cfg.crop_coords[3], cfg.crop_coords[0]:cfg.crop_coords[2]]
+        else:
+            print("Error in crop (region of interest) parameter (expecting a list with four integers. "
+                  "Got: {0}.".format(crop))
+
+        print " * Finished crop step, with pixel data type: {0}.".format(data.dtype)
+    else:
+        print " * Note: not applying crop."
+
     if cfg.crop_coords:
         air_sums = []
         for idx in range(0, data.shape[0]):
@@ -109,6 +121,9 @@ def apply_prep_filters(data, cfg, white, dark):
         norm_divide = None
         if norm_dark_img:
             norm_divide = norm_flat_img - norm_dark_img
+        if cfg.crop_coords:
+            norm_divide = norm_divide[:, cfg.crop_coords[1]:cfg.crop_coords[3],
+                                      cfg.crop_coords[0]:cfg.crop_coords[2]]
         # prevent divide-by-zero issues
         norm_divide[norm_divide==0] = 1e-6
 
@@ -131,17 +146,11 @@ def apply_prep_filters(data, cfg, white, dark):
     else:
         print " * Note: not applying cut-off."
 
-    # list with first-x, first-y, second-x, second-y
-    if cfg.crop_coords:
-        if  isinstance(cfg.crop_coords, list) and 4 == len(cfg.crop_coords):
-            data = data[:, cfg.crop_coords[1]:cfg.crop_coords[3], cfg.crop_coords[0]:cfg.crop_coords[2]]
-        else:
-            print "Error in crop parameter (expecting a list with four integers. Got: {0}.".format(crop)
+    if cfg.mcp_corrections:
+        print " * MCP corrections not implemented in this version"
 
-        print " * Finished crop step, with pixel data type: {0}.".format(data.dtype)
-    else:
-        print " * Note: not applying crop."
-
+    if cfg.scale_down:
+        print " * Scale down not implemented in this version"
 
     if cfg.median_filter_size and cfg.median_filter_size > 1:
         for idx in range(0, data.shape[0]):
@@ -463,13 +472,6 @@ def apply_postproc_filters(recon_data, cfg):
 
     @param cfg :: post-processing configuration
     """
-    if cfg.cut_off_level and cfg.cut_off_level > 0.0:
-        print "=== applying cut-off: {0}".format(cfg.cut_off)
-        dmin = np.amin(recon_data)
-        dmax = np.amax(recon_data)
-        rel_cut_off = dmin + cfg.cut_off * (dmax - dmin)
-        recon_data[recon_data < rel_cut_off] = dmin
-
     import prep as iprep
 
     if cfg.circular_mask:
@@ -477,6 +479,16 @@ def apply_postproc_filters(recon_data, cfg):
         print " * Applied circular mask on reconstructed volume"
     else:
         print " * Note: not applied circular mask on reconstructed volume"
+
+    if cfg.cut_off_level and cfg.cut_off_level > 0.0:
+        print "=== applying cut-off: {0}".format(cfg.cut_off)
+        dmin = np.amin(recon_data)
+        dmax = np.amax(recon_data)
+        rel_cut_off = dmin + cfg.cut_off * (dmax - dmin)
+        recon_data[recon_data < rel_cut_off] = dmin
+
+    if cfg.gaussian_filter_par:
+        print " * Gaussian filter not implemented"
 
     if cfg.median_filter_size and cfg.median_filter_size > 0.0:
         recon_data = scipy.ndimage.median_filter(recon_data, cfg.median_filter_size)
@@ -579,7 +591,7 @@ def do_recon(preproc_cfg, alg_cfg, postproc_cfg, cmd_line=None):
     @param cmd_line :: command line text if running from the CLI. When provided it will
     be written in the output readme file(s) for reference.
     """
-
+    tstart = time.time()
     data, white, dark = read_in_stack(preproc_cfg.input_dir, preproc_cfg.in_img_format)
     print "Shape of raw data: {0}, dtype: {1}".format(data.shape, data.dtype)
 
@@ -604,7 +616,8 @@ def do_recon(preproc_cfg, alg_cfg, postproc_cfg, cmd_line=None):
     print "Shape of preproc data: {0}".format(preproc_data.shape)
 
 
-    preproc_data = apply_line_projection(preproc_data)
+    if preproc_cfg.line_projection:
+        preproc_data = apply_line_projection(preproc_data)
 
     preproc_data = apply_final_preproc_corrections(preproc_data, preproc_cfg)
 
@@ -615,10 +628,9 @@ def do_recon(preproc_cfg, alg_cfg, postproc_cfg, cmd_line=None):
     # Save pre-proc images
     save_preproc_images(postproc_cfg.output_dir, preproc_data, preproc_cfg)
 
-    tstart = time.time()
+    t_recon_start = time.time()
     recon_data = run_reconstruct_3d(preproc_data, preproc_cfg, alg_cfg)
-
-    tnow = time.time()
+    t_recon_end = time.time()
 
     print("Reconstructed volume. Shape: {0}, and pixel data type: {1}".
           format(recon_data.shape, recon_data.dtype))
@@ -628,53 +640,63 @@ def do_recon(preproc_cfg, alg_cfg, postproc_cfg, cmd_line=None):
     # Save output from the reconstruction
     save_recon_output(recon_data, postproc_cfg.output_dir)
 
+    tend = time.time()
+
     #run_summary_string = gen_txt_run_summary()
     out_readme_fname = '0.README_reconstruction.txt'
     # generate file with dos/windows line end for windoze users' convenience
     with open(os.path.join(postproc_cfg.output_dir, out_readme_fname), 'w') as oreadme:
         #oreadme.write(run_summary_string)
-        oreadme.write('Tomographic reconstruction. Summary of inputs, settings and outputs.\r\n')
-        oreadme.write(time.strftime("%c") + "\r\n")
-        oreadme.write("\r\n")
-        oreadme.write("Dimensions of raw input sample data: {0}\r\n".format(raw_data_shape))
-        oreadme.write("Dimensions of pre-processed sample data: {0}\r\n".format(preproc_data.shape))
-        oreadme.write("Dimensions of reconstructed volume: {0}\r\n".format(recon_data.shape))
-        oreadme.write("Max. angle: {0}\r\n".format(preproc_cfg.max_angle))
-        oreadme.write("Tool: {0}\r\n".format(alg_cfg.tool))
-        oreadme.write("Algorithm: {0}\r\n".format(alg_cfg.algorithm))
-        if alg_cfg.num_iter:
-            oreadme.write("Number of algorith iterations: {0}\r\n".format(alg_cfg.num_iter))
-        else:
-            oreadme.write("(No algorithm iterations parameter)\r\n")
-        oreadme.write("Raw input pixel type: {0}\r\n".format(raw_data_dtype))
-        oreadme.write("Output pixel type: {0}\r\n".format('uint16'))
-        oreadme.write("Reconstruction time: {0:.3f}s\r\n".format(tnow-tstart))
-        oreadme.write("\r\n")
-        oreadme.write("--------------------------\r\n")
-        oreadme.write("Pre-processing parameters\r\n")
-        oreadme.write("--------------------------\r\n")
-        oreadme.write("Center of rotation: {0}\r\n".format(preproc_cfg.cor))
-        oreadme.write("Normalize flat: {0}\r\n".format(1))
-        oreadme.write("Normalize dark: {0}\r\n".format(1))
-        oreadme.write("Normalize proton charge: {0}\r\n".format(0))
-        oreadme.write("Cut-off on normalized images: {0}\r\n".format(preproc_cfg.cut_off_level))
-        oreadme.write("Line integral: {0}\r\n".format(1))
-        oreadme.write("Median filter width: {0}\r\n".format(preproc_cfg.median_filter_size))
-        oreadme.write("Rotation: {0}\r\n".format(preproc_cfg.rotation))
-        oreadme.write("Crop coordinates: {0}\r\n".format(preproc_cfg.crop_coords))
-        oreadme.write("Sinogram stripes removal: {0}\r\n".format('fw method'))
-        oreadme.write("\r\n")
-        oreadme.write("--------------------------\r\n")
-        oreadme.write("Post-processing parameters\r\n")
-        oreadme.write("--------------------------\r\n")
-        oreadme.write("Gaussian filter: {0}\r\n".format(0))
-        oreadme.write("Cut-off on reconstructed volume: {0}\r\n".format(postproc_cfg.cut_off_level))
-        oreadme.write("Circular mask: {0}\r\n".format(1))
-        oreadme.write("\r\n\r\n")
-        oreadme.write("Output written into: {0}\r\n".format(os.path.abspath(postproc_cfg.output_dir)))
-        oreadme.write("Write pre-proc: {0}\r\n".format(1))
-        oreadme.write("\r\n\r\n")
+        oreadme.write('Tomographic reconstruction. Summary of inputs, settings and outputs.\n')
+        oreadme.write('Time now (run begin): ' + time.ctime(tstart)) #time.strftime("%c") + "\n")
+
+        alg_hdr = ("\n"
+                   "--------------------------\n"
+                   "Tool/Algorithm\n"
+                   "--------------------------\n")
+        oreadme.write(alg_hdr)
+        oreadme.write(str(alg_cfg))
+        oreadme.write("\n")
+
+        preproc_hdr = ("\n"
+                       "--------------------------\n"
+                       "Pre-processing parameters\n"
+                       "--------------------------\n")
+        oreadme.write(preproc_hdr)
+        oreadme.write(str(preproc_cfg))
+        oreadme.write("\n")
+
+        postproc_hdr = ("\n"
+                        "--------------------------\n"
+                        "Post-processing parameters\n"
+                        "--------------------------\n")
+        oreadme.write(postproc_hdr)
+        oreadme.write(str(postproc_cfg))
+        oreadme.write("\n")
+
+        cmd_hdr = ("\n"
+                   "--------------------------\n"
+                   "Command line\n"
+                   "--------------------------\n")
+        oreadme.write(cmd_hdr)
         oreadme.write(cmd_line)
+        oreadme.write("\n")
+
+        run_hdr = ("\n"
+                   "--------------------------\n"
+                   "Run/job details:\n"
+                   "--------------------------\n")
+        oreadme.write(run_hdr)
+        oreadme.write("Dimensions of raw input sample data: {0}\n".format(raw_data_shape))
+        oreadme.write("Dimensions of pre-processed sample data: {0}\n".format(preproc_data.shape))
+        oreadme.write("Dimensions of reconstructed volume: {0}\n".format(recon_data.shape))
+        oreadme.write("Max. angle: {0}\n".format(preproc_cfg.max_angle))
+
+        oreadme.write("Raw input pixel type: {0}\n".format(raw_data_dtype))
+        oreadme.write("Output pixel type: {0}\n".format('uint16'))
+        oreadme.write("Time elapsed in reconstruction: {0:.3f}s\r\n".format(t_recon_end-t_recon_start))
+        oreadme.write("Total time elapsed: {0:.3f}s\r\n".format(tend-tstart))
+        oreadme.write('Time now (run end): ' + time.ctime(tend)) #time.strftime("%c") + "\n")
 
 # To save this script (and dependencies) into the output reconstructions
 def we_are_frozen():
@@ -694,7 +716,10 @@ def self_save_zipped_scripts(output_path):
         # ziph is zipfile handle
         for root, _, files in os.walk(path):
             for indiv_file in files:
-                ziph.write(os.path.join(root, indiv_file))
+                # Write all files, with the exception of the pyc's
+                exclude_extensions = ['pyc']
+                if not indiv_file.endswith(tuple(exclude_extensions)):
+                    ziph.write(os.path.join(root, indiv_file))
 
     import inspect
     this_path = os.path.abspath(inspect.getsourcefile(lambda:0))
