@@ -69,15 +69,17 @@ class DarkRunSubtractionTest(unittest.TestCase):
         mon_number = None
         run_number = self._get_dark_file()
 
+        is_input_event = True
+
         settings = []
         setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
         settings.append(setting)
 
         # Act + Assert
-        scatter_workspace, monitor_workspace = self._do_test_valid(settings)
+        scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_input_event)
 
-        expected_num_spectr_ws = 245768 - 9 + 1 # Total number of spectra in the original workspace from 9 to 245798
-        self.assertTrue(scatter_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 8 spectra")
+        expected_num_spectr_ws = 20 - 9  + 1
+        self.assertTrue(scatter_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 10 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
@@ -103,7 +105,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
         use_mon_2 = True
         mon_number_2 = [1]
 
-
         settings = []
         setting1 = self._get_dark_run_settings_object(run_number, use_time_1, use_mean_1,
                                                       use_mon_1, mon_number_1)
@@ -115,7 +116,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         # Act + Assert
         scatter_workspace, monitor_workspace = self._do_test_valid(settings)
 
-        expected_num_spectr_ws = 245768 - 9 + 1 # Total number of spectra in the original workspace from 9 to 245798
+        expected_num_spectr_ws = 20 - 9 + 1 # Total number of spectra in the original workspace from 9 to 245798
         self.assertTrue(scatter_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 8 spectra")
 
         # Expect all entries to be 0 except for monitor 0. We selected monitor 1 and all detectors
@@ -130,7 +131,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         for i in mon_number_2:
              self.assertTrue(all_entries_zero(monitor_workspace, i), "Entries should all be 0")
-    
+
     def test_that_subtracts_correct_added_file_type(self):
         # Arrange
         use_time = False
@@ -140,18 +141,18 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Create added workspace and have it saved out
         import SANSadd2
-        SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs',
+        SANSadd2.add_runs(('SANS2D00028827_removed_spectra.nxs','SANS2D00028797_removed_spectra.nxs'),'SANS2DTUBES', '.nxs',
                           rawTypes=('.add','.raw','.s*'), lowMem=False,
                           saveAsEvent=True, isOverlay = False)
-        run_number = r'SANS2D00028797-add.nxs'
+        run_number = r'SANS2D00028797_removed_spectra-add.nxs'
         settings = []
         setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
         settings.append(setting)
 
         # Act + Assert
-        scatter_workspace, monitor_workspace = self._do_test_valid(settings, run_number)
-
-        expected_num_spectr_ws = 245768 - 9 + 1 # Total number of spectra in the original workspace from 9 to 245798
+        is_event_ws = True
+        scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_event_ws, run_number)
+        expected_num_spectr_ws = 20 - 9 + 1 
         self.assertTrue(scatter_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 8 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
@@ -166,7 +167,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
             self.assertFalse(all_entries_zero(monitor_workspace, i), "Monitor entries should not all be 0")
 
         os.remove(os.path.join(config['defaultsave.directory'],run_number))
-    
+
     def test_that_subtracts_correct_added_file_type_when_only_monitor_subtracted(self):
         # Arrange
         use_time = False
@@ -185,7 +186,8 @@ class DarkRunSubtractionTest(unittest.TestCase):
         settings.append(setting)
 
         # Act + Assert
-        scatter_workspace, monitor_workspace = self._do_test_valid(settings, run_number)
+        is_event_ws = True
+        scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_event_ws, run_number)
 
         expected_num_spectr_ws = 245768 - 9 + 1 # Total number of spectra in the original workspace from 9 to 245798
         self.assertTrue(scatter_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 8 spectra")
@@ -210,29 +212,226 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         os.remove(os.path.join(config['defaultsave.directory'],run_number))
 
+    def test_that_subtracts_correct_for_histo_input_workspace(self):
+        # Arrange
+        use_time = False
+        use_mean = False
+        use_mon = True
+        mon_number = [1]
+
+        run_number = self._get_dark_file()
+        settings = []
+        setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
+        settings.append(setting)
+
+        is_event_input = False
+        # Act + Assert
+        scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_event_input, run_number)
+
+        expected_num_spectr_ws = 20 - 9 + 1
+        self.assertTrue(scatter_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 8 spectra")
+
+        # Since in this test we use the same file for the scatterer and the dark run, we expect
+        # that the detectors are 0. This is because we subtract bin by bin when using UAMP
+        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
+
+        # Some spectra might be zero, so we have to check that there is something which is not zero
+        all_detectors_zero = True
+        for i in range(0, scatter_workspace.getNumberHistograms()):
+             all_detectors_zero = all_detectors_zero & all_entries_zero(scatter_workspace, i)
+        self.assertFalse(all_detectors_zero, "There should be some detectors which are not zero")
+
+        # The monitors should not be affected, but we only have data in ws_index 0-3
+        for i in [0,2,3]:
+            self.assertFalse(all_entries_zero(monitor_workspace, i), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
+
+        # Monitor 1 should be 0
+        for i in mon_number:
+            self.assertTrue(all_entries_zero(monitor_workspace, i), "Monitor1 entries should  all be 0")
+
+    def test_that_subtracts_correct_for_transmission_workspace_with_only_monitors(self):
+        # Arrange
+        use_time = False
+        use_mean = False
+        use_mon = True
+        mon_number = [1]
+
+        run_number = self._get_dark_file()
+        settings = []
+        setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
+        settings.append(setting)
+
+        # Act + Assert
+        transmission_workspace = self._do_test_valid_transmission(settings)
+
+        expected_num_spectr_ws = 8 # only monitors
+        self.assertTrue(transmission_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 8 spectra")
+
+        # Since in this test we use the same file for the scatterer and the dark run, we expect
+        # that the detectors are 0. This is because we subtract bin by bin when using UAMP
+        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
+
+        # We only have monitors in our transmission file, monitor 1 should be 0
+        for i in [0,2,3]:
+            self.assertFalse(all_entries_zero(transmission_workspace, i), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
+
+        # Monitor 1 should be 0
+        for i in mon_number:
+            self.assertTrue(all_entries_zero(transmission_workspace, i), "Monitor1 entries should  all be 0")
+
+    def test_that_subtracts_nothing_when_selecting_detector_subtraction_for_transmission_workspace_with_only_monitors(self):
+        # Arrange
+        use_time = False
+        use_mean = False
+        use_mon = False
+        mon_number = None
+
+        run_number = self._get_dark_file()
+        settings = []
+        setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
+        settings.append(setting)
+
+        # Act + Assert
+        transmission_workspace = self._do_test_valid_transmission(settings)
+
+        expected_num_spectr_ws = 8 # only monitors
+        self.assertTrue(transmission_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 8 spectra")
+
+        # Since in this test we use the same file for the scatterer and the dark run, we expect
+        # that the detectors are 0. This is because we subtract bin by bin when using UAMP
+        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
+
+        # We only have monitors in our transmission file, monitor 1 should be 0
+        for i in [0,1,2,3]:
+            self.assertFalse(all_entries_zero(transmission_workspace, i), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
+
+    def test_that_subtracts_monitors_and_detectors_for_transmission_workspace_with_monitors_and_detectors(self):
+        # Arrange
+        use_time = False
+        use_mean = False
+        use_mon = False
+        mon_number = None
+        run_number = self._get_dark_file()
+
+        settings = []
+        setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
+        settings.append(setting)
+
+        use_time2 = False
+        use_mean2 = False
+        use_mon2 = True
+        mon_number2 = [1]
+        run_number2 = self._get_dark_file()
+
+        setting2 = self._get_dark_run_settings_object(run_number2, use_time2, use_mean2, use_mon2, mon_number2)
+        settings.append(setting2)
+
+        # Act + Assert
+        full_ws = True
+        transmission_workspace = self._do_test_valid_transmission(settings, full_ws)
+
+        expected_num_spectr_ws = 20 # monitors + detectors
+        self.assertTrue(transmission_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 20 spectra")
+
+        # Since in this test we use the same file for the scatterer and the dark run, we expect
+        # that the detectors are 0. This is because we subtract bin by bin when using UAMP
+        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
+
+        # We only have monitors in our transmission file, monitor 1 should be 0
+        for i in [0,2,3]:
+            self.assertFalse(all_entries_zero(transmission_workspace, i), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
+
+        # Monitor 1 should be set to 0
+        for i in mon_number2:
+            self.assertTrue(all_entries_zero(transmission_workspace, i), "Monitor1 entries should be 0")
+
+        # Detectors should be set to 0
+        detector_indices = set(range(0, transmission_workspace.getNumberHistograms())) - set(range(0,8))
+        for i in detector_indices:
+            self.assertTrue(all_entries_zero(transmission_workspace, i), "All detectors entries should be 0")
+
+    def test_that_subtracts_monitors_only_for_transmission_workspace_with_monitors_and_detectors(self):
+        # Arrange
+        use_time = False
+        use_mean = False
+        use_mon = True
+        mon_number = [1]
+        run_number = self._get_dark_file()
+
+        settings = []
+        setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
+        settings.append(setting)
+
+        # Act + Assert
+        full_ws = True
+        transmission_workspace = self._do_test_valid_transmission(settings, full_ws)
+
+        expected_num_spectr_ws = 20 # monitors + detectors
+        self.assertTrue(transmission_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 20 spectra")
+
+        # Since in this test we use the same file for the scatterer and the dark run, we expect
+        # that the detectors are 0. This is because we subtract bin by bin when using UAMP
+        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
+
+        # We only have monitors in our transmission file, monitor 1 should be 0
+        for i in [0,2,3]:
+            self.assertFalse(all_entries_zero(transmission_workspace, i), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
+
+        # Monitor 1 should be set to 0
+        for i in mon_number:
+            self.assertTrue(all_entries_zero(transmission_workspace, i), "Monitor1 entries should be 0")
+
+        # Detectors should NOT all be set to 0
+        detector_indices = set(range(0, transmission_workspace.getNumberHistograms())) - set(range(0,8))
+        all_detectors_zero = True
+        for i in detector_indices:
+            all_detectors_zero = all_detectors_zero & all_entries_zero(transmission_workspace, i)
+        self.assertFalse(all_detectors_zero, "There should be some detectors which are not zero")
+
     #------- HELPER Methods
-    def _do_test_valid(self, settings, run_number = None):
+    def _do_test_valid(self, settings, is_input_event= True, run_number = None) :
         # Arrange
         dark_run_subtractor = DarkRunSubtraction()
         for setting in settings:
             dark_run_subtractor.add_setting(setting)
 
         # Create an actual scatter workspace
-        scatter_workspace, monitor_workspace = self._get_sample_workspaces(run_number)
+        scatter_workspace = None
+        monitor_workspace = None
+        if is_input_event:
+            scatter_workspace, monitor_workspace = self._get_sample_workspaces(run_number)
+        else:
+            scatter_workspace, monitor_workspace = self._get_sample_workspace_histo()
 
         # Execute the dark_run_subtractor
         try:
             start_spec = 9
-            end_spec = 245768 # Full specturm length
-            scatter_workspace, monitor_workspace = dark_run_subtractor.execute(scatter_workspace, monitor_workspace, start_spec, end_spec)
+            end_spec = 20 # Full specturm length
+            scatter_workspace, monitor_workspace = dark_run_subtractor.execute(scatter_workspace, monitor_workspace,
+                                                                               start_spec, end_spec, is_input_event)
         except:
             self.assertFalse(True, "The DarkRunSubtraction executed with an error")
-
         return scatter_workspace, monitor_workspace
+
+    def _do_test_valid_transmission(self, settings, full_ws = False):
+        # Arrange
+        dark_run_subtractor = DarkRunSubtraction()
+        for setting in settings:
+            dark_run_subtractor.add_setting(setting)
+
+        # Create an actual scatter workspace
+        transmission_workspace = self._get_transmission_workspace(full_ws)
+
+        # Execute the dark_run_subtractor
+        try:
+            transmission_workspace = dark_run_subtractor.execute_transmission(transmission_workspace)
+        except:
+            self.assertFalse(True, "The DarkRunSubtraction executed with an error")
+        return transmission_workspace
 
     def _get_dark_file(self):
         # Provide an event file from the system test data repo
-        return "SANS2D00028827.nxs"
+        return "SANS2D00028827_removed_spectra.nxs"
 
     def _get_sample_workspaces(self, run_number = None):
         ws = None
@@ -263,13 +462,13 @@ class DarkRunSubtractionTest(unittest.TestCase):
         # Now get the monitor
         monitor_ws = None
         if run_number is not None:
-            ws_name2 = "monitors"
+            monitors_name = ws_name + "_monitors"
             alg_load2 = AlgorithmManager.createUnmanaged("LoadNexusProcessed")
             alg_load2.initialize()
             alg_load2.setChild(True)
             alg_load2.setProperty("Filename", file_path)
             alg_load2.setProperty("EntryNumber", 2)
-            alg_load2.setProperty("OutputWorkspace", ws_name2)
+            alg_load2.setProperty("OutputWorkspace", monitors_name)
             alg_load2.execute()
             monitor_ws = alg_load2.getProperty("OutputWorkspace").value
         else:
@@ -298,6 +497,117 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         return sample_ws, monitor_ws
 
+    def _get_sample_workspace_histo(self):
+        # Load the event workspace and the monitor workspace. Rebin the event to the monitor
+        # and conjoin them
+        file_path, ws_name= getFileAndName(self._get_dark_file())
+        alg_load = AlgorithmManager.createUnmanaged("LoadEventNexus")
+        alg_load.initialize()
+        alg_load.setChild(True)
+        alg_load.setProperty("Filename", file_path)
+        alg_load.setProperty("OutputWorkspace", ws_name)
+        alg_load.execute()
+        event_ws = alg_load.getProperty("OutputWorkspace").value
+
+        monitor_name = ws_name + "_monitor"
+        alg_load2 = AlgorithmManager.createUnmanaged("LoadNexusMonitors")
+        alg_load2.initialize()
+        alg_load2.setChild(True)
+        alg_load2.setProperty("Filename", file_path)
+        alg_load2.setProperty("MonitorsAsEvents", False)
+        alg_load2.setProperty("OutputWorkspace", monitor_name)
+        alg_load2.execute()
+        monitor_ws = alg_load2.getProperty("OutputWorkspace").value
+
+        rebinned_name = ws_name + "_rebinned"
+        alg_rebin = AlgorithmManager.createUnmanaged("RebinToWorkspace")
+        alg_rebin.initialize()
+        alg_rebin.setChild(True)
+        alg_rebin.setProperty("WorkspaceToRebin", event_ws)
+        alg_rebin.setProperty("WorkspaceToMatch", monitor_ws)
+        alg_rebin.setProperty("PreserveEvents", False)
+        alg_rebin.setProperty("OutputWorkspace", rebinned_name)
+        alg_rebin.execute()
+        sample_ws = alg_rebin.getProperty("OutputWorkspace").value
+
+        # We need to create a copy of the sample because it will be deleted/swallowed by
+        # the conjoin below
+        cloned_name = ws_name + "_cloned"
+        alg_rebin = AlgorithmManager.createUnmanaged("CloneWorkspace")
+        alg_rebin.initialize()
+        alg_rebin.setChild(True)
+        alg_rebin.setProperty("InputWorkspace", sample_ws)
+        alg_rebin.setProperty("OutputWorkspace", cloned_name)
+        alg_rebin.execute()
+        sample_ws_copy = alg_rebin.getProperty("OutputWorkspace").value
+
+        alg_conjoined = AlgorithmManager.createUnmanaged("ConjoinWorkspaces")
+        alg_conjoined.initialize()
+        alg_conjoined.setChild(True)
+        alg_conjoined.setProperty("InputWorkspace1", monitor_ws)
+        alg_conjoined.setProperty("InputWorkspace2", sample_ws_copy)
+        alg_conjoined.setProperty("CheckOverlapping", True)
+        alg_conjoined.execute()
+        monitor_ws = alg_conjoined.getProperty("InputWorkspace1").value
+
+        return sample_ws, monitor_ws
+
+    def _get_transmission_workspace(self, full_ws = False):
+        ws = None
+        trans_ws = None
+        file_path = None
+        if full_ws is True:
+            file_path, ws_name= getFileAndName(self._get_dark_file())
+            alg_load = AlgorithmManager.createUnmanaged("LoadEventNexus")
+            alg_load.initialize()
+            alg_load.setChild(True)
+            alg_load.setProperty("Filename", file_path)
+            alg_load.setProperty("OutputWorkspace", ws_name)
+            alg_load.execute()
+            detector = alg_load.getProperty("OutputWorkspace").value
+
+            trans_name = ws_name + "_monitor"
+            alg_load_monitors = AlgorithmManager.createUnmanaged("LoadNexusMonitors")
+            alg_load_monitors.initialize()
+            alg_load_monitors.setChild(True)
+            alg_load_monitors.setProperty("Filename", file_path)
+            alg_load_monitors.setProperty("MonitorsAsEvents", False)
+            alg_load_monitors.setProperty("OutputWorkspace", trans_name)
+            alg_load_monitors.execute()
+            monitor = alg_load_monitors.getProperty("OutputWorkspace").value
+
+            rebinned_name = ws_name + "_rebinned"
+            alg_rebin = AlgorithmManager.createUnmanaged("RebinToWorkspace")
+            alg_rebin.initialize()
+            alg_rebin.setChild(True)
+            alg_rebin.setProperty("WorkspaceToRebin", detector)
+            alg_rebin.setProperty("WorkspaceToMatch", monitor)
+            alg_rebin.setProperty("PreserveEvents", False)
+            alg_rebin.setProperty("OutputWorkspace", rebinned_name)
+            alg_rebin.execute()
+            detector = alg_rebin.getProperty("OutputWorkspace").value
+
+            alg_conjoined = AlgorithmManager.createUnmanaged("ConjoinWorkspaces")
+            alg_conjoined.initialize()
+            alg_conjoined.setChild(True)
+            alg_conjoined.setProperty("InputWorkspace1", monitor)
+            alg_conjoined.setProperty("InputWorkspace2", detector)
+            alg_conjoined.setProperty("CheckOverlapping", True)
+            alg_conjoined.execute()
+            trans_ws = alg_conjoined.getProperty("InputWorkspace1").value
+        else:
+            file_path, ws_name= getFileAndName(self._get_dark_file())
+            trans_name = ws_name + "_trans"
+            alg_load_monitors = AlgorithmManager.createUnmanaged("LoadNexusMonitors")
+            alg_load_monitors.initialize()
+            alg_load_monitors.setChild(True)
+            alg_load_monitors.setProperty("Filename", file_path)
+            alg_load_monitors.setProperty("MonitorsAsEvents", False)
+            alg_load_monitors.setProperty("OutputWorkspace", trans_name)
+            alg_load_monitors.execute()
+            trans_ws = alg_load_monitors.getProperty("OutputWorkspace").value
+        return trans_ws
+
     def _get_dark_run_settings_object(self, run, time, mean,
                                       use_mon, mon_number):
         # This is what would be coming from a parsed user file
@@ -306,7 +616,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
                                time = time,
                                mean = mean,
                                mon_number = mon_number)
-
 
 class DarkRunSubtractionTestStressTest(stresstesting.MantidStressTest):
     def runTest(self):

@@ -701,6 +701,7 @@ def get_masked_det_ids(ws):
             break
         if det.isMasked():
             yield det.getID()
+
 def create_zero_error_free_workspace(input_workspace_name, output_workspace_name):
     '''
     Creates a cloned workspace where all zero-error values have been replaced with a large value
@@ -1270,7 +1271,6 @@ def is_valid_user_file_extension(user_file):
     if file_extension in allowed_values or re.match(pattern, file_extension):
         is_allowed = True
     return is_allowed
-
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

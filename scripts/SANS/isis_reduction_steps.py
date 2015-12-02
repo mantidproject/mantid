@@ -1184,7 +1184,9 @@ class DarkRunSubtraction(object):
     '''
     This class handles the subtraction of a dark run from the sample workspace.
     The dark run subtraction does not take place and just passes the workspace through
-    if the parameters are not fully specified.
+    if the parameters are not fully specified. This layer knows about some details of the
+    ISIS process, eg it knows about the format of Histogram or Event mode reduction and the
+    shape of added event files. It does not depend on the reducer itself though!
     '''
     # The named tuple contains the information for a dark run subtraction for a single run number ( of
     # a dark run file)
@@ -1208,7 +1210,8 @@ class DarkRunSubtraction(object):
 
         # Keeps a hold on the number of histograms in the monitor workspace associated
         # with the scatter workspace
-        self._number_histograms_in_monitor_of_sample  = 0
+
+        self._monitor_list = None
 
     def add_setting(self, dark_run_setting):
         '''
@@ -1231,7 +1234,7 @@ class DarkRunSubtraction(object):
         self._dark_run_time_monitor_setting = None
         self._dark_run_uamp_monitor_setting = None
 
-    def execute(self, workspace, monitor_workspace, start_spec_index, end_spec_index):
+    def execute(self, workspace, monitor_workspace, start_spec_index, end_spec_index, workspace_was_event):
         '''
         Load the dark run. Cropt it to the current detector. Find out what kind of subtraction
         to perform and subtract the dark run from the workspace.
@@ -1239,6 +1242,8 @@ class DarkRunSubtraction(object):
         @param monitor_workspace: the associated monitor workspace
         @param  start_spec_index: the start workspace index to consider
         @param end_spec_index: the end workspace index to consider
+        @param workspace_was_event: flag  if the original workspace was derived from histo or event
+        @returns a corrected detector and monitor workspace
         '''
         # The workspace signature of the execute method exists to make it an easy step
         # to convert to a full-grown reduction step for now we add it when converting
@@ -1247,7 +1252,7 @@ class DarkRunSubtraction(object):
             return workspace
 
         # Set the number of histograms
-        self._number_histograms_in_monitor_of_sample = monitor_workspace.getNumberHistograms()
+        self._monitor_list = self._get_monitor_list(monitor_workspace)
 
         # Get the time-based correction settings for detectors
         setting_time_detectors = self.get_time_based_setting_detectors()
@@ -1264,7 +1269,7 @@ class DarkRunSubtraction(object):
         # Subtract the dark runs for the monitors
         for setting in monitor_settings:
             if setting is not None:
-                monitor_workspace = self._execute_dark_run_subtraction_monitors(monitor_workspace, setting)
+                monitor_workspace = self._execute_dark_run_subtraction_monitors(monitor_workspace, setting, workspace_was_event)
 
         # Subtract the dark runs for the detectors
         for setting in detector_settings:
@@ -1272,6 +1277,51 @@ class DarkRunSubtraction(object):
                 workspace = self._execute_dark_run_subtraction_detectors(workspace, setting, start_spec_index, end_spec_index)
 
         return workspace, monitor_workspace
+
+    def execute_transmission(self, workspace, trans_ids):
+        '''
+        Performs the dark background correction for transmission and direct workspaces
+        @param workspace: a transmission workspace (histogram!). We need to have a separate method
+                          for transmission since we the format slightly different to the scattering
+                          workspaces.
+        @param transmission_ids: a list of transmission ids
+        @returns a subtracted transmission workspace
+        '''
+        if not self.has_dark_runs():
+            return workspace
+
+        # Set the number of histograms
+        self._monitor_list = self._get_monitor_list(workspace)
+        # Get the time-based correction settings for detectors
+        setting_time_detectors = self.get_time_based_setting_detectors()
+        # Get the uamp-based correction settings for detectors
+        setting_uamp_detectors = self.get_uamp_based_setting_detectors()
+        # Get the time-based correction settings for monitors
+        setting_time_monitors =  self.get_time_based_setting_monitors()
+        # Get the uamp-based correction settings for monitors
+        setting_uamp_monitors =  self.get_uamp_based_setting_monitors()
+
+        settings = [setting_time_monitors, setting_uamp_monitors, setting_time_detectors, setting_uamp_detectors]
+
+        for setting in settings:
+            if setting is not None:
+                workspace = self._execute_dark_run_subtraction_for_transmission(workspace, setting)
+        return workspace
+
+    def _execute_dark_run_subtraction_for_transmission(self, workspace, setting):
+        '''
+        @param workspace: the transmission workspace
+        @param setting: the setting which is to be applied
+        @returns a subtracted transmission workspace
+        '''
+        # Get the name and file path to the dark run
+        dark_run_name, dark_run_file_path = self._get_dark_run_name_and_path(setting)
+
+        # The transmission contains the monitors and the detectors
+        dark_run_ws = self._load_dark_run_transmission(workspace, dark_run_name, dark_run_file_path)
+
+        # Subtract the dark run from the workspace
+        return self._subtract_dark_run(workspace, dark_run_ws, setting)
 
     def has_dark_runs(self):
         '''
@@ -1282,6 +1332,60 @@ class DarkRunSubtraction(object):
             return False
         else:
             return True
+
+    def _load_dark_run_transmission(self, workspace, dark_run_name, dark_run_file_path):
+        '''
+        Loads the dark run in the correct format for transmission correction. The dark run
+        files will always be Event workspaces, hence we need load the detector and monitor
+        separately and conjoin them.
+        @param workspace
+        @param dark_run_name
+        @param dark_run_file_path
+        '''
+        # Load the monitors
+        monitor = self._load_dark_run_monitors(dark_run_name, dark_run_file_path)
+        monitor = self._rebin_to_match(workspace, monitor)
+
+        # Load the detectors if the workspace contains detectors at all
+        contains_detectors = True
+        if (len(self._monitor_list) == workspace.getNumberHistograms()):
+            contains_detectors = False
+
+        out_ws = monitor
+        if contains_detectors:
+            start_spec_index = len(self._monitor_list) + 1
+            end_spec_index = workspace.getNumberHistograms() # It already contains the +1 offset 
+            workspace_index_offset = len(self._monitor_list) # Note that this is needed to be consistent
+                                                             # with non-transmission correction
+            detector = self._load_workspace(dark_run_name, dark_run_file_path,
+                                                  start_spec_index,end_spec_index, workspace_index_offset)
+            detector = self._rebin_to_match(workspace, detector)
+            # Conjoin the monitors and the detectors
+            out_ws = self._conjoin_monitor_with_detector_workspace(monitor, detector)
+
+        return out_ws
+
+    def _get_monitor_list(self, monitor_workspace):
+        '''
+        This makes use of the fact that the monitor data is always to be found at the front of the data set.
+        If we are dealing with a monitor_workspace which originates from an event-based workspace, then all
+        elements should be picked upt. If we are dealing with a monitor which originaates from a histo-based
+        workspace, then only the first 8 to 10 indices should be found. This knowledge of the workspace layout
+        helps to speed up things.
+        @param monitor_workspace: the monitor workspace
+        @returns a list with monitor spectra
+        '''
+        monitor_indices = []
+        for ws_index in range(monitor_workspace.getNumberHistograms()):
+            try:
+                det = monitor_workspace.getDetector(ws_index)
+            except RuntimeError:
+                # Skip the rest after finding the first spectra with no detectors,
+                # which is a big speed increase for SANS2D.
+                break
+            if det.isMonitor():
+                monitor_indices.append(ws_index)
+        return monitor_indices
 
     def _execute_dark_run_subtraction_detectors(self, workspace, setting, start_spec_index, end_spec_index):
         '''
@@ -1294,7 +1398,8 @@ class DarkRunSubtraction(object):
         # Get the dark run name and path
         dark_run_name, dark_run_file_path = self._get_dark_run_name_and_path(setting)
         # Load the dark run workspace is it has not already been loaded
-        dark_run_ws = self._load_dark_run_detectors(workspace, dark_run_name, dark_run_file_path, start_spec_index, end_spec_index)
+        dark_run_ws = self._load_dark_run_detectors(workspace, dark_run_name, dark_run_file_path,
+                                                    start_spec_index, end_spec_index)
 
         # Subtract the dark run from the workspace
         return self._subtract_dark_run(workspace, dark_run_ws, setting)
@@ -1313,24 +1418,64 @@ class DarkRunSubtraction(object):
         # Load the dark run workspace
         dark_run = self._load_workspace(dark_run_name, dark_run_file_path,
                                         start_spec_index, end_spec_index,
-                                        self._number_histograms_in_monitor_of_sample)
+                                        len(self._monitor_list))
+
         # Rebin to match the scatter workspace
         return self._rebin_to_match(workspace, dark_run)
 
-    def _execute_dark_run_subtraction_monitors(self, monitor_workspace, setting):
+    def _execute_dark_run_subtraction_monitors(self, monitor_workspace, setting, workspace_was_event):
         '''
         Apply one dark run setting to a monitor workspace
         @param monitor_workspace: the monitor data set associated with the scatter data
         @param setting: a dark run settings tuple
+        @param workspace_was_event: flag  if the original workspace was derived from histo or event
         @returns a monitor for the dark run
         '''
         # Get the dark run name and path for the monitor 
         dark_run_name, dark_run_file_path = self._get_dark_run_name_and_path(setting)
         # Load the dark run workspace is it has not already been loaded
         monitor_dark_run_ws = self._load_dark_run_monitors(dark_run_name, dark_run_file_path)
-        # Rebin to the dark run monitor workspace to the original monitor workspace
-        monitor_dark_run_ws = self._rebin_to_match(monitor_workspace, monitor_dark_run_ws)
-        return self._subtract_dark_run(monitor_workspace, monitor_dark_run_ws, setting)
+
+        # Check if the original workspace is based on Histo or Event. If it was an event workspace,
+        # then the monitor workspace of the dark run should match (note that for event workspaces
+        # the monitor workspace is separate). In the case of histo workspaces the monitor data
+        # has all the histo data appended.
+        if workspace_was_event:
+            # Rebin to the dark run monitor workspace to the original monitor workspace
+            monitor_dark_run_ws = self._rebin_to_match(monitor_workspace, monitor_dark_run_ws)
+            return self._subtract_dark_run(monitor_workspace, monitor_dark_run_ws, setting)
+        else:
+            return self._get_monitor_workspace_from_original_histo_input(monitor_workspace, monitor_dark_run_ws, setting)
+
+    def _get_monitor_workspace_from_original_histo_input(self, monitor_workspace, monitor_dark_run_ws, setting):
+        '''
+        Get the monitor workspace from an original histo input. Note that this is just the original input workspace.
+        We will extract the monitor workspaces, do the subtraction and add it back to the original workspace.
+        @param monitor_workspace: the monitor workspace (actually the full input)
+        @param monitor_dark_run_ws: the dark run workspace
+        @param setting: a dark run settings tuple
+        @returns the corrected monitor workspace
+        '''
+        # Extract the spectra
+        monitor_temp_name = monitor_workspace.name() + "_mon_tmp"
+        alg_extract = AlgorithmManager.createUnmanaged("ExtractSpectra")
+        alg_extract.initialize()
+        alg_extract.setChild(True)
+        alg_extract.setProperty("InputWorkspace", monitor_workspace)
+        alg_extract.setProperty("OutputWorkspace", monitor_temp_name)
+        alg_extract.setProperty("WorkspaceIndexList", self._monitor_list)
+        alg_extract.execute()
+        ws_mon_tmp = alg_extract.getProperty("OutputWorkspace").value
+
+        # Rebin to match
+        monitor_dark_run_ws = self._rebin_to_match(ws_mon_tmp, monitor_dark_run_ws)
+
+        # Subtract the two monitor workapces
+        ws_mon_tmp = self._subtract_dark_run(ws_mon_tmp, monitor_dark_run_ws, setting)
+
+        # Stitch back together
+        monitor_workspace = self._crop_workspace_at_front(monitor_workspace, len(self._monitor_list))
+        return self._conjoin_monitor_with_detector_workspace(ws_mon_tmp, monitor_workspace)
 
     def _load_dark_run_monitors(self, dark_run_name, dark_run_file_path):
         '''
@@ -1386,7 +1531,7 @@ class DarkRunSubtraction(object):
                                "Please make sure that that it exists in your search directory.")
         return dark_run_ws_name, dark_run_file_path
 
-    def _load_workspace(self, dark_run_file_path, dark_run_ws_name, start_spec_index, end_spec_index, workspace_index_offset):
+    def _load_workspace(self, dark_run_ws_name, dark_run_file_path, start_spec_index, end_spec_index, workspace_index_offset):
         '''
         Loads the dark run workspace
         @param dark_run_file_path: file path to the dark run
@@ -1486,6 +1631,39 @@ class DarkRunSubtraction(object):
         dark_run_correction.set_mon_numbers(setting.mon_numbers)
         return dark_run_correction.execute(scatter_workspace = workspace,
                                            dark_run = dark_run)
+
+    def _crop_workspace_at_front(self, workspace, start_ws_index):
+        '''
+        Creates a cropped workspace
+        @param workspace: the workspace to be cropped
+        @param start_ws_index: the start index
+        @returns a workspace which has the front cropped off
+        '''
+        cropped_temp_name = workspace.name() + "_cropped_tmp"
+        alg_cropped = AlgorithmManager.createUnmanaged("ExtractSpectra")
+        alg_cropped.initialize()
+        alg_cropped.setChild(True)
+        alg_cropped.setProperty("InputWorkspace", workspace)
+        alg_cropped.setProperty("OutputWorkspace", cropped_temp_name)
+        alg_cropped.setProperty("StartWorkspaceIndex", start_ws_index)
+        alg_cropped.execute()
+        return alg_cropped.getProperty("OutputWorkspace").value
+
+    def _conjoin_monitor_with_detector_workspace(self, monitor, detector):
+        '''
+        Conjoins the monitor data set with the detector data set
+        @param monitor: the monitor data set
+        @param detector: the detector data set
+        @returns a conjoined data set
+        '''
+        conjoined_temp_name = detector.name() + "_conjoined_tmp"
+        alg_conjoined = AlgorithmManager.createUnmanaged("ConjoinWorkspaces")
+        alg_conjoined.initialize()
+        alg_conjoined.setChild(True)
+        alg_conjoined.setProperty("InputWorkspace1", monitor)
+        alg_conjoined.setProperty("InputWorkspace2", detector)
+        alg_conjoined.execute()
+        return alg_conjoined.getProperty("InputWorkspace1").value
 
     def get_time_based_setting_detectors(self):
         '''
@@ -1667,7 +1845,7 @@ class CropDetBank(ReductionStep):
         reducer.instrument.cur_detector().crop_to_detector(in_wksp, workspace)
 
         # If the workspace requires dark run subtraction for the detectors and monitors, then this will be performed here.
-        if self._dark_run_subtraction.has_dark_runs():
+        if reducer.dark_run_subtraction.has_dark_runs():
             # Get the spectrum index range for spectra which are part of the current detector
             start_spec_num = reducer.instrument.cur_detector().get_first_spec_num()
             end_spec_num = reducer.instrument.cur_detector().last_spec_num
@@ -1679,8 +1857,10 @@ class CropDetBank(ReductionStep):
             monitor_name = monitor_ws.name()
 
             # Run the subtraction
-            scatter_ws, monitor_ws = reducer.dark_run_subtractor.execute(scatter_ws, monitor_ws, start_spec_num, end_spec_num)
-
+            was_event_workspace = reducer.is_based_on_event()
+            scatter_ws, monitor_ws = reducer.dark_run_subtraction.execute(scatter_ws, monitor_ws,
+                                                                          start_spec_num, end_spec_num,
+                                                                          was_event_workspace)
             # We need to replace the workspaces in the ADS
             mtd.addOrReplace(scatter_name, scatter_ws)
             mtd.addOrReplace(monitor_name, monitor_ws)
@@ -1862,7 +2042,7 @@ class TransmissionCalc(ReductionStep):
         """ Returns true if the can or sample was given and false if just both was used"""
         return self.fit_settings.has_key('sample::fit_method') or self.fit_settings.has_key('can::fit_method')
 
-    def setup_wksp(self, inputWS, inst, wavbining, trans_det_ids):
+    def setup_wksp(self, inputWS, inst, wavbining, trans_det_ids, reducer):
         """
             Creates a new workspace removing any background from the monitor spectra, converting units
             and re-bins. If the instrument is LOQ it zeros values between the x-values 19900 and 20500
@@ -1875,6 +2055,7 @@ class TransmissionCalc(ReductionStep):
                                   b) a list of detector that make up a region of interest
                                   Together these make up all spectra needed to carry out the
                                   CalculateTransmission algorithm.
+            @param reducer: the reducer singleton
             @return the name of the workspace created
         """
         #the workspace is forked, below is its new name
@@ -1885,12 +2066,14 @@ class TransmissionCalc(ReductionStep):
         # problems if we don't.
         extract_spectra(mtd[inputWS], trans_det_ids, tmpWS)
 
+        # Perform the a dark run background correction if one was specified
+        self._correct_dark_run_background(reducer, tmpWS, trans_det_ids)
+
         if inst.name() == 'LOQ':
             RemoveBins(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,XMin= self.loq_removePromptPeakMin,XMax= self.loq_removePromptPeakMax,
                        Interpolation='Linear')
 
         tmp = mtd[tmpWS]
-
         # We perform a FlatBackground correction. We do this in two parts.
         # First we find the workspace indices which correspond to monitors
         # and perform the correction on these indicies.
@@ -1926,7 +2109,6 @@ class TransmissionCalc(ReductionStep):
             InterpolatingRebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
         else :
             Rebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
-
         return tmpWS
 
     def _get_index(self, number):
@@ -2070,9 +2252,9 @@ class TransmissionCalc(ReductionStep):
 
         #set up the input workspaces
         trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,\
-            wavbin, trans_det_ids)
+            wavbin, trans_det_ids, reducer)
         direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,\
-            wavbin, trans_det_ids)
+            wavbin, trans_det_ids, reducer)
 
         # Where a ROI has been specified, it is useful to keep a copy of the
         # summed ROI spectra around for the scientists to look at, so that they
@@ -2172,6 +2354,19 @@ class TransmissionCalc(ReductionStep):
         if resp in ['YLOG','LOG']:
             resp = 'LOGARITHMIC'
         return resp
+
+    def _correct_dark_run_background(self, reducer, workspace_name, trans_det_ids):
+        '''
+        Subtract the dark run from the transmission workspace
+        @param reducer: the reducer object
+        @param workspace_name: the name of the workspace to correct
+        @param trans_det_ids: the transmission detector ids
+        '''
+        if reducer.dark_run_subtraction.has_dark_runs():
+            # We need to grab the workspace from the ADS and place the corrected workspace back into the ADS
+            trans_ws = mtd[workspace_name]
+            trans_ws = reducer.dark_run_subtraction.execute_transmission(trans_ws)
+            mtd.addOrReplace(workspace_name, trans_ws)
 
 class AbsoluteUnitsISIS(ReductionStep):
     DEFAULT_SCALING = 100.0
@@ -3426,7 +3621,7 @@ class UserFile(ReductionStep):
         back_parser = UserFileParser.BackCommandParser()
         if back_parser.can_attempt_to_parse(arguments):
             dark_run_setting = back_parser.parse_and_set(arguments)
-            reducer.crop_detector.add_dark_run_setting(dark_run_setting)
+            reducer.add_dark_run_setting(dark_run_setting)
         else:
             #a list of the key words this function can read and the functions it calls in response
             keys = ['MON/TIMES', 'M', 'TRANS']

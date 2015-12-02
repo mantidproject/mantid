@@ -63,7 +63,6 @@ class DarkRunCorrection(object):
         # Get the normalization ratio from the workspaces
         normalization_ratio = self._normalization_extractor.extract_normalization(scatter_workspace,
                                                                                   dark_run, self._use_time)
-
         # Run the correction algorithm with the user settings
         corrected_ws_name = scatter_workspace.name() + "_dark_workspace_corrected"
         alg_dark = AlgorithmManager.createUnmanaged("SANSDarkRunBackgroundCorrection")

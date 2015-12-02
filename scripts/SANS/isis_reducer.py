@@ -739,3 +739,25 @@ class ISISReducer(Reducer):
     def clear_dark_run_settings(self):
         self.dark_run_subtraction.clear_settings()
 
+    def is_based_on_event(self):
+        '''
+        One way to determine if we are dealing with an original event workspace
+        is if the monitor workspace was loaded separately
+        @returns true if the input was an event workspace
+        '''
+        was_event = False
+        if self.is_can:
+            sample = self.get_can()
+            try:
+                dummy_ws = mtd[can.loader.wksp_name + "_monitors"]
+                was_event = True
+            except:
+                was_event = False
+        else:
+            sample = self.get_sample()
+            try:
+                dummy_ws = mtd[sample.loader.wksp_name + "_monitors"]
+                was_event = True
+            except:
+                was_event = False
+        return was_event
