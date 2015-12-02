@@ -44,6 +44,9 @@ public:
   virtual int version() const;
   virtual const std::string category() const;
 
+  /// Perform validation of inputs to the algorithm
+  virtual std::map<std::string, std::string> validateInputs() override;
+
 private:
   void init();
   void exec();
@@ -69,6 +72,9 @@ private:
   /// Applies offset, crops and rebins all workspaces in the group
   API::WorkspaceGroup_sptr correctWorkspaces(API::WorkspaceGroup_sptr wsGroup,
                                              double loadedTimeZero);
+
+  /// Builds an error message from a list of invalid periods
+  std::string buildErrorString(const std::vector<int> &invalidPeriods) const;
 };
 
 } // namespace WorkflowAlgorithms

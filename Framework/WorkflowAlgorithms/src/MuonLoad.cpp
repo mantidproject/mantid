@@ -146,25 +146,11 @@ void MuonLoad::exec() {
 
   // Deal with single-period workspace
   if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
-    if (std::find_if_not(summedPeriods.begin(), summedPeriods.end(), isOne) !=
-        summedPeriods.end()) {
-      throw std::invalid_argument("Single period data but set of periods to "
-                                  "sum contains invalid values.");
-    }
-
-    if (!subtractedPeriods.empty())
-      throw std::invalid_argument(
-          "Single period data but second set of periods specified");
-
     allPeriodsWS->addWorkspace(ws);
   }
   // Deal with multi-period workspace
   else if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
     allPeriodsWS = group;
-  }
-  // Unexpected workspace type
-  else {
-    throw std::runtime_error("Input workspace is of invalid type");
   }
 
   progress.report();
@@ -178,10 +164,6 @@ void MuonLoad::exec() {
     // Deal with dead time correction (if required)
     if (applyDtc) {
       TableWorkspace_sptr deadTimes = getProperty("DeadTimeTable");
-      if (!deadTimes) {
-        throw std::runtime_error(
-            "Cannot apply dead time correction as no dead times were supplied");
-      }
       allPeriodsWS = applyDTC(allPeriodsWS, deadTimes);
     }
     progress.report();
@@ -199,12 +181,6 @@ void MuonLoad::exec() {
   Workspace_sptr outWS = allPeriodsWS;
 
   if (mode != "CorrectAndGroup") {
-    // For these modes, SummedPeriodSet is mandatory
-    if (summedPeriods.empty()) {
-      throw std::invalid_argument(
-          "Cannot analyse: list of periods to sum was empty");
-    }
-
     // Correct bin values
     double loadedTimeZero = getProperty("LoadedTimeZero");
     allPeriodsWS = correctWorkspaces(allPeriodsWS, loadedTimeZero);
@@ -359,6 +335,112 @@ MatrixWorkspace_sptr MuonLoad::correctWorkspace(MatrixWorkspace_sptr ws,
   }
 
   return ws;
+}
+
+/**
+ * Performs validation of inputs to the algorithm.
+ * - Input workspace must be single-period or a workspace group
+ * - Single-period input must only use period 1
+ * - Supplied period numbers must all be valid (between 1 and total number of
+ * periods)
+ * - If analysis will take place, SummedPeriodSet is mandatory
+ * - If ApplyDeadTimeCorrection is true, DeadTimeTable is mandatory
+ * @returns Map of parameter names to errors
+ */
+std::map<std::string, std::string> MuonLoad::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  // Supplied input workspace and sets of periods
+  const std::string propInputWS("InputWorkspace"),
+      propSummedPeriodSet("SummedPeriodSet"),
+      propSubtractedPeriodSet("SubtractedPeriodSet");
+  Workspace_sptr inputWS = getProperty(propInputWS);
+  std::vector<int> summedPeriods = getProperty(propSummedPeriodSet);
+  std::vector<int> subtractedPeriods = getProperty(propSubtractedPeriodSet);
+
+  // If single-period data, test the sets of periods specified
+  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+    if (std::find_if_not(summedPeriods.begin(), summedPeriods.end(), isOne) !=
+        summedPeriods.end()) {
+      errors[propSummedPeriodSet] = "Single period data but set of periods to "
+                                    "sum contains invalid values.";
+    }
+    if (!subtractedPeriods.empty()) {
+      errors[propSubtractedPeriodSet] =
+          "Single period data but second set of periods specified";
+    }
+  } else {
+    // If not a MatrixWorkspace, must be a multi-period WorkspaceGroup
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+    if (group == nullptr) {
+      errors[propInputWS] = "Input workspace is of invalid type";
+    }
+    auto numPeriods = group->getNumberOfEntries();
+    if (numPeriods < 1) {
+      errors[propInputWS] = "Input workspace contains no periods";
+    }
+    // check summed period numbers
+    std::vector<int> invalidPeriods;
+    for (auto period : summedPeriods) {
+      if ((period < 1) || (period > numPeriods)) {
+        invalidPeriods.push_back(period);
+      }
+    }
+    if (!invalidPeriods.empty()) {
+      errors[propSummedPeriodSet] = buildErrorString(invalidPeriods);
+      invalidPeriods.clear();
+    }
+    // check subtracted period numbers
+    for (auto period : subtractedPeriods) {
+      if ((period < 1) || (period > numPeriods)) {
+        invalidPeriods.push_back(period);
+      }
+    }
+    if (!invalidPeriods.empty()) {
+      errors[propSubtractedPeriodSet] = buildErrorString(invalidPeriods);
+    }
+  }
+
+  // Some parameters can be mandatory or not depending on the mode
+  const std::string propMode("Mode"), propApplyDTC("ApplyDeadTimeCorrection"),
+      propDeadTime("DeadTimeTable");
+  const std::string mode = getProperty(propMode);
+  // If analysis will take place, SummedPeriodSet is mandatory
+  if (mode != "CorrectAndGroup") {
+    if (summedPeriods.empty()) {
+      errors[propSummedPeriodSet] =
+          "Cannot analyse: list of periods to sum was empty";
+    }
+  }
+  // If dead time correction is to be applied, must supply dead times
+  bool applyDtc = getProperty(propApplyDTC);
+  if (applyDtc) {
+    TableWorkspace_sptr deadTimes = getProperty(propDeadTime);
+    if (!deadTimes) {
+      errors[propDeadTime] =
+          "Cannot apply dead time correction as no dead times were supplied";
+    }
+  }
+
+  return errors;
+}
+
+/**
+* Builds an error message from the supplied parameters.
+* @param invalidPeriods :: [input] Vector containing invalid periods
+* @returns An error message
+*/
+std::string
+MuonLoad::buildErrorString(const std::vector<int> &invalidPeriods) const {
+  std::stringstream message;
+  message << "Invalid periods specified: ";
+  for (auto it = invalidPeriods.begin(); it != invalidPeriods.end(); it++) {
+    message << *it;
+    if (it != invalidPeriods.end() - 1) {
+      message << ", ";
+    }
+  }
+  return message.str();
 }
 
 } // namespace WorkflowAlgorithms
