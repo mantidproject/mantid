@@ -1284,7 +1284,7 @@ class DarkRunSubtraction(object):
         @param workspace: a transmission workspace (histogram!). We need to have a separate method
                           for transmission since we the format slightly different to the scattering
                           workspaces.
-        @param transmission_ids: a list of transmission ids
+        @param transmission_ids: a list of transmission spectrum ids
         @returns a subtracted transmission workspace
         '''
         if not self.has_dark_runs():
@@ -1296,6 +1296,7 @@ class DarkRunSubtraction(object):
         setting_time_detectors = self.get_time_based_setting_detectors()
         # Get the uamp-based correction settings for detectors
         setting_uamp_detectors = self.get_uamp_based_setting_detectors()
+
         # Get the time-based correction settings for monitors
         setting_time_monitors =  self.get_time_based_setting_monitors()
         # Get the uamp-based correction settings for monitors
@@ -1305,7 +1306,7 @@ class DarkRunSubtraction(object):
 
         for setting in settings:
             if setting is not None:
-                workspace = self._execute_dark_run_subtraction_for_transmission(workspace, setting)
+                workspace = self._execute_dark_run_subtraction_for_transmission(workspace, setting, trans_ids)
         return workspace
 
     def _execute_dark_run_subtraction_for_transmission(self, workspace, setting):

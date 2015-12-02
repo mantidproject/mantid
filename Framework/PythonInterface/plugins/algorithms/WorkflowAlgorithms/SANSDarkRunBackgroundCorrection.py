@@ -37,7 +37,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("SelectedMonitors", values=[],
                                               validator=arrvalidator,
                                               direction=Direction.Input),
-                             "List of selected workspace indices of monitors to which the "
+                             "List of selected detector IDs of monitors to which the "
                              "correction should be applied. If empty, all monitors will "
                               "be corrected, if ApplyToMonitors has been selected.")
     def PyExec(self):
@@ -270,7 +270,7 @@ class DarkRunMonitorAndDetectorRemover(object):
 
         # Since we only have around 10 or so monitors
         # we set them manually to 0
-        for index in monitor_list:
+        for ws_index, dummy_det_id in monitor_list:
             data = dark_run.dataY(index)
             error = dark_run.dataE(index)
             data = data*0
@@ -284,20 +284,22 @@ class DarkRunMonitorAndDetectorRemover(object):
         '''
         Finds all monitor workspace indices
         @param dark_run: the dark run workspace
-        @returns a list of indices with monitors
+        @returns a zipped list of workspace/detids 
         '''
         monitor_list = []
+        det_id_list = []
         # pylint: disable=bare-except
         try:
             num_histograms = dark_run.getNumberHistograms()
             for index in range(0, num_histograms):
                 det = dark_run.getDetector(index)
                 if det.isMonitor():
+                    det_id_list.append(det.getId())
                     monitor_list.append(index)
         except:
             Logger("DarkRunMonitorAndDetectorRemover").information("There was an issue when trying "
                                                                    "to extract the monitor list from workspace")
-        return monitor_list
+        return list(zip(monitor_list, det_id_list))
 
     def set_pure_monitor_dark_run(self, dark_run, monitor_selection):
         '''
@@ -370,10 +372,13 @@ class DarkRunMonitorAndDetectorRemover(object):
         @param monitor_list: the list of monitors
         @raise RuntimeError: If the selected monitor workspace index does not exist.
         '''
+        det_id_list = zip(*monitor_list)[0]
+        det_id_list = set(det_id_list)
+
         selected_monitors = []
         if len(monitor_selection) > 0:
             selected_monitors = set(monitor_selection)
-            if not selected_monitors.issubset(set(monitor_list)):
+            if not selected_monitors.issubset(set(det_id_list)):
                 raise RuntimeError("DarkRunMonitorAndDetectorRemover: "
                                    "The selected monitors are not part of the workspace. "
                                    "Make sure you have selected a monitor workspace index "
@@ -389,27 +394,29 @@ class DarkRunMonitorAndDetectorRemover(object):
         '''
         list_dataY = []
         list_dataE = []
-        for index in monitor_list:
-            list_dataY.append(np.copy(dark_run.dataY(index)))
-            list_dataE.append(np.copy(dark_run.dataE(index)))
+        for ws_index, dummy_det_id in monitor_list:
+            list_dataY.append(np.copy(dark_run.dataY(ws_index)))
+            list_dataE.append(np.copy(dark_run.dataE(ws_index)))
         return list_dataY, list_dataE
 
     def _set_all_monitors(self, dark_run, list_dataY, list_dataE, monitor_list):
         '''
         We reset all monitors back to the old values
         '''
+        ws_index_list = zip(*monitor_list)[0]
         for i in range(0,len(monitor_list)):
-            dark_run.setY(monitor_list[i], list_dataY[i])
-            dark_run.setE(monitor_list[i], list_dataE[i])
+            dark_run.setY(ws_index_list[i], list_dataY[i])
+            dark_run.setE(ws_index_list[i], list_dataE[i])
         return dark_run
     #pylint: disable=too-many-arguments
     def _set_only_selected_monitors(self, dark_run, list_dataY, list_dataE,
                                     monitor_list, selected_monitors):
-        for i in range(0,len(monitor_list)):
+        ws_index_list = zip(*monitor_list)[0]
+        for i in range(0,len(ws_index_list)):
             # Only add the data back for the specified monitors
             if monitor_list[i] in selected_monitors:
-                dark_run.setY(monitor_list[i], list_dataY[i])
-                dark_run.setE(monitor_list[i], list_dataE[i])
+                dark_run.setY(ws_index_list[i], list_dataY[i])
+                dark_run.setE(ws_index_list[i], list_dataE[i])
         return dark_run
 #############################################################################################
 

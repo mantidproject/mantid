@@ -10,6 +10,7 @@ from SANSDarkRunBackgroundCorrection import SANSDarkRunBackgroundCorrection
 class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
     #-----
     # Workspace2D tests
+    '''
     def test_dark_run_correction_with_uniform_and_not_mean_for_workspace2D_input(self):
         # Arrange
         spectra = 4
@@ -441,7 +442,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         # Clean up
         ws_to_clean = [scatter_name, dark_name]
         self._clean_up(ws_to_clean)
-
+    '''
     #------
     # Helper methods
     def _create_test_workspace(self, name, x, y, error, number_of_spectra):
@@ -549,34 +550,6 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         return ws
 
 class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
-    def _load_workspace_with_monitors(self):
-        filename = "LOQ48127np.nxs"
-        out_ws_name = "dark_run_monitor_test_ws"
-        alg = run_algorithm(
-                    'LoadNexusProcessed',
-                    Filename= filename,
-                    OutputWorkspace = out_ws_name,
-                    rethrow = True)
-        return alg.getPropertyValue("OutputWorkspace")
-
-    def _load_workspace_without_monitors(self):
-        out_ws_name = "dark_run_monitor_test_ws"
-        alg = run_algorithm(
-                    'CreateSampleWorkspace',
-                    OutputWorkspace = out_ws_name,
-                    rethrow = True)
-        return alg.getPropertyValue("OutputWorkspace")
-
-    def _clean_up(self, ws_to_clean):
-        for ws in ws_to_clean:
-            if AnalysisDataService.doesExist(ws):
-                AnalysisDataService.remove(ws)
-
-    def _assert_items_are_equal(self, list1, list2, message):
-        # This method is needed since RHEL6 cannot handle assertItemsEqual
-        for index in range(0, len(list1)):
-            self.assertEqual(list1[index], list1[index], message)
-
     def test_finds_all_monitor_indices_when_monitor_is_present(self):
         # Arrange
         test_ws = self._load_workspace_with_monitors()
@@ -750,6 +723,34 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
         # Clean up
         ws_to_clean = [test_ws]
         self._clean_up(ws_to_clean)
+
+    def _load_workspace_with_monitors(self):
+        filename = "LOQ48127np.nxs"
+        out_ws_name = "dark_run_monitor_test_ws"
+        alg = run_algorithm(
+                    'LoadNexusProcessed',
+                    Filename= filename,
+                    OutputWorkspace = out_ws_name,
+                    rethrow = True)
+        return alg.getPropertyValue("OutputWorkspace")
+
+    def _load_workspace_without_monitors(self):
+        out_ws_name = "dark_run_monitor_test_ws"
+        alg = run_algorithm(
+                    'CreateSampleWorkspace',
+                    OutputWorkspace = out_ws_name,
+                    rethrow = True)
+        return alg.getPropertyValue("OutputWorkspace")
+
+    def _clean_up(self, ws_to_clean):
+        for ws in ws_to_clean:
+            if AnalysisDataService.doesExist(ws):
+                AnalysisDataService.remove(ws)
+
+    def _assert_items_are_equal(self, list1, list2, message):
+        # This method is needed since RHEL6 cannot handle assertItemsEqual
+        for index in range(0, len(list1)):
+            self.assertEqual(list1[index], list1[index], message)
 
 if __name__ == '__main__':
     unittest.main()
