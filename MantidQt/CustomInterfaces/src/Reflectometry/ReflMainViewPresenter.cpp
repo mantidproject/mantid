@@ -1510,8 +1510,6 @@ void ReflMainViewPresenter::transfer() {
       for (auto errorRowIt = error.begin(); errorRowIt != error.end();
            ++errorRowIt) {
         const std::string runNumber = errorRowIt->first; // grab run number
-        const std::string whyUnusable =
-            errorRowIt->second; // grab reason why invalid
 
         // iterate over rows that are selected in the search table
         for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
