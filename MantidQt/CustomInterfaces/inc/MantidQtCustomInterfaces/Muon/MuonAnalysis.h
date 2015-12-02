@@ -49,7 +49,6 @@ namespace Muon
   struct GroupResult {
     bool usedExistGrouping;
     boost::shared_ptr<Grouping> groupingUsed;
-    Workspace_sptr groupedWorkspace;
   };
 }
 
@@ -271,8 +270,9 @@ private:
   /// Loads the given list of files
   boost::shared_ptr<LoadResult> load(const QStringList& files) const;
 
-  /// Groups the loaded workspace
-  boost::shared_ptr<GroupResult> group(boost::shared_ptr<LoadResult> loadResult) const;
+  /// Get grouping for the loaded workspace
+  boost::shared_ptr<GroupResult>
+  getGrouping(boost::shared_ptr<LoadResult> loadResult) const;
 
   /// Set whether the loading buttons and MWRunFiles widget are enabled.
   void allowLoading(bool enabled);
@@ -332,8 +332,8 @@ private:
   /// Loads dead time table (group of tables) from the file.
   Workspace_sptr loadDeadTimes(const std::string& filename) const;
 
-  /// Applies dead time correction to the loaded workspace
-  void applyDeadTimeCorrection(boost::shared_ptr<LoadResult> loadResult) const;
+  /// Gets table of dead time corrections from the loaded workspace
+  Workspace_sptr getDeadTimeCorrection(boost::shared_ptr<LoadResult> loadResult) const;
 
   /// Creates and algorithm with all the properties set according to widget values on the interface
   Algorithm_sptr createLoadAlgorithm();

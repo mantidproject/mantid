@@ -72,6 +72,7 @@ using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::Muon;
 using namespace Mantid::Geometry;
+using Mantid::API::Workspace_sptr;
 
 namespace
 {
@@ -1340,12 +1341,12 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
 }
 
 /**
- * Groups the loaded workspace
+ * Get grouping for the loaded workspace
  * @param loadResult :: Various loaded parameters as returned by load()
- * @return Grouped workspace and used grouping for populating grouping table
+ * @return Used grouping for populating grouping table
  */
-boost::shared_ptr<GroupResult> MuonAnalysis::group(boost::shared_ptr<LoadResult> loadResult) const
-{
+boost::shared_ptr<GroupResult>
+MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
   auto result = boost::make_shared<GroupResult>();
 
   boost::shared_ptr<Grouping> groupingToUse;
@@ -1412,9 +1413,6 @@ boost::shared_ptr<GroupResult> MuonAnalysis::group(boost::shared_ptr<LoadResult>
 
   result->groupingUsed = groupingToUse;
 
-  ITableWorkspace_sptr groupingTableToUse = groupingToTable(groupingToUse);
-  result->groupedWorkspace = groupWorkspace(loadResult->loadedWorkspace, groupingTableToUse);
-
   return result;
 }
 
@@ -1434,26 +1432,44 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   boost::shared_ptr<LoadResult> loadResult;
   boost::shared_ptr<GroupResult> groupResult;
+  Workspace_sptr deadTimes;
+  MatrixWorkspace_sptr correctedGroupedWS;
 
-  try
-  {
+  try {
+    // Load the new file(s)
     loadResult = load(files);
 
-    try // to apply dead time correction
+    try // to get the dead time correction
     {
-      applyDeadTimeCorrection(loadResult);
-    }
-    catch(std::exception& e)
-    {
-      // If dead correction wasn't applied we can still continue, though should make user be aware
-      // of that
-      g_log.warning() << "No dead time correction applied: " << e.what() << "\n";
+      deadTimes = getDeadTimeCorrection(loadResult);
+    } catch (std::exception &e) {
+      // If dead correction wasn't applied we can still continue, though should
+      // make user aware of that
+      g_log.warning() << "No dead time correction applied: " << e.what()
+                      << "\n";
     }
 
-    groupResult = group(loadResult);
-  }
-  catch(std::exception& e)
-  {
+    // Get the grouping
+    groupResult = getGrouping(loadResult);
+    ITableWorkspace_sptr groupingTable =
+        groupingToTable(groupResult->groupingUsed);
+
+    // Now apply DTC, if used, and grouping
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().createUnmanaged("MuonLoad");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", loadResult->loadedWorkspace);
+    alg->setProperty("Mode", "CorrectAndGroup");
+    if (deadTimes != nullptr) {
+      alg->setProperty("ApplyDeadTimeCorrection", true);
+      alg->setProperty("DeadTimeTable", deadTimes);
+    }
+    alg->setProperty("DetectorGroupingTable", groupingTable);
+    alg->setChild(true);
+    alg->setPropertyValue("OutputWorkspace", "__NotUsed");
+    alg->execute();
+    correctedGroupedWS = alg->getProperty("OutputWorkspace");
+  } catch (std::exception &e) {
     g_log.error(e.what());
     QMessageBox::critical(this, "Loading failed", "Unable to load the file[s]. See log for details.");
 
@@ -1471,7 +1487,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   deleteWorkspaceIfExists(m_grouped_name);
 
   AnalysisDataService::Instance().add(m_workspace_name, loadResult->loadedWorkspace);
-  AnalysisDataService::Instance().add(m_grouped_name, groupResult->groupedWorkspace);
+  AnalysisDataService::Instance().add(m_grouped_name, correctedGroupedWS);
 
   // Get hold of a pointer to a matrix workspace
   MatrixWorkspace_sptr matrix_workspace = firstPeriod(loadResult->loadedWorkspace);
@@ -3084,45 +3100,27 @@ Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename) const
 }
 
 /**
- * Applies dead time correction to the loaded workspace. Updates loadedWorkspace in loadResult.
+ * Gets table of dead time corrections from the loaded workspace.
  * @param loadResult :: Struct with loaded parameters
+ * @returns Table of dead times, or nullptr if no correction used
  */
-void MuonAnalysis::applyDeadTimeCorrection(boost::shared_ptr<LoadResult> loadResult) const
-{
-  if (m_uiForm.deadTimeType->currentText() != "None")
-  {
-    // Dead time table which will be used
-    Workspace_sptr deadTimes;
+Workspace_sptr MuonAnalysis::getDeadTimeCorrection(
+    boost::shared_ptr<LoadResult> loadResult) const {
+  // Dead time table which will be used
+  Workspace_sptr deadTimes = nullptr;
 
-    if (m_uiForm.deadTimeType->currentText() == "From Data File")
-    {
-      if( ! loadResult->loadedDeadTimes )
-        throw std::runtime_error("Data file doesn't appear to contain dead time values");
+  if (m_uiForm.deadTimeType->currentText() != "None") {
+    if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+      if (!loadResult->loadedDeadTimes)
+        throw std::runtime_error(
+            "Data file doesn't appear to contain dead time values");
 
       deadTimes = loadResult->loadedDeadTimes;
+    } else if (m_uiForm.deadTimeType->currentText() == "From Disk") {
+      deadTimes = loadDeadTimes(deadTimeFilename());
     }
-    else if (m_uiForm.deadTimeType->currentText() == "From Disk")
-    {
-      deadTimes = loadDeadTimes( deadTimeFilename() );
-    }
-
-    // Add workspaces to ADS so that they can be processed correctly in case they are groups
-    ScopedWorkspace loadedWsEntry(loadResult->loadedWorkspace);
-    ScopedWorkspace deadTimesEntry(deadTimes);
-
-    ScopedWorkspace correctedWsEntry;
-
-    IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
-    applyCorrAlg->initialize();
-    applyCorrAlg->setRethrows(true);
-    applyCorrAlg->setLogging(false);
-    applyCorrAlg->setPropertyValue("InputWorkspace", loadedWsEntry.name());
-    applyCorrAlg->setPropertyValue("DeadTimeTable", deadTimesEntry.name());
-    applyCorrAlg->setPropertyValue("OutputWorkspace", correctedWsEntry.name());
-    applyCorrAlg->execute();
-
-    loadResult->loadedWorkspace = correctedWsEntry.retrieve();
   }
+  return deadTimes;
 }
 
 /**
