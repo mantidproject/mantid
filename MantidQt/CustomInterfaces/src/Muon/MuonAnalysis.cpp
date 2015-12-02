@@ -3129,7 +3129,7 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 
       Workspace_sptr deadTimes = loadDeadTimes( deadTimeFilename() );
 
-      loadAlg->setProperty("CustomDeadTimeTable", deadTimes);
+      loadAlg->setProperty("DeadTimeTable", deadTimes);
     }
   }
 
