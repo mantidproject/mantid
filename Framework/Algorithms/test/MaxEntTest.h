@@ -3,55 +3,122 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/MaxEnt.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 
-using Mantid::Algorithms::MaxEnt;
+using namespace Mantid::API;
+using Mantid::MantidVec;
 
 class MaxEntTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static MaxEntTest *createSuite() { return new MaxEntTest(); }
-  static void destroySuite( MaxEntTest *suite ) { delete suite; }
+  static void destroySuite(MaxEntTest *suite) { delete suite; }
 
-
-  void test_Init()
-  {
-    MaxEnt alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+  void test_init() {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    TS_ASSERT(alg->isInitialized())
   }
 
-  void test_exec()
-  {
-    // Create test input if necessary
-    MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
+  void test_cosine() {
 
-    MaxEnt alg;
-    // Don't put output in ADS by default
-    alg.setChild(true);
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
+    auto ws = createWorkspace(0.0);
 
-    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
-    // be the type using in declareProperty for the "OutputWorkspace" type.
-    // We can't use auto as it's an implicit conversion.
-    Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
-    TS_FAIL("TODO: Check the results and remove this line");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("Background", 0.01);
+    alg->setProperty("ChiTarget", 50.);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr chi = alg->getProperty("EvolChi");
+    MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
+
+    TS_ASSERT(data);
+    TS_ASSERT(image);
+    TS_ASSERT(chi);
+    TS_ASSERT(angle);
+
+    // Test some values
+    TS_ASSERT_DELTA(data->readY(0)[25], 0.3112, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[26], 0.4893, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[27], 0.6485, 0.0001);
   }
-  
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
+
+  void test_sine() {
+
+    auto ws = createWorkspace(M_PI / 2.);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("Background", 0.01);
+    alg->setProperty("ChiTarget", 50.);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr chi = alg->getProperty("EvolChi");
+    MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
+
+    TS_ASSERT(data);
+    TS_ASSERT(image);
+    TS_ASSERT(chi);
+    TS_ASSERT(angle);
+
+    // Test some values
+    TS_ASSERT_DELTA(data->readY(0)[25], 0.8961, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[26], 0.8257, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[27], 0.7218, 0.0001);
   }
 
+  MatrixWorkspace_sptr createWorkspace(double phase) {
 
+    // Create cosine with phase 'phase'
+
+    // Frequency of the oscillations
+    double w = 1.6;
+    // Maximum time
+    int maxt = 50;
+
+    MantidVec X;
+    MantidVec Y;
+    MantidVec E;
+    for (size_t t = 0; t < maxt; t++) {
+      double x = 2. * M_PI * t / maxt;
+      X.push_back(x);
+      Y.push_back(cos(w * x + phase));
+      E.push_back(0.1);
+    }
+
+    auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWS->initialize();
+    createWS->setChild(true);
+    createWS->setProperty("DataX", X);
+    createWS->setProperty("DataY", Y);
+    createWS->setProperty("DataE", E);
+    createWS->setPropertyValue("OutputWorkspace", "ws");
+    createWS->execute();
+    MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
+
+    return ws;
+  }
 };
-
 
 #endif /* MANTID_ALGORITHMS_MAXENTTEST_H_ */
