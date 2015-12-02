@@ -374,30 +374,31 @@ std::map<std::string, std::string> MuonLoad::validateInputs() {
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
     if (group == nullptr) {
       errors[propInputWS] = "Input workspace is of invalid type";
-    }
-    auto numPeriods = group->getNumberOfEntries();
-    if (numPeriods < 1) {
-      errors[propInputWS] = "Input workspace contains no periods";
-    }
-    // check summed period numbers
-    std::vector<int> invalidPeriods;
-    for (auto period : summedPeriods) {
-      if ((period < 1) || (period > numPeriods)) {
-        invalidPeriods.push_back(period);
+    } else {
+      auto numPeriods = group->getNumberOfEntries();
+      if (numPeriods < 1) {
+        errors[propInputWS] = "Input workspace contains no periods";
       }
-    }
-    if (!invalidPeriods.empty()) {
-      errors[propSummedPeriodSet] = buildErrorString(invalidPeriods);
-      invalidPeriods.clear();
-    }
-    // check subtracted period numbers
-    for (auto period : subtractedPeriods) {
-      if ((period < 1) || (period > numPeriods)) {
-        invalidPeriods.push_back(period);
+      // check summed period numbers
+      std::vector<int> invalidPeriods;
+      for (auto period : summedPeriods) {
+        if ((period < 1) || (period > numPeriods)) {
+          invalidPeriods.push_back(period);
+        }
       }
-    }
-    if (!invalidPeriods.empty()) {
-      errors[propSubtractedPeriodSet] = buildErrorString(invalidPeriods);
+      if (!invalidPeriods.empty()) {
+        errors[propSummedPeriodSet] = buildErrorString(invalidPeriods);
+        invalidPeriods.clear();
+      }
+      // check subtracted period numbers
+      for (auto period : subtractedPeriods) {
+        if ((period < 1) || (period > numPeriods)) {
+          invalidPeriods.push_back(period);
+        }
+      }
+      if (!invalidPeriods.empty()) {
+        errors[propSubtractedPeriodSet] = buildErrorString(invalidPeriods);
+      }
     }
   }
 

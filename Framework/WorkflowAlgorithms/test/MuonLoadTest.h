@@ -277,7 +277,7 @@ public:
     }
   }
 
-  void test_errorReporting() {
+  void test_errorReporting_emptyGrouping() {
     ScopedWorkspace output;
 
     auto emptyGrouping =
@@ -309,6 +309,138 @@ public:
         alg.setPropertyValue("OutputWorkspace", output.name()));
 
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_errorReporting_emptyWS() {
+    MuonLoad alg;
+    alg.setRethrows(true);
+    Workspace_sptr emptyWS;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", emptyWS),
+                     std::invalid_argument);
+  }
+
+  void test_errorReporting_badWSType() {
+    ScopedWorkspace output;
+    std::vector<int> group1, group2;
+    for (int i = 1; i <= 16; ++i)
+      group1.push_back(i);
+    for (int i = 17; i <= 32; ++i)
+      group2.push_back(i);
+    TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
+
+    MuonLoad alg;
+    alg.setRethrows(true);
+    Workspace_sptr badWS = boost::make_shared<TableWorkspace>();
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", badWS));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", output.name()));
+
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_errorReporting_invalidPeriodNumbers() {
+    ScopedWorkspace output;
+    std::vector<int> group1, group2;
+    for (int i = 1; i <= 16; ++i)
+      group1.push_back(i);
+    for (int i = 17; i <= 32; ++i)
+      group2.push_back(i);
+    TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
+
+    MuonLoad alg;
+    alg.setRethrows(true);
+    auto data = loadEMU();
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("SummedPeriodSet", std::vector<int>{1, 9}));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", output.name()));
+
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_errorReporting_noPeriodsSpecified() {
+    ScopedWorkspace output;
+    std::vector<int> group1, group2;
+    for (int i = 1; i <= 16; ++i)
+      group1.push_back(i);
+    for (int i = 17; i <= 32; ++i)
+      group2.push_back(i);
+    TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
+
+    MuonLoad alg;
+    alg.setRethrows(true);
+    auto data = loadEMU();
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", output.name()));
+
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_errorReporting_noDeadTimes() {
+    ScopedWorkspace output;
+    std::vector<int> group1, group2;
+    for (int i = 1; i <= 16; ++i)
+      group1.push_back(i);
+    for (int i = 17; i <= 32; ++i)
+      group2.push_back(i);
+    TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
+
+    MuonLoad alg;
+    alg.setRethrows(true);
+    auto data = loadEMU();
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyDeadTimeCorrection", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", output.name()));
+
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
     TS_ASSERT(!alg.isExecuted());
   }
 
