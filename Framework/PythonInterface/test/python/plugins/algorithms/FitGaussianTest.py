@@ -24,7 +24,7 @@ class FitGaussianTest(unittest.TestCase):
 
     def _veryNarrowPeakWorkspace(self):
         self._gaussianWorkspace(5,1,.05)
-        
+
     def test_errors(self):
         """Conditions that raise RuntimeError.
         """
@@ -33,17 +33,13 @@ class FitGaussianTest(unittest.TestCase):
             # bad index
             fitResult = FitGaussian(self.ws,1)
 
-    def test_zeroSignal(self):
-        """Non-positive signal -> returns (0.0,0.0)
+    def test_noFit(self):
+        """Cases where fit is not possible.
         """
         self._linearWorkspace(0)
         fitResult = FitGaussian(self.ws,0)
         self.assertTupleEqual((0.0,0.0), fitResult)
 
-    def test_narrowPeak(self):
-        """When a peak is just a blip.
-        """
-        # only one-sample peak
         self._veryNarrowPeakWorkspace()
         fitResult = FitGaussian(self.ws,0)
         self.assertTupleEqual((0.0,0.0), fitResult)
@@ -61,7 +57,7 @@ class FitGaussianTest(unittest.TestCase):
         self.assertLess(diffPeakCentre,.03)
         self.assertLess(diffSigma,     1e-6)
 
-    def test_fewPeaks(self):
+    def test_guessedPeaks(self):
         """Test that generated Gaussian peaks are reasonably well guessed.
         """
         self._guessPeak(2,10,.7)

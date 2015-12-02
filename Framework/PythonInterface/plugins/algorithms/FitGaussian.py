@@ -4,28 +4,23 @@ from mantid.simpleapi import Fit
 import numpy as np
 
 class FitGaussian(PythonAlgorithm):
+    # pylint: disable = no-init
 
     def category(self):
         return "Optimization"
 
     def PyInit(self):
         # input
-        self.declareProperty(
-            MatrixWorkspaceProperty("Workspace", "", Direction.Input),
-            doc="input workspace")
-        self.declareProperty(name="Index",
-            defaultValue=0, validator=IntBoundedValidator(lower=0),
-            doc="workspace index - which spectrum to fit")
+        self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.Input),
+                             doc="input workspace")
+        self.declareProperty(name="Index",defaultValue=0,validator=IntBoundedValidator(lower=0),
+                             doc="workspace index - which spectrum to fit")
 
         # output
-        self.declareProperty(name="PeakCentre",
-            defaultValue=0.,
-            direction=Direction.Output,
-            doc="the centre of the fitted peak")
-        self.declareProperty(name="Sigma",
-            defaultValue=0.,
-            direction=Direction.Output,
-            doc="the sigma of the fitted peak; 0. if fitting was not successful")
+        self.declareProperty(name="PeakCentre",defaultValue=0.,direction=Direction.Output,
+                             doc="the centre of the fitted peak")
+        self.declareProperty(name="Sigma",defaultValue=0.,direction=Direction.Output,
+                             doc="the sigma of the fitted peak; 0. if fitting was not successful")
 
     def _setOutput(self,peakCentre,sigma):
         self.setProperty("PeakCentre",peakCentre)
@@ -71,9 +66,9 @@ class FitGaussian(PythonAlgorithm):
             self._warning("Spectrum " + str(index) + " in workspace " + workspace.getName() +
                           " has a too narrow peak. Cannot guess sigma. Check your data.")
             return
-            
-        minIndex = x_values[indices[0,0]]
-        maxIndex = x_values[indices[-1,0]]
+
+        minIndex = indices[0,0]
+        maxIndex = indices[-1,0]
 
         # full width at half maximum: fwhm = sigma * (2.*np.sqrt(2.*np.log(2.)))
         fwhm  = np.fabs(x_values[maxIndex] - x_values[minIndex])
@@ -85,7 +80,8 @@ class FitGaussian(PythonAlgorithm):
         startX = tryCentre - 3.0*fwhm
         endX   = tryCentre + 3.0*fwhm
 
-        fitStatus, chiSq, covarianceTable, paramTable = Fit(
+        # pylint: disable = unpacking-non-sequence, assignment-from-none
+        fitStatus, _, _, paramTable = Fit(
             InputWorkspace=workspace, Function=fitFun,
             CreateOutput=True, OutputParametersOnly=True,
             StartX=startX, EndX=endX)
