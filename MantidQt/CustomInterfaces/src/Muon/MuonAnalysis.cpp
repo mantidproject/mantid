@@ -500,10 +500,11 @@ MuonAnalysis::PlotType MuonAnalysis::parsePlotType(QComboBox* selector)
 MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, int tableRow, PlotType plotType,
   bool isRaw)
 {
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("MuonCalculateAsymmetry");
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("MuonLoad");
 
   alg->initialize();
 
+  // ---- Input workspace ----
   auto loadedWS =
       AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
   auto inputGroup = boost::make_shared<WorkspaceGroup>();
@@ -512,7 +513,7 @@ MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, in
     // If is a group, will need to handle periods
     for (int i = 0; i < group->getNumberOfEntries(); i++) {
       auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
-      inputGroup->addWorkspace(prepareAnalysisWorkspace(ws, isRaw));
+      inputGroup->addWorkspace(ws);
     }
     // Parse selected operation
     const std::string summedPeriods =
@@ -523,12 +524,31 @@ MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, in
     alg->setProperty("SubtractedPeriodSet", subtractedPeriods);
   } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
     // Put this single WS into a group and set it as the input property
-    inputGroup->addWorkspace(prepareAnalysisWorkspace(ws, isRaw));
+    inputGroup->addWorkspace(ws);
   } else {
     throw std::runtime_error("Unsupported workspace type");
   }
   alg->setProperty("InputWorkspace", inputGroup);
 
+  // ---- Time zero correction ----
+  alg->setProperty("TimeZero", timeZero());           // user input
+  alg->setProperty("LoadedTimeZero", m_dataTimeZero); // from file
+
+  // ---- X axis options ----
+  alg->setProperty("Xmin", startTime());
+
+  double Xmax = finishTime();
+  if (Xmax != EMPTY_DBL()) {
+    alg->setProperty("Xmax", Xmax);
+  }
+
+  // ---- Rebin parameters ----
+  std::string params = rebinParams(loadedWS);
+  if (!isRaw && !params.empty()) {
+    alg->setProperty("RebinParams", params);
+  }
+
+  // ---- Analysis ----
   if ( itemType == Group )
   {
     std::string outputType;
@@ -580,69 +600,6 @@ MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, in
   alg->execute();
 
   return alg->getProperty("OutputWorkspace");
-}
-
-/**
- * Crop/rebins/offsets the workspace according to interface settings.  
- * @param ws    :: Loaded data which to prepare
- * @param isRaw :: If true, Rebin is not applied
- * @return Prepared workspace
- */ 
-MatrixWorkspace_sptr MuonAnalysis::prepareAnalysisWorkspace(MatrixWorkspace_sptr ws, bool isRaw)
-{
-  // Adjust for time zero if necessary
-  if ( m_dataTimeZero != timeZero())
-  {
-      double shift = m_dataTimeZero - timeZero();
-
-      Mantid::API::IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("ChangeBinOffset");
-      alg->initialize();
-      alg->setChild(true);
-      alg->setProperty("InputWorkspace", ws);
-      alg->setProperty("Offset", shift);
-      alg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
-      alg->execute();    
-
-      ws = alg->getProperty("OutputWorkspace");
-  }
-
-  // Crop workspace
-  Mantid::API::IAlgorithm_sptr cropAlg = AlgorithmManager::Instance().createUnmanaged("CropWorkspace");
-  cropAlg->initialize();
-  cropAlg->setChild(true);
-  cropAlg->setProperty("InputWorkspace", ws);
-  cropAlg->setProperty("Xmin", startTime());
-
-  double Xmax = finishTime();
-  if(Xmax != EMPTY_DBL())
-  {
-    cropAlg->setProperty("Xmax", Xmax);
-  }
-
-  cropAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
-  cropAlg->execute();
-
-  ws = cropAlg->getProperty("OutputWorkspace");
-
-  std::string params = rebinParams(ws);
-
-  // Rebin data if option set in Plot Options and we don't want raw workspace
-  if ( !isRaw && !params.empty())
-  {
-    // Rebin data
-    IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().createUnmanaged("Rebin");
-    rebinAlg->initialize();
-    rebinAlg->setChild(true);
-    rebinAlg->setProperty("InputWorkspace", ws);
-    rebinAlg->setProperty("Params", params);
-    rebinAlg->setProperty("FullBinsOnly", true);
-    rebinAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
-    rebinAlg->execute();
-
-    ws = rebinAlg->getProperty("OutputWorkspace");
-  }
-
-  return ws;
 }
 
 /**

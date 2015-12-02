@@ -283,9 +283,6 @@ private:
   /// is grouping set
   bool isGroupingSet() const;
 
-  /// Crop/rebins/offsets the workspace according to interface settings. 
-  MatrixWorkspace_sptr prepareAnalysisWorkspace(MatrixWorkspace_sptr ws, bool isRaw);
-
   /// Creates workspace for specified group/pair and plots it 
   void plotItem(ItemType itemType, int tableRow, PlotType plotType);
   
