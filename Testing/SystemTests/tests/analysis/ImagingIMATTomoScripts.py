@@ -33,21 +33,21 @@ class ImagingIMATTomoTests(unittest.TestCase):
         _data_wsname = 'small_img_stack'
 
         if not self.__class__.data_wsg:
-            filename_string = ",".join(self._raw_files)
+            filename_string = ",".join(_raw_files)
             # Load all images into a workspace group, one matrix workspace per image
             self.__class__.data_wsg = sapi.LoadFITS(Filename=filename_string,
                                                     LoadAsRectImg=True,
-                                                    OutputWorkspace=self._data_wsname)
-            self.__class__.data_vol = self._ws_group_to_data_vol(self._data_wsg)
+                                                    OutputWorkspace=_data_wsname)
+            self.__class__.data_vol = self._ws_group_to_data_vol(self.data_wsg)
 
         # double-check before every test that the input workspaces are available and of the
         # correct types
-        if not self._data_wsg or not self._data_wsname in mtd:
+        if not self.data_wsg or not _data_wsname in mtd:
             raise RuntimeError("Input workspace not available")
 
         # this could use assertIsInstance (new in version 2.7)
-        self.assertTrue(isinstance(self._data_wsg, WorkspaceGroup))
-        img_workspaces = [ self._data_wsg.getItem(i) for i in range(0, self._data_wsg.size()) ]
+        self.assertTrue(isinstance(self.data_wsg, WorkspaceGroup))
+        img_workspaces = [ self.data_wsg.getItem(i) for i in range(0, self.data_wsg.size()) ]
         for wksp in img_workspaces:
             self.assertTrue(isinstance(wksp, MatrixWorkspace))
 
@@ -58,7 +58,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
     # Remember: use this when rhel6/Python 2.6 is deprecated
     # @classmethod
     # def tearDownClass(cls):
-    #    sapi.DeleteWorkspace(cls._data_wsg)
+    #    sapi.DeleteWorkspace(cls.data_wsg)
 
     @staticmethod
     def _ws_group_to_data_vol(ws_group):
@@ -86,16 +86,16 @@ class ImagingIMATTomoTests(unittest.TestCase):
         import IMAT.prep as iprep
 
         with self.assertRaises(ValueError):
-            iprep.filters.scale_down(self._data_vol, 9)
+            iprep.filters.scale_down(self.data_vol, 9)
 
         with self.assertRaises(ValueError):
-            iprep.filters.scale_down(self._data_vol, 1000)
+            iprep.filters.scale_down(self.data_vol, 1000)
 
         with self.assertRaises(ValueError):
-            iprep.filters.scale_down(self._data_vol, 513)
+            iprep.filters.scale_down(self.data_vol, 513)
 
         with self.assertRaises(ValueError):
-            iprep.filters.scale_down(self._data_vol, 2, method='fail-now')
+            iprep.filters.scale_down(self.data_vol, 2, method='fail-now')
 
     def test_scale_down_ok(self):
         import IMAT.prep as iprep
@@ -105,26 +105,26 @@ class ImagingIMATTomoTests(unittest.TestCase):
         scaled = iprep.filters.scale_down(dummy, 2)
         self.assertEquals(scaled.shape, (dummy_shape[0], dummy_shape[1]/2, dummy_shape[2]/2))
 
-        scaled = iprep.filters.scale_down(self._data_vol, 2)
+        scaled = iprep.filters.scale_down(self.data_vol, 2)
 
         self.assertEquals(len(scaled.shape), 3)
-        self.assertEquals(self._data_vol.shape[0], scaled.shape[0])
-        self.assertEquals(self._data_vol.shape[1]/2, scaled.shape[1])
-        self.assertEquals(self._data_vol.shape[2]/2, scaled.shape[2])
+        self.assertEquals(self.data_vol.shape[0], scaled.shape[0])
+        self.assertEquals(self.data_vol.shape[1]/2, scaled.shape[1])
+        self.assertEquals(self.data_vol.shape[2]/2, scaled.shape[2])
 
     def test_crop_ok(self):
         import IMAT.prep as iprep
 
         coords = [2, 2, 100, 100]
-        cropped = iprep.filters.crop_vol(self._data_vol, coords)
+        cropped = iprep.filters.crop_vol(self.data_vol, coords)
 
-        self.assertTrue(isinstance(self._data_vol, np.ndarray))
+        self.assertTrue(isinstance(self.data_vol, np.ndarray))
         self.assertTrue(isinstance(cropped, np.ndarray))
 
-        expected_shape = (self._data_vol.shape[0], coords[3]-coords[1], coords[2]-coords[0])
+        expected_shape = (self.data_vol.shape[0], coords[3]-coords[1], coords[2]-coords[0])
         self.assertEqual(cropped.shape, expected_shape)
 
-        orig_cropped_equals = self._data_vol[:, coords[1]:coords[3], coords[0]:coords[2]] == cropped
+        orig_cropped_equals = self.data_vol[:, coords[1]:coords[3], coords[0]:coords[2]] == cropped
         self.assertTrue(orig_cropped_equals.all())
 
     def test_correct_import_excepts(self):
@@ -151,16 +151,16 @@ class ImagingIMATTomoTests(unittest.TestCase):
     def test_circular_mask_ok(self):
         import IMAT.prep as iprep
 
-        masked = iprep.filters.circular_mask(self._data_vol, ratio=0.0)
-        np.testing.assert_allclose(masked, self._data_vol,
+        masked = iprep.filters.circular_mask(self.data_vol, ratio=0.0)
+        np.testing.assert_allclose(masked, self.data_vol,
                                    err_msg="An empty circular mask not behaving as expected")
 
-        masked = iprep.filters.circular_mask(self._data_vol, ratio=1.0, mask_out_val=0)
+        masked = iprep.filters.circular_mask(self.data_vol, ratio=1.0, mask_out_val=0)
         self.assertEquals(masked[2, 2, 3], 0,
                           msg="Circular mask: wrong values outside")
 
         some_val = -1.23456
-        masked = iprep.filters.circular_mask(self._data_vol, ratio=1.0, mask_out_val=some_val)
+        masked = iprep.filters.circular_mask(self.data_vol, ratio=1.0, mask_out_val=some_val)
 
         for coords in [(3, 510, 0), (2,2,3), (1,0,0), (0, 500, 5)]:
             peek_out = masked[coords]
@@ -170,7 +170,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         for coords in [(3, 200, 200), (2, 50, 20), (1, 300, 100), (0, 400, 200)]:
             peek_in = masked[coords]
-            expected_val = self._data_vol[coords]
+            expected_val = self.data_vol[coords]
             self.assertEquals(peek_in, expected_val,
                               msg="Circular mask: wrong value found inside. Expected: {0}, found: {1}".
                               format(expected_val, peek_in))
@@ -179,14 +179,14 @@ class ImagingIMATTomoTests(unittest.TestCase):
         import IMAT.prep as iprep
 
         with self.assertRaises(ValueError):
-            iprep.filters.remove_stripes_ring_artifacts(self._data_vol, '')
+            iprep.filters.remove_stripes_ring_artifacts(self.data_vol, '')
 
         with self.assertRaises(ValueError):
-            iprep.filters.remove_stripes_ring_artifacts(self._data_vol,
+            iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
                                                         'funny-method-doesnt-exist')
 
         with self.assertRaises(RuntimeError):
-            iprep.filters.remove_stripes_ring_artifacts(self._data_vol,
+            iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
                                                         'fourier-wavelet')
 
 # Just run the unittest tests defined above
