@@ -623,7 +623,7 @@ std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
 * @return :: The calculated chi-square
 */
 double MaxEnt::calculateChi(const SearchDirections &dirs, double a,
-                      std::vector<double> &b) {
+                            std::vector<double> &b) {
 
   size_t dim = dirs.c2.size().first;
 

@@ -48,6 +48,31 @@ one step closer to the solution:
 
 .. math:: \mathbf{\rho} = \mathbf{\rho} + \delta \mathbf{\rho}
 
+Output Workspaces
+-----------------
+
+There are four output workspaces: *ReconstructedImage* and *ReconstructedData* contain the image and
+calculated data respectively. The latter can be used as a test to check that the reconstructed data
+approaches the experimental, measured data. The first one corresponds to its Fourier transform, and
+so it containes twice the original number of spectra, as the Fourier transform will be a complex signal
+in general. The real and imaginary parts are organized as follows: assuming your input workspace has
+:math:`N` spectra, the real part of the reconstructed image for spectrum :math:`i` corresponds to
+spectrum :math:`i` in *ReconstructedImage*, while the imaginary part can be found in spectrum :math:`N+i`.
+
+At present, the algorithm runs until a solution was found. An image is considered to be a maximum entropy
+solution when the following two conditions are met simultaneously:
+
+.. math:: \chi^2_{Target} - \chi^2 < \epsilon_1, \qquad \frac{1}{2} \left| \frac{\nabla S}{\left|\nabla S\right|} - \frac{\nabla \chi^2}{\left|\nabla \chi^2\right|} \right| < \epsilon_2
+
+While one of this conditions is not satisfied the algorithm keeps running until it reaches the maximum
+number of iterations. When the maximum number of iteration is reached, the algorithm returns the last
+reconstructed image and its corresponding calculated data. The user must ensure that the result is a
+true solution by checking manually that the above conditions are satisfied. This can be done by inspecting
+the output workspaces *EvolChi* and *EvolAngle*. They record the evolution of :math:`\chi^2` and the
+angle between :math:`\nabla S` and :math:`\nabla \chi^2` at each iteration, and are set to zero when
+a solution was found. This means that, if in these output workspaces the last value is zero, an image
+satisfying the above conditions was found.
+
 Usage
 -----
 
