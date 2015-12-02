@@ -657,7 +657,6 @@ def _get_args_from_lhs(lhs, algm_obj):
                 ret_names = ret_names[1:]
             elif len(ret_names) > 0:
                 extra_args[p.name] = ret_names[name]
-                ret_names = ret_names[name:]
 
         name += 1
 
