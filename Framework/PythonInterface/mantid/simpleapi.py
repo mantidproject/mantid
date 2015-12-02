@@ -654,7 +654,7 @@ def _get_args_from_lhs(lhs, algm_obj):
         if _is_workspace_property(p):
             if i<len(ret_names):
                 extra_args[p.name] = ret_names[i] # match argument to property name
-            else:
+            elif len(ret_names) > 0:
                 extra_args[p.name] = ret_names[0]+"_Workspace_"+str(id) # default workspace name if none provided
             id += 1
         i += 1
