@@ -13,30 +13,49 @@ class ImagingIMATTomoTests(unittest.TestCase):
     methods of tomographic reconstruction scripts
     """
 
-    @classmethod
-    def setUpClass(cls):
-        # example files to make a stack of images
-        cls._raw_files = ['LARMOR00005328_Metals_000_SummedImg_1.fits',
-                          'LARMOR00005329_Metals_000_SummedImg_2.fits',
-                          'LARMOR00005330_Metals_000_SummedImg_3.fits',
-                          'LARMOR00005331_Metals_000_SummedImg_4.fits',
-                          'LARMOR00005332_Metals_000_SummedImg_5.fits'
-                         ]
+    # example files to make a stack of images
+    _raw_files = ['LARMOR00005328_Metals_000_SummedImg_1.fits',
+                  'LARMOR00005329_Metals_000_SummedImg_2.fits',
+                  'LARMOR00005330_Metals_000_SummedImg_3.fits',
+                  'LARMOR00005331_Metals_000_SummedImg_4.fits',
+                  'LARMOR00005332_Metals_000_SummedImg_5.fits'
+                 ]
 
-        # data volume from a 'stack' of images
-        cls._data_wsname = 'small_img_stack'
+    # data volume from a 'stack' of images
+    _data_wsname = 'small_img_stack'
 
-        filename_string = ",".join(cls._raw_files)
-        # Load all images into a workspace group, one matrix workspace per image
-        cls._data_wsg = sapi.LoadFITS(Filename=filename_string,
-                                      LoadAsRectImg=True,
-                                      OutputWorkspace=cls._data_wsname)
+    # group of image workspaces
+    _data_wsg = None
 
-        cls._data_vol = cls._ws_group_to_data_vol(cls._data_wsg)
+    # This should rather use setUpClass() - not supported in Python 2.6 (rhel6)
+    def setUp(self):
+        if not self.__class__._data_wsg:
+            filename_string = ",".join(self.__class__._raw_files)
+            # Load all images into a workspace group, one matrix workspace per image
+            self.__class__._data_wsg = sapi.LoadFITS(Filename=filename_string,
+                                                     LoadAsRectImg=True,
+                                                     OutputWorkspace=self._data_wsname)
+            self.__class__._data_vol = self._ws_group_to_data_vol(self._data_wsg)
 
-    @classmethod
-    def tearDownClass(cls):
-        sapi.DeleteWorkspace(cls._data_wsg)
+        # double-check before every test that the input workspaces are available and of the
+        # correct types
+        if not self._data_wsg or not self._data_wsname in mtd:
+            raise RuntimeError("Input workspace not available")
+
+        # this could use assertIsInstance (new in version 2.7)
+        self.assertTrue(isinstance(self._data_wsg, WorkspaceGroup))
+        img_workspaces = [ self._data_wsg.getItem(i) for i in range(0, self._data_wsg.size()) ]
+        for wksp in img_workspaces:
+            self.assertTrue(isinstance(wksp, MatrixWorkspace))
+
+    # Remember: use this when rhel6/Python 2.6 is deprecated
+    # @classmethod
+    # def setUpClass(cls):
+
+    # Remember: use this when rhel6/Python 2.6 is deprecated
+    # @classmethod
+    # def tearDownClass(cls):
+    #    sapi.DeleteWorkspace(cls._data_wsg)
 
     @staticmethod
     def _ws_group_to_data_vol(ws_group):
@@ -59,19 +78,6 @@ class ImagingIMATTomoTests(unittest.TestCase):
                 data_vol[zidx, yidx, :] = wksp.readY(yidx)
 
         return data_vol
-
-
-    def setUp(self):
-        # double-check before every test that the input workspaces are available and of the
-        # correct types
-        if not self._data_wsg or not self._data_wsname in mtd:
-            raise RuntimeError("Input workspace not available")
-
-        # this could use assertIsInstance (new in version 2.7)
-        self.assertTrue(isinstance(self._data_wsg, WorkspaceGroup))
-        img_workspaces = [ self._data_wsg.getItem(i) for i in range(0, self._data_wsg.size()) ]
-        for wksp in img_workspaces:
-            self.assertTrue(isinstance(wksp, MatrixWorkspace))
 
     def test_scale_down_errors(self):
         import IMAT.prep as iprep
