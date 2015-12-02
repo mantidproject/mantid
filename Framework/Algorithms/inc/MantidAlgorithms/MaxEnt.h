@@ -6,9 +6,10 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxEnt : Entropy maximization algorithm as described in the article by J.
-  Skilling and R. K. Bryan: "Maximum entropy image reconstruction: general
-  algorithm", Mon. Not. R. astr. Soc. (1984) 211, 111-124
+/** MaxEnt : Entropy maximization algorithm following the approach described in
+  the article by J. Skilling and R. K. Bryan: "Maximum entropy image
+  reconstruction: general algorithm", Mon. Not. R. astr. Soc. (1984) 211,
+  111-124
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -39,20 +40,22 @@ class SearchDirections {
   // SB eq. 24
 public:
   SearchDirections(size_t dim, size_t points) {
-    xi = Kernel::DblMatrix(dim, points);
-    eta = Kernel::DblMatrix(dim, points);
+    xIm = Kernel::DblMatrix(dim, points);
+    xDat = Kernel::DblMatrix(dim, points);
     s1 = Kernel::DblMatrix(dim, 1);
     c1 = Kernel::DblMatrix(dim, 1);
     s2 = Kernel::DblMatrix(dim, dim);
     c2 = Kernel::DblMatrix(dim, dim);
   };
-  Kernel::DblMatrix xi;  // Image space
-  Kernel::DblMatrix eta; // Data space
-  Kernel::DblMatrix s1;  // S_mu
-  Kernel::DblMatrix c1;  // C_mu
-  Kernel::DblMatrix s2;  // g_mu_nu
-  Kernel::DblMatrix c2;  // M_mu_nu
+  Kernel::DblMatrix xIm;  // Search directions in image space
+  Kernel::DblMatrix xDat; // Search directions in data space
+  Kernel::DblMatrix s1;   // Quadratic coefficient S_mu
+  Kernel::DblMatrix c1;   // Quadratic coefficient C_mu
+  Kernel::DblMatrix s2;   // Quadratic coefficient g_mu_nu
+  Kernel::DblMatrix c2;   // Quadratic coefficient M_mu_nu
+  // Chi-sq
   double chisq;
+  // Non-parallelism between S and C (angle)
   double angle;
 };
 
@@ -80,9 +83,9 @@ private:
   /// Validate the input properties
   std::map<std::string, std::string> validateInputs();
   /// Transforms from image space to data space
-  std::vector<double> opus(const std::vector<double> &input);
+  std::vector<double> transformImageToData(const std::vector<double> &input);
   /// Transforms from data space to image space
-  std::vector<double> tropus(const std::vector<double> &input);
+  std::vector<double> transformDataToImage(const std::vector<double> &input);
   /// Calculates chi-square
   double getChiSq(const std::vector<double> &data,
                   const std::vector<double> &errors,
@@ -100,8 +103,8 @@ private:
                                              const std::vector<double> &image,
                                              double background);
   // Calculates chi-square by solving the matrix equation A*x = b
-  double chiNow(const SearchDirections &coeffs, double a,
-                std::vector<double> &beta);
+  double calculateChi(const SearchDirections &coeffs, double a,
+                      std::vector<double> &beta);
   // Calculates the SVD of the input matrix A
   void singularValueDecomposition(const Kernel::DblMatrix &A,
                                   Kernel::DblMatrix &aa, Kernel::DblMatrix &zz,

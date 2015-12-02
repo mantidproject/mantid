@@ -214,12 +214,12 @@ void MaxEnt::exec() {
       // Calculate the new image
       for (size_t i = 0; i < npoints; i++) {
         for (size_t k = 0; k < beta.size(); k++) {
-          newImage[i] = newImage[i] + beta[k] * dirs.xi[k][i];
+          newImage[i] = newImage[i] + beta[k] * dirs.xIm[k][i];
         }
       }
 
       // Calculate the new Chi-square
-      auto dataC = opus(newImage);
+      auto dataC = transformImageToData(newImage);
       double chiSq = getChiSq(data, error, dataC);
 
       // Record the evolution of Chi-square and angle(S,C)
@@ -241,7 +241,7 @@ void MaxEnt::exec() {
     } // iterations
 
     // Get calculated data
-    std::vector<double> solutionData = opus(newImage);
+    std::vector<double> solutionData = transformImageToData(newImage);
 
     // Populate the output workspaces
     populateOutputWS(inWS, s, nspec, solutionData, newImage, outDataWS,
@@ -273,7 +273,8 @@ void MaxEnt::exec() {
 * @param input :: [input] An input vector in image space
 * @return :: The input vector transformed to data space
 */
-std::vector<double> MaxEnt::opus(const std::vector<double> &input) {
+std::vector<double>
+MaxEnt::transformImageToData(const std::vector<double> &input) {
 
   /* Performs backward Fourier transform */
 
@@ -309,7 +310,8 @@ std::vector<double> MaxEnt::opus(const std::vector<double> &input) {
 * @param input :: [input] An input vector in data space
 * @return :: The input vector converted to image space
 */
-std::vector<double> MaxEnt::tropus(const std::vector<double> &input) {
+std::vector<double>
+MaxEnt::transformDataToImage(const std::vector<double> &input) {
 
   /* Performs forward Fourier transform */
 
@@ -365,13 +367,13 @@ SearchDirections MaxEnt::calculateSearchDirections(
   size_t npoints = data.size();
 
   // Calculate data from start image
-  std::vector<double> dataC = opus(image);
+  std::vector<double> dataC = transformImageToData(image);
   // Calculate Chi-square
   double chiSq = getChiSq(data, error, dataC);
 
   // Gradient of C (Chi)
   std::vector<double> cgrad = getCGrad(data, error, dataC);
-  cgrad = tropus(cgrad);
+  cgrad = transformDataToImage(cgrad);
   // Gradient of S (Entropy)
   std::vector<double> sgrad = getSGrad(image, background);
 
@@ -403,24 +405,24 @@ SearchDirections MaxEnt::calculateSearchDirections(
   // Calculate the search directions
 
   // Temporary vectors (image space)
-  std::vector<double> xi0(npoints, 0.);
-  std::vector<double> xi1(npoints, 0.);
+  std::vector<double> xIm0(npoints, 0.);
+  std::vector<double> xIm1(npoints, 0.);
 
   for (size_t i = 0; i < npoints; i++) {
-    xi0[i] = fabs(image[i]) * cgrad[i] / cnorm;
-    xi1[i] = fabs(image[i]) * sgrad[i] / snorm;
+    xIm0[i] = fabs(image[i]) * cgrad[i] / cnorm;
+    xIm1[i] = fabs(image[i]) * sgrad[i] / snorm;
     // xi1[i] = image[i] * (sgrad[i] / snorm - cgrad[i] / cnorm);
   }
 
   // Temporary vectors (data space)
-  std::vector<double> eta0 = opus(xi0);
-  std::vector<double> eta1 = opus(xi1);
+  std::vector<double> xDat0 = transformImageToData(xIm0);
+  std::vector<double> xDat1 = transformImageToData(xIm1);
 
   // Store the search directions
-  dirs.xi.setRow(0, xi0);
-  dirs.xi.setRow(1, xi1);
-  dirs.eta.setRow(0, eta0);
-  dirs.eta.setRow(1, eta1);
+  dirs.xIm.setRow(0, xIm0);
+  dirs.xIm.setRow(1, xIm1);
+  dirs.xDat.setRow(0, xDat0);
+  dirs.xDat.setRow(1, xDat1);
 
   // Now compute the quadratic coefficients SB. eq 24
 
@@ -428,10 +430,10 @@ SearchDirections MaxEnt::calculateSearchDirections(
   for (size_t k = 0; k < dim; k++) {
     dirs.c1[k][0] = dirs.s1[k][0] = 0.;
     for (size_t i = 0; i < npoints; i++) {
-      dirs.s1[k][0] += dirs.xi[k][i] * sgrad[i];
-      dirs.c1[k][0] += dirs.xi[k][i] * cgrad[i];
+      dirs.s1[k][0] += dirs.xIm[k][i] * sgrad[i];
+      dirs.c1[k][0] += dirs.xIm[k][i] * cgrad[i];
     }
-    // Note: the factor chiSQ has to go either here or in ChiNow
+    // Note: the factor chiSQ has to go either here or in calculateChi
     dirs.c1[k][0] /= chiSq;
   }
 
@@ -443,10 +445,10 @@ SearchDirections MaxEnt::calculateSearchDirections(
       for (size_t i = 0; i < npoints; i++) {
         if (error[i])
           dirs.c2[k][l] +=
-              dirs.eta[k][i] * dirs.eta[l][i] / error[i] / error[i];
-        dirs.s2[k][l] -= dirs.xi[k][i] * dirs.xi[l][i] / fabs(image[i]);
+              dirs.xDat[k][i] * dirs.xDat[l][i] / error[i] / error[i];
+        dirs.s2[k][l] -= dirs.xIm[k][i] * dirs.xIm[l][i] / fabs(image[i]);
       }
-      // Note: the factor chiSQ has to go either here or in ChiNow
+      // Note: the factor chiSQ has to go either here or in calculateChi
       dirs.c2[k][l] *= 2.0 / chiSq;
       dirs.s2[k][l] *= 1.0 / background;
     }
@@ -559,8 +561,8 @@ std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
 
   std::vector<double> beta(dim, 0); // Solution
 
-  double chiMin = chiNow(dirs, aMin, beta); // Chi at alpha min
-  double chiMax = chiNow(dirs, aMax, beta); // Chi at alpha max
+  double chiMin = calculateChi(dirs, aMin, beta); // Chi at alpha min
+  double chiMax = calculateChi(dirs, aMax, beta); // Chi at alpha max
 
   double dchiMin = chiMin - chiTarget; // Delta = max - target
   double dchiMax = chiMax - chiTarget; // Delta = min - target
@@ -569,9 +571,9 @@ std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
     // ChiTarget could be outside the range [chiMin, chiMax]
 
     if (fabs(dchiMin) < fabs(dchiMax)) {
-      chiMin = chiNow(dirs, aMin, beta);
+      chiMin = calculateChi(dirs, aMin, beta);
     } else {
-      chiMax = chiNow(dirs, aMax, beta);
+      chiMax = calculateChi(dirs, aMax, beta);
     }
     return beta;
     //    throw std::runtime_error("Error in alpha chop\n");
@@ -586,7 +588,7 @@ std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
   while ((fabs(eps) > chiEps) && (iter < alphaIter)) {
 
     double aMid = 0.5 * (aMin + aMax);
-    double chiMid = chiNow(dirs, aMid, beta);
+    double chiMid = calculateChi(dirs, aMid, beta);
 
     eps = chiMid - chiTarget;
 
@@ -620,7 +622,7 @@ std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
 * @param b :: [output] The solution
 * @return :: The calculated chi-square
 */
-double MaxEnt::chiNow(const SearchDirections &dirs, double a,
+double MaxEnt::calculateChi(const SearchDirections &dirs, double a,
                       std::vector<double> &b) {
 
   size_t dim = dirs.c2.size().first;
