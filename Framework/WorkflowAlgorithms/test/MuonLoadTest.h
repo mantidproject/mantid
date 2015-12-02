@@ -7,13 +7,28 @@
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidKernel/make_unique.h"
 
 using Mantid::WorkflowAlgorithms::MuonLoad;
+using Mantid::DataHandling::LoadMuonNexus2;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
+/// Holds data loaded from file
+struct LoadedData {
+  Workspace_sptr workspace;
+  double timeZero;
+  Workspace_sptr grouping;
+};
+
+/**
+ * Tests for MuonLoad. Note that testing of the calculation (group counts, group
+ * asymmetry, pair asymmetry) is covered in the tests of
+ * IMuonAsymmetryCalculator, so these tests are for the other parts of MuonLoad.
+ */
 class MuonLoadTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -40,13 +55,19 @@ public:
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
+    auto data = loadEMU();
+
     MuonLoad alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "emu00006473.nxs"));
+        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
     TS_ASSERT_THROWS_NOTHING(
@@ -89,12 +110,16 @@ public:
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
+    auto data = loadMUSR();
+
     MuonLoad alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "MUSR00015189.nxs"));
+        alg.setProperty("InputWorkspace", data->workspace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", "1,2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
@@ -139,11 +164,17 @@ public:
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
+    auto data = loadEMU();
+
     MuonLoad alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "emu00006473.nxs"));
+        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
@@ -201,15 +232,21 @@ public:
       newRow << (i + 1) << 1.0;
     }
 
+    auto data = loadEMU();
+
     MuonLoad alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "emu00006473.nxs"));
+        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyDeadTimeCorrection", true));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CustomDeadTimeTable", deadTimes));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeadTimeTable", deadTimes));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
     TS_ASSERT_THROWS_NOTHING(
@@ -249,16 +286,23 @@ public:
     MuonLoad alg;
     alg.setRethrows(true);
 
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Filename", "non-existent-file.nxs"),
-                     std::invalid_argument);
-
+    // Single-period input
+    auto data = loadEMU();
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "emu00006473.nxs"));
+        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
+
+    // Test empty grouping
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("SubtractedPeriodSet", std::vector<int>{}));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("DetectorGroupingTable", emptyGrouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
     TS_ASSERT_THROWS_NOTHING(
@@ -272,10 +316,15 @@ public:
     ScopedWorkspace output;
 
     try {
+      auto load = loadEMU();
       MuonLoad alg;
       alg.setRethrows(true);
       alg.initialize();
-      alg.setPropertyValue("Filename", "emu00006473.nxs");
+      alg.setProperty("InputWorkspace", load->workspace);
+      alg.setProperty("SummedPeriodSet", std::vector<int>{1});
+      alg.setProperty("LoadedTimeZero", load->timeZero);
+      alg.setProperty("DetectorGroupingTable", load->grouping);
+      alg.setProperty("Mode", "Combined");
       alg.setProperty("OutputType", "GroupCounts");
       alg.setProperty("GroupIndex", 0);
       alg.setPropertyValue("OutputWorkspace", output.name());
@@ -314,6 +363,43 @@ private:
 
     return t;
   }
+
+  /**
+   * Use LoadMuonNexus to load data from file and return it
+   * @param filename :: [input] Name of file to load
+   * @returns LoadedData struct
+   */
+  std::unique_ptr<LoadedData> loadData(const std::string &filename) {
+    auto data = Mantid::Kernel::make_unique<LoadedData>();
+    LoadMuonNexus2 load;
+    load.initialize();
+    load.setChild(true);
+    load.setPropertyValue("Filename", filename);
+    load.setPropertyValue("OutputWorkspace", "__notused");
+    load.setPropertyValue("DetectorGroupingTable", "__notused");
+    load.execute();
+    data->workspace = load.getProperty("OutputWorkspace");
+    data->timeZero = load.getProperty("TimeZero");
+    data->grouping = load.getProperty("DetectorGroupingTable");
+    return data;
+  }
+
+  /**
+   * Use LoadMuonNexus to load data from EMU file
+   * @returns LoadedData struct
+   */
+  std::unique_ptr<LoadedData> loadEMU() {
+    return loadData("EMU00006473.nxs");
+  }
+
+  /**
+  * Use LoadMuonNexus to load data from MUSR file
+  * @returns LoadedData struct
+  */
+  std::unique_ptr<LoadedData> loadMUSR() {
+    return loadData("MUSR00015189.nxs");
+  }
+
 };
 
 #endif /* MANTID_WORKFLOWALGORITHMS_MUONLOADTEST_H_ */
