@@ -136,6 +136,65 @@ public:
     TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
   }
 
+  void test_when_there_is_no_valid_measurement_id() {
+    // Search result inforation not used in the following since we mock the
+    // return from the measurementSource
+    SearchResultMap data;
+    data.insert(
+        std::make_pair<std::string, SearchResult>("111", SearchResult()));
+    data.insert(
+        std::make_pair<std::string, SearchResult>("112", SearchResult()));
+    data.insert(
+        std::make_pair<std::string, SearchResult>("113", SearchResult()));
+
+    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
+    // We have 2 with valid measurement ids and 1 with no measurement id
+    EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
+        .Times(Exactly(static_cast<int>(data.size())))
+        .WillOnce(Return(MeasurementItem("", "s1", "l1", "t1", 0.1, "111")))
+        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122")))
+        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123")));
+
+    auto mockCatInfo = new MockICatalogInfo;
+
+    // We expect that every location will be translated/transformed to make it
+    // os specific
+    EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
+        .Times(Exactly(static_cast<int>(data.size())))
+        .WillRepeatedly(Return(std::string()));
+
+    MockProgressBase progress;
+    // Expect a progress update
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
+
+    // Make the transfer stragegy
+    ReflMeasureTransferStrategy strategy(
+        std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
+        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
+            mockMeasurementItemSource)));
+
+    // retreive transfer results
+    auto transferResult = strategy.transferRuns(data, progress);
+    // get valid runs
+    auto successfulRuns = transferResult.getTransferRuns();
+    // get invalid runs
+    auto invalidRuns = transferResult.getErrorRuns();
+
+    TSM_ASSERT_EQUALS("Should have two rows", 2, successfulRuns.size());
+    TSM_ASSERT_EQUALS("Should have one invalid run", 1, invalidRuns.size());
+    TSM_ASSERT_DIFFERS("Runs should be the different for both columns",
+                       successfulRuns[0][ReflTableSchema::RUNS],
+                       successfulRuns[1][ReflTableSchema::RUNS]);
+    TSM_ASSERT_EQUALS("run should be singular", "122",
+                      successfulRuns[0][ReflTableSchema::RUNS]);
+    TSM_ASSERT_EQUALS("run should be singular.", "123",
+                      successfulRuns[1][ReflTableSchema::RUNS]);
+
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
+  }
+
   void test_when_two_measurement_sub_ids_match_combine_rows() {
 
     // Search result inforation not used in the following since we mock the
@@ -180,17 +239,17 @@ public:
     // Check the transfer entries
     TSM_ASSERT_EQUALS("Should have two rows", 2, successfulRuns.size());
     TSM_ASSERT_DIFFERS("Runs should be the different for both columns",
-        successfulRuns[0][ReflTableSchema::RUNS],
-        successfulRuns[1][ReflTableSchema::RUNS]);
+                       successfulRuns[0][ReflTableSchema::RUNS],
+                       successfulRuns[1][ReflTableSchema::RUNS]);
     TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.", "111+122",
-        successfulRuns[0][ReflTableSchema::RUNS]);
+                      successfulRuns[0][ReflTableSchema::RUNS]);
     TSM_ASSERT_EQUALS("Other run should be singular.", "123",
-        successfulRuns[1][ReflTableSchema::RUNS]);
+                      successfulRuns[1][ReflTableSchema::RUNS]);
 
     for (size_t i = 1; i < successfulRuns.size(); ++i) {
       TSM_ASSERT_EQUALS("All should have the same group",
-          successfulRuns[0][ReflTableSchema::GROUP],
-          successfulRuns[i][ReflTableSchema::GROUP]);
+                        successfulRuns[0][ReflTableSchema::GROUP],
+                        successfulRuns[i][ReflTableSchema::GROUP]);
     }
 
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
@@ -246,8 +305,8 @@ public:
     // Check the transfer entries
     TSM_ASSERT_EQUALS("Should have two rows", 2, successfulRuns.size());
     TSM_ASSERT_DIFFERS("Runs should be the different for both columns",
-        successfulRuns[0][ReflTableSchema::RUNS],
-        successfulRuns[1][ReflTableSchema::RUNS]);
+                       successfulRuns[0][ReflTableSchema::RUNS],
+                       successfulRuns[1][ReflTableSchema::RUNS]);
     TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.",
                       "14913+14914", successfulRuns[0][ReflTableSchema::RUNS]);
     TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.",
