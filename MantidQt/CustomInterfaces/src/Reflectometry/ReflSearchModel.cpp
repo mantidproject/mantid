@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include <QColor>
 
 namespace MantidQt {
 namespace CustomInterfaces {
