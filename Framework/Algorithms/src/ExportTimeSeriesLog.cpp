@@ -219,7 +219,8 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
  * @param times :: vector of Kernel::DateAndTime
  * @param values :: vector of log value in double
  * @param epochtime :: flag to output time in epoch time/absolute time
- * @param timeunitfactor :: conversion factor for various unit of time for output
+ * @param timeunitfactor :: conversion factor for various unit of time for
+ * output
  */
 void ExportTimeSeriesLog::setupWorkspace2D(
     const size_t &start_index, const size_t &stop_index, int numentries,
