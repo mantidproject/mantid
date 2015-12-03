@@ -92,19 +92,19 @@ class SANSStitch1DTest(unittest.TestCase):
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'Both')
-        alg.setProperty('HABSample', multi_spectra_input)
-        alg.setProperty('LABSample', multi_spectra_input)
-        alg.setProperty('HABNorm', multi_spectra_input)
-        alg.setProperty('LABNorm', multi_spectra_input)
+        alg.setProperty('HABCountsSample', multi_spectra_input)
+        alg.setProperty('LABCountsSample', multi_spectra_input)
+        alg.setProperty('HABNormSample', multi_spectra_input)
+        alg.setProperty('LABNormSample', multi_spectra_input)
 
         errors = alg.validateInputs()
-        self.assertTrue('HABSample' in errors)
-        self.assertTrue('LABSample' in errors)
-        self.assertTrue('HABNorm' in errors)
-        self.assertTrue('LABNorm' in errors)
+        self.assertTrue('HABCountsSample' in errors)
+        self.assertTrue('LABCountsSample' in errors)
+        self.assertTrue('HABNormSample' in errors)
+        self.assertTrue('LABNormSample' in errors)
 
 
-    def test_workspace_entries_must_be_q1d(self):
+    def test_can_workspaces_required_if_process_can(self):
         # create an input workspace that has multiple spectra
         create_alg = AlgorithmManager.create('CreateWorkspace')
         create_alg.setChild(True)
@@ -112,7 +112,7 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg.setProperty('DataX', range(0,1))
         create_alg.setProperty('DataY', [1])
         create_alg.setProperty('NSpec', 1)
-        create_alg.setProperty('UnitX', 'TOF') # Wrong units
+        create_alg.setProperty('UnitX', 'MomentumTransfer') # Wrong units
         create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
         create_alg.execute()
         multi_spectra_input = create_alg.getProperty('OutputWorkspace').value
@@ -121,16 +121,17 @@ class SANSStitch1DTest(unittest.TestCase):
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'Both')
-        alg.setProperty('HABSample', multi_spectra_input)
-        alg.setProperty('LABSample', multi_spectra_input)
-        alg.setProperty('HABNorm', multi_spectra_input)
-        alg.setProperty('LABNorm', multi_spectra_input)
+        alg.setProperty('HABCountsSample', multi_spectra_input)
+        alg.setProperty('LABCountsSample', multi_spectra_input)
+        alg.setProperty('HABNormSample', multi_spectra_input)
+        alg.setProperty('LABNormSample', multi_spectra_input)
+        alg.setProperty('ProcessCan', True) # Now can workspaces should be provided
 
         errors = alg.validateInputs()
-        self.assertTrue('HABSample' in errors)
-        self.assertTrue('LABSample' in errors)
-        self.assertTrue('HABNorm' in errors)
-        self.assertTrue('LABNorm' in errors)
+        self.assertTrue('HABCountsCan' in errors)
+        self.assertTrue('LABCountsCan' in errors)
+        self.assertTrue('HABNormCan' in errors)
+        self.assertTrue('LABNormCan' in errors)
 
 
 
