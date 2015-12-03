@@ -313,7 +313,7 @@ public:
     max.push_back(1.5);
     max.push_back(1.5);
 
-    // Create an function to mask some of the workspace.
+    // Create a function to mask some of the workspace.
     MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
     ew->setMDMasking(function);
     ew->refreshCache();
@@ -325,6 +325,26 @@ public:
         "Masked returns 0",
         ew->getSignalWithMaskAtCoord(coords1, Mantid::API::NoNormalization),
         0.0, 1e-5);
+  }
+
+  //-------------------------------------------------------------------------------------
+  /** hasMask should return true when the workspace has a mask */
+  void test_hasMask() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+
+    TSM_ASSERT("Should return false as the workspace does not have a mask",
+               !ew->hasMask());
+
+    std::vector<coord_t> min{0, 0, 0};
+    std::vector<coord_t> max{1.5, 1.5, 1.5};
+
+    // Create a function to mask some of the workspace.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ew->setMDMasking(function);
+    ew->refreshCache();
+
+    TSM_ASSERT("Should return true as the workspace has a mask", ew->hasMask());
   }
 
   //-------------------------------------------------------------------------------------
