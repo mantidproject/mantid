@@ -63,6 +63,7 @@ set ( SRC_FILES
 	src/LoadILLAsciiHelper.cpp
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
+	src/LoadSQW2.cpp
 	src/LogarithmMD.cpp
 	src/MDEventWSWrapper.cpp
 	src/MDNormDirectSC.cpp
@@ -189,6 +190,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadILLAsciiHelper.h
 	inc/MantidMDAlgorithms/LoadMD.h
 	inc/MantidMDAlgorithms/LoadSQW.h
+	inc/MantidMDAlgorithms/LoadSQW2.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
 	inc/MantidMDAlgorithms/MDEventWSWrapper.h
 	inc/MantidMDAlgorithms/MDNormDirectSC.h
@@ -311,6 +313,7 @@ set ( TEST_FILES
 	LessThanMDTest.h
 	LoadMDTest.h
 	LoadSQWTest.h
+	LoadSQW2Test.h
 	LogarithmMDTest.h
 	MDEventWSWrapperTest.h
 	MDNormDirectSCTest.h
