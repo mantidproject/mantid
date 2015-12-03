@@ -25,8 +25,7 @@ Specifically:
    resulting workspace.
 
 MuonProcess can be applied in three different modes.
-* **CorrectAndGroup** applies the dead time correction and groups the workspaces only,
-  returning the output of this step without performing the rest of the analysis.
+* **CorrectAndGroup** applies the dead time correction and groups the workspaces only, returning the output of this step without performing the rest of the analysis.
 * **Analyse** performs the second half only, *i.e.* offset time zero, crop, rebin and calculate asymmetry.
 * **Combined** performs the whole sequence of actions above (*CorrectAndGroup* followed by *Analyse*).
 
