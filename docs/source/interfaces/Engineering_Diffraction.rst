@@ -30,7 +30,9 @@ Close
   Close the interface
 
 RB Number
-  To enable the GUI specify a RB Number
+  To enable the GUI specify a RB Number, the RB number will be used for the
+  output paths, so that files from different users and/or experiments can
+  be kept separate.
 
 * Red Star Sign
   If a red star sign is displayed next to the Browse Button, it is mostly
@@ -135,10 +137,11 @@ If a red star sign is displayed next to the Browse Button, it is mostly
 likely because the file specified has not been found. Error message
 can be viewed by hovering over the red star sign.
 
-It is also possible sometimes that a file has not been found but
-the red star sign is only displayed once you have clicked outside the
-*Run #* text-field. If you manage to click Focus before red sign is
-displayed, the interface will process the last valid focus run instead.
+Checking the availability of all the files can take some time, for this
+reason it is also possible that a file may not have been found but the
+red star sign has not been displayed. If you manage to click Focus
+before red sign is displayed, the interface will process the last valid
+focus run instead.
 
 Output
 ^^^^^^
