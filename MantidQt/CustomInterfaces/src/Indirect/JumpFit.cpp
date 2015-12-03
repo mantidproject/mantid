@@ -217,10 +217,6 @@ void JumpFit::fitAlgDone(bool error) {
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
           paramTableName);
 
-  // Don't run the algorithm when updating parameter values
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(runPreviewAlgorithm()));
-
   for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
     QString propName(it.key());
     if (propName.startsWith("parameter_")) {
@@ -232,8 +228,6 @@ void JumpFit::fitAlgDone(bool error) {
     }
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(runPreviewAlgorithm()));
 }
 
 /**
@@ -273,12 +267,6 @@ void JumpFit::loadSettings(const QSettings &settings) {
  * @param filename :: The name of the workspace to plot
  */
 void JumpFit::handleSampleInputReady(const QString &filename) {
-  // Disable things that run the preview algorithm
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(runPreviewAlgorithm()));
-  disconnect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString &)),
-             this, SLOT(runPreviewAlgorithm()));
-
   // Scale to convert to HWHM
   IAlgorithm_sptr scaleAlg = AlgorithmManager::Instance().create("Scale");
   scaleAlg->initialize();
@@ -325,11 +313,6 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
   // Update preview plot
   runPreviewAlgorithm();
 
-  // Re-enable things that run the preview algorithm
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(runPreviewAlgorithm()));
-  connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(runPreviewAlgorithm()));
 }
 
 /**
@@ -463,8 +446,7 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
   }
 
   // Don't run the algorithm when updating parameter values
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(runPreviewAlgorithm()));
+
 
   // Add new parameter elements
   QStringList parameters = getFunctionParameters(functionName);
@@ -474,9 +456,6 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
     m_dblManager->setValue(m_properties[name], 1.0);
     m_properties["FitFunction"]->addSubProperty(m_properties[name]);
   }
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(runPreviewAlgorithm()));
 
   runPreviewAlgorithm();
 }
