@@ -97,7 +97,7 @@ Usage
 	       Alpha = 1.0,
 	       OutputWorkspace = "MuonProcess_output")
 
-   processed = mtd['MuonProcess_output"]
+   processed = mtd['MuonProcess_output']
    output_int = Integration(processed)
 
    print 'Integrated asymmetry for the run: {0:.3f}'.format(output_int.readY(0)[0])
