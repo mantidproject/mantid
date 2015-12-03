@@ -1,7 +1,7 @@
 #pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import (WorkspaceProperty, FileProperty, FileAction, TextAxis,
-                        DataProcessorAlgorithm, AlgorithmFactory, mtd)
+                        DataProcessorAlgorithm, AlgorithmFactory, mtd, Progress)
 from mantid.simpleapi import *
 import numpy as np
 
@@ -35,7 +35,7 @@ class SwapWidths(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-        prog_workflow = Progress(this, start=0, end=1.0, nreports=6)
+        prog_workflow = Progress(self, start=0, end=1.0, nreports=6)
         prog_workflow.report("Starting SwapWidths algorithm")
         self._setup()
         prog_workflow.report("Reading data values")
