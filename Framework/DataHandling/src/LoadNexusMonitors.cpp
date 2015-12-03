@@ -662,18 +662,6 @@ void LoadNexusMonitors::splitMutiPeriodHistrogramData(const size_t numPeriods) {
 
     // add to workspace group
     wsGroup->addWorkspace(wsPeriod);
-
-    // create additional output workspace property
-    std::stringstream ssWsName;
-    ssWsName << this->WS->name() << "_" << i + 1;
-    std::stringstream ssPropName;
-    ssPropName << "OutputWorkspace"
-               << "_" << i + 1;
-    declareProperty(
-        new API::WorkspaceProperty<API::Workspace>(
-            ssPropName.str(), ssWsName.str(), Kernel::Direction::Output),
-        "Additional output workspace for multi period monitors.");
-    setProperty(ssPropName.str(), wsPeriod);
   }
 
   // set the output workspace
