@@ -95,7 +95,8 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
     def PyExec(self):
         """ Main execution body
         """
-        input_ws = self.getProperty("InputWorkspace").value
+        input_ws   = self.getProperty("InputWorkspace").value
+        outws_name = self.getPropertyValue("OutputWorkspace")
         choice_tof = self.getProperty("ChoiceElasticTof").value
 
         run = input_ws.getRun()
@@ -125,7 +126,8 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
                 tof_elastic[idx] = api.FitGaussian(vanaws, idx)[0]
 
         self.log().debug("Tel = " + str(tof_elastic))
-        outws = api.CloneWorkspace(input_ws)
+
+        outws = api.CloneWorkspace(input_ws,OutputWorkspace=outws_name)
 
         # mask detectors with EPP=0
         zeros = np.where(tof_elastic == 0)[0]
