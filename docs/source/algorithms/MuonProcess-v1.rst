@@ -56,7 +56,7 @@ Note that the first part of the algorithm will have grouped the spectra in the i
 Workflow
 ########
 
-.. diagram:: MuonLoad-v1_wkflw.dot
+.. diagram:: MuonProcess-v1_wkflw.dot
 
 Usage
 -----
