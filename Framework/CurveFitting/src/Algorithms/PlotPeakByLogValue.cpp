@@ -154,13 +154,11 @@ void PlotPeakByLogValue::exec() {
                            // is the data source name
   ITableWorkspace_sptr result =
       WorkspaceFactory::Instance().createTable("TableWorkspace");
-  bool isLogColumnNameSet = true;
   if (logName == "SourceName") {
     result->addColumn("str", "Source name");
     isDataName = true;
   } else if (logName.empty()) {
     auto col = result->addColumn("double", "axis-1");
-    isLogColumnNameSet = false;
     col->setPlotType(1); // X-values inplots
   } else {
     auto col = result->addColumn("double", logName);
@@ -238,10 +236,6 @@ void PlotPeakByLogValue::exec() {
           logValue = lowerEdge + (upperEdge - lowerEdge) / 2;
         } else
           logValue = (*axis)(j);
-        if (!isLogColumnNameSet) {
-          isLogColumnNameSet = true;
-          result->getColumn(0)->setName(axis->unit()->caption());
-        }
       } else if (logName != "SourceName") {
         Kernel::Property *prop = data.ws->run().getLogData(logName);
         if (!prop) {

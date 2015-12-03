@@ -287,7 +287,6 @@ def plotTableColumns(table, columns, type = -1):
         columns = '%s_%s' % (table.name(), columns)
 
     graph = proxies.Graph(threadsafe_call(_qti.app.plot, table._getHeldObject(), columns, type))
-    threadsafe_call(graph.activeLayer().setTitle, table.windowLabel())
 
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
