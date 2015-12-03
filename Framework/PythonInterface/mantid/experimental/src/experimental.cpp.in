@@ -1,0 +1,26 @@
+/*****************************************************************************************/
+/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
+/********** Source = experimental.cpp.in *************************************************/
+/*****************************************************************************************/
+#include <boost/python/def.hpp>
+#include <boost/python/module.hpp>
+#include <boost/python/docstring_options.hpp>
+
+// See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
+#define PY_ARRAY_UNIQUE_SYMBOL EXPERIMENTAL_ARRAY_API
+#include <numpy/arrayobject.h>
+#include <boost/python/numeric.hpp>
+
+// Forward declare
+@EXPORT_DECLARE@
+
+BOOST_PYTHON_MODULE(_experimental)
+{
+  // Doc string options - User defined, python arguments, C++ call signatures
+  boost::python::docstring_options docstrings(true, true, false);
+  // Import numpy
+  _import_array();
+  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+
+@EXPORT_FUNCTIONS@
+}
