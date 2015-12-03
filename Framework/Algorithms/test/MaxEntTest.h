@@ -101,7 +101,7 @@ public:
     MantidVec Y;
     MantidVec E;
     for (size_t t = 0; t < maxt; t++) {
-      double x = 2. * M_PI * t / maxt;
+      double x = 2. * M_PI * static_cast<double>(t) / static_cast<double>(maxt);
       X.push_back(x);
       Y.push_back(cos(w * x + phase));
       E.push_back(0.1);
