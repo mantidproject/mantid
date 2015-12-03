@@ -1,16 +1,16 @@
-#ifndef MANTID_WORKFLOWALGORITHMS_MUONLOADTEST_H_
-#define MANTID_WORKFLOWALGORITHMS_MUONLOADTEST_H_
+#ifndef MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_
+#define MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidWorkflowAlgorithms/MuonLoad.h"
+#include "MantidWorkflowAlgorithms/MuonProcess.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidKernel/make_unique.h"
 
-using Mantid::WorkflowAlgorithms::MuonLoad;
+using Mantid::WorkflowAlgorithms::MuonProcess;
 using Mantid::DataHandling::LoadMuonNexus2;
 
 using namespace Mantid::Kernel;
@@ -25,19 +25,20 @@ struct LoadedData {
 };
 
 /**
- * Tests for MuonLoad. Note that testing of the calculation (group counts, group
- * asymmetry, pair asymmetry) is covered in the tests of
- * IMuonAsymmetryCalculator, so these tests are for the other parts of MuonLoad.
+ * Tests for MuonProcess. Note that testing of the calculation (group counts,
+ * group asymmetry, pair asymmetry) is covered in the tests of
+ * IMuonAsymmetryCalculator,
+ * so these tests are for the other parts of MuonProcess.
  */
-class MuonLoadTest : public CxxTest::TestSuite {
+class MuonProcessTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuonLoadTest *createSuite() { return new MuonLoadTest(); }
-  static void destroySuite(MuonLoadTest *suite) { delete suite; }
+  static MuonProcessTest *createSuite() { return new MuonProcessTest(); }
+  static void destroySuite(MuonProcessTest *suite) { delete suite; }
 
   void test_Init() {
-    MuonLoad alg;
+    MuonProcess alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -57,7 +58,7 @@ public:
 
     auto data = loadEMU();
 
-    MuonLoad alg;
+    MuonProcess alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
@@ -112,7 +113,7 @@ public:
 
     auto data = loadMUSR();
 
-    MuonLoad alg;
+    MuonProcess alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
@@ -166,7 +167,7 @@ public:
 
     auto data = loadEMU();
 
-    MuonLoad alg;
+    MuonProcess alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
@@ -234,7 +235,7 @@ public:
 
     auto data = loadEMU();
 
-    MuonLoad alg;
+    MuonProcess alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
@@ -283,7 +284,7 @@ public:
     auto emptyGrouping =
         createGroupingTable(std::vector<int>(), std::vector<int>());
 
-    MuonLoad alg;
+    MuonProcess alg;
     alg.setRethrows(true);
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -313,7 +314,7 @@ public:
   }
 
   void test_errorReporting_emptyWS() {
-    MuonLoad alg;
+    MuonProcess alg;
     alg.setRethrows(true);
     Workspace_sptr emptyWS;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -331,7 +332,7 @@ public:
       group2.push_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
-    MuonLoad alg;
+    MuonProcess alg;
     alg.setRethrows(true);
     Workspace_sptr badWS = boost::make_shared<TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -361,7 +362,7 @@ public:
       group2.push_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
-    MuonLoad alg;
+    MuonProcess alg;
     alg.setRethrows(true);
     auto data = loadEMU();
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -392,7 +393,7 @@ public:
       group2.push_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
-    MuonLoad alg;
+    MuonProcess alg;
     alg.setRethrows(true);
     auto data = loadEMU();
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -421,7 +422,7 @@ public:
       group2.push_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
-    MuonLoad alg;
+    MuonProcess alg;
     alg.setRethrows(true);
     auto data = loadEMU();
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -449,7 +450,7 @@ public:
 
     try {
       auto load = loadEMU();
-      MuonLoad alg;
+      MuonProcess alg;
       alg.setRethrows(true);
       alg.initialize();
       alg.setProperty("InputWorkspace", load->workspace);
@@ -534,4 +535,4 @@ private:
 
 };
 
-#endif /* MANTID_WORKFLOWALGORITHMS_MUONLOADTEST_H_ */
+#endif /* MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_ */

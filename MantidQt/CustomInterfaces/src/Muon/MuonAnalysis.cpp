@@ -501,7 +501,8 @@ MuonAnalysis::PlotType MuonAnalysis::parsePlotType(QComboBox* selector)
 MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, int tableRow, PlotType plotType,
   bool isRaw)
 {
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("MuonLoad");
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
 
   alg->initialize();
 
@@ -1456,7 +1457,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
     // Now apply DTC, if used, and grouping
     IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged("MuonLoad");
+        AlgorithmManager::Instance().createUnmanaged("MuonProcess");
     alg->initialize();
     alg->setProperty("InputWorkspace", loadResult->loadedWorkspace);
     alg->setProperty("Mode", "CorrectAndGroup");
@@ -3115,7 +3116,8 @@ Workspace_sptr MuonAnalysis::getDeadTimeCorrection(
  */
 Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 {
-  Algorithm_sptr loadAlg = AlgorithmManager::Instance().createUnmanaged("MuonLoad");
+  Algorithm_sptr loadAlg =
+      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
   loadAlg->initialize();
 
   // -- Dead Time Correction --------------------------------------------------

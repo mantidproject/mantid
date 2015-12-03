@@ -369,7 +369,7 @@ namespace MantidWidgets
       MatrixWorkspace_sptr ws;
 
       try {
-        // Use MuonLoadNexus to load the file
+        // Use LoadMuonNexus to load the file
         auto loadAlg = AlgorithmManager::Instance().create("LoadMuonNexus");
         loadAlg->initialize();
         loadAlg->setChild(true);
@@ -380,8 +380,8 @@ namespace MantidWidgets
         Workspace_sptr loadedWS = loadAlg->getProperty("OutputWorkspace");
         double loadedTimeZero = loadAlg->getProperty("TimeZero");
 
-        // then use MuonLoad to process it
-        auto process = AlgorithmManager::Instance().create("MuonLoad");
+        // then use MuonProcess to process it
+        auto process = AlgorithmManager::Instance().create("MuonProcess");
         process->initialize();
         process->setChild(true);
         process->setRethrows(true);

@@ -25,7 +25,7 @@ set ( SRC_FILES
 	src/MuonGroupAsymmetryCalculator.cpp
 	src/MuonGroupCalculator.cpp
 	src/MuonGroupCountsCalculator.cpp
-	src/MuonLoad.cpp
+	src/MuonProcess.cpp
 	src/MuonPairAsymmetryCalculator.cpp
 	src/ProcessIndirectFitParameters.cpp
 	src/RefReduction.cpp
@@ -72,7 +72,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h
 	inc/MantidWorkflowAlgorithms/MuonGroupCalculator.h
 	inc/MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h
-	inc/MantidWorkflowAlgorithms/MuonLoad.h
+	inc/MantidWorkflowAlgorithms/MuonProcess.h
 	inc/MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h
 	inc/MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h
 	inc/MantidWorkflowAlgorithms/RefReduction.h
@@ -93,7 +93,7 @@ set ( TEST_FILES
 	ConvolutionFitSequentialTest.h
 	IMuonAsymmetryCalculatorTest.h
 	LoadEventAndCompressTest.h
-	MuonLoadTest.h
+	MuonProcessTest.h
 	ProcessIndirectFitParametersTest.h
 	SANSSolidAngleCorrectionTest.h
 	SendUsageTest.h

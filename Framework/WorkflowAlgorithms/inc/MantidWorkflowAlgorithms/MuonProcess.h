@@ -1,5 +1,5 @@
-#ifndef MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_
-#define MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_
+#ifndef MANTID_WORKFLOWALGORITHMS_MUONPROCESS_H_
+#define MANTID_WORKFLOWALGORITHMS_MUONPROCESS_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
@@ -7,7 +7,7 @@
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
-/** MuonLoad : loads Muon workspace ready for analysis.
+/** MuonProcess : loads Muon workspace ready for analysis.
 
   Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,10 +30,10 @@ namespace WorkflowAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MuonLoad : public API::DataProcessorAlgorithm {
+class DLLExport MuonProcess : public API::DataProcessorAlgorithm {
 public:
-  MuonLoad();
-  virtual ~MuonLoad();
+  MuonProcess();
+  virtual ~MuonProcess();
 
   virtual const std::string name() const;
   /// Summary of algorithms purpose
@@ -80,4 +80,4 @@ private:
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
 
-#endif /* MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_ */
+#endif /* MANTID_WORKFLOWALGORITHMS_MUONPROCESS_H_ */

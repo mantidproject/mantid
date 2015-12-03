@@ -1,4 +1,4 @@
-#include "MantidWorkflowAlgorithms/MuonLoad.h"
+#include "MantidWorkflowAlgorithms/MuonProcess.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -28,29 +28,29 @@ using namespace DataObjects;
 using API::WorkspaceGroup_sptr;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(MuonLoad)
+DECLARE_ALGORITHM(MuonProcess)
 
 //----------------------------------------------------------------------------------------------
 /**
  * Constructor
  */
-MuonLoad::MuonLoad() {}
+MuonProcess::MuonProcess() {}
 
 //----------------------------------------------------------------------------------------------
 /**
  * Destructor
  */
-MuonLoad::~MuonLoad() {}
+MuonProcess::~MuonProcess() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string MuonLoad::name() const { return "MuonLoad"; }
+const std::string MuonProcess::name() const { return "MuonProcess"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MuonLoad::version() const { return 1; }
+int MuonProcess::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MuonLoad::category() const { return "Workflow\\Muon"; }
+const std::string MuonProcess::category() const { return "Workflow\\Muon"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -58,7 +58,7 @@ const std::string MuonLoad::category() const { return "Workflow\\Muon"; }
 /*
  * Initialize the algorithm's properties.
  */
-void MuonLoad::init() {
+void MuonProcess::init() {
   declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace", "",
                                                    Direction::Input,
                                                    PropertyMode::Mandatory),
@@ -133,7 +133,7 @@ void MuonLoad::init() {
 /**
  * Execute the algorithm.
  */
-void MuonLoad::exec() {
+void MuonProcess::exec() {
   Progress progress(this, 0, 1, 5);
 
   // Supplied input workspace
@@ -218,7 +218,7 @@ void MuonLoad::exec() {
  * @param grouping :: Detector grouping table to use
  * @return Grouped workspaces
  */
-WorkspaceGroup_sptr MuonLoad::groupWorkspaces(WorkspaceGroup_sptr wsGroup,
+WorkspaceGroup_sptr MuonProcess::groupWorkspaces(WorkspaceGroup_sptr wsGroup,
                                               TableWorkspace_sptr grouping) {
   WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
@@ -242,7 +242,7 @@ WorkspaceGroup_sptr MuonLoad::groupWorkspaces(WorkspaceGroup_sptr wsGroup,
  * @param dt :: Dead time table to use
  * @return Corrected workspace group
  */
-WorkspaceGroup_sptr MuonLoad::applyDTC(WorkspaceGroup_sptr wsGroup,
+WorkspaceGroup_sptr MuonProcess::applyDTC(WorkspaceGroup_sptr wsGroup,
                                        TableWorkspace_sptr dt) {
   WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
@@ -268,7 +268,7 @@ WorkspaceGroup_sptr MuonLoad::applyDTC(WorkspaceGroup_sptr wsGroup,
  * offset
  * @return Corrected workspaces
  */
-WorkspaceGroup_sptr MuonLoad::correctWorkspaces(WorkspaceGroup_sptr wsGroup,
+WorkspaceGroup_sptr MuonProcess::correctWorkspaces(WorkspaceGroup_sptr wsGroup,
                                                 double loadedTimeZero) {
   WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
@@ -289,7 +289,7 @@ WorkspaceGroup_sptr MuonLoad::correctWorkspaces(WorkspaceGroup_sptr wsGroup,
  * offset
  * @return Corrected workspace
  */
-MatrixWorkspace_sptr MuonLoad::correctWorkspace(MatrixWorkspace_sptr ws,
+MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws,
                                                 double loadedTimeZero) {
   // Offset workspace, if need to
   double timeZero = getProperty("TimeZero");
@@ -347,7 +347,7 @@ MatrixWorkspace_sptr MuonLoad::correctWorkspace(MatrixWorkspace_sptr ws,
  * - If ApplyDeadTimeCorrection is true, DeadTimeTable is mandatory
  * @returns Map of parameter names to errors
  */
-std::map<std::string, std::string> MuonLoad::validateInputs() {
+std::map<std::string, std::string> MuonProcess::validateInputs() {
   std::map<std::string, std::string> errors;
 
   // Supplied input workspace and sets of periods
@@ -432,7 +432,7 @@ std::map<std::string, std::string> MuonLoad::validateInputs() {
 * @returns An error message
 */
 std::string
-MuonLoad::buildErrorString(const std::vector<int> &invalidPeriods) const {
+MuonProcess::buildErrorString(const std::vector<int> &invalidPeriods) const {
   std::stringstream message;
   message << "Invalid periods specified: ";
   for (auto it = invalidPeriods.begin(); it != invalidPeriods.end(); it++) {
