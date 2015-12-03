@@ -35,8 +35,10 @@ class SwapWidths(DataProcessorAlgorithm):
 
 
     def PyExec(self):
+        prog_workflow = Progress(this, start=0, end=1.0, nreports=6)
+        prog_workflow.report("Starting SwapWidths algorithm")
         self._setup()
-
+        prog_workflow.report("Reading data values")
         label_1 = "f2.f1.FWHM"
         index_1 = self._indexOf(mtd[self._input_ws].getAxis(1), label_1)
         width1_x = mtd[self._input_ws].readX(index_1)
@@ -51,6 +53,7 @@ class SwapWidths(DataProcessorAlgorithm):
         logger.information('Number of points is %i' % number_points)
         logger.information('Swap point is %i' % self._swap_point)
 
+        prog_workflow.report("Calculating swap points")
         x1 = width1_x
         y1 = width1_y[:self._swap_point]
         y1 = np.append(y1,width2_y[self._swap_point:])
@@ -62,6 +65,7 @@ class SwapWidths(DataProcessorAlgorithm):
         e2 = width2_e[:self._swap_point]
         e2 = np.append(e2,width1_e[self._swap_point:])
 		
+        prog_workflow.report("Appending new points after swap")
         dataX = x1                              #create data for WS
         dataY = y1
         dataE = e1
@@ -69,6 +73,7 @@ class SwapWidths(DataProcessorAlgorithm):
         dataY = np.append(dataY,y2)
         dataE = np.append(dataE,e2)
         names = label_1 + ', ' + label_2           #names for WS
+        prog_workflow.report("Create new workspace with correct values")
         CreateWorkspace(OutputWorkspace=self._output_ws,
                         DataX=dataX,
                         DataY=dataY,
@@ -78,6 +83,7 @@ class SwapWidths(DataProcessorAlgorithm):
                         VerticalAxisUnit='Text',
                         VerticalAxisValues=names)
 
+        prog_workflow.report("Algorithm finished")
         self.setProperty('OutputWorkspace', self._output_ws)
 
 
