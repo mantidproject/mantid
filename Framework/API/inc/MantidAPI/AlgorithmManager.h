@@ -78,7 +78,7 @@ public:
 
   void clear();
   void cancelAll();
-  virtual void shutdown();
+  void shutdown();
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
