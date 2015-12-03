@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+﻿#pylint: disable=no-init,invalid-name
 import mantid.simpleapi
 import mantid.kernel
 import mantid.api
@@ -24,8 +24,9 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         return "Algorithm to mask detectors with scattering angles in a given interval (in degrees)."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input,
-                                                          validator=mantid.api.InstrumentValidator()), "Input workspace")
+        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input),
+                             "Input workspace")
+
         angleValidator=mantid.kernel.FloatBoundedValidator()
         angleValidator.setBounds(0.,180.)
         self.declareProperty(name="MinAngle", defaultValue=0.0, validator=angleValidator,
