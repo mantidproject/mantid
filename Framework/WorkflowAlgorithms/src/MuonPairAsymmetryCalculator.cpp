@@ -25,9 +25,9 @@ MuonPairAsymmetryCalculator::MuonPairAsymmetryCalculator(
     const std::vector<int> summedPeriods,
     const std::vector<int> subtractedPeriods, const int firstPairIndex,
     const int secondPairIndex, const double alpha)
-    : m_firstPairIndex(firstPairIndex), m_secondPairIndex(secondPairIndex),
-      m_alpha(alpha),
-      IMuonAsymmetryCalculator(inputWS, summedPeriods, subtractedPeriods) {}
+    : IMuonAsymmetryCalculator(inputWS, summedPeriods, subtractedPeriods),
+      m_firstPairIndex(firstPairIndex), m_secondPairIndex(secondPairIndex),
+      m_alpha(alpha) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

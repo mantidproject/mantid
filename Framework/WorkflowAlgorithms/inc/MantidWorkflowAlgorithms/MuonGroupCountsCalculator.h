@@ -40,7 +40,6 @@ public:
 
   /// Performs group counts calculation
   virtual Mantid::API::MatrixWorkspace_sptr calculate() const override;
-
 };
 
 } // namespace WorkflowAlgorithms

@@ -10,7 +10,8 @@
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
-/** IMuonAsymmetryCalculator : Abstract base class for muon asymmetry calculations 
+/** IMuonAsymmetryCalculator : Abstract base class for muon asymmetry
+  calculations
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

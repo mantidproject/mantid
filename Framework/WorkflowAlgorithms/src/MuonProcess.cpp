@@ -191,18 +191,16 @@ void MuonProcess::exec() {
     std::unique_ptr<IMuonAsymmetryCalculator> asymCalc;
     if (outputType == "GroupCounts") {
       asymCalc = Mantid::Kernel::make_unique<MuonGroupCountsCalculator>(
-        allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
-    }
-    else if (outputType == "GroupAsymmetry") {
+          allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
+    } else if (outputType == "GroupAsymmetry") {
       asymCalc = Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
-        allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
-    }
-    else if (outputType == "PairAsymmetry") {
+          allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
+    } else if (outputType == "PairAsymmetry") {
       int first = getProperty("PairFirstIndex");
       int second = getProperty("PairSecondIndex");
       double alpha = getProperty("Alpha");
       asymCalc = Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
-        allPeriodsWS, summedPeriods, subtractedPeriods, first, second, alpha);
+          allPeriodsWS, summedPeriods, subtractedPeriods, first, second, alpha);
     }
     progress.report();
     outWS = asymCalc->calculate();
@@ -219,7 +217,7 @@ void MuonProcess::exec() {
  * @return Grouped workspaces
  */
 WorkspaceGroup_sptr MuonProcess::groupWorkspaces(WorkspaceGroup_sptr wsGroup,
-                                              TableWorkspace_sptr grouping) {
+                                                 TableWorkspace_sptr grouping) {
   WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
@@ -243,7 +241,7 @@ WorkspaceGroup_sptr MuonProcess::groupWorkspaces(WorkspaceGroup_sptr wsGroup,
  * @return Corrected workspace group
  */
 WorkspaceGroup_sptr MuonProcess::applyDTC(WorkspaceGroup_sptr wsGroup,
-                                       TableWorkspace_sptr dt) {
+                                          TableWorkspace_sptr dt) {
   WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
@@ -269,7 +267,7 @@ WorkspaceGroup_sptr MuonProcess::applyDTC(WorkspaceGroup_sptr wsGroup,
  * @return Corrected workspaces
  */
 WorkspaceGroup_sptr MuonProcess::correctWorkspaces(WorkspaceGroup_sptr wsGroup,
-                                                double loadedTimeZero) {
+                                                   double loadedTimeZero) {
   WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
@@ -290,7 +288,7 @@ WorkspaceGroup_sptr MuonProcess::correctWorkspaces(WorkspaceGroup_sptr wsGroup,
  * @return Corrected workspace
  */
 MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws,
-                                                double loadedTimeZero) {
+                                                   double loadedTimeZero) {
   // Offset workspace, if need to
   double timeZero = getProperty("TimeZero");
   if (timeZero != EMPTY_DBL()) {

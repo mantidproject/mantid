@@ -20,19 +20,19 @@ class MuonProcessTest(stresstesting.MantidStressTest):
             deadTimes.addRow([i, i * 0.01])
         mtd.addOrReplace("MuonProcess_DeadTimes", deadTimes)
 
-	load_result = LoadMuonNexus(Filename = "MUSR00015192",
+        load_result = LoadMuonNexus(Filename = "MUSR00015192",
                                     OutputWorkspace = "MuonProcess_Loaded")
-	loaded_time_zero = load_result[2]
+        loaded_time_zero = load_result[2]
 
         MuonProcess(InputWorkspace = "MuonProcess_Loaded",
-		    Mode = "Combined",
+                    Mode = "Combined",
                     DetectorGroupingTable = "MuonProcess_Grouping",
                     ApplyDeadTimeCorrection = True,
                     DeadTimeTable = "MuonProcess_DeadTimes",
-		    SummedPeriodSet = "2",
-		    SubtractedPeriodSet = "1",
+                    SummedPeriodSet = "2",
+                    SubtractedPeriodSet = "1",
                     TimeZero = 0.6,
-		    LoadedTimeZero = loaded_time_zero,
+                    LoadedTimeZero = loaded_time_zero,
                     Xmin = 0.11,
                     Xmax = 10.0,
                     RebinParams = "0.032",
@@ -49,4 +49,4 @@ class MuonProcessTest(stresstesting.MantidStressTest):
         mtd.remove("MuonProcess_MUSR00015192")
         mtd.remove("MuonProcess_Grouping")
         mtd.remove("MuonProcess_DeadTimes")
-	mtd.remove("MuonProcess_Loaded")
+        mtd.remove("MuonProcess_Loaded")

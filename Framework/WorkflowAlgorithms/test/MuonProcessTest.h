@@ -521,9 +521,7 @@ private:
    * Use LoadMuonNexus to load data from EMU file
    * @returns LoadedData struct
    */
-  std::unique_ptr<LoadedData> loadEMU() {
-    return loadData("EMU00006473.nxs");
-  }
+  std::unique_ptr<LoadedData> loadEMU() { return loadData("EMU00006473.nxs"); }
 
   /**
   * Use LoadMuonNexus to load data from MUSR file
@@ -532,7 +530,6 @@ private:
   std::unique_ptr<LoadedData> loadMUSR() {
     return loadData("MUSR00015189.nxs");
   }
-
 };
 
 #endif /* MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_ */

@@ -16,8 +16,8 @@ MuonGroupCalculator::MuonGroupCalculator(
     const Mantid::API::WorkspaceGroup_sptr inputWS,
     const std::vector<int> summedPeriods,
     const std::vector<int> subtractedPeriods, const int groupIndex)
-    : m_groupIndex(groupIndex),
-      IMuonAsymmetryCalculator(inputWS, summedPeriods, subtractedPeriods) {}
+    : IMuonAsymmetryCalculator(inputWS, summedPeriods, subtractedPeriods),
+      m_groupIndex(groupIndex) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

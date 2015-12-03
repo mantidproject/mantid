@@ -3094,7 +3094,7 @@ Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename) const
 Workspace_sptr MuonAnalysis::getDeadTimeCorrection(
     boost::shared_ptr<LoadResult> loadResult) const {
   // Dead time table which will be used
-  Workspace_sptr deadTimes = nullptr;
+  Workspace_sptr deadTimes;
 
   if (m_uiForm.deadTimeType->currentText() != "None") {
     if (m_uiForm.deadTimeType->currentText() == "From Data File") {
