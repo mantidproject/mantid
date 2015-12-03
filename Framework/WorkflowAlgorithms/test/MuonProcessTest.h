@@ -521,7 +521,7 @@ private:
    * Use LoadMuonNexus to load data from EMU file
    * @returns LoadedData struct
    */
-  std::unique_ptr<LoadedData> loadEMU() { return loadData("EMU00006473.nxs"); }
+  std::unique_ptr<LoadedData> loadEMU() { return loadData("emu00006473.nxs"); }
 
   /**
   * Use LoadMuonNexus to load data from MUSR file
