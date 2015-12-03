@@ -171,21 +171,34 @@ private:
 };
 
 
-class AlgHistoryProperties: public QObject
-{
+class AlgHistoryProperties : public QObject {
   Q_OBJECT
-  public:
-  AlgHistoryProperties(QWidget*w,const std::vector<Mantid::Kernel::PropertyHistory_sptr>& propHist);
+
+public:
+  AlgHistoryProperties(
+      QWidget *w,
+      const std::vector<Mantid::Kernel::PropertyHistory_sptr> &propHist);
+
   void displayAlgHistoryProperties();
   void clearData();
-  void setAlgProperties( const std::vector<Mantid::Kernel::PropertyHistory_sptr>& histProp);
-  const Mantid::Kernel::PropertyHistories& getAlgProperties();
+
+  void setAlgProperties(
+      const std::vector<Mantid::Kernel::PropertyHistory_sptr> &histProp);
+  const Mantid::Kernel::PropertyHistories &getAlgProperties();
+
+public slots:
+  void popupMenu(const QPoint &pos);
+  void copySelectedItemText();
+
 public:
   QTreeWidget *m_histpropTree;
+
 private:
+  QAction *m_copyAction;
+  QMenu *m_contextMenu;
+  QString m_selectedItemText;
+
   std::vector<Mantid::Kernel::PropertyHistory_sptr> m_Histprop;
 };
-#endif
 
-
-
+#endif // ALGORITHMHISTORYWINDOW_H
