@@ -372,6 +372,25 @@ signal_t MDHistoWorkspaceIterator::getNormalizedError() const {
 }
 
 //----------------------------------------------------------------------------------------------
+/// Returns the normalized signal for this box
+signal_t MDHistoWorkspaceIterator::getNormalizedSignalWithMask() const {
+  if (this->getIsMasked()) {
+    return m_maskValue;
+  }
+  // What is our normalization factor?
+  switch (m_normalization) {
+    case NoNormalization:
+      return m_ws->getSignalAt(m_pos);
+    case VolumeNormalization:
+      return m_ws->getSignalAt(m_pos) * m_ws->getInverseVolume();
+    case NumEventsNormalization:
+      return m_ws->getSignalAt(m_pos) / m_ws->getNumEventsAt(m_pos);
+  }
+  // Should not reach here
+  return std::numeric_limits<signal_t>::quiet_NaN();
+}
+
+//----------------------------------------------------------------------------------------------
 /// Returns the signal for this box, same as innerSignal
 signal_t MDHistoWorkspaceIterator::getSignal() const {
   return m_ws->getSignalAt(m_pos);
