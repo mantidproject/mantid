@@ -77,7 +77,7 @@ public:
                    const Mantid::API::MDNormalization &normalization) const;
 
   /// Returns the (normalized) signal at a given coordinates
-  // or NaN if masked
+  // or 0 if masked
   virtual signal_t getSignalWithMaskAtCoord(
       const coord_t *coords,
       const Mantid::API::MDNormalization &normalization) const;

@@ -18,12 +18,23 @@
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 """
-Pre-processing operations and filters that are applied on stacks of images
-or individual images.
+A collection of scripts for neutron imaging. Includes
+pre-processing/preparation steps, reconstruction via third party
+tools, and post-processing steps, in addition to input/output and
+format conversion routines.
+
 """
 
 try:
-    from . import filters
-except ImportError:
-    raise ImportError("Inconsistency found. Could not import filters which "
-                      "should be available in this package.")
+    from . import io
+except ImportError as exc:
+    raise ImportError("Inconsistency found. Could not import 'io' (input/output "
+                      "routines) which should be available in this package. "
+                      "Details/reason: {0}".format(exc))
+
+try:
+    from . import tool_imports
+except ImportError as exc:
+    raise ImportError("Inconsistency found. Could not import 'tool_imports' (for third "
+                      "party tools such as Tomopy and Astra) which should be available "
+                      "in this package. Details/reason: {0}".format(exc))
