@@ -342,7 +342,6 @@ public:
     // Create a function to mask some of the workspace.
     MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
     ew->setMDMasking(function);
-    ew->refreshCache();
 
     TSM_ASSERT("Should return true as the workspace has a mask", ew->hasMask());
   }
