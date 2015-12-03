@@ -1,15 +1,18 @@
 import mantid
 
 
+def _get_temporary_workspace_name(workspace):
+    return 'algorithm-internal-temporary_{0}'.format(id(workspace))
+
 def _pythonapi_create_algorithm_function_post_process_lhs_info(lhs):
-    modified_names = [ 'algorithm-internal-temporary_{}'.format(id(i)) for i in lhs[1] ]
+    modified_names = [ _get_temporary_workspace_name(i) for i in lhs[1] ]
     return (lhs[0], modified_names)
 
 def _pythonapi_create_algorithm_function_get_initial_workspaces(args, kwargs):
     initial_workspaces = {}
     for i in list(args) + kwargs.values():
         if isinstance(i, _api.Workspace):
-            name = 'algorithm-internal-temporary_{}'.format(id(i))
+            name = _get_temporary_workspace_name(i)
             initial_workspaces[name] = i
             _api.AnalysisDataService[name] = i
     return initial_workspaces
