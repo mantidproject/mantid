@@ -149,7 +149,8 @@ public:
     // 2D workspace
     MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
-    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
+    auto pMockFactorySuccessor =
+        Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA"));
 
@@ -163,11 +164,12 @@ public:
             Mantid::VATES::VolumeNormalization, (double)0);
 
     //Successor is provided.
-    factory.SetSuccessor(pMockFactorySuccessor);
+    factory.SetSuccessor(std::move(pMockFactorySuccessor));
 
     factory.initialize(ws_sptr);
 
-    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+    TSM_ASSERT("successor factory not used as expected.",
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
   }
 
   void testInitializationDelegatesThrows()
@@ -196,7 +198,7 @@ public:
     // 2D workspace
     MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
-    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
+    auto pMockFactorySuccessor = Kernel::make_unique<MockvtkDataSetFactory>();
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA"));
@@ -211,12 +213,13 @@ public:
             Mantid::VATES::VolumeNormalization, (double)0);
 
     //Successor is provided.
-    factory.SetSuccessor(pMockFactorySuccessor);
+    factory.SetSuccessor(std::move(pMockFactorySuccessor));
 
     factory.initialize(ws_sptr);
     factory.create(progressUpdate); // should be called on successor.
 
-    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+    TSM_ASSERT("successor factory not used as expected.",
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
   }
 
   void testTypeName()

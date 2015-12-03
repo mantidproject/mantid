@@ -12,6 +12,7 @@
 #include <gtest/gtest.h>
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include <vtkSmartPointer.h>
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -116,18 +117,21 @@ public:
     // 3 dimensions on the workspace
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
 
-    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
-    EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
+    auto pMockFactorySuccessor =
+        Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    EXPECT_CALL(*pMockFactorySuccessor, initialize(_))
+        .Times(1); // expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkMDHistoLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), Mantid::VATES::VolumeNormalization);
 
     //Successor is provided.
-    factory.SetSuccessor(pMockFactorySuccessor);
+    factory.SetSuccessor(std::move(pMockFactorySuccessor));
     factory.initialize(ws_sptr);
 
-    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+    TSM_ASSERT("successor factory not used as expected.",
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
   }
 
   void testInitializationDelegatesThrows()
@@ -149,26 +153,33 @@ public:
     // 3 dimensions on the workspace
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
 
-    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
-    EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
+    auto pMockFactorySuccessor =
+        Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    EXPECT_CALL(*pMockFactorySuccessor, initialize(_))
+        .Times(1); // expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkMDHistoLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
+        Mantid::VATES::VolumeNormalization);
 
     //Successor is provided.
-    factory.SetSuccessor(pMockFactorySuccessor);
+    factory.SetSuccessor(std::move(pMockFactorySuccessor));
     
     factory.initialize(ws_sptr);
     factory.create(progressUpdate); // should be called on successor.
 
-    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+    TSM_ASSERT("successor factory not used as expected.",
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
   }
 
   void testTypeName()
   {
-    vtkMDHistoLineFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
+        Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDHistoLineFactory", factory.getFactoryTypeName());
   }
 
@@ -194,7 +205,9 @@ public:
 	{
     FakeProgressAction progressUpdate;
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
-    vtkMDHistoLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)),Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 2),
+        Mantid::VATES::VolumeNormalization);
     factory.initialize(m_ws_sptr);
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 	}

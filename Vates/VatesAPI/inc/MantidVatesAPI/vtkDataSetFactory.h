@@ -6,6 +6,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/make_unique.h"
 #include "vtkDataSet.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -80,7 +81,7 @@ public:
   virtual vtkDataSet* oneStepCreate(Mantid::API::Workspace_sptr,ProgressAction&);
 
   /// Add a chain-of-responsibility successor to this factory. Handle case where the factory cannot render the MDWorkspace owing to its dimensionality.
-  virtual void SetSuccessor(vtkDataSetFactory* pSuccessor);
+  virtual void SetSuccessor(std::unique_ptr<vtkDataSetFactory> pSuccessor);
 
   /// Determine whether a successor factory has been provided.
   virtual bool hasSuccessor() const;
@@ -228,7 +229,7 @@ private:
 };
 
 typedef boost::shared_ptr<vtkDataSetFactory> vtkDataSetFactory_sptr;
-
+typedef std::unique_ptr<vtkDataSetFactory> vtkDataSetFactory_uptr;
 
 }
 }

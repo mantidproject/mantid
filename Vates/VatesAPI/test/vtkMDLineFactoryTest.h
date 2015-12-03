@@ -2,6 +2,7 @@
 #define VTK_MD_LINE_FACTORY_TEST
 
 #include <cxxtest/TestSuite.h>
+#include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
@@ -26,50 +27,58 @@ public:
 
   void testGetFactoryTypeName()
   {
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDLineFactory", factory.getFactoryTypeName());
   }
 
   void testInitializeDelegatesToSuccessor()
   {
-    MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
+    auto mockSuccessor = Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
-    factory.SetSuccessor(mockSuccessor);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
+    factory.SetSuccessor(std::move(mockSuccessor));
 
-    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    ITableWorkspace_sptr ws =
+        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
 
-    TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
+    TSM_ASSERT("Successor has not been used properly.",
+               Mock::VerifyAndClearExpectations(mockSuccessor.get()));
   }
 
   void testCreateDelegatesToSuccessor()
   {
     FakeProgressAction progressUpdate;
 
-    MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
+    auto mockSuccessor = Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
-    factory.SetSuccessor(mockSuccessor);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
+    factory.SetSuccessor(std::move(mockSuccessor));
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 
-    TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
+    TSM_ASSERT("Successor has not been used properly.",
+               Mock::VerifyAndClearExpectations(mockSuccessor.get()));
   }
 
   void testOnInitaliseCannotDelegateToSuccessor()
   {
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
     //factory.SetSuccessor(mockSuccessor); No Successor set.
 
-    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    ITableWorkspace_sptr ws =
+        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS(factory.initialize(ws), std::runtime_error);
   }
 
@@ -77,7 +86,8 @@ public:
   {
     FakeProgressAction progressUpdate;
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
     //initialize not called!
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
@@ -102,7 +112,8 @@ public:
 
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
     auto product =
@@ -153,7 +164,8 @@ public:
 
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
     auto product =

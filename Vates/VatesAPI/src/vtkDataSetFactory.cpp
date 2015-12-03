@@ -20,10 +20,10 @@ vtkDataSetFactory::~vtkDataSetFactory()
  @param pSuccessor :: pointer to the successor. Note RAII is used.
  @return true if addition was successful.
  */
-void vtkDataSetFactory::SetSuccessor(vtkDataSetFactory* pSuccessor)
+void vtkDataSetFactory::SetSuccessor(vtkDataSetFactory_uptr pSuccessor)
 { 
   //Assigment peformed first (RAII) to guarentee no side effects.
-  m_successor = vtkDataSetFactory::SuccessorType(pSuccessor);
+  m_successor = vtkDataSetFactory::SuccessorType(std::move(pSuccessor));
   //Unless overriden, successors should not be the same type as the present instance.
   if(pSuccessor->getFactoryTypeName() == this->getFactoryTypeName())
   {

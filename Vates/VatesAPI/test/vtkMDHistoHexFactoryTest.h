@@ -1,6 +1,7 @@
 #ifndef VTK_MD_HISTO_HEX_FACTORY_TEST_H_
 #define VTK_MD_HISTO_HEX_FACTORY_TEST_H_
 
+#include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
@@ -38,17 +39,23 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
-    vtkMDHistoHexFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory inside(
+        boost::make_shared<UserDefinedThresholdRange>(0, 2),
+        Mantid::VATES::VolumeNormalization);
     inside.initialize(ws_sptr);
     vtkStructuredGrid *insideProduct =
         dynamic_cast<vtkStructuredGrid *>(inside.create(progressUpdate));
 
-    vtkMDHistoHexFactory below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory below(
+        boost::make_shared<UserDefinedThresholdRange>(0, 0.5),
+        Mantid::VATES::VolumeNormalization);
     below.initialize(ws_sptr);
     vtkStructuredGrid *belowProduct =
         dynamic_cast<vtkStructuredGrid *>(below.create(progressUpdate));
 
-    vtkMDHistoHexFactory above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory above(
+        boost::make_shared<UserDefinedThresholdRange>(2, 3),
+        Mantid::VATES::VolumeNormalization);
     above.initialize(ws_sptr);
     vtkStructuredGrid *aboveProduct =
         dynamic_cast<vtkStructuredGrid *>(above.create(progressUpdate));
@@ -79,7 +86,9 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkMDHistoHexFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
+        Mantid::VATES::VolumeNormalization);
     factory.initialize(ws_sptr);
 
     auto product =
@@ -98,7 +107,8 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
     MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new NoThresholdRange), Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(boost::make_shared<NoThresholdRange>(),
+                                 Mantid::VATES::VolumeNormalization);
 
     factory.initialize(ws_sptr);
     auto product =
@@ -111,8 +121,10 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
   {
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
-    
-    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), Mantid::VATES::VolumeNormalization);
+
+    vtkMDHistoHexFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
+        Mantid::VATES::VolumeNormalization);
 
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::invalid_argument);
   }
@@ -120,7 +132,9 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
   void testCreateWithoutInitializeThrows()
   {
     FakeProgressAction progressUpdate;
-    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
+        Mantid::VATES::VolumeNormalization);
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
 
@@ -129,19 +143,23 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
-    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
+    auto pMockFactorySuccessor =
+        Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
+        Mantid::VATES::VolumeNormalization);
 
     //Successor is provided.
-    factory.SetSuccessor(pMockFactorySuccessor);
+    factory.SetSuccessor(std::move(pMockFactorySuccessor));
     
     factory.initialize(ws_sptr);
 
-    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+    TSM_ASSERT("successor factory not used as expected.",
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
   }
 
   void testInitializationDelegatesThrows()
@@ -150,7 +168,9 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
+        Mantid::VATES::VolumeNormalization);
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
@@ -162,28 +182,34 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     //2 dimensions on the workspace.
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
-    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
+    auto pMockFactorySuccessor =
+        Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkMDHistoHexFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
+        Mantid::VATES::VolumeNormalization);
 
     //Successor is provided.
-    factory.SetSuccessor(pMockFactorySuccessor);
+    factory.SetSuccessor(std::move(pMockFactorySuccessor));
     
     factory.initialize(ws_sptr);
     factory.create(progressUpdate); // should be called on successor.
 
-    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+    TSM_ASSERT("successor factory not used as expected.",
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
   }
 
   void testTypeName()
   {
     using namespace Mantid::VATES;
-    vtkMDHistoHexFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
+        Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDHistoHexFactory", factory.getFactoryTypeName());
   }
 
@@ -212,7 +238,9 @@ public:
     FakeProgressAction progressUpdate;
 
     //Create the factory.
-    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
+        Mantid::VATES::VolumeNormalization);
     factory.initialize(m_ws_sptr);
 
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));

@@ -2,6 +2,7 @@
 #define VTK_MD_QUAD_FACTORY_TEST_H_
 
 #include "MantidAPI/IMDIterator.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
@@ -38,8 +39,8 @@ public:
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization);
+    auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 100);
+    vtkMDHistoQuadFactory factory(pRange, Mantid::VATES::VolumeNormalization);
 
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::invalid_argument);
   }
@@ -48,8 +49,8 @@ public:
   {
     FakeProgressAction progressUpdate;
 
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization);
+    auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 100);
+    vtkMDHistoQuadFactory factory(pRange, Mantid::VATES::VolumeNormalization);
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
 
@@ -60,9 +61,10 @@ public:
     // WS with 2 dimensions
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
-    //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 2);
-    vtkMDHistoQuadFactory inside(ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization);
+    // Thresholds have been set such that the signal values (hard-coded to 1,
+    // see above) will fall between the minimum 0 and maximum 2.
+    auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 2);
+    vtkMDHistoQuadFactory inside(pRange, Mantid::VATES::VolumeNormalization);
     inside.initialize(ws_sptr);
     vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create(progressUpdate));
 
@@ -76,9 +78,10 @@ public:
     // WS with 2 dimensions
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
-    //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall above and outside the minimum 0 and maximum 0.5.
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 0.5);
-    vtkMDHistoQuadFactory above(ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization);
+    // Thresholds have been set such that the signal values (hard-coded to 1,
+    // see above) will fall above and outside the minimum 0 and maximum 0.5.
+    auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 0.5);
+    vtkMDHistoQuadFactory above(pRange, Mantid::VATES::VolumeNormalization);
     above.initialize(ws_sptr);
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create(progressUpdate));
 
@@ -94,9 +97,10 @@ public:
     // WS with 2 dimensions
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
-    //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall below and outside the minimum 1.5 and maximum 2.
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(1.5, 2);
-    vtkMDHistoQuadFactory below(ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization);
+    // Thresholds have been set such that the signal values (hard-coded to 1,
+    // see above) will fall below and outside the minimum 1.5 and maximum 2.
+    auto pRange = boost::make_shared<UserDefinedThresholdRange>(1.5, 2);
+    vtkMDHistoQuadFactory below(pRange, Mantid::VATES::VolumeNormalization);
 
     below.initialize(ws_sptr);
     vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create(progressUpdate));
@@ -113,20 +117,23 @@ public:
     // WS with 1 dimension
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
 
-    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
-    EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
+    auto pMockFactorySuccessor =
+        Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName())
+        .WillOnce(testing::Return("TypeA"));
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
-    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange),Mantid::VATES::VolumeNormalization);
+    auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 1);
+    vtkMDHistoQuadFactory factory(pRange, Mantid::VATES::VolumeNormalization);
 
     //Successor is provided.
-    factory.SetSuccessor(pMockFactorySuccessor);
-    
+    factory.SetSuccessor(std::move(pMockFactorySuccessor));
+
     factory.initialize(ws_sptr);
 
-    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+    TSM_ASSERT("successor factory not used as expected.",
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
   }
 
   void testInitializationDelegatesThrows()
@@ -149,29 +156,32 @@ public:
     // WS with 1 dimension
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
 
-    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
-    EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
+    auto pMockFactorySuccessor =
+        Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    EXPECT_CALL(*pMockFactorySuccessor, initialize(_))
+        .Times(1); // expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
-    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization);
+    auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 1);
+    vtkMDHistoQuadFactory factory(pRange, Mantid::VATES::VolumeNormalization);
 
     //Successor is provided.
-    factory.SetSuccessor(pMockFactorySuccessor);
-    
+    factory.SetSuccessor(std::move(pMockFactorySuccessor));
+
     factory.initialize(ws_sptr);
     factory.create(progressUpdate); // should be called on successor.
 
-    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+    TSM_ASSERT("successor factory not used as expected.",
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
   }
 
   
   void testTypeName()
   {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
-    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization);
+    auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 1);
+    vtkMDHistoQuadFactory factory(pRange, Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDHistoQuadFactory", factory.getFactoryTypeName());
   }
 
@@ -214,8 +224,8 @@ public:
 	{
     FakeProgressAction progressUpdate;
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
-    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization);
+    auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 1);
+    vtkMDHistoQuadFactory factory(pRange, Mantid::VATES::VolumeNormalization);
     factory.initialize(m_ws_sptr);
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 	}
