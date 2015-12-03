@@ -1,7 +1,7 @@
 #pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode
-from mantid.kernel import Direction, Property, StringListValidator
+from mantid.kernel import Direction, Property, StringListValidator, UnitFactory
 
 
 class SANSStitch1D(DataProcessorAlgorithm):
@@ -47,6 +47,19 @@ class SANSStitch1D(DataProcessorAlgorithm):
         pass
 
 
+    def _validateIs1DFromPropertyName(self, property_name):
+        ws = self.getProperty(property_name).value
+        if not ws:
+            return True # Mandatory validators to take care of this. Early exit.
+        return ws.getNumberHistograms() == 1
+
+    def _validateIsInQ(self, property_name):
+        ws = self.getProperty(property_name).value
+        if not ws:
+            return True # Mandatory validators to take care of this. Early exit.
+
+        targetUnit = UnitFactory.create('MomentumTransfer')
+        return targetUnit.caption() == ws.getAxis(0).getUnit().caption()
 
     def validateInputs(self):
         q_min_property_name = 'QMin'
@@ -62,22 +75,51 @@ class SANSStitch1D(DataProcessorAlgorithm):
             errors[q_max_property_name] = 'QMin must be < QMax'
 
 
+        # Mode compatibility checks
         scale_factor_property = self.getProperty('ScaleFactor')
         shift_factor_property = self.getProperty('ShiftFactor')
         mode_property = self.getProperty('Mode')
-
-        if(mode_property.value == 'None'):
+        if mode_property.value == 'None':
             if scale_factor_property.isDefault:
                 errors[scale_factor_property.name] = 'ScaleFactor required'
             if shift_factor_property.isDefault:
                 errors[shift_factor_property.name] = 'ShiftFactor required'
+        elif mode_property.value == 'ScaleOnly':
+            if shift_factor_property.isDefault:
+                errors[shift_factor_property.name] = 'ShiftFactor required'
+        elif mode_property.value == 'ShiftOnly':
+            if shift_factor_property.isDefault:
+                errors[scale_factor_property.name] = 'ScaleFactor required'
+
+
+        # 1d data check
+        message_when_not_1d = 'Wrong number of spectra. Must be 1D input'
+        if not self._validateIs1DFromPropertyName('HABSample'):
+            errors['HABSample'] = message_when_not_1d
+        if not self._validateIs1DFromPropertyName('LABSample'):
+            errors['LABSample'] = message_when_not_1d
+        if not self._validateIs1DFromPropertyName('HABNorm'):
+            errors['HABNorm'] = message_when_not_1d
+        if not self._validateIs1DFromPropertyName('LABNorm'):
+            errors['LABNorm'] = message_when_not_1d
+
+        # Units check
+        message_when_not_in_q = 'Workspace must have units of momentum transfer'
+        if not self._validateIsInQ('HABSample'):
+            errors['HABSample'] = message_when_not_in_q
+        if not self._validateIsInQ('LABSample'):
+            errors['LABSample'] = message_when_not_in_q
+        if not self._validateIsInQ('HABNorm'):
+            errors['HABNorm'] = message_when_not_in_q
+        if not self._validateIsInQ('LABNorm'):
+            errors['LABNorm'] = message_when_not_in_q
+
+
+
 
         return errors
 
 
-    # 1D data
-    # Units in Q
-    # Scale modes require inputs
 
 
 
