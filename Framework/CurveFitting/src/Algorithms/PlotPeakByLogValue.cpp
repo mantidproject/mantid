@@ -240,10 +240,7 @@ void PlotPeakByLogValue::exec() {
           logValue = (*axis)(j);
         if (!isLogColumnNameSet) {
           isLogColumnNameSet = true;
-          auto caption = axis->unit()->caption();
-          if (!caption.empty()) {
-            result->getColumn(0)->setName(caption);
-          }
+          result->getColumn(0)->setName(axis->unit()->caption());
         }
       } else if (logName != "SourceName") {
         Kernel::Property *prop = data.ws->run().getLogData(logName);
