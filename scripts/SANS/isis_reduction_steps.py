@@ -1456,12 +1456,15 @@ class DarkRunSubtraction(object):
         # then the monitor workspace of the dark run should match (note that for event workspaces
         # the monitor workspace is separate). In the case of histo workspaces the monitor data
         # has all the histo data appended.
+        out_ws = None
         if workspace_was_event:
             # Rebin to the dark run monitor workspace to the original monitor workspace
             monitor_dark_run_ws = self._rebin_to_match(monitor_workspace, monitor_dark_run_ws)
-            return self._subtract_dark_run(monitor_workspace, monitor_dark_run_ws, setting)
+            out_ws = self._subtract_dark_run(monitor_workspace, monitor_dark_run_ws, setting)
         else:
-            return self._get_monitor_workspace_from_original_histo_input(monitor_workspace, monitor_dark_run_ws, setting)
+            out_ws = self._get_monitor_workspace_from_original_histo_input(monitor_workspace, monitor_dark_run_ws, setting)
+
+        return out_ws
 
     def _get_monitor_workspace_from_original_histo_input(self, monitor_workspace, monitor_dark_run_ws, setting):
         '''
@@ -3054,7 +3057,7 @@ class SliceEvent(ReductionStep):
                 binning = reducer.settings["events.binning"]
             else:
                 binning = ""
-            hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
+            dummy_hist, (dummy_tot_t, tot_c, dummy_part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
             self.scale = part_c / tot_c
 
 class BaseBeamFinder(ReductionStep):

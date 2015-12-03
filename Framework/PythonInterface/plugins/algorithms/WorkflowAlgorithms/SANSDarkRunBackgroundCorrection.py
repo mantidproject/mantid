@@ -91,20 +91,6 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         return issues
 
     def _subtract_dark_run_from_sans_data(self, workspace, dark_run):
-        alg_save = AlgorithmManager.createUnmanaged("SaveNexus")
-        alg_save.initialize()
-        alg_save.setChild(True)
-        alg_save.setProperty("InputWorkspace", dark_run)
-        alg_save.setProperty("Filename", "C:/Users/xsd05043/Desktop/dark_temp.nxs")
-        alg_save.execute()
-
-        alg_save = AlgorithmManager.createUnmanaged("SaveNexus")
-        alg_save.initialize()
-        alg_save.setChild(True)
-        alg_save.setProperty("InputWorkspace", workspace)
-        alg_save.setProperty("Filename", "C:/Users/xsd05043/Desktop/orig_temp.nxs")
-        alg_save.execute()
-
         # Subtract the dark_run from the workspace
         subtracted_ws_name = "_dark_run_corrected_ws"
         alg_minus = AlgorithmManager.createUnmanaged("Minus")

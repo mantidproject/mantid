@@ -243,7 +243,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         # Some spectra might be zero, so we have to check that there is something which is not zero
         all_detectors_zero = True
         for i in range(0, scatter_workspace.getNumberHistograms()):
-             all_detectors_zero = all_detectors_zero & all_entries_zero(scatter_workspace, i)
+            all_detectors_zero = all_detectors_zero & all_entries_zero(scatter_workspace, i)
         self.assertFalse(all_detectors_zero, "There should be some detectors which are not zero")
 
         # The monitors should not be affected, but we only have data in ws_index 0-3
@@ -638,8 +638,11 @@ class DarkRunSubtractionTest(unittest.TestCase):
                                mon_number = mon_number)
 
 class DarkRunSubtractionTestStressTest(stresstesting.MantidStressTest):
-    def runTest(self):
+    def __init__(self):
+        stresstesting.MantidStressTest.__init__(self)
         self._success = False
+
+    def runTest(self):
         suite = unittest.TestSuite()
         suite.addTest(unittest.makeSuite(DarkRunSubtractionTest, 'test'))
         runner = unittest.TextTestRunner()
