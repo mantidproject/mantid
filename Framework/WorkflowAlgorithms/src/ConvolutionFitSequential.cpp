@@ -280,11 +280,10 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Run ProcessIndirectFitParameters
-  auto columnXName = outputWs->getColumn(0)->name();
   auto pifp =
       createChildAlgorithm("ProcessIndirectFitParameters", 0.94, 0.96, true);
   pifp->setProperty("InputWorkspace", outputWs);
-  pifp->setProperty("ColumnX", columnXName);
+  pifp->setProperty("ColumnX", "axis-1");
   pifp->setProperty("XAxisUnit", "MomentumTransfer");
   pifp->setProperty("ParameterNames", paramNamesList);
   pifp->setProperty("OutputWorkspace", resultWsName);
