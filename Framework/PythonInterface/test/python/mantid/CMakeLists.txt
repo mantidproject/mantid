@@ -5,6 +5,7 @@ add_subdirectory( kernel )
 add_subdirectory( geometry )
 add_subdirectory( api )
 add_subdirectory( dataobjects )
+add_subdirectory( experimental )
 
 set ( TEST_PY_FILES
   ImportModuleTest.py

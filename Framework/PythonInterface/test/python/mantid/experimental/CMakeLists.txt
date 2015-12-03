@@ -1,0 +1,12 @@
+##
+## mantid.experimental tests
+##
+set ( TEST_PY_FILES
+  pythonapiTest.py
+  simpleapiTest.py
+)
+
+check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
+
+# Prefix for test=PythonInterfaceExperimental
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterfaceExperimental ${TEST_PY_FILES} )
