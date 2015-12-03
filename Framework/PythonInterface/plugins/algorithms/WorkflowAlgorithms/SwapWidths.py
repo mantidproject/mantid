@@ -1,7 +1,7 @@
 #pylint: disable=no-init
 from mantid.kernel import *
-from mantid.api import (WorkspaceProperty, FileProperty, FileAction, TextAxis,
-                        DataProcessorAlgorithm, AlgorithmFactory, mtd, Progress)
+from mantid.api import (WorkspaceProperty,DataProcessorAlgorithm, AlgorithmFactory,
+                        mtd, Progress)
 from mantid.simpleapi import *
 import numpy as np
 
@@ -54,24 +54,24 @@ class SwapWidths(DataProcessorAlgorithm):
         logger.information('Swap point is %i' % self._swap_point)
 
         prog_workflow.report("Calculating swap points")
-        x1 = width1_x
-        y1 = width1_y[:self._swap_point]
-        y1 = np.append(y1,width2_y[self._swap_point:])
-        e1 = width1_e[:self._swap_point]
-        e1 = np.append(e1,width2_e[self._swap_point:])
-        x2 = width2_x
-        y2 = width2_y[:self._swap_point]
-        y2 = np.append(y2,width1_y[self._swap_point:])
-        e2 = width2_e[:self._swap_point]
-        e2 = np.append(e2,width1_e[self._swap_point:])
-		
+        x_axis_1 = width1_x
+        y_axis_1 = width1_y[:self._swap_point]
+        y_axis_1 = np.append(y_axis_1,width2_y[self._swap_point:])
+        error_1 = width1_e[:self._swap_point]
+        error_1 = np.append(error_1,width2_e[self._swap_point:])
+        x_axis_2 = width2_x
+        y_axis_2 = width2_y[:self._swap_point]
+        y_axis_2 = np.append(y_axis_2,width1_y[self._swap_point:])
+        error_2 = width2_e[:self._swap_point]
+        error_2 = np.append(error_2,width1_e[self._swap_point:])
+
         prog_workflow.report("Appending new points after swap")
-        dataX = x1                              #create data for WS
-        dataY = y1
-        dataE = e1
-        dataX = np.append(dataX,x2)
-        dataY = np.append(dataY,y2)
-        dataE = np.append(dataE,e2)
+        dataX = x_axis_1                              #create data for WS
+        dataY = y_axis_1
+        dataE = error_1
+        dataX = np.append(dataX,x_axis_2)
+        dataY = np.append(dataY,y_axis_2)
+        dataE = np.append(dataE,error_2)
         names = label_1 + ', ' + label_2           #names for WS
         prog_workflow.report("Create new workspace with correct values")
         CreateWorkspace(OutputWorkspace=self._output_ws,
