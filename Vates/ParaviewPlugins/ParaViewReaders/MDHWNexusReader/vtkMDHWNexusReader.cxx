@@ -129,16 +129,21 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   FilterUpdateProgressAction<vtkMDHWNexusReader> loadingProgressAction(this, "Loading...");
   FilterUpdateProgressAction<vtkMDHWNexusReader> drawingProgressAction(this, "Drawing...");
 
-  ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
+  ThresholdRange_scptr thresholdRange =
+      boost::make_shared<IgnoreZerosThresholdRange>();
 
   // Will attempt to handle drawing in 4D case and then in 3D case
   // if that fails.
-  vtkMDHistoHexFactory* successor = new vtkMDHistoHexFactory(thresholdRange, m_normalizationOption);
-  vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, m_normalizationOption, m_time);
-  factory->SetSuccessor(successor);
+  auto successor = Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+      thresholdRange, m_normalizationOption);
+  auto factory =
+      Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+          thresholdRange, m_normalizationOption, m_time);
+  factory->SetSuccessor(std::move(successor));
 
-  vtkDataSet* product = m_presenter->execute(factory, loadingProgressAction, drawingProgressAction);
-  
+  vtkDataSet *product = m_presenter->execute(
+      factory.get(), loadingProgressAction, drawingProgressAction);
+
   vtkDataSet* output = vtkDataSet::GetData(outInfo);
   output->ShallowCopy(product);
   product->Delete();

@@ -201,18 +201,23 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     FilterUpdateProgressAction<vtkMDEWSource> loadingProgressUpdate(this, "Loading...");
     FilterUpdateProgressAction<vtkMDEWSource> drawingProgressUpdate(this, "Drawing...");
 
-    ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
-    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory;
-    vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, m_normalization);
-    vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, m_normalization);
-    vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, m_normalization);
+    ThresholdRange_scptr thresholdRange =
+        boost::make_shared<IgnoreZerosThresholdRange>();
+    auto zeroDFactory = Mantid::Kernel::make_unique<vtkMD0DFactory>();
+    auto hexahedronFactory = Mantid::Kernel::make_unique<vtkMDHexFactory>(
+        thresholdRange, m_normalization);
+    auto quadFactory = Mantid::Kernel::make_unique<vtkMDQuadFactory>(
+        thresholdRange, m_normalization);
+    auto lineFactory = Mantid::Kernel::make_unique<vtkMDLineFactory>(
+        thresholdRange, m_normalization);
 
-    hexahedronFactory->SetSuccessor(quadFactory);
-    quadFactory->SetSuccessor(lineFactory);
-    lineFactory->SetSuccessor(zeroDFactory);
+    hexahedronFactory->SetSuccessor(std::move(quadFactory));
+    quadFactory->SetSuccessor(std::move(lineFactory));
+    lineFactory->SetSuccessor(std::move(zeroDFactory));
 
     hexahedronFactory->setTime(m_time);
-    vtkDataSet* product = m_presenter->execute(hexahedronFactory, loadingProgressUpdate, drawingProgressUpdate);
+    vtkDataSet *product = m_presenter->execute(
+        hexahedronFactory.get(), loadingProgressUpdate, drawingProgressUpdate);
 
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
     vtkBox* box = vtkBox::New();

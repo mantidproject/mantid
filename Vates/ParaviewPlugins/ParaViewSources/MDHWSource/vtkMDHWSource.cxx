@@ -184,24 +184,31 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     FilterUpdateProgressAction<vtkMDHWSource> loadingProgressUpdate(this, "Loading...");
     FilterUpdateProgressAction<vtkMDHWSource> drawingProgressUpdate(this, "Drawing...");
 
-    ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
+    ThresholdRange_scptr thresholdRange =
+        boost::make_shared<IgnoreZerosThresholdRange>();
 
     /*
     Will attempt to handle drawing in 4D case and then in 3D case if that fails, and so on down to 1D
     */
-    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory;
-    vtkMDHistoLineFactory* lineFactory = new vtkMDHistoLineFactory(thresholdRange, m_normalizationOption);
-    vtkMDHistoQuadFactory* quadFactory = new vtkMDHistoQuadFactory(thresholdRange, m_normalizationOption);
-    vtkMDHistoHexFactory* hexFactory = new vtkMDHistoHexFactory(thresholdRange, m_normalizationOption);
-    vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, m_normalizationOption, m_time);
+    auto zeroDFactory = Mantid::Kernel::make_unique<vtkMD0DFactory>();
+    auto lineFactory = Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
+        thresholdRange, m_normalizationOption);
+    auto quadFactory = Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
+        thresholdRange, m_normalizationOption);
+    auto hexFactory = Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+        thresholdRange, m_normalizationOption);
+    auto factory =
+        Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+            thresholdRange, m_normalizationOption, m_time);
 
-    factory->SetSuccessor(hexFactory);
-    hexFactory->SetSuccessor(quadFactory);
-    quadFactory->SetSuccessor(lineFactory);
-    lineFactory->SetSuccessor(zeroDFactory);
+    factory->SetSuccessor(std::move(hexFactory));
+    hexFactory->SetSuccessor(std::move(quadFactory));
+    quadFactory->SetSuccessor(std::move(lineFactory));
+    lineFactory->SetSuccessor(std::move(zeroDFactory));
 
-    vtkDataSet* product = m_presenter->execute(factory, loadingProgressUpdate, drawingProgressUpdate);
-      
+    vtkDataSet *product = m_presenter->execute(
+        factory.get(), loadingProgressUpdate, drawingProgressUpdate);
+
     vtkDataSet* output = vtkDataSet::GetData(outInfo);
     output->ShallowCopy(product);
     product->Delete();
