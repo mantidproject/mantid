@@ -76,6 +76,9 @@ public:
   /// Returns the normalized error for this box
   virtual signal_t getNormalizedError() const = 0;
 
+  /// Returns the normalized signal or mask value for this box
+  virtual signal_t getNormalizedSignalWithMask() const = 0;
+
   /// Returns the total signal for this box
   virtual signal_t getSignal() const = 0;
 
@@ -130,6 +133,9 @@ public:
 protected:
   /// Normalization method for getNormalizedSignal()
   Mantid::API::MDNormalization m_normalization;
+
+  // Value to be used for masked data in plots of MDWorkspaces
+  static const signal_t m_maskValue;
 };
 
 } // namespace API
