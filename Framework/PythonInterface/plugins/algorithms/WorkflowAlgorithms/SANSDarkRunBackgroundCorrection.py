@@ -271,12 +271,12 @@ class DarkRunMonitorAndDetectorRemover(object):
         # Since we only have around 10 or so monitors
         # we set them manually to 0
         for ws_index, dummy_det_id in monitor_list:
-            data = dark_run.dataY(index)
-            error = dark_run.dataE(index)
+            data = dark_run.dataY(ws_index)
+            error = dark_run.dataE(ws_index)
             data = data*0
             error = error*0
-            dark_run.setY(index,data)
-            dark_run.setE(index,error)
+            dark_run.setY(ws_index,data)
+            dark_run.setE(ws_index,error)
 
         return dark_run
 
@@ -294,7 +294,7 @@ class DarkRunMonitorAndDetectorRemover(object):
             for index in range(0, num_histograms):
                 det = dark_run.getDetector(index)
                 if det.isMonitor():
-                    det_id_list.append(det.getId())
+                    det_id_list.append(det.getID())
                     monitor_list.append(index)
         except:
             Logger("DarkRunMonitorAndDetectorRemover").information("There was an issue when trying "
@@ -372,8 +372,9 @@ class DarkRunMonitorAndDetectorRemover(object):
         @param monitor_list: the list of monitors
         @raise RuntimeError: If the selected monitor workspace index does not exist.
         '''
-        det_id_list = zip(*monitor_list)[0]
-        det_id_list = set(det_id_list)
+        det_id_list = []
+        if len(monitor_list) != 0:
+            det_id_list = zip(*monitor_list)[1]
 
         selected_monitors = []
         if len(monitor_selection) > 0:
@@ -403,20 +404,25 @@ class DarkRunMonitorAndDetectorRemover(object):
         '''
         We reset all monitors back to the old values
         '''
-        ws_index_list = zip(*monitor_list)[0]
-        for i in range(0,len(monitor_list)):
-            dark_run.setY(ws_index_list[i], list_dataY[i])
-            dark_run.setE(ws_index_list[i], list_dataE[i])
+        # We need to iterate over all 
+        counter = 0
+        for ws_index, dummy_det_id in monitor_list:
+            dark_run.setY(ws_index, list_dataY[counter])
+            dark_run.setE(ws_index, list_dataE[counter])
+            counter += 1
         return dark_run
     #pylint: disable=too-many-arguments
     def _set_only_selected_monitors(self, dark_run, list_dataY, list_dataE,
                                     monitor_list, selected_monitors):
-        ws_index_list = zip(*monitor_list)[0]
-        for i in range(0,len(ws_index_list)):
+        # The selected monitors is a detector ID, hence we need to compare it with
+        # a detector ID, but we use the assoicated workspace index to correct the data
+        counter = 0
+        for ws_index, det_id in monitor_list:
             # Only add the data back for the specified monitors
-            if monitor_list[i] in selected_monitors:
-                dark_run.setY(ws_index_list[i], list_dataY[i])
-                dark_run.setE(ws_index_list[i], list_dataE[i])
+            if det_id in selected_monitors:
+                dark_run.setY(ws_index, list_dataY[counter])
+                dark_run.setE(ws_index, list_dataE[counter])
+            counter +=1
         return dark_run
 #############################################################################################
 

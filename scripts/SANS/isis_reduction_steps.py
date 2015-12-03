@@ -1309,17 +1309,18 @@ class DarkRunSubtraction(object):
                 workspace = self._execute_dark_run_subtraction_for_transmission(workspace, setting, trans_ids)
         return workspace
 
-    def _execute_dark_run_subtraction_for_transmission(self, workspace, setting):
+    def _execute_dark_run_subtraction_for_transmission(self, workspace, setting, trans_ids):
         '''
         @param workspace: the transmission workspace
         @param setting: the setting which is to be applied
+        @param trans_ids: the detector ids which can be found in the transmission workspace
         @returns a subtracted transmission workspace
         '''
         # Get the name and file path to the dark run
         dark_run_name, dark_run_file_path = self._get_dark_run_name_and_path(setting)
 
         # The transmission contains the monitors and the detectors
-        dark_run_ws = self._load_dark_run_transmission(workspace, dark_run_name, dark_run_file_path)
+        dark_run_ws = self._load_dark_run_transmission(workspace, dark_run_name, dark_run_file_path, trans_ids)
 
         # Subtract the dark run from the workspace
         return self._subtract_dark_run(workspace, dark_run_ws, setting)
@@ -1334,7 +1335,7 @@ class DarkRunSubtraction(object):
         else:
             return True
 
-    def _load_dark_run_transmission(self, workspace, dark_run_name, dark_run_file_path):
+    def _load_dark_run_transmission(self, workspace, dark_run_name, dark_run_file_path, trans_ids):
         '''
         Loads the dark run in the correct format for transmission correction. The dark run
         files will always be Event workspaces, hence we need load the detector and monitor
@@ -1342,6 +1343,8 @@ class DarkRunSubtraction(object):
         @param workspace
         @param dark_run_name
         @param dark_run_file_path
+        @param trans_ids: the detector ids which can be found in the transmission workspace
+        @returns a dark run workspace
         '''
         # Load the monitors
         monitor = self._load_dark_run_monitors(dark_run_name, dark_run_file_path)
@@ -1359,12 +1362,22 @@ class DarkRunSubtraction(object):
             workspace_index_offset = len(self._monitor_list) # Note that this is needed to be consistent
                                                              # with non-transmission correction
             detector = self._load_workspace(dark_run_name, dark_run_file_path,
-                                                  start_spec_index,end_spec_index, workspace_index_offset)
+                                            start_spec_index,end_spec_index, workspace_index_offset)
             detector = self._rebin_to_match(workspace, detector)
             # Conjoin the monitors and the detectors
             out_ws = self._conjoin_monitor_with_detector_workspace(monitor, detector)
 
-        return out_ws
+        # Extract the spectra which are present in the transmission workspace
+        extract_name = workspace.name() + "_extracted"
+        alg_extract = AlgorithmManager.createUnmanaged("ExtractSpectra")
+        alg_extract.initialize()
+        alg_extract.setChild(True)
+        alg_extract.setProperty("InputWorkspace", out_ws)
+        alg_extract.setProperty("OutputWorkspace", extract_name)
+        alg_extract.setProperty("OutputWorkspace", extract_name)
+        alg_extract.setProperty("DetectorList", trans_ids)
+        alg_extract.execute()
+        return alg_extract.getProperty("OutputWorkspace").value
 
     def _get_monitor_list(self, monitor_workspace):
         '''
@@ -2366,7 +2379,7 @@ class TransmissionCalc(ReductionStep):
         if reducer.dark_run_subtraction.has_dark_runs():
             # We need to grab the workspace from the ADS and place the corrected workspace back into the ADS
             trans_ws = mtd[workspace_name]
-            trans_ws = reducer.dark_run_subtraction.execute_transmission(trans_ws)
+            trans_ws = reducer.dark_run_subtraction.execute_transmission(trans_ws, trans_det_ids)
             mtd.addOrReplace(workspace_name, trans_ws)
 
 class AbsoluteUnitsISIS(ReductionStep):

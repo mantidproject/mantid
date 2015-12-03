@@ -10,7 +10,7 @@ from SANSDarkRunBackgroundCorrection import SANSDarkRunBackgroundCorrection
 class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
     #-----
     # Workspace2D tests
-    '''
+
     def test_dark_run_correction_with_uniform_and_not_mean_for_workspace2D_input(self):
         # Arrange
         spectra = 4
@@ -237,7 +237,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         applyToMonitors = True
         applyToDetectors = False
         out_ws_name = "out_test"
-        selected_monitor = [1]
+        selected_monitor = [2] 
         # Act
         ws = self._do_run_dark_subtraction(scatter_ws, dark_run, mean, uniform, normalization_ratio,
                                       out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
@@ -248,11 +248,11 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
                                                   for i in range(0, len(data))])
 
-        # Expected value for monitor 1
+        # Expected value for monitor 2 -- workspace index 1
         expected_monitor_Y_1 = monY_scatter - monY_dark*len(dark_run.dataY(0))/len(scatter_ws.dataY(0))*normalization_ratio
         comparison(ws.dataY(1), expected_monitor_Y_1)
 
-        # Expected value for monitor 0
+        # Expected value for monitor 1  -- workspace index 0
         expected_monitor_Y_0 = monY_scatter
         comparison(ws.dataY(0), expected_monitor_Y_0)
 
@@ -327,7 +327,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         applyToMonitors = True
         applyToDetectors = True
         out_ws_name = "out_test"
-        selected_monitor = [1]
+        selected_monitor = [2]
         # Act
         ws = self._do_run_dark_subtraction(scatter_ws, dark_run, mean, uniform, normalization_ratio,
                                       out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
@@ -338,11 +338,11 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
                                                   for i in range(0, len(data))])
 
-        # Expected value for monitor 1
+        # Expected value for monitor 2 -- workspace index 1
         expected_monitor_Y_1 = monY_scatter - monY_dark*len(dark_run.dataY(0))/len(scatter_ws.dataY(0))*normalization_ratio
         comparison(ws.dataY(1), expected_monitor_Y_1)
 
-        # Expected value for monitor 0
+        # Expected value for monitor 1 -- workspace index 0
         expected_monitor_Y_0 = monY_scatter
         comparison(ws.dataY(0), expected_monitor_Y_0)
 
@@ -375,7 +375,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         applyToMonitors = True
         applyToDetectors = False
         out_ws_name = "out_test"
-        selected_monitor = [2]
+        selected_monitor = [3] # only has det IDs 1 and 2 as monitors
         # Act + Assert
         kwds = {"InputWorkspace": scatter_ws,
                 "DarkRun": dark_run,
@@ -442,7 +442,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         # Clean up
         ws_to_clean = [scatter_name, dark_name]
         self._clean_up(ws_to_clean)
-    '''
+
     #------
     # Helper methods
     def _create_test_workspace(self, name, x, y, error, number_of_spectra):
@@ -550,6 +550,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         return ws
 
 class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
+
     def test_finds_all_monitor_indices_when_monitor_is_present(self):
         # Arrange
         test_ws = self._load_workspace_with_monitors()
@@ -557,13 +558,16 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
         remover = DarkRunMonitorAndDetectorRemover()
 
         # Act
+
         indices = remover.find_monitor_workspace_indices(ws)
 
         # Assert
+        ws_index, det_ids = zip(*indices)
         self.assertEqual(len(indices), 2, "There should be two monitors")
-        self.assertEqual(indices[0], 0, "The first monitor should have an index of 0")
-        self.assertEqual(indices[1], 1, "The second monitor should have an index of 1")
-
+        self.assertEqual(ws_index[0], 0, "The first monitor should have a workspace index of 0")
+        self.assertEqual(ws_index[1], 1, "The second monitor should have a workspace index of 1")
+        self.assertEqual(det_ids[0], 1, "The first monitor should have a detector ID of 1")
+        self.assertEqual(det_ids[1], 2, "The second monitor should have a detector ID of 2")
         # Clean up
         ws_to_clean =[test_ws]
         self._clean_up(ws_to_clean)
@@ -670,27 +674,30 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
         remover = DarkRunMonitorAndDetectorRemover()
 
         zero_reference = np.copy(ws.dataY(0))*0
-        dataY1_reference = np.copy(ws.dataY(1))
-        dataE1_reference = np.copy(ws.dataE(1))
+        dataY0_reference = np.copy(ws.dataY(0))
+        dataE0_reference = np.copy(ws.dataE(0))
         number_histograms_reference = ws.getNumberHistograms()
 
-        monitor_selection = [1]
+        monitor_selection = [1] # We select the monitor with detector ID 1
+                                # which is workspace index 0 for this workspace
 
         # Act
         dark_run_corrected = remover.set_pure_monitor_dark_run(ws, monitor_selection)
+
 
         # Assert
         self.assertEqual(dark_run_corrected.getNumberHistograms(), number_histograms_reference,
                          "The number of histograms should not have changed")
 
-        self._assert_items_are_equal(dark_run_corrected.dataY(0), zero_reference,
+        self._assert_items_are_equal(dark_run_corrected.dataY(0), dataY0_reference,
                                      "First monitor Y data should be 0")
-        self._assert_items_are_equal(dark_run_corrected.dataE(0), zero_reference,
+
+        self._assert_items_are_equal(dark_run_corrected.dataE(0), dataE0_reference,
                                      "First monitor E data should be 0")
 
-        self._assert_items_are_equal(dark_run_corrected.dataY(1), dataY1_reference,
+        self._assert_items_are_equal(dark_run_corrected.dataY(1), zero_reference,
                                      "Second monitor Y data should not have changed")
-        self._assert_items_are_equal(dark_run_corrected.dataE(1),  dataE1_reference,
+        self._assert_items_are_equal(dark_run_corrected.dataE(1),  zero_reference,
                                      "Second monitor E data should not have changed")
 
         for element in range(2, dark_run_corrected.getNumberHistograms()):
@@ -750,7 +757,7 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
     def _assert_items_are_equal(self, list1, list2, message):
         # This method is needed since RHEL6 cannot handle assertItemsEqual
         for index in range(0, len(list1)):
-            self.assertEqual(list1[index], list1[index], message)
+            self.assertEqual(list1[index], list2[index], message)
 
 if __name__ == '__main__':
     unittest.main()
