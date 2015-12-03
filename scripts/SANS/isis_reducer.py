@@ -672,6 +672,7 @@ class ISISReducer(Reducer):
             try:
                 if wk and wk in mtd:
                     DeleteWorkspace(Workspace=wk)
+            # pylint: disable=bare-except
             except:
                 #if the workspace can't be deleted this function does nothing
                 pass
@@ -751,6 +752,7 @@ class ISISReducer(Reducer):
             try:
                 dummy_ws = mtd[can.loader.wksp_name + "_monitors"]
                 was_event = True
+            # pylint: disable=bare-except
             except:
                 was_event = False
         else:
@@ -758,6 +760,7 @@ class ISISReducer(Reducer):
             try:
                 dummy_ws = mtd[sample.loader.wksp_name + "_monitors"]
                 was_event = True
+            # pylint: disable=bare-except
             except:
                 was_event = False
         return was_event

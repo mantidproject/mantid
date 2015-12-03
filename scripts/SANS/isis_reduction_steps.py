@@ -27,7 +27,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                           MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
                           can_load_as_event_workspace, is_convertible_to_float,correct_q_resolution_for_can,
                           is_valid_user_file_extension, ADD_TAG, ADD_MONITORS_TAG)
-import DarkRunCorrection as DarkCorr                          
+import DarkRunCorrection as DarkCorr
 import isis_instrument
 import isis_reducer
 import SANSUserFileParser as UserFileParser
@@ -1234,6 +1234,7 @@ class DarkRunSubtraction(object):
         self._dark_run_time_monitor_setting = None
         self._dark_run_uamp_monitor_setting = None
 
+    #pylint: disable=too-many-arguments
     def execute(self, workspace, monitor_workspace, start_spec_index, end_spec_index, workspace_was_event):
         '''
         Load the dark run. Cropt it to the current detector. Find out what kind of subtraction
@@ -1352,13 +1353,13 @@ class DarkRunSubtraction(object):
 
         # Load the detectors if the workspace contains detectors at all
         contains_detectors = True
-        if (len(self._monitor_list) == workspace.getNumberHistograms()):
+        if len(self._monitor_list) == workspace.getNumberHistograms():
             contains_detectors = False
 
         out_ws = monitor
         if contains_detectors:
             start_spec_index = len(self._monitor_list) + 1
-            end_spec_index = workspace.getNumberHistograms() # It already contains the +1 offset 
+            end_spec_index = workspace.getNumberHistograms() # It already contains the +1 offset
             workspace_index_offset = len(self._monitor_list) # Note that this is needed to be consistent
                                                              # with non-transmission correction
             detector = self._load_workspace(dark_run_name, dark_run_file_path,
@@ -1418,6 +1419,7 @@ class DarkRunSubtraction(object):
         # Subtract the dark run from the workspace
         return self._subtract_dark_run(workspace, dark_run_ws, setting)
 
+    #pylint: disable=too-many-arguments
     def _load_dark_run_detectors(self, workspace, dark_run_name, dark_run_file_path,
                                  start_spec_index, end_spec_index):
         '''
@@ -1445,7 +1447,7 @@ class DarkRunSubtraction(object):
         @param workspace_was_event: flag  if the original workspace was derived from histo or event
         @returns a monitor for the dark run
         '''
-        # Get the dark run name and path for the monitor 
+        # Get the dark run name and path for the monitor
         dark_run_name, dark_run_file_path = self._get_dark_run_name_and_path(setting)
         # Load the dark run workspace is it has not already been loaded
         monitor_dark_run_ws = self._load_dark_run_monitors(dark_run_name, dark_run_file_path)
@@ -1533,7 +1535,7 @@ class DarkRunSubtraction(object):
         '''
         @param settings: a dark run settings tuple
         @returns a dark run workspace name and the dark run path
-        @raises RuntimeError: if there is an issue with loading the workspace 
+        @raises RuntimeError: if there is an issue with loading the workspace
         '''
         dark_run_ws_name = None
         dark_run_file_path = None
@@ -1545,6 +1547,7 @@ class DarkRunSubtraction(object):
                                "Please make sure that that it exists in your search directory.")
         return dark_run_ws_name, dark_run_file_path
 
+    #pylint: disable=too-many-arguments
     def _load_workspace(self, dark_run_ws_name, dark_run_file_path, start_spec_index, end_spec_index, workspace_index_offset):
         '''
         Loads the dark run workspace
@@ -1670,7 +1673,6 @@ class DarkRunSubtraction(object):
         @param detector: the detector data set
         @returns a conjoined data set
         '''
-        conjoined_temp_name = detector.name() + "_conjoined_tmp"
         alg_conjoined = AlgorithmManager.createUnmanaged("ConjoinWorkspaces")
         alg_conjoined.initialize()
         alg_conjoined.setChild(True)
@@ -1781,7 +1783,6 @@ class DarkRunSubtraction(object):
         detector_mean = [use_mean[index] for index in indices]
         detector_time = [use_time[index] for index in indices]
 
-        # Make sure we can pass back a 
         if len(detector_runs) == 0 or detector_runs[0] == None:
             return None
         else:
@@ -1791,7 +1792,7 @@ class DarkRunSubtraction(object):
                                                                  detector = True,
                                                                  mon = False,
                                                                  mon_numbers = None)
-
+    #pylint: disable=too-many-arguments
     def _get_final_setting_monitors(self, run_number, use_mean, use_time, mon_numbers, indices):
         '''
         Get the final settings for monitors
@@ -3038,7 +3039,6 @@ class SliceEvent(ReductionStep):
     def __init__(self):
         super(SliceEvent, self).__init__()
         self.scale = 1
-        self._dark_run_subtraction = DarkRunSubtraction()
 
     def execute(self, reducer, workspace):
         ws_pointer = getWorkspaceReference(workspace)

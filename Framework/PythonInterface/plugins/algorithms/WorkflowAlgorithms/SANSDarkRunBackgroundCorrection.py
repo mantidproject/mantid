@@ -284,7 +284,7 @@ class DarkRunMonitorAndDetectorRemover(object):
         '''
         Finds all monitor workspace indices
         @param dark_run: the dark run workspace
-        @returns a zipped list of workspace/detids 
+        @returns a zipped list of workspace/detids
         '''
         monitor_list = []
         det_id_list = []
@@ -403,8 +403,12 @@ class DarkRunMonitorAndDetectorRemover(object):
     def _set_all_monitors(self, dark_run, list_dataY, list_dataE, monitor_list):
         '''
         We reset all monitors back to the old values
+        @param dark_run: the dark run workspace
+        @param list_dataY: the old Y data
+        @param list_dataE: the old E data
+        @param monitor_list: a colleciton of monitors
+        @returns the reset dark run workspace
         '''
-        # We need to iterate over all 
         counter = 0
         for ws_index, dummy_det_id in monitor_list:
             dark_run.setY(ws_index, list_dataY[counter])
@@ -414,6 +418,15 @@ class DarkRunMonitorAndDetectorRemover(object):
     #pylint: disable=too-many-arguments
     def _set_only_selected_monitors(self, dark_run, list_dataY, list_dataE,
                                     monitor_list, selected_monitors):
+        '''
+        Resets indivisual monitors
+        @param dark_run: the dark run workspace
+        @param list_dataY: the old Y data
+        @param list_dataE: the old E data
+        @param monitor_list: a colleciton of monitors
+        @param selected_monitors: a collection of monitors which need to be reset
+        @returns the reset dark run workspace
+        '''
         # The selected monitors is a detector ID, hence we need to compare it with
         # a detector ID, but we use the assoicated workspace index to correct the data
         counter = 0
