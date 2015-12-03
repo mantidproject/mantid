@@ -559,10 +559,11 @@ std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
   // Dimension, number of search directions
   size_t dim = dirs.c2.size().first;
 
-  std::vector<double> beta(dim, 0); // Solution
+  std::vector<double> betaMin(dim, 0); // Beta at alpha min
+  std::vector<double> betaMax(dim, 0); // Beta at alpha max
 
-  double chiMin = calculateChi(dirs, aMin, beta); // Chi at alpha min
-  double chiMax = calculateChi(dirs, aMax, beta); // Chi at alpha max
+  double chiMin = calculateChi(dirs, aMin, betaMin); // Chi at alpha min
+  double chiMax = calculateChi(dirs, aMax, betaMax); // Chi at alpha max
 
   double dchiMin = chiMin - chiTarget; // Delta = max - target
   double dchiMax = chiMax - chiTarget; // Delta = min - target
@@ -571,11 +572,10 @@ std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
     // ChiTarget could be outside the range [chiMin, chiMax]
 
     if (fabs(dchiMin) < fabs(dchiMax)) {
-      double chi = calculateChi(dirs, aMin, beta);
+      return betaMin;
     } else {
-      double chi = calculateChi(dirs, aMax, beta);
+      return betaMax;
     }
-    return beta;
     //    throw std::runtime_error("Error in alpha chop\n");
   }
 
@@ -584,6 +584,8 @@ std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
   size_t iter = 0;
 
   // Bisection method
+
+  std::vector<double> beta(dim, 0); // Beta at current alpha
 
   while ((fabs(eps) > chiEps) && (iter < alphaIter)) {
 
