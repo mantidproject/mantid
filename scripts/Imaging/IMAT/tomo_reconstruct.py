@@ -65,10 +65,6 @@ except ImportError:
 import tomorec.io as tomoio
 import tomorec.reconstruction_command as tomocmd
 
-
-# MCP correction - horizontal line!!!
-#  normalize proton charge
-
 def apply_prep_filters(data, cfg, white, dark):
     """
     @param data ::
@@ -351,17 +347,6 @@ def run_reconstruct_3d(proj_data, preproc_cfg, alg_cfg):
 
     return rec
 
-def _make_dirs_if_needed(dirname):
-    """
-    Makes sure that the directory needed to save the file exists, or creates it
-
-    @param dirname :: (output) directory to check
-    """
-    absname = os.path.abspath(dirname)
-    if not os.path.exists(absname):
-        os.makedirs(absname)
-
-
 def read_in_stack(sample_path, img_format):
     # Note, not giving prefix. It will load all the files found.
     # Example prefixes are prefix = 'tomo_', prefix = 'LARMOR00', prefix = 'angle_agg'
@@ -375,7 +360,7 @@ def read_in_stack(sample_path, img_format):
 
     return (sample, white, dark)
 
-def apply_line_projection(imgs_angles):
+def apply_line_projection(imgs_angles, preproc_cfg):
     """
     Transform pixel values as $- ln (Is/I0)$, where $Is$ is the pixel (intensity) value and $I0$ is a
     reference value (pixel/intensity value for open beam, or maximum in the stack or the image).
@@ -394,8 +379,13 @@ def apply_line_projection(imgs_angles):
     processed independently, using as reference intensity the maximum pixel value found across all the
     images.
 
+    @param preproc_cfg :: pre-processing configuration set up for a reconstruction
+
     Returns :: projected data volume (image stack)
     """
+    if not preproc_cfg.line_projection:
+        return imgs_angles
+
     imgs_angles = imgs_angles.astype('float32')
     for idx in range(0, imgs_angles.shape[0]):
         max_img = np.amax(imgs_angles[idx, :, :])
@@ -436,8 +426,9 @@ def apply_final_preproc_corrections(preproc_data, cfg):
     else:
         print " * Note: not applying stripe removal."
 
+    # Experimental options, disabled and not present in the config objects for now
+    # This needs more evaluation
     if False:
-        # preproc_data = tomopy.misc.corr.remove_outlier(preproc_data ...
         preproc_data = tomopy.misc.corr.adjust_range(preproc_data)
 
     if False:
@@ -448,7 +439,13 @@ def apply_final_preproc_corrections(preproc_data, cfg):
 def save_preproc_images(output_dir, preproc_data, preproc_cfg,
                         subdir_name='preproc_images', out_dtype='uint16'):
     """
+    Save (pre-processed) images from a data array to image files.
 
+    @param output_dir :: where results are being saved, including the pre-proc images/slices
+    @param preproc_data :: data volume with pre-processed images
+    @param preproc_cfg :: pre-processing configuration set up for a reconstruction
+    @param subdir_name :: a separate subdirectory for these pre-proc images
+    @param out_dtype :: dtype used for the pixel type/depth in the output image files
     """
     print " * Pre-processed images (preproc_data) dtype:", preproc_data.dtype
     min_pix = np.amin(preproc_data)
@@ -457,12 +454,12 @@ def save_preproc_images(output_dir, preproc_data, preproc_cfg,
     if preproc_cfg.save_preproc_imgs:
         preproc_dir = os.path.join(output_dir, subdir_name)
         print "* Saving pre-processed images into: {0}".format(preproc_dir)
-        _make_dirs_if_needed(preproc_dir)
+        tomoio.make_dirs_if_needed(preproc_dir)
         for idx in range(0, preproc_data.shape[0]):
             # rescale_intensity has issues with float64=>int16
             tomoio._write_image(preproc_data[idx, :, :], min_pix, max_pix,
                                 os.path.join(preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)),
-                                dtype=out_dtype)#, rescale_intensity=False)
+                                img_format=preproc_cfg.out_img_format, dtype=out_dtype)
     else:
         print "* NOTE: not saving pre-processed images..."
 
@@ -490,14 +487,14 @@ def apply_postproc_filters(recon_data, cfg):
     if cfg.gaussian_filter_par:
         print " * Gaussian filter not implemented"
 
-    if cfg.median_filter_size and cfg.median_filter_size > 0.0:
+    if cfg.median_filter_size and cfg.median_filter_size > 1:
         recon_data = scipy.ndimage.median_filter(recon_data, cfg.median_filter_size)
         print (" * Applied median_filter on reconstructed volume, with filtersize: {0}".
                format(cfg.median_filter_size))
     else:
         print " * Note: not applied median_filter on reconstructed volume"
 
-    if cfg.median_filter3d_size and cfg.median_filter3d_size > 0.0:
+    if cfg.median_filter3d_size and cfg.median_filter3d_size > 1:
         kernel_size=3
         # Note this can be extremely slow
         recon_data = scipy.signal.medfilt(recon_data, kernel_size=kernel_size)
@@ -510,8 +507,13 @@ def apply_postproc_filters(recon_data, cfg):
 def save_recon_as_vertical_slices(recon_data, output_dir, name_prefix='out_recon_slice', zero_fill=6):
     """
     Save reconstructed volume (3d) into a series of slices along the Z axis (outermost numpy dimension)
+
+    @param data :: data as images/slices stores in numpy array
+    @param output_dir :: where to save the files
+    @param name_prefix :: prefix for the names of the images - an index is appended to this prefix
+    @param zero_fill :: number of zeros to pad the image/slice index number
     """
-    _make_dirs_if_needed(output_dir)
+    tomoio.make_dirs_if_needed(output_dir)
     #tomopy.io.writer.write_tiff_stack(recon_data)
     min_pix = np.amin(recon_data)
     max_pix = np.amax(recon_data)
@@ -523,8 +525,14 @@ def save_recon_as_vertical_slices(recon_data, output_dir, name_prefix='out_recon
 def save_recon_as_horizontal_slices(recon_data, out_horiz_dir, name_prefix='out_recon_horiz_slice', zero_fill=6):
     """
     Save reconstructed volume (3d) into a series of slices along the Y axis (second numpy dimension)
+
+    @param data :: data as images/slices stores in numpy array
+    @param output_dir :: where to save the files
+    @param name_prefix :: prefix for the names of the images throughout the horizontal axis
+    @param zero_fill :: number of zeros to pad the image/slice index number. This index is appended to
+    the prefix
     """
-    _make_dirs_if_needed(out_horiz_dir)
+    tomoio.make_dirs_if_needed(out_horiz_dir)
     for idx in range(0, recon_data.shape[1]):
         tomoio._write_image(recon_data[:, idx, :], np.amin(recon_data), np.amax(recon_data),
                             os.path.join(out_horiz_dir, name_prefix + str(idx).zfill(zero_fill)),
@@ -533,6 +541,10 @@ def save_recon_as_horizontal_slices(recon_data, out_horiz_dir, name_prefix='out_
 def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
     """
     A netCDF, for compatibility/easier interoperation with other tools
+
+    @param recon_data :: reconstructed data volume. A sequence of images will be saved from this
+    @param output_dir :: where the outputs are being saved
+    @param filename :: name for the NetCDF file
     """
     try:
         from scipy.io import netcdf_file
@@ -556,9 +568,16 @@ def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
     print " Closing netCDF file: {0}".format(nc_path)
     ncfile.close()
 
-def save_recon_output(recon_data, output_dir):
+def save_recon_output(recon_data, output_dir, save_horiz_slices=False, save_netcdf_vol=False):
     """
     Save output reconstructed volume in different forms.
+
+    @param recon_data :: reconstructed data volume. A sequence of images will be saved from this
+    @param output_dir :: where the outputs are being saved
+    @param save_horiz_slices :: Save images along the horizontal axis in addition to the vertical
+    slices saved by defult. Useful for testing
+    @param save_netcdf_vol :: save data into a NetCDF, useful for testing, and easy to load in
+    some tools
     """
     # slices along the vertical (z) axis
     # output_dir = 'output_recon_tomopy'
@@ -572,11 +591,31 @@ def save_recon_output(recon_data, output_dir):
         print "* Saving horizontal slices in: {0}".format(out_horiz_dir)
         save_recon_as_horizontal_slices(recon_data, out_horiz_dir)
 
-    save_netcdf_vol = True
     if save_netcdf_vol:
         print "* Saving reconstructed volume as NetCDF"
         save_recon_netcdf(recon_data, output_dir)
 
+def apply_all_preproc(data, preproc_cfg, white, dark):
+    """
+    Do all the pre-processing. This does all that is needed between a)
+    loading the input data, and b) starting a reconstruction
+    run/job. From raw inputs to pre-proc data that is ready to go for
+    reconstruction.
+
+    @param data :: raw data (sample projection images)
+    @param preproc_cfg :: pre-processing configuration
+    @param white :: white / flat / open-beam image for normalization in some of the first
+    pre-processing steps
+    @param dark :: dark image for normalization
+
+    Returns :: pre-processed data.
+
+    """
+    preproc_data = apply_prep_filters(data, preproc_cfg, white, dark)
+    preproc_data = apply_line_projection(preproc_data, preproc_cfg)
+    preproc_data = apply_final_preproc_corrections(preproc_data, preproc_cfg)
+
+    return preproc_data
 
 def do_recon(preproc_cfg, alg_cfg, postproc_cfg, cmd_line=None):
     """
@@ -591,14 +630,11 @@ def do_recon(preproc_cfg, alg_cfg, postproc_cfg, cmd_line=None):
     @param cmd_line :: command line text if running from the CLI. When provided it will
     be written in the output readme file(s) for reference.
     """
-    tstart = time.time()
+    out_readme_fname = '0.README_reconstruction.txt'
+    tstart = gen_readme_summary_begin(out_readme_fname, preproc_cfg, alg_cfg, postproc_cfg)
+
     data, white, dark = read_in_stack(preproc_cfg.input_dir, preproc_cfg.in_img_format)
     print "Shape of raw data: {0}, dtype: {1}".format(data.shape, data.dtype)
-
-    raw_data_dtype = data.dtype
-    raw_data_shape = data.shape
-
-    # For Cannon. tompoy CoR: 470.8 / oct: 504
 
     # These imports will raise appropriate exceptions in case of error
     import tomorec.tool_imports as tti
@@ -607,48 +643,42 @@ def do_recon(preproc_cfg, alg_cfg, postproc_cfg, cmd_line=None):
     elif 'tomopy' == alg_cfg.tool:
         tomopy = tti.import_tomo_tool('tomopy')
 
-    median_filter_size = 3
-
-    preproc_data = apply_prep_filters(data, preproc_cfg, white, dark)
-
-    #preproc_data = data
-    #data = apply_prep_filters(data, rotate=-1, crop=[0, 256, 512, 512])
-    print "Shape of preproc data: {0}".format(preproc_data.shape)
-
-
-    if preproc_cfg.line_projection:
-        preproc_data = apply_line_projection(preproc_data)
-
-    preproc_data = apply_final_preproc_corrections(preproc_data, preproc_cfg)
-
-    #import matplotlib.pyplot as pl
-    #pl.imshow(preproc_data[66], cmap='gray')
-    #pl.show()
+    preproc_data = apply_all_preproc(data, preproc_cfg, white, dark)
+    print "Shape of pre-processed data: {0}".format(preproc_data.shape)
 
     # Save pre-proc images
     save_preproc_images(postproc_cfg.output_dir, preproc_data, preproc_cfg)
 
+    # Reconstruction
     t_recon_start = time.time()
     recon_data = run_reconstruct_3d(preproc_data, preproc_cfg, alg_cfg)
     t_recon_end = time.time()
-
     print("Reconstructed volume. Shape: {0}, and pixel data type: {1}".
           format(recon_data.shape, recon_data.dtype))
 
+    # Post-processing
     apply_postproc_filters(recon_data, postproc_cfg)
 
     # Save output from the reconstruction
-    save_recon_output(recon_data, postproc_cfg.output_dir)
+    save_recon_output(recon_data, postproc_cfg.output_dir, save_netcdf_vol=True)
 
-    tend = time.time()
+    gen_readme_summary_end(out_readme_fname, postproc_cfg, data, preproc_data, recon_data, tstart,
+                           t_recon_end - t_recon_start)
 
-    #run_summary_string = gen_txt_run_summary()
-    out_readme_fname = '0.README_reconstruction.txt'
+def gen_readme_summary_begin(filename, preproc_cfg, alg_cfg, postproc_cfg):
+    """
+    To write configuration, settings, etc. early on. As early as possible, before any failure
+    can happen.
+
+    Returns :: time now (begin of run) in number of seconds since epoch (time() time)
+    """
+    tstart = time.time()
+
     # generate file with dos/windows line end for windoze users' convenience
-    with open(os.path.join(postproc_cfg.output_dir, out_readme_fname), 'w') as oreadme:
+    with open(os.path.join(postproc_cfg.output_dir, filename), 'w') as oreadme:
         #oreadme.write(run_summary_string)
         oreadme.write('Tomographic reconstruction. Summary of inputs, settings and outputs.\n')
-        oreadme.write('Time now (run begin): ' + time.ctime(tstart)) #time.strftime("%c") + "\n")
+        oreadme.write('Time now (run begin): ' + time.ctime(tstart))
 
         alg_hdr = ("\n"
                    "--------------------------\n"
@@ -682,64 +712,39 @@ def do_recon(preproc_cfg, alg_cfg, postproc_cfg, cmd_line=None):
         oreadme.write(cmd_line)
         oreadme.write("\n")
 
+    return tstart
+
+def gen_readme_summary_end(filename, postproc_cfg, raw_data, preproc_data, recon_data, tstart,
+                           t_recon_elapsed):
+    """
+    Write last part of report in the output readme/report file. This should be used whenever a
+    reconstruction runs correctly.
+    """
+
+    with open(os.path.join(postproc_cfg.output_dir, filename), 'w') as oreadme:
+
         run_hdr = ("\n"
                    "--------------------------\n"
                    "Run/job details:\n"
                    "--------------------------\n")
         oreadme.write(run_hdr)
-        oreadme.write("Dimensions of raw input sample data: {0}\n".format(raw_data_shape))
+        oreadme.write("Dimensions of raw input sample data: {0}\n".format(raw_data.shape))
         oreadme.write("Dimensions of pre-processed sample data: {0}\n".format(preproc_data.shape))
         oreadme.write("Dimensions of reconstructed volume: {0}\n".format(recon_data.shape))
-        oreadme.write("Max. angle: {0}\n".format(preproc_cfg.max_angle))
 
-        oreadme.write("Raw input pixel type: {0}\n".format(raw_data_dtype))
+        oreadme.write("Raw input pixel type: {0}\n".format(raw_data.dtype))
         oreadme.write("Output pixel type: {0}\n".format('uint16'))
-        oreadme.write("Time elapsed in reconstruction: {0:.3f}s\r\n".format(t_recon_end-t_recon_start))
+        oreadme.write("Time elapsed in reconstruction: {0:.3f}s\r\n".format(t_recon_elapsed))
+        tend = time.time()
         oreadme.write("Total time elapsed: {0:.3f}s\r\n".format(tend-tstart))
-        oreadme.write('Time now (run end): ' + time.ctime(tend)) #time.strftime("%c") + "\n")
+        oreadme.write('Time now (run end): ' + time.ctime(tend))
 
-# To save this script (and dependencies) into the output reconstructions
-def we_are_frozen():
-    # All of the modules are built-in to the interpreter, e.g., by py2exe
-    return hasattr(sys, "frozen")
+def setup_cmd_options():
+    """
+    Build an argument parser
 
-def module_path():
-    encoding = sys.getfilesystemencoding()
-    if we_are_frozen():
-        return os.path.dirname(unicode(sys.executable, encoding))
-    else:
-        return os.path.dirname(unicode(__file__, encoding))
-
-def self_save_zipped_scripts(output_path):
-
-    def _zipdir(path, ziph):
-        # ziph is zipfile handle
-        for root, _, files in os.walk(path):
-            for indiv_file in files:
-                # Write all files, with the exception of the pyc's
-                exclude_extensions = ['pyc']
-                if not indiv_file.endswith(tuple(exclude_extensions)):
-                    ziph.write(os.path.join(root, indiv_file))
-
-    import inspect
-    this_path = os.path.abspath(inspect.getsourcefile(lambda:0))
-
-    scripts_path = os.path.dirname(this_path)
-
-    _make_dirs_if_needed(output_path)
-    print ("Saving myself (reconstruction scripts) from: {0} in: {1}".
-           format(scripts_path, os.path.abspath(output_path)))
-    import zipfile
-    # os.path.join(output_path, ... )
-    RECON_SCRIPTS_PKG_NAME = '0.reconstruction_scripts.zip'
-    with zipfile.ZipFile(os.path.join(output_path, RECON_SCRIPTS_PKG_NAME), 'w', zipfile.ZIP_DEFLATED) as zip_scripts:
-        # To write just this file: zipscr.write(this_path)
-        _zipdir(scripts_path, zip_scripts)
-
-if __name__=='__main__':
-    import argparse
-    import ast
-
+    Returns :: Python ArgumentParser set up and ready to parse command line arguments
+    """
     arg_parser = argparse.ArgumentParser(description='Run tomographic reconstruction via third party tools')
 
     grp_req = arg_parser.add_argument_group('Mandatory/required options')
@@ -772,9 +777,14 @@ if __name__=='__main__':
 
     grp_pre = arg_parser.add_argument_group('Pre-processing of input raw images/projections')
 
+    img_formats = ['tiff', 'fits', 'tif', 'fit', 'png']
     grp_pre.add_argument("--in-img-format", required=False, default='fits', type=str,
                          help="Format/file extension expected for the input images. Supported: {0}".
-                         format(['tiff', 'fits', 'tif', 'fit', 'png']))
+                         format(img_formats))
+
+    grp_pre.add_argument("--out-img-format", required=False, default='tiff', type=str,
+                         help="Format/file extension expected for the input images. Supported: {0}".
+                         format(img_formats))
 
     grp_pre.add_argument("--region-of-interest", required=False, type=str,
                          help="Region of interest (crop original "
@@ -824,46 +834,82 @@ if __name__=='__main__':
     arg_parser.add_argument("-v", "--verbose", action="count", default=1, help="Verbosity level. Default: 1. "
                             "User zero to supress outputs.")
 
+    return arg_parser
+
+# To save this script (and dependencies) into the output reconstructions
+def we_are_frozen():
+    # All of the modules are built-in to the interpreter, e.g., by py2exe
+    return hasattr(sys, "frozen")
+
+def module_path():
+    encoding = sys.getfilesystemencoding()
+    if we_are_frozen():
+        return os.path.dirname(unicode(sys.executable, encoding))
+    else:
+        return os.path.dirname(unicode(__file__, encoding))
+
+def self_save_zipped_scripts(output_path):
+
+    def _zipdir(path, ziph):
+        # ziph is zipfile handle
+        for root, _, files in os.walk(path):
+            for indiv_file in files:
+                # Write all files, with the exception of the pyc's
+                exclude_extensions = ['pyc']
+                if not indiv_file.endswith(tuple(exclude_extensions)):
+                    ziph.write(os.path.join(root, indiv_file))
+
+    import inspect
+    this_path = os.path.abspath(inspect.getsourcefile(lambda:0))
+
+    scripts_path = os.path.dirname(this_path)
+
+    tomoio.make_dirs_if_needed(output_path)
+    print ("Saving myself (reconstruction scripts) from: {0} in: {1}".
+           format(scripts_path, os.path.abspath(output_path)))
+    import zipfile
+    # os.path.join(output_path, ... )
+    RECON_SCRIPTS_PKG_NAME = '0.reconstruction_scripts.zip'
+    with zipfile.ZipFile(os.path.join(output_path, RECON_SCRIPTS_PKG_NAME), 'w', zipfile.ZIP_DEFLATED) as zip_scripts:
+        # To write just this file: zipscr.write(this_path)
+        _zipdir(scripts_path, zip_scripts)
+
+
+if __name__=='__main__':
+    import argparse
+    import ast
+
+    arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()
 
-    # '/home/fedemp/tomography-tests/stack_larmor_metals_summed_all_bands/data_metals/'
-
-    # Save myself
+    # Save myself early
     self_save_zipped_scripts(args.output_path)
 
     # Grab and check pre-processing options
     pre_config = tomocmd.PreProcConfig()
-
     pre_config.input_dir = args.input_path
-
     if args.in_img_format:
         pre_config.in_img_format = args.in_img_format
+    if args.out_img_format:
+        pre_config.out_img_format = args.out_img_format
     pre_config.cor = int(args.cor)
-
-
-    cmd_line = " ".join(sys.argv)
-
     if 'yes' == args.mcp_corrections:
         pre_config.mcp_corrections = True
-
     if 'wf' == args.remove_stripes:
         pre_config.stripe_removal_method = 'wavelet-fourier'
-
     if args.region_of_interest:
         pre_config.crop_coords = ast.literal_eval(args.region_of_interest)
     else:
         border_pix = 5
         pre_config.crop_coords = [0+border_pix, 252, 512-border_pix, 512-border_pix]
-
     if args.median_filter_width:
         if not args.num_iter.isdigit():
             raise RuntimeError("The median filter width must be an integer")
         pre_config.median_filter_width = args.median_filter_width
-
     if args.max_angle:
         pre_config.max_angle = float(args.max_angle)
 
-    # Algorithm and related options
+    # Algorithm setup and related options
     alg_config = tomocmd.ToolAlgorithmConfig()
     alg_config.tool = args.tool
     alg_config.algorithm = args.algorithm
@@ -873,19 +919,15 @@ if __name__=='__main__':
         alg_config.num_iter = int(args.num_iter)
 
     # post-processing options
-
     post_config = tomocmd.PostProcConfig()
-
     post_config.output_dir = args.output_path
-
     if args.circular_mask:
         post_config.circular_mask = float(args.circular_mask)
-
     if args.cut_off:
         post_config.cut_off_level = float(args.cut_off)
-
     if args.out_median_filter:
         post_config.median_filter_size = float(args.out_median_filter)
 
+    cmd_line = " ".join(sys.argv)
     do_recon(preproc_cfg=pre_config, alg_cfg=alg_config, postproc_cfg=post_config,
              cmd_line=cmd_line)

@@ -61,7 +61,7 @@ def _import_skimage_io():
                           "several image formats. Error details: {0}".format(exc))
     return skio
 
-def _make_dirs_if_needed(dirname):
+def make_dirs_if_needed(dirname):
     """
     Makes sure that the directory needed (for example to save a file)
     exists, otherwise creates it.

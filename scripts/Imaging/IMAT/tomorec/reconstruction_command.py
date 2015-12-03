@@ -69,6 +69,8 @@ class PreProcConfig(object):
         # median_filter=3, rotate=-1, crop=[0,  252, 0, 512], MCP correction: on
         self.input_dir = None
         self.in_img_format = 'tiff'
+        self.out_img_format = 'tiff'
+        self.max_angle = 360
         # Center of rotation
         self.cor = None
         self.normalize_flat_dark = True
@@ -80,16 +82,18 @@ class PreProcConfig(object):
         self.scale_down = 0
         self.median_filter_size = 3
         self.rotation = -1
-        self.line_projection = 0
+        self.line_projection = True
         self.stripe_removal_method = 'wavelet-fourier'
-        self.max_angle = 360
         self.save_preproc_imgs = True
 
     def __str__(self):
         import os
 
-        mystr = "Input path (absolute): {0}\n".format(os.path.abspath(self.input_dir))
-        mystr += "Input format: {0}\n".format(self.in_img_format)
+        mystr = "Input path (relative): {0}\n".format(self.input_dir)
+        mystr += "Input path (absolute): {0}\n".format(os.path.abspath(self.input_dir))
+        mystr += "Input image format: {0}\n".format(self.in_img_format)
+        mystr += "Output image format: {0}\n".format(self.out_img_format)
+        mystr += "Maximum angle:: {0}\n".format(self.max_angle)
         mystr += "Center of rotation: {0}\n".format(self.cor)
         mystr += "Region of interest (crop coordinates): {0}\n".format(self.crop_coords)
         mystr += "Normalize by flat/dark images: {0}\n".format(self.normalize_flat_dark)
@@ -122,7 +126,10 @@ class PostProcConfig(object):
         self.median_filter3d_size = 0
 
     def __str__(self):
-        mystr = "Output path: {0}\n".format(self.output_dir)
+        import os
+
+        mystr = "Output path (relative): {0}\n".format(self.output_dir)
+        mystr += "Output path (absolute): {0}\n".format(os.path.abspath(self.output_dir))
         mystr += "Circular mask: {0}\n".format(self.circular_mask)
         mystr += "Cut-off on reconstructed volume: {0}\n".format(self.cut_off_level)
         mystr += "Gaussian filter: {0}\n".format(self.gaussian_filter_par)
