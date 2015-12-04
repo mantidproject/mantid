@@ -228,8 +228,9 @@ class LRDirectBeamSort(PythonAlgorithm):
             h = 6.626e-34  # m^2 kg s^-1
             m = 1.675e-27  # kg
             wl = g[0].getRun().getProperty('LambdaRequest').value[0]
-            tof_min = source_detector_distance / h * m * (wl + 0.5 - 1.7) * 1e-4
-            tof_max = source_detector_distance / h * m * (wl + 0.5 + 1.7) * 1e-4
+            chopper_speed = g[0].getRun().getProperty('SpeedRequest1').value[0]
+            tof_min = source_detector_distance / h * m * (wl + 0.5*60.0/chopper_speed - 1.7*60.0/chopper_speed) * 1e-4
+            tof_max = source_detector_distance / h * m * (wl + 0.5*60.0/chopper_speed + 1.7*60.0/chopper_speed) * 1e-4
             tof_range = [tof_min, tof_max]
             
             summary += "TOF: %s\n\n" % tof_range
