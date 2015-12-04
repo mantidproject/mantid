@@ -77,7 +77,7 @@ void RotateSource::exec() {
 
     auto pointingAlong = refFrame->pointingHorizontal();
 
-		// (x, y, z) -> the rotation axis
+    // (x, y, z) -> the rotation axis
     double x = 0.;
     double y = 0.;
     double z = 0.;
@@ -94,20 +94,22 @@ void RotateSource::exec() {
 
     // Get the source's position
     auto source = inst->getSource();
-		if (!source) {
-			throw std::runtime_error("Could not get the source's position");
-		}
-		// Get the sample's position
+    if (!source) {
+      throw std::runtime_error("Could not get the source's position");
+    }
+    // Get the sample's position
     auto sample = inst->getSample();
-		if (!sample) {
-			throw std::runtime_error("Could not get the sample's position");
-		}
+    if (!sample) {
+      throw std::runtime_error("Could not get the sample's position");
+    }
+    auto samplePos = sample->getPos();
     // The vector we want to rotate
-    auto sourcePos = source->getPos() - sample->getPos();
+    auto sourcePos = source->getPos() - samplePos;
 
     // The new position
     Quat quat(angle, V3D(x, y, z));
     quat.rotate(sourcePos);
+    sourcePos += samplePos;
 
     // The source's name
     std::string sourceName = source->getName();

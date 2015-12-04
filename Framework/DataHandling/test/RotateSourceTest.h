@@ -107,6 +107,83 @@ public:
     TS_ASSERT_EQUALS(newPos.Z(), 0);
   }
 
+	void testRotateClockwiseSampleAt001() {
+
+		// The instrument
+		Instrument_sptr instr = boost::make_shared<Instrument>();
+		instr->setReferenceFrame(
+			boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+
+		// The source
+		ObjComponent *source = new ObjComponent("source");
+		source->setPos(V3D(0, 0, 2));
+		instr->add(source);
+		instr->markAsSource(source);
+
+		// The sample
+		ObjComponent *sample = new ObjComponent("sample");
+		sample->setPos(V3D(0, 0, 1));
+		instr->add(sample);
+		instr->markAsSamplePos(sample);
+
+		// The workspace
+		auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+		ws->setInstrument(instr);
+		// The angle
+		double theta = 90.;
+
+		IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
+		alg->setChild(true);
+		alg->setProperty("Workspace", ws);
+		alg->setProperty("Angle", theta);
+
+		TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+		auto newPos = ws->getInstrument()->getSource()->getPos();
+
+		TS_ASSERT_EQUALS(newPos.X(), 0);
+		TS_ASSERT_EQUALS(newPos.Y(), -1);
+		TS_ASSERT_EQUALS(newPos.Z(), 1);
+	}
+
+	void testRotateClockwiseSampleAt111() {
+
+		// The instrument
+		Instrument_sptr instr = boost::make_shared<Instrument>();
+		instr->setReferenceFrame(
+			boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+
+		// The source
+		ObjComponent *source = new ObjComponent("source");
+		source->setPos(V3D(1, 1, 2));
+		instr->add(source);
+		instr->markAsSource(source);
+
+		// The sample
+		ObjComponent *sample = new ObjComponent("sample");
+		sample->setPos(V3D(1, 1, 1));
+		instr->add(sample);
+		instr->markAsSamplePos(sample);
+
+		// The workspace
+		auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+		ws->setInstrument(instr);
+		// The angle
+		double theta = 90.;
+
+		IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
+		alg->setChild(true);
+		alg->setProperty("Workspace", ws);
+		alg->setProperty("Angle", theta);
+
+		TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+		auto newPos = ws->getInstrument()->getSource()->getPos();
+
+		TS_ASSERT_EQUALS(newPos.X(), 1);
+		TS_ASSERT_EQUALS(newPos.Y(), 0);
+		TS_ASSERT_EQUALS(newPos.Z(), 1);
+	}
 };
 
 #endif /* MANTID_DATAHANDLING_ROTATESOURCETEST_H_ */
