@@ -74,8 +74,8 @@ def make_dirs_if_needed(dirname):
         os.makedirs(absname)
 
 #pylint: disable=too-many-arguments
-def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=None,
-                 rescale_intensity=False):
+def write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=None,
+                rescale_intensity=False):
     """
     Output image data, given as a numpy array, to a file, in a given image format.
     Assumes that the output directory exists (must be checked before). The pixel
@@ -401,3 +401,34 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
                                    img_shape, data_dtype)
 
     return sample_data, flat_avg, dark_avg
+
+
+def self_save_zipped_scripts(output_path, this_path):
+    """
+    Self-save a python file and its subpackages.
+
+    @param output_path :: path where to save
+    @param this_path :: full path to 'this' file, the file that wants to self-save itself.
+    """
+
+    def _zipdir(path, ziph):
+        # ziph is zipfile handle
+        for root, _, files in os.walk(path):
+            for indiv_file in files:
+                # Write all files, with the exception of the pyc's
+                exclude_extensions = ['pyc']
+                if not indiv_file.endswith(tuple(exclude_extensions)):
+                    ziph.write(os.path.join(root, indiv_file))
+
+    scripts_path = os.path.dirname(this_path)
+
+    make_dirs_if_needed(output_path)
+    print ("Saving myself (reconstruction scripts) from: {0} in: {1}".
+           format(scripts_path, os.path.abspath(output_path)))
+    import zipfile
+    # os.path.join(output_path, ... )
+    RECON_SCRIPTS_PKG_NAME = '0.reconstruction_scripts.zip'
+    with zipfile.ZipFile(os.path.join(output_path, RECON_SCRIPTS_PKG_NAME), 'w',
+                         zipfile.ZIP_DEFLATED) as zip_scripts:
+        # To write just this file: zipscr.write(this_path)
+        _zipdir(scripts_path, zip_scripts)

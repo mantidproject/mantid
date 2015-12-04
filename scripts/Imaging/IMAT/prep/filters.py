@@ -123,68 +123,7 @@ def remove_sino_stripes_rings_wf(data_vol, wv_levels=None):
         max_len = np.max(data_vol.shape)
         wv_levels = int(np.ceil(np.log2(max_len)))
 
-    return _remove_sino_stripes_rings_wf(data_vol, wv_levels)
-
-# This is heavily based on the implementation of this method in tomopy
-def _remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=2, pad=True):
-    """
-    Removes horizontal stripes in sinograms (reducing ring artifacts in the reconstructed volume).
-    Implements a combined Wavelet-Fourier filter (wf) as described in:
-
-    Muench B, Trtrik P, Marone F, and Stampanoni M. 2009. Optics Express, 17(10):8567-8591.
-    Stripe and ring artifact removal with combined wavelet-fourier filtering. 2009.
-
-    This implementation is heavily based on the implementation from tomopy. This is not parallel
-    at the moment.
-    """
-    try:
-        import pywt
-    except ImportError as exc:
-        raise ImportError("pywt. Details: {0}".format(exc))
-
-
-    dimx = data_vol.shape[0]
-    n_x = dimx
-    if pad:
-        n_x = dimx + dimx / 8
-    xshift = int((n_x - dimx) / 2.)
-
-    for sino_idx in range(0, data_vol.shape[1]):
-        sli = np.zeros((n_x, data_vol.shape[2]), dtype='float32')
-        sli[xshift:dimx + xshift] = data_vol[:, sino_idx, :]
-
-        # Wavelet decomposition
-        c_H = []
-        c_V = []
-        c_D = []
-        for _ in range(wv_levels):
-            sli, (cHt, cVt, cDt) = pywt.dwt2(sli, wavelet_name)
-            c_H.append(cHt)
-            c_V.append(cVt)
-            c_D.append(cDt)
-
-        # Fourier transform of horizontal frequency bands
-        for nlvl in range(wv_levels):
-            # FT
-            fcV = np.fft.fftshift(np.fft.fft(c_V[nlvl], axis=0))
-            m_y, m_x = fcV.shape
-
-            # Damping of ring artifact information
-            y_hat = (np.arange(-m_y, m_y, 2, dtype='float32') + 1) / 2
-            damp = 1 - np.exp(-np.power(y_hat, 2) / (2 * np.power(sigma, 2)))
-            fcV = np.multiply(fcV, np.transpose(np.tile(damp, (m_x, 1))))
-
-            # Inverse FT
-            c_V[nlvl] = np.real(np.fft.ifft(np.fft.ifftshift(fcV), axis=0))
-
-        # Wavelet reconstruction
-        for nlvl in range(wv_levels)[::-1]:
-            sli = sli[0:c_H[nlvl].shape[0], 0:c_H[nlvl].shape[1]]
-            sli = pywt.idwt2((sli, (c_H[nlvl], c_V[nlvl], c_D[nlvl])),
-                             wavelet_name)
-        data_vol[:, sino_idx, :] = sli[xshift:dimx + xshift, 0:data_vol.shape[2]]
-
-    return data_vol
+    return filters_adv.remove_sino_stripes_rings_wf(data_vol, wv_levels)
 
 def circular_mask(data_vol, ratio=1.0, mask_out_val=0.0):
     """

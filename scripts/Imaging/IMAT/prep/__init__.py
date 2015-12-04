@@ -22,8 +22,15 @@ Pre-processing operations and filters that are applied on stacks of images
 or individual images.
 """
 
+err_msg = ("Inconsistency found. Could not import {0} which "
+           "should be available in this package. Details: {1}")
+
 try:
     from . import filters
 except ImportError as exc:
-    raise ImportError("Inconsistency found. Could not import filters which "
-                      "should be available in this package. Details: {0}".format(exc))
+    raise ImportError(err_msg.format('filters', exc))
+
+try:
+    from . import filters_adv
+except ImportError as exc:
+    raise ImportError(err_msg.format('filters_adv', exc))
