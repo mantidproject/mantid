@@ -603,9 +603,8 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
  *
  * @param numPeriods :: number of periods
  **/
-void
-LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) {
-
+void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
+    const size_t numPeriods) {
   // protection - we should not have entered the routine if these are not true
   // More than 1 period
   if (numPeriods < 2) {
