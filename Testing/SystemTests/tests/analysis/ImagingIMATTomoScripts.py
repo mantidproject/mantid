@@ -122,7 +122,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
         self.assertTrue(isinstance(cropped, np.ndarray),
                         msg="the result of cropping should be a numpy array")
 
-        expected_shape = (self._data_vol.shape[0], coords[3]-coords[1], coords[2]-coords[0])
+        expected_shape = (self.data_vol.shape[0], coords[3]-coords[1], coords[2]-coords[0])
         self.assertEqual(cropped.shape, expected_shape,
                          msg="the result of cropping should have the appropriate dimensions")
 
@@ -180,7 +180,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
     def test_remove_stripes_ok(self):
         import IMAT.prep as iprep
 
-        method = 'fourier-wavelet'
+        method = 'wavelet-fourier'
         stripped = iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
                                                                method)
 
@@ -189,7 +189,9 @@ class ImagingIMATTomoTests(unittest.TestCase):
                         msg="the result of remove_stripes should be a numpy array")
         self.assertEquals(stripped.shape, self.data_vol.shape,
                           msg="the result of remove_stripes should be a numpy array")
-        self.assertAlmostEquals(stripped[0, 100, 123], 0.37813,
+        expected_val = -0.25781357
+        val = stripped[0, 100, 123]
+        self.assertAlmostEquals(val, expected_val,
                                 msg="Expected the results of stripe removal (method {0} not to change "
                                 "with respect to previous executions".format(method))
 
@@ -215,7 +217,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
             iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
                                                         'funny-method-doesnt-exist')
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
                                                         'fourier-wavelet')
 
