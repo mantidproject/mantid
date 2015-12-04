@@ -7,6 +7,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include <Poco/ActiveResult.h>
+#include <Poco/DirectoryIterator.h>
 
 #include <QApplication>
 #include <QFileInfo>
@@ -17,6 +18,40 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 using namespace MantidQt::API;
+
+// free functions
+namespace {
+/**
+ * Gets the most recently modified Nexus file in the given directory
+ * @param path :: [input] Path to any file in the directory
+ * @returns Path to most recently modified file
+ */
+std::string getMostRecentFile(const std::string &path) {
+  Poco::Path givenPath(path);
+  Poco::File latestFile(givenPath);
+  try {
+    // Directory iterator - check if we were passed a file or a directory
+    Poco::DirectoryIterator iter(latestFile.isDirectory() ? givenPath
+                                                          : givenPath.parent());
+    Poco::DirectoryIterator end; // the end iterator
+    Poco::Timestamp lastModified = iter->getLastModified();
+    while (iter != end) {
+      if (Poco::Path(iter->path()).getExtension() == "nxs") {
+        if (iter->getLastModified() > lastModified) {
+          latestFile = *iter;
+          lastModified = iter->getLastModified();
+        }
+        ++iter;
+      }
+    }
+  } catch (const Poco::Exception &) {
+    // There was some problem iterating through the directory.
+    // Return the file we were given.
+    return givenPath.toString();
+  }
+  return latestFile.path();
+}
+}
 
 namespace MantidQt
 {
@@ -30,20 +65,111 @@ namespace CustomInterfaces
   {
     m_view->initialize();
 
-    connect(m_view, SIGNAL(loadRequested()), SLOT(load()));
+    connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
     connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableInfo()));
+    connect(&m_watcher, SIGNAL(directoryChanged(const QString &)),
+            SLOT(updateDirectoryChangedFlag(const QString &)));
+    connect(m_view, SIGNAL(lastRunAutoCheckedChanged(int)),
+            SLOT(changeWatchState(int)));
   }
 
-  void ALCDataLoadingPresenter::load()
-  {
-    m_view->disableAll();
+  /**
+   * Called when the Load button is clicked.
+   * Gets last run, passes it to load method if not "auto".
+   * If it was "auto", sets up a watcher to automatically reload on new files.
+   */
+  void ALCDataLoadingPresenter::handleLoadRequested() {
+    std::string lastFile(m_view->lastRun());
+    // remove any directories the watcher is currently watching
+    changeWatchState(false);
+    // Check if input was "Auto"
+    if (0 == lastFile.compare(m_view->autoString())) {
+      // Add path to watcher
+      changeWatchState(true);
+      // and get the most recent file in the directory to be lastFile
+      lastFile = getMostRecentFile(m_view->firstRun());
+      m_view->setCurrentAutoFile(lastFile);
+    }
+    // Now perform the load
+    load(lastFile);
+  }
 
+  /**
+   * The watched directory has been changed - update flag.
+   * @param path :: [input] Path to directory modified (not used)
+   */
+  void ALCDataLoadingPresenter::updateDirectoryChangedFlag(const QString &path) {
+    Q_UNUSED(path); // just set the flag, don't need the path
+    m_directoryChanged = true;
+  }
+
+  /**
+   * This timer runs every second when we are watching a directory.
+   * If any changes have occurred in the meantime, reload.
+   * @param timeup :: [input] Qt timer event (not used)
+   */
+  void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
+    Q_UNUSED(timeup); // We only have one timer, so not necessary to use this
+
+    // Check flag for changes
+    if (m_directoryChanged.load() == true) {
+      // Most recent file in directory
+      Poco::Path filePath(m_view->firstRun());
+      std::string lastFile = getMostRecentFile(filePath.parent().toString());
+      // Load file and update view
+      load(lastFile);
+      m_view->setCurrentAutoFile(lastFile);
+      // Reset flag
+      m_directoryChanged = false;
+    }
+  }
+
+  /**
+   * Start/stop watching directory for changes
+   * @param watching :: [input] True to start watching, false to stop
+   */
+  void ALCDataLoadingPresenter::changeWatchState(bool watching) {
+    m_directoryChanged = false;
+    if (watching) {
+      Poco::Path path(m_view->firstRun());
+      m_watcher.addPath(QString(path.parent().toString().c_str()));
+      m_timerID = startTimer(1000); // 1-second timer
+    } else {
+      if (!m_watcher.directories().empty()) {
+        m_watcher.removePaths(m_watcher.directories());
+      }
+      killTimer(m_timerID);
+    }
+  }
+
+  /**
+   * Start/stop watching directory for changes
+   * (called when Auto checkbox checked/unchecked)
+   * @param state :: [input] Member of Qt::CheckState enum
+   */
+  void ALCDataLoadingPresenter::changeWatchState(int state) {
+    if (state == Qt::Checked) {
+      changeWatchState(true);
+    } else {
+      changeWatchState(false);
+    }
+  }
+
+  /**
+   * Load new data and update the view accordingly
+   * @param lastFile :: [input] Last file in range (user-specified or auto)
+   */
+  void ALCDataLoadingPresenter::load(const std::string &lastFile) {
+    m_view->disableAll();
+    // Use Path.toString() to ensure both are in same (native) format
+    Poco::Path firstRun(m_view->firstRun());
+    Poco::Path lastRun(lastFile);
     try
     {
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
       alg->setChild(true); // Don't want workspaces in the ADS
-      alg->setProperty("FirstRun", m_view->firstRun());
-      alg->setProperty("LastRun", m_view->lastRun());
+      alg->setProperty("FirstRun", firstRun.toString());
+      alg->setProperty("LastRun", lastRun.toString());
       alg->setProperty("LogValue", m_view->log());
       alg->setProperty("Function", m_view->function());
       alg->setProperty("Type", m_view->calculationType());

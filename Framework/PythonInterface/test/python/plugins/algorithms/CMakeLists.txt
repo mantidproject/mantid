@@ -75,6 +75,7 @@ set ( TEST_PY_FILES
   StringToPngTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
+  SwapWidthsTest.py
   SymmetriseTest.py
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
