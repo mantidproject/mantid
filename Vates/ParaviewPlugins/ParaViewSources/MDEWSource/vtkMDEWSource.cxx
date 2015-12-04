@@ -9,6 +9,7 @@
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
+#include "vtkNew.h"
 
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -22,7 +23,6 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/optional.hpp>
 
@@ -30,18 +30,15 @@ using namespace Mantid::VATES;
 
 vtkStandardNewMacro(vtkMDEWSource)
 
-/// Constructor
-vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL), m_normalization(AutoSelect)
-{
+    /// Constructor
+    vtkMDEWSource::vtkMDEWSource()
+    : m_wsName(""), m_depth(1000), m_time(0), m_normalization(AutoSelect) {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
 
 /// Destructor
-vtkMDEWSource::~vtkMDEWSource()
-{
-  delete m_presenter;
-}
+vtkMDEWSource::~vtkMDEWSource() {}
 
 /*
  Setter for the recursion depth
@@ -71,21 +68,17 @@ void vtkMDEWSource::SetWsName(std::string name)
 }
 
 /**
-  Gets the geometry xml from the workspace. Allows object panels to configure themeselves.
+  Gets the geometry xml from the workspace. Allows object panels to configure
+  themeselves.
   @return geometry xml const * char reference.
 */
-const char* vtkMDEWSource::GetInputGeometryXML()
-{
-  if(m_presenter == NULL)
-  {
+const char *vtkMDEWSource::GetInputGeometryXML() {
+  if (m_presenter == nullptr) {
     return "";
   }
-  try
-  {
+  try {
     return m_presenter->getGeometryXML().c_str();
-  }
-  catch(std::runtime_error&)
-  {
+  } catch (std::runtime_error &) {
     return "";
   }
 }
@@ -95,60 +88,45 @@ const char* vtkMDEWSource::GetInputGeometryXML()
  * workspace.
  * @return the special coordinates value
  */
-int vtkMDEWSource::GetSpecialCoordinates()
-{
-  if (NULL == m_presenter)
-  {
+int vtkMDEWSource::GetSpecialCoordinates() {
+  if (nullptr == m_presenter) {
     return 0;
   }
-  try
-  {
+  try {
     return m_presenter->getSpecialCoordinates();
-  }
-  catch (std::runtime_error &)
-  {
+  } catch (std::runtime_error &) {
     return 0;
   }
 }
 
 /**
- * Gets the minimum value of the data associated with the 
+ * Gets the minimum value of the data associated with the
  * workspace.
  * @return The minimum value of the workspace data.
  */
-double vtkMDEWSource::GetMinValue()
-{
-  if (NULL == m_presenter)
-  {
+double vtkMDEWSource::GetMinValue() {
+  if (nullptr == m_presenter) {
     return 0.0;
   }
-  try
-  {
+  try {
     return m_presenter->getMinValue();
-  }
-  catch (std::runtime_error &)
-  {
+  } catch (std::runtime_error &) {
     return 0;
   }
 }
 
 /**
- * Gets the maximum value of the data associated with the 
+ * Gets the maximum value of the data associated with the
  * workspace.
  * @return The maximum value of the workspace data.
  */
-double vtkMDEWSource::GetMaxValue()
-{
-  if (NULL == m_presenter)
-  {
+double vtkMDEWSource::GetMaxValue() {
+  if (nullptr == m_presenter) {
     return 0.0;
   }
-  try
-  {
+  try {
     return m_presenter->getMaxValue();
-  }
-  catch (std::runtime_error &)
-  {
+  } catch (std::runtime_error &) {
     return 0;
   }
 }
@@ -157,18 +135,13 @@ double vtkMDEWSource::GetMaxValue()
  * Gets the (first) instrument which is associated with the workspace.
  * @return The name of the instrument.
  */
-const char* vtkMDEWSource::GetInstrument()
-{
-  if (NULL == m_presenter)
-  {
+const char *vtkMDEWSource::GetInstrument() {
+  if (nullptr == m_presenter) {
     return "";
   }
-  try
-  {
+  try {
     return m_presenter->getInstrument().c_str();
-  }
-  catch (std::runtime_error &)
-  {
+  } catch (std::runtime_error &) {
     return "";
   }
 }
@@ -220,11 +193,11 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
         hexahedronFactory.get(), loadingProgressUpdate, drawingProgressUpdate);
 
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
-    vtkBox* box = vtkBox::New();
+    vtkNew<vtkBox> box;
     box->SetBounds(product->GetBounds());
-    vtkPVClipDataSet* clipper = vtkPVClipDataSet::New();
+    vtkNew<vtkPVClipDataSet> clipper;
     clipper->SetInputData(product);
-    clipper->SetClipFunction(box);
+    clipper->SetClipFunction(box.GetPointer());
     clipper->SetInsideOut(true);
     clipper->Update();
     vtkDataSet* clipperOutput = clipper->GetOutput();
@@ -247,29 +220,28 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
       m_presenter->setDefaultCOBandBoundaries(output);
     }
     m_presenter->setAxisLabels(output);
-
-    clipper->Delete();
   }
   return 1;
 }
 
-GCC_DIAG_OFF(strict-aliasing)
-int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkInformationVector **vtkNotUsed(inputVector), vtkInformationVector *outputVector)
-{
-  if(m_presenter == NULL && !m_wsName.empty())
-  {
+GCC_DIAG_OFF(strict - aliasing)
+int vtkMDEWSource::RequestInformation(
+    vtkInformation *vtkNotUsed(request),
+    vtkInformationVector **vtkNotUsed(inputVector),
+    vtkInformationVector *outputVector) {
+  if (m_presenter == NULL && !m_wsName.empty()) {
     std::unique_ptr<MDLoadingView> view =
         Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWSource>>(this);
-    m_presenter = new MDEWInMemoryLoadingPresenter(
+    m_presenter = Mantid::Kernel::make_unique<MDEWInMemoryLoadingPresenter>(
         std::move(view),
         new ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>, m_wsName);
     if (!m_presenter->canReadFile()) {
-      vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");
-    }
-    else
-    {
-      // If the MDEvent workspace has had top level splitting applied to it, then use the a depth of 1
-      if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName)) {
+      vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
+    } else {
+      // If the MDEvent workspace has had top level splitting applied to it,
+      // then use the a depth of 1
+      if (auto split =
+              Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName)) {
         SetDepth(split.get());
       }
 
@@ -346,21 +318,16 @@ void vtkMDEWSource::updateAlgorithmProgress(double progress, const std::string& 
 /*
 Getter for the workspace type name.
 */
-char* vtkMDEWSource::GetWorkspaceTypeName()
-{
-  if(m_presenter == NULL)
-  {
-    return const_cast<char*>("");
+char *vtkMDEWSource::GetWorkspaceTypeName() {
+  if (m_presenter == nullptr) {
+    return const_cast<char *>("");
   }
-  try
-  {
-    //Forward request on to MVP presenter
+  try {
+    // Forward request on to MVP presenter
     typeName = m_presenter->getWorkspaceTypeName();
-    return const_cast<char*>(typeName.c_str());
-  }
-  catch(std::runtime_error&)
-  {
-    return const_cast<char*>("");
+    return const_cast<char *>(typeName.c_str());
+  } catch (std::runtime_error &) {
+    return const_cast<char *>("");
   }
 }
 

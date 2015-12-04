@@ -11,6 +11,7 @@
 #include <vtkSphereSource.h>
 #include <vtkTransform.h>
 #include <vtkTransformPolyDataFilter.h>
+#include <vtkNew.h>
 
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
@@ -117,15 +118,13 @@ int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
     shapeMarker = transformFilter;
   }
 
-  vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
+  vtkNew<vtkPVGlyphFilter> glyphFilter;
   glyphFilter->SetInputData(structuredMesh);
   glyphFilter->SetSourceConnection(shapeMarker->GetOutputPort());
   glyphFilter->Update();
   vtkPolyData *glyphed = glyphFilter->GetOutput();
 
   output->ShallowCopy(glyphed);
-
-  glyphFilter->Delete();
 
   return 1;
 }

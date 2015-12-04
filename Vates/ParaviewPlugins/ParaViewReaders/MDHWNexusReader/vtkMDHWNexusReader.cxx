@@ -19,30 +19,21 @@
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
-#include "MantidKernel/make_unique.h"
 
 vtkStandardNewMacro(vtkMDHWNexusReader)
 
 using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;
 
-vtkMDHWNexusReader::vtkMDHWNexusReader() :
-  m_presenter(NULL),
-  m_loadInMemory(false),
-  m_depth(1),
-  m_time(0),
-  m_normalizationOption(AutoSelect)
-{
+vtkMDHWNexusReader::vtkMDHWNexusReader()
+    : m_loadInMemory(false), m_depth(1), m_time(0),
+      m_normalizationOption(AutoSelect) {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
 
-vtkMDHWNexusReader::~vtkMDHWNexusReader()
-{
-  delete m_presenter;
-  this->SetFileName(0);
-}
+vtkMDHWNexusReader::~vtkMDHWNexusReader() { this->SetFileName(0); }
 
 void vtkMDHWNexusReader::SetDepth(int depth)
 {
@@ -86,18 +77,13 @@ void vtkMDHWNexusReader::SetInMemory(bool inMemory)
  * Gets the geometry xml from the workspace. Allows object panels to configure themeselves.
  * @return geometry xml const * char reference.
  */
-const char* vtkMDHWNexusReader::GetInputGeometryXML()
-{
-  if(m_presenter == NULL)
-  {
+const char *vtkMDHWNexusReader::GetInputGeometryXML() {
+  if (m_presenter == nullptr) {
     return "";
   }
-  try
-  {
+  try {
     return m_presenter->getGeometryXML().c_str();
-  }
-  catch(std::runtime_error&)
-  {
+  } catch (std::runtime_error &) {
     return "";
   }
 }
@@ -141,12 +127,11 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
           thresholdRange, m_normalizationOption, m_time);
   factory->SetSuccessor(std::move(successor));
 
-  vtkDataSet *product = m_presenter->execute(
-      factory.get(), loadingProgressAction, drawingProgressAction);
+  auto product = vtkSmartPointer<vtkDataSet>::Take(m_presenter->execute(
+      factory.get(), loadingProgressAction, drawingProgressAction));
 
   vtkDataSet* output = vtkDataSet::GetData(outInfo);
   output->ShallowCopy(product);
-  product->Delete();
 
   try
   {
@@ -164,39 +149,33 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
 }
 
 int vtkMDHWNexusReader::RequestInformation(
-  vtkInformation *vtkNotUsed(request),
-  vtkInformationVector **vtkNotUsed(inputVector),
-  vtkInformationVector *outputVector)
-{
-  if(m_presenter == NULL)
-  {
+    vtkInformation *vtkNotUsed(request),
+    vtkInformationVector **vtkNotUsed(inputVector),
+    vtkInformationVector *outputVector) {
+  if (m_presenter == nullptr) {
     std::unique_ptr<MDLoadingView> view =
         Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDHWNexusReader>>(
             this);
-    m_presenter = new MDHWNexusLoadingPresenter(std::move(view), FileName);
+    m_presenter = Mantid::Kernel::make_unique<MDHWNexusLoadingPresenter>(
+        std::move(view), FileName);
   }
 
-  if (m_presenter == NULL)
-  {
-    // updater information has been called prematurely. We will reexecute once all attributes are setup.
+  if (m_presenter == nullptr) {
+    // updater information has been called prematurely. We will reexecute once
+    // all attributes are setup.
     return 1;
   }
-  if(!m_presenter->canReadFile())
-  {
-    vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");
+  if (!m_presenter->canReadFile()) {
+    vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
     return 0;
   }
-  
+
   m_presenter->executeLoadMetadata();
   setTimeRange(outputVector);
-  MDHWNexusLoadingPresenter *castPresenter =
-      dynamic_cast<MDHWNexusLoadingPresenter *>(m_presenter);
-  if (castPresenter) {
-    std::vector<int> extents = castPresenter->getExtents();
-    outputVector->GetInformationObject(0)
-        ->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), &extents[0],
-              static_cast<int>(extents.size()));
-  }
+  std::vector<int> extents = m_presenter->getExtents();
+  outputVector->GetInformationObject(0)
+      ->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), &extents[0],
+            static_cast<int>(extents.size()));
   return 1;
 }
 
