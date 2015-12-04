@@ -79,11 +79,13 @@ class SortHKLTest(stresstesting.MantidStressTest):
         keys = lines[0].split()
         values = [float(x) for x in lines[2].split()[2:]]
 
-        return dict(zip(keys, values))
+        overall_statistics = dict(zip(keys, values))
+
+        completentess = float(lines[3].split()[-1].replace('%', ''))
+        overall_statistics['Completeness'] = completentess
+
+        return overall_statistics
 
     def _compare_statistics(self, statistics, reference_statistics, space_group):
         self.assertEquals(round(statistics['Multiplicity'], 1), round(reference_statistics['<N>'], 1))
-
-        print space_group
-        print statistics
-        print reference_statistics
+        self.assertEquals(round(statistics['Data Completeness'], 1), round(reference_statistics['Completeness'], 1))
