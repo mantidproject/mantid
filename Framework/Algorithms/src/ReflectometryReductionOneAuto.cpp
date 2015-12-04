@@ -535,6 +535,10 @@ ReflectometryReductionOneAuto::sumOverTransmissionGroup(
   // we clone the first member of transmission group as to
   // avoid addition in place which would affect the original
   // workspace member.
+  //
+  // We used .release because clone() will return a unique_ptr.
+  // we need to release the ownership of the pointer so that it
+  // can be cast into a shared_ptr of type Workspace.
   Workspace_sptr transmissionRunSum(transGroup->getItem(0)->clone().release());
 
   // make a variable to store the overall total of the summation
