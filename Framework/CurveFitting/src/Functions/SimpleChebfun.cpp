@@ -53,7 +53,7 @@ SimpleChebfun::SimpleChebfun(ChebfunFunctionType fun, double start, double end,
                              double accuracy, size_t badSize)
     : m_badFit(false) {
   m_base = ChebfunBase::bestFitAnyTolerance<ChebfunFunctionType>(
-      start, end, fun, m_P, m_A, 0.0, accuracy);
+      start, end, fun, m_P, m_A, accuracy);
   if (!m_base) {
     m_base = boost::make_shared<ChebfunBase>(badSize - 1, start, end, accuracy);
     m_P = m_base->fit(fun);
@@ -65,7 +65,7 @@ SimpleChebfun::SimpleChebfun(const API::IFunction &fun, double start,
                              double end, double accuracy, size_t badSize)
     : m_badFit(false) {
   m_base = ChebfunBase::bestFitAnyTolerance<const API::IFunction &>(
-      start, end, fun, m_P, m_A, 0.0, accuracy);
+      start, end, fun, m_P, m_A, accuracy);
   if (!m_base) {
     m_base = boost::make_shared<ChebfunBase>(badSize - 1, start, end, accuracy);
     m_P = m_base->fit(fun);

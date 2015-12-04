@@ -17,64 +17,67 @@ size_t g_maxSplitLevel = 100;
 //------------------------------------------------------------------------------
 /// Split the fitting interval in half recursively until for each sub-interval
 /// the function can be approximated to the required accuracy.
-std::list<SimpleChebfun> splitFit(ChebfunFunctionType fun, double start,
-                                  double end, double accuracy, size_t badSize, size_t &level) {
+std::list<SimpleChebfun> splitFit(size_t &level, ChebfunFunctionType fun, double start,
+                                  double end, const Chebfun::Options &options) {
 
   std::list<SimpleChebfun> chebs;
   double middle = (start + end) / 2;
 
   std::vector<double> p, a;
-  auto base = ChebfunBase::bestFit(start, middle, fun, p, a, 0.0, accuracy);
+  auto base = ChebfunBase::bestFit(start, middle, fun, p, a, options.accuracy, options.maxPartSize);
 
-  if (base)
-  {
+  if (base) {
     SimpleChebfun leftFun(base);
     leftFun.setData(p, a);
     chebs.insert(chebs.end(), leftFun);
-  }
-  else
-  {
+  } else {
     ++level;
-    if (level > g_maxSplitLevel)
-    {
-      return std::list<SimpleChebfun>();
+    if (level > options.maxParts) {
+      if (options.doNotFail) {
+        chebs.push_back(SimpleChebfun(options.badPartSize, fun, start, middle));
+      } else {
+        return std::list<SimpleChebfun>();
+      }
+    } else {
+      std::list<SimpleChebfun> leftChebs =
+          splitFit(level, fun, start, middle, options);
+      chebs.insert(chebs.end(), leftChebs.begin(), leftChebs.end());
     }
-    std::list<SimpleChebfun> leftChebs = splitFit(fun, start, middle, accuracy, badSize, level);
-    chebs.insert(chebs.end(), leftChebs.begin(), leftChebs.end());
   }
 
-  base = ChebfunBase::bestFit(middle, end, fun, p, a, 0.0, accuracy);
-  if (base)
-  {
+  base = ChebfunBase::bestFit(middle, end, fun, p, a, options.accuracy, options.maxPartSize);
+  if (base) {
     SimpleChebfun rightFun(base);
     rightFun.setData(p, a);
     chebs.insert(chebs.end(), rightFun);
-  }
-  else
-  {
+  } else {
     ++level;
-    if (level > g_maxSplitLevel)
-    {
-      return std::list<SimpleChebfun>();
+    if (level > options.maxParts) {
+      if (options.doNotFail) {
+        chebs.push_back(SimpleChebfun(options.badPartSize, fun, middle, end));
+      } else {
+        return std::list<SimpleChebfun>();
+      }
+    } else {
+      std::list<SimpleChebfun> rightChebs =
+          splitFit(level, fun, middle, end, options);
+      chebs.insert(chebs.end(), rightChebs.begin(), rightChebs.end());
     }
-    std::list<SimpleChebfun> rightChebs = splitFit(fun, middle, end, accuracy, badSize, level);
-    chebs.insert(chebs.end(), rightChebs.begin(), rightChebs.end());
   }
   return chebs;
-
 }
+
 
 //------------------------------------------------------------------------------
 /// Try to find the best approximation to the required accuracy.
 /// If failed return an empty list.
-std::list<SimpleChebfun> bestFit(ChebfunFunctionType fun, double start,
-                                 double end, double accuracy, size_t badSize,
-                                 size_t &level) {
+std::list<SimpleChebfun> bestFit(size_t &level, ChebfunFunctionType fun,
+                                 double start, double end, const Chebfun::Options &options) {
   std::vector<double> p, a;
-  auto base = ChebfunBase::bestFit(start, end, fun, p, a, 0.0, accuracy);
+  auto base = ChebfunBase::bestFit(start, end, fun, p, a, options.accuracy, options.maxPartSize);
   if (!base) {
-    auto split = splitFit(fun, start, end, accuracy, badSize, level);
-    //if (level >= g_maxSplitLevel) throw std::runtime_error("Failed to build a Chebfun.");
+    auto split = splitFit(level, fun, start, end, options);
+    if (!options.doNotFail && level >= options.maxParts) throw std::runtime_error("Failed to build a Chebfun.");
     return split;
   }
   SimpleChebfun cheb(base);
@@ -85,7 +88,7 @@ std::list<SimpleChebfun> bestFit(ChebfunFunctionType fun, double start,
 //------------------------------------------------------------------------------
 /// Try to join two SimpleChebfuns into one keeping the highest accuracy.
 /// Must be true: fun1.endX() == fun2.startX()
-boost::optional<SimpleChebfun> join(const SimpleChebfun &fun1, const SimpleChebfun &fun2) {
+boost::optional<SimpleChebfun> join(const SimpleChebfun &fun1, const SimpleChebfun &fun2, const Chebfun::Options &options) {
   if (fun1.size() + fun2.size() >= ChebfunBase::maximumSize()) {
     return boost::optional<SimpleChebfun>();
   }
@@ -98,7 +101,7 @@ boost::optional<SimpleChebfun> join(const SimpleChebfun &fun1, const SimpleChebf
   auto accuracy = std::min(fun1.accuracy(), fun2.accuracy());
   auto fun = [&fun1, &fun2, &border](double x) { return x <= border ? fun1(x) : fun2(x); };
   std::vector<double> p, a;
-  auto base = ChebfunBase::bestFit(fun1.startX(), fun2.endX(), fun, p, a, 0.0, accuracy);
+  auto base = ChebfunBase::bestFit(fun1.startX(), fun2.endX(), fun, p, a, accuracy, options.maxPartSize);
   if (base && base->size() < 10*(fun1.size() + fun2.size())) {
     SimpleChebfun cheb(base);
     cheb.setData(p, a);
@@ -109,7 +112,7 @@ boost::optional<SimpleChebfun> join(const SimpleChebfun &fun1, const SimpleChebf
 
 //------------------------------------------------------------------------------
 /// Try to join as many SimpleChebfuns as possible.
-std::list<SimpleChebfun> join(const std::list<SimpleChebfun> &parts) {
+std::list<SimpleChebfun> join(const std::list<SimpleChebfun> &parts, const Chebfun::Options &options) {
   std::list<SimpleChebfun> chebs;
   auto part2 = parts.begin();
   chebs.push_back(*part2);
@@ -120,7 +123,7 @@ std::list<SimpleChebfun> join(const std::list<SimpleChebfun> &parts) {
       chebs.push_back(*part2);
       continue;
     }
-    auto joined = join(part1, *part2);
+    auto joined = join(part1, *part2, options);
     if (joined) {
       chebs.pop_back();
       chebs.push_back(joined.get());
@@ -134,26 +137,51 @@ std::list<SimpleChebfun> join(const std::list<SimpleChebfun> &parts) {
 }
 
 //------------------------------------------------------------------------------
+/// Options constructor
+Chebfun::Options::Options(double acc, size_t mp, size_t mps, bool dnf,
+                          size_t bps)
+    : accuracy(acc), maxParts(mp), maxPartSize(mps), doNotFail(dnf),
+      badPartSize(bps) {
+  if (accuracy == 0.0) {
+    accuracy = ChebfunBase::defaultTolerance();
+  }
+
+  if (maxParts == 0) {
+    maxParts = g_maxSplitLevel;
+  }
+
+  if (maxPartSize == 0) {
+    maxPartSize = ChebfunBase::maximumSize();
+  }
+}
+
+//------------------------------------------------------------------------------
 /// Constructor
 Chebfun::Chebfun(ChebfunFunctionType fun, double start, double end,
-                 double accuracy, size_t badSize) {
-  bestFitAnyAccuracy(fun, start, end, accuracy, badSize);
+                 double accuracy) {
+  Options options(accuracy);
+  bestFitAnyAccuracy(fun, start, end, options);
+}
+
+//------------------------------------------------------------------------------
+/// Constructor
+Chebfun::Chebfun(ChebfunFunctionType fun, double start, double end,
+                 const Chebfun::Options &options) {
+  bestFitAnyAccuracy(fun, start, end, options);
 }
 
 //------------------------------------------------------------------------------
 /// Number of smooth parts
 void Chebfun::bestFitAnyAccuracy(ChebfunFunctionType fun, double start,
-                                 double end, double accuracy, size_t badSize) {
+                                 double end, const Chebfun::Options &options) {
 
-  if (accuracy == 0.0)  {
-    accuracy = ChebfunBase::defaultTolerance();
-  }
-
-  for (double acc = accuracy; acc < 0.1; acc *= 100) {
+  Options opts = options;
+  for (double acc = options.accuracy; acc < 0.1; acc *= 100) {
     size_t level = 0;
-    auto chebs = bestFit(fun, start, end, acc, badSize, level);
+    opts.accuracy = acc;
+    auto chebs = bestFit(level, fun, start, end, options);
     if (!chebs.empty()) {
-      auto joinedChebs = join(chebs);
+      auto joinedChebs = join(chebs, options);
       if (joinedChebs.empty()) {
         m_parts.assign(chebs.begin(), chebs.end());
       } else {
@@ -235,6 +263,28 @@ std::vector<double> Chebfun::getBreakPoints() const {
   }
   breaks.push_back(endX());
   return breaks;
+}
+
+//------------------------------------------------------------------------------
+/// Get all x - points
+std::vector<double> Chebfun::getAllXPoints() const {
+  std::vector<double> res;
+  for (auto &p : m_parts) {
+    auto &x = p.xPoints();
+    res.insert(res.end(), x.begin(), x.end());
+  }
+  return res;
+}
+
+//------------------------------------------------------------------------------
+/// Get all y - points
+std::vector<double> Chebfun::getAllYPoints() const {
+  std::vector<double> res;
+  for (auto &p : m_parts) {
+    auto &y = p.yPoints();
+    res.insert(res.end(), y.begin(), y.end());
+  }
+  return res;
 }
 
 } // namespace Functions

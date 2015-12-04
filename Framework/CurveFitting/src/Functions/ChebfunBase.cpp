@@ -384,7 +384,7 @@ template <class FunctionType>
 ChebfunBase_sptr
 ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
                           std::vector<double> &p, std::vector<double> &a,
-                          double maxA, double tolerance, size_t maxSize) {
+                          double tolerance, size_t maxSize, double maxA) {
 
   std::vector<double> p1, p2;
   const size_t n0 = 8;
@@ -475,19 +475,19 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
 ChebfunBase_sptr ChebfunBase::bestFit(double start, double end,
                                       ChebfunFunctionType f,
                                       std::vector<double> &p,
-                                      std::vector<double> &a, double maxA,
-                                      double tolerance, size_t maxSize) {
-  return bestFitTempl(start, end, f, p, a, maxA, tolerance, maxSize);
+                                      std::vector<double> &a,
+                                      double tolerance, size_t maxSize, double maxA) {
+  return bestFitTempl(start, end, f, p, a, tolerance, maxSize, maxA);
 }
 
 /// Template specialization for IFunction
 ChebfunBase_sptr ChebfunBase::bestFit(double start, double end,
                                       const API::IFunction &f,
                                       std::vector<double> &p,
-                                      std::vector<double> &a, double maxA,
-                                      double tolerance, size_t maxSize) {
-  return bestFitTempl<const API::IFunction &>(start, end, f, p, a, maxA,
-                                              tolerance, maxSize);
+                                      std::vector<double> &a,
+                                      double tolerance, size_t maxSize, double maxA) {
+  return bestFitTempl<const API::IFunction &>(start, end, f, p, a,
+                                              tolerance, maxSize, maxA);
 }
 
 /**

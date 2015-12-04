@@ -118,13 +118,13 @@ public:
   /// Fit a function until full convergence
   static boost::shared_ptr<ChebfunBase>
   bestFit(double start, double end, ChebfunFunctionType, std::vector<double> &p,
-          std::vector<double> &a, double maxA = 0.0, double tolerance = 0.0,
-          size_t maxSize = 0);
+          std::vector<double> &a, double tolerance = 0.0,
+          size_t maxSize = 0, double maxA = 0.0);
   /// Fit a function until full convergence
   static boost::shared_ptr<ChebfunBase>
   bestFit(double start, double end, const API::IFunction &,
-          std::vector<double> &p, std::vector<double> &a, double maxA = 0.0,
-          double tolerance = 0.0, size_t maxSize = 0);
+          std::vector<double> &p, std::vector<double> &a,
+          double tolerance = 0.0, size_t maxSize = 0, double maxA = 0.0);
   /// Tolerance for comparing doubles
   double tolerance() { return m_tolerance; }
   /// Default tolerance for comparing doubles
@@ -138,8 +138,8 @@ public:
   static boost::shared_ptr<ChebfunBase>
   bestFitAnyTolerance(double start, double end, FunctionType f,
                       std::vector<double> &p, std::vector<double> &a,
-                      double maxA = 0.0, double tolerance = 0.0,
-                      size_t maxSize = 0);
+                      double tolerance = 0.0, size_t maxSize = 0,
+                      double maxA = 0.0);
 
   /// Create a vector of x values linearly spaced on the approximation interval
   std::vector<double> linspace(size_t n) const;
@@ -168,8 +168,8 @@ private:
   template <class FunctionType>
   static boost::shared_ptr<ChebfunBase>
   bestFitTempl(double start, double end, FunctionType f, std::vector<double> &p,
-               std::vector<double> &a, double maxA, double tolerance,
-               size_t maxSize);
+               std::vector<double> &a, double tolerance, size_t maxSize,
+               double maxA);
 
   /// Actual tolerance in comparing doubles
   const double m_tolerance;
@@ -197,13 +197,11 @@ using ChebfunBase_sptr = boost::shared_ptr<ChebfunBase>;
 template <class FunctionType>
 boost::shared_ptr<ChebfunBase> ChebfunBase::bestFitAnyTolerance(
     double start, double end, FunctionType f, std::vector<double> &p,
-    std::vector<double> &a, double maxA, double tolerance, size_t maxSize) {
+    std::vector<double> &a, double tolerance, size_t maxSize, double maxA) {
   if (tolerance == 0.0)
     tolerance = g_tolerance;
-
-  double tol = tolerance;
-  while (tol < 0.1) {
-    auto base = bestFit(start, end, f, p, a, maxA, tol, maxSize);
+  for (double tol = tolerance; tol < 0.1; tol *= 100) {
+    auto base = bestFit(start, end, f, p, a, tol, maxSize, maxA);
     if (base) {
       return base;
     }

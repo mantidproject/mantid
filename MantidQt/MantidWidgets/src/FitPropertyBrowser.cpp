@@ -226,6 +226,7 @@ void FitPropertyBrowser::init()
                << "Conjugate gradient (Polak-Ribiere imp.)"
                << "BFGS"
                << "SteepestDescent"
+               << "LocalSearch"
                << "Damping";
 
   m_ignoreInvalidData = m_boolManager->addProperty("Ignore invalid data");

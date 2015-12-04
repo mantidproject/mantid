@@ -33,8 +33,19 @@ namespace Functions {
 */
 class MANTID_CURVEFITTING_DLL Chebfun {
 public:
+  struct Options {
+    Options(double acc = 0.0, size_t mp = 0, size_t mps = 0,
+      bool dnf = false, size_t bps = 2);
+    double accuracy;
+    size_t maxParts;
+    size_t maxPartSize;
+    bool doNotFail;
+    size_t badPartSize;
+  };
   Chebfun(ChebfunFunctionType fun, double start, double end,
-          double accuracy = 0.0, size_t badSize = 10);
+          double accuracy = 0.0);
+  Chebfun(ChebfunFunctionType fun, double start, double end,
+          const Options &options);
   /// Number of smooth parts
   size_t numberOfParts() const;
   /// Start of the interval
@@ -53,9 +64,14 @@ public:
   bool isGood() const;
   /// Get all break points
   std::vector<double> getBreakPoints() const;
-private:
+  /// Get all x - points
+  std::vector<double> getAllXPoints() const;
+  /// Get all y - points
+  std::vector<double> getAllYPoints() const;
+  /// Find an approximation for a function.
   void bestFitAnyAccuracy(ChebfunFunctionType fun, double start, double end,
-                          double accuracy = 0.0, size_t badSize = 10);
+    const Options& options);
+private:
   /// Parts of a piece-wise function
   std::vector<SimpleChebfun> m_parts;
   /// Start of the interval
