@@ -210,9 +210,6 @@ void EnggDiffractionPresenter::processFocusBasic() {
     // start focusing
     startFocusing(multi_RunNo, banks, "", "");
 
-    // counter resetted to prepare for the next focusing run
-    g_plottingCounter = 0;
-
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
     /**
@@ -248,9 +245,6 @@ void EnggDiffractionPresenter::processFocusCropped() {
 
     startFocusing(multi_RunNo, banks, specNos, "");
 
-    // counter resetted to prepare for the next focusing run
-    g_plottingCounter = 0;
-
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
   }
@@ -280,9 +274,6 @@ void EnggDiffractionPresenter::processFocusTexture() {
     g_log.debug() << " focus mode selected Individual Run Files Separately "
                   << std::endl;
     startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
-
-    // counter resetted to prepare for the next focusing run
-    g_plottingCounter = 0;
 
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
@@ -1131,7 +1122,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
 
-  while (!g_abortThread) {
+  if (!g_abortThread) {
 
     // to track last valid run
     g_lastValidRun = runNo;
