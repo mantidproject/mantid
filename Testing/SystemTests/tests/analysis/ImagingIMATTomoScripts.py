@@ -118,7 +118,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
         coords = [2, 2, 100, 100]
         cropped = iprep.filters.crop_vol(self.data_vol, coords)
 
-        self.assertTrue(isinstance(self._data_vol, np.ndarray))
+        self.assertTrue(isinstance(self.data_vol, np.ndarray))
         self.assertTrue(isinstance(cropped, np.ndarray),
                         msg="the result of cropping should be a numpy array")
 
@@ -181,13 +181,13 @@ class ImagingIMATTomoTests(unittest.TestCase):
         import IMAT.prep as iprep
 
         method = 'fourier-wavelet'
-        stripped = iprep.filters.remove_stripes_ring_artifacts(self._data_vol,
+        stripped = iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
                                                                method)
 
-        self.assertTrue(isinstance(self._data_vol, np.ndarray))
+        self.assertTrue(isinstance(self.data_vol, np.ndarray))
         self.assertTrue(isinstance(stripped, np.ndarray),
                         msg="the result of remove_stripes should be a numpy array")
-        self.assertEquals(stripped.shape, self._data_vol.shape,
+        self.assertEquals(stripped.shape, self.data_vol.shape,
                           msg="the result of remove_stripes should be a numpy array")
         self.assertAlmostEquals(stripped[0, 100, 123], 0.37813,
                                 msg="Expected the results of stripe removal (method {0} not to change "
@@ -209,7 +209,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
             iprep.filters.remove_stripes_ring_artifacts(np.zeros((1,1,2,2)))
 
         with self.assertRaises(ValueError):
-            iprep.filters.remove_stripes_ring_artifacts(self._data_vol, '')
+            iprep.filters.remove_stripes_ring_artifacts(self.data_vol, '')
 
         with self.assertRaises(ValueError):
             iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
