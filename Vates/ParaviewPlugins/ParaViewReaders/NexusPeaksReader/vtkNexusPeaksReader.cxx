@@ -12,6 +12,7 @@
 #include <vtkTransform.h>
 #include <vtkTransformPolyDataFilter.h>
 #include <vtkNew.h>
+#include <vtkSmartPointer.h>
 
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
@@ -81,14 +82,16 @@ int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   case 3: dim = vtkPeakMarkerFactory::Peak_in_HKL; break;
   default: dim = vtkPeakMarkerFactory::Peak_in_Q_lab; break;
   }
-  vtkPeakMarkerFactory * p_peakFactory = new vtkPeakMarkerFactory("peaks", dim);
+  auto p_peakFactory =
+      Mantid::Kernel::make_unique<vtkPeakMarkerFactory>("peaks", dim);
 
   p_peakFactory->initialize(m_PeakWS);
 
   FilterUpdateProgressAction<vtkNexusPeaksReader> drawingProgressUpdate(this, "Drawing...");
-  vtkDataSet * structuredMesh = p_peakFactory->create(drawingProgressUpdate);
+  auto structuredMesh = vtkSmartPointer<vtkDataSet>::Take(
+      p_peakFactory->create(drawingProgressUpdate));
 
-  vtkPolyDataAlgorithm* shapeMarker = NULL;
+  vtkSmartPointer<vtkPolyDataAlgorithm> shapeMarker;
   if(p_peakFactory->isPeaksWorkspaceIntegrated())
   {
     double peakRadius = p_peakFactory->getIntegrationRadius(); 
@@ -97,25 +100,25 @@ int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
     sphere->SetRadius(peakRadius);
     sphere->SetPhiResolution(resolution);
     sphere->SetThetaResolution(resolution);
-    shapeMarker = sphere;
+    shapeMarker.TakeReference(sphere);
   }
   else
   {
-    vtkAxes* axis = vtkAxes::New();
+    vtkNew<vtkAxes> axis;
     axis->SymmetricOn();
     axis->SetScaleFactor(m_uintPeakMarkerSize);
 
-    vtkTransform* transform = vtkTransform::New();
+    vtkNew<vtkTransform> transform;
     const double rotationDegrees = 45;
     transform->RotateX(rotationDegrees);
     transform->RotateY(rotationDegrees);
     transform->RotateZ(rotationDegrees);
 
     vtkTransformPolyDataFilter* transformFilter = vtkTransformPolyDataFilter::New();
-    transformFilter->SetTransform(transform);
+    transformFilter->SetTransform(transform.GetPointer());
     transformFilter->SetInputConnection(axis->GetOutputPort());
     transformFilter->Update();
-    shapeMarker = transformFilter;
+    shapeMarker.TakeReference(transformFilter);
   }
 
   vtkNew<vtkPVGlyphFilter> glyphFilter;
