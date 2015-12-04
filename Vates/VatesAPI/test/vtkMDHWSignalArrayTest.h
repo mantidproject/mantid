@@ -105,7 +105,7 @@ public:
 
   void testLookupMaskedValues() {
     MDHistoWorkspace_sptr ws_sptr =
-      MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 4);
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 4);
     vtkNew<vtkMDHWSignalArray<double>> signal;
     std::size_t offset = 0;
     const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());

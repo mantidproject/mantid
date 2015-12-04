@@ -267,7 +267,8 @@ public:
   virtual signal_t getSignalWithMask() const = 0;
   virtual signal_t getSignalNormalizedWithMask() const = 0;
   virtual signal_t getSignalByNEventsWithMask() const {
-    return this->getSignalWithMask() / static_cast<signal_t>(this->getNPoints());
+    return this->getSignalWithMask() /
+           static_cast<signal_t>(this->getNPoints());
   }
 
   virtual void calcVolume() = 0;
