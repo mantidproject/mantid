@@ -10,35 +10,39 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+This algorithm corrects the source's position by rotating it around an axis centered at the sample.
+The rotation axis is perpendicular to the plane determined by the beam direction and the *up* direction.
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - RotateSource**
 
 .. testcode:: RotateSourceExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
+   # Create a workspace with a simple instrument
    ws = CreateSampleWorkspace()
 
-   wsOut = RotateSource()
+   # Original positions
+   print "Original position of the sample", ws.getInstrument().getSample().getPos()
+   print "Original position of the source", ws.getInstrument().getSource().getPos()
 
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+   # Move (rotate) the source around X axis
+   RotateSource(ws, 90)
+
+   # New positions
+   print "New position of the sample", ws.getInstrument().getSample().getPos()
+   print "New position of the source", ws.getInstrument().getSource().getPos()
 
 Output:
 
 .. testoutput:: RotateSourceExample
 
-  The output workspace has ?? spectra
+   Original position of the sample [0,0,0]
+   Original position of the source [0,0,-10]
+   New position of the sample [0,0,0]
+   New position of the source [0,10,0]
 
 .. categories::
 
