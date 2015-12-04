@@ -37,7 +37,7 @@ const std::string MaxEnt::name() const { return "MaxEnt"; }
 int MaxEnt::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MaxEnt::category() const { return "FFT"; }
+const std::string MaxEnt::category() const { return "Arithmetic\\FFT"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MaxEnt::summary() const {
