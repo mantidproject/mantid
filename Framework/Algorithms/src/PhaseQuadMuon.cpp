@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidAPI/MatrixWorkspaceValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,7 +19,6 @@ DECLARE_ALGORITHM(PhaseQuadMuon)
  *
  */
 void PhaseQuadMuon::init() {
-
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace containing the spectra");
@@ -72,9 +72,18 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
   // Check that input ws and table ws have compatible dimensions
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   API::ITableWorkspace_const_sptr tabWS = getProperty("PhaseTable");
-
+  if (!inputWS) {
+    result["InputWorkspace"] = "InputWorkspace is of Incorrect type. Please "
+                               "provide a MatrixWorkspace as the "
+                               "InputWorkspace";
+    return result;
+  }
   size_t nspec = inputWS->getNumberHistograms();
   size_t ndet = tabWS->rowCount();
+
+  if (tabWS->columnCount() == 0) {
+    result["PhaseTable"] = "Please provide a non-empty PhaseTable.";
+  }
 
   if (nspec != ndet) {
     result["PhaseTable"] = "PhaseTable must have one row per spectrum";

@@ -7,6 +7,9 @@
 #include "MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h"
 
 #include <QObject>
+#include <QFileSystemWatcher>
+
+#include <atomic>
 
 namespace MantidQt
 {
@@ -54,22 +57,47 @@ namespace CustomInterfaces
     void setData (MatrixWorkspace_const_sptr data);
 
   private slots:
-    /// Load new data and update the view accordingly
-    void load();
+    /// Check file range and call method to load new data
+    void handleLoadRequested();
 
     /// Updates the list of logs and number of periods
     void updateAvailableInfo();
+
+    /// When directory contents change, set flag
+    void updateDirectoryChangedFlag(const QString &path);
+
+    /// When "Auto" selected/deselected, start/stop watching directory
+    void changeWatchState(int state);
 
   signals:
     /// Signal emitted when data get changed
     void dataChanged();
 
+  protected:
+    /// Signal emitted when timer event occurs
+    void timerEvent(QTimerEvent *timeup) override;
+
   private:
+    /// Load new data and update the view accordingly
+    void load(const std::string &lastFile);
+
+    /// Start/stop watching directory
+    void changeWatchState(bool watching);
+
     /// View which the object works with
     IALCDataLoadingView* const m_view;
 
     /// Last loaded data workspace
     MatrixWorkspace_const_sptr m_loadedData;
+
+    /// Watch a directory for changes
+    QFileSystemWatcher m_watcher;
+
+    /// Flag to indicate directory has had changes since last load
+    std::atomic_bool m_directoryChanged;
+
+    /// ID of timer, if one is running
+    int m_timerID;
   };
 
 

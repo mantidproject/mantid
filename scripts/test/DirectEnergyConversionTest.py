@@ -1,5 +1,4 @@
-﻿import os, sys
-#os.environ["PATH"] = r"c:\Mantid\_builds\br_master\bin\Release;"+os.environ["PATH"]
+import os, sys
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -103,7 +102,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_diagnostics_wb(self):
         wb_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000)
-        LoadInstrument(wb_ws,InstrumentName='MARI')
+        LoadInstrument(wb_ws,InstrumentName='MARI', RewriteSpectraMap=True)
 
         tReducer = DirectEnergyConversion(wb_ws.getInstrument())
 
@@ -117,7 +116,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_do_white_wb(self) :
         wb_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000)
         #LoadParameterFile(Workspace=wb_ws,ParameterXML = used_parameters)
-        LoadInstrument(wb_ws,InstrumentName='MARI')
+        LoadInstrument(wb_ws,InstrumentName='MARI', RewriteSpectraMap=True)
 
         tReducer = DirectEnergyConversion(wb_ws.getInstrument())
 
@@ -152,7 +151,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_get_abs_normalization_factor(self) :
         mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1,function='Flat background')
-        LoadInstrument(mono_ws,InstrumentName='MARI')
+        LoadInstrument(mono_ws,InstrumentName='MARI', RewriteSpectraMap=True)
 
         tReducer = DirectEnergyConversion(mono_ws.getInstrument())
         tReducer.prop_man.incident_energy = 5.
@@ -167,7 +166,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # check warning. WB spectra with 0 signal indicate troubles.
         mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1,function='Flat background')
-        LoadInstrument(mono_ws,InstrumentName='MARI')
+        LoadInstrument(mono_ws,InstrumentName='MARI', RewriteSpectraMap=True)
         sig = mono_ws.dataY(0)
         sig[:]=0
 
@@ -182,7 +181,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_dgreduce_works(self):
         """ Test for old interface """
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
-        LoadInstrument(run_ws,InstrumentName='MARI')
+        LoadInstrument(run_ws,InstrumentName='MARI', RewriteSpectraMap=True)
 
         #mono_ws = CloneWorkspace(run_ws)
         wb_ws   = CloneWorkspace(run_ws)
@@ -204,7 +203,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_dgreduce_works_with_name(self):
         """ Test for old interface """
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
-        LoadInstrument(run_ws,InstrumentName='MARI')
+        LoadInstrument(run_ws,InstrumentName='MARI', RewriteSpectraMap=True)
         AddSampleLog(run_ws,LogName='run_number',LogText='200',LogType='Number')
         #mono_ws = CloneWorkspace(run_ws)
         wb_ws   = CloneWorkspace(run_ws)
@@ -273,7 +272,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_late_rebinning(self):
         run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100000, XUnit='Energy',
                                                      XMin=3, XMax=200, BinWidth=0.1)
-        LoadInstrument(run_monitors,InstrumentName='MARI')
+        LoadInstrument(run_monitors,InstrumentName='MARI', RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
         tof = run_monitors.dataX(3)
@@ -281,7 +280,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tMax = tof[-1]
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1, NumEvents=100000,
                                     XUnit='TOF',xMin=tMin,xMax=tMax)
-        LoadInstrument(run,InstrumentName='MARI')
+        LoadInstrument(run,InstrumentName='MARI', RewriteSpectraMap=True)
+
         run.setMonitorWorkspace(run_monitors)
 
         wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
@@ -311,7 +311,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         run=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1, NumEvents=10,\
                                   XUnit='Energy', XMin=5, XMax=75, BinWidth=0.2)
-        LoadInstrument(run,InstrumentName='MARI')
+        LoadInstrument(run,InstrumentName='MARI', RewriteSpectraMap=True)
 
         red = DirectEnergyConversion(run.getInstrument())
 
@@ -357,7 +357,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # create test workspace
         run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
                                            NumEvents=100000,XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
-        LoadInstrument(run_monitors,InstrumentName='MARI')
+        LoadInstrument(run_monitors,InstrumentName='MARI', RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
         tof = run_monitors.dataX(3)
@@ -365,7 +365,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tMax = tof[-1]
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
                                      NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
-        LoadInstrument(run,InstrumentName='MARI')
+        LoadInstrument(run,InstrumentName='MARI', RewriteSpectraMap=True)
         MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1102,Z=1)
        # MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1103,Z=4)
        # MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1104,Z=5)
@@ -417,7 +417,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # create test workspace
         run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
                                             NumEvents=100000, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
-        LoadInstrument(run_monitors,InstrumentName='MARI')
+        LoadInstrument(run_monitors,InstrumentName='MARI', RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
         tof = run_monitors.dataX(3)
@@ -425,7 +425,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tMax = tof[-1]
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
                                      NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
-        LoadInstrument(run,InstrumentName='MARI')
+        LoadInstrument(run,InstrumentName='MARI', RewriteSpectraMap=True)
 
         # build "monovanadium"
         mono = CloneWorkspace(run)
@@ -482,7 +482,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # create test workspace
         run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
                                             NumEvents=100000, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
-        LoadInstrument(run_monitors,InstrumentName='MARI')
+        LoadInstrument(run_monitors,InstrumentName='MARI', RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
         tof = run_monitors.dataX(3)
@@ -490,7 +490,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tMax = tof[-1]
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
                                      NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
-        LoadInstrument(run,InstrumentName='MARI')
+        LoadInstrument(run,InstrumentName='MARI', RewriteSpectraMap=True)
         AddSampleLog(run,LogName='gd_prtn_chrg',LogText='1.',LogType='Number')
         run.setMonitorWorkspace(run_monitors)
 
@@ -555,26 +555,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # create test workspace
         monitor_ws=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1,\
                                             NumEvents=100000, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
-
-        # Place all detectors into appropriate positions as the distance for all detectors
-        # to sum have to be equal
-        mon1_det = monitor_ws.getDetector(0)
-        mon1_pos = mon1_det.getPos()
-        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=2,
-                                X=mon1_pos.getX(),Y=mon1_pos.getY(), Z=mon1_pos.getZ(),
-                                 RelativePosition=False)
-        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=3,
-                                X=mon1_pos.getX(),Y=mon1_pos.getY(), Z=mon1_pos.getZ(),
-                                 RelativePosition=False)
-        mon2_det = monitor_ws.getDetector(3)
-        mon2_pos = mon2_det.getPos()
-        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=4,
-                                X=mon2_pos.getX(),Y=mon2_pos.getY(), Z=mon2_pos.getZ(),
-                                 RelativePosition=False)
-        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=5,
-                                X=mon2_pos.getX(),Y=mon2_pos.getY(), Z=mon2_pos.getZ(),
-                                 RelativePosition=False)
         ConvertUnits(InputWorkspace=monitor_ws, OutputWorkspace='monitor_ws', Target='TOF')
+
         # Rebin to "formally" make common bin boundaries as it is not considered as such
         #any more after converting units (Is this a bug?)
         xx = monitor_ws.readX(0)
@@ -599,11 +581,15 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # DirectEnergyConversion class properly
         SetInstrumentParameter(monitor_ws,ParameterName='fix_ei',ParameterType='Number',Value='0')
         SetInstrumentParameter(monitor_ws,DetectorList=[1,2,3,6],ParameterName='DelayTime',\
-                               ParameterType='Number',Value='0.5') 
+                               ParameterType='Number',Value='0.5')
+        SetInstrumentParameter(monitor_ws,ParameterName='mon2_norm_spec',\
+                               ParameterType='Number',Value='1')
+
         # initiate test reducer
         tReducer = DirectEnergyConversion(monitor_ws.getInstrument())
         tReducer.prop_man.ei_mon_spectra= ([1,2,3],6)
         tReducer.prop_man.normalise_method = 'current'
+        tReducer.prop_man.mon2_norm_spec = 2
         ei_mon_spectra  = tReducer.prop_man.ei_mon_spectra
         ei_mon_spectra,monitor_ws  = tReducer.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
         #
@@ -621,10 +607,13 @@ class DirectEnergyConversionTest(unittest.TestCase):
         ei2,mon1_peak2=tReducer.get_ei(monitor_ws,62.2)
         self.assertAlmostEqual(ei2,64.95,2)
 
+        ei2b,mon1_peak2=tReducer.get_ei(monitor_ws,62.2)
+        self.assertAlmostEqual(ei2b,64.95,2)
+
 
 
 
 if __name__=="__main__":
-   #test = DirectEnergyConversionTest('test_multirep_mode')
-   #test.test_multirep_mode()
+   #test = DirectEnergyConversionTest('test_sum_monitors')
+   #test.run()
    unittest.main()

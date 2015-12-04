@@ -1206,6 +1206,8 @@ void InstrumentWindow::createTabs(QSettings &settings) {
   mControlsTab->addTab(maskTab, QString("Draw"));
   connect(maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
+  connect(m_xIntegration, SIGNAL(changed(double, double)), maskTab,
+          SLOT(changedIntegrationRange(double, double)));
   maskTab->loadSettings(settings);
 
   // Instrument tree controls

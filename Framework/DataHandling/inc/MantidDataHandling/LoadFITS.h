@@ -191,6 +191,12 @@ private:
   static const std::string g_ROTATION_NAME;
   static const std::string g_IMAGE_KEY_NAME;
   static const std::string g_HEADER_MAP_NAME;
+
+  // Bits per pixel
+  // This must be consistent with how the BITPIX header entries are processed
+  static const size_t g_maxBitDepth;
+  // max. bytes per pixel, for buffers
+  static const size_t g_maxBytesPP;
 };
 
 } // namespace DataHandling

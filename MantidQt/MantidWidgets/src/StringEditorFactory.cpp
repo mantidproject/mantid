@@ -1,6 +1,6 @@
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
-QWidget* StringEditorFactory::createEditor(QtStringPropertyManager *, QtProperty *property,QWidget *parent)
+QWidget* StringEditorFactory::createEditorForManager(QtStringPropertyManager *, QtProperty *property,QWidget *parent)
 {
   return new StringEditor(property,parent);
 }

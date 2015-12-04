@@ -87,9 +87,9 @@ public:
 
   std::string currentCalibFile() const;
 
-  std::string newVanadiumNo() const;
+  std::vector<std::string> newVanadiumNo() const;
 
-  std::string newCeriaNo() const;
+  std::vector<std::string> newCeriaNo() const;
 
   std::string outCalibFilename() const { return m_outCalibFilename; }
 
@@ -106,11 +106,11 @@ public:
 
   virtual std::string focusingDir() const;
 
-  virtual std::string focusingRunNo() const;
+  virtual std::vector<std::string> focusingRunNo() const;
 
-  virtual std::string focusingCroppedRunNo() const;
+  virtual std::vector<std::string> focusingCroppedRunNo() const;
 
-  virtual std::string focusingTextureRunNo() const;
+  virtual std::vector<std::string> focusingTextureRunNo() const;
 
   virtual std::vector<bool> focusingBanks() const;
 
@@ -139,6 +139,8 @@ public:
   virtual bool saveOutputFiles() const;
 
   int currentPlotType() const { return m_currentType; }
+
+  int currentMultiRunMode() const { return m_currentRunMode; }
 
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
@@ -170,6 +172,9 @@ private slots:
 
   // slots of the focus part of the interface
   void plotRepChanged(int idx);
+
+  // slot of the multi-run mode for focus
+  void multiRunModeChanged(int idx);
 
   // slots of plot spectrum check box status
   void plotFocusStatus();
@@ -212,6 +217,10 @@ private:
   Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
+  /// converts QList to a vector
+  std::vector<std::string> qListToVector(QStringList list,
+                                         bool validator) const;
+
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;
 
@@ -223,6 +232,9 @@ private:
 
   // plot data representation type selected
   int static m_currentType;
+
+  // multi-run focus mode type selected
+  int static m_currentRunMode;
 
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;

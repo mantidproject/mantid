@@ -43,8 +43,8 @@ class AdvancedSetupScript(BaseScriptElement):
     pushdatapositive = "None"
     unwrapref = ""
     lowresref = ""
-    cropwavelengthmin = ""
-    crop_wavelength_max = ''
+    cropwavelengthmin = ''
+    cropwavelengthmax = ''
     removepropmppulsewidth = 50.0
     maxchunksize = ""
     filterbadpulses = 95.
@@ -128,7 +128,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["UnwrapRef"] = self.unwrapref
         pardict["LowResRef"] = self.lowresref
         pardict["CropWavelengthMin"] = self.cropwavelengthmin
-        pardict['CropWavelengthMax'] = self.crop_wavelength_max
+        pardict['CropWavelengthMax'] = self.cropwavelengthmax
         pardict["RemovePromptPulseWidth"] = self.removepropmppulsewidth
         pardict["MaxChunkSize"] = self.maxchunksize
         pardict["FilterBadPulses"] = self.filterbadpulses
@@ -182,8 +182,8 @@ class AdvancedSetupScript(BaseScriptElement):
             self.cropwavelengthmin = getFloatElement(instrument_dom, "cropwavelengthmin",
                                                      AdvancedSetupScript.cropwavelengthmin)
 
-            self.crop_wavelength_max = getFloatElement(instrument_dom, 'crop_wavelength_max',
-                                                       AdvancedSetupScript.crop_wavelength_max)
+            self.cropwavelengthmax = getFloatElement(instrument_dom, 'cropwavelengthmax',
+                                                     AdvancedSetupScript.cropwavelengthmax)
 
             self.removepropmppulsewidth = getFloatElement(instrument_dom, "removepromptpulsewidth",
                                                           AdvancedSetupScript.removepropmppulsewidth)
@@ -238,7 +238,7 @@ class AdvancedSetupScript(BaseScriptElement):
         self.unwrapref              = AdvancedSetupScript.unwrapref
         self.lowresref              = AdvancedSetupScript.lowresref
         self.cropwavelengthmin      = AdvancedSetupScript.cropwavelengthmin
-        self.crop_wavelength_max    = AdvancedSetupScript.crop_wavelength_max
+        self.cropwavelengthmax      = AdvancedSetupScript.cropwavelengthmax
         self.removepropmppulsewidth = AdvancedSetupScript.removepropmppulsewidth
         self.maxchunksize           = AdvancedSetupScript.maxchunksize
         self.filterbadpulses        = AdvancedSetupScript.filterbadpulses

@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/SaveGSASInstrumentFile.h"
+#include "MantidDataHandling/SaveGSASInstrumentFile.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -16,13 +16,13 @@ using namespace Mantid::DataObjects;
 using namespace std;
 
 namespace Mantid {
-namespace Algorithms {
+namespace DataHandling {
 
 DECLARE_ALGORITHM(SaveGSASInstrumentFile)
 
 class ChopperConfiguration {
 public:
-  ChopperConfiguration(vector<int> bankids);
+  explicit ChopperConfiguration(vector<int> bankids);
   ChopperConfiguration(const int freq, const std::string &bankidstr,
                        const std::string &cwlstr, const std::string &mndspstr,
                        const std::string &mxdspstr,
@@ -1161,5 +1161,5 @@ double SaveGSASInstrumentFile::erfc(double xx) {
   return y;
 }
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid

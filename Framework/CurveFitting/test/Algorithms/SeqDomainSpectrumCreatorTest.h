@@ -256,7 +256,7 @@ public:
   void testCreateOutputWorkspaceWithDistributionAsInput() {
     // Arrange
     MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::Create2DWorkspace123(4, 12);
+        WorkspaceCreationHelper::Create2DWorkspace123(4, 12, true);
     Mantid::API::WorkspaceHelpers::makeDistribution(matrixWs);
 
     TestableSeqDomainSpectrumCreator creator(NULL, "");

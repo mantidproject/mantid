@@ -1,5 +1,4 @@
-import os,sys
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+﻿import os,sys
 
 from mantid.simpleapi import *
 from mantid import api,config

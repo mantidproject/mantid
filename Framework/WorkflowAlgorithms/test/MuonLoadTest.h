@@ -94,9 +94,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("Filename", "MUSR00015189.nxs"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FirstPeriod", 0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SecondPeriod", 1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeriodOperation", "+"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", "1,2"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));

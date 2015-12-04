@@ -4,13 +4,105 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using boost::regex;
 
 namespace Mantid {
 namespace MDAlgorithms {
+
+static const std::string REGEX_STR = "\\[[^\\[\\]]*\\]";
+
+/*
+ * Split the input string on commas and trim leading and trailing whitespace
+ * from the results
+ */
+std::vector<std::string> splitByCommas(const std::string &names_string) {
+  std::vector<std::string> names_split_by_commas;
+  boost::split(names_split_by_commas, names_string, boost::is_any_of(","));
+
+  // Remove leading/trailing whitespace from potential dimension name
+  for (auto &name : names_split_by_commas) {
+    boost::trim(name);
+  }
+  return names_split_by_commas;
+}
+
+/*
+ * Return a vector of only those names from the input string which are within
+ * brackets
+ */
+std::vector<std::string> findNamesInBrackets(const std::string &names_string) {
+  std::vector<std::string> names_result;
+
+  regex re(REGEX_STR);
+  boost::sregex_token_iterator iter(names_string.begin(), names_string.end(),
+                                    re, 0);
+  boost::sregex_token_iterator end;
+  std::ostringstream ss;
+  for (; iter != end; ++iter) {
+    ss.str(std::string());
+    ss << *iter;
+    names_result.push_back(ss.str());
+  }
+
+  return names_result;
+}
+
+/*
+ * Return a vector of names from the string, but with names in brackets reduced
+ * to '[]'
+ */
+std::vector<std::string> removeBracketedNames(const std::string &names_string) {
+  regex re(REGEX_STR);
+  const std::string names_string_reduced =
+      regex_replace(names_string, re, "[]");
+
+  std::vector<std::string> remainder_split =
+      splitByCommas(names_string_reduced);
+
+  return remainder_split;
+}
+
+/*
+ * The list of dimension names often looks like "[H,0,0],[0,K,0]" with "[H,0,0]"
+ * being the first dimension but getProperty returns a vector of
+ * the string split on every comma
+ * This function parses the string, and does not split on commas within brackets
+ */
+std::vector<std::string> parseDimensionNames(const std::string &names_string) {
+
+  // If there are no brackets then simply split the string on commas
+  if (!boost::contains(names_string, "[")) {
+    // Split input string by commas
+    return splitByCommas(names_string);
+  }
+
+  std::vector<std::string> names_result = findNamesInBrackets(names_string);
+  std::vector<std::string> remainder_split = removeBracketedNames(names_string);
+
+  // Insert these into results vector if they are not "[]"
+  // if they are "[]" then skip a position in the vector instead
+  // This preserves the original order of the names,
+  // it is also inefficient, but the name list is expected to be short
+  size_t names_position = 0;
+  auto begin_it = names_result.begin();
+  for (std::string name : remainder_split) {
+    if (name != "[]") {
+      if (names_position == names_result.size()) {
+        names_result.push_back(name);
+      } else {
+        names_result.insert(begin_it + names_position, name);
+      }
+    }
+    ++names_position;
+  }
+  return names_result;
+}
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaskMD)
@@ -21,7 +113,7 @@ struct InputArgument {
   size_t index;
 };
 
-/// Comparitor to allow sorting by dimension index.
+/// Comparator to allow sorting by dimension index.
 struct LessThanIndex
     : std::binary_function<InputArgument, InputArgument, bool> {
   bool operator()(const InputArgument &a, const InputArgument &b) const {
@@ -110,39 +202,21 @@ size_t tryFetchDimensionIndex(Mantid::API::IMDWorkspace_sptr ws,
  */
 void MaskMD::exec() {
   IMDWorkspace_sptr ws = getProperty("Workspace");
-  std::vector<std::string> dimensions = getProperty("Dimensions");
+  std::string dimensions_string = getPropertyValue("Dimensions");
   std::vector<double> extents = getProperty("Extents");
+
+  // Dimension names may contain brackets with commas (i.e. [H,0,0])
+  // so getProperty would return an incorrect vector of names;
+  // instead get the string and parse it here
+  std::vector<std::string> dimensions = parseDimensionNames(dimensions_string);
+  // Report what dimension names were found
+  g_log.notice() << "Dimension names parsed as: " << std::endl;
+  for (const auto &name : dimensions) {
+    g_log.notice() << name << std::endl;
+  }
 
   size_t nDims = ws->getNumDims();
   size_t nDimensionIds = dimensions.size();
-
-  std::stringstream messageStream;
-
-  // Check cardinality on names/ids
-  if (nDimensionIds % nDims != 0) {
-    messageStream << "Number of dimension ids/names must be n * " << nDims;
-    this->g_log.error(messageStream.str());
-    throw std::invalid_argument(messageStream.str());
-  }
-
-  // Check cardinality on extents
-  if (extents.size() != (2 * dimensions.size())) {
-    messageStream << "Number of extents must be " << 2 * dimensions.size();
-    this->g_log.error(messageStream.str());
-    throw std::invalid_argument(messageStream.str());
-  }
-
-  // Check extent value provided.
-  for (size_t i = 0; i < nDimensionIds; ++i) {
-    double min = extents[i * 2];
-    double max = extents[(i * 2) + 1];
-    if (min > max) {
-      messageStream << "Cannot have minimum extents " << min
-                    << " larger than maximum extents " << max;
-      this->g_log.error(messageStream.str());
-      throw std::invalid_argument(messageStream.str());
-    }
-  }
 
   size_t nGroups = nDimensionIds / nDims;
 
@@ -150,7 +224,13 @@ void MaskMD::exec() {
   if (bClearExistingMasks) {
     ws->clearMDMasking();
   }
+  this->interruption_point();
+  this->progress(0.0);
 
+  // Explicitly cast nGroups and group to double to avoid compiler warnings
+  // loss of precision does not matter as we are only using the result
+  // for reporting algorithm progress
+  const double nGroups_double = static_cast<double>(nGroups);
   // Loop over all groups
   for (size_t group = 0; group < nGroups; ++group) {
     std::vector<InputArgument> arguments(nDims);
@@ -169,9 +249,9 @@ void MaskMD::exec() {
     }
 
     // Sort all the inputs by the dimension index. Without this it will not be
-    // possible to construct the MDImplicit function propertly.
-    LessThanIndex comparitor;
-    std::sort(arguments.begin(), arguments.end(), comparitor);
+    // possible to construct the MDImplicit function property.
+    LessThanIndex comparator;
+    std::sort(arguments.begin(), arguments.end(), comparator);
 
     // Create inputs for a box implicit function
     VMD mins(nDims);
@@ -183,7 +263,73 @@ void MaskMD::exec() {
 
     // Add new masking.
     ws->setMDMasking(new MDBoxImplicitFunction(mins, maxs));
+    this->interruption_point();
+    double group_double = static_cast<double>(group);
+    this->progress(group_double / nGroups_double);
   }
+  this->progress(1.0); // Ensure algorithm progress is reported as complete
+}
+
+std::map<std::string, std::string> MaskMD::validateInputs() {
+  // Create the map
+  std::map<std::string, std::string> validation_output;
+
+  // Get properties to validate
+  IMDWorkspace_sptr ws = getProperty("Workspace");
+  std::string dimensions_string = getPropertyValue("Dimensions");
+  std::vector<double> extents = getProperty("Extents");
+
+  std::vector<std::string> dimensions = parseDimensionNames(dimensions_string);
+
+  std::stringstream messageStream;
+
+  // Check named dimensions can be found in workspace
+  for (auto dimension_name : dimensions) {
+    try {
+      tryFetchDimensionIndex(ws, dimension_name);
+    } catch (std::runtime_error) {
+      messageStream << "Dimension '" << dimension_name << "' not found. ";
+    }
+  }
+  if (messageStream.rdbuf()->in_avail() != 0) {
+    validation_output["Dimensions"] = messageStream.str();
+    messageStream.str(std::string());
+  }
+
+  size_t nDims = ws->getNumDims();
+  size_t nDimensionIds = dimensions.size();
+
+  // Check cardinality on names/ids
+  if (nDimensionIds % nDims != 0) {
+    messageStream << "Number of dimension ids/names must be n * " << nDims
+                  << ". The following names were given: ";
+    for (const auto &name : dimensions) {
+      messageStream << name << ", ";
+    }
+
+    validation_output["Dimensions"] = messageStream.str();
+    messageStream.str(std::string());
+  }
+
+  // Check cardinality on extents
+  if (extents.size() != (2 * dimensions.size())) {
+    messageStream << "Number of extents must be " << 2 * dimensions.size()
+                  << ". ";
+    validation_output["Extents"] = messageStream.str();
+  }
+  // Check extent value provided.
+  for (size_t i = 0; (i < nDimensionIds) && ((i * 2 + 1) < extents.size());
+       ++i) {
+    double min = extents[i * 2];
+    double max = extents[(i * 2) + 1];
+    if (min > max) {
+      messageStream << "Cannot have minimum extents " << min
+                    << " larger than maximum extents " << max << ". ";
+      validation_output["Extents"] = messageStream.str();
+    }
+  }
+
+  return validation_output;
 }
 
 } // namespace Mantid

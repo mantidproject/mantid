@@ -13,7 +13,7 @@ class ScriptOutputDisplay : public QTextEdit
 
 public:
   /// Constructor
-  ScriptOutputDisplay(QWidget *parent = NULL);
+  explicit ScriptOutputDisplay(QWidget *parent = NULL);
 
   /// Is there anything here
   bool isEmpty() const;

@@ -94,6 +94,10 @@ QwtDoubleRect MantidCurve::boundingRect() const
     }
     double x_min = data->x(0);
     double x_max = data->x(data->size()-1);
+    if (x_min > x_max)
+    {
+      std::swap(x_min, x_max);
+    }
     m_boundingRect = QwtDoubleRect(x_min,y_min,x_max-x_min,y_max-y_min);
   }
   return m_boundingRect;

@@ -36,7 +36,7 @@ class Bar : public Qwt3D::VertexEnrichment
 {
 public:
   Bar();
-  Bar(double rad);
+  explicit Bar(double rad);
 
   Qwt3D::Enrichment* clone() const {return new Bar(*this);}
   

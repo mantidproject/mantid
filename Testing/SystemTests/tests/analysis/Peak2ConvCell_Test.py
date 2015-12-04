@@ -831,7 +831,7 @@ class Peak2ConvCell_Test(object):#(stresstesting.MantidStressTest):
         CreateSingleValuedWorkspace(OutputWorkspace="Sws",DataValue="3")
 
         CreateSingleValuedWorkspace(OutputWorkspace="Temp",DataValue="3")
-        LoadInstrument(Workspace="Sws",InstrumentName="TOPAZ")
+        LoadInstrument(Workspace="Sws",InstrumentName="TOPAZ", RewriteSpectraMap=True)
         Inst= mtd["Sws"].getInstrument()
         startA = 2
         side1Ratios =[1.0, 1.2,  3.0,  8.0]

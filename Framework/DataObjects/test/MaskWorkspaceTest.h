@@ -6,6 +6,10 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "PropertyManagerHelper.h"
+
+using Mantid::DataObjects::MaskWorkspace_const_sptr;
+using Mantid::DataObjects::MaskWorkspace_sptr;
 
 class MaskWorkspaceTest : public CxxTest::TestSuite {
 public:
@@ -108,6 +112,38 @@ public:
     detIds.erase(0);
     detIds.insert(2);
     TS_ASSERT_EQUALS(maskWS.isMasked(detIds), true);
+  }
+
+  /**
+  * Test declaring an input MaskWorkspace and retrieving it as const_sptr or
+  * sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    MaskWorkspace_sptr wsInput(new Mantid::DataObjects::MaskWorkspace());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    MaskWorkspace_const_sptr wsConst;
+    MaskWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<MaskWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsNonConst =
+                                 manager.getValue<MaskWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    MaskWorkspace_const_sptr wsCastConst;
+    MaskWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (MaskWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (MaskWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
 

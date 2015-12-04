@@ -49,7 +49,7 @@ public:
 	enum FunctionType{Normal = 0, Parametric = 1, Polar = 2};
 
 	FunctionCurve(const FunctionType& t, const QString& name = QString());
-	FunctionCurve(const QString& name = QString());
+        explicit FunctionCurve(const QString &name = QString());
   FunctionCurve(const Mantid::API::IFunction* fun, 
     const QString& wsName, int wsIndex = 0, const QString& name = QString());
 	FunctionCurve(const FunctionCurve& c);

@@ -41,7 +41,8 @@ const std::string WORKSPACE_TYPES_SEPARATOR = ";";
 
 class WorkspacePropertyValueIs {
 public:
-  WorkspacePropertyValueIs(const std::string &value) : m_value(value){};
+  explicit WorkspacePropertyValueIs(const std::string &value)
+      : m_value(value){};
   bool operator()(IWorkspaceProperty *property) {
     Property *prop = dynamic_cast<Property *>(property);
     if (!prop)
@@ -1427,7 +1428,7 @@ struct AsyncFlagHolder {
   /** Constructor
   * @param A :: reference to the running flag
   */
-  AsyncFlagHolder(bool &running_flag) : m_running_flag(running_flag) {
+  explicit AsyncFlagHolder(bool &running_flag) : m_running_flag(running_flag) {
     m_running_flag = true;
   }
   /// Destructor
@@ -1600,8 +1601,8 @@ IPropertyManager::getValue<API::IAlgorithm_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message =
-        "Attempt to assign property " + name + " to incorrect type";
+    std::string message = "Attempt to assign property " + name +
+                          " to incorrect type. Expected shared_ptr<IAlgorithm>";
     throw std::runtime_error(message);
   }
 }
@@ -1623,7 +1624,8 @@ IPropertyManager::getValue<API::IAlgorithm_const_sptr>(
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name + " to incorrect type";
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<IAlgorithm>";
     throw std::runtime_error(message);
   }
 }

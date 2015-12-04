@@ -41,16 +41,6 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
 
-  // Re-validate when certain inputs are changed
-  connect(m_uiForm.spRebinLow, SIGNAL(valueChanged(double)), this,
-          SLOT(validate()));
-  connect(m_uiForm.spRebinWidth, SIGNAL(valueChanged(double)), this,
-          SLOT(validate()));
-  connect(m_uiForm.spRebinHigh, SIGNAL(valueChanged(double)), this,
-          SLOT(validate()));
-  connect(m_uiForm.leRebinString, SIGNAL(textChanged(const QString &)), this,
-          SLOT(validate()));
-
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
 
@@ -88,8 +78,21 @@ bool ISISEnergyTransfer::validate() {
   // Rebinning
   if (!m_uiForm.ckDoNotRebin->isChecked()) {
     if (m_uiForm.cbRebinType->currentText() == "Single") {
-      bool rebinValid = !uiv.checkBins(m_uiForm.spRebinLow->value(),
-                                       m_uiForm.spRebinWidth->value(),
+      double rebinWidth = m_uiForm.spRebinWidth->value();
+      if (rebinWidth < 0) {
+        // Ensure negative bin width is intentionally logarithmic
+        QString text = "The Binning width is currently negative, this suggests "
+                       "you wish to use logarithmic binning.\n"
+                       " Do you want to use Logarithmic Binning?";
+        int result = QMessageBox::question(
+            NULL, tr("Logarithmic Binning"), tr(text), QMessageBox::Yes,
+            QMessageBox::No, QMessageBox::NoButton);
+        if (result == QMessageBox::Yes) {
+          // Treat rebin width as a positive for validation
+          rebinWidth = std::abs(rebinWidth);
+        }
+      }
+      bool rebinValid = !uiv.checkBins(m_uiForm.spRebinLow->value(), rebinWidth,
                                        m_uiForm.spRebinHigh->value());
       m_uiForm.valRebinLow->setVisible(rebinValid);
       m_uiForm.valRebinWidth->setVisible(rebinValid);
