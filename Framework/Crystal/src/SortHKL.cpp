@@ -4,6 +4,9 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/HKLGenerator.h"
+#include "MantidGeometry/Crystal/BasicHKLFilters.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/ListValidator.h"
 #include <fstream>
@@ -22,7 +25,10 @@ DECLARE_ALGORITHM(SortHKL)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SortHKL::SortHKL() { m_pointGroups = getAllPointGroups(); }
+SortHKL::SortHKL() {
+  m_pointGroups = getAllPointGroups();
+  m_refConds = getAllReflectionConditions();
+}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -38,12 +44,19 @@ void SortHKL::init() {
   declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
                                                         Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
-  std::vector<std::string> propOptions;
+  std::vector<std::string> pgOptions;
   for (size_t i = 0; i < m_pointGroups.size(); ++i)
-    propOptions.push_back(m_pointGroups[i]->getName());
-  declareProperty("PointGroup", propOptions[0],
-                  boost::make_shared<StringListValidator>(propOptions),
+    pgOptions.push_back(m_pointGroups[i]->getName());
+  declareProperty("PointGroup", pgOptions[0],
+                  boost::make_shared<StringListValidator>(pgOptions),
                   "Which point group applies to this crystal?");
+
+  std::vector<std::string> centeringOptions;
+  for (size_t i = 0; i < m_refConds.size(); ++i)
+    centeringOptions.push_back(m_refConds[i]->getName());
+  declareProperty("LatticeCentering", centeringOptions[0],
+                  boost::make_shared<StringListValidator>(centeringOptions),
+                  "Appropriate lattice centering for the peaks.");
 
   declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
                                                         Direction::Output),
@@ -59,6 +72,30 @@ void SortHKL::init() {
   declareProperty("Append", false,
                   "Append to output table workspace if true.\n"
                   "If false, new output table workspace (default).");
+}
+
+ReflectionCondition_sptr SortHKL::getCentering() const {
+  ReflectionCondition_sptr centering =
+      boost::make_shared<ReflectionConditionPrimitive>();
+  // Get it from the property
+  std::string refCondName = getPropertyValue("LatticeCentering");
+  for (size_t i = 0; i < m_refConds.size(); ++i)
+    if (m_refConds[i]->getName() == refCondName)
+      centering = m_refConds[i];
+
+  return centering;
+}
+
+PointGroup_sptr SortHKL::getPointgroup() const {
+  PointGroup_sptr pointGroup =
+      PointGroupFactory::Instance().createPointGroup("-1");
+  // Get it from the property
+  std::string pointGroupName = getPropertyValue("PointGroup");
+  for (size_t i = 0; i < m_pointGroups.size(); ++i)
+    if (m_pointGroups[i]->getName() == pointGroupName)
+      pointGroup = m_pointGroups[i];
+
+  return pointGroup;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -103,28 +140,33 @@ void SortHKL::exec() {
     V3D hkl1 = round(peaks[i].getHKL());
     peaks[i].setHKL(hkl1);
   }
-  // Use the primitive by default
-  PointGroup_sptr pointGroup =
-      PointGroupFactory::Instance().createPointGroup("-1");
-  // Get it from the property
-  std::string pointGroupName = getPropertyValue("PointGroup");
-  for (size_t i = 0; i < m_pointGroups.size(); ++i)
-    if (m_pointGroups[i]->getName() == pointGroupName)
-      pointGroup = m_pointGroups[i];
 
   double Chisq = 0.0;
   for (int i = int(NumberPeaks) - 1; i >= 0; --i) {
     if (peaks[i].getIntensity() == 0.0 || peaks[i].getHKL() == V3D(0, 0, 0))
       peaksW->removePeak(i);
   }
+
   NumberPeaks = peaksW->getNumberPeaks();
   if (NumberPeaks == 0) {
     g_log.error() << "Number of peaks should not be 0 for SortHKL.\n";
     return;
   }
+
+  ReflectionCondition_sptr centering = getCentering();
+  PointGroup_sptr pointGroup = getPointgroup();
+
+  std::vector<V3D> possibleUniqueReflections =
+      getPossibleUniqueReflections(peaksW, pointGroup, centering);
+
+  std::vector<V3D> measuredUniqueReflections;
+  measuredUniqueReflections.reserve(possibleUniqueReflections.size());
+
   int equivalent = 0;
   for (int i = 0; i < NumberPeaks; i++) {
     V3D hkl1 = peaks[i].getHKL();
+    measuredUniqueReflections.push_back(pointGroup->getReflectionFamily(hkl1));
+
     bool found = false;
     for (int j = i + 1; j < NumberPeaks; j++) {
       V3D hkl2 = peaks[j].getHKL();
@@ -136,32 +178,20 @@ void SortHKL::exec() {
     if (found)
       equivalent++;
   }
+
+  std::sort(measuredUniqueReflections.begin(), measuredUniqueReflections.end());
+  measuredUniqueReflections.erase(std::unique(measuredUniqueReflections.begin(),
+                                              measuredUniqueReflections.end()),
+                                  measuredUniqueReflections.end());
+
   std::vector<std::pair<std::string, bool>> criteria;
   // Sort by wavelength
   criteria.push_back(std::pair<std::string, bool>("wavelength", true));
   peaksW->sort(criteria);
-  int unique = NumberPeaks - equivalent;
+  int unique = static_cast<int>(measuredUniqueReflections.size());
   // table workspace output
   newrow << unique << peaks[0].getWavelength()
          << peaks[NumberPeaks - 1].getWavelength();
-
-  int predictedPeaks = 0;
-  if (name.substr(0, 4) != "bank") {
-    API::IAlgorithm_sptr predictAlg = createChildAlgorithm("PredictPeaks");
-    predictAlg->setProperty("InputWorkspace", InPeaksW);
-    predictAlg->setPropertyValue("OutputWorkspace", "predictedPeaks");
-    predictAlg->setProperty("WavelengthMin", peaks[0].getWavelength());
-    predictAlg->setProperty("WavelengthMax",
-                            peaks[NumberPeaks - 1].getWavelength());
-    // Sort by dspacing
-    criteria.push_back(std::pair<std::string, bool>("dspacing", true));
-    peaksW->sort(criteria);
-    predictAlg->setProperty("MinDSpacing", peaks[0].getDSpacing());
-    predictAlg->executeAsChildAlg();
-    PeaksWorkspace_sptr predictedWksp =
-        predictAlg->getProperty("OutputWorkspace");
-    predictedPeaks = predictedWksp->getNumberPeaks();
-  }
 
   criteria.clear();
   // Sort by HKL
@@ -247,9 +277,15 @@ void SortHKL::exec() {
   multiplicity.clear();
   // statistics to output table workspace
 
+  double uniqueReflectionsCount = 0.0;
+  if (name.substr(0, 4) != "bank") {
+    uniqueReflectionsCount =
+        static_cast<double>(possibleUniqueReflections.size());
+  }
+
   newrow << statsMult.mean << statsIsigI.mean << 100.0 * rSum / f2Sum
          << 100.0 * rpSum / f2Sum
-         << 100.0 * double(unique) / double(predictedPeaks);
+         << 100.0 * double(unique) / double(uniqueReflectionsCount);
   data.clear();
   sig2.clear();
   // Reset hkl of equivalent peaks to original value
@@ -297,6 +333,48 @@ V3D SortHKL::round(V3D hkl) {
   hkl1.setY(round(hkl.Y()));
   hkl1.setZ(round(hkl.Z()));
   return hkl1;
+}
+
+std::vector<V3D> SortHKL::getPossibleUniqueReflections(
+    const IPeaksWorkspace_sptr &peaks, const PointGroup_sptr &pointGroup,
+    const ReflectionCondition_sptr &centering) const {
+
+  UnitCell cell = peaks->sample().getOrientedLattice();
+
+  std::vector<double> dValues;
+  dValues.reserve(peaks->getNumberPeaks());
+
+  for (int i = 0; i < peaks->getNumberPeaks(); ++i) {
+    dValues.push_back(cell.d(peaks->getPeak(i).getHKL()));
+  }
+  std::sort(dValues.begin(), dValues.end());
+
+  double dMin = dValues.front();
+  double dMax = dValues.back();
+
+  // Get unit cell from sample
+
+  // Generate HKLS, transform to
+  HKLGenerator generator(cell, dMin);
+  HKLFilter_const_sptr dFilter =
+      boost::make_shared<const HKLFilterDRange>(cell, dMin, dMax);
+  HKLFilter_const_sptr centeringFilter =
+      boost::make_shared<const HKLFilterCentering>(centering);
+  HKLFilter_const_sptr filter = dFilter & centeringFilter;
+
+  std::vector<V3D> uniqueHKLs;
+  uniqueHKLs.reserve(generator.size());
+  for (auto hkl : generator) {
+    if (filter->isAllowed(hkl)) {
+      uniqueHKLs.push_back(pointGroup->getReflectionFamily(hkl));
+    }
+  }
+
+  std::sort(uniqueHKLs.begin(), uniqueHKLs.end());
+  uniqueHKLs.erase(std::unique(uniqueHKLs.begin(), uniqueHKLs.end()),
+                   uniqueHKLs.end());
+
+  return uniqueHKLs;
 }
 
 /** Rounds a double using 0.5 as the cut off for rounding down

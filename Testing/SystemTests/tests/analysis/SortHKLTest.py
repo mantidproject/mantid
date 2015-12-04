@@ -12,7 +12,12 @@ class SortHKLTest(stresstesting.MantidStressTest):
                                              UnitX='TOF',
                                              OutputWorkspace='topaz_instrument_workspace')
 
-        self._space_groups = ['Fm-3m', 'Im-3m']
+        self._space_groups = ['Pm-3m', 'P4_mmm', 'Pmmm', 'Im-3m', 'Fm-3m', 'I4_mmm', 'Cmmm', 'Immm', 'Fmmm']
+
+        self._centering_map = {'P': 'Primitive',
+                               'I': 'Body centred',
+                               'F': 'All-face centred',
+                               'C': 'C-face centred'}
 
         self._base_directory = 'SortHKL/'
         self._template_hkl = 'reflections_{0}.hkl'
@@ -61,9 +66,11 @@ class SortHKLTest(stresstesting.MantidStressTest):
         return actual_hkls
 
     def _calculate_statistics(self, reflections, space_group):
-        point_group_name = PointGroupFactory.createPointGroup(space_group[1:]).getName()
+        point_group_name = PointGroupFactory.createPointGroup(space_group[1:].replace('_', '/')).getName()
+        centering_name = self._centering_map[space_group[0]]
         sorted, chi2, statistics = SortHKL(InputWorkspace=reflections,
-                                           PointGroup=point_group_name)
+                                           PointGroup=point_group_name,
+                                           LatticeCentering=centering_name)
 
         return statistics.row(0)
 
@@ -87,5 +94,9 @@ class SortHKLTest(stresstesting.MantidStressTest):
         return overall_statistics
 
     def _compare_statistics(self, statistics, reference_statistics, space_group):
+        print statistics
+        print reference_statistics
+
         self.assertEquals(round(statistics['Multiplicity'], 1), round(reference_statistics['<N>'], 1))
-        self.assertEquals(round(statistics['Data Completeness'], 1), round(reference_statistics['Completeness'], 1))
+        self.assertDelta(round(statistics['Data Completeness'], 1), round(reference_statistics['Completeness'], 1),
+                         0.5)

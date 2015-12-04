@@ -3,7 +3,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -39,6 +41,9 @@ private:
   /// Point Groups possible
   std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;
 
+  /// Reflection conditions
+  std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
+
   /// Initialise the properties
   void init();
   /// Run the algorithm
@@ -49,6 +54,14 @@ private:
   double round(double d);
   /// Rounds the V3D to integer values
   Kernel::V3D round(Kernel::V3D hkl);
+
+  std::vector<Kernel::V3D> getPossibleUniqueReflections(
+      const API::IPeaksWorkspace_sptr &peaks,
+      const Geometry::PointGroup_sptr &pointGroup,
+      const Geometry::ReflectionCondition_sptr &centering) const;
+
+  Geometry::ReflectionCondition_sptr getCentering() const;
+  Geometry::PointGroup_sptr getPointgroup() const;
 };
 
 } // namespace Crystal
