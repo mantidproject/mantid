@@ -1,7 +1,5 @@
-
-
 import unittest
-from mantid.api import AlgorithmManager
+from mantid.api import AlgorithmManager, MatrixWorkspace
 
 
 class SANSStitch1DTest(unittest.TestCase):
@@ -112,19 +110,19 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg.setProperty('DataX', range(0,1))
         create_alg.setProperty('DataY', [1])
         create_alg.setProperty('NSpec', 1)
-        create_alg.setProperty('UnitX', 'MomentumTransfer') # Wrong units
+        create_alg.setProperty('UnitX', 'MomentumTransfer')
         create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
         create_alg.execute()
-        multi_spectra_input = create_alg.getProperty('OutputWorkspace').value
+        single_spectra_input = create_alg.getProperty('OutputWorkspace').value
 
         alg = AlgorithmManager.create('SANSStitch1D')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'Both')
-        alg.setProperty('HABCountsSample', multi_spectra_input)
-        alg.setProperty('LABCountsSample', multi_spectra_input)
-        alg.setProperty('HABNormSample', multi_spectra_input)
-        alg.setProperty('LABNormSample', multi_spectra_input)
+        alg.setProperty('HABCountsSample', single_spectra_input)
+        alg.setProperty('LABCountsSample', single_spectra_input)
+        alg.setProperty('HABNormSample', single_spectra_input)
+        alg.setProperty('LABNormSample', single_spectra_input)
         alg.setProperty('ProcessCan', True) # Now can workspaces should be provided
 
         errors = alg.validateInputs()
@@ -133,6 +131,34 @@ class SANSStitch1DTest(unittest.TestCase):
         self.assertTrue('HABNormCan' in errors)
         self.assertTrue('LABNormCan' in errors)
 
+
+    def test_scale_none(self):
+        create_alg = AlgorithmManager.create('CreateWorkspace')
+        create_alg.setChild(True)
+        create_alg.initialize()
+        create_alg.setProperty('DataX', range(0,10))
+        create_alg.setProperty('DataY', [1]*9)
+        create_alg.setProperty('NSpec', 1)
+        create_alg.setProperty('UnitX', 'MomentumTransfer')
+        create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
+        create_alg.execute()
+        single_spectra_input = create_alg.getProperty('OutputWorkspace').value
+
+        alg = AlgorithmManager.create('SANSStitch1D')
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty('Mode', 'None')
+        alg.setProperty('HABCountsSample', single_spectra_input)
+        alg.setProperty('LABCountsSample', single_spectra_input)
+        alg.setProperty('HABNormSample', single_spectra_input)
+        alg.setProperty('LABNormSample', single_spectra_input)
+        alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('ShiftFactor', 1.0)
+        alg.setProperty('ScaleFactor', 1.0)
+        alg.execute()
+        out_ws = alg.getProperty('OutputWorkspace').value
+
+        self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
 
 

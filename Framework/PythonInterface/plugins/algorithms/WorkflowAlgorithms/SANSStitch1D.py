@@ -1,67 +1,75 @@
-#pylint: disable=no-init
+# pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, \
     EnabledWhenProperty, PropertyCriterion
 
+
 class Mode:
-        class ShiftOnly: pass
-        class ScaleOnly: pass
-        class BothFit: pass
-        class NoneFit: pass
+    class ShiftOnly: pass
+
+    class ScaleOnly: pass
+
+    class BothFit: pass
+
+    class NoneFit: pass
+
 
 class SANSStitch1D(DataProcessorAlgorithm):
-
-
-
     def _make_mode_map(self):
-        return {'ShiftOnly':Mode.ShiftOnly, 'ScaleOnly':Mode.ScaleOnly,
-                'Both':Mode.BothFit,'None':Mode.NoneFit}
-
+        return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly,
+                'Both': Mode.BothFit, 'None': Mode.NoneFit}
 
     def category(self):
         return 'DataHandling\\Logs'
 
-
     def summary(self):
         return 'Stitch the high angle and low angle banks of a workspace together'
 
-
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('HABCountsSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='High angle bank sample workspace in Q')
+        self.declareProperty(
+            MatrixWorkspaceProperty('HABCountsSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
+            doc='High angle bank sample workspace in Q')
 
-        self.declareProperty(MatrixWorkspaceProperty('HABNormSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='High angle bank normalization workspace in Q')
+        self.declareProperty(
+            MatrixWorkspaceProperty('HABNormSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
+            doc='High angle bank normalization workspace in Q')
 
-        self.declareProperty(MatrixWorkspaceProperty('LABCountsSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='Low angle bank sample workspace in Q')
+        self.declareProperty(
+            MatrixWorkspaceProperty('LABCountsSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
+            doc='Low angle bank sample workspace in Q')
 
-        self.declareProperty(MatrixWorkspaceProperty('LABNormSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='Low angle bank normalization workspace in Q')
-
+        self.declareProperty(
+            MatrixWorkspaceProperty('LABNormSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
+            doc='Low angle bank normalization workspace in Q')
 
         self.declareProperty('ProcessCan', defaultValue=False, direction=Direction.Input, doc='Process the can')
 
-        self.declareProperty(MatrixWorkspaceProperty('HABCountsCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='High angle bank sample workspace in Q')
+        self.declareProperty(
+            MatrixWorkspaceProperty('HABCountsCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
+            doc='High angle bank sample workspace in Q')
 
-        self.declareProperty(MatrixWorkspaceProperty('HABNormCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='High angle bank normalization workspace in Q')
+        self.declareProperty(
+            MatrixWorkspaceProperty('HABNormCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
+            doc='High angle bank normalization workspace in Q')
 
-        self.declareProperty(MatrixWorkspaceProperty('LABCountsCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='Low angle bank sample workspace in Q')
+        self.declareProperty(
+            MatrixWorkspaceProperty('LABCountsCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
+            doc='Low angle bank sample workspace in Q')
 
-        self.declareProperty(MatrixWorkspaceProperty('LABNormCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='Low angle bank normalization workspace in Q')
+        self.declareProperty(
+            MatrixWorkspaceProperty('LABNormCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
+            doc='Low angle bank normalization workspace in Q')
 
         allowedModes = StringListValidator(self._make_mode_map().keys())
 
         self.declareProperty('Mode', 'None', validator=allowedModes, direction=Direction.Input, doc='What to fit')
 
-        self.declareProperty('ScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input, doc='Optional scaling factor')
+        self.declareProperty('ScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
+                             doc='Optional scaling factor')
 
-        self.declareProperty('ShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input, doc='Optional shift factor')
+        self.declareProperty('ShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
+                             doc='Optional shift factor')
 
         self.declareProperty('QMin', defaultValue=Property.EMPTY_DBL, direction=Direction.Input, doc='Optional q-min')
 
@@ -69,7 +77,6 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Stitched high and low Q 1-D data')
-
 
         self.setPropertyGroup("Mode", 'Fitting')
         self.setPropertyGroup("ScaleFactor", 'Fitting')
@@ -91,33 +98,94 @@ class SANSStitch1D(DataProcessorAlgorithm):
         self.setPropertySettings("LABCountsCan", can_settings)
         self.setPropertySettings("LABNormCan", can_settings)
 
+    def _divide(self, a, b):
+        divide = self.createChildAlgorithm('Divide')
+        divide.setProperty('LHSWorkspace', a)
+        divide.setProperty('RHSWorkspace', b)
+        divide.execute()
+        return divide.getProperty('OutputWorkspace').value
+
+    def _multiply(self, a, b):
+        multiply = self.createChildAlgorithm('Multiply')
+        multiply.setProperty('LHSWorkspace', a)
+        multiply.setProperty('RHSWorkspace', b)
+        multiply.execute()
+        return multiply.getProperty('OutputWorkspace').value
+
+    def _add(self, a, b):
+        plus = self.createChildAlgorithm('Plus')
+        plus.setProperty('LHSWorkspace', a)
+        plus.setProperty('RHSWorkspace', b)
+        plus.execute()
+        return plus.getProperty('OutputWorkspace').value
+
+    def _crop_to_x_range(self, ws, x_min, x_max):
+        crop = self.createChildAlgorithm('CropWorkspace')
+        crop.setProperty('InputWorkspace', ws)
+        crop.setProperty('XMin', x_min)
+        crop.setProperty('XMax', x_max)
+        crop.execute()
+        return crop.getProperty('OutputWorkspace').value
+
+
     def PyExec(self):
         enum_map = self._make_mode_map()
 
         mode = enum_map[self.getProperty('Mode').value]
 
-
-        scale_factor = 0;
-        shift_factor = 0;
+        scale_factor = 0
+        shift_factor = 0
         if mode == Mode.NoneFit:
-            shift_factor = 1
-            scale_factor = 1
+            shift_factor = self.getProperty('ShiftFactor').value
+            scale_factor = self.getProperty('ScaleFactor').value
+
+        cF = self.getProperty('HABCountsSample').value
+        cR = self.getProperty('LABCountsSample').value
+        nF = self.getProperty('HABNormSample').value
+        nR = self.getProperty('LABNormSample').value
+
+        min_q = min(min(cF.dataX(0)), min(cR.dataX(0)))
+        max_q = max(max(cF.dataX(0)), max(cR.dataX(0)))
+
+        # Crop our input workspaces
+        cF = self._crop_to_x_range(cF, min_q, max_q)
+        cR = self._crop_to_x_range(cR, min_q, max_q)
+        nF = self._crop_to_x_range(nF, min_q, max_q)
+        nR = self._crop_to_x_range(nR, min_q, max_q)
 
 
+        # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
+        scale = self.createChildAlgorithm('Scale')
+        scale.setProperty('InputWorkspace', nF)
+        scale.setProperty('Operation', 'Multiply')
+        scale.setProperty('Factor', shift_factor)
+        scale.execute()
+        shifted_norm_front = scale.getProperty('OutputWorkspace').value
 
+        scale.setProperty('InputWorkspace', nF)
+        scale.setProperty('Operation', 'Multiply')
+        scale.setProperty('Factor', 1.0/scale_factor)
+        scale.execute()
+        scaled_norm_front = scale.getProperty('OutputWorkspace').value
 
+        numerator = self._add(self._add(cF , shifted_norm_front), cR)
+        denominator = self._add(scaled_norm_front, nR)
+
+        merged_q = self._divide(numerator, denominator)
+
+        self.setProperty('OutputWorkspace', merged_q)
 
 
     def _validateIs1DFromPropertyName(self, property_name):
         ws = self.getProperty(property_name).value
         if not ws:
-            return True # Mandatory validators to take care of this. Early exit.
+            return True  # Mandatory validators to take care of this. Early exit.
         return ws.getNumberHistograms() == 1
 
     def _validateIsInQ(self, property_name):
         ws = self.getProperty(property_name).value
         if not ws:
-            return True # Mandatory validators to take care of this. Early exit.
+            return True  # Mandatory validators to take care of this. Early exit.
 
         targetUnit = UnitFactory.create('MomentumTransfer')
         return targetUnit.caption() == ws.getAxis(0).getUnit().caption()
@@ -153,51 +221,37 @@ class SANSStitch1D(DataProcessorAlgorithm):
             if shift_factor_property.isDefault:
                 errors[scale_factor_property.name] = 'ScaleFactor required'
 
+        workspace_property_names = ['HABCountsSample', 'LABCountsSample', 'HABNormSample', 'LABNormSample']
         # 1d data check
-        message_when_not_1d = 'Wrong number of spectra. Must be 1D input'
-        if not self._validateIs1DFromPropertyName('HABCountsSample'):
-            errors['HABCountsSample'] = message_when_not_1d
-        if not self._validateIs1DFromPropertyName('LABCountsSample'):
-            errors['LABCountsSample'] = message_when_not_1d
-        if not self._validateIs1DFromPropertyName('HABNormSample'):
-            errors['HABNormSample'] = message_when_not_1d
-        if not self._validateIs1DFromPropertyName('LABNormSample'):
-            errors['LABNormSample'] = message_when_not_1d
+        self._validate_1D(workspace_property_names, errors)
 
         # Units check
-        message_when_not_in_q = 'Workspace must have units of momentum transfer'
-        if not self._validateIsInQ('HABCountsSample'):
-            errors['HABCountsSample'] = message_when_not_in_q
-        if not self._validateIsInQ('LABCountsSample'):
-            errors['LABCountsSample'] = message_when_not_in_q
-        if not self._validateIsInQ('HABNormSample'):
-            errors['HABNormSample'] = message_when_not_in_q
-        if not self._validateIsInQ('LABNormSample'):
-            errors['LABNormSample'] = message_when_not_in_q
+        self._validate_units(workspace_property_names, errors)
 
         process_can = self.getProperty('ProcessCan')
-        hab_counts_can = self.getProperty('HABCountsCan')
-        hab_norm_can = self.getProperty('HABNormCan')
-        lab_counts_can = self.getProperty('LABCountsCan')
-        lab_norm_can = self.getProperty('LABNormCan')
-        mesage_when_can_required = 'This workspace is required in order to process the can'
         if bool(process_can.value):
-            if hab_counts_can.isDefault:
-                errors[hab_counts_can.name] = mesage_when_can_required
-            if lab_counts_can.isDefault:
-                errors[lab_counts_can.name] = mesage_when_can_required
-            if hab_norm_can.isDefault:
-                errors[hab_norm_can.name] = mesage_when_can_required
-            if lab_norm_can.isDefault:
-                errors[lab_norm_can.name] = mesage_when_can_required
-
-
-
+            workspace_property_names = ['HABCountsCan', 'HABNormCan', 'LABCountsCan', 'LABNormCan']
+            # Check existance
+            self._validate_provided(workspace_property_names, errors)
+            # Check Q units
+            self._validate_units(workspace_property_names, errors)
 
         return errors
 
+    def _validate_units(self, workspace_property_names, errors):
+        for property_name in workspace_property_names:
+            if not self._validateIsInQ(property_name):
+                errors[property_name] = 'Workspace must have units of momentum transfer'
 
+    def _validate_1D(self, workspace_property_names, errors):
+        for property_name in workspace_property_names:
+            if not self._validateIs1DFromPropertyName(property_name):
+                errors[property_name] = 'Wrong number of spectra. Must be 1D input'
 
+    def _validate_provided(self, workspace_property_names, errors):
+        for property_name in workspace_property_names:
+            if not self.getProperty(property_name).value:
+                errors[property_name] = 'This workspace is required in order to process the can'
 
 
 # Register algorithm with Mantid
