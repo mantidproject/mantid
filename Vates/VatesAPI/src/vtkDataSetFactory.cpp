@@ -18,16 +18,22 @@ vtkDataSetFactory::~vtkDataSetFactory()
 /**
  Set the successor factory for the chain-of-responsibility.
  @param pSuccessor :: pointer to the successor. Note RAII is used.
- @return true if addition was successful.
+ @throw std::runtime_error if types are the same
+ @throw std::invalid_argument if successor is nullptr
  */
-void vtkDataSetFactory::SetSuccessor(vtkDataSetFactory_uptr pSuccessor)
-{ 
-  //Assigment peformed first (RAII) to guarentee no side effects.
-  m_successor = vtkDataSetFactory::SuccessorType(std::move(pSuccessor));
-  //Unless overriden, successors should not be the same type as the present instance.
-  if(pSuccessor->getFactoryTypeName() == this->getFactoryTypeName())
-  {
-    throw std::runtime_error("Cannot assign a successor to vtkDataSetFactory with the same type as the present vtkDataSetFactory type.");
+void vtkDataSetFactory::SetSuccessor(vtkDataSetFactory_uptr pSuccessor) {
+  if (pSuccessor != nullptr) {
+    // Assignment peformed first (RAII) to guarantee no side effects.
+    m_successor = std::move(pSuccessor);
+    // Unless overriden, successors should not be the same type as the present
+    // instance.
+    if (m_successor->getFactoryTypeName() == this->getFactoryTypeName()) {
+      throw std::runtime_error("Cannot assign a successor to vtkDataSetFactory "
+                               "with the same type as the present "
+                               "vtkDataSetFactory type.");
+    }
+  } else {
+    throw std::invalid_argument("Null pointer passed as successor");
   }
 }
 

@@ -159,26 +159,22 @@ public:
     auto normalizationOption = Mantid::VATES::VisualNormalization::AutoSelect;
     MDHWNexusLoadingPresenter presenter(std::move(view), filename);
     const double time = 0.0;
-    vtkDataSetFactory_uptr zeroDFactory =
-        Mantid::Kernel::make_unique<vtkMD0DFactory>();
-    vtkDataSetFactory_uptr lineFactory =
-        Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(thresholdRange,
-                                                           normalizationOption);
-    vtkDataSetFactory_uptr quadFactory =
-        Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(thresholdRange,
-                                                           normalizationOption);
-    vtkDataSetFactory_uptr hexFactory =
-        Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(thresholdRange,
-                                                          normalizationOption);
+    auto zeroDFactory = Mantid::Kernel::make_unique<vtkMD0DFactory>();
+    auto lineFactory = Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
+        thresholdRange, normalizationOption);
+    auto quadFactory = Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
+        thresholdRange, normalizationOption);
+    auto hexFactory = Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+        thresholdRange, normalizationOption);
     // Deleting factory should delete the whole chain since it is connected
     // via smart pointers
     auto factory = boost::make_shared<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
         thresholdRange, normalizationOption, time);
 
-    factory->SetSuccessor(std::move(hexFactory));
-    hexFactory->SetSuccessor(std::move(quadFactory));
-    quadFactory->SetSuccessor(std::move(lineFactory));
     lineFactory->SetSuccessor(std::move(zeroDFactory));
+    quadFactory->SetSuccessor(std::move(lineFactory));
+    hexFactory->SetSuccessor(std::move(quadFactory));
+    factory->SetSuccessor(std::move(hexFactory));
 
     presenter.executeLoadMetadata();
     auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
