@@ -71,6 +71,7 @@ set ( SRC_FILES
 	src/LoadNexus.cpp
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
+        src/LoadNexusMonitors2.cpp
 	src/LoadNexusProcessed.cpp
 	src/LoadPDFgetNFile.cpp
 	src/LoadParameterFile.cpp
@@ -230,6 +231,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexus.h
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
+        inc/MantidDataHandling/LoadNexusMonitors2.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadPDFgetNFile.h
 	inc/MantidDataHandling/LoadParameterFile.h
