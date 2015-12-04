@@ -379,12 +379,12 @@ signal_t MDHistoWorkspaceIterator::getNormalizedSignalWithMask() const {
   }
   // What is our normalization factor?
   switch (m_normalization) {
-    case NoNormalization:
-      return m_ws->getSignalAt(m_pos);
-    case VolumeNormalization:
-      return m_ws->getSignalAt(m_pos) * m_ws->getInverseVolume();
-    case NumEventsNormalization:
-      return m_ws->getSignalAt(m_pos) / m_ws->getNumEventsAt(m_pos);
+  case NoNormalization:
+    return m_ws->getSignalAt(m_pos);
+  case VolumeNormalization:
+    return m_ws->getSignalAt(m_pos) * m_ws->getInverseVolume();
+  case NumEventsNormalization:
+    return m_ws->getSignalAt(m_pos) / m_ws->getNumEventsAt(m_pos);
   }
   // Should not reach here
   return std::numeric_limits<signal_t>::quiet_NaN();

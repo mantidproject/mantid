@@ -174,8 +174,8 @@ private:
   boost::scoped_ptr<VatesConfigurations> m_vatesConfigurations;
 
   /// Sort boxes by normalized signal value
-  virtual void sortBoxesByDecreasingSignal(
-    SigFuncIMDNodePtr getSignalFunction, const bool VERBOSE) const;
+  virtual void sortBoxesByDecreasingSignal(SigFuncIMDNodePtr getSignalFunction,
+                                           const bool VERBOSE) const;
 };
 }
 }

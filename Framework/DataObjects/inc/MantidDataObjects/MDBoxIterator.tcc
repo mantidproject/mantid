@@ -260,12 +260,12 @@ TMDE(signal_t MDBoxIterator)::getNormalizedSignalWithMask() const {
   }
   // What is our normalization factor?
   switch (m_normalization) {
-    case NoNormalization:
-      return m_current->getSignal();
-    case VolumeNormalization:
-      return m_current->getSignal() * m_current->getInverseVolume();
-    case NumEventsNormalization:
-      return m_current->getSignal() / double(m_current->getNPoints());
+  case NoNormalization:
+    return m_current->getSignal();
+  case VolumeNormalization:
+    return m_current->getSignal() * m_current->getInverseVolume();
+  case NumEventsNormalization:
+    return m_current->getSignal() / double(m_current->getNPoints());
   }
   return std::numeric_limits<signal_t>::quiet_NaN();
 }
