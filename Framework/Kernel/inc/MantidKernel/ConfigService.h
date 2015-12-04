@@ -255,15 +255,11 @@ public:
   /// Gets the proxy for the system
   Kernel::ProxyInfo &getProxy(const std::string &url);
 
-  /// Gets access to the UsageReporter
-  Mantid::Kernel::UsageReporter& UsageReporter();
-
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
   /// Handles distribution of Poco signals.
   mutable Poco::NotificationCenter m_notificationCenter;
 
-  void setupUsageReporting();
   // Private constructors and destructor for singleton class
   ConfigServiceImpl();
   /// Private copy constructor. Prevents singleton being copied.
@@ -344,10 +340,8 @@ private:
 
   /// local cache of proxy details
   Kernel::ProxyInfo m_proxyInfo;
-  /// wether the proxy has been populated yet
+  /// whether the proxy has been populated yet
   bool m_isProxySet;
-  ///Usage Reporter
-  Mantid::Kernel::UsageReporter *m_usage_reporter;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

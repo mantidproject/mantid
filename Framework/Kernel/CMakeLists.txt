@@ -102,7 +102,7 @@ set ( SRC_FILES
 	src/UnitFactory.cpp
 	src/UnitLabel.cpp
 	src/UnitLabelTypes.cpp
-	src/UsageReporter.cpp
+	src/UsageService.cpp
 	src/UserCatalogInfo.cpp
 	src/UserStringParser.cpp
 	src/Utils.cpp
@@ -262,7 +262,7 @@ set ( INC_FILES
 	inc/MantidKernel/UnitFactory.h
 	inc/MantidKernel/UnitLabel.h
 	inc/MantidKernel/UnitLabelTypes.h
-	inc/MantidKernel/UsageReporter.h
+	inc/MantidKernel/UsageService.h
 	inc/MantidKernel/UserCatalogInfo.h
 	inc/MantidKernel/UserStringParser.h
 	inc/MantidKernel/Utils.h
@@ -384,7 +384,7 @@ set ( TEST_FILES
 	UnitFactoryTest.h
 	UnitLabelTest.h
 	UnitTest.h
-	UsageReporterTest.h
+	UsageServiceTest.h
 	UserCatalogInfoTest.h
 	UserStringParserTest.h
 	UtilsTest.h

@@ -76,7 +76,7 @@ public:
 
   /// Clear memory associated with the PropertyManagers
   void clearPropertyManagers();
-
+  void shutdown();
   /// Creates and instance of an algorithm
   IAlgorithm *createAlgorithm(const std::string &algName,
                               const int &version = -1);
@@ -100,7 +100,6 @@ public:
 
   /// Deletes a workspace from the framework
   bool deleteWorkspace(const std::string &wsName);
-
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FrameworkManagerImpl>;
 
@@ -119,6 +118,8 @@ private:
   void disableNexusOutput();
   /// Starts asynchronous tasks that are done as part of Start-up
   void AsynchronousStartupTasks();
+  /// Setup Usage Reporting if enabled
+  void setupUsageReporting();
   /// Update instrument definitions from github
   void UpdateInstrumentDefinitions();
   /// check if a newer version of Mantid is available

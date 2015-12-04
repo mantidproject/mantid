@@ -8,7 +8,7 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/UsageService.h"
+#include "MantidKernel/UsageService.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
@@ -113,7 +113,7 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
     g_log.information() << "Version check disabled." << std::endl;
   }
 
-  UsageService::Instance().registerStartup();
+  setupUsageReporting();
 }
 
 /// Update instrument definitions from github
@@ -249,6 +249,12 @@ void FrameworkManagerImpl::clearInstruments() {
 void FrameworkManagerImpl::clearPropertyManagers() {
   PropertyManagerDataService::Instance().clear();
 }
+
+void FrameworkManagerImpl::shutdown() {
+  //clear();
+  Kernel::UsageService::Instance().shutdown();
+}
+
 
 /** Creates and initialises an instance of an algorithm
  *
@@ -409,6 +415,18 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
   }
   Mantid::API::MemoryManager::Instance().releaseFreeMemory();
   return retVal;
+}
+
+void FrameworkManagerImpl::setupUsageReporting() {
+  int enabled = 0;
+  int interval = 0;
+  int retVal = Kernel::ConfigService::Instance().getValue("Usage.BufferCheckInterval", interval);
+  if ((retVal == 1) && (interval > 0)) {
+    Kernel::UsageService::Instance().setInterval(interval);
+  }
+  retVal = Kernel::ConfigService::Instance().getValue("usagereports.enabled", enabled);
+  Kernel::UsageService::Instance().setEnabled((retVal == 0) || (enabled == 0));
+  Kernel::UsageService::Instance().registerStartup();
 }
 
 } // namespace API

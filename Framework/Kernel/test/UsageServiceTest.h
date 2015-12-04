@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/UsageReporter.h"
+#include "MantidKernel/UsageService.h"
 
-using Mantid::Kernel::UsageReporter;
+using Mantid::Kernel::UsageServiceImpl;
 
 class UsageServiceTest : public CxxTest::TestSuite {
 public:

@@ -11,7 +11,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/NetworkProxy.h"
-#include "MantidKernel/UsageReporter.h"
 
 #include <Poco/Util/LoggingConfigurator.h>
 #include <Poco/Util/SystemConfiguration.h>
@@ -140,20 +139,6 @@ private:
 // Private member functions
 //-------------------------------
 
-void ConfigServiceImpl::setupUsageReporting() {
-  m_usage_reporter = new Mantid::Kernel::UsageReporter();
-
-  int enabled = 0;
-  int interval = 0;
-  int retVal = getValue("Usage.BufferCheckInterval", interval);
-  if ((retVal == 1) && (interval > 0)) {
-    m_usage_reporter->setInterval(interval);
-  }
-  retVal = getValue("usagereports.enabled", enabled);
-  m_usage_reporter->setEnabled((retVal == 0) || (enabled == 0));
-  m_usage_reporter->registerStartup();
-}
-
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl()
     : m_pConf(NULL), m_pSysConfig(NULL), m_changed_keys(), m_ConfigPaths(),
@@ -167,8 +152,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
-      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false),
-      m_usage_reporter(NULL) {
+      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
   m_pConf = 0;
@@ -294,17 +278,12 @@ ConfigServiceImpl::ConfigServiceImpl()
   }
   // must update the cache of instrument paths
   cacheInstrumentPaths();
-
-  // setup usage reporting
-  setupUsageReporting();
 }
 
 /** Private Destructor
  *  Prevents client from calling 'delete' on the pointer handed out by Instance
  */
 ConfigServiceImpl::~ConfigServiceImpl() {
-  //clear up the usage reporter first
-  delete m_usage_reporter;
   // std::cerr << "ConfigService destroyed." << std::endl;
   Kernel::Logger::shutdown();
   delete m_pSysConfig;
@@ -1986,13 +1965,6 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   return m_proxyInfo;
 }
 
-/** Gets a reference to the UsageReporter
-* @returns a reference to the UsageReporter class
-*/
-UsageReporter& ConfigServiceImpl::UsageReporter()
-{
-  return *m_usage_reporter;
-}
 
   /** Sets the log level priority for the File log channel
   * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug

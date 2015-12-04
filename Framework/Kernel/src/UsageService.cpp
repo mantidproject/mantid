@@ -1,4 +1,4 @@
-#include "MantidKernel/UsageReporter.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -16,12 +16,12 @@ namespace Mantid {
 namespace Kernel {
 
 /// static logger
-Kernel::Logger g_log("UsageReporter");
+Kernel::Logger g_log("UsageServiceImpl");
 
 // const std::string STARTUP_URL("http://reports.mantidproject.org/api/usage");
 const std::string STARTUP_URL(
     "http://posttestserver.com/post.php?dir=Mantid"); // dev location
-                                                      // http://posttestserver.com/data/
+// http://posttestserver.com/data/
 // const std::string FEATURE_URL("http://reports.mantidproject.org/api/usage");
 const std::string FEATURE_URL(
     "http://posttestserver.com/post.php?dir=Mantid"); // dev location
@@ -52,9 +52,9 @@ std::string FeatureUsage::asString() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor for UsageReporter
+/** Constructor for UsageServiceImpl
  */
-UsageReporter::UsageReporter()
+UsageServiceImpl::UsageServiceImpl()
     : m_timer(), m_timerTicks(0), m_timerTicksTarget(0), m_FeatureQueue(),
       m_FeatureQueueSizeThreshold(50), m_isEnabled(false), m_mutex(),
       m_cachedHeader() {
@@ -64,33 +64,20 @@ UsageReporter::UsageReporter()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-UsageReporter::~UsageReporter() {
-  try {
-    try {
-      // stop the timer
-      m_timer.restart(0);
-      // send any remaining feature usage records
-      flush();
-    } catch (std::exception &ex) {
-      g_log.error() << "Error during the closedown of the UsageService. "
-                    << ex.what();
-    }
-  } catch (...) { // do not allow exceptions to leave the destructor
-  }
-}
+UsageServiceImpl::~UsageServiceImpl() {}
 
-void UsageReporter::setInterval(const uint32_t seconds) {
+void UsageServiceImpl::setInterval(const uint32_t seconds) {
   // set the ticks target to by 24 hours / interval
   m_timerTicksTarget = 24 * 60 * 60 / seconds;
 
   m_timer.setPeriodicInterval((seconds * 1000));
   if (isEnabled()) {
-    m_timer.start(Poco::TimerCallback<UsageReporter>(
-        *this, &UsageReporter::timerCallback));
+    m_timer.start(Poco::TimerCallback<UsageServiceImpl>(
+        *this, &UsageServiceImpl::timerCallback));
   }
 }
 
-void UsageReporter::registerStartup() {
+void UsageServiceImpl::registerStartup() {
   if (isEnabled()) {
     sendStartupReport();
   }
@@ -99,7 +86,7 @@ void UsageReporter::registerStartup() {
 //----------------------------------------------------------------------------------------------
 /** registerFeatureUsage Overloads
 */
-void UsageReporter::registerFeatureUsage(const std::string &type,
+void UsageServiceImpl::registerFeatureUsage(const std::string &type,
                                             const std::string &name,
                                             const Kernel::DateAndTime &start,
                                             const float &duration,
@@ -107,7 +94,7 @@ void UsageReporter::registerFeatureUsage(const std::string &type,
   m_FeatureQueue.push(FeatureUsage(type, name, start, duration, details));
 }
 
-void UsageReporter::registerFeatureUsage(const std::string &type,
+void UsageServiceImpl::registerFeatureUsage(const std::string &type,
                                             const std::string &name,
                                             const std::string &details) {
   registerFeatureUsage(type, name, DateAndTime::getCurrentTime(), 0.0, details);
@@ -115,13 +102,13 @@ void UsageReporter::registerFeatureUsage(const std::string &type,
 
 //----------------------------------------------------------------------------------------------
 
-bool UsageReporter::isEnabled() const { return m_isEnabled; }
+bool UsageServiceImpl::isEnabled() const { return m_isEnabled; }
 
-void UsageReporter::setEnabled(const bool enabled) {
+void UsageServiceImpl::setEnabled(const bool enabled) {
   if (m_isEnabled != enabled) {
     if (enabled) {
-      m_timer.start(Poco::TimerCallback<UsageReporter>(
-        *this, &UsageReporter::timerCallback));
+      m_timer.start(Poco::TimerCallback<UsageServiceImpl>(
+          *this, &UsageServiceImpl::timerCallback));
     } else {
       m_timer.stop();
     }
@@ -129,13 +116,25 @@ void UsageReporter::setEnabled(const bool enabled) {
   m_isEnabled = enabled;
 }
 
-void UsageReporter::flush() {
+void UsageServiceImpl::flush() {
   if (isEnabled()) {
     sendFeatureUsageReport(true);
   }
 }
 
-void UsageReporter::sendStartupReport() {
+void UsageServiceImpl::shutdown() {
+  try {
+    // stop the timer
+    setEnabled(false);
+    // send any remaining feature usage records
+    sendFeatureUsageReport(true);
+  } catch (std::exception &ex) {
+    g_log.error() << "Error during the shutdown of the UsageService. "
+                  << ex.what();
+  }
+}
+
+void UsageServiceImpl::sendStartupReport() {
   try {
     std::string message = this->generateStartupMessage();
 
@@ -147,10 +146,10 @@ void UsageReporter::sendStartupReport() {
   }
 }
 
-void UsageReporter::sendFeatureUsageReport(const bool synchronous = false) {
+void UsageServiceImpl::sendFeatureUsageReport(const bool synchronous = false) {
   try {
     std::string message = this->generateFeatureUsageMessage();
-    //g_log.debug() << "FeatureUsage to send\n" << message << std::endl;
+    // g_log.debug() << "FeatureUsage to send\n" << message << std::endl;
     if (!message.empty()) {
       if (synchronous) {
         sendFeatureAsyncImpl(message);
@@ -165,7 +164,7 @@ void UsageReporter::sendFeatureUsageReport(const bool synchronous = false) {
   }
 }
 
-void UsageReporter::timerCallback(Poco::Timer &) {
+void UsageServiceImpl::timerCallback(Poco::Timer &) {
   m_timerTicks++;
   if (m_timerTicks > m_timerTicksTarget) {
     // send startup report
@@ -182,7 +181,7 @@ void UsageReporter::timerCallback(Poco::Timer &) {
 /**
 * This puts together the system information for the json document.
 */
-::Json::Value UsageReporter::generateHeader() {
+::Json::Value UsageServiceImpl::generateHeader() {
   ::Json::Value header = m_cachedHeader;
 
   if (header.size() == 0) {
@@ -220,7 +219,7 @@ void UsageReporter::timerCallback(Poco::Timer &) {
   return header;
 }
 
-std::string UsageReporter::generateStartupMessage() {
+std::string UsageServiceImpl::generateStartupMessage() {
   auto message = this->generateHeader();
 
   // get the properties that were set#
@@ -234,7 +233,7 @@ std::string UsageReporter::generateStartupMessage() {
   return writer.write(message);
 }
 
-std::string UsageReporter::generateFeatureUsageMessage() {
+std::string UsageServiceImpl::generateFeatureUsageMessage() {
 
   auto message = this->generateHeader();
   ::Json::FastWriter writer;
@@ -265,34 +264,34 @@ std::string UsageReporter::generateFeatureUsageMessage() {
 * Asynchronous execution
 */
 Poco::ActiveResult<int>
-UsageReporter::sendStartupAsync(const std::string &message) {
-  auto sendAsync = new Poco::ActiveMethod<int, std::string, UsageReporter>(
-      this, &UsageReporter::sendStartupAsyncImpl);
+UsageServiceImpl::sendStartupAsync(const std::string &message) {
+  auto sendAsync = new Poco::ActiveMethod<int, std::string, UsageServiceImpl>(
+      this, &UsageServiceImpl::sendStartupAsyncImpl);
   return (*sendAsync)(message);
 }
 
 /**Async method for sending startup messages
 */
-int UsageReporter::sendStartupAsyncImpl(const std::string &message) {
+int UsageServiceImpl::sendStartupAsyncImpl(const std::string &message) {
   return this->sendReport(message, STARTUP_URL);
 }
 
 /**Async method for sending feature messages
 */
 Poco::ActiveResult<int>
-UsageReporter::sendFeatureAsync(const std::string &message) {
-  auto sendAsync = new Poco::ActiveMethod<int, std::string, UsageReporter>(
-      this, &UsageReporter::sendFeatureAsyncImpl);
+UsageServiceImpl::sendFeatureAsync(const std::string &message) {
+  auto sendAsync = new Poco::ActiveMethod<int, std::string, UsageServiceImpl>(
+      this, &UsageServiceImpl::sendFeatureAsyncImpl);
   return (*sendAsync)(message);
 }
 
 /**Async method for sending feature messages
 */
-int UsageReporter::sendFeatureAsyncImpl(const std::string &message) {
+int UsageServiceImpl::sendFeatureAsyncImpl(const std::string &message) {
   return this->sendReport(message, FEATURE_URL);
 }
 
-int UsageReporter::sendReport(const std::string &message,
+int UsageServiceImpl::sendReport(const std::string &message,
                                  const std::string &url) {
   int status = -1;
   try {

@@ -1,9 +1,10 @@
-#ifndef MANTID_KERNEL_USAGEREPORTER_H_
-#define MANTID_KERNEL_USAGEREPORTER_H_
+#ifndef MANTID_KERNEL_USAGESERVICE_H_
+#define MANTID_KERNEL_USAGESERVICE_H_
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include <json/value.h>
 
@@ -64,7 +65,7 @@ public:
   std::string details;
 };
 
-class MANTID_KERNEL_DLL UsageReporter {
+class MANTID_KERNEL_DLL UsageServiceImpl {
 public:
   /// Sets the interval that the timer checks for tasks
   void setInterval(const uint32_t seconds = 60);
@@ -84,17 +85,19 @@ public:
 
   /// flushes any buffers and sends any outstanding usage reports
   void flush();
+  void shutdown();
 
-  /// Constructor
-  UsageReporter();
-  /// Destructor
-  ~UsageReporter();
 private:
+  friend struct Mantid::Kernel::CreateUsingNew<UsageServiceImpl>;
   /// Private, unimplemented copy constructor
-  UsageReporter(const UsageReporter &);
+  UsageServiceImpl(const UsageServiceImpl &);
   /// Private, unimplemented copy assignment operator
-  UsageReporter &operator=(const UsageReporter &);
-  
+  UsageServiceImpl &operator=(const UsageServiceImpl &);
+  /// Constructor
+  UsageServiceImpl();
+  /// Destructor
+  ~UsageServiceImpl();
+
   /// Send startup Report
   void sendStartupReport();
   /// Send featureUsageReport
@@ -130,7 +133,18 @@ private:
   ::Json::Value m_cachedHeader;
 };
 
+/// Forward declaration of a specialisation of SingletonHolder for
+/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+#if defined(__APPLE__) && defined(__INTEL_COMPILER)
+inline
+#endif
+template class MANTID_KERNEL_DLL
+Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
+typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<UsageServiceImpl>
+UsageService;
+
+
 } // namespace API
 } // namespace Mantid
 
-#endif /* MANTID_KERNEL_USAGEREPORTER_H_ */
+#endif /* MANTID_KERNEL_USAGESERVICE_H_ */
