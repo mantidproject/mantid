@@ -3,55 +3,110 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/RotateSource.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
-using Mantid::DataHandling::RotateSource;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 class RotateSourceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static RotateSourceTest *createSuite() { return new RotateSourceTest(); }
-  static void destroySuite( RotateSourceTest *suite ) { delete suite; }
+  static void destroySuite(RotateSourceTest *suite) { delete suite; }
 
-
-  void test_Init()
-  {
-    RotateSource alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+  void testInit() {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
+    alg->initialize();
+    TS_ASSERT(alg->isInitialized())
   }
 
-  void test_exec()
-  {
-    // Create test input if necessary
-    MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
+  void testRotateClockwise() {
 
-    RotateSource alg;
-    // Don't put output in ADS by default
-    alg.setChild(true);
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
+    // The instrument
+    Instrument_sptr instr = boost::make_shared<Instrument>();
+    instr->setReferenceFrame(
+        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
 
-    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
-    // be the type using in declareProperty for the "OutputWorkspace" type.
-    // We can't use auto as it's an implicit conversion.
-    Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
-    TS_FAIL("TODO: Check the results and remove this line");
+    // The source
+    ObjComponent *source = new ObjComponent("source");
+    source->setPos(V3D(0, 0, 1));
+    instr->add(source);
+    instr->markAsSource(source);
+
+    // The sample
+    ObjComponent *sample = new ObjComponent("sample");
+    sample->setPos(V3D(0, 0, 0));
+    instr->add(sample);
+    instr->markAsSamplePos(sample);
+
+    // The workspace
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+    ws->setInstrument(instr);
+    // The angle
+    double theta = 90.;
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
+    alg->setChild(true);
+    alg->setProperty("Workspace", ws);
+    alg->setProperty("Angle", theta);
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    auto newPos = ws->getInstrument()->getSource()->getPos();
+
+    TS_ASSERT_EQUALS(newPos.X(), 0);
+    TS_ASSERT_EQUALS(newPos.Y(), -1);
+    TS_ASSERT_EQUALS(newPos.Z(), 0);
   }
-  
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
-  }
 
+  void testRotateCounterClockwise() {
+
+    // The instrument
+    Instrument_sptr instr = boost::make_shared<Instrument>();
+    instr->setReferenceFrame(
+        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+
+    // The source
+    ObjComponent *source = new ObjComponent("source");
+    source->setPos(V3D(0, 0, 1));
+    instr->add(source);
+    instr->markAsSource(source);
+
+    // The sample
+    ObjComponent *sample = new ObjComponent("sample");
+    sample->setPos(V3D(0, 0, 0));
+    instr->add(sample);
+    instr->markAsSamplePos(sample);
+
+    // The workspace
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+    ws->setInstrument(instr);
+    // The angle
+    double theta = -90.;
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
+    alg->setChild(true);
+    alg->setProperty("Workspace", ws);
+    alg->setProperty("Angle", theta);
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    auto newPos = ws->getInstrument()->getSource()->getPos();
+
+    TS_ASSERT_EQUALS(newPos.X(), 0);
+    TS_ASSERT_EQUALS(newPos.Y(), 1);
+    TS_ASSERT_EQUALS(newPos.Z(), 0);
+  }
 
 };
-
 
 #endif /* MANTID_DATAHANDLING_ROTATESOURCETEST_H_ */

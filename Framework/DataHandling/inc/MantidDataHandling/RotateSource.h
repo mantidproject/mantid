@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** RotateSource : TODO: DESCRIPTION
+/** RotateSource : Moves the source by a given angle
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -29,10 +29,10 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_DATAHANDLING_DLL RotateSource : public API::Algorithm {
+class DLLExport RotateSource : public API::Algorithm {
 public:
-	RotateSource() {};
-	virtual ~RotateSource() {};
+  RotateSource(){};
+  virtual ~RotateSource(){};
 
   virtual const std::string name() const { return "RotateSource"; };
   virtual int version() const { return 1; };
@@ -40,7 +40,7 @@ public:
     return "DataHandling\\Instrument";
   };
   virtual const std::string summary() const {
-    return "Rotates the source around the specified axis by a given angle";
+    return "Rotates the source by a given angle";
   };
 
 private:
