@@ -408,7 +408,8 @@ void ReflectometryReductionOneAuto::exec() {
       } catch (std::runtime_error &e) {
         g_log.warning() << "Could not autodetect polynomial correction method. "
                            "Polynomial correction will not be performed. "
-                           "Reason for failure: " << e.what() << std::endl;
+                           "Reason for failure: "
+                        << e.what() << std::endl;
         refRedOne->setProperty("CorrectionAlgorithm", "None");
       }
 
@@ -644,6 +645,11 @@ bool ReflectometryReductionOneAuto::processGroups() {
 
     // If our transmission run is a group and PolarizationCorrection is on
     // then we sum our transmission group members.
+    //
+    // This is done inside of the for loop to avoid the wrong workspace being
+    // used when these arguments are passed through to the exec() method.
+    // If this is not set in the loop, exec() will fetch the first workspace
+    // from the specified Transmission Group workspace that the user entered.
     if (firstTransG && isPolarizationCorrectionOn) {
       auto firstTransmissionSum = sumOverTransmissionGroup(firstTransG);
       alg->setProperty("FirstTransmissionRun", firstTransmissionSum);
