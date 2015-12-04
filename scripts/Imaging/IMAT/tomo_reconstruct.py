@@ -49,6 +49,7 @@ ipython -- scripts/Imaging/IMAT/tomo_reconstruct.py\
 """
 
 import tomorec.reconstruction_command as tomocmd
+import tomorec.configs as tomocfg
 
 def setup_cmd_options():
     """
@@ -160,26 +161,37 @@ def grab_preproc_options(args):
     """
     import ast
 
-    pre_config = tomocmd.PreProcConfig()
+    pre_config = tomocfg.PreProcConfig()
     pre_config.input_dir = args.input_path
+
     if args.in_img_format:
         pre_config.in_img_format = args.in_img_format
+
     if args.out_img_format:
         pre_config.out_img_format = args.out_img_format
+
     pre_config.cor = int(args.cor)
+
     if 'yes' == args.mcp_corrections:
         pre_config.mcp_corrections = True
+
     if 'wf' == args.remove_stripes:
         pre_config.stripe_removal_method = 'wavelet-fourier'
+
     if args.region_of_interest:
         pre_config.crop_coords = ast.literal_eval(args.region_of_interest)
     else:
         border_pix = 5
         pre_config.crop_coords = [0+border_pix, 252, 512-border_pix, 512-border_pix]
+
+    if args.air_region:
+        pre_config.crop_coords = ast.literal_eval(args.air_region)
+
     if args.median_filter_width:
         if not args.num_iter.isdigit():
             raise RuntimeError("The median filter width must be an integer")
         pre_config.median_filter_width = args.median_filter_width
+
     if args.max_angle:
         pre_config.max_angle = float(args.max_angle)
 
@@ -193,9 +205,10 @@ def grab_tool_alg_options(args):
 
     Returns:: an algorithm config object set up according to the user inputs in the command line
     """
-    config = tomocmd.ToolAlgorithmConfig()
+    config = tomocfg.ToolAlgorithmConfig()
     config.tool = args.tool
     config.algorithm = args.algorithm
+
     if args.num_iter:
         if not args.num_iter.isdigit():
             raise RuntimeError("The number of iterations must be an integer")
@@ -212,12 +225,15 @@ def grab_postproc_options(args):
 
     Returns:: a post-processing object set up according to the user inputs in the command line
     """
-    config = tomocmd.PostProcConfig()
+    config = tomocfg.PostProcConfig()
     config.output_dir = args.output_path
+
     if args.circular_mask:
         config.circular_mask = float(args.circular_mask)
+
     if args.cut_off:
         config.cut_off_level = float(args.cut_off)
+
     if args.out_median_filter:
         config.median_filter_size = float(args.out_median_filter)
 
@@ -225,8 +241,16 @@ def grab_postproc_options(args):
 
 
 def main_tomo_rec():
-    import os
+    # several dependencies (numpy, scipy) are too out-of-date in standard Python 2.6
+    # distributions, as found for example on rhel6
     import sys
+    vers = sys.version_info
+    if vers < (2,7,0):
+        raise("Not running this test as it requires Python >= 2.7. Version found: {0}".
+              format(vers))
+
+    import os
+
     import inspect
 
     import tomorec.io as tomoio
@@ -244,7 +268,7 @@ def main_tomo_rec():
     postproc_config = grab_postproc_options(args)
 
     cmd_line = " ".join(sys.argv)
-    cfg = tomocmd.ReconstructionConfig(preproc_config, alg_config, postproc_config)
+    cfg = tomocfg.ReconstructionConfig(preproc_config, alg_config, postproc_config)
     # Does all the real work
     cmd = tomocmd.ReconstructionCommand()
     cmd.do_recon(cfg, cmd_line=cmd_line)

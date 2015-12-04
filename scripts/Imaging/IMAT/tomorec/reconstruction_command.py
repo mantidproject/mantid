@@ -34,140 +34,7 @@ except ImportError:
     raise ImportError("Could not find the subpackage scipy.ndimage, required for image pre-/post-processing")
 
 import tomorec.io as tomoio
-
-#pylint: disable=too-few-public-methods
-class ToolAlgorithmConfig(object):
-    """
-    Reconstruction algorithm specific configuration. Required for any reconstruction:
-    a tool that implements the method/algorithm,
-    the algorithm name,
-    (only for the iterative algorithms) the number of iterations
-    (only for some algorithms) a regularization/smoothing parameter
-    """
-
-    DEF_TOOL = 'tomopy'
-    DEF_ALGORITHM = 'gridrec'
-
-    def __init__(self):
-        self.tool = self.DEF_TOOL
-        self.algorithm = self.DEF_ALGORITHM
-        self.num_iter = None
-        self.regularization = None
-
-    def __str__(self):
-        mystr = "Tool: {0}\n".format(self.tool)
-        mystr += "Algorithm: {0}\n".format(self.algorithm)
-        if self.num_iter:
-            mystr += "Number of algorith iterations: {0}\n".format(self.num_iter)
-        else:
-            mystr += "(Algorithm iterations: not defined)\n"
-        if self.regularization:
-            mystr += "Regularization parameter: {0}\n".format(self.regularization)
-        else:
-            mystr += "(Regularization parameter: not defined)\n"
-
-        return mystr
-
-
-#pylint: disable=too-many-instance-attributes
-class PreProcConfig(object):
-    """
-    All pre-processing options required to run a tomographic reconstruction.
-
-    Options like the stripe removal, MCP correction, or even the median filter would
-    better be handled as plugins. For the time being we just have a panel with a fixed
-    set of options to enable/disable/configure
-    """
-
-    DEF_NUM_ITER = 5
-
-    def __init__(self):
-        # defaults that look sensible for the MCP detector:
-        # median_filter=3, rotate=-1, crop=[0,  252, 0, 512], MCP correction: on
-        self.input_dir = None
-        self.in_img_format = 'tiff'
-        self.out_img_format = 'tiff'
-        self.max_angle = 360
-        # Center of rotation
-        self.cor = None
-        self.normalize_flat_dark = True
-        self.normalize_proton_charge = False
-        # region of interest
-        self.crop_coords = None
-        self.cut_off_level = 0
-        self.mcp_correction = True
-        self.scale_down = 0
-        self.median_filter_size = 3
-        # Rotation 90 degrees clockwise (positive) or counterclockwise (negative)
-        # Example: -1 => (-90 degrees == 90 degrees counterclockwise)
-        self.rotation = -1
-        self.line_projection = True
-        self.stripe_removal_method = 'wavelet-fourier'
-        self.save_preproc_imgs = True
-
-    def __str__(self):
-
-        mystr = "Input path (relative): {0}\n".format(self.input_dir)
-        mystr += "Input path (absolute): {0}\n".format(os.path.abspath(self.input_dir))
-        mystr += "Input image format: {0}\n".format(self.in_img_format)
-        mystr += "Output image format: {0}\n".format(self.out_img_format)
-        mystr += "Maximum angle:: {0}\n".format(self.max_angle)
-        mystr += "Center of rotation: {0}\n".format(self.cor)
-        mystr += "Region of interest (crop coordinates): {0}\n".format(self.crop_coords)
-        mystr += "Normalize by flat/dark images: {0}\n".format(self.normalize_flat_dark)
-        mystr += "Normalize by proton charge: {0}\n".format(self.normalize_proton_charge)
-        mystr += "Cut-off on normalized images: {0}\n".format(self.cut_off_level)
-        mystr += "Corrections for MCP detector: {0}\n".format(self.mcp_correction)
-        mystr += "Scale down factor for images: {0}\n".format(self.scale_down)
-        mystr += "Median filter width: {0}\n".format(self.median_filter_size)
-        mystr += "Rotation: {0}\n".format(self.rotation)
-        mystr += "Line projection (line integral/log re-scale): {0}\n".format(1)
-        mystr += "Sinogram stripes removal: {0}".format(self.stripe_removal_method)
-
-        return mystr
-
-
-class PostProcConfig(object):
-    """
-    All pre-processing options required to run a tomographic reconstruction
-    """
-
-    def __init__(self):
-        """
-        Builds a default post-processing configuration with a sensible choice of parameters
-        """
-        self.output_dir = None
-        self.circular_mask = 0.94
-        self.cut_off_level = 0
-        self.gaussian_filter_par = 0
-        self.median_filter_size = 0
-        self.median_filter3d_size = 0
-
-    def __str__(self):
-
-        mystr = "Output path (relative): {0}\n".format(self.output_dir)
-        mystr += "Output path (absolute): {0}\n".format(os.path.abspath(self.output_dir))
-        mystr += "Circular mask: {0}\n".format(self.circular_mask)
-        mystr += "Cut-off on reconstructed volume: {0}\n".format(self.cut_off_level)
-        mystr += "Gaussian filter: {0}\n".format(self.gaussian_filter_par)
-        mystr += "Median filter size:: {0}\n".format(self.median_filter_size)
-        mystr += "Median filter (3d) size:: {0}\n".format(self.median_filter3d_size)
-
-        return mystr
-
-class ReconstructionConfig(object):
-    """
-    Full configuration (pre-proc + tool/algorithm + post-proc.
-    """
-
-    def __init__(self, preproc_cfg, alg_cfg, postproc_cfg):
-        self.preproc_cfg = preproc_cfg
-        self.alg_cfg = alg_cfg
-        self.postproc_cfg = postproc_cfg
-
-    def __str__(self):
-        return str(self.preproc_cfg) + str(self.alg_cfg) + str(self.postproc_cfg)
-
+import tomorec.configs as tomocfg
 
 class ReconstructionCommand(object):
     """
@@ -176,10 +43,14 @@ class ReconstructionCommand(object):
     """
 
     def __init__(self):
+        self._PREPROC_IMGS_SUBDIR_NAME = 'preproc_images'
         self._OUT_README_FNAME = '0.README_reconstruction.txt'
-        self.preproc_cfg = PreProcConfig()
-        self.alg_cfg = ToolAlgorithmConfig
-        self.postproc_cfg = PostProcConfig()
+        self._OUT_SLICES_FILENAME_PREFIX='out_recon_slice'
+        self._OUT_HORIZ_SLICES_SUBDIR='out_recon_horiz_slice'
+
+        self.preproc_cfg = tomocfg.PreProcConfig()
+        self.alg_cfg = tomocfg.ToolAlgorithmConfig
+        self.postproc_cfg = tomocfg.PostProcConfig()
 
     def do_recon(self, cfg, cmd_line=None):
         """
@@ -335,50 +206,89 @@ class ReconstructionCommand(object):
             oreadme.write("Total time elapsed: {0:.3f}s\r\n".format(tend-tstart))
             oreadme.write('Time now (run end): ' + time.ctime(tend))
 
-    def normalize_proton_charge(self, data, pre_cfg):
+    def normalize_air_region(self, data, pre_cfg):
         """
+        Normalize by beam intensity. This is not directly about proton charg - not using the proton
+        charge field as usually found in experiment/nexus files. This uses an area of normalization,
+        if provided in the pre-processing configuration.
+
+        @param data :: stack of images as a 3d numpy array
+        @param pre_cfg :: pre-processing configuration
+
+        Returns :: filtered data (stack of images)
         """
-        if pre_cfg.normalize_proton_charge:
+        if pre_cfg.normalize_air_region:
+            if not isinstance(pre_cfg.normalize_air_region, list) or\
+               4 != len(pre_cfg.normalize_air_region):
+                raise ValueError("Wrong air region coordinates when trying to use them to normalize images: {0}".
+                                 format(pre_cfg.normalize_air_region))
+
             air_sums = []
             for idx in range(0, data.shape[0]):
-                air_data_sum = data[idx, cfg.crop_coords[1]:cfg.crop_coords[3],
-                                    cfg.crop_coords[0]:cfg.crop_coords[2]].sum()
+                air_data_sum = data[idx, cfg.normalize_air_region[1]:cfg.normalize_air_region[3],
+                                    cfg.normalize_air_region[0]:cfg.normalize_air_region[2]].sum()
                 air_sums.append(air_data_sum)
 
-            too_verbose = False
+            too_verbose = True
             if too_verbose:
                 print "air sums: ", air_sums
+
+            for idx in range(0, data.shape[0]):
+                data[idx, :, :] = np.true_divide(data[idx, :, :], air_sums[idx])
+
             avg = np.average(air_sums)
-            if too_verbose:
-                print("Air avg: {0}, max ratio: {1}, min ratio: {2}".format(
-                    avg, np.max(air_sums)/avg, np.min(air_sums)/avg))
+            print(" * Finished normalization by air region. Statistics of values in the air region, "
+                  "average: {0}, max ratio: {1}, min ratio: {2}".
+                  format(avg, np.max(air_sums)/avg, np.min(air_sums)/avg))
+
+        else:
+            print " * Note: not normalizing by air region"
 
         return data
 
     def crop_coords(self, data, cfg):
         """
+        Crop stack of images to a region (region of interest or similar), image by image
+
+        @param data :: stack of images as a 3d numpy array
+        @param cfg :: pre-processing configuration
+
+        Returns :: filtered data (stack of images)
         """
         # list with first-x, first-y, second-x, second-y
         if cfg.crop_coords:
-            if  isinstance(cfg.crop_coords, list) and 4 == len(cfg.crop_coords):
-                data = data[:, cfg.crop_coords[1]:cfg.crop_coords[3], cfg.crop_coords[0]:cfg.crop_coords[2]]
-            else:
+            try:
+                tomoio.crop_coords(data, cfg.crop_coords)
+                print " * Finished crop step, with pixel data type: {0}.".format(data.dtype)
+            except ValueError as exc:
                 print("Error in crop (region of interest) parameter (expecting a list with four integers. "
-                      "Got: {0}.".format(crop))
-
-            print " * Finished crop step, with pixel data type: {0}.".format(data.dtype)
+                      "Got: {0}. Error details: ".format(crop), exc)
         else:
             print " * Note: not applying crop."
 
         return data
 
-    def normalize_flat_dark(self, data, cfg):
+    def normalize_flat_dark(self, data, cfg, norm_flat_img, norm_dark_img):
         """
+        Normalize by flat and dark images
+
+        @param data :: image stack as a 3d numpy array
+        @param cfg :: pre-processing configuration
+        @param norm_flat_img :: flat (open beam) image to use in normalization
+        @param norm_dark_img :: dark image to use in normalization
+
+        Returns :: filtered data (stack of images)
         """
-        if False and cfg.normalize_flat_dark:
+        if cfg.normalize_flat_dark and norm_flat_img:
+            if not norm_flat_img:
+                raise ValueError("Normalization by flat/dark images cannot be done withtout "
+                                 "at least an input flat image")
+
             norm_divide = None
             if norm_dark_img:
                 norm_divide = norm_flat_img - norm_dark_img
+            else:
+                norm_divide = norm_flat_img
             if cfg.crop_coords:
                 norm_divide = norm_divide[:, cfg.crop_coords[1]:cfg.crop_coords[3],
                                           cfg.crop_coords[0]:cfg.crop_coords[2]]
@@ -388,14 +298,20 @@ class ReconstructionCommand(object):
             for idx in range(0, data.shape[0]):
                 data[idx, :, :] = np.true_divide(data[idx, :, :] - norm_dark_img, norm_divide)
             # true_divide produces float64, we assume that precision not needed (definitely not
-            # for 16-bit depth images as we usually have.
+            # for 16-bit depth output images as we usually have).
             print " * Finished normalization by flat/dark images with pixel data type: {0}.".format(data.dtype)
+        elif cfg.normalize_flat_dark and not norm_flat_img:
+            print( " * Note: cannot apply normalization by flat/dark images because no flat image has been "
+                   "provided in the inputs")
         else:
             print " * Note: not applying normalization by flat/dark images."
 
         return data
 
     def apply_cut_off(self, data, cfg):
+        """
+        Returns :: filtered data (stack of images)
+        """
         # Apply cut-off for the normalization?
         if cfg.cut_off_level and cfg.cut_off_level:
             print "* Applying cut-off with level: {0}".format(cfg.cut_off_level)
@@ -425,8 +341,12 @@ class ReconstructionCommand(object):
 
     def rotate_imgs(self, data, cfg):
         """
+        Rotate every imge of a stack
+
         @param data :: image stack as a 3d numpy array
         @param cfg :: pre-processing configuration
+
+        Returns :: filtered data (stack of images)
         """
         data_rotated = data
         if cfg.rotation:
@@ -458,8 +378,8 @@ class ReconstructionCommand(object):
             print " * Note: pixel data type changed to:", data.dtype
 
         data = self.crop_coords(data, cfg)
-        data = self.normalize_proton_charge(data, cfg)
-        data = self.normalize_flat_dark(data, cfg)
+        data = self.normalize_air_region(data, cfg)
+        data = self.normalize_flat_dark(data, cfg, white, dark)
 
         data = self.apply_cut_off(data, cfg)
         data = self.rotate_imgs(data, cfg)
@@ -509,6 +429,8 @@ class ReconstructionCommand(object):
 
         @param preproc_data :: input data as a 3d volume (projection images)
         @param cfg :: pre-processing configuration
+
+        Returns :: filtered data (stack of images)
         """
         # Remove stripes in sinograms / ring artefacts in reconstructed volume
         if cfg.stripe_removal_method:
@@ -581,7 +503,7 @@ class ReconstructionCommand(object):
         start = time.time()
         if 'tomopy' == alg_cfg.tool and 'gridrec' != alg_cfg.algorithm and 'fbp' != alg_cfg.algorithm:
             if not alg_cfg.num_iter:
-                alg.cfg_num_iter = tomorec.PreProcConfig.DEF_NUM_ITER
+                alg.cfg_num_iter = tomocfg.PreProcConfig.DEF_NUM_ITER
             # For ref, some typical run times with 4 cores:
             # 'bart' with num_iter=20 => 467.640s ~= 7.8m
             # 'sirt' with num_iter=30 => 698.119 ~= 11.63
@@ -601,11 +523,15 @@ class ReconstructionCommand(object):
 
         return rec
 
-    def get_max_frames(self, algorithm):
-        frames = 8 if "3D" in algorithm else 1
-        return frames
-
     def astra_reconstruct3d(self, sinogram, angles, depth, alg_cfg):
+        """
+        Run a reconstruction with astra
+
+        @param sinogram :: sinogram data
+        @param angles :: angles of the image projections
+        @param depth :: number of rows in images/sinograms
+        @param alg_cfg :: tool/algorithm configuration
+        """
         # Some of these have issues depending on the GPU setup
         algs_avail = "[FP3D_CUDA], [BP3D_CUDA]], [FDK_CUDA], [SIRT3D_CUDA], [CGLS3D_CUDA]"
 
@@ -632,9 +558,11 @@ class ReconstructionCommand(object):
         alg_id = astra.algorithm.create(cfg)
         # This will have a runtime in the order of 10 seconds.
         astra.algorithm.run(alg_id, alg_cfg.num_iter)
-        #if "CUDA" in params[0] and "FBP" not in params[0]:
-        #self.res += astra.algorithm.get_res_norm(alg_id)**2
-        #print math.sqrt(self.res)
+        # This could be used to check the norm of the difference between the projection data
+        # and the forward projection of the reconstruction.
+        # if "CUDA" in cfg_alg.algorithm and "FBP" not cfg_alg.algorithm:
+        # self.norm_diff += astra.algorithm.get_res_norm(alg_id)**2
+        # print math.sqrt(self.norm_diff)
 
         # Get the result
         rec = astra.data3d.get(rec_id)
@@ -643,11 +571,21 @@ class ReconstructionCommand(object):
         astra.data3d.delete(rec_id)
         astra.data3d.delete(sinogram_id)
 
-        rec = rec[:160, :160, 1]
-
         return rec
 
     def run_reconstruct_3d_astra(self, proj_data, proj_angles, alg_cfg):
+        """
+        Run a reconstruction with astra, approach based on swpapping axes
+
+        @param proj_data :: projection images
+        @param proj_angles :: angles corresponding to the projection images
+        @param alg_cfg :: tool/algorithm configuration
+        """
+
+        def get_max_frames(algorithm):
+            frames = 8 if "3D" in algorithm else 1
+            return frames
+
         nSinos = get_max_frames(algorithm=algorithm)
         iterations = alg_cfg.num_iter
         print " astra recon - doing {0} iterations".format(iterations)
@@ -656,7 +594,7 @@ class ReconstructionCommand(object):
         sinogram = proj_data
         sinogram = np.swapaxes(sinogram, 0, 1)
 
-
+        # Needs to be figured out better
         #ctr = cor
         #width = sinogram.shape[1]
         #pad = 50
@@ -729,6 +667,8 @@ class ReconstructionCommand(object):
         Apply all post-processing steps/filters/transformations on a reconstructed volume
 
         @param cfg :: post-processing configuration
+
+        Returns :: filtered data (reconstructed 3d volume)
         """
         import prep as iprep
 
@@ -771,6 +711,9 @@ class ReconstructionCommand(object):
 
         @param sample_path :: path to sample images
         @param img_format :: image format to expect/use (as a filename extension)
+
+        Returns :: stack of images as a 3-elements tuple: numpy array with sample images, white image,
+        and dark image.
         """
         # Note, not giving prefix. It will load all the files found.
         # Example prefixes are prefix = 'tomo_', prefix = 'LARMOR00', prefix = 'angle_agg'
@@ -798,21 +741,22 @@ class ReconstructionCommand(object):
         # slices along the vertical (z) axis
         # output_dir = 'output_recon_tomopy'
         print "* Saving slices of the reconstructed volume in: {0}".format(output_dir)
-        self.save_recon_as_vertical_slices(recon_data, output_dir)
+        tomoio.save_recon_as_vertical_slices(recon_data, output_dir,
+                                             name_prefix=self._OUT_SLICES_FILENAME_PREFIX)
 
         # Sideways slices:
         save_horiz_slices = False
         if save_horiz_slices:
             out_horiz_dir = os.path.join(output_dir, 'horiz_slices')
             print "* Saving horizontal slices in: {0}".format(out_horiz_dir)
-            self.save_recon_as_horizontal_slices(recon_data, out_horiz_dir)
+            tomoio.save_recon_as_horizontal_slices(recon_data, out_horiz_dir,
+                                                   name_prefix=self._OUT_HORIZ_SLICES_SUBDIR)
 
         if save_netcdf_vol:
             print "* Saving reconstructed volume as NetCDF"
-            self.save_recon_netcdf(recon_data, output_dir)
+            tomoio.save_recon_netcdf(recon_data, output_dir)
 
-    def save_preproc_images(self, output_dir, preproc_data, preproc_cfg,
-                            out_dtype='uint16'):
+    def save_preproc_images(self, output_dir, preproc_data, preproc_cfg, out_dtype='uint16'):
         """
         Save (pre-processed) images from a data array to image files.
 
@@ -821,14 +765,13 @@ class ReconstructionCommand(object):
         @param preproc_cfg :: pre-processing configuration set up for a reconstruction
         @param out_dtype :: dtype used for the pixel type/depth in the output image files
         """
-        SUBDIR_NAME='preproc_images'
 
         print " * Pre-processed images (preproc_data) dtype:", preproc_data.dtype
         min_pix = np.amin(preproc_data)
         max_pix = np.amax(preproc_data)
         print "   with min_pix: {0}, max_pix: {1}".format(min_pix, max_pix)
         if preproc_cfg.save_preproc_imgs:
-            preproc_dir = os.path.join(output_dir, SUBDIR_NAME)
+            preproc_dir = os.path.join(output_dir, self._PREPROC_IMGS_SUBDIR_NAME)
             print "* Saving pre-processed images into: {0}".format(preproc_dir)
             tomoio.make_dirs_if_needed(preproc_dir)
             for idx in range(0, preproc_data.shape[0]):
@@ -838,69 +781,3 @@ class ReconstructionCommand(object):
                                    img_format=preproc_cfg.out_img_format, dtype=out_dtype)
         else:
             print "* NOTE: not saving pre-processed images..."
-
-    def save_recon_as_vertical_slices(self, recon_data, output_dir, name_prefix='out_recon_slice',
-                                      zero_fill=6):
-        """
-        Save reconstructed volume (3d) into a series of slices along the Z axis (outermost numpy dimension)
-
-        @param data :: data as images/slices stores in numpy array
-        @param output_dir :: where to save the files
-        @param name_prefix :: prefix for the names of the images - an index is appended to this prefix
-        @param zero_fill :: number of zeros to pad the image/slice index number
-        """
-        tomoio.make_dirs_if_needed(output_dir)
-        #tomopy.io.writer.write_tiff_stack(recon_data)
-        min_pix = np.amin(recon_data)
-        max_pix = np.amax(recon_data)
-        for idx in range(0, recon_data.shape[0]):
-            tomoio.write_image(recon_data[idx, :, :], min_pix, max_pix,
-                               os.path.join(output_dir, name_prefix + str(idx).zfill(zero_fill)),
-                               dtype='uint16')
-
-    def save_recon_as_horizontal_slices(self, recon_data, out_horiz_dir,
-                                        name_prefix='out_recon_horiz_slice', zero_fill=6):
-        """
-        Save reconstructed volume (3d) into a series of slices along the Y axis (second numpy dimension)
-
-        @param data :: data as images/slices stores in numpy array
-        @param output_dir :: where to save the files
-        @param name_prefix :: prefix for the names of the images throughout the horizontal axis
-        @param zero_fill :: number of zeros to pad the image/slice index number. This index is appended to
-        the prefix
-        """
-        tomoio.make_dirs_if_needed(out_horiz_dir)
-        for idx in range(0, recon_data.shape[1]):
-            tomoio.write_image(recon_data[:, idx, :], np.amin(recon_data), np.amax(recon_data),
-                               os.path.join(out_horiz_dir, name_prefix + str(idx).zfill(zero_fill)),
-                               dtype='uint16')
-
-    def save_recon_netcdf(self, recon_data, output_dir, filename='tomo_recon_vol.nc'):
-        """
-        A netCDF, for compatibility/easier interoperation with other tools
-
-        @param recon_data :: reconstructed data volume. A sequence of images will be saved from this
-        @param output_dir :: where the outputs are being saved
-        @param filename :: name for the NetCDF file
-        """
-        try:
-            from scipy.io import netcdf_file
-        except ImportError as exc:
-            print " WARNING: could not save NetCDF file. Import error: {0}".format(exc)
-
-        xsize = recon_data.shape[0]
-        ysize = recon_data.shape[1]
-        zsize = recon_data.shape[2]
-
-        nc_path = os.path.join(output_dir, filename)
-        ncfile = netcdf_file(nc_path, 'w')
-        ncfile.createDimension('x', xsize)
-        ncfile.createDimension('y', ysize)
-        ncfile.createDimension('z', zsize)
-        print " Creating netCDF volume data variable"
-        data = ncfile.createVariable('data', np.dtype('int16').char, ('x','y','z'))
-        print " Data shape: {0}".format(data.shape)
-        print " Assigning data..."
-        data[:, :, :] = recon_data[0:xsize, 0:ysize, 0:zsize]
-        print " Closing netCDF file: {0}".format(nc_path)
-        ncfile.close()

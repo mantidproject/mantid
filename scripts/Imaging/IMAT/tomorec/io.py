@@ -402,6 +402,70 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
 
     return sample_data, flat_avg, dark_avg
 
+def save_recon_as_vertical_slices(recon_data, output_dir, name_prefix='out_recon_slice',
+                                  zero_fill=6):
+    """
+    Save reconstructed volume (3d) into a series of slices along the Z axis (outermost numpy dimension)
+
+    @param data :: data as images/slices stores in numpy array
+    @param output_dir :: where to save the files
+    @param name_prefix :: prefix for the names of the images - an index is appended to this prefix
+    @param zero_fill :: number of zeros to pad the image/slice index number
+    """
+    tomoio.make_dirs_if_needed(output_dir)
+    min_pix = np.amin(recon_data)
+    max_pix = np.amax(recon_data)
+    for idx in range(0, recon_data.shape[0]):
+        tomoio.write_image(recon_data[idx, :, :], min_pix, max_pix,
+                           os.path.join(output_dir, name_prefix + str(idx).zfill(zero_fill)),
+                           dtype='uint16')
+
+def save_recon_as_horizontal_slices(recon_data, out_horiz_dir,
+                                    name_prefix='out_recon_horiz_slice', zero_fill=6):
+    """
+    Save reconstructed volume (3d) into a series of slices along the Y axis (second numpy dimension)
+
+    @param data :: data as images/slices stores in numpy array
+    @param output_dir :: where to save the files
+    @param name_prefix :: prefix for the names of the images throughout the horizontal axis
+    @param zero_fill :: number of zeros to pad the image/slice index number. This index is appended to
+    the prefix
+    """
+    tomoio.make_dirs_if_needed(out_horiz_dir)
+    for idx in range(0, recon_data.shape[1]):
+        tomoio.write_image(recon_data[:, idx, :], np.amin(recon_data), np.amax(recon_data),
+                           os.path.join(out_horiz_dir, name_prefix + str(idx).zfill(zero_fill)),
+                           dtype='uint16')
+
+def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
+    """
+    A netCDF, for compatibility/easier interoperation with other tools
+
+    @param recon_data :: reconstructed data volume. A sequence of images will be saved from this
+    @param output_dir :: where the outputs are being saved
+    @param filename :: name for the NetCDF file
+    """
+    try:
+        from scipy.io import netcdf_file
+    except ImportError as exc:
+        print " WARNING: could not save NetCDF file. Import error: {0}".format(exc)
+
+    xsize = recon_data.shape[0]
+    ysize = recon_data.shape[1]
+    zsize = recon_data.shape[2]
+
+    nc_path = os.path.join(output_dir, filename)
+    ncfile = netcdf_file(nc_path, 'w')
+    ncfile.createDimension('x', xsize)
+    ncfile.createDimension('y', ysize)
+    ncfile.createDimension('z', zsize)
+    print " Creating netCDF volume data variable"
+    data = ncfile.createVariable('data', np.dtype('int16').char, ('x','y','z'))
+    print " Data shape: {0}".format(data.shape)
+    print " Loading/assigning data..."
+    data[:, :, :] = recon_data[0:xsize, 0:ysize, 0:zsize]
+    print " Closing netCDF file: {0}".format(nc_path)
+    ncfile.close()
 
 def self_save_zipped_scripts(output_path, this_path):
     """
