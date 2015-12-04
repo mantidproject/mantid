@@ -44,9 +44,10 @@ public:
         alg->setProperty("Filename", m_filename));
   }
 
-  void test_OutputWorkspace_Is_4D_MDEventWorkspace() {
-    auto outputWS = runAlgorithm();
+  void test_OutputWorkspace_Has_Correct_Data() {
+    IMDEventWorkspace_sptr outputWS = runAlgorithm();
     TS_ASSERT_EQUALS(4, outputWS->getNumDims());
+    TS_ASSERT_EQUALS(2, outputWS->getNumExperimentInfo());
   }
   
   //----------------------------------------------------------------------------

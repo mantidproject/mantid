@@ -9,6 +9,12 @@
 #include <fstream>
 
 namespace Mantid {
+
+// Forward declarations
+namespace API {
+class ExperimentInfo;
+}
+
 namespace MDAlgorithms {
 
 /**
@@ -53,11 +59,13 @@ private:
   struct SQWHeader {
     int32_t nfiles;
   };
-  
+
   void init();
   void exec();
   void initFileReader();
   SQWHeader readMainHeader();
+  void readAllSPEHeaders(const int32_t nfiles);
+  void readSingleSPEHeader(API::ExperimentInfo &experiment);
   void createOutputWorkspace();
 
   std::unique_ptr<std::ifstream> m_file;
