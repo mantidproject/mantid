@@ -375,7 +375,7 @@ signal_t MDHistoWorkspaceIterator::getNormalizedError() const {
 /// Returns the normalized signal for this box
 signal_t MDHistoWorkspaceIterator::getNormalizedSignalWithMask() const {
   if (this->getIsMasked()) {
-    return m_maskValue;
+    return MDMaskValue;
   }
   // What is our normalization factor?
   switch (m_normalization) {

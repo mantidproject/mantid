@@ -256,7 +256,7 @@ TMDE(signal_t MDBoxIterator)::getNormalizedError() const {
 /// Returns the normalized signal for this box
 TMDE(signal_t MDBoxIterator)::getNormalizedSignalWithMask() const {
   if (this->getIsMasked()) {
-    return m_maskValue;
+    return MDMaskValue;
   }
   // What is our normalization factor?
   switch (m_normalization) {

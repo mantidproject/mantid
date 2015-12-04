@@ -259,7 +259,7 @@ public:
    */
   virtual signal_t getSignalWithMask() const {
     if (this->getIsMasked()) {
-      return m_maskValue;
+      return Mantid::API::MDMaskValue;
     }
     return m_signal;
   }
@@ -319,7 +319,7 @@ public:
    */
   virtual signal_t getSignalNormalizedWithMask() const {
     if (this->getIsMasked()) {
-      return m_maskValue;
+      return Mantid::API::MDMaskValue;
     }
     return m_signal * m_inverseVolume;
   }
@@ -387,9 +387,6 @@ protected:
   size_t m_fileID;
   /// Mutex for modifying the event list or box averages
   Mantid::Kernel::Mutex m_dataMutex;
-
-  // Value to be returned for masked data when plotting
-  static constexpr signal_t m_maskValue = 0.0;
 
 private:
   MDBoxBase(const MDBoxBase<MDE, nd> &box);

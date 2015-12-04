@@ -133,9 +133,6 @@ public:
 protected:
   /// Normalization method for getNormalizedSignal()
   Mantid::API::MDNormalization m_normalization;
-
-  // Value to be used for masked data in plots of MDWorkspaces
-  static const signal_t m_maskValue;
 };
 
 } // namespace API

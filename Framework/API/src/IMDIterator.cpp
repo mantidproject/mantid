@@ -24,8 +24,5 @@ Mantid::API::MDNormalization IMDIterator::getNormalization() const {
   return m_normalization;
 }
 
-// Value to be used for masked data in plots of MDWorkspaces
-const signal_t IMDIterator::m_maskValue = 0.0;
-
 } // namespace API
 } // namespace Mantid
