@@ -255,6 +255,16 @@ public:
   virtual signal_t getError() const { return sqrt(m_errorSquared); }
 
   //-----------------------------------------------------------------------------------------------
+  /** Returns the integrated signal from all points within or mask value.
+   */
+  virtual signal_t getSignalWithMask() const {
+    if (this->getIsMasked()) {
+      return m_maskValue;
+    }
+    return m_signal;
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns the integrated error squared from all points within.
    */
   virtual signal_t getErrorSquared() const { return m_errorSquared; }
@@ -301,6 +311,17 @@ public:
    */
   virtual signal_t getErrorSquaredNormalized() const {
     return m_errorSquared * m_inverseVolume;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Returns the integrated signal from all points within, normalized for the
+   * cell volume
+   */
+  virtual signal_t getSignalNormalizedWithMask() const {
+    if (this->getIsMasked()) {
+      return m_maskValue;
+    }
+    return m_signal * m_inverseVolume;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -366,6 +387,9 @@ protected:
   size_t m_fileID;
   /// Mutex for modifying the event list or box averages
   Mantid::Kernel::Mutex m_dataMutex;
+
+  // Value to be returned for masked data when plotting
+  static constexpr signal_t m_maskValue = 0.0;
 
 private:
   MDBoxBase(const MDBoxBase<MDE, nd> &box);

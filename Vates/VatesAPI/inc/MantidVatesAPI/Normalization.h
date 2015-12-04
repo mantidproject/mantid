@@ -41,7 +41,8 @@ Determine which normalization function will be called on an IMDNode
 */
 NormFuncIMDNodePtr makeMDEventNormalizationFunction(
     VisualNormalization normalizationOption,
-    Mantid::API::IMDEventWorkspace const *const ws);
+    Mantid::API::IMDEventWorkspace const *const ws,
+    const bool hasMask);
 
 /**
 Determine which normalization function will be called on an IMDIterator of an IMDWorkspace

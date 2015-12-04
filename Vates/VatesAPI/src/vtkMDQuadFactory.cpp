@@ -107,7 +107,7 @@ namespace Mantid
         {
           progressUpdating.eventRaised(progressFactor * double(iBox));
 
-          Mantid::signal_t signal = it->getNormalizedSignal();
+          Mantid::signal_t signal = it->getNormalizedSignalWithMask();
           if (!isSpecial( signal ) && m_thresholdRange->inRange(signal))
           {
             useBox[iBox] = true;
