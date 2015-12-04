@@ -64,7 +64,8 @@ public:
 
   /// Clears all memory associated with the AlgorithmManager, ADS & IDS
   void clear();
-
+  /// shuts down and performs clean up tasks
+  void shutdown();
   /// Clear memory associated with the AlgorithmManager
   void clearAlgorithms();
 
@@ -76,7 +77,6 @@ public:
 
   /// Clear memory associated with the PropertyManagers
   void clearPropertyManagers();
-  void shutdown();
   /// Creates and instance of an algorithm
   IAlgorithm *createAlgorithm(const std::string &algName,
                               const int &version = -1);

@@ -33,6 +33,7 @@ private:
     // 3 = testMeanFirst
     // 4 = testMeanFirstWithReturnBackground
     // 5 = testMeanSecond
+    // 6 = testLeaveNegativeValues
 
     // common beginning
     Mantid::Algorithms::CalculateFlatBackground flatBG;
@@ -56,7 +57,8 @@ private:
         TS_ASSERT_THROWS_NOTHING(
             flatBG.setPropertyValue("OutputMode", "Return Background"))
       }
-    } else if (functindex == 3 || functindex == 4 || functindex == 5) {
+    } else if (functindex == 3 || functindex == 4 || functindex == 5 ||
+               functindex == 6) {
       flatBG.setPropertyValue("InputWorkspace",
                               "calculateflatbackgroundtest_ramp");
       flatBG.setPropertyValue("WorkspaceIndexList", "");
@@ -80,6 +82,14 @@ private:
         // remove the last half of the spectrum
         flatBG.setProperty("StartX", 2 * double(NUMBINS) / 3);
         flatBG.setProperty("EndX", double(NUMBINS));
+      } else if (functindex == 6) {
+        flatBG.setPropertyValue("OutputWorkspace",
+                                "calculateflatbackgroundtest_second");
+
+        flatBG.setProperty("StartX", 2 * double(NUMBINS) / 3);
+        flatBG.setProperty("EndX", double(NUMBINS));
+
+        flatBG.setProperty("NullifyNegativeValues", false);
       }
     }
 
@@ -296,6 +306,42 @@ public:
               EOut[i], std::sqrt((EIn[i] * EIn[i]) + (backError * backError)),
               1e-6)
         }
+      }
+    }
+  }
+  void testLeaveNegatives() {
+
+    runCalculateFlatBackground(6);
+    MatrixWorkspace_sptr inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "calculateflatbackgroundtest_ramp");
+    MatrixWorkspace_sptr outputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "calculateflatbackgroundtest_second");
+    // The X vectors should be the same
+    TS_ASSERT_DELTA(inputWS->readX(0), outputWS->readX(0), 1e-6)
+
+    for (int j = 0; j < NUMSPECS; ++j) {
+      const Mantid::MantidVec &YIn = inputWS->readY(j);
+      const Mantid::MantidVec &EIn = inputWS->readE(j);
+      const Mantid::MantidVec &YOut = outputWS->readY(j);
+      const Mantid::MantidVec &EOut = outputWS->readE(j);
+      // do our own calculation of the background and its error to check with
+      // later
+      double background = 0, backError = 0, numSummed = 0;
+      // 2*NUMBINS/3 makes use of the truncation of integer division
+      for (int k = 2 * NUMBINS / 3; k < NUMBINS; ++k) {
+        background += YIn[k];
+        backError += EIn[k] * EIn[k];
+        numSummed++;
+      }
+      background /= numSummed;
+      backError = std::sqrt(backError) / numSummed;
+      for (int i = 0; i < NUMBINS; ++i) {
+        double correct = (YIn[i] - background);
+        double err = std::sqrt((EIn[i] * EIn[i]) + (backError * backError));
+        TS_ASSERT_DELTA(YOut[i], correct, 1e-6)
+        TS_ASSERT_DELTA(EOut[i], err, 1e-6)
       }
     }
   }

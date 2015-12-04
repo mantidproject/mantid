@@ -222,7 +222,7 @@ private:
   //@}
 
   // plots workspace according to the user selection
-  void plotFocusedWorkspace(std::string outWSName, int bank);
+  void plotFocusedWorkspace(std::string outWSName);
 
   // algorithms to save the generated workspace
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);

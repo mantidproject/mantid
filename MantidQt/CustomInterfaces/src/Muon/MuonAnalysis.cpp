@@ -87,22 +87,18 @@ const QString MuonAnalysis::FIRST_GOOD_BIN_DEFAULT("0.3");
 //----------------------
 // Public member functions
 //----------------------
-///Constructor
-MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), 
-  m_last_dir(), 
-  m_workspace_name("MuonAnalysis"), m_grouped_name(m_workspace_name + "Grouped"), 
-  m_currentDataName(),
-  m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), 
-  m_currentTab(NULL),
-  m_groupNames(), 
-  m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
-  m_updating(false), m_updatingGrouping(false), m_loaded(false), m_deadTimesChanged(false),
-  m_textToDisplay(""), 
-  m_optionTab(NULL), m_fitDataTab(NULL), m_resultTableTab(NULL), // Will be created in initLayout()
-  m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
-  m_currentLabel("NoLabelSet")
-{}
+/// Constructor
+MuonAnalysis::MuonAnalysis(QWidget *parent)
+    : UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"),
+      m_grouped_name(m_workspace_name + "Grouped"), m_currentDataName(),
+      m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), m_currentTab(NULL),
+      m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
+      m_updating(false), m_updatingGrouping(false), m_loaded(false),
+      m_deadTimesChanged(false), m_textToDisplay(""), m_optionTab(NULL),
+      m_fitDataTab(NULL),
+      m_resultTableTab(NULL), // Will be created in initLayout()
+      m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
+      m_currentLabel("NoLabelSet"), m_numPeriods(0) {}
 
 /**
  * Initialize local Python environmnet. 
@@ -228,8 +224,10 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.frontPlotFuncs, SIGNAL( activated(int) ),m_uiForm.groupTablePlotChoice, SLOT( setCurrentIndex(int) ) );
   connect(m_uiForm.groupTablePlotChoice, SIGNAL( activated(int) ), this, SLOT( syncGroupTablePlotTypeWithHome() ) );
 
-  connect(m_uiForm.homePeriodBox1, SIGNAL( currentIndexChanged(int) ), this, SLOT( checkForEqualPeriods() ));
-  connect(m_uiForm.homePeriodBox2, SIGNAL( currentIndexChanged(int) ), this, SLOT( checkForEqualPeriods() ));
+  connect(m_uiForm.homePeriodBox1, SIGNAL(textChanged(const QString &)), this,
+          SLOT(checkForEqualPeriods()));
+  connect(m_uiForm.homePeriodBox2, SIGNAL(textChanged(const QString &)), this,
+          SLOT(checkForEqualPeriods()));
 
   connect(m_uiForm.hideToolbars, SIGNAL( toggled(bool) ), this, SIGNAL( setToolbarsHidden(bool) ));
 
@@ -506,41 +504,30 @@ MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, in
 
   alg->initialize();
 
-  auto loadedWS = AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
+  auto loadedWS =
+      AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
+  auto inputGroup = boost::make_shared<WorkspaceGroup>();
 
-  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS) )
-  {
+  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS)) {
     // If is a group, will need to handle periods
-    
-    if ( MatrixWorkspace_sptr ws1 = getPeriodWorkspace(First, group) )
-    {
-      alg->setProperty( "FirstPeriodWorkspace", prepareAnalysisWorkspace(ws1, isRaw) );
+    for (int i = 0; i < group->getNumberOfEntries(); i++) {
+      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+      inputGroup->addWorkspace(prepareAnalysisWorkspace(ws, isRaw));
     }
-    else
-    {
-      // First period should be selected no matter what
-      throw std::runtime_error("First period should be specified");
-    }
-
-    if ( MatrixWorkspace_sptr ws2 = getPeriodWorkspace(Second, group) )
-    {
-      // If second period was selected, set it up together with selected period arithmetics
-
-      alg->setProperty("SecondPeriodWorkspace", prepareAnalysisWorkspace(ws2, isRaw) );
- 
-      // Parse selected operation
-      const std::string op = m_uiForm.homePeriodBoxMath->currentText().toStdString();
-      alg->setProperty("PeriodOperation", op);
-    }
+    // Parse selected operation
+    const std::string summedPeriods =
+        m_uiForm.homePeriodBox1->text().toStdString();
+    const std::string subtractedPeriods =
+        m_uiForm.homePeriodBox2->text().toStdString();
+    alg->setProperty("SummedPeriodSet", summedPeriods);
+    alg->setProperty("SubtractedPeriodSet", subtractedPeriods);
+  } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
+    // Put this single WS into a group and set it as the input property
+    inputGroup->addWorkspace(prepareAnalysisWorkspace(ws, isRaw));
+  } else {
+    throw std::runtime_error("Unsupported workspace type");
   }
-  else if ( auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS) )
-  {
-    alg->setProperty( "FirstPeriodWorkspace", prepareAnalysisWorkspace(ws, isRaw) );
-  }
-  else
-  {
-    throw std::runtime_error("Usupported workspace type");
-  }
+  alg->setProperty("InputWorkspace", inputGroup);
 
   if ( itemType == Group )
   {
@@ -656,45 +643,6 @@ MatrixWorkspace_sptr MuonAnalysis::prepareAnalysisWorkspace(MatrixWorkspace_sptr
   }
 
   return ws;
-}
-
-
-/**
- * Selects a workspace from the group according to what is selected on the interface for the period.
- * @param periodType :: Which period we want
- * @param group      :: Workspace group as loaded from the data file
- * @return Selected workspace
- */ 
-MatrixWorkspace_sptr MuonAnalysis::getPeriodWorkspace(PeriodType periodType, WorkspaceGroup_sptr group)
-{
-  QComboBox* periodSelector;
- 
-  switch(periodType)
-  {
-    case First:
-      periodSelector = m_uiForm.homePeriodBox1; break;
-    case Second:
-      periodSelector = m_uiForm.homePeriodBox2; break;
-    default:
-      throw std::invalid_argument("Unsupported period type");
-  }
-
-  const QString periodLabel = periodSelector->currentText();
-
-  if ( periodLabel != "None" )
-  {
-    int periodNumber = periodLabel.toInt();
-    size_t periodIndex = static_cast<size_t>(periodNumber - 1);
-
-    if ( periodNumber < 1 || periodIndex >= group->size() )
-      throw std::runtime_error("Loaded group doesn't seem to have period " + periodLabel.toStdString());
-
-    return boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(periodIndex) );
-  }
-  else
-  {
-    return MatrixWorkspace_sptr();
-  }
 }
 
 /**
@@ -1642,7 +1590,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   // If instrument or number of periods has changed -> update period widgets
   size_t numPeriods = MuonAnalysisHelper::numPeriods(loadResult->loadedWorkspace);
-  if(instrumentChanged || static_cast<int>(numPeriods) != m_uiForm.homePeriodBox1->count())
+  if(instrumentChanged || numPeriods != m_numPeriods)
   {
     updatePeriodWidgets(numPeriods);
   }
@@ -1706,8 +1654,8 @@ void MuonAnalysis::guessAlphaClicked()
       return;
 
     QString inputWS = m_workspace_name.c_str();
-    if ( m_uiForm.homePeriodBox2->isEnabled() )
-      inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
+    if (m_uiForm.homePeriodBox2->isEnabled())
+      inputWS += "_" + m_uiForm.homePeriodBox1->text();
 
     double alphaValue;
 
@@ -1838,37 +1786,25 @@ void MuonAnalysis::updateFrontAndCombo()
  * Updates widgets related to period algebra.
  * @param numPeriods Number of periods available
  */
-void MuonAnalysis::updatePeriodWidgets(size_t numPeriods)
-{
-  QString periodLabel = "Data collected in " + QString::number(numPeriods)
-                        + " periods. Plot/analyse period: ";
+void MuonAnalysis::updatePeriodWidgets(size_t numPeriods) {
+  QString periodLabel = "Data collected in " + QString::number(numPeriods) +
+                        " periods. Plot/analyse period(s): ";
   m_uiForm.homePeriodsLabel->setText(periodLabel);
 
-  // Remove all the previous items
-  m_uiForm.homePeriodBox1->clear();
+  // Reset the previous text
+  m_uiForm.homePeriodBox1->setText("1");
   m_uiForm.homePeriodBox2->clear();
 
-  m_uiForm.homePeriodBox2->addItem("None");
-
-  for ( size_t i = 1; i <= numPeriods; i++ )
-  {
-    m_uiForm.homePeriodBox1->addItem(QString::number(i));
-    m_uiForm.homePeriodBox2->addItem(QString::number(i));
-  }
-
   // We only need period widgets enabled if we have more than 1 period
-  if(numPeriods > 1)
-  {
+  if (numPeriods > 1) {
     m_uiForm.homePeriodBox2->setEnabled(true);
-    m_uiForm.homePeriodBoxMath->setEnabled(true);
-  }
-  else
-  {
+  } else {
     m_uiForm.homePeriodBox2->setEnabled(false);
-    m_uiForm.homePeriodBoxMath->setEnabled(false);
-  }  
-}
+  }
 
+  // cache number of periods
+  m_numPeriods = numPeriods;
+}
 
 /**
  * Return the group-number for the group in a row. Return -1 if
@@ -1952,19 +1888,15 @@ void MuonAnalysis::clearLoadedRun() {
  * @return Return empty string if no periods (well just one period). If more 
  *         one period then return "_#" string for the periods selected by user
  */
-QStringList MuonAnalysis::getPeriodLabels() const
-{
+QStringList MuonAnalysis::getPeriodLabels() const {
   QStringList retVal;
-  if ( m_uiForm.homePeriodBox2->isEnabled() && m_uiForm.homePeriodBox2->currentText()!="None" )
-  {
-    retVal.append( "_" + m_uiForm.homePeriodBox1->currentText());
-    retVal.append( "_" + m_uiForm.homePeriodBox2->currentText());
-  }
-  else if ( m_uiForm.homePeriodBox2->isEnabled() )
-  {
-    retVal.append( "_" + m_uiForm.homePeriodBox1->currentText());
-  }
-  else
+  if (m_uiForm.homePeriodBox2->isEnabled() &&
+      m_uiForm.homePeriodBox2->text() != "") {
+    retVal.append("_" + m_uiForm.homePeriodBox1->text());
+    retVal.append("_" + m_uiForm.homePeriodBox2->text());
+  } else if (m_uiForm.homePeriodBox2->isEnabled()) {
+    retVal.append("_" + m_uiForm.homePeriodBox1->text());
+  } else
     retVal.append("");
 
   return retVal;
@@ -2263,7 +2195,6 @@ void MuonAnalysis::startUpLook()
   m_uiForm.frontAlphaLabel->setVisible(false);
   m_uiForm.frontAlphaNumber->setVisible(false);
   m_uiForm.frontAlphaNumber->setEnabled(false);
-  m_uiForm.homePeriodBox2->setEditable(false);
   m_uiForm.homePeriodBox2->setEnabled(false);
 
   // Set validators for number-only boxes
@@ -2744,9 +2675,10 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
 
-  connect(m_uiForm.homePeriodBox1, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
-  connect(m_uiForm.homePeriodBoxMath, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
-  connect(m_uiForm.homePeriodBox2, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+  connect(m_uiForm.homePeriodBox1, SIGNAL(editingFinished()), this,
+          SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.homePeriodBox2, SIGNAL(editingFinished()), this,
+          SLOT(homeTabUpdatePlot()));
 
   connect(m_uiForm.deadTimeType, SIGNAL( activated(int) ), this, SLOT( deadTimeTypeAutoUpdate(int) ));
 
@@ -2837,13 +2769,14 @@ void MuonAnalysis::loadWidgetValue(QWidget* target, const QVariant& defaultValue
 }
 
 /**
- * Checks whether two specified periods are equal and, if they are, sets second one to None.
+ * Checks whether two specified period sets are equal and, if they are, unsets
+ * second one.
+ * At present, no check is made for if the same index appears in both lists -
+ * this is down to the user!
  */
-void MuonAnalysis::checkForEqualPeriods()
-{
-  if ( m_uiForm.homePeriodBox2->currentText() == m_uiForm.homePeriodBox1->currentText() )
-  {
-    m_uiForm.homePeriodBox2->setCurrentIndex(0);
+void MuonAnalysis::checkForEqualPeriods() {
+  if (m_uiForm.homePeriodBox2->text() == m_uiForm.homePeriodBox1->text()) {
+    m_uiForm.homePeriodBox2->clear();
   }
 }
 
@@ -3316,19 +3249,13 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 
   // -- Period options --------------------------------------------------------
 
-  QString periodLabel1 = m_uiForm.homePeriodBox1->currentText();
+  QString periodLabel1 = m_uiForm.homePeriodBox1->text();
+  loadAlg->setProperty("SummedPeriodSet", periodLabel1.toStdString());
 
-  int periodIndex1 = periodLabel1.toInt() - 1;
-  loadAlg->setProperty("FirstPeriod", periodIndex1);
-
-  QString periodLabel2 = m_uiForm.homePeriodBox2->currentText();
+  QString periodLabel2 = m_uiForm.homePeriodBox2->text();
   if ( periodLabel2 != "None" )
   {
-    int periodIndex2 = periodLabel2.toInt() - 1;
-    loadAlg->setProperty("SecondPeriod", periodIndex2);
-
-    std::string op = m_uiForm.homePeriodBoxMath->currentText().toStdString();
-    loadAlg->setProperty("PeriodOperation", op);
+    loadAlg->setProperty("SubtractedPeriodSet", periodLabel2.toStdString());
   }
 
   return loadAlg;

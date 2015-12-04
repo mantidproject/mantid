@@ -17,8 +17,6 @@
 
 #include <Poco/ActiveResult.h>
 
-#include <json/json.h>
-
 #include <cstdarg>
 
 #ifdef _WIN32
@@ -221,6 +219,12 @@ void FrameworkManagerImpl::clear() {
   clearPropertyManagers();
 }
 
+void FrameworkManagerImpl::shutdown()
+{
+  clear();
+  Kernel::UsageService::Instance().shutdown();
+}
+
 /**
  * Clear memory associated with the AlgorithmManager
  */
@@ -250,10 +254,6 @@ void FrameworkManagerImpl::clearPropertyManagers() {
   PropertyManagerDataService::Instance().clear();
 }
 
-void FrameworkManagerImpl::shutdown() {
-  //clear();
-  Kernel::UsageService::Instance().shutdown();
-}
 
 
 /** Creates and initialises an instance of an algorithm

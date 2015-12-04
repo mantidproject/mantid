@@ -21,6 +21,9 @@ IMDWorkspace::IMDWorkspace(const IMDWorkspace &other)
 /// Destructor
 IMDWorkspace::~IMDWorkspace() {}
 
+// Value to be used for masked data in plots of MDWorkspaces
+const signal_t IMDWorkspace::m_maskValue = 0.0;
+
 /** Creates a single iterator and returns it.
  *
  * This calls createIterators(), a pure virtual method on IMDWorkspace which
@@ -51,6 +54,20 @@ signal_t IMDWorkspace::getSignalAtVMD(
     const Mantid::Kernel::VMD &coords,
     const Mantid::API::MDNormalization &normalization) const {
   return this->getSignalAtCoord(coords.getBareArray(), normalization);
+}
+
+//-------------------------------------------------------------------------------------------
+/** Returns the signal (normalized by volume) at a given coordinates
+ * or 0 if masked
+ *
+ * @param coords :: coordinate as a VMD vector
+ * @param normalization :: how to normalize the signal returned
+ * @return normalized signal
+ */
+signal_t IMDWorkspace::getSignalWithMaskAtVMD(
+    const Mantid::Kernel::VMD &coords,
+    const Mantid::API::MDNormalization &normalization) const {
+  return this->getSignalWithMaskAtCoord(coords.getBareArray(), normalization);
 }
 
 //-----------------------------------------------------------------------------------------------

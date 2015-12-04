@@ -1,5 +1,4 @@
 #include "MantidPythonInterface/kernel/DataServiceExporter.h"
-#include "MantidPythonInterface/kernel/TrackingInstanceMethod.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -12,8 +11,8 @@ void export_AnalysisDataService() {
   typedef DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>
       ADSExporter;
   auto pythonClass = ADSExporter::define("AnalysisDataServiceImpl");
-
-  // Instance method
-  TrackingInstanceMethod<AnalysisDataService, ADSExporter::PythonType>::define(
-      pythonClass);
+  pythonClass.def("Instance", &AnalysisDataService::Instance,
+                  return_value_policy<reference_existing_object>(),
+                  "Return a reference to the singleton instance")
+      .staticmethod("Instance");
 }

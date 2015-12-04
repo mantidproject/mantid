@@ -31,7 +31,6 @@ bool MantidApplication::notify( QObject * receiver, QEvent * event )
   }
   catch(std::exception& e)
   {
-
     if (MantidQt::API::MantidDialog::handle(receiver,e))
       return true; // stops event propagation
 
