@@ -211,8 +211,8 @@ protected:
     return NULL;
   }
 
-  /// Typedef for internal unique shared pointer for successor types.
-  typedef boost::shared_ptr<vtkDataSetFactory> SuccessorType;
+  /// Typedef for internal unique pointer for successor types.
+  typedef std::unique_ptr<vtkDataSetFactory> SuccessorType;
 
   vtkDataSetFactory::SuccessorType m_successor;
 

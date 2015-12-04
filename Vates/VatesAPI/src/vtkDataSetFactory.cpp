@@ -24,9 +24,7 @@ vtkDataSetFactory::~vtkDataSetFactory()
 void vtkDataSetFactory::SetSuccessor(vtkDataSetFactory_uptr pSuccessor) {
   if (pSuccessor != nullptr) {
     // Assignment peformed first (RAII) to guarantee no side effects.
-    m_successor = vtkDataSetFactory::SuccessorType(
-        static_cast<std::unique_ptr<vtkDataSetFactory> &&>(
-            std::move(pSuccessor)));
+    m_successor = std::move(pSuccessor);
     // Unless overriden, successors should not be the same type as the present
     // instance.
     if (m_successor->getFactoryTypeName() == this->getFactoryTypeName()) {
