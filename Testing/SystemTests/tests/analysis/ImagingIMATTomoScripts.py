@@ -32,6 +32,9 @@ class ImagingIMATTomoTests(unittest.TestCase):
         # a name for the stack / group of workspaces
         _data_wsname = 'small_img_stack'
 
+        self.__class__.test_input_dir = 'some_imaging_test_path_in'
+        self.__class__.test_output_dir = 'some_imaging_test_path_out'
+
         if not self.__class__.data_wsg:
             filename_string = ",".join(_raw_files)
             # Load all images into a workspace group, one matrix workspace per image
@@ -50,6 +53,14 @@ class ImagingIMATTomoTests(unittest.TestCase):
         img_workspaces = [ self.data_wsg.getItem(i) for i in range(0, self.data_wsg.size()) ]
         for wksp in img_workspaces:
             self.assertTrue(isinstance(wksp, MatrixWorkspace))
+
+    def tearDown(self):
+        import os
+        if os.path.exists(self.test_input_dir):
+            os.rmdir(self.test_input_dir)
+        import shutil
+        if os.path.exists(self.test_output_dir):
+            shutil.rmtree(self.test_output_dir)
 
     # Remember: use this when rhel6/Python 2.6 is deprecated
     # @classmethod
@@ -80,7 +91,9 @@ class ImagingIMATTomoTests(unittest.TestCase):
             for yidx in range(0, wksp.getNumberHistograms()):
                 data_vol[zidx, yidx, :] = wksp.readY(yidx)
 
-        return data_vol
+        # In the Mantid workspaces we have the usual double/float64 values
+        # but reconstruction tools effectively work on float32
+        return data_vol.astype(dtype='float32')
 
     def test_scale_down_errors(self):
         import IMAT.prep as iprep
@@ -166,14 +179,14 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         for coords in [(3, 510, 0), (2,2,3), (1,0,0), (0, 500, 5)]:
             peek_out = masked[coords]
-            self.assertEquals(peek_out, some_val,
+            self.assertAlmostEquals(peek_out, some_val,
                               msg="Circular mask: wrong value found outside. Expected: {0}, found: {1}".
                               format(some_val, peek_out))
 
         for coords in [(3, 200, 200), (2, 50, 20), (1, 300, 100), (0, 400, 200)]:
             peek_in = masked[coords]
             expected_val = self.data_vol[coords]
-            self.assertEquals(peek_in, expected_val,
+            self.assertAlmostEquals(peek_in, expected_val,
                               msg="Circular mask: wrong value found inside. Expected: {0}, found: {1}".
                               format(expected_val, peek_in))
 
@@ -220,6 +233,115 @@ class ImagingIMATTomoTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
                                                         'fourier-wavelet')
+
+        with self.assertRaises(ValueError):
+            iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
+                                                        'fw')
+
+        with self.assertRaises(ValueError):
+            iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
+                                                        'wf')
+
+    def test_config_pre(self):
+        """
+        Basic consistency check of the pre-processing config and some default
+        settings
+        """
+        import IMAT.tomorec.configs as cfgs
+
+        pre = cfgs.PreProcConfig()
+        self.assertEquals(pre.input_dir, None)
+        self.assertEquals(pre.max_angle, 360)
+        self.assertEquals(pre.normalize_flat_dark, True)
+        self.assertEquals(pre.crop_coords, None)
+        self.assertEquals(pre.scale_down, 0)
+        self.assertEquals(pre.stripe_removal_method, 'wavelet-fourier')
+        self.assertEquals(pre.save_preproc_imgs, True)
+
+    def test_config_alg(self):
+        """
+        Basic consistency check of the tool/algorithm config and some default
+        values
+        """
+        import IMAT.tomorec.configs as cfgs
+
+        alg = cfgs.ToolAlgorithmConfig()
+        self.assertEquals(alg.tool, alg.DEF_TOOL)
+        self.assertEquals(alg.algorithm, alg.DEF_ALGORITHM)
+        self.assertEquals(alg.num_iter, None)
+        self.assertEquals(alg.regularization, None)
+
+    def test_config_post(self):
+        """
+        Basic consistency check of the post-processing config and some default
+        values
+        """
+        import IMAT.tomorec.configs as cfgs
+
+        post = cfgs.PostProcConfig()
+        self.assertEquals(post.output_dir, None)
+        self.assertEquals(post.circular_mask, 0.94)
+
+    def test_config_all(self):
+        """
+        Basic consistency check of the tomographic reconstruction config and some
+        default values
+        """
+        import IMAT.tomorec.configs as cfgs
+
+        pre_conf = cfgs.PreProcConfig()
+        alg_conf = cfgs.ToolAlgorithmConfig()
+        post_conf = cfgs.PostProcConfig()
+        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
+
+        self.assertEquals(conf.preproc_cfg, pre_conf)
+        self.assertEquals(conf.alg_cfg, alg_conf)
+        self.assertEquals(conf.postproc_cfg, post_conf)
+
+        print conf
+
+    def test_recon_fails_ok(self):
+        import IMAT.tomorec.reconstruction_command as cmd
+        cmd = cmd.ReconstructionCommand()
+
+        with self.assertRaises(ValueError):
+            cmd.do_recon('', cmd_line='')
+
+        import IMAT.tomorec.configs as cfgs
+        pre_conf = cfgs.PreProcConfig()
+        alg_conf = cfgs.ToolAlgorithmConfig()
+        post_conf = cfgs.PostProcConfig()
+        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
+        with self.assertRaises(ValueError):
+            cmd.do_recon(conf, cmd_line='irrelevant')
+
+        pre_conf.input_dir = self.test_input_dir
+        import IMAT.tomorec.io as tomoio
+        tomoio.make_dirs_if_needed(self.test_input_dir)
+        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
+        with self.assertRaises(ValueError):
+            cmd.do_recon(conf, cmd_line='irrelevant')
+
+        post_conf.output_dir = self.test_output_dir
+        tomoio.make_dirs_if_needed(self.test_output_dir)
+        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
+        # should fail because no images found in input dir
+        with self.assertRaises(RuntimeError):
+            cmd.do_recon(conf, cmd_line='irrelevant')
+
+        import os
+        self.assertTrue(os.path.exists(self.test_input_dir))
+        self.assertTrue(os.path.exists(os.path.join(self.test_output_dir,
+                                                    '0.README_reconstruction.txt')))
+        self.assertTrue(os.path.exists(self.test_output_dir))
+
+    def test_read_in_fails_ok(self):
+        import IMAT.tomorec.reconstruction_command as cmd
+        cmd = cmd.ReconstructionCommand()
+
+        with self.assertRaises(RuntimeError):
+            cmd.read_in_stack(self.test_input_dir, 'tiff')
+
 
 # Just run the unittest tests defined above
 class ImagingIMATScriptsTest(stresstesting.MantidStressTest):

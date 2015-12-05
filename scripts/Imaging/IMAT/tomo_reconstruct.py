@@ -48,8 +48,8 @@ ipython -- scripts/Imaging/IMAT/tomo_reconstruct.py\
  --region-of-interest='[5, 252, 507, 507] -- rotate -1'
 """
 
-import tomorec.reconstruction_command as tomocmd
-import tomorec.configs as tomocfg
+import IMAT.tomorec.reconstruction_command as tomocmd
+import IMAT.tomorec.configs as tomocfg
 
 def setup_cmd_options():
     """
@@ -111,7 +111,7 @@ def setup_cmd_options():
                          "If not provided, the normalization against beam intensity fluctuations will not be "
                          "performed")
 
-    grp_pre.add_argument("--median-filter-width", type=int,
+    grp_pre.add_argument("--median-filter-size", type=int,
                          required=False, help="Size/width of the median filter (pre-processing")
 
     grp_pre.add_argument("--remove-stripes", default='wf', required=False, type=str,
@@ -187,10 +187,10 @@ def grab_preproc_options(args):
     if args.air_region:
         pre_config.crop_coords = ast.literal_eval(args.air_region)
 
-    if args.median_filter_width:
+    if args.median_filter_size:
         if not args.num_iter.isdigit():
-            raise RuntimeError("The median filter width must be an integer")
-        pre_config.median_filter_width = args.median_filter_width
+            raise RuntimeError("The median filter size/width must be an integer")
+        pre_config.median_filter_size = args.median_filter_size
 
     if args.max_angle:
         pre_config.max_angle = float(args.max_angle)
@@ -253,7 +253,7 @@ def main_tomo_rec():
 
     import inspect
 
-    import tomorec.io as tomoio
+    import IMAT.tomorec.io as tomoio
 
     arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()

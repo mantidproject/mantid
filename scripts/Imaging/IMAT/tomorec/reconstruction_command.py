@@ -33,8 +33,8 @@ try:
 except ImportError:
     raise ImportError("Could not find the subpackage scipy.ndimage, required for image pre-/post-processing")
 
-import tomorec.io as tomoio
-import tomorec.configs as tomocfg
+import IMAT.tomorec.io as tomoio
+import IMAT.tomorec.configs as tomocfg
 
 class ReconstructionCommand(object):
     """
@@ -61,6 +61,14 @@ class ReconstructionCommand(object):
         @param cmd_line :: command line text if running from the CLI. When provided it will
         be written in the output readme file(s) for reference.
         """
+        if not cfg or not isinstance(cfg, tomocfg.ReconstructionConfig):
+            raise ValueError("Cannot run a reconstruction without a valid configuration")
+
+        if not cfg.preproc_cfg.input_dir:
+            raise ValueError("Cannot run a reconstruction without setting the input path")
+
+        if not cfg.postproc_cfg.output_dir:
+            raise ValueError("Cannot run a reconstruction without setting the output path")
 
         readme_fullpath = os.path.join(cfg.postproc_cfg.output_dir, self._OUT_README_FNAME)
         tstart = self.gen_readme_summary_begin(readme_fullpath, cfg, cmd_line)
@@ -96,28 +104,6 @@ class ReconstructionCommand(object):
 
         self.gen_readme_summary_end(readme_fullpath, (data, preproc_data, recon_data), tstart,
                                     t_recon_end - t_recon_start)
-
-    def apply_all_preproc(self, data, preproc_cfg, white, dark):
-        """
-        Do all the pre-processing. This does all that is needed between a)
-        loading the input data, and b) starting a reconstruction
-        run/job. From raw inputs to pre-proc data that is ready to go for
-        reconstruction.
-
-        @param data :: raw data (sample projection images)
-        @param preproc_cfg :: pre-processing configuration
-        @param white :: white / flat / open-beam image for normalization in some of the first
-        pre-processing steps
-        @param dark :: dark image for normalization
-
-        Returns :: pre-processed data.
-
-        """
-        preproc_data = self.apply_prep_filters(data, preproc_cfg, white, dark)
-        preproc_data = self.apply_line_projection(preproc_data, preproc_cfg)
-        preproc_data = self.apply_final_preproc_corrections(preproc_data, preproc_cfg)
-
-        return preproc_data
 
     def gen_readme_summary_begin(self, filename, cfg, cmd_line):
         """
@@ -205,6 +191,136 @@ class ReconstructionCommand(object):
             tend = time.time()
             oreadme.write("Total time elapsed: {0:.3f}s\r\n".format(tend-tstart))
             oreadme.write('Time now (run end): ' + time.ctime(tend))
+
+    def apply_all_preproc(self, data, preproc_cfg, white, dark):
+        """
+        Do all the pre-processing. This does all that is needed between a)
+        loading the input data, and b) starting a reconstruction
+        run/job. From raw inputs to pre-proc data that is ready to go for
+        reconstruction.
+
+        @param data :: raw data (sample projection images)
+        @param preproc_cfg :: pre-processing configuration
+        @param white :: white / flat / open-beam image for normalization in some of the first
+        pre-processing steps
+        @param dark :: dark image for normalization
+
+        Returns :: pre-processed data.
+
+        """
+        preproc_data = self.apply_prep_filters(data, preproc_cfg, white, dark)
+        preproc_data = self.apply_line_projection(preproc_data, preproc_cfg)
+        preproc_data = self.apply_final_preproc_corrections(preproc_data, preproc_cfg)
+
+        return preproc_data
+
+    def apply_prep_filters(self, data, cfg, white, dark):
+        """
+        Apply the normal initial pre-processing filters, including simple
+        operations as selecting/cropping to the region-of-interest,
+        normalization, etc.
+
+        @param data :: projection images data, as 3d numpy array, with images along outermost (z)
+        dimension
+
+        @param cfg :: pre-processing configuration
+        @param white :: white/flat/open-beam image for normalization
+        @param dark :: dark image for normalization
+
+        Returns :: process/filtered data (sizes can change (cropped) and data can be rotated)
+        """
+        print " * Beginning pre-processing with pixel data type:", data.dtype
+        if 'float64' == data.dtype:
+            data = data.astype(dtype='float32')
+            print " * Note: pixel data type changed to:", data.dtype
+
+        data = self.crop_coords(data, cfg)
+        data = self.normalize_air_region(data, cfg)
+        data = self.normalize_flat_dark(data, cfg, white, dark)
+
+        data = self.apply_cut_off(data, cfg)
+        data = self.rotate_imgs(data, cfg)
+
+        return data
+
+    def apply_line_projection(self, imgs_angles, preproc_cfg):
+        """
+        Transform pixel values as $- ln (Is/I0)$, where $Is$ is the pixel (intensity) value and $I0$ is a
+        reference value (pixel/intensity value for open beam, or maximum in the stack or the image).
+
+        This produces a projection image, $ p(s) = -ln\\frac{I(s)}{I(0)} $,
+        with $ I(s) = I(0) e^{-\\int_0^s \\mu(x)dx} $
+        where:
+        $p(s)$ represents the sum of the density of objects along a line (pixel) of the beam
+        I(0) initital intensity of netron beam (white images)
+        I(s) neutron count measured by detector/camera
+
+        The integral is the density along the path through objects.
+        This is required for example when pixels have neutron count values.
+
+        @param imgs_angles :: stack of images (angular projections) as 3d numpy array. Every image will be
+        processed independently, using as reference intensity the maximum pixel value found across all the
+        images.
+
+        @param preproc_cfg :: pre-processing configuration set up for a reconstruction
+
+        Returns :: projected data volume (image stack)
+        """
+        if not preproc_cfg.line_projection:
+            return imgs_angles
+
+        imgs_angles = imgs_angles.astype('float32')
+        for idx in range(0, imgs_angles.shape[0]):
+            max_img = np.amax(imgs_angles[idx, :, :])
+            to_log = np.true_divide(imgs_angles[idx, :, :], max_img)
+            if False:
+                print("initial img max: {0}. transformed to log scale,  min: {1}, max: {2}".
+                      format(max_img, np.amin(to_log), np.amax(to_log)))
+            imgs_angles[idx, :, :] = - np.log(to_log +1e-6)
+
+        return imgs_angles
+
+    def apply_final_preproc_corrections(self, preproc_data, cfg):
+        """
+        Apply additional, optional, pre-processing steps/filters.
+
+        @param preproc_data :: input data as a 3d volume (projection images)
+        @param cfg :: pre-processing configuration
+
+        Returns :: filtered data (stack of images)
+        """
+        # Remove stripes in sinograms / ring artefacts in reconstructed volume
+        if cfg.stripe_removal_method:
+            import prep as iprep
+            if 'wavelet-fourier' == cfg.stripe_removal_method.lower():
+                time1 = time.time()
+                print " * Removing stripes/ring artifacts using the method '{0}'".format(cfg.stripe_removal_method)
+                #preproc_data = tomopy.prep.stripe.remove_stripe_fw(preproc_data)
+                preproc_data = iprep.filters.remove_stripes_ring_artifacts(preproc_data, 'wavelet-fourier')
+                time2 = time.time()
+                print " * Removed stripes/ring artifacts. Time elapsed: {0:.3f}".format(time2 - time1)
+            elif 'titarenko' == cfg.stripe_removal_method.lower():
+                time1 = time.time()
+                print " * Removing stripes/ring artifacts, using the method '{0}'".format(cfg.stripe_removal_method)
+                preproc_data = tomopy.prep.stripe.remove_stripe_ti(preproc_data)
+                time2 = time.time()
+                print " * Removed stripes/ring artifacts, Time elapsed: {0:.3f}".format(time2 - time1)
+            else:
+                print(" * WARNING: stripe removal method '{0}' is unknown. Not applying it.".
+                      format(cfg.stripe_removal_method))
+        else:
+            print " * Note: not applying stripe removal."
+
+        # Experimental options, disabled and not present in the config objects for now
+        # These and related algorithms needs more evaluation/benchmarking
+        if False:
+            preproc_data = tomopy.misc.corr.adjust_range(preproc_data)
+
+        if False:
+            preproc_data = tomopy.prep.normalize.normalize_bg(preproc_data, air=5)
+
+        return preproc_data
+
 
     def normalize_air_region(self, data, pre_cfg):
         """
@@ -356,113 +472,6 @@ class ReconstructionCommand(object):
             print " * Finished rotation step, with pixel data type: {0}".format(data_rotated.dtype)
 
         return data_rotated
-
-    def apply_prep_filters(self, data, cfg, white, dark):
-        """
-        Apply the normal initial pre-processing filters, including simple
-        operations as selecting/cropping to the region-of-interest,
-        normalization, etc.
-
-        @param data :: projection images data, as 3d numpy array, with images along outermost (z)
-        dimension
-
-        @param cfg :: pre-processing configuration
-        @param white :: white/flat/open-beam image for normalization
-        @param dark :: dark image for normalization
-
-        Returns :: process/filtered data (sizes can change (cropped) and data can be rotated)
-        """
-        print " * Beginning pre-processing with pixel data type:", data.dtype
-        if 'float64' == data.dtype:
-            data = data.astype(dtype='float32')
-            print " * Note: pixel data type changed to:", data.dtype
-
-        data = self.crop_coords(data, cfg)
-        data = self.normalize_air_region(data, cfg)
-        data = self.normalize_flat_dark(data, cfg, white, dark)
-
-        data = self.apply_cut_off(data, cfg)
-        data = self.rotate_imgs(data, cfg)
-
-        return data
-
-    def apply_line_projection(self, imgs_angles, preproc_cfg):
-        """
-        Transform pixel values as $- ln (Is/I0)$, where $Is$ is the pixel (intensity) value and $I0$ is a
-        reference value (pixel/intensity value for open beam, or maximum in the stack or the image).
-
-        This produces a projection image, $ p(s) = -ln\\frac{I(s)}{I(0)} $,
-        with $ I(s) = I(0) e^{-\\int_0^s \\mu(x)dx} $
-        where:
-        $p(s)$ represents the sum of the density of objects along a line (pixel) of the beam
-        I(0) initital intensity of netron beam (white images)
-        I(s) neutron count measured by detector/camera
-
-        The integral is the density along the path through objects.
-        This is required for example when pixels have neutron count values.
-
-        @param imgs_angles :: stack of images (angular projections) as 3d numpy array. Every image will be
-        processed independently, using as reference intensity the maximum pixel value found across all the
-        images.
-
-        @param preproc_cfg :: pre-processing configuration set up for a reconstruction
-
-        Returns :: projected data volume (image stack)
-        """
-        if not preproc_cfg.line_projection:
-            return imgs_angles
-
-        imgs_angles = imgs_angles.astype('float32')
-        for idx in range(0, imgs_angles.shape[0]):
-            max_img = np.amax(imgs_angles[idx, :, :])
-            to_log = np.true_divide(imgs_angles[idx, :, :], max_img)
-            if False:
-                print("initial img max: {0}. transformed to log scale,  min: {1}, max: {2}".
-                      format(max_img, np.amin(to_log), np.amax(to_log)))
-            imgs_angles[idx, :, :] = - np.log(to_log +1e-6)
-
-        return imgs_angles
-
-    def apply_final_preproc_corrections(self, preproc_data, cfg):
-        """
-        Apply additional, optional, pre-processing steps/filters.
-
-        @param preproc_data :: input data as a 3d volume (projection images)
-        @param cfg :: pre-processing configuration
-
-        Returns :: filtered data (stack of images)
-        """
-        # Remove stripes in sinograms / ring artefacts in reconstructed volume
-        if cfg.stripe_removal_method:
-            import prep as iprep
-            if 'wavelet-fourier' == cfg.stripe_removal_method.lower():
-                time1 = time.time()
-                print " * Removing stripes/ring artifacts using the method '{0}'".format(cfg.stripe_removal_method)
-                #preproc_data = tomopy.prep.stripe.remove_stripe_fw(preproc_data)
-                preproc_data = iprep.filters.remove_stripes_ring_artifacts(preproc_data, 'wavelet-fourier')
-                time2 = time.time()
-                print " * Removed stripes/ring artifacts. Time elapsed: {0:.3f}".format(time2 - time1)
-            elif 'titarenko' == cfg.stripe_removal_method.lower():
-                time1 = time.time()
-                print " * Removing stripes/ring artifacts, using the method '{0}'".format(cfg.stripe_removal_method)
-                preproc_data = tomopy.prep.stripe.remove_stripe_ti(preproc_data)
-                time2 = time.time()
-                print " * Removed stripes/ring artifacts, Time elapsed: {0:.3f}".format(time2 - time1)
-            else:
-                print(" * WARNING: stripe removal method '{0}' is unknown. Not applying it.".
-                      format(cfg.stripe_removal_method))
-        else:
-            print " * Note: not applying stripe removal."
-
-        # Experimental options, disabled and not present in the config objects for now
-        # These and related algorithms needs more evaluation/benchmarking
-        if False:
-            preproc_data = tomopy.misc.corr.adjust_range(preproc_data)
-
-        if False:
-            preproc_data = tomopy.prep.normalize.normalize_bg(preproc_data, air=5)
-
-        return preproc_data
 
     def run_reconstruct_3d(self, proj_data, preproc_cfg, alg_cfg):
         """

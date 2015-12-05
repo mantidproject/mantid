@@ -86,7 +86,7 @@ class PreProcConfig(object):
         # region of interest
         self.crop_coords = None
         self.cut_off_level = 0
-        self.mcp_correction = True
+        self.mcp_corrections = True
         self.scale_down = 0
         self.median_filter_size = 3
         # Rotation 90 degrees clockwise (positive) or counterclockwise (negative)
@@ -99,7 +99,11 @@ class PreProcConfig(object):
     def __str__(self):
 
         mystr = "Input path (relative): {0}\n".format(self.input_dir)
-        mystr += "Input path (absolute): {0}\n".format(os.path.abspath(self.input_dir))
+        if self.input_dir:
+            mystr += "Input path (absolute): {0}\n".format(os.path.abspath(self.input_dir))
+        else:
+            mystr += "Input path (absolute): {0}\n".format('cannot find because the input '
+                                                           'path has not been set')
         mystr += "Input image format: {0}\n".format(self.in_img_format)
         mystr += "Output image format: {0}\n".format(self.out_img_format)
         mystr += "Maximum angle:: {0}\n".format(self.max_angle)
@@ -109,7 +113,7 @@ class PreProcConfig(object):
         mystr += "Normalize by air region: {0}\n".format(self.normalize_air_region)
         mystr += "Normalize by proton charge: {0}\n".format(self.normalize_proton_charge)
         mystr += "Cut-off on normalized images: {0}\n".format(self.cut_off_level)
-        mystr += "Corrections for MCP detector: {0}\n".format(self.mcp_correction)
+        mystr += "Corrections for MCP detector: {0}\n".format(self.mcp_corrections)
         mystr += "Scale down factor for images: {0}\n".format(self.scale_down)
         mystr += "Median filter width: {0}\n".format(self.median_filter_size)
         mystr += "Rotation: {0}\n".format(self.rotation)
@@ -138,7 +142,11 @@ class PostProcConfig(object):
     def __str__(self):
 
         mystr = "Output path (relative): {0}\n".format(self.output_dir)
-        mystr += "Output path (absolute): {0}\n".format(os.path.abspath(self.output_dir))
+        if self.output_dir:
+            mystr += "Output path (absolute): {0}\n".format(os.path.abspath(self.output_dir))
+        else:
+            mystr += "Output path (absolute): {0}\n".format('cannot find because the input '
+                                                           'path has not been set')
         mystr += "Circular mask: {0}\n".format(self.circular_mask)
         mystr += "Cut-off on reconstructed volume: {0}\n".format(self.cut_off_level)
         mystr += "Gaussian filter: {0}\n".format(self.gaussian_filter_par)

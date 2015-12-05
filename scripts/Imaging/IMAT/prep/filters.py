@@ -82,7 +82,7 @@ def crop_vol(data_vol, coords):
 
     return cropped_data
 
-def remove_stripes_ring_artifacts(data_vol, method='fourier-wavelet'):
+def remove_stripes_ring_artifacts(data_vol, method='wavelet-fourier'):
     """
     Removal of stripes in sinograms / ring artifacts in reconstructed
     volume.
@@ -123,6 +123,7 @@ def remove_sino_stripes_rings_wf(data_vol, wv_levels=None):
         max_len = np.max(data_vol.shape)
         wv_levels = int(np.ceil(np.log2(max_len)))
 
+    from . import filters_adv
     return filters_adv.remove_sino_stripes_rings_wf(data_vol, wv_levels)
 
 def circular_mask(data_vol, ratio=1.0, mask_out_val=0.0):

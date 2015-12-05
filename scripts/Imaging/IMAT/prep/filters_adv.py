@@ -83,6 +83,7 @@ def remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=
     except ImportError as exc:
         raise ImportError("pywt. Details: {0}".format(exc))
 
+    import numpy as np
 
     dimx = data_vol.shape[0]
     n_x = dimx
