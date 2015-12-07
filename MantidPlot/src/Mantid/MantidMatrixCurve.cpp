@@ -127,8 +127,6 @@ void MantidMatrixCurve::init(Graph *g, bool distr, Graph::CurveType style) {
   m_yUnits.reset(new Mantid::Kernel::Units::Label(matrixWS->YUnit(),
                                                   matrixWS->YUnitLabel()));
 
-  setWorkspace(m_wsName, m_index, m_indexType, distr);
-
   if (m_indexType == Spectrum) // Spectrum plot
   {
     QwtWorkspaceSpectrumData data(*matrixWS, m_index, log, distr);
@@ -204,6 +202,16 @@ void MantidMatrixCurve::loadData() {
   // This should only be called for waterfall plots
   // Calculate the offsets...
   computeWaterfallOffsets();
+
+  Plot *plot = static_cast<Plot *>(this->plot());
+  Graph *g = static_cast<Graph *>(plot->parent());
+
+  MantidQwtWorkspaceData &data =
+      dynamic_cast<MantidQwtWorkspaceData &>(this->data());
+
+  data.setWaterfallPlot(g->isWaterfallPlot());
+  data.setXOffset(d_x_offset);
+  data.setYOffset(d_y_offset);
 }
 
 void MantidMatrixCurve::setData(const QwtData &data) {

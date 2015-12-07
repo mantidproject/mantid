@@ -55,8 +55,6 @@ public:
   int type() const { return d_type; };
   void setType(int t) { d_type = t; };
 
-  void setWorkspace(const QString &name, int index, int type, bool isDistr);
-
   double xOffset() const { return d_x_offset; };
   void setXOffset(double dx) { d_x_offset = dx; };
 
@@ -111,10 +109,6 @@ protected:
   bool d_side_lines;
   int d_skip_symbols;
   bool m_isDistribution;
-  QString m_wksp_name;
-  int m_wksp_index;
-  int m_wksp_type;
-  bool m_wksp_dist;
   // x and y units
   boost::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
   boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;

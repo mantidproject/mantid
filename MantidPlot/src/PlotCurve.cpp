@@ -50,23 +50,13 @@ using namespace Mantid::API;
 
 PlotCurve::PlotCurve(const QString &name)
     : QwtPlotCurve(name), d_type(0), d_x_offset(0.0), d_y_offset(0.0),
-      d_side_lines(false), d_skip_symbols(1), m_isDistribution(false),
-      m_wksp_name(""), m_wksp_index(0), m_wksp_type(0), m_wksp_dist(false) {}
+      d_side_lines(false), d_skip_symbols(1), m_isDistribution(false) {}
 
 PlotCurve::PlotCurve(const PlotCurve &c)
     : QObject(), QwtPlotCurve(c.title().text()), d_type(c.d_type),
       d_x_offset(c.d_x_offset), d_y_offset(c.d_y_offset),
       d_side_lines(c.d_side_lines), d_skip_symbols(c.d_skip_symbols),
-      m_isDistribution(c.m_isDistribution), m_wksp_name(""), m_wksp_index(0),
-      m_wksp_type(0), m_wksp_dist(false) {}
-
-void PlotCurve::setWorkspace(const QString &name, int index, int type,
-                             bool isDist) {
-  m_wksp_name = name;
-  m_wksp_index = index;
-  m_wksp_type = type;
-  m_wksp_dist = isDist;
-}
+      m_isDistribution(c.m_isDistribution) {}
 
 QString PlotCurve::saveCurveLayout() {
   Plot *plot = static_cast<Plot *>(this->plot());
@@ -306,44 +296,10 @@ void PlotCurve::computeWaterfallOffsets() {
     PlotCurve *c = dynamic_cast<PlotCurve *>(g->curve(0));
     if (index > 0 && c) {
       // Compute offsets based on the maximum value for the curve
-      double x_offset = index * g->waterfallXOffset() * 0.01 *
-                        g->curve(0)->maxXValue() / (double)(curves - 1);
-      double y_offset = index * g->waterfallYOffset() * 0.01 *
-                        g->curve(0)->maxYValue() / (double)(curves - 1);
-
-      // Clone the workspace so that the data is not corrupted when applying
-      // offsets
-      std::unique_ptr<MatrixWorkspace> wksp_clone =
-          AnalysisDataService::Instance()
-              .retrieveWS<MatrixWorkspace>(m_wksp_name.toStdString())
-              ->clone();
-
-      // Get original data
-      MatrixWorkspace &wksp = *wksp_clone;
-      MantidVec x = wksp.readX(m_wksp_index);
-      MantidVec y = wksp.readY(m_wksp_index);
-      MantidVec e = wksp.readE(m_wksp_index);
-
-      // Apply offsets; separate loops used since x width and y width are not
-      // stricly identical
-      for (size_t i = 0; i < x.size(); i++)
-        x[(int)i] += x_offset;
-
-      for (size_t i = 0; i < y.size(); i++)
-        y[(int)i] += y_offset;
-
-      // Update cloned workspace with offset data
-      wksp.setX(m_wksp_index, x);
-      wksp.setData(m_wksp_index, boost::make_shared<MantidVec>(y),
-                   boost::make_shared<MantidVec>(e));
-
-      // Set data according to whether it is spectrum or bin data.
-      if (m_wksp_type == 0)
-        this->setData(QwtWorkspaceSpectrumData(
-            wksp, m_wksp_index, g->isLog(QwtPlot::yLeft), m_wksp_dist));
-      else if (m_wksp_type == 1)
-        this->setData(
-            QwtWorkspaceBinData(wksp, m_wksp_index, g->isLog(QwtPlot::yLeft)));
+      d_x_offset = index * g->waterfallXOffset() * 0.01 *
+                   g->curve(0)->maxXValue() / (double)(curves - 1);
+      d_y_offset = index * g->waterfallYOffset() * 0.01 *
+                   g->curve(0)->maxYValue() / (double)(curves - 1);
 
       setZ(-index);
       setBaseline(ymin -
@@ -358,19 +314,6 @@ void PlotCurve::computeWaterfallOffsets() {
   } else {
     // Retrieve original workspace data and add to QwtPlot
     int index = g->curveIndex(this);
-
-    if (index > 0) {
-      MatrixWorkspace &wksp =
-          *AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              m_wksp_name.toStdString());
-
-      if (m_wksp_type == 0)
-        this->setData(QwtWorkspaceSpectrumData(
-            wksp, m_wksp_index, g->isLog(QwtPlot::yLeft), m_wksp_dist));
-      else if (m_wksp_type == 1)
-        this->setData(
-            QwtWorkspaceBinData(wksp, m_wksp_index, g->isLog(QwtPlot::yLeft)));
-    }
   }
 }
 
