@@ -2,7 +2,9 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/IMDIterator.h"
 
+/*
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/System.h"
@@ -23,6 +25,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/Progress.h"
 #include <fstream>
+*/
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -47,8 +50,6 @@ IntegratePeaksCWSD::IntegratePeaksCWSD() {}
 IntegratePeaksCWSD::~IntegratePeaksCWSD() {}
 
 //----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksCWSD::init() {
@@ -67,35 +68,68 @@ void IntegratePeaksCWSD::init() {
       "with the peaks' integrated intensities.");
 
   declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>(
-                      "MaskWorkspace", "", Direction::Output, PropertyMode::Optional),
+                      "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
                   "Output Masking Workspace");
 }
 
+//----------------------------------------------------------------------------------------------
 /**
  * @brief IntegratePeaksCWSD::exec
  */
 void IntegratePeaksCWSD::exec()
 {
-  // Process input
+  // Process input & check
   m_inputWS = getProperty("InputWorkspace");
+  m_peaksWS = getProperty("PeaksWorkspace");
+
   std::string maskwsname = getPropertyValue("MaskWorkspace");
   if (maskwsname.size() > 0)
   {
+    // process mask workspace
     m_maskDets = true;
     m_maskWS = getProperty("MaskWorkspace");
+    processMaskWorkspace(m_maskWS);
   }
   else
   {
     m_maskDets = false;
   }
 
+  // Process peaks
+
+
 
 } //
 
+//----------------------------------------------------------------------------------------------
+/**
+ * @brief IntegratePeaksCWSD::simplePeakIntegration
+ * Purpose:
+ *   Integrate a single crystal peak with the simplest algorithm, i.e.,
+ *   by adding all the signal with normalization to monitor counts
+ * Requirements:
+ *   Valid MDEventWorkspace
+ *   Valid PeaksWorkspace
+ * Guarantees:
+ *   A valid value is given
+ */
 void IntegratePeaksCWSD::simplePeakIntegration()
 {
+  // Check requirements
+  assert(m_inputWS && "MDEventWorkspace is not defined.");
+  assert(m_peaksWS && "PeaksWorkspace is not defined.");
+  bool maskDetectors = true;
+  if (!m_maskWS)
+    maskDetectors = false;
+
+  // Define data structures
+  // FIXME :: can this be moved to outer scope of this method?
+  std::vector<Kernel::V3D> vec_event_qsample;
+  std::vector<float> vec_event_signal;
+  std::vector<detid_t> vec_event_det;
+
   // Go through to get value
-  IMDIterator *mditer = m_inputWS->createIterator();
+  API::IMDIterator *mditer = m_inputWS->createIterator();
   size_t nextindex = 1;
   bool scancell = true;
   size_t currindex = 0;
@@ -103,8 +137,8 @@ void IntegratePeaksCWSD::simplePeakIntegration()
     size_t numevent_cell = mditer->getNumEvents();
     for (size_t iev = 0; iev < numevent_cell; ++iev) {
       // Check
-      if (currindex >= vec_event_qsample.size())
-        throw std::runtime_error("Logic error in event size!");
+      // if (currindex >= vec_event_qsample.size())
+      //  throw std::runtime_error("Logic error in event size!");
 
       float tempx = mditer->getInnerPosition(iev, 0);
       float tempy = mditer->getInnerPosition(iev, 1);
@@ -134,8 +168,14 @@ void IntegratePeaksCWSD::simplePeakIntegration()
     }
   }
 
+}
+
+
+void IntegratePeaksCWSD::processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws)
+{
 
 }
+
 
 } // namespace Mantid
 } // namespace MDAlgorithms

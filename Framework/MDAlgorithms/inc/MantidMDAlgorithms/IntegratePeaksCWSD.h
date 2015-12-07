@@ -31,7 +31,7 @@ public:
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 2; };
+  virtual int version() const { return 1; };
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MDAlgorithms\\Peaks"; }
 
@@ -46,8 +46,14 @@ private:
   template <typename MDE, size_t nd>
   void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
+
+  void processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws);
+
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_inputWS;
+
+  /// Input PeaksWorkspace
+  Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
 
   /// Mask
   bool m_maskDets;
