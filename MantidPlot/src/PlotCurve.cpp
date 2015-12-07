@@ -311,10 +311,7 @@ void PlotCurve::computeWaterfallOffsets() {
     }
     if (g->grid())
       g->grid()->setZ(-g->curves() /*Count()*/ - 1);
-  } else {
-    // Retrieve original workspace data and add to QwtPlot
-    int index = g->curveIndex(this);
-  }
+  } 
 }
 
 // --- DataCurve --- //
