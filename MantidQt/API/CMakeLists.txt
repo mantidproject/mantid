@@ -129,14 +129,13 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
-if(MAKE_VATES)
-  find_package( ParaView )
+if(MAKE_VATES AND ParaView_FOUND)
   include( ${PARAVIEW_USE_FILE} )
 endif()
 
 # Python includes
 include_directories ( ${PYTHON_INCLUDE_PATH})
-if(MAKE_VATES)
+if(MAKE_VATES AND ParaView_FOUND)
   include_directories (SYSTEM ${PARAVIEW_INCLUDE_DIRS})
 endif()
 # Use a precompiled header where they are supported
@@ -154,7 +153,7 @@ target_link_libraries ( MantidQtAPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}
 )
 
-if(MAKE_VATES)
+if(MAKE_VATES AND ParaView_FOUND)
   target_link_libraries (MantidQtAPI LINK_PRIVATE
   vtkPVServerManagerRendering
   ${vtkjsoncpp_LIBRARIES}
