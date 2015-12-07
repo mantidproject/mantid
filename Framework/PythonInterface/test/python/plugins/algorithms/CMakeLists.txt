@@ -49,6 +49,7 @@ set ( TEST_PY_FILES
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
+  LoadNexusMonitorsTest.py
   LoadNMoldyn3AsciiTest.py
   LoadNMoldyn4AsciiTest.py
   MaskAngleTest.py
