@@ -3230,7 +3230,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     g->checkValuesInAxisRange(firstCurve);
   }
   ml->toggleWaterfall(waterfallPlot);
-  g->setAutoScale();
+
   // Check if window does not contain any curves and should be closed
   ml->maybeNeedToClose();
 
