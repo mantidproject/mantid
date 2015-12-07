@@ -50,6 +50,7 @@ public:
   virtual const std::string category() const;
   virtual const std::string summary() const;
 
+  void skipDetectorData();
 private:
   /// Local typedef for
   typedef DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>
@@ -64,7 +65,7 @@ private:
   void exec();
   void initFileReader();
   SQWHeader readMainHeader();
-  void readAllSPEHeaders(const int32_t nfiles);
+  void readAllSPEHeadersToWorkspace(const int32_t nfiles);
   void readSingleSPEHeader(API::ExperimentInfo &experiment);
   void createOutputWorkspace();
 

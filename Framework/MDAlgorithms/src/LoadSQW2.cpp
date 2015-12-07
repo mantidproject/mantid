@@ -67,7 +67,8 @@ void LoadSQW2::exec() {
   initFileReader();
   auto mainHeader = readMainHeader();
   createOutputWorkspace();
-  readAllSPEHeaders(mainHeader.nfiles);
+  readAllSPEHeadersToWorkspace(mainHeader.nfiles);
+  skipDetectorData();
 
   setProperty("OutputWorkspace", m_outputWS);
 }
@@ -112,12 +113,17 @@ LoadSQW2::SQWHeader LoadSQW2::readMainHeader() {
   return header;
 }
 
+/// Create the output workspace object
+void LoadSQW2::createOutputWorkspace() {
+  m_outputWS = boost::make_shared<SQWWorkspace>();
+}
+
 /**
  * Read all of the SPE headers and fill in the experiment details on the
  * output workspace
  * @param nfiles The number of expected spe header sections
  */
-void LoadSQW2::readAllSPEHeaders(const int32_t nfiles) {
+void LoadSQW2::readAllSPEHeadersToWorkspace(const int32_t nfiles) {
   for (int32_t i = 0; i < nfiles; ++i) {
     auto expt = boost::make_shared<ExperimentInfo>();
     readSingleSPEHeader(*expt);
@@ -201,12 +207,27 @@ void LoadSQW2::readSingleSPEHeader(API::ExperimentInfo &experiment) {
   m_file->seekg(96, std::ios_base::cur);
   std::vector<int32_t> ulabel_shape(2);
   m_reader->read(ulabel_shape, 2);
+  // shape[0]*shape[1]*sizeof(char)
   m_file->seekg(ulabel_shape[0] * ulabel_shape[1], std::ios_base::cur);
 }
 
-/// Create the output workspace object
-void LoadSQW2::createOutputWorkspace() {
-  m_outputWS = boost::make_shared<SQWWorkspace>();
+/**
+ * Skip the data in the detector section. The size is based on the number
+ * of contribution detector parameters
+ */
+void LoadSQW2::skipDetectorData() {
+  std::string filename, filepath;
+  *m_reader >> filename >> filepath;
+  int32_t ndet(0);
+  *m_reader >> ndet;
+  if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+    std::stringstream os;
+    os << "Skipping " << ndet << " detector parameters from '" << filename
+       << "'\n";
+    g_log.debug(os.str());
+  }
+  // 6 float fields all ndet long - group, x2, phi, azim, width, height
+  m_file->seekg(6 * 4 * ndet);
 }
 
 } // namespace MDAlgorithms
