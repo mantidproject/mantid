@@ -160,6 +160,11 @@ class SANSStitch1DTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
+        y_array = out_ws.readY(0)
+
+        expected_y_array = [1.5]*9
+        self.assertTrue(all(map(lambda element: element in y_array, expected_y_array)))
+
 
 
 

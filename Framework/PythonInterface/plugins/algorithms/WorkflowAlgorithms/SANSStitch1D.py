@@ -127,6 +127,15 @@ class SANSStitch1D(DataProcessorAlgorithm):
         crop.execute()
         return crop.getProperty('OutputWorkspace').value
 
+    def _scale(self, ws, factor, operation='Multiply'):
+        scale = self.createChildAlgorithm('Scale')
+        scale.setProperty('InputWorkspace', ws)
+        scale.setProperty('Operation', operation)
+        scale.setProperty('Factor', factor)
+        scale.execute()
+        scaled = scale.getProperty('OutputWorkspace').value
+        return scaled
+
 
     def PyExec(self):
         enum_map = self._make_mode_map()
@@ -155,18 +164,8 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
 
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
-        scale = self.createChildAlgorithm('Scale')
-        scale.setProperty('InputWorkspace', nF)
-        scale.setProperty('Operation', 'Multiply')
-        scale.setProperty('Factor', shift_factor)
-        scale.execute()
-        shifted_norm_front = scale.getProperty('OutputWorkspace').value
-
-        scale.setProperty('InputWorkspace', nF)
-        scale.setProperty('Operation', 'Multiply')
-        scale.setProperty('Factor', 1.0/scale_factor)
-        scale.execute()
-        scaled_norm_front = scale.getProperty('OutputWorkspace').value
+        shifted_norm_front = self._scale(nF, shift_factor)
+        scaled_norm_front = self._scale(nF, 1.0/scale_factor)
 
         numerator = self._add(self._add(cF , shifted_norm_front), cR)
         denominator = self._add(scaled_norm_front, nR)
