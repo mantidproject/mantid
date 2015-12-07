@@ -152,7 +152,7 @@ set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
 
 if ( MAKE_VATES )
   add_subdirectory ( Vates )
-
+  add_definitions ( -DMAKE_VATES )
   if (NOT APPLE)
     LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
           "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
