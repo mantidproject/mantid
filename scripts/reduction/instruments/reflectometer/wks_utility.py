@@ -1,14 +1,13 @@
-#pylint: disable=too-many-lines
-#pylint: disable=invalid-name
+# pylint: disable=too-many-lines, invalid-name, too-many-arguments, too-many-locals
 from numpy import zeros, arctan2, arange, shape, sqrt, fliplr, asfarray, mean, sum, NAN
 from mantid.simpleapi import *
-# from MantidFramework import *
+
 import math
 import os.path
 
-h = 6.626e-34 #m^2 kg s^-1
-m = 1.675e-27 #kg
-ref_date = '2014-10-01' #when the detector has been rotated
+h = 6.626e-34  # m^2 kg s^-1
+m = 1.675e-27  # kg
+ref_date = '2014-10-01'  # when the detector has been rotated
 
 def getSequenceRuns(run_numbers):
     """
@@ -276,11 +275,8 @@ def cleanup_data(InputWorkspace=None,
                     UnitX="TOF",
                     ParentWorkspace=mti)
 
-def createIntegratedWorkspace(mt1,
-                              fromXpixel, toXpixel,
-                              fromYpixel, toYpixel,
-                              maxX=304, maxY=256,
-                              bCleaning=False):
+def createIntegratedWorkspace(mt1, fromXpixel, toXpixel, fromYpixel, toYpixel, _maxX=304, maxY=256,
+                              _bCleaning=False):
     """
         This creates the integrated workspace over the second pixel range (304 here) and
         returns the new workspace handle
@@ -288,7 +284,7 @@ def createIntegratedWorkspace(mt1,
 
     _tof_axis = mt1.readX(0)[:]
     nbr_tof = len(_tof_axis)
-    t_range = arange(nbr_tof-1)
+    _t_range = arange(nbr_tof-1)
 
     _fromXpixel = min([fromXpixel, toXpixel])
     _toXpixel = max([fromXpixel, toXpixel])
@@ -335,10 +331,10 @@ def createIntegratedWorkspace(mt1,
 
 def convertWorkspaceToQ(ws_data,
                         fromYpixel, toYpixel,
-                        maxX=304, maxY=256,
+                        _maxX=304, _maxY=256,
                         cpix=None,
                         source_to_detector=None,
-                        sample_to_detector=None,
+                        _sample_to_detector=None,
                         theta=None,
                         geo_correction=False,
                         q_binning=None):
@@ -371,7 +367,7 @@ def convertWorkspaceToQ(ws_data,
         #replace the _q_axis of the yrange of interest by the new
         #individual _q_axis
         y_size = toYpixel - fromYpixel + 1
-        y_range = arange(y_size) + fromYpixel
+        _y_range = arange(y_size) + fromYpixel
 
         _y_axis = zeros((y_size, len(_tof_axis) - 1))
         _y_error_axis = zeros((y_size, len(_tof_axis) - 1))
@@ -507,7 +503,7 @@ def angleUnitConversion(value, from_units='degree', to_units='rad'):
     if from_units == to_units:
         return value
 
-    from_factor = 1
+    from_factor = 1.0
     #convert everything into rad
     if from_units == 'degree':
         from_factor = 1.745329252e-2
@@ -531,14 +527,14 @@ def convertToThetaVsLambda(_tof_axis,
     to theta/lambda
 
     """
-    h = 6.626e-34 #m^2 kg s^-1
-    m = 1.675e-27 #kg
+    planck_const = 6.626e-34  # m^2 kg s^-1
+    mass = 1.675e-27  # kg
 
-    #convert tof_axis into seconds
+    # convert tof_axis into seconds
     _tof_axis = _tof_axis * 1e-6
 
-    vel_array = dMD / _tof_axis         #mm/ms = m/s
-    _lambda = h / (m * vel_array)  #m
+    vel_array = dMD / _tof_axis         # mm/ms = m/s
+    _lambda = planck_const / (mass * vel_array)  # m
     _lambda = _lambda * 1e10  #angstroms
 
     d_vec = (_pixel_axis - central_pixel) * pixel_size
@@ -548,7 +544,7 @@ def convertToThetaVsLambda(_tof_axis,
 
     return dico
 
-def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, cpix=None):
+def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1.0, tof=None, yrange=None, cpix=None):
     """
     This function converts the pixel/TOF array to the R(Q) array
     using Q = (4.Pi.Mn)/h  *  L.sin(theta/2)/TOF
@@ -556,15 +552,14 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, c
             TOF: TOF of pixel
             theta: angle of detector
     """
-
-    h = 6.626e-34 #m^2 kg s^-1
-    m = 1.675e-27 #kg
+    planck_const = 6.626e-34  # m^2 kg s^-1
+    mass = 1.675e-27  # kg
 
     sample = mt.getInstrument().getSample()
     source = mt.getInstrument().getSource()
     dSM = sample.getDistance(source)
 
-    maxX = 304
+    _maxX = 304
     maxY = 256
 
     dPS_array = zeros(maxY)
@@ -573,11 +568,11 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, c
         dPS_array[y] = sample.getDistance(detector)
 
     #array of distances pixel->source
-    dMP_array = dPS_array + dSM
+    _dMP_array = dPS_array + dSM
     #distance sample->center of detector
     dSD = dPS_array[maxY / 2]
 
-    _const = float(4) * math.pi * m * dMD / h
+    _const = float(4) * math.pi * mass * dMD / planck_const
     sz_tof = len(tof)
     q_array = zeros((len(yrange), sz_tof - 1))
 
@@ -596,7 +591,6 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, c
             tof2 = tof[t+1]
             tofm = (tof1+tof2)/2.
             _Q = _const * math.sin(_theta) / (tofm*1e-6)
-#            _Q = _const * math.sin(_theta) / (tof1 * 1e-6)
             q_array[y, t] = _Q * 1e-10
 
     return q_array
@@ -695,30 +689,30 @@ def ref_beamdiv_correct(cpix, det_secondary,
 
         if xI < xF:
 
-            if xI < xMinus and xF > xMinus:
+            if xI < xMinus < xF:
                 yLeftCross = yI + (yF - yI) * (xMinus - xI) / (xF - xI)
                 int_poly_x.append(yLeftCross)
                 int_poly_y.append(xMinus)
 
-            if xI < xPlus and xF >= xPlus:
+            if xI < xPlus <= xF:
                 yRightCross = yI + (yF - yI) * (xPlus - xI) / (xF - xI)
                 int_poly_x.append(yRightCross)
                 int_poly_y.append(xPlus)
 
         else:
 
-            if xF < xPlus and xI >= xPlus:
+            if xF < xPlus <= xI:
                 yRightCross = yI + (yF - yI) * (xPlus - xI) / (xF - xI)
                 int_poly_x.append(yRightCross)
                 int_poly_y.append(xPlus)
 
-            if xF < xMinus and xI >= xMinus:
+            if xF < xMinus <= xI:
                 yLeftCross = yI + (yF - yI) * (xMinus - xI) / (xF - xI)
                 int_poly_x.append(yLeftCross)
                 int_poly_y.append(xMinus)
 
         #This catches points on the polygon inside the range of interest
-        if xF >= xMinus and xF < xPlus:
+        if xMinus <= xF < xPlus:
             int_poly_x.append(yF)
             int_poly_y.append(xF)
 
@@ -933,11 +927,11 @@ def _applySFtoArray(workspace, a, b, a_error, b_error):
                     Nspec=1,
                     UnitX="TOF")
 
-    mt_before = mtd[workspace]
+    _mt_before = mtd[workspace]
 
     Divide(workspace, 'sfWorkspace', workspace)
 
-    mt_after = mtd[workspace]
+    _mt_after = mtd[workspace]
 
     return workspace
 
@@ -1043,8 +1037,8 @@ def integrateOverLowResRange(mt1,\
 
     print '--> integrated over low res range of ', type
     _tof_axis = mt1.readX(0)[:].copy()
-    nbr_tof = len(_tof_axis)
-#     t_range = arange(nbr_tof-1)
+    _nbr_tof = len(_tof_axis)
+
 
     # -1 to work with index directly
     fromXpixel = min(dataLowResRange) - 1
@@ -1052,10 +1046,10 @@ def integrateOverLowResRange(mt1,\
 
     if is_nexus_detector_rotated_flag:
         sz_y_axis = 304
-        sz_x_axis = 256
+        _sz_x_axis = 256
     else:
         sz_y_axis = 256
-        sz_x_axis = 304
+        _sz_x_axis = 304
 
     _y_axis = zeros((sz_y_axis, len(_tof_axis) - 1))
     _y_error_axis = zeros((sz_y_axis, len(_tof_axis) - 1))
@@ -1071,11 +1065,8 @@ def integrateOverLowResRange(mt1,\
             _y_axis[y, :] += mt1.readY(_index)[:].copy()
             _tmp_error_axis = mt1.readE(_index)[:].copy()
             # 0 -> 1
-#             index_where_0 = where(_tmp_error_axis == 0)
-#             _tmp_error_axis[index_where_0] = 1
-
             _y_error_axis[y, :] += _tmp_error_axis * _tmp_error_axis
-#             _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
+
 
     _y_error_axis = sqrt(_y_error_axis)
 
@@ -1112,10 +1103,10 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
     szPeak = peakMax - peakMin + 1
 
     # init arrays
-    minBack = []
-    minBackError = []
-    maxBack = []
-    maxBackError = []
+    _minBack = []
+    _minBackError = []
+    _maxBack = []
+    _maxBackError = []
 
     final_y_axis = zeros((szPeak, nbrTof))
     final_y_error_axis = zeros((szPeak, nbrTof))
@@ -1135,10 +1126,9 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
             bMinBack = True
             _backMinArray = y_axis[backMin:peakMin, t]
             _backMinErrorArray = y_error_axis[backMin:peakMin, t]
-            [_backMin, _backMinError] = weightedMean(_backMinArray,\
-                                                          _backMinErrorArray, error_0)
+            [_backMin, _backMinError] = weightedMean(_backMinArray, _backMinErrorArray, error_0)
 
-        if (peakMax) < backMax:
+        if peakMax < backMax:
             bMaxBack = True
             _backMaxArray = y_axis[peakMax+1:backMax+1, t]
             _backMaxErrorArray = y_error_axis[peakMax+1:backMax+1, t]
@@ -1159,8 +1149,8 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
 
         # remove background for each pixel of the peak
         for x in range(szPeak):
-            final_y_axis[x,t] = float(y_axis[peakMin + x,t]) - float(background)
-            final_y_error_axis[x,t] = float(math.sqrt(pow(y_error_axis[peakMin+x,t],2) + pow(background_error,2)))
+            final_y_axis[x, t] = float(y_axis[peakMin + x, t]) - float(background)
+            final_y_error_axis[x, t] = float(math.sqrt(pow(y_error_axis[peakMin+x, t], 2) + pow(background_error, 2)))
 
 #         if t == nbrTof-2:
 #             print float(y_axis[peakMin + x,t]) - float(background)
@@ -1212,7 +1202,7 @@ def weightedMeanOfRange(norm_y_axis, norm_y_error_axis):
     for t in range(nbr_tof):
         _tmp_range = norm_y_axis[:, t]
         _tmp_range_error = norm_y_error_axis[:,t]
-        [_mean,_mean_error] = weightedMean(_tmp_range, _tmp_range_error)
+        [_mean, _mean_error] = weightedMean(_tmp_range, _tmp_range_error, None)
         final_array[t] = _mean
         final_array_error[t] = _mean_error
 
@@ -1232,16 +1222,16 @@ def meanOfRange(norm_y_axis, norm_y_error_axis):
 
     for t in range(nbr_tof):
         _tmp_range = norm_y_axis[:,t]
-        _tmp_range_error = norm_y_error_axis[:,t]
-        [_mean,_mean_error] = myMean(_tmp_range, _tmp_range_error)
+        _tmp_range_error = norm_y_error_axis[:, t]
+        [_mean,_mean_error] = myMean(_tmp_range)
         final_array[t] = _mean
         final_array_error[t] = _mean_error
 
     return [final_array, final_array_error]
 
-def myMean(data_array, error_array):
+def myMean(data_array):
 
-    sz=size(data_array)
+    sz = size(data_array)
 
     _mean = mean(data_array)
     _mean_error = sqrt(sum(_mean*_mean))/float(sz[0])
@@ -1265,16 +1255,16 @@ def divideDataByNormalization(data_y_axis,
     for t in range(nbr_tof):
         for x in range(nbr_pixel):
 
-            if (not av_norm[t] == 0) and (not data_y_axis[x,t] == 0) :
+            if (av_norm[t] != 0) and (data_y_axis[x, t] != 0):
 
-                tmp_value = float(data_y_axis[x,t]) / float(av_norm[t])
+                tmp_value = float(data_y_axis[x, t]) / float(av_norm[t])
 
-                tmp_error_1 = pow(float(data_y_error_axis[x,t]) / float(data_y_axis[x,t]),2)
-                tmp_error_2 = pow(float(av_norm_error[t]) / float(av_norm[t]),2)
-                tmp_error = sqrt(tmp_error_1 + tmp_error_2) * abs(float(data_y_axis[x,t]) / float(av_norm[t]))
+                tmp_error_1 = pow(float(data_y_error_axis[x, t]) / float(data_y_axis[x, t]), 2)
+                tmp_error_2 = pow(float(av_norm_error[t]) / float(av_norm[t]), 2)
+                tmp_error = sqrt(tmp_error_1 + tmp_error_2) * abs(float(data_y_axis[x, t]) / float(av_norm[t]))
 
-                new_data_y_axis[x,t] = tmp_value
-                new_data_y_error_axis[x,t] = tmp_error
+                new_data_y_axis[x, t] = tmp_value
+                new_data_y_error_axis[x, t] = tmp_error
 
     return [new_data_y_axis, new_data_y_error_axis]
 
@@ -1297,13 +1287,13 @@ def sumWithError(value, error):
 def integratedOverPixelDim(data_y_axis, data_y_error_axis):
 
     size = data_y_axis.shape
-    nbr_pixel = size[0]
+    _nbr_pixel = size[0]
     nbr_tof = size[1]
 
     final_data = zeros(nbr_tof)
     final_data_error = zeros(nbr_tof)
     for t in range(nbr_tof):
-        [data, error] = sumWithError(data_y_axis[:,t], data_y_error_axis[:,t])
+        [data, error] = sumWithError(data_y_axis[:, t], data_y_error_axis[:, t])
         final_data[t] = data
         final_data_error[t] = error
 
@@ -1311,17 +1301,14 @@ def integratedOverPixelDim(data_y_axis, data_y_error_axis):
 
 def fullSumWithError(data_y_axis, data_y_error_axis):
     size = data_y_axis.shape
-    nbr_pixel = size[0]
+    _nbr_pixel = size[0]
     nbr_tof = size[1]
 
     final_data = zeros(nbr_tof)
     final_data_error = zeros(nbr_tof)
-#    final_data = empty(nbr_tof)
-#    final_data_error = empty(nbr_tof)
-#    final_data[:] = NAN
-#    final_data_error[:] = NAN
+
     for t in range(nbr_tof):
-        [data, error] = sumWithError(data_y_axis[:,t], data_y_error_axis[:,t])
+        [data, error] = sumWithError(data_y_axis[:, t], data_y_error_axis[:, t])
         final_data[t] = data
         final_data_error[t] = error
 
@@ -1340,12 +1327,9 @@ def ouput_ascii_file(file_name,
 
     f.close
 
-def ouput_big_ascii_file(file_name,
-                         x_axis,
-                         y_axis,
-                         y_error_axis):
+def ouput_big_ascii_file(file_name, x_axis, y_axis, y_error_axis):
 
-    f=open(file_name,'w')
+    f = open(file_name, 'w')
 
     sz = y_axis.shape # (nbr_pixel, nbr_tof)
     nbr_tof = sz[1]
@@ -1354,21 +1338,18 @@ def ouput_big_ascii_file(file_name,
     for t in range(nbr_tof):
         _tmp_str = str(x_axis[t])
         for x in range(nbr_pixel):
-            _tmp_str += ' ,' + str(y_axis[x,t]) + " ," + str(y_error_axis[x,t])
+            _tmp_str += ' ,' + str(y_axis[x, t]) + " ," + str(y_error_axis[x, t])
 
         _tmp_str += '\n'
         f.write(_tmp_str)
 
-    f.close
+    f.close()
 
 
 
-def ouput_big_Q_ascii_file(file_name,\
-                         x_axis,\
-                         y_axis,\
-                         y_error_axis):
+def ouput_big_Q_ascii_file(file_name, x_axis, y_axis, y_error_axis):
 
-    f=open(file_name,'w')
+    f = open(file_name, 'w')
 
     sz = y_axis.shape # (nbr_pixel, nbr_tof)
     nbr_tof = sz[1]
@@ -1377,11 +1358,11 @@ def ouput_big_Q_ascii_file(file_name,\
     for t in range(nbr_tof):
         _tmp_str = ''
         for x in range(nbr_pixel):
-            _tmp_str += str(x_axis[x,t]) +  ',' + str(y_axis[x,t]) + " ," + str(y_error_axis[x,t]) + ',,'
+            _tmp_str += str(x_axis[x, t]) + ',' + str(y_axis[x, t]) + " ," + str(y_error_axis[x, t]) + ',,'
         _tmp_str += '\n'
         f.write(_tmp_str)
 
-    f.close
+    f.close()
 
 
 def divideData1DbyNormalization(inte_data_y_axis,
@@ -1397,12 +1378,12 @@ def divideData1DbyNormalization(inte_data_y_axis,
     final_data_error = zeros(nbrPixel)
 
     for x in range(nbrPixel[0]):
-        if not av_norm[x] == 0:
+        if av_norm[x] != 0:
 
             final_data[x] = inte_data_y_axis[x] / av_norm[x]
 
-            tmp1 = pow(float(inte_data_y_error_axis[x]) / float(inte_data_y_axis[x]),2)
-            tmp2 = pow(float(av_norm_error[x]) / float(av_norm[x]),2)
+            tmp1 = pow(float(inte_data_y_error_axis[x]) / float(inte_data_y_axis[x]), 2)
+            tmp2 = pow(float(av_norm_error[x]) / float(av_norm[x]), 2)
             tmp_error = sqrt(tmp1 + tmp2) * (float(inte_data_y_axis[x] / av_norm[x]))
 
             final_data_error[x] = tmp_error
@@ -1422,12 +1403,12 @@ def applyScalingFactor(tof_axis,
     """
     isSFfound = False
 
-    #sf_file = 'NaN'
+    # sf_file = 'NaN'
     if os.path.isfile(sf_file):
 
         print '-> scaling factor file FOUND! (', sf_file, ')'
 
-        #parse file and put info into array
+        # parse file and put info into array
         f = open(sf_file, 'r')
         sfFactorTable = []
         for line in f.read().split('\n'):
@@ -1444,14 +1425,14 @@ def applyScalingFactor(tof_axis,
         _lr_value = _lr[0]
         _lr_value = float("{0:.2f}".format(_lr_value))
 
-        #retrieve s1h and s2h or sih values
+        # retrieve s1h and s2h or sih values
         s1h = getS1h(mtd['ws_event_data'])
         [isSih, s2h] = getS2h(mtd['ws_event_data'])
 
         s1h_value = abs(s1h)
         s2h_value = abs(s2h)
 
-        #retrieve s1w and s2w values
+        # retrieve s1w and s2w values
         s1w = getS1w(mtd['ws_event_data'])
         [isSiw, s2w] = getS2w(mtd['ws_event_data'])
 
@@ -1472,42 +1453,42 @@ def applyScalingFactor(tof_axis,
 
         for i in range(nbr_row):
 
-            _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
+            _file_incidentMedium = getFieldValue(sfFactorTable, i, 0)
             if _file_incidentMedium.strip() == _incidentMedium.strip():
                 print '*** incident medium match ***'
-                _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
+                _file_lambdaRequested = getFieldValue(sfFactorTable, i, 1)
                 if (isWithinPrecisionRange(_file_lambdaRequested,
                                            _lr_value,
                                            valuePrecision)):
                     print '*** lambda requested match ***'
-                    _file_s1h = getFieldValue(sfFactorTable,i,2)
+                    _file_s1h = getFieldValue(sfFactorTable, i, 2)
                     if(isWithinPrecisionRange(_file_s1h,
                                               s1h_value,
                                               valuePrecision)):
                         print '*** s1h match ***'
-                        _file_s2h = getFieldValue(sfFactorTable,i,3)
+                        _file_s2h = getFieldValue(sfFactorTable, i, 3)
                         if(isWithinPrecisionRange(_file_s2h,
                                                   s2h_value,
                                                   valuePrecision)):
                             print '*** s2h match ***'
                             if slitsWidthFlag:
                                 print '*** (with slits width flag) ***'
-                                _file_s1w = getFieldValue(sfFactorTable,i,4)
+                                _file_s1w = getFieldValue(sfFactorTable, i, 4)
                                 if(isWithinPrecisionRange(_file_s1w,
                                                           s1w_value,
                                                           valuePrecision)):
                                     print '*** s1w match ***'
-                                    _file_s2w = getFieldValue(sfFactorTable,i,5)
+                                    _file_s2w = getFieldValue(sfFactorTable, i, 5)
                                     if(isWithinPrecisionRange(_file_s2w,
                                                               s2w_value,
                                                               valuePrecision)):
                                         print '*** s2w match ***'
 
                                         print '--> Found a perfect match'
-                                        a = float(getFieldValue(sfFactorTable,i,6))
-                                        b = float(getFieldValue(sfFactorTable,i,7))
-                                        a_error = float(getFieldValue(sfFactorTable,i,8))
-                                        b_error = float(getFieldValue(sfFactorTable,i,9))
+                                        a = float(getFieldValue(sfFactorTable, i, 6))
+                                        b = float(getFieldValue(sfFactorTable, i, 7))
+                                        a_error = float(getFieldValue(sfFactorTable, i, 8))
+                                        b_error = float(getFieldValue(sfFactorTable, i, 9))
 
                                         [y_data, y_data_error] = applyScalingFactorToArray(tof_axis,
                                                                                            y_data,
@@ -1520,10 +1501,10 @@ def applyScalingFactor(tof_axis,
                             else:
 
                                 print '--> Found a perfect match'
-                                a = float(getFieldValue(sfFactorTable,i,6))
-                                b = float(getFieldValue(sfFactorTable,i,7))
-                                a_error = float(getFieldValue(sfFactorTable,i,8))
-                                b_error = float(getFieldValue(sfFactorTable,i,9))
+                                a = float(getFieldValue(sfFactorTable, i, 6))
+                                b = float(getFieldValue(sfFactorTable, i, 7))
+                                a_error = float(getFieldValue(sfFactorTable, i, 8))
+                                b_error = float(getFieldValue(sfFactorTable, i, 9))
 
                                 [y_data, y_data_error] = applyScalingFactorToArray(tof_axis,
                                                                                    y_data,
@@ -1571,13 +1552,13 @@ def applyScalingFactorToArray(tof_axis, y_data, y_data_error, a, b, a_error, b_e
 #    final_y_data_error[:] = NAN
     for x in range(nbr_pixel):
 
-        [ratio_array, ratio_array_error] = divideArrays(y_data[x,:],
-                                                        y_data_error[x,:],
+        [ratio_array, ratio_array_error] = divideArrays(y_data[x, :],
+                                                        y_data_error[x, :],
                                                         x_axis_factors,
                                                         x_axis_factors_error)
 
-        final_y_data[x,:] = ratio_array[:]
-        final_y_data_error[x,:] = ratio_array_error
+        final_y_data[x, :] = ratio_array[:]
+        final_y_data_error[x, :] = ratio_array_error
 
     return [final_y_data, final_y_data_error]
 
@@ -1661,9 +1642,9 @@ def getDistances(ws_event_data):
             dPS_array[y, x] = sample.getDistance(detector)
 
     # Array of distances pixel->source
-    dMP_array = dPS_array + dSM
+    _dMP_array = dPS_array + dSM
     # Distance sample->center of detector
-    dSD = dPS_array[256./2.,304./2.]
+    dSD = dPS_array[256./2., 304./2.]
     # Distance source->center of detector
     dMD = dSD + dSM
 
@@ -1698,9 +1679,9 @@ def  getTheta(ws_event_data, angleOffsetDeg):
 def getSlitsSize(mt):
     print '---> retrieving slits size'
     first_slit_size = getSheight(mt, '1')
-    last_slit_size = getSheight(mt,'2')
-    print '----> first_slit_size: ' , first_slit_size
-    print '----> last_slit_size: ' , last_slit_size
+    last_slit_size = getSheight(mt, '2')
+    print '----> first_slit_size: ', first_slit_size
+    print '----> last_slit_size: ', last_slit_size
     return [first_slit_size, last_slit_size]
 
 def getQrange(ws_histo_data, theta, dMD, q_min, q_step):
@@ -1731,13 +1712,13 @@ def getQrange(ws_histo_data, theta, dMD, q_min, q_step):
 def convertToQ(tof_axis,
                y_axis,
                y_error_axis,
-               peak_range = None,
-               central_pixel = None,
-               source_to_detector_distance = None,
-               sample_to_detector_distance = None,
-               theta = None,
-               first_slit_size = None,
-               last_slit_size = None):
+               peak_range=None,
+               central_pixel=None,
+               source_to_detector_distance=None,
+               sample_to_detector_distance=None,
+               theta=None,
+               first_slit_size=None,
+               last_slit_size=None):
     """
     will convert the tof_axis into q_axis according to q range specified
     """
@@ -1760,21 +1741,17 @@ def convertToQ(tof_axis,
     # boxes
     _y_axis = zeros((y_size, len(tof_axis)-1))
     _y_error_axis = zeros((y_size, len(tof_axis)-1))
-#    _y_axis = empty((y_size, len(tof_axis)-1))
-#    _y_error_axis = empty((y_size, len(tof_axis)-1))
-#    _y_axis[:] = NAN
-#    _y_error_axis[:] = NAN
 
     # now determine the _y_axis and _y_error_axis
     for _y_index in range(y_size):
 
         # get the q_axis of the given peak pixel
         _tmp_q_axis = _q_axis[_y_index]
-        q_axis = _tmp_q_axis[::-1] #reverse the axis (now in increasing order)
+        _q_axis = _tmp_q_axis[::-1]  # reverse the axis (now in increasing order)
 
         _tmp_peak_pixel = y_range[_y_index]
-        _y_axis_tmp = y_axis[_y_index,:]
-        _y_error_axis_tmp = y_error_axis[_y_index,:]
+        _y_axis_tmp = y_axis[_y_index, :]
+        _y_error_axis_tmp = y_error_axis[_y_index, :]
 
         # keep only the overlap region of Qs
         _q_min = _q_axis_min_max_index[_y_index, 0]
@@ -1798,15 +1775,11 @@ def convertToQ(tof_axis,
 
     return [q_axis_reverse, _y_axis, _y_error_axis]
 
-def convertToQWithoutCorrection(tof_axis,\
-               y_axis,\
-               y_error_axis,\
-               peak_range = None,\
-               source_to_detector_distance = None,\
-               sample_to_detector_distance = None,\
-               theta = None,\
-               first_slit_size = None,\
-               last_slit_size = None):
+def convertToQWithoutCorrection(tof_axis, y_axis, y_error_axis, _peak_range=None, source_to_detector_distance=None,\
+               _sample_to_detector_distance=None,\
+               theta=None,\
+               _first_slit_size=None,\
+               _last_slit_size=None):
     """
     will convert the tof_axis into q_axis according to q range specified
     but without using any geometry correction
@@ -1823,7 +1796,7 @@ def convertToQWithoutCorrection(tof_axis,\
 
     q_axis_2d = zeros((nbr_pixel, nbr_q))
     for p in range(nbr_pixel):
-        q_axis_2d[p,:] = _q_axis
+        q_axis_2d[p, :] = _q_axis
 
     q_axis_reverse = reverseQAxis(q_axis_2d)
     y_axis_reverse = fliplr(y_axis)
@@ -1852,7 +1825,7 @@ def getQaxis(dMD, dSD, theta,
 
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = len(tof_axis)
-    tmp_q_axis = zeros(sz_tof)
+    _tmp_q_axis = zeros(sz_tof)
     q_array = zeros((len(y_range), sz_tof))
 
     index_y = range(len(y_range))
@@ -1871,11 +1844,7 @@ def getQaxis(dMD, dSD, theta,
             _theta = theta
 
         for t in range(sz_tof):
-#            tof1 = tof_axis[t]
-#            tof2 = tof_axis[t+1]
-#            tofm = (tof1+tof2)/2.
             tof = tof_axis[t]
-#            _Q = _const * math.sin(_theta) / (tofm*1e-6)
             _Q = _const * math.sin(_theta) / (tof*1e-6)
             q_array[y, t] = _Q * 1e-10
 
@@ -1900,9 +1869,9 @@ def integrateOverPeakRange(wks, dataPeakRange):
 #    bigE[:]= NAN
     for x in range(nbrPixel):
         _tmp_y = wks.readY(x)[:]
-        bigY[x,:] = _tmp_y
+        bigY[x, :] = _tmp_y
         _tmp_e = wks.readE(x)[:]
-        bigE[x,:] = _tmp_e
+        bigE[x, :] = _tmp_e
 
     final_y_axis = zeros(nbr_q)
     final_y_error_axis = zeros(nbr_q)
@@ -1920,7 +1889,6 @@ def integrateOverPeakRange(wks, dataPeakRange):
         _tmp_y = bigY[:,q]
         _tmp_y_error = bigE[:,q]
 
-#         [_y, _y_error] = myMean(_tmp_y, _tmp_y_error)
         [_y, _y_error] = sumWithError(_tmp_y, _tmp_y_error)
 
         final_y_axis[q] = _y
@@ -1932,7 +1900,7 @@ def createQworkspace(q_axis, y_axis, y_error_axis):
 
     sz = q_axis.shape
     nbr_pixel = sz[0]
-    nbr_tof = sz[1]
+    _nbr_tof = sz[1]
 
     q_axis_1d = q_axis.flatten()
     y_axis_1d = y_axis.flatten()
@@ -2082,8 +2050,6 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
 
         final_data_y_axis[t] = _data_tmp
         final_data_y_error_axis[t] = _error_tmp
-
-#        print 'final_data_y_axis[t]: ' , _data_tmp , ' final_data_y_error_axis[t]: ' , _error_tmp
 
     return [final_data_y_axis, final_data_y_error_axis]
 
