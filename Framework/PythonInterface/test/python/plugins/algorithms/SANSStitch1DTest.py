@@ -3,7 +3,6 @@ from mantid.api import AlgorithmManager, MatrixWorkspace
 
 
 class SANSStitch1DTest(unittest.TestCase):
-
     def test_initalize(self):
         alg = AlgorithmManager.create('SANSStitch1D')
         alg.setChild(True)
@@ -78,9 +77,9 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg = AlgorithmManager.create('CreateWorkspace')
         create_alg.setChild(True)
         create_alg.initialize()
-        create_alg.setProperty('DataX', range(0,1))
-        create_alg.setProperty('DataY', [1,2])
-        create_alg.setProperty('NSpec', 2) # Wrong number of spectra
+        create_alg.setProperty('DataX', range(0, 1))
+        create_alg.setProperty('DataY', [1, 2])
+        create_alg.setProperty('NSpec', 2)  # Wrong number of spectra
         create_alg.setProperty('UnitX', 'MomentumTransfer')
         create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
         create_alg.execute()
@@ -101,13 +100,12 @@ class SANSStitch1DTest(unittest.TestCase):
         self.assertTrue('HABNormSample' in errors)
         self.assertTrue('LABNormSample' in errors)
 
-
     def test_can_workspaces_required_if_process_can(self):
         # create an input workspace that has multiple spectra
         create_alg = AlgorithmManager.create('CreateWorkspace')
         create_alg.setChild(True)
         create_alg.initialize()
-        create_alg.setProperty('DataX', range(0,1))
+        create_alg.setProperty('DataX', range(0, 1))
         create_alg.setProperty('DataY', [1])
         create_alg.setProperty('NSpec', 1)
         create_alg.setProperty('UnitX', 'MomentumTransfer')
@@ -123,7 +121,7 @@ class SANSStitch1DTest(unittest.TestCase):
         alg.setProperty('LABCountsSample', single_spectra_input)
         alg.setProperty('HABNormSample', single_spectra_input)
         alg.setProperty('LABNormSample', single_spectra_input)
-        alg.setProperty('ProcessCan', True) # Now can workspaces should be provided
+        alg.setProperty('ProcessCan', True)  # Now can workspaces should be provided
 
         errors = alg.validateInputs()
         self.assertTrue('HABCountsCan' in errors)
@@ -131,13 +129,12 @@ class SANSStitch1DTest(unittest.TestCase):
         self.assertTrue('HABNormCan' in errors)
         self.assertTrue('LABNormCan' in errors)
 
-
     def test_scale_none(self):
         create_alg = AlgorithmManager.create('CreateWorkspace')
         create_alg.setChild(True)
         create_alg.initialize()
-        create_alg.setProperty('DataX', range(0,10))
-        create_alg.setProperty('DataY', [1]*9)
+        create_alg.setProperty('DataX', range(0, 10))
+        create_alg.setProperty('DataY', [1] * 9)
         create_alg.setProperty('NSpec', 1)
         create_alg.setProperty('UnitX', 'MomentumTransfer')
         create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
@@ -162,17 +159,52 @@ class SANSStitch1DTest(unittest.TestCase):
 
         y_array = out_ws.readY(0)
 
-        expected_y_array = [1.5]*9
+        expected_y_array = [1.5] * 9
         self.assertTrue(all(map(lambda element: element in y_array, expected_y_array)))
 
+    def test_scale_none_with_can(self):
+        create_alg = AlgorithmManager.create('CreateWorkspace')
+        create_alg.setChild(True)
+        create_alg.initialize()
+        create_alg.setProperty('DataX', range(0, 10))
+        create_alg.setProperty('DataY', [1] * 9)
+        create_alg.setProperty('NSpec', 1)
+        create_alg.setProperty('UnitX', 'MomentumTransfer')
+        create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
+        create_alg.execute()
+        single_spectra_input = create_alg.getProperty('OutputWorkspace').value
 
+        create_alg.setProperty('DataY', [0.5] * 9)
+        create_alg.execute()
+        smaller_single_spectra_input = create_alg.getProperty('OutputWorkspace').value
 
+        alg = AlgorithmManager.create('SANSStitch1D')
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty('Mode', 'None')
+        alg.setProperty('HABCountsSample', single_spectra_input)
+        alg.setProperty('LABCountsSample', single_spectra_input)
+        alg.setProperty('HABNormSample', single_spectra_input)
+        alg.setProperty('LABNormSample', single_spectra_input)
+        alg.setProperty('ProcessCan', True)
+        alg.setProperty('HABCountsCan', smaller_single_spectra_input)
+        alg.setProperty('LABCountsCan', smaller_single_spectra_input)
+        alg.setProperty('HABNormCan', single_spectra_input)
+        alg.setProperty('LABNormCan', single_spectra_input)
+        alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('ShiftFactor', 0.0)
+        alg.setProperty('ScaleFactor', 1.0)
+        alg.execute()
+        out_ws = alg.getProperty('OutputWorkspace').value
 
+        self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
+        y_array = out_ws.readY(0)
 
+        expected_y_array = [0.5] * 9
 
-
-
+        self.assertTrue(all(map(lambda element: element in y_array, expected_y_array)),
+                        msg='can gets subtracted so expect 1 - 0.5 as output signal. Proves the can workspace gets used correctly.')
 
 
 if __name__ == '__main__':

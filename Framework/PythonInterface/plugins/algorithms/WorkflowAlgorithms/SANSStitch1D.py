@@ -119,6 +119,13 @@ class SANSStitch1D(DataProcessorAlgorithm):
         plus.execute()
         return plus.getProperty('OutputWorkspace').value
 
+    def _subract(self, a, b):
+        minus = self.createChildAlgorithm('Minus')
+        minus.setProperty('LHSWorkspace', a)
+        minus.setProperty('RHSWorkspace', b)
+        minus.execute()
+        return minus.getProperty('OutputWorkspace').value
+
     def _crop_to_x_range(self, ws, x_min, x_max):
         crop = self.createChildAlgorithm('CropWorkspace')
         crop.setProperty('InputWorkspace', ws)
@@ -136,6 +143,14 @@ class SANSStitch1D(DataProcessorAlgorithm):
         scaled = scale.getProperty('OutputWorkspace').value
         return scaled
 
+    def _calculate_merged_q(self, cF, nF, cR, nR, shift_factor, scale_factor):
+        # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
+        shifted_norm_front = self._scale(nF, shift_factor)
+        scaled_norm_front = self._scale(nF, 1.0 / scale_factor)
+        numerator = self._add(self._add(cF, shifted_norm_front), cR)
+        denominator = self._add(scaled_norm_front, nR)
+        merged_q = self._divide(numerator, denominator)
+        return merged_q
 
     def PyExec(self):
         enum_map = self._make_mode_map()
@@ -153,6 +168,12 @@ class SANSStitch1D(DataProcessorAlgorithm):
         nF = self.getProperty('HABNormSample').value
         nR = self.getProperty('LABNormSample').value
 
+        if self.getProperty('ProcessCan').value:
+            cF_can = self.getProperty('HABCountsCan').value
+            cR_can = self.getProperty('LABCountsCan').value
+            nF_can = self.getProperty('HABNormCan').value
+            nR_can = self.getProperty('LABNormCan').value
+
         min_q = min(min(cF.dataX(0)), min(cR.dataX(0)))
         max_q = max(max(cF.dataX(0)), max(cR.dataX(0)))
 
@@ -162,18 +183,24 @@ class SANSStitch1D(DataProcessorAlgorithm):
         nF = self._crop_to_x_range(nF, min_q, max_q)
         nR = self._crop_to_x_range(nR, min_q, max_q)
 
-
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
-        shifted_norm_front = self._scale(nF, shift_factor)
-        scaled_norm_front = self._scale(nF, 1.0/scale_factor)
+        merged_q = self._calculate_merged_q(cF=cF, nF=nF, cR=cR, nR=nR, scale_factor=scale_factor,
+                                            shift_factor=shift_factor)
 
-        numerator = self._add(self._add(cF , shifted_norm_front), cR)
-        denominator = self._add(scaled_norm_front, nR)
+        if self.getProperty('ProcessCan').value:
+            cF_can = self.getProperty('HABCountsCan').value
+            cR_can = self.getProperty('LABCountsCan').value
+            nF_can = self.getProperty('HABNormCan').value
+            nR_can = self.getProperty('LABNormCan').value
 
-        merged_q = self._divide(numerator, denominator)
+            # Calculate merged q for the can
+            merged_q_can = self._calculate_merged_q(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,
+                                                    scale_factor=scale_factor,
+                                                    shift_factor=shift_factor)
+            # Subtract it from the sample
+            merged_q = self._subract(merged_q, merged_q_can)
 
         self.setProperty('OutputWorkspace', merged_q)
-
 
     def _validateIs1DFromPropertyName(self, property_name):
         ws = self.getProperty(property_name).value
