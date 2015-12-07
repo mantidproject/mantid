@@ -4,14 +4,22 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidMDAlgorithms/LoadSQW2.h"
 #include "MantidKernel/make_unique.h"
 
+using Mantid::API::ExperimentInfo;
 using Mantid::API::IAlgorithm;
 using Mantid::API::IAlgorithm_uptr;
+using Mantid::API::IMDEventWorkspace;
 using Mantid::API::IMDEventWorkspace_sptr;
+using Mantid::API::Run;
+using Mantid::API::Sample;
 using Mantid::MDAlgorithms::LoadSQW2;
 using Mantid::Kernel::make_unique;
+using Mantid::Kernel::V3D;
 
 class LoadSQW2Test : public CxxTest::TestSuite {
 public:
@@ -40,16 +48,16 @@ public:
   void test_SQW_Is_Accepted_Filename() {
     IAlgorithm_uptr alg;
     TS_ASSERT_THROWS_NOTHING(alg = createAlgorithm());
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("Filename", m_filename));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Filename", m_filename));
   }
 
   void test_OutputWorkspace_Has_Correct_Data() {
     IMDEventWorkspace_sptr outputWS = runAlgorithm();
-    TS_ASSERT_EQUALS(4, outputWS->getNumDims());
-    TS_ASSERT_EQUALS(2, outputWS->getNumExperimentInfo());
+
+    checkGeometryAsExpected(*outputWS);
+    checkExperimentInfoAsExpected(*outputWS);
   }
-  
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -75,7 +83,72 @@ private:
     return alg;
   }
 
-  
+  void checkGeometryAsExpected(const IMDEventWorkspace &outputWS) {
+    TS_ASSERT_EQUALS(4, outputWS.getNumDims());
+  }
+
+  void checkExperimentInfoAsExpected(const IMDEventWorkspace &outputWS) {
+    TS_ASSERT_EQUALS(2, outputWS.getNumExperimentInfo());
+    for (uint16_t i = 0; i < 2; ++i) {
+      checkExperimentInfoAsExpected(*outputWS.getExperimentInfo(i), i);
+    }
+  }
+
+  void checkExperimentInfoAsExpected(const ExperimentInfo &expt,
+                                     const uint16_t index) {
+    checkRunAsExpected(expt.run(), index);
+    checkSampleAsExpected(expt.sample(), index);
+  }
+
+  void checkRunAsExpected(const Run &run, const size_t index) {
+    const double efix(787.0);
+    TS_ASSERT_DELTA(efix, run.getLogAsSingleValue("Ei"), 1e-04);
+    // histogram bins
+    const auto enBins = run.getBinBoundaries();
+    std::vector<double> expectedBins(31);
+    double en(-5.0);
+    std::generate(begin(expectedBins), end(expectedBins), [&en]() {
+      en += 5.0;
+      return en;
+    });
+    TS_ASSERT_DELTA(expectedBins, enBins, 1e-4);
+    // goniometer
+    const auto &gR = run.getGoniometerMatrix();
+    std::vector<double> expectedG;
+    if (index == 0) {
+      expectedG = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+    } else {
+      expectedG = {1.0,  0.000304617, 0.0, -0.000304617, 1.0,
+                   -0.0, -0.0,        0.0, 1.0};
+    }
+    TSM_ASSERT_DELTA("Goniometer for run index " + std::to_string(index) +
+                         " is incorrect",
+                     expectedG, gR.getVector(), 1e-04);
+  }
+
+  void checkSampleAsExpected(const Sample &sample, const size_t) {
+    const auto &lattice = sample.getOrientedLattice();
+    // lattice
+    TS_ASSERT_DELTA(2.87, lattice.a1(), 1e-04);
+    TS_ASSERT_DELTA(2.87, lattice.a2(), 1e-04);
+    TS_ASSERT_DELTA(2.87, lattice.a3(), 1e-04);
+    TS_ASSERT_DELTA(90.0, lattice.alpha(), 1e-04);
+    TS_ASSERT_DELTA(90.0, lattice.beta(), 1e-04);
+    TS_ASSERT_DELTA(90.0, lattice.gamma(), 1e-04);
+    auto uVec(lattice.getuVector()), vVec(lattice.getvVector());
+    uVec.normalize();
+    vVec.normalize();
+    TS_ASSERT_DELTA(1.0, uVec[0], 1e-04);
+    TS_ASSERT_DELTA(0.0, uVec[1], 1e-04);
+    TS_ASSERT_DELTA(0.0, uVec[2], 1e-04);
+    TS_ASSERT_DELTA(0.0, vVec[0], 1e-04);
+    TS_ASSERT_DELTA(1.0, vVec[1], 1e-04);
+    TS_ASSERT_DELTA(0.0, vVec[2], 1e-04);
+  }
+
+  //----------------------------------------------------------------------------
+  // Private data
+  //----------------------------------------------------------------------------
   std::string m_filename;
 };
 
