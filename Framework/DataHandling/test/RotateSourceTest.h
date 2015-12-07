@@ -63,9 +63,9 @@ public:
 
     auto newPos = ws->getInstrument()->getSource()->getPos();
 
-    TS_ASSERT_EQUALS(newPos.X(), 0);
-    TS_ASSERT_EQUALS(newPos.Y(), -1);
-    TS_ASSERT_EQUALS(newPos.Z(), 0);
+    TS_ASSERT_DELTA(newPos.X(), 0);
+    TS_ASSERT_DELTA(newPos.Y(), -1);
+    TS_ASSERT_DELTA(newPos.Z(), 0);
   }
 
   void testRotateCounterClockwise() {
@@ -102,9 +102,9 @@ public:
 
     auto newPos = ws->getInstrument()->getSource()->getPos();
 
-    TS_ASSERT_EQUALS(newPos.X(), 0);
-    TS_ASSERT_EQUALS(newPos.Y(), 1);
-    TS_ASSERT_EQUALS(newPos.Z(), 0);
+    TS_ASSERT_DELTA(newPos.X(), 0.0, 1E-5);
+    TS_ASSERT_DELTA(newPos.Y(), 1.0, 1E-5);
+    TS_ASSERT_DELTA(newPos.Z(), 0.0, 1E-5);
   }
 
   void testRotateClockwiseSampleAt001() {
@@ -141,9 +141,9 @@ public:
 
     auto newPos = ws->getInstrument()->getSource()->getPos();
 
-    TS_ASSERT_EQUALS(newPos.X(), 0);
-    TS_ASSERT_EQUALS(newPos.Y(), -1);
-    TS_ASSERT_EQUALS(newPos.Z(), 1);
+    TS_ASSERT_DELTA(newPos.X(), 0.0, 1E-5);
+    TS_ASSERT_DELTA(newPos.Y(), -1.0, 1E-5);
+    TS_ASSERT_DELTA(newPos.Z(), 1.0, 1E-5);
   }
 
   void testRotateClockwiseSampleAt111() {
@@ -180,9 +180,9 @@ public:
 
     auto newPos = ws->getInstrument()->getSource()->getPos();
 
-    TS_ASSERT_EQUALS(newPos.X(), 1);
-    TS_ASSERT_EQUALS(newPos.Y(), 0);
-    TS_ASSERT_EQUALS(newPos.Z(), 1);
+    TS_ASSERT_DELTA(newPos.X(), 1.0, 1E-5);
+    TS_ASSERT_DELTA(newPos.Y(), 0.0, 1E-5);
+    TS_ASSERT_DELTA(newPos.Z(), 1.0, 1E-5);
   }
 };
 
