@@ -32,31 +32,31 @@ Usage
 
 .. testcode:: SANSDarkRunBackgroundCorrection
 
-	# Create sample workspaces. Note that the dark run is here the same as the sample run
-	ws_sample = CreateSampleWorkspace()
-	ws_dark_run = CloneWorkspace(ws_sample)
+    # Create sample workspaces. Note that the dark run is here the same as the sample run
+    ws_sample = CreateSampleWorkspace()
+    ws_dark_run = CloneWorkspace(ws_sample)
 
-	out_ws = SANSDarkRunBackgroundCorrection(InputWorkspace = ws_sample, 
-																  DarkRun = ws_dark_run,
-																  NormalizationRatio = 0.5,
-																  Uniform = False,
-																  Mean = False,
-																  ApplyToDetectors = True,
-																  ApplyToMonitors = False)
-														  
-	# We should have effectively halfed the data values
-	in_y = ws_sample.dataY(0)
-	out_y = out_ws.dataY(0)
+    out_ws = SANSDarkRunBackgroundCorrection(InputWorkspace = ws_sample, 
+                                             DarkRun = ws_dark_run,
+                                             NormalizationRatio = 0.5,
+                                             Uniform = False,
+                                             Mean = False,
+                                             ApplyToDetectors = True,
+                                             ApplyToMonitors = False)
 
-	print "The first bin of the first spectrum of the input was " + str(in_y[0])
-	print "After the dark run correction it is " + str(out_y[0])
+    # We should have effectively halfed the data values
+    in_y = ws_sample.dataY(0)
+    out_y = out_ws.dataY(0)
+
+    print "The first bin of the first spectrum of the input was " + str(in_y[0])
+    print "After the dark run correction it is " + str(out_y[0])
 
 Output:
 
-.. testoutput:: ReplicateMDExample1D
+.. testoutput:: SANSDarkRunBackgroundCorrection
 
-	The first bin of the first spectrum of the input was 0.3
-	After the dark run correction it is 0.15
+    The first bin of the first spectrum of the input was 0.3
+    After the dark run correction it is 0.15
 
 
 .. categories::
