@@ -1348,8 +1348,16 @@ class CWSCDReductionControl(object):
 
     def estimate_detector_background(self, bkgd_scan_list):
         """ Integrate peak with background and etc...
+        Purpose:
+        
+        Requirements:
+
+        Guarantees:
+
+        :param bkgd_scan_list: 
+        :return:
         """
-        # TODO/FIXME - Add me into workflow!
+        raise RuntimeError('Incorrect note and documentation: Add me into workflow!')
         # Check
         assert isinstance(bkgd_scan_list, list)
         assert len(bkgd_scan_list) > 2
@@ -1369,8 +1377,6 @@ class CWSCDReductionControl(object):
         bkgd_ws *= 1./len(bkgd_scan_list)
 
         return bkgd_ws.name()
-
-
 
 
 def get_spice_file_name(exp_number, scan_number):
