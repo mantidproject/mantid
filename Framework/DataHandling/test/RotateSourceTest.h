@@ -63,9 +63,9 @@ public:
 
     auto newPos = ws->getInstrument()->getSource()->getPos();
 
-    TS_ASSERT_DELTA(newPos.X(), 0);
-    TS_ASSERT_DELTA(newPos.Y(), -1);
-    TS_ASSERT_DELTA(newPos.Z(), 0);
+    TS_ASSERT_DELTA(newPos.X(), 0.0, 1E-5);
+    TS_ASSERT_DELTA(newPos.Y(), -1.0, 1E-5);
+    TS_ASSERT_DELTA(newPos.Z(), 0.0, 1E-5);
   }
 
   void testRotateCounterClockwise() {
