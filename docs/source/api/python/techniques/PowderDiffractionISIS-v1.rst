@@ -22,44 +22,102 @@ machine: `C:\MantidInstall\scripts\PowderISIS`.
 Run Requirement
 ---------------
 There are a preference file and a small script which is required to run inside
-`Scripting Window <http://docs.mantidproject.org/nightly/interfaces/ScriptingWindow.html>`_
-on mantid in order to carry out the data normalisation:
+`Scripting Window <http://docs.mantidproject.org/nightly/interfaces/
+ScriptingWindow.html>`_ on mantid in order to carry out the data normalisation:
 
-
-The preference file, a file with an extension name of .pref (e.g: UserPrefFile.Ppref)
+The preference file, a file with an extension name of .pref (e.g: UserPrefFile.pref)
 will contain the following at least:
  - vanadium, background and empty sample container (if used) run numbers
  - parameters  for carrying out a sample absorption correction (if required)
  - Directories which can be assigned to RAW files, Vanadium Directory
 *These directories have been left blank but can be changed and set by each user*
 *on their preference. The directories are also modifiable via small script which*
-*is ran inside* :ref:`Scripting Window <interfaces-ScriptingWindow>`
+*is ran inside* `Scripting Window <http://docs.mantidproject.org/nightly/interfaces
+/ScriptingWindow.html>`_
 
-The script which is required to be written inside `Scripting Window <http://docs.mantidproject.org/
-nightly/interfaces/ScriptingWindow.html>`_ on Mantid contains:
+The script which is required to be written inside `Scripting Window <http://docs.
+mantidproject.org/nightly/interfaces/ScriptingWindow.html>`_ on Mantid contains:
  - Details of the location for all the files which will be utilised
  - Name of the pref file and folders
  - The run number(s) you wish to process
 
-Folder & Files Structure
-------------------------
+Files & Folders
+---------------
 
-Folder and files pre structure
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-When ExistingV is equal to yes inside the pref file being utilised, you are required to have nexus files named after the
-value of CorrVanFile inside the pref file. In this case we are using POLARIS instrument so we shall need 5
-nexus files as you can see inside the calibration folder below (5 is the number of banks for Polaris).
+Files & Folder Pre=Structure
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+When ExistingV is yes inside the pref file that is being utilised, you are required to
+have nexus files named after the value of CorrVanFile which is also found inside the
+pref file. In this case we are using POLARIS instrument so we shall need 5 nexus files
+as you can see inside the calibration folder below (5 is the number of banks for Polaris).
 
 .. image:: /images/PowderISIS_pre_structure_extV_yes.png
    :scale: 20%
 
+.. _post-structure-PowderISIS-ref:
 
-Folder and files post structure
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Once the process has completed these are the out pull files which should be if ExistingV is equal to yes in pref file
+Files & Folder Post-Structure
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Once the process has completed these are the output files which should be generated if
+ExistingV is equal to yes in pref file
 
 .. image:: /images/PowderISIS_Post_structure_extV_yes.png
    :scale: 20%
+
+Data Layout
+^^^^^^^^^^^
+The structure of the folder shown above in the image can be easily modified within the
+script that is written inside `Scripting Window <http://docs.mantidproject.org/nightly/
+interfaces/ScriptingWindow.html>`_. The script that is being used to generate above folder
+structure can be found in the :ref:`usage-PowderISIS-ref` section.
+If the `Analysisdir` equals empty string or `Analysisdir` is not pass as a parameter within
+the python script, the `GrpOff` and `Cycle_15_2` folder will be required in the `POLARIS`
+folder.
+
+Similarly if the `Cycle_15_2` or `user` is not passed as a parameter or passed as an empty
+string `("")`, then the script shall look for the files in previous folder.
+
+The 'GrpOff' folder is always required, within the 'GrpOff' folder is a .cal file which
+gives the detector grouping (i.e. the detector banks' numbers) and the Offset to be
+applied to focus each detector (this is in addition to the "ideal" instrument geometry
+focusing information, which Mantid determines from the Instrument Definintion File).
+
+The run number, vanadium number and V-Empty number data is required to be provided within
+the raw directory, if the vana-peaks are also required to be removed then a file named
+*VanaPeaks.dat* is needed inside the raw directory.
+This will enable vana peaks to be removed by interpolation in range given within the
+VanaPeaks.dat file. The vanadium number and V-Empty number is set in the pref file as
+shown below.
+
+.. code-block:: python
+
+   #----------------------------------------------------
+   # Calibration Runs Numbers
+   #----------------------------------------------------
+   #
+   # Cycle 2013/5  Beam 40mm(h) x 15mm(w)
+   # Fixed collimator in sample tank (no Jaws5)
+   #
+   Vanadium     78338
+   V-Empty      78339
+   #
+
+The output files will vary on the values provided in pref file for the following variables,
+which either equal yes or no.
+
+.. code-block:: python
+
+   #Output
+   XYE-TOF      yes
+   XYE-D        yes
+   GSS          yes
+   Nexus        yes
+
+The `XYE-TOF`, `XYE-D`, `GSS` and `Nexus` files along with a copy of the Grouping file are all
+generated where the pref file is located, which would be inside the 'Mantid_tester' folder in
+:ref:`post-structure-PowderISIS-ref`.
+
+.. _usage-PowderISIS-ref:
 
 Usage
 -----
