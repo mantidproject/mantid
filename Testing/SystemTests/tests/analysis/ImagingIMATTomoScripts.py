@@ -180,17 +180,31 @@ class ImagingIMATTomoTests(unittest.TestCase):
         for coords in [(3, 510, 0), (2,2,3), (1,0,0), (0, 500, 5)]:
             peek_out = masked[coords]
             self.assertAlmostEquals(peek_out, some_val,
-                              msg="Circular mask: wrong value found outside. Expected: {0}, found: {1}".
-                              format(some_val, peek_out))
+                              msg="Circular mask: wrong value found outside. Expected: {0}, "
+                                    "found: {1}".format(some_val, peek_out))
 
         for coords in [(3, 200, 200), (2, 50, 20), (1, 300, 100), (0, 400, 200)]:
             peek_in = masked[coords]
             expected_val = self.data_vol[coords]
             self.assertAlmostEquals(peek_in, expected_val,
-                              msg="Circular mask: wrong value found inside. Expected: {0}, found: {1}".
-                              format(expected_val, peek_in))
+                              msg="Circular mask: wrong value found inside. Expected: "
+                                    "{0}, found: {1}".format(expected_val, peek_in))
 
-    def test_remove_stripes_ok(self):
+    def test_remove_stripes_err(self):
+        import IMAT.prep as iprep
+
+        method = 'wavelet-fourier'
+
+        # expect pywt to be missing
+        with self.assertRaises(ImportError):
+            stripped = iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
+                                                                   method)
+
+    def disabled_test_remove_stripes_ok(self):
+        """
+        This tests the local implementation of the wavelet-fourier stripe removal
+        method. It will only run if pywt is available
+        """
         import IMAT.prep as iprep
 
         method = 'wavelet-fourier'

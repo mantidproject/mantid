@@ -18,6 +18,7 @@
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
+import numpy as np
 
 # The code of the 'Wavelet-Fourier' stripe removal method is heavily based on
 # the implementation of this method in tomopy
@@ -81,9 +82,7 @@ def remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=
     try:
         import pywt
     except ImportError as exc:
-        raise ImportError("pywt. Details: {0}".format(exc))
-
-    import numpy as np
+        raise ImportError("Could not import the package pywt. Details: {0}".format(exc))
 
     dimx = data_vol.shape[0]
     n_x = dimx
@@ -96,28 +95,14 @@ def remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=
         sli[xshift:dimx + xshift] = data_vol[:, sino_idx, :]
 
         # Wavelet decomposition
-        c_H = []
-        c_V = []
-        c_D = []
+        c_H, c_V, c_D = [], [], []
         for _ in range(wv_levels):
             sli, (cHt, cVt, cDt) = pywt.dwt2(sli, wavelet_name)
             c_H.append(cHt)
             c_V.append(cVt)
             c_D.append(cDt)
 
-        # Fourier transform of horizontal frequency bands
-        for nlvl in range(wv_levels):
-            # FT
-            fcV = np.fft.fftshift(np.fft.fft(c_V[nlvl], axis=0))
-            m_y, m_x = fcV.shape
-
-            # Damping of ring artifact information
-            y_hat = (np.arange(-m_y, m_y, 2, dtype='float32') + 1) / 2
-            damp = 1 - np.exp(-np.power(y_hat, 2) / (2 * np.power(sigma, 2)))
-            fcV = np.multiply(fcV, np.transpose(np.tile(damp, (m_x, 1))))
-
-            # Inverse FT
-            c_V[nlvl] = np.real(np.fft.ifft(np.fft.ifftshift(fcV), axis=0))
+        c_V = ft_horizontal_bands(c_V, wv_levels, sigma)
 
         # Wavelet reconstruction
         for nlvl in range(wv_levels)[::-1]:
@@ -127,3 +112,23 @@ def remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=
         data_vol[:, sino_idx, :] = sli[xshift:dimx + xshift, 0:data_vol.shape[2]]
 
     return data_vol
+
+def ft_horizontal_bands(c_V, wv_levels, sigma):
+    """
+    Fourier transform of horizontal frequency bands
+    """
+    for nlvl in range(wv_levels):
+        # FT
+        fcV = np.fft.fftshift(np.fft.fft(c_V[nlvl], axis=0))
+        m_y, m_x = fcV.shape
+
+        # Damping of ring artifact information
+        y_hat = (np.arange(-m_y, m_y, 2, dtype='float32') + 1) / 2
+        damp = 1 - np.exp(-np.power(y_hat, 2) / (2 * np.power(sigma, 2)))
+        fcV = np.multiply(fcV, np.transpose(np.tile(damp, (m_x, 1))))
+
+        # Inverse FT
+        c_V[nlvl] = np.real(np.fft.ifft(np.fft.ifftshift(fcV), axis=0))
+
+    return c_V
+
