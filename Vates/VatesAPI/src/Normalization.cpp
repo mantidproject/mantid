@@ -12,6 +12,7 @@ requested normalisation.
 This is used for visualisation of IMDEventWorkspaces.
 @param normalizationOption : Visual Normalization option desired
 @param ws : workspace to fetch defaults from if needed
+@param hasMask : true if the workspace has a mask
 @return member function to use on IMDNodes
 */
 NormFuncIMDNodePtr
