@@ -402,8 +402,8 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
 
     return sample_data, flat_avg, dark_avg
 
-def save_recon_as_vertical_slices(recon_data, output_dir, name_prefix='out_recon_slice',
-                                  zero_fill=6):
+def save_recon_as_vertical_slices(recon_data, output_dir, img_format='tiff',
+                                  name_prefix='out_recon_slice', zero_fill=6):
     """
     Save reconstructed volume (3d) into a series of slices along the Z axis (outermost numpy dimension)
 
@@ -412,15 +412,15 @@ def save_recon_as_vertical_slices(recon_data, output_dir, name_prefix='out_recon
     @param name_prefix :: prefix for the names of the images - an index is appended to this prefix
     @param zero_fill :: number of zeros to pad the image/slice index number
     """
-    tomoio.make_dirs_if_needed(output_dir)
+    make_dirs_if_needed(output_dir)
     min_pix = np.amin(recon_data)
     max_pix = np.amax(recon_data)
     for idx in range(0, recon_data.shape[0]):
-        tomoio.write_image(recon_data[idx, :, :], min_pix, max_pix,
-                           os.path.join(output_dir, name_prefix + str(idx).zfill(zero_fill)),
-                           dtype='uint16')
+        write_image(recon_data[idx, :, :], min_pix, max_pix,
+                    os.path.join(output_dir, name_prefix + str(idx).zfill(zero_fill)),
+                    img_format=img_format, dtype='uint16')
 
-def save_recon_as_horizontal_slices(recon_data, out_horiz_dir,
+def save_recon_as_horizontal_slices(recon_data, out_horiz_dir, img_format='tiff',
                                     name_prefix='out_recon_horiz_slice', zero_fill=6):
     """
     Save reconstructed volume (3d) into a series of slices along the Y axis (second numpy dimension)
@@ -431,11 +431,11 @@ def save_recon_as_horizontal_slices(recon_data, out_horiz_dir,
     @param zero_fill :: number of zeros to pad the image/slice index number. This index is appended to
     the prefix
     """
-    tomoio.make_dirs_if_needed(out_horiz_dir)
+    make_dirs_if_needed(out_horiz_dir)
     for idx in range(0, recon_data.shape[1]):
-        tomoio.write_image(recon_data[:, idx, :], np.amin(recon_data), np.amax(recon_data),
-                           os.path.join(out_horiz_dir, name_prefix + str(idx).zfill(zero_fill)),
-                           dtype='uint16')
+        write_image(recon_data[:, idx, :], np.amin(recon_data), np.amax(recon_data),
+                    os.path.join(out_horiz_dir, name_prefix + str(idx).zfill(zero_fill)),
+                    img_format=img_format, dtype='uint16')
 
 def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
     """

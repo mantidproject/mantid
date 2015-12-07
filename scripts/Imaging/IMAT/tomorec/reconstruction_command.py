@@ -100,7 +100,7 @@ class ReconstructionCommand(object):
         self.apply_postproc_filters(recon_data, cfg.postproc_cfg)
 
         # Save output from the reconstruction
-        self.save_recon_output(recon_data, cfg.postproc_cfg.output_dir, save_netcdf_vol=True)
+        self.save_recon_output(recon_data, cfg, save_netcdf_vol=True)
 
         self.gen_readme_summary_end(readme_fullpath, (data, preproc_data, recon_data), tstart,
                                     t_recon_end - t_recon_start)
@@ -374,7 +374,8 @@ class ReconstructionCommand(object):
         # list with first-x, first-y, second-x, second-y
         if cfg.crop_coords:
             try:
-                tomoio.crop_coords(data, cfg.crop_coords)
+                import prep as iprep
+                data = iprep.filters.crop_vol(data, cfg.crop_coords)
                 print " * Finished crop step, with pixel data type: {0}.".format(data.dtype)
             except ValueError as exc:
                 print("Error in crop (region of interest) parameter (expecting a list with four integers. "
@@ -736,12 +737,12 @@ class ReconstructionCommand(object):
 
         return (sample, white, dark)
 
-    def save_recon_output(self, recon_data, output_dir, save_horiz_slices=False, save_netcdf_vol=False):
+    def save_recon_output(self, recon_data, cfg, save_horiz_slices=False, save_netcdf_vol=False):
         """
         Save output reconstructed volume in different forms.
 
         @param recon_data :: reconstructed data volume. A sequence of images will be saved from this
-        @param output_dir :: where the outputs are being saved
+        @param cfg :: configuration of the reconstruction, including output paths and formats
         @param save_horiz_slices :: Save images along the horizontal axis in addition to the vertical
         slices saved by defult. Useful for testing
         @param save_netcdf_vol :: save data into a NetCDF, useful for testing, and easy to load in
@@ -749,9 +750,11 @@ class ReconstructionCommand(object):
         """
         # slices along the vertical (z) axis
         # output_dir = 'output_recon_tomopy'
+        output_dir = cfg.postproc_cfg.output_dir
         print "* Saving slices of the reconstructed volume in: {0}".format(output_dir)
         tomoio.save_recon_as_vertical_slices(recon_data, output_dir,
-                                             name_prefix=self._OUT_SLICES_FILENAME_PREFIX)
+                                             name_prefix=self._OUT_SLICES_FILENAME_PREFIX,
+                                             img_format=cfg.preproc_cfg.out_img_format)
 
         # Sideways slices:
         save_horiz_slices = False
@@ -759,7 +762,8 @@ class ReconstructionCommand(object):
             out_horiz_dir = os.path.join(output_dir, 'horiz_slices')
             print "* Saving horizontal slices in: {0}".format(out_horiz_dir)
             tomoio.save_recon_as_horizontal_slices(recon_data, out_horiz_dir,
-                                                   name_prefix=self._OUT_HORIZ_SLICES_SUBDIR)
+                                                   name_prefix=self._OUT_HORIZ_SLICES_SUBDIR,
+                                                   img_format=cfg.preproc_cfg.out_img_format)
 
         if save_netcdf_vol:
             print "* Saving reconstructed volume as NetCDF"
