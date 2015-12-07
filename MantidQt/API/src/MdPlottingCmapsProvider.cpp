@@ -7,14 +7,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Node.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/SAX/InputSource.h>
-#include <Poco/Exception.h>
-
 #ifdef MAKE_VATES
 #include "vtkSMTransferFunctionPresets.h"
 #include "vtkNew.h"
@@ -127,4 +119,4 @@ namespace MantidQt{
       return indexVector;
     }
   }
-}
+  }
