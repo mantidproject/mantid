@@ -77,7 +77,12 @@ VsiColorScale ColorUpdater::autoScale()
 
 void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
                                   const Json::Value &model) {
-  vtkSMProxy *lutProxy = repr->getLookupTable()->getProxy();
+  pqScalarsToColors *lut = repr->getLookupTable();
+  if (NULL == lut) {
+    // Got a bad proxy, so just return
+    return;
+  }
+  vtkSMProxy *lutProxy = lut->getProxy();
   vtkSMTransferFunctionProxy::ApplyPreset(lutProxy, model, true);
 }
 
