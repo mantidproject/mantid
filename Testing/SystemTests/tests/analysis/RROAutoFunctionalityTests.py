@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 import stresstesting
 from algorithm_decorator import make_decorator
 from mantid.simpleapi import *
@@ -134,7 +134,7 @@ class RROAutoFunctionalityTest(stresstesting.MantidStressTest):
         alg.set_ProcessingInstructions("73") # Fictional values
         alg.set_CorrectDetectorPositions(True)
         alg.set_RegionOfDirectBeam("28, 29") # Fictional values
-        alg.set_ThetaIn(0.49 / 2) # Fictional values
+        alg.set_ThetaIn(0.49) # Fictional values
 
         out_ws_q, out_ws_lam, theta =  alg.execute()
 

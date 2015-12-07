@@ -54,7 +54,7 @@ Output:
 
 .. testoutput:: SpecularReflectionPositionCorrectExample 
  
-   [0,1,1]
+   [0,0.414214,1]
 
 .. categories::
 

@@ -13,7 +13,8 @@ void export_FrameworkManager() {
                                                    no_init)
       .def("setNumOMPThreadsToConfigValue",
            &FrameworkManagerImpl::setNumOMPThreadsToConfigValue, arg("self"),
-           "Sets the number of OpenMP threads to the value specified in the "
+           "Sets the number of OpenMP threads to the value "
+           "specified in the "
            "config file")
 
       .def("setNumOMPThreads", &FrameworkManagerImpl::setNumOMPThreads,
@@ -32,7 +33,8 @@ void export_FrameworkManager() {
            "Clear memory held by algorithms (does not include workspaces)")
 
       .def("clearData", &FrameworkManagerImpl::clearData, arg("self"),
-           "Clear memory held by the data service (essentially all workspaces, "
+           "Clear memory held by the data service (essentially all "
+           "workspaces, "
            "including hidden)")
 
       .def("clearInstruments", &FrameworkManagerImpl::clearInstruments,
@@ -42,10 +44,11 @@ void export_FrameworkManager() {
            &FrameworkManagerImpl::clearPropertyManagers, arg("self"),
            "Clear memory held by the PropertyManagerDataService")
 
+      .def("shutdown", &FrameworkManagerImpl::shutdown, arg("self"),
+           "Effectively shutdown this service")
+
       .def("Instance", &FrameworkManager::Instance,
            return_value_policy<reference_existing_object>(),
-           "Returns a reference to the FrameworkManager singleton")
-      .staticmethod("Instance")
-
-      ;
+           "Return a reference to the singleton instance")
+      .staticmethod("Instance");
 }

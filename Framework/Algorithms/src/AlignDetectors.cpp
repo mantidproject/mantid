@@ -30,7 +30,7 @@ namespace { // anonymous namespace
 
 /// Applies the equation d=(TOF-tzero)/difc
 struct func_difc_only {
-  func_difc_only(const double difc) : factor(1. / difc) {}
+  explicit func_difc_only(const double difc) : factor(1. / difc) {}
 
   double operator()(const double tof) const { return factor * tof; }
 
@@ -77,7 +77,7 @@ struct func_difa {
 
 class ConversionFactors {
 public:
-  ConversionFactors(ITableWorkspace_const_sptr table) {
+  explicit ConversionFactors(ITableWorkspace_const_sptr table) {
     m_difcCol = table->getColumn("difc");
     m_difaCol = table->getColumn("difa");
     m_tzeroCol = table->getColumn("tzero");

@@ -76,6 +76,18 @@ public:
   getSignalAtCoord(const coord_t *coords,
                    const Mantid::API::MDNormalization &normalization) const;
 
+  /// Returns the (normalized) signal at a given coordinates
+  // or 0 if masked
+  virtual signal_t getSignalWithMaskAtCoord(
+      const coord_t *coords,
+      const Mantid::API::MDNormalization &normalization) const;
+
+  bool isInBounds(const coord_t *coords) const;
+
+  signal_t
+  getNormalizedSignal(const API::IMDNode *box,
+                      const Mantid::API::MDNormalization &normalization) const;
+
   virtual void getLinePlot(const Mantid::Kernel::VMD &start,
                            const Mantid::Kernel::VMD &end,
                            API::MDNormalization normalize,

@@ -15,7 +15,7 @@ import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
 from Direct.PropertyManager  import PropertyManager
 from Direct.RunDescriptor    import RunDescriptor
-from Direct.ReductionHelpers import extract_non_system_names
+from Direct.ReductionHelpers import extract_non_system_names,process_prop_list
 
 
 
@@ -324,8 +324,7 @@ class DirectEnergyConversion(object):
                 diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
             else: # either WB was diagnosed or WB masks were applied to it
                 # Extract the mask workspace
-#pylint: disable=unused-variable
-                diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
+                diag_mask, _ = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
         else:
             diag_mask = None
         # Clean up
@@ -356,10 +355,10 @@ class DirectEnergyConversion(object):
         #
         self.prop_man.set_input_parameters(**kwargs)
 
+
         # output workspace name.
         try:
-#pylint: disable=unused-variable
-            n,r = funcreturns.lhs_info('both')
+            _,r = funcreturns.lhs_info('both')
             out_ws_name = r[0]
 #pylint: disable=bare-except
         except:
@@ -370,7 +369,7 @@ class DirectEnergyConversion(object):
         # and verify some other properties which can be wrong before starting a
         # long run.
         prop_man.log("****************************************************************")
-        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WRORKFLOW STARTED **********")
+        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WORKFLOW STARTED  **********")
         prop_man.validate_properties()
         prop_man.log("*** Loading or retrieving sample run: {0}".format(prop_man.sample_run))
         prop_man.log("****************************************************************")
@@ -383,6 +382,27 @@ class DirectEnergyConversion(object):
 
         PropertyManager.sample_run.set_action_suffix('')
         sample_ws = PropertyManager.sample_run.get_workspace()
+        # Check auto-ei mode and calculate incident energies if necessary
+        if PropertyManager.incident_energy.autoEi_mode():
+            mon_ws = PropertyManager.sample_run.get_monitors_ws()
+            # sum monitor spectra if this is requested
+            ei_mon_spec = self.ei_mon_spectra
+            if PropertyManager.ei_mon_spectra.need_to_sum_monitors(prop_man):
+                ei_mon_spec,mon_ws = self.sum_monitors_spectra(mon_ws,ei_mon_spec)
+                sample_ws.setMonitorWorkspace(mon_ws)
+            else:
+                pass
+
+            try:
+                PropertyManager.incident_energy.set_auto_Ei(mon_ws,prop_man,ei_mon_spec)
+                EiToProcessAvailible = True
+            except RuntimeError as er:
+                prop_man.log('*** Error while calculating autoEi: {0}. See algorithm log for details.'.\
+                format(str(er)))
+                EiToProcessAvailible = False
+        else:
+            EiToProcessAvailible = True
+
 
         # Update reduction properties which may change in the workspace but have
         # not been modified from input parameters.
@@ -399,6 +419,11 @@ class DirectEnergyConversion(object):
         # inform user on what parameters have changed from script or gui
         # if monovan present, check if abs_norm_ parameters are set
         self.prop_man.log_changed_values('notice')
+        if not EiToProcessAvailible:
+            prop_man.log("*** NO GUESS INCIDENT ENERGIES IDENTIFIED FOR THIS RUN *********")
+            prop_man.log("*** NOTHING TO REDUCE ******************************************")
+            prop_man.log("****************************************************************")
+            return None
 
         masking = None
         masks_done = False
@@ -455,7 +480,6 @@ class DirectEnergyConversion(object):
         if PropertyManager.incident_energy.multirep_mode():
             self._multirep_mode = True
             ws_base = None
-            num_ei_cuts = len(self.incident_energy)
             if self.check_background:
                 # find the count rate seen in the regions of the histograms defined
                 # as the background regions, if the user defined such region.
@@ -466,16 +490,20 @@ class DirectEnergyConversion(object):
             # initialize list to store resulting workspaces to return
             result = []
         else:
-#pylint: disable=attribute-defined-outside-init
+#pylint: disable=W0201
             self._multirep_mode = False
-            num_ei_cuts = 0
+
 #------------------------------------------------------------------------------------------
 # Main loop over incident energies
 #------------------------------------------------------------------------------------------
-        cut_ind = 0 # do not do enumerate if it generates all sequence at once
+        # do not do enumerate if it generates all sequence at once
         #  -- code below uses current energy state from PropertyManager.incident_energy
-        for ei_guess in PropertyManager.incident_energy:
-            cut_ind +=1
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        num_ei_cuts = len(AllEn)
+        for ind,ei_guess in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ind)
+
+            cut_ind =ind + 1 # nice printing convention (1 of 1 rather them 0 of 1)
             #---------------
             if self._multirep_mode:
                 tof_range = self.find_tof_range_for_multirep(ws_base)
@@ -552,7 +580,7 @@ class DirectEnergyConversion(object):
         # clear combined mask
         self.spectra_masks = None
         end_time = time.time()
-        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WRORKFLOW FINISHED *********")
+        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WORKFLOW FINISHED  *********")
         prop_man.log("*** Elapsed time : {0:>9.2f} sec                       *********".\
                     format(end_time - start_time),'notice')
         prop_man.log("****************************************************************")
@@ -699,38 +727,63 @@ class DirectEnergyConversion(object):
            Returns tuple of two spectra numbers, containing in the
            new summed monitors workspace and pointer to the new workspace itself.
         """
-        spectra_list1=ei_mon_spectra[0]
-        spectra_list2=ei_mon_spectra[1]
-        if not isinstance(spectra_list1,list):
-            spectra_list1 = [spectra_list1]
-        spec_num1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
-
-        if not isinstance(spectra_list2,list):
-            spectra_list2 = [spectra_list2]
-        spec_num2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
+        existing_list = process_prop_list(monitor_ws,"CombinedSpectraIDList")
         monitor_ws_name = monitor_ws.name()
-        DeleteWorkspace(monitor_ws_name)
-        AppendSpectra(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2',OutputWorkspace=monitor_ws_name)
-        if 'spectr_ws1' in mtd:
-            DeleteWorkspace('spectr_ws1')
-        if 'spectr_ws2' in mtd:
-            DeleteWorkspace('spectr_ws2')
-        monitor_ws = mtd[monitor_ws_name]
+        if len(existing_list) == 0:
+            spectra_list1=ei_mon_spectra[0]
+            spectra_list2=ei_mon_spectra[1]
+            if not isinstance(spectra_list1,list):
+                spectra_list1 = [spectra_list1]
+            spec_id1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
+
+            if not isinstance(spectra_list2,list):
+                spectra_list2 = [spectra_list2]
+            spec_id2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
+            # Are other monitors necessary?
+            mon_list = self.prop_man.get_used_monitors_list()
+            spectra_needed=[]
+            monitors_left=[]
+            for mon_id in mon_list:
+                if not(mon_id in spectra_list1 or mon_id in spectra_list2):
+                    wsInd = monitor_ws.getIndexFromSpectrumNumber(int(mon_id))
+                    monitors_left.append(int(mon_id))
+                    spectra_needed.append(int(wsInd))
+            n_other_mon = len(spectra_needed)
+            if n_other_mon > 0:
+                ExtractSpectra(InputWorkspace=monitor_ws,OutputWorkspace='_OtherMon',\
+                               WorkspaceIndexList=spectra_needed)
+            else:
+                pass
+            # Deal with summed monitors
+            DeleteWorkspace(monitor_ws_name)
+            ConjoinWorkspaces(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2')
+            RenameWorkspace(InputWorkspace='spectr_ws1',OutputWorkspace=monitor_ws_name)
+            if '_OtherMon' in mtd:
+                ConjoinWorkspaces(InputWorkspace1=monitor_ws_name,InputWorkspace2='_OtherMon')
+            else:
+                pass
+
+            monitor_ws = mtd[monitor_ws_name]
+            AddSampleLog(monitor_ws,LogName='CombinedSpectraIDList',\
+                         LogText=str(monitors_left+spectra_list1+spectra_list2),LogType='String')
+        else:
+            pass
         # Weird operation. It looks like the spectra numbers obtained from
         # AppendSpectra operation depend on instrument.
         # Looks like a bug in AppendSpectra
-        spec_num1 = monitor_ws.getSpectrum(0).getSpectrumNo()
-        spec_num2 = monitor_ws.getSpectrum(1).getSpectrumNo()
+        spec_id1 = monitor_ws.getSpectrum(0).getSpectrumNo()
+        spec_id2 = monitor_ws.getSpectrum(1).getSpectrumNo()
 
-        return (spec_num1,spec_num2),monitor_ws
 
+        return (spec_id1,spec_id2),monitor_ws
+    #
     def _process_spectra_list(self,workspace,spectra_list,target_ws_name='SpectraWS'):
         """Method moves all detectors of the spectra list into the same position and
            sums the specified spectra in the workspace"""
         detPos=None
         wsIDs=list()
-        for spec_num in spectra_list:
-            specID = workspace.getIndexFromSpectrumNumber(spec_num)
+        for spec_id in spectra_list:
+            specID = workspace.getIndexFromSpectrumNumber(spec_id)
             if detPos is None:
                 first_detector = workspace.getDetector(specID)
                 detPos = first_detector.getPos()
@@ -779,11 +832,12 @@ class DirectEnergyConversion(object):
         # sum monitor spectra if this is requested
         if PropertyManager.ei_mon_spectra.need_to_sum_monitors(self.prop_man):
             ei_mon_spectra,monitor_ws = self.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
+            data_ws.setMonitorWorkspace(monitor_ws)
 
 
         # Calculate the incident energy
-#pylint: disable=unused-variable
-        ei,mon1_peak,mon1_index,tzero = \
+        #Returns: ei,mon1_peak,mon1_index,tzero
+        ei,mon1_peak,mon1_index,_ = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
@@ -1090,15 +1144,14 @@ class DirectEnergyConversion(object):
 
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
-#pylint: disable=unused-variable
-                    ei,mon1_peak,mon1_index,tzero = \
+                    ei,mon1_peak,mon1_index,_ = \
                     GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_1_spec_ID,
                         Monitor2Spec=mon_2_spec_ID,
                         EnergyEstimate=ei_guess,FixEi=fix_ei)
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
                     src_name = monitor_ws.getInstrument().getSource().getName()
-#pylint: disable=bare-except
+                #pylint: disable=bare-except
                 except:
                     src_name = None
                     mon1_peak = 0
@@ -1144,7 +1197,7 @@ class DirectEnergyConversion(object):
 
         return TOF_range
     #
-#pylint: disable=too-many-branches
+    #pylint: disable=too-many-branches
     def save_results(self, workspace, save_file=None, formats=None):
         """
         Save the result workspace to the specified filename using the list of formats specified in
@@ -1250,7 +1303,7 @@ class DirectEnergyConversion(object):
             else:
                 self._spectra_masks = None
         else:
-#pylint: disable=attribute-defined-outside-init
+#pylint: disable=W0201
             self._spectra_masks = None
         return
 #-------------------------------------------------------------------------------
@@ -1375,13 +1428,13 @@ class DirectEnergyConversion(object):
         #-------------------------------------------------------------------------
         # Guess which minimizes the value sum(n_i-n)^2/Sigma_i -- this what
         # Libisis had
-        signal_sum = sum(map(lambda s,e: s / e,signal,error))
-        weight_sum = sum(map(lambda e: 1. / e, error))
+        signal_sum = sum([ s / e  for s,e in zip(signal,error)])
+        weight_sum = sum([1. / e  for e   in error])
         norm_factor['LibISIS'] = signal_sum / weight_sum
         #-------------------------------------------------------------------------
         # Guess which minimizes the value sum(n_i-n)^2/Sigma_i^2
-        signal_sum = sum(map(lambda s,e: s / (e * e),signal,error))
-        weight_sum = sum(map(lambda e: 1. / (e * e), error))
+        signal_sum = sum([ s / (e * e)  for s,e in zip(signal,error)])
+        weight_sum = sum([1. / (e * e)  for e   in error])
         norm_factor['SigSq'] = signal_sum / weight_sum
         #-------------------------------------------------------------------------
         # Guess which assumes Poisson distribution with Err=Sqrt(signal) and
@@ -1393,8 +1446,8 @@ class DirectEnergyConversion(object):
         # signal on i-th detector and the WB_average -- average WB vanadium
         # signal.
         # n_i is the modified signal
-        signal_sum = sum(map(lambda e: e * e,error))
-        weight_sum = sum(map(lambda s,e: e * e / s,signal,error))
+        signal_sum = sum([ e * e     for e   in error])
+        weight_sum = sum([ e * e / s for s,e in zip(signal,error)])
         if weight_sum == 0.0:
             prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(ws_name),'error')
             raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(ws_name))
@@ -1402,8 +1455,8 @@ class DirectEnergyConversion(object):
         #-------------------------------------------------------------------------
         # Guess which estimates value sum(n_i^2/Sigma_i^2)/sum(n_i/Sigma_i^2)
         # TGP suggestion from 12-2012
-        signal_sum = sum(map(lambda s,e: s * s / (e * e),signal,error))
-        weight_sum = sum(map(lambda s,e: s / (e * e),signal,error))
+        signal_sum = sum([s * s / (e * e) for s,e in zip(signal,error)])
+        weight_sum = sum([s / (e * e)     for s,e in zip(signal,error)])
         if weight_sum == 0.0:
             prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(ws_name),'error')
             raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(ws_name))
@@ -1594,8 +1647,7 @@ class DirectEnergyConversion(object):
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
 
         # Do ISIS stuff for Ei
-#pylint: disable=unused-variable
-        ei_value, mon1_peak = self.get_ei(data_run, ei_guess)
+        _, mon1_peak = self.get_ei(data_run, ei_guess)
 
 
 
@@ -1604,7 +1656,7 @@ class DirectEnergyConversion(object):
         bin_offset = -mon1_peak
         result_name = data_run.set_action_suffix('_spe')
 
-        if self.check_background == True:
+        if self.check_background:
             # Remove the count rate seen in the regions of the histograms
             # defined as the background regions, if the user defined such
             # region
@@ -1618,7 +1670,8 @@ class DirectEnergyConversion(object):
                 bkgr_ws = None
                 CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
                                         StartX= bkg_range_min,EndX= bkg_range_max,
-                                        WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
+                                        WorkspaceIndexList= '',Mode= 'Mean',OutputMode='Subtract Background',
+                                        SkipMonitors='1',NullifyNegativeValues='0')
         else:
             bkgr_ws = None
             result_ws = data_run.get_workspace()
@@ -1731,6 +1784,13 @@ class DirectEnergyConversion(object):
 
         if prop_man.energy_bins: # It should already be a distribution.
             ConvertToDistribution(Workspace=result_ws)
+        # nullify negarive signals if necessary
+        if prop_man.check_background and prop_man.nullify_negative_signal:
+            zeroBg = CreateWorkspace(DataX='0,1',DataY=0,DataE=0,UnitX='TOF')
+            result_ws=RemoveBackground(result_ws,BkgWorkspace=zeroBg,Emode='Direct',NullifyNegativeValues=True)
+            DeleteWorkspace(zeroBg)
+
+
         # White beam correction
         if white_run is not None:
             white_ws = self.do_white(white_run, spectra_masks, map_file)

@@ -1,7 +1,6 @@
 #ifndef MANTID_DATAOBJECTS_CALCULATEREFLECTOMETRYP_H_
 #define MANTID_DATAOBJECTS_CALCULATEREFLECTOMETRYP_H_
 
-#include <cmath>
 #include "MantidDataObjects/CalculateReflectometry.h"
 
 namespace Mantid {
@@ -71,20 +70,29 @@ public:
     auto dim1UpperRightVertex = calculateDim1(lamLower);
     auto dim0LowerLeftVertex = calculateDim0(lamUpper);
     // UPPER LEFT VERTEX
-    const Mantid::Kernel::V2D ul(calculateDim0(lamUpper), // highest qx
-                                 calculateDim1(lamLower));
+    const Mantid::Kernel::V2D secondVertex(
+        calculateDim0(lamUpper), // highest qx
+        calculateDim1(lamLower));
 
     setThetaFinal(thetaUpper);
-    const Mantid::Kernel::V2D ll(dim0LowerLeftVertex,
-                                 calculateDim1(lamUpper)); // lowest qz
+    const Mantid::Kernel::V2D firstVertex(dim0LowerLeftVertex,
+                                          calculateDim1(lamUpper)); // lowest qz
 
-    const Mantid::Kernel::V2D ur(calculateDim0(lamLower),
-                                 dim1UpperRightVertex); // highest qz
+    const Mantid::Kernel::V2D thirdVertex(calculateDim0(lamLower),
+                                          dim1UpperRightVertex); // highest qz
     // LOWER RIGHT VERTEX
-    const Mantid::Kernel::V2D lr(calculateDim0(lamLower), // lowest qx
-                                 calculateDim1(lamUpper));
+    const Mantid::Kernel::V2D fourthVertex(calculateDim0(lamLower), // lowest qx
+                                           calculateDim1(lamUpper));
 
-    Mantid::Geometry::Quadrilateral quad(ll, lr, ur, ul);
+    Mantid::Geometry::Quadrilateral quad(firstVertex, fourthVertex, thirdVertex,
+                                         secondVertex);
+    // Our lower-left vertex may not be in the right position
+    // we keep shifting the vertices around in a clock-wise fashion
+    // until the lower-left vertex is in the correct place.
+    while ((quad.at(0).X() > quad.at(3).X()) ||
+           (quad.at(0).Y() > quad.at(1).Y())) {
+      quad.shiftVertexesClockwise();
+    }
     return quad;
   }
 };

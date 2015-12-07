@@ -299,9 +299,6 @@ private:
   /// Finds a name for new analysis workspace 
   std::string getNewAnalysisWSName(ItemType itemType, int tableRow, PlotType plotType);
 
-  /// Selects a workspace from the group according to what is selected on the interface for the period
-  MatrixWorkspace_sptr getPeriodWorkspace(PeriodType periodType, WorkspaceGroup_sptr group);
-
   /// Update front anc pair combo box
   void updateFrontAndCombo();
 
@@ -316,6 +313,9 @@ private:
 
   /// Clear tables and front combo box
   void clearTablesAndCombo();
+
+  /// Clear run info and loaded run
+  void clearLoadedRun();
 
   /// Deletes a workspace _or_ a workspace group with the given name, if one exists
   void deleteWorkspaceIfExists(const std::string& wsName);
@@ -513,6 +513,8 @@ private:
 
   static const QString NOT_AVAILABLE;
 
+  /// Current number of periods
+  size_t m_numPeriods;
 };
 
 }

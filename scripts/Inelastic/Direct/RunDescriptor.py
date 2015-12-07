@@ -561,6 +561,13 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     def is_monws_separate(self):
         """Is monitor workspace is separated from data workspace or not"""
+        try:
+            data_ws = self.get_workspace()
+            mon_ws = data_ws.getMonitorWorkspace()
+            return True
+        except:
+            pass
+        # lets go long but reliable way
         mon_ws = self.get_monitors_ws()
         if mon_ws:
             name = mon_ws.name()
@@ -805,8 +812,10 @@ class RunDescriptor(PropDescriptor):
             if mon_ws_name in mtd:
                 mon_ws = mtd[mon_ws_name]
                 origin.setMonitorWorkspace(mon_ws)
-            else:
-                mon_ws = None
+            else: # may be monitors are stored together with ws. We can not chop it
+                # so only way ahead is: TODO: Its possible to perform better here (take only monitors)
+                mon_ws = CloneWorkspace(InputWorkspace=origin_name,OutputWorkspace=origin_name + '_monitors')
+                origin.setMonitorWorkspace(mon_ws)
         #
 
         target_name = '#{0}/{1}#'.format(chunk_num,n_chunks) + origin_name
@@ -870,12 +879,15 @@ class RunDescriptor(PropDescriptor):
             monitors_separate = True
 
         spec_to_mon = RunDescriptor._holder.spectra_to_monitors_list
+        combined_spec_list = prop_helpers.process_prop_list(mon_ws,"CombinedSpectraIDList")
         if monitors_separate and spec_to_mon:
             mon_ws_name = mon_ws.name()
+
             for specID in spec_to_mon:
-                mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
+                if not specID in combined_spec_list:
+                    mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
             if mon_ws:
-                mon_ws=mtd[mon_ws_name] # very weird operation needed
+                #mon_ws=mtd[mon_ws_name] # very weird operation needed
                 data_ws.setMonitorWorkspace(mon_ws)
 
         if monitors_ID:
@@ -893,16 +905,17 @@ class RunDescriptor(PropDescriptor):
                 mon_list = [monitors_ID]
         else:
             mon_list = self._holder.get_used_monitors_list()
-        #
+        # Check if all requested spectra are indeed availible
         for monID in mon_list:
+            if monID in combined_spec_list:
+                continue
             try:
-#pylint: disable=unused-variable
-                ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
-#pylint: disable=bare-except
+                mon_ws.getIndexFromSpectrumNumber(int(monID))
+            #pylint: disable=bare-except
             except:
                 try:
                     monws_name = mon_ws.name()
-#pylint: disable=bare-except
+                #pylint: disable=bare-except
                 except:
                     monws_name = 'None'
                 RunDescriptor._logger('*** Monitor workspace {0} does not have spectra with ID {1}. Monitor workspace set to None'.\
@@ -1015,50 +1028,18 @@ class RunDescriptor(PropDescriptor):
         if not ok:
             self._ws_name = None
             raise IOError(data_file)
-        # This is may be for a future
-        #if not ok:
-        #    key = self.get_fext().lower()
-        #    if key in RunDescriptor.fext_equivalents:
-        #        equivalents = RunDescriptor.fext_equivalents[key]
-        #        found = False
-        #        for ext in equivalents:
-        #            ok,data_file = self.find_file(None,run_number,filePath,ext)
-        #            if ok:
-        #                found=True
-        #                break
-        #        if found:
-        #            RunDescriptor.prefile_found = True
-        #        else:
-        #            self._ws_name = None
-        #            raise IOError(data_file)
 
         if load_mon_with_workspace:
             mon_load_option = 'Include'
         else:
             mon_load_option = 'Separate'
         #
-        nxs_file=False
-#pylint: disable=unused-variable
-        file_name,ext = os.path.splitext(data_file)
-        if ext == '.nxs':
-            nxs_file = True
-        try: # Hack: LoadEventNexus does not understand Separate at the moment and throws.
-            # And event loader always loads monitors separately
+        try:#LoadEventNexus does not understand Separate and throws.
+            # And event loader always loads monitors separately, so this issue used to
+            # call appropritate load command
             Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = mon_load_option)
-        except ValueError:
-            #mon_load_option =str(int(load_mon_with_workspace))
+        except ValueError: # if loader thrown, its probably event file rejected "separate" options
             Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = '1',MonitorsAsEvents='0')
-        #HACK >>> , necessary until #11565 is fixed
-        if nxs_file :
-            instr_name = RunDescriptor._holder.instr_name
-            if instr_name == 'LET' and self._run_number>14151 and self._run_number<14382:
-                FrameworkManager.clearInstruments()
-                idf_file = api.ExperimentInfo.getInstrumentFilename(instr_name)
-#pylint: disable=unused-variable
-                idf_path,tile = os.path.split(idf_file)
-                idf_file = os.path.join(idf_path,'LET_Definition.xml')
-                LoadInstrument(ws_name,idf_file,RewriteSpectraMap='0')
-        #HACK<<<
         RunDescriptor._logger("Loaded {0}".format(data_file),'information')
 
         loaded_ws = mtd[ws_name]

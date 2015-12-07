@@ -14,7 +14,7 @@ class SimpleWidget : public QWidget
 {
 public:
   /// Constructor
-  SimpleWidget(QWidget* parent);
+  explicit SimpleWidget(QWidget *parent);
   ~SimpleWidget();
   /// Assign a surface to draw on
   void setSurface(boost::shared_ptr<ProjectionSurface> surface);

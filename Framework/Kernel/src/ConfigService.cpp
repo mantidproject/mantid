@@ -107,7 +107,7 @@ public:
   /** Constructor with a class to wrap
    *  @param F :: The object to wrap
    */
-  template <typename Field> WrappedObject(Field &F) : T(F) {
+  template <typename Field> explicit WrappedObject(Field &F) : T(F) {
     m_pPtr = static_cast<T *>(this);
   }
 
@@ -255,10 +255,29 @@ ConfigServiceImpl::ConfigServiceImpl()
   Poco::Path path(appDataDir);
   path.pushDirectory("instrument");
   Poco::File file(path);
-  // createdirectories will fail gracefully if it is already present
-  file.createDirectories();
+  // createDirectories will fail gracefully if it is already present - but will
+  // throw an error if it cannot create the directory
+  try {
+    file.createDirectories();
+  } catch (Poco::FileException &fe) {
+    g_log.error()
+        << "Cannot create the local instrument cache directory ["
+        << path.toString()
+        << "]. Mantid will not be able to update instrument definitions.\n"
+        << fe.what() << std::endl;
+  }
   Poco::File vtpDir(getVTPFileDirectory());
-  vtpDir.createDirectories();
+  try {
+    vtpDir.createDirectories();
+  } catch (Poco::FileException &fe) {
+    g_log.error()
+        << "Cannot create the local instrument geometry cache directory ["
+        << path.toString()
+        << "]. Mantid will be slower at viewing complex instruments.\n"
+        << fe.what() << std::endl;
+  }
+  // must update the cache of instrument paths
+  cacheInstrumentPaths();
 }
 
 /** Private Destructor

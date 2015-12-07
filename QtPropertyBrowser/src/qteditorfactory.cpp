@@ -308,7 +308,7 @@ void QtSpinBoxFactory::connectPropertyManager(QtIntPropertyManager *manager)
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtSpinBoxFactory::createEditor(QtIntPropertyManager *manager, QtProperty *property,
+QWidget *QtSpinBoxFactory::createEditorForManager(QtIntPropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
     QSpinBox *editor = d_ptr->createEditor(property, parent);
@@ -461,7 +461,7 @@ void QtSliderFactory::connectPropertyManager(QtIntPropertyManager *manager)
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtSliderFactory::createEditor(QtIntPropertyManager *manager, QtProperty *property,
+QWidget *QtSliderFactory::createEditorForManager(QtIntPropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
     QSlider *editor = new QSlider(Qt::Horizontal, parent);
@@ -614,7 +614,7 @@ void QtScrollBarFactory::connectPropertyManager(QtIntPropertyManager *manager)
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtScrollBarFactory::createEditor(QtIntPropertyManager *manager, QtProperty *property,
+QWidget *QtScrollBarFactory::createEditorForManager(QtIntPropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
     QScrollBar *editor = new QScrollBar(Qt::Horizontal, parent);
@@ -729,7 +729,7 @@ void QtCheckBoxFactory::connectPropertyManager(QtBoolPropertyManager *manager)
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtCheckBoxFactory::createEditor(QtBoolPropertyManager *manager, QtProperty *property,
+QWidget *QtCheckBoxFactory::createEditorForManager(QtBoolPropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
     QtBoolEdit *editor = d_ptr->createEditor(property, parent);
@@ -907,7 +907,7 @@ void QtDoubleSpinBoxFactory::connectPropertyManager(QtDoublePropertyManager *man
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtDoubleSpinBoxFactory::createEditor(QtDoublePropertyManager *manager,
+QWidget *QtDoubleSpinBoxFactory::createEditorForManager(QtDoublePropertyManager *manager,
         QtProperty *property, QWidget *parent)
 {
     QDoubleSpinBox *editor = d_ptr->createEditor(property, parent);
@@ -1055,7 +1055,7 @@ void QtLineEditFactory::connectPropertyManager(QtStringPropertyManager *manager)
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtLineEditFactory::createEditor(QtStringPropertyManager *manager,
+QWidget *QtLineEditFactory::createEditorForManager(QtStringPropertyManager *manager,
         QtProperty *property, QWidget *parent)
 {
 
@@ -1195,7 +1195,7 @@ void QtDateEditFactory::connectPropertyManager(QtDatePropertyManager *manager)
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtDateEditFactory::createEditor(QtDatePropertyManager *manager, QtProperty *property,
+QWidget *QtDateEditFactory::createEditorForManager(QtDatePropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
     QDateEdit *editor = d_ptr->createEditor(property, parent);
@@ -1308,7 +1308,7 @@ void QtTimeEditFactory::connectPropertyManager(QtTimePropertyManager *manager)
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtTimeEditFactory::createEditor(QtTimePropertyManager *manager, QtProperty *property,
+QWidget *QtTimeEditFactory::createEditorForManager(QtTimePropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
     QTimeEdit *editor = d_ptr->createEditor(property, parent);
@@ -1420,7 +1420,7 @@ void QtDateTimeEditFactory::connectPropertyManager(QtDateTimePropertyManager *ma
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtDateTimeEditFactory::createEditor(QtDateTimePropertyManager *manager,
+QWidget *QtDateTimeEditFactory::createEditorForManager(QtDateTimePropertyManager *manager,
         QtProperty *property, QWidget *parent)
 {
     QDateTimeEdit *editor =  d_ptr->createEditor(property, parent);
@@ -1531,7 +1531,7 @@ void QtKeySequenceEditorFactory::connectPropertyManager(QtKeySequencePropertyMan
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtKeySequenceEditorFactory::createEditor(QtKeySequencePropertyManager *manager,
+QWidget *QtKeySequenceEditorFactory::createEditorForManager(QtKeySequencePropertyManager *manager,
         QtProperty *property, QWidget *parent)
 {
     QtKeySequenceEdit *editor = d_ptr->createEditor(property, parent);
@@ -1812,7 +1812,7 @@ void QtCharEditorFactory::connectPropertyManager(QtCharPropertyManager *manager)
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtCharEditorFactory::createEditor(QtCharPropertyManager *manager,
+QWidget *QtCharEditorFactory::createEditorForManager(QtCharPropertyManager *manager,
         QtProperty *property, QWidget *parent)
 {
     QtCharEdit *editor = d_ptr->createEditor(property, parent);
@@ -1975,7 +1975,7 @@ void QtEnumEditorFactory::connectPropertyManager(QtEnumPropertyManager *manager)
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtEnumEditorFactory::createEditor(QtEnumPropertyManager *manager, QtProperty *property,
+QWidget *QtEnumEditorFactory::createEditorForManager(QtEnumPropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
     QComboBox *editor = d_ptr->createEditor(property, parent);
@@ -2139,7 +2139,7 @@ void QtCursorEditorFactory::connectPropertyManager(QtCursorPropertyManager *mana
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtCursorEditorFactory::createEditor(QtCursorPropertyManager *manager, QtProperty *property,
+QWidget *QtCursorEditorFactory::createEditorForManager(QtCursorPropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
     QtProperty *enumProp = 0;
@@ -2353,7 +2353,7 @@ void QtColorEditorFactory::connectPropertyManager(QtColorPropertyManager *manage
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtColorEditorFactory::createEditor(QtColorPropertyManager *manager,
+QWidget *QtColorEditorFactory::createEditorForManager(QtColorPropertyManager *manager,
         QtProperty *property, QWidget *parent)
 {
     QtColorEditWidget *editor = d_ptr->createEditor(property, parent);
@@ -2564,7 +2564,7 @@ void QtFontEditorFactory::connectPropertyManager(QtFontPropertyManager *manager)
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtFontEditorFactory::createEditor(QtFontPropertyManager *manager,
+QWidget *QtFontEditorFactory::createEditorForManager(QtFontPropertyManager *manager,
         QtProperty *property, QWidget *parent)
 {
     QtFontEditWidget *editor = d_ptr->createEditor(property, parent);

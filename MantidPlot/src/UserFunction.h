@@ -57,7 +57,7 @@ private:
 class UserFunction2D : public Function2D
 {
 public:
-    UserFunction2D(const QString& s);
+  explicit UserFunction2D(const QString &s);
     /// Get function value
     double operator()(double x, double y);
     /// Get minimum positive value.

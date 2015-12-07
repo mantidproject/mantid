@@ -9,6 +9,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/OptionalBool.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
@@ -479,6 +480,36 @@ public:
     TS_ASSERT_EQUALS(i, 57);
     i = mgr1.getProperty("new_int");
     TS_ASSERT_EQUALS(i, 655);
+  }
+
+  void test_char_array() {
+    PropertyManagerHelper mgr;
+
+    auto nonEmptyString = boost::make_shared<MandatoryValidator<std::string>>();
+    mgr.declareProperty("SampleChemicalFormula", "",
+                        "Chemical composition of the sample material",
+                        nonEmptyString, Direction::Input);
+
+    TSM_ASSERT("Mandatory validator unsatisified.", !mgr.validateProperties());
+    mgr.setProperty("SampleChemicalFormula", "CH3");
+    TSM_ASSERT("Mandatory validator should be satisfied.",
+               mgr.validateProperties());
+  }
+
+  void test_optional_bool_property() {
+    PropertyManagerHelper mgr;
+
+    mgr.declareProperty(
+        new PropertyWithValue<OptionalBool>(
+            "PropertyX", OptionalBool::Unset,
+            boost::make_shared<MandatoryValidator<OptionalBool>>(),
+            Direction::Input),
+        "Custom property");
+
+    TSM_ASSERT("Mandatory validator unsatisified.", !mgr.validateProperties());
+    mgr.setProperty("PropertyX", OptionalBool(true));
+    TSM_ASSERT("Mandatory validator should be satisfied.",
+               mgr.validateProperties());
   }
 
 private:

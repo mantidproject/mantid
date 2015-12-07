@@ -9,7 +9,7 @@ class EQSANSQ2DTest(unittest.TestCase):
         x = [1.,2.,3.,4.,5.,6.,7.,8.,9.,10.,11.]
         y = 491520*[0.1]
         CreateWorkspace(OutputWorkspace=self.test_ws_name,DataX=x,DataY=y,DataE=y,NSpec='49152',UnitX='Wavelength')
-        LoadInstrument(Workspace=self.test_ws_name, InstrumentName="EQSANS")
+        LoadInstrument(Workspace=self.test_ws_name, InstrumentName="EQSANS", RewriteSpectraMap=True)
 
         run = mtd[self.test_ws_name].mutableRun()
 

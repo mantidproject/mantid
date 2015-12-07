@@ -19,12 +19,18 @@ SAMPLE_XML = """  <!--SAMPLE-->
 
 """
 
-COMPONENT_XML = """      <location x="%(x)f" y="%(y)f" z="%(z)f" name="%(name)s">
+COMPONENT_XML_FULL = """      <location x="%(x)f" y="%(y)f" z="%(z)f" name="%(name)s">
         <rot axis-x="0" axis-y="1" axis-z="0" val="%(Y1)f">
           <rot axis-x="0" axis-y="0" axis-z="1" val="%(Z)f">
             <rot axis-x="0" axis-y="1" axis-z="0" val="%(Y2)f"/>
           </rot>
         </rot>
+      </location>
+
+"""
+
+# no rotation needs to be specified
+COMPONENT_XML_MINIMAL = """      <location x="%(x)f" y="%(y)f" z="%(z)f" name="%(name)s">
       </location>
 
 """
@@ -97,7 +103,10 @@ class ExportGeometry(PythonAlgorithm):
         info = {'name': component.getName()}
         self.__updatePos(info, component)
 
-        handle.write(COMPONENT_XML % info)
+        if info['Y1'] == 0. and info['Z'] == 0. and info['Y2'] == 0.:
+            handle.write(COMPONENT_XML_MINIMAL % info)
+        else:
+            handle.write(COMPONENT_XML_FULL % info)
 
     def PyExec(self):
         wksp = self.getProperty("InputWorkspace").value
