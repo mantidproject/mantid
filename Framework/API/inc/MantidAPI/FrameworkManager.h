@@ -64,7 +64,8 @@ public:
 
   /// Clears all memory associated with the AlgorithmManager, ADS & IDS
   void clear();
-
+  /// shuts down and performs clean up tasks
+  void shutdown();
   /// Clear memory associated with the AlgorithmManager
   void clearAlgorithms();
 

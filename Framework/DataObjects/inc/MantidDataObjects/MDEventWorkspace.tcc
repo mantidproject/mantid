@@ -27,7 +27,9 @@
 #if __GNUC__ > 4 ||                                                            \
     (__GNUC__ == 4 &&                                                          \
      (__GNUC_MINOR__ > 4 || (__GNUC_MINOR__ == 4 && __GNUC_PATCHLEVEL__ > 0)))
-GCC_DIAG_OFF(strict - aliasing)
+// clang-format off
+GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 #endif
 
 using namespace Mantid;
@@ -326,7 +328,7 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
   // Check if masked
   const API::IMDNode *box = data->getBoxAtCoord(coords);
   if (box->getIsMasked()) {
-    return 0.0;
+    return m_maskValue;
   }
   return getNormalizedSignal(box, normalization);
 }
@@ -759,36 +761,32 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
     // const MDBoxBase<MDE,nd> * box = NULL;
     const IMDNode *box = NULL;
 
-    // Do an initial bounds check
-    bool outOfBounds = false;
-    for (size_t d = 0; d < nd; d++) {
-      if (data->getExtents(d).outside(coord[d])) {
-        outOfBounds = true;
-        break;
-      }
-    }
-
     // TODO: make the logic/reuse in the following nicer.
-    if (!outOfBounds) {
+    if (isInBounds(coord.getBareArray())) {
       box = this->data->getBoxAtCoord(coord.getBareArray());
 
       if (box != NULL) {
-        // What is our normalization factor?
-        signal_t normalizer = 1.0;
-        switch (normalize) {
-        case NoNormalization:
-          break;
-        case VolumeNormalization:
-          normalizer = box->getInverseVolume();
-          break;
-        case NumEventsNormalization:
-          normalizer = 1.0 / double(box->getNPoints());
-          break;
-        }
+        if (box->getIsMasked()) {
+          y.push_back(m_maskValue);
+          e.push_back(m_maskValue);
+        } else {
+          // What is our normalization factor?
+          signal_t normalizer = 1.0;
+          switch (normalize) {
+          case NoNormalization:
+            break;
+          case VolumeNormalization:
+            normalizer = box->getInverseVolume();
+            break;
+          case NumEventsNormalization:
+            normalizer = 1.0 / double(box->getNPoints());
+            break;
+          }
 
-        // And add the normalized signal/error to the list
-        y.push_back(box->getSignal() * normalizer);
-        e.push_back(box->getError() * normalizer);
+          // And add the normalized signal/error to the list
+          y.push_back(box->getSignal() * normalizer);
+          e.push_back(box->getError() * normalizer);
+        }
       } else {
         y.push_back(std::numeric_limits<double>::quiet_NaN());
         e.push_back(std::numeric_limits<double>::quiet_NaN());
