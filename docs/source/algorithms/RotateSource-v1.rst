@@ -46,7 +46,7 @@ Output:
    Original position of the sample: [0.0, 0.0, 0.0]
    Original position of the source: [0.0, 0.0, -10.0]
    New position of the sample: [0.0, 0.0, 0.0]
-   New position of the source: [0.0, 10.0, 0.0]
+   New position of the source: [0.0, 10.0, -0.0]
 
 .. categories::
 
