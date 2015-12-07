@@ -25,24 +25,28 @@ Usage
    ws = CreateSampleWorkspace()
 
    # Original positions
-   print "Original position of the sample", ws.getInstrument().getSample().getPos()
-   print "Original position of the source", ws.getInstrument().getSource().getPos()
+   samplePos = ws.getInstrument().getSample().getPos()
+   sourcePos = ws.getInstrument().getSource().getPos()
+   print "Original position of the sample: [%.1f, %.1f, %.1f]" % (samplePos.X(), samplePos.Y(), samplePos.Z())
+   print "Original position of the source: [%.1f, %.1f, %.1f]" % (sourcePos.X(), sourcePos.Y(), sourcePos.Z())
 
    # Move (rotate) the source around X axis
    RotateSource(ws, 90)
 
    # New positions
-   print "New position of the sample", ws.getInstrument().getSample().getPos()
-   print "New position of the source", ws.getInstrument().getSource().getPos()
+   samplePos = ws.getInstrument().getSample().getPos()
+   sourcePos = ws.getInstrument().getSource().getPos()
+   print "New position of the sample: [%.1f, %.1f, %.1f]" % (samplePos.X(), samplePos.Y(), samplePos.Z())
+   print "New position of the source: [%.1f, %.1f, %.1f]" % (sourcePos.X(), sourcePos.Y(), sourcePos.Z())
 
 Output:
 
 .. testoutput:: RotateSourceExample
 
-   Original position of the sample [0,0,0]
-   Original position of the source [0,0,-10]
-   New position of the sample [0,0,0]
-   New position of the source [0,10,0]
+   Original position of the sample: [0.0, 0.0, 0.0]
+   Original position of the source: [0.0, 0.0, -10.0]
+   New position of the sample: [0.0, 0.0, 0.0]
+   New position of the source: [0.0, 10.0, 0.0]
 
 .. categories::
 
