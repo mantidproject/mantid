@@ -190,37 +190,6 @@ class ImagingIMATTomoTests(unittest.TestCase):
                                     msg="Circular mask: wrong value found inside. Expected: "
                                     "{0}, found: {1}".format(expected_val, peek_in))
 
-    def test_remove_stripes_err(self):
-        import IMAT.prep as iprep
-
-        method = 'wavelet-fourier'
-
-        # expect pywt to be missing
-        with self.assertRaises(ImportError):
-            iprep.filters.remove_stripes_ring_artifacts(self.data_vol, method)
-
-    def disabled_test_remove_stripes_ok(self):
-        """
-        This tests the local implementation of the wavelet-fourier stripe removal
-        method. It will only run if pywt is available
-        """
-        import IMAT.prep as iprep
-
-        method = 'wavelet-fourier'
-        stripped = iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
-                                                               method)
-
-        self.assertTrue(isinstance(self.data_vol, np.ndarray))
-        self.assertTrue(isinstance(stripped, np.ndarray),
-                        msg="the result of remove_stripes should be a numpy array")
-        self.assertEquals(stripped.shape, self.data_vol.shape,
-                          msg="the result of remove_stripes should be a numpy array")
-        expected_val = -0.25781357
-        val = stripped[0, 100, 123]
-        self.assertAlmostEquals(val, expected_val,
-                                msg="Expected the results of stripe removal (method {0} not to change "
-                                "with respect to previous executions".format(method))
-
     def test_remove_stripes_raises(self):
         import IMAT.prep as iprep
 
@@ -254,6 +223,37 @@ class ImagingIMATTomoTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
                                                         'wf')
+
+    def test_remove_stripes_err(self):
+        import IMAT.prep as iprep
+
+        method = 'wavelet-fourier'
+
+        # expect pywt to be missing
+        with self.assertRaises(ImportError):
+            iprep.filters.remove_stripes_ring_artifacts(self.data_vol, method)
+
+    def disabled_test_remove_stripes_ok(self):
+        """
+        This tests the local implementation of the wavelet-fourier stripe removal
+        method. It will only run if pywt is available
+        """
+        import IMAT.prep as iprep
+
+        method = 'wavelet-fourier'
+        stripped = iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
+                                                               method)
+
+        self.assertTrue(isinstance(self.data_vol, np.ndarray))
+        self.assertTrue(isinstance(stripped, np.ndarray),
+                        msg="the result of remove_stripes should be a numpy array")
+        self.assertEquals(stripped.shape, self.data_vol.shape,
+                          msg="the result of remove_stripes should be a numpy array")
+        expected_val = -0.25781357
+        val = stripped[0, 100, 123]
+        self.assertAlmostEquals(val, expected_val,
+                                msg="Expected the results of stripe removal (method {0} not to change "
+                                "with respect to previous executions".format(method))
 
     def test_config_pre(self):
         """
@@ -348,7 +348,66 @@ class ImagingIMATTomoTests(unittest.TestCase):
                                                     '0.README_reconstruction.txt')))
         self.assertTrue(os.path.exists(self.test_output_dir))
 
-    def test_read_in_fails_ok(self):
+    def test_normalize_air_raises(self):
+        import IMAT.tomorec.reconstruction_command as cmd
+        cmd = cmd.ReconstructionCommand()
+
+        import IMAT.tomorec.configs as cfgs
+        pre_conf = cfgs.PreProcConfig()
+
+        normalized = cmd.normalize_air_region(self.data_vol, pre_conf)
+        np.testing.assert_allclose(normalized, self.data_vol,
+                                   err_msg="Epected normalized data volume not to changed")
+
+        pre_conf.normalize_air_region = [3]
+        with self.assertRaises(ValueError):
+            cmd.normalize_air_region(self.data_vol, pre_conf)
+
+        pre_conf.normalize_air_region = (3, 0, 100, 10)
+        with self.assertRaises(ValueError):
+            cmd.normalize_air_region(self.data_vol, pre_conf)
+
+        pre_conf.normalize_air_region = [3, 0, 100]
+        with self.assertRaises(ValueError):
+            cmd.normalize_air_region(self.data_vol, pre_conf)
+
+    def test_normalize_flat_raises(self):
+        import IMAT.tomorec.reconstruction_command as cmd
+        cmd = cmd.ReconstructionCommand()
+
+        import IMAT.tomorec.configs as cfgs
+        pre_conf = cfgs.PreProcConfig()
+        alg_conf = cfgs.ToolAlgorithmConfig()
+        post_conf = cfgs.PostProcConfig()
+        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
+
+        with self.assertRaises(ValueError):
+            cmd.normalize_flat_dark(self.data_vol, conf, np.ones((10, 23)), None)
+
+    def test_normalize_flat_ok(self):
+        import IMAT.tomorec.reconstruction_command as cmd
+        cmd = cmd.ReconstructionCommand()
+
+        import IMAT.tomorec.configs as cfgs
+        pre_conf = cfgs.PreProcConfig()
+        alg_conf = cfgs.ToolAlgorithmConfig()
+        post_conf = cfgs.PostProcConfig()
+        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
+
+        # ignored, with just info message
+        norm = cmd.normalize_flat_dark(self.data_vol, conf, None, None)
+
+        # ignored, with just info message
+        norm = cmd.normalize_flat_dark(self.data_vol, conf, 45, None)
+
+        for img_idx in range(0, self.data_vol.shape[0]):
+            fake_white = self.data_vol[img_idx, :, :]
+            norm = cmd.normalize_flat_dark(self.data_vol, conf, fake_white, None)
+            np.testing.assert_allclose(norm[img_idx, : :], np.ones(fake_white.shape),
+                                       err_msg="Epected normalized data volume not to changed "
+                                       "wheh using fake flat image, with index {0}".format(img_idx))
+
+    def test_read_stack_fails_ok(self):
         import IMAT.tomorec.reconstruction_command as cmd
         cmd = cmd.ReconstructionCommand()
 

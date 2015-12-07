@@ -208,6 +208,8 @@ class ReconstructionCommand(object):
         Returns :: pre-processed data.
 
         """
+        self._check_data_stack(data)
+
         preproc_data = self.apply_prep_filters(data, preproc_cfg, white, dark)
         preproc_data = self.apply_line_projection(preproc_data, preproc_cfg)
         preproc_data = self.apply_final_preproc_corrections(preproc_data, preproc_cfg)
@@ -229,6 +231,8 @@ class ReconstructionCommand(object):
 
         Returns :: process/filtered data (sizes can change (cropped) and data can be rotated)
         """
+        self._check_data_stack(data)
+
         print " * Beginning pre-processing with pixel data type:", data.dtype
         if 'float64' == data.dtype:
             data = data.astype(dtype='float32')
@@ -266,7 +270,10 @@ class ReconstructionCommand(object):
 
         Returns :: projected data volume (image stack)
         """
+        self._check_data_stack(data)
+
         if not preproc_cfg.line_projection:
+            print " * Note: not applying line projection."
             return imgs_angles
 
         imgs_angles = imgs_angles.astype('float32')
@@ -289,6 +296,8 @@ class ReconstructionCommand(object):
 
         Returns :: filtered data (stack of images)
         """
+        self._check_data_stack(data)
+
         # Remove stripes in sinograms / ring artefacts in reconstructed volume
         if cfg.stripe_removal_method:
             import prep as iprep
@@ -333,6 +342,8 @@ class ReconstructionCommand(object):
 
         Returns :: filtered data (stack of images)
         """
+        self._check_data_stack(data)
+
         if pre_cfg.normalize_air_region:
             if not isinstance(pre_cfg.normalize_air_region, list) or\
                4 != len(pre_cfg.normalize_air_region):
@@ -371,6 +382,8 @@ class ReconstructionCommand(object):
 
         Returns :: filtered data (stack of images)
         """
+        self._check_data_stack(data)
+
         # list with first-x, first-y, second-x, second-y
         if cfg.crop_coords:
             try:
@@ -396,32 +409,39 @@ class ReconstructionCommand(object):
 
         Returns :: filtered data (stack of images)
         """
-        if cfg.normalize_flat_dark and norm_flat_img:
-            if not norm_flat_img:
-                raise ValueError("Normalization by flat/dark images cannot be done withtout "
-                                 "at least an input flat image")
+        self._check_data_stack(data)
+
+        if not cfg.preproc_cfg.normalize_flat_dark:
+            print " * Note: not applying normalization by flat/dark images."
+            return data
+
+        if isinstance(norm_flat_img, np.ndarray):
+            if 2 != len(norm_flat_img.shape) or norm_flat_img.shape != data.shape[1:]:
+                raise ValueError("Incorrect shape of the flat image ({0}) which should match the "
+                                 "shape of the sample images ({1})".
+                                 format(norm_flat_img.shape, data[0].shape))
 
             norm_divide = None
             if norm_dark_img:
                 norm_divide = norm_flat_img - norm_dark_img
             else:
                 norm_divide = norm_flat_img
-            if cfg.crop_coords:
+            if cfg.preproc_cfg.crop_coords:
                 norm_divide = norm_divide[:, cfg.crop_coords[1]:cfg.crop_coords[3],
                                           cfg.crop_coords[0]:cfg.crop_coords[2]]
             # prevent divide-by-zero issues
             norm_divide[norm_divide==0] = 1e-6
 
+            if not norm_dark_img:
+                norm_dark_img = 0
             for idx in range(0, data.shape[0]):
                 data[idx, :, :] = np.true_divide(data[idx, :, :] - norm_dark_img, norm_divide)
             # true_divide produces float64, we assume that precision not needed (definitely not
             # for 16-bit depth output images as we usually have).
             print " * Finished normalization by flat/dark images with pixel data type: {0}.".format(data.dtype)
-        elif cfg.normalize_flat_dark and not norm_flat_img:
-            print( " * Note: cannot apply normalization by flat/dark images because no flat image has been "
-                   "provided in the inputs")
         else:
-            print " * Note: not applying normalization by flat/dark images."
+            print(" * Note: cannot apply normalization by flat/dark images because no valid flat image has been "
+                  "provided in the inputs. Flat image given: {0}".format(norm_flat_img))
 
         return data
 
@@ -429,6 +449,8 @@ class ReconstructionCommand(object):
         """
         Returns :: filtered data (stack of images)
         """
+        self._check_data_stack(data)
+
         # Apply cut-off for the normalization?
         if cfg.cut_off_level and cfg.cut_off_level:
             print "* Applying cut-off with level: {0}".format(cfg.cut_off_level)
@@ -465,6 +487,8 @@ class ReconstructionCommand(object):
 
         Returns :: filtered data (stack of images)
         """
+        self._check_data_stack(data)
+
         data_rotated = data
         if cfg.rotation:
             data_rotated = np.zeros((data.shape[0], data.shape[2], data.shape[1]), dtype=data.dtype)
@@ -483,6 +507,8 @@ class ReconstructionCommand(object):
 
         Returns :: reconstructed volume
         """
+        self._check_data_stack(proj_data)
+
         num_proj = proj_data.shape[0]
         inc = float(preproc_cfg.max_angle)/(num_proj-1)
 
@@ -794,3 +820,11 @@ class ReconstructionCommand(object):
                                    img_format=preproc_cfg.out_img_format, dtype=out_dtype)
         else:
             print "* NOTE: not saving pre-processed images..."
+
+    def _check_data_stack(self, data):
+        if not isinstance(data, np.ndarray):
+            raise ValueError("Invalid stack of images data. It is not a numpy array: {0}".format(data))
+
+        if not 3 == len(data.shape):
+            raise ValueError("Invalid stack of images data. It does not have 3 dimensions. Shape: {0}".
+                             format(data.shape))
