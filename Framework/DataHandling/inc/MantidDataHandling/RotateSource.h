@@ -6,7 +6,10 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** RotateSource : Moves the source by a given angle
+/** RotateSource : Moves the source by a given angle taking into account the
+  handedness. The centre of rotation is the sample's position and the rotation
+  axis (X, Y, Z) is calculated from the instrument geometry as the axis
+  perpendicular to the plane defined by the beam and "up" vectors.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

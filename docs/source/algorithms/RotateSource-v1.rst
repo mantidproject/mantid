@@ -12,6 +12,8 @@ Description
 
 This algorithm corrects the source's position by rotating it around an axis centered at the sample.
 The rotation axis is perpendicular to the plane determined by the beam direction and the *up* direction.
+The handedness of the coordinate system is considered to determine whether a positive/negative angle
+corresponds to a clockwise or counterclockwise rotation.
 
 
 Usage

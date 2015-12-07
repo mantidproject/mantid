@@ -31,7 +31,8 @@ void RotateSource::init() {
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
                   "stored in the analysis data service will be unaffected.");
-  declareProperty("Angle", 0.0, "The angle of rotation in degrees.");
+  declareProperty("Angle", 0.0, "The angle of rotation in degrees (according "
+                                "to the handedness of the coordinate system.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -70,27 +71,14 @@ void RotateSource::exec() {
 
     // Need the reference frame to decide around which axis to rotate
     auto refFrame = inst->getReferenceFrame();
-
     if (!refFrame) {
       throw std::runtime_error("Could not get a valid reference frame");
     }
 
-    auto pointingAlong = refFrame->pointingHorizontal();
-
-    // (x, y, z) -> the rotation axis
-    double x = 0.;
-    double y = 0.;
-    double z = 0.;
-
-    if (pointingAlong == X) {
-      x = 1.;
-    } else if (pointingAlong == Y) {
-      y = 1.;
-    } else if (pointingAlong == Z) {
-      z = 1.;
-    } else {
-      throw std::runtime_error("Could not get a valid rotation axis");
-    }
+    // Axis of rotation
+    auto beam = refFrame->vecPointingAlongBeam();
+    auto up = refFrame->vecPointingUp();
+    auto rotationAxis = up.cross_prod(beam);
 
     // The handedness
     auto handedness = refFrame->getHandedness();
@@ -113,7 +101,7 @@ void RotateSource::exec() {
     auto sourcePos = source->getPos() - samplePos;
 
     // The new position
-    Quat quat(angle, V3D(x, y, z));
+    Quat quat(angle, rotationAxis);
     quat.rotate(sourcePos);
     sourcePos += samplePos;
 
