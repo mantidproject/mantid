@@ -1,5 +1,4 @@
-# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,
-# pylint: disable = too-many-locals, too-many-nested-blocks
+# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
 
 try:
     from mantidplot import *
@@ -429,7 +428,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 file_name = row['Name']
                 file_id = row['Id']
                 description = row['Description']
-                run_number = re.search('[1-9]\d+', file_name).group()
+                run_number = re.search(r'[1-9]\d+', file_name).group()
 
                 if bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
                     title = (run_number + ': ' + description).strip()
