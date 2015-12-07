@@ -1140,7 +1140,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             try:
                 #before loading make sure you give them a chance to save
                 if self.mod_flag:
-                    ret, saved = self._save_check()
+                    ret, _saved = self._save_check()
                     if ret == QtGui.QMessageBox.Cancel:
                         #if they hit cancel abort the load
                         self.loading = False
