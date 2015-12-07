@@ -129,9 +129,10 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
-find_package( ParaView )
-
-include( ${PARAVIEW_USE_FILE} )
+if(MAKE_VATES)
+  find_package( ParaView )
+  include( ${PARAVIEW_USE_FILE} )
+endif()
 
 # Python includes
 include_directories ( ${PYTHON_INCLUDE_PATH})
