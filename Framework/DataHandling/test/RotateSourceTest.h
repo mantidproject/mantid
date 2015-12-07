@@ -64,7 +64,7 @@ public:
     auto newPos = ws->getInstrument()->getSource()->getPos();
 
     TS_ASSERT_DELTA(newPos.X(), 0.0, 1E-5);
-    TS_ASSERT_DELTA(newPos.Y(), -1.0, 1E-5);
+    TS_ASSERT_DELTA(newPos.Y(), 1.0, 1E-5);
     TS_ASSERT_DELTA(newPos.Z(), 0.0, 1E-5);
   }
 
@@ -103,7 +103,7 @@ public:
     auto newPos = ws->getInstrument()->getSource()->getPos();
 
     TS_ASSERT_DELTA(newPos.X(), 0.0, 1E-5);
-    TS_ASSERT_DELTA(newPos.Y(), 1.0, 1E-5);
+    TS_ASSERT_DELTA(newPos.Y(), -1.0, 1E-5);
     TS_ASSERT_DELTA(newPos.Z(), 0.0, 1E-5);
   }
 
@@ -112,7 +112,7 @@ public:
     // The instrument
     Instrument_sptr instr = boost::make_shared<Instrument>();
     instr->setReferenceFrame(
-        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Right, "")));
 
     // The source
     ObjComponent *source = new ObjComponent("source");
@@ -151,7 +151,7 @@ public:
     // The instrument
     Instrument_sptr instr = boost::make_shared<Instrument>();
     instr->setReferenceFrame(
-        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Right, "")));
 
     // The source
     ObjComponent *source = new ObjComponent("source");

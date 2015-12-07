@@ -31,7 +31,7 @@ Usage
    print "Original position of the source: [%.1f, %.1f, %.1f]" % (sourcePos.X(), sourcePos.Y(), sourcePos.Z())
 
    # Move (rotate) the source around X axis
-   RotateSource(ws, 90)
+   RotateSource(ws, -90)
 
    # New positions
    samplePos = ws.getInstrument().getSample().getPos()

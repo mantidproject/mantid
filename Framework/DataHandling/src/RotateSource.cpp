@@ -64,7 +64,7 @@ void RotateSource::exec() {
                              "be either MatrixWorkspace or PeaksWorkspace)");
   }
 
-  const double angle = getProperty("Angle");
+  double angle = getProperty("Angle");
 
   if (angle != 0.) {
 
@@ -90,6 +90,12 @@ void RotateSource::exec() {
       z = 1.;
     } else {
       throw std::runtime_error("Could not get a valid rotation axis");
+    }
+
+    // The handedness
+    auto handedness = refFrame->getHandedness();
+    if (handedness == Left) {
+      angle *= -1.;
     }
 
     // Get the source's position
