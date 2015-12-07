@@ -141,6 +141,22 @@ public:
       double const L0, Kernel::V3D const newSampPos,
       boost::shared_ptr<const Geometry::ParameterMap> const pmapOld);
 
+  struct compareBanks {
+    bool operator()(const std::string &lhs, const std::string &rhs) const {
+      std::string bankPart = "bank";
+      std::string bankName = lhs;
+      boost::trim(bankName);
+      boost::erase_all(bankName, bankPart);
+      int bank1 = 0;
+      Kernel::Strings::convert(bankName, bank1);
+      bankName = rhs;
+      boost::trim(bankName);
+      boost::erase_all(bankName, bankPart);
+      int bank2 = 0;
+      Kernel::Strings::convert(bankName, bank2);
+      return bank1 < bank2;
+    }
+  };
   /**
    * Given a string representation of a set of groups( [] separated list of
    * bank nums separated by commas or colons( for ranges) , this method will
@@ -164,7 +180,7 @@ public:
    *names.
    *
    */
-  void CalculateGroups(std::set<std::string> &AllBankNames,
+  void CalculateGroups(std::set<std::string, compareBanks> &AllBankNames,
                        std::string Grouping, std::string bankPrefix,
                        std::string bankingCode,
                        std::vector<std::vector<std::string>> &Groups);
@@ -230,7 +246,7 @@ private:
                       std::set<std::string> &AllBankName, double T0,
                       std::string filename);
 
-  void createResultWorkspace(const int numGroups,
+  void createResultWorkspace(const int numGroups, const int colNum,
                              const std::vector<std::string> &names,
                              const std::vector<double> &params,
                              const std::vector<double> &errs);
@@ -238,6 +254,8 @@ private:
   void exec();
 
   void init();
+
+  API::ITableWorkspace_sptr Result;
 
   /**
    * Creates a new instrument when a calibration file( .xml or .detcal)
