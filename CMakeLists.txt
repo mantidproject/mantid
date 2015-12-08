@@ -137,11 +137,6 @@ add_dependencies ( check GUITests )
 add_custom_target ( AllTests )
 add_dependencies ( AllTests FrameworkTests GUITests )
 
-if ( MSVC )
-  add_definitions ( -DQWT_DLL )
-endif ()
-add_subdirectory ( MantidQt )
-
 if ( UNIX )
   #Experimental feature. Unix only at this point.
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
@@ -172,6 +167,11 @@ if ( MAKE_VATES )
   endif()
 
 endif ( MAKE_VATES )
+
+if ( MSVC )
+  add_definitions ( -DQWT_DLL )
+endif ()
+add_subdirectory ( MantidQt )
 
 add_subdirectory ( MantidPlot )
 
