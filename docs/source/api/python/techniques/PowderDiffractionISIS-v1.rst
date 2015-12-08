@@ -68,8 +68,7 @@ files as you can see inside the calibration folder (5 is the number of banks
 for Polaris). If the nexus files are not found, then the script will automatically change
 `ExvistingV` to `no` from `yes` until the end of the process.
 
-.. image:: /images/PowderISIS_pre_structure_extV_yes.png
-   :scale: 20%
+.. image:: /images/PowderISIS_pre_structure_extV_yes.PNG
 
 .. _post-structure-PowderISIS-ref:
 
@@ -78,8 +77,7 @@ Files & Folder Post-Structure
 Once the process has completed, files should be generated inside the `Calibration`
 and `Mantid_tester` folder.
 
-.. image:: /images/PowderISIS_Post_structure_extV_yes.png
-   :scale: 20%
+.. image:: /images/PowderISIS_Post_structure_extV_yes.PNG
 
 Dependencies
 ^^^^^^^^^^^^
@@ -198,15 +196,14 @@ Instead the files will be generated and the script will automatically change the
 pref file value of `ExistingV` to `yes` from `no` once the process has finished.
 
 .. image:: /images/PowderISIS_pre_structure.png
-   :scale: 20%
 
 Files & Folder Post-Structure With No ExistingV
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Once the process has completed, additional files with the label `unstripped` should
 be generated inside the calibration folder, if `ExistingV` is `no`.
 
-.. image:: /images/PowderISIS_Post_structure.png
-   :scale: 20%
+.. image:: /images/PowderISIS_Post_structure.PNG
+   :scale: 80%
 
 .. _usage-PowderISIS-ref:
 
