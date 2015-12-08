@@ -423,7 +423,6 @@ void FilterEvents::processSplittersWorkspace() {
   for (size_t i = 0; i < numsplitters; i++) {
     m_splitters.push_back(m_splittersWorkspace->getSplitter(i));
     m_workGroupIndexes.insert(m_splitters.back().index());
-
     if (inorder && i > 0 && m_splitters[i] < m_splitters[i - 1])
       inorder = false;
   }
@@ -522,7 +521,7 @@ void FilterEvents::createOutputWorkspaces() {
     if (wsgroup < minwsgroup && wsgroup >= 0)
       minwsgroup = wsgroup;
   }
-  g_log.debug() << "[DB] Min WS Group = " << minwsgroup << "\n";
+  g_log.debug() << "Min WS Group = " << minwsgroup << "\n";
 
   bool from1 = getProperty("OutputWorkspaceIndexedFrom1");
   int delta_wsindex = 0;

@@ -164,7 +164,6 @@ public:
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
     for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
       AnalysisDataService::Instance().remove(outputwsnames[i]);
     }
 
@@ -261,7 +260,6 @@ public:
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
     for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
       AnalysisDataService::Instance().remove(outputwsnames[i]);
     }
 
@@ -344,7 +342,6 @@ public:
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
     for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
       AnalysisDataService::Instance().remove(outputwsnames[i]);
     }
 
@@ -379,13 +376,6 @@ public:
     std::vector<std::string> vecwsname =
         filter.getProperty("OutputWorkspaceNames");
     TS_ASSERT_EQUALS(vecwsname.size(), 9);
-
-    for (size_t i = 0; i < vecwsname.size(); ++i) {
-      EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(
-          AnalysisDataService::Instance().retrieve(vecwsname[i]));
-      std::cout << "Output workspace " << vecwsname[i] << ": "
-                << ws->getNumberEvents() << "\n";
-    }
 
     EventWorkspace_sptr ws5 = boost::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("SplittedDataElastic_5"));
@@ -463,7 +453,6 @@ public:
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
     for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
       AnalysisDataService::Instance().remove(outputwsnames[i]);
     }
 
@@ -519,8 +508,6 @@ public:
 
         double shift = -l2 / sqrt(efix * 2. * PhysicalConstants::meV /
                                   PhysicalConstants::NeutronMass);
-        std::cout << "Detector " << iws << ": L2 = " << l2
-                  << ", EFix = " << efix << "\n";
 
         TS_ASSERT_DELTA(outcorrws->readY(iws)[0], 1., 1.0E-9);
         TS_ASSERT_DELTA(outcorrws->readY(iws)[1], shift, 1.0E-9);
@@ -532,7 +519,6 @@ public:
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
     for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
       AnalysisDataService::Instance().remove(outputwsnames[i]);
     }
 
@@ -582,32 +568,33 @@ public:
     TS_ASSERT_THROWS_NOTHING(filter.execute());
     TS_ASSERT(filter.isExecuted());
 
-    // Get output
+    // Get 3 output workspaces
     int numsplittedws = filter.getProperty("NumberOutputWS");
     TS_ASSERT_EQUALS(numsplittedws, 3);
 
-    // 4.1 Workspace group 0
+    // Workspace 0
     DataObjects::EventWorkspace_sptr filteredws0 =
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
-    TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 4);
+    TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 3);
 
-    // 4.2 Workspace group 1
+    // Workspace 1
     DataObjects::EventWorkspace_sptr filteredws1 =
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getEventList(1).getNumberEvents(), 16);
 
-    // 4.3 Workspace group 2
+    // Workspace 2
     DataObjects::EventWorkspace_sptr filteredws2 =
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS10_3"));
     TS_ASSERT(filteredws2);
-    TS_ASSERT_EQUALS(filteredws2->getEventList(1).getNumberEvents(), 21);
+    TS_ASSERT_EQUALS(filteredws2->getEventList(1).getNumberEvents(), 27);
 
+    // Check spectrum 3 of workspace 2
     DataObjects::EventList elist3 = filteredws2->getEventList(3);
     elist3.sortPulseTimeTOF();
 
@@ -616,7 +603,7 @@ public:
                      runstart_i64 + pulsedt * 2);
     TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
 
-    DataObjects::TofEvent eventmax = elist3.getEvent(20);
+    DataObjects::TofEvent eventmax = elist3.getEvent(26);
     TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(),
                      runstart_i64 + pulsedt * 4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000),
@@ -628,7 +615,6 @@ public:
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
     for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
       AnalysisDataService::Instance().remove(outputwsnames[i]);
     }
 
@@ -695,8 +681,6 @@ public:
     // L1 = 10
     Kernel::V3D samplepos = eventWS->getInstrument()->getSample()->getPos();
     Kernel::V3D sourcepos = eventWS->getInstrument()->getSource()->getPos();
-    std::cout << "sample position: " << samplepos.toString() << "\n";
-    std::cout << "source position: " << sourcepos.toString() << "\n";
     double l1 = samplepos.distance(sourcepos);
 
     Kernel::DateAndTime runstart(runstart_i64);
@@ -720,21 +704,11 @@ public:
       for (size_t ievent = 0; ievent < fakeevlist.getNumberEvents(); ++ievent) {
         TofEvent tofevent = fakeevlist.getEvent(ievent);
         elist->addEventQuickly(tofevent);
-        // std::cout << "Add event " << ievent << " as " << tofevent.tof() << ".
-        // Size of elist = " << elist->getNumberEvents() << "\n";
       } // FOR each pulse
     }   // For each bank
 
-    double constshift = l1 / sqrt(ei * 2. * PhysicalConstants::meV /
-                                  PhysicalConstants::NeutronMass);
-    std::cout << "Fake direct inelastic scattering: L1 = " << l1
-              << ", Shift = " << shift << ": Ei = " << ei
-              << "; check shift = " << constshift << "\n"
-              << "- Number of events = " << eventWS->getNumberEvents()
-              << ", Number of spectra = " << eventWS->getNumberHistograms()
-              << "\n"
-              << "- Number of faked events = " << fakeevlist.getNumberEvents()
-              << "\n";
+    // double constshift = l1 / sqrt(ei * 2. * PhysicalConstants::meV /
+    //                           PhysicalConstants::NeutronMass);
 
     return eventWS;
   }
@@ -759,22 +733,13 @@ public:
 
     for (size_t i = 0; i < 10; ++i) {
       Geometry::IDetector_const_sptr det = eventWS->getDetector(i);
-      if (det)
-        std::cout << "detector " << i << ": " << det->getPos().toString()
-                  << "\n";
-      else
-        std::cout << "detector of workspace index " << i << " is not defined. "
-                  << "\n";
-
       Parameter_sptr par = pmap.getRecursive(det.get(), "Efixed");
       if (par) {
-        double efix = par->value<double>();
-        std::cout << "Detector: " << det->getID() << " EFixed: " << efix
-                  << "\n";
+        // No need to set up E-Fix
+        // double efix = par->value<double>();
+        ;
       } else {
-        std::cout << "Detector: " << det->getID()
-                  << " has no EFixed set up. Set to 2.08"
-                  << "\n";
+
         eventWS->setEFixed(det->getID(), 2.08);
       }
     }
@@ -809,6 +774,7 @@ public:
                                                                         true);
 
     // L1 = 10
+    /*
     Kernel::V3D samplepos = eventWS->getInstrument()->getSample()->getPos();
     Kernel::V3D sourcepos = eventWS->getInstrument()->getSource()->getPos();
     std::cout << "sample position: " << samplepos.toString() << "\n";
@@ -820,6 +786,7 @@ public:
       double l2 = samplepos.distance(detpos);
       std::cout << "detector " << i << ": L2 = " << l2 << "\n";
     }
+    */
 
     Kernel::DateAndTime runstart(runstart_i64);
 
