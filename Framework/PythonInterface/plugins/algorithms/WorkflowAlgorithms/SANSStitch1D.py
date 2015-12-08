@@ -64,7 +64,7 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
         allowedModes = StringListValidator(self._make_mode_map().keys())
 
-        self.declareProperty('Mode', 'None', validator=allowedModes, direction=Direction.Input, doc='What to fit')
+        self.declareProperty('Mode', 'None', validator=allowedModes, direction=Direction.Input, doc='What to fit. Free parameter(s).')
 
         self.declareProperty('ScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
                              doc='Optional scaling factor')
@@ -211,7 +211,7 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
         return min_q, max_q
 
-    def _determine_factors(self, q_high_angle, q_low_angle, mode, start_scale, start_shift):
+    def _determine_factors(self, q_high_angle, q_low_angle, mode, scale, shift):
 
         # We need to make suret that the fitting only occurs in the y direction
         constant_x_shift_and_scale = ', f0.Shift=0.0, f0.XScaling=1.0'
@@ -253,13 +253,23 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
         fit.setProperty('Function', function)
         fit.setProperty('InputWorkspace', rear_data_corrected)
-        fit.setProperty('Ties', 'f0.Shift=0.0, f0.XScaling=1.0')
+
+        constant_x_shift_and_scale = 'f0.Shift=0.0, f0.XScaling=1.0'
+        if mode == Mode.BothFit:
+            fit.setProperty('Ties', constant_x_shift_and_scale)
+        elif mode == Mode.ShiftOnly:
+            fit.setProperty('Ties', 'f0.Scaling=' + str(scale) + ',' + constant_x_shift_and_scale)
+        elif mode == Mode.ScaleOnly:
+            fit.setProperty('Ties', 'f1.A0=' + str(shift) + '*f0.Scaling,' + constant_x_shift_and_scale)
+        else:
+            raise RuntimeError('Unknown fitting mode requested.')
+
+
         fit.setProperty('StartX', q_min)
         fit.setProperty('EndX', q_max)
         fit.setProperty('CreateOutput', True)
         fit.execute()
         param = fit.getProperty('OutputParameters').value
-        chiSquared = fit.getProperty('OutputChi2overDoF').value
         AnalysisDataService.remove(front_in_ads.name())
 
         # The outparameters are:
@@ -305,16 +315,12 @@ class SANSStitch1D(DataProcessorAlgorithm):
             q_high_angle = self._subract(q_high_angle, q_high_angle_can)
             q_low_angle = self._subract(q_low_angle, q_low_angle_can)
 
-        scale_factor = 0
-        shift_factor = 0
-        if mode == Mode.NoneFit:
-            shift_factor = self.getProperty('ShiftFactor').value
-            scale_factor = self.getProperty('ScaleFactor').value
-        else:
-            shift_factor, scale_factor = self._determine_factors(q_high_angle, q_low_angle, mode, start_scale=scale_factor,
-                                                                 start_shift=shift_factor)
+        shift_factor = self.getProperty('ShiftFactor').value
+        scale_factor = self.getProperty('ScaleFactor').value
+        if not mode == Mode.NoneFit:
 
-
+            shift_factor, scale_factor = self._determine_factors(q_high_angle, q_low_angle, mode, scale=scale_factor,
+                                                                 shift=shift_factor)
 
         min_q = min(min(cF.dataX(0)), min(cR.dataX(0)))
         max_q = max(max(cF.dataX(0)), max(cR.dataX(0)))
@@ -386,7 +392,7 @@ class SANSStitch1D(DataProcessorAlgorithm):
             if shift_factor_property.isDefault:
                 errors[shift_factor_property.name] = 'ShiftFactor required'
         elif enum_map[mode_property.value] == Mode.ShiftOnly:
-            if shift_factor_property.isDefault:
+            if scale_factor_property.isDefault:
                 errors[scale_factor_property.name] = 'ScaleFactor required'
 
         workspace_property_names = ['HABCountsSample', 'LABCountsSample', 'HABNormSample', 'LABNormSample']
