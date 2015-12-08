@@ -5,7 +5,6 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <stdexcept>
 #include <algorithm>
-#include <iostream>
 
 extern "C" {
 #include <gsl/gsl_errno.h>
