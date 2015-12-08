@@ -265,6 +265,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   ${Boost_LIBRARIES}
   ${JSONCPP_LIBRARIES}
   ${GMOCK_LIBRARIES} 
+  ${QWT_LIBRARIES}
   ${GTEST_LIBRARIES} )
   add_dependencies( AllTests VatesAPITest )
   # Add to the 'UnitTests' group in VS
