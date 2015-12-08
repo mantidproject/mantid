@@ -64,7 +64,7 @@ private:
   void updatePlotOptions();
   QString convertFuncToShort(const QString &);
   QString convertBackToShort(const std::string &original);
-  void extendResolutionWorkspace();
+  void extendResolutionWorkspace(const bool &run);
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
   QtTreePropertyBrowser *m_cfTree;

@@ -223,7 +223,7 @@ void ConvFit::run() {
     g_log.error("No workspace loaded");
     return;
   }
-  extendResolutionWorkspace();
+  extendResolutionWorkspace(true);
 }
 
 /**
@@ -233,8 +233,10 @@ void ConvFit::run() {
 * Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as
 * they need
 * to have the WorkspaceIndex attribute set.
+* @param run :: if the call is from running the algorithm or single fit (true =
+* algorithm)
 */
-void ConvFit::extendResolutionWorkspace() {
+void ConvFit::extendResolutionWorkspace(const bool &run) {
   if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
     const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
     API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
@@ -255,8 +257,10 @@ void ConvFit::extendResolutionWorkspace() {
         m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
       }
     }
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-            SLOT(extensionComplete(bool)));
+    if (run) {
+      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+              SLOT(extensionComplete(bool)));
+    }
     m_batchAlgoRunner->executeBatchAsync();
   }
 }
@@ -1147,7 +1151,7 @@ void ConvFit::singleFit() {
   if (fitType == "") {
     g_log.error("No fit type defined.");
   }
-
+  extendResolutionWorkspace(false);
   m_singleFitOutputName =
       runPythonCode(
           QString(
