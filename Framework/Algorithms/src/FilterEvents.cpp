@@ -43,7 +43,8 @@ FilterEvents::FilterEvents()
       m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
       m_vecSplitterTime(), m_vecSplitterGroup(), m_splitSampleLogs(false),
       m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(),
-      m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false), m_filterStartTime(0) {}
+      m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false),
+      m_filterStartTime(0) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -142,10 +143,15 @@ void FilterEvents::init() {
       new ArrayProperty<string>("OutputWorkspaceNames", Direction::Output),
       "List of output workspaces names");
 
-  declareProperty("RelativeTime", false, "Flag to indicate that in the input Matrix splitting workspace,"
-                  "the time indicated by X-vector is relative to either run start time or some indicted time.");
+  declareProperty(
+      "RelativeTime", false,
+      "Flag to indicate that in the input Matrix splitting workspace,"
+      "the time indicated by X-vector is relative to either run start time or "
+      "some indicted time.");
 
-  declareProperty("FilterStartTime", "", "Start time for splitters that can be parsed to DateAndTime.");
+  declareProperty(
+      "FilterStartTime", "",
+      "Start time for splitters that can be parsed to DateAndTime.");
 
   return;
 }
@@ -312,29 +318,24 @@ void FilterEvents::processAlgorithmProperties() {
 
   // Splitters are given relative time
   m_isSplittersRelativeTime = getProperty("RelativeTime");
-  if (m_isSplittersRelativeTime)
-  {
+  if (m_isSplittersRelativeTime) {
     // Using relative time
     std::string start_time_str = getProperty("FilterStartTime");
-    if (start_time_str.size() > 0)
-    {
+    if (start_time_str.size() > 0) {
       // User specifies the filter starting time
       Kernel::DateAndTime temp_shift_time(start_time_str);
       m_filterStartTime = temp_shift_time;
-    }
-    else
-    {
+    } else {
       // Retrieve filter starting time from property run_start as default
-      if (m_eventWS->run().hasProperty("run_start"))
-      {
-        Kernel::DateAndTime temp_shift_time(m_eventWS->run().getProperty("run_start")->value());
+      if (m_eventWS->run().hasProperty("run_start")) {
+        Kernel::DateAndTime temp_shift_time(
+            m_eventWS->run().getProperty("run_start")->value());
         m_filterStartTime = temp_shift_time;
-      }
-      else
-      {
-        throw std::runtime_error("Input event workspace does not have property run_start. "
-                                 "User does not specifiy filter start time."
-                                 "Splitters cannot be in reltive time.");
+      } else {
+        throw std::runtime_error(
+            "Input event workspace does not have property run_start. "
+            "User does not specifiy filter start time."
+            "Splitters cannot be in reltive time.");
       }
     }
   }
@@ -482,8 +483,7 @@ void FilterEvents::processMatrixSplitterWorkspace() {
     m_vecSplitterTime[i] = static_cast<int64_t>(vecX[i]);
   }
   // shift the splitters' time if applied
-  if (m_isSplittersRelativeTime)
-  {
+  if (m_isSplittersRelativeTime) {
     int64_t time_shift_ns = m_filterStartTime.totalNanoseconds();
     for (size_t i = 0; i < sizex; ++i)
       m_vecSplitterTime[i] += time_shift_ns;

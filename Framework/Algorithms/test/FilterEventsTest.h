@@ -525,7 +525,8 @@ public:
     return;
   }
   //----------------------------------------------------------------------------------------------
-  /**  Filter events without any correction and test for splitters in MatrixWorkspace format
+  /**  Filter events without any correction and test for splitters in
+   *MatrixWorkspace format
    *   and the time given for splitters is relative
    *  Event workspace:
    * (1) 10 detectors
@@ -861,7 +862,8 @@ public:
    * 2: from pulse 2: 0 ~ 6+
    * -1: from pulse 2: 6+ ~ 9+
    * @brief createMatrixSplitter
-   * @param runstart_i64 : absolute run start time in int64_t format with unit nanosecond
+   * @param runstart_i64 : absolute run start time in int64_t format with unit
+   * nanosecond
    * @param pulsedt: pulse length in int64_t format with unit nanosecond
    * @param tofdt: time interval between 2 adjacent event in same pulse in
    * int64_t format of unit nanosecond
@@ -897,8 +899,10 @@ public:
     size_t size_y = index_vec.size();
     TS_ASSERT(size_x - size_y == 1);
 
-    MatrixWorkspace_sptr splitterws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, size_x, size_y));
+    MatrixWorkspace_sptr splitterws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(
+            WorkspaceFactory::Instance().create("Workspace2D", 1, size_x,
+                                                size_y));
 
     for (size_t ix = 0; ix < size_x; ++ix)
       splitterws->dataX(0)[ix] = static_cast<double>(time_vec[ix]);
