@@ -36,6 +36,22 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output),
                              doc="List of detector masked, with scatterin angles between MinAngle and MaxAngle")
 
+    def validateInputs(self):
+        issues = dict()
+
+        ws = self.getProperty("Workspace").value
+
+        try:
+            if type(ws).__name__ == "WorkspaceGroup":
+                for w in ws:
+                    src = w.getInstrument().getSource().getPos()
+            else: 
+                source = ws.getInstrument().getSource().getPos()
+        except (RuntimeError, ValueError, AttributeError, TypeError):
+            issues["Workspace"] = "Workspace must have an associated instrument."
+   
+        return issues
+
     def PyExec(self):
         ws = self.getProperty("Workspace").value
         ttmin = self.getProperty("MinAngle").value
