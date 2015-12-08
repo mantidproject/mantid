@@ -538,7 +538,102 @@ public:
 
     return;
   }
+  //----------------------------------------------------------------------------------------------
+  /**  Filter events without any correction and test for splitters in MatrixWorkspace format
+   *   and the time given for splitters is relative
+   *  Event workspace:
+   * (1) 10 detectors
+    * (2) Run starts @ 20000000000 seconds
+    * (3) Pulse length = 100*1000*1000 seconds
+    * (4) Within one pulse, two consecutive events/neutrons is apart for
+   *10*1000*1000 seconds
+    * (5) "Experiment": 5 pulse times.  10 events in each pulse
+    *
+    * In this test
+   *  (1) Leave correction table workspace empty
+   *  (2) Count events in each output including "-1", the excluded/unselected
+   *events
+   */
+  void test_FilterRelativeTime() {
+    // Create EventWorkspace and SplittersWorkspace
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100 * 1000 * 1000;
+    int64_t tofdt = 10 * 1000 * 1000;
+    size_t numpulses = 5;
 
+    DataObjects::EventWorkspace_sptr inpWS =
+        createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    AnalysisDataService::Instance().addOrReplace("Test10", inpWS);
+
+    API::MatrixWorkspace_sptr splws = createMatrixSplitter(0, pulsedt, tofdt);
+    AnalysisDataService::Instance().addOrReplace("Splitter10", splws);
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "Test10");
+    filter.setProperty("OutputWorkspaceBaseName", "FilteredWS10");
+    filter.setProperty("SplitterWorkspace", "Splitter10");
+    filter.setProperty("RelativeTime", true);
+    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+    // Get output
+    int numsplittedws = filter.getProperty("NumberOutputWS");
+    TS_ASSERT_EQUALS(numsplittedws, 3);
+
+    // 4.1 Workspace group 0
+    DataObjects::EventWorkspace_sptr filteredws0 =
+        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+            AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
+    TS_ASSERT(filteredws0);
+    TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
+    TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 4);
+
+    // 4.2 Workspace group 1
+    DataObjects::EventWorkspace_sptr filteredws1 =
+        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+            AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
+    TS_ASSERT(filteredws1);
+    TS_ASSERT_EQUALS(filteredws1->getEventList(1).getNumberEvents(), 16);
+
+    // 4.3 Workspace group 2
+    DataObjects::EventWorkspace_sptr filteredws2 =
+        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+            AnalysisDataService::Instance().retrieve("FilteredWS10_3"));
+    TS_ASSERT(filteredws2);
+    TS_ASSERT_EQUALS(filteredws2->getEventList(1).getNumberEvents(), 21);
+
+    DataObjects::EventList elist3 = filteredws2->getEventList(3);
+    elist3.sortPulseTimeTOF();
+
+    DataObjects::TofEvent eventmin = elist3.getEvent(0);
+    TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(),
+                     runstart_i64 + pulsedt * 2);
+    TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
+
+    DataObjects::TofEvent eventmax = elist3.getEvent(20);
+    TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(),
+                     runstart_i64 + pulsedt * 4);
+    TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000),
+                    1.0E-4);
+
+    // 5. Clean up
+    AnalysisDataService::Instance().remove("Test02");
+    AnalysisDataService::Instance().remove("Splitter02");
+    std::vector<std::string> outputwsnames =
+        filter.getProperty("OutputWorkspaceNames");
+    for (size_t i = 0; i < outputwsnames.size(); ++i) {
+      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
+      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    }
+
+    return;
+  }
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace.  This workspace has
     * @param runstart_i64 : absolute run start time in int64_t format with unit
@@ -787,6 +882,61 @@ public:
       Kernel::SplittingInterval interval2(t0, t1, 2);
       splitterws->addSplitter(interval2);
     }
+
+    return splitterws;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Create a  Splitter for output
+   *  Region:
+   * 0: pulse 0: 0 ~ 3+
+   * 1: pulse 0: 3+ ~ pulse 1: 9+
+   * 2: from pulse 2: 0 ~ 6+
+   * -1: from pulse 2: 6+ ~ 9+
+   * @brief createMatrixSplitter
+   * @param runstart_i64 : absolute run start time in int64_t format with unit nanosecond
+   * @param pulsedt: pulse length in int64_t format with unit nanosecond
+   * @param tofdt: time interval between 2 adjacent event in same pulse in
+   * int64_t format of unit nanosecond
+   * @return
+   */
+  API::MatrixWorkspace_sptr
+  createMatrixSplitter(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt) {
+    // Create vectors for the splitters
+    std::vector<int64_t> time_vec;
+    std::vector<int> index_vec;
+
+    time_vec.push_back(runstart_i64);
+
+    // Splitter 0: 0 ~ 3+ (first pulse)
+    int64_t t1 = runstart_i64 + tofdt * 3 + tofdt / 2;
+    time_vec.push_back(t1);
+    index_vec.push_back(0);
+
+    // Splitter 1: 3+ ~ 9+ (second pulse)
+    int64_t t2 = runstart_i64 + pulsedt + tofdt * 9 + tofdt / 2;
+    time_vec.push_back(t2);
+    index_vec.push_back(1);
+
+    // Splitter 2 and so on: from 3rd pulse, 0 ~ 6+
+    for (size_t i = 2; i < 5; i++) {
+      int64_t newT = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
+      time_vec.push_back(newT);
+      index_vec.push_back(2);
+    }
+
+    // Create the workspace and set it
+    size_t size_x = time_vec.size();
+    size_t size_y = index_vec.size();
+    TS_ASSERT(size_x - size_y == 1);
+
+    MatrixWorkspace_sptr splitterws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, size_x, size_y));
+
+    for (size_t ix = 0; ix < size_x; ++ix)
+      splitterws->dataX(0)[ix] = static_cast<double>(time_vec[ix]);
+    for (size_t iy = 0; iy < size_y; ++iy)
+      splitterws->dataY(0)[iy] = static_cast<double>(index_vec[iy]);
 
     return splitterws;
   }
