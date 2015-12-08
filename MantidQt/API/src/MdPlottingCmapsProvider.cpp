@@ -10,6 +10,9 @@
 #ifdef MAKE_VATES
 #include "vtkSMTransferFunctionPresets.h"
 #include "vtkNew.h"
+#ifdef JSON_DLL
+#undef JSON_DLL
+#endif
 #include "vtk_jsoncpp.h"
 #endif
 
