@@ -97,7 +97,8 @@ QRectF ErrorCurve::boundingRect() const {
   if (!m_e.empty()) {
     int n = dataSize();
     const double width = m_x[n - 1] - m_x[0];
-    double max = DBL_MIN, min = DBL_MAX;
+    double max = std::numeric_limits<double>::min();
+    double min = std::numeric_limits<double>::max();
     for (int i = 0; i < n; i++) {
       const double upper = m_y[i] + m_e[i];
       const double lower = m_y[i] - m_e[i];
