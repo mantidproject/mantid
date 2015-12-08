@@ -41,15 +41,15 @@ bool PeakHKL::add(PeakMarker2D* marker,const QRectF& trect)
   {
     return false;
   }
-  if (nh && marker->getH() != h) 
+  if (nh && marker->getH() != h)
   {
     nh = false;
   }
-  if (nk && marker->getK() != k) 
+  if (nk && marker->getK() != k)
   {
     nk = false;
   }
-  if (nl && marker->getL() != l) 
+  if (nl && marker->getL() != l)
   {
     nl = false;
   }
@@ -64,7 +64,7 @@ bool PeakHKL::add(PeakMarker2D* marker,const QRectF& trect)
 void PeakHKL::draw(QPainter& painter,int prec)
 {
   QString label;
-  if (nh) 
+  if (nh)
   {
       label += formatNumber( h, prec ) + " ";
   }
@@ -127,7 +127,8 @@ m_peaksWorkspace(pws),
 m_surface(surface),
 m_precision(6),
 m_showRows(true),
-m_showLabels(true)
+m_showLabels(true),
+m_showRelativeIntensity(true)
 {
   if (g_defaultStyles.isEmpty())
   {
@@ -139,7 +140,7 @@ m_showLabels(true)
 }
 
 /**---------------------------------------------------------------------
- * Overridden virtual function to remove peaks from the workspace along with 
+ * Overridden virtual function to remove peaks from the workspace along with
  * the shapes.
  * @param shapeList :: Shapes to remove.
  */
@@ -189,6 +190,7 @@ void PeakOverlay::addMarker(PeakMarker2D* m)
 void PeakOverlay::createMarkers(const PeakMarker2D::Style& style)
 {
   int nPeaks = getNumberPeaks();
+
   this->clear();
   for(int i = 0; i < nPeaks; ++i)
   {
@@ -203,7 +205,29 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style& style)
     r->setPeak(peak,i);
     addMarker(r);
   }
+
+  scaleMarkerSizesToIntensities();
+
   deselectAll();
+}
+
+void PeakOverlay::scaleMarkerSizesToIntensities() {
+    if(m_showRelativeIntensity) {
+        if(!isEmpty()) {
+            double maxIntensity = getMaximumIntensity();
+
+            QList<PeakMarker2D *> markers = m_det2marker.values();
+            for(auto it = markers.constBegin(); it != markers.constEnd(); ++it) {
+                int markerSize = getMarkerSizeIncrement((*it)->getPeak().getIntensity(),
+                                                        maxIntensity);
+                (*it)->setMarkerSize((*it)->getMarkerSize() + markerSize);
+            }
+        }
+    }
+}
+
+int PeakOverlay::getMarkerSizeIncrement(double intensity, double maxIntensity) const {
+    return static_cast<int>(intensity / maxIntensity * 5.0);
 }
 
 /**---------------------------------------------------------------------
@@ -248,7 +272,7 @@ void PeakOverlay::draw(QPainter& painter) const
       overlap = hkl.add(marker,rect);
       if ( overlap ) break;
     }
-    
+
     if (!overlap)
     {
       PeakHKL hkl(marker,rect,m_showRows);
@@ -293,6 +317,12 @@ Mantid::Geometry::IPeak& PeakOverlay::getPeak(int i)
   return m_peaksWorkspace->getPeak(i);
 }
 
+void PeakOverlay::setShowRelativeIntensityFlag(bool yes) {
+    m_showRelativeIntensity = yes;
+
+    scaleMarkerSizesToIntensities();
+}
+
 /** ---------------------------------------------------------------------
  * Handler of the AfterReplace notifications. Updates the markers.
  * @param wsName :: The name of the modified workspace.
@@ -312,8 +342,28 @@ void PeakOverlay::afterReplaceHandle(const std::string& wsName,
   }
 }
 
+double PeakOverlay::getMaximumIntensity() const
+{
+    if(m_peaksWorkspace) {
+        int peakCount = m_peaksWorkspace->getNumberPeaks();
+
+        std::vector<double> intensities;
+        intensities.reserve(peakCount);
+
+        for(int i = 0; i < peakCount; ++i) {
+            intensities.push_back(m_peaksWorkspace->getPeak(i).getIntensity());
+        }
+
+        std::sort(intensities.begin(), intensities.end());
+
+        return intensities.back();
+    }
+
+    return 1.0;
+}
+
 /** ---------------------------------------------------------------------
- * Return a default style for creating markers by index. 
+ * Return a default style for creating markers by index.
  * Styles are taken form g_defaultStyles
  */
 PeakMarker2D::Style PeakOverlay::getDefaultStyle(int index)

@@ -1057,6 +1057,17 @@ void InstrumentWindow::setShowPeakLabelsFlag(bool on) {
 }
 
 /**
+ * Enable or disable indication of relative peak intensities
+ *
+ * @param on :: True to show, false to hide.
+ */
+void InstrumentWindow::setShowPeakRelativeIntensity(bool on)
+{
+    getSurface()->setShowPeakRelativeIntensity(on);
+    updateInstrumentView();
+}
+
+/**
  * Set background color of the instrument display
  * @param color :: New background colour.
  */

@@ -72,6 +72,7 @@ public:
   void setPrecision(int prec) const {m_precision = prec;}
   void setShowRowsFlag(bool yes) {m_showRows = yes;}
   void setShowLabelsFlag(bool yes) {m_showLabels = yes;}
+  void setShowRelativeIntensityFlag(bool yes);
   static PeakMarker2D::Style getDefaultStyle(int index);
   void setPeakVisibility(double xmin, double xmax, QString units);
 
@@ -83,6 +84,11 @@ private:
   virtual void afterReplaceHandle(const std::string& wsName,
     const Mantid::API::Workspace_sptr ws);
 
+  double getMaximumIntensity() const;
+  void scaleMarkerSizesToIntensities();
+  int getMarkerSizeIncrement(double intensity, double maxIntensity) const;
+
+
   QMultiHash<int,PeakMarker2D*> m_det2marker; ///< detector ID to PeakMarker2D map
   mutable QList<PeakHKL> m_labels;
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
@@ -90,7 +96,7 @@ private:
   mutable int m_precision;
   mutable bool m_showRows;   ///< flag to show peak row index
   mutable bool m_showLabels; ///< flag to show peak hkl labels
-
+  mutable bool m_showRelativeIntensity; ///< flag to show peak intensities
   static QList<PeakMarker2D::Style> g_defaultStyles; ///< default marker styles
 };
 
