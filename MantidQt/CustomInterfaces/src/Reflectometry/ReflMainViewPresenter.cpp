@@ -1250,9 +1250,7 @@ void ReflMainViewPresenter::openTable() {
 /**
 Import a table from TBL file
 */
-void ReflMainViewPresenter::importTable() {
-  m_view->showAlgorithmDialog("LoadReflTBL");
-}
+void ReflMainViewPresenter::importTable() { m_view->showImportDialog(); }
 
 /**
 Export a table to TBL file
@@ -1693,8 +1691,8 @@ ReflMainViewPresenter::getTransferStrategy() {
 
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
-    auto source =
-        std::unique_ptr<ReflMeasurementItemSource>(new ReflNexusMeasurementItemSource);
+    auto source = std::unique_ptr<ReflMeasurementItemSource>(
+        new ReflNexusMeasurementItemSource);
 
     // Finally make and return the Measure based transfer strategy.
     return std::unique_ptr<ReflTransferStrategy>(
