@@ -1,8 +1,9 @@
 # pylint: disable=no-init
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode
+from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, \
     EnabledWhenProperty, PropertyCriterion
+import numpy as np
 
 
 class Mode:
@@ -152,27 +153,168 @@ class SANSStitch1D(DataProcessorAlgorithm):
         merged_q = self._divide(numerator, denominator)
         return merged_q
 
+    def _get_error_corrected_front_and_rear_data_sets(self, front_data, rear_data, q_min, q_max):
+
+        front_data_cropped = self._crop_to_x_range(front_data, q_min, q_max)
+
+        # For the rear data set
+        rear_data_cropped = self._crop_to_x_range(rear_data, q_min, q_max)
+
+        # Now transfer the error from front data to the rear data workspace
+        # This works only if we have a single QMod spectrum in the workspaces
+        front_error = front_data_cropped.dataE(0)
+        rear_error = rear_data_cropped.dataE(0)
+
+        rear_error_squared = rear_error * rear_error
+        front_error_squared = front_error * front_error
+
+        corrected_error_squared = rear_error_squared + front_error_squared
+        corrected_error = np.sqrt(corrected_error_squared)
+        rear_error[0:len(rear_error)] = corrected_error[0:len(rear_error)]
+
+        return front_data_cropped, rear_data_cropped
+
+    def _get_start_q_and_end_q_values(self, rear_data, front_data):
+
+        min_q = None
+        max_q = None
+
+        front_dataX = front_data.readX(0)
+
+        front_size = len(front_dataX)
+        front_q_min = None
+        front_q_max = None
+        if front_size > 0:
+            front_q_min = front_dataX[0]
+            front_q_max = front_dataX[front_size - 1]
+        else:
+            raise RuntimeError("The FRONT detector does not seem to contain q values")
+
+        rear_dataX = rear_data.readX(0)
+
+        rear_size = len(rear_dataX)
+        rear_q_min = None
+        rear_q_max = None
+        if rear_size > 0:
+            rear_q_min = rear_dataX[0]
+            rear_q_max = rear_dataX[rear_size - 1]
+        else:
+            raise RuntimeError("The REAR detector does not seem to contain q values")
+
+        if rear_q_max < front_q_min:
+            raise RuntimeError("The min value of the FRONT detector data set is larger"
+                               "than the max value of the REAR detector data set")
+
+        # Get the min and max range
+        min_q = max(rear_q_min, front_q_min)
+        max_q = min(rear_q_max, front_q_max)
+
+        return min_q, max_q
+
+    def _determine_factors(self, q_high_angle, q_low_angle, mode, start_scale, start_shift):
+
+        # We need to make suret that the fitting only occurs in the y direction
+        constant_x_shift_and_scale = ', f0.Shift=0.0, f0.XScaling=1.0'
+
+        # Determine the StartQ and EndQ values
+        q_min, q_max = self._get_start_q_and_end_q_values(rear_data=q_low_angle, front_data=q_high_angle,
+                                                          )
+
+        # We need to transfer the errors from the front data to the rear data, as we are using the the front data as a model, but
+        # we want to take into account the errors of both workspaces.
+        front_data_corrected, rear_data_corrected = self._get_error_corrected_front_and_rear_data_sets(rear_data=q_low_angle,
+                                                                                                       front_data=q_high_angle,
+                                                                                                       q_min=q_min, q_max=q_max)
+
+        '''
+        if mode == Mode.ScaleOnly:
+            Fit(InputWorkspace=rear_data_corrected.name(),
+                Function='name=TabulatedFunction, Workspace="' + front_data_corrected.name() + '"' + ";name=FlatBackground",
+                Ties='f0.Scaling=' + str(rAnds.scale) + constant_x_shift_and_scale,
+                Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
+
+
+        elif mode == Mode.ShiftOnly:
+            Fit(InputWorkspace=rear_data_corrected.name(),
+                Function='name=TabulatedFunction, Workspace="' + str(
+                    front_data_corrected.name()) + '"' + ";name=FlatBackground",
+                Ties='f1.A0=' + str(rAnds.shift) + '*f0.Scaling' + constant_x_shift_and_scale,
+                Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
+        '''
+
+        fit = self.createChildAlgorithm('Fit')
+
+        # We currently have to put the front_data into the ADS so that the TabulatedFunction has access to it
+        front_data_corrected = AnalysisDataService.addOrReplace('front_data_corrected', front_data_corrected)
+        front_in_ads = AnalysisDataService.retrieve('front_data_corrected')
+
+        function = 'name=TabulatedFunction, Workspace="' + str(
+            front_in_ads.name()) + '"' + ";name=FlatBackground"
+
+        fit.setProperty('Function', function)
+        fit.setProperty('InputWorkspace', rear_data_corrected)
+        fit.setProperty('Ties', 'f0.Shift=0.0, f0.XScaling=1.0')
+        fit.setProperty('StartX', q_min)
+        fit.setProperty('EndX', q_max)
+        fit.setProperty('CreateOutput', True)
+        fit.execute()
+        param = fit.getProperty('OutputParameters').value
+        chiSquared = fit.getProperty('OutputChi2overDoF').value
+        AnalysisDataService.remove(front_in_ads.name())
+
+        # The outparameters are:
+        # 1. Scaling in y direction
+        # 2. Shift in x direction
+        # 3. Scaling in x direction
+        # 4. Shift in y direction
+        # 5. Chi^2 value
+        row0 = param.row(0).items()
+        row3 = param.row(3).items()
+
+        scale = row0[1][1]
+
+        if scale == 0.0:
+            raise RuntimeError('Fit scaling as part of stitching evaluated to zero')
+
+        # In order to determine the shift, we need to remove the scale factor
+        shift = row3[1][1] / scale
+
+        return (shift, scale)
+
     def PyExec(self):
         enum_map = self._make_mode_map()
 
         mode = enum_map[self.getProperty('Mode').value]
+
+        cF = self.getProperty('HABCountsSample').value
+        cR = self.getProperty('LABCountsSample').value
+        nF = self.getProperty('HABNormSample').value
+        nR = self.getProperty('LABNormSample').value
+        q_high_angle = self._divide(cF, nF)
+        q_low_angle = self._divide(cR, nR)
+        if self.getProperty('ProcessCan').value:
+            cF_can = self.getProperty('HABCountsCan').value
+            cR_can = self.getProperty('LABCountsCan').value
+            nF_can = self.getProperty('HABNormCan').value
+            nR_can = self.getProperty('LABNormCan').value
+
+            q_high_angle_can = self._divide(cF_can, nF_can)
+            q_low_angle_can = self._divide(cR_can, nR_can)
+
+            # Now we can do the can subraction.
+            q_high_angle = self._subract(q_high_angle, q_high_angle_can)
+            q_low_angle = self._subract(q_low_angle, q_low_angle_can)
 
         scale_factor = 0
         shift_factor = 0
         if mode == Mode.NoneFit:
             shift_factor = self.getProperty('ShiftFactor').value
             scale_factor = self.getProperty('ScaleFactor').value
+        else:
+            shift_factor, scale_factor = self._determine_factors(q_high_angle, q_low_angle, mode, start_scale=scale_factor,
+                                                                 start_shift=shift_factor)
 
-        cF = self.getProperty('HABCountsSample').value
-        cR = self.getProperty('LABCountsSample').value
-        nF = self.getProperty('HABNormSample').value
-        nR = self.getProperty('LABNormSample').value
 
-        if self.getProperty('ProcessCan').value:
-            cF_can = self.getProperty('HABCountsCan').value
-            cR_can = self.getProperty('LABCountsCan').value
-            nF_can = self.getProperty('HABNormCan').value
-            nR_can = self.getProperty('LABNormCan').value
 
         min_q = min(min(cF.dataX(0)), min(cR.dataX(0)))
         max_q = max(max(cF.dataX(0)), max(cR.dataX(0)))
