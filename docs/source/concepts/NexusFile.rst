@@ -17,10 +17,19 @@ Structure
 ISIS uses NEXUS files for both histrogram and event data and SNS uses NEXUS only for event data. 
 Also both ISIS and SNS use the same structure for event data. 
 Hence there are two principal types of NEXUS files loaded by Mantid 
- - ISIS Nexus file, which is loaded by LoadISISNexus and
- - Event Nexus file, which is loaded by LoadEventNexus.
-Also there is a third kind of Nexus file, which is produced by Mantid, when it saves a workspace
-to Nexus, which is called a Processed Nexus file and is saved by SaveNexusProcessed.
+
+ - ISIS Nexus file, which is loaded by :ref:`LoadISISNexus <algm-LoadISISNexus>` and
+ - Event Nexus file, which is loaded by :ref:`LoadEventNexus <algm-LoadEventNexus>`.
+
+ISIS also have two versions of Nexus files for muon histogram data:
+
+ - Muon Nexus file v1, which is loaded by :ref:`LoadMuonNexus v1<algm-LoadMuonNexus-v1>` and
+ - Muon Nexus file v2, which is loaded by :ref:`LoadEventNexus v2<algm-LoadMuonNexus-v2>`.
+
+
+Also there is a kind of Nexus file, which is produced by Mantid, when it saves a workspace
+to Nexus, which is called a Processed Nexus file and is saved by 
+:ref:`SaveNexusProcessed <algm-SaveNexusProcessed>`.
 
 See also
 --------
