@@ -354,11 +354,33 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         import IMAT.tomorec.configs as cfgs
         pre_conf = cfgs.PreProcConfig()
+        alg_conf = cfgs.ToolAlgorithmConfig()
+        post_conf = cfgs.PostProcConfig()
+        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
 
         normalized = cmd.normalize_air_region(self.data_vol, pre_conf)
         np.testing.assert_allclose(normalized, self.data_vol,
                                    err_msg="Epected normalized data volume not to changed")
 
+        # absolutely invalid data
+        with self.assertRaises(ValueError):
+            cmd.normalize_air_region([], pre_conf)
+
+        # wrong data dimensions
+        with self.assertRaises(ValueError):
+            cmd.normalize_air_region(np.ones((3, 2)), pre_conf)
+
+        # invalid configurations
+        with self.assertRaises(ValueError):
+            cmd.normalize_air_region(self.data_vol, alg_conf)
+
+        with self.assertRaises(ValueError):
+            cmd.normalize_air_region(self.data_vol, post_conf)
+
+        with self.assertRaises(ValueError):
+            cmd.normalize_air_region(self.data_vol, conf)
+
+        # wrong air-regions
         pre_conf.normalize_air_region = [3]
         with self.assertRaises(ValueError):
             cmd.normalize_air_region(self.data_vol, pre_conf)
@@ -381,8 +403,27 @@ class ImagingIMATTomoTests(unittest.TestCase):
         post_conf = cfgs.PostProcConfig()
         conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
 
+        # absolutely invalid data
         with self.assertRaises(ValueError):
-            cmd.normalize_flat_dark(self.data_vol, conf, np.ones((10, 23)), None)
+            cmd.normalize_flat_dark([], pre_conf, np.ones((10, 23)), None)
+
+        # wrong data dimensions
+        with self.assertRaises(ValueError):
+            cmd.normalize_flat_dark(np.ones((3, 2)), pre_conf, np.ones((10, 23)), None)
+
+        # wrong dimensions of the flat image
+        with self.assertRaises(ValueError):
+            cmd.normalize_flat_dark(self.data_vol, pre_conf, np.ones((10, 23)), None)
+
+        # invalid configurations
+        with self.assertRaises(ValueError):
+            cmd.normalize_flat_dark(self.data_vol, alg_conf, None, None)
+
+        with self.assertRaises(ValueError):
+            cmd.normalize_flat_dark(self.data_vol, post_conf, None, None)
+
+        with self.assertRaises(ValueError):
+            cmd.normalize_flat_dark(self.data_vol, conf, None, None)
 
     def test_normalize_flat_ok(self):
         import IMAT.tomorec.reconstruction_command as cmd
@@ -390,19 +431,16 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         import IMAT.tomorec.configs as cfgs
         pre_conf = cfgs.PreProcConfig()
-        alg_conf = cfgs.ToolAlgorithmConfig()
-        post_conf = cfgs.PostProcConfig()
-        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
 
         # ignored, with just info message
-        norm = cmd.normalize_flat_dark(self.data_vol, conf, None, None)
+        norm = cmd.normalize_flat_dark(self.data_vol, pre_conf, None, None)
 
         # ignored, with just info message
-        norm = cmd.normalize_flat_dark(self.data_vol, conf, 45, None)
+        norm = cmd.normalize_flat_dark(self.data_vol, pre_conf, 45, None)
 
         for img_idx in range(0, self.data_vol.shape[0]):
             fake_white = self.data_vol[img_idx, :, :]
-            norm = cmd.normalize_flat_dark(self.data_vol, conf, fake_white, None)
+            norm = cmd.normalize_flat_dark(self.data_vol, pre_conf, fake_white, None)
             np.testing.assert_allclose(norm[img_idx, : :], np.ones(fake_white.shape),
                                        err_msg="Epected normalized data volume not to changed "
                                        "wheh using fake flat image, with index {0}".format(img_idx))

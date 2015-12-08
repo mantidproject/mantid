@@ -35,17 +35,17 @@ ipython -- tomo_reconstruct.py --help
 ipython -- scripts/Imaging/IMAT/tomo_reconstruct.py\
  --input-path=../tomography-tests/stack_larmor_metals_summed_all_bands/ --output-path=test_REMOVE_ME\
  --tool tomopy --algorithm gridrec  --cor 123 --max-angle 360 --in-img-format=tiff\
- --region-of-interest='[5, 252, 507, 507]' --rotation=-1'
+ --region-of-interest='[5, 252, 507, 507]' --rotation=-1
 
 ipython -- scripts/Imaging/IMAT/tomo_reconstruct.py\
  --input-path=../tomography-tests/stack_larmor_metals_summed_all_bands/ --output-path=test_REMOVE_ME\
  --tool tomopy --algorithm sirt --num-iter 10  --cor 123 --max-angle 360 --in-img-format=tiff\
- --out-img-format png --region-of-interest='[5, 252, 507, 507]' --rotation=-1'
+ --out-img-format png --region-of-interest='[5, 252, 507, 507]' --rotation=-1
 
 ipython -- scripts/Imaging/IMAT/tomo_reconstruct.py\
  --input-path=../tomography-tests/stack_larmor_metals_summed_all_bands/ --output-path=test_REMOVE_ME\
  --tool astra --algorithm FP3D_CUDA  --num-iter 10  --cor 123 --max-angle 360 --in-img-format=tiff\
- --region-of-interest='[5, 252, 507, 507]' --rotation=-1'
+ --region-of-interest='[5, 252, 507, 507]' --rotation=-1
 """
 
 # find first the package/subpackages in the path of this file.

@@ -39,7 +39,9 @@ import IMAT.tomorec.configs as tomocfg
 class ReconstructionCommand(object):
     """
     Run a tomographic reconstruction command, which can be a local process or a job on a
-    remote machine/scheduler.
+    remote machine/scheduler. This class provides functionality to pre-process a raw dataset,
+    run a reconstruction (from pre-processed data to reconstructed volume), and post-process
+    a reconstructed volume.
     """
 
     def __init__(self):
@@ -270,7 +272,7 @@ class ReconstructionCommand(object):
 
         Returns :: projected data volume (image stack)
         """
-        self._check_data_stack(data)
+        self._check_data_stack(imgs_angles)
 
         if not preproc_cfg.line_projection:
             print " * Note: not applying line projection."
@@ -296,7 +298,7 @@ class ReconstructionCommand(object):
 
         Returns :: filtered data (stack of images)
         """
-        self._check_data_stack(data)
+        self._check_data_stack(preproc_data)
 
         # Remove stripes in sinograms / ring artefacts in reconstructed volume
         if cfg.stripe_removal_method:
@@ -343,6 +345,9 @@ class ReconstructionCommand(object):
         Returns :: filtered data (stack of images)
         """
         self._check_data_stack(data)
+
+        if not pre_cfg or not isinstance(pre_cfg, tomocfg.PreProcConfig):
+            raise ValueError("Cannot normalize by air region without a valid pre-processing configuration")
 
         if pre_cfg.normalize_air_region:
             if not isinstance(pre_cfg.normalize_air_region, list) or\
@@ -411,7 +416,11 @@ class ReconstructionCommand(object):
         """
         self._check_data_stack(data)
 
-        if not cfg.preproc_cfg.normalize_flat_dark:
+        if not cfg or not isinstance(cfg, tomocfg.PreProcConfig):
+            raise ValueError("Cannot normalize by flat/dark images without a valid pre-processing "
+                             "configuration")
+
+        if not cfg.normalize_flat_dark:
             print " * Note: not applying normalization by flat/dark images."
             return data
 
@@ -426,7 +435,7 @@ class ReconstructionCommand(object):
                 norm_divide = norm_flat_img - norm_dark_img
             else:
                 norm_divide = norm_flat_img
-            if cfg.preproc_cfg.crop_coords:
+            if cfg.crop_coords:
                 norm_divide = norm_divide[:, cfg.crop_coords[1]:cfg.crop_coords[3],
                                           cfg.crop_coords[0]:cfg.crop_coords[2]]
             # prevent divide-by-zero issues
@@ -450,6 +459,9 @@ class ReconstructionCommand(object):
         Returns :: filtered data (stack of images)
         """
         self._check_data_stack(data)
+
+        if not cfg or not isinstance(cfg, tomocfg.PreProcConfig):
+            raise ValueError("Cannot apply cut-off without a valid pre-processing configuration")
 
         # Apply cut-off for the normalization?
         if cfg.cut_off_level and cfg.cut_off_level:
@@ -488,6 +500,9 @@ class ReconstructionCommand(object):
         Returns :: filtered data (stack of images)
         """
         self._check_data_stack(data)
+
+        if not cfg or not isinstance(cfg, tomocfg.PreProcConfig):
+            raise ValueError("Cannot rotate images without a valid pre-processing configuration")
 
         data_rotated = data
         if cfg.rotation:
