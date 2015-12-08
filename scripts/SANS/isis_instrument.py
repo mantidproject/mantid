@@ -1,4 +1,4 @@
-# pylint: disable=too-many-lines, disable=invalid-name
+# pylint: disable=too-many-lines, invalid-name
 import math
 import os
 import re
