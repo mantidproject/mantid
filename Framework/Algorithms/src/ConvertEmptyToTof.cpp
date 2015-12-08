@@ -15,7 +15,6 @@
 #include <map>
 #include <numeric> // std::accumulate
 #include <utility> // std::pair
-#include <iterator>
 
 namespace Mantid {
 namespace Algorithms {
