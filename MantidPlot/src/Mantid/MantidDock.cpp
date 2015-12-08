@@ -241,6 +241,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_clearUB = new QAction(tr("Clear UB Matrix"), this);
   connect(m_clearUB, SIGNAL(activated()), this, SLOT(clearUB()));
+
+  m_plotSurface = new QAction(tr("Plot Surface from Group"), this);
+  connect(m_plotSurface, SIGNAL(triggered()), this, SLOT(plotSurface()));
 }
 
 /**
@@ -638,6 +641,8 @@ void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
   menu->addAction(m_plotSpecErr);
   menu->addAction(m_colorFill);
   m_colorFill->setEnabled(true);
+  menu->addAction(m_plotSurface);
+  m_plotSurface->setEnabled(true);
   menu->addSeparator();
   menu->addAction(m_saveNexus);
 }
@@ -1498,6 +1503,17 @@ void MantidDockWidget::clearUB()
 void MantidDockWidget::dropEvent(QDropEvent *de)
 {
   m_tree->dropEvent(de);
+}
+
+/**
+ * Create a 3D surface plot from the selected workspace group
+ */
+void MantidDockWidget::plotSurface() {
+  // find the workspace group clicked on
+  // create empty table workspace
+  // populate table ws as in python example
+  // MantidUI::importTableWorkspace to Table*
+  // plotXYZ, or Graph3D from a Table...
 }
 
 //------------ MantidTreeWidget -----------------------//
