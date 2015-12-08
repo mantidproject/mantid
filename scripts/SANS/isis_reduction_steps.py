@@ -1292,7 +1292,7 @@ class TransmissionCalc(ReductionStep):
     # The y unit label for transmission data
     YUNITLABEL_TRANSMISSION_RATIO = "Transmission"
 
-    def __init__(self):
+    def __init__(self, loader=None):
         super(TransmissionCalc, self).__init__()
         # set these variables to None, which means they haven't been set and defaults will be set further down
         self.fit_props = ['lambda_min', 'lambda_max', 'fit_method', 'order']
@@ -2428,7 +2428,7 @@ class BaseBeamFinder(ReductionStep):
         """
         return [self._beam_center_x, self._beam_center_y]
 
-    def execute(self):
+    def execute(self, _reducer, _workspace=None):
         return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
 
     def update_beam_center(self, beam_center_x, beam_center_y):
@@ -2464,7 +2464,7 @@ class UserFile(ReductionStep):
             'MASKFILE': self._read_maskfile_line,
             'QRESOL/': self._read_q_resolution_line}
 
-    def __deepcopy__(self):
+    def __deepcopy__(self, memo):
         """Called when a deep copy is requested
         """
         fresh = UserFile(self.filename)
@@ -2480,7 +2480,7 @@ class UserFile(ReductionStep):
         }
         return fresh
 
-    def execute(self, reducer):
+    def execute(self, reducer, _workspace=None):
         if self.filename is None:
             raise AttributeError('The user file must be set, use the function MaskFile')
         user_file = self.filename

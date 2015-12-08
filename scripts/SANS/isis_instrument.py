@@ -582,7 +582,7 @@ class ISISInstrument(BaseInstrument):
             return self.DETECTORS['high-angle']
 
     def getDetector(self, requested):
-        for n, detect in self.DETECTORS.iteritems():
+        for _n, detect in self.DETECTORS.iteritems():
             if detect.isAlias(requested):
                 return detect
         sanslog.notice("getDetector: Detector " + requested + "not found")
@@ -724,7 +724,7 @@ class ISISInstrument(BaseInstrument):
             MoveInstrumentComponent(Workspace=ws, ComponentName=component, Z=offset,
                                     RelativePosition=True)
 
-    def move_components(self, ws, beamX, beamY):
+    def move_components(self, _ws, _beamX, _beamY):
         """Define how to move the bank to position beamX and beamY must be implemented"""
         raise RuntimeError("Not Implemented")
 
@@ -946,7 +946,7 @@ class LOQ(ISISInstrument):
     def get_marked_dets(self):
         raise NotImplementedError('The marked detector list isn\'t stored for instrument ' + self._NAME)
 
-    def set_up_for_run(self, base_runno):
+    def set_up_for_run(self):
         """
             Needs to run whenever a sample is loaded
         """
@@ -1262,16 +1262,16 @@ class SANS2D(ISISInstrument):
                     return datetime.strptime(date_string, format)
 
             # if the value was stored as a time series we have an array here
-            property = log_data.getLogData(log_name)
+            _property = log_data.getLogData(log_name)
 
-            size = len(property.value)
+            size = len(_property.value)
             if size == 1:
                 return float(log_data.getLogData(log_name).value[0])
 
             start = log_data.getLogData('run_start')
             dt_0 = format_date(start.value, "%Y-%m-%dT%H:%M:%S", 19)
             for i in range(0, size):
-                dt = format_date(str(property.times[i]), "%Y-%m-%dT%H:%M:%S", 19)
+                dt = format_date(str(_property.times[i]), "%Y-%m-%dT%H:%M:%S", 19)
                 if dt > dt_0:
                     if i == 0:
                         return float(log_data.getLogData(log_name).value[0])
