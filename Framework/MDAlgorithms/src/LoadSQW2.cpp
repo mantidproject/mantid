@@ -10,6 +10,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -76,8 +77,7 @@ void LoadSQW2::exec() {
   readAllSPEHeadersToWorkspace(mainHeader.nfiles);
   skipDetectorSection();
   readDataSection();
-
-  setProperty("OutputWorkspace", m_outputWS);
+  finalize();
 }
 
 /**
@@ -240,11 +240,45 @@ void LoadSQW2::skipDetectorSection() {
 void LoadSQW2::readDataSection() {
   skipDataSectionMetadata();
   readSQWDimensions();
+
+  // Pixel Data
+  // skip redundant field
+  m_file->seekg(sizeof(int32_t), std::ios_base::cur);
+  int64_t npixtot(0);
+  *m_reader >> npixtot;
+  g_log.debug() << "    npixtot: " << npixtot << "\n";
+
+  // each pixel has 9 float fields
+  std::vector<float> pixBuffer;
+  m_reader->read(pixBuffer, 9 * npixtot);
+  // Add events to the workspace
+  using DataObjects::MDEvent;
+  for (int64_t i = 0; i < npixtot; ++i) {
+    auto offset = i * 9;
+    auto irun = static_cast<uint16_t>(pixBuffer[offset + 4] - 1);
+    const auto idet = static_cast<detid_t>(pixBuffer[offset + 5]);
+    auto signal = pixBuffer[offset + 7];
+    auto error = pixBuffer[offset + 8];
+    auto u1(pixBuffer[offset]), u2(pixBuffer[offset + 1]),
+        u3(pixBuffer[offset + 2]), en(pixBuffer[offset+3]);
+    coord_t centres[4] = {u1, u2, u3, en};
+    m_outputWS->addEvent(
+        MDEvent<4>(signal, error * error, irun, idet, centres));
+  }
+
+  using Kernel::ThreadPool;
+  using Kernel::ThreadSchedulerFIFO;
+  auto *ts = new ThreadSchedulerFIFO();
+  ThreadPool tp(ts);
+  m_outputWS->splitAllIfNeeded(ts);
+  tp.joinAll();
 }
 
 /**
  * Skip metadata in data section: filename, filepath, title, lattice,
- * projection information
+ * projection information.
+ * On exit the file pointer will be positioned after the last
+ * ulen entry
  */
 void LoadSQW2::skipDataSectionMetadata() {
   std::string filename, filepath, title;
@@ -255,6 +289,8 @@ void LoadSQW2::skipDataSectionMetadata() {
 
 /**
  * Read and create the SQW dimensions on the output
+ * On exit the file pointer will be positioned after the last
+ * ulimit entry
  */
 void LoadSQW2::readSQWDimensions() {
   // dimension labels
@@ -334,6 +370,50 @@ void LoadSQW2::readSQWDimensions() {
     builder.setUnits(units[i]);
     m_outputWS->addDimension(builder.create());
   }
+  setupBoxController();
+}
+
+/**
+ * Setup the box controller based on the bin structure
+ */
+void LoadSQW2::setupBoxController() {
+  auto boxController = m_outputWS->getBoxController();
+  for (size_t i = 0; i < 4; i++) {
+    boxController->setSplitInto(i, m_outputWS->getDimension(i)->getNBins());
+  }
+  boxController->setMaxDepth(1);
+  m_outputWS->initialize();
+  // Start with a MDGridBox.
+  m_outputWS->splitBox();
+}
+
+/**
+ * Transform the given coordinates from U to the HKL frame
+ * using the transformation defined for the given run
+ * @param u1 Coordinate parallel to the beam axis
+ * @param u2 Coordinate perpendicular to u1 and in the horizontal plane
+ * @param u3 The cross-product of u1 & u2
+ * @param runIndex Index into the experiment list
+ */
+void LoadSQW2::toHKL(float &u1, float &u2, float &u3, const uint16_t runIndex) {
+  constexpr double invTwoPi = 0.5 / M_PI;
+  const auto &sample = m_outputWS->getExperimentInfo(runIndex)->sample();
+  const auto &uToRLU = sample.getOrientedLattice().getBinv();
+  V3D uVec(static_cast<double>(u1), static_cast<double>(u2),
+           static_cast<double>(u3));
+  V3D qhkl = (uToRLU * uVec) * invTwoPi;
+  u1 = static_cast<float>(qhkl[0]);
+  u2 = static_cast<float>(qhkl[1]);
+  u3 = static_cast<float>(qhkl[2]);
+}
+
+/**
+ * Assumed to be the last step in the algorithm. Performs any steps
+ * necessary after everything else has run successfully
+ */
+void LoadSQW2::finalize() {
+  m_outputWS->refreshCache();
+  setProperty("OutputWorkspace", m_outputWS);
 }
 
 } // namespace MDAlgorithms

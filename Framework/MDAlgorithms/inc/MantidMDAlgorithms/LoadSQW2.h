@@ -71,6 +71,9 @@ private:
   void readDataSection();
   void skipDataSectionMetadata();
   void readSQWDimensions();
+  void setupBoxController();
+  void toHKL(float &u1, float &u2, float &u3, const uint16_t runIndex);
+  void finalize();
 
   std::unique_ptr<std::ifstream> m_file;
   std::unique_ptr<Kernel::BinaryStreamReader> m_reader;
