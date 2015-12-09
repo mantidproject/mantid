@@ -226,14 +226,31 @@ void ImageROIPresenter::processShutDown() { m_view->saveSettings(); }
 
 Mantid::API::WorkspaceGroup_sptr
 ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
+  if (imgs.empty())
+    return Mantid::API::WorkspaceGroup_sptr();
+
   const std::string wsName = "__stack_fits_viewer_tomography_gui";
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   if (ads.doesExist(wsName)) {
     ads.remove(wsName);
   }
-  for (size_t i = 0; i < imgs.size(); ++i) {
-    loadFITSImage(imgs[i], wsName);
+
+  // This would be the alternative that loads images one by one (one
+  // algorithm run per image file)
+  // for (size_t i = 0; i < imgs.size(); ++i) {
+  //  loadFITSImage(imgs[i], wsName);
+  // }
+
+  // Load all image files using a list with their names
+  std::string allPaths;
+  size_t i = 0;
+  allPaths = imgs[i];
+  i++;
+  while (i<imgs.size()) {
+    allPaths.append(", ");
+    allPaths.append(imgs[i++]);
   }
+  loadFITSImage(allPaths, wsName);
 
   Mantid::API::WorkspaceGroup_sptr wsg;
   try {
