@@ -302,7 +302,8 @@ std::string getWikiSummary(IAlgorithm &self) {
 boost::python::object validateInputs(IAlgorithm &self) {
   auto map = self.validateInputs();
   using MapToPyDictionary =
-      Mantid::PythonInterface::Converters::MapToPyDictionary<std::string, std::string>;
+      Mantid::PythonInterface::Converters::MapToPyDictionary<std::string,
+                                                             std::string>;
   return MapToPyDictionary(map)();
 }
 }
