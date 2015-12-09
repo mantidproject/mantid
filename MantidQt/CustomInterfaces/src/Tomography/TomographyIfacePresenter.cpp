@@ -21,6 +21,25 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+std::string TomographyIfacePresenter::g_localExternalPythonPath =
+#ifdef _WIN32
+    // assume we're using Aanconda python and it is installed in c:/local
+    // could also be c:/local/anaconda/scripts/ipython
+    "c:/local/anaconda/python.exe";
+#else
+    // just use the system python, assuming is in the system path
+    "python";
+#endif
+
+// For paths where python third party tools are installed, if they're not
+// included in the system's python path. For example you could have put
+// the AstraToolbox package in
+// c:/local/tomo-tools/astra/astra-1.6-python27-win-x64/astra-1.6
+// Leaving this empty implies that the tools must have been installed in the
+// system python path. As an example, in the Anaconda python distribution for
+// windows it could be in: c:/local/Anaconda/Lib/site-packages/
+std::vector<std::string> TomographyIfacePresenter::g_defaultAddPathPython;
+
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
     : m_view(view), m_model(new TomographyIfaceModel()), m_statusMutex(NULL),
       m_keepAliveTimer(NULL), m_keepAliveThread(NULL) {
@@ -300,8 +319,8 @@ void TomographyIfacePresenter::processVisualizeJobs() {
   doVisualize(m_view->processingJobsIDs());
 }
 
-void
-TomographyIfacePresenter::doVisualize(const std::vector<std::string> &ids) {
+void TomographyIfacePresenter::doVisualize(
+    const std::vector<std::string> &ids) {
   m_model->logMsg(" Visualizing results from job: " + ids.front());
   // TODO: open dialog, send to Paraview, etc.
 }
