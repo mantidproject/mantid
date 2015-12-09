@@ -65,6 +65,7 @@ Usage
 Output:
    
 .. testoutput:: ExSimpleShift
+
    [ 6.  6.  6.  6.  6.  6.  6.  6.  6.]
    
 .. categories::
