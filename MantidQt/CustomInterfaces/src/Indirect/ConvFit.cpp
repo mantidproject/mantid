@@ -196,7 +196,8 @@ void ConvFit::setup() {
           SLOT(typeSelection(int)));
   connect(m_uiForm.cbBackground, SIGNAL(currentIndexChanged(int)), this,
           SLOT(bgTypeSelection(int)));
-  connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFitExtension()));
+  connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this,
+          SLOT(singleFitExtension()));
 
   // Context menu
   m_cfTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -260,11 +261,10 @@ void ConvFit::extendResolutionWorkspace(const bool &run) {
     if (run) {
       connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
               SLOT(extensionComplete(bool)));
-	}
-	else {
-		connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-			SLOT(singleFit(bool)));
-	}
+    } else {
+      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+              SLOT(singleFit(bool)));
+    }
     m_batchAlgoRunner->executeBatchAsync();
   }
 }
@@ -1135,24 +1135,30 @@ void ConvFit::plotGuess() {
 }
 
 /**
-* Fits a single spectrum to the plot
+* Runs the extension of the resolution workspace before the singlefit takes
+* place
 */
 void ConvFit::singleFitExtension() {
-	if (!validate())
-		return;
+  if (!validate())
+    return;
 
-	updatePlot();
+  updatePlot();
 
-	extendResolutionWorkspace(false);
-
+  extendResolutionWorkspace(false);
 }
 
+/**
+ * Runs the single fit algorithm after the workspace has been extended
+ * @param error :: if the resolution extension algorithm was successful
+ */
 void ConvFit::singleFit(const bool &error) {
+  // disconnect signal for single fit
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(singleFit(bool)));
+  // ensure algorithm was successful
   if (error) {
-	  showMessageBox("Workspace extension failed.");
-	  return;
+    showMessageBox("Workspace extension failed.");
+    return;
   }
   m_uiForm.ckPlotGuess->setChecked(false);
 
@@ -1177,6 +1183,7 @@ void ConvFit::singleFit(const bool &error) {
   int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
+  // Run fit algorithm
   m_singleFitAlg = AlgorithmManager::Instance().create("Fit");
   m_singleFitAlg->initialize();
   m_singleFitAlg->setPropertyValue("Function", function->asString());
@@ -1196,6 +1203,7 @@ void ConvFit::singleFit(const bool &error) {
   m_singleFitAlg->setProperty(
       "Minimizer", minimizerString(m_singleFitOutputName).toStdString());
 
+  // Connection to singleFitComplete SLOT (post algorithm completion)
   m_batchAlgoRunner->addAlgorithm(m_singleFitAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(singleFitComplete(bool)));
@@ -1205,9 +1213,10 @@ void ConvFit::singleFit(const bool &error) {
 /**
 * Handle completion of the fit algorithm for single fit.
 *
-* @param error If the fit algorithm failed
+* @param error :: If the fit algorithm failed
 */
 void ConvFit::singleFitComplete(bool error) {
+  // Disconnect signal for single fit complete
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(singleFitComplete(bool)));
 
