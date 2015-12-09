@@ -15,7 +15,7 @@ sys.path.append(library_path)
 import mantid.simpleapi as api
 
 
-def plot_with_options(axes_option, workspace, options_list, plot_number):
+def _plot_with_options(axes_option, workspace, options_list, plot_number):
     """
     Enable/disable legend, grid, limits according to
     options (ops) for the given axes (ax).
@@ -65,25 +65,13 @@ def plots(list_of_workspaces, *args, **kwargs):
     if not hasattr(list_of_workspaces, "__iter__"):
         list_of_workspaces = [list_of_workspaces]
 
-    # Process the function arguments.
-    # In either case(named or unnamed) build a dictionary of options)
-    key_list = ['title', 'grid', 'legend', 'legendLocation',
-                'xScale', 'yScale', 'xLimits', 'yLimits', 'sharedAxes', 'errorbars']
-    default_values = ['', True, True, 1, 'log', 'log', 'auto', 'auto', True, 'True']
-
-    # Fill ops with the default values
-    for i in range(len(args)):  # copy in values provided in args
-        default_values[i] = args[i]
-    ops = dict(zip(key_list, default_values))
-
-    for k in ops.keys():  # copy in any key word given arguments
-        ops[k] = kwargs.get(k, ops[k])
+    ops = _process_arguments(args, kwargs)
 
     # Create subplots for workspaces in the list
     fig, axes_handle = plt.subplots(1,
-                           len(list_of_workspaces),
-                           sharey=ops['sharedAxes'],
-                           figsize=(6 * len(list_of_workspaces), 4))
+                                    len(list_of_workspaces),
+                                    sharey=ops['sharedAxes'],
+                                    figsize=(6 * len(list_of_workspaces), 4))
 
     if not hasattr(axes_handle, "__iter__"):
         axes_handle = [axes_handle]
@@ -92,9 +80,9 @@ def plots(list_of_workspaces, *args, **kwargs):
         if type(workspace) == api._api.WorkspaceGroup:
             # Plot grouped workspaces on the same axes
             for sub_ws in workspace:
-                plot_with_options(axes_handle[plot_number], sub_ws, ops, plot_number)
+                _plot_with_options(axes_handle[plot_number], sub_ws, ops, plot_number)
         else:
-            plot_with_options(axes_handle[plot_number], workspace, ops, plot_number)
+            _plot_with_options(axes_handle[plot_number], workspace, ops, plot_number)
 
     # If a single title was given, use it to title the whole figure
     if not hasattr(ops['title'], "__iter__"):
@@ -102,3 +90,21 @@ def plots(list_of_workspaces, *args, **kwargs):
     plt.show()
 
     return plt.gcf()
+
+
+def _process_arguments(input_args, input_kwargs):
+    """
+    Build a dictionary of plotting options
+    """
+    key_list = ['title', 'grid', 'legend', 'legendLocation',
+                'xScale', 'yScale', 'xLimits', 'yLimits', 'sharedAxes', 'errorbars']
+    default_values = ['', True, True, 1, 'log', 'log', 'auto', 'auto', True, 'True']
+
+    # Fill ops with the default values
+    for i in range(len(input_args)):  # copy in values provided in args
+        default_values[i] = input_args[i]
+    ops = dict(zip(key_list, default_values))
+    for k in ops.keys():  # copy in any key word given arguments
+        ops[k] = input_kwargs.get(k, ops[k])
+
+    return ops
