@@ -11,10 +11,13 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
 
 #include "ui_ImageSelectCoRAndRegions.h"
+#include "ui_ImgFormatsConversion.h"
 #include "ui_TomographyIfaceQtGUI.h"
+#include "ui_TomographyIfaceQtTabEnergy.h"
 #include "ui_TomographyIfaceQtTabFiltersSettings.h"
-#include "ui_TomographyIfaceQtTabSetup.h"
 #include "ui_TomographyIfaceQtTabRun.h"
+#include "ui_TomographyIfaceQtTabSetup.h"
+#include "ui_TomographyIfaceQtTabVisualize.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
@@ -133,6 +136,7 @@ private slots:
   void runVisualizeClicked();
   void jobCancelClicked();
   void jobTableRefreshClicked();
+  void updatedRBNumber();
 
   void compResourceIndexChanged(int);
   void runToolIndexChanged(int);
@@ -151,6 +155,19 @@ private slots:
   /// open the MantidQT help window for this interface
   void openHelpWin();
 
+  // visualization tools / short-cuts
+  void browseFilesToVisualizeClicked();
+  void sendToParaviewClicked();
+  void localDefaultDirVisualizeClicked();
+
+  // convert formats section/tab
+  void browseImgInputConvertClicked();
+  void browseImgOutputConvertClicked();
+
+  // processing of energy bands
+  void browseEnergyInputClicked();
+
+  // for the savu functionality - waiting for Savu
   void menuSaveClicked();
   void menuSaveAsClicked();
   void availablePluginSelected();
@@ -172,6 +189,10 @@ private:
   void doSetupSectionFilters();
   void doSetupGeneralWidgets();
 
+  void doSetupSectionVisualize();
+  void doSetupSectionConvert();
+  void doSetupSectionEnergy();
+
   void doSetupSavu();
 
   /// Load default interface settings for each tab, normally on startup
@@ -188,6 +209,10 @@ private:
   TomoReconFiltersSettings grabPrePostProcSettings() const;
 
   void setPrePostProcSettings(TomoReconFiltersSettings &opts) const;
+
+  std::string
+  checkUserBrowsePath(QLineEdit *le,
+                      const std::string &userMsg = "Open directory/folder");
 
   // Begin of Savu related functionality. This will grow and will need
   // separation. They should find a better place to live.
@@ -231,6 +256,9 @@ private:
   Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
   Ui::TomographyIfaceQtTabRun m_uiTabRun;
   Ui::ImageSelectCoRAndRegions m_uiTabCoR;
+  Ui::TomographyIfaceQtTabVisualize m_uiTabVisualize;
+  Ui::ImgFormatsConversion m_uiTabConvertFormats;
+  Ui::TomographyIfaceQtTabEnergy m_uiTabEnergy;
 
   /// Tool specific setup dialogs
   Ui::TomoToolConfigAstra m_uiAstra;
@@ -256,6 +284,12 @@ private:
   static const std::string g_customCmdTool;
 
   TomoPathsConfig m_pathsConfig;
+
+  // several paths or path components related to where the files are found
+  // (raw files, reconstructions, pre-post processed files, etc.)
+  static const std::string g_pathComponentPhase;
+  static const std::string g_defParaviewPath;
+  static const std::string g_defProcessedSubpath;
 
   // here the view puts messages before notifying the presenter to show them
   std::vector<std::string> m_logMsgs;

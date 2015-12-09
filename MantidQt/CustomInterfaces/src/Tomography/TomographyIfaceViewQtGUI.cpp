@@ -16,7 +16,10 @@ using namespace MantidQt::CustomInterfaces;
 
 #include <boost/lexical_cast.hpp>
 
+#include <Poco/Path.h>
+
 #include <QFileDialog>
+#include <QFileSystemModel>
 #include <QMessageBox>
 #include <QPainter>
 #include <QSettings>
@@ -28,7 +31,20 @@ size_t TomographyIfaceViewQtGUI::g_nameSeqNo = 0;
 
 const std::string TomographyIfaceViewQtGUI::g_SCARFName = "SCARF@STFC";
 const std::string TomographyIfaceViewQtGUI::g_defOutPath =
-    "/work/imat/runs_output";
+#ifdef _WIN32
+    "D:/imat/"
+#else
+    "~/imat/";
+#endif
+
+    const std::string TomographyIfaceViewQtGUI::g_defParaviewPath =
+#ifdef _WIN32
+        "C\\Program Files\\ParaView\\";
+#else
+        "/usr/bin/";
+#endif
+
+const std::string TomographyIfaceViewQtGUI::g_defProcessedSubpath = "processed";
 
 // names by which we know image/tomography reconstruction tools (3rd party)
 const std::string TomographyIfaceViewQtGUI::g_TomoPyTool = "TomoPy";
@@ -36,6 +52,9 @@ const std::string TomographyIfaceViewQtGUI::g_AstraTool = "Astra";
 const std::string TomographyIfaceViewQtGUI::g_CCPiTool = "CCPi CGLS";
 const std::string TomographyIfaceViewQtGUI::g_SavuTool = "Savu";
 const std::string TomographyIfaceViewQtGUI::g_customCmdTool = "Custom command";
+
+const std::string TomographyIfaceViewQtGUI::g_pathComponentPhase =
+    "phase_commissioning";
 
 // Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
@@ -82,12 +101,15 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.tabMain->addTab(tabFiltersW, QString("Filters"));
 
   QWidget *tabVizW = new QWidget();
+  m_uiTabVisualize.setupUi(tabVizW);
   m_ui.tabMain->addTab(tabVizW, QString("Visualize"));
 
   QWidget *tabConvertW = new QWidget();
+  m_uiTabConvertFormats.setupUi(tabConvertW);
   m_ui.tabMain->addTab(tabConvertW, QString("Convert"));
 
   QWidget *tabEBandsW = new QWidget();
+  m_uiTabEnergy.setupUi(tabEBandsW);
   m_ui.tabMain->addTab(tabEBandsW, QString("Energy bands"));
 
   readSettings();
@@ -97,6 +119,11 @@ void TomographyIfaceViewQtGUI::initLayout() {
   doSetupSectionSetup();
   doSetupSectionRun();
   doSetupSectionFilters();
+
+  // extra / experimental tabs:
+  doSetupSectionVisualize();
+  doSetupSectionConvert();
+  doSetupSectionEnergy();
 
   // presenter that knows how to handle a ITomographyIfaceView should take care
   // of all the logic
@@ -123,9 +150,9 @@ void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
-  // disable 'local' for now
-  m_uiTabSetup.tabWidget_comp_resource->setTabEnabled(false, 1);
-  m_uiTabSetup.tab_local->setEnabled(false);
+  // disable 'local' for now - not anymore
+  // m_uiTabSetup.tabWidget_comp_resource->setTabEnabled(false, 1);
+  // m_uiTabSetup.tab_local->setEnabled(false);
 
   m_uiTabSetup.groupBox_run_config->setEnabled(false);
 
@@ -192,6 +219,10 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
   connect(m_uiTabRun.pushButton_run_job_cancel, SIGNAL(released()), this,
           SLOT(jobCancelClicked()));
 
+  // RB number changes
+  connect(m_uiTabRun.lineEdit_rb_number, SIGNAL(editingFinished()), this,
+          SLOT(updatedRBNumber()));
+
   // update tools for a resource
   connect(m_uiTabRun.comboBox_run_compute_resource,
           SIGNAL(currentIndexChanged(int)), this,
@@ -204,6 +235,52 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
 void TomographyIfaceViewQtGUI::doSetupSectionFilters() {
   connect(m_uiTabFilters.pushButton_reset, SIGNAL(released()), this,
           SLOT(resetPrePostFilters()));
+}
+
+void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
+  m_uiTabVisualize.lineEdit_processed_subpath->setText(
+      QString::fromStdString(g_defProcessedSubpath));
+  m_uiTabVisualize.lineEdit_paraview_location->setText(
+      QString::fromStdString(g_defParaviewPath));
+
+  // make a file system model for the visualization browser
+  QFileSystemModel *model = new QFileSystemModel;
+  model->setRootPath(QDir::currentPath());
+
+  // set the model for the visualization browser
+  m_uiTabVisualize.treeView_files->setModel(model);
+  m_uiTabVisualize.treeView_files->setSelectionMode(
+      QTreeView::ExtendedSelection);
+  m_uiTabVisualize.treeView_files->setSelectionBehavior(QTreeView::SelectRows);
+
+  // display: current dir
+  const QString startDir =
+      QString::fromStdString(Poco::Path::expand(g_defOutPath));
+
+  m_uiTabVisualize.treeView_files->setRootIndex(
+      model->index(QDir::currentPath())); // startDir)); //
+
+  connect(m_uiTabVisualize.pushButton_paraview, SIGNAL(released()), this,
+          SLOT(sendToParaviewClicked()));
+
+  connect(m_uiTabVisualize.pushButton_browse_files, SIGNAL(released()), this,
+          SLOT(browseFilesToVisualizeClicked()));
+
+  connect(m_uiTabVisualize.pushButton_local_default_dir, SIGNAL(released()),
+          this, SLOT(localDefaultDirVisualizeClicked()));
+}
+
+void TomographyIfaceViewQtGUI::doSetupSectionConvert() {
+  connect(m_uiTabConvertFormats.pushButton_browse_input, SIGNAL(released()),
+          this, SLOT(browseImgInputConvertClicked()));
+
+  connect(m_uiTabConvertFormats.pushButton_browse_output, SIGNAL(released()),
+          this, SLOT(browseImgOutputConvertClicked()));
+}
+
+void TomographyIfaceViewQtGUI::doSetupSectionEnergy() {
+  connect(m_uiTabEnergy.pushButton_browse_input, SIGNAL(released()), this,
+          SLOT(browseEnergyInputClicked()));
 }
 
 void TomographyIfaceViewQtGUI::setComputeResources(
@@ -566,23 +643,25 @@ void TomographyIfaceViewQtGUI::toolSetupClicked() {
  * @param name Name of the (tomographic reconstruction) tool
  */
 void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
+  QString run = "/work/imat/commissioning_phase/scripts/Imaging/IMAT/"
+                "tomo_reconstruct.py"; // m_uiAstra.lineEdit_runnable->text();
+  const std::vector<std::pair<std::string, std::string>> tomopy_methods = {
+      std::make_pair("gridrec", "gridrec: llll"),
+      std::make_pair("SIRT", "statistical image reconstruction")};
+  const std::vector<std::pair<std::string, std::string>> astra_methods = {
+      std::make_pair("FBP3D_CUDA", "Filtered Back-Propagation, accelerated")};
+
   if (g_TomoPyTool == name) {
     TomoToolConfigTomoPy tomopy;
     m_uiTomoPy.setupUi(&tomopy);
     int res = tomopy.exec();
+
     if (QDialog::Accepted == res) {
       // TODO: move this
       int mi = m_uiTomoPy.comboBox_method->currentIndex();
-      QString run = m_uiTomoPy.lineEdit_runnable->text();
-      if (1 == mi) {
-        // hard-coded for now, this is a different script on SCARF that should
-        // be
-        // integrated with the FBP script
-        run = "/work/imat/runs-scripts/scripts/tomopy/imat_recon_SIRT.py";
-      }
-      double minAngle = m_uiTomoPy.doubleSpinBox_angle_min->value();
-      double maxAngle = m_uiTomoPy.doubleSpinBox_angle_max->value();
-      double cor = m_uiTomoPy.doubleSpinBox_center_rot->value();
+      double cor = 0;      // m_uiTomoPy.doubleSpinBox_center_rot->value();
+      double minAngle = 0; // m_uiTomoPy.doubleSpinBox_angle_min->value();
+      double maxAngle = 0; // m_uiTomoPy.doubleSpinBox_angle_max->value();
 
       TomoPathsConfig paths = currentPathsConfig();
       m_toolsSettings.tomoPy = ToolConfigTomoPy(
@@ -593,17 +672,13 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
     TomoToolConfigAstra astra;
     m_uiAstra.setupUi(&astra);
     int res = astra.exec();
+
     if (QDialog::Accepted == res) {
       // TODO: move this
       int mi = m_uiAstra.comboBox_method->currentIndex();
-      QString run = m_uiAstra.lineEdit_runnable->text();
-      if (1 == mi) {
-        // hard-coded for now, this is a different script on SCARF
-        run = "/work/imat/runs-scripts/scripts/astra/astra-3d-SIRT3D.py";
-      }
-      double cor = m_uiAstra.doubleSpinBox_center_rot->value();
-      double minAngle = m_uiAstra.doubleSpinBox_angle_min->value();
-      double maxAngle = m_uiAstra.doubleSpinBox_angle_max->value();
+      double cor = 0;      // m_uiAstra.doubleSpinBox_center_rot->value();
+      double minAngle = 0; // m_uiAstra.doubleSpinBox_angle_min->value();
+      double maxAngle = 0; // m_uiAstra.doubleSpinBox_angle_max->value();
 
       TomoPathsConfig paths = currentPathsConfig();
       m_toolsSettings.astra = ToolConfigAstraToolbox(
@@ -625,6 +700,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
     TomoToolConfigCustom cmd;
     m_uiCustom.setupUi(&cmd);
     int res = cmd.exec();
+
     if (QDialog::Accepted == res) {
       // TODO: move this
       QString run = m_uiCustom.lineEdit_runnable->text();
@@ -752,8 +828,20 @@ void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
                new QTableWidgetItem(QString::fromStdString(status[i].name)));
     t->setItem(ii, 2,
                new QTableWidgetItem(QString::fromStdString(status[i].id)));
+
     t->setItem(ii, 3,
                new QTableWidgetItem(QString::fromStdString(status[i].status)));
+
+    if (std::string::npos != status[i].status.find("Exit"))
+      t->item(ii, 3)->setBackground(QColor(255, 120, 120)); // Qt::red
+    else if (std::string::npos != status[i].status.find("Running"))
+      t->item(ii, 3)->setBackground(QColor(120, 120, 255)); // Qt::blue
+    else if (std::string::npos != status[i].status.find("Pending"))
+      t->item(ii, 3)->setBackground(QColor(150, 150, 150)); // Qt::gray
+    else if (std::string::npos != status[i].status.find("Finished") ||
+             std::string::npos != status[i].status.find("Done"))
+      t->item(ii, 3)->setBackground(QColor(120, 255, 120)); // Qt::green
+
     t->setItem(ii, 4,
                new QTableWidgetItem(QString::fromStdString(status[i].cmdLine)));
   }
@@ -814,12 +902,16 @@ void TomographyIfaceViewQtGUI::processPathBrowseClick(QLineEdit *le,
                                                       std::string &data) {
   QString algPrev =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  /*
+  // This would remember every widget's old value, and not the last path
   QString prev;
   if (le->text().isEmpty()) {
     prev = algPrev;
   } else {
     prev = le->text();
   }
+  */
+  QString prev = algPrev;
 
   QString path(QFileDialog::getExistingDirectory(
       this, tr("Open directory/folder"), prev));
@@ -837,6 +929,8 @@ void TomographyIfaceViewQtGUI::processPathBrowseClick(QLineEdit *le,
 
     le->setText(QString::fromStdString(pp));
     data = pp;
+
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   }
 }
 
@@ -1034,6 +1128,110 @@ void TomographyIfaceViewQtGUI::resetPrePostFilters() {
   setPrePostProcSettings(def);
 }
 
+void TomographyIfaceViewQtGUI::sendToParaviewClicked() {
+  std::cerr << "EXECUTING : " << std::endl;
+
+  // TODO: start paraview
+  Poco::Path fullPath(g_defParaviewPath);
+  const std::string appendBin =
+#ifdef _WIN32
+      "bin\paraview.exe";
+#else
+      "paraview";
+#endif
+
+  // prepare external tool executable path
+  Poco::Path ppath(g_defParaviewPath);
+  ppath.append(appendBin);
+  const std::string parapath = ppath.toString();
+
+  // get path to pass as parameter
+  const QFileSystemModel *model = dynamic_cast<QFileSystemModel *>(
+      m_uiTabVisualize.treeView_files->model());
+  if (!model)
+    return;
+
+  auto selection =
+      m_uiTabVisualize.treeView_files->selectionModel()->selectedIndexes();
+  // just take the first selected item/directory
+  if (selection.empty())
+    return;
+  QString selPath = model->filePath(selection.first());
+
+  // Execute
+  std::vector<std::string> args;
+  args.push_back(selPath.toStdString());
+
+  m_logMsgs.push_back(" Executing visualization tool. Executing: '" + parapath +
+                      "', with parameters: '" + args[0] + "'.");
+  m_presenter->notify(ITomographyIfacePresenter::LogMsg);
+  m_logMsgs.clear();
+  Mantid::Kernel::ConfigService::Instance().launchProcess(parapath, args);
+}
+
+void TomographyIfaceViewQtGUI::browseFilesToVisualizeClicked() {
+  // an alternative would be to start from the current selection, instead of the
+  // current root:
+  const QFileSystemModel *model = dynamic_cast<QFileSystemModel *>(
+      m_uiTabVisualize.treeView_files->model());
+  if (!model)
+    return;
+
+  const QString currentPath = model->rootPath();
+  QString path(QFileDialog::getExistingDirectory(
+      this, tr("Select root directory/folder with processed data "
+               "(reconstructions) under it"),
+      currentPath));
+
+  if (!path.isEmpty()) {
+    m_uiTabVisualize.treeView_files->setRootIndex(model->index(path));
+  }
+}
+
+void TomographyIfaceViewQtGUI::localDefaultDirVisualizeClicked() {}
+
+void TomographyIfaceViewQtGUI::browseImgInputConvertClicked() {
+  const std::string path =
+      checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
+  // m_pathsConfig.updatePathDark(str);
+  // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
+}
+
+void TomographyIfaceViewQtGUI::browseImgOutputConvertClicked() {
+  const std::string path =
+      checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_output);
+  // m_pathsConfig.updatePathDark(str);
+  // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
+}
+
+void TomographyIfaceViewQtGUI::browseEnergyInputClicked() {
+  const std::string path = checkUserBrowsePath(m_uiTabEnergy.lineEdit_input);
+}
+
+std::string
+TomographyIfaceViewQtGUI::checkUserBrowsePath(QLineEdit *le,
+                                              const std::string &userMsg) {
+  QString algPrev =
+      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+
+  QString prev;
+  if (le->text().isEmpty()) {
+    prev = algPrev;
+  } else {
+    prev = le->text();
+  }
+
+  QString path(QFileDialog::getExistingDirectory(
+      this, tr(QString::fromStdString(userMsg)), prev));
+
+  if (!path.isEmpty()) {
+    le->setText(path);
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+  }
+
+  return path.toStdString();
+}
+
 /**
 * Show a warning message to the user (pop up)
 *
@@ -1046,6 +1244,10 @@ void TomographyIfaceViewQtGUI::userWarning(const std::string &err,
   QMessageBox::warning(this, QString::fromStdString(err),
                        QString::fromStdString(description), QMessageBox::Ok,
                        QMessageBox::Ok);
+}
+
+void TomographyIfaceViewQtGUI::updatedRBNumber() {
+  // May have to change: m_uiTabRun.lineEdit_local_out_recon_dir
 }
 
 /**
