@@ -156,6 +156,7 @@ public:
 
   /// Return a lookup of the top level items
   std::map<std::string, Workspace_sptr> topLevelItems() const;
+  void shutdown();
 
 private:
   /// Checks the name is valid, throwing if not

@@ -2714,6 +2714,17 @@ class ConvertToQISIS(ReductionStep):
                 ReplaceSpecialValues(InputWorkspace=workspace,
                                      OutputWorkspace= workspace,
                                      NaNValue="0", InfinityValue="0")
+                # We need to correct for special values in the partial outputs. The
+                # counts seem to have NANS.
+                if self.outputParts:
+                    sum_of_counts = workspace + "_sumOfCounts"
+                    sum_of_norm = workspace + "_sumOfNormFactors"
+                    ReplaceSpecialValues(InputWorkspace = sum_of_counts,
+                                         OutputWorkspace = sum_of_counts,
+                                         NaNValue = "0", InfinityValue = "0")
+                    ReplaceSpecialValues(InputWorkspace = sum_of_norm,
+                                         OutputWorkspace = sum_of_norm,
+                                         NaNValue="0", InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
         except:

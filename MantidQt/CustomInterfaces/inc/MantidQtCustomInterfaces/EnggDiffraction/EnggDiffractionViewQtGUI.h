@@ -151,6 +151,7 @@ private slots:
   void focusTextureClicked();
   void rebinTimeClicked();
   void rebinMultiperiodClicked();
+  void focusStopClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
