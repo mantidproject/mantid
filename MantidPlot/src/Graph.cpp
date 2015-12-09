@@ -4041,6 +4041,11 @@ void Graph::copy(Graph *g) {
       s_cpy->setData(s->data());
       s_cpy->setColorMapPen();
       plotSpectrogram(s_cpy, (CurveType)g->curveType(i));
+
+      c_keys.resize(++n_curves);
+      c_type.resize(n_curves);
+      c_type[i] = g->curveType(i);
+
       continue;
     }
 
@@ -4050,12 +4055,16 @@ void Graph::copy(Graph *g) {
       PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
       PlotCurve *pc_cpy;
 
+      c_keys.resize(++n_curves);
+      c_type.resize(n_curves);
+      c_type[i] = g->curveType(i);
+
       if (mmc != nullptr) {
         pc_cpy = dynamic_cast<PlotCurve *>(mmc->clone(g));
-        d_plot->insertCurve(pc_cpy);
+        c_keys[i] = d_plot->insertCurve(pc_cpy);
       } else if (mdc != nullptr) {
         pc_cpy = dynamic_cast<PlotCurve *>(mdc->clone(g));
-        d_plot->insertCurve(pc_cpy);
+        c_keys[i] = d_plot->insertCurve(pc_cpy);
       } else
         continue;
 
@@ -4075,6 +4084,8 @@ void Graph::copy(Graph *g) {
       QList<QwtPlotCurve *> lst = g->fitCurvesList();
       if (lst.contains(dynamic_cast<QwtPlotCurve *>(it)))
         d_fit_curves << pc_cpy;
+
+      addLegendItem();
     } else if (it->rtti() == QwtPlotItem::Rtti_PlotCurve) {
       DataCurve *cv = dynamic_cast<DataCurve *>(it);
       if (!cv)
