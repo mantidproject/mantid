@@ -431,6 +431,9 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="text">
+                  <string>D:/imat/phase_commissioning/RB000XXX</string>
+                 </property>
                 </widget>
                </item>
                <item>

@@ -91,10 +91,6 @@ protected:
   void killKeepAliveMechanism();
 
 private:
-  // Settings for external tools. where to find the system Python
-  static std::string g_localExternalPythonPath;
-  static std::vector<std::string> g_defaultAddPathPython;
-
   /// Associated view for this presenter (MVP pattern)
   ITomographyIfaceView *const m_view;
 

@@ -185,6 +185,13 @@ private slots:
   void expandedItem(QTreeWidgetItem *);
 
 private:
+  void processLocalRunRecon();
+  void makeRunnableWithOptions(const std::string &comp, std::string &run,
+                               std::string &opt);
+  void splitCmdLine(const std::string &cmd, std::string &run,
+                    std::string &opts);
+
+private:
   /// Setup the interface (tab UI)
   virtual void initLayout();
 
@@ -281,6 +288,13 @@ private:
   std::string m_currentReconTool;
 
   std::string m_imgPath;
+
+  // Settings for external tools. where to find the system Python
+  static std::string g_defLocalExternalPythonPath;
+  static std::vector<std::string> g_defAddPathPython;
+
+  std::string m_localExternalPythonPath;
+  std::vector<std::string> m_defAddPathPython;
 
   static const std::string g_SCARFName;
   // a general (all tools in principle) default output path

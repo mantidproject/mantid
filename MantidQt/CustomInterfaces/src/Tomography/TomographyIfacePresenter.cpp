@@ -21,25 +21,6 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-std::string TomographyIfacePresenter::g_localExternalPythonPath =
-#ifdef _WIN32
-    // assume we're using Aanconda python and it is installed in c:/local
-    // could also be c:/local/anaconda/scripts/ipython
-    "c:/local/anaconda/python.exe";
-#else
-    // just use the system python, assuming is in the system path
-    "python";
-#endif
-
-// For paths where python third party tools are installed, if they're not
-// included in the system's python path. For example you could have put
-// the AstraToolbox package in
-// c:/local/tomo-tools/astra/astra-1.6-python27-win-x64/astra-1.6
-// Leaving this empty implies that the tools must have been installed in the
-// system python path. As an example, in the Anaconda python distribution for
-// windows it could be in: c:/local/Anaconda/Lib/site-packages/
-std::vector<std::string> TomographyIfacePresenter::g_defaultAddPathPython;
-
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
     : m_view(view), m_model(new TomographyIfaceModel()), m_statusMutex(NULL),
       m_keepAliveTimer(NULL), m_keepAliveThread(NULL) {
@@ -174,6 +155,14 @@ void TomographyIfacePresenter::processCompResourceChange() {
   const std::string comp = m_view->currentComputeResource();
 
   m_model->setupRunTool(comp);
+
+  if ("Local" == comp) {
+    m_view->enableLoggedActions(true);
+  } else {
+    const bool status = !m_model->loggedIn().empty();
+    m_view->enableLoggedActions(status);
+  }
+
 }
 
 void TomographyIfacePresenter::processToolChange() {
@@ -188,7 +177,10 @@ void TomographyIfacePresenter::processToolChange() {
     m_view->enableRunReconstruct(false);
     m_view->enableConfigTool(true);
   } else {
-    m_view->enableRunReconstruct(!(m_model->loggedIn().empty()));
+    // No need to be logged in anymore when local is selected
+    const bool runningLocally = "Local" == m_view->currentComputeResource();
+    m_view->enableRunReconstruct(runningLocally ||
+                                 !(m_model->loggedIn().empty()));
     m_view->enableConfigTool(true);
   }
 
@@ -216,7 +208,11 @@ void TomographyIfacePresenter::processLogin() {
         "again if that's what you meant.");
   }
 
-  const std::string compRes = m_view->currentComputeResource();
+  std::string compRes = m_view->currentComputeResource();
+  // if local is selected, just take the first remote resource
+  if ("Local" == compRes) {
+    compRes = "SCARF@STFC";
+  }
   try {
     const std::string user = m_view->getUsername();
     if (user.empty()) {
@@ -257,7 +253,12 @@ void TomographyIfacePresenter::processLogout() {
   }
 
   try {
-    m_model->doLogout(m_view->currentComputeResource(), m_view->getUsername());
+    std::string compRes = m_view->currentComputeResource();
+    // if local is selected, just take the first remote resource
+    if ("Local" == compRes) {
+      compRes = "SCARF@STFC";
+    }
+    m_model->doLogout(compRes, m_view->getUsername());
   } catch (std::exception &e) {
     throw(std::string("Problem when logging out. Error description: ") +
           e.what());
@@ -270,6 +271,10 @@ void TomographyIfacePresenter::processSetupReconTool() {
   if (TomographyIfaceModel::g_CCPiTool != m_view->currentReconTool()) {
     m_view->showToolConfig(m_view->currentReconTool());
     m_model->updateReconToolsSettings(m_view->reconToolsSettings());
+
+    // TODO: this would make sense if the reconstruct action/button
+    // was only enabled after setting up at least one tool
+    // m_view->enableToolsSetupsActions(true);
   }
 }
 
@@ -294,7 +299,10 @@ void TomographyIfacePresenter::processRefreshJobs() {
   if (m_model->loggedIn().empty())
     return;
 
-  const std::string &comp = m_view->currentComputeResource();
+  std::string comp = m_view->currentComputeResource();
+  if ("Local" == comp) {
+    comp = "SCARF@STFC";
+  }
   m_model->doRefreshJobsInfo(comp);
 
   {

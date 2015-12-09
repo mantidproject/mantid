@@ -29,6 +29,25 @@ namespace CustomInterfaces {
 
 size_t TomographyIfaceViewQtGUI::g_nameSeqNo = 0;
 
+std::string TomographyIfaceViewQtGUI::g_defLocalExternalPythonPath =
+#ifdef _WIN32
+    // assume we're using Aanconda python and it is installed in c:/local
+    // could also be c:/local/anaconda/scripts/ipython
+    "c:/local/anaconda/python.exe";
+#else
+    // just use the system python, assuming is in the system path
+    "python";
+#endif
+
+// For paths where python third party tools are installed, if they're not
+// included in the system's python path. For example you could have put
+// the AstraToolbox package in
+// c:/local/tomo-tools/astra/astra-1.6-python27-win-x64/astra-1.6
+// Leaving this empty implies that the tools must have been installed in the
+// system python path. As an example, in the Anaconda python distribution for
+// windows it could be in: c:/local/Anaconda/Lib/site-packages/
+std::vector<std::string> TomographyIfaceViewQtGUI::g_defAddPathPython;
+
 const std::string TomographyIfaceViewQtGUI::g_SCARFName = "SCARF@STFC";
 const std::string TomographyIfaceViewQtGUI::g_defOutPathLocal =
 #ifdef _WIN32
@@ -168,6 +187,10 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
   // m_uiTabSetup.tabWidget_comp_resource->setTabEnabled(false, 1);
   // m_uiTabSetup.tab_local->setEnabled(false);
 
+  // TODO: use Qsettings
+  m_localExternalPythonPath = g_defLocalExternalPythonPath;
+  m_defAddPathPython = g_defAddPathPython;
+
   // TODO: take g_def values first time, when Qsettings are empty, then from
   // QSettings
   m_setupPathComponentPhase = g_defPathComponentPhase;
@@ -218,8 +241,11 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
 
   m_uiTabRun.label_image_name->setText("none");
 
-  m_uiTabRun.pushButton_reconstruct->setEnabled(false);
-  m_uiTabRun.pushButton_run_tool_setup->setEnabled(false);
+  // enable by default, which will use default tools setups
+  m_uiTabRun.pushButton_reconstruct->setEnabled(true);
+  // setup always possible with local compute resource
+  // m_uiTabRun.pushButton_run_tool_setup->setEnabled(false);
+  m_uiTabRun.pushButton_run_tool_setup->setEnabled(true);
   m_uiTabRun.pushButton_run_job_cancel->setEnabled(false);
   m_uiTabRun.pushButton_run_job_visualize->setEnabled(false);
 
@@ -424,10 +450,21 @@ void TomographyIfaceViewQtGUI::enableLoggedActions(bool enable) {
  * @param online whether to show good/working/online status
  */
 void TomographyIfaceViewQtGUI::updateCompResourceStatus(bool online) {
-  if (online)
+  if (online) {
     m_uiTabRun.pushButton_remote_status->setText("Online");
-  else
+    // m_uiTabRun.pushButton_remote_status->setBackground(QColor(120, 255,
+    // 120));
+    QString style =
+        "QPushButton:flat { background-color: rgb(120, 255, 120); }";
+    m_uiTabRun.pushButton_remote_status->setStyleSheet(style);
+  } else {
     m_uiTabRun.pushButton_remote_status->setText("Offline");
+    // m_uiTabRun.pushButton_remote_status->setBackground(QColor(150, 150,
+    // 150));
+    QString style =
+        "QPushButton:flat { background-color: rgb(150, 150, 150); }";
+    m_uiTabRun.pushButton_remote_status->setStyleSheet(style);
+  }
 }
 
 #ifndef _MSC_VER
@@ -716,6 +753,8 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
       std::make_pair("FDK_CUDA", "FDK 3D: Feldkamp-Davis-Kress algorithm for "
                                  "3D circular cone beam data sets")};
 
+  // TomoReconToolsUserSettings prePostProcSettings();
+
   if (g_TomoPyTool == name) {
     TomoToolConfigTomoPy tomopy;
     m_uiTomoPy.setupUi(&tomopy);
@@ -782,7 +821,96 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
  * Slot - when the user clicks the 'reconstruct data' or similar button.
  */
 void TomographyIfaceViewQtGUI::reconstructClicked() {
-  m_presenter->notify(ITomographyIfacePresenter::RunReconstruct);
+  // TODO: this should be refactored and moved from here to the presenter/model,
+  // and use proper methods like m_model->localComputeResource()
+  // and m_view->currentComputeResource();
+  const std::string compRes = "Local";
+  if (compRes == currentComputeResource()) {
+    processLocalRunRecon();
+  } else {
+    m_presenter->notify(ITomographyIfacePresenter::RunReconstruct);
+  }
+}
+
+// TODO: move to the presenter / merge in processRunRecon
+void TomographyIfaceViewQtGUI::processLocalRunRecon() {
+  const std::string toolName = currentReconTool();
+  try {
+    std::string run, args;
+    makeRunnableWithOptions("local", run, args);
+
+    sendLog("Executing " + toolName + ", with parameters: " + args);
+    std::vector<std::string> runArgs = {args};
+    Mantid::Kernel::ConfigService::Instance().launchProcess(run, runArgs);
+  } catch (std::runtime_error &rexc) {
+    sendLog("The execution of " + toolName + "failed. details: " +
+            std::string(rexc.what()));
+    userWarning("Execution failed",
+                "Coult not execute the tool. Error details: " +
+                    std::string(rexc.what()));
+  }
+}
+
+void TomographyIfaceViewQtGUI::makeRunnableWithOptions(const std::string &comp,
+                                                       std::string &run,
+                                                       std::string &opt) {
+  run = "bin";
+  opt = "--help";
+
+  // m_model->checkDataPathsSet();
+  // TODO: validate data path:
+  if (m_uiTabSetup.lineEdit_path_FITS->text().isEmpty()) {
+    userWarning("Sample images path not set!", "The path to the sample images "
+                                               "is strictly required to start "
+                                               "a reconstruction");
+  }
+
+  const std::string tool = currentReconTool();
+  std::string cmd;
+
+  // TODO: use here prePostProcSettings()
+
+  // TODO this is still incomplete, not all tools ready
+  if (tool == g_TomoPyTool) {
+    cmd = m_toolsSettings.tomoPy.toCommand();
+    // this will make something like:
+    // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
+    // opt = "--input_dir " + base + currentPathFITS() + " " + "--dark " +
+    // base +
+    //      currentPathDark() + " " + "--white " + base + currentPathFlat();
+  } else if (tool == g_AstraTool) {
+    cmd = m_toolsSettings.astra.toCommand();
+    // this will produce something like this:
+    // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
+    // opt = base + currentPathFITS();
+  } else if (tool == g_customCmdTool) {
+    cmd = m_toolsSettings.custom.toCommand();
+  } else {
+    throw std::runtime_error(
+        "Unable to use this tool. "
+        "I do not know how to submit jobs to use this tool: " +
+        tool + ". It seems that this interface is "
+               "misconfigured or there has been an unexpected "
+               "failure.");
+  }
+
+  splitCmdLine(cmd, run, opt);
+  // TODO: this may not make sense any longer:
+  // checkWarningToolNotSetup(tool, cmd, run, opt);
+}
+
+void TomographyIfaceViewQtGUI::splitCmdLine(const std::string &cmd,
+                                            std::string &run,
+                                            std::string &opts) {
+  if (cmd.empty())
+    return;
+
+  auto pos = cmd.find(' ');
+  if (std::string::npos == pos)
+    return;
+
+  run = cmd.substr(0, pos);
+  opts = cmd.substr(pos + 1);
 }
 
 /**
@@ -1235,7 +1363,7 @@ void TomographyIfaceViewQtGUI::sendToVisTool(const std::string &toolName,
   if (!appendBin.empty()) {
     tmpPath.append(appendBin);
   }
-  const std::string tooPath = tmpPath.toString();
+  const std::string toolPath = tmpPath.toString();
 
   // get path to pass as parameter
   const QFileSystemModel *model = dynamic_cast<QFileSystemModel *>(
@@ -1255,9 +1383,9 @@ void TomographyIfaceViewQtGUI::sendToVisTool(const std::string &toolName,
   args.push_back(selPath.toStdString());
 
   sendLog("Executing visualization tool: " + toolName + ". Executing: '" +
-          tooPath + "', with parameters: '" + args[0] + "'.");
+          toolPath + "', with parameters: '" + args[0] + "'.");
   try {
-    Mantid::Kernel::ConfigService::Instance().launchProcess(tooPath, args);
+    Mantid::Kernel::ConfigService::Instance().launchProcess(toolPath, args);
   } catch (std::runtime_error &rexc) {
     sendLog("The execution of " + toolName + "failed. details: " +
             std::string(rexc.what()));

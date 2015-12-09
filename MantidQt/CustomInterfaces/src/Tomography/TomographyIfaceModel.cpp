@@ -83,8 +83,11 @@ void TomographyIfaceModel::cleanup() {
 std::string TomographyIfaceModel::validateCompResource(const std::string &res) {
   if (res == m_localCompName) {
     // Nothing yet
-    throw std::runtime_error("There is no support for the local compute "
-                             "resource. You should not have got here.");
+    // throw std::runtime_error("There is no support for the local compute "
+    //                         "resource. You should not have got here.");
+    // all good at the moment - could do basic validation and checks for
+    // availability of absolutely necessary tools
+    return "local";
   }
 
   if (m_computeRes.size() <= 0) {
@@ -159,9 +162,10 @@ void TomographyIfaceModel::setupComputeResource() {
   }
   m_computeResStatus.push_back(true);
 
-  // put local as second compute resource, but disable, as it's not yet sorted
-  // out how it will work
-  m_computeResStatus.push_back(false);
+  // put local as second compute resource, and enable it by default
+  // TODO: some basic sanity checks could be done before enabling it,
+  // including availability of the necessaryy external tools
+  m_computeResStatus.push_back(true);
 }
 
 /**
@@ -179,7 +183,10 @@ void TomographyIfaceModel::setupRunTool(const std::string &compRes) {
   // catch all the useable/relevant tools for the compute
   // resources. For the time being this is rather simple (just
   // SCARF) and will probably stay like this for a while.
-  if ("ISIS" == m_facility && (compRes.empty() || g_SCARFName == compRes)) {
+  std::string low = compRes;
+  std::transform(low.begin(), low.end(), low.begin(), tolower);
+  if ("local" == low ||
+      ("ISIS" == m_facility && (compRes.empty() || g_SCARFName == compRes))) {
     m_reconTools = m_SCARFtools;
   } else {
     throw std::runtime_error("Cannot setup this interface for the facility: " +
