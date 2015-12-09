@@ -41,8 +41,8 @@ def plot_with_options(ax, ws, ops, n):
 
 def plots(listOfWorkspaces, *args, **kwargs):
     """
-    Draw a default reflectivity plot.
-    Workspaces within a group workspace are plotted together on the same axes.
+    Create a figure with a subplot for each workspace given.
+    Workspaces within a group workspace are plotted together in the same subplot.
 
     Examples:
     plots(rr)

@@ -204,7 +204,7 @@ std::string tableString(QReflTableModel_sptr model, ColNumbers col_nums,
   */
 std::string plotsFunctionString() {
   return "#Import some useful tools for plotting\n"
-         "import MantidIPython\n";
+         "from MantidIPython import *";
 }
 
 /**
@@ -296,7 +296,7 @@ std::string plot1DString(const std::vector<std::string> &ws_names,
 
   std::ostringstream plot_string;
 
-  plot_string << "fig = MantidIPython.plots([" << vectorString(ws_names)
+  plot_string << "fig = plots([" << vectorString(ws_names)
               << "], title=" << title << ", legendLocation=[1, 1, 4])\n";
 
   return plot_string.str();
