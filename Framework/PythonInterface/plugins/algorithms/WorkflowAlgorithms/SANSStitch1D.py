@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name,too-many-arguments
+# pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
 
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
@@ -7,17 +7,17 @@ from mantid.kernel import Direction, Property, StringListValidator, UnitFactory,
 import numpy as np
 
 
-class Mode:
-    class ShiftOnly:
+class Mode(object):
+    class ShiftOnly(object):
         pass
 
-    class ScaleOnly:
+    class ScaleOnly(object):
         pass
 
-    class BothFit:
+    class BothFit(object):
         pass
 
-    class NoneFit:
+    class NoneFit(object):
         pass
 
 
