@@ -2,12 +2,15 @@
 #define MANTID_KERNEL_BINARYSTREAMREADERTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <cxxtest/ValueTraits.h>
 
 #include "MantidKernel/BinaryStreamReader.h"
+#include "MantidKernel/Matrix.h"
 
 #include <sstream>
 
 using Mantid::Kernel::BinaryStreamReader;
+using Mantid::Kernel::Matrix;
 
 class BinaryStreamReaderTest : public CxxTest::TestSuite {
 public:
@@ -18,8 +21,7 @@ public:
   }
   static void destroySuite(BinaryStreamReaderTest *suite) { delete suite; }
 
-  BinaryStreamReaderTest()
-      : CxxTest::TestSuite(), m_bytes() {
+  BinaryStreamReaderTest() : CxxTest::TestSuite(), m_bytes() {
     createTestStream();
   }
 
@@ -85,6 +87,98 @@ public:
     std::vector<double> expectedValue{10.0, 15.0, 20.0, 25.0};
     const auto nvals(expectedValue.size());
     doReadArrayValueTest(nvals, expectedValue, nvals * sizeof(double));
+  }
+
+  void test_Read_Vector_String_In_Row_Major_Order() {
+    moveStreamToPosition(118);
+
+    BinaryStreamReader reader(m_bytes);
+    std::vector<std::string> expected{"abc", "def"}, value;
+    std::vector<int32_t> shape{2, 3};
+    reader.read(value, shape, BinaryStreamReader::MatrixOrdering::RowMajor);
+    TS_ASSERT_EQUALS(expected, value);
+  }
+
+  void test_Read_Vector_String_In_Column_Major_Order() {
+    moveStreamToPosition(118);
+
+    BinaryStreamReader reader(m_bytes);
+    std::vector<std::string> expected{"ace", "bdf"}, value;
+    std::vector<int32_t> shape{2, 3};
+    reader.read(value, shape, BinaryStreamReader::MatrixOrdering::ColumnMajor);
+    TS_ASSERT_EQUALS(expected, value);
+  }
+
+  void test_Read_Matrix_Float_In_RowMajor_Order() {
+    moveStreamToPosition(124);
+
+    BinaryStreamReader reader(m_bytes);
+    std::vector<int32_t> shape{2, 3};
+    Matrix<float> expected(shape[0], shape[1]);
+    expected[0][0] = 1.0f;
+    expected[0][1] = 2.0f;
+    expected[0][2] = 3.0f;
+    expected[1][0] = 4.0f;
+    expected[1][1] = 5.0f;
+    expected[1][2] = 6.0f;
+
+    Matrix<float> value;
+    reader.read(value, shape, BinaryStreamReader::MatrixOrdering::RowMajor);
+    TS_ASSERT_EQUALS(expected, value);
+  }
+
+  void test_Read_Matrix_Float_In_ColumnMajor_Order() {
+    moveStreamToPosition(124);
+
+    BinaryStreamReader reader(m_bytes);
+    std::vector<int32_t> shape{2, 3};
+    Matrix<float> expected(shape[0], shape[1]);
+    expected[0][0] = 1.0f;
+    expected[0][1] = 3.0f;
+    expected[0][2] = 5.0f;
+    expected[1][0] = 2.0f;
+    expected[1][1] = 4.0f;
+    expected[1][2] = 6.0f;
+
+    Matrix<float> value;
+    reader.read(value, shape, BinaryStreamReader::MatrixOrdering::ColumnMajor);
+    TS_ASSERT_EQUALS(expected, value);
+  }
+
+  void test_Read_Matrix_Double_In_RowMajor_Order() {
+    moveStreamToPosition(148);
+
+    BinaryStreamReader reader(m_bytes);
+    std::vector<int32_t> shape{2, 3};
+    Matrix<double> expected(shape[0], shape[1]);
+    expected[0][0] = 1.0;
+    expected[0][1] = 2.0;
+    expected[0][2] = 3.0;
+    expected[1][0] = 4.0;
+    expected[1][1] = 5.0;
+    expected[1][2] = 6.0;
+
+    Matrix<double> value;
+    reader.read(value, shape, BinaryStreamReader::MatrixOrdering::RowMajor);
+    TS_ASSERT_EQUALS(expected, value);
+  }
+
+  void test_Read_Matrix_Double_In_ColumnMajor_Order() {
+    moveStreamToPosition(148);
+
+    BinaryStreamReader reader(m_bytes);
+    std::vector<int32_t> shape{2, 3};
+    Matrix<double> expected(shape[0], shape[1]);
+    expected[0][0] = 1.0;
+    expected[0][1] = 3.0;
+    expected[0][2] = 5.0;
+    expected[1][0] = 2.0;
+    expected[1][1] = 4.0;
+    expected[1][2] = 6.0;
+
+    Matrix<double> value;
+    reader.read(value, shape, BinaryStreamReader::MatrixOrdering::ColumnMajor);
+    TS_ASSERT_EQUALS(expected, value);
   }
 
   // Only test this for a single type assuming it is the same for all
@@ -174,6 +268,13 @@ private:
     writeArrayValuesToStream<float>(m_bytes, {0.0f, 5.0f, 10.0f});
     // vector double
     writeArrayValuesToStream<double>(m_bytes, {10.0, 15.0, 20.0, 25.0});
+    // array of characters
+    m_bytes.write("abcdef", 6);
+    // matrix of floats
+    writeArrayValuesToStream<float>(m_bytes,
+                                    {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f});
+    // matrix of doubles
+    writeArrayValuesToStream<double>(m_bytes, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0});
   }
 
   template <typename T> void writeSingleValueToStream(std::ostream &, T value) {

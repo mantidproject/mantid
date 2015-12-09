@@ -3,8 +3,13 @@
 //------------------------------------------------------------------------------
 #include "MantidKernel/BinaryStreamReader.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Matrix.h"
 
+#include <cassert>
 #include <istream>
+
+namespace Mantid {
+namespace Kernel {
 
 //------------------------------------------------------------------------------
 // Anonymous functions
@@ -36,10 +41,43 @@ inline void readFromStream(std::istream &stream, std::vector<T> &value,
     value.resize(nvals);
   stream.read(reinterpret_cast<char *>(value.data()), nvals * sizeof(T));
 }
-}
 
-namespace Mantid {
-namespace Kernel {
+/**
+ * Read a stream of numbers and interpret them as a 2D matrix of specified
+ * shape & order
+ * @param stream The open stream on which to perform the read
+ * @param value The Matrix to fill. Its size is increased if necessary
+ * @param shape 2D-vector defined as (nrows, ncols)
+ * @param order Defines whether the stream of bytes is interpreted as moving
+ * across the rows first (RowMajor) or down columns first (ColumnMajor)
+ */
+template <typename T>
+inline void readFromStream(std::istream &stream, Matrix<T> &value,
+                           const std::vector<int32_t> &shape,
+                           BinaryStreamReader::MatrixOrdering order) {
+  assert(2 <= shape.size());
+  const size_t s0(shape[0]), s1(shape[1]), totalLength(s0 * s1);
+  std::vector<T> buffer;
+  readFromStream(stream, buffer, totalLength);
+  value = Matrix<T>(s0, s1);
+  if (order == BinaryStreamReader::MatrixOrdering::RowMajor) {
+    for (size_t i = 0; i < s0; ++i) {
+      auto row = value[i];
+      const size_t offset = i * s1;
+      for (size_t j = 0; j < s1; ++j) {
+        row[j] = buffer[offset + j];
+      }
+    }
+  } else {
+    for (size_t i = 0; i < s0; ++i) {
+      auto row = value[i];
+      for (size_t j = 0; j < s1; ++j) {
+        row[j] = buffer[j * s0 + i];
+      }
+    }
+  }
+}
+}
 
 //------------------------------------------------------------------------------
 // Public members
@@ -182,6 +220,77 @@ BinaryStreamReader &BinaryStreamReader::read(std::string &value,
                                              const size_t length) {
   value.resize(length);
   m_istrm.read(const_cast<char *>(value.data()), length);
+  return *this;
+}
+
+/**
+ * Read a stream of characters and interpret them as a 2D matrix of specified
+ * shape & order
+ * @param value The array to fill. Its size is increased if necessary
+ * @param shape 2D-vector defined as (nstrs, strLength)
+ * @param order Defines whether the stream of bytes is interpreted as moving
+ * across the rows first (RowMajor) or down columns first (ColumnMajor)
+ * @return A reference to the BinaryStreamReader object
+ */
+BinaryStreamReader &
+BinaryStreamReader::read(std::vector<std::string> &value,
+                         const std::vector<int32_t> &shape,
+                         BinaryStreamReader::MatrixOrdering order) {
+  assert(2 <= shape.size());
+
+  const size_t s0(shape[0]), s1(shape[1]), totalLength(s0 * s1);
+  std::string buffer;
+  this->read(buffer, totalLength);
+  value.resize(s0);
+  if (order == MatrixOrdering::RowMajor) {
+    size_t pos(0);
+    for (auto &str : value) {
+      str = buffer.substr(pos, s1);
+      pos += s1;
+    }
+  } else {
+    for (size_t i = 0; i < s0; ++i) {
+      auto &str = value[i];
+      str.resize(s1);
+      for (size_t j = 0; j < s1; ++j) {
+        str[j] = buffer[j * s0 + i];
+      }
+    }
+  }
+  return *this;
+}
+
+/**
+ * Read a stream of floats and interpret them as a 2D matrix of specified
+ * shape & order
+ * @param value The Matrix to fill. Its size is increased if necessary
+ * @param shape 2D-vector defined as (nrows, ncols)
+ * @param order Defines whether the stream of bytes is interpreted as moving
+ * across the rows first (RowMajor) or down columns first (ColumnMajor)
+ * @return A reference to the BinaryStreamReader object
+ */
+BinaryStreamReader &
+BinaryStreamReader::read(Kernel::Matrix<float> &value,
+                         const std::vector<int32_t> &shape,
+                         BinaryStreamReader::MatrixOrdering order) {
+  readFromStream(m_istrm, value, shape, order);
+  return *this;
+}
+
+/**
+ * Read a stream of doubles and interpret them as a 2D matrix of specified
+ * shape & order
+ * @param value The Matrix to fill. Its size is increased if necessary
+ * @param shape 2D-vector defined as (nrows, ncols)
+ * @param order Defines whether the stream of bytes is interpreted as moving
+ * across the rows first (RowMajor) or down columns first (ColumnMajor)
+ * @return A reference to the BinaryStreamReader object
+ */
+BinaryStreamReader &
+BinaryStreamReader::read(Kernel::Matrix<double> &value,
+                         const std::vector<int32_t> &shape,
+                         BinaryStreamReader::MatrixOrdering order) {
+  readFromStream(m_istrm, value, shape, order);
   return *this;
 }
 

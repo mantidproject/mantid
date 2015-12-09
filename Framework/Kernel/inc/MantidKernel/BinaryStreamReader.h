@@ -14,6 +14,9 @@
 namespace Mantid {
 namespace Kernel {
 
+// Forward declarations
+template <typename T> class Matrix;
+
 /**
   * Assists with reading a binary file by providing standard overloads for the
   * istream operators (>>) to given types (and vectors of those types). It
@@ -43,6 +46,9 @@ namespace Kernel {
   */
 class MANTID_KERNEL_DLL BinaryStreamReader {
 public:
+  /// Define the ordering of 2D structures in the file
+  enum class MatrixOrdering { RowMajor, ColumnMajor };
+
   BinaryStreamReader(std::istream &istrm);
   ~BinaryStreamReader();
 
@@ -55,19 +61,28 @@ public:
   BinaryStreamReader &operator>>(std::string &value);
   /// @}
 
-  ///@name std::vector-reader methods
+  ///@name 1D methods
   /// @{
-  BinaryStreamReader & read(std::vector<int32_t> &value, const size_t nvals);
-  BinaryStreamReader & read(std::vector<int64_t> &value, const size_t nvals);
-  BinaryStreamReader & read(std::vector<float> &value, const size_t nvals);
-  BinaryStreamReader & read(std::vector<double> &value, const size_t nvals);
+  BinaryStreamReader &read(std::vector<int32_t> &value, const size_t nvals);
+  BinaryStreamReader &read(std::vector<int64_t> &value, const size_t nvals);
+  BinaryStreamReader &read(std::vector<float> &value, const size_t nvals);
+  BinaryStreamReader &read(std::vector<double> &value, const size_t nvals);
+  BinaryStreamReader &read(std::string &value, const size_t length);
   /// @}
 
-  ///@name std::string methods for specifying number of characters
+  ///@name 2D methods
   /// @{
-  BinaryStreamReader & read(std::string &value, const size_t length);
+  BinaryStreamReader &read(std::vector<std::string> &value,
+                           const std::vector<int32_t> &shape,
+                           MatrixOrdering order);
+  BinaryStreamReader &read(Kernel::Matrix<float> &value,
+                           const std::vector<int32_t> &shape,
+                           MatrixOrdering order);
+  BinaryStreamReader &read(Kernel::Matrix<double> &value,
+                           const std::vector<int32_t> &shape,
+                           MatrixOrdering order);
   /// @}
-  
+
 private:
   /// Reference to the stream being read
   std::istream &m_istrm;
