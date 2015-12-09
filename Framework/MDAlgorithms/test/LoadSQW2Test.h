@@ -92,8 +92,8 @@ private:
     TS_ASSERT_EQUALS(4, outputWS.getNumDims());
     std::array<const char *, 4> ids{"Q1", "Q2", "Q3", "DeltaE"};
     std::array<const char *, 4> names{"Q_\\zeta", "Q_\\xi", "Q_\\eta", "E"};
-    std::array<double, 8> ulimits{0.0962059, 2.02969,  -1.01689, -0.881047,
-                                  -1.7117,   -1.10604, 2.5,      147.5};
+    std::array<double, 8> ulimits{0.0439,  0.9271,  -0.4644, -0.4024,
+                                  -0.7818, -0.5052, 2.5,     147.5};
     std::array<size_t, 4> nbins{3, 3, 2, 2};
     std::array<const char *, 4> units{"A\\^-1", "A\\^-1", "A\\^-1", "mev"};
     std::array<const char *, 4> frames{"HKL", "HKL", "HKL", "meV"};
@@ -188,7 +188,7 @@ private:
         auto idet = iter->getInnerDetectorID(i);
         TSM_ASSERT("Expected 1 <= det ID <= 10. Found " + std::to_string(idet),
                    1 <= idet || idet <= 10);
-        ids[idet-1] += 1;
+        ids[idet - 1] += 1;
       }
     } while (iter->next());
     TS_ASSERT_EQUALS(290, nexpt1);

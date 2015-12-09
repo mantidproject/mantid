@@ -260,7 +260,8 @@ void LoadSQW2::readDataSection() {
     auto signal = pixBuffer[offset + 7];
     auto error = pixBuffer[offset + 8];
     auto u1(pixBuffer[offset]), u2(pixBuffer[offset + 1]),
-        u3(pixBuffer[offset + 2]), en(pixBuffer[offset+3]);
+        u3(pixBuffer[offset + 2]), en(pixBuffer[offset + 3]);
+    toHKL(u1, u2, u3, irun);
     coord_t centres[4] = {u1, u2, u3, en};
     m_outputWS->addEvent(
         MDEvent<4>(signal, error * error, irun, idet, centres));
@@ -342,7 +343,7 @@ void LoadSQW2::readSQWDimensions() {
       os << val << ",";
     }
     os << "\n";
-    os << "    ulimits: ";
+    os << "    ulimits (from file): ";
     for (size_t i = 0; i < 4; ++i) {
       os << "(" << urange[0][i] << "," << urange[1][i] << ") ";
     }
@@ -359,12 +360,18 @@ void LoadSQW2::readSQWDimensions() {
   const char *ids[] = {"Q1", "Q2", "Q3", "DeltaE"};
   const char *units[] = {"A\\^-1", "A\\^-1", "A\\^-1", "mev"};
   const char *frames[] = {"HKL", "HKL", "HKL", "meV"};
+  std::vector<float> dimMin{urange[0][0], urange[0][1], urange[0][2],
+                            urange[0][3]};
+  toHKL(dimMin[0], dimMin[1], dimMin[2], 0);
+  std::vector<float> dimMax{urange[1][0], urange[1][1], urange[1][2],
+                            urange[1][3]};
+  toHKL(dimMax[0], dimMax[1], dimMax[2], 0);
   for (size_t i = 0; i < 4; ++i) {
     MDHistoDimensionBuilder builder;
     builder.setId(ids[i]);
     builder.setName(dimNames[i]);
-    builder.setMin(urange[0][i]);
-    builder.setMax(urange[1][i]);
+    builder.setMin(dimMin[i]);
+    builder.setMax(dimMax[i]);
     builder.setNumBins(static_cast<size_t>(nbins[i]));
     builder.setFrameName(frames[i]);
     builder.setUnits(units[i]);
