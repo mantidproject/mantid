@@ -196,7 +196,7 @@ void ConvFit::setup() {
           SLOT(typeSelection(int)));
   connect(m_uiForm.cbBackground, SIGNAL(currentIndexChanged(int)), this,
           SLOT(bgTypeSelection(int)));
-  connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
+  connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFitExtension()));
 
   // Context menu
   m_cfTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -260,7 +260,11 @@ void ConvFit::extendResolutionWorkspace(const bool &run) {
     if (run) {
       connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
               SLOT(extensionComplete(bool)));
-    }
+	}
+	else {
+		connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+			SLOT(singleFit(bool)));
+	}
     m_batchAlgoRunner->executeBatchAsync();
   }
 }
@@ -1133,12 +1137,23 @@ void ConvFit::plotGuess() {
 /**
 * Fits a single spectrum to the plot
 */
-void ConvFit::singleFit() {
-  if (!validate())
-    return;
+void ConvFit::singleFitExtension() {
+	if (!validate())
+		return;
 
-  updatePlot();
+	updatePlot();
 
+	extendResolutionWorkspace(false);
+
+}
+
+void ConvFit::singleFit(const bool &error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(singleFit(bool)));
+  if (error) {
+	  showMessageBox("Workspace extension failed.");
+	  return;
+  }
   m_uiForm.ckPlotGuess->setChecked(false);
 
   CompositeFunction_sptr function =
@@ -1151,7 +1166,6 @@ void ConvFit::singleFit() {
   if (fitType == "") {
     g_log.error("No fit type defined.");
   }
-  extendResolutionWorkspace(false);
   m_singleFitOutputName =
       runPythonCode(
           QString(
