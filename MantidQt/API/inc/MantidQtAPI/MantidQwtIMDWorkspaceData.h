@@ -59,6 +59,10 @@ public:
   void saveLowestPositiveValue(const double v);
   bool setAsDistribution(bool on = true);
 
+  void setXOffset(const double x);
+  void setYOffset(const double y);
+  void setWaterfallPlot(bool on);
+
 private:
 
   void cacheLinePlot();
@@ -122,6 +126,15 @@ private:
   /// This will correspond to -1 (distance)
   /// or the index into the original workspace dimensions
   int m_currentPlotAxis;
+
+  /// Indicates whether or not waterfall plots are enabled
+  bool m_isWaterfall;
+
+  /// x-axis offset for waterfall plots
+  double m_offsetX;
+
+  /// y-axis offset for waterfall plots
+  double m_offsetY;
 
 };
 #endif
