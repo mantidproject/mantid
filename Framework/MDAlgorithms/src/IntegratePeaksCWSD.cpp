@@ -3,6 +3,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidGeometry/IDetector.h"
 
 /*
 #include "MantidDataObjects/Peak.h"
@@ -83,12 +84,13 @@ void IntegratePeaksCWSD::exec()
   m_peaksWS = getProperty("PeaksWorkspace");
 
   std::string maskwsname = getPropertyValue("MaskWorkspace");
+  std::vector<detid_t> vecMaskedDetID;
   if (maskwsname.size() > 0)
   {
     // process mask workspace
     m_maskDets = true;
     m_maskWS = getProperty("MaskWorkspace");
-    processMaskWorkspace(m_maskWS);
+    vecMaskedDetID = processMaskWorkspace(m_maskWS);
   }
   else
   {
@@ -96,7 +98,7 @@ void IntegratePeaksCWSD::exec()
   }
 
   // Process peaks
-
+  simplePeakIntegration(vecMaskedDetID);
 
 
 } //
@@ -113,14 +115,11 @@ void IntegratePeaksCWSD::exec()
  * Guarantees:
  *   A valid value is given
  */
-void IntegratePeaksCWSD::simplePeakIntegration()
+void IntegratePeaksCWSD::simplePeakIntegration(const std::vector<detid_t> &vecMaskedDetID)
 {
   // Check requirements
   assert(m_inputWS && "MDEventWorkspace is not defined.");
   assert(m_peaksWS && "PeaksWorkspace is not defined.");
-  bool maskDetectors = true;
-  if (!m_maskWS)
-    maskDetectors = false;
 
   // Define data structures
   // FIXME :: can this be moved to outer scope of this method?
@@ -132,19 +131,43 @@ void IntegratePeaksCWSD::simplePeakIntegration()
   API::IMDIterator *mditer = m_inputWS->createIterator();
   size_t nextindex = 1;
   bool scancell = true;
-  size_t currindex = 0;
+  // size_t currindex = 0;
   while (scancell) {
-    size_t numevent_cell = mditer->getNumEvents();
-    for (size_t iev = 0; iev < numevent_cell; ++iev) {
+    // Go through all the MDEvents in one cell.
+    size_t numeventincell = mditer->getNumEvents();
+    for (size_t iev = 0; iev < numeventincell; ++iev) {
+      // Check whether this detector is masked
+      if (vecMaskedDetID.size() > 0)
+      {
+        detid_t detid = mditer->getInnerDetectorID(iev);
+        std::vector<detid_t>::const_iterator it;
+
+        it = find (vecMaskedDetID.begin(), vecMaskedDetID.end(), detid);
+        if (it != vecMaskedDetID.end())
+        {
+          // The detector ID is found among masked detector IDs
+          // Skip this event and move to next
+          continue;
+        }
+      }
+
+      // Get signal to add
+      signal_t signal = mditer->getInnerSignal(iev);
+
+
       // Check
       // if (currindex >= vec_event_qsample.size())
       //  throw std::runtime_error("Logic error in event size!");
-
+      /*
       float tempx = mditer->getInnerPosition(iev, 0);
       float tempy = mditer->getInnerPosition(iev, 1);
       float tempz = mditer->getInnerPosition(iev, 2);
-      signal_t signal = mditer->getInnerSignal(iev);
-      detid_t detid = mditer->getInnerDetectorID(iev);
+
+
+
+
+
+
 
       // FIXME/TODO/NOW - Continue from here!
       throw std::runtime_error("Need to find out how to deal with detid and signal here!");
@@ -153,8 +176,9 @@ void IntegratePeaksCWSD::simplePeakIntegration()
       vec_event_qsample[currindex] = qsample;
       vec_event_signal[currindex] = signal;
       vec_event_det[currindex] = detid;
+      */
 
-      ++currindex;
+      // ++currindex;
     }
 
     // Advance to next cell
@@ -170,10 +194,33 @@ void IntegratePeaksCWSD::simplePeakIntegration()
 
 }
 
-
-void IntegratePeaksCWSD::processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws)
+/** Purpose: Process mask workspace
+ *  Requirement: m_maskWS is not None
+ *  Guarantees: an array will be set up for masked detectors
+ * @brief IntegratePeaksCWSD::processMaskWorkspace
+ * @param maskws
+ */
+std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws)
 {
+  std::vector<detid_t> vecMaskedDetID;
 
+  // Add the detector IDs of all masked detector to a vector
+  size_t numspec = maskws->getNumberHistograms();
+  for (size_t iws = 0; iws < numspec; ++iws)
+  {
+    Geometry::IDetector_const_sptr detector = maskws->getDetector(iws);
+    if (detector->isMasked())
+    {
+      detid_t detid = detector->getID();
+      vecMaskedDetID.push_back(detid);
+    }
+  }
+
+  // Sort the vector for future lookup
+  if (vecMaskedDetID.size() > 1)
+    std::sort(vecMaskedDetID.begin(), vecMaskedDetID.end());
+
+  return vecMaskedDetID;
 }
 
 

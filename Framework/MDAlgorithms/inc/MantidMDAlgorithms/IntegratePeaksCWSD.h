@@ -35,7 +35,7 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MDAlgorithms\\Peaks"; }
 
-  void simplePeakIntegration();
+  void simplePeakIntegration(const std::vector<detid_t> &vecMaskedDetID);
 
 private:
   /// Initialise the properties
@@ -47,7 +47,7 @@ private:
   void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
 
-  void processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws);
+  std::vector<detid_t> processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws);
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_inputWS;
