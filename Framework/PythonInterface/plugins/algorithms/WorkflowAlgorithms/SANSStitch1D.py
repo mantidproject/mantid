@@ -22,7 +22,7 @@ class SANSStitch1D(DataProcessorAlgorithm):
                 'Both': Mode.BothFit, 'None': Mode.NoneFit}
 
     def category(self):
-        return 'DataHandling\\Logs'
+        return 'SANS'
 
     def summary(self):
         return 'Stitch the high angle and low angle banks of a workspace together'
@@ -128,10 +128,10 @@ class SANSStitch1D(DataProcessorAlgorithm):
         return minus.getProperty('OutputWorkspace').value
 
     def _crop_to_x_range(self, ws, x_min, x_max):
-        crop = self.createChildAlgorithm('CropWorkspace')
+        crop = self.createChildAlgorithm('Rebin')
         crop.setProperty('InputWorkspace', ws)
-        crop.setProperty('XMin', x_min)
-        crop.setProperty('XMax', x_max)
+        step = ws.readX(0)[1] - ws.readX(0)[0]
+        crop.setProperty('Params', [x_min, step,x_max])
         crop.execute()
         return crop.getProperty('OutputWorkspace').value
 
@@ -225,22 +225,6 @@ class SANSStitch1D(DataProcessorAlgorithm):
         front_data_corrected, rear_data_corrected = self._get_error_corrected_front_and_rear_data_sets(rear_data=q_low_angle,
                                                                                                        front_data=q_high_angle,
                                                                                                        q_min=q_min, q_max=q_max)
-
-        '''
-        if mode == Mode.ScaleOnly:
-            Fit(InputWorkspace=rear_data_corrected.name(),
-                Function='name=TabulatedFunction, Workspace="' + front_data_corrected.name() + '"' + ";name=FlatBackground",
-                Ties='f0.Scaling=' + str(rAnds.scale) + constant_x_shift_and_scale,
-                Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
-
-
-        elif mode == Mode.ShiftOnly:
-            Fit(InputWorkspace=rear_data_corrected.name(),
-                Function='name=TabulatedFunction, Workspace="' + str(
-                    front_data_corrected.name()) + '"' + ";name=FlatBackground",
-                Ties='f1.A0=' + str(rAnds.shift) + '*f0.Scaling' + constant_x_shift_and_scale,
-                Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
-        '''
 
         fit = self.createChildAlgorithm('Fit')
 
