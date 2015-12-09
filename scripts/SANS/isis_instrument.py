@@ -98,11 +98,10 @@ class DetectorBank(object):
             """
                 Sets the dimensions of the detector
                 @param width: the detector's width, spectra numbers along the width should increase in intervals of one
-                @param height: the detector's height, spectra numbers along the down the height should increase in
-                intervals of width
+                @param height: the detector's height, spectra numbers along the down the height should increase in intervals of width
                 @param isRect: true for rectangular or square detectors, i.e. number of pixels = width * height
-                @param n_pixels: optional for rectangular shapes because if it is not given it is calculated from
-                the height and width in that case
+                @param n_pixels: optional for rectangular shapes because if it is not given it is calculated from the
+                height and width in that case
             """
             self._width = width
             self._height = height
@@ -167,8 +166,8 @@ class DetectorBank(object):
     last_spec_num = None
 
     def __init__(self, instr, det_type):
-        # detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name
-        # is the instrument view name and 'short' name often used for convenience
+        # detectors are known by many names, the 'uni' name is an instrument independent alias the 'long'
+        # name is the instrument view name and 'short' name often used for convenience
         self._names = { \
             'uni': det_type, \
             'long': instr.getStringParameter(det_type + '-detector-name')[0], \
@@ -223,7 +222,7 @@ class DetectorBank(object):
         self._radius_corr = 0.0
         self._side_corr = 0.0
         # 10/03/15 RKH add 2 more, valid for all detectors.  WHY do some of the above have an extra leading
-        #  underscore?? Seems they are the optional ones sorted below
+        # underscore?? Seems they are the optional ones sorted below
         self.x_tilt = 0.0
         self.y_tilt = 0.0
 
@@ -458,8 +457,8 @@ class ISISInstrument(BaseInstrument):
         self.DETECTORS['high-angle'] = secondDetect
 
         self.setDefaultDetector()
-        # if this is set InterpolationRebin will be used on the monitor spectrum used to normalize the
-        #  sample, useful because wavelength resolution in the monitor spectrum can be course in the range of interest
+        # if this is set InterpolationRebin will be used on the monitor spectrum used to normalize the sample,
+        #  useful because wavelength resolution in the monitor spectrum can be course in the range of interest
         self._use_interpol_norm = False
         # remove use_interpol_trans_calc once the beam centre finder has been converted
         self.use_interpol_trans_calc = False
@@ -511,11 +510,11 @@ class ISISInstrument(BaseInstrument):
         self._back_start_ROI = None
         self._back_end_ROI = None
         # if the user moves a monitor to this z coordinate (with MON/LENGTH ...) this will be recorded here.
-        #  These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
+        # These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
         self.monitor_zs = {}
         # Used when new calibration required.
         self._newCalibrationWS = None
-        # Centre of beam after a move has been applied
+        # Centre of beam after a move has been applied,
         self.beam_centre_pos1_after_move = 0.0
         self.beam_centre_pos2_after_move = 0.0
 
@@ -582,7 +581,7 @@ class ISISInstrument(BaseInstrument):
             return self.DETECTORS['high-angle']
 
     def getDetector(self, requested):
-        for _n, detect in self.DETECTORS.iteritems():
+        for n, detect in self.DETECTORS.iteritems():
             if detect.isAlias(requested):
                 return detect
         sanslog.notice("getDetector: Detector " + requested + "not found")
@@ -724,7 +723,7 @@ class ISISInstrument(BaseInstrument):
             MoveInstrumentComponent(Workspace=ws, ComponentName=component, Z=offset,
                                     RelativePosition=True)
 
-    def move_components(self, _ws, _beamX, _beamY):
+    def move_components(self, ws, beamX, beamY):
         """Define how to move the bank to position beamX and beamY must be implemented"""
         raise RuntimeError("Not Implemented")
 
@@ -946,7 +945,7 @@ class LOQ(ISISInstrument):
     def get_marked_dets(self):
         raise NotImplementedError('The marked detector list isn\'t stored for instrument ' + self._NAME)
 
-    def set_up_for_run(self):
+    def set_up_for_run(self, base_runno):
         """
             Needs to run whenever a sample is loaded
         """
@@ -1109,16 +1108,14 @@ class SANS2D(ISISInstrument):
         RotRadians = math.pi * (FRONT_DET_ROT + frontDet.rot_corr) / 180.
         # The rear detector is translated to the beam position using the beam centre coordinates in the user file.
         # (Note that the X encoder values in NOT used for the rear detector.)
-        # The front detector is translated using the difference in X encoder values, with a correction from the
-        # user file.
+        # The front detector is translated using the difference in X encoder values, with a correction from the user file.
         # 21/3/12 RKH [In reality only the DIFFERENCE in X encoders is used, having separate X corrections for
         # both detectors is unnecessary,
         # but we will continue with this as it makes the mask file smore logical and avoids a retrospective change.]
         # 21/3/12 RKH add .side_corr    allows rotation axis of the front detector being offset from the detector X=0
         # this inserts *(1.0-math.cos(RotRadians)) into xshift, and
         # - frontDet.side_corr*math.sin(RotRadians) into zshift.
-        # (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be
-        # wavelength dependent!)
+        # (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
         xshift = (REAR_DET_X + rearDet.x_corr - frontDet.x_corr - FRONT_DET_X - frontDet.side_corr * (
             1 - math.cos(RotRadians)) + (self.FRONT_DET_RADIUS + frontDet.radius_corr) *
                   math.sin(RotRadians)) / 1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
@@ -1137,8 +1134,7 @@ class SANS2D(ISISInstrument):
 
         # deal with rear detector
 
-        # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the
-        # detector plane
+        # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane
         # Best to do the tilts first, while the detector is still centred on the z axis,
         # ytilt rotates about x axis, xtilt rotates about z axis
         # NOTE the beam centre coordinates may change
@@ -1262,16 +1258,16 @@ class SANS2D(ISISInstrument):
                     return datetime.strptime(date_string, format)
 
             # if the value was stored as a time series we have an array here
-            _property = log_data.getLogData(log_name)
+            property = log_data.getLogData(log_name)
 
-            size = len(_property.value)
+            size = len(property.value)
             if size == 1:
                 return float(log_data.getLogData(log_name).value[0])
 
             start = log_data.getLogData('run_start')
             dt_0 = format_date(start.value, "%Y-%m-%dT%H:%M:%S", 19)
             for i in range(0, size):
-                dt = format_date(str(_property.times[i]), "%Y-%m-%dT%H:%M:%S", 19)
+                dt = format_date(str(property.times[i]), "%Y-%m-%dT%H:%M:%S", 19)
                 if dt > dt_0:
                     if i == 0:
                         return float(log_data.getLogData(log_name).value[0])
