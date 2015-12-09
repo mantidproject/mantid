@@ -1,4 +1,5 @@
-# pylint: disable=no-init
+# pylint: disable=no-init,invalid-name,too-many-arguments
+
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, \
@@ -7,13 +8,17 @@ import numpy as np
 
 
 class Mode:
-    class ShiftOnly: pass
+    class ShiftOnly:
+        pass
 
-    class ScaleOnly: pass
+    class ScaleOnly:
+        pass
 
-    class BothFit: pass
+    class BothFit:
+        pass
 
-    class NoneFit: pass
+    class NoneFit:
+        pass
 
 
 class SANSStitch1D(DataProcessorAlgorithm):
@@ -99,31 +104,31 @@ class SANSStitch1D(DataProcessorAlgorithm):
         self.setPropertySettings("LABCountsCan", can_settings)
         self.setPropertySettings("LABNormCan", can_settings)
 
-    def _divide(self, a, b):
+    def _divide(self, left, right):
         divide = self.createChildAlgorithm('Divide')
-        divide.setProperty('LHSWorkspace', a)
-        divide.setProperty('RHSWorkspace', b)
+        divide.setProperty('LHSWorkspace', left)
+        divide.setProperty('RHSWorkspace', right)
         divide.execute()
         return divide.getProperty('OutputWorkspace').value
 
-    def _multiply(self, a, b):
+    def _multiply(self, left, right):
         multiply = self.createChildAlgorithm('Multiply')
-        multiply.setProperty('LHSWorkspace', a)
-        multiply.setProperty('RHSWorkspace', b)
+        multiply.setProperty('LHSWorkspace', left)
+        multiply.setProperty('RHSWorkspace', right)
         multiply.execute()
         return multiply.getProperty('OutputWorkspace').value
 
-    def _add(self, a, b):
+    def _add(self, left, right):
         plus = self.createChildAlgorithm('Plus')
-        plus.setProperty('LHSWorkspace', a)
-        plus.setProperty('RHSWorkspace', b)
+        plus.setProperty('LHSWorkspace', left)
+        plus.setProperty('RHSWorkspace', right)
         plus.execute()
         return plus.getProperty('OutputWorkspace').value
 
-    def _subract(self, a, b):
+    def _subract(self, left, right):
         minus = self.createChildAlgorithm('Minus')
-        minus.setProperty('LHSWorkspace', a)
-        minus.setProperty('RHSWorkspace', b)
+        minus.setProperty('LHSWorkspace', left)
+        minus.setProperty('RHSWorkspace', right)
         minus.execute()
         return minus.getProperty('OutputWorkspace').value
 
@@ -153,7 +158,7 @@ class SANSStitch1D(DataProcessorAlgorithm):
         merged_q = self._divide(numerator, denominator)
         return merged_q
 
-    def _get_error_corrected_front_and_rear_data_sets(self, front_data, rear_data, q_min, q_max):
+    def _get_error_corrected(self, front_data, rear_data, q_min, q_max):
 
         front_data_cropped = self._crop_to_x_range(front_data, q_min, q_max)
 
@@ -222,7 +227,7 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
         # We need to transfer the errors from the front data to the rear data, as we are using the the front data as a model, but
         # we want to take into account the errors of both workspaces.
-        front_data_corrected, rear_data_corrected = self._get_error_corrected_front_and_rear_data_sets(rear_data=q_low_angle,
+        front_data_corrected, rear_data_corrected = self._get_error_corrected(rear_data=q_low_angle,
                                                                                                        front_data=q_high_angle,
                                                                                                        q_min=q_min, q_max=q_max)
 
