@@ -254,7 +254,7 @@ SCARFLSFJobManager::guessJobSubmissionAppName(const std::string &runnablePath,
   // Basic guess of the app that we might really need. Not
   // fixed/unstable at the moment
   if (jobOptions.find("--tool astra") != std::string::npos ||
-      jobOptions.find("--tool astra") != std::string::npos) {
+      jobOptions.find("--tool=astra") != std::string::npos) {
     appName = "PYASTRATOOLBOX_1_6";
   }
 

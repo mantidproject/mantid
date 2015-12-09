@@ -246,7 +246,7 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   size_t i = 0;
   allPaths = imgs[i];
   i++;
-  while (i<imgs.size()) {
+  while (i < imgs.size()) {
     allPaths.append(", ");
     allPaths.append(imgs[i++]);
   }

@@ -158,7 +158,11 @@ private slots:
   // visualization tools / short-cuts
   void browseFilesToVisualizeClicked();
   void sendToParaviewClicked();
-  void localDefaultDirVisualizeClicked();
+  void sendToOctopusVisClicked();
+  void defaultDirLocalVisualizeClicked();
+  void defaultDirRemoteVisualizeClicked();
+  void browseVisToolParaviewClicke();
+  void browseVisToolOctopusClicked();
 
   // convert formats section/tab
   void browseImgInputConvertClicked();
@@ -213,6 +217,11 @@ private:
   std::string
   checkUserBrowsePath(QLineEdit *le,
                       const std::string &userMsg = "Open directory/folder");
+
+  void sendToVisTool(const std::string &toolName, const std::string &pathString,
+                     const std::string &appendBin);
+
+  void sendLog(const std::string &msg);
 
   // Begin of Savu related functionality. This will grow and will need
   // separation. They should find a better place to live.
@@ -275,7 +284,8 @@ private:
 
   static const std::string g_SCARFName;
   // a general (all tools in principle) default output path
-  static const std::string g_defOutPath;
+  static const std::string g_defOutPathLocal;
+  static const std::string g_defOutPathRemote;
 
   static const std::string g_TomoPyTool;
   static const std::string g_AstraTool;
@@ -287,9 +297,16 @@ private:
 
   // several paths or path components related to where the files are found
   // (raw files, reconstructions, pre-post processed files, etc.)
-  static const std::string g_pathComponentPhase;
+  // These are the defaults
+  static const std::string g_defPathComponentPhase;
   static const std::string g_defParaviewPath;
+  static const std::string g_defOctopusVisPath;
   static const std::string g_defProcessedSubpath;
+  // And these are the paths set up
+  std::string m_setupPathComponentPhase;
+  std::string m_setupParaviewPath;
+  std::string m_setupOctopusVisPath;
+  std::string m_setupProcessedSubpath;
 
   // here the view puts messages before notifying the presenter to show them
   std::vector<std::string> m_logMsgs;

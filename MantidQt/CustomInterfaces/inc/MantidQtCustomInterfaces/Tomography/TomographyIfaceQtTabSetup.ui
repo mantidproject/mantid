@@ -459,6 +459,9 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="text">
+                  <string>C:/MantidInstall/scripts/Imaging</string>
+                 </property>
                 </widget>
                </item>
                <item>

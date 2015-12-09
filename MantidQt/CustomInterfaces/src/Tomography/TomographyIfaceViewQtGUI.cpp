@@ -30,18 +30,32 @@ namespace CustomInterfaces {
 size_t TomographyIfaceViewQtGUI::g_nameSeqNo = 0;
 
 const std::string TomographyIfaceViewQtGUI::g_SCARFName = "SCARF@STFC";
-const std::string TomographyIfaceViewQtGUI::g_defOutPath =
+const std::string TomographyIfaceViewQtGUI::g_defOutPathLocal =
 #ifdef _WIN32
-    "D:/imat/"
+    "D:/imat/";
 #else
     "~/imat/";
 #endif
 
-    const std::string TomographyIfaceViewQtGUI::g_defParaviewPath =
+const std::string TomographyIfaceViewQtGUI::g_defOutPathRemote =
 #ifdef _WIN32
-        "C\\Program Files\\ParaView\\";
+    "I:/imat/";
 #else
-        "/usr/bin/";
+    "~/imat/";
+#endif
+
+const std::string TomographyIfaceViewQtGUI::g_defParaviewPath =
+#ifdef _WIN32
+    "C\\Program Files\\ParaView\\";
+#else
+    "/usr/bin/";
+#endif
+
+const std::string TomographyIfaceViewQtGUI::g_defOctopusVisPath =
+#ifdef _WIN32
+    "C:/Program Files/Octopus Imaging/Octopus Visualization/octoviewer3d.exe";
+#else
+    "";
 #endif
 
 const std::string TomographyIfaceViewQtGUI::g_defProcessedSubpath = "processed";
@@ -53,7 +67,7 @@ const std::string TomographyIfaceViewQtGUI::g_CCPiTool = "CCPi CGLS";
 const std::string TomographyIfaceViewQtGUI::g_SavuTool = "Savu";
 const std::string TomographyIfaceViewQtGUI::g_customCmdTool = "Custom command";
 
-const std::string TomographyIfaceViewQtGUI::g_pathComponentPhase =
+const std::string TomographyIfaceViewQtGUI::g_defPathComponentPhase =
     "phase_commissioning";
 
 // Add this class to the list of specialised dialogs in this namespace
@@ -154,6 +168,10 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
   // m_uiTabSetup.tabWidget_comp_resource->setTabEnabled(false, 1);
   // m_uiTabSetup.tab_local->setEnabled(false);
 
+  // TODO: take g_def values first time, when Qsettings are empty, then from
+  // QSettings
+  m_setupPathComponentPhase = g_defPathComponentPhase;
+
   m_uiTabSetup.groupBox_run_config->setEnabled(false);
 
   connect(m_uiTabSetup.pushButton_SCARF_login, SIGNAL(released()), this,
@@ -238,6 +256,12 @@ void TomographyIfaceViewQtGUI::doSetupSectionFilters() {
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
+  // TODO: take g_def values first time, when Qsettings are empty, then from
+  // QSettings
+  m_setupParaviewPath = g_defParaviewPath;
+  m_setupProcessedSubpath = g_defProcessedSubpath;
+  m_setupOctopusVisPath = g_defOctopusVisPath;
+
   m_uiTabVisualize.lineEdit_processed_subpath->setText(
       QString::fromStdString(g_defProcessedSubpath));
   m_uiTabVisualize.lineEdit_paraview_location->setText(
@@ -255,7 +279,7 @@ void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
 
   // display: current dir
   const QString startDir =
-      QString::fromStdString(Poco::Path::expand(g_defOutPath));
+      QString::fromStdString(Poco::Path::expand(g_defOutPathLocal));
 
   m_uiTabVisualize.treeView_files->setRootIndex(
       model->index(QDir::currentPath())); // startDir)); //
@@ -263,11 +287,16 @@ void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
   connect(m_uiTabVisualize.pushButton_paraview, SIGNAL(released()), this,
           SLOT(sendToParaviewClicked()));
 
+  connect(m_uiTabVisualize.pushButton_paraview, SIGNAL(released()), this,
+          SLOT(sendToOctopusVisClicked()));
+
   connect(m_uiTabVisualize.pushButton_browse_files, SIGNAL(released()), this,
           SLOT(browseFilesToVisualizeClicked()));
 
   connect(m_uiTabVisualize.pushButton_local_default_dir, SIGNAL(released()),
-          this, SLOT(localDefaultDirVisualizeClicked()));
+          this, SLOT(defaultDirLocalVisualizeClicked()));
+  connect(m_uiTabVisualize.pushButton_remote_default_dir, SIGNAL(released()),
+          this, SLOT(defaultDirRemoteVisualizeClicked()));
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionConvert() {
@@ -645,11 +674,47 @@ void TomographyIfaceViewQtGUI::toolSetupClicked() {
 void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
   QString run = "/work/imat/commissioning_phase/scripts/Imaging/IMAT/"
                 "tomo_reconstruct.py"; // m_uiAstra.lineEdit_runnable->text();
+  // pairs of name-in-the-tool, human-readable-name
   const std::vector<std::pair<std::string, std::string>> tomopy_methods = {
-      std::make_pair("gridrec", "gridrec: llll"),
-      std::make_pair("SIRT", "statistical image reconstruction")};
+      std::make_pair("gridrec", "gridrec: Fourier grid reconstruction "
+                                "algorithm (Dowd, 19999; Rivers, 2006)"),
+      std::make_pair("sirt",
+                     "sirt: Simultaneous algebraic reconstruction technique"),
+
+      std::make_pair("art",
+                     "arg: Algebraic reconstruction technique (Kak, 1998)"),
+      std::make_pair("bart", "bart: Block algebraic reconstruction technique."),
+      std::make_pair("fbp", "fbp: Filtered back-projection algorithm"),
+      std::make_pair("mlem",
+                     "mlem: Maximum-likelihood expectation maximization "
+                     "algorithm (Dempster, 1977)"),
+      std::make_pair("osem", "osem: Ordered-subset expectation maximization "
+                             "algorithm (Hudson, 1994)"),
+      std::make_pair("ospml_hybrid",
+                     "ospml_hybrid: Ordered-subset penalized maximum "
+                     "likelihood algorithm with weighted "
+                     "linear and quadratic penalties"),
+      std::make_pair("ospml_quad",
+                     "ospml_quad: Ordered-subset penalized maximum "
+                     "likelihood algorithm with quadratic "
+                     "penalties"),
+      std::make_pair("pml_hybrid",
+                     "pml_hybrid: Penalized maximum likelihood algorithm "
+                     "with weighted linear and quadratic "
+                     "penalties (Chang, 2004)"),
+      std::make_pair("pml_quad", "pml_quad: Penalized maximum likelihood "
+                                 "algorithm with quadratic penalty"),
+  };
+
   const std::vector<std::pair<std::string, std::string>> astra_methods = {
-      std::make_pair("FBP3D_CUDA", "Filtered Back-Propagation, accelerated")};
+      std::make_pair("FBP3D_CUDA", "FBP 3D: Filtered Back-Propagation"),
+      std::make_pair(
+          "SIRT3D_CUDA",
+          "SIRT 3D: Simultaneous Iterative Reconstruction Technique algorithm"),
+      std::make_pair("CGLS3D_CUDA",
+                     "CGLS 3D: Conjugate gradient least square algorithm"),
+      std::make_pair("FDK_CUDA", "FDK 3D: Feldkamp-Davis-Kress algorithm for "
+                                 "3D circular cone beam data sets")};
 
   if (g_TomoPyTool == name) {
     TomoToolConfigTomoPy tomopy;
@@ -665,7 +730,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
 
       TomoPathsConfig paths = currentPathsConfig();
       m_toolsSettings.tomoPy = ToolConfigTomoPy(
-          run.toStdString(), g_defOutPath, paths.pathDark(),
+          run.toStdString(), g_defOutPathLocal, paths.pathDark(),
           paths.pathOpenBeam(), paths.pathSamples(), cor, minAngle, maxAngle);
     }
   } else if (g_AstraTool == name) {
@@ -682,7 +747,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
 
       TomoPathsConfig paths = currentPathsConfig();
       m_toolsSettings.astra = ToolConfigAstraToolbox(
-          run.toStdString(), cor, minAngle, maxAngle, g_defOutPath,
+          run.toStdString(), cor, minAngle, maxAngle, g_defOutPathLocal,
           paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples());
     }
   } else if (g_SavuTool == name) {
@@ -832,12 +897,17 @@ void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     t->setItem(ii, 3,
                new QTableWidgetItem(QString::fromStdString(status[i].status)));
 
-    if (std::string::npos != status[i].status.find("Exit"))
+    // beware "Exit" is called "Exited" on the web portal, but the REST
+    // responses
+    // call it "Exit"
+    if (std::string::npos != status[i].status.find("Exit") ||
+        std::string::npos != status[i].status.find("Suspend"))
       t->item(ii, 3)->setBackground(QColor(255, 120, 120)); // Qt::red
-    else if (std::string::npos != status[i].status.find("Running"))
-      t->item(ii, 3)->setBackground(QColor(120, 120, 255)); // Qt::blue
     else if (std::string::npos != status[i].status.find("Pending"))
       t->item(ii, 3)->setBackground(QColor(150, 150, 150)); // Qt::gray
+    else if (std::string::npos != status[i].status.find("Running") ||
+             std::string::npos != status[i].status.find("Active"))
+      t->item(ii, 3)->setBackground(QColor(120, 120, 255)); // Qt::blue
     else if (std::string::npos != status[i].status.find("Finished") ||
              std::string::npos != status[i].status.find("Done"))
       t->item(ii, 3)->setBackground(QColor(120, 255, 120)); // Qt::green
@@ -1128,22 +1198,44 @@ void TomographyIfaceViewQtGUI::resetPrePostFilters() {
   setPrePostProcSettings(def);
 }
 
-void TomographyIfaceViewQtGUI::sendToParaviewClicked() {
-  std::cerr << "EXECUTING : " << std::endl;
-
-  // TODO: start paraview
-  Poco::Path fullPath(g_defParaviewPath);
+void TomographyIfaceViewQtGUI::sendToOctopusVisClicked() {
   const std::string appendBin =
 #ifdef _WIN32
-      "bin\paraview.exe";
+      "octoviewer3d.exe";
+#else
+      "This tool is not available";
+#endif
+
+  sendToVisTool("Octopus Visualization 3D", m_setupOctopusVisPath, appendBin);
+}
+
+void TomographyIfaceViewQtGUI::sendToParaviewClicked() {
+  const std::string appendBin =
+#ifdef _WIN32
+      "bin\\paraview.exe";
 #else
       "paraview";
 #endif
 
+  sendToVisTool("ParaView", m_setupParaviewPath, appendBin);
+}
+
+/**
+ * Start a third party tool as a process
+ *
+ * @param toolName Human understandable name of the tool/program
+ * @param pathString Path where the tool is installed
+ * @param string to append to the path if required, example: bin/tool.exe
+ */
+void TomographyIfaceViewQtGUI::sendToVisTool(const std::string &toolName,
+                                             const std::string &pathString,
+                                             const std::string &appendBin) {
   // prepare external tool executable path
-  Poco::Path ppath(g_defParaviewPath);
-  ppath.append(appendBin);
-  const std::string parapath = ppath.toString();
+  Poco::Path tmpPath(pathString);
+  if (!appendBin.empty()) {
+    tmpPath.append(appendBin);
+  }
+  const std::string tooPath = tmpPath.toString();
 
   // get path to pass as parameter
   const QFileSystemModel *model = dynamic_cast<QFileSystemModel *>(
@@ -1162,11 +1254,17 @@ void TomographyIfaceViewQtGUI::sendToParaviewClicked() {
   std::vector<std::string> args;
   args.push_back(selPath.toStdString());
 
-  m_logMsgs.push_back(" Executing visualization tool. Executing: '" + parapath +
-                      "', with parameters: '" + args[0] + "'.");
-  m_presenter->notify(ITomographyIfacePresenter::LogMsg);
-  m_logMsgs.clear();
-  Mantid::Kernel::ConfigService::Instance().launchProcess(parapath, args);
+  sendLog("Executing visualization tool: " + toolName + ". Executing: '" +
+          tooPath + "', with parameters: '" + args[0] + "'.");
+  try {
+    Mantid::Kernel::ConfigService::Instance().launchProcess(tooPath, args);
+  } catch (std::runtime_error &rexc) {
+    sendLog("The execution of " + toolName + "failed. details: " +
+            std::string(rexc.what()));
+    userWarning("Execution failed",
+                "Coult not execute the tool. Error details: " +
+                    std::string(rexc.what()));
+  }
 }
 
 void TomographyIfaceViewQtGUI::browseFilesToVisualizeClicked() {
@@ -1188,7 +1286,41 @@ void TomographyIfaceViewQtGUI::browseFilesToVisualizeClicked() {
   }
 }
 
-void TomographyIfaceViewQtGUI::localDefaultDirVisualizeClicked() {}
+void TomographyIfaceViewQtGUI::defaultDirLocalVisualizeClicked() {
+  const QFileSystemModel *model = dynamic_cast<QFileSystemModel *>(
+      m_uiTabVisualize.treeView_files->model());
+  if (!model)
+    return;
+
+  const QString path =
+      QString::fromStdString(Poco::Path::expand(g_defOutPathLocal));
+  if (!path.isEmpty()) {
+    m_uiTabVisualize.treeView_files->setRootIndex(model->index(path));
+  }
+}
+
+void TomographyIfaceViewQtGUI::defaultDirRemoteVisualizeClicked() {
+  const QFileSystemModel *model = dynamic_cast<QFileSystemModel *>(
+      m_uiTabVisualize.treeView_files->model());
+  if (!model)
+    return;
+
+  const QString path =
+      QString::fromStdString(Poco::Path::expand(g_defOutPathRemote));
+  if (!path.isEmpty()) {
+    m_uiTabVisualize.treeView_files->setRootIndex(model->index(path));
+  }
+}
+
+void TomographyIfaceViewQtGUI::browseVisToolParaviewClicke() {
+  m_setupParaviewPath =
+      checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
+}
+
+void TomographyIfaceViewQtGUI::browseVisToolOctopusClicked() {
+  m_setupOctopusVisPath =
+      checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
+}
 
 void TomographyIfaceViewQtGUI::browseImgInputConvertClicked() {
   const std::string path =
@@ -1248,6 +1380,15 @@ void TomographyIfaceViewQtGUI::userWarning(const std::string &err,
 
 void TomographyIfaceViewQtGUI::updatedRBNumber() {
   // May have to change: m_uiTabRun.lineEdit_local_out_recon_dir
+}
+
+/**
+ * To log a message without waiting.
+ */
+void TomographyIfaceViewQtGUI::sendLog(const std::string &msg) {
+  m_logMsgs.push_back(msg);
+  m_presenter->notify(ITomographyIfacePresenter::LogMsg);
+  m_logMsgs.clear();
 }
 
 /**

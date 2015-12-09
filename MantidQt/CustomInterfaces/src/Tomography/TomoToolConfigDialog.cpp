@@ -27,7 +27,7 @@ TomoToolConfigDialog::TomoToolConfigDialog(QWidget *parent) : QDialog(parent) {
   okButton = new QPushButton("Ok");
   cancelButton = new QPushButton("Cancel");
   hBut = new QHBoxLayout();
-  hBut->insertStretch(0,1);
+  hBut->insertStretch(0, 1);
   hBut->addWidget(okButton);
   hBut->addWidget(cancelButton);
 
