@@ -1,20 +1,21 @@
 # pylint: disable=invalid-name, redefined-outer-name, multiple-statements
 # -*- coding: utf-8 -*-
+
 """ Classes describing test projects,
 how they are run,
 and interpreting the results"""
+
 import time
 import datetime
 import os
 import commands
 import tempfile
 import shutil
-from xml.dom.minidom import parse, parseString
+from xml.dom.minidom import parse
 import multiprocessing
 from multiprocessing import Pool
 import random
 import subprocess
-import sys
 import shlex
 import threading
 
@@ -55,17 +56,17 @@ process_timeout_sec = 1
 # ==================================================================================================
 class TestResult:
     """Enumeration giving the state of a single test, suite, or project"""
-    """ Test was not run since the program started """
+    # """ Test was not run since the program started """
     NOT_RUN = 0
-    """ Test passed """
+    # """ Test passed """
     ALL_PASSED = 1
-    """ At least one test failed """
+    # """ At least one test failed """
     SOME_FAILED = 2
-    """ Build error ! """
+    # """ Build error ! """
     BUILD_ERROR = 3
-    """ All tests failed """
+    # """ All tests failed """
     ALL_FAILED = 4
-    """ Probably a segfault """
+    # """ Probably a segfault """
     ABORTED = 5
 
     def __init__(self, value=0, old=False):
@@ -237,7 +238,7 @@ class TestSingle(object):
         if len(fails) > 0:
             self.state = TestResult(TestResult.ALL_FAILED, old=False)
             # File and line of failure
-            file = fails[0].getAttribute("file")
+            _file = fails[0].getAttribute("file")
             self.failure_line = fails[0].getAttribute("line")
             # Get the failure text
             self.failure = fails[0].firstChild.data
@@ -1363,7 +1364,7 @@ def run_command_with_callback(full_command, callback_func, run_shell=True):
                          stdin=None, stderr=subprocess.STDOUT,
                          stdout=subprocess.PIPE, close_fds=True,
                          universal_newlines=True)
-    (put, get) = (p.stdin, p.stdout)
+    (_put, get) = (p.stdin, p.stdout)
 
     line = get.readline()
     while line != "":
@@ -1420,7 +1421,7 @@ def run_command_with_timeout(full_command, timeout, run_shell=True):
             def target():
                 self.process = subprocess.Popen(self.cmd, shell=self.run_shell, stdin=None, stderr=subprocess.STDOUT,
                                                 stdout=subprocess.PIPE, close_fds=True, universal_newlines=True)
-                (self.output, stdin) = self.process.communicate()
+                (self.output, _stdin) = self.process.communicate()
 
             thread = threading.Thread(target=target)
             thread.start()
