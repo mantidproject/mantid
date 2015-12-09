@@ -18,11 +18,10 @@ and have the same bin boundaries. **NOTE:** The entry is assumed to be
 in SNS or ISIS format, so the loader is currently not generically
 applicable.
 
-This version (v1) of this algorithm has a bug where, in case of a
-multiperiod input workspace, invoking this Algorithm from Python returns
-a tuple that contains the resulting group workspace as the first element,
-followed by references to the individual workspaces as siblings (in 
-addition to being contained within the group).
+This version (v2) fixes a bug in the first version and now returns a
+group workspace when invoked from Python with a multiperiod input
+workspace. As a side-effect of the fix, the contained individual
+workspaces for each of the periods are named slightly differently.
 
 Usage
 -----
