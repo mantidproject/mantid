@@ -1874,11 +1874,13 @@ class CropDetBank(ReductionStep):
             monitor_ws = reducer.get_sample().get_monitor()
             monitor_name = monitor_ws.name()
 
+
             # Run the subtraction
             was_event_workspace = reducer.is_based_on_event()
             scatter_ws, monitor_ws = reducer.dark_run_subtraction.execute(scatter_ws, monitor_ws,
                                                                           start_spec_num, end_spec_num,
                                                                           was_event_workspace)
+
             # We need to replace the workspaces in the ADS
             mtd.addOrReplace(scatter_name, scatter_ws)
             mtd.addOrReplace(monitor_name, monitor_ws)

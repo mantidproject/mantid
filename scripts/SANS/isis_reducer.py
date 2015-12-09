@@ -747,7 +747,7 @@ class ISISReducer(Reducer):
         @returns true if the input was an event workspace
         '''
         was_event = False
-        if self.is_can:
+        if self.is_can():
             sample = self.get_can()
             try:
                 dummy_ws = mtd[can.loader.wksp_name + "_monitors"]
