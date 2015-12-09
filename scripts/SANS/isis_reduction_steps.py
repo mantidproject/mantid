@@ -1,4 +1,5 @@
-﻿# pylint: disable=too-many-lines, invalid-name, protected-access, super-on-old-class, property-on-old-class
+﻿# pylint: disable=too-many-lines, invalid-name, super-on-old-class, protected-access, too-few-public-methods,
+# too-few-public-methods
 """
     This file defines what happens in each step in the data reduction, it's
     the guts of the reduction. See ISISReducer for order the steps are run
@@ -33,7 +34,6 @@ DEBUG = False
 # A global name for the Q Resolution workspace which lives longer than a reducer core
 QRESOLUTION_WORKSPACE_NAME = "Q_Resolution_ISIS_SANS"
 QRESOLUTION_MODERATOR_WORKSPACE_NAME = "Q_Resolution_MODERATOR_ISIS_SANS"
-
 
 def _issueWarning(msg):
     """
@@ -139,7 +139,7 @@ class LoadRun(object):
                     # except:
                     # self._load(inst, is_can, extra_options)
 
-    def _load(self, extra_options=dict()):
+    def _load(self, inst=None, is_can=False, extra_options=dict()):
         """
             Load a workspace and read the logs into the passed instrument reference
             @param inst: a reference to the current instrument
@@ -235,7 +235,7 @@ class LoadRun(object):
         for ws in workspaces:
             LoadSampleDetailsFromRaw(ws, self._data_file)
 
-    def _loadFromWorkspace(self):
+    def _loadFromWorkspace(self, reducer):
         """ It substitute the work of _assignHelper for workspaces, or, at least,
         prepare the internal attributes, to be processed by the _assignHelper.
 
@@ -384,7 +384,7 @@ class LoadRun(object):
         return numPeriods
 
     def _getHistory(self, wk_name):
-        # ws = getWorkspaceReference(wk_name)
+        _ws = getWorkspaceReference(wk_name)
 
         if isinstance(wk_name, Workspace):
             ws_h = wk_name.getHistory()
@@ -451,7 +451,7 @@ class LoadTransmissions():
         self._direct_name = direct
         self._period_d = period
 
-    def execute(self, reducer):
+    def execute(self, reducer, workspace):
         if self._trans_name not in [None, '']:
             self.trans = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
             self.trans._assignHelper(reducer)
@@ -541,7 +541,7 @@ class CanSubtraction(ReductionStep):
         if not original_ws.hasDx(0):
             return
         for index in range(0, original_ws.getNumHistograms()):
-            subtracted_ws.setDx(index, original_ws.dataDX(index))
+            subtraced_ws.setDx(index, original_ws.dataDX(index))
 
 
 class Mask_ISIS(ReductionStep):
@@ -552,7 +552,7 @@ class Mask_ISIS(ReductionStep):
     """
 
     def __init__(self, timemask='', timemask_r='', timemask_f='',
-                 specmask_r='', specmask_f=''):
+                 specmask='', specmask_r='', specmask_f=''):
         self._xml = []
 
         # these spectra will be masked by the algorithm MaskDetectors
@@ -608,10 +608,10 @@ class Mask_ISIS(ReductionStep):
             raise ValueError('Excepted xml string but found: ' + str(complete_xml_element))
         self._xml.append(complete_xml_element)
 
-    def _infinite_plane(self, identity, plane_pt, normal_pt, complement=False):
+    def _infinite_plane(self, id, plane_pt, normal_pt, complement=False):
         """
             Generates xml code for an infinte plane
-            @param identity: a string to refer to the shape by
+            @param id: a string to refer to the shape by
             @param plane_pt: a point in the plane
             @param normal_pt: the direction of a normal to the plane
             @param complement: mask in the direction of the normal or away
@@ -621,58 +621,58 @@ class Mask_ISIS(ReductionStep):
             _addition = '#'
         else:
             _addition = ''
-        return '<infinite-plane identity="' + str(identity) + '">' + \
+        return '<infinite-plane id="' + str(id) + '">' + \
                '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + \
                str(plane_pt[2]) + '" />' + \
-               '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + \
+               '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' +\
                str(normal_pt[2]) + '" />' + \
                '</infinite-plane>\n'
 
-    def _infinite_cylinder(self, centre, radius, axis, identity='shape'):
+    def _infinite_cylinder(self, centre, radius, axis, id='shape'):
         """
             Generates xml code for an infintely long cylinder
             @param centre: a tupple for a point on the axis
             @param radius: cylinder radius
             @param axis: cylinder orientation
-            @param identity: a string to refer to the shape by
+            @param id: a string to refer to the shape by
             @return the xml string
         """
-        return '<infinite-cylinder id="' + str(identity) + '">' + \
+        return '<infinite-cylinder id="' + str(id) + '">' + \
                '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
                '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
                '<radius val="' + str(radius) + '" /></infinite-cylinder>\n'
 
-    def _finite_cylinder(self, centre, radius, height, axis, identity='shape'):
+    def _finite_cylinder(self, centre, radius, height, axis, id='shape'):
         """
             Generates xml code for an infintely long cylinder
             @param centre: a tupple for a point on the axis
             @param radius: cylinder radius
             @param height: cylinder height
             @param axis: cylinder orientation
-            @param identity: a string to refer to the shape by
+            @param id: a string to refer to the shape by
             @return the xml string
         """
-        return '<cylinder id="' + str(identity) + '">' + \
-               '<centre-of-bottom-base x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + \
-               str(centre[2]) + '" />' + \
+        return '<cylinder id="' + str(id) + '">' + \
+               '<centre-of-bottom-base x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + \
+               '" />' + \
                '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
                '<radius val="' + str(radius) + '" /><height val="' + str(height) + '" /></cylinder>\n'
 
     def add_cylinder(self, radius, xcentre, ycentre, ID='shape'):
         '''Mask the inside of an infinite cylinder on the input workspace.'''
         self.add_xml_shape(
-            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], identity=ID) + '<algebra val="' + str(
+            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], id=ID) + '<algebra val="' + str(
                 ID) + '"/>')
 
     def add_outside_cylinder(self, radius, xcentre=0.0, ycentre=0.0, ID='shape'):
         '''Mask out the outside of a cylinder or specified radius'''
         self.add_xml_shape(
-            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], identity=ID) + '<algebra val="#' + str(
+            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], id=ID) + '<algebra val="#' + str(
                 ID) + '"/>')
 
-    def set_radi(self, min_, max_):
-        self.min_radius = float(min_) / 1000.
-        self.max_radius = float(max_) / 1000.
+    def set_radi(self, _min, _max):
+        self.min_radius = float(_min) / 1000.
+        self.max_radius = float(_max) / 1000.
 
     def _whichBank(self, instName, specNo):
         """
@@ -740,16 +740,16 @@ class Mask_ISIS(ReductionStep):
             # Default to the rear detector if not MASK Ssp command
             self.add_mask_string(argToMask, detect=bank)
         elif len(parts) == 2:  # Command is to type MASK/ something
-            type_ = parts[1]  # this is the part of the command following /
-            typeSplit = type_.split()  # used for command such as MASK/REAR Hn and MASK/Line w a
-            if type_ == 'CLEAR':  # Command is specifically MASK/CLEAR
+            _type = parts[1]  # this is the part of the command following /
+            typeSplit = _type.split()  # used for command such as MASK/REAR Hn and MASK/Line w a
+            if _type == 'CLEAR':  # Command is specifically MASK/CLEAR
                 self.spec_mask_r = ''
                 self.spec_mask_f = ''
-            elif type_.startswith('T'):
-                if type_.startswith('TIME'):
-                    bin_range = type_[4:].lstrip()
+            elif _type.startswith('T'):
+                if _type.startswith('TIME'):
+                    bin_range = _type[4:].lstrip()
                 else:
-                    bin_range = type_[1:].lstrip()
+                    bin_range = _type[1:].lstrip()
                 self.time_mask += ';' + bin_range
             elif len(typeSplit) == 2:
                 # Commands such as MASK/REAR Hn, where typeSplit[0] then equal 'REAR'
@@ -763,7 +763,7 @@ class Mask_ISIS(ReductionStep):
                     self.add_mask_string(mask_string=typeSplit[1], detect='rear')
                 else:
                     self.add_mask_string(mask_string=typeSplit[1], detect=typeSplit[0])
-            elif type_.startswith('LINE'):
+            elif _type.startswith('LINE'):
                 # RMD mod 24/7/13
                 if len(typeSplit) == 5:
                     self.arm_width = float(typeSplit[1])
@@ -781,12 +781,12 @@ class Mask_ISIS(ReductionStep):
             else:
                 _issueWarning('Unrecognized masking option "' + details + '"')
         elif len(parts) == 3:
-            type_ = parts[1]
-            if type_ == 'CLEAR':
+            _type = parts[1]
+            if _type == 'CLEAR':
                 self.time_mask = ''
                 self.time_mask_r = ''
                 self.time_mask_f = ''
-            elif type_ == 'TIME' or type_ == 'T':
+            elif _type == 'TIME' or _type == 'T':
                 parts = parts[2].split()
                 if len(parts) == 3:
                     detname = parts[0].rstrip()
@@ -888,7 +888,7 @@ class Mask_ISIS(ReductionStep):
 
         return speclist
 
-    def _mask_phi(self, identity, centre, phimin, phimax, use_mirror=True):
+    def _mask_phi(self, id, centre, phimin, phimax, use_mirror=True):
         '''
             Mask the detector bank such that only the region specified in the
             phi range is left unmasked
@@ -910,30 +910,28 @@ class Mask_ISIS(ReductionStep):
         phimin = math.pi * phimin / 180.0
         phimax = math.pi * phimax / 180.0
 
-        identity = str(identity)
+        id = str(id)
         self._lim_phi_xml = \
-            self._infinite_plane(identity + '_plane1', centre,
+            self._infinite_plane(id + '_plane1', centre,
                                  [math.cos(-phimin + math.pi / 2.0), math.sin(-phimin + math.pi / 2.0), 0]) \
-            + self._infinite_plane(identity + '_plane2', centre,
+            + self._infinite_plane(id + '_plane2', centre,
                                    [-math.cos(-phimax + math.pi / 2.0), -math.sin(-phimax + math.pi / 2.0), 0])
 
         if use_mirror:
-            self._lim_phi_xml += self._infinite_plane(identity + '_plane3', centre,
+            self._lim_phi_xml += self._infinite_plane(id + '_plane3', centre,
                                                       [math.cos(-phimax + math.pi / 2.0),
                                                        math.sin(-phimax + math.pi / 2.0), 0]) \
-                                 + self._infinite_plane(identity + '_plane4', centre,
-                                                        [-math.cos(-phimin + math.pi / 2.0),
-                                                         -math.sin(-phimin + math.pi / 2.0), 0]) \
-                                 + '<algebra val="#((' + identity + '_plane1 ' + identity + '_plane2):(' + identity + \
-                                 '_plane3 ' + identity + '_plane4))" />'
+                                 + self._infinite_plane(id + '_plane4', centre, [-math.cos(-phimin + math.pi / 2.0),
+                                                                                 -math.sin(-phimin + math.pi / 2.0), 0]) \
+                                 + '<algebra val="#((' + id + '_plane1 ' + id + '_plane2):(' + id + '_plane3 ' + id + '_plane4))" />'
         else:
             # the formula is different for acute verses obtuse angles
             if phimax - phimin > math.pi:
                 # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
-                self._lim_phi_xml += '<algebra val="#(' + identity + '_plane1:' + identity + '_plane2)" />'
+                self._lim_phi_xml += '<algebra val="#(' + id + '_plane1:' + id + '_plane2)" />'
             else:
                 # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
-                self._lim_phi_xml += '<algebra val="#(' + identity + '_plane1 ' + identity + '_plane2)" />'
+                self._lim_phi_xml += '<algebra val="#(' + id + '_plane1 ' + id + '_plane2)" />'
 
     def _mask_line(self, startPoint, length, width, angle):
         '''
@@ -1071,7 +1069,7 @@ class Mask_ISIS(ReductionStep):
         original = instrum.cur_detector().name()
         instrum.setDetector(other)
         self.execute(None, wksp_name, instrum)
-        # reset the instrument to mask the current detector
+        # reset the instrument to mask the currecnt detector
         instrum.setDetector(original)
 
         # Mark up "dead" detectors with error value
@@ -1269,7 +1267,7 @@ class TransmissionCalc(ReductionStep):
     """
 
     # The different ways of doing a fit, convert the possible ways of specifying this (also the way it is specified
-    #  in the GUI to the way it can be send to CalculateTransmission
+    # in the GUI to the way it can be send to CalculateTransmission
     TRANS_FIT_OPTIONS = {
         'YLOG': 'Log',
         'STRAIGHT': 'Linear',
@@ -1511,7 +1509,7 @@ class TransmissionCalc(ReductionStep):
         # Remove duplicates and sort.
         self.trans_roi = sorted(set(self.trans_roi) - set(masked_ids))
 
-    def execute(self, reducer):
+    def execute(self, reducer, workspace):
         """
             Reads in the different settings, without affecting self. Calculates
             or estimates the proportion of neutrons that are transmitted
@@ -1583,8 +1581,8 @@ class TransmissionCalc(ReductionStep):
 
         use_instrum_default_range = reducer.full_trans_wav
 
-        # there are a number of settings and defaults that determine the wavelength to use,
-        # go through each in order of increasing precedence
+        # there are a number of settings and defaults that determine the wavelength to use, go through each in
+        # order of increasing precedence
         if use_instrum_default_range:
             translambda_min = reducer.instrument.WAV_RANGE_MIN
             translambda_max = reducer.instrument.WAV_RANGE_MAX
@@ -1872,8 +1870,8 @@ class ConvertToQISIS(ReductionStep):
 
     def __init__(self, normalizations):
         """
-            @param normalizations: CalculateNormISIS object contains the workspace, ReductionSteps
-            or files require for the optional normalization arguments
+            @param normalizations: CalculateNormISIS object contains the workspace, ReductionSteps or files require
+            for the optional normalization arguments
         """
         if not issubclass(normalizations.__class__, CalculateNormISIS):
             raise RuntimeError('Error initializing ConvertToQ, invalid normalization object')
@@ -2299,10 +2297,11 @@ class UnitsConvert(ReductionStep):
         self._bin_alg = bin_alg
 
     # TODO: consider how to remove the extra argument after workspace
-    def execute(self, workspace, bin_alg=None):
+    def execute(self, reducer, workspace, bin_alg=None):
         """
             Runs the ConvertUnits() and a rebin algorithm on the specified
             workspace
+            @param reducer:
             @param workspace: the name of the workspace to convert
             @param workspace: the name of the workspace to convert
         """
@@ -2394,7 +2393,7 @@ class SliceEvent(ReductionStep):
             binning = reducer.settings["events.binning"]
         else:
             binning = ""
-        _hist, (_tot_t, _tot_c, _part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
+        _hist, (_tot_t, tot_c, _part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
         self.scale = part_c / tot_c
 
 
@@ -2428,7 +2427,7 @@ class BaseBeamFinder(ReductionStep):
         """
         return [self._beam_center_x, self._beam_center_y]
 
-    def execute(self, _reducer, _workspace=None):
+    def execute(self, reducer, workspace=None):
         return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
 
     def update_beam_center(self, beam_center_x, beam_center_y):
@@ -2446,12 +2445,12 @@ class UserFile(ReductionStep):
         Reads an ISIS SANS mask file of the format described here mantidproject.org/SANS_User_File_Commands
     """
 
-    def __init__(self, file_=None):
+    def __init__(self, file=None):
         """
             Optionally sets the location of the file and initialise the reader
         """
         super(UserFile, self).__init__()
-        self.filename = file_
+        self.filename = file
         self._incid_monitor_lckd = False
         self.executed = False
 
@@ -2480,7 +2479,7 @@ class UserFile(ReductionStep):
         }
         return fresh
 
-    def execute(self, reducer, _workspace=None):
+    def execute(self, reducer, workspace=None):
         if self.filename is None:
             raise AttributeError('The user file must be set, use the function MaskFile')
         user_file = self.filename
@@ -2838,8 +2837,8 @@ class UserFile(ReductionStep):
                 if filepath and not os.path.isfile(filepath):
                     raise RuntimeError("The following MON/DIRECT datafile does not exist: %s" % filepath)
 
-                type_ = parts[0]
-                parts = type_.split("/")
+                _type = parts[0]
+                parts = _type.split("/")
                 if len(parts) == 1:
                     if parts[0].upper() == 'DIRECT':
                         reducer.instrument.cur_detector().correction_file \
@@ -3233,7 +3232,7 @@ class UserFile(ReductionStep):
         except:
             # If we throw a runtime here, then we cannot execute 'Load Data'.
             raise RuntimeError("Invalid input for tube calibration file (" + path2file + " ).\n" \
-                               "Please do not run a reduction as it will not successfully complete.\n")
+                   "Please do not run a reduction as it will not successfully complete.\n")
 
     def _read_maskfile_line(self, line, reducer):
         try:
@@ -3252,7 +3251,7 @@ class GetOutputName(ReductionStep):
         super(GetOutputName, self).__init__()
         self.name_holder = ['problem_setting_name']
 
-    def execute(self, reducer):
+    def execute(self, reducer, workspace=None):
         """
             Generates the name of the sample workspace and changes the
             loaded workspace to that.
@@ -3267,7 +3266,7 @@ class ReplaceErrors(ReductionStep):
         super(ReplaceErrors, self).__init__()
         self.name = None
 
-    def execute(self, workspace):
+    def execute(self, reducer, workspace):
         ReplaceSpecialValues(InputWorkspace=workspace, OutputWorkspace=workspace, NaNValue="0", InfinityValue="0")
 
 
@@ -3303,7 +3302,7 @@ class StripEndNans(ReductionStep):
         else:
             return False
 
-    def execute(self, workspace):
+    def execute(self, reducer, workspace):
         """
             Trips leading and trailing Nan values from workspace
             @param reducer: unused
@@ -3465,7 +3464,7 @@ class GetSampleGeom(ReductionStep):
     height = property(get_height, set_height, None, None)
     thickness = property(get_thickness, set_thickness, None, None)
 
-    def execute(self, workspace):
+    def execute(self, reducer, workspace):
         """
             Reads the geometry information stored in the workspace
             but doesn't replace values that have been previously set
