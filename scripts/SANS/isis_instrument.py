@@ -1,11 +1,11 @@
-# pylint: disable=too-many-lines, invalid-name
+# pylint: disable=too-many-lines, invalid-name, bare-except
 import math
 import os
 import re
 import sys
 
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace, ExperimentInfo
+from mantid.api import WorkspaceGroup, Workspace
 from mantid.kernel import Logger
 from mantid.kernel import V3D
 import SANSUtility as su
@@ -317,8 +317,10 @@ class DetectorBank(object):
         self.set_first_spec_num(previousDet.last_spec_num + 1)
 
     def name(self, form='long'):
-        if form.lower() == 'inst_view': form = 'long'
-        if not self._names.has_key(form): form = 'long'
+        if form.lower() == 'inst_view':
+            form = 'long'
+        if not self._names.has_key(form):
+            form = 'long'
 
         return self._names[form]
 
@@ -581,7 +583,7 @@ class ISISInstrument(BaseInstrument):
             return self.DETECTORS['high-angle']
 
     def getDetector(self, requested):
-        for n, detect in self.DETECTORS.iteritems():
+        for _n, detect in self.DETECTORS.iteritems():
             if detect.isAlias(requested):
                 return detect
         sanslog.notice("getDetector: Detector " + requested + "not found")
@@ -1574,11 +1576,9 @@ class LARMOR(ISISInstrument):
         MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=yshift, Z=zshift)
 
         # Deal with the angle value
-        total_x_shift = self._rotate_around_y_axis(workspace=ws,
-                                                   component_name=detBench.name(),
-                                                   x_beam=xbeam,
-                                                   x_scale_factor=XSF,
-                                                   bench_rotation=BENCH_ROT)
+        _total_x_shift = self._rotate_around_y_axis(workspace=ws, component_name=detBench.name(),
+                                                    x_beam=xbeam, x_scale_factor=XSF,
+                                                    bench_rotation=BENCH_ROT)
 
         # Set the beam centre position afte the move
         self.beam_centre_pos1_after_move = xbeam  # Need to provide the angle in 1000th of a degree
