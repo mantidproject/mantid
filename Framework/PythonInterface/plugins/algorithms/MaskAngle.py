@@ -44,12 +44,12 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         try:
             if type(ws).__name__ == "WorkspaceGroup":
                 for w in ws:
-                    src = w.getInstrument().getSource().getPos()
-            else: 
-                source = ws.getInstrument().getSource().getPos()
+                    w.getInstrument().getSource().getPos()
+            else:
+                ws.getInstrument().getSource().getPos()
         except (RuntimeError, ValueError, AttributeError, TypeError):
             issues["Workspace"] = "Workspace must have an associated instrument."
-   
+
         return issues
 
     def PyExec(self):
