@@ -101,23 +101,34 @@ PointGroup_sptr SortHKL::getPointgroup() const {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void SortHKL::exec() {
+double SortHKL::getIOverSigmaSum(const std::vector<double> &sigmas,
+                                 const std::vector<double> &intensities) const {
+  std::vector<double> iOverSigma;
+  iOverSigma.reserve(sigmas.size());
+  std::transform(intensities.begin(), intensities.end(), sigmas.begin(),
+                 std::back_inserter(iOverSigma), std::divides<double>());
 
-  PeaksWorkspace_sptr InPeaksW = getProperty("InputWorkspace");
-  // HKL will be overwritten by equivalent HKL but never seen by user
-  PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
-  if (peaksW != InPeaksW)
-    peaksW.reset(InPeaksW->clone().release());
+  return std::accumulate(iOverSigma.begin(), iOverSigma.end(), 0.0);
+}
+
+double SortHKL::getMeanOfSquared(const std::vector<double> &data) const {
+  double sumOfSquares = std::accumulate(
+      data.begin(), data.end(), 0.0,
+      [](double sum, double value) { return sum + value * value; });
+
+  return sumOfSquares / static_cast<double>(data.size());
+}
+
+ITableWorkspace_sptr
+SortHKL::getStatisticsTable(const std::string &name) const {
+  TableWorkspace_sptr tablews;
 
   // Init or append to a table workspace
   bool append = getProperty("Append");
-  TableWorkspace_sptr tablews;
-  const std::string tableName = getProperty("StatisticsTable");
-  if (append && AnalysisDataService::Instance().doesExist(tableName)) {
-    tablews =
-        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(tableName);
+  if (append && AnalysisDataService::Instance().doesExist(name)) {
+    tablews = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(name);
   } else {
-    tablews = boost::shared_ptr<TableWorkspace>(new TableWorkspace());
+    tablews = boost::make_shared<TableWorkspace>();
     tablews->addColumn("str", "Resolution Shell");
     tablews->addColumn("int", "No. of Unique Reflections");
     tablews->addColumn("double", "Resolution Min");
@@ -129,198 +140,193 @@ void SortHKL::exec() {
     tablews->addColumn("double", "Data Completeness");
   }
 
-  // append to the table workspace
-  API::TableRow newrow = tablews->appendRow();
-  std::string name = getProperty("RowName");
-  newrow << name;
+  return tablews;
+}
 
-  std::vector<Peak> &peaks = peaksW->getPeaks();
-  int NumberPeaks = peaksW->getNumberPeaks();
-  for (int i = 0; i < NumberPeaks; i++) {
-    V3D hkl1 = round(peaks[i].getHKL());
-    peaks[i].setHKL(hkl1);
+std::pair<double, double>
+SortHKL::getLambdaLimits(const IPeaksWorkspace_sptr &peaksWs) const {
+  // Sort by wavelength
+  std::vector<std::pair<std::string, bool>> criteria;
+  criteria.push_back(std::make_pair("wavelength", true));
+  peaksWs->sort(criteria);
+
+  return ResolutionLimits(
+      peaksWs->getPeak(0).getWavelength(),
+      peaksWs->getPeak(peaksWs->getNumberPeaks() - 1).getWavelength());
+}
+
+/**
+ * @brief SortHKL::getUniqueReflections
+ * @param peaks
+ * @param outputPeaksWorkspace
+ * @return
+ */
+std::map<V3D, UniqueReflection> SortHKL::getUniqueReflections(
+    const std::vector<Peak> &peaks,
+    const IPeaksWorkspace_sptr &outputPeaksWorkspace) const {
+  ReflectionCondition_sptr centering = getCentering();
+  PointGroup_sptr pointGroup = getPointgroup();
+
+  std::pair<double, double> dLimits =
+      getResolutionLimitsD(outputPeaksWorkspace);
+
+  std::map<V3D, UniqueReflection> uniqueReflectionInRange =
+      getPossibleUniqueReflections(dLimits.pointGroup, centering);
+
+  for (auto const &peak : peaks) {
+    V3D hkl = peak.getHKL();
+    hkl.round();
+
+    uniqueReflectionInRange.at(pointGroup->getReflectionFamily(hkl))
+        .addPeak(peak);
   }
 
-  double Chisq = 0.0;
-  for (int i = int(NumberPeaks) - 1; i >= 0; --i) {
-    if (peaks[i].getIntensity() == 0.0 || peaks[i].getHKL() == V3D(0, 0, 0))
-      peaksW->removePeak(i);
-  }
+  return uniqueReflectionInRange;
+}
 
-  NumberPeaks = peaksW->getNumberPeaks();
-  if (NumberPeaks == 0) {
+void SortHKL::sortOutputPeaksByHKL(IPeaksWorkspace_sptr outputPeaksWorkspace) {
+  std::vector<std::pair<std::string, bool>> criteria;
+  // Sort by HKL
+  criteria.push_back(std::make_pair("H", true));
+  criteria.push_back(std::make_pair("K", true));
+  criteria.push_back(std::make_pair("L", true));
+  outputPeaksWorkspace->sort(criteria);
+}
+
+void SortHKL::exec() {
+  PeaksWorkspace_sptr InPeaksW = getProperty("InputWorkspace");
+
+  PeaksWorkspace_sptr outputPeaksWorkspace = getProperty("OutputWorkspace");
+  if (outputPeaksWorkspace != InPeaksW)
+    outputPeaksWorkspace.reset(InPeaksW->clone().release());
+
+  // Get reference to peaks vector in PeaksWorkspace
+  const std::vector<Peak> &peaks = outputPeaksWorkspace->getPeaks();
+
+  // Remove all non-zero peaks
+  peaks.erase(std::remove_if(peaks.begin(), peaks.end(), [](const Peak &peak) {
+    return peak.getIntensity() <= 0.0 || peak.getSigmaIntensity() <= 0.0 ||
+           peak.getHKL() == V3D(0, 0, 0);
+  }), peaks.end());
+
+  if (peaks.size() == 0) {
     g_log.error() << "Number of peaks should not be 0 for SortHKL.\n";
     return;
   }
 
-  ReflectionCondition_sptr centering = getCentering();
-  PointGroup_sptr pointGroup = getPointgroup();
+  std::map<V3D, UniqueReflection> uniqueReflections =
+      getUniqueReflections(peaks, outputPeaksWorkspace);
 
-  std::vector<V3D> possibleUniqueReflections =
-      getPossibleUniqueReflections(peaksW, pointGroup, centering);
+  double rMergeNumerator = 0.0;
+  double rPimNumerator = 0.0;
+  double intensitySumRValues = 0.0;
+  double iOverSigmaSum = 0.0;
+  size_t uniqueCount = 0;
+  double chiSquared = 0.0;
 
-  std::vector<V3D> measuredUniqueReflections;
-  measuredUniqueReflections.reserve(possibleUniqueReflections.size());
+  peaks.clear();
 
-  int equivalent = 0;
-  for (int i = 0; i < NumberPeaks; i++) {
-    V3D hkl1 = peaks[i].getHKL();
-    measuredUniqueReflections.push_back(pointGroup->getReflectionFamily(hkl1));
+  for (auto &unique : uniqueReflections) {
+    size_t count = unique.second.count();
 
-    bool found = false;
-    for (int j = i + 1; j < NumberPeaks; j++) {
-      V3D hkl2 = peaks[j].getHKL();
-      if (pointGroup->isEquivalent(hkl1, hkl2)) {
-        peaks[j].setHKL(hkl1);
-        found = true;
+    /* Since all possible unique reflections are explored
+     * there may be 0 observations for some of them.
+     * In that case, nothing can be done.*/
+    if (count > 0) {
+      ++uniqueCount;
+
+      /* Remove any outliers from the statistics calculation,
+       * so it needs to be done before the actual statistics are calculated.
+       */
+      unique.second.removeOutliers();
+
+      // I/sigma is calculated for all reflections, even if there is only one
+      // observation.
+      std::vector<double> intensities = unique.second.getIntensities();
+      std::vector<double> sigmas = unique.second.getSigmas();
+
+      // Accumulate the I/sigma's for current reflection into sum
+      iOverSigmaSum += getIOverSigmaSum(sigmas, intensities);
+
+      if (count > 1) {
+        // Get mean, standard deviation for intensities
+        Statistics intensityStatistics = Kernel::getStatistics(intensities);
+        double meanIntensity = intensityStatistics.mean;
+
+        /* This was in the original algorithm, not entirely sure where it is
+         * used. It's basically the sum of all relative standard deviations.
+         * In a perfect data set with all equivalent reflections exactly
+         * equivalent that would be 0. */
+        chiSquared += intensityStatistics.standard_deviation / meanIntensity;
+
+        // For both RMerge and RPim sum(|I - <I>|) is required
+        double sumOfDeviationsFromMean =
+            std::accumulate(intensities.begin(), intensities.end(), 0.0,
+                            [meanIntensity](double sum, double intensity) {
+                              return sum + fabs(intensity - meanIntensity);
+                            });
+
+        // Accumulate into total sum for numerator of RMerge
+        rMergeNumerator += sumOfDeviationsFromMean;
+
+        // And Rpim, the sum is weighted by a factor depending on N
+        double rPimFactor = sqrt(1.0 / (static_cast<double>(count) - 1.0));
+        rPimNumerator += (rPimFactor * sumOfDeviationsFromMean);
+
+        // Collect sum of intensities for R-value calculation
+        double reflectionIntensitySum =
+            std::accumulate(intensities.begin(), intensities.end(), 0.0);
+
+        intensitySumRValues += reflectionIntensitySum;
+
+        // The original algorithm sets the intensities and sigmas to the mean.
+        double sqrtOfMeanSqrSigma = sqrt(getMeanOfSquared(sigmas));
+        unique.second.setPeaksIntensityAndSigma(meanIntensity,
+                                                sqrtOfMeanSqrSigma);
       }
-    }
-    if (found)
-      equivalent++;
-  }
 
-  std::sort(measuredUniqueReflections.begin(), measuredUniqueReflections.end());
-  measuredUniqueReflections.erase(std::unique(measuredUniqueReflections.begin(),
-                                              measuredUniqueReflections.end()),
-                                  measuredUniqueReflections.end());
-
-  std::vector<std::pair<std::string, bool>> criteria;
-  // Sort by wavelength
-  criteria.push_back(std::pair<std::string, bool>("wavelength", true));
-  peaksW->sort(criteria);
-  int unique = static_cast<int>(measuredUniqueReflections.size());
-  // table workspace output
-  newrow << unique << peaks[0].getWavelength()
-         << peaks[NumberPeaks - 1].getWavelength();
-
-  criteria.clear();
-  // Sort by HKL
-  criteria.push_back(std::pair<std::string, bool>("H", true));
-  criteria.push_back(std::pair<std::string, bool>("K", true));
-  criteria.push_back(std::pair<std::string, bool>("L", true));
-  peaksW->sort(criteria);
-
-  std::vector<size_t> multiplicity;
-  std::vector<double> IsigI;
-  for (int i = 0; i < NumberPeaks; i++) {
-    IsigI.push_back(peaks[i].getIntensity() / peaks[i].getSigmaIntensity());
-  }
-  Statistics statsIsigI = getStatistics(IsigI);
-  IsigI.clear();
-
-  std::vector<double> data, sig2;
-  std::vector<int> peakno;
-  double rSum = 0, rpSum = 0, f2Sum = 0;
-  V3D hkl1;
-  for (int i = 1; i < NumberPeaks; i++) {
-    hkl1 = peaks[i - 1].getHKL();
-    f2Sum += peaks[i - 1].getIntensity();
-    if (i == 1) {
-      peakno.push_back(0);
-      data.push_back(peaks[i - 1].getIntensity());
-      sig2.push_back(std::pow(peaks[i - 1].getSigmaIntensity(), 2));
-    }
-    V3D hkl2 = peaks[i].getHKL();
-    if (hkl1 == hkl2) {
-      peakno.push_back(i);
-      data.push_back(peaks[i].getIntensity());
-      sig2.push_back(std::pow(peaks[i].getSigmaIntensity(), 2));
-      if (i == NumberPeaks - 1) {
-        f2Sum += peaks[i].getIntensity();
-        Outliers(data, sig2);
-        if (static_cast<int>(data.size()) > 1) {
-          Statistics stats = getStatistics(data);
-          Chisq += stats.standard_deviation / stats.mean;
-          Statistics stats2 = getStatistics(sig2);
-          std::vector<int>::iterator itpk;
-          for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk) {
-            double F2 = peaks[*itpk].getIntensity();
-            rSum += std::fabs(F2 - stats.mean);
-            rpSum += std::sqrt(1.0 / double(data.size() - 1)) *
-                     std::fabs(F2 - stats.mean);
-            peaks[*itpk].setIntensity(stats.mean);
-            peaks[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
-          }
-        }
-        multiplicity.push_back(data.size());
-        peakno.clear();
-        data.clear();
-        sig2.clear();
-      }
-    } else {
-      Outliers(data, sig2);
-      if (static_cast<int>(data.size()) > 1) {
-        Statistics stats = getStatistics(data);
-        Chisq += stats.standard_deviation / stats.mean;
-        Statistics stats2 = getStatistics(sig2);
-        std::vector<int>::iterator itpk;
-        for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk) {
-          double F2 = peaks[*itpk].getIntensity();
-          rSum += std::fabs(F2 - stats.mean);
-          rpSum += std::sqrt(1.0 / double(data.size() - 1)) *
-                   std::fabs(F2 - stats.mean);
-          peaks[*itpk].setIntensity(stats.mean);
-          peaks[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
-        }
-      }
-      multiplicity.push_back(data.size());
-      peakno.clear();
-      data.clear();
-      sig2.clear();
-      hkl1 = hkl2;
-      peakno.push_back(i);
-      data.push_back(peaks[i].getIntensity());
-      sig2.push_back(std::pow(peaks[i].getSigmaIntensity(), 2));
+      unique.second.appendPeaksToVector(peaks);
     }
   }
-  Statistics statsMult = getStatistics(multiplicity);
-  multiplicity.clear();
-  // statistics to output table workspace
+
+  double rMerge = rMergeNumerator / intensitySumRValues;
+  double rPim = rPimNumerator / intensitySumRValues;
+
+  sortOutputPeaksByHKL(outputPeaksWorkspace);
+
+  double meanIOverSigma = iOverSigmaSum / static_cast<double>(peaks.size());
+
+  std::pair<double, double> lambdaLimits =
+      getLambdaLimits(outputPeaksWorkspace);
+
+  std::string name = getProperty("RowName");
 
   double uniqueReflectionsCount = 0.0;
   if (name.substr(0, 4) != "bank") {
-    uniqueReflectionsCount =
-        static_cast<double>(possibleUniqueReflections.size());
+    uniqueReflectionsCount = static_cast<double>(uniqueReflections.size());
   }
 
-  newrow << statsMult.mean << statsIsigI.mean << 100.0 * rSum / f2Sum
-         << 100.0 * rpSum / f2Sum
-         << 100.0 * double(unique) / double(uniqueReflectionsCount);
-  data.clear();
-  sig2.clear();
-  // Reset hkl of equivalent peaks to original value
-  for (int i = 0; i < NumberPeaks; i++) {
-    peaks[i].resetHKL();
+  // Generate Statistics table
+  const std::string tableName = getProperty("StatisticsTable");
+  ITableWorkspace_sptr statisticsTable = getStatisticsTable(tableName);
+
+  if (!statisticsTable) {
+    throw std::runtime_error("Problem with ");
   }
-  setProperty("OutputWorkspace", peaksW);
-  setProperty("OutputChi2", Chisq);
-  setProperty("StatisticsTable", tablews);
-  AnalysisDataService::Instance().addOrReplace(tableName, tablews);
-}
-void SortHKL::Outliers(std::vector<double> &data, std::vector<double> &sig2) {
-  if (data.size() < 3)
-    return;
-  std::vector<double> Zscore = getZscore(data);
-  std::vector<size_t> banned;
-  for (size_t i = 0; i < data.size(); ++i) {
-    if (Zscore[i] > 3.0) {
-      banned.push_back(i);
-      g_log.notice() << "Data (I):";
-      for (size_t j = 0; j < data.size(); ++j)
-        g_log.notice() << data[j] << "  ";
-      g_log.notice() << "\nData (sigI^2):";
-      for (size_t j = 0; j < data.size(); ++j)
-        g_log.notice() << data[j] << "  " << sig2[j];
-      g_log.notice() << "\nOutlier removed (I and sigI^2):" << data[i] << "  "
-                     << sig2[i] << "\n";
-    }
-  }
-  // delete banned peaks
-  for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin();
-       it != banned.rend(); ++it) {
-    data.erase(data.begin() + (*it));
-    sig2.erase(sig2.begin() + (*it));
-  }
+  // append to the table workspace
+  API::TableRow newrow = statisticsTable->appendRow();
+
+  newrow << name << static_cast<int>(uniqueCount) << lambdaLimits.first
+         << lambdaLimits.second
+         << static_cast<double>(peaks.size()) / static_cast<double>(uniqueCount)
+         << meanIOverSigma << 100.0 * rMerge << 100.0 * rPim
+         << 100.0 * static_cast<double>(uniqueCount) /
+                static_cast<double>(uniqueReflectionsCount);
+
+  setProperty("OutputWorkspace", outputPeaksWorkspace);
+  setProperty("OutputChi2", chiSquared);
+  setProperty("StatisticsTable", statisticsTable);
+  AnalysisDataService::Instance().addOrReplace(tableName, statisticsTable);
 }
 
 /** Rounds the V3D to integer values
@@ -335,26 +341,10 @@ V3D SortHKL::round(V3D hkl) {
   return hkl1;
 }
 
-std::vector<V3D> SortHKL::getPossibleUniqueReflections(
-    const IPeaksWorkspace_sptr &peaks, const PointGroup_sptr &pointGroup,
+std::map<V3D, UniqueReflection> SortHKL::getPossibleUniqueReflections(
+    double dMin, double dMax, const PointGroup_sptr &pointGroup,
     const ReflectionCondition_sptr &centering) const {
 
-  UnitCell cell = peaks->sample().getOrientedLattice();
-
-  std::vector<double> dValues;
-  dValues.reserve(peaks->getNumberPeaks());
-
-  for (int i = 0; i < peaks->getNumberPeaks(); ++i) {
-    dValues.push_back(cell.d(peaks->getPeak(i).getHKL()));
-  }
-  std::sort(dValues.begin(), dValues.end());
-
-  double dMin = dValues.front();
-  double dMax = dValues.back();
-
-  // Get unit cell from sample
-
-  // Generate HKLS, transform to
   HKLGenerator generator(cell, dMin);
   HKLFilter_const_sptr dFilter =
       boost::make_shared<const HKLFilterDRange>(cell, dMin, dMax);
@@ -362,17 +352,14 @@ std::vector<V3D> SortHKL::getPossibleUniqueReflections(
       boost::make_shared<const HKLFilterCentering>(centering);
   HKLFilter_const_sptr filter = dFilter & centeringFilter;
 
-  std::vector<V3D> uniqueHKLs;
-  uniqueHKLs.reserve(generator.size());
+  // Generate map of UniqueReflection-objects with reflection family as key.
+  std::map<V3D, UniqueReflection> uniqueHKLs;
   for (auto hkl : generator) {
     if (filter->isAllowed(hkl)) {
-      uniqueHKLs.push_back(pointGroup->getReflectionFamily(hkl));
+      V3D hklFamily = pointGroup->getReflectionFamily(hkl);
+      uniqueHKLs.insert(std::make_pair(hklFamily, UniqueReflection(hklFamily)));
     }
   }
-
-  std::sort(uniqueHKLs.begin(), uniqueHKLs.end());
-  uniqueHKLs.erase(std::unique(uniqueHKLs.begin(), uniqueHKLs.end()),
-                   uniqueHKLs.end());
 
   return uniqueHKLs;
 }
