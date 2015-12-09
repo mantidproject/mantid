@@ -10,6 +10,8 @@
 #include "MantidMDAlgorithms/LoadSQW2.h"
 #include "MantidKernel/make_unique.h"
 
+#include <array>
+
 using Mantid::API::ExperimentInfo;
 using Mantid::API::IAlgorithm;
 using Mantid::API::IAlgorithm_uptr;
@@ -85,6 +87,23 @@ private:
 
   void checkGeometryAsExpected(const IMDEventWorkspace &outputWS) {
     TS_ASSERT_EQUALS(4, outputWS.getNumDims());
+    std::array<const char *, 4> ids{"Q1", "Q2", "Q3", "DeltaE"};
+    std::array<const char *, 4> names{"Q_\\zeta", "Q_\\xi", "Q_\\eta", "E"};
+    std::array<double, 8> ulimits{0.0962059, 2.02969,  -1.01689, -0.881047,
+                                  -1.7117,   -1.10604, 2.5,      147.5};
+    std::array<size_t, 4> nbins{3, 3, 2, 2};
+    std::array<const char *, 4> units{"A\\^-1", "A\\^-1", "A\\^-1", "mev"};
+    std::array<const char *, 4> frames{"HKL", "HKL", "HKL", "meV"};
+    for (size_t i = 0; i < 4; ++i) {
+      auto dim = outputWS.getDimension(i);
+      TS_ASSERT_EQUALS(ids[i], dim->getDimensionId());
+      TS_ASSERT_EQUALS(names[i], dim->getName());
+      TS_ASSERT_DELTA(ulimits[2 * i], dim->getMinimum(), 1e-04);
+      TS_ASSERT_DELTA(ulimits[2 * i + 1], dim->getMaximum(), 1e-04);
+      TS_ASSERT_EQUALS(nbins[i], dim->getNBins());
+      TS_ASSERT_EQUALS(units[i], dim->getUnits().ascii());
+      TS_ASSERT_EQUALS(frames[i], dim->getMDFrame().name());
+    }
   }
 
   void checkExperimentInfoAsExpected(const IMDEventWorkspace &outputWS) {

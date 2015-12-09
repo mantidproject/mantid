@@ -6,7 +6,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -15,9 +18,12 @@ namespace MDAlgorithms {
 using API::ExperimentInfo;
 using Geometry::Goniometer;
 using Geometry::OrientedLattice;
+using Geometry::MDHistoDimension;
+using Geometry::MDHistoDimensionBuilder;
 using Kernel::BinaryStreamReader;
 using Kernel::Logger;
 using Kernel::make_unique;
+using Kernel::Matrix;
 using Kernel::V3D;
 
 // Register the algorithm into the AlgorithmFactory
@@ -68,7 +74,8 @@ void LoadSQW2::exec() {
   auto mainHeader = readMainHeader();
   createOutputWorkspace();
   readAllSPEHeadersToWorkspace(mainHeader.nfiles);
-  skipDetectorData();
+  skipDetectorSection();
+  readDataSection();
 
   setProperty("OutputWorkspace", m_outputWS);
 }
@@ -202,8 +209,8 @@ void LoadSQW2::readSingleSPEHeader(API::ExperimentInfo &experiment) {
   run.storeHistogramBinBoundaries(
       std::vector<double>(enBins.begin(), enBins.end()));
 
-  // skip uoffset (4*4), u_to_rlu (16*4), ulen (4*4), ulabel_shape (2*4),
-  // ulabel (size based on shape)
+  // Skip the per-spe file projection information. We only use the
+  // information from the data section
   m_file->seekg(96, std::ios_base::cur);
   std::vector<int32_t> ulabel_shape(2);
   m_reader->read(ulabel_shape, 2);
@@ -215,7 +222,7 @@ void LoadSQW2::readSingleSPEHeader(API::ExperimentInfo &experiment) {
  * Skip the data in the detector section. The size is based on the number
  * of contribution detector parameters
  */
-void LoadSQW2::skipDetectorData() {
+void LoadSQW2::skipDetectorSection() {
   std::string filename, filepath;
   *m_reader >> filename >> filepath;
   int32_t ndet(0);
@@ -227,7 +234,106 @@ void LoadSQW2::skipDetectorData() {
     g_log.debug(os.str());
   }
   // 6 float fields all ndet long - group, x2, phi, azim, width, height
-  m_file->seekg(6 * 4 * ndet);
+  m_file->seekg(6 * 4 * ndet, std::ios_base::cur);
+}
+
+void LoadSQW2::readDataSection() {
+  skipDataSectionMetadata();
+  readSQWDimensions();
+}
+
+/**
+ * Skip metadata in data section: filename, filepath, title, lattice,
+ * projection information
+ */
+void LoadSQW2::skipDataSectionMetadata() {
+  std::string filename, filepath, title;
+  *m_reader >> filename >> filepath >> title;
+  // skip alatt, angdeg, uoffset, u_to_rlu, ulen
+  m_file->seekg(120, std::ios_base::cur);
+}
+
+/**
+ * Read and create the SQW dimensions on the output
+ */
+void LoadSQW2::readSQWDimensions() {
+  // dimension labels
+  std::vector<int32_t> ulabelShape(2);
+  m_reader->read(ulabelShape, 2);
+  std::vector<std::string> dimNames;
+  m_reader->read(dimNames, ulabelShape,
+                 BinaryStreamReader::MatrixOrdering::ColumnMajor);
+  // projection information
+  int32_t npax(0);
+  *m_reader >> npax;
+  int32_t niax(4 - npax);
+  if (niax > 0) {
+    // skip iaxes, iint (2 values per axis)
+    m_file->seekg(niax * sizeof(int32_t) + 2 * niax * sizeof(float),
+                  std::ios_base::cur);
+  }
+  std::vector<int32_t> nbins(npax, 1);
+  int32_t signalLength(1);
+  if (npax > 0) {
+    // indices (starting at 1) of projection axes
+    std::vector<int32_t> pax;
+    m_reader->read(pax, npax);
+    for (int32_t i = 0; i < npax; ++i) {
+      int32_t np(0);
+      *m_reader >> np;
+      nbins[pax[i] - 1] = np - 1;
+      signalLength *= np - 1;
+      m_file->seekg(np * sizeof(float), std::ios_base::cur);
+    }
+    // skip display axes
+    m_file->seekg(npax * sizeof(int32_t), std::ios_base::cur);
+  }
+  // skip signal(float), error data(float), npix(int64)
+  m_file->seekg(2 * signalLength * sizeof(float) +
+                    signalLength * sizeof(int64_t),
+                std::ios_base::cur);
+  // dimensions limits
+  Matrix<float> urange;
+  m_reader->read(urange, {int32_t(2), int32_t(4)},
+                 BinaryStreamReader::MatrixOrdering::ColumnMajor);
+  assert(urange.numRows() == 2 && urange.numCols() == 4);
+
+  if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+    std::stringstream os;
+    os << "Data:\n"
+       << "    labels: ";
+    for (const auto &val : dimNames) {
+      os << val << ",";
+    }
+    os << "\n";
+    os << "    ulimits: ";
+    for (size_t i = 0; i < 4; ++i) {
+      os << "(" << urange[0][i] << "," << urange[1][i] << ") ";
+    }
+    os << "\n";
+    os << "    nbins: (";
+    for (const auto &val : nbins) {
+      os << val << ",";
+    }
+    os << ")\n";
+    g_log.debug(os.str());
+  }
+
+  // Create dimensions
+  const char *ids[] = {"Q1", "Q2", "Q3", "DeltaE"};
+  const char *units[] = {"A\\^-1", "A\\^-1", "A\\^-1", "mev"};
+  const char *frames[] = {"HKL", "HKL", "HKL", "meV"};
+  for (size_t i = 0; i < 4; ++i) {
+    MDHistoDimensionBuilder builder;
+    builder.setId(ids[i]);
+    builder.setName(dimNames[i]);
+    builder.setMin(urange[0][i]);
+    builder.setMax(urange[1][i]);
+    builder.setNumBins(static_cast<size_t>(nbins[i]));
+    builder.setFrameName(frames[i]);
+    builder.setUnits(units[i]);
+    m_outputWS->addDimension(builder.create());
+  }
 }
 
 } // namespace MDAlgorithms
