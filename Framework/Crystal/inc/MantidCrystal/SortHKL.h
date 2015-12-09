@@ -142,8 +142,8 @@ private:
   API::ITableWorkspace_sptr getStatisticsTable(const std::string &name) const;
 
   std::pair<double, double>
-  getLambdaLimits(const API::IPeaksWorkspace_sptr &peaksWs,
-                      const std::vector<DataObjects::Peak> &peaks) const;
+  getLambdaLimits(const API::IPeaksWorkspace_sptr &peaksWs) const;
+
   std::map<Kernel::V3D, UniqueReflection> getUniqueReflections(
       const std::vector<DataObjects::Peak> &peaks,
       const API::IPeaksWorkspace_sptr &outputPeaksWorkspace) const;
