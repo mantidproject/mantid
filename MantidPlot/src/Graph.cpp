@@ -4035,8 +4035,15 @@ void Graph::copy(Graph *g) {
   for (int i = 0; i < g->curves(); i++) {
     QwtPlotItem *it = dynamic_cast<QwtPlotItem *>(g->curve(i));
 
-    if (it == nullptr)
-      continue;
+	if (it == nullptr)
+	{
+		Spectrogram *s = g->spectrogram();
+		Spectrogram *s_cpy = s->copy();
+		s_cpy->setData(s->data());
+		s_cpy->setColorMapPen();
+		plotSpectrogram(s_cpy, (CurveType)g->curveType(i));
+		continue;
+	}
 
     if (it->rtti() == QwtPlotItem::Rtti_PlotUserItem) {
       MantidMatrixCurve *mmc = dynamic_cast<MantidMatrixCurve *>(it);
