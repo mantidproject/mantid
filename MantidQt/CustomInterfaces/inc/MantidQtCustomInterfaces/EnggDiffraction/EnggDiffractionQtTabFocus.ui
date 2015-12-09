@@ -606,6 +606,13 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_13">
      <item>
+      <widget class="QPushButton" name="pushButton_stopFocus">
+       <property name="text">
+        <string>Stop Focus</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_11">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

@@ -104,12 +104,6 @@ void JumpFit::run() {
 }
 
 /**
- * Runs the JumpFit algorithm with preview parameters to update the preview
- * plot.
- */
-void JumpFit::runPreviewAlgorithm() { runImpl(); }
-
-/**
  * Runs algorithm.
  *
  * @param plot Enable/disable plotting
@@ -217,10 +211,6 @@ void JumpFit::fitAlgDone(bool error) {
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
           paramTableName);
 
-  // Don't run the algorithm when updating parameter values
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(runPreviewAlgorithm()));
-
   for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
     QString propName(it.key());
     if (propName.startsWith("parameter_")) {
@@ -232,8 +222,6 @@ void JumpFit::fitAlgDone(bool error) {
     }
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(runPreviewAlgorithm()));
 }
 
 /**
@@ -273,12 +261,6 @@ void JumpFit::loadSettings(const QSettings &settings) {
  * @param filename :: The name of the workspace to plot
  */
 void JumpFit::handleSampleInputReady(const QString &filename) {
-  // Disable things that run the preview algorithm
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(runPreviewAlgorithm()));
-  disconnect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString &)),
-             this, SLOT(runPreviewAlgorithm()));
-
   // Scale to convert to HWHM
   IAlgorithm_sptr scaleAlg = AlgorithmManager::Instance().create("Scale");
   scaleAlg->initialize();
@@ -321,15 +303,6 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
     m_uiForm.cbWidth->setEnabled(false);
     emit showMessageBox("Workspace doesn't appear to contain any width data");
   }
-
-  // Update preview plot
-  runPreviewAlgorithm();
-
-  // Re-enable things that run the preview algorithm
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(runPreviewAlgorithm()));
-  connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(runPreviewAlgorithm()));
 }
 
 /**
@@ -462,10 +435,6 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
     }
   }
 
-  // Don't run the algorithm when updating parameter values
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(runPreviewAlgorithm()));
-
   // Add new parameter elements
   QStringList parameters = getFunctionParameters(functionName);
   for (auto it = parameters.begin(); it != parameters.end(); ++it) {
@@ -475,10 +444,29 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
     m_properties["FitFunction"]->addSubProperty(m_properties[name]);
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(runPreviewAlgorithm()));
+  clearPlot();
+}
 
-  runPreviewAlgorithm();
+/**
+ * clears the previous plot curves and readds sample
+ */
+void JumpFit::clearPlot() {
+  m_uiForm.ppPlot->clear();
+  const std::string sampleName =
+      m_uiForm.dsSample->getCurrentDataName().toStdString();
+  if (sampleName.compare("") != 0) {
+    MatrixWorkspace_sptr sample =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleName);
+    if (sample && m_spectraList.size() > 0) {
+      m_uiForm.cbWidth->setEnabled(true);
+
+      std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
+
+      m_uiForm.ppPlot->clear();
+      m_uiForm.ppPlot->addSpectrum("Sample", sample,
+                                   m_spectraList[currentWidth]);
+    }
+  }
 }
 
 } // namespace IDA
