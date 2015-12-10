@@ -460,10 +460,23 @@ def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
     ncfile.createDimension('y', ysize)
     ncfile.createDimension('z', zsize)
     print " Creating netCDF volume data variable"
-    data = ncfile.createVariable('data', np.dtype('int16').char, ('x','y','z'))
+    dtype = 'int16'
+    data = ncfile.createVariable('data', np.dtype(dtype).char, ('x','y','z'))
     print " Data shape: {0}".format(data.shape)
     print " Loading/assigning data..."
-    data[:, :, :] = recon_data[0:xsize, 0:ysize, 0:zsize]
+
+    # handle differences in pixel type
+    save_data = recon_data
+    if recon_data.dtype != dtype:
+        save_data = np.zeros(recon_data.shape, dtype='float32')
+        max_vol = np.amax(recon_data)
+        min_vol = np.amin(recon_data)
+        vol_range = max_vol - min_vol
+        scale_factor = (np.iinfo(dtype).max - np.iinfo(dtype).min) / vol_range
+        save_data = scale_factor * (recon_data - min_vol)
+        save_data = save_data.astype(dtype=dtype)
+
+    data[:, :, :] = save_data[0:xsize, 0:ysize, 0:zsize]
     print " Closing netCDF file: {0}".format(nc_path)
     ncfile.close()
 
