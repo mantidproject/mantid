@@ -6,6 +6,22 @@ from mantid.geometry import PointGroupFactory
 
 
 class SortHKLTest(stresstesting.MantidStressTest):
+    ''' System test for SortHKL
+
+    This system test compares some of the output of SortHKL to statistics produced
+    by running the program SORTAV [1] on the same data set.
+
+    Since SORTAV processes HKL-files and those are small, the peaks are loaded from
+    HKL-files and put into an empty PeaksWorkspace. Two additional files are read
+    for the test, the parameters for SetUB in JSON-format and some of the output from
+    the sortav.lp file which contains the output after a SORTAV-run.
+
+    This system test is there to ensure the correctness what SortHKL does against
+    the output of an established program.
+
+    [1] SORTAV: ftp://ftp.hwi.buffalo.edu/pub/Blessing/Drear/sortav.use
+        (and references therein).
+    '''
     def runTest(self):
         self._ws = CreateSimulationWorkspace(Instrument='TOPAZ',
                                              BinParams='0,10000,20000',
@@ -94,9 +110,6 @@ class SortHKLTest(stresstesting.MantidStressTest):
         return overall_statistics
 
     def _compare_statistics(self, statistics, reference_statistics, space_group):
-        print statistics
-        print reference_statistics
-
         self.assertEquals(round(statistics['Multiplicity'], 1), round(reference_statistics['<N>'], 1))
         self.assertEquals(round(statistics['Rpim'], 2), round(100.0 * reference_statistics['Rm'], 2))
         self.assertEquals(statistics['No. of Unique Reflections'], int(reference_statistics['Nunique']))
