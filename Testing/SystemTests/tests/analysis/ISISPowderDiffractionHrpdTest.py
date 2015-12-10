@@ -198,7 +198,7 @@ class LoadTests(unittest.TestCase):
 class ISISPowderDiffractionHrpd2(stresstesting.MantidStressTest):
     def requiredFiles(self):
         return set(["hrp39191.raw", "hrp39187.raw", "hrp43022.raw", "hrpd/test/GrpOff/hrpd_new_072_01.cal",
-                    "hrpd/test/GrpOff/hrpd_new_072_01_corr.cal", "hrpd/test/cycle_09_2/tester/mtd2.pref"])
+                    "hrpd/test/GrpOff/hrpd_new_072_01_corr.cal", "hrpd/test/cycle_09_2_no_existv/tester/mtd2.pref"])
 
     def _clean_up_files(self, filenames, directories):
         try:
@@ -212,7 +212,7 @@ class ISISPowderDiffractionHrpd2(stresstesting.MantidStressTest):
         self._success = False
         expt = cry_ini.Files('hrpd', RawDir=(DIRS[0]), Analysisdir='test', forceRootDirFromScripts=False,
                              inputInstDir=DIRS[0])
-        expt.initialize('cycle_09_2', user='tester', prefFile='mtd2.pref')
+        expt.initialize('cycle_09_2_no_existv', user='tester', prefFile='mtd2.pref')
         expt.tell()
         cry_focus.focus_all(expt, "43022", Write_ExtV=False)
 
@@ -232,26 +232,26 @@ class ISISPowderDiffractionHrpd2(stresstesting.MantidStressTest):
         return self._success
 
     def cleanup(self):
-        filenames = (["hrpd/test/cycle_09_2/Calibration/hrpd_new_072_01_corr.cal",
-                      "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.gss",
-                      "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.nxs",
-                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b1_D.dat',
-                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b1_TOF.dat',
-                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_D.dat',
-                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_TOF.dat',
-                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_D.dat',
-                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_TOF.dat',
-                      'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal',
-                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped.nxs',
-                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-0.dat',
-                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-1.dat',
-                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-2.dat',
-                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-0.nxs',
-                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-0_.dat',
-                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-1.nxs',
-                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-1_.dat',
-                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-2.nxs',
-                      'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-2_.dat'])
+        filenames = (["hrpd/test/cycle_09_2_no_existv/Calibration/hrpd_new_072_01_corr.cal",
+                      "hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old.gss",
+                      "hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old.nxs",
+                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b1_D.dat',
+                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b1_TOF.dat',
+                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b2_D.dat',
+                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b2_TOF.dat',
+                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b3_D.dat',
+                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b3_TOF.dat',
+                      'hrpd/test/cycle_09_2_no_existv/tester/hrpd_new_072_01_corr.cal',
+                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped.nxs',
+                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-0.dat',
+                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-1.dat',
+                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-2.dat',
+                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-0.nxs',
+                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-0_.dat',
+                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-1.nxs',
+                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-1_.dat',
+                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-2.nxs',
+                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-2_.dat'])
         self._clean_up_files(filenames, DIRS)
 
 
@@ -273,10 +273,10 @@ class LoadTests2(unittest.TestCase):
     def test_upstripped_files(self):
         diff_places = 3
 
-        nxsfile = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped.nxs')
-        datfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-0.dat')
-        datfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-1.dat')
-        datfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-2.dat')
+        nxsfile = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped.nxs')
+        datfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-0.dat')
+        datfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-1.dat')
+        datfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-2.dat')
 
         nxsdata = LoadNexusProcessed(Filename=nxsfile, OutputWorkspace="nxs_workspace")
         data1 = LoadAscii(Filename=datfile1, OutputWorkspace="dat_workspace1")
@@ -305,12 +305,12 @@ class LoadTests2(unittest.TestCase):
     def test_van_s1_files(self):
         diff_places = 3
 
-        nxsfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-0.nxs')
-        nxsfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-1.nxs')
-        nxsfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-2.nxs')
-        datfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-0_.dat')
-        datfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-1_.dat')
-        datfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-2_.dat')
+        nxsfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-0.nxs')
+        nxsfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-1.nxs')
+        nxsfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-2.nxs')
+        datfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-0_.dat')
+        datfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-1_.dat')
+        datfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-2_.dat')
 
         nxsdata1 = LoadNexusProcessed(Filename=nxsfile1, OutputWorkspace="nxs_workspace1")
         nxsdata2 = LoadNexusProcessed(Filename=nxsfile2, OutputWorkspace="nxs_workspace2")
