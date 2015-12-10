@@ -4,7 +4,7 @@ from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
 
-   
+
 class LRScalingFactors(PythonAlgorithm):
     """
         This algorithm runs through a sequence of direct beam data sets
@@ -41,7 +41,7 @@ class LRScalingFactors(PythonAlgorithm):
         return "LiquidsReflectometryScalingFactors"
 
     def version(self):
-        return 2
+        return 1
 
     def summary(self):
         return "Liquids Reflectometer (REFL) scaling factor calculation"
@@ -73,7 +73,7 @@ class LRScalingFactors(PythonAlgorithm):
     def PyExec(self):
         # Verify whether we have a sorted list of runs.
         data_runs = self.getProperty("DirectBeamRuns").value
-        
+
         # We will be rejecting prompt pulses. We will store pulses here:
         self.prompt_pulses = None
 
@@ -100,7 +100,7 @@ class LRScalingFactors(PythonAlgorithm):
         # Current wavelength value
         self.wavelength = None
         self.wavelength_tolerance = 0.2
-        
+
         # Slit settings tolerance
         self.tolerance = 0.02
 
@@ -119,16 +119,17 @@ class LRScalingFactors(PythonAlgorithm):
 
             # Get wavelength, to make sure they all match across runs
             self.validate_wavelength(workspace)
+            
+            # Get attenuators
+            current_att = n_attenuator
+            n_attenuator = self.get_attenuators(workspace, i)
+            if current_att > n_attenuator:
+                raise RuntimeError("Runs were not supplied in increasing number of attenuators.")
 
             self.process_data(workspace,
                               peak_range=[int(peak_range[2*i]), int(peak_range[2*i+1])],
                               background_range=[int(background_range[2*i]), int(background_range[2*i+1])],
                               low_res_range=[int(lowres_range[2*i]), int(lowres_range[2*i+1])])
-
-            current_att = n_attenuator
-            n_attenuator = self.get_attenuators(workspace, i)
-            if current_att > n_attenuator:
-                raise RuntimeError("Runs were not supplied in increasing number of attenuators.")
 
             is_reference = False
 
@@ -196,12 +197,12 @@ class LRScalingFactors(PythonAlgorithm):
         """
             All supplied runs should have the same wavelength band.
             Verify that it is the case or raise an exception.
-            
+
             @param workspace: data set we are checking
         """
         # Get the wavelength for the workspace being considered
         wl = workspace.getRun().getProperty('LambdaRequest').value[0]
-        
+
         # If this is the first workspace we process, set the our
         # internal reference value to be used with the following runs.
         if self.wavelength is None:
@@ -215,7 +216,7 @@ class LRScalingFactors(PythonAlgorithm):
             Return the number of attenuators for each run as an array.
             Check whether the supplied attenuation array is of the same length,
             otherwise we will read the number of attenuators from the logs.
-            
+
             @param number_of_runs: number of runs we are processing
         """
         self.attenuators = self.getProperty("Attenuators").value
@@ -241,7 +242,7 @@ class LRScalingFactors(PythonAlgorithm):
         """
             Return a valid pixel range we can use in our calculations.
             The output is a list of length 2*number_of_runs.
-            
+
             @param property_name: name of the algorithm property specifying a pixel range
             @param number_of_runs: number of runs we are processing
         """
@@ -255,7 +256,7 @@ class LRScalingFactors(PythonAlgorithm):
                 pixel_range[2*i+1] = x_max
         elif len(pixel_range) < 2:
             raise RuntimeError("%s should have a length of at least 2." % property_name)
-            
+
         # Check that the peak range arrays are of the proper length
         if not len(pixel_range) == 2*number_of_runs:
             raise RuntimeError("Supplied peak/background arrays should be of the same length as the run array.")
@@ -361,15 +362,15 @@ class LRScalingFactors(PythonAlgorithm):
             # Accelerator rep rate
             # Use max here because the first entry can be zero
             frequency = max(workspace.getRun().getProperty('frequency').value)
-            
+
             # Go up to 4 frames - that should cover more than enough TOF
             self.prompt_pulses = [1.0e6 / frequency * i for i in range(4)]
-            
+
         for peak_x in self.prompt_pulses:
             if peak_x > x_min and peak_x < x_max:
                 return True
         return False
-    
+
     def save_scaling_factor_file(self):
         """
             Save the output. First see if the scaling factor file exists.
@@ -426,7 +427,7 @@ class LRScalingFactors(PythonAlgorithm):
                 if add_this_entry:
                     scaling_file_content.append(entry)
         return scaling_file_content
-        
+
     def process_data(self, workspace, peak_range, background_range, low_res_range):
         """
             Common processing for both sample data and normalization.
