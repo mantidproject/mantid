@@ -279,8 +279,10 @@ void TomographyIfacePresenter::processSetupReconTool() {
 }
 
 void TomographyIfacePresenter::processRunRecon() {
-  if (m_model->loggedIn().empty())
+  if (m_model->loggedIn().empty()) {
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus());
     return;
+  }
 
   const std::string &resource = m_view->currentComputeResource();
 
@@ -296,8 +298,11 @@ void TomographyIfacePresenter::processRunRecon() {
 }
 
 void TomographyIfacePresenter::processRefreshJobs() {
-  if (m_model->loggedIn().empty())
+  // No need to be logged in, there can be local processes
+  if (m_model->loggedIn().empty()) {
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus());
     return;
+  }
 
   std::string comp = m_view->currentComputeResource();
   if ("Local" == comp) {

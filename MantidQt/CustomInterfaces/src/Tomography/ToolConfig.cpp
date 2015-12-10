@@ -23,12 +23,14 @@ ToolConfigTomoPy::ToolConfigTomoPy(const std::string &runnable,
       m_angleMin(angleMin), m_angleMax(angleMax) {}
 
 std::string ToolConfigTomoPy::makeCmdLineOptions() const {
-  return "--input_dir " + m_pathSample + " --dark " + m_pathDark + " --white " +
-         m_pathOpen + " --output " + m_pathOut + " --start_angle " +
-         boost::lexical_cast<std::string>(m_angleMin) + " --end_angle " +
-         boost::lexical_cast<std::string>(m_angleMax) +
-         " --center_of_rotation " +
-         boost::lexical_cast<std::string>(m_centerRot);
+  return "--input-path=" + m_pathSample +
+         // " --dark " + m_pathDark + " --white " + m_pathOpen +
+         " --output-path=" + m_pathOut;
+  //+ " --start_angle " +
+  //       boost::lexical_cast<std::string>(m_angleMin) + " --end_angle " +
+  //       boost::lexical_cast<std::string>(m_angleMax) +
+  //       " --center_of_rotation " +
+  //       boost::lexical_cast<std::string>(m_centerRot);
 }
 
 ToolConfigAstraToolbox::ToolConfigAstraToolbox()
@@ -44,12 +46,13 @@ ToolConfigAstraToolbox::ToolConfigAstraToolbox(
       m_pathOpen(pathOpen), m_pathSample(pathSample) {}
 
 std::string ToolConfigAstraToolbox::makeCmdLineOptions() const {
-  return "--start_slice " + boost::lexical_cast<std::string>(m_angleMin) +
-         " --end_slice " + boost::lexical_cast<std::string>(m_angleMax) +
-         " --center_of_rotation " +
-         boost::lexical_cast<std::string>(m_centerRot) + " --input_dir " +
-         m_pathSample + " --dark " + m_pathDark + " --white " + m_pathOpen +
-         " --output " + m_pathOut;
+  return //"--start_slice " + boost::lexical_cast<std::string>(m_angleMin) +
+         //" --end_slice " + boost::lexical_cast<std::string>(m_angleMax) +
+         //" --center_of_rotation " +
+      // boost::lexical_cast<std::string>(m_centerRot) +
+      " --input-path=" + m_pathSample +
+      //" --dark " + m_pathDark + " --white " + m_pathOpen +
+      " --output-path=" + m_pathOut;
 }
 
 } // namespace CustomInterfaces

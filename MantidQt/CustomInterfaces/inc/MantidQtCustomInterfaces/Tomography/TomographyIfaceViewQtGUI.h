@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYIFACEVIEWQTGUI_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYIFACEVIEWQTGUI_H_
 
+#include "MantidAPI/IRemoteJobManager.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/TableRow.h"
@@ -310,6 +311,8 @@ private:
 
   std::string m_imgPath;
 
+  std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> m_localJobsStatus;
+
   // Settings for external tools. where to find the system Python
   static std::string g_defLocalExternalPythonPath;
   static std::vector<std::string> g_defAddPathPython;
@@ -360,6 +363,11 @@ private:
 
   /// Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;
+  static const std::vector<std::pair<std::string, std::string>> g_astra_methods;
+  static const std::vector<std::pair<std::string, std::string>>
+      g_tomopy_methods;
+  std::string m_astraMethod;
+  std::string m_tomopyMethod;
 
   // Basic representation of user settings, read/written on startup/close.
   // TODO: this could be done more sophisticated, with a class using
