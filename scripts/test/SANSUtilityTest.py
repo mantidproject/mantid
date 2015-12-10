@@ -1225,8 +1225,6 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         names =['ws1', 'ws2']
         out_ws_name = 'out_ws'
         time_shift = 0
-        import time
-        time.sleep(10)
         log_names = ['good_uah_log', 'good_frames', 'new_series']
 
         start_time_1 = "2010-01-01T00:00:00"

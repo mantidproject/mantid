@@ -176,7 +176,7 @@ public:
   }
 
   void test_replaceValues() {
-    // Arrange 
+    // Arrange
     size_t num = 1000;
     DateAndTime first("2007-11-30T16:17:10");
     std::vector<DateAndTime> times;
@@ -199,7 +199,8 @@ public:
 
     // Assert
     TSM_ASSERT_EQUALS("Should have 1000 entries", tsp.size(), 1000);
-    TSM_ASSERT_EQUALS("Should be 3 plus the offset of 100", tsp.nthValue(3), 103.0);
+    TSM_ASSERT_EQUALS("Should be 3 plus the offset of 100", tsp.nthValue(3),
+                      103.0);
   }
 
   void test_addValues() {

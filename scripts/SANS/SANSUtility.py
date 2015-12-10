@@ -991,7 +991,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 self._populate_property(property_rhs, times, shifted_values)
 
                 self._original_times_rhs[element] = times
-                self._original_values_rhs[element] = values 
+                self._original_values_rhs[element] = values
 
     def restore_original_workspace(self, rhs):
         '''
@@ -1008,7 +1008,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 values = self._original_values_rhs[element]
                 self._populate_property(property_rhs, times, values)
 
-    def _populate_property(self, property, times, values):
+    def _populate_property(self, prop, times, values):
         '''
         Populates a time series property
         @param property: the time series property
@@ -1016,8 +1016,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
         @param values: the values array
         '''
         for index in range(0, len(times)):
-            property.addValue(times[index],
-                                values[index])
+            prop.addValue(times[index],
+                          values[index])
 
 def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appendix):
     '''

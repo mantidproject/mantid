@@ -1005,8 +1005,9 @@ void TimeSeriesProperty<TYPE>::addValues(
 *  @param values :: The associated value
 */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::replaceValues(const std::vector<Kernel::DateAndTime> &times,
-  const std::vector<TYPE> &values) {
+void TimeSeriesProperty<TYPE>::replaceValues(
+    const std::vector<Kernel::DateAndTime> &times,
+    const std::vector<TYPE> &values) {
   clear();
   addValues(times, values);
 }
