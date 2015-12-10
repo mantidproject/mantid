@@ -398,7 +398,7 @@ def fitBrowser():
 
 
 # -----------------------------------------------------------------------------
-def plotBin(source, indices, error_bars=False, type=-1, window=None, clearWindow=False,
+def plotBin(source, indices, distribution=mantidqtpython.MantidQt.DistributionDefault, error_bars=False, type=-1, window=None, clearWindow=False,
             waterfall=False):
     """Create a 1D Plot of bin count vs spectrum in a workspace.
 
@@ -440,7 +440,7 @@ def plotBin(source, indices, error_bars=False, type=-1, window=None, clearWindow
         window = window._getHeldObject()
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
-                                          workspace_names, index_list, False, 0, error_bars,
+                                          workspace_names, index_list, False, distribution, error_bars,
                                           type, window, clearWindow, waterfall))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
