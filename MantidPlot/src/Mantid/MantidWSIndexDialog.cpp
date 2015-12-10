@@ -23,17 +23,14 @@
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: If true the waterfall checkbox is created
  */
-MantidWSIndexDialog::MantidWSIndexDialog(MantidUI* mui, Qt::WFlags flags, QList<QString> wsNames, const bool showWaterfallOption) 
-  : QDialog(mui->appWindow(), flags), 
-  m_mantidUI(mui),
-  m_spectra(false),
-  m_waterfall(showWaterfallOption),
-  m_wsNames(wsNames),
-  m_wsIndexIntervals(),
-  m_spectraIdIntervals(),
-  m_wsIndexChoice(), 
-  m_spectraIdChoice()
-{
+MantidWSIndexDialog::MantidWSIndexDialog(MantidUI *mui, Qt::WFlags flags,
+                                         QList<QString> wsNames,
+                                         const bool showWaterfallOption,
+                                         const bool showPlotAll)
+    : QDialog(mui->appWindow(), flags), m_mantidUI(mui), m_spectra(false),
+      m_waterfall(showWaterfallOption), m_wsNames(wsNames),
+      m_wsIndexIntervals(), m_spectraIdIntervals(), m_wsIndexChoice(),
+      m_spectraIdChoice(), m_plotAll(showPlotAll) {
   checkForSpectraAxes();
 
   // Generate the intervals allowed to be plotted by the user.
@@ -223,13 +220,15 @@ void MantidWSIndexDialog::initButtons()
 
   m_buttonBox->addWidget(m_okButton);
   m_buttonBox->addWidget(m_cancelButton);
-  m_buttonBox->addWidget(m_plotAllButton);
+  if (m_plotAll)
+    m_buttonBox->addWidget(m_plotAllButton);
 
   m_outer->addItem(m_buttonBox);
 
   connect(m_okButton, SIGNAL(clicked()), this, SLOT(plot()));
   connect(m_cancelButton, SIGNAL(clicked()), this, SLOT(close()));
-  connect(m_plotAllButton, SIGNAL(clicked()), this, SLOT(plotAll()));
+  if (m_plotAll)
+    connect(m_plotAllButton, SIGNAL(clicked()), this, SLOT(plotAll()));
 }
 
 void MantidWSIndexDialog::checkForSpectraAxes()

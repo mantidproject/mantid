@@ -1753,16 +1753,21 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 * single-spectrum workspaces.
 *
 * We also must filter the list of selected workspace names to account for any
-* non-MatrixWorkspaces that may have been selected.  In particular WorkspaceGroups
+* non-MatrixWorkspaces that may have been selected.  In particular
+* WorkspaceGroups
 * (the children of which are to be included if they are MatrixWorkspaces) and
 * TableWorkspaces (which are implicitly excluded).  We only want workspaces we
 * can actually plot!
 *
 * @param showWaterfallOpt If true, show the waterfall option on the dialog
-* @return :: A MantidWSIndexDialog::UserInput structure listing the selected options
+* @param showPlotAll :: [input] If true, show the "Plot All" button on the
+* dialog
+* @return :: A MantidWSIndexDialog::UserInput structure listing the selected
+* options
 */
-MantidWSIndexDialog::UserInput MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt) const
-{
+MantidWSIndexDialog::UserInput
+MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
+                                             bool showPlotAll) const {
   // Check for any selected WorkspaceGroup names and replace with the names of
   // their children.
   QSet<QString> selectedWsNames;
@@ -1826,8 +1831,8 @@ MantidWSIndexDialog::UserInput MantidTreeWidget::chooseSpectrumFromSelected(bool
   }
 
   // Else, one or more workspaces
-  MantidWSIndexDialog *dio = new MantidWSIndexDialog(m_mantidUI, 0, selectedMatrixWsNameList,
-                                                     showWaterfallOpt);
+  MantidWSIndexDialog *dio = new MantidWSIndexDialog(
+      m_mantidUI, 0, selectedMatrixWsNameList, showWaterfallOpt, true);
   dio->exec();
   return dio->getSelections();
 }

@@ -219,8 +219,10 @@ public:
 
 /// Constructor - same parameters as one of the parent constructors, along with a 
   /// list of the names of workspaces to be plotted.
-  MantidWSIndexDialog(MantidUI* parent, Qt::WFlags flags, QList<QString> wsNames,
-                      const bool showWaterfallOption = false);
+  MantidWSIndexDialog(MantidUI *parent, Qt::WFlags flags,
+                      QList<QString> wsNames,
+                      const bool showWaterfallOption = false,
+                      const bool showPlotAll = true);
 
   /// Returns a structure holding all of the selected options
   UserInput getSelections() const;
@@ -272,6 +274,9 @@ private:
 
   /// Do we allow the display of the waterfall option
   bool m_waterfall;
+
+  /// Do we allow the display of the "Plot all" button
+  bool m_plotAll;
   
   /// Pointers to the obligatory Qt objects:
   QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage;
