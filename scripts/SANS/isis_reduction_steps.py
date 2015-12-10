@@ -3266,6 +3266,14 @@ class StripEndNans(ReductionStep):
         else:
             return False
 
+    def _isInf(self, val):
+        '''
+        Check if the value is inf or not
+        @param val: float to check
+        @returns true if value is inf
+        '''
+        return math.isinf(val)
+
     def execute(self, reducer, workspace):
         """
             Trips leading and trailing Nan values from workspace
@@ -3282,14 +3290,14 @@ class StripEndNans(ReductionStep):
         # Find the first non-zero value
         start = 0
         for i in range(0, length):
-            if not self._isNan(y_vals[i]):
+            if not self._isNan(y_vals[i]) and not self._isInf(y_vals[i]):
                 start = i
                 break
         # Now find the last non-zero value
         stop = 0
         length -= 1
         for j in range(length, 0,-1):
-            if not self._isNan(y_vals[j]):
+            if not self._isNan(y_vals[j]) and not self._isInf(y_vals[j]):
                 stop = j
                 break
         # Find the appropriate X values and call CropWorkspace
