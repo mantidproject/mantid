@@ -1056,7 +1056,6 @@ void TomographyIfaceViewQtGUI::processLocalRunRecon() {
     try {
       Poco::ProcessHandle handle = Poco::Process::launch(run, runArgs);
       Poco::Process::PID pid = handle.id();
-      std::cerr << "pid: " << pid << std::endl;
       Mantid::API::IRemoteJobManager::RemoteJobInfo info;
       info.id = boost::lexical_cast<std::string>(pid);
       info.name = "Mantid_Local";
@@ -1064,10 +1063,16 @@ void TomographyIfaceViewQtGUI::processLocalRunRecon() {
       info.cmdLine = run + " " + args;
       m_localJobsStatus.push_back(info);
     } catch (Poco::SystemException &sexc) {
-      userWarning("Execution failed", "Could not run the tool. Error details" +
-                                          std::string(sexc.what()));
+      // userWarning("Execution failed", "Could not run the tool. Error details:
+      // " +
+      //                                    std::string(sexc.what()));
+      Mantid::API::IRemoteJobManager::RemoteJobInfo info;
+      info.id = boost::lexical_cast<std::string>(std::rand());
+      info.name = "Mantid_Local";
+      info.status = "Exit";
+      info.cmdLine = run + " " + args;
+      m_localJobsStatus.push_back(info);
     }
-    // sendLog("New options are: '" + cmdOpts + "'");
   } catch (std::runtime_error &rexc) {
     sendLog("The execution of " + toolName + "failed. details: " +
             std::string(rexc.what()));
