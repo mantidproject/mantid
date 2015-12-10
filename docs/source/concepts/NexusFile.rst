@@ -14,6 +14,8 @@ Mantidplot is capable of loading certain types of Nexus files and of saving cert
 Structure
 ---------
 
+The general structure of NEXUS files is explained in http://download.nexusformat.org/doc/html/user_manual.html .
+
 ISIS uses NEXUS files for both histrogram and event data and SNS uses NEXUS only for event data. 
 Also both ISIS and SNS use the same structure for event data. 
 Hence there are two principal types of NEXUS files loaded by Mantid 
