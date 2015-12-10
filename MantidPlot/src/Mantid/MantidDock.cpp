@@ -1571,6 +1571,9 @@ void MantidDockWidget::plotSurface() {
         xLabelQ.append(" (").append(xAxisUnits.c_str()).append(")");
       }
       plot->setXAxisLabel(xLabelQ);
+
+      // Sometimes resolution is auto-set too high and plot appears empty
+      plot->setResolution(1);
     }
   }
 }
