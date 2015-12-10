@@ -142,7 +142,7 @@ void SimpleChebfun::evaluate(double *xvalues, size_t n) const {}
 /// Create a vector of x values linearly spaced on the approximation interval.
 /// @param n :: Number of points in the vector.
 std::vector<double> SimpleChebfun::linspace(size_t n) const {
-  return m_base->linspace(n);
+  return ChebfunBase::linspace(n, m_base->startX(), m_base->endX());
 }
 
 /// Get the accuracy of the approximation
@@ -176,8 +176,22 @@ SimpleChebfun SimpleChebfun::integral() const {
 /// @param level :: An optional right-hand-side of equation (*this)(x) == level.
 std::vector<double> SimpleChebfun::roughRoots(double level) const {
   std::vector<double> rs;
-  if (m_P.empty())
+  if (m_P.empty()) {
     return rs;
+  }
+  // If size is small accurate roots are prefered.
+  if (size() <= 50) {
+    if (m_A.empty()) {
+      m_A = m_base->calcA(m_P);
+    }
+    m_A.front() -= level;
+    rs = m_base->roots(coeffs());
+    std::sort(rs.begin(), rs.end());
+    m_A.front() += level;
+    return rs;
+  }
+
+  // FOr large sizes find rough estimates.
   auto &x = m_base->xPoints();
   auto y1 = m_P.front() - level;
   for (size_t i = 1; i < m_P.size(); ++i) {

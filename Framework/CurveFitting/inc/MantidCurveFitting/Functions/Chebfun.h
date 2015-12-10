@@ -52,6 +52,8 @@ public:
   double startX() const { return m_startX; }
   /// End of the interval
   double endX() const { return m_endX; }
+  /// Get the width of the interval
+  double width() const;
   /// Evaluate the function.
   double operator()(double x) const;
   /// Evaluate the function.
@@ -68,10 +70,18 @@ public:
   std::vector<double> getAllXPoints() const;
   /// Get all y - points
   std::vector<double> getAllYPoints() const;
+  /// Create a vector of x values linearly spaced on the approximation interval
+  std::vector<double> linspace(size_t n = 100) const;
   /// Find an approximation for a function.
   void bestFitAnyAccuracy(ChebfunFunctionType fun, double start, double end,
     const Options& options);
+  /// Create a derivative of this function.
+  Chebfun derivative() const;
+  /// Get rough estimates of the roots
+  std::vector<double> roughRoots(double level = 0.0) const;
 private:
+  /// Constructor
+  Chebfun(std::vector<SimpleChebfun>&& parts);
   /// Parts of a piece-wise function
   std::vector<SimpleChebfun> m_parts;
   /// Start of the interval

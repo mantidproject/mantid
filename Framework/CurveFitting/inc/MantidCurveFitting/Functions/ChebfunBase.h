@@ -141,7 +141,9 @@ public:
                       double tolerance = 0.0, size_t maxSize = 0,
                       double maxA = 0.0);
 
-  /// Create a vector of x values linearly spaced on the approximation interval
+  /// Create a vector of x values linearly spaced on an interval
+  static std::vector<double> linspace(size_t n, double startX, double endX);
+  /// Create a vector of x values linearly spaced on the approxiamtion interval
   std::vector<double> linspace(size_t n) const;
   std::vector<double> smooth(const std::vector<double> &xvalues,
                              const std::vector<double> &yvalues) const;

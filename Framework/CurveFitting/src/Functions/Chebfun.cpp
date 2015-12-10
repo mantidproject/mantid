@@ -171,6 +171,13 @@ Chebfun::Chebfun(ChebfunFunctionType fun, double start, double end,
 }
 
 //------------------------------------------------------------------------------
+/// Constructor
+Chebfun::Chebfun(std::vector<SimpleChebfun>&& parts):m_parts(parts){
+  m_startX = parts.front().startX();
+  m_endX = parts.back().endX();
+}
+
+//------------------------------------------------------------------------------
 /// Number of smooth parts
 void Chebfun::bestFitAnyAccuracy(ChebfunFunctionType fun, double start,
                                  double end, const Chebfun::Options &options) {
@@ -204,6 +211,12 @@ size_t Chebfun::numberOfParts() const {
 }
 
 //------------------------------------------------------------------------------
+/// Get the width of the interval
+double Chebfun::width() const{
+  return m_endX - m_startX;
+}
+
+//------------------------------------------------------------------------------
 /// Evaluate the function.
 double Chebfun::operator()(double x) const {
   for (auto &part : m_parts) {
@@ -215,9 +228,15 @@ double Chebfun::operator()(double x) const {
 }
 
 //------------------------------------------------------------------------------
-/// Evaluate the function.
+/// Evaluate the function for all values in a vector. TODO: more efficient implementation.
+/// @param x :: A vector with arguments.
 std::vector<double> Chebfun::operator()(const std::vector<double> &x) const {
-  return std::vector<double>();
+  std::vector<double> res;
+  res.reserve(x.size());
+  for(auto xi : x) {
+    res.push_back((*this)(xi));
+  }
+  return res;
 }
 
 //------------------------------------------------------------------------------
@@ -285,6 +304,34 @@ std::vector<double> Chebfun::getAllYPoints() const {
     res.insert(res.end(), y.begin(), y.end());
   }
   return res;
+}
+
+//------------------------------------------------------------------------------
+/// Create a derivative of this function.
+Chebfun Chebfun::derivative() const{
+  std::vector<SimpleChebfun> derivativeParts;
+  derivativeParts.reserve(m_parts.size());
+  for (auto &part : m_parts) {
+    derivativeParts.push_back(part.derivative());
+  }
+  return Chebfun(std::move(derivativeParts));
+}
+
+//------------------------------------------------------------------------------
+/// Get rough estimates of the roots
+/// @param level :: An optional right-hand-side of equation (*this)(x) == level.
+std::vector<double> Chebfun::roughRoots(double level) const{
+  std::vector<double> roots;
+  for(auto &part : m_parts) {
+    auto partRoots = part.roughRoots(level);
+    roots.insert(roots.end(), partRoots.begin(), partRoots.end());
+  }
+  return roots;
+}
+
+/// Create a vector of x values linearly spaced on the approximation interval
+std::vector<double> Chebfun::linspace(size_t n) const {
+  return ChebfunBase::linspace(n, m_startX, m_endX);
 }
 
 } // namespace Functions

@@ -6,6 +6,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 
+#include <limits>
+
 namespace Mantid {
 namespace CurveFitting {
 namespace CostFunctions {
@@ -34,14 +36,15 @@ void CostFuncPoisson::addVal(API::FunctionDomain_sptr domain,
     const double y = values->getCalculated(i);
     if (y <= 0.0)
     {
-      retVal = -y;
+      retVal = std::numeric_limits<double>::infinity();
+      break;
     }
     else
     {
       const double N = values->getFitData(i);
       if (N == 0.0)
       {
-        retVal = y;
+        retVal += y;
       }
       else
       {
@@ -89,9 +92,9 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
       if (calc <= 0.0)
       {
         if (iActiveP == 0) {
-          fVal += - calc;
+          fVal += std::numeric_limits<double>::infinity();
         }
-        d += - jacobian.get(i, ip);
+        d += std::numeric_limits<double>::infinity();
       }
       else
       {
@@ -153,7 +156,7 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
         double obs = values->getFitData(k);
         if (calc <= 0.0)
         {
-          d += - d2;
+          d += std::numeric_limits<double>::infinity();
         }
         else
         {

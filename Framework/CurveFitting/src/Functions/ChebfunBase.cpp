@@ -491,27 +491,39 @@ ChebfunBase_sptr ChebfunBase::bestFit(double start, double end,
 }
 
 /**
- * Return a vector of linearly spaced values in the domain interval m_start <= x
- * <= m_end
+ * Return a vector of linearly spaced values in an interval: startX <= x <= endX
  * @param n :: Number of points in the output vector.
+ * @param startX :: Start of the interval.
+ * @param endX :: End of the interval.
  */
-std::vector<double> ChebfunBase::linspace(size_t n) const {
+std::vector<double> ChebfunBase::linspace(size_t n, double startX, double endX){
+  if (n < 2){
+    throw std::runtime_error("linspace must have at least two points.");
+  }
   std::vector<double> space(n);
-  double x = m_start;
-  const double dx = width() / double(n - 1);
-  for (double &s : space) {
-    s = x;
+  double x = startX;
+  const double dx = (endX - startX) / double(n - 1);
+  for (auto s = space.begin(); s != space.end(); ++s) {
+    *s = x;
     x += dx;
   }
-  space.back() = m_end;
+  space.back() = endX;
   return space;
 }
 
 /**
- * Calculate the chebyshev expansion coefficients given function values
- * at the x-points.
- * @param p :: Function values at chebyshev points.
+ * Return a vector of linearly spaced values in the approximation interval: m_start <= x <= m_end
+ * @param n :: Number of points in the output vector.
  */
+std::vector<double> ChebfunBase::linspace(size_t n) const {
+  return linspace(n, m_start, m_end);
+}
+
+/**
+* Calculate the chebyshev expansion coefficients given function values
+* at the x-points.
+* @param p :: Function values at chebyshev points.
+*/
 std::vector<double> ChebfunBase::calcA(const std::vector<double> &p) const {
   const size_t nn = m_n + 1;
 
