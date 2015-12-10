@@ -98,5 +98,7 @@ class SortHKLTest(stresstesting.MantidStressTest):
         print reference_statistics
 
         self.assertEquals(round(statistics['Multiplicity'], 1), round(reference_statistics['<N>'], 1))
+        self.assertEquals(round(statistics['Rpim'], 2), round(100.0 * reference_statistics['Rm'], 2))
+        self.assertEquals(statistics['No. of Unique Reflections'], int(reference_statistics['Nunique']))
         self.assertDelta(round(statistics['Data Completeness'], 1), round(reference_statistics['Completeness'], 1),
                          0.5)
