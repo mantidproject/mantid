@@ -4,6 +4,7 @@
 #include "MantidMDAlgorithms/LoadSQW2.h"
 
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Progress.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -17,14 +18,10 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-using API::ExperimentInfo;
 using Geometry::Goniometer;
 using Geometry::OrientedLattice;
-using Geometry::MDHistoDimension;
-using Geometry::MDHistoDimensionBuilder;
 using Kernel::BinaryStreamReader;
 using Kernel::Logger;
-using Kernel::make_unique;
 using Kernel::Matrix;
 using Kernel::V3D;
 
@@ -43,7 +40,8 @@ DECLARE_ALGORITHM(LoadSQW2)
 // Public methods
 //------------------------------------------------------------------------------
 /// Default constructor
-LoadSQW2::LoadSQW2() : API::Algorithm(), m_file(), m_reader(), m_outputWS() {}
+LoadSQW2::LoadSQW2()
+    : API::Algorithm(), m_file(), m_reader(), m_outputWS(), m_progress() {}
 
 /// Default destructor
 LoadSQW2::~LoadSQW2() {}
@@ -97,9 +95,13 @@ void LoadSQW2::exec() {
  * Opens the file given to the algorithm and initializes the reader
  */
 void LoadSQW2::initFileReader() {
+  using API::Progress;
+  using Kernel::make_unique;
   m_file = make_unique<std::ifstream>(getPropertyValue("Filename"),
                                       std::ios_base::binary);
   m_reader = make_unique<BinaryStreamReader>(*m_file);
+  // steps are reset once we know what we are reading
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, 100);
 }
 
 /**
@@ -145,6 +147,7 @@ void LoadSQW2::createOutputWorkspace() {
  * @param nfiles The number of expected spe header sections
  */
 void LoadSQW2::readAllSPEHeadersToWorkspace(const int32_t nfiles) {
+  using API::ExperimentInfo;
   for (int32_t i = 0; i < nfiles; ++i) {
     auto expt = boost::make_shared<ExperimentInfo>();
     readSingleSPEHeader(*expt);
@@ -276,6 +279,9 @@ void LoadSQW2::skipDataSectionMetadata() {
  * ulimit entry
  */
 void LoadSQW2::readSQWDimensions() {
+  using Geometry::MDHistoDimension;
+  using Geometry::MDHistoDimensionBuilder;
+
   // dimension labels
   std::vector<int32_t> ulabelShape(2);
   m_reader->read(ulabelShape, 2);
@@ -368,10 +374,10 @@ void LoadSQW2::readSQWDimensions() {
 void LoadSQW2::setupBoxController() {
   using Kernel::Timer;
   Timer timer;
-  
+
   auto boxController = m_outputWS->getBoxController();
   for (size_t i = 0; i < 4; i++) {
-    boxController->setSplitInto(i,  m_outputWS->getDimension(i)->getNBins());
+    boxController->setSplitInto(i, m_outputWS->getDimension(i)->getNBins());
   }
   boxController->setMaxDepth(1);
   m_outputWS->initialize();
@@ -387,12 +393,13 @@ void LoadSQW2::setupBoxController() {
 void LoadSQW2::readPixelData() {
   using Kernel::Timer;
   Timer timer;
-  
+
   // skip redundant field
   m_file->seekg(sizeof(int32_t), std::ios_base::cur);
   int64_t npixtot(0);
   *m_reader >> npixtot;
   g_log.debug() << "    npixtot: " << npixtot << "\n";
+  m_progress->setNumSteps(npixtot);
 
   // Each pixel has 9 float fields. Do a chunked read to avoid
   // using too much memory for the buffer
@@ -408,6 +415,7 @@ void LoadSQW2::readPixelData() {
     m_reader->read(pixBuffer, numFields * readNPix);
     for (int64_t i = 0; i < readNPix; ++i) {
       addEventFromBuffer(pixBuffer.data() + i * 9);
+      m_progress->report();
     }
     pixelsToRead -= readNPix;
   }
@@ -433,6 +441,7 @@ void LoadSQW2::addEventFromBuffer(const float *pixel) {
   m_outputWS->addEvent(MDEvent<4>(signal, error * error, irun, idet, centres));
 }
 
+
 /**
  * Transform the given coordinates from U to the HKL frame
  * using the transformation defined for the given run
@@ -445,6 +454,7 @@ void LoadSQW2::toHKL(float &u1, float &u2, float &u3, const uint16_t runIndex) {
   constexpr double invTwoPi = 0.5 / M_PI;
   const auto &sample = m_outputWS->getExperimentInfo(runIndex)->sample();
   const auto &uToRLU = sample.getOrientedLattice().getBinv();
+
   V3D uVec(static_cast<double>(u1), static_cast<double>(u2),
            static_cast<double>(u3));
   V3D qhkl = (uToRLU * uVec) * invTwoPi;

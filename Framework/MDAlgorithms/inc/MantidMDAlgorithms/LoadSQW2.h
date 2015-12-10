@@ -13,6 +13,7 @@ namespace Mantid {
 // Forward declarations
 namespace API {
 class ExperimentInfo;
+class Progress;
 }
 
 namespace MDAlgorithms {
@@ -80,6 +81,7 @@ private:
   std::unique_ptr<std::ifstream> m_file;
   std::unique_ptr<Kernel::BinaryStreamReader> m_reader;
   boost::shared_ptr<SQWWorkspace> m_outputWS;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace MDAlgorithms
