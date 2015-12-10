@@ -4,8 +4,10 @@ from mantid.simpleapi import *
 import ISISCommandInterface as i
 import stresstesting
 class SANSMergedDetectorsTest(stresstesting.MantidStressTest):
-    def runTest(self):
+    def __init__(self):
+        stresstesting.MantidStressTest.__init__(self)
 
+    def runTest(self):
         i.SANS2DTUBES()
         i.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
         i.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
@@ -24,7 +26,6 @@ class SANSMergedDetectorsTest(stresstesting.MantidStressTest):
     def validate(self):
         # we have double the sample and the can, this means that the reduced data will be
         # almost the same
-        self.tolerance = 0.01
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
