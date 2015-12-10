@@ -34,7 +34,7 @@ namespace MantidQt
     class DLLExport ReflLegacyTransferStrategy : public ReflTransferStrategy
     {
     public:
-      virtual std::vector<std::map<std::string, std::string>>
+      virtual TransferResults
       transferRuns(SearchResultMap &searchResults,
                    Mantid::Kernel::ProgressBase &progress);
 
