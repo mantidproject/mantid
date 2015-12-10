@@ -3000,6 +3000,7 @@ Plots the spectra from the given workspaces
 @param ws_names :: List of ws names to plot
 @param indexList :: List of indices to plot for each workspace
 @param spectrumPlot :: True if indices should be interpreted as row indices
+@param distr :: if true, workspace plot as y data/bin width
 @param errs :: If true include the errors on the graph
 @param style :: Curve style for plot
 @param plotWindow :: Window to plot to. If NULL a new one will be created
