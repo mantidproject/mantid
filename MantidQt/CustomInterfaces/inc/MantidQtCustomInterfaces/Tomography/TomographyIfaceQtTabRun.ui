@@ -233,7 +233,7 @@
              <item>
               <widget class="QLabel" name="label_12">
                <property name="text">
-                <string>Status:</string>
+                <string>Remote status:</string>
                </property>
               </widget>
              </item>
@@ -241,6 +241,12 @@
               <widget class="QPushButton" name="pushButton_remote_status">
                <property name="text">
                 <string>Offline</string>
+               </property>
+               <property name="autoDefault">
+                <bool>false</bool>
+               </property>
+               <property name="default">
+                <bool>false</bool>
                </property>
                <property name="flat">
                 <bool>true</bool>

@@ -4,7 +4,6 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h"
@@ -26,6 +25,38 @@ using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+const std::string TomographyIfaceViewQtGUI::g_styleSheetOffline =
+    "QPushButton { "
+    "margin: 1px;"
+    "border-color: #0c457e;"
+    "border-style: outset;"
+    "border-radius: 3px;"
+    "border-width: 0px;"
+    "color: black;"
+    "background-color: rgb(100, 100, 100); "
+    "}"
+    "QPushButton:flat { "
+    "background-color: rgb(100, 100, 100); "
+    "}"
+    "QPushButton:pressed { "
+    "background-color: rgb(100, 100, 100) "
+    "}";
+
+const std::string TomographyIfaceViewQtGUI::g_styleSheetOnline =
+    "QPushButton { "
+    "margin: 1px;"
+    "border-color: #0c457e;"
+    "border-style: outset;"
+    "border-radius: 3px;"
+    "border-width: 0px;"
+    "color: black;"
+    "background-color: rgb(140, 255, 140); "
+    "}"
+    "QPushButton:flat { background-color: rgb(120, 255, 120); "
+    "}"
+    "QPushButton:pressed { background-color: rgb(120, 255, 120); "
+    "}";
 
 size_t TomographyIfaceViewQtGUI::g_nameSeqNo = 0;
 
@@ -100,9 +131,9 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
  * @param parent Parent window (most likely the Mantid main app window).
  */
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), ITomographyIfaceView(), m_processingJobsIDs(),
-      m_currentComputeRes(""), m_currentReconTool(""), m_imgPath(""),
-      m_logMsgs(), m_toolsSettings(), m_settings(),
+    : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(NULL),
+      m_processingJobsIDs(), m_currentComputeRes(""), m_currentReconTool(""),
+      m_imgPath(""), m_logMsgs(), m_toolsSettings(), m_settings(),
       m_settingsGroup("CustomInterfaces/Tomography"), m_availPlugins(),
       m_currPlugins(), m_currentParamPath(), m_presenter(NULL) {
 
@@ -126,8 +157,8 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_uiTabSetup.setupUi(tabSetupW);
   m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
 
-  ImageROIViewQtWidget *tabROIW = new ImageROIViewQtWidget(m_ui.tabMain);
-  m_ui.tabMain->addTab(tabROIW, QString("ROI etc."));
+  m_tabROIW = new ImageROIViewQtWidget(m_ui.tabMain);
+  m_ui.tabMain->addTab(m_tabROIW, QString("ROI etc."));
 
   QWidget *tabFiltersW = new QWidget();
   m_uiTabFilters.setupUi(tabFiltersW);
@@ -240,6 +271,8 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
   m_uiTabRun.splitter_run_jobs->setSizes(sizes);
 
   m_uiTabRun.label_image_name->setText("none");
+
+  updateCompResourceStatus(false);
 
   // enable by default, which will use default tools setups
   m_uiTabRun.pushButton_reconstruct->setEnabled(true);
@@ -452,18 +485,15 @@ void TomographyIfaceViewQtGUI::enableLoggedActions(bool enable) {
 void TomographyIfaceViewQtGUI::updateCompResourceStatus(bool online) {
   if (online) {
     m_uiTabRun.pushButton_remote_status->setText("Online");
+    // push buttons won't work with something like:
     // m_uiTabRun.pushButton_remote_status->setBackground(QColor(120, 255,
     // 120));
-    QString style =
-        "QPushButton:flat { background-color: rgb(120, 255, 120); }";
-    m_uiTabRun.pushButton_remote_status->setStyleSheet(style);
+    m_uiTabRun.pushButton_remote_status->setStyleSheet(
+        QString::fromStdString(g_styleSheetOnline));
   } else {
     m_uiTabRun.pushButton_remote_status->setText("Offline");
-    // m_uiTabRun.pushButton_remote_status->setBackground(QColor(150, 150,
-    // 150));
-    QString style =
-        "QPushButton:flat { background-color: rgb(150, 150, 150); }";
-    m_uiTabRun.pushButton_remote_status->setStyleSheet(style);
+    m_uiTabRun.pushButton_remote_status->setStyleSheet(
+        QString::fromStdString(g_styleSheetOffline));
   }
 }
 
@@ -753,8 +783,6 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
       std::make_pair("FDK_CUDA", "FDK 3D: Feldkamp-Davis-Kress algorithm for "
                                  "3D circular cone beam data sets")};
 
-  // TomoReconToolsUserSettings prePostProcSettings();
-
   if (g_TomoPyTool == name) {
     TomoToolConfigTomoPy tomopy;
     m_uiTomoPy.setupUi(&tomopy);
@@ -818,6 +846,61 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
 }
 
 /**
+ * Build options string to send them to the tomographic reconstruction
+ * scripts command line.
+ *
+ * @param filters Settings for the pre-post processing steps/filters
+ *
+ * This doesn't belong here and should be move to more appropriate
+ * place.
+ */
+std::string
+TomographyIfaceViewQtGUI::filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
+                                              ImageStackPreParams &corRegions) {
+  std::string opts;
+
+  corRegions.cor.X();
+  corRegions.cor.Y();
+  corRegions.normalizationRegion;
+  corRegions.medianFilter;
+
+  int rotationIdx = filters.prep.rotation / 90;
+  double cor = 0;
+  if (1 == rotationIdx % 2) {
+    cor = corRegions.cor.Y();
+  } else {
+    cor = corRegions.cor.X();
+  }
+  opts += "--cor='[" + std::to_string(cor) + "']";
+
+  // filters.prep.normalizeByProtonCharge
+
+  // filters.prep.normalizeByFlatDark
+
+  // filters.prep.rotation
+  opts += "--rotation=" + std::to_string(rotationIdx);
+
+  opts +=
+      " --median-filter-size=" + std::to_string(filters.prep.medianFilterWidth);
+
+  // filters.prep.maxAngle
+  opts += " --max-angle=" + std::to_string(filters.prep.maxAngle);
+
+  // opts.prep.scaleDownFactor
+  if (filters.prep.scaleDownFactor > 1)
+    opts += " --scale-down=" + std::to_string(filters.prep.scaleDownFactor);
+
+  // opts.postp.circMaskRadius
+  opts += " --circular-mask=" + std::to_string(filters.postp.circMaskRadius);
+
+  // opts.postp.cutOffLevel
+  if (filters.postp.cutOffLevel > 0.0)
+    opts += " --cut-off" + std::to_string(filters.postp.cutOffLevel);
+
+  return opts;
+}
+
+/**
  * Slot - when the user clicks the 'reconstruct data' or similar button.
  */
 void TomographyIfaceViewQtGUI::reconstructClicked() {
@@ -839,9 +922,18 @@ void TomographyIfaceViewQtGUI::processLocalRunRecon() {
     std::string run, args;
     makeRunnableWithOptions("local", run, args);
 
-    sendLog("Executing " + toolName + ", with parameters: " + args);
+    // pre-/post processing steps and filters
+    TomoReconFiltersSettings filters = prePostProcSettings();
+    // center of rotation and regions
+    ImageStackPreParams corRegions = m_tabROIW->userSelection();
+    // options with all the info from filters and regions
+    const std::string cmdOpts = filtersCfgToCmdOpts(filters, corRegions);
+
+    sendLog("Running " + toolName + ", with parameters: " + args);
     std::vector<std::string> runArgs = {args};
     Mantid::Kernel::ConfigService::Instance().launchProcess(run, runArgs);
+
+    sendLog("New options are: '" + cmdOpts + "'");
   } catch (std::runtime_error &rexc) {
     sendLog("The execution of " + toolName + "failed. details: " +
             std::string(rexc.what()));

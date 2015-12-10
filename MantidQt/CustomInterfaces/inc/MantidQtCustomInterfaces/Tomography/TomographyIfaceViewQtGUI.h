@@ -6,6 +6,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
@@ -21,6 +22,9 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
+
+// widgets used in this interface
+class ImageROIViewQtWidget;
 
 // Qt classes forward declarations
 class QMutex;
@@ -186,10 +190,15 @@ private slots:
 
 private:
   void processLocalRunRecon();
+
   void makeRunnableWithOptions(const std::string &comp, std::string &run,
                                std::string &opt);
+
   void splitCmdLine(const std::string &cmd, std::string &run,
                     std::string &opts);
+
+  std::string filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
+                                  ImageStackPreParams &corRegions);
 
 private:
   /// Setup the interface (tab UI)
@@ -263,18 +272,23 @@ private:
 
   // end of Savu related methods
 
+  static const std::string g_styleSheetOffline;
+  static const std::string g_styleSheetOnline;
+
   /// Interface definition with widgets for the main interface window
   Ui::TomographyIfaceQtGUI m_ui;
   // And its sections/tabs. Note that for compactness they're called simply
   // 'tabs'
   // but they could be separate dialogs, widgets, etc.
-  Ui::TomographyIfaceQtTabFiltersSettings m_uiTabFilters;
-  Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
   Ui::TomographyIfaceQtTabRun m_uiTabRun;
+  Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
+  Ui::TomographyIfaceQtTabFiltersSettings m_uiTabFilters;
   Ui::ImageSelectCoRAndRegions m_uiTabCoR;
   Ui::TomographyIfaceQtTabVisualize m_uiTabVisualize;
   Ui::ImgFormatsConversion m_uiTabConvertFormats;
   Ui::TomographyIfaceQtTabEnergy m_uiTabEnergy;
+
+  ImageROIViewQtWidget *m_tabROIW;
 
   /// Tool specific setup dialogs
   Ui::TomoToolConfigAstra m_uiAstra;
