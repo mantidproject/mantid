@@ -1517,6 +1517,20 @@ void MantidDockWidget::plotSurface() {
     const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(
         m_ads.retrieve(wsName.toStdString()));
     if (wsGroup) {
+      // Which spectrum to plot from each workspace
+      // Even if user entered a range, just use the first number
+      int spectrumIndex{0}; // default to 0
+      const auto userInput = m_tree->chooseSpectrumFromSelected(false, false);
+      if (!userInput.plots.empty()) {
+        auto indexList = userInput.plots.values();
+        if (!indexList.empty()) {
+          auto spectrumIndexes = indexList.at(0);
+          if (!spectrumIndexes.empty()) {
+            spectrumIndex = *spectrumIndexes.begin();
+          }
+        }
+      }
+
       // Set up one new matrix workspace to hold all the data for plotting
       const QString plotWSTitle("__matrixToPlot");
       IAlgorithm_sptr alg = m_mantidUI->createAlgorithm("CreateWorkspace");
@@ -1534,8 +1548,8 @@ void MantidDockWidget::plotSurface() {
           const auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
               wsGroup->getItem(i));
           if (ws) {
-            auto X = ws->readX(0);
-            auto Y = ws->readY(0);
+            auto X = ws->readX(spectrumIndex);
+            auto Y = ws->readY(spectrumIndex);
             xPoints.insert(xPoints.end(), X.begin(), X.end());
             data.insert(data.end(), Y.begin(), Y.end());
             if (i == 0) {
@@ -1558,8 +1572,9 @@ void MantidDockWidget::plotSurface() {
       auto plot = matrixToPlot->plotGraph3D(Qwt3D::PLOTSTYLE::FILLED);
 
       // Default title is "Workspace __matrixToPlot". Change this:
-      QString title("Surface plot for ");
-      title.append(wsGroup->name().c_str());
+      QString title =
+          QString("Surface plot for %1, spectrum %2")
+              .arg(wsGroup->name().c_str(), QString::number(spectrumIndex));
       plot->setTitle(title);
 
       // Set the X axis label correctly
@@ -1832,7 +1847,7 @@ MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
 
   // Else, one or more workspaces
   MantidWSIndexDialog *dio = new MantidWSIndexDialog(
-      m_mantidUI, 0, selectedMatrixWsNameList, showWaterfallOpt, true);
+      m_mantidUI, 0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll);
   dio->exec();
   return dio->getSelections();
 }
