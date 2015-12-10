@@ -94,6 +94,16 @@ public:
     TS_ASSERT_EQUALS(ws3->readY(0)[2], 2);
   }
 
+  void test_findConsecutiveRuns() {
+    std::vector<int> testVec{1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14};
+    auto ranges = findConsecutiveRuns(testVec);
+    TS_ASSERT_EQUALS(ranges.size(), 4);
+    TS_ASSERT_EQUALS(ranges[0], std::make_pair(1, 3));
+    TS_ASSERT_EQUALS(ranges[1], std::make_pair(5, 6));
+    TS_ASSERT_EQUALS(ranges[2], std::make_pair(8, 8));
+    TS_ASSERT_EQUALS(ranges[3], std::make_pair(10, 14));
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
   Workspace_sptr createWs(const std::string &instrName, int runNumber) {

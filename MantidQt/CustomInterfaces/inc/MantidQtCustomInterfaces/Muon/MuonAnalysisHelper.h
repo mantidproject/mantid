@@ -47,12 +47,13 @@ MANTIDQT_CUSTOMINTERFACES_DLL std::string getRunLabel(std::vector<Workspace_sptr
 /// Sums a list of workspaces together
 MANTIDQT_CUSTOMINTERFACES_DLL Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces);
 
-/// Compares two workspaces by run numbers
-MANTIDQT_CUSTOMINTERFACES_DLL bool compareByRunNumber(Workspace_sptr ws1, Workspace_sptr ws2);
-
 /// Makes sure the specified workspaces are in specified group
 MANTIDQT_CUSTOMINTERFACES_DLL void groupWorkspaces(const std::string& groupName,
                                                    const std::vector<std::string>& inputWorkspaces);
+
+/// Finds runs of consecutive numbers
+MANTIDQT_CUSTOMINTERFACES_DLL std::vector<std::pair<int, int>>
+findConsecutiveRuns(const std::vector<int> &runNumbers);
 
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any

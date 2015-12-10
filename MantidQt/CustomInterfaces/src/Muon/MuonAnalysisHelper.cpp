@@ -395,7 +395,17 @@ std::string getRunLabel(std::vector<Workspace_sptr> wsList)
     throw std::invalid_argument("Unable to run on an empty list");
 
   // Sort by run numbers, in case of non-sequential list of runs
-  std::sort(wsList.begin(), wsList.end(), compareByRunNumber);
+  std::vector<int> runNumbers;
+  for (auto ws : wsList) {
+    runNumbers.push_back(firstPeriod(ws)->getRunNumber());
+  }
+  auto ranges = findConsecutiveRuns(runNumbers);
+
+  // Begin string output
+  std::ostringstream label;
+  label << getRunLabel(wsList.front());
+  int firstRunNumber = firstPeriod(wsList.front())->getRunNumber();
+  // see desktop for 13738
 
   // Get string representation of the first and last run numbers
   auto firstRun = boost::lexical_cast<std::string>(firstPeriod(wsList.front())->getRunNumber());
@@ -411,10 +421,41 @@ std::string getRunLabel(std::vector<Workspace_sptr> wsList)
     }
   }
 
-  std::ostringstream label;
-  label << getRunLabel(wsList.front());
   label << '-' << lastRun;
   return label.str();
+}
+
+/**
+ * Given a vector of run numbers, returns the consecutive ranges of runs.
+ * e.g. 1,2,3,5,6,8 -> (1,3), (5,6), (8,8)
+ * @param runNumbers :: [input] Vector of run numbers - need not be sorted
+ * @returns Vector of pairs of (start, end) of consecutive runs
+ */
+std::vector<std::pair<int, int>>
+findConsecutiveRuns(const std::vector<int> &runs) {
+  // Groups to output
+  std::vector<std::pair<int, int>> ranges;
+  // Sort the vector to begin with
+  std::vector<int> runNumbers(runs); // local copy
+  std::sort(runNumbers.begin(), runNumbers.end());
+
+  // Iterate through vector looking for consecutive groups
+  auto a = runNumbers.begin();
+  auto start = a;
+  auto b = a + 1;
+  while (b != runNumbers.end()) {
+    if (*b - 1 == *a) { // Still consecutive
+      a++;
+      b++;
+    } else { // Reached end of consecutive group
+      ranges.emplace_back(*start, *a);
+      start = b++;
+      a = start;
+    }
+  }
+  // Reached end of last consecutive group
+  ranges.emplace_back(*start, *(runNumbers.end() - 1));
+  return ranges;
 }
 
 /**
@@ -486,16 +527,6 @@ double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
   }
 
   return value;
-}
-
-/**
- * @param ws1 :: First workspace to compare
- * @param ws2 :: Second workspace to compare
- * @return True if ws1 < ws2, false otherwise
- */
-bool compareByRunNumber(Workspace_sptr ws1, Workspace_sptr ws2)
-{
-  return firstPeriod(ws1)->getRunNumber() < firstPeriod(ws2)->getRunNumber();
 }
 
 /**
