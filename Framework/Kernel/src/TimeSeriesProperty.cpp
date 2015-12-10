@@ -999,6 +999,18 @@ void TimeSeriesProperty<TYPE>::addValues(
   return;
 }
 
+/** replace vectors of values to the map. First we clear the vectors
+ * and then we run addValues
+*  @param times :: The time as a boost::posix_time::ptime value
+*  @param values :: The associated value
+*/
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::replaceValues(const std::vector<Kernel::DateAndTime> &times,
+  const std::vector<TYPE> &values) {
+  clear();
+  addValues(times, values);
+}
+
 /**
  * Returns the last time
  * @return Value

@@ -37,7 +37,7 @@ def addSampleLogEntry(log_name, ws, start_time, extra_time_shift):
         date += int(extra_time_shift*1e9)
         AddTimeSeriesLog(ws, Name=log_name, Time=date.__str__().strip(), Value=val)
 
-def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False):
+def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False, log_names= None):
      # Create the event workspace
     ws = CreateSampleWorkspace(WorkspaceType= 'Event', NumEvents = number_events, OutputWorkspace = name)
 
@@ -49,7 +49,11 @@ def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_
             addSampleLogEntry('proton_charge', ws, start_time, extra_time_shift)
 
     # Add some other time series log entry
-    addSampleLogEntry('time_series_2', ws, start_time, extra_time_shift)
+    if log_names is None:
+        addSampleLogEntry('time_series_2', ws, start_time, extra_time_shift)
+    else:
+        for name in log_names:
+            addSampleLogEntry(name, ws, start_time, extra_time_shift)
     return ws
 
 def provide_event_ws_custom(name, start_time, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False):
@@ -1214,6 +1218,61 @@ class TestDetectingValidUserFileExtensions(unittest.TestCase):
         expected = True
         # Act and Assert
         self._do_test(file_name, expected)
+
+class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
+    def test_that_offset_added_to_logs_which_need_offset(self):
+        # Arrange
+        names =['ws1', 'ws2']
+        out_ws_name = 'out_ws'
+        time_shift = 0
+        import time
+        time.sleep(10)
+        log_names = ['good_uah_log', 'good_frames', 'new_series']
+
+        start_time_1 = "2010-01-01T00:00:00"
+        lhs = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0, log_names = log_names)
+        start_time_2 = "2010-01-01T00:00:12"
+        rhs = provide_event_ws_with_entries(names[1],start_time_2, extra_time_shift = 0.0, log_names = log_names)
+
+        # Get the expected shift
+        run_lhs = lhs.getRun()
+        shift_0 = run_lhs.getProperty(log_names[0]).value[-1]
+        shift_1 = run_lhs.getProperty(log_names[1]).value[-1]
+
+        # Get the original values
+        run = rhs.getRun()
+        original_values_0 = run.getProperty(log_names[0]).value
+        original_values_1 = run.getProperty(log_names[1]).value
+        original_values_2 = run.getProperty(log_names[2]).value
+
+        # Act
+        converter = su.CummulativeTimeSeriesPropertyAdder()
+        converter.apply_correction_to_workspace(lhs, rhs)
+
+        shifted_values_0 = run.getProperty(log_names[0]).value
+        shifted_values_1 = run.getProperty(log_names[1]).value
+        shifted_values_2 = run.getProperty(log_names[2]).value
+
+        converter.restore_original_workspace(rhs)
+        unshifted_values_0 = run.getProperty(log_names[0]).value
+        unshifted_values_1 = run.getProperty(log_names[1]).value
+        unshifted_values_2 = run.getProperty(log_names[2]).value
+
+        # Assert
+        # Function to check if all entries in two arrays are identical
+        is_identical = lambda in1, in2 : all([el1 == el2 for el1, el2 in zip(in1, in2)])
+
+        # Check that the arrays are identical
+        self.assertTrue(is_identical(original_values_2, shifted_values_2))
+        self.assertTrue(is_identical(original_values_0, unshifted_values_0))
+        self.assertTrue(is_identical(original_values_1, unshifted_values_1))
+        self.assertTrue(is_identical(original_values_2, unshifted_values_2))
+
+        # Check that values have been shifted
+        shifted_expected_0 = original_values_0 + shift_0
+        shifted_expected_1 = original_values_1 + shift_1
+        self.assertTrue(is_identical(shifted_values_0, shifted_expected_0))
+        self.assertTrue(is_identical(shifted_values_1, shifted_expected_1))
 
 if __name__ == "__main__":
     unittest.main()

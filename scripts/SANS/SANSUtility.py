@@ -848,7 +848,22 @@ class PlusWorkspaces(object):
         @param time_shift :: unused parameter
         """
         dummy_shift = time_shift
+        lhs_ws = self._get_workspace(LHS_workspace)
+        rhs_ws = self._get_workspace(RHS_workspace)
+
+        # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
+        # cummulative time series correctly at this point
+        cummulative_correction = CummulativeTimeSeriesPropertyAdder()
+        cummulative_correction.apply_correction_to_workspace(lhs_ws, rhs_ws)
         Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= RHS_workspace,OutputWorkspace= output_workspace)
+        cummulative_correction.restore_original_workspace(rhs_ws)
+
+    def _get_workspace(self, workspace):
+        if isinstance(workspace, MatrixWorkspace):
+            return workspace
+        elif isinstance(workspace, basestring) and mtd.doesExist(workspace):
+            return mtd[workspace]
+
 
 class OverlayWorkspaces(object):
     """
@@ -872,11 +887,19 @@ class OverlayWorkspaces(object):
         time_difference = self._extract_time_difference_in_seconds(lhs_ws, rhs_ws)
         total_time_shift = time_difference + time_shift
 
+        # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
+        # cummulative time series correctly at this point
+        cummulative_correction = CummulativeTimeSeriesPropertyAdder()
+        cummulative_correction.apply_correction_to_workspace(lhs_ws, rhs_ws)
+
         # Create a temporary workspace with shifted time values from RHS, if the shift is necesary
         temp = rhs_ws
         temp_ws_name = 'shifted'
         if total_time_shift != 0.0:
             temp = ChangeTimeZero(InputWorkspace=rhs_ws, OutputWorkspace=temp_ws_name, RelativeTimeOffset=total_time_shift)
+
+        # Undo correction on the original RHS workspace
+        cummulative_correction.restore_original_workspace(rhs_ws)
 
         # Add the LHS and shifted workspace
         Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= temp ,OutputWorkspace= output_workspace)
@@ -928,6 +951,73 @@ class TimeShifter(object):
         except ValueError:
             pass# Log here
         return float_element
+
+class CummulativeTimeSeriesPropertyAdder(object):
+    '''
+    Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
+    cummulative time series correctly at this point.
+    '''
+    def __init__(self):
+        super(CummulativeTimeSeriesPropertyAdder, self).__init__()
+        self.to_check = ['good_uah_log', 'good_frames']
+        self._original_times_rhs = dict()
+        self._original_values_rhs = dict()
+
+    def apply_correction_to_workspace(self, lhs, rhs):
+        '''
+        When adding specific logs, we need to make sure that the values are added correctly.
+        @param lhs: the lhs workspace
+        @param rhs: the rhs workspace
+        '''
+        run_lhs = lhs.getRun()
+        run_rhs = rhs.getRun()
+        for element in self.to_check:
+            if (run_lhs.hasProperty(element) and
+               run_rhs.hasProperty(element)):
+                # Get values for lhs
+                property_lhs = run_lhs.getProperty(element)
+                offset = property_lhs.lastValue()
+
+                # Get values for rhs
+                property_rhs = run_rhs.getProperty(element)
+                times =  property_rhs.times
+                values = property_rhs.value
+
+                # Add the shift
+                shifted_values = values + offset
+
+                # Replace the shifted value for that property
+                property_rhs.clear()
+                self._populate_property(property_rhs, times, shifted_values)
+
+                self._original_times_rhs[element] = times
+                self._original_values_rhs[element] = values 
+
+    def restore_original_workspace(self, rhs):
+        '''
+        Restore the original values for the shifted properties
+        @param rhs: the workspace which requires correction.
+        '''
+        for element in self.to_check:
+            if (element in self._original_times_rhs and
+               element in self._original_values_rhs):
+                run_rhs = rhs.getRun()
+                property_rhs = run_rhs.getProperty(element)
+                property_rhs.clear()
+                times = self._original_times_rhs[element]
+                values = self._original_values_rhs[element]
+                self._populate_property(property_rhs, times, values)
+
+    def _populate_property(self, property, times, values):
+        '''
+        Populates a time series property
+        @param property: the time series property
+        @param times: the times array
+        @param values: the values array
+        '''
+        for index in range(0, len(times)):
+            property.addValue(times[index],
+                                values[index])
 
 def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appendix):
     '''
