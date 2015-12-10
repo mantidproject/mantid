@@ -25,10 +25,11 @@ login and through its `web portal
 <https://portal.scarf.rl.ac.uk/>`_. This resource is available for
 ISIS users.
 
-.. warning:: This interface is undergoing heavy works. New functionality
-             is being added and the pre-post-processing and reconstruction
-             workflow is being modified based on feedback from initial
-             test data.
+.. warning:: This interface is undergoing heavy works. The sections or
+             tabs are subject to changes and reorganization.New
+             functionality is being added and the pre-post-processing
+             and reconstruction workflow is being modified based on
+             feedback from initial test data.
 
 Interface at a glance
 ---------------------
@@ -258,7 +259,21 @@ same location:
 Running jobs locally
 --------------------
 
-This functionality is not available at present.
+This functionality is being added at the moment.
+
+Visualization
+-------------
+
+.. warning:: The interface is being extended to have integration with
+             third party tools for 3D visualization and segmentation.
+             This is work in progress.
+
+Energy bands
+------------
+
+.. warning:: The interface is being extended to provide different methods
+             of combining energy bands from energy selective experiments.
+             This is work in progress.
 
 Example
 -------
