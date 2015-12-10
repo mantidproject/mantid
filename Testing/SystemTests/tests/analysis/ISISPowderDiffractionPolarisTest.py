@@ -1,6 +1,6 @@
 ﻿# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
 
-from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup,\
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, \
     ITableWorkspace
 from mantid.simpleapi import *
 from mantid import config
@@ -310,7 +310,6 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(nxsdata.readY(5)[1700], data5.readY(0)[1700], places=diff_places)
         self.assertAlmostEqual(nxsdata.readY(5)[7000], data5.readY(0)[7000], places=diff_places)
 
-
     def test_POL_2015_2_5mm_files(self):
         diff_places = 3
 
@@ -401,7 +400,7 @@ class ISISPowderDiffractionPol2(stresstesting.MantidStressTest):
         # Custom code to create and run this single test suite
         # and then mark as success or failure
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(LoadTests, "test"))
+        suite.addTest(unittest.makeSuite(LoadTests2, "test"))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)
