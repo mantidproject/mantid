@@ -389,7 +389,7 @@ signal_t MDHistoWorkspace::getSignalWithMaskAtCoord(
     const Mantid::API::MDNormalization &normalization) const {
   size_t linearIndex = this->getLinearIndexAtCoord(coords);
   if (this->getIsMaskedAt(linearIndex)) {
-    return m_maskValue;
+    return MDMaskValue;
   }
   return getSignalAtCoord(coords, normalization);
 }
@@ -586,8 +586,8 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
 
         // Is the signal here masked?
         if (this->getIsMaskedAt(linearIndex)) {
-          y.push_back(m_maskValue);
-          e.push_back(m_maskValue);
+          y.push_back(MDMaskValue);
+          e.push_back(MDMaskValue);
         } else {
           signal_t normalizer = getNormalizationFactor(normalize, linearIndex);
           // And add the normalized signal/error to the list too
