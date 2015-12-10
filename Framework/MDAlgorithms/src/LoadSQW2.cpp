@@ -11,6 +11,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -26,6 +27,14 @@ using Kernel::Logger;
 using Kernel::make_unique;
 using Kernel::Matrix;
 using Kernel::V3D;
+
+//------------------------------------------------------------------------------
+// Constants
+//------------------------------------------------------------------------------
+/// Defines buffer size for reading the pixel data. It is assumed to be the
+/// number of pixels to read in a single call. A single pixel is 9 float
+/// fields. 150000 is ~5MB buffer
+constexpr int64_t NPIX_CHUNK = 150000;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadSQW2)
@@ -46,11 +55,15 @@ const std::string LoadSQW2::name() const { return "LoadSQW"; }
 int LoadSQW2::version() const { return 2; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadSQW2::category() const { return "DataHandling"; }
+const std::string LoadSQW2::category() const {
+  return "DataHandling\\SQW;MDAlgorithms\\DataHandling";
+}
 
-/// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
+/// Algorithm's summary for use in the GUI and help. @see
+/// Algorithm::summary
 const std::string LoadSQW2::summary() const {
-  return "Load an N-dimensional workspace from a .sqw file produced by Horace.";
+  return "Load an N-dimensional workspace from a .sqw file produced by "
+         "Horace.";
 }
 
 //------------------------------------------------------------------------------
@@ -91,7 +104,8 @@ void LoadSQW2::initFileReader() {
 
 /**
  * Reads the initial header section. Skips specifically the
- * following: app_name, app_version, sqw_type, ndims, filename, filepath, title.
+ * following: app_name, app_version, sqw_type, ndims, filename, filepath,
+ * title.
  * Stores the number of files.
  * @return A SQWHeader object describing the section
  */
@@ -240,39 +254,7 @@ void LoadSQW2::skipDetectorSection() {
 void LoadSQW2::readDataSection() {
   skipDataSectionMetadata();
   readSQWDimensions();
-
-  // Pixel Data
-  // skip redundant field
-  m_file->seekg(sizeof(int32_t), std::ios_base::cur);
-  int64_t npixtot(0);
-  *m_reader >> npixtot;
-  g_log.debug() << "    npixtot: " << npixtot << "\n";
-
-  // each pixel has 9 float fields
-  std::vector<float> pixBuffer;
-  m_reader->read(pixBuffer, 9 * npixtot);
-  // Add events to the workspace
-  using DataObjects::MDEvent;
-  for (int64_t i = 0; i < npixtot; ++i) {
-    auto offset = i * 9;
-    auto irun = static_cast<uint16_t>(pixBuffer[offset + 4] - 1);
-    const auto idet = static_cast<detid_t>(pixBuffer[offset + 5]);
-    auto signal = pixBuffer[offset + 7];
-    auto error = pixBuffer[offset + 8];
-    auto u1(pixBuffer[offset]), u2(pixBuffer[offset + 1]),
-        u3(pixBuffer[offset + 2]), en(pixBuffer[offset + 3]);
-    toHKL(u1, u2, u3, irun);
-    coord_t centres[4] = {u1, u2, u3, en};
-    m_outputWS->addEvent(
-        MDEvent<4>(signal, error * error, irun, idet, centres));
-  }
-
-  using Kernel::ThreadPool;
-  using Kernel::ThreadSchedulerFIFO;
-  auto *ts = new ThreadSchedulerFIFO();
-  ThreadPool tp(ts);
-  m_outputWS->splitAllIfNeeded(ts);
-  tp.joinAll();
+  readPixelData();
 }
 
 /**
@@ -352,7 +334,7 @@ void LoadSQW2::readSQWDimensions() {
     for (const auto &val : nbins) {
       os << val << ",";
     }
-    os << ")\n";
+    os << ")";
     g_log.debug(os.str());
   }
 
@@ -384,14 +366,71 @@ void LoadSQW2::readSQWDimensions() {
  * Setup the box controller based on the bin structure
  */
 void LoadSQW2::setupBoxController() {
+  using Kernel::Timer;
+  Timer timer;
+  
   auto boxController = m_outputWS->getBoxController();
   for (size_t i = 0; i < 4; i++) {
-    boxController->setSplitInto(i, m_outputWS->getDimension(i)->getNBins());
+    boxController->setSplitInto(i,  m_outputWS->getDimension(i)->getNBins());
   }
   boxController->setMaxDepth(1);
   m_outputWS->initialize();
   // Start with a MDGridBox.
   m_outputWS->splitBox();
+
+  g_log.debug() << "Time to setup box structure: " << timer.elapsed() << "s\n";
+}
+
+/**
+ * Read the pixel data into the workspace
+ */
+void LoadSQW2::readPixelData() {
+  using Kernel::Timer;
+  Timer timer;
+  
+  // skip redundant field
+  m_file->seekg(sizeof(int32_t), std::ios_base::cur);
+  int64_t npixtot(0);
+  *m_reader >> npixtot;
+  g_log.debug() << "    npixtot: " << npixtot << "\n";
+
+  // Each pixel has 9 float fields. Do a chunked read to avoid
+  // using too much memory for the buffer
+  constexpr int32_t numFields(9);
+  constexpr int64_t bufferSize(numFields * NPIX_CHUNK);
+  std::vector<float> pixBuffer(bufferSize);
+  int64_t pixelsToRead(npixtot);
+  while (pixelsToRead > 0) {
+    int64_t readNPix(pixelsToRead);
+    if (readNPix > NPIX_CHUNK) {
+      readNPix = NPIX_CHUNK;
+    }
+    m_reader->read(pixBuffer, numFields * readNPix);
+    for (int64_t i = 0; i < readNPix; ++i) {
+      addEventFromBuffer(pixBuffer.data() + i * 9);
+    }
+    pixelsToRead -= readNPix;
+  }
+  g_log.debug() << "Time to read all pixels: " << timer.elapsed() << "s\n";
+}
+
+/**
+ * Assume the given pointer points to the start of a full pixel and create
+ * an MDEvent based on it
+ * @param pixel A pointer assumed to point to at the start of a single pixel
+ * from the data file
+ */
+void LoadSQW2::addEventFromBuffer(const float *pixel) {
+  using DataObjects::MDEvent;
+  auto u1(pixel[0]), u2(pixel[1]), u3(pixel[2]), en(pixel[3]);
+  auto irun = static_cast<uint16_t>(pixel[4] - 1);
+  toHKL(u1, u2, u3, irun);
+  const auto idet = static_cast<detid_t>(pixel[5]);
+  // skip energy bin
+  auto signal = pixel[7];
+  auto error = pixel[8];
+  coord_t centres[4] = {u1, u2, u3, en};
+  m_outputWS->addEvent(MDEvent<4>(signal, error * error, irun, idet, centres));
 }
 
 /**
@@ -419,6 +458,12 @@ void LoadSQW2::toHKL(float &u1, float &u2, float &u3, const uint16_t runIndex) {
  * necessary after everything else has run successfully
  */
 void LoadSQW2::finalize() {
+  using Kernel::ThreadPool;
+  using Kernel::ThreadSchedulerFIFO;
+  auto *ts = new ThreadSchedulerFIFO();
+  ThreadPool tp(ts);
+  m_outputWS->splitAllIfNeeded(ts);
+  tp.joinAll();
   m_outputWS->refreshCache();
   setProperty("OutputWorkspace", m_outputWS);
 }

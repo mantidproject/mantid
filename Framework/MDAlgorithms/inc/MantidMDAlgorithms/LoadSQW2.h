@@ -72,6 +72,8 @@ private:
   void skipDataSectionMetadata();
   void readSQWDimensions();
   void setupBoxController();
+  void readPixelData();
+  void addEventFromBuffer(const float *pixel);
   void toHKL(float &u1, float &u2, float &u3, const uint16_t runIndex);
   void finalize();
 
