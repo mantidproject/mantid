@@ -701,6 +701,12 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
     // MDEWs)
     coord_t min = m_ws->getDimension(d)->getMinimum();
     coord_t max = m_ws->getDimension(d)->getMaximum();
+    if (max < min)
+    {
+      coord_t tmp = max;
+      max = min;
+      min = tmp;
+    }
     if (boost::math::isnan(min) || boost::math::isinf(min) ||
         boost::math::isnan(max) || boost::math::isinf(max)) {
       mess << "Dimension " << m_ws->getDimension(d)->getName()

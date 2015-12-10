@@ -669,9 +669,13 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "## e.g.: ISIS, SNS, ILL" << std::endl;
     filestr << "default.facility=" << std::endl;
     filestr << std::endl;
-    filestr << "## Stes the default instrument" << std::endl;
+    filestr << "## Sets the default instrument" << std::endl;
     filestr << "## e.g. IRIS, HET, NIMROD" << std::endl;
     filestr << "default.instrument=" << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets the default convention" << std::endl;
+    filestr << "## Uncomment next line for kf-ki instead of ki-kf" << std::endl;
+    filestr << "#default.convention=Crystallography" << std::endl;
     filestr << std::endl;
     filestr << "##" << std::endl;
     filestr << "## DIRECTORIES" << std::endl;

@@ -56,6 +56,10 @@ Facility and instrument properties
 |                              |be valid. The file is described                    |             |
 |                              |:ref:`here <Facilities file>`.                     |             |
 +------------------------------+---------------------------------------------------+-------------+
+|default.convention            |The convention for converting to Q. For inelastic  | Crystal-    |
+|                              |the convention is ki-kf.  For Crystallogaphy the   | ography     |
+|                              |convention is kf-ki.                               |             |
++------------------------------+---------------------------------------------------+-------------+
 
 Directory Properties
 ********************
