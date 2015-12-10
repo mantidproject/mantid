@@ -634,16 +634,18 @@ void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API
 * Add the actions that are appropriate for a MatrixWorkspace
 * @param menu :: The menu to store the items
 */
-void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
-{
+void MantidDockWidget::addWorkspaceGroupMenuItems(
+    QMenu *menu, const WorkspaceGroup_const_sptr &groupWS) const {
   m_plotSpec->setEnabled(true);
   menu->addAction(m_plotSpec);
   m_plotSpecErr->setEnabled(true);
   menu->addAction(m_plotSpecErr);
   menu->addAction(m_colorFill);
   m_colorFill->setEnabled(true);
-  menu->addAction(m_plotSurface);
-  m_plotSurface->setEnabled(true);
+  if (groupWS && groupWS->getNumberOfEntries() > 2) {
+    menu->addAction(m_plotSurface);
+    m_plotSurface->setEnabled(true);
+  }
   menu->addSeparator();
   menu->addAction(m_saveNexus);
 }
@@ -1262,13 +1264,11 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     else if( IPeaksWorkspace_const_sptr peaksWS = boost::dynamic_pointer_cast<const IPeaksWorkspace>(ws) )
     {
       addPeaksWorkspaceMenuItems(menu, peaksWS);
-    }
-    else if( boost::dynamic_pointer_cast<const WorkspaceGroup>(ws) ) 
-    {
-      addWorkspaceGroupMenuItems(menu);
-    }
-    else if( boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(ws) )
-    {
+    } else if (WorkspaceGroup_const_sptr groupWS =
+                   boost::dynamic_pointer_cast<const WorkspaceGroup>(ws)) {
+      addWorkspaceGroupMenuItems(menu, groupWS);
+    } else if (boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(
+                   ws)) {
       addTableWorkspaceMenuItems(menu);
     }
     addClearMenuItems(menu, selectedWsName);

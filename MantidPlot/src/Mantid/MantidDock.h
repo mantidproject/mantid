@@ -7,6 +7,7 @@
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 #include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
 
@@ -105,7 +106,8 @@ private:
   void addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDEventWorkspace_const_sptr & mdeventWS) const;
   void addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr & WS) const;
   void addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr & WS) const;
-  void addWorkspaceGroupMenuItems(QMenu *menu) const;
+  void addWorkspaceGroupMenuItems(
+      QMenu *menu, const Mantid::API::WorkspaceGroup_const_sptr &groupWS) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
   void addClearMenuItems(QMenu* menu, const QString& wsName);
 
