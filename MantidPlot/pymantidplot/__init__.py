@@ -1,4 +1,4 @@
-"""
+﻿"""
 MantidPlot module to gain access to plotting functions etc.
 Requires that the main script be run from within MantidPlot
 """
@@ -16,6 +16,7 @@ from PyQt4.QtCore import Qt
 import os
 import time
 import mantid.api
+import mantidqtpython
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
@@ -217,7 +218,7 @@ def newTiledWindow(name=None, sources = None, ncols = None):
 
 
 # ----------------------------------------------------------------------------------------------------
-def plotSpectrum(source, indices, error_bars=False, type=-1, window=None,
+def plotSpectrum(source, indices, distribution = mantidqtpython.MantidQt.DistributionDefault, error_bars=False, type=-1, window=None,
                  clearWindow=False, waterfall=False):
     """Open a 1D Plot of a spectrum in a workspace.
 
@@ -256,7 +257,7 @@ def plotSpectrum(source, indices, error_bars=False, type=-1, window=None,
         window = window._getHeldObject()
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
-                                          workspace_names, index_list, True, error_bars,
+                                          workspace_names, index_list, True, distribution, error_bars,
                                           type, window, clearWindow, waterfall))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
@@ -439,7 +440,7 @@ def plotBin(source, indices, error_bars=False, type=-1, window=None, clearWindow
         window = window._getHeldObject()
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
-                                          workspace_names, index_list, False, error_bars,
+                                          workspace_names, index_list, False, 0, error_bars,
                                           type, window, clearWindow, waterfall))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
@@ -856,6 +857,10 @@ Layer.Right = _qti.GraphOptions.Right
 Layer.Bottom = _qti.GraphOptions.Bottom
 Layer.Top = _qti.GraphOptions.Top
 
+DistributionFlag = mantidqtpython.MantidQt
+DistributionFlag.DistributionDefault = mantidqtpython.MantidQt.DistributionDefault
+DistributionFlag.DistributionTrue = mantidqtpython.MantidQt.DistributionTrue
+DistributionFlag.DistributionFalse = mantidqtpython.MantidQt.DistributionFalse
 
 # -----------------------------------------------------------------------------
 # --------------------------- "Private" functions -----------------------------

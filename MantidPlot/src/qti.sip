@@ -1688,9 +1688,11 @@ sipClass=sipFindClass(sipCpp->className());
 
 public:
   // Plotting methods
-  MultiLayer* plot1D(const QList<QString>& wsnames, const QList<int>&, bool spectrumPlot, bool errs=false,
-    Graph::CurveType style = Graph::Unspecified, MultiLayer* window = NULL,
-                     bool clearWindow = false, bool waterfallPlot = false);
+  MultiLayer *plot1D(const QList<QString> &wsnames, const QList<int> &, bool spectrumPlot,
+					 MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+					 bool errs = true, Graph::CurveType style = Graph::Unspecified,
+					 MultiLayer *plotWindow = NULL, bool clearWindow = false,
+					 bool waterfallPlot = false);
 
   MultiLayer* drawSingleColorFillPlot(const QString & name, Graph::CurveType style = Graph::ColorMap,
                                       MultiLayer* window = NULL);

@@ -67,11 +67,20 @@
 };
 
 
+namespace MantidQt 
+{
+%TypeHeaderCode 
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+%End
+
+	enum DistributionFlag {DistributionDefault, DistributionTrue, DistributionFalse};  
+};
+
+
 namespace Mantid
 {
 namespace API
 {
-
 
 enum MDNormalization
 {
