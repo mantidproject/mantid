@@ -64,7 +64,7 @@ class LRScalingFactors(PythonAlgorithm):
         self.declareProperty("IncidentMedium", "Air", doc="Name of the incident medium")
         self.declareProperty("FrontSlitName", "S1", doc="Name of the front slit")
         self.declareProperty("BackSlitName", "Si", doc="Name of the back slit")
-        self.declareProperty("TOFSteps", 10.0, doc="TOF step size")
+        self.declareProperty("TOFSteps", 500.0, doc="TOF step size")
         self.declareProperty(FileProperty("ScalingFactorFile","",
                                           action=FileAction.Save,
                                           extensions=['cfg']))
