@@ -747,8 +747,7 @@ void SCDCalibratePanels::exec() {
 
     //---------- setup ties ----------------------------------
     tie(iFunc, !use_PanelWidth, "f0_detWidthScale", detWidthScale0);
-    tie(iFunc, !use_PanelHeight, "f0_detHeightScale",
-        detHeightScale0);
+    tie(iFunc, !use_PanelHeight, "f0_detHeightScale", detHeightScale0);
     tie(iFunc, !use_PanelPosition, "f0_Xoffset", Xoffset0);
     tie(iFunc, !use_PanelPosition, "f0_Yoffset", Yoffset0);
     tie(iFunc, !use_PanelPosition, "f0_Zoffset", Zoffset0);
@@ -760,11 +759,9 @@ void SCDCalibratePanels::exec() {
     constrain(iFunc, "l0", (MIN_DET_HW_SCALE * L0), (MAX_DET_HW_SCALE * L0));
     constrain(iFunc, "t0", -5., 5.);
 
-    constrain(iFunc, "f0_detWidthScale",
-              MIN_DET_HW_SCALE * detWidthScale0,
+    constrain(iFunc, "f0_detWidthScale", MIN_DET_HW_SCALE * detWidthScale0,
               MAX_DET_HW_SCALE * detWidthScale0);
-    constrain(iFunc, "f0_detHeightScale",
-              MIN_DET_HW_SCALE * detHeightScale0,
+    constrain(iFunc, "f0_detHeightScale", MIN_DET_HW_SCALE * detHeightScale0,
               MAX_DET_HW_SCALE * detHeightScale0);
     constrain(iFunc, "f0_Xoffset", -1. * maxXYOffset + Xoffset0,
               maxXYOffset + Xoffset0);
@@ -928,13 +925,11 @@ void SCDCalibratePanels::exec() {
       Quat newRelRot = Quat(rotx, V3D(1, 0, 0)) * Quat(roty, V3D(0, 1, 0)) *
                        Quat(rotz, V3D(0, 0, 1)); //*RelRot;
 
-      FixUpBankParameterMap((banksVec), NewInstrument,
-                            V3D(result["f0_Xoffset"],
-                                result["f0_Yoffset"],
-                                result["f0_Zoffset"]),
-                            newRelRot, result["f0_detWidthScale"],
-                            result["f0_detHeightScale"], pmapOld,
-                            getProperty("RotateCenters"));
+      FixUpBankParameterMap(
+          (banksVec), NewInstrument,
+          V3D(result["f0_Xoffset"], result["f0_Yoffset"], result["f0_Zoffset"]),
+          newRelRot, result["f0_detWidthScale"], result["f0_detHeightScale"],
+          pmapOld, getProperty("RotateCenters"));
 
       //} // For @ group
 
