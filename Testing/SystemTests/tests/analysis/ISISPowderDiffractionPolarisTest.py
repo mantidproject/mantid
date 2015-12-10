@@ -361,3 +361,94 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(nxsdata3.readY(0)[7000], data3.readY(0)[7000], places=diff_places)
         self.assertAlmostEqual(nxsdata4.readY(0)[2000], data4.readY(0)[2000], places=diff_places)
         self.assertAlmostEqual(nxsdata5.readY(0)[0], data5.readY(0)[0], places=diff_places)
+
+
+# ================ Below test cases use different pref file ==================
+# =================== when 'ExistingV' = 'yes' in pref file ===================
+
+
+class ISISPowderDiffractionPol2(stresstesting.MantidStressTest):
+    def requiredFiles(self):
+        return set(["POLARIS/POL78338.raw", "POLARIS/POL78339.raw",
+                    "POLARIS/POL79514.raw", "POLARIS/VanaPeaks.dat",
+                    "POLARIS/test/GrpOff/Cycle_12_2_group_masked_collimator.cal",
+                    "POLARIS/test/GrpOff/cycle_15_2_silicon_all_spectra.cal",
+                    "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/UserPrefFile_15_2_original.pref",
+                    "POLARIS/test/Cycle_15_2_exist_v/Calibration/POL_2015_2_5mm_vrod_78338_152_calfile-0.nxs",
+                    "POLARIS/test/Cycle_15_2_exist_v/Calibration/POL_2015_2_5mm_vrod_78338_152_calfile-1.nxs",
+                    "POLARIS/test/Cycle_15_2_exist_v/Calibration/POL_2015_2_5mm_vrod_78338_152_calfile-2.nxs",
+                    "POLARIS/test/Cycle_15_2_exist_v/Calibration/POL_2015_2_5mm_vrod_78338_152_calfile-3.nxs",
+                    "POLARIS/test/Cycle_15_2_exist_v/Calibration/POL_2015_2_5mm_vrod_78338_152_calfile-4.nxs",
+                    ])
+        # note: VanaPeaks.dat is used only if provided in the directory
+
+    def _clean_up_files(self, filenames, directories):
+        try:
+            for files in filenames:
+                path = os.path.join(directories[0], files)
+                os.remove(path)
+        except OSError, ose:
+            print 'could not delete generated file : ', ose.filename
+
+    def runTest(self):
+        self._success = False
+        expt = cry_ini.Files('POLARIS', RawDir=(DIRS[0] + "POLARIS"), Analysisdir='test',
+                             forceRootDirFromScripts=False, inputInstDir=DIRS[0])
+        expt.initialize('Cycle_15_2_exist_v', user='Mantid_tester', prefFile='UserPrefFile_15_2_original.pref')
+        expt.tell()
+        cry_focus.focus_all(expt, "79514", Write_ExtV=False)
+
+        # Custom code to create and run this single test suite
+        # and then mark as success or failure
+        suite = unittest.TestSuite()
+        suite.addTest(unittest.makeSuite(LoadTests, "test"))
+        runner = unittest.TextTestRunner()
+        # Run using either runner
+        res = runner.run(suite)
+        if res.wasSuccessful():
+            self._success = True
+        else:
+            self._success = False
+
+    def validate(self):
+        return self._success
+
+    def cleanup(self):
+        filenames = set(["POLARIS/test/Cycle_15_2_exist_v/Calibration/Cycle_12_2_group_masked_collimator.cal",
+
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/Cycle_12_2_group_masked_collimator.cal",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514.gss",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514.nxs",
+
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b1_D.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b1_TOF.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b2_D.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b2_TOF.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b3_D.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b3_TOF.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b4_D.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b4_TOF.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b5_D.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b5_TOF.dat"])
+        self._clean_up_files(filenames, DIRS)
+
+
+# ======================================================================
+# work horse
+class LoadTests2(unittest.TestCase):
+    wsname = "__LoadTest"
+    cleanup_names = []
+
+    def tearDown(self):
+        self.cleanup_names.append(self.wsname)
+        for name in self.cleanup_names:
+            try:
+                AnalysisDataService.remove(name)
+            except KeyError:
+                pass
+        self.cleanup_names = []
+
+    # ============================ Success ==============================
+
+    def test_calfile_with_workspace(self):
+        self.wsname = "CalWorkspace1"
