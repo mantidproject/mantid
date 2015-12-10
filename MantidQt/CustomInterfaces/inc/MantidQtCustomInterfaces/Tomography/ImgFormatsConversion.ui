@@ -132,17 +132,17 @@
         </property>
         <item>
          <property name="text">
+          <string>PNG</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>TIFF</string>
          </property>
         </item>
         <item>
          <property name="text">
           <string>FITS</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>PNG</string>
          </property>
         </item>
         <item>

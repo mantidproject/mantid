@@ -28,24 +28,24 @@ namespace CustomInterfaces {
 
 const std::string TomographyIfaceViewQtGUI::g_styleSheetOffline =
     "QPushButton { "
-    "margin: 1px;"
+    "margin: 6px;"
     "border-color: #0c457e;"
     "border-style: outset;"
     "border-radius: 3px;"
     "border-width: 0px;"
     "color: black;"
-    "background-color: rgb(130, 130, 130); "
+    "background-color: rgb(180, 180, 180); "
     "}"
     "QPushButton:flat { "
-    "background-color: rgb(130, 130, 130); "
+    "background-color: rgb(180, 180, 180); "
     "}"
     "QPushButton:pressed { "
-    "background-color: rgb(130, 130, 130) "
+    "background-color: rgb(180, 180, 180) "
     "}";
 
 const std::string TomographyIfaceViewQtGUI::g_styleSheetOnline =
     "QPushButton { "
-    "margin: 1px;"
+    "margin: 6px;"
     "border-color: #0c457e;"
     "border-style: outset;"
     "border-radius: 3px;"
@@ -79,6 +79,9 @@ std::string TomographyIfaceViewQtGUI::g_defLocalExternalPythonPath =
 // windows it could be in: c:/local/Anaconda/Lib/site-packages/
 std::vector<std::string> TomographyIfaceViewQtGUI::g_defAddPathPython;
 
+const std::string TomographyIfaceViewQtGUI::g_defRemotePathScripts =
+    "/work/imat/phase_commissioning";
+
 const std::string TomographyIfaceViewQtGUI::g_SCARFName = "SCARF@STFC";
 const std::string TomographyIfaceViewQtGUI::g_defOutPathLocal =
 #ifdef _WIN32
@@ -101,28 +104,26 @@ const std::string TomographyIfaceViewQtGUI::g_defParaviewPath =
     "/usr/bin/";
 #endif
 
-const  std::string TomographyIfaceViewQtGUI::g_defParaviewAppendPath =
+const std::string TomographyIfaceViewQtGUI::g_defParaviewAppendPath =
 #ifdef _WIN32
-      "bin\\paraview.exe";
+    "bin\\paraview.exe";
 #else
-      "paraview";
+    "paraview";
 #endif
-
 
 const std::string TomographyIfaceViewQtGUI::g_defOctopusVisPath =
 #ifdef _WIN32
-    "C:/Program Files/Octopus Imaging/Octopus Visualisation/octoviewer3d.exe";
+    "C:/Program Files/Octopus Imaging/Octopus Visualisation";
 #else
     "This tool is not available on this platform";
 #endif
 
 const std::string TomographyIfaceViewQtGUI::g_defOctopusAppendPath =
 #ifdef _WIN32
-      "octoviewer3d.exe";
+    "octoviewer3d.exe";
 #else
-      "This tool is not available";
+    "This tool is not available";
 #endif
-
 
 const std::string TomographyIfaceViewQtGUI::g_defProcessedSubpath = "processed";
 
@@ -133,8 +134,25 @@ const std::string TomographyIfaceViewQtGUI::g_CCPiTool = "CCPi CGLS";
 const std::string TomographyIfaceViewQtGUI::g_SavuTool = "Savu";
 const std::string TomographyIfaceViewQtGUI::g_customCmdTool = "Custom command";
 
+// phase or cycle component, like: phase_commissioning, cycle_15_4, cycle_16_1
 const std::string TomographyIfaceViewQtGUI::g_defPathComponentPhase =
     "phase_commissioning";
+
+const std::string TomographyIfaceViewQtGUI::g_defRBNumber = "RB000XXX";
+
+const std::string TomographyIfaceViewQtGUI::g_defPathReconScripts =
+#ifdef _WIN32
+    "C:/MantidInstall/scripts";
+#else
+    QDir::currentPath().toStdString();
+#endif
+
+const std::string TomographyIfaceViewQtGUI::g_defPathReconOut =
+#ifdef _WIN32
+    "D:/imat";
+#else
+    "~/imat/";
+#endif
 
 // Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
@@ -241,13 +259,29 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
   // TODO: take g_def values first time, when Qsettings are empty, then from
   // QSettings
   m_setupPathComponentPhase = g_defPathComponentPhase;
+  m_setupRBNumber = g_defRBNumber;
+  m_setupPathReconScripts = g_defPathReconScripts;
+  m_setupPathReconOut = g_defPathReconOut;
 
-  m_uiTabSetup.groupBox_run_config->setEnabled(false);
+  resetRemoteSetup();
 
+  // log in/out
   connect(m_uiTabSetup.pushButton_SCARF_login, SIGNAL(released()), this,
           SLOT(SCARFLoginClicked()));
   connect(m_uiTabSetup.pushButton_SCARF_logout, SIGNAL(released()), this,
           SLOT(SCARFLogoutClicked()));
+
+  // RB number changes
+  connect(m_uiTabSetup.lineEdit_cycle, SIGNAL(editingFinished()), this,
+          SLOT(updatedCycleName()));
+
+  // 'browse' buttons for image paths
+  connect(m_uiTabSetup.pushButton_fits_dir, SIGNAL(released()), this,
+          SLOT(fitsPathBrowseClicked()));
+  connect(m_uiTabSetup.pushButton_flat_dir, SIGNAL(released()), this,
+          SLOT(flatPathBrowseClicked()));
+  connect(m_uiTabSetup.pushButton_dark_dir, SIGNAL(released()), this,
+          SLOT(darkPathBrowseClicked()));
 
   // populate setup values from defaults
   m_uiTabSetup.lineEdit_path_FITS->setText(
@@ -261,13 +295,22 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
   m_uiTabSetup.lineEdit_scripts_base_dir->setText(
       QString::fromStdString(m_pathsConfig.pathScriptsTools()));
 
-  // 'browse' buttons
-  connect(m_uiTabSetup.pushButton_fits_dir, SIGNAL(released()), this,
-          SLOT(fitsPathBrowseClicked()));
-  connect(m_uiTabSetup.pushButton_flat_dir, SIGNAL(released()), this,
-          SLOT(flatPathBrowseClicked()));
-  connect(m_uiTabSetup.pushButton_dark_dir, SIGNAL(released()), this,
-          SLOT(darkPathBrowseClicked()));
+  // reset setup of the remote
+  connect(m_uiTabSetup.pushButton_reset_scripts_base_dir, SIGNAL(released()),
+          this, SLOT(resetRemoteSetup()));
+
+  // 'browse' buttons for local conf:
+  connect(m_uiTabSetup.pushButton_in_out_dir, SIGNAL(released()), this,
+          SLOT(browseLocalInOutDirClicked()));
+  connect(m_uiTabSetup.pushButton_recon_scripts_dir, SIGNAL(released()), this,
+          SLOT(browseLocalReconScriptsDirClicked()));
+}
+
+void TomographyIfaceViewQtGUI::resetRemoteSetup() {
+  m_uiTabSetup.lineEdit_scripts_base_dir->setText(
+      QString::fromStdString(g_defRemotePathScripts));
+  m_uiTabSetup.spinBox_SCARFnumNodes->setValue(1);
+  m_uiTabSetup.spinBox_SCARFnumCores->setValue(8);
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionRun() {
@@ -356,7 +399,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
   const QString startDir =
       QString::fromStdString(Poco::Path::expand(g_defOutPathLocal));
 
-
   // start at default local path when possible
   const QString path =
       QString::fromStdString(Poco::Path::expand(g_defOutPathLocal));
@@ -364,7 +406,7 @@ void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
     m_uiTabVisualize.treeView_files->setRootIndex(model->index(path));
   } else {
     m_uiTabVisualize.treeView_files->setRootIndex(
-      model->index(QDir::currentPath()));
+        model->index(QDir::currentPath()));
   }
 
   connect(m_uiTabVisualize.pushButton_paraview, SIGNAL(released()), this,
@@ -393,6 +435,9 @@ void TomographyIfaceViewQtGUI::doSetupSectionConvert() {
 void TomographyIfaceViewQtGUI::doSetupSectionEnergy() {
   connect(m_uiTabEnergy.pushButton_browse_input, SIGNAL(released()), this,
           SLOT(browseEnergyInputClicked()));
+
+  connect(m_uiTabEnergy.pushButton_browse_input, SIGNAL(released()), this,
+          SLOT(browseEnergyOutputClicked()));
 }
 
 void TomographyIfaceViewQtGUI::setComputeResources(
@@ -953,7 +998,8 @@ void TomographyIfaceViewQtGUI::processLocalRunRecon() {
     // options with all the info from filters and regions
     const std::string cmdOpts = filtersCfgToCmdOpts(filters, corRegions);
 
-    sendLog("Running " + toolName + ", with parameters: " + args);
+    sendLog("Running " + toolName + ", with binary: " +
+            m_localExternalPythonPath + ", with parameters: " + args);
     std::vector<std::string> runArgs = {args};
     Mantid::Kernel::ConfigService::Instance().launchProcess(run, runArgs);
 
@@ -1205,6 +1251,16 @@ void TomographyIfaceViewQtGUI::darkPathBrowseClicked() {
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
+void TomographyIfaceViewQtGUI::browseLocalInOutDirClicked() {
+  m_setupPathReconScripts =
+      checkUserBrowsePath(m_uiTabSetup.lineEdit_local_out_recon_dir);
+}
+
+void TomographyIfaceViewQtGUI::browseLocalReconScriptsDirClicked() {
+  m_setupPathReconScripts =
+      checkUserBrowsePath(m_uiTabSetup.lineEdit_local_recon_scripts);
+}
+
 /**
  * Get path from user and update a line edit and a variable.
  *
@@ -1443,7 +1499,8 @@ void TomographyIfaceViewQtGUI::resetPrePostFilters() {
 }
 
 void TomographyIfaceViewQtGUI::sendToOctopusVisClicked() {
-  sendToVisTool("Octopus Visualization 3D", m_setupOctopusVisPath, g_defOctopusAppendPath);
+  sendToVisTool("Octopus Visualization 3D", m_setupOctopusVisPath,
+                g_defOctopusAppendPath);
 }
 
 void TomographyIfaceViewQtGUI::sendToParaviewClicked() {
@@ -1567,7 +1624,13 @@ void TomographyIfaceViewQtGUI::browseImgOutputConvertClicked() {
 }
 
 void TomographyIfaceViewQtGUI::browseEnergyInputClicked() {
-  const std::string path = checkUserBrowsePath(m_uiTabEnergy.lineEdit_input);
+  const std::string path =
+      checkUserBrowsePath(m_uiTabEnergy.lineEdit_input_path);
+}
+
+void TomographyIfaceViewQtGUI::browseEnergyOutputClicked() {
+  const std::string path =
+      checkUserBrowsePath(m_uiTabEnergy.lineEdit_output_path);
 }
 
 std::string
@@ -1608,8 +1671,13 @@ void TomographyIfaceViewQtGUI::userWarning(const std::string &err,
                        QMessageBox::Ok);
 }
 
+void TomographyIfaceViewQtGUI::updatedCycleName() {
+  m_setupPathComponentPhase = m_uiTabSetup.lineEdit_cycle->text().toStdString();
+}
+
 void TomographyIfaceViewQtGUI::updatedRBNumber() {
-  // May have to change: m_uiTabRun.lineEdit_local_out_recon_dir
+  m_setupRBNumber = m_uiTabRun.lineEdit_rb_number->text().toStdString();
+  // Might have to change: m_uiTabRun.lineEdit_local_out_recon_dir as well
 }
 
 /**

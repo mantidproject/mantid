@@ -149,6 +149,12 @@ private slots:
 
   void browseImageClicked();
 
+  void updatedCycleName();
+
+  void browseLocalInOutDirClicked();
+  void browseLocalReconScriptsDirClicked();
+
+  void resetRemoteSetup();
   void fitsPathBrowseClicked();
   void flatPathBrowseClicked();
   void darkPathBrowseClicked();
@@ -174,6 +180,7 @@ private slots:
 
   // processing of energy bands
   void browseEnergyInputClicked();
+  void browseEnergyOutputClicked();
 
   // for the savu functionality - waiting for Savu
   void menuSaveClicked();
@@ -323,10 +330,17 @@ private:
 
   TomoPathsConfig m_pathsConfig;
 
+  static const std::string g_defRemotePathScripts;
+
   // several paths or path components related to where the files are found
   // (raw files, reconstructions, pre-post processed files, etc.)
   // These are the defaults
   static const std::string g_defPathComponentPhase;
+  static const std::string g_defRBNumber;
+  // reconstruction scripts (external, but shipped with Mantid)
+  static const std::string g_defPathReconScripts;
+  // base dir for the reconstruction outputs
+  static const std::string g_defPathReconOut;
   static const std::string g_defParaviewPath;
   static const std::string g_defParaviewAppendPath;
   static const std::string g_defOctopusVisPath;
@@ -334,6 +348,9 @@ private:
   static const std::string g_defProcessedSubpath;
   // And these are the paths set up
   std::string m_setupPathComponentPhase;
+  std::string m_setupRBNumber;
+  std::string m_setupPathReconScripts;
+  std::string m_setupPathReconOut;
   std::string m_setupParaviewPath;
   std::string m_setupOctopusVisPath;
   std::string m_setupProcessedSubpath;
