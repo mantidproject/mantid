@@ -34,13 +34,13 @@ const std::string TomographyIfaceViewQtGUI::g_styleSheetOffline =
     "border-radius: 3px;"
     "border-width: 0px;"
     "color: black;"
-    "background-color: rgb(100, 100, 100); "
+    "background-color: rgb(130, 130, 130); "
     "}"
     "QPushButton:flat { "
-    "background-color: rgb(100, 100, 100); "
+    "background-color: rgb(130, 130, 130); "
     "}"
     "QPushButton:pressed { "
-    "background-color: rgb(100, 100, 100) "
+    "background-color: rgb(130, 130, 130) "
     "}";
 
 const std::string TomographyIfaceViewQtGUI::g_styleSheetOnline =
@@ -96,17 +96,33 @@ const std::string TomographyIfaceViewQtGUI::g_defOutPathRemote =
 
 const std::string TomographyIfaceViewQtGUI::g_defParaviewPath =
 #ifdef _WIN32
-    "C\\Program Files\\ParaView\\";
+    "C:\\Program Files\\ParaView\\";
 #else
     "/usr/bin/";
 #endif
 
+const  std::string TomographyIfaceViewQtGUI::g_defParaviewAppendPath =
+#ifdef _WIN32
+      "bin\\paraview.exe";
+#else
+      "paraview";
+#endif
+
+
 const std::string TomographyIfaceViewQtGUI::g_defOctopusVisPath =
 #ifdef _WIN32
-    "C:/Program Files/Octopus Imaging/Octopus Visualization/octoviewer3d.exe";
+    "C:/Program Files/Octopus Imaging/Octopus Visualisation/octoviewer3d.exe";
 #else
-    "";
+    "This tool is not available on this platform";
 #endif
+
+const std::string TomographyIfaceViewQtGUI::g_defOctopusAppendPath =
+#ifdef _WIN32
+      "octoviewer3d.exe";
+#else
+      "This tool is not available";
+#endif
+
 
 const std::string TomographyIfaceViewQtGUI::g_defProcessedSubpath = "processed";
 
@@ -340,13 +356,21 @@ void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
   const QString startDir =
       QString::fromStdString(Poco::Path::expand(g_defOutPathLocal));
 
-  m_uiTabVisualize.treeView_files->setRootIndex(
-      model->index(QDir::currentPath())); // startDir)); //
+
+  // start at default local path when possible
+  const QString path =
+      QString::fromStdString(Poco::Path::expand(g_defOutPathLocal));
+  if (!path.isEmpty()) {
+    m_uiTabVisualize.treeView_files->setRootIndex(model->index(path));
+  } else {
+    m_uiTabVisualize.treeView_files->setRootIndex(
+      model->index(QDir::currentPath()));
+  }
 
   connect(m_uiTabVisualize.pushButton_paraview, SIGNAL(released()), this,
           SLOT(sendToParaviewClicked()));
 
-  connect(m_uiTabVisualize.pushButton_paraview, SIGNAL(released()), this,
+  connect(m_uiTabVisualize.pushButton_octopus, SIGNAL(released()), this,
           SLOT(sendToOctopusVisClicked()));
 
   connect(m_uiTabVisualize.pushButton_browse_files, SIGNAL(released()), this,
@@ -937,7 +961,7 @@ void TomographyIfaceViewQtGUI::processLocalRunRecon() {
   } catch (std::runtime_error &rexc) {
     sendLog("The execution of " + toolName + "failed. details: " +
             std::string(rexc.what()));
-    userWarning("Execution failed",
+    userWarning("Execution failed ",
                 "Coult not execute the tool. Error details: " +
                     std::string(rexc.what()));
   }
@@ -1419,25 +1443,11 @@ void TomographyIfaceViewQtGUI::resetPrePostFilters() {
 }
 
 void TomographyIfaceViewQtGUI::sendToOctopusVisClicked() {
-  const std::string appendBin =
-#ifdef _WIN32
-      "octoviewer3d.exe";
-#else
-      "This tool is not available";
-#endif
-
-  sendToVisTool("Octopus Visualization 3D", m_setupOctopusVisPath, appendBin);
+  sendToVisTool("Octopus Visualization 3D", m_setupOctopusVisPath, g_defOctopusAppendPath);
 }
 
 void TomographyIfaceViewQtGUI::sendToParaviewClicked() {
-  const std::string appendBin =
-#ifdef _WIN32
-      "bin\\paraview.exe";
-#else
-      "paraview";
-#endif
-
-  sendToVisTool("ParaView", m_setupParaviewPath, appendBin);
+  sendToVisTool("ParaView", m_setupParaviewPath, g_defParaviewAppendPath);
 }
 
 /**
@@ -1481,7 +1491,7 @@ void TomographyIfaceViewQtGUI::sendToVisTool(const std::string &toolName,
   } catch (std::runtime_error &rexc) {
     sendLog("The execution of " + toolName + "failed. details: " +
             std::string(rexc.what()));
-    userWarning("Execution failed",
+    userWarning("Execution failed ",
                 "Coult not execute the tool. Error details: " +
                     std::string(rexc.what()));
   }

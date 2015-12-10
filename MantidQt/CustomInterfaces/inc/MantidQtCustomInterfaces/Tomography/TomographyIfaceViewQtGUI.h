@@ -328,7 +328,9 @@ private:
   // These are the defaults
   static const std::string g_defPathComponentPhase;
   static const std::string g_defParaviewPath;
+  static const std::string g_defParaviewAppendPath;
   static const std::string g_defOctopusVisPath;
+  static const std::string g_defOctopusAppendPath;
   static const std::string g_defProcessedSubpath;
   // And these are the paths set up
   std::string m_setupPathComponentPhase;

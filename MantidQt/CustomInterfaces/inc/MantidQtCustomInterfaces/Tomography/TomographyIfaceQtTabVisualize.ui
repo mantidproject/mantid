@@ -91,14 +91,14 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="pushButton_octopus">
          <property name="text">
           <string>&gt;Octopus Vis.</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_3">
+        <widget class="QPushButton" name="pushButton_vgstudio">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -210,7 +210,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>C:/Program Files/Octopus Imaging/Octopus Visualization/octoviewer3d.exe</string>
+           <string>C:/Program Files/Octopus Imaging/Octopus Visualisation</string>
           </property>
          </widget>
         </item>
