@@ -157,6 +157,18 @@ void ImageROIPresenter::processNewStack() {
     return;
   }
 
+  for (size_t i = 0; i < imgs.size(); i++) {
+    const std::string extShort = imgs[i].substr(imgs[i].size() - 3);
+    const std::string extLong = imgs[i].substr(imgs[i].size() - 4);
+    if (extShort != "fit" && extLong != "fits") {
+      m_view->userWarning("Invalid files found in the stack of images",
+                          "Found files with unrecognized extension. Expected "
+                          "files with extension 'fit' or 'fits' but found: " +
+                              imgs[i]);
+      return;
+    }
+  }
+
   Mantid::API::WorkspaceGroup_sptr wsg = loadFITSStack(imgs);
   if (!wsg)
     return;
