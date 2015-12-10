@@ -706,9 +706,6 @@ void SCDCalibratePanels::exec() {
     iFunc->setParameter("t0", T0);
 
     double maxXYOffset = getProperty("MaxPositionChange_meters");
-    int i = -1; // position in ParamResults Array.
-    // for (auto group = Groups.begin(); group != Groups.end(); ++group) {
-    i++;
 
     boost::shared_ptr<const RectangularDetector> bank_rect;
     string paramPrefix = "f" + boost::lexical_cast<string>(i) + "_";
@@ -761,10 +758,8 @@ void SCDCalibratePanels::exec() {
     tie(iFunc, !use_PanelOrientation, paramPrefix + "Zrot", Zrot0);
 
     //--------------- setup constraints ------------------------------
-    if (i == 0) {
-      constrain(iFunc, "l0", (MIN_DET_HW_SCALE * L0), (MAX_DET_HW_SCALE * L0));
-      constrain(iFunc, "t0", -5., 5.);
-    }
+    constrain(iFunc, "l0", (MIN_DET_HW_SCALE * L0), (MAX_DET_HW_SCALE * L0));
+    constrain(iFunc, "t0", -5., 5.);
 
     constrain(iFunc, paramPrefix + "detWidthScale",
               MIN_DET_HW_SCALE * detWidthScale0,
