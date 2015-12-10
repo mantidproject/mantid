@@ -1128,6 +1128,7 @@ void TomographyIfaceViewQtGUI::makeRunnableWithOptions(const std::string &comp,
   splitCmdLine(cmd, run, opt);
   // TODO: this may not make sense any longer:
   // checkWarningToolNotSetup(tool, cmd, run, opt);
+  run = m_localExternalPythonPath;
 }
 
 void TomographyIfaceViewQtGUI::splitCmdLine(const std::string &cmd,
