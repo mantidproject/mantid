@@ -76,6 +76,9 @@ public:
   /// Returns the normalized error for this box
   virtual signal_t getNormalizedError() const = 0;
 
+  /// Returns the normalized signal or mask value for this box
+  virtual signal_t getNormalizedSignalWithMask() const = 0;
+
   /// Returns the total signal for this box
   virtual signal_t getSignal() const = 0;
 

@@ -85,6 +85,7 @@ set ( SRC_FILES
 	src/Reflectometry/ReflNexusMeasurementItemSource.cpp
 	src/Reflectometry/ReflSearchModel.cpp
 	src/Reflectometry/ReflTableSchema.cpp
+    src/Reflectometry/TransferResults.cpp
 	src/SANSAddFiles.cpp
 	src/SANSConstants.cpp
 	src/SANSDiagnostics.cpp
@@ -217,6 +218,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h
+    inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSConstants.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
