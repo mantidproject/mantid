@@ -1525,7 +1525,7 @@ void MantidDockWidget::plotSurface() {
 
       // Each "spectrum" will be the data from one workspace
       int nWorkspaces = wsGroup->getNumberOfEntries();
-      std::string xAxisLabel, dataAxisLabel;
+      std::string xAxisLabel, dataAxisLabel, xAxisUnits;
       alg->setProperty("NSpec", nWorkspaces);
       if (nWorkspaces > 0) {
         // For each workspace in group, add data
@@ -1540,6 +1540,7 @@ void MantidDockWidget::plotSurface() {
             data.insert(data.end(), Y.begin(), Y.end());
             if (i == 0) {
               xAxisLabel = ws->getXDimension()->getName();
+              xAxisUnits = ws->getXDimension()->getUnits();
               dataAxisLabel = ws->YUnitLabel();
             }
           }
@@ -1551,10 +1552,6 @@ void MantidDockWidget::plotSurface() {
       m_mantidUI->executeAlgorithmAsync(alg, true);
 
       // Plot the output workspace in 3D
-      if (auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
-              m_mantidUI->getWorkspace(plotWSTitle))) {
-        matrixWS->getAxis(0)->title() = xAxisLabel;
-      }
       auto matrixToPlot =
           m_mantidUI->importMatrixWorkspace(plotWSTitle, -1, -1, false, false);
       m_mantidUI->deleteWorkspace(plotWSTitle);
@@ -1564,6 +1561,16 @@ void MantidDockWidget::plotSurface() {
       QString title("Surface plot for ");
       title.append(wsGroup->name().c_str());
       plot->setTitle(title);
+
+      // Set the X axis label correctly
+      if (xAxisLabel.empty()) {
+        xAxisLabel = "X";
+      }
+      QString xLabelQ(xAxisLabel.c_str());
+      if (!xAxisUnits.empty()) {
+        xLabelQ.append(" (").append(xAxisUnits.c_str()).append(")");
+      }
+      plot->setXAxisLabel(xLabelQ);
     }
   }
 }
