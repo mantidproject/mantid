@@ -510,3 +510,78 @@ class LoadTests2(unittest.TestCase):
         self.assertEquals(990, data.blocksize())
         self.assertAlmostEqual(221.15625, data.readX(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(1.003815133228, data.readY(0)[0], places=DIFF_PLACES)
+
+    def test_datfile_with_workspace(self):
+        datfile1 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b1_D.dat")
+        datfile2 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b1_TOF.dat")
+        datfile3 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b2_D.dat")
+        datfile4 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b2_TOF.dat")
+        datfile5 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b3_D.dat")
+        datfile6 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b3_TOF.dat")
+        datfile7 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b4_D.dat")
+        datfile8 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b4_TOF.dat")
+        datfile9 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b5_D.dat")
+        datfile10 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b5_TOF.dat")
+
+        data1 = LoadAscii(Filename=datfile1, OutputWorkspace="datWorkspace1")
+        data2 = LoadAscii(Filename=datfile2, OutputWorkspace="datWorkspace2")
+        data3 = LoadAscii(Filename=datfile3, OutputWorkspace="datWorkspace3")
+        data4 = LoadAscii(Filename=datfile4, OutputWorkspace="datWorkspace4")
+        data5 = LoadAscii(Filename=datfile5, OutputWorkspace="datWorkspace5")
+        data6 = LoadAscii(Filename=datfile6, OutputWorkspace="datWorkspace6")
+        data7 = LoadAscii(Filename=datfile7, OutputWorkspace="datWorkspace7")
+        data8 = LoadAscii(Filename=datfile8, OutputWorkspace="datWorkspace8")
+        data9 = LoadAscii(Filename=datfile9, OutputWorkspace="datWorkspace9")
+        data10 = LoadAscii(Filename=datfile10, OutputWorkspace="datWorkspace10")
+
+        self.assertTrue(isinstance(data1, MatrixWorkspace))
+        self.assertTrue(isinstance(data2, MatrixWorkspace))
+        self.assertTrue(isinstance(data3, MatrixWorkspace))
+        self.assertTrue(isinstance(data4, MatrixWorkspace))
+        self.assertTrue(isinstance(data5, MatrixWorkspace))
+        self.assertTrue(isinstance(data6, MatrixWorkspace))
+        self.assertTrue(isinstance(data7, MatrixWorkspace))
+        self.assertTrue(isinstance(data8, MatrixWorkspace))
+        self.assertTrue(isinstance(data9, MatrixWorkspace))
+        self.assertTrue(isinstance(data10, MatrixWorkspace))
+
+        self.assertEquals(1, data1.getNumberHistograms())
+        self.assertEquals(990, data1.blocksize())
+        self.assertAlmostEqual(0.30078, data1.readX(0)[2], places=DIFF_PLACES)
+
+        self.assertEquals(1, data2.getNumberHistograms())
+        self.assertEquals(990, data2.blocksize())
+        self.assertAlmostEqual(data1.readY(0)[6], data2.readY(0)[6], places=DIFF_PLACES)
+
+        self.assertEquals(1, data3.getNumberHistograms())
+        self.assertEquals(4648, data3.blocksize())
+        self.assertAlmostEqual(0.16076, data3.readX(0)[199], places=DIFF_PLACES)
+
+        self.assertEquals(1, data4.getNumberHistograms())
+        self.assertEquals(4648, data4.blocksize())
+        self.assertAlmostEqual(0.15179466, data4.readE(0)[10], places=DIFF_PLACES)
+
+        self.assertEquals(1, data5.getNumberHistograms())
+        self.assertEquals(4565, data5.blocksize())
+        self.assertAlmostEqual(data5.readY(0)[2228], data6.readY(0)[2228], places=DIFF_PLACES)
+
+        self.assertEquals(1, data6.getNumberHistograms())
+        self.assertEquals(4565, data6.blocksize())
+        self.assertAlmostEqual(1.01458598, data6.readY(0)[0], places=DIFF_PLACES)
+
+        self.assertEquals(1, data7.getNumberHistograms())
+        self.assertEquals(4429, data7.blocksize())
+        self.assertAlmostEqual(0.03795158, data7.readE(0)[0], places=DIFF_PLACES)
+
+        self.assertEquals(1, data8.getNumberHistograms())
+        self.assertEquals(4429, data8.blocksize())
+        self.assertAlmostEqual(data7.readY(0)[6], data8.readY(0)[6], places=DIFF_PLACES)
+
+        self.assertEquals(1, data9.getNumberHistograms())
+        self.assertEquals(6110, data9.blocksize())
+        self.assertAlmostEqual(data9.readE(0)[3369], data10.readE(0)[3369], places=DIFF_PLACES)
+
+        self.assertEquals(1, data10.getNumberHistograms())
+        self.assertEquals(6110, data10.blocksize())
+        self.assertAlmostEqual(300.4597, data10.readX(0)[10], places=DIFF_PLACES)
+
