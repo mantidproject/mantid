@@ -37,12 +37,8 @@ void SaveIsawUB::init() {
       new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
       "An input workspace containing the orientation matrix.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".mat");
-  exts.push_back(".ub");
-  exts.push_back(".txt");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
+                                   {".mat", ".ub", ".txt"}),
                   "Path to an ISAW-style UB matrix text file.");
 }
 
@@ -146,8 +142,7 @@ void SaveIsawUB::exec() {
         << lattice.errorgamma() << setw(12) << setprecision(4) << ErrorVolume
         << " " << endl;
 
-    out << endl
-        << endl;
+    out << endl << endl;
 
     out << "The above matrix is the Transpose of the UB Matrix. ";
     out << "The UB matrix maps the column" << endl;
