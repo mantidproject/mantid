@@ -62,8 +62,8 @@ def compare_relative_errors(values_fitted, reference_values, tolerance=1e-6):
 
     if not isinstance(values_fitted, list) or not isinstance(reference_values, list) or\
        len(values_fitted) != len(reference_values):
-        ValueError("The values fitted and the reference values must be provided as lists (with the same "
-                   "number of elements). Got A: {0} and B: {1}".format(values_fitted, reference_values))
+        raise ValueError("The values fitted and the reference values must be provided as lists (with the same "
+                         "number of elements). Got A: {0} and B: {1}".format(values_fitted, reference_values))
 
     for idx, (val, expected) in enumerate(zip(values_fitted, reference_values)):
         if 0 == expected:
