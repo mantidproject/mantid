@@ -1054,12 +1054,9 @@ int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialisation method.
 */
 void LoadEventNexus::init() {
-  std::vector<std::string> exts;
-  exts.push_back("_event.nxs");
-  exts.push_back(".nxs.h5");
-  exts.push_back(".nxs");
   this->declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load,
+                       {"_event.nxs", ".nxs.h5", ".nxs"}),
       "The name of the Event NeXus file to read, including its full or "
       "relative path. "
       "The file name is typically of the form INST_####_event.nxs (N.B. case "
@@ -1975,11 +1972,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   if (shortest_tof < 0)
     g_log.warning() << "The shortest TOF was negative! At least 1 event has an "
-                       "invalid time-of-flight." << std::endl;
+                       "invalid time-of-flight."
+                    << std::endl;
   if (bad_tofs > 0)
     g_log.warning() << "Found " << bad_tofs << " events with TOF > 2e8. This "
                                                "may indicate errors in the raw "
-                                               "TOF data." << std::endl;
+                                               "TOF data."
+                    << std::endl;
 
   // Use T0 offset from TOPAZ Parameter file if it exists
   if (m_ws->getInstrument()->hasParameter("T0")) {
@@ -2308,7 +2307,8 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     if (m_instrument_loaded_correctly) {
       m_ws->setInstrument(dataWS->getInstrument());
       g_log.information() << "Instrument data copied into monitors workspace "
-                             " from the data workspace." << std::endl;
+                             " from the data workspace."
+                          << std::endl;
     }
 
     // Perform the load (only events from monitor)
@@ -2330,7 +2330,8 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
         g_log.error()
             << "Could not copy log data into monitors workspace. Some "
                " logs may be wrong and/or missing in the output "
-               "monitors workspace." << std::endl;
+               "monitors workspace."
+            << std::endl;
       }
     }
 
