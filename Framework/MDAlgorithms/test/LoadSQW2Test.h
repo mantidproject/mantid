@@ -56,11 +56,23 @@ public:
   }
 
   void test_OutputWorkspace_Has_Correct_Data() {
-    IMDEventWorkspace_sptr outputWS = runAlgorithm();
+    Arguments args;
+    args.metadataOnly = false;
+    IMDEventWorkspace_sptr outputWS = runAlgorithm(args);
 
     checkGeometryAsExpected(*outputWS);
     checkExperimentInfoAsExpected(*outputWS);
-    checkDataAsExpected(*outputWS);
+    checkDataAsExpected(*outputWS, args);
+  }
+
+  void test_OutputWorkspace_Has_No_Events_When_MetaDataOnly_Selected() {
+    Arguments args;
+    args.metadataOnly = true;
+    IMDEventWorkspace_sptr outputWS = runAlgorithm(args);
+
+    checkGeometryAsExpected(*outputWS);
+    checkExperimentInfoAsExpected(*outputWS);
+    checkDataAsExpected(*outputWS, args);
   }
 
   //----------------------------------------------------------------------------
@@ -73,10 +85,16 @@ public:
   }
 
 private:
-  IMDEventWorkspace_sptr runAlgorithm() {
+  struct Arguments {
+    Arguments() : metadataOnly(false) {}
+    bool metadataOnly;
+  };
+
+  IMDEventWorkspace_sptr runAlgorithm(Arguments args) {
     auto algm = createAlgorithm();
     algm->setProperty("Filename", m_filename);
     algm->setProperty("OutputWorkspace", "__unused_value_for_child_algorithm");
+    algm->setProperty("MetadataOnly", args.metadataOnly);
     algm->execute();
     return algm->getProperty("OutputWorkspace");
   }
@@ -168,34 +186,39 @@ private:
     TS_ASSERT_DELTA(0.0, vVec[2], 1e-04);
   }
 
-  void checkDataAsExpected(const IMDEventWorkspace &outputWS) {
-    TS_ASSERT_EQUALS(580, outputWS.getNEvents());
-    // equal split between experiments
-    size_t nexpt1(0), nexpt2(0);
-    // 10 detector Ids split evenly
-    std::vector<int> ids(10, 0);
-    auto iter = std::unique_ptr<IMDIterator>(outputWS.createIterator());
-    do {
-      auto nevents = iter->getNumEvents();
-      for (size_t i = 0; i < nevents; ++i) {
-        auto irun = iter->getInnerRunIndex(i);
-        TSM_ASSERT("Expected run index 0 or 1. Found " + std::to_string(irun),
-                   irun == 0 || irun == 1);
-        if (irun == 0)
-          nexpt1++;
-        else
-          nexpt2++;
-        auto idet = iter->getInnerDetectorID(i);
-        TSM_ASSERT("Expected 1 <= det ID <= 10. Found " + std::to_string(idet),
-                   1 <= idet || idet <= 10);
-        ids[idet - 1] += 1;
-      }
-    } while (iter->next());
-    TS_ASSERT_EQUALS(290, nexpt1);
-    TS_ASSERT_EQUALS(290, nexpt2);
-    // 58 events in each detector
-    std::vector<int> expectedIds(10, 58);
-    TS_ASSERT_EQUALS(expectedIds, ids);
+  void checkDataAsExpected(const IMDEventWorkspace &outputWS, Arguments args) {
+    if (args.metadataOnly) {
+      TS_ASSERT_EQUALS(0, outputWS.getNEvents());
+    } else {
+      TS_ASSERT_EQUALS(580, outputWS.getNEvents());
+      // equal split between experiments
+      size_t nexpt1(0), nexpt2(0);
+      // 10 detector Ids split evenly
+      std::vector<int> ids(10, 0);
+      auto iter = std::unique_ptr<IMDIterator>(outputWS.createIterator());
+      do {
+        auto nevents = iter->getNumEvents();
+        for (size_t i = 0; i < nevents; ++i) {
+          auto irun = iter->getInnerRunIndex(i);
+          TSM_ASSERT("Expected run index 0 or 1. Found " + std::to_string(irun),
+                     irun == 0 || irun == 1);
+          if (irun == 0)
+            nexpt1++;
+          else
+            nexpt2++;
+          auto idet = iter->getInnerDetectorID(i);
+          TSM_ASSERT("Expected 1 <= det ID <= 10. Found " +
+                         std::to_string(idet),
+                     1 <= idet || idet <= 10);
+          ids[idet - 1] += 1;
+        }
+      } while (iter->next());
+      TS_ASSERT_EQUALS(290, nexpt1);
+      TS_ASSERT_EQUALS(290, nexpt2);
+      // 58 events in each detector
+      std::vector<int> expectedIds(10, 58);
+      TS_ASSERT_EQUALS(expectedIds, ids);
+    }
   }
 
   //----------------------------------------------------------------------------

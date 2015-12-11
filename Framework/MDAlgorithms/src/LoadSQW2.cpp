@@ -93,10 +93,15 @@ int LoadSQW2::confidence(Kernel::FileDescriptor &descriptor) const {
 /// Initialize the algorithm's properties.
 void LoadSQW2::init() {
   using namespace API;
+  using Kernel::PropertyWithValue;
 
+  // Inputs
   declareProperty(
       new FileProperty("Filename", "", FileProperty::Load, {".sqw"}),
       "File of type SQW format");
+  declareProperty(new PropertyWithValue<bool>("MetadataOnly", false),
+                  "Load Metadata without events.");
+  // Outputs
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "Output IMDEventWorkspace reflecting SQW data");
@@ -279,7 +284,9 @@ void LoadSQW2::skipDetectorSection() {
 void LoadSQW2::readDataSection() {
   skipDataSectionMetadata();
   readSQWDimensions();
-  readPixelData();
+  bool metadataOnly = getProperty("MetadataOnly");
+  if (!metadataOnly)
+    readPixelData();
 }
 
 /**
