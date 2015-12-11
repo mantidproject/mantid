@@ -237,10 +237,7 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
     def _correct_q_resolution_for_merged(self, count_ws_front, count_ws_rear,
                                          output_ws, scale):
-
-        self._comment(output_ws, 'Internal Step: q-resolution transferred from input workspaces')
-
-        '''
+        """
         We need to transfer the DX error values from the original workspaces to the merged worksapce.
         We have:
         C(Q) = Sum_all_lambda_for_particular_Q(Counts(lambda))
@@ -255,7 +252,9 @@ class SANSStitch1D(DataProcessorAlgorithm):
         @param count_ws_front: the front counts
         @param count_ws_rear: the rear counts
         @param output_ws: the output workspace
-        '''
+        """
+
+        self._comment(output_ws, 'Internal Step: q-resolution transferred from input workspaces')
 
         def divide_q_resolution_by_counts(q_res, counts):
             # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
