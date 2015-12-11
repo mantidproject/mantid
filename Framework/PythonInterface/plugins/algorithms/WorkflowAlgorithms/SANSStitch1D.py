@@ -372,21 +372,22 @@ class SANSStitch1D(DataProcessorAlgorithm):
         shift_factor_property = self.getProperty('ShiftFactor')
         mode_property = self.getProperty('Mode')
         enum_map = self._make_mode_map()
-        if enum_map[mode_property.value] == Mode.NoneFit:
+        mode = enum_map[mode_property.value]
+        if mode == Mode.NoneFit:
             if scale_factor_property.isDefault:
                 errors[scale_factor_property.name] = 'ScaleFactor required'
             if shift_factor_property.isDefault:
                 errors[shift_factor_property.name] = 'ShiftFactor required'
-        elif enum_map[mode_property.value] == Mode.ScaleOnly:
+        elif mode == Mode.ScaleOnly:
             if shift_factor_property.isDefault:
                 errors[shift_factor_property.name] = 'ShiftFactor required'
-        elif enum_map[mode_property.value] == Mode.ShiftOnly:
+        elif mode == Mode.ShiftOnly:
             if scale_factor_property.isDefault:
                 errors[scale_factor_property.name] = 'ScaleFactor required'
 
         workspace_property_names = ['HABCountsSample', 'LABCountsSample', 'HABNormSample', 'LABNormSample']
         # 1d data check
-        self._validate_1D(workspace_property_names, errors)
+        self._validate_1D(workspace_property_names, errors, mode)
 
         # Units check
         self._validate_units(workspace_property_names, errors)
@@ -398,6 +399,8 @@ class SANSStitch1D(DataProcessorAlgorithm):
             self._validate_provided(workspace_property_names, errors)
             # Check Q units
             self._validate_units(workspace_property_names, errors)
+            # Check 1D
+            self._validate_1D(workspace_property_names, errors, mode)
 
         return errors
 
@@ -406,10 +409,11 @@ class SANSStitch1D(DataProcessorAlgorithm):
             if not self._validateIsInQ(property_name):
                 errors[property_name] = 'Workspace must have units of momentum transfer'
 
-    def _validate_1D(self, workspace_property_names, errors):
-        for property_name in workspace_property_names:
-            if not self._validateIs1DFromPropertyName(property_name):
-                errors[property_name] = 'Wrong number of spectra. Must be 1D input'
+    def _validate_1D(self, workspace_property_names, errors, mode):
+        if mode != Mode.NoneFit:
+            for property_name in workspace_property_names:
+                if not self._validateIs1DFromPropertyName(property_name):
+                    errors[property_name] = 'Wrong number of spectra. Must be 1D input'
 
     def _validate_provided(self, workspace_property_names, errors):
         for property_name in workspace_property_names:
