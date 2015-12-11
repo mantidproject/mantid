@@ -35,6 +35,13 @@ When can runs are provided they are processed separately using the same merge fo
 
 This is analogous to how :ref:`algm-Q1D` operates on input workspaces.
 
+Merging of front and rear banks for the can is achieved using a different form from that above. 
+
+.. math:: 
+
+   \frac{C_f(Q)+C_r(Q)}{\frac{N_f(Q)}{scale} + N_r(Q)}
+
+where *C* denotes counts, *N* denotes normalization and *f* and *r* relate to forward (high-angle) and rear (low-angle) respectively. The can workspace is subtracted from the merged sample workspace to generate the output.
 
 Usage
 -----

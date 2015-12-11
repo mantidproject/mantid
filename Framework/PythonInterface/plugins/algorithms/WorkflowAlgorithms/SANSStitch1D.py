@@ -69,7 +69,8 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
         allowedModes = StringListValidator(self._make_mode_map().keys())
 
-        self.declareProperty('Mode', 'None', validator=allowedModes, direction=Direction.Input, doc='What to fit. Free parameter(s).')
+        self.declareProperty('Mode', 'None', validator=allowedModes, direction=Direction.Input,
+                             doc='What to fit. Free parameter(s).')
 
         self.declareProperty('ScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
                              doc='Optional scaling factor')
@@ -136,7 +137,7 @@ class SANSStitch1D(DataProcessorAlgorithm):
         crop = self.createChildAlgorithm('Rebin')
         crop.setProperty('InputWorkspace', ws)
         step = ws.readX(0)[1] - ws.readX(0)[0]
-        crop.setProperty('Params', [x_min, step,x_max])
+        crop.setProperty('Params', [x_min, step, x_max])
         crop.execute()
         return crop.getProperty('OutputWorkspace').value
 
@@ -160,6 +161,14 @@ class SANSStitch1D(DataProcessorAlgorithm):
         shifted_norm_front = self._scale(nF, shift_factor)
         scaled_norm_front = self._scale(nF, 1.0 / scale_factor)
         numerator = self._add(self._add(cF, shifted_norm_front), cR)
+        denominator = self._add(scaled_norm_front, nR)
+        merged_q = self._divide(numerator, denominator)
+        return merged_q
+
+    def _calculate_merged_q_can(self, cF, nF, cR, nR, scale_factor):
+        # We want: (Cf_can+Cr_can)/(Nf_can/scale + Nr_can)
+        scaled_norm_front = self._scale(nF, 1.0 / scale_factor)
+        numerator = self._add(cF, cR)
         denominator = self._add(scaled_norm_front, nR)
         merged_q = self._divide(numerator, denominator)
         return merged_q
@@ -226,6 +235,79 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
         return min_q, max_q
 
+    def _correct_q_resolution_for_merged(self, count_ws_front, count_ws_rear,
+                                         output_ws, scale):
+
+        self._comment(output_ws, 'Internal Step: q-resolution transferred from input workspaces')
+
+        '''
+        We need to transfer the DX error values from the original workspaces to the merged worksapce.
+        We have:
+        C(Q) = Sum_all_lambda_for_particular_Q(Counts(lambda))
+        weightedQRes(Q) = Sum_all_lambda_for_particular_Q(Counts(lambda)* qRes(lambda))
+        ResQ(Q) = weightedQRes(Q)/C(Q)
+        Richard suggested:
+        ResQMerged(Q) = (weightedQRes_FRONT(Q)*scale + weightedQRes_REAR(Q))/
+                        (C_FRONT(Q)*scale + C_REAR(Q))
+        Note that we drop the shift here.
+        The Q Resolution functionality only exists currently
+        for 1D, ie when only one spectrum is present.
+        @param count_ws_front: the front counts
+        @param count_ws_rear: the rear counts
+        @param output_ws: the output workspace
+        '''
+
+        def divide_q_resolution_by_counts(q_res, counts):
+            # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
+            # Unfortunately, we need some knowlege about the Q1D algorithm here.
+            # The two last entries of DX are duplicate in Q1D and this is how we
+            # treat it here.
+            q_res_buffer = np.divide(q_res[0:-1], counts)
+            q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+            return q_res_buffer
+
+        def multiply_q_resolution_by_counts(q_res, counts):
+            # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
+            # Unfortunately, we need some knowlege about the Q1D algorithm here.
+            # The two last entries of DX are duplicate in Q1D and this is how we
+            # treat it here.
+            q_res_buffer = np.multiply(q_res[0:-1], counts)
+            q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+            return q_res_buffer
+
+        if count_ws_rear.getNumberHistograms() != 1:
+            return
+
+        # We require both count workspaces to contain the DX value
+        if not count_ws_rear.hasDx(0) or not count_ws_front.hasDx(0):
+            return
+
+        q_resolution_front = count_ws_front.readDx(0)
+        q_resolution_rear = count_ws_rear.readDx(0)
+        counts_front = count_ws_front.readY(0)
+        counts_rear = count_ws_rear.readY(0)
+
+        # We need to make sure that the workspaces match in length
+        if ((len(q_resolution_front) != len(q_resolution_rear)) or
+                (len(counts_front) != len(counts_rear))):
+            return
+
+        # Get everything for the FRONT detector
+        q_res_front_norm_free = multiply_q_resolution_by_counts(q_resolution_front, counts_front)
+        q_res_front_norm_free = q_res_front_norm_free * scale
+        counts_front = counts_front * scale
+
+        # Get everything for the REAR detector
+        q_res_rear_norm_free = multiply_q_resolution_by_counts(q_resolution_rear, counts_rear)
+
+        # Now add and divide
+        new_q_res = np.add(q_res_front_norm_free, q_res_rear_norm_free)
+        new_counts = np.add(counts_front, counts_rear)
+        q_resolution = divide_q_resolution_by_counts(new_q_res, new_counts)
+
+        # Set the dx error
+        output_ws.setDx(0, q_resolution)
+
     def _determine_factors(self, q_high_angle, q_low_angle, mode, scale, shift):
 
         # We need to make suret that the fitting only occurs in the y direction
@@ -238,8 +320,8 @@ class SANSStitch1D(DataProcessorAlgorithm):
         # We need to transfer the errors from the front data to the rear data, as we are using the the front data as a model, but
         # we want to take into account the errors of both workspaces.
         front_data_corrected, rear_data_corrected = self._get_error_corrected(rear_data=q_low_angle,
-                                                                                                       front_data=q_high_angle,
-                                                                                                       q_min=q_min, q_max=q_max)
+                                                                              front_data=q_high_angle,
+                                                                              q_min=q_min, q_max=q_max)
 
         fit = self.createChildAlgorithm('Fit')
 
@@ -262,7 +344,6 @@ class SANSStitch1D(DataProcessorAlgorithm):
             fit.setProperty('Ties', 'f1.A0=' + str(shift) + '*f0.Scaling,' + constant_x_shift_and_scale)
         else:
             raise RuntimeError('Unknown fitting mode requested.')
-
 
         fit.setProperty('StartX', q_min)
         fit.setProperty('EndX', q_max)
@@ -317,7 +398,6 @@ class SANSStitch1D(DataProcessorAlgorithm):
         shift_factor = self.getProperty('ShiftFactor').value
         scale_factor = self.getProperty('ScaleFactor').value
         if not mode == Mode.NoneFit:
-
             shift_factor, scale_factor = self._determine_factors(q_high_angle, q_low_angle, mode, scale=scale_factor,
                                                                  shift=shift_factor)
 
@@ -341,11 +421,14 @@ class SANSStitch1D(DataProcessorAlgorithm):
             nR_can = self.getProperty('LABNormCan').value
 
             # Calculate merged q for the can
-            merged_q_can = self._calculate_merged_q(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,
-                                                    scale_factor=scale_factor,
-                                                    shift_factor=shift_factor)
+            merged_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,
+                                                    scale_factor=scale_factor)
             # Subtract it from the sample
             merged_q = self._subract(merged_q, merged_q_can)
+
+        if not mode == Mode.NoneFit:
+            self._correct_q_resolution_for_merged(count_ws_front=cF, count_ws_rear=cR, output_ws=merged_q,
+                                                  scale=scale_factor)
 
         self.setProperty('OutputWorkspace', merged_q)
 
