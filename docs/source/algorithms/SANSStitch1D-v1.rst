@@ -56,7 +56,7 @@ Usage
    lab_counts = CreateWorkspace(DataX=range(0,6), DataY=[6]*5, UnitX='MomentumTransfer')
    lab_norm = CreateWorkspace(DataX=range(0,6), DataY=[1]*5, UnitX='MomentumTransfer')
 
-   stitched = SANSStitch1D(HABCountsSample=hab_counts, 
+   stitched, scale, shift = SANSStitch1D(HABCountsSample=hab_counts, 
        HABNormSample=hab_norm, 
        LABCountsSample=lab_counts, 
        LABNormSample=lab_norm, 
