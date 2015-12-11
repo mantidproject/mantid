@@ -85,6 +85,11 @@ class SANSStitch1D(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Stitched high and low Q 1-D data')
 
+        self.declareProperty('OutScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
+                             doc='Applied scale factor')
+        self.declareProperty('OutShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
+                             doc='Applied shift factor')
+
         self.setPropertyGroup("Mode", 'Fitting')
         self.setPropertyGroup("ScaleFactor", 'Fitting')
         self.setPropertyGroup("ShiftFactor", 'Fitting')
@@ -93,6 +98,10 @@ class SANSStitch1D(DataProcessorAlgorithm):
         self.setPropertyGroup("HABNormSample", 'Sample')
         self.setPropertyGroup("LABCountsSample", 'Sample')
         self.setPropertyGroup("LABNormSample", 'Sample')
+
+        self.setPropertyGroup("OutputWorkspace", 'Output')
+        self.setPropertyGroup("OutScaleFactor", 'Output')
+        self.setPropertyGroup("OutShiftFactor", 'Output')
 
         can_settings = EnabledWhenProperty('ProcessCan', PropertyCriterion.IsNotDefault)
 
@@ -430,6 +439,8 @@ class SANSStitch1D(DataProcessorAlgorithm):
                                                   scale=scale_factor)
 
         self.setProperty('OutputWorkspace', merged_q)
+        self.setProperty('OutScaleFactor', scale_factor)
+        self.setProperty('OutShiftFactor', shift_factor)
 
     def _validateIs1DFromPropertyName(self, property_name):
         ws = self.getProperty(property_name).value

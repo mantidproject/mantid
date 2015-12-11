@@ -197,6 +197,8 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg.execute()
         single_spectra_input = create_alg.getProperty('OutputWorkspace').value
 
+        in_scale_factor = 1.0
+        in_shift_factor = 1.0
         alg = AlgorithmManager.create('SANSStitch1D')
         alg.setChild(True)
         alg.initialize()
@@ -206,13 +208,17 @@ class SANSStitch1DTest(unittest.TestCase):
         alg.setProperty('HABNormSample', single_spectra_input)
         alg.setProperty('LABNormSample', single_spectra_input)
         alg.setProperty('OutputWorkspace', 'dummy_name')
-        alg.setProperty('ShiftFactor', 1.0)
-        alg.setProperty('ScaleFactor', 1.0)
+        alg.setProperty('ShiftFactor', in_shift_factor)
+        alg.setProperty('ScaleFactor', in_scale_factor)
         alg.execute()
         out_ws = alg.getProperty('OutputWorkspace').value
+        out_shift_factor = alg.getProperty('OutShiftFactor').value
+        out_scale_factor = alg.getProperty('OutScaleFactor').value
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
+        self.assertEquals(out_scale_factor, in_scale_factor)
+        self.assertEquals(out_shift_factor, in_shift_factor)
         y_array = out_ws.readY(0)
 
         expected_y_array = [1.5] * 9
@@ -297,6 +303,12 @@ class SANSStitch1DTest(unittest.TestCase):
         alg.setProperty('OutputWorkspace', 'dummy_name')
         alg.execute()
         out_ws = alg.getProperty('OutputWorkspace').value
+        out_shift_factor = alg.getProperty('OutShiftFactor').value
+        out_scale_factor = alg.getProperty('OutScaleFactor').value
+
+
+        self.assertEquals(out_scale_factor, 1.0)
+        self.assertEquals(out_shift_factor, -5.0)
 
         y_array = out_ws.readY(0)
 
