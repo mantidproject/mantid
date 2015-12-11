@@ -502,10 +502,10 @@ void LoadSQW2::warnIfMemoryInsufficient(int64_t npixtot) {
   MemoryStats stat;
   size_t reqdMemory =
       (npixtot * sizeof(MDEvent<4>) + NPIX_CHUNK * FIELDS_PER_PIXEL) / 1024;
-  if (reqdMemory < stat.availMem()) {
+  if (reqdMemory > stat.availMem()) {
     g_log.warning()
         << "It looks as if there is insufficient memory to load the "
-        << "entire file. It is recommended to cancel the algorith and specify "
+        << "entire file. It is recommended to cancel the algorithm and specify "
            "the OutputFilename option to create a file-backed workspace.\n";
   }
 }
