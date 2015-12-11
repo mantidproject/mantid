@@ -1250,9 +1250,7 @@ void ReflMainViewPresenter::openTable() {
 /**
 Import a table from TBL file
 */
-void ReflMainViewPresenter::importTable() {
-  m_view->showAlgorithmDialog("LoadReflTBL");
-}
+void ReflMainViewPresenter::importTable() { m_view->showImportDialog(); }
 
 /**
 Export a table to TBL file
