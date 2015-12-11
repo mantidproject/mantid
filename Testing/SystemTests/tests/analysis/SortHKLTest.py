@@ -1,4 +1,4 @@
-# pylint: disable=no-init
+# pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 import json
 from mantid.simpleapi import *
@@ -85,9 +85,12 @@ class SortHKLTest(stresstesting.MantidStressTest):
     def _run_sort_hkl(self, reflections, space_group):
         point_group_name = self._get_point_group(space_group).getName()
         centering_name = self._centering_map[space_group[0]]
+
+        # pylint: disable=unused-variable
         sorted_hkls, chi2, statistics = SortHKL(InputWorkspace=reflections,
                                            PointGroup=point_group_name,
                                            LatticeCentering=centering_name)
+
 
         return statistics.row(0), sorted_hkls
 
@@ -133,6 +136,7 @@ class SortHKLTest(stresstesting.MantidStressTest):
             else:
                 unique_map[unique].append(peak)
 
+        # pylint: disable=unused-variable
         for unique_hkl, equivalents in unique_map.iteritems():
             if len(equivalents) > 1:
                 reference_peak = equivalents[0]
