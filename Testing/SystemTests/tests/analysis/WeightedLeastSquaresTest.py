@@ -140,28 +140,35 @@ class WeightedLSSysTest(stresstesting.MantidStressTest):
     def requiredFiles(self):
         return set([self.input_data_file])
 
-    def compare_relative_err(self, val, ref):
+    def compare_relative_errors(self, values_fitted, reference_values):
         """
-        Checks that a value 'val' does not differ from a reference value 'ref' by a tolerance/threshold
-        or more. This method compares the relative error. An epsilon of 0.01 means a relative
-        difference of 1 % = 100*0.01 %. If the reference value is 0, checks that the difference
-        from 0 is less than the tolerance.
+        Checks that all the values 'fitted' do not differ from reference
+        values by a tolerance/threshold or more. This method compares
+        the relative error. An epsilon of 0.01 means a relative
+        difference of 1 % = 100*0.01 %. If the reference value is 0,
+        checks that the difference from 0 is less than the tolerance.
 
-        @param val :: value obtained from a calculation or algorithm (fitting for example)
-        @param ref :: (expected) reference value
+        @param values_fitted :: parameter values obtained from a calculation or algorithm (fitting for example)
+        @param reference_values :: (expected) reference value
 
         @returns if val differs in relative terms from ref by less than epsilon
-        """
-        if 0 == ref:
-            logger.information("Trying to calculate relative error with respect to 0. "
-                               "Checking absolute difference from 0. Make sure this is the intended behavior!")
-            check = (abs(val - ref) < self.tolerance)
-        else:
-            check = (abs(val/ref - 1) < self.tolerance)
 
-        if not check:
-            print("Value '{0}' differs from reference '{1}' by more than required tolerance '{2}'".
-                  format(val, ref, self.tolerance))
+        """
+        for idx, (val, expected) in enumerate(zip(values_fitted, reference_values)):
+            if 0 == expected:
+                logger.information("Trying to calculate relative error with respect to 0. "
+                                   "Checking absolute difference from 0. Make sure this is the intended behavior!")
+                check = (abs(val - expected) < self.tolerance)
+            else:
+                check = (abs(val/expected - 1) < self.tolerance)
+
+            if not check:
+                logger.information("For the parameter with index {0}, the fitted value '{1}' differs from "
+                                   "reference '{2}' by more than required tolerance '{3}'".
+                                   format(idx, val, expected, self.tolerance))
+                logger.information("These where the values fitted for all the parameters: {0}".
+                                   format(values_fitted))
+                logger.information(" and these are the reference values: {0}".format(reference_values))
 
         return check
 
@@ -179,11 +186,10 @@ class WeightedLSSysTest(stresstesting.MantidStressTest):
             raise RuntimeError("The number of fitted parameters does not match the number of "
                                "expected parameters")
 
-        for idx, (val, expected) in enumerate(zip(self.fitted_params, self.expected_params)):
-            self.assertTrue(self.compare_relative_err(val, expected),
-                            "Relative error bigger than acceptable (tolerance: {0}) when "
-                            "comparing parameter number {1} against expected value. Got: {2}. "
-                            "Expected: {3}".format(self.tolerance, idx+1, val, expected))
+        self.assertTrue(self.compare_relative_errors(self.fitted_params, self.expected_params),
+                        "Relative error bigger than acceptable (tolerance: {0}). Please see "
+                        "log messages for full details on the expected and fitted parameter "
+                        "values.")
 
         return True
 
@@ -225,7 +231,7 @@ class WeightedLSSineLikeMuonExperimentAsymmetry(WeightedLSSysTest):
         """This needs to be overriden in the concrete test classes"""
 
 
-class WeightedLSSineLikeMuonExperimentAsymmetry_Fails(WeightedLSSineLikeMuonExperimentAsymmetry):
+class WeightedLSSineLikeMuonExperimentAsymmetryFails(WeightedLSSineLikeMuonExperimentAsymmetry):
     """
     This tests a fit failure. Initial guess of frequency not good enough (5.2 too far off 6)
     """
@@ -240,7 +246,7 @@ class WeightedLSSineLikeMuonExperimentAsymmetry_Fails(WeightedLSSineLikeMuonExpe
         self.fitted_params, _ = run_fit(self.workspace,
                                         self.function_definition, self.minimizer)
 
-class WeightedLSSineLikeMuonExperimentAsymmetry_Good(WeightedLSSineLikeMuonExperimentAsymmetry):
+class WeightedLSSineLikeMuonExperimentAsymmetryGood(WeightedLSSineLikeMuonExperimentAsymmetry):
     """
     This tests a fit that works. Initial guess of frequency close enough to real value.
     """
@@ -277,7 +283,7 @@ class WeightedLSVanadiumPatternFromENGINXSmoothing(WeightedLSSysTest):
     def runTest(self):
         """This needs to be overriden in the concrete test classes"""
 
-class WeightedLSVanadiumPatternFromENGINXSmoothing_50(WeightedLSVanadiumPatternFromENGINXSmoothing):
+class WeightedLSVanadiumPatternFromENGINXSmoothing50(WeightedLSVanadiumPatternFromENGINXSmoothing):
 
     """
     This tests a normal fit with a spline with 50 knots. This is currently producing results that look
