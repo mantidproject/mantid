@@ -196,7 +196,7 @@ def grab_preproc_options(args):
         pre_config.crop_coords = ast.literal_eval(args.air_region)
 
     if args.median_filter_size:
-        if not args.num_iter.isdigit():
+        if not args.median_filter.isdigit():
             raise RuntimeError("The median filter size/width must be an integer")
         pre_config.median_filter_size = args.median_filter_size
 
