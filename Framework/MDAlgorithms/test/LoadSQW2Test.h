@@ -11,6 +11,8 @@
 #include "MantidMDAlgorithms/LoadSQW2.h"
 #include "MantidKernel/make_unique.h"
 
+#include <Poco/TemporaryFile.h>
+
 #include <array>
 
 using Mantid::API::ExperimentInfo;
@@ -75,6 +77,20 @@ public:
     checkDataAsExpected(*outputWS, args);
   }
 
+  void test_OutputWorkspace_Is_File_Backed_When_Requested() {
+    using Poco::TemporaryFile;
+
+    Arguments args;
+    args.metadataOnly = false;
+    TemporaryFile filebacking;
+    args.outputFilename = filebacking.path();
+    IMDEventWorkspace_sptr outputWS = runAlgorithm(args);
+
+    checkGeometryAsExpected(*outputWS);
+    checkExperimentInfoAsExpected(*outputWS);
+    checkDataAsExpected(*outputWS, args);
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -86,8 +102,9 @@ public:
 
 private:
   struct Arguments {
-    Arguments() : metadataOnly(false) {}
+    Arguments() : metadataOnly(false), outputFilename() {}
     bool metadataOnly;
+    std::string outputFilename;
   };
 
   IMDEventWorkspace_sptr runAlgorithm(Arguments args) {
@@ -95,6 +112,7 @@ private:
     algm->setProperty("Filename", m_filename);
     algm->setProperty("OutputWorkspace", "__unused_value_for_child_algorithm");
     algm->setProperty("MetadataOnly", args.metadataOnly);
+    algm->setProperty("OutputFilename", args.outputFilename);
     algm->execute();
     return algm->getProperty("OutputWorkspace");
   }
@@ -219,6 +237,16 @@ private:
       std::vector<int> expectedIds(10, 58);
       TS_ASSERT_EQUALS(expectedIds, ids);
     }
+    if (!args.outputFilename.empty()) {
+      checkOutputFile(outputWS, args.outputFilename);
+    }
+  }
+
+  void checkOutputFile(const IMDEventWorkspace &outputWS,
+                       std::string outputFilename) {
+    TS_ASSERT(outputWS.isFileBacked());
+    Poco::File fileback(outputFilename);
+    TS_ASSERT(fileback.getSize() > 0);
   }
 
   //----------------------------------------------------------------------------

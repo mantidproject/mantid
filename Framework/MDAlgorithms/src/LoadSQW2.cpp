@@ -6,6 +6,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -101,6 +102,11 @@ void LoadSQW2::init() {
       "File of type SQW format");
   declareProperty(new PropertyWithValue<bool>("MetadataOnly", false),
                   "Load Metadata without events.");
+  declareProperty(new API::FileProperty("OutputFilename", "",
+                                        FileProperty::OptionalSave, {".nxs"}),
+                  "If specified, the output workspace will be a file-backed "
+                  "MDEventWorkspace");
+
   // Outputs
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
@@ -414,6 +420,34 @@ void LoadSQW2::setupBoxController() {
   m_outputWS->splitBox();
 
   g_log.debug() << "Time to setup box structure: " << timer.elapsed() << "s\n";
+
+  std::string fileback = getProperty("OutputFilename");
+  if (!fileback.empty()) {
+    setupFileBackend(fileback);
+  }
+}
+
+/**
+ * Setup the filebackend for the output workspace. It assumes that the
+ * box controller has already been initialized
+ * @param filebackPath Path to the file used for backend storage
+ */
+void LoadSQW2::setupFileBackend(std::string filebackPath) {
+  using DataObjects::BoxControllerNeXusIO;
+  auto savemd = this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
+  savemd->setProperty("InputWorkspace", m_outputWS);
+  savemd->setPropertyValue("Filename", filebackPath);
+  savemd->setProperty("UpdateFileBackEnd", false);
+  savemd->setProperty("MakeFileBacked", false);
+  savemd->executeAsChildAlg();
+
+  // create file-backed box controller
+  auto boxControllerMem = m_outputWS->getBoxController();
+  auto boxControllerIO =
+      boost::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
+  boxControllerMem->setFileBacked(boxControllerIO, filebackPath);
+  m_outputWS->getBox()->setFileBacked();
+  boxControllerMem->getFileIO()->setWriteBufferSize(1000000);
 }
 
 /**
@@ -503,6 +537,13 @@ void LoadSQW2::finalize() {
   m_outputWS->splitAllIfNeeded(ts);
   tp.joinAll();
   m_outputWS->refreshCache();
+
+  if (m_outputWS->isFileBacked()) {
+    auto savemd = this->createChildAlgorithm("SaveMD", 0.76, 1.00);
+    savemd->setProperty("InputWorkspace", m_outputWS);
+    savemd->setProperty("UpdateFileBackEnd", true);
+    savemd->executeAsChildAlg();
+  }
   setProperty("OutputWorkspace", m_outputWS);
 }
 
