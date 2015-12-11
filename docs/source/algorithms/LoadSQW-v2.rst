@@ -141,20 +141,30 @@ Units are :math:`\AA^{-1}` for all 3 axes.
 ``data.s`` is normalized by the number of pixels, as is the variance ``data.e``.
 For those elements where ``data.npix==0``, ``data.s=0`` and ``data.e=0``
 
+Output Frame
+############
+
+The pixel information from the file is transformed to the HKL frame on loading. More specifically the final
+coordinates Q of the MD events will be
+
+.. math::
+
+   q_{hkl} = \frac{1}{2\pi}B^{-1} u_{123}
+
+where :math:`\frac{1}{2\pi}B^{-1}` is the uper-left 3x3 portion of ``u_to_rlu``. The energy value is left unchanged. 
+
 Assumptions
 ###########
 
-Parts of the code were written with the idea of generalising
-functionality at a later stage. However, we can now assume that:
+The following assumptions are made about data contained within the file.
 
 - the lattice parameters are all the same for all contributing spe files
 - the energy offset is zero in cuts
 - requires that all sqw files that are to be combined have
-  #.   each been created from only one spe file
-  #.   the same lattice parameters and pixel projection axes as held in the header block
-  #.   the same projection axes and offsets, as held in the data block
-  #.   the same plot and integration axes, with same bins and integration ranges
-- the display axes will be taken from the first sqw object in the list to be combined
+  #   each been created from only one spe file
+  #   the same lattice parameters and pixel projection axes as held in the header block
+  #   the same projection axes and offsets, as held in the data block
+  #   the same plot and integration axes, with same bins and integration ranges
 
 .. categories::
 
