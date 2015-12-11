@@ -123,6 +123,11 @@ private:
     return alg;
   }
 
+#ifdef __clang__
+// The missing braces warning is a false positive
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#endif
   void checkGeometryAsExpected(const IMDEventWorkspace &outputWS) {
     TS_ASSERT_EQUALS(4, outputWS.getNumDims());
     std::array<const char *, 4> ids{"Q1", "Q2", "Q3", "DeltaE"};
@@ -143,6 +148,9 @@ private:
       TS_ASSERT_EQUALS(frames[i], dim->getMDFrame().name());
     }
   }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
   void checkExperimentInfoAsExpected(const IMDEventWorkspace &outputWS) {
     TS_ASSERT_EQUALS(2, outputWS.getNumExperimentInfo());
