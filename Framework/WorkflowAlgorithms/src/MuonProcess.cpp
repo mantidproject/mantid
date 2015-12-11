@@ -6,6 +6,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h"
@@ -68,8 +69,10 @@ void MuonProcess::init() {
   allowedModes.push_back("CorrectAndGroup");
   allowedModes.push_back("Analyse");
   allowedModes.push_back("Combined");
-  declareProperty("Mode", "Combined",
-                  boost::make_shared<StringListValidator>(allowedModes),
+  auto modeVal = boost::make_shared<CompositeValidator>();
+  modeVal->add(boost::make_shared<StringListValidator>(allowedModes));
+  modeVal->add(boost::make_shared<MandatoryValidator<std::string>>());
+  declareProperty("Mode", "Combined", modeVal,
                   "Mode to run in. CorrectAndGroup applies dead time "
                   "correction and grouping; Analyse changes bin offset, "
                   "crops, rebins and calculates asymmetry; Combined does all "
@@ -94,7 +97,7 @@ void MuonProcess::init() {
   declareProperty(
       new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable", "",
                                             Direction::Input,
-                                            PropertyMode::Mandatory),
+                                            PropertyMode::Optional),
       "Table with detector grouping information, e.g. from LoadMuonNexus.");
 
   declareProperty("TimeZero", EMPTY_DBL(),
@@ -402,13 +405,20 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
 
   // Some parameters can be mandatory or not depending on the mode
   const std::string propMode("Mode"), propApplyDTC("ApplyDeadTimeCorrection"),
-      propDeadTime("DeadTimeTable");
+      propDeadTime("DeadTimeTable"), propDetGroup("DetectorGroupingTable");
   const std::string mode = getProperty(propMode);
   // If analysis will take place, SummedPeriodSet is mandatory
   if (mode != "CorrectAndGroup") {
     if (summedPeriods.empty()) {
       errors[propSummedPeriodSet] =
           "Cannot analyse: list of periods to sum was empty";
+    }
+  }
+  // If correcting/grouping will take place, DetectorGroupingTable is mandatory
+  if (mode != "Analyse") {
+    TableWorkspace_sptr grouping = getProperty(propDetGroup);
+    if (grouping == nullptr) {
+      errors[propDetGroup] = "No detector grouping table supplied";
     }
   }
   // If dead time correction is to be applied, must supply dead times

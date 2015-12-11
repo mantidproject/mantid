@@ -374,8 +374,8 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
   try 
   {
     // Create workspace and a raw (unbinned) version of it
-    MatrixWorkspace_sptr ws = createAnalysisWorkspace(itemType, tableRow, plotType);
-    MatrixWorkspace_sptr wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
+    auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
+    auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
 
     // Find names for new workspaces
     const std::string wsName = getNewAnalysisWSName(itemType, tableRow, plotType);
@@ -497,10 +497,11 @@ MuonAnalysis::PlotType MuonAnalysis::parsePlotType(QComboBox* selector)
  * @param plotType :: What kind of plot we want to analyse
  * @param isRaw    :: Whether binning should be applied to the workspace
  * @return Created workspace
- */ 
-MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, int tableRow, PlotType plotType,
-  bool isRaw)
-{
+ */
+Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
+                                                     int tableRow,
+                                                     PlotType plotType,
+                                                     bool isRaw) {
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("MuonProcess");
 
@@ -531,6 +532,7 @@ MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, in
     throw std::runtime_error("Unsupported workspace type");
   }
   alg->setProperty("InputWorkspace", inputGroup);
+  alg->setProperty("Mode", "Analyse");
 
   // ---- Time zero correction ----
   alg->setProperty("TimeZero", timeZero());           // user input
@@ -1433,8 +1435,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   boost::shared_ptr<LoadResult> loadResult;
   boost::shared_ptr<GroupResult> groupResult;
-  Workspace_sptr deadTimes;
-  MatrixWorkspace_sptr correctedGroupedWS;
+  ITableWorkspace_sptr deadTimes;
+  Workspace_sptr correctedGroupedWS;
 
   try {
     // Load the new file(s)
@@ -1465,6 +1467,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       alg->setProperty("ApplyDeadTimeCorrection", true);
       alg->setProperty("DeadTimeTable", deadTimes);
     }
+    alg->setProperty("LoadedTimeZero", loadResult->timeZero);
     alg->setProperty("DetectorGroupingTable", groupingTable);
     alg->setChild(true);
     alg->setPropertyValue("OutputWorkspace", "__NotUsed");
@@ -1487,9 +1490,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   deleteWorkspaceIfExists(m_workspace_name);
   deleteWorkspaceIfExists(m_grouped_name);
 
-  AnalysisDataService::Instance().add(m_workspace_name, loadResult->loadedWorkspace);
-  AnalysisDataService::Instance().add(m_grouped_name, correctedGroupedWS);
-
   // Get hold of a pointer to a matrix workspace
   MatrixWorkspace_sptr matrix_workspace = firstPeriod(loadResult->loadedWorkspace);
 
@@ -1505,6 +1505,12 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   bool instrumentChanged = newInstrIndex != m_uiForm.instrSelector->currentIndex();
 
   m_uiForm.instrSelector->setCurrentIndex(newInstrIndex);
+
+  // Add workspaces to ADS *after* changing selected instrument (as that can
+  // clear them)
+  AnalysisDataService::Instance().add(m_workspace_name,
+                                      loadResult->loadedWorkspace);
+  AnalysisDataService::Instance().add(m_grouped_name, correctedGroupedWS);
 
   // Update the grouping table with the used grouping, if new grouping was loaded
   // XXX: this should be done after the instrument was changed, because changing the instrument will
@@ -3091,9 +3097,10 @@ Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename) const
  * @param loadResult :: Struct with loaded parameters
  * @returns Table of dead times, or nullptr if no correction used
  */
-Workspace_sptr MuonAnalysis::getDeadTimeCorrection(
+ITableWorkspace_sptr MuonAnalysis::getDeadTimeCorrection(
     boost::shared_ptr<LoadResult> loadResult) const {
   // Dead time table which will be used
+  ITableWorkspace_sptr deadTimesTable;
   Workspace_sptr deadTimes;
 
   if (m_uiForm.deadTimeType->currentText() != "None") {
@@ -3107,7 +3114,28 @@ Workspace_sptr MuonAnalysis::getDeadTimeCorrection(
       deadTimes = loadDeadTimes(deadTimeFilename());
     }
   }
-  return deadTimes;
+
+  return deadTimesToTable(deadTimes);
+}
+
+/**
+ * Converts dead times workspace to a TableWorkspace
+ * @param deadTimes :: [input] Loaded dead times Workspace_sptr
+ * @returns Table workspace of dead times
+ */
+ITableWorkspace_sptr
+MuonAnalysis::deadTimesToTable(const Workspace_sptr &deadTimes) const {
+  ITableWorkspace_sptr deadTimesTable;
+  if (deadTimes != nullptr) {
+    if (auto table = boost::dynamic_pointer_cast<ITableWorkspace>(deadTimes)) {
+      deadTimesTable = table;
+    } else if (auto group =
+                   boost::dynamic_pointer_cast<WorkspaceGroup>(deadTimes)) {
+      deadTimesTable =
+          boost::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
+    }
+  }
+  return deadTimesTable;
 }
 
 /**
@@ -3119,6 +3147,7 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
   Algorithm_sptr loadAlg =
       AlgorithmManager::Instance().createUnmanaged("MuonProcess");
   loadAlg->initialize();
+  loadAlg->setProperty("Mode", "Combined");
 
   // -- Dead Time Correction --------------------------------------------------
 
@@ -3131,7 +3160,7 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 
       Workspace_sptr deadTimes = loadDeadTimes( deadTimeFilename() );
 
-      loadAlg->setProperty("DeadTimeTable", deadTimes);
+      loadAlg->setProperty("DeadTimeTable", deadTimesToTable(deadTimes));
     }
   }
 

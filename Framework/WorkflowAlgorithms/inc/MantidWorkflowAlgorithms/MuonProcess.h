@@ -7,7 +7,7 @@
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
-/** MuonProcess : loads Muon workspace ready for analysis.
+/** MuonProcess : Processes and analyses Muon workspace.
 
   Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -38,7 +38,7 @@ public:
   virtual const std::string name() const;
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Loads Muon workspace ready for analysis.";
+    return "Processes and analyses Muon workspace.";
   }
 
   virtual int version() const;

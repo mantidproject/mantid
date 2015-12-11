@@ -21,7 +21,7 @@ Specifically:
 #. Apply dead time correction
 #. Group the workspaces
 #. Offset, crop and rebin the workspace
-#. Perform counts or asymmetry calclation to get the
+#. Perform counts or asymmetry calculation to get the
    resulting workspace.
 
 MuonProcess can be applied in three different modes.
