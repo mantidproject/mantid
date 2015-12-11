@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_LOADSQW2_H_
 #define MANTID_MDALGORITHMS_LOADSQW2_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/BinaryStreamReader.h"
@@ -41,7 +41,7 @@ namespace MDAlgorithms {
   * File change history is stored at: <https://github.com/mantidproject/mantid>
   * Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport LoadSQW2 : public API::Algorithm {
+class DLLExport LoadSQW2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSQW2();
   ~LoadSQW2();
@@ -50,6 +50,7 @@ public:
   virtual int version() const;
   virtual const std::string category() const;
   virtual const std::string summary() const;
+  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
 
 private:
   /// Local typedef for

@@ -5,6 +5,7 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -34,14 +35,15 @@ using Kernel::V3D;
 constexpr int64_t NPIX_CHUNK = 150000;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadSQW2)
+DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
 
 //------------------------------------------------------------------------------
 // Public methods
 //------------------------------------------------------------------------------
 /// Default constructor
 LoadSQW2::LoadSQW2()
-    : API::Algorithm(), m_file(), m_reader(), m_outputWS(), m_progress() {}
+    : API::IFileLoader<Kernel::FileDescriptor>(), m_file(), m_reader(),
+      m_outputWS(), m_progress() {}
 
 /// Default destructor
 LoadSQW2::~LoadSQW2() {}
@@ -62,6 +64,26 @@ const std::string LoadSQW2::category() const {
 const std::string LoadSQW2::summary() const {
   return "Load an N-dimensional workspace from a .sqw file produced by "
          "Horace.";
+}
+
+/**
+* Return the confidence with this algorithm can load the file
+* @param descriptor A descriptor for the file
+* @returns An integer specifying the confidence level. 0 indicates it will not
+* be used
+*/
+int LoadSQW2::confidence(Kernel::FileDescriptor &descriptor) const {
+  // only .sqw can be considered
+  const std::string &extn = descriptor.extension();
+  if (extn.compare(".sqw") != 0)
+    return 0;
+
+  if (descriptor.isAscii()) {
+    // Low so that others may try
+    return 10;
+  }
+  // Beat v1
+  return 81;
 }
 
 //------------------------------------------------------------------------------
@@ -440,7 +462,6 @@ void LoadSQW2::addEventFromBuffer(const float *pixel) {
   coord_t centres[4] = {u1, u2, u3, en};
   m_outputWS->addEvent(MDEvent<4>(signal, error * error, irun, idet, centres));
 }
-
 
 /**
  * Transform the given coordinates from U to the HKL frame
