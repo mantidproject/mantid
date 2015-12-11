@@ -50,6 +50,8 @@ public:
 
   signal_t getNormalizedError() const;
 
+  signal_t getNormalizedSignalWithMask() const;
+
   signal_t getSignal() const;
 
   signal_t getError() const;
