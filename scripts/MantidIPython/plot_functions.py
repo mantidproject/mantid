@@ -13,6 +13,7 @@ if os.path.exists(LIB_PATH) is False:
     LIB_PATH = os.path.join(CURRENT_DIR.split('Code')[0], 'Code/release/bin')
 sys.path.append(LIB_PATH)
 import mantid.simpleapi as api
+import mantid.api as mapi
 
 
 def _plot_with_options(axes_option, workspace, options_list, plot_number):
@@ -77,7 +78,7 @@ def plots(list_of_workspaces, *args, **kwargs):
         axes_handle = [axes_handle]
 
     for plot_number, workspace in enumerate(list_of_workspaces):
-        if isinstance(workspace, api.WorkspaceGroup):
+        if isinstance(workspace, mapi.WorkspaceGroup):
             # Plot grouped workspaces on the same axes
             for sub_ws in workspace:
                 _plot_with_options(axes_handle[plot_number], sub_ws, ops, plot_number)
