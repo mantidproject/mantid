@@ -20,7 +20,7 @@ class ISISPowderDiffractionHrpd1(stresstesting.MantidStressTest):
                     "hrpd/test/GrpOff/hrpd_new_072_01_corr.cal", "hrpd/test/cycle_09_2/Calibration/van_s1_old-0.nxs",
                     "hrpd/test/cycle_09_2/Calibration/van_s1_old-1.nxs",
                     "hrpd/test/cycle_09_2/Calibration/van_s1_old-2.nxs", "hrpd/test/cycle_09_2/tester/mtd.pref"
-					])
+                    ])
 
     def _clean_up_files(self, filenames, directories):
         try:
@@ -91,20 +91,16 @@ class LoadTests(unittest.TestCase):
         data2 = LoadCalFile(InstrumentName="hrpd", CalFilename=calfile2,
                             WorkspaceName="CalWorkspace2")
 
-        self.assertTrue(isinstance(data1[0], MatrixWorkspace))
-        self.assertTrue(isinstance(data1[1], MatrixWorkspace))
-        self.assertTrue(isinstance(data1[2], MatrixWorkspace))
-        self.assertTrue(isinstance(data1[3], ITableWorkspace))
+        for i in range(0, 3):
+            self.assertTrue(isinstance(data1[i], MatrixWorkspace))
 
         self.assertTrue("CalWorkspace1_group" in data1[0].getName())
         self.assertTrue("CalWorkspace1_offsets" in data1[1].getName())
         self.assertTrue("CalWorkspace1_mask" in data1[2].getName())
         self.assertTrue("CalWorkspace1_cal" in data1[3].getName())
 
-        self.assertTrue(isinstance(data2[0], MatrixWorkspace))
-        self.assertTrue(isinstance(data2[1], MatrixWorkspace))
-        self.assertTrue(isinstance(data2[2], MatrixWorkspace))
-        self.assertTrue(isinstance(data2[3], ITableWorkspace))
+        for i in range(0, 3):
+            self.assertTrue(isinstance(data2[i], MatrixWorkspace))
 
         self.assertTrue("CalWorkspace2_group" in data2[0].getName())
         self.assertTrue("CalWorkspace2_offsets" in data2[1].getName())
@@ -119,13 +115,11 @@ class LoadTests(unittest.TestCase):
         self.assertTrue(isinstance(data[0], WorkspaceGroup))
         self.assertEquals(3, data[0].getNumberOfEntries())
 
-        self.assertTrue(isinstance(data[1], MatrixWorkspace))
-        self.assertTrue(isinstance(data[2], MatrixWorkspace))
-        self.assertTrue(isinstance(data[3], MatrixWorkspace))
+        for i in range(1, 3):
+            self.assertTrue(isinstance(data[i], MatrixWorkspace))
 
-        self.assertTrue("ResultTOF-1" in data[1].getName())
-        self.assertTrue("ResultTOF-2" in data[2].getName())
-        self.assertTrue("ResultTOF-3" in data[3].getName())
+        for i in range(1, 3):
+            self.assertTrue(("ResultTOF-" + str(i)) in data[i].getName())
 
         self.assertTrue('ResultTOFgrp', self.wsname[0])
 
@@ -139,57 +133,36 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(9783.15138, data.readX(2)[1], places=DIFF_PLACES)
 
     def test_datfile_with_workspace(self):
-        datfile1 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b1_D.dat")
-        datfile2 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b1_TOF.dat")
-        datfile3 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_D.dat")
-        datfile4 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_TOF.dat")
-        datfile5 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_D.dat")
-        datfile6 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_TOF.dat")
 
-        data1 = LoadAscii(Filename=datfile1, OutputWorkspace="datWorkspace1")
-        data2 = LoadAscii(Filename=datfile2, OutputWorkspace="datWorkspace2")
-        data3 = LoadAscii(Filename=datfile3, OutputWorkspace="datWorkspace3")
-        data4 = LoadAscii(Filename=datfile4, OutputWorkspace="datWorkspace4")
-        data5 = LoadAscii(Filename=datfile5, OutputWorkspace="datWorkspace5")
-        data6 = LoadAscii(Filename=datfile6, OutputWorkspace="datWorkspace6")
+        file_name = []
+        for i in range(0, 3):
+            file_name.append((DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b" + str(i+1) + "_D.dat"))
+            file_name.append((DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b" + str(i+1) + "_TOF.dat"))
 
-        self.assertTrue(isinstance(data1, MatrixWorkspace))
-        self.assertTrue(isinstance(data2, MatrixWorkspace))
-        self.assertTrue(isinstance(data3, MatrixWorkspace))
-        self.assertTrue(isinstance(data4, MatrixWorkspace))
-        self.assertTrue(isinstance(data5, MatrixWorkspace))
-        self.assertTrue(isinstance(data6, MatrixWorkspace))
+        data_list = []
+        for i in range(0, len(file_name)):
+            data_list.append((LoadAscii(Filename=file_name[i], OutputWorkspace=("datWorkspace" + str(i+1)))))
+            self.assertTrue(isinstance(data_list[i], MatrixWorkspace))
+            self.assertTrue(("datWorkspace"+str(i+1)) in data_list[i].getName())
+            self.assertEquals(1, data_list[i].getNumberHistograms())
 
-        self.assertTrue("datWorkspace1" in data1.getName())
-        self.assertTrue("datWorkspace2" in data2.getName())
-        self.assertTrue("datWorkspace3" in data3.getName())
-        self.assertTrue("datWorkspace4" in data4.getName())
-        self.assertTrue("datWorkspace5" in data5.getName())
-        self.assertTrue("datWorkspace6" in data6.getName())
+        self.assertEquals(22981, data_list[0].blocksize())
+        self.assertAlmostEqual(0.2168, data_list[0].readX(0)[2], places=DIFF_PLACES)
 
-        self.assertEquals(1, data1.getNumberHistograms())
-        self.assertEquals(22981, data1.blocksize())
-        self.assertAlmostEqual(0.2168, data1.readX(0)[2], places=DIFF_PLACES)
+        self.assertEquals(22981, data_list[1].blocksize())
+        self.assertAlmostEqual(data_list[0].readY(0)[6], data_list[1].readY(0)[6], places=DIFF_PLACES)
 
-        self.assertEquals(1, data2.getNumberHistograms())
-        self.assertEquals(22981, data2.blocksize())
-        self.assertAlmostEqual(data1.readY(0)[6], data2.readY(0)[6], places=DIFF_PLACES)
+        self.assertEquals(23038, data_list[2].blocksize())
+        self.assertAlmostEqual(0.44656, data_list[2].readX(0)[4311], places=DIFF_PLACES)
 
-        self.assertEquals(1, data3.getNumberHistograms())
-        self.assertEquals(23038, data3.blocksize())
-        self.assertAlmostEqual(0.44656, data3.readX(0)[4311], places=DIFF_PLACES)
+        self.assertEquals(23038, data_list[3].blocksize())
+        self.assertAlmostEqual(1.58185696, data_list[3].readE(0)[10], places=DIFF_PLACES)
 
-        self.assertEquals(1, data4.getNumberHistograms())
-        self.assertEquals(23038, data4.blocksize())
-        self.assertAlmostEqual(1.58185696, data4.readE(0)[10], places=DIFF_PLACES)
+        self.assertEquals(23025, data_list[4].blocksize())
+        self.assertAlmostEqual(data_list[4].readY(0)[15098], data_list[5].readY(0)[15098], places=DIFF_PLACES)
 
-        self.assertEquals(1, data5.getNumberHistograms())
-        self.assertEquals(23025, data5.blocksize())
-        self.assertAlmostEqual(data5.readY(0)[15098], data6.readY(0)[15098], places=DIFF_PLACES)
-
-        self.assertEquals(1, data6.getNumberHistograms())
-        self.assertEquals(23025, data6.blocksize())
-        self.assertAlmostEqual(9782.63819, data6.readX(0)[0], places=DIFF_PLACES)
+        self.assertEquals(23025, data_list[5].blocksize())
+        self.assertAlmostEqual(9782.63819, data_list[5].readX(0)[0], places=DIFF_PLACES)
 
 # ================ Below test cases use different pref file ==================
 # =================== when 'ExistingV' = 'no' in pref file ===================
