@@ -48,7 +48,8 @@ void SaveIsawPeaks::init() {
   exts.push_back(".peaks");
   exts.push_back(".integrate");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
+                                   {".peaks", ".integrate"}),
                   "Path to an ISAW-style peaks or integrate file to save.");
 
   declareProperty(
@@ -166,7 +167,8 @@ void SaveIsawPeaks::exec() {
     if (true) {
       out << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
              "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
-             "     UpZ" << std::endl;
+             "     UpZ"
+          << std::endl;
       // Here would save each detector...
       std::set<int>::iterator it;
       for (it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it) {
