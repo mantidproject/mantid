@@ -132,9 +132,14 @@ SortHKL::getNonZeroPeaks(const std::vector<Peak> &inputPeaks) const {
 
 /**
  * @brief SortHKL::getUniqueReflections
- * @param peaks
- * @param outputPeaksWorkspace
- * @return
+ *
+ * This method returns a map that contains a UniqueReflection-
+ * object with 0 to n Peaks each. The key of the map is the
+ * reflection index all peaks are equivalent to.
+ *
+ * @param peaks :: Vector of peaks to assign.
+ * @param cell :: UnitCell to use for calculation of possible reflections.
+ * @return Map of unique reflections.
  */
 std::map<V3D, UniqueReflection>
 SortHKL::getUniqueReflections(const std::vector<Peak> &peaks,
