@@ -107,8 +107,6 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   // Plot slice miniplot when file has finished loading
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFoundChanged()), this,
           SLOT(handleNewFile()));
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFoundChanged()), this,
-          SLOT(updatePreviewPlot()));
   // Shows message on run buton when user is inputting a run number
   connect(m_uiForm.dsInputFiles, SIGNAL(fileTextChanged(const QString &)), this,
           SLOT(pbRunEditing()));
@@ -119,9 +117,6 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsInputFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
-
-  connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this,
-          SLOT(updatePreviewPlot()));
 
   // Set default UI state
   sliceTwoRanges(0, false);
@@ -393,64 +388,8 @@ void ISISDiagnostics::doublePropertyChanged(QtProperty *prop, double val) {
     m_dblManager->setMaximum(m_properties["SpecMin"], val - 1);
     m_dblManager->setMaximum(m_properties["PreviewSpec"], val);
   }
-
-  if (prop != m_properties["PreviewSpec"])
-    updatePreviewPlot();
 }
 
-/**
- * Runs the slice algorithm with preview properties.
- */
-void ISISDiagnostics::updatePreviewPlot() {
-  if (!m_uiForm.dsInputFiles->isValid())
-    return;
-
-  QString suffix = "_" + getInstrumentConfiguration()->getAnalyserName() +
-                   getInstrumentConfiguration()->getReflectionName() + "_slice";
-  QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
-
-  std::vector<long> spectraRange;
-  spectraRange.push_back(
-      static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));
-  spectraRange.push_back(
-      static_cast<long>(m_dblManager->value(m_properties["SpecMax"])));
-
-  std::vector<double> peakRange;
-  peakRange.push_back(m_dblManager->value(m_properties["PeakStart"]));
-  peakRange.push_back(m_dblManager->value(m_properties["PeakEnd"]));
-
-  IAlgorithm_sptr sliceAlg = AlgorithmManager::Instance().create("TimeSlice");
-  sliceAlg->initialize();
-
-  sliceAlg->setProperty("InputFiles", filenames.toStdString());
-  sliceAlg->setProperty("SpectraRange", spectraRange);
-  sliceAlg->setProperty("PeakRange", peakRange);
-  sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
-  sliceAlg->setProperty("OutputWorkspace", "IndirectDiagnostics_Workspaces");
-
-  if (m_uiForm.ckUseCalibration->isChecked()) {
-    QString calibWsName = m_uiForm.dsCalibration->getCurrentDataName();
-    sliceAlg->setProperty("CalibrationWorkspace", calibWsName.toStdString());
-  }
-
-  if (m_blnManager->value(m_properties["UseTwoRanges"])) {
-    std::vector<double> backgroundRange;
-    backgroundRange.push_back(
-        m_dblManager->value(m_properties["BackgroundStart"]));
-    backgroundRange.push_back(
-        m_dblManager->value(m_properties["BackgroundEnd"]));
-    sliceAlg->setProperty("BackgroundRange", backgroundRange);
-  }
-
-  // Stop the algorithm conflicting with it's self if it is already running
-  if (m_batchAlgoRunner->queueLength() == 0) {
-    // Update preview plot when slice algorithm completes
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-            SLOT(sliceAlgDone(bool)));
-
-    runAlgorithm(sliceAlg);
-  }
-}
 
 /**
  * Updates the preview plot when the algorithm is complete.

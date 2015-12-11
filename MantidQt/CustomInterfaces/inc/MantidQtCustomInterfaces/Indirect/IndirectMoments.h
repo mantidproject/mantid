@@ -12,7 +12,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  /** IndirectMoments : TODO: DESCRIPTION
+  /** IndirectMoments : Calculates the S(Q,w) Moments of the provided data with the user specified range and scale factor
 
 
     @author Samuel Jackson
@@ -56,9 +56,7 @@ namespace CustomInterfaces
     /// Slot for when the range selector changes
     void rangeChanged(double min, double max);
     /// Slot to update the guides when the range properties change
-    void updateProperties(QtProperty* prop, double val);
-    /// Triggers an update of the preview plot
-    void updatePreviewPlot(QString workspaceName = "");
+	void updateProperties(QtProperty* prop, double val);
     /// Called when the algorithm completes to update preview plot
     void momentsAlgComplete(bool error);
 
