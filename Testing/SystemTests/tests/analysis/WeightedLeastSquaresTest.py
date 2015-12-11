@@ -36,7 +36,7 @@ def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least
 
     @returns the fitted parameter values and error estimates for these
     """
-    res=Fit(function, wks, Output='ws',
+    Fit(function, wks, Output='ws',
         Minimizer=minimizer, CostFunction=cost_function, IgnoreInvalidData=True)
 
     param_table = mtd['ws_Parameters']
@@ -97,6 +97,8 @@ def load_fitting_test_file_ascii(filename):
 class WLS2GaussPeaksEVSData(unittest.TestCase):
 
     workspace = None
+    function_template = ("name=Gaussian, {0} ; name=LinearBackground,A0=0,A1=0;"
+                         "name=Gaussian, {1}")
 
     # Using this workaround as we still support Python 2.6 on rhel6, where setUpClass()
     # is not available
@@ -114,10 +116,8 @@ class WLS2GaussPeaksEVSData(unittest.TestCase):
         Use default Mantid Levenberg-Marquardt minimizer, which for this example it does not get to the expected
         solution (minimum), starting from the below specified initial guess of the fitting parameters
         """
-        # TODO: function template
-        function = ("name=Gaussian,Height=0.01,PeakCentre=0.00037,Sigma=1e-05;name=LinearBackground,A0=0,A1=0;"
-                    "name=Gaussian,Height=0.0979798,PeakCentre=0.000167,Sigma=1e-05")
-
+        function = self.function_template.format('Height=0.01,PeakCentre=0.00037,Sigma=1e-05',
+                                                 'Height=0.0979798,PeakCentre=0.000167,Sigma=1e-05')
         expected_params = [-0.02830944965319149, 0.0003966626475232753, 3.2690103473132937e-06, 0.04283560333422615,
                            -82.49982468272542, 0.13971885301153036, 0.00016591941312628293, 9.132514633819799e-06]
         expected_errors = [0.007480178355054269, 9.93278345856534e-07, 9.960514853350883e-07, 0.0017945463077016224,
@@ -137,8 +137,8 @@ class WLS2GaussPeaksEVSData(unittest.TestCase):
         Same as WeigthedLSGaussPeaksEVSdataTest1 but starting from a different initial guess of the fitting
         parameters. Here the minmizer gets to the expected solution (minimum), i.e. do the right thing
         """
-        function = ("name=Gaussian,Height=0.0271028,PeakCentre=0.000371946,Sigma=1e-05;name=LinearBackground,A0=0,A1=0;"
-                    "name=Gaussian,Height=0.0979798,PeakCentre=0.000167,Sigma=1.7267e-05")
+        function = self.function_template.format('Height=0.0271028,PeakCentre=0.000371946,Sigma=1e-05',
+                                                 'Height=0.0979798,PeakCentre=0.000167,Sigma=1.7267e-05')
 
         expected_params = [0.117909282702681, 0.0003733355959906781, 4.750983503334754e-06, 0.002725666504029797,
                            -4.494580010809393, 0.12986299166539694, 0.00016646632365980064, 2.616230019006275e-05]
@@ -175,7 +175,7 @@ class WLSSineLikeMuonExperimentAsymmetry(unittest.TestCase):
     Any local minimizer should be very sensitive to the initial guess.
     """
     workspace = None
-    function_template = 'name=UserFunction, Formula=sin(w*x)'
+    function_template = 'name=UserFunction, Formula=sin(w*x), w={0}'
 
     def setUp(self):
         filename = 'sine_fitting_test_muon_asymmetry.txt'
@@ -190,7 +190,7 @@ class WLSSineLikeMuonExperimentAsymmetry(unittest.TestCase):
         """
         This tests a fit failure. Initial guess of w not good enough (5.2 too far off 6)
         """
-        function_definition = ("{0}, w=5.2".format(self.function_template))
+        function_definition = self.function_template.format('5.2')
         expected_params = [4.753040119492522]
 
         # Note: ignoring parameter errors
@@ -201,7 +201,7 @@ class WLSSineLikeMuonExperimentAsymmetry(unittest.TestCase):
         """
         This tests a fit that works. Initial guess of frequency close enough to real value.
         """
-        function_definition = ("{0}, w=5.4".format(self.function_template))
+        function_definition = self.function_template.format('5.4')
         expected_params = [6.000000000717283]
         fitted_params, _ = run_fit(self.workspace, function_definition)
         compare_relative_errors(fitted_params, expected_params)
@@ -214,7 +214,7 @@ class WLSVanadiumPatternFromENGINXSmoothing(unittest.TestCase):
     In the new ENGIN-X algorithms/scripts/interface this pattern is usually smoothed with
     a spline with 20-50 knots. This is used for calibration.
     """
-    spline_user_def_function = 'name=BSpline,Uniform=true,Order=3, StartX=0, EndX=5.5'
+    spline_user_def_function = 'name=BSpline, Uniform=true, Order=3, StartX=0, EndX=5.5, NBreak={0}'
     workspace = None
 
     def setUp(self):
@@ -231,7 +231,7 @@ class WLSVanadiumPatternFromENGINXSmoothing(unittest.TestCase):
         This tests a normal fit with a spline with 50 knots. This is currently producing results that look
         satisfactory to instrument scientists.
         """
-        function_definition = ("{0}, NBreak=50".format(self.spline_user_def_function))
+        function_definition = self.spline_user_def_function.format('50')
         expected_params = [0.0, 0.0, -37.210995939539366, 18.370350660372594,
                            -2.323438604684101, 74.22342247724607, 489.75852793518493, 922.5302436427901,
                            1261.989106878403, 1600.0406590395235, 1968.4303057681236, 2139.756948117313,
@@ -244,22 +244,23 @@ class WLSVanadiumPatternFromENGINXSmoothing(unittest.TestCase):
                            103.07539466368209, 88.69333062995749, 73.2453746596794, 57.94761712646885,
                            46.150107399338026, 33.49607446438909, 27.023391825663943, 19.660388795715143,
                            14.846016985914035, 9.65919973049868, 5.724008517073549, 1.9527932349469075,
-                           -0.9197805852038337, 10.656047152998436, 0.0]
+                           -0.9197805852038337, 10.656047152998436, 0.0
+                          ]
 
         # Note: ignoring parameter errors; note the higher tolerance
         fitted_params, _ = run_fit(self.workspace, function_definition)
         compare_relative_errors(fitted_params, expected_params, tolerance=1e-4)
 
-    def test_50breaks(self):
+    def test_12breaks(self):
         """
         This uses 12 break points, which usually produces poorish results.
         """
-        function_definition = ("{0}, NBreak=12".format(self.spline_user_def_function))
+        function_definition = self.spline_user_def_function.format('12')
         expected_params = [575.5043460508207, -362.0695583401004, 722.7394915082397, 2621.9749776340186,
                            1572.450059153195, 836.417481475315, 361.6875979793134, 240.00983642384153,
                            132.46098325093416, 63.95362315830608, 17.41805806345004, 0.8684078907341928,
                            -5.204195324981802
-                           ]
+                          ]
 
         # Note: ignoring parameter errors; note the higher tolerance
         fitted_params, _ = run_fit(self.workspace, function_definition)
