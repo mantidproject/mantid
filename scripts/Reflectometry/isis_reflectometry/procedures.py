@@ -1,4 +1,5 @@
-# pylint: disable=too-many-lines, invalid-name, too-many-arguments, too-many-branches
+# pylint: disable=too-many-lines, invalid-name, too-many-arguments, too-many-branches, too-many-locals
+
 from math import *
 
 try:
@@ -396,11 +397,11 @@ def nrSESANSFn(runList, nameList, P0runList, P0nameList, minSpec, maxSpec, upPer
         for j in range(len(x) - 1):
             lam = ((a1.readX(0)[j] + a1.readX(0)[j + 1]) / 2.0) / 10.0
             p = a1.readY(0)[j]
-            e = a1.readE(0)[j]
+            _e = a1.readE(0)[j]
             if lnPOverLam == "2":
                 if p > 0.0:
                     a1.dataY(0)[j] = log(p) / ((lam) ** 2)
-                    a1.dataE(0)[j] = (e / p) / ((lam) ** 2)
+                    a1.dataE(0)[j] = (_e / p) / ((lam) ** 2)
                 else:
                     a1.dataY(0)[j] = 0.0
                     a1.dataE(0)[j] = 0.0
@@ -423,11 +424,11 @@ def nrSESANSFn(runList, nameList, P0runList, P0nameList, minSpec, maxSpec, upPer
                 for j in range(len(x) - 1):
                     lam = ((a1.readX(l)[j] + a1.readX(l)[j + 1]) / 2.0) / 10.0
                     p = a1.readY(l)[j]
-                    e = a1.readE(l)[j]
+                    _e = a1.readE(l)[j]
                     if lnPOverLam == "2":
                         if p > 0.0:
                             a1.dataY(l)[j] = log(p) / ((lam * 1.0e-9) ** 2)
-                            a1.dataE(l)[j] = (e / p) / ((lam * 1.0e-9) ** 2)
+                            a1.dataE(l)[j] = (_e / p) / ((lam * 1.0e-9) ** 2)
                         else:
                             a1.dataY(l)[j] = 0.0
                             a1.dataE(l)[j] = 0.0
@@ -737,6 +738,8 @@ def findbin(wksp, val):
     a1 = mtd[wksp]
     x1 = a1.readX(0)
     _bnum = -1
+
+    i = None
     for i in range(len(x1) - 1):
         if x1[i] > val:
             break
@@ -862,6 +865,7 @@ def numberofbins(wksp):
 def maskbin(wksp, val):
     a1 = mtd[wksp]
     x1 = a1.readX(0)
+    i = None
     for i in range(len(x1) - 1):
         if x1[i] > val:
             break
@@ -881,7 +885,7 @@ def arr2list(iarray):
 def NRCombineDatafn(RunsNameList, CombNameList, applySFs, SFList, SFError, scaleOption, bparams, globalSF,
                     applyGlobalSF, diagnostics=0):
     qmin = bparams[0]
-    bin = bparams[1]
+    _bin = bparams[1]
     qmax = bparams[2]
     rlist = parseNameList(RunsNameList)
     listsfs = parseNameList(SFList)
@@ -889,7 +893,7 @@ def NRCombineDatafn(RunsNameList, CombNameList, applySFs, SFList, SFError, scale
     sfs = []
     sferrs = []
     for i in rlist:
-        Rebin(i, i + "reb", qmin + "," + bin + "," + qmax)
+        Rebin(i, i + "reb", qmin + "," + _bin + "," + qmax)
     # find the overlap ranges
     bol = []  # beginning of overlaps
     eol = []  # end of overlaps
@@ -1023,9 +1027,9 @@ def nrPNRCorrection(UpWksp, DownWksp):
     RenameWorkspace(nIp, str(Ip) + "corr")
     RenameWorkspace(nIa, str(Ia) + "corr")
     iwksp = mtd.getWorkspaceNames()
-    list = [str(Ip), str(Ia), "PCalpha", "PCrho", "PCAp", "PCPp", "1_p"]
+    _list = [str(Ip), str(Ia), "PCalpha", "PCrho", "PCAp", "PCPp", "1_p"]
     for i in range(len(iwksp)):
-        for j in list:
+        for j in _list:
             lname = len(j)
             if iwksp[i][0:lname + 1] == j + "_":
                 mtd.deleteWorkspace(iwksp[i])
@@ -1105,9 +1109,9 @@ def nrPACorrection(UpUpWksp, UpDownWksp, DownUpWksp, DownDownWksp):
     ReplaceSpecialValues(str(Ipp) + "corr", str(Ipp) + "corr", NaNValue="0.0", NaNError="0.0", InfinityValue="0.0",
                          InfinityError="0.0")
     iwksp = mtd.getWorkspaceNames()
-    list = [str(Ipp), str(Ipa), str(Iap), str(Iaa), "PCalpha", "PCrho", "PCAp", "PCPp", "1_p"]
+    _list = [str(Ipp), str(Ipa), str(Iap), str(Iaa), "PCalpha", "PCrho", "PCAp", "PCPp", "1_p"]
     for i in range(len(iwksp)):
-        for j in list:
+        for j in _list:
             lname = len(j)
             if iwksp[i][0:lname + 1] == j + "_":
                 mtd.deleteWorkspace(iwksp[i])
@@ -1291,11 +1295,11 @@ def tl(wksp, th0, schan):
     for i in range(0, nspec):
         x = a1.readX(i)
         y = a1.readY(i)
-        e = a1.readE(i)
+        _e = a1.readE(i)
         x1[i, 0:ntc + 1] = x[0:ntc + 1]
         theta[i, :] = atan2((i - schan - 0.5) * pixel + dist * tan(ThetaInc), dist) * 180 / pi
         y1[i, 0:ntc] = y[0:ntc]
-        e1[i, 0:ntc] = e[0:ntc]
+        e1[i, 0:ntc] = _e[0:ntc]
     x1[nspec, :] = x1[nspec - 1, :]
     theta[nspec, :] = atan2((nspec - schan - 0.5) * pixel + dist * tan(ThetaInc), dist) * 180 / pi
     d1 = [x1, theta, y1, e1]
@@ -1308,7 +1312,7 @@ def writemap_tab(dat, th0, spchan, fname):
     x = a1[0]
     y = a1[1]
     z = a1[2]
-    e = a1[3]
+    _e = a1[3]
     s = "\t"
     for i in range(0, n.shape(z)[1] - 1):
         s += "%g\t" % ((x[0][i] + x[0][i + 1]) / 2.0)
@@ -1320,7 +1324,7 @@ def writemap_tab(dat, th0, spchan, fname):
         s += "%g\t" % ((y[i][0] + y[i + 1][0]) / 2.0)
         for j in range(0, n.shape(z)[1] - 1):
             s += "%g\t" % z[i][j]
-            s += "%g\t" % e[i][j]
+            s += "%g\t" % _e[i][j]
         s += "\n"
         f.write(s)
     f.close()
@@ -1343,7 +1347,7 @@ def writeXYE_tab(dat, fname):
     f = open(fname, 'w')
     x = a1[0]
     y = a1[1]
-    e = a1[2]
+    _e = a1[2]
     s = ""
     s += "x\ty\te\n"
     f.write(s)
@@ -1351,7 +1355,7 @@ def writeXYE_tab(dat, fname):
         s = ""
         s += "%f\t" % x[i]
         s += "%f\t" % y[i]
-        s += "%f\n" % e[i]
+        s += "%f\n" % _e[i]
         f.write(s)
     f.close()
 

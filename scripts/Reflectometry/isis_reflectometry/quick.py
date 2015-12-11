@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, unidiomatic-typecheck, too-few-public-methods, too-many-arguments
+# pylint: disable=invalid-name, unidiomatic-typecheck, too-few-public-methods, too-many-arguments, too-many-locals
 ''' SVN Info:      The variables below will only get subsituted at svn checkout if
         the repository is configured for variable subsitution.
 
@@ -400,8 +400,8 @@ def get_defaults(run_ws, polcorr=False):
     defaults['MultiDetectorStart'] = int(instrument.getNumberParameter('MultiDetectorStart')[0])
     defaults['I0MonitorIndex'] = int(instrument.getNumberParameter('I0MonitorIndex')[0])
     if polcorr and (polcorr != PolarisationCorrection.NONE):
-        def str_to_float_list(str):
-            str_list = str.split(',')
+        def str_to_float_list(_str):
+            str_list = _str.split(',')
             float_list = map(float, str_list)
             return float_list
 
@@ -479,9 +479,9 @@ def nrPNRCorrection(Wksp, crho, calpha, cAp, cPp):
 
         # CloneWorkspace=(InputWorkspace="gr",OutputWorkspace=Wksp)
         iwksp = mtd.getObjectNames()
-        list = [str(Ip), str(Ia), "PCalpha", "PCrho", "PCAp", "PCPp", "1_p"]
+        _list = [str(Ip), str(Ia), "PCalpha", "PCrho", "PCAp", "PCPp", "1_p"]
         for i in range(len(iwksp)):
-            for j in list:
+            for j in _list:
                 lname = len(j)
                 if iwksp[i][0:lname + 1] == j + "_":
                     DeleteWorkspace(iwksp[i])
@@ -563,9 +563,9 @@ def nrPACorrection(Wksp, crho, calpha, cAp, cPp):  # UpUpWksp,UpDownWksp,DownUpW
         ReplaceSpecialValues(str(Ipp) + "corr", OutputWorkspace=str(Ipp) + "corr", NaNValue="0.0", NaNError="0.0",
                              InfinityValue="0.0", InfinityError="0.0")
         iwksp = mtd.getObjectNames()
-        list = [str(Ipp), str(Ipa), str(Iap), str(Iaa), "PCalpha", "PCrho", "PCAp", "PCPp", "1_p"]
+        _list = [str(Ipp), str(Ipa), str(Iap), str(Iaa), "PCalpha", "PCrho", "PCAp", "PCPp", "1_p"]
         for i in range(len(iwksp)):
-            for j in list:
+            for j in _list:
                 lname = len(j)
                 if iwksp[i][0:lname + 1] == j + "_":
                     DeleteWorkspace(iwksp[i])
@@ -660,9 +660,9 @@ def _doAllTests():
 
 
 if __name__ == '__main__':
-    ''' This is the debugging and testing area of the file.  The code below is run when ever the
-       script is called directly from a shell command line or the execute all menu option in mantid.
-    '''
+    # This is the debugging and testing area of the file.  The code below is run when ever the
+    # script is called directly from a shell command line or the execute all menu option in mantid.
+
     # Debugging = True  # Turn the debugging on and the testing code off
     Debugging = False  # Turn the debugging off and the testing on
 
