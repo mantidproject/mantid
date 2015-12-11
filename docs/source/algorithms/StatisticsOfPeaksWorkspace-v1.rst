@@ -30,7 +30,6 @@ Usage
 
 .. testcode:: ExStatisticsOfPeaksWorkspaceOption
 
-    #load a peaks workspace from file
     # Load example peak data and find cell
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
 
@@ -40,9 +39,9 @@ Usage
                                CellType='Hexagonal', Apply=True, Tolerance=0.2)
 
     # Run the SortHKL algorithm
-    sorted, chi2, statistics_table = StatisticsOfPeaksWorkspace(peaks, PointGroup='-3m1 (Trigonal - Hexagonal)',
-                                                                LatticeCentering='Rhombohedrally centred, obverse',
-                                                                SortBy='Overall')
+    sorted, statistics_table = StatisticsOfPeaksWorkspace(peaks, PointGroup='-3m1 (Trigonal - Hexagonal)',
+                                                          LatticeCentering='Rhombohedrally centred, obverse',
+                                                          SortBy='Overall')
 
     statistics = statistics_table.row(0)
 
