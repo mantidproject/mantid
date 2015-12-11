@@ -205,31 +205,24 @@ class ISISPowderDiffractionHrpd2(stresstesting.MantidStressTest):
         return self._success
 
     def cleanup(self):
-        filenames = (["hrpd/test/cycle_09_2_no_existv/Calibration/hrpd_new_072_01_corr.cal",
-                      "hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old.gss",
-                      "hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old.nxs",
-                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b1_D.dat',
-                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b1_TOF.dat',
-                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b2_D.dat',
-                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b2_TOF.dat',
-                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b3_D.dat',
-                      'hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b3_TOF.dat',
-                      'hrpd/test/cycle_09_2_no_existv/tester/hrpd_new_072_01_corr.cal',
-                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped.nxs',
-                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-0.dat',
-                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-1.dat',
-                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-2.dat',
-                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-0.nxs',
-                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-0_.dat',
-                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-1.nxs',
-                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-1_.dat',
-                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-2.nxs',
-                      'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-2_.dat'])
+        filenames = []
+        filenames.extend(("hrpd/test/cycle_09_2_no_existv/Calibration/hrpd_new_072_01_corr.cal",
+                         "hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old.gss",
+                          "hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old.nxs"))
+        for i in range(0, 2):
+            filenames.append('hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b' + str(i+1) + '_D.dat')
+            filenames.append('hrpd/test/cycle_09_2_no_existv/tester/hrp43022_s1_old_b' + str(i+1) + '_TOF.dat')
+            filenames.append('hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-' + str(i) + '.nxs')
+            filenames.append('hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-' + str(i) + '.dat')
+            filenames.append('hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-' + str(i) + '.dat')
         self._clean_up_files(filenames, DIRS)
 
 
 # ======================================================================
 # work horse
+class Filename(object):
+    pass
+
 class LoadTests2(unittest.TestCase):
     wsname = "__LoadTest"
     cleanup_names = []
@@ -247,58 +240,53 @@ class LoadTests2(unittest.TestCase):
         diff_places = 3
 
         nxsfile = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped.nxs')
-        datfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-0.dat')
-        datfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-1.dat')
-        datfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-2.dat')
-
         nxsdata = LoadNexusProcessed(Filename=nxsfile, OutputWorkspace="nxs_workspace")
-        data1 = LoadAscii(Filename=datfile1, OutputWorkspace="dat_workspace1")
-        data2 = LoadAscii(Filename=datfile2, OutputWorkspace="dat_workspace2")
-        data3 = LoadAscii(Filename=datfile3, OutputWorkspace="dat_workspace3")
 
         self.assertTrue(isinstance(nxsdata, MatrixWorkspace))
         self.assertEquals(3, nxsdata.getNumberHistograms())
         self.assertEquals(23987, nxsdata.blocksize())
 
-        self.assertAlmostEqual(nxsdata.readX(0)[0], data1.readX(0)[0], places=diff_places)
-        self.assertAlmostEqual(nxsdata.readX(0)[4500], data1.readX(0)[4500], places=diff_places)
-        self.assertAlmostEqual(nxsdata.readX(0)[17000], data1.readX(0)[17000], places=diff_places)
-        self.assertAlmostEqual(nxsdata.readX(0)[22000], data1.readX(0)[22000], places=diff_places)
+        file_name = []
+        for i in range(0, 2):
+            file_name.append((DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new_unstripped-' +
+                              str(i) + '.dat'))
 
-        self.assertAlmostEqual(nxsdata.readX(1)[0], data2.readX(0)[0], places=diff_places)
-        self.assertAlmostEqual(nxsdata.readX(1)[4500], data2.readX(0)[4500], places=diff_places)
-        self.assertAlmostEqual(nxsdata.readX(1)[17000], data2.readX(0)[17000], places=diff_places)
-        self.assertAlmostEqual(nxsdata.readX(1)[22000], data2.readX(0)[22000], places=diff_places)
+        data_list = []
+        for i in range(0, len(file_name)):
+            data_list.append(LoadAscii(Filename=file_name[i], OutputWorkspace="dat_workspace" + str(i+1)))
 
-        self.assertAlmostEqual(nxsdata.readX(2)[0], data3.readX(0)[0], places=diff_places)
-        self.assertAlmostEqual(nxsdata.readX(2)[4500], data3.readX(0)[4500], places=diff_places)
-        self.assertAlmostEqual(nxsdata.readX(2)[17000], data3.readX(0)[17000], places=diff_places)
-        self.assertAlmostEqual(nxsdata.readX(2)[22000], data3.readX(0)[22000], places=diff_places)
+        for i in range(0, len(data_list)):
+            self.assertAlmostEqual(nxsdata.readX(i)[0], data_list[i].readX(0)[0], places=diff_places)
+            self.assertAlmostEqual(nxsdata.readX(i)[4500], data_list[i].readX(0)[4500], places=diff_places)
+            self.assertAlmostEqual(nxsdata.readX(i)[17000], data_list[i].readX(0)[17000], places=diff_places)
+            self.assertAlmostEqual(nxsdata.readX(i)[22000], data_list[i].readX(0)[22000], places=diff_places)
 
     def test_van_s1_files(self):
         diff_places = 3
 
-        nxsfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-0.nxs')
-        nxsfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-1.nxs')
-        nxsfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-2.nxs')
-        datfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-0_.dat')
-        datfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-1_.dat')
-        datfile3 = (DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-2_.dat')
+        nxs_file = []
+        for i in range(0, 2):
+            nxs_file.append((DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-' +
+                              str(i) + '.nxs'))
 
-        nxsdata1 = LoadNexusProcessed(Filename=nxsfile1, OutputWorkspace="nxs_workspace1")
-        nxsdata2 = LoadNexusProcessed(Filename=nxsfile2, OutputWorkspace="nxs_workspace2")
-        nxsdata3 = LoadNexusProcessed(Filename=nxsfile3, OutputWorkspace="nxs_workspace3")
-        data1 = LoadAscii(Filename=datfile1, OutputWorkspace="dat_workspace1")
-        data2 = LoadAscii(Filename=datfile2, OutputWorkspace="dat_workspace2")
-        data3 = LoadAscii(Filename=datfile3, OutputWorkspace="dat_workspace3")
+        nxs_data = []
+        for i in range(0, len(nxs_file)):
+            nxs_data.append(LoadNexusProcessed(Filename=nxs_file[i], OutputWorkspace="nxs_workspace" + str(i+1)))
 
-        self.assertTrue(isinstance(nxsdata1, MatrixWorkspace))
-        self.assertTrue(isinstance(nxsdata2, MatrixWorkspace))
-        self.assertTrue(isinstance(nxsdata3, MatrixWorkspace))
+        dat_file = []
+        for i in range(0, 2):
+            dat_file.append((DIRS[0] + 'hrpd/test/cycle_09_2_no_existv/Calibration/van_s1_old_new-' +
+                              str(i) + '_.dat'))
 
-        self.assertAlmostEqual(nxsdata1.readX(0)[0], data1.readX(0)[0], places=diff_places)
-        self.assertAlmostEqual(nxsdata2.readX(0)[4500], data2.readX(0)[4500], places=diff_places)
-        self.assertAlmostEqual(nxsdata3.readX(0)[17000], data3.readX(0)[17000], places=diff_places)
-        self.assertAlmostEqual(nxsdata3.readX(0)[22000], data3.readX(0)[22000], places=diff_places)
-        self.assertAlmostEqual(nxsdata2.readX(0)[0], data2.readX(0)[0], places=diff_places)
-        self.assertAlmostEqual(nxsdata1.readX(0)[4500], data1.readX(0)[4500], places=diff_places)
+        dat_data = []
+        for i in range(0, len(dat_file)):
+            dat_data.append(LoadAscii(Filename=dat_file[i], OutputWorkspace="dat_workspace" + str(i+1)))
+
+        for _file in nxs_data:
+            self.assertTrue(isinstance(_file, MatrixWorkspace))
+
+        for i in range(0, len(dat_data)):
+            self.assertAlmostEqual(nxs_data[i].readX(0)[0], dat_data[i].readX(0)[0], places=diff_places)
+            self.assertAlmostEqual(nxs_data[i].readX(0)[4500], dat_data[i].readX(0)[4500], places=diff_places)
+            self.assertAlmostEqual(nxs_data[i].readX(0)[17000], dat_data[i].readX(0)[17000], places=diff_places)
+            self.assertAlmostEqual(nxs_data[i].readX(0)[22000], dat_data[i].readX(0)[22000], places=diff_places)
