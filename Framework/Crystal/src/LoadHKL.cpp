@@ -60,6 +60,10 @@ void LoadHKL::exec() {
   //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM, TRANSMISSION,
   //    DN, TWOTH, DSP))
   // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
+  // Default for kf-ki has -q
+  double qSign = -1.0;
+  std::string convention = ConfigService::Instance().getString("default.convention");
+  if (convention == "Crystallography") qSign = 1.0;
   Instrument_sptr inst(new Geometry::Instrument);
   Detector *detector = new Detector("det1", -1, 0);
   detector->setPos(0.0, 0.0, 0.0);
@@ -107,7 +111,7 @@ void LoadHKL::exec() {
     }
 
     Peak peak(inst, scattering, wl);
-    peak.setHKL(-h, -k, -l);
+    peak.setHKL(qSign *h, qSign *k, qSign * l);
     peak.setIntensity(Inti);
     peak.setSigmaIntensity(SigI);
     peak.setRunNumber(run);
