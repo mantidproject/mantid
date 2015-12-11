@@ -36,6 +36,8 @@ JAR_FILE=slave.jar
 [ -z "$USER" ] && export USER=$(whoami)
 # Put /usr/local/bin on the PATH if brew is installed
 [ -f /usr/local/bin/brew ] && export PATH=${PATH}:/usr/local/bin
+# Put /usr/texbin on the PATH if latex is installed
+[ -f /usr/texbin/latex ] && export PATH=${PATH}:/usr/texbin
 
 #####################################################################
 # Script

@@ -24,6 +24,7 @@ public:
   void draw(QPainter *painter, 
         const QwtScaleMap &xMap, const QwtScaleMap &yMap,
         const QRect &canvasRect) const;
+  QRectF boundingRect() const override;
 private:
 
   std::vector<double> m_x; ///< The x coordinates
