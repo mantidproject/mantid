@@ -9,9 +9,6 @@
 #include "MantidVatesAPI/ColorScaleGuard.h"
 #include <QPointer>
 #include <QWidget>
-#ifdef JSON_DLL
-#undef JSON_DLL
-#endif
 #include "vtk_jsoncpp.h"
 
 class pqDataRepresentation;

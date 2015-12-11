@@ -6,9 +6,6 @@
 #include "MantidVatesAPI/ColorScaleGuard.h"
 
 #include "pqPresetDialog.h"
-#ifdef JSON_DLL
-#undef JSON_DLL
-#endif
 #include "vtk_jsoncpp.h"
 #include "vtkSMTransferFunctionPresets.h"
 #include "vtkNew.h"
