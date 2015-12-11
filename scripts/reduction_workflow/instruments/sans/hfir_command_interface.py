@@ -278,12 +278,6 @@ def SetSampleDetectorOffset(distance):
 def SetSampleDetectorDistance(distance):
     ReductionSingleton().reduction_properties["SampleDetectorDistance"] = distance
 
-def SetSampleSiWindowDistance(distance):
-    ReductionSingleton().reduction_properties["SampleSiWindowDistance"] = distance
-
-def SetSampleTotalDistance(distance):
-    ReductionSingleton().reduction_properties["TotalDetectorDistance"] = distance                                                                       
-
 def SetWavelength(wavelength, spread):
     ReductionSingleton().reduction_properties["Wavelength"] = wavelength
     ReductionSingleton().reduction_properties["WavelengthSpread"] = spread

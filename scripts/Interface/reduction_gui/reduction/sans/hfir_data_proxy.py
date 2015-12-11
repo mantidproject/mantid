@@ -4,6 +4,7 @@ import sys
 try:
     from mantid.api import AnalysisDataService
     from mantid.kernel import Logger
+    logger = Logger("hfir_data_proxy")
     import mantid.simpleapi as api
     HAS_MANTID = True
 except:
@@ -25,6 +26,8 @@ class DataProxy(object):
     sample_detector_distance = None
     sample_detector_distance_offset = None
     sample_si_window_distance = None
+    # If it was moved before that's where the distance is:
+    sample_detector_distance_moved = None
     
     
     data = None
@@ -51,11 +54,12 @@ class DataProxy(object):
                 self.sample_detector_distance = ws.getRun().getProperty("sample-detector-distance").value
                 self.sample_detector_distance_offset = ws.getRun().getProperty("sample-detector-distance-offset").value
                 self.sample_si_window_distance = ws.getRun().getProperty("sample-si-window-distance").value
-                
+                self.sample_detector_distance_moved = ws.getRun().getProperty("sample_detector_distance").value
+
                 self.sample_thickness = ws.getRun().getProperty("sample-thickness").value
                 self.beam_diameter = ws.getRun().getProperty("beam-diameter").value
 
-                Logger("hfir_data_proxy").information("Loaded data file: %s" % data_file)
+                logger.notice("Loaded data file: %s" % data_file)
             except:
-                Logger("hfir_data_proxy").error("Error loading data file:\n%s" % sys.exc_value)
+                logger.error("Error loading data file:\n%s" % sys.exc_value)
                 self.errors.append("Error loading data file:\n%s" % sys.exc_value)
