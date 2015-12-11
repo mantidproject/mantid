@@ -149,6 +149,12 @@ class SANSStitch1D(DataProcessorAlgorithm):
         scaled = scale.getProperty('OutputWorkspace').value
         return scaled
 
+    def _comment(self, ws, message):
+        comment = self.createChildAlgorithm('Comment')
+        comment.setProperty('Workspace', ws)
+        comment.setProperty('Text', message)
+        comment.execute()
+
     def _calculate_merged_q(self, cF, nF, cR, nR, shift_factor, scale_factor):
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
         shifted_norm_front = self._scale(nF, shift_factor)
@@ -160,6 +166,9 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
     def _get_error_corrected(self, front_data, rear_data, q_min, q_max):
 
+        self._comment(front_data, 'Internal Step: Front data errors corrected as sqrt(rear_error^2 + front_error^2)')
+        self._comment(rear_data, 'Internal Step: Rear data errors corrected as sqrt(rear_error^2 + front_error^2)')
+
         front_data_cropped = self._crop_to_x_range(front_data, q_min, q_max)
 
         # For the rear data set
@@ -167,15 +176,16 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
         # Now transfer the error from front data to the rear data workspace
         # This works only if we have a single QMod spectrum in the workspaces
-        front_error = front_data_cropped.dataE(0)
-        rear_error = rear_data_cropped.dataE(0)
+        for i in range(0, front_data_cropped.getNumberHistograms()):
+            front_error = front_data_cropped.dataE(i)
+            rear_error = rear_data_cropped.dataE(i)
 
-        rear_error_squared = rear_error * rear_error
-        front_error_squared = front_error * front_error
+            rear_error_squared = rear_error * rear_error
+            front_error_squared = front_error * front_error
 
-        corrected_error_squared = rear_error_squared + front_error_squared
-        corrected_error = np.sqrt(corrected_error_squared)
-        rear_error[0:len(rear_error)] = corrected_error[0:len(rear_error)]
+            corrected_error_squared = rear_error_squared + front_error_squared
+            corrected_error = np.sqrt(corrected_error_squared)
+            rear_error[0:len(rear_error)] = corrected_error[0:len(rear_error)]
 
         return front_data_cropped, rear_data_cropped
 
