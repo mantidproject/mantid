@@ -213,7 +213,7 @@ BinaryStreamReader &BinaryStreamReader::read(std::vector<double> &value,
 /**
  * Read a series of characters into a string object.
  * @param value The string to fill. Its size is increased if necessary
- * @param nvals The number values to attempt to read from the stream
+ * @param length The number characters to attempt to read from the stream
  * @return A reference to the BinaryStreamReader object
  */
 BinaryStreamReader &BinaryStreamReader::read(std::string &value,
