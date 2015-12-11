@@ -13,6 +13,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
@@ -34,6 +35,8 @@ using Kernel::V3D;
 /// number of pixels to read in a single call. A single pixel is 9 float
 /// fields. 150000 is ~5MB buffer
 constexpr int64_t NPIX_CHUNK = 150000;
+/// Defines the number of fields that define a single pixel
+constexpr int32_t FIELDS_PER_PIXEL = 9;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
@@ -462,12 +465,12 @@ void LoadSQW2::readPixelData() {
   int64_t npixtot(0);
   *m_reader >> npixtot;
   g_log.debug() << "    npixtot: " << npixtot << "\n";
+  warnIfMemoryInsufficient(npixtot);
   m_progress->setNumSteps(npixtot);
 
   // Each pixel has 9 float fields. Do a chunked read to avoid
   // using too much memory for the buffer
-  constexpr int32_t numFields(9);
-  constexpr int64_t bufferSize(numFields * NPIX_CHUNK);
+  constexpr int64_t bufferSize(FIELDS_PER_PIXEL * NPIX_CHUNK);
   std::vector<float> pixBuffer(bufferSize);
   int64_t pixelsToRead(npixtot);
   while (pixelsToRead > 0) {
@@ -475,7 +478,7 @@ void LoadSQW2::readPixelData() {
     if (readNPix > NPIX_CHUNK) {
       readNPix = NPIX_CHUNK;
     }
-    m_reader->read(pixBuffer, numFields * readNPix);
+    m_reader->read(pixBuffer, FIELDS_PER_PIXEL * readNPix);
     for (int64_t i = 0; i < readNPix; ++i) {
       addEventFromBuffer(pixBuffer.data() + i * 9);
       m_progress->report();
@@ -483,6 +486,28 @@ void LoadSQW2::readPixelData() {
     pixelsToRead -= readNPix;
   }
   g_log.debug() << "Time to read all pixels: " << timer.elapsed() << "s\n";
+}
+
+/**
+ * If the output is not file backed and the machine appears to have insufficient
+ * memory to read the data in total then warn the user. We don't stop
+ * the algorithm just in case our memory calculation is wrong.
+ * @param npixtot The total number of pixels to be read
+ */
+void LoadSQW2::warnIfMemoryInsufficient(int64_t npixtot) {
+  using DataObjects::MDEvent;
+  using Kernel::MemoryStats;
+  if (m_outputWS->isFileBacked())
+    return;
+  MemoryStats stat;
+  size_t reqdMemory =
+      (npixtot * sizeof(MDEvent<4>) + NPIX_CHUNK * FIELDS_PER_PIXEL) / 1024;
+  if (reqdMemory < stat.availMem()) {
+    g_log.warning()
+        << "It looks as if there is insufficient memory to load the "
+        << "entire file. It is recommended to cancel the algorith and specify "
+           "the OutputFilename option to create a file-backed workspace.\n";
+  }
 }
 
 /**

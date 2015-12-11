@@ -76,6 +76,7 @@ private:
   void setupBoxController();
   void setupFileBackend(std::string filebackPath);
   void readPixelData();
+  void warnIfMemoryInsufficient(int64_t npixtot);
   void addEventFromBuffer(const float *pixel);
   void toHKL(float &u1, float &u2, float &u3, const uint16_t runIndex);
   void finalize();
