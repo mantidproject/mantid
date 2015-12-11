@@ -1344,14 +1344,13 @@ def plot_bin(workspaces, indices, *args, **kwargs):
     # Find optional params to plotBin
     bars_val = __translate_error_bars_kwarg(**kwargs)
     window_val, clearWindow_val = __translate_hold_kwarg(**kwargs)
-    dist_val = __translate_distribution_kwarg(**kwargs)
 
     # to change properties on the new lines being added
     first_line = 0
     if None != window_val:
         first_line = window_val.activeLayer().numCurves()
 
-    graph = mantidplot.plotBin(workspaces, indices, dist_val, error_bars=bars_val, type=-1, window=window_val, clearWindow=clearWindow_val)
+    graph = mantidplot.plotBin(workspaces, indices, error_bars=bars_val, type=-1, window=window_val, clearWindow=clearWindow_val)
 
     __apply_plot_args(graph, first_line, *args)
     __apply_plot_kwargs(graph, first_line, **kwargs)
