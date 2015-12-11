@@ -95,7 +95,7 @@ void ThreadPool::start(double waitSec) {
     m_threads.push_back(thread);
 
     // Make the runnable object and run it
-    ThreadPoolRunnable *runnable =
+    auto runnable =
         new ThreadPoolRunnable(i, m_scheduler, m_prog, waitSec);
     m_runnables.push_back(runnable);
 

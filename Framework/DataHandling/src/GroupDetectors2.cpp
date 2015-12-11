@@ -535,7 +535,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
 
     for (size_t i = 0; i < detids.size(); i++) {
       detid_t detid = detids[i];
-      detid2index_map::const_iterator ind = detIdToWiMap.find(detid);
+      auto ind = detIdToWiMap.find(detid);
       if (ind != detIdToWiMap.end()) {
         size_t wsid = ind->second;
         wsindexes.push_back(wsid);
@@ -564,7 +564,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
 
     for (size_t i = 0; i < spectra.size(); i++) {
       int specid = spectra[i];
-      spec2index_map::iterator ind = specs2index.find(specid);
+      auto ind = specs2index.find(specid);
       if (ind != specs2index.end()) {
         size_t wsid = ind->second;
         wsindexes.push_back(wsid);
@@ -858,8 +858,8 @@ void GroupDetectors2::readSpectraIndexes(std::string line,
                                          std::string seperator) {
   // remove comments and white space
   Poco::StringTokenizer dataComment(line, seperator, IGNORE_SPACES);
-  Poco::StringTokenizer::Iterator iend = dataComment.end();
-  for (Poco::StringTokenizer::Iterator itr = dataComment.begin(); itr != iend;
+  auto iend = dataComment.end();
+  for (auto itr = dataComment.begin(); itr != iend;
        ++itr) {
     std::vector<size_t> specNums;
     specNums.reserve(output.capacity());
@@ -967,7 +967,7 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
     size_t nonMaskedSpectra(0);
     beh->dataX(outIndex)[0] = 0.0;
     beh->dataE(outIndex)[0] = 0.0;
-    for (std::vector<size_t>::const_iterator wsIter = it->second.begin();
+    for (auto wsIter = it->second.begin();
          wsIter != it->second.end(); ++wsIter) {
       const size_t originalWI = *wsIter;
 
@@ -975,9 +975,9 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       const ISpectrum *fromSpectrum = inputWS->getSpectrum(originalWI);
 
       // Add up all the Y spectra and store the result in the first one
-      MantidVec::iterator fEit = outSpec->dataE().begin();
-      MantidVec::const_iterator Yit = fromSpectrum->dataY().begin();
-      MantidVec::const_iterator Eit = fromSpectrum->dataE().begin();
+      auto fEit = outSpec->dataE().begin();
+      auto Yit = fromSpectrum->dataY().begin();
+      auto Eit = fromSpectrum->dataE().begin();
       for (auto fYit = firstY.begin(); fYit != firstY.end();
            ++fYit, ++fEit, ++Yit, ++Eit) {
         *fYit += *Yit;
@@ -1075,7 +1075,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
     size_t nonMaskedSpectra(0);
     beh->dataX(outIndex)[0] = 0.0;
     beh->dataE(outIndex)[0] = 0.0;
-    for (std::vector<size_t>::const_iterator wsIter = it->second.begin();
+    for (auto wsIter = it->second.begin();
          wsIter != it->second.end(); ++wsIter) {
       const size_t originalWI = *wsIter;
 
@@ -1144,7 +1144,7 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
   double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
                      static_cast<double>(unGroupedSet.size());
 
-  std::set<int64_t>::const_iterator copyFrIt = unGroupedSet.begin();
+  auto copyFrIt = unGroupedSet.begin();
   // go thorugh all the spectra in the input workspace
   for (; copyFrIt != unGroupedSet.end(); ++copyFrIt) {
     if (*copyFrIt == USED)
@@ -1202,7 +1202,7 @@ void GroupDetectors2::moveOthersEvent(
   double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
                      static_cast<double>(unGroupedSet.size());
 
-  std::set<int64_t>::const_iterator copyFrIt = unGroupedSet.begin();
+  auto copyFrIt = unGroupedSet.begin();
   // go thorugh all the spectra in the input workspace
   for (; copyFrIt != unGroupedSet.end(); ++copyFrIt) {
     if (*copyFrIt == USED)
@@ -1262,7 +1262,7 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
     size_t loop = 0;
     do {
       Poco::StringTokenizer beforeHyphen(ranges[loop], " ", IGNORE_SPACES);
-      Poco::StringTokenizer::Iterator readPostion = beforeHyphen.begin();
+      auto readPostion = beforeHyphen.begin();
       if (readPostion == beforeHyphen.end()) {
         throw std::invalid_argument("'-' found at the start of a list, can't "
                                     "interpret range specification");

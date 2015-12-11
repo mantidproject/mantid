@@ -338,7 +338,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
     specid_t deltaPlusT = inSpec + this->m_detNeighbourOffset;
     specid_t deltaMinusT = inSpec - this->m_detNeighbourOffset;
 
-    for (SpectraDistanceMap::iterator it = neighbours.begin();
+    for (auto it = neighbours.begin();
          it != neighbours.end(); ++it) {
       specid_t spec = it->first;
       g_log.debug() << "Neighbor ID: " << spec << std::endl;

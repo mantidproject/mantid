@@ -535,7 +535,7 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
     }
 
     // Create a new log
-    TimeSeriesProperty<double> *templog =
+    auto templog =
         new TimeSeriesProperty<double>(logname);
     templog->addValues(vectimes, veclogval);
 

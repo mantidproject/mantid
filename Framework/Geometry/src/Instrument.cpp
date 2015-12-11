@@ -182,7 +182,7 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
     const detid2det_map &in_dets =
         static_cast<const Instrument *>(m_base)->m_detectorCache;
     // And turn them into parametrized versions
-    for (detid2det_map::const_iterator it = in_dets.begin();
+    for (auto it = in_dets.begin();
          it != in_dets.end(); ++it) {
       out_map.insert(std::pair<detid_t, IDetector_sptr>(
           it->first,
@@ -201,13 +201,13 @@ std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
   if (m_map) {
     const detid2det_map &in_dets =
         static_cast<const Instrument *>(m_base)->m_detectorCache;
-    for (detid2det_map::const_iterator it = in_dets.begin();
+    for (auto it = in_dets.begin();
          it != in_dets.end(); ++it)
       if (!skipMonitors || !it->second->isMonitor())
         out.push_back(it->first);
   } else {
     const detid2det_map &in_dets = m_detectorCache;
-    for (detid2det_map::const_iterator it = in_dets.begin();
+    for (auto it = in_dets.begin();
          it != in_dets.end(); ++it)
       if (!skipMonitors || !it->second->isMonitor())
         out.push_back(it->first);
@@ -231,13 +231,13 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
     if (m_map) {
       const detid2det_map &in_dets =
           static_cast<const Instrument *>(m_base)->m_detectorCache;
-      for (detid2det_map::const_iterator it = in_dets.begin();
+      for (auto it = in_dets.begin();
            it != in_dets.end(); ++it)
         if (it->second->isMonitor())
           monitors += 1;
     } else {
       const detid2det_map &in_dets = m_detectorCache;
-      for (detid2det_map::const_iterator it = in_dets.begin();
+      for (auto it = in_dets.begin();
            it != in_dets.end(); ++it)
         if (it->second->isMonitor())
           monitors += 1;
@@ -468,7 +468,7 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
     IDetector_const_sptr baseDet = m_instr->getDetector(detector_id);
     return ParComponentFactory::createDetector(baseDet.get(), m_map);
   } else {
-    detid2det_map::const_iterator it = m_detectorCache.find(detector_id);
+    auto it = m_detectorCache.find(detector_id);
     if (it == m_detectorCache.end()) {
       std::stringstream readInt;
       readInt << detector_id;
@@ -486,7 +486,7 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
   *  @returns A const pointer to the detector object
   */
 const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
-  detid2det_map::const_iterator it = m_instr->m_detectorCache.find(detector_id);
+  auto it = m_instr->m_detectorCache.find(detector_id);
   if (it == m_instr->m_detectorCache.end()) {
     return NULL;
   }
@@ -495,7 +495,7 @@ const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
 
 bool Instrument::isMonitor(const detid_t &detector_id) const {
   // Find the (base) detector object in the map.
-  detid2det_map::const_iterator it = m_instr->m_detectorCache.find(detector_id);
+  auto it = m_instr->m_detectorCache.find(detector_id);
   if (it == m_instr->m_detectorCache.end())
     return false;
   // This is the detector
@@ -509,7 +509,7 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
   if (detector_ids.empty())
     return false;
 
-  for (std::set<detid_t>::const_iterator it = detector_ids.begin();
+  for (auto it = detector_ids.begin();
        it != detector_ids.end(); ++it) {
     if (this->isMonitor(*it))
       return true;
@@ -528,7 +528,7 @@ bool Instrument::isDetectorMasked(const detid_t &detector_id) const {
   if (!isParametrized())
     return false;
   // Find the (base) detector object in the map.
-  detid2det_map::const_iterator it = m_instr->m_detectorCache.find(detector_id);
+  auto it = m_instr->m_detectorCache.find(detector_id);
   if (it == m_instr->m_detectorCache.end())
     return false;
   // This is the detector
@@ -557,7 +557,7 @@ bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const {
   if (detector_ids.empty())
     return false;
 
-  for (std::set<detid_t>::const_iterator it = detector_ids.begin();
+  for (auto it = detector_ids.begin();
        it != detector_ids.end(); ++it) {
     if (!this->isDetectorMasked(*it))
       return false;
@@ -714,7 +714,7 @@ void Instrument::markAsDetector(const IDetector *det) {
 
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
-  std::map<int, IDetector_const_sptr>::iterator it = m_detectorCache.end();
+  auto it = m_detectorCache.end();
   m_detectorCache.insert(it, std::map<int, IDetector_const_sptr>::value_type(
                                  det->getID(), det_sptr));
 }
@@ -760,7 +760,7 @@ void Instrument::removeDetector(IDetector *det) {
   m_detectorCache.erase(id);
   // Also need to remove from monitor cache if appropriate
   if (det->isMonitor()) {
-    std::vector<detid_t>::iterator it =
+    auto it =
         std::find(m_monitorCache.begin(), m_monitorCache.end(), id);
     if (it != m_monitorCache.end())
       m_monitorCache.erase(it);
@@ -832,7 +832,7 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
       m_cachedBoundingBox = new BoundingBox();
       ComponentID sourceID = getSource()->getComponentID();
       // Loop over the children and define a box large enough for all of them
-      for (const_comp_it it = m_children.begin(); it != m_children.end();
+      for (auto it = m_children.begin(); it != m_children.end();
            ++it) {
         BoundingBox compBox;
         IComponent *component = *it;
@@ -958,9 +958,9 @@ double Instrument::calcConversion(
     const std::map<detid_t, double> &offsets) {
   double factor = 0.;
   double offset;
-  for (std::vector<detid_t>::const_iterator iter = detectors.begin();
+  for (auto iter = detectors.begin();
        iter != detectors.end(); ++iter) {
-    std::map<detid_t, double>::const_iterator off_iter = offsets.find(*iter);
+    auto off_iter = offsets.find(*iter);
     if (off_iter != offsets.end()) {
       offset = offsets.find(*iter)->second;
     } else {

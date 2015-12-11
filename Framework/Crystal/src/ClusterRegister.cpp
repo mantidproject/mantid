@@ -57,7 +57,7 @@ public:
     GroupType containingAny;
     GroupType containingNone;
     // ------------- Find equivalent sets
-    for (GroupType::iterator i = m_groups.begin(); i != m_groups.end(); ++i) {
+    for (auto i = m_groups.begin(); i != m_groups.end(); ++i) {
       GroupType::value_type &cluster = *i;
       if (cluster.find(aLabel) != cluster.end()) {
         containingAny.push_back(cluster);

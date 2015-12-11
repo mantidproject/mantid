@@ -741,8 +741,8 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
       recordMismatch(out.str());
       return false;
     }
-    std::set<detid_t>::const_iterator it1 = spec1->getDetectorIDs().begin();
-    std::set<detid_t>::const_iterator it2 = spec2->getDetectorIDs().begin();
+    auto it1 = spec1->getDetectorIDs().begin();
+    auto it2 = spec2->getDetectorIDs().begin();
     for (; it1 != spec1->getDetectorIDs().end(); ++it1, ++it2) {
       if (*it1 != *it2) {
         recordMismatch("Detector IDs mismatch");

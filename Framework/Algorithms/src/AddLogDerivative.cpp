@@ -107,7 +107,7 @@ Mantid::Kernel::TimeSeriesProperty<double> *AddLogDerivative::makeDerivative(
     timeFull.push_back(start + times[i]);
 
   // Create the TSP out of it
-  Mantid::Kernel::TimeSeriesProperty<double> *out =
+  auto out =
       new TimeSeriesProperty<double>(name);
   out->addValues(timeFull, values);
   return out;

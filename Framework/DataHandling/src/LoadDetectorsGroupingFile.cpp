@@ -212,7 +212,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
       m_groupWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Set
-  for (std::map<int, std::vector<std::string>>::iterator it =
+  for (auto it =
            m_groupComponentsMap.begin();
        it != m_groupComponentsMap.end(); ++it) {
     g_log.debug() << "Group ID = " << it->first << " With " << it->second.size()
@@ -243,7 +243,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
         if (det) {
           // Component is DETECTOR:
           int32_t detid = det->getID();
-          detid2index_map::const_iterator itx = indexmap.find(detid);
+          auto itx = indexmap.find(detid);
           if (itx != indexmap.end()) {
             size_t wsindex = itx->second;
             m_groupWS->dataY(wsindex)[0] = it->first;
@@ -290,14 +290,14 @@ void LoadDetectorsGroupingFile::setByDetectors() {
       m_groupWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Set GroupingWorkspace
-  for (std::map<int, std::vector<detid_t>>::iterator it =
+  for (auto it =
            m_groupDetectorsMap.begin();
        it != m_groupDetectorsMap.end(); ++it) {
     g_log.debug() << "Group ID = " << it->first << std::endl;
 
     for (size_t i = 0; i < it->second.size(); i++) {
       detid_t detid = it->second[i];
-      detid2index_map::const_iterator itx = indexmap.find(detid);
+      auto itx = indexmap.find(detid);
 
       if (itx != indexmap.end()) {
         size_t wsindex = itx->second;
@@ -516,7 +516,7 @@ void LoadGroupXMLFile::parseXML() {
       }
 
       // b) Set in map
-      std::map<int, std::vector<std::string>>::iterator itc =
+      auto itc =
           m_groupComponentsMap.find(curgroupid);
       if (itc != m_groupComponentsMap.end()) {
         // Error! Duplicate Group ID defined in XML
@@ -542,7 +542,7 @@ void LoadGroupXMLFile::parseXML() {
     } // "group"
     else if (pNode->nodeName().compare("component") == 0) {
       // Node "component" = value
-      std::map<int, std::vector<std::string>>::iterator it =
+      auto it =
           m_groupComponentsMap.find(curgroupid);
       if (it == m_groupComponentsMap.end()) {
         std::stringstream ss;
@@ -566,7 +566,7 @@ void LoadGroupXMLFile::parseXML() {
     } // Component
     else if (pNode->nodeName().compare("detids") == 0) {
       // Node "detids"
-      std::map<int, std::vector<detid_t>>::iterator it =
+      auto it =
           m_groupDetectorsMap.find(curgroupid);
       if (it == m_groupDetectorsMap.end()) {
         std::stringstream ss;
@@ -592,7 +592,7 @@ void LoadGroupXMLFile::parseXML() {
     } // "detids"
     else if (pNode->nodeName().compare("ids") == 0) {
       // Node ids: for spectrum number
-      std::map<int, std::vector<int>>::iterator it =
+      auto it =
           m_groupSpectraMap.find(curgroupid);
       if (it == m_groupSpectraMap.end()) {
         std::stringstream ss;

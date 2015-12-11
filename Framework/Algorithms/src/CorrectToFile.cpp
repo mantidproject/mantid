@@ -97,7 +97,7 @@ void CorrectToFile::exec() {
         const double currentX =
             histogramData ? (xIn[j] + xIn[j + 1]) / 2.0 : xIn[j];
         // Find out the index of the first correction point after this value
-        MantidVec::const_iterator pos =
+        auto pos =
             std::lower_bound(Xcor.begin(), Xcor.end(), currentX);
         const size_t index = pos - Xcor.begin();
         if (index == Xcor.size()) {

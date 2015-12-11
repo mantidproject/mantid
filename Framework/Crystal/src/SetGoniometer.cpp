@@ -97,7 +97,7 @@ void SetGoniometer::exec() {
           axisName = "GoniometerAxis" + Strings::toString(i) + "_FixedValue";
           try {
             Kernel::DateAndTime now = Kernel::DateAndTime::getCurrentTime();
-            Kernel::TimeSeriesProperty<double> *tsp =
+            auto tsp =
                 new Kernel::TimeSeriesProperty<double>(axisName);
             tsp->addValue(now, angle);
             tsp->setUnits("degree");

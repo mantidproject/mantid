@@ -60,7 +60,7 @@ std::string MultiFileValidator::checkValidity(
       VecVecString_cIt;
   typedef std::vector<std::string>::const_iterator VecString_cIt;
 
-  for (VecVecString_cIt rowIt = values.begin(); rowIt != values.end();
+  for (auto rowIt = values.begin(); rowIt != values.end();
        ++rowIt) {
     std::vector<std::string> row = (*rowIt);
     for (VecString_cIt valueIt = row.begin(); valueIt != row.end(); ++valueIt) {

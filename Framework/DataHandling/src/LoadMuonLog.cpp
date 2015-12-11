@@ -70,9 +70,9 @@ void LoadMuonLog::exec() {
   Progress prog(this, 0.0, 1.0, nxload.numberOfLogs());
   for (int i = 0; i < nxload.numberOfLogs(); i++) {
     std::string logName = nxload.getLogName(i);
-    TimeSeriesProperty<double> *l_PropertyDouble =
+    auto l_PropertyDouble =
         new TimeSeriesProperty<double>(logName);
-    TimeSeriesProperty<std::string> *l_PropertyString =
+    auto l_PropertyString =
         new TimeSeriesProperty<std::string>(logName);
 
     // Read log file into Property which is then stored in Sample object

@@ -46,7 +46,7 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager,
                                       const std::string &name,
                                       const TYPE value) {
   // create time series property and add single value
-  Kernel::TimeSeriesProperty<TYPE> *p =
+  auto p =
       new Kernel::TimeSeriesProperty<TYPE>(name);
   p->addValue(time, value);
 

@@ -210,7 +210,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
 
   // Now set up a new numeric axis holding the theta values corresponding to
   // each spectrum.
-  NumericAxis *const newAxis = new NumericAxis(m_indexMap.size());
+  auto const newAxis = new NumericAxis(m_indexMap.size());
   outputWorkspace->replaceAxis(1, newAxis);
 
   progress.setNumSteps(nHist + m_indexMap.size());

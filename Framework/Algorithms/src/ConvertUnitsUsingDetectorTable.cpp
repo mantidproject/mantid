@@ -647,7 +647,7 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
     }
     // Get an X spectrum to search (they're all the same, monitors excepted)
     const MantidVec &X0 = workspace->readX(i);
-    MantidVec::const_iterator start =
+    auto start =
         std::lower_bound(X0.begin(), X0.end(), -1.0e-10 * DBL_MAX);
     if (start == X0.end()) {
       const std::string e("Check the input EFixed: the one given leads to all "
@@ -680,7 +680,7 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
     int maxBins = 0;
     for (size_t i = 0; i < numSpec; ++i) {
       const MantidVec &X = workspace->readX(i);
-      MantidVec::const_iterator end =
+      auto end =
           std::lower_bound(X.begin(), X.end(), 1.0e-10 * DBL_MAX);
       MantidVec::difference_type bins = end - X.begin();
       lastBins[i] = bins;

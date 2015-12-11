@@ -98,7 +98,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
     return 0;
 
   if (isNumeric) {
-    Kernel::TimeSeriesProperty<double> *logv =
+    auto logv =
         new Kernel::TimeSeriesProperty<double>(name);
     auto it = change_times.begin();
     for (; it != change_times.end(); ++it) {
@@ -109,7 +109,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
     }
     return logv;
   } else {
-    Kernel::TimeSeriesProperty<std::string> *logv =
+    auto logv =
         new Kernel::TimeSeriesProperty<std::string>(name);
     auto it = change_times.begin();
     for (; it != change_times.end(); ++it) {

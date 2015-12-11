@@ -456,7 +456,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
   size_t i_property = 0;
 
   //    And at the same time, iterate through the splitter
-  Kernel::TimeSplitterType::iterator itspl = splitter.begin();
+  auto itspl = splitter.begin();
 
   size_t counter = 0;
   g_log.debug() << "[DB] Number of time series entries = " << m_values.size()
@@ -752,7 +752,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
 
   double numerator(0.0), totalTime(0.0);
   // Loop through the filter ranges
-  for (TimeSplitterType::const_iterator it = filter.begin(); it != filter.end();
+  for (auto it = filter.begin(); it != filter.end();
        ++it) {
     // Calculate the total time duration (in seconds) within by the filter
     totalTime += it->duration();

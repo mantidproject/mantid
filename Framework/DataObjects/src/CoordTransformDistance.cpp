@@ -42,7 +42,7 @@ CoordTransformDistance::CoordTransformDistance(const size_t inD,
 /** Virtual cloner
  * @return a copy of this object  */
 CoordTransform *CoordTransformDistance::clone() const {
-  CoordTransformDistance *out =
+  auto out =
       new CoordTransformDistance(inD, m_center, m_dimensionsUsed);
   return out;
 }

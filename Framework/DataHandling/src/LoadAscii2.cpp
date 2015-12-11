@@ -555,9 +555,9 @@ int LoadAscii2::splitIntoColumns(std::list<std::string> &columns,
 void LoadAscii2::fillInputValues(std::vector<double> &values,
                                  const std::list<std::string> &columns) const {
   values.resize(columns.size());
-  std::list<std::string>::const_iterator iend = columns.end();
+  auto iend = columns.end();
   int i = 0;
-  for (std::list<std::string>::const_iterator itr = columns.begin();
+  for (auto itr = columns.begin();
        itr != iend; ++itr) {
     std::string value = *itr;
     boost::trim(value);
@@ -670,7 +670,7 @@ void LoadAscii2::exec() {
   }
   // Else if the separator drop down choice is not UserDefined then we use that.
   else if (choice != "UserDefined") {
-    std::map<std::string, std::string>::iterator it =
+    auto it =
         m_separatorIndex.find(choice);
     sep = it->second;
   }

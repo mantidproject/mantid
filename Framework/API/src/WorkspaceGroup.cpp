@@ -330,7 +330,7 @@ bool WorkspaceGroup::isMultiperiod() const {
     g_log.debug("Not a multiperiod-group with < 1 nested workspace.");
     return false;
   }
-  std::vector<Workspace_sptr>::const_iterator iterator = m_workspaces.begin();
+  auto iterator = m_workspaces.begin();
   // Loop through all inner workspaces, checking each one in turn.
   while (iterator != m_workspaces.end()) {
     if (MatrixWorkspace_sptr ws =

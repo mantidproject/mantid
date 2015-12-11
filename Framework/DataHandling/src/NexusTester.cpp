@@ -106,7 +106,7 @@ void NexusTester::exec() {
   // Size of the chunk in number of integers
   size_t chunkSize = ChunkSizeKb * 1024 / sizeof(uint32_t);
   // ----------- Generate the fake data -----------------------------
-  uint32_t *fakeData = new uint32_t[chunkSize];
+  auto fakeData = new uint32_t[chunkSize];
   if (FakeDataType == "Zeros") {
     for (size_t i = 0; i < chunkSize; i++)
       fakeData[i] = 0;

@@ -227,7 +227,7 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
     Poco::StringTokenizer data(ids, ",", Poco::StringTokenizer::TOK_TRIM);
 
     if (data.begin() != data.end()) {
-      for (Poco::StringTokenizer::Iterator it = data.begin(); it != data.end();
+      for (auto it = data.begin(); it != data.end();
            ++it) {
         // cast the string to an int
         int detID;

@@ -148,7 +148,7 @@ void AlgorithmProxy::addObserver(const Poco::AbstractObserver &observer) const {
 */
 void AlgorithmProxy::removeObserver(
     const Poco::AbstractObserver &observer) const {
-  std::vector<const Poco::AbstractObserver *>::iterator o = std::find(
+  auto o = std::find(
       m_externalObservers.begin(), m_externalObservers.end(), &observer);
   if (o != m_externalObservers.end())
     m_externalObservers.erase(o);
@@ -282,7 +282,7 @@ void AlgorithmProxy::dropWorkspaceReferences() {
 void AlgorithmProxy::addObservers() {
   if (!m_alg)
     return;
-  std::vector<const Poco::AbstractObserver *>::reverse_iterator o =
+  auto o =
       m_externalObservers.rbegin();
   for (; o != m_externalObservers.rend(); ++o)
     m_alg->addObserver(**o);
@@ -314,7 +314,7 @@ const std::vector<std::string> AlgorithmProxy::categories() const {
   Poco::StringTokenizer tokenizer(category(), categorySeparator(),
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
+  auto h = tokenizer.begin();
 
   for (; h != tokenizer.end(); ++h) {
     res.push_back(*h);

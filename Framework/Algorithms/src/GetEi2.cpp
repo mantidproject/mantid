@@ -395,7 +395,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
   const MantidVec &Ys = data_ws->readY(0);
   const MantidVec &Es = data_ws->readE(0);
 
-  MantidVec::const_iterator peakIt = std::max_element(Ys.begin(), Ys.end());
+  auto peakIt = std::max_element(Ys.begin(), Ys.end());
   double bkg_val = *std::min_element(Ys.begin(), Ys.end());
   if (*peakIt == bkg_val) {
     throw std::invalid_argument("No peak in the range specified as minimal and "
@@ -668,9 +668,9 @@ void GetEi2::integrate(double &integral_val, double &integral_err,
   // MG: Note that this is integration of a point data set from libisis
   // @todo: Move to Kernel::VectorHelper and improve performance
 
-  MantidVec::const_iterator lowit = std::lower_bound(x.begin(), x.end(), xmin);
+  auto lowit = std::lower_bound(x.begin(), x.end(), xmin);
   MantidVec::difference_type ml = std::distance(x.begin(), lowit);
-  MantidVec::const_iterator highit = std::upper_bound(lowit, x.end(), xmax);
+  auto highit = std::upper_bound(lowit, x.end(), xmax);
   MantidVec::difference_type mu = std::distance(x.begin(), highit);
   if (mu > 0)
     --mu;

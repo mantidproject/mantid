@@ -38,8 +38,8 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
 
     // We require the same binning for the input workspace and the q resolution
     // workspace
-    MantidVec::const_iterator reqX = dataWS->readX(0).begin();
-    MantidVec::const_iterator qResX = qResolution->readX(0).begin();
+    auto reqX = dataWS->readX(0).begin();
+    auto qResX = qResolution->readX(0).begin();
     for (; reqX != dataWS->readX(0).end(); ++reqX, ++qResX) {
       if (*reqX != *qResX) {
         throw std::invalid_argument(
@@ -77,8 +77,8 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
       throw std::invalid_argument("The WavelengthAdj workspace's bins must "
                                   "match those of the detector bank workspace");
     }
-    MantidVec::const_iterator reqX = dataWS->readX(0).begin();
-    MantidVec::const_iterator testX = binAdj->readX(0).begin();
+    auto reqX = dataWS->readX(0).begin();
+    auto testX = binAdj->readX(0).begin();
     for (; reqX != dataWS->readX(0).end(); ++reqX, ++testX) {
       if (*reqX != *testX) {
         throw std::invalid_argument("The WavelengthAdj workspace must have "

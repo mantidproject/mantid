@@ -516,7 +516,7 @@ void FABADAMinimizer::finalize() {
     Y[i - 1] = pdf_y[i - 1] / (double(conv_length) * bin);
   }
 
-  std::vector<double>::iterator pos_MPchi2 =
+  auto pos_MPchi2 =
       std::max_element(pdf_y.begin(), pdf_y.end());
 
   if (pos_MPchi2 - pdf_y.begin() == 0) {
@@ -548,7 +548,7 @@ void FABADAMinimizer::finalize() {
     }
 
     // Calculate the most probable value, from the PDF.
-    std::vector<double>::iterator pos_MP =
+    auto pos_MP =
         std::max_element(pdf_y.begin(), pdf_y.end());
     double mostP = X[pos_MP - pdf_y.begin()] + (bin / 2.0);
     m_leastSquares->setParameter(j, mostP);

@@ -484,7 +484,7 @@ ICat3::ns1__advancedSearchDetails *
 CICatHelper::buildSearchQuery(const CatalogSearchParam &inputs) {
   // As this is a member variable we need to reset the search terms once
   // a new search is performed.
-  ICat3::ns1__advancedSearchDetails *advancedSearchDetails =
+  auto advancedSearchDetails =
       new ICat3::ns1__advancedSearchDetails;
 
   ns1__investigationInclude invesInclude =

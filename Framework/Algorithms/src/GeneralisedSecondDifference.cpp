@@ -112,10 +112,10 @@ void GeneralisedSecondDifference::exec() {
     MantidVec &outE = out->dataE(out_index);
 
     std::copy(refX.begin() + n_av, refX.end() - n_av, outX.begin());
-    MantidVec::const_iterator itInY = refY.begin();
-    MantidVec::iterator itOutY = outY.begin();
-    MantidVec::const_iterator itInE = refE.begin();
-    MantidVec::iterator itOutE = outE.begin();
+    auto itInY = refY.begin();
+    auto itOutY = outY.begin();
+    auto itInE = refE.begin();
+    auto itOutE = outE.begin();
     for (; itOutY != outY.end(); ++itOutY, ++itInY, ++itOutE, ++itInE) {
       // Calculate \sum_{j}Cij.Y(j)
       (*itOutY) = std::inner_product(itInY, itInY + nsteps, m_Cij.begin(), 0.0);

@@ -169,7 +169,7 @@ AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
     throw std::out_of_range(
         "AlgorithmHistory::getAlgorithmHistory() - Index out of range");
   }
-  AlgorithmHistories::const_iterator start = m_childHistories.begin();
+  auto start = m_childHistories.begin();
   std::advance(start, index);
   return *start;
 }
@@ -273,7 +273,7 @@ void AlgorithmHistory::saveNexus(::NeXus::File *file, int &algCount) const {
   file->writeData("data", algData.str());
 
   // child algorithms
-  AlgorithmHistories::const_iterator histIter = m_childHistories.begin();
+  auto histIter = m_childHistories.begin();
   for (; histIter != m_childHistories.end(); ++histIter) {
     (*histIter)->saveNexus(file, algCount);
   }

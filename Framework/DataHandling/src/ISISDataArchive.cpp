@@ -42,18 +42,18 @@ const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
 std::string
 ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
                                 const std::vector<std::string> &exts) const {
-  std::set<std::string>::const_iterator iter = filenames.begin();
+  auto iter = filenames.begin();
   for (; iter != filenames.end(); ++iter) {
     g_log.debug() << *iter << ")\n";
   }
-  std::vector<std::string>::const_iterator iter2 = exts.begin();
+  auto iter2 = exts.begin();
   for (; iter2 != exts.end(); ++iter2) {
     g_log.debug() << *iter2 << ")\n";
   }
 
-  std::vector<std::string>::const_iterator ext = exts.begin();
+  auto ext = exts.begin();
   for (; ext != exts.end(); ++ext) {
-    std::set<std::string>::const_iterator it = filenames.begin();
+    auto it = filenames.begin();
     for (; it != filenames.end(); ++it) {
       const std::string fullPath = getPath(*it + *ext);
       if (!fullPath.empty())

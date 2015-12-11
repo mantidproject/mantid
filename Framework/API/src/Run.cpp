@@ -398,8 +398,8 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
-  std::map<std::string, std::string>::iterator it = entries.begin();
-  std::map<std::string, std::string>::iterator it_end = entries.end();
+  auto it = entries.begin();
+  auto it_end = entries.end();
   for (; it != it_end; ++it) {
     // Get the name/class pair
     const std::pair<std::string, std::string> &name_class = *it;
@@ -508,8 +508,8 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
   // get pointers to all the properties on the right-handside and prepare to
   // loop through them
   const std::vector<Property *> inc = toAdd.getProperties();
-  std::vector<Property *>::const_iterator end = inc.end();
-  for (std::vector<Property *>::const_iterator it = inc.begin(); it != end;
+  auto end = inc.end();
+  for (auto it = inc.begin(); it != end;
        ++it) {
     const std::string rhs_name = (*it)->name();
     try {

@@ -248,7 +248,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
   *   @param scaleMap :: A map of integer detectorID and corresponding scaling
   * (in Y)
   */
-  std::map<int, Kernel::V3D>::iterator iter = posMap.begin();
+  auto iter = posMap.begin();
   Geometry::ParameterMap &pmap = WS->instrumentParameters();
   boost::shared_ptr<const Instrument> inst = WS->getInstrument();
   boost::shared_ptr<const IComponent> comp;
@@ -282,7 +282,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
         *det, pmap, iter->second, Geometry::ComponentHelper::Relative);
 
     // Set the "sca" instrument parameter
-    std::map<int, double>::iterator it = scaleMap.find(idet);
+    auto it = scaleMap.find(idet);
     if (it != scaleMap.end()) {
       scale = it->second;
       if (minScale > scale)

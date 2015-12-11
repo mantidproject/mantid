@@ -328,7 +328,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // Now we go (backwards) through the map
     // e.g. from highest density down to lowest density.
     typename std::multimap<double, boxPtr>::reverse_iterator it2;
-    typename std::multimap<double, boxPtr>::reverse_iterator it2_end =
+    auto it2_end =
         sortedBoxes.rend();
     for (it2 = sortedBoxes.rbegin(); it2 != it2_end; it2++) {
       signal_t density = it2->first;
@@ -342,7 +342,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       // Compare to all boxes already picked.
       bool badBox = false;
-      for (typename std::vector<boxPtr>::iterator it3 = peakBoxes.begin();
+      for (auto it3 = peakBoxes.begin();
            it3 != peakBoxes.end(); it3++) {
 
 #ifndef MDBOX_TRACK_CENTROID
@@ -388,7 +388,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     prog->resetNumSteps(numBoxesFound, 0.95, 1.0);
 
     // --- Convert the "boxes" to peaks ----
-    for (typename std::vector<boxPtr>::iterator it3 = peakBoxes.begin();
+    for (auto it3 = peakBoxes.begin();
          it3 != peakBoxes.end(); it3++) {
       // The center of the box = Q in the lab frame
       boxPtr box = *it3;
@@ -509,7 +509,7 @@ void FindPeaksMD::findPeaksHisto(
     // Now we go (backwards) through the map
     // e.g. from highest density down to lowest density.
     std::multimap<double, size_t>::reverse_iterator it2;
-    std::multimap<double, size_t>::reverse_iterator it2_end =
+    auto it2_end =
         sortedBoxes.rend();
     for (it2 = sortedBoxes.rbegin(); it2 != it2_end; ++it2) {
       signal_t density = it2->first;
@@ -519,7 +519,7 @@ void FindPeaksMD::findPeaksHisto(
 
       // Compare to all boxes already picked.
       bool badBox = false;
-      for (std::vector<size_t>::iterator it3 = peakBoxes.begin();
+      for (auto it3 = peakBoxes.begin();
            it3 != peakBoxes.end(); ++it3) {
         VMD otherCenter = ws->getCenter(*it3);
 
@@ -554,7 +554,7 @@ void FindPeaksMD::findPeaksHisto(
       }
     }
     // --- Convert the "boxes" to peaks ----
-    for (std::vector<size_t>::iterator it3 = peakBoxes.begin();
+    for (auto it3 = peakBoxes.begin();
          it3 != peakBoxes.end(); ++it3) {
       size_t index = *it3;
       // The center of the box = Q in the lab frame

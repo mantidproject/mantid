@@ -25,7 +25,7 @@ void FilterChannel::setProperty(const std::string &name,
   if (name.compare(0, 7, "channel") == 0) {
     StringTokenizer tokenizer(value, ",;", StringTokenizer::TOK_IGNORE_EMPTY |
                                                StringTokenizer::TOK_TRIM);
-    for (StringTokenizer::Iterator it = tokenizer.begin();
+    for (auto it = tokenizer.begin();
          it != tokenizer.end(); ++it) {
       addChannel(LoggingRegistry::defaultRegistry().channelForName(*it));
     }

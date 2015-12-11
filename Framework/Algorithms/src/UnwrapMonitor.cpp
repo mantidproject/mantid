@@ -370,8 +370,8 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
   }
   if (rangeBounds[0] != -1 && rangeBounds[1] > 0) {
     // Now append the lower range
-    MantidVec::const_iterator YStart = YIn.begin();
-    MantidVec::const_iterator EStart = EIn.begin();
+    auto YStart = YIn.begin();
+    auto EStart = EIn.begin();
     Y.insert(Y.end(), YStart + rangeBounds[0], YStart + rangeBounds[1]);
     E.insert(E.end(), EStart + rangeBounds[0], EStart + rangeBounds[1]);
     // Propagate masking, if necessary

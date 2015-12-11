@@ -136,9 +136,7 @@ Workspace2D_sptr Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist,
 Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
 
   Workspace2D_sptr outputWS = Create2DWorkspaceBinned(nHist, nBins);
-  NumericAxis *const newAxis = new NumericAxis(nHist);
-  outputWS->replaceAxis(1, newAxis);
-  newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
+  auto  boost::shared_ptr<Unit>(new Units::Degrees);
   for (int i = 0; i < nHist; ++i) {
     newAxis->setValue(i, i + 1);
   }
@@ -463,9 +461,7 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
 
   // Set the X axes
   MantidVec x = ws->readX(0);
-  NumericAxis *ax0 = new NumericAxis(x.size());
-  ax0->setUnit("dSpacing");
-  for (size_t i = 0; i < x.size(); i++)
+  auto i++)
     ax0->setValue(i, x[i]);
   ws->replaceAxis(0, ax0);
 
@@ -712,14 +708,7 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
   for (size_t g = 0; g < groups.size(); g++) {
     retVal->getOrAddEventList(g).clearDetectorIDs();
     std::vector<int> dets = groups[g];
-    for (std::vector<int>::iterator it = dets.begin(); it != dets.end(); ++it) {
-      for (int i = 0; i < numBins; i++)
-        retVal->getOrAddEventList(g) += TofEvent((i + 0.5) * binDelta, 1);
-      retVal->getOrAddEventList(g).addDetectorID(*it);
-    }
-  }
-
-  // Create the x-axis for histogramming.
+    for (autoing.
   MantidVecPtr x1;
   MantidVec &xRef = x1.access();
   double x0 = 0;
@@ -748,10 +737,7 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   retVal->initialize(numpixels, numbins, numbins - 1);
 
   // and X-axis for references:
-  NumericAxis *pAxis0 = new NumericAxis(numbins);
-
-  // Create the original X axis to histogram on.
-  // Create the x-axis for histogramming.
+  auto  the x-axis for histogramming.
   Kernel::cow_ptr<MantidVec> axis;
   MantidVec &xRef = axis.access();
   xRef.resize(numbins);
@@ -917,10 +903,7 @@ createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
 
   Mantid::API::MatrixWorkspace_sptr ws =
       CreateGroupedWorkspace2DWithRingsAndBoxes(rHist, 10, 0.1);
-  NumericAxis *pAxis0 = new NumericAxis(numBins);
-
-  for (size_t i = 0; i < numBins; i++) {
-    double dE = -1.0 + static_cast<double>(i) * 0.8;
+  auto 0 + static_cast<double>(i) * 0.8;
     pAxis0->setValue(i, dE);
   }
   pAxis0->setUnit("DeltaE");
@@ -991,9 +974,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
     }
   }
   // set axis, correspondent to the X-values
-  NumericAxis *pAxis0 = new NumericAxis(numBins);
-  MantidVec &E_transfer = ws->dataX(0);
-  for (size_t i = 0; i < numBins; i++) {
+  auto i < numBins; i++) {
     double E = 0.5 * (E_transfer[i] + E_transfer[i + 1]);
     pAxis0->setValue(i, E);
   }

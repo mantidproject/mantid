@@ -138,7 +138,7 @@ void SaveAscii2::exec() {
   }
   // Else if the separator drop down choice is not UserDefined then we use that.
   else if (choice != "UserDefined") {
-    std::map<std::string, std::string>::iterator it =
+    auto it =
         m_separatorIndex.find(choice);
     m_sep = it->second;
   }
@@ -233,7 +233,7 @@ void SaveAscii2::exec() {
     }
   } else {
     Progress progress(this, 0, 1, idx.size());
-    for (std::set<int>::const_iterator i = idx.begin(); i != idx.end(); ++i) {
+    for (auto i = idx.begin(); i != idx.end(); ++i) {
       writeSpectra(i, file);
       progress.report();
     }

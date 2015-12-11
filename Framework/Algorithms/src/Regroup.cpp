@@ -193,7 +193,7 @@ int Regroup::newAxis(const std::vector<double> &params,
   int isteps = ibounds - 1; // highest index in params array containing a step
 
   xcurr = params[0];
-  std::vector<double>::const_iterator iup =
+  auto iup =
       std::find_if(xold.begin(), xold.end(),
                    std::bind2nd(std::greater_equal<double>(), xcurr));
   if (iup != xold.end()) {

@@ -189,7 +189,7 @@ void MergeRuns::buildAdditionTables() {
         // Didn't find it. Try to use the LHS map.
 
         // First, we have to get the (single) detector ID of the RHS
-        std::set<detid_t>::iterator inDets_it = inDets.begin();
+        auto inDets_it = inDets.begin();
         detid_t rhs_detector_ID = *inDets_it;
 
         // Now we use the LHS map to find it. This only works if both the lhs

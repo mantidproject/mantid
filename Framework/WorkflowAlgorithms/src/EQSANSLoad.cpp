@@ -123,7 +123,7 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
 
   const std::vector<std::string> &searchPaths =
       Kernel::ConfigService::Instance().getDataSearchDirs();
-  std::vector<std::string>::const_iterator it = searchPaths.begin();
+  auto it = searchPaths.begin();
 
   int max_run_number = 0;
   std::string config_file = "";

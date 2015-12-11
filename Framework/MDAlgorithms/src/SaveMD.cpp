@@ -111,7 +111,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       oldFile.remove();
   }
 
-  Progress *prog = new Progress(this, 0.0, 0.05, 1);
+  auto prog = new Progress(this, 0.0, 0.05, 1);
   if (update) // workspace has its own file and ignores any changes to the
               // algorithm parameters
   {

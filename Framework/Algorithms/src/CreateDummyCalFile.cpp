@@ -213,7 +213,7 @@ void CreateDummyCalFile::saveGroupingFile(const std::string &filename,
         continue;
       std::istringstream istr(str);
       istr >> number >> udet >> offset >> select >> group;
-      instrcalmap::const_iterator it = instrcalib.find(udet);
+      auto it = instrcalib.find(udet);
       if (it == instrcalib.end()) // Not found, don't assign a group
         group = 0;
       else
@@ -223,7 +223,7 @@ void CreateDummyCalFile::saveGroupingFile(const std::string &filename,
     }
   } else //
   {
-    instrcalmap::const_iterator it = instrcalib.begin();
+    auto it = instrcalib.begin();
     for (; it != instrcalib.end(); ++it)
       writeCalEntry(outfile, (*it).first, ((*it).second).first, 0.0, 1,
                     ((*it).second).second);

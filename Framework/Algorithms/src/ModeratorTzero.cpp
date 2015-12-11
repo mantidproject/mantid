@@ -348,7 +348,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
             double tof;
             // fix the histogram bins
             MantidVec &x = evlist.dataX();
-            for (MantidVec::iterator iter = x.begin(); iter != x.end();
+            for (auto iter = x.begin(); iter != x.end();
                  ++iter) {
               tof = *iter;
               if (tof < m_t1min + t2)
@@ -375,7 +375,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           double tof;
           // Apply t0 correction to histogram bins
           MantidVec &x = evlist.dataX();
-          for (MantidVec::iterator iter = x.begin(); iter != x.end(); ++iter) {
+          for (auto iter = x.begin(); iter != x.end(); ++iter) {
             tof = *iter;
             if (tof < m_t1min * (L1 + L2) / L1)
               tof -= min_t0_next;
@@ -404,7 +404,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
         else if (emode == "Direct") {
           // fix the histogram bins
           MantidVec &x = evlist.dataX();
-          for (MantidVec::iterator iter = x.begin(); iter != x.end(); ++iter) {
+          for (auto iter = x.begin(); iter != x.end(); ++iter) {
             *iter -= t0_direct;
           }
 

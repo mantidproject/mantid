@@ -149,7 +149,7 @@ void AlgorithmManagerImpl::setMaxAlgorithms(int n) {
  */
 IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
   Mutex::ScopedLock _lock(this->m_managedMutex);
-  for (std::deque<IAlgorithm_sptr>::const_iterator a = m_managed_algs.begin();
+  for (auto a = m_managed_algs.begin();
        a != m_managed_algs.end(); ++a) {
     if ((**a).getAlgorithmID() == id)
       return *a;

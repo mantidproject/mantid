@@ -296,8 +296,8 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
     m_container->interceptSurfaces(beforeScatter);
   }
   // Attenuation factor is product of factor for each material
-  Track::LType::const_iterator cend = beforeScatter.end();
-  for (Track::LType::const_iterator citr = beforeScatter.begin(); citr != cend;
+  auto cend = beforeScatter.end();
+  for (auto citr = beforeScatter.begin(); citr != cend;
        ++citr) {
     length = citr->distInsideObject;
     factor *= attenuation(length, citr->object->material(), lambda);
@@ -312,7 +312,7 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
   }
   // Attenuation factor is product of factor for each material
   cend = afterScatter.end();
-  for (Track::LType::const_iterator citr = afterScatter.begin(); citr != cend;
+  for (auto citr = afterScatter.begin(); citr != cend;
        ++citr) {
     length = citr->distInsideObject;
     factor *= attenuation(length, citr->object->material(), lambda);

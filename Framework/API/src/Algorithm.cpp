@@ -206,7 +206,7 @@ const std::vector<std::string> Algorithm::categories() const {
   Poco::StringTokenizer tokenizer(category(), categorySeparator(),
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
+  auto h = tokenizer.begin();
 
   for (; h != tokenizer.end(); ++h) {
     res.push_back(*h);

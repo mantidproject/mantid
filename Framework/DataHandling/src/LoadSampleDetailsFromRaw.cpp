@@ -47,7 +47,7 @@ void LoadSampleDetailsFromRaw::exec() {
     throw Exception::FileError("Unable to open File:", filename);
   }
 
-  ISISRAW2 *isis_raw = new ISISRAW2;
+  auto isis_raw = new ISISRAW2;
   isis_raw->ioRAW(file, true);
   fclose(file);
 

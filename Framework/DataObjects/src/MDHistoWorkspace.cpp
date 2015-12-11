@@ -321,7 +321,7 @@ coord_t *MDHistoWorkspace::getVertexesArray(size_t linearIndex,
       numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
 
   // The output vertexes coordinates
-  coord_t *out = new coord_t[numDimensions * numVertices];
+  auto out = new coord_t[numDimensions * numVertices];
   for (size_t i = 0; i < numVertices; ++i) {
     size_t outIndex = i * numDimensions;
     // Offset the 0th box by the position of this linear index, in each

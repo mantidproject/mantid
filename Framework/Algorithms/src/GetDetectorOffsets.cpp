@@ -187,7 +187,7 @@ void GetDetectorOffsets::exec() {
 double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   // Find point of peak centre
   const MantidVec &yValues = inputW->readY(s);
-  MantidVec::const_iterator it =
+  auto it =
       std::max_element(yValues.begin(), yValues.end());
   const double peakHeight = *it;
   const double peakLoc = inputW->readX(s)[it - yValues.begin()];
@@ -255,7 +255,7 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
   const double sigma(10.0);
   peak->setFwhm(2.0 * std::sqrt(2.0 * std::log(2.0)) * sigma);
 
-  CompositeFunction *fitFunc =
+  auto fitFunc =
       new CompositeFunction(); // Takes ownership of the functions
   fitFunc->addFunction(background);
   fitFunc->addFunction(peak);

@@ -72,12 +72,12 @@ void CrossCorrelate::exec() {
 
   // Now check if the range between x_min and x_max is valid
   const MantidVec &referenceX = inputWS->readX(index_ref);
-  MantidVec::const_iterator minIt =
+  auto minIt =
       std::find_if(referenceX.begin(), referenceX.end(),
                    std::bind2nd(std::greater<double>(), xmin));
   if (minIt == referenceX.end())
     throw std::runtime_error("No daWorkspaceIndexMaxta above XMin");
-  MantidVec::const_iterator maxIt = std::find_if(
+  auto maxIt = std::find_if(
       minIt, referenceX.end(), std::bind2nd(std::greater<double>(), xmax));
   if (minIt == maxIt)
     throw std::runtime_error("Range is not valid");
@@ -147,8 +147,8 @@ void CrossCorrelate::exec() {
                                      VectorHelper::SumSquares<double>());
   refMean /= static_cast<double>(nY);
   refMeanE2 /= static_cast<double>(nY * nY);
-  std::vector<double>::iterator itY = refY.begin();
-  std::vector<double>::iterator itE = refE.begin();
+  auto itY = refY.begin();
+  auto itE = refE.begin();
 
   double refVar = 0.0, refVarE = 0.0;
   for (; itY != refY.end(); ++itY, ++itE) {

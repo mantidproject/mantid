@@ -91,7 +91,7 @@ void AverageLogData::exec() {
   pctime.push_back(EMPTY_DBL() * 1.1); // larger than stime
   pcvalue.push_back(0.0);
 
-  std::vector<double>::iterator istime = stime.begin(),
+  auto istime = stime.begin(),
                                 isvalue = svalue.begin(),
                                 ipctime = pctime.begin(),
                                 ipcvalue = pcvalue.begin();

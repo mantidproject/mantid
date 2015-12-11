@@ -46,7 +46,7 @@ std::string CompositeImplicitFunction::toXMLString() const {
   functionElement->appendChild(parameterListElement);
 
   std::string functionXML;
-  for (FunctionIterator it = m_Functions.begin(); it != m_Functions.end();
+  for (auto it = m_Functions.begin(); it != m_Functions.end();
        ++it) {
     functionXML += (*it)->toXMLString();
   }

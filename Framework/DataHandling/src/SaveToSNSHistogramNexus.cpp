@@ -274,7 +274,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
   double saveTime = 0;
 
   // Make a buffer of floats will all the counts in that bank.
-  float *data =
+  auto data =
       new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];
 
   // Only allocate an array for errors if it is needed

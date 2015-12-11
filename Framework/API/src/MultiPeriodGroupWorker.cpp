@@ -76,7 +76,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
 
     WorkspaceNameType workspaces =
         sourceAlg->getProperty(this->m_workspacePropertyName);
-    WorkspaceNameType::iterator it = workspaces.begin();
+    auto it = workspaces.begin();
 
     // Inspect all the input workspaces in the ArrayProperty input.
     while (it != workspaces.end()) {
@@ -93,7 +93,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
     WorkspaceVector outWorkspaces;
     sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
     UNUSED_ARG(outWorkspaces);
-    WorkspaceVector::iterator it = inWorkspaces.begin();
+    auto it = inWorkspaces.begin();
     while (it != inWorkspaces.end()) {
       tryAddInputWorkspaceToInputGroups(*it, vecWorkspaceGroups);
       ++it;

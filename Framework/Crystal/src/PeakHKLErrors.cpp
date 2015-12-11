@@ -118,7 +118,7 @@ void PeakHKLErrors::cLone(
   if (component->isParametrized()) {
 
     std::set<std::string> nms = pmapSv->names(component.get());
-    for (std::set<std::string>::iterator it = nms.begin(); it != nms.end();
+    for (auto it = nms.begin(); it != nms.end();
          ++it) {
 
       if (pmapSv->contains(component.get(), *it, "double")) {

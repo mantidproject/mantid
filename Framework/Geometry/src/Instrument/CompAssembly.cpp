@@ -65,7 +65,7 @@ CompAssembly::~CompAssembly() {
   if (m_cachedBoundingBox)
     delete m_cachedBoundingBox;
   // Iterate over pointers in m_children, deleting them
-  for (comp_it it = m_children.begin(); it != m_children.end(); ++it) {
+  for (auto it = m_children.begin(); it != m_children.end(); ++it) {
     delete *it;
   }
   m_children.clear();
@@ -150,7 +150,7 @@ int CompAssembly::remove(IComponent *comp) {
         "CompAssembly::remove() called for a parameterized CompAssembly.");
 
   // Look for the passed in component in the list of children
-  std::vector<IComponent *>::iterator it =
+  auto it =
       std::find(m_children.begin(), m_children.end(), comp);
   if (it != m_children.end()) {
     // If it's found, remove it from the list and then delete it
@@ -372,7 +372,7 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
     if (!m_cachedBoundingBox) {
       m_cachedBoundingBox = new BoundingBox();
       // Loop over the children and define a box large enough for all of them
-      for (const_comp_it it = m_children.begin(); it != m_children.end();
+      for (auto it = m_children.begin(); it != m_children.end();
            ++it) {
         BoundingBox compBox;
         if (*it) {

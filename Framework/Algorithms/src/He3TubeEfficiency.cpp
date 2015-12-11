@@ -169,12 +169,12 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex) {
   const Mantid::MantidVec yValues = this->inputWS->readY(spectraIndex);
   const Mantid::MantidVec eValues = this->inputWS->readE(spectraIndex);
 
-  std::vector<double>::const_iterator yinItr = yValues.begin();
-  std::vector<double>::const_iterator einItr = eValues.begin();
-  Mantid::MantidVec::const_iterator xItr =
+  auto yinItr = yValues.begin();
+  auto einItr = eValues.begin();
+  auto xItr =
       this->inputWS->readX(spectraIndex).begin();
-  Mantid::MantidVec::iterator youtItr = yout.begin();
-  Mantid::MantidVec::iterator eoutItr = eout.begin();
+  auto youtItr = yout.begin();
+  auto eoutItr = eout.begin();
 
   for (; youtItr != yout.end(); ++youtItr, ++eoutItr) {
     const double wavelength = (*xItr + *(xItr + 1)) / 2.0;

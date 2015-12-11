@@ -519,7 +519,7 @@ void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
 
     // Allow multiple detectors per workspace index, or,
     // If only one is allowed, then this has thrown already
-    for (std::set<detid_t>::const_iterator it = detList.begin();
+    for (auto it = detList.begin();
          it != detList.end(); ++it) {
       int index = *it + offset;
       if (index < 0 || index >= outSize) {
@@ -550,7 +550,7 @@ void MatrixWorkspace::getIndicesFromSpectra(
   indexList.clear();
   indexList.reserve(this->getNumberHistograms());
 
-  std::vector<specid_t>::const_iterator iter = spectraList.begin();
+  auto iter = spectraList.begin();
   while (iter != spectraList.end()) {
     for (size_t i = 0; i < this->getNumberHistograms(); ++i) {
       if (this->getSpectrum(i)->getSpectrumNo() == *iter) {
@@ -625,8 +625,8 @@ void MatrixWorkspace::getIndicesFromDetectorIDs(
 void MatrixWorkspace::getSpectraFromDetectorIDs(
     const std::vector<detid_t> &detIdList,
     std::vector<specid_t> &spectraList) const {
-  std::vector<detid_t>::const_iterator it_start = detIdList.begin();
-  std::vector<detid_t>::const_iterator it_end = detIdList.end();
+  auto it_start = detIdList.begin();
+  auto it_end = detIdList.end();
 
   spectraList.clear();
 
@@ -1016,7 +1016,7 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
   spec->clearData();
 
   const std::set<detid_t> dets = spec->getDetectorIDs();
-  for (std::set<detid_t>::const_iterator iter = dets.begin();
+  for (auto iter = dets.begin();
        iter != dets.end(); ++iter) {
     try {
       if (const Geometry::Detector *det =
@@ -1085,7 +1085,7 @@ void MatrixWorkspace::flagMasked(const size_t &spectrumIndex,
     // First get a reference to the list for this spectrum (or create a new
     // list)
     MaskList &binList = m_masks[spectrumIndex];
-    MaskList::iterator it = binList.find(binIndex);
+    auto it = binList.find(binIndex);
     if (it != binList.end()) {
       binList.erase(it);
     }
@@ -1113,7 +1113,7 @@ bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {
 */
 const MatrixWorkspace::MaskList &
 MatrixWorkspace::maskedBins(const size_t &workspaceIndex) const {
-  std::map<int64_t, MaskList>::const_iterator it = m_masks.find(workspaceIndex);
+  auto it = m_masks.find(workspaceIndex);
   // Throw if there are no masked bins for this spectrum. The caller should
   // check first using hasMaskedBins!
   if (it == m_masks.end()) {
@@ -1238,7 +1238,7 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
     throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower than "
                             "lowest in current range.");
   }
-  MantidVec::const_iterator lowit =
+  auto lowit =
       std::lower_bound(xValues.begin(), xValues.end(), xValue);
   if (lowit == xValues.end()) {
     throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater "
@@ -1438,11 +1438,11 @@ private:
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimension(size_t index) const {
   if (index == 0) {
-    MWXDimension *dimension = new MWXDimension(this, xDimensionId);
+    auto dimension = new MWXDimension(this, xDimensionId);
     return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
   } else if (index == 1) {
     Axis *yAxis = this->getAxis(1);
-    MWDimension *dimension = new MWDimension(yAxis, yDimensionId);
+    auto dimension = new MWDimension(yAxis, yDimensionId);
     return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
   } else
     throw std::invalid_argument("MatrixWorkspace only has 2 dimensions.");
@@ -1567,7 +1567,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
 
   if (wi < nhist) {
     const MantidVec &X = this->readX(wi);
-    MantidVec::const_iterator it = std::lower_bound(X.begin(), X.end(), x);
+    auto it = std::lower_bound(X.begin(), X.end(), x);
     if (it == X.end()) {
       // Out of range
       return std::numeric_limits<double>::quiet_NaN();

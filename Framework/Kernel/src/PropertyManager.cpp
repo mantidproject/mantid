@@ -41,7 +41,7 @@ PropertyManager::PropertyManager(const PropertyManager &other)
 PropertyManager &PropertyManager::operator=(const PropertyManager &other) {
   // We need to do a deep copy here
   if (this != &other) {
-    for (PropertyMap::iterator it = m_properties.begin();
+    for (auto it = m_properties.begin();
          it != m_properties.end(); ++it) {
       delete it->second;
     }
@@ -403,7 +403,7 @@ bool PropertyManager::existsProperty(const std::string &name) const {
  */
 bool PropertyManager::validateProperties() const {
   bool allValid = true;
-  for (PropertyMap::const_iterator it = m_properties.begin();
+  for (auto it = m_properties.begin();
        it != m_properties.end(); ++it) {
     // check for errors in each property
     std::string error = it->second->isValid();
@@ -483,7 +483,7 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
  */
 Property *PropertyManager::getPointerToProperty(const std::string &name) const {
   const std::string key = createKey(name);
-  PropertyMap::const_iterator it = m_properties.find(key);
+  auto it = m_properties.find(key);
   if (it != m_properties.end()) {
     return it->second;
   }
@@ -498,7 +498,7 @@ Property *PropertyManager::getPointerToProperty(const std::string &name) const {
 Property *
 PropertyManager::getPointerToPropertyOrNull(const std::string &name) const {
   const std::string key = createKey(name);
-  PropertyMap::const_iterator it = m_properties.find(key);
+  auto it = m_properties.find(key);
   if (it != m_properties.end()) {
     return it->second;
   }
@@ -577,7 +577,7 @@ void PropertyManager::removeProperty(const std::string &name,
  */
 void PropertyManager::clear() {
   m_orderedProperties.clear();
-  for (PropertyMap::iterator it = m_properties.begin();
+  for (auto it = m_properties.begin();
        it != m_properties.end(); ++it) {
     delete it->second;
   }

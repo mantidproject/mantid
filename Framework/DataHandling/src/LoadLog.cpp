@@ -256,7 +256,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
     isNumeric = !istr.fail();
 
     if (isNumeric) {
-      std::map<std::string, Kernel::TimeSeriesProperty<double> *>::iterator
+      auto
           ditr = dMap.find(propname);
       if (ditr != dMap.end()) {
         Kernel::TimeSeriesProperty<double> *prop = ditr->second;
@@ -268,7 +268,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
         dMap.insert(dpair(propname, logd));
       }
     } else {
-      std::map<std::string, Kernel::TimeSeriesProperty<std::string> *>::iterator
+      auto
           sitr = sMap.find(propname);
       if (sitr != sMap.end()) {
         Kernel::TimeSeriesProperty<std::string> *prop = sitr->second;
@@ -356,7 +356,7 @@ bool LoadLog::LoadSNSText() {
   // Ok, create all the logs
   std::vector<TimeSeriesProperty<double> *> props;
   for (size_t i = 0; i < numCols; i++) {
-    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>(names[i]);
+    auto p = new TimeSeriesProperty<double>(names[i]);
     if (units.size() == numCols)
       p->setUnits(units[i]);
     props.push_back(p);

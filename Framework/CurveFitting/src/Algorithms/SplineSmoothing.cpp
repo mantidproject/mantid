@@ -177,7 +177,7 @@ SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws,
       WorkspaceFactory::Instance().create(inws, size);
 
   // create labels for output workspace
-  API::TextAxis *tAxis = new API::TextAxis(size);
+  auto tAxis = new API::TextAxis(size);
   for (int i = 0; i < size; ++i) {
     std::string index = boost::lexical_cast<std::string>(i);
     tAxis->setLabel(i, "Y" + index);
@@ -362,7 +362,7 @@ void SplineSmoothing::selectSmoothingPoints(
     m_cspline->function1D(ysmooth.get(), xs.data(), xSize);
 
     // iterate over smoothing points
-    std::set<int>::const_iterator iter = smoothPts.begin();
+    auto iter = smoothPts.begin();
     int start = *iter;
 
     for (++iter; iter != smoothPts.end(); ++iter) {

@@ -228,7 +228,7 @@ void SaveNexusProcessed::doExec(Workspace_sptr inputWorkspace,
   nexusFile->openNexusWrite(m_filename, entryNumber);
 
   // Equivalent C++ API handle
-  ::NeXus::File *cppFile = new ::NeXus::File(nexusFile->fileID);
+  auto cppFile = new ::NeXus::File(nexusFile->fileID);
 
   prog_init.reportIncrement(1, "Opening file");
   if (nexusFile->writeNexusProcessedHeader(m_title, wsName) != 0)

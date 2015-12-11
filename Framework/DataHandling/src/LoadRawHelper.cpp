@@ -475,7 +475,7 @@ bool LoadRawHelper::isAscii(FILE *file) const {
 std::vector<boost::shared_ptr<MantidVec>>
 LoadRawHelper::getTimeChannels(const int64_t &regimes,
                                const int64_t &lengthIn) {
-  float *const timeChannels = new float[lengthIn];
+  auto const timeChannels = new float[lengthIn];
   isisRaw->getTimeChannels(timeChannels, static_cast<int>(lengthIn));
 
   std::vector<boost::shared_ptr<MantidVec>> timeChannelsVec;
@@ -498,7 +498,7 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
     // In this case, also need to populate the map of spectrum-regime
     // correspondence
     const int64_t ndet = static_cast<int64_t>(isisRaw->i_det);
-    std::map<specid_t, specid_t>::iterator hint = m_specTimeRegimes.begin();
+    auto hint = m_specTimeRegimes.begin();
     for (int64_t j = 0; j < ndet; ++j) {
       // No checking for consistency here - that all detectors for given
       // spectrum
@@ -959,7 +959,7 @@ specid_t LoadRawHelper::calculateWorkspaceSize() {
 
     if (m_list) {
       if (m_interval) {
-        for (std::vector<specid_t>::iterator it = m_spec_list.begin();
+        for (auto it = m_spec_list.begin();
              it != m_spec_list.end();)
           if (*it >= m_spec_min && *it < m_spec_max) {
             it = m_spec_list.erase(it);

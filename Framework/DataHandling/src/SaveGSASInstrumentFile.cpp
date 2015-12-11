@@ -145,7 +145,7 @@ bool ChopperConfiguration::hasBank(unsigned int bankid) const {
 double ChopperConfiguration::getParameter(unsigned int bankid,
                                           const string &paramname) const {
   // Obtain index for the bank
-  map<unsigned int, size_t>::const_iterator biter =
+  auto biter =
       m_bankIDIndexMap.find(bankid);
   if (biter == m_bankIDIndexMap.end()) {
     stringstream errss;
@@ -187,7 +187,7 @@ double ChopperConfiguration::getParameter(unsigned int bankid,
   */
 void ChopperConfiguration::setParameter(unsigned int bankid,
                                         const string &paramname, double value) {
-  map<unsigned, size_t>::iterator biter = m_bankIDIndexMap.find(bankid);
+  auto biter = m_bankIDIndexMap.find(bankid);
 
   if (biter == m_bankIDIndexMap.end()) {
     stringstream errss;
@@ -369,7 +369,7 @@ void SaveGSASInstrumentFile::exec() {
   // Deal with a default
   if (m_vecBankID2File.empty()) {
     // Default is to export all banks
-    for (map<unsigned int, map<string, double>>::iterator miter =
+    for (auto miter =
              bankprofileparammap.begin();
          miter != bankprofileparammap.end(); ++miter) {
       unsigned int bankid = miter->first;
@@ -765,7 +765,7 @@ void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
     const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
     unsigned int bankid) {
   // Locate the profile map
-  map<unsigned int, map<string, double>>::const_iterator biter =
+  auto biter =
       bankprofilemap.find(bankid);
   if (biter == bankprofilemap.end())
     throw runtime_error("Bank ID cannot be found in bank-profile-map-map. 001");
@@ -869,7 +869,7 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
     const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
     unsigned int bankid, const std::string &prmfilename) {
   // Get access to the profile map
-  map<unsigned int, map<string, double>>::const_iterator biter =
+  auto biter =
       bankprofilemap.find(bankid);
   if (biter == bankprofilemap.end())
     throw runtime_error("Bank does not exist in bank-profile-map. 002");
@@ -1079,12 +1079,12 @@ SaveGSASInstrumentFile::getValueFromMap(const map<string, double> &profilemap,
   */
 double SaveGSASInstrumentFile::getProfileParameterValue(
     const map<string, double> &profilemap, const string &paramname) {
-  map<string, double>::const_iterator piter = profilemap.find(paramname);
+  auto piter = profilemap.find(paramname);
   if (piter == profilemap.end()) {
     stringstream errss;
     errss << "Profile map does not contain parameter " << paramname
           << ". Available parameters are ";
-    for (map<string, double>::const_iterator piter = profilemap.begin();
+    for (auto piter = profilemap.begin();
          piter != profilemap.end(); ++piter) {
       errss << piter->first << ", ";
     }

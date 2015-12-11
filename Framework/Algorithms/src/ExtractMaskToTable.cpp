@@ -270,7 +270,7 @@ void ExtractMaskToTable::extractMaskFromMaskWorkspace(
           "Unable to get spectrum reference from mask workspace.");
 
     const set<detid_t> detidset = spec->getDetectorIDs();
-    for (set<detid_t>::const_iterator sit = detidset.begin();
+    for (auto sit = detidset.begin();
          sit != detidset.end(); ++sit) {
       detid_t tmpdetid = *sit;
       maskeddetids.push_back(tmpdetid);

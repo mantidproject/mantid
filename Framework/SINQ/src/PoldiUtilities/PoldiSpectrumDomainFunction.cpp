@@ -271,7 +271,7 @@ std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(
   const std::vector<double> &chopperSlitTimes = chopper->slitTimes();
   std::vector<double> offsets;
   offsets.reserve(chopperSlitTimes.size());
-  for (std::vector<double>::const_iterator time = chopperSlitTimes.begin();
+  for (auto time = chopperSlitTimes.begin();
        time != chopperSlitTimes.end(); ++time) {
     offsets.push_back(*time + chopper->zeroOffset());
   }

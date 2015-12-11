@@ -76,7 +76,7 @@ void SaveReflTBL::exec() {
   }
 
   typedef std::map<int, std::vector<size_t>>::iterator map_it_type;
-  for (map_it_type iterator = m_stichgroups.begin();
+  for (auto iterator = m_stichgroups.begin();
        iterator != m_stichgroups.end(); ++iterator) {
     std::vector<size_t> &rowNos = iterator->second;
     size_t i = 0;
@@ -105,7 +105,7 @@ void SaveReflTBL::exec() {
   // now do the same for the ungrouped
 
   typedef std::vector<size_t>::iterator vec_it_type;
-  for (vec_it_type iterator = m_nogroup.begin(); iterator != m_nogroup.end();
+  for (auto iterator = m_nogroup.begin(); iterator != m_nogroup.end();
        ++iterator) {
     TableRow row = ws->getRow(*iterator);
     for (int j = 0; j < 5; ++j) {

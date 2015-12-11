@@ -71,7 +71,7 @@ void Expression::add_operators(const std::vector<std::string> &ops) {
     char j = 0;
     tokenizer tkz(m_operators->binary[i], " ",
                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-    for (tokenizer::Iterator it = tkz.begin(); it != tkz.end(); it++) {
+    for (auto it = tkz.begin(); it != tkz.end(); it++) {
       m_operators->precedence[*it] = i + 1;
       m_operators->op_number[*it] = j++;
     }
@@ -90,7 +90,7 @@ void Expression::add_operators(const std::vector<std::string> &ops) {
 
 void Expression::add_unary(const std::set<std::string> &ops) {
   m_operators->unary = ops;
-  for (std::set<std::string>::const_iterator it = ops.begin(); it != ops.end();
+  for (auto it = ops.begin(); it != ops.end();
        ++it) {
     for (std::string::const_iterator c = it->begin(); c != it->end(); ++c) {
       m_operators->symbols.insert(*c);
@@ -499,7 +499,7 @@ std::set<std::string> Expression::getVariables() const {
       out.insert(s);
     }
   } else {
-    for (iterator e = begin(); e != end(); ++e) {
+    for (auto e = begin(); e != end(); ++e) {
       if (e->isFunct()) {
         std::set<std::string> tout = e->getVariables();
         out.insert(tout.begin(), tout.end());
@@ -521,7 +521,7 @@ void Expression::renameAll(const std::string &oldName,
   if (!isFunct() && name() == oldName) {
     rename(newName);
   } else {
-    std::vector<Expression>::iterator e = m_terms.begin();
+    auto e = m_terms.begin();
     for (; e != m_terms.end(); ++e) {
       e->renameAll(oldName, newName);
     }

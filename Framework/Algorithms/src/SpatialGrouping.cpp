@@ -82,7 +82,7 @@ void SpatialGrouping::exec() {
 
   Mantid::API::Progress prog(this, 0.0, 1.0, m_detectors.size());
 
-  for (std::map<specid_t, Geometry::IDetector_const_sptr>::iterator detIt =
+  for (auto detIt =
            m_detectors.begin();
        detIt != m_detectors.end(); ++detIt) {
     prog.report();
@@ -101,7 +101,7 @@ void SpatialGrouping::exec() {
     }
 
     // Or detectors already flagged as included in a group
-    std::set<specid_t>::iterator inclIt = m_included.find(specNo);
+    auto inclIt = m_included.find(specNo);
     if (inclIt != m_included.end()) {
       continue;
     }
@@ -176,7 +176,7 @@ void SpatialGrouping::exec() {
           inputWorkspace->getIndexFromSpectrumNumber((*grpIt)[i]);
       const std::set<detid_t> &detIds =
           inputWorkspace->getSpectrum(workspaceIndex)->getDetectorIDs();
-      for (std::set<detid_t>::const_iterator it = detIds.begin();
+      for (auto it = detIds.begin();
            it != detIds.end(); ++it) {
         xml << "," << (*it);
       }
@@ -215,12 +215,12 @@ bool SpatialGrouping::expandNet(
   if (incoming == 0) {
     potentials = inputWorkspace->getNeighbours(det.get());
   } else {
-    for (std::map<specid_t, Mantid::Kernel::V3D>::iterator nrsIt =
+    for (auto nrsIt =
              nearest.begin();
          nrsIt != nearest.end(); ++nrsIt) {
       std::map<specid_t, Mantid::Kernel::V3D> results;
       results = inputWorkspace->getNeighbours(m_detectors[nrsIt->first].get());
-      for (std::map<specid_t, Mantid::Kernel::V3D>::iterator resIt =
+      for (auto resIt =
                results.begin();
            resIt != results.end(); ++resIt) {
         potentials[resIt->first] = resIt->second;
@@ -228,7 +228,7 @@ bool SpatialGrouping::expandNet(
     }
   }
 
-  for (std::map<specid_t, Mantid::Kernel::V3D>::iterator potIt =
+  for (auto potIt =
            potentials.begin();
        potIt != potentials.end(); ++potIt) {
     // We do not want to include the detector in it's own list of nearest
@@ -239,7 +239,7 @@ bool SpatialGrouping::expandNet(
 
     // Or detectors that are already in the nearest list passed into this
     // function
-    std::map<detid_t, Mantid::Kernel::V3D>::iterator nrsIt =
+    auto nrsIt =
         nearest.find(potIt->first);
     if (nrsIt != nearest.end()) {
       continue;
@@ -247,7 +247,7 @@ bool SpatialGrouping::expandNet(
 
     // We should not include detectors already included in a group (or monitors
     // for that matter)
-    std::set<specid_t>::iterator inclIt = m_included.find(potIt->first);
+    auto inclIt = m_included.find(potIt->first);
     if (inclIt != m_included.end()) {
       continue;
     }

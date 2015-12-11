@@ -574,7 +574,7 @@ void LoadEventPreNexus2::processImbedLogs() {
 void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
                                            size_t mindex) {
   // Create TimeSeriesProperty
-  TimeSeriesProperty<double> *property =
+  auto property =
       new TimeSeriesProperty<double>(logtitle);
 
   // Add entries
@@ -730,7 +730,7 @@ void LoadEventPreNexus2::procEvents(
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (std::vector<int64_t>::iterator it = spectra_list.begin();
+  for (auto it = spectra_list.begin();
        it != spectra_list.end(); it++)
     spectraLoadMap[*it] = true;
 
@@ -1166,7 +1166,7 @@ void LoadEventPreNexus2::procEventsLinear(
 
       // Create class map entry if not there
       size_t mindex = 0;
-      std::map<PixelType, size_t>::iterator git =
+      auto git =
           this->wrongdetidmap.find(tmpid);
       if (git == this->wrongdetidmap.end()) {
         // create entry
@@ -1184,7 +1184,7 @@ void LoadEventPreNexus2::procEventsLinear(
       }
 
       // 2. Find local
-      std::map<PixelType, size_t>::iterator lit = local_pidindexmap.find(tmpid);
+      auto lit = local_pidindexmap.find(tmpid);
       size_t localindex = lit->second;
 
       for (size_t iv = 0; iv < local_pulsetimes[localindex].size(); iv++) {

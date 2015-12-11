@@ -193,7 +193,7 @@ double DiffractionEventCalibrateDetectors::intensity(
 
   // Find point of peak centre
   const MantidVec &yValues = outputW->readY(0);
-  MantidVec::const_iterator it =
+  auto it =
       std::max_element(yValues.begin(), yValues.end());
   double peakHeight = *it;
   if (peakHeight == 0)

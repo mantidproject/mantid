@@ -34,7 +34,7 @@ namespace {
  */
 bool isSingleFile(const std::vector<std::vector<std::string>> &fileNames) {
   if (fileNames.size() == 1) {
-    std::vector<std::vector<std::string>>::const_iterator first =
+    auto first =
         fileNames.begin();
     if (first->size() == 1)
       return true;
@@ -386,7 +386,7 @@ void Load::loadMultipleFiles() {
   std::transform(allFilenames.begin(), allFilenames.end(), wsNames.begin(),
                  generateWsNameFromFileNames);
 
-  std::vector<std::vector<std::string>>::const_iterator filenames =
+  auto filenames =
       allFilenames.begin();
   std::vector<std::string>::const_iterator wsName = wsNames.begin();
   assert(allFilenames.size() == wsNames.size());
@@ -398,7 +398,7 @@ void Load::loadMultipleFiles() {
 
   // Cycle through the filenames and wsNames.
   for (; filenames != allFilenames.end(); ++filenames, ++wsName) {
-    std::vector<std::string>::const_iterator filename = filenames->begin();
+    auto filename = filenames->begin();
     Workspace_sptr sumWS = loadFileToWs(*filename, *wsName);
 
     ++filename;
@@ -648,7 +648,7 @@ API::Workspace_sptr Load::loadFileToWs(const std::string &fileName,
   const std::vector<Kernel::Property *> &props = getProperties();
 
   // Loop through and set the properties on the Child Algorithm
-  std::vector<Kernel::Property *>::const_iterator prop = props.begin();
+  auto prop = props.begin();
   for (; prop != props.end(); ++prop) {
     const std::string &propName = (*prop)->name();
 

@@ -239,7 +239,7 @@ void MaskBins::findIndices(const MantidVec &X,
   startBin = std::upper_bound(X.begin(), X.end(), m_startX) - X.begin();
   if (startBin != 0)
     --startBin;
-  MantidVec::const_iterator last = std::lower_bound(X.begin(), X.end(), m_endX);
+  auto last = std::lower_bound(X.begin(), X.end(), m_endX);
   if (last == X.end())
     --last;
   endBin = last - X.begin();

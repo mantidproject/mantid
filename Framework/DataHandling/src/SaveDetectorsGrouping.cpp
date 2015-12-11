@@ -91,7 +91,7 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
     int groupid = static_cast<int>(mGroupWS->dataY(iws)[0]);
 
     // b) Exist? Yes --> get hanlder on vector.  No --> create vector and
-    std::map<int, std::vector<detid_t>>::iterator it =
+    auto it =
         groupwkspmap.find(groupid);
     if (it == groupwkspmap.end()) {
       std::vector<detid_t> tempvector;
@@ -120,7 +120,7 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
       throw;
     }
     detid_t detid = 0;
-    for (std::set<detid_t>::iterator it = detids.begin(); it != detids.end();
+    for (auto it = detids.begin(); it != detids.end();
          ++it) {
       detid = *it;
     }
@@ -137,7 +137,7 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
     std::map<int, std::vector<detid_t>> groupdetidsmap,
     std::map<int, std::vector<detid_t>> &groupdetidrangemap) {
 
-  for (std::map<int, std::vector<detid_t>>::iterator it =
+  for (auto it =
            groupdetidsmap.begin();
        it != groupdetidsmap.end(); ++it) {
 
@@ -201,7 +201,7 @@ void SaveDetectorsGrouping::printToXML(
   }
 
   // 3. Append Groups
-  for (std::map<int, std::vector<detid_t>>::iterator it =
+  for (auto it =
            groupdetidrangemap.begin();
        it != groupdetidrangemap.end(); ++it) {
 

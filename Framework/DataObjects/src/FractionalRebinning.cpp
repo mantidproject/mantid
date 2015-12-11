@@ -43,9 +43,9 @@ bool getIntersectionRegion(MatrixWorkspace_const_sptr outputWS,
       yn_hi < verticalAxis.front() || yn_lo > verticalAxis.back())
     return false;
 
-  MantidVec::const_iterator start_it =
+  auto start_it =
       std::upper_bound(xAxis.begin(), xAxis.end(), xn_lo);
-  MantidVec::const_iterator end_it =
+  auto end_it =
       std::upper_bound(xAxis.begin(), xAxis.end(), xn_hi);
   x_start = 0;
   x_end = xAxis.size() - 1;

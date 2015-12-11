@@ -262,7 +262,7 @@ void rebinHistogram(const std::vector<double> &xold,
   size_t iold = 0, inew = 0; // iold/inew is the bin number under consideration
                              // (counting from 1, so index+1)
   if (xnew.front() > xold.front()) {
-    std::vector<double>::const_iterator it =
+    auto it =
         std::upper_bound(xold.begin(), xold.end(), xnew.front());
     if (it == xold.end())
       return;
@@ -270,7 +270,7 @@ void rebinHistogram(const std::vector<double> &xold,
     iold = std::distance(xold.begin(), it) -
            1; // Old bin to start at (counting from 0)
   } else {
-    std::vector<double>::const_iterator it =
+    auto it =
         std::upper_bound(xnew.begin(), xnew.end(), xold.front());
     if (it == xnew.end())
       return;
@@ -410,7 +410,7 @@ void convertToBinBoundary(const std::vector<double> &bin_centers,
 */
 bool isConstantValue(const std::vector<double> &arra) {
   // make comparisons with the first value
-  std::vector<double>::const_iterator i = arra.begin();
+  auto i = arra.begin();
 
   if (i == arra.end()) { // empty array
     return true;
@@ -453,7 +453,7 @@ std::vector<NumT> splitStringIntoVector(std::string listString) {
   split_vector_type strs;
 
   boost::split(strs, listString, boost::is_any_of(", "));
-  for (std::vector<std::string>::iterator it = strs.begin(); it != strs.end();
+  for (auto it = strs.begin(); it != strs.end();
        ++it) {
     if (!it->empty()) {
       // String not empty

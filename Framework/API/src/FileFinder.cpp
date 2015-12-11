@@ -126,7 +126,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
 
   const std::vector<std::string> &searchPaths =
       Kernel::ConfigService::Instance().getDataSearchDirs();
-  std::vector<std::string>::const_iterator it = searchPaths.begin();
+  auto it = searchPaths.begin();
   for (; it != searchPaths.end(); ++it) {
 // On windows globbing is note working properly with network drives
 // for example a network drive containing a $
@@ -479,7 +479,7 @@ FileFinderImpl::findRun(const std::string &hintstr,
                    tolower);
     if (!archiveOpt.empty() && archiveOpt != "off" &&
         !facility.archiveSearch().empty()) {
-      std::vector<std::string>::const_iterator it =
+      auto it =
           facility.archiveSearch().begin();
       for (; it != facility.archiveSearch().end(); ++it) {
         g_log.debug() << "get archive search for the facility..." << *it
@@ -602,7 +602,7 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
   Poco::StringTokenizer hints(hint, ",",
                               Poco::StringTokenizer::TOK_TRIM |
                                   Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = hints.begin();
+  auto h = hints.begin();
 
   for (; h != hints.end(); ++h) {
     // Quick check for a filename
@@ -686,7 +686,7 @@ FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
                                const std::set<std::string> &filenames,
                                const std::vector<std::string> &exts) const {
   std::string path = "";
-  std::vector<IArchiveSearch_sptr>::const_iterator it = archs.begin();
+  auto it = archs.begin();
   for (; it != archs.end(); ++it) {
     try {
       path = (*it)->getArchivePath(filenames, exts);
@@ -751,7 +751,7 @@ FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
   }
 
   for (auto ext = extensions.begin(); ext != extensions.end(); ++ext) {
-    std::set<std::string>::const_iterator it = filenames.begin();
+    auto it = filenames.begin();
     for (; it != filenames.end(); ++it) {
       path = getFullPath(*it + *ext);
       try {

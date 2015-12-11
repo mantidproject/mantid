@@ -278,9 +278,9 @@ int LoadAscii::splitIntoColumns(std::list<std::string> &columns,
 void LoadAscii::fillInputValues(std::vector<double> &values,
                                 const std::list<std::string> &columns) const {
   values.resize(columns.size());
-  std::list<std::string>::const_iterator iend = columns.end();
+  auto iend = columns.end();
   int i = 0;
-  for (std::list<std::string>::const_iterator itr = columns.begin();
+  for (auto itr = columns.begin();
        itr != iend; ++itr) {
     std::string value = *itr;
     boost::trim(value);

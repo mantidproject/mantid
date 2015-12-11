@@ -227,9 +227,9 @@ bool FileProperty::extsMatchRunFiles() {
     Kernel::FacilityInfo facilityInfo =
         Kernel::ConfigService::Instance().getFacility();
     const std::vector<std::string> facilityExts = facilityInfo.extensions();
-    std::vector<std::string>::const_iterator facilityExtsBegin =
+    auto facilityExtsBegin =
         facilityExts.begin();
-    std::vector<std::string>::const_iterator facilityExtsEnd =
+    auto facilityExtsEnd =
         facilityExts.end();
     const std::vector<std::string> allowedExts = this->allowedValues();
 

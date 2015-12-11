@@ -146,7 +146,7 @@ Mantid::Geometry::VecIMDDimension_const_sptr
 MDGeometry::getNonIntegratedDimensions() const {
   using namespace Mantid::Geometry;
   VecIMDDimension_const_sptr vecCollapsedDimensions;
-  std::vector<Mantid::Geometry::IMDDimension_sptr>::const_iterator it =
+  auto it =
       this->m_dimensions.begin();
   for (; it != this->m_dimensions.end(); ++it) {
     IMDDimension_sptr current = (*it);

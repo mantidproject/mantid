@@ -304,7 +304,7 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
  * the vector)
  */
 int RemoveBins::findIndex(const double &value, const MantidVec &vec) {
-  MantidVec::const_iterator pos =
+  auto pos =
       std::lower_bound(vec.begin(), vec.end(), value);
   return static_cast<int>(pos - vec.begin());
 }
