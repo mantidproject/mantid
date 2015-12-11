@@ -114,7 +114,7 @@ void SaveLauenorm::exec() {
   // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
   // Default for kf-ki has -q
   double qSign = -1.0;
-  std::string convention = ConfigService::Instance().getString("default.convention");
+  std::string convention = ConfigService::Instance().getString("Q.convention");
   if (convention == "Crystallography") qSign = 1.0;
 
   // Go through each peak at this run / bank

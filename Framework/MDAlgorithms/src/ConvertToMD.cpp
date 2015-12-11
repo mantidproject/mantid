@@ -19,7 +19,6 @@
 
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
-#include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -214,8 +213,6 @@ void ConvertToMD::exec() {
 
   // Set the normalization of the event workspace
   m_Convertor->setDisplayNormalization(spws, m_InWS2D);
-
-  spws = changeConvention(spws) ;
 
   // JOB COMPLETED:
   setProperty("OutputWorkspace",
@@ -663,32 +660,6 @@ void ConvertToMD::findMinMax(
         maxVal[i] = maxAlgValues[i];
     }
   }
-}
-
- /**change convention if specified in properties
- * @param spws: md workspace
- *@returns md workspace
- */
-IMDEventWorkspace_sptr ConvertToMD::changeConvention(IMDEventWorkspace_sptr spws) {
-  // kf-ki for crystallograpy convention
-  std::string convention = ConfigService::Instance().getString("default.convention");
-  if (convention == "Crystallography")
-  {
-    auto trans = createChildAlgorithm("TransformMD");
-    trans->initialize();
-    trans->setProperty("InputWorkspace", spws);
-    trans->setPropertyValue("Scaling",  "-1");
-    trans->setProperty("OutputWorkspace", spws);
-    trans->execute();
-
-    g_log.information() << "Workspace has " << spws->getNPoints();
-    std::vector<std::string> stats = spws->getBoxControllerStats();
-    for (size_t i = 0; i < stats.size(); ++i)
-      g_log.information() << stats[i] << "\n";
-    g_log.information() << std::endl;
-
-  }
-  return spws;
 }
 
 } // namespace Mantid

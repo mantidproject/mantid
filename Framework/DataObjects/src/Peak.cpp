@@ -455,7 +455,7 @@ Mantid::Kernel::V3D Peak::getQLabFrame() const {
   // And Q in the lab frame
   // Default for ki-kf is positive
   double qSign = 1.0;
-  std::string convention = ConfigService::Instance().getString("default.convention");
+  std::string convention = ConfigService::Instance().getString("Q.convention");
   if (convention == "Crystallography") qSign = -1.0;
   return (beamDir * wvi - detDir * wvf) * qSign;
 }
@@ -555,7 +555,7 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
 
   // Default for ki-kf has -q
   double qSign = -1.0;
-  std::string convention = ConfigService::Instance().getString("default.convention");
+  std::string convention = ConfigService::Instance().getString("Q.convention");
   if (convention == "Crystallography") qSign = 1.0;
 
   V3D detectorDir = q * qSign;

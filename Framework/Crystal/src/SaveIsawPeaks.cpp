@@ -249,7 +249,7 @@ void SaveIsawPeaks::exec() {
   // HKL's are flipped by -1 because of the internal Q convention
    // unless Crystallography convention
    double qSign = -1.0;
-   std::string convention = ConfigService::Instance().getString("default.convention");
+   std::string convention = ConfigService::Instance().getString("Q.convention");
    if (convention == "Crystallography") qSign = 1.0;
   // ============================== Save all Peaks
   // =========================================

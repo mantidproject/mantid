@@ -116,7 +116,6 @@ protected: // for testing, otherwise private:
 
   /// Sets up the top level splitting, i.e. of level 0, for the box controller
   void setupTopLevelSplitting(Mantid::API::BoxController_sptr bc);
-  API::IMDEventWorkspace_sptr changeConvention(API::IMDEventWorkspace_sptr spws);
 };
 
 } // namespace Mantid

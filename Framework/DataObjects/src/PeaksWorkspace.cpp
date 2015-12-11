@@ -608,7 +608,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   // HKL is flipped by -1 due to different q convention in Crystallography.
   // Always write out in ki-kf so consistent with old files
   double qSign = 1.0;
-  std::string convention = ConfigService::Instance().getString("default.convention");
+  std::string convention = ConfigService::Instance().getString("Q.convention");
   if (convention == "Crystallography") qSign = -1.0;
 
   // Populate column vectors from Peak Workspace
