@@ -1,7 +1,7 @@
 #ifndef MANTID_PYTHONINERFACE_MAPTOPYDICTIONARY_H_
 #define MANTID_PYTHONINERFACE_MAPTOPYDICTIONARY_H_
 
-/** SmoothMD : Algorithm for smoothing MDHistoWorkspaces
+/** Converter to generate a python dictionary from a std::map
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
