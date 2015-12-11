@@ -46,10 +46,11 @@ class SortHKLTest(stresstesting.MantidStressTest):
         for space_group in self._space_groups:
             ub_parameters = self._load_ub_parameters(space_group)
             reflections = self._load_reflections(space_group, ub_parameters)
-            statistics = self._calculate_statistics(reflections, space_group)
+            statistics, sorted_hkls = self._run_sort_hkl(reflections, space_group)
             reference_statistics = self._load_reference_statistics(space_group)
 
-            self._compare_statistics(statistics, reference_statistics, space_group)
+            self._compare_statistics(statistics, reference_statistics)
+            self._check_sorted_hkls_consistency(sorted_hkls, space_group)
 
     def _load_ub_parameters(self, space_group):
         filename = FileFinder.Instance().getFullPath(self._base_directory + self._template_ub.format(space_group))
@@ -81,14 +82,17 @@ class SortHKLTest(stresstesting.MantidStressTest):
 
         return actual_hkls
 
-    def _calculate_statistics(self, reflections, space_group):
-        point_group_name = PointGroupFactory.createPointGroup(space_group[1:].replace('_', '/')).getName()
+    def _run_sort_hkl(self, reflections, space_group):
+        point_group_name = self._get_point_group(space_group).getName()
         centering_name = self._centering_map[space_group[0]]
-        sorted, chi2, statistics = SortHKL(InputWorkspace=reflections,
+        sorted_hkls, chi2, statistics = SortHKL(InputWorkspace=reflections,
                                            PointGroup=point_group_name,
                                            LatticeCentering=centering_name)
 
-        return statistics.row(0)
+        return statistics.row(0), sorted_hkls
+
+    def _get_point_group(self, space_group):
+        return PointGroupFactory.createPointGroup(space_group[1:].replace('_', '/'))
 
     def _load_reference_statistics(self, space_group):
         filename = FileFinder.Instance().getFullPath(
@@ -109,9 +113,30 @@ class SortHKLTest(stresstesting.MantidStressTest):
 
         return overall_statistics
 
-    def _compare_statistics(self, statistics, reference_statistics, space_group):
+    def _compare_statistics(self, statistics, reference_statistics):
         self.assertEquals(round(statistics['Multiplicity'], 1), round(reference_statistics['<N>'], 1))
         self.assertEquals(round(statistics['Rpim'], 2), round(100.0 * reference_statistics['Rm'], 2))
         self.assertEquals(statistics['No. of Unique Reflections'], int(reference_statistics['Nunique']))
         self.assertDelta(round(statistics['Data Completeness'], 1), round(reference_statistics['Completeness'], 1),
                          0.5)
+
+    def _check_sorted_hkls_consistency(self, sorted_hkls, space_group):
+        peaks = [sorted_hkls.getPeak(i) for i in range(sorted_hkls.getNumberPeaks())]
+
+        point_group = self._get_point_group(space_group)
+
+        unique_map = dict()
+        for peak in peaks:
+            unique = point_group.getReflectionFamily(peak.getHKL())
+            if not unique in unique_map:
+                unique_map[unique] = [peak]
+            else:
+                unique_map[unique].append(peak)
+
+        for unique_hkl, equivalents in unique_map.iteritems():
+            if len(equivalents) > 1:
+                reference_peak = equivalents[0]
+                for peak in equivalents[1:]:
+                    self.assertEquals(peak.getIntensity(), reference_peak.getIntensity())
+                    self.assertEquals(peak.getSigmaIntensity(), reference_peak.getSigmaIntensity())
+

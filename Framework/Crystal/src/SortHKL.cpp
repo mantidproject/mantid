@@ -290,6 +290,7 @@ void SortHKL::insertStatisticsIntoTable(
          << 100.0 * statistics.m_rPim << 100.0 * completeness;
 }
 
+/// Returns a PeaksWorkspace which is either the input workspace or a clone.
 PeaksWorkspace_sptr SortHKL::getOutputPeaksWorkspace(
     const PeaksWorkspace_sptr &inputPeaksWorkspace) const {
   PeaksWorkspace_sptr outputPeaksWorkspace = getProperty("OutputWorkspace");
@@ -321,6 +322,10 @@ double PeaksStatistics::getRMS(const std::vector<double> &data) const {
 /// Returns the lowest and hights wavelength in the peak list.
 std::pair<double, double>
 PeaksStatistics::getLambdaLimits(const std::vector<Peak> &peaks) const {
+  if (peaks.size() == 0) {
+    return std::make_pair(0.0, 0.0);
+  }
+
   auto lambdaLimitIterators = std::minmax_element(
       peaks.begin(), peaks.end(), [](const Peak &lhs, const Peak &rhs) {
         return lhs.getWavelength() < rhs.getWavelength();
@@ -351,7 +356,7 @@ void SortHKL::sortOutputPeaksByHKL(IPeaksWorkspace_sptr outputPeaksWorkspace) {
  * Furthermore it sets the intensities of each peak to the mean of the
  * group of equivalent reflections.
  *
- * @param uniqueReflections
+ * @param uniqueReflections :: Map of unique reflections and peaks.
  */
 void PeaksStatistics::calculatePeaksStatistics(
     std::map<V3D, UniqueReflection> &uniqueReflections) {
@@ -361,12 +366,10 @@ void PeaksStatistics::calculatePeaksStatistics(
   double iOverSigmaSum = 0.0;
 
   for (auto &unique : uniqueReflections) {
-    size_t count = unique.second.count();
-
     /* Since all possible unique reflections are explored
      * there may be 0 observations for some of them.
      * In that case, nothing can be done.*/
-    if (count > 0) {
+    if (unique.second.count() > 0) {
       ++m_uniqueReflections;
 
       // Possibly remove outliers.
@@ -426,19 +429,27 @@ void PeaksStatistics::calculatePeaksStatistics(
 
   m_measuredReflections = static_cast<int>(m_peaks.size());
 
-  m_redundancy = static_cast<double>(m_measuredReflections) /
-                 static_cast<double>(m_uniqueReflections);
+  if (m_uniqueReflections > 0) {
+    m_redundancy = static_cast<double>(m_measuredReflections) /
+                   static_cast<double>(m_uniqueReflections);
+  }
 
   m_completeness = static_cast<double>(m_uniqueReflections) /
                    static_cast<double>(uniqueReflections.size());
 
-  m_rMerge = rMergeNumerator / intensitySumRValues;
-  m_rPim = rPimNumerator / intensitySumRValues;
-  m_meanIOverSigma = iOverSigmaSum / static_cast<double>(m_peaks.size());
+  if (intensitySumRValues > 0.0) {
+    m_rMerge = rMergeNumerator / intensitySumRValues;
+    m_rPim = rPimNumerator / intensitySumRValues;
+  }
 
-  std::pair<double, double> lambdaLimits = getLambdaLimits(m_peaks);
-  m_lambdaMin = lambdaLimits.first;
-  m_lambdaMax = lambdaLimits.second;
+  if (m_measuredReflections > 0) {
+    m_meanIOverSigma =
+        iOverSigmaSum / static_cast<double>(m_measuredReflections);
+
+    std::pair<double, double> lambdaLimits = getLambdaLimits(m_peaks);
+    m_lambdaMin = lambdaLimits.first;
+    m_lambdaMax = lambdaLimits.second;
+  }
 }
 
 /// Returns a vector with the intensities of the Peaks stored in this
@@ -470,8 +481,12 @@ std::vector<double> UniqueReflection::getSigmas() const {
 /// Removes peaks whose intensity deviates more than sigmaCritical from the
 /// intensities' mean.
 void UniqueReflection::removeOutliers(double sigmaCritical) {
-  if (m_peaks.size() > 2) {
+  if (sigmaCritical <= 0.0) {
+    throw std::invalid_argument(
+        "Critical sigma value has to be greater than 0.");
+  }
 
+  if (m_peaks.size() > 2) {
     const std::vector<double> &intensities = getIntensities();
     const std::vector<double> &zScores = Kernel::getZscore(intensities);
 
