@@ -132,12 +132,12 @@ void LoadSQW2::exec() {
  */
 void LoadSQW2::initFileReader() {
   using API::Progress;
-  using Kernel::make_unique;
-  m_file = make_unique<std::ifstream>(getPropertyValue("Filename"),
-                                      std::ios_base::binary);
-  m_reader = make_unique<BinaryStreamReader>(*m_file);
+
+  m_file = Kernel::make_unique<std::ifstream>(getPropertyValue("Filename"),
+                                              std::ios_base::binary);
+  m_reader = Kernel::make_unique<BinaryStreamReader>(*m_file);
   // steps are reset once we know what we are reading
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, 100);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, 100);
 }
 
 /**

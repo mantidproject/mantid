@@ -24,7 +24,6 @@ using Mantid::API::IMDIterator;
 using Mantid::API::Run;
 using Mantid::API::Sample;
 using Mantid::MDAlgorithms::LoadSQW2;
-using Mantid::Kernel::make_unique;
 using Mantid::Kernel::V3D;
 
 class LoadSQW2Test : public CxxTest::TestSuite {
@@ -118,7 +117,7 @@ private:
   }
 
   IAlgorithm_uptr createAlgorithm() {
-    IAlgorithm_uptr alg(make_unique<LoadSQW2>());
+    IAlgorithm_uptr alg(Mantid::Kernel::make_unique<LoadSQW2>());
     alg->initialize();
     alg->setChild(true);
     return alg;
