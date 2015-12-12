@@ -36,19 +36,19 @@ public:
   MuonCalculateAsymmetry();
   virtual ~MuonCalculateAsymmetry();
 
-  virtual const std::string name() const;
+  virtual const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  virtual const std::string summary() const override {
     return "Converts loaded/prepared Muon data to a data suitable for "
            "analysis.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  virtual int version() const override;
+  virtual const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   // Calculates raw counts
   API::MatrixWorkspace_sptr
