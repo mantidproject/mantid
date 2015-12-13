@@ -855,9 +855,10 @@ class PlusWorkspaces(object):
         # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
         # cummulative time series correctly at this point
         cummulative_correction = CummulativeTimeSeriesPropertyAdder()
-        cummulative_correction.apply_correction_to_workspace(lhs_ws, rhs_ws)
+        cummulative_correction. extract_sample_logs_from_workspace(lhs_ws, rhs_ws)
         Plus(LHSWorkspace = LHS_workspace, RHSWorkspace = RHS_workspace, OutputWorkspace = output_workspace)
-        cummulative_correction.restore_original_workspace(rhs_ws)
+        out_ws = self._get_workspace(output_workspace)
+        cummulative_correction.apply_cummulative_logs_to_workspace(out_ws)
 
     def _get_workspace(self, workspace):
         if isinstance(workspace, MatrixWorkspace):
@@ -891,7 +892,7 @@ class OverlayWorkspaces(object):
         # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
         # cummulative time series correctly at this point
         cummulative_correction = CummulativeTimeSeriesPropertyAdder()
-        cummulative_correction.apply_correction_to_workspace(lhs_ws, rhs_ws)
+        cummulative_correction. extract_sample_logs_from_workspace(lhs_ws, rhs_ws)
 
         # Create a temporary workspace with shifted time values from RHS, if the shift is necesary
         temp = rhs_ws
@@ -899,11 +900,11 @@ class OverlayWorkspaces(object):
         if total_time_shift != 0.0:
             temp = ChangeTimeZero(InputWorkspace=rhs_ws, OutputWorkspace=temp_ws_name, RelativeTimeOffset=total_time_shift)
 
-        # Undo correction on the original RHS workspace
-        cummulative_correction.restore_original_workspace(rhs_ws)
-
         # Add the LHS and shifted workspace
         Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= temp ,OutputWorkspace= output_workspace)
+
+        #Apply sample log correciton
+        cummulative_correction.apply_cummulative_logs_to_workspace(output_workspace)
 
         # Remove the shifted workspace
         if mtd.doesExist(temp_ws_name):
@@ -952,6 +953,42 @@ class TimeShifter(object):
         except ValueError:
             pass# Log here
         return float_element
+
+def transfer_special_sample_logs(from_ws, to_ws):
+    '''
+    Transfers selected sample logs from one workspace to another
+    '''
+    single_valued_names = [ "gd_prtn_chrg"]
+    time_series_names = ['good_uah_log', 'good_frames']
+    run_from = from_ws.getRun()
+    run_to = to_ws.getRun()
+
+    # Populate the time series
+    for time_series_name in time_series_names:
+        if (run_from.hasProperty(time_series_name) and
+            run_to.hasProperty(time_series_name)):
+
+            times = run_from.getProperty(time_series_name).times
+            values = run_from.getProperty(time_series_name).value
+
+            prop = run_to.getProperty(time_series_name)
+            prop.clear()
+            for index in range(0, len(times)):
+                prop.addValue(times[index],
+                              values[index])
+
+    alg_log = AlgorithmManager.createUnmanaged("AddSampleLog")
+    alg_log.initialize()
+    alg_log.setChild(True)
+    for single_valued_name in single_valued_names:
+        if (run_from.hasProperty(single_valued_name) and
+            run_to.hasProperty(single_valued_name)):
+            value = run_from.getProperty(single_valued_name).value
+            alg_log.setProperty("Workspace", to_ws)
+            alg_log.setProperty("LogName", single_valued_name)
+            alg_log.setProperty("LogText", str(value))
+            alg_log.setProperty("LogType", "Number")
+            alg_log.execute()
 
 class CummulativeTimeSeriesPropertyAdder(object):
     '''

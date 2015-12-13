@@ -1223,6 +1223,10 @@ class TestDetectingValidUserFileExtensions(unittest.TestCase):
 
 '''
 class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
+    def _clean_up_workspaces(self):
+        for name in mtd.getObjectNames():
+            DeleteWorkspace(name)
+
     def _check_that_increasing(self, series):
         for index in range(1, len(series)):
             larger_or_equal = series[index] > series[index - 1] or series[index] == series[index - 1]
@@ -1308,6 +1312,8 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
                                                        out.getRun().getProperty(log_names[2]).value)
         self.assertFalse(self._has_the_same_length_as_input(out, lhs, rhs, log_names[2]))
 
+        # Clean up
+        self._clean_up_workspaces()
 
     def test_that_overlapping_workspaces_have_their_cummulative_sample_log_added_correctly(self):
         # Arrange
@@ -1361,6 +1367,9 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
                                                        out.getRun().getProperty(log_names[2]).value)
         self.assertFalse(self._has_the_same_length_as_input(out, lhs, rhs, log_names[2]))
 
+        # Clean up
+        self._clean_up_workspaces()
+
     def test_that_non_overlapping_workspaces_with_time_shift_have_their_cummulative_sample_log_added_correctly(self):
         # Arrange
         names =['ws1', 'ws2', 'out']
@@ -1412,6 +1421,50 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         self._check_that_values_of_series_are_the_same(out_ref.getRun().getProperty(log_names[2]).value,
                                                        out.getRun().getProperty(log_names[2]).value)
         self.assertFalse(self._has_the_same_length_as_input(out, lhs, rhs, log_names[2]))
+
+        # Clean up
+        self._clean_up_workspaces()
+
+    def test_that_special_sample_logs_are_transferred(self):
+        # Arrange, note that the values don't make sense since we are not using "make_linear" but
+        # this is not releavnt for the bare functionality
+        names =['ws1', 'ws2', 'out']
+        out_ws_name = 'out_ws'
+        time_shift = 0
+        log_names = ['good_uah_log', 'good_frames', 'new_series']
+
+        start_time = "2010-01-01T00:00:00"
+        in_ws = provide_event_ws_with_entries(names[0],start_time, extra_time_shift = 0.0,
+                                            log_names = log_names, make_linear = False)
+        self._add_single_log(in_ws, "gd_prtn_chrg", in_ws.getRun().getProperty("good_uah_log").value[-1])
+
+        start_time = "2010-02-01T00:10:00"
+        out_ws = provide_event_ws_with_entries(names[2],start_time, extra_time_shift = 0.0,
+                                            log_names = log_names, make_linear = True)
+        self._add_single_log(out_ws, "gd_prtn_chrg", out_ws.getRun().getProperty("good_uah_log").value[-1])
+
+        out_ref = CloneWorkspace(InputWorkspace = out_ws)
+
+        # Act
+        su.transfer_special_sample_logs(from_ws = in_ws, to_ws = out_ws)
+
+        # Assert
+        # The good_uah_log and good_frames should have been transferred
+        for index in range(1):
+            self._check_that_values_of_series_are_the_same(out_ws.getRun().getProperty(log_names[index]).times,
+                                                           in_ws.getRun().getProperty(log_names[index]).times)
+            self._check_that_values_of_series_are_the_same(out_ws.getRun().getProperty(log_names[index]).value,
+                                                           in_ws.getRun().getProperty(log_names[index]).value)
+
+        # The gd_prtn_chrg should have been transferred
+        self.assertTrue(out_ws.getRun().getProperty("gd_prtn_chrg").value == in_ws.getRun().getProperty("gd_prtn_chrg").value)
+
+        # The new series log should not have been transferred
+        self._check_that_values_of_series_are_the_same(out_ref.getRun().getProperty(log_names[2]).value,
+                                                       out_ws.getRun().getProperty(log_names[2]).value)
+
+        # Clean up
+        self._clean_up_workspaces()
 
 if __name__ == "__main__":
     unittest.main()
