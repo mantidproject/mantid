@@ -27,17 +27,19 @@ def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name,
     CreateSampleWorkspace(WorkspaceType= 'Event', OutputWorkspace = event_ws_name)
     GroupWorkspaces(InputWorkspaces = [event_ws_name, monitor_ws_name ], OutputWorkspace = out_ws_name)
     
-def addSampleLogEntry(log_name, ws, start_time, extra_time_shift):
+def addSampleLogEntry(log_name, ws, start_time, extra_time_shift, make_linear = False):
     number_of_times = 10
     for i in range(0, number_of_times):
-
-        val = random.randrange(0, 10, 1)
+        if make_linear:
+            val = float(i)
+        else:
+            val = random.randrange(0, 10, 1)
         date = DateAndTime(start_time)
         date +=  int(i*1e9)
         date += int(extra_time_shift*1e9)
         AddTimeSeriesLog(ws, Name=log_name, Time=date.__str__().strip(), Value=val)
 
-def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False, log_names= None):
+def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False, log_names= None, make_linear = False):
      # Create the event workspace
     ws = CreateSampleWorkspace(WorkspaceType= 'Event', NumEvents = number_events, OutputWorkspace = name)
 
@@ -50,10 +52,10 @@ def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_
 
     # Add some other time series log entry
     if log_names is None:
-        addSampleLogEntry('time_series_2', ws, start_time, extra_time_shift)
+        addSampleLogEntry('time_series_2', ws, start_time, extra_time_shift, make_linear)
     else:
         for name in log_names:
-            addSampleLogEntry(name, ws, start_time, extra_time_shift)
+            addSampleLogEntry(name, ws, start_time, extra_time_shift, make_linear)
     return ws
 
 def provide_event_ws_custom(name, start_time, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False):
@@ -102,7 +104,7 @@ def provide_workspace_with_x_errors(workspace_name,use_xerror = True, nspec = 1,
             ws.setDx(hists, x_error_array)
 
 
-
+'''
 # This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.
 class SANSUtilityTest(unittest.TestCase):
 
@@ -1219,58 +1221,197 @@ class TestDetectingValidUserFileExtensions(unittest.TestCase):
         # Act and Assert
         self._do_test(file_name, expected)
 
+'''
 class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
-    def test_that_offset_added_to_logs_which_need_offset(self):
+    def _check_that_increasing(self, series):
+        for index in range(1, len(series)):
+            larger_or_equal = series[index] > series[index - 1] or series[index] == series[index - 1]
+            self.assertTrue(larger_or_equal)
+
+    def _check_that_values_of_series_are_the_same(self, series1, series2):
+        zipped = zip(series1, series2)
+        areEqual = True
+        for e1, e2 in zipped:
+            isEqual = e1 == e2
+            areEqual &=  isEqual
+        self.assertTrue(areEqual)
+
+    def _has_the_same_length_as_input(self, out, in1, in2, log_entry):
+        len_out = len(out.getRun().getProperty(log_entry).value)
+        len_in1 = len(in1.getRun().getProperty(log_entry).value)
+        len_in2 = len(in2.getRun().getProperty(log_entry).value)
+        return len_out == (len_in1 + len_in2)
+
+    def _add_single_log(self, workspace, name, value):
+        alg_log = AlgorithmManager.createUnmanaged("AddSampleLog")
+        alg_log.initialize()
+        alg_log.setChild(True)
+        alg_log.setProperty("Workspace", workspace)
+        alg_log.setProperty("LogName", name)
+        alg_log.setProperty("LogText", str(value))
+        alg_log.setProperty("LogType", "Number")
+        alg_log.execute()
+
+    def _assert_that_good_proton_charge_is_correct(self, in1, in2, out):
+        in1_charge = in1.getRun().getProperty("gd_prtn_chrg").value
+        in2_charge = in2.getRun().getProperty("gd_prtn_chrg").value
+        out_charge = out.getRun().getProperty("gd_prtn_chrg").value
+        self.assertTrue(out_charge == (in1_charge + in2_charge))
+
+    def test_that_non_overlapping_workspaces_have_their_cummulative_sample_log_added_correctly(self):
         # Arrange
-        names =['ws1', 'ws2']
+        names =['ws1', 'ws2', 'out']
+        out_ws_name = 'out_ws'
+        time_shift = 0
+
+        log_names = ['good_uah_log', 'good_frames', 'new_series']
+        start_time_1 = "2010-01-01T00:00:00"
+        lhs = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift = 0.0,
+                                            log_names = log_names, make_linear = True)
+        self._add_single_log(lhs, "gd_prtn_chrg", lhs.getRun().getProperty("good_uah_log").value[-1])
+
+        start_time_2 = "2010-01-01T00:00:12"
+        rhs = provide_event_ws_with_entries(names[1],start_time_2, extra_time_shift = 0.0,
+                                            log_names = log_names, make_linear = True)
+        self._add_single_log(rhs, "gd_prtn_chrg", rhs.getRun().getProperty("good_uah_log").value[-1])
+
+        start_time_3 = "2010-02-01T00:00:00"
+        out = provide_event_ws_with_entries(names[2],start_time_3, extra_time_shift = 0.0,
+                                            log_names = log_names, make_linear = True)
+        self._add_single_log(out, "gd_prtn_chrg", out.getRun().getProperty("good_uah_log").value[-1])
+
+        out_ref = CloneWorkspace(InputWorkspace = out)
+
+        # Act
+        converter = su.CummulativeTimeSeriesPropertyAdder(total_time_shift_seconds = 0.0)
+        converter.extract_sample_logs_from_workspace(lhs, rhs)
+        converter.apply_cummulative_logs_to_workspace(out)
+
+        # Assert
+        # good_uah_log should be sorted
+        self._check_that_increasing(out.getRun().getProperty(log_names[0]).times)
+        self._check_that_increasing(out.getRun().getProperty(log_names[0]).value)
+        self.assertTrue(self._has_the_same_length_as_input(out, lhs, rhs, log_names[0]))
+
+        # Check gd_prtn_chrg
+        self._assert_that_good_proton_charge_is_correct(lhs, rhs, out)
+
+        # good_frames should be sorted
+        self._check_that_increasing(out.getRun().getProperty(log_names[1]).times)
+        self._check_that_increasing(out.getRun().getProperty(log_names[1]).value)
+        self.assertTrue(self._has_the_same_length_as_input(out, lhs, rhs, log_names[1]))
+
+        # new_series should not have been touched
+        self._check_that_values_of_series_are_the_same(out_ref.getRun().getProperty(log_names[2]).times,
+                                                       out.getRun().getProperty(log_names[2]).times)
+        self._check_that_values_of_series_are_the_same(out_ref.getRun().getProperty(log_names[2]).value,
+                                                       out.getRun().getProperty(log_names[2]).value)
+        self.assertFalse(self._has_the_same_length_as_input(out, lhs, rhs, log_names[2]))
+
+
+    def test_that_overlapping_workspaces_have_their_cummulative_sample_log_added_correctly(self):
+        # Arrange
+        names =['ws1', 'ws2', 'out']
+        out_ws_name = 'out_ws'
+        time_shift = 0
+        log_names = ['good_uah_log', 'good_frames', 'new_series']
+        import time
+        time.sleep(10)
+        start_time_1 = "2010-01-01T00:00:00"
+        lhs = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0,
+                                            log_names = log_names, make_linear = True)
+        self._add_single_log(lhs, "gd_prtn_chrg", lhs.getRun().getProperty("good_uah_log").value[-1])
+
+        # The rhs workspace should have an overlap time of about 5s
+        start_time_2 = "2010-01-01T00:00:05"
+        rhs = provide_event_ws_with_entries(names[1],start_time_2, extra_time_shift = 0.0,
+                                            log_names = log_names, make_linear = True)
+        self._add_single_log(rhs, "gd_prtn_chrg", rhs.getRun().getProperty("good_uah_log").value[-1])
+
+        start_time_3 = "2010-02-01T00:00:00"
+        out = provide_event_ws_with_entries(names[2],start_time_3, extra_time_shift = 0.0,
+                                            log_names = log_names, make_linear = True)
+        self._add_single_log(out, "gd_prtn_chrg", out.getRun().getProperty("good_uah_log").value[-1])
+
+        out_ref = CloneWorkspace(InputWorkspace = out)
+
+        # Act
+        converter = su.CummulativeTimeSeriesPropertyAdder(total_time_shift_seconds = 0.0)
+        converter.extract_sample_logs_from_workspace(lhs, rhs)
+        converter.apply_cummulative_logs_to_workspace(out)
+
+        # Assert
+        # good_uah_log should be sorted
+        self._check_that_increasing(out.getRun().getProperty(log_names[0]).times)
+        self._check_that_increasing(out.getRun().getProperty(log_names[0]).value)
+        self.assertTrue(self._has_the_same_length_as_input(out, lhs, rhs, log_names[0]))
+
+        # Check gd_prtn_chrg
+        self._assert_that_good_proton_charge_is_correct(lhs, rhs, out)
+
+        # good_frames should be sorted
+        self._check_that_increasing(out.getRun().getProperty(log_names[1]).times)
+        self._check_that_increasing(out.getRun().getProperty(log_names[1]).value)
+        self.assertTrue(self._has_the_same_length_as_input(out, lhs, rhs, log_names[1]))
+
+        # new_series should not have been touched
+        self._check_that_values_of_series_are_the_same(out_ref.getRun().getProperty(log_names[2]).times,
+                                                       out.getRun().getProperty(log_names[2]).times)
+        self._check_that_values_of_series_are_the_same(out_ref.getRun().getProperty(log_names[2]).value,
+                                                       out.getRun().getProperty(log_names[2]).value)
+        self.assertFalse(self._has_the_same_length_as_input(out, lhs, rhs, log_names[2]))
+
+    def test_that_non_overlapping_workspaces_with_time_shift_have_their_cummulative_sample_log_added_correctly(self):
+        # Arrange
+        names =['ws1', 'ws2', 'out']
         out_ws_name = 'out_ws'
         time_shift = 0
         log_names = ['good_uah_log', 'good_frames', 'new_series']
 
         start_time_1 = "2010-01-01T00:00:00"
-        lhs = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0, log_names = log_names)
-        start_time_2 = "2010-01-01T00:00:12"
-        rhs = provide_event_ws_with_entries(names[1],start_time_2, extra_time_shift = 0.0, log_names = log_names)
+        lhs = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0,
+                                            log_names = log_names, make_linear = True)
+        self._add_single_log(lhs, "gd_prtn_chrg", lhs.getRun().getProperty("good_uah_log").value[-1])
 
-        # Get the expected shift
-        run_lhs = lhs.getRun()
-        shift_0 = run_lhs.getProperty(log_names[0]).value[-1]
-        shift_1 = run_lhs.getProperty(log_names[1]).value[-1]
+        # The rhs workspace should have an overlap time of about 5s
+        start_time_2 = "2010-01-01T00:00:20"
+        rhs = provide_event_ws_with_entries(names[1],start_time_2, extra_time_shift = 0.0,
+                                            log_names = log_names, make_linear = True)
+        self._add_single_log(rhs, "gd_prtn_chrg", rhs.getRun().getProperty("good_uah_log").value[-1])
 
-        # Get the original values
-        run = rhs.getRun()
-        original_values_0 = run.getProperty(log_names[0]).value
-        original_values_1 = run.getProperty(log_names[1]).value
-        original_values_2 = run.getProperty(log_names[2]).value
+        start_time_3 = "2010-02-01T00:00:00"
+        out = provide_event_ws_with_entries(names[2],start_time_3, extra_time_shift = 0.0,
+                                            log_names = log_names, make_linear = True)
+        self._add_single_log(out, "gd_prtn_chrg", out.getRun().getProperty("good_uah_log").value[-1])
 
-        # Act
-        converter = su.CummulativeTimeSeriesPropertyAdder()
-        converter.apply_correction_to_workspace(lhs, rhs)
+        out_ref = CloneWorkspace(InputWorkspace = out)
 
-        shifted_values_0 = run.getProperty(log_names[0]).value
-        shifted_values_1 = run.getProperty(log_names[1]).value
-        shifted_values_2 = run.getProperty(log_names[2]).value
-
-        converter.restore_original_workspace(rhs)
-        unshifted_values_0 = run.getProperty(log_names[0]).value
-        unshifted_values_1 = run.getProperty(log_names[1]).value
-        unshifted_values_2 = run.getProperty(log_names[2]).value
+        # Act 
+        # Shift the time -15.5 s into the past
+        converter = su.CummulativeTimeSeriesPropertyAdder(total_time_shift_seconds = -15.5)
+        converter.extract_sample_logs_from_workspace(lhs, rhs)
+        converter.apply_cummulative_logs_to_workspace(out)
 
         # Assert
-        # Function to check if all entries in two arrays are identical
-        is_identical = lambda in1, in2 : all([el1 == el2 for el1, el2 in zip(in1, in2)])
+        # good_uah_log should be sorted
+        self._check_that_increasing(out.getRun().getProperty(log_names[0]).times)
+        self._check_that_increasing(out.getRun().getProperty(log_names[0]).value)
+        self.assertTrue(self._has_the_same_length_as_input(out, lhs, rhs, log_names[0]))
 
-        # Check that the arrays are identical
-        self.assertTrue(is_identical(original_values_2, shifted_values_2))
-        self.assertTrue(is_identical(original_values_0, unshifted_values_0))
-        self.assertTrue(is_identical(original_values_1, unshifted_values_1))
-        self.assertTrue(is_identical(original_values_2, unshifted_values_2))
+        # Check gd_prtn_chrg
+        self._assert_that_good_proton_charge_is_correct(lhs, rhs, out)
 
-        # Check that values have been shifted
-        shifted_expected_0 = original_values_0 + shift_0
-        shifted_expected_1 = original_values_1 + shift_1
-        self.assertTrue(is_identical(shifted_values_0, shifted_expected_0))
-        self.assertTrue(is_identical(shifted_values_1, shifted_expected_1))
+        # good_frames should be sorted
+        self._check_that_increasing(out.getRun().getProperty(log_names[1]).times)
+        self._check_that_increasing(out.getRun().getProperty(log_names[1]).value)
+        self.assertTrue(self._has_the_same_length_as_input(out, lhs, rhs, log_names[1]))
+
+        # new_series should not have been touched
+        self._check_that_values_of_series_are_the_same(out_ref.getRun().getProperty(log_names[2]).times,
+                                                       out.getRun().getProperty(log_names[2]).times)
+        self._check_that_values_of_series_are_the_same(out_ref.getRun().getProperty(log_names[2]).value,
+                                                       out.getRun().getProperty(log_names[2]).value)
+        self.assertFalse(self._has_the_same_length_as_input(out, lhs, rhs, log_names[2]))
 
 if __name__ == "__main__":
     unittest.main()

@@ -7,13 +7,14 @@
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry
 import mantid
-from mantid.kernel import time_duration
+from mantid.kernel import time_duration, DateAndTime
 import inspect
 import math
 import os
 import re
 import types
 import numpy as np
+import copy
 
 sanslog = Logger("SANS")
 ADDED_EVENT_DATA_TAG = '_added_event_data'
@@ -855,7 +856,7 @@ class PlusWorkspaces(object):
         # cummulative time series correctly at this point
         cummulative_correction = CummulativeTimeSeriesPropertyAdder()
         cummulative_correction.apply_correction_to_workspace(lhs_ws, rhs_ws)
-        Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= RHS_workspace,OutputWorkspace= output_workspace)
+        Plus(LHSWorkspace = LHS_workspace, RHSWorkspace = RHS_workspace, OutputWorkspace = output_workspace)
         cummulative_correction.restore_original_workspace(rhs_ws)
 
     def _get_workspace(self, workspace):
@@ -957,13 +958,21 @@ class CummulativeTimeSeriesPropertyAdder(object):
     Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
     cummulative time series correctly at this point.
     '''
-    def __init__(self):
+    def __init__(self, total_time_shift_seconds = 0):
         super(CummulativeTimeSeriesPropertyAdder, self).__init__()
-        self.to_check = ['good_uah_log', 'good_frames']
+        self._to_check = ['good_uah_log', 'good_frames']
+        self._single_values_to_update = {self._to_check[0]: "gd_prtn_chrg"}
+
+        self._original_times_lhs = dict()
+        self._original_values_lhs = dict()
         self._original_times_rhs = dict()
         self._original_values_rhs = dict()
 
-    def apply_correction_to_workspace(self, lhs, rhs):
+        self._start_time_lhs = None
+        self._start_time_rhs = None
+        self._total_time_shift_nano_seconds = int(total_time_shift_seconds*1e9)
+
+    def extract_sample_logs_from_workspace(self, lhs, rhs):
         '''
         When adding specific logs, we need to make sure that the values are added correctly.
         @param lhs: the lhs workspace
@@ -971,42 +980,174 @@ class CummulativeTimeSeriesPropertyAdder(object):
         '''
         run_lhs = lhs.getRun()
         run_rhs = rhs.getRun()
-        for element in self.to_check:
+        for element in self._to_check:
             if (run_lhs.hasProperty(element) and
-               run_rhs.hasProperty(element)):
+                run_rhs.hasProperty(element)):
                 # Get values for lhs
                 property_lhs = run_lhs.getProperty(element)
-                offset = property_lhs.lastValue()
+                self._original_times_lhs[element] = property_lhs.times
+                self._original_values_lhs[element] = property_lhs.value
 
                 # Get values for rhs
                 property_rhs = run_rhs.getProperty(element)
-                times =  property_rhs.times
-                values = property_rhs.value
+                self._original_times_rhs[element] = property_rhs.times
+                self._original_values_rhs[element] = property_rhs.value
 
-                # Add the shift
-                shifted_values = values + offset
+        log_name_start_time = "start_time"
+        convert_to_date = lambda val: DateAndTime(val) if isinstance(val, str) else val
+        self._start_time_lhs = convert_to_date(run_lhs.getProperty(log_name_start_time).value)
+        self._start_time_rhs = convert_to_date(run_rhs.getProperty(log_name_start_time).value)
 
-                # Replace the shifted value for that property
-                property_rhs.clear()
-                self._populate_property(property_rhs, times, shifted_values)
-
-                self._original_times_rhs[element] = times
-                self._original_values_rhs[element] = values
-
-    def restore_original_workspace(self, rhs):
+    def apply_cummulative_logs_to_workspace(self, workspace):
         '''
         Restore the original values for the shifted properties
-        @param rhs: the workspace which requires correction.
+        @param workspace: the workspace which requires correction.
         '''
-        for element in self.to_check:
+        for element in self._to_check:
             if (element in self._original_times_rhs and
-               element in self._original_values_rhs):
-                run_rhs = rhs.getRun()
-                property_rhs = run_rhs.getProperty(element)
-                property_rhs.clear()
-                times = self._original_times_rhs[element]
-                values = self._original_values_rhs[element]
-                self._populate_property(property_rhs, times, values)
+                element in self._original_values_rhs):
+                run = workspace.getRun()
+                property = run.getProperty(element)
+                property.clear()
+                # Get the cummulated values and times
+                times, values = self._get_cummulative_sample_logs(element)
+                self._populate_property(property, times, values)
+
+        self._update_single_valued_entries(workspace)
+
+
+    def _update_single_valued_entries(self, workspace):
+        '''
+        We need to update single-valued entries which are based on the
+        cummulative time series
+        @param workspace: the workspace which requires the changes
+        '''
+        run = workspace.getRun()
+
+        alg_log = AlgorithmManager.createUnmanaged("AddSampleLog")
+        alg_log.initialize()
+        alg_log.setChild(True)
+        for key in self._single_values_to_update.keys():
+            # The single-valued entry should be the last entry of the
+            # cummulative time series
+            new_value = run.getProperty(key).value[-1]
+            alg_log.setProperty("Workspace", workspace)
+            alg_log.setProperty("LogName", self._single_values_to_update[key])
+            alg_log.setProperty("LogText", str(new_value))
+            alg_log.setProperty("LogType", "Number")
+            alg_log.execute()
+
+    def _get_cummulative_sample_logs(self, log_name):
+        '''
+        Gets the added sample logs for a particular log.
+        @param log_name: the name of the logs
+        @param an array with times and an array with values
+        '''
+        # Remove data from the beginning of the measurement
+        times_lhs, values_lhs, times_rhs, values_rhs = self._get_corrected_times_and_values(log_name)
+
+        # Create the actual entries and not the cumulated ones
+        values_raw_lhs = self._get_raw_values(values_lhs)
+        values_raw_rhs = self._get_raw_values(values_rhs)
+
+        # Shift the times of the rhs workspace if required 
+        times_rhs = self._shift_time_series(times_rhs)
+
+        # Now merge and sort the two entries
+        time_merged, value_merged = self._create_merged_values_and_times(times_lhs, values_raw_lhs, times_rhs, values_raw_rhs)
+
+        # Create cummulated values
+        time_final = time_merged
+        value_final = self._create_cummulated_values(value_merged)
+
+        return time_final, value_final
+
+    def _create_cummulated_values(self, values):
+        '''
+        Creates cummulated values
+        @param time: a time array
+        @param value: a value array which is the basis for the accumulation
+        '''
+        values_accumulated = []
+        for index in range(0, len(values)):
+            if index == 0:
+                values_accumulated.append(values[index])
+            else:
+                values_accumulated.append(values_accumulated[index - 1] + values[index])
+        return values_accumulated
+
+    def _create_merged_values_and_times(self, times_lhs, values_lhs, times_rhs, values_rhs):
+        times = []
+        times.extend(times_lhs)
+        times.extend(times_rhs)
+
+        values = []
+        values.extend(values_lhs)
+        values.extend(values_rhs)
+
+        zipped = zip(times, values)
+        # We sort via the times
+        zipped.sort(key = lambda z : z[0])
+        unzipped = zip(*zipped)
+        return unzipped[0], unzipped[1]
+
+    def _shift_time_series(self, time_series):
+        shifted_series = []
+        for element in time_series:
+            shifted_series.append(element + self._total_time_shift_nano_seconds)
+        return shifted_series
+
+    def _get_raw_values(self, values):
+        '''
+        We extract the original data from the cummulative
+        series.
+        '''
+        raw_values = []
+        for index in range(0, len(values)):
+            if index == 0:
+                raw_values.append(values[index])
+            else:
+                element = values[index] - values[index-1]
+                raw_values.append(element)
+        return raw_values
+
+
+    def _get_corrected_times_and_values(self, log_name):
+        '''
+        Removes times before time 0
+        @param log_name: the log to consider
+        '''
+        start_time_lhs = self._start_time_lhs
+        start_time_rhs = self._start_time_rhs
+
+        times_lhs = self._original_times_lhs[log_name]
+        times_rhs = self._original_times_rhs[log_name]
+
+        values_lhs = self._original_values_lhs[log_name]
+        values_rhs = self._original_values_rhs[log_name]
+
+        # At this point we assume that the values are sorted.
+        # We search for the index which is larger or equal to the
+        # start time
+
+        index_lhs = self._find_start_time_index(times_lhs, start_time_lhs)
+        index_rhs = self._find_start_time_index(times_rhs, start_time_rhs)
+
+        times_lhs_corrected = times_lhs[index_lhs:]
+        values_lhs_corrected = values_lhs[index_lhs:]
+
+        times_rhs_corrected = times_rhs[index_rhs:]
+        values_rhs_corrected = values_rhs[index_rhs:]
+
+        return times_lhs_corrected, values_lhs_corrected, times_rhs_corrected, values_rhs_corrected
+
+    def _find_start_time_index(self, time_series, start_time):
+        index = 0
+        for element in time_series:
+            if element > start_time or element == start_time:
+                break
+            index += 1
+        return index
 
     def _populate_property(self, prop, times, values):
         '''
