@@ -469,8 +469,7 @@ class SANSStitch1D(DataProcessorAlgorithm):
             # Subtract it from the sample
             merged_q = self._subract(merged_q, merged_q_can)
 
-        if not mode == Mode.NoneFit:
-            self._correct_q_resolution_for_merged(count_ws_front=cF, count_ws_rear=cR, output_ws=merged_q,
+        self._correct_q_resolution_for_merged(count_ws_front=cF, count_ws_rear=cR, output_ws=merged_q,
                                                   scale=scale_factor)
 
         self.setProperty('OutputWorkspace', merged_q)
