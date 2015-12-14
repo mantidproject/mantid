@@ -46,7 +46,7 @@ const std::string NexusTester::category() const {
 /** Initialize the algorithm's properties.
  */
 void NexusTester::init() {
-  std::initializer_list<std::string> exts = { ".nxs" };
+  std::initializer_list<std::string> exts = {".nxs"};
 
   declareProperty(
       new FileProperty("SaveFilename", "", FileProperty::OptionalSave, exts),

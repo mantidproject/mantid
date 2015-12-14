@@ -83,9 +83,10 @@ const std::string RawFileInfo::runHeader(const ISISRAW &isisRaw) {
 
 /// Create properties
 void RawFileInfo::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, {".raw", ".s*"}),
-                  "The name of the [[RAW_File | RAW]] file from which to "
-                  "extract the parameters");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".raw", ".s*"}),
+      "The name of the [[RAW_File | RAW]] file from which to "
+      "extract the parameters");
   declareProperty("GetRunParameters", false,
                   "If this is true, the parameters from the RPB struct are "
                   "placed into a TableWorkspace called Raw_RPB",

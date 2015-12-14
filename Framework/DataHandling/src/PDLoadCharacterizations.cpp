@@ -56,8 +56,9 @@ const std::string PDLoadCharacterizations::category() const {
 /** Initialize the algorithm's properties.
  */
 void PDLoadCharacterizations::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, {".txt"}),
-                  "Characterizations file");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".txt"}),
+      "Characterizations file");
   declareProperty(
       new FileProperty("ExpIniFilename", "", FileProperty::OptionalLoad, "ini"),
       "(Optional) exp.ini file used at NOMAD");

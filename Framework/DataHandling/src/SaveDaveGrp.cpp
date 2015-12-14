@@ -33,7 +33,7 @@ void SaveDaveGrp::init() {
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
   this->declareProperty(
-	  new FileProperty("Filename", "", FileProperty::Save, { ".grp" }),
+      new FileProperty("Filename", "", FileProperty::Save, {".grp"}),
       "A DAVE grouped data format file that will be created");
   this->declareProperty(new Kernel::PropertyWithValue<bool>(
                             "ToMicroEV", false, Kernel::Direction::Input),

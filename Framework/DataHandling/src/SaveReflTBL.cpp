@@ -23,8 +23,9 @@ SaveReflTBL::SaveReflTBL() : m_sep(','), m_stichgroups(), m_nogroup() {}
 
 /// Initialisation method.
 void SaveReflTBL::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, { ".tbl" }),
-                  "The filename of the output TBL file.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Save, {".tbl"}),
+      "The filename of the output TBL file.");
 
   declareProperty(new WorkspaceProperty<ITableWorkspace>("InputWorkspace", "",
                                                          Direction::Input),

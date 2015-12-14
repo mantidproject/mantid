@@ -60,7 +60,7 @@ void SaveParameterFile::init() {
       "Workspace to save the instrument parameters from.");
 
   declareProperty(
-	  new API::FileProperty("Filename", "", API::FileProperty::Save, { ".xml" }),
+      new API::FileProperty("Filename", "", API::FileProperty::Save, {".xml"}),
       "The name of the file into which the instrument parameters will be "
       "saved.");
 
