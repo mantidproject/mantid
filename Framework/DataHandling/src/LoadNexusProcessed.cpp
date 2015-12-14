@@ -216,12 +216,9 @@ int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadNexusProcessed::init() {
   // Declare required input parameters for algorithm
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".nx5");
-  exts.push_back(".xml");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load,
+                       {".nxs", ".nx5", ".xml"}),
       "The name of the Nexus file to read, as a full or relative path.");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -302,7 +299,8 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     std::stringstream buffer;
     buffer << "Group entry " << p - 1 << " has fractional area present. Try "
                                          "reloading with FastMultiPeriod set "
-                                         "off." << std::endl;
+                                         "off."
+           << std::endl;
     throw std::runtime_error(buffer.str());
   }
 
