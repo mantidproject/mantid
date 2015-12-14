@@ -46,12 +46,9 @@ SaveISISNexus::SaveISISNexus()
  *
  */
 void SaveISISNexus::init() {
-  std::vector<std::string> raw_exts;
-  raw_exts.push_back(".raw");
-  raw_exts.push_back(".s*");
-  raw_exts.push_back(".add");
   declareProperty(
-      new FileProperty("InputFilename", "", FileProperty::Load, raw_exts),
+      new FileProperty("InputFilename", "", FileProperty::Load,
+                       {".raw", ".s*", ".add"}),
       "The name of the RAW file to read, including its full or relative\n"
       "path. (N.B. case sensitive if running on Linux).");
 
