@@ -1878,6 +1878,7 @@ void Object::setVtkGeometryCacheWriter(
 void Object::setVtkGeometryCacheReader(
     boost::shared_ptr<vtkGeometryCacheReader> reader) {
   vtkCacheReader = reader;
+  updateGeometryHandler();
 }
 
 /**

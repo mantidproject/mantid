@@ -1,36 +1,38 @@
-#pylint: disable=too-many-lines,invalid-name
+# pylint: disable=invalid-name, redefined-outer-name, multiple-statements
 # -*- coding: utf-8 -*-
+
 """ Classes describing test projects,
 how they are run,
 and interpreting the results"""
+
 import time
 import datetime
 import os
 import commands
 import tempfile
 import shutil
-from xml.dom.minidom import parse, parseString
+from xml.dom.minidom import parse
 import multiprocessing
 from multiprocessing import Pool
 import random
 import subprocess
-import sys
 import shlex
 import threading
 
-#==================================================================================================
+# ==================================================================================================
 # GLOBAL CONSTANTS
 global MSG_ALL_BUILDS_SUCCESSFUL
 MSG_ALL_BUILDS_SUCCESSFUL = "MSG(all_builds_successful)"
 
 html_escape_table = {
-    #"&": "&amp;",
-    #'"': "&quot;",
-    #"'": "&apos;",
-    #">": "&gt;",
+    # "&": "&amp;",
+    # '"': "&quot;",
+    # "'": "&apos;",
+    # ">": "&gt;",
     "<": "&lt;",
-    #'‘': "&apos;",
-    }
+    # '‘': "&apos;",
+}
+
 
 def html_escape(text):
     """Produce entities within text."""
@@ -38,11 +40,10 @@ def html_escape(text):
     for (key, val) in html_escape_table.items():
         out = out.replace(key, val)
     return out
-    #return "".join(html_escape_table.get(c,c) for c in text)
+    # return "".join(html_escape_table.get(c,c) for c in text)
 
 
-
-#==================================================================================================
+# ==================================================================================================
 # GLOBAL VARIABLES
 
 # Limit in memory to a process (single test suite)
@@ -51,20 +52,21 @@ memory_limit_kb = 800000
 # Limit of time that a suite can run
 process_timeout_sec = 1
 
-#==================================================================================================
+
+# ==================================================================================================
 class TestResult:
     """Enumeration giving the state of a single test, suite, or project"""
-    """ Test was not run since the program started """
+    # """ Test was not run since the program started """
     NOT_RUN = 0
-    """ Test passed """
+    # """ Test passed """
     ALL_PASSED = 1
-    """ At least one test failed """
+    # """ At least one test failed """
     SOME_FAILED = 2
-    """ Build error ! """
+    # """ Build error ! """
     BUILD_ERROR = 3
-    """ All tests failed """
+    # """ All tests failed """
     ALL_FAILED = 4
-    """ Probably a segfault """
+    # """ Probably a segfault """
     ABORTED = 5
 
     def __init__(self, value=0, old=False):
@@ -101,7 +103,6 @@ class TestResult:
             s += " (old)"
         return s
 
-
     def add(self, other):
         """ Add the state from a another test result or another suite. """
         if other == self.BUILD_ERROR:
@@ -132,10 +133,10 @@ class TestResult:
                 self.old = True
 
 
-
-#==================================================================================================
+# ==================================================================================================
 class TestSingle(object):
     """ A single test instance (one test inside one suite) """
+
     def __init__(self, name, parent, fullname=None):
         self.name = name
         if fullname is None:
@@ -163,45 +164,46 @@ class TestSingle(object):
         # Stdout output for that failure
         self.stdout = ""
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_failed(self):
         """Return 1 if the test failed"""
         if self.state.is_failed():
             return 1
         else:
             return 0
+
     failed = property(get_failed)
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_fullname(self):
         """Return a full, uniquely identifying name for this """
         return self.fullname
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_results_text(self):
         """Returns HTML text describing these test results """
         # Change the header color
         color = ['"green"', '"red"'][self.failed]
         s = u"<font color=%s><b>%s</b></font><br />" % (color, self.name)
-#        if len(self.failure) > 0:
-#            s += self.failure + "<br>"
+        #        if len(self.failure) > 0:
+        #            s += self.failure + "<br>"
         if len(self.stdout) > 0:
             s += u'<pre style="white-space: pre-wrap;">'
-            s +=  unicode(self.stdout)
-            #s += html_escape( unicode(self.stdout) )
+            s += unicode(self.stdout)
+            # s += html_escape( unicode(self.stdout) )
             s += u"</pre>"
-#            lines = self.stdout.split("\n")
-#            # Remove any empty first line
-#            if lines[0] == "" and len(lines)>1: lines = lines[1:]
-#            # Use the pre tag but wrap long lines.
-#            s += u'<pre style="white-space: pre-wrap;">'
-#            # Print the rest
-#            for line in lines:
-#                s += unicode( html_escape(line) + "\n")
-#            s += u"</pre>"
+        # lines = self.stdout.split("\n")
+        #            # Remove any empty first line
+        #            if lines[0] == "" and len(lines)>1: lines = lines[1:]
+        #            # Use the pre tag but wrap long lines.
+        #            s += u'<pre style="white-space: pre-wrap;">'
+        #            # Print the rest
+        #            for line in lines:
+        #                s += unicode( html_escape(line) + "\n")
+        #            s += u"</pre>"
         return s
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def replace_contents(self, other):
         """ Replace the contents of self with those of other (coming after running in
         a separate thread """
@@ -213,7 +215,7 @@ class TestSingle(object):
         self.failure_line = other.failure_line
         self.stdout = other.stdout
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def load_results(self, case):
         """Load the results from a xml Junit file
         Parameters
@@ -233,10 +235,10 @@ class TestSingle(object):
         # Look for failures
         fails = case.getElementsByTagName("failure")
 
-        if len(fails)>0:
+        if len(fails) > 0:
             self.state = TestResult(TestResult.ALL_FAILED, old=False)
             # File and line of failure
-            file = fails[0].getAttribute("file")
+            _file = fails[0].getAttribute("file")
             self.failure_line = fails[0].getAttribute("line")
             # Get the failure text
             self.failure = fails[0].firstChild.data
@@ -247,7 +249,7 @@ class TestSingle(object):
 
         # Look for errors (python unit tests mostly)
         errors = case.getElementsByTagName("error")
-        if len(errors)>0:
+        if len(errors) > 0:
             self.state = TestResult(TestResult.ALL_FAILED, old=False)
             self.failure_line = 0
             # Get the failure text
@@ -255,13 +257,12 @@ class TestSingle(object):
             # Put it in std out so we can see it
             self.stdout += "\n" + self.failure
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def run_test(self):
         """Run only this single test and interpret the results. """
         self.parent.run_tests()
 
-
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_state_str(self):
         """Return a string summarizing the state. Used in GUI."""
         return self.state.get_string()
@@ -271,10 +272,11 @@ class TestSingle(object):
         self.state.old = True
 
     def __repr__(self):
-        return "TestSingle(%s): state=%s, lastrun=%s, runtime=%s.\n%s" % (self.name, self.get_state_str(), self.lastrun, self.runtime, self.stdout)
+        return "TestSingle(%s): state=%s, lastrun=%s, runtime=%s.\n%s" % (
+            self.name, self.get_state_str(), self.lastrun, self.runtime, self.stdout)
 
 
-#==================================================================================================
+# ==================================================================================================
 class TestSuite(object):
     """ A suite of tests """
 
@@ -302,7 +304,7 @@ class TestSuite(object):
         # Source file (BlaBlaTest.h) for this suite
         self.source_file = source_file
         if not os.path.exists(self.source_file):
-            #print "Warning! Source file for test %s not found: %s" % (self.name, self.source_file)
+            # print "Warning! Source file for test %s not found: %s" % (self.name, self.source_file)
             self.source_file_mtime = time.time()
         else:
             # Last modified time of the source file
@@ -323,12 +325,12 @@ class TestSuite(object):
         # Contents of the mantid.log file
         self.log_contents = ""
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_fullname(self):
         """Return a full, uniquely identifying name for this """
         return self.classname
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_results_text(self, details=True):
         """Returns HTML text describing these test results """
         # Change the header color
@@ -336,7 +338,7 @@ class TestSuite(object):
         s = u"<font color=%s><h3>%s</h3></font>" % (color, self.name + ": " + self.get_state_str())
         if not self.build_succeeded:
             s += u'<pre style="white-space: pre-wrap;">'
-            s += unicode( html_escape( self.build_stdout) )
+            s += unicode(html_escape(self.build_stdout))
             s += u"</pre>"
         else:
             for test in self.tests:
@@ -351,17 +353,17 @@ class TestSuite(object):
                     s += u"<font color=Orange><h3>%s</h3></font>" % (self.name + ": " + "Log File")
                     s += "<br>"
                     if len(self.log_contents) < 10000:
-                        html_log = html_escape( self.log_contents )
+                        html_log = html_escape(self.log_contents)
                     else:
                         # Too long to escape HTML
-                        html_log = html_escape( self.log_contents[:10000] )
+                        html_log = html_escape(self.log_contents[:10000])
                         html_log += "<br><br> LOG TOO LONG ... <br>"
 
                     html_log = html_log.replace("\n", "<br>")
                     s += html_log
         return s
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def replace_contents(self, other):
         """ Replace the contents of self with those of other (coming after running in
         a separate thread """
@@ -375,7 +377,7 @@ class TestSuite(object):
             for i in xrange(len(self.tests)):
                 if self.tests[i].name != other.tests[i].name:
                     self.contents_changed = True
-                self.tests[i].replace_contents( other.tests[i] )
+                self.tests[i].replace_contents(other.tests[i])
         # Copy local values
         self.lastrun = other.lastrun
         self.build_succeeded = other.build_succeeded
@@ -384,18 +386,17 @@ class TestSuite(object):
         # Re-compile the states from the individual tests
         self.compile_states()
 
-
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def add_single(self, test_name, fullname):
         """ Add a single test to this suite """
-        self.tests.append( TestSingle(test_name, self, fullname) )
+        self.tests.append(TestSingle(test_name, self, fullname))
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_parent(self):
         """ Return the parent Project of this suite """
         return self.parent
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_modified(self):
         """" Returns True if the required source file was modified.
         NOTE: This overwrites the previous cached modified time, AKA it will
@@ -408,25 +409,25 @@ class TestSuite(object):
     def get_selected(self):
         return self.selected
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def set_selected(self, value):
         """Sets the selection state of this suite. """
         self.selected = value
-        #if self.parent.selected:
+        # if self.parent.selected:
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def age(self):
         """ Age the results (flag them as "old" ) """
         self.state.old = True
         for test in self.tests:
             test.age()
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def is_built(self):
         """Returns True if the test build for this suite was successful."""
         return self.build_succeeded
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def set_build_failed(self, output):
         """Sets that the build failed for all single tests in this suite.
         Parameters:
@@ -439,7 +440,7 @@ class TestSuite(object):
             test.failure = "Build failure"
             test.stdout = ""
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def compile_states(self):
         """ Add up the single test results into this suite """
         self.state = TestResult(TestResult.NOT_RUN)
@@ -447,7 +448,7 @@ class TestSuite(object):
         self.failed = 0
         self.num_run = 0
         for test in self.tests:
-            self.state.add( test.state )
+            self.state.add(test.state)
             if test.state.is_failed():
                 self.failed += 1
                 self.num_run += 1
@@ -455,27 +456,27 @@ class TestSuite(object):
                 self.passed += 1
                 self.num_run += 1
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_runtime(self):
         """Return the total runtime of contained tests """
         runtime = 0
         for test in self.tests:
             runtime += test.runtime
         return runtime
+
     runtime = property(get_runtime)
 
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_state_str(self):
         """Return a string summarizing the state. Used in GUI."""
         self.compile_states()
         if self.failed > 0:
-            return self.state.get_string() + " (%d of %d failed)" % (self.failed, self.num_run) #, self.num_run)
+            return self.state.get_string() + " (%d of %d failed)" % (self.failed, self.num_run)  # , self.num_run)
         else:
-            return self.state.get_string() + " (%d)" % (self.num_run) #, self.num_run)
+            return self.state.get_string() + " (%d)" % (self.num_run)  # , self.num_run)
 
-
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def run_tests(self, stdout_callback_func, single_test_name=None):
         """ Runs this test suite, then loads the produced XML file
         and interprets its results.
@@ -546,8 +547,8 @@ class TestSuite(object):
         # Finalize
         self.compile_states()
 
-    #----------------------------------------------------------------------------------
-    def set_aborted(self, stdout, single_test_name = None):
+    # ----------------------------------------------------------------------------------
+    def set_aborted(self, stdout, single_test_name=None):
         """ Set that all tests aborted and save the stdout """
         for test in self.tests:
             if single_test_name is None or (single_test_name == test.name):
@@ -556,8 +557,7 @@ class TestSuite(object):
                 test.stdout = stdout
                 test.lastrun = datetime.datetime.now()
 
-
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def find_test(self, test_name):
         """Find and return a TestSingle instance of given name"""
         for test in self.tests:
@@ -565,8 +565,7 @@ class TestSuite(object):
                 return test
         return None
 
-
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def parse_xml(self, xml_path, single_test=False):
         """Interpret a jUnit-style XML file produced for this suite.
 
@@ -582,7 +581,7 @@ class TestSuite(object):
             # Empty file, for example? Just return
             return
 
-        #print dom.getElementsByTagName(self.name)
+        # print dom.getElementsByTagName(self.name)
         suites = dom.getElementsByTagName("testsuite")
         if len(suites) == 0:
             return
@@ -603,8 +602,8 @@ class TestSuite(object):
                 test = self.find_test(test_name)
                 # It is possible that the test was just added
                 if test is None:
-                    #print "Test %s in suite %s was not found. Adding it." % (test_name, classname)
-                    self.add_single(test_name, self.classname+"."+test_name)
+                    # print "Test %s in suite %s was not found. Adding it." % (test_name, classname)
+                    self.add_single(test_name, self.classname + "." + test_name)
                     # Look for it now
                     test = self.find_test(test_name)
                     # Mark that we need to update the tree in the GUI
@@ -623,22 +622,22 @@ class TestSuite(object):
             tests_copy = self.tests[:]
             for test in tests_copy:
                 if test.lastrun != self.lastrun:
-                    #print "Removing test %s" % test.get_fullname()
+                    # print "Removing test %s" % test.get_fullname()
                     self.tests.remove(test)
                     # Mark that we need to update the tree in the GUI
                     self.contents_changed = True
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def __repr__(self):
-        return "TestSuite(%s) with %d TestSingle(s).\nCommand=%s\nXML File=%s\nSource file=%s" % (self.name, len(self.tests), self.command, self.xml_file, self.source_file)
+        return "TestSuite(%s) with %d TestSingle(s).\nCommand=%s\nXML File=%s\nSource file=%s" % (
+            self.name, len(self.tests), self.command, self.xml_file, self.source_file)
 
 
-
-#==================================================================================================
+# ==================================================================================================
 class TestProject(object):
     """ A sub-project of several test suites, e.g. KernelTest """
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def __init__(self, name, executable, make_command):
         self.name = name
 
@@ -662,26 +661,27 @@ class TestProject(object):
         self.build_succeeded = True
         self.build_stdout = ""
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_lastrun(self):
         """Return the last time any of the suites were run"""
-        latest = datetime.datetime(2000,1,1)
+        latest = datetime.datetime(2000, 1, 1)
         for suite in self.suites:
             if not suite.lastrun is None:
                 if suite.lastrun > latest:
                     latest = suite.lastrun
-        if latest != datetime.datetime(2000,1,1):
+        if latest != datetime.datetime(2000, 1, 1):
             return latest
         else:
             return None
+
     lastrun = property(get_lastrun)
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_fullname(self):
         """Return a full, uniquely identifying name for this """
         return self.name
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_selected(self):
         """Return whether this is selected or not. NOTE:
         Returns: 0: none are selected; 1: all are selected; 2: some are selected"""
@@ -699,7 +699,7 @@ class TestProject(object):
             return 0
         return 2
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_results_text(self):
         """Returns HTML text describing these test results """
         # Change the header color
@@ -707,14 +707,14 @@ class TestProject(object):
         s = u"<font color=%s><h1>%s</h1></font>" % (color, self.name + ": " + self.get_state_str())
         if not self.build_succeeded:
             s += u'<pre style="white-space: pre-wrap;">'
-            s += unicode( html_escape( self.build_stdout ) )
+            s += unicode(html_escape(self.build_stdout))
             s += u"</pre>"
         else:
             for suite in self.suites:
                 s += suite.get_results_text(details=False)
         return s
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def is_source_modified(self, selected_only):
         """Return true if any of the source files were modified
         @param selected_only :: True if you only check the selected ones."""
@@ -725,21 +725,21 @@ class TestProject(object):
                 anymod = anymod or this_one_changed
         return anymod
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def replace_contents(self, other):
         """ Replace the contents of self with those of other (coming after running in
         a separate thread """
         if len(self.suites) != len(other.suites):
             print "The number of suites in %s changed. You should refresh your view." % self.name
-            #TODO! handle better
+            # TODO! handle better
             self.suites = other.suites
         else:
             for i in xrange(len(self.suites)):
-                self.suites[i].replace_contents( other.suites[i] )
+                self.suites[i].replace_contents(other.suites[i])
         # Re do the stats and states
         self.compile_states()
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def make(self, callback_func=None):
         """Make the project using the saved command.
         @param callback_func :: Callback function that will accept a
@@ -766,24 +766,21 @@ class TestProject(object):
             for suite in self.suites:
                 suite.build_succeeded = True
 
-
-
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def age(self):
         """ Age the results (flag them as "old" ) """
         self.state.old = True
         for suite in self.suites:
             suite.age()
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def find_source_file(self, suite_name):
         """ Find the source file corresponding to the given suite in this project
         Returns: the full path to the test file.
         """
-        return os.path.join( self.source_path, "test/" + suite_name + ".h")
+        return os.path.join(self.source_path, "test/" + suite_name + ".h")
 
-
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def is_anything_selected(self):
         """Return True if any of the suites are selected."""
         for suite in self.suites:
@@ -791,16 +788,17 @@ class TestProject(object):
                 return True
         return False
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_runtime(self):
         """Return the total runtime of contained tests """
         runtime = 0
         for suite in self.suites:
             runtime += suite.get_runtime()
         return runtime
+
     runtime = property(get_runtime)
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def compile_states(self):
         """ Add up the single test results into this suite """
         self.state = TestResult(TestResult.NOT_RUN)
@@ -809,21 +807,21 @@ class TestProject(object):
         self.num_run = 0
         for suite in self.suites:
             state = suite.state
-            self.state.add( state )
+            self.state.add(state)
             self.passed += suite.passed
             self.num_run += suite.num_run
             self.failed += suite.failed
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_state_str(self):
         """Return a string summarizing the state. Used in GUI."""
         self.compile_states()
         if self.failed > 0:
-            return self.state.get_string() + " (%d of %d failed)" % (self.failed, self.num_run) #, self.num_run)
+            return self.state.get_string() + " (%d of %d failed)" % (self.failed, self.num_run)  # , self.num_run)
         else:
-            return self.state.get_string() + " (%d)" % (self.num_run) #, self.num_run)
+            return self.state.get_string() + " (%d)" % (self.num_run)  # , self.num_run)
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def populate(self, project_source_path):
         """ Discover the suites and single tests in this test project.
         @param project_source_path :: root path to the project. e.g. Framework/Kernel
@@ -847,7 +845,7 @@ class TestProject(object):
         except:
             pass
 
-        lines =  output.split("\n")
+        lines = output.split("\n")
         # Look for the The first two lines are headers
         count = 0
         while count < len(lines) and not lines[count].startswith("-------------------------"):
@@ -888,7 +886,7 @@ class TestProject(object):
                         self.suites.append(suite)
 
                     # Add a single test to whatever suite we are in
-                    suite.add_single(test_name, classname+"."+test_name)
+                    suite.add_single(test_name, classname + "." + test_name)
             else:
                 # Could not interpret line
                 pass
@@ -897,13 +895,13 @@ class TestProject(object):
         return "TestProject(%s)" % (self.name)
 
 
-#==================================================================================================
-#======== Global methods used by parallel processing ================
-#==================================================================================================
+# ==================================================================================================
+# ======== Global methods used by parallel processing ================
+# ==================================================================================================
 
 
-#==================================================================================================
-def run_tests_in_suite(multiple_tests, suite, stdout_callback_func ):
+# ==================================================================================================
+def run_tests_in_suite(multiple_tests, suite, stdout_callback_func):
     """Run all tests in a given suite. Method called
     by the multiprocessing Pool.apply_async() method.
 
@@ -919,7 +917,8 @@ def run_tests_in_suite(multiple_tests, suite, stdout_callback_func ):
     # Simply return the object back (for use by the callback function)
     return suite
 
-#==================================================================================================
+
+# ==================================================================================================
 def make_test(multiple_tests, project):
     """Make the tests in a given project. Method called
     by the multiprocessing Pool.apply_async() method.
@@ -941,16 +940,14 @@ def make_test(multiple_tests, project):
         return None
 
 
-
-
-#==================================================================================================
-#==================================================================================================
-#==================================================================================================
+# ==================================================================================================
+# ==================================================================================================
+# ==================================================================================================
 class MultipleProjects(object):
     """ A Class containing a list of all the available test projects.
     This will be made into a single global variable instance. """
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def __init__(self):
         # The projects contained
         self.projects = []
@@ -966,19 +963,19 @@ class MultipleProjects(object):
         # Head folder of the source files (Framework normally)
         self.source_path = "."
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def abort(self):
         """ Set a flag to abort all further calculations. """
         print "... Attempting to abort ..."
         self.abort_run = True
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def age(self):
         """ Age the results (flag them as "old" ) """
         for pj in self.projects:
             pj.age()
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def select_all(self, value):
         """ Select all tests """
         for pj in self.projects:
@@ -986,7 +983,7 @@ class MultipleProjects(object):
             for suite in pj.suites:
                 suite.selected = value
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def select_failed(self):
         """ Select all failing tests """
         for pj in self.projects:
@@ -994,30 +991,30 @@ class MultipleProjects(object):
             for suite in pj.suites:
                 suite.selected = (suite.failed > 0)
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def select_svn(self):
         """ Do a 'git status st' call and interpret the results to find which tests need to be run. """
         # First, de-select it all
         self.select_all(False)
         os.chdir(self.source_path)
-        output = commands.getoutput("git status --porcelain %s " % self.source_path )
+        output = commands.getoutput("git status --porcelain %s " % self.source_path)
         lines = output.split('\n')
         for line in lines:
             line = line.strip()
-            #if line.startswith('M') or line.startswith('A') or line.startswith('D') or line.startswith('R'):
+            # if line.startswith('M') or line.startswith('A') or line.startswith('D') or line.startswith('R'):
             # Consider every line in git status to be a modified file
             if True:
-                #Change to file or stuff.
+                # Change to file or stuff.
                 filename = line[2:].strip()
                 # Go up two levels from Code/Framework so that we can append the filename, which starts with "Code/Framework/etc."
-                filename = os.path.join( self.source_path, "..", "..", "..", filename)
+                filename = os.path.join(self.source_path, "..", "..", "..", filename)
                 filename = os.path.abspath(filename)
                 foundit = None
                 for pj in self.projects:
                     for suite in pj.suites:
                         # If the test file and the source file are the same,
                         if os.path.exists(suite.source_file):
-                            if os.path.samefile( suite.source_file, filename):
+                            if os.path.samefile(suite.source_file, filename):
                                 suite.selected = True
                                 pj.selected = True
                                 foundit = suite
@@ -1039,10 +1036,9 @@ class MultipleProjects(object):
                 if foundit is None:
                     print "%s: No test found." % (filename)
                 else:
-                    print "%s: Test found: '%s'" % ( filename, foundit.get_fullname() )
+                    print "%s: Test found: '%s'" % (filename, foundit.get_fullname())
 
-
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def select_by_string(self, val):
         """ Search by words """
         if len(val) < 2:
@@ -1067,7 +1063,7 @@ class MultipleProjects(object):
 
         print num, " suites were selected."
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def discover_CXX_projects(self, path, source_path):
         """Look for CXXTest projects in the given paths.
         Populates all the test in it."""
@@ -1078,22 +1074,22 @@ class MultipleProjects(object):
         self.projects = []
 
         # How many cores to use to make projects
-        num_threads = multiprocessing.cpu_count()-1
+        num_threads = multiprocessing.cpu_count() - 1
         if num_threads < 1: num_threads = 1
 
         testnames = set()
 
-        dirList=os.listdir(path)
+        dirList = os.listdir(path)
         for fname in dirList:
             # Look for executables ending in Test
-            #if (fname.endswith("Test") or fname.endswith("Test.py")) and os.path.isfile( os.path.join(path, fname) ):
-            if (fname.endswith("Test")) and os.path.isfile( os.path.join(path, fname) ):
+            # if (fname.endswith("Test") or fname.endswith("Test.py")) and os.path.isfile( os.path.join(path, fname) ):
+            if (fname.endswith("Test")) and os.path.isfile(os.path.join(path, fname)):
                 testnames.add(fname)
 
         # Now add the known tests, in case they were deleted
         for x in ["AlgorithmsTest", "DataObjectsTest", "MDAlgorithmsTest", "PythonAPITest", "APITest",
-                       "GeometryTest", "CurveFittingTest", "ICatTest", "MDEventsTest",
-                       "DataHandlingTest", "KernelTest", "CrystalTest", "VatesAPITest"]:
+                  "GeometryTest", "CurveFittingTest", "ICatTest", "MDEventsTest",
+                  "DataHandlingTest", "KernelTest", "CrystalTest", "VatesAPITest"]:
             testnames.add(x)
 
         for fname in testnames:
@@ -1110,19 +1106,19 @@ class MultipleProjects(object):
             pj.populate(project_source_path)
             self.projects.append(pj)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def make_fake_results(self):
         """Generate some fake results for quick debugging """
         for pj in self.projects:
-            pj.state.value = random.randint(0,4)
+            pj.state.value = random.randint(0, 4)
             for suite in pj.suites:
-                suite.state.value = random.randint(0,4)
+                suite.state.value = random.randint(0, 4)
                 for test in suite.tests:
                     test.state = TestResult(random.randint(0, 4))
-                    test.state.old = (random.randint(0,10) > 5)
-                    test.runtime = random.random()/1000
+                    test.state.old = (random.randint(0, 10) > 5)
+                    test.runtime = random.random() / 1000
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def compile_states(self):
         """ Add up the single test results into this suite """
         self.state = TestResult(TestResult.NOT_RUN)
@@ -1131,20 +1127,20 @@ class MultipleProjects(object):
         self.num_run = 0
         for pj in self.projects:
             state = pj.state
-            self.state.add( state )
+            self.state.add(state)
             self.passed += pj.passed
             self.num_run += pj.num_run
             self.failed += pj.failed
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def get_state_str(self):
         """Return a string summarizing the state. Used in GUI."""
         if self.failed > 0:
-            return self.state.get_string() + " (%d of %d failed)" % (self.failed, self.num_run) #, self.num_run)
+            return self.state.get_string() + " (%d of %d failed)" % (self.failed, self.num_run)  # , self.num_run)
         else:
-            return self.state.get_string() + " (%d)" % (self.num_run) #, self.num_run)
+            return self.state.get_string() + " (%d)" % (self.num_run)  # , self.num_run)
 
-    #----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def is_source_modified(self, selected_only):
         """Return true if any of the source files were modified
         @param selected_only :: True if you only check the selected ones."""
@@ -1154,7 +1150,7 @@ class MultipleProjects(object):
                 anymod = anymod or pj.is_source_modified(selected_only)
         return anymod
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def find_project(self, name):
         """Return the TestProject named name; None if not found"""
         for pj in self.projects:
@@ -1162,7 +1158,7 @@ class MultipleProjects(object):
                 return pj
         return None
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def find_suite(self, classname):
         """ Return the TestSuite with the given classname (e.g. KernelTest.UnitTest).
         Returns None if not found"""
@@ -1172,8 +1168,7 @@ class MultipleProjects(object):
                     return suite
         return None
 
-
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def replace_project(self, pj):
         """Given a project from another thread, replace the current one with this one.
         Will look for a matching name"""
@@ -1182,7 +1177,7 @@ class MultipleProjects(object):
                 self.projects[i].replace_contents(pj)
                 break
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def replace_suite(self, st):
         """Given a suite from another thread, replace the current one with this one.
         Will look for a matching name"""
@@ -1197,7 +1192,7 @@ class MultipleProjects(object):
                 pj.suites[i].replace_contents(st)
                 break
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def get_selected_suites(self, selected_only=True):
         """Returns a list of all selected suites. Suites where make failed
         are excluded!
@@ -1209,13 +1204,13 @@ class MultipleProjects(object):
             for st in pj.suites:
                 # print "get_selected_suites: status of ", st.classname, st.is_built()
                 if st.is_built() and (st.get_selected() or (not selected_only)):
-                    #print "get_selected_suites adding ", st.classname
+                    # print "get_selected_suites adding ", st.classname
                     # Suite must be built to be included here!
                     suites.append(st)
         # print "get_selected_suites ", len(suites)
         return suites
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def run_tests_computation_steps(self, selected_only=True, make_tests=True):
         """Returns the number of computation steps that will be done with these parameters
         This is used by the GUI to know how to report progress."""
@@ -1227,8 +1222,7 @@ class MultipleProjects(object):
         count += len(self.get_selected_suites(selected_only))
         return count
 
-
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def run_tests_in_parallel(self, selected_only=True, make_tests=True, parallel=True,
                               callback_func=None):
         """Run tests in parallel using multiprocessing.
@@ -1249,7 +1243,7 @@ class MultipleProjects(object):
         self.age()
 
         # How many thread in parallel?  one fewer threads than the # of cpus
-        num_threads = multiprocessing.cpu_count()-1
+        num_threads = multiprocessing.cpu_count() - 1
         if num_threads < 1: num_threads = 1
 
         # Now let's run the make test command for each one
@@ -1290,13 +1284,13 @@ class MultipleProjects(object):
 
         if parallel:
             # Make the pool
-            p = Pool( num_threads )
+            p = Pool(num_threads)
 
             # Call the method that will run each suite
             results = []
             for suite in suites:
-                result = p.apply_async( run_tests_in_suite, (self, suite, None), callback=callback_func)
-                results.append( (result, suite) )
+                result = p.apply_async(run_tests_in_suite, (self, suite, None), callback=callback_func)
+                results.append((result, suite))
             p.close()
 
             # This will block until completed
@@ -1304,22 +1298,23 @@ class MultipleProjects(object):
 
         else:
             for suite in suites:
-                result = run_tests_in_suite( self, suite, callback_func)
+                result = run_tests_in_suite(self, suite, callback_func)
                 if not callback_func is None: callback_func(result)
 
         # Now we compile all the projects' states
         for pj in self.projects:
             pj.compile_states()
         self.compile_states()
-        print "... %s tests %sand completed in %f seconds ..." % (["All", "Selected"][selected_only], ["","built "][parallel],  (time.time() - start))
-
+        print "... %s tests %sand completed in %f seconds ..." % (
+            ["All", "Selected"][selected_only], ["", "built "][parallel], (time.time() - start))
 
 
 # Global variable containing a list of all the available test projects
 global all_tests
 all_tests = MultipleProjects()
 
-#==================================================================================================
+
+# ==================================================================================================
 def test_run_print_callback(obj):
     """ Simple callback for running tests. This is called into the MainProcess.
 
@@ -1335,19 +1330,21 @@ def test_run_print_callback(obj):
     elif isinstance(obj, TestProject):
         pj = obj
         # Replace the project in THIS thread!
-        all_tests.replace_project( pj )
+        all_tests.replace_project(pj)
         print "Made project %s" % pj.name
 
     else:
         pass
-#        print "-->" + obj
+
+
+# print "-->" + obj
 #        sys.stdout.flush()
 
 
 
 
-#==================================================================================================
-#==================================================================================================
+# ==================================================================================================
+# ==================================================================================================
 def run_command_with_callback(full_command, callback_func, run_shell=True):
     """Run a shell command while outputting each line to a callback function.
     Parameters:
@@ -1362,29 +1359,28 @@ def run_command_with_callback(full_command, callback_func, run_shell=True):
     if not run_shell:
         full_command = shlex.split(full_command)
 
-
     p = subprocess.Popen(full_command, shell=run_shell, bufsize=10000,
                          cwd=".",
                          stdin=None, stderr=subprocess.STDOUT,
                          stdout=subprocess.PIPE, close_fds=True,
                          universal_newlines=True)
-    (put, get) = (p.stdin, p.stdout)
+    (_put, get) = (p.stdin, p.stdout)
 
-    line=get.readline()
+    line = get.readline()
     while line != "":
         # Replace annoying character
         line = line.replace('‘', '\'')
         line = line.replace('’', '\'')
-        #line = line.replace('\xe2', '\'')
+        # line = line.replace('\xe2', '\'')
         line = unicode(line)
         # Make one long output string
         output += line
-        #Remove trailing /n
-        if len(line)>1: line = line[:-1]
-        #print line
-        if not callback_func is None: callback_func( line )
-        #Keep reading output.
-        line=get.readline()
+        # Remove trailing /n
+        if len(line) > 1: line = line[:-1]
+        # print line
+        if not callback_func is None: callback_func(line)
+        # Keep reading output.
+        line = get.readline()
 
         # Do we prematurely abort it?
         if all_tests.abort_run:
@@ -1399,9 +1395,8 @@ def run_command_with_callback(full_command, callback_func, run_shell=True):
     return (status, output)
 
 
-
-#==================================================================================================
-#==================================================================================================
+# ==================================================================================================
+# ==================================================================================================
 def run_command_with_timeout(full_command, timeout, run_shell=True):
     """Run a shell command with a timeout.
 
@@ -1425,8 +1420,8 @@ def run_command_with_timeout(full_command, timeout, run_shell=True):
         def run(self, timeout):
             def target():
                 self.process = subprocess.Popen(self.cmd, shell=self.run_shell, stdin=None, stderr=subprocess.STDOUT,
-                                 stdout=subprocess.PIPE, close_fds=True, universal_newlines=True)
-                (self.output, stdin) = self.process.communicate()
+                                                stdout=subprocess.PIPE, close_fds=True, universal_newlines=True)
+                (self.output, _stdin) = self.process.communicate()
 
             thread = threading.Thread(target=target)
             thread.start()
@@ -1437,7 +1432,6 @@ def run_command_with_timeout(full_command, timeout, run_shell=True):
                 thread.join()
 
             self.returncode = self.process.returncode
-
 
     if not run_shell:
         full_command = shlex.split(full_command)
@@ -1452,14 +1446,9 @@ def run_command_with_timeout(full_command, timeout, run_shell=True):
     return (status, output)
 
 
-
-
-
-
-
-#==================================================================================
-#=================== Unit Tests ====================
-#==================================================================================
+# ==================================================================================
+# =================== Unit Tests ====================
+# ==================================================================================
 def test_results_compiling():
     r = TestResult()
     assert r.value == TestResult.NOT_RUN
@@ -1485,6 +1474,7 @@ def test_results_compiling():
     r.add(TestResult.ALL_PASSED)
     assert r.value == TestResult.SOME_FAILED
 
+
 def test_age():
     a = TestSingle("my_test_test", None)
     assert a.state == TestResult.NOT_RUN
@@ -1496,25 +1486,28 @@ def test_age():
     a.age()
     assert a.state.old
 
+
 test_results_compiling()
 test_age()
 
 
 
 
-#==================================================================================================
+# ==================================================================================================
 if __name__ == '__main__':
-#    run_command_with_timeout("echo 'Process started'; sleep 2; echo 'Process finished'", timeout=3)
-#    run_command_with_timeout("echo 'Process started'; sleep 2; echo 'Process finished'", timeout=1)
+    #    run_command_with_timeout("echo 'Process started'; sleep 2; echo 'Process finished'", timeout=3)
+    #    run_command_with_timeout("echo 'Process started'; sleep 2; echo 'Process finished'", timeout=1)
 
-    all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
+    all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/",
+                                    "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     all_tests.select_svn()
     all_tests.select_all(False)
 
     suite = all_tests.find_suite("MDEventsTest.MDEventTest")
     suite.run_tests(test_run_print_callback, 'test_Constructors')
 
-#    suite = all_tests.find_suite("MDEventsTest.MDEventTest")
+
+# suite = all_tests.find_suite("MDEventsTest.MDEventTest")
 #    suite.set_selected(True)
 #    suite = all_tests.find_suite("KernelTest.ConfigServiceTest")
 #    suite.set_selected(True)
@@ -1533,13 +1526,11 @@ if __name__ == '__main__':
 
 
 
-#==================================================================================================
+# ==================================================================================================
 def other_test():
     # Make a sample test project
     kt = TestProject("GeometryTest", "/home/8oz/Code/Mantid/Code/Mantid/bin/GeometryTest", "")
     kt.populate()
-    #print kt.suites
+    # print kt.suites
     print "----"
     kt.suites[16].run_tests()
-
-

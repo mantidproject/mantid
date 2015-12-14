@@ -38,6 +38,8 @@ const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
     "engggui_vanadium_integration_ws";
 int EnggDiffractionPresenter::g_croppedCounter = 0;
 int EnggDiffractionPresenter::g_plottingCounter = 0;
+bool EnggDiffractionPresenter::g_abortThread = false;
+std::string EnggDiffractionPresenter::g_lastValidRun = "";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -129,6 +131,10 @@ void EnggDiffractionPresenter::notify(
   case IEnggDiffractionPresenter::ShutDown:
     processShutDown();
     break;
+
+  case IEnggDiffractionPresenter::StopFocus:
+    processStopFocus();
+    break;
   }
 }
 
@@ -183,6 +189,10 @@ void EnggDiffractionPresenter::processFocusBasic() {
       isValidMultiRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
 
+  // reset global values
+  g_abortThread = false;
+  g_plottingCounter = 0;
+
   // check if valid run number provided before focusin
   try {
     inputChecksBeforeFocusBasic(multi_RunNo, banks);
@@ -200,9 +210,6 @@ void EnggDiffractionPresenter::processFocusBasic() {
     // start focusing
     startFocusing(multi_RunNo, banks, "", "");
 
-    // counter resetted to prepare for the next focusing run
-    g_plottingCounter = 0;
-
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
     /**
@@ -216,6 +223,10 @@ void EnggDiffractionPresenter::processFocusCropped() {
       isValidMultiRunNumber(m_view->focusingCroppedRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
   const std::string specNos = m_view->focusingCroppedSpectrumIDs();
+
+  // reset global values
+  g_abortThread = false;
+  g_plottingCounter = 0;
 
   // check if valid run number provided before focusin
   try {
@@ -234,9 +245,6 @@ void EnggDiffractionPresenter::processFocusCropped() {
 
     startFocusing(multi_RunNo, banks, specNos, "");
 
-    // counter resetted to prepare for the next focusing run
-    g_plottingCounter = 0;
-
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
   }
@@ -246,6 +254,10 @@ void EnggDiffractionPresenter::processFocusTexture() {
   const std::vector<std::string> multi_RunNo =
       isValidMultiRunNumber(m_view->focusingTextureRunNo());
   const std::string dgFile = m_view->focusingTextureGroupingFile();
+
+  // reset global values
+  g_abortThread = false;
+  g_plottingCounter = 0;
 
   // check if valid run number provided before focusing
   try {
@@ -262,9 +274,6 @@ void EnggDiffractionPresenter::processFocusTexture() {
     g_log.debug() << " focus mode selected Individual Run Files Separately "
                   << std::endl;
     startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
-
-    // counter resetted to prepare for the next focusing run
-    g_plottingCounter = 0;
 
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
@@ -385,6 +394,21 @@ void EnggDiffractionPresenter::processRBNumberChange() {
 void EnggDiffractionPresenter::processShutDown() {
   m_view->saveSettings();
   cleanup();
+}
+
+void EnggDiffractionPresenter::processStopFocus() {
+  if (m_workerThread) {
+    if (m_workerThread->isRunning()) {
+      g_log.notice() << "A focus process is currently running, shutting "
+                        "it down as soon as possible..."
+                     << std::endl;
+
+      g_abortThread = true;
+      g_log.warning() << "Focus Stop has been clicked, please wait until "
+                         "current focus run process has been completed. "
+                      << std::endl;
+    }
+  }
 }
 
 /**
@@ -1098,88 +1122,95 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
 
-  g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                    "this directory: "
-                 << dir << std::endl;
+  if (!g_abortThread) {
 
-  // TODO: this is almost 100% common with doNewCalibrate() - refactor
-  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
-  Mantid::Kernel::ConfigServiceImpl &conf =
-      Mantid::Kernel::ConfigService::Instance();
-  const std::vector<std::string> tmpDirs = conf.getDataSearchDirs();
-  // in principle, the run files will be found from 'DirRaw', and the
-  // pre-calculated Vanadium corrections from 'DirCalib'
-  if (!cs.m_inputDirCalib.empty() && Poco::File(cs.m_inputDirCalib).exists()) {
-    conf.appendDataSearchDir(cs.m_inputDirCalib);
-  }
-  if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists()) {
-    conf.appendDataSearchDir(cs.m_inputDirRaw);
-  }
+    // to track last valid run
+    g_lastValidRun = runNo;
 
-  // Prepare special inputs for "texture" focusing
-  std::vector<size_t> bankIDs;
-  std::vector<std::string> effectiveFilenames;
-  std::vector<std::string> specs;
-  if (!specNos.empty()) {
-    // Cropped focusing
-    // just to iterate once, but there's no real bank here
-    bankIDs.push_back(0);
-    specs.push_back(specNos); // one spectrum IDs list given by the user
-    effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
-  } else {
-    if (dgFile.empty()) {
-      // Basic/normal focusing
-      for (size_t bidx = 0; bidx < banks.size(); bidx++) {
-        if (banks[bidx]) {
-          bankIDs.push_back(bidx + 1);
-          specs.push_back("");
-          effectiveFilenames = outputFocusFilenames(runNo, banks);
-        }
-      }
+    g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
+                      "this directory: "
+                   << dir << std::endl;
+
+    // TODO: this is almost 100% common with doNewCalibrate() - refactor
+    EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+    Mantid::Kernel::ConfigServiceImpl &conf =
+        Mantid::Kernel::ConfigService::Instance();
+    const std::vector<std::string> tmpDirs = conf.getDataSearchDirs();
+    // in principle, the run files will be found from 'DirRaw', and the
+    // pre-calculated Vanadium corrections from 'DirCalib'
+    if (!cs.m_inputDirCalib.empty() &&
+        Poco::File(cs.m_inputDirCalib).exists()) {
+      conf.appendDataSearchDir(cs.m_inputDirCalib);
+    }
+    if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists()) {
+      conf.appendDataSearchDir(cs.m_inputDirRaw);
+    }
+
+    // Prepare special inputs for "texture" focusing
+    std::vector<size_t> bankIDs;
+    std::vector<std::string> effectiveFilenames;
+    std::vector<std::string> specs;
+    if (!specNos.empty()) {
+      // Cropped focusing
+      // just to iterate once, but there's no real bank here
+      bankIDs.push_back(0);
+      specs.push_back(specNos); // one spectrum IDs list given by the user
+      effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
     } else {
-      // texture focusing
-      try {
-        loadDetectorGroupingCSV(dgFile, bankIDs, specs);
-      } catch (std::runtime_error &re) {
-        g_log.error() << "Error loading detector grouping file: " + dgFile +
-                             ". Detailed error: " + re.what()
-                      << std::endl;
-        bankIDs.clear();
-        specs.clear();
+      if (dgFile.empty()) {
+        // Basic/normal focusing
+        for (size_t bidx = 0; bidx < banks.size(); bidx++) {
+          if (banks[bidx]) {
+            bankIDs.push_back(bidx + 1);
+            specs.push_back("");
+            effectiveFilenames = outputFocusFilenames(runNo, banks);
+          }
+        }
+      } else {
+        // texture focusing
+        try {
+          loadDetectorGroupingCSV(dgFile, bankIDs, specs);
+        } catch (std::runtime_error &re) {
+          g_log.error() << "Error loading detector grouping file: " + dgFile +
+                               ". Detailed error: " + re.what()
+                        << std::endl;
+          bankIDs.clear();
+          specs.clear();
+        }
+        effectiveFilenames = outputFocusTextureFilenames(runNo, bankIDs);
       }
-      effectiveFilenames = outputFocusTextureFilenames(runNo, bankIDs);
     }
-  }
 
-  // focus all requested banks
-  for (size_t idx = 0; idx < bankIDs.size(); idx++) {
+    // focus all requested banks
+    for (size_t idx = 0; idx < bankIDs.size(); idx++) {
 
-    Poco::Path fpath(dir);
-    const std::string fullFilename =
-        fpath.append(effectiveFilenames[idx]).toString();
-    g_log.notice() << "Generating new focused file (bank " +
-                          boost::lexical_cast<std::string>(bankIDs[idx]) +
-                          ") for run " + runNo + " into: "
-                   << effectiveFilenames[idx] << std::endl;
-    try {
-      m_focusFinishedOK = false;
-      doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
-      m_focusFinishedOK = true;
-    } catch (std::runtime_error &) {
-      g_log.error()
-          << "The focusing calculations failed. One of the algorithms"
-             "did not execute correctly. See log messages for details."
-          << std::endl;
-    } catch (std::invalid_argument &ia) {
-      g_log.error()
-          << "The focusing failed. Some input properties were not valid. "
-             "See log messages for details. Error: "
-          << ia.what() << std::endl;
+      Poco::Path fpath(dir);
+      const std::string fullFilename =
+          fpath.append(effectiveFilenames[idx]).toString();
+      g_log.notice() << "Generating new focused file (bank " +
+                            boost::lexical_cast<std::string>(bankIDs[idx]) +
+                            ") for run " + runNo + " into: "
+                     << effectiveFilenames[idx] << std::endl;
+      try {
+        m_focusFinishedOK = false;
+        doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
+        m_focusFinishedOK = true;
+      } catch (std::runtime_error &) {
+        g_log.error()
+            << "The focusing calculations failed. One of the algorithms"
+               "did not execute correctly. See log messages for details."
+            << std::endl;
+      } catch (std::invalid_argument &ia) {
+        g_log.error() << "The focusing failed. Some input properties "
+                         "were not valid. "
+                         "See log messages for details. Error: "
+                      << ia.what() << std::endl;
+      }
     }
-  }
 
-  // restore initial data search paths
-  conf.setDataSearchDirs(tmpDirs);
+    // restore initial data search paths
+    conf.setDataSearchDirs(tmpDirs);
+  }
 }
 
 void EnggDiffractionPresenter::loadDetectorGroupingCSV(
@@ -1257,6 +1288,23 @@ void EnggDiffractionPresenter::focusingFinished() {
   if (m_workerThread) {
     delete m_workerThread;
     m_workerThread = NULL;
+  }
+
+  // display warning and information to the users regarding Stop Focus
+  if (g_abortThread) {
+    // will get the last number in the list
+    std::string last_RunNo = isValidRunNumber(m_view->focusingRunNo());
+    double lastRun = boost::lexical_cast<double>(last_RunNo);
+    double lastValid = boost::lexical_cast<double>(g_lastValidRun);
+
+    if (lastRun != lastValid) {
+      g_log.warning()
+          << "Focussing process has been stopped, last successful "
+             "run number: "
+          << g_lastValidRun
+          << " , total number of focus run that could not be processed: "
+          << (lastRun - lastValid) << std::endl;
+    }
   }
 }
 
