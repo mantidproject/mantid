@@ -16,10 +16,11 @@
 
 #include <set>
 
+#include "MantidUI.h"
+
 //----------------------------------
 // Forward declarations
 //----------------------------------
-class MantidUI;
 class IntervalList;
 
 /** 
