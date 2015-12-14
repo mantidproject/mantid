@@ -1012,6 +1012,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
         self._start_time_rhs = None
         self._total_time_shift_nano_seconds = int(total_time_shift_seconds*1e9)
 
+        self._type_map = {'good_uah_log': float , 'good_frames' : int, "gd_prtn_chrg" : float}
+
     def extract_sample_logs_from_workspace(self, lhs, rhs):
         '''
         When adding specific logs, we need to make sure that the values are added correctly.
@@ -1051,16 +1053,17 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 prop.clear()
                 # Get the cummulated values and times
                 times, values = self._get_cummulative_sample_logs(element)
-                self._populate_property(prop, times, values)
+                self._populate_property(prop, times, values, self._type_map[element])
 
-        self._update_single_valued_entries(workspace)
+        self._update_single_valued_entries(workspace, self._type_map[element])
 
 
-    def _update_single_valued_entries(self, workspace):
+    def _update_single_valued_entries(self, workspace, type_converter):
         '''
         We need to update single-valued entries which are based on the
         cummulative time series
         @param workspace: the workspace which requires the changes
+        @param type_converter: a type converter
         '''
         run = workspace.getRun()
 
@@ -1074,7 +1077,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 new_value = run.getProperty(key).value[-1]
                 alg_log.setProperty("Workspace", workspace)
                 alg_log.setProperty("LogName", self._single_values_to_update[key])
-                alg_log.setProperty("LogText", str(new_value))
+                alg_log.setProperty("LogText", str(type_converter(new_value)))
                 alg_log.setProperty("LogType", "Number")
                 alg_log.execute()
 
@@ -1190,16 +1193,17 @@ class CummulativeTimeSeriesPropertyAdder(object):
             index += 1
         return index
 
-    def _populate_property(self, prop, times, values):
+    def _populate_property(self, prop, times, values, type_converter):
         '''
         Populates a time series property
         @param property: the time series property
         @param times: the times array
         @param values: the values array
+        @param type_converter: a type converter
         '''
         for index in range(0, len(times)):
             prop.addValue(times[index],
-                          values[index])
+                          type_converter(values[index]))
 
 def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appendix):
     '''
