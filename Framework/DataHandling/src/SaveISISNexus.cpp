@@ -54,17 +54,10 @@ void SaveISISNexus::init() {
 
   // Declare required parameters, filename with ext {.nx,.nx5,xml} and input
   // workspac
-  std::vector<std::string> nxs_exts;
-  nxs_exts.push_back(".nxs");
-  nxs_exts.push_back(".nx5");
-  nxs_exts.push_back(".xml");
-  declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::Save, nxs_exts),
-      "The name of the Nexus file to write, as a full or relative\n"
-      "path");
-  // declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace",
-  // "", Direction::Input),
-  //    "Name of the workspace to be saved");
+  declareProperty(new FileProperty("OutputFilename", "", FileProperty::Save,
+                                   {".nxs", ".nx5", ".xml"}),
+                  "The name of the Nexus file to write, as a full or relative\n"
+                  "path");
 }
 
 /**
