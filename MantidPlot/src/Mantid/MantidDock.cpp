@@ -1521,52 +1521,11 @@ void MantidDockWidget::plotSurface() {
       auto options = m_tree->chooseSurfacePlotOptions();
       // If user clicked OK and not Cancel...
       if (options.accepted) {
-        // Which spectrum to plot from each workspace
-        const int spectrumIndex = options.plotIndex;
-        // Vector holding log values to plot
-        std::vector<double> logValues;
 
         // Set up one new matrix workspace to hold all the data for plotting
         const QString plotWSTitle("__matrixToPlot");
-        IAlgorithm_sptr alg = m_mantidUI->createAlgorithm("CreateWorkspace");
-        alg->initialize();
-        alg->setProperty("OutputWorkspace", plotWSTitle.toStdString());
-
-        // Each "spectrum" will be the data from one workspace
-        int nWorkspaces = wsGroup->getNumberOfEntries();
-        std::string xAxisLabel, dataAxisLabel, xAxisUnits;
-        alg->setProperty("NSpec", nWorkspaces);
-        if (nWorkspaces > 0) {
-          // For each workspace in group, add data and log values
-          std::vector<double> xPoints, data;
-          for (int i = 0; i < nWorkspaces; i++) {
-            const auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
-                wsGroup->getItem(i));
-            if (ws) {
-              auto X = ws->readX(spectrumIndex);
-              auto Y = ws->readY(spectrumIndex);
-              xPoints.insert(xPoints.end(), X.begin(), X.end());
-              data.insert(data.end(), Y.begin(), Y.end());
-              logValues.push_back(2*i);
-              if (i == 0) {
-                xAxisLabel = ws->getXDimension()->getName();
-                xAxisUnits = ws->getXDimension()->getUnits();
-                dataAxisLabel = ws->YUnitLabel();
-              }
-            }
-          }
-          alg->setProperty("DataX", xPoints);
-          alg->setProperty("DataY", data);
-          alg->setProperty("YUnitLabel", dataAxisLabel);
-        }
-        m_mantidUI->executeAlgorithmAsync(alg, true);
-
-        // Set log axis values
-        auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-            m_ads.retrieve(plotWSTitle.toStdString()));
-        if (ws) {
-          ws->replaceAxis(1, new NumericAxis(logValues));
-        }
+        const QString xLabelQ = createWorkspaceForSurfacePlot(
+            plotWSTitle, wsGroup, options.plotIndex, options.logName);
 
         // Plot the output workspace in 3D
         auto matrixToPlot = m_mantidUI->importMatrixWorkspace(plotWSTitle, -1,
@@ -1575,19 +1534,12 @@ void MantidDockWidget::plotSurface() {
         auto plot = matrixToPlot->plotGraph3D(Qwt3D::PLOTSTYLE::FILLED);
 
         // Default title is "Workspace __matrixToPlot". Change this:
-        QString title =
-            QString("Surface plot for %1, spectrum %2")
-                .arg(wsGroup->name().c_str(), QString::number(spectrumIndex));
+        QString title = QString("Surface plot for %1, spectrum %2")
+                            .arg(wsGroup->name().c_str(),
+                                 QString::number(options.plotIndex));
         plot->setTitle(title);
 
         // Set the X, Y axis labels correctly
-        if (xAxisLabel.empty()) {
-          xAxisLabel = "X";
-        }
-        QString xLabelQ(xAxisLabel.c_str());
-        if (!xAxisUnits.empty()) {
-          xLabelQ.append(" (").append(xAxisUnits.c_str()).append(")");
-        }
         plot->setXAxisLabel(xLabelQ);
         plot->setYAxisLabel(options.axisName);
 
@@ -1596,6 +1548,75 @@ void MantidDockWidget::plotSurface() {
       }
     }
   }
+}
+
+/**
+ * Create a workspace for the surface plot from the given workspace group, and
+ * add it to the ADS. Returns title for the X axis.
+ * Called by plotSurface().
+ * @param wsName :: [input] Name to give the resulting workspace
+ * @param wsGroup :: [input] Pointer to workspace group to use as input
+ * @param index :: [input] Which spectrum to plot from each workspace
+ * @param logName :: [input] Log to read from for axis of XYZ plot
+ * @returns Title for the X axis, read from the workspaces in the group
+ */
+const QString MantidDockWidget::createWorkspaceForSurfacePlot(
+    const QString &wsName, WorkspaceGroup_const_sptr wsGroup, const int index,
+    const QString &logName) {
+  QString xAxisTitle;
+  if (wsGroup) {
+    // Vector holding log values to plot
+    std::vector<double> logValues;
+
+    // Create workspace and set its name
+    IAlgorithm_sptr alg = m_mantidUI->createAlgorithm("CreateWorkspace");
+    alg->initialize();
+    alg->setProperty("OutputWorkspace", wsName.toStdString());
+
+    // Each "spectrum" will be the data from one workspace
+    int nWorkspaces = wsGroup->getNumberOfEntries();
+    std::string xAxisLabel, dataAxisLabel, xAxisUnits;
+    alg->setProperty("NSpec", nWorkspaces);
+
+    if (nWorkspaces > 0) {
+      // For each workspace in group, add data and log values
+      std::vector<double> xPoints, data;
+      for (int i = 0; i < nWorkspaces; i++) {
+        const auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+            wsGroup->getItem(i));
+        if (ws) {
+          auto X = ws->readX(index);
+          auto Y = ws->readY(index);
+          xPoints.insert(xPoints.end(), X.begin(), X.end());
+          data.insert(data.end(), Y.begin(), Y.end());
+          logValues.push_back(2 * i);
+          if (i == 0) {
+            xAxisLabel = ws->getXDimension()->getName();
+            xAxisUnits = ws->getXDimension()->getUnits();
+            dataAxisLabel = ws->YUnitLabel();
+          }
+        }
+      }
+      alg->setProperty("DataX", xPoints);
+      alg->setProperty("DataY", data);
+      alg->setProperty("YUnitLabel", dataAxisLabel);
+    }
+    m_mantidUI->executeAlgorithmAsync(alg, true);
+
+    // Set log axis values by replacing the "spectra" axis
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        m_ads.retrieve(wsName.toStdString()));
+    if (ws) {
+      ws->replaceAxis(1, new NumericAxis(logValues));
+    }
+
+    // Generate title for the X axis
+    xAxisTitle = xAxisLabel.empty() ? "X" : xAxisLabel.c_str();
+    if (!xAxisUnits.empty()) {
+      xAxisTitle.append(" (").append(xAxisUnits.c_str()).append(")");
+    }
+  }
+  return xAxisTitle;
 }
 
 //------------ MantidTreeWidget -----------------------//

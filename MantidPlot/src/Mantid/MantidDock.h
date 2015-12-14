@@ -113,7 +113,11 @@ private:
   void addClearMenuItems(QMenu* menu, const QString& wsName);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
-  
+  const QString createWorkspaceForSurfacePlot(
+      const QString &wsName,
+      boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
+      const int index, const QString &logName);
+
 protected:
   MantidTreeWidget * m_tree;
   friend class MantidUI;
