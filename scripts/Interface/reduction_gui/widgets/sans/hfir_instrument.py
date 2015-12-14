@@ -26,6 +26,7 @@ class SANSInstrumentWidget(BaseWidget):
     name = "Reduction Options"
 
     # Place holder for data read from file
+    # Those will be set when the data file is read through key/value pair signals
     _sample_detector_distance = None
     _sample_detector_distance_supplied = True
     _sample_detector_distance_offset = None
@@ -449,20 +450,27 @@ class SANSInstrumentWidget(BaseWidget):
         m.scaling_beam_diam = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
         m.manual_beam_diam = self._summary.beamstop_chk.isChecked()
 
-        ## If total detector distance is checked, ignore the other 3 distances:
-        if self._summary.total_detector_distance_chk.isChecked():
-            m.sample_total_distance = util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit)
-        else:
-            # Detector offset input
-            if self._summary.detector_offset_chk.isChecked():
-                m.detector_offset = util._check_and_get_float_line_edit(self._summary.detector_offset_edit)
-            # Sample-detector distance
-            if self._summary.sample_dist_chk.isChecked():
-                m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
-            # Sample-Si-window
-            if self._summary.sample_si_dist_chk.isChecked():
-                m.sample_si_window_distance = util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit)
-                
+#         ## If total detector distance is checked, ignore the other 3 distances:
+#         if self._summary.total_detector_distance_chk.isChecked():
+#             m.sample_total_distance = util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit)
+#         else:
+#             # Detector offset input
+#             if self._summary.detector_offset_chk.isChecked():
+#                 m.detector_offset = util._check_and_get_float_line_edit(self._summary.detector_offset_edit)
+#             # Sample-detector distance
+#             if self._summary.sample_dist_chk.isChecked():
+#                 m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
+#             # Sample-Si-window
+#             if self._summary.sample_si_dist_chk.isChecked():
+#                 m.sample_si_window_distance = util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit)
+        
+        # Workaround:
+        # Offset is not used
+        # The detector_distanc will be used as sample_total_distance
+        m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit)
+        m.detector_offset = 0
+        
+        
         # Wavelength value
         wavelength = util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
         if self._summary.wavelength_chk.isChecked():
