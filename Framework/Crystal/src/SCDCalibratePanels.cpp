@@ -625,8 +625,7 @@ void SCDCalibratePanels::exec() {
     }
     if (!GoodStart(peaksWs, a, b, c, alpha, beta, gamma, tolerance)) {
       g_log.warning() << "**** Indexing is NOT compatible with given lattice "
-                         "parameters******"
-                      << std::endl;
+                         "parameters******" << std::endl;
       g_log.warning() << "        Index with conventional orientation matrix???"
                       << std::endl;
     }
@@ -1057,8 +1056,7 @@ void SCDCalibratePanels::exec() {
   outfile << std::setw(13) << std::setprecision(3) << stats.mean << std::endl;
   outfile << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
              "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
-             "     UpZ"
-          << std::endl;
+             "     UpZ" << std::endl;
   for (vector<std::string>::const_iterator itdet = detcal.begin();
        itdet != detcal.end(); ++itdet)
     outfile << *itdet << "\n";
@@ -1415,7 +1413,6 @@ void SCDCalibratePanels::init() {
                                    {".DetCal", ".Det_Cal"}),
                   "Path to an ISAW-style .detcal file to save.");
 
-  vector<string> exts1;
   declareProperty(
       new FileProperty("XmlFilename", "", FileProperty::OptionalSave, {".xml"}),
       "Path to an Mantid .xml description(for LoadParameterFile) file to "
@@ -1531,9 +1528,9 @@ void SCDCalibratePanels::CreateFxnGetValues(
   fit->setAttribute("NGroups", IFunction::Attribute(NGroups));
   fit->setAttribute("BankNames", IFunction::Attribute(BankNameString));
 
-  string fieldBase[8] = {
-      "detWidthScale", "detHeightScale", "Xoffset", "Yoffset",
-      "Zoffset",       "Xrot",           "Yrot",    "Zrot"};
+  string fieldBase[8] = {"detWidthScale", "detHeightScale", "Xoffset",
+                         "Yoffset",       "Zoffset",        "Xrot",
+                         "Yrot",          "Zrot"};
   set<string> FieldB(fieldBase, fieldBase + 8);
 
   for (int g = 0; g < NGroups; ++g) {

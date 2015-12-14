@@ -313,9 +313,12 @@ void LoadAscii::init() {
                   "the read-in data and stored in the [[Analysis Data "
                   "Service]].");
 
-  std::string spacers[6][6] = {{"Automatic", ",\t:; "}, {"CSV", ","},
-                               {"Tab", "\t"},           {"Space", " "},
-                               {"Colon", ":"},          {"SemiColon", ";"}};
+  std::string spacers[6][6] = {{"Automatic", ",\t:; "},
+                               {"CSV", ","},
+                               {"Tab", "\t"},
+                               {"Space", " "},
+                               {"Colon", ":"},
+                               {"SemiColon", ";"}};
   // For the ListValidator
   std::vector<std::string> sepOptions;
   for (size_t i = 0; i < 5; ++i) {

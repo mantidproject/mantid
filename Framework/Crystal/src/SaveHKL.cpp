@@ -75,8 +75,9 @@ void SaveHKL::init() {
                                    API::FileProperty::OptionalLoad, ".dat"),
                   " Spectrum data read from a spectrum file.");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, { ".hkl" }),
-                  "Path to an hkl file to save.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Save, {".hkl"}),
+      "Path to an hkl file to save.");
 
   std::vector<std::string> histoTypes;
   histoTypes.push_back("Bank");

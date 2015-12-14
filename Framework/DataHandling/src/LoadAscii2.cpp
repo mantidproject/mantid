@@ -673,8 +673,7 @@ void LoadAscii2::exec() {
   if (sep.empty()) {
     g_log.notice() << "\"UserDefined\" has been selected, but no custom "
                       "separator has been entered."
-                      " Using default instead."
-                   << std::endl;
+                      " Using default instead." << std::endl;
     sep = ",";
   }
   m_columnSep = sep;
