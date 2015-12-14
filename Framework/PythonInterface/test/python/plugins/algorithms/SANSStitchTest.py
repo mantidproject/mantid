@@ -3,27 +3,27 @@ from mantid.api import AlgorithmManager, MatrixWorkspace
 import numpy as np
 
 
-class SANSStitch1DTest(unittest.TestCase):
+class SANSStitchTest(unittest.TestCase):
     def test_initalize(self):
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         self.assertTrue(alg.isInitialized())
 
     def test_permissable_modes(self):
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         self.assertRaises(ValueError, alg.setProperty, 'Mode', 'InvalidMode')
 
     def test_default_mode(self):
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         self.assertEquals('None', alg.getProperty('Mode').value)
 
     def test_q_forms_valid_range(self):
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'Both')
@@ -49,7 +49,7 @@ class SANSStitch1DTest(unittest.TestCase):
         self.assertEquals(0, len(errors))
 
     def test_none_mode_requires_scale_and_shift_factors(self):
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'None')
@@ -58,7 +58,7 @@ class SANSStitch1DTest(unittest.TestCase):
         self.assertTrue('ShiftFactor' in errors)
 
     def test_fit_scale_requires_shift_factor(self):
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'ScaleOnly')
@@ -66,7 +66,7 @@ class SANSStitch1DTest(unittest.TestCase):
         self.assertTrue('ShiftFactor' in errors)
 
     def test_fit_shift_requires_scale_factor(self):
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'ShiftOnly')
@@ -86,7 +86,7 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg.execute()
         multi_spectra_input = create_alg.getProperty('OutputWorkspace').value
 
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'Both')
@@ -114,7 +114,7 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg.execute()
         single_spectra_input = create_alg.getProperty('OutputWorkspace').value
 
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'Both')
@@ -145,7 +145,7 @@ class SANSStitch1DTest(unittest.TestCase):
         double_spectra_input = create_alg.getProperty('OutputWorkspace').value
 
         # Basic algorithm setup
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('HABCountsSample', double_spectra_input)
@@ -200,7 +200,7 @@ class SANSStitch1DTest(unittest.TestCase):
 
         in_scale_factor = 1.0
         in_shift_factor = 1.0
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'None')
@@ -241,7 +241,7 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg.execute()
         single_spectra_input = create_alg.getProperty('OutputWorkspace').value
 
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'Both')
@@ -271,7 +271,7 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg.execute()
         smaller_single_spectra_input = create_alg.getProperty('OutputWorkspace').value
 
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'None')
@@ -323,7 +323,7 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg.execute()
         flat_norm = create_alg.getProperty('OutputWorkspace').value
 
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'Both')
@@ -372,7 +372,7 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg.execute()
         flat_norm = create_alg.getProperty('OutputWorkspace').value
 
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'ShiftOnly')
@@ -418,7 +418,7 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg.execute()
         flat_norm = create_alg.getProperty('OutputWorkspace').value
 
-        alg = AlgorithmManager.create('SANSStitch1D')
+        alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Mode', 'ScaleOnly')

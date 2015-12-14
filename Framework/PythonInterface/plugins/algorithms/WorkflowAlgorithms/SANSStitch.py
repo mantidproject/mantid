@@ -21,7 +21,7 @@ class Mode(object):
         pass
 
 
-class SANSStitch1D(DataProcessorAlgorithm):
+class SANSStitch(DataProcessorAlgorithm):
     def _make_mode_map(self):
         return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly,
                 'Both': Mode.BothFit, 'None': Mode.NoneFit}
@@ -559,4 +559,4 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(SANSStitch1D)
+AlgorithmFactory.subscribe(SANSStitch)
