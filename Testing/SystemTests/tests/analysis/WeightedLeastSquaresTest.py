@@ -95,7 +95,11 @@ def load_fitting_test_file_ascii(filename):
 
 # pylint: disable=too-many-public-methods
 class WLS2GaussPeaksEVSData(unittest.TestCase):
-
+    """
+    Load a processed ISIS Vesuvio data. 
+    
+    Representative of a processed Vesuvio dataset that contains a couple of peaks.
+    """
     workspace = None
     function_template = ("name=Gaussian, {0} ; name=LinearBackground,A0=0,A1=0;"
                          "name=Gaussian, {1}")
