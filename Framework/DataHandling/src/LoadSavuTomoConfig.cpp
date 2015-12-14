@@ -25,13 +25,9 @@ LoadSavuTomoConfig::~LoadSavuTomoConfig() {}
  */
 void LoadSavuTomoConfig::init() {
   // Required input properties
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".nx5");
-  exts.push_back(".xml");
-
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load,
+                       {".nxs", ".nx5", ".xml"}),
       "The name of the Nexus parameterization file to read, as a full "
       "or relative path.");
 
@@ -66,7 +62,8 @@ void LoadSavuTomoConfig::exec() {
     }
   } catch (std::exception &e) {
     g_log.error() << "Failed to load savu tomography reconstruction "
-                     "parameterization file: " << e.what() << std::endl;
+                     "parameterization file: "
+                  << e.what() << std::endl;
     return;
   }
 
@@ -169,8 +166,8 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string &fname,
       // detailed NeXus error message and throw...
       g_log.error() << "Failed to load plugin '" << j
                     << "' from"
-                       "NeXus file. Error description: " << e.what()
-                    << std::endl;
+                       "NeXus file. Error description: "
+                    << e.what() << std::endl;
       throw std::runtime_error(
           "Could not load one or more plugin "
           "entries from the tomographic reconstruction parameterization "
@@ -198,7 +195,8 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string &fname,
       g_log.warning()
           << "Failed to read some fields in tomographic "
              "reconstruction plugin line. The file seems to be wrong. Error "
-             "description: " << e.what() << std::endl;
+             "description: "
+          << e.what() << std::endl;
     }
 
     table << id << params << name << cite;
