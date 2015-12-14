@@ -465,7 +465,7 @@ Show the user file dialog to choose save location of notebook
 */
 std::string QtReflMainView::requestNotebookPath() {
   QString qfilename = QFileDialog::getSaveFileName(
-      0, "Save notebook file", QDir::currentPath(),
+      this, "Save notebook file", QDir::currentPath(),
       "IPython Notebook files (*.ipynb);;All files (*.*)",
       new QString("IPython Notebook files (*.ipynb)"));
 
