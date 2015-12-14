@@ -468,7 +468,20 @@ std::string QtReflMainView::requestNotebookPath() {
       0, "Save notebook file", QDir::currentPath(),
       "IPython Notebook files (*.ipynb);;All files (*.*)",
       new QString("IPython Notebook files (*.ipynb)"));
-  return qfilename.toStdString();
+
+  // Sadly there is a Qt bug (QTBUG-27186) which means the filename returned
+  // from the dialog doesn't always the file extension appended.
+  // So we'll have to ensure this ourselves.
+  std::string filename = qfilename.toStdString();
+  if (filename.size() > 6) {
+    if (filename.substr(filename.size() - 6) != ".ipynb") {
+      filename.append(".ipynb");
+    }
+  } else {
+    filename.append(".ipynb");
+  }
+
+  return filename;
 }
 
 /**
