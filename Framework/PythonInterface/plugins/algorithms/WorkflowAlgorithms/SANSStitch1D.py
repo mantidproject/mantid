@@ -379,6 +379,36 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
         return (shift, scale)
 
+    def _crop_out_special_values(self, ws):
+
+        if ws.getNumberHistograms() != 1:
+            # Strip zeros is only possible on 1D workspaces
+            return
+
+        y_vals = ws.readY(0)
+        length = len(y_vals)
+        # Find the first non-zero value
+        start = 0
+        for i in range(0, length):
+            if not np.isnan(y_vals[i]) and not np.isinf(y_vals[i]):
+                start = i
+                break
+        # Now find the last non-zero value
+        stop = 0
+        length -= 1
+        for j in range(length, 0, -1):
+            if not np.isnan(y_vals[j]) and not np.isinf(y_vals[j]):
+                stop = j
+                break
+        # Find the appropriate X values and call CropWorkspace
+        x_vals = ws.readX(0)
+        startX = x_vals[start]
+        # Make sure we're inside the bin that we want to crop
+        endX = x_vals[stop + 1]
+        ws = self._crop_to_x_range(ws=ws,x_min=startX, x_max=endX)
+        return ws
+
+
     def PyExec(self):
         enum_map = self._make_mode_map()
 
@@ -402,6 +432,9 @@ class SANSStitch1D(DataProcessorAlgorithm):
             # Now we can do the can subraction.
             q_high_angle = self._subract(q_high_angle, q_high_angle_can)
             q_low_angle = self._subract(q_low_angle, q_low_angle_can)
+
+        q_high_angle = self._crop_out_special_values(q_high_angle)
+        q_low_angle = self._crop_out_special_values(q_low_angle)
 
         shift_factor = self.getProperty('ShiftFactor').value
         scale_factor = self.getProperty('ScaleFactor').value

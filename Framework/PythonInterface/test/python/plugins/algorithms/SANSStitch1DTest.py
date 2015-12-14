@@ -1,5 +1,6 @@
 import unittest
 from mantid.api import AlgorithmManager, MatrixWorkspace
+import numpy as np
 
 
 class SANSStitch1DTest(unittest.TestCase):
@@ -223,6 +224,36 @@ class SANSStitch1DTest(unittest.TestCase):
 
         expected_y_array = [1.5] * 9
         self.assertTrue(all(map(lambda element: element in y_array, expected_y_array)))
+        x_array = out_ws.readX(0)
+
+    def test_strip_special_values(self):
+        create_alg = AlgorithmManager.create('CreateWorkspace')
+        create_alg.setChild(True)
+        create_alg.initialize()
+        create_alg.setProperty('DataX', range(0, 10))
+        y_data = np.array([1] * 7)
+        y_data = np.append(y_data, [np.nan])
+        y_data = np.append(y_data, [np.inf])
+        create_alg.setProperty('DataY', y_data)
+        create_alg.setProperty('NSpec', 1)
+        create_alg.setProperty('UnitX', 'MomentumTransfer')
+        create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
+        create_alg.execute()
+        single_spectra_input = create_alg.getProperty('OutputWorkspace').value
+
+        alg = AlgorithmManager.create('SANSStitch1D')
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty('Mode', 'Both')
+        alg.setProperty('HABCountsSample', single_spectra_input)
+        alg.setProperty('LABCountsSample', single_spectra_input)
+        alg.setProperty('HABNormSample', single_spectra_input)
+        alg.setProperty('LABNormSample', single_spectra_input)
+        alg.setProperty('OutputWorkspace', 'dummy_name')
+        # This would throw at the point of fitting in NaNs or infs where present
+        alg.execute()
+
+
 
     def test_scale_none_with_can(self):
         create_alg = AlgorithmManager.create('CreateWorkspace')
