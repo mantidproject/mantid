@@ -14,7 +14,6 @@ import os
 import re
 import types
 import numpy as np
-import copy
 
 sanslog = Logger("SANS")
 ADDED_EVENT_DATA_TAG = '_added_event_data'
@@ -930,7 +929,7 @@ class OverlayWorkspaces(object):
         elif isinstance(workspace, basestring) and mtd.doesExist(workspace):
             return mtd[workspace]
 
-#pylint: disable=too-few-public-methods 
+#pylint: disable=too-few-public-methods
 class TimeShifter(object):
     """
     The time shifter stores all time shifts for all runs which are to be added. If there is
@@ -1055,15 +1054,14 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 times, values = self._get_cummulative_sample_logs(element)
                 self._populate_property(prop, times, values, self._type_map[element])
 
-        self._update_single_valued_entries(workspace, self._type_map[element])
+        self._update_single_valued_entries(workspace)
 
 
-    def _update_single_valued_entries(self, workspace, type_converter):
+    def _update_single_valued_entries(self, workspace):
         '''
         We need to update single-valued entries which are based on the
         cummulative time series
         @param workspace: the workspace which requires the changes
-        @param type_converter: a type converter
         '''
         run = workspace.getRun()
 
@@ -1074,6 +1072,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
             if run.hasProperty(key) and run.hasProperty(self._single_values_to_update[key]):
                 # The single-valued entry should be the last entry of the
                 # cummulative time series
+                type_converter = self._type_map[self._single_values_to_update[key]]
                 new_value = run.getProperty(key).value[-1]
                 alg_log.setProperty("Workspace", workspace)
                 alg_log.setProperty("LogName", self._single_values_to_update[key])
