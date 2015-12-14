@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, unidiomatic-typecheck, too-few-public-methods, too-many-arguments, too-many-locals
+# pylint: disable=invalid-name, too-many-branches, too-few-public-methods, too-many-arguments, too-many-locals
 ''' SVN Info:      The variables below will only get subsituted at svn checkout if
         the repository is configured for variable subsitution.
 
