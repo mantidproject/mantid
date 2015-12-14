@@ -167,7 +167,7 @@ public:
   void mouseDoubleClickEvent(QMouseEvent *e);
 
   QStringList getSelectedWorkspaceNames() const;
-  MantidWSIndexDialog::UserInput
+  MantidWSIndexWidget::UserInput
   chooseSpectrumFromSelected(bool showWaterfallOpt = true,
                              bool showPlotAll = true) const;
   void setSortScheme(MantidItemSortScheme);

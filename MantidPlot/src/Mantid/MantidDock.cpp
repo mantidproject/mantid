@@ -1793,7 +1793,7 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 * @return :: A MantidWSIndexDialog::UserInput structure listing the selected
 * options
 */
-MantidWSIndexDialog::UserInput
+MantidWSIndexWidget::UserInput
 MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
                                              bool showPlotAll) const {
   // Check for any selected WorkspaceGroup names and replace with the names of
@@ -1852,7 +1852,7 @@ MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
         SINGLE_SPECTRUM
         );
     }
-    MantidWSIndexDialog::UserInput selections;
+    MantidWSIndexWidget::UserInput selections;
     selections.plots = spectrumToPlot;
     selections.waterfall = false;
     return selections;
