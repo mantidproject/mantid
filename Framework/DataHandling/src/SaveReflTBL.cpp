@@ -23,10 +23,7 @@ SaveReflTBL::SaveReflTBL() : m_sep(','), m_stichgroups(), m_nogroup() {}
 
 /// Initialisation method.
 void SaveReflTBL::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".tbl");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Save, { ".tbl" }),
                   "The filename of the output TBL file.");
 
   declareProperty(new WorkspaceProperty<ITableWorkspace>("InputWorkspace", "",
