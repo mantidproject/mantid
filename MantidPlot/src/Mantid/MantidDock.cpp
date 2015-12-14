@@ -13,6 +13,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <MantidAPI/WorkspaceGroup.h>
+#include "MantidAPI/NumericAxis.h"
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidQtMantidWidgets/LineEditWithClear.h>
@@ -1517,12 +1518,13 @@ void MantidDockWidget::plotSurface() {
     const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(
         m_ads.retrieve(wsName.toStdString()));
     if (wsGroup) {
-      // Which spectrum to plot from each workspace
       auto options = m_tree->chooseSurfacePlotOptions();
-      if (options.accepted) { // User clicked OK and not Cancel
+      // If user clicked OK and not Cancel...
+      if (options.accepted) {
+        // Which spectrum to plot from each workspace
         const int spectrumIndex = options.plotIndex;
-        // Name for y-axis of plot
-        QString yLabelQ = options.axisName;
+        // Vector holding log values to plot
+        std::vector<double> logValues;
 
         // Set up one new matrix workspace to hold all the data for plotting
         const QString plotWSTitle("__matrixToPlot");
@@ -1535,7 +1537,7 @@ void MantidDockWidget::plotSurface() {
         std::string xAxisLabel, dataAxisLabel, xAxisUnits;
         alg->setProperty("NSpec", nWorkspaces);
         if (nWorkspaces > 0) {
-          // For each workspace in group, add data
+          // For each workspace in group, add data and log values
           std::vector<double> xPoints, data;
           for (int i = 0; i < nWorkspaces; i++) {
             const auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
@@ -1545,6 +1547,7 @@ void MantidDockWidget::plotSurface() {
               auto Y = ws->readY(spectrumIndex);
               xPoints.insert(xPoints.end(), X.begin(), X.end());
               data.insert(data.end(), Y.begin(), Y.end());
+              logValues.push_back(2*i);
               if (i == 0) {
                 xAxisLabel = ws->getXDimension()->getName();
                 xAxisUnits = ws->getXDimension()->getUnits();
@@ -1557,6 +1560,13 @@ void MantidDockWidget::plotSurface() {
           alg->setProperty("YUnitLabel", dataAxisLabel);
         }
         m_mantidUI->executeAlgorithmAsync(alg, true);
+
+        // Set log axis values
+        auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            m_ads.retrieve(plotWSTitle.toStdString()));
+        if (ws) {
+          ws->replaceAxis(1, new NumericAxis(logValues));
+        }
 
         // Plot the output workspace in 3D
         auto matrixToPlot = m_mantidUI->importMatrixWorkspace(plotWSTitle, -1,
@@ -1579,7 +1589,7 @@ void MantidDockWidget::plotSurface() {
           xLabelQ.append(" (").append(xAxisUnits.c_str()).append(")");
         }
         plot->setXAxisLabel(xLabelQ);
-        plot->setYAxisLabel(yLabelQ);
+        plot->setYAxisLabel(options.axisName);
 
         // Sometimes resolution is auto-set too high and plot appears empty
         plot->setResolution(1);
