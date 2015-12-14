@@ -13,12 +13,16 @@ def add_log(ws, number_of_times, log_name, start_time):
     alg_log.setProperty("Name", log_name)
 
     # Add the data
+    if log_name == "good_frames":
+        convert_to_type = int
+    else:
+        convert_to_type = float
+
     for i in range(0, number_of_times):
-        val = 2
         date = DateAndTime(start_time)
         date +=  int(i*1e9) # Add nanoseconds
         alg_log.setProperty("Time", date.__str__().strip())
-        alg_log.setProperty("Value", val)
+        alg_log.setProperty("Value", convert_to_type(i))
         alg_log.execute()
 
     return alg_log.getProperty("Workspace").value
@@ -34,6 +38,17 @@ def create_sample_workspace_with_log(name, x_start, x_end, bin_width,
     ws = mtd[name]
     ws = add_log(ws, number_of_times, log_name, start_time)
 
+    # We need the gd_prtn_chrg if "good_uah_log" present
+    if "good_uah_log" in log_name:
+        alg = AlgorithmManager.create("AddSampleLog")
+        alg.initialize()
+        alg.setChild(True)
+        alg.setProperty("Workspace", ws)
+        alg.setProperty("LogName", "gd_prtn_chrg")
+        alg.setProperty("LogText", str(ws.getRun().getProperty("good_uah_log").value[-1]))
+        alg.setProperty("LogType", "Number")
+        alg.execute()
+
 def create_real_workspace_with_log(name, log_names, start_time, number_of_times):
         filename = "LOQ48127np.nxs"
         out_ws_name = name
@@ -47,6 +62,17 @@ def create_real_workspace_with_log(name, log_names, start_time, number_of_times)
 
         for log_name in log_names:
             ws = add_log(ws, number_of_times, log_name, start_time)
+
+        # We need the gd_prtn_chrg if "good_uah_log" present
+        if "good_uah_log" in log_names:
+            alg = AlgorithmManager.create("AddSampleLog")
+            alg.initialize()
+            alg.setChild(True)
+            alg.setProperty("Workspace", ws)
+            alg.setProperty("LogName", "gd_prtn_chrg")
+            alg.setProperty("LogText", str(ws.getRun().getProperty("good_uah_log").value[-1]))
+            alg.setProperty("LogType", "Number")
+            alg.execute()
         return ws
 
 def create_real_event_workspace_with_log(name, log_names, start_time, number_of_times):
@@ -133,7 +159,7 @@ class DarkRunCorrectionTest(unittest.TestCase):
         use_time = False
         log_name = "good_uah_log"
         self._do_test_dark_run_correction(log_name, use_mean, use_time)
-        
+
     def test__no_mean__time__dark_run_correction_runs(self):
         use_mean = False
         use_time = True 
@@ -145,6 +171,7 @@ class DarkRunCorrectionTest(unittest.TestCase):
         use_time = False
         log_name = "good_uah_log"
         self._do_test_dark_run_correction(log_name, use_mean, use_time)
+
 
     ## -- The tests below make sure that monitor and detector settings can be applied
     def test__mean__time__all_monitors__no_detectors(self):
@@ -158,7 +185,7 @@ class DarkRunCorrectionTest(unittest.TestCase):
         self._do_test_dark_run_correction(log_name,  use_mean, use_time, use_detectors,
                                           use_monitors, mon_numbers,
                                           use_real_data = True)
-
+    
     def test__mean__no_time__one_monitor__no_detectors(self):
         use_mean = True
         use_time = False 
@@ -206,13 +233,10 @@ class DarkRunNormalizationExtractorTest(unittest.TestCase):
 
         start_time_scatter = 0 # in nanoseconds
         number_of_times_scatter = 5 # in seconds
-        end_time_scatter = start_time_scatter + (number_of_times_scatter-1)*1e9
-        duration_scatter_nano_seconds = end_time_scatter - start_time_scatter
 
         start_time_dark_run = 7 # in nanoseconds
         number_of_times_dark_run = 13 # in seconds
-        end_time_dark_run = start_time_dark_run + (number_of_times_dark_run-1)*1e9
-        duration_dark_run_nano_seconds = end_time_dark_run - start_time_dark_run
+
 
         ws_scatter_name = "ws_scatter"
         create_sample_workspace_with_log(ws_scatter_name, x_start, x_end, bin_width,
@@ -222,13 +246,24 @@ class DarkRunNormalizationExtractorTest(unittest.TestCase):
                                             log_name, start_time_dark_run, number_of_times_dark_run)
         ws_scatter = mtd[ws_scatter_name]
         ws_dark = mtd[ws_dark_name]
+
         extractor = dc.DarkRunNormalizationExtractor()
 
         # Act
         ratio = extractor.extract_normalization(ws_scatter, ws_dark, use_time)
 
         # Assert
-        expected_ratio = float(duration_scatter_nano_seconds)/float(duration_dark_run_nano_seconds )
+        if log_name == "good_frames":
+            time_frame_scatter = ws_scatter.dataX(0)[-1] - ws_scatter.dataX(0)[0]
+            number_of_frames_scatter = ws_scatter.getRun().getProperty("good_frames").value[-1]
+
+            time_frame_dark = ws_dark.dataX(0)[-1] - ws_dark.dataX(0)[0]
+            number_of_frames_dark = ws_dark.getRun().getProperty("good_frames").value[-1]
+
+            expected_ratio = float(time_frame_scatter * number_of_frames_scatter)/float(time_frame_dark*number_of_frames_dark)
+        else:
+            expected_ratio = ws_scatter.getRun().getProperty("gd_prtn_chrg").value/ws_dark.getRun().getProperty("gd_prtn_chrg").value
+
         self.assertEqual(ratio, expected_ratio, "Should have the same ratio")
 
         # Clean up

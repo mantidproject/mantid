@@ -99,32 +99,80 @@ class DarkRunNormalizationExtractor(object):
         Extract the normalization by either looking at the time duration of the measurement (good_frames)
         or by looking at the time of the good charge (good_uah_log)
         '''
-        log_entry = None
         if use_time:
-            log_entry = "good_frames"
+            normalization = self._extract_normalization_from_time(scatter_workspace, dark_run)
         else:
-            log_entry = "good_uah_log"
-        return self._extract_normalization(scatter_workspace, dark_run, log_entry)
+            normalization = self._extract_normalization_from_charge(scatter_workspace, dark_run)
+        return normalization
 
-    def _extract_normalization(self, scatter_workspace, dark_run, log_entry):
+    def _extract_normalization_from_charge(self, scatter_workspace, dark_run):
         '''
-        Create a normalization ratio based on the duration.
+        We get the get the normalization ration from the gd_prtn_chrg entries.
+        @param scatter_workspace: the scatter workspace
+        @param dark_run: the dark run
+        @returns a normalization factor for good proton charges
         '''
-        scatter_duration = self._get_time_duration_from_logs(scatter_workspace, log_entry)
-        dark_run_duration = self._get_time_duration_from_logs(dark_run, log_entry)
-        return scatter_duration/dark_run_duration
+        scatter_proton_charge = self._get_good_proton_charge(scatter_workspace)
+        dark_proton_charge = self._get_good_proton_charge(dark_run)
+        return scatter_proton_charge/dark_proton_charge
 
-    def _get_time_duration_from_logs(self, workspace, log_entry):
+    def _get_good_proton_charge(self, workspace):
         '''
-        Extract the time duration from the logs.
+        Get the good proton charge
+        @param workspace: the workspace from which to extract
+        @returns the proton charge
         '''
+        log_entry = "gd_prtn_chrg"
         run = workspace.getRun()
         if not run.hasProperty(log_entry):
             raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry +
                                "log entry. This is required for calculating the noramlization"
                                "of the dark run.")
-
         entry = run.getProperty(log_entry)
-        first_time = entry.firstTime()
-        last_time = entry.lastTime()
-        return time_duration.total_nanoseconds(last_time- first_time)/1e9
+        return entry.value
+
+    def _extract_normalization_from_time(self, scatter_workspace, dark_run):
+        '''
+        Create a normalization ratio based on the duration.
+        @param scatter_workspace: the scatter workspace
+        @param dark_run: the dark run
+        @returns a normalization factor based on good frames
+        '''
+        scatter_time = self._get_duration_for_frames(scatter_workspace)
+        dark_time = self._get_duration_for_frames(dark_run)
+        return scatter_time/dark_time
+
+    def _get_duration_for_frames(self, workspace):
+        '''
+        Extract the time duration from the logs.
+        @param workspace: the workspace to extract from
+        @returns the duration
+        '''
+        log_entry = "good_frames"
+        run = workspace.getRun()
+        if not run.hasProperty(log_entry):
+            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry +
+                               "log entry. This is required for calculating the noramlization"
+                               "of the dark run.")
+        property = run.getProperty(log_entry)
+        frame_time = self._get_time_for_frame(workspace)
+        number_of_frames = self._get_number_of_good_frames(property)
+        return frame_time*number_of_frames
+
+    def _get_time_for_frame(self, workspace):
+        '''
+        Get the time of a frame. Look into the first histogram only.
+        @param workspace: the workspace from which extract the frame time
+        '''
+        return workspace.dataX(0)[-1] - workspace.dataX(0)[0]
+
+    def _get_number_of_good_frames(self, property):
+        '''
+        Get the number of good frames.
+        @param property: the property from which we extract the frames
+        @returns the number of good frames
+        '''
+        # Since we are dealing with a cummulative sample log, we can extract
+        # the total number of good frames by looking at the last frame
+        frames = property.value
+        return frames[-1]
