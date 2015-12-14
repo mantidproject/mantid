@@ -904,7 +904,8 @@ class OverlayWorkspaces(object):
         Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= temp ,OutputWorkspace= output_workspace)
 
         #Apply sample log correciton
-        cummulative_correction.apply_cummulative_logs_to_workspace(output_workspace)
+        out_ws = self._get_workspace(output_workspace)
+        cummulative_correction.apply_cummulative_logs_to_workspace(out_ws)
 
         # Remove the shifted workspace
         if mtd.doesExist(temp_ws_name):
@@ -1067,14 +1068,15 @@ class CummulativeTimeSeriesPropertyAdder(object):
         alg_log.initialize()
         alg_log.setChild(True)
         for key in self._single_values_to_update.keys():
-            # The single-valued entry should be the last entry of the
-            # cummulative time series
-            new_value = run.getProperty(key).value[-1]
-            alg_log.setProperty("Workspace", workspace)
-            alg_log.setProperty("LogName", self._single_values_to_update[key])
-            alg_log.setProperty("LogText", str(new_value))
-            alg_log.setProperty("LogType", "Number")
-            alg_log.execute()
+            if run.hasProperty(key) and run.hasProperty(self._single_values_to_update[key]):
+                # The single-valued entry should be the last entry of the
+                # cummulative time series
+                new_value = run.getProperty(key).value[-1]
+                alg_log.setProperty("Workspace", workspace)
+                alg_log.setProperty("LogName", self._single_values_to_update[key])
+                alg_log.setProperty("LogText", str(new_value))
+                alg_log.setProperty("LogType", "Number")
+                alg_log.execute()
 
     def _get_cummulative_sample_logs(self, log_name):
         '''
