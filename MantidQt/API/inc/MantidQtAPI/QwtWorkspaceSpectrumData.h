@@ -2,22 +2,13 @@
 #define MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "DistributionOptions.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 #include "DllOption.h"
 
 #include <boost/shared_ptr.hpp>
 #include <QString>
-
-namespace MantidQt {
-
-// Enumerate how to handle distributions
-enum DistributionFlag {
-  DistributionDefault = 0, // Use preferences value
-  DistributionTrue,        // Force distribution plotting
-  DistributionFalse        // Disable distribution plotting
-};
-}
 
 //=================================================================================================
 //=================================================================================================

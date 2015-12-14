@@ -70,7 +70,7 @@
 namespace MantidQt 
 {
 %TypeHeaderCode 
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtAPI/DistributionOptions.h"
 %End
 
 	enum DistributionFlag {DistributionDefault, DistributionTrue, DistributionFalse};  
