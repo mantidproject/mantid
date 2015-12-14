@@ -24,18 +24,9 @@ using namespace ::NeXus;
 
 void LoadFlexiNexus::init() {
 
-  std::vector<std::string> exts;
-  exts.push_back(".hdf");
-  exts.push_back(".h5");
-  exts.push_back("");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, {".hdf", ".h5", ""}),
                   "A NeXus file");
-  std::vector<std::string> exts2;
-  exts2.push_back(".txt");
-  exts2.push_back(".dic");
-  exts2.push_back("");
-  declareProperty(new FileProperty("Dictionary", "", FileProperty::Load, exts2),
+  declareProperty(new FileProperty("Dictionary", "", FileProperty::Load, {".txt", ".dic", ""}),
                   "A Dictionary for controlling NeXus loading");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output));
