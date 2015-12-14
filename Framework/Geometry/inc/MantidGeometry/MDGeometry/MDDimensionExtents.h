@@ -59,7 +59,7 @@ public:
     max = static_cast<T>(max * scaling + offset);
     m_size = static_cast<T>(m_size * scaling);
     if (max < min){
-      float tmp = max;
+      T tmp = max;
       max = min;
       min = tmp;
       m_size = std::fabs(m_size);

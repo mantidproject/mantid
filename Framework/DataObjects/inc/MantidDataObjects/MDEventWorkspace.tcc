@@ -329,7 +329,7 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
   }
   // Check if masked
   const API::IMDNode *box = data->getBoxAtCoord(coords);
-  if (!box) return m_maskValue;
+  if (!box) return MDMaskValue;
   if (box->getIsMasked()) {
     return MDMaskValue;
   }
