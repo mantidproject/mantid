@@ -129,6 +129,62 @@ class SANSStitch1DTest(unittest.TestCase):
         self.assertTrue('HABNormCan' in errors)
         self.assertTrue('LABNormCan' in errors)
 
+
+    def test_stitch_2d_restricted_to_none(self):
+        # create an input workspace that has multiple spectra
+        create_alg = AlgorithmManager.create('CreateWorkspace')
+        create_alg.setChild(True)
+        create_alg.initialize()
+        create_alg.setProperty('DataX', range(0, 1))
+        create_alg.setProperty('DataY', [1,1])
+        create_alg.setProperty('NSpec', 2)
+        create_alg.setProperty('UnitX', 'MomentumTransfer')
+        create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
+        create_alg.execute()
+        double_spectra_input = create_alg.getProperty('OutputWorkspace').value
+
+        # Basic algorithm setup
+        alg = AlgorithmManager.create('SANSStitch1D')
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty('HABCountsSample', double_spectra_input)
+        alg.setProperty('LABCountsSample', double_spectra_input)
+        alg.setProperty('HABNormSample', double_spectra_input)
+        alg.setProperty('LABNormSample', double_spectra_input)
+        alg.setProperty('ProcessCan', False)
+        alg.setProperty('ShiftFactor', 1.0)
+        alg.setProperty('ScaleFactor', 0.0)
+
+        # 2D inputs Should not be allowed for mode Both
+        alg.setProperty('Mode', 'Both')
+        errors = alg.validateInputs()
+        self.assertTrue('HABCountsSample' in errors)
+        self.assertTrue('LABCountsSample' in errors)
+        self.assertTrue('HABNormSample' in errors)
+        self.assertTrue('LABNormSample' in errors)
+
+        # 2D inputs Should not be allowed for mode ScaleOnly
+        alg.setProperty('Mode', 'ScaleOnly')
+        errors = alg.validateInputs()
+        self.assertTrue('HABCountsSample' in errors)
+        self.assertTrue('LABCountsSample' in errors)
+        self.assertTrue('HABNormSample' in errors)
+        self.assertTrue('LABNormSample' in errors)
+
+        # 2D inputs Should not be allowed for mode ShiftOnly
+        alg.setProperty('Mode', 'ShiftOnly')
+        errors = alg.validateInputs()
+        self.assertTrue('HABCountsSample' in errors)
+        self.assertTrue('LABCountsSample' in errors)
+        self.assertTrue('HABNormSample' in errors)
+        self.assertTrue('LABNormSample' in errors)
+
+        # With no fitting 2D inputs are allowed
+        alg.setProperty('Mode', 'None')
+        errors = alg.validateInputs()
+        self.assertEqual(0, len(errors))
+
+
     def test_scale_none(self):
         create_alg = AlgorithmManager.create('CreateWorkspace')
         create_alg.setChild(True)
@@ -141,6 +197,8 @@ class SANSStitch1DTest(unittest.TestCase):
         create_alg.execute()
         single_spectra_input = create_alg.getProperty('OutputWorkspace').value
 
+        in_scale_factor = 1.0
+        in_shift_factor = 1.0
         alg = AlgorithmManager.create('SANSStitch1D')
         alg.setChild(True)
         alg.initialize()
@@ -150,13 +208,17 @@ class SANSStitch1DTest(unittest.TestCase):
         alg.setProperty('HABNormSample', single_spectra_input)
         alg.setProperty('LABNormSample', single_spectra_input)
         alg.setProperty('OutputWorkspace', 'dummy_name')
-        alg.setProperty('ShiftFactor', 1.0)
-        alg.setProperty('ScaleFactor', 1.0)
+        alg.setProperty('ShiftFactor', in_shift_factor)
+        alg.setProperty('ScaleFactor', in_scale_factor)
         alg.execute()
         out_ws = alg.getProperty('OutputWorkspace').value
+        out_shift_factor = alg.getProperty('OutShiftFactor').value
+        out_scale_factor = alg.getProperty('OutScaleFactor').value
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
+        self.assertEquals(out_scale_factor, in_scale_factor)
+        self.assertEquals(out_shift_factor, in_shift_factor)
         y_array = out_ws.readY(0)
 
         expected_y_array = [1.5] * 9
@@ -206,7 +268,6 @@ class SANSStitch1DTest(unittest.TestCase):
         self.assertTrue(all(map(lambda element: element in y_array, expected_y_array)),
                         msg='can gets subtracted so expect 1 - 0.5 as output signal. Proves the can workspace gets used correctly.')
 
-
     def test_scale_both_without_can(self):
         create_alg = AlgorithmManager.create('CreateWorkspace')
         create_alg.setChild(True)
@@ -242,6 +303,12 @@ class SANSStitch1DTest(unittest.TestCase):
         alg.setProperty('OutputWorkspace', 'dummy_name')
         alg.execute()
         out_ws = alg.getProperty('OutputWorkspace').value
+        out_shift_factor = alg.getProperty('OutShiftFactor').value
+        out_scale_factor = alg.getProperty('OutScaleFactor').value
+
+
+        self.assertEquals(out_scale_factor, 1.0)
+        self.assertEquals(out_shift_factor, -5.0)
 
         y_array = out_ws.readY(0)
 
