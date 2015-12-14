@@ -136,3 +136,53 @@ class LoadTests(unittest.TestCase):
 
         self.assertTrue('ResultTOFgrp', self.wsname[0])
 
+    def test_gssfile_with_workspace(self):
+        gssfile = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489.gss")
+        data = LoadGSS(Filename=gssfile, OutputWorkspace=self.wsname)
+
+        self.assertTrue(isinstance(data, MatrixWorkspace))
+        self.assertEquals(6, data.getNumberHistograms())
+        self.assertEquals(3572, data.blocksize())
+        self.assertAlmostEqual(435.20061, data.readX(1)[7], places=DIFF_PLACES)
+        self.assertAlmostEqual(26.909216575, data.readY(5)[5], places=DIFF_PLACES)
+
+    def test_datfile_with_workspace(self):
+        dat_files = []
+        for i in range(1, 7):
+            dat_files.append(DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b" + str(i) + "_D.dat")
+            dat_files.append(DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b" + str(i) + "_TOF.dat")
+
+        dat_data = []
+        for i in range(0, len(dat_files)):
+            dat_data.append(LoadAscii(Filename=dat_files[i], OutputWorkspace="datWorkspace" + str(i+1)))
+
+        for _file in dat_data:
+            self.assertTrue(isinstance(_file, MatrixWorkspace))
+
+        for i in range(0, len(dat_data)):
+            self.assertTrue(("datWorkspace" + str(i+1)) in dat_data[i].getName())
+
+        for _file in dat_data:
+            self.assertEquals(1, _file.getNumberHistograms())
+
+        for i in range(0, len(dat_data), 2):
+            b_size_avg = ((dat_data[i].blocksize() + dat_data[i+1].blocksize()) / 2)
+            self.assertEquals(b_size_avg, dat_data[i+1].blocksize())
+
+        self.assertAlmostEqual(0.43865, dat_data[0].readX(0)[2], places=DIFF_PLACES)
+        self.assertAlmostEqual(dat_data[0].readY(0)[6], dat_data[1].readY(0)[6], places=DIFF_PLACES)
+
+        self.assertAlmostEqual(0.36329, dat_data[2].readX(0)[199], places=DIFF_PLACES)
+        self.assertAlmostEqual(9.7999821399, dat_data[3].readE(0)[10], places=DIFF_PLACES)
+
+        self.assertAlmostEqual(dat_data[4].readY(0)[2228], dat_data[5].readY(0)[2228], places=DIFF_PLACES)
+        self.assertAlmostEqual(62.05717607, dat_data[5].readY(0)[0], places=DIFF_PLACES)
+
+        self.assertAlmostEqual(8.85650716, dat_data[6].readE(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(dat_data[6].readY(0)[6], dat_data[7].readY(0)[6], places=DIFF_PLACES)
+
+        self.assertAlmostEqual(dat_data[8].readE(0)[3369], dat_data[9].readE(0)[3369], places=DIFF_PLACES)
+        self.assertAlmostEqual(458.71929, dat_data[9].readX(0)[10], places=DIFF_PLACES)
+
+        self.assertAlmostEqual(dat_data[10].readY(0)[50], dat_data[10].readY(0)[50], places=DIFF_PLACES)
+        self.assertAlmostEqual(499.0768, dat_data[11].readX(0)[0], places=DIFF_PLACES)
