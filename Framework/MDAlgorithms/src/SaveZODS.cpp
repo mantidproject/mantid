@@ -48,10 +48,8 @@ void SaveZODS::init() {
                                                            Direction::Input),
                   "An input MDHistoWorkspace in HKL space.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".h5");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Save, exts),
+	  new FileProperty("Filename", "", FileProperty::Save, {".h5"}),
       "The name of the HDF5 file to write, as a full or relative path.");
 }
 
