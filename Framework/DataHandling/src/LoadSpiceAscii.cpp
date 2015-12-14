@@ -99,7 +99,7 @@ const std::string LoadSpiceAscii::summary() const {
  */
 void LoadSpiceAscii::init() {
   declareProperty(
-	  new FileProperty("Filename", "", API::FileProperty::Load, {".dat"}),
+      new FileProperty("Filename", "", API::FileProperty::Load, {".dat"}),
       "Name of SPICE data file.");
 
   // Logs to be float type sample log
