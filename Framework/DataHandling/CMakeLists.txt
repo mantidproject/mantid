@@ -58,7 +58,7 @@ set ( SRC_FILES
 	src/LoadLLB.cpp
 	src/LoadLog.cpp
 	src/LoadLogsForSNSPulsedMagnet.cpp
-        src/LoadMLZ.cpp
+	src/LoadMLZ.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
 	src/LoadMcStas.cpp
@@ -71,6 +71,7 @@ set ( SRC_FILES
 	src/LoadNexus.cpp
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
+        src/LoadNexusMonitors2.cpp
 	src/LoadNexusProcessed.cpp
 	src/LoadPDFgetNFile.cpp
 	src/LoadParameterFile.cpp
@@ -112,6 +113,7 @@ set ( SRC_FILES
 	src/RemoveLogs.cpp
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
+	src/RotateSource.cpp
 	src/SNSDataArchive.cpp
 	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
@@ -217,7 +219,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadLLB.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
-        inc/MantidDataHandling/LoadMLZ.h
+	inc/MantidDataHandling/LoadMLZ.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMcStas.h
@@ -230,6 +232,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexus.h
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
+        inc/MantidDataHandling/LoadNexusMonitors2.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadPDFgetNFile.h
 	inc/MantidDataHandling/LoadParameterFile.h
@@ -266,6 +269,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/RemoveLogs.h
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
+	inc/MantidDataHandling/RotateSource.h
 	inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SaveANSTOAscii.h
 	inc/MantidDataHandling/SaveAscii.h
@@ -369,7 +373,7 @@ set ( TEST_FILES
 	LoadIsawDetCalTest.h
 	LoadLLBTest.h
 	LoadLogTest.h
-        LoadMLZTest.h
+	LoadMLZTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
 	LoadMcStasNexusTest.h
@@ -417,6 +421,7 @@ set ( TEST_FILES
 	RemoveLogsTest.h
 	RenameLogTest.h
 	RotateInstrumentComponentTest.h
+	RotateSourceTest.h
 	SNSDataArchiveTest.h
 	SaveANSTOAsciiTest.h
 	SaveAscii2Test.h

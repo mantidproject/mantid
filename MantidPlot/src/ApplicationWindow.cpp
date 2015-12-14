@@ -7315,7 +7315,7 @@ void ApplicationWindow::showAxisDialog() {
   QDialog *gd = showScaleDialog();
   if (gd && plot->isA("MultiLayer")) {
     MultiLayer *ml = dynamic_cast<MultiLayer *>(plot);
-    if (!ml || (ml && !ml->layers()))
+    if (!ml || !ml->layers())
       return;
 
     auto ad = dynamic_cast<AxesDialog *>(gd);
@@ -8716,6 +8716,21 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
       return NULL;
     QString caption = generateUniqueName(tr("Table"));
     nw = newTable(caption, t->numRows(), t->numCols());
+
+    Table *nt = dynamic_cast<Table *>(nw);
+
+    nt->setHeader(t->colNames());
+
+    Q3TableItem *io;
+
+    for (auto i = 0; i < nt->numCols(); i++) {
+      for (auto j = 0; j < nt->numRows(); j++) {
+        io = t->table()->item(j, i);
+        nt->table()->setItem(j, i, io);
+        // nt->table()->item(j, i)->setText(t->table()->item(j, i)->text());
+      }
+    }
+
   } else if (w->isA("Graph3D")) {
     Graph3D *g = dynamic_cast<Graph3D *>(w);
     if (!g)
@@ -10233,7 +10248,8 @@ void ApplicationWindow::showGraphContextMenu() {
 
     QAction *eventsNormMD = new QAction(tr("&Events"), &normMD);
     eventsNormMD->setCheckable(true);
-    connect(eventsNormMD, SIGNAL(activated()), ag, SLOT(numEventsNormalizationMD()));
+    connect(eventsNormMD, SIGNAL(activated()), ag,
+            SLOT(numEventsNormalizationMD()));
     normMD.addAction(eventsNormMD);
 
     int normalization = ag->normalizationMD();
@@ -15885,7 +15901,7 @@ void ApplicationWindow::executeScriptFile(
   runner->redirectStdOut(false);
   scriptingEnv()->redirectStdOut(false);
   if (execMode == Script::Asynchronous) {
-    QFuture<bool> job = runner->executeAsync(code);
+    QFuture<bool> job = runner->executeAsync(ScriptCode(code));
     while (job.isRunning()) {
       QCoreApplication::processEvents();
     }
@@ -15893,7 +15909,7 @@ void ApplicationWindow::executeScriptFile(
     QCoreApplication::processEvents();
     QCoreApplication::processEvents();
   } else {
-    runner->execute(code);
+    runner->execute(ScriptCode(code));
   }
   delete runner;
 }
@@ -15963,7 +15979,7 @@ bool ApplicationWindow::runPythonScript(const QString &code, bool async,
   }
   bool success(false);
   if (async) {
-    QFuture<bool> job = m_iface_script->executeAsync(code);
+    QFuture<bool> job = m_iface_script->executeAsync(ScriptCode(code));
     while (job.isRunning()) {
       QCoreApplication::instance()->processEvents();
     }
@@ -15971,7 +15987,7 @@ bool ApplicationWindow::runPythonScript(const QString &code, bool async,
     QCoreApplication::instance()->processEvents();
     success = job.result();
   } else {
-    success = m_iface_script->execute(code);
+    success = m_iface_script->execute(ScriptCode(code));
   }
   if (redirect) {
     m_iface_script->redirectStdOut(false);

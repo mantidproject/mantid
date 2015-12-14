@@ -71,11 +71,11 @@ class Interval
 {
 public:
   /// Constructor - starting and ending at single.
-  Interval(int single);
+  explicit Interval(int single);
   /// Constructor - starting at start and ending at end.
   Interval(int start, int end);
   /// Constructor - attempts to parse given string to find start and end.
-  Interval(QString);
+  explicit Interval(QString);
   /// Copy constructor
   Interval(const Interval&);
 
@@ -115,9 +115,9 @@ public:
   /// Constructor - with empty list.
   IntervalList(void);
   /// Constructor - with a list created by parsing the input string
-  IntervalList(QString);
+  explicit IntervalList(QString);
   /// Constructor - with a list containing a single Interval
-  IntervalList(Interval);
+  explicit IntervalList(Interval);
   /// Copy Constructor
   IntervalList(const IntervalList&);
 
@@ -196,7 +196,7 @@ class MantidWSIndexDialog : public QDialog
 class QLineEditWithErrorMark : public QWidget{
 public:
   /// constructor that will join togheter the QLineEdit and an 'invisible' * label.
-  QLineEditWithErrorMark(QWidget * parent = 0); 
+  explicit QLineEditWithErrorMark(QWidget *parent = 0);
   /// virtual destructor to allow Qt to deallocate all objects
   virtual ~QLineEditWithErrorMark(){};
   /// provide acess to the QLineEdit

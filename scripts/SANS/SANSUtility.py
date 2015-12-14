@@ -1240,6 +1240,26 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
     output_ws.setDx(0, q_resolution)
 
 
+def is_valid_user_file_extension(user_file):
+    '''
+    Check if the file name has a valid extension for user files
+    @param user_file: the name of the user file
+    @returns true if it is valid, else false
+    '''
+    allowed_values = ['.TXT']
+    # We need to allow for old user file formats. They started with a number.
+    # But there doesn't seem to be a general format. As a very basic check
+    # we make sure that the ending starts with a number
+    pattern = r'^\.[0-9]+'
+
+    filename, file_extension = os.path.splitext(user_file)
+    file_extension = file_extension.upper()
+    dummy_file = filename
+    is_allowed = False
+    if file_extension in allowed_values or re.match(pattern, file_extension):
+        is_allowed = True
+    return is_allowed
+
 def createUnmangedAlgorithm(name, **kwargs):
     '''
     This creates an unmanged child algorithm with the
@@ -1252,8 +1272,6 @@ def createUnmangedAlgorithm(name, **kwargs):
     for key, value in kwargs.iteritems():
         alg.setProperty(key, value)
     return alg
-
-def get_shift_mode(rAnd
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

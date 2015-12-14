@@ -81,7 +81,7 @@ private:
   void exec();
 
   /// Process user input properties
-  void processProperties();
+  void processAlgorithmProperties();
 
   void processSplittersWorkspace();
 
@@ -171,6 +171,11 @@ private:
   EVENTFILTERSKIP m_specSkipType;
   /// Vector for skip information
   std::vector<bool> m_vecSkip;
+
+  // Flag to have relative time in splitters workspace
+  bool m_isSplittersRelativeTime;
+  // Starting time for starting time of event filters
+  Kernel::DateAndTime m_filterStartTime;
 };
 
 } // namespace Algorithms

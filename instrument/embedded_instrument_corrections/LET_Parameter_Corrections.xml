@@ -1,0 +1,4 @@
+<EmbeddedParameterCorrections name="LET_embedded_corrections">
+ <correction  valid-from="1900-01-31 23:59:59"
+               valid-to="2014-02-10 23:59:59" file='LET_Parameters.xml' append='false'/>
+</EmbeddedParameterCorrections>

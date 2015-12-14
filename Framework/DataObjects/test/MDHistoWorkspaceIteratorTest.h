@@ -140,6 +140,50 @@ public:
     delete histoIt;
   }
 
+  void test_getNormalizedSignalWIthMask() {
+    // std::vector<coord_t> normal_vector{1.};
+    // std::vector<coord_t> bound_vector{3.};
+
+    // MDImplicitFunction *function = new MDImplicitFunction();
+    // function->addPlane(MDPlane(normal_vector, bound_vector));
+
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+    WritableHistoWorkspace *ws =
+        new WritableHistoWorkspace(MDHistoDimension_sptr(
+            new MDHistoDimension("x", "x", frame, 0.0, 10.0, 10)));
+
+    ws->setSignalAt(0, 3.0);
+    ws->setSignalAt(1, 3.0);
+    ws->setSignalAt(2, 3.0);
+    ws->setSignalAt(3, 3.0);
+    ws->setSignalAt(4, 3.0);
+
+    ws->setMaskValueAt(0, false); // Unmasked
+    ws->setMaskValueAt(1, false); // Unmasked
+    ws->setMaskValueAt(2, true);  // Masked
+    ws->setMaskValueAt(3, false); // Unmasked
+    ws->setMaskValueAt(4, true);  // Masked
+
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
+
+    MDHistoWorkspaceIterator *histoIt =
+        dynamic_cast<MDHistoWorkspaceIterator *>(ws->createIterator());
+
+    TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
+                      " are unmasked",
+                      3.0, histoIt->getNormalizedSignalWithMask());
+    histoIt->jumpTo(2);
+    TSM_ASSERT_EQUALS("Should return 0 here as data at the iterator are masked",
+                      0.0, histoIt->getNormalizedSignalWithMask());
+    histoIt->jumpTo(3);
+    TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
+                      " are unmasked",
+                      3.0, histoIt->getNormalizedSignalWithMask());
+
+    delete histoIt;
+  }
+
   void test_iterator_1D() { do_test_iterator(1, 10); }
 
   void test_iterator_2D() { do_test_iterator(2, 100); }

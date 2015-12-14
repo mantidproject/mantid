@@ -27,6 +27,7 @@ DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 int EnggDiffractionViewQtGUI::m_currentType = 0;
+int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -51,10 +52,10 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
     "CustomInterfaces/EnggDiffractionView";
 
 /**
- * Default constructor.
- *
- * @param parent Parent window (most likely the Mantid main app window).
- */
+* Default constructor.
+*
+* @param parent Parent window (most likely the Mantid main app window).
+*/
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
       m_currentCalibFilename(""), m_presenter(NULL) {}
@@ -143,8 +144,14 @@ void EnggDiffractionViewQtGUI::doSetupTabFocus() {
   connect(m_uiTabFocus.pushButton_reset, SIGNAL(released()), this,
           SLOT(focusResetClicked()));
 
+  connect(m_uiTabFocus.pushButton_stopFocus, SIGNAL(released()), this,
+	  SLOT(focusStopClicked()));
+
   connect(m_uiTabFocus.comboBox_PlotData, SIGNAL(currentIndexChanged(int)),
           this, SLOT(plotRepChanged(int)));
+
+  connect(m_uiTabFocus.comboBox_Multi_Runs, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(multiRunModeChanged(int)));
 
   connect(m_uiTabFocus.checkBox_FocusedWS, SIGNAL(clicked()), this,
           SLOT(plotFocusStatus()));
@@ -260,10 +267,18 @@ void EnggDiffractionViewQtGUI::readSettings() {
       qs.value("user-params-focus-texture-detector-grouping-file", "")
           .toString());
 
+  m_uiTabFocus.groupBox_cropped->setChecked(
+	  qs.value("user-params-focus-cropped-group-checkbox", false).toBool());
+
+  m_uiTabFocus.groupBox_texture->setChecked(
+	  qs.value("user-params-focus-texture-group-checkbox", false).toBool());
+
   m_uiTabFocus.checkBox_FocusedWS->setChecked(
       qs.value("user-params-focus-plot-ws", true).toBool());
 
   m_uiTabFocus.comboBox_PlotData->setCurrentIndex(0);
+
+  m_uiTabFocus.comboBox_Multi_Runs->setCurrentIndex(0);
 
   // pre-processing (re-binning)
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setUserInput(
@@ -345,6 +360,12 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabFocus.lineEdit_texture_run_num->getText());
   qs.setValue("user-params-focus-texture-detector-grouping-file",
               m_uiTabFocus.lineEdit_texture_grouping_file->text());
+
+  qs.setValue("user-params-focus-cropped-group-checkbox",
+	  m_uiTabFocus.groupBox_cropped->isChecked());
+
+  qs.setValue("user-params-focus-texture-group-checkbox",
+	  m_uiTabFocus.groupBox_texture->isChecked());
 
   qs.setValue("value", m_uiTabFocus.checkBox_FocusedWS->isChecked());
 
@@ -477,10 +498,12 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
   m_uiTabFocus.checkBox_FocusedWS->setEnabled(enable);
   m_uiTabFocus.checkBox_SaveOutputFiles->setEnabled(enable);
+  // m_uiTabFocus.comboBox_Multi_Runs->setEnabled(enable);
 
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_cropped->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_texture->setEnabled(enable);
+  m_uiTabFocus.pushButton_stopFocus->setDisabled(enable);
 
   // pre-processing
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setEnabled(enable);
@@ -511,7 +534,8 @@ double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
-  std::string pyCode = "win = plotSpectrum('" + wsName + "', 0)";
+  std::string pyCode =
+      "win=plotSpectrum('" + wsName + "', 0, error_bars=False, type=0)";
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
@@ -524,7 +548,8 @@ void EnggDiffractionViewQtGUI::plotWaterfallSpectrum(
     const std::string &wsName) {
   // parameter of list ?
   std::string pyCode =
-      "plotSpectrum('" + wsName + "', 0, waterfall = True, window = win)";
+      "plotSpectrum('" + wsName +
+      "', 0, error_bars=False, type=0, waterfall=True, window=win)";
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
   m_logMsgs.push_back("Plotted output focused data, with status string " +
@@ -534,7 +559,8 @@ void EnggDiffractionViewQtGUI::plotWaterfallSpectrum(
 
 void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName) {
   std::string pyCode =
-      "plotSpectrum('" + wsName + "', 0, window = win, clearWindow = True)";
+      "plotSpectrum('" + wsName +
+      "', 0, error_bars=False, type=0, window=win, clearWindow=True)";
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
 
@@ -550,6 +576,9 @@ void EnggDiffractionViewQtGUI::resetFocus() {
 
   m_uiTabFocus.lineEdit_cropped_run_num->setText("");
   m_uiTabFocus.lineEdit_cropped_spec_ids->setText("");
+
+  m_uiTabFocus.groupBox_cropped->setChecked(false);
+  m_uiTabFocus.groupBox_texture->setChecked(false);
 
   m_uiTabFocus.lineEdit_texture_run_num->setText("");
   m_uiTabFocus.lineEdit_texture_grouping_file->setText("");
@@ -636,6 +665,10 @@ void EnggDiffractionViewQtGUI::focusTextureClicked() {
 
 void EnggDiffractionViewQtGUI::focusResetClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::ResetFocus);
+}
+
+void EnggDiffractionViewQtGUI::focusStopClicked() {
+	m_presenter->notify(IEnggDiffractionPresenter::StopFocus);
 }
 
 void EnggDiffractionViewQtGUI::rebinTimeClicked() {
@@ -823,6 +856,13 @@ void EnggDiffractionViewQtGUI::plotFocusStatus() {
   } else {
     m_uiTabFocus.comboBox_PlotData->setEnabled(false);
   }
+}
+
+void EnggDiffractionViewQtGUI::multiRunModeChanged(int /*idx*/) {
+  QComboBox *plotType = m_uiTabFocus.comboBox_Multi_Runs;
+  if (!plotType)
+    return;
+  m_currentRunMode = plotType->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {

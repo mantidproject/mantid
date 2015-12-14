@@ -47,7 +47,7 @@ BinFinder::BinFinder(const std::vector<double> &binParams) {
 
     // Pre-do some calculations for log binning.
     if (step < 0) {
-      double log_step = log(1.0 + fabs(step));
+      double log_step = log1p(fabs(step));
       logSteps.push_back(log_step);
       if (i == 0)
         logBoundaries.push_back(log(min));

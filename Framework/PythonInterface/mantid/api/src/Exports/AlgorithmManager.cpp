@@ -1,6 +1,5 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidPythonInterface/api/AlgorithmIDProxy.h"
-#include "MantidPythonInterface/kernel/TrackingInstanceMethod.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -9,7 +8,6 @@
 
 using namespace Mantid::API;
 using Mantid::PythonInterface::AlgorithmIDProxy;
-using Mantid::PythonInterface::TrackingInstanceMethod;
 using namespace boost::python;
 
 namespace {
@@ -75,38 +73,37 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,
 }
 
 void export_AlgorithmManager() {
-  typedef class_<AlgorithmManagerImpl, boost::noncopyable> PythonType;
 
-  auto pythonClass =
-      class_<AlgorithmManagerImpl, boost::noncopyable>("AlgorithmManagerImpl",
-                                                       no_init)
-          .def("create", &AlgorithmManagerImpl::create,
-               create_overloads((arg("name"), arg("version")),
-                                "Creates a managed algorithm."))
-          .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
-               createUnmanaged_overloads((arg("name"), arg("version")),
-                                         "Creates an unmanaged algorithm."))
-          .def("size", &AlgorithmManagerImpl::size, arg("self"),
-               "Returns the number of managed algorithms")
-          .def("setMaxAlgorithms", &AlgorithmManagerImpl::setMaxAlgorithms,
-               (arg("self"), arg("n")),
-               "Set the maximum number of allowed managed algorithms")
-          .def("getAlgorithm", &getAlgorithm, (arg("self"), arg("id_holder")),
-               "Return the algorithm instance identified by the given id.")
-          .def("removeById", &removeById, (arg("self"), arg("id_holder")),
-               "Remove an algorithm from the managed list")
-          .def("newestInstanceOf", &AlgorithmManagerImpl::newestInstanceOf,
-               (arg("self"), arg("algorithm_name")),
-               "Returns the newest created instance of the named algorithm")
-          .def("runningInstancesOf", &runningInstancesOf,
-               (arg("self"), arg("algorithm_name")),
-               "Returns a list of managed algorithm instances that are "
-               "currently executing")
-          .def("clear", &AlgorithmManagerImpl::clear, arg("self"),
-               "Clears the current list of managed algorithms")
-          .def("cancelAll", &AlgorithmManagerImpl::cancelAll, arg("self"),
-               "Requests that all currently running algorithms be cancelled");
-
-  // Instance method
-  TrackingInstanceMethod<AlgorithmManager, PythonType>::define(pythonClass);
+  class_<AlgorithmManagerImpl, boost::noncopyable>("AlgorithmManagerImpl",
+                                                   no_init)
+      .def("create", &AlgorithmManagerImpl::create,
+           create_overloads((arg("name"), arg("version")),
+                            "Creates a managed algorithm."))
+      .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
+           createUnmanaged_overloads((arg("name"), arg("version")),
+                                     "Creates an unmanaged algorithm."))
+      .def("size", &AlgorithmManagerImpl::size, arg("self"),
+           "Returns the number of managed algorithms")
+      .def("setMaxAlgorithms", &AlgorithmManagerImpl::setMaxAlgorithms,
+           (arg("self"), arg("n")),
+           "Set the maximum number of allowed managed algorithms")
+      .def("getAlgorithm", &getAlgorithm, (arg("self"), arg("id_holder")),
+           "Return the algorithm instance identified by the given id.")
+      .def("removeById", &removeById, (arg("self"), arg("id_holder")),
+           "Remove an algorithm from the managed list")
+      .def("newestInstanceOf", &AlgorithmManagerImpl::newestInstanceOf,
+           (arg("self"), arg("algorithm_name")),
+           "Returns the newest created instance of the named algorithm")
+      .def("runningInstancesOf", &runningInstancesOf,
+           (arg("self"), arg("algorithm_name")),
+           "Returns a list of managed algorithm instances that are "
+           "currently executing")
+      .def("clear", &AlgorithmManagerImpl::clear, arg("self"),
+           "Clears the current list of managed algorithms")
+      .def("cancelAll", &AlgorithmManagerImpl::cancelAll, arg("self"),
+           "Requests that all currently running algorithms be cancelled")
+      .def("Instance", &AlgorithmManager::Instance,
+           return_value_policy<reference_existing_object>(),
+           "Return a reference to the singleton instance")
+      .staticmethod("Instance");
 }

@@ -1,5 +1,5 @@
-#ifndef MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_
-#define MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_
+#ifndef MANTID_WORKFLOWALGORITHMS_MUONPROCESS_H_
+#define MANTID_WORKFLOWALGORITHMS_MUONPROCESS_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
@@ -7,7 +7,7 @@
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
-/** MuonLoad : loads Muon workspace ready for analysis.
+/** MuonProcess : Processes and analyses Muon workspace.
 
   Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,19 +30,22 @@ namespace WorkflowAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MuonLoad : public API::DataProcessorAlgorithm {
+class DLLExport MuonProcess : public API::DataProcessorAlgorithm {
 public:
-  MuonLoad();
-  virtual ~MuonLoad();
+  MuonProcess();
+  virtual ~MuonProcess();
 
   virtual const std::string name() const;
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Loads Muon workspace ready for analysis.";
+    return "Processes and analyses Muon workspace.";
   }
 
   virtual int version() const;
   virtual const std::string category() const;
+
+  /// Perform validation of inputs to the algorithm
+  virtual std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init();
@@ -51,30 +54,30 @@ private:
   // We dont' want processGroups to be called
   virtual bool checkGroups() { return false; }
 
-  /// Returns a workspace for the first period as specified using FirstPeriod
-  /// property.
-  API::MatrixWorkspace_sptr getFirstPeriodWS(API::WorkspaceGroup_sptr group);
+  /// Groups specified workspace group according to specified
+  /// DetectorGroupingTable.
+  API::WorkspaceGroup_sptr
+  groupWorkspaces(API::WorkspaceGroup_sptr wsGroup,
+                  DataObjects::TableWorkspace_sptr grouping);
 
-  /// Returns a workspace for the second period as specified using SecondPeriod
-  /// property.
-  API::MatrixWorkspace_sptr getSecondPeriodWS(API::WorkspaceGroup_sptr group);
-
-  /// Groups specified workspace according to specified DetectorGroupingTable.
-  API::MatrixWorkspace_sptr
-  groupWorkspace(API::MatrixWorkspace_sptr ws,
-                 DataObjects::TableWorkspace_sptr grouping);
-
-  /// Applies dead time correction to the workspace.
-  API::MatrixWorkspace_sptr applyDTC(API::MatrixWorkspace_sptr ws,
-                                     DataObjects::TableWorkspace_sptr dt);
+  /// Applies dead time correction to the workspace group.
+  API::WorkspaceGroup_sptr applyDTC(API::WorkspaceGroup_sptr wsGroup,
+                                    DataObjects::TableWorkspace_sptr dt);
 
   /// Applies offset, crops and rebin the workspace according to specified
   /// params
   API::MatrixWorkspace_sptr correctWorkspace(API::MatrixWorkspace_sptr ws,
                                              double loadedTimeZero);
+
+  /// Applies offset, crops and rebins all workspaces in the group
+  API::WorkspaceGroup_sptr correctWorkspaces(API::WorkspaceGroup_sptr wsGroup,
+                                             double loadedTimeZero);
+
+  /// Builds an error message from a list of invalid periods
+  std::string buildErrorString(const std::vector<int> &invalidPeriods) const;
 };
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
 
-#endif /* MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_ */
+#endif /* MANTID_WORKFLOWALGORITHMS_MUONPROCESS_H_ */

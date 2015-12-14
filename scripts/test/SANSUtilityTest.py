@@ -53,7 +53,9 @@ def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_
     return ws
 
 def provide_event_ws_custom(name, start_time, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False):
-    return provide_event_ws_with_entries(name=name, start_time=start_time,number_events = 100, extra_time_shift = extra_time_shift, proton_charge=proton_charge, proton_charge_empty=proton_charge_empty)
+    return provide_event_ws_with_entries(name=name, start_time=start_time,
+                                         number_events = 100, extra_time_shift = extra_time_shift,
+                                         proton_charge=proton_charge, proton_charge_empty=proton_charge_empty)
 
 def provide_event_ws(name, start_time, extra_time_shift):
     return provide_event_ws_custom(name = name, start_time = start_time, extra_time_shift = extra_time_shift,  proton_charge = True)
@@ -98,7 +100,6 @@ def provide_workspace_with_x_errors(workspace_name,use_xerror = True, nspec = 1,
 
 
 # This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.
-
 class SANSUtilityTest(unittest.TestCase):
 
     #def checkValues(self, list1, list2):
@@ -1178,7 +1179,7 @@ class TestGetQResolutionForMergedWorkspaces(unittest.TestCase):
         dx_expected_1 = (dx_front[1]*y_front[1]*scale + dx_rear[1]*y_rear[1])/(y_front[1]*scale + y_rear[1])
         dx_expected_2 = dx_expected_1
         dx_result = result.readDx(0)
-        self.assertTrue(len(dx_result) ==3)
+        self.assertTrue(len(dx_result) == 3)
         self.assertEqual(dx_result[0], dx_expected_0)
         self.assertEqual(dx_result[1], dx_expected_1)
         self.assertEqual(dx_result[2], dx_expected_2)
@@ -1188,6 +1189,31 @@ class TestGetQResolutionForMergedWorkspaces(unittest.TestCase):
         DeleteWorkspace(rear)
         DeleteWorkspace(result)
 
+class TestDetectingValidUserFileExtensions(unittest.TestCase):
+    def _do_test(self, file_name, expected):
+        result = su.is_valid_user_file_extension(file_name)
+        self.assertTrue(result == expected)
+
+    def test_that_detects_txt_file(self):
+        # Arrange
+        file_name = "/path1/path2/file.Txt"
+        expected = True
+        # Act and Assert
+        self._do_test(file_name, expected)
+
+    def test_that_fails_for_random_file_extension(self):
+        # Arrange
+        file_name = "/path1/path2/file.abc"
+        expected = False
+        # Act and Assert
+        self._do_test(file_name, expected)
+
+    def test_that_detects_when_ending_starts_with_number(self):
+        # Arrange
+        file_name = "/path1/path2/file.091A"
+        expected = True
+        # Act and Assert
+        self._do_test(file_name, expected)
 
 if __name__ == "__main__":
     unittest.main()

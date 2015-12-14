@@ -42,6 +42,7 @@ public:
   MOCK_METHOD1(next, bool(size_t skip));
   MOCK_CONST_METHOD0(getNormalizedSignal, signal_t());
   MOCK_CONST_METHOD0(getNormalizedError, signal_t());
+  MOCK_CONST_METHOD0(getNormalizedSignalWithMask, signal_t());
   MOCK_CONST_METHOD0(getSignal, signal_t());
   MOCK_CONST_METHOD0(getError, signal_t());
   MOCK_CONST_METHOD1(getVertexesArray, coord_t *(size_t &numVertices));

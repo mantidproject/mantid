@@ -17,7 +17,7 @@ class XIntegrationScrollBar: public QFrame
 {
   Q_OBJECT
 public:
-  XIntegrationScrollBar(QWidget* parent);
+  explicit XIntegrationScrollBar(QWidget *parent);
   double getMinimum()const;
   double getMaximum()const;
   double getWidth()const;
@@ -50,7 +50,7 @@ class XIntegrationControl: public QFrame
 {
   Q_OBJECT
 public:
-  XIntegrationControl(InstrumentWindow* instrWindow);
+  explicit XIntegrationControl(InstrumentWindow *instrWindow);
   void setTotalRange(double minimum,double maximum);
   void setUnits(const QString& units);
   void setRange(double minimum,double maximum);

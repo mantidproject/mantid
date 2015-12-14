@@ -10,7 +10,7 @@ private:
   size_t m_label;
 
 public:
-  Comparitor(const size_t &label) : m_label(label) {}
+  explicit Comparitor(const size_t &label) : m_label(label) {}
   bool operator()(
       const boost::shared_ptr<Mantid::Crystal::ICluster> &pCluster) const {
     return pCluster->containsLabel(m_label);

@@ -448,6 +448,45 @@ public:
     TS_ASSERT_DELTA(bbox.zMax(), 0.5, 1e-08);
   }
 
+  void testMultipleCompAssemblyRelativeTranslate() {
+    V3D instInitialPos(0, 0, 0);
+    V3D parentInitialPos(100, 100, 100);
+    V3D pos1(1, 1, 1);
+    V3D pos2(6, 7, 8);
+    V3D pos3(-10, -10, -10);
+    V3D translate1(5, 6, 7);
+    V3D translate2(-16, -17, -18);
+    V3D translate3(2, 10, 3);
+    V3D translate4(-1, -100, -8);
+
+    CompAssembly *inst = new CompAssembly("Instrument");
+    inst->setPos(instInitialPos);
+    CompAssembly *parent = new CompAssembly("parent", inst);
+    parent->setPos(parentInitialPos);
+    CompAssembly *child = new CompAssembly("child", parent);
+    child->setPos(pos2);
+    Component *det = new Component("det1");
+    det->setPos(pos3);
+    child->add(det);
+
+    V3D instPos = inst->getPos();
+    V3D parentPos = parent->getPos();
+    V3D childPos = child->getPos();
+    V3D detPos = det->getPos();
+
+    inst->translate(translate1);
+    parent->translate(translate2);
+    child->translate(translate3);
+    det->translate(translate4);
+    TS_ASSERT_EQUALS(inst->getPos(), translate1 + instPos);
+    TS_ASSERT_EQUALS(parent->getPos(), translate1 + translate2 + parentPos);
+    TS_ASSERT_EQUALS(child->getPos(),
+                     translate1 + translate2 + translate3 + childPos);
+    TS_ASSERT_EQUALS(det->getPos(), translate1 + translate2 + translate3 +
+                                        translate4 + detPos);
+    delete inst;
+  }
+
   void test_get_component_by_name_with_rect_detectors() {
 
     CompAssembly *inst = new CompAssembly("inst");
