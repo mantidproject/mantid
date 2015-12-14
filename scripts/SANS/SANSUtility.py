@@ -1239,6 +1239,22 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
     # Set the dx error
     output_ws.setDx(0, q_resolution)
 
+
+def createUnmangedAlgorithm(name, **kwargs):
+    '''
+    This creates an unmanged child algorithm with the
+    provided proeprties set. The returned algorithm has
+    not been executed yet.
+    '''
+    alg = AlgoritmManager.createUnmanaged(name)
+    alg.initialze()
+    alg.setChild(True)
+    for key, value in kwargs.iteritems():
+        alg.setProperty(key, value)
+    return alg
+
+def get_shift_mode(rAnd
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

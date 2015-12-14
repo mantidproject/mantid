@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
@@ -404,7 +404,11 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # if 'merged' then when cross section is calculated output the two individual parts
     # of the cross section. These additional outputs are required to calculate
     # the merged workspace
-    if merge_flag:
+    # The fitRequired part is a hack which is needed as long as the fitting and
+    # the stitching for merged
+    # workspaces live in the same algorithm. We need to separte the two then we
+    # can remove the partial outoputs
+    if merge_flag or fitRequired:
         ReductionSingleton().to_Q.outputParts = True
 
     # do reduce rear bank data
@@ -446,6 +450,109 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         retWSname_front = _WavRangeReduction(name_suffix)
         retWSname = retWSname_front
 
+    # =============================================================
+    # START REFACTOR
+    # This section provides a the REAR -- FRONT fitting and a stitched workspace
+    if fitRequired or merge_flag:
+        # Prepare the Norm and Count workspaces for the FRONT and the REAR detectors
+        retWSname_merged = retWSname_rear
+        if retWSname_merged.count('rear') == 1:
+            retWSname_merged = retWSname_merged.replace('rear', 'merged')
+        else:
+            retWSname_merged = retWSname_merged + "_merged"
+
+        Nf = mtd[retWSname_front+"_sumOfNormFactors"]
+        Nr = mtd[retWSname_rear+"_sumOfNormFactors"]
+        Cf = mtd[retWSname_front+"_sumOfCounts"]
+        Cr = mtd[retWSname_rear+"_sumOfCounts"]
+        consider_can = True
+        try:
+            Nf_can = mtd[retWSname_front+"_can_tmp_sumOfNormFactors"]
+            Nr_can = mtd[retWSname_rear+"_can_tmp_sumOfNormFactors"]
+            Cf_can = mtd[retWSname_front+"_can_tmp_sumOfCounts"]
+            Cr_can = mtd[retWSname_rear+"_can_tmp_sumOfCounts"]
+            if Cr_can is None:
+                consider_can = False
+        except KeyError :
+            #The CAN was not specified
+            consider_can = False
+
+        # Set the scale and shift factor
+        scale_factor = rAnds.scale
+        shift_factor = rAnds.shift
+
+        # Set the fit mode
+        fit_mode = None
+        if rAnds.fitScale and rAnds.fitShift:
+            fit_mode = "Both"
+        elif rAnds.fitScale:
+            fit_mode = "ScaleOnly"
+        elif rAnds.fitShift:
+            fit_mode = "ShiftOnly"
+        else:
+            fit_mode = "None"
+
+        return rAnds.scale, rAnds.shift
+        kwargs_stitch = {"HABCountSample" : Cf,
+                         "HABNormSample" : Nf,
+                         "LABCountSample" : Cr,
+                         "LABNormSample" : Nr,
+                         "ProcessCan" : False,
+                         "Mode" : fit_mode,
+                         "ScaleFactor" : scale_factor,
+                         "ShiftFactor" : shift_factor,
+                         "OutputWorkspace" : retWSname_merged}
+        if consider_can:
+            kwargs_can = {"HABCountsCan" : Cf_can,
+                          "HABNormCan" : Nf_can,
+                          "LABCountsCan" : Cr_can,
+                          "LABNormCan" : Nf_can,
+                          "ProcessCan": True}
+            kwargs_stitch.update(kwargs_can)
+
+        alg_stitch = su.createUnmangedAlgorithm("SANSStitch1D", kwargs)
+        alg_stitch.execute()
+
+        # Get the fit values
+        shift_from_alg = alg_stitch.getProperty("ShiftFactor").value
+        scale_from_alg = alg_stitch.getProperty("ScaleFactor").value
+        ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift_from_alg
+        ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale_from_alg
+
+        if mergedQ:
+            # Get the merged workspace
+            mergedQ = alg_stitch.getProperty("OutputWorkspace").value
+            RenameWorkspace(InputWorkspace=mergedQ, OutputWorkspace= retWSname_merged)
+
+            # save the properties Transmission and TransmissionCan inside the merged workspace
+            # get these values from the rear_workspace because they are the same value as the front one.
+            # ticket #6929
+            rear_ws = mtd[retWSname_rear]
+            for prop in ['Transmission','TransmissionCan']:
+                if rear_ws.getRun().hasProperty(prop):
+                    ws_name = rear_ws.getRun().getLogData(prop).value
+                    if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
+                        AddSampleLog(Workspace=retWSname_merged,LogName= prop, LogText=ws_name)
+
+            retWSname = retWSname_merged
+
+        # Remove the partial workspaces, this needs to be done for when we merge and/or fit
+        delete_workspaces(retWSname_rear+"_sumOfCounts")
+        delete_workspaces(retWSname_rear+"_sumOfNormFactors")
+        delete_workspaces(retWSname_front+"_sumOfCounts")
+        delete_workspaces(retWSname_front+"_sumOfNormFactors")
+        if consider_can:
+            delete_workspaces(retWSname_front+"_can_tmp_sumOfNormFactors")
+            delete_workspaces(retWSname_rear+"_can_tmp_sumOfNormFactors")
+            delete_workspaces(retWSname_front+"_can_tmp_sumOfCounts")
+            delete_workspaces(retWSname_rear+"_can_tmp_sumOfCounts")
+
+    shift = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift
+    scale = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale
+
+    # STOP REFACTOR
+    # =============================================================
+'''
     # do fit and scale if required
     if fitRequired:
         scale, shift = _fitRescaleAndShift(rAnds, retWSname_front, retWSname_rear)
@@ -480,7 +587,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         except KeyError :
             #The CAN was not specified
             consider_can = False
-
 
         fisF = mtd[retWSname_front]
         fisR = mtd[retWSname_rear]
@@ -546,7 +652,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             delete_workspaces(retWSname_rear+"_can_tmp_sumOfCounts")
 
         retWSname = retWSname_merged
-
+'''
     #applying scale and shift on the front detector reduced data
     if reduce_front_flag:
         frontWS = mtd[retWSname_front]
