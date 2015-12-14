@@ -286,6 +286,9 @@ class SANSStitch1D(DataProcessorAlgorithm):
         if count_ws_rear.getNumberHistograms() != 1:
             return
 
+        if count_ws_front.getNumberHistograms() != 1:
+            return
+
         # We require both count workspaces to contain the DX value
         if not count_ws_rear.hasDx(0) or not count_ws_front.hasDx(0):
             return
@@ -402,11 +405,10 @@ class SANSStitch1D(DataProcessorAlgorithm):
                 break
         # Find the appropriate X values and call CropWorkspace
         x_vals = ws.readX(0)
-        startX = x_vals[start]
+        start_x = x_vals[start]
         # Make sure we're inside the bin that we want to crop
-        endX = x_vals[stop + 1]
-        ws = self._crop_to_x_range(ws=ws,x_min=startX, x_max=endX)
-        return ws
+        end_x = x_vals[stop + 1]
+        return self._crop_to_x_range(ws=ws,x_min=start_x, x_max=end_x)
 
 
     def PyExec(self):
