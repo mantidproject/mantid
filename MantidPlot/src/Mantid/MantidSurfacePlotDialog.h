@@ -20,6 +20,7 @@ class MantidSurfacePlotDialog : public QDialog {
 public:
   /// Struct to hold user input
   struct UserInputSurface {
+    bool accepted;
     int plotIndex;
     QString axisName;
     QString logName;
@@ -55,6 +56,8 @@ private:
   MantidUI *m_mantidUI;
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;
+  /// Set to true when user accepts input
+  bool m_accepted;
   /// Qt objects
   QPushButton *m_okButton, *m_cancelButton;
   QHBoxLayout *m_buttonBox;

@@ -16,7 +16,7 @@ MantidSurfacePlotDialog::MantidSurfacePlotDialog(MantidUI *mui,
                                                  Qt::WFlags flags,
                                                  QList<QString> wsNames)
     : QDialog(mui->appWindow(), flags), m_mantidUI(mui), m_wsNames(wsNames),
-      m_widget(this, flags, wsNames, false) {
+      m_accepted(false), m_widget(this, flags, wsNames, false) {
   // Set up UI.
   init();
 }
@@ -42,7 +42,7 @@ void MantidSurfacePlotDialog::initLogs() {
   m_logLabel = new QLabel(tr("Log value to plot against:"));
   m_logSelector = new QComboBox();
   populateLogComboBox();
-  m_axisLabel = new QLabel(tr("Label for plot axis:"));
+  m_axisLabel = new QLabel(tr("<br>Label for plot axis:"));
   m_axisNameEdit = new QLineEdit();
 
   m_logBox->add(m_logLabel);
@@ -128,6 +128,7 @@ const QString MantidSurfacePlotDialog::getAxisName() const {
 MantidSurfacePlotDialog::UserInputSurface
 MantidSurfacePlotDialog::getSelections() const {
   UserInputSurface selections;
+  selections.accepted = m_accepted;
   selections.plotIndex = getPlot();
   selections.axisName = getAxisName();
   selections.logName = getLogName();
@@ -159,6 +160,7 @@ const int MantidSurfacePlotDialog::getPlot() const {
  */
 void MantidSurfacePlotDialog::plot() {
   if (m_widget.plotRequested()) {
+    m_accepted = true;
     accept();
   }
 }
