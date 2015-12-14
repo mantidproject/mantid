@@ -112,7 +112,6 @@ private:
   void addClearMenuItems(QMenu* menu, const QString& wsName);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
-  const int getSingleSpectrumIndex() const;
   
 protected:
   MantidTreeWidget * m_tree;

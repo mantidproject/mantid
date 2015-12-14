@@ -127,20 +127,30 @@ const QString MantidSurfacePlotDialog::getAxisName() const {
 MantidSurfacePlotDialog::UserInputSurface
 MantidSurfacePlotDialog::getSelections() const {
   UserInputSurface selections;
-  selections.plotOptions.plots = getPlots();
-  selections.plotOptions.waterfall = false; // always false
+  selections.plotIndex = getPlot();
   selections.axisName = getAxisName();
   selections.logName = getLogName();
   return selections;
 }
 
 /**
-* Returns the QMultiMap that contains all the workspaces that are to be
-* plotted, mapped to the set of workspace indices.
-* @returns Workspaces to be plotted
+* Returns the workspace index to be plotted
+* @returns Workspace index to be plotted
 */
-QMultiMap<QString, std::set<int>> MantidSurfacePlotDialog::getPlots() const {
-  return m_widget.getPlots();
+const int MantidSurfacePlotDialog::getPlot() const {
+  int spectrumIndex{0}; // default to 0
+  const auto userInput = m_widget.getPlots();
+
+  if (!userInput.empty()) {
+    const auto indexList = userInput.values();
+    if (!indexList.empty()) {
+      const auto spectrumIndexes = indexList.at(0);
+      if (!spectrumIndexes.empty()) {
+        spectrumIndex = *spectrumIndexes.begin();
+      }
+    }
+  }
+  return spectrumIndex;
 }
 
 /**

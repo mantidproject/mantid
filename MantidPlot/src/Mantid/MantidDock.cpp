@@ -1518,7 +1518,7 @@ void MantidDockWidget::plotSurface() {
         m_ads.retrieve(wsName.toStdString()));
     if (wsGroup) {
       // Which spectrum to plot from each workspace
-      const int spectrumIndex = getSingleSpectrumIndex();
+      const int spectrumIndex = 0;
       // Name for y-axis of plot
       QString yLabelQ("Workspace index");
 
@@ -1583,27 +1583,6 @@ void MantidDockWidget::plotSurface() {
       plot->setResolution(1);
     }
   }
-}
-
-/**
- * Ask the user for a choice of which spectrum to plot from each workspace.
- * Disable waterfall and "Plot all" options.
- * Even if user enters a range, just use the first number.
- * @returns Selected spectrum index
- */
-const int MantidDockWidget::getSingleSpectrumIndex() const {
-  int spectrumIndex{0}; // default to 0
-  const auto userInput = m_tree->chooseSpectrumFromSelected(false, false);
-  if (!userInput.plots.empty()) {
-    const auto indexList = userInput.plots.values();
-    if (!indexList.empty()) {
-      const auto spectrumIndexes = indexList.at(0);
-      if (!spectrumIndexes.empty()) {
-        spectrumIndex = *spectrumIndexes.begin();
-      }
-    }
-  }
-  return spectrumIndex;
 }
 
 //------------ MantidTreeWidget -----------------------//

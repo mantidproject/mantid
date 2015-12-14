@@ -20,7 +20,7 @@ class MantidSurfacePlotDialog : public QDialog {
 public:
   /// Struct to hold user input
   struct UserInputSurface {
-    MantidWSIndexWidget::UserInput plotOptions;
+    int plotIndex;
     QString axisName;
     QString logName;
   };
@@ -31,9 +31,8 @@ public:
                           QList<QString> wsNames);
   /// Returns a structure holding all of the selected options
   UserInputSurface getSelections() const;
-  /// Returns the QMultiMap that contains all the workspaces that are to be
-  /// plotted, mapped to the set of workspace indices.
-  QMultiMap<QString, std::set<int>> getPlots() const;
+  /// Returns the workspace index to be plotted
+  const int getPlot() const;
 private slots:
   /// Called when the OK button is pressed.
   void plot();
