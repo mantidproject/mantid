@@ -1589,7 +1589,7 @@ const QString MantidDockWidget::createWorkspaceForSurfacePlot(
           auto Y = ws->readY(index);
           xPoints.insert(xPoints.end(), X.begin(), X.end());
           data.insert(data.end(), Y.begin(), Y.end());
-          logValues.push_back(2 * i);
+          logValues.push_back(getSingleLogValue(i, ws, logName));
           if (i == 0) {
             xAxisLabel = ws->getXDimension()->getName();
             xAxisUnits = ws->getXDimension()->getUnits();
@@ -1617,6 +1617,42 @@ const QString MantidDockWidget::createWorkspaceForSurfacePlot(
     }
   }
   return xAxisTitle;
+}
+
+/**
+ * Gets the given log value from the given workspace as a double.
+ * Should be a single-valued log!
+ * @param wsIndex :: [input] Index of workspace in group
+ * @param matrixWS :: [input] Workspace to find log from
+ * @param logName :: [input] Name of log
+ * @returns log value as a double, or workspace index
+ * @throws invalid_argument if log is wrong type or not present
+ */
+const double
+MantidDockWidget::getSingleLogValue(const int wsIndex,
+                                    const MatrixWorkspace_const_sptr &matrixWS,
+                                    const QString &logName) const {
+  if (logName == MantidSurfacePlotDialog::WORKSPACE_INDEX) {
+    return wsIndex;
+  } else {
+    // MatrixWorkspace is an ExperimentInfo
+    if (auto ei = boost::dynamic_pointer_cast<const ExperimentInfo>(matrixWS)) {
+      auto log = ei->run().getLogData(logName.toStdString());
+      if (log) {
+        if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
+            dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
+          return std::stod(log->value());
+        } else {
+          throw std::invalid_argument(
+              "Log is of wrong type (expected single numeric value");
+        }
+      } else {
+        throw std::invalid_argument("Log not present in workspace");
+      }
+    } else {
+      throw std::invalid_argument("Bad input workspace type");
+    }
+  }
 }
 
 //------------ MantidTreeWidget -----------------------//

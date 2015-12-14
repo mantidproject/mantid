@@ -117,6 +117,10 @@ private:
       const QString &wsName,
       boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
       const int index, const QString &logName);
+  const double
+  getSingleLogValue(const int wsIndex,
+                    const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
+                    const QString &logName) const;
 
 protected:
   MantidTreeWidget * m_tree;

@@ -6,6 +6,9 @@ using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDWorkspace_sptr;
 using Mantid::API::ExperimentInfo;
 
+/// The string "Workspace index"
+const QString MantidSurfacePlotDialog::WORKSPACE_INDEX{"Workspace index"};
+
 /**
  * Construct an object of this type
  * @param mui :: The MantidUI area
@@ -76,7 +79,7 @@ void MantidSurfacePlotDialog::initButtons() {
  */
 void MantidSurfacePlotDialog::populateLogComboBox() {
   // First item should be "Workspace index"
-  m_logSelector->addItem(tr("Workspace index"));
+  m_logSelector->addItem(WORKSPACE_INDEX);
 
   // We have been given a list of names of MatrixWorkspaces (m_wsNames)
   // Get the log names out of all of them

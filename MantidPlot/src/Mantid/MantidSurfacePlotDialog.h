@@ -34,6 +34,9 @@ public:
   UserInputSurface getSelections() const;
   /// Returns the workspace index to be plotted
   const int getPlot() const;
+  /// The string "Workspace index"
+  static const QString WORKSPACE_INDEX;
+
 private slots:
   /// Called when the OK button is pressed.
   void plot();
