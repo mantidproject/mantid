@@ -47,11 +47,8 @@ LoadRawHelper::~LoadRawHelper() {}
 
 /// Initialisation method.
 void LoadRawHelper::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".raw");
-  exts.push_back(".s*");
-  exts.push_back(".add");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
+                                   {".raw", ".s*", ".add"}),
                   "The name of the RAW file to read, including its full or "
                   "relative path. The file extension must be .raw or .RAW "
                   "(N.B. case sensitive if running on Linux).");
@@ -850,7 +847,8 @@ void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
       DateAndTime(isisDate.substr(7, 4) + "-" +
                   convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
                   isisDate.substr(0, 2) + "T" +
-                  std::string(localISISRaw->hdr.hd_time, 8)).toISO8601String());
+                  std::string(localISISRaw->hdr.hd_time, 8))
+          .toISO8601String());
 }
 
 /// To help transforming date stored in ISIS raw file into iso 8601
