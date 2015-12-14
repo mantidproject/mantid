@@ -33,15 +33,15 @@ using namespace DataObjects;
 void SANSSensitivityCorrection::init() {
   declareProperty(new WorkspaceProperty<>(
       "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
-  declareProperty(
-	  new API::FileProperty("Filename", "", API::FileProperty::Load, {"_event.nxs", ".xml"}),
-      "Flood field or sensitivity file.");
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
+                                        {"_event.nxs", ".xml"}),
+                  "Flood field or sensitivity file.");
   declareProperty("UseSampleDC", true, "If true, the dark current subtracted "
                                        "from the sample data will also be "
                                        "subtracted from the flood field.");
   declareProperty(new API::FileProperty("DarkCurrentFile", "",
                                         API::FileProperty::OptionalLoad,
-										{"_event.nxs", ".xml"}),
+                                        {"_event.nxs", ".xml"}),
                   "The name of the input file to load as dark current.");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();

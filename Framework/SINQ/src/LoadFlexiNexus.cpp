@@ -24,9 +24,11 @@ using namespace ::NeXus;
 
 void LoadFlexiNexus::init() {
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, {".hdf", ".h5", ""}),
-                  "A NeXus file");
-  declareProperty(new FileProperty("Dictionary", "", FileProperty::Load, {".txt", ".dic", ""}),
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".hdf", ".h5", ""}),
+      "A NeXus file");
+  declareProperty(new FileProperty("Dictionary", "", FileProperty::Load,
+                                   {".txt", ".dic", ""}),
                   "A Dictionary for controlling NeXus loading");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output));

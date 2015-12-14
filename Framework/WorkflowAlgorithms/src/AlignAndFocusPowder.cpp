@@ -72,7 +72,8 @@ void AlignAndFocusPowder::init() {
   //   "The name of the workspace containing the filtered low resolution TOF
   //   data.");
   declareProperty(
-	  new FileProperty("CalFileName", "", FileProperty::OptionalLoad, {".h5", ".hd5", ".hdf", ".cal"}),
+      new FileProperty("CalFileName", "", FileProperty::OptionalLoad,
+                       {".h5", ".hd5", ".hdf", ".cal"}),
       "The name of the CalFile with offset, masking, and grouping data");
   declareProperty(
       new WorkspaceProperty<GroupingWorkspace>(

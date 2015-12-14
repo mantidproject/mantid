@@ -82,7 +82,7 @@ int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
 */
 void LoadMD::init() {
   declareProperty(
-	  new FileProperty("Filename", "", FileProperty::Load, {".nxs"}),
+      new FileProperty("Filename", "", FileProperty::Load, {".nxs"}),
       "The name of the Nexus file to load, as a full or relative path");
 
   declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),

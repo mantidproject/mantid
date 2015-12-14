@@ -32,7 +32,8 @@ SetScalingPSD::SetScalingPSD() : Algorithm(), m_scalingOption(0) {}
 void SetScalingPSD::init() {
   // Declare required input parameters for algorithm
   declareProperty(
-	  new FileProperty("ScalingFilename", "", FileProperty::Load, {".sca", ".raw"}),
+      new FileProperty("ScalingFilename", "", FileProperty::Load,
+                       {".sca", ".raw"}),
       "The name of the scaling calibrations file to read, including its\n"
       "full or relative path. The file extension must be either .sca or\n"
       ".raw (filenames are case sensitive on linux)");

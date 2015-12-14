@@ -49,7 +49,7 @@ void SaveZODS::init() {
                   "An input MDHistoWorkspace in HKL space.");
 
   declareProperty(
-	  new FileProperty("Filename", "", FileProperty::Save, {".h5"}),
+      new FileProperty("Filename", "", FileProperty::Save, {".h5"}),
       "The name of the HDF5 file to write, as a full or relative path.");
 }
 

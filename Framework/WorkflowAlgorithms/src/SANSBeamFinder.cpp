@@ -25,9 +25,9 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void SANSBeamFinder::init() {
-  declareProperty(
-	  new API::FileProperty("Filename", "", API::FileProperty::Load, {"_event.nxs", ".xml"}),
-      "Data filed used to find beam center");
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
+                                        {"_event.nxs", ".xml"}),
+                  "Data filed used to find beam center");
 
   declareProperty("BeamCenterX", EMPTY_DBL(),
                   "Beam position in X pixel coordinates");

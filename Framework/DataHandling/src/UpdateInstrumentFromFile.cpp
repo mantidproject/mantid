@@ -44,7 +44,8 @@ void UpdateInstrumentFromFile::init() {
       new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
                                              Direction::InOut),
       "The name of the workspace in which to store the imported instrument");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, {".raw", ".nxs", ".s*"}),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
+                                   {".raw", ".nxs", ".s*"}),
                   "The filename of the input file.\n"
                   "Currently supports RAW, ISIS NeXus, DAT & multi-column (at "
                   "least 2) ascii files");

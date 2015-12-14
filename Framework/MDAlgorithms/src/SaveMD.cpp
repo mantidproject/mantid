@@ -54,7 +54,7 @@ void SaveMD::init() {
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
   declareProperty(
-	  new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
+      new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd

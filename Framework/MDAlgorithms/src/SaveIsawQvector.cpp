@@ -66,7 +66,7 @@ void SaveIsawQvector::init() {
                   "An input EventWorkspace with units along X-axis and defined "
                   "instrument with defined sample");
   declareProperty(
-	  new FileProperty("Filename", "", FileProperty::OptionalSave, {".bin"}),
+      new FileProperty("Filename", "", FileProperty::OptionalSave, {".bin"}),
       "Optional path to an hkl file to save.  Vectors returned if no file "
       "requested.");
   declareProperty("RightHanded", true, "Save the Q-vector as k_f - k_i");

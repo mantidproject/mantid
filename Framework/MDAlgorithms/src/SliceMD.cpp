@@ -49,7 +49,8 @@ void SliceMD::init() {
                   "Name of the output MDEventWorkspace.");
 
   declareProperty(
-	  new FileProperty("OutputFilename", "", FileProperty::OptionalSave, {".nxs"}),
+      new FileProperty("OutputFilename", "", FileProperty::OptionalSave,
+                       {".nxs"}),
       "Optional: Specify a NeXus file to write if you want the output "
       "workspace to be file-backed.");
 
