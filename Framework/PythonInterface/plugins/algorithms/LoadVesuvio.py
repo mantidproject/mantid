@@ -548,13 +548,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
         respective foil states
         """
         if self._nperiods == 2:
-            foil_out_periods = (2)
-            foil_thin_periods = (1)
+            foil_out_periods = (2,)
+            foil_thin_periods = (1,)
             foil_thick_periods = None
         elif self._nperiods == 3:
-            foil_out_periods = (3)
-            foil_thin_periods = (2)
-            foil_thick_periods = (1)
+            foil_out_periods = (3,)
+            foil_thin_periods = (2,)
+            foil_thick_periods = (1,)
         elif self._nperiods == 6:
             if self._spectra_type == BACKWARD:
                 foil_out_periods = (5,6)
