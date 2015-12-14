@@ -56,9 +56,7 @@ const std::string PDLoadCharacterizations::category() const {
 /** Initialize the algorithm's properties.
  */
 void PDLoadCharacterizations::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".txt");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, {".txt"}),
                   "Characterizations file");
   declareProperty(
       new FileProperty("ExpIniFilename", "", FileProperty::OptionalLoad, "ini"),
