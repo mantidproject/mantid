@@ -674,7 +674,7 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "default.instrument=" << std::endl;
     filestr << std::endl;
     filestr << "## Sets the Q.convention" << std::endl;
-    filestr << "## Uncomment next line for kf-ki instead of ki-kf" << std::endl;
+    filestr << "## Set to Crystallography for kf-ki instead of default Inelastic which is ki-kf" << std::endl;
     filestr << "#Q.convention=Crystallography" << std::endl;
     filestr << std::endl;
     filestr << "##" << std::endl;

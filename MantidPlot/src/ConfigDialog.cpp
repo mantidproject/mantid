@@ -694,7 +694,7 @@ void ConfigDialog::initMantidPage()
   ckQconvention = new QCheckBox("Crystallography Convention");
   ckQconvention->setToolTip("Change from default ki-kf to kf-ki.");
   const std::string QconventionProperty = "Q.convention";
-  bool Qconvention =  cfgSvc.hasProperty(QconventionProperty) && bool(atoi(cfgSvc.getString(QconventionProperty).c_str()));
+  bool Qconvention =  cfgSvc.hasProperty(QconventionProperty) && bool(cfgSvc.getString(QconventionProperty) == "Crystallography");
   ckQconvention->setChecked(Qconvention);
   grid->addWidget(ckQconvention, 4, 0);
 
