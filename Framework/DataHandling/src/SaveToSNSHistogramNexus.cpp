@@ -48,8 +48,7 @@ SaveToSNSHistogramNexus::SaveToSNSHistogramNexus()
 void SaveToSNSHistogramNexus::init() {
   // Declare required parameters, filename with ext {.nx,.nx5,xml} and input
   // workspac
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
+  std::initializer_list<std::string> exts = { ".nxs" };
 
   declareProperty(
       new FileProperty("InputFilename", "", FileProperty::Load, exts),
