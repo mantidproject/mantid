@@ -1,4 +1,4 @@
-﻿# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
+﻿# pylint: disable=no-init,attribute-defined-outside-init, too-few-public-methods
 
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import *
@@ -170,7 +170,7 @@ class LoadTests(unittest.TestCase):
 class ISISPowderDiffractionHrpd2(stresstesting.MantidStressTest):
     def requiredFiles(self):
         return set(["hrp39191.raw", "hrp39187.raw", "hrp43022.raw", "hrpd/test/GrpOff/hrpd_new_072_01.cal",
-                    "hrpd/test/GrpOff/hrpd_new_072_01_corr.cal", "hrpd/test/cycle_09_2_no_existv/tester/mtd2.pref"])
+                    "hrpd/test/GrpOff/hrpd_new_072_01_corr.cal", "hrpd/test/cycle_09_2_no_existv/tester/mtd_existv_no.pref"])
 
     def _clean_up_files(self, filenames, directories):
         try:
@@ -184,7 +184,7 @@ class ISISPowderDiffractionHrpd2(stresstesting.MantidStressTest):
         self._success = False
         expt = cry_ini.Files('hrpd', RawDir=(DIRS[0]), Analysisdir='test', forceRootDirFromScripts=False,
                              inputInstDir=DIRS[0])
-        expt.initialize('cycle_09_2_no_existv', user='tester', prefFile='mtd2.pref')
+        expt.initialize('cycle_09_2_no_existv', user='tester', prefFile='mtd_existv_no.pref')
         expt.tell()
         cry_focus.focus_all(expt, "43022", Write_ExtV=False)
 
