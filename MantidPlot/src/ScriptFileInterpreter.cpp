@@ -27,8 +27,7 @@ ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent,
       m_messages(new ScriptOutputDisplay), m_status(new QStatusBar),
       m_runner() {
 
-  // Initialise line wrapping to include additional indent and visual arrow flag
-  m_editor->setWrapIndentMode(QsciScintilla::WrapIndentIndented);
+  // Initialise line wrapping to include visual arrow indicator
   m_editor->setWrapVisualFlags(QsciScintilla::WrapFlagByText);
 
   setupChildWidgets();
