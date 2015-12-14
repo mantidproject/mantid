@@ -81,11 +81,8 @@ int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
 */
 void LoadMD::init() {
-
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+	  new FileProperty("Filename", "", FileProperty::Load, {".nxs"}),
       "The name of the Nexus file to load, as a full or relative path");
 
   declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
