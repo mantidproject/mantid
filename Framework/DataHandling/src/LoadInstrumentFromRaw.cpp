@@ -34,11 +34,8 @@ void LoadInstrumentFromRaw::init() {
                                              Direction::InOut),
       "The name of the workspace in which to store the imported instrument.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".raw");
-  exts.push_back(".s*");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load, {".raw", ".s*"}),
       "The filename (including its full or relative path) of an ISIS RAW file. "
       "The file extension must either be .raw or .s??");
   declareProperty(new ArrayProperty<int>("MonitorList", Direction::Output),
@@ -159,7 +156,8 @@ void LoadInstrumentFromRaw::exec() {
       << "Source component added with position set to (0,0,-" << l1
       << "). In standard configuration, with \n"
       << "the beam along z-axis pointing from source to sample, this implies "
-         "the source is " << l1 << "m in front \n"
+         "the source is "
+      << l1 << "m in front \n"
       << "of the sample. This value can be changed via the 'instrument.l1' "
          "configuration property.\n";
 
