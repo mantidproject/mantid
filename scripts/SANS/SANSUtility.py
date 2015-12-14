@@ -961,6 +961,8 @@ def transfer_special_sample_logs(from_ws, to_ws):
     '''
     single_valued_names = [ "gd_prtn_chrg"]
     time_series_names = ['good_uah_log', 'good_frames']
+    type_map = {'good_uah_log': float , 'good_frames' : int, "gd_prtn_chrg" : float}
+
     run_from = from_ws.getRun()
     run_to = to_ws.getRun()
 
@@ -976,7 +978,7 @@ def transfer_special_sample_logs(from_ws, to_ws):
             prop.clear()
             for index in range(0, len(times)):
                 prop.addValue(times[index],
-                              values[index])
+                              type_map[time_series_name](values[index]))
 
     alg_log = AlgorithmManager.createUnmanaged("AddSampleLog")
     alg_log.initialize()
@@ -987,7 +989,7 @@ def transfer_special_sample_logs(from_ws, to_ws):
             value = run_from.getProperty(single_valued_name).value
             alg_log.setProperty("Workspace", to_ws)
             alg_log.setProperty("LogName", single_valued_name)
-            alg_log.setProperty("LogText", str(value))
+            alg_log.setProperty("LogText", str(type_map[single_valued_name](value)))
             alg_log.setProperty("LogType", "Number")
             alg_log.execute()
 
@@ -1035,9 +1037,10 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 self._original_values_rhs[element] = property_rhs.value
 
         log_name_start_time = "start_time"
-        convert_to_date = lambda val: DateAndTime(val) if isinstance(val, str) else val
-        self._start_time_lhs = convert_to_date(run_lhs.getProperty(log_name_start_time).value)
-        self._start_time_rhs = convert_to_date(run_rhs.getProperty(log_name_start_time).value)
+        if (run_lhs.hasProperty(log_name_start_time) and run_rhs.hasProperty(log_name_start_time)):
+            convert_to_date = lambda val: DateAndTime(val) if isinstance(val, str) else val
+            self._start_time_lhs = convert_to_date(run_lhs.getProperty(log_name_start_time).value)
+            self._start_time_rhs = convert_to_date(run_rhs.getProperty(log_name_start_time).value)
 
     def apply_cummulative_logs_to_workspace(self, workspace):
         '''
