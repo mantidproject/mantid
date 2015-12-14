@@ -27,6 +27,7 @@ MantidSurfacePlotDialog::MantidSurfacePlotDialog(MantidUI *mui,
 void MantidSurfacePlotDialog::init() {
   m_outer = new QVBoxLayout();
   setWindowTitle(tr("Surface plot versus log value"));
+  m_outer->insertWidget(1, &m_widget);
   initLogs();
   initButtons();
   setLayout(m_outer);

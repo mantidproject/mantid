@@ -1518,9 +1518,10 @@ void MantidDockWidget::plotSurface() {
         m_ads.retrieve(wsName.toStdString()));
     if (wsGroup) {
       // Which spectrum to plot from each workspace
-      const int spectrumIndex = 0;
+      auto options = m_tree->chooseSurfacePlotOptions();
+      const int spectrumIndex = options.plotIndex;
       // Name for y-axis of plot
-      QString yLabelQ("Workspace index");
+      QString yLabelQ = options.axisName;
 
       // Set up one new matrix workspace to hold all the data for plotting
       const QString plotWSTitle("__matrixToPlot");
@@ -1754,17 +1755,49 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 }
 
 /**
+ * Filter the list of selected workspace names to account for any
+ * non-MatrixWorkspaces that may have been selected.  In particular
+ * WorkspaceGroups (the children of which are to be included if they are
+ * MatrixWorkspaces) and TableWorkspaces (which are implicitly excluded).
+ * We only want workspaces we can actually plot!
+ */
+QList<MatrixWorkspace_const_sptr>
+MantidTreeWidget::getSelectedWorkspaces() const {
+  // Check for any selected WorkspaceGroup names and replace with the names of
+  // their children.
+  QSet<QString> selectedWsNames;
+  foreach (const QString wsName, this->getSelectedWorkspaceNames()) {
+    const auto groupWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(
+        m_ads.retrieve(wsName.toStdString()));
+    if (groupWs) {
+      const auto childWsNames = groupWs->getNames();
+      for (auto childWsName = childWsNames.begin();
+           childWsName != childWsNames.end(); ++childWsName) {
+        selectedWsNames.insert(QString::fromStdString(*childWsName));
+      }
+    } else {
+      selectedWsNames.insert(wsName);
+    }
+  }
+
+  // Get the names of, and pointers to, the MatrixWorkspaces only.
+  QList<MatrixWorkspace_const_sptr> selectedMatrixWsList;
+  QList<QString> selectedMatrixWsNameList;
+  foreach (const auto selectedWsName, selectedWsNames) {
+    const auto matrixWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+        m_ads.retrieve(selectedWsName.toStdString()));
+    if (matrixWs) {
+      selectedMatrixWsList.append(matrixWs);
+    }
+  }
+  return selectedMatrixWsList;
+}
+
+/**
 * Allows users to choose spectra from the selected workspaces by presenting them
 * with a dialog box.  Skips showing the dialog box and automatically chooses
 * workspace index 0 for all selected workspaces if one or more of the them are
 * single-spectrum workspaces.
-*
-* We also must filter the list of selected workspace names to account for any
-* non-MatrixWorkspaces that may have been selected.  In particular
-* WorkspaceGroups
-* (the children of which are to be included if they are MatrixWorkspaces) and
-* TableWorkspaces (which are implicitly excluded).  We only want workspaces we
-* can actually plot!
 *
 * @param showWaterfallOpt If true, show the waterfall option on the dialog
 * @param showPlotAll :: [input] If true, show the "Plot All" button on the
@@ -1775,37 +1808,10 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 MantidWSIndexWidget::UserInput
 MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
                                              bool showPlotAll) const {
-  // Check for any selected WorkspaceGroup names and replace with the names of
-  // their children.
-  QSet<QString> selectedWsNames;
-  foreach( const QString wsName, this->getSelectedWorkspaceNames() )
-  {
-    const auto groupWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
-    if( groupWs )
-    {
-      const auto childWsNames = groupWs->getNames();
-      for( auto childWsName = childWsNames.begin(); childWsName != childWsNames.end(); ++childWsName )
-      {
-        selectedWsNames.insert(QString::fromStdString(*childWsName));
-      }
-    }
-    else
-    {
-      selectedWsNames.insert(wsName);
-    }
-  }
-
-  // Get the names of, and pointers to, the MatrixWorkspaces only.
-  QList<MatrixWorkspace_const_sptr> selectedMatrixWsList;
+  auto selectedMatrixWsList = getSelectedWorkspaces();
   QList<QString> selectedMatrixWsNameList;
-  foreach( const auto selectedWsName, selectedWsNames )
-  {
-    const auto matrixWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(m_ads.retrieve(selectedWsName.toStdString()));
-    if( matrixWs )
-    {
-      selectedMatrixWsList.append(matrixWs);
-      selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
-    }
+  foreach (const auto matrixWs, selectedMatrixWsList) {
+    selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
   }
 
   // Check to see if all workspaces have only a single spectrum ...
@@ -1842,6 +1848,26 @@ MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
       m_mantidUI, 0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll);
   dio->exec();
   return dio->getSelections();
+}
+
+/**
+* Allows users to choose spectra from the selected workspaces by presenting them
+* with a dialog box, and also allows choice of a log to plot against and a name
+* for this axis.
+*
+* @returns :: A structure listing the selected options
+*/
+MantidSurfacePlotDialog::UserInputSurface
+MantidTreeWidget::chooseSurfacePlotOptions() const {
+  auto selectedMatrixWsList = getSelectedWorkspaces();
+  QList<QString> selectedMatrixWsNameList;
+  foreach (const auto matrixWs, selectedMatrixWsList) {
+    selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
+  }
+  MantidSurfacePlotDialog *dlg =
+      new MantidSurfacePlotDialog(m_mantidUI, 0, selectedMatrixWsNameList);
+  dlg->exec();
+  return dlg->getSelections();
 }
 
 void MantidTreeWidget::setSortScheme(MantidItemSortScheme sortScheme)

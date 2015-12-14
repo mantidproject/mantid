@@ -12,6 +12,7 @@
 #include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
 
 #include "Mantid/MantidWSIndexDialog.h"
+#include "Mantid/MantidSurfacePlotDialog.h"
 
 #include <QActionGroup>
 #include <QAtomicInt>
@@ -177,6 +178,9 @@ public:
   void disableNodes(bool);
   void sort();
   void dropEvent(QDropEvent *de);
+  QList<boost::shared_ptr<const Mantid::API::MatrixWorkspace>>
+  getSelectedWorkspaces() const;
+  MantidSurfacePlotDialog::UserInputSurface chooseSurfacePlotOptions() const;
 
 protected:
   void dragMoveEvent(QDragMoveEvent *de);
