@@ -179,6 +179,7 @@ ALCDataLoadingView::~ALCDataLoadingView() {
     m_dataErrorCurve =
         new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, errors);
     m_dataErrorCurve->attach(m_ui.dataPlot);
+    m_dataErrorCurve->setItemAttribute(QwtPlotItem::AutoScale, true);
 
     m_ui.dataPlot->replot();
   }

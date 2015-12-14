@@ -194,8 +194,8 @@ MDBox<MDLeanEvent<3>, 3> *makeMDBox3() {
  */
 std::vector<MDLeanEvent<1>> makeMDEvents1(size_t num) {
   std::vector<MDLeanEvent<1>> out;
-  for (double i = 0; i < num; i++) {
-    double coords[1] = {i * 1.0 + 0.5};
+  for (std::size_t i = 0; i < num; i++) {
+    double coords[1] = {static_cast<double>(i) * 1.0 + 0.5};
     out.push_back(MDLeanEvent<1>(1.0, 1.0, coords));
   }
   return out;

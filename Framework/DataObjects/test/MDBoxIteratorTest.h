@@ -621,6 +621,30 @@ public:
     TSM_ASSERT("Has not used SkippingPolicy as expected.",
                testing::Mock::VerifyAndClearExpectations(mockPolicy));
   }
+
+  void test_getNormalizedSignalWithMask_returns_zero_for_masked() {
+    // Make a MDBox with 10 events
+    ibox_t *A = MDEventsTestHelper::makeMDBox1();
+    MDEventsTestHelper::feedMDBox<1>(A, 1, 10, 0.5, 1.0);
+    MDBoxIterator<MDLeanEvent<1>, 1> *it =
+        new MDBoxIterator<MDLeanEvent<1>, 1>(A, 20, true);
+
+    // Mask box 0, unmask box 1 and mask box 2.
+    // For masked boxes, getNormalizedSignalWithMask() should return 0.
+    it->getBox()->mask();
+    TS_ASSERT_DELTA(it->getNormalizedSignalWithMask(), 0.0, 1e-5);
+    TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
+    it->next();
+    it->getBox()->unmask();
+    TS_ASSERT_DELTA(it->getNormalizedSignalWithMask(), 1.0, 1e-5);
+    TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
+    it->next();
+    it->getBox()->mask();
+    TS_ASSERT_DELTA(it->getNormalizedSignalWithMask(), 0.0, 1e-5);
+    TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
+
+    delete it;
+  }
 };
 
 class MDBoxIteratorTestPerformance : public CxxTest::TestSuite {

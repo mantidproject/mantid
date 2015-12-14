@@ -228,28 +228,37 @@ void StandardView::render()
   emit this->triggerAccept();
 }
 
-void StandardView::onCutButtonClicked()
-{
+void StandardView::onCutButtonClicked() {
   // Apply cut to currently viewed data
-  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->createFilter("filters", "Cut", this->getPvActiveSrc());
+
+  // We need to attach the visibility listener to the newly
+  // created filter, this is required for automatic updating the color scale
+  setVisibilityListener();
 }
 
-void StandardView::onScaleButtonClicked()
-{
+void StandardView::onScaleButtonClicked() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->m_scaler = builder->createFilter("filters",
-                                       "MantidParaViewScaleWorkspace",
-                                       this->getPvActiveSrc());
+  this->m_scaler = builder->createFilter(
+      "filters", "MantidParaViewScaleWorkspace", this->getPvActiveSrc());
 
   /*
-   Paraview will try to set the respresentation to Outline. This is not good. Instead we listen for the
-   represnetation added as a result of the filter completion, and change the representation to be
+   Paraview will try to set the respresentation to Outline. This is not good.
+   Instead we listen for the
+   represnetation added as a result of the filter completion, and change the
+   representation to be
    Surface instead.
    */
-  QObject::connect(this->m_scaler, SIGNAL(representationAdded (pqPipelineSource *, pqDataRepresentation* , int)), this,
-                                          SLOT(onScaleRepresentationAdded(pqPipelineSource *, pqDataRepresentation* , int)));
+  QObject::connect(this->m_scaler,
+                   SIGNAL(representationAdded(pqPipelineSource *,
+                                              pqDataRepresentation *, int)),
+                   this, SLOT(onScaleRepresentationAdded(
+                             pqPipelineSource *, pqDataRepresentation *, int)));
 
+  // We need to attach the visibility listener to the newly
+  // created filter, this is required for automatic updating the color scale
+  setVisibilityListener();
 }
 
 /**

@@ -27,7 +27,8 @@ private slots:
   void newDataLoaded(const QString wsName);
   void updatePlot();
   void plotGuess();
-  void singleFit();
+  void singleFitExtension();
+  void singleFit(const bool &error);
   void specMinChanged(int value);
   void specMaxChanged(int value);
   void minChanged(double);
@@ -64,7 +65,7 @@ private:
   void updatePlotOptions();
   QString convertFuncToShort(const QString &);
   QString convertBackToShort(const std::string &original);
-  void extendResolutionWorkspace();
+  void extendResolutionWorkspace(const bool &run);
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
   QtTreePropertyBrowser *m_cfTree;

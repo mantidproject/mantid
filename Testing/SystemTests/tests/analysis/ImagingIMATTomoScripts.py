@@ -201,6 +201,16 @@ class ImagingIMATScriptsTest(stresstesting.MantidStressTest):
         self._success = False
 
     def runTest(self):
+        # Disable for Python 2.6 (which we still have on rhel6)
+        import sys
+        vers = sys.version_info
+        if vers < (2,7,0):
+            from mantid import logger
+            logger.warning("Not running this test as it requires Python >= 2.7. Version found: {0}".
+                           format(vers))
+            self._success = True
+            return
+
         self._success = False
         # Custom code to create and run this single test suite
         suite = unittest.TestSuite()

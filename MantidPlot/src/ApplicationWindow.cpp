@@ -8716,6 +8716,21 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
       return NULL;
     QString caption = generateUniqueName(tr("Table"));
     nw = newTable(caption, t->numRows(), t->numCols());
+
+    Table *nt = dynamic_cast<Table *>(nw);
+
+    nt->setHeader(t->colNames());
+
+    Q3TableItem *io;
+
+    for (auto i = 0; i < nt->numCols(); i++) {
+      for (auto j = 0; j < nt->numRows(); j++) {
+        io = t->table()->item(j, i);
+        nt->table()->setItem(j, i, io);
+        // nt->table()->item(j, i)->setText(t->table()->item(j, i)->text());
+      }
+    }
+
   } else if (w->isA("Graph3D")) {
     Graph3D *g = dynamic_cast<Graph3D *>(w);
     if (!g)
@@ -10233,7 +10248,8 @@ void ApplicationWindow::showGraphContextMenu() {
 
     QAction *eventsNormMD = new QAction(tr("&Events"), &normMD);
     eventsNormMD->setCheckable(true);
-    connect(eventsNormMD, SIGNAL(activated()), ag, SLOT(numEventsNormalizationMD()));
+    connect(eventsNormMD, SIGNAL(activated()), ag,
+            SLOT(numEventsNormalizationMD()));
     normMD.addAction(eventsNormMD);
 
     int normalization = ag->normalizationMD();

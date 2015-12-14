@@ -1,6 +1,6 @@
 ﻿# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
 
-from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup,\
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, \
     ITableWorkspace
 from mantid.simpleapi import *
 from mantid import config
@@ -310,7 +310,6 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(nxsdata.readY(5)[1700], data5.readY(0)[1700], places=diff_places)
         self.assertAlmostEqual(nxsdata.readY(5)[7000], data5.readY(0)[7000], places=diff_places)
 
-
     def test_POL_2015_2_5mm_files(self):
         diff_places = 3
 
@@ -361,3 +360,228 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(nxsdata3.readY(0)[7000], data3.readY(0)[7000], places=diff_places)
         self.assertAlmostEqual(nxsdata4.readY(0)[2000], data4.readY(0)[2000], places=diff_places)
         self.assertAlmostEqual(nxsdata5.readY(0)[0], data5.readY(0)[0], places=diff_places)
+
+
+# ================ Below test cases use different pref file ==================
+# =================== when 'ExistingV' = 'yes' in pref file ===================
+
+
+class ISISPowderDiffractionPol2(stresstesting.MantidStressTest):
+    def requiredFiles(self):
+        return set(["POLARIS/POL78338.raw", "POLARIS/POL78339.raw",
+                    "POLARIS/POL79514.raw", "POLARIS/VanaPeaks.dat",
+                    "POLARIS/test/GrpOff/Cycle_12_2_group_masked_collimator.cal",
+                    "POLARIS/test/GrpOff/cycle_15_2_silicon_all_spectra.cal",
+                    "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/UserPrefFile_15_2_original.pref",
+                    "POLARIS/test/Cycle_15_2_exist_v/Calibration/POL_2015_2_5mm_vrod_78338_152_calfile-0.nxs",
+                    "POLARIS/test/Cycle_15_2_exist_v/Calibration/POL_2015_2_5mm_vrod_78338_152_calfile-1.nxs",
+                    "POLARIS/test/Cycle_15_2_exist_v/Calibration/POL_2015_2_5mm_vrod_78338_152_calfile-2.nxs",
+                    "POLARIS/test/Cycle_15_2_exist_v/Calibration/POL_2015_2_5mm_vrod_78338_152_calfile-3.nxs",
+                    "POLARIS/test/Cycle_15_2_exist_v/Calibration/POL_2015_2_5mm_vrod_78338_152_calfile-4.nxs",
+                    ])
+        # note: VanaPeaks.dat is used only if provided in the directory
+
+    def _clean_up_files(self, filenames, directories):
+        try:
+            for files in filenames:
+                path = os.path.join(directories[0], files)
+                os.remove(path)
+        except OSError, ose:
+            print 'could not delete generated file : ', ose.filename
+
+    def runTest(self):
+        self._success = False
+        expt = cry_ini.Files('POLARIS', RawDir=(DIRS[0] + "POLARIS"), Analysisdir='test',
+                             forceRootDirFromScripts=False, inputInstDir=DIRS[0])
+        expt.initialize('Cycle_15_2_exist_v', user='Mantid_tester', prefFile='UserPrefFile_15_2_original.pref')
+        expt.tell()
+        cry_focus.focus_all(expt, "79514", Write_ExtV=False)
+
+        # Custom code to create and run this single test suite
+        # and then mark as success or failure
+        suite = unittest.TestSuite()
+        suite.addTest(unittest.makeSuite(LoadTests2, "test"))
+        runner = unittest.TextTestRunner()
+        # Run using either runner
+        res = runner.run(suite)
+        if res.wasSuccessful():
+            self._success = True
+        else:
+            self._success = False
+
+    def validate(self):
+        return self._success
+
+    def cleanup(self):
+        filenames = set(["POLARIS/test/Cycle_15_2_exist_v/Calibration/Cycle_12_2_group_masked_collimator.cal",
+
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/Cycle_12_2_group_masked_collimator.cal",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514.gss",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514.nxs",
+
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b1_D.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b1_TOF.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b2_D.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b2_TOF.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b3_D.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b3_TOF.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b4_D.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b4_TOF.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b5_D.dat",
+                         "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b5_TOF.dat"])
+        self._clean_up_files(filenames, DIRS)
+
+
+# ======================================================================
+# work horse
+class LoadTests2(unittest.TestCase):
+    wsname = "__LoadTest"
+    cleanup_names = []
+
+    def tearDown(self):
+        self.cleanup_names.append(self.wsname)
+        for name in self.cleanup_names:
+            try:
+                AnalysisDataService.remove(name)
+            except KeyError:
+                pass
+        self.cleanup_names = []
+
+    # ============================ Success ==============================
+
+    def test_calfile_with_workspace(self):
+        self.wsname = "CalWorkspace1"
+        calfile1 = (DIRS[0] + 'POLARIS/test/Cycle_15_2_exist_v/Calibration/Cycle_12_2_group_masked_collimator.cal')
+        calfile2 = (DIRS[0] + 'POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/Cycle_12_2_group_masked_collimator.cal')
+        data1 = LoadCalFile(InstrumentName="POL", CalFilename=calfile1,
+                            WorkspaceName=self.wsname)
+        data2 = LoadCalFile(InstrumentName="POL", CalFilename=calfile2,
+                            WorkspaceName="CalWorkspace2")
+
+        self.assertTrue(isinstance(data1[0], MatrixWorkspace))
+        self.assertTrue(isinstance(data1[1], MatrixWorkspace))
+        self.assertTrue(isinstance(data1[2], MatrixWorkspace))
+        self.assertTrue(isinstance(data1[3], ITableWorkspace))
+
+        self.assertTrue("CalWorkspace1_group" in data1[0].getName())
+        self.assertTrue("CalWorkspace1_offsets" in data1[1].getName())
+        self.assertTrue("CalWorkspace1_mask" in data1[2].getName())
+        self.assertTrue("CalWorkspace1_cal" in data1[3].getName())
+
+        self.assertTrue(isinstance(data2[0], MatrixWorkspace))
+        self.assertTrue(isinstance(data2[1], MatrixWorkspace))
+        self.assertTrue(isinstance(data2[2], MatrixWorkspace))
+        self.assertTrue(isinstance(data2[3], ITableWorkspace))
+
+        self.assertTrue("CalWorkspace2_group" in data2[0].getName())
+        self.assertTrue("CalWorkspace2_offsets" in data2[1].getName())
+        self.assertTrue("CalWorkspace2_mask" in data2[2].getName())
+        self.assertTrue("CalWorkspace2_cal" in data2[3].getName())
+
+    def test_nxsfile_with_workspace(self):
+        self.wsname = "NexusWorkspace"
+        nxsfile = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514.nxs")
+        data = LoadNexusProcessed(Filename=nxsfile, OutputWorkspace=self.wsname)
+
+        self.assertTrue(isinstance(data[0], WorkspaceGroup))
+        self.assertEquals(5, data[0].getNumberOfEntries())
+
+        self.assertTrue(isinstance(data[1], MatrixWorkspace))
+        self.assertTrue(isinstance(data[2], MatrixWorkspace))
+        self.assertTrue(isinstance(data[3], MatrixWorkspace))
+        self.assertTrue(isinstance(data[4], MatrixWorkspace))
+        self.assertTrue(isinstance(data[5], MatrixWorkspace))
+
+        self.assertTrue('POL79514', self.wsname[0])
+
+        self.assertTrue("ResultTOF-1" in data[1].getName())
+        self.assertTrue("ResultTOF-2" in data[2].getName())
+        self.assertTrue("ResultTOF-3" in data[3].getName())
+        self.assertTrue("ResultTOF-4" in data[4].getName())
+        self.assertTrue("ResultTOF-5" in data[5].getName())
+
+    def test_gssfile_with_workspace(self):
+        self.wsname = "GSSFile"
+        gssfile = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514.gss")
+        data = LoadGSS(Filename=gssfile, OutputWorkspace=self.wsname)
+
+        self.assertTrue(isinstance(data, MatrixWorkspace))
+        self.assertEquals(5, data.getNumberHistograms())
+        self.assertEquals(990, data.blocksize())
+        self.assertAlmostEqual(221.15625, data.readX(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(1.003815133228, data.readY(0)[0], places=DIFF_PLACES)
+
+    def test_datfile_with_workspace(self):
+        datfile1 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b1_D.dat")
+        datfile2 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b1_TOF.dat")
+        datfile3 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b2_D.dat")
+        datfile4 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b2_TOF.dat")
+        datfile5 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b3_D.dat")
+        datfile6 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b3_TOF.dat")
+        datfile7 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b4_D.dat")
+        datfile8 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b4_TOF.dat")
+        datfile9 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b5_D.dat")
+        datfile10 = (DIRS[0] + "POLARIS/test/Cycle_15_2_exist_v/Mantid_tester/POL79514_b5_TOF.dat")
+
+        data1 = LoadAscii(Filename=datfile1, OutputWorkspace="datWorkspace1")
+        data2 = LoadAscii(Filename=datfile2, OutputWorkspace="datWorkspace2")
+        data3 = LoadAscii(Filename=datfile3, OutputWorkspace="datWorkspace3")
+        data4 = LoadAscii(Filename=datfile4, OutputWorkspace="datWorkspace4")
+        data5 = LoadAscii(Filename=datfile5, OutputWorkspace="datWorkspace5")
+        data6 = LoadAscii(Filename=datfile6, OutputWorkspace="datWorkspace6")
+        data7 = LoadAscii(Filename=datfile7, OutputWorkspace="datWorkspace7")
+        data8 = LoadAscii(Filename=datfile8, OutputWorkspace="datWorkspace8")
+        data9 = LoadAscii(Filename=datfile9, OutputWorkspace="datWorkspace9")
+        data10 = LoadAscii(Filename=datfile10, OutputWorkspace="datWorkspace10")
+
+        self.assertTrue(isinstance(data1, MatrixWorkspace))
+        self.assertTrue(isinstance(data2, MatrixWorkspace))
+        self.assertTrue(isinstance(data3, MatrixWorkspace))
+        self.assertTrue(isinstance(data4, MatrixWorkspace))
+        self.assertTrue(isinstance(data5, MatrixWorkspace))
+        self.assertTrue(isinstance(data6, MatrixWorkspace))
+        self.assertTrue(isinstance(data7, MatrixWorkspace))
+        self.assertTrue(isinstance(data8, MatrixWorkspace))
+        self.assertTrue(isinstance(data9, MatrixWorkspace))
+        self.assertTrue(isinstance(data10, MatrixWorkspace))
+
+        self.assertEquals(1, data1.getNumberHistograms())
+        self.assertEquals(990, data1.blocksize())
+        self.assertAlmostEqual(0.30078, data1.readX(0)[2], places=DIFF_PLACES)
+
+        self.assertEquals(1, data2.getNumberHistograms())
+        self.assertEquals(990, data2.blocksize())
+        self.assertAlmostEqual(data1.readY(0)[6], data2.readY(0)[6], places=DIFF_PLACES)
+
+        self.assertEquals(1, data3.getNumberHistograms())
+        self.assertEquals(4648, data3.blocksize())
+        self.assertAlmostEqual(0.16076, data3.readX(0)[199], places=DIFF_PLACES)
+
+        self.assertEquals(1, data4.getNumberHistograms())
+        self.assertEquals(4648, data4.blocksize())
+        self.assertAlmostEqual(0.15179466, data4.readE(0)[10], places=DIFF_PLACES)
+
+        self.assertEquals(1, data5.getNumberHistograms())
+        self.assertEquals(4565, data5.blocksize())
+        self.assertAlmostEqual(data5.readY(0)[2228], data6.readY(0)[2228], places=DIFF_PLACES)
+
+        self.assertEquals(1, data6.getNumberHistograms())
+        self.assertEquals(4565, data6.blocksize())
+        self.assertAlmostEqual(1.01458598, data6.readY(0)[0], places=DIFF_PLACES)
+
+        self.assertEquals(1, data7.getNumberHistograms())
+        self.assertEquals(4429, data7.blocksize())
+        self.assertAlmostEqual(0.03795158, data7.readE(0)[0], places=DIFF_PLACES)
+
+        self.assertEquals(1, data8.getNumberHistograms())
+        self.assertEquals(4429, data8.blocksize())
+        self.assertAlmostEqual(data7.readY(0)[6], data8.readY(0)[6], places=DIFF_PLACES)
+
+        self.assertEquals(1, data9.getNumberHistograms())
+        self.assertEquals(6110, data9.blocksize())
+        self.assertAlmostEqual(data9.readE(0)[3369], data10.readE(0)[3369], places=DIFF_PLACES)
+
+        self.assertEquals(1, data10.getNumberHistograms())
+        self.assertEquals(6110, data10.blocksize())
+        self.assertAlmostEqual(300.4597, data10.readX(0)[10], places=DIFF_PLACES)
+

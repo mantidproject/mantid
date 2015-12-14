@@ -172,6 +172,9 @@ public:
   /// Clear masking
   void clearMDMasking();
 
+  /// Return true if there is any mask on the workspace
+  bool hasMask();
+
   /// Get the coordinate system.
   Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
   /// Set the coordinate system.
