@@ -104,7 +104,7 @@ def provide_workspace_with_x_errors(workspace_name,use_xerror = True, nspec = 1,
             ws.setDx(hists, x_error_array)
 
 
-'''
+
 # This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.
 class SANSUtilityTest(unittest.TestCase):
 
@@ -1221,7 +1221,7 @@ class TestDetectingValidUserFileExtensions(unittest.TestCase):
         # Act and Assert
         self._do_test(file_name, expected)
 
-'''
+
 class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
     def _clean_up_workspaces(self):
         for name in mtd.getObjectNames():

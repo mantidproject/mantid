@@ -929,6 +929,7 @@ class OverlayWorkspaces(object):
         elif isinstance(workspace, basestring) and mtd.doesExist(workspace):
             return mtd[workspace]
 
+#pylint: disable=too-few-public-methods 
 class TimeShifter(object):
     """
     The time shifter stores all time shifts for all runs which are to be added. If there is
@@ -990,6 +991,7 @@ def transfer_special_sample_logs(from_ws, to_ws):
             alg_log.setProperty("LogType", "Number")
             alg_log.execute()
 
+#pylint: disable=too-many-instance-attributes
 class CummulativeTimeSeriesPropertyAdder(object):
     '''
     Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
@@ -1044,11 +1046,11 @@ class CummulativeTimeSeriesPropertyAdder(object):
             if (element in self._original_times_rhs and
                 element in self._original_values_rhs):
                 run = workspace.getRun()
-                property = run.getProperty(element)
-                property.clear()
+                prop = run.getProperty(element)
+                prop.clear()
                 # Get the cummulated values and times
                 times, values = self._get_cummulative_sample_logs(element)
-                self._populate_property(property, times, values)
+                self._populate_property(prop, times, values)
 
         self._update_single_valued_entries(workspace)
 
@@ -1087,7 +1089,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         values_raw_lhs = self._get_raw_values(values_lhs)
         values_raw_rhs = self._get_raw_values(values_rhs)
 
-        # Shift the times of the rhs workspace if required 
+        # Shift the times of the rhs workspace if required
         times_rhs = self._shift_time_series(times_rhs)
 
         # Now merge and sort the two entries
