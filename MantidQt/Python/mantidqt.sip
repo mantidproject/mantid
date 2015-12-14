@@ -66,17 +66,6 @@
 %End
 };
 
-
-namespace MantidQt 
-{
-%TypeHeaderCode 
-#include "MantidQtAPI/DistributionOptions.h"
-%End
-
-	enum DistributionFlag {DistributionDefault, DistributionTrue, DistributionFalse};  
-};
-
-
 namespace Mantid
 {
 namespace API

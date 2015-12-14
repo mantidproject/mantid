@@ -694,6 +694,15 @@ namespace GraphOptions
   enum Axis{Left, Right, Bottom, Top};
 };
 
+namespace MantidQt 
+{
+%TypeHeaderCode 
+#include "MantidQtAPI/DistributionOptions.h"
+%End
+
+	enum DistributionFlag {DistributionDefault, DistributionTrue, DistributionFalse};  
+};
+
 class Graph : QWidget /PyName=Layer/
 {
 %TypeHeaderCode

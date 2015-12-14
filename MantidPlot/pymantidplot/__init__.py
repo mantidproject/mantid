@@ -857,10 +857,10 @@ Layer.Right = _qti.GraphOptions.Right
 Layer.Bottom = _qti.GraphOptions.Bottom
 Layer.Top = _qti.GraphOptions.Top
 
-DistributionFlag = mantidqtpython.MantidQt
-DistributionFlag.DistributionDefault = mantidqtpython.MantidQt.DistributionDefault
-DistributionFlag.DistributionTrue = mantidqtpython.MantidQt.DistributionTrue
-DistributionFlag.DistributionFalse = mantidqtpython.MantidQt.DistributionFalse
+DistrFlag = mantidqtpython.MantidQt
+DistrFlag.DistrDefault = mantidqtpython.MantidQt.DistributionDefault
+DistrFlag.DistrTrue = mantidqtpython.MantidQt.DistributionTrue
+DistrFlag.DistrFalse = mantidqtpython.MantidQt.DistributionFalse
 
 # -----------------------------------------------------------------------------
 # --------------------------- "Private" functions -----------------------------
