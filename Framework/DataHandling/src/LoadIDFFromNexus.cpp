@@ -39,11 +39,8 @@ void LoadIDFFromNexus::init() {
                                              Direction::InOut),
       "The name of the workspace in which to attach the imported instrument");
 
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".nxs.h5");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".nxs.h5"}),
       "The name (including its full or relative path) of the Nexus file to "
       "attempt to load the instrument from.");
 
@@ -297,7 +294,8 @@ void LoadIDFFromNexus::LoadParameters(
     }
   } else { // We do have parameters from the Nexus file
     g_log.notice() << "Found Instrument parameter map entry in Nexus file, "
-                      "which is loaded.\n" << std::endl;
+                      "which is loaded.\n"
+                   << std::endl;
     // process parameterString into parameters in workspace
     localWorkspace->readParameterMap(parameterString);
   }
