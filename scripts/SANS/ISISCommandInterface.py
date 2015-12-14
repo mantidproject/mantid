@@ -492,10 +492,9 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         else:
             fit_mode = "None"
 
-        return rAnds.scale, rAnds.shift
-        kwargs_stitch = {"HABCountSample" : Cf,
+        kwargs_stitch = {"HABCountsSample" : Cf,
                          "HABNormSample" : Nf,
-                         "LABCountSample" : Cr,
+                         "LABCountsSample" : Cr,
                          "LABNormSample" : Nr,
                          "ProcessCan" : False,
                          "Mode" : fit_mode,
@@ -510,7 +509,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                           "ProcessCan": True}
             kwargs_stitch.update(kwargs_can)
 
-        alg_stitch = su.createUnmangedAlgorithm("SANSStitch1D", kwargs)
+        alg_stitch = su.createUnmanagedAlgorithm("SANSStitch1D", **kwargs_stitch)
         alg_stitch.execute()
 
         # Get the fit values
@@ -519,7 +518,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift_from_alg
         ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale_from_alg
 
-        if mergedQ:
+        if merge_flag:
             # Get the merged workspace
             mergedQ = alg_stitch.getProperty("OutputWorkspace").value
             RenameWorkspace(InputWorkspace=mergedQ, OutputWorkspace= retWSname_merged)

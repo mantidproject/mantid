@@ -1260,14 +1260,14 @@ def is_valid_user_file_extension(user_file):
         is_allowed = True
     return is_allowed
 
-def createUnmangedAlgorithm(name, **kwargs):
+def createUnmanagedAlgorithm(name, **kwargs):
     '''
     This creates an unmanged child algorithm with the
     provided proeprties set. The returned algorithm has
     not been executed yet.
     '''
-    alg = AlgoritmManager.createUnmanaged(name)
-    alg.initialze()
+    alg = AlgorithmManager.createUnmanaged(name)
+    alg.initialize()
     alg.setChild(True)
     for key, value in kwargs.iteritems():
         alg.setProperty(key, value)
