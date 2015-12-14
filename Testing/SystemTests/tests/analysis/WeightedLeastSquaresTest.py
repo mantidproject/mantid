@@ -20,6 +20,7 @@
 
 import stresstesting
 from mantid.simpleapi import *
+from mantid.api import MatrixWorkspace
 
 import unittest
 
@@ -48,16 +49,18 @@ def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least
 
 def compare_relative_errors(values_fitted, reference_values, tolerance=1e-6):
     """
-    Checks that all the values 'fitted' do not differ from reference
-    values by a tolerance/threshold or more. This method compares
-    the relative error. An epsilon of 0.01 means a relative
-    difference of 1 % = 100*0.01 %. If the reference value is 0,
-    checks that the difference from 0 is less than the tolerance.
+    Checks that all the values 'fitted' do not differ from reference values by
+    a tolerance/threshold or more. This method compares the relative error. An
+    epsilon of 0.01 means a relative difference of 1 % = 100*0.01 %. If the
+    reference value is 0, checks that the difference from 0 is less than the
+    tolerance.
 
-    @param values_fitted :: parameter values obtained from a calculation or algorithm (fitting for example)
+    @param values_fitted :: parameter values obtained from the Fit algorithm
+    (this function can be used to compare function parameters, error estimations, etc.)
     @param reference_values :: (expected) reference value
 
-    @returns if val differs in relative terms from ref by less than epsilon
+    @returns if val differs in relative terms from ref by less than epsilon. Otherwise RuntimeError is
+    raised with description why comparison/test failed.
     """
 
     if not isinstance(values_fitted, list) or not isinstance(reference_values, list) or\
@@ -90,16 +93,20 @@ def load_fitting_test_file_ascii(filename):
     @returns this data as a workspace
     """
     wks = LoadAscii(Filename=filename)
+    if not wks or not isinstance(wks, MatrixWorkspace):
+        raise RuntimeError("Input workspace from file {0} not available as a MatrixWorkspace. "
+                           "Cannot continue.".format(filename))
 
     return wks
 
 # pylint: disable=too-many-public-methods
-class WLS2GaussPeaksEVSData(unittest.TestCase):
+class TwoGaussPeaksEVSData(unittest.TestCase):
     """
-    Load a processed ISIS Vesuvio data. 
-    
+    Load a processed ISIS Vesuvio data.
+
     Representative of a processed Vesuvio dataset that contains a couple of peaks.
     """
+    filename = 'EVS14188-90_processed.txt'
     workspace = None
     function_template = ("name=Gaussian, {0} ; name=LinearBackground,A0=0,A1=0;"
                          "name=Gaussian, {1}")
@@ -107,13 +114,9 @@ class WLS2GaussPeaksEVSData(unittest.TestCase):
     # Using this workaround as we still support Python 2.6 on rhel6, where setUpClass()
     # is not available
     def setUp(self):
-        filename = 'EVS14188-90_processed.txt'
 
         if not self.__class__.workspace:
-            self.__class__.workspace = load_fitting_test_file_ascii(filename)
-
-        if not self.workspace:
-            raise RuntimeError("Input workspace not available. Cannot continue.")
+            self.__class__.workspace = load_fitting_test_file_ascii(self.filename)
 
     def test_misses_expected_solution(self):
         """
@@ -127,7 +130,7 @@ class WLS2GaussPeaksEVSData(unittest.TestCase):
         expected_errors = [0.007480178355054269, 9.93278345856534e-07, 9.960514853350883e-07, 0.0017945463077016224,
                            4.9824412855830404, 0.004955791268590802, 3.695975249653185e-07, 3.8197105944596216e-07]
 
-        # osx exception
+        # osx exception. Big difference in the error estimation for the sigma of the first peak
         import sys
         if "darwin" == sys.platform:
             expected_errors[2] = 1.0077697381037357e-06
@@ -138,7 +141,7 @@ class WLS2GaussPeaksEVSData(unittest.TestCase):
 
     def test_good_initial_guess(self):
         """
-        Same as WeigthedLSGaussPeaksEVSdataTest1 but starting from a different initial guess of the fitting
+        Same as test_misses_expected_solution but starting from a different initial guess of the fitting
         parameters. Here the minmizer gets to the expected solution (minimum), i.e. do the right thing
         """
         function = self.function_template.format('Height=0.0271028,PeakCentre=0.000371946,Sigma=1e-05',
@@ -163,7 +166,7 @@ class WLS2GaussPeaksEVSData(unittest.TestCase):
         compare_relative_errors(errors, expected_errors, tolerance=1e-2)
 
 
-class WLSSineLikeMuonExperimentAsymmetry(unittest.TestCase):
+class SineLikeMuonExperimentAsymmetry(unittest.TestCase):
     """
     Tests of the fitting of a function that resembles the asymmetry from a muon experiment.
 
@@ -178,17 +181,13 @@ class WLSSineLikeMuonExperimentAsymmetry(unittest.TestCase):
     This is very sensitive to inital conditions. The goodness of fit is highly non-convex on w.
     Any local minimizer should be very sensitive to the initial guess.
     """
+    filename = 'sine_fitting_test_muon_asymmetry.txt'
     workspace = None
     function_template = 'name=UserFunction, Formula=sin(w*x), w={0}'
 
     def setUp(self):
-        filename = 'sine_fitting_test_muon_asymmetry.txt'
         if not self.__class__.workspace:
-            self.__class__.workspace = load_fitting_test_file_ascii(filename)
-
-        if not self.workspace:
-            raise RuntimeError("Input workspace from file {0} not available. Cannot continue.".
-                               format(filename))
+            self.__class__.workspace = load_fitting_test_file_ascii(self.filename)
 
     def test_bad_initial_guess(self):
         """
@@ -210,7 +209,7 @@ class WLSSineLikeMuonExperimentAsymmetry(unittest.TestCase):
         fitted_params, _ = run_fit(self.workspace, function_definition)
         compare_relative_errors(fitted_params, expected_params)
 
-class WLSVanadiumPatternFromENGINXSmoothing(unittest.TestCase):
+class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
     """
     Tests the fitting of data from a Vanadium run on the instrument ENGIN-X. This uses data
     collected for one bank (North bank, all specta focused).
@@ -218,17 +217,13 @@ class WLSVanadiumPatternFromENGINXSmoothing(unittest.TestCase):
     In the new ENGIN-X algorithms/scripts/interface this pattern is usually smoothed with
     a spline with 20-50 knots. This is used for calibration.
     """
-    spline_user_def_function = 'name=BSpline, Uniform=true, Order=3, StartX=0, EndX=5.5, NBreak={0}'
+    filename = 'fitting_test_vanadium_pattern_enginx236516_bank1.txt'
     workspace = None
+    spline_user_def_function = 'name=BSpline, Uniform=true, Order=3, StartX=0, EndX=5.5, NBreak={0}'
 
     def setUp(self):
-        filename = 'fitting_test_vanadium_pattern_enginx236516_bank1.txt'
         if not self.__class__.workspace:
-            self.__class__.workspace = load_fitting_test_file_ascii(filename)
-
-        if not self.workspace:
-            raise RuntimeError("Input workspace from file {0} not available. Cannot continue.".
-                               format(filename))
+            self.__class__.workspace = load_fitting_test_file_ascii(self.filename)
 
     def test_50breaks(self):
         """
@@ -251,7 +246,7 @@ class WLSVanadiumPatternFromENGINXSmoothing(unittest.TestCase):
                            -0.9197805852038337, 10.656047152998436, 0.0
                           ]
 
-        # Note: ignoring parameter errors; note the higher tolerance
+        # Note: ignoring parameter errors. Note the higher tolerance so that it works on all platforms
         fitted_params, _ = run_fit(self.workspace, function_definition)
         compare_relative_errors(fitted_params, expected_params, tolerance=1e-4)
 
@@ -266,7 +261,7 @@ class WLSVanadiumPatternFromENGINXSmoothing(unittest.TestCase):
                            -5.204195324981802
                           ]
 
-        # Note: ignoring parameter errors; note the higher tolerance
+        # Note: ignoring parameter errors. Note the higher tolerance so that it works on all platforms
         fitted_params, _ = run_fit(self.workspace, function_definition)
         compare_relative_errors(fitted_params, expected_params, tolerance=1e-4)
 
@@ -279,9 +274,9 @@ class WeightedLeastSquaresTest(stresstesting.MantidStressTest):
         # Custom code to create and run one or more test suites
         suite = unittest.TestSuite()
         # Add the tests for all the datasets
-        suite.addTest( unittest.makeSuite(WLS2GaussPeaksEVSData, "test") )
-        suite.addTest( unittest.makeSuite(WLSSineLikeMuonExperimentAsymmetry, "test") )
-        suite.addTest( unittest.makeSuite(WLSVanadiumPatternFromENGINXSmoothing, "test") )
+        suite.addTest( unittest.makeSuite(TwoGaussPeaksEVSData, "test") )
+        suite.addTest( unittest.makeSuite(SineLikeMuonExperimentAsymmetry, "test") )
+        suite.addTest( unittest.makeSuite(VanadiumPatternFromENGINXSmoothing, "test") )
 
         runner = unittest.TextTestRunner()
         # Run using either runner
