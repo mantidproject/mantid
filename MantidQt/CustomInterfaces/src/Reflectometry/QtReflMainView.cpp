@@ -438,10 +438,26 @@ Show the user the dialog for an algorithm
 void QtReflMainView::showAlgorithmDialog(const std::string &algorithm) {
   std::stringstream pythonSrc;
   pythonSrc << "try:\n";
-  pythonSrc << "  " << algorithm << "Dialog()\n";
+  pythonSrc << "  algm = " << algorithm << "Dialog()\n";
   pythonSrc << "except:\n";
   pythonSrc << "  pass\n";
-  runPythonCode(QString::fromStdString(pythonSrc.str()));
+  runPythonCode(QString::fromStdString(pythonSrc.str()), false);
+}
+
+void QtReflMainView::showImportDialog() {
+  std::stringstream pythonSrc;
+  pythonSrc << "try:\n";
+  pythonSrc << "  algm = "
+            << "LoadReflTBL"
+            << "Dialog()\n";
+  pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
+  pythonSrc << "except:\n";
+  pythonSrc << "  pass\n";
+  // outputWorkspaceName will hold the name of the workspace
+  // otherwise this should be an empty string.
+  QString outputWorkspaceName =
+      runPythonCode(QString::fromStdString(pythonSrc.str()), false);
+  this->setModel(outputWorkspaceName.trimmed());
 }
 
 /**

@@ -175,6 +175,12 @@ public:
   getSignalAtCoord(const coord_t *coords,
                    const Mantid::API::MDNormalization &normalization) const;
 
+  /// Returns the (normalized) signal at a given coordinates
+  // or 0 if masked
+  virtual signal_t getSignalWithMaskAtCoord(
+      const coord_t *coords,
+      const Mantid::API::MDNormalization &normalization) const;
+
   /// Sets the signal at the specified index.
   void setSignalAt(size_t index, signal_t value) { m_signals[index] = value; }
 
@@ -445,6 +451,15 @@ private:
 
   /// Display normalization to use
   Mantid::API::MDNormalization m_displayNormalization;
+
+  // Get ordered list of boundaries in position-along-the-line coordinates
+  std::set<coord_t> getBinBoundariesOnLine(const Kernel::VMD &start,
+                                           const Kernel::VMD &end, size_t nd,
+                                           const Kernel::VMD &dir,
+                                           coord_t length) const;
+
+  signal_t getNormalizationFactor(const API::MDNormalization &normalize,
+                                  size_t linearIndex) const;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

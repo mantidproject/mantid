@@ -50,7 +50,8 @@ public:
     LogMsg,            ///< need to send a message to the Mantid log system
     InstrumentChange,  ///< Instrument selection updated
     RBNumberChange,    ///< RBNumber filled-in/changed
-    ShutDown           ///< closing the interface
+    ShutDown,           ///< closing the interface
+	StopFocus		   ///< stopping the focus process
   };
 
   /**

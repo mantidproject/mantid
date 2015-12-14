@@ -40,6 +40,7 @@ public:
   MOCK_METHOD0(requestNotebookPath, std::string());
 
   MOCK_METHOD1(showAlgorithmDialog, void(const std::string&));
+  MOCK_METHOD0(showImportDialog, void());
   MOCK_METHOD1(plotWorkspaces, void(const std::set<std::string>&));
 
   //IO

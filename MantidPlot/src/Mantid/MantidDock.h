@@ -88,6 +88,7 @@ private slots:
   void recordWorkspaceRename(QString,QString);
   void clearUB();
   void filterWorkspaceTree(const QString &text);
+  void plotSurface();
 
 private:
   void addSaveMenuOption(QString algorithmString, QString menuEntryName = "");
@@ -132,17 +133,14 @@ private:
 
   //Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr,
-  *m_showDetectors, *m_showBoxData, *m_showVatesGui,
-  *m_showSpectrumViewer,
-  *m_showSliceViewer,
-  *m_colorFill, *m_showLogs, *m_showSampleMaterial,  *m_showHist, *m_showMDPlot, *m_showListData,
-  *m_saveNexus, *m_rename, *m_delete,
-  *m_program, * m_ascendingSortAction,
-  *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
-  *m_convertToMatrixWorkspace,
-  *m_convertMDHistoToMatrixWorkspace,
-  *m_clearUB;
-  
+      *m_showDetectors, *m_showBoxData, *m_showVatesGui, *m_showSpectrumViewer,
+      *m_showSliceViewer, *m_colorFill, *m_showLogs, *m_showSampleMaterial,
+      *m_showHist, *m_showMDPlot, *m_showListData, *m_saveNexus, *m_rename,
+      *m_delete, *m_program, *m_ascendingSortAction, *m_descendingSortAction,
+      *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
+      *m_convertToMatrixWorkspace, *m_convertMDHistoToMatrixWorkspace,
+      *m_clearUB, *m_plotSurface;
+
   ApplicationWindow *m_appParent;
 
   QAtomicInt m_updateCount;
@@ -195,7 +193,7 @@ private:
 class MantidTreeWidgetItem : public QTreeWidgetItem
 {
 public:
-  MantidTreeWidgetItem(MantidTreeWidget*);
+  explicit MantidTreeWidgetItem(MantidTreeWidget *);
   MantidTreeWidgetItem(QStringList, MantidTreeWidget*);
   void disableIfNode(bool);
   void setSortPos(int o) {m_sortPos = o;}

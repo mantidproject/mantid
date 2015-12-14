@@ -50,7 +50,7 @@ class UserFitFunctionDialog : public QDialog
 public:
   
   /// Default constructor
-  UserFitFunctionDialog(QWidget *parent);
+  explicit UserFitFunctionDialog(QWidget *parent);
 
   /// The constructed expression
   QString expression()const{return ui.teExpression->toPlainText();}

@@ -64,8 +64,7 @@ void LoadTOFRawNexus::init() {
 int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
   if (descriptor.pathOfTypeExists("/entry", "NXentry") ||
-      descriptor.pathOfTypeExists("/entry-state0", "NXentry") ||
-      descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
+      descriptor.pathOfTypeExists("/entry-state0", "NXentry")) {
     const bool hasEventData = descriptor.classTypeExists("NXevent_data");
     const bool hasData = descriptor.classTypeExists("NXdata");
     if (hasData && hasEventData)

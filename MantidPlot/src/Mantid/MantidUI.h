@@ -111,7 +111,7 @@ class MantidUI:public QObject
 public:
 
   // Constructor
-  MantidUI(ApplicationWindow *aw);
+  explicit MantidUI(ApplicationWindow *aw);
 
   // Destructor
   ~MantidUI();

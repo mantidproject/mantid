@@ -45,7 +45,7 @@ public:
   void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
                   const API::MatrixWorkspace_sptr &sourceWS, int emode,
                   Kernel::Logger *pLog = NULL, int nTreads = 1,
-                  bool inPlace = true);
+                  bool inPlace = true, bool nullifyNegative = false);
   void removeBackground(int hist, MantidVec &XValues, MantidVec &y_data,
                         MantidVec &e_data, int tread_num = 0) const;
 
@@ -70,8 +70,9 @@ private:
   double m_NBg;
   // time interval for measuring the background
   double m_dtBg;
-  // Squared error of the background for first spectra of a background workspace
-  // double m_ErrSq;
+  // Squared error of the background for first spectra of the background
+  // workspace
+  double m_ErrSq;
   // energy conversion mode
   int m_Emode;
   // source-sample distance
@@ -80,6 +81,10 @@ private:
   double m_Efix;
   // shared pointer to the sample
   Geometry::IComponent_const_sptr m_Sample;
+  // if true, negative signals are nullified
+  bool m_nullifyNegative;
+  // removing negative values from ws with background removed previously.
+  bool m_previouslyRemovedBkgMode;
 
   // get Ei attached to direct or indirect instrument workspace
   double getEi(const API::MatrixWorkspace_const_sptr &inputWS) const;

@@ -187,11 +187,6 @@ void ConvFit::setup() {
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
 
-  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(extendResolutionWorkspace()));
-  connect(m_uiForm.dsResInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(extendResolutionWorkspace()));
-
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
   connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this,
@@ -201,7 +196,8 @@ void ConvFit::setup() {
           SLOT(typeSelection(int)));
   connect(m_uiForm.cbBackground, SIGNAL(currentIndexChanged(int)), this,
           SLOT(bgTypeSelection(int)));
-  connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
+  connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this,
+          SLOT(singleFitExtension()));
 
   // Context menu
   m_cfTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -223,11 +219,64 @@ void ConvFit::setup() {
 * algorithm
 */
 void ConvFit::run() {
+
   if (m_cfInputWS == NULL) {
     g_log.error("No workspace loaded");
     return;
   }
+  extendResolutionWorkspace(true);
+}
 
+/**
+* Create a resolution workspace with the same number of histograms as in the
+* sample.
+*
+* Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as
+* they need
+* to have the WorkspaceIndex attribute set.
+* @param run :: if the call is from running the algorithm or single fit (true =
+* algorithm)
+*/
+void ConvFit::extendResolutionWorkspace(const bool &run) {
+  if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
+    const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
+    appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
+
+    size_t numHist = m_cfInputWS->getNumberHistograms();
+    for (size_t i = 0; i < numHist; i++) {
+      IAlgorithm_sptr appendAlg =
+          AlgorithmManager::Instance().create("AppendSpectra");
+      appendAlg->initialize();
+      appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
+      appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
+
+      if (i == 0) {
+        appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
+        m_batchAlgoRunner->addAlgorithm(appendAlg);
+      } else {
+        m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
+      }
+    }
+    if (run) {
+      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+              SLOT(extensionComplete(bool)));
+    } else {
+      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+              SLOT(singleFit(bool)));
+    }
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+}
+
+void ConvFit::extensionComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(extensionComplete(bool)));
+
+  if (error)
+    return;
+
+  // Run Convolution Fit Sequetial algorithm
   QString fitType = fitTypeString();
   QString bgType = backgroundString();
 
@@ -481,40 +530,6 @@ void ConvFit::newDataLoaded(const QString wsName) {
   m_uiForm.spSpectraMax->setValue(maxSpecIndex);
 
   updatePlot();
-}
-
-/**
-* Create a resolution workspace with the same number of histograms as in the
-* sample.
-*
-* Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as
-* they need
-* to have the WorkspaceIndex attribute set.
-*/
-void ConvFit::extendResolutionWorkspace() {
-  if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
-    const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
-    API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
-    appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
-
-    size_t numHist = m_cfInputWS->getNumberHistograms();
-    for (size_t i = 0; i < numHist; i++) {
-      IAlgorithm_sptr appendAlg =
-          AlgorithmManager::Instance().create("AppendSpectra");
-      appendAlg->initialize();
-      appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
-      appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
-
-      if (i == 0) {
-        appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
-        m_batchAlgoRunner->addAlgorithm(appendAlg);
-      } else {
-        m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
-      }
-    }
-
-    m_batchAlgoRunner->executeBatchAsync();
-  }
 }
 
 namespace {
@@ -1017,8 +1032,8 @@ void ConvFit::updatePlot() {
     m_uiForm.ppPlot->getRangeSelector("ConvFitRange")
         ->setRange(range.first, range.second);
     m_uiForm.ckPlotGuess->setChecked(plotGuess);
-	m_dblManager->setValue(m_properties["StartX"], range.first);
-	m_dblManager->setValue(m_properties["EndX"], range.second);
+    m_dblManager->setValue(m_properties["StartX"], range.first);
+    m_dblManager->setValue(m_properties["EndX"], range.second);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
@@ -1120,14 +1135,31 @@ void ConvFit::plotGuess() {
 }
 
 /**
-* Fits a single spectrum to the plot
+* Runs the extension of the resolution workspace before the singlefit takes
+* place
 */
-void ConvFit::singleFit() {
+void ConvFit::singleFitExtension() {
   if (!validate())
     return;
 
   updatePlot();
 
+  extendResolutionWorkspace(false);
+}
+
+/**
+ * Runs the single fit algorithm after the workspace has been extended
+ * @param error :: if the resolution extension algorithm was successful
+ */
+void ConvFit::singleFit(const bool &error) {
+  // disconnect signal for single fit
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(singleFit(bool)));
+  // ensure algorithm was successful
+  if (error) {
+    showMessageBox("Workspace extension failed.");
+    return;
+  }
   m_uiForm.ckPlotGuess->setChecked(false);
 
   CompositeFunction_sptr function =
@@ -1140,7 +1172,6 @@ void ConvFit::singleFit() {
   if (fitType == "") {
     g_log.error("No fit type defined.");
   }
-
   m_singleFitOutputName =
       runPythonCode(
           QString(
@@ -1152,6 +1183,7 @@ void ConvFit::singleFit() {
   int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
+  // Run fit algorithm
   m_singleFitAlg = AlgorithmManager::Instance().create("Fit");
   m_singleFitAlg->initialize();
   m_singleFitAlg->setPropertyValue("Function", function->asString());
@@ -1171,6 +1203,7 @@ void ConvFit::singleFit() {
   m_singleFitAlg->setProperty(
       "Minimizer", minimizerString(m_singleFitOutputName).toStdString());
 
+  // Connection to singleFitComplete SLOT (post algorithm completion)
   m_batchAlgoRunner->addAlgorithm(m_singleFitAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(singleFitComplete(bool)));
@@ -1180,9 +1213,10 @@ void ConvFit::singleFit() {
 /**
 * Handle completion of the fit algorithm for single fit.
 *
-* @param error If the fit algorithm failed
+* @param error :: If the fit algorithm failed
 */
 void ConvFit::singleFitComplete(bool error) {
+  // Disconnect signal for single fit complete
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(singleFitComplete(bool)));
 

@@ -29,7 +29,7 @@ public:
     RectF(const QPointF &origin, const QSizeF &size);
     /// Explicitly set the two points
     RectF(const QPointF &point0, const QPointF &point1);
-    RectF(const QRectF &rect);
+    explicit RectF(const QRectF &rect);
     /// Copy constructor
     RectF(const RectF &rect) {*this = rect;}
     /// Copy assignment operator
