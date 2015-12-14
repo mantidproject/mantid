@@ -83,10 +83,7 @@ const std::string RawFileInfo::runHeader(const ISISRAW &isisRaw) {
 
 /// Create properties
 void RawFileInfo::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".raw");
-  exts.push_back(".s*");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, {".raw", ".s*"}),
                   "The name of the [[RAW_File | RAW]] file from which to "
                   "extract the parameters");
   declareProperty("GetRunParameters", false,
