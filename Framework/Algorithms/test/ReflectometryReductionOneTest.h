@@ -225,7 +225,6 @@ public:
     // Compare the two values (they should be identical)
     TS_ASSERT_DELTA(qMinFromEQ, qMinFromWS, 0.00001);
     TS_ASSERT_DELTA(qMaxFromEQ, qMaxFromWS, 0.00001);
-
   }
 };
 
