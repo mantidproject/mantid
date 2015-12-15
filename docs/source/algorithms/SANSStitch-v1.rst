@@ -60,8 +60,6 @@ Usage
        HABNormSample=hab_norm, 
        LABCountsSample=lab_counts, 
        LABNormSample=lab_norm, 
-       QMin=0, 
-       QMax=10, 
        Mode='None', 
        ScaleFactor=1, 
        ShiftFactor=2)
