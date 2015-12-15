@@ -4,9 +4,9 @@ from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import *
 from mantid import config
 import os.path
+import shutil
 import stresstesting
 import unittest
-
 import cry_ini
 import cry_focus
 
@@ -177,6 +177,8 @@ class ISISPowderDiffractionHrpd2(stresstesting.MantidStressTest):
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
+            cali_path = os.path.join(directories[0], "hrpd/test/cycle_09_2_no_existv/Calibration")
+            shutil.rmtree(cali_path)
         except OSError, ose:
             print 'could not delete generated file : ', ose.filename
 
