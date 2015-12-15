@@ -424,6 +424,7 @@ std::string EnggDiffractionViewQtGUI::guessDefaultFullCalibrationPath() const {
   templ = templ.makeParent();
   templ.append("scripts");
   templ.append("Engineering");
+  templ.append("calib");
   templ.append("ENGINX_full_pixel_calibration_vana194547_ceria193749.csv");
   return templ.toString();
 }
