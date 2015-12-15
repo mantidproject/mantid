@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
+﻿# pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
 
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
@@ -143,12 +143,12 @@ class SANSStitch(DataProcessorAlgorithm):
         return minus.getProperty('OutputWorkspace').value
 
     def _crop_to_x_range(self, ws, x_min, x_max):
-        crop = self.createChildAlgorithm('Rebin')
-        crop.setProperty('InputWorkspace', ws)
-        step = ws.readX(0)[1] - ws.readX(0)[0]
-        crop.setProperty('Params', [x_min, step, x_max])
+        crop = self.createChildAlgorithm("CropWorkspace")
+        crop.setProperty("InputWorkspace", ws)
+        crop.setProperty("XMin", x_min)
+        crop.setProperty("XMax", x_max)
         crop.execute()
-        return crop.getProperty('OutputWorkspace').value
+        return crop.getProperty("OutputWorkspace").value
 
     def _scale(self, ws, factor, operation='Multiply'):
         scale = self.createChildAlgorithm('Scale')
@@ -440,12 +440,13 @@ class SANSStitch(DataProcessorAlgorithm):
 
         shift_factor = self.getProperty('ShiftFactor').value
         scale_factor = self.getProperty('ScaleFactor').value
+
         if not mode == Mode.NoneFit:
             shift_factor, scale_factor = self._determine_factors(q_high_angle, q_low_angle, mode, scale=scale_factor,
                                                                  shift=shift_factor)
 
-        min_q = min(min(cF.dataX(0)), min(cR.dataX(0)))
-        max_q = max(max(cF.dataX(0)), max(cR.dataX(0)))
+        min_q = min(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
+        max_q = max(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))
 
         # Crop our input workspaces
         cF = self._crop_to_x_range(cF, min_q, max_q)
@@ -458,14 +459,15 @@ class SANSStitch(DataProcessorAlgorithm):
                                             shift_factor=shift_factor)
 
         if self.getProperty('ProcessCan').value:
-            cF_can = self.getProperty('HABCountsCan').value
-            cR_can = self.getProperty('LABCountsCan').value
-            nF_can = self.getProperty('HABNormCan').value
-            nR_can = self.getProperty('LABNormCan').value
+            cF_can = self._crop_to_x_range(cF_can, min_q, max_q)
+            cR_can = self._crop_to_x_range(cR_can, min_q, max_q)
+            nF_can = self._crop_to_x_range(nF_can, min_q, max_q)
+            nR_can = self._crop_to_x_range(nR_can, min_q, max_q)
 
             # Calculate merged q for the can
             merged_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,
                                                     scale_factor=scale_factor)
+
             # Subtract it from the sample
             merged_q = self._subract(merged_q, merged_q_can)
 
