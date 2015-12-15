@@ -1,7 +1,6 @@
-#pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+#pylint: disable=invalid-name,protected-access
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
-import math
 import os
 from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
@@ -11,12 +10,9 @@ import ui.sans.ui_hfir_instrument
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
-    from mantid.kernel import logger
     IS_IN_MANTIDPLOT = True
-except:
-    import logging
-    logging.basicConfig(level=logging.DEBUG)
-    logger = logging.getLogger("hfir_instrument")
+except ImportError:
+    pass
 
 class SANSInstrumentWidget(BaseWidget):
     """
@@ -283,7 +279,7 @@ class SANSInstrumentWidget(BaseWidget):
 #             self._summary.total_detector_distance_edit.setEnabled(not is_checked)
 
     def _update_total_distance(self, text):
-        distance = 0;
+        distance = 0
         distance += float(self._summary.sample_dist_edit.text())
         distance += float(self._summary.detector_offset_edit.text())
         distance += float(self._summary.sample_si_dist_edit.text())
@@ -519,7 +515,7 @@ class SANSInstrumentWidget(BaseWidget):
             from mantid.api import AnalysisDataService
             import mantid.simpleapi as api
             if AnalysisDataService.doesExist(self.mask_ws):
-                ws, masked_detectors = api.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
+                _, masked_detectors = api.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
                 m.detector_ids = [int(i) for i in masked_detectors]
 
         self._settings.emit_key_value("DARK_CURRENT", str(self._summary.dark_file_edit.text()))

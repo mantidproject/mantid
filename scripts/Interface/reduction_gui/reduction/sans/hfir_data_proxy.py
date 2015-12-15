@@ -13,13 +13,11 @@ except ImportError:
 class DataProxy(object):
     """
         Class used to load a data file temporarily to extract header information:
-        
         HFIR SANS Data files have the following properties (parsed from the data file!)
         "sample-detector-distance-offset"
         "sample-detector-distance"
         "sample-si-window-distance"
         "sample_detector_distance"
-        
     """
     wavelength = None
     wavelength_spread = None
@@ -28,8 +26,6 @@ class DataProxy(object):
     sample_si_window_distance = None
     # If it was moved before that's where the distance is:
     sample_detector_distance_moved = None
-    
-    
     data = None
     data_ws = ''
     sample_thickness = None
