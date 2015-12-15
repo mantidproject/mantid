@@ -47,31 +47,36 @@ Usage
 -----
 
 
-**Example - Simple no-fit shift:**
+**Example - Simple shift:**
 
 .. testcode:: ExSimpleShift
 
-   hab_counts = CreateWorkspace(DataX=range(4,10), DataY=[4]*5, UnitX='MomentumTransfer')
+   hab_counts = CreateWorkspace(DataX=range(4,10), DataY=[1]*5, UnitX='MomentumTransfer')
    hab_norm = CreateWorkspace(DataX=range(4,10), DataY=[1]*5, UnitX='MomentumTransfer')
    lab_counts = CreateWorkspace(DataX=range(0,6), DataY=[6]*5, UnitX='MomentumTransfer')
    lab_norm = CreateWorkspace(DataX=range(0,6), DataY=[1]*5, UnitX='MomentumTransfer')
+   
+   uniform_binning = [0, 1, 10]
+   hab_counts = Rebin(hab_counts, Params=uniform_binning)
+   hab_norm = Rebin(hab_norm, Params=uniform_binning)
+   lab_counts = Rebin(lab_counts, Params=uniform_binning)
+   lab_norm = Rebin(lab_norm, Params=uniform_binning)
 
    stitched, scale, shift = SANSStitch(HABCountsSample=hab_counts, 
        HABNormSample=hab_norm, 
        LABCountsSample=lab_counts, 
        LABNormSample=lab_norm, 
-       Mode='None', 
-       ScaleFactor=1, 
-       ShiftFactor=2)
+       Mode='ShiftOnly', ScaleFactor=1.0 )
 
-   # Shift should result in high-angle counts moving to 6 too.   
-   print stitched.readY(0)    
+   print scale
+   print shift
 
 Output:
    
 .. testoutput:: ExSimpleShift
 
-   [ 6.  6.  6.  6.  6.  6.  6.  6.  6.]
+   1.0
+   6.0
    
 .. categories::
 
