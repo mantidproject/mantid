@@ -4,6 +4,16 @@
 from mantid.api import *
 import mantid.simpleapi as sapi
 
+CERIA_EXPECTED_PEAKS = [3.124277511, 2.705702376, 1.913220892, 1.631600313,
+                        1.562138267, 1.352851554, 1.241461538, 1.210027059,
+                        1.104598643, 1.04142562, 1.04142562, 0.956610446,
+                        0.914694494, 0.901900955, 0.855618487, 0.825231622,
+                        0.815800156, 0.781069134, 0.757748432, 0.750426918,
+                        0.723129589, 0.704504971, 0.676425777, 0.66110842,
+                        0.656229382, 0.637740216, 0.624855346, 0.620730846,
+                        0.605013529
+                       ]
+
 ENGINX_BANKS = ['', 'North', 'South', '1', '2']
 
 def readInExpectedPeaks(filename, expectedGiven):
@@ -22,7 +32,7 @@ def readInExpectedPeaks(filename, expectedGiven):
 
     expectedPeaksD = None
 
-    if filename != "":
+    if filename:
         exPeakArray = []
         readInArray = []
         try:
@@ -47,7 +57,7 @@ def readInExpectedPeaks(filename, expectedGiven):
             expectedPeaksD = sorted(exPeakArray)
 
     else:
-        if [] == expectedGiven:
+        if not expectedGiven:
             raise ValueError("No expected peaks were given in the property 'ExpectedPeaks', "
                              "could not get default expected peaks, and 'ExpectedPeaksFromFile' "
                              "was not given either. Cannot continout without a list of expected peaks.")

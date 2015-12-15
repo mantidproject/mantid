@@ -40,10 +40,11 @@ class EnggCalibrateFull(PythonAlgorithm):
                              'workspace is generated.')
 
         self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),\
-                             "A table with the detector IDs and calibrated detector positions and additional "
-                             "calibration information. The table includes: the old positions in V3D format "
-                             "(3D vector with x, y, z values), the new positions in V3D, the new positions "
-                             "in spherical coordinates, the change in L2, and the DIFC and ZERO parameters.")
+                             doc="A table with the detector IDs and calibrated detector positions and "
+                             "additional calibration information. The table includes: the old positions "
+                             "in V3D format (3D vector with x, y, z values), the new positions in V3D, the "
+                             "new positions in spherical coordinates, the change in L2, and the DIFC and "
+                             "ZERO parameters.")
 
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
@@ -58,16 +59,18 @@ class EnggCalibrateFull(PythonAlgorithm):
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
         self.declareProperty(FileProperty("OutDetPosFilename", "", FileAction.OptionalSave, [".csv"]),
-                             "Name of the file to save the pre-/post-calibrated detector positions - this "
+                             doc="Name of the file to save the pre-/post-calibrated detector positions - this "
                              "saves the same information that is provided in the output table workspace "
                              "(OutDetPosTable).")
 
-        self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
-    		"A list of dSpacing values where peaks are expected.")
+        self.declareProperty(FloatArrayProperty("ExpectedPeaks",
+                                                values=EnggUtils.CERIA_EXPECTED_PEAKS,
+                                                direction=Direction.Input),
+                             doc="A list of dSpacing values where peaks are expected.")
 
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
                                           action=FileAction.OptionalLoad,extensions = [".csv"]),
-                             "Load from file a list of dSpacing values to be translated into TOF to "
+                             doc="Load from file a list of dSpacing values to be translated into TOF to "
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 

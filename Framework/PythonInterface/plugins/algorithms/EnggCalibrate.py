@@ -12,30 +12,34 @@ class EnggCalibrate(PythonAlgorithm):
         return "EnggCalibrate"
 
     def summary(self):
-        return "Calibrates a detector bank (or group of detectors) by performing a single peak fitting."
+        return ("Calibrates one or more detector banks (or group(s) of detectors) by performing single peak "
+                "fitting.")
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
-                             "Workspace with the calibration run to use.")
+                             doc="Workspace with the calibration run to use.")
 
-        self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
-    		"A list of dSpacing values where peaks are expected.")
+        import EnggUtils
+        self.declareProperty(FloatArrayProperty("ExpectedPeaks",
+                                                values=EnggUtils.CERIA_EXPECTED_PEAKS,
+                                                direction=Direction.Input),
+                             doc="A list of dSpacing values where peaks are expected.")
 
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
                                           action=FileAction.OptionalLoad,extensions = [".csv"]),
-                             "Load from file a list of dSpacing values to be translated into TOF to "
+                             doc="Load from file a list of dSpacing values to be translated into TOF to "
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),
-                             'Workspace with the Vanadium (correction and calibration) run. '
+                             doc='Workspace with the Vanadium (correction and calibration) run. '
                              'Alternatively, when the Vanadium run has been already processed, '
                              'the properties can be used')
 
         self.declareProperty(ITableWorkspaceProperty("VanIntegrationWorkspace", "",
                                                      Direction.Input, PropertyMode.Optional),
-                             'Results of integrating the spectra of a Vanadium run, with one column '
+                             doc='Results of integrating the spectra of a Vanadium run, with one column '
                              '(integration result) and one row per spectrum. This can be used in '
                              'combination with OutVanadiumCurveFits from a previous execution and '
                              'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
