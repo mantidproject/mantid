@@ -1,9 +1,8 @@
-#pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+#pylint: disable=invalid-name,protected-access
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import os
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_trans_direct_beam
 import ui.sans.ui_trans_spreader
@@ -288,7 +287,7 @@ class SampleDataWidget(BaseWidget):
 
             # Store the location of the loaded file
             if len(state.data_files[0])>0:
-                (folder, file_name) = os.path.split(state.data_files[0])
+                (folder, _) = os.path.split(state.data_files[0])
                 self._settings.data_path = folder
                 if current_file != state.data_files[0].strip():
                     self.get_data_info()

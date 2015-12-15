@@ -1,13 +1,13 @@
-#pylint: disable=invalid-name
+#pylint: disable=bare-except,invalid-name
 import sys
- # Check whether Mantid is available
+# Check whether Mantid is available
 try:
     from mantid.api import AnalysisDataService
     from mantid.kernel import Logger
     logger = Logger("hfir_data_proxy")
     import mantid.simpleapi as api
     HAS_MANTID = True
-except:
+except ImportError:
     HAS_MANTID = False
 
 class DataProxy(object):

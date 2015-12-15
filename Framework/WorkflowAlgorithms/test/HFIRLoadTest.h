@@ -173,7 +173,8 @@ public:
                      146.000000);
 
     TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "sample_detector_distance"),19100);
+                         "sample_detector_distance"),
+                     19100);
 
     TS_ASSERT_EQUALS(result->getAxis(0)->unit()->unitID(), "Wavelength")
 

@@ -1,3 +1,4 @@
+#pylint: disable=bare-except,invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the HFIRReduction class could
@@ -6,14 +7,6 @@
 import inspect
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
-from pprint import pformat
-try:
-    import mantidplot
-    from mantid import logger
-except:
-    import logging
-    logging.basicConfig(level=logging.DEBUG)
-    logger = logging.getLogger("hfir_options")
     
 class ReductionOptions(BaseScriptElement):
     instrument_name = "BIOSANS"
@@ -120,8 +113,6 @@ class ReductionOptions(BaseScriptElement):
             Generate reduction script
         """
         
-        #logger.debug(pformat(self.get_this_class_variables()))
-        
         script  = "%s()\n" % self.instrument_name
 
         if self.sample_detector_distance != 0:
@@ -138,7 +129,7 @@ class ReductionOptions(BaseScriptElement):
 
         if self.dark_current_corr:
             if len(str(self.dark_current_data).strip())==0:
-                raise RuntimeError, "Dark current subtraction was selected but no sensitivity data file was entered."
+                raise RuntimeError("Dark current subtraction was selected but no sensitivity data file was entered.")
             script += "DarkCurrent(\"%s\")\n" % self.dark_current_data
 
         script += self._normalization_options()
@@ -203,7 +194,7 @@ class ReductionOptions(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<Instrument>\n"
+        xml = "<Instrument>\n"
         xml += "  <name>%s</name>\n" % self.instrument_name
         if self.nx_pixels is not None:
             xml += "  <nx_pixels>%g</nx_pixels>\n" % self.nx_pixels
