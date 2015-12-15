@@ -129,7 +129,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 #----------------------------------------------------------------------------------------
 
     def PyExec(self):
-        self._load_inst_parameters()
+        self._load_common_inst_parameters()
         self._retrieve_input()
 
         if "Difference" in self._diff_opt:
@@ -250,7 +250,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _load_inst_parameters(self):
+    def _load_common_inst_parameters(self):
         """
             Loads an empty VESUVIO instrument and attaches the necessary
             parameters as attributes
@@ -301,6 +301,36 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self._forw_period_sum1 = to_range_tuple(self.forward_period_sum1)
         self._forw_period_sum2 = to_range_tuple(self.forward_period_sum2)
         self._forw_foil_out_norm = to_range_tuple(self.forward_foil_out_norm)
+
+#----------------------------------------------------------------------------------------
+
+    def _load_diff_mode_parameters(self, workspace):
+        """
+        Loads the relevant parameter file for the current difference mode
+        into the given workspace
+        """
+        load_parameter_file = self.createChildAlgorithm("LoadParameterFile")
+        load_parameter_file.setLogging(_LOGGING_)
+        load_parameter_file.setPropertyValue("Workspace", workspace.name())
+        load_parameter_file.setProperty("Filename",
+                                        self._get_parameter_filename(self._diff_opt))
+        load_parameter_file.execute()
+
+#----------------------------------------------------------------------------------------
+
+    def _get_parameter_filename(self, diff_opt):
+       """
+       Returns the filename for the diff-mode specific parameters
+       """
+       if "Difference" not in diff_opt:
+           raise RuntimeError("Trying to load parameters for difference mode when not doing differencing! "
+                              "This is most likely a bug in the code. Please report this to the developers")
+
+       template = "VESUVIO_{0}_diff_Parameters.xml"
+       if diff_opt == "SingleDifference":
+           return template.format("single")
+       else:
+           return template.format("double")
 
 #----------------------------------------------------------------------------------------
 
@@ -402,7 +432,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
                          XMax=self._mon_tof_max,
                          EnableLogging=_LOGGING_)
 
-        return mtd[SUMMED_WS], mtd[SUMMED_MON]
+        summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_MON]
+        self._load_diff_mode_parameters(summed_data)
+        return summed_data, summed_mon
 
 #----------------------------------------------------------------------------------------
 
