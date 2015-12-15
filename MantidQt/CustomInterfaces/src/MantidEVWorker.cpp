@@ -142,7 +142,9 @@ bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
  *  @param file_name        Name of the NeXus file to load
  *  @param ev_ws_name       Name of the event workspace to create
  *  @param md_ws_name       Name of the MD workspace to create
- *  @param minQ             The smallest absolute value of any component
+ *  @param modQ             The smallest absolute value of any component
+ *                          of Q to include.
+ *  @param minQ             The smallest value of any component
  *                          of Q to include.
  *  @param maxQ             The largest absolute value of any component
  *                          of Q to include. When ConvertToMD is called,
@@ -163,6 +165,7 @@ bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
 bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
                                          const std::string & ev_ws_name,
                                          const std::string & md_ws_name,
+                                         const double        modQ,
                                          const double        minQ,
                                          const double        maxQ,
                                          const bool          do_lorentz_corr,
@@ -215,6 +218,7 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
     alg->setProperty("QConversionScales","Q in A^-1");
     alg->setProperty("Q3DFrames","Q_sample");
     alg->setProperty("LorentzCorrection",do_lorentz_corr);
+    alg->setProperty("AbsMinQ", modQ);
     alg->setProperty("MinValues",min_str.str());
     alg->setProperty("MaxValues",max_str.str());
     alg->setProperty("SplitInto","2");

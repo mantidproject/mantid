@@ -39,6 +39,7 @@ class RunLoadAndConvertToMD : public QRunnable
                          const std::string    & file_name,
                          const std::string    & ev_ws_name,
                          const std::string    & md_ws_name,
+                         const double           modQ,
                          const double           minQ,
                          const double           maxQ,
                          const bool             do_lorentz_corr,
@@ -55,6 +56,7 @@ class RunLoadAndConvertToMD : public QRunnable
     std::string      file_name;
     std::string      ev_ws_name;
     std::string      md_ws_name;
+    double           modQ;
     double           minQ;
     double           maxQ;
     bool             do_lorentz_corr;

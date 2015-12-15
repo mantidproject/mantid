@@ -30,6 +30,7 @@ RunLoadAndConvertToMD::RunLoadAndConvertToMD(MantidEVWorker * worker,
                                              const std::string & file_name,
                                              const std::string & ev_ws_name,
                                              const std::string & md_ws_name,
+                                             const double        modQ,
                                              const double        minQ,
                                              const double        maxQ,
                                              const bool          do_lorentz_corr,
@@ -39,7 +40,7 @@ RunLoadAndConvertToMD::RunLoadAndConvertToMD(MantidEVWorker * worker,
                                              const std::string & det_cal_file2 ) :
   worker(worker),
   file_name(file_name), ev_ws_name(ev_ws_name), md_ws_name(md_ws_name),
-  minQ(minQ), maxQ(maxQ), do_lorentz_corr(do_lorentz_corr),
+  modQ(modQ), minQ(minQ), maxQ(maxQ), do_lorentz_corr(do_lorentz_corr),
   load_data(load_data), load_det_cal(load_det_cal),
   det_cal_file(det_cal_file), det_cal_file2(det_cal_file2)
 {
@@ -48,7 +49,7 @@ RunLoadAndConvertToMD::RunLoadAndConvertToMD(MantidEVWorker * worker,
 void RunLoadAndConvertToMD::run()
 {
   worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name,
-                              minQ, maxQ, do_lorentz_corr, load_data,
+                              modQ, minQ, maxQ, do_lorentz_corr, load_data,
                               load_det_cal, det_cal_file, det_cal_file2 );
 }
 
@@ -434,6 +435,7 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.loadDataGroupBox->setChecked(true);
    m_uiForm.EventFileName_ledt->setText(""); 
    m_uiForm.MaxMagQ_ledt->setText("25");
+   m_uiForm.ModQ_ledt->setText("0");
    m_uiForm.LorentzCorrection_ckbx->setChecked(true);
    setEnabledLoadEventFileParams_slot(true);
    m_uiForm.LoadDetCal_ckbx->setChecked(false);
@@ -585,6 +587,9 @@ void MantidEV::selectWorkspace_slot()
        }
      }
 
+     double modQ;
+     getDouble( m_uiForm.ModQ_ledt, modQ );
+
      double minQ;
      getDouble( m_uiForm.MinMagQ_ledt, minQ );
 
@@ -602,7 +607,7 @@ void MantidEV::selectWorkspace_slot()
 
      RunLoadAndConvertToMD* runner = new RunLoadAndConvertToMD(worker,file_name,
                                                                ev_ws_name, md_ws_name,
-                                                               minQ, maxQ,
+                                                               modQ, minQ, maxQ,
                                                                m_uiForm.LorentzCorrection_ckbx->isChecked(),
                                                                m_uiForm.loadDataGroupBox->isChecked(),
                                                                load_det_cal, det_cal_file, det_cal_file2 );

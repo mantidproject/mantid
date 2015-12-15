@@ -178,9 +178,9 @@ void ConvertToMDParent::init() {
   // if one needs no events near the origin of Q
   declareProperty(
       new PropertyWithValue<double>("AbsMinQ",0.0, Direction::Input),
-      "Do not add event to MD workspace that are closer to the origin "
-      "that have absolute value less than this value. Needed for 3D"
-      "view to remove noise. ");
+      "Do not add events to MD workspace that are closer to the origin "
+      "in QSample radius than this value. Needed for 3D"
+      "views to remove noise. ");
 }
 /**The method responsible for analyzing input workspace parameters and
 *preprocessing detectors positions into reciprocal space

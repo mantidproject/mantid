@@ -68,6 +68,7 @@ public:
   bool loadAndConvertToMD(const std::string & file_name,
                           const std::string & ev_ws_name,
                           const std::string & md_ws_name,
+                          const double        modQ,
                           const double        minQ,
                           const double        maxQ,
                           const bool          do_lorentz_corr,
