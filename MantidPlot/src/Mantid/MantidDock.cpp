@@ -1565,55 +1565,45 @@ const QString MantidDockWidget::createWorkspaceForSurfacePlot(
     const QString &logName) {
   QString xAxisTitle;
   if (wsGroup) {
-    // Vector holding log values to plot
-    std::vector<double> logValues;
-
-    // Create workspace and set its name
-    IAlgorithm_sptr alg = m_mantidUI->createAlgorithm("CreateWorkspace");
-    alg->initialize();
-    alg->setProperty("OutputWorkspace", wsName.toStdString());
-
+    // Create workspace to hold the data
     // Each "spectrum" will be the data from one workspace
     int nWorkspaces = wsGroup->getNumberOfEntries();
-    std::string xAxisLabel, dataAxisLabel, xAxisUnits;
-    alg->setProperty("NSpec", nWorkspaces);
-
     if (nWorkspaces > 0) {
+      const auto firstWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+          wsGroup->getItem(0));
+      std::string xAxisLabel, xAxisUnits;
+      MatrixWorkspace_sptr matrixWS = WorkspaceFactory::Instance().create(
+          "Workspace2D", nWorkspaces, firstWS->blocksize(),
+          firstWS->blocksize());
+      matrixWS->setYUnitLabel(firstWS->YUnitLabel());
+      xAxisLabel = firstWS->getXDimension()->getName();
+      xAxisUnits = firstWS->getXDimension()->getUnits();
+
+      // Vector holding log values to plot
+      std::vector<double> logValues;
+
       // For each workspace in group, add data and log values
-      std::vector<double> xPoints, data;
       for (int i = 0; i < nWorkspaces; i++) {
         const auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
             wsGroup->getItem(i));
         if (ws) {
           auto X = ws->readX(index);
           auto Y = ws->readY(index);
-          xPoints.insert(xPoints.end(), X.begin(), X.end());
-          data.insert(data.end(), Y.begin(), Y.end());
+          matrixWS->dataX(i).swap(X);
+          matrixWS->dataY(i).swap(Y);
           logValues.push_back(getSingleLogValue(i, ws, logName));
-          if (i == 0) {
-            xAxisLabel = ws->getXDimension()->getName();
-            xAxisUnits = ws->getXDimension()->getUnits();
-            dataAxisLabel = ws->YUnitLabel();
-          }
         }
       }
-      alg->setProperty("DataX", xPoints);
-      alg->setProperty("DataY", data);
-      alg->setProperty("YUnitLabel", dataAxisLabel);
-    }
-    m_mantidUI->executeAlgorithmAsync(alg, true);
 
-    // Set log axis values by replacing the "spectra" axis
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        m_ads.retrieve(wsName.toStdString()));
-    if (ws) {
-      ws->replaceAxis(1, new NumericAxis(logValues));
-    }
+      // Set log axis values by replacing the "spectra" axis
+      matrixWS->replaceAxis(1, new NumericAxis(logValues));
+      m_ads.add(wsName.toStdString(), matrixWS);
 
-    // Generate title for the X axis
-    xAxisTitle = xAxisLabel.empty() ? "X" : xAxisLabel.c_str();
-    if (!xAxisUnits.empty()) {
-      xAxisTitle.append(" (").append(xAxisUnits.c_str()).append(")");
+      // Generate title for the X axis
+      xAxisTitle = xAxisLabel.empty() ? "X" : xAxisLabel.c_str();
+      if (!xAxisUnits.empty()) {
+        xAxisTitle.append(" (").append(xAxisUnits.c_str()).append(")");
+      }
     }
   }
   return xAxisTitle;
