@@ -21,7 +21,7 @@ class EnggCalibrate(PythonAlgorithm):
 
         import EnggUtils
         self.declareProperty(FloatArrayProperty("ExpectedPeaks",
-                                                values=EnggUtils.CERIA_EXPECTED_PEAKS,
+                                                values=EnggUtils.default_ceria_expected_peaks(),
                                                 direction=Direction.Input),
                              doc="A list of dSpacing values where peaks are expected.")
 
@@ -52,7 +52,6 @@ class EnggCalibrate(PythonAlgorithm):
                              'VanadiumWorkspace for testing and performance reasons. If not given, no '
                              'workspace is generated.')
 
-        import EnggUtils
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc = "Which bank to calibrate. It can be specified as 1 or 2, or "
@@ -86,8 +85,8 @@ class EnggCalibrate(PythonAlgorithm):
         import EnggUtils
 
         # Get peaks in dSpacing from file
-        expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                       self.getProperty('ExpectedPeaks').value)
+        expectedPeaksD = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                          self.getProperty('ExpectedPeaks').value)
 
         prog = Progress(self, start=0, end=1, nreports=2)
 

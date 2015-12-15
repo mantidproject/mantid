@@ -64,7 +64,7 @@ class EnggCalibrateFull(PythonAlgorithm):
                              "(OutDetPosTable).")
 
         self.declareProperty(FloatArrayProperty("ExpectedPeaks",
-                                                values=EnggUtils.CERIA_EXPECTED_PEAKS,
+                                                values=EnggUtils.default_ceria_expected_peaks(),
                                                 direction=Direction.Input),
                              doc="A list of dSpacing values where peaks are expected.")
 
@@ -77,8 +77,8 @@ class EnggCalibrateFull(PythonAlgorithm):
     def PyExec(self):
 
         # Get peaks in dSpacing from file, and check we have what we need, before doing anything
-        expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                       self.getProperty('ExpectedPeaks').value)
+        expectedPeaksD = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                          self.getProperty('ExpectedPeaks').value)
 
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
