@@ -3452,6 +3452,7 @@ class UserFile(ReductionStep):
             limit_type = blocks[0].lstrip().rstrip()
             try:
                 rebin_str = limits.split(limit_type)[1]
+            # pylint: disable=bare-except
             except:
                 _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
                 return
@@ -3849,6 +3850,7 @@ class UserFile(ReductionStep):
 
         # Check if it is the moderator file name, if so add it and return
         if arguments[0].startswith('MODERATOR'):
+            # pylint: disable=bare-except
             try:
                 reducer.to_Q.set_q_resolution_moderator(file_name=arguments[1])
             except:

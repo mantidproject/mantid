@@ -1,6 +1,5 @@
 ﻿#pylint: disable=invalid-name
 from mantid.simpleapi import *
-from mantid.kernel import time_duration
 
 class DarkRunCorrection(object):
     '''
@@ -154,9 +153,9 @@ class DarkRunNormalizationExtractor(object):
             raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry +
                                "log entry. This is required for calculating the noramlization"
                                "of the dark run.")
-        property = run.getProperty(log_entry)
+        prop = run.getProperty(log_entry)
         frame_time = self._get_time_for_frame(workspace)
-        number_of_frames = self._get_number_of_good_frames(property)
+        number_of_frames = self._get_number_of_good_frames(prop)
         return frame_time*number_of_frames
 
     def _get_time_for_frame(self, workspace):
@@ -166,13 +165,13 @@ class DarkRunNormalizationExtractor(object):
         '''
         return workspace.dataX(0)[-1] - workspace.dataX(0)[0]
 
-    def _get_number_of_good_frames(self, property):
+    def _get_number_of_good_frames(self, prop):
         '''
         Get the number of good frames.
-        @param property: the property from which we extract the frames
+        @param prop: the property from which we extract the frames
         @returns the number of good frames
         '''
         # Since we are dealing with a cummulative sample log, we can extract
         # the total number of good frames by looking at the last frame
-        frames = property.value
+        frames = prop.value
         return frames[-1]
