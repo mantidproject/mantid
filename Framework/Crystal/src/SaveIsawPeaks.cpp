@@ -246,11 +246,7 @@ void SaveIsawPeaks::exec() {
       }
     }
   }
-  // HKL's are flipped by -1 because of the internal Q convention
-   // unless Crystallography convention
-   double qSign = -1.0;
-   std::string convention = ConfigService::Instance().getString("Q.convention");
-   if (convention == "Crystallography") qSign = 1.0;
+
   // ============================== Save all Peaks
   // =========================================
   // Sequence number
@@ -308,11 +304,11 @@ void SaveIsawPeaks::exec() {
           // Sequence (run) number
           out << "3" << std::setw(7) << seqNum;
 
-          // HKL's are flipped by -1 because of the internal Q convention
-           // unless Crystallography convention
-          out << std::setw(5) << Utils::round(qSign *p.getH()) << std::setw(5)
-              << Utils::round(qSign *p.getK()) << std::setw(5)
-              << Utils::round(qSign *p.getL());
+          // HKL is flipped by -1 due to different q convention in ISAW vs
+          // mantid.
+          out << std::setw(5) << Utils::round(-p.getH()) << std::setw(5)
+              << Utils::round(-p.getK()) << std::setw(5)
+              << Utils::round(-p.getL());
 
           // Row/column
           out << std::setw(8) << std::fixed << std::setprecision(2)

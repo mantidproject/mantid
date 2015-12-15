@@ -150,17 +150,6 @@ void TransformMD::exec() {
   } else if (event) {
     // Call the method for this type of MDEventWorkspace.
     CALL_MDEVENT_FUNCTION(this->doTransform, outWS);
-    Progress *prog2 = NULL;
-    ThreadScheduler *ts = new ThreadSchedulerFIFO();
-    ThreadPool tp(ts, 0, prog2);
-    event->splitAllIfNeeded(ts);
-    // prog2->resetNumSteps( ts->size(), 0.4, 0.6);
-    tp.joinAll();
-    event->refreshCache();
-    // Set the special coordinate system.
-    IMDEventWorkspace_sptr inEvent =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
-    event->setCoordinateSystem(inEvent->getSpecialCoordinateSystem());
   }
 
   this->setProperty("OutputWorkspace", outWS);

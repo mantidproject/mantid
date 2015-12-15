@@ -335,7 +335,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
 DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
                                           std::string &lastStr,
                                           std::ifstream &in, int &seqNum,
-                                          std::string bankName, double qSign) {
+                                          std::string bankName) {
   double h;
   double k;
   double l;
@@ -408,7 +408,8 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 
   // Create the peak object
   Peak peak(outWS->getInstrument(), pixelID, wl);
-  peak.setHKL(qSign * h, qSign * k, qSign * l);
+  // HKL's are flipped by -1 because of the internal Q convention
+  peak.setHKL(-h, -k, -l);
   peak.setIntensity(Inti);
   peak.setSigmaIntensity(SigI);
   peak.setBinCount(IPK);
@@ -505,11 +506,7 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
  */
 void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
                                std::string filename) {
-  // HKL's are flipped by -1 because of the internal Q convention
-  // unless Crystallography convention
-  double qSign = -1.0;
-  std::string convention = ConfigService::Instance().getString("Q.convention");
-  if (convention == "Crystallography") qSign = 1.0;
+
   // Open the file
   std::ifstream in(filename.c_str());
 
@@ -569,7 +566,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
 
     try {
       // Read the peak
-      Peak peak = readPeak(outWS, s, in, seqNum, bankName, qSign);
+      Peak peak = readPeak(outWS, s, in, seqNum, bankName);
 
       // Get the calculated goniometer matrix
       Matrix<double> gonMat = uniGonio.getR();

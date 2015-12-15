@@ -690,9 +690,6 @@ TMDE(void MDBox)::centroidSphere(Mantid::API::CoordTransform &radiusTransform,
 TMDE(void MDBox)::transformDimensions(std::vector<double> &scaling,
                                       std::vector<double> &offset) {
   MDBoxBase<MDE, nd>::transformDimensions(scaling, offset);
-  for (size_t d = 0; d < nd; d++)
-    this->m_centroid[d] = (this->m_centroid[d] * static_cast<coord_t>(scaling[d])) +
-                static_cast<coord_t>(offset[d]);
   std::vector<MDE> &events = this->getEvents();
   typename std::vector<MDE>::iterator it;
   typename std::vector<MDE>::iterator it_end = events.end();

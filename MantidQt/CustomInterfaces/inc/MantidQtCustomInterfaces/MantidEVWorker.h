@@ -83,7 +83,9 @@ public:
                   const std::string & peaks_ws_name,
                         double        max_abc,
                         size_t        num_to_find,
-                        double        min_intensity );
+                        double        min_intensity,
+                        double minQPeaks,
+                        double maxQPeaks );
 
   /// Predict peaks and overwrite the peaks workspace
   bool predictPeaks( const std::string & peaks_ws_name,

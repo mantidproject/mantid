@@ -1074,12 +1074,6 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   // peaks_workspace
   m_cppFile->closeGroup();
 
-  // HKL is flipped by -1 due to different q convention in Crystallography.
-  // Always write out in ki-kf so consistent with old files
-  double qSign = 1.0;
-  std::string convention = ConfigService::Instance().getString("default.convention");
-  if (convention == "Crystallography") qSign = -1.0;
-
   for (int r = 0; r < numberPeaks; r++) {
     Kernel::V3D v3d;
     v3d[2] = 1.0;
@@ -1106,7 +1100,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
-        double val = qSign *nxDouble[r];
+        double val = nxDouble[r];
         peakWS->getPeak(r).setH(val);
       }
     }
@@ -1116,7 +1110,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
-        double val = qSign *nxDouble[r];
+        double val = nxDouble[r];
         peakWS->getPeak(r).setK(val);
       }
     }
@@ -1126,7 +1120,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
-        double val = qSign *nxDouble[r];
+        double val = nxDouble[r];
         peakWS->getPeak(r).setL(val);
       }
     }

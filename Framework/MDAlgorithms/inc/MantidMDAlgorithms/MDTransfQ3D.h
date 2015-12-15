@@ -4,7 +4,6 @@
 #include "MantidMDAlgorithms/MDTransfInterface.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDTransfModQ.h"
-#include "MantidKernel/ConfigService.h"
 //
 namespace Mantid {
 namespace MDAlgorithms {
@@ -99,8 +98,6 @@ protected:
   // current value of Sin(Theta)^2 corresponding to the current detector value
   // and used to calculate Lorentz corrections
   double m_SinThetaSq;
-  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // all other variables are the same as in ModQ
   // hole near origin of Q
   double m_AbsMin;

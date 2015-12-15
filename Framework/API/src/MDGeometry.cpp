@@ -379,8 +379,7 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
                   static_cast<coord_t>(offset[d]);
     coord_t max = (dim->getMaximum() * static_cast<coord_t>(scaling[d])) +
                   static_cast<coord_t>(offset[d]);
-    if (min < max) dim->setRange(dim->getNBins(), min, max);
-    else dim->setRange(dim->getNBins(), max, min);
+    dim->setRange(dim->getNBins(), min, max);
   }
   // Clear the original workspace
   setOriginalWorkspace(boost::shared_ptr<Workspace>());

@@ -260,7 +260,8 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
  *                        MD box to be a possible peak.  If this
  *                        is 10000, only boxes with intensity 10000 times
  *                        the average intensity will be considered.
- *
+ *  @param minQPeaks   Filter with ModQ min
+ *  @param maxQPeaks  Filter with ModQmax
  *  @return true if FindPeaksMD completed successfully.
  */
 bool MantidEVWorker::findPeaks( const std::string & ev_ws_name,
@@ -268,7 +269,9 @@ bool MantidEVWorker::findPeaks( const std::string & ev_ws_name,
                                 const std::string & peaks_ws_name,
                                       double        max_abc,
                                       size_t        num_to_find,
-                                      double        min_intensity )
+                                      double        min_intensity,
+                                      double minQPeaks,
+                                      double maxQPeaks)
 {
   try
   {
@@ -317,6 +320,26 @@ bool MantidEVWorker::findPeaks( const std::string & ev_ws_name,
 		  else
 			peak.setMonitorCount( proton_charge );
 		}
+		if (minQPeaks != Mantid::EMPTY_DBL())
+		{
+      IAlgorithm_sptr filter_alg = AlgorithmManager::Instance().create("FilterPeaks");
+      filter_alg->setProperty("InputWorkspace", peaks_ws );
+      filter_alg->setProperty("FilterVariable", "QMod" );
+      filter_alg->setProperty("FilterValue", minQPeaks );
+      filter_alg->setProperty("Operator", ">" );
+      filter_alg->setProperty("OutputWorkspace", peaks_ws );
+      filter_alg->execute();
+		}
+    if (maxQPeaks != Mantid::EMPTY_DBL())
+    {
+      IAlgorithm_sptr filter_alg = AlgorithmManager::Instance().create("FilterPeaks");
+      filter_alg->setProperty("InputWorkspace", peaks_ws );
+      filter_alg->setProperty("FilterVariable", "QMod" );
+      filter_alg->setProperty("FilterValue", maxQPeaks );
+      filter_alg->setProperty("Operator", "<" );
+      filter_alg->setProperty("OutputWorkspace", peaks_ws );
+      filter_alg->execute();
+    }
       return true;
     }
   }

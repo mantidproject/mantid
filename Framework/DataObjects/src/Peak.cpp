@@ -3,7 +3,6 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include <algorithm>
@@ -453,11 +452,7 @@ Mantid::Kernel::V3D Peak::getQLabFrame() const {
   // Now calculate the wavevector of the scattered neutron
   double wvf = (2.0 * M_PI) / this->getWavelength();
   // And Q in the lab frame
-  // Default for ki-kf is positive
-  double qSign = 1.0;
-  std::string convention = ConfigService::Instance().getString("Q.convention");
-  if (convention == "Crystallography") qSign = -1.0;
-  return (beamDir * wvi - detDir * wvf) * qSign;
+  return beamDir * wvi - detDir * wvf;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -533,7 +528,7 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
   boost::shared_ptr<const ReferenceFrame> refFrame =
       this->m_inst->getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
-  const double qBeam = fabs(q.scalar_prod(refBeamDir));
+  const double qBeam = q.scalar_prod(refBeamDir);
 
   if (norm_q == 0.0)
     throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
@@ -553,12 +548,7 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
   // Save the wavelength
   this->setWavelength(wl);
 
-  // Default for ki-kf has -q
-  double qSign = -1.0;
-  std::string convention = ConfigService::Instance().getString("Q.convention");
-  if (convention == "Crystallography") qSign = 1.0;
-
-  V3D detectorDir = q * qSign;
+  V3D detectorDir = q * -1.0;
   detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
   detectorDir.normalize();
 

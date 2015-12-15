@@ -642,10 +642,6 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
                                                            const double phi) {
   V3D q(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
   q = m_rubw * q;
-  if (convention != "Crystallography") {
-    q *= -1;
-  }
-
   double hStart = q.X() * m_kiMin, hEnd = q.X() * m_kiMax;
   double kStart = q.Y() * m_kiMin, kEnd = q.Y() * m_kiMax;
   double lStart = q.Z() * m_kiMin, lEnd = q.Z() * m_kiMax;
