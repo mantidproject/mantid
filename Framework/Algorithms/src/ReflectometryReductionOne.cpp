@@ -353,7 +353,7 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   rotateSource->setChild(true);
   rotateSource->initialize();
   rotateSource->setProperty("Workspace", toConvert);
-  rotateSource->setProperty("Angle", thetaInDeg.value());
+  rotateSource->setProperty("Angle", thetaInDeg.get());
   rotateSource->execute();
 
   // Always convert units.
