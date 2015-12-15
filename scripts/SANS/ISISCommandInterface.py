@@ -505,23 +505,24 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             kwargs_can = {"HABCountsCan" : Cf_can,
                           "HABNormCan" : Nf_can,
                           "LABCountsCan" : Cr_can,
-                          "LABNormCan" : Nf_can,
+                          "LABNormCan" : Nr_can,
                           "ProcessCan": True}
             kwargs_stitch.update(kwargs_can)
 
-        alg_stitch = su.createUnmanagedAlgorithm("SANSStitch1D", **kwargs_stitch)
+        alg_stitch = su.createUnmanagedAlgorithm("SANSStitch", **kwargs_stitch)
         alg_stitch.execute()
 
         # Get the fit values
-        shift_from_alg = alg_stitch.getProperty("ShiftFactor").value
-        scale_from_alg = alg_stitch.getProperty("ScaleFactor").value
+        shift_from_alg = alg_stitch.getProperty("OutShiftFactor").value
+        scale_from_alg = alg_stitch.getProperty("OutScaleFactor").value
         ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift_from_alg
         ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale_from_alg
 
         if merge_flag:
             # Get the merged workspace
             mergedQ = alg_stitch.getProperty("OutputWorkspace").value
-            RenameWorkspace(InputWorkspace=mergedQ, OutputWorkspace= retWSname_merged)
+            # Add the ouput to the Analysis Data Service
+            AnalysisDataService.addOrReplace(retWSname_merged, mergedQ)
 
             # save the properties Transmission and TransmissionCan inside the merged workspace
             # get these values from the rear_workspace because they are the same value as the front one.
