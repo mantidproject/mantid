@@ -31,6 +31,11 @@ class EnggCalibrate(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
+        peaks_grp = 'Peaks to fit'
+        self.setPropertyGroup('ExpectedPeaks', peaks_grp)
+        self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
+
+
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),
                              doc='Workspace with the Vanadium (correction and calibration) run. '
@@ -52,6 +57,11 @@ class EnggCalibrate(PythonAlgorithm):
                              'VanadiumWorkspace for testing and performance reasons. If not given, no '
                              'workspace is generated.')
 
+        vana_grp = 'Vanadium (open beam) properties'
+        self.setPropertyGroup('VanadiumWorkspace', vana_grp)
+        self.setPropertyGroup('VanIntegrationWorkspace', vana_grp)
+        self.setPropertyGroup('VanCurvesWorkspace', vana_grp)
+
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc = "Which bank to calibrate. It can be specified as 1 or 2, or "
@@ -63,6 +73,10 @@ class EnggCalibrate(PythonAlgorithm):
                              'that should be considered in the calibration (all others will be '
                              'ignored). This option cannot be used together with Bank, as they overlap. '
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
+
+        banks_grp = 'Banks / spectra'
+        self.setPropertyGroup('Bank', banks_grp)
+        self.setPropertyGroup(self.INDICES_PROP_NAME, banks_grp)
 
         self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",\
                 Direction.Input, PropertyMode.Optional),\
@@ -79,6 +93,12 @@ class EnggCalibrate(PythonAlgorithm):
 
         self.declareProperty("Zero", 0.0, direction = Direction.Output,
                              doc = "Calibrated Zero value for the bank or range of pixels/detectors given")
+
+        out_grp = 'Outputs'
+        self.setPropertyGroup('DetectorPositions', out_grp)
+        self.setPropertyGroup('OutputParametersTableName', out_grp)
+        self.setPropertyGroup('Difc', out_grp)
+        self.setPropertyGroup('Zero', out_grp)
 
     def PyExec(self):
 

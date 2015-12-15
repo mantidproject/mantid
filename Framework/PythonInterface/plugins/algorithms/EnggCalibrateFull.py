@@ -20,6 +20,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
                              "Workspace with the calibration run to use. The calibration will be applied on it.")
 
+
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),
                              "Workspace with the Vanadium (correction and calibration) run.")
@@ -38,6 +39,11 @@ class EnggCalibrateFull(PythonAlgorithm):
                              'by the algorithm Fit. This is meant to be used as an alternative input '
                              'VanadiumWorkspace for testing and performance reasons. If not given, no '
                              'workspace is generated.')
+
+        vana_grp = 'Vanadium (open beam) properties'
+        self.setPropertyGroup('VanadiumWorkspace', vana_grp)
+        self.setPropertyGroup('VanIntegrationWorkspace', vana_grp)
+        self.setPropertyGroup('VanCurvesWorkspace', vana_grp)
 
         self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),\
                              doc="A table with the detector IDs and calibrated detector positions and "
@@ -58,10 +64,17 @@ class EnggCalibrateFull(PythonAlgorithm):
                              'ignored). This option cannot be used together with Bank, as they overlap. '
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
+        banks_grp = 'Banks / spectra'
+        self.setPropertyGroup('Bank', banks_grp)
+        self.setPropertyGroup(self.INDICES_PROP_NAME, banks_grp)
+
         self.declareProperty(FileProperty("OutDetPosFilename", "", FileAction.OptionalSave, [".csv"]),
                              doc="Name of the file to save the pre-/post-calibrated detector positions - this "
                              "saves the same information that is provided in the output table workspace "
                              "(OutDetPosTable).")
+
+        opt_outs_grp = 'Optional outputs'
+        self.setPropertyGroup('OutDetPosFilename', opt_outs_grp)
 
         self.declareProperty(FloatArrayProperty("ExpectedPeaks",
                                                 values=EnggUtils.default_ceria_expected_peaks(),
@@ -73,6 +86,11 @@ class EnggCalibrateFull(PythonAlgorithm):
                              doc="Load from file a list of dSpacing values to be translated into TOF to "
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
+
+        peaks_grp = 'Peaks to fit'
+        self.setPropertyGroup('ExpectedPeaks', peaks_grp)
+        self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
+
 
     def PyExec(self):
 

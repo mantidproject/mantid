@@ -34,6 +34,10 @@ class EnggFitPeaks(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
+        peaks_grp = 'Peaks to fit'
+        self.setPropertyGroup('ExpectedPeaks', peaks_grp)
+        self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
+
         self.declareProperty('OutParametersTable', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the fitted values calculated by '
                              'this algorithm (Difc and Zero parameters) for GSAS. '

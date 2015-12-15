@@ -40,6 +40,10 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                                                      PropertyMode.Optional),
                              'Output curves workspace produced when given an input Vanadium workspace')
 
+        out_vana_grp = 'Output parameters (for when calculating corrections)'
+        self.setPropertyGroup('OutIntegrationWorkspace', out_vana_grp)
+        self.setPropertyGroup('OutCurvesWorkspace', out_vana_grp)
+
         self.declareProperty(ITableWorkspaceProperty("IntegrationWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),
                              "Workspace with the integrated values for every spectra of the reference "
@@ -51,6 +55,10 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                              'data, one per bank. This workspace has three spectra per bank, as produced '
                              'by the algorithm Fit. This is meant to be used as an alternative input '
                              'VanadiumWorkspace')
+
+        in_vana_grp = 'Input parameters (for when applying pre-calculated corrections)'
+        self.setPropertyGroup('IntegrationWorkspace', in_vana_grp)
+        self.setPropertyGroup('CurvesWorkspace', in_vana_grp)
 
     def PyExec(self):
         """
