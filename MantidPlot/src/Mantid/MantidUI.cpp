@@ -308,8 +308,11 @@ void MantidUI::shutdown()
       Poco::Thread::sleep(100);
     }
   }
-  bool prompt = false;
-  this->clearAllMemory(prompt);
+  // If any python objects need to be cleared away then the GIL needs to be held. This doesn't feel like
+  // it is in the right place but it will do no harm
+  ScopedPythonGIL gil;
+  // Relevant notifications are connected to signals that will close all dependent windows
+  Mantid::API::FrameworkManager::Instance().shutdown();
 }
 
 MantidUI::~MantidUI()
@@ -3230,6 +3233,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     g->checkValuesInAxisRange(firstCurve);
   }
   ml->toggleWaterfall(waterfallPlot);
+
   // Check if window does not contain any curves and should be closed
   ml->maybeNeedToClose();
 
