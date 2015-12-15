@@ -208,7 +208,7 @@ public:
 
     TS_ASSERT_DELTA(45.0, outTheta, 0.00001);
 
-    //convert from degrees to radians for sin() function
+    // convert from degrees to radians for sin() function
     double outThetaInRadians = outTheta * M_PI / 180;
 
     double lamMin = inLam->readX(0).front();
