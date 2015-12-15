@@ -5,6 +5,7 @@
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -464,14 +465,18 @@ void QtReflMainView::showImportDialog() {
 Show the user file dialog to choose save location of notebook
 */
 std::string QtReflMainView::requestNotebookPath() {
-  QString qfilename = QFileDialog::getSaveFileName(
+
+  // We won't use QFileDialog directly here as using the NativeDialog option
+  // causes problems on MacOS.
+  QString qfilename = API::FileDialogHandler::getSaveFileName(
       this, "Save notebook file", QDir::currentPath(),
       "IPython Notebook files (*.ipynb);;All files (*.*)",
       new QString("IPython Notebook files (*.ipynb)"));
 
-  // Sadly there is a Qt bug (QTBUG-27186) which means the filename returned
+  // There is a Qt bug (QTBUG-27186) which means the filename returned
   // from the dialog doesn't always the file extension appended.
   // So we'll have to ensure this ourselves.
+  // Important, notebooks can't be loaded without this extension.
   std::string filename = qfilename.toStdString();
   if (filename.size() > 6) {
     if (filename.substr(filename.size() - 6) != ".ipynb") {
