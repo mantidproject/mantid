@@ -102,6 +102,8 @@ protected:
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // all other variables are the same as in ModQ
+  // hole near origin of Q
+  double m_AbsMin;
 private:
   /// how to transform workspace data in elastic case
   inline bool calcMatrixCoord3DElastic(const double &k0,
