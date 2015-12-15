@@ -1001,13 +1001,16 @@ class CummulativeTimeSeriesPropertyAdder(object):
     '''
     def __init__(self, total_time_shift_seconds = 0):
         super(CummulativeTimeSeriesPropertyAdder, self).__init__()
-        self._to_check = ['good_uah_log', 'good_frames']
-        self._single_values_to_update = {self._to_check[0]: "gd_prtn_chrg"}
+        self._time_series = ['good_uah_log', 'good_frames']
+        self._single_valued= {"gd_prtn_chrg"}
 
         self._original_times_lhs = dict()
         self._original_values_lhs = dict()
         self._original_times_rhs = dict()
         self._original_values_rhs = dict()
+
+        self._original_single_valued_lhs = dict()
+        self._original_single_valued_rhs = dict()
 
         self._start_time_lhs = None
         self._start_time_rhs = None
@@ -1023,7 +1026,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
         '''
         run_lhs = lhs.getRun()
         run_rhs = rhs.getRun()
-        for element in self._to_check:
+        # Get the cummulative time s
+        for element in self._time_series:
             if (run_lhs.hasProperty(element) and
                 run_rhs.hasProperty(element)):
                 # Get values for lhs
@@ -1036,8 +1040,20 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 self._original_times_rhs[element] = property_rhs.times
                 self._original_values_rhs[element] = property_rhs.value
 
+        for element in self._single_valued:
+            if (run_lhs.hasProperty(element) and
+                run_rhs.hasProperty(element)):
+                # Get the values for lhs
+                property_lhs = run_lhs.getProperty(element)
+                self._original_single_valued_lhs[element] = property_lhs.value
+
+                # Get the values for rhs
+                property_rhs = run_rhs.getProperty(element)
+                self._original_single_valued_rhs[element] = property_rhs.value
+
         log_name_start_time = "start_time"
-        if (run_lhs.hasProperty(log_name_start_time) and run_rhs.hasProperty(log_name_start_time)):
+        if (run_lhs.hasProperty(log_name_start_time) and
+            run_rhs.hasProperty(log_name_start_time)):
             convert_to_date = lambda val: DateAndTime(val) if isinstance(val, str) else val
             self._start_time_lhs = convert_to_date(run_lhs.getProperty(log_name_start_time).value)
             self._start_time_rhs = convert_to_date(run_rhs.getProperty(log_name_start_time).value)
@@ -1047,7 +1063,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         Restore the original values for the shifted properties
         @param workspace: the workspace which requires correction.
         '''
-        for element in self._to_check:
+        for element in self._time_series:
             if (element in self._original_times_rhs and
                 element in self._original_values_rhs):
                 run = workspace.getRun()
@@ -1071,15 +1087,14 @@ class CummulativeTimeSeriesPropertyAdder(object):
         alg_log = AlgorithmManager.createUnmanaged("AddSampleLog")
         alg_log.initialize()
         alg_log.setChild(True)
-        for key in self._single_values_to_update.keys():
-            if run.hasProperty(key) and run.hasProperty(self._single_values_to_update[key]):
-                # The single-valued entry should be the last entry of the
-                # cummulative time series
-                type_converter = self._type_map[self._single_values_to_update[key]]
-                new_value = run.getProperty(key).value[-1]
+        for element in self._single_valued:
+            if run.hasProperty(element):
+                type_converter = self._type_map[element]
+                new_value = type_converter(self._original_single_valued_lhs[element] +
+                                           self._original_single_valued_rhs[element])
                 alg_log.setProperty("Workspace", workspace)
-                alg_log.setProperty("LogName", self._single_values_to_update[key])
-                alg_log.setProperty("LogText", str(type_converter(new_value)))
+                alg_log.setProperty("LogName", element)
+                alg_log.setProperty("LogText", str(new_value))
                 alg_log.setProperty("LogType", "Number")
                 alg_log.execute()
 
@@ -1156,7 +1171,6 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 element = values[index] - values[index-1]
                 raw_values.append(element)
         return raw_values
-
 
     def _get_corrected_times_and_values(self, log_name):
         '''

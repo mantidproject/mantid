@@ -1270,19 +1270,22 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
 
         log_names = ['good_uah_log', 'good_frames', 'new_series']
         start_time_1 = "2010-01-01T00:00:00"
+        proton_charge_1 = 10.2
         lhs = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift = 0.0,
                                             log_names = log_names, make_linear = True)
-        self._add_single_log(lhs, "gd_prtn_chrg", lhs.getRun().getProperty("good_uah_log").value[-1])
+        self._add_single_log(lhs, "gd_prtn_chrg", proton_charge_1)
 
         start_time_2 = "2010-01-01T00:00:12"
+        proton_charge_2 = 30.2
         rhs = provide_event_ws_with_entries(names[1],start_time_2, extra_time_shift = 0.0,
                                             log_names = log_names, make_linear = True)
-        self._add_single_log(rhs, "gd_prtn_chrg", rhs.getRun().getProperty("good_uah_log").value[-1])
+        self._add_single_log(rhs, "gd_prtn_chrg", proton_charge_2)
 
         start_time_3 = "2010-02-01T00:00:00"
+        proton_charge_3 = 20.2
         out = provide_event_ws_with_entries(names[2],start_time_3, extra_time_shift = 0.0,
                                             log_names = log_names, make_linear = True)
-        self._add_single_log(out, "gd_prtn_chrg", out.getRun().getProperty("good_uah_log").value[-1])
+        self._add_single_log(out, "gd_prtn_chrg", proton_charge_3)
 
         out_ref = CloneWorkspace(InputWorkspace = out)
 
@@ -1324,20 +1327,23 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         import time
         time.sleep(10)
         start_time_1 = "2010-01-01T00:00:00"
+        proton_charge_1 = 10.2
         lhs = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0,
                                             log_names = log_names, make_linear = True)
-        self._add_single_log(lhs, "gd_prtn_chrg", lhs.getRun().getProperty("good_uah_log").value[-1])
+        self._add_single_log(lhs, "gd_prtn_chrg", proton_charge_1)
 
         # The rhs workspace should have an overlap time of about 5s
         start_time_2 = "2010-01-01T00:00:05"
+        proton_charge_2 = 19.2
         rhs = provide_event_ws_with_entries(names[1],start_time_2, extra_time_shift = 0.0,
                                             log_names = log_names, make_linear = True)
-        self._add_single_log(rhs, "gd_prtn_chrg", rhs.getRun().getProperty("good_uah_log").value[-1])
+        self._add_single_log(rhs, "gd_prtn_chrg", proton_charge_2)
 
         start_time_3 = "2010-02-01T00:00:00"
+        proton_charge_3 = 30.2
         out = provide_event_ws_with_entries(names[2],start_time_3, extra_time_shift = 0.0,
                                             log_names = log_names, make_linear = True)
-        self._add_single_log(out, "gd_prtn_chrg", out.getRun().getProperty("good_uah_log").value[-1])
+        self._add_single_log(out, "gd_prtn_chrg", proton_charge_3)
 
         out_ref = CloneWorkspace(InputWorkspace = out)
 
@@ -1378,20 +1384,23 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         log_names = ['good_uah_log', 'good_frames', 'new_series']
 
         start_time_1 = "2010-01-01T00:00:00"
+        proton_charge_1 = 10.2
         lhs = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0,
                                             log_names = log_names, make_linear = True)
-        self._add_single_log(lhs, "gd_prtn_chrg", lhs.getRun().getProperty("good_uah_log").value[-1])
+        self._add_single_log(lhs, "gd_prtn_chrg", proton_charge_1)
 
         # The rhs workspace should have an overlap time of about 5s
         start_time_2 = "2010-01-01T00:00:20"
+        proton_charge_2 = 18.2
         rhs = provide_event_ws_with_entries(names[1],start_time_2, extra_time_shift = 0.0,
                                             log_names = log_names, make_linear = True)
-        self._add_single_log(rhs, "gd_prtn_chrg", rhs.getRun().getProperty("good_uah_log").value[-1])
+        self._add_single_log(rhs, "gd_prtn_chrg", proton_charge_2)
 
         start_time_3 = "2010-02-01T00:00:00"
+        proton_charge_3 = 80.2
         out = provide_event_ws_with_entries(names[2],start_time_3, extra_time_shift = 0.0,
                                             log_names = log_names, make_linear = True)
-        self._add_single_log(out, "gd_prtn_chrg", out.getRun().getProperty("good_uah_log").value[-1])
+        self._add_single_log(out, "gd_prtn_chrg", proton_charge_3)
 
         out_ref = CloneWorkspace(InputWorkspace = out)
 
