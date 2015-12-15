@@ -21,7 +21,7 @@ class Mode(object):
         pass
 
 
-class SANSStitch1D(DataProcessorAlgorithm):
+class SANSStitch(DataProcessorAlgorithm):
     def _make_mode_map(self):
         return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly,
                 'Both': Mode.BothFit, 'None': Mode.NoneFit}
@@ -286,6 +286,9 @@ class SANSStitch1D(DataProcessorAlgorithm):
         if count_ws_rear.getNumberHistograms() != 1:
             return
 
+        if count_ws_front.getNumberHistograms() != 1:
+            return
+
         # We require both count workspaces to contain the DX value
         if not count_ws_rear.hasDx(0) or not count_ws_front.hasDx(0):
             return
@@ -379,6 +382,35 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
         return (shift, scale)
 
+    def _crop_out_special_values(self, ws):
+
+        if ws.getNumberHistograms() != 1:
+            # Strip zeros is only possible on 1D workspaces
+            return
+
+        y_vals = ws.readY(0)
+        length = len(y_vals)
+        # Find the first non-zero value
+        start = 0
+        for i in range(0, length):
+            if not np.isnan(y_vals[i]) and not np.isinf(y_vals[i]):
+                start = i
+                break
+        # Now find the last non-zero value
+        stop = 0
+        length -= 1
+        for j in range(length, 0, -1):
+            if not np.isnan(y_vals[j]) and not np.isinf(y_vals[j]):
+                stop = j
+                break
+        # Find the appropriate X values and call CropWorkspace
+        x_vals = ws.readX(0)
+        start_x = x_vals[start]
+        # Make sure we're inside the bin that we want to crop
+        end_x = x_vals[stop + 1]
+        return self._crop_to_x_range(ws=ws,x_min=start_x, x_max=end_x)
+
+
     def PyExec(self):
         enum_map = self._make_mode_map()
 
@@ -402,6 +434,9 @@ class SANSStitch1D(DataProcessorAlgorithm):
             # Now we can do the can subraction.
             q_high_angle = self._subract(q_high_angle, q_high_angle_can)
             q_low_angle = self._subract(q_low_angle, q_low_angle_can)
+
+        q_high_angle = self._crop_out_special_values(q_high_angle)
+        q_low_angle = self._crop_out_special_values(q_low_angle)
 
         shift_factor = self.getProperty('ShiftFactor').value
         scale_factor = self.getProperty('ScaleFactor').value
@@ -434,8 +469,7 @@ class SANSStitch1D(DataProcessorAlgorithm):
             # Subtract it from the sample
             merged_q = self._subract(merged_q, merged_q_can)
 
-        if not mode == Mode.NoneFit:
-            self._correct_q_resolution_for_merged(count_ws_front=cF, count_ws_rear=cR, output_ws=merged_q,
+        self._correct_q_resolution_for_merged(count_ws_front=cF, count_ws_rear=cR, output_ws=merged_q,
                                                   scale=scale_factor)
 
         self.setProperty('OutputWorkspace', merged_q)
@@ -525,4 +559,4 @@ class SANSStitch1D(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(SANSStitch1D)
+AlgorithmFactory.subscribe(SANSStitch)
