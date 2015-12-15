@@ -68,8 +68,8 @@ TMDE(MDBox)::MDBox(API::BoxController *const splitter, const uint32_t depth,
  */
 TMDE(MDBox)::MDBox(
     BoxController_sptr &splitter, const uint32_t depth,
-    const std::vector<
-        Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector,
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
+        extentsVector,
     const size_t nBoxEvents, const size_t boxID)
     : MDBoxBase<MDE, nd>(splitter.get(), depth, boxID, extentsVector),
       m_Saveable(NULL), m_bIsMasked(false) {
@@ -86,8 +86,8 @@ TMDE(MDBox)::MDBox(
  */
 TMDE(MDBox)::MDBox(
     BoxController *const splitter, const uint32_t depth,
-    const std::vector<
-        Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector,
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
+        extentsVector,
     const size_t nBoxEvents, const size_t boxID)
     : MDBoxBase<MDE, nd>(splitter, depth, boxID, extentsVector),
       m_Saveable(NULL), m_bIsMasked(false) {
