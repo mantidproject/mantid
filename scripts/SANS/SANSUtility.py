@@ -1002,7 +1002,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
     def __init__(self, total_time_shift_seconds = 0):
         super(CummulativeTimeSeriesPropertyAdder, self).__init__()
         self._time_series = ['good_uah_log', 'good_frames']
-        self._single_valued= {"gd_prtn_chrg"}
+        self._single_valued= ["gd_prtn_chrg"]
 
         self._original_times_lhs = dict()
         self._original_values_lhs = dict()
