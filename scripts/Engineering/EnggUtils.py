@@ -4,7 +4,7 @@
 from mantid.api import *
 import mantid.simpleapi as sapi
 
-ENGINX_BANKS = ['', 'North', 'South', '1', '2']
+ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 
 def default_ceria_expected_peaks():
     """
@@ -92,7 +92,7 @@ def getWsIndicesFromInProperties(ws, bank, detIndices):
                          "'DetectorIndices', as they overlap. Please use either of them. Got Bank: '%s', "
                          "and DetectorIndices: '%s'"%(bank, detIndices))
     elif bank:
-        bankAliases = {'North': '1', 'South': '2'}
+        bankAliases = {'North': '1', 'South': '2', 'Both: North, South': '-1'}
         bank = bankAliases.get(bank, bank)
         indices = getWsIndicesForBank(ws, bank)
         if not indices:
@@ -138,7 +138,7 @@ def getWsIndicesForBank(ws, bank):
     Finds the workspace indices of all the pixels/detectors/spectra corresponding to a bank.
 
     ws :: workspace with instrument definition
-    bank :: bank number as it appears in the instrument definition
+    bank :: bank number as it appears in the instrument definition.  A <0 value implies all banks.
 
     @returns :: list of workspace indices for the bank
     """
@@ -158,7 +158,7 @@ def getDetIDsForBank(bank):
     Find the detector IDs for an instrument bank. Note this is at this point specific to
     the ENGINX instrument.
 
-    @param bank :: name/number as a string
+    @param bank :: name/number as a string.
 
     @returns list of detector IDs corresponding to the specified Engg bank number
     """
@@ -184,8 +184,9 @@ def getDetIDsForBank(bank):
 
     detIDs = set()
 
+    bank_int = int(bank)
     for i in range(grouping.getNumberHistograms()):
-        if grouping.readY(i)[0] == int(bank):
+        if bank_int < 0 or grouping.readY(i)[0] == bank_int:
             detIDs.add(grouping.getDetector(i).getID())
 
     sapi.DeleteWorkspace(grouping)
