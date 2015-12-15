@@ -22,32 +22,6 @@ class SANSStitchTest(unittest.TestCase):
         alg.initialize()
         self.assertEquals('None', alg.getProperty('Mode').value)
 
-    def test_q_forms_valid_range(self):
-        alg = AlgorithmManager.create('SANSStitch')
-        alg.setChild(True)
-        alg.initialize()
-        alg.setProperty('Mode', 'Both')
-
-        # Same as
-        alg.setProperty('QMin', 1.0)
-        alg.setProperty('QMax', 1.0)
-        errors = alg.validateInputs()
-        self.assertTrue('QMin' in errors)
-        self.assertTrue('QMax' in errors)
-
-        # Less than
-        alg.setProperty('QMin', 1.0)
-        alg.setProperty('QMax', 0.0)
-        errors = alg.validateInputs()
-        self.assertTrue('QMin' in errors)
-        self.assertTrue('QMax' in errors)
-
-        # Fine
-        alg.setProperty('QMin', 0.0)
-        alg.setProperty('QMax', 1.0)
-        errors = alg.validateInputs()
-        self.assertEquals(0, len(errors))
-
     def test_none_mode_requires_scale_and_shift_factors(self):
         alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
