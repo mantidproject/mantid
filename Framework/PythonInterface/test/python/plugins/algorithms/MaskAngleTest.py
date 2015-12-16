@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 from testhelpers import *
@@ -23,7 +23,7 @@ class MaskAngleTest(unittest.TestCase):
         try:
             MaskAngle(w1,10,20)
             self.fail("Should not have got here. Should throw because no instrument.")
-        except ValueError:
+        except (RuntimeError, ValueError):
             pass
         finally:
             DeleteWorkspace(w1)

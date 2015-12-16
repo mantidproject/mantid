@@ -264,6 +264,13 @@ public:
   virtual uint32_t getDepth() const = 0;
   virtual signal_t getSignalNormalized() const = 0;
 
+  virtual signal_t getSignalWithMask() const = 0;
+  virtual signal_t getSignalNormalizedWithMask() const = 0;
+  virtual signal_t getSignalByNEventsWithMask() const {
+    return this->getSignalWithMask() /
+           static_cast<signal_t>(this->getNPoints());
+  }
+
   virtual void calcVolume() = 0;
   virtual void setInverseVolume(const coord_t) = 0;
   virtual void setSignal(const signal_t) = 0;

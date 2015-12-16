@@ -2402,32 +2402,31 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections(int n_steps) {
 
   double angle_step = M_PI / (2 * n_steps);
 
-  for (double phi = 0; phi <= (1.0001) * M_PI / 2.; phi += angle_step) {
+  for (int iPhi = 0; iPhi < n_steps + 1; ++iPhi) {
+    double phi = static_cast<double>(iPhi) * angle_step;
     double r = sin(phi);
 
     int n_theta = (int)(2. * M_PI * r / angle_step + 0.5);
 
     double theta_step;
-
-    if (n_theta == 0)              // n = ( 0, 1, 0 ).  Just
+    if (n_theta == 0) {            // n = ( 0, 1, 0 ).  Just
       theta_step = 2. * M_PI + 1.; // use one vector at the pole
-
-    else
+      n_theta = 1;
+    } else {
       theta_step = 2. * M_PI / n_theta;
+    }
 
-    double last_theta = 2. * M_PI - theta_step / 2.;
+    // use half the equator to avoid vectors that are the negatives of other
+    // vectors in the list.
+    if (fabs(phi - M_PI / 2.) < angle_step / 2.) {
+      n_theta /= 2;
+    }
 
-    if (fabs(phi - M_PI / 2.) <
-        angle_step / 2.)                   // use half the equator to avoid
-      last_theta = M_PI - theta_step / 2.; // vectors that are the negatives
-                                           // of other vectors in the list.
-
-    for (double theta = 0.; theta < last_theta; theta += theta_step) {
-      V3D direction(r * cos(theta), cos(phi), r * sin(theta));
-      direction_list.push_back(direction);
+    for (int jTheta = 0; jTheta < n_theta; ++jTheta) {
+      double theta = static_cast<double>(jTheta) * theta_step;
+      direction_list.emplace_back(r * cos(theta), cos(phi), r * sin(theta));
     }
   }
-
   return direction_list;
 }
 

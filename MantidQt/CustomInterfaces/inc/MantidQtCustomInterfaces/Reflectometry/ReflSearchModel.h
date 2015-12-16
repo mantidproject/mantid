@@ -8,68 +8,69 @@
 #include <vector>
 #include <memory>
 
-namespace MantidQt
-{
-  namespace CustomInterfaces
-  {
-  // Forward declaration
-  class ReflTransferStrategy;
+namespace MantidQt {
+namespace CustomInterfaces {
+// Forward declaration
+class ReflTransferStrategy;
 
-    /** ReflSearchModel : Provides a QAbstractTableModel for a Mantid ITableWorkspace of Reflectometry search results.
+/** ReflSearchModel : Provides a QAbstractTableModel for a Mantid
+ITableWorkspace of Reflectometry search results.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
-    This file is part of Mantid.
+This file is part of Mantid.
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
-    class ReflSearchModel : public QAbstractTableModel
-    {
-      Q_OBJECT
-    public:
-      ReflSearchModel(const ReflTransferStrategy &transferMethod,
-                      Mantid::API::ITableWorkspace_sptr tableWorkspace,
-                      const std::string &instrument);
-      virtual ~ReflSearchModel();
-      //row and column counts
-      int rowCount(const QModelIndex &parent = QModelIndex()) const;
-      int columnCount(const QModelIndex &parent = QModelIndex()) const;
-      //get data from a cell
-      QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-      //get header data for the table
-      QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-      //get flags for a cell
-      Qt::ItemFlags flags(const QModelIndex &index) const;
+File change history is stored at: <https://github.com/mantidproject/mantid>
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class ReflSearchModel : public QAbstractTableModel {
+  Q_OBJECT
+public:
+  ReflSearchModel(const ReflTransferStrategy &transferMethod,
+                  Mantid::API::ITableWorkspace_sptr tableWorkspace,
+                  const std::string &instrument);
+  virtual ~ReflSearchModel();
+  // row and column counts
+  int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  int columnCount(const QModelIndex &parent = QModelIndex()) const;
+  // get data from a cell
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+  // get header data for the table
+  QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+  // get flags for a cell
+  Qt::ItemFlags flags(const QModelIndex &index) const;
+  /// maps each run number to why it was unusable in the process table
+  std::vector<std::map<std::string, std::string>> m_errors;
 
-    protected:
-      //vector of the run numbers
-      std::vector<std::string> m_runs;
+protected:
+  // vector of the run numbers
+  std::vector<std::string> m_runs;
 
-      /// maps each run number to its description
-      std::map<std::string,std::string> m_descriptions;
+  /// maps each run number to its description
+  std::map<std::string, std::string> m_descriptions;
 
-      /// maps each run number to its location
-      std::map<std::string, std::string> m_locations;
-    };
+  /// maps each run number to its location
+  std::map<std::string, std::string> m_locations;
+};
 
-    /// Typedef for a shared pointer to \c ReflSearchModel
-    typedef boost::shared_ptr<ReflSearchModel> ReflSearchModel_sptr;
+/// Typedef for a shared pointer to \c ReflSearchModel
+typedef boost::shared_ptr<ReflSearchModel> ReflSearchModel_sptr;
 
-  } // namespace CustomInterfaces
+} // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif  /* MANTID_CUSTOMINTERFACES_REFLSEARCHMODEL_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_REFLSEARCHMODEL_H_ */
