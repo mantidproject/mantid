@@ -188,7 +188,6 @@ private:
   QComboBox *facility;
   MantidQt::MantidWidgets::InstrumentSelector  *defInstr;
   QCheckBox* ckIgnoreParaView;
-  QCheckBox* ckQconvention;
 
   /// Mantid tab for setting directories
   QWidget *directoriesPage;

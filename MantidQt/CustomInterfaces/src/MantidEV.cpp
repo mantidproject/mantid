@@ -764,10 +764,10 @@ void MantidEV::findPeaks_slot()
        return;
 
      double minQPeaks;
-     getDouble( m_uiForm.MinMagQ_ledt, minQPeaks );
+     getDouble( m_uiForm.MinQPeaks_ledt, minQPeaks );
 
      double maxQPeaks;
-     getDouble( m_uiForm.MinMagQ_ledt, maxQPeaks );
+     getDouble( m_uiForm.MaxQPeaks_ledt, maxQPeaks );
 
      std::string ev_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
      RunFindPeaks* runner = new RunFindPeaks( worker, ev_ws_name,
@@ -1711,6 +1711,8 @@ void MantidEV::setEnabledFindPeaksParams_slot( bool on )
   m_uiForm.NumToFind_ledt->setEnabled( on );
   m_uiForm.MinIntensity_lbl->setEnabled( on );
   m_uiForm.MinIntensity_ledt->setEnabled( on );
+  m_uiForm.MinQPeaks_ledt->setEnabled( on );
+  m_uiForm.MaxQPeaks_ledt->setEnabled( on );
 }
 
 /**
@@ -2174,6 +2176,8 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("MaxABC_ledt", m_uiForm.MaxABC_ledt->text());
   state->setValue("NumToFind_ledt", m_uiForm.NumToFind_ledt->text());
   state->setValue("MinIntensity_ledt", m_uiForm.MinIntensity_ledt->text());
+  state->setValue("MinQPeaks_ledt", m_uiForm.MinQPeaks_ledt->text());
+  state->setValue("MaxQPeaks_ledt", m_uiForm.MaxQPeaks_ledt->text());
   state->setValue("UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn->isChecked());
   state->setValue("LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn->isChecked());
   state->setValue("SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt->text());
@@ -2285,6 +2289,8 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "MaxABC_ledt", m_uiForm.MaxABC_ledt );
   restore( state, "NumToFind_ledt", m_uiForm.NumToFind_ledt );
   restore( state, "MinIntensity_ledt", m_uiForm.MinIntensity_ledt );
+  restore( state, "MinQPeaks_ledt", m_uiForm.MinQPeaks_ledt );
+  restore( state, "MaxQPeaks_ledt", m_uiForm.MaxQPeaks_ledt );
   restore( state, "UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn );
   restore( state, "LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn );
   restore( state, "SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt );

@@ -250,7 +250,7 @@
                    <item>
                     <widget class="QLabel" name="ModQ_lbl">
                      <property name="text">
-                      <string>|Q|min to Map to MD</string>
+                      <string>Min ModQ to Map to MD</string>
                      </property>
                     </widget>
                    </item>
@@ -931,7 +931,6 @@
                 </property>
                 <property name="toolTip">
                  <string>Lower bound on mod Q for peaks.</string>
-                 <string>10000</string>
                 </property>
                </widget>
               </item>
@@ -985,7 +984,6 @@
                 </property>
                 <property name="toolTip">
                  <string>Upper bound on mod Q for peaks.</string>
-                 <string>10000</string>
                 </property>
                </widget>
               </item>

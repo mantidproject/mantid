@@ -320,6 +320,7 @@ bool MantidEVWorker::findPeaks( const std::string & ev_ws_name,
 		  else
 			peak.setMonitorCount( proton_charge );
 		}
+
 		if (minQPeaks != Mantid::EMPTY_DBL())
 		{
       IAlgorithm_sptr filter_alg = AlgorithmManager::Instance().create("FilterPeaks");
@@ -327,8 +328,9 @@ bool MantidEVWorker::findPeaks( const std::string & ev_ws_name,
       filter_alg->setProperty("FilterVariable", "QMod" );
       filter_alg->setProperty("FilterValue", minQPeaks );
       filter_alg->setProperty("Operator", ">" );
-      filter_alg->setProperty("OutputWorkspace", peaks_ws );
+      filter_alg->setPropertyValue("OutputWorkspace", peaks_ws_name);
       filter_alg->execute();
+      peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
 		}
     if (maxQPeaks != Mantid::EMPTY_DBL())
     {
@@ -337,8 +339,9 @@ bool MantidEVWorker::findPeaks( const std::string & ev_ws_name,
       filter_alg->setProperty("FilterVariable", "QMod" );
       filter_alg->setProperty("FilterValue", maxQPeaks );
       filter_alg->setProperty("Operator", "<" );
-      filter_alg->setProperty("OutputWorkspace", peaks_ws );
+      filter_alg->setPropertyValue("OutputWorkspace", peaks_ws_name );
       filter_alg->execute();
+      peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
     }
       return true;
     }
