@@ -60,7 +60,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
     _raw_grp = None
     _raw_monitors = None
     _nperiods = None
-    _goodframes = None
     pt_times = None
     delta_t = None
     mon_pt_times = None
@@ -330,7 +329,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         first_ws = self._raw_grp[0]
         self._nperiods = nperiods
-        self._goodframes = first_ws.getRun().getLogData("goodfrm").value
 
         # Cache delta_t values
         raw_t = first_ws.readX(0)
