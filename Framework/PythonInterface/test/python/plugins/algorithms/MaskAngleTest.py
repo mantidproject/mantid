@@ -25,7 +25,6 @@ class MaskAngleTest(unittest.TestCase):
         AnalysisDataService.add('ws2',ws2)
 
         group = GroupWorkspaces(['ws1', 'ws2'])
-
         MaskAngle(group, 10, 20)
 
         for w in group:
