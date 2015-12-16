@@ -57,7 +57,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(pAlg->initialize())
     TS_ASSERT(pAlg->isInitialized())
 
-    TSM_ASSERT_EQUALS("algorithm should have 22 properties", 22,
+    TSM_ASSERT_EQUALS("algorithm should have 23 properties", 23,
                       (size_t)(pAlg->getProperties().size()));
   }
 
