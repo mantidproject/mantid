@@ -2,8 +2,7 @@
 
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
-from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, \
-    EnabledWhenProperty, PropertyCriterion
+from mantid.kernel import Direction, Property, StringListValidator, UnitFactory
 import numpy as np
 
 class Mode(object):
