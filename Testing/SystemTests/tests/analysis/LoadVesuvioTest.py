@@ -99,16 +99,6 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(0.0013599866184859088, evs_raw.readY(63)[1188], places=DIFF_PLACES)
         self.assertAlmostEqual(0.16935354944452052, evs_raw.readE(0)[1], places=DIFF_PLACES)
 
-    def test_load_with_spectra_mixed_from_forward_backward_gives_expected_numbers(self):
-        self._run_load("14188", "134,135", "DoubleDifference")
-
-        # Check some data
-        evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.43816507168120111, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.23224859590051541, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.013611354662030284, evs_raw.readY(1)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.031506182465619419, evs_raw.readE(1)[1188], places=DIFF_PLACES)
-
     def test_foilout_mode_gives_expected_numbers(self):
         self._run_load("14188", "3", "FoilOut")
 
@@ -311,6 +301,17 @@ class VesuvioTests(unittest.TestCase):
                           OutputWorkspace=self.ws_name, SpectrumList="1")
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name, SpectrumList="1-2")
+
+    def test_load_with_spectra_mixed_from_forward_backward_raises_error(self):
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          Mode="SingleDifference",
+                          OutputWorkspace=self.ws_name, SpectrumList="135,134")
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          Mode="SingleDifference",
+                          OutputWorkspace=self.ws_name, SpectrumList="3,134,136,198")
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          Mode="SingleDifference",
+                          OutputWorkspace=self.ws_name, SpectrumList="20-50,180-192")
 
     def test_load_with_invalid_difference_option_raises_error(self):
         self.assertRaises(ValueError, ms.LoadVesuvio, Filename="14188",
