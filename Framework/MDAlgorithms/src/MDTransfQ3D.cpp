@@ -90,7 +90,8 @@ bool MDTransfQ3D::calcMatrixCoord3DInelastic(
   if (Coord[2] < m_DimMin[2] || Coord[2] >= m_DimMax[2])
     return false;
 
-  if (std::sqrt(Coord[0]*Coord[0]+Coord[1]*Coord[1]+Coord[2]*Coord[2]) < m_AbsMin)
+  if (std::sqrt(Coord[0] * Coord[0] + Coord[1] * Coord[1] +
+                Coord[2] * Coord[2]) < m_AbsMin)
     return false;
 
   return true;
@@ -131,7 +132,8 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
   if (Coord[2] < m_DimMin[2] || Coord[2] >= m_DimMax[2])
     return false;
 
-  if (std::sqrt(Coord[0]*Coord[0]+Coord[1]*Coord[1]+Coord[2]*Coord[2]) < m_AbsMin)
+  if (std::sqrt(Coord[0] * Coord[0] + Coord[1] * Coord[1] +
+                Coord[2] * Coord[2]) < m_AbsMin)
     return false;
 
   /*Apply Lorentz corrections if necessary */

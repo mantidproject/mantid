@@ -243,8 +243,7 @@ void MDWSDescription::checkWSCorresponsMDWorkspace(
 MDWSDescription::MDWSDescription(unsigned int nDimensions)
     : m_Wtransf(3, 3, true), m_RotMatrix(9, 0), m_buildingNewWorkspace(true),
       m_Emode(Kernel::DeltaEMode::Undefined), m_LorentzCorr(false),
-      m_AbsMin(0.),
-      m_coordinateSystem(Mantid::Kernel::None) {
+      m_AbsMin(0.), m_coordinateSystem(Mantid::Kernel::None) {
 
   this->resizeDimDescriptions(nDimensions);
   m_DimMin.assign(m_NDims, std::numeric_limits<double>::quiet_NaN());

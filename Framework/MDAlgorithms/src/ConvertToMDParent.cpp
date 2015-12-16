@@ -177,7 +177,7 @@ void ConvertToMDParent::init() {
                   "coordinate system in **Q3D** mode. - Default (0,0,1)");
   // if one needs no events near the origin of Q
   declareProperty(
-      new PropertyWithValue<double>("AbsMinQ",0.0, Direction::Input),
+      new PropertyWithValue<double>("AbsMinQ", 0.0, Direction::Input),
       "Do not add events to MD workspace that are closer to the origin "
       "in QSample radius than this value. Needed for 3D"
       "views to remove noise. ");
