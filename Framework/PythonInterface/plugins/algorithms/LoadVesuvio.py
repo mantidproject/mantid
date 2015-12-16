@@ -470,26 +470,24 @@ class LoadVesuvio(LoadEmptyVesuvio):
         xvalues = self.pt_times # values of the raw_grp x axis
         logger.information(("sum_start,end (1) = %f , %f ") % (sum1_start, sum1_end))
         logger.information(("sum_start,end (2) = %f , %f ") % (sum2_start, sum2_end))
-        logger.information("x_values = " + str(xvalues))
         # Array of bin indexes corresponding to bins that lie within start/end range
         sum1_indices = np.where((xvalues > sum1_start) & (xvalues < sum1_end))
         sum2_indices = np.where((xvalues > sum2_start) & (xvalues < sum2_end))
-        logger.information("sum1_indices = " + str(sum1_indices))
-        logger.information("sum2_indices = " + str(sum2_indices))
 
-        wsindex = self._ws_index
+        wsindex = self._ws_index # The current spectra to examine
+        logger.information("wsindex = " + str(wsindex))
         logger.information("wsindex = " + str(wsindex))
         for i in range(self._nperiods):
             # Gets the sum(1,2) of the yvalues at the bin indexs
             yvalues = self._raw_grp[i].readY(wsindex)
             self.sum1[i] = np.sum(yvalues[sum1_indices])
             self.sum2[i] = np.sum(yvalues[sum2_indices])
-            logger.information("current period = " + str(i))
+            logger.information("current ws in group = " + str(i))
             logger.information("sum1 = " + str(self.sum1))
             logger.information("sum2 = " + str(self.sum2))
             if self.sum2[i] != 0.0:
                 self.sum1[i] /= self.sum2[i]
-                logger.information("dividing sum1 by sum 2... result = " + str(self.sum1))
+                logger.information("sum_1["+str(i)+"] / sum_2["+str(i)+"] = " + str(self.sum1))
 
         # Sort sum1 in increasing order and match the foil map
         self.sum1 = self.foil_map.reorder(self.sum1)
@@ -615,7 +613,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         wsindex = self._ws_index        # Spectra number - monitors(2) - 1
         outY = foil_ws.dataY(wsindex)   # Initialise outY list to correct length with 0s
         logger.information("foil_ws.dataY("+str(wsindex)+") = " + str(outY))
-        delta_t = self.delta_t          # Bin width
+        delta_t = self.delta_t          # List of workspace bin width
         logger.information("delta t = " + str(delta_t))
         for grp_index in raw_grp_indices:
             raw_ws = self._raw_grp[grp_index]
@@ -869,13 +867,19 @@ class SpectraToFoilPeriodMap(object):
            it reorders the 1:1 map to match this order
            numpy
         """
+        logger.warning("*************************REORDER************************")
         vals = np.array(self._one_to_one.values())
+        logger.information("vals = " + str(vals))
         sorted_indices = arr.argsort()
+        logger.information("sorted_indices = " + str(sorted_indices))
         vals = vals[sorted_indices]
+        logger.information("vals[sorted_indices] = " + str(vals))
         arr = arr[sorted_indices]
+        logger.information("arr[sorted_indices] = " + str(arr))
         self._one_to_one = {}
         for index,val in enumerate(vals):
             self._one_to_one[index+1] = int(val)
+        logger.information("one_to_one = " + str(self._one_to_one))
         return arr
 
 #----------------------------------------------------------------------------------------
@@ -948,6 +952,7 @@ class SpectraToFoilPeriodMap(object):
                                         foil state is required
             @returns The index in a WorkspaceGroup that gives the associated Workspace
         """
+        logger.warning("******************GET WORKSPACE INDEX*******************************")
         self._validate_foil_number(foil_state_no)
         self._validate_spectrum_number(spectrum_no)
 
@@ -965,6 +970,7 @@ class SpectraToFoilPeriodMap(object):
             foil_periods = self._even_odd
 
         foil_period_no = foil_periods[foil_state_no]
+        logger.information("foil_period_number = " + str(foil_period_no - 1))
         return foil_period_no - 1 # Minus 1 to get to WorkspaceGroup index
 
 #----------------------------------------------------------------------------------------
