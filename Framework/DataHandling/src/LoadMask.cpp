@@ -71,12 +71,10 @@ void LoadMask::init() {
   declareProperty("Instrument", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the instrument to apply the mask.");
-  std::vector<std::string> exts;
-  exts.push_back(".xml");
-  exts.push_back(".msk");
-  declareProperty(new FileProperty("InputFile", "", FileProperty::Load, exts),
-                  "Masking file for masking. Supported file format is XML and "
-                  "ISIS ASCII. ");
+  declareProperty(
+      new FileProperty("InputFile", "", FileProperty::Load, {".xml", ".msk"}),
+      "Masking file for masking. Supported file format is XML and "
+      "ISIS ASCII. ");
   declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>(
                       "OutputWorkspace", "Masking", Direction::Output),
                   "Output Masking Workspace");
