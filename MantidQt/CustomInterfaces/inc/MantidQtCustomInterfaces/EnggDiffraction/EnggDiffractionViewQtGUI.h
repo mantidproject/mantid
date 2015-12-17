@@ -87,6 +87,8 @@ public:
 
   std::string currentCalibFile() const;
 
+  std::string currentCalibCroppedSpecID() const;
+
   std::vector<std::string> newVanadiumNo() const;
 
   std::vector<std::string> newCeriaNo() const;

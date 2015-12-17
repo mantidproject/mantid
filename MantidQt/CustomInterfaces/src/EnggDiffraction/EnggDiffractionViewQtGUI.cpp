@@ -241,6 +241,15 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabCalib.lineEdit_new_ceria_num->setText(
       qs.value("user-params-new-ceria-num", "").toString());
 
+  m_uiTabCalib.groupBox_calib_cropped->setChecked(
+	  qs.value("user-params-calib-cropped-group-checkbox", false).toBool());
+
+  m_uiTabCalib.lineEdit_cropped_run_num->setText(
+	  qs.value("user-params-current-vanadium-num", "").toString());
+
+  m_uiTabCalib.lineEdit_calib_cropped_spec_ids->setText(
+	  qs.value("user-params-calib-cropped-spectrum-nos", "").toString());
+
   // user params - focusing
   m_uiTabFocus.lineEdit_run_num->setUserInput(
       qs.value("user-params-focus-runno", "").toString());
@@ -342,6 +351,9 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabCalib.lineEdit_new_vanadium_num->getText());
   qs.setValue("user-params-new-ceria-num",
               m_uiTabCalib.lineEdit_new_ceria_num->getText());
+
+  qs.setValue("user-params-calib-cropped-group-checkbox",
+	  m_uiTabCalib.groupBox_calib_cropped->isChecked());
 
   // user params - focusing
   qs.setValue("user-params-focus-runno",
@@ -483,6 +495,10 @@ std::vector<std::string> EnggDiffractionViewQtGUI::newCeriaNo() const {
 
 std::string EnggDiffractionViewQtGUI::currentCalibFile() const {
   return m_uiTabCalib.lineEdit_current_calib_filename->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::currentCalibCroppedSpecID() const {
+	return m_uiTabCalib.lineEdit_calib_cropped_spec_ids->text().toStdString();
 }
 
 void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
