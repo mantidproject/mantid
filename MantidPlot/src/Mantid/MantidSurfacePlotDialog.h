@@ -29,7 +29,7 @@ public:
   /// Constructor - same parameters as one of the parent constructors, along
   /// with a list of the names of workspaces to be plotted.
   MantidSurfacePlotDialog(MantidUI *parent, Qt::WFlags flags,
-                          QList<QString> wsNames);
+                          QList<QString> wsNames, const QString &plotType);
   /// Returns a structure holding all of the selected options
   UserInputSurface getSelections() const;
   /// Returns the workspace index to be plotted
@@ -44,7 +44,7 @@ private slots:
 private:
   MantidWSIndexWidget m_widget;
   /// Initializes the layout of the dialog
-  void init();
+  void init(const QString &plotType);
   /// Initializes the layout of the log options
   void initLogs();
   /// Initializes the layout of the buttons

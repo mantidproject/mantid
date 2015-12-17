@@ -1562,7 +1562,7 @@ void MantidDockWidget::plotContour() {
     const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(
         m_ads.retrieve(wsName.toStdString()));
     if (wsGroup) {
-      auto options = m_tree->chooseSurfacePlotOptions();
+      auto options = m_tree->chooseContourPlotOptions();
       // If user clicked OK and not Cancel...
       if (options.accepted) {
 
@@ -1942,20 +1942,42 @@ MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
 * Allows users to choose spectra from the selected workspaces by presenting them
 * with a dialog box, and also allows choice of a log to plot against and a name
 * for this axis.
-*
+* @param type :: [input] Type of plot (for dialog title)
 * @returns :: A structure listing the selected options
 */
 MantidSurfacePlotDialog::UserInputSurface
-MantidTreeWidget::chooseSurfacePlotOptions() const {
+MantidTreeWidget::choosePlotOptions(const QString &type) const {
   auto selectedMatrixWsList = getSelectedWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
     selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
   }
-  MantidSurfacePlotDialog *dlg =
-      new MantidSurfacePlotDialog(m_mantidUI, 0, selectedMatrixWsNameList);
+  MantidSurfacePlotDialog *dlg = new MantidSurfacePlotDialog(
+      m_mantidUI, 0, selectedMatrixWsNameList, type);
   dlg->exec();
   return dlg->getSelections();
+}
+
+/**
+* Allows users to choose spectra from the selected workspaces by presenting them
+* with a dialog box, and also allows choice of a log to plot against and a name
+* for this axis.
+* @returns :: A structure listing the selected options
+*/
+MantidSurfacePlotDialog::UserInputSurface
+MantidTreeWidget::chooseSurfacePlotOptions() const {
+  return choosePlotOptions("Surface");
+}
+
+/**
+* Allows users to choose spectra from the selected workspaces by presenting them
+* with a dialog box, and also allows choice of a log to plot against and a name
+* for this axis.
+* @returns :: A structure listing the selected options
+*/
+MantidSurfacePlotDialog::UserInputSurface
+MantidTreeWidget::chooseContourPlotOptions() const {
+  return choosePlotOptions("Contour");
 }
 
 void MantidTreeWidget::setSortScheme(MantidItemSortScheme sortScheme)

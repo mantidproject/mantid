@@ -14,22 +14,27 @@ const QString MantidSurfacePlotDialog::WORKSPACE_INDEX{"Workspace index"};
  * @param mui :: The MantidUI area
  * @param flags :: Window flags that are passed the the QDialog constructor
  * @param wsNames :: the names of the workspaces to be plotted
+ * @param plotType :: Type of plot (for window title)
  */
 MantidSurfacePlotDialog::MantidSurfacePlotDialog(MantidUI *mui,
                                                  Qt::WFlags flags,
-                                                 QList<QString> wsNames)
+                                                 QList<QString> wsNames,
+                                                 const QString &plotType)
     : QDialog(mui->appWindow(), flags), m_mantidUI(mui), m_wsNames(wsNames),
       m_accepted(false), m_widget(this, flags, wsNames, false) {
   // Set up UI.
-  init();
+  init(plotType);
 }
 
 /**
  * Set up layout of dialog
+ * @param plotType :: Type of plot (for window title)
  */
-void MantidSurfacePlotDialog::init() {
+void MantidSurfacePlotDialog::init(const QString &plotType) {
   m_outer = new QVBoxLayout();
-  setWindowTitle(tr("Surface plot versus log value"));
+  QString title(plotType);
+  title.append(tr(" plot versus log value"));
+  setWindowTitle(title);
   m_outer->insertWidget(1, &m_widget);
   initLogs();
   initButtons();
