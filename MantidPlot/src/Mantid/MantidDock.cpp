@@ -1533,16 +1533,7 @@ void MantidDockWidget::plotSurface() {
             plotWSTitle, wsGroup, options.plotIndex, options.logName);
 
         // Convert to point data if not already
-        if (auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
-                m_mantidUI->getWorkspace(plotWSTitle))) {
-          if (matrixWS->isHistogramData()) {
-            auto alg = m_mantidUI->createAlgorithm("ConvertToPointData");
-            alg->initialize();
-            alg->setPropertyValue("InputWorkspace", plotWSTitle.toStdString());
-            alg->setProperty("OutputWorkspace", plotWSTitle.toStdString());
-            alg->execute();
-          }
-        }
+        convertHistoToPoints(plotWSTitle);
 
         // Plot the output workspace in 3D
         auto matrixToPlot = m_mantidUI->importMatrixWorkspace(plotWSTitle, -1,
@@ -1585,6 +1576,9 @@ void MantidDockWidget::plotContour() {
         const QString plotWSTitle("__matrixToPlotContour");
         const QString xLabelQ = createWorkspaceForGroupPlot(
             plotWSTitle, wsGroup, options.plotIndex, options.logName);
+
+        // Convert to histogram data if not already
+        convertPointsToHisto(plotWSTitle);
 
         // Plot the output workspace as a contour plot
         auto plot =
@@ -1697,6 +1691,42 @@ MantidDockWidget::getSingleLogValue(const int wsIndex,
       }
     } else {
       throw std::invalid_argument("Bad input workspace type");
+    }
+  }
+}
+
+/**
+ * Utility method to convert a histogram workspace to points data
+ * (centred bins) for surface plots.
+ * @param wsName :: [input] Name of workspace to convert
+ */
+void MantidDockWidget::convertHistoToPoints(const QString &wsName) const {
+  if (auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+          m_mantidUI->getWorkspace(wsName))) {
+    if (matrixWS->isHistogramData()) {
+      auto alg = m_mantidUI->createAlgorithm("ConvertToPointData");
+      alg->initialize();
+      alg->setPropertyValue("InputWorkspace", wsName.toStdString());
+      alg->setProperty("OutputWorkspace", wsName.toStdString());
+      alg->execute();
+    }
+  }
+}
+
+/**
+ * Utility method to convert a points workspace to histogram data
+ * for contour plots.
+ * @param wsName :: [input] Name of workspace to convert
+ */
+void MantidDockWidget::convertPointsToHisto(const QString &wsName) const {
+  if (auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+          m_mantidUI->getWorkspace(wsName))) {
+    if (!matrixWS->isHistogramData()) {
+      auto alg = m_mantidUI->createAlgorithm("ConvertToHistogram");
+      alg->initialize();
+      alg->setPropertyValue("InputWorkspace", wsName.toStdString());
+      alg->setProperty("OutputWorkspace", wsName.toStdString());
+      alg->execute();
     }
   }
 }
