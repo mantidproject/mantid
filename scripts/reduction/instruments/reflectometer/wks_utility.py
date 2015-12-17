@@ -1,7 +1,6 @@
-#pylint: disable=too-many-lines,invalid-name,too-many-arguments, too-many-locals
+#pylint: disable=too-many-lines,invalid-name,too-many-arguments, too-many-locals, unused-argument
 from numpy import zeros, arctan2, arange, shape, sqrt, fliplr, asfarray, mean, sum, NAN
 from mantid.simpleapi import *
-# from MantidFramework import *
 import math
 import os.path
 
@@ -287,7 +286,7 @@ def createIntegratedWorkspace(mt1,
 
     _tof_axis = mt1.readX(0)[:]
     nbr_tof = len(_tof_axis)
-    t_range = arange(nbr_tof-1)
+    _t_range = arange(nbr_tof-1)
 
     _fromXpixel = min([fromXpixel, toXpixel])
     _toXpixel = max([fromXpixel, toXpixel])
@@ -506,7 +505,7 @@ def angleUnitConversion(value, from_units='degree', to_units='rad'):
     if from_units == to_units:
         return value
 
-    from_factor = 1
+    from_factor = 1.0
     #convert everything into rad
     if from_units == 'degree':
         from_factor = 1.745329252e-2
@@ -530,8 +529,8 @@ def convertToThetaVsLambda(_tof_axis,
     to theta/lambda
 
     """
-    h = 6.626e-34 #m^2 kg s^-1
-    m = 1.675e-27 #kg
+    # h = 6.626e-34 #m^2 kg s^-1
+    # m = 1.675e-27 #kg
 
     #convert tof_axis into seconds
     _tof_axis = _tof_axis * 1e-6
@@ -547,7 +546,7 @@ def convertToThetaVsLambda(_tof_axis,
 
     return dico
 
-def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, cpix=None):
+def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1.0, tof=None, yrange=None, cpix=None):
     """
     This function converts the pixel/TOF array to the R(Q) array
     using Q = (4.Pi.Mn)/h  *  L.sin(theta/2)/TOF
@@ -556,14 +555,14 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, c
             theta: angle of detector
     """
 
-    h = 6.626e-34 #m^2 kg s^-1
-    m = 1.675e-27 #kg
+    # h = 6.626e-34 #m^2 kg s^-1
+    # m = 1.675e-27 #kg
 
     sample = mt.getInstrument().getSample()
     source = mt.getInstrument().getSource()
     dSM = sample.getDistance(source)
 
-    maxX = 304
+    _maxX = 304
     maxY = 256
 
     dPS_array = zeros(maxY)
@@ -572,7 +571,7 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, c
         dPS_array[y] = sample.getDistance(detector)
 
     #array of distances pixel->source
-    dMP_array = dPS_array + dSM
+    _dMP_array = dPS_array + dSM
     #distance sample->center of detector
     dSD = dPS_array[maxY / 2]
 
@@ -595,7 +594,6 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, c
             tof2 = tof[t+1]
             tofm = (tof1+tof2)/2.
             _Q = _const * math.sin(_theta) / (tofm*1e-6)
-#            _Q = _const * math.sin(_theta) / (tof1 * 1e-6)
             q_array[y, t] = _Q * 1e-10
 
     return q_array
