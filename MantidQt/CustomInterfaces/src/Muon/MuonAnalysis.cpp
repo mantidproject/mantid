@@ -3100,7 +3100,6 @@ Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename) const
 ITableWorkspace_sptr MuonAnalysis::getDeadTimeCorrection(
     boost::shared_ptr<LoadResult> loadResult) const {
   // Dead time table which will be used
-  ITableWorkspace_sptr deadTimesTable;
   Workspace_sptr deadTimes;
 
   if (m_uiForm.deadTimeType->currentText() != "None") {
@@ -3150,6 +3149,9 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
   loadAlg->setProperty("Mode", "Combined");
 
   // -- Dead Time Correction --------------------------------------------------
+  // If ApplyDeadTimeCorrection is set, the algorithm must have DeadTimeTable
+  // set too. If it can't be set here (from disk file), the sequential fit
+  // must load the dead times from each file.
 
   if (m_uiForm.deadTimeType->currentIndex() != 0)
   {
