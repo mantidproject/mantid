@@ -47,7 +47,7 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
   IFunction::Attribute attr;
 
   if (PyBool_Check(rawptr) == 1)
-	  attr = IFunction::Attribute(extract<bool>(rawptr)());
+    attr = IFunction::Attribute(extract<bool>(rawptr)());
   else if (PyInt_Check(rawptr) == 1)
     attr = IFunction::Attribute(extract<int>(rawptr)());
   else if (PyFloat_Check(rawptr) == 1)
