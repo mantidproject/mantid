@@ -246,7 +246,8 @@ ConfigServiceImpl::ConfigServiceImpl()
   g_log.information() << "This is Mantid version " << MantidVersion::version()
                       << " revision " << MantidVersion::revision() << std::endl;
   g_log.information() << "running on " << getComputerName() << " starting "
-                      << DateAndTime::getCurrentTime().toFormattedString("%Y-%m-%dT%H:%MZ") << "\n";
+                      << DateAndTime::getCurrentTime().toFormattedString(
+                             "%Y-%m-%dT%H:%MZ") << "\n";
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
                       << std::endl;
 #ifndef MPI_BUILD // There is no logging to file by default in MPI build
