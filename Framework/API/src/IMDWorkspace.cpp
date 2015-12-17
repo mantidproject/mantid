@@ -89,9 +89,12 @@ const std::string IMDWorkspace::toString() const {
     os << "Binned from '" << getOriginalWorkspace()->getName();
   }
   os << "\n";
-  std::string convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  if (convention == "Crystallography") os << "Crystallography: ki-kf";
-  else os << "Inelastic: kf-ki";
+  std::string convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+  if (convention == "Crystallography")
+    os << "Crystallography: ki-kf";
+  else
+    os << "Inelastic: kf-ki";
   os << "\n";
 
   return os.str();

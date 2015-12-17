@@ -196,8 +196,9 @@ void LoadMD::exec() {
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string QConvention =
       Kernel::ConfigService::Instance().getString("Q.convention");
-  std::cout << QConvention << "  "<<m_QConvention<<"\n";
-  if (QConvention != m_QConvention) std::cout << "Conversion needed\n";
+  std::cout << QConvention << "  " << m_QConvention << "\n";
+  if (QConvention != m_QConvention)
+    std::cout << "Conversion needed\n";
 
   // Display normalization settting
   if (levelEntries.find(VISUAL_NORMALIZATION_KEY) != levelEntries.end()) {
