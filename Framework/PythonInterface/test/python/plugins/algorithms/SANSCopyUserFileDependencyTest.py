@@ -5,7 +5,7 @@ from SANSCopyUserFileDependency import UserFileDependencyExtractor
 import shutil
 
 class SANSCopyUserFileDependency(unittest.TestCase):
-    def _save_set_of_files(self, name):
+    def _save_set_of_files(self, name, save_only_some_dependencies = False):
         text_in_file = ("TUBECALIBFILE=A.nxs\n"
                         "MON/DIRECT=B.txt\n"
                         "! use for front, this command has to come second!\n"
@@ -15,14 +15,19 @@ class SANSCopyUserFileDependency(unittest.TestCase):
                         "!TRANS/TRANSPEC=3\n"
                         "MON/SPECTRUM=2\n")
 
-        expected_hits = ["A.nxs",
-                         "B.txt",
-                         "C.xml",
-                         "D.xml"]
         user_file = self._create_file_path(name)
-
         with open(user_file, 'w') as f:
             f.write(text_in_file)
+
+        if save_only_some_dependencies:
+            expected_hits = ["A.nxs",
+                             "B.txt",
+                             "D.xml"]
+        else:
+            expected_hits = ["A.nxs",
+                             "B.txt",
+                             "C.xml",
+                             "D.xml"]
 
         dependencies = []
         # Also save the dependencies
@@ -32,7 +37,6 @@ class SANSCopyUserFileDependency(unittest.TestCase):
         for dependency in dependencies:
             with open(dependency, 'w') as f:
                 f.write("test")
-
         to_remove = dependencies
         to_remove.append(user_file)
         return set(expected_hits), to_remove
@@ -85,6 +89,91 @@ class SANSCopyUserFileDependency(unittest.TestCase):
         # Clean up
         self._remove_files(to_remove)
         self._remove_target_directory(target_directory)
+
+    def test_that_raises_when_user_file_cannot_be_found(self):
+        #Arrange
+        user_file_name = "does_not_exist.txt"
+        target_directory = "copy_user_file_sans_unit_test"
+
+        #Act
+        copier = AlgorithmManager.createUnmanaged("SANSCopyUserFileDependency")
+        copier.initialize()
+        copier.setChild(True)
+        copier.setProperty("Filename", user_file_name)
+        copier.setProperty("OutputDirectory", target_directory)
+
+        raises_exception = False
+        error_message = ""
+        try:
+            copier.execute()
+        except RuntimeError as e:
+            raises_exception = True
+            error_message = str(e)
+
+        # Assert
+        self.assertTrue(raises_exception)
+        self.assertTrue("finding the specfied user file" in error_message)
+
+    def test_that_raises_when_a_dependency_cannot_be_found(self):
+        #Arrange
+        user_file_name = "user_file_test_for_copy.txt"
+        save_only_some_dependencies = True
+        expected, to_remove = self._save_set_of_files(user_file_name, save_only_some_dependencies)
+        target_directory = self._create_target_directory("copy_user_file_sans_unit_test")
+        missing_depedency = "C.xml"
+
+        #Act
+        copier = AlgorithmManager.createUnmanaged("SANSCopyUserFileDependency")
+        copier.initialize()
+        copier.setChild(True)
+        copier.setProperty("Filename", user_file_name)
+        copier.setProperty("OutputDirectory", target_directory)
+
+        raises_exception = False
+        error_message = ""
+        try:
+            copier.execute()
+        except RuntimeError as e:
+            raises_exception = True
+            error_message = str(e)
+
+        # Assert
+        self.assertTrue(raises_exception)
+        self.assertTrue(missing_depedency in error_message)
+
+        # Cleanup
+        self._remove_files(to_remove)
+        self._remove_target_directory(target_directory)
+
+    def test_that_raises_when_output_directory_does_not_exist(self):
+        #Arrange
+        user_file_name = "user_file_test_for_copy.txt"
+        expected, to_remove = self._save_set_of_files(user_file_name)
+        target_directory = "copy_user_file_sans_unit_test"
+
+        #Act
+        copier = AlgorithmManager.createUnmanaged("SANSCopyUserFileDependency")
+        copier.initialize()
+        copier.setChild(True)
+        copier.setProperty("Filename", user_file_name)
+        copier.setProperty("OutputDirectory", target_directory)
+
+        raises_exception = False
+        error_message = ""
+        try:
+            copier.execute()
+        except RuntimeError as e:
+            raises_exception = True
+            error_message = str(e)
+
+        # Assert
+        self.assertTrue(raises_exception)
+        self.assertTrue("output directory" in error_message)
+
+        # Cleanup
+        self._remove_files(to_remove)
+
+
 
 class UserFileDependencyExtractorTest(unittest.TestCase):
     def _save_user_file(self, file_path):

@@ -33,12 +33,9 @@ class SANSCopyUserFileDependency(PythonAlgorithm):
 
         # Get the full user file path
         full_user_file_path = self._get_full_user_file_path(user_file)
-        if full_user_file_path is None:
-            pass
 
         # Make sure that output directory can be found
-        if not self._does_directory_exist(output_dir):
-            pass
+        self._check_if_directory_exists(output_dir)
 
         # Read all dependencies
         dependency_extractor = UserFileDependencyExtractor()
@@ -68,13 +65,18 @@ class SANSCopyUserFileDependency(PythonAlgorithm):
         if len(dependencies_full) != len(targets):
             pass # TODO handle correctly
 
-        soure_target = zip(dependencies_full, targets)
-
-        for src, trg in soure_target:
+        source_target = zip(dependencies_full, targets)
+        index = 0
+        for src, trg in source_target:
             try:
                 shutil.copyfile(src, trg)
+                index += 1
             except IOError:
-                pass # TODO handle correctlry here
+                self._remove_copied_files(source_target[0:index])
+                error_msg = ("SANSCopyUserFileDependency: There was an issue copying"
+                             " the file " + src + " to " + trg + ". Attempted to remove all"
+                             "copied files. Please make sure that you have write permissions.")
+                raise RuntimeError(error_msg)
 
     def _find_all_dependencies(self, dependencies):
         '''
@@ -87,30 +89,60 @@ class SANSCopyUserFileDependency(PythonAlgorithm):
             try:
                 full_dependencies.append(self._get_file_path(dependency))
             except:
-                #TODO Track error
-                pass
+                error_msg = ("SANSCopyUserFileDependency: The dependency " + str(dependency) +
+                             " could not be found. Make sure it is in the Mantid path.")
+                raise RuntimeError(error_msg)
         return full_dependencies
 
     def _get_full_user_file_path(self, user_file):
+        '''
+        @param user_file: the name or full path to the user file
+        @returns the full file name
+        @raises RuntimeError: if the file cannot be found.
+        '''
         user_file_path = None
         try:
             user_file_path = self._get_file_path(user_file)
         except:
-            user_file_path = None
+            error_msg = ("SANSCopyUserFileDependency: There was an issue "
+                         "finding the specfied user file. Make sure the "
+                         "user file can be found")
+            raise RuntimeError(error_msg)
         return user_file_path
 
-    def _does_directory_exist(self, directory):
-        return os.path.isdir(directory)
+    def _check_if_directory_exists(self, directory):
+        '''
+        Checks if the directory exists
+        @param directory: the output directory
+        @raises RuntimeError: if the output directory does not exist
+        '''
+        if not os.path.isdir(directory):
+            error_msg = ("SANSCopyUserFileDependency: Could not find the "
+                         "output directory.")
+            raise RuntimeError(error_msg)
 
     def _get_file_path(self, incomplete_path):
         this_path = FileFinder.getFullPath(incomplete_path)
         if not this_path:
-            # do not catch exception, let it goes.
+            # do not catch exception at this point
             this_path = FileFinder.findRuns(incomplete_path)
             # if list, get first value
             if hasattr(this_path, '__iter__'):
                 this_path = this_path[0]
         return this_path
+
+    def _remove_copied_files(self, copied_files):
+        '''
+        We attempt to remove all copied files. This clean up
+        opeation could occur in a except block, hence we don't want any
+        exception to pass out of this method.
+        @param copied_files: a zip of copied files and targets
+        '''
+        try:
+            for copied_file in copied_files:
+                os.remove(copied_file)
+        except:
+            pass
 
 
 class UserFileDependencyExtractor(object):
