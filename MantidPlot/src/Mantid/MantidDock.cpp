@@ -246,6 +246,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_plotSurface = new QAction(tr("Plot Surface from Group"), this);
   connect(m_plotSurface, SIGNAL(triggered()), this, SLOT(plotSurface()));
+
+  m_plotContour = new QAction(tr("Plot Contour from Group"), this);
+  connect(m_plotContour, SIGNAL(triggered()), this, SLOT(plotContour()));
 }
 
 /**
@@ -646,6 +649,8 @@ void MantidDockWidget::addWorkspaceGroupMenuItems(
   if (groupWS && groupWS->getNumberOfEntries() > 2) {
     menu->addAction(m_plotSurface);
     m_plotSurface->setEnabled(true);
+    menu->addAction(m_plotContour);
+    m_plotContour->setEnabled(true);
   }
   menu->addSeparator();
   menu->addAction(m_saveNexus);
@@ -1545,6 +1550,30 @@ void MantidDockWidget::plotSurface() {
 
         // Sometimes resolution is auto-set too high and plot appears empty
         plot->setResolution(1);
+      }
+    }
+  }
+}
+
+void MantidDockWidget::plotContour() {
+  const QStringList wsNames = m_tree->getSelectedWorkspaceNames();
+  if (!wsNames.empty()) {
+    const auto wsName = wsNames[0];
+    const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(
+        m_ads.retrieve(wsName.toStdString()));
+    if (wsGroup) {
+      auto options = m_tree->chooseSurfacePlotOptions();
+      // If user clicked OK and not Cancel...
+      if (options.accepted) {
+
+        // Set up one new matrix workspace to hold all the data for plotting
+        const QString plotWSTitle("__matrixToPlotContour");
+        const QString xLabelQ = createWorkspaceForSurfacePlot(
+            plotWSTitle, wsGroup, options.plotIndex, options.logName);
+
+        // Plot the output workspace in 3D
+        auto plot =
+            m_mantidUI->drawSingleColorFillPlot(plotWSTitle, Graph::Contour);
       }
     }
   }

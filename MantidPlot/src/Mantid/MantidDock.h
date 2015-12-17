@@ -91,6 +91,7 @@ private slots:
   void clearUB();
   void filterWorkspaceTree(const QString &text);
   void plotSurface();
+  void plotContour();
 
 private:
   void addSaveMenuOption(QString algorithmString, QString menuEntryName = "");
@@ -142,7 +143,7 @@ private:
   QActionGroup *m_sortChoiceGroup;
   QFileDialog *m_saveFolderDialog;
 
-  //Context-menu actions
+  // Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr,
       *m_showDetectors, *m_showBoxData, *m_showVatesGui, *m_showSpectrumViewer,
       *m_showSliceViewer, *m_colorFill, *m_showLogs, *m_showSampleMaterial,
@@ -150,7 +151,7 @@ private:
       *m_delete, *m_program, *m_ascendingSortAction, *m_descendingSortAction,
       *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
       *m_convertToMatrixWorkspace, *m_convertMDHistoToMatrixWorkspace,
-      *m_clearUB, *m_plotSurface;
+      *m_clearUB, *m_plotSurface, *m_plotContour;
 
   ApplicationWindow *m_appParent;
 
