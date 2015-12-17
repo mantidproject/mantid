@@ -22,6 +22,7 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidKernel/ConfigService.h"
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vector>
@@ -188,6 +189,15 @@ void LoadMD::exec() {
 
   // Coordinate system
   this->loadCoordinateSystem();
+
+  // QConvention (Inelastic or Crystallography)
+  this->loadQConvention();
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string QConvention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+  std::cout << QConvention << "  "<<m_QConvention<<"\n";
+  if (QConvention != m_QConvention) std::cout << "Conversion needed\n";
 
   // Display normalization settting
   if (levelEntries.find(VISUAL_NORMALIZATION_KEY) != levelEntries.end()) {
@@ -416,6 +426,28 @@ void LoadMD::loadCoordinateSystem() {
       int readCoord(0);
       m_file->readData("value", readCoord);
       m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
+    } catch (::NeXus::Exception &) {
+    }
+    // return to where we started
+    m_file->openPath(pathOnEntry);
+  }
+}
+
+/** Load the coordinate system **/
+void LoadMD::loadQConvention() {
+  // Current version stores the coordinate system
+  // in its own field. The first version stored it
+  // as a log value so fallback on that if it can't
+  // be found.
+  try {
+    m_QConvention = "Inelastic";
+    m_file->readData("QConvention", m_QConvention);
+  } catch (::NeXus::Exception &) {
+    auto pathOnEntry = m_file->getPath();
+    try {
+      m_file->openPath(pathOnEntry + "/experiment0/logs/CoordinateSystem");
+      m_QConvention = "Inelastic";
+      m_file->readData("value", m_QConvention);
     } catch (::NeXus::Exception &) {
     }
     // return to where we started

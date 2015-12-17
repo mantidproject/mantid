@@ -379,11 +379,6 @@ TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
 TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
   std::vector<std::string> out;
   std::ostringstream mess;
-  std::string convention = ConfigService::Instance().getString("Q.convention");
-  if (convention == "Crystallography") mess << "Crystallography: ki-kf";
-  else mess << "Inelastic: kf-ki";
-  out.push_back(mess.str());
-  mess.str("");
  
   size_t mem;
   mem = (this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE, nd>)) /

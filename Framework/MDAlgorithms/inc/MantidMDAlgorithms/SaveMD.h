@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid {
 

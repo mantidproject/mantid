@@ -241,6 +241,12 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   file->writeData("coordinate_system",
                   static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
 
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string m_QConvention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+  file->writeData("QConvention", m_QConvention);
+
   // Write out the set display normalization
   file->writeData("visual_normalization",
                   static_cast<uint32_t>(ws->displayNormalization()));
