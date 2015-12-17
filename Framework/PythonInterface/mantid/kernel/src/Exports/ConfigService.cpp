@@ -60,7 +60,7 @@ void export_ConfigService() {
            "Returns the path to the user properties file")
 
       .def("getUserPropertiesDir", &ConfigServiceImpl::getUserPropertiesDir,
-	   arg("self"),
+           arg("self"),
            "Returns the directory to use to write out Mantid information")
 
       .def("getInstrumentDirectory", &ConfigServiceImpl::getInstrumentDirectory,
