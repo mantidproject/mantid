@@ -330,6 +330,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
  * @param in :: input stream
  * @param seqNum [out] :: the sequence number of the peak
  * @param bankName :: the bank number from the ISAW file.
+ * @param qSign :: For inelastic this is 1; for crystallography this is -1
  * @return the Peak the Peak object created
  */
 DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
