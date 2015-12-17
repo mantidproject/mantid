@@ -21,11 +21,11 @@ class SANSCopyUserFileDependency(PythonAlgorithm):
         """
             Declare properties
         """
-        self.declareProperty("Filename", "", direction = Direction.Input,
-                             doc="Name of the user file.")
-        self.declareProperty("OutputDirectory", "", direction = Direction.Input,
+        self.declareProperty(FileProperty(name = "Filename", defaultValue = "",
+                                          action = FileAction.Load, extensions = ["*.txt"]))
+        self.declareProperty(FileProperty(name = "OutputDirectory", defaultValue = "",
+                                          action = FileAction.Directory),
                              doc="The path to the output directory.")
-        return
 
     def PyExec(self):
         user_file = self.getProperty("Filename").value
@@ -45,12 +45,31 @@ class SANSCopyUserFileDependency(PythonAlgorithm):
         dependencies_full = self._find_all_dependencies(dependencies)
 
         # Get target names
-        targets_full = self._get_targets(dependencies, output_dir)
+        targets_full = self._get_dependency_targets(dependencies, output_dir)
 
         # Copy each file into the new directory
         self._copy_all_dependencies_to_new_directory(dependencies_full, targets_full)
 
-    def _get_targets(self, dependencies, output_dir):
+        # Finally copy the user file itself into the target directory
+        self._copy_user_file_to_target_directory(full_user_file_path , output_dir, targets_full)
+
+    def _copy_user_file_to_target_directory(self, src, target_directory, dependencies):
+        trg = self._get_user_file_target(src, target_directory)
+        try:
+            shutil.copyfile(src, trg)
+        except IOError:
+                self._remove_copied_files(dependencies)
+                error_msg = ("SANSCopyUserFileDependency: There was an issue copying"
+                             " the file " + src + " to " + trg + ". Attempted to remove all"
+                             "copied files. Please make sure that you have write permissions.")
+                raise RuntimeError(error_msg)
+
+    def _get_user_file_target(self, user_file_full_path, target_directory):
+        basename = os.path.basename(user_file_full_path)
+        target = os.path.join(target_directory, basename)
+        return target
+
+    def _get_dependency_targets(self, dependencies, output_dir):
         targets = []
         for dependency in dependencies:
             targets.append(os.path.join(output_dir, dependency))
@@ -63,7 +82,9 @@ class SANSCopyUserFileDependency(PythonAlgorithm):
         @param targets: a list of targets
         '''
         if len(dependencies_full) != len(targets):
-            pass # TODO handle correctly
+            error_msg = ("SANSCopyUserFileDependency: There was a mismatch between the number "
+                         " of source and target dependencies.")
+            raise RuntimeError(error_msg)
 
         source_target = zip(dependencies_full, targets)
         index = 0
@@ -72,7 +93,9 @@ class SANSCopyUserFileDependency(PythonAlgorithm):
                 shutil.copyfile(src, trg)
                 index += 1
             except IOError:
-                self._remove_copied_files(source_target[0:index])
+                dummy_source, remove_targets = zip(*source_target[0:index])
+                remove_targets = list(remove_targets)
+                self._remove_copied_files(remove_targets)
                 error_msg = ("SANSCopyUserFileDependency: There was an issue copying"
                              " the file " + src + " to " + trg + ". Attempted to remove all"
                              "copied files. Please make sure that you have write permissions.")
