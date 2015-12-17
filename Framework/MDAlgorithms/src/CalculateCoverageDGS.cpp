@@ -459,7 +459,7 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
 
   qout = m_rubw * qout;
   qin = m_rubw * qin;
-  if (convention != "Crystallography") {
+  if (convention == "Crystallography") {
     qout *= -1;
     qin *= -1;
   }
