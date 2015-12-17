@@ -181,6 +181,7 @@ void MDWSDescription::setUpMissingParameters(
   m_InWS = SourceMatrWS.m_InWS;
   m_Emode = SourceMatrWS.m_Emode;
   m_LorentzCorr = SourceMatrWS.m_LorentzCorr;
+  m_AbsMin = SourceMatrWS.m_AbsMin;
   this->AlgID = SourceMatrWS.AlgID;
 
   m_AddCoord.assign(SourceMatrWS.m_AddCoord.begin(),
@@ -242,7 +243,7 @@ void MDWSDescription::checkWSCorresponsMDWorkspace(
 MDWSDescription::MDWSDescription(unsigned int nDimensions)
     : m_Wtransf(3, 3, true), m_RotMatrix(9, 0), m_buildingNewWorkspace(true),
       m_Emode(Kernel::DeltaEMode::Undefined), m_LorentzCorr(false),
-      m_coordinateSystem(Mantid::Kernel::None) {
+      m_AbsMin(0.), m_coordinateSystem(Mantid::Kernel::None) {
 
   this->resizeDimDescriptions(nDimensions);
   m_DimMin.assign(m_NDims, std::numeric_limits<double>::quiet_NaN());
