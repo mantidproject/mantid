@@ -92,6 +92,10 @@ void EnggDiffractionPresenter::notify(
     processCalcCalib();
     break;
 
+  case IEnggDiffractionPresenter::CropCalib:
+	  ProcessCropCalib();
+	  break;
+
   case IEnggDiffractionPresenter::FocusRun:
     processFocusBasic();
     break;
@@ -183,6 +187,33 @@ void EnggDiffractionPresenter::processCalcCalib() {
   // calibrationFinished()
   startAsyncCalibWorker(outFilename, vanNo, ceriaNo);
 }
+
+void EnggDiffractionPresenter::ProcessCropCalib() {
+	const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
+	const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
+	try {
+		inputChecksBeforeCalibrate(vanNo, ceriaNo);
+	}
+	catch (std::invalid_argument &ia) {
+		m_view->userWarning("Error in the inputs required for calibrate",
+			ia.what());
+		return;
+	}
+	g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
+		"take a few seconds... "
+		<< std::endl;
+
+	const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
+
+	const std::string specID = m_view->focusingCroppedSpectrumIDs();
+
+	m_view->enableCalibrateAndFocusActions(false);
+	// alternatively, this would be GUI-blocking:
+	// doNewCalibration(outFilename, vanNo, ceriaNo);
+	// calibrationFinished()
+	startAsyncCalibWorker(outFilename, vanNo, ceriaNo);
+}
+
 
 void EnggDiffractionPresenter::processFocusBasic() {
   const std::vector<std::string> multi_RunNo =

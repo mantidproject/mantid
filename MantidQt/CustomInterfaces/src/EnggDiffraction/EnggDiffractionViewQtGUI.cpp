@@ -124,6 +124,9 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   connect(m_uiTabCalib.pushButton_new_calib, SIGNAL(released()), this,
           SLOT(calibrateClicked()));
 
+  connect(m_uiTabCalib.pushButton_new_cropped_calib, SIGNAL(released()), this,
+          SLOT(CroppedCalibrateClicked()));
+
   enableCalibrateAndFocusActions(true);
 }
 
@@ -242,13 +245,13 @@ void EnggDiffractionViewQtGUI::readSettings() {
       qs.value("user-params-new-ceria-num", "").toString());
 
   m_uiTabCalib.groupBox_calib_cropped->setChecked(
-	  qs.value("user-params-calib-cropped-group-checkbox", false).toBool());
+      qs.value("user-params-calib-cropped-group-checkbox", false).toBool());
 
   m_uiTabCalib.lineEdit_cropped_run_num->setText(
-	  qs.value("user-params-current-vanadium-num", "").toString());
+      qs.value("user-params-current-vanadium-num", "").toString());
 
   m_uiTabCalib.lineEdit_calib_cropped_spec_ids->setText(
-	  qs.value("user-params-calib-cropped-spectrum-nos", "").toString());
+      qs.value("user-params-calib-cropped-spectrum-nos", "").toString());
 
   // user params - focusing
   m_uiTabFocus.lineEdit_run_num->setUserInput(
@@ -353,7 +356,7 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabCalib.lineEdit_new_ceria_num->getText());
 
   qs.setValue("user-params-calib-cropped-group-checkbox",
-	  m_uiTabCalib.groupBox_calib_cropped->isChecked());
+              m_uiTabCalib.groupBox_calib_cropped->isChecked());
 
   // user params - focusing
   qs.setValue("user-params-focus-runno",
@@ -498,7 +501,7 @@ std::string EnggDiffractionViewQtGUI::currentCalibFile() const {
 }
 
 std::string EnggDiffractionViewQtGUI::currentCalibCroppedSpecID() const {
-	return m_uiTabCalib.lineEdit_calib_cropped_spec_ids->text().toStdString();
+  return m_uiTabCalib.lineEdit_calib_cropped_spec_ids->text().toStdString();
 }
 
 void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
@@ -681,6 +684,10 @@ void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
 
 void EnggDiffractionViewQtGUI::calibrateClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::CalcCalib);
+}
+
+void EnggDiffractionViewQtGUI::CroppedCalibrateClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::CropCalib);
 }
 
 void EnggDiffractionViewQtGUI::focusClicked() {

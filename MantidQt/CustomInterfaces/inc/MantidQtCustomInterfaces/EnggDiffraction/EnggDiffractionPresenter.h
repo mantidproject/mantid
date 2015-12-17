@@ -95,6 +95,7 @@ protected:
   void processStart();
   void processLoadExistingCalib();
   void processCalcCalib();
+  void ProcessCropCalib();
   void processFocusBasic();
   void processFocusCropped();
   void processFocusTexture();

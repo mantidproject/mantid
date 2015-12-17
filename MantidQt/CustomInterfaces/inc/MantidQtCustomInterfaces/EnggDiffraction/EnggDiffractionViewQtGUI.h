@@ -148,6 +148,7 @@ private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
   void loadCalibrationClicked();
   void calibrateClicked();
+  void CroppedCalibrateClicked();
   void focusClicked();
   void focusCroppedClicked();
   void focusTextureClicked();
