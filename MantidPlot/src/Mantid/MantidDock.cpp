@@ -1532,6 +1532,18 @@ void MantidDockWidget::plotSurface() {
         const QString xLabelQ = createWorkspaceForGroupPlot(
             plotWSTitle, wsGroup, options.plotIndex, options.logName);
 
+        // Convert to point data if not already
+        if (auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+                m_mantidUI->getWorkspace(plotWSTitle))) {
+          if (matrixWS->isHistogramData()) {
+            auto alg = m_mantidUI->createAlgorithm("ConvertToPointData");
+            alg->initialize();
+            alg->setPropertyValue("InputWorkspace", plotWSTitle.toStdString());
+            alg->setProperty("OutputWorkspace", plotWSTitle.toStdString());
+            alg->execute();
+          }
+        }
+
         // Plot the output workspace in 3D
         auto matrixToPlot = m_mantidUI->importMatrixWorkspace(plotWSTitle, -1,
                                                               -1, false, false);
