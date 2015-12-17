@@ -78,10 +78,6 @@ class SANSStitch(DataProcessorAlgorithm):
         self.declareProperty('ShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
                              doc='Optional shift factor')
 
-        self.declareProperty('QMin', defaultValue=Property.EMPTY_DBL, direction=Direction.Input, doc='Optional q-min')
-
-        self.declareProperty('QMax', defaultValue=Property.EMPTY_DBL, direction=Direction.Input, doc='Optional q-max')
-
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Stitched high and low Q 1-D data')
 
@@ -493,17 +489,7 @@ class SANSStitch(DataProcessorAlgorithm):
         return targetUnit.caption() == ws.getAxis(0).getUnit().caption()
 
     def validateInputs(self):
-        q_min_property_name = 'QMin'
-        q_max_property_name = 'QMax'
-        q_min_property = self.getProperty(q_min_property_name)
-        q_max_property = self.getProperty(q_max_property_name)
-        q_min = q_min_property.value
-        q_max = q_max_property.value
-
         errors = dict()
-        if not q_min_property.isDefault and not q_max_property.isDefault and q_min >= q_max:
-            errors[q_min_property_name] = 'QMin must be < QMax'
-            errors[q_max_property_name] = 'QMin must be < QMax'
 
 
         # Mode compatibility checks

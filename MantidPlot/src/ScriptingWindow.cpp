@@ -93,6 +93,7 @@ void ScriptingWindow::saveSettings() {
   settings.setValue("/TabWhitespaceCount", m_manager->m_tabWhitespaceCount);
   settings.setValue("/ScriptFontFamily", m_manager->m_fontFamily);
   settings.setValue("/CodeFolding", m_toggleFolding->isChecked());
+  settings.setValue("/LineWrapping", m_toggleWrapping->isChecked());
   settings.setValue("/PreviousFiles", m_manager->fileNamesToQStringList());
   settings.endGroup();
 }
@@ -116,6 +117,7 @@ void ScriptingWindow::readSettings() {
   m_manager->setRecentScripts(settings.value("/RecentScripts").toStringList());
   m_manager->m_globalZoomLevel = settings.value("ZoomLevel", 0).toInt();
   m_toggleFolding->setChecked(settings.value("CodeFolding", false).toBool());
+  m_toggleWrapping->setChecked(settings.value("LineWrapping", false).toBool());
   m_toggleWhitespace->setChecked(
       settings.value("ShowWhitespace", false).toBool());
 
@@ -275,6 +277,7 @@ void ScriptingWindow::populateWindowMenu() {
     m_windowMenu->insertSeparator();
     m_windowMenu->addAction(m_toggleProgress);
     m_windowMenu->addAction(m_toggleFolding);
+    m_windowMenu->addAction(m_toggleWrapping);
     m_windowMenu->addAction(m_toggleWhitespace);
 
     m_windowMenu->insertSeparator();
@@ -725,6 +728,11 @@ void ScriptingWindow::initWindowMenuActions() {
   m_toggleFolding->setCheckable(true);
   connect(m_toggleFolding, SIGNAL(toggled(bool)), m_manager,
           SLOT(toggleCodeFolding(bool)));
+
+  m_toggleWrapping = new QAction(tr("Line &Wrapping"), this);
+  m_toggleWrapping->setCheckable(true);
+  connect(m_toggleWrapping, SIGNAL(toggled(bool)), m_manager,
+          SLOT(toggleLineWrapping(bool)));
 
   // Toggle the whitespace arrow
   m_toggleWhitespace = new QAction(tr("&Show Whitespace"), this);
