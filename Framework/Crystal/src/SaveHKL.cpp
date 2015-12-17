@@ -132,7 +132,8 @@ void SaveHKL::exec() {
   // Default for kf-ki has -q
   double qSign = -1.0;
   std::string convention = ConfigService::Instance().getString("Q.convention");
-  if (convention == "Crystallography") qSign = 1.0;
+  if (convention == "Crystallography")
+    qSign = 1.0;
 
   std::fstream out;
   bool append = getProperty("AppendFile");
@@ -320,8 +321,9 @@ void SaveHKL::exec() {
       continue;
     }
     if (decimalHKL == EMPTY_INT())
-      out << std::setw(4) << Utils::round(qSign *p.getH()) << std::setw(4)
-          << Utils::round(qSign *p.getK()) << std::setw(4) << Utils::round(qSign *p.getL());
+      out << std::setw(4) << Utils::round(qSign * p.getH()) << std::setw(4)
+          << Utils::round(qSign * p.getK()) << std::setw(4)
+          << Utils::round(qSign * p.getL());
     else
       out << std::setw(5 + decimalHKL) << std::fixed
           << std::setprecision(decimalHKL) << -p.getH()

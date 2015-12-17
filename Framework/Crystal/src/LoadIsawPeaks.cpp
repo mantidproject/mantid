@@ -509,7 +509,8 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
   // unless Crystallography convention
   double qSign = -1.0;
   std::string convention = ConfigService::Instance().getString("Q.convention");
-  if (convention == "Crystallography") qSign = 1.0;
+  if (convention == "Crystallography")
+    qSign = 1.0;
   // Open the file
   std::ifstream in(filename.c_str());
 

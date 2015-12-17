@@ -115,7 +115,8 @@ void SaveLauenorm::exec() {
   // Default for kf-ki has -q
   double qSign = -1.0;
   std::string convention = ConfigService::Instance().getString("Q.convention");
-  if (convention == "Crystallography") qSign = 1.0;
+  if (convention == "Crystallography")
+    qSign = 1.0;
 
   // Go through each peak at this run / bank
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
@@ -179,7 +180,8 @@ void SaveLauenorm::exec() {
     if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0)
       continue;
     out << std::setw(5) << Utils::round(qSign * p.getH()) << std::setw(5)
-        << Utils::round(qSign * p.getK()) << std::setw(5) << Utils::round(qSign * p.getL());
+        << Utils::round(qSign * p.getK()) << std::setw(5)
+        << Utils::round(qSign * p.getL());
     out << std::setw(10) << std::fixed << std::setprecision(5) << lambda;
     // Assume that want theta not two-theta
     out << std::setw(10) << std::fixed << std::setprecision(5)

@@ -454,7 +454,8 @@ Mantid::Kernel::V3D Peak::getQLabFrame() const {
   // And Q in the lab frame
   // Default for ki-kf is positive
   double qSign = 1.0;
-  if (convention == "Crystallography") qSign = -1.0;
+  if (convention == "Crystallography")
+    qSign = -1.0;
   return (beamDir * wvi - detDir * wvf) * qSign;
 }
 
@@ -533,7 +534,8 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
   // Default for ki-kf has -q
   double qSign = 1.0;
-  if (convention == "Crystallography") qSign = -1.0;
+  if (convention == "Crystallography")
+    qSign = -1.0;
   const double qBeam = q.scalar_prod(refBeamDir) * qSign;
 
   if (norm_q == 0.0)
@@ -556,7 +558,8 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
 
   // Default for ki-kf has -q
   qSign = -1.0;
-  if (convention == "Crystallography") qSign = 1.0;
+  if (convention == "Crystallography")
+    qSign = 1.0;
 
   V3D detectorDir = q * qSign;
   detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;

@@ -100,7 +100,8 @@ protected:
   // and used to calculate Lorentz corrections
   double m_SinThetaSq;
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  std::string convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
   // all other variables are the same as in ModQ
 private:
   /// how to transform workspace data in elastic case

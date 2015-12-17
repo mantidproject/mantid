@@ -217,8 +217,10 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     //  (normalized to 1)
     V3D Q_dir_lab_frame = beamDir - detDir;
     double qSign = -1.0;
-    std::string convention = ConfigService::Instance().getString("Q.convention");
-    if (convention == "Crystallography") qSign = 1.0;
+    std::string convention =
+        ConfigService::Instance().getString("Q.convention");
+    if (convention == "Crystallography")
+      qSign = 1.0;
     Q_dir_lab_frame *= qSign;
 
     // Multiply by the rotation matrix to convert to Q in the sample frame (take

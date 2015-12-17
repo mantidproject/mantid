@@ -217,7 +217,8 @@ private:
   static Mantid::Kernel::Logger g_log;
 
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  std::string convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
 };
 
 } // namespace Mantid
