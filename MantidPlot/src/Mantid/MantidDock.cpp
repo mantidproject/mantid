@@ -1581,8 +1581,8 @@ void MantidDockWidget::plotContour() {
         convertPointsToHisto(plotWSTitle);
 
         // Plot the output workspace as a contour plot
-        auto plot =
-            m_mantidUI->drawSingleColorFillPlot(plotWSTitle, Graph::Contour);
+        auto plot = m_mantidUI->drawSingleColorFillPlot(plotWSTitle,
+                                                        Graph::ColorMapContour);
 
         // Set X, Y axis titles correctly
         plot->activeGraph()->setXAxisTitle(xLabelQ);
