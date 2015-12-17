@@ -48,8 +48,9 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         van_ws = Load(Filename = 'ENGINX00236516.nxs')
 
         # note: not giving calibrated detector positions
-
+        # Using just 12 break points which is enough for this test. The normal/default value would be 50
         EnggVanadiumCorrections(VanadiumWorkspace = van_ws,
+                                SplineBreakPoints = 12,
                                 OutIntegrationWorkspace = self.van_integ_name,
                                 OutCurvesWorkspace = self.van_bank_curves_name)
 

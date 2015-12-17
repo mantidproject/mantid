@@ -4,9 +4,28 @@
 from mantid.api import *
 import mantid.simpleapi as sapi
 
-ENGINX_BANKS = ['', 'North', 'South', '1', '2']
+ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 
-def readInExpectedPeaks(filename, expectedGiven):
+def default_ceria_expected_peaks():
+    """
+    Get the list of expected Ceria peaks, which can be a good default for the expected peaks
+    properties of algorithms like EnggCalibrate and EnggCalibrateFull
+
+    @Returns :: a list of peaks in d-spacing as a float list
+    """
+    _CERIA_EXPECTED_PEAKS = [3.124277511, 2.705702376, 1.913220892, 1.631600313,
+                             1.562138267, 1.352851554, 1.241461538, 1.210027059,
+                             1.104598643, 1.04142562, 1.04142562, 0.956610446,
+                             0.914694494, 0.901900955, 0.855618487, 0.825231622,
+                             0.815800156, 0.781069134, 0.757748432, 0.750426918,
+                             0.723129589, 0.704504971, 0.676425777, 0.66110842,
+                             0.656229382, 0.637740216, 0.624855346, 0.620730846,
+                             0.605013529
+                            ]
+
+    return _CERIA_EXPECTED_PEAKS
+
+def read_in_expected_peaks(filename, expectedGiven):
     """
     Reads in expected peaks from the .csv file if requested. Otherwise fall back to the list of
     peaks given (and check that it is not empty).
@@ -22,7 +41,7 @@ def readInExpectedPeaks(filename, expectedGiven):
 
     expectedPeaksD = None
 
-    if filename != "":
+    if filename:
         exPeakArray = []
         readInArray = []
         try:
@@ -73,7 +92,7 @@ def getWsIndicesFromInProperties(ws, bank, detIndices):
                          "'DetectorIndices', as they overlap. Please use either of them. Got Bank: '%s', "
                          "and DetectorIndices: '%s'"%(bank, detIndices))
     elif bank:
-        bankAliases = {'North': '1', 'South': '2'}
+        bankAliases = {'North': '1', 'South': '2', 'Both: North, South': '-1'}
         bank = bankAliases.get(bank, bank)
         indices = getWsIndicesForBank(ws, bank)
         if not indices:
@@ -119,7 +138,7 @@ def getWsIndicesForBank(ws, bank):
     Finds the workspace indices of all the pixels/detectors/spectra corresponding to a bank.
 
     ws :: workspace with instrument definition
-    bank :: bank number as it appears in the instrument definition
+    bank :: bank number as it appears in the instrument definition.  A <0 value implies all banks.
 
     @returns :: list of workspace indices for the bank
     """
@@ -139,7 +158,7 @@ def getDetIDsForBank(bank):
     Find the detector IDs for an instrument bank. Note this is at this point specific to
     the ENGINX instrument.
 
-    @param bank :: name/number as a string
+    @param bank :: name/number as a string.
 
     @returns list of detector IDs corresponding to the specified Engg bank number
     """
@@ -165,8 +184,9 @@ def getDetIDsForBank(bank):
 
     detIDs = set()
 
+    bank_int = int(bank)
     for i in range(grouping.getNumberHistograms()):
-        if grouping.readY(i)[0] == int(bank):
+        if bank_int < 0 or grouping.readY(i)[0] == bank_int:
             detIDs.add(grouping.getDetector(i).getID())
 
     sapi.DeleteWorkspace(grouping)
