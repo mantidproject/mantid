@@ -1529,7 +1529,7 @@ void MantidDockWidget::plotSurface() {
 
         // Set up one new matrix workspace to hold all the data for plotting
         const QString plotWSTitle("__matrixToPlot");
-        const QString xLabelQ = createWorkspaceForSurfacePlot(
+        const QString xLabelQ = createWorkspaceForGroupPlot(
             plotWSTitle, wsGroup, options.plotIndex, options.logName);
 
         // Plot the output workspace in 3D
@@ -1555,6 +1555,9 @@ void MantidDockWidget::plotSurface() {
   }
 }
 
+/**
+ * Create a contour plot from the selected workspace group
+ */
 void MantidDockWidget::plotContour() {
   const QStringList wsNames = m_tree->getSelectedWorkspaceNames();
   if (!wsNames.empty()) {
@@ -1568,28 +1571,40 @@ void MantidDockWidget::plotContour() {
 
         // Set up one new matrix workspace to hold all the data for plotting
         const QString plotWSTitle("__matrixToPlotContour");
-        const QString xLabelQ = createWorkspaceForSurfacePlot(
+        const QString xLabelQ = createWorkspaceForGroupPlot(
             plotWSTitle, wsGroup, options.plotIndex, options.logName);
 
-        // Plot the output workspace in 3D
+        // Plot the output workspace as a contour plot
         auto plot =
             m_mantidUI->drawSingleColorFillPlot(plotWSTitle, Graph::Contour);
+
+        // Set X, Y axis titles correctly
+        plot->activeGraph()->setXAxisTitle(xLabelQ);
+        plot->activeGraph()->setYAxisTitle(options.axisName);
+
+        // Default title is "__matrixToPlotContour". Change this:
+        QString title = QString("Contour plot for %1, spectrum %2")
+                            .arg(wsGroup->name().c_str(),
+                                 QString::number(options.plotIndex));
+        plot->activeGraph()->setTitle(title);
+        plot->window()->setWindowTitle(
+            m_appParent->generateUniqueName(tr("Graph")));
       }
     }
   }
 }
 
 /**
- * Create a workspace for the surface plot from the given workspace group, and
- * add it to the ADS. Returns title for the X axis.
- * Called by plotSurface().
+ * Create a workspace for the surface/contour plot from the given workspace
+ * group, and add it to the ADS. Returns title for the X axis.
+ * Called by plotSurface() and plotContour().
  * @param wsName :: [input] Name to give the resulting workspace
  * @param wsGroup :: [input] Pointer to workspace group to use as input
  * @param index :: [input] Which spectrum to plot from each workspace
  * @param logName :: [input] Log to read from for axis of XYZ plot
  * @returns Title for the X axis, read from the workspaces in the group
  */
-const QString MantidDockWidget::createWorkspaceForSurfacePlot(
+const QString MantidDockWidget::createWorkspaceForGroupPlot(
     const QString &wsName, WorkspaceGroup_const_sptr wsGroup, const int index,
     const QString &logName) {
   QString xAxisTitle;
