@@ -20,7 +20,6 @@ class CreateCacheFilename(unittest.TestCase):
         mantid.PropertyManagerDataService.add("pm", pm)
         
         # Execute
-        out_path = "tempout_curve.json"
         alg_test = run_algorithm(
             "CreateCacheFilename",
             PropertyManager = "pm",
@@ -41,7 +40,6 @@ class CreateCacheFilename(unittest.TestCase):
             expected)
 
         # Another test. don't specify the default values
-        out_path = "tempout_curve.json"
         alg_test = run_algorithm(
             "CreateCacheFilename",
             PropertyManager = "pm",
@@ -62,7 +60,6 @@ class CreateCacheFilename(unittest.TestCase):
         """CreateCacheFilename: wrong input
         """
         # Execute
-        out_path = "tempout_curve.json"
         alg_test = run_algorithm(
             "CreateCacheFilename",
             )
@@ -85,7 +82,6 @@ class CreateCacheFilename(unittest.TestCase):
         mantid.PropertyManagerDataService.add("test_glob", pm)
         
         # Execute
-        out_path = "tempout_curve.json"
         alg_test = run_algorithm(
             "CreateCacheFilename",
             PropertyManager = "test_glob",
@@ -98,6 +94,26 @@ class CreateCacheFilename(unittest.TestCase):
         expected = os.path.join(
             ConfigService.getUserPropertiesDir(), "cache",
             "%s.nxs" % hashlib.sha1(s).hexdigest()
+            )
+        self.assertEqual(
+            alg_test.getPropertyValue("OutputFilename"),
+            expected)
+        return
+
+    def test_otherprops_only(self):
+        """CreateCacheFilename: other_props only
+        """
+        # Execute
+        alg_test = run_algorithm(
+            "CreateCacheFilename",
+            OtherProperties = ["a=1", "b=2"],
+            )
+        # executed?
+        self.assertTrue(alg_test.isExecuted())
+        # Verify ....
+        expected = os.path.join(
+            ConfigService.getUserPropertiesDir(), "cache",
+            "%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest()
             )
         self.assertEqual(
             alg_test.getPropertyValue("OutputFilename"),

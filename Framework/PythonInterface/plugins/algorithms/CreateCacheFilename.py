@@ -108,10 +108,11 @@ cache_dir: the directory in which the cach file will be created.
         other_props = self.getProperty("OtherProperties").value
         if not prop_manager and not other_props:
             raise ValueError("Either PropertyManager or OtherProperties should be supplied")
-        prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)
+        prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)\
+                       if prop_manager else None        
         # default to all properties in the manager
         props = self.getProperty("Properties").value
-        if not props:
+        if not props and prop_manager:
             props = prop_manager.keys()
         # output settings
         prefix = self.getPropertyValue("Prefix")
@@ -129,12 +130,15 @@ cache_dir: the directory in which the cach file will be created.
 
     def _calculate(self, prop_manager, props, other_props, prefix, cache_dir):
         # get matched properties
-        props = matched(prop_manager.keys(), props)
-        # create the list of key=value strings
-        kvpairs = [ 
-            '%s=%s' % (prop, prop_manager.getPropertyValue(prop))
-            for prop in props
+        if prop_manager:
+            props = matched(prop_manager.keys(), props)
+            # create the list of key=value strings
+            kvpairs = [ 
+                '%s=%s' % (prop, prop_manager.getPropertyValue(prop))
+                for prop in props
             ]
+        else:
+            kvpairs = []
         kvpairs += other_props
         # sort
         kvpairs.sort()
