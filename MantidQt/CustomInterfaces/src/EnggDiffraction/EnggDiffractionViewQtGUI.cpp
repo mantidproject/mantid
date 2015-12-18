@@ -24,10 +24,10 @@ namespace CustomInterfaces {
 
 // Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
-
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 int EnggDiffractionViewQtGUI::m_currentType = 0;
 int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
+int EnggDiffractionViewQtGUI::m_currentCropCalibSpecId = 0;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "

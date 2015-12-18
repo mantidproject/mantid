@@ -25,8 +25,9 @@ private:
   // not async at all
   void startAsyncCalibWorker(const std::string &outFilename,
                              const std::string &vanNo,
-                             const std::string &ceriaNo) {
-    doNewCalibration(outFilename, vanNo, ceriaNo);
+                             const std::string &ceriaNo,
+                             const std::string &specNos) {
+    doNewCalibration(outFilename, vanNo, ceriaNo, "");
     calibrationFinished();
   }
 

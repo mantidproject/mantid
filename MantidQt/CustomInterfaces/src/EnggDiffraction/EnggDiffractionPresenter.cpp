@@ -218,7 +218,7 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
     specId = "South";
 
   } else if (specIdNum == PlotMode::BOTH) {
-    specId = "Both : North, South";
+    specId = "Both: North, South";
   }
 
   m_view->enableCalibrateAndFocusActions(false);
@@ -746,6 +746,7 @@ void EnggDiffractionPresenter::startAsyncCalibWorker(
   m_workerThread->start();
 }
 
+
 /**
 * Calculate a new calibration. This is what threads/workers should
 * use to run the calculations in response to the user clicking
@@ -895,10 +896,18 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   }
 
   // Bank 1 and 2 - ENGIN-X
-  const size_t numBanks = 2;
+  const size_t numBanks1 = 1;
+  const size_t numBanks2 = 2;
   std::vector<double> difc, tzero;
-  difc.resize(numBanks);
-  tzero.resize(numBanks);
+
+  if (specNos != "") {
+    difc.resize(numBanks1);
+    tzero.resize(numBanks1);
+  } else {
+    difc.resize(numBanks2);
+    tzero.resize(numBanks2);
+  }
+
   for (size_t i = 0; i < difc.size(); i++) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "EnggCalibrate");
@@ -907,10 +916,10 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       alg->setProperty("InputWorkspace", ceriaWS);
       alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
       alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-	  if(specNos == "")
-		  alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
-	  else
+	  if(specNos != "")
 		  alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(specNos));
+	  else
+		  alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
       // TODO: figure out what should be done about the list of expected peaks
       // to EnggCalibrate => it should be a default, as in EnggFitPeaks, that
       // should be fixed in a nother ticket/issue
