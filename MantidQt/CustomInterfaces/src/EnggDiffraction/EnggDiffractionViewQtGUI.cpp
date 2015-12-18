@@ -127,6 +127,10 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   connect(m_uiTabCalib.pushButton_new_cropped_calib, SIGNAL(released()), this,
           SLOT(CroppedCalibrateClicked()));
 
+  connect(m_uiTabCalib.comboBox_calib_cropped_spec_ids,
+          SIGNAL(currentIndexChanged(int)), this,
+          SLOT(calibSpecIdChanged(int)));
+
   enableCalibrateAndFocusActions(true);
 }
 
@@ -250,8 +254,9 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabCalib.lineEdit_cropped_run_num->setText(
       qs.value("user-params-current-vanadium-num", "").toString());
 
-  m_uiTabCalib.lineEdit_calib_cropped_spec_ids->setText(
-      qs.value("user-params-calib-cropped-spectrum-nos", "").toString());
+  m_uiTabCalib.lineEdit_cropped_run_num->setReadOnly(true);
+
+  m_uiTabCalib.comboBox_calib_cropped_spec_ids->setCurrentIndex(0);
 
   // user params - focusing
   m_uiTabFocus.lineEdit_run_num->setUserInput(
@@ -498,10 +503,6 @@ std::vector<std::string> EnggDiffractionViewQtGUI::newCeriaNo() const {
 
 std::string EnggDiffractionViewQtGUI::currentCalibFile() const {
   return m_uiTabCalib.lineEdit_current_calib_filename->text().toStdString();
-}
-
-std::string EnggDiffractionViewQtGUI::currentCalibCroppedSpecID() const {
-  return m_uiTabCalib.lineEdit_calib_cropped_spec_ids->text().toStdString();
 }
 
 void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
@@ -909,6 +910,13 @@ void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   if (!plotType)
     return;
   m_currentType = plotType->currentIndex();
+}
+
+void EnggDiffractionViewQtGUI::calibSpecIdChanged(int /*idx*/) {
+  QComboBox *SpecId = m_uiTabCalib.comboBox_calib_cropped_spec_ids;
+  if (!SpecId)
+    return;
+  m_currentCropCalibSpecId = SpecId->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

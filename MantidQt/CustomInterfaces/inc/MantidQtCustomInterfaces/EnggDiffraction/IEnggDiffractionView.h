@@ -117,6 +117,14 @@ public:
   virtual std::string currentInstrument() const = 0;
 
   /**
+  * selected spec will be passed as a bank for the calibrartion
+  * process to be carried out
+  *
+  * @return which format should to applied for plotting data
+  */
+  virtual int currentCropCalibSpecId() const = 0;
+
+  /**
   * Selected plot data representation will be applied, which will
   * ran through python script
   *

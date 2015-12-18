@@ -87,7 +87,6 @@ public:
 
   std::string currentCalibFile() const;
 
-  std::string currentCalibCroppedSpecID() const;
 
   std::vector<std::string> newVanadiumNo() const;
 
@@ -142,6 +141,8 @@ public:
 
   int currentPlotType() const { return m_currentType; }
 
+  int currentCropCalibSpecId() const { return m_currentCropCalibSpecId; }
+
   int currentMultiRunMode() const { return m_currentRunMode; }
 
 private slots:
@@ -173,6 +174,9 @@ private slots:
   void instrumentChanged(int idx);
 
   void RBNumberChanged();
+
+  // slot of the cropped calibration part of the interface
+  void calibSpecIdChanged(int idx);
 
   // slots of the focus part of the interface
   void plotRepChanged(int idx);
@@ -234,6 +238,9 @@ private:
 
   /// setting the instrument prefix ahead of the run number
   void setPrefix(std::string prefix);
+
+  // current bank number used for cropped calibration
+  int static m_currentCropCalibSpecId;
 
   // plot data representation type selected
   int static m_currentType;
