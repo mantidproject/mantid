@@ -61,6 +61,7 @@ Usage
 .. testcode:: ExCreateCacheFilename
 
   import mantid
+  from mantid.kernel import PropertyManager
   pm = PropertyManager()
   aprops = ["a", "alibaba", "taa", "sa", "a75"]
   props = aprops + ['b', 'c', 'd']
