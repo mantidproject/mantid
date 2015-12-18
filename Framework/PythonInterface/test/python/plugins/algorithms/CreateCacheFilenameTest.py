@@ -39,6 +39,66 @@ class CreateCacheFilename(unittest.TestCase):
         self.assertEqual(
             alg_test.getPropertyValue("OutputFilename"),
             expected)
+
+        # Another test. don't specify the default values
+        out_path = "tempout_curve.json"
+        alg_test = run_algorithm(
+            "CreateCacheFilename",
+            PropertyManager = "pm",
+            )
+        # executed?
+        self.assertTrue(alg_test.isExecuted())
+        # Verify ....
+        expected = os.path.join(
+            ConfigService.getUserPropertiesDir(), "cache",
+            "%s.nxs" % hashlib.sha1("a=3").hexdigest()
+            )
+        self.assertEqual(
+            alg_test.getPropertyValue("OutputFilename"),
+            expected)
+        return
+
+    def test_wronginput(self):
+        """CreateCacheFilename: wrong input
+        """
+        # Execute
+        out_path = "tempout_curve.json"
+        alg_test = run_algorithm(
+            "CreateCacheFilename",
+            )
+        # executed?
+        self.assertFalse(alg_test.isExecuted())
+        return
+
+    def test_glob(self):
+        """CreateCacheFilename: globbing
+        """
+        pm = PropertyManager()
+        props = ["a", "alibaba", "taa", "sa", "a75"]
+        for p in props:
+            pm.declareProperty(p, 0)
+            pm.setProperty(p, 3)
+            continue
+        mantid.PropertyManagerDataService.add("test_glob", pm)
+        
+        # Execute
+        out_path = "tempout_curve.json"
+        alg_test = run_algorithm(
+            "CreateCacheFilename",
+            PropertyManager = "test_glob",
+            )
+        # executed?
+        self.assertTrue(alg_test.isExecuted())
+        # Verify ....
+        s = ','.join(sorted( ['%s=3' % p for p in props] ))
+        print s
+        expected = os.path.join(
+            ConfigService.getUserPropertiesDir(), "cache",
+            "%s.nxs" % hashlib.sha1(s).hexdigest()
+            )
+        self.assertEqual(
+            alg_test.getPropertyValue("OutputFilename"),
+            expected)
         return
 
 
