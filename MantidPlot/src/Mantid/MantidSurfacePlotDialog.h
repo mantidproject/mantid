@@ -34,12 +34,18 @@ public:
   UserInputSurface getSelections() const;
   /// Returns the workspace index to be plotted
   const int getPlot() const;
+  /// Returns the input custom log values
+  const std::vector<double> getCustomLogValues() const;
   /// The string "Workspace index"
   static const QString WORKSPACE_INDEX;
+  /// The string "Custom"
+  static const QString CUSTOM;
 
 private slots:
   /// Called when the OK button is pressed.
   void plot();
+  /// Called when the log selection is changed.
+  void onLogSelected(const QString &logName);
 
 private:
   MantidWSIndexWidget m_widget;
@@ -66,8 +72,8 @@ private:
   QHBoxLayout *m_buttonBox;
   QVBoxLayout *m_logBox, *m_outer;
   QComboBox *m_logSelector;
-  QLineEdit *m_axisNameEdit;
-  QLabel *m_logLabel, *m_axisLabel;
+  QLineEdit *m_axisNameEdit, *m_logValues;
+  QLabel *m_logLabel, *m_axisLabel, *m_customLogLabel;
 };
 
 #endif

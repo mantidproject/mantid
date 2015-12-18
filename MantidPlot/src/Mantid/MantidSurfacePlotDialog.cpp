@@ -9,6 +9,9 @@ using Mantid::API::ExperimentInfo;
 /// The string "Workspace index"
 const QString MantidSurfacePlotDialog::WORKSPACE_INDEX{"Workspace index"};
 
+/// The string "Custom"
+const QString MantidSurfacePlotDialog::CUSTOM{"Custom"};
+
 /**
  * Construct an object of this type
  * @param mui :: The MantidUI area
@@ -52,12 +55,21 @@ void MantidSurfacePlotDialog::initLogs() {
   populateLogComboBox();
   m_axisLabel = new QLabel(tr("<br>Label for plot axis:"));
   m_axisNameEdit = new QLineEdit();
+  m_customLogLabel = new QLabel(tr("Custom log values:"));
+  m_logValues = new QLineEdit();
 
   m_logBox->add(m_logLabel);
   m_logBox->add(m_logSelector);
+  m_logBox->add(m_customLogLabel);
+  m_logBox->add(m_logValues);
   m_logBox->add(m_axisLabel);
   m_logBox->add(m_axisNameEdit);
   m_outer->addItem(m_logBox);
+
+  m_logValues->setEnabled(false);
+
+  connect(m_logSelector, SIGNAL(currentIndexChanged(const QString &)), this,
+          SLOT(onLogSelected(const QString &)));
 }
 
 /**
@@ -111,6 +123,9 @@ void MantidSurfacePlotDialog::populateLogComboBox() {
   for (std::string name : logNames) {
     m_logSelector->addItem(name.c_str());
   }
+
+  // Add "Custom" at the end of the list
+  m_logSelector->addItem(CUSTOM);
 }
 
 /**
@@ -171,4 +186,28 @@ void MantidSurfacePlotDialog::plot() {
     m_accepted = true;
     accept();
   }
+}
+
+/**
+ * Called when log selection changed
+ * If "Custom" selected, enable the custom log input box.
+ * Otherwise, it is read-only.
+ * @param logName :: [input] Text selected in combo box
+ */
+void MantidSurfacePlotDialog::onLogSelected(const QString &logName) {
+  m_logValues->setEnabled(logName == CUSTOM);
+  m_logValues->clear();
+}
+
+/**
+ * If "Custom" is selected as log, returns the list of values the user has input
+ * into the edit box, otherwise returns an empty vector.
+ * @returns Vector of numerical log values
+ */
+const std::vector<double> MantidSurfacePlotDialog::getCustomLogValues() const {
+  std::vector<double> logValues;
+  if (m_logSelector->currentText() == CUSTOM) {
+    // populate vector here
+  }
+  return logValues;
 }
