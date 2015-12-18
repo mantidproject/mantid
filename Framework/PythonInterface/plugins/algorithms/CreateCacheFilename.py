@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name,bare-except
+#pylint: disable=no-init,invalid-name,bare-except,too-many-arguments
 from mantid.api import *
 from mantid.kernel import *
 import mantid, os
@@ -109,7 +109,7 @@ cache_dir: the directory in which the cach file will be created.
         if not prop_manager and not other_props:
             raise ValueError("Either PropertyManager or OtherProperties should be supplied")
         prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)\
-                       if prop_manager else None        
+                       if prop_manager else None
         # default to all properties in the manager
         props = self.getProperty("Properties").value
         if not props and prop_manager:
@@ -128,12 +128,12 @@ cache_dir: the directory in which the cach file will be created.
         self.setProperty("OutputFilename", fn)
         return
 
-    def _get_signature(self, prop_manager, props, other_props, prefix, cache_dir):
+    def _get_signature(self, prop_manager, props, other_props):
         # get matched properties
         if prop_manager:
             props = matched(prop_manager.keys(), props)
             # create the list of key=value strings
-            kvpairs = [ 
+            kvpairs = [
                 '%s=%s' % (prop, prop_manager.getPropertyValue(prop))
                 for prop in props
             ]
@@ -146,12 +146,11 @@ cache_dir: the directory in which the cach file will be created.
         s = ','.join(kvpairs)
         self.setProperty("OutputSignature", s)
         return s
-        
+
     def _calculate(self, prop_manager, props, other_props, prefix, cache_dir):
-        s = self._get_signature(
-            prop_manager, props, other_props, prefix, cache_dir)
+        s = self._get_signature(prop_manager, props, other_props)
         # hash
-        h = hash(s)
+        h = _hash(s)
         # prefix
         if prefix:
             h = "%s_%s" % (prefix, h)
@@ -160,7 +159,7 @@ cache_dir: the directory in which the cach file will be created.
         return os.path.join(cache_dir, fn)
 
 
-def hash(s):
+def _hash(s):
     import hashlib
     return hashlib.sha1(s).hexdigest()
 

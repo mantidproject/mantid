@@ -1,24 +1,20 @@
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
 import unittest
-import numpy as np
-import mantid.simpleapi as api
 from mantid.kernel import *
 from mantid.api import *
 from testhelpers import run_algorithm
-from mantid.api import AnalysisDataService
 
 import os, mantid, hashlib
 
 class CreateCacheFilename(unittest.TestCase):
 
     def test1(self):
-        """CreateCacheFilename: one prop 
+        """CreateCacheFilename: one prop
         """
         pm = PropertyManager()
         pm.declareProperty("a", 0)
         pm.setProperty("a", 3)
         mantid.PropertyManagerDataService.add("pm", pm)
-        
         # Execute
         alg_test = run_algorithm(
             "CreateCacheFilename",
@@ -80,7 +76,6 @@ class CreateCacheFilename(unittest.TestCase):
             pm.setProperty(p, 3)
             continue
         mantid.PropertyManagerDataService.add("test_glob", pm)
-        
         # Execute
         alg_test = run_algorithm(
             "CreateCacheFilename",
