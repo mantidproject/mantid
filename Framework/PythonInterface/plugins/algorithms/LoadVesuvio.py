@@ -1,4 +1,4 @@
-#pylint: disable=no-init, unused-variable
+#pylint: disable=no-init, unused-variable, too-many-lines
 # we need to disable unused_variable because ws.dataY(n) returns a reference  to the underlying c++ object
 # that can be modified inplace
 from mantid.kernel import *
@@ -161,7 +161,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         try:
             all_spectra = [item for sublist in self._spectra for item in sublist]
-            self._raise_error_if_forward_backward_mix(all_spectra)
+            self._raise_error_if_mix_fwd_back(all_spectra)
             self._set_spectra_type(all_spectra[0])
             self._setup_raw(all_spectra)
             self._create_foil_workspaces()
@@ -190,7 +190,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _raise_error_if_forward_backward_mix(self, spectra):
+    def _raise_error_if_mix_fwd_back(self, spectra):
         """
         Checks that in input spectra are all in the forward or all in the backward
         scattering range
@@ -338,18 +338,18 @@ class LoadVesuvio(LoadEmptyVesuvio):
 #----------------------------------------------------------------------------------------
 
     def _get_parameter_filename(self, diff_opt):
-       """
-       Returns the filename for the diff-mode specific parameters
-       """
-       if "Difference" not in diff_opt:
-           raise RuntimeError("Trying to load parameters for difference mode when not doing differencing! "
-                              "This is most likely a bug in the code. Please report this to the developers")
+        """
+        Returns the filename for the diff-mode specific parameters
+        """
+        if "Difference" not in diff_opt:
+            raise RuntimeError("Trying to load parameters for difference mode when not doing differencing! "
+                               "This is most likely a bug in the code. Please report this to the developers")
 
-       template = "VESUVIO_{0}_diff_Parameters.xml"
-       if diff_opt == "SingleDifference":
-           return template.format("single")
-       else:
-           return template.format("double")
+        template = "VESUVIO_{0}_diff_Parameters.xml"
+        if diff_opt == "SingleDifference":
+            return template.format("single")
+        else:
+            return template.format("double")
 
 #----------------------------------------------------------------------------------------
 
