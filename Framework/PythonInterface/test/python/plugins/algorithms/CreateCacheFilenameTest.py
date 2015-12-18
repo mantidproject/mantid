@@ -141,6 +141,27 @@ class CreateCacheFilename(unittest.TestCase):
             expected)
         return
 
+    def test_cache_dir(self):
+        """CreateCacheFilename: cache_dir
+        """
+        # Execute
+        alg_test = run_algorithm(
+            "CreateCacheFilename",
+            OtherProperties = ["a=1", "b=2"],
+            CacheDir = "my_cache",
+            )
+        # executed?
+        self.assertTrue(alg_test.isExecuted())
+        # Verify ....
+        expected = os.path.join(
+            "my_cache",
+            "%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest()
+            )
+        self.assertEqual(
+            alg_test.getPropertyValue("OutputFilename"),
+            expected)
+        return
+
 
 if __name__ == '__main__':
     unittest.main()
