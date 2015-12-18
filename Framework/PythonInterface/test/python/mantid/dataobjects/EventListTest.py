@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name, too-many-public-methods
 import unittest
 
 from mantid.kernel import DateAndTime
