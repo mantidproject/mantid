@@ -73,7 +73,7 @@ Usage
   other_props = ["A=1", "B=2"]
   # Execute
   cache_path, signature = CreateCacheFilename(
-      PropertyManager = "test_bothprops",
+      PropertyManager = "excreatecachefilename",
       Properties = ['*a*'],
       OtherProperties = other_props,
       )
