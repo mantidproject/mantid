@@ -1581,10 +1581,18 @@ void MantidDockWidget::plotContour() {
         convertPointsToHisto(plotWSTitle);
 
         // Plot the output workspace as a contour plot
-        auto plot = m_mantidUI->drawSingleColorFillPlot(plotWSTitle,
-                                                        Graph::ColorMapContour);
+        auto matrixToPlot = m_mantidUI->importMatrixWorkspace(plotWSTitle, -1,
+                                                              -1, false, false);
+        m_mantidUI->deleteWorkspace(plotWSTitle);
 
-        // Set X, Y axis titles correctly
+        // Copying the plot in this way ensures that the workspace can be
+        // deleted and the plot will not disappear
+        MultiLayer *plot = m_appParent->multilayerPlot(
+            m_appParent->generateUniqueName(tr("Graph")));
+        plot->removeLayer();
+        plot->copy(matrixToPlot->plotGraph2D(Graph::ColorMapContour));
+
+        // Set the X, Y axis labels correctly
         plot->activeGraph()->setXAxisTitle(xLabelQ);
         plot->activeGraph()->setYAxisTitle(options.axisName);
 
@@ -1593,8 +1601,6 @@ void MantidDockWidget::plotContour() {
                             .arg(wsGroup->name().c_str(),
                                  QString::number(options.plotIndex));
         plot->activeGraph()->setTitle(title);
-        plot->window()->setWindowTitle(
-            m_appParent->generateUniqueName(tr("Graph")));
       }
     }
   }
