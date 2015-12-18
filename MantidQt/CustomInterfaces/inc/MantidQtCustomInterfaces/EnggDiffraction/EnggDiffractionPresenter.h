@@ -64,7 +64,8 @@ public:
 
   /// the calibration hard work that a worker / thread will run
   void doNewCalibration(const std::string &outFilename,
-                        const std::string &vanNo, const std::string &ceriaNo);
+                        const std::string &vanNo, const std::string &ceriaNo,
+                        const std::string &specNos);
 
   /// the focusing hard work that a worker / thread will run
   void doFocusRun(const std::string &dir, const std::string &runNo,
@@ -130,10 +131,12 @@ private:
   // this may need to be mocked up in tests
   virtual void startAsyncCalibWorker(const std::string &outFilename,
                                      const std::string &vanNo,
-                                     const std::string &ceriaNo);
+                                     const std::string &ceriaNo,
+                                     const std::string &specNos);
 
   void doCalib(const EnggDiffCalibSettings &cs, const std::string &vanNo,
-               const std::string &ceriaNo, const std::string &outFilename);
+               const std::string &ceriaNo, const std::string &outFilename,
+               const std::string &specNos);
 
   std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
                                               const std::string &ceriaNo) const;
