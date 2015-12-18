@@ -39,9 +39,7 @@ void ModifyDetectorDotDatFile::init() {
       "Workspace with detectors in the positions to be put into the detector "
       "dot dat file");
 
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
-  exts.push_back(".txt");
+  std::initializer_list<std::string> exts = {".dat", ".txt"};
 
   declareProperty(
       new FileProperty("InputFilename", "", FileProperty::Load, exts),
