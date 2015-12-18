@@ -93,8 +93,8 @@ void EnggDiffractionPresenter::notify(
     break;
 
   case IEnggDiffractionPresenter::CropCalib:
-	  ProcessCropCalib();
-	  break;
+    ProcessCropCalib();
+    break;
 
   case IEnggDiffractionPresenter::FocusRun:
     processFocusBasic();
@@ -183,37 +183,50 @@ void EnggDiffractionPresenter::processCalcCalib() {
 
   m_view->enableCalibrateAndFocusActions(false);
   // alternatively, this would be GUI-blocking:
-  // doNewCalibration(outFilename, vanNo, ceriaNo);
+  // doNewCalibration(outFilename, vanNo, ceriaNo, specNos);
   // calibrationFinished()
-  startAsyncCalibWorker(outFilename, vanNo, ceriaNo);
+  startAsyncCalibWorker(outFilename, vanNo, ceriaNo, "");
 }
 
 void EnggDiffractionPresenter::ProcessCropCalib() {
-	const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
-	const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
-	try {
-		inputChecksBeforeCalibrate(vanNo, ceriaNo);
-	}
-	catch (std::invalid_argument &ia) {
-		m_view->userWarning("Error in the inputs required for calibrate",
-			ia.what());
-		return;
-	}
-	g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
-		"take a few seconds... "
-		<< std::endl;
+  const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
+  const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
+  try {
+    inputChecksBeforeCalibrate(vanNo, ceriaNo);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning("Error in the inputs required for calibrate",
+                        ia.what());
+    return;
+  }
+  g_log.notice()
+      << "EnggDiffraction GUI: starting cropped calibration. This may "
+         "take a few seconds... "
+      << std::endl;
 
-	const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
+  const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
-	const std::string specID = m_view->focusingCroppedSpectrumIDs();
+  // const std::string specID = m_view->focusingCroppedSpectrumIDs();
 
-	m_view->enableCalibrateAndFocusActions(false);
-	// alternatively, this would be GUI-blocking:
-	// doNewCalibration(outFilename, vanNo, ceriaNo);
-	// calibrationFinished()
-	startAsyncCalibWorker(outFilename, vanNo, ceriaNo);
+  int specIdNum = m_view->currentCropCalibSpecId();
+  enum PlotMode { NORTH = 0, SOUTH = 1, BOTH = 2 };
+
+  std::string specId = "";
+  if (specIdNum == PlotMode::NORTH) {
+    specId = "North";
+
+  } else if (specIdNum == PlotMode::SOUTH) {
+    specId = "South";
+
+  } else if (specIdNum == PlotMode::BOTH) {
+    specId = "Both : North, South";
+  }
+
+  m_view->enableCalibrateAndFocusActions(false);
+  // alternatively, this would be GUI-blocking:
+  // doNewCalibration(outFilename, vanNo, ceriaNo);
+  // calibrationFinished()
+  startAsyncCalibWorker(outFilename, vanNo, ceriaNo, specId);
 }
-
 
 void EnggDiffractionPresenter::processFocusBasic() {
   const std::vector<std::string> multi_RunNo =
@@ -717,11 +730,11 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
 */
 void EnggDiffractionPresenter::startAsyncCalibWorker(
     const std::string &outFilename, const std::string &vanNo,
-    const std::string &ceriaNo) {
+    const std::string &ceriaNo, const std::string &specNos) {
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
-      new EnggDiffWorker(this, outFilename, vanNo, ceriaNo);
+      new EnggDiffWorker(this, outFilename, vanNo, ceriaNo, specNos);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(calibrate()));
@@ -744,7 +757,8 @@ void EnggDiffractionPresenter::startAsyncCalibWorker(
 */
 void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
                                                 const std::string &vanNo,
-                                                const std::string &ceriaNo) {
+                                                const std::string &ceriaNo,
+                                                const std::string &specNos) {
   g_log.notice() << "Generating new calibration file: " << outFilename
                  << std::endl;
 
@@ -762,7 +776,7 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
 
   try {
     m_calibFinishedOK = false;
-    doCalib(cs, vanNo, ceriaNo, outFilename);
+    doCalib(cs, vanNo, ceriaNo, outFilename, specNos);
     m_calibFinishedOK = true;
   } catch (std::runtime_error &) {
     g_log.error() << "The calibration calculations failed. One of the "
@@ -849,7 +863,8 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
 void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &vanNo,
                                        const std::string &ceriaNo,
-                                       const std::string &outFilename) {
+                                       const std::string &outFilename,
+                                       const std::string &specNos) {
   ITableWorkspace_sptr vanIntegWS;
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr ceriaWS;
@@ -892,7 +907,10 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       alg->setProperty("InputWorkspace", ceriaWS);
       alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
       alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-      alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
+	  if(specNos == "")
+		  alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
+	  else
+		  alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(specNos));
       // TODO: figure out what should be done about the list of expected peaks
       // to EnggCalibrate => it should be a default, as in EnggFitPeaks, that
       // should be fixed in a nother ticket/issue
@@ -1113,13 +1131,13 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
 */
 void EnggDiffractionPresenter::startAsyncFocusWorker(
     const std::string &dir, const std::vector<std::string> &multi_RunNo,
-    const std::vector<bool> &banks, const std::string &specNos,
-    const std::string &dgFile) {
+    const std::vector<bool> &banks, const std::string &dgFile,
+    const std::string &specNos) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
-      new EnggDiffWorker(this, dir, multi_RunNo, banks, specNos, dgFile);
+      new EnggDiffWorker(this, dir, multi_RunNo, banks, dgFile, specNos);
   worker->moveToThread(m_workerThread);
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(focus()));
   connect(worker, SIGNAL(finished()), this, SLOT(focusingFinished()));
