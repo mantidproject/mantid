@@ -45,14 +45,15 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
                                         const object &defaultValue) {
   PyObject *rawptr = defaultValue.ptr();
   IFunction::Attribute attr;
-  if (PyInt_Check(rawptr) == 1)
+
+  if (PyBool_Check(rawptr) == 1)
+    attr = IFunction::Attribute(extract<bool>(rawptr)());
+  else if (PyInt_Check(rawptr) == 1)
     attr = IFunction::Attribute(extract<int>(rawptr)());
   else if (PyFloat_Check(rawptr) == 1)
     attr = IFunction::Attribute(extract<double>(rawptr)());
   else if (PyString_Check(rawptr) == 1)
     attr = IFunction::Attribute(extract<std::string>(rawptr)());
-  else if (PyBool_Check(rawptr) == 1)
-    attr = IFunction::Attribute(extract<bool>(rawptr)());
   else
     throw std::invalid_argument(
         "Invalid attribute type. Allowed types=float,int,str,bool");
