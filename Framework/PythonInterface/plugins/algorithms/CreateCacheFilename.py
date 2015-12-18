@@ -81,20 +81,23 @@ cache_dir: the directory in which the cach file will be created.
         self.declareProperty("PropertyManager", "", "name of a property manager from which properties are extracted from")
 
         self.declareProperty(
-            StringArrayProperty("Properties", "", Direction.Input),
+            StringArrayProperty("Properties", Direction.Input),
             "A list of property names to be included")
 
         self.declareProperty(
-            StringArrayProperty("OtherProperties", "", Direction.Input),
+            StringArrayProperty("OtherProperties", Direction.Input),
             "A list of key=value strings for other properties not in the property manager")
 
         self.declareProperty(
-            StringProperty("Prefix", "", Direction.Input),
-            "prefix to the output hash name")
+            "Prefix", "", "prefix to the output hash name")
 
         self.declareProperty(
-            StringProperty("CacheDir", "", Direction.Input),
+            "CacheDir", "",
             "the directory in which the cache file will be created")
+
+        self.declareProperty(
+            "OutputFilename", "",
+            "output filename")
         return
 
     def PyExec(self):
@@ -119,15 +122,17 @@ cache_dir: the directory in which the cach file will be created.
                 "cache"
                 )
         # calculate
-        return self._calculate(
+        fn = self._calculate(
             prop_manager, props, other_props, prefix, cache_dir)
+        self.setProperty("OutputFilename", fn)
+        return
 
     def _calculate(self, prop_manager, props, other_props, prefix, cache_dir):
         # get matched properties
         props = matched(prop_manager.keys(), props)
         # create the list of key=value strings
         kvpairs = [ 
-            '%s=%s' % (prop, prop_manager.getPropertyValue(key))
+            '%s=%s' % (prop, prop_manager.getPropertyValue(prop))
             for prop in props
             ]
         kvpairs += other_props
