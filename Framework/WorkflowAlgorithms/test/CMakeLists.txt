@@ -17,6 +17,7 @@ if ( CXXTEST_FOUND )
             DataObjects
             Geometry
             Kernel
+			Nexus
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             )

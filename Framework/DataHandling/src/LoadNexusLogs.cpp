@@ -83,12 +83,10 @@ void LoadNexusLogs::init() {
       new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
                                              Direction::InOut),
       "The name of the workspace that will be filled with the logs.");
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".n*");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "Path to the .nxs file to load. Can be an EventNeXus or a "
-                  "histogrammed NeXus.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".n*"}),
+      "Path to the .nxs file to load. Can be an EventNeXus or a "
+      "histogrammed NeXus.");
   declareProperty(
       new PropertyWithValue<bool>("OverwriteLogs", true, Direction::Input),
       "If true then existing logs will be overwritten, if false they will "

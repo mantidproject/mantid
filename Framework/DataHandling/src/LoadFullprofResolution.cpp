@@ -53,10 +53,9 @@ LoadFullprofResolution::~LoadFullprofResolution() {}
  */
 void LoadFullprofResolution::init() {
   // Input file name
-  vector<std::string> exts;
-  exts.push_back(".irf");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "Path to an Fullprof .irf file to load.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".irf"}),
+      "Path to an Fullprof .irf file to load.");
 
   // Output table workspace
   auto wsprop = new WorkspaceProperty<API::ITableWorkspace>(

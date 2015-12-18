@@ -60,14 +60,9 @@ int LoadGSS::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialise the algorithm
   */
 void LoadGSS::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".gsa");
-  exts.push_back(".gss");
-  exts.push_back(".gda");
-  exts.push_back(".txt");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
-      "The input filename of the stored data");
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
+                                        {".gsa", ".gss", ".gda", ".txt"}),
+                  "The input filename of the stored data");
 
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
                                                Kernel::Direction::Output),

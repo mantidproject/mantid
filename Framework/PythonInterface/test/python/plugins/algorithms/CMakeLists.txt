@@ -62,6 +62,7 @@ set ( TEST_PY_FILES
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
+  SANSStitchTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
   SaveVulcanGSSTest.py

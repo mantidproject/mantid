@@ -41,11 +41,9 @@ void SaveIsawDetCal::init() {
       new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".DetCal");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
-                  "Path to an ISAW-style .detcal file to save.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Save, {".DetCal"}),
+      "Path to an ISAW-style .detcal file to save.");
 
   declareProperty("TimeOffset", 0.0, "Offsets to be applied to times");
   declareProperty(new ArrayProperty<string>("BankNames", Direction::Input),
