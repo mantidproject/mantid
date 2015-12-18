@@ -95,9 +95,9 @@ cache_dir: the directory in which the cach file will be created.
             "CacheDir", "",
             "the directory in which the cache file will be created")
 
-        self.declareProperty(
-            "OutputFilename", "",
-            "output filename")
+        self.declareProperty("OutputFilename", "", "output filename")
+
+        self.declareProperty("OutputSignature", "", "output signature")
         return
 
     def PyExec(self):
@@ -128,7 +128,7 @@ cache_dir: the directory in which the cach file will be created.
         self.setProperty("OutputFilename", fn)
         return
 
-    def _calculate(self, prop_manager, props, other_props, prefix, cache_dir):
+    def _get_signature(self, prop_manager, props, other_props, prefix, cache_dir):
         # get matched properties
         if prop_manager:
             props = matched(prop_manager.keys(), props)
@@ -144,6 +144,12 @@ cache_dir: the directory in which the cach file will be created.
         kvpairs.sort()
         # one string out of the list
         s = ','.join(kvpairs)
+        self.setProperty("OutputSignature", s)
+        return s
+        
+    def _calculate(self, prop_manager, props, other_props, prefix, cache_dir):
+        s = self._get_signature(
+            prop_manager, props, other_props, prefix, cache_dir)
         # hash
         h = hash(s)
         # prefix

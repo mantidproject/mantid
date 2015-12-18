@@ -120,6 +120,38 @@ class CreateCacheFilename(unittest.TestCase):
             expected)
         return
 
+    def test_bothprops(self):
+        """CreateCacheFilename: use both PropertyManager and OtherProperties
+        """
+        pm = PropertyManager()
+        aprops = ["a", "alibaba", "taa", "sa", "a75"]
+        props = aprops + ['b', 'c', 'd']
+        for p in props:
+            pm.declareProperty(p, '')
+            pm.setProperty(p, "fish")
+            continue
+        mantid.PropertyManagerDataService.add("test_bothprops", pm)
+        other_props = ["A=1", "B=2"]
+        # Execute
+        alg_test = run_algorithm(
+            "CreateCacheFilename",
+            PropertyManager = "test_bothprops",
+            Properties = ['*a*'],
+            OtherProperties = other_props,
+            )
+        # executed?
+        self.assertTrue(alg_test.isExecuted())
+        # Verify ....
+        s = ','.join(sorted( ['%s=fish' % p for p in aprops] + other_props ))
+        expected = os.path.join(
+            ConfigService.getUserPropertiesDir(), "cache",
+            "%s.nxs" % hashlib.sha1(s).hexdigest()
+            )
+        self.assertEqual(
+            alg_test.getPropertyValue("OutputFilename"),
+            expected)
+        return
+
     def test_prefix(self):
         """CreateCacheFilename: prefix
         """
