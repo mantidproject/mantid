@@ -105,12 +105,12 @@ cache_dir: the directory in which the cach file will be created.
         """
         # Inputs
         prop_manager = self.getPropertyValue("PropertyManager")
-        other_props = self.getPropertyValue("OtherProperties")
+        other_props = self.getProperty("OtherProperties").value
         if not prop_manager and not other_props:
             raise ValueError("Either PropertyManager or OtherProperties should be supplied")
         prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)
         # default to all properties in the manager
-        props = self.getPropertyValue("Properties")
+        props = self.getProperty("Properties").value
         if not props:
             props = prop_manager.keys()
         # output settings

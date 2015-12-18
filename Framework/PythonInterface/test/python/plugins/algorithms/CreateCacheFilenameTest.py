@@ -73,8 +73,11 @@ class CreateCacheFilename(unittest.TestCase):
     def test_glob(self):
         """CreateCacheFilename: globbing
         """
+        # glob pattern search anything with 'a' in it
+        # and leave other props out
         pm = PropertyManager()
-        props = ["a", "alibaba", "taa", "sa", "a75"]
+        aprops = ["a", "alibaba", "taa", "sa", "a75"]
+        props = aprops + ['b', 'c', 'd']
         for p in props:
             pm.declareProperty(p, 0)
             pm.setProperty(p, 3)
@@ -86,12 +89,12 @@ class CreateCacheFilename(unittest.TestCase):
         alg_test = run_algorithm(
             "CreateCacheFilename",
             PropertyManager = "test_glob",
+            Properties = ['*a*'],
             )
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        s = ','.join(sorted( ['%s=3' % p for p in props] ))
-        print s
+        s = ','.join(sorted( ['%s=3' % p for p in aprops] ))
         expected = os.path.join(
             ConfigService.getUserPropertiesDir(), "cache",
             "%s.nxs" % hashlib.sha1(s).hexdigest()
