@@ -120,6 +120,27 @@ class CreateCacheFilename(unittest.TestCase):
             expected)
         return
 
+    def test_prefix(self):
+        """CreateCacheFilename: prefix
+        """
+        # Execute
+        alg_test = run_algorithm(
+            "CreateCacheFilename",
+            OtherProperties = ["a=1", "b=2"],
+            Prefix = "vanadium",
+            )
+        # executed?
+        self.assertTrue(alg_test.isExecuted())
+        # Verify ....
+        expected = os.path.join(
+            ConfigService.getUserPropertiesDir(), "cache",
+            "vanadium_%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest()
+            )
+        self.assertEqual(
+            alg_test.getPropertyValue("OutputFilename"),
+            expected)
+        return
+
 
 if __name__ == '__main__':
     unittest.main()
