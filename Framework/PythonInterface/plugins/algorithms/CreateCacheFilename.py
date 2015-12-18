@@ -1,7 +1,7 @@
 #pylint: disable=no-init,invalid-name,bare-except
 from mantid.api import *
 from mantid.kernel import *
-import mantid
+import mantid, os
 
 
 # See ticket #14716
@@ -119,11 +119,45 @@ cache_dir: the directory in which the cach file will be created.
                 "cache"
                 )
         # calculate
-        self._calculate(prop_manager, props, other_props, prefix, cache_dir)
-        return
+        return self._calculate(
+            prop_manager, props, other_props, prefix, cache_dir)
 
     def _calculate(self, prop_manager, props, other_props, prefix, cache_dir):
-        return
+        # get matched properties
+        props = matched(prop_manager.keys(), props)
+        # create the list of key=value strings
+        kvpairs = [ 
+            '%s=%s' % (prop, prop_manager.getPropertyValue(key))
+            for prop in props
+            ]
+        kvpairs += other_props
+        # sort
+        kvpairs.sort()
+        # one string out of the list
+        s = ','.join(kvpairs)
+        # hash
+        h = hash(s)
+        # prefix
+        if prefix:
+            h = "%s_%s" % (prefix, h)
+        # filename
+        fn = "%s.nxs" % h
+        return os.path.join(cache_dir, fn)
+
+
+def hash(s):
+    import hashlib
+    return hashlib.sha1(s).hexdigest()
+
+
+def matched(keys, patterns):
+    "return keys that match any of the given patterns"
+    import fnmatch
+    filtered = []
+    for pat in patterns:
+        filtered += fnmatch.filter(keys, pat)
+        continue
+    return set(filtered)
 
 
 # Register algorithm with Mantid
