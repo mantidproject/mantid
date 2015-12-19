@@ -25,7 +25,7 @@
 
   <!--DETECTOR-->
   
-<component type="panel"  idstart="100001" idfillbyfirst="x">
+<component type="panel"  idstart="0" idfillbyfirst="x">
   <location z="2.5505" y="0" x="0" name="detector1">
   </location>
 </component>  
