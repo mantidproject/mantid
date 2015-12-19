@@ -25,7 +25,7 @@
 
   <!--DETECTOR-->
   
-<component type="panel"  idstart="0" idfillbyfirst="x">
+<component type="panel"  idstart="0" idfillbyfirst="y">
   <location z="2.5505" y="0" x="0" name="detector1">
   </location>
 </component>  
@@ -33,8 +33,8 @@
 <!-- Rectangular Detector Panel. Position 256 "pixel" along x 
      and 304 "pixel" along y  (relative to the coordinate system of the bank) -->
 <type name="panel" is="RectangularDetector" type="pixel"
-    xpixels="256" xstart="-0.0896" xstep="+0.0007"
-    ypixels="304" ystart="-0.1064" ystep="+0.0007" >
+    xpixels="304" xstart="-0.1064" xstep="+0.0007"
+    ypixels="256" ystart="-0.0896" ystep="+0.0007" >
 </type>
 
 <!-- Pixel for Detectors. Shape defined to be a (0.0007m)^2 square in XY-plane with tickness 0.0001m -->
