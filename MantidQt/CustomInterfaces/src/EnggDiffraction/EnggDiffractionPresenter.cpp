@@ -192,13 +192,24 @@ void EnggDiffractionPresenter::processCalcCalib() {
 void EnggDiffractionPresenter::ProcessCropCalib() {
   const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
   const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
+  int specIdNum = m_view->currentCropCalibBankName();
+  enum BankMode { SPECIDS = 0, NORTH = 1, SOUTH = 2 };
+
   try {
-    inputChecksBeforeCalibrate(vanNo, ceriaNo);
+    if (m_view->currentCalibSpecNos().empty() &&
+        specIdNum == BankMode::SPECIDS) {
+      throw std::invalid_argument(
+          "The Spectrum IDs cannot be empty, must be a"
+          "valid range or a Bank Name can be selected instead");
+
+      inputChecksBeforeCalibrate(vanNo, ceriaNo);
+    }
   } catch (std::invalid_argument &ia) {
     m_view->userWarning("Error in the inputs required for calibrate",
                         ia.what());
     return;
   }
+
   g_log.notice()
       << "EnggDiffraction GUI: starting cropped calibration. This may "
          "take a few seconds... "
@@ -206,21 +217,16 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
-  // const std::string specID = m_view->focusingCroppedSpectrumIDs();
-
-  int specIdNum = m_view->currentCropCalibBankName();
-  enum PlotMode { SpecIDS = 0, NORTH = 1, SOUTH = 2 };
-
   std::string specId = "";
-  if (specIdNum == PlotMode::NORTH) {
+  if (specIdNum == BankMode::NORTH) {
     specId = "North";
     g_calibCropIdentifier = "Bank";
 
-  } else if (specIdNum == PlotMode::SOUTH) {
+  } else if (specIdNum == BankMode::SOUTH) {
     specId = "South";
     g_calibCropIdentifier = "Bank";
 
-  } else if (specIdNum == PlotMode::SpecIDS) {
+  } else if (specIdNum == BankMode::SPECIDS) {
     specId = m_view->currentCalibSpecNos();
   }
 
@@ -901,16 +907,18 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   }
 
   // Bank 1 and 2 - ENGIN-X
-  const size_t numBanks1 = 1;
-  const size_t numBanks2 = 2;
+  // bank 1 - loops once & used for cropped calibration
+  // bank 2 - loops twice, one with each bank & used for new calibration
+  const size_t bankNo1 = 1;
+  const size_t bankNo2 = 2;
   std::vector<double> difc, tzero;
 
   if (specNos != "") {
-    difc.resize(numBanks1);
-    tzero.resize(numBanks1);
+    difc.resize(bankNo1);
+    tzero.resize(bankNo1);
   } else {
-    difc.resize(numBanks2);
-    tzero.resize(numBanks2);
+    difc.resize(bankNo2);
+    tzero.resize(bankNo2);
   }
 
   for (size_t i = 0; i < difc.size(); i++) {
