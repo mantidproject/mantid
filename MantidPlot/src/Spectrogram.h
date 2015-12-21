@@ -187,8 +187,6 @@ protected:
 
   //! Axis used to display the color scale
   int color_axis;
-  /// Flag to indicate live data. If live, don't update colour scale
-  bool m_liveData;
 
   //! Flags
   ColorMapPolicy color_map_policy;
@@ -224,6 +222,8 @@ protected:
   std::vector<unsigned char> mScaledValues;
   /// boolean flag to indicate intensity changed
   bool m_bIntensityChanged;
+  /// Flag to indicate live data. If live, don't update colour scale
+  bool m_liveData;
 };
 
 class SpectrogramData: public QwtRasterData
