@@ -7,10 +7,10 @@ using Mantid::API::IMDWorkspace_sptr;
 using Mantid::API::ExperimentInfo;
 
 /// The string "Workspace index"
-const QString MantidSurfacePlotDialog::WORKSPACE_INDEX{"Workspace index"};
+const QString MantidSurfacePlotDialog::WORKSPACE_INDEX = "Workspace index";
 
 /// The string "Custom"
-const QString MantidSurfacePlotDialog::CUSTOM{"Custom"};
+const QString MantidSurfacePlotDialog::CUSTOM = "Custom";
 
 /**
  * Construct an object of this type
@@ -166,7 +166,7 @@ MantidSurfacePlotDialog::getSelections() const {
 * @returns Workspace index to be plotted
 */
 const int MantidSurfacePlotDialog::getPlot() const {
-  int spectrumIndex{0}; // default to 0
+  int spectrumIndex = 0; // default to 0
   const auto userInput = m_widget.getPlots();
 
   if (!userInput.empty()) {

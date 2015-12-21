@@ -635,8 +635,9 @@ void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API
 }
 
 /**
-* Add the actions that are appropriate for a MatrixWorkspace
+* Add the actions that are appropriate for a WorkspaceGroup
 * @param menu :: The menu to store the items
+* @param groupWS :: [input] Workspace group related to the menu
 */
 void MantidDockWidget::addWorkspaceGroupMenuItems(
     QMenu *menu, const WorkspaceGroup_const_sptr &groupWS) const {
@@ -1721,7 +1722,7 @@ const double MantidDockWidget::getSingleLogValue(
 
   try {
     value = std::stod(logValues.at(wsIndex));
-  } catch (std::exception &e) {
+  } catch (std::exception &) {
     // Either value was not a number, or not enough entries in the vector.
     // Whichever it was, we return zero.
     value = 0;
