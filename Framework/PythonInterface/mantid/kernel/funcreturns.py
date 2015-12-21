@@ -148,7 +148,6 @@ def process_frame(frame):
     # have the incorrect index at last_i due to the call being passed through
     # an intermediate reference. Currently this method does not provide the
     # correct answer and throws a KeyError. Ticket #4186
-    isContainer = False
     output_var_names = []
     max_returns = []
     last_func_offset = call_function_locs[last_i][0]
@@ -158,7 +157,6 @@ def process_frame(frame):
     if name == 'STORE_FAST' or name == 'STORE_NAME': # one return value
         output_var_names.append(argvalue)
     if name == 'UNPACK_SEQUENCE': # Many Return Values, One equal sign
-        isContainer = True
         for index in range(argvalue):
             (offset_, op_, name_, argument_, argtype_, argvalue_) = ins_stack[last_func_offset + 2 +index]
             output_var_names.append(argvalue_)
@@ -189,7 +187,7 @@ def process_frame(frame):
                 output_var_names.append(argvalue_)
             count = count + 1
 
-    return (max_returns, tuple(output_var_names)), isContainer
+    return (max_returns, tuple(output_var_names))
 
 #-------------------------------------------------------------------------------
 

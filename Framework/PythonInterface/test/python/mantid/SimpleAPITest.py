@@ -130,7 +130,7 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
         try:
             ws, ws2 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength')
             self.fail("Should not have made it to this point.")
-        except ValueError:
+        except RuntimeError:
             pass
         
     def test_function_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):

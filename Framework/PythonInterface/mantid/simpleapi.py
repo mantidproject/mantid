@@ -626,7 +626,7 @@ def _is_workspace_property(prop):
         # Doesn't look like a workspace property
         return False
 
-def _get_args_from_lhs(lhs, algm_obj, isContainer):
+def _get_args_from_lhs(lhs, algm_obj):
     """
         Return the extra arguments that are to be passed to the algorithm
         from the information in the lhs tuple. These are basically the names
@@ -646,20 +646,18 @@ def _get_args_from_lhs(lhs, algm_obj, isContainer):
 
     output_props = [ algm_obj.getProperty(p) for p in algm_obj.outputProperties() ]
 
-    if len(output_props) > 0:
-        if len(ret_names) > len(output_props) :
-            raise ValueError("need more than 2 values to unpack")
-
     nprops = len(output_props)
-    
+    nnames = len(ret_names)
+
     name = 0
 
     for p in output_props:
         if _is_workspace_property(p):
-            if len(ret_names) > 0 and nprops > len(ret_names):
+            if nnames > 0 and nprops > nnames:
                 extra_args[p.name] = ret_names[0] # match argument to property name
                 ret_names = ret_names[1:]
-            elif len(ret_names) > 0:
+                nnames -= 1
+            elif nnames > 0:
                 extra_args[p.name] = ret_names[name]
 
         name += 1
@@ -825,8 +823,8 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         except KeyError:
             frame = None
 
-        lhs, isContainer = _kernel.funcreturns.lhs_info(frame=frame)
-        lhs_args = _get_args_from_lhs(lhs, algm, isContainer)
+        lhs = _kernel.funcreturns.lhs_info(frame=frame)
+        lhs_args = _get_args_from_lhs(lhs, algm)
         final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
 
         set_properties(algm, *args, **final_keywords)
