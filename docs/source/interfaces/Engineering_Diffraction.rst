@@ -50,6 +50,10 @@ It is possible to load an existing calibration (as a CSV file) and to
 generate a new calibration file (which becomes the new current
 calibration).
 
+With the help of Cropped Calibration user can also calibrate according
+to bank or by setting the SpectrumIDs once the Cropped Calibration group
+box has been enabled.
+
 Parameters
 ^^^^^^^^^^
 
@@ -62,6 +66,22 @@ Vanadium #
 Calibration sample #
   Number of the calibration sample run (for example Ceria run) used to
   calibrate experiment runs.
+
+Bank Name:
+  This parameter is only required when Cropped Calibration is being
+  carried out. The bank name can be selected from a drop down list with
+  option of North and South, which are equivalently to 1 and 2
+  respectively. The Bank Name drop down list is set to `Enable Spectrum-IDs`
+  by default. This option cannot be used together with Spectrum IDs,
+  as they overlap.
+
+SpectrumIDs:
+  This parameter is only required when Cropped Calibration is being
+  carried out, the parameter will set the spectrum numbers of the
+  detectors, that should be considered in the calibration while all
+  others will be ignored. This option cannot be used together with
+  Bank Name, as they overlap. You may also give multiple ranges, for
+  example: "0-100", or "0-9", "150-750".
 
 The calibration process depends on several additional parameters and
 settings which can be modified in the *Settings* section (tab), see
