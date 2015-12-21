@@ -136,6 +136,9 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   connect(m_uiTabCalib.lineEdit_new_ceria_num, SIGNAL(fileTextChanged(QString)), this,
 	  SLOT(updateCroppedCalibRun()));
 
+  connect(m_uiTabCalib.comboBox_calib_cropped_bank_name, SIGNAL(currentIndexChanged(int)),
+	  this, SLOT(enableSpecIds()));
+
   enableCalibrateAndFocusActions(true);
 }
 
@@ -527,6 +530,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabCalib.groupBox_current_calib->setEnabled(enable);
   m_uiTabCalib.groupBox_calib_cropped->setEnabled(enable);
   m_uiTabCalib.pushButton_new_cropped_calib->setEnabled(enable);
+  // m_uiTabCalib.lineEdit_cropped_spec_ids->setDisabled(enable); shahroz
   m_ui.pushButton_close->setEnabled(enable);
 
   // focus
@@ -904,6 +908,21 @@ void EnggDiffractionViewQtGUI::updateCroppedCalibRun() {
 }
 
 
+void EnggDiffractionViewQtGUI::calibSpecIdChanged(int /*idx*/) {
+	QComboBox *BankName = m_uiTabCalib.comboBox_calib_cropped_bank_name;
+	if (!BankName)
+		return;
+	m_currentCropCalibBankName = BankName->currentIndex();
+}
+
+void EnggDiffractionViewQtGUI::enableSpecIds() {
+	if (m_currentCropCalibBankName == 0)  // shahroz
+		m_uiTabCalib.lineEdit_cropped_spec_ids->setEnabled(true);
+	else
+		m_uiTabCalib.lineEdit_cropped_spec_ids->setDisabled(true);
+}
+
+
 void EnggDiffractionViewQtGUI::multiRunModeChanged(int /*idx*/) {
   QComboBox *plotType = m_uiTabFocus.comboBox_Multi_Runs;
   if (!plotType)
@@ -916,13 +935,6 @@ void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   if (!plotType)
     return;
   m_currentType = plotType->currentIndex();
-}
-
-void EnggDiffractionViewQtGUI::calibSpecIdChanged(int /*idx*/) {
-  QComboBox *BankName = m_uiTabCalib.comboBox_calib_cropped_bank_name;
-  if (!BankName)
-    return;
-  m_currentCropCalibBankName = BankName->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

@@ -189,6 +189,9 @@ private slots:
   // updates the cropped calib run number with new ceria
   void updateCroppedCalibRun();
 
+  // enables the text field when appropriate bank name is selected
+  void enableSpecIds();
+
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
 

@@ -49,10 +49,10 @@ public:
   /// for focusing
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outDir,
                  const std::vector<std::string> &runNo,
-                 const std::vector<bool> &banks, const std::string &specNos,
+                 const std::vector<bool> &banks, const std::string &specIDs,
                  const std::string &dgFile)
       : m_pres(pres), m_outCalibFilename(), m_multiRunNo(runNo),
-        m_outDir(outDir), m_banks(banks), m_specIDs(specNos), m_dgFile(dgFile),
+        m_outDir(outDir), m_banks(banks), m_specIDs(specIDs), m_dgFile(dgFile),
         m_bin(.0), m_nperiods(0) {}
 
   // for rebinning (ToF)
