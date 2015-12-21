@@ -40,6 +40,7 @@ int EnggDiffractionPresenter::g_croppedCounter = 0;
 int EnggDiffractionPresenter::g_plottingCounter = 0;
 bool EnggDiffractionPresenter::g_abortThread = false;
 std::string EnggDiffractionPresenter::g_lastValidRun = "";
+std::string EnggDiffractionPresenter::g_calibCropIdentifier = "SpectrumNumbers";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -210,22 +211,24 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
   int specIdNum = m_view->currentCropCalibBankName();
   enum PlotMode { SpecIDS = 0, NORTH = 1, SOUTH = 2 };
 
-  std::string bank_name = "";
+  std::string specId = "";
   if (specIdNum == PlotMode::NORTH) {
-	  bank_name = "North";
+    specId = "North";
+    g_calibCropIdentifier = "Bank";
 
   } else if (specIdNum == PlotMode::SOUTH) {
-	  bank_name = "South";
+    specId = "South";
+    g_calibCropIdentifier = "Bank";
 
   } else if (specIdNum == PlotMode::SpecIDS) {
-	  bank_name = "";
+    specId = m_view->currentCalibSpecNos();
   }
 
   m_view->enableCalibrateAndFocusActions(false);
   // alternatively, this would be GUI-blocking:
   // doNewCalibration(outFilename, vanNo, ceriaNo, specID/bankName);
   // calibrationFinished()
-  startAsyncCalibWorker(outFilename, vanNo, ceriaNo, bank_name);
+  startAsyncCalibWorker(outFilename, vanNo, ceriaNo, specId);
 }
 
 void EnggDiffractionPresenter::processFocusBasic() {
@@ -747,7 +750,6 @@ void EnggDiffractionPresenter::startAsyncCalibWorker(
   m_workerThread->start();
 }
 
-
 /**
 * Calculate a new calibration. This is what threads/workers should
 * use to run the calculations in response to the user clicking
@@ -919,10 +921,11 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       alg->setProperty("InputWorkspace", ceriaWS);
       alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
       alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-	  if(specNos != "")
-		  alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(specNos));
-	  else
-		  alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
+      if (specNos != "")
+        alg->setPropertyValue(g_calibCropIdentifier,
+                              boost::lexical_cast<std::string>(specNos));
+      else
+        alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
       // TODO: figure out what should be done about the list of expected peaks
       // to EnggCalibrate => it should be a default, as in EnggFitPeaks, that
       // should be fixed in a nother ticket/issue

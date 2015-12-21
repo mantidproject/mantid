@@ -255,7 +255,11 @@ private:
   /// whether to break the thread
   static bool g_abortThread;
 
+  /// saves the last valid run number
   static std::string g_lastValidRun;
+
+  /// bank name use or specIds for cropped calibration
+  static std::string g_calibCropIdentifier;
 
   // name of the workspace with the vanadium integration (of spectra)
   static const std::string g_vanIntegrationWSName;
