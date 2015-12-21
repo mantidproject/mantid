@@ -39,6 +39,7 @@
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
@@ -48,35 +49,26 @@
 
 #include <numeric>
 
-Spectrogram::Spectrogram():
-      QObject(), QwtPlotSpectrogram(),
-			d_color_map_pen(false),
-			d_matrix(0),d_funct(0),d_wsData(0), d_wsName(),
-	    color_axis(QwtPlot::yRight),
-	    color_map_policy(Default),
-			color_map(QwtLinearColorMap()),
-			d_show_labels(true),
-			d_white_out_labels(false),
-			d_labels_angle(0.0),
-			d_selected_label(NULL),
-			d_click_pos_x(0.),
-			d_click_pos_y(0.),
-			d_labels_x_offset(0),
-			d_labels_y_offset(0),
-			d_labels_align(Qt::AlignHCenter),
-			m_nRows(0),
-			m_nColumns(0),
-			m_bIntensityChanged(false)
-{
-}
+Spectrogram::Spectrogram()
+    : QObject(), QwtPlotSpectrogram(), d_color_map_pen(false), d_matrix(0),
+      d_funct(0), d_wsData(0), d_wsName(), color_axis(QwtPlot::yRight),
+      color_map_policy(Default), color_map(QwtLinearColorMap()),
+      d_show_labels(true), d_white_out_labels(false), d_labels_angle(0.0),
+      d_selected_label(NULL), d_click_pos_x(0.), d_click_pos_y(0.),
+      d_labels_x_offset(0), d_labels_y_offset(0),
+      d_labels_align(Qt::AlignHCenter), m_nRows(0), m_nColumns(0),
+      m_bIntensityChanged(false), m_liveData(false) {}
 
-Spectrogram::Spectrogram(const QString & wsName, const Mantid::API::IMDWorkspace_const_sptr &workspace) :
-      QObject(), QwtPlotSpectrogram(),
-      d_matrix(NULL),d_funct(NULL),d_wsData(NULL), d_wsName(),
-      color_axis(QwtPlot::yRight),
-      color_map_policy(Default),mColorMap()
-{
+Spectrogram::Spectrogram(const QString &wsName,
+                         const Mantid::API::IMDWorkspace_const_sptr &workspace,
+                         const bool isLiveData)
+    : QObject(), QwtPlotSpectrogram(), d_matrix(NULL), d_funct(NULL),
+      d_wsData(NULL), d_wsName(), color_axis(QwtPlot::yRight),
+      color_map_policy(Default), mColorMap(), m_liveData(false) {
+  // First time round, always update color scale, whether live data or not.
   d_wsData = dataFromWorkspace(workspace);
+  // Then set "is live data" to correct value
+  m_liveData = isLiveData;
   setData(*d_wsData);
   d_wsName = wsName.toStdString();
 
@@ -88,17 +80,21 @@ Spectrogram::Spectrogram(const QString & wsName, const Mantid::API::IMDWorkspace
 
   setContourLevels(contourLevels);
 
+  // Find out if this workspace contains live data.
+  // If it does, set a flag so colour scale is not reset on each update.
+  auto liveAlgorithms =
+      Mantid::API::AlgorithmManager::Instance().runningInstancesOf(
+          "MonitorLiveData");
+
   observePostDelete();
   observeADSClear();
   observeAfterReplace();
 }
 
-Spectrogram::Spectrogram(Matrix *m):
-			QObject(), QwtPlotSpectrogram(QString(m->objectName())),
-			d_matrix(m),d_funct(0),d_wsData(NULL), d_wsName(),
-			color_axis(QwtPlot::yRight),
-			color_map_policy(Default),mColorMap()
-{
+Spectrogram::Spectrogram(Matrix *m)
+    : QObject(), QwtPlotSpectrogram(QString(m->objectName())), d_matrix(m),
+      d_funct(0), d_wsData(NULL), d_wsName(), color_axis(QwtPlot::yRight),
+      color_map_policy(Default), mColorMap(), m_liveData(false) {
   setData(MatrixData(m));
   double step = fabs(data().range().maxValue() - data().range().minValue())/5.0;
 
@@ -240,8 +236,11 @@ MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(const Mantid::API
   wsData->setZerosAsNan(false);
 
   // colour range
-  QwtDoubleInterval fullRange = MantidQt::API::SignalRange(*workspace).interval();
-  wsData->setRange(fullRange);
+  if (!m_liveData) {
+    QwtDoubleInterval fullRange =
+        MantidQt::API::SignalRange(*workspace).interval();
+    wsData->setRange(fullRange);
+  }
 
   auto dim0 = workspace->getDimension(0);
   auto dim1 = workspace->getDimension(1);
@@ -261,13 +260,15 @@ void Spectrogram::postDataUpdate()
   auto *plot = this->plot();
   setLevelsNumber(levels());
 
-  QwtScaleWidget *colorAxis = plot->axisWidget(color_axis);
-  if (colorAxis)
-  {
-    colorAxis->setColorMap(data().range(), colorMap());
-  }
+  if (!m_liveData) {
+    QwtScaleWidget *colorAxis = plot->axisWidget(color_axis);
+    if (colorAxis) {
+      colorAxis->setColorMap(data().range(), colorMap());
+    }
 
-  plot->setAxisScale(color_axis, data().range().minValue(), data().range().maxValue());
+    plot->setAxisScale(color_axis, data().range().minValue(),
+                       data().range().maxValue());
+  }
 
   if ( d_wsData )
   {
