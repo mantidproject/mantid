@@ -117,11 +117,13 @@ private:
   const QString createWorkspaceForGroupPlot(
       const QString &wsName,
       boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
-      const int index, const QString &logName);
+      const MantidSurfacePlotDialog::UserInputSurface &options);
   const double
   getSingleLogValue(const int wsIndex,
                     const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
                     const QString &logName) const;
+  const double getSingleLogValue(const int wsIndex,
+                                 const std::vector<std::string> &values) const;
   void convertHistoToPoints(const QString &wsName) const;
   void convertPointsToHisto(const QString &wsName) const;
 

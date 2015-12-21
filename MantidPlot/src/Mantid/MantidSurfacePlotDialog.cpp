@@ -155,6 +155,9 @@ MantidSurfacePlotDialog::getSelections() const {
   selections.plotIndex = getPlot();
   selections.axisName = getAxisName();
   selections.logName = getLogName();
+  if (selections.logName == CUSTOM) {
+    selections.customLogValues = getCustomLogValues();
+  }
   return selections;
 }
 
@@ -202,12 +205,16 @@ void MantidSurfacePlotDialog::onLogSelected(const QString &logName) {
 /**
  * If "Custom" is selected as log, returns the list of values the user has input
  * into the edit box, otherwise returns an empty vector.
- * @returns Vector of numerical log values
+ * @returns Vector of numerical log values (as strings)
  */
-const std::vector<double> MantidSurfacePlotDialog::getCustomLogValues() const {
-  std::vector<double> logValues;
+const std::vector<std::string>
+MantidSurfacePlotDialog::getCustomLogValues() const {
+  std::vector<std::string> logValues;
   if (m_logSelector->currentText() == CUSTOM) {
-    // populate vector here
+    QStringList values = m_logValues->text().split(',');
+    foreach (QString value, values) {
+      logValues.push_back(value.toStdString());
+    }
   }
   return logValues;
 }

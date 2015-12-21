@@ -1529,8 +1529,8 @@ void MantidDockWidget::plotSurface() {
 
         // Set up one new matrix workspace to hold all the data for plotting
         const QString plotWSTitle("__matrixToPlot");
-        const QString xLabelQ = createWorkspaceForGroupPlot(
-            plotWSTitle, wsGroup, options.plotIndex, options.logName);
+        const QString xLabelQ =
+            createWorkspaceForGroupPlot(plotWSTitle, wsGroup, options);
 
         // Convert to point data if not already
         convertHistoToPoints(plotWSTitle);
@@ -1574,8 +1574,8 @@ void MantidDockWidget::plotContour() {
 
         // Set up one new matrix workspace to hold all the data for plotting
         const QString plotWSTitle("__matrixToPlotContour");
-        const QString xLabelQ = createWorkspaceForGroupPlot(
-            plotWSTitle, wsGroup, options.plotIndex, options.logName);
+        const QString xLabelQ =
+            createWorkspaceForGroupPlot(plotWSTitle, wsGroup, options);
 
         // Convert to histogram data if not already
         convertPointsToHisto(plotWSTitle);
@@ -1612,14 +1612,15 @@ void MantidDockWidget::plotContour() {
  * Called by plotSurface() and plotContour().
  * @param wsName :: [input] Name to give the resulting workspace
  * @param wsGroup :: [input] Pointer to workspace group to use as input
- * @param index :: [input] Which spectrum to plot from each workspace
- * @param logName :: [input] Log to read from for axis of XYZ plot
+ * @param options :: [input] User input from dialog
  * @returns Title for the X axis, read from the workspaces in the group
  */
 const QString MantidDockWidget::createWorkspaceForGroupPlot(
-    const QString &wsName, WorkspaceGroup_const_sptr wsGroup, const int index,
-    const QString &logName) {
+    const QString &wsName, WorkspaceGroup_const_sptr wsGroup,
+    const MantidSurfacePlotDialog::UserInputSurface &options) {
   QString xAxisTitle;
+  int index = options.plotIndex; // which spectrum to plot from each WS
+  QString logName = options.logName; // Log to read from for axis of XYZ plot
   if (wsGroup) {
     // Create workspace to hold the data
     // Each "spectrum" will be the data from one workspace
@@ -1647,7 +1648,11 @@ const QString MantidDockWidget::createWorkspaceForGroupPlot(
           auto Y = ws->readY(index);
           matrixWS->dataX(i).swap(X);
           matrixWS->dataY(i).swap(Y);
-          logValues.push_back(getSingleLogValue(i, ws, logName));
+          if (logName == MantidSurfacePlotDialog::CUSTOM) {
+            logValues.push_back(getSingleLogValue(i, options.customLogValues));
+          } else {
+            logValues.push_back(getSingleLogValue(i, ws, logName));
+          }
         }
       }
 
@@ -1699,6 +1704,30 @@ MantidDockWidget::getSingleLogValue(const int wsIndex,
       throw std::invalid_argument("Bad input workspace type");
     }
   }
+}
+
+/**
+ * Gets the custom, user-provided log value of the given index out of the
+ * vector.
+ * Attempts to convert to a numeric value.
+ * If conversion fails, or not enough values in the vector, returns zero.
+ * @param wsIndex :: [input] Index of log value to use
+ * @param logValues :: [input] User-provided vector of log values
+ * @returns Numeric log value, or zero
+ */
+const double MantidDockWidget::getSingleLogValue(
+    const int wsIndex, const std::vector<std::string> &logValues) const {
+  double value = 0;
+
+  try {
+    value = std::stod(logValues.at(wsIndex));
+  } catch (std::exception &e) {
+    // Either value was not a number, or not enough entries in the vector.
+    // Whichever it was, we return zero.
+    value = 0;
+  }
+
+  return value;
 }
 
 /**
