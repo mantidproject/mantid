@@ -562,15 +562,26 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return wksp
 
     def _getStrategy(self, runnumber, extension):
+        """
+        Get chunking strategy by calling mantid algorithm 'DetermineChunking'
+        :param runnumber:
+        :param extension:
+        :return: a list of dictionary.  Each dictionary is a row in table workspace
+        """
         # generate the workspace name
-        wksp = "%s_%d" % (self._instrument, runnumber)
+        assert isinstance(runnumber, int)
+        wksp_name = "%s_%d" % (self._instrument, runnumber)
+        assert self.does_workspace_exist(wksp_name)
+
+        self.log().debug("[Fx116] Run file Name : %s,\t\tMax chunk size: %s" % (str(wksp_name+extension), str(self._chunks)))
+        chunks = api.DetermineChunking(Filename=wksp_name+extension, MaxChunkSize=self._chunks)
+
         strategy = []
-        self.log().debug("[Fx116] Run file Name : %s,\t\tMax chunk size: %s" % (str(wksp+extension), str(self._chunks)))
-        chunks = api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks)
         for row in chunks:
             strategy.append(row)
-        #For table with no rows
-        if not strategy:
+
+        # For table with no rows
+        if len(strategy) == 0:
             strategy.append({})
 
         # delete chunks workspace
@@ -691,37 +702,45 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         wksp = "%s_%d" % (self._instrument, runnumber)
         self.log().information("_focusChunks(): runnumber = %d, extension = %s" % (runnumber, extension))
 
+        # get chunk strategy for parallel processing (MPI)
         strategy = self._getStrategy(runnumber, extension)
 
-        dosplit = False
-        # Number of output workspaces from _focusChunk
-        numwksp = 1
+        # determine event splitting by checking filterWall and number of output workspaces from _focusChunk
+        do_split_raw_wksp, num_out_wksp = self._determine_workspace_splitting(splitwksp)
+
+        """
+        do_split_raw_wksp = False
+        num_out_wksp = 1
+
         if splitwksp is not None:
-            # Check consistency in the code
+            # Use splitting workspace
+
+            # Check consistency with filterWall
             if filterWall[0] < 1.0E-20 and filterWall[1] < 1.0E-20:
                 # Default definition of filterWall when there is no split workspace specified.
-                raise NotImplementedError("It is impossible to have a not-NONE splitters workspace and (0,0) time filter wall.")
+                raise RuntimeError("It is impossible to have a not-NONE splitters workspace and (0,0) time filter wall.")
             # ENDIF
 
-            # FIXME Unfiltered workspace (remainder) is not considered here
-            numwksp = self.getNumberOfSplittedWorkspace(splitwksp)
-            numsplitters = splitwksp.rowCount()
+            # Note: Unfiltered workspace (remainder) is not considered here
+            num_out_wksp = self.getNumberOfSplittedWorkspace(splitwksp)
+            num_splitters = splitwksp.rowCount()
 
             # Do explicit FilterEvents if number of splitters is larger than 1.
             # If number of splitters is equal to 1, then filterWall will do the job itself.
-            if numsplitters > 1:
-                dosplit = True
-            self.log().debug("[Fx948] Number of split workspaces = %d; Do split = %s" % (numwksp, str(dosplit)))
+            if num_splitters > 1:
+                do_split_raw_wksp = True
+            self.log().debug("[Fx948] Number of split workspaces = %d; Do split = %s" % (num_out_wksp, str(do_split_raw_wksp)))
         # ENDIF
+        """
 
         firstChunkList = []
         wksplist = []
-        for dummy_n in xrange(numwksp):
+        for dummy_n in xrange(num_out_wksp):
             # In some cases, there will be 1 more splitted workspace (unfiltered)
             firstChunkList.append(True)
             wksplist.append(None)
 
-        self.log().debug("F1141A: Number of workspace to process = %d" %(numwksp))
+        self.log().debug("F1141A: Number of workspace to process = %d" %(num_out_wksp))
 
         # reduce data by chunks
         ichunk = -1
@@ -746,7 +765,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             tempwslist = []
             if temp.id() == EVENT_WORKSPACE_ID:
                 # Filter to bad
-                if dosplit:
+                if do_split_raw_wksp:
                     # Splitting workspace
                     basename = str(temp)
                     if self._splitinfotablews is None:
@@ -784,13 +803,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # ENDIF
 
                 # Update number of workspaces
-                numwksp = len(tempwslist)
+                num_out_wksp = len(tempwslist)
             else:
                 # Histogram data
                 tempwslist.append(temp)
             # ENDIF
 
-            msg = "[Fx1142] Workspace of chunk %d is %d/%d. \n" % (ichunk, len(tempwslist), numwksp)
+            msg = "[Fx1142] Workspace of chunk %d is %d/%d. \n" % (ichunk, len(tempwslist), num_out_wksp)
             for iws in xrange(len(tempwslist)):
                 ws = tempwslist[iws]
                 msg += "%s\t\t" % (str(ws))
@@ -798,7 +817,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     msg += "\n"
             self.log().debug(msg)
 
-            for itemp in xrange(numwksp):
+            for itemp in xrange(num_out_wksp):
                 temp = tempwslist[itemp]
                 # Align and focus
                 focuspos = self._focusPos
@@ -820,7 +839,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
                 # Rename and/or add to workspace of same splitter but different chunk
                 wkspname = wksp
-                if numwksp > 1:
+                if num_out_wksp > 1:
                     wkspname += "_%s" % ( (str(temp)).split("_")[-1] )
 
                 if firstChunkList[itemp]:
@@ -840,23 +859,23 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # Sum workspaces for all mpi tasks
         if HAVE_MPI:
-            for itemp in xrange(numwksp):
+            for itemp in xrange(num_out_wksp):
                 wksplist[itemp] = api.GatherWorkspaces(InputWorkspace=wksplist[itemp],\
                         PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksplist[itemp])
         # ENDIF MPI
 
         if self._chunks > 0:
             # When chunks are added, proton charge is summed for all chunks
-            for itemp in xrange(numwksp):
+            for itemp in xrange(num_out_wksp):
                 wksplist[itemp].getRun().integrateProtonCharge()
         # ENDIF
 
         if (self.iparmFile is not None) and (len(self.iparmFile) > 0):
             # When chunks are added, add iparamFile
-            for itemp in xrange(numwksp):
+            for itemp in xrange(num_out_wksp):
                 wksplist[itemp].getRun()['iparm_file'] = self.iparmFile
 
-        for itemp in xrange(numwksp):
+        for itemp in xrange(num_out_wksp):
             if wksplist[itemp].id() == EVENT_WORKSPACE_ID:
                 wksplist[itemp] = api.CompressEvents(InputWorkspace=wksplist[itemp],\
                     OutputWorkspace=wksplist[itemp], Tolerance=self.COMPRESS_TOL_TOF) # 100ns
@@ -995,7 +1014,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return filterWall
 
-
     def getNumberOfSplittedWorkspace(self, splitwksp):
         """ Get number of splitted workspaces due to input splitwksp
 
@@ -1011,5 +1029,45 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return len(wscountdict.keys())
 
-# Register algorthm with Mantid.
+    @staticmethod
+    def does_workspace_exist(workspace_name):
+        """
+        Purpose: Check whether a workspace exists in AnalysisDataService
+        :param workspace_name:
+        :return:
+        """
+        assert isinstance(workspace_name, str)
+
+        return AnalysisDataService.doesExist(workspace_name)
+
+    def _determine_workspace_splitting(self, split_wksp, filter_wall):
+        """
+        :return: do_split_raw_wksp, num_out_wksp
+        """
+        do_split_raw_wksp = False
+        num_out_wksp = 1
+
+        if split_wksp is not None:
+            # Use splitting workspace
+
+            # Check consistency with filterWall
+            if filter_wall[0] < 1.0E-20 and filter_wall[1] < 1.0E-20:
+                # Default definition of filterWall when there is no split workspace specified.
+                raise RuntimeError("It is impossible to have a not-NONE splitters workspace and (0,0) time filter wall.")
+            # ENDIF
+
+            # Note: Unfiltered workspace (remainder) is not considered here
+            num_out_wksp = self.getNumberOfSplittedWorkspace(split_wksp)
+            num_splitters = split_wksp.rowCount()
+
+            # Do explicit FilterEvents if number of splitters is larger than 1.
+            # If number of splitters is equal to 1, then filterWall will do the job itself.
+            if num_splitters > 1:
+                do_split_raw_wksp = True
+            self.log().debug("[Fx948] Number of split workspaces = %d; Do split = %s" % (num_out_wksp, str(do_split_raw_wksp)))
+        # ENDIF
+
+        return do_split_raw_wksp, num_out_wksp
+
+# Register algorithm with Mantid.
 AlgorithmFactory.subscribe(SNSPowderReduction)
