@@ -236,11 +236,9 @@ MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(const Mantid::API
   wsData->setZerosAsNan(false);
 
   // colour range
-  if (!m_liveData) {
-    QwtDoubleInterval fullRange =
-        MantidQt::API::SignalRange(*workspace).interval();
-    wsData->setRange(fullRange);
-  }
+  QwtDoubleInterval fullRange =
+      MantidQt::API::SignalRange(*workspace).interval();
+  wsData->setRange(fullRange);
 
   auto dim0 = workspace->getDimension(0);
   auto dim1 = workspace->getDimension(1);
