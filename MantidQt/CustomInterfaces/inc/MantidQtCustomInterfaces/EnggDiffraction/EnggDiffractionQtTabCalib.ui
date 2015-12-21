@@ -212,7 +212,7 @@
       <bool>true</bool>
      </property>
      <property name="title">
-      <string>Calibration Cropped</string>
+      <string>Cropped Calibration </string>
      </property>
      <property name="checkable">
       <bool>true</bool>
