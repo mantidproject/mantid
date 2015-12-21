@@ -265,6 +265,9 @@ void EnggDiffractionPresenter::processFocusBasic() {
 
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+
+
+
     /**
     Todo
     **/
@@ -2208,5 +2211,34 @@ Poco::Path EnggDiffractionPresenter::outFilesDir(std::string addToDir) {
   return saveDir;
 }
 
+
+void EnggDiffractionPresenter::MergeFiles(const std::vector<std::string> &multi_RunNo) {
+	const std::string instStr = m_view->currentInstrument();
+	const std::string mergedRunNo = "engggui_focusing_merged_ws";
+	try {
+		auto load =
+			Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+		load->initialize();
+		load->setPropertyValue("Filename", instStr + multi_RunNo[0]);
+
+		load->setPropertyValue("OutputWorkspace", mergedRunNo);
+		load->execute();
+
+		AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+		mergedRunNo = ADS.retrieveWS<MatrixWorkspace>(mergedRunNo);
+	}
+	catch (std::runtime_error &re) {
+		g_log.error()
+			<< "Error while loading calibration sample data. "
+			"Could not run the algorithm Load succesfully for the calibration "
+			"sample (run number: " +
+			ceriaNo + "). Error description: " + re.what() +
+			" Please check also the previous log messages for details.";
+		throw;
+	}
+
+	}
+g_log.notice() << "Load alogirthm successfully merged the following files: " << outWSName << std::endl;
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

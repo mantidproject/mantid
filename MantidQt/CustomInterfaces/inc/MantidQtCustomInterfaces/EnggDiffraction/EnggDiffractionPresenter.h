@@ -72,6 +72,8 @@ public:
                   const std::vector<bool> &banks, const std::string &specNos,
                   const std::string &dgFile);
 
+  void MergeFiles(const std::vector<std::string> &multi_RunNo);
+
   /// checks if its a valid run number returns string
   std::string isValidRunNumber(std::vector<std::string> dir);
 
