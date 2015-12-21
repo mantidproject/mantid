@@ -27,7 +27,7 @@ DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 int EnggDiffractionViewQtGUI::m_currentType = 0;
 int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
-int EnggDiffractionViewQtGUI::m_currentCropCalibSpecId = 0;
+int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -116,6 +116,8 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
       QString::fromStdString(vanadiumRun));
   m_uiTabCalib.lineEdit_new_ceria_num->setUserInput(
       QString::fromStdString(ceriaRun));
+  m_uiTabCalib.lineEdit_cropped_run_num->setUserInput(
+	  QString::fromStdString(ceriaRun));
 
   // push button signals/slots
   connect(m_uiTabCalib.pushButton_load_calib, SIGNAL(released()), this,
@@ -127,9 +129,12 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   connect(m_uiTabCalib.pushButton_new_cropped_calib, SIGNAL(released()), this,
           SLOT(CroppedCalibrateClicked()));
 
-  connect(m_uiTabCalib.comboBox_calib_cropped_spec_ids,
+  connect(m_uiTabCalib.comboBox_calib_cropped_bank_name,
           SIGNAL(currentIndexChanged(int)), this,
           SLOT(calibSpecIdChanged(int)));
+
+  connect(m_uiTabCalib.lineEdit_new_ceria_num, SIGNAL(fileTextChanged(QString)), this,
+	  SLOT(updateCroppedCalibRun()));
 
   enableCalibrateAndFocusActions(true);
 }
@@ -242,21 +247,15 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabCalib.lineEdit_new_ceria_num->setText(
       qs.value("user-params-new-ceria-num", "").toString());
 
-  m_uiTabCalib.lineEdit_new_vanadium_num->setText(
-      qs.value("user-params-new-vanadium-num", "").toString());
-
-  m_uiTabCalib.lineEdit_new_ceria_num->setText(
-      qs.value("user-params-new-ceria-num", "").toString());
-
   m_uiTabCalib.groupBox_calib_cropped->setChecked(
       qs.value("user-params-calib-cropped-group-checkbox", false).toBool());
 
   m_uiTabCalib.lineEdit_cropped_run_num->setText(
-      qs.value("user-params-current-vanadium-num", "").toString());
+      qs.value("user-params-new-ceria-num", "").toString());
 
   m_uiTabCalib.lineEdit_cropped_run_num->setReadOnly(true);
 
-  m_uiTabCalib.comboBox_calib_cropped_spec_ids->setCurrentIndex(0);
+  m_uiTabCalib.comboBox_calib_cropped_bank_name->setCurrentIndex(0);
 
   // user params - focusing
   m_uiTabFocus.lineEdit_run_num->setUserInput(
@@ -526,7 +525,8 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   // calibrate
   m_uiTabCalib.groupBox_make_new_calib->setEnabled(enable);
   m_uiTabCalib.groupBox_current_calib->setEnabled(enable);
-
+  m_uiTabCalib.groupBox_calib_cropped->setEnabled(enable);
+  m_uiTabCalib.pushButton_new_cropped_calib->setEnabled(enable);
   m_ui.pushButton_close->setEnabled(enable);
 
   // focus
@@ -898,6 +898,12 @@ void EnggDiffractionViewQtGUI::plotFocusStatus() {
   }
 }
 
+void EnggDiffractionViewQtGUI::updateCroppedCalibRun() {
+	auto ceria = m_uiTabCalib.lineEdit_new_ceria_num->getText();
+	m_uiTabCalib.lineEdit_cropped_run_num->setText(ceria);
+}
+
+
 void EnggDiffractionViewQtGUI::multiRunModeChanged(int /*idx*/) {
   QComboBox *plotType = m_uiTabFocus.comboBox_Multi_Runs;
   if (!plotType)
@@ -913,10 +919,10 @@ void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
 }
 
 void EnggDiffractionViewQtGUI::calibSpecIdChanged(int /*idx*/) {
-  QComboBox *SpecId = m_uiTabCalib.comboBox_calib_cropped_spec_ids;
-  if (!SpecId)
+  QComboBox *BankName = m_uiTabCalib.comboBox_calib_cropped_bank_name;
+  if (!BankName)
     return;
-  m_currentCropCalibSpecId = SpecId->currentIndex();
+  m_currentCropCalibBankName = BankName->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
@@ -946,6 +952,7 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
   // calibration tab
   m_uiTabCalib.lineEdit_new_ceria_num->setInstrumentOverride(prefixInput);
   m_uiTabCalib.lineEdit_new_vanadium_num->setInstrumentOverride(prefixInput);
+  m_uiTabCalib.lineEdit_cropped_run_num->setInstrumentOverride(prefixInput);
 }
 
 void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {

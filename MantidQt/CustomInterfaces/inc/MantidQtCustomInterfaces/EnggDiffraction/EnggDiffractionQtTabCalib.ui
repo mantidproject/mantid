@@ -239,12 +239,17 @@
         <item>
          <widget class="QLabel" name="label_calib_cropped_spec_ids">
           <property name="text">
-           <string>Spectrum IDs:</string>
+           <string>Bank Name:</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QComboBox" name="comboBox_calib_cropped_bank_name">
+          <item>
+           <property name="text">
+            <string>Enable Spectrum-IDs</string>
+           </property>
+          </item>
           <item>
            <property name="text">
             <string>Bank North - 1</string>
@@ -253,11 +258,6 @@
           <item>
            <property name="text">
             <string>Bank South - 2</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Both: North, South</string>
            </property>
           </item>
          </widget>

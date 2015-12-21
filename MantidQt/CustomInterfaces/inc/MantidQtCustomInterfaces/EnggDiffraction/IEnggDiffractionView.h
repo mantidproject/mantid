@@ -122,7 +122,7 @@ public:
   *
   * @return which format should to applied for plotting data
   */
-  virtual int currentCropCalibSpecId() const = 0;
+  virtual int currentCropCalibBankName() const = 0;
 
   /**
   * Selected plot data representation will be applied, which will

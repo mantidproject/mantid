@@ -87,7 +87,6 @@ public:
 
   std::string currentCalibFile() const;
 
-
   std::vector<std::string> newVanadiumNo() const;
 
   std::vector<std::string> newCeriaNo() const;
@@ -141,7 +140,7 @@ public:
 
   int currentPlotType() const { return m_currentType; }
 
-  int currentCropCalibSpecId() const { return m_currentCropCalibSpecId; }
+  int currentCropCalibBankName() const { return m_currentCropCalibBankName; }
 
   int currentMultiRunMode() const { return m_currentRunMode; }
 
@@ -186,6 +185,9 @@ private slots:
 
   // slots of plot spectrum check box status
   void plotFocusStatus();
+
+  // updates the cropped calib run number with new ceria
+  void updateCroppedCalibRun();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -240,7 +242,7 @@ private:
   void setPrefix(std::string prefix);
 
   // current bank number used for cropped calibration
-  int static m_currentCropCalibSpecId;
+  int static m_currentCropCalibBankName;
 
   // plot data representation type selected
   int static m_currentType;
