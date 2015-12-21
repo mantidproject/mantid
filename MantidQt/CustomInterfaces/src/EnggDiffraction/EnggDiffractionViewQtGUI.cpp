@@ -117,7 +117,7 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   m_uiTabCalib.lineEdit_new_ceria_num->setUserInput(
       QString::fromStdString(ceriaRun));
   m_uiTabCalib.lineEdit_cropped_run_num->setUserInput(
-	  QString::fromStdString(ceriaRun));
+      QString::fromStdString(ceriaRun));
 
   // push button signals/slots
   connect(m_uiTabCalib.pushButton_load_calib, SIGNAL(released()), this,
@@ -133,11 +133,11 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
           SIGNAL(currentIndexChanged(int)), this,
           SLOT(calibSpecIdChanged(int)));
 
-  connect(m_uiTabCalib.lineEdit_new_ceria_num, SIGNAL(fileTextChanged(QString)), this,
-	  SLOT(updateCroppedCalibRun()));
+  connect(m_uiTabCalib.lineEdit_new_ceria_num, SIGNAL(fileTextChanged(QString)),
+          this, SLOT(updateCroppedCalibRun()));
 
-  connect(m_uiTabCalib.comboBox_calib_cropped_bank_name, SIGNAL(currentIndexChanged(int)),
-	  this, SLOT(enableSpecIds()));
+  connect(m_uiTabCalib.comboBox_calib_cropped_bank_name,
+          SIGNAL(currentIndexChanged(int)), this, SLOT(enableSpecIds()));
 
   enableCalibrateAndFocusActions(true);
 }
@@ -902,29 +902,27 @@ void EnggDiffractionViewQtGUI::plotFocusStatus() {
 }
 
 void EnggDiffractionViewQtGUI::updateCroppedCalibRun() {
-	auto ceria = m_uiTabCalib.lineEdit_new_ceria_num->getText();
-	m_uiTabCalib.lineEdit_cropped_run_num->setText(ceria);
+  auto ceria = m_uiTabCalib.lineEdit_new_ceria_num->getText();
+  m_uiTabCalib.lineEdit_cropped_run_num->setText(ceria);
 }
 
-
 void EnggDiffractionViewQtGUI::calibSpecIdChanged(int /*idx*/) {
-	QComboBox *BankName = m_uiTabCalib.comboBox_calib_cropped_bank_name;
-	if (!BankName)
-		return;
-	m_currentCropCalibBankName = BankName->currentIndex();
+  QComboBox *BankName = m_uiTabCalib.comboBox_calib_cropped_bank_name;
+  if (!BankName)
+    return;
+  m_currentCropCalibBankName = BankName->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::enableSpecIds() {
-	if (m_currentCropCalibBankName == 0)
-		m_uiTabCalib.lineEdit_cropped_spec_ids->setEnabled(true);
-	else
-		m_uiTabCalib.lineEdit_cropped_spec_ids->setDisabled(true);
+  if (m_currentCropCalibBankName == 0)
+    m_uiTabCalib.lineEdit_cropped_spec_ids->setEnabled(true);
+  else
+    m_uiTabCalib.lineEdit_cropped_spec_ids->setDisabled(true);
 }
 
 std::string EnggDiffractionViewQtGUI::currentCalibSpecNos() const {
-	return m_uiTabCalib.lineEdit_cropped_spec_ids->text().toStdString();
+  return m_uiTabCalib.lineEdit_cropped_spec_ids->text().toStdString();
 }
-
 
 void EnggDiffractionViewQtGUI::multiRunModeChanged(int /*idx*/) {
   QComboBox *plotType = m_uiTabFocus.comboBox_Multi_Runs;

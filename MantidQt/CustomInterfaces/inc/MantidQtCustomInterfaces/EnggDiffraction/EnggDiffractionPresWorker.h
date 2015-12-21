@@ -43,8 +43,8 @@ public:
                  const std::string &vanNo, const std::string &ceriaNo,
                  const std::string &specNos)
       : m_pres(pres), m_outFilenames(), m_outCalibFilename(outFilename),
-        m_vanNo(vanNo), m_ceriaNo(ceriaNo), m_CalibSpecIDs(specNos), m_banks(), m_bin(.0),
-        m_nperiods(0) {}
+        m_vanNo(vanNo), m_ceriaNo(ceriaNo), m_CalibSpecIDs(specNos), m_banks(),
+        m_bin(.0), m_nperiods(0) {}
 
   /// for focusing
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outDir,
@@ -74,7 +74,8 @@ private slots:
    * signal.
    */
   void calibrate() {
-    m_pres->doNewCalibration(m_outCalibFilename, m_vanNo, m_ceriaNo, m_CalibSpecIDs);
+    m_pres->doNewCalibration(m_outCalibFilename, m_vanNo, m_ceriaNo,
+                             m_CalibSpecIDs);
     emit finished();
   }
 
