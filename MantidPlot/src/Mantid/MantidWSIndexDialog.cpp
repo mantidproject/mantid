@@ -343,8 +343,8 @@ MantidWSIndexDialog::MantidWSIndexDialog(MantidUI *mui, Qt::WFlags flags,
                                          QList<QString> wsNames,
                                          const bool showWaterfallOption,
                                          const bool showPlotAll)
-    : QDialog(mui->appWindow(), flags), m_mantidUI(mui),
-      m_widget(this, flags, wsNames, showWaterfallOption),
+    : QDialog(mui->appWindow(), flags),
+      m_widget(this, flags, wsNames, showWaterfallOption), m_mantidUI(mui),
       m_plotAll(showPlotAll) {
   // Set up UI.
   init();
