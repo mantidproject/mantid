@@ -207,25 +207,25 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
 
   // const std::string specID = m_view->focusingCroppedSpectrumIDs();
 
-  int specIdNum = m_view->currentCropCalibSpecId();
-  enum PlotMode { NORTH = 0, SOUTH = 1, BOTH = 2 };
+  int specIdNum = m_view->currentCropCalibBankName();
+  enum PlotMode { SpecIDS = 0, NORTH = 1, SOUTH = 2 };
 
-  std::string specId = "";
+  std::string bank_name = "";
   if (specIdNum == PlotMode::NORTH) {
-    specId = "North";
+	  bank_name = "North";
 
   } else if (specIdNum == PlotMode::SOUTH) {
-    specId = "South";
+	  bank_name = "South";
 
-  } else if (specIdNum == PlotMode::BOTH) {
-    specId = "Both: North, South";
+  } else if (specIdNum == PlotMode::SpecIDS) {
+	  bank_name = "";
   }
 
   m_view->enableCalibrateAndFocusActions(false);
   // alternatively, this would be GUI-blocking:
-  // doNewCalibration(outFilename, vanNo, ceriaNo);
+  // doNewCalibration(outFilename, vanNo, ceriaNo, specID/bankName);
   // calibrationFinished()
-  startAsyncCalibWorker(outFilename, vanNo, ceriaNo, specId);
+  startAsyncCalibWorker(outFilename, vanNo, ceriaNo, bank_name);
 }
 
 void EnggDiffractionPresenter::processFocusBasic() {
@@ -727,6 +727,7 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
 * @param outFilename name for the output GSAS calibration file
 * @param vanNo vanadium run number
 * @param ceriaNo ceria run number
+* @param specNos specIDs or bank name to be passed
 */
 void EnggDiffractionPresenter::startAsyncCalibWorker(
     const std::string &outFilename, const std::string &vanNo,
@@ -755,6 +756,7 @@ void EnggDiffractionPresenter::startAsyncCalibWorker(
 * @param outFilename name for the output GSAS calibration file
 * @param vanNo vanadium run number
 * @param ceriaNo ceria run number
+* @param specNos specIDs or bank name to be passed
 */
 void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
                                                 const std::string &vanNo,
@@ -860,6 +862,7 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
 * @param vanNo Vanadium run number
 * @param ceriaNo Ceria run number
 * @param outFilename output filename chosen by the user
+* @param specNos specIDs or bank name to be passed
 */
 void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &vanNo,
