@@ -17,6 +17,8 @@ typedef boost::fusion::vector<int, boost::optional<int>> ParsedRationalNumber;
 using boost::spirit::qi::grammar;
 using boost::spirit::qi::rule;
 
+typedef boost::spirit::qi::space_type skipper_type_;
+
 /** MatrixVectorPairParser
 
   MatrixVectorPairParser can parse matrix/vector pairs in
@@ -56,10 +58,9 @@ using boost::spirit::qi::rule;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-template <typename Iterator, typename Skipper>
+template <typename Iterator>
 class MANTID_GEOMETRY_DLL MatrixVectorPairParser
-    : public grammar<Iterator, Skipper> {
+    : public grammar<Iterator, skipper_type_> {
 public:
   MatrixVectorPairParser()
       : MatrixVectorPairParser::base_type(m_parser), m_directions(),
@@ -225,7 +226,7 @@ private:
     m_currentRow = 0;
   }
 
-  rule<Iterator, Skipper> m_sign, m_rational, m_direction, m_component,
+  rule<Iterator, skipper_type_> m_sign, m_rational, m_direction, m_component,
       m_componentSeries, m_parser;
 
   std::map<std::string, V3R> m_directions;
@@ -247,7 +248,7 @@ MatrixVectorPair<T, V3R>
 parseMatrixVectorPair(const std::string &matrixVectorString) {
   namespace qi = boost::spirit::qi;
 
-  MatrixVectorPairParser<std::string::const_iterator, qi::space_type> parser;
+  MatrixVectorPairParser<std::string::const_iterator> parser;
 
   std::string::const_iterator strIterator = matrixVectorString.begin();
   std::string::const_iterator strEnd = matrixVectorString.end();
