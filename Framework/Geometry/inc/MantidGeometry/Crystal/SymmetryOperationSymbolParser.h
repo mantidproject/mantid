@@ -3,7 +3,6 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
-#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -78,29 +77,8 @@ public:
 protected:
   SymmetryOperationSymbolParser();
 
-  static std::pair<Kernel::IntMatrix, V3R>
-  parseComponents(const std::vector<std::string> &components);
-  static std::string
-  getCleanComponentString(const std::string &componentString);
-  static std::pair<std::vector<int>, RationalNumber>
-  parseComponent(const std::string &component);
-
-  static void processMatrixRowToken(const std::string &matrixToken,
-                                    std::vector<int> &matrixRow);
-  static void addToVector(std::vector<int> &vector,
-                          const std::vector<int> &add);
-  static std::vector<int> getVectorForSymbol(const char symbol,
-                                             const char sign = '+');
-  static int getFactorForSign(const char sign);
-
-  static void
-  processVectorComponentToken(const std::string &rationalNumberToken,
-                              RationalNumber &vectorComponent);
-
-  static bool isValidMatrixRow(const std::vector<int> &matrixRow);
-
-  static bool regexMembersInitialized();
-  static void initializeRegexMembers();
+  static void verifyMatrix(const Kernel::IntMatrix &matrix);
+  static bool isValidMatrixRow(const int *element, size_t columnNumber);
 };
 
 } // namespace Geometry
