@@ -23,8 +23,8 @@ MantidSurfacePlotDialog::MantidSurfacePlotDialog(MantidUI *mui,
                                                  Qt::WFlags flags,
                                                  QList<QString> wsNames,
                                                  const QString &plotType)
-    : QDialog(mui->appWindow(), flags), m_mantidUI(mui), m_wsNames(wsNames),
-      m_accepted(false), m_widget(this, flags, wsNames, false) {
+    : QDialog(mui->appWindow(), flags), m_widget(this, flags, wsNames, false),
+      m_mantidUI(mui), m_wsNames(wsNames), m_accepted(false) {
   // Set up UI.
   init(plotType);
 }
@@ -165,7 +165,7 @@ MantidSurfacePlotDialog::getSelections() const {
 * Returns the workspace index to be plotted
 * @returns Workspace index to be plotted
 */
-const int MantidSurfacePlotDialog::getPlot() const {
+int MantidSurfacePlotDialog::getPlot() const {
   int spectrumIndex = 0; // default to 0
   const auto userInput = m_widget.getPlots();
 

@@ -34,7 +34,7 @@ public:
   /// Returns a structure holding all of the selected options
   UserInputSurface getSelections() const;
   /// Returns the workspace index to be plotted
-  const int getPlot() const;
+  int getPlot() const;
   /// The string "Workspace index"
   static const QString WORKSPACE_INDEX;
   /// The string "Custom"

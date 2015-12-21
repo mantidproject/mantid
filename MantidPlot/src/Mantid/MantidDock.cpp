@@ -1680,7 +1680,7 @@ const QString MantidDockWidget::createWorkspaceForGroupPlot(
  * @returns log value as a double, or workspace index
  * @throws invalid_argument if log is wrong type or not present
  */
-const double
+double
 MantidDockWidget::getSingleLogValue(const int wsIndex,
                                     const MatrixWorkspace_const_sptr &matrixWS,
                                     const QString &logName) const {
@@ -1716,7 +1716,7 @@ MantidDockWidget::getSingleLogValue(const int wsIndex,
  * @param logValues :: [input] User-provided vector of log values
  * @returns Numeric log value, or zero
  */
-const double MantidDockWidget::getSingleLogValue(
+double MantidDockWidget::getSingleLogValue(
     const int wsIndex, const std::vector<std::string> &logValues) const {
   double value = 0;
 
