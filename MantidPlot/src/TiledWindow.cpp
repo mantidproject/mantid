@@ -139,7 +139,7 @@ namespace {
   {
   public:
     /// Constructor
-    InnerWidget(QWidget *parent): QWidget(parent),m_draw(false) {}
+    explicit InnerWidget(QWidget *parent) : QWidget(parent), m_draw(false) {}
 
     /**
      * Work out where to put the marker.

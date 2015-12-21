@@ -56,7 +56,7 @@ public:
   enum Mode {Mask, Group, ROI};
   enum Activity {Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing,DrawFree};
 
-  InstrumentWindowMaskTab(InstrumentWindow* instrWindow);
+  explicit InstrumentWindowMaskTab(InstrumentWindow *instrWindow);
   void initSurface();
   void setMode(Mode mode);
   void selectTool(Activity tool);

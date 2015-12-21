@@ -67,7 +67,7 @@ public:
     InteractionModeSize
   };
   /// Constructor
-  ProjectionSurface(const InstrumentActor* rootActor);
+  explicit ProjectionSurface(const InstrumentActor *rootActor);
   /// Destructor
   virtual ~ProjectionSurface();
   /// Resets the instrument actor.

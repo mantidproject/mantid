@@ -170,7 +170,7 @@ class FlatBankFinder: public GLActorConstVisitor
 {
     PanelsSurface &m_surface;
 public:
-    FlatBankFinder(PanelsSurface &surface):m_surface(surface){}
+  explicit FlatBankFinder(PanelsSurface &surface) : m_surface(surface) {}
 
     bool visit(const GLActor*){return false;}
     bool visit(const GLActorCollection*){return false;}

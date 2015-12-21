@@ -42,8 +42,8 @@ public:
   virtual ~IMDHistoWorkspace();
 
   /// Returns a clone of the workspace
-  std::unique_ptr<IMDHistoWorkspace> clone() const {
-    return std::unique_ptr<IMDHistoWorkspace>(doClone());
+  IMDHistoWorkspace_uptr clone() const {
+    return IMDHistoWorkspace_uptr(doClone());
   }
 
   /// See the MDHistoWorkspace definition for descriptions of these

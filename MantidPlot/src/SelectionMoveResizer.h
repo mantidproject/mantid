@@ -92,14 +92,14 @@ class SelectionMoveResizer : public QWidget
 
 	public:
 		//! Construct a new MoveResizer with the given marker as the only target.
-		SelectionMoveResizer(LegendWidget *target);
-		//! Construct a new MoveResizer with the given marker as the only target.
-		SelectionMoveResizer(ArrowMarker *target);
-		//! Construct a new MoveResizer with the given marker as the only target.
-		SelectionMoveResizer(ImageMarker *target);
-		//! Construct a new MoveResizer with the given widget as the only target.
-		SelectionMoveResizer(QWidget *target);
-		//! Clean up after myself.
+          explicit SelectionMoveResizer(LegendWidget *target);
+                //! Construct a new MoveResizer with the given marker as the only target.
+          explicit SelectionMoveResizer(ArrowMarker *target);
+                //! Construct a new MoveResizer with the given marker as the only target.
+          explicit SelectionMoveResizer(ImageMarker *target);
+                //! Construct a new MoveResizer with the given widget as the only target.
+          explicit SelectionMoveResizer(QWidget *target);
+                //! Clean up after myself.
 		~SelectionMoveResizer();
 		/**\brief React on geometry changes of parent and targets.
 		 */

@@ -7315,7 +7315,7 @@ void ApplicationWindow::showAxisDialog() {
   QDialog *gd = showScaleDialog();
   if (gd && plot->isA("MultiLayer")) {
     MultiLayer *ml = dynamic_cast<MultiLayer *>(plot);
-    if (!ml || (ml && !ml->layers()))
+    if (!ml || !ml->layers())
       return;
 
     auto ad = dynamic_cast<AxesDialog *>(gd);
@@ -15885,7 +15885,7 @@ void ApplicationWindow::executeScriptFile(
   runner->redirectStdOut(false);
   scriptingEnv()->redirectStdOut(false);
   if (execMode == Script::Asynchronous) {
-    QFuture<bool> job = runner->executeAsync(code);
+    QFuture<bool> job = runner->executeAsync(ScriptCode(code));
     while (job.isRunning()) {
       QCoreApplication::processEvents();
     }
@@ -15893,7 +15893,7 @@ void ApplicationWindow::executeScriptFile(
     QCoreApplication::processEvents();
     QCoreApplication::processEvents();
   } else {
-    runner->execute(code);
+    runner->execute(ScriptCode(code));
   }
   delete runner;
 }
@@ -15963,7 +15963,7 @@ bool ApplicationWindow::runPythonScript(const QString &code, bool async,
   }
   bool success(false);
   if (async) {
-    QFuture<bool> job = m_iface_script->executeAsync(code);
+    QFuture<bool> job = m_iface_script->executeAsync(ScriptCode(code));
     while (job.isRunning()) {
       QCoreApplication::instance()->processEvents();
     }
@@ -15971,7 +15971,7 @@ bool ApplicationWindow::runPythonScript(const QString &code, bool async,
     QCoreApplication::instance()->processEvents();
     success = job.result();
   } else {
-    success = m_iface_script->execute(code);
+    success = m_iface_script->execute(ScriptCode(code));
   }
   if (redirect) {
     m_iface_script->redirectStdOut(false);

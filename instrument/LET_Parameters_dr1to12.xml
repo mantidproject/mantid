@@ -64,8 +64,6 @@
 <parameter name="norm-mon1-spec">
   <value val="98305"/>
 </parameter>
-  
-
 <!-- Time interval used for integration to estimate current on the sample 
     This interval is usually taken around the monitor peak-->
 <parameter name="norm-mon1-min">
@@ -99,7 +97,7 @@
 </parameter>
 
 <!-- -->
-<parameter name="ei-mon1-spec"  type="string">
+<parameter name="ei-mon1-spec"  type="int">
   <value val="98310"/>
   <description is="First spectra number (monitor's spectra number) to use when measuring incident energy,
      or comma separated list of such numbers.
@@ -163,9 +161,19 @@
   <value val="1000"/>
 </parameter>
 
-<!-- Remove the count rate seen in the regions of the histograms defined as the background regions -->
+<!--  -->
 <parameter name="check_background"  type="bool">
    <value val="False"/>
+   <description is="If True, remove the count rate seen in the regions of the
+     histograms defined as the background regions. 
+     The background region is defined by background_range property."/>
+ </parameter>
+
+<parameter name="nullify_negative_signal"  type="bool">
+  <value val="False"/>
+  <description is="If True and background removed, nullify the negative signal, which
+     may occur at some detectors at some moments of time due to flat background removal and modify errors accordingly.
+     If False, leave signals and errors unchanged. "/>
 </parameter>
 
 <!--  detector_van_range- integratin in E(mev) for detector(white beam) vanadium data [20,100] -->
@@ -428,16 +436,17 @@
        fix_ei=fixei;
        sum_runs=sum;
        wb_integr_range=detector_van_range;
-       motor_log_names = motor_name;       
+       motor_log_names = motor_name;
        van_mass=vanadium-mass;
        check_background = background;
+
        mon1_norm_spec=norm-mon1-spec;
-       mon2_norm_spec=norm-mon2-spec;       
+       mon2_norm_spec=norm-mon2-spec;
        scale_factor=scale-factor;
        wb_scale_factor=wb-scale-factor;
        monovan_integr_range=abs_units_van_range;
        monovan_lo_value = monovan-integr-min;
-       monovan_hi_value = monovan-integr-max;       
+       monovan_hi_value = monovan-integr-max;
        bkgd_range = background_range;
        background_test_range = diag_background_test_range;
        hard_mask_file=hard_mask;
@@ -454,7 +463,7 @@
        samp_sig   = diag_samp_median_sigma=diag_samp_sig;
        variation  = diag_variation;
        bleed_test = bleed = diag_bleed_test;
-       bleed_maxrate = diag_bleed_maxrate;
+       bleed_maxrate= diag_bleed_maxrate;
        bleed_pixels  = diag_bleed_pixels;
        deltaE_mode =  deltaE-mode;
        ei-mon1-spec=ei_mon1_spec;

@@ -26,11 +26,8 @@ namespace MantidWidgets
     const std::string m_type;
     const bool m_isMatrixWorkspace;
   public:
-    WorkspaceIsNotOfType(const std::string &type) : 
-    m_type(type),
-    m_isMatrixWorkspace(type == "MatrixWorkspace")
-    {
-    }
+    explicit WorkspaceIsNotOfType(const std::string &type)
+        : m_type(type), m_isMatrixWorkspace(type == "MatrixWorkspace") {}
     bool operator()(Mantid::API::Workspace_sptr ws) const
     {
       if ( m_type.empty() ) return false;

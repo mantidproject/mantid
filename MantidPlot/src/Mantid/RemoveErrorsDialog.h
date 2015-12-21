@@ -10,7 +10,7 @@ namespace Ui {
 class RemoveErrorsDialog : public QDialog {
     Q_OBJECT
 public:
-    RemoveErrorsDialog(QWidget *parent = 0);
+  explicit RemoveErrorsDialog(QWidget *parent = 0);
     ~RemoveErrorsDialog();
 
     //! Supply the dialog with a curves list

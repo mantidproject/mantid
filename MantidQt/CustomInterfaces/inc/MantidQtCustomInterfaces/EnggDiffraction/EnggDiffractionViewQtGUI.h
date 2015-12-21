@@ -140,6 +140,8 @@ public:
 
   int currentPlotType() const { return m_currentType; }
 
+  int currentMultiRunMode() const { return m_currentRunMode; }
+
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
   void loadCalibrationClicked();
@@ -149,6 +151,7 @@ private slots:
   void focusTextureClicked();
   void rebinTimeClicked();
   void rebinMultiperiodClicked();
+  void focusStopClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -170,6 +173,9 @@ private slots:
 
   // slots of the focus part of the interface
   void plotRepChanged(int idx);
+
+  // slot of the multi-run mode for focus
+  void multiRunModeChanged(int idx);
 
   // slots of plot spectrum check box status
   void plotFocusStatus();
@@ -214,7 +220,7 @@ private:
 
   /// converts QList to a vector
   std::vector<std::string> qListToVector(QStringList list,
-	  bool validator) const;
+                                         bool validator) const;
 
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;
@@ -227,6 +233,9 @@ private:
 
   // plot data representation type selected
   int static m_currentType;
+
+  // multi-run focus mode type selected
+  int static m_currentRunMode;
 
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;

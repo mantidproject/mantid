@@ -422,7 +422,7 @@ void ScriptFileInterpreter::showFindReplaceDialog()
 void ScriptFileInterpreter::executeAll(const Script::ExecutionMode mode)
 {
   m_runner->clearLocals();
-  executeCode(m_editor->text(), mode);
+  executeCode(ScriptCode(m_editor->text()), mode);
 }
 
 /**

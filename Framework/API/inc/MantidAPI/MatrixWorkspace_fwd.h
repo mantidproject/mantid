@@ -2,6 +2,7 @@
 #define MANTID_API_MATRIXWORKSPACE_FWD_H_
 
 #include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -36,6 +37,10 @@ class MatrixWorkspace;
 typedef boost::shared_ptr<MatrixWorkspace> MatrixWorkspace_sptr;
 /// shared pointer to Mantid::API::MatrixWorkspace (const version)
 typedef boost::shared_ptr<const MatrixWorkspace> MatrixWorkspace_const_sptr;
+/// unique pointer to Mantid::API::MatrixWorkspace
+typedef std::unique_ptr<MatrixWorkspace> MatrixWorkspace_uptr;
+/// unique pointer to Mantid::API::MatrixWorkspace (const version)
+typedef std::unique_ptr<const MatrixWorkspace> MatrixWorkspace_const_uptr;
 
 } // namespace API
 } // namespace Mantid
