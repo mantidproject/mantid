@@ -266,7 +266,9 @@ const std::string FindClusterFaces::name() const { return "FindClusterFaces"; }
 int FindClusterFaces::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string FindClusterFaces::category() const { return "Crystal"; }
+const std::string FindClusterFaces::category() const {
+  return "Crystal\\Integration";
+}
 
 //----------------------------------------------------------------------------------------------
 

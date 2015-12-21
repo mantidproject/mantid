@@ -24,18 +24,18 @@ Holds a basic surface with equation form
 class MANTID_GEOMETRY_DLL Quadratic : public Surface {
 private:
   void matrixForm(Kernel::Matrix<double> &, Kernel::V3D &, double &) const;
+  Quadratic *doClone() const = 0;
 
 protected:
   std::vector<double> BaseEqn; ///< Base equation (as a 10 point vector)
+  Quadratic(const Quadratic &);
+  Quadratic &operator=(const Quadratic &);
 
 public:
   static const int Nprecision = 10; ///< Precision of the output
 
   Quadratic();
-  Quadratic(const Quadratic &);
-  virtual Quadratic *clone() const = 0; ///< Abstract clone function
-  Quadratic &operator=(const Quadratic &);
-  virtual ~Quadratic();
+  std::unique_ptr<Quadratic> clone() const;
 
   /// Accept visitor for line calculation
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }

@@ -441,6 +441,7 @@ private:
     std::string inputFile = "INES_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", WS_Name);
+    loader.setProperty("RewriteSpectraMap", Kernel::OptionalBool(true));
     loader.execute();
 
     return inputWS;

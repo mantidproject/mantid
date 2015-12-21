@@ -215,7 +215,9 @@ const std::string IntegrateEllipsoids::name() const {
 int IntegrateEllipsoids::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string IntegrateEllipsoids::category() const { return "Crystal"; }
+const std::string IntegrateEllipsoids::category() const {
+  return "Crystal\\Integration";
+}
 
 //---------------------------------------------------------------------
 

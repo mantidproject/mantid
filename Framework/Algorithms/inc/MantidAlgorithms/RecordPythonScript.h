@@ -57,9 +57,7 @@ public:
   /// Algorithm's version for identification
   virtual int version() const { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
-    return "Utility;PythonAlgorithms";
-  }
+  virtual const std::string category() const { return "Utility\\Python"; }
 
 private:
   /// Initialise the properties

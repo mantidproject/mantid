@@ -111,7 +111,6 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
   }
 
   // the algorithm will see if it should run
-
   SendStartupUsageInfo();
 }
 
@@ -241,6 +240,8 @@ void FrameworkManagerImpl::clear() {
   clearPropertyManagers();
 }
 
+void FrameworkManagerImpl::shutdown() { clear(); }
+
 /**
  * Clear memory associated with the AlgorithmManager
  */
@@ -307,7 +308,8 @@ FrameworkManagerImpl::createAlgorithm(const std::string &algName,
   IAlgorithm *alg = AlgorithmManager::Instance()
                         .create(algName, version)
                         .get(); // createAlgorithm(algName);
-  alg->setProperties(propertiesArray);
+  alg->setPropertiesWithSimpleString(propertiesArray);
+
   return alg;
 }
 

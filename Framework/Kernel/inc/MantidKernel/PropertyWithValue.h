@@ -8,6 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
+#include "MantidKernel/OptionalBool.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
@@ -246,13 +247,33 @@ template <> inline void addingOperator(bool &, const bool &) {
       "PropertyWithValue.h: += operator not implemented for type bool");
 }
 
+template <> inline void addingOperator(OptionalBool &, const OptionalBool &) {
+  throw Exception::NotImplementedError(
+      "PropertyWithValue.h: += operator not implemented for type OptionalBool");
+}
+
 template <typename T>
-inline void addingOperator(boost::shared_ptr<T> &lhs,
-                           const boost::shared_ptr<T> &rhs) {
-  UNUSED_ARG(lhs);
-  UNUSED_ARG(rhs);
+inline void addingOperator(boost::shared_ptr<T> &,
+                           const boost::shared_ptr<T> &) {
   throw Exception::NotImplementedError(
       "PropertyWithValue.h: += operator not implemented for boost::shared_ptr");
+}
+
+template <typename T>
+inline std::vector<std::string>
+determineAllowedValues(const T &, const IValidator &validator) {
+  return validator.allowedValues();
+}
+
+template <>
+inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
+                                                       const IValidator &) {
+  auto enumMap = OptionalBool::enumToStrMap();
+  std::vector<std::string> values;
+  for (auto it = enumMap.begin(); it != enumMap.end(); ++it) {
+    values.push_back(it->second);
+  }
+  return values;
 }
 }
 //------------------------------------------------------------------------------------------------
@@ -492,7 +513,7 @@ public:
    * an empty vector.
    */
   virtual std::vector<std::string> allowedValues() const {
-    return m_validator->allowedValues();
+    return determineAllowedValues(m_value, *m_validator);
   }
 
   /**

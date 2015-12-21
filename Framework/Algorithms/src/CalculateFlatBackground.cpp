@@ -71,6 +71,14 @@ void CalculateFlatBackground::init() {
                   "If this property is set to true, background is not "
                   "calculated/removed from monitors.",
                   Direction::Input);
+  declareProperty("NullifyNegativeValues", true,
+                  "When background is subtracted, signals in some time "
+                  "channels may become negative.\n"
+                  "If this option is true, signal in such bins is nullified "
+                  "and the module of the removed signal"
+                  "is added to the error. If false, the signal and errors are "
+                  "left unchanged",
+                  Direction::Input);
 }
 
 void CalculateFlatBackground::exec() {
@@ -85,6 +93,7 @@ void CalculateFlatBackground::exec() {
                              "not possible.");
 
   m_skipMonitors = getProperty("SkipMonitors");
+  m_nullifyNegative = getProperty("NullifyNegativeValues");
   // Get the required X range
   double startX, endX;
   this->checkRange(startX, endX);
@@ -188,7 +197,7 @@ void CalculateFlatBackground::exec() {
           Y[j] = background;
         }
         // remove negative values
-        if (Y[j] < 0.0) {
+        if (m_nullifyNegative && Y[j] < 0.0) {
           Y[j] = 0;
           // The error estimate must go up in this nonideal situation and the
           // value of background is a good estimate for it. However, don't

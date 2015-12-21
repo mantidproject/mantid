@@ -74,7 +74,7 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "DataHandling\\SPE;Inelastic";
+    return "DataHandling\\SPE;Inelastic\\DataHandling";
   }
   /** the method used in tests. It requested the ChildAlgorithm, which does the
    detectors

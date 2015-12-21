@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "ReflMainViewMockObjects.h"
-#include "MantidQtCustomInterfaces/ReflMeasureTransferStrategy.h"
-#include "MantidQtCustomInterfaces/ReflMeasurementSource.h"
-#include "MantidQtCustomInterfaces/ReflTableSchema.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include <memory>
 #include <gmock/gmock.h>
 #include <utility>
@@ -13,13 +13,13 @@
 using namespace testing;
 using namespace MantidQt::CustomInterfaces;
 
-class MockReflMeasurementSource
-    : public MantidQt::CustomInterfaces::ReflMeasurementSource {
+class MockReflMeasurementItemSource
+    : public MantidQt::CustomInterfaces::ReflMeasurementItemSource {
 public:
-  MOCK_CONST_METHOD2(obtain, MantidQt::CustomInterfaces::Measurement(
+  MOCK_CONST_METHOD2(obtain, MantidQt::CustomInterfaces::MeasurementItem(
                                  const std::string &, const std::string &));
-  MOCK_CONST_METHOD0(clone, MockReflMeasurementSource *());
-  ~MockReflMeasurementSource() {}
+  MOCK_CONST_METHOD0(clone, MockReflMeasurementItemSource *());
+  ~MockReflMeasurementItemSource() {}
 };
 
 class ReflMeasureTransferStrategyTest : public CxxTest::TestSuite {
@@ -36,17 +36,18 @@ public:
   void test_obtain_single_measurement() {
 
     // Search result inforation not used in the following since we mock the
-    // return from the measurementSource
+    // return from the measurementItemSource
     SearchResultMap data;
     data.insert(
         std::make_pair<std::string, SearchResult>("111", SearchResult()));
 
-    auto mockMeasurementSource = new MockReflMeasurementSource;
+    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
     // We expect that we are going to fetch the  measurement data for every
     // search result.
-    EXPECT_CALL(*mockMeasurementSource, obtain(_, _))
+    EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillRepeatedly(Return(Measurement("a", "s_a", "l", "t", 0, "111")));
+        .WillRepeatedly(
+            Return(MeasurementItem("a", "s_a", "l", "t", 0, "111")));
 
     auto mockCatInfo = new MockICatalogInfo;
     // We expect that every location will be translated/transformed to make it
@@ -62,13 +63,13 @@ public:
 
     ReflMeasureTransferStrategy strategy(
         std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
-        std::move(
-            std::unique_ptr<MockReflMeasurementSource>(mockMeasurementSource)));
+        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
+            mockMeasurementItemSource)));
 
     strategy.transferRuns(data, progress);
 
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
   }
 
   void test_when_two_measurement_ids_match_group_them_but_not_others() {
@@ -83,14 +84,14 @@ public:
     data.insert(
         std::make_pair<std::string, SearchResult>("113", SearchResult()));
 
-    auto mockMeasurementSource = new MockReflMeasurementSource;
+    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
     // We are going to return three SearchResults two have the same measurement
     // id
-    EXPECT_CALL(*mockMeasurementSource, obtain(_, _))
+    EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillOnce(Return(Measurement("m1", "s1", "l1", "t1", 0.1, "111")))
-        .WillOnce(Return(Measurement("m1", "s2", "l1", "t1", 0.2, "122")))
-        .WillOnce(Return(Measurement("m2", "s2", "l1", "t1", 0.2, "123")));
+        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "111")))
+        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "122")))
+        .WillOnce(Return(MeasurementItem("m2", "s2", "l1", "t1", 0.2, "123")));
 
     auto mockCatInfo = new MockICatalogInfo;
     // We expect that every location will be translated/transformed to make it
@@ -107,31 +108,91 @@ public:
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(
         std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
-        std::move(
-            std::unique_ptr<MockReflMeasurementSource>(mockMeasurementSource)));
+        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
+            mockMeasurementItemSource)));
 
     // Do the transfer
     auto transferResult = strategy.transferRuns(data, progress);
 
+    auto successfulRuns = transferResult.getTransferRuns();
     // Check the transfer entries
-    TSM_ASSERT_EQUALS("Wrong number of rows", 3, transferResult.size());
+    TSM_ASSERT_EQUALS("Wrong number of rows", 3, successfulRuns.size());
 
-    for (size_t i = 1; i < transferResult.size(); ++i) {
+    for (size_t i = 1; i < successfulRuns.size(); ++i) {
       TSM_ASSERT_DIFFERS("Runs should be the different for all rows",
-                         transferResult[0][ReflTableSchema::RUNS],
-                         transferResult[i][ReflTableSchema::RUNS]);
+                         successfulRuns[0][ReflTableSchema::RUNS],
+                         successfulRuns[i][ReflTableSchema::RUNS]);
     }
 
     TSM_ASSERT_EQUALS("Group should be the same for first two rows",
-                      transferResult[0][ReflTableSchema::GROUP],
-                      transferResult[1][ReflTableSchema::GROUP]);
+                      successfulRuns[0][ReflTableSchema::GROUP],
+                      successfulRuns[1][ReflTableSchema::GROUP]);
 
     TSM_ASSERT_DIFFERS("Group should be different for last rows",
-                       transferResult[0][ReflTableSchema::GROUP],
-                       transferResult[2][ReflTableSchema::GROUP]);
+                       successfulRuns[0][ReflTableSchema::GROUP],
+                       successfulRuns[2][ReflTableSchema::GROUP]);
 
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
+  }
+
+  void test_when_there_is_no_valid_measurement_id() {
+    // Search result inforation not used in the following since we mock the
+    // return from the measurementSource
+    SearchResultMap data;
+    data.insert(
+        std::make_pair<std::string, SearchResult>("111", SearchResult()));
+    data.insert(
+        std::make_pair<std::string, SearchResult>("112", SearchResult()));
+    data.insert(
+        std::make_pair<std::string, SearchResult>("113", SearchResult()));
+
+    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
+    // We have 2 with valid measurement ids and 1 with no measurement id
+    EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
+        .Times(Exactly(static_cast<int>(data.size())))
+        .WillOnce(Return(MeasurementItem("", "s1", "l1", "t1", 0.1, "111")))
+        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122")))
+        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123")));
+
+    auto mockCatInfo = new MockICatalogInfo;
+
+    // We expect that every location will be translated/transformed to make it
+    // os specific
+    EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
+        .Times(Exactly(static_cast<int>(data.size())))
+        .WillRepeatedly(Return(std::string()));
+
+    MockProgressBase progress;
+    // Expect a progress update
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
+
+    // Make the transfer stragegy
+    ReflMeasureTransferStrategy strategy(
+        std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
+        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
+            mockMeasurementItemSource)));
+
+    // retreive transfer results
+    auto transferResult = strategy.transferRuns(data, progress);
+    // get valid runs
+    auto successfulRuns = transferResult.getTransferRuns();
+    // get invalid runs
+    auto invalidRuns = transferResult.getErrorRuns();
+
+    TSM_ASSERT_EQUALS("Should have two rows", 2, successfulRuns.size());
+    TSM_ASSERT_EQUALS("Should have one invalid run", 1, invalidRuns.size());
+    TSM_ASSERT_DIFFERS("Runs should be the different for both columns",
+                       successfulRuns[0][ReflTableSchema::RUNS],
+                       successfulRuns[1][ReflTableSchema::RUNS]);
+    TSM_ASSERT_EQUALS("run should be singular", "122",
+                      successfulRuns[0][ReflTableSchema::RUNS]);
+    TSM_ASSERT_EQUALS("run should be singular.", "123",
+                      successfulRuns[1][ReflTableSchema::RUNS]);
+
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
   }
 
   void test_when_two_measurement_sub_ids_match_combine_rows() {
@@ -146,13 +207,13 @@ public:
     data.insert(
         std::make_pair<std::string, SearchResult>("113", SearchResult()));
 
-    auto mockMeasurementSource = new MockReflMeasurementSource;
+    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
     // All 3 have same measurment id, but we also have 2 with same sub id.
-    EXPECT_CALL(*mockMeasurementSource, obtain(_, _))
+    EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillOnce(Return(Measurement("m1", "s1", "l1", "t1", 0.1, "111")))
-        .WillOnce(Return(Measurement("m1", "s1", "l1", "t1", 0.2, "122")))
-        .WillOnce(Return(Measurement("m1", "s2", "l1", "t1", 0.2, "123")));
+        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "111")))
+        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122")))
+        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123")));
 
     auto mockCatInfo = new MockICatalogInfo;
     // We expect that every location will be translated/transformed to make it
@@ -169,33 +230,33 @@ public:
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(
         std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
-        std::move(
-            std::unique_ptr<MockReflMeasurementSource>(mockMeasurementSource)));
+        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
+            mockMeasurementItemSource)));
 
     // Do the transfer
     auto transferResult = strategy.transferRuns(data, progress);
-
+    auto successfulRuns = transferResult.getTransferRuns();
     // Check the transfer entries
-    TSM_ASSERT_EQUALS("Should have two rows", 2, transferResult.size());
+    TSM_ASSERT_EQUALS("Should have two rows", 2, successfulRuns.size());
     TSM_ASSERT_DIFFERS("Runs should be the different for both columns",
-                       transferResult[0][ReflTableSchema::RUNS],
-                       transferResult[1][ReflTableSchema::RUNS]);
+                       successfulRuns[0][ReflTableSchema::RUNS],
+                       successfulRuns[1][ReflTableSchema::RUNS]);
     TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.", "111+122",
-                      transferResult[0][ReflTableSchema::RUNS]);
+                      successfulRuns[0][ReflTableSchema::RUNS]);
     TSM_ASSERT_EQUALS("Other run should be singular.", "123",
-                      transferResult[1][ReflTableSchema::RUNS]);
+                      successfulRuns[1][ReflTableSchema::RUNS]);
 
-    for (size_t i = 1; i < transferResult.size(); ++i) {
+    for (size_t i = 1; i < successfulRuns.size(); ++i) {
       TSM_ASSERT_EQUALS("All should have the same group",
-                        transferResult[0][ReflTableSchema::GROUP],
-                        transferResult[i][ReflTableSchema::GROUP]);
+                        successfulRuns[0][ReflTableSchema::GROUP],
+                        successfulRuns[i][ReflTableSchema::GROUP]);
     }
 
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
   }
-  
-    void test_complex_example_two_groups_of_two() {
+
+  void test_complex_example_two_groups_of_two() {
 
     // Search result inforation not used in the following since we mock the
     // return from the measurementSource
@@ -209,14 +270,15 @@ public:
     data.insert(
         std::make_pair<std::string, SearchResult>("14916", SearchResult()));
 
-    auto mockMeasurementSource = new MockReflMeasurementSource;
+    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
     // All 3 have same measurment id, but we also have 2 with same sub id.
-    EXPECT_CALL(*mockMeasurementSource, obtain(_, _))
+    EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillOnce(Return(Measurement("m1", "s1", "l1", "t1", 0.1, "14913")))
-        .WillOnce(Return(Measurement("m1", "s1", "l1", "t1", 0.1, "14914")))
-        .WillOnce(Return(Measurement("m2", "s1", "l1", "t1", 0.2, "14915")))
-        .WillOnce(Return(Measurement("m2", "s1", "l1", "t1", 0.2, "14916")));
+        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14913")))
+        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14914")))
+        .WillOnce(Return(MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14915")))
+        .WillOnce(
+            Return(MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14916")));
 
     auto mockCatInfo = new MockICatalogInfo;
     // We expect that every location will be translated/transformed to make it
@@ -233,26 +295,26 @@ public:
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(
         std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
-        std::move(
-            std::unique_ptr<MockReflMeasurementSource>(mockMeasurementSource)));
+        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
+            mockMeasurementItemSource)));
 
     // Do the transfer
     auto transferResult = strategy.transferRuns(data, progress);
+    auto successfulRuns = transferResult.getTransferRuns();
 
     // Check the transfer entries
-    TSM_ASSERT_EQUALS("Should have two rows", 2, transferResult.size());
+    TSM_ASSERT_EQUALS("Should have two rows", 2, successfulRuns.size());
     TSM_ASSERT_DIFFERS("Runs should be the different for both columns",
-                       transferResult[0][ReflTableSchema::RUNS],
-                       transferResult[1][ReflTableSchema::RUNS]);
-    TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.", "14913+14914",
-                      transferResult[0][ReflTableSchema::RUNS]);
-    TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.", "14915+14916",
-                      transferResult[1][ReflTableSchema::RUNS]);
+                       successfulRuns[0][ReflTableSchema::RUNS],
+                       successfulRuns[1][ReflTableSchema::RUNS]);
+    TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.",
+                      "14913+14914", successfulRuns[0][ReflTableSchema::RUNS]);
+    TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.",
+                      "14915+14916", successfulRuns[1][ReflTableSchema::RUNS]);
 
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
   }
-
 
   void test_do_not_include_invalid_measurements() {
     // Search result inforation not used in the following since we mock the
@@ -261,12 +323,13 @@ public:
     data.insert(
         std::make_pair<std::string, SearchResult>("111", SearchResult()));
 
-    auto mockMeasurementSource = new MockReflMeasurementSource;
+    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
     // We expect that we are going to fetch the  measurement data for every
     // search result.
-    EXPECT_CALL(*mockMeasurementSource, obtain(_, _))
+    EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillRepeatedly(Return(Measurement::InvalidMeasurement("Abort!")));
+        .WillRepeatedly(
+            Return(MeasurementItem::InvalidMeasurementItem("Abort!")));
 
     auto mockCatInfo = new MockICatalogInfo;
     // We expect that every location will be translated/transformed to make it
@@ -280,15 +343,15 @@ public:
 
     ReflMeasureTransferStrategy strategy(
         std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
-        std::move(
-            std::unique_ptr<MockReflMeasurementSource>(mockMeasurementSource)));
+        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
+            mockMeasurementItemSource)));
 
-    auto result = strategy.transferRuns(data, progress);
-
+    auto transferRuns = strategy.transferRuns(data, progress);
+    auto result = transferRuns.getTransferRuns();
     TSM_ASSERT_EQUALS("Measurements where invalid. Results should be empty.", 0,
                       result.size());
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
   }
 
   void test_clone() {
@@ -298,15 +361,15 @@ public:
     EXPECT_CALL(*pCatInfo, clone()).WillOnce(Return(new MockICatalogInfo));
 
     // Sub component Measurment source will be cloned
-    auto pMeasurementSource = new MockReflMeasurementSource;
-    EXPECT_CALL(*pMeasurementSource, clone())
-        .WillOnce(Return(new MockReflMeasurementSource));
+    auto pMeasurementItemSource = new MockReflMeasurementItemSource;
+    EXPECT_CALL(*pMeasurementItemSource, clone())
+        .WillOnce(Return(new MockReflMeasurementItemSource));
 
     // Create it
     ReflMeasureTransferStrategy strategy(
         std::move(std::unique_ptr<MockICatalogInfo>(pCatInfo)),
-        std::move(
-            std::unique_ptr<MockReflMeasurementSource>(pMeasurementSource)));
+        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
+            pMeasurementItemSource)));
     // Clone it
     auto *clone = strategy.clone();
     TS_ASSERT(dynamic_cast<ReflMeasureTransferStrategy *>(clone));
@@ -317,8 +380,8 @@ public:
 
     ReflMeasureTransferStrategy strategy(
         std::unique_ptr<MockICatalogInfo>(new MockICatalogInfo),
-        std::unique_ptr<MockReflMeasurementSource>(
-            new MockReflMeasurementSource));
+        std::unique_ptr<MockReflMeasurementItemSource>(
+            new MockReflMeasurementItemSource));
 
     // ISIS nexus format files can have the right logs.
     TSM_ASSERT("Yes this transfer mechanism should know about nexus formats",

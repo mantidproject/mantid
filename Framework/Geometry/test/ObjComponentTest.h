@@ -12,6 +12,8 @@
 
 #include "MantidKernel/Timer.h"
 
+#include "boost/make_shared.hpp"
+
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
@@ -450,10 +452,10 @@ private:
     std::string C33 = "px -3.2";
 
     // First create some surfaces
-    std::map<int, Surface *> CylSurMap;
-    CylSurMap[31] = new Cylinder();
-    CylSurMap[32] = new Plane();
-    CylSurMap[33] = new Plane();
+    std::map<int, boost::shared_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = boost::make_shared<Cylinder>();
+    CylSurMap[32] = boost::make_shared<Plane>();
+    CylSurMap[33] = boost::make_shared<Plane>();
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);
@@ -479,10 +481,10 @@ private:
     std::string C33 = "px -3.0";
 
     // First create some surfaces
-    std::map<int, Surface *> CylSurMap;
-    CylSurMap[31] = new Cylinder();
-    CylSurMap[32] = new Plane();
-    CylSurMap[33] = new Plane();
+    std::map<int, boost::shared_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = boost::make_shared<Cylinder>();
+    CylSurMap[32] = boost::make_shared<Plane>();
+    CylSurMap[33] = boost::make_shared<Plane>();
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);
@@ -511,13 +513,13 @@ private:
     std::string C6 = planes[5];
 
     // Create surfaces
-    std::map<int, Surface *> CubeSurMap;
-    CubeSurMap[1] = new Plane();
-    CubeSurMap[2] = new Plane();
-    CubeSurMap[3] = new Plane();
-    CubeSurMap[4] = new Plane();
-    CubeSurMap[5] = new Plane();
-    CubeSurMap[6] = new Plane();
+    std::map<int, boost::shared_ptr<Surface>> CubeSurMap;
+    CubeSurMap[1] = boost::make_shared<Plane>();
+    CubeSurMap[2] = boost::make_shared<Plane>();
+    CubeSurMap[3] = boost::make_shared<Plane>();
+    CubeSurMap[4] = boost::make_shared<Plane>();
+    CubeSurMap[5] = boost::make_shared<Plane>();
+    CubeSurMap[6] = boost::make_shared<Plane>();
 
     CubeSurMap[1]->setSurface(C1);
     CubeSurMap[2]->setSurface(C2);

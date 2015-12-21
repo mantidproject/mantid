@@ -216,12 +216,9 @@ int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadNexusProcessed::init() {
   // Declare required input parameters for algorithm
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".nx5");
-  exts.push_back(".xml");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load,
+                       {".nxs", ".nx5", ".xml"}),
       "The name of the Nexus file to read, as a full or relative path.");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -1044,7 +1041,6 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
   // Coordinates - Older versions did not have the separate field but used a log
   // value
-  uint32_t loadCoord(0);
   const std::string peaksWSName = "peaks_workspace";
   try {
     m_cppFile->openGroup(peaksWSName, "NXentry");
@@ -1055,6 +1051,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         peaksWSName + ". Lower level error description: " + re.what());
   }
   try {
+    uint32_t loadCoord(0);
     m_cppFile->readData("coordinate_system", loadCoord);
     peakWS->setCoordinateSystem(
         static_cast<Kernel::SpecialCoordinateSystem>(loadCoord));

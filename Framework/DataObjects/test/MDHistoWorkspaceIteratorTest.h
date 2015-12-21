@@ -98,6 +98,92 @@ public:
     }
   }
 
+  void test_edge_of_masked_region_falls_outside_implicit_function_bounds() {
+
+    std::vector<coord_t> normal_vector;
+    std::vector<coord_t> bound_vector;
+    normal_vector.push_back(1.);
+    bound_vector.push_back(3.);
+
+    MDImplicitFunction *function = new MDImplicitFunction();
+    function->addPlane(MDPlane(normal_vector, bound_vector));
+
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+    WritableHistoWorkspace *ws =
+        new WritableHistoWorkspace(MDHistoDimension_sptr(
+            new MDHistoDimension("x", "x", frame, 0.0, 10, 11)));
+
+    ws->setMaskValueAt(0, true);  // Masked
+    ws->setMaskValueAt(1, true);  // Masked
+    ws->setMaskValueAt(2, false); // NOT MASKED, EXCLUDED BY FUNCTION
+    ws->setMaskValueAt(3, true);  // Masked
+    ws->setMaskValueAt(4, true);  // Masked
+    ws->setMaskValueAt(5, false); // NOT MASKED
+    ws->setMaskValueAt(6, true);  // Masked
+    ws->setMaskValueAt(7, false); // NOT MASKED
+    ws->setMaskValueAt(8, true);  // Masked
+
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
+
+    MDHistoWorkspaceIterator *histoIt =
+        new MDHistoWorkspaceIterator(ws, function);
+
+    TSM_ASSERT_EQUALS("The first index hit should be 5 since that is the first "
+                      "unmasked and inside function",
+                      5, histoIt->getLinearIndex());
+    histoIt->next();
+    TSM_ASSERT_EQUALS("The next index hit should be 7 since that is the next "
+                      "unmasked and inside function",
+                      7, histoIt->getLinearIndex());
+
+    delete histoIt;
+  }
+
+  void test_getNormalizedSignalWIthMask() {
+    // std::vector<coord_t> normal_vector{1.};
+    // std::vector<coord_t> bound_vector{3.};
+
+    // MDImplicitFunction *function = new MDImplicitFunction();
+    // function->addPlane(MDPlane(normal_vector, bound_vector));
+
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+    WritableHistoWorkspace *ws =
+        new WritableHistoWorkspace(MDHistoDimension_sptr(
+            new MDHistoDimension("x", "x", frame, 0.0, 10.0, 10)));
+
+    ws->setSignalAt(0, 3.0);
+    ws->setSignalAt(1, 3.0);
+    ws->setSignalAt(2, 3.0);
+    ws->setSignalAt(3, 3.0);
+    ws->setSignalAt(4, 3.0);
+
+    ws->setMaskValueAt(0, false); // Unmasked
+    ws->setMaskValueAt(1, false); // Unmasked
+    ws->setMaskValueAt(2, true);  // Masked
+    ws->setMaskValueAt(3, false); // Unmasked
+    ws->setMaskValueAt(4, true);  // Masked
+
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
+
+    MDHistoWorkspaceIterator *histoIt =
+        dynamic_cast<MDHistoWorkspaceIterator *>(ws->createIterator());
+
+    TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
+                      " are unmasked",
+                      3.0, histoIt->getNormalizedSignalWithMask());
+    histoIt->jumpTo(2);
+    TSM_ASSERT_EQUALS("Should return 0 here as data at the iterator are masked",
+                      0.0, histoIt->getNormalizedSignalWithMask());
+    histoIt->jumpTo(3);
+    TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
+                      " are unmasked",
+                      3.0, histoIt->getNormalizedSignalWithMask());
+
+    delete histoIt;
+  }
+
   void test_iterator_1D() { do_test_iterator(1, 10); }
 
   void test_iterator_2D() { do_test_iterator(2, 100); }
@@ -267,8 +353,8 @@ public:
         2, histoIt->getLinearIndex());
     histoIt->next();
     TSM_ASSERT_EQUALS(
-        "The first index hit should be 2 since that is the first unmasked one",
-        5, histoIt->getLinearIndex());
+        "The next index hit should be 5 since that is the next unmasked one", 5,
+        histoIt->getLinearIndex());
 
     delete histoIt;
   }

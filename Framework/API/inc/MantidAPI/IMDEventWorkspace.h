@@ -35,8 +35,8 @@ public:
   virtual ~IMDEventWorkspace() {}
 
   /// Returns a clone of the workspace
-  std::unique_ptr<IMDEventWorkspace> clone() const {
-    return std::unique_ptr<IMDEventWorkspace>(doClone());
+  IMDEventWorkspace_uptr clone() const {
+    return IMDEventWorkspace_uptr(doClone());
   }
 
   /// Perform initialization after dimensions (and others) have been set.
@@ -64,6 +64,9 @@ public:
 
   /// Refresh the cache (integrated signal of each box)
   virtual void refreshCache() = 0;
+
+  /// Return true if there is any mask on the workspace
+  virtual bool hasMask() = 0;
 
   /// Recurse down to a minimum depth
   virtual void setMinRecursionDepth(size_t depth) = 0;

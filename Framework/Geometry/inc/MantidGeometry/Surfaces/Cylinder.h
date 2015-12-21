@@ -56,16 +56,18 @@ private:
   void rotate(const Kernel::Matrix<double> &);
   void displace(const Kernel::V3D &);
   void setNvec(); ///< check to obtain orientation
+  Cylinder *doClone() const;
+
+protected:
+  Cylinder(const Cylinder &);
+  Cylinder &operator=(const Cylinder &);
 
 public:
   /// Public identifer
   virtual std::string className() const { return "Cylinder"; }
 
   Cylinder();
-  Cylinder(const Cylinder &);
-  Cylinder *clone() const;
-  Cylinder &operator=(const Cylinder &);
-  ~Cylinder();
+  std::unique_ptr<Cylinder> clone() const;
 
   // Visit acceptor
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }

@@ -25,7 +25,7 @@ The following example shows how to calculate the residuals following a fit perfo
 
     # Load data from file, load instrument and truncate data to correct size
     data_Si_raw = Load("Poldi2013Silicon.nxs")
-    LoadInstrument(data_Si_raw, InstrumentName="POLDI")
+    LoadInstrument(data_Si_raw, InstrumentName="POLDI", RewriteSpectraMap=True)
     data_Si = PoldiTruncateData(data_Si_raw)
 
     # Perform correlation method, find and refine peaks in correlation spectrum

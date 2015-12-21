@@ -112,6 +112,8 @@ void CreateFlatEventWorkspace::exec() {
   MatrixWorkspace_sptr tmpChunkWs =
       boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
 
+  Progress progress(this, 0, 1, nRegions);
+
   for (int i = 0; i < nRegions; ++i) {
 
     IAlgorithm_sptr shiftchunk = this->createChildAlgorithm("ChangeBinOffset");
@@ -129,6 +131,8 @@ void CreateFlatEventWorkspace::exec() {
     plus_alg->executeAsChildAlg();
     outputWS = plus_alg->getProperty("OutputWorkspace");
     tmpChunkWs = plus_alg->getProperty("RHSWorkspace");
+
+    progress.report();
   }
 
   // Crop the output workspace to be the same range as the input data

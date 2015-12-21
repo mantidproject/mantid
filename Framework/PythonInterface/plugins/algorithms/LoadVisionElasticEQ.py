@@ -13,7 +13,7 @@ class LoadVisionElasticEQ(PythonAlgorithm):
     __equatorial = "bank25,bank26,bank27,bank28,bank29,bank30"
 
     def category(self):
-        return "DataHandling;PythonAlgorithms"
+        return "DataHandling\\Nexus"
 
     def name(self):
         return "LoadVisionElasticEQ"

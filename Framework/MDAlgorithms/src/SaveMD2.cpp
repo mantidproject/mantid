@@ -54,10 +54,8 @@ void SaveMD2::init() {
                                                       Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
+      new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd

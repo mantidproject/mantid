@@ -83,7 +83,9 @@ int LoadSpiceAscii::version() const { return 1; }
 //----------------------------------------------------------------------------------------------
 /** Category
  */
-const std::string LoadSpiceAscii::category() const { return "DataHandling"; }
+const std::string LoadSpiceAscii::category() const {
+  return "DataHandling\\Text";
+}
 
 //----------------------------------------------------------------------------------------------
 /** Summary
@@ -96,11 +98,8 @@ const std::string LoadSpiceAscii::summary() const {
 /** Declaration of properties
  */
 void LoadSpiceAscii::init() {
-  // Input files
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
   declareProperty(
-      new FileProperty("Filename", "", API::FileProperty::Load, exts),
+      new FileProperty("Filename", "", API::FileProperty::Load, {".dat"}),
       "Name of SPICE data file.");
 
   // Logs to be float type sample log

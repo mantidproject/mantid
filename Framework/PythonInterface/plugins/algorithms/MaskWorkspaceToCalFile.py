@@ -16,7 +16,7 @@ class QueryValue(object):
 class MaskWorkspaceToCalFile(PythonAlgorithm):
 
     def category(self):
-        return "DataHandling\\Text;Diffraction;PythonAlgorithms"
+        return "DataHandling\\Text;Diffraction\\DataHandling;Diffraction\\Masking"
 
     def name(self):
         return "MaskWorkspaceToCalFile"

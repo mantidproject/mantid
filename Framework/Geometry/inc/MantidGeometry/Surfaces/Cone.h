@@ -49,17 +49,18 @@ private:
 
   void rotate(const Kernel::Matrix<double> &);
   void displace(const Kernel::V3D &);
+  Cone *doClone() const;
+
+protected:
+  Cone(const Cone &);
+  Cone &operator=(const Cone &);
 
 public:
   /// Public identifer
   virtual std::string className() const { return "Cone"; }
   Cone();
-  Cone(const Cone &);
-  Cone *clone() const;
-  Cone &operator=(const Cone &);
+  std::unique_ptr<Cone> clone() const;
   int operator==(const Cone &) const;
-  ~Cone();
-
   /// Calculate if the point R is within the cone (return -1) or outside (return
   /// 1)
   int side(const Kernel::V3D &R) const;

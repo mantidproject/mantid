@@ -9,7 +9,7 @@ class DSFinterp(PythonAlgorithm):
     channelgroup = None
 
     def category(self):
-        return "Transforms\\Smoothing;Utility;PythonAlgorithms"
+        return "Transforms\\Smoothing"
 
     def name(self):
         return 'DSFinterp'

@@ -2,7 +2,7 @@
 #
 # SCons - a Software Constructor
 #
-# Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012 The SCons Foundation
+# Copyright (c) 2001 - 2015 The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -23,17 +23,17 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-__revision__ = "src/script/sconsign.py issue-2856:2676:d23b7a2f45e8 2012/08/05 15:38:28 garyo"
+__revision__ = "src/script/sconsign.py rel_2.4.0:3365:9259ea1c13d7 2015/09/21 14:03:43 bdbaddog"
 
-__version__ = "2.2.0"
+__version__ = "2.4.0"
 
-__build__ = "issue-2856:2676:d23b7a2f45e8[MODIFIED]"
+__build__ = "rel_2.4.0:3365:9259ea1c13d7"
 
-__buildsys__ = "oberbrunner-dev"
+__buildsys__ = "hpmicrodog"
 
-__date__ = "2012/08/05 15:38:28"
+__date__ = "2015/09/21 14:03:43"
 
-__developer__ = "garyo"
+__developer__ = "bdbaddog"
 
 import os
 import sys
@@ -278,7 +278,7 @@ def field(name, entry, verbose=Verbose):
 def nodeinfo_raw(name, ninfo, prefix=""):
     # This just formats the dictionary, which we would normally use str()
     # to do, except that we want the keys sorted for deterministic output.
-    d = ninfo.__dict__
+    d = ninfo.__getstate__()
     try:
         keys = ninfo.field_list + ['_version_id']
     except AttributeError:

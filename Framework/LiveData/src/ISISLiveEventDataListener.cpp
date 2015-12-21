@@ -428,7 +428,7 @@ void ISISLiveEventDataListener::loadInstrument(const std::string &instrName) {
     alg->initialize();
     alg->setPropertyValue("InstrumentName", instrName);
     alg->setProperty("Workspace", m_eventBuffer[0]);
-    alg->setProperty("RewriteSpectraMap", false);
+    alg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     alg->setChild(true);
     alg->execute();
     // check if the instrument was loaded

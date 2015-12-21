@@ -513,21 +513,21 @@
       <string>Container Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="3" column="2">
+      <item row="4" column="2">
        <widget class="QLabel" name="lbCanChemicalFormula">
         <property name="text">
          <string>Chemical Formula:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="lbCanNumberDensity">
         <property name="text">
          <string>Number Density:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="QDoubleSpinBox" name="spCanNumberDensity">
         <property name="enabled">
          <bool>false</bool>
@@ -546,7 +546,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="3">
+      <item row="4" column="3">
        <widget class="QLineEdit" name="leCanChemicalFormula">
         <property name="enabled">
          <bool>false</bool>
@@ -570,6 +570,9 @@
         <property name="singleStep">
          <double>0.100000000000000</double>
         </property>
+        <property name="value">
+          <double>1.000000000000000</double>
+        </property>
        </widget>
       </item>
       <item row="2" column="2">
@@ -578,6 +581,35 @@
          <string>Scale:</string>
         </property>
        </widget>
+      </item>
+      <item row="3" column="3">
+        <widget class="QDoubleSpinBox" name="spCanShift">
+          <property name="enabled">
+            <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="singleStep">
+            <double>0.010000000000000</double>
+          </property>
+          <property name="minimum">
+            <double>-999.999999</double>
+          </property>
+          <property name="maximum">
+            <double>999.99999</double>
+          </property>
+          <property name="value">
+            <double>0.000000000000000</double>
+          </property>
+        </widget>
+      </item>
+      <item row="3" column="2">
+        <widget class="QCheckBox" name="ckShiftCan">
+          <property name="text">
+            <string>Shift x-values of container by adding:</string>
+          </property>
+        </widget>
       </item>
       <item row="2" column="0" colspan="2">
        <widget class="QCheckBox" name="ckUseCanCorrections">
@@ -682,6 +714,8 @@
   <tabstop>ckUseCanCorrections</tabstop>
   <tabstop>ckScaleCan</tabstop>
   <tabstop>spCanScale</tabstop>
+  <tabstop>ckShiftCan</tabstop>
+  <tabstop>spCanShift</tabstop>
   <tabstop>spCanNumberDensity</tabstop>
   <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>ckKeepFactors</tabstop>
@@ -707,20 +741,36 @@
    </hints>
   </connection>
   <connection>
-   <sender>ckScaleCan</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spCanScale</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>156</x>
-     <y>91</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>436</x>
-     <y>92</y>
-    </hint>
-   </hints>
+    <sender>ckScaleCan</sender>
+    <signal>toggled(bool)</signal>
+    <receiver>spCanScale</receiver>
+    <slot>setEnabled(bool)</slot>
+    <hints>
+      <hint type="sourcelabel">
+        <x>156</x>
+        <y>91</y>
+      </hint>
+      <hint type="destinationlabel">
+        <x>436</x>
+        <y>92</y>
+     </hint>
+    </hints>
+  </connection>
+  <connection>
+    <sender>ckShiftCan</sender>
+    <signal>toggled(bool)</signal>
+    <receiver>spCanShift</receiver>
+    <slot>setEnabled(bool)</slot>
+    <hints>
+     <hint type="sourcelabel">
+        <x>156</x>
+        <y>91</y>
+     </hint>
+     <hint type="destinationlabel">
+       <x>436</x>
+       <y>92</y>
+      </hint>
+     </hints>
   </connection>
   <connection>
    <sender>ckUseCan</sender>

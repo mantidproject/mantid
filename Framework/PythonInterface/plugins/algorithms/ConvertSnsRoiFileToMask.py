@@ -26,7 +26,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         """
         Set the category for the algorithm.
         """
-        return "Inelastic;PythonAlgorithms"
+        return "Inelastic\\Utility"
 
     def name(self):
         """

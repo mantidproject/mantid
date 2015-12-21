@@ -229,7 +229,7 @@ void SpecularReflectionPositionCorrect::correctPosition(
 
   double upOffset =
       (beamOffset *
-       std::tan(twoThetaInRad)); // We only correct vertical position
+       std::tan(0.5 * twoThetaInRad)); // We only correct vertical position
 
   // Apply the movements.
   moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset,

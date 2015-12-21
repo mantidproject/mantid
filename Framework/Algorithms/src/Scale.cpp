@@ -38,11 +38,16 @@ void Scale::exec() {
 
   auto hasDx = inputWS->hasDx(0);
 
+  Progress progress(this, 0, 1, 2);
+
   // We require a copy of the workspace if the
   auto inPlace = outputWS == inputWS;
   MatrixWorkspace_sptr bufferWS;
 
   if (op == "Multiply") {
+
+    progress.report("Multiplying factor...");
+
     if (outputWS == inputWS) {
       if (hasDx) {
         bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
@@ -52,6 +57,9 @@ void Scale::exec() {
       outputWS = inputWS * factor;
     }
   } else {
+
+    progress.report("Adding factor...");
+
     if (outputWS == inputWS) {
       if (hasDx) {
         bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
@@ -61,6 +69,8 @@ void Scale::exec() {
       outputWS = inputWS + factor;
     }
   }
+
+  progress.report();
 
   // If there are any Dx values in the input workspace, then
   // copy them across. We check only the first spectrum.

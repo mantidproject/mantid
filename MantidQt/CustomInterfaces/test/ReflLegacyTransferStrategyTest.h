@@ -7,8 +7,8 @@
 #include <vector>
 #include <gmock/gmock.h>
 
-#include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
-#include "MantidQtCustomInterfaces/ReflTableSchema.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "ReflMainViewMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -56,8 +56,8 @@ public:
     MockProgressBase progress;
     EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
 
-    auto output = strategy.transferRuns(input, progress);
-
+    auto transferRuns = strategy.transferRuns(input, progress);
+    auto output = transferRuns.getTransferRuns();
     TS_ASSERT_EQUALS(output, expected);
     TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
@@ -92,7 +92,8 @@ public:
     MockProgressBase progress;
     EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
 
-    auto output = strategy.transferRuns(input, progress);
+    auto transferRuns = strategy.transferRuns(input, progress);
+    auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
     TS_ASSERT(Mock::VerifyAndClear(&progress));
@@ -136,7 +137,8 @@ public:
     MockProgressBase progress;
     EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
 
-    auto output = strategy.transferRuns(input, progress);
+    auto transferRuns = strategy.transferRuns(input, progress);
+    auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
     TS_ASSERT(Mock::VerifyAndClear(&progress));
@@ -199,7 +201,8 @@ public:
     MockProgressBase progress;
     EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
 
-    auto output = strategy.transferRuns(input, progress);
+    auto transferRuns = strategy.transferRuns(input, progress);
+    auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
     TS_ASSERT(Mock::VerifyAndClear(&progress));

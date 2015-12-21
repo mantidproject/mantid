@@ -45,20 +45,11 @@ private:
   void init();
   void exec();
 
-  /// Create output workspace
-  void createOutputWorkspace();
-
   /// Calculate the DIFC for every pixel
-  void calculate();
-
-  /// Input workspace
-  API::MatrixWorkspace_sptr m_inputWS;
-
-  /// Offsets workspace
-  DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
-
-  /// Output workspace
-  API::MatrixWorkspace_sptr m_outputWS;
+  void calculate(API::Progress &progress, API::MatrixWorkspace_sptr &outputWs,
+                 DataObjects::OffsetsWorkspace_sptr &offsetsWs, double l1,
+                 double beamlineNorm, Kernel::V3D &beamline,
+                 Kernel::V3D &samplePos, detid2det_map &allDetectors);
 };
 
 } // namespace Algorithms

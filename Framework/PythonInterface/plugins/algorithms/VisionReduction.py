@@ -50,7 +50,7 @@ class VisionReduction(PythonAlgorithm):
         return outfilename
 
     def category(self):
-        return "DataHandling;PythonAlgorithms;Utility\\Development"
+        return "Workflow\\Inelastic;Utility\\Development"
 
     def name(self):
         return "VisionReduction"

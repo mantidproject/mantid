@@ -152,8 +152,8 @@ void ColorMaps::GetIntensityMap( double                control_s,
     double scale = 1.0 / log( s );
     for ( size_t i = 0; i < n_entries - 1; i++ )
     {
-      intensity_table[i] = scale *
-                       log( 1.0+((s-1.0)*(double)i) / (double)(n_entries-1) );
+      intensity_table[i] = scale * log1p((s - 1.0) * static_cast<double>(i) /
+                                         static_cast<double>(n_entries - 1));
     }
     intensity_table[n_entries - 1] = 1.0;  // this could have been calculated
                                            // by running the loop one step

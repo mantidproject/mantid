@@ -4,6 +4,8 @@
 #include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/PropertyManager.h"
 
+#include <json/json.h>
+
 namespace Mantid {
 namespace Kernel {
 namespace {
@@ -39,14 +41,44 @@ void PropertyManagerOwner::declareProperty(Property *p,
   m_properties->declareProperty(p, doc);
 }
 
-/** Set the ordered list of properties by one string of values.
-*  @param propertiesArray :: The list of property values
-*  @throw invalid_argument if error in parameters
+/** Set the ordered list of properties by one string of values, separated by
+ *semicolons.
+ *
+ * The string should be a json formatted collection of name value pairs
+ *
+ *  @param propertiesJson :: The string of property values
+ *  @param ignoreProperties :: A set of names of any properties NOT to set
+ *      from the propertiesArray
+ *  @throw invalid_argument if error in parameters
+ */
+void PropertyManagerOwner::setProperties(
+    const std::string &propertiesJson,
+    const std::set<std::string> &ignoreProperties) {
+  m_properties->setProperties(propertiesJson, this, ignoreProperties);
+}
+
+/** Sets all the declared properties from a json object
+  @param jsonValue :: A json name value pair collection
+  @param ignoreProperties :: A set of names of any properties NOT to set
+  from the propertiesArray
+  */
+void PropertyManagerOwner::setProperties(
+    const ::Json::Value &jsonValue,
+    const std::set<std::string> &ignoreProperties) {
+  m_properties->setProperties(jsonValue, this, ignoreProperties);
+}
+
+/** Sets all the declared properties from a string.
+  @param propertiesString :: A list of name = value pairs separated by a
+    semicolon
+  @param ignoreProperties :: A set of names of any properties NOT to set
+  from the propertiesArray
 */
-// Care will certainly be required in the calling of this function or it could
-// all go horribly wrong!
-void PropertyManagerOwner::setProperties(const std::string &propertiesArray) {
-  m_properties->setProperties(propertiesArray);
+void PropertyManagerOwner::setPropertiesWithSimpleString(
+    const std::string &propertiesString,
+    const std::set<std::string> &ignoreProperties) {
+  m_properties->setPropertiesWithSimpleString(propertiesString,
+                                              ignoreProperties);
 }
 
 /** Set the value of a property by string
@@ -171,12 +203,19 @@ bool PropertyManagerOwner::isDefault(const std::string &name) const {
 * The format is propName=value,propName=value,propName=value
 * @param withDefaultValues :: If true then the value of default parameters will
 * be included
-* @param separator :: character for the separator
 * @returns A stringized version of the manager
 */
-std::string PropertyManagerOwner::asString(bool withDefaultValues,
-                                           char separator) const {
-  return m_properties->asString(withDefaultValues, separator);
+std::string PropertyManagerOwner::asString(bool withDefaultValues) const {
+  return m_properties->asString(withDefaultValues);
+}
+/**
+* Return the property manager serialized as a json object.
+* @param withDefaultValues :: If true then the value of default parameters will
+* be included
+* @returns A jsonValue of the manager
+*/
+::Json::Value PropertyManagerOwner::asJson(bool withDefaultValues) const {
+  return m_properties->asJson(withDefaultValues);
 }
 
 /**

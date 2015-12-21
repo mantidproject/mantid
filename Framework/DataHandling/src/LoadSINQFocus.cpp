@@ -44,7 +44,9 @@ const std::string LoadSINQFocus::name() const { return "LoadSINQFocus"; }
 int LoadSINQFocus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadSINQFocus::category() const { return "DataHandling"; }
+const std::string LoadSINQFocus::category() const {
+  return "DataHandling\\Nexus";
+}
 
 //----------------------------------------------------------------------------------------------
 
@@ -68,11 +70,9 @@ int LoadSINQFocus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadSINQFocus::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".hdf");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the Nexus file to load");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".hdf"}),
+      "The name of the Nexus file to load");
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "The name to use for the output workspace");
@@ -243,6 +243,8 @@ void LoadSINQFocus::runLoadInstrument() {
     // different IDF
 
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
     loadInst->execute();
   } catch (...) {

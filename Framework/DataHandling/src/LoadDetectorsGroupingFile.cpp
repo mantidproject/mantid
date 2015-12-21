@@ -45,12 +45,8 @@ LoadDetectorsGroupingFile::~LoadDetectorsGroupingFile() {}
 void LoadDetectorsGroupingFile::init() {
   /// Initialise the properties
 
-  std::vector<std::string> fileExts(2);
-  fileExts[0] = ".xml";
-  fileExts[1] = ".map";
-
   declareProperty(
-      new FileProperty("InputFile", "", FileProperty::Load, fileExts),
+      new FileProperty("InputFile", "", FileProperty::Load, {".xml", ".map"}),
       "The XML or Map file with full path.");
 
   declareProperty(new WorkspaceProperty<DataObjects::GroupingWorkspace>(
@@ -98,7 +94,8 @@ void LoadDetectorsGroupingFile::exec() {
       MatrixWorkspace_sptr tempWS(new DataObjects::Workspace2D());
       childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
       childAlg->setPropertyValue("Filename", instrumentFilename);
-      childAlg->setProperty("RewriteSpectraMap", false);
+      childAlg->setProperty("RewriteSpectraMap",
+                            Mantid::Kernel::OptionalBool(false));
       childAlg->executeAsChildAlg();
       m_instrument = tempWS->getInstrument();
     }

@@ -37,7 +37,7 @@ const std::string MergeMD::name() const { return "MergeMD"; }
 int MergeMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MergeMD::category() const { return "MDAlgorithms"; }
+const std::string MergeMD::category() const { return "MDAlgorithms\\Creation"; }
 
 //----------------------------------------------------------------------------------------------
 

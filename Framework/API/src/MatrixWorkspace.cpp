@@ -1601,6 +1601,20 @@ signal_t MatrixWorkspace::getSignalAtCoord(
     return std::numeric_limits<double>::quiet_NaN();
 }
 
+//------------------------------------------------------------------------------------
+/** Returns the (normalized) signal at a given coordinates
+ * Implementation differs from getSignalAtCoord for MD workspaces
+*
+* @param coords :: bare array, size 2, of coordinates. X, Y
+* @param normalization :: how to normalize the signal
+* @return normalized signal.
+*/
+signal_t MatrixWorkspace::getSignalWithMaskAtCoord(
+    const coord_t *coords,
+    const Mantid::API::MDNormalization &normalization) const {
+  return getSignalAtCoord(coords, normalization);
+}
+
 //--------------------------------------------------------------------------------------------
 /** Save the spectra detector map to an open NeXus file.
 * @param file :: open NeXus file
@@ -2049,8 +2063,9 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected MatrixWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<MatrixWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -2065,8 +2080,9 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const MatrixWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<MatrixWorkspace>.";
     throw std::runtime_error(message);
   }
 }

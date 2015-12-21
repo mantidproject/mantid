@@ -48,7 +48,7 @@ int FitResolutionConvolvedModel::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string FitResolutionConvolvedModel::category() const {
-  return "Quantification";
+  return "Inelastic\\Quantification";
 }
 
 //----------------------------------------------------------------------------------------------

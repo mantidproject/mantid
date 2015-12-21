@@ -12,7 +12,7 @@ class SANSSubtract(PythonAlgorithm):
         """
             Return category
         """
-        return "PythonAlgorithms;SANS"
+        return "SANS"
 
     def name(self):
         """

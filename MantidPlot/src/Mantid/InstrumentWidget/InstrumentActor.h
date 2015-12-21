@@ -5,6 +5,7 @@
 #include "GLActor.h"
 #include "GLActorCollection.h"
 #include "GLActorVisitor.h"
+#include "MaskBinsData.h"
 #include "SampleActor.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
@@ -82,8 +83,11 @@ public:
   boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspace() const;
   /// Apply the mask in the attached mask workspace to the data.
   void applyMaskWorkspace();
+  /// Add a range of bins for masking
+  void addMaskBinsData(const QList<int>& detIDs);
   /// Remove the attached mask workspace without applying the mask.
-  void clearMaskWorkspace();
+  /// Remove the bin masking data.
+  void clearMasks();
 
   /// Get the color map.
   const MantidColorMap & getColorMap() const;
@@ -174,6 +178,7 @@ public:
 
   void initMaskHelper() const;
   bool hasMaskWorkspace() const;
+  bool hasBinMask() const;
 signals:
   void colorMapChanged();
 
@@ -185,6 +190,7 @@ private:
   void saveSettings();
   void setDataMinMaxRange(double vmin, double vmax);
   void setDataIntegrationRange(const double& xmin,const double& xmax);
+  void calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace& workspace);
   /// Sum the counts in detectors if the workspace has equal bins for all spectra
   void sumDetectorsUniform(QList<int>& dets, std::vector<double>&x, std::vector<double>&y) const;
   /// Sum the counts in detectors if the workspace is ragged
@@ -200,17 +206,22 @@ private:
   const boost::weak_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
   /// The helper masking workspace keeping the mask build in the mask tab but not applied to the data workspace.
   mutable boost::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
+  /// A helper object that keeps bin masking data.
+  mutable MaskBinsData m_maskBinsData;
   /// The colormap
   MantidColorMap m_colorMap;
   QString m_currentColorMapFilename;
   /// integrated spectra
   std::vector<double> m_specIntegrs;
   /// The workspace data and bin range limits
-  double m_WkspBinMinValue, m_WkspBinMaxValue;                         ///< x-values min and max over whole workspace
-  /// The user requested data and bin ranges
-  double m_DataMinValue, m_DataMaxValue, m_DataPositiveMinValue;    ///< y-values min and max for current bin (x integration) range
-  double m_DataMinScaleValue, m_DataMaxScaleValue;           ///< min and max of the color map scale
-  double m_BinMinValue, m_BinMaxValue;                       ///< x integration range
+  double m_WkspBinMinValue, m_WkspBinMaxValue;
+  // The user requested data and bin ranges
+  /// y-values min and max for current bin (x integration) range
+  double m_DataMinValue, m_DataMaxValue, m_DataPositiveMinValue;
+  /// min and max of the color map scale
+  double m_DataMinScaleValue, m_DataMaxScaleValue;
+  /// x integration range
+  double m_BinMinValue, m_BinMaxValue;
   /// Hint on whether the workspace is ragged or not
   bool m_ragged;
   /// Flag to rescale the colormap axis automatically when the data or integration range change
@@ -259,7 +270,8 @@ private:
 class SetVisibleComponentVisitor: public SetVisibilityVisitor
 {
 public:
-  SetVisibleComponentVisitor(const Mantid::Geometry::ComponentID id):m_id(id){}
+  explicit SetVisibleComponentVisitor(const Mantid::Geometry::ComponentID id)
+      : m_id(id) {}
   bool visit(GLActor*);
   bool visit(GLActorCollection*);
   bool visit(ComponentActor* actor);
@@ -281,7 +293,7 @@ class SetVisibleNonDetectorVisitor: public SetVisibilityVisitor
 public:
   /// Constructor
   /// @param on :: If true then all non-detectors will be made visible or invisible if false.
-  SetVisibleNonDetectorVisitor(bool on):m_on(on){}
+  explicit SetVisibleNonDetectorVisitor(bool on) : m_on(on) {}
   using GLActorVisitor::visit;
   bool visit(GLActor*);
 private:
@@ -294,7 +306,8 @@ private:
 class FindComponentVisitor: public GLActorVisitor
 {
 public:
-  FindComponentVisitor(const Mantid::Geometry::ComponentID id):m_id(id),m_actor(NULL){}
+  explicit FindComponentVisitor(const Mantid::Geometry::ComponentID id)
+      : m_id(id), m_actor(NULL) {}
   using GLActorVisitor::visit;
   bool visit(GLActor*);
   ComponentActor* getActor()const{return m_actor;}

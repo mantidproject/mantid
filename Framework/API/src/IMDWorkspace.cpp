@@ -53,6 +53,20 @@ signal_t IMDWorkspace::getSignalAtVMD(
   return this->getSignalAtCoord(coords.getBareArray(), normalization);
 }
 
+//-------------------------------------------------------------------------------------------
+/** Returns the signal (normalized by volume) at a given coordinates
+ * or 0 if masked
+ *
+ * @param coords :: coordinate as a VMD vector
+ * @param normalization :: how to normalize the signal returned
+ * @return normalized signal
+ */
+signal_t IMDWorkspace::getSignalWithMaskAtVMD(
+    const Mantid::Kernel::VMD &coords,
+    const Mantid::API::MDNormalization &normalization) const {
+  return this->getSignalWithMaskAtCoord(coords.getBareArray(), normalization);
+}
+
 //-----------------------------------------------------------------------------------------------
 
 /**
@@ -155,8 +169,9 @@ IPropertyManager::getValue<Mantid::API::IMDWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected IMDWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IMDWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -173,8 +188,9 @@ IPropertyManager::getValue<Mantid::API::IMDWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const IMDWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<IMDWorkspace>.";
     throw std::runtime_error(message);
   }
 }

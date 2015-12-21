@@ -452,7 +452,7 @@ def rename_wrapper(f):
         return _gather_returns(function_name, lhs, algm)
 
     # Have a better load signature for autocomplete
-    _signature = "\bInputWorkspace,[OutputWorkspace]"
+    _signature = "\bInputWorkspace,[OutputWorkspace],[True||False]"
     # Getting the code object for Load
     _f = wrapper.func_code
     # Creating a new code object nearly identical, but with the two variable names replaced
@@ -825,7 +825,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
                 # Check for missing mandatory parameters
                 _check_mandatory_args(algorithm, _algm_object, e, *args, **kwargs)
             else:
-                raise RuntimeError(e.message)
+                raise
         return _gather_returns(algorithm, lhs, algm)
 
 

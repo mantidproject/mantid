@@ -66,6 +66,32 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
                           IntegWorkspace=self.__class__._van_integ_tbl,
                           CurvesWorkspace=self.__class__._van_curves_ws)
 
+        # mispelled SplineBreakPoints
+        self.assertRaises(RuntimeError,
+                          sapi.EnggVanadiumCorrections,
+                          BreakPoints=self.__class__._van_integ_tbl,
+                          IntegrationWorkspace=self.__class__._van_integ_tbl,
+                          CurvesWorkspace=self.__class__._van_curves_ws)
+
+        # validation of SplineBreakPoints value bounds fails
+        self.assertRaises(ValueError,
+                          sapi.EnggVanadiumCorrections,
+                          SplineBreakPoints=-1,
+                          IntegrationWorkspace=self.__class__._van_integ_tbl,
+                          CurvesWorkspace=self.__class__._van_curves_ws)
+
+        self.assertRaises(ValueError,
+                          sapi.EnggVanadiumCorrections,
+                          SplineBreakPoints=0,
+                          IntegrationWorkspace=self.__class__._van_integ_tbl,
+                          CurvesWorkspace=self.__class__._van_curves_ws)
+
+        self.assertRaises(ValueError,
+                          sapi.EnggVanadiumCorrections,
+                          SplineBreakPoints=3,
+                          IntegrationWorkspace=self.__class__._van_integ_tbl,
+                          CurvesWorkspace=self.__class__._van_curves_ws)
+
     def _check_corrected_ws(self, ws):
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'TOF')
         self.assertEqual(ws.getAxis(1).getUnit().unitID(), 'Label')

@@ -24,12 +24,12 @@ Usage
 **Example - CorelliCrossCorrelate**
 
 .. testcode:: CorelliCrossCorrelateExample
-
+    
     # Load a Corelli data file.
     ws = Load('CORELLI_2100')
 
     # You will need to load the instrument if the one in the NeXus file doesn't contain the chopper sequence.
-    LoadInstrument(ws, MonitorList='-1,-2,-3', InstrumentName='CORELLI')
+    LoadInstrument(ws, MonitorList='-1,-2,-3', InstrumentName='CORELLI', RewriteSpectraMap=True)
 
     # Run the cross-correlation. This is using a TDC timing offset of 56000ns.
     wsOut = CorelliCrossCorrelate(ws,56000)

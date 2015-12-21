@@ -35,7 +35,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
     def category(self):
         """ Category
         """
-        return "Diffraction"
+        return "Diffraction\\Fitting"
 
     def name(self):
         """ Algorithm name

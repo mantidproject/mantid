@@ -55,7 +55,7 @@ void ErrorCurve::draw(QPainter *painter,
   if (m_e.empty()) return;
   painter->save();
   painter->setPen(m_pen);
-  int n = static_cast<int>(m_x.size());
+  int n = dataSize();
   const int dx = 4;
 
   for (int i = 0; i < n; ++i)
@@ -84,6 +84,39 @@ void ErrorCurve::draw(QPainter *painter,
 int ErrorCurve::dataSize() const
 {
   return static_cast<int>(m_x.size());
+}
+
+/**
+ * Bounding rectangle of all points and error bars, used for autoscaling.
+ * For an empty series the rectangle is invalid, meaning autoscaler ignores it.
+ * @returns Bounding rectangle
+ */
+QRectF ErrorCurve::boundingRect() const {
+  // Default returns an invalid rect, like base class
+  QRectF rect = QRectF(1, 1, -2, -2);
+  if (!m_e.empty()) {
+    int n = dataSize();
+    const double width = m_x[n - 1] - m_x[0];
+    double max = std::numeric_limits<double>::min();
+    double min = std::numeric_limits<double>::max();
+    for (int i = 0; i < n; i++) {
+      const double upper = m_y[i] + m_e[i];
+      const double lower = m_y[i] - m_e[i];
+      if (upper > max) {
+        max = upper;
+      }
+      if (lower < min) {
+        min = lower;
+      }
+    }
+    const double height = max - min;
+    // On a graph, y increases from bottom to top.
+    // Coordinate system expects y to increase from top to bottom.
+    // That's why we set rect's "top left" to the bottom left
+    // (can't set a negative height or it won't autoscale).
+    rect.setRect(m_x[0], min, width, height);
+  }
+  return rect;
 }
 
 } // MantidWidgets

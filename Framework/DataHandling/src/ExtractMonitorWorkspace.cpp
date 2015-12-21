@@ -22,7 +22,7 @@ int ExtractMonitorWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ExtractMonitorWorkspace::category() const {
-  return "DataHandling";
+  return "Utility\\Workspaces";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary

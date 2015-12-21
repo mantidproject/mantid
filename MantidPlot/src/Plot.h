@@ -43,7 +43,7 @@ class Grid;
 /// Helper class to delay deletion of curves
 struct Detacher : public QObject
 {
-  Detacher(QwtPlotItem* plotItem);
+  explicit Detacher(QwtPlotItem *plotItem);
   ~Detacher();
 private:
   Detacher();

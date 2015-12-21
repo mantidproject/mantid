@@ -30,6 +30,7 @@ RunLoadAndConvertToMD::RunLoadAndConvertToMD(MantidEVWorker * worker,
                                              const std::string & file_name,
                                              const std::string & ev_ws_name,
                                              const std::string & md_ws_name,
+                                             const double        modQ,
                                              const double        minQ,
                                              const double        maxQ,
                                              const bool          do_lorentz_corr,
@@ -39,7 +40,7 @@ RunLoadAndConvertToMD::RunLoadAndConvertToMD(MantidEVWorker * worker,
                                              const std::string & det_cal_file2 ) :
   worker(worker),
   file_name(file_name), ev_ws_name(ev_ws_name), md_ws_name(md_ws_name),
-  minQ(minQ), maxQ(maxQ), do_lorentz_corr(do_lorentz_corr),
+  modQ(modQ), minQ(minQ), maxQ(maxQ), do_lorentz_corr(do_lorentz_corr),
   load_data(load_data), load_det_cal(load_det_cal),
   det_cal_file(det_cal_file), det_cal_file2(det_cal_file2)
 {
@@ -48,7 +49,7 @@ RunLoadAndConvertToMD::RunLoadAndConvertToMD(MantidEVWorker * worker,
 void RunLoadAndConvertToMD::run()
 {
   worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name,
-                              minQ, maxQ, do_lorentz_corr, load_data,
+                              modQ, minQ, maxQ, do_lorentz_corr, load_data,
                               load_det_cal, det_cal_file, det_cal_file2 );
 }
 
@@ -61,7 +62,9 @@ RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
                             const std::string     & peaks_ws_name,
                                   double            max_abc,
                                   size_t            num_to_find,
-                                  double            min_intensity )
+                                  double            min_intensity,
+                                  double            minQPeaks,
+                                  double            maxQPeaks)
 {
   this->worker        = worker;
   this->ev_ws_name    = ev_ws_name;
@@ -70,6 +73,8 @@ RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
   this->max_abc       = max_abc;
   this->num_to_find   = num_to_find;
   this->min_intensity = min_intensity;
+  this->minQPeaks = minQPeaks;
+  this->maxQPeaks = maxQPeaks;
 }
 
 
@@ -79,7 +84,7 @@ RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
 void RunFindPeaks::run()
 {
   worker->findPeaks( ev_ws_name, md_ws_name, peaks_ws_name,
-                     max_abc, num_to_find, min_intensity );
+                     max_abc, num_to_find, min_intensity, minQPeaks, maxQPeaks );
 }
 
 /**
@@ -434,6 +439,7 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.loadDataGroupBox->setChecked(true);
    m_uiForm.EventFileName_ledt->setText(""); 
    m_uiForm.MaxMagQ_ledt->setText("25");
+   m_uiForm.ModQ_ledt->setText("0");
    m_uiForm.LorentzCorrection_ckbx->setChecked(true);
    setEnabledLoadEventFileParams_slot(true);
    m_uiForm.LoadDetCal_ckbx->setChecked(false);
@@ -585,6 +591,9 @@ void MantidEV::selectWorkspace_slot()
        }
      }
 
+     double modQ;
+     getDouble( m_uiForm.ModQ_ledt, modQ );
+
      double minQ;
      getDouble( m_uiForm.MinMagQ_ledt, minQ );
 
@@ -602,7 +611,7 @@ void MantidEV::selectWorkspace_slot()
 
      RunLoadAndConvertToMD* runner = new RunLoadAndConvertToMD(worker,file_name,
                                                                ev_ws_name, md_ws_name,
-                                                               minQ, maxQ,
+                                                               modQ, minQ, maxQ,
                                                                m_uiForm.LorentzCorrection_ckbx->isChecked(),
                                                                m_uiForm.loadDataGroupBox->isChecked(),
                                                                load_det_cal, det_cal_file, det_cal_file2 );
@@ -753,10 +762,18 @@ void MantidEV::findPeaks_slot()
 
      if ( !getPositiveDouble( m_uiForm.MinIntensity_ledt, min_intensity ) )
        return;
+
+     double minQPeaks;
+     getDouble( m_uiForm.MinQPeaks_ledt, minQPeaks );
+
+     double maxQPeaks;
+     getDouble( m_uiForm.MaxQPeaks_ledt, maxQPeaks );
+
      std::string ev_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
      RunFindPeaks* runner = new RunFindPeaks( worker, ev_ws_name,
                                          md_ws_name, peaks_ws_name,
-                                         max_abc, num_to_find, min_intensity );
+                                         max_abc, num_to_find, min_intensity,
+                                         minQPeaks, maxQPeaks);
 
      bool running = m_thread_pool->tryStart( runner );
      if ( !running )
@@ -1694,6 +1711,8 @@ void MantidEV::setEnabledFindPeaksParams_slot( bool on )
   m_uiForm.NumToFind_ledt->setEnabled( on );
   m_uiForm.MinIntensity_lbl->setEnabled( on );
   m_uiForm.MinIntensity_ledt->setEnabled( on );
+  m_uiForm.MinQPeaks_ledt->setEnabled( on );
+  m_uiForm.MaxQPeaks_ledt->setEnabled( on );
 }
 
 /**
@@ -2157,6 +2176,8 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("MaxABC_ledt", m_uiForm.MaxABC_ledt->text());
   state->setValue("NumToFind_ledt", m_uiForm.NumToFind_ledt->text());
   state->setValue("MinIntensity_ledt", m_uiForm.MinIntensity_ledt->text());
+  state->setValue("MinQPeaks_ledt", m_uiForm.MinQPeaks_ledt->text());
+  state->setValue("MaxQPeaks_ledt", m_uiForm.MaxQPeaks_ledt->text());
   state->setValue("UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn->isChecked());
   state->setValue("LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn->isChecked());
   state->setValue("SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt->text());
@@ -2268,6 +2289,8 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "MaxABC_ledt", m_uiForm.MaxABC_ledt );
   restore( state, "NumToFind_ledt", m_uiForm.NumToFind_ledt );
   restore( state, "MinIntensity_ledt", m_uiForm.MinIntensity_ledt );
+  restore( state, "MinQPeaks_ledt", m_uiForm.MinQPeaks_ledt );
+  restore( state, "MaxQPeaks_ledt", m_uiForm.MaxQPeaks_ledt );
   restore( state, "UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn );
   restore( state, "LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn );
   restore( state, "SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt );

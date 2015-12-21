@@ -765,7 +765,7 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   for (size_t i = 0; i < numpixels; i++) {
     // Create one event for each bin
     EventList &events = retVal->getEventList(static_cast<detid_t>(i));
-    for (double ie = 0; ie < numbins; ie++) {
+    for (std::size_t ie = 0; ie < numbins; ie++) {
       // Create a list of events, randomize
       events += TofEvent(std::rand(), std::rand());
     }
@@ -1057,7 +1057,8 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
   loadInst->setPropertyValue("InstrumentName",
                              sourceWS->getInstrument()->getName());
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", outputWS);
-  loadInst->setProperty("RewriteSpectraMap", true);
+  loadInst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(true));
   loadInst->executeAsChildAlg();
   // Populate the instrument parameters in this workspace - this works around a
   // bug
