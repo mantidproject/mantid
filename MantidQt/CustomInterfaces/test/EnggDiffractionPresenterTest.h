@@ -27,7 +27,7 @@ private:
                              const std::string &vanNo,
                              const std::string &ceriaNo,
                              const std::string &specNos) {
-    doNewCalibration(outFilename, vanNo, ceriaNo, "");
+    doNewCalibration(outFilename, vanNo, ceriaNo, specNos);
     calibrationFinished();
   }
 

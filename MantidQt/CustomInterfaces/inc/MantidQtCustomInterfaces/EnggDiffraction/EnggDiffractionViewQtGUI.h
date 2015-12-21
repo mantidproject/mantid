@@ -93,6 +93,10 @@ public:
 
   std::string outCalibFilename() const { return m_outCalibFilename; }
 
+  int currentCropCalibBankName() const { return m_currentCropCalibBankName; }
+
+  std::string currentCalibSpecNos() const;
+
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
                       const std::string &fname);
 
@@ -139,8 +143,6 @@ public:
   virtual bool saveOutputFiles() const;
 
   int currentPlotType() const { return m_currentType; }
-
-  int currentCropCalibBankName() const { return m_currentCropCalibBankName; }
 
   int currentMultiRunMode() const { return m_currentRunMode; }
 

@@ -530,7 +530,6 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabCalib.groupBox_current_calib->setEnabled(enable);
   m_uiTabCalib.groupBox_calib_cropped->setEnabled(enable);
   m_uiTabCalib.pushButton_new_cropped_calib->setEnabled(enable);
-  // m_uiTabCalib.lineEdit_cropped_spec_ids->setDisabled(enable); shahroz
   m_ui.pushButton_close->setEnabled(enable);
 
   // focus
@@ -916,10 +915,14 @@ void EnggDiffractionViewQtGUI::calibSpecIdChanged(int /*idx*/) {
 }
 
 void EnggDiffractionViewQtGUI::enableSpecIds() {
-	if (m_currentCropCalibBankName == 0)  // shahroz
+	if (m_currentCropCalibBankName == 0)
 		m_uiTabCalib.lineEdit_cropped_spec_ids->setEnabled(true);
 	else
 		m_uiTabCalib.lineEdit_cropped_spec_ids->setDisabled(true);
+}
+
+std::string EnggDiffractionViewQtGUI::currentCalibSpecNos() const {
+	return m_uiTabCalib.lineEdit_cropped_spec_ids->text().toStdString();
 }
 
 
