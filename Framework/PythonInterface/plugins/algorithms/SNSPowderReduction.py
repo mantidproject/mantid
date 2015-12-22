@@ -1,10 +1,12 @@
 #pylint: disable=invalid-name,no-init,too-many-lines
+import os
+import numpy
+
 import mantid
 import mantid.api
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
-import os
 
 if AlgorithmFactory.exists('GatherWorkspaces'):
     HAVE_MPI = True
@@ -18,6 +20,13 @@ else:
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
 def noRunSpecified(runs):
+    """
+
+    :param runs:
+    :return:
+    """
+    # TODO/NOW - Doc!
+    assert(runs, numpy.ndarray)
     if runs.size <= 0:
         return True
     if runs.size == 1:
@@ -28,7 +37,9 @@ def allEventWorkspaces(*args):
     result = True
 
     for arg in args:
-        result = result and (arg.id() == EVENT_WORKSPACE_ID)
+        assert isinstance(arg, str)
+        workspace = AnalysisDataService.retrieve(arg)
+        result = result and (workspace.id() == EVENT_WORKSPACE_ID)
 
     return result
 
@@ -312,7 +323,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self.log().information("Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
 
             # Get run number
-            self._info = self._getinfo(samRun)
+            self._info = self._getinfo(samRun.name())
 
             # process the container
             canRuns = self._info["container"].value
@@ -347,62 +358,76 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 workspacelist.append(str(canRun))
 
             # process the vanadium run
-            vanRuns = self._info["vanadium"].value
-            if not noRunSpecified(vanRuns):
-                if len(vanRuns) == 1:
-                    vanRun = vanRuns[0]
+            van_run_number_list = self._info["vanadium"].value
+            van_specified = not noRunSpecified(van_run_number_list)
+            if van_specified:
+                # get the right van run number to this sample
+                if len(van_run_number_list) == 1:
+                    van_run_number = van_run_number_list[0]
                 else:
-                    vanRun = vanRuns[samRunIndex]
+                    van_run_number = van_run_number_list[samRunIndex]
+                # set up filter wall for van run
                 if self.getProperty("FilterCharacterizations").value:
-                    vanFilterWall = {'FilterByTimeStart':timeFilterWall[0], 'FilterByTimeStop':timeFilterWall[1]}
+                    vanFilterWall = {'FilterByTimeStart': timeFilterWall[0], 'FilterByTimeStop': timeFilterWall[1]}
                 else:
-                    vanFilterWall = {'FilterByTimeStart':Property.EMPTY_DBL, 'FilterByTimeStop':Property.EMPTY_DBL}
-                if "%s_%d" % (self._instrument, vanRun) in mtd:
-                    vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
-                    vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
+                    vanFilterWall = {'FilterByTimeStart': Property.EMPTY_DBL, 'FilterByTimeStop': Property.EMPTY_DBL}
+                # get handle on workspace of this van run and make sure its unit is T.O.F
+                if "%s_%d" % (self._instrument, van_run_number) in mtd:
+                    # use the existing vanadium
+                    van_run_ws_name = "%s_%d" % (self._instrument, van_run_number)
+                    van_run_ws = mtd[van_run_ws_name]
+                    van_run_ws = api.ConvertUnits(InputWorkspace=van_run_ws_name,
+                                                  OutputWorkspace=van_run_ws_name,
+                                                  Target="TOF")
                 else:
                     # load the vanadium
-                    name = "%s_%d" % (self._instrument, vanRun)
+                    van_run_ws_name = "%s_%d" % (self._instrument, van_run_number)
                     if self.getProperty("Sum").value:
-                        vanRun = self._loadAndSum(vanRuns, name, **vanFilterWall)
+                        van_run_ws = self._loadAndSum(van_run_number_list, van_run_ws_name, **vanFilterWall)
                     else:
-                        vanRun = self._loadAndSum([vanRun], name, **vanFilterWall)
+                        van_run_ws = self._loadAndSum([van_run_number], van_run_ws_name, **vanFilterWall)
+                    assert van_run_ws is not None
 
                     # load the vanadium background (if appropriate)
-                    vbackRuns = self._info["empty"].value
-                    if not noRunSpecified(vbackRuns):
-                        if len(vbackRuns) == 1:
-                            vbackRun = vbackRuns[0]
+                    van_bkgd_run_number_list = self._info["empty"].value
+                    if not noRunSpecified(van_bkgd_run_number_list):
+                        if len(van_bkgd_run_number_list) == 1:
+                            van_bkgd_run_number = van_bkgd_run_number_list[0]
                         else:
-                            vbackRun = vbackRuns[samRunIndex]
-                        name = "%s_%d" % (self._instrument, vbackRun)
+                            van_bkgd_run_number = van_bkgd_run_number_list[samRunIndex]
+                        van_bkgd_ws_name = "%s_%d" % (self._instrument, van_bkgd_run_number)
                         if self.getProperty("Sum").value:
-                            vbackRun = self._loadAndSum(vbackRuns, name, **vanFilterWall)
+                            van_bkgd_ws = self._loadAndSum(van_bkgd_run_number_list, van_bkgd_ws_name, **vanFilterWall)
                         else:
-                            vbackRun = self._loadAndSum([vbackRun], name, **vanFilterWall)
+                            van_bkgd_ws = self._loadAndSum([van_bkgd_run_number], van_bkgd_ws_name, **vanFilterWall)
 
-                        if vbackRun.id() == EVENT_WORKSPACE_ID and vbackRun.getNumberEvents() <= 0:
+                        if van_bkgd_ws.id() == EVENT_WORKSPACE_ID and van_bkgd_ws.getNumberEvents() <= 0:
+                            # skip if background run is empty
                             pass
                         else:
-                            vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun, OutputWorkspace=vanRun,
-                                               ClearRHSWorkspace=allEventWorkspaces(vanRun, vbackRun))
-
-                        api.DeleteWorkspace(Workspace=vbackRun)
+                            van_run_ws = api.Minus(LHSWorkspace=van_run_ws_name,
+                                                   RHSWorkspace=van_bkgd_ws_name,
+                                                   OutputWorkspace=van_run_ws_name,
+                                                   ClearRHSWorkspace=allEventWorkspaces(van_run_ws_name, van_bkgd_ws_name))
+                        api.DeleteWorkspace(Workspace=van_bkgd_ws_name)
 
                     # compress events
-                    if vanRun.id() == EVENT_WORKSPACE_ID:
-                        vanRun = api.CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun,
-                                                    Tolerance=self.COMPRESS_TOL_TOF) # 10ns
+                    if van_run_ws.id() == EVENT_WORKSPACE_ID:
+                        van_run_number = api.CompressEvents(InputWorkspace=van_run_ws_name,
+                                                            OutputWorkspace=van_run_ws_name,
+                                                            Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
 
                     # do the absorption correction
-                    vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="Wavelength")
-                    api.SetSampleMaterial(InputWorkspace=vanRun, ChemicalFormula="V", SampleNumberDensity=0.0721)
-                    vanRun = api.MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun,
+                    van_run_number = api.ConvertUnits(InputWorkspace=van_run_ws_name,
+                                                      OutputWorkspace=van_run_ws_name,
+                                                      Target="Wavelength")
+                    api.SetSampleMaterial(InputWorkspace=van_run_number, ChemicalFormula="V", SampleNumberDensity=0.0721)
+                    van_run_number = api.MultipleScatteringCylinderAbsorption(InputWorkspace=van_run_number, OutputWorkspace=van_run_number,
                                                                       CylinderSampleRadius=self._vanRadius)
-                    vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
+                    van_run_number = api.ConvertUnits(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Target="TOF")
 
                     # focus the data
-                    vanRun = api.AlignAndFocusPowder(InputWorkspace=vanRun, OutputWorkspace=vanRun, CalFileName=calib,
+                    van_run_number = api.AlignAndFocusPowder(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, CalFileName=calib,
                                                      Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
                                                      RemovePromptPulseWidth=self._removePromptPulseWidth,
                                                      CompressTolerance=self.COMPRESS_TOL_TOF,
@@ -415,20 +440,20 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
                     # strip peaks
                     if self.getProperty("StripVanadiumPeaks").value:
-                        vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                        vanRun = api.StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,\
+                        van_run_number = api.ConvertUnits(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Target="dSpacing")
+                        van_run_number = api.StripVanadiumPeaks(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, FWHM=self._vanPeakFWHM,\
                                            PeakPositionTolerance=self.getProperty("VanadiumPeakTol").value,\
                                            BackgroundType="Quadratic", HighBackground=True)
                     else:
                         self.log().information("Not strip vanadium peaks")
-                    vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
-                    vanRun = api.FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",\
+                    van_run_number = api.ConvertUnits(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Target="TOF")
+                    van_run_number = api.FFTSmooth(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Filter="Butterworth",\
                               Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                    vanRun = api.SetUncertainties(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                    vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
-                workspacelist.append(str(vanRun))
+                    van_run_number = api.SetUncertainties(InputWorkspace=van_run_number, OutputWorkspace=van_run_number)
+                    van_run_number = api.ConvertUnits(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Target="TOF")
+                workspacelist.append(str(van_run_number))
             else:
-                vanRun = None
+                van_run_number = None
 
             if mpiRank > 0:
                 return
@@ -444,11 +469,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
                                Tolerance=self.COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
-            if vanRun is not None:
-                samRun = api.Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun)
+            if van_run_number is not None:
+                samRun = api.Divide(LHSWorkspace=samRun, RHSWorkspace=van_run_number, OutputWorkspace=samRun)
                 normalized = True
-                samRun.getRun()['van_number'] = vanRun.getRun()['run_number'].value
-                vanRun = str(vanRun)
+                samRun.getRun()['van_number'] = van_run_number.getRun()['run_number'].value
+                van_run_number = str(van_run_number)
             else:
                 normalized = False
 
@@ -505,23 +530,45 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._focusPos['Azimuthal'] = results[6]
 
     #pylint: disable=too-many-branches
-    def _loadData(self, runnumber, extension, filterWall=None, outname=None, **chunk):
-        if  runnumber is None or runnumber <= 0:
-            return None
+    def _loadData(self, run_number, extension, filterWall=None, out_ws_name=None, **chunk):
+        """ Load data optionally by chunk strategy
+        Purpose:
+            Load a complete or partial run, filter bad pulses.
+            Output workspace name is formed as
+            - user specified (highest priority)
+            - instrument-name_run-number_0 (no chunking)
+            - instrument-name_run-number_X: X is either ChunkNumber of SpectrumMin
+        Requirements:
+            1. run number is integer and larger than 0
+        Guarantees:
+            A workspace is created with name described above
+        :param run_number:
+        :param extension: file extension
+        :param filterWall:
+        :param out_ws_name: name of output workspace specified by user. it will override the automatic name
+        :param chunk:
+        :return:
+        """
+        # Check requirements
+        assert isinstance(run_number, int), 'Input run number must be integer but not %s.' % str(type(run_number))
+        assert run_number > 0, 'Input run number must be larger than 0 but not %d.' % run_number
+        assert (chunk is None) or isinstance(chunk, dict), 'Input chunk must be either a dictionary or None.'
 
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-        # EMPTY_INT() from C++
-        if chunk:
-            if "ChunkNumber" in chunk:
-                name += "_%d" % (int(chunk["ChunkNumber"]))
-            elif "SpectrumMin" in chunk:
-                name += "_%d" % (1 + int(chunk["SpectrumMin"])/(int(chunk["SpectrumMax"])-int(chunk["SpectrumMin"])))
-        else:
-            name += "_%d" % 0
-        if outname is not None:
-            name = outname
+        base_name = "%s_%d" % (self._instrument, run_number)
+        filename = base_name + extension
+        # give out the default output workspace name
+        if out_ws_name is None:
+            if chunk:
+                if "ChunkNumber" in chunk:
+                    out_ws_name = base_name + "__chk%d" % (int(chunk["ChunkNumber"]))
+                elif "SpectrumMin" in chunk:
+                    seq_number = 1 + int(chunk["SpectrumMin"])/(int(chunk["SpectrumMax"])-int(chunk["SpectrumMin"]))
+                    out_ws_name = base_name + "__chk%d" % seq_number
+            else:
+                out_ws_name = "%s_%d" % (base_name, 0)
+        # END-IF
 
+        # Specify the other chunk information including Precount, FilterByTimeStart and FilterByTimeStop.
         if extension.endswith("_event.nxs") or extension.endswith(".nxs.h5"):
             chunk["Precount"] = True
             if filterWall is not None:
@@ -530,12 +577,15 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 if filterWall[1] > 0.:
                     chunk["FilterByTimeStop"] = filterWall[1]
 
-        wksp = api.Load(Filename=filename, OutputWorkspace=name, **chunk)
-        try:
-            self.log().debug("Load run %s: number of events = %d" % (str(runnumber), wksp.getNumberEvents()))
-        except Exception as e:
-            self.log().debug("Load run %s: unable to get events of %s.  Error message: %s" % (str(runnumber), str(wksp), str(e)))
+        # Call Mantid's Load algorithm to load complete or partial data
+        wksp = api.Load(Filename=filename, OutputWorkspace=out_ws_name, **chunk)
+        assert wksp is not None, 'Mantid Load algorithm does not return a workspace.'
 
+        # Log output
+        try:
+            self.log().debug("Load run %s: number of events = %d" % (str(run_number), wksp.getNumberEvents()))
+        except Exception as e:
+            self.log().debug("Load run %s: unable to get events of %s.  Error message: %s" % (str(run_number),                                                                                     str(wksp), str(e)))
         if HAVE_MPI:
             msg = "MPI Task = %s ;" % (str(mpiRank))
             try:
@@ -546,18 +596,26 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # filter bad pulses
         if self._filterBadPulses > 0.:
-            isEventWS = isinstance(wksp, mantid.api.IEventWorkspace)
-            if isEventWS is True:
+            # record number of events of the original workspace
+            is_event_ws = isinstance(wksp, mantid.api.IEventWorkspace)
+            if is_event_ws is True:
                 # Event workspace: record original number of events
-                numeventsbefore =  wksp.getNumberEvents()
+                num_original_events = wksp.getNumberEvents()
+            else:
+                num_original_events = -1
 
-            wksp = api.FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp,
+            # filter bad pulse
+            wksp = api.FilterBadPulses(InputWorkspace=out_ws_name, OutputWorkspace=out_ws_name,
                                        LowerCutoff=self._filterBadPulses)
+            assert wksp is not None, 'Returned value from FilterBadPulses cannot be None'
 
-            if isEventWS is True:
+            if is_event_ws is True:
                 # Event workspace
-                self.log().information("FilterBadPulses reduces number of events from %d to %d (under %s percent) of workspace %s." % (\
-                        numeventsbefore, wksp.getNumberEvents(), str(self._filterBadPulses), str(wksp)))
+                message = "FilterBadPulses reduces number of events from %d to %d (under %s percent) " \
+                          "of workspace %s." % (num_original_events, wksp.getNumberEvents(),
+                                                str(self._filterBadPulses), str(wksp))
+                self.log().information(message)
+        # END-IF (filter bad pulse)
 
         return wksp
 
@@ -570,11 +628,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         """
         # generate the workspace name
         assert isinstance(runnumber, int)
-        wksp_name = "%s_%d" % (self._instrument, runnumber)
-        assert self.does_workspace_exist(wksp_name)
+        file_name = "%s_%d" % (self._instrument, runnumber) + extension
+        assert os.path.exists(file_name), 'NeXus file %s does not exist.' % file_name
 
-        self.log().debug("[Fx116] Run file Name : %s,\t\tMax chunk size: %s" % (str(wksp_name+extension), str(self._chunks)))
-        chunks = api.DetermineChunking(Filename=wksp_name+extension, MaxChunkSize=self._chunks)
+        self.log().debug("[Fx116] Run file Name : %s,\t\tMax chunk size: %s" % (file_name, str(self._chunks)))
+        chunks = api.DetermineChunking(Filename=file_name, MaxChunkSize=self._chunks)
 
         strategy = []
         for row in chunks:
@@ -706,224 +764,213 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         strategy = self._getStrategy(runnumber, extension)
 
         # determine event splitting by checking filterWall and number of output workspaces from _focusChunk
-        do_split_raw_wksp, num_out_wksp = self._determine_workspace_splitting(splitwksp)
+        do_split_raw_wksp, num_out_wksp = self._determine_workspace_splitting(splitwksp, filterWall)
 
-        """
-        do_split_raw_wksp = False
-        num_out_wksp = 1
+        # Set up the data structure to hold and control output workspaces
+        output_wksp_list = [None] * num_out_wksp
+        is_first_chunk_list = [True] * num_out_wksp
 
-        if splitwksp is not None:
-            # Use splitting workspace
-
-            # Check consistency with filterWall
-            if filterWall[0] < 1.0E-20 and filterWall[1] < 1.0E-20:
-                # Default definition of filterWall when there is no split workspace specified.
-                raise RuntimeError("It is impossible to have a not-NONE splitters workspace and (0,0) time filter wall.")
-            # ENDIF
-
-            # Note: Unfiltered workspace (remainder) is not considered here
-            num_out_wksp = self.getNumberOfSplittedWorkspace(splitwksp)
-            num_splitters = splitwksp.rowCount()
-
-            # Do explicit FilterEvents if number of splitters is larger than 1.
-            # If number of splitters is equal to 1, then filterWall will do the job itself.
-            if num_splitters > 1:
-                do_split_raw_wksp = True
-            self.log().debug("[Fx948] Number of split workspaces = %d; Do split = %s" % (num_out_wksp, str(do_split_raw_wksp)))
-        # ENDIF
-        """
-
-        firstChunkList = []
-        wksplist = []
-        for dummy_n in xrange(num_out_wksp):
-            # In some cases, there will be 1 more splitted workspace (unfiltered)
-            firstChunkList.append(True)
-            wksplist.append(None)
-
-        self.log().debug("F1141A: Number of workspace to process = %d" %(num_out_wksp))
+        self.log().debug("F1141A: Number of workspace to process = %d" % num_out_wksp)
 
         # reduce data by chunks
-        ichunk = -1
+        chunk_index = -1
+        # FIXME/TODO/Now: there are 2 places that determine the base name
+        base_name = "%s_%d" % (self._instrument, runnumber)
         for chunk in strategy:
-            self.log().debug("F1141B: Start of Chunk %s" % (str(chunk)))
-            ichunk += 1
-
-            # Log information
-            self.__logChunkInfo(chunk)
-
-            # Load chunk
-            temp = self._loadData(runnumber, extension, filterWall, **chunk)
-            if isinstance(temp, mantid.api.IEventWorkspace) is True:
-                # Event workspace
-                self.log().debug("F1141C There are %d events after data is loaded in workspace %s." % (
-                    temp.getNumberEvents(), str(temp)))
+            # progress on chunk index
+            chunk_index += 1
+            # Load chunk, i.e., partial data into Mantid
+            raw_ws_chunk = self._loadData(runnumber, extension, filterWall, **chunk)
+            raw_ws_name_chunk = raw_ws_chunk.name()
 
             if self._info is None:
-                self._info = self._getinfo(temp)
+                self._info = self._getinfo(raw_ws_name_chunk)
 
-            # Filtering...
-            tempwslist = []
-            if temp.id() == EVENT_WORKSPACE_ID:
-                # Filter to bad
-                if do_split_raw_wksp:
-                    # Splitting workspace
-                    basename = str(temp)
-                    if self._splitinfotablews is None:
-                        api.FilterEvents(InputWorkspace=temp, OutputWorkspaceBaseName=basename,\
-                                SplitterWorkspace=splitwksp, GroupWorkspaces=True)
-                    else:
-                        self.log().information("SplitterWorkspace = %s, Information Workspace = %s. " % (
-                            str(splitwksp), str(self._splitinfotablews)))
-                        api.FilterEvents(InputWorkspace=temp, OutputWorkspaceBaseName=basename,\
-                                SplitterWorkspace=splitwksp, InformationWorkspace = str(self._splitinfotablews),\
-                                GroupWorkspaces=True)
-                    # ENDIF
-                    wsgroup = mtd[basename]
-                    tempwsnamelist = wsgroup.getNames()
+            # Log information for current chunk
+            self.__logChunkInfo(chunk)
+            if raw_ws_chunk.id() == EVENT_WORKSPACE_ID:
+                # Event workspace
+                self.log().debug("F1141C: There are %d events after data is loaded in workspace %s." % (
+                    raw_ws_chunk.getNumberEvents(), raw_ws_name_chunk))
 
-                    dbstr = "[Fx951] Splitted workspace names: "
-                    for wsname in tempwsnamelist:
-                        dbstr += "%s, " % (wsname)
-                    self.log().debug(dbstr)
-
-                    tempwslist = []
-                    # FIXME Keep in mind to use this option.
-                    # keepremainder = self.getProperty("KeepRemainder").value
-                    for wsname in tempwsnamelist:
-                        tempws = mtd[wsname]
-                        if tempws is not None:
-                            if wsname.endswith("_unfiltered") is False:
-                                tempwslist.append(tempws)
-                            else:
-                                api.DeleteWorkspace(Workspace=tempws)
-                    # ENDFOR
-                else:
-                    # Non-splitting
-                    tempwslist.append(temp)
-                # ENDIF
-
-                # Update number of workspaces
-                num_out_wksp = len(tempwslist)
+            # Split the workspace if it is required
+            if do_split_raw_wksp is True:
+                output_ws_name_list = self._split_workspace(raw_ws_name_chunk, splitwksp)
             else:
                 # Histogram data
-                tempwslist.append(temp)
+                output_ws_name_list = [raw_ws_name_chunk]
             # ENDIF
+            # check
+            if num_out_wksp != len(output_ws_name_list):
+                self.log().warning('Projected number of output workspaces %d must be same as '
+                                   'that of real output workspaces %d.' % (num_out_wksp, len(output_ws_name_list)))
+                num_out_wksp = output_ws_name_list
 
-            msg = "[Fx1142] Workspace of chunk %d is %d/%d. \n" % (ichunk, len(tempwslist), num_out_wksp)
-            for iws in xrange(len(tempwslist)):
-                ws = tempwslist[iws]
+            # log
+            msg = "[Fx1142] Workspace of chunk %d is %d (vs. estimated %d). \n" % (
+                chunk_index, len(output_ws_name_list), num_out_wksp)
+            for iws in xrange(len(output_ws_name_list)):
+                ws = output_ws_name_list[iws]
                 msg += "%s\t\t" % (str(ws))
                 if iws %5 == 4:
                     msg += "\n"
             self.log().debug(msg)
 
-            for itemp in xrange(num_out_wksp):
-                temp = tempwslist[itemp]
+            # Do align and focus
+            num_out_wksp = len(output_ws_name_list)
+            for split_index in xrange(num_out_wksp):
+                # Get workspace name
+                out_ws_name_chunk_split = output_ws_name_list[split_index]
                 # Align and focus
-                focuspos = self._focusPos
-                temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,\
-                    Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,\
-                    PreserveEvents=preserveEvents,\
-                    RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=self.COMPRESS_TOL_TOF,\
-                    UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset,\
-                    CropWavelengthMin=self._wavelengthMin, CropWavelengthMax=self._wavelengthMax,
-                    ReductionProperties="__snspowderreduction", **(focuspos))
-                for iws in xrange(temp.getNumberHistograms()):
-                    spec = temp.getSpectrum(iws)
+                # focuspos = self._focusPos
+                self.log().notice('Align and focus workspace %s' % out_ws_name_chunk_split)
+                out_ws_c_s = api.AlignAndFocusPowder(InputWorkspace=out_ws_name_chunk_split,
+                                                     OutputWorkspace=out_ws_name_chunk_split,
+                                                     CalFileName=calib,
+                                                     Params=self._binning,
+                                                     ResampleX=self._resampleX,
+                                                     Dspacing=self._bin_in_dspace,
+                                                     PreserveEvents=preserveEvents,
+                                                     RemovePromptPulseWidth=self._removePromptPulseWidth,
+                                                     CompressTolerance=self.COMPRESS_TOL_TOF,
+                                                     UnwrapRef=self._LRef,
+                                                     LowResRef=self._DIFCref,
+                                                     LowResSpectrumOffset=self._lowResTOFoffset,
+                                                     CropWavelengthMin=self._wavelengthMin,
+                                                     CropWavelengthMax=self._wavelengthMax,
+                                                     ReductionProperties="__snspowderreduction",
+                                                     **self._focusPos)
+                assert out_ws_c_s is not None
+                # logging (ignorable)
+                for iws in xrange(out_ws_c_s.getNumberHistograms()):
+                    spec = out_ws_c_s.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
+                if out_ws_c_s.id() == EVENT_WORKSPACE_ID:
+                    self.log().information('After being aligned and focused, workspace %s: Number of events = %d '
+                                           'of chunk %d ' % (out_ws_c_s.name(), out_ws_c_s.getNumberEvents(),
+                                                             chunk_index))
+            # END-FOR-Splits
 
-                if preserveEvents is True and isinstance(temp, mantid.api.IEventWorkspace) is True:
-                    self.log().information("After being aligned and focussed workspace "+\
-                                           "%s; Number of events = %d of chunk %d " % (str(temp),\
-                                           temp.getNumberEvents(), ichunk))
+            # Merge among chunks
+            for split_index in range(num_out_wksp):
 
-                # Rename and/or add to workspace of same splitter but different chunk
-                wkspname = wksp
+                # determine the final workspace name
+                final_out_ws_name = base_name
                 if num_out_wksp > 1:
-                    wkspname += "_%s" % ( (str(temp)).split("_")[-1] )
+                    final_out_ws_name += '_%d' % split_index
 
-                if firstChunkList[itemp]:
-                    self.log().debug("[F1145] Slot %d is renamed to %s" % (itemp, wkspname))
-                    wksplist[itemp] = api.RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wkspname)
-                    firstChunkList[itemp] = False
+                if is_first_chunk_list[split_index] is True:
+                    # Rename if it is the first chunk that is finished
+                    self.log().debug("[F1145] Slot %d is renamed to %s" % (split_index, final_out_ws_name))
+                    temp_out_ws = api.RenameWorkspace(InputWorkspace=output_ws_name_list[split_index],
+                                                      OutputWorkspace=final_out_ws_name)
+                    assert temp_out_ws is not None
+
+                    output_wksp_list[split_index] = final_out_ws_name
+                    is_first_chunk_list[split_index] = False
                 else:
-                    wksplist[itemp] = api.Plus(LHSWorkspace=wksplist[itemp], RHSWorkspace=temp,
-                                               OutputWorkspace=wksplist[itemp],
-                                               ClearRHSWorkspace=allEventWorkspaces(wksplist[itemp], temp))
-                    api.DeleteWorkspace(temp)
-                # ENDIF
-            # ENDFOR (spliited workspaces)
-        # ENDFOR  Chunk
+                    # Add this chunk of workspace to the final one
+                    clear_rhs_ws = allEventWorkspaces(output_wksp_list[split_index], output_ws_name_list[split_index])
+                    temp_out_ws = api.Plus(LHSWorkspace=output_wksp_list[split_index],
+                                           RHSWorkspace=output_ws_name_list[split_index],
+                                           OutputWorkspace=output_wksp_list[split_index],
+                                           ClearRHSWorkspace=clear_rhs_ws)
+                    assert temp_out_ws is not None
 
-        self.log().information("[F1207] Number of workspace in workspace list after loading by chunks = %d. " %(len(wksplist)))
+                    # Delete the chunk workspace
+                    api.DeleteWorkspace(output_ws_name_list[split_index])
+                # END-IF-ELSE
+        # END-FOR-Chunks
 
         # Sum workspaces for all mpi tasks
         if HAVE_MPI:
-            for itemp in xrange(num_out_wksp):
-                wksplist[itemp] = api.GatherWorkspaces(InputWorkspace=wksplist[itemp],\
-                        PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksplist[itemp])
+            for split_index in xrange(num_out_wksp):
+                output_wksp_list[split_index] = api.GatherWorkspaces(
+                    InputWorkspace=output_wksp_list[split_index],
+                    PreserveEvents=preserveEvents,
+                    AccumulationMethod="Add",
+                    OutputWorkspace=output_wksp_list[split_index])
         # ENDIF MPI
 
         if self._chunks > 0:
             # When chunks are added, proton charge is summed for all chunks
-            for itemp in xrange(num_out_wksp):
-                wksplist[itemp].getRun().integrateProtonCharge()
+            for split_index in xrange(num_out_wksp):
+                output_wksp_list[split_index].getRun().integrateProtonCharge()
         # ENDIF
 
         if (self.iparmFile is not None) and (len(self.iparmFile) > 0):
             # When chunks are added, add iparamFile
-            for itemp in xrange(num_out_wksp):
-                wksplist[itemp].getRun()['iparm_file'] = self.iparmFile
+            for split_index in xrange(num_out_wksp):
+                output_wksp_list[split_index].getRun()['iparm_file'] = self.iparmFile
 
-        for itemp in xrange(num_out_wksp):
-            if wksplist[itemp].id() == EVENT_WORKSPACE_ID:
-                wksplist[itemp] = api.CompressEvents(InputWorkspace=wksplist[itemp],\
-                    OutputWorkspace=wksplist[itemp], Tolerance=self.COMPRESS_TOL_TOF) # 100ns
+        # Compress events
+        for split_index in xrange(num_out_wksp):
+            temp_out_ws = self.get_workspace(output_wksp_list[split_index])
+            if temp_out_ws.id() == EVENT_WORKSPACE_ID:
+                temp_out_ws = api.CompressEvents(InputWorkspace=output_wksp_list[split_index],
+                                                 OutputWorkspace=output_wksp_list[split_index],
+                                                 Tolerance=self.COMPRESS_TOL_TOF) # 100ns
+                assert temp_out_ws is not None
 
             try:
                 if normalisebycurrent is True:
-                    wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp],
-                                                             OutputWorkspace=wksplist[itemp])
-                    wksplist[itemp].getRun()['gsas_monitor'] = 1
+                    output_wksp_list[split_index] = api.NormaliseByCurrent(InputWorkspace=output_wksp_list[split_index],
+                                                                           OutputWorkspace=output_wksp_list[split_index])
+                    output_wksp_list[split_index].getRun()['gsas_monitor'] = 1
             except Exception, e:
                 self.log().warning(str(e))
 
-            propertyName = "OutputWorkspace%s" % str(wksplist[itemp])
+            propertyName = "OutputWorkspace%s" % str(output_wksp_list[split_index])
             self.log().warning(propertyName)
-            self.declareProperty(WorkspaceProperty(propertyName, str(wksplist[itemp]), Direction.Output))
-            self.setProperty(propertyName, wksplist[itemp])
-            self._save(wksplist[itemp], self._info, False, True)
-            self.log().information("Done focussing data of %d." % (itemp))
+            self.declareProperty(WorkspaceProperty(propertyName, str(output_wksp_list[split_index]), Direction.Output))
+            self.setProperty(propertyName, output_wksp_list[split_index])
+            self._save(output_wksp_list[split_index], self._info, False, True)
+            self.log().information("Done focussing data of %d." % (split_index))
 
-        self.log().information("[E1207] Number of workspace in workspace list after clean = %d. " %(len(wksplist)))
+        self.log().information("[E1207] Number of workspace in workspace list after clean = %d. " %(len(output_wksp_list)))
 
         # About return
         if splitwksp is None:
-            return wksplist[0]
+            return output_wksp_list[0]
         else:
-            return wksplist
+            return output_wksp_list
 
-    def _getinfo(self, wksp):
+    def _getinfo(self, wksp_name):
+        """ Get characterization information of a certain workspace
+        Purpose:
+
+        Requirements:
+        1. wksp_name is string and AnalysisDataService has such workspace
+        Guarantees:
+
+        :param wksp_name:
+        :return:
+        """
+        # Check requirements
+        assert isinstance(wksp_name, str)
+        assert self.does_workspace_exist(wksp_name)
+
+        # Determine characterization
         if mtd.doesExist("characterizations"):
-            # get the correct row of the table
+            # get the correct row of the table if table workspace 'charactersizations' exists
 
             #pylint: disable=unused-variable
-            charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
+            charac = api.PDDetermineCharacterizations(InputWorkspace=wksp_name,
                                                       Characterizations="characterizations",
                                                       ReductionProperties="__snspowderreduction",
                                                       BackRun=self.getProperty("BackgroundNumber").value,
                                                       NormRun=self.getProperty("VanadiumNumber").value,
                                                       NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
-                                                      FrequencyLogNames = self.getProperty("FrequencyLogNames").value,
-                                                      WaveLengthLogNames = self.getProperty("WaveLengthLogNames").value)
+                                                      FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
+                                                      WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
         else:
-            charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
+            charac = api.PDDetermineCharacterizations(InputWorkspace=wksp_name,
                                                       ReductionProperties="__snspowderreduction",
                                                       BackRun=self.getProperty("BackgroundNumber").value,
                                                       NormRun=self.getProperty("VanadiumNumber").value,
                                                       NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
-                                                      FrequencyLogNames = self.getProperty("FrequencyLogNames").value,
-                                                      WaveLengthLogNames = self.getProperty("WaveLengthLogNames").value)
+                                                      FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
+                                                      WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
 
         # convert the result into a dict
         return PropertyManagerDataService.retrieve("__snspowderreduction")
@@ -1040,6 +1087,21 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return AnalysisDataService.doesExist(workspace_name)
 
+    def get_workspace(self, workspace_name):
+        """
+        Purpose: Get the reference of a workspace
+        Requirements:
+            1. workspace_name is a string
+        Guarantees:
+            The reference of the workspace with same is returned.
+        :exception RuntimeError: a RuntimeError from Mantid will be thrown
+        :param workspace_name:
+        :return:
+        """
+        assert isinstance(workspace_name, str)
+
+        return AnalysisDataService.retrieve(workspace_name)
+
     def _determine_workspace_splitting(self, split_wksp, filter_wall):
         """
         :return: do_split_raw_wksp, num_out_wksp
@@ -1068,6 +1130,68 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # ENDIF
 
         return do_split_raw_wksp, num_out_wksp
+
+    def _split_workspace(self, raw_ws_name, split_ws_name):
+        """ Split workspace
+        Purpose:
+            Split a workspace
+        Requirements:
+            1. raw_ws_name is a string
+            2. an event workspace with this name exists
+        Guarantees:
+            Raw input workspace is split
+        :param raw_ws_name:
+        :param split_ws_name:
+        :return: list of strings as output workspaces
+        """
+        # Check requirements
+        assert isinstance(raw_ws_name, str), 'Raw workspace name must be a string.'
+        assert isinstance(split_ws_name, str)
+        assert self.does_workspace_exist(split_ws_name)
+
+        raw_ws = self.get_workspace(workspace_name=raw_ws_name)
+        assert raw_ws.id() == EVENT_WORKSPACE_ID, 'Input workspace for splitting must be an EventWorkspace.'
+
+        # Splitting workspace
+        self.log().information("SplitterWorkspace = %s, Information Workspace = %s. " % (
+                split_ws_name, str(self._splitinfotablews)))
+
+        base_name = raw_ws_name
+        if self._splitinfotablews is None:
+            # split without information table
+            api.FilterEvents(InputWorkspace=raw_ws_name, OutputWorkspaceBaseName=base_name,
+                             SplitterWorkspace=split_ws_name, GroupWorkspaces=True)
+        else:
+            # split with information table
+            api.FilterEvents(InputWorkspace=raw_ws_name, OutputWorkspaceBaseName=base_name,
+                             SplitterWorkspace=split_ws_name, InformationWorkspace = str(self._splitinfotablews),
+                             GroupWorkspaces=True)
+        # ENDIF
+
+        # Get workspace group for names of split workspace
+        wsgroup = mtd[base_name]
+        tempwsnamelist = wsgroup.getNames()
+        # logging
+        dbstr = "[Fx951] Splitted workspace names: "
+        for ws_name in tempwsnamelist:
+            dbstr += "%s, " % (ws_name)
+        self.log().debug(dbstr)
+
+        # Build the list of workspaces' names for return
+        out_ws_name_list = []
+        # FIXME Keep in mind to use this option.
+        # keepremainder = self.getProperty("KeepRemainder").value
+        for ws_name in tempwsnamelist:
+            this_ws = self.get_workspace(ws_name)
+            if ws_name.endswith("_unfiltered") is False:
+                # workspace to save
+                out_ws_name_list.append(ws_name)
+            else:
+                # events that are not excluded by filters. delete the workspace
+                api.DeleteWorkspace(Workspace=this_ws)
+        # END-FOR
+
+        return out_ws_name_list
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(SNSPowderReduction)
