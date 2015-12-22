@@ -48,7 +48,7 @@ namespace Geometry {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename MatrixNumericType, typename VectorType>
-class MANTID_GEOMETRY_DLL MatrixVectorPair {
+class MatrixVectorPair {
 public:
   /// Default constructor, unit matrix and 0-vector.
   MatrixVectorPair() : m_matrix(3, 3, true), m_vector() {}

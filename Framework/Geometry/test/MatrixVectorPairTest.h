@@ -49,7 +49,7 @@ public:
 
   void test_multiplicationOperatorVector() {
     IntMatrix m(3, 3, true);
-    m *= -1.0;
+    m *= -1;
     V3R v(1, 1, 1);
 
     V3RIntPair pair(m, v);
@@ -66,7 +66,7 @@ public:
 
   void test_multiplicationOperatorMatrixVectorPair() {
     IntMatrix m(3, 3, true);
-    m *= -1.0;
+    m *= -1;
 
     V3RIntPair pairLHS(m, V3R(1, 1, 1));
     V3RIntPair pairRHS(m, V3R(2, 3, 4));
@@ -78,7 +78,7 @@ public:
 
   void test_inverse() {
     IntMatrix m(3, 3, true);
-    m *= -1.0;
+    m *= -1;
     m[1][1] = 1;
 
     V3RIntPair pair(m, V3R(1, 2, 3));
@@ -90,7 +90,7 @@ public:
 
   void test_equalOperator() {
     IntMatrix m(3, 3, true);
-    m *= -1.0;
+    m *= -1;
 
     V3RIntPair pairLHS(m, V3R(1, 1, 1));
     V3RIntPair pairLHSCopy(pairLHS);
