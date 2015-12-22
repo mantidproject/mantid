@@ -12,13 +12,6 @@
 namespace Mantid {
 namespace Geometry {
 
-typedef boost::fusion::vector<int, boost::optional<int>> ParsedRationalNumber;
-
-using boost::spirit::qi::grammar;
-using boost::spirit::qi::rule;
-
-typedef boost::spirit::qi::space_type skipper_type_;
-
 /** MatrixVectorPairParser
 
   MatrixVectorPairParser can parse matrix/vector pairs in
@@ -59,11 +52,14 @@ typedef boost::spirit::qi::space_type skipper_type_;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename Iterator>
-class MANTID_GEOMETRY_DLL MatrixVectorPairParser
-    : public grammar<Iterator, skipper_type_> {
+class MatrixVectorPairParser
+    : public boost::spirit::qi::grammar<Iterator, boost::spirit::qi::space_type> {
 public:
+
+  typedef boost::fusion::vector<int, boost::optional<int>> ParsedRationalNumber;
+
   MatrixVectorPairParser()
-      : MatrixVectorPairParser::base_type(m_parser), m_directions(),
+      : base_type(m_parser), m_directions(),
         m_matrixRows(3), m_vector(), m_currentFactor(1),
         m_currentDirection(0, 0, 0), m_currentSign(1), m_currentRow(0) {
     m_directions.insert(std::make_pair("x", V3R(1, 0, 0)));
@@ -83,14 +79,16 @@ public:
              lit('-')[std::bind(&MatrixVectorPairParser::setCurrentSignNegative,
                                 this)];
 
-    // This matches a rational number (also things like -1/-2 -> 1/2)
-    m_rational = (int_ >> -('/' >> int_))[std::bind(
-        &MatrixVectorPairParser::setCurrentFactor, this, _1)];
+    //// This matches a rational number (also things like -1/-2 -> 1/2)
+    auto rnAction = [this](const ParsedRationalNumber &rationalNumberComponents) {
+      this->setCurrentFactor(rationalNumberComponents); };
+    m_rational = (int_ >> -('/' >> int_))[rnAction];
 
-    // Matches x, y or z.
-    m_direction =
-        (qi::string("x") | qi::string("y") | qi::string("z"))[std::bind(
-            &MatrixVectorPairParser::setCurrentDirection, this, _1)];
+    //// Matches x, y or z.
+    auto dirAction = [this](const std::string &s) {
+      this->setCurrentDirection(s);
+    };
+    m_direction = (qi::string("x") | qi::string("y") | qi::string("z"))[dirAction];
 
     /* A "component", which is either a rational number possibly followed by a
      * vector
@@ -226,7 +224,7 @@ private:
     m_currentRow = 0;
   }
 
-  rule<Iterator, skipper_type_> m_sign, m_rational, m_direction, m_component,
+  boost::spirit::qi::rule<Iterator, boost::spirit::qi::space_type> m_sign, m_rational, m_direction, m_component,
       m_componentSeries, m_parser;
 
   std::map<std::string, V3R> m_directions;
@@ -247,12 +245,9 @@ template <typename T>
 MatrixVectorPair<T, V3R>
 parseMatrixVectorPair(const std::string &matrixVectorString) {
   namespace qi = boost::spirit::qi;
-
-  MatrixVectorPairParser<std::string::const_iterator> parser;
-
-  std::string::const_iterator strIterator = matrixVectorString.begin();
-  std::string::const_iterator strEnd = matrixVectorString.end();
-
+  auto strIterator = matrixVectorString.cbegin();
+  auto strEnd = matrixVectorString.cend();
+  MatrixVectorPairParser<decltype(strIterator)> parser;
   qi::phrase_parse(strIterator, strEnd, parser, qi::space);
 
   if (std::distance(strIterator, strEnd) > 0) {
