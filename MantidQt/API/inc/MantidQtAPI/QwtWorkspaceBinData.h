@@ -12,18 +12,21 @@
 
 //=================================================================================================
 //=================================================================================================
-/**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
+/**  This class implements QwtData with direct access to a spectrum in a
+ * MatrixWorkspace.
  */
-class EXPORT_OPT_MANTIDQT_API QwtWorkspaceBinData : public MantidQwtMatrixWorkspaceData
-{
+class EXPORT_OPT_MANTIDQT_API QwtWorkspaceBinData
+    : public MantidQwtMatrixWorkspaceData {
 public:
-  QwtWorkspaceBinData(const Mantid::API::MatrixWorkspace & workspace, int binIndex, const bool logScale);
+  QwtWorkspaceBinData(const Mantid::API::MatrixWorkspace &workspace,
+                      int binIndex, const bool logScale);
 
   //! @return Pointer to a copy (virtual copy constructor)
   virtual QwtWorkspaceBinData *copy() const;
 
   /// Return a new data object of the same type but with a new workspace
-  virtual QwtWorkspaceBinData *copyWithNewSource(const Mantid::API::MatrixWorkspace & workspace) const;
+  virtual QwtWorkspaceBinData *
+  copyWithNewSource(const Mantid::API::MatrixWorkspace &workspace) const;
 
   //! @return Size of the data set
   virtual size_t size() const;
@@ -41,13 +44,12 @@ public:
   */
   virtual double y(size_t i) const;
 
-
   /// Returns the error of the i-th data point
-  double e(size_t i)const;
+  double e(size_t i) const;
   /// Returns the x position of the error bar for the i-th data point (bin)
-  double ex(size_t i)const;
+  double ex(size_t i) const;
   /// Number of error bars to plot
-  size_t esize()const;
+  size_t esize() const;
 
   double getYMin() const;
   double getYMax() const;
@@ -58,16 +60,23 @@ public:
 
   /// Inform the data that it is to be plotted on a log y scale
   void setLogScale(bool on);
-  bool logScale()const{return m_logScale;}
+  bool logScale() const { return m_logScale; }
   void saveLowestPositiveValue(const double v);
 
+  // Set offsets for and enables waterfall plots
+  void setXOffset(const double x);
+  void setYOffset(const double y);
+  void setWaterfallPlot(bool on);
+
 protected:
-  // Assignment operator (virtualized). MSVC not happy with compiler generated one
-  QwtWorkspaceBinData& operator=(const QwtWorkspaceBinData&); // required by QwtData base class
+  // Assignment operator (virtualized). MSVC not happy with compiler generated
+  // one
+  QwtWorkspaceBinData &
+  operator=(const QwtWorkspaceBinData &); // required by QwtData base class
 
 private:
   /// Initialize the object
-  void init(const Mantid::API::MatrixWorkspace & workspace);
+  void init(const Mantid::API::MatrixWorkspace &workspace);
 
   /// The column index of the current data
   int m_binIndex;
@@ -78,10 +87,10 @@ private:
   /// Copy of the E vector
   Mantid::MantidVec m_E;
 
- /// A title for the X axis
- QString m_xTitle;
- /// A title for the Y axis
- QString m_yTitle;
+  /// A title for the X axis
+  QString m_xTitle;
+  /// A title for the Y axis
+  QString m_yTitle;
 
   /// Indicates that the data is plotted on a log y scale
   bool m_logScale;
@@ -94,5 +103,14 @@ private:
 
   /// highest y value
   double m_maxY;
+
+  /// Indicates whether or not waterfall plots are enabled
+  bool m_isWaterfall;
+
+  /// x-axis offset for waterfall plots
+  double m_offsetX;
+
+  /// y-axis offset for waterfall plots
+  double m_offsetY;
 };
 #endif

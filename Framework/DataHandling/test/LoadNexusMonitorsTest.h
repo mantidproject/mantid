@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/LoadNexusMonitors.h"
+#include "MantidDataHandling/LoadNexusMonitors2.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -147,6 +148,58 @@ public:
 
     AnalysisDataService::Instance().clear();
     Poco::File(filename).remove();
+  }
+
+  void testPythonOutputFix() {
+    std::string filename = "LARMOR00003368.nxs";
+    std::string outws_name = "ws_group";
+
+    // Version 1 of algorithm
+    LoadNexusMonitors ld1;
+    ld1.initialize();
+    ld1.setPropertyValue("Filename", filename);
+    ld1.setPropertyValue("OutputWorkspace", outws_name);
+    ld1.execute();
+
+    // Count output workspaces
+    int ws_count = 0;
+    auto props = ld1.getProperties();
+    for (auto iter = props.begin(); iter != props.end(); ++iter)
+      if ((*iter)->type() == "Workspace")
+        ws_count++;
+
+    // Version 1 has an issue that produces additional output workspaces for
+    // every child workspace in the output WorkspaceGroup. This causes the
+    // Python interface to return a tuple with 5 elements rather than a group
+    // workspace.
+    TS_ASSERT_EQUALS(ws_count, 5);
+
+    // Names of child workspaces are also missing the outws_name prefix
+    auto child = ld1.getPropertyValue("OutputWorkspace_1");
+    TS_ASSERT_EQUALS(child, "_1");
+
+    // Version 2 of algorithm
+    LoadNexusMonitors2 ld2;
+    ld2.initialize();
+    ld2.setPropertyValue("Filename", filename);
+    ld2.setPropertyValue("OutputWorkspace", outws_name);
+    ld2.execute();
+
+    // Count output workspaces
+    ws_count = 0;
+    props = ld2.getProperties();
+    for (auto iter = props.begin(); iter != props.end(); ++iter)
+      if ((*iter)->type() == "Workspace")
+        ws_count++;
+
+    // Version 2 always produces one OutputWorkspace, which may be a group
+    // workspace in case of a multiperiod nexus file input.
+    TS_ASSERT_EQUALS(ws_count, 1);
+
+    // Child workspace names also have proper output workspace name prefix
+    WorkspaceGroup_sptr ws_group =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outws_name);
+    TS_ASSERT(ws_group->contains(outws_name + "_1"));
   }
 
   void createFakeFile(const std::string &filename) {

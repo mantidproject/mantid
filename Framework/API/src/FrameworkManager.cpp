@@ -16,8 +16,6 @@
 
 #include <Poco/ActiveResult.h>
 
-#include <json/json.h>
-
 #include <cstdarg>
 
 #ifdef _WIN32
@@ -113,7 +111,6 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
   }
 
   // the algorithm will see if it should run
-
   SendStartupUsageInfo();
 }
 
@@ -242,6 +239,8 @@ void FrameworkManagerImpl::clear() {
   clearData();
   clearPropertyManagers();
 }
+
+void FrameworkManagerImpl::shutdown() { clear(); }
 
 /**
  * Clear memory associated with the AlgorithmManager

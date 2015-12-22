@@ -7,16 +7,19 @@ Defines Python objects that wrap the C++ API namespace.
 """
 from __future__ import absolute_import
 
-###############################################################################
 # Load the C++ library
-###############################################################################
 from . import _api
 from ._api import *
 
+# stdlib imports
+import atexit as _atexit
+
 ###############################################################################
-# Start the framework (if not embedded in other application)
+# Start the framework
 ###############################################################################
 FrameworkManagerImpl.Instance()
+_atexit.register(FrameworkManagerImpl.Instance().shutdown)
+
 # Declare any additional C++ algorithms defined in this package
 _api._declareCPPAlgorithms()
 

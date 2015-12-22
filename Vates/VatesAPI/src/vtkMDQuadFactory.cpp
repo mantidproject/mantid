@@ -19,184 +19,172 @@
 
 using namespace Mantid::API;
 
-namespace
-{
-  Mantid::Kernel::Logger g_log("vtkMDQuadFactory");
+namespace {
+Mantid::Kernel::Logger g_log("vtkMDQuadFactory");
 }
 
-namespace Mantid
-{
-  namespace VATES
-  {
-    /// Constructor
-    vtkMDQuadFactory::vtkMDQuadFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption) : m_thresholdRange(thresholdRange), m_normalizationOption(normalizationOption)
-    {
-    }
+namespace Mantid {
+namespace VATES {
+/// Constructor
+vtkMDQuadFactory::vtkMDQuadFactory(
+    ThresholdRange_scptr thresholdRange,
+    const VisualNormalization normalizationOption)
+    : m_thresholdRange(thresholdRange),
+      m_normalizationOption(normalizationOption) {}
 
-    /// Destructor
-    vtkMDQuadFactory::~vtkMDQuadFactory()
-    {
-    }
+/// Destructor
+vtkMDQuadFactory::~vtkMDQuadFactory() {}
 
-    /**
-    Create the vtkStructuredGrid from the provided workspace
-    @param progressUpdating: Reporting object to pass progress information up the stack.
-    @return fully constructed vtkDataSet.
+/**
+Create the vtkStructuredGrid from the provided workspace
+@param progressUpdating: Reporting object to pass progress information up the
+stack.
+@return fully constructed vtkDataSet.
+*/
+vtkDataSet *vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
+  vtkDataSet *product = tryDelegatingCreation<IMDEventWorkspace, 2>(
+      m_workspace, progressUpdating);
+  if (product != NULL) {
+    return product;
+  } else {
+    g_log.warning() << "Factory " << this->getFactoryTypeName()
+                    << " is being used. You are viewing data with less than "
+                       "three dimensions in the VSI. \n";
+
+    IMDEventWorkspace_sptr imdws =
+        this->castAndCheck<IMDEventWorkspace, 2>(m_workspace);
+    // Acquire a scoped read-only lock to the workspace (prevent segfault from
+    // algos modifying ws)
+    Mantid::Kernel::ReadLock lock(*imdws);
+
+    const size_t nDims = imdws->getNumDims();
+    size_t nNonIntegrated = imdws->getNonIntegratedDimensions().size();
+
+    /*
+    Write mask array with correct order for each internal dimension.
     */
-    vtkDataSet* vtkMDQuadFactory::create(ProgressAction& progressUpdating) const
-    {
-      vtkDataSet* product = tryDelegatingCreation<IMDEventWorkspace, 2>(m_workspace, progressUpdating);
-      if(product != NULL)
-      {
-        return product;
-      }
-      else
-      {
-        g_log.warning() << "Factory " << this->getFactoryTypeName() << " is being used. You are viewing data with less than three dimensions in the VSI. \n";
-
-        IMDEventWorkspace_sptr imdws = this->castAndCheck<IMDEventWorkspace, 2>(m_workspace);
-        // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
-        Mantid::Kernel::ReadLock lock(*imdws);
-
-        const size_t nDims = imdws->getNumDims();
-        size_t nNonIntegrated = imdws->getNonIntegratedDimensions().size();
-
-        /*
-        Write mask array with correct order for each internal dimension.
-        */
         auto masks = Mantid::Kernel::make_unique<bool[]>(nDims);
-        for(size_t i_dim = 0; i_dim < nDims; ++i_dim)
-        {
-          bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
-          masks[i_dim] = !bIntegrated; //TRUE for unmaksed, integrated dimensions are masked.
-        }
+    for (size_t i_dim = 0; i_dim < nDims; ++i_dim) {
+      bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
+      masks[i_dim] =
+          !bIntegrated; // TRUE for unmaksed, integrated dimensions are masked.
+    }
 
-        //Make iterator, which will use the desired normalization. Ensure destruction in any eventuality. 
-        boost::scoped_ptr<IMDIterator> it(createIteratorWithNormalization(m_normalizationOption, imdws.get()));
+    // Make iterator, which will use the desired normalization. Ensure
+    // destruction in any eventuality.
+    boost::scoped_ptr<IMDIterator> it(
+        createIteratorWithNormalization(m_normalizationOption, imdws.get()));
 
-        // Create 4 points per box.
+    // Create 4 points per box.
         vtkNew<vtkPoints> points;
-        points->SetNumberOfPoints(it->getDataSize() * 4);
+    points->SetNumberOfPoints(it->getDataSize() * 4);
 
-        // One scalar per box
+    // One scalar per box
         vtkNew<vtkFloatArray> signals;
-        signals->Allocate(it->getDataSize());
-        signals->SetName(vtkDataSetFactory::ScalarName.c_str());
-        signals->SetNumberOfComponents(1);
+    signals->Allocate(it->getDataSize());
+    signals->SetName(vtkDataSetFactory::ScalarName.c_str());
+    signals->SetNumberOfComponents(1);
 
-        size_t nVertexes;
+    size_t nVertexes;
 
-        vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
-        visualDataSet->Allocate(it->getDataSize());
+    vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+    visualDataSet->Allocate(it->getDataSize());
 
         vtkNew<vtkIdList> quadPointList;
-        quadPointList->SetNumberOfIds(4);
+    quadPointList->SetNumberOfIds(4);
 
-        Mantid::API::CoordTransform const* transform = NULL;
-        if (m_useTransform)
-        {
-          transform = imdws->getTransformToOriginal();
-        }
+    Mantid::API::CoordTransform const *transform = NULL;
+    if (m_useTransform) {
+      transform = imdws->getTransformToOriginal();
+    }
 
-        Mantid::coord_t out[2];
+    Mantid::coord_t out[2];
         auto useBox = Mantid::Kernel::make_unique<bool[]>(it->getDataSize());
 
-        double progressFactor = 0.5/double(it->getDataSize());
-        double progressOffset = 0.5;
+    double progressFactor = 0.5 / double(it->getDataSize());
+    double progressOffset = 0.5;
 
-        size_t iBox = 0;
-        do
-        {
-          progressUpdating.eventRaised(progressFactor * double(iBox));
+    size_t iBox = 0;
+    do {
+      progressUpdating.eventRaised(progressFactor * double(iBox));
 
-          Mantid::signal_t signal = it->getNormalizedSignal();
-          if (!isSpecial( signal ) && m_thresholdRange->inRange(signal))
-          {
-            useBox[iBox] = true;
-            signals->InsertNextValue(static_cast<float>(signal));
+      Mantid::signal_t signal = it->getNormalizedSignalWithMask();
+      if (!isSpecial(signal) && m_thresholdRange->inRange(signal)) {
+        useBox[iBox] = true;
+        signals->InsertNextValue(static_cast<float>(signal));
 
-            coord_t* coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks.get());
+        coord_t *coords =
+            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get());
 
-            //Iterate through all coordinates. Candidate for speed improvement.
-            for(size_t v = 0; v < nVertexes; ++v)
-            {
-              coord_t * coord = coords + v*2;
-              size_t id = iBox*4 + v;
-              if(m_useTransform)
-              {
-                transform->apply(coord, out);
-                points->SetPoint(id, out[0], out[1], 0);
-              }
-              else
-              {
-                points->SetPoint(id, coord[0], coord[1], 0);
-              }
-            }
-            // Free memory
-            delete [] coords;
-          } // valid number of vertexes returned
-          else
-          {
-            useBox[iBox] = false;
+        // Iterate through all coordinates. Candidate for speed improvement.
+        for (size_t v = 0; v < nVertexes; ++v) {
+          coord_t *coord = coords + v * 2;
+          size_t id = iBox * 4 + v;
+          if (m_useTransform) {
+            transform->apply(coord, out);
+            points->SetPoint(id, out[0], out[1], 0);
+          } else {
+            points->SetPoint(id, coord[0], coord[1], 0);
           }
-          ++iBox;
-        } while (it->next());
-
-        for(size_t ii = 0; ii < it->getDataSize() ; ++ii)
-        {
-          progressUpdating.eventRaised((progressFactor * double(ii)) + progressOffset);
-
-          if (useBox[ii] == true)
-          {
-            vtkIdType pointIds = vtkIdType(ii * 4);
-
-            quadPointList->SetId(0, pointIds + 0); //xyx
-            quadPointList->SetId(1, pointIds + 1); //dxyz
-            quadPointList->SetId(2, pointIds + 3); //dxdyz
-            quadPointList->SetId(3, pointIds + 2); //xdyz
-            visualDataSet->InsertNextCell(VTK_QUAD, quadPointList.GetPointer());
-          } // valid number of vertexes returned
         }
+        // Free memory
+        delete[] coords;
+      } // valid number of vertexes returned
+      else {
+        useBox[iBox] = false;
+      }
+      ++iBox;
+    } while (it->next());
 
-        signals->Squeeze();
-        points->Squeeze();
+    for (size_t ii = 0; ii < it->getDataSize(); ++ii) {
+      progressUpdating.eventRaised((progressFactor * double(ii)) +
+                                   progressOffset);
+
+      if (useBox[ii] == true) {
+        vtkIdType pointIds = vtkIdType(ii * 4);
+
+        quadPointList->SetId(0, pointIds + 0); // xyx
+        quadPointList->SetId(1, pointIds + 1); // dxyz
+        quadPointList->SetId(2, pointIds + 3); // dxdyz
+        quadPointList->SetId(3, pointIds + 2); // xdyz
+            visualDataSet->InsertNextCell(VTK_QUAD, quadPointList.GetPointer());
+      } // valid number of vertexes returned
+    }
+
+    signals->Squeeze();
+    points->Squeeze();
 
         visualDataSet->SetPoints(points.GetPointer());
         visualDataSet->GetCellData()->SetScalars(signals.GetPointer());
-        visualDataSet->Squeeze();
+    visualDataSet->Squeeze();
 
-        // Hedge against empty data sets
-        if (visualDataSet->GetNumberOfPoints() <= 0)
-        {
-          visualDataSet->Delete();
-          vtkNullUnstructuredGrid nullGrid;
-          visualDataSet = nullGrid.createNullData();
-        }
-
-        return visualDataSet;
-      }
+    // Hedge against empty data sets
+    if (visualDataSet->GetNumberOfPoints() <= 0) {
+      visualDataSet->Delete();
+      vtkNullUnstructuredGrid nullGrid;
+      visualDataSet = nullGrid.createNullData();
     }
 
-    /// Initalize with a target workspace.
-    void vtkMDQuadFactory::initialize(Mantid::API::Workspace_sptr ws)
-    {
-      m_workspace = doInitialize<IMDEventWorkspace, 2>(ws);
-    }
-
-    /// Get the name of the type.
-    std::string vtkMDQuadFactory::getFactoryTypeName() const
-    {
-      return "vtkMDQuadFactory";
-    }
-
-    /// Template Method pattern to validate the factory before use.
-    void vtkMDQuadFactory::validate() const
-    {
-      if(NULL == m_workspace.get())
-      {
-        throw std::runtime_error("vtkMDQuadFactory has no workspace to run against");
-      }
-    }
-
+    return visualDataSet;
   }
+}
+
+/// Initalize with a target workspace.
+void vtkMDQuadFactory::initialize(Mantid::API::Workspace_sptr ws) {
+  m_workspace = doInitialize<IMDEventWorkspace, 2>(ws);
+}
+
+/// Get the name of the type.
+std::string vtkMDQuadFactory::getFactoryTypeName() const {
+  return "vtkMDQuadFactory";
+}
+
+/// Template Method pattern to validate the factory before use.
+void vtkMDQuadFactory::validate() const {
+  if (NULL == m_workspace.get()) {
+    throw std::runtime_error(
+        "vtkMDQuadFactory has no workspace to run against");
+  }
+}
+}
 }
