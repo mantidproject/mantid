@@ -5,6 +5,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
@@ -1031,6 +1032,10 @@ public:
 
   void test_SaveAndLoadOnHistogramWS() { doTestLoadAndSaveHistogramWS(false); }
 
+  void test_SaveAndLoadOnHistogramWSWithNumericAxis() {
+    doTestLoadAndSaveHistogramWS(false, true);
+  }
+
   void test_SaveAndLoadOnHistogramWSwithXErrors() {
     doTestLoadAndSaveHistogramWS(true);
   }
@@ -1189,7 +1194,8 @@ private:
       Poco::File(m_savedTmpEventFile).remove();
   }
 
-  void doTestLoadAndSaveHistogramWS(bool useXErrors = false) {
+  void doTestLoadAndSaveHistogramWS(bool useXErrors = false,
+                                    bool numericAxis = false) {
     // Test SaveNexusProcessed/LoadNexusProcessed on a histogram workspace with
     // x errors
 
@@ -1209,6 +1215,12 @@ private:
     if (useXErrors) {
       inputWs->dataDx(0) = dx1;
       inputWs->dataDx(1) = dx2;
+    }
+    if (numericAxis) {
+      auto numericAxis = new NumericAxis(2);
+      numericAxis->setValue(0, 10.0);
+      numericAxis->setValue(1, 20.0);
+      inputWs->replaceAxis(1, numericAxis);
     }
 
     // Save workspace
@@ -1235,8 +1247,8 @@ private:
     // Check spectra in loaded workspace
     MatrixWorkspace_sptr outputWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
-    TS_ASSERT_EQUALS(1, inputWs->getSpectrum(0)->getSpectrumNo());
-    TS_ASSERT_EQUALS(2, inputWs->getSpectrum(1)->getSpectrumNo());
+    TS_ASSERT_EQUALS(1, outputWs->getSpectrum(0)->getSpectrumNo());
+    TS_ASSERT_EQUALS(2, outputWs->getSpectrum(1)->getSpectrumNo());
     TS_ASSERT_EQUALS(inputWs->readX(0), outputWs->readX(0));
     TS_ASSERT_EQUALS(inputWs->readX(1), outputWs->readX(1));
     TS_ASSERT_EQUALS(inputWs->readY(0), outputWs->readY(0));
@@ -1247,6 +1259,18 @@ private:
       TSM_ASSERT("Should have an x error", outputWs->hasDx(0));
       TS_ASSERT_EQUALS(inputWs->readDx(0), outputWs->readDx(0));
       TS_ASSERT_EQUALS(inputWs->readDx(1), outputWs->readDx(1));
+    }
+
+    // Axes
+    auto axis1 = outputWs->getAxis(1);
+    if (numericAxis) {
+      TS_ASSERT(axis1->isNumeric());
+      TS_ASSERT_DELTA(10.0, axis1->getValue(0), 1e-10);
+      TS_ASSERT_DELTA(20.0, axis1->getValue(1), 1e-10);
+    } else {
+      TS_ASSERT(axis1->isSpectra());
+      TS_ASSERT_DELTA(1.0, axis1->getValue(0), 1e-10);
+      TS_ASSERT_DELTA(2.0, axis1->getValue(1), 1e-10);
     }
 
     // Remove workspace and saved nexus file
