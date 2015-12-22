@@ -35,18 +35,6 @@ Kernel::Logger g_log("FrameworkManager");
 const char *PLUGINS_DIR_KEY = "plugins.directory";
 }
 
-/** This is a function called every time NeXuS raises an error.
- * This swallows the errors and outputs nothing.
- *
- * @param data :: data passed in NXMSetError (will be NULL)
- * @param text :: text of the error.
- */
-void NexusErrorFunction(void *data, char *text) {
-  UNUSED_ARG(data);
-  UNUSED_ARG(text);
-  // Do nothing.
-}
-
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl()
 #ifdef MPI_BUILD
@@ -72,7 +60,6 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 
   g_log.notice() << Mantid::welcomeMessage() << std::endl;
   loadPluginsUsingKey(PLUGINS_DIR_KEY);
-  disableNexusOutput();
   setNumOMPThreadsToConfigValue();
 
 #ifdef MPI_BUILD
@@ -192,11 +179,6 @@ void FrameworkManagerImpl::setGlobalLocaleToAscii() {
   // interpretation in
   // German where a comma is used instead of a period.
   std::locale::global(std::locale::classic());
-}
-
-/// Silence NeXus output
-void FrameworkManagerImpl::disableNexusOutput() {
-  NXMSetError(NULL, NexusErrorFunction);
 }
 
 /**
