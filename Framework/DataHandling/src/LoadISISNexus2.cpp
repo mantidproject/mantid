@@ -72,11 +72,9 @@ int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
 
 /// Initialization method.
 void LoadISISNexus2::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".n*");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the Nexus file to load");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".n*"}),
+      "The name of the Nexus file to load");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output));
 

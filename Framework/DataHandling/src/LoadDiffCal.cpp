@@ -69,12 +69,8 @@ void LoadDiffCal::init() {
   // 3 properties for getting the right instrument
   LoadCalFile::getInstrument3WaysInit(this);
 
-  std::vector<std::string> exts;
-  exts.push_back(".h5");
-  exts.push_back(".hd5");
-  exts.push_back(".hdf");
-  exts.push_back(".cal");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
+                                   {".h5", ".hd5", ".hdf", ".cal"}),
                   "Path to the .h5 file.");
 
   declareProperty(new PropertyWithValue<bool>("MakeGroupingWorkspace", true,

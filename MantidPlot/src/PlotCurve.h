@@ -37,49 +37,47 @@ class PlotMarker;
 class Graph;
 class ErrorBarSettings;
 
-namespace Mantid
-{
-  namespace Kernel
-  {
-    class Unit;
-  }
+namespace Mantid {
+namespace Kernel {
+class Unit;
+}
 }
 
 //! Abstract 2D plot curve class
-class PlotCurve: public QObject, public QwtPlotCurve
-{
-Q_OBJECT
+class PlotCurve : public QObject, public QwtPlotCurve {
+  Q_OBJECT
 public:
   explicit PlotCurve(const QString &name = QString());
-  PlotCurve(const PlotCurve& c);
+  PlotCurve(const PlotCurve &c);
 
-  virtual PlotCurve* clone(const Graph*)const = 0;
+  virtual PlotCurve *clone(const Graph *) const = 0;
 
-  int type()const{return d_type;};
-  void setType(int t){d_type = t;};
+  int type() const { return d_type; };
+  void setType(int t) { d_type = t; };
 
-  double xOffset()const{return d_x_offset;};
-  void setXOffset(double dx){d_x_offset = dx;};
+  double xOffset() const { return d_x_offset; };
+  void setXOffset(double dx) { d_x_offset = dx; };
 
-  double yOffset()const{return d_y_offset;};
-  void setYOffset(double dy){d_y_offset = dy;};
+  double yOffset() const { return d_y_offset; };
+  void setYOffset(double dy) { d_y_offset = dy; };
 
-  bool sideLinesEnabled(){return d_side_lines;};
-  void enableSideLines(bool on){d_side_lines = on;};
+  bool sideLinesEnabled() { return d_side_lines; };
+  void enableSideLines(bool on) { d_side_lines = on; };
 
   QString saveCurveLayout();
-  void restoreCurveLayout(const QStringList& lst);
+  void restoreCurveLayout(const QStringList &lst);
 
   //! Set the number of symbols not to be drawn: useful for large data sets
   void setSkipSymbolsCount(int count);
   //! Returns the number of symbols not to be drawn
-  int skipSymbolsCount() const {return d_skip_symbols;}
+  int skipSymbolsCount() const { return d_skip_symbols; }
 
-  /// Returns a list of error bar settings for each set of error bars associated to this curve
-  virtual QList<ErrorBarSettings*> errorBarSettingsList() const = 0;
+  /// Returns a list of error bar settings for each set of error bars associated
+  /// to this curve
+  virtual QList<ErrorBarSettings *> errorBarSettingsList() const = 0;
 
   // remove this curve form the graph (and delete from memory)
-  void removeMe(){emit removeMe(this);}
+  void removeMe() { emit removeMe(this); }
 
   // to be called only by Plot before deleting the curve
   void aboutToBeDeleted();
@@ -87,19 +85,22 @@ public:
 signals:
 
   // fired to tell the owning plot to remove it
-  void removeMe(PlotCurve*);
+  void removeMe(PlotCurve *);
   void dataUpdated();
   // fired to indicate that this curve is about to be deleted from memory
   // and any reference to it must be invalidated
-  void forgetMe(PlotCurve*);
+  void forgetMe(PlotCurve *);
   void forgetMe();
 
 protected:
-  virtual void drawCurve(QPainter *p, int style, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
-  void drawSideLines(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
+  virtual void drawCurve(QPainter *p, int style, const QwtScaleMap &xMap,
+                         const QwtScaleMap &yMap, int from, int to) const;
+  void drawSideLines(QPainter *p, const QwtScaleMap &xMap,
+                     const QwtScaleMap &yMap, int from, int to) const;
 
   virtual void drawSymbols(QPainter *p, const QwtSymbol &,
-      const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
+                           const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+                           int from, int to) const;
 
   void computeWaterfallOffsets();
 
@@ -113,57 +114,58 @@ protected:
   boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
 };
 
-class DataCurve: public PlotCurve
-{
+class DataCurve : public PlotCurve {
 public:
-  DataCurve(Table *t, const QString& xColName, const QString& name, int startRow = 0, int endRow = -1);
-  DataCurve(const DataCurve& c);
-  void clone(DataCurve* c);
+  DataCurve(Table *t, const QString &xColName, const QString &name,
+            int startRow = 0, int endRow = -1);
+  DataCurve(const DataCurve &c);
+  void clone(DataCurve *c);
 
-  PlotCurve* clone(const Graph*)const;
+  PlotCurve *clone(const Graph *) const;
 
   QString saveToString();
 
-  QString xColumnName(){return d_x_column;};
-  void setXColumnName(const QString& name){d_x_column = name;};
+  QString xColumnName() { return d_x_column; };
+  void setXColumnName(const QString &name) { d_x_column = name; };
 
-  bool hasLabels()const{return !d_labels_list.isEmpty();};
-  QString labelsColumnName()const{return d_labels_column;};
-  void setLabelsColumnName(const QString& name);
+  bool hasLabels() const { return !d_labels_list.isEmpty(); };
+  QString labelsColumnName() const { return d_labels_column; };
+  void setLabelsColumnName(const QString &name);
 
-  int labelsAlignment()const{return d_labels_align;};
+  int labelsAlignment() const { return d_labels_align; };
   void setLabelsAlignment(int flags);
 
-  int labelsXOffset()const{return d_labels_x_offset;};
-  int labelsYOffset()const{return d_labels_y_offset;};
+  int labelsXOffset() const { return d_labels_x_offset; };
+  int labelsYOffset() const { return d_labels_y_offset; };
   void setLabelsOffset(int x, int y);
 
-  double labelsRotation()const{return d_labels_angle;};
+  double labelsRotation() const { return d_labels_angle; };
   void setLabelsRotation(double angle);
 
-  QFont labelsFont()const{return d_labels_font;};
-  void setLabelsFont(const QFont& font);
+  QFont labelsFont() const { return d_labels_font; };
+  void setLabelsFont(const QFont &font);
 
-  QColor labelsColor()const{return d_labels_color;};
-  void setLabelsColor(const QColor& c);
+  QColor labelsColor() const { return d_labels_color; };
+  void setLabelsColor(const QColor &c);
 
-  bool labelsWhiteOut()const{return d_white_out_labels;};
+  bool labelsWhiteOut() const { return d_white_out_labels; };
   void setLabelsWhiteOut(bool whiteOut = true);
 
-  Table* table()const{return d_table;};
+  Table *table() const { return d_table; };
 
-  int startRow()const{return d_start_row;};
-  int endRow()const{return d_end_row;};
+  int startRow() const { return d_start_row; };
+  int endRow() const { return d_end_row; };
   void setRowRange(int startRow, int endRow);
 
-  bool isFullRange()const;
+  bool isFullRange() const;
   void setFullRange();
 
-  virtual bool updateData(Table *t, const QString& colName);
+  virtual bool updateData(Table *t, const QString &colName);
   virtual void loadData();
 
-  //! Returns the row index in the data source table corresponding to the data point index.
-  int tableRow(int point)const;
+  //! Returns the row index in the data source table corresponding to the data
+  //! point index.
+  int tableRow(int point) const;
 
   void remove();
 
@@ -171,23 +173,32 @@ public:
    * \brief A list of data sources for this curve.
    *
    * Elements must be in either of the following forms:
-   *  - &lt;id of X column> "(X)," &lt;id of Y column> "(Y)" [ "," &lt;id of error column> ("(xErr)" | "(yErr)") ]
-   *  - &lt;id of Xstart column> "(X)," &lt;id of Ystart column>"(Y)," &lt;id of Xend column> "(X)," &lt;id of Yend column> "(Y)"\n
+   *  - &lt;id of X column> "(X)," &lt;id of Y column> "(Y)" [ "," &lt;id of
+   * error column> ("(xErr)" | "(yErr)") ]
+   *  - &lt;id of Xstart column> "(X)," &lt;id of Ystart column>"(Y)," &lt;id of
+   * Xend column> "(X)," &lt;id of Yend column> "(Y)"\n
    *    (denoting start and end coordinates for the #VectXYXY style)
-   *  - &lt;id of Xstart column> "(X)," &lt;id of Ystart column> "(Y)," &lt;id of angle column> "(A)," &lt;id of magnitude column> "(M)"\n
-   *    (denoting start coordinates, angle in radians and length for the #VectXYAM style)
+   *  - &lt;id of Xstart column> "(X)," &lt;id of Ystart column> "(Y)," &lt;id
+   * of angle column> "(A)," &lt;id of magnitude column> "(M)"\n
+   *    (denoting start coordinates, angle in radians and length for the
+   * #VectXYAM style)
    *
    * Column ids are of the form '&lt;name of table> "_" &lt;name of column>'.
    */
-  virtual QString plotAssociation()const;
-  virtual void updateColumnNames(const QString& oldName, const QString& newName, bool updateTableName);
+  virtual QString plotAssociation() const;
+  virtual void updateColumnNames(const QString &oldName, const QString &newName,
+                                 bool updateTableName);
 
   //! The list of attached error bars.
-  QList<DataCurve *> errorBarsList()const{return d_error_bars;};
-  /// Returns a list of error bar settings for each set of error bars associated to this curve
+  QList<DataCurve *> errorBarsList() const { return d_error_bars; };
+  /// Returns a list of error bar settings for each set of error bars associated
+  /// to this curve
   virtual QList<ErrorBarSettings *> errorBarSettingsList() const;
   //! Adds a single error bars curve to the list of attached error bars.
-  void addErrorBars(DataCurve *c){if (c) d_error_bars << c;};
+  void addErrorBars(DataCurve *c) {
+    if (c)
+      d_error_bars << c;
+  };
   //! Remove a single error bars curve from the list of attached error bars.
   void removeErrorBars(DataCurve *c);
   //! Clears the list of attached error bars.
@@ -197,19 +208,19 @@ public:
 
   void setVisible(bool on);
 
-  bool selectedLabels(const QPoint& pos);
-  bool hasSelectedLabels()const;
+  bool selectedLabels(const QPoint &pos);
+  bool hasSelectedLabels() const;
   void setLabelsSelected(bool on = true);
 
-  void moveLabels(const QPoint& pos);
+  void moveLabels(const QPoint &pos);
   void updateLabelsPosition();
 
 protected:
-  bool validCurveType()const;
+  bool validCurveType() const;
   void loadLabels();
 
   //! List of the error bar curves associated to this curve.
-  QList <DataCurve *> d_error_bars;
+  QList<DataCurve *> d_error_bars;
   //! The data source table.
   Table *d_table;
   //!\brief The name of the column used for abscissae values.
@@ -225,8 +236,9 @@ protected:
   QString d_labels_column;
 
   //! List of the text labels associated to this curve.
-  QList <PlotMarker *> d_labels_list;
-  //! Keep track of the coordinates of the point where the user clicked when selecting the labels.
+  QList<PlotMarker *> d_labels_list;
+  //! Keep track of the coordinates of the point where the user clicked when
+  //! selecting the labels.
   double d_click_pos_x, d_click_pos_y;
 
   QColor d_labels_color;
@@ -234,27 +246,31 @@ protected:
   double d_labels_angle;
   bool d_white_out_labels;
   int d_labels_align, d_labels_x_offset, d_labels_y_offset;
-  //! Keeps track of the plot marker on which the user clicked when selecting the labels.
+  //! Keeps track of the plot marker on which the user clicked when selecting
+  //! the labels.
   PlotMarker *d_selected_label;
 };
 
-class PlotMarker: public QwtPlotMarker
-{
+class PlotMarker : public QwtPlotMarker {
 public:
   PlotMarker(int index, double angle);
 
-  int index(){return d_index;};
-  void setIndex(int i){d_index = i;};
+  int index() { return d_index; };
+  void setIndex(int i) { d_index = i; };
 
-  double angle(){return d_angle;};
-  void setAngle(double a){d_angle = a;};
-  void setLabelOffset(double xOffset, double yOffset){d_label_x_offset = xOffset; d_label_y_offset = yOffset;};
+  double angle() { return d_angle; };
+  void setAngle(double a) { d_angle = a; };
+  void setLabelOffset(double xOffset, double yOffset) {
+    d_label_x_offset = xOffset;
+    d_label_y_offset = yOffset;
+  };
 
-  //QwtDoubleRect boundingRect() const;
+  // QwtDoubleRect boundingRect() const;
 
 protected:
   //! Does the actual drawing; see QwtPlotItem::draw.
-  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &r) const;
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            const QRect &r) const;
 
   int d_index;
   double d_angle;

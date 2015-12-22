@@ -3,6 +3,8 @@
 
 #include "MantidAPI/AnalysisDataService.h" 
 #include "MantidAPI/AlgorithmProxy.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace MantidQt
 {
@@ -369,19 +371,69 @@ namespace MantidWidgets
       MatrixWorkspace_sptr ws;
 
       try {
-        auto load = AlgorithmManager::Instance().create("MuonLoad");
-        load->initialize();
-        load->setChild(true);
-        load->setRethrows(true);
-        load->updatePropertyValues(*m_loadAlg);
-        load->setPropertyValue("Filename", fileIt->toStdString());
-        load->setPropertyValue("OutputWorkspace", "__YouDontSeeMeIAmNinja");
+        // If ApplyDeadTimeCorrection is set but no dead time table is set,
+        // we need to load one from the file.
+        bool loadDeadTimesFromFile = false;
+        bool applyDTC = m_loadAlg->getProperty("ApplyDeadTimeCorrection");
+        if (applyDTC) {
+          if (auto deadTimes =
+                  m_loadAlg->getPointerToProperty("DeadTimeTable")) {
+            if (deadTimes->value() == "") {
+              // No workspace set for dead time table - we need to load one
+              loadDeadTimesFromFile = true;
+            }
+          }
+        }
+
+        // Use LoadMuonNexus to load the file
+        auto loadAlg = AlgorithmManager::Instance().create("LoadMuonNexus");
+        loadAlg->initialize();
+        loadAlg->setChild(true);
+        loadAlg->setRethrows(true);
+        loadAlg->setPropertyValue("Filename", fileIt->toStdString());
+        loadAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
+        if (loadDeadTimesFromFile) {
+          loadAlg->setPropertyValue("DeadTimeTable", "__DeadTimes");
+        }
+        loadAlg->execute();
+        Workspace_sptr loadedWS = loadAlg->getProperty("OutputWorkspace");
+        double loadedTimeZero = loadAlg->getProperty("TimeZero");
+
+        // then use MuonProcess to process it
+        auto process = AlgorithmManager::Instance().create("MuonProcess");
+        process->initialize();
+        process->setChild(true);
+        process->setRethrows(true);
+        process->updatePropertyValues(*m_loadAlg);
+        process->setProperty("InputWorkspace", loadedWS);
+        process->setProperty("LoadedTimeZero", loadedTimeZero);
+        process->setPropertyValue("OutputWorkspace", "__YouDontSeeMeIAmNinja");
         if (m_fitPropBrowser->rawData()) // TODO: or vice verca?
-          load->setPropertyValue("RebinParams", "");
+          process->setPropertyValue("RebinParams", "");
+        if (loadDeadTimesFromFile) {
+          Workspace_sptr deadTimes = loadAlg->getProperty("DeadTimeTable");
+          ITableWorkspace_sptr deadTimesTable;
+          if (auto table =
+                  boost::dynamic_pointer_cast<ITableWorkspace>(deadTimes)) {
+            deadTimesTable = table;
+          } else if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+                         deadTimes)) {
+            deadTimesTable =
+                boost::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
+          }
+          process->setProperty("DeadTimeTable", deadTimesTable);
+        }
 
-        load->execute();
+        process->execute();
 
-        ws = load->getProperty("OutputWorkspace");
+        Workspace_sptr outputWS = process->getProperty("OutputWorkspace");
+        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+      } catch (const std::exception &ex) {
+        g_log.error(ex.what());
+        QMessageBox::critical(
+            this, "Loading failed",
+            "Unable to load one of the files.\n\nCheck log for details");
+
       } catch (...) {
         QMessageBox::critical(
             this, "Loading failed",

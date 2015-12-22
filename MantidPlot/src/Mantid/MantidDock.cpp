@@ -6,6 +6,7 @@
 #include "MantidWSIndexDialog.h"
 #include "FlowLayout.h"
 #include "WorkspaceIcons.h"
+#include "Graph3D.h"
 
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/FileProperty.h>
@@ -241,6 +242,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_clearUB = new QAction(tr("Clear UB Matrix"), this);
   connect(m_clearUB, SIGNAL(activated()), this, SLOT(clearUB()));
+
+  m_plotSurface = new QAction(tr("Plot Surface from Group"), this);
+  connect(m_plotSurface, SIGNAL(triggered()), this, SLOT(plotSurface()));
 }
 
 /**
@@ -638,6 +642,8 @@ void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
   menu->addAction(m_plotSpecErr);
   menu->addAction(m_colorFill);
   m_colorFill->setEnabled(true);
+  menu->addAction(m_plotSurface);
+  m_plotSurface->setEnabled(true);
   menu->addSeparator();
   menu->addAction(m_saveNexus);
 }
@@ -1498,6 +1504,68 @@ void MantidDockWidget::clearUB()
 void MantidDockWidget::dropEvent(QDropEvent *de)
 {
   m_tree->dropEvent(de);
+}
+
+/**
+ * Create a 3D surface plot from the selected workspace group
+ */
+void MantidDockWidget::plotSurface() {
+  // find the workspace group clicked on
+  const QStringList wsNames = m_tree->getSelectedWorkspaceNames();
+  if (!wsNames.empty()) {
+    const auto wsName = wsNames[0];
+    const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(
+        m_ads.retrieve(wsName.toStdString()));
+    if (wsGroup) {
+      // Set up one new matrix workspace to hold all the data for plotting
+      const QString plotWSTitle("__matrixToPlot");
+      IAlgorithm_sptr alg = m_mantidUI->createAlgorithm("CreateWorkspace");
+      alg->initialize();
+      alg->setProperty("OutputWorkspace", plotWSTitle.toStdString());
+
+      // Each "spectrum" will be the data from one workspace
+      int nWorkspaces = wsGroup->getNumberOfEntries();
+      std::string xAxisLabel, dataAxisLabel;
+      alg->setProperty("NSpec", nWorkspaces);
+      if (nWorkspaces > 0) {
+        // For each workspace in group, add data
+        std::vector<double> xPoints, data;
+        for (int i = 0; i < nWorkspaces; i++) {
+          const auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+              wsGroup->getItem(i));
+          if (ws) {
+            auto X = ws->readX(0);
+            auto Y = ws->readY(0);
+            xPoints.insert(xPoints.end(), X.begin(), X.end());
+            data.insert(data.end(), Y.begin(), Y.end());
+            if (i == 0) {
+              xAxisLabel = ws->getXDimension()->getName();
+              dataAxisLabel = ws->YUnitLabel();
+            }
+          }
+        }
+        alg->setProperty("DataX", xPoints);
+        alg->setProperty("DataY", data);
+        alg->setProperty("YUnitLabel", dataAxisLabel);
+      }
+      m_mantidUI->executeAlgorithmAsync(alg, true);
+
+      // Plot the output workspace in 3D
+      if (auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+              m_mantidUI->getWorkspace(plotWSTitle))) {
+        matrixWS->getAxis(0)->title() = xAxisLabel;
+      }
+      auto matrixToPlot =
+          m_mantidUI->importMatrixWorkspace(plotWSTitle, -1, -1, false, false);
+      m_mantidUI->deleteWorkspace(plotWSTitle);
+      auto plot = matrixToPlot->plotGraph3D(Qwt3D::PLOTSTYLE::FILLED);
+
+      // Default title is "Workspace __matrixToPlot". Change this:
+      QString title("Surface plot for ");
+      title.append(wsGroup->name().c_str());
+      plot->setTitle(title);
+    }
+  }
 }
 
 //------------ MantidTreeWidget -----------------------//

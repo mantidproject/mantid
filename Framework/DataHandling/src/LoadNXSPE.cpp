@@ -89,11 +89,9 @@ int LoadNXSPE::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadNXSPE::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".nxspe");
-  exts.push_back("");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "An NXSPE file");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".nxspe", ""}),
+      "An NXSPE file");
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "The name of the workspace that will be created.");

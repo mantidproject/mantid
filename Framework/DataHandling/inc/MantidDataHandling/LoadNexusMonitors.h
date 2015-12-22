@@ -2,14 +2,10 @@
 #define MANTID_DATAHANDLING_LOADNEXUSMONITORS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include <boost/scoped_array.hpp>
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
 
 namespace Mantid {
-
 namespace DataHandling {
+
 /** @class LoadNexusMonitors LoadNexusMonitors.h
 DataHandling/LoadNexusMonitors.h
 
@@ -48,50 +44,33 @@ class DLLExport LoadNexusMonitors : public API::Algorithm {
 public:
   /// Default constructor
   LoadNexusMonitors();
+
   /// Destructor
   virtual ~LoadNexusMonitors();
+
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadNexusMonitors"; };
+  virtual const std::string name() const { return "LoadNexusMonitors"; }
+
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Load all monitors from a NeXus file into a workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  virtual int version() const { return 1; }
+
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "DataHandling\\Nexus"; }
 
-private:
+protected:
   /// Intialisation code
   void init();
+
   /// Execution code
   void exec();
-
-  // Fix the detector numbers if the defaults are not correct
-  void fixUDets(boost::scoped_array<detid_t> &det_ids, ::NeXus::File &file,
-                const boost::scoped_array<specid_t> &spec_ids,
-                const size_t nmonitors) const;
-  /// Load the logs
-  void runLoadLogs(const std::string filename,
-                   API::MatrixWorkspace_sptr localWorkspace);
-  bool allMonitorsHaveHistoData(::NeXus::File &file,
-                                const std::vector<std::string> &monitorNames);
-  /// is it possible to open the file?
-  bool canOpenAsNeXus(const std::string &fname);
-
-  /// split multi period histogram workspace into a workspace group
-  void splitMutiPeriodHistrogramData(const size_t numPeriods);
-
-  /// The name and path of the input file
-  std::string filename;
-  /// The workspace being filled out
-  API::MatrixWorkspace_sptr WS;
-  /// Number of monitors
-  size_t nMonitors;
-  /// name of top level NXentry to use
-  std::string m_top_entry_name;
 };
-}
-}
+
+} // namespace DataHandling
+} // namespace Mantid
+
 #endif /* MANTID_DATAHANDLING_LOADNEXUSMONITORS_H_ */
