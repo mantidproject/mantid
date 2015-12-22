@@ -21,14 +21,13 @@
 
 #include "SaveNexusProcessedTest.h"
 
-#include <boost/assign/list_of.hpp>
-#include <boost/lexical_cast.hpp>
-
 #include <cxxtest/TestSuite.h>
 
 #include <hdf5.h>
 
 #include <Poco/File.h>
+
+#include <string>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -130,6 +129,13 @@ public:
 
     // Testing the number of histograms
     TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(), 3);
+    // Test spectrum numbers are as expected
+    size_t index(0);
+    for (auto spectrum : {3, 4, 5}) {
+      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index)->getSpectrumNo(),
+                       spectrum);
+      index++;
+    }
     doHistoryTest(matrix_ws);
 
     boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
@@ -163,6 +169,13 @@ public:
 
     // Testing the number of histograms
     TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(), 4);
+    // Test spectrum numbers
+    size_t index(0);
+    for (auto spectrum : {2, 3, 4, 5}) {
+      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index)->getSpectrumNo(),
+                       spectrum);
+      index++;
+    }
 
     // Test history
     doHistoryTest(matrix_ws);
@@ -199,6 +212,13 @@ public:
 
     // Testing the number of histograms
     TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(), 5);
+    // Test spectrum numbers
+    size_t index(0);
+    for (auto spectrum : {2, 3, 4, 5, 6}) {
+      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index)->getSpectrumNo(),
+                       spectrum);
+      index++;
+    }
 
     // Test history
     doHistoryTest(matrix_ws);
@@ -564,8 +584,7 @@ public:
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 10);
-      TS_ASSERT_EQUALS(ws->name(),
-                       "group_" + boost::lexical_cast<std::string>(i + 1));
+      TS_ASSERT_EQUALS(ws->name(), "group_" + std::to_string(i + 1));
     }
   }
 
@@ -1175,12 +1194,12 @@ private:
     // x errors
 
     // Create histogram workspace with two spectra and 4 points
-    std::vector<double> x1 = boost::assign::list_of(1)(2)(3);
-    std::vector<double> dx1 = boost::assign::list_of(3)(2)(1);
-    std::vector<double> y1 = boost::assign::list_of(1)(2);
-    std::vector<double> x2 = boost::assign::list_of(1)(2)(3);
-    std::vector<double> dx2 = boost::assign::list_of(3)(2)(1);
-    std::vector<double> y2 = boost::assign::list_of(1)(2);
+    std::vector<double> x1{1, 2, 3};
+    std::vector<double> dx1{3, 2, 1};
+    std::vector<double> y1{1, 2};
+    std::vector<double> x2{1, 2, 3};
+    std::vector<double> dx2{3, 2, 1};
+    std::vector<double> y2{1, 2};
     MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
         "Workspace2D", 2, x1.size(), y1.size());
     inputWs->dataX(0) = x1;
@@ -1216,6 +1235,8 @@ private:
     // Check spectra in loaded workspace
     MatrixWorkspace_sptr outputWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
+    TS_ASSERT_EQUALS(1, inputWs->getSpectrum(0)->getSpectrumNo());
+    TS_ASSERT_EQUALS(2, inputWs->getSpectrum(1)->getSpectrumNo());
     TS_ASSERT_EQUALS(inputWs->readX(0), outputWs->readX(0));
     TS_ASSERT_EQUALS(inputWs->readX(1), outputWs->readX(1));
     TS_ASSERT_EQUALS(inputWs->readY(0), outputWs->readY(0));
@@ -1237,12 +1258,12 @@ private:
     // Test SaveNexusProcessed/LoadNexusProcessed on a point-like workspace
 
     // Create histogram workspace with two spectra and 4 points
-    std::vector<double> x1 = boost::assign::list_of(1)(2)(3);
-    std::vector<double> dx1 = boost::assign::list_of(3)(2)(1);
-    std::vector<double> y1 = boost::assign::list_of(1)(2)(3);
-    std::vector<double> x2 = boost::assign::list_of(10)(20)(30);
-    std::vector<double> dx2 = boost::assign::list_of(30)(22)(10);
-    std::vector<double> y2 = boost::assign::list_of(10)(20)(30);
+    std::vector<double> x1{1, 2, 3};
+    std::vector<double> dx1{3, 2, 1};
+    std::vector<double> y1{1, 2, 3};
+    std::vector<double> x2{10, 20, 30};
+    std::vector<double> dx2{30, 22, 10};
+    std::vector<double> y2{10, 20, 30};
     MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
         "Workspace2D", 2, x1.size(), y1.size());
     inputWs->dataX(0) = x1;
