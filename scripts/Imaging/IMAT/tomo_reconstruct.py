@@ -253,8 +253,8 @@ def main_tomo_rec():
     # distributions, as found for example on rhel6
     vers = sys.version_info
     if vers < (2,7,0):
-        raise("Not running this test as it requires Python >= 2.7. Version found: {0}".
-              format(vers))
+        raise RuntimeErrorn("Not running this test as it requires Python >= 2.7. Version found: {0}".
+                            format(vers))
 
     import inspect
 
