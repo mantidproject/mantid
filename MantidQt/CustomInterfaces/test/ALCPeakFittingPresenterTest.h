@@ -38,6 +38,8 @@ public:
   {
     emit parameterChanged(funcIndex, paramName);
   }
+  void plotGuess() { emit plotGuessRequested(); }
+  void clearGuess() { emit removeGuessRequested(); }
 
   MOCK_CONST_METHOD1(function, IFunction_const_sptr(QString));
   MOCK_CONST_METHOD0(currentFunctionIndex, boost::optional<QString>());
