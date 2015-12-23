@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm is used to fit data from the high-angle bank to data from the low-angle bank in a SANS experiment. The degrees of freedom are a shift and a scale factor which detmine by how much the high-angle bank data needs to be scaled and then shifted to match the low-angle bank data.
+This algorithm is used to fit data from the high-angle bank to data from the low-angle bank in a SANS experiment. The degrees of freedom are a shift and a scale factor which determine by how much the high-angle bank data needs to be scaled and then shifted to match the low-angle bank data.
 
 Fit Modes
 ##############
