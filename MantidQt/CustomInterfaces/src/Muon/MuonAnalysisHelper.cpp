@@ -385,43 +385,57 @@ std::string getRunLabel(const Workspace_sptr& ws)
 
 /**
  * Get a run label for a list of workspaces.
- * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like MUSR00015189-91.
+ * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like
+ * MUSR00015189-91.
  * @param wsList
  * @return
  */
-std::string getRunLabel(std::vector<Workspace_sptr> wsList)
-{
+std::string getRunLabel(std::vector<Workspace_sptr> wsList) {
   if (wsList.empty())
     throw std::invalid_argument("Unable to run on an empty list");
 
-  // Sort by run numbers, in case of non-sequential list of runs
+  // Extract the run numbers and find the first run in the list
   std::vector<int> runNumbers;
-  for (auto ws : wsList) {
-    runNumbers.push_back(firstPeriod(ws)->getRunNumber());
-  }
-  auto ranges = findConsecutiveRuns(runNumbers);
-
-  // Begin string output
-  std::ostringstream label;
-  label << getRunLabel(wsList.front());
+  int firstRunIndex = 0;
   int firstRunNumber = firstPeriod(wsList.front())->getRunNumber();
-  // see desktop for 13738
-
-  // Get string representation of the first and last run numbers
-  auto firstRun = boost::lexical_cast<std::string>(firstPeriod(wsList.front())->getRunNumber());
-  auto lastRun = boost::lexical_cast<std::string>(firstPeriod(wsList.back())->getRunNumber());
-
-  // Remove the common part of the first and last run, so we get e.g. "12345-56" instead of "12345-12356"
-  for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i)
-  {
-    if (firstRun[i] != lastRun[i])
-    {
-      lastRun.erase(0,i);
-      break;
+  for (int i = 0; i < wsList.size(); i++) {
+    int runNumber = firstPeriod(wsList[i])->getRunNumber();
+    runNumbers.push_back(runNumber);
+    if (runNumber < firstRunNumber) {
+      firstRunNumber = runNumber;
+      firstRunIndex = i;
     }
   }
 
-  label << '-' << lastRun;
+  // Find ranges of consecutive runs
+  auto ranges = findConsecutiveRuns(runNumbers);
+
+  // Begin string output with full label of first run
+  std::ostringstream label;
+  label << getRunLabel(wsList[firstRunIndex]);
+
+  for (auto range : ranges) {
+    std::string firstRun = std::to_string(range.first);
+    std::string lastRun = std::to_string(range.second);
+    if (range != ranges.front()) {
+      label << firstRun;
+    }
+    if (range.second != range.first) {
+      // Remove the common part of the first and last run, so we get e.g.
+      // "12345-56" instead of "12345-12356"
+      for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i) {
+        if (firstRun[i] != lastRun[i]) {
+          lastRun.erase(0, i);
+          break;
+        }
+      }
+      label << "-" << lastRun;
+    }
+    if (range != ranges.back()) {
+      label << ", ";
+    }
+  }
+
   return label.str();
 }
 

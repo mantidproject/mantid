@@ -54,7 +54,7 @@ public:
   }
 
   void test_getRunLabel_wsList_wrongOrder() {
-    std::vector<int> runNumbers = {10, 3, 5, 1, 6};
+    std::vector<int> runNumbers{10, 3, 5, 1, 6, 2, 4, 8, 7, 9};
     std::vector<Workspace_sptr> list;
 
     for (auto it = runNumbers.begin(); it != runNumbers.end(); ++it) {
@@ -63,6 +63,26 @@ public:
 
     std::string label = getRunLabel(list);
     TS_ASSERT_EQUALS(label, "EMU00000001-10");
+  }
+
+  void test_getRunLabel_wsList_nonConsecutive() {
+    std::vector<int> runNumbers{1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14};
+    std::vector<Workspace_sptr> list;
+    for (auto it = runNumbers.begin(); it != runNumbers.end(); it++) {
+      list.push_back(createWs("EMU", *it));
+    }
+    std::string label = getRunLabel(list);
+    TS_ASSERT_EQUALS(label, "EMU00000001-3, 5-6, 8, 10-4");
+  }
+
+  void test_getRunLabel_wsList_nonConsecutive_wrongOrder() {
+    std::vector<int> runNumbers{5, 14, 8, 1, 11, 3, 10, 6, 13, 12, 2};
+    std::vector<Workspace_sptr> list;
+    for (auto it = runNumbers.begin(); it != runNumbers.end(); it++) {
+      list.push_back(createWs("EMU", *it));
+    }
+    std::string label = getRunLabel(list);
+    TS_ASSERT_EQUALS(label, "EMU00000001-3, 5-6, 8, 10-4");
   }
 
   void test_sumWorkspaces() {
