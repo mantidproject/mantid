@@ -50,6 +50,7 @@ public:
 private:
   /// Function to minimize.
   API::ICostFunction_sptr m_costFunction;
+  std::vector<std::vector<double>> m_directions;
 };
 
 } // namespace FuncMinimisers

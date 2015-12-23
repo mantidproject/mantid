@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <gsl/gsl_blas.h>
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <iomanip>
 #include <numeric>
 #include <sstream>
@@ -180,7 +181,7 @@ GSLVector &GSLVector::operator+=(const double d) {
 /// Normalise this vector
 void GSLVector::normalize() {
   double N = norm();
-  if (N == 0.0) {
+  if (N == 0.0 || !boost::math::isfinite(N)) {
     throw std::runtime_error("Cannot normalize null vector.");
   }
   *this *= 1.0 / N;

@@ -15,6 +15,7 @@
 #include <tuple>
 
 #include "C:/Users/hqs74821/Work/Mantid_stuff/Testing/class/MyTestDef.h"
+#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -26,9 +27,9 @@ using Functions::Chebfun;
 
 namespace {
 
-size_t iiter;
-size_t iparam;
-bool isGrad;
+static size_t iiter = 0;
+
+typedef boost::optional<GSLVector> OptionalParameters;
 
 //-----------------------------------------------------------------------------
 /// Helper class to calculate the chi squared along a direction in the parameter
@@ -38,7 +39,7 @@ public:
   /// Constructor.
   /// @param function  :: The cost function.
   /// @param direction :: A normalised direction vector in the parameter space.
-  Slice(API::ICostFunction &function, const std::vector<double> &direction)
+  Slice(API::ICostFunction &function, const GSLVector &direction)
       : m_function(function), m_direction(direction) {}
 
   /// Calculate a value of the cost function along the chosen direction at a
@@ -61,7 +62,7 @@ private:
   /// The cost function.
   API::ICostFunction &m_function;
   /// The direction of the slice.
-  const std::vector<double> m_direction;
+  const GSLVector m_direction;
 };
 
 //-----------------------------------------------------------------------------
@@ -78,28 +79,6 @@ double makeAccuracy(double value1, double value2) {
 }
 
 //-----------------------------------------------------------------------------
-/// Normalise a vector to 1
-bool normalise(std::vector<double> &direction) {
-  //double norm = 0.0;
-  //for(auto x : direction) {
-  //  norm += x * x;
-  //}
-  //norm = sqrt(norm);
-  //for(auto &x : direction) {
-  //  x /= norm;
-  //}
-
-  double norm = sqrt(std::accumulate(direction.begin(), direction.end(), 0.0,
-                              [](double init, double x) { return init + x * x; }));
-  if (norm == 0.0 || !boost::math::isfinite(norm)) {
-    return false;
-  }
-  std::transform(direction.begin(), direction.end(), direction.begin(),
-                 std::bind2nd(std::divides<double>(), norm));
-  return true;
-}
-
-//-----------------------------------------------------------------------------
 ///
 std::tuple<double, double, double, bool> findExtent(std::function<double(double)> fun,
                                               double paramValue) {
@@ -110,16 +89,41 @@ std::tuple<double, double, double, bool> findExtent(std::function<double(double)
   }
   bool isGood = false;
   double fun0 = fun(0);
+  if (!boost::math::isfinite(fun0)) {
+    throw std::runtime_error("Cost function has non-finite value at starting point.0");
+  }
+
+  const size_t maxSteps = 100;
+  size_t istep = 0;
   double x = shift;
   double fun1 = fun(x);
-  //std::cerr << "extent fun " << fun0 << ' ' << fun1 << ' ' << shift <<
-  //std::endl;
+  if (!boost::math::isfinite(fun0)) {
+    for (istep = 0; istep < maxSteps; ++istep) {
+      x /= 2;
+      fun1 = fun(x);
+      if (boost::math::isfinite(fun1)) {
+        break;
+      }
+    }
+    throw std::runtime_error("Cost function has non-finite value at starting point.1");
+  }
   if (fun1 >= fun0) {
     shift = -shift;
     x = shift;
     fun0 = fun1;
     fun1 = fun(x);
-    //std::cerr << "extent fun " << fun1 << ' ' << shift << std::endl;
+    if (!boost::math::isfinite(fun1)) {
+      for (istep = 0; istep < maxSteps; ++istep) {
+        x /= 2;
+        fun1 = fun(x);
+        if (boost::math::isfinite(fun1)) {
+          break;
+        }
+      }
+      if (istep == maxSteps) {
+        return std::make_tuple(0.0, -shift, makeAccuracy(fun1, fun1 - fun0), isGood);
+      }
+    }
     if (fun1 >= fun0) {
       return std::make_tuple(shift, -shift, makeAccuracy(fun1, fun1 - fun0), isGood);
     }
@@ -129,7 +133,7 @@ std::tuple<double, double, double, bool> findExtent(std::function<double(double)
   double xAtMaxDifference = x;
   bool canStop = false;
   std::vector<double> X, Y;
-  for (size_t i = 0; i < 100; ++i) {
+  for (istep = 0; istep < maxSteps; ++istep) {
     double difference = fun0 - fun1;
 
     if (difference == 0.0) {
@@ -142,7 +146,7 @@ std::tuple<double, double, double, bool> findExtent(std::function<double(double)
         x -= shift;
         shift *= 0.75;
       } else {
-        if (ratio > 0.5) {
+        if (ratio > 0.1) {
           isGood = true;
         }
         break;
@@ -155,7 +159,6 @@ std::tuple<double, double, double, bool> findExtent(std::function<double(double)
       shift = x;
     }
 
-    // std::cerr << "extent " << i << ' ' << shift << std::endl;
     x += shift;
     fun1 = fun(x);
     if (boost::math::isfinite(fun1)){
@@ -165,9 +168,8 @@ std::tuple<double, double, double, bool> findExtent(std::function<double(double)
     ++count;
   }
 
-  if (!boost::math::isfinite(fun1)) {
+  if (!boost::math::isfinite(fun1) || istep == maxSteps) {
     x = xAtMaxDifference;
-    std::cerr << "Revert to " << x << " fun1= " << fun(x) << std::endl;
   }
 
   auto xLeft = 0.0;
@@ -177,25 +179,12 @@ std::tuple<double, double, double, bool> findExtent(std::function<double(double)
     std::swap(xLeft, xRight);
   }
 
-  std::string suffix = "_" + boost::lexical_cast<std::string>(iiter) + "_" + (isGrad? "grad" : boost::lexical_cast<std::string>(iparam));
-  std::vector<double> XX, YY;
-  for(size_t i = 0; i < X.size(); ++i)
-  {
-    if (X[i] >= xLeft && X[i] <= xRight){
-      XX.push_back(X[i]);
-      YY.push_back(Y[i]);
-    }
-  }
-  CHECK_OUT_2("x"+suffix, XX);
-  CHECK_OUT_2("y"+suffix, YY);
-  std::cerr << count << " evaluations" << std::endl;
-
   return std::make_tuple(xLeft, xRight, accuracy, isGood);
 }
 
 //-----------------------------------------------------------------------------
-std::vector<double> getParameters(const API::ICostFunction &function) {
-  std::vector<double> parameters(function.nParams());
+GSLVector getParameters(const API::ICostFunction &function) {
+  GSLVector parameters(function.nParams());
   for (size_t i = 0; i < parameters.size(); ++i) {
     parameters[i] = function.getParameter(i);
   }
@@ -203,18 +192,38 @@ std::vector<double> getParameters(const API::ICostFunction &function) {
 }
 
 //-----------------------------------------------------------------------------
-bool setParameters(API::ICostFunction &function,
-                       const std::vector<double> &parameters) {
-  for(auto p : parameters) {
-    if (!boost::math::isfinite(p)) {
+bool checkParameters(const GSLVector &parameters) {
+  for (size_t i = 0; i < parameters.size(); ++i) {
+    if (!boost::math::isfinite(parameters[i])) {
       return false;
     }
   }
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+void setParameters(API::ICostFunction &function,
+                       const GSLVector &parameters) {
   for (size_t i = 0; i < parameters.size(); ++i) {
     function.setParameter(i, parameters[i]);
   }
-  return true;
 }
+
+//-----------------------------------------------------------------------------
+Chebfun makeChebfunSlice(API::ICostFunction &function, const GSLVector& direction, double p = 0.0, bool *ok = nullptr) {
+  Slice slice(function, direction);
+  double minBound = 0.0;
+  double maxBound = 0.0;
+  double accuracy = 0.0;
+  bool isGood = false;
+  std::tie(minBound, maxBound, accuracy, isGood) = findExtent(slice, p);
+  if (ok != nullptr) {
+    *ok = isGood;
+  }
+  Chebfun::Options options(accuracy, 2, 20, true);
+  return Chebfun(slice, minBound, maxBound, options);
+}
+
 //-----------------------------------------------------------------------------
 /// Find the smallest minimum of a slice.
 std::tuple<double, double> findMinimum(const Chebfun& cheb) {
@@ -224,9 +233,6 @@ std::tuple<double, double> findMinimum(const Chebfun& cheb) {
     auto valueAtStartX = cheb(cheb.startX());
     auto valueAtEndX = cheb(cheb.endX());
     if (valueAtStartX == valueAtEndX) {
-      //if (cheb.startX() != 0.0 && cheb.endX() != 0.0) {
-      //  throw std::logic_error("LocalSearchMinimizer: slice interval must have a 0 at one end of the interval.");
-      //}
       return std::make_tuple(0.0, valueAtStartX);
     } else if (valueAtStartX < valueAtEndX) {
       return std::make_tuple(cheb.startX(), valueAtStartX);
@@ -234,67 +240,26 @@ std::tuple<double, double> findMinimum(const Chebfun& cheb) {
       return std::make_tuple(cheb.endX(), valueAtEndX);
     }
   }
+  auto breakPoints = cheb.getBreakPoints();
+  roots.insert(roots.end(), breakPoints.begin(), breakPoints.end());
+  std::sort(roots.begin(), roots.end());
   auto minima = cheb(roots);
-  auto lowestMinimum = std::min(minima.begin(), minima.end());
+  auto lowestMinimum = std::min_element(minima.begin(), minima.end());
   auto argumentAtMinimum = roots[std::distance(minima.begin(), lowestMinimum)];
-  auto valueAtMinimum = cheb(argumentAtMinimum);
-  return std::make_tuple(argumentAtMinimum, valueAtMinimum);
-}
-
-//-----------------------------------------------------------------------------
-/// Perform an iteration by searching for the minimum on a grid defined by
-/// Chebfun slices.
-void iterationSearch(API::ICostFunction &function,
-                     const std::vector<Chebfun> &slices) {
-  std::cerr << "Search" << std::endl;
-  size_t n = function.nParams();
-  size_t nPoints = 1;
-  std::vector<std::vector<double>> ps;
-  std::vector<size_t> multiSizes(n);
-  for (size_t j = 0; j < n; ++j) {
-    auto x = slices[j].getAllXPoints();
-    nPoints *= x.size();
-    multiSizes[j] = x.size();
-    ps.push_back(x);
+  if (boost::math::isfinite(argumentAtMinimum)) {
+    auto valueAtMinimum = cheb(argumentAtMinimum);
+    return std::make_tuple(argumentAtMinimum, valueAtMinimum);
   }
-  auto p = getParameters(function);
-  auto p0 = p;
-  double funMin = function.val();
-  std::vector<size_t> multiIndex(n);
-  for (size_t i = 0; i < nPoints; ++i) {
-    auto f = function.val();
-    if (f < funMin) {
-      funMin = f;
-      p = getParameters(function);
-    }
-    multiIndex[0] += 1;
-    for (size_t j = 0; j < n - 1; ++j) {
-      if (multiIndex[j] == multiSizes[j]) {
-        multiIndex[j] = 0;
-        auto m1 = multiIndex[j + 1] + 1;
-        multiIndex[j + 1] = m1;
-        function.setParameter(j, p0[j] + ps[j][0]);
-        if (m1 < multiSizes[j + 1]) {
-          function.setParameter(j + 1, p0[j + 1] + ps[j + 1][m1]);
-        }
-      } else {
-        function.setParameter(j, p0[j] + ps[j][multiIndex[j]]);
-        break;
-      }
-    }
-  }
-
-  setParameters(function, p);
+  return std::make_tuple(0.0, std::numeric_limits<double>::infinity());
 }
 
 //-----------------------------------------------------------------------------
 /// Perform an iteration of the Newton algorithm.
-bool iterationNewton(API::ICostFunction &function) {
+OptionalParameters iterationNewton(API::ICostFunction &function) {
   auto fittingFunction =
       dynamic_cast<CostFunctions::CostFuncFitting *>(&function);
   auto n = function.nParams();
   if (fittingFunction) {
-    std::cerr << "Newton" << std::endl;
     auto hessian = fittingFunction->getHessian();
     auto derivatives = fittingFunction->getDeriv();
 
@@ -305,9 +270,7 @@ bool iterationNewton(API::ICostFunction &function) {
       double tmp = hessian.get(i, i);
       scalingFactors[i] = sqrt(tmp);
       if (tmp == 0.0) {
-        // treat this case as a logic error for now
-        //throw std::logic_error("Singular matrix in Newton iteration.");
-        return false;
+        return OptionalParameters();
       }
     }
 
@@ -339,86 +302,155 @@ bool iterationNewton(API::ICostFunction &function) {
     for (size_t i = 0; i < n; ++i) {
       parameters[i] += corrections.get(i) / scalingFactors[i];
     }
-    bool paramsAreOK = setParameters(function, parameters);
-    if (!paramsAreOK) {
-      return false;
+    
+    if (!checkParameters(parameters)) {
+      return OptionalParameters();
     }
-    if (function.val() > oldCostFunction) {
-      setParameters(function, oldParameters);
-      return false;
-    }
-    return true;
+
+    std::cerr << "Newton " << std::endl;
+    return parameters;
   }
-  return false;
+  return OptionalParameters();
+}
+
+//-----------------------------------------------------------------------------
+/// Perform an iteration of the Newton algorithm.
+OptionalParameters iterationLMStep(API::ICostFunction &function, const GSLVector& newtonParameters) {
+  auto oldParameters = getParameters(function);
+  GSLVector direction = newtonParameters;
+  direction -= oldParameters;
+  setParameters(function, oldParameters);
+  
+  OptionalParameters parameters;
+  try {
+    direction.normalize();
+    auto cheb = makeChebfunSlice(function, direction);
+    double paramMin = 0;
+    double valueMin = 0;
+    std::tie(paramMin, valueMin) = findMinimum(cheb);
+    parameters = oldParameters;
+    direction *= paramMin;
+    parameters.get() += direction;
+    if (!checkParameters(parameters.get())) {
+      parameters = OptionalParameters();
+    } else {
+      std::cerr << "LM step " << valueMin << ' ' << bool(parameters) << std::endl;
+    }
+  } catch (std::runtime_error&) {
+    parameters = OptionalParameters();
+  }
+  return parameters;
 }
 
 //-----------------------------------------------------------------------------
 /// Perform an iteration of the gradient descent algorithm.
-bool iterationGradientDescent(API::ICostFunction &function,
-                              const std::vector<Chebfun> &slices, double accuracy) {
-  std::cerr << "gradient" << std::endl;
+OptionalParameters iterationGradientDescent(API::ICostFunction &function) {
   auto params = getParameters(function);
-  std::vector<double> negativeGradient;
-  double extent = 0.0;
+
   auto n = function.nParams();
-  negativeGradient.reserve(n);
-  for(size_t i = 0; i < n; ++i){
-    auto &slice = slices[i];
-    auto derivative = slice.derivative();
-    negativeGradient.push_back(-derivative(0.0));
-    auto width = slice.width();
-    extent += width * width;
+  auto fittingFunction =
+      dynamic_cast<CostFunctions::CostFuncFitting *>(&function);
+
+  if (!fittingFunction) {
+    return OptionalParameters();
   }
-  extent = sqrt(extent);
-  if (!normalise(negativeGradient)) {
-    return false;
+
+  GSLVector negativeGradient = fittingFunction->getDeriv();
+  negativeGradient *= -1.0;
+
+  try {
+    negativeGradient.normalize();
+  } catch(std::runtime_error&) {
+    return OptionalParameters();
   }
-  Slice slice(function, negativeGradient);
-  double minBound = 0.0;
-  double maxBound = 0.0;
-  double accuracy1 = 0.0;
-  bool isGood = false;
-  isGrad = true;
-  std::tie(minBound, maxBound, accuracy1, isGood) = findExtent(slice, 0.0);
-  Chebfun cheb(slice, minBound, maxBound, accuracy);
 
-  //auto x = cheb.linspace();
-  //auto suffix = "_" + boost::lexical_cast<std::string>(iiter);
-  //CHECK_OUT_2("x"+suffix, x);
-  //CHECK_OUT_2("y"+suffix, cheb(x));
+  Chebfun cheb = makeChebfunSlice(function, negativeGradient);
+  double paramMin = 0.0;
+  double valueMin = 0.0;
+  std::tie(paramMin, valueMin) = findMinimum(cheb);
 
-  double parameterShiftAtMinimum = 0.0;
-  double costFunctionMinimum = 0.0;
-  std::tie(parameterShiftAtMinimum, costFunctionMinimum) = findMinimum(cheb);
-  std::cerr << "minimum " << costFunctionMinimum << std::endl;
+  negativeGradient *= paramMin;
+  params += negativeGradient;
 
-  boost::optional<size_t> indexOfParameterWithLowerMinimum;
-  for(size_t i = 0; i < slices.size(); ++i) {
-    auto &slice = slices[i];
+  if (!checkParameters(params)) {
+    return OptionalParameters();
+  }
+
+  std::cerr << "gradient " << valueMin << std::endl;
+  return params;
+}
+
+//-----------------------------------------------------------------------------
+/// 
+OptionalParameters iterationSingleParameters(API::ICostFunction &function, double oldValue) {
+  auto n = function.nParams();
+  std::vector<Chebfun> slices;
+  slices.reserve(n);
+  std::vector<double> parametersAtMinimum(n);
+  std::vector<double> valuesAtMinimum(n);
+  std::vector<bool> converged(n);
+  bool allConverged = true;
+  size_t indexOfLowestMinimum = 0;
+
+  for (size_t i = 0; i < n; ++i) {
+    double p = function.getParameter(i);
+    GSLVector dir(n);
+    dir.zero();
+    dir[i] = 1.0;
+
+    bool ok = false;
+    auto cheb = makeChebfunSlice(function, dir, p, &ok);
+    auto accuracy = cheb.accuracy();
+    slices.push_back(cheb);
+
     double paramMin = 0;
     double valueMin = 0;
-    std::tie(paramMin, valueMin) = findMinimum(slice);
-    if (valueMin < costFunctionMinimum) {
-      indexOfParameterWithLowerMinimum = i;
-      parameterShiftAtMinimum = paramMin;
-      costFunctionMinimum = valueMin;
-      std::cerr << "lower minimum " << costFunctionMinimum << " for " << i << " at " << params[i] + parameterShiftAtMinimum << std::endl;
+    std::tie(paramMin, valueMin) = findMinimum(cheb);
+
+    parametersAtMinimum[i] = p + paramMin;
+    valuesAtMinimum[i] = valueMin;
+    if (valueMin == 0.0 || fabs(valueMin - oldValue) / fabs(valueMin) < accuracy * 100) {
+      converged[i] = true;
+      std::cerr << "   converged " << i << std::endl;
+    }
+    allConverged = allConverged && converged[i];
+
+    if (i == 0) {
+      indexOfLowestMinimum = 0;
+    } else if (valueMin < valuesAtMinimum[indexOfLowestMinimum]) {
+      indexOfLowestMinimum = i;
     }
   }
 
-  if (indexOfParameterWithLowerMinimum) {
-    params[indexOfParameterWithLowerMinimum.get()] += parameterShiftAtMinimum;
-  } else {
-    for(size_t i = 0; i < n; ++i){
-      params[i] += negativeGradient[i] * parameterShiftAtMinimum;
+  if (allConverged) {
+
+    for(size_t i = 0; i < n; ++i) {
+      std::cerr << "   slice " << i << ' ' << slices[i].size() << ' ' << slices[i].accuracy() << std::endl;
+      auto si = "_" + boost::lexical_cast<std::string>(iiter) + "_" +
+                boost::lexical_cast<std::string>(i);
+      auto x = slices[i].linspace();
+      auto y = slices[i](x);
+      CHECK_OUT_2("xx" + si, x);
+      CHECK_OUT_2("yy" + si, y);
     }
+
+    return OptionalParameters();
   }
 
-  auto ok = setParameters(function, params);
-  if (!ok) {
-    std::cerr << "gradient not ok" << std::endl;
+  OptionalParameters parameters = getParameters(function);
+  parameters.get()[indexOfLowestMinimum] = parametersAtMinimum[indexOfLowestMinimum];
+  return parameters;
+}
+
+//-----------------------------------------------------------------------------
+void initializeDirections(API::ICostFunction &function,
+                          std::vector<std::vector<double>> &directions) {
+  auto n = function.nParams();
+  directions.resize(n);
+  for(size_t i = 0; i < n; ++i) {
+    directions[i] = std::vector<double>(n);
+    directions[i][i] = 1.0;
   }
-  return ok;
 }
 
 } // anonymous namespace
@@ -439,6 +471,7 @@ void LocalSearchMinimizer::initialize(API::ICostFunction_sptr function,
                                       size_t maxIterations) {
   (void)maxIterations;
   m_costFunction = function;
+  initializeDirections(*m_costFunction, m_directions);
 }
 
 //-----------------------------------------------------------------------------
@@ -447,59 +480,67 @@ bool LocalSearchMinimizer::iterate(size_t iter) {
 
   iiter = iter;
 
-  if (iter >= 20) {
+  auto oldParameters = getParameters(*m_costFunction);
+  auto oldValue = m_costFunction->val();
+  std::cerr << "\nIteration " << iter << ' ' << oldValue << std::endl;
+  size_t n = m_costFunction->nParams();
+
+
+  OptionalParameters parameters = iterationNewton(*m_costFunction);
+
+  if (parameters) {
+    setParameters(*m_costFunction, parameters.get());
+    auto value = m_costFunction->val();
+    std::cerr << "   " << value << std::endl;
+    if (!boost::math::isfinite(value) || value > oldValue) {
+      setParameters(*m_costFunction, oldParameters);
+      parameters = iterationLMStep(*m_costFunction, parameters.get());
+      setParameters(*m_costFunction, parameters.get());
+      value = m_costFunction->val();
+    }
+
+    if (!boost::math::isfinite(value) || value >= oldValue) {
+      setParameters(*m_costFunction, oldParameters);
+      parameters = OptionalParameters();
+    }
+  }
+  
+  if (!parameters) {
+    parameters = iterationGradientDescent(*m_costFunction);
+  }
+
+  if (!parameters) {
+    throw std::runtime_error("Minimizer failed!");
+  }
+
+  setParameters(*m_costFunction, parameters.get());
+
+  double newValue = m_costFunction->val();
+  if (!boost::math::isfinite(newValue)) {
+    throw std::runtime_error("New params give inf.");
+  }
+
+  if (newValue == 0.0) {
     return false;
   }
 
-  size_t n = m_costFunction->nParams();
-
-  std::vector<Chebfun> slices;
-  slices.reserve(n);
-  bool allQuadratics = true;
-  double lowestAccuracy = 0.0;
-  for (size_t i = 0; i < n; ++i) {
-    double p = m_costFunction->getParameter(i);
-    std::vector<double> dir(n, 0.0);
-    dir[i] = 1.0;
-    Slice slice(*m_costFunction, dir);
-    double minBound = 0.0;
-    double maxBound = 0.0;
-    double accuracy = 0.0;
-    bool isGood = false;
-    iparam = i;
-    isGrad = false;
-    std::tie(minBound, maxBound, accuracy, isGood) = findExtent(slice, p);
-    if (accuracy > lowestAccuracy) {
-      lowestAccuracy = accuracy;
+  if (fabs(oldValue / newValue) < 1.0001) {
+    auto altParameters = iterationSingleParameters(*m_costFunction, oldValue);
+    if (!altParameters) {
+      return false;
     }
-    Chebfun::Options options(accuracy, 3, 100, true);
-    Chebfun cheb(slice, minBound, maxBound, options);
-    slices.push_back(cheb);
-    allQuadratics &= isGood && cheb.numberOfParts() == 1 && cheb.size() == 3;
-
-    std::cerr << "slice " << minBound << ' ' << maxBound << ' ' << accuracy
-              << ' ' << cheb.size() << ' ' << isGood << std::endl;
-    auto si = "_" + boost::lexical_cast<std::string>(iter) + "_" +
-              boost::lexical_cast<std::string>(i);
-    //auto x = cheb.linspace();
-    //auto y = cheb(x);
-    //CHECK_OUT_2("xx" + si, x);
-    //CHECK_OUT_2("yy" + si, y);
-  }
-
-  auto success = false; //iterationNewton(*m_costFunction);
-  if (!success) {
-    if (!iterationGradientDescent(*m_costFunction, slices, lowestAccuracy)) {
-      iterationSearch(*m_costFunction, slices);
+    setParameters(*m_costFunction, altParameters.get());
+    auto altValue = m_costFunction->val();
+    if (altValue >= newValue) {
+      setParameters(*m_costFunction, parameters.get());
+    } else {
+      std::cerr << "Single parameter " << altValue << std::endl;
     }
   }
 
-  std::cerr << "Params:" << std::endl;
-  for(size_t i = 0; i < n; ++i) {
-    std::cerr << "     " << m_costFunction->getParameter(i) << std::endl;
-  }
   return true;
 }
+
 
 } // namespace FuncMinimisers
 } // namespace CurveFitting

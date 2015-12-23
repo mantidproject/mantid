@@ -77,7 +77,9 @@ std::list<SimpleChebfun> bestFit(size_t &level, ChebfunFunctionType fun,
   auto base = ChebfunBase::bestFit(start, end, fun, p, a, options.accuracy, options.maxPartSize);
   if (!base) {
     auto split = splitFit(level, fun, start, end, options);
-    if (!options.doNotFail && level >= options.maxParts) throw std::runtime_error("Failed to build a Chebfun.");
+    if (!options.doNotFail && level >= options.maxParts) {
+      throw std::runtime_error("Failed to build a Chebfun.");
+    }
     return split;
   }
   SimpleChebfun cheb(base);

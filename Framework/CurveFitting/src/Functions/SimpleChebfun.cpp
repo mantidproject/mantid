@@ -180,7 +180,7 @@ std::vector<double> SimpleChebfun::roughRoots(double level) const {
     return rs;
   }
   // If size is small accurate roots are prefered.
-  if (size() <= 50) {
+  if (size() <= 10) {
     if (m_A.empty()) {
       m_A = m_base->calcA(m_P);
     }
