@@ -30,7 +30,7 @@ def noRunSpecified(runs):
     :param runs:
     :return:
     """
-    assert(runs, numpy.ndarray)
+    assert isinstance(runs, numpy.ndarray)
 
     # return True if runs is of size zero
     if runs.size <= 0:
@@ -336,13 +336,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         for (samRunIndex, samRun) in enumerate(samwksplist):
             samRun = mtd[str(samRun)]
-            try:
+            assert isinstance(samRun, str)
+            samRunWS = self.get_workspace(samRun)
+            if samRunWS.id() == EVENT_WORKSPACE_ID:
                 self.log().information("Sample Run %s:  starting number of events = %d" % (str(samRun), samRun.getNumberEvents()))
-            except Exception as e:
-                self.log().information("Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
 
             # Get run number
-            self._info = self._getinfo(samRun.name())
+            self._info = self._getinfo(samRunWS.name())
 
             # process the container
             can_run_numbers = self._info["container"].value
@@ -366,13 +366,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     can_run_number = can_run_numbers[samRunIndex]
 
                 # get reference to container run
-                if "%s_%d" % (self._instrument, can_run_number) in mtd:
+                can_run_ws_name = '%s_%d' % (self._instrument, can_run_number)
+                if self.does_workspace_exist(can_run_ws_name) is True:
                     # container run exists to get reference from mantid
-                    can_run_ws = mtd["%s_%d" % (self._instrument, can_run_number)]
+                    can_run_ws = api.ConvertUnits(InputWorkspace=can_run_ws_name,
+                                                  OutputWorkspace=can_run_ws_name,
+                                                  Target="TOF")
                     assert can_run_ws is not None
-                    can_run_ws = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
-                    assert can_run_ws is not None
-                    can_run_ws_name = can_run_ws.name()
                 else:
                     # load the container run
                     if self.getProperty("Sum").value:
@@ -382,7 +382,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                         can_run_ws = self._focusChunks(can_run_number, SUFFIX, canFilterWall, calib,
                                                        normalisebycurrent=self._normalisebycurrent,
                                                        preserveEvents=preserveEvents)
-                    can_run_ws_name = can_run_ws.name()
+                    assert can_run_ws.name() == can_run_ws_name
+                    # convert unit to TOF
                     can_run_ws = api.ConvertUnits(InputWorkspace=can_run_ws_name,
                                                   OutputWorkspace=can_run_ws_name,
                                                   Target="TOF")
@@ -519,47 +520,75 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     # END-IF
 
                     # convert unit to T.O.F., smooth vanadium, reset uncertainties and make sure the unit is TOF
-                    van_run_number = api.ConvertUnits(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Target="TOF")
-                    van_run_number = api.FFTSmooth(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Filter="Butterworth",\
-                              Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                    van_run_number = api.SetUncertainties(InputWorkspace=van_run_number, OutputWorkspace=van_run_number)
-                    van_run_number = api.ConvertUnits(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Target="TOF")
-                workspacelist.append(str(van_run_number))
+                    api.ConvertUnits(InputWorkspace=van_run_ws_name,
+                                     OutputWorkspace=van_run_ws_name,
+                                     Target="TOF")
+                    api.FFTSmooth(InputWorkspace=van_run_ws_name,
+                                  OutputWorkspace=van_run_ws_name,
+                                  Filter="Butterworth",
+                                  Params=self._vanSmoothing,
+                                  IgnoreXBins=True,
+                                  AllSpectra=True)
+                    api.SetUncertainties(InputWorkspace=van_run_ws_name, OutputWorkspace=van_run_ws_name)
+                    van_run_ws = api.ConvertUnits(InputWorkspace=van_run_ws_name,
+                                                  OutputWorkspace=van_run_ws_name,
+                                                  Target="TOF")
+                    assert van_run_ws is not None
+                # END-IF-ELSE for get reference of vanadium workspace
+                workspacelist.append(van_run_ws_name)
             else:
-                van_run_number = None
+                van_run_ws_name = None
 
+            # return if MPI is used and there is more than 1 processor
             if mpiRank > 0:
                 return
+
+            # return if there is no sample run
             if samRun == 0:
                 return
-            # the final bit of math
-            if canRun is not None:
+
+            # the final bit of math to remove container run and vanadium run
+            if can_run_ws is not None:
                 # must convert the sample to a matrix workspace if the can run isn't one
-                if canRun.id() != EVENT_WORKSPACE_ID and samRun.id() == EVENT_WORKSPACE_ID:
-                    samRun = api.ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
-                samRun = api.Minus(LHSWorkspace=samRun, RHSWorkspace=canRun, OutputWorkspace=samRun)
+                if can_run_ws.id() != EVENT_WORKSPACE_ID and samRun.id() == EVENT_WORKSPACE_ID:
+                    samRun = api.ConvertToMatrixWorkspace(InputWorkspace=samRun,
+                                                          OutputWorkspace=samRun)
+                # remove container run
+                samRun = api.Minus(LHSWorkspace=samRun,
+                                   RHSWorkspace=can_run_ws_name,
+                                   OutputWorkspace=samRun)
+                # compress event if the sample run workspace is EventWorkspace
                 if samRun.id() == EVENT_WORKSPACE_ID:
-                    samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
-                               Tolerance=self.COMPRESS_TOL_TOF) # 10ns
-                canRun = str(canRun)
-            if van_run_number is not None:
-                samRun = api.Divide(LHSWorkspace=samRun, RHSWorkspace=van_run_number, OutputWorkspace=samRun)
+                    samRun = api.CompressEvents(InputWorkspace=samRun,
+                                                OutputWorkspace=samRun,
+                                                Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
+                # canRun = str(canRun)
+
+            if van_run_ws_name is not None:
+                # subtract vanadium run from sample run by division
+                samRun = api.Divide(LHSWorkspace=samRun,
+                                    RHSWorkspace=van_run_ws_name,
+                                    OutputWorkspace=samRun)
                 normalized = True
-                samRun.getRun()['van_number'] = van_run_number.getRun()['run_number'].value
-                van_run_number = str(van_run_number)
+                van_run_ws = self.get_workspace(van_run_ws_name)
+                samRun.getRun()['van_number'] = van_run_ws.getRun()['run_number'].value
+                # van_run_number = str(van_run_number)
             else:
                 normalized = False
 
+            # Compress the event again
             if samRun.id() == EVENT_WORKSPACE_ID:
-                samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
-                           Tolerance=self.COMPRESS_TOL_TOF) # 5ns/
+                samRun = api.CompressEvents(InputWorkspace=samRun,
+                                            OutputWorkspace=samRun,
+                                            Tolerance=self.COMPRESS_TOL_TOF)  # 5ns/
 
             # make sure there are no negative values - gsas hates them
             if self.getProperty("PushDataPositive").value != "None":
-                addMin = (self.getProperty("PushDataPositive").value == "AddMinimum")
+                addMin = self.getProperty("PushDataPositive").value == "AddMinimum"
                 samRun = api.ResetNegatives(InputWorkspace=samRun, OutputWorkspace=samRun, AddMinimum=addMin, ResetValue=0.)
 
             # write out the files
+            # FIXME - need documentation for mpiRank
             if mpiRank == 0:
                 if self._scaleFactor != 1.:
                     samRun = api.Scale(samRun, Factor=self._scaleFactor, OutputWorkspace=samRun)
@@ -569,11 +598,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # ENDFOR
 
-        # convert everything into d-spacing
-        workspacelist = set(workspacelist) # only do each workspace once
+        # convert everything into d-spacing as the final units
         if HAVE_MPI is False:
+            workspacelist = set(workspacelist) # only do each workspace once
             for wksp in workspacelist:
-                wksp = api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)
+                wksp = api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp,
+                                        Target=self.getProperty("FinalDataUnits").value)
 
         return
 
@@ -655,16 +685,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         assert wksp is not None, 'Mantid Load algorithm does not return a workspace.'
 
         # Log output
-        try:
-            self.log().debug("Load run %s: number of events = %d" % (str(run_number), wksp.getNumberEvents()))
-        except Exception as e:
-            self.log().debug("Load run %s: unable to get events of %s.  Error message: %s" % (str(run_number),                                                                                     str(wksp), str(e)))
+        if wksp.id() == EVENT_WORKSPACE_ID:
+            self.log().debug("Load run %d: number of events = %d. " % (run_number, wksp.getNumberEvents()))
         if HAVE_MPI:
             msg = "MPI Task = %s ;" % (str(mpiRank))
-            try:
+            if wksp.id() == EVENT_WORKSPACE_ID:
                 msg += "Number Events = " + str(wksp.getNumberEvents())
-            except Exception as e:
-                msg += "Unable to get events of %s.  Error message: %s" % (str(wksp), str(e))
             self.log().debug(msg)
 
         # filter bad pulses
@@ -768,16 +794,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         if str(sumRun) != outName:
             sumRun = api.RenameWorkspace(InputWorkspace=sumRun, OutputWorkspace=outName)
 
-        try:
-            if self._normalisebycurrent is True:
-                sumRun = api.NormaliseByCurrent(InputWorkspace=temp,
-                                              OutputWorkspace=temp)
-                temp.getRun()['gsas_monitor'] = 1
-        except Exception, e:
-            self.log().warning(str(e))
+        if self._normalisebycurrent is True:
+            sumRun = api.NormaliseByCurrent(InputWorkspace=temp,
+                                            OutputWorkspace=temp)
+            temp.getRun()['gsas_monitor'] = 1
 
         return sumRun
-
 
     #pylint: disable=too-many-arguments
     def _focusAndSum(self, runnumbers, extension, filterWall, calib, preserveEvents=True):
@@ -830,7 +852,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         Return:
         """
         # generate the workspace name
-        wksp = "%s_%d" % (self._instrument, runnumber)
         self.log().information("_focusChunks(): runnumber = %d, extension = %s" % (runnumber, extension))
 
         # get chunk strategy for parallel processing (MPI)
@@ -848,7 +869,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # reduce data by chunks
         chunk_index = -1
         # FIXME/TODO/Now: there are 2 places that determine the base name
-        base_name = "%s_%d" % (self._instrument, runnumber)
+        base_name = '%s_%d' % (self._instrument, runnumber)
         for chunk in strategy:
             # progress on chunk index
             chunk_index += 1
@@ -935,9 +956,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 if is_first_chunk_list[split_index] is True:
                     # Rename if it is the first chunk that is finished
                     self.log().debug("[F1145] Slot %d is renamed to %s" % (split_index, final_out_ws_name))
-                    temp_out_ws = api.RenameWorkspace(InputWorkspace=output_ws_name_list[split_index],
-                                                      OutputWorkspace=final_out_ws_name)
-                    assert temp_out_ws is not None
+                    api.RenameWorkspace(InputWorkspace=output_ws_name_list[split_index],
+                                        OutputWorkspace=final_out_ws_name)
 
                     output_wksp_list[split_index] = final_out_ws_name
                     is_first_chunk_list[split_index] = False
@@ -990,7 +1010,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     output_wksp_list[split_index] = api.NormaliseByCurrent(InputWorkspace=output_wksp_list[split_index],
                                                                            OutputWorkspace=output_wksp_list[split_index])
                     output_wksp_list[split_index].getRun()['gsas_monitor'] = 1
-            except Exception, e:
+            except RuntimeError as e:
                 self.log().warning(str(e))
 
             propertyName = "OutputWorkspace%s" % str(output_wksp_list[split_index])
