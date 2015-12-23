@@ -631,31 +631,52 @@ std::pair<DateAndTime, DateAndTime> findStartAndEndTimes(Workspace_sptr ws) {
   DateAndTime start, end;
   MatrixWorkspace_sptr matrixWS;
 
+  auto starts = findLogValues(ws, "run_start");
+  auto ends = findLogValues(ws, "run_end");
+  std::vector<DateAndTime> startTimes, endTimes;
+  for (std::string time : starts) {
+    startTimes.emplace_back(time);
+  }
+  for (std::string time : ends) {
+    endTimes.emplace_back(time);
+  }
+  start = *std::min_element(startTimes.begin(), startTimes.end());
+  end = *std::max_element(endTimes.begin(), endTimes.end());
+
+  return std::make_pair(start, end);
+}
+
+/**
+ * Returns the range of values for the given log in the workspace given, which
+ * could be a group. If it isn't a group, the vector will have only one entry
+ * (or none, if log not present).
+ * @param ws :: [input] Workspace (could be group)
+ * @param logName :: [input] Name of log
+ * @returns All values found for the given log
+ */
+std::vector<std::string> findLogValues(Workspace_sptr ws,
+                                       const std::string &logName) {
+  std::vector<std::string> values;
+  MatrixWorkspace_sptr matrixWS;
+
   // Try casting input to a MatrixWorkspace_sptr directly
   matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   if (matrixWS) {
-    start = matrixWS->run().getProperty("run_start")->value();
-    end = matrixWS->run().getProperty("run_end")->value();
-
+    values.push_back(matrixWS->run().getProperty(logName)->value());
   } else {
     // It could be a workspace group
     auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
     if (groupWS && groupWS->getNumberOfEntries() > 0) {
-      std::vector<DateAndTime> starts, ends;
       for (int index = 0; index < groupWS->getNumberOfEntries(); index++) {
         matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
             groupWS->getItem(index));
         if (matrixWS) {
-          starts.push_back(matrixWS->run().getProperty("run_start")->value());
-          ends.push_back(matrixWS->run().getProperty("run_end")->value());
+          values.push_back(matrixWS->run().getProperty(logName)->value());
         }
       }
-      start = *std::min_element(starts.begin(), starts.end());
-      end = *std::max_element(ends.begin(), ends.end());
     }
   }
-
-  return std::make_pair(start, end);
+  return values;
 }
 
 } // namespace MuonAnalysisHelper

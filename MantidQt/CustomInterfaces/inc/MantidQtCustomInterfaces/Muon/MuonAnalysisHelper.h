@@ -66,6 +66,10 @@ MANTIDQT_CUSTOMINTERFACES_DLL
 std::pair<Mantid::Kernel::DateAndTime, Mantid::Kernel::DateAndTime>
 findStartAndEndTimes(Mantid::API::Workspace_sptr ws);
 
+/// Finds the range of values for a log
+MANTIDQT_CUSTOMINTERFACES_DLL std::vector<std::string>
+findLogValues(Mantid::API::Workspace_sptr ws, const std::string &logName);
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any
  * change, their value is stored using QSettings.
