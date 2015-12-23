@@ -6,6 +6,7 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/DateAndTime.h"
 
 #include <QSettings>
 #include <QVector>
@@ -62,8 +63,8 @@ MANTIDQT_CUSTOMINTERFACES_DLL void replaceLogValue(const std::string &wsName,
 
 /// Finds start, end times from logs
 MANTIDQT_CUSTOMINTERFACES_DLL
-    std::pair<Mantid::Kernel::DateAndTime, Mantid::Kernel::DateAndTime>
-    findStartAndEndTimes(Mantid::API::Workspace_sptr ws);
+std::pair<Mantid::Kernel::DateAndTime, Mantid::Kernel::DateAndTime>
+findStartAndEndTimes(Mantid::API::Workspace_sptr ws);
 
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any

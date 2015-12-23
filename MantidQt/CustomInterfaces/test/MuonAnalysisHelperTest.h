@@ -6,6 +6,8 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ScopedWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -92,8 +94,14 @@ public:
         WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
     MatrixWorkspace_sptr ws3 =
         WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    addLog(ws1, "run_start", start.toSimpleString());
+    addLog(ws1, "run_end", end.toSimpleString());
+    addLog(ws2, "run_start", start.toSimpleString());
+    addLog(ws2, "run_end", end.toSimpleString());
+    addLog(ws3, "run_start", start.toSimpleString());
+    addLog(ws3, "run_end", end.toSimpleString());
 
-    std::vector<Workspace_sptr> wsList = {ws1, ws2, ws3};
+    std::vector<Workspace_sptr> wsList{ws1, ws2, ws3};
 
     auto result =
         boost::dynamic_pointer_cast<MatrixWorkspace>(sumWorkspaces(wsList));
@@ -124,6 +132,47 @@ public:
     TS_ASSERT_EQUALS(ranges[3], std::make_pair(10, 14));
   }
 
+  void test_findStartAndEndTimes_singleWS() {
+    Workspace_sptr ws = createWs("MUSR", 15189);
+    DateAndTime start{"2015-12-23T15:32:40Z"};
+    DateAndTime end{"2015-12-24T09:00:00Z"};
+    addLog(ws, "run_start", start.toSimpleString());
+    addLog(ws, "run_end", end.toSimpleString());
+    auto times = findStartAndEndTimes(ws);
+    TS_ASSERT_EQUALS(times.first, start);
+    TS_ASSERT_EQUALS(times.second, end);
+  }
+
+  void test_findStartAndEndTimes_groupWS() {
+    Workspace_sptr ws1 = createWs("MUSR", 15189);
+    Workspace_sptr ws2 = createWs("MUSR", 15190);
+    DateAndTime start1{"2015-12-23T15:32:40Z"};
+    DateAndTime end1{"2016-12-24T09:00:00Z"};
+    DateAndTime start2{"2014-12-23T15:32:40Z"};
+    DateAndTime end2{"2015-12-24T09:00:00Z"};
+    addLog(ws1, "run_start", start1.toSimpleString());
+    addLog(ws1, "run_end", end1.toSimpleString());
+    addLog(ws2, "run_start", start2.toSimpleString());
+    addLog(ws2, "run_end", end2.toSimpleString());
+    auto groupWS = groupWorkspaces({ws1, ws2});
+    auto times = findStartAndEndTimes(groupWS);
+    TS_ASSERT_EQUALS(times.first, start2);
+    TS_ASSERT_EQUALS(times.second, end1);
+  }
+
+  void test_replaceLogValue() {
+    ScopedWorkspace ws(createWs("MUSR", 15189));
+    DateAndTime start1{"2015-12-23T15:32:40Z"};
+    DateAndTime start2{"2014-12-23T15:32:40Z"};
+    DateAndTime end{"2015-12-24T09:00:00Z"};
+    addLog(ws.retrieve(), "run_start", start1.toSimpleString());
+    addLog(ws.retrieve(), "run_end", end.toSimpleString());
+    replaceLogValue(ws.name(), "run_start", start2.toSimpleString());
+    auto times = findStartAndEndTimes(ws.retrieve());
+    TS_ASSERT_EQUALS(times.first, start2);
+    TS_ASSERT_EQUALS(times.second, end);
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
   Workspace_sptr createWs(const std::string &instrName, int runNumber) {
@@ -137,6 +186,28 @@ private:
     ws->mutableRun().addProperty("run_number", runNumber);
 
     return ws;
+  }
+  // Adds a log to the workspace
+  void addLog(const Workspace_sptr &ws, const std::string &logName,
+              const std::string &logValue) {
+    auto alg = AlgorithmManager::Instance().create("AddSampleLog");
+    alg->setChild(true);
+    alg->setLogging(false);
+    alg->setRethrows(true);
+    alg->setProperty("Workspace", ws);
+    alg->setPropertyValue("LogName", logName);
+    alg->setPropertyValue("LogText", logValue);
+    alg->execute();
+  }
+
+  // Groups the supplied workspaces
+  WorkspaceGroup_sptr
+  groupWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
+    auto group = boost::make_shared<WorkspaceGroup>();
+    for (auto ws : workspaces) {
+      group->addWorkspace(ws);
+    }
+    return group;
   }
 };
 

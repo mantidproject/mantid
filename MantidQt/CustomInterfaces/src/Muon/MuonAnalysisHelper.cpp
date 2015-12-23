@@ -641,12 +641,17 @@ std::pair<DateAndTime, DateAndTime> findStartAndEndTimes(Workspace_sptr ws) {
     // It could be a workspace group
     auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
     if (groupWS && groupWS->getNumberOfEntries() > 0) {
-      matrixWS =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(0));
-      if (matrixWS) {
-        start = matrixWS->run().getProperty("run_start")->value();
-        end = matrixWS->run().getProperty("run_end")->value();
+      std::vector<DateAndTime> starts, ends;
+      for (int index = 0; index < groupWS->getNumberOfEntries(); index++) {
+        matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            groupWS->getItem(index));
+        if (matrixWS) {
+          starts.push_back(matrixWS->run().getProperty("run_start")->value());
+          ends.push_back(matrixWS->run().getProperty("run_end")->value());
+        }
       }
+      start = *std::min_element(starts.begin(), starts.end());
+      end = *std::max_element(ends.begin(), ends.end());
     }
   }
 
