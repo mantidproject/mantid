@@ -517,7 +517,7 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
                           sampleTemps.end());
     }
     if (!sampleFields.empty()) {
-      magFields.insert(sampleFields.end(), sampleFields.begin(),
+      magFields.insert(magFields.end(), sampleFields.begin(),
                        sampleFields.end());
     }
 
@@ -539,6 +539,25 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
   replaceLogValue(accumulatorEntry.name(), "run_end", lastEnd.toSimpleString());
 
   // Put in range of temperatures and magnetic fields
+  if (!temperatures.empty() && !magFields.empty()) {
+    auto tempRange =
+        std::minmax_element(temperatures.begin(), temperatures.end());
+    auto fieldRange = std::minmax_element(magFields.begin(), magFields.end());
+    std::ostringstream tempRangeStream;
+    tempRangeStream << *tempRange.first;
+    if (*tempRange.second != *tempRange.first) {
+      tempRangeStream << " to " << *tempRange.second;
+    }
+    replaceLogValue(accumulatorEntry.name(), "sample_temp",
+                    tempRangeStream.str());
+    std::ostringstream fieldRangeStream;
+    fieldRangeStream << *fieldRange.first;
+    if (*fieldRange.first != *fieldRange.second) {
+      fieldRangeStream << " to " << *fieldRange.second;
+    }
+    replaceLogValue(accumulatorEntry.name(), "sample_magn_field",
+                    fieldRangeStream.str());
+  }
 
   return accumulatorEntry.retrieve();
 }
@@ -641,24 +660,31 @@ void replaceLogValue(const std::string &wsName, const std::string &logName,
 /**
  * Finds the start and end times from the logs in the supplied workspace.
  * If given a workspace group, finds earliest start and latest end.
+ *
+ * If there are no start/end times, they're set to "default time" (midnight on
+ * 1/1/1970)
  * @param ws :: [input] Workspace - could be a group
  * @return Pair containing (start time, end time)
  */
 std::pair<DateAndTime, DateAndTime> findStartAndEndTimes(Workspace_sptr ws) {
-  DateAndTime start, end;
+  DateAndTime start = DateAndTime::defaultTime(),
+              end = DateAndTime::defaultTime();
   MatrixWorkspace_sptr matrixWS;
 
   auto starts = findLogValues(ws, "run_start");
   auto ends = findLogValues(ws, "run_end");
-  std::vector<DateAndTime> startTimes, endTimes;
-  for (std::string time : starts) {
-    startTimes.emplace_back(time);
+
+  if (starts.size() > 0 && ends.size() > 0) {
+    std::vector<DateAndTime> startTimes, endTimes;
+    for (std::string time : starts) {
+      startTimes.emplace_back(time);
+    }
+    for (std::string time : ends) {
+      endTimes.emplace_back(time);
+    }
+    start = *std::min_element(startTimes.begin(), startTimes.end());
+    end = *std::max_element(endTimes.begin(), endTimes.end());
   }
-  for (std::string time : ends) {
-    endTimes.emplace_back(time);
-  }
-  start = *std::min_element(startTimes.begin(), startTimes.end());
-  end = *std::max_element(endTimes.begin(), endTimes.end());
 
   return std::make_pair(start, end);
 }

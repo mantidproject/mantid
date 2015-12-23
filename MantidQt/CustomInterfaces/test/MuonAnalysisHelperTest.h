@@ -94,6 +94,8 @@ public:
         WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
     MatrixWorkspace_sptr ws3 =
         WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    DateAndTime start{"2015-12-23T15:32:40Z"};
+    DateAndTime end{"2015-12-24T09:00:00Z"};
     addLog(ws1, "run_start", start.toSimpleString());
     addLog(ws1, "run_end", end.toSimpleString());
     addLog(ws2, "run_start", start.toSimpleString());
