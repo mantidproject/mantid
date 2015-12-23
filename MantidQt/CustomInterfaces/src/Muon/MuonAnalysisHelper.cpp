@@ -481,6 +481,12 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
   ScopedWorkspace firstEntry(workspaces.front());
   ScopedWorkspace accumulatorEntry;
 
+  // Earliest start and latest end times
+  DateAndTime firstStart, lastEnd;
+  auto times = findStartAndEndTimes(workspaces.front());
+  firstStart = times.first;
+  lastEnd = times.second;
+
   // Create accumulator workspace, by cloning the first one from the list
   IAlgorithm_sptr cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
@@ -491,6 +497,16 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
 
   for ( auto it = (workspaces.begin() + 1); it != workspaces.end(); ++it )
   {
+    // Check start and end times
+    auto startEndTimes = findStartAndEndTimes(*it);
+    if (startEndTimes.first < firstStart) {
+      firstStart = startEndTimes.first;
+    }
+    if (startEndTimes.second > lastEnd) {
+      lastEnd = startEndTimes.second;
+    }
+
+    // Add this workspace on to the sum
     ScopedWorkspace wsEntry(*it);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
@@ -501,6 +517,11 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
     alg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
     alg->execute();
   }
+
+  // Replace the start and end times with the earliest start and latest end
+  replaceLogValue(accumulatorEntry.name(), "run_start",
+                  firstStart.toSimpleString());
+  replaceLogValue(accumulatorEntry.name(), "run_end", lastEnd.toSimpleString());
 
   return accumulatorEntry.retrieve();
 }
@@ -575,6 +596,61 @@ void groupWorkspaces(const std::string& groupName, const std::vector<std::string
     groupingAlg->setPropertyValue("OutputWorkspace", groupName);
     groupingAlg->execute();
   }
+}
+
+/**
+ * Replaces the named log value in the given workspace with the given value
+ * @param wsName :: [input] Name of workspace
+ * @param logName :: [input] Name of log to replace
+ * @param logValue :: [input] Name of value to replace it with
+ */
+void replaceLogValue(const std::string &wsName, const std::string &logName,
+                     const std::string &logValue) {
+  IAlgorithm_sptr removeAlg = AlgorithmManager::Instance().create("DeleteLog");
+  removeAlg->setLogging(false);
+  removeAlg->setRethrows(true);
+  removeAlg->setPropertyValue("Workspace", wsName);
+  removeAlg->setPropertyValue("Name", logName);
+  removeAlg->execute();
+  IAlgorithm_sptr addAlg = AlgorithmManager::Instance().create("AddSampleLog");
+  addAlg->setLogging(false);
+  addAlg->setRethrows(true);
+  addAlg->setPropertyValue("Workspace", wsName);
+  addAlg->setPropertyValue("LogName", logName);
+  addAlg->setPropertyValue("LogText", logValue);
+  addAlg->execute();
+}
+
+/**
+ * Finds the start and end times from the logs in the supplied workspace.
+ * If given a workspace group, finds earliest start and latest end.
+ * @param ws :: [input] Workspace - could be a group
+ * @return Pair containing (start time, end time)
+ */
+std::pair<DateAndTime, DateAndTime> findStartAndEndTimes(Workspace_sptr ws) {
+  DateAndTime start, end;
+  MatrixWorkspace_sptr matrixWS;
+
+  // Try casting input to a MatrixWorkspace_sptr directly
+  matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  if (matrixWS) {
+    start = matrixWS->run().getProperty("run_start")->value();
+    end = matrixWS->run().getProperty("run_end")->value();
+
+  } else {
+    // It could be a workspace group
+    auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    if (groupWS && groupWS->getNumberOfEntries() > 0) {
+      matrixWS =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(0));
+      if (matrixWS) {
+        start = matrixWS->run().getProperty("run_start")->value();
+        end = matrixWS->run().getProperty("run_end")->value();
+      }
+    }
+  }
+
+  return std::make_pair(start, end);
 }
 
 } // namespace MuonAnalysisHelper

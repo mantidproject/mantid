@@ -55,6 +55,16 @@ MANTIDQT_CUSTOMINTERFACES_DLL void groupWorkspaces(const std::string& groupName,
 MANTIDQT_CUSTOMINTERFACES_DLL std::vector<std::pair<int, int>>
 findConsecutiveRuns(const std::vector<int> &runNumbers);
 
+/// Replaces sample log value
+MANTIDQT_CUSTOMINTERFACES_DLL void replaceLogValue(const std::string &wsName,
+                                                   const std::string &logName,
+                                                   const std::string &logValue);
+
+/// Finds start, end times from logs
+MANTIDQT_CUSTOMINTERFACES_DLL
+    std::pair<Mantid::Kernel::DateAndTime, Mantid::Kernel::DateAndTime>
+    findStartAndEndTimes(Mantid::API::Workspace_sptr ws);
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any
  * change, their value is stored using QSettings.
