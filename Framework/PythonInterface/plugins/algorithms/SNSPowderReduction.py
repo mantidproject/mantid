@@ -20,20 +20,39 @@ else:
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
 def noRunSpecified(runs):
-    """
-
+    """ Check whether any run is specified
+    Purpose:
+        Check whether any run, which is larger than 0, is specified in the input numpy array
+    Requirements:
+        Input is a numpy array
+    Guarantees:
+        A boolean is returned
     :param runs:
     :return:
     """
-    # TODO/NOW - Doc!
     assert(runs, numpy.ndarray)
+
+    # return True if runs is of size zero
     if runs.size <= 0:
         return True
+
+    # return True if there is one and only one run in runs and it is not greater than 0.
     if runs.size == 1:
         return runs[0] <= 0
+
     return False
 
 def allEventWorkspaces(*args):
+    """
+    Purpose:
+        Check whether all the inputs are event workspace
+    Requirements:
+        Each element in the args is a string as name of workspace
+    Guarantees:
+        return boolean
+    @param args:
+    @return:
+    """
     result = True
 
     for arg in args:
@@ -326,36 +345,61 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self._info = self._getinfo(samRun.name())
 
             # process the container
-            canRuns = self._info["container"].value
-            if noRunSpecified(canRuns):
-                canRun = None
+            can_run_numbers = self._info["container"].value
+            if noRunSpecified(can_run_numbers):
+                # no container run is specified
+                can_run_number = None
             else:
+                # reduce container run such that it can be removed from sample run
                 if self.getProperty("FilterCharacterizations").value:
+                    # use common time filter
                     canFilterWall = timeFilterWall
                 else:
+                    # no time filter
                     canFilterWall = (0., 0.)
 
-                if len(canRuns) == 1:
-                    canRun = canRuns[0]
+                if len(can_run_numbers) == 1:
+                    # only 1 container run
+                    can_run_number = can_run_numbers[0]
                 else:
-                    canRun = canRuns[samRunIndex]
-                if "%s_%d" % (self._instrument, canRun) in mtd:
-                    canRun = mtd["%s_%d" % (self._instrument, canRun)]
-                    canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+                    # in case of multiple container run, use the corresponding one to sample
+                    can_run_number = can_run_numbers[samRunIndex]
+
+                # get reference to container run
+                if "%s_%d" % (self._instrument, can_run_number) in mtd:
+                    # container run exists to get reference from mantid
+                    can_run_ws = mtd["%s_%d" % (self._instrument, can_run_number)]
+                    assert can_run_ws is not None
+                    can_run_ws = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+                    assert can_run_ws is not None
+                    can_run_ws_name = can_run_ws.name()
                 else:
+                    # load the container run
                     if self.getProperty("Sum").value:
-                        canRun = self._focusAndSum(canRuns, SUFFIX, canFilterWall, calib,\
-                               preserveEvents=preserveEvents)
+                        can_run_ws = self._focusAndSum(can_run_numbers, SUFFIX, canFilterWall, calib,
+                                                       preserveEvents=preserveEvents)
                     else:
-                        canRun = self._focusChunks(canRun, SUFFIX, canFilterWall, calib,\
-                                                   normalisebycurrent=self._normalisebycurrent,
-                                                   preserveEvents=preserveEvents)
-                    canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+                        can_run_ws = self._focusChunks(can_run_number, SUFFIX, canFilterWall, calib,
+                                                       normalisebycurrent=self._normalisebycurrent,
+                                                       preserveEvents=preserveEvents)
+                    can_run_ws_name = can_run_ws.name()
+                    can_run_ws = api.ConvertUnits(InputWorkspace=can_run_ws_name,
+                                                  OutputWorkspace=can_run_ws_name,
+                                                  Target="TOF")
+                    assert can_run_ws is not None
+                    # smooth background
                     smoothParams = self.getProperty("BackgroundSmoothParams").value
-                    if smoothParams != None and len(smoothParams)>0:
-                        canRun = api.FFTSmooth(InputWorkspace=canRun, OutputWorkspace=canRun, Filter="Butterworth",\
-                                               Params=smoothParams,IgnoreXBins=True,AllSpectra=True)
-                workspacelist.append(str(canRun))
+                    if smoothParams is not None and len(smoothParams) > 0:
+                        can_run_ws = api.FFTSmooth(InputWorkspace=can_run_ws_name,
+                                                   OutputWorkspace=can_run_ws_name,
+                                                   Filter="Butterworth",
+                                                   Params=smoothParams,
+                                                   IgnoreXBins=True,
+                                                   AllSpectra=True)
+                        assert can_run_ws is not None
+                # END-IF-ELSE
+                workspacelist.append(can_run_ws_name)
+            # END-IF (can run)
 
             # process the vanadium run
             van_run_number_list = self._info["vanadium"].value
@@ -366,20 +410,24 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     van_run_number = van_run_number_list[0]
                 else:
                     van_run_number = van_run_number_list[samRunIndex]
-                # set up filter wall for van run
-                if self.getProperty("FilterCharacterizations").value:
-                    vanFilterWall = {'FilterByTimeStart': timeFilterWall[0], 'FilterByTimeStop': timeFilterWall[1]}
-                else:
-                    vanFilterWall = {'FilterByTimeStart': Property.EMPTY_DBL, 'FilterByTimeStop': Property.EMPTY_DBL}
+
                 # get handle on workspace of this van run and make sure its unit is T.O.F
                 if "%s_%d" % (self._instrument, van_run_number) in mtd:
                     # use the existing vanadium
                     van_run_ws_name = "%s_%d" % (self._instrument, van_run_number)
                     van_run_ws = mtd[van_run_ws_name]
+                    assert van_run_ws is not None
                     van_run_ws = api.ConvertUnits(InputWorkspace=van_run_ws_name,
                                                   OutputWorkspace=van_run_ws_name,
                                                   Target="TOF")
+                    assert van_run_ws is not None
                 else:
+                    # set up filter wall for van run
+                    if self.getProperty("FilterCharacterizations").value:
+                        vanFilterWall = {'FilterByTimeStart': timeFilterWall[0], 'FilterByTimeStop': timeFilterWall[1]}
+                    else:
+                        vanFilterWall = {'FilterByTimeStart': Property.EMPTY_DBL, 'FilterByTimeStop': Property.EMPTY_DBL}
+
                     # load the vanadium
                     van_run_ws_name = "%s_%d" % (self._instrument, van_run_number)
                     if self.getProperty("Sum").value:
@@ -405,47 +453,72 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                             # skip if background run is empty
                             pass
                         else:
+                            clear_rhs_ws = allEventWorkspaces(van_run_ws_name, van_bkgd_ws_name)
                             van_run_ws = api.Minus(LHSWorkspace=van_run_ws_name,
                                                    RHSWorkspace=van_bkgd_ws_name,
                                                    OutputWorkspace=van_run_ws_name,
-                                                   ClearRHSWorkspace=allEventWorkspaces(van_run_ws_name, van_bkgd_ws_name))
+                                                   ClearRHSWorkspace=clear_rhs_ws)
                         api.DeleteWorkspace(Workspace=van_bkgd_ws_name)
 
                     # compress events
                     if van_run_ws.id() == EVENT_WORKSPACE_ID:
-                        van_run_number = api.CompressEvents(InputWorkspace=van_run_ws_name,
-                                                            OutputWorkspace=van_run_ws_name,
-                                                            Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
+                        van_run_ws = api.CompressEvents(InputWorkspace=van_run_ws_name,
+                                                        OutputWorkspace=van_run_ws_name,
+                                                        Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
+                        assert van_run_ws is not None
 
                     # do the absorption correction
-                    van_run_number = api.ConvertUnits(InputWorkspace=van_run_ws_name,
-                                                      OutputWorkspace=van_run_ws_name,
-                                                      Target="Wavelength")
-                    api.SetSampleMaterial(InputWorkspace=van_run_number, ChemicalFormula="V", SampleNumberDensity=0.0721)
-                    van_run_number = api.MultipleScatteringCylinderAbsorption(InputWorkspace=van_run_number, OutputWorkspace=van_run_number,
-                                                                      CylinderSampleRadius=self._vanRadius)
-                    van_run_number = api.ConvertUnits(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Target="TOF")
+                    van_run_ws = api.ConvertUnits(InputWorkspace=van_run_ws_name,
+                                                  OutputWorkspace=van_run_ws_name,
+                                                  Target="Wavelength")
+                    assert van_run_ws is not None
+
+                    # set material as Vanadium and correct for multiple scattering
+                    api.SetSampleMaterial(InputWorkspace=van_run_ws_name,
+                                          ChemicalFormula="V",
+                                          SampleNumberDensity=0.0721)
+                    van_run_ws = api.MultipleScatteringCylinderAbsorption(InputWorkspace=van_run_ws_name,
+                                                                          OutputWorkspace=van_run_ws_name,
+                                                                          CylinderSampleRadius=self._vanRadius)
+                    assert van_run_ws is not None
+
+                    # convert unit to T.O.F.
+                    van_run_ws = api.ConvertUnits(InputWorkspace=van_run_ws_name,
+                                                  OutputWorkspace=van_run_ws_name,
+                                                  Target="TOF")
 
                     # focus the data
-                    van_run_number = api.AlignAndFocusPowder(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, CalFileName=calib,
-                                                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
-                                                     RemovePromptPulseWidth=self._removePromptPulseWidth,
-                                                     CompressTolerance=self.COMPRESS_TOL_TOF,
-                                                     UnwrapRef=self._LRef, LowResRef=self._DIFCref,
-                                                     LowResSpectrumOffset=self._lowResTOFoffset,
-                                                     CropWavelengthMin=self._wavelengthMin,
-                                                     CropWavelengthMax=self._wavelengthMax,
-                                                     ReductionProperties="__snspowderreduction", **(focuspos))
+                    van_run_ws = api.AlignAndFocusPowder(InputWorkspace=van_run_ws_name,
+                                                         OutputWorkspace=van_run_ws_name,
+                                                         CalFileName=calib,
+                                                         Params=self._binning,
+                                                         ResampleX=self._resampleX,
+                                                         Dspacing=self._bin_in_dspace,
+                                                         RemovePromptPulseWidth=self._removePromptPulseWidth,
+                                                         CompressTolerance=self.COMPRESS_TOL_TOF,
+                                                         UnwrapRef=self._LRef, LowResRef=self._DIFCref,
+                                                         LowResSpectrumOffset=self._lowResTOFoffset,
+                                                         CropWavelengthMin=self._wavelengthMin,
+                                                         CropWavelengthMax=self._wavelengthMax,
+                                                         ReductionProperties="__snspowderreduction", **focuspos)
+                    assert van_run_ws is not None
 
-
-                    # strip peaks
+                    # convert to d-spacing and do strip vanadium peaks
                     if self.getProperty("StripVanadiumPeaks").value:
-                        van_run_number = api.ConvertUnits(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Target="dSpacing")
-                        van_run_number = api.StripVanadiumPeaks(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, FWHM=self._vanPeakFWHM,\
-                                           PeakPositionTolerance=self.getProperty("VanadiumPeakTol").value,\
-                                           BackgroundType="Quadratic", HighBackground=True)
-                    else:
-                        self.log().information("Not strip vanadium peaks")
+                        van_run_ws = api.ConvertUnits(InputWorkspace=van_run_ws_name,
+                                                      OutputWorkspace=van_run_ws_name,
+                                                      Target="dSpacing")
+                        assert van_run_ws is not None
+                        van_run_ws = api.StripVanadiumPeaks(InputWorkspace=van_run_ws_name,
+                                                            OutputWorkspace=van_run_ws_name,
+                                                            FWHM=self._vanPeakFWHM,
+                                                            PeakPositionTolerance=self.getProperty("VanadiumPeakTol").value,
+                                                            BackgroundType="Quadratic",
+                                                            HighBackground=True)
+                        assert van_run_ws is not None
+                    # END-IF
+
+                    # convert unit to T.O.F., smooth vanadium, reset uncertainties and make sure the unit is TOF
                     van_run_number = api.ConvertUnits(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Target="TOF")
                     van_run_number = api.FFTSmooth(InputWorkspace=van_run_number, OutputWorkspace=van_run_number, Filter="Butterworth",\
                               Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
