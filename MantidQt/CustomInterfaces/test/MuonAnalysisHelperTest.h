@@ -173,6 +173,25 @@ public:
     TS_ASSERT_EQUALS(times.second, end);
   }
 
+  void test_findLogValues() {
+    Workspace_sptr ws1 = createWs("MUSR", 15189);
+    Workspace_sptr ws2 = createWs("MUSR", 15190);
+    DateAndTime start1{"2015-12-23T15:32:40Z"};
+    DateAndTime start2{"2014-12-23T15:32:40Z"};
+    addLog(ws1, "run_start", start1.toSimpleString());
+    addLog(ws2, "run_start", start2.toSimpleString());
+    auto groupWS = groupWorkspaces({ws1, ws2});
+    auto starts = findLogValues(groupWS, "run_start");
+    auto badLogs = findLogValues(groupWS, "not_present");
+    auto singleStart = findLogValues(ws1, "run_start");
+    TS_ASSERT_EQUALS(2, starts.size());
+    TS_ASSERT_EQUALS(start1, starts[0]);
+    TS_ASSERT_EQUALS(start2, starts[1]);
+    TS_ASSERT_EQUALS(0, badLogs.size());
+    TS_ASSERT_EQUALS(1, singleStart.size());
+    TS_ASSERT_EQUALS(start1, singleStart[0]);
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
   Workspace_sptr createWs(const std::string &instrName, int runNumber) {

@@ -487,6 +487,9 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
   firstStart = times.first;
   lastEnd = times.second;
 
+  // Range of temperatures and magnetic fields
+  std::vector<std::string> temperatures, magFields;
+
   // Create accumulator workspace, by cloning the first one from the list
   IAlgorithm_sptr cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
@@ -506,6 +509,18 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
       lastEnd = startEndTimes.second;
     }
 
+    // Get temperatures, magnetic fields
+    auto sampleTemps = findLogValues(*it, "sample_temp");
+    auto sampleFields = findLogValues(*it, "sample_magn_field");
+    if (!sampleTemps.empty()) {
+      temperatures.insert(temperatures.end(), sampleTemps.begin(),
+                          sampleTemps.end());
+    }
+    if (!sampleFields.empty()) {
+      magFields.insert(sampleFields.end(), sampleFields.begin(),
+                       sampleFields.end());
+    }
+
     // Add this workspace on to the sum
     ScopedWorkspace wsEntry(*it);
 
@@ -522,6 +537,8 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
   replaceLogValue(accumulatorEntry.name(), "run_start",
                   firstStart.toSimpleString());
   replaceLogValue(accumulatorEntry.name(), "run_end", lastEnd.toSimpleString());
+
+  // Put in range of temperatures and magnetic fields
 
   return accumulatorEntry.retrieve();
 }
@@ -662,7 +679,9 @@ std::vector<std::string> findLogValues(Workspace_sptr ws,
   // Try casting input to a MatrixWorkspace_sptr directly
   matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   if (matrixWS) {
-    values.push_back(matrixWS->run().getProperty(logName)->value());
+    if (matrixWS->run().hasProperty(logName)) {
+      values.push_back(matrixWS->run().getProperty(logName)->value());
+    }
   } else {
     // It could be a workspace group
     auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
@@ -671,7 +690,9 @@ std::vector<std::string> findLogValues(Workspace_sptr ws,
         matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
             groupWS->getItem(index));
         if (matrixWS) {
-          values.push_back(matrixWS->run().getProperty(logName)->value());
+          if (matrixWS->run().hasProperty(logName)) {
+            values.push_back(matrixWS->run().getProperty(logName)->value());
+          }
         }
       }
     }
