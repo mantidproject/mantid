@@ -174,24 +174,20 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
   }
 
   // Add sample temperature
+  // Could be stored as a double or as a string (range e.g. "1000.0 - 1020.0")
   out << "\nSample Temperature: ";
-  if ( run.hasProperty("sample_temp") )
-  {
-    out << run.getPropertyValueAsType<double>("sample_temp");
-  }
-  else
-  {
+  if (run.hasProperty("sample_temp")) {
+    out << run.getProperty("sample_temp")->value();
+  } else {
     out << "Not found";
   }
 
   // Add sample magnetic field
+  // Could be stored as a double or as a string (range e.g. "1000.0 - 1020.0")
   out << "\nSample Magnetic Field: ";
-  if ( run.hasProperty("sample_magn_field") )
-  {
-    out << run.getPropertyValueAsType<double>("sample_magn_field");
-  }
-  else
-  {
+  if (run.hasProperty("sample_magn_field")) {
+    out << run.getProperty("sample_magn_field")->value();
+  } else {
     out << "Not found";
   }
 }
