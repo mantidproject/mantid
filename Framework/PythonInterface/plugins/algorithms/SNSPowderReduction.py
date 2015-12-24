@@ -566,7 +566,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # generate the workspace name
         assert isinstance(runnumber, int)
         file_name = "%s_%d" % (self._instrument, runnumber) + extension
-        assert os.path.exists(file_name), 'NeXus file %s does not exist.' % file_name
+        # DetermineChunking can search in archive.
+        # Therefore this will fail: assert os.path.exists(file_name), 'NeXus file %s does not exist.' % file_name
 
         self.log().debug("[Fx116] Run file Name : %s,\t\tMax chunk size: %s" % (file_name, str(self._chunks)))
         chunks = api.DetermineChunking(Filename=file_name, MaxChunkSize=self._chunks)
