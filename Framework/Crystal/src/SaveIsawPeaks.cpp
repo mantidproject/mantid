@@ -48,7 +48,8 @@ void SaveIsawPeaks::init() {
   exts.push_back(".peaks");
   exts.push_back(".integrate");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
+                                   {".peaks", ".integrate"}),
                   "Path to an ISAW-style peaks or integrate file to save.");
 
   declareProperty(

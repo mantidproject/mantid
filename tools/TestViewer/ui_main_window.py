@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name, attribute-defined-outside-init
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'main_window.ui'
@@ -14,6 +14,7 @@ try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -510,7 +511,10 @@ class Ui_MainWindow(object):
         self.textResults = QtGui.QTextEdit(self.tabResults)
         self.textResults.setFrameShape(QtGui.QFrame.StyledPanel)
         self.textResults.setReadOnly(True)
-        self.textResults.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
+        self.textResults.setTextInteractionFlags(
+            QtCore.Qt.LinksAccessibleByKeyboard | QtCore.Qt.LinksAccessibleByMouse |
+            QtCore.Qt.TextBrowserInteraction | QtCore.Qt.TextSelectableByKeyboard |
+            QtCore.Qt.TextSelectableByMouse)
         self.textResults.setObjectName(_fromUtf8("textResults"))
         self.verticalLayout_2.addWidget(self.textResults)
         self.tabWidgetRight.addTab(self.tabResults, _fromUtf8(""))
@@ -519,7 +523,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.tabConsole)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.textConsole = QtGui.QTextEdit(self.tabConsole)
-        self.textConsole.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
+        self.textConsole.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard | QtCore.Qt.TextSelectableByMouse)
         self.textConsole.setObjectName(_fromUtf8("textConsole"))
         self.verticalLayout_3.addWidget(self.textConsole)
         self.tabWidgetRight.addTab(self.tabConsole, _fromUtf8(""))
@@ -559,62 +563,133 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Mantid TestViewer", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkMonitorTests.setToolTip(QtGui.QApplication.translate("MainWindow", "Continuously monitor the test files for any changes, and rerun them when they change.", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkMonitorTests.setText(QtGui.QApplication.translate("MainWindow", "Monitor Test Files", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonRunAll.setText(QtGui.QApplication.translate("MainWindow", "Run All Tests", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonRunSelected.setText(QtGui.QApplication.translate("MainWindow", "Run Selected Tests", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkInParallel.setText(QtGui.QApplication.translate("MainWindow", "In Parallel", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("MainWindow", "Timeout (sec):", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_7.setText(QtGui.QApplication.translate("MainWindow", "Memory limit (MB):", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_5.setText(QtGui.QApplication.translate("MainWindow", "Expand to:", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonExpandProjects.setText(QtGui.QApplication.translate("MainWindow", "Projects", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonExpandSuites.setText(QtGui.QApplication.translate("MainWindow", "Suites", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonExpandAll.setText(QtGui.QApplication.translate("MainWindow", "All", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(
+            QtGui.QApplication.translate("MainWindow", "Mantid TestViewer", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkMonitorTests.setToolTip(QtGui.QApplication.translate("MainWindow", "Continuously "
+                                                                                     "monitor the test files for any changes, and "
+                                                                                     "rerun them when they change.",
+                                                                       None,
+                                                                       QtGui.QApplication.UnicodeUTF8))
+        self.checkMonitorTests.setText(
+            QtGui.QApplication.translate("MainWindow", "Monitor Test Files", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonRunAll.setText(
+            QtGui.QApplication.translate("MainWindow", "Run All Tests", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonRunSelected.setText(
+            QtGui.QApplication.translate("MainWindow", "Run Selected Tests", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkInParallel.setText(
+            QtGui.QApplication.translate("MainWindow", "In Parallel", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(
+            QtGui.QApplication.translate("MainWindow", "Timeout (sec):", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_7.setText(
+            QtGui.QApplication.translate("MainWindow", "Memory limit (MB):", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_5.setText(
+            QtGui.QApplication.translate("MainWindow", "Expand to:", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonExpandProjects.setText(
+            QtGui.QApplication.translate("MainWindow", "Projects", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonExpandSuites.setText(
+            QtGui.QApplication.translate("MainWindow", "Suites", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonExpandAll.setText(
+            QtGui.QApplication.translate("MainWindow", "All", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("MainWindow", "Show:", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkShowSelected.setText(QtGui.QApplication.translate("MainWindow", "Selected", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkShowFailedOnly.setText(QtGui.QApplication.translate("MainWindow", "Failed only", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonRefresh.setText(QtGui.QApplication.translate("MainWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonTest.setText(QtGui.QApplication.translate("MainWindow", "test!", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_4.setText(QtGui.QApplication.translate("MainWindow", "Select:", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonSelectAll.setText(QtGui.QApplication.translate("MainWindow", "All", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonSelectNone.setText(QtGui.QApplication.translate("MainWindow", "None", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonSelectFailed.setText(QtGui.QApplication.translate("MainWindow", "Failures", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonSelectSVN.setText(QtGui.QApplication.translate("MainWindow", "Using GIT", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonSelectByString.setText(QtGui.QApplication.translate("MainWindow", "By String", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Test Run Progress:", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonAbort.setText(QtGui.QApplication.translate("MainWindow", "Abort Tests", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Overall Test Results:", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelResult.setText(QtGui.QApplication.translate("MainWindow", "All Passed! ", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelTestType.setText(QtGui.QApplication.translate("MainWindow", "Single Test Results:", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelTestName.setText(QtGui.QApplication.translate("MainWindow", "(Name of test)", None, QtGui.QApplication.UnicodeUTF8))
-        self.textResults.setHtml(QtGui.QApplication.translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<table border=\"0\" style=\"-qt-table-type: root; margin-top:4px; margin-bottom:4px; margin-left:4px; margin-right:4px;\">\n"
-"<tr>\n"
-"<td style=\"border: none;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></td></tr></table></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidgetRight.setTabText(self.tabWidgetRight.indexOf(self.tabResults), QtGui.QApplication.translate("MainWindow", "Test Results", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidgetRight.setTabText(self.tabWidgetRight.indexOf(self.tabConsole), QtGui.QApplication.translate("MainWindow", "Console output", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuTests.setTitle(QtGui.QApplication.translate("MainWindow", "&Tests", None, QtGui.QApplication.UnicodeUTF8))
-        self.menu_File.setTitle(QtGui.QApplication.translate("MainWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRun_All_Tests.setText(QtGui.QApplication.translate("MainWindow", "Run &All Tests", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRun_All_Tests.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+A", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRun_Selected_Tests.setText(QtGui.QApplication.translate("MainWindow", "Run &Selected Tests", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRun_Selected_Tests.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+R", None, QtGui.QApplication.UnicodeUTF8))
-        self.action_Quit.setText(QtGui.QApplication.translate("MainWindow", "&Quit", None, QtGui.QApplication.UnicodeUTF8))
-        self.action_Quit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
-        self.action_Preferences.setText(QtGui.QApplication.translate("MainWindow", "&Preferences", None, QtGui.QApplication.UnicodeUTF8))
-        self.action_Preferences.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+P", None, QtGui.QApplication.UnicodeUTF8))
-
+        self.checkShowSelected.setText(
+            QtGui.QApplication.translate("MainWindow", "Selected", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkShowFailedOnly.setText(
+            QtGui.QApplication.translate("MainWindow", "Failed only", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonRefresh.setText(
+            QtGui.QApplication.translate("MainWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonTest.setText(
+            QtGui.QApplication.translate("MainWindow", "test!", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_4.setText(
+            QtGui.QApplication.translate("MainWindow", "Select:", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSelectAll.setText(
+            QtGui.QApplication.translate("MainWindow", "All", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSelectNone.setText(
+            QtGui.QApplication.translate("MainWindow", "None", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSelectFailed.setText(
+            QtGui.QApplication.translate("MainWindow", "Failures", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSelectSVN.setText(
+            QtGui.QApplication.translate("MainWindow", "Using GIT", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSelectByString.setText(
+            QtGui.QApplication.translate("MainWindow", "By String", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(
+            QtGui.QApplication.translate("MainWindow", "Test Run Progress:", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonAbort.setText(
+            QtGui.QApplication.translate("MainWindow", "Abort Tests", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setText(
+            QtGui.QApplication.translate("MainWindow", "Overall Test Results:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelResult.setText(
+            QtGui.QApplication.translate("MainWindow", "All Passed! ", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelTestType.setText(
+            QtGui.QApplication.translate("MainWindow", "Single Test Results:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelTestName.setText(
+            QtGui.QApplication.translate("MainWindow", "(Name of test)", None, QtGui.QApplication.UnicodeUTF8))
+        self.textResults.setHtml(QtGui.QApplication.translate("MainWindow",
+                                                              "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" "
+                                                              "\"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                                              "<html><head><meta name=\"qrichtext\" content=\"1\" "
+                                                              "/><style type=\"text/css\">\n"
+                                                              "p, li { white-space: pre-wrap; }\n"
+                                                              "</style></head><body style=\" font-family:\'Ubuntu\';"
+                                                              " font-size:11pt; font-weight:400; font-style:normal;\">\n"
+                                                              "<table border=\"0\" style=\"-qt-table-type: root; "
+                                                              "margin-top:4px; margin-bottom:4px; margin-left:4px; margin-right:4px;\">\n"
+                                                              "<tr>\n"
+                                                              "<td style=\"border: none;\">\n"
+                                                              "<p style=\"-qt-paragraph-type:empty; margin-top:0px; "
+                                                              "margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0;"
+                                                              "text-indent:0px;\"></p>\n"
+                                                              "<p style=\"-qt-paragraph-type:empty; margin-top:0px;"
+                                                              " margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0;"
+                                                              " text-indent:0px;\"></p>\n"
+                                                              "<p style=\"-qt-paragraph-type:empty; margin-top:0px;"
+                                                              " margin-bottom:0px; margin-left:0px; margin-right:0px; "
+                                                              "-qt-block-indent:0;"
+                                                              " text-indent:0px;\"></p>\n"
+                                                              "<p style=\"-qt-paragraph-type:empty; margin-top:0px; "
+                                                              "margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; "
+                                                              "text-indent:0px;\"></p>\n"
+                                                              "<p style=\"-qt-paragraph-type:empty; margin-top:0px;"
+                                                              " margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0;"
+                                                              " text-indent:0px;\"></p>\n"
+                                                              "<p style=\"-qt-paragraph-type:empty; margin-top:0px;"
+                                                              " margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; "
+                                                              "text-indent:0px;\"></p>\n"
+                                                              "<p style=\"-qt-paragraph-type:empty; margin-top:0px; "
+                                                              "margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0;"
+                                                              " text-indent:0px;\"></p>\n"
+                                                              "<p style=\"-qt-paragraph-type:empty; margin-top:0px; "
+                                                              "margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; "
+                                                              "text-indent:0px;\"></p>\n"
+                                                              "<p style=\"-qt-paragraph-type:empty; margin-top:0px; "
+                                                              "margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0;"
+                                                              " text-indent:0px;\"></p>\n"
+                                                              "<p style=\"-qt-paragraph-type:empty; margin-top:0px;"
+                                                              " margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; "
+                                                              "text-indent:0px;\"></p></td></tr></table></body></html>",
+                                                              None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidgetRight.setTabText(self.tabWidgetRight.indexOf(self.tabResults),
+                                       QtGui.QApplication.translate("MainWindow", "Test Results", None,
+                                                                    QtGui.QApplication.UnicodeUTF8))
+        self.tabWidgetRight.setTabText(self.tabWidgetRight.indexOf(self.tabConsole),
+                                       QtGui.QApplication.translate("MainWindow", "Console output", None,
+                                                                    QtGui.QApplication.UnicodeUTF8))
+        self.menuTests.setTitle(
+            QtGui.QApplication.translate("MainWindow", "&Tests", None, QtGui.QApplication.UnicodeUTF8))
+        self.menu_File.setTitle(
+            QtGui.QApplication.translate("MainWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRun_All_Tests.setText(
+            QtGui.QApplication.translate("MainWindow", "Run &All Tests", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRun_All_Tests.setShortcut(
+            QtGui.QApplication.translate("MainWindow", "Ctrl+A", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRun_Selected_Tests.setText(
+            QtGui.QApplication.translate("MainWindow", "Run &Selected Tests", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRun_Selected_Tests.setShortcut(
+            QtGui.QApplication.translate("MainWindow", "Ctrl+R", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Quit.setText(
+            QtGui.QApplication.translate("MainWindow", "&Quit", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Quit.setShortcut(
+            QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Preferences.setText(
+            QtGui.QApplication.translate("MainWindow", "&Preferences", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Preferences.setShortcut(
+            QtGui.QApplication.translate("MainWindow", "Ctrl+P", None, QtGui.QApplication.UnicodeUTF8))

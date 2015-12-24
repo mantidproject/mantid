@@ -193,6 +193,7 @@ private:
   void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;
+  std::string guessDefaultFullCalibrationPath() const;
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();

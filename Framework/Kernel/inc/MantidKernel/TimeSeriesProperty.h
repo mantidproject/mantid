@@ -190,6 +190,9 @@ public:
   /// calls to addValue.
   void addValues(const std::vector<Kernel::DateAndTime> &times,
                  const std::vector<TYPE> &values);
+  /// Replaces the time series with new values time series values
+  void replaceValues(const std::vector<Kernel::DateAndTime> &times,
+                     const std::vector<TYPE> &values);
 
   /// Returns the last time
   DateAndTime lastTime() const;

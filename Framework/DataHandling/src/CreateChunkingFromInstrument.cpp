@@ -82,12 +82,9 @@ void CreateChunkingFromInstrument::init() {
   // instrument selection
   string grp1Name("Specify the Instrument");
 
-  std::vector<std::string> exts;
-  exts.push_back("_event.nxs");
-  exts.push_back(".nxs.h5");
-  exts.push_back(".nxs");
   this->declareProperty(
-      new FileProperty(PARAM_IN_FILE, "", FileProperty::OptionalLoad, exts),
+      new FileProperty(PARAM_IN_FILE, "", FileProperty::OptionalLoad,
+                       {"_event.nxs", ".nxs.h5", ".nxs"}),
       "The name of the event nexus file to read, including its full or "
       "relative path.");
 
