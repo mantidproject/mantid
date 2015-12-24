@@ -80,6 +80,7 @@ set ( TEST_PY_FILES
   SwapWidthsTest.py
   SymmetriseTest.py
   UpdatePeakParameterTableValueTest.py
+  SANSDarkRunBackgroundCorrectionTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
   TOFTOFConvertTofToDeltaETest.py
