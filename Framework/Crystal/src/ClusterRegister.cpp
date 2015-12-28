@@ -3,6 +3,7 @@
 #include "MantidCrystal/CompositeCluster.h"
 #include <boost/make_shared.hpp>
 #include <boost/functional/hash.hpp>
+#include <list>
 #include <set>
 
 namespace {
