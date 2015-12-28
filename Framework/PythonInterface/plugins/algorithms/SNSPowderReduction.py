@@ -303,17 +303,22 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             assert isinstance(sam_ws_name, str), 'Returned from _focusAndSum() must be a string but not' \
                                                  '%s. ' % str(type(sam_ws_name))
 
-            samRuns = [sam_ws_name]
+            # samRuns = [sam_ws_name]
             workspacelist.append(sam_ws_name)
             samwksplist.append(sam_ws_name)
         # ENDIF (SUM)
+        else:
+            # Process each sample run
+            for sam_run_number in samRuns:
+                # check
+                err_msg = 'sample run number %s must be either int or numpy.int32, ' \
+                          'but not %s' % (str(sam_run_number), str(type(sam_run_number)))
+                assert isinstance(sam_run_number, int) or isinstance(sam_run_number, numpy.int32), err_msg
+                if sam_run_number <= 0:
+                    self.log().warning('Sample run number %d is less and equal to zero!' % sam_run_number)
+                    continue
 
-        # Process each sample run
-        for sam_run_number in samRuns:
-            # check
-            assert isinstance(sam_run_number, int)
-            # first round of processing the sample
-            if not self.getProperty("Sum").value and sam_run_number > 0:
+                # first round of processing the sample
                 self._info = None
                 returned = self._focusChunks(sam_run_number, SUFFIX, timeFilterWall, calib, splitwksp=self._splitws,
                                              normalisebycurrent=self._normalisebycurrent,
@@ -335,8 +340,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     samwksplist.append(sam_ws_name)
                     workspacelist.append(sam_ws_name)
                 # ENDIF
-            # ENDIF
-        # ENDFOR
+            # END-FOR
+        # ENDIF (Sum data or not)
 
         for (samRunIndex, sam_ws_name) in enumerate(samwksplist):
             assert isinstance(sam_ws_name, str), 'Assuming that samRun is a string. But it is %s' % str(type(sam_ws_))
@@ -488,11 +493,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         :return:
         """
         # Check requirements
-        assert isinstance(run_number, int), 'Input run number must be integer but not %s.' % str(type(run_number))
+        assert isinstance(run_number, int) or isinstance(run_number, numpy.int32), 'Input run number must be integer ' \
+                                                                                   'but not %s.' % str(type(run_number))
         assert run_number > 0, 'Input run number must be larger than 0 but not %d.' % run_number
         assert (chunk is None) or isinstance(chunk, dict), 'Input chunk must be either a dictionary or None.'
 
-        base_name = "%s_%d" % (self._instrument, run_number)
+        base_name = "%s_%d" % (self._instrument, int(run_number))
         filename = base_name + extension
         # give out the default output workspace name
         if out_ws_name is None:
@@ -561,11 +567,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         :return: a list of dictionary.  Each dictionary is a row in table workspace
         """
         # generate the workspace name
-        assert isinstance(runnumber, int)
-        file_name = "%s_%d" % (self._instrument, runnumber) + extension
-        # DetermineChunking can search in archive.
-        # Therefore this will fail: assert os.path.exists(file_name), 'NeXus file %s does not exist.' % file_name
+        assert isinstance(runnumber, int) or isinstance(runnumber, numpy.int32), \
+            'Expected run number %s to be either integer or numpy.int32, but not %s' % (
+                str(runnumber), str(type(runnumber)))
+        file_name = "%s_%d" % (self._instrument, int(runnumber)) + extension
 
+        # Determine chunk strategy can search in archive.
+        # Therefore this will fail: assert os.path.exists(file_name), 'NeXus file %s does not exist.' % file_name
         self.log().debug("[Fx116] Run file Name : %s,\t\tMax chunk size: %s" % (file_name, str(self._chunks)))
         chunks = api.DetermineChunking(Filename=file_name, MaxChunkSize=self._chunks)
 
@@ -1183,11 +1191,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # load the container run
                 if self.getProperty("Sum").value:
                     can_run_ws_name = self._focusAndSum(can_run_numbers, SUFFIX, canFilterWall, calib,
-                                                   preserveEvents=preserveEvents)
+                                                        preserveEvents=preserveEvents)
                 else:
                     can_run_ws_name = self._focusChunks(can_run_number, SUFFIX, canFilterWall, calib,
-                                                   normalisebycurrent=self._normalisebycurrent,
-                                                   preserveEvents=preserveEvents)
+                                                        normalisebycurrent=self._normalisebycurrent,
+                                                        preserveEvents=preserveEvents)
                 can_run_ws = self.get_workspace(can_run_ws_name)
                 assert can_run_ws.name() == can_run_ws_name
                 # convert unit to TOF
