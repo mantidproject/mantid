@@ -3,6 +3,7 @@
 #include "MantidCrystal/CompositeCluster.h"
 #include <boost/make_shared.hpp>
 #include <boost/functional/hash.hpp>
+#include <set>
 
 namespace {
 template <typename T> std::pair<T, T> ordered_pair(const T &a, const T &b) {
