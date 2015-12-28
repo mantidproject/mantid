@@ -266,7 +266,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.COMPRESS_TOL_TOF = 0.01
 
         # Process data
-        workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
+        # List stores the workspacename of all data workspaces that will be converted to d-spacing in the end.
+        workspacelist = []
         samwksplist = []
 
         self._lowResTOFoffset = self.getProperty("LowResolutionSpectraOffset").value
@@ -297,13 +298,14 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if self._splitws is not None:
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
-            sam_ws_ = self._focusAndSum(samRuns, SUFFIX, timeFilterWall, calib,\
-                                       preserveEvents=preserveEvents)
-            assert isinstance(sam_ws_, str)
+            sam_ws_name = self._focusAndSum(samRuns, SUFFIX, timeFilterWall, calib,
+                                            preserveEvents=preserveEvents)
+            assert isinstance(sam_ws_name, str), 'Returned from _focusAndSum() must be a string but not' \
+                                                 '%s. ' % str(type(sam_ws_name))
 
-            samRuns = [sam_ws_]
-            workspacelist.append(str(sam_ws_))
-            samwksplist.append(str(sam_ws_))
+            samRuns = [sam_ws_name]
+            workspacelist.append(sam_ws_name)
+            samwksplist.append(sam_ws_name)
         # ENDIF (SUM)
 
         # Process each sample run
@@ -320,23 +322,18 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 if isinstance(returned, list):
                     # Returned with a list of workspaces
                     focusedwksplist = returned
-                    run_index = 0
-                    for run in focusedwksplist:
-                        assert isinstance(run, str)
-                        if run is not None:
-                            samwksplist.append(run)
-                            workspacelist.append(str(run))
-                        else:
-                            self.log().warning("Found a None entry in returned focused workspaces.  "
-                                               "Index = %d." % run_index)
-                        # ENDIF
-                        run_index += 1
+                    for sam_ws_name in focusedwksplist:
+                        assert isinstance(sam_ws_name, str), 'Impossible to have a non-string value in ' \
+                                                             'returned focused workspaces\' names.'
+                        samwksplist.append(sam_ws_name)
+                        workspacelist.append(sam_ws_name)
                     # END-FOR
                 else:
-                    run = returned
-                    assert isinstance(run, str)
-                    samwksplist.append(run)
-                    workspacelist.append(str(run))
+                    # returned as a single workspace
+                    sam_ws_name = returned
+                    assert isinstance(sam_ws_name, str)
+                    samwksplist.append(sam_ws_name)
+                    workspacelist.append(sam_ws_name)
                 # ENDIF
             # ENDIF
         # ENDFOR
@@ -684,54 +681,85 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return outName
 
     #pylint: disable=too-many-arguments
-    def _focusAndSum(self, runnumbers, extension, filterWall, calib, preserveEvents=True):
-        """Load, sum, and focus data in chunks"""
+    def _focusAndSum(self, run_number_list, extension, filterWall, calib, preserveEvents=True):
+        """Load, sum, and focus data in chunks
+        Purpose:
+            Load, sum and focus data in chunks;
+        Requirements:
+            1. input run numbers are in numpy array or list
+        Guarantees:
+            The experimental runs are focused and summed together
+        @param run_number_list:
+        @param extension:
+        @param filterWall:
+        @param calib:
+        @param preserveEvents:
+        @return: string as the summed workspace's name
+        """
+        # Check requirements
+        assert isinstance(run_number_list, numpy.array) or isinstance(run_number_list, list)
+
         sumRun = None
         info = None
 
-        for temp in runnumbers:
-            runnumber = temp
-            self.log().information("[Sum] Process run number %s. " %(str(runnumber)))
+        for run_number in run_number_list:
+            # check
+            error_message = 'Run number %s should be integer or numpy.int32. But it is %s.' % (str(run_number),
+                                                                                               str(type(run_number)))
+            assert isinstance(run_number, int) or isinstance(run_number, numpy.int32), error_message
+            self.log().information("[Sum] Process run number %d. " % run_number)
 
-            temp = self._focusChunks(temp, extension, filterWall, calib,\
-                                     normalisebycurrent=False,
-                                     preserveEvents=preserveEvents)
+            # focus one run
+            out_ws_name = self._focusChunks(run_number, extension, filterWall, calib,
+                                            normalisebycurrent=False,
+                                            preserveEvents=preserveEvents)
+            assert isinstance(out_ws_name, str), 'Output from _focusChunks() should be a string but' \
+                                                 ' not %s.' % str(type(out_ws_name))
+            assert self.does_workspace_exist(out_ws_name)
+
             tempinfo = self._getinfo(temp)
 
+            # sum reduced runs
             if sumRun is None:
-                sumRun = temp
+                # First run. No need to sumRun
+                sumRun = out_ws_name
                 info = tempinfo
             else:
+                # Non-first run. Add this run to current summed run
                 self.checkInfoMatch(info, tempinfo)
-
-                sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun,
-                                  ClearRHSWorkspace=allEventWorkspaces(sumRun, temp))
-                if sumRun.id() == EVENT_WORKSPACE_ID:
-                    sumRun = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,\
-                                                Tolerance=self.COMPRESS_TOL_TOF) # 10ns
-                api.DeleteWorkspace(str(temp))
+                # add current workspace to sub sum
+                temp_ws = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=out_ws_name, OutputWorkspace=sumRun,
+                                  ClearRHSWorkspace=allEventWorkspaces(sumRun, out_ws_name))
+                if temp_ws.id() == EVENT_WORKSPACE_ID:
+                    temp_ws = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,
+                                                 Tolerance=self.COMPRESS_TOL_TOF) # 10ns
+                    assert temp_ws is not None
+                # after adding all events, delete the current workspace.
+                api.DeleteWorkspace(out_ws_name)
             # ENDIF
         # ENDFOR (processing each)
+
         if self._normalisebycurrent is True:
-            sumRun = api.NormaliseByCurrent(InputWorkspace=sumRun,
-                                            OutputWorkspace=sumRun)
-            sumRun.getRun()['gsas_monitor'] = 1
+            temp_ws = api.NormaliseByCurrent(InputWorkspace=sumRun,
+                                             OutputWorkspace=sumRun)
+            temp_ws.getRun()['gsas_monitor'] = 1
 
         return sumRun
-
 
     #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
     def _focusChunks(self, runnumber, extension, filterWall, calib,
                      normalisebycurrent, splitwksp=None, preserveEvents=True):
-        """ Load, (optional) split and focus data in chunks
-
-        Arguments:
-         - runnumber : integer for run number
-         - normalisebycurrent: Set to False if summing runs for correct math
-         - splitwksp:  SplittersWorkspace (if None then no split)
-         - filterWall: Enabled if splitwksp is defined
-
-        Return:
+        """
+        Load, (optional) split and focus data in chunks
+        @param runnumber: integer for run number
+        @param extension:
+        @param filterWall:  Enabled if splitwksp is defined
+        @param calib:
+        @param normalisebycurrent: Set to False if summing runs for correct math
+        @param splitwksp: SplittersWorkspace (if None then no split)
+        @param preserveEvents:
+        @return: a string as the returned workspace's name or a list of strings as the returned workspaces' names
+                 in the case that split workspace is used.
         """
         # generate the workspace name
         self.log().information("_focusChunks(): runnumber = %d, extension = %s" % (runnumber, extension))
@@ -771,7 +799,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Split the workspace if it is required
             if do_split_raw_wksp is True:
-                output_ws_name_list = self._split_workspace(raw_ws_name_chunk, splitwksp)
+                output_ws_name_list = self._split_workspace(raw_ws_name_chunk, splitwksp.name())
             else:
                 # Histogram data
                 output_ws_name_list = [raw_ws_name_chunk]
@@ -1346,7 +1374,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         """
         # Check requirements
         assert isinstance(raw_ws_name, str), 'Raw workspace name must be a string.'
-        assert isinstance(split_ws_name, str)
+        assert isinstance(split_ws_name, str), 'Input split workspace name must be string,' \
+                                               'but not of type %s' % str(type(split_ws_name))
         assert self.does_workspace_exist(split_ws_name)
 
         raw_ws = self.get_workspace(workspace_name=raw_ws_name)
