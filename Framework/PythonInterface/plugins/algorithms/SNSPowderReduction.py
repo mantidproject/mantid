@@ -697,7 +697,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         @return: string as the summed workspace's name
         """
         # Check requirements
-        assert isinstance(run_number_list, numpy.array) or isinstance(run_number_list, list)
+        assert isinstance(run_number_list, numpy.ndarray) or isinstance(run_number_list, list)
 
         sumRun = None
         info = None
