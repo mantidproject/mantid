@@ -587,7 +587,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         keys = chunk.keys()
         keys.sort()
 
-        keys = [ str(key) + "=" + str(chunk[key]) for key in keys ]
+        keys = [str(key) + "=" + str(chunk[key]) for key in keys]
         self.log().information("Working on chunk [" + ", ".join(keys) + "]")
 
     def checkInfoMatch(self, left, right):
@@ -717,7 +717,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                                  ' not %s.' % str(type(out_ws_name))
             assert self.does_workspace_exist(out_ws_name)
 
-            tempinfo = self._getinfo(temp)
+            tempinfo = self._getinfo(out_ws_name)
 
             # sum reduced runs
             if sumRun is None:
@@ -996,8 +996,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if "pdfgetn" in self._outTypes:
                 pdfwksp = str(wksp)+"_norm"
                 pdfwksp = api.SetUncertainties(InputWorkspace=wksp, OutputWorkspace=pdfwksp, SetError="sqrt")
-                api.SaveGSS(InputWorkspace=pdfwksp, Filename=filename+".getn", SplitFiles=False, Append=False,\
-                        MultiplyByBinWidth=False, Bank=info["bank"].value, Format="SLOG", ExtendedHeader=True)
+                api.SaveGSS(InputWorkspace=pdfwksp, Filename=filename+".getn", SplitFiles=False, Append=False,
+                            MultiplyByBinWidth=False, Bank=info["bank"].value, Format="SLOG", ExtendedHeader=True)
                 api.DeleteWorkspace(pdfwksp)
             return # don't do the other bits of saving
         if "gsas" in self._outTypes:
