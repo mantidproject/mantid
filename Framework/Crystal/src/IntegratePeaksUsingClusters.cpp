@@ -13,6 +13,8 @@
 #include "MantidKernel/Utils.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
