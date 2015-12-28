@@ -3,9 +3,12 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h"
+#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFFunctionPlotData.h"
 
+#include "MantidQtAPI/PythonRunner.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <boost/make_shared.hpp>
@@ -15,6 +18,9 @@
 #include <qwt_plot_zoomer.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_magnifier.h>
+#include <qwt_plot_curve.h>
+
+#include <qwt_scale_widget.h>
 
 namespace{
   // columns in the data table
@@ -22,8 +28,8 @@ namespace{
   const int wsIndexColumn = 1;
   const int startXColumn  = 2;
   const int endXColumn    = 3;
-  QColor rangeSelectorDisabledColor(Qt::darkGray);
-  QColor rangeSelectorEnabledColor(Qt::blue);
+  QColor rangeSelectorDisabledColor = Qt::darkGray;
+  QColor rangeSelectorEnabledColor = Qt::blue;
 }
 
 namespace MantidQt
@@ -39,7 +45,7 @@ PlotController::PlotController(MultiDatasetFit *parent, QwtPlot *plot,
                                QPushButton *prev, QPushButton *next)
     : QObject(parent), m_plot(plot), m_table(table),
       m_plotSelector(plotSelector), m_prevPlot(prev), m_nextPlot(next),
-      m_currentIndex(-1), m_showDataErrors(false)
+      m_currentIndex(-1), m_showDataErrors(false), m_showGuessFunction(false)
 {
   connect(prev,SIGNAL(clicked()),this,SLOT(prevPlot()));
   connect(next,SIGNAL(clicked()),this,SLOT(nextPlot()));
@@ -59,12 +65,15 @@ PlotController::PlotController(MultiDatasetFit *parent, QwtPlot *plot,
   connect(m_rangeSelector,SIGNAL(selectionChanged(double, double)),this,SLOT(updateFittingRange(double, double)));
 
   disableAllTools();
+
+  connect( plot->axisWidget(QwtPlot::xBottom), SIGNAL(scaleDivChanged()), this, SLOT(updateGuessPlot()));
 }
 
 /// Destructor.
 PlotController::~PlotController()
 {
   m_plotData.clear();
+  m_guessFunctionData.reset();
 }
 
 /// Slot. Respond to changes in the data table.
@@ -114,19 +123,11 @@ boost::shared_ptr<DatasetPlotData> PlotController::getData(int index)
   if (index < 0) return data;
   if ( !m_plotData.contains(index) )
   {
-    QString wsName = m_table->item( index, wsColumn )->text();
-    int wsIndex = m_table->item( index, wsIndexColumn )->text().toInt();
-    QString outputWorkspaceName = owner()->getOutputWorkspaceName();
-    std::string outName = outputWorkspaceName.toStdString();
-    if (!outputWorkspaceName.isEmpty() &&
-        Mantid::API::AnalysisDataService::Instance().doesExist(outName)) {
-      auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(outName);
-      if (auto  group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
-        outputWorkspaceName = QString::fromStdString(group->getItem(index)->name());
-      }
-    }
+    QString wsName = owner()->getWorkspaceName(index);
+    int wsIndex = owner()->getWorkspaceIndex(index);
+    QString outputWorkspaceName = owner()->getOutputWorkspaceName(index);
     try {
-      data = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
+      data = boost::make_shared<DatasetPlotData>(wsName, wsIndex, outputWorkspaceName);
       m_plotData.insert(index, data );
     }
     catch(std::exception& e)
@@ -176,10 +177,11 @@ void PlotController::plotDataSet(int index)
   // but if zoom rect doesn't show any data reset zoom base to show all
   auto dataRect = m_plotData[index]->boundingRect();
   auto zoomRect = m_zoomer->zoomRect();
-  if ( !zoomRect.intersects( dataRect ) )
+  if (!zoomRect.intersects( dataRect ) || resetZoom)
   {
-    m_plot->setAxisAutoScale(QwtPlot::xBottom);
-    m_plot->setAxisAutoScale(QwtPlot::yLeft);
+    dataRect = plotData->boundingRect();
+    m_plot->setAxisScale(QwtPlot::xBottom, dataRect.left(), dataRect.right());
+    m_plot->setAxisScale(QwtPlot::yLeft, dataRect.top(), dataRect.bottom());
   }
   // change the current data set index
   m_currentIndex = index;
@@ -201,9 +203,13 @@ void PlotController::plotDataSet(int index)
 }
 
 /// Clear all plot data.
-void PlotController::clear()
+void PlotController::clear(bool clearGuess)
 {
   m_plotData.clear();
+  if (clearGuess)
+  {
+    m_guessFunctionData.reset();
+  }
 }
 
 /// Update the plot.
@@ -233,6 +239,56 @@ void PlotController::zoomToRange()
   m_zoomer->zoom(-1);
   // Set new zoom level.
   m_zoomer->zoom(rect);
+}
+
+/// Make a string of python code to be used as 'source, indices' arguments
+/// to plotSpectrum(...)
+QString PlotController::makePyPlotSource(int index) const
+{
+  QString pyCode;
+  auto outputWsorkspaceName = owner()->getOutputWorkspaceName(index);
+  auto wsIndex = owner()->getWorkspaceIndex(index);
+  if (outputWsorkspaceName.isEmpty()) {
+    pyCode = QString("['%1'], %2").arg(owner()->getWorkspaceName(index)).arg(wsIndex);
+  } else {
+    pyCode = QString("['%1'], [0,1,2]").arg(outputWsorkspaceName);
+  }
+  return pyCode;
+}
+
+/// Export i-th plot.
+/// @param index :: Index of a plot to export.
+void PlotController::exportPlot(int index)
+{
+  if (index < 0) return;
+  QString pyInput = "from mantidplot import plotSpectrum\n";
+  pyInput += QString("plotSpectrum(%1)\n").arg(makePyPlotSource(index));
+  owner()->runPythonCode(pyInput);
+}
+
+/// Export current plot
+void PlotController::exportCurrentPlot()
+{
+  exportPlot(m_currentIndex);
+}
+
+/// Export all plots
+void PlotController::exportAllPlots()
+{
+  int nPlots = owner()->getNumberOfSpectra();
+  if (nPlots <= 0) return;
+  QString pyInput = "from mantidplot import newTiledWindow\n";
+  pyInput += "newTiledWindow(sources=[";
+  for(int index = 0; index < nPlots; ++index)
+  {
+    if (index > 0)
+    {
+      pyInput += ",";
+    }
+    pyInput += QString("(%1)").arg(makePyPlotSource(index));
+  }
+  pyInput += "])\n";
+  owner()->runPythonCode(pyInput);
 }
 
 /// Disable all plot tools. It is a helper method 
@@ -328,6 +384,74 @@ void PlotController::showDataErrors(bool on)
   {
     data->show(m_plot);
     m_plot->replot();
+  }
+}
+
+void PlotController::setGuessFunction(const QString& funStr)
+{
+  if (funStr.isEmpty())
+  {
+    m_guessFunctionData.reset();
+    m_plot->replot();
+  }
+  else
+  {
+    QwtScaleMap xMap = m_plot->canvasMap(QwtPlot::xBottom);
+    double startX = xMap.s1();
+    double endX = xMap.s2();
+    auto fun = Mantid::API::FunctionFactory::Instance().createInitialized(
+        funStr.toStdString());
+    m_guessFunctionData.reset(new MDFFunctionPlotData(fun, startX, endX));
+    if (m_showGuessFunction)
+    {
+      plotGuess();
+    }
+  }
+}
+
+void PlotController::plotGuess()
+{
+  if (!m_guessFunctionData) return;
+  m_guessFunctionData->show(m_plot);
+  m_plot->replot();
+}
+
+void PlotController::hideGuess()
+{
+  if (!m_guessFunctionData) return;
+  m_guessFunctionData->hide();
+  m_plot->replot();
+}
+
+void PlotController::updateGuessPlot()
+{
+  if (!m_guessFunctionData) return;
+  QwtScaleMap xMap = m_plot->canvasMap(QwtPlot::xBottom);
+  double startX = xMap.s1();
+  double endX = xMap.s2();
+  m_guessFunctionData->setDomain(startX, endX);
+  m_plot->replot();
+}
+
+void PlotController::updateGuessFunction(const Mantid::API::IFunction& fun)
+{
+  if (m_guessFunctionData)
+  {
+    m_guessFunctionData->updateFunction(fun);
+    updateGuessPlot();
+  }
+}
+
+void PlotController::showGuessFunction(bool ok)
+{
+  m_showGuessFunction = ok;
+  if (ok)
+  {
+    plotGuess();
+  }
+  else
+  {
+    hideGuess();
   }
 }
 

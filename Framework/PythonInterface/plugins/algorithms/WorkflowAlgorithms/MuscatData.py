@@ -6,7 +6,7 @@ from mantid.kernel import StringListValidator, StringMandatoryValidator
 class MuscatData(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
     def summary(self):
         return "Calculates multiple scattering using a sample S(Q,w)."

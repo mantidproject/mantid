@@ -30,7 +30,9 @@ const std::string CombinePeaksWorkspaces::name() const {
 /// Algorithm's version for identification. @see Algorithm::version
 int CombinePeaksWorkspaces::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CombinePeaksWorkspaces::category() const { return "Crystal"; }
+const std::string CombinePeaksWorkspaces::category() const {
+  return "Crystal\\Peaks";
+}
 
 /** Initialises the algorithm's properties.
  */

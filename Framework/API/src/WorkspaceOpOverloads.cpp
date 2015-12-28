@@ -138,7 +138,7 @@ executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
 } // namespace OperatorOverloads
 
 /** Performs a comparison operation on two workspaces, using the
- *CheckWorkspacesMatch algorithm
+ * CompareWorkspaces algorithm
  *
  *  @param lhs :: left hand side workspace shared pointer
  *  @param rhs :: right hand side workspace shared pointer
@@ -148,23 +148,21 @@ executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
 bool equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs,
             double tolerance) {
   IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
+      AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
   alg->setChild(true);
   alg->setRethrows(false);
   alg->initialize();
   alg->setProperty<MatrixWorkspace_sptr>("Workspace1", lhs);
-  alg->setProperty<MatrixWorkspace_sptr>("Workspace2", rhs);
   alg->setProperty<MatrixWorkspace_sptr>("Workspace2", rhs);
   alg->setProperty<double>("Tolerance", tolerance);
   // Rest: use default
 
   alg->execute();
   if (!alg->isExecuted()) {
-    std::string message =
-        "Error while executing operation: CheckWorkspacesMatch";
+    std::string message = "Error while executing operation: CompareWorkspaces";
     throw std::runtime_error(message);
   }
-  return (alg->getPropertyValue("Result") == "Success!");
+  return alg->getProperty("Result");
 }
 
 /** Creates a temporary single value workspace the error is set to zero

@@ -71,7 +71,7 @@ namespace CustomDialogs
 ///Constructor
 StartLiveDataDialog::StartLiveDataDialog(QWidget *parent) :
   AlgorithmDialog(parent),
-  m_useProcessAlgo(false), m_useProcessScript(false),
+  m_scrollbars(this), m_useProcessAlgo(false), m_useProcessScript(false),
   m_usePostProcessAlgo(false), m_usePostProcessScript(false)
 {
   // Create the input history. This loads it too.
@@ -90,6 +90,9 @@ StartLiveDataDialog::~StartLiveDataDialog()
 void StartLiveDataDialog::initLayout()
 {
   ui.setupUi(this);
+
+  // Enable scrollbars (must happen after setupUi()!)
+  m_scrollbars.setEnabled(true);
 
   // To save the history of inputs
   // RJT: I don't much like this, but at least it's safe from a lifetime point of view.
@@ -222,7 +225,7 @@ void StartLiveDataDialog::parseInput()
   {
     storePropertyValue("ProcessingAlgorithm", ui.processingAlgo->getSelectedAlgorithm());
     std::string props;
-    props = m_processingAlg->asString(false, ';'); /* use semicolon to properly separate the props */
+    props = m_processingAlg->asString(false); 
     storePropertyValue("ProcessingProperties", QString::fromStdString(props));
   }
   else if (m_useProcessScript)
@@ -235,7 +238,7 @@ void StartLiveDataDialog::parseInput()
   {
     storePropertyValue("PostProcessingAlgorithm", ui.postAlgo->getSelectedAlgorithm());
     std::string props;
-    props = m_postProcessingAlg->asString(false, ';'); /* use semicolon to properly separate the props */
+    props = m_postProcessingAlg->asString(false); 
     storePropertyValue("PostProcessingProperties", QString::fromStdString(props));
   }
   else if (m_usePostProcessScript)

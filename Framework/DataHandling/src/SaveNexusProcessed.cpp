@@ -45,12 +45,8 @@ void SaveNexusProcessed::init() {
       new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
       "Name of the workspace to be saved");
   // Declare required input parameters for algorithm
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".nx5");
-  exts.push_back(".xml");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
+                                   {".nxs", ".nx5", ".xml"}),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
 

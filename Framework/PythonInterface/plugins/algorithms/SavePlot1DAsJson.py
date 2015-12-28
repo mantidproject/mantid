@@ -11,7 +11,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
     def category(self):
         """
         """
-        return "Utility"
+        return "DataHandling\\Plots"
 
     def name(self):
         """

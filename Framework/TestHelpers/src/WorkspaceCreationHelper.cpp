@@ -519,7 +519,7 @@ MatrixWorkspace_sptr
 create2DWorkspaceWithReflectometryInstrument(double startX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
+      boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
 
   ObjComponent *source = new ObjComponent("source");
   source->setPos(V3D(0, 0, 0));
@@ -536,7 +536,10 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
-  Detector *det = new Detector("point-detector", 2, NULL);
+  // Where 0.01 is half detector width etc.
+  Detector *det = new Detector(
+      "point-detector", 2,
+      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), NULL);
   det->setPos(20, (20 - sample->getPos().X()), 0);
   instrument->add(det);
   instrument->markAsDetector(det);
@@ -762,7 +765,7 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   for (size_t i = 0; i < numpixels; i++) {
     // Create one event for each bin
     EventList &events = retVal->getEventList(static_cast<detid_t>(i));
-    for (double ie = 0; ie < numbins; ie++) {
+    for (std::size_t ie = 0; ie < numbins; ie++) {
       // Create a list of events, randomize
       events += TofEvent(std::rand(), std::rand());
     }
@@ -1054,7 +1057,8 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
   loadInst->setPropertyValue("InstrumentName",
                              sourceWS->getInstrument()->getName());
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", outputWS);
-  loadInst->setProperty("RewriteSpectraMap", true);
+  loadInst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(true));
   loadInst->executeAsChildAlg();
   // Populate the instrument parameters in this workspace - this works around a
   // bug

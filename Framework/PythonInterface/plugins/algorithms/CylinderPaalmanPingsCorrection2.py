@@ -2,7 +2,7 @@
 
 from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator)
+                        WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress)
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, CompositeValidator)
 import math
@@ -44,7 +44,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         return 2
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections"
+        return "Workflow\\MIDAS;CorrectionFunctions\\AbsorptionCorrections"
 
     def summary(self):
         return "Calculates absorption corrections for a cylindrical or annular sample using Paalman & Pings format."
@@ -145,10 +145,11 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         dataA3 = []
         dataA4 = []
 
+        data_prog = Progress(self, start=0.1, end=0.85, nreports=len(self._angles))
         for angle in self._angles:
             (A1, A2, A3, A4) = self._cyl_abs(angle)
             logger.information('Angle : %f * successful' % (angle))
-
+            data_prog.report('Appending data for angle %f' % (angle))
             dataA1 = np.append(dataA1, A1)
             dataA2 = np.append(dataA2, A2)
             dataA3 = np.append(dataA3, A3)
@@ -156,8 +157,13 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         dataX = self._waves * len(self._angles)
 
+        wrk_reports = 5
+        if self._use_can:
+            wrk_reports = 8
+        workflow_prog = Progress(self, start=0.85, end=1.0, nreports=wrk_reports)
         # Create the output workspaces
         ass_ws = self._output_ws_name + '_ass'
+        workflow_prog.report('Creating Workspace')
         CreateWorkspace(OutputWorkspace=ass_ws,
                         DataX=dataX,
                         DataY=dataA1,
@@ -167,6 +173,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         workspaces = [ass_ws]
 
         if self._use_can:
+            workflow_prog.report('Creating assc Workspace')
             assc_ws = self._output_ws_name + '_assc'
             workspaces.append(assc_ws)
             CreateWorkspace(OutputWorkspace=assc_ws,
@@ -176,6 +183,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                             UnitX='Wavelength',
                             ParentWorkspace=self._sample_ws_name)
 
+            workflow_prog.report('Creating acsc Workspace')
             acsc_ws = self._output_ws_name + '_acsc'
             workspaces.append(acsc_ws)
             CreateWorkspace(OutputWorkspace=acsc_ws,
@@ -185,6 +193,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                             UnitX='Wavelength',
                             ParentWorkspace=self._sample_ws_name)
 
+            workflow_prog.report('Creating acc Workspace')
             acc_ws = self._output_ws_name + '_acc'
             workspaces.append(acc_ws)
             CreateWorkspace(OutputWorkspace=acc_ws,
@@ -197,6 +206,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         if self._interpolate:
             self._interpolate_corrections(workspaces)
 
+        workflow_prog.report('Constructing Sample Logs')
         sample_log_workspaces = workspaces
         sample_logs = [('sample_shape', 'cylinder'),
                        ('sample_filename', self._sample_ws_name),
@@ -211,14 +221,19 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         log_values = [item[1] for item in sample_logs]
 
         for ws_name in sample_log_workspaces:
+            workflow_prog.report('Adding sample logs to %s' % ws_name)
             AddSampleLogMultiple(Workspace=ws_name, LogNames=log_names, LogValues=log_values)
 
+        workflow_prog.report('Create GroupWorkpsace Output')
         GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name)
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
+        workflow_prog.report('Algorithm complete')
 
 #------------------------------------------------------------------------------
 
     def _setup(self):
+        setup_prog = Progress(self, start=0.00, end=0.01, nreports=2)
+        setup_prog.report('Obtaining input properties')
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
         self._sample_number_density = self.getProperty('SampleNumberDensity').value
@@ -255,7 +270,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                 raise ValueError('Can outer radius not > sample outer radius')
             else:
                 logger.information('Can : inner radius = %f ; outer radius = %f' % (self._radii[1], self._radii[2]))
-
+        setup_prog.report('Obtaining beam values')
         beam_width = self.getProperty('BeamWidth').value
         beam_height = self.getProperty('BeamHeight').value
         self._beam = [beam_height,
@@ -279,6 +294,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 #------------------------------------------------------------------------------
 
     def _sample(self):
+        sample_prog = Progress(self, start=0.01, end=0.03, nreports=2)
+        sample_prog.report('Setting Sample Material for Sample') 
         SetSampleMaterial(self._sample_ws_name , ChemicalFormula=self._sample_chemical_formula,
                           SampleNumberDensity=self._sample_number_density)
         sample = mtd[self._sample_ws_name].sample()
@@ -294,6 +311,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self._density[0] = self._sample_number_density
 
         if self._use_can:
+            sample_prog.report('Setting Sample Material for Container') 
             SetSampleMaterial(InputWorkspace=self._can_ws_name, ChemicalFormula=self._can_chemical_formula,
                               SampleNumberDensity=self._can_number_density)
             can_sample = mtd[self._can_ws_name].sample()
@@ -306,11 +324,13 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
     def _get_angles(self):
         num_hist = mtd[self._sample_ws_name].getNumberHistograms()
+        angle_prog = Progress(self, start=0.03, end=0.07, nreports=num_hist)
         source_pos = mtd[self._sample_ws_name].getInstrument().getSource().getPos()
         sample_pos = mtd[self._sample_ws_name].getInstrument().getSample().getPos()
         beam_pos = sample_pos - source_pos
         self._angles = list()
         for index in range(0, num_hist):
+            angle_prog.report('Obtaining data for detector angle %i' % index)
             detector = mtd[self._sample_ws_name].getDetector(index)
             two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi
             self._angles.append(two_theta)
@@ -329,7 +349,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         wave_bin = (wave_max - wave_min) / (number_waves-1)
 
         self._waves = list()
+        wave_prog = Progress(self, start=0.07, end = 0.10, nreports=number_waves)
         for idx in range(0, number_waves):
+            wave_prog.report('Appending wave data: %i' % idx)
             self._waves.append(wave_min + idx * wave_bin)
         DeleteWorkspace(wave_range)
 

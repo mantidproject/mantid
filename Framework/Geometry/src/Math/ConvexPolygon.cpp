@@ -66,8 +66,7 @@ void ConvexPolygon::clear() {
 }
 
 /**
- * Insert a new vertex. It is assumed this point is the next
- * point in anti-clockwise manner
+ * Insert a new vertex.
  * @param pt A new point for the shape
  */
 void ConvexPolygon::insert(const V2D &pt) {
@@ -75,12 +74,12 @@ void ConvexPolygon::insert(const V2D &pt) {
   // Update extrema
   if (pt.X() < m_minX)
     m_minX = pt.X();
-  else if (pt.X() > m_maxX)
+  if (pt.X() > m_maxX)
     m_maxX = pt.X();
 
   if (pt.Y() < m_minY)
     m_minY = pt.Y();
-  else if (pt.Y() > m_maxY)
+  if (pt.Y() > m_maxY)
     m_maxY = pt.Y();
 }
 
@@ -178,13 +177,12 @@ double ConvexPolygon::determinant() const {
   // that calling next() on the vertex takes us clockwise within
   // the polygon.
   double lhs(0.0), rhs(0.0);
-  const V2D *v_i(NULL), *v_ip1(NULL);
   for (size_t i = 0; i < npoints(); ++i) {
-    v_i = &(m_vertices[i]);
-    v_ip1 = &(m_vertices[(i + 1) % npoints()]);
+    const V2D &v_i = m_vertices[i];
+    const V2D &v_ip1 = m_vertices[(i + 1) % npoints()];
 
-    lhs += v_ip1->X() * v_i->Y();
-    rhs += v_i->X() * v_ip1->Y();
+    lhs += v_ip1.X() * v_i.Y();
+    rhs += v_i.X() * v_ip1.Y();
   }
   return lhs - rhs;
 }

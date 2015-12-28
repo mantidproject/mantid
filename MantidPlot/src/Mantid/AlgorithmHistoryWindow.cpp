@@ -435,40 +435,79 @@ void AlgorithmHistoryWindow::doRoll( int index )
 // AlgHistoryProperties Definitions
 //--------------------------------------------------------------------------------------------------
 
-AlgHistoryProperties::AlgHistoryProperties(QWidget*w,const std::vector<PropertyHistory_sptr>& propHist):
-  m_Histprop(propHist)
-{
+AlgHistoryProperties::AlgHistoryProperties(
+    QWidget *w, const std::vector<PropertyHistory_sptr> &propHist)
+    : m_Histprop(propHist) {
   QStringList hList;
-  hList<<"Name"<<"Value"<<"Default?:"<<"Direction"<<"";
-  m_histpropTree = new  QTreeWidget(w);
-  if(m_histpropTree)
-  {
-    m_histpropTree->setColumnCount(5);
-    m_histpropTree->setSelectionMode(QAbstractItemView::NoSelection);
-    m_histpropTree->setHeaderLabels(hList);
-    m_histpropTree->setGeometry (213,5,350,200);
-  }
+  hList << "Name"
+        << "Value"
+        << "Default?:"
+        << "Direction"
+        << "";
+
+  m_histpropTree = new QTreeWidget(w);
+  m_histpropTree->setColumnCount(5);
+  m_histpropTree->setSelectionMode(QAbstractItemView::NoSelection);
+  m_histpropTree->setHeaderLabels(hList);
+  m_histpropTree->setGeometry(213, 5, 350, 200);
+
+  m_contextMenu = new QMenu(w);
+
+  m_copyAction = new QAction("Copy to Clipboard", m_contextMenu);
+  connect(m_copyAction, SIGNAL(triggered()), this,
+          SLOT(copySelectedItemText()));
+  m_contextMenu->addAction(m_copyAction);
+
+  m_histpropTree->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(m_histpropTree, SIGNAL(customContextMenuRequested(const QPoint &)),
+          this, SLOT(popupMenu(const QPoint &)));
 }
-void AlgHistoryProperties::clearData()
-{
-  if(m_histpropTree)
-  {   m_histpropTree->clear();
-    int ntopcount=m_histpropTree->topLevelItemCount() ;
-    while(ntopcount--)
-    {m_histpropTree->topLevelItem(ntopcount);
+
+void AlgHistoryProperties::clearData() {
+  if (m_histpropTree) {
+    m_histpropTree->clear();
+    int ntopcount = m_histpropTree->topLevelItemCount();
+    while (ntopcount--) {
+      m_histpropTree->topLevelItem(ntopcount);
     }
   }
 }
-void AlgHistoryProperties::setAlgProperties( const std::vector<PropertyHistory_sptr>& histProp)
-{
-  m_Histprop.assign(histProp.begin(),histProp.end());
+
+void AlgHistoryProperties::setAlgProperties(
+    const std::vector<PropertyHistory_sptr> &histProp) {
+  m_Histprop.assign(histProp.begin(), histProp.end());
 }
-const PropertyHistories& AlgHistoryProperties:: getAlgProperties()
-{
+
+const PropertyHistories &AlgHistoryProperties::getAlgProperties() {
   return m_Histprop;
 }
-void AlgHistoryProperties::displayAlgHistoryProperties()
-{
+
+void AlgHistoryProperties::popupMenu(const QPoint &pos) {
+  QTreeWidgetItem *treeItem = m_histpropTree->itemAt(pos);
+  if (!treeItem)
+    return;
+
+  m_selectedItemText = treeItem->text(m_histpropTree->currentColumn());
+  m_contextMenu->popup(QCursor::pos());
+}
+
+void AlgHistoryProperties::copySelectedItemText() {
+  QClipboard *clipboard = QApplication::clipboard();
+  if (clipboard)
+    clipboard->setText(m_selectedItemText);
+}
+
+/**
+ * @brief Populates the Algorithm History display
+ * with property names, values, directions and whether their values were the
+ * defaults.
+ *
+ * If a value was unset and its default value is EMPTY_INT, EMPTY_DBL
+ * or EMPTY_LONG, display an empty space to the user rather than the
+ * internal numeric representation of an empty value.
+ *
+ */
+void AlgHistoryProperties::displayAlgHistoryProperties() {
   QStringList propList;
   std::string sProperty;
   for ( std::vector<PropertyHistory_sptr>::const_iterator pIter = m_Histprop.begin();
@@ -476,12 +515,17 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
   {
     sProperty=(*pIter)->name();
     propList.append(sProperty.c_str());
-    sProperty=(*pIter)->value();
+
+    sProperty = (*pIter)->value();
+    bool bisDefault = (*pIter)->isDefault();
+    if (bisDefault == true) {
+      if ((*pIter)->isEmptyDefault()) {
+        sProperty = ""; // replace EMPTY_XXX with empty string
+      }
+    }
     propList.append(sProperty.c_str());
 
-    bool bisDefault=(*pIter)->isDefault();
     bisDefault? (sProperty="Yes"):(sProperty="No");
-
     propList.append(sProperty.c_str());
     int nDirection=(*pIter)->direction();
     switch(nDirection)

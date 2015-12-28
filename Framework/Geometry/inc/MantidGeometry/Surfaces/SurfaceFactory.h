@@ -40,9 +40,10 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL SurfaceFactory {
 private:
-  typedef std::map<std::string, Surface *>
-      MapType; ///< Storage of surface pointers
-
+  // workaround because gcc 4.4 cannot have std::unique_ptr inside a std::map.
+  // http://stackoverflow.com/questions/7342703/gcc-4-4-4-5-unique-ptr-not-work-for-unordered-set-unordered-map
+  typedef std::vector<std::pair<std::string, std::unique_ptr<Surface>>>
+      MapType;                 ///< Storage of surface pointers
   static SurfaceFactory *FOBJ; ///< Effective "this"
 
   MapType SGrid;                  ///< The tally stack
@@ -60,9 +61,9 @@ public:
   static SurfaceFactory *Instance();
   ~SurfaceFactory();
 
-  Surface *createSurface(const std::string &) const;
-  Surface *createSurfaceID(const std::string &) const;
-  Surface *processLine(const std::string &) const;
+  std::unique_ptr<Surface> createSurface(const std::string &) const;
+  std::unique_ptr<Surface> createSurfaceID(const std::string &) const;
+  std::unique_ptr<Surface> processLine(const std::string &) const;
 };
 
 } // NAMESPACE Geometry

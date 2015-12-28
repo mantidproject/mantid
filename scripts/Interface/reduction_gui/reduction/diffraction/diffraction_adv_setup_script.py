@@ -4,11 +4,10 @@
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
-import os
-import time
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
+
 
 def getBooleanElement(instrument_dom, keyname, default):
     """ Get a boolean value from an element.
@@ -44,7 +43,8 @@ class AdvancedSetupScript(BaseScriptElement):
     pushdatapositive = "None"
     unwrapref = ""
     lowresref = ""
-    cropwavelengthmin = ""
+    cropwavelengthmin = ''
+    cropwavelengthmax = ''
     removepropmppulsewidth = 50.0
     maxchunksize = ""
     filterbadpulses = 95.
@@ -78,6 +78,7 @@ class AdvancedSetupScript(BaseScriptElement):
         self.parnamelist.append("UnwrapRef")
         self.parnamelist.append("LowResRef")
         self.parnamelist.append("CropWavelengthMin")
+        self.parnamelist.append('CropWavelengthMax')
         self.parnamelist.append("RemovePromptPulseWidth")
         self.parnamelist.append("MaxChunkSize")
         self.parnamelist.append("StripVanadiumPeaks")
@@ -127,6 +128,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["UnwrapRef"] = self.unwrapref
         pardict["LowResRef"] = self.lowresref
         pardict["CropWavelengthMin"] = self.cropwavelengthmin
+        pardict['CropWavelengthMax'] = self.cropwavelengthmax
         pardict["RemovePromptPulseWidth"] = self.removepropmppulsewidth
         pardict["MaxChunkSize"] = self.maxchunksize
         pardict["FilterBadPulses"] = self.filterbadpulses
@@ -180,18 +182,21 @@ class AdvancedSetupScript(BaseScriptElement):
             self.cropwavelengthmin = getFloatElement(instrument_dom, "cropwavelengthmin",
                                                      AdvancedSetupScript.cropwavelengthmin)
 
+            self.cropwavelengthmax = getFloatElement(instrument_dom, 'cropwavelengthmax',
+                                                     AdvancedSetupScript.cropwavelengthmax)
 
             self.removepropmppulsewidth = getFloatElement(instrument_dom, "removepromptpulsewidth",
                                                           AdvancedSetupScript.removepropmppulsewidth)
 
             try:
-                self.maxchunksize = BaseScriptElement.getIntElement(instrument_dom,\
-                    "maxchunksize", default=AdvancedSetupScript.maxchunksize)
+                self.maxchunksize = BaseScriptElement.getIntElement(
+                    instrument_dom, 'maxchunksize', default=AdvancedSetupScript.maxchunksize)
             except ValueError:
                 self.maxchunksize = AdvancedSetupScript.maxchunksize
 
-            self.filterbadpulses = getFloatElement(instrument_dom,\
-                    "filterbadpulses", AdvancedSetupScript.filterbadpulses)
+            self.filterbadpulses = getFloatElement(instrument_dom,
+                                                   'filterbadpulses',
+                                                   AdvancedSetupScript.filterbadpulses)
 
             self.bkgdsmoothpars = BaseScriptElement.getStringElement(instrument_dom,\
                 "bkgdsmoothpars", default=AdvancedSetupScript.bkgdsmoothpars)
@@ -233,6 +238,7 @@ class AdvancedSetupScript(BaseScriptElement):
         self.unwrapref              = AdvancedSetupScript.unwrapref
         self.lowresref              = AdvancedSetupScript.lowresref
         self.cropwavelengthmin      = AdvancedSetupScript.cropwavelengthmin
+        self.cropwavelengthmax      = AdvancedSetupScript.cropwavelengthmax
         self.removepropmppulsewidth = AdvancedSetupScript.removepropmppulsewidth
         self.maxchunksize           = AdvancedSetupScript.maxchunksize
         self.filterbadpulses        = AdvancedSetupScript.filterbadpulses

@@ -57,7 +57,7 @@ class TimeSlice(PythonAlgorithm):
     _out_ws_group = None
 
     def category(self):
-        return 'PythonAlgorithms;Inelastic'
+        return 'Inelastic\\Utility'
 
 
     def summary(self):
@@ -244,7 +244,8 @@ class TimeSlice(PythonAlgorithm):
 
         # Construct output workspace name
         run = mtd[raw_file].getRun().getLogData('run_number').value
-        slice_file = raw_file[:3].lower() + run + self._output_ws_name_suffix
+        inst = mtd[raw_file].getInstrument().getName()
+        slice_file = inst.lower() + run + self._output_ws_name_suffix
 
         if self._background_range is None:
             Integration(InputWorkspace=raw_file,

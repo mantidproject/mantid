@@ -88,7 +88,7 @@ int LoadILLAscii::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLAscii::category() const {
-  return "MDAlgorithms\\Text";
+  return "MDAlgorithms\\DataHandling";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -230,6 +230,8 @@ void LoadILLAscii::loadIDF(API::MatrixWorkspace_sptr &workspace) {
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          OptionalBool(OptionalBool::True));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");

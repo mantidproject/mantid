@@ -3,6 +3,7 @@ set ( SRC_FILES
 	# Old TMP convertToMD code prepared for deprecation:
 	# src/CreateMDFitWorkspace.cpp
 	#end TMP
+    src/AccumulateMD.cpp
 	src/AndMD.cpp
 	src/BinMD.cpp
 	src/BinaryOperationMD.cpp
@@ -12,7 +13,7 @@ set ( SRC_FILES
 	src/CentroidPeaksMD.cpp
 	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
-    src/CompactMD.cpp
+	src/CompactMD.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
@@ -31,10 +32,11 @@ set ( SRC_FILES
 	src/ConvertToMDMinMaxLocal.cpp
 	src/ConvertToMDParent.cpp
 	src/ConvertToReflectometryQ.cpp
+	src/CreateMD.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/CutMD.cpp
-	src/DisplayNormalizationSetter.cpp	
+	src/DisplayNormalizationSetter.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/EvaluateMDFunction.cpp
@@ -107,6 +109,7 @@ set ( SRC_FILES
 	src/SaveMD.cpp
 	src/SaveMD2.cpp
 	src/SaveZODS.cpp
+	src/SetMDFrame.cpp
 	src/SetMDUsingMask.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
@@ -127,6 +130,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
+    inc/MantidMDAlgorithms/AccumulateMD.h
 	inc/MantidMDAlgorithms/AndMD.h
 	inc/MantidMDAlgorithms/BinMD.h
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
@@ -136,8 +140,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
+	inc/MantidMDAlgorithms/CompactMD.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
-    inc/MantidMDAlgorithms/CompactMD.h
 	inc/MantidMDAlgorithms/ConvToMDBase.h
 	inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
 	inc/MantidMDAlgorithms/ConvertCWSDExpToMomentum.h
@@ -152,6 +156,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h
 	inc/MantidMDAlgorithms/ConvertToMDParent.h
 	inc/MantidMDAlgorithms/ConvertToReflectometryQ.h
+	inc/MantidMDAlgorithms/CreateMD.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/CutMD.h
@@ -230,6 +235,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/SaveMD.h
 	inc/MantidMDAlgorithms/SaveMD2.h
 	inc/MantidMDAlgorithms/SaveZODS.h
+	inc/MantidMDAlgorithms/SetMDFrame.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
 	inc/MantidMDAlgorithms/SliceMD.h
 	inc/MantidMDAlgorithms/SlicingAlgorithm.h
@@ -250,6 +256,7 @@ set ( TEST_FILES
 	#
 	# these tests are as they test verify different parts of the CPR algorithms
 	#CreateMDFitWorkspaceTest.h
+    AccumulateMDTest.h
 	AndMDTest.h
 	BooleanBinaryOperationMDTest.h
 	BoxControllerSettingsAlgorithmTest.h
@@ -258,8 +265,8 @@ set ( TEST_FILES
 	CentroidPeaksMD2Test.h
 	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
+	CompactMDTest.h
 	CompareMDWorkspacesTest.h
-    CompactMDTest.h
 	ConvertCWPDMDToSpectraTest.h
 	ConvertCWSDExpToMomentumTest.h
 	ConvertCWSDMDtoHKLTest.h
@@ -276,6 +283,7 @@ set ( TEST_FILES
 	ConvertToQ3DdETest.h
 	ConvertToReflectometryQTest.h
 	CreateMDHistoWorkspaceTest.h
+	CreateMDTest.h
 	CreateMDWorkspaceTest.h
 	CutMDTest.h
 	DisplayNormalizationSetterTest.h
@@ -337,6 +345,7 @@ set ( TEST_FILES
 	SaveMD2Test.h
 	SaveMDTest.h
 	SaveZODSTest.h
+	SetMDFrameTest.h
 	SetMDUsingMaskTest.h
 	SimulateResolutionConvolvedModelTest.h
 	SliceMDTest.h

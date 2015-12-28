@@ -14,10 +14,6 @@ public:
 
   void testVersion() { TS_ASSERT_EQUALS(mr.version(), 1); }
 
-  void testCategory() {
-    TS_ASSERT_EQUALS(mr.category(), "CorrectionFunctions");
-  }
-
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(mr.initialize());
     TS_ASSERT(mr.isInitialized());

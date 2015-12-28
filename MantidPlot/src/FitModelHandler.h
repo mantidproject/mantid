@@ -37,7 +37,7 @@ class Fit;
 class FitModelHandler : public QXmlDefaultHandler
 {
 public:
-    FitModelHandler(Fit *fit);
+  explicit FitModelHandler(Fit *fit);
 
     bool startElement(const QString &namespaceURI, const QString &localName,
                        const QString &qName, const QXmlAttributes &attributes);

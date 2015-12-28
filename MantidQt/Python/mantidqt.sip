@@ -66,12 +66,10 @@
 %End
 };
 
-
 namespace Mantid
 {
 namespace API
 {
-
 
 enum MDNormalization
 {
@@ -1448,3 +1446,95 @@ public:
 
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
+
+
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+
+namespace MantidQt
+{
+namespace API
+{
+
+class WidgetScrollbarDecorator
+{
+%TypeHeaderCode
+#include "MantidQtAPI/WidgetScrollbarDecorator.h"
+%End
+%Docstring
+
+WidgetScrollbarDecorator
+=================
+
+    Adds scrollbar functionality to a QWidget
+
+    Mainly intended to make QDialogs and QMainWindows scrollable since this
+    feature is missing in Qt. This allows particularly large dialogs to be
+    used on laptops and other devices with small screens.
+
+    Usage:
+        from mantidqtpython import MantidQt
+
+        # Usually in __init__ or other setup function
+        self._scrollbars = MantidQt.API.WidgetScrollbarDecorator(self)
+        self._scrollbars.setEnabled(True) # Must come after setupUi(self)!
+
+%End
+
+public:
+    explicit WidgetScrollbarDecorator(QWidget *target);
+%Docstring
+WidgetScrollbarDecorator::WidgetScrollbarDecorator(QWidget *target)
+------------------------------
+    Constructor. Decorates the target widget to add scrollbars to it.
+
+    Scrollbars are disabled by default and must be enabled using:
+    setEnabled(True)
+
+%End
+
+    virtual ~WidgetScrollbarDecorator();
+
+    bool enabled() const;
+    void setEnabled(bool enable);
+%Docstring
+WidgetScrollbarDecorator::setEnabled(bool enable)
+------------------------------
+    Enables or disables scrollbars on the target widget.
+
+    Note: setupUi() MUST be called before scrollbars are enabled.
+
+%End
+
+    void setThresholdWidth(int width);
+%Docstring
+setThresholdWidth(int width)
+------------------------------
+    Set the width, in pixels, at which scrollbars should appear
+
+%End
+
+    void setThresholdHeight(int height);
+%Docstring
+setThresholdHeight(int height)
+------------------------------
+    Set the height, in pixels, at which scrollbars should appear
+
+%End
+
+    void setThresholdSize(int width, int height);
+%Docstring
+setThresholdSize(int width, int height)
+------------------------------
+    Set the size, in pixels, at which scrollbars should appear
+
+%End
+
+};
+
+}; // end namespace API
+}; // end namespace MantidQt
+
+

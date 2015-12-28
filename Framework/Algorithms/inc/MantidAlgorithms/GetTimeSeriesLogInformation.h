@@ -52,7 +52,7 @@ public:
 
   virtual int version() const { return 1; }
   virtual const std::string category() const {
-    return "Diffraction;Events\\EventFiltering";
+    return "Diffraction\\Utility;Events\\EventFiltering";
   }
 
 private:

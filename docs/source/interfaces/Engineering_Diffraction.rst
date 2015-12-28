@@ -7,10 +7,11 @@ Engineering Diffraction
 Overview
 --------
 
-This custom interface integrates several tasks related to engineeering
-diffraction. It provides calibration and focusing functionality which
-can be expected to expand for next releases as it is under active
-development. The following sections describe the different tabs or
+This custom interface integrates several tasks related to engineering
+diffraction. It provides functionality for calibration, focusing, and
+pre-processing of event mode data. Further extensions can be expected
+for next releases as it is under active development. Feedback is very
+much welcome. The following sections describe the different tabs or
 functionality areas of the interface.
 
 .. interface:: Engineering Diffraction
@@ -27,6 +28,17 @@ Instrument
 
 Close
   Close the interface
+
+RB Number
+  To enable the GUI specify a RB Number, the RB number will be used for the
+  output paths, so that files from different users and/or experiments can
+  be kept separate.
+
+* Red Star Sign
+  If a red star sign is displayed next to the Browse Button, it is mostly
+  likely because the file specified has not been found. Error message
+  can be viewed by hovering over the red star sign.
+
 
 Calibration
 -----------
@@ -51,19 +63,26 @@ Calibration sample #
   Number of the calibration sample run (for example Ceria run) used to
   calibrate experiment runs.
 
+The calibration process depends on several additional parameters and
+settings which can be modified in the *Settings* section (tab), see
+below for details.
+
 Focus
 -----
 
-Here it is possible to focus run files, provided a run number or run
-file. The focusing process uses the algorithm :ref:`EnggFocus
+Here it is possible to focus run files, by providing a run number or a
+range of run number to enable multi-run focusing, along with that the
+user may also select the files with the help of Browse button.
+
+The focusing process uses the algorithm :ref:`EnggFocus
 <algm-EnggFocus>`. In the documentation of the algorithm you can find
 the details on how the input runs are focused.
 
 The interface will also create workspaces that can be inspected in the
 workspaces window:
 
-1. The *engg_focusing_input_ws workspace* for the data being focused
-2. The *engg_focusing_output_ws... workspace* for the corresponding
+1. The *engggui_focusing_input_ws workspace* for the data being focused
+2. The *engggui_focusing_output_ws... workspace* for the corresponding
    focused data (where the ... denotes a suffix explained below).
 
 Three focusing alternatives are provided:
@@ -72,7 +91,7 @@ Three focusing alternatives are provided:
 2. Cropped focusing, where several spectra or ranges of spectra can
    be specified, as a list separated by commas.
 3. Texture focusing, where the *texture* group of detectors is given
-   in a Detector Gropuing File.
+   in a Detector Grouping File.
 
 Depending on the alternative chosen, the focusing operation will
 include different banks and/or combinations of spectra (detectors). In
@@ -88,16 +107,45 @@ for normal focusing, *_cropped* for cropped focusing, and
 *_texture_bank_1, _texture_bank_2*, and so on for texture focusing
 (using the bank IDs given in the detector grouping file).
 
+Cropped focusing and Texture focusing have been disabled by default to
+declutter the interface, but each section can be enabled simply by
+ticking the check-box next to Focus Cropped and Focus Texture.
+
 For texture focusing, the detector grouping file is a text (csv) file
 with one line per bank. Each line must contain at least two numeric
 fields, where the first one specifies the bank ID, and the second and
 subsequent ones different spectrum numbers or ranges of spectrum
-numbers. For example:
-::
+numbers. For example::
+
    # Bank ID, spectrum numbers
    1, 205-210
    2, 100, 102, 107
    3, 300, 310, 320-329, 350-370
+
+When a focus run process is being carried out, Focus Stop button will
+be enabled. Focus Stop button will allow the user to abort once the
+current focus run process has been completed. Inside the *Result Log*
+a warning message will be displayed with last successful run and total
+number of focus runs that could not be processed.
+
+Run Number
+^^^^^^^^^^
+The run provided to focus can be for example 228061-228063, this will
+run all the files within the given range as long as the file
+directories are included in the
+`User Directories <http://www.mantidproject.org/SplittersWorkspace>`_.
+The user may also provide an input of 228061-3 or 228061, 228062,
+2280623 which should work the same way.
+
+If a red star sign is displayed next to the Browse Button, it is mostly
+likely because the file specified has not been found. Error message
+can be viewed by hovering over the red star sign.
+
+Checking the availability of all the files can take some time, for this
+reason it is also possible that a file may not have been found but the
+red star sign has not been displayed. If you manage to click Focus
+before red sign is displayed, the interface will process the last valid
+focus run instead.
 
 Output
 ^^^^^^
@@ -108,7 +156,13 @@ Plots: will replace the previous graph and plot a new graph on top.
 One Window - Waterfall: will plot all the generated focused
 workspace graphs in one window which can be useful while comparing
 various graphs. The Multiple Windows: will plot graph in
-separate windows.
+separate windows. However, user may also change the Plot Data
+Representation drop-down box while a run is being carried out. This
+will update the interface and plot workspace according to the new
+given input. For example, if a user has selected One Window -
+Replacing Plots and then decides to change it to One Window -
+Waterfall during a run, the interface will carry on by plotting
+Waterfall within the same window.
 
 The user also has an option of generated GSS, XYE and OpenGenie
 formatted file by clicking the Output Files checkbox. This will
@@ -116,6 +170,46 @@ generated three different files for each focused output workspace
 in Mantid. These files can be found with appropriate name at location:
 C:\EnginX_Mantid\User\236516\Focus on Windows, the
 EnginX_Mantid folder can be found on Desktop/Home on other platforms.
+
+Pre-processing
+--------------
+
+.. warning:: This is a new capability that is currently in a very
+             early stage of definition and implementation. Not all
+             options may be supported and/or consistent at the moment.
+
+The focusing options can be applied directly to histogram data. For
+event mode experiments, the event data (which would be loaded as event
+workspaces in Mantid) need to be pre-processed.
+
+The simplest pre-processing option is "regular time binning" which
+will produce a histogram data workspace (as a :ref:`Workspace2D
+<Workspace2D>`). The only parameter required is the bin width. The
+workspace will be named with the following convention:
+
+- *engggui_preproc_time_ws*
+
+When the input run file contains multiple workspaces (it would be
+loaded by :ref:`Load <algm-Load>` as multiple :ref:`EventWorkspace
+<EventWorkspace>` workspaces) the output workspace will be a group
+with the corresponding number of histogram workspaces, binned
+separately. This is the case when the input run file comes from a
+multi-period experiment. Note that the time bin can be a multiple of
+the pulse time.
+
+A different way of pre-processing event data is by rebinning
+multi-period data by pulse times. In this case the input required is
+the time step for the binning (the x axis of the output will be time
+instead of time-of-flight). It is also possible to specify the number
+of periods that will be processed (starting from the first one). This
+type of pre-processing produces workspaces with the following naming
+convention:
+
+- *engggui_preproc_by_pulse_time_ws*
+
+This tab uses the algorithms :ref:`Rebin <algm-Rebin>` and :ref:`Rebin
+<algm-RebinByPulseTimes>` to bin the data in different ways when
+converting event data into histogram data.
 
 Settings
 --------
@@ -131,16 +225,21 @@ Calibration Parameters
 The calibration settings are organized in three blocks:
 
 1. Input directories
-2. Pixel calibration
+2. Pixel (full) calibration
 3. Advanced settings
 
 The input directories will be used when looking for run files
-(Vanadium and Ceria). They effectivel ybecome part of the search path
+(Vanadium and Ceria). They effectively become part of the search path
 of Mantid when using this interface.
 
-The pixel calibration file contains the calibration of every pixel of
-all banks, as produced by the algorithm :ref:`EnggCalibrateFull
-<algm-EnggCalibrateFull>`.
+The pixel (full) calibration file contains the calibration details of
+every pixel of all banks, as produced by the algorithm
+:ref:`EnggCalibrateFull <algm-EnggCalibrateFull>`. A default pixel
+calibration file is provided with Mantid packages. This calibration
+has been produced for the Vanadium and calibration sample (Ceria) runs
+indicated in the name of the calibration file. Note that this
+calibration is currently subject to changes, as the fitting of peaks
+is being refined.
 
 The Following advanced settings are available to customize the
 behavior of this interface:
@@ -152,7 +251,7 @@ Force recalculate
   original Vanadium run file, or there is a change in the algorithms
   that calculate the corrections
 
-Tempalte .prm file
+Template .prm file
   By changing this option you can Use a different template file for the
   output GSAS IPAR that is generated in the Calibration tab.
 

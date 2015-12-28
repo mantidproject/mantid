@@ -85,7 +85,7 @@ private:
 class CustomActionHandler : public QXmlDefaultHandler
 {
 public:
-    CustomActionHandler(QAction *action);
+  explicit CustomActionHandler(QAction *action);
 
     bool startElement(const QString &namespaceURI, const QString &localName,
                        const QString &qName, const QXmlAttributes &attributes);

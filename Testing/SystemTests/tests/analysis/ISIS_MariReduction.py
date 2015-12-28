@@ -1,8 +1,7 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 """ Sample MARI reduction scrip used in testing ReductionWrapper """
 import os
-#os.environ["PATH"] =\
-#r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#
 from Direct.ReductionWrapper import *
 try:
     import reduce_vars as web_var
@@ -40,6 +39,7 @@ class ReduceMARIFromFile(ReductionWrapper):
         prop['hard_mask_file'] = "mar11015.msk"
         prop['det_cal_file'] = 11060
         prop['save_format'] = ''
+        prop['nullify_negative_signal']=True
         return prop
       #
     @iliad
@@ -78,9 +78,9 @@ class ReduceMARIFromFile(ReductionWrapper):
         return None
 
 
-    def __init__(self,web_var=None):
+    def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var)
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
@@ -136,6 +136,7 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
       # TODO: Why not workspace?
         prop['det_cal_file'] = "11060"
         prop['save_format'] = ''
+        prop['nullify_negative_signal']=True
         return prop
       #
     @iliad
@@ -147,9 +148,9 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return ws
 
-    def __init__(self,web_var=None):
+    def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var)
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
 #----------------------------------------------------------------------------------------------------------------------
 class ReduceMARIMon2Norm(ReductionWrapper):
 
@@ -167,7 +168,6 @@ class ReduceMARIMon2Norm(ReductionWrapper):
         prop['monovan_run'] = 11015 #Load(Filename='MAR11015.RAW',OutputWorkspace='MAR11015.RAW')
         prop['sample_mass'] = 10
         prop['sample_rmm'] = 435.96
-
         return prop
 
     @AdvancedProperties
@@ -186,8 +186,9 @@ class ReduceMARIMon2Norm(ReductionWrapper):
       # MARI calibration uses one of data files defined on instrument.  Here
       # vanadium run is used for calibration
       # TODO: Why not workspace?, check it
-        prop['det_cal_file'] = "11060"
+        prop['det_cal_file'] = "MAR11060.raw"
         prop['save_format'] = []
+        prop['nullify_negative_signal']=True
         return prop
       #
     @iliad
@@ -199,9 +200,9 @@ class ReduceMARIMon2Norm(ReductionWrapper):
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return outWS
 
-    def __init__(self,web_var=None):
+    def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var)
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
 #----------------------------------------------------------------------------------------------------------------------
 class MARIReductionSum(ReductionWrapper):
     @MainProperties
@@ -232,6 +233,7 @@ class MARIReductionSum(ReductionWrapper):
         prop['hard_mask_file'] = "mar11015.msk"
       #prop['det_cal_file'] =11060
         prop['save_format'] = ''
+        prop['nullify_negative_signal']=True
         return prop
       #
     @iliad
@@ -243,9 +245,9 @@ class MARIReductionSum(ReductionWrapper):
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return ws
 
-    def __init__(self,web_var=None):
+    def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var)
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
 #----------------------------------------------------------------------------------------------------------------------
 class ReduceMARIMonitorsSeparate(ReductionWrapper):
 
@@ -282,6 +284,7 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
         prop['det_cal_file'] = "11060"
         prop['save_format'] = ''
         prop['load_monitors_with_workspace'] = False
+        prop['nullify_negative_signal']=False
         return prop
       #
     @iliad
@@ -293,24 +296,109 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
      #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
         return outWS
 
-    def __init__(self,web_var=None):
+    def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var)
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
+
+class ReduceMARIAutoEi(ReductionWrapper):
+    @MainProperties
+    def def_main_properties(self):
+        """ Define main properties used in reduction """
+        prop = {}
+        ws = Load(Filename='MAR11001.RAW',OutputWorkspace='MAR11001')
+        # Add these log values to simulated workspace to represent real sample logs
+        AddTimeSeriesLog(ws, Name="fermi_delay", Time="2005-01-13T22:55:56", Value=6530 ,DeleteExisting=True)
+        AddTimeSeriesLog(ws, Name="fermi_delay", Time="2005-01-14T09:23:34", Value=6530)
+        AddTimeSeriesLog(ws, Name="fermi_speed", Time="2005-01-13T22:55:56", Value=400 ,DeleteExisting=True)
+        AddTimeSeriesLog(ws, Name="fermi_speed", Time="2005-01-14T09:23:34", Value=400)
+        #AddTimeSeriesLog(mon_ws, Name="is_running", Time="2010-01-01T00:00:00", Value=1 ,DeleteExisting=True)
+        #AddTimeSeriesLog(mon_ws, Name="is_running", Time="2010-01-01T00:30:00", Value=1 )
+
+        prop['sample_run'] = ws
+        prop['wb_run'] = 11060
+        prop['incident_energy'] = 'auto'
+        # Relative energy ranges
+        prop['energy_bins'] = [-11./13.,0.05/13.,11./13.]
+
+       #prop['sum_runs'] = False
+
+        # Absolute units reduction properties.
+        prop['monovan_run'] = 11015
+        prop['sample_mass'] = 10
+        prop['sample_rmm'] = 435.96
+        return prop
+
+    @AdvancedProperties
+    def def_advanced_properties(self):
+        """  separation between simple and advanced properties depends
+           on scientist, experiment and user.
+           main properties override advanced properties.
+        """
+        prop = {}
+        prop['map_file'] = "mari_res.map"
+        prop['monovan_mapfile'] = "mari_res.map"
+        prop['hard_mask_file'] = "mar11015.msk"
+        prop['det_cal_file'] = 11060
+        prop['save_format'] = ''
+        #prop['check_background'] = False
+        prop['nullify_negative_signal']=True
+        return prop
+      #
+    @iliad
+    def reduce(self,input_file=None,output_directory=None):
+        """Method executes reduction over single file
+         Overload only if custom reduction is needed
+        """
+        converted_to_energy_transfer_ws = ReductionWrapper.reduce(self,input_file,output_directory)
+        #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
+        return converted_to_energy_transfer_ws
+
+    def set_custom_output_filename(self):
+        """ define custom name of output files if standard one is not satisfactory
+          In addition to that, example of accessing reduction properties
+          Changing them if necessary
+        """
+        def custom_name(prop_man):
+            """Sample function which builds filename from
+              incident energy and run number and adds some auxiliary information
+              to it.
+            """
+            # Note -- properties have the same names as the list of advanced and
+            # main properties
+            ei = prop_man.incident_energy
+            # sample run is more then just list of runs, so we use
+            # the formalization below to access its methods
+            run_num = PropertyManager.sample_run.run_number()
+            name = "RUN{0}atEi{1:<3.2f}meV_One2One".format(run_num ,ei)
+            return name
+
+        # Uncomment this to use custom filename function
+        # Note: the properties are stored in prop_man class accessed as
+        # below.
+        #return lambda : custom_name(self.reducer.prop_man)
+        # use this method to use standard file name generating function
+        return None
+
+
+    def __init__(self,web_var_val=None):
+        """ sets properties defaults for the instrument with Name"""
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
+#-------------------------------------------------------------------------------------------------#
 
 
 if __name__ == "__main__":
 
     data_root = r'd:\Data\MantidDevArea\Datastore\DataCopies'
-    data_dir = os.path.join(data_root,r'Testing\Data\SystemTest')
-    ref_data_dir = os.path.join(data_root,r'Testing\SystemTests\tests\analysis\reference')
-    result_dir = r'd:/Data/Mantid_Testing/14_12_15'
-    config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,ref_data_dir,result_dir))
+    #data_dir = os.path.join(data_root,r'Testing\Data\SystemTest')
+    #ref_data_dir = os.path.join(data_root,r'Testing\SystemTests\tests\analysis\reference')
+    #result_dir = r'd:/Data/Mantid_Testing/14_12_15'
+    #config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,ref_data_dir,result_dir))
     #config.appendDataSearchDir('d:/Data/Mantid_GIT/Test/AutoTestData')
-    config['defaultsave.directory'] = result_dir # folder to save resulting spe/nxspe files.  Defaults are in
+    #config['defaultsave.directory'] = result_dir # folder to save resulting spe/nxspe files.  Defaults are in
 
     # execute stuff from Mantid
-    #rd = ReduceMARIFromFile()
-    rd= ReduceMARIMon2Norm()
+    rd = ReduceMARIFromFile()
+    #rd= ReduceMARIMon2Norm()
     #rd = ReduceMARIMonitorsSeparate()
     #rd = ReduceMARIFromWorkspace()
     rd.def_advanced_properties()

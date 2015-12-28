@@ -5,7 +5,7 @@
 
 find_path ( QWTPLOT3D_INCLUDE_DIR qwt3d_plot.h 
                 /usr/local/include /usr/include/qwtplot3d-qt4 /usr/include/qwtplot3d 
-                ${CMAKE_INCLUDE_PATH}/qwtplot3d 
+                ${CMAKE_INCLUDE_PATH}/qwtplot3d ${CMAKE_INCLUDE_PATH}/qwtplot3d-qt4
 )
 	  
 if (APPLE)

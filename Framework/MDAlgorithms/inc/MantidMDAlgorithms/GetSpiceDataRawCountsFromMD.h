@@ -58,7 +58,7 @@ public:
 
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "Diffraction;DataHandling";
+    return "Diffraction\\ConstantWavelength";
   }
 
 private:

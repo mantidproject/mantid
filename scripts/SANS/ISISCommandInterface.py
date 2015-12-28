@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
@@ -206,8 +206,10 @@ def TransFit(mode,lambdamin=None,lambdamax=None, selector='BOTH'):
     """
     mode = str(mode).strip().upper()
     message = mode
-    if lambdamin: message += ', ' + str(lambdamin)
-    if lambdamax: message += ', ' + str(lambdamax)
+    if lambdamin:
+    	message += ', ' + str(lambdamin)
+    if lambdamax:
+    	message += ', ' + str(lambdamax)
     message += ', selector=' + selector
     _printMessage("TransFit(\"" + message + "\")")
 
@@ -1156,7 +1158,15 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
                                           coord1_scale_factor,
                                           coord2_scale_factor)
 
-    # If we have 0 iterations then we should return here
+    # this function moves the detector to the beam center positions defined above and
+    # returns an estimate of where the beam center is relative to the new center
+    resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
+    centre_reduction = copy.deepcopy(ReductionSingleton().reference())
+    LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
+    beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
+
+    # If we have 0 iterations then we should return here. At this point the
+    # Left/Right/Up/Down workspaces have been already created by the SeekCentre function.
     if MaxIter <= 0:
         zero_iterations_msg = ("You have selected 0 iterations. The beam centre" +
                                "will be positioned at (" + str(xstart) + ", " + str(ystart) +")")
@@ -1165,12 +1175,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     beam_center_logger.report_init(COORD1NEW, COORD2NEW)
 
-    # this function moves the detector to the beam center positions defined above and
-    # returns an estimate of where the beam center is relative to the new center
-    resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
-    centre_reduction = copy.deepcopy(ReductionSingleton().reference())
-    LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
-    beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
     # take first trial step
     COORD1NEW, COORD2NEW = centre_positioner.increment_position(COORD1NEW, COORD2NEW)
     graph_handle = None
@@ -1441,7 +1445,19 @@ def AddRuns(runs, instrument ='sans2d', saveAsEvent=False, binning = "Monitors",
     Method to expose the add_runs functionality for custom scripting.
     @param runs: a list with the requested run numbers
     @param instrument: the name of the selected instrument
-    @param binning: the where to get the binnings from. This can either be "Monitors
+    @param saveAsEvent: when adding event-type data, then this can be stored as event-type data
+    @param binning: where to get the binnings from. This is relevant when adding Event-type data.
+                    The property can be set to "Monitors" in order to emulate the binning of the monitors or to a
+                    string list with the same format that is used for the Rebin algorithm. This property is ignored
+                    when saving as event data.
+    @param isOverlay: sets if the the overlay mechanism should be used when the saveAsEvent flag is set
+    @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are specifed
+                        in a string list. Either time_shifts is not used or a list with times in secomds. Note that there
+                        has to be one entry fewer than the number of workspaces to add.
+    @param defType: the file type
+    @param rawTypes: the raw types
+    @param lowMem: if the lowMem option should be used
+    @returns a success message
     '''
     # Need at least two runs to work
     if len(runs) < 1:
@@ -1451,15 +1467,15 @@ def AddRuns(runs, instrument ='sans2d', saveAsEvent=False, binning = "Monitors",
     if time_shifts is None:
         time_shifts = []
 
-    add_runs(runs = runs,
-             inst = instrument,
-             defType = defType,
-             rawTypes = rawTypes,
-             lowMem = lowMem,
-             binning = binning,
-             saveAsEvent=saveAsEvent,
-             isOverlay = isOverlay,
-             time_shifts = time_shifts)
+    return add_runs(runs = runs,
+                    inst = instrument,
+                    defType = defType,
+                    rawTypes = rawTypes,
+                    lowMem = lowMem,
+                    binning = binning,
+                    saveAsEvent=saveAsEvent,
+                    isOverlay = isOverlay,
+                    time_shifts = time_shifts)
 
 
 
@@ -1723,6 +1739,17 @@ def is_current_workspace_an_angle_workspace():
     except:
         is_angle = False
     return is_angle
+
+def has_user_file_valid_extension(file_name):
+    '''
+    Checks if the user file has a valid extension
+    @param file_name: the name of the user file
+    @returns true if it is valid else false
+    '''
+    is_valid = su.is_valid_user_file_extension(file_name)
+    print str(is_valid)
+    return is_valid
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

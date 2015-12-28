@@ -102,7 +102,7 @@ Mantid::coord_t getPrecisionCorrectedCoordinate(Mantid::coord_t position,
   const auto diffDown = fabs(down - position);
   const auto nearest = diffUp < diffDown ? up : down;
 
-  // Check if the relative deviation is larger than 1e-6
+  // Check if the relative deviation is larger than 1e-5
   const auto deviation = fabs((nearest - position) / binWidth);
   const auto tolerance = 1e-5;
   Mantid::coord_t coordinate(position);
@@ -261,7 +261,7 @@ int IntegrateMDHistoWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string IntegrateMDHistoWorkspace::category() const {
-  return "MDAlgorithms";
+  return "MDAlgorithms\\Slicing";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary

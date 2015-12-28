@@ -32,7 +32,7 @@ const std::string EditInstrumentGeometry::name() const {
 }
 
 const std::string EditInstrumentGeometry::category() const {
-  return "Diffraction";
+  return "Diffraction\\DataHandling;DataHandling\\Instrument";
 }
 
 int EditInstrumentGeometry::version() const { return 1; }

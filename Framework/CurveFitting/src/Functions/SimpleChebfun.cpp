@@ -111,6 +111,9 @@ std::vector<double> SimpleChebfun::linspace(size_t n) const {
   return m_base->linspace(n);
 }
 
+/// Get the accuracy of the approximation
+double SimpleChebfun::accuracy() const { return m_base->tolerance(); }
+
 /// Create a derivative of this function.
 SimpleChebfun SimpleChebfun::derivative() const {
   SimpleChebfun cheb(m_base);
@@ -154,6 +157,9 @@ std::vector<double> SimpleChebfun::roughRoots(double level) const {
   }
   return rs;
 }
+
+/// Integrate the function on its interval
+double SimpleChebfun::integrate() const { return m_base->integrate(m_P); }
 
 /// Add a C++ function to the function
 /// @param fun :: A function to add.

@@ -62,7 +62,8 @@ public:
         "HET_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", this->inputSpace);
-    loader.setProperty("RewriteSpectraMap", false);
+    loader.setProperty("RewriteSpectraMap",
+                       Mantid::Kernel::OptionalBool(false));
     loader.execute();
   }
 

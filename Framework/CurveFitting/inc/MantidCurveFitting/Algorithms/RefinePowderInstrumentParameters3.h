@@ -57,7 +57,7 @@ public:
   virtual int version() const { return 3; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diffraction"; }
+  virtual const std::string category() const { return "Diffraction\\Fitting"; }
 
 private:
   /// Implement abstract Algorithm methods

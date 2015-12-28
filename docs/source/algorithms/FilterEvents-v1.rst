@@ -15,8 +15,31 @@ This algorithm filters events from an
 `SplittersWorkspace <http://www.mantidproject.org/SplittersWorkspace>`_ containing a series of
 splitters (i.e., `SplittingIntervals <http://www.mantidproject.org/SplittingInterval>`_).
 
-Output
+Inputs
 ######
+Algorithm *FilterEvents* takes 2 mandatory input Workspaces and 1 optional Workspace.
+One of mandatory workspace is the EventWorkspace where the events are filtered from.
+The other mandatory workspace is workspace containing splitters. 
+It can be either a MatrixWorkspace or a SplittersWorkspace.
+
+The optional workspace is a TableWorkspace for information of splitters.
+
+Algorithm *GenerateEventsFilter* creates both the splitters' workspace and splitter information workspace.
+
+
+Splitters in relative time
+==========================
+
+As the splitters' workspace is in format of MatrixWorkspace,
+its time, i.e., the value in X vector, can be relative time.
+
+Property *RelativeTime* flags that the splitters' time is relative.
+Property *FilterStartTime* specifies the starting time of the filter.
+Or the shift of time of the splitters.
+If it is not specified, then the algorithm will search for sample log *run_start*.
+
+Outputs
+#######
 
 The output will be one or multiple workspaces according to the number of
 index in splitters. The output workspace name is the combination of

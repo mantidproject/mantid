@@ -9,6 +9,7 @@
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidAPI/TableRow.h"
@@ -252,6 +253,34 @@ public:
     }
   }
 
+  void testCreateOutputWorkspaceWithDistributionAsInput() {
+    // Arrange
+    MatrixWorkspace_sptr matrixWs =
+        WorkspaceCreationHelper::Create2DWorkspace123(4, 12, true);
+    Mantid::API::WorkspaceHelpers::makeDistribution(matrixWs);
+
+    TestableSeqDomainSpectrumCreator creator(NULL, "");
+    creator.setMatrixWorkspace(matrixWs);
+
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+    creator.createDomain(domain, values);
+
+    IFunction_sptr testFunction(new SeqDomainCreatorTestFunction);
+    testFunction->initialize();
+    testFunction->setParameter("Slope", 2.0);
+
+    Workspace_sptr outputWs =
+        creator.createOutputWorkspace("", testFunction, domain, values);
+
+    MatrixWorkspace_sptr outputWsMatrix =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
+    TS_ASSERT(outputWsMatrix);
+    TSM_ASSERT("Output should be a distribution",
+               outputWsMatrix->isDistribution());
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
+
   void testFit() {
     double slope = 2.0;
 
@@ -351,8 +380,8 @@ private:
     ~TestableSeqDomainSpectrumCreator() {}
   };
 
-  class SeqDomainCreatorTestFunction : public virtual IFunction1DSpectrum,
-                                       public virtual ParamFunction {
+  class SeqDomainCreatorTestFunction : public IFunction1DSpectrum,
+                                       public ParamFunction {
   public:
     ~SeqDomainCreatorTestFunction() {}
 
@@ -373,9 +402,8 @@ private:
     void init() { declareParameter("Slope", 1.0); }
   };
 
-  class SeqDomainCreatorTestFunctionComplex
-      : public virtual IFunction1DSpectrum,
-        public virtual ParamFunction {
+  class SeqDomainCreatorTestFunctionComplex : public IFunction1DSpectrum,
+                                              public ParamFunction {
   public:
     ~SeqDomainCreatorTestFunctionComplex() {}
 

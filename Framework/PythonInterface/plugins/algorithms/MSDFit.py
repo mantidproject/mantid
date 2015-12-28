@@ -14,7 +14,7 @@ class MSDFit(DataProcessorAlgorithm):
     _output_msd_ws = None
 
     def category(self):
-        return 'Workflow\\MIDAS;PythonAlgorithms'
+        return 'Workflow\\MIDAS'
 
 
     def summary(self):

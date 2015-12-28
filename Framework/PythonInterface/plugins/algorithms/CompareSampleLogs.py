@@ -18,7 +18,7 @@ class CompareSampleLogs(PythonAlgorithm):
         """
         Returns category
         """
-        return "PythonAlgorithms;Utility\\Workspaces"
+        return "Utility\\Workspaces"
 
     def name(self):
         """

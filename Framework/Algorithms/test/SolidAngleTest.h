@@ -58,6 +58,7 @@ public:
     std::string inputFile = "INES_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", inputSpace);
+    loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loader.execute();
 
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");

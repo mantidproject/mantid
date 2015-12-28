@@ -63,7 +63,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     _info = None
 
     def category(self):
-        return "Diffraction;PythonAlgorithms"
+        return "Diffraction\\Reduction"
 
     def name(self):
         return "SNSPowderReduction"
@@ -395,10 +395,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                                     Tolerance=self.COMPRESS_TOL_TOF) # 10ns
 
                     # do the absorption correction
-                    vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
+                    vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="Wavelength")
                     api.SetSampleMaterial(InputWorkspace=vanRun, ChemicalFormula="V", SampleNumberDensity=0.0721)
                     vanRun = api.MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun,
                                                                       CylinderSampleRadius=self._vanRadius)
+                    vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
 
                     # focus the data
                     vanRun = api.AlignAndFocusPowder(InputWorkspace=vanRun, OutputWorkspace=vanRun, CalFileName=calib,
@@ -490,7 +491,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         results = api.PDLoadCharacterizations(Filename=charFilename,
                                               ExpIniFilename=expIniFilename,
                                               OutputWorkspace="characterizations")
+        # export the characterizations table
         self._charTable = results[0]
+        self.declareProperty(ITableWorkspaceProperty("CharacterizationsTable", "characterizations", Direction.Output))
+        self.setProperty("CharacterizationsTable", self._charTable)
+
+        # get the focus positions from the properties
         self.iparmFile = results[1]
         self._focusPos['PrimaryFlightPath'] = results[2]
         self._focusPos['SpectrumIDs'] = results[3]
@@ -863,6 +869,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             except Exception, e:
                 self.log().warning(str(e))
 
+            propertyName = "OutputWorkspace%s" % str(wksplist[itemp])
+            self.log().warning(propertyName)
+            self.declareProperty(WorkspaceProperty(propertyName, str(wksplist[itemp]), Direction.Output))
+            self.setProperty(propertyName, wksplist[itemp])
             self._save(wksplist[itemp], self._info, False, True)
             self.log().information("Done focussing data of %d." % (itemp))
 
@@ -905,6 +915,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             prefix = self._outPrefix
         filename = os.path.join(self._outDir, prefix)
         if pdfgetn:
+            self.log().notice("Saving 'pdfgetn' is deprecated. Use PDtoPDFgetN instead.")
             if "pdfgetn" in self._outTypes:
                 pdfwksp = str(wksp)+"_norm"
                 pdfwksp = api.SetUncertainties(InputWorkspace=wksp, OutputWorkspace=pdfwksp, SetError="sqrt")
@@ -925,7 +936,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             #api.Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning) # crop edges
             api.SaveNexus(InputWorkspace=wksp, Filename=filename+".nxs")
 
-        # always save python script
+        # always save python script - this is broken because the history isn't
+        # attached until the algorithm is finished
         api.GeneratePythonScript(InputWorkspace=wksp, Filename=filename+".py")
 
         return

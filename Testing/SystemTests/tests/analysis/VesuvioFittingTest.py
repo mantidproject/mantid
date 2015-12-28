@@ -82,6 +82,7 @@ class VesuvioFittingTest(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = tolerance()
+        self.disableChecking.append('SpectraMap')
         return "fit_Workspace","VesuvioFittingTest.nxs"
 
 #------------------------------------------------------------------------------------------------------------------
@@ -97,6 +98,7 @@ class VesuvioFittingWithKFreeTest(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = tolerance()
+        self.disableChecking.append('SpectraMap')
         return "fit_Workspace","VesuvioFittingWithKFreeTest.nxs"
 
 #------------------------------------------------------------------------------------------------------------------
@@ -112,4 +114,5 @@ class VesuvioFittingWithQuadraticBackgroundTest(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = tolerance()
+        self.disableChecking.append('SpectraMap')
         return "fit_Workspace","VesuvioFittingWithQuadraticBackgroundTest.nxs"

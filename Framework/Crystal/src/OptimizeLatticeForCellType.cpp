@@ -81,12 +81,13 @@ void OptimizeLatticeForCellType::exec() {
   DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
 
   std::vector<DataObjects::PeaksWorkspace_sptr> runWS;
-
-  for (int i = int(ws->getNumberPeaks()) - 1; i >= 0; --i) {
-    const std::vector<Peak> &peaks = ws->getPeaks();
-    if (edgePixel(ws, peaks[i].getBankName(), peaks[i].getCol(),
-                  peaks[i].getRow(), edge)) {
-      ws->removePeak(i);
+  if (edge > 0) {
+    for (int i = int(ws->getNumberPeaks()) - 1; i >= 0; --i) {
+      const std::vector<Peak> &peaks = ws->getPeaks();
+      if (edgePixel(ws, peaks[i].getBankName(), peaks[i].getCol(),
+                    peaks[i].getRow(), edge)) {
+        ws->removePeak(i);
+      }
     }
   }
   runWS.push_back(ws);
@@ -146,16 +147,12 @@ void OptimizeLatticeForCellType::exec() {
 
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
     Geometry::UnitCell refinedCell = latticeFunction->getUnitCell();
-    /*std::vector<double> sigabc;
-    for (size_t i = 0; i < latticeFunction->nParams(); i++)
-      sigabc.push_back(latticeFunction->getError(i));*/
 
     IAlgorithm_sptr ub_alg;
     try {
-      ub_alg =
-          createChildAlgorithm("FindUBUsingLatticeParameters", -1, -1, false);
+      ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
     } catch (Exception::NotFoundError &) {
-      g_log.error("Can't locate FindUBUsingLatticeParameters algorithm");
+      g_log.error("Can't locate CalculateUMatrix algorithm");
       throw;
     }
 
@@ -166,8 +163,6 @@ void OptimizeLatticeForCellType::exec() {
     ub_alg->setProperty("alpha", refinedCell.alpha());
     ub_alg->setProperty("beta", refinedCell.beta());
     ub_alg->setProperty("gamma", refinedCell.gamma());
-    ub_alg->setProperty("NumInitial", 15);
-    ub_alg->setProperty("Tolerance", tolerance);
     ub_alg->executeAsChildAlg();
     DblMatrix UBnew = peakWS->mutableSample().getOrientedLattice().getUB();
     OrientedLattice o_lattice;
@@ -233,11 +228,7 @@ API::ILatticeFunction_sptr
 OptimizeLatticeForCellType::getLatticeFunction(const std::string &cellType,
                                                const UnitCell &cell) const {
   std::ostringstream fun_str;
-  // TODO remove next 3 lines when PointGroup is changed
-  if (cellType == "Rhombohedral")
-    fun_str << "name=LatticeFunction,CrystalSystem=Trigonal";
-  else
-    fun_str << "name=LatticeFunction,CrystalSystem=" << cellType;
+  fun_str << "name=LatticeFunction,LatticeSystem=" << cellType;
 
   API::IFunction_sptr rawFunction =
       API::FunctionFactory::Instance().createInitialized(fun_str.str());
@@ -281,6 +272,15 @@ bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
+    int startI = 1;
+    if (children[0]->getName() == "sixteenpack") {
+      startI = 0;
+      parent = children[0];
+      children.clear();
+      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+      asmb->getChildren(children, false);
+    }
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
@@ -288,8 +288,8 @@ bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
     int NROWS = static_cast<int>(grandchildren.size());
     int NCOLS = static_cast<int>(children.size());
     // Wish pixels and tubes start at 1 not 0
-    if (col - 1 < Edge || col - 1 >= (NCOLS - Edge) || row - 1 < Edge ||
-        row - 1 >= (NROWS - Edge))
+    if (col - startI < Edge || col - startI >= (NCOLS - Edge) ||
+        row - startI < Edge || row - startI >= (NROWS - Edge))
       return true;
     else
       return false;

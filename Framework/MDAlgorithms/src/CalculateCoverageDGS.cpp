@@ -56,7 +56,7 @@ int CalculateCoverageDGS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CalculateCoverageDGS::category() const {
-  return "Inelastic;MDAlgorithms";
+  return "Inelastic\\Planning;MDAlgorithms\\Planning";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary

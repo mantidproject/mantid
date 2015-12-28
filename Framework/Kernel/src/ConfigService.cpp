@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
@@ -107,7 +108,7 @@ public:
   /** Constructor with a class to wrap
    *  @param F :: The object to wrap
    */
-  template <typename Field> WrappedObject(Field &F) : T(F) {
+  template <typename Field> explicit WrappedObject(Field &F) : T(F) {
     m_pPtr = static_cast<T *>(this);
   }
 
@@ -244,6 +245,9 @@ ConfigServiceImpl::ConfigServiceImpl()
                 << getPropertiesDir() << std::endl;
   g_log.information() << "This is Mantid version " << MantidVersion::version()
                       << " revision " << MantidVersion::revision() << std::endl;
+  g_log.information() << "running on " << getComputerName() << " starting "
+                      << DateAndTime::getCurrentTime().toFormattedString(
+                             "%Y-%m-%dT%H:%MZ") << "\n";
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
                       << std::endl;
 #ifndef MPI_BUILD // There is no logging to file by default in MPI build
@@ -255,10 +259,29 @@ ConfigServiceImpl::ConfigServiceImpl()
   Poco::Path path(appDataDir);
   path.pushDirectory("instrument");
   Poco::File file(path);
-  // createdirectories will fail gracefully if it is already present
-  file.createDirectories();
+  // createDirectories will fail gracefully if it is already present - but will
+  // throw an error if it cannot create the directory
+  try {
+    file.createDirectories();
+  } catch (Poco::FileException &fe) {
+    g_log.error()
+        << "Cannot create the local instrument cache directory ["
+        << path.toString()
+        << "]. Mantid will not be able to update instrument definitions.\n"
+        << fe.what() << std::endl;
+  }
   Poco::File vtpDir(getVTPFileDirectory());
-  vtpDir.createDirectories();
+  try {
+    vtpDir.createDirectories();
+  } catch (Poco::FileException &fe) {
+    g_log.error()
+        << "Cannot create the local instrument geometry cache directory ["
+        << path.toString()
+        << "]. Mantid will be slower at viewing complex instruments.\n"
+        << fe.what() << std::endl;
+  }
+  // must update the cache of instrument paths
+  cacheInstrumentPaths();
 }
 
 /** Private Destructor

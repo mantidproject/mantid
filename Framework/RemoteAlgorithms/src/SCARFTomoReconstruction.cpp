@@ -724,7 +724,7 @@ bool SCARFTomoReconstruction::doPing() {
     }
   } else {
     throw std::runtime_error(
-        "Failed to ping the web service at:" + httpsURL +
+        "Failed to ping the web service at: " + httpsURL +
         ". Please check your parameters, software version, "
         "etc.");
   }

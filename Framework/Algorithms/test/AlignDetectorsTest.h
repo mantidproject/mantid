@@ -36,7 +36,6 @@ public:
   void testTheBasics() {
     TS_ASSERT_EQUALS(align.name(), "AlignDetectors");
     TS_ASSERT_EQUALS(align.version(), 1);
-    TS_ASSERT_EQUALS(align.category(), "Diffraction");
   }
 
   void testInit() {

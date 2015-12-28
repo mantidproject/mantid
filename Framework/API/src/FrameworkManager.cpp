@@ -63,10 +63,10 @@ FrameworkManagerImpl::FrameworkManagerImpl()
   WSAStartup(MAKEWORD(2, 2), &wsaData);
 #endif
 
-#ifdef _MSC_VER
-  // This causes the exponent to consist of two digits (Windows Visual Studio
-  // normally 3, Linux default 2), where two digits are not sufficient I presume
-  // it uses more
+#if defined(_MSC_VER) && _MSC_VER < 1900
+  // This causes the exponent to consist of two digits.
+  // VC++ >=1900 use standards conforming behaviour and only
+  // uses the number of digits required
   _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 
@@ -111,7 +111,6 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
   }
 
   // the algorithm will see if it should run
-
   SendStartupUsageInfo();
 }
 
@@ -241,6 +240,8 @@ void FrameworkManagerImpl::clear() {
   clearPropertyManagers();
 }
 
+void FrameworkManagerImpl::shutdown() { clear(); }
+
 /**
  * Clear memory associated with the AlgorithmManager
  */
@@ -307,7 +308,8 @@ FrameworkManagerImpl::createAlgorithm(const std::string &algName,
   IAlgorithm *alg = AlgorithmManager::Instance()
                         .create(algName, version)
                         .get(); // createAlgorithm(algName);
-  alg->setProperties(propertiesArray);
+  alg->setPropertiesWithSimpleString(propertiesArray);
+
   return alg;
 }
 

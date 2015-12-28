@@ -166,7 +166,9 @@ const std::string LoadSpiceXML2DDet::name() const {
 int LoadSpiceXML2DDet::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
-const std::string LoadSpiceXML2DDet::category() const { return "DataHandling"; }
+const std::string LoadSpiceXML2DDet::category() const {
+  return "DataHandling\\XML";
+}
 
 //----------------------------------------------------------------------------------------------
 const std::string LoadSpiceXML2DDet::summary() const {
@@ -674,7 +676,8 @@ void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws,
     loadinst->setProperty("Filename", idffilename);
   } else
     loadinst->setProperty("InstrumentName", "HB3A");
-  loadinst->setProperty("RewriteSpectraMap", true);
+  loadinst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(true));
   loadinst->execute();
   if (loadinst->isExecuted())
     matrixws = loadinst->getProperty("Workspace");

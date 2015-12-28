@@ -3,14 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include <Poco/Path.h>
 #include <Poco/File.h>
 #include <fstream>
 
-using namespace Mantid::Kernel;
+using Mantid::API::FileProperty;
+using Mantid::API::FileFinder;
+using Mantid::Kernel::ConfigService;
 
 class FilePropertyTest : public CxxTest::TestSuite {
 public:
@@ -55,116 +56,81 @@ public:
     TS_ASSERT_DIFFERS(ConfigService::Instance().getDataSearchDirs().size(), 0);
   }
 
-  void testLoadPropertyNoExtension() {
-    Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
-        "Filename", "", Mantid::API::FileProperty::Load);
-    doPropertyTraitTests(*fp, true, false, false);
-    TS_ASSERT_EQUALS(fp->getDefaultExt(), "");
-
-    /// Test a file in the test directory
-    const std::string test_file = "LOQ48127.raw";
-    std::string msg = fp->setValue(test_file);
-    TS_ASSERT_EQUALS(msg, "");
-
-    // Absolute path
-    msg = fp->setValue(fp->value());
-    TS_ASSERT_EQUALS(msg, "");
-
-    delete fp;
+  void testLoadPropertyWithEmptyValueIsInvalid() {
+    FileProperty fp("Filename", "", FileProperty::Load);
+    doPropertyTraitTests(fp, true, false, false);
+    std::string msg = fp.setValue("");
+    TS_ASSERT_DIFFERS("", msg);
   }
 
-  void testLoadPropertyWithExtension() {
-    std::vector<std::string> exts(1, "raw");
-    Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
-        "Filename", "", Mantid::API::FileProperty::Load, exts);
-    doPropertyTraitTests(*fp, true, false, false);
+  void testLoadPropertyNoExtension() {
+    FileProperty fp("Filename", "", FileProperty::Load);
+    doPropertyTraitTests(fp, true, false, false);
+    doExtensionCheck(fp, "", "LOQ48127.raw", "48098.Q");
+  }
 
-    TS_ASSERT_EQUALS(fp->getDefaultExt(), "raw");
+  void testLoadPropertyWithExtensionAsVector() {
+    std::vector<std::string> exts(1, ".raw");
+    FileProperty fp("Filename", "", FileProperty::Load, exts);
+    doPropertyTraitTests(fp, true, false, false);
+    doExtensionCheck(fp, ".raw", "LOQ48127.raw", "48098.Q");
+  }
 
-    /// Test a GEM file in the test directory
-    std::string msg = fp->setValue("LOQ48127.raw");
-    TS_ASSERT_EQUALS(msg, "");
+  void testLoadPropertyWithExtensionAsString() {
+    std::string ext(".raw");
+    FileProperty fp("Filename", "", FileProperty::Load, ext);
+    doPropertyTraitTests(fp, true, false, false);
+    doExtensionCheck(fp, ".raw", "LOQ48127.raw", "48098.Q");
+  }
 
-    // Check different extension
-    msg = fp->setValue("48098.Q");
-    TS_ASSERT_EQUALS(msg, "");
-
-    delete fp;
-    fp = new Mantid::API::FileProperty("Filename", "",
-                                       Mantid::API::FileProperty::Load, exts);
-    // Check empty value
-    msg = fp->setValue("");
-    TS_ASSERT_EQUALS(fp->value(), "");
-    TS_ASSERT_EQUALS(msg, "No file specified.");
-
-    delete fp;
+  void testLoadPropertyWithExtensionAsInitializerList() {
+    FileProperty fp("Filename", "", FileProperty::Load, {".raw"});
+    doPropertyTraitTests(fp, true, false, false);
+    doExtensionCheck(fp, ".raw", "LOQ48127.raw", "48098.Q");
   }
 
   void testOptionalLoadProperty() {
     std::vector<std::string> exts(1, "raw");
-    Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
-        "Filename", "", Mantid::API::FileProperty::OptionalLoad, exts);
-    doPropertyTraitTests(*fp, true, false, true);
+    FileProperty fp("Filename", "", FileProperty::OptionalLoad, exts);
+    doPropertyTraitTests(fp, true, false, true);
 
-    std::string msg = fp->setValue("LOQ48127.raw");
+    std::string msg = fp.setValue("LOQ48127.raw");
     TS_ASSERT_EQUALS(msg, "");
     // I'm using part of the file's path to check that the property really has
     // found the file, with OptionalLoad the property returns valid whether it
     // finds the file or not
-    TS_ASSERT(fp->value().find("UnitTest") != std::string::npos);
+    TS_ASSERT(fp.value().find("UnitTest") != std::string::npos);
     // do this in parts making no assumptions about the identity of the slash
     // that separates directories
-    TS_ASSERT(fp->value().find("Test") != std::string::npos);
+    TS_ASSERT(fp.value().find("Test") != std::string::npos);
 
-    msg = fp->setValue("LOQ48127.raw");
+    msg = fp.setValue("LOQ48127.raw");
     TS_ASSERT_EQUALS(msg, "");
 
-    msg = fp->setValue("");
+    msg = fp.setValue("");
     TS_ASSERT_EQUALS(msg, "");
-    TS_ASSERT_EQUALS(fp->value(), "");
-
-    delete fp;
+    TS_ASSERT_EQUALS(fp.value(), "");
   }
 
   void testSaveProperty() {
-    Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
-        "Filename", "", Mantid::API::FileProperty::Save);
-    doPropertyTraitTests(*fp, false, true, false);
+    FileProperty fp("Filename", "", FileProperty::Save);
+    doPropertyTraitTests(fp, false, true, false);
     // Test for some random file name as this doesn't need to exist here
-    std::string msg = fp->setValue("filepropertytest.sav");
+    std::string msg = fp.setValue("filepropertytest.sav");
     TS_ASSERT_EQUALS(msg, "");
-
-    delete fp;
   }
 
   void testOptionalSaveProperty() {
-    Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
-        "Filename", "", Mantid::API::FileProperty::OptionalSave);
-    doPropertyTraitTests(*fp, false, true, true);
+    FileProperty fp("Filename", "", FileProperty::OptionalSave);
+    doPropertyTraitTests(fp, false, true, true);
     // Test for some random file name as this doesn't need to exist here
-    std::string msg = fp->setValue("filepropertytest.sav");
+    std::string msg = fp.setValue("filepropertytest.sav");
     TS_ASSERT_EQUALS(msg, "");
-
-    delete fp;
-  }
-
-  void doPropertyTraitTests(const Mantid::API::FileProperty &fileProp,
-                            const bool loadProp, const bool saveProp,
-                            const bool validByDefault) {
-    // Check type
-    TS_ASSERT_EQUALS(fileProp.isLoadProperty(), loadProp);
-    TS_ASSERT_EQUALS(fileProp.isSaveProperty(), saveProp);
-    if (validByDefault) {
-      TS_ASSERT_EQUALS(fileProp.isValid(), "");
-    } else {
-      TS_ASSERT_DIFFERS(fileProp.isValid(), "");
-    }
   }
 
   void testThatRunNumberReturnsFileWithCorrectPrefix() {
-    Mantid::API::FileProperty fp("Filename", "",
-                                 Mantid::API::FileProperty::Load,
-                                 std::vector<std::string>(1, ".raw"));
+    FileProperty fp("Filename", "", FileProperty::Load,
+                    std::vector<std::string>(1, ".raw"));
     std::string error = fp.setValue("48127");
     TS_ASSERT_EQUALS(error, "");
     TS_ASSERT_DIFFERS(fp.value().find("LOQ48127"), std::string::npos);
@@ -184,28 +150,22 @@ public:
   }
 
   void testOptionalDirectory() {
-    Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
-        "SavePath", "", Mantid::API::FileProperty::OptionalDirectory);
+    FileProperty fp("SavePath", "", FileProperty::OptionalDirectory);
     // Check type
-    TS_ASSERT_EQUALS(fp->isDirectoryProperty(), true);
+    TS_ASSERT_EQUALS(fp.isDirectoryProperty(), true);
 
     // Test for some random directory that does not need to exist
-    std::string msg = fp->setValue("my_nonexistent_folder");
+    std::string msg = fp.setValue("my_nonexistent_folder");
     TS_ASSERT_EQUALS(msg, "");
-
-    delete fp;
   }
 
   void testDirectoryFailsIfNonExistent() {
-    Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
-        "SavePath", "", Mantid::API::FileProperty::Directory);
+    FileProperty fp("SavePath", "", FileProperty::Directory);
     // This will fail because this folder does not exist
     std::string TestDir("my_nonexistent_folder");
-    std::string msg = fp->setValue(TestDir);
+    std::string msg = fp.setValue(TestDir);
     // It gives an error message starting "Directory "X" not found".
     TS_ASSERT_EQUALS(msg.substr(0, 3), "Dir");
-
-    delete fp;
   }
 
   void testDirectoryPasses() {
@@ -214,16 +174,43 @@ public:
     Poco::File dir(TestDir);
     dir.createDirectory();
 
-    Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
-        "SavePath", "", Mantid::API::FileProperty::Directory);
-    TS_ASSERT_EQUALS(fp->isDirectoryProperty(), true);
+    FileProperty fp("SavePath", "", FileProperty::Directory);
+    TS_ASSERT_EQUALS(fp.isDirectoryProperty(), true);
 
     // The directory exists, so no failure
-    std::string msg = fp->setValue(TestDir);
+    std::string msg = fp.setValue(TestDir);
     TS_ASSERT_EQUALS(msg, "");
 
-    delete fp;
     dir.remove(); // clean up your folder
+  }
+
+private:
+  void doPropertyTraitTests(const FileProperty &fileProp, const bool loadProp,
+                            const bool saveProp, const bool validByDefault) {
+    // Check type
+    TS_ASSERT_EQUALS(fileProp.isLoadProperty(), loadProp);
+    TS_ASSERT_EQUALS(fileProp.isSaveProperty(), saveProp);
+    if (validByDefault) {
+      TS_ASSERT_EQUALS(fileProp.isValid(), "");
+    } else {
+      TS_ASSERT_DIFFERS(fileProp.isValid(), "");
+    }
+  }
+
+  void doExtensionCheck(FileProperty &fileProp, const std::string &defaultExt,
+                        const std::string &match, const std::string &nomatch) {
+    TS_ASSERT_EQUALS(fileProp.getDefaultExt(), defaultExt);
+    // Filename as given
+    std::string msg = fileProp.setValue(match);
+    TS_ASSERT_EQUALS(msg, "");
+
+    // full path
+    msg = fileProp.setValue(fileProp.value());
+    TS_ASSERT_EQUALS(msg, "");
+
+    // Extension is not mandatory so different also passes
+    msg = fileProp.setValue(nomatch);
+    TS_ASSERT_EQUALS(msg, "");
   }
 };
 

@@ -34,7 +34,6 @@ class InstrumentWindowRenderTab;
 class QPushButton;
 class QDialog;
 class QSlider;
-class QSpinBox;
 class QTabWidget;
 class QLineEdit;
 class QLabel;

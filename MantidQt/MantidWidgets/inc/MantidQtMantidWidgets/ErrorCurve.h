@@ -21,9 +21,9 @@ public:
   /// Number of points in the curve
   int dataSize() const;
   /// Draw this curve
-  void draw(QPainter *painter, 
-        const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-        const QRect &canvasRect) const;
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            const QRect &canvasRect) const override;
+  QRectF boundingRect() const override;
 private:
 
   std::vector<double> m_x; ///< The x coordinates

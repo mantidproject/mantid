@@ -4051,7 +4051,6 @@ void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType &splitter,
   // 1. Prepare to Iterate through the splitter at the same time
   Kernel::TimeSplitterType::iterator itspl = splitter.begin();
   Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
-  int64_t start, stop;
 
   // 2. Prepare to Iterate through all events (sorted by tof)
   typename std::vector<T>::iterator itev = events.begin();
@@ -4060,8 +4059,8 @@ void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType &splitter,
   // 3. This is the time of the first section. Anything before is thrown out.
   while (itspl != itspl_end) {
     // Get the splitting interval times and destination
-    start = itspl->start().totalNanoseconds();
-    stop = itspl->stop().totalNanoseconds();
+    int64_t start = itspl->start().totalNanoseconds();
+    int64_t stop = itspl->stop().totalNanoseconds();
     const int index = itspl->index();
 
     // a) Skip the events before the start of the time
