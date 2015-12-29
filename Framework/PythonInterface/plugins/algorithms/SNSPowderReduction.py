@@ -402,6 +402,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             if van_run_ws_name is not None:
                 # subtract vanadium run from sample run by division
+                sam_ws = self.get_workspace(sam_ws_name)
+                van_ws = self.get_workspace(van_run_ws_name)
+                num_hist_sam = sam_ws.getNumberHistograms()
+                num_hist_van = van_ws.getNumberHistograms()
+                assert num_hist_sam == num_hist_van, \
+                    'Number of histograms of sample %d is not equal to van %d.' % (num_hist_sam, num_hist_van)
                 sam_ws = api.Divide(LHSWorkspace=sam_ws_name,
                                     RHSWorkspace=van_run_ws_name,
                                     OutputWorkspace=sam_ws_name)
@@ -623,7 +629,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         :return:
         """
         # Check requirements
-        assert isinstance(run_number_list, list)
+        assert isinstance(run_number_list, list) or isinstance(run_number_list, numpy.ndarray),\
+            'Run number list is not a list but of type %s' % str(type(run_number_list))
         for run_number in run_number_list:
             assert isinstance(run_number, int) or isinstance(run_number, numpy.int32), \
                 'Run number %s must be an integer but not a %s.' % (str(run_number), str(type(run_number)))
@@ -1219,6 +1226,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return can_run_ws_name
 
     def _process_vanadium_runs(self, van_run_number_list, timeFilterWall, samRunIndex, calib, **focuspos):
+        # TODO/FIXME/NOW: Clean the codes for _process_vanadium_runs
         """
         Purpose:
         Requirements:
@@ -1318,6 +1326,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              Target="TOF")
 
             # focus the data
+            self.log().warning('Reducing vanadium run %s.' % van_run_ws_name)
             van_run_ws = api.AlignAndFocusPowder(InputWorkspace=van_run_ws_name,
                                                  OutputWorkspace=van_run_ws_name,
                                                  CalFileName=calib,
