@@ -3,6 +3,10 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include <map>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -42,6 +46,21 @@ public:
 private:
   void init();
   void exec();
+  void loadAndBin();
+  API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr wksp);
+  API::MatrixWorkspace_sptr load(const std::string filename);
+  void loadOldCalibration();
+  std::vector<double> dSpacingToTof(const std::vector<double> &dSpacing,
+                                    const detid_t id);
+
+  API::MatrixWorkspace_sptr m_uncalibratedWS;
+  API::ITableWorkspace_sptr m_calibrationTableNew;
+  API::ITableWorkspace_sptr m_calibrationTableOld;
+  std::vector<double> m_peaksInDspacing;
+  std::map<detid_t, size_t> m_detidToRow;
+  double m_tofMin;
+  double m_tofMax;
+  bool m_hasDasIds;
 };
 
 } // namespace Algorithms
