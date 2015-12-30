@@ -1,6 +1,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
@@ -192,13 +193,6 @@ void LoadMD::exec() {
 
   // QConvention (Inelastic or Crystallography)
   this->loadQConvention();
-  // Write out the Qconvention
-  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string QConvention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
-  std::cout << QConvention << "  " << m_QConvention << "\n";
-  if (QConvention != m_QConvention)
-    std::cout << "Conversion needed\n";
 
   // Display normalization settting
   if (levelEntries.find(VISUAL_NORMALIZATION_KEY) != levelEntries.end()) {
@@ -240,6 +234,21 @@ void LoadMD::exec() {
     if (m_requiresMDFrameCorrection) {
       setMDFrameOnWorkspaceFromLegacyFile(ws);
     }
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string QConvention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+
+  std::cout << QConvention <<"  "<<m_QConvention<<"\n";
+  if (QConvention != m_QConvention)
+  {
+    Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
+    transform_alg->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    transform_alg->setProperty("Scaling", "-1.0");
+    transform_alg->executeAsChildAlg();
+    IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
+    ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
+  }
     // Save to output
     setProperty("OutputWorkspace",
                 boost::dynamic_pointer_cast<IMDWorkspace>(ws));
@@ -326,6 +335,22 @@ void LoadMD::loadHisto() {
   checkForRequiredLegacyFixup(ws);
   if (m_requiresMDFrameCorrection) {
     setMDFrameOnWorkspaceFromLegacyFile(ws);
+  }
+
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string QConvention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+
+  std::cout << QConvention <<"  "<<m_QConvention<<"\n";
+  if (QConvention != m_QConvention)
+  {
+    Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
+    transform_alg->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    transform_alg->setProperty("Scaling", -1.0);
+    transform_alg->executeAsChildAlg();
+    IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
+    ws = boost::dynamic_pointer_cast<MDHistoWorkspace>(ws);
   }
 
   // Save to output
@@ -434,25 +459,12 @@ void LoadMD::loadCoordinateSystem() {
   }
 }
 
-/** Load the coordinate system **/
+/** Load the convention for Q  **/
 void LoadMD::loadQConvention() {
-  // Current version stores the coordinate system
-  // in its own field. The first version stored it
-  // as a log value so fallback on that if it can't
-  // be found.
   try {
-    m_QConvention = "Inelastic";
     m_file->readData("QConvention", m_QConvention);
-  } catch (::NeXus::Exception &) {
-    auto pathOnEntry = m_file->getPath();
-    try {
-      m_file->openPath(pathOnEntry + "/experiment0/logs/CoordinateSystem");
-      m_QConvention = "Inelastic";
-      m_file->readData("value", m_QConvention);
-    } catch (::NeXus::Exception &) {
-    }
-    // return to where we started
-    m_file->openPath(pathOnEntry);
+  } catch (...) {
+    m_QConvention = "Inelastic";
   }
 }
 
