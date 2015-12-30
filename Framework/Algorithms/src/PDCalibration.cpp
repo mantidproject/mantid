@@ -122,7 +122,9 @@ void PDCalibration::exec() {
 
   m_peaksInDspacing = getProperty("PeakPositions");
 
-  loadAndBin();
+  m_uncalibratedWS = loadAndBin();
+  setProperty("UncalibratedWorkspace", m_uncalibratedWS);
+
   auto uncalibratedEWS = boost::dynamic_pointer_cast<EventWorkspace>(m_uncalibratedWS);
   bool isEvent = bool(uncalibratedEWS);
 
@@ -252,15 +254,11 @@ MatrixWorkspace_sptr PDCalibration::load(const std::string filename) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
-void PDCalibration::loadAndBin() {
+MatrixWorkspace_sptr PDCalibration::loadAndBin() {
   m_uncalibratedWS = getProperty("UncalibratedWorkspace");
 
   if (bool(m_uncalibratedWS)) {
-    m_uncalibratedWS = rebin(m_uncalibratedWS);
-
-    setProperty("UncalibratedWorkspace", m_uncalibratedWS);
-
-    return;
+    return rebin(m_uncalibratedWS);
   }
 
   const std::string signalFile = getProperty("Signalfile");
@@ -293,9 +291,7 @@ void PDCalibration::loadAndBin() {
     signalWS = boost::dynamic_pointer_cast<MatrixWorkspace>(compressResult);
   }
 
-  m_uncalibratedWS = rebin(signalWS);
-
-  setProperty("UncalibratedWorkspace", m_uncalibratedWS);
+  return rebin(signalWS);
 }
 
 API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {

@@ -46,7 +46,7 @@ public:
 private:
   void init();
   void exec();
-  void loadAndBin();
+  API::MatrixWorkspace_sptr loadAndBin();
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr wksp);
   API::MatrixWorkspace_sptr load(const std::string filename);
   void loadOldCalibration();
