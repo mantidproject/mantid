@@ -1637,11 +1637,20 @@ void LoadNexusProcessed::readInstrumentGroup(
 
   // Now build the spectra list
   int index = 0;
+  bool haveSpectraAxis = local_workspace->getAxis(1)->isSpectra();
 
   for (int i = 1; i <= spectraInfo.nSpectra; ++i) {
     int spectrum(-1);
+    // prefer the spectra number from the instrument section
+    // over anything else. If not there then use a spectra axis
+    // number if we have one, else make one up as nothing was
+    // written to the file. We should always set it so that
+    // CompareWorkspaces gives the expected answer on a Save/Load
+    // round trip.
     if (spectraInfo.hasSpectra) {
       spectrum = spectraInfo.spectraNumbers[i - 1];
+    } else if (haveSpectraAxis && !m_axis1vals.empty()) {
+      spectrum = static_cast<specid_t>(m_axis1vals[i - 1]);
     } else {
       spectrum = i + 1;
     }
@@ -1651,11 +1660,7 @@ void LoadNexusProcessed::readInstrumentGroup(
          find(m_spec_list.begin(), m_spec_list.end(), i) !=
              m_spec_list.end())) {
       ISpectrum *spec = local_workspace->getSpectrum(index);
-      if (m_axis1vals.empty()) {
-        spec->setSpectrumNo(spectrum);
-      } else {
-        spec->setSpectrumNo(static_cast<specid_t>(m_axis1vals[i - 1]));
-      }
+      spec->setSpectrumNo(spectrum);
       ++index;
 
       int start = spectraInfo.detectorIndex[i - 1];
