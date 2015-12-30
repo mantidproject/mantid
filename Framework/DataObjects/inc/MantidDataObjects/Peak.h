@@ -9,6 +9,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidKernel/ConfigService.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 
@@ -214,6 +215,10 @@ private:
 
   /// Static logger
   static Mantid::Kernel::Logger g_log;
+
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
 };
 
 } // namespace Mantid

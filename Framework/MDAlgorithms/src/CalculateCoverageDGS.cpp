@@ -456,8 +456,13 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
                                              const double phi) {
   V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)),
       qin(0., 0., m_ki);
+
   qout = m_rubw * qout;
   qin = m_rubw * qin;
+  if (convention == "Crystallography") {
+    qout *= -1;
+    qin *= -1;
+  }
   double hStart = qin.X() - qout.X() * m_kfmin,
          hEnd = qin.X() - qout.X() * m_kfmax;
   double kStart = qin.Y() - qout.Y() * m_kfmin,
