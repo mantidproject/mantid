@@ -102,7 +102,7 @@ void TransformMD::exec() {
 
   inWS = getProperty("InputWorkspace");
   outWS = getProperty("OutputWorkspace");
-  std::string outName =  getPropertyValue("OutputWorkspace");
+  std::string outName = getPropertyValue("OutputWorkspace");
 
   if (boost::dynamic_pointer_cast<MatrixWorkspace>(inWS))
     throw std::runtime_error("TransformMD can only transform a "
@@ -189,16 +189,17 @@ void TransformMD::exec() {
 
       AnalysisDataService::Instance().addOrReplace(outName, event);
       AnalysisDataService::Instance().addOrReplace("__none", none);
-      Mantid::API::BoxController_sptr boxController =
-              event->getBoxController();
+      Mantid::API::BoxController_sptr boxController = event->getBoxController();
       std::vector<int> splits;
       for (size_t d = 0; d < nd; d++) {
         splits.push_back(static_cast<int>(boxController->getSplitInto(d)));
       }
       Algorithm_sptr merge_alg = createChildAlgorithm("MergeMD");
-      merge_alg->setPropertyValue("InputWorkspaces", outName+",__none");
+      merge_alg->setPropertyValue("InputWorkspaces", outName + ",__none");
       merge_alg->setProperty("SplitInto", splits);
-      merge_alg->setProperty("SplitThreshold", static_cast<int>(boxController->getSplitThreshold()));
+      merge_alg->setProperty(
+          "SplitThreshold",
+          static_cast<int>(boxController->getSplitThreshold()));
       merge_alg->setProperty("MaxRecursionDepth", 13);
       merge_alg->executeAsChildAlg();
       event = merge_alg->getProperty("OutputWorkspace");
@@ -206,8 +207,6 @@ void TransformMD::exec() {
     }
     this->setProperty("OutputWorkspace", event);
   }
-
-
 }
 
 } // namespace Mantid

@@ -234,24 +234,25 @@ void LoadMD::exec() {
     if (m_requiresMDFrameCorrection) {
       setMDFrameOnWorkspaceFromLegacyFile(ws);
     }
-  // Write out the Qconvention
-  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string pref_QConvention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
-  g_log.information() << "Convention for Q in Preferences is " << pref_QConvention
-                      << "; Convention of Q in NeXus file is " << m_QConvention
-                      << std::endl;
+    // Write out the Qconvention
+    // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+    std::string pref_QConvention =
+        Kernel::ConfigService::Instance().getString("Q.convention");
+    g_log.information() << "Convention for Q in Preferences is "
+                        << pref_QConvention
+                        << "; Convention of Q in NeXus file is "
+                        << m_QConvention << std::endl;
 
-  if (pref_QConvention != m_QConvention)
-  {
-    g_log.information() << "Transforming Q" << std::endl;
-    Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
-    transform_alg->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-    transform_alg->setProperty("Scaling", "-1.0");
-    transform_alg->executeAsChildAlg();
-    IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
-    ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
-  }
+    if (pref_QConvention != m_QConvention) {
+      g_log.information() << "Transforming Q" << std::endl;
+      Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
+      transform_alg->setProperty("InputWorkspace",
+                                 boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+      transform_alg->setProperty("Scaling", "-1.0");
+      transform_alg->executeAsChildAlg();
+      IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
+      ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
+    }
     // Save to output
     setProperty("OutputWorkspace",
                 boost::dynamic_pointer_cast<IMDWorkspace>(ws));
@@ -344,15 +345,16 @@ void LoadMD::loadHisto() {
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string pref_QConvention =
       Kernel::ConfigService::Instance().getString("Q.convention");
-  g_log.information() << "Convention for Q in Preferences is " << pref_QConvention
+  g_log.information() << "Convention for Q in Preferences is "
+                      << pref_QConvention
                       << "; Convention of Q in NeXus file is " << m_QConvention
                       << std::endl;
 
-  if (pref_QConvention != m_QConvention)
-  {
+  if (pref_QConvention != m_QConvention) {
     g_log.information() << "Transforming Q" << std::endl;
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
-    transform_alg->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    transform_alg->setProperty("InputWorkspace",
+                               boost::dynamic_pointer_cast<IMDWorkspace>(ws));
     transform_alg->setProperty("Scaling", "-1.0");
     transform_alg->executeAsChildAlg();
     IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
