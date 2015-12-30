@@ -236,12 +236,15 @@ void LoadMD::exec() {
     }
   // Write out the Qconvention
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string QConvention =
+  std::string pref_QConvention =
       Kernel::ConfigService::Instance().getString("Q.convention");
+  g_log.information() << "Convention for Q in Preferences is " << pref_QConvention
+                      << "; Convention of Q in NeXus file is " << m_QConvention
+                      << std::endl;
 
-  std::cout << QConvention <<"  "<<m_QConvention<<"\n";
-  if (QConvention != m_QConvention)
+  if (pref_QConvention != m_QConvention)
   {
+    g_log.information() << "Transforming Q" << std::endl;
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
     transform_alg->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
     transform_alg->setProperty("Scaling", "-1.0");
@@ -339,18 +342,21 @@ void LoadMD::loadHisto() {
 
   // Write out the Qconvention
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string QConvention =
+  std::string pref_QConvention =
       Kernel::ConfigService::Instance().getString("Q.convention");
+  g_log.information() << "Convention for Q in Preferences is " << pref_QConvention
+                      << "; Convention of Q in NeXus file is " << m_QConvention
+                      << std::endl;
 
-  std::cout << QConvention <<"  "<<m_QConvention<<"\n";
-  if (QConvention != m_QConvention)
+  if (pref_QConvention != m_QConvention)
   {
+    g_log.information() << "Transforming Q" << std::endl;
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
     transform_alg->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-    transform_alg->setProperty("Scaling", -1.0);
+    transform_alg->setProperty("Scaling", "-1.0");
     transform_alg->executeAsChildAlg();
     IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
-    ws = boost::dynamic_pointer_cast<MDHistoWorkspace>(ws);
+    ws = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
   }
 
   // Save to output
@@ -463,7 +469,7 @@ void LoadMD::loadCoordinateSystem() {
 void LoadMD::loadQConvention() {
   try {
     m_file->readData("QConvention", m_QConvention);
-  } catch (...) {
+  } catch (::NeXus::Exception &) {
     m_QConvention = "Inelastic";
   }
 }
