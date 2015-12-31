@@ -12,7 +12,7 @@ class CreateCacheFilename(PythonAlgorithm):
     def category(self):
         """
         """
-        return "Utils"
+        return "Utility"
 
     def name(self):
         """
