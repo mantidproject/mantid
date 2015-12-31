@@ -110,7 +110,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string m_QConvention =
       Kernel::ConfigService::Instance().getString("Q.convention");
-  file->writeData("QConvention", m_QConvention);
+  file->putAttr("QConvention", m_QConvention);
 
   // Write out the visual normalization
   file->writeData("visual_normalization",

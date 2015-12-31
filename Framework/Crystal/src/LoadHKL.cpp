@@ -33,11 +33,9 @@ LoadHKL::~LoadHKL() {}
 /** Initialize the algorithm's properties.
  */
 void LoadHKL::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".hkl");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "Path to an hkl file to save.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".hkl"}),
+      "Path to an hkl file to save.");
 
   declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
                                                         Direction::Output),

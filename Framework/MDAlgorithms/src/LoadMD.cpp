@@ -467,8 +467,8 @@ void LoadMD::loadCoordinateSystem() {
 /** Load the convention for Q  **/
 void LoadMD::loadQConvention() {
   try {
-    m_file->readData("QConvention", m_QConvention);
-  } catch (::NeXus::Exception &) {
+    m_file->getAttr("QConvention", m_QConvention);
+  } catch (std::exception &) {
     m_QConvention = "Inelastic";
   }
 }
