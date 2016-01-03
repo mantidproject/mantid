@@ -472,6 +472,9 @@ void MDNormSCD::calculateNormalization(
                      prevIntSec.getBareArray(), pos.begin(),
                      VectorHelper::SimpleAverage<coord_t>());
       std::vector<coord_t> posNew = affineTrans * pos;
+      if (convention == "Crystallography") {
+        for (auto i = posNew.begin(); i != posNew.end(); ++i) *i = -(*i);
+      }
       size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
       if (linIndex == size_t(-1))
         continue;
@@ -642,7 +645,7 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
                                                            const double phi) {
   V3D q(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
   q = m_rubw * q;
-  if (convention != "Crystallography") {
+  if (convention == "Crystallography") {
     q *= -1;
   }
 

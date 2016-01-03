@@ -514,6 +514,9 @@ void MDNormDirectSC::calculateNormalization(
       // transform kf to energy transfer
       pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
       std::vector<coord_t> posNew = affineTrans * pos;
+      if (convention == "Crystallography") {
+        for (auto i = posNew.begin(); i != posNew.end(); ++i) *i = -(*i);
+      }
       size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
       if (linIndex == size_t(-1))
         continue;
@@ -610,7 +613,7 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
 
   qout = m_rubw * qout;
   qin = m_rubw * qin;
-  if (convention != "Crystallography") {
+  if (convention == "Crystallography") {
     qout *= -1;
     qin *= -1;
   }
