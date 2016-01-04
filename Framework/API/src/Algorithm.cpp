@@ -714,15 +714,19 @@ void Algorithm::exec(MPI::ExecutionMode executionMode) {
   case MPI::ExecutionMode::Distributed:
     return execDistributed();
   case MPI::ExecutionMode::MasterOnly:
-    if (MPI::isRoot())
-      return exec();
-    else
-      return;
+    return execMasterOnly();
   default:
     throw(std::runtime_error("Algorithm " + name() +
                              " does not support execution mode " +
                              MPI::toString(executionMode)));
   }
+}
+
+void Algorithm::execMasterOnly() {
+  if (MPI::isRoot())
+    return exec();
+  else
+    return execNonMaster();
 }
 
 //---------------------------------------------------------------------------------------------

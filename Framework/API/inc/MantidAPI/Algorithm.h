@@ -308,6 +308,8 @@ protected:
   virtual void exec() = 0;
 
   virtual void execDistributed() { exec(); }
+  virtual void execMasterOnly();
+  virtual void execNonMaster(){};
 
   /** Get correct execution mode based on input storage modes for an MPI run.
    *
