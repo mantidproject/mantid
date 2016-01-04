@@ -1426,7 +1426,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
         isValidMultiRunNumber(m_view->focusingRunNo());
 
     std::string loadInput = "";
-    for (int i = 0; i < multi_RunNo.size(); i++) {
+    for (size_t i = 0; i < multi_RunNo.size(); i++) {
       // if last run number in list
       if (i + 1 == multi_RunNo.size())
         loadInput += instStr + multi_RunNo[i];
