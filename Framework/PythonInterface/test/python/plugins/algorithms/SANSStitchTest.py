@@ -1,7 +1,8 @@
-import unittest
+﻿import unittest
 from mantid.api import AlgorithmManager, MatrixWorkspace
 import numpy as np
 
+from SANSStitch import QErrorCorrectionForMergedWorkspaces
 
 class SANSStitchTest(unittest.TestCase):
     def test_initalize(self):
@@ -311,7 +312,6 @@ class SANSStitchTest(unittest.TestCase):
         out_shift_factor = alg.getProperty('OutShiftFactor').value
         out_scale_factor = alg.getProperty('OutScaleFactor').value
 
-
         self.assertEquals(out_scale_factor, 1.0)
         self.assertEquals(out_shift_factor, -5.0)
 
@@ -414,8 +414,118 @@ class SANSStitchTest(unittest.TestCase):
                         msg='All data should be scaled and shifted to the LAB scale=1 shift=-5')
 
 
+class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):
+    def _provide_workspace_with_x_errors(self, workspace_name, use_xerror = True, nspec = 1,
+                                         x_in = [1,2,3,4,5,6,7,8,9,10], y_in = [2,2,2,2,2,2,2,2,2],
+                                         e_in = [1,1,1,1,1,1,1,1,1],  x_error = [1.1,2.2,3.3,4.4,5.5,6.6,7.7,8.8,9.9, 10.1]):
+        x = []
+        y = []
+        e = []
+        for item in range(0, nspec):
+            x = x + x_in
+            y = y + y_in
+            e = e + e_in
+        ws_alg = AlgorithmManager.createUnmanaged("CreateWorkspace")
+        ws_alg.initialize()
+        ws_alg.setChild(True)
+        ws_alg.setProperty("DataX", x)
+        ws_alg.setProperty("DataY", y)
+        ws_alg.setProperty("DataE", e)
+        ws_alg.setProperty("NSpec", nspec)
+        ws_alg.setProperty("UnitX", "MomentumTransfer")
+        ws_alg.setProperty("OutputWorkspace", workspace_name)
+        ws_alg.execute()
 
+        ws = ws_alg.getProperty("OutputWorkspace").value
+        if use_xerror:
+            for hists in range(0, nspec):
+                x_error_array = np.asarray(x_error)
+                ws.setDx(hists, x_error_array)
+        return ws
 
+    def test_error_is_ignored_for_more_than_one_spectrum(self):
+        # Arrange
+        front_name = "front"
+        rear_name = "rear"
+        result_name = "result"
+        front = self._provide_workspace_with_x_errors(front_name, True, 2)
+        rear = self._provide_workspace_with_x_errors(rear_name, True, 2)
+        result = self._provide_workspace_with_x_errors(result_name, False, 2)
+
+        scale = 2.
+        # Act
+        q_correction = QErrorCorrectionForMergedWorkspaces()
+        q_correction.correct_q_resolution_for_merged(front, rear,result, scale)
+        # Assert
+        self.assertFalse(result.hasDx(0))
+
+    def test_error_is_ignored_when_only_one_input_has_dx(self):
+        # Arrange
+        front_name = "front"
+        rear_name = "rear"
+        result_name = "result"
+        front = self._provide_workspace_with_x_errors(front_name, True, 1)
+        rear = self._provide_workspace_with_x_errors(rear_name, False, 1)
+        result = self._provide_workspace_with_x_errors(result_name, False, 1)
+        scale = 2.
+        # Act
+        q_correction = QErrorCorrectionForMergedWorkspaces()
+        q_correction.correct_q_resolution_for_merged(front, rear,result, scale)
+        # Assert
+        self.assertFalse(result.hasDx(0))
+
+    def test_that_non_matching_workspaces_are_detected(self):
+        # Arrange
+        front_name = "front"
+        rear_name = "rear"
+        result_name = "result"
+        x1 = [1,2,3]
+        e1 = [1,1]
+        y1 = [2,2]
+        dx1 = [1.,2.,3.]
+        x2 = [1,2,3,4]
+        e2 = [1,1, 1]
+        y2 = [2,2, 2]
+        dx2 = [1.,2.,3.,4.]
+        front = self._provide_workspace_with_x_errors(front_name, True, 1, x1, y1, e1, dx1)
+        rear = self._provide_workspace_with_x_errors(rear_name, True, 1, x2, y2, e2, dx2)
+        result = self._provide_workspace_with_x_errors(result_name, False, 1)
+        scale = 2.
+        # Act
+        q_correction = QErrorCorrectionForMergedWorkspaces()
+        q_correction.correct_q_resolution_for_merged(front, rear,result, scale)
+        # Assert
+        self.assertFalse(result.hasDx(0))
+
+    def test_correct_x_error_is_produced(self):
+        # Arrange
+        x = [1,2,3]
+        e = [1,1]
+        y_front = [2,2]
+        dx_front = [1.,2.,3.]
+        y_rear = [1.5,1.5]
+        dx_rear = [3.,2.,1.]
+        front_name = "front"
+        rear_name = "rear"
+        result_name = "result"
+        front = self._provide_workspace_with_x_errors(front_name, True, 1, x, y_front, e, dx_front)
+        rear = self._provide_workspace_with_x_errors(rear_name, True, 1, x, y_rear, e, dx_rear)
+        result = self._provide_workspace_with_x_errors(result_name, False, 1, x, y_front, e)
+        scale = 2.
+        # Act
+        q_correction = QErrorCorrectionForMergedWorkspaces()
+        q_correction.correct_q_resolution_for_merged(front, rear,result, scale)
+        # Assert
+        self.assertTrue(result.hasDx(0))
+
+        dx_expected_0 = (dx_front[0]*y_front[0]*scale + dx_rear[0]*y_rear[0])/(y_front[0]*scale + y_rear[0])
+        dx_expected_1 = (dx_front[1]*y_front[1]*scale + dx_rear[1]*y_rear[1])/(y_front[1]*scale + y_rear[1])
+        dx_expected_2 = dx_expected_1
+        dx_result = result.readDx(0)
+        self.assertTrue(len(dx_result) == 3)
+        self.assertEqual(dx_result[0], dx_expected_0)
+        self.assertEqual(dx_result[1], dx_expected_1)
+        self.assertEqual(dx_result[2], dx_expected_2)
 
 
 if __name__ == '__main__':

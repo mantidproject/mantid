@@ -36,6 +36,11 @@ message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 # Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
+execute_process(COMMAND python-config --prefix OUTPUT_VARIABLE PYTHON_PREFIX)
+string(STRIP ${PYTHON_PREFIX} PYTHON_PREFIX)
+set( PYTHON_LIBRARY "${PYTHON_PREFIX}/lib/libpython2.7.dylib" CACHE FILEPATH "PYTHON_LIBRARY")
+set( PYTHON_INCLUDE_DIR "${PYTHON_PREFIX}/include/python2.7" CACHE PATH "PYTHON_INCLUDE_DIR")
+
 ###########################################################################
 # Use the system-installed version of Python.
 ###########################################################################
