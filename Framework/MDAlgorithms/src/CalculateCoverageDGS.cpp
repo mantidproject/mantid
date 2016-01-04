@@ -434,7 +434,8 @@ void CalculateCoverageDGS::exec() {
 
       std::vector<coord_t> posNew = affineMat * pos;
       if (convention == "Crystallography") {
-        for (auto ip = posNew.begin(); ip != posNew.end(); ++ip) *ip = -(*ip);
+        for (auto ip = posNew.begin(); ip != posNew.end(); ++ip)
+          *ip = -(*ip);
       }
       size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
       if (linIndex == size_t(-1))
