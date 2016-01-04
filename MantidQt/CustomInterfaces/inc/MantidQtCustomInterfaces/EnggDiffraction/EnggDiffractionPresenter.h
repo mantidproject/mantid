@@ -256,7 +256,7 @@ private:
   static bool g_abortThread;
 
   /// whether to run Sum Of Files
-  static bool g_mergeFocus;
+  static bool g_sumOfFilesFocus;
 
   /// saves the last valid run number
   static std::string g_lastValidRun;

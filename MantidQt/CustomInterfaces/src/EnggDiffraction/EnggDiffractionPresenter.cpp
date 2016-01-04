@@ -39,7 +39,7 @@ const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
 int EnggDiffractionPresenter::g_croppedCounter = 0;
 int EnggDiffractionPresenter::g_plottingCounter = 0;
 bool EnggDiffractionPresenter::g_abortThread = false;
-bool EnggDiffractionPresenter::g_mergeFocus = false;
+bool EnggDiffractionPresenter::g_sumOfFilesFocus = false;
 std::string EnggDiffractionPresenter::g_lastValidRun = "";
 std::string EnggDiffractionPresenter::g_calibCropIdentifier = "SpectrumNumbers";
 
@@ -245,6 +245,7 @@ void EnggDiffractionPresenter::processFocusBasic() {
 
   // reset global values
   g_abortThread = false;
+  g_sumOfFilesFocus = false;
   g_plottingCounter = 0;
 
   // check if valid run number provided before focusin
@@ -266,14 +267,13 @@ void EnggDiffractionPresenter::processFocusBasic() {
 
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
-	g_mergeFocus = true;
-	std::vector<std::string> firstRun;
-	firstRun.push_back(multi_RunNo[0]);
+    g_sumOfFilesFocus = true;
+    std::vector<std::string> firstRun;
+    firstRun.push_back(multi_RunNo[0]);
 
-	// to avoid multiple loops, use firstRun instead as the 
-	// multi-run number is not required for sumOfFiles
-	startFocusing(firstRun, banks, "", "");
-	g_mergeFocus = false;
+    // to avoid multiple loops, use firstRun instead as the
+    // multi-run number is not required for sumOfFiles
+    startFocusing(firstRun, banks, "", "");
   }
 }
 
@@ -1224,7 +1224,6 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       conf.appendDataSearchDir(cs.m_inputDirRaw);
     }
 
-
     // Prepare special inputs for "texture" focusing
     std::vector<size_t> bankIDs;
     std::vector<std::string> effectiveFilenames;
@@ -1422,8 +1421,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   const std::string inWSName = "engggui_focusing_input_ws";
   const std::string instStr = m_view->currentInstrument();
 
-  // shahroz
-  if (g_mergeFocus) {
+  if (g_sumOfFilesFocus) {
     std::vector<std::string> multi_RunNo =
         isValidMultiRunNumber(m_view->focusingRunNo());
 
@@ -1458,8 +1456,16 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
       throw;
     }
 
-    g_log.notice() << "Load alogirthm successfully merged the following files: "
-                   << std::endl;
+    if (multi_RunNo.size() == 1) {
+      g_log.notice() << "Only single file has been listed, the Sum Of Files"
+                        "cannot not be processed"
+                     << std::endl;
+    } else {
+      g_log.notice()
+          << "Load alogirthm has successfully merged the files provided"
+          << std::endl;
+    }
+
   } else {
     try {
       auto load =
@@ -1573,6 +1579,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     }
   }
 }
+
 /**
 * Produce the two workspaces that are required to apply Vanadium
 * corrections. Try to load them if precalculated results are
