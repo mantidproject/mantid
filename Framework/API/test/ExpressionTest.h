@@ -367,6 +367,30 @@ public:
     e.toList();
     TS_ASSERT_EQUALS(e.name(), ",");
   }
+
+  void testEmptyString() {
+    Expression e;
+    e.parse("");
+    TS_ASSERT_EQUALS(e.name(), "EMPTY");
+  }
+
+  void testEmptyStringInBrackets() {
+    {
+      Expression e;
+      e.parse("()");
+      TS_ASSERT_EQUALS(e.name(), "EMPTY");
+    }
+    {
+      Expression e;
+      e.parse(" (  ) ");
+      TS_ASSERT_EQUALS(e.name(), "EMPTY");
+    }
+    {
+      Expression e;
+      e.parse(" ((  ) )  ");
+      TS_ASSERT_EQUALS(e.name(), "EMPTY");
+    }
+  }
 };
 
 #endif /*EXPRESSIONTEST_H_*/

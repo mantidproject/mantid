@@ -73,7 +73,7 @@ if platform.system() == "Windows":
             # Test values of probability
             prob_y = probability.dataY(0)
             self.assertEquals(round(probability.dataY(0)[0], 1), -65487.5)
-            self.assertEquals(round(probability.dataY(1)[0], 3), -375.124)
+            self.assertEquals(round(probability.dataY(1)[0], 3), -375.123)
             self.assertEquals(round(probability.dataY(2)[0], 6), 0)
 
             # Test values of group
@@ -124,16 +124,16 @@ if platform.system() == "Windows":
 
             # Test values of result
             result_y = result.dataY(0)
-            self.assertEquals(round(result.dataY(0)[0], 5), 8.28044)
-            self.assertEquals(round(result.dataY(1)[0], 7), 0.0335993)
-            self.assertEquals(round(result.dataY(2)[0], 5), 0.77844)
+            self.assertEquals(round(result.dataY(0)[0], 5), 8.2741)
+            self.assertEquals(round(result.dataY(1)[0], 7), 0.0335946)
+            self.assertEquals(round(result.dataY(2)[0], 5), 0.77801)
 
             # Test values of group
             sub_ws = group.getItem(0)
             sub_y = sub_ws.dataY(0)
             self.assertEquals(round(sub_ws.dataY(0)[0], 5), 0.02540)
-            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01656)
-            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00884)
+            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01648)
+            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00893)
 
 
         def test_QLr_Run(self):

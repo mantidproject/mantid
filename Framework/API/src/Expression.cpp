@@ -14,6 +14,8 @@ typedef Poco::StringTokenizer tokenizer;
 const std::string DEFAULT_OPS_STR[] = {";", ",", "=", "== != > < <= >=",
                                        "&& || ^^", "+ -", "* /", "^"};
 
+const std::string EMPTY_EXPRESSION_NAME = "EMPTY";
+
 Expression::Expression() {
 
   m_operators.reset(new Operators());
@@ -392,8 +394,10 @@ void Expression::setFunct(const std::string &name) {
 
   m_funct = name;
   trim(m_funct);
+
   if (m_funct.empty()) {
-    throw std::runtime_error("Expression: Syntax error");
+    m_funct = EMPTY_EXPRESSION_NAME;
+    return;
   }
 
   // Check if the function has arguments
@@ -428,7 +432,7 @@ void Expression::setFunct(const std::string &name) {
       std::string f = name.substr(0, i);
       Expression tmp(this);
       tmp.parse(args);
-      if (!tmp.isFunct() || tmp.name() != ",") {
+      if (tmp.name() != EMPTY_EXPRESSION_NAME && (!tmp.isFunct() || tmp.name() != ",")) {
         m_terms.push_back(tmp);
       } else {
         std::string my_op = m_op;
@@ -436,6 +440,9 @@ void Expression::setFunct(const std::string &name) {
         m_op = my_op;
       }
       m_funct = f;
+      if (m_funct.empty() && m_terms.empty()) {
+        m_funct = EMPTY_EXPRESSION_NAME;
+      }
     }
   }
 }

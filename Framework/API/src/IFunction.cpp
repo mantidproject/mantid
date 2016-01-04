@@ -568,7 +568,7 @@ protected:
   }
   /// Apply if vector
   void apply(std::vector<double> &v) const {
-    if (m_value.empty()) {
+    if (m_value.empty() || m_value == "EMPTY") {
       v.clear();
       return;
     }
@@ -1007,7 +1007,7 @@ void IFunction::setAttributeValue(const std::string &attName,
 
 /// Returns a list of attribute names
 std::vector<std::string> IFunction::getAttributeNames() const {
-  std::vector<std::string> names(nAttributes(), "");
+  std::vector<std::string> names(m_attrs.size(), "");
   size_t index(0);
   for (auto iter = m_attrs.begin(); iter != m_attrs.end(); ++iter) {
     names[index] = iter->first;

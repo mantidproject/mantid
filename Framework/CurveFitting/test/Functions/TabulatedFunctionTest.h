@@ -140,6 +140,16 @@ public:
     TS_ASSERT_EQUALS(fun.getAttribute("Workspace").asString(),
                      "TABULATEDFUNCTIONTEST_WS");
     TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(), "");
+    auto X = fun.getAttribute("X").asVector();
+    TS_ASSERT_EQUALS(X.size(), ws->blocksize());
+    TS_ASSERT_EQUALS(X[0], ws->readX(0)[0]);
+    TS_ASSERT_EQUALS(X[1], ws->readX(0)[1]);
+    TS_ASSERT_EQUALS(X[2], ws->readX(0)[2]);
+    auto Y = fun.getAttribute("Y").asVector();
+    TS_ASSERT_EQUALS(Y.size(), ws->blocksize());
+    TS_ASSERT_EQUALS(Y[0], ws->readY(0)[0]);
+    TS_ASSERT_EQUALS(Y[1], ws->readY(0)[1]);
+    TS_ASSERT_EQUALS(Y[2], ws->readY(0)[2]);
     AnalysisDataService::Instance().clear();
   }
 
@@ -219,13 +229,17 @@ public:
   void test_Attributes() {
     TabulatedFunction fun;
     auto names = fun.getAttributeNames();
-    TS_ASSERT_EQUALS(names.size(), 3);
+    TS_ASSERT_EQUALS(names.size(), 5);
     TS_ASSERT_EQUALS(names[0], "FileName");
     TS_ASSERT_EQUALS(names[1], "Workspace");
     TS_ASSERT_EQUALS(names[2], "WorkspaceIndex");
+    TS_ASSERT_EQUALS(names[3], "X");
+    TS_ASSERT_EQUALS(names[4], "Y");
     TS_ASSERT(fun.hasAttribute("FileName"));
     TS_ASSERT(fun.hasAttribute("Workspace"));
     TS_ASSERT(fun.hasAttribute("WorkspaceIndex"));
+    TS_ASSERT(fun.hasAttribute("X"));
+    TS_ASSERT(fun.hasAttribute("Y"));
   }
 
   void test_factory_create_from_file() {
@@ -261,6 +275,65 @@ public:
     TS_ASSERT_EQUALS(funf->getParameter("Shift"), 0.02);
     TS_ASSERT_EQUALS(funf->getParameter("XScaling"), 0.2);
     AnalysisDataService::Instance().clear();
+  }
+
+  void test_set_X_Y_attributes() {
+    TabulatedFunction fun;
+    const size_t n = 10;
+    std::vector<double> X(n);
+    std::vector<double> Y(n);
+    for(size_t i = 0; i < n; ++i) {
+      X[i] = double(i);
+      Y[i] = X[i] * X[i];
+    }
+    fun.setAttributeValue("X", X);
+    fun.setAttributeValue("Y", Y);
+
+    FunctionDomain1DVector x(0.0, 9.0, 33);
+    FunctionValues y(x);
+    fun.function(x, y);
+
+    for(size_t i = 0; i < x.size(); ++i) {
+      double xx = x[i];
+      TS_ASSERT_DELTA(y[i], xx*xx, 0.5);
+    }
+  }
+
+  void test_set_X_Y_attributes_different_sizes() {
+    TabulatedFunction fun;
+    const size_t n = 10;
+    std::vector<double> X(n);
+    std::vector<double> Y(n-1);
+
+    fun.setAttributeValue("X", X);
+    fun.setAttributeValue("Y", Y);
+
+    FunctionDomain1DVector x(0.0, 9.0, 33);
+    FunctionValues y(x);
+    TS_ASSERT_THROWS(fun.function(x, y), std::runtime_error);
+
+  }
+
+  void test_set_X_Y_attributes_string() {
+    std::string inif = "name=TabulatedFunction,X=(1,2,3),Y=(4,5,6)";
+    auto fun = FunctionFactory::Instance().createInitialized(inif);
+    TS_ASSERT(fun);
+    auto x = fun->getAttribute("X").asVector();
+    TS_ASSERT_EQUALS(x.size(), 3);
+    TS_ASSERT_EQUALS(x[0], 1);
+    TS_ASSERT_EQUALS(x[1], 2);
+    TS_ASSERT_EQUALS(x[2], 3);
+    auto y = fun->getAttribute("Y").asVector();
+    TS_ASSERT_EQUALS(y.size(), 3);
+    TS_ASSERT_EQUALS(y[0], 4);
+    TS_ASSERT_EQUALS(y[1], 5);
+    TS_ASSERT_EQUALS(y[2], 6);
+  }
+
+  void test_set_X_Y_attributes_string_empty() {
+    std::string inif = "name=TabulatedFunction,X=(),Y=()";
+    auto fun = FunctionFactory::Instance().createInitialized(inif);
+    TS_ASSERT(fun);
   }
 
 private:
