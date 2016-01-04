@@ -1,6 +1,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Unit.h"
+#include "MantidMPI/Helpers.h"
 
 namespace Mantid {
 namespace API {
@@ -29,6 +30,9 @@ Kernel::IValidator_sptr WorkspaceUnitValidator::clone() const {
   */
 std::string
 WorkspaceUnitValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
+  if (value->getStorageMode() == MPI::StorageMode::MasterOnly)
+    if (MPI::rank() != 0)
+      return "";
   // This effectively checks for single-valued workspaces
   if (value->axes() == 0)
     return "A single valued workspace has no unit, which is required for "
