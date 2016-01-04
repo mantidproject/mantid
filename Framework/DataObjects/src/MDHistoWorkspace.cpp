@@ -572,7 +572,6 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
     for (; it != boundaries.end(); ++it) {
       // This is our current position along the line
       coord_t linePos = *it;
-      x.push_back(linePos);
 
       // This is the full position at this boundary
       VMD pos = start + (dir * linePos);
@@ -585,10 +584,8 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
       if (linearIndex < m_length) {
 
         // Is the signal here masked?
-        if (this->getIsMaskedAt(linearIndex)) {
-          y.push_back(MDMaskValue);
-          e.push_back(MDMaskValue);
-        } else {
+        if (!this->getIsMaskedAt(linearIndex)) {
+          x.push_back(linePos);
           signal_t normalizer = getNormalizationFactor(normalize, linearIndex);
           // And add the normalized signal/error to the list too
           auto signal = this->getSignalAt(linearIndex) * normalizer;
@@ -603,6 +600,7 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
         lastPos = pos;
       } else {
         // Invalid index. This shouldn't happen
+        x.push_back(linePos);
         y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
         e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
       }

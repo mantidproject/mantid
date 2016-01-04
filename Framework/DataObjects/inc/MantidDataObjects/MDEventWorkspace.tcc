@@ -754,51 +754,39 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
   for (size_t i = 0; i < numPoints; i++) {
     // Coordinate along the line
     VMD coord = start + step * double(i);
-    // Record the position along the line
-    x.push_back(static_cast<coord_t>(stepLength * double(i)));
 
     // Look for the box at this coordinate
-    // const MDBoxBase<MDE,nd> * box = NULL;
     const IMDNode *box = NULL;
 
-    // TODO: make the logic/reuse in the following nicer.
     if (isInBounds(coord.getBareArray())) {
       box = this->data->getBoxAtCoord(coord.getBareArray());
 
-      if (box != NULL) {
-        if (box->getIsMasked()) {
-          y.push_back(MDMaskValue);
-          e.push_back(MDMaskValue);
-        } else {
-          // What is our normalization factor?
-          signal_t normalizer = 1.0;
-          switch (normalize) {
-          case NoNormalization:
-            break;
-          case VolumeNormalization:
-            normalizer = box->getInverseVolume();
-            break;
-          case NumEventsNormalization:
-            normalizer = 1.0 / double(box->getNPoints());
-            break;
-          }
+      if (box != NULL && !box->getIsMasked()) {
 
-          // And add the normalized signal/error to the list
-          y.push_back(box->getSignal() * normalizer);
-          e.push_back(box->getError() * normalizer);
+        // Record the position along the line
+        x.push_back(static_cast<coord_t>(stepLength * double(i)));
+
+        // What is our normalization factor?
+        signal_t normalizer = 1.0;
+        switch (normalize) {
+        case NoNormalization:
+          break;
+        case VolumeNormalization:
+          normalizer = box->getInverseVolume();
+          break;
+        case NumEventsNormalization:
+          normalizer = 1.0 / double(box->getNPoints());
+          break;
         }
-      } else {
-        y.push_back(std::numeric_limits<double>::quiet_NaN());
-        e.push_back(std::numeric_limits<double>::quiet_NaN());
+
+        // And add the normalized signal/error to the list
+        y.push_back(box->getSignal() * normalizer);
+        e.push_back(box->getError() * normalizer);
       }
-    } else {
-      // Point is outside the workspace. Add NANs
-      y.push_back(std::numeric_limits<double>::quiet_NaN());
-      e.push_back(std::numeric_limits<double>::quiet_NaN());
     }
   }
   // And the last point
-  x.push_back((end - start).norm());
+  // x.push_back((end - start).norm());
 }
 
 /**
