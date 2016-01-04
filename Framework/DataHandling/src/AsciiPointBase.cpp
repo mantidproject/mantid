@@ -25,9 +25,7 @@ void AsciiPointBase::init() {
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
       "The name of the workspace containing the data you want to save.");
 
-  std::vector<std::string> exts;
-  exts.push_back(ext());
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Save, {ext()}),
                   "The filename of the output file.");
   extraProps();
 }

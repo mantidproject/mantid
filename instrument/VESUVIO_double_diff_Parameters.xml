@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "VESUVIO">
+
+  <!-- This file contains those parameters that are affected by the differencing
+       mode of the instrument. The common parameters are contained within
+       VESUVIO_Parameters.xml.
+
+       This file is for double differencing.
+  -->
+
+<!-- Back-scattering Banks -->
+<component-link name = "back">
+
+  <!-- Standard deviation of source-sample distribution (metres) -->
+  <parameter name="sigma_l1">
+    <value val="0.021"/>
+  </parameter>
+
+  <!-- Standard deviation of sample-detector distribution (metres) -->
+  <parameter name="sigma_l2">
+    <value val="0.023"/>
+  </parameter>
+
+  <!-- Standard deviation of tof measurement (microseconds) -->
+  <parameter name="sigma_tof">
+    <value val="0.37"/>
+  </parameter>
+
+  <!-- Standard deviation of detector theta distribution (radians) -->
+  <parameter name="sigma_theta">
+    <value val="0.0227"/>
+  </parameter>
+
+  <!-- Lorentzian HWHM of the analyser energy (efixed) (meV) -->
+  <parameter name="hwhm_lorentz">
+    <value val="40.3"/>
+  </parameter>
+
+  <!-- Gaussian standard deviation of the analyser energy (efixed) (meV)
+       Note that this is not the HWHM but the standard deviation unlike the
+       Lorentzian parameter -->
+  <parameter name="sigma_gauss">
+    <value val="88.7"/>
+  </parameter>
+</component-link>
+
+<!-- END Back-scattering banks -->
+
+
+</parameter-file>

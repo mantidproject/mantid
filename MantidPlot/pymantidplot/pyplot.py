@@ -1,4 +1,4 @@
-"""============================================================================
+﻿"""============================================================================
 New Python command line interface for plotting in Mantid (a la matplotlib)
 ============================================================================
 
@@ -460,6 +460,7 @@ from mantid.api import mtd
 #    return __is_workspace(arg) or (mantid.api.mtd.doesExist(arg) and isinstance(mantid.api.mtd[arg], mantid.api.IMDWorkspace))
 from mantid.simpleapi import CreateWorkspace as CreateWorkspace
 import mantidplot  
+import mantidqtpython
 
 class Line2D():
     """
@@ -1213,6 +1214,28 @@ def __translate_error_bars_kwarg(**kwargs):
 
     return bars_val
 
+def __translate_distribution_kwarg(**kwargs):
+    """
+    Helper function to translate from distribution=DistributionDefault/DistributionTrue/DistributionFalse kwarg to a
+    mantidplot distribution argument
+
+    @param kwargs :: keyword arguments passed to a plot function. This function only cares about 'distribution'.
+
+    Returns :: DistributionDefault/DistributionTrue/DistributionFalse value for distribution, to be used with plotSpectrum, plotBin, etc.
+
+    """
+    # distribution param
+    distr_val = False
+    distr_name = 'distribution'
+    missing_off = mantidqtpython.MantidQt.DistributionDefault
+    str_val = kwargs.get(distr_name, missing_off)
+    if str_val != missing_off and str_val == 'DistributionTrue':
+        distr_val = mantidqtpython.DistributionTrue
+    elif str_val != missing_off and str_val == 'DistributionFalse':
+        distr_val = mantidqtpython.DistributionFalse
+
+    return distr_val
+
 def __plot_as_workspace(*args, **kwargs):
     """
         plot spectrum via qti plotting framework to plot a workspace.
@@ -1374,6 +1397,7 @@ def plot_spectrum(workspaces, indices, *args, **kwargs):
     """
     # Find optional params to plotSpectrum
     bars_val = __translate_error_bars_kwarg(**kwargs)
+    distr_val = __translate_distribution_kwarg(**kwargs)
     window_val, clearWindow_val = __translate_hold_kwarg(**kwargs)
 
     # to change properties on the new lines being added

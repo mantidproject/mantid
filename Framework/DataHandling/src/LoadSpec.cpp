@@ -23,13 +23,10 @@ LoadSpec::LoadSpec() {}
 
 /// Initialisation method.
 void LoadSpec::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
-  exts.push_back(".txt");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the text file to read, including its full or "
-                  "relative path. The file extension must be .txt or .dat.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".dat", ".txt"}),
+      "The name of the text file to read, including its full or "
+      "relative path. The file extension must be .txt or .dat.");
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "The name of the workspace that will be created, filled with the read-in "

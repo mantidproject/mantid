@@ -66,6 +66,7 @@ public:
   virtual void giveUserWarning(std::string prompt, std::string title);
   virtual void giveUserCritical(std::string prompt, std::string title);
   virtual void showAlgorithmDialog(const std::string &algorithm);
+  virtual void showImportDialog();
   virtual std::string requestNotebookPath();
 
   // Settings

@@ -1,4 +1,4 @@
-#pylint: disable=no-init, unused-variable
+#pylint: disable=no-init, unused-variable, too-many-lines
 # we need to disable unused_variable because ws.dataY(n) returns a reference  to the underlying c++ object
 # that can be modified inplace
 from mantid.kernel import *
@@ -129,7 +129,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 #----------------------------------------------------------------------------------------
 
     def PyExec(self):
-        self._load_inst_parameters()
+        self._load_common_inst_parameters()
         self._retrieve_input()
 
         if "Difference" in self._diff_opt:
@@ -153,18 +153,21 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
+#----------------------------------------------------------------------------------------
+
     def _exec_difference_mode(self):
         """
            Execution path when a difference mode is selected
         """
         try:
             all_spectra = [item for sublist in self._spectra for item in sublist]
+            self._raise_error_if_mix_fwd_back(all_spectra)
+            self._set_spectra_type(all_spectra[0])
             self._setup_raw(all_spectra)
             self._create_foil_workspaces()
 
             for ws_index, spectrum_no in enumerate(all_spectra):
                 self._ws_index, self._spectrum_no = ws_index, spectrum_no
-                self._set_spectra_type(spectrum_no)
                 self.foil_map = SpectraToFoilPeriodMap(self._nperiods)
 
                 self._integrate_periods()
@@ -184,6 +187,22 @@ class LoadVesuvio(LoadEmptyVesuvio):
             self._store_results()
         finally: # Ensures it happens whether there was an error or not
             self._cleanup_raw()
+
+#----------------------------------------------------------------------------------------
+
+    def _raise_error_if_mix_fwd_back(self, spectra):
+        """
+        Checks that in input spectra are all in the forward or all in the backward
+        scattering range
+        Assumes that the spectra is sorted sorted
+        """
+        if len(spectra) == 1:
+            return
+        all_back = self._is_back_scattering(spectra[0])
+        for spec_no in spectra[1:]:
+            if all_back and self._is_fwd_scattering(spec_no):
+                raise RuntimeError("Mixing backward and forward spectra is not permitted."
+                                   "Please correct the SpectrumList property.")
 
 #----------------------------------------------------------------------------------------
 
@@ -250,7 +269,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _load_inst_parameters(self):
+    def _load_common_inst_parameters(self):
         """
             Loads an empty VESUVIO instrument and attaches the necessary
             parameters as attributes
@@ -304,6 +323,36 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
+    def _load_diff_mode_parameters(self, workspace):
+        """
+        Loads the relevant parameter file for the current difference mode
+        into the given workspace
+        """
+        load_parameter_file = self.createChildAlgorithm("LoadParameterFile")
+        load_parameter_file.setLogging(_LOGGING_)
+        load_parameter_file.setPropertyValue("Workspace", workspace.name())
+        load_parameter_file.setProperty("Filename",
+                                        self._get_parameter_filename(self._diff_opt))
+        load_parameter_file.execute()
+
+#----------------------------------------------------------------------------------------
+
+    def _get_parameter_filename(self, diff_opt):
+        """
+        Returns the filename for the diff-mode specific parameters
+        """
+        if "Difference" not in diff_opt:
+            raise RuntimeError("Trying to load parameters for difference mode when not doing differencing! "
+                               "This is most likely a bug in the code. Please report this to the developers")
+
+        template = "VESUVIO_{0}_diff_Parameters.xml"
+        if diff_opt == "SingleDifference":
+            return template.format("single")
+        else:
+            return template.format("double")
+
+#----------------------------------------------------------------------------------------
+
     def _retrieve_input(self):
         self._diff_opt = self.getProperty(MODE_PROP).value
 
@@ -317,8 +366,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
             numbers = prop.value.tolist()
             if self._mon_spectra in numbers:
                 numbers.remove(self._spectra)
+            numbers.sort()
             self._spectra.append(numbers)
         #endfor
+
         self._sumspectra = self.getProperty(SUM_PROP).value
 
 #----------------------------------------------------------------------------------------
@@ -402,7 +453,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
                          XMax=self._mon_tof_max,
                          EnableLogging=_LOGGING_)
 
-        return mtd[SUMMED_WS], mtd[SUMMED_MON]
+        summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_MON]
+        self._load_diff_mode_parameters(summed_data)
+        return summed_data, summed_mon
 
 #----------------------------------------------------------------------------------------
 
@@ -432,21 +485,30 @@ class LoadVesuvio(LoadEmptyVesuvio):
         and set the normalization range appropriately
         @param spectrum_no The current spectrum no
         """
-        if spectrum_no >= self._backward_spectra_list[0] and spectrum_no <= self._backward_spectra_list[-1]:
+        if self._is_back_scattering(spectrum_no):
             self._spectra_type=BACKWARD
-        else:
-            self._spectra_type=FORWARD
-
-        if self._spectra_type == BACKWARD:
             self._mon_norm_start, self._mon_norm_end = self._back_mon_norm
             self._period_sum1_start, self._period_sum1_end = self._back_period_sum1
             self._period_sum2_start, self._period_sum2_end = self._back_period_sum2
             self._foil_out_norm_start, self._foil_out_norm_end = self._back_foil_out_norm
         else:
+            self._spectra_type=FORWARD
             self._mon_norm_start, self._mon_norm_end = self._forw_mon_norm
             self._period_sum1_start, self._period_sum1_end = self._forw_period_sum1
             self._period_sum2_start, self._period_sum2_end = self._forw_period_sum2
             self._foil_out_norm_start, self._foil_out_norm_end = self._forw_foil_out_norm
+
+#----------------------------------------------------------------------------------------
+
+    def _is_back_scattering(self, spectrum_no):
+        return spectrum_no >= self._backward_spectra_list[0] and \
+            spectrum_no <= self._backward_spectra_list[-1]
+
+#----------------------------------------------------------------------------------------
+
+    def _is_fwd_scattering(self, spectrum_no):
+        return spectrum_no >= self._forward_spectra_list[0] and \
+            spectrum_no <= self._forward_spectra_list[-1]
 
 #----------------------------------------------------------------------------------------
 

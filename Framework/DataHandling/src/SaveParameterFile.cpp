@@ -59,11 +59,8 @@ void SaveParameterFile::init() {
                               boost::make_shared<InstrumentValidator>()),
       "Workspace to save the instrument parameters from.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".xml");
-
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save, exts),
+      new API::FileProperty("Filename", "", API::FileProperty::Save, {".xml"}),
       "The name of the file into which the instrument parameters will be "
       "saved.");
 

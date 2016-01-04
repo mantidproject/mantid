@@ -39,11 +39,8 @@ void LoadIDFFromNexus::init() {
                                              Direction::InOut),
       "The name of the workspace in which to attach the imported instrument");
 
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".nxs.h5");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".nxs.h5"}),
       "The name (including its full or relative path) of the Nexus file to "
       "attempt to load the instrument from.");
 
