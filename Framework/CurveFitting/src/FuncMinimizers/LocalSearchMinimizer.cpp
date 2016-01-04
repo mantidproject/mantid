@@ -509,11 +509,9 @@ bool LocalSearchMinimizer::iterate(size_t iter) {
     parameters = iterationGradientDescent(*m_costFunction);
   }
 
-  if (!parameters) {
-    throw std::runtime_error("Minimizer failed!");
+  if (parameters) {
+    setParameters(*m_costFunction, parameters.get());
   }
-
-  setParameters(*m_costFunction, parameters.get());
 
   double newValue = m_costFunction->val();
   if (!boost::math::isfinite(newValue)) {
@@ -524,7 +522,7 @@ bool LocalSearchMinimizer::iterate(size_t iter) {
     return false;
   }
 
-  if (fabs(oldValue / newValue) < 1.0001) {
+  if (!parameters || fabs(oldValue / newValue) < 1.0001) {
     auto altParameters = iterationSingleParameters(*m_costFunction, oldValue);
     if (!altParameters) {
       return false;
@@ -532,7 +530,14 @@ bool LocalSearchMinimizer::iterate(size_t iter) {
     setParameters(*m_costFunction, altParameters.get());
     auto altValue = m_costFunction->val();
     if (altValue >= newValue) {
-      setParameters(*m_costFunction, parameters.get());
+      if (parameters) {
+        if (fabs(oldValue / newValue) < 1.0 + 1e-8) {
+          return false;
+        }
+        setParameters(*m_costFunction, parameters.get());
+      } else {
+        throw std::runtime_error("Minimizer failed.");
+      }
     } else {
       std::cerr << "Single parameter " << altValue << std::endl;
     }

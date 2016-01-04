@@ -14,6 +14,9 @@ namespace CostFunctions {
 
 DECLARE_COSTFUNCTION(CostFuncPoisson, Poisson)
 
+const double absoluteCutOff =  0.0;
+const double effectiveCutOff = 0.0001;
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -34,7 +37,7 @@ void CostFuncPoisson::addVal(API::FunctionDomain_sptr domain,
 
   for (size_t i = 0; i < ny; i++) {
     const double y = values->getCalculated(i);
-    if (y <= 0.0)
+    if (y <= absoluteCutOff)
     {
       retVal = std::numeric_limits<double>::infinity();
       break;
@@ -42,13 +45,12 @@ void CostFuncPoisson::addVal(API::FunctionDomain_sptr domain,
     else
     {
       const double N = values->getFitData(i);
-      if (N == 0.0)
-      {
+      if (y <= effectiveCutOff) {
+        retVal += (effectiveCutOff - y) / (y - absoluteCutOff);
+      } else if (N == 0.0) {
         retVal += y;
-      }
-      else
-      {
-        retVal += (y - N) + N*(log(N) - log(y));
+      } else {
+        retVal += (y - N) + N * (log(N) - log(y));
       }
     }
   }
@@ -89,31 +91,31 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
     for (size_t i = 0; i < ny; ++i) {
       double calc = values->getCalculated(i);
       double obs = values->getFitData(i);
-      if (calc <= 0.0)
-      {
+      if (calc <= absoluteCutOff) {
         if (iActiveP == 0) {
           fVal += std::numeric_limits<double>::infinity();
         }
         d += std::numeric_limits<double>::infinity();
-      }
-      else
-      {
-        if (obs == 0.0)
-        {
+      } else {
+        if (calc <= effectiveCutOff) {
+          if (iActiveP == 0) {
+            fVal += (effectiveCutOff - calc) / (calc - absoluteCutOff);
+          }
+          double tmp = calc - absoluteCutOff;
+          d += jacobian.get(i, ip) * (absoluteCutOff - effectiveCutOff) /
+               (tmp * tmp);
+        } else if (obs == 0.0) {
           if (iActiveP == 0) {
             fVal += calc;
           }
           d += jacobian.get(i, ip);
-        }
-        else
-        {
+        } else {
           if (iActiveP == 0) {
-            fVal += (calc - obs) + obs*(log(obs) - log(calc));
+            fVal += (calc - obs) + obs * (log(obs) - log(calc));
           }
           d += jacobian.get(i, ip) * (1.0 - obs / calc);
         }
       }
-
     }
     PARALLEL_CRITICAL(der_set) {
       double der = m_der.get(iActiveP);
@@ -154,19 +156,19 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
         
         double calc = values->getCalculated(k);
         double obs = values->getFitData(k);
-        if (calc <= 0.0)
-        {
+        if (calc <= absoluteCutOff) {
           d += std::numeric_limits<double>::infinity();
-        }
-        else
-        {
-          if (obs == 0.0)
-          {
+        } else {
+          if (calc <= effectiveCutOff) {
+            double tmp = calc - absoluteCutOff;
+            d += d2 * (absoluteCutOff - effectiveCutOff) / (tmp * tmp) +
+                 jacobian.get(k, i) * jacobian.get(k, j) *
+                     (effectiveCutOff - absoluteCutOff) * 2 / (tmp * tmp * tmp);
+          } else if (obs == 0.0) {
             d += d2;
-          }
-          else
-          {
-            d += d2 * (1.0 - obs / calc) + jacobian.get(k, i) * jacobian.get(k, j) * obs / calc / calc;
+          } else {
+            d += d2 * (1.0 - obs / calc) +
+                 jacobian.get(k, i) * jacobian.get(k, j) * obs / calc / calc;
           }
         }
       }
