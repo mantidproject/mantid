@@ -39,9 +39,9 @@ const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
 int EnggDiffractionPresenter::g_croppedCounter = 0;
 int EnggDiffractionPresenter::g_plottingCounter = 0;
 bool EnggDiffractionPresenter::g_abortThread = false;
-bool EnggDiffractionPresenter::g_sumOfFilesFocus = false;
 std::string EnggDiffractionPresenter::g_lastValidRun = "";
 std::string EnggDiffractionPresenter::g_calibCropIdentifier = "SpectrumNumbers";
+std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -245,7 +245,7 @@ void EnggDiffractionPresenter::processFocusBasic() {
 
   // reset global values
   g_abortThread = false;
-  g_sumOfFilesFocus = false;
+  g_sumOfFilesFocus = "";
   g_plottingCounter = 0;
 
   // check if valid run number provided before focusin
@@ -267,7 +267,7 @@ void EnggDiffractionPresenter::processFocusBasic() {
 
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
-    g_sumOfFilesFocus = true;
+    g_sumOfFilesFocus = "basic";
     std::vector<std::string> firstRun;
     firstRun.push_back(multi_RunNo[0]);
 
@@ -285,7 +285,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
 
   // reset global values
   g_abortThread = false;
-  g_sumOfFilesFocus = false;
+  g_sumOfFilesFocus = "";
   g_plottingCounter = 0;
 
   // check if valid run number provided before focusin
@@ -305,16 +305,15 @@ void EnggDiffractionPresenter::processFocusCropped() {
 
     startFocusing(multi_RunNo, banks, specNos, "");
 
-  }
-  else if (focusMode == 1) {
-	  g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
-	  g_sumOfFilesFocus = true;
-	  std::vector<std::string> firstRun;
-	  firstRun.push_back(multi_RunNo[0]);
+  } else if (focusMode == 1) {
+    g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+    g_sumOfFilesFocus = "cropped";
+    std::vector<std::string> firstRun;
+    firstRun.push_back(multi_RunNo[0]);
 
-	  // to avoid multiple loops, use firstRun instead as the
-	  // multi-run number is not required for sumOfFiles
-	  startFocusing(firstRun, banks, specNos, "");
+    // to avoid multiple loops, use firstRun instead as the
+    // multi-run number is not required for sumOfFiles
+    startFocusing(firstRun, banks, specNos, "");
   }
 }
 
@@ -325,7 +324,7 @@ void EnggDiffractionPresenter::processFocusTexture() {
 
   // reset global values
   g_abortThread = false;
-  g_sumOfFilesFocus = false;
+  g_sumOfFilesFocus = "";
   g_plottingCounter = 0;
 
   // check if valid run number provided before focusing
@@ -344,16 +343,15 @@ void EnggDiffractionPresenter::processFocusTexture() {
                   << std::endl;
     startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
 
-  }
-  else if (focusMode == 1) {
-	  g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
-	  g_sumOfFilesFocus = true;
-	  std::vector<std::string> firstRun;
-	  firstRun.push_back(multi_RunNo[0]);
+  } else if (focusMode == 1) {
+    g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+    g_sumOfFilesFocus = "texture";
+    std::vector<std::string> firstRun;
+    firstRun.push_back(multi_RunNo[0]);
 
-	  // to avoid multiple loops, use firstRun instead as the
-	  // multi-run number is not required for sumOfFiles
-	  startFocusing(firstRun, std::vector<bool>(), "", dgFile);
+    // to avoid multiple loops, use firstRun instead as the
+    // multi-run number is not required for sumOfFiles
+    startFocusing(firstRun, std::vector<bool>(), "", dgFile);
   }
 }
 
@@ -1151,6 +1149,19 @@ EnggDiffractionPresenter::outputFocusCroppedFilename(const std::string &runNo) {
   return instStr + "_" + runNo + "_focused_cropped.nxs";
 }
 
+std::vector<std::string> EnggDiffractionPresenter::sumOfFilesLoadVec() {
+  std::vector<std::string> multi_RunNo;
+
+  if (g_sumOfFilesFocus == "basic")
+    multi_RunNo = isValidMultiRunNumber(m_view->focusingRunNo());
+  else if (g_sumOfFilesFocus == "cropped")
+    multi_RunNo = isValidMultiRunNumber(m_view->focusingCroppedRunNo());
+  else if (g_sumOfFilesFocus == "texture")
+    multi_RunNo = isValidMultiRunNumber(m_view->focusingTextureRunNo());
+
+  return multi_RunNo;
+}
+
 std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
     const std::string &runNo, const std::vector<size_t> &bankIDs) {
   const std::string instStr = m_view->currentInstrument();
@@ -1438,19 +1449,19 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   const std::string inWSName = "engggui_focusing_input_ws";
   const std::string instStr = m_view->currentInstrument();
+  std::vector<std::string> multi_RunNo = sumOfFilesLoadVec();
+  std::string loadInput = "";
 
-  if (g_sumOfFilesFocus) {
-    std::vector<std::string> multi_RunNo =
-        isValidMultiRunNumber(m_view->focusingRunNo());
+  for (size_t i = 0; i < multi_RunNo.size(); i++) {
+    // if last run number in list
+    if (i + 1 == multi_RunNo.size())
+      loadInput += instStr + multi_RunNo[i];
+    else
+      loadInput += instStr + multi_RunNo[i] + '+';
+  }
 
-    std::string loadInput = "";
-    for (size_t i = 0; i < multi_RunNo.size(); i++) {
-      // if last run number in list
-      if (i + 1 == multi_RunNo.size())
-        loadInput += instStr + multi_RunNo[i];
-      else
-        loadInput += instStr + multi_RunNo[i] + '+';
-    }
+  // if its not empty the global variable is set for sumOfFiles
+  if (!g_sumOfFilesFocus.empty()) {
 
     try {
       auto load =
