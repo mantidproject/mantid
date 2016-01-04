@@ -220,13 +220,13 @@ bool ContainerSubtraction::validate() {
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             m_uiForm.dsContainer->getCurrentDataName().toStdString());
 
-    // Check Sample is of same type as container
+    // Check Sample is of same type as container (e.g. _red/_sqw)
     QString sample = m_uiForm.dsSample->getCurrentDataName();
     QString sampleType =
         sample.right(sample.length() - sample.lastIndexOf("_"));
     QString container = m_uiForm.dsContainer->getCurrentDataName();
     QString containerType =
-        container.right(sample.length() - container.lastIndexOf("_"));
+        container.right(container.length() - container.lastIndexOf("_"));
 
     g_log.debug() << "Sample type is: " << sampleType.toStdString()
                   << std::endl;
