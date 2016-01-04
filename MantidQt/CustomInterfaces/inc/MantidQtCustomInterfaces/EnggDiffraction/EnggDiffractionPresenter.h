@@ -72,8 +72,6 @@ public:
                   const std::vector<bool> &banks, const std::string &specNos,
                   const std::string &dgFile);
 
-  void MergeFiles(const std::vector<std::string> &multi_RunNo);
-
   /// checks if its a valid run number returns string
   std::string isValidRunNumber(std::vector<std::string> dir);
 
@@ -256,6 +254,9 @@ private:
 
   /// whether to break the thread
   static bool g_abortThread;
+
+  /// whether to run Sum Of Files
+  static bool g_mergeFocus;
 
   /// saves the last valid run number
   static std::string g_lastValidRun;

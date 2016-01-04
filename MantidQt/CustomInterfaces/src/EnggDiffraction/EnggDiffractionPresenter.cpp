@@ -39,6 +39,7 @@ const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
 int EnggDiffractionPresenter::g_croppedCounter = 0;
 int EnggDiffractionPresenter::g_plottingCounter = 0;
 bool EnggDiffractionPresenter::g_abortThread = false;
+bool EnggDiffractionPresenter::g_mergeFocus = false;
 std::string EnggDiffractionPresenter::g_lastValidRun = "";
 std::string EnggDiffractionPresenter::g_calibCropIdentifier = "SpectrumNumbers";
 
@@ -238,7 +239,7 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
 }
 
 void EnggDiffractionPresenter::processFocusBasic() {
-  const std::vector<std::string> multi_RunNo =
+  std::vector<std::string> multi_RunNo =
       isValidMultiRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
 
@@ -265,12 +266,14 @@ void EnggDiffractionPresenter::processFocusBasic() {
 
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
-	MergeFiles(multi_RunNo);
+	g_mergeFocus = true;
+	std::vector<std::string> firstRun;
+	firstRun.push_back(multi_RunNo[0]);
 
-
-    /**
-    Todo
-    **/
+	// to avoid multiple loops, use firstRun instead as the 
+	// multi-run number is not required for sumOfFiles
+	startFocusing(firstRun, banks, "", "");
+	g_mergeFocus = false;
   }
 }
 
@@ -1221,6 +1224,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       conf.appendDataSearchDir(cs.m_inputDirRaw);
     }
 
+
     // Prepare special inputs for "texture" focusing
     std::vector<size_t> bankIDs;
     std::vector<std::string> effectiveFilenames;
@@ -1417,24 +1421,66 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   const std::string inWSName = "engggui_focusing_input_ws";
   const std::string instStr = m_view->currentInstrument();
-  try {
-    auto load =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
-    load->initialize();
-    load->setPropertyValue("Filename", instStr + runNo);
-    load->setPropertyValue("OutputWorkspace", inWSName);
-    load->execute();
 
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
-  } catch (std::runtime_error &re) {
-    g_log.error()
-        << "Error while loading sample data for focusing. "
-           "Could not run the algorithm Load succesfully for the focusing "
-           "sample (run number: " +
-               runNo + "). Error description: " + re.what() +
-               " Please check also the previous log messages for details.";
-    throw;
+  // shahroz
+  if (g_mergeFocus) {
+    std::vector<std::string> multi_RunNo =
+        isValidMultiRunNumber(m_view->focusingRunNo());
+
+    std::string loadInput = "";
+    for (int i = 0; i < multi_RunNo.size(); i++) {
+      // if last run number in list
+      if (i + 1 == multi_RunNo.size())
+        loadInput += instStr + multi_RunNo[i];
+      else
+        loadInput += instStr + multi_RunNo[i] + '+';
+    }
+
+    try {
+      auto load =
+          Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      load->initialize();
+      load->setPropertyValue("Filename", loadInput);
+
+      load->setPropertyValue("OutputWorkspace", inWSName);
+      load->execute();
+
+      AnalysisDataServiceImpl &ADS =
+          Mantid::API::AnalysisDataService::Instance();
+      inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
+    } catch (std::runtime_error &re) {
+      g_log.error()
+          << "Error while loading files provided. "
+             "Could not run the algorithm Load succesfully for the focus "
+             "(run number provided. Error description:"
+             "Please check also the previous log messages for details." +
+                 static_cast<std::string>(re.what());
+      throw;
+    }
+
+    g_log.notice() << "Load alogirthm successfully merged the following files: "
+                   << std::endl;
+  } else {
+    try {
+      auto load =
+          Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      load->initialize();
+      load->setPropertyValue("Filename", instStr + runNo);
+      load->setPropertyValue("OutputWorkspace", inWSName);
+      load->execute();
+
+      AnalysisDataServiceImpl &ADS =
+          Mantid::API::AnalysisDataService::Instance();
+      inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
+    } catch (std::runtime_error &re) {
+      g_log.error()
+          << "Error while loading sample data for focusing. "
+             "Could not run the algorithm Load succesfully for the focusing "
+             "sample (run number: " +
+                 runNo + "). Error description: " + re.what() +
+                 " Please check also the previous log messages for details.";
+      throw;
+    }
   }
 
   std::string outWSName;
@@ -2211,40 +2257,5 @@ Poco::Path EnggDiffractionPresenter::outFilesDir(std::string addToDir) {
   return saveDir;
 }
 
-void EnggDiffractionPresenter::MergeFiles(
-    const std::vector<std::string> &multi_RunNo) {
-  const std::string instStr = m_view->currentInstrument();
-  const std::string mergedRunNoWs = "engggui_focusing_merged_ws";
-
-  std::string loadInput = "";
-  for (int i = 0; i < multi_RunNo.size(); i++) {
-    if (i + 1 == multi_RunNo.size())
-      loadInput += instStr + multi_RunNo[i];
-    else
-      loadInput += instStr + multi_RunNo[i] + '+';
-  }
-
-  try {
-    auto load =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
-    load->initialize();
-    load->setPropertyValue("Filename", loadInput);
-
-    load->setPropertyValue("OutputWorkspace", mergedRunNoWs);
-    load->execute();
-
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    auto mergedRunNo = ADS.retrieveWS<MatrixWorkspace>(mergedRunNoWs);
-  } catch (std::runtime_error &re) {
-    g_log.error()
-        << "Error while loading files provided. "
-           "Could not run the algorithm Load succesfully for the focus "
-           "(run number provided. Error description:" 
-		"Please check also the previous log messages for details.";
-    throw;
-  }
-
-  g_log.notice() << "Load alogirthm successfully merged the following files: " << std::endl;
-}
 } // namespace CustomInterfaces
 } // namespace MantidQt
