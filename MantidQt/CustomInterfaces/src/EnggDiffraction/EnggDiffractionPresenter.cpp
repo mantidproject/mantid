@@ -1760,6 +1760,9 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
 *
 * @param vanCurvesWS output (matrix) workspace loaded from the
 * precalculated Vanadium correction file, with the per-bank curves
+*
+* @param vanNo the Vanadium run number used for the openGenieAscii
+* output label
 */
 void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
     const std::string &preIntegFilename, const std::string &preCurvesFilename,
