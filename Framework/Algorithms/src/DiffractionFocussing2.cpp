@@ -11,6 +11,10 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidMPI/Helpers.h"
+
+#include <boost/mpi/collectives.hpp>
+#include <boost/serialization/set.hpp>
 
 #include <cfloat>
 #include <iterator>
@@ -293,6 +297,47 @@ void DiffractionFocussing2::exec() {
       }
       prog->report();
     } // end of loop for input spectra
+
+    // Gather data from all ranks
+#ifdef MPI_BUILD
+    if (!MPI::isRoot()) {
+      // Now take the root-square of the errors
+      typedef double (*pf)(double);
+      pf uf = std::sqrt;
+      std::transform(Eout.begin(), Eout.end(), Eout.begin(), uf);
+    }
+
+    // TODO sqrt error before rebin!
+    g_log.notice() << "Gathering data..." << std::endl;
+    std::vector<std::set<detid_t>> allDetectorIDs;
+    std::vector<MantidVec> allGroupWgts;
+    std::vector<MantidVec> allXouts;
+    std::vector<MantidVec> allYouts;
+    std::vector<MantidVec> allEouts;
+    gather(MPI::communicator(), outSpec->getDetectorIDs(), allDetectorIDs, MPI::rootRank());
+    gather(MPI::communicator(), groupWgt, allGroupWgts, MPI::rootRank());
+    gather(MPI::communicator(), Xout, allXouts, MPI::rootRank());
+    gather(MPI::communicator(), Yout, allYouts, MPI::rootRank());
+    gather(MPI::communicator(), Eout, allEouts, MPI::rootRank());
+    g_log.notice() << "Gathering data done." << std::endl;
+    if (MPI::isRoot()) {
+      g_log.notice() << "Merging data..." << std::endl;
+      for (size_t i = 0; i < allXouts.size(); i++) {
+        if((int)i == MPI::rootRank())
+          continue;
+        outSpec->addDetectorIDs(allDetectorIDs[i]);
+        bool distribution = true;
+        bool addition = true;
+        const MantidVec zeroes(allGroupWgts[i].size(), 0.0);
+        VectorHelper::rebin(allXouts[i], allGroupWgts[i], zeroes, Xout,
+                            groupWgt, EOutDummy, distribution, addition);
+        VectorHelper::rebinHistogram(allXouts[i], allYouts[i], allEouts[i],
+                                     Xout, Yout, Eout, addition);
+      }
+      g_log.notice() << "Merging data done." << std::endl;
+    }
+#endif
+    // End gather data from all ranks
 
     // Calculate the bin widths
     std::vector<double> widths(Xout.size());
@@ -705,6 +750,22 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
   }
 
   return totalHistProcess;
+}
+
+MPI::ExecutionMode DiffractionFocussing2::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  // The (non-optional) "InputWorkspace" determines the execution mode. Other
+  // workspaces are helpers and some may differ.
+  return getCorrespondingExecutionMode(storageModes.at("InputWorkspace"));
+}
+
+MPI::StorageMode DiffractionFocussing2::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  return MPI::StorageMode::MasterOnly;
+  // Ignored, since we have only one output workspace.
+  UNUSED_ARG(propertyName)
+  API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+  return ws->getStorageMode();
 }
 
 } // namespace Algorithm
