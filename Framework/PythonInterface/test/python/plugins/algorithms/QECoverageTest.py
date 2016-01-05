@@ -4,7 +4,6 @@ import mantid
 import numpy as np
 
 # First test that the limits have not been changed, and that the arithmetics work.
-# Then checks that the figure is plotted.
 
 class QECoverageTest(unittest.TestCase):
     def test_simple(self):
