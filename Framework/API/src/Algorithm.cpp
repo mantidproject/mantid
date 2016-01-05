@@ -1583,21 +1583,9 @@ void Algorithm::reportCompleted(const double &duration,
 void Algorithm::registerFeatureUsage(const float &duration) const
 {
   if (UsageService::Instance().isEnabled()) {
-    ::Json::FastWriter writer;
-    ::Json::Value algJson = toJson();
-    algJson["internal"] = isChild();
-    std::string details = writer.write(algJson);
-
-    //Limit details length for very long strings
-    const int STRING_SIZE_LIMIT = 8000;
-    if (details.size() > STRING_SIZE_LIMIT)
-      details.erase(STRING_SIZE_LIMIT, std::string::npos);
-
     std::ostringstream oss;
     oss << this->name() << ".v" << this->version();
-    UsageService::Instance().registerFeatureUsage("Algorithm", oss.str(),
-      DateAndTime::getCurrentTime(),
-      duration, details);
+    UsageService::Instance().registerFeatureUsage("Algorithm", oss.str(), isChild());
   }
 }
 

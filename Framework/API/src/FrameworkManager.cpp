@@ -221,8 +221,8 @@ void FrameworkManagerImpl::clear() {
 
 void FrameworkManagerImpl::shutdown()
 {
-  clear();
   Kernel::UsageService::Instance().shutdown();
+  clear();
 }
 
 /**

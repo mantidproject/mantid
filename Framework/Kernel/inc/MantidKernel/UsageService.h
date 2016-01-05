@@ -52,17 +52,14 @@ class FeatureUsage {
 public:
   /// Constructor
   FeatureUsage(const std::string &type, const std::string &name,
-               const Kernel::DateAndTime &start, const float &duration,
-               const std::string &details);
+    const bool internal);
+  bool operator<(const FeatureUsage& r) const;
 
   ::Json::Value asJson() const;
-  std::string asString() const;
 
   std::string type;
   std::string name;
-  Kernel::DateAndTime start;
-  float duration;
-  std::string details;
+  bool internal;
 };
 
 class MANTID_KERNEL_DLL UsageServiceImpl {
@@ -73,10 +70,7 @@ public:
   void registerStartup();
   /// Registers the use of a feature in mantid
   void registerFeatureUsage(const std::string &type, const std::string &name,
-                            const Kernel::DateAndTime &start,
-                            const float &duration, const std::string &details);
-  void registerFeatureUsage(const std::string &type, const std::string &name,
-                            const std::string &details = "");
+    const bool internal);
 
   /// Returns true if usage reporting is enabled
   bool isEnabled() const;
@@ -87,16 +81,24 @@ public:
   void flush();
   void shutdown();
 
+protected:
+  /// Constructor
+  UsageServiceImpl();
+  /// Destructor
+  virtual ~UsageServiceImpl();
+  /// generates the message body for a startup message
+  virtual std::string generateStartupMessage();
+  /// generates the message body for a feature usage message
+  virtual std::string generateFeatureUsageMessage();
+  /// sends a report over the internet
+  virtual int sendReport(const std::string &message, const std::string &url);
 private:
   friend struct Mantid::Kernel::CreateUsingNew<UsageServiceImpl>;
   /// Private, unimplemented copy constructor
   UsageServiceImpl(const UsageServiceImpl &);
   /// Private, unimplemented copy assignment operator
   UsageServiceImpl &operator=(const UsageServiceImpl &);
-  /// Constructor
-  UsageServiceImpl();
-  /// Destructor
-  ~UsageServiceImpl();
+
 
   /// Send startup Report
   void sendStartupReport();
@@ -105,18 +107,17 @@ private:
 
   /// A method to handle the timerCallbacks
   void timerCallback(Poco::Timer &);
-  /// Generate json for calls to usage service
+
+  /// Generate json for startup headers
   ::Json::Value generateHeader();
-  /// generates the message body for a startup message
-  std::string generateStartupMessage();
-  /// generates the message body for a feature usage message
-  std::string generateFeatureUsageMessage();
+  //generate Json header for feature calls
+  ::Json::Value generateFeatureHeader();
+
   Poco::ActiveResult<int> sendStartupAsync(const std::string &message);
   int sendStartupAsyncImpl(const std::string &message);
   Poco::ActiveResult<int> sendFeatureAsync(const std::string &message);
   int sendFeatureAsyncImpl(const std::string &message);
-  /// sends a report over the internet
-  int sendReport(const std::string &message, const std::string &url);
+
   /// a timer
   Poco::Timer m_timer;
 
@@ -129,8 +130,6 @@ private:
   size_t m_FeatureQueueSizeThreshold;
   bool m_isEnabled;
   mutable Kernel::Mutex m_mutex;
-
-  ::Json::Value m_cachedHeader;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

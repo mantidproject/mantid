@@ -30,25 +30,33 @@ const std::string FEATURE_URL(
 /** FeatureUsage
 */
 FeatureUsage::FeatureUsage(const std::string &type, const std::string &name,
-                           const Kernel::DateAndTime &start,
-                           const float &duration, const std::string &details)
-    : type(type), name(name), start(start), duration(duration),
-      details(details) {}
+    const bool internal)
+    : type(type), name(name), internal(internal) {}
 
-::Json::Value FeatureUsage::asJson() const {
-  ::Json::Value jsonMap;
-  jsonMap["type"] = type;
-  jsonMap["name"] = name;
-  jsonMap["start"] = start.toISO8601String();
-  jsonMap["duration"] = duration;
-  jsonMap["details"] = details;
-
-  return jsonMap;
+// Better brute force.
+bool FeatureUsage::operator<(const FeatureUsage& r) const
+{
+  if (type < r.type)  return true;
+  if (type > r.type)  return false;
+  // Otherwise type are equal
+  if (name < r.name)  return true;
+  if (name > r.name)  return false;
+  // Otherwise name are equal
+ if (static_cast<int>(internal) < static_cast<int>(r.internal))  return true;
+ if (static_cast<int>(internal) > static_cast<int>(r.internal))  return false;
+  // Otherwise all are equal
+  return false;
 }
 
-std::string FeatureUsage::asString() const {
-  ::Json::FastWriter writer;
-  return writer.write(asJson());
+::Json::Value FeatureUsage::asJson() const
+{
+  ::Json::Value retVal;
+
+  retVal["type"] = type;
+  retVal["name"] = name;
+  retVal["internal"] = internal;
+
+  return retVal;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -56,8 +64,7 @@ std::string FeatureUsage::asString() const {
  */
 UsageServiceImpl::UsageServiceImpl()
     : m_timer(), m_timerTicks(0), m_timerTicksTarget(0), m_FeatureQueue(),
-      m_FeatureQueueSizeThreshold(50), m_isEnabled(false), m_mutex(),
-      m_cachedHeader() {
+      m_FeatureQueueSizeThreshold(50), m_isEnabled(false), m_mutex() {
   setInterval(60);
 }
 
@@ -70,11 +77,8 @@ void UsageServiceImpl::setInterval(const uint32_t seconds) {
   // set the ticks target to by 24 hours / interval
   m_timerTicksTarget = 24 * 60 * 60 / seconds;
 
+  m_timer.setStartInterval((seconds * 1000));
   m_timer.setPeriodicInterval((seconds * 1000));
-  if (isEnabled()) {
-    m_timer.start(Poco::TimerCallback<UsageServiceImpl>(
-        *this, &UsageServiceImpl::timerCallback));
-  }
 }
 
 void UsageServiceImpl::registerStartup() {
@@ -83,24 +87,16 @@ void UsageServiceImpl::registerStartup() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
-/** registerFeatureUsage Overloads
+/** registerFeatureUsage 
 */
 void UsageServiceImpl::registerFeatureUsage(const std::string &type,
                                             const std::string &name,
-                                            const Kernel::DateAndTime &start,
-                                            const float &duration,
-                                            const std::string &details) {
-  m_FeatureQueue.push(FeatureUsage(type, name, start, duration, details));
+                                            const bool internal) {
+  if (isEnabled()) {
+    Kernel::Mutex::ScopedLock _lock(m_mutex);
+    m_FeatureQueue.push(FeatureUsage(type, name, internal));
+  }
 }
-
-void UsageServiceImpl::registerFeatureUsage(const std::string &type,
-                                            const std::string &name,
-                                            const std::string &details) {
-  registerFeatureUsage(type, name, DateAndTime::getCurrentTime(), 0.0, details);
-}
-
-//----------------------------------------------------------------------------------------------
 
 bool UsageServiceImpl::isEnabled() const { return m_isEnabled; }
 
@@ -182,39 +178,46 @@ void UsageServiceImpl::timerCallback(Poco::Timer &) {
 * This puts together the system information for the json document.
 */
 ::Json::Value UsageServiceImpl::generateHeader() {
-  ::Json::Value header = m_cachedHeader;
+  ::Json::Value header;
 
-  if (header.size() == 0) {
-    // username
-    header["uid"] = Kernel::ChecksumHelper::md5FromString(
-        ConfigService::Instance().getUsername());
-    // hostname
-    header["host"] = Kernel::ChecksumHelper::md5FromString(
-        ConfigService::Instance().getComputerName());
+  // username
+  header["uid"] = Kernel::ChecksumHelper::md5FromString(
+      ConfigService::Instance().getUsername());
+  // hostname
+  header["host"] = Kernel::ChecksumHelper::md5FromString(
+      ConfigService::Instance().getComputerName());
 
-    // os name, version, and architecture
-    header["osName"] = ConfigService::Instance().getOSName();
-    header["osArch"] = ConfigService::Instance().getOSArchitecture();
-    header["osVersion"] = ConfigService::Instance().getOSVersion();
-    header["osReadable"] = ConfigService::Instance().getOSVersionReadable();
+  // os name, version, and architecture
+  header["osName"] = ConfigService::Instance().getOSName();
+  header["osArch"] = ConfigService::Instance().getOSArchitecture();
+  header["osVersion"] = ConfigService::Instance().getOSVersion();
+  header["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
-    // paraview version or zero
-    if (ConfigService::Instance().pvPluginsAvailable()) {
-      header["ParaView"] = Kernel::ParaViewVersion::targetVersion();
-    } else {
-      header["ParaView"] = 0;
-    }
-
-    // mantid version and sha1
-    header["mantidVersion"] = MantidVersion::version();
-    header["mantidSha1"] = MantidVersion::revisionFull();
-
-    // cache this for future use
-    m_cachedHeader = header;
+  // paraview version or zero
+  if (ConfigService::Instance().pvPluginsAvailable()) {
+    header["ParaView"] = Kernel::ParaViewVersion::targetVersion();
+  } else {
+    header["ParaView"] = 0;
   }
 
   // mantid version and sha1
+  header["mantidVersion"] = MantidVersion::version();
+  header["mantidSha1"] = MantidVersion::revisionFull();
+
+  // mantid version and sha1
   header["dateTime"] = DateAndTime::getCurrentTime().toISO8601String();
+
+  return header;
+}
+
+/**
+* This puts together the system information for the json document.
+*/
+::Json::Value UsageServiceImpl::generateFeatureHeader() {
+  ::Json::Value header;
+
+  // mantid version and sha1
+  header["mantidVersion"] = MantidVersion::versionShort();
 
   return header;
 }
@@ -235,26 +238,36 @@ std::string UsageServiceImpl::generateStartupMessage() {
 
 std::string UsageServiceImpl::generateFeatureUsageMessage() {
 
-  auto message = this->generateHeader();
-  ::Json::FastWriter writer;
-  ::Json::Value features;
-  size_t featureCount = 0;
+  std::map<FeatureUsage, size_t> featureCountMap;
 
   if (!m_FeatureQueue.empty()) {
     // lock around emptying of the Q so any further threads have to wait
     Kernel::Mutex::ScopedLock _lock(m_mutex);
-    // generate json to submit
+    // generate a map containing the counts of identical feature usage records
     while (!m_FeatureQueue.empty()) {
       auto featureUsage = m_FeatureQueue.front();
-      features.append(featureUsage.asJson());
       m_FeatureQueue.pop();
-      featureCount++;
+      if (featureCountMap.find(featureUsage) == featureCountMap.end()) {
+        featureCountMap[featureUsage] = 1;
+      } else {
+        featureCountMap[featureUsage]++;
+      }
     }
   }
 
-  if (featureCount > 0) {
-    message["features"] = features;
-    return writer.write(message);
+  if (featureCountMap.size() > 0) {
+    ::Json::FastWriter writer;
+    ::Json::Value features;
+    auto message = this->generateFeatureHeader();
+    for (auto const& featureItem : featureCountMap) {
+      ::Json::Value thisFeature = featureItem.first.asJson();
+      thisFeature["count"] = featureItem.second;
+      features.append(thisFeature);
+    }
+    if (features.size() > 0) {
+      message["features"] = features;
+      return writer.write(message);
+    }
   }
   return "";
 }
