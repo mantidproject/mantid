@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -66,7 +66,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvertUnits : public API::Algorithm {
+class DLLExport ConvertUnits : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
   ConvertUnits();

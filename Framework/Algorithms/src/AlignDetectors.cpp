@@ -423,5 +423,20 @@ void AlignDetectors::execEvent() {
   outputWS->clearMRU();
 }
 
+MPI::ExecutionMode AlignDetectors::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  // The (non-optional) "InputWorkspace" determines the execution mode. Other
+  // workspaces are helpers and some may differ.
+  return getCorrespondingExecutionMode(storageModes.at("InputWorkspace"));
+}
+
+MPI::StorageMode AlignDetectors::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  // Ignored, since we have only one output workspace.
+  UNUSED_ARG(propertyName)
+  API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+  return ws->getStorageMode();
+}
+
 } // namespace Algorithms
 } // namespace Mantid

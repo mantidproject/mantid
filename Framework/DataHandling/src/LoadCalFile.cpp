@@ -364,5 +364,11 @@ bool LoadCalFile::idIsMonitor(Instrument_const_sptr inst, int detID) {
   return (it != monitorList.end());
 }
 
+MPI::ExecutionMode LoadCalFile::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  UNUSED_ARG(storageModes)
+  return MPI::ExecutionMode::Identical;
+}
+
 } // namespace Mantid
 } // namespace DataHandling

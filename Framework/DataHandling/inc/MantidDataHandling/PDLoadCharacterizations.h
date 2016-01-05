@@ -45,6 +45,19 @@ public:
     return "Load a characterization file used in Powder Diffraction Reduction.";
   }
 
+protected:
+  /** The current implementation returns ExecutionMode::Identical.
+   *
+   * Load the full file on each rank. */
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+  /** The current implementation returns StorageMode::Cloned.
+   *
+   * The output workspace contains the full data on each rank. */
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
 private:
   void init();
   void exec();

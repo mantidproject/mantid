@@ -245,6 +245,13 @@ public:
   /// in the event list.
   std::vector<std::vector<WeightedEventVector_pt>> weightedEventVectors;
 
+protected:
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
 private:
   /// Intialisation code
   void init();

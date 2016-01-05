@@ -64,6 +64,13 @@ public:
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   virtual std::map<std::string, std::string> validateInputs();
 
+protected:
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
 private:
   // Implement abstract Algorithm methods
   void init();
