@@ -198,7 +198,7 @@ void CreateMD::exec() {
   MatrixWorkspace_sptr workspace;
   std::stringstream ws_name;
   IMDEventWorkspace_sptr run_md;
-  Progress progress(this, 0.0, 1.0, entries);
+  Progress progress(this, 0.0, 1.0, entries + 1);
   for (unsigned long entry_number = 0; entry_number < entries;
        ++entry_number, ++counter) {
     ws_name.str(std::string());
@@ -229,22 +229,28 @@ void CreateMD::exec() {
     run_md = single_run(workspace, emode, efix[entry_number], psi[entry_number],
                         gl[entry_number], gs[entry_number], do_in_place, alatt,
                         angdeg, u, v, run_md);
+
     to_merge_names.push_back(to_merge_name);
 
     // We are stuck using ADS as we can't pass workspace pointers to MergeMD
     // There is currently no way to pass a list of workspace pointers
-    AnalysisDataService::Instance().addOrReplace(to_merge_name, run_md);
+    if (!do_in_place) {
+      AnalysisDataService::Instance().addOrReplace(to_merge_name, run_md);
+    }
 
     progress.report();
   }
 
   Workspace_sptr output_workspace;
   if (to_merge_names.size() > 1 && !in_place) {
+    progress.doReport("Merging loaded data into single workspace");
     output_workspace = merge_runs(to_merge_names);
   } else {
     output_workspace =
         AnalysisDataService::Instance().retrieve(to_merge_names[0]);
   }
+
+  progress.report();
 
   // Clean up temporary workspaces
   for (const auto &workspace_name : to_merge_names) {

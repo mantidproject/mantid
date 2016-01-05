@@ -1,8 +1,5 @@
 #include "MantidMDAlgorithms/MergeMD.h"
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/CPUTimer.h"
