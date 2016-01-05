@@ -1,5 +1,5 @@
-#ifndef MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_
-#define MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_
+#ifndef MANTID_WORKFLOWALGORITHMS_MUONPROCESS_H_
+#define MANTID_WORKFLOWALGORITHMS_MUONPROCESS_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
@@ -7,7 +7,7 @@
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
-/** MuonLoad : loads Muon workspace ready for analysis.
+/** MuonProcess : Processes and analyses Muon workspace.
 
   Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,26 +30,29 @@ namespace WorkflowAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MuonLoad : public API::DataProcessorAlgorithm {
+class DLLExport MuonProcess : public API::DataProcessorAlgorithm {
 public:
-  MuonLoad();
-  virtual ~MuonLoad();
+  MuonProcess();
+  virtual ~MuonProcess();
 
-  virtual const std::string name() const;
+  virtual const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
-    return "Loads Muon workspace ready for analysis.";
+  virtual const std::string summary() const override {
+    return "Processes and analyses Muon workspace.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  virtual int version() const override;
+  virtual const std::string category() const override;
+
+  /// Perform validation of inputs to the algorithm
+  virtual std::map<std::string, std::string> validateInputs() override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   // We dont' want processGroups to be called
-  virtual bool checkGroups() { return false; }
+  virtual bool checkGroups() override { return false; }
 
   /// Groups specified workspace group according to specified
   /// DetectorGroupingTable.
@@ -69,9 +72,12 @@ private:
   /// Applies offset, crops and rebins all workspaces in the group
   API::WorkspaceGroup_sptr correctWorkspaces(API::WorkspaceGroup_sptr wsGroup,
                                              double loadedTimeZero);
+
+  /// Builds an error message from a list of invalid periods
+  std::string buildErrorString(const std::vector<int> &invalidPeriods) const;
 };
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
 
-#endif /* MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_ */
+#endif /* MANTID_WORKFLOWALGORITHMS_MUONPROCESS_H_ */

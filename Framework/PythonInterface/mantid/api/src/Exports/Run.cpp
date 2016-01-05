@@ -109,9 +109,16 @@ bpl::list keys(Run &self) {
   return names;
 }
 }
-
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(integrateProtonCharge_Overload,
                                        integrateProtonCharge, 0, 1)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 void export_Run() {
   // Pointer

@@ -1408,17 +1408,13 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("InitialTimeOffset", PREPROC);
 
   // ---------- outputs
-  vector<string> exts;
-  exts.push_back(".DetCal");
-  exts.push_back(".Det_Cal");
-  declareProperty(
-      new FileProperty("DetCalFilename", "", FileProperty::OptionalSave, exts),
-      "Path to an ISAW-style .detcal file to save.");
+  declareProperty(new FileProperty("DetCalFilename", "",
+                                   FileProperty::OptionalSave,
+                                   {".DetCal", ".Det_Cal"}),
+                  "Path to an ISAW-style .detcal file to save.");
 
-  vector<string> exts1;
-  exts1.push_back(".xml");
   declareProperty(
-      new FileProperty("XmlFilename", "", FileProperty::OptionalSave, exts1),
+      new FileProperty("XmlFilename", "", FileProperty::OptionalSave, {".xml"}),
       "Path to an Mantid .xml description(for LoadParameterFile) file to "
       "save.");
 

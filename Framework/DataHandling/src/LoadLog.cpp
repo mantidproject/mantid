@@ -47,17 +47,15 @@ void LoadLog::init() {
                                              Direction::InOut),
       "The name of the workspace to which the log data will be added.");
 
-  std::vector<std::string> exts(2, "");
-  exts[0] = ".txt";
-  exts[1] = ".log";
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The filename (including its full or relative path) of a SNS "
-                  "text log file (not cvinfo), "
-                  "an ISIS log file, or an ISIS raw file. "
-                  "If a raw file is specified all log files associated with "
-                  "that raw file are loaded into the specified workspace. The "
-                  "file extension must "
-                  "either be .raw or .s when specifying a raw file");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".txt", ".log"}),
+      "The filename (including its full or relative path) of a SNS "
+      "text log file (not cvinfo), "
+      "an ISIS log file, or an ISIS raw file. "
+      "If a raw file is specified all log files associated with "
+      "that raw file are loaded into the specified workspace. The "
+      "file extension must "
+      "either be .raw or .s when specifying a raw file");
 
   declareProperty(
       new ArrayProperty<std::string>("Names"),

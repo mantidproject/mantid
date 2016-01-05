@@ -48,10 +48,9 @@ void SliceMD::init() {
                                                    Direction::Output),
                   "Name of the output MDEventWorkspace.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
   declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::OptionalSave, exts),
+      new FileProperty("OutputFilename", "", FileProperty::OptionalSave,
+                       {".nxs"}),
       "Optional: Specify a NeXus file to write if you want the output "
       "workspace to be file-backed.");
 

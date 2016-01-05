@@ -179,6 +179,8 @@ public slots:
   void toggleProgressReporting(bool on);
   /// Toggle code folding
   void toggleCodeFolding(bool on);
+  /// Toggle line wrapping
+  void toggleLineWrapping(bool on);
   /// Toggle the whitespace reporting arrow
   void toggleWhitespace(bool state);
   /// Show configuration dialogue for tab whitespace
@@ -251,6 +253,8 @@ private:
   QString m_fontFamily;
   // Save the code folding preference
   bool m_codeFolding;
+  // Save the line wrapping preference
+  bool m_LineWrapping;
 };
 
 #endif

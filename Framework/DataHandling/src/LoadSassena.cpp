@@ -325,16 +325,11 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
  * read from after the execution (output).
  */
 void LoadSassena::init() {
-  std::vector<std::string> exts; // Specify file extensions which can be
-                                 // associated with an output Sassena file
-  exts.push_back(".h5");
-  exts.push_back(".hd5");
-
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
-      "A Sassena file");
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
+                                        {".h5", ".hd5"}),
+                  "A Sassena file");
   // Declare the OutputWorkspace property
   declareProperty(new API::WorkspaceProperty<API::Workspace>(
                       "OutputWorkspace", "", Kernel::Direction::Output),

@@ -45,12 +45,8 @@ LoadDetectorsGroupingFile::~LoadDetectorsGroupingFile() {}
 void LoadDetectorsGroupingFile::init() {
   /// Initialise the properties
 
-  std::vector<std::string> fileExts(2);
-  fileExts[0] = ".xml";
-  fileExts[1] = ".map";
-
   declareProperty(
-      new FileProperty("InputFile", "", FileProperty::Load, fileExts),
+      new FileProperty("InputFile", "", FileProperty::Load, {".xml", ".map"}),
       "The XML or Map file with full path.");
 
   declareProperty(new WorkspaceProperty<DataObjects::GroupingWorkspace>(

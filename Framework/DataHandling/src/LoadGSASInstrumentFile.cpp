@@ -53,10 +53,9 @@ LoadGSASInstrumentFile::~LoadGSASInstrumentFile() {}
  */
 void LoadGSASInstrumentFile::init() {
   // Input file name
-  vector<std::string> exts;
-  exts.push_back(".prm");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "Path to an GSAS file to load.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".prm"}),
+      "Path to an GSAS file to load.");
 
   // Output table workspace
   auto wsprop = new WorkspaceProperty<API::ITableWorkspace>(

@@ -1054,12 +1054,9 @@ int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialisation method.
 */
 void LoadEventNexus::init() {
-  std::vector<std::string> exts;
-  exts.push_back("_event.nxs");
-  exts.push_back(".nxs.h5");
-  exts.push_back(".nxs");
   this->declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load,
+                       {"_event.nxs", ".nxs.h5", ".nxs"}),
       "The name of the Event NeXus file to read, including its full or "
       "relative path. "
       "The file name is typically of the form INST_####_event.nxs (N.B. case "

@@ -27,11 +27,9 @@ void LoadSampleDetailsFromRaw::init() {
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
       "The sample details are attached to this workspace.");
 
-  std::vector<std::string> exts;
-  exts.push_back("raw");
-  exts.push_back(".s*");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The raw file containing the sample geometry information.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {"raw", ".s*"}),
+      "The raw file containing the sample geometry information.");
 }
 
 /**

@@ -1,13 +1,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <string>
+
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
 #include "MantidWorkflowAlgorithms/HFIRInstrument.h"
-#include <MantidAPI/FileProperty.h>
 #include "Poco/NumberFormatter.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
@@ -40,7 +42,8 @@ void HFIRLoad::init() {
       "Sample to detector distance to use (overrides meta data), in mm");
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(),
                   "Offset to the sample to detector distance (use only when "
-                  "using the distance found in the meta data), in mm");
+                  "using the distance found in the meta data), in mm."
+                  "Not used when SampleDetectorDistance is provided.");
 
   // Optionally, we can specify the wavelength and wavelength spread and
   // overwrite
@@ -169,6 +172,9 @@ void HFIRLoad::exec() {
       boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 
   // Get the sample-detector distance
+  // If SampleDetectorDistance is provided, use it!
+  // Otherwise get's "sample-detector-distance" from the data file
+  // And uses SampleDetectorDistanceOffset if given!
   double sdd = 0.0;
   const double sample_det_dist = getProperty("SampleDetectorDistance");
   if (!isEmpty(sample_det_dist)) {
@@ -226,7 +232,7 @@ void HFIRLoad::exec() {
     output_message +=
         "   Could not compute SSD from number of guides, taking: " +
         Poco::NumberFormatter::format(src_to_sample / 1000.0, 3) + " \n";
-  };
+  }
 
   const std::string sampleADName = "sample-aperture-diameter";
   Mantid::Kernel::Property *prop = dataWS->run().getProperty(sampleADName);

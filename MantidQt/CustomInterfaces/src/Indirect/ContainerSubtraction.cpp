@@ -212,21 +212,13 @@ bool ContainerSubtraction::validate() {
       uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
   if (samValid && canValid) {
-    // Get Workspaces
-    MatrixWorkspace_sptr sampleWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_uiForm.dsSample->getCurrentDataName().toStdString());
-    MatrixWorkspace_sptr containerWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_uiForm.dsContainer->getCurrentDataName().toStdString());
-
-    // Check Sample is of same type as container
-    QString sample = m_uiForm.dsSample->getCurrentDataName();
-    QString sampleType =
-        sample.right(sample.length() - sample.lastIndexOf("_"));
-    QString container = m_uiForm.dsContainer->getCurrentDataName();
-    QString containerType =
-        container.right(sample.length() - container.lastIndexOf("_"));
+    // Check Sample is of same type as container (e.g. _red/_sqw)
+    const QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+    const QString sampleType =
+        sampleName.right(sampleName.length() - sampleName.lastIndexOf("_"));
+    const QString containerName = m_uiForm.dsContainer->getCurrentDataName();
+    const QString containerType = containerName.right(
+        containerName.length() - containerName.lastIndexOf("_"));
 
     g_log.debug() << "Sample type is: " << sampleType.toStdString()
                   << std::endl;
@@ -236,6 +228,14 @@ bool ContainerSubtraction::validate() {
     if (containerType != sampleType)
       uiv.addErrorMessage(
           "Sample and can workspaces must contain the same type of data.");
+
+    // Get Workspaces for histogram checking
+    MatrixWorkspace_sptr sampleWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            sampleName.toStdString());
+    MatrixWorkspace_sptr containerWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            containerName.toStdString());
 
     // Check sample has the same number of Histograms as the contianer
     const size_t sampleHist = sampleWs->getNumberHistograms();

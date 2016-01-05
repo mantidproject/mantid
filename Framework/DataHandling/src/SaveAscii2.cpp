@@ -33,11 +33,8 @@ void SaveAscii2::init() {
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
-  exts.push_back(".txt");
-  exts.push_back(".csv");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
+                                   {".dat", ".txt", ".csv"}),
                   "The filename of the output Ascii file.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();

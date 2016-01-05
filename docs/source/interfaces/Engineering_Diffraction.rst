@@ -63,6 +63,10 @@ Calibration sample #
   Number of the calibration sample run (for example Ceria run) used to
   calibrate experiment runs.
 
+The calibration process depends on several additional parameters and
+settings which can be modified in the *Settings* section (tab), see
+below for details.
+
 Focus
 -----
 
@@ -221,16 +225,21 @@ Calibration Parameters
 The calibration settings are organized in three blocks:
 
 1. Input directories
-2. Pixel calibration
+2. Pixel (full) calibration
 3. Advanced settings
 
 The input directories will be used when looking for run files
 (Vanadium and Ceria). They effectively become part of the search path
 of Mantid when using this interface.
 
-The pixel calibration file contains the calibration of every pixel of
-all banks, as produced by the algorithm :ref:`EnggCalibrateFull
-<algm-EnggCalibrateFull>`.
+The pixel (full) calibration file contains the calibration details of
+every pixel of all banks, as produced by the algorithm
+:ref:`EnggCalibrateFull <algm-EnggCalibrateFull>`. A default pixel
+calibration file is provided with Mantid packages. This calibration
+has been produced for the Vanadium and calibration sample (Ceria) runs
+indicated in the name of the calibration file. Note that this
+calibration is currently subject to changes, as the fitting of peaks
+is being refined.
 
 The Following advanced settings are available to customize the
 behavior of this interface:

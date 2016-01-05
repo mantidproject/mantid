@@ -41,12 +41,9 @@ void LoadDspacemap::init() {
   // 3 properties for getting the right instrument
   LoadCalFile::getInstrument3WaysInit(this);
 
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
-  exts.push_back(".bin");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The DspacemapFile containing the d-space mapping.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".dat", ".bin"}),
+      "The DspacemapFile containing the d-space mapping.");
 
   std::vector<std::string> propOptions;
   propOptions.push_back("POWGEN");

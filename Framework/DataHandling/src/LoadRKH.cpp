@@ -131,13 +131,9 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
  * Initialise the algorithm
  */
 void LoadRKH::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".txt");
-  exts.push_back(".q");
-  exts.push_back(".dat");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
-      "Name of the RKH file to load");
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
+                                        {".txt", ".q", ".dat"}),
+                  "Name of the RKH file to load");
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
                                                Kernel::Direction::Output),
                   "The name to use for the output workspace");

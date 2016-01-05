@@ -73,12 +73,9 @@ void VesuvioL1ThetaResolution::init() {
   auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLower(DBL_EPSILON);
 
-  std::vector<std::string> exts;
-  exts.push_back(".par");
-  exts.push_back(".dat");
   declareProperty(new FileProperty("PARFile", "",
-                                   FileProperty::FileAction::OptionalLoad, exts,
-                                   Direction::Input),
+                                   FileProperty::FileAction::OptionalLoad,
+                                   {".par", ".dat"}, Direction::Input),
                   "PAR file containing calibrated detector positions.");
 
   declareProperty("SampleWidth", 3.0, positiveDouble, "With of sample in cm.");
