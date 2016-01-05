@@ -64,6 +64,10 @@ public:
 
 class MANTID_KERNEL_DLL UsageServiceImpl {
 public:
+  /// Sets the application name that has invoked Mantid
+  void setApplication(const std::string& name);
+  /// Returns the application name that has invoked Mantid
+  std::string getApplication() const;
   /// Sets the interval that the timer checks for tasks
   void setInterval(const uint32_t seconds = 60);
   /// Registers the Startup of Mantid
@@ -108,8 +112,6 @@ private:
   /// A method to handle the timerCallbacks
   void timerCallback(Poco::Timer &);
 
-  /// Generate json for startup headers
-  ::Json::Value generateHeader();
   //generate Json header for feature calls
   ::Json::Value generateFeatureHeader();
 
@@ -130,6 +132,7 @@ private:
   size_t m_FeatureQueueSizeThreshold;
   bool m_isEnabled;
   mutable Kernel::Mutex m_mutex;
+  std::string m_application;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

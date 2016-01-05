@@ -58,6 +58,8 @@ public:
 
   void test_startupMessage() {
     TestableUsageService usageService;
+    std::string name = "My testing application name";
+    usageService.setApplication(name);
     std::string message = usageService.generateStartupMessage();
 
     ::Json::Reader reader;
@@ -78,6 +80,8 @@ public:
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found", std::find(members.begin(), members.end(), expectedMember) != members.end());
     }
+
+    TS_ASSERT_EQUALS(root["application"].asString(), name);
   }
 
   void test_FeatureUsageMessage() {
@@ -151,7 +155,16 @@ public:
     TS_ASSERT_EQUALS(usageService.generateFeatureUsageMessage(), "");
     //and it should be disabled
     TS_ASSERT_EQUALS(usageService.isEnabled(), false);
-    ;
+  }
+
+  void test_setApplicationName() {
+    TestableUsageService usageService;
+    //test default first
+    TS_ASSERT_EQUALS(usageService.getApplication(), "python");
+
+    std::string name = "My testing application name";
+    usageService.setApplication(name);
+    TS_ASSERT_EQUALS(usageService.getApplication(),name);
   }
 };
 

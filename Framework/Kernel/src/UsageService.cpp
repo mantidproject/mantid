@@ -64,7 +64,8 @@ bool FeatureUsage::operator<(const FeatureUsage& r) const
  */
 UsageServiceImpl::UsageServiceImpl()
     : m_timer(), m_timerTicks(0), m_timerTicksTarget(0), m_FeatureQueue(),
-      m_FeatureQueueSizeThreshold(50), m_isEnabled(false), m_mutex() {
+      m_FeatureQueueSizeThreshold(50), m_isEnabled(false), m_mutex(),
+      m_application("python") {
   setInterval(60);
 }
 
@@ -72,6 +73,14 @@ UsageServiceImpl::UsageServiceImpl()
 /** Destructor
  */
 UsageServiceImpl::~UsageServiceImpl() {}
+
+void UsageServiceImpl::setApplication(const std::string &name) {
+  m_application = name;
+}
+
+std::string UsageServiceImpl::getApplication() const {
+  return m_application;
+}
 
 void UsageServiceImpl::setInterval(const uint32_t seconds) {
   // set the ticks target to by 24 hours / interval
@@ -177,42 +186,6 @@ void UsageServiceImpl::timerCallback(Poco::Timer &) {
 /**
 * This puts together the system information for the json document.
 */
-::Json::Value UsageServiceImpl::generateHeader() {
-  ::Json::Value header;
-
-  // username
-  header["uid"] = Kernel::ChecksumHelper::md5FromString(
-      ConfigService::Instance().getUsername());
-  // hostname
-  header["host"] = Kernel::ChecksumHelper::md5FromString(
-      ConfigService::Instance().getComputerName());
-
-  // os name, version, and architecture
-  header["osName"] = ConfigService::Instance().getOSName();
-  header["osArch"] = ConfigService::Instance().getOSArchitecture();
-  header["osVersion"] = ConfigService::Instance().getOSVersion();
-  header["osReadable"] = ConfigService::Instance().getOSVersionReadable();
-
-  // paraview version or zero
-  if (ConfigService::Instance().pvPluginsAvailable()) {
-    header["ParaView"] = Kernel::ParaViewVersion::targetVersion();
-  } else {
-    header["ParaView"] = 0;
-  }
-
-  // mantid version and sha1
-  header["mantidVersion"] = MantidVersion::version();
-  header["mantidSha1"] = MantidVersion::revisionFull();
-
-  // mantid version and sha1
-  header["dateTime"] = DateAndTime::getCurrentTime().toISO8601String();
-
-  return header;
-}
-
-/**
-* This puts together the system information for the json document.
-*/
 ::Json::Value UsageServiceImpl::generateFeatureHeader() {
   ::Json::Value header;
 
@@ -222,15 +195,40 @@ void UsageServiceImpl::timerCallback(Poco::Timer &) {
   return header;
 }
 
+/**
+* This puts together the system information for the json document.
+*/
 std::string UsageServiceImpl::generateStartupMessage() {
-  auto message = this->generateHeader();
+  ::Json::Value message;
 
-  // get the properties that were set#
-  message["application"] = "mantidplot";
+  // username
+  message["uid"] = Kernel::ChecksumHelper::md5FromString(
+    ConfigService::Instance().getUsername());
+  // hostname
+  message["host"] = Kernel::ChecksumHelper::md5FromString(
+    ConfigService::Instance().getComputerName());
 
-  // The server possibly knows about component
-  // but we are not using it here.
-  // message["component"] = "";
+  // os name, version, and architecture
+  message["osName"] = ConfigService::Instance().getOSName();
+  message["osArch"] = ConfigService::Instance().getOSArchitecture();
+  message["osVersion"] = ConfigService::Instance().getOSVersion();
+  message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
+
+  // paraview version or zero
+  if (ConfigService::Instance().pvPluginsAvailable()) {
+    message["ParaView"] = Kernel::ParaViewVersion::targetVersion();
+  } else {
+    message["ParaView"] = 0;
+  }
+
+  // mantid version and sha1
+  message["mantidVersion"] = MantidVersion::version();
+  message["mantidSha1"] = MantidVersion::revisionFull();
+
+  // mantid version and sha1
+  message["dateTime"] = DateAndTime::getCurrentTime().toISO8601String();
+
+  message["application"] = m_application;
 
   ::Json::FastWriter writer;
   return writer.write(message);

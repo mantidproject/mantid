@@ -15,6 +15,13 @@ class UsageServiceTest(unittest.TestCase):
         UsageService.setEnabled(False)
         self.assertEquals(UsageService.isEnabled(),False)
 
+    def test_getSetApplication(self):
+        self.assertEquals(UsageService.getApplication(),"python")
+        UsageService.setApplication("python unit tests")
+        self.assertEquals(UsageService.getApplication(),"python unit tests")
+        UsageService.setApplication("python")
+        self.assertEquals(UsageService.getApplication(),"python")
+
     def test_setInterval(self):
         UsageService.setEnabled(False)
         UsageService.setInterval(60)
