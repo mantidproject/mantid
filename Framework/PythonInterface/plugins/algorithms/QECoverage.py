@@ -68,14 +68,14 @@ class QECoverage(PythonAlgorithm):
         eierr = '\n-----------------------------------------------------------------------------------\n'
         eierr += 'Error: Invalid input Ei. This must be a number or a comma-separated list of numbers\n'
         eierr += '-----------------------------------------------------------------------------------\n'
-        if ', ' not in myE:
+        if ',' not in myE:
             try:
                 myEs = [float(myE)]
             except ValueError:
                 raise ValueError(eierr)
         else:
             try:
-                myEs = [float(val) for val in myE.split(', ')]
+                myEs = [float(val) for val in myE.split(',')]
             except ValueError:
                 raise ValueError(eierr)
 
