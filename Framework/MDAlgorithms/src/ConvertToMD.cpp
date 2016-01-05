@@ -17,12 +17,15 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
+
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::Geometry::MDHistoDimensionBuilder;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -630,16 +633,8 @@ void ConvertToMD::findMinMax(
         minVal[i] *= 1.1;
         maxVal[i] *= 0.9;
       }
-    } else // expand min-max values a bit to avoid cutting data on the edges
-    {
-      if (std::fabs(minVal[i]) > FLT_EPSILON)
-        minVal[i] *= (1 + 2 * FLT_EPSILON);
-      else
-        minVal[i] -= 2 * FLT_EPSILON;
-      if (std::fabs(minVal[i]) > FLT_EPSILON)
-        maxVal[i] *= (1 + 2 * FLT_EPSILON);
-      else
-        minVal[i] += 2 * FLT_EPSILON;
+    } else {
+      MDHistoDimensionBuilder::resizeToFitMDBox(minVal[i], maxVal[i]);
     }
   }
 

@@ -20,6 +20,28 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL MDHistoDimensionBuilder {
 public:
+  /**
+   * Push the min/max values out by a defined amount. This is primarily used
+   * for moving the dimensions boundaries so that an MDGridBox can
+   * encompass all of the data and not chop of events if some events lie exactly
+   * on a boundary
+   * @param min A reference to the minimum value [InOut]
+   * @param max A reference to the maximum value [InOut]
+   */
+  template <typename CoordT>
+  static void resizeToFitMDBox(CoordT &min, CoordT &max) {
+    // Always use minimum float value as DBL_EPS is always too small
+    static constexpr CoordT twoEps = 2*std::numeric_limits<float>::epsilon();
+    if (std::fabs(min) > twoEps)
+      min *= (1 + twoEps);
+    else
+      min -= twoEps;
+    if (std::fabs(max) > twoEps)
+      max *= (1 + twoEps);
+    else
+      max += twoEps;
+  }
+
   MDHistoDimensionBuilder();
   ~MDHistoDimensionBuilder();
   void setName(std::string name);
