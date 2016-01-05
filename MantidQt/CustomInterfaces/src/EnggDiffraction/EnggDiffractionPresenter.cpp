@@ -1638,7 +1638,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
   std::string preIntegFilename, preCurvesFilename;
   findPrecalcVanadiumCorrFilenames(vanNo, inputDirCalib, preIntegFilename,
                                    preCurvesFilename, foundPrecalc);
-
+  // if pre calculated not found..
   if (forceRecalc || !foundPrecalc) {
     g_log.notice()
         << "Calculating Vanadium corrections. This may take a few seconds..."
@@ -1722,7 +1722,7 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
   const std::string runNo = std::string(2, '0').append(vanNo);
   preIntegFilename =
       g_enginxStr + "_precalculated_vanadium_run" + runNo + "_integration.nxs";
-
+  
   preCurvesFilename =
       g_enginxStr + "_precalculated_vanadium_run" + runNo + "_bank_curves.nxs";
 
@@ -1780,6 +1780,12 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
   algCurves->execute();
   // algCurves->getProperty("OutputWorkspace");
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
+
+  //shahroz
+  // call save open genie here
+  
+
+
 }
 
 /**
@@ -1793,15 +1799,14 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
 *
 * @param vanCurvesWS workspace where to keep the per-bank vanadium
 * curves
-*/
+*/ // shahroz
 void EnggDiffractionPresenter::calcVanadiumWorkspaces(
     const std::string &vanNo, ITableWorkspace_sptr &vanIntegWS,
     MatrixWorkspace_sptr &vanCurvesWS) {
 
   auto load = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
   load->initialize();
-  load->setPropertyValue("Filename",
-                         vanNo); // TODO more specific build Vanadium filename
+  load->setPropertyValue("Filename", vanNo); // TODO more specific build Vanadium filename
   std::string vanWSName = "engggui_vanadium_ws";
   load->setPropertyValue("OutputWorkspace", vanWSName);
   load->execute();
@@ -2203,8 +2208,15 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
   std::string fullFilename =
       outFileNameFactory(inputWorkspace, runNo, bank, ".his");
 
-  // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir("Focus");
+  Poco::Path saveDir;
+  if (inputWorkspace.std::string::find("curves") != std::string::npos ||
+      inputWorkspace.std::string::find("intgration") != std::string::npos) {
+    // Creates appropriate directory
+    saveDir = outFilesDir("Calibration");
+  } else {
+    // Creates appropriate directory
+    saveDir = outFilesDir("Focus");
+  }
 
   // append the full file name in the end
   saveDir.append(fullFilename);
@@ -2244,6 +2256,15 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
     std::string inputWorkspace, std::string runNo, std::string bank,
     std::string format) {
   std::string fullFilename;
+  // calibration
+  if (inputWorkspace.std::string::find("curves") != std::string::npos) {
+	  fullFilename = "ob+ENGINX_" + runNo + "_North_bank" + format;
+  }
+  if (inputWorkspace.std::string::find("integration") != std::string::npos) {
+	  fullFilename = "ob+ENGINX_" + runNo + "_South_bank" + format;
+  }
+
+  // focus
   if (inputWorkspace.std::string::find("texture") != std::string::npos) {
     fullFilename = "ENGINX_" + runNo + "_texture_" + bank + format;
   }
