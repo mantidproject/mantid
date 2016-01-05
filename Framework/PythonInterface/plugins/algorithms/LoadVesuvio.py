@@ -390,11 +390,17 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self.delta_t = (raw_t[1:] - raw_t[:-1])
 
         mon_raw_t = self._raw_monitors[0].readX(0)
+        logger.information("raw_monitors[0].readX(0) = " +  str(self._raw_monitors[0].readX(0)))
         delay = mon_raw_t[2] - mon_raw_t[1]
         # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
+        logger.information("mon_raw_t = " + str(mon_raw_t))
+        logger.information("delay = " + str(delay))
         mon_raw_t = mon_raw_t - delay
+        logger.information("mon_raw_t - delay = " + str(mon_raw_t))
         self.mon_pt_times = mon_raw_t[1:]
+        logger.information("mon_pt_times = " + str(self.mon_pt_times))
         self.delta_tmon = (mon_raw_t[1:] - mon_raw_t[:-1])
+        logger.information("delta_tmon = " + str(self.delta_tmon))
 
 #----------------------------------------------------------------------------------------
 
@@ -442,7 +448,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
                 ms.DeleteWorkspace(out_name, EnableLogging=_LOGGING_)
                 ms.DeleteWorkspace(out_mon, EnableLogging=_LOGGING_)
-
+        '''
         ms.CropWorkspace(Inputworkspace= SUMMED_WS,
                          OutputWorkspace=SUMMED_WS,
                          XMax=self._tof_max,
@@ -451,7 +457,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                          OutputWorkspace=SUMMED_MON,
                          XMax=self._mon_tof_max,
                          EnableLogging=_LOGGING_)
-
+        '''
         summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_MON]
         self._load_diff_mode_parameters(summed_data)
         return summed_data, summed_mon
@@ -520,7 +526,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             It also creates a 3rd blank array that will be filled by calculate_foil_counts_per_us.
             Operates on the current workspace index
         """
-        logger.warning("***************************INTEGRATE PERIODS**********************************")
+
         self.sum1 = np.zeros(self._nperiods)
         self.sum2 = np.zeros(self._nperiods)
         self.sum3 = np.zeros(3)
@@ -528,30 +534,21 @@ class LoadVesuvio(LoadEmptyVesuvio):
         sum1_start,sum1_end = self._period_sum1_start, self._period_sum1_end
         sum2_start,sum2_end = self._period_sum2_start,self._period_sum2_end
         xvalues = self.pt_times # values of the raw_grp x axis
-        logger.information(("sum_start,end (1) = %f , %f ") % (sum1_start, sum1_end))
-        logger.information(("sum_start,end (2) = %f , %f ") % (sum2_start, sum2_end))
         # Array of bin indexes corresponding to bins that lie within start/end range
         sum1_indices = np.where((xvalues > sum1_start) & (xvalues < sum1_end))
         sum2_indices = np.where((xvalues > sum2_start) & (xvalues < sum2_end))
 
         wsindex = self._ws_index # The current spectra to examine
-        logger.information("wsindex = " + str(wsindex))
-        logger.information("wsindex = " + str(wsindex))
         for i in range(self._nperiods):
             # Gets the sum(1,2) of the yvalues at the bin indexs
             yvalues = self._raw_grp[i].readY(wsindex)
             self.sum1[i] = np.sum(yvalues[sum1_indices])
             self.sum2[i] = np.sum(yvalues[sum2_indices])
-            logger.information("current ws in group = " + str(i))
-            logger.information("sum1 = " + str(self.sum1))
-            logger.information("sum2 = " + str(self.sum2))
             if self.sum2[i] != 0.0:
                 self.sum1[i] /= self.sum2[i]
-                logger.information("sum_1["+str(i)+"] / sum_2["+str(i)+"] = " + str(self.sum1))
 
         # Sort sum1 in increasing order and match the foil map
         self.sum1 = self.foil_map.reorder(self.sum1)
-        logger.information("reordered sum1 = " + str(self.sum1))
 
 
 #----------------------------------------------------------------------------------------
@@ -596,11 +593,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         for the foil out, thin foil & thick foil states for the back scattering detectors for the
         current workspace index & spectrum number
         """
-        logger.warning("*************************SUM FOIL PERIODS************************************")
         foil_out_periods, foil_thin_periods, foil_thick_periods = self._get_foil_periods()
-        logger.information("foil_out_periods = " + str(foil_out_periods))
-        logger.information("foil_thin_periods = " + str(foil_thin_periods))
-        logger.information("foil_thick_periods = " + str(foil_thick_periods))
 
         if self._nperiods == 6 and self._spectra_type == FORWARD:
             mon_out_periods = (5,6)
@@ -666,21 +659,18 @@ class LoadVesuvio(LoadEmptyVesuvio):
         @param mon_periods :: The period numbers of the monitors that contribute to this monitor sum
                               (if None then uses the foil_periods)
         """
-        logger.warning("****************************SUM FOILS*************************************")
         # index that corresponds to workspace in group based on foil state
         raw_grp_indices = self.foil_map.get_indices(self._spectrum_no, foil_periods)
-        logger.information("raw_grp_indices = " + str(raw_grp_indices))
+        #logger.information("raw_grp_indices = " + str(raw_grp_indices))
         wsindex = self._ws_index        # Spectra number - monitors(2) - 1
         outY = foil_ws.dataY(wsindex)   # Initialise outY list to correct length with 0s
         logger.information("foil_ws.dataY("+str(wsindex)+") = " + str(outY))
         delta_t = self.delta_t          # List of workspace bin width
-        logger.information("delta t = " + str(delta_t))
         for grp_index in raw_grp_indices:
             raw_ws = self._raw_grp[grp_index]
             outY += raw_ws.readY(wsindex)
             self.sum3[sum_index] += self.sum2[grp_index]
             logger.information("grp_idx = " + str(grp_index))
-            logger.information("outY = " + str(outY))
             logger.information("sum_idx = " + str(sum_index))
             logger.information("sum3 = " + str(self.sum3))
 
@@ -688,7 +678,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         eout = np.sqrt(outY)/delta_t
         foil_ws.setE(wsindex,eout)
         outY /= delta_t
-
+        logger.information("outY/delta_t = " + str(outY))
         # monitors
         if mon_periods is None:
             mon_periods = foil_periods
@@ -697,8 +687,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
         for grp_index in raw_grp_indices:
             raw_ws = self._raw_monitors[grp_index]
             outY += raw_ws.readY(self._mon_index)
-
+            logger.information("mon_y = " + str(outY))
+            logger.information("mon_y size = " + str(len(outY)))
         outY /= self.delta_tmon
+        logger.information("delta_tmon = " + str(self.delta_tmon))
 
 
 #----------------------------------------------------------------------------------------
@@ -708,9 +700,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
             Normalises by the monitor counts between mon_norm_start & mon_norm_end
             instrument parameters for the current workspace index
         """
-        logger.warning("**************************************Normalise bu monitor***************************************")
-        indices_in_range = np.where((self.mon_pt_times >= self._mon_norm_start) & (self.mon_pt_times < self._mon_norm_end))
+        logger.warning("**************************************Normalise by monitor***************************************")
+        monitor_x_data = self._raw_monitors[0].readX(0) #new line
+        indices_in_range = np.where((monitor_x_data >= self._mon_norm_start) & (monitor_x_data < self._mon_norm_end))  #changed line ~ used to be: indices_in_range = np.where((self.mon_pt_times >= self._mon_norm_start) & (self.mon_pt_times < self._mon_norm_end))
+        logger.information("mon_norm_start = " + str(self._mon_norm_start))
+        logger.information("mon_norm_end = " + str(self._mon_norm_end))
         logger.information("indices in range = " + str(indices_in_range))
+        logger.information("The number of indices in range are: " + str(len(indices_in_range[0])))
 
         wsindex = self._ws_index
         # inner function to apply normalization
@@ -719,11 +715,16 @@ class LoadVesuvio(LoadEmptyVesuvio):
             Applies monitor normalization to the given foil spectrum from the given
             monitor spectrum.
             """
+            logger.warning("Monitor Normalisation")
             mon_values = mon_ws.readY(wsindex)
             mon_values_sum = np.sum(mon_values[indices_in_range])
-
+            logger.information(str(len(mon_values)))
+            logger.information("mon_val = " + str(mon_values))
+            logger.information("mon_sum = " + str(mon_values_sum))
             foil_state = foil_ws.dataY(wsindex)
+            logger.information("foil_state = " + str(foil_state))
             foil_state *= (self._mon_scale/mon_values_sum)
+            logger.information("foil_state (post) = " + str(foil_state))
             err = foil_ws.dataE(wsindex)
             err *= (self._mon_scale/mon_values_sum)
 
@@ -731,6 +732,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         monitor_normalization(self.foil_thin, self.mon_thin)
         if self._nperiods != 2:
             monitor_normalization(self.foil_thick, self.mon_thick)
+        logger.warning("=========================ALL CORRECT ABOVE==========================")
 
 #----------------------------------------------------------------------------------------
 
@@ -741,19 +743,32 @@ class LoadVesuvio(LoadEmptyVesuvio):
             for the current workspace index
         """
         # Indices where the given condition is true
-        range_indices = np.where((self.pt_times >= self._foil_out_norm_start) & (self.pt_times < self._foil_out_norm_end))
+        logger.warning("===================Normalise by foil=====================")
+        raw_count_x = self._raw_grp[0].readX(0)
+        range_indices = np.where((raw_count_x >= self._foil_out_norm_start) & (raw_count_x < self._foil_out_norm_end)) #prevoiusly: range_indices = np.where((self.pt_times >= self._foil_out_norm_start) & (self.pt_times < self._foil_out_norm_end))
         wsindex = self._ws_index
         cout = self.foil_out.readY(wsindex)
+        logger.information("cout = " + str(cout))
+        logger.information("indices in range = " + str(range_indices))
+        logger.information("The number of indices in range are: " + str(len(range_indices[0])))
+        logger.information("foil_out_norm_start = " + str(self._foil_out_norm_start))
+        logger.information("foil_out_norm_end = " + str(self._foil_out_norm_end))
         sum_out = np.sum(cout[range_indices])
+        logger.information("sum_out = " + str(sum_out))
 
         def normalise_to_out(foil_ws, foil_type):
+            logger.warning("Foil Normalisation")
             values = foil_ws.dataY(wsindex)
+            logger.information("(pre)values = " + str(values))
             sum_values = np.sum(values[range_indices])
+            logger.information("sum_values = " + str(sum_values))
             if sum_values == 0.0:
                 self.getLogger().warning("No counts in %s foil spectrum %d." % (foil_type,self._spectrum_no))
                 sum_values = 1.0
             norm_factor = (sum_out/sum_values)
+            logger.information("Norm factor = " + str(norm_factor))
             values *= norm_factor
+            logger.information("(post)values = "+ str(values))
             errors = foil_ws.dataE(wsindex)
             errors *= norm_factor
 

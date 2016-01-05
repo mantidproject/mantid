@@ -61,7 +61,7 @@
 
   <!-- Normalisation by foil out -->
   <parameter name="backward_foil_out_norm" type="string">
-    <value val="410-430"/>
+    <value val="600-700"/>
   </parameter>
 
   <!-- ====================================================== -->
