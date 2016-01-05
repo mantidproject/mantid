@@ -1725,7 +1725,6 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
 
   const std::string runNo = std::string(2, '0').append(vanNo);
 
-  // shahroz - save preIntegFilename and preCurvesFile as openGenie too
   preIntegFilename =
       g_enginxStr + "_precalculated_vanadium_run" + runNo + "_integration.nxs";
 
@@ -1788,7 +1787,8 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
   // algCurves->getProperty("OutputWorkspace");
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
 
-  saveOpenGenie(curvesWSName, "", "South", vanNo);
+  saveOpenGenie(curvesWSName, "1-1200", "North", vanNo);
+  saveOpenGenie(curvesWSName, "1201-1400", "South", vanNo);
 }
 
 /**
@@ -1829,7 +1829,6 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
   alg->setPropertyValue("OutCurvesWorkspace", curvesName);
   alg->execute();
 
-  // shahroz
   ADS.remove(vanWSName);
 
   vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integName);
@@ -2261,13 +2260,12 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
     std::string inputWorkspace, std::string runNo, std::string bank,
     std::string format) {
   std::string fullFilename;
-  // if found enng curves or integration - shahroz
-  // calibration
+
+  // calibration output files
   if (inputWorkspace.std::string::find("curves") != std::string::npos) {
-    fullFilename = "ob+ENGINX_" + runNo + "_North_bank" + format;
-  } else if (inputWorkspace.std::string::find("integration") !=
-             std::string::npos) {
-    fullFilename = "ob+ENGINX_" + runNo + "_South_bank" + format;
+    fullFilename = "ob+ENGINX_" + runNo + "_" + bank + "_bank" + format;
+
+    // focus output files
   } else if (inputWorkspace.std::string::find("texture") != std::string::npos) {
     fullFilename = "ENGINX_" + runNo + "_texture_" + bank + format;
   } else if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
