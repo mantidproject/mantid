@@ -433,10 +433,6 @@ void CalculateCoverageDGS::exec() {
       pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
 
       std::vector<coord_t> posNew = affineMat * pos;
-      if (convention == "Crystallography") {
-        for (auto ip = posNew.begin(); ip != posNew.end(); ++ip)
-          *ip = -(*ip);
-      }
       size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
       if (linIndex == size_t(-1))
         continue;
@@ -460,7 +456,6 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
                                              const double phi) {
   V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)),
       qin(0., 0., m_ki);
-
   qout = m_rubw * qout;
   qin = m_rubw * qin;
   if (convention == "Crystallography") {

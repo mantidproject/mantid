@@ -472,10 +472,6 @@ void MDNormSCD::calculateNormalization(
                      prevIntSec.getBareArray(), pos.begin(),
                      VectorHelper::SimpleAverage<coord_t>());
       std::vector<coord_t> posNew = affineTrans * pos;
-      if (convention == "Crystallography") {
-        for (auto i = posNew.begin(); i != posNew.end(); ++i)
-          *i = -(*i);
-      }
       size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
       if (linIndex == size_t(-1))
         continue;
