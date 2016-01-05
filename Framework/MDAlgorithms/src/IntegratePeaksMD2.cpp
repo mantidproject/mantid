@@ -150,6 +150,12 @@ void IntegratePeaksMD2::init() {
                   "PeakRadius plus this value multiplied"
                   "by the magnitude of Q at the peak center so each peak has a "
                   "different integration radius.  Q includes the 2*pi factor.");
+
+  declareProperty(
+      "CorrectIfOnEdge", false,
+      "Only warning if all of peak outer radius is not on detector (default).\n"
+      "If false, correct for volume off edge for both background and intensity.");
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -257,6 +263,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   /// Replace intensity with 0
   bool replaceIntensity = getProperty("ReplaceIntensity");
   bool integrateEdge = getProperty("IntegrateIfOnEdge");
+  bool correctEdge = getProperty("CorrectIfOnEdge");
 
   std::string profileFunction = getProperty("ProfileFunction");
   std::string integrationOption = getProperty("IntegrationOption");
@@ -270,6 +277,10 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     outFile = save_path + outFile;
     out.open(outFile.c_str(), std::ofstream::out);
   }
+  // volume of Background sphere
+  double volumeBkg = 4.0/3.0*M_PI*std::pow(BackgroundOuterRadius,3);
+  // volume of PeakRadius sphere
+  double volumeRadius = 4.0/3.0*M_PI*std::pow(PeakRadius,3);
   //
   // If the following OMP pragma is included, this algorithm seg faults
   // sporadically when processing multiple TOPAZ runs in a script, on
@@ -302,10 +313,10 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     // Do not integrate if sphere is off edge of detector
 
-    int edge = detectorQ(p.getQLabFrame(), PeakRadius);
-    if (edge > 1) {
+    double edge = detectorQ(p.getQLabFrame(), std::max(BackgroundOuterRadius, PeakRadius));
+    if (edge < std::max(BackgroundOuterRadius, PeakRadius)) {
       g_log.warning() << "Warning: sphere/cylinder for integration is off edge "
-                         "of detector for peak " << i << "; #hits =  "<< edge << std::endl;
+                         "of detector for peak " << i << "; radius of edge =  "<< edge << std::endl;
       if (!integrateEdge) {
         if (replaceIntensity) {
           p.setIntensity(0.0);
@@ -621,10 +632,26 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // Save it back in the peak object.
     if (signal != 0. || replaceIntensity) {
       double edgeMultiplier = 1.0;
-      if(edge > 1 && edge < 100) edgeMultiplier = 1.0+0.01666*static_cast<double>(edge);
-      p.setIntensity(edgeMultiplier*(signal - ratio * background_total - bgSignal));
-      p.setSigmaIntensity(sqrt(edgeMultiplier*(errorSquared +
-                               ratio * ratio * std::fabs(background_total) +
+      double peakMultiplier = 1.0;
+      if (correctEdge){
+      if(edge < BackgroundOuterRadius) {
+      double e1 = BackgroundOuterRadius-edge;
+      // volume of cap of sphere with h = edge
+      double f1 =M_PI*std::pow(e1,2)/3*(3*BackgroundOuterRadius-e1);
+      edgeMultiplier = volumeBkg/(volumeBkg-f1);
+      }
+      if(edge < PeakRadius) {
+      double sigma = PeakRadius/3.0;
+      // assume gaussian peak
+      double e1=std::exp(-std::pow(edge,2)/(2*sigma*sigma))*PeakRadius;
+      // volume of cap of sphere with h = edge
+      double f1=M_PI*std::pow(e1,2)/3*(3*PeakRadius-e1);
+      peakMultiplier = volumeRadius/(volumeRadius-f1);
+      }
+      }
+      p.setIntensity(peakMultiplier*signal - edgeMultiplier *(ratio * background_total + bgSignal));
+      p.setSigmaIntensity(sqrt(peakMultiplier*errorSquared + edgeMultiplier *
+                               (ratio * ratio * std::fabs(background_total) +
                                bgErrorSquared)));
     }
 
@@ -705,14 +732,14 @@ void IntegratePeaksMD2::calculateE1(Geometry::Instrument_const_sptr inst) {
  * @param QLabFrame: The Peak center.
  * @param r: Peak radius.
  */
-int IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
-  int edge = 0;
+double IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
+  double edge = r;
   for (auto E1 = E1Vec.begin(); E1 != E1Vec.end(); ++E1) {
     V3D distv = QLabFrame -
                 *E1 * (QLabFrame.scalar_prod(
                           *E1)); // distance to the trajectory as a vector
-    if (distv.norm() < r) {
-      edge++;
+    if (distv.norm() < std::min(r, edge)) {
+      edge = distv.norm();
     }
   }
   return edge;
