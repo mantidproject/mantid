@@ -472,19 +472,20 @@ void LoadSQW2::readPixelData() {
   // using too much memory for the buffer
   constexpr int64_t bufferSize(FIELDS_PER_PIXEL * NPIX_CHUNK);
   std::vector<float> pixBuffer(bufferSize);
-  int64_t pixelsToRead(npixtot);
-  while (pixelsToRead > 0) {
-    int64_t readNPix(pixelsToRead);
-    if (readNPix > NPIX_CHUNK) {
-      readNPix = NPIX_CHUNK;
+  int64_t pixelsLeftToRead(npixtot);
+  while (pixelsLeftToRead > 0) {
+    int64_t chunkSize(pixelsLeftToRead);
+    if (chunkSize > NPIX_CHUNK) {
+      chunkSize = NPIX_CHUNK;
     }
-    m_reader->read(pixBuffer, FIELDS_PER_PIXEL * readNPix);
-    for (int64_t i = 0; i < readNPix; ++i) {
+    m_reader->read(pixBuffer, FIELDS_PER_PIXEL * chunkSize);
+    for (int64_t i = 0; i < chunkSize; ++i) {
       addEventFromBuffer(pixBuffer.data() + i * 9);
       m_progress->report();
     }
-    pixelsToRead -= readNPix;
+    pixelsLeftToRead -= chunkSize;
   }
+  assert(pixelsLeftToRead == 0);
   g_log.debug() << "Time to read all pixels: " << timer.elapsed() << "s\n";
 }
 
