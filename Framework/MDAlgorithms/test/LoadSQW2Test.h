@@ -130,13 +130,13 @@ private:
 #endif
   void checkGeometryAsExpected(const IMDEventWorkspace &outputWS) {
     TS_ASSERT_EQUALS(4, outputWS.getNumDims());
-    std::array<const char *, 4> ids{"Q1", "Q2", "Q3", "DeltaE"};
-    std::array<const char *, 4> names{"Q_\\zeta", "Q_\\xi", "Q_\\eta", "E"};
+    std::array<std::string, 4> ids{"Q1", "Q2", "Q3", "DeltaE"};
+    std::array<std::string, 4> names{"[H,0,0]", "[0,K,0]", "[0,0,L]", "DeltaE"};
     std::array<double, 8> ulimits{0.0439,  0.9271,  -0.4644, -0.4024,
                                   -0.7818, -0.5052, 2.5,     147.5};
     std::array<size_t, 4> nbins{3, 3, 2, 2};
-    std::array<const char *, 4> units{"A\\^-1", "A\\^-1", "A\\^-1", "mev"};
-    std::array<const char *, 4> frames{"HKL", "HKL", "HKL", "meV"};
+    std::array<std::string, 4> units{"in 2.189 A^-1", "in 2.189 A^-1",
+                                     "in 2.189 A^-1", "DeltaE"};
     for (size_t i = 0; i < 4; ++i) {
       auto dim = outputWS.getDimension(i);
       TS_ASSERT_EQUALS(ids[i], dim->getDimensionId());
@@ -145,7 +145,7 @@ private:
       TS_ASSERT_DELTA(ulimits[2 * i + 1], dim->getMaximum(), 1e-04);
       TS_ASSERT_EQUALS(nbins[i], dim->getNBins());
       TS_ASSERT_EQUALS(units[i], dim->getUnits().ascii());
-      TS_ASSERT_EQUALS(frames[i], dim->getMDFrame().name());
+      TS_ASSERT_EQUALS(names[i], dim->getMDFrame().name());
     }
   }
 #ifdef __clang__

@@ -2,6 +2,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidMDAlgorithms/LoadSQW2.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
@@ -228,7 +229,9 @@ void LoadSQW2::readSingleSPEHeader(API::ExperimentInfo &experiment) {
        << "    cu: " << floats[6] << " " << floats[7] << " " << floats[8]
        << "\n"
        << "    cv: " << floats[9] << " " << floats[10] << " " << floats[11]
-       << "\n";
+       << "\n"
+       << "B matrix (calculated): " << lattice->getB() << "\n"
+       << "Inverse B matrix (calculated): " << lattice->getBinv() << "\n";
     g_log.debug(os.str());
   }
 
@@ -323,9 +326,7 @@ void LoadSQW2::readSQWDimensions() {
   // dimension labels
   std::vector<int32_t> ulabelShape(2);
   m_reader->read(ulabelShape, 2);
-  std::vector<std::string> dimNames;
-  m_reader->read(dimNames, ulabelShape,
-                 BinaryStreamReader::MatrixOrdering::ColumnMajor);
+  m_file->seekg(ulabelShape[0] * ulabelShape[1], std::ios_base::cur);
   // projection information
   int32_t npax(0);
   *m_reader >> npax;
@@ -364,12 +365,7 @@ void LoadSQW2::readSQWDimensions() {
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     std::stringstream os;
     os << "Data:\n"
-       << "    labels: ";
-    for (const auto &val : dimNames) {
-      os << val << ",";
-    }
-    os << "\n";
-    os << "    ulimits (from file): ";
+       << "    ulimits (from file): ";
     for (size_t i = 0; i < 4; ++i) {
       os << "(" << urange[0][i] << "," << urange[1][i] << ") ";
     }
@@ -382,26 +378,34 @@ void LoadSQW2::readSQWDimensions() {
     g_log.debug(os.str());
   }
 
-  // Create dimensions
+  // Create dimensions in the same manner as ConvertToMD.
+  // See MDWSTransform::setQ3DDimensionsNames.
   const char *ids[] = {"Q1", "Q2", "Q3", "DeltaE"};
-  const char *units[] = {"A\\^-1", "A\\^-1", "A\\^-1", "mev"};
-  const char *frames[] = {"HKL", "HKL", "HKL", "meV"};
-  std::vector<float> dimMin{urange[0][0], urange[0][1], urange[0][2],
-                            urange[0][3]};
+  const char *names[] = {"[H,0,0]", "[0,K,0]", "[0,0,L]", "DeltaE"};
+  std::array<float, 4> dimMin{urange[0][0], urange[0][1], urange[0][2],
+                              urange[0][3]};
   toHKL(dimMin[0], dimMin[1], dimMin[2], 0);
-  std::vector<float> dimMax{urange[1][0], urange[1][1], urange[1][2],
-                            urange[1][3]};
+  std::array<float, 4> dimMax{urange[1][0], urange[1][1], urange[1][2],
+                              urange[1][3]};
   toHKL(dimMax[0], dimMax[1], dimMax[2], 0);
+  std::array<V3D, 3> dimDir{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+  const auto &Bm =
+      m_outputWS->getExperimentInfo(0)->sample().getOrientedLattice().getB();
   for (size_t i = 0; i < 4; ++i) {
-    MDHistoDimensionBuilder builder;
-    builder.setId(ids[i]);
-    builder.setName(dimNames[i]);
-    builder.setMin(dimMin[i]);
-    builder.setMax(dimMax[i]);
-    builder.setNumBins(static_cast<size_t>(nbins[i]));
-    builder.setFrameName(frames[i]);
-    builder.setUnits(units[i]);
-    m_outputWS->addDimension(builder.create());
+    std::string unit;
+    if (i < 3) {
+      V3D x = Bm * dimDir[i];
+      double length = 2 * M_PI * x.norm();
+      unit = "in " + MDAlgorithms::sprintfd(length, 1.e-3) + " A^-1";
+    } else {
+      unit = "DeltaE";
+    }
+    Mantid::Geometry::GeneralFrame frame(names[i], unit);
+    double min(dimMin[i]), max(dimMax[i]);
+    MDHistoDimensionBuilder::resizeToFitMDBox(min, max);
+    auto dim = boost::make_shared<Geometry::MDHistoDimension>(
+        names[i], ids[i], frame, min, max, static_cast<size_t>(nbins[i]));
+    m_outputWS->addDimension(dim);
   }
   setupBoxController();
 }
@@ -539,13 +543,12 @@ void LoadSQW2::addEventFromBuffer(const float *pixel) {
  * @param runIndex Index into the experiment list
  */
 void LoadSQW2::toHKL(float &u1, float &u2, float &u3, const uint16_t runIndex) {
-  constexpr double invTwoPi = 0.5 / M_PI;
+  static constexpr double invTwoPi = 0.5 / M_PI;
   const auto &sample = m_outputWS->getExperimentInfo(runIndex)->sample();
-  const auto &uToRLU = sample.getOrientedLattice().getBinv();
-
+  const auto &uToRLU = sample.getOrientedLattice().getBinv() * invTwoPi;
   V3D uVec(static_cast<double>(u1), static_cast<double>(u2),
            static_cast<double>(u3));
-  V3D qhkl = (uToRLU * uVec) * invTwoPi;
+  V3D qhkl = uToRLU * uVec;
   u1 = static_cast<float>(qhkl[0]);
   u2 = static_cast<float>(qhkl[1]);
   u3 = static_cast<float>(qhkl[2]);
