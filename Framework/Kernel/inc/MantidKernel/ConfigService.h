@@ -40,7 +40,6 @@ namespace Kernel {
 class Logger;
 class FacilityInfo;
 class InstrumentInfo;
-class UsageReporter;
 
 /** The ConfigService class provides a simple facade to access the Configuration
    functionality of the Mantid Framework.

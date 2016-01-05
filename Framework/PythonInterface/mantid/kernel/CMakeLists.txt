@@ -49,6 +49,7 @@ set ( EXPORT_FILES
   src/Exports/Material.cpp
   src/Exports/Statistics.cpp
   src/Exports/OptionalBool.cpp
+  src/Exports/UsageService.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )

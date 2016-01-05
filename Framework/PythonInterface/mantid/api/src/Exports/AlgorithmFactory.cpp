@@ -8,6 +8,7 @@
 #include <boost/python/def.hpp>
 #include <boost/python/overloads.hpp>
 #include <Poco/ScopedLock.h>
+#include <Poco/ScopedLock.h>
 
 // Python frameobject. This is under the boost includes so that boost will have
 // done the
