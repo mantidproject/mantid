@@ -41,9 +41,15 @@ Usage
 
     ###### Simulates LoadVesuvio #################
     tof_ws = CreateSimulationWorkspace(Instrument='Vesuvio',BinParams=[50,0.5,562],UnitX='TOF')
-    tof_ws = CropWorkspace(tof_ws,StartWorkspaceIndex=0,EndWorkspaceIndex=4)
+    tof_ws = CropWorkspace(tof_ws,StartWorkspaceIndex=0,EndWorkspaceIndex=4) # index one less than spectrum number
     tof_ws = ConvertToPointData(tof_ws)
-    SetInstrumentParameter(tof_ws,ParameterName='t0',ParameterType='Number',Value='0.5')
+    SetInstrumentParameter(tof_ws, ParameterName='t0',ParameterType='Number',Value='0.5')
+    SetInstrumentParameter(tof_ws, ParameterName='sigma_l1', ParameterType='Number', Value='0.021')
+    SetInstrumentParameter(tof_ws, ParameterName='sigma_l2', ParameterType='Number', Value='0.023')
+    SetInstrumentParameter(tof_ws, ParameterName='sigma_tof', ParameterType='Number', Value='0.3')
+    SetInstrumentParameter(tof_ws, ParameterName='sigma_theta', ParameterType='Number', Value='0.028')
+    SetInstrumentParameter(tof_ws, ParameterName='hwhm_lorentz', ParameterType='Number', Value='24.0')
+    SetInstrumentParameter(tof_ws, ParameterName='sigma_gauss', ParameterType='Number', Value='73.0')
     ##############################################
 
     normalised, yspace, fitted, symmetrised = \
@@ -65,11 +71,17 @@ Usage
 
 .. testcode:: NormaliseWithSummedOutput
 
-    ###### Simulates LoadVesuvio #################
+    ###### Simulates LoadVesuvio ################
     tof_ws = CreateSimulationWorkspace(Instrument='Vesuvio',BinParams=[50,0.5,562],UnitX='TOF')
-    tof_ws = CropWorkspace(tof_ws,StartWorkspaceIndex=0,EndWorkspaceIndex=4)
+    tof_ws = CropWorkspace(tof_ws,StartWorkspaceIndex=0,EndWorkspaceIndex=4) # index one less than spectrum number
     tof_ws = ConvertToPointData(tof_ws)
-    SetInstrumentParameter(tof_ws,ParameterName='t0',ParameterType='Number',Value='0.5')
+    SetInstrumentParameter(tof_ws, ParameterName='t0',ParameterType='Number',Value='0.5')
+    SetInstrumentParameter(tof_ws, ParameterName='sigma_l1', ParameterType='Number', Value='0.021')
+    SetInstrumentParameter(tof_ws, ParameterName='sigma_l2', ParameterType='Number', Value='0.023')
+    SetInstrumentParameter(tof_ws, ParameterName='sigma_tof', ParameterType='Number', Value='0.3')
+    SetInstrumentParameter(tof_ws, ParameterName='sigma_theta', ParameterType='Number', Value='0.028')
+    SetInstrumentParameter(tof_ws, ParameterName='hwhm_lorentz', ParameterType='Number', Value='24.0')
+    SetInstrumentParameter(tof_ws, ParameterName='sigma_gauss', ParameterType='Number', Value='73.0')
     ##############################################
 
     normalised, yspace, fitted, symmetrised = \

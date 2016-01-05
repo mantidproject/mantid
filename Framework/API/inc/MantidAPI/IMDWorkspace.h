@@ -33,6 +33,8 @@ enum MDNormalization {
   NumEventsNormalization = 2
 };
 
+static const signal_t MDMaskValue = 0.0;
+
 /** Basic MD Workspace Abstract Class.
  *
  *  This defines the interface that allows one to iterate through several types
@@ -158,9 +160,6 @@ protected:
   IMDWorkspace &operator=(const IMDWorkspace &other);
 
   virtual const std::string toString() const;
-
-  // Value to be used for masked data in plots of MDWorkspaces
-  static const signal_t m_maskValue;
 
 private:
   virtual IMDWorkspace *doClone() const = 0;

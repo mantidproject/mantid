@@ -36,13 +36,9 @@ LoadNexus::LoadNexus() : Algorithm(), m_filename() {}
  */
 void LoadNexus::init() {
   // Declare required input parameters for all Child Algorithms
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".nx5");
-  exts.push_back(".xml");
-  exts.push_back(".n*");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load,
+                       {".nxs", ".nx5", ".xml", ".n*"}),
       "The name of the Nexus file to read, as a full or relative path.");
 
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",

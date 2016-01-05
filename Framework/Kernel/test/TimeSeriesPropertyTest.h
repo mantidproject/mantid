@@ -175,6 +175,34 @@ public:
     delete p;
   }
 
+  void test_replaceValues() {
+    // Arrange
+    size_t num = 1000;
+    DateAndTime first("2007-11-30T16:17:10");
+    std::vector<DateAndTime> times;
+
+    std::vector<double> values;
+    std::vector<double> replacementValues;
+    double offset = 100.0;
+    for (size_t i = 0; i < num; i++) {
+      times.push_back(first + double(i));
+      values.push_back(double(i));
+      replacementValues.push_back(double(i) + offset);
+    }
+    TimeSeriesProperty<double> tsp("test");
+    tsp.addValues(times, values);
+    TS_ASSERT_EQUALS(tsp.size(), 1000);
+    TS_ASSERT_EQUALS(tsp.nthValue(3), 3.0);
+
+    // Act
+    tsp.replaceValues(times, replacementValues);
+
+    // Assert
+    TSM_ASSERT_EQUALS("Should have 1000 entries", tsp.size(), 1000);
+    TSM_ASSERT_EQUALS("Should be 3 plus the offset of 100", tsp.nthValue(3),
+                      103.0);
+  }
+
   void test_addValues() {
     size_t num = 1000;
     DateAndTime first("2007-11-30T16:17:10");

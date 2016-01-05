@@ -151,6 +151,7 @@ private slots:
   void focusTextureClicked();
   void rebinTimeClicked();
   void rebinMultiperiodClicked();
+  void focusStopClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -192,6 +193,7 @@ private:
   void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;
+  std::string guessDefaultFullCalibrationPath() const;
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();

@@ -144,6 +144,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFocus() {
   connect(m_uiTabFocus.pushButton_reset, SIGNAL(released()), this,
           SLOT(focusResetClicked()));
 
+  connect(m_uiTabFocus.pushButton_stopFocus, SIGNAL(released()), this,
+          SLOT(focusStopClicked()));
+
   connect(m_uiTabFocus.comboBox_PlotData, SIGNAL(currentIndexChanged(int)),
           this, SLOT(plotRepChanged(int)));
 
@@ -265,10 +268,10 @@ void EnggDiffractionViewQtGUI::readSettings() {
           .toString());
 
   m_uiTabFocus.groupBox_cropped->setChecked(
-	  qs.value("user-params-focus-cropped-group-checkbox", false).toBool());
+      qs.value("user-params-focus-cropped-group-checkbox", false).toBool());
 
   m_uiTabFocus.groupBox_texture->setChecked(
-	  qs.value("user-params-focus-texture-group-checkbox", false).toBool());
+      qs.value("user-params-focus-texture-group-checkbox", false).toBool());
 
   m_uiTabFocus.checkBox_FocusedWS->setChecked(
       qs.value("user-params-focus-plot-ws", true).toBool());
@@ -293,18 +296,21 @@ void EnggDiffractionViewQtGUI::readSettings() {
   // settings
   QString lastPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  // TODO: this should become << >> operators on
+  // TODO: as this is growing, it should become << >> operators on
   // EnggDiffCalibSettings
   m_calibSettings.m_inputDirCalib =
       qs.value("input-dir-calib-files", lastPath).toString().toStdString();
   m_calibSettings.m_inputDirRaw =
       qs.value("input-dir-raw-files", lastPath).toString().toStdString();
+  const std::string fullCalib = guessDefaultFullCalibrationPath();
   m_calibSettings.m_pixelCalibFilename =
-      qs.value("pixel-calib-filename", "").toString().toStdString();
+      qs.value("pixel-calib-filename", QString::fromStdString(fullCalib))
+          .toString()
+          .toStdString();
   // 'advanced' block
   m_calibSettings.m_forceRecalcOverwrite =
       qs.value("force-recalc-overwrite", false).toBool();
-  std::string templ = guessGSASTemplatePath();
+  const std::string templ = guessGSASTemplatePath();
   m_calibSettings.m_templateGSAS_PRM =
       qs.value("template-gsas-prm", QString::fromStdString(templ))
           .toString()
@@ -359,10 +365,10 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabFocus.lineEdit_texture_grouping_file->text());
 
   qs.setValue("user-params-focus-cropped-group-checkbox",
-	  m_uiTabFocus.groupBox_cropped->isChecked());
+              m_uiTabFocus.groupBox_cropped->isChecked());
 
   qs.setValue("user-params-focus-texture-group-checkbox",
-	  m_uiTabFocus.groupBox_texture->isChecked());
+              m_uiTabFocus.groupBox_texture->isChecked());
 
   qs.setValue("value", m_uiTabFocus.checkBox_FocusedWS->isChecked());
 
@@ -399,7 +405,8 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
 }
 
 std::string EnggDiffractionViewQtGUI::guessGSASTemplatePath() const {
-  // +scripts/Engineering/template_ENGINX_241391_236516_North_and_South_banks.par
+  // Inside the mantid installation target directory:
+  // scripts/Engineering/template_ENGINX_241391_236516_North_and_South_banks.par
   Poco::Path templ =
       Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory();
   templ = templ.makeParent();
@@ -409,6 +416,18 @@ std::string EnggDiffractionViewQtGUI::guessGSASTemplatePath() const {
   return templ.toString();
 }
 
+std::string EnggDiffractionViewQtGUI::guessDefaultFullCalibrationPath() const {
+  // Inside the mantid installation target directory:
+  // scripts/Engineering/ENGINX_full_pixel_calibration_vana194547_ceria193749.csv
+  Poco::Path templ =
+      Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory();
+  templ = templ.makeParent();
+  templ.append("scripts");
+  templ.append("Engineering");
+  templ.append("calib");
+  templ.append("ENGINX_full_pixel_calibration_vana194547_ceria193749.csv");
+  return templ.toString();
+}
 void EnggDiffractionViewQtGUI::userWarning(const std::string &err,
                                            const std::string &description) {
   QMessageBox::warning(this, QString::fromStdString(err),
@@ -500,6 +519,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_cropped->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_texture->setEnabled(enable);
+  m_uiTabFocus.pushButton_stopFocus->setDisabled(enable);
 
   // pre-processing
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setEnabled(enable);
@@ -661,6 +681,10 @@ void EnggDiffractionViewQtGUI::focusTextureClicked() {
 
 void EnggDiffractionViewQtGUI::focusResetClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::ResetFocus);
+}
+
+void EnggDiffractionViewQtGUI::focusStopClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::StopFocus);
 }
 
 void EnggDiffractionViewQtGUI::rebinTimeClicked() {

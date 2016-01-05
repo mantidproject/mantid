@@ -1250,9 +1250,7 @@ void ReflMainViewPresenter::openTable() {
 /**
 Import a table from TBL file
 */
-void ReflMainViewPresenter::importTable() {
-  m_view->showAlgorithmDialog("LoadReflTBL");
-}
+void ReflMainViewPresenter::importTable() { m_view->showImportDialog(); }
 
 /**
 Export a table to TBL file
@@ -1472,6 +1470,7 @@ void ReflMainViewPresenter::transfer() {
   // Build the input for the transfer strategy
   SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
+
   for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
        ++rowIt) {
     const int row = *rowIt;
@@ -1487,7 +1486,6 @@ void ReflMainViewPresenter::transfer() {
     searchResult.location = m_searchModel->data(m_searchModel->index(row, 2))
                                 .toString()
                                 .toStdString();
-
     runs[run] = searchResult;
   }
 
@@ -1495,7 +1493,43 @@ void ReflMainViewPresenter::transfer() {
                         static_cast<int64_t>(selectedRows.size()),
                         this->m_progressView);
 
-  auto newRows = getTransferStrategy()->transferRuns(runs, progress);
+  TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
+
+  auto invalidRuns =
+      results.getErrorRuns(); // grab our invalid runs from the transfer
+
+  // iterate through invalidRuns to set the 'invalid transfers' in the search
+  // model
+  if (!invalidRuns.empty()) { // check if we have any invalid runs
+    for (auto invalidRowIt = invalidRuns.begin();
+         invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
+      auto &error = *invalidRowIt; // grab row from vector
+      // iterate over row containing run number and reason why it's invalid
+      for (auto errorRowIt = error.begin(); errorRowIt != error.end();
+           ++errorRowIt) {
+        const std::string runNumber = errorRowIt->first; // grab run number
+
+        // iterate over rows that are selected in the search table
+        for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
+             ++rowIt) {
+          const int row = *rowIt;
+          // get the run number from that selected row
+          const auto searchRun =
+              m_searchModel->data(m_searchModel->index(row, 0))
+                  .toString()
+                  .toStdString();
+          if (searchRun == runNumber) { // if search run number is the same as
+                                        // our invalid run number
+
+            // add this error to the member of m_searchModel that holds errors.
+            m_searchModel->m_errors.push_back(error);
+          }
+        }
+      }
+    }
+  }
+
+  auto newRows = results.getTransferRuns();
 
   std::map<std::string, int> groups;
   // Loop over the rows (vector elements)
@@ -1693,8 +1727,8 @@ ReflMainViewPresenter::getTransferStrategy() {
 
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
-    auto source =
-        std::unique_ptr<ReflMeasurementItemSource>(new ReflNexusMeasurementItemSource);
+    auto source = std::unique_ptr<ReflMeasurementItemSource>(
+        new ReflNexusMeasurementItemSource);
 
     // Finally make and return the Measure based transfer strategy.
     return std::unique_ptr<ReflTransferStrategy>(

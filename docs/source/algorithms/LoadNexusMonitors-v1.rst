@@ -10,13 +10,19 @@ Description
 -----------
 
 This algorithm loads all monitors found in a NeXus file into a single
-:ref:`Workspace2D <Workspace2D>` (if there is no event data) or into
-an :ref:`EventWorkspace <EventWorkspace>` (if event monitor data is
+:ref:`Workspace2D <Workspace2D>` (if there is no event data or if 
+MonitorsAsEvents is false) or into an 
+:ref:`EventWorkspace <EventWorkspace>` (if event monitor data is
 found).  The algorithm assumes that all of the monitors are histograms
 and have the same bin boundaries. **NOTE:** The entry is assumed to be
 in SNS or ISIS format, so the loader is currently not generically
-applicable. It is also written for single entry files and will need
-tweaking to handle period data where the monitors are different.
+applicable.
+
+This version (v1) of this algorithm has a bug where, in case of a
+multiperiod input workspace, invoking this Algorithm from Python returns
+a tuple that contains the resulting group workspace as the first element,
+followed by references to the individual workspaces as siblings (in 
+addition to being contained within the group).
 
 Usage
 -----
