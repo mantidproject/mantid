@@ -110,7 +110,7 @@ class QECoverage(PythonAlgorithm):
                         windowname=self.getPropertyValue('PlotOverWindow')
                         windowhand=[ val for ind,val in enumerate(pymantidplot.activeFolder().windows()) if val.name()==windowname ]
                         fig=pymantidplot.plotSpectrum(mtd[wsname],0,type=0,window=windowhand[0])
-                        figName=windowhand[0]
+                        figName=windowname
                     # First Ei and we don't want to overplot. So make a new window
                     elif myE==myEs[0]:
                         fig=pymantidplot.plotSpectrum(mtd[wsname],0,type=0)
