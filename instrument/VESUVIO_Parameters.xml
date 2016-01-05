@@ -87,47 +87,13 @@
     <value val="400-450"/>
   </parameter>
 
-  <!-- ======== Resolution parameters ========
-    Defined at two levels: Instrument level for the common parameters
-    then at component level below for the component specific ones
-  -->
-
-  <!-- Standard deviation of source-sample distribution (metres) -->
-  <parameter name="sigma_l1">
-    <value val="0.021"/>
-  </parameter>
-
-  <!-- Standard deviation of sample-detector distribution (metres) -->
-  <parameter name="sigma_l2">
-    <value val="0.023"/>
-  </parameter>
-
-  <!-- Standard deviation of tof measurement (microseconds) -->
-  <parameter name="sigma_tof">
-    <value val="0.3"/>
-  </parameter>
-
-  <!-- Standard deviation of detector theta distribution (radians) -->
-  <parameter name="sigma_theta">
-    <value val="0.028"/>
-  </parameter>
-
-  <!-- Final energy of neutrons (meV) (Currently common but should it be?) -->
+  <!-- =========== Common resolution energy =========================== -->
+  <!-- Final energy of neutrons (meV) -->
   <parameter name="efixed">
     <value val="4908"/>
   </parameter>
 
-  <!-- Lorentzian HWHM of the analyser energy (efixed) (meV) -->
-  <parameter name="hwhm_lorentz">
-    <value val="24"/>
-  </parameter>
-
-  <!-- Gaussian standard deviation of the analyser energy (efixed) (meV)
-       Note that this is not the HWHM but the standard deviation unlike the
-       Lorentzian parameter -->
-  <parameter name="sigma_gauss">
-    <value val="73"/>
-  </parameter>
+  <!-- =========== Diffraction =========================== -->
 
   <parameter name="analysers" type="string">
     <value val="diffraction" />
@@ -191,35 +157,5 @@
 
 </component-link>
 <!-- End VESUVIO link -->
-
-<!-- ======================= Energy widths for foils ================================= -->
-
-<component-link name = "foil-pos0">
-  <!-- Lorentzian HWHM of the foil energy (meV) -->
-  <parameter name="hwhm_lorentz">
-    <value val="144"/>
-  </parameter>
-
-  <!-- Gaussian standard deviation of the foil energy (meV)
-       Note that this is not the HWHM but the standard deviation unlike the
-       Lorentzian parameter -->
-  <parameter name="sigma_gauss">
-    <value val="20"/>
-  </parameter>
-</component-link>
-
-<component-link name = "foil-pos1">
-  <!-- Lorentzian HWHM of the foil energy (meV) -->
-  <parameter name="hwhm_lorentz">
-    <value val="144"/>
-  </parameter>
-
-  <!-- Gaussian standard deviation of the foil energy (meV)
-       Note that this is not the HWHM but the standard deviation unlike the
-       Lorentzian parameter -->
-  <parameter name="sigma_gauss">
-    <value val="20"/>
-  </parameter>
-</component-link>
 
 </parameter-file>
