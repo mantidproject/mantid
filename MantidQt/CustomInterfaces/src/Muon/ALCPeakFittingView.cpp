@@ -12,10 +12,10 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
-ALCPeakFittingView::ALCPeakFittingView(QWidget* widget)
-  : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()), m_fittedCurve(new QwtPlotCurve()),
-    m_dataErrorCurve(NULL), m_peakPicker(NULL)
-{}
+ALCPeakFittingView::ALCPeakFittingView(QWidget *widget)
+    : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()),
+      m_fittedCurve(new QwtPlotCurve()), m_dataErrorCurve(NULL),
+      m_peakPicker(NULL), m_guessPlotted(false) {}
 
 ALCPeakFittingView::~ALCPeakFittingView()
 {
@@ -71,6 +71,7 @@ void ALCPeakFittingView::initialize()
           SIGNAL(parameterChanged(QString,QString)));
 
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
+  connect(m_ui.plotGuess, SIGNAL(clicked()), this, SLOT(plotGuess()));
 }
 
 void ALCPeakFittingView::setDataCurve(const QwtData &data,
@@ -148,7 +149,39 @@ void ALCPeakFittingView::displayError(const QString& message)
 }
 
 void ALCPeakFittingView::emitFitRequested() {
+  // Fit requested: reset "plot guess"
+  clearGuess();
   emit fitRequested();
+}
+
+/**
+ * Clears fit guess and changes button text
+ */
+void ALCPeakFittingView::clearGuess() {
+  m_guessPlotted = false;
+  m_ui.plotGuess->setText("Plot guess");
+}
+
+/**
+ * Changes the text on the "Plot guess" button and emits a signal
+ * to plot the guess on the graph
+ */
+void ALCPeakFittingView::plotGuess() {
+  QString buttonText("Plot guess");
+
+  if (m_guessPlotted) {
+    // Remove the plotted guess
+    emit removeGuessRequested();
+    m_guessPlotted = false;
+  } else {
+    // Plot the guess function, if there is one
+    if (function("") != nullptr) {
+      buttonText = "Remove guess";
+      emit plotGuessRequested();
+      m_guessPlotted = true;
+    }
+  }
+  m_ui.plotGuess->setText(buttonText);
 }
 
 } // namespace CustomInterfaces

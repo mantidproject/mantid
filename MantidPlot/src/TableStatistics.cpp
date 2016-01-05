@@ -43,8 +43,6 @@ TableStatistics::TableStatistics(ScriptingEnv *env, ApplicationWindow *parent, T
 	: Table(env, 1, 1, "", parent, ""),
 	d_base(base), d_type(t), d_targets(targets)
 {
-	// FIXME: Haven't found a set read-only method in Qt4 yet
-	// d_table->setReadOnly(true);
 	setCaptionPolicy(MdiSubWindow::Both);
 	if (d_type == row)
 	{
@@ -61,9 +59,10 @@ TableStatistics::TableStatistics(ScriptingEnv *env, ApplicationWindow *parent, T
 		setColName(6, tr("Max"));
 		setColName(7, tr("Min"));
 		setColName(8, "N");
+                setReadOnlyAllColumns(true);
 
-		for (int i=0; i < 9; i++)
-			setColumnType(i, Text);
+                for (int i = 0; i < 9; i++)
+                        setColumnType(i, Text);
 
 		for (int i=0; i < d_targets.size(); i++)
 			setText(i, 0, QString::number(d_targets[i]+1));
@@ -86,9 +85,10 @@ TableStatistics::TableStatistics(ScriptingEnv *env, ApplicationWindow *parent, T
 		setColName(8, tr("iMin"));
 		setColName(9, tr("Min"));
 		setColName(10, "N");
+                setReadOnlyAllColumns(true);
 
-		for (int i=0; i < 11; i++)
-			setColumnType(i, Text);
+                for (int i = 0; i < 11; i++)
+                        setColumnType(i, Text);
 
 		for (int i=0; i < d_targets.size(); i++)
 		{
