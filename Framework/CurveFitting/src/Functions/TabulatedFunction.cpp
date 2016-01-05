@@ -193,7 +193,14 @@ void TabulatedFunction::setAttribute(const std::string &attName,
   } else if (attName == "X") {
       m_xData = value.asVector();
       if (m_xData.empty()) {
+        m_setupFinished = false;
+        if (!m_yData.empty()) {
+          m_yData.clear();
+        }
         return;
+      }
+      if (m_xData.size() != m_yData.size()) {
+        m_yData.resize(m_xData.size());
       }
       storeAttributeValue("FileName", Attribute("", true));
       storeAttributeValue("Workspace", Attribute(""));
@@ -201,7 +208,14 @@ void TabulatedFunction::setAttribute(const std::string &attName,
   } else if (attName == "Y") {
       m_yData = value.asVector();
       if (m_yData.empty()) {
+        m_setupFinished = false;
+        if (!m_xData.empty()) {
+          m_xData.clear();
+        }
         return;
+      }
+      if (m_xData.size() != m_yData.size()) {
+        m_xData.resize(m_yData.size());
       }
       storeAttributeValue("FileName", Attribute("", true));
       storeAttributeValue("Workspace", Attribute(""));
@@ -298,7 +312,7 @@ void TabulatedFunction::loadWorkspace(
 void TabulatedFunction::setupData() const {
   if (m_setupFinished) {
     if (m_xData.size() != m_yData.size()) {
-      throw std::runtime_error(this->name() + ": X and Y vectors have different sizes.");
+      throw std::invalid_argument(this->name() + ": X and Y vectors have different sizes.");
     }
     g_log.debug() << "Re-setting isn't required.";
     return;

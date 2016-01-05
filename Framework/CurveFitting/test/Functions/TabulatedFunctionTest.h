@@ -308,9 +308,11 @@ public:
     fun.setAttributeValue("X", X);
     fun.setAttributeValue("Y", Y);
 
-    FunctionDomain1DVector x(0.0, 9.0, 33);
-    FunctionValues y(x);
-    TS_ASSERT_THROWS(fun.function(x, y), std::runtime_error);
+    auto x = fun.getAttribute("X").asVector();
+    auto y = fun.getAttribute("Y").asVector();
+
+    TS_ASSERT_EQUALS(x.size(), y.size());
+    TS_ASSERT_EQUALS(x.size(), Y.size());
 
   }
 

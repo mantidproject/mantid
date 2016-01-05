@@ -53,7 +53,12 @@ void MDFFunctionPlotData::setDomain(double startX, double endX, size_t nX)
 {
   Mantid::API::FunctionDomain1DVector x(startX, endX, nX);
   Mantid::API::FunctionValues y(x);
-  m_function->function(x, y);
+  try {
+    m_function->function(x, y);
+  } catch(std::invalid_argument&) {
+    // Do nothing.
+    // Maybe the function hasn't been set up yet.
+  }
   m_functionCurve->setData(x.getPointerAt(0), y.getPointerToCalculated(0), static_cast<int>(x.size()));
 }
 
