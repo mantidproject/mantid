@@ -273,11 +273,9 @@ void AlgorithmHistory::saveNexus(::NeXus::File *file, int &algCount) const {
   file->writeData("data", algData.str());
 
   // child algorithms
-  auto histIter = m_childHistories.begin();
-  for (; histIter != m_childHistories.end(); ++histIter) {
-    (*histIter)->saveNexus(file, algCount);
+  for (auto &history : m_childHistories) {
+    history->saveNexus(file, algCount);
   }
-
   file->closeGroup();
 }
 

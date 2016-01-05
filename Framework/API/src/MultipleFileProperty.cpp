@@ -154,9 +154,7 @@ std::vector<std::string> MultipleFileProperty::flattenFileNames(
     const std::vector<std::vector<std::string>> &fileNames) {
   std::vector<std::string> flattenedFileNames;
 
-  auto it = fileNames.begin();
-
-  for (; it != fileNames.end(); ++it) {
+  for (auto it = fileNames.begin(); it != fileNames.end(); ++it) {
     flattenedFileNames.insert(flattenedFileNames.end(), it->begin(), it->end());
   }
 

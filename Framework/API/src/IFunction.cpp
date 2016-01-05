@@ -253,17 +253,10 @@ void IFunction::setHandler(FunctionHandler *handler) {
 
 /// Function to return all of the categories that contain this function
 const std::vector<std::string> IFunction::categories() const {
-  std::vector<std::string> res;
   Poco::StringTokenizer tokenizer(category(), categorySeparator(),
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  auto h = tokenizer.begin();
-
-  for (; h != tokenizer.end(); ++h) {
-    res.push_back(*h);
-  }
-
-  return res;
+  return std::vector<std::string>(tokenizer.begin(), tokenizer.end());
 }
 
 /**

@@ -180,8 +180,8 @@ void WorkspaceHistory::saveNexus(::NeXus::File *file) const {
 
   // Algorithm History
   int algCount = 0;
-  auto histIter = m_algorithms.begin();
-  for (; histIter != m_algorithms.end(); ++histIter) {
+  for (auto histIter = m_algorithms.begin(); histIter != m_algorithms.end();
+       ++histIter) {
     (*histIter)->saveNexus(file, algCount);
   }
 

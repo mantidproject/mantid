@@ -394,11 +394,8 @@ void AlgorithmFactoryImpl::fillHiddenCategories(
   Poco::StringTokenizer tokenizer(categoryString, ";",
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  auto h = tokenizer.begin();
-
-  for (; h != tokenizer.end(); ++h) {
-    categorySet->insert(*h);
-  }
+  std::copy(tokenizer.begin(), tokenizer.end(),
+            std::inserter(*categorySet, categorySet->end()));
 }
 
 /** Extract the name of an algorithm

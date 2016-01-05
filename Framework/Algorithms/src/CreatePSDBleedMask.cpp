@@ -269,10 +269,7 @@ bool CreatePSDBleedMask::performBleedTest(
 void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices,
                                   API::MatrixWorkspace_sptr workspace) {
   const double deadValue(1.0); // delete the data
-
-  auto cend = tubeIndices.end();
-  for (auto citr = tubeIndices.begin();
-       citr != cend; ++citr) {
+  for (auto citr = tubeIndices.begin(); citr != tubeIndices.end(); ++citr) {
     workspace->dataY(*citr)[0] = deadValue;
   }
 }

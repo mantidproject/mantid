@@ -521,9 +521,8 @@ void Expression::renameAll(const std::string &oldName,
   if (!isFunct() && name() == oldName) {
     rename(newName);
   } else {
-    auto e = m_terms.begin();
-    for (; e != m_terms.end(); ++e) {
-      e->renameAll(oldName, newName);
+    for (auto &term : m_terms) {
+      term.renameAll(oldName, newName);
     }
   }
 }

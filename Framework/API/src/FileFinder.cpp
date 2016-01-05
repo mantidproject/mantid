@@ -126,8 +126,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
 
   const std::vector<std::string> &searchPaths =
       Kernel::ConfigService::Instance().getDataSearchDirs();
-  auto it = searchPaths.begin();
-  for (; it != searchPaths.end(); ++it) {
+  for (auto it = searchPaths.begin(); it != searchPaths.end(); ++it) {
 // On windows globbing is note working properly with network drives
 // for example a network drive containing a $
 // For this reason, and since windows is case insensitive anyway
@@ -479,9 +478,8 @@ FileFinderImpl::findRun(const std::string &hintstr,
                    tolower);
     if (!archiveOpt.empty() && archiveOpt != "off" &&
         !facility.archiveSearch().empty()) {
-      auto it =
-          facility.archiveSearch().begin();
-      for (; it != facility.archiveSearch().end(); ++it) {
+      for (auto it = facility.archiveSearch().begin();
+           it != facility.archiveSearch().end(); ++it) {
         g_log.debug() << "get archive search for the facility..." << *it
                       << "\n";
         archs.push_back(ArchiveSearchFactory::Instance().create(*it));
@@ -751,8 +749,7 @@ FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
   }
 
   for (auto ext = extensions.begin(); ext != extensions.end(); ++ext) {
-    auto it = filenames.begin();
-    for (; it != filenames.end(); ++it) {
+    for (auto it = filenames.begin(); it != filenames.end(); ++it) {
       path = getFullPath(*it + *ext);
       try {
         if (!path.empty() && Poco::File(path).exists()) {

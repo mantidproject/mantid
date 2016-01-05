@@ -202,15 +202,11 @@ void Algorithm::progress(double p, const std::string &msg, double estimatedTime,
 //---------------------------------------------------------------------------------------------
 /// Function to return all of the categories that contain this algorithm
 const std::vector<std::string> Algorithm::categories() const {
-  std::vector<std::string> res;
   Poco::StringTokenizer tokenizer(category(), categorySeparator(),
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  auto h = tokenizer.begin();
 
-  for (; h != tokenizer.end(); ++h) {
-    res.push_back(*h);
-  }
+  std::vector<std::string> res(tokenizer.begin(), tokenizer.end());
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);

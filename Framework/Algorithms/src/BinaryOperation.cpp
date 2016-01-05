@@ -1040,7 +1040,7 @@ BinaryOperation::buildBinaryOperationTable(
       // Didn't find it. Try to use the RHS map.
 
       // First, we have to get the (single) detector ID of the LHS
-      auto lhsDets_it = lhsDets.begin();
+      auto lhsDets_it = lhsDets.cbegin();
       detid_t lhs_detector_ID = *lhsDets_it;
 
       // Now we use the RHS map to find it. This only works if both the lhs and

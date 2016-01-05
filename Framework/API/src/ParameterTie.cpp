@@ -152,9 +152,7 @@ std::string ParameterTie::asString(const IFunction *fun) const {
 
       int iTemp = boost::lexical_cast<int>(res[1]);
       int i = 0;
-      for (auto it =
-               m_varMap.begin();
-           it != m_varMap.end(); ++it) {
+      for (auto it = m_varMap.cbegin(); it != m_varMap.cend(); ++it) {
         if (i == iTemp) {
           res_expression +=
               fun->parameterName(fun->getParameterIndex(it->second));
@@ -178,9 +176,7 @@ std::string ParameterTie::asString(const IFunction *fun) const {
  * @return True if any of the parameters is used as a variable in the mu::Parser
  */
 bool ParameterTie::findParametersOf(const IFunction *fun) const {
-  for (auto it =
-           m_varMap.begin();
-       it != m_varMap.end(); ++it) {
+  for (auto it = m_varMap.cbegin(); it != m_varMap.cend(); ++it) {
     if (it->second.getFunction() == fun) {
       return true;
     }

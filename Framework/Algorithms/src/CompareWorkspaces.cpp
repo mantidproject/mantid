@@ -741,9 +741,9 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
       recordMismatch(out.str());
       return false;
     }
-    auto it1 = spec1->getDetectorIDs().begin();
-    auto it2 = spec2->getDetectorIDs().begin();
-    for (; it1 != spec1->getDetectorIDs().end(); ++it1, ++it2) {
+    auto it2 = spec2->getDetectorIDs().cbegin();
+    for (auto it1 = spec1->getDetectorIDs().cbegin();
+         it1 != spec1->getDetectorIDs().cend(); ++it1, ++it2) {
       if (*it1 != *it2) {
         recordMismatch("Detector IDs mismatch");
         return false;

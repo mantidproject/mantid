@@ -625,14 +625,11 @@ void MatrixWorkspace::getIndicesFromDetectorIDs(
 void MatrixWorkspace::getSpectraFromDetectorIDs(
     const std::vector<detid_t> &detIdList,
     std::vector<specid_t> &spectraList) const {
-  auto it_start = detIdList.begin();
-  auto it_end = detIdList.end();
 
   spectraList.clear();
 
   // Try every detector in the list
-  std::vector<detid_t>::const_iterator it;
-  for (it = it_start; it != it_end; ++it) {
+  for (auto it = detIdList.cbegin(); it != detIdList.cend(); ++it) {
     bool foundDet = false;
     specid_t foundSpecNum = 0;
 
