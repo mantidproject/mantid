@@ -903,6 +903,9 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr ceriaWS;
 
+  // save vanIntegWS and vanCurvesWS as open genie
+  // see where spec number comes from
+
   loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
                                vanCurvesWS, cs.m_forceRecalcOverwrite);
 
@@ -1638,7 +1641,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
   std::string preIntegFilename, preCurvesFilename;
   findPrecalcVanadiumCorrFilenames(vanNo, inputDirCalib, preIntegFilename,
                                    preCurvesFilename, foundPrecalc);
-  // if pre calculated not found..
+
+  // if pre caluclated not found ..
   if (forceRecalc || !foundPrecalc) {
     g_log.notice()
         << "Calculating Vanadium corrections. This may take a few seconds..."
@@ -1674,7 +1678,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                    << ", and " << preCurvesFilename << std::endl;
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
-                                    vanIntegWS, vanCurvesWS);
+                                    vanIntegWS, vanCurvesWS, vanNo);
     } catch (std::invalid_argument &ia) {
       g_log.error() << "Error while loading precalculated Vanadium corrections",
           "The files with precalculated Vanadium corection features (spectra "
@@ -1720,9 +1724,11 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
   found = false;
 
   const std::string runNo = std::string(2, '0').append(vanNo);
+
+  // shahroz - save preIntegFilename and preCurvesFile as openGenie too
   preIntegFilename =
       g_enginxStr + "_precalculated_vanadium_run" + runNo + "_integration.nxs";
-  
+
   preCurvesFilename =
       g_enginxStr + "_precalculated_vanadium_run" + runNo + "_bank_curves.nxs";
 
@@ -1758,7 +1764,8 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
 */
 void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
     const std::string &preIntegFilename, const std::string &preCurvesFilename,
-    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS) {
+    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
+    const std::string &vanNo) {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
 
   auto alg =
@@ -1781,11 +1788,7 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
   // algCurves->getProperty("OutputWorkspace");
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
 
-  //shahroz
-  // call save open genie here
-  
-
-
+  saveOpenGenie(curvesWSName, "", "South", vanNo);
 }
 
 /**
@@ -1799,14 +1802,15 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
 *
 * @param vanCurvesWS workspace where to keep the per-bank vanadium
 * curves
-*/ // shahroz
+*/
 void EnggDiffractionPresenter::calcVanadiumWorkspaces(
     const std::string &vanNo, ITableWorkspace_sptr &vanIntegWS,
     MatrixWorkspace_sptr &vanCurvesWS) {
 
   auto load = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
   load->initialize();
-  load->setPropertyValue("Filename", vanNo); // TODO more specific build Vanadium filename
+  load->setPropertyValue("Filename",
+                         vanNo); // TODO more specific build Vanadium filename
   std::string vanWSName = "engggui_vanadium_ws";
   load->setPropertyValue("OutputWorkspace", vanWSName);
   load->execute();
@@ -1825,6 +1829,7 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
   alg->setPropertyValue("OutCurvesWorkspace", curvesName);
   alg->execute();
 
+  // shahroz
   ADS.remove(vanWSName);
 
   vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integName);
@@ -2256,19 +2261,16 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
     std::string inputWorkspace, std::string runNo, std::string bank,
     std::string format) {
   std::string fullFilename;
+  // if found enng curves or integration - shahroz
   // calibration
   if (inputWorkspace.std::string::find("curves") != std::string::npos) {
-	  fullFilename = "ob+ENGINX_" + runNo + "_North_bank" + format;
-  }
-  if (inputWorkspace.std::string::find("integration") != std::string::npos) {
-	  fullFilename = "ob+ENGINX_" + runNo + "_South_bank" + format;
-  }
-
-  // focus
-  if (inputWorkspace.std::string::find("texture") != std::string::npos) {
+    fullFilename = "ob+ENGINX_" + runNo + "_North_bank" + format;
+  } else if (inputWorkspace.std::string::find("integration") !=
+             std::string::npos) {
+    fullFilename = "ob+ENGINX_" + runNo + "_South_bank" + format;
+  } else if (inputWorkspace.std::string::find("texture") != std::string::npos) {
     fullFilename = "ENGINX_" + runNo + "_texture_" + bank + format;
-  }
-  if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
+  } else if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
     fullFilename = "ENGINX_" + runNo + "_cropped_" +
                    boost::lexical_cast<std::string>(g_croppedCounter) + format;
     g_croppedCounter++;
