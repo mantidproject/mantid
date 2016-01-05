@@ -52,6 +52,8 @@ private:
   void loadOldCalibration();
   std::vector<double> dSpacingToTof(const std::vector<double> &dSpacing,
                                     const detid_t id);
+  std::vector<double> dSpacingWindows(const std::vector<double> &centres,
+                                      const double widthMax);
 
   API::MatrixWorkspace_sptr m_uncalibratedWS;
   API::ITableWorkspace_sptr m_calibrationTableNew;

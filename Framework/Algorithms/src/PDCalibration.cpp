@@ -9,6 +9,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include <cassert>
 
 namespace Mantid {
 namespace Algorithms {
@@ -121,6 +122,17 @@ void PDCalibration::exec() {
   m_tofMax = tofBinningParams.back();
 
   m_peaksInDspacing = getProperty("PeakPositions");
+  const double peakWindowMaxInDSpacing = 0.1; // TODO configurable
+  auto windowsInDSpacing = dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
+
+  for (std::size_t i = 0; i < m_peaksInDspacing.size(); ++i) {
+    std::cout << "[" << i << "] "
+              << windowsInDSpacing[2*i] << " < "
+              << m_peaksInDspacing[i] << " < "
+              << windowsInDSpacing[2*i + 1]
+              << std::endl;
+
+  }
 
   m_uncalibratedWS = loadAndBin();
   setProperty("UncalibratedWorkspace", m_uncalibratedWS);
@@ -131,7 +143,11 @@ void PDCalibration::exec() {
   loadOldCalibration();
 
   const std::size_t NUMHIST = m_uncalibratedWS->getNumberHistograms();
+
+  // cppcheck-suppress syntaxError
+  PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (std::size_t wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
+      PARALLEL_START_INTERUPT_REGION
        const auto spectrum = m_uncalibratedWS->getSpectrum(wkspIndex);
        const auto detIds = spectrum->getDetectorIDs();
        if (detIds.size() != 1) {
@@ -145,8 +161,8 @@ void PDCalibration::exec() {
          continue;
        }
 
-
        auto tofs = dSpacingToTof(m_peaksInDspacing, detid);
+       auto tofWindows = dSpacingToTof(windowsInDSpacing, detid);
 
        std::cout << "****************************** detid = " << detid
                  << " wkspIndex = " << wkspIndex << std::endl;
@@ -155,6 +171,7 @@ void PDCalibration::exec() {
        alg->setProperty("InputWorkspace", m_uncalibratedWS);
        alg->setProperty("WorkspaceIndex", static_cast<int>(wkspIndex));
        alg->setProperty("PeakPositions", tofs);
+       alg->setProperty("FitWindows", tofWindows);
        alg->setProperty("FWHM", 7); // TODO default
        alg->setProperty("Tolerance", 4); // TODO default
        alg->setProperty("PeakFunction", "Gaussian"); // TODO configurable?
@@ -186,7 +203,10 @@ void PDCalibration::exec() {
 
          std::cout << "d=" << m_peaksInDspacing[i]<< " centre old=" << tofs[i];
          if (chi2 > 1.e10) {
-           std::cout << " failed to fit" << std::endl;
+           std::cout << " failed to fit - chisq" << chi2 << std::endl;
+         } else if (tofWindows[2*i] >= centre || tofWindows[2*i+1] <= centre) {
+           std::cout << " failed to fit - centre " << tofWindows[2*i] << " < " << centre
+                     << " < " << tofWindows[2*i+1] << std::endl;
          } else {
            double difc = centre / m_peaksInDspacing[i];
            difc_cumm += difc;
@@ -196,10 +216,16 @@ void PDCalibration::exec() {
                      << " chi2=" << chi2 << " difc=" << difc << std::endl;
          }
        }
-       std::cout << "avg difc = " << (difc_cumm/static_cast<double>(difc_count)) << std::endl;
+       if (difc_count > 0) {
+           std::cout << "avg difc = " << (difc_cumm/static_cast<double>(difc_count)) << std::endl;
+       } else {
+           std::cout << "failed to fit - zero peaks found" << std::endl;
+       }
 
-       break;
+       //break;
+       PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 namespace {
@@ -220,8 +246,48 @@ struct d_to_tof {
 };
 }
 
+vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres,
+                                              const double widthMax) {
+  if (widthMax <= 0. || isEmpty(widthMax)) {
+    return vector<double>(); // option is turned off
+  }
+
+  const std::size_t numPeaks = centres.size();
+
+  // assumes distance between peaks can be used for window sizes
+  assert(numPeaks >= 2);
+
+  vector<double> windows(2 * numPeaks);
+  double widthLeft;
+  double widthRight;
+  for (std::size_t i = 0; i < centres.size(); ++i) {
+    // calculate left
+    if (i == 0)
+      widthLeft = .5 * (centres[1] - centres[0]);
+    else
+      widthLeft = .5 * (centres[i] - centres[i-1]);
+    widthLeft = std::min(widthLeft, widthMax);
+
+    // calculate right
+    if (i + 1 == numPeaks)
+      widthRight = .5 * (centres[numPeaks-1] - centres[numPeaks - 2]);
+    else
+      widthRight = .5 * (centres[i + 1] - centres[i]);
+    widthRight = std::min(widthRight, widthMax);
+
+    // set the windows
+    windows[2 * i] = centres[i] - widthLeft;
+    windows[2 * i + 1] = centres[i] + widthRight;
+  }
+  return windows;
+}
+
 vector<double> PDCalibration::dSpacingToTof(const vector<double> &dSpacing,
                                   const detid_t detid) {
+  if (dSpacing.empty()) { // quickly return an empty vector
+    return vector<double>();
+  }
+
   auto rowNum = m_detidToRow[detid];
 
   const double difa = m_calibrationTableOld->getRef<double>("difa", rowNum);
@@ -271,6 +337,10 @@ MatrixWorkspace_sptr PDCalibration::loadAndBin() {
     g_log.information() << "Loading background file \""
                         << backFile << "\"\n";
     auto backWS = load(backFile);
+
+    double signalPcharge = signalWS->run().getProtonCharge();
+    double backPcharge = backWS->run().getProtonCharge();
+    backWS *= (signalPcharge / backPcharge); // scale background by charge
 
     g_log.information("Subtracting background");
     auto algMinus = createChildAlgorithm("Minus");
