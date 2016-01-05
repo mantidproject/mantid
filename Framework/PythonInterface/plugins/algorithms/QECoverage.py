@@ -1,4 +1,4 @@
-#pylint: disable=no-init, invalid-name, line-too-long
+#pylint: disable=no-init, invalid-name, line-too-long, too-many-branches
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -34,7 +34,7 @@ class QECoverage(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(name='Ei', defaultValue='', doc='Incident Energy in meV')
-        whitelist = StringListValidator(['LET', 'MAPS', 'MARI', 'MERLIN'])
+        whitelist = StringListValidator(['LET', 'MAPS', 'MARI', 'MERLIN', 'ARCS', 'CNCS', 'HYSPEC', 'SEQUOIA', 'IN4', 'IN5', 'IN6', 'FOCUS', 'MIBEMOL', 'DNS', 'TOFTOF'])
         self.declareProperty(name='Instrument', defaultValue='MERLIN', validator=whitelist, doc="Instrument name")
         # Get list of all active graph windows with titles starting with 'QECoverage'
         # On first initialisation, pymantidplot is declared after all user algorithms are initialised so the next line will fail - catch it and make it an empty list.
@@ -55,6 +55,9 @@ class QECoverage(PythonAlgorithm):
 
     def PyExec(self):
         Inst = self.getPropertyValue('Instrument')
+        # Set detector angle limits - obtained manually from Mantid instrument definition files.
+        #    Could in principle look it up programmatically from the IDF and a powder map file...
+        #    Or just the IDF if assuming no gaps between detectors.
         if Inst == 'LET':
             tthlims = [2.65, 140]
         elif Inst == 'MAPS':
@@ -63,6 +66,30 @@ class QECoverage(PythonAlgorithm):
             tthlims = [3.43, 29.14, 30.86, 44.14, 45.86, 59.15, 60.86, 74.14, 75.86, 89.14, 90.86, 104.14, 105.86, 119.14, 120.86, 134.14]
         elif Inst == 'MERLIN':
             tthlims = [2.838, 135.69]
+        elif Inst == 'ARCS':
+            tthlims = [2.373, 135.955]
+        elif Inst == 'CNCS':
+            tthlims = [3.806, 132.609]
+        # HYSPEC info from webpage - detectors can rotate about sample. Actual coverage with rotation at 0 is [16.795, 76.174]
+        elif Inst == 'HYSPEC':
+            tthlims = [2, 135] 
+        elif Inst == 'SEQUOIA':
+            tthlims = [1.997, 61.926]
+        elif Inst == 'IN4':
+            tthlims = [2.435, 8.738, 13.075, 120.96]
+        elif Inst == 'IN5':
+            tthlims = [0.372, 134.817]
+        elif Inst == 'IN6':
+            tthlims = [10.323, 115.048]
+        elif Inst == 'FOCUS':
+            tthlims = [9.64, 129.4]
+        elif Inst == 'MIBEMOL':
+            tthlims = [23.5, 147.157]
+        # DNS information from webpage because only polarised IDF available in Mantid.
+        elif Inst == 'DNS':
+            tthlims = [0, 135]
+        elif Inst == 'TOFTOF':
+            tthlims = [7.591, 140.194]
 
         myE = self.getProperty('Ei').value
         eierr = '\n-----------------------------------------------------------------------------------\n'
