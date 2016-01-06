@@ -74,6 +74,25 @@ protected:
   std::string getCenteringSymbol() const;
 };
 
+/// Concrete generator that generates a space group from another space group
+/// using a transformation.
+class MANTID_GEOMETRY_DLL TransformationSpaceGroupGenerator
+    : public AbstractSpaceGroupGenerator {
+public:
+  TransformationSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
+                                    const std::string &generatorInformation);
+  virtual ~TransformationSpaceGroupGenerator() {}
+
+protected:
+  Group_const_sptr generateGroup() const;
+  virtual SpaceGroup_const_sptr getBaseSpaceGroup() const;
+
+  void setBaseAndTransformation(const std::string &generatorInformation);
+
+  std::string m_baseGroupHMSymbol;
+  std::string m_transformation;
+};
+
 /// Concrete space group generator that constructs space groups from a list of
 /// symmetry operations with no further computations.
 class MANTID_GEOMETRY_DLL TabulatedSpaceGroupGenerator
@@ -105,6 +124,10 @@ protected:
   a base class pointer. For convenience there are two methods which
   provide a generator- and a table-based approach
   (subscribeGeneratedSpaceGroup and subscribeTabulatedSpaceGroup).
+
+  A third option is available, using a TransformationSpaceGroupGenerator,
+  which generates a space group using the factory and transforms it using
+  the specified transformation.
 
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 08/10/2014
@@ -218,6 +241,16 @@ typedef Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>
                                                  __COUNTER__)(                 \
       ((Mantid::Geometry::SpaceGroupFactory::Instance()                        \
             .subscribeGeneratedSpaceGroup(number, hmSymbol, generators)),      \
+       0));                                                                    \
+  }
+
+#define DECLARE_TRANSFORMED_SPACE_GROUP(number, hmSymbol, generators)          \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper SPGF_CONCAT(register_spacegroup_,         \
+                                                 __COUNTER__)(                 \
+      ((Mantid::Geometry::SpaceGroupFactory::Instance()                        \
+            .subscribeUsingGenerator<TransformationSpaceGroupGenerator>(       \
+                number, hmSymbol, generators)),                                \
        0));                                                                    \
   }
 

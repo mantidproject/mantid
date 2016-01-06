@@ -4,6 +4,7 @@
 
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 #include "MantidGeometry/Crystal/CenteringGroup.h"
+#include "MantidGeometry/Crystal/GroupTransformation.h"
 
 #include "MantidKernel/LibraryManager.h"
 
@@ -98,6 +99,66 @@ Group_const_sptr AlgorithmicSpaceGroupGenerator::generateGroup() const {
 /// Hermann-Mauguin-symbol.
 std::string AlgorithmicSpaceGroupGenerator::getCenteringSymbol() const {
   return getHMSymbol().substr(0, 1);
+}
+
+/// Constructor of TransformationSpaceGroupGenerator that may throw an
+/// std::invalid_argument exception when the generatorInformation-
+/// argument can not be interpreted as (base group symbol | transformation).
+TransformationSpaceGroupGenerator::TransformationSpaceGroupGenerator(
+    size_t number, const std::string &hmSymbol,
+    const std::string &generatorInformation)
+    : AbstractSpaceGroupGenerator(number, hmSymbol, generatorInformation) {
+  setBaseAndTransformation(generatorInformation);
+}
+
+/// Generates a group from the SymmetryOperations obtained by applying the
+/// stored transformation to the base group.
+Group_const_sptr TransformationSpaceGroupGenerator::generateGroup() const {
+  SpaceGroup_const_sptr baseGroup = getBaseSpaceGroup();
+
+  GroupTransformation transformation(m_transformation);
+
+  return boost::make_shared<Group>(transformation(*baseGroup));
+}
+
+/// This method is virtual for testing purposes so that using the actual
+/// SpaceGroupFactory can be circumvented in the unit tests.
+SpaceGroup_const_sptr
+TransformationSpaceGroupGenerator::getBaseSpaceGroup() const {
+  return SpaceGroupFactory::Instance().createSpaceGroup(m_baseGroupHMSymbol);
+}
+
+/**
+ * Method to extract base space group symbol and transformation
+ *
+ * This method tries to extract the symbol of the base space group and the
+ * transformation matrix/vector pair from the supplied generator string.
+ * The expected format of the string is:
+ *
+ *      Symbol of base space group | Specification of transformation
+ *
+ * An example could be, to generate space group P 1 n 1 from P 1 c 1:
+ *
+ *      P 1 c 1 | -x+z,y,-x
+ *
+ * This works similarly for origin shifts and so on.
+ *
+ * @param generatorInformation :: Generator string in the format (base group |
+ *                                transformation).
+ */
+void TransformationSpaceGroupGenerator::setBaseAndTransformation(
+    const std::string &generatorInformation) {
+  std::vector<std::string> parts;
+  boost::split(parts, generatorInformation, boost::is_any_of("|"));
+
+  if (parts.size() != 2) {
+    throw std::invalid_argument("Not a valid string for generation of "
+                                "transformed space groups. Correct format is "
+                                "'HM symbol | transformation'.");
+  }
+
+  m_baseGroupHMSymbol = boost::trim_copy(parts.front());
+  m_transformation = parts.back();
 }
 
 /// Constructor of TabulatedSpaceGroupGenerator, throws an std::runtime_error

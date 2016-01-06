@@ -208,6 +208,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(factory.unsubscribeSpaceGroup("P-1"));
   }
 
+  void testUnsubscribeSymbol_multiple_groups_per_number() {
+    TestableSpaceGroupFactory factory;
+
+    factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z");
+    factory.subscribeTabulatedSpaceGroup(2, "F-1", "x,y,z; -x,-y,-z");
+
+    TS_ASSERT_THROWS_NOTHING(factory.unsubscribeSpaceGroup("F-1"));
+
+    TS_ASSERT(factory.isSubscribed("P-1"));
+    TS_ASSERT(!factory.isSubscribed("F-1"));
+
+    TS_ASSERT(factory.isSubscribed(2));
+
+    factory.unsubscribeSpaceGroup("P-1");
+    TS_ASSERT(!factory.isSubscribed(2));
+  }
+
   void testAbstractSpaceGroupGenerator() {
     MockSpaceGroupGenerator generator(1, "P 1", "x,y,z");
 
@@ -256,6 +273,48 @@ public:
     TS_ASSERT_EQUALS(prototype->order(), 1);
   }
 
+  void testTransformationSpaceGroupGenerator_fails_without_registered_base() {
+    TransformationSpaceGroupGenerator generator(1, "fake symbol",
+                                                "Fake base symbol | -x+z,y,-x");
+
+    TS_ASSERT_THROWS(generator.getPrototype(), std::invalid_argument);
+  }
+
+  void testTransformationSpaceGroupGenerator_succeeds_with_registered_base() {
+    TestableSpaceGroupFactory factory;
+    factory.subscribeGeneratedSpaceGroup(1, "Fake base symbol", "x,-y,z+1/2");
+
+    TestableTransformationSpaceGroupGenerator generator(
+        1, "fake symbol", "Fake base symbol | -x+z,y,-x", factory);
+
+    // It should not throw because 'Fake base symbol' is registered.
+    TS_ASSERT_THROWS_NOTHING(generator.getPrototype());
+
+    // The base symbol is trimmed so white space does not matter.
+    TestableTransformationSpaceGroupGenerator generatorWhiteSpace(
+        1, "fake symbol other", "  Fake base symbol     | -x+z,y,-x", factory);
+    TS_ASSERT_THROWS_NOTHING(generatorWhiteSpace.getPrototype());
+  }
+
+  void testTransformationSpaceGroupGenerator_performs_correct_transformation() {
+    // The P is required to determine the centering from the first character.
+    TestableSpaceGroupFactory factory;
+    factory.subscribeGeneratedSpaceGroup(1, "P Fake base symbol", "x,-y,z+1/2");
+
+    TestableTransformationSpaceGroupGenerator generator(
+        1, "fake symbol", "P Fake base symbol | -x+z,y,-x", factory);
+
+    SpaceGroup_const_sptr generatedGroup = generator.getPrototype();
+
+    /* The group subscribed to the factory is actually P 1 c 1,
+     * after the transformation it is P 1 n 1.
+     */
+    Group_const_sptr correctGroup =
+        GroupFactory::create<Group>("x,y,z; x+1/2,-y,z+1/2");
+
+    TS_ASSERT_EQUALS(*generatedGroup, *correctGroup);
+  }
+
 private:
   class TestableSpaceGroupFactory : public SpaceGroupFactoryImpl {
     friend class SpaceGroupFactoryTest;
@@ -273,6 +332,31 @@ private:
     ~MockSpaceGroupGenerator() {}
 
     MOCK_CONST_METHOD0(generateGroup, Group_const_sptr());
+  };
+
+  /* Testing TransformationSpaceGroupGenerator is a bit hard in the sense that
+   * it requires access to the SpaceGroupFactory to generate the base group
+   * so that the transformation can be carried out. This is encapsulated in
+   * the getBaseSpaceGroup()-method, so that this method can be replaced with
+   * a custom one using any factory.
+   */
+  class TestableTransformationSpaceGroupGenerator
+      : public TransformationSpaceGroupGenerator {
+  public:
+    TestableTransformationSpaceGroupGenerator(
+        size_t number, const std::string &hmSymbol,
+        const std::string &generatorInformation, SpaceGroupFactoryImpl &factory)
+        : TransformationSpaceGroupGenerator(number, hmSymbol,
+                                            generatorInformation),
+          m_factory(factory) {}
+
+  protected:
+    SpaceGroup_const_sptr getBaseSpaceGroup() const {
+      return m_factory.createSpaceGroup(m_baseGroupHMSymbol);
+    }
+
+  private:
+    SpaceGroupFactoryImpl &m_factory;
   };
 };
 
