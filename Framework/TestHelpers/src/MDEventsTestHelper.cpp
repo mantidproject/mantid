@@ -161,7 +161,9 @@ MDBox<MDLeanEvent<1>, 1> *makeMDBox1(size_t splitInto,
   // Splits into 10 boxes
   splitter->setSplitInto(splitInto);
   // Set the size
-  auto ->calcVolume();
+  auto *out = new MDBox<MDLeanEvent<1>, 1>(splitter);
+  out->setExtents(0, 0.0, 10.0);
+  out->calcVolume();
   return out;
 }
 
@@ -171,14 +173,17 @@ MDBox<MDLeanEvent<1>, 1> *makeMDBox1(size_t splitInto,
    tests !!!!**/
 MDBox<MDLeanEvent<3>, 3> *makeMDBox3() {
   // Split at 5 events
-
-  auto tter->setSplitThreshold(5);
+  auto splitter = new BoxController(3);
+  splitter->setSplitThreshold(5);
   // Splits into 10x5x2 boxes
   splitter->setSplitInto(10);
   splitter->setSplitInto(1, 5);
   splitter->setSplitInto(2, 2);
   // Set the size to 10.0 in all directions
-  auto ut->setExtents(d, 0.0, 10.0);
+  auto out = new MDBox<MDLeanEvent<3>, 3>(splitter);
+  for (size_t d = 0; d < 3; ++d) {
+    out->setExtents(d, 0.0, 10.0);
+  }
   out->calcVolume();
   return out;
 }

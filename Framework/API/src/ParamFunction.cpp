@@ -152,8 +152,8 @@ double ParamFunction::getParameter(const std::string &name) const {
   std::string ucName(name);
   // std::transform(name.begin(), name.end(), ucName.begin(), toupper);
   auto it =
-      std::find(m_parameterNames.begin(), m_parameterNames.end(), ucName);
-  if (it == m_parameterNames.end()) {
+      std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), ucName);
+  if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
     msg << "ParamFunction tries to get value of non-existing parameter ("
         << ucName << ") "
@@ -164,7 +164,7 @@ double ParamFunction::getParameter(const std::string &name) const {
     throw std::invalid_argument(msg.str());
   }
 
-  double parvalue = m_parameters[it - m_parameterNames.begin()];
+  double parvalue = m_parameters[it - m_parameterNames.cbegin()];
 
   if (parvalue != parvalue || !(parvalue > -DBL_MAX && parvalue < DBL_MAX)) {
     g_log.warning() << "Parameter " << name << " has a NaN or infinity value "
@@ -183,14 +183,14 @@ size_t ParamFunction::parameterIndex(const std::string &name) const {
   std::string ucName(name);
   // std::transform(name.begin(), name.end(), ucName.begin(), toupper);
   auto it =
-      std::find(m_parameterNames.begin(), m_parameterNames.end(), ucName);
-  if (it == m_parameterNames.end()) {
+      std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), ucName);
+  if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
     msg << "ParamFunction " << this->name() << " does not have parameter ("
         << ucName << ").";
     throw std::invalid_argument(msg.str());
   }
-  return int(it - m_parameterNames.begin());
+  return std::distance(m_parameterNames.cbegin(), it);
 }
 
 /** Returns the name of parameter i
@@ -368,9 +368,8 @@ ParameterTie *ParamFunction::getTie(size_t i) const {
   if (i >= nParams()) {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
-  auto it =
-      std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(i));
-  if (it != m_ties.end()) {
+  auto it = std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(i));
+  if (it != m_ties.cend()) {
     return *it;
   }
   return NULL;
@@ -416,9 +415,9 @@ IConstraint *ParamFunction::getConstraint(size_t i) const {
   if (i >= nParams()) {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
-  auto it = std::find_if(
-      m_constraints.begin(), m_constraints.end(), ReferenceEqual(i));
-  if (it != m_constraints.end()) {
+  auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
+                         ReferenceEqual(i));
+  if (it != m_constraints.cend()) {
     return *it;
   }
   return NULL;

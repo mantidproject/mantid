@@ -222,8 +222,7 @@ void CreateCalFileByNames::saveGroupingFile(const std::string &filename,
     }
   } else //
   {
-    auto it = instrcalib.begin();
-    for (; it != instrcalib.end(); ++it)
+    for (auto it = instrcalib.cbegin(); it != instrcalib.cend(); ++it)
       writeCalEntry(outfile, (*it).first, ((*it).second).first, 0.0, 1,
                     ((*it).second).second);
   }

@@ -84,15 +84,12 @@ void DiffractionFocussing::exec() {
   if (iprogress_step == 0)
     iprogress_step = 1;
   std::vector<int64_t> resultIndeces;
-  for (auto g = groupNumbers.begin();
-       g != groupNumbers.end(); ++g) {
+  for (auto g = groupNumbers.cbegin(); g != groupNumbers.end(); ++g) {
     if (iprogress++ % iprogress_step == 0) {
       progress(0.68 + double(iprogress) / iprogress_count / 3);
     }
-    std::multimap<int64_t, int64_t>::const_iterator from =
-        detectorGroups.lower_bound(*g);
-    std::multimap<int64_t, int64_t>::const_iterator to =
-        detectorGroups.upper_bound(*g);
+    auto from = detectorGroups.lower_bound(*g);
+    auto to = detectorGroups.upper_bound(*g);
     std::vector<detid_t> detectorList;
     for (auto d = from; d != to; ++d)
       detectorList.push_back(static_cast<detid_t>(d->second));

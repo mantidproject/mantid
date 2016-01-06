@@ -331,7 +331,7 @@ bool WorkspaceGroup::isMultiperiod() const {
     return false;
   }
   // Loop through all inner workspaces, checking each one in turn.
-  for (auto iterator = m_workspaces.begin(); iterator != m_workspaces.end();
+  for (auto iterator = m_workspaces.cbegin(); iterator != m_workspaces.cend();
        ++iterator) {
     if (MatrixWorkspace_sptr ws =
             boost::dynamic_pointer_cast<MatrixWorkspace>(*iterator)) {

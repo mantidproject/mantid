@@ -187,8 +187,7 @@ void GetDetectorOffsets::exec() {
 double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   // Find point of peak centre
   const MantidVec &yValues = inputW->readY(s);
-  auto it =
-      std::max_element(yValues.begin(), yValues.end());
+  auto it = std::max_element(yValues.cbegin(), yValues.cend());
   const double peakHeight = *it;
   const double peakLoc = inputW->readX(s)[it - yValues.begin()];
   // Return if peak of Cross Correlation is nan (Happens when spectra is zero)

@@ -212,8 +212,7 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
   // Storage for the reciprocal wave vectors that are calculated as the
   // correction proceeds
   std::vector<double> oneOverWaveVectors(yValues.size());
-  auto iend = dets.end();
-  for (auto it = dets.begin(); it != iend; ++it) {
+  for (auto it = dets.cbegin(); it != dets.cend(); ++it) {
     IDetector_const_sptr det_member =
         m_inputWS->getInstrument()->getDetector(*it);
 
@@ -250,11 +249,11 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
     const double det_const =
         g_helium_prefactor * (detRadius - wallThickness) * atms / sinTheta;
 
-    auto yinItr = yValues.begin();
-    auto einItr = eValues.begin();
+    auto yinItr = yValues.cbegin();
+    auto einItr = eValues.cbegin();
     auto youtItr = yout.begin();
     auto eoutItr = eout.begin();
-    auto xItr = m_inputWS->readX(spectraIn).begin();
+    auto xItr = m_inputWS->readX(spectraIn).cbegin();
     auto wavItr = oneOverWaveVectors.begin();
 
     for (; youtItr != yout.end(); ++youtItr, ++eoutItr) {

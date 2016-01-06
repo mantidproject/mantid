@@ -519,8 +519,7 @@ void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
 
     // Allow multiple detectors per workspace index, or,
     // If only one is allowed, then this has thrown already
-    for (auto it = detList.begin();
-         it != detList.end(); ++it) {
+    for (auto it = detList.cbegin(); it != detList.cend(); ++it) {
       int index = *it + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
@@ -550,8 +549,8 @@ void MatrixWorkspace::getIndicesFromSpectra(
   indexList.clear();
   indexList.reserve(this->getNumberHistograms());
 
-  auto iter = spectraList.begin();
-  while (iter != spectraList.end()) {
+  auto iter = spectraList.cbegin();
+  while (iter != spectraList.cend()) {
     for (size_t i = 0; i < this->getNumberHistograms(); ++i) {
       if (this->getSpectrum(i)->getSpectrumNo() == *iter) {
         indexList.push_back(i);
@@ -1013,8 +1012,7 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
   spec->clearData();
 
   const std::set<detid_t> dets = spec->getDetectorIDs();
-  for (auto iter = dets.begin();
-       iter != dets.end(); ++iter) {
+  for (auto iter = dets.cbegin(); iter != dets.cend(); ++iter) {
     try {
       if (const Geometry::Detector *det =
               dynamic_cast<const Geometry::Detector *>(
@@ -1235,8 +1233,7 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
     throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower than "
                             "lowest in current range.");
   }
-  auto lowit =
-      std::lower_bound(xValues.begin(), xValues.end(), xValue);
+  auto lowit = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
   if (lowit == xValues.end()) {
     throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater "
                             "than highest in current range.");
@@ -1564,7 +1561,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
 
   if (wi < nhist) {
     const MantidVec &X = this->readX(wi);
-    auto it = std::lower_bound(X.begin(), X.end(), x);
+    auto it = std::lower_bound(X.cbegin(), X.cend(), x);
     if (it == X.end()) {
       // Out of range
       return std::numeric_limits<double>::quiet_NaN();

@@ -245,8 +245,7 @@ void DiffractionFocussing2::exec() {
             m_matrixInputW->maskedBins(i);
         // Now iterate over the list, adjusting the weights for the affected
         // bins
-        for (auto it = mask.begin();
-             it != mask.end(); ++it) {
+        for (auto it = mask.cbegin(); it != mask.cend(); ++it) {
           const double currentX = Xin[(*it).first];
           // Add an intermediate bin with full weight if masked bins aren't
           // consecutive
@@ -369,8 +368,7 @@ void DiffractionFocussing2::execEvent() {
     const vector<size_t> &indices = this->m_wsIndices[group];
 
     totalHistProcess += static_cast<int>(indices.size());
-    for (auto index = indices.begin();
-         index != indices.end(); ++index) {
+    for (auto index = indices.cbegin(); index != indices.cend(); ++index) {
       size_required[iGroup] += m_eventW->getEventList(*index).getNumberEvents();
     }
     prog->report(1, "Pre-counting");
@@ -528,7 +526,7 @@ int DiffractionFocussing2::validateSpectrumInGroup(size_t wi) {
     return -1;
   }
 
-  auto it = dets.begin();
+  auto it = dets.cbegin();
   if (*it < 0) // bad pixel id
     return -1;
 

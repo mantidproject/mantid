@@ -90,9 +90,8 @@ void Expression::add_operators(const std::vector<std::string> &ops) {
 
 void Expression::add_unary(const std::set<std::string> &ops) {
   m_operators->unary = ops;
-  for (auto it = ops.begin(); it != ops.end();
-       ++it) {
-    for (std::string::const_iterator c = it->begin(); c != it->end(); ++c) {
+  for (auto it = ops.cbegin(); it != ops.cend(); ++it) {
+    for (auto c = it->cbegin(); c != it->cend(); ++c) {
       m_operators->symbols.insert(*c);
     }
   }

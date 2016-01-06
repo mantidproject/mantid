@@ -201,7 +201,7 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
         std::min(std::abs(*std::min_element(xIn.begin(), xIn.end())), m_Ei) <
         m_Ei;
 
-    auto xIn_it = xIn.begin(); // DeltaE
+    auto xIn_it = xIn.cbegin(); // DeltaE
     auto effOut_it = effOut.begin();
     for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
       if (conditionForEnergy) {

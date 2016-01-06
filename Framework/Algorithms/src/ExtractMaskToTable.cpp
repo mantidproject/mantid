@@ -99,9 +99,9 @@ void ExtractMaskToTable::exec() {
   // Extract mask
   vector<detid_t> maskeddetids;
   if (m_inputIsMask)
-    extractMaskFromMaskWorkspace(maskeddetids);
+    maskeddetids = extractMaskFromMaskWorkspace();
   else
-    extractMaskFromMatrixWorkspace(maskeddetids);
+    maskeddetids = extractMaskFromMatrixWorkspace();
   g_log.debug() << "[DB] Number of masked detectors = " << maskeddetids.size()
                 << ".\n";
 
@@ -211,10 +211,9 @@ void ExtractMaskToTable::parseStringToVector(std::string liststr,
 /** Extract mask information from a workspace containing instrument
   * @param maskeddetids :: vector of detector IDs of detectors that are masked
   */
-void ExtractMaskToTable::extractMaskFromMatrixWorkspace(
-    std::vector<detid_t> &maskeddetids) {
+std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
   // Clear input
-  maskeddetids.clear();
+  std::vector<detid_t> maskeddetids;
 
   // Get on hold of instrument
   Instrument_const_sptr instrument = m_dataWS->getInstrument();
@@ -232,7 +231,7 @@ void ExtractMaskToTable::extractMaskFromMatrixWorkspace(
     if (masked) {
       maskeddetids.push_back(tmpdetid);
     }
-    g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << detids[i]
+    g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << tmpdetid
                   << ", Masked = " << masked << ".\n";
   }
 
@@ -241,7 +240,7 @@ void ExtractMaskToTable::extractMaskFromMatrixWorkspace(
                     " are masked."
                  << ".\n";
 
-  return;
+  return maskeddetids;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -249,10 +248,9 @@ void ExtractMaskToTable::extractMaskFromMatrixWorkspace(
   * @param maskeddetids :: vector of detector IDs of the detectors that are
  * masked
   */
-void ExtractMaskToTable::extractMaskFromMaskWorkspace(
-    std::vector<detid_t> &maskeddetids) {
-  // Clear input
-  maskeddetids.clear();
+std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
+  // output vector
+  std::vector<detid_t> maskeddetids;
 
   // Go through all spectra to find masked workspace
   MaskWorkspace_const_sptr maskws =
@@ -270,14 +268,10 @@ void ExtractMaskToTable::extractMaskFromMaskWorkspace(
           "Unable to get spectrum reference from mask workspace.");
 
     const set<detid_t> detidset = spec->getDetectorIDs();
-    for (auto sit = detidset.begin();
-         sit != detidset.end(); ++sit) {
-      detid_t tmpdetid = *sit;
-      maskeddetids.push_back(tmpdetid);
-    }
+    std::copy(detidset.cbegin(), detidset.cend(),
+              std::inserter(maskeddetids, maskeddetids.end()));
   }
-
-  return;
+  return maskeddetids;
 }
 
 //----------------------------------------------------------------------------------------------

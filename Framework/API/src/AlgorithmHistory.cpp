@@ -169,7 +169,7 @@ AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
     throw std::out_of_range(
         "AlgorithmHistory::getAlgorithmHistory() - Index out of range");
   }
-  auto start = m_childHistories.begin();
+  auto start = m_childHistories.cbegin();
   std::advance(start, index);
   return *start;
 }
