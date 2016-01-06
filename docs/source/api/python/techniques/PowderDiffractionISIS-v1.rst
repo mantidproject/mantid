@@ -184,6 +184,11 @@ modifying the following line of the :ref:`usage-PowderISIS-ref` script to:
 
    expt = cry_ini.Files('Polaris', RawDir=(DIRS[0] + "Polaris"), Analysisdir='test', forceRootDirFromScripts=True)
 
+Workflow
+--------
+
+.. diagram:: PowderDiffractionISIS-v1_wkflw.dot
+
 Additional Information
 ----------------------
 
