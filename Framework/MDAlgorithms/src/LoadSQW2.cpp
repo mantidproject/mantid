@@ -477,7 +477,7 @@ void LoadSQW2::transformLimitsToOutputFrame(Kernel::Matrix<float> &urange) {
  * the file
  * @param index Index of the dimension
  * @param dimMin Dimension minimum in output frame
- * @param dimMmax Dimension maximum in output frame
+ * @param dimMax Dimension maximum in output frame
  * @param nbins Number of bins for this dimension
  * @param bmat A reference to the B matrix to create the axis labels for the HKL
  * frame
