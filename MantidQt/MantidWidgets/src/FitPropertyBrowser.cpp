@@ -297,6 +297,7 @@ void FitPropertyBrowser::initLayout(QWidget *w)
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_columnManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(columnChanged(QtProperty*)));
   connect(m_vectorDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(vectorDoubleChanged(QtProperty*)));
+  connect(m_vectorSizeManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(vectorSizeChanged(QtProperty*)));
   connect(m_parameterManager,SIGNAL(propertyChanged(QtProperty*)), this, SLOT(parameterChanged(QtProperty*)));
 
   QVBoxLayout* layout = new QVBoxLayout(w);
@@ -1890,6 +1891,17 @@ void FitPropertyBrowser::currentItemChanged(QtBrowserItem * current )
  * @param prop :: A property managed by m_vectorDoubleManager.
  */
 void FitPropertyBrowser::vectorDoubleChanged(QtProperty *prop)
+{
+    PropertyHandler* h = getHandler()->findHandler(prop);
+    if ( !h ) return;
+    h->setVectorAttribute(prop);
+}
+
+/**
+ * Slot. Responds to changing a vector attribute size
+ * @param prop :: A property managed by m_vectorSizeManager.
+ */
+void FitPropertyBrowser::vectorSizeChanged(QtProperty *prop)
 {
     PropertyHandler* h = getHandler()->findHandler(prop);
     if ( !h ) return;

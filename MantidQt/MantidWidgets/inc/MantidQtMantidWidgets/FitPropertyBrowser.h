@@ -286,6 +286,7 @@ private slots:
   void columnChanged(QtProperty* prop);
   void currentItemChanged(QtBrowserItem*);
   void vectorDoubleChanged(QtProperty* prop);
+  void vectorSizeChanged(QtProperty* prop);
   void addTie();
   void addTieToFunction();
   void addFixTie();

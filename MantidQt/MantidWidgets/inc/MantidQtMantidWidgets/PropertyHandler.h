@@ -104,10 +104,11 @@ public:
 
   /**
    * Set function attribute value read from a QtProperty
-   * @param prop :: The (string) property with the new attribute value
+   * @param prop :: The property with the new attribute value
+   * @param resetProperties :: Flag to reset all properties of the handled function.
    * @return true if successfull
    */
-  bool setAttribute(QtProperty* prop);
+  bool setAttribute(QtProperty* prop, bool resetProperties = true);
 
   /**
    * Set function's double attribute
@@ -213,6 +214,7 @@ private:
   QMap<QString,QtProperty*> m_ties;//< tie properties
   QMap<QString,std::pair<QtProperty*,QtProperty*> > m_constraints;//< constraints
   QList<QtProperty*> m_vectorMembers; //< vector member properties
+  QList<QtProperty*> m_vectorSizes; //< vector size properties
   bool m_isMultispectral; ///< true if fitting to multiple spectra using MultiBG function
   QtProperty* m_workspace; ///< workspace name for multispectral fitting
   QtProperty* m_workspaceIndex; ///< workspace index for multispectral fitting
