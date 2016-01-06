@@ -32,7 +32,8 @@ DECLARE_FUNCTION(TabulatedFunction)
 const int TabulatedFunction::defaultIndexValue = 0;
 
 /// Constructor
-TabulatedFunction::TabulatedFunction() : m_setupFinished(false), m_explicitXY(false) {
+TabulatedFunction::TabulatedFunction()
+    : m_setupFinished(false), m_explicitXY(false) {
   declareParameter("Scaling", 1.0, "A scaling factor");
   declareParameter("Shift", 0.0, "Shift in the abscissa");
   declareParameter("XScaling", 1.0, "Scaling factor in X");
@@ -193,39 +194,39 @@ void TabulatedFunction::setAttribute(const std::string &attName,
       m_explicitXY = false;
     }
   } else if (attName == "X") {
-      m_xData = value.asVector();
-      if (m_xData.empty()) {
-        m_setupFinished = false;
-        m_explicitXY = false;
-        if (!m_yData.empty()) {
-          m_yData.clear();
-        }
-        return;
+    m_xData = value.asVector();
+    if (m_xData.empty()) {
+      m_setupFinished = false;
+      m_explicitXY = false;
+      if (!m_yData.empty()) {
+        m_yData.clear();
       }
-      if (m_xData.size() != m_yData.size()) {
-        m_yData.resize(m_xData.size());
-      }
-      storeAttributeValue("FileName", Attribute("", true));
-      storeAttributeValue("Workspace", Attribute(""));
-      m_setupFinished = true;
-      m_explicitXY = true;
+      return;
+    }
+    if (m_xData.size() != m_yData.size()) {
+      m_yData.resize(m_xData.size());
+    }
+    storeAttributeValue("FileName", Attribute("", true));
+    storeAttributeValue("Workspace", Attribute(""));
+    m_setupFinished = true;
+    m_explicitXY = true;
   } else if (attName == "Y") {
-      m_yData = value.asVector();
-      if (m_yData.empty()) {
-        m_setupFinished = false;
-        m_explicitXY = false;
-        if (!m_xData.empty()) {
-          m_xData.clear();
-        }
-        return;
+    m_yData = value.asVector();
+    if (m_yData.empty()) {
+      m_setupFinished = false;
+      m_explicitXY = false;
+      if (!m_xData.empty()) {
+        m_xData.clear();
       }
-      if (m_xData.size() != m_yData.size()) {
-        m_xData.resize(m_yData.size());
-      }
-      storeAttributeValue("FileName", Attribute("", true));
-      storeAttributeValue("Workspace", Attribute(""));
-      m_setupFinished = true;
-      m_explicitXY = true;
+      return;
+    }
+    if (m_xData.size() != m_yData.size()) {
+      m_xData.resize(m_yData.size());
+    }
+    storeAttributeValue("FileName", Attribute("", true));
+    storeAttributeValue("Workspace", Attribute(""));
+    m_setupFinished = true;
+    m_explicitXY = true;
   } else {
     IFunction::setAttribute(attName, value);
     m_setupFinished = false;
@@ -233,13 +234,13 @@ void TabulatedFunction::setAttribute(const std::string &attName,
 }
 
 /// Returns the number of attributes associated with the function
-size_t TabulatedFunction::nAttributes() const{
+size_t TabulatedFunction::nAttributes() const {
   // additional X and Y attributes
   return IFunction::nAttributes() + 2;
 }
 
 /// Returns a list of attribute names
-std::vector<std::string> TabulatedFunction::getAttributeNames() const{
+std::vector<std::string> TabulatedFunction::getAttributeNames() const {
   std::vector<std::string> attNames = IFunction::getAttributeNames();
   attNames.push_back("X");
   attNames.push_back("Y");
@@ -248,7 +249,8 @@ std::vector<std::string> TabulatedFunction::getAttributeNames() const{
 
 /// Return a value of attribute attName
 /// @param attName :: The attribute name
-IFunction::Attribute TabulatedFunction::getAttribute(const std::string &attName) const{
+IFunction::Attribute
+TabulatedFunction::getAttribute(const std::string &attName) const {
   if (attName == "X") {
     return m_explicitXY ? Attribute(m_xData) : Attribute(std::vector<double>());
   } else if (attName == "Y") {
@@ -259,13 +261,12 @@ IFunction::Attribute TabulatedFunction::getAttribute(const std::string &attName)
 
 /// Check if attribute attName exists
 /// @param attName :: The attribute name
-bool TabulatedFunction::hasAttribute(const std::string &attName) const{
+bool TabulatedFunction::hasAttribute(const std::string &attName) const {
   if (attName == "X" || attName == "Y") {
     return true;
   }
   return IFunction::hasAttribute(attName);
 }
-
 
 /**
  * Load input file as a Nexus file.
@@ -318,7 +319,8 @@ void TabulatedFunction::loadWorkspace(
 void TabulatedFunction::setupData() const {
   if (m_setupFinished) {
     if (m_xData.size() != m_yData.size()) {
-      throw std::invalid_argument(this->name() + ": X and Y vectors have different sizes.");
+      throw std::invalid_argument(this->name() +
+                                  ": X and Y vectors have different sizes.");
     }
     g_log.debug() << "Re-setting isn't required.";
     return;

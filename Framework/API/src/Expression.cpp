@@ -432,7 +432,8 @@ void Expression::setFunct(const std::string &name) {
       std::string f = name.substr(0, i);
       Expression tmp(this);
       tmp.parse(args);
-      if (tmp.name() != EMPTY_EXPRESSION_NAME && (!tmp.isFunct() || tmp.name() != ",")) {
+      if (tmp.name() != EMPTY_EXPRESSION_NAME &&
+          (!tmp.isFunct() || tmp.name() != ",")) {
         m_terms.push_back(tmp);
       } else {
         std::string my_op = m_op;

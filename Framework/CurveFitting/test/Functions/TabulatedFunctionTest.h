@@ -276,7 +276,7 @@ public:
     const size_t n = 10;
     std::vector<double> X(n);
     std::vector<double> Y(n);
-    for(size_t i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
       X[i] = double(i);
       Y[i] = X[i] * X[i];
     }
@@ -287,9 +287,9 @@ public:
     FunctionValues y(x);
     fun.function(x, y);
 
-    for(size_t i = 0; i < x.size(); ++i) {
+    for (size_t i = 0; i < x.size(); ++i) {
       double xx = x[i];
-      TS_ASSERT_DELTA(y[i], xx*xx, 0.5);
+      TS_ASSERT_DELTA(y[i], xx * xx, 0.5);
     }
   }
 
@@ -297,7 +297,7 @@ public:
     TabulatedFunction fun;
     const size_t n = 10;
     std::vector<double> X(n);
-    std::vector<double> Y(n-1);
+    std::vector<double> Y(n - 1);
 
     fun.setAttributeValue("X", X);
     fun.setAttributeValue("Y", Y);
@@ -307,7 +307,6 @@ public:
 
     TS_ASSERT_EQUALS(x.size(), y.size());
     TS_ASSERT_EQUALS(x.size(), Y.size());
-
   }
 
   void test_set_X_Y_attributes_string() {
