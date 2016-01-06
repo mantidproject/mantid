@@ -1791,7 +1791,7 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
 
   saveOpenGenie(curvesWSName, "1-1200", "North", vanNo);
-  saveOpenGenie(curvesWSName, "1201-1400", "South", vanNo);
+  saveOpenGenie(curvesWSName, "1201-2400", "South", vanNo);
 }
 
 /**
