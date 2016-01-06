@@ -530,6 +530,7 @@ protected:
     for(size_t i = 0; i < v.size(); ++i)
     {
         QtProperty *dprop = m_browser->m_attributeVectorDoubleManager->addProperty( parName.arg(i) );
+        m_browser->m_attributeVectorDoubleManager->setDecimals(dprop, 6);
         m_browser->m_attributeVectorDoubleManager->setValue( dprop, v[i] );
         m_browser->addProperty( prop, dprop );
     }
@@ -1959,6 +1960,7 @@ void FunctionBrowser::attributeChanged(QtProperty* prop)
  */
 void FunctionBrowser::attributeVectorDoubleChanged(QtProperty *prop)
 {
+  UNUSED_ARG(prop);
   emit functionStructureChanged();
 }
 
@@ -1982,7 +1984,8 @@ void FunctionBrowser::attributeVectorSizeChanged(QtProperty *prop)
   auto attName = vectorProp->propertyName().toStdString();
   auto attribute = fun->getAttribute(attName).asVector();
   auto newSize = m_attributeSizeManager->value(prop);
-  if (attribute.size() != newSize) {
+  if (newSize < 0) newSize = 0;
+  if (attribute.size() != static_cast<size_t>(newSize)) {
     if (newSize == 0) {
       attribute.clear();
     } else {
