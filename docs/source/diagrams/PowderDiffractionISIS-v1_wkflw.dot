@@ -1,0 +1,63 @@
+digraph PowderDiffractionISIS {
+  label="PowderDiffractionISIS"
+  $global_style
+
+  subgraph processes {
+    $process_style
+  }
+
+
+  subgraph values{
+    $value_style
+    Sample_and_UampsTotal          [label="Sample & UampsTotal"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+
+  }
+
+  subgraph decisions {
+    $decision_style
+    NoSac                             [label="if NoSac"]
+    Eff                               [label="if Eff"]
+    FirstNonZeroNotFound              [label="FirstNonZeroNotFound"]
+    UampsotalLess                     [label="if UampsTotal < 1e-6"]
+    IfHrpd                            [label="if HRPD"]
+
+  }
+
+  subgraph get_data_sum {
+  GetDataSum_Start              -> LoadRaw
+  FileName                      -> LoadRaw
+  LoadRaw                       -> IfHrpd
+  IfHrpd                        -> MaskBins                           [label="true"]
+  MaskBins                      -> FirstNonZeroNotFound
+  IfHrpd                        -> FirstNonZeroNotFound               [label="else"]
+  FirstNonZeroNotFound          -> CreateSingleValuedWorkspace         [label="true"]
+  FirstNonZeroNotFound          -> Plus                               [label="else"]
+  Plus                          -> CreateSingleValuedWorkspace
+  CreateSingleValuedWorkspace   -> Divide
+  }
+
+  subgraph load_sac_eff {
+  LoadSac_Start                 -> NoSac
+  NoSac                         -> CreateSingleValueWorkspace         [label="true"]
+  NoSac                         -> SacEff_RunGetDataSum               [label="else"]
+  SacEff_RunGetDataSum           -> UampsotalLess
+  UampsotalLess                 -> LoadSac_CreateSingle_1             [label="true"]
+  UampsotalLess                 -> LoadSac_Integrate_1                [label="else"]
+  LoadSac_Integrate_1           -> MaskDetectorIf
+  MaskDetectorIf                -> SolidAngle
+  SolidAngle                    -> LoadSac_CreateSingle_2
+  LoadSac_CreateSingle_2        -> Multiply
+  Multiply                      -> Eff
+  Eff                           -> LoadSac_Divide_1                   [label="true"]
+  LoadSac_Divide_1              -> ConvertUnits
+  ConvertUnits                  -> Integration
+  Integration                   -> LoadSac_Multiply_1
+  LoadSac_Multiply_1            -> LoadSac_CreateSingle_3
+  LoadSac_CreateSingle_3        -> LoadSac_Divide_2
+
+  }
+
