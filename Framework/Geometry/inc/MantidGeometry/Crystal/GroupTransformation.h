@@ -62,7 +62,10 @@ private:
   SymmetryOperation
   transformOperation(const SymmetryOperation &operation) const;
 
-  MatrixVectorPair<double, V3R> m_symOp;
+  void setInverseFromPair();
+
+  MatrixVectorPair<double, V3R> m_matrixVectorPair;
+  MatrixVectorPair<double, V3R> m_inversePair;
 };
 
 } // namespace Geometry
