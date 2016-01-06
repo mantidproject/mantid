@@ -74,8 +74,10 @@ def _run(cache_dir, days):
         if os.stat(f).st_mtime > rm_date: continue
         # check filename pattern
         base = os.path.basename(f)
-        if re.match(".*[0-9a-f]{40}.nxs", base):
-            os.remove(f)
+        if re.match(".*_[0-9a-f]{40}.nxs", base):
+            os.remove(f); continue
+        if re.match("[0-9a-f]{40}.nxs", base):
+            os.remove(f); continue
         continue
     return
 
