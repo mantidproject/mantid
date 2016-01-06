@@ -365,27 +365,90 @@ SpaceGroupFactoryImpl::SpaceGroupFactoryImpl()
 
 /* Space groups according to International Tables for Crystallography,
  * using the generators specified there.
- *
- * When two origin choices are possible, only the first is given.
  */
 // Triclinic
 DECLARE_TABULATED_SPACE_GROUP(1, "P 1", "x,y,z")
 DECLARE_GENERATED_SPACE_GROUP(2, "P -1", "-x,-y,-z")
 
-// Monoclinic
+/* Monoclinic space groups.
+ *
+ * Unique axes b and c are given, as well as 3 cell choices where
+ * applicable. Since there are only so few monoclinic space group
+ * types, all the transformations are given explicitly. It would
+ * actually be shorter to provide all group definition explicitly
+ * with their generators, but this way the relationship between
+ * the groups is more pronounced.
+ */
 DECLARE_GENERATED_SPACE_GROUP(3, "P 1 2 1", "-x,y,-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(3, "P 1 1 21", "P 1 21 1 | y,z,x")
+
 DECLARE_GENERATED_SPACE_GROUP(4, "P 1 21 1", "-x,y+1/2,-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(4, "P 1 1 21", "P 1 21 1 | y,z,x")
+
 DECLARE_GENERATED_SPACE_GROUP(5, "C 1 2 1", "-x,y,-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(5, "A 1 2 1", "C 1 2 1 | -x+z,y,-x")
+DECLARE_TRANSFORMED_SPACE_GROUP(5, "I 1 2 1", "C 1 2 1 | -z,y,x-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(5, "A 1 1 2", "C 1 2 1 | y,z,x")
+DECLARE_TRANSFORMED_SPACE_GROUP(5, "B 1 1 2", "A 1 1 2 | -y,x-y,z")
+DECLARE_TRANSFORMED_SPACE_GROUP(5, "I 1 1 2", "A 1 1 2 | -x+y,-x,z")
+
 DECLARE_GENERATED_SPACE_GROUP(6, "P 1 m 1", "x,-y,z")
+DECLARE_TRANSFORMED_SPACE_GROUP(6, "P 1 1 m", "P 1 m 1 | y,z,x")
+
 DECLARE_GENERATED_SPACE_GROUP(7, "P 1 c 1", "x,-y,z+1/2")
+DECLARE_TRANSFORMED_SPACE_GROUP(7, "P 1 n 1", "P 1 c 1 | -x+z,y,-x")
+DECLARE_TRANSFORMED_SPACE_GROUP(7, "P 1 a 1", "P 1 c 1 | -z,y,x-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(7, "P 1 1 a", "P 1 c 1 | y,z,x")
+DECLARE_TRANSFORMED_SPACE_GROUP(7, "P 1 1 n", "P 1 1 a | -y,x-y,z")
+DECLARE_TRANSFORMED_SPACE_GROUP(7, "P 1 1 b", "P 1 1 a | -x+y,-x,z")
+
 DECLARE_GENERATED_SPACE_GROUP(8, "C 1 m 1", "x,-y,z")
+DECLARE_TRANSFORMED_SPACE_GROUP(8, "A 1 m 1", "C 1 m 1 | -x+z,y,-x")
+DECLARE_TRANSFORMED_SPACE_GROUP(8, "I 1 m 1", "C 1 m 1 | -z,y,x-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(8, "A 1 1 m", "C 1 m 1 | y,z,x")
+DECLARE_TRANSFORMED_SPACE_GROUP(8, "B 1 1 m", "A 1 1 m | -y,x-y,z")
+DECLARE_TRANSFORMED_SPACE_GROUP(8, "I 1 1 m", "A 1 1 m | -x+y,-x,z")
+
 DECLARE_GENERATED_SPACE_GROUP(9, "C 1 c 1", "x,-y,z+1/2")
+DECLARE_TRANSFORMED_SPACE_GROUP(9, "A 1 n 1", "C 1 c 1 | -x+z,y,-x")
+DECLARE_TRANSFORMED_SPACE_GROUP(9, "I 1 a 1", "C 1 c 1 | -z,y,x-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(9, "A 1 1 a", "C 1 c 1 | y,z,x")
+DECLARE_TRANSFORMED_SPACE_GROUP(9, "B 1 1 n", "A 1 1 a | -y,x-y,z")
+DECLARE_TRANSFORMED_SPACE_GROUP(9, "I 1 1 b", "A 1 1 a | -x+y,-x,z")
+
 DECLARE_GENERATED_SPACE_GROUP(10, "P 1 2/m 1", "-x,y,-z; -x,-y,-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(10, "P 1 1 2/m", "P 1 2/m 1 | y,z,x")
+
 DECLARE_GENERATED_SPACE_GROUP(11, "P 1 21/m 1", "-x,y+1/2,-z; -x,-y,-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(11, "P 1 1 21/m", "P 1 21/m 1 | y,z,x")
+
 DECLARE_GENERATED_SPACE_GROUP(12, "C 1 2/m 1", "-x,y,-z; -x,-y,-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(12, "A 1 2/m 1", "C 1 2/m 1 | -x+z,y,-x")
+DECLARE_TRANSFORMED_SPACE_GROUP(12, "I 1 2/m 1", "C 1 2/m 1 | -z,y,x-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(12, "A 1 1 2/m", "C 1 2/m 1 | y,z,x")
+DECLARE_TRANSFORMED_SPACE_GROUP(12, "B 1 1 2/m", "A 1 1 2/m | -y,x-y,z")
+DECLARE_TRANSFORMED_SPACE_GROUP(12, "I 1 1 2/m", "A 1 1 2/m | -x+y,-x,z")
+
 DECLARE_GENERATED_SPACE_GROUP(13, "P 1 2/c 1", "-x,y,-z+1/2; -x,-y,-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(13, "P 1 2/n 1", "P 1 2/c 1 | -x+z,y,-x")
+DECLARE_TRANSFORMED_SPACE_GROUP(13, "P 1 2/a 1", "P 1 2/c 1 | -z,y,x-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(13, "P 1 1 2/a", "P 1 2/c 1 | y,z,x")
+DECLARE_TRANSFORMED_SPACE_GROUP(13, "P 1 1 2/n", "P 1 1 2/a | -y,x-y,z")
+DECLARE_TRANSFORMED_SPACE_GROUP(13, "P 1 1 2/b", "P 1 1 2/a | -x+y,-x,z")
+
 DECLARE_GENERATED_SPACE_GROUP(14, "P 1 21/c 1", "-x,y+1/2,-z+1/2; -x,-y,-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(14, "P 1 21/n 1", "P 1 21/c 1 | -x+z,y,-x")
+DECLARE_TRANSFORMED_SPACE_GROUP(14, "P 1 21/a 1", "P 1 21/c 1 | -z,y,x-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(14, "P 1 1 21/a", "P 1 21/c 1 | y,z,x")
+DECLARE_TRANSFORMED_SPACE_GROUP(14, "P 1 1 21/n", "P 1 1 21/a | -y,x-y,z")
+DECLARE_TRANSFORMED_SPACE_GROUP(14, "P 1 1 21/b", "P 1 1 21/a | -x+y,-x,z")
+
 DECLARE_GENERATED_SPACE_GROUP(15, "C 1 2/c 1", "-x,y,-z+1/2; -x,-y,-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(15, "A 1 2/n 1", "C 1 2/c 1 | -x+z,y,-x")
+DECLARE_TRANSFORMED_SPACE_GROUP(15, "I 1 2/a 1", "C 1 2/c 1 | -z,y,x-z")
+DECLARE_TRANSFORMED_SPACE_GROUP(15, "A 1 1 2/a", "C 1 2/c 1 | y,z,x")
+DECLARE_TRANSFORMED_SPACE_GROUP(15, "B 1 1 2/n", "A 1 1 2/a | -y,x-y,z")
+DECLARE_TRANSFORMED_SPACE_GROUP(15, "I 1 1 2/b", "A 1 1 2/a | -x+y,-x,z")
 
 // Orthorhombic
 DECLARE_GENERATED_SPACE_GROUP(16, "P 2 2 2", "-x,y,-z; x,-y,-z")
@@ -422,8 +485,10 @@ DECLARE_GENERATED_SPACE_GROUP(44, "I m m 2", "-x,-y,z; x,-y,z")
 DECLARE_GENERATED_SPACE_GROUP(45, "I b a 2", "-x,-y,z; x+1/2,-y+1/2,z")
 DECLARE_GENERATED_SPACE_GROUP(46, "I m a 2", "-x,-y,z; x+1/2,-y,z")
 DECLARE_GENERATED_SPACE_GROUP(47, "P m m m", "-x,-y,z; -x,y,-z; -x,-y,-z")
+
 DECLARE_GENERATED_SPACE_GROUP(48, "P n n n",
                               "-x,-y,z; -x,y,-z; -x+1/2,-y+1/2,-z+1/2")
+
 DECLARE_GENERATED_SPACE_GROUP(49, "P c c m", "-x,-y,z; -x,y,-z+1/2; -x,-y,-z")
 DECLARE_GENERATED_SPACE_GROUP(50, "P b a n",
                               "-x,-y,z; -x,y,-z; -x+1/2,-y+1/2,-z")
