@@ -3011,9 +3011,8 @@ void FitPowderDiffPeaks::plotFunction(IFunction_sptr peakfunction,
   // 1. Determine range
   const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
   double x0 = domain[0];
-  auto viter =
-      lower_bound(vecX.begin(), vecX.end(), x0);
-  int ix0 = static_cast<int>(viter - vecX.begin());
+  auto viter = lower_bound(vecX.cbegin(), vecX.cend(), x0);
+  int ix0 = static_cast<int>(std::distance(vecX.cbegin(), viter));
 
   // Check boundary
   if ((static_cast<int>(domain.size()) + ix0) >

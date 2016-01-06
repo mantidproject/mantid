@@ -362,10 +362,10 @@ void SplineSmoothing::selectSmoothingPoints(
     m_cspline->function1D(ysmooth.get(), xs.data(), xSize);
 
     // iterate over smoothing points
-    auto iter = smoothPts.begin();
+    auto iter = smoothPts.cbegin();
     int start = *iter;
 
-    for (++iter; iter != smoothPts.end(); ++iter) {
+    for (++iter; iter != smoothPts.cend(); ++iter) {
       int end = *iter;
 
       // check each point falls within our range of error.

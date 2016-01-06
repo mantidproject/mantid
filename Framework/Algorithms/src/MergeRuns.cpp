@@ -196,7 +196,7 @@ void MergeRuns::buildAdditionTables() {
         // and rhs have 1 detector per pixel
         detid2index_map::const_iterator map_it =
             lhs_det_to_wi.find(rhs_detector_ID);
-        if (map_it != lhs_det_to_wi.end()) {
+        if (map_it != lhs_det_to_wi.cend()) {
           outWI = static_cast<int>(map_it->second); // This is the workspace
                                                     // index in the LHS that
                                                     // matched rhs_detector_ID

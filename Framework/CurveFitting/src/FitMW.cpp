@@ -220,7 +220,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
   bool shouldNormalise = m_normalise && m_matrixWorkspace->isHistogramData();
 
   // set the data to fit to
-  m_startIndex = static_cast<size_t>(from - X.begin());
+  m_startIndex = std::distance(X.cbegin(), from);
   assert(n == domain->size());
   size_t ito = m_startIndex + n;
   const Mantid::MantidVec &Y = m_matrixWorkspace->readY(m_workspaceIndex);

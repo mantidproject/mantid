@@ -1646,8 +1646,7 @@ void SCDCalibratePanels::FixUpBankParameterMap(
     boost::shared_ptr<const ParameterMap> const pmapOld, bool RotCenters) {
   boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
 
-  for (auto it1 = bankNames.begin();
-       it1 != bankNames.end(); ++it1) {
+  for (auto it1 = bankNames.cbegin(); it1 != bankNames.cend(); ++it1) {
 
     const string bankName = (*it1);
 

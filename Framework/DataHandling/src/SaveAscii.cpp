@@ -182,8 +182,7 @@ void SaveAscii::exec() {
           file << " , DX" << spec;
       }
     else
-      for (auto spec = idx.begin(); spec != idx.end();
-           ++spec) {
+      for (auto spec = idx.cbegin(); spec != idx.cend(); ++spec) {
         file << comstr << "Y" << *spec << comstr << errstr << *spec << errstr2;
         if (write_dx)
           file << " , DX" << *spec;
@@ -216,8 +215,7 @@ void SaveAscii::exec() {
         file << ws->readE(spec)[bin];
       }
     else
-      for (auto spec = idx.begin(); spec != idx.end();
-           ++spec) {
+      for (auto spec = idx.cbegin(); spec != idx.cend(); ++spec) {
         file << sep;
         file << ws->readY(*spec)[bin];
         file << sep;

@@ -474,10 +474,8 @@ const std::string LoadRKH::readUnit(const std::string &line) {
 
   // theQuantity will contain the name of the unit, which can be many words long
   std::string theQuantity;
-  auto current = codes.begin() + 1,
-                                  end = codes.end();
-  for (; current != end; ++current) {
-    if (current != end - 1) {
+  for (auto current = codes.begin() + 1; current != codes.end(); ++current) {
+    if (current != codes.end() - 1) {
       theQuantity += *current;
     }
   }

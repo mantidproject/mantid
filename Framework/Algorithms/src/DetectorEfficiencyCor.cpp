@@ -383,7 +383,7 @@ double DetectorEfficiencyCor::distToSurface(const V3D &start,
   }
   // the first part of the track will be the part inside the shape, return its
   // length
-  return track.begin()->distInsideObject;
+  return track.cbegin()->distInsideObject;
 }
 
 /** Calculates detector efficiency, copied from the fortran code in

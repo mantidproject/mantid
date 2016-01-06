@@ -78,8 +78,7 @@ void MaskDetectorsIf::exec() {
     else {
       double val = inputW->readY(i)[0];
       if (compar_f(val, value)) {
-        auto it = dets.begin();
-        for (; it != dets.end(); ++it)
+        for (auto it = dets.cbegin(); it != dets.cend(); ++it)
           umap.insert(std::make_pair(*it, select_on));
       }
     }

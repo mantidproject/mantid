@@ -201,8 +201,8 @@ void Q1D2::exec() {
     convertWavetoQ(i, doGravity, wavStart, QIn, getProperty("ExtraLength"));
 
     // Pointers to the counts data and it's error
-    auto YIn = m_dataWS->readY(i).begin() + wavStart;
-    auto EIn = m_dataWS->readE(i).begin() + wavStart;
+    auto YIn = m_dataWS->readY(i).cbegin() + wavStart;
+    auto EIn = m_dataWS->readE(i).cbegin() + wavStart;
 
     // Pointers to the QResolution data. Note that the xdata was initially the
     // same, hence
@@ -211,14 +211,14 @@ void Q1D2::exec() {
     // that does not matter, as
     // we won't use it
     auto QResIn =
-        useQResolution ? (qResolution->readY(i).begin() + wavStart) : YIn;
+        useQResolution ? (qResolution->readY(i).cbegin() + wavStart) : YIn;
 
     // when finding the output Q bin remember that the input Q bins (from the
     // convert to wavelength) start high and reduce
-    auto loc = QOut.end();
+    auto loc = QOut.cend();
     // sum the Q contributions from each individual spectrum into the output
     // array
-    const MantidVec::const_iterator end = m_dataWS->readY(i).end();
+    const auto end = m_dataWS->readY(i).cend();
     for (; YIn != end; ++YIn, ++EIn, ++QIn, ++norms, ++normETo2s) {
       // find the output bin that each input y-value will fall into, remembering
       // there is one more bin boundary than bins
@@ -267,7 +267,7 @@ void Q1D2::exec() {
     // The number of Q (x)_ values is N, while the number of DeltaQ values is
     // N-1,
     // Richard Heenan suggested to duplicate the last entry of DeltaQ
-    Mantid::MantidVec::const_iterator countsIterator = YOut.begin();
+    auto countsIterator = YOut.cbegin();
     auto qResolutionIterator = qResolutionOut.begin();
     for (; countsIterator != YOut.end();
          ++countsIterator, ++qResolutionIterator) {
@@ -570,7 +570,7 @@ void Q1D2::convertWavetoQ(const size_t specInd, const bool doGravity,
   IDetector_const_sptr det = m_dataWS->getDetector(specInd);
 
   // wavelengths (lamda) to be converted to Q
-  auto waves = m_dataWS->readX(specInd).begin() + offset;
+  auto waves = m_dataWS->readX(specInd).cbegin() + offset;
   // going from bin boundaries to bin centered x-values the size goes down one
   const MantidVec::const_iterator end = m_dataWS->readX(specInd).end() - 1;
   if (doGravity) {

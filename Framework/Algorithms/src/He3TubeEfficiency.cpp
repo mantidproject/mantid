@@ -169,10 +169,9 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex) {
   const Mantid::MantidVec yValues = this->inputWS->readY(spectraIndex);
   const Mantid::MantidVec eValues = this->inputWS->readE(spectraIndex);
 
-  auto yinItr = yValues.begin();
-  auto einItr = eValues.begin();
-  auto xItr =
-      this->inputWS->readX(spectraIndex).begin();
+  auto yinItr = yValues.cbegin();
+  auto einItr = eValues.cbegin();
+  auto xItr = this->inputWS->readX(spectraIndex).cbegin();
   auto youtItr = yout.begin();
   auto eoutItr = eout.begin();
 
@@ -343,7 +342,7 @@ double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
   }
   // the first part of the track will be the part inside the shape,
   // return its length
-  return track.begin()->distInsideObject;
+  return track.cbegin()->distInsideObject;
 }
 
 /**

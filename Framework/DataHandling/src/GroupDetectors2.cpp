@@ -856,9 +856,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line,
                                          std::string seperator) {
   // remove comments and white space
   Poco::StringTokenizer dataComment(line, seperator, IGNORE_SPACES);
-  auto iend = dataComment.end();
-  for (auto itr = dataComment.begin(); itr != iend;
-       ++itr) {
+  for (auto itr = dataComment.begin(); itr != dataComment.end(); ++itr) {
     std::vector<size_t> specNums;
     specNums.reserve(output.capacity());
 
@@ -965,8 +963,8 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
     size_t nonMaskedSpectra(0);
     beh->dataX(outIndex)[0] = 0.0;
     beh->dataE(outIndex)[0] = 0.0;
-    for (auto wsIter = it->second.begin();
-         wsIter != it->second.end(); ++wsIter) {
+    for (auto wsIter = it->second.cbegin(); wsIter != it->second.cend();
+         ++wsIter) {
       const size_t originalWI = *wsIter;
 
       // detectors to add to firstSpecNum
@@ -974,8 +972,8 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
 
       // Add up all the Y spectra and store the result in the first one
       auto fEit = outSpec->dataE().begin();
-      auto Yit = fromSpectrum->dataY().begin();
-      auto Eit = fromSpectrum->dataE().begin();
+      auto Yit = fromSpectrum->dataY().cbegin();
+      auto Eit = fromSpectrum->dataE().cbegin();
       for (auto fYit = firstY.begin(); fYit != firstY.end();
            ++fYit, ++fEit, ++Yit, ++Eit) {
         *fYit += *Yit;
@@ -1073,8 +1071,8 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
     size_t nonMaskedSpectra(0);
     beh->dataX(outIndex)[0] = 0.0;
     beh->dataE(outIndex)[0] = 0.0;
-    for (auto wsIter = it->second.begin();
-         wsIter != it->second.end(); ++wsIter) {
+    for (auto wsIter = it->second.cbegin(); wsIter != it->second.cend();
+         ++wsIter) {
       const size_t originalWI = *wsIter;
 
       const EventList &fromEL = inputWS->getEventList(originalWI);
@@ -1142,9 +1140,9 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
   double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
                      static_cast<double>(unGroupedSet.size());
 
-  auto copyFrIt = unGroupedSet.begin();
   // go thorugh all the spectra in the input workspace
-  for (; copyFrIt != unGroupedSet.end(); ++copyFrIt) {
+  for (auto copyFrIt = unGroupedSet.cbegin(); copyFrIt != unGroupedSet.cend();
+       ++copyFrIt) {
     if (*copyFrIt == USED)
       continue; // Marked as not to be used
     size_t sourceIndex = static_cast<size_t>(*copyFrIt);
@@ -1200,9 +1198,9 @@ void GroupDetectors2::moveOthersEvent(
   double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
                      static_cast<double>(unGroupedSet.size());
 
-  auto copyFrIt = unGroupedSet.begin();
   // go thorugh all the spectra in the input workspace
-  for (; copyFrIt != unGroupedSet.end(); ++copyFrIt) {
+  for (auto copyFrIt = unGroupedSet.cbegin(); copyFrIt != unGroupedSet.cend();
+       ++copyFrIt) {
     if (*copyFrIt == USED)
       continue; // Marked as not to be used
     size_t sourceIndex = static_cast<size_t>(*copyFrIt);

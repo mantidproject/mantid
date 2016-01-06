@@ -344,12 +344,10 @@ void NeutronBk2BkExpConvPVoigt::function(vector<double> &out,
   const double RANGE = m_fwhm * PEAKRANGE;
 
   const double LEFT_VALUE = m_centre - RANGE;
-  auto iter =
-      std::lower_bound(xValues.begin(), xValues.end(), LEFT_VALUE);
+  auto iter = std::lower_bound(xValues.cbegin(), xValues.cend(), LEFT_VALUE);
 
   const double RIGHT_VALUE = m_centre + RANGE;
-  auto iter_end =
-      std::lower_bound(iter, xValues.end(), RIGHT_VALUE);
+  auto iter_end = std::lower_bound(iter, xValues.cend(), RIGHT_VALUE);
 
   // Calcualte
   std::size_t pos(std::distance(xValues.begin(), iter)); // second loop variable

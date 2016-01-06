@@ -367,7 +367,7 @@ void AbsorptionCorrection::calculateDistances(
       // AbsorptionCorrection::calculateDistances");
     } else // The normal situation
     {
-      L2s[i] = outgoing.begin()->distFromStart;
+      L2s[i] = outgoing.cbegin()->distFromStart;
     }
   }
 }

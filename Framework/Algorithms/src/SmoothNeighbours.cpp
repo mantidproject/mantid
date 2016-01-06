@@ -543,8 +543,7 @@ Check whether the properties provided are all in their default state.
 */
 bool areAllDefault(ConstVecProperties &properties) {
   bool areAllDefault = false;
-  for (auto it = properties.begin();
-       it != properties.end(); ++it) {
+  for (auto it = properties.cbegin(); it != properties.cend(); ++it) {
     if (!(*it)->isDefault()) {
       return areAllDefault;
     }

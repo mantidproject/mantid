@@ -1823,7 +1823,7 @@ int Object::searchForObject(Kernel::V3D &point) const {
   for (dir = axes.begin(); dir != axes.end(); ++dir) {
     Geometry::Track tr(point, (*dir));
     if (this->interceptSurface(tr) > 0) {
-      point = tr.begin()->entryPoint;
+      point = tr.cbegin()->entryPoint;
       return 1;
     }
   }
