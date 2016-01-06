@@ -7,30 +7,28 @@ digraph PowderDiffractionISIS {
 
     C_Vana_RunCorrectAbs      [label="Van Absorption Correction"]
     C_Vana_RunLoadSacEff1     [label="Load Sac Eff"]
-    C_Vana_RunLoadSacEff2     [label="Load Sac Eff"]
+    C_Vana_RunLoadSacEff2     [label="Load Sac Eff (NoSac=true)"]
     C_Vana_RunStripPeaks      [label="Strip Vanadium Peaks"]
 
-    SacEff_RunGetDataSum      [label="Load Vana - Get Data Sum"]
+    SacEff_RunGetDataSum      [label="Load Vana (Get Data Sum)"]
 
-    Focus_one_RunGetDataSum   [label="Load Vana - Get Data Sum"]
+    Focus_one_RunGetDataSum   [label="Load Vana (Get Data Sum)"]
     Focus_one_RunCreateVana   [label="Create Vana"]
     Focus_one_RunCorrectAbs   [label="Van Absorption Correction"]
 
+    Focus_All_LoadSac1        [label="Load Sac Eff"]
+    Focus_All_LoadSac2        [label="Load Sac Eff"]
+    Focus_All_C_Vana          [label="Create Vana"]
+    Focus_All_Focus_one       [label="Start Focusing"]
   }
 
   LoadSac_Start               [label="Load Sac Eff"]
   CorrectAbs_Start            [label="Van Absorption Correction"]
   C_Vana_Start                [label="Create Vana"]
   S_Vana_Start                [label="Strip Vanadium Peaks"]
-  GetDataSum_Start            [label="Load Vana - Get Data Sum"]
+  GetDataSum_Start            [label="Load Vana (Get Data Sum)"]
   Focus_one_Start             [label="Start Focusing"]
-  Focus_All_Start             [label="Focus All - Run"]
-
-
-  subgraph values{
-    $value_style
-    Sample_and_UampsTotal          [label="Sample & UampsTotal"]
-  }
+  Focus_All_Start             [label="Focus All (Run)"]
 
   subgraph algorithms {
     $algorithm_style
@@ -116,8 +114,8 @@ digraph PowderDiffractionISIS {
     Focus_one_CorrectSampleAbs        [label="If CorrectSampleAbs is yes"]
     Focus_one_Norm                    [label="If Normalization required"]
 
-    Focus_one_Norm                    [label="If Normalization required"]
-
+    Focus_All_Norm                    [label="If Normalization required"]
+    Focus_Al_ExistingV                [label="ExistingV in .pref"]
 
   }
 
@@ -247,4 +245,15 @@ digraph PowderDiffractionISIS {
 
   }
 
+  subgraph focus_one {
+  Focus_All_Start              -> Focus_All_Norm
+  Focus_All_Norm               -> Focus_All_LoadSac1                   [label="true"]
+  Focus_All_Norm               -> Focus_All_LoadSac2                   [label="else"]
+  Focus_All_LoadSac1           -> Focus_Al_ExistingV
+  Focus_Al_ExistingV           -> LoadNexusProcessed                   [label="load"]
+  Focus_Al_ExistingV           -> Focus_All_C_Vana                     [label="no"]
+  Focus_All_LoadSac2           -> Focus_All_Focus_one
+  LoadNexusProcessed           -> Focus_All_Focus_one
+  Focus_All_C_Vana             -> Focus_All_Focus_one
 
+  }
