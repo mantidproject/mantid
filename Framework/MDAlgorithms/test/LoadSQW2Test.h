@@ -33,7 +33,9 @@ public:
   static LoadSQW2Test *createSuite() { return new LoadSQW2Test(); }
   static void destroySuite(LoadSQW2Test *suite) { delete suite; }
 
-  LoadSQW2Test() : CxxTest::TestSuite(), m_filename("test_horace_reader.sqw") {}
+  LoadSQW2Test()
+      : CxxTest::TestSuite(), m_filename("test_horace_reader.sqw"),
+        m_defaultFrame("HKL") {}
 
   //----------------------------------------------------------------------------
   // Success tests
@@ -56,12 +58,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("Filename", m_filename));
   }
 
-  void test_OutputWorkspace_Has_Correct_Data() {
+  void test_OutputWorkspace_As_Expected_For_Default_Values() {
     Arguments args;
-    args.metadataOnly = false;
     IMDEventWorkspace_sptr outputWS = runAlgorithm(args);
 
-    checkGeometryAsExpected(*outputWS);
+    checkGeometryAsExpected(*outputWS, m_defaultFrame);
     checkExperimentInfoAsExpected(*outputWS);
     checkDataAsExpected(*outputWS, args);
   }
@@ -71,7 +72,7 @@ public:
     args.metadataOnly = true;
     IMDEventWorkspace_sptr outputWS = runAlgorithm(args);
 
-    checkGeometryAsExpected(*outputWS);
+    checkGeometryAsExpected(*outputWS, m_defaultFrame);
     checkExperimentInfoAsExpected(*outputWS);
     checkDataAsExpected(*outputWS, args);
   }
@@ -85,7 +86,7 @@ public:
     args.outputFilename = filebacking.path();
     IMDEventWorkspace_sptr outputWS = runAlgorithm(args);
 
-    checkGeometryAsExpected(*outputWS);
+    checkGeometryAsExpected(*outputWS, m_defaultFrame);
     checkExperimentInfoAsExpected(*outputWS);
     checkDataAsExpected(*outputWS, args);
   }
@@ -99,11 +100,18 @@ public:
                      std::invalid_argument);
   }
 
+  void test_Unknown_Q3DFrame_Is_Not_Accepted() {
+    auto alg = createAlgorithm();
+    TS_ASSERT_THROWS(alg->setPropertyValue("Q3DFrames", "Unknown"),
+                     std::invalid_argument);
+  }
+
 private:
   struct Arguments {
-    Arguments() : metadataOnly(false), outputFilename() {}
+    Arguments() : metadataOnly(false), outputFilename(), outputFrame() {}
     bool metadataOnly;
     std::string outputFilename;
+    std::string outputFrame;
   };
 
   IMDEventWorkspace_sptr runAlgorithm(Arguments args) {
@@ -112,6 +120,9 @@ private:
     algm->setProperty("OutputWorkspace", "__unused_value_for_child_algorithm");
     algm->setProperty("MetadataOnly", args.metadataOnly);
     algm->setProperty("OutputFilename", args.outputFilename);
+    if (!args.outputFrame.empty()) {
+      algm->setProperty("Q3DFrames", args.outputFrame);
+    }
     algm->execute();
     return algm->getProperty("OutputWorkspace");
   }
@@ -128,15 +139,24 @@ private:
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-braces"
 #endif
-  void checkGeometryAsExpected(const IMDEventWorkspace &outputWS) {
+  void checkGeometryAsExpected(const IMDEventWorkspace &outputWS,
+                               std::string outputFrame) {
     TS_ASSERT_EQUALS(4, outputWS.getNumDims());
     std::array<std::string, 4> ids{"Q1", "Q2", "Q3", "DeltaE"};
-    std::array<std::string, 4> names{"[H,0,0]", "[0,K,0]", "[0,0,L]", "DeltaE"};
-    std::array<double, 8> ulimits{0.0439,  0.9271,  -0.4644, -0.4024,
-                                  -0.7818, -0.5052, 2.5,     147.5};
     std::array<size_t, 4> nbins{3, 3, 2, 2};
-    std::array<std::string, 4> units{"in 2.189 A^-1", "in 2.189 A^-1",
-                                     "in 2.189 A^-1", "DeltaE"};
+    // frame-dependent factors
+    std::array<std::string, 4> names;
+    std::array<double, 8> ulimits;
+    std::array<std::string, 4> units;
+    if (outputFrame == "HKL") {
+      names = {"[H,0,0]", "[0,K,0]", "[0,0,L]", "DeltaE"};
+      ulimits = {0.0439,  0.9271,  -0.4644, -0.4024,
+                 -0.7818, -0.5052, 2.5,     147.5};
+      units = {"in 2.189 A^-1", "in 2.189 A^-1", "in 2.189 A^-1", "DeltaE"};
+    } else {
+      TS_FAIL("Unknown output frame: " + outputFrame);
+    }
+
     for (size_t i = 0; i < 4; ++i) {
       auto dim = outputWS.getDimension(i);
       TS_ASSERT_EQUALS(ids[i], dim->getDimensionId());
@@ -215,6 +235,9 @@ private:
     if (args.metadataOnly) {
       TS_ASSERT_EQUALS(0, outputWS.getNEvents());
     } else {
+      // It is assumed that if the events are not transformed to the output
+      // frame correctly then they will all not register into the workspace
+      // correctly and the number events will be incorrect
       TS_ASSERT_EQUALS(580, outputWS.getNEvents());
       // equal split between experiments
       size_t nexpt1(0), nexpt2(0);
@@ -244,6 +267,7 @@ private:
       std::vector<int> expectedIds(10, 58);
       TS_ASSERT_EQUALS(expectedIds, ids);
     }
+
     if (!args.outputFilename.empty()) {
       checkOutputFile(outputWS, args.outputFilename);
     }
@@ -260,6 +284,7 @@ private:
   // Private data
   //----------------------------------------------------------------------------
   std::string m_filename;
+  std::string m_defaultFrame;
 };
 
 #endif /* MANTID_MDALGORITHMS_LOADSQW2TEST_H_ */

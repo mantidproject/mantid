@@ -57,34 +57,46 @@ private:
   typedef DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>
       SQWWorkspace;
 
-  /// Classes that define the sections of the file
+  /// Define the sections of the file
   struct SQWHeader {
     int32_t nfiles;
   };
 
   void init();
   void exec();
+  void cacheInputs();
   void initFileReader();
   SQWHeader readMainHeader();
   void createOutputWorkspace();
   void readAllSPEHeadersToWorkspace(const int32_t nfiles);
-  void readSingleSPEHeader(API::ExperimentInfo &experiment);
+  boost::shared_ptr<API::ExperimentInfo> readSingleSPEHeader();
+  Kernel::DblMatrix
+  calculateOutputTransform(const Kernel::DblMatrix &gonR,
+                           const Geometry::OrientedLattice &lattice);
   void skipDetectorSection();
   void readDataSection();
   void skipDataSectionMetadata();
   void readSQWDimensions();
+  Geometry::IMDDimension_sptr createQDimension(size_t index, float dimMin,
+                                               float dimMax, size_t nbins,
+                                               const Kernel::DblMatrix &bmat);
+  void transformLimitsToOutputFrame(Kernel::Matrix<float> &urange);
+  Geometry::IMDDimension_sptr createEnDimension(float umin, float umax,
+                                                size_t nbins);
   void setupBoxController();
   void setupFileBackend(std::string filebackPath);
   void readPixelData();
   void warnIfMemoryInsufficient(int64_t npixtot);
   void addEventFromBuffer(const float *pixel);
-  void toHKL(float &u1, float &u2, float &u3, const uint16_t runIndex);
+  void toOutputFrame(const uint16_t runIndex, float &u1, float &u2, float &u3);
   void finalize();
 
   std::unique_ptr<std::ifstream> m_file;
   std::unique_ptr<Kernel::BinaryStreamReader> m_reader;
   boost::shared_ptr<SQWWorkspace> m_outputWS;
+  std::vector<Kernel::DblMatrix> m_outputTransforms;
   std::unique_ptr<API::Progress> m_progress;
+  std::string m_outputFrame;
 };
 
 } // namespace MDAlgorithms

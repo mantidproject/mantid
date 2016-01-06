@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Memory.h"
@@ -22,22 +23,31 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
+using API::ExperimentInfo;
+using Geometry::MDHistoDimension;
+using Geometry::MDHistoDimensionBuilder;
 using Geometry::Goniometer;
 using Geometry::OrientedLattice;
 using Kernel::BinaryStreamReader;
 using Kernel::Logger;
+using Kernel::DblMatrix;
 using Kernel::Matrix;
 using Kernel::V3D;
+using boost::make_shared;
 
 //------------------------------------------------------------------------------
 // Constants
 //------------------------------------------------------------------------------
+namespace {
 /// Defines buffer size for reading the pixel data. It is assumed to be the
 /// number of pixels to read in a single call. A single pixel is 9 float
 /// fields. 150000 is ~5MB buffer
 constexpr int64_t NPIX_CHUNK = 150000;
 /// Defines the number of fields that define a single pixel
 constexpr int32_t FIELDS_PER_PIXEL = 9;
+/// 1/2pi
+constexpr double INV_TWO_PI = 0.5 / M_PI;
+}
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
@@ -48,7 +58,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
 /// Default constructor
 LoadSQW2::LoadSQW2()
     : API::IFileLoader<Kernel::FileDescriptor>(), m_file(), m_reader(),
-      m_outputWS(), m_progress() {}
+      m_outputWS(), m_outputTransforms(), m_progress(), m_outputFrame() {}
 
 /// Default destructor
 LoadSQW2::~LoadSQW2() {}
@@ -99,6 +109,8 @@ int LoadSQW2::confidence(Kernel::FileDescriptor &descriptor) const {
 void LoadSQW2::init() {
   using namespace API;
   using Kernel::PropertyWithValue;
+  using Kernel::StringListValidator;
+  using boost::make_shared;
 
   // Inputs
   declareProperty(
@@ -110,6 +122,10 @@ void LoadSQW2::init() {
                                         FileProperty::OptionalSave, {".nxs"}),
                   "If specified, the output workspace will be a file-backed "
                   "MDEventWorkspace");
+  std::vector<std::string> allowed = {"Q_sample", "Q_lab", "HKL"};
+  declareProperty("Q3DFrames", allowed[2],
+                  make_shared<StringListValidator>(allowed),
+                  "The required frame for the output workspace");
 
   // Outputs
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
@@ -119,6 +135,7 @@ void LoadSQW2::init() {
 
 /// Execute the algorithm.
 void LoadSQW2::exec() {
+  cacheInputs();
   initFileReader();
   auto mainHeader = readMainHeader();
   createOutputWorkspace();
@@ -128,9 +145,10 @@ void LoadSQW2::exec() {
   finalize();
 }
 
-/**
- * Opens the file given to the algorithm and initializes the reader
- */
+/// Cache any user input to avoid repeated lookups
+void LoadSQW2::cacheInputs() { m_outputFrame = getPropertyValue("Q3DFrames"); }
+
+/// Opens the file given to the algorithm and initializes the reader
 void LoadSQW2::initFileReader() {
   using API::Progress;
 
@@ -184,22 +202,26 @@ void LoadSQW2::createOutputWorkspace() {
  * @param nfiles The number of expected spe header sections
  */
 void LoadSQW2::readAllSPEHeadersToWorkspace(const int32_t nfiles) {
-  using API::ExperimentInfo;
+  m_outputTransforms.reserve(nfiles);
   for (int32_t i = 0; i < nfiles; ++i) {
-    auto expt = boost::make_shared<ExperimentInfo>();
-    readSingleSPEHeader(*expt);
+    auto expt = readSingleSPEHeader();
     m_outputWS->addExperimentInfo(expt);
+    m_outputTransforms.emplace_back(
+        calculateOutputTransform(expt->run().getGoniometerMatrix(),
+                                 expt->sample().getOrientedLattice()));
   }
 }
 
 /**
  * Read single SPE header from the file. It assumes the file stream
- * points at the start of a header section
- * @param experiment A reference to an ExperimentInfo object to store the data
+ * points at the start of a header section. It is left pointing at the end of
+ * this section
+ * @return A new ExperimentInfo object storing the data
  */
-void LoadSQW2::readSingleSPEHeader(API::ExperimentInfo &experiment) {
-  auto &sample = experiment.mutableSample();
-  auto &run = experiment.mutableRun();
+boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
+  auto experiment = boost::make_shared<ExperimentInfo>();
+  auto &sample = experiment->mutableSample();
+  auto &run = experiment->mutableRun();
 
   std::string chars;
   // skip filename, filepath
@@ -272,6 +294,30 @@ void LoadSQW2::readSingleSPEHeader(API::ExperimentInfo &experiment) {
   m_reader->read(ulabel_shape, 2);
   // shape[0]*shape[1]*sizeof(char)
   m_file->seekg(ulabel_shape[0] * ulabel_shape[1], std::ios_base::cur);
+
+  return experiment;
+}
+
+/**
+ * Return the required transformation to move from the coordinates in the file
+ * to the selected output frame
+ * @param gonR The goniometer matrix
+ * @param lattice A reference to the lattice object
+ */
+Kernel::DblMatrix
+LoadSQW2::calculateOutputTransform(const Kernel::DblMatrix &gonR,
+                                   const Geometry::OrientedLattice &lattice) {
+  // File coordinates are in the crystal coordinate system
+  if (m_outputFrame == "Q_sample")
+    return DblMatrix(3, 3, true);
+  if (m_outputFrame == "Q_lab")
+    return gonR * lattice.getU();
+  else if (m_outputFrame == "HKL")
+    return lattice.getBinv() * INV_TWO_PI;
+  else
+    throw std::logic_error(
+        "LoadSQW2::calculateOutputTransform - Unknown output frame: " +
+        m_outputFrame);
 }
 
 /**
@@ -320,9 +366,6 @@ void LoadSQW2::skipDataSectionMetadata() {
  * ulimit entry
  */
 void LoadSQW2::readSQWDimensions() {
-  using Geometry::MDHistoDimension;
-  using Geometry::MDHistoDimensionBuilder;
-
   // dimension labels
   std::vector<int32_t> ulabelShape(2);
   m_reader->read(ulabelShape, 2);
@@ -378,36 +421,113 @@ void LoadSQW2::readSQWDimensions() {
     g_log.debug(os.str());
   }
 
-  // Create dimensions in the same manner as ConvertToMD.
-  // See MDWSTransform::setQ3DDimensionsNames.
-  const char *ids[] = {"Q1", "Q2", "Q3", "DeltaE"};
-  const char *names[] = {"[H,0,0]", "[0,K,0]", "[0,0,L]", "DeltaE"};
-  std::array<float, 4> dimMin{urange[0][0], urange[0][1], urange[0][2],
-                              urange[0][3]};
-  toHKL(dimMin[0], dimMin[1], dimMin[2], 0);
-  std::array<float, 4> dimMax{urange[1][0], urange[1][1], urange[1][2],
-                              urange[1][3]};
-  toHKL(dimMax[0], dimMax[1], dimMax[2], 0);
-  std::array<V3D, 3> dimDir{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
-  const auto &Bm =
+  transformLimitsToOutputFrame(urange);
+  // The lattice is assumed to be the same in all contributing files so use
+  // the first B matrix to create the axis information (only needed in HKL
+  // frame)
+  const auto &bmat0 =
       m_outputWS->getExperimentInfo(0)->sample().getOrientedLattice().getB();
   for (size_t i = 0; i < 4; ++i) {
-    std::string unit;
+    float umin(urange[0][i]), umax(urange[1][i]);
     if (i < 3) {
-      V3D x = Bm * dimDir[i];
-      double length = 2 * M_PI * x.norm();
-      unit = "in " + MDAlgorithms::sprintfd(length, 1.e-3) + " A^-1";
+      m_outputWS->addDimension(createQDimension(
+          i, umin, umax, static_cast<size_t>(nbins[i]), bmat0));
     } else {
-      unit = "DeltaE";
+      m_outputWS->addDimension(
+          createEnDimension(umin, umax, static_cast<size_t>(nbins[i])));
     }
-    Mantid::Geometry::GeneralFrame frame(names[i], unit);
-    double min(dimMin[i]), max(dimMax[i]);
-    MDHistoDimensionBuilder::resizeToFitMDBox(min, max);
-    auto dim = boost::make_shared<Geometry::MDHistoDimension>(
-        names[i], ids[i], frame, min, max, static_cast<size_t>(nbins[i]));
-    m_outputWS->addDimension(dim);
   }
   setupBoxController();
+}
+
+/**
+ * Find the min/max dimension values in the output frame. Takes the min/max
+ * values found after testing transforms from all contributing SPE files
+ * @param urange On input should contain the matrix of limits in the frame
+ * defined by the file (assumed to be 4x4). On output it will contain the
+ * limits in the transformed frame that will contain all of the data
+ */
+void LoadSQW2::transformLimitsToOutputFrame(Kernel::Matrix<float> &urange) {
+  // Track the global min/max values for X,Y,Z (as min/max pair)
+  std::array<float, 6> globalLimits{FLT_MAX,  -FLT_MAX, FLT_MAX,
+                                    -FLT_MAX, FLT_MAX,  -FLT_MAX};
+  for (const auto &transf : m_outputTransforms) {
+    V3D fileMin(urange[0][0], urange[0][1], urange[0][2]);
+    V3D transMin = transf * fileMin;
+    V3D fileMax(urange[1][0], urange[1][1], urange[1][2]);
+    V3D transMax = transf * fileMax;
+    for (size_t i = 0; i < 3; ++i) {
+      float minf = static_cast<float>(transMin[i]);
+      if (minf < globalLimits[2 * i])
+        globalLimits[2 * i] = minf;
+      float maxf = static_cast<float>(transMax[i]);
+      if (maxf > globalLimits[2 * i + 1])
+        globalLimits[2 * i + 1] = maxf;
+    }
+  }
+  // overwrite input range
+  for (size_t i = 0; i < 3; ++i) {
+    urange[0][i] = globalLimits[2 * i];
+    urange[1][i] = globalLimits[2 * i + 1];
+  }
+}
+
+/**
+ * Create the Q MDHistoDimension for the output frame and given information from
+ * the file
+ * @param index Index of the dimension
+ * @param dimMin Dimension minimum in output frame
+ * @param dimMmax Dimension maximum in output frame
+ * @param nbins Number of bins for this dimension
+ * @param bmat A reference to the B matrix to create the axis labels for the HKL
+ * frame
+ * @return A new MDHistoDimension object
+ */
+Geometry::IMDDimension_sptr
+LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
+                           size_t nbins, const Kernel::DblMatrix &bmat) {
+  if (index > 2) {
+    throw std::logic_error("LoadSQW2::createQDimension - Expected a dimension "
+                           "index between 0 & 2. Found: " +
+                           std::to_string(index));
+  }
+  const std::string id = "Q" + std::to_string(index + 1);
+  std::string name, unit;
+  if (m_outputFrame == "Q_sample" || m_outputFrame == "Q_lab") {
+    static std::array<const char *, 3> indexToDim{"x", "y", "z"};
+    name = m_outputFrame + "_" + indexToDim[index];
+    unit = "A^-1";
+  } else if (m_outputFrame == "HKL") {
+    static std::array<const char *, 3> indexToHKL{"[H,0,0]", "[0,K,0]",
+                                                  "[0,0,L]"};
+    name = indexToHKL[index];
+    V3D dimDir;
+    dimDir[index] = 1;
+    const V3D x = bmat * dimDir;
+    double length = 2. * M_PI * x.norm();
+    unit = "in " + MDAlgorithms::sprintfd(length, 1.e-3) + " A^-1";
+  } else {
+    throw std::logic_error(
+        "LoadSQW2::createQDimension - Unknown output frame: " + m_outputFrame);
+  }
+  Mantid::Geometry::GeneralFrame frame(name, unit);
+  MDHistoDimensionBuilder::resizeToFitMDBox(dimMin, dimMax);
+  return make_shared<MDHistoDimension>(name, id, frame, dimMin, dimMax, nbins);
+}
+
+/**
+ * Create an energy dimension
+ * @param umin Dimension minimum from file
+ * @param umax Dimension maximum from file
+ * @param nbins Number of bins for this dimension
+ * @return A new MDHistoDimension object
+ */
+Geometry::IMDDimension_sptr LoadSQW2::createEnDimension(float umin, float umax,
+                                                        size_t nbins) {
+  const std::string id("DeltaE"), name(id), unit(id);
+  Mantid::Geometry::GeneralFrame frame(name, unit);
+  MDHistoDimensionBuilder::resizeToFitMDBox(umin, umax);
+  return make_shared<MDHistoDimension>(name, id, frame, umin, umax, nbins);
 }
 
 /**
@@ -494,7 +614,8 @@ void LoadSQW2::readPixelData() {
 }
 
 /**
- * If the output is not file backed and the machine appears to have insufficient
+ * If the output is not file backed and the machine appears to have
+ * insufficient
  * memory to read the data in total then warn the user. We don't stop
  * the algorithm just in case our memory calculation is wrong.
  * @param npixtot The total number of pixels to be read
@@ -510,7 +631,8 @@ void LoadSQW2::warnIfMemoryInsufficient(int64_t npixtot) {
   if (reqdMemory > stat.availMem()) {
     g_log.warning()
         << "It looks as if there is insufficient memory to load the "
-        << "entire file. It is recommended to cancel the algorithm and specify "
+        << "entire file. It is recommended to cancel the algorithm and "
+           "specify "
            "the OutputFilename option to create a file-backed workspace.\n";
   }
 }
@@ -525,7 +647,7 @@ void LoadSQW2::addEventFromBuffer(const float *pixel) {
   using DataObjects::MDEvent;
   auto u1(pixel[0]), u2(pixel[1]), u3(pixel[2]), en(pixel[3]);
   auto irun = static_cast<uint16_t>(pixel[4] - 1);
-  toHKL(u1, u2, u3, irun);
+  toOutputFrame(irun, u1, u2, u3);
   const auto idet = static_cast<detid_t>(pixel[5]);
   // skip energy bin
   auto signal = pixel[7];
@@ -535,23 +657,20 @@ void LoadSQW2::addEventFromBuffer(const float *pixel) {
 }
 
 /**
- * Transform the given coordinates from U to the HKL frame
- * using the transformation defined for the given run
+ * Transform the given coordinates from the file frame to the requested output
+ * frame using the cached transformation for the given run
+ * @param runIndex Index into the experiment list
  * @param u1 Coordinate parallel to the beam axis
  * @param u2 Coordinate perpendicular to u1 and in the horizontal plane
  * @param u3 The cross-product of u1 & u2
- * @param runIndex Index into the experiment list
  */
-void LoadSQW2::toHKL(float &u1, float &u2, float &u3, const uint16_t runIndex) {
-  static constexpr double invTwoPi = 0.5 / M_PI;
-  const auto &sample = m_outputWS->getExperimentInfo(runIndex)->sample();
-  const auto &uToRLU = sample.getOrientedLattice().getBinv() * invTwoPi;
-  V3D uVec(static_cast<double>(u1), static_cast<double>(u2),
-           static_cast<double>(u3));
-  V3D qhkl = uToRLU * uVec;
-  u1 = static_cast<float>(qhkl[0]);
-  u2 = static_cast<float>(qhkl[1]);
-  u3 = static_cast<float>(qhkl[2]);
+void LoadSQW2::toOutputFrame(const uint16_t runIndex, float &u1, float &u2,
+                             float &u3) {
+  V3D uVec(u1, u2, u3);
+  V3D qout = m_outputTransforms[runIndex] * uVec;
+  u1 = static_cast<float>(qout[0]);
+  u2 = static_cast<float>(qout[1]);
+  u3 = static_cast<float>(qout[2]);
 }
 
 /**
