@@ -6,9 +6,11 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/AnvredCorrection.h"
+
 #include <fstream>
-#include "Poco/File.h"
-#include "boost/assign.hpp"
+
+#include <Poco/File.h>
+#include <boost/assign.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Geometry;
