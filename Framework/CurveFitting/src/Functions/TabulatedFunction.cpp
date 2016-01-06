@@ -32,7 +32,7 @@ DECLARE_FUNCTION(TabulatedFunction)
 const int TabulatedFunction::defaultIndexValue = 0;
 
 /// Constructor
-TabulatedFunction::TabulatedFunction() : m_setupFinished(false) {
+TabulatedFunction::TabulatedFunction() : m_setupFinished(false), m_explicitXY(false) {
   declareParameter("Scaling", 1.0, "A scaling factor");
   declareParameter("Shift", 0.0, "Shift in the abscissa");
   declareParameter("XScaling", 1.0, "Scaling factor in X");
@@ -182,6 +182,7 @@ void TabulatedFunction::setAttribute(const std::string &attName,
     }
     load(fileName);
     m_setupFinished = false;
+    m_explicitXY = false;
   } else if (attName == "Workspace") {
     std::string wsName = value.asString();
     if (!wsName.empty()) {
@@ -189,11 +190,13 @@ void TabulatedFunction::setAttribute(const std::string &attName,
       storeAttributeValue("FileName", Attribute("", true));
       loadWorkspace(wsName);
       m_setupFinished = false;
+      m_explicitXY = false;
     }
   } else if (attName == "X") {
       m_xData = value.asVector();
       if (m_xData.empty()) {
         m_setupFinished = false;
+        m_explicitXY = false;
         if (!m_yData.empty()) {
           m_yData.clear();
         }
@@ -205,10 +208,12 @@ void TabulatedFunction::setAttribute(const std::string &attName,
       storeAttributeValue("FileName", Attribute("", true));
       storeAttributeValue("Workspace", Attribute(""));
       m_setupFinished = true;
+      m_explicitXY = true;
   } else if (attName == "Y") {
       m_yData = value.asVector();
       if (m_yData.empty()) {
         m_setupFinished = false;
+        m_explicitXY = false;
         if (!m_xData.empty()) {
           m_xData.clear();
         }
@@ -220,6 +225,7 @@ void TabulatedFunction::setAttribute(const std::string &attName,
       storeAttributeValue("FileName", Attribute("", true));
       storeAttributeValue("Workspace", Attribute(""));
       m_setupFinished = true;
+      m_explicitXY = true;
   } else {
     IFunction::setAttribute(attName, value);
     m_setupFinished = false;
@@ -244,9 +250,9 @@ std::vector<std::string> TabulatedFunction::getAttributeNames() const{
 /// @param attName :: The attribute name
 IFunction::Attribute TabulatedFunction::getAttribute(const std::string &attName) const{
   if (attName == "X") {
-    return Attribute(m_xData);
+    return m_explicitXY ? Attribute(m_xData) : Attribute(std::vector<double>());
   } else if (attName == "Y") {
-    return Attribute(m_yData);
+    return m_explicitXY ? Attribute(m_yData) : Attribute(std::vector<double>());
   }
   return IFunction::getAttribute(attName);
 }

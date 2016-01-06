@@ -141,15 +141,9 @@ public:
                      "TABULATEDFUNCTIONTEST_WS");
     TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(), "");
     auto X = fun.getAttribute("X").asVector();
-    TS_ASSERT_EQUALS(X.size(), ws->blocksize());
-    TS_ASSERT_EQUALS(X[0], ws->readX(0)[0]);
-    TS_ASSERT_EQUALS(X[1], ws->readX(0)[1]);
-    TS_ASSERT_EQUALS(X[2], ws->readX(0)[2]);
+    TS_ASSERT_EQUALS(X.size(), 0);
     auto Y = fun.getAttribute("Y").asVector();
-    TS_ASSERT_EQUALS(Y.size(), ws->blocksize());
-    TS_ASSERT_EQUALS(Y[0], ws->readY(0)[0]);
-    TS_ASSERT_EQUALS(Y[1], ws->readY(0)[1]);
-    TS_ASSERT_EQUALS(Y[2], ws->readY(0)[2]);
+    TS_ASSERT_EQUALS(Y.size(), 0);
     AnalysisDataService::Instance().clear();
   }
 

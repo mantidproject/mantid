@@ -131,6 +131,9 @@ private:
 
   /// Flag of completing data setup
   mutable bool m_setupFinished;
+
+  /// Flag of explicit x-y data setup
+  mutable bool m_explicitXY;
 };
 
 } // namespace Functions
