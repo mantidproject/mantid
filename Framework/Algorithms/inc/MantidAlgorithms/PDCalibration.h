@@ -50,8 +50,9 @@ private:
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr wksp);
   API::MatrixWorkspace_sptr load(const std::string filename);
   void loadOldCalibration();
+  std::function<double(double)> getDSpacingToTof(const detid_t detid);
   std::vector<double> dSpacingToTof(const std::vector<double> &dSpacing,
-                                    const detid_t id);
+                                    std::function<double(double)> toTof);
   std::vector<double> dSpacingWindows(const std::vector<double> &centres,
                                       const double widthMax);
 

@@ -131,7 +131,6 @@ void PDCalibration::exec() {
               << m_peaksInDspacing[i] << " < "
               << windowsInDSpacing[2*i + 1]
               << std::endl;
-
   }
 
   m_uncalibratedWS = loadAndBin();
@@ -161,8 +160,9 @@ void PDCalibration::exec() {
          continue;
        }
 
-       auto tofs = dSpacingToTof(m_peaksInDspacing, detid);
-       auto tofWindows = dSpacingToTof(windowsInDSpacing, detid);
+       auto toTof = getDSpacingToTof(detid);
+       auto tofs = dSpacingToTof(m_peaksInDspacing, toTof);
+       auto tofWindows = dSpacingToTof(windowsInDSpacing, toTof);
 
        std::cout << "****************************** detid = " << detid
                  << " wkspIndex = " << wkspIndex << std::endl;
@@ -282,19 +282,21 @@ vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres
   return windows;
 }
 
+std::function<double(double)> PDCalibration::getDSpacingToTof(const detid_t detid) {
+    auto rowNum = m_detidToRow[detid];
+
+    const double difa = m_calibrationTableOld->getRef<double>("difa", rowNum);
+    const double difc = m_calibrationTableOld->getRef<double>("difc", rowNum);
+    const double tzero = m_calibrationTableOld->getRef<double>("tzero", rowNum);
+
+    return d_to_tof(difc, difa, tzero);
+}
+
 vector<double> PDCalibration::dSpacingToTof(const vector<double> &dSpacing,
-                                  const detid_t detid) {
+                                  std::function<double(double)> toTof) {
   if (dSpacing.empty()) { // quickly return an empty vector
     return vector<double>();
   }
-
-  auto rowNum = m_detidToRow[detid];
-
-  const double difa = m_calibrationTableOld->getRef<double>("difa", rowNum);
-  const double difc = m_calibrationTableOld->getRef<double>("difc", rowNum);
-  const double tzero = m_calibrationTableOld->getRef<double>("tzero", rowNum);
-  std::cout << ">>>>> difc=" << difc << " difa=" << difa << " tzero=" << tzero << std::endl;
-  auto toTof = d_to_tof(difc, difa, tzero);
 
   vector<double> tof(dSpacing.size());
   std::transform(dSpacing.begin(), dSpacing.end(), tof.begin(), toTof);
