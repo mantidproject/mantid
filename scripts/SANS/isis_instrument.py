@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 import math
 import os
@@ -28,6 +28,9 @@ class BaseInstrument(object):
 
         inst_ws_name = self.load_empty()
         self.definition = AnalysisDataService.retrieve(inst_ws_name).getInstrument()
+
+    def get_idf_file_path(self):
+        return self._definition_file
 
     def get_default_beam_center(self):
         """
@@ -1361,8 +1364,8 @@ class LARMOR(ISISInstrument):
     _NAME = 'LARMOR'
     WAV_RANGE_MIN = 0.5
     WAV_RANGE_MAX = 13.5
-    def __init__(self):
-        super(LARMOR,self).__init__('LARMOR_Definition.xml')
+    def __init__(self, idf_path=None):
+        super(LARMOR,self).__init__(idf_path)
         self._marked_dets = []
         # set to true once the detector positions have been moved to the locations given in the sample logs
         self.corrections_applied = False
