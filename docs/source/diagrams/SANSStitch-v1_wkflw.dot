@@ -1,8 +1,9 @@
 digraph SansStitch {
     label="SANSStitch Flowchart";
+    $global_style
+
     subgraph params {
-        $global_style
-        
+        $param_style
         hABCountsSample [label="HABCountsSample"];
         lABCountsSample [label="LABCountsSample"];
         hABNormSample [label="HABNormSample"];
@@ -22,19 +23,12 @@ digraph SansStitch {
 
     subgraph decisions {
         $decision_style
-        
-        node [shape=diamond, 
-              fillcolor=limegreen];
         checkProcessCan [label="Process the can?"];
         checkModeForFit [label="Mode Requires Fitting"];
     }
 
     subgraph algorithms {
         $algorithm_style
-    
-        node [shape=rectangle, 
-              style="rounded,filled", 
-              fillcolor=lightskyblue];
         divideHABSample [label="Divide\nHAB sample\ncounts/normalization"];
         divideLABSample [label="Divide\nLAB sample\ncounts/normalization"];
         divideHABCan [label="Divide\nHAB can\ncounts/normalization"];
@@ -46,9 +40,6 @@ digraph SansStitch {
 
     subgraph processes {
         $process_style
-       
-        node [shape=rectangle, 
-              fillcolor=lightseagreen];
         errorCorrection [label="Error Correction Merged Workspace"];
         calculateMergedQ [label="Calculate Merged Q"];
         readCanInputs [label="Read Can Inputs"];
