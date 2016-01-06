@@ -159,7 +159,7 @@ void CreateMD::init() {
                   "gs rotation in degrees. Optional or one entry per run.");
 
   declareProperty(
-      new PropertyWithValue<bool>("InPlace", false, Direction::Input),
+      new PropertyWithValue<bool>("InPlace", true, Direction::Input),
       "Execute conversions to MD and Merge in one-step. Less "
       "memory overhead.");
 }
@@ -379,6 +379,8 @@ CreateMD::convertToMD(Mantid::API::Workspace_sptr workspace,
   convert_alg->setProperty("dEAnalysisMode", analysis_mode);
   convert_alg->setPropertyValue("MinValues", min_values);
   convert_alg->setPropertyValue("MaxValues", max_values);
+  // OverwriteExisting=false means events are added to the existing workspace,
+  // effectively doing the merge in place  (without using MergeMD)
   convert_alg->setProperty("OverwriteExisting", !in_place);
   if (in_place) {
     convert_alg->setProperty("OutputWorkspace", out_mdws);
