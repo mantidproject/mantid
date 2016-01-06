@@ -11,6 +11,15 @@ Description
 
 Loads a Nexus file created from an ISIS instrument.
 
+Data loaded from Nexus File
+###########################
+
+The nexus file must have ``/raw_data_1`` as its main group and
+contain a ``/isis_vms_compat`` group to be loaded.
+
+The workspace data is loaded from ``/raw_data_1/Detector_1``.
+
+
 Usage
 -----
 
