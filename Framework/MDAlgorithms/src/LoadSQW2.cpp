@@ -123,7 +123,7 @@ void LoadSQW2::init() {
                   "If specified, the output workspace will be a file-backed "
                   "MDEventWorkspace");
   std::vector<std::string> allowed = {"Q_sample", "Q_lab", "HKL"};
-  declareProperty("Q3DFrames", allowed[2],
+  declareProperty("Q3DFrames", allowed[0],
                   make_shared<StringListValidator>(allowed),
                   "The required frame for the output workspace");
 
