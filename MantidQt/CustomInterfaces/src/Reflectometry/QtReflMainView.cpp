@@ -324,7 +324,6 @@ void QtReflMainView::tableUpdated(const QModelIndex &topLeft,
   Q_UNUSED(topLeft);
   Q_UNUSED(bottomRight);
   m_presenter->notify(IReflPresenter::TableUpdatedFlag);
-
 }
 
 /**
