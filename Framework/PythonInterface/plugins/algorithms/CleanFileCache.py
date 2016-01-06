@@ -71,6 +71,7 @@ def _run(cache_dir, days):
         # skip over non-files
         if not os.path.isfile(f): continue
         # skip over new files
+        # print os.stat(f).st_mtime, rm_date
         if os.stat(f).st_mtime > rm_date: continue
         # check filename pattern
         base = os.path.basename(f)
