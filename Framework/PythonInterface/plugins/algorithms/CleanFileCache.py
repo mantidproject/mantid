@@ -1,13 +1,12 @@
-#pylint: disable=no-init,invalid-name,bare-except,too-many-arguments
+#pylint: disable=no-init,invalid-name,bare-except,too-many-arguments,multiple-statements
 from mantid.api import *
 from mantid.kernel import *
-import mantid, os
+import os
 
 
 # See ticket #14716
 
 class CleanFileCache(PythonAlgorithm):
-    
     """ Remove cache files from the cache directory
     """
     def category(self):
@@ -42,7 +41,7 @@ class CleanFileCache(PythonAlgorithm):
 
         self.declareProperty(
             "AgeInDays", 14,
-            "If any file is more than this many days old, it will be deleted. 0 means remove everything", 
+            "If any file is more than this many days old, it will be deleted. 0 means remove everything",
             Direction.Input)
         return
 
@@ -57,13 +56,13 @@ class CleanFileCache(PythonAlgorithm):
                 "cache"
                 )
         age = int(self.getPropertyValue("AgeInDays"))
-        # 
+        #
         _run(cache_dir, age)
         return
 
 
 def _run(cache_dir, days):
-    import os, glob, re, time
+    import glob, re, time
     from datetime import timedelta, date
     rm_date = date.today() - timedelta(days = days)
     rm_date = time.mktime(rm_date.timetuple()) + 24*60*60

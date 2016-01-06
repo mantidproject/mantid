@@ -1,15 +1,15 @@
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
+#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,multiple-statements
 import unittest
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import CreateCacheFilename
 
-from testhelpers import run_algorithm
+# from testhelpers import run_algorithm
 
-import os, sys, mantid, hashlib, tempfile, glob, shutil, time
+import os, sys, hashlib, tempfile, glob, shutil, time
 
 class CleanFileCache(unittest.TestCase):
-    
+
     def test1(self):
         """CleanFileCache: simple test with two cache files and two normal files
         """
@@ -17,11 +17,11 @@ class CleanFileCache(unittest.TestCase):
         # and other files
         cache_root = tempfile.mkdtemp()
         _hash = lambda s: hashlib.sha1(s).hexdigest()
-        cache1, sig = CreateCacheFilename(
+        cache1, _ = CreateCacheFilename(
             CacheDir = cache_root,
             OtherProperties = ["A=1", "B=2"]
         )
-        cache2, sig = CreateCacheFilename(
+        cache2, _ = CreateCacheFilename(
             CacheDir = cache_root,
             OtherProperties = ["C=3"],
         )
@@ -55,18 +55,18 @@ class CleanFileCache(unittest.TestCase):
         # and other files
         cache_root = tempfile.mkdtemp()
         _hash = lambda s: hashlib.sha1(s).hexdigest()
-        cache1, sig = CreateCacheFilename(
+        cache1, _ = CreateCacheFilename(
             CacheDir = cache_root,
             OtherProperties = ["A=1"]
         )
-        cache2, sig = CreateCacheFilename(
+        cache2, _ = CreateCacheFilename(
             CacheDir = cache_root,
             OtherProperties = ["B='silly'"],
         )
         touch(cache1)
         touch(cache2)
         non_cache = [
-            os.path.join(cache_root, f) 
+            os.path.join(cache_root, f)
             for f in [
                 'a'*39+".nxs", '0'*41+".nxs",
                 'alpha_' + 'b'*39 + ".nxs",
@@ -101,15 +101,15 @@ class CleanFileCache(unittest.TestCase):
         # and other files
         cache_root = tempfile.mkdtemp()
         _hash = lambda s: hashlib.sha1(s).hexdigest()
-        cache1, sig = CreateCacheFilename(
+        cache1, _ = CreateCacheFilename(
             CacheDir = cache_root,
             OtherProperties = ["A=newer"]
         )
-        cache2, sig = CreateCacheFilename(
+        cache2, _ = CreateCacheFilename(
             CacheDir = cache_root,
             OtherProperties = ["B=rightonedge"],
         )
-        cache3, sig = CreateCacheFilename(
+        cache3, _ = CreateCacheFilename(
             CacheDir = cache_root,
             OtherProperties = ["C=old"],
         )
@@ -117,7 +117,7 @@ class CleanFileCache(unittest.TestCase):
         createFile(cache2, age)
         createFile(cache3, age+1)
         non_cache = [
-            os.path.join(cache_root, f) 
+            os.path.join(cache_root, f)
             for f in [
                 'a'*39+".nxs", '0'*41+".nxs",
                 'alpha_' + 'b'*39 + ".nxs",
@@ -157,9 +157,8 @@ def computeTime(daysbefore):
     "compute time as float of the time at n=daysbefore days before today"
     return time.time() - daysbefore * 24*60*60
 
-    
 def touch(f):
-    with open(f, 'wt') as stream:
+    with open(f, 'w') as stream:
         stream.write('\n')
     return
 
