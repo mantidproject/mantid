@@ -97,6 +97,10 @@ void QtReflMainView::showTable(QReflTableModel_sptr model) {
           SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
   ui.viewTable->setModel(m_model.get());
   ui.viewTable->resizeColumnsToContents();
+  std::string windowTitle = "ISIS Reflectometry (Polref) - " + m_toOpen;
+  auto mainWindowWidget = this->topLevelWidget();
+  mainWindowWidget->setWindowTitle(QString::fromStdString(windowTitle + "[*]"));
+  this->setWindowModified(false);
 }
 
 /**
@@ -320,6 +324,7 @@ void QtReflMainView::tableUpdated(const QModelIndex &topLeft,
   Q_UNUSED(topLeft);
   Q_UNUSED(bottomRight);
   m_presenter->notify(IReflPresenter::TableUpdatedFlag);
+
 }
 
 /**
@@ -458,7 +463,8 @@ void QtReflMainView::showImportDialog() {
   // otherwise this should be an empty string.
   QString outputWorkspaceName =
       runPythonCode(QString::fromStdString(pythonSrc.str()), false);
-  this->setModel(outputWorkspaceName.trimmed());
+  m_toOpen = outputWorkspaceName.trimmed();
+  m_presenter->notify(ReflMainViewPresenter::OpenTableFlag);
 }
 
 /**
