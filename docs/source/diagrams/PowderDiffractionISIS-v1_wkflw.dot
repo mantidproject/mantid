@@ -4,7 +4,23 @@ digraph PowderDiffractionISIS {
 
   subgraph processes {
     $process_style
+
+    C_Vana_RunCorrectAbs      [label="Van Absorption Correction"]
+    C_Vana_RunLoadSacEff1     [label="Load Sac Eff"]
+    C_Vana_RunLoadSacEff2     [label="Load Sac Eff"]
+    C_Vana_RunStripPeaks      [label="Strip Vanadium Peaks"]
+
+    SacEff_RunGetDataSum      [label="Load Vana - Get Data Sum"]
+
   }
+
+  LoadSac_Start               [label="Load Sac Eff"]
+  CorrectAbs_Start            [label="Van Absorption Correction"]
+  C_Vana_Start                [label="Create Vana"]
+  S_Vana_Start                [label="Strip Vanadium Peaks"]
+  GetDataSum_Start            [label="Load Vana - Get Data Sum"]
+  Focus_one_Start             [label="Start Focusing"]
+  Focus_All_Start             [label="Focus All - Run"]
 
 
   subgraph values{
@@ -15,6 +31,41 @@ digraph PowderDiffractionISIS {
   subgraph algorithms {
     $algorithm_style
 
+    LoadSac_CreateSingle_1                [label="CreateSingleValuedWorkspace"]
+    LoadSac_CreateSingle_2                [label="CreateSingleValuedWorkspace"]
+    LoadSac_CreateSingle_3                [label="CreateSingleValuedWorkspace"]
+    LoadSac_Divide_1                      [label="Divide"]
+    LoadSac_Divide_2                      [label="Divide"]
+    LoadSac_Integrate_1                   [label="Integrate"]
+    LoadSac_Multiply_1                    [label="Multiply"]
+
+    CorrAbs_ConvertUnits                  [label="ConvertUnits"]
+    CorrAbs_CylinderAbsorption            [label="CylinderAbsorption"]
+    CorrAbs_Divide                        [label="Divide"]
+    CorrAbs_ConvertUnits2                 [label="ConvertUnits"]
+
+    C_Vana_Minus                          [label="Minus"]
+    C_Vana_AlignDetectors                 [label="AlignDetectors"]
+    C_Vana_Divide                         [label="Divide"]
+    C_Vana_DiffractionFocusing            [label="DiffractionFocusing"]
+    C_Vana_ReplaceSpecialValues           [label="ReplaceSpecialValues"]
+    C_Vana_SaveNexusProcessed             [label="SaveNexusProcessed"]
+    C_Vana_SaveFocusedXYE                 [label="SaveFocusedXYE"]
+
+    S_Vana_LoadNexusProcessed             [label="LoadNexusProcessed"]
+    S_Vana_CropWorkspace                  [label="CropWorkspace"]
+    S_Vana_SmoothData                     [label="SmoothData"]
+    S_Vana_RemoveBins                     [label="RemoveBins"]
+    S_Vana_StripPeaks                     [label="StripPeaks"]
+    S_Vana_MaskBins                       [label="MaskBins"]
+    S_Vana_SplineBackground1               [label="SplineBackground"]
+    S_Vana_SplineBackground2               [label="SplineBackground"]
+    S_Vana_SaveFocusedXYE1                [label="SaveFocusedXYE"]
+    S_Vana_SaveFocusedXYE2                [label="SaveFocusedXYE"]
+    S_Vana_SaveFocusedXYE3                [label="SaveFocusedXYE"]
+    S_Vana_SaveFocusedXYE4                [label="SaveFocusedXYE"]
+    S_Vana_SaveFocusedXYE5                [label="SaveFocusedXYE"]
+
   }
 
   subgraph decisions {
@@ -24,6 +75,20 @@ digraph PowderDiffractionISIS {
     FirstNonZeroNotFound              [label="FirstNonZeroNotFound"]
     UampsotalLess                     [label="if UampsTotal < 1e-6"]
     IfHrpd                            [label="if HRPD"]
+
+    C_Vana_UampsotalGreater           [label="if UampsTotal > 1e-6"]
+    C_Vana_NoAbs                      [label="if NoAbs"]
+
+    S_Vana_LoadUnstrip                [label="if Load Unstripped"]
+    S_Vana_VanPeakRemove              [label="Van peak stripping"]
+
+    Focus_one_VGrpFocus               [label="If VGrpFocus is sam"]
+    Focus_one_SEmptyFile              [label="If SEmptyFile is not none"]
+    Focus_one_CorrectSampleAbs        [label="If CorrectSampleAbs is yes"]
+    Focus_one_Norm                    [label="If Normalization required"]
+
+    Focus_one_Norm                    [label="If Normalization required"]
+
 
   }
 
@@ -38,6 +103,7 @@ digraph PowderDiffractionISIS {
   FirstNonZeroNotFound          -> Plus                               [label="else"]
   Plus                          -> CreateSingleValuedWorkspace
   CreateSingleValuedWorkspace   -> Divide
+
   }
 
   subgraph load_sac_eff {
@@ -60,4 +126,59 @@ digraph PowderDiffractionISIS {
   LoadSac_CreateSingle_3        -> LoadSac_Divide_2
 
   }
+
+  subgraph correct_abs {
+  CorrectAbs_Start              -> CorrAbs_ConvertUnits
+  CorrAbs_ConvertUnits          -> CorrAbs_CylinderAbsorption
+  CorrAbs_CylinderAbsorption    -> CorrAbs_Divide
+  CorrAbs_Divide                -> CorrAbs_ConvertUnits2
+
+  }
+
+  subgraph create_vana {
+  C_Vana_Start                  -> C_Vana_RunLoadSacEff1
+  VanadiumFile                  -> C_Vana_RunLoadSacEff1
+  C_Vana_RunLoadSacEff1         -> C_Vana_RunLoadSacEff2
+  VEmptyFile                    -> C_Vana_RunLoadSacEff2
+  C_Vana_RunLoadSacEff2         -> C_Vana_UampsotalGreater
+  C_Vana_UampsotalGreater       -> C_Vana_Minus                         [label="true"]
+  C_Vana_UampsotalGreater       -> C_Vana_AlignDetectors                [label="else"]
+  C_Vana_Minus                  -> C_Vana_AlignDetectors
+  C_Vana_AlignDetectors         -> C_Vana_Divide
+  C_Vana_Divide                 -> C_Vana_NoAbs
+  C_Vana_NoAbs                  -> C_Vana_RunCorrectAbs                 [label="true"]
+  C_Vana_NoAbs                  -> C_Vana_DiffractionFocusing           [label="else"]
+  C_Vana_RunCorrectAbs          -> C_Vana_DiffractionFocusing
+  C_Vana_DiffractionFocusing    -> C_Vana_ReplaceSpecialValues
+  C_Vana_ReplaceSpecialValues   -> C_Vana_SaveNexusProcessed
+  C_Vana_SaveNexusProcessed     -> C_Vana_SaveFocusedXYE
+  C_Vana_SaveFocusedXYE         -> C_Vana_RunStripPeaks
+
+  }
+
+  subgraph strip_the_vana {
+  S_Vana_Start                  -> S_Vana_LoadUnstrip
+  S_Vana_LoadUnstrip            -> S_Vana_LoadNexusProcessed            [label="true"]
+  S_Vana_LoadUnstrip            -> S_Vana_CropWorkspace                 [label="else"]
+  S_Vana_CropWorkspace          -> S_Vana_VanPeakRemove
+  S_Vana_LoadNexusProcessed     -> S_Vana_VanPeakRemove
+  S_Vana_VanPeakRemove          -> S_Vana_SmoothData                    [label="interpol"]
+  S_Vana_SmoothData             -> S_Vana_RemoveBins
+  S_Vana_RemoveBins             -> S_Vana_SaveFocusedXYE1
+  S_Vana_VanPeakRemove          -> S_Vana_StripPeaks                    [label="strip"]
+  S_Vana_StripPeaks             -> S_Vana_SaveFocusedXYE2
+  S_Vana_VanPeakRemove          -> S_Vana_MaskBins                      [label="spline"]
+  S_Vana_MaskBins               -> S_Vana_SplineBackground1
+  S_Vana_SplineBackground1      -> S_Vana_SaveFocusedXYE3
+  S_Vana_VanPeakRemove          -> S_Vana_SplineBackground2             [label="spline only"]
+  S_Vana_SplineBackground2      -> S_Vana_SaveFocusedXYE4
+  S_Vana_SaveFocusedXYE1        -> S_Vana_SaveFocusedXYE5
+  S_Vana_SaveFocusedXYE2        -> S_Vana_SaveFocusedXYE5
+  S_Vana_SaveFocusedXYE3        -> S_Vana_SaveFocusedXYE5
+  S_Vana_SaveFocusedXYE4        -> S_Vana_SaveFocusedXYE5
+
+  }
+
+
+
 
