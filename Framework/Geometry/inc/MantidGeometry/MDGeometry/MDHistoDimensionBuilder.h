@@ -31,7 +31,7 @@ public:
   template <typename CoordT>
   static void resizeToFitMDBox(CoordT &min, CoordT &max) {
     // Always use minimum float value as DBL_EPS is always too small
-    static constexpr CoordT twoEps = 2*std::numeric_limits<float>::epsilon();
+    static constexpr CoordT twoEps = 2 * std::numeric_limits<float>::epsilon();
     if (std::fabs(min) > twoEps)
       min *= (1 + twoEps);
     else
