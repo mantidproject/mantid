@@ -462,7 +462,10 @@ void QtReflMainView::showImportDialog() {
   // otherwise this should be an empty string.
   QString outputWorkspaceName =
       runPythonCode(QString::fromStdString(pythonSrc.str()), false);
-  m_toOpen = outputWorkspaceName.trimmed();
+  m_toOpen = outputWorkspaceName.trimmed().toStdString();
+  // notifying the presenter that a new table should be opened
+  // The presenter will ask about any unsaved changes etc
+  // before opening the new table
   m_presenter->notify(ReflMainViewPresenter::OpenTableFlag);
 }
 
