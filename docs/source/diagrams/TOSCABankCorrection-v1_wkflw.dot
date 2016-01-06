@@ -1,0 +1,59 @@
+digraph TOSCABankCorrection {
+  label="TOSCABankCorrection Flowchart"
+  $global_style
+
+  subgraph params  {
+    $param_style
+    InputWorkspace
+    SearchRange
+    CroppedWorkspace
+    PeakPosition
+    ClosePeakTolerance
+    PeakFunction
+	OutputWorkspace
+    TargetPeakCentre
+    ScaleFactor1
+    ScaleFactor2
+    Peaks
+  }
+
+  subgraph algorithms  {
+    $algorithm_style
+    CropWorkspace
+    FindPeak1
+    FindPeak2
+    SortTableWorkspace
+    ScaleX1
+    ScaleX2
+    RebinToWorkspace
+    GroupDetectors
+    AppendSpectra
+  }
+
+  InputWorkspace                 -> CropWorkspace
+  SearchRange                    -> CropWorkspace                  [label="Defines XMin and XMax"]
+  CropWorkspace                  -> CroppedWorkspace
+  CroppedWorkspace               -> FindPeak1                      [label="Find peak in Bank 1"]
+  PeakFunction                   -> FindPeak1
+  PeakPosition                   -> FindPeak1
+  CropWorkspace                  -> FindPeak2                      [label="Find peak in Bank 2"]
+  PeakFunction                   -> FindPeak2
+  PeakPosition                   -> FindPeak2
+  FindPeak1                      -> SortTableWorkspace             
+  FindPeak2                      -> SortTableWorkspace
+  SortTableWorkspace             -> Peaks                          [label="Centres of two peaks that are close to each other in both banks"]
+  Peaks                          -> TargetPeakCentre               [label="Output"]
+  ClosePeakTolerance             -> ScaleFactor1
+  Peaks                          -> ScaleFactor1
+  ClosePeaktolerance             -> ScaleFactor2
+  Peaks                          -> ScaleFactor2                 [label="Create copy of workspace with only bank spectra"]
+  Croppedworkspace               -> ScaleX1
+  ScaleFactor1                   -> ScaleX1
+  ScaleX1                        -> ScaleX2                        
+  ScaleFactor2                   -> ScaleX2
+  ScaleX2                        -> RebinToWorkspace
+  InputWorkspace                 -> RebinToWorkspace
+  RebinToWorkspace               -> GroupDetectors                 [label="Recalculate sum spectra from corrected banks"]
+  GroupDetectors                 -> AppendSpectra                  [label="Behaviour = Average"]
+  AppendSpectra                  -> OutputWorkspace                [label="Output"]
+}
