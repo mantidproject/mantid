@@ -33,9 +33,9 @@ Output:
 
 .. testoutput:: ExConvolveWorkspaces
 
-    Output:  [  60.78539112    0.           32.3478194   121.57078223  175.00835395
+    Output:  [  74.7278871    26.1996044    32.3478194   121.57078223  175.00835395
       146.57078223]
-
+  
 .. categories::
 
 .. sourcelink::

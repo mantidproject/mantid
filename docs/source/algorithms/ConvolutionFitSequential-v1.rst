@@ -71,21 +71,21 @@ Output:
   
 .. testoutput:: ConvolutionFitSequentialExample
   :options: +NORMALIZE_WHITESPACE
-  
+
   Result has 2 Spectra
   
-  Amplitude 0: 4.29258
-  Amplitude 1: 4.17928
-  Amplitude 2: 3.97924
-
+  Amplitude 0: 4.29259
+  Amplitude 1: 4.17927
+  Amplitude 2: 3.97923
+  
   X axis at 0: 0.52531
   X axis at 1: 0.72917
   X axis at 2: 0.92340
-
+  
   Amplitude Err 0: 0.00465
   Amplitude Err 1: 0.00464
   Amplitude Err 2: 0.00504
-
+  
 .. categories::
 
 .. sourcelink::
