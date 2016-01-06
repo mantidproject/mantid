@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-init
+﻿#pylint: disable=invalid-name,no-init
 """
 Check that file manipulation works fine
 """
@@ -113,7 +113,7 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
     def test_that_reducer_for_SANS2D_stays_when_already_the_same_as_in_workspace(self):
         # Arrange
         Clean()
-        SANS2D()
+        SANS2DTUBES()
         MaskFile('MASKSANS2D.091A')
         Set1D()
         instrument_name = "SANS2D"
@@ -127,6 +127,92 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         idf_reducer_after = ReductionSingleton().get_idf_file_path()
 
         self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
+        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
+
+    '''
+    def test_that_reducer_for_LARMOR_switches_to_correct_IDF_when_outdated(self):
+        # Arrange
+        Clean()
+        LARMOR()
+        MaskFile('USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt')
+        Set1D()
+        instrument_name = "LARMOR"
+        filename = 'LARMOR00000063.nxs'
+        idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
+        idf_reducer_before = ReductionSingleton().get_idf_file_path()
+        # Act
+        AssignSample(filename)
+        # Assert
+        idf_reducer_after = ReductionSingleton().get_idf_file_path()
+        self.assertNotEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
+        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
+    def test_that_reducer_for_LARMOR_stays_when_already_the_same_as_in_workspace(self):
+        # Arrange
+        Clean()
+        LARMOR("LARMOR_Definition_19000000-20150317.xml")
+        MaskFile('USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt')
+        Set1D()
+        instrument_name ="LARMOR"
+        filename = 'LARMOR00000063.nxs'
+        idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
+        idf_reducer_before = ReductionSingleton().get_idf_file_path()
+        # Act
+        AssignSample(filename)
+        # Assert
+        idf_reducer_after = ReductionSingleton().get_idf_file_path()
+        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
+        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
+    def test_that_reducer_for_LARMOR_switches_to_correct_IDF_when_outdated_V2(self):
+        # Arrange
+        Clean()
+        LARMOR()
+        MaskFile('USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt')
+        Set1D()
+        instrument_name = "LARMOR"
+        filename = 'LARMOR00002260.nxs'
+        idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
+        idf_reducer_before = ReductionSingleton().get_idf_file_path()
+        # Act
+        AssignSample(filename)
+        # Assert
+        idf_reducer_after = ReductionSingleton().get_idf_file_path()
+        self.assertNotEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
+        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
+    '''
+
+    def test_that_reducer_for_LOQ_stays_when_already_the_same_as_in_workspace(self):
+        # Arrange
+        Clean()
+        LOQ()
+        MaskFile('MASK.094AA')
+        Set1D()
+        instrument_name = "LOQ"
+        filename = 'LOQ54431.raw'
+        idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
+        idf_reducer_before = ReductionSingleton().get_idf_file_path()
+        # Act
+        AssignSample(filename)
+        # Assert
+        idf_reducer_after = ReductionSingleton().get_idf_file_path()
+        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
+        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
+
+
+    def test_that_reducer_for_LOQ_switches_to_correct_IDF_when_outdated(self):
+        # Arrange
+        Clean()
+        LOQ("LOQ_Definition_20121016-.xml")
+        MaskFile('MASK.094AA')
+        Set1D()
+        instrument_name = "LOQ"
+        filename = 'LOQ54431.raw'
+        idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
+        idf_reducer_before = ReductionSingleton().get_idf_file_path()
+        # Act
+        AssignSample(filename)
+        # Assert
+        idf_reducer_after = ReductionSingleton().get_idf_file_path()
+        self.assertNotEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
         self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
 
 

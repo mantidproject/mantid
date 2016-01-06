@@ -870,12 +870,13 @@ class LOQ(ISISInstrument):
     #maximum wavelength of neutrons assumed to be measurable by this instrument
     WAV_RANGE_MAX = 10.0
 
-    def __init__(self):
+    def __init__(self, idf_path='LOQ_Definition_20020226-.xml'):
         """
             Reads LOQ's instrument definition xml file
+            @param idf_path: the idf file
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
-        super(LOQ, self).__init__('LOQ_Definition_20020226-.xml')
+        super(LOQ, self).__init__(idf_path)
         #relates the numbers of the monitors to their names in the instrument definition file
         self.monitor_names = {1 : 'monitor1',
                               2 : 'monitor2'}
