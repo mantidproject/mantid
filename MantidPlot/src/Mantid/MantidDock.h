@@ -192,7 +192,7 @@ public:
   void sort();
   void dropEvent(QDropEvent *de);
   QList<boost::shared_ptr<const Mantid::API::MatrixWorkspace>>
-  getSelectedWorkspaces() const;
+  getSelectedMatrixWorkspaces() const;
   MantidSurfacePlotDialog::UserInputSurface chooseSurfacePlotOptions() const;
   MantidSurfacePlotDialog::UserInputSurface chooseContourPlotOptions() const;
 

@@ -1943,7 +1943,7 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
  * We only want workspaces we can actually plot!
  */
 QList<MatrixWorkspace_const_sptr>
-MantidTreeWidget::getSelectedWorkspaces() const {
+MantidTreeWidget::getSelectedMatrixWorkspaces() const {
   // Check for any selected WorkspaceGroup names and replace with the names of
   // their children.
   QSet<QString> selectedWsNames;
@@ -1952,9 +1952,8 @@ MantidTreeWidget::getSelectedWorkspaces() const {
         m_ads.retrieve(wsName.toStdString()));
     if (groupWs) {
       const auto childWsNames = groupWs->getNames();
-      for (auto childWsName = childWsNames.begin();
-           childWsName != childWsNames.end(); ++childWsName) {
-        selectedWsNames.insert(QString::fromStdString(*childWsName));
+      for (auto childWsName : childWsNames) {
+        selectedWsNames.insert(QString::fromStdString(childWsName));
       }
     } else {
       selectedWsNames.insert(wsName);
@@ -1989,7 +1988,7 @@ MantidTreeWidget::getSelectedWorkspaces() const {
 MantidWSIndexWidget::UserInput
 MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
                                              bool showPlotAll) const {
-  auto selectedMatrixWsList = getSelectedWorkspaces();
+  auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
     selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
@@ -2040,7 +2039,7 @@ MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
 */
 MantidSurfacePlotDialog::UserInputSurface
 MantidTreeWidget::choosePlotOptions(const QString &type) const {
-  auto selectedMatrixWsList = getSelectedWorkspaces();
+  auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
     selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
