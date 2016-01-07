@@ -197,10 +197,6 @@ install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
           DESTINATION MantidPlot.app/Contents/Resources/
 )
 
-install ( FILES ${CMAKE_SOURCE_DIR}/buildconfig/CMake/Packaging/MantidPlot.icns
-          DESTINATION MantidPlot.app/Contents/MacOS/
-)
-
 configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython_osx
                  MantidPlot.app/Contents/MacOS/mantidpython @ONLY )
 # Needs to be executable
