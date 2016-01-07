@@ -69,8 +69,7 @@ void CompositeValidator::add(Kernel::IValidator_sptr child) {
  */
 std::string CompositeValidator::check(const boost::any &value) const {
   auto itrEnd = m_children.end();
-  for (auto itr = m_children.begin();
-       itr != itrEnd; ++itr) {
+  for (auto itr = m_children.begin(); itr != itrEnd; ++itr) {
     std::string error = (*itr)->check(value);
     // exit on the first error, to avoid passing doing more tests on invalid
     // objects that could fail

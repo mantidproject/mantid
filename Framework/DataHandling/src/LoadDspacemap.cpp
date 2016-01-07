@@ -203,8 +203,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
   Kernel::V3D referencePos;
   detid_t anydetinrefmodule = 21 * 1250 + 5;
 
-  auto det_iter =
-      allDetectors.find(anydetinrefmodule);
+  auto det_iter = allDetectors.find(anydetinrefmodule);
 
   if (det_iter == allDetectors.end()) {
     throw std::invalid_argument("Any Detector ID is Instrument's detector");
@@ -376,8 +375,7 @@ void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName,
   BinaryFile<VulcanCorrectionFactor> file(fileName);
   std::vector<VulcanCorrectionFactor> *results = file.loadAll();
   if (results) {
-    for (auto it = results->begin();
-         it != results->end(); ++it) {
+    for (auto it = results->begin(); it != results->end(); ++it) {
       // std::cout << it->pixelID << " :! " << it->factor << std::endl;
       vulcan[static_cast<detid_t>(it->pixelID)] = it->factor;
     }

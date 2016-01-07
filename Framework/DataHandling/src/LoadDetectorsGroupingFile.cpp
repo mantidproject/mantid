@@ -208,9 +208,8 @@ void LoadDetectorsGroupingFile::setByComponents() {
       m_groupWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Set
-  for (auto it =
-           m_groupComponentsMap.begin();
-       it != m_groupComponentsMap.end(); ++it) {
+  for (auto it = m_groupComponentsMap.begin(); it != m_groupComponentsMap.end();
+       ++it) {
     g_log.debug() << "Group ID = " << it->first << " With " << it->second.size()
                   << " Components" << std::endl;
 
@@ -286,9 +285,8 @@ void LoadDetectorsGroupingFile::setByDetectors() {
       m_groupWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Set GroupingWorkspace
-  for (auto it =
-           m_groupDetectorsMap.begin();
-       it != m_groupDetectorsMap.end(); ++it) {
+  for (auto it = m_groupDetectorsMap.begin(); it != m_groupDetectorsMap.end();
+       ++it) {
     g_log.debug() << "Group ID = " << it->first << std::endl;
 
     for (size_t i = 0; i < it->second.size(); i++) {
@@ -512,8 +510,7 @@ void LoadGroupXMLFile::parseXML() {
       }
 
       // b) Set in map
-      auto itc =
-          m_groupComponentsMap.find(curgroupid);
+      auto itc = m_groupComponentsMap.find(curgroupid);
       if (itc != m_groupComponentsMap.end()) {
         // Error! Duplicate Group ID defined in XML
         std::stringstream ss;
@@ -538,8 +535,7 @@ void LoadGroupXMLFile::parseXML() {
     } // "group"
     else if (pNode->nodeName().compare("component") == 0) {
       // Node "component" = value
-      auto it =
-          m_groupComponentsMap.find(curgroupid);
+      auto it = m_groupComponentsMap.find(curgroupid);
       if (it == m_groupComponentsMap.end()) {
         std::stringstream ss;
         ss << "XML File (component) heirachial error!"
@@ -562,8 +558,7 @@ void LoadGroupXMLFile::parseXML() {
     } // Component
     else if (pNode->nodeName().compare("detids") == 0) {
       // Node "detids"
-      auto it =
-          m_groupDetectorsMap.find(curgroupid);
+      auto it = m_groupDetectorsMap.find(curgroupid);
       if (it == m_groupDetectorsMap.end()) {
         std::stringstream ss;
         ss << "XML File (detids) hierarchal error!"
@@ -588,8 +583,7 @@ void LoadGroupXMLFile::parseXML() {
     } // "detids"
     else if (pNode->nodeName().compare("ids") == 0) {
       // Node ids: for spectrum number
-      auto it =
-          m_groupSpectraMap.find(curgroupid);
+      auto it = m_groupSpectraMap.find(curgroupid);
       if (it == m_groupSpectraMap.end()) {
         std::stringstream ss;
         ss << "XML File (ids) hierarchal error! "

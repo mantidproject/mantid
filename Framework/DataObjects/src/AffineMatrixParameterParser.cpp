@@ -59,8 +59,7 @@ AffineMatrixParameter *AffineMatrixParameterParser::createParameter(
     }
 
     // Create the parameter and set the matrix.
-    auto parameter =
-        new AffineMatrixParameter(nRows - 1, nCols - 1);
+    auto parameter = new AffineMatrixParameter(nRows - 1, nCols - 1);
     parameter->setMatrix(m);
 
     // Now return the fully constructed parameter.

@@ -85,8 +85,7 @@ void splitPath(const std::string &path, std::vector<std::string> &splitted) {
   Poco::StringTokenizer tokenizer(path, ";,", options);
   auto iend = tokenizer.end();
   splitted.reserve(tokenizer.count());
-  for (auto itr = tokenizer.begin(); itr != iend;
-       ++itr) {
+  for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
     if (!itr->empty()) {
       splitted.push_back(*itr);
     }
@@ -914,8 +913,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
   if (!m_changed_keys.empty()) {
     updated_file += "\n";
     auto key_end = m_changed_keys.end();
-    for (auto key_itr = m_changed_keys.begin();
-         key_itr != key_end;) {
+    for (auto key_itr = m_changed_keys.begin(); key_itr != key_end;) {
       updated_file += *key_itr + "=";
       std::string value = getString(*key_itr, false);
       Poco::replaceInPlace(value, "\\", "\\\\"); // replace single \ with double
@@ -956,8 +954,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
 std::string ConfigServiceImpl::getString(const std::string &keyName,
                                          bool use_cache) const {
   if (use_cache) {
-    auto mitr =
-        m_AbsolutePaths.find(keyName);
+    auto mitr = m_AbsolutePaths.find(keyName);
     if (mitr != m_AbsolutePaths.end()) {
       return (*mitr).second;
     }

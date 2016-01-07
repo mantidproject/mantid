@@ -95,8 +95,7 @@ Property *makeStringProperty(::NeXus::File *file, const std::string &name,
     for (int i = 0; i < numStrings; i++)
       values.push_back(std::string(data.get() + i * span));
 
-    auto prop =
-        new TimeSeriesProperty<std::string>(name);
+    auto prop = new TimeSeriesProperty<std::string>(name);
     prop->addValues(times, values);
     return prop;
   }

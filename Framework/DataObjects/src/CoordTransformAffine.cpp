@@ -376,8 +376,7 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
     ownSecondAff = true;
   }
   // Initialize the affine matrix
-  auto out =
-      new CoordTransformAffine(firstAff->getInD(), secondAff->getOutD());
+  auto out = new CoordTransformAffine(firstAff->getInD(), secondAff->getOutD());
   // Multiply the two matrices together
   Matrix<coord_t> outMat = secondAff->getMatrix() * firstAff->getMatrix();
   // Set in the output

@@ -377,8 +377,7 @@ void DiskBuffer::setFreeSpaceVector(std::vector<uint64_t> &free) {
   if (free.size() % 2 != 0)
     throw std::length_error("Free vector size is not a factor of 2.");
 
-  for (auto it = free.begin(); it != free.end();
-       it += 2) {
+  for (auto it = free.begin(); it != free.end(); it += 2) {
     auto it_next = boost::next(it);
 
     if (*it == 0 && *it_next == 0) {

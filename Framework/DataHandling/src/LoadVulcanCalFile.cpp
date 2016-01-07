@@ -393,8 +393,8 @@ void LoadVulcanCalFile::processOffsets(
   std::set<int> set_bankID;
   map<detid_t, pair<bool, int>>
       map_verify; // key: detector ID, value: flag to have a match, bank ID
-  for (auto miter = map_detoffset.begin();
-       miter != map_detoffset.end(); ++miter) {
+  for (auto miter = map_detoffset.begin(); miter != map_detoffset.end();
+       ++miter) {
     detid_t pid = miter->first;
     auto fiter = map_det2index.find(pid);
     if (fiter == map_det2index.end()) {

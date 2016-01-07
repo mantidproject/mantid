@@ -41,8 +41,7 @@ PropertyManager::PropertyManager(const PropertyManager &other)
 PropertyManager &PropertyManager::operator=(const PropertyManager &other) {
   // We need to do a deep copy here
   if (this != &other) {
-    for (auto it = m_properties.begin();
-         it != m_properties.end(); ++it) {
+    for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
       delete it->second;
     }
     this->m_properties.clear();
@@ -576,8 +575,7 @@ void PropertyManager::removeProperty(const std::string &name,
  */
 void PropertyManager::clear() {
   m_orderedProperties.clear();
-  for (auto it = m_properties.begin();
-       it != m_properties.end(); ++it) {
+  for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
     delete it->second;
   }
   m_properties.clear();

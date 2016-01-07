@@ -166,8 +166,7 @@ int Track::addLink(const V3D &firstPoint, const V3D &secondPoint,
     m_links.push_back(newLink);
     index = 0;
   } else {
-    auto linkPtr =
-        std::lower_bound(m_links.begin(), m_links.end(), newLink);
+    auto linkPtr = std::lower_bound(m_links.begin(), m_links.end(), newLink);
     // must extract the distance before you insert otherwise the iterators are
     // incompatible
     index = static_cast<int>(std::distance(m_links.begin(), linkPtr));

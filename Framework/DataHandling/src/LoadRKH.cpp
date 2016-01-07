@@ -342,8 +342,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
 
     // now read in the Y values
     MantidVec &YOut = outWrksp->dataY(i);
-    for (auto it = YOut.begin(), end = YOut.end(); it != end;
-         ++it) {
+    for (auto it = YOut.begin(), end = YOut.end(); it != end; ++it) {
       m_fileIn >> *it;
     }
     prog.report("Loading Y data");
@@ -352,8 +351,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   // the error values form one big block after the Y-values
   for (size_t i = 0; i < nAxis1Values; ++i) {
     MantidVec &EOut = outWrksp->dataE(i);
-    for (auto it = EOut.begin(), end = EOut.end(); it != end;
-         ++it) {
+    for (auto it = EOut.begin(), end = EOut.end(); it != end; ++it) {
       m_fileIn >> *it;
     }
     prog.report("Loading error estimates");

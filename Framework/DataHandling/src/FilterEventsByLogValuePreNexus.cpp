@@ -515,8 +515,7 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   m_loadOnlySomeSpectra = (this->m_spectraList.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (auto it = m_spectraList.begin();
-       it != m_spectraList.end(); it++)
+  for (auto it = m_spectraList.begin(); it != m_spectraList.end(); it++)
     spectraLoadMap[*it] = true;
 
   //---------------------------------------------------------------------------
@@ -676,8 +675,7 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
 void FilterEventsByLogValuePreNexus::addToWorkspaceLog(std::string logtitle,
                                                        size_t mindex) {
   // Create TimeSeriesProperty
-  auto property =
-      new TimeSeriesProperty<double>(logtitle);
+  auto property = new TimeSeriesProperty<double>(logtitle);
 
   // Add entries
   size_t nbins = this->wrongdetid_pulsetimes[mindex].size();
@@ -1377,8 +1375,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
       // Obtain the global map index for this wrong detector ID events entry in
       // local map
       size_t mindex = 0;
-      auto git =
-          this->wrongdetidmap.find(tmpid);
+      auto git = this->wrongdetidmap.find(tmpid);
       if (git == this->wrongdetidmap.end()) {
         // Create 'wrong detid' global map entry if not there
         size_t newindex = this->wrongdetid_pulsetimes.size();
@@ -2253,8 +2250,7 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
   eventws->getInstrument()->getDetectors(detector_map);
 
   // Set up
-  for (auto it = detector_map.begin();
-       it != detector_map.end(); it++) {
+  for (auto it = detector_map.begin(); it != detector_map.end(); it++) {
     if (!it->second->isMonitor()) {
       // Add non-monitor detector ID
       size_t workspaceIndex = m_pixelToWkspindex[it->first];

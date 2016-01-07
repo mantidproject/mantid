@@ -574,8 +574,7 @@ PlotPeakByLogValue::makeNames() const {
           boost::dynamic_pointer_cast<API::WorkspaceGroup>(ws);
       if (wsg) {
         std::vector<std::string> wsNames = wsg->getNames();
-        for (auto i = wsNames.begin();
-             i != wsNames.end(); ++i) {
+        for (auto i = wsNames.begin(); i != wsNames.end(); ++i) {
           nameList.push_back(InputData(*i, wi, -1, period, start, end));
         }
         continue;

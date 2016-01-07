@@ -155,8 +155,8 @@ void LoadFullprofResolution::exec() {
                         << ") is negative.  It is not allowed and is  ignored. "
                         << ".\n";
       } else {
-        auto fiter = lower_bound(
-            vec_bankinirf.begin(), vec_bankinirf.end(), outputbankid);
+        auto fiter = lower_bound(vec_bankinirf.begin(), vec_bankinirf.end(),
+                                 outputbankid);
         if (fiter == vec_bankinirf.end() || *fiter != outputbankid) {
           // Specified bank ID does not exist.
           stringstream errmsg;

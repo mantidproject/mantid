@@ -73,8 +73,8 @@ void SaveReflTBL::exec() {
     throw Exception::FileError("Unable to create file: ", filename);
   }
 
-  for (auto iterator = m_stichgroups.begin();
-       iterator != m_stichgroups.end(); ++iterator) {
+  for (auto iterator = m_stichgroups.begin(); iterator != m_stichgroups.end();
+       ++iterator) {
     std::vector<size_t> &rowNos = iterator->second;
     size_t i = 0;
     for (; i < rowNos.size(); ++i) {

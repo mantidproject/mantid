@@ -1140,8 +1140,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
 
   auto iend = splitter.end();
   // std::string prev_name;
-  for (auto itr = splitter.begin(); itr != iend;
-       ++itr) {
+  for (auto itr = splitter.begin(); itr != iend; ++itr) {
     Poco::StringTokenizer tokens(*itr, ";");
     if (tokens.count() < 4)
       continue;

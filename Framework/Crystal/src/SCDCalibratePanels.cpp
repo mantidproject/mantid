@@ -183,8 +183,7 @@ void SCDCalibratePanels::CalculateGroups(
   Groups.clear();
 
   if (Grouping == "OnePanelPerGroup") {
-    for (auto it = AllBankNames.begin();
-         it != AllBankNames.end(); ++it) {
+    for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
       string bankName = (*it);
       vector<string> vbankName;
       vbankName.push_back(bankName);
@@ -194,8 +193,7 @@ void SCDCalibratePanels::CalculateGroups(
   } else if (Grouping == "AllPanelsInOneGroup") {
     vector<string> vbankName;
 
-    for (auto it = AllBankNames.begin();
-         it != AllBankNames.end(); ++it) {
+    for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
       string bankName = (*it);
 
       vbankName.push_back(bankName);
@@ -319,8 +317,7 @@ boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
   boost::shared_ptr<const ParameterMap> pmap0 = instrument->getParameterMap();
   boost::shared_ptr<ParameterMap> pmap1(new ParameterMap());
 
-  for (auto vit = AllBankNames.begin();
-       vit != AllBankNames.end(); ++vit) {
+  for (auto vit = AllBankNames.begin(); vit != AllBankNames.end(); ++vit) {
     string bankName = (*vit);
     updateBankParams(instrument->getComponentByName(bankName), pmap1, pmap0);
   }
@@ -1732,10 +1729,8 @@ void SCDCalibratePanels::saveXmlFile(
   ParameterMap_sptr pmap = instrument->getParameterMap();
 
   // write out the detector banks
-  for (auto it = Groups.begin();
-       it != Groups.end(); ++it) {
-    for (auto it1 = (*it).begin(); it1 != (*it).end();
-         ++it1) {
+  for (auto it = Groups.begin(); it != Groups.end(); ++it) {
+    for (auto it1 = (*it).begin(); it1 != (*it).end(); ++it1) {
       string bankName = (*it1);
 
       oss3 << "<component-link name=\"" << bankName << "\">" << endl;

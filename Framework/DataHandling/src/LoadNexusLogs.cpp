@@ -595,8 +595,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     // The string may contain non-printable (i.e. control) characters, replace
     // these
     std::replace_if(values.begin(), values.end(), iscntrl, ' ');
-    auto tsp =
-        new TimeSeriesProperty<std::string>(prop_name);
+    auto tsp = new TimeSeriesProperty<std::string>(prop_name);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);
     const size_t ntimes = times.size();

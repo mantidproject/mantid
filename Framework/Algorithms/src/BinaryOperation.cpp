@@ -1045,8 +1045,7 @@ BinaryOperation::buildBinaryOperationTable(
 
       // Now we use the RHS map to find it. This only works if both the lhs and
       // rhs have 1 detector per pixel
-      auto map_it =
-          rhs_det_to_wi.find(lhs_detector_ID);
+      auto map_it = rhs_det_to_wi.find(lhs_detector_ID);
       if (map_it != rhs_det_to_wi.end()) {
         rhsWI = map_it->second; // This is the workspace index in the RHS that
                                 // matched lhs_detector_ID

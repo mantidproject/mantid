@@ -353,8 +353,7 @@ EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
     // and append to the list
     this->weightedEventsNoTime.reserve(this->weightedEventsNoTime.size() +
                                        more_events.size());
-    for (auto it = more_events.begin();
-         it != more_events.end(); ++it)
+    for (auto it = more_events.begin(); it != more_events.end(); ++it)
       this->weightedEventsNoTime.emplace_back(*it);
     break;
   }
@@ -1548,8 +1547,7 @@ const MantidVec &EventList::constDataY() const {
     yData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
 
     // prepare to update the uncertainties
-    auto eData =
-        new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
+    auto eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
     mru->ensureEnoughBuffersE(thread);
 
     // see if E should be calculated;
@@ -1870,8 +1868,7 @@ typename std::vector<T>::const_iterator
 EventList::findFirstPulseEvent(const std::vector<T> &events,
                                const double seek_pulsetime) {
   auto itev = events.begin();
-  auto itev_end =
-      events.end(); // cache for speed
+  auto itev_end = events.end(); // cache for speed
 
   // if tof < X[0], that means that you need to skip some events
   while ((itev != itev_end) &&
@@ -2175,8 +2172,7 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
 
   if (this->events.size() > 0) {
     // Iterate through all events (sorted by pulse time)
-    auto itev =
-        findFirstPulseEvent(this->events, X[0]);
+    auto itev = findFirstPulseEvent(this->events, X[0]);
     auto itev_end = events.cend(); // cache for speed
     // The above can still take you to end() if no events above X[0], so check
     // again.

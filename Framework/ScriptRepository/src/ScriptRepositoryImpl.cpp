@@ -475,8 +475,7 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
   // and also fill up the output vector (in reverse order)
   Mantid::API::SCRIPTSTATUS acc_status = Mantid::API::BOTH_UNCHANGED;
   std::string last_directory = "";
-  for (auto it = repo.rbegin(); it != repo.rend();
-       ++it) {
+  for (auto it = repo.rbegin(); it != repo.rend(); ++it) {
     // for every entry, it takes the path and RepositoryEntry
     std::string entry_path = it->first;
     RepositoryEntry &entry = it->second;
@@ -1312,8 +1311,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
   ensureValidRepository();
   std::string path = convertPath(input_path);
   std::vector<std::string> files_to_update;
-  for (auto it = repo.rbegin(); it != repo.rend();
-       ++it) {
+  for (auto it = repo.rbegin(); it != repo.rend(); ++it) {
     // for every entry, it takes the path and RepositoryEntry
     std::string entry_path = it->first;
     RepositoryEntry &entry = it->second;
@@ -1551,8 +1549,8 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
         }
       }
 
-      for (auto it = entries_to_delete.begin();
-           it != entries_to_delete.end(); ++it) {
+      for (auto it = entries_to_delete.begin(); it != entries_to_delete.end();
+           ++it) {
         // remove this entry
         pt.removeMember(*it);
       }

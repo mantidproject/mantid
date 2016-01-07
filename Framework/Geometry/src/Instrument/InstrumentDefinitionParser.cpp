@@ -1230,8 +1230,7 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
         pLocElem, pCompElem);
 
     // Create the bank with the given parent.
-    auto bank =
-        new Geometry::RectangularDetector(name, parent);
+    auto bank = new Geometry::RectangularDetector(name, parent);
 
     // set location for this newly added comp and set facing if specified in
     // instrument def. file. Also

@@ -113,8 +113,7 @@ void SaveAscii::exec() {
   }
   // Else if the separator drop down choice is not UserDefined then we use that.
   else if (choice != "UserDefined") {
-    auto it =
-        m_separatorIndex.find(choice);
+    auto it = m_separatorIndex.find(choice);
     sep = it->second;
   }
   // If we still have nothing, then we are forced to use a default.

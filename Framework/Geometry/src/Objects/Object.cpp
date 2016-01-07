@@ -279,8 +279,7 @@ int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
       SurfPoint *KV = dynamic_cast<SurfPoint *>(T1);
       if (KV) {
         // Ensure that we have a it in the surface list:
-        auto mf =
-            Smap.find(KV->getKeyN());
+        auto mf = Smap.find(KV->getKeyN());
         if (mf != Smap.end()) {
           KV->setKey(mf->second);
           Rcount++;

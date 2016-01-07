@@ -150,8 +150,7 @@ int CompAssembly::remove(IComponent *comp) {
         "CompAssembly::remove() called for a parameterized CompAssembly.");
 
   // Look for the passed in component in the list of children
-  auto it =
-      std::find(m_children.begin(), m_children.end(), comp);
+  auto it = std::find(m_children.begin(), m_children.end(), comp);
   if (it != m_children.end()) {
     // If it's found, remove it from the list and then delete it
     m_children.erase(it);

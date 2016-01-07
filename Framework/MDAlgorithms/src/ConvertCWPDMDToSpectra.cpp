@@ -346,8 +346,7 @@ void ConvertCWPDMDToSpectra::findXBoundary(
     // Get run number
     int runnumber = dataws->getExperimentInfo(irun)->getRunNumber();
     g_log.debug() << "Run " << runnumber << ": ";
-    auto miter =
-        map_runwavelength.find(runnumber);
+    auto miter = map_runwavelength.find(runnumber);
     double wavelength = -1;
     if (miter != map_runwavelength.end()) {
       wavelength = miter->second;
@@ -504,8 +503,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
       else {
         if (temprun != currRunIndex) {
           // use map to find a new wavelength
-          auto miter =
-              map_runlambda.find(temprun);
+          auto miter = map_runlambda.find(temprun);
           if (miter == map_runlambda.end()) {
             std::stringstream errss;
             errss << "Event " << iev << " has run ID as " << temprun << ". "

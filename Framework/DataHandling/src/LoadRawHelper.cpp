@@ -956,8 +956,7 @@ specid_t LoadRawHelper::calculateWorkspaceSize() {
 
     if (m_list) {
       if (m_interval) {
-        for (auto it = m_spec_list.begin();
-             it != m_spec_list.end();)
+        for (auto it = m_spec_list.begin(); it != m_spec_list.end();)
           if (*it >= m_spec_min && *it < m_spec_max) {
             it = m_spec_list.erase(it);
           } else

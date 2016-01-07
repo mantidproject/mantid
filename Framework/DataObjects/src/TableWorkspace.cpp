@@ -71,8 +71,7 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
     return c;
   }
   // Check that there is no column with the same name.
-  auto ci =
-      std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
+  auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
   if (ci != m_columns.end()) {
     g_log.error() << "Column with name " << name << " already exists.\n";
     return c;
@@ -106,8 +105,7 @@ void TableWorkspace::setRowCount(size_t count) {
 
 /// Gets the shared pointer to a column.
 API::Column_sptr TableWorkspace::getColumn(const std::string &name) {
-  auto ci =
-      std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
+  auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
   if (ci == m_columns.end()) {
     std::string str = "Column " + name + " does not exist.\n";
     g_log.error(str);
@@ -149,8 +147,7 @@ API::Column_const_sptr TableWorkspace::getColumn(size_t index) const {
 }
 
 void TableWorkspace::removeColumn(const std::string &name) {
-  auto ci =
-      std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
+  auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
   if (ci != m_columns.end()) {
     if (!ci->unique()) {
       g_log.error() << "Deleting column in use (" << name << ").\n";
@@ -193,7 +190,7 @@ std::vector<std::string> TableWorkspace::getColumnNames() const {
 
 bool TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
   auto ci = std::find_if(m_columns.begin(), m_columns.end(),
-                              FindName(column->name()));
+                         FindName(column->name()));
   if (ci != m_columns.end()) {
     g_log.error() << "Column with name " << column->name()
                   << " already exists.\n";

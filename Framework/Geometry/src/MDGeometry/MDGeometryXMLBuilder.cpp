@@ -46,8 +46,8 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(
   bool bAdded = false; // Addition fails by default.
   if (dimensionToAdd.get() != NULL) {
     CompareIMDDimension_const_sptr comparitor(dimensionToAdd);
-    auto location = std::find_if(
-        m_vecDimensions.begin(), m_vecDimensions.end(), comparitor);
+    auto location = std::find_if(m_vecDimensions.begin(), m_vecDimensions.end(),
+                                 comparitor);
     if (location == m_vecDimensions.end()) {
       m_vecDimensions.push_back(dimensionToAdd);
       bAdded = true;

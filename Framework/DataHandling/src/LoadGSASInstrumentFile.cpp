@@ -181,8 +181,7 @@ void LoadGSASInstrumentFile::exec() {
       }
     } else {
       // Else, use all available banks
-      for (auto it = bankparammap.begin();
-           it != bankparammap.end(); ++it) {
+      for (auto it = bankparammap.begin(); it != bankparammap.end(); ++it) {
         bankIds.push_back(static_cast<int>(it->first));
       }
     }

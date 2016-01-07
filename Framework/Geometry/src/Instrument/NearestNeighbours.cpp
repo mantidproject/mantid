@@ -166,8 +166,8 @@ void NearestNeighbours::build(const int noNeighbours) {
   auto annTree = new ANNkd_tree(dataPoints, nspectra, 3);
   pointNo = 0;
   // Run the nearest neighbour search on each detector, reusing the arrays
-  auto  nnIndexList = new ANNidx[m_noNeighbours];
-  auto  nnDistList = new ANNdist[m_noNeighbours];
+  auto nnIndexList = new ANNidx[m_noNeighbours];
+  auto nnDistList = new ANNdist[m_noNeighbours];
 
   for (detIt = spectraDets.begin(); detIt != spectraDets.end(); ++detIt) {
     ANNpoint scaledPos = dataPoints[pointNo];
@@ -250,8 +250,7 @@ std::map<specid_t, IDetector_const_sptr> NearestNeighbours::getSpectraDetectors(
   if (spectraMap.empty())
     return spectra;
   auto cend = spectraMap.cend();
-  for (auto citr = spectraMap.cbegin();
-       citr != cend; ++citr) {
+  for (auto citr = spectraMap.cbegin(); citr != cend; ++citr) {
     const std::vector<detid_t> detIDs(citr->second.begin(), citr->second.end());
     IDetector_const_sptr det = instrument->getDetectorG(detIDs);
     // Always ignore monitors and ignore masked detectors if requested.

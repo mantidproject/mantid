@@ -148,8 +148,8 @@ void AlgorithmProxy::addObserver(const Poco::AbstractObserver &observer) const {
 */
 void AlgorithmProxy::removeObserver(
     const Poco::AbstractObserver &observer) const {
-  auto o = std::find(
-      m_externalObservers.begin(), m_externalObservers.end(), &observer);
+  auto o = std::find(m_externalObservers.begin(), m_externalObservers.end(),
+                     &observer);
   if (o != m_externalObservers.end())
     m_externalObservers.erase(o);
   if (m_alg)

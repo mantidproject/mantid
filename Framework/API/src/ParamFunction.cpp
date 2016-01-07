@@ -21,13 +21,11 @@ Kernel::Logger g_log("ParamFunction");
 
 /// Destructor
 ParamFunction::~ParamFunction() {
-  for (auto it = m_ties.begin();
-       it != m_ties.end(); ++it) {
+  for (auto it = m_ties.begin(); it != m_ties.end(); ++it) {
     delete *it;
   }
   m_ties.clear();
-  for (auto it = m_constraints.begin();
-       it != m_constraints.end(); ++it) {
+  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
     delete *it;
   }
   m_constraints.clear();
@@ -319,8 +317,7 @@ void ParamFunction::addTie(ParameterTie *tie) {
  * Apply the ties.
  */
 void ParamFunction::applyTies() {
-  for (auto tie = m_ties.begin();
-       tie != m_ties.end(); ++tie) {
+  for (auto tie = m_ties.begin(); tie != m_ties.end(); ++tie) {
     (**tie).eval();
   }
 }
@@ -349,8 +346,7 @@ bool ParamFunction::removeTie(size_t i) {
   if (i >= nParams()) {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
-  auto it =
-      std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(i));
+  auto it = std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(i));
   if (it != m_ties.end()) {
     delete *it;
     m_ties.erase(it);
@@ -378,8 +374,7 @@ ParameterTie *ParamFunction::getTie(size_t i) const {
 /** Remove all ties
  */
 void ParamFunction::clearTies() {
-  for (auto it = m_ties.begin();
-       it != m_ties.end(); ++it) {
+  for (auto it = m_ties.begin(); it != m_ties.end(); ++it) {
     size_t i = getParameterIndex(**it);
     unfix(i);
     delete *it;
@@ -428,8 +423,7 @@ IConstraint *ParamFunction::getConstraint(size_t i) const {
  */
 void ParamFunction::removeConstraint(const std::string &parName) {
   size_t iPar = parameterIndex(parName);
-  for (auto it = m_constraints.begin();
-       it != m_constraints.end(); ++it) {
+  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
     if (iPar == (**it).getIndex()) {
       delete *it;
       m_constraints.erase(it);
@@ -446,13 +440,11 @@ void ParamFunction::setUpForFit() {
 
 /// Nonvirtual member which removes all declared parameters
 void ParamFunction::clearAllParameters() {
-  for (auto it = m_ties.begin();
-       it != m_ties.end(); ++it) {
+  for (auto it = m_ties.begin(); it != m_ties.end(); ++it) {
     delete *it;
   }
   m_ties.clear();
-  for (auto it = m_constraints.begin();
-       it != m_constraints.end(); ++it) {
+  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
     delete *it;
   }
   m_constraints.clear();

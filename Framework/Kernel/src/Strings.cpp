@@ -1075,8 +1075,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
   // Estimation of the resulting number of elements
   result.reserve(elements->count());
 
-  for (auto it = elements->begin(); it != elements->end();
-       it++) {
+  for (auto it = elements->begin(); it != elements->end(); it++) {
     // See above for the reason space is added
     Tokenizer rangeElements(*it + " ", rangeSep, Tokenizer::TOK_TRIM);
 

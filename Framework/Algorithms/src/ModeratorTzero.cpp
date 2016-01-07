@@ -348,8 +348,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
             double tof;
             // fix the histogram bins
             MantidVec &x = evlist.dataX();
-            for (auto iter = x.begin(); iter != x.end();
-                 ++iter) {
+            for (auto iter = x.begin(); iter != x.end(); ++iter) {
               tof = *iter;
               if (tof < m_t1min + t2)
                 tof -= min_t0_next;

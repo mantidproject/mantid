@@ -393,8 +393,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   // std::cout << m_inputMinPoint << " m_inputMinPoint " << std::endl;
 
   // Create the CoordTransformAffine for BINNING with these basis vectors
-  auto ct =
-      new DataObjects::CoordTransformAffine(inD, m_outD);
+  auto ct = new DataObjects::CoordTransformAffine(inD, m_outD);
   // Note: the scaling makes the coordinate correspond to a bin index
   // ct->buildOrthogonal(m_inputMinPoint, this->m_bases,
   //                    VMD(this->m_binningScaling));
@@ -403,8 +402,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   this->m_transform = ct;
 
   // Transformation original->binned
-  auto ctFrom =
-      new DataObjects::CoordTransformAffine(inD, m_outD);
+  auto ctFrom = new DataObjects::CoordTransformAffine(inD, m_outD);
   // ctFrom->buildOrthogonal(m_translation, this->m_bases,
   //                        VMD(m_transformScaling));
   ctFrom->buildNonOrthogonal(m_translation, this->m_bases,
@@ -427,8 +425,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   m_transformToOriginal = NULL;
   if (m_outD == inD) {
     // Can't reverse transform if you lost dimensions.
-    auto ctTo =
-        new DataObjects::CoordTransformAffine(inD, m_outD);
+    auto ctTo = new DataObjects::CoordTransformAffine(inD, m_outD);
     Matrix<coord_t> fromMatrix = ctFrom->getMatrix();
     Matrix<coord_t> toMatrix = fromMatrix;
     // Invert the affine matrix to get the reverse transformation
@@ -596,8 +593,7 @@ void SlicingAlgorithm::createAlignedTransform() {
     // dimension index is that?
     Matrix<coord_t> mat = m_transformFromOriginal->makeAffineMatrix();
     mat.Invert();
-    auto tmp =
-        new DataObjects::CoordTransformAffine(inD, m_outD);
+    auto tmp = new DataObjects::CoordTransformAffine(inD, m_outD);
     tmp->setMatrix(mat);
     m_transformToOriginal = tmp;
   } else {
@@ -997,8 +993,7 @@ SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
         function_max[d] =
             m_binDimensions[bd]->getX(m_binDimensions[bd]->getNBins());
     }
-    auto function =
-        new MDBoxImplicitFunction(function_min, function_max);
+    auto function = new MDBoxImplicitFunction(function_min, function_max);
     return function;
   } else {
     // General implicit function

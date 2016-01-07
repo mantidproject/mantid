@@ -351,8 +351,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   if (m_spec_max != Mantid::EMPTY_INT()) {
     uint32_t ifirst = pixel_id[0];
     range_check out_range(m_spec_min, m_spec_max, id_to_wi);
-    auto newEnd =
-        std::remove_if(pixel_id.begin(), pixel_id.end(), out_range);
+    auto newEnd = std::remove_if(pixel_id.begin(), pixel_id.end(), out_range);
     pixel_id.erase(newEnd, pixel_id.end());
     // check if beginning or end of array was erased
     if (ifirst != pixel_id[0])

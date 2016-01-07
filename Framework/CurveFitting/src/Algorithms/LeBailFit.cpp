@@ -1623,8 +1623,7 @@ void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap,
   for (size_t icycle = 1; icycle <= maxcycles; ++icycle) {
     // Refine parameters (for all parameters in turn) to data with background
     // removed
-    for (auto giter = m_MCGroups.begin();
-         giter != m_MCGroups.end(); ++giter) {
+    for (auto giter = m_MCGroups.begin(); giter != m_MCGroups.end(); ++giter) {
       // Propose new value for ONE AND ONLY ONE Monte Carlo parameter group
       /*
       int igroup = giter->first; // group id

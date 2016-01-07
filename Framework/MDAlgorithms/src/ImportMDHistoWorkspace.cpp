@@ -104,8 +104,7 @@ void ImportMDHistoWorkspace::exec() {
 
   // Write to the signal and error array from the deque.
   size_t currentBox = 0;
-  for (auto it = box_elements.begin();
-       it != box_elements.end(); it += 2) {
+  for (auto it = box_elements.begin(); it != box_elements.end(); it += 2) {
     auto temp = it;
     double signal = atof((*(temp)).c_str());
     double error = atof((*(++temp)).c_str());

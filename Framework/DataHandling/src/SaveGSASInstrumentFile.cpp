@@ -145,8 +145,7 @@ bool ChopperConfiguration::hasBank(unsigned int bankid) const {
 double ChopperConfiguration::getParameter(unsigned int bankid,
                                           const string &paramname) const {
   // Obtain index for the bank
-  auto biter =
-      m_bankIDIndexMap.find(bankid);
+  auto biter = m_bankIDIndexMap.find(bankid);
   if (biter == m_bankIDIndexMap.end()) {
     stringstream errss;
     errss << "Bank ID and index map does not have entry for bank " << bankid;
@@ -366,8 +365,7 @@ void SaveGSASInstrumentFile::exec() {
   // Deal with a default
   if (m_vecBankID2File.empty()) {
     // Default is to export all banks
-    for (auto miter =
-             bankprofileparammap.begin();
+    for (auto miter = bankprofileparammap.begin();
          miter != bankprofileparammap.end(); ++miter) {
       unsigned int bankid = miter->first;
       m_vecBankID2File.push_back(bankid);
@@ -762,8 +760,7 @@ void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
     const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
     unsigned int bankid) {
   // Locate the profile map
-  auto biter =
-      bankprofilemap.find(bankid);
+  auto biter = bankprofilemap.find(bankid);
   if (biter == bankprofilemap.end())
     throw runtime_error("Bank ID cannot be found in bank-profile-map-map. 001");
   const map<string, double> &profilemap = biter->second;
@@ -866,8 +863,7 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
     const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
     unsigned int bankid, const std::string &prmfilename) {
   // Get access to the profile map
-  auto biter =
-      bankprofilemap.find(bankid);
+  auto biter = bankprofilemap.find(bankid);
   if (biter == bankprofilemap.end())
     throw runtime_error("Bank does not exist in bank-profile-map. 002");
 

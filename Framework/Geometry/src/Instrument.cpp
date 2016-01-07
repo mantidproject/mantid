@@ -233,8 +233,7 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
           monitors += 1;
     } else {
       const detid2det_map &in_dets = m_detectorCache;
-      for (auto it = in_dets.begin();
-           it != in_dets.end(); ++it)
+      for (auto it = in_dets.begin(); it != in_dets.end(); ++it)
         if (it->second->isMonitor())
           monitors += 1;
     }
@@ -754,8 +753,7 @@ void Instrument::removeDetector(IDetector *det) {
   m_detectorCache.erase(id);
   // Also need to remove from monitor cache if appropriate
   if (det->isMonitor()) {
-    auto it =
-        std::find(m_monitorCache.begin(), m_monitorCache.end(), id);
+    auto it = std::find(m_monitorCache.begin(), m_monitorCache.end(), id);
     if (it != m_monitorCache.end())
       m_monitorCache.erase(it);
   }

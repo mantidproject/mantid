@@ -2741,14 +2741,13 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
         // spread the events uniformly inside the bin
         boost::uniform_real<> distribution(left, right);
         std::vector<double> random_numbers(m);
-        for (auto it = random_numbers.begin();
-             it != random_numbers.end(); ++it) {
+        for (auto it = random_numbers.begin(); it != random_numbers.end();
+             ++it) {
           *it = distribution(rand_gen);
         }
         std::sort(random_numbers.begin(), random_numbers.end());
         auto it = random_numbers.begin();
-        for (auto ev1 = ev - m; ev1 != ev;
-             ++ev1, ++it) {
+        for (auto ev1 = ev - m; ev1 != ev; ++ev1, ++it) {
           ev1->m_tof = *it;
         }
       }
@@ -2844,9 +2843,8 @@ void LoadEventNexus::createSpectraList(int32_t min, int32_t max) {
 
     if (!m_specList.empty()) {
       // Check no negative/zero numbers have been passed
-      auto itr =
-          std::find_if(m_specList.begin(), m_specList.end(),
-                       std::bind2nd(std::less<int32_t>(), 1));
+      auto itr = std::find_if(m_specList.begin(), m_specList.end(),
+                              std::bind2nd(std::less<int32_t>(), 1));
       if (itr != m_specList.end()) {
         throw std::invalid_argument(
             "Negative/Zero SpectraList property encountered.");

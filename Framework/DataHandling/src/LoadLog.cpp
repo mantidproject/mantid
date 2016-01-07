@@ -254,8 +254,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
     isNumeric = !istr.fail();
 
     if (isNumeric) {
-      auto
-          ditr = dMap.find(propname);
+      auto ditr = dMap.find(propname);
       if (ditr != dMap.end()) {
         Kernel::TimeSeriesProperty<double> *prop = ditr->second;
         if (prop)
@@ -266,8 +265,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
         dMap.insert(dpair(propname, logd));
       }
     } else {
-      auto
-          sitr = sMap.find(propname);
+      auto sitr = sMap.find(propname);
       if (sitr != sMap.end()) {
         Kernel::TimeSeriesProperty<std::string> *prop = sitr->second;
         if (prop)

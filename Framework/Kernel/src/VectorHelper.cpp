@@ -451,8 +451,7 @@ std::vector<NumT> splitStringIntoVector(std::string listString) {
   split_vector_type strs;
 
   boost::split(strs, listString, boost::is_any_of(", "));
-  for (auto it = strs.begin(); it != strs.end();
-       ++it) {
+  for (auto it = strs.begin(); it != strs.end(); ++it) {
     if (!it->empty()) {
       // String not empty
       std::stringstream oneNumber(*it);
