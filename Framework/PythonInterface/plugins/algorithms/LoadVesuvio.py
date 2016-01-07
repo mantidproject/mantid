@@ -383,10 +383,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         # Cache delta_t values
         raw_t = first_ws.readX(0)
-        delay = raw_t[1] - raw_t[0] # previous: delay = raw_t[2] - raw_t[1]
+        delay = raw_t[1] - raw_t[0]
         # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
         raw_t = raw_t - delay
-        self.pt_times = raw_t[0:] # previous: self.pt_times = raw_t[1:]
+        self.pt_times = raw_t[0:]
         self.delta_t = (raw_t[1:] - raw_t[:-1])
 
         mon_raw_t = self._raw_monitors[0].readX(0)
@@ -629,10 +629,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 foil_out_periods = (4,5,6)
                 foil_thin_periods = (1,2,3)
                 foil_thick_periods = (1,2)
-        elif self._nperiods == 9:
-            foil_out_periods = (7,8,9)
-            foil_thin_periods = (4,5,6)
-            foil_thick_periods = (1,2,3)
         else:
             pass
 
@@ -886,10 +882,6 @@ class SpectraToFoilPeriodMap(object):
             self._one_to_one = {1:1, 2:2, 3:3, 4:4, 5:5, 6:6}
             self._odd_even =   {1:1, 2:3, 3:5, 4:2, 5:4, 6:6}
             self._even_odd =   {1:2, 2:4, 3:6, 4:1, 5:3, 6:5}
-        elif nperiods == 9:
-            self._one_to_one = {1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9}
-            self._odd_even =   {1:1, 2:3, 3:5, 4:2, 5:4, 6:6, 7:7, 8:8, 9:9}
-            self._even_odd =   {1:2, 2:4, 3:6, 4:1, 5:3, 6:5, 7:7, 8:8, 9:9}
         else:
             raise RuntimeError("Unsupported number of periods given: " + str(nperiods) +
                                ". Supported number of periods=2,3,6,9")
