@@ -13,6 +13,7 @@ using ::testing::Return;
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
+using Mantid::Kernel::Matrix;
 
 class SpaceGroupFactoryTest : public CxxTest::TestSuite {
 public:
@@ -315,7 +316,61 @@ public:
     TS_ASSERT_EQUALS(*generatedGroup, *correctGroup);
   }
 
+  void test_OperatorSymOpString_too_short() {
+    std::vector<std::string> strings{"a", "b"};
+    TS_ASSERT_THROWS(SymmetryOperation("x,y,z") * strings,
+                     std::invalid_argument);
+  }
+
+  void test_OperatorSymOpString_correctness() {
+    auto vectorsEqual = [](const std::vector<std::string> &lhs,
+                           const std::vector<std::string> &rhs) {
+      return std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+    };
+
+    std::vector<std::string> strings{"a", "b", "c"};
+
+    TS_ASSERT(
+        vectorsEqual(SymmetryOperation("x,y,z") * strings, {"a", "b", "c"}));
+    TS_ASSERT(
+        vectorsEqual(SymmetryOperation("-x,-y,-z") * strings, {"a", "b", "c"}));
+    TS_ASSERT(
+        vectorsEqual(SymmetryOperation("y,x,z") * strings, {"b", "a", "c"}));
+    TS_ASSERT(
+        vectorsEqual(SymmetryOperation("-z,x,-y") * strings, {"c", "a", "b"}));
+  }
+
+  void test_OrthorhombicSymbolPermutations() {
+    std::vector<std::string> transformations{"y,x,-z", "y,z,x", "z,y,-x",
+                                             "z,x,y", "x,z,-y"};
+
+    checkOrthorhombicSymbols(
+        "C c c 2", transformations,
+        {"C c c 2", "A 2 a a", "A 2 a a", "B b 2 b", "B b 2 b"});
+    checkOrthorhombicSymbols(
+        "P b c m", transformations,
+        {"P c a m", "P m c a", "P m a b", "P b m a", "P c m b"});
+  }
+
 private:
+  void checkOrthorhombicSymbols(
+      const std::string &symbol,
+      const std::vector<std::string> &transformations,
+      const std::vector<std::string> &expectedTransformations) const {
+    TestableSpaceGroupFactory factory;
+
+    for (size_t i = 0; i < transformations.size(); ++i) {
+      std::string transformed =
+          factory.getTransformedSymbolOrthorhombic(symbol, transformations[i]);
+
+      TSM_ASSERT_EQUALS("Transforming " + symbol + " with " +
+                            transformations[i] + " should give " +
+                            expectedTransformations[i] + ", but gave " +
+                            transformed,
+                        transformed, expectedTransformations[i]);
+    }
+  }
+
   class TestableSpaceGroupFactory : public SpaceGroupFactoryImpl {
     friend class SpaceGroupFactoryTest;
 
