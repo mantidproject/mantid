@@ -126,6 +126,8 @@ private:
                            const std::vector<std::string> &values) const;
   void convertHistoToPoints(const QString &wsName) const;
   void convertPointsToHisto(const QString &wsName) const;
+  bool groupIsAllMatrixWorkspaces(
+      const Mantid::API::WorkspaceGroup_const_sptr &groupWS) const;
 
 protected:
   MantidTreeWidget * m_tree;
