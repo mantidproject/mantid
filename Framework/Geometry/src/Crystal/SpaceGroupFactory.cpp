@@ -581,6 +581,7 @@ DECLARE_GENERATED_SPACE_GROUP(103, "P 4 c c", "-x,-y,z; -y,x,z; x,-y,z+1/2")
 DECLARE_GENERATED_SPACE_GROUP(104, "P 4 n c",
                               "-x,-y,z; -y,x,z; x+1/2,-y+1/2,z+1/2")
 DECLARE_GENERATED_SPACE_GROUP(105, "P 42 m c", "-x,-y,z; -y,x,z+1/2; x,-y,z")
+DECLARE_GENERATED_SPACE_GROUP(106, "P 42 b c",
 DECLARE_GENERATED_SPACE_GROUP(106, "P 43 b c",
                               "-x,-y,z; -y,x,z+1/2; x+1/2,-y+1/2,z")
 DECLARE_GENERATED_SPACE_GROUP(107, "I 4 m m", "-x,-y,z; -y,x,z; x,-y,z")
