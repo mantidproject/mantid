@@ -209,7 +209,7 @@ void ExtractMaskToTable::parseStringToVector(std::string liststr,
 
 //----------------------------------------------------------------------------------------------
 /** Extract mask information from a workspace containing instrument
-  * @param maskeddetids :: vector of detector IDs of detectors that are masked
+  * @return vector of detector IDs of detectors that are masked
   */
 std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
   // Clear input
@@ -245,8 +245,8 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
 
 //----------------------------------------------------------------------------------------------
 /** Extract masked detectors from a MaskWorkspace
-  * @param maskeddetids :: vector of detector IDs of the detectors that are
- * masked
+  * @return vector of detector IDs of the detectors that are
+  * masked
   */
 std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
   // output vector

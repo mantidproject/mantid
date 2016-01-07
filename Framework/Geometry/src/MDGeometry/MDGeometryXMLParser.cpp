@@ -47,8 +47,6 @@ void MDGeometryXMLParser::validate() const {
 Peforms the processing associated with these transformations.
 */
 void MDGeometryXMLParser::execute() {
-  typedef std::vector<Mantid::Geometry::IMDDimension_sptr>::iterator Iterator;
-
   Poco::XML::DOMParser pParser;
   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(m_xmlToProcess);
   Poco::XML::Element *pRootElem = pDoc->documentElement();
