@@ -741,6 +741,16 @@ public:
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
+    // inputs from user
+    EXPECT_CALL(mockView, currentPreprocRunNo())
+        .Times(1)
+        .WillOnce(Return(m_ex_empty_run_num));
+    EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(0));
+
+    // No errors/1 warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
     pres.notify(IEnggDiffractionPresenter::RebinTime);
   }
 
