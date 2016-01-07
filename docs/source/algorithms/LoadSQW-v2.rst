@@ -144,14 +144,18 @@ For those elements where ``data.npix==0``, ``data.s=0`` and ``data.e=0``
 Output Frame
 ############
 
-The pixel information from the file is transformed to the HKL frame on loading. More specifically the final
-coordinates Q of the MD events will be
+The pixel information from the file is transformed to the frame selected by the user. More specifically the final
+coordinates are computed by applying one of the following transformations:
 
-.. math::
+- ``Q_sample``: :math:`\mathbb{I}`
+- ``Q_lab``: :math:`G_r U u_{123}`
+- ``HKL``: :math:`\frac{1}{2\pi}B^{-1}`
 
-   q_{hkl} = \frac{1}{2\pi}B^{-1} u_{123}
-
-where :math:`\frac{1}{2\pi}B^{-1}` is the uper-left 3x3 portion of ``u_to_rlu``. The energy value is left unchanged. 
+where :math:`\mathbb{I}` is the identity matrix, :math:`\frac{1}{2\pi}B^{-1}` is
+the uper-left 3x3 portion of ``u_to_rlu``,
+:math:`G_r` is the matrix of rotation from the goniometer and :math:`U` is the rotation matrix
+that maps from the cartesian coordinate system attached to the sample to the spectrometer
+coordinate system.The energy value is left unchanged.
 
 Assumptions
 ###########
