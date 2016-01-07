@@ -114,8 +114,14 @@ public:
   void setMantidColorMap(const MantidColorMap &map);
   void updateData(Matrix *m);
   void updateData(const Mantid::API::IMDWorkspace_const_sptr & workspace);
-  MantidQt::API::QwtRasterDataMD *dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr & workspace);
+  MantidQt::API::QwtRasterDataMD *
+  dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr &workspace,
+                    const QwtDoubleInterval *range = nullptr);
   void postDataUpdate();
+  /// Set autoscale on/off for color scale (default: on)
+  void setColorMapAutoScale(bool autoscale = true) {
+    d_color_map_autoscale = autoscale;
+  }
 
   ColorMapPolicy colorMapPolicy()const{return color_map_policy;};
 
@@ -201,6 +207,8 @@ protected:
   QList <PlotMarker *> d_labels_list;
   //! Keeps track of the plot marker on which the user clicked when selecting the labels.
   PlotMarker *d_selected_label;
+  //! Flag for whether we autoscale color bar
+  bool d_color_map_autoscale;
 
   //! Keep track of the coordinates of the point where the user clicked when selecting the labels.
   double d_click_pos_x, d_click_pos_y;
