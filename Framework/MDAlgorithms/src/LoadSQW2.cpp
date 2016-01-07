@@ -33,7 +33,6 @@ using Kernel::Logger;
 using Kernel::DblMatrix;
 using Kernel::Matrix;
 using Kernel::V3D;
-using boost::make_shared;
 
 //------------------------------------------------------------------------------
 // Constants
@@ -110,7 +109,6 @@ void LoadSQW2::init() {
   using namespace API;
   using Kernel::PropertyWithValue;
   using Kernel::StringListValidator;
-  using boost::make_shared;
 
   // Inputs
   declareProperty(
@@ -124,7 +122,7 @@ void LoadSQW2::init() {
                   "MDEventWorkspace");
   std::vector<std::string> allowed = {"Q_sample", "Q_lab", "HKL"};
   declareProperty("Q3DFrames", allowed[0],
-                  make_shared<StringListValidator>(allowed),
+                  boost::make_shared<StringListValidator>(allowed),
                   "The required frame for the output workspace");
 
   // Outputs
