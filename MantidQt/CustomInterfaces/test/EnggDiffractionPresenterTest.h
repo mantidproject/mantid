@@ -92,6 +92,7 @@ public:
     m_ex_run_number.push_back(g_validRunNo);
     g_vanNo.push_back("8899999988");
     g_ceriaNo.push_back("9999999999");
+    g_rebinRunNo.push_back(g_eventModeRunNo);
 
     // provide personal directories in order to carry out the full disable tests
     m_basicCalibSettings.m_inputDirCalib = "GUI_calib_folder/";
@@ -750,7 +751,7 @@ public:
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
         .Times(1)
-        .WillOnce(Return(g_eventModeRunNo));
+        .WillOnce(Return(g_rebinRunNo));
     EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(0));
 
     // No errors/warnings
@@ -767,7 +768,7 @@ public:
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
         .Times(1)
-        .WillRepeatedly(Return(g_eventModeRunNo));
+        .WillRepeatedly(Return(g_rebinRunNo));
 
     EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(1.0));
 
@@ -783,7 +784,9 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // inputs from user
-    EXPECT_CALL(mockView, currentPreprocRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, currentPreprocRunNo())
+        .Times(1)
+        .WillOnce(Return(m_ex_empty_run_num));
     // should not even call this one when the run number is obviously wrong
     EXPECT_CALL(mockView, rebinningTimeBin()).Times(0);
 
@@ -797,7 +800,7 @@ public:
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
         .Times(1)
-        .WillOnce(Return(g_eventModeRunNo));
+        .WillOnce(Return(g_rebinRunNo));
     EXPECT_CALL(mockView, rebinningPulsesNumberPeriods())
         .Times(1)
         .WillOnce(Return(1));
@@ -819,7 +822,7 @@ public:
     // This file will be found but it is not a valid file for this re-binning
     EXPECT_CALL(mockView, currentPreprocRunNo())
         .Times(1)
-        .WillOnce(Return(g_eventModeRunNo));
+        .WillOnce(Return(g_rebinRunNo));
     EXPECT_CALL(mockView, rebinningPulsesNumberPeriods())
         .Times(1)
         .WillOnce(Return(1000));
@@ -916,6 +919,7 @@ private:
   std::vector<std::string> m_ex_run_number;
   std::vector<std::string> g_vanNo;
   std::vector<std::string> g_ceriaNo;
+  std::vector<std::string> g_rebinRunNo;
 };
 
 // Note this is not a correct event mode run number. Using it here just
