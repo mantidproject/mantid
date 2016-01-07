@@ -638,6 +638,54 @@ void FitOneSinglePeak::pop(const std::map<std::string, double> &funcparammap,
 }
 
 //----------------------------------------------------------------------------------------------
+/** Calcualte chi-square for single domain data
+ * @brief FitOneSinglePeak::calChiSquareSD
+ * @param fitfunc
+ * @param dataws
+ * @param wsindex
+ * @param xmin
+ * @param xmax
+ * @return
+ */
+double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
+                                        MatrixWorkspace_sptr dataws,
+                                        size_t wsindex, double xmin,
+                                        double xmax) {
+    // Set up sub algorithm fit
+    IAlgorithm_sptr fit;
+    try {
+        fit = createChildAlgorithm("CalculateChiSquared", -1, -1, false);
+    }
+    catch (Exception::NotFoundError &) {
+        std::stringstream errss;
+        errss << "The FitPeak algorithm requires the CurveFitting library";
+        g_log.error(errss.str());
+        throw std::runtime_error(errss.str());
+    }
+
+    // Set the properties
+    fit->setProperty("Function", fitfunc);
+    fit->setProperty("InputWorkspace", dataws);
+    fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+    fit->setProperty("StartX", xmin);
+    fit->setProperty("EndX", xmax);
+
+    fit->executeAsChildAlg();
+    if (!fit->isExecuted()) {
+        g_log.error("Fit for background is not executed. ");
+        throw std::runtime_error("Fit for background is not executed. ");
+    }
+
+    // Retrieve result
+    // double chi2 = fit->getProperty("ChiSquaredDividedByDOF");
+    double chi2 = fit->getProperty("ChiSquared");
+    // g_log.notice() << "[DELETE DB] Chi2/DOF = " << chi2 << ", Chi2 = " <<
+    // chi2_2 << "\n";
+
+    return chi2;
+}
+
+//----------------------------------------------------------------------------------------------
 /** Fit function in single domain
   * @exception :: (1) Fit cannot be called. (2) Fit.isExecuted is false (cannot
  * be executed)
