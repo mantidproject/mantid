@@ -24,8 +24,9 @@ Peak::Peak()
       m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakShape(new NoShape) {  convention =
-          Kernel::ConfigService::Instance().getString("Q.convention");}
+      m_peakShape(new NoShape) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the lab frame).
@@ -44,8 +45,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
-  convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setQLabFrame(QLabFrame, detectorDistance);
 }
@@ -71,8 +71,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst,
       m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
-  convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -94,8 +93,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
-  convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
   this->setWavelength(m_Wavelength);
@@ -116,8 +114,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
-  convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
   this->setWavelength(m_Wavelength);
@@ -140,8 +137,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
-  convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -164,8 +160,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, double scattering,
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
       m_peakShape(new NoShape) {
-  convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
   m_detectorID = -1;
@@ -193,8 +188,9 @@ Peak::Peak(const Peak &other)
       m_orig_L(other.m_orig_L), m_detIDs(other.m_detIDs),
       m_peakShape(other.m_peakShape->clone())
 
-{  convention =
-    Kernel::ConfigService::Instance().getString("Q.convention");}
+{
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
@@ -215,8 +211,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
       m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
       m_peakShape(new NoShape) {
-  convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");

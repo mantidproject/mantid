@@ -112,8 +112,7 @@ void MDNormSCD::init() {
 void MDNormSCD::exec() {
   cacheInputs();
   auto outputWS = binInputWS();
-  convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   setProperty<Workspace_sptr>("OutputWorkspace", outputWS);
   createNormalizationWS(*outputWS);
   setProperty("OutputNormalizationWorkspace", m_normWS);

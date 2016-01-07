@@ -50,9 +50,8 @@ class MANTID_API_DLL IPeaksWorkspace : public ITableWorkspace,
 public:
   /// Ctor
   IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {
-    convention =
-        Kernel::ConfigService::Instance().getString("Q.convention");
-}
+    convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  }
 
   /// Destructor
   virtual ~IPeaksWorkspace();

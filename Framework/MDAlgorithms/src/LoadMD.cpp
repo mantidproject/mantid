@@ -119,8 +119,7 @@ void LoadMD::init() {
 */
 void LoadMD::exec() {
   m_filename = getPropertyValue("Filename");
-  convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // Start loading
   bool fileBacked = this->getProperty("FileBackEnd");
 

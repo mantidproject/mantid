@@ -13,8 +13,7 @@ namespace API {
 //-----------------------------------------------------------------------------------------------
 /** Default constructor */
 IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {
-  convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
 //-----------------------------------------------------------------------------------------------
