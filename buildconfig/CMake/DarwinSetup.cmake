@@ -197,6 +197,16 @@ install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
           DESTINATION MantidPlot.app/Contents/Resources/
 )
 
+install ( FILES ${CMAKE_SOURCE_DIR}/buildconfig/CMake/Packaging/MantidPlot.icns
+          DESTINATION MantidPlot.app/Contents/MacOS/
+)
+
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython_osx
+                 MantidPlot.app/Contents/MacOS/mantidpython @ONLY )
+# Needs to be executable
+execute_process ( COMMAND "chmod" "+x" "MantidPlot.app/Contents/MacOS/mantidpython"
+                  OUTPUT_QUIET ERROR_QUIET )
+
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
 set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/installers/MacInstaller/osx_DS_Store)
 set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )

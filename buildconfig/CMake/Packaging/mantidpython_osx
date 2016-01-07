@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#
+# For OS X only
+# Launch IPython with paths set for the Mantid environment
+
+# Find out where we are
+INSTALLDIR=/Applications/MantidPlot.app
+PROG='/Applications/MantidPlot.app/Contents/MacOS/bin/ipython'
+
+# Define extra libraries for python
+LOCAL_PYTHONPATH=${INSTALLDIR}/Contents/MacOS
+if [-n "${PYTHONPATH}" ]; then
+	LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
+fi
+
+if [ -n "$1" ] && [ "$1" = "--classic" ]; then
+    shift
+    PROG=$(command -v python)
+fi
+
+PYTHONPATH=${LOCAL_PYTHONPATH} \
+	${PROG} $*
