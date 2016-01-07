@@ -321,10 +321,8 @@ void EnggDiffractionPresenter::startFocusing(
 void EnggDiffractionPresenter::processResetFocus() { m_view->resetFocus(); }
 
 void EnggDiffractionPresenter::processRebinTime() {
-	// shahroz
-  const std::string runNo = isValidRunNumber(m_view->currentPreprocRunNo());
 
-  g_log.error() << runNo << " is the run number given here" << std::endl;
+  const std::string runNo = isValidRunNumber(m_view->currentPreprocRunNo());
   double bin = m_view->rebinningTimeBin();
 
   try {
@@ -350,7 +348,6 @@ void EnggDiffractionPresenter::processRebinTime() {
 }
 
 void EnggDiffractionPresenter::processRebinMultiperiod() {
-// shahroz
   const std::string runNo = isValidRunNumber(m_view->currentPreprocRunNo());
   size_t nperiods = m_view->rebinningPulsesNumberPeriods();
   double timeStep = m_view->rebinningPulsesTime();
@@ -1682,13 +1679,14 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
 */
 Workspace_sptr
 EnggDiffractionPresenter::loadToPreproc(const std::string runNo) {
+  const std::string instStr = m_view->currentInstrument();
   Workspace_sptr inWS;
 
   try {
     auto load =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
-    load->setPropertyValue("Filename", runNo);
+    load->setPropertyValue("Filename", instStr + runNo);
     const std::string inWSName = "engggui_preproc_input_ws";
     load->setPropertyValue("OutputWorkspace", inWSName);
 
@@ -1754,7 +1752,7 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
 void EnggDiffractionPresenter::inputChecksBeforeRebin(
     const std::string &runNo) {
   if (runNo.empty()) {
-    throw std::invalid_argument("The run to pre-process cannot be empty");
+    throw std::invalid_argument("The run to pre-process" + g_runNumberErrorStr);
   }
 }
 
