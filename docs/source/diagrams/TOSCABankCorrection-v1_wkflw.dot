@@ -10,21 +10,19 @@ digraph TOSCABankCorrection {
     PeakPosition
     ClosePeakTolerance
     PeakFunction
-	OutputWorkspace
+    OutputWorkspace
     TargetPeakCentre
-    ScaleFactor1
-    ScaleFactor2
+    Bank1_ScaleFactor
+    Bank2_ScaleFactor
     Peaks
   }
 
   subgraph algorithms  {
     $algorithm_style
     CropWorkspace
-    FindPeak1
-    FindPeak2
+    FindPeak
     SortTableWorkspace
-    ScaleX1
-    ScaleX2
+    ScaleX
     RebinToWorkspace
     GroupDetectors
     AppendSpectra
@@ -32,28 +30,24 @@ digraph TOSCABankCorrection {
 
   InputWorkspace                 -> CropWorkspace
   SearchRange                    -> CropWorkspace                  [label="Defines XMin and XMax"]
-  CropWorkspace                  -> CroppedWorkspace
-  CroppedWorkspace               -> FindPeak1                      [label="Find peak in Bank 1"]
-  PeakFunction                   -> FindPeak1
-  PeakPosition                   -> FindPeak1
-  CropWorkspace                  -> FindPeak2                      [label="Find peak in Bank 2"]
-  PeakFunction                   -> FindPeak2
-  PeakPosition                   -> FindPeak2
-  FindPeak1                      -> SortTableWorkspace             
-  FindPeak2                      -> SortTableWorkspace
-  SortTableWorkspace             -> Peaks                          [label="Centres of two peaks that are close to each other in both banks"]
+  CropWorkspace                  -> CroppedWorkspace               [label="Workspace containing bank 1 and 2 data"]
+  CroppedWorkspace               -> FindPeak                       [label="Find peak in Bank 1 and 2"]
+  PeakFunction                   -> FindPeak
+  PeakPosition                   -> FindPeak
+  FindPeak                       -> SortTableWorkspace             [label="Sort peaks by height"]
+  SortTableWorkspace             -> Peaks                          
   Peaks                          -> TargetPeakCentre               [label="Output"]
-  ClosePeakTolerance             -> ScaleFactor1
-  Peaks                          -> ScaleFactor1
-  ClosePeaktolerance             -> ScaleFactor2
-  Peaks                          -> ScaleFactor2                 [label="Create copy of workspace with only bank spectra"]
-  Croppedworkspace               -> ScaleX1
-  ScaleFactor1                   -> ScaleX1
-  ScaleX1                        -> ScaleX2                        
-  ScaleFactor2                   -> ScaleX2
-  ScaleX2                        -> RebinToWorkspace
+  ClosePeakTolerance             -> Bank1_ScaleFactor
+  Peaks                          -> Bank1_ScaleFactor
+  ClosePeaktolerance             -> Bank2_ScaleFactor
+  Peaks                          -> Bank2_ScaleFactor              
+  Croppedworkspace               -> ScaleX                         [label="Workspace containing bank spectra"]
+  Bank1_ScaleFactor              -> ScaleX                      
+  Bank2_ScaleFactor              -> ScaleX
+  ScaleX                         -> ScaledWorkspace
+  ScaledWorkspace                -> RebinToWorkspace               [label="Rebin to original input binning"]
   InputWorkspace                 -> RebinToWorkspace
-  RebinToWorkspace               -> GroupDetectors                 [label="Recalculate sum spectra from corrected banks"]
+  RebinToWorkspace               -> GroupDetectors                 [label="Sum spectra from corrected banks"]
   GroupDetectors                 -> AppendSpectra                  [label="Behaviour = Average"]
   AppendSpectra                  -> OutputWorkspace                [label="Output"]
 }
