@@ -55,7 +55,7 @@ void MantidSurfacePlotDialog::initLogs() {
   populateLogComboBox();
   m_axisLabel = new QLabel(tr("<br>Label for plot axis:"));
   m_axisNameEdit = new QLineEdit();
-  m_customLogLabel = new QLabel(tr("Custom log values:"));
+  m_customLogLabel = new QLabel(tr("<br>Custom log values:"));
   m_logValues = new QLineEdit();
 
   m_logBox->add(m_logLabel);
