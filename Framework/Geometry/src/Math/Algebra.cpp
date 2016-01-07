@@ -177,7 +177,7 @@ std::string Algebra::writeMCNPX() const
   for (int i = 0; i < lenOut; i++) {
     if (islower(Out[i]) || isupper(Out[i])) {
       auto vc = find_if(
-          SurfMap.begin(), SurfMap.end(),
+          SurfMap.cbegin(), SurfMap.cend(),
           MapSupport::valEqual<int, std::string>(std::string(1, Out[i])));
       if (vc == SurfMap.end()) {
         std::cout << "SurfMap size == " << SurfMap.size() << std::endl;

@@ -1199,8 +1199,7 @@ bool NexusFileIO::writeNexusBinMasking(
       const API::MatrixWorkspace::MaskList &mList = ws->maskedBins(i);
       spectra.push_back(spectra_count);
       spectra.push_back(offset);
-      auto it = mList.begin();
-      for (; it != mList.end(); ++it) {
+      for (auto it = mList.cbegin(); it != mList.cend(); ++it) {
         bins.push_back(it->first);
         weights.push_back(it->second);
       }

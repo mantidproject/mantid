@@ -403,8 +403,7 @@ bool PropertyManager::existsProperty(const std::string &name) const {
  */
 bool PropertyManager::validateProperties() const {
   bool allValid = true;
-  for (auto it = m_properties.begin();
-       it != m_properties.end(); ++it) {
+  for (auto it = m_properties.cbegin(); it != m_properties.cend(); ++it) {
     // check for errors in each property
     std::string error = it->second->isValid();
     //"" means no error

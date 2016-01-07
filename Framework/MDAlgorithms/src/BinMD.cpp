@@ -181,9 +181,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
   // So you need to iterate through events.
 
   const std::vector<MDE> &events = box->getConstEvents();
-  auto it = events.begin();
-  auto it_end = events.end();
-  for (; it != it_end; it++) {
+  for (auto it = events.begin(); it != events.end(); ++it) {
     // Cache the center of the event (again for speed)
     const coord_t *inCenter = it->getCenter();
 

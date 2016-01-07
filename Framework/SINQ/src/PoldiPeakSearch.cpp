@@ -332,8 +332,8 @@ MantidVec PoldiPeakSearch::getBackground(
   MantidVec background;
   background.reserve(backgroundPoints);
 
-  for (auto point = correlationCounts.begin() + 1;
-       point != correlationCounts.end() - 1; ++point) {
+  for (auto point = correlationCounts.cbegin() + 1;
+       point != correlationCounts.cend() - 1; ++point) {
     if (distanceToPeaksGreaterThanMinimum(peakPositions, point)) {
       background.push_back(*point);
     }

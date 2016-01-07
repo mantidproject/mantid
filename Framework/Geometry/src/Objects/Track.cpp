@@ -80,7 +80,7 @@ int Track::nonComplete() const {
   if (m_links.size() < 2) {
     return 0;
   }
-  auto ac = m_links.begin();
+  auto ac = m_links.cbegin();
   if (m_startPoint.distance(ac->entryPoint) > Tolerance) {
     return 1;
   }
@@ -187,7 +187,7 @@ void Track::buildLink() {
 
   // The surface points were added in order when they were built so no sorting
   // is required here.
-  PType::const_iterator ac = m_surfPoints.begin();
+  auto ac = m_surfPoints.cbegin();
   auto bc = ac;
   ++bc;
   V3D workPt = m_startPoint; // last good point

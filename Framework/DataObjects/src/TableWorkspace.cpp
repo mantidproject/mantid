@@ -34,10 +34,10 @@ TableWorkspace::TableWorkspace(const TableWorkspace &other)
     : ITableWorkspace(other), m_rowCount(0), m_LogManager(new API::LogManager) {
   setRowCount(other.m_rowCount);
 
-  auto it = other.m_columns.begin();
-  while (it != other.m_columns.end()) {
+  auto it = other.m_columns.cbegin();
+  while (it != other.m_columns.cend()) {
     addColumn(boost::shared_ptr<API::Column>((*it)->clone()));
-    it++;
+    ++it;
   }
   // copy logs/properties.
   m_LogManager = boost::make_shared<API::LogManager>(*(other.m_LogManager));
@@ -48,7 +48,7 @@ TableWorkspace::~TableWorkspace() {}
 
 size_t TableWorkspace::getMemorySize() const {
   size_t data_size = 0;
-  for (auto c = m_columns.begin(); c != m_columns.end(); c++) {
+  for (auto c = m_columns.cbegin(); c != m_columns.cend(); ++c) {
     data_size += (*c)->sizeOfData();
   }
   data_size += m_LogManager->getMemorySize();
@@ -118,9 +118,7 @@ API::Column_sptr TableWorkspace::getColumn(const std::string &name) {
 /// Gets the shared pointer to a column.
 API::Column_const_sptr
 TableWorkspace::getColumn(const std::string &name) const {
-  auto c_it = m_columns.begin();
-  auto c_end = m_columns.end();
-  for (; c_it != c_end; c_it++) {
+  for (auto c_it = m_columns.cbegin(); c_it != m_columns.cend(); ++c_it) {
     if (c_it->get()->name() == name) {
       return *c_it;
     }

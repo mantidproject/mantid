@@ -772,9 +772,9 @@ int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y,
   FX << "# " << Npts << " " << Epts << std::endl;
   FX.precision(10);
   FX.setf(std::ios::scientific, std::ios::floatfield);
-  auto xPt = X.begin();
-  auto yPt = Y.begin();
-  auto ePt = (Epts ? Err.begin() : Y.begin());
+  auto xPt = X.cbegin();
+  auto yPt = Y.cbegin();
+  auto ePt = (Epts ? Err.cbegin() : Y.cbegin());
 
   // Double loop to include/exclude a short error stack
   size_t eCount = 0;

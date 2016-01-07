@@ -216,9 +216,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       const std::vector<MDE> &events = box->getConstEvents();
 
-      auto it = events.begin();
-      auto it_end = events.end();
-      for (; it != it_end; it++) {
+      for (auto it = events.cbegin(); it != events.cend(); ++it) {
         // Cache the center of the event (again for speed)
         const coord_t *inCenter = it->getCenter();
 

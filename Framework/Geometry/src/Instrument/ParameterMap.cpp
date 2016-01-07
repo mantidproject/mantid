@@ -104,14 +104,14 @@ bool ParameterMap::operator==(const ParameterMap &rhs) const {
   // asString method turns the ComponentIDs to full-qualified name identifiers
   // so we will use the same approach to compare them
 
-  auto thisEnd = this->m_map.end();
-  auto rhsEnd = rhs.m_map.end();
+  auto thisEnd = this->m_map.cend();
+  auto rhsEnd = rhs.m_map.cend();
   for (auto thisIt = this->m_map.begin(); thisIt != thisEnd; ++thisIt) {
     const IComponent *comp = static_cast<IComponent *>(thisIt->first);
     const std::string fullName = comp->getFullName();
     const auto &param = thisIt->second;
     bool match(false);
-    for (auto rhsIt = rhs.m_map.begin(); rhsIt != rhsEnd; ++rhsIt) {
+    for (auto rhsIt = rhs.m_map.cbegin(); rhsIt != rhsEnd; ++rhsIt) {
       const IComponent *rhsComp = static_cast<IComponent *>(rhsIt->first);
       const std::string rhsFullName = rhsComp->getFullName();
       if (fullName == rhsFullName && (*param) == (*rhsIt->second)) {
@@ -203,14 +203,14 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
   // so we will use the same approach to compare them
 
   std::stringstream strOutput;
-  auto thisEnd = this->m_map.end();
-  auto rhsEnd = rhs.m_map.end();
-  for (auto thisIt = this->m_map.begin(); thisIt != thisEnd; ++thisIt) {
+  auto thisEnd = this->m_map.cend();
+  auto rhsEnd = rhs.m_map.cend();
+  for (auto thisIt = this->m_map.cbegin(); thisIt != thisEnd; ++thisIt) {
     const IComponent *comp = static_cast<IComponent *>(thisIt->first);
     const std::string fullName = comp->getFullName();
     const auto &param = thisIt->second;
     bool match(false);
-    for (auto rhsIt = rhs.m_map.begin(); rhsIt != rhsEnd; ++rhsIt) {
+    for (auto rhsIt = rhs.m_map.cbegin(); rhsIt != rhsEnd; ++rhsIt) {
       const IComponent *rhsComp = static_cast<IComponent *>(rhsIt->first);
       const std::string rhsFullName = rhsComp->getFullName();
       if (fullName == rhsFullName && (*param) == (*rhsIt->second)) {
@@ -227,7 +227,7 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
                 << " and value: " << (*param).asString() << std::endl;
       bool componentWithSameNameRHS = false;
       bool parameterWithSameNameRHS = false;
-      for (auto rhsIt = rhs.m_map.begin(); rhsIt != rhsEnd; ++rhsIt) {
+      for (auto rhsIt = rhs.m_map.cbegin(); rhsIt != rhsEnd; ++rhsIt) {
         const IComponent *rhsComp = static_cast<IComponent *>(rhsIt->first);
         const std::string rhsFullName = rhsComp->getFullName();
         if (fullName == rhsFullName) {
@@ -939,7 +939,7 @@ std::set<std::string> ParameterMap::names(const IComponent *comp) const {
  */
 std::string ParameterMap::asString() const {
   std::stringstream out;
-  for (auto it = m_map.begin(); it != m_map.end(); it++) {
+  for (auto it = m_map.cbegin(); it != m_map.cend(); ++it) {
     boost::shared_ptr<Parameter> p = it->second;
     if (p && it->first) {
       const IComponent *comp = (const IComponent *)(it->first);

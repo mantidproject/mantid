@@ -620,7 +620,7 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
   replace(correctedPath.begin(), correctedPath.end(), '\\', '/');
 
   auto it =
-      std::find_if(m_DataSearchDirs.begin(), m_DataSearchDirs.end(),
+      std::find_if(m_DataSearchDirs.cbegin(), m_DataSearchDirs.cend(),
                    std::bind2nd(std::equal_to<std::string>(), correctedPath));
   return (it != m_DataSearchDirs.end());
 }
@@ -1806,8 +1806,7 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
   }
 
   // Now let's look through the other facilities
-  auto it = m_facilities.begin();
-  for (; it != m_facilities.end(); ++it) {
+  for (auto it = m_facilities.cbegin(); it != m_facilities.cend(); ++it) {
     try {
       g_log.debug() << "Looking for " << instrumentName << " at "
                     << (**it).name() << "." << std::endl;
@@ -1867,8 +1866,7 @@ ConfigServiceImpl::getFacility(const std::string &facilityName) const {
   if (facilityName.empty())
     return this->getFacility();
 
-  auto it = m_facilities.begin();
-  for (; it != m_facilities.end(); ++it) {
+  for (auto it = m_facilities.begin(); it != m_facilities.end(); ++it) {
     if ((**it).name() == facilityName) {
       return **it;
     }

@@ -1108,10 +1108,9 @@ void InstrumentDefinitionParser::appendAssembly(
           InstrumentDefinitionParser::getParentComponent(pElem);
 
       // check if this location is in the exclude list
-      auto it =
-          find(excludeList.begin(), excludeList.end(),
-               InstrumentDefinitionParser::getNameOfLocationElement(
-                   pElem, pParentElem));
+      auto it = find(excludeList.cbegin(), excludeList.cend(),
+                     InstrumentDefinitionParser::getNameOfLocationElement(
+                         pElem, pParentElem));
       if (it == excludeList.end()) {
 
         std::string typeName =

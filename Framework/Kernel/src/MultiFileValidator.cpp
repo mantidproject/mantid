@@ -60,8 +60,7 @@ std::string MultiFileValidator::checkValidity(
       VecVecString_cIt;
   typedef std::vector<std::string>::const_iterator VecString_cIt;
 
-  for (auto rowIt = values.begin(); rowIt != values.end();
-       ++rowIt) {
+  for (auto rowIt = values.cbegin(); rowIt != values.cend(); ++rowIt) {
     std::vector<std::string> row = (*rowIt);
     for (VecString_cIt valueIt = row.begin(); valueIt != row.end(); ++valueIt) {
       // For each filename value, check its validity, and and accumulate any

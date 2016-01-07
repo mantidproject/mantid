@@ -538,9 +538,8 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
         xindex = static_cast<int>(vecy.size()) - 1;
       } else {
         // Other situation
-        auto vfiter =
-            std::lower_bound(vecx.begin(), vecx.end(), outx);
-        xindex = static_cast<int>(vfiter - vecx.begin());
+        auto vfiter = std::lower_bound(vecx.cbegin(), vecx.cend(), outx);
+        xindex = static_cast<int>(vfiter - vecx.cbegin());
         if ((xindex < static_cast<int>(vecx.size())) &&
             (outx + 1.0E-5 < vecx[xindex])) {
           // assume the bin's boundaries are of [...) and consider numerical

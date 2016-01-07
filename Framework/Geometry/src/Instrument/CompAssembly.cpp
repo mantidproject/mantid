@@ -372,8 +372,7 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
     if (!m_cachedBoundingBox) {
       m_cachedBoundingBox = new BoundingBox();
       // Loop over the children and define a box large enough for all of them
-      for (auto it = m_children.begin(); it != m_children.end();
-           ++it) {
+      for (auto it = m_children.cbegin(); it != m_children.cend(); ++it) {
         BoundingBox compBox;
         if (*it) {
           (*it)->getBoundingBox(compBox);

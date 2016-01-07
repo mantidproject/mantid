@@ -197,8 +197,7 @@ bool MaskWorkspace::isMasked(const std::set<detid_t> &detectorIDs) const {
   }
 
   bool masked(true);
-  for (auto it = detectorIDs.begin();
-       it != detectorIDs.end(); ++it) {
+  for (auto it = detectorIDs.cbegin(); it != detectorIDs.cend(); ++it) {
     if (!this->isMasked(*it)) {
       masked = false;
       break; // allows space for a debug print statement

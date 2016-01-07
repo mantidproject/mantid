@@ -190,8 +190,7 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
     }
   }
 
-  auto it = m_instruments.begin();
-  for (; it != m_instruments.end(); ++it) {
+  for (auto it = m_instruments.cbegin(); it != m_instruments.cend(); ++it) {
     if (boost::iequals(it->name(), iName)) // Case-insensitive search
     {
       g_log.debug() << "Instrument '" << iName << "' found as " << it->name()
@@ -201,7 +200,7 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
   }
 
   // if unsuccessful try shortname
-  for (it = m_instruments.begin(); it != m_instruments.end(); ++it) {
+  for (auto it = m_instruments.begin(); it != m_instruments.end(); ++it) {
     if (boost::iequals(it->shortName(), iName)) // Case-insensitive search
     {
       g_log.debug() << "Instrument '" << iName << "' found as " << it->name()

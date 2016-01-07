@@ -142,11 +142,9 @@ PyObject *getAlgorithmPropertiesOrdered(IAlgorithm &self) {
  */
 PyObject *getOutputProperties(IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
-  auto iend = properties.end();
   // Build the list
   PyObject *names = PyList_New(0);
-  for (auto itr = properties.begin(); itr != iend;
-       ++itr) {
+  for (auto itr = properties.cbegin(); itr != properties.cend(); ++itr) {
     Property *p = *itr;
     if (p->direction() == Direction::Output) {
       PyList_Append(names, PyString_FromString(p->name().c_str()));

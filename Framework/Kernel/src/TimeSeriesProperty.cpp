@@ -752,8 +752,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
 
   double numerator(0.0), totalTime(0.0);
   // Loop through the filter ranges
-  for (auto it = filter.begin(); it != filter.end();
-       ++it) {
+  for (auto it = filter.cbegin(); it != filter.cend(); ++it) {
     // Calculate the total time duration (in seconds) within by the filter
     totalTime += it->duration();
 

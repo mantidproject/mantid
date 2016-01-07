@@ -64,8 +64,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(
 template <typename CheckDimensionPolicy>
 void MDGeometryBuilderXML<CheckDimensionPolicy>::addManyOrdinaryDimensions(
     VecIMDDimension_sptr manyDims) const {
-  auto it = manyDims.begin();
-  for (; it != manyDims.end(); ++it) {
+  for (auto it = manyDims.begin(); it != manyDims.end(); ++it) {
     addOrdinaryDimension(*it);
   }
 }
@@ -205,9 +204,7 @@ const std::string &MDGeometryBuilderXML<CheckDimensionPolicy>::create() const {
     // Loop through dimensions and generate xml for each.
     std::string dimensionXMLString;
 
-    auto it = m_vecDimensions.begin();
-
-    for (; it != m_vecDimensions.end(); ++it) {
+    for (auto it = m_vecDimensions.begin(); it != m_vecDimensions.end(); ++it) {
       dimensionXMLString += (*it)->toXMLString();
     }
 

@@ -343,9 +343,9 @@ EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
     // and append to the list
     this->weightedEvents.reserve(this->weightedEvents.size() +
                                  more_events.size());
-    for (auto it = more_events.begin();
-         it != more_events.end(); ++it)
-      this->weightedEvents.push_back(WeightedEvent(*it));
+    for (const auto &event : more_events) {
+      this->weightedEvents.emplace_back(event);
+    }
     break;
 
   case WEIGHTED_NOTIME:
@@ -355,7 +355,7 @@ EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
                                        more_events.size());
     for (auto it = more_events.begin();
          it != more_events.end(); ++it)
-      this->weightedEventsNoTime.push_back(WeightedEventNoTime(*it));
+      this->weightedEventsNoTime.emplace_back(*it);
     break;
   }
 
@@ -405,9 +405,9 @@ operator+=(const std::vector<WeightedEvent> &more_events) {
     // and append to the list
     this->weightedEventsNoTime.reserve(this->weightedEventsNoTime.size() +
                                        more_events.size());
-    for (auto it = more_events.begin();
-         it != more_events.end(); ++it)
-      this->weightedEventsNoTime.push_back(WeightedEventNoTime(*it));
+    for (const auto &event : more_events) {
+      this->weightedEventsNoTime.emplace_back(event);
+    }
     break;
   }
 
@@ -501,14 +501,14 @@ void EventList::minusHelper(std::vector<T1> &events,
    * Using it caused a segault, Ticket #2306.
    * So we cache the end (this speeds up too).
    */
-  auto more_begin = more_events.begin();
-  auto more_end = more_events.end();
+  auto more_begin = more_events.cbegin();
+  auto more_end = more_events.cend();
 
   for (itev = more_begin; itev != more_end; itev++) {
     // We call the constructor for T1. In the case of WeightedEventNoTime, the
     // pulse time will just be ignored.
-    events.push_back(T1(itev->tof(), itev->pulseTime(), itev->weight() * (-1.0),
-                        itev->errorSquared()));
+    events.emplace_back(itev->tof(), itev->pulseTime(), itev->weight() * (-1.0),
+                        itev->errorSquared());
   }
 }
 
@@ -1628,10 +1628,7 @@ EventList::compressEventsHelper(const std::vector<T> &events,
   double weight = 0;
   double errorSquared = 0;
 
-  typename std::vector<T>::const_iterator it;
-  auto it_end =
-      events.end(); // cache for speed
-  for (it = events.begin(); it != it_end; it++) {
+  for (auto it = events.cbegin(); it != events.cend(); it++) {
     if ((it->m_tof - lastTof) <= tolerance) {
       // Carry the error and weight
       weight += it->weight();
@@ -1847,9 +1844,8 @@ void EventList::compressEvents(double tolerance, EventList *destination,
 template <class T>
 typename std::vector<T>::const_iterator
 EventList::findFirstEvent(const std::vector<T> &events, const double seek_tof) {
-  auto itev = events.begin();
-  auto itev_end =
-      events.end(); // cache for speed
+  auto itev = events.cbegin();
+  auto itev_end = events.cend(); // cache for speed
 
   // if tof < X[0], that means that you need to skip some events
   while ((itev != itev_end) && (itev->tof() < seek_tof))
@@ -1903,9 +1899,8 @@ template <class T>
 typename std::vector<T>::const_iterator EventList::findFirstTimeAtSampleEvent(
     const std::vector<T> &events, const double seek_time,
     const double &tofFactor, const double &tofOffset) const {
-  auto itev = events.begin();
-  auto itev_end =
-      events.end(); // cache for speed
+  auto itev = events.cbegin();
+  auto itev_end = events.cend(); // cache for speed
 
   // if tof < X[0], that means that you need to skip some events
   while ((itev != itev_end) &&
@@ -1987,7 +1982,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events,
   if (events.size() > 0) {
     // Iterate through all events (sorted by tof)
     auto itev = findFirstEvent(events, X[0]);
-    auto itev_end = events.end();
+    auto itev_end = events.cend();
     // The above can still take you to end() if no events above X[0], so check
     // again.
     if (itev == itev_end)
@@ -2182,8 +2177,7 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
     // Iterate through all events (sorted by pulse time)
     auto itev =
         findFirstPulseEvent(this->events, X[0]);
-    std::vector<TofEvent>::const_iterator itev_end =
-        events.end(); // cache for speed
+    auto itev_end = events.cend(); // cache for speed
     // The above can still take you to end() if no events above X[0], so check
     // again.
     if (itev == itev_end)
@@ -2607,10 +2601,9 @@ template <class T>
 void EventList::convertTofHelper(std::vector<T> &events, const double factor,
                                  const double offset) {
   // iterate through all events
-  typename std::vector<T>::iterator itev;
-  auto itev_end = events.end(); // cache for speed
-  for (itev = events.begin(); itev != itev_end; itev++)
-    itev->m_tof = itev->m_tof * factor + offset;
+  for (auto &event : events) {
+    event.m_tof = event.m_tof * factor + offset;
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -2639,10 +2632,9 @@ template <class T>
 void EventList::addPulsetimeHelper(std::vector<T> &events,
                                    const double seconds) {
   // iterate through all events
-  typename std::vector<T>::iterator itev;
-  auto itev_end = events.end(); // cache for speed
-  for (itev = events.begin(); itev != itev_end; itev++)
-    itev->m_pulsetime += seconds;
+  for (auto &event : events) {
+    event.m_pulsetime += seconds;
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -2761,11 +2753,8 @@ void EventList::maskTof(const double tofMin, const double tofMax) {
 template <class T>
 void EventList::getTofsHelper(const std::vector<T> &events,
                               std::vector<double> &tofs) {
-  typename std::vector<T>::const_iterator itev;
-  auto itev_end =
-      events.end(); // cache for speed
   tofs.clear();
-  for (itev = events.begin(); itev != itev_end; itev++)
+  for (auto itev = events.cbegin(); itev != events.cend(); ++itev)
     tofs.push_back(itev->m_tof);
 }
 
@@ -2809,12 +2798,10 @@ std::vector<double> EventList::getTofs() const {
 template <class T>
 void EventList::getWeightsHelper(const std::vector<T> &events,
                                  std::vector<double> &weights) {
-  typename std::vector<T>::const_iterator itev;
-  auto itev_end =
-      events.end(); // cache for speed
   weights.clear();
-  for (itev = events.begin(); itev != itev_end; itev++)
-    weights.push_back(itev->weight());
+  for (const auto &event : events) {
+    weights.push_back(event.weight());
+  }
 }
 
 /** Fill a vector with the list of Weights
@@ -2858,12 +2845,10 @@ std::vector<double> EventList::getWeights() const {
 template <class T>
 void EventList::getWeightErrorsHelper(const std::vector<T> &events,
                                       std::vector<double> &weightErrors) {
-  typename std::vector<T>::const_iterator itev;
-  auto itev_end =
-      events.end(); // cache for speed
   weightErrors.clear();
-  for (itev = events.begin(); itev != itev_end; itev++)
-    weightErrors.push_back(itev->error());
+  for (const auto &event : events) {
+    weightErrors.push_back(event.error());
+  }
 }
 
 /** Fill a vector with the list of Weight Errors
@@ -2908,12 +2893,10 @@ template <class T>
 void EventList::getPulseTimesHelper(
     const std::vector<T> &events,
     std::vector<Mantid::Kernel::DateAndTime> &times) {
-  typename std::vector<T>::const_iterator itev;
-  auto itev_end =
-      events.end(); // cache for speed
   times.clear();
-  for (itev = events.begin(); itev != itev_end; itev++)
-    times.push_back(itev->pulseTime());
+  for (const auto &event : events) {
+    times.push_back(event.pulseTime());
+  }
 }
 
 /** Get the pulse times of each event in this EventList.
@@ -3290,19 +3273,18 @@ void EventList::multiplyHelper(std::vector<T> &events, const double value,
   double errorSquared = error * error;
   double valueSquared = value * value;
 
-  typename std::vector<T>::iterator itev;
   auto itev_end = events.end();
 
   if (error == 0) {
     // Error-less calculation
-    for (itev = events.begin(); itev != itev_end; itev++) {
+    for (auto itev = events.begin(); itev != itev_end; itev++) {
       itev->m_errorSquared =
           static_cast<float>(itev->m_errorSquared * valueSquared);
       itev->m_weight *= static_cast<float>(value);
     }
   } else {
     // Carry the scalar error
-    for (itev = events.begin(); itev != itev_end; itev++) {
+    for (auto itev = events.begin(); itev != itev_end; itev++) {
       itev->m_errorSquared =
           static_cast<float>(itev->m_errorSquared * valueSquared +
                              errorSquared * itev->m_weight * itev->m_weight);
@@ -4548,11 +4530,9 @@ template <class T>
 void EventList::convertUnitsQuicklyHelper(typename std::vector<T> &events,
                                           const double &factor,
                                           const double &power) {
-  auto itev = events.begin();
-  auto itev_end = events.end();
-  for (; itev != itev_end; itev++) {
+  for (auto &event : events) {
     // Output unit = factor * (input) ^ power
-    itev->m_tof = factor * std::pow(itev->m_tof, power);
+    event.m_tof = factor * std::pow(event.m_tof, power);
   }
 }
 
