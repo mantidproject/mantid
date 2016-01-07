@@ -163,11 +163,6 @@ private:
     return alg;
   }
 
-#ifdef __clang__
-// The missing braces warning is a false positive
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-braces"
-#endif
   void checkGeometryAsExpected(const IMDEventWorkspace &outputWS,
                                std::string outputFrame) {
     TS_ASSERT_EQUALS(4, outputWS.getNumDims());
@@ -183,9 +178,6 @@ private:
       TS_ASSERT_EQUALS(expectedDim.frameNames[i], dim->getMDFrame().name());
     }
   }
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
 
   DimensionProperties getExpectedDimProperties(std::string outputFrame) {
     DimensionProperties expected;

@@ -438,6 +438,12 @@ void LoadSQW2::readSQWDimensions() {
   setupBoxController();
 }
 
+#ifdef __clang__
+// The missing braces warning is a false positive -
+// https://llvm.org/bugs/show_bug.cgi?id=21629
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#endif
 /**
  * Find the min/max dimension values in the output frame. Takes the min/max
  * values found after testing transforms from all contributing SPE files
@@ -522,6 +528,9 @@ LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
 
   return builder.create();
 }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 /**
  * Create an energy dimension
