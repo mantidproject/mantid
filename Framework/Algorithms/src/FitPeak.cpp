@@ -651,11 +651,6 @@ double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
                                         MatrixWorkspace_sptr dataws,
                                         size_t wsindex, double xmin,
                                         double xmax) {
-    // Fix all parameters
-    const size_t PARAMS_NUM = fitfunc->nParams();
-    for (size_t i = 0; i < PARAMS_NUM; ++i)
-      fitfunc->fix(i);
-
     // Set up sub algorithm fit
     IAlgorithm_sptr fit;
     try {
@@ -682,17 +677,14 @@ double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
     }
 
     // Retrieve result
-    const double chi2 = fit->getProperty("ChiSquaredWeightedDividedByDOF");
+    const double chi2 = fit->getProperty("ChiSquaredWeightedDividedByNData");
     //g_log.notice() << "[DELETE DB]"
+    //               << " Chi2/NParam = " << fit->getPropertyValue("ChiSquaredDividedByNData")
     //               << " Chi2/DOF = " << fit->getPropertyValue("ChiSquaredDividedByDOF")
     //               << " Chi2 = " << fit->getPropertyValue("ChiSquared")
+    //               << " Chi2W/NParam = " << fit->getPropertyValue("ChiSquaredWeightedDividedByNData")
     //               << " Chi2W/DOF = " << fit->getPropertyValue("ChiSquaredWeightedDividedByDOF")
     //               << " Chi2W = " << fit->getPropertyValue("ChiSquaredWeighted") << "\n";
-
-
-    // Unfix all parameteters
-    for (size_t i = 0; i < PARAMS_NUM; ++i)
-      fitfunc->unfix(i);
 
     return chi2;
 }
@@ -707,13 +699,6 @@ double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
 double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
                                        MatrixWorkspace_sptr dataws,
                                        size_t wsindex, double xmin, double xmax) {
-
-
-  // Unfix all parameters
-  for (size_t i = 0; i < fitfunc->nParams(); ++i) {
-    fitfunc->unfix(i);
-  }
-
   // Set up sub algorithm fit
   IAlgorithm_sptr fit;
   try {
