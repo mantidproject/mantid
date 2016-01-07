@@ -162,6 +162,7 @@ protected:
   virtual const std::string toString() const;
 
 private:
+  std::string convention;
   virtual IMDWorkspace *doClone() const = 0;
 };
 

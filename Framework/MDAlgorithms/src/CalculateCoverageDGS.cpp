@@ -167,6 +167,8 @@ void CalculateCoverageDGS::exec() {
   // get the limits
   Mantid::API::MatrixWorkspace_const_sptr inputWS =
       getProperty("InputWorkspace");
+  convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
   // cache two theta and phi
   auto instrument = inputWS->getInstrument();
   std::vector<detid_t> detIDS = instrument->getDetectorIDs(true);

@@ -205,6 +205,8 @@ bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
 /** function initalizes all variables necessary for converting workspace
  * variables into MD variables in ModQ (elastic/inelastic) cases  */
 void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
+  convention =
+        Kernel::ConfigService::Instance().getString("Q.convention");
   m_pEfixedArray = NULL;
   m_pDetMasks = NULL;
   //********** Generic part of initialization, common for elastic and inelastic

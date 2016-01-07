@@ -67,8 +67,7 @@ private:
   void exec();
 
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  std::string convention;
 
   /// Helper method
   template <typename MDE, size_t nd>

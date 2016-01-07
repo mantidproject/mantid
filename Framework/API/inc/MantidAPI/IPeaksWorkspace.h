@@ -8,6 +8,7 @@
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/ConfigService.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -48,7 +49,10 @@ class MANTID_API_DLL IPeaksWorkspace : public ITableWorkspace,
                                        public Mantid::API::ExperimentInfo {
 public:
   /// Ctor
-  IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {}
+  IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {
+    convention =
+        Kernel::ConfigService::Instance().getString("Q.convention");
+}
 
   /// Destructor
   virtual ~IPeaksWorkspace();
@@ -162,6 +166,7 @@ protected:
   virtual const std::string toString() const;
 
 private:
+  std::string convention;
   virtual IPeaksWorkspace *doClone() const = 0;
 };
 }

@@ -12,7 +12,10 @@ namespace Mantid {
 namespace API {
 //-----------------------------------------------------------------------------------------------
 /** Default constructor */
-IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {}
+IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {
+  convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+}
 
 //-----------------------------------------------------------------------------------------------
 /** Copy constructor */
@@ -89,8 +92,6 @@ const std::string IMDWorkspace::toString() const {
     os << "Binned from '" << getOriginalWorkspace()->getName();
   }
   os << "\n";
-  std::string convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
   if (convention == "Crystallography")
     os << "Crystallography: ki-kf";
   else
