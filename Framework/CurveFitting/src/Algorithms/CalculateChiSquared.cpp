@@ -139,11 +139,11 @@ void CalculateChiSquared::execConcrete() {
 
   // Divided by NParams
   double nData = dof + static_cast<double>(nParams);
-  const double chiSquaredNData = chiSquared/nData;
-  const double chiSquaredWeightedNData = chiSquaredWeighted/nData;
-  g_log.notice() << "Chi squared / NData "<< chiSquaredNData << "\n"
-                 << "Chi squared weighed / NData "
-                 << chiSquaredWeightedNData << "\n"
+  const double chiSquaredNData = chiSquared / nData;
+  const double chiSquaredWeightedNData = chiSquaredWeighted / nData;
+  g_log.notice() << "Chi squared / NData " << chiSquaredNData << "\n"
+                 << "Chi squared weighed / NData " << chiSquaredWeightedNData
+                 << "\n"
                  << "NParams " << nParams << "\n";
 
   // Store the result.
@@ -155,8 +155,8 @@ void CalculateChiSquared::execConcrete() {
     dof = 1.0;
     g_log.warning("DOF has a non-positive value, changing to 1.0");
   }
-  const double chiSquaredDOF = chiSquared/dof;
-  const double chiSquaredWeightedDOF= chiSquaredWeighted/dof;
+  const double chiSquaredDOF = chiSquared / dof;
+  const double chiSquaredWeightedDOF = chiSquaredWeighted / dof;
   g_log.notice() << "Chi squared / DOF " << chiSquaredDOF << "\n"
                  << "Chi squared weighed / DOF " << chiSquaredWeightedDOF
                  << "\n"

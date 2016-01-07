@@ -331,8 +331,8 @@ bool FitOneSinglePeak::simpleFit() {
     m_peakFunc->setFwhm(m_vecFWHM[i]);
 
     // fit and process result
-    double goodndess = fitFunctionSD(compfunc, m_dataWS, m_wsIndex, m_minFitX,
-                                     m_maxFitX);
+    double goodndess =
+        fitFunctionSD(compfunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
     processNStoreFitResult(goodndess, true);
 
     // restore the function parameters
@@ -468,8 +468,7 @@ double FitOneSinglePeak::fitPeakFunction(API::IPeakFunction_sptr peakfunc,
   m_sstream << "Function (to fit): " << peakfunc->asString() << "  From "
             << startx << "  to " << endx << ".\n";
 
-  double goodness =
-      fitFunctionSD(peakfunc, dataws, wsindex, startx, endx);
+  double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx);
 
   return goodness;
 }
@@ -651,42 +650,46 @@ double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
                                         MatrixWorkspace_sptr dataws,
                                         size_t wsindex, double xmin,
                                         double xmax) {
-    // Set up sub algorithm fit
-    IAlgorithm_sptr fit;
-    try {
-        fit = createChildAlgorithm("CalculateChiSquared", -1, -1, false);
-    }
-    catch (Exception::NotFoundError &) {
-        std::stringstream errss;
-        errss << "The FitPeak algorithm requires the CurveFitting library";
-        g_log.error(errss.str());
-        throw std::runtime_error(errss.str());
-    }
+  // Set up sub algorithm fit
+  IAlgorithm_sptr fit;
+  try {
+    fit = createChildAlgorithm("CalculateChiSquared", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    std::stringstream errss;
+    errss << "The FitPeak algorithm requires the CurveFitting library";
+    g_log.error(errss.str());
+    throw std::runtime_error(errss.str());
+  }
 
-    // Set the properties
-    fit->setProperty("Function", fitfunc);
-    fit->setProperty("InputWorkspace", dataws);
-    fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
-    fit->setProperty("StartX", xmin);
-    fit->setProperty("EndX", xmax);
+  // Set the properties
+  fit->setProperty("Function", fitfunc);
+  fit->setProperty("InputWorkspace", dataws);
+  fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+  fit->setProperty("StartX", xmin);
+  fit->setProperty("EndX", xmax);
 
-    fit->executeAsChildAlg();
-    if (!fit->isExecuted()) {
-        g_log.error("Fit for background is not executed. ");
-        throw std::runtime_error("Fit for background is not executed. ");
-    }
+  fit->executeAsChildAlg();
+  if (!fit->isExecuted()) {
+    g_log.error("Fit for background is not executed. ");
+    throw std::runtime_error("Fit for background is not executed. ");
+  }
 
-    // Retrieve result
-    const double chi2 = fit->getProperty("ChiSquaredWeightedDividedByNData");
-    //g_log.notice() << "[DELETE DB]"
-    //               << " Chi2/NParam = " << fit->getPropertyValue("ChiSquaredDividedByNData")
-    //               << " Chi2/DOF = " << fit->getPropertyValue("ChiSquaredDividedByDOF")
-    //               << " Chi2 = " << fit->getPropertyValue("ChiSquared")
-    //               << " Chi2W/NParam = " << fit->getPropertyValue("ChiSquaredWeightedDividedByNData")
-    //               << " Chi2W/DOF = " << fit->getPropertyValue("ChiSquaredWeightedDividedByDOF")
-    //               << " Chi2W = " << fit->getPropertyValue("ChiSquaredWeighted") << "\n";
+  // Retrieve result
+  const double chi2 = fit->getProperty("ChiSquaredWeightedDividedByNData");
+  // g_log.notice() << "[DELETE DB]"
+  //               << " Chi2/NParam = " <<
+  //               fit->getPropertyValue("ChiSquaredDividedByNData")
+  //               << " Chi2/DOF = " <<
+  //               fit->getPropertyValue("ChiSquaredDividedByDOF")
+  //               << " Chi2 = " << fit->getPropertyValue("ChiSquared")
+  //               << " Chi2W/NParam = " <<
+  //               fit->getPropertyValue("ChiSquaredWeightedDividedByNData")
+  //               << " Chi2W/DOF = " <<
+  //               fit->getPropertyValue("ChiSquaredWeightedDividedByDOF")
+  //               << " Chi2W = " << fit->getPropertyValue("ChiSquaredWeighted")
+  //               << "\n";
 
-    return chi2;
+  return chi2;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -698,7 +701,8 @@ double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
   */
 double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
                                        MatrixWorkspace_sptr dataws,
-                                       size_t wsindex, double xmin, double xmax) {
+                                       size_t wsindex, double xmin,
+                                       double xmax) {
   // Set up sub algorithm fit
   IAlgorithm_sptr fit;
   try {
@@ -850,8 +854,7 @@ double FitOneSinglePeak::fitCompositeFunction(
   // Do calculation for starting chi^2/Rwp: as the assumption that the input the
   // so far the best Rwp
   // FIXME - This is not a good practise...
-  double backRwp =
-      calChiSquareSD(bkgdfunc, dataws, wsindex, startx, endx);
+  double backRwp = calChiSquareSD(bkgdfunc, dataws, wsindex, startx, endx);
   m_sstream << "Background: Pre-fit Goodness = " << backRwp << "\n";
   m_bestRwp = calChiSquareSD(compfunc, dataws, wsindex, startx, endx);
   m_sstream << "Peak+Background: Pre-fit Goodness = " << m_bestRwp << "\n";
@@ -863,8 +866,7 @@ double FitOneSinglePeak::fitCompositeFunction(
   storeFunctionError(bkgdfunc, m_fitErrorBkgdFunc);
 
   // Fit
-  double goodness =
-      fitFunctionSD(compfunc, dataws, wsindex, startx, endx);
+  double goodness = fitFunctionSD(compfunc, dataws, wsindex, startx, endx);
   string errorreason;
 
   // Check fit result
