@@ -16,9 +16,9 @@ const std::string IPeaksWorkspace::toString() const {
   std::ostringstream os;
   os << ITableWorkspace::toString() << "\n" << ExperimentInfo::toString();
   if (convention == "Crystallography")
-    os << "Crystallography: ki-kf";
+    os << "Crystallography: kf-ki";
   else
-    os << "Inelastic: kf-ki";
+    os << "Inelastic: ki-kf";
   os << "\n";
 
   return os.str();

@@ -92,9 +92,9 @@ const std::string IMDWorkspace::toString() const {
   }
   os << "\n";
   if (convention == "Crystallography")
-    os << "Crystallography: ki-kf";
+    os << "Crystallography: kf-ki";
   else
-    os << "Inelastic: kf-ki";
+    os << "Inelastic: ki-kf";
   os << "\n";
 
   return os.str();
