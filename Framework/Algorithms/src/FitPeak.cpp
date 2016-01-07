@@ -332,7 +332,7 @@ bool FitOneSinglePeak::simpleFit() {
 
     // fit and process result
     double goodndess = fitFunctionSD(compfunc, m_dataWS, m_wsIndex, m_minFitX,
-                                     m_maxFitX, false);
+                                     m_maxFitX);
     processNStoreFitResult(goodndess, true);
 
     // restore the function parameters
@@ -469,7 +469,7 @@ double FitOneSinglePeak::fitPeakFunction(API::IPeakFunction_sptr peakfunc,
             << startx << "  to " << endx << ".\n";
 
   double goodness =
-      fitFunctionSD(peakfunc, dataws, wsindex, startx, endx, false);
+      fitFunctionSD(peakfunc, dataws, wsindex, startx, endx);
 
   return goodness;
 }
@@ -706,17 +706,12 @@ double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
   */
 double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
                                        MatrixWorkspace_sptr dataws,
-                                       size_t wsindex, double xmin, double xmax,
-                                       bool calmode) {
-  // Set up calculation mode: for pure chi-square/Rwp
-  int maxiteration = 50;
-  if (calmode) { // return early
-    return calChiSquareSD(fitfunc, dataws, wsindex,
-                          xmin, xmax);
-  } else {
-    // Unfix all parameters
-    for (size_t i = 0; i < fitfunc->nParams(); ++i)
-      fitfunc->unfix(i);
+                                       size_t wsindex, double xmin, double xmax) {
+
+
+  // Unfix all parameters
+  for (size_t i = 0; i < fitfunc->nParams(); ++i) {
+    fitfunc->unfix(i);
   }
 
   // Set up sub algorithm fit
@@ -734,7 +729,7 @@ double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
   fit->setProperty("Function", fitfunc);
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
-  fit->setProperty("MaxIterations", maxiteration);
+  fit->setProperty("MaxIterations", 50); // magic number
   fit->setProperty("StartX", xmin);
   fit->setProperty("EndX", xmax);
   fit->setProperty("Minimizer", m_minimizer);
@@ -754,7 +749,7 @@ double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
   // Retrieve result
   std::string fitStatus = fit->getProperty("OutputStatus");
   double chi2 = EMPTY_DBL();
-  if (fitStatus == "success" || calmode) {
+  if (fitStatus == "success") {
     chi2 = fit->getProperty("OutputChi2overDoF");
     fitfunc = fit->getProperty("Function");
   }
@@ -871,9 +866,9 @@ double FitOneSinglePeak::fitCompositeFunction(
   // so far the best Rwp
   // FIXME - This is not a good practise...
   double backRwp =
-      fitFunctionSD(bkgdfunc, dataws, wsindex, startx, endx, true);
+      calChiSquareSD(bkgdfunc, dataws, wsindex, startx, endx);
   m_sstream << "Background: Pre-fit Goodness = " << backRwp << "\n";
-  m_bestRwp = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, true);
+  m_bestRwp = calChiSquareSD(compfunc, dataws, wsindex, startx, endx);
   m_sstream << "Peak+Background: Pre-fit Goodness = " << m_bestRwp << "\n";
 
   map<string, double> bkuppeakmap, bkupbkgdmap;
@@ -884,7 +879,7 @@ double FitOneSinglePeak::fitCompositeFunction(
 
   // Fit
   double goodness =
-      fitFunctionSD(compfunc, dataws, wsindex, startx, endx, false);
+      fitFunctionSD(compfunc, dataws, wsindex, startx, endx);
   string errorreason;
 
   // Check fit result
