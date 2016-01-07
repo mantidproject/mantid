@@ -179,6 +179,12 @@ private:
     }
   }
 
+#ifdef __clang__
+// The missing braces warning is a false positive -
+// https://llvm.org/bugs/show_bug.cgi?id=21629
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#endif
   DimensionProperties getExpectedDimProperties(std::string outputFrame) {
     DimensionProperties expected;
     expected.ids = {"qx", "qy", "qz", "en"};
@@ -208,6 +214,9 @@ private:
     }
     return expected;
   }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
   void checkExperimentInfoAsExpected(const IMDEventWorkspace &outputWS) {
     TS_ASSERT_EQUALS(2, outputWS.getNumExperimentInfo());
