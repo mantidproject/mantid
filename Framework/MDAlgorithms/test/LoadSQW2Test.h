@@ -138,7 +138,7 @@ private:
     typedef std::array<std::string, 4> StringList;
     typedef std::array<double, 8> DoubleList;
     typedef std::array<size_t, 4> SizeTList;
-    StringList ids, names, units;
+    StringList ids, names, units, frameNames;
     DoubleList ulimits;
     SizeTList nbins;
   };
@@ -180,7 +180,7 @@ private:
       TS_ASSERT_DELTA(expectedDim.ulimits[2 * i + 1], dim->getMaximum(), 1e-04);
       TS_ASSERT_EQUALS(expectedDim.nbins[i], dim->getNBins());
       TS_ASSERT_EQUALS(expectedDim.units[i], dim->getUnits().ascii());
-      TS_ASSERT_EQUALS(expectedDim.names[i], dim->getMDFrame().name());
+      TS_ASSERT_EQUALS(expectedDim.frameNames[i], dim->getMDFrame().name());
     }
   }
 #ifdef __clang__
@@ -189,24 +189,27 @@ private:
 
   DimensionProperties getExpectedDimProperties(std::string outputFrame) {
     DimensionProperties expected;
-    expected.ids = {"Q1", "Q2", "Q3", "DeltaE"};
+    expected.ids = {"qx", "qy", "qz", "en"};
     expected.nbins = {3, 3, 2, 2};
     if (outputFrame == "HKL") {
       expected.units = {"in 2.189 A^-1", "in 2.189 A^-1", "in 2.189 A^-1",
-                        "DeltaE"};
-      expected.names = {"[H,0,0]", "[0,K,0]", "[0,0,L]", "DeltaE"};
+                        "meV"};
+      expected.names = {"[H,0,0]", "[0,K,0]", "[0,0,L]", "en"};
       expected.ulimits = {0.0439,  0.9271,  -0.4644, -0.4024,
                           -0.7818, -0.5052, 2.5,     147.5};
+      expected.frameNames = {"HKL", "HKL", "HKL", "meV"};
     } else {
-      expected.units = {"A^-1", "A^-1", "A^-1", "DeltaE"};
+      expected.units = {"Angstrom^-1", "Angstrom^-1", "Angstrom^-1", "meV"};
       if (outputFrame == "Q_sample") {
-        expected.names = {"Q_sample_x", "Q_sample_y", "Q_sample_z", "DeltaE"};
+        expected.names = {"Q_sample_x", "Q_sample_y", "Q_sample_z", "en"};
         expected.ulimits = {0.0962,  2.0297,  -1.0169, -0.8811,
                             -1.7117, -1.1060, 2.5,     147.5};
+        expected.frameNames = {"QSample", "QSample", "QSample", "meV"};
       } else if (outputFrame == "Q_lab") {
-        expected.names = {"Q_lab_x", "Q_lab_y", "Q_lab_z", "DeltaE"};
+        expected.names = {"Q_lab_x", "Q_lab_y", "Q_lab_z", "en"};
         expected.ulimits = {-1.0174, -0.8810, -1.7116, -1.1057,
                             0.0962,  2.0296,  2.5,     147.5};
+        expected.frameNames = {"QLab", "QLab", "QLab", "meV"};
       } else {
         TS_FAIL("Unknown output frame: " + outputFrame);
       }

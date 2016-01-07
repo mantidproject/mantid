@@ -491,12 +491,19 @@ LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
                            "index between 0 & 2. Found: " +
                            std::to_string(index));
   }
-  const std::string id = "Q" + std::to_string(index + 1);
-  std::string name, unit;
+  static std::array<const char *, 3> indexToDim{"x", "y", "z"};
+  MDHistoDimensionBuilder builder;
+  builder.setId(std::string("q") + indexToDim[index]);
+  MDHistoDimensionBuilder::resizeToFitMDBox(dimMin, dimMax);
+  builder.setMin(dimMin);
+  builder.setMax(dimMax);
+  builder.setNumBins(nbins);
+
+  std::string name, unit, frameName;
   if (m_outputFrame == "Q_sample" || m_outputFrame == "Q_lab") {
-    static std::array<const char *, 3> indexToDim{"x", "y", "z"};
     name = m_outputFrame + "_" + indexToDim[index];
     unit = "A^-1";
+    frameName = (m_outputFrame == "Q_sample") ? "QSample" : "QLab";
   } else if (m_outputFrame == "HKL") {
     static std::array<const char *, 3> indexToHKL{"[H,0,0]", "[0,K,0]",
                                                   "[0,0,L]"};
@@ -506,28 +513,37 @@ LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
     const V3D x = bmat * dimDir;
     double length = 2. * M_PI * x.norm();
     unit = "in " + MDAlgorithms::sprintfd(length, 1.e-3) + " A^-1";
+    frameName = "HKL";
   } else {
     throw std::logic_error(
         "LoadSQW2::createQDimension - Unknown output frame: " + m_outputFrame);
   }
-  Mantid::Geometry::GeneralFrame frame(name, unit);
-  MDHistoDimensionBuilder::resizeToFitMDBox(dimMin, dimMax);
-  return make_shared<MDHistoDimension>(name, id, frame, dimMin, dimMax, nbins);
+  builder.setUnits(unit);
+  builder.setName(name);
+  builder.setFrameName(frameName);
+
+  return builder.create();
 }
 
 /**
  * Create an energy dimension
- * @param umin Dimension minimum from file
- * @param umax Dimension maximum from file
+ * @param dimMin Dimension minimum in output frame
+ * @param dimMax Dimension maximum in output frame
  * @param nbins Number of bins for this dimension
  * @return A new MDHistoDimension object
  */
-Geometry::IMDDimension_sptr LoadSQW2::createEnDimension(float umin, float umax,
-                                                        size_t nbins) {
-  const std::string id("DeltaE"), name(id), unit(id);
-  Mantid::Geometry::GeneralFrame frame(name, unit);
-  MDHistoDimensionBuilder::resizeToFitMDBox(umin, umax);
-  return make_shared<MDHistoDimension>(name, id, frame, umin, umax, nbins);
+Geometry::IMDDimension_sptr
+LoadSQW2::createEnDimension(float dimMin, float dimMax, size_t nbins) {
+  MDHistoDimensionBuilder builder;
+  builder.setId("en");
+  builder.setUnits("meV");
+  builder.setName("en");
+  builder.setFrameName("meV");
+  MDHistoDimensionBuilder::resizeToFitMDBox(dimMin, dimMax);
+  builder.setMin(dimMin);
+  builder.setMax(dimMax);
+  builder.setNumBins(nbins);
+  return builder.create();
 }
 
 /**

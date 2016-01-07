@@ -192,7 +192,7 @@ void testTimeLabel()
   presenter.executeLoadMetadata();
   vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
   TSM_ASSERT_EQUALS("Time label should be exact.",
-                    presenter.getTimeStepLabel(), "E (mev)");
+                    presenter.getTimeStepLabel(), "en (meV)");
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
@@ -231,13 +231,13 @@ void testAxisLabels()
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
   TSM_ASSERT_EQUALS("X Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForX"),
-                    "Q_\\zeta ($A\\^-1$)");
+                    "Q_sample_x ($\\AA^{-1}$)");
   TSM_ASSERT_EQUALS("Y Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForY"),
-                    "Q_\\xi ($A\\^-1$)");
+                    "Q_sample_y ($\\AA^{-1}$)");
   TSM_ASSERT_EQUALS("Z Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForZ"),
-                    "Q_\\eta ($A\\^-1$)");
+                    "Q_sample_z ($\\AA^{-1}$)");
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
