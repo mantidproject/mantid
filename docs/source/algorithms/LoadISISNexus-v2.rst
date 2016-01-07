@@ -17,7 +17,10 @@ Data loaded from Nexus File
 The nexus file must have ``/raw_data_1`` as its main group and
 contain a ``/isis_vms_compat`` group to be loaded.
 
-The workspace data is loaded from ``/raw_data_1/Detector_1``.
+The workspace data is loaded from ``/raw_data_1/Detector_1``. 
+Instrument information is loaded ``/raw_data_1/Instrument``, if available there and not overriden.
+Also the ``NSP1``, ``UDET``, ``SPEC``, ``HDR``, ``IRPB``, ``RRPB``, ``SPB`` and ``RSPB`` sections of
+``/raw_data_1/isis_vms_compat`` are read.
 
 
 Usage
