@@ -321,7 +321,10 @@ void EnggDiffractionPresenter::startFocusing(
 void EnggDiffractionPresenter::processResetFocus() { m_view->resetFocus(); }
 
 void EnggDiffractionPresenter::processRebinTime() {
-  std::string runNo = m_view->currentPreprocRunNo();
+	// shahroz
+  const std::string runNo = isValidRunNumber(m_view->currentPreprocRunNo());
+
+  g_log.error() << runNo << " is the run number given here" << std::endl;
   double bin = m_view->rebinningTimeBin();
 
   try {
@@ -347,7 +350,8 @@ void EnggDiffractionPresenter::processRebinTime() {
 }
 
 void EnggDiffractionPresenter::processRebinMultiperiod() {
-  std::string runNo = m_view->currentPreprocRunNo();
+// shahroz
+  const std::string runNo = isValidRunNumber(m_view->currentPreprocRunNo());
   size_t nperiods = m_view->rebinningPulsesNumberPeriods();
   double timeStep = m_view->rebinningPulsesTime();
 

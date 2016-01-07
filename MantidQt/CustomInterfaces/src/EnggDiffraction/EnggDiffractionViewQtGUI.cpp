@@ -533,8 +533,9 @@ void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
   }
 }
 
-std::string EnggDiffractionViewQtGUI::currentPreprocRunNo() const {
-  return m_uiTabPreproc.MWRunFiles_preproc_run_num->getText().toStdString();
+std::vector<std::string> EnggDiffractionViewQtGUI::currentPreprocRunNo() const {
+	return qListToVector(m_uiTabPreproc.MWRunFiles_preproc_run_num->getFilenames(),
+		m_uiTabPreproc.MWRunFiles_preproc_run_num->isValid());
 }
 
 double EnggDiffractionViewQtGUI::rebinningTimeBin() const {
