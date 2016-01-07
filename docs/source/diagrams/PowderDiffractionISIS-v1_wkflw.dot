@@ -2,6 +2,14 @@ digraph PowderDiffractionISIS {
   label="PowderDiffractionISIS"
   $global_style
 
+  LoadSac_Start               [label="Load Sac Eff"]
+  CorrectAbs_Start            [label="Van Absorption Correction"]
+  C_Vana_Start                [label="Create Vana"]
+  S_Vana_Start                [label="Strip Vanadium Peaks"]
+  GetDataSum_Start            [label="Load Vana (Get Data Sum)"]
+  Focus_one_Start             [label="Start Focusing"]
+  Focus_All_Start             [label="Focus All (Run)"]
+
   subgraph processes {
     $process_style
 
@@ -21,14 +29,6 @@ digraph PowderDiffractionISIS {
     Focus_All_C_Vana          [label="Create Vana"]
     Focus_All_Focus_one       [label="Start Focusing"]
   }
-
-  LoadSac_Start               [label="Load Sac Eff"]
-  CorrectAbs_Start            [label="Van Absorption Correction"]
-  C_Vana_Start                [label="Create Vana"]
-  S_Vana_Start                [label="Strip Vanadium Peaks"]
-  GetDataSum_Start            [label="Load Vana (Get Data Sum)"]
-  Focus_one_Start             [label="Start Focusing"]
-  Focus_All_Start             [label="Focus All (Run)"]
 
   subgraph algorithms {
     $algorithm_style
@@ -257,3 +257,5 @@ digraph PowderDiffractionISIS {
   Focus_All_C_Vana             -> Focus_All_Focus_one
 
   }
+
+}
