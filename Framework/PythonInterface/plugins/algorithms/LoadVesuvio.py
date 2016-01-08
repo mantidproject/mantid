@@ -60,7 +60,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
     _raw_grp = None
     _raw_monitors = None
     _nperiods = None
-    _goodframes = None
     pt_times = None
     delta_t = None
     mon_pt_times = None
@@ -380,7 +379,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         first_ws = self._raw_grp[0]
         self._nperiods = nperiods
-        self._goodframes = first_ws.getRun().getLogData("goodfrm").value
 
         # Cache delta_t values
         raw_t = first_ws.readX(0)
@@ -626,10 +624,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 foil_out_periods = (4,5,6)
                 foil_thin_periods = (1,2,3)
                 foil_thick_periods = (1,2)
-        elif self._nperiods == 9:
-            foil_out_periods = (7,8,9)
-            foil_thin_periods = (4,5,6)
-            foil_thick_periods = (1,2,3)
         else:
             pass
 
@@ -882,13 +876,9 @@ class SpectraToFoilPeriodMap(object):
             self._one_to_one = {1:1, 2:2, 3:3, 4:4, 5:5, 6:6}
             self._odd_even =   {1:1, 2:3, 3:5, 4:2, 5:4, 6:6}
             self._even_odd =   {1:2, 2:4, 3:6, 4:1, 5:3, 6:5}
-        elif nperiods == 9:
-            self._one_to_one = {1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9}
-            self._odd_even =   {1:1, 2:3, 3:5, 4:2, 5:4, 6:6, 7:7, 8:8, 9:9}
-            self._even_odd =   {1:2, 2:4, 3:6, 4:1, 5:3, 6:5, 7:7, 8:8, 9:9}
         else:
             raise RuntimeError("Unsupported number of periods given: " + str(nperiods) +
-                               ". Supported number of periods=2,3,6,9")
+                               ". Supported number of periods=2,3,6")
 
 #----------------------------------------------------------------------------------------
 
@@ -958,7 +948,7 @@ class SpectraToFoilPeriodMap(object):
         Returns a tuple of indices that can be used to access the Workspace within
         a WorkspaceGroup that corresponds to the foil state numbers given
         @param spectrum_no :: A spectrum number (1->nspectra)
-        @param foil_state_no :: A number between 1 & 9(inclusive) that defines which foil
+        @param foil_state_no :: A number between 1 & 6(inclusive) that defines which foil
                                 state is required
         @returns A tuple of indices in a WorkspaceGroup that gives the associated Workspace
         """
@@ -973,7 +963,7 @@ class SpectraToFoilPeriodMap(object):
         """Returns an index that can be used to access the Workspace within
         a WorkspaceGroup that corresponds to the foil state given
             @param spectrum_no :: A spectrum number (1->nspectra)
-            @param foil_state_no :: A number between 1 & 9(inclusive) that defines which
+            @param foil_state_no :: A number between 1 & 6(inclusive) that defines which
                                         foil state is required
             @returns The index in a WorkspaceGroup that gives the associated Workspace
         """
@@ -999,9 +989,9 @@ class SpectraToFoilPeriodMap(object):
 #----------------------------------------------------------------------------------------
 
     def _validate_foil_number(self, foil_number):
-        if foil_number < 1 or foil_number > 9:
+        if foil_number < 1 or foil_number > 6:
             raise ValueError("Invalid foil state given, expected a number between "
-                             "1 and 9. number=%d" % foil_number)
+                             "1 and 6. number=%d" % foil_number)
 
 #----------------------------------------------------------------------------------------
 
