@@ -475,7 +475,12 @@ MantidMatrix *MantidUI::importMatrixWorkspace(const QString &wsName, int lower,
         wsName.toStdString());
   }
 
-  return importMatrixWorkspace(ws, lower, upper, showDlg, makeVisible);
+  MantidMatrix *matrix =
+      importMatrixWorkspace(ws, lower, upper, showDlg, makeVisible);
+  if (matrix) {
+    appWindow()->addMdiSubWindow(matrix, makeVisible);
+  }
+  return matrix;
 }
 
 /**  Import a MatrixWorkspace into a MantidMatrix.
@@ -505,9 +510,6 @@ MantidUI::importMatrixWorkspace(const MatrixWorkspace_sptr workspace, int lower,
     } else {
       matrix = new MantidMatrix(workspace, appWindow(), "Mantid", wsName, lower,
                                 upper);
-    }
-    if (matrix) {
-      appWindow()->addMdiSubWindow(matrix, makeVisible);
     }
   }
   return matrix;

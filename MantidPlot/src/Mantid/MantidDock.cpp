@@ -1536,20 +1536,18 @@ void MantidDockWidget::plotSurface() {
       if (options.accepted) {
 
         // Set up one new matrix workspace to hold all the data for plotting
-        const QString plotWSTitle("__matrixToPlot");
-        const QString xLabelQ =
-            createWorkspaceForGroupPlot(plotWSTitle, wsGroup, options);
+        QString xLabelQ;
+        auto matrixWS = createWorkspaceForGroupPlot(wsGroup, options, &xLabelQ);
 
         // Convert to point data if not already
-        convertHistoToPoints(plotWSTitle);
+        convertHistoToPoints(matrixWS);
 
         // Plot the output workspace in 3D
-        auto matrixToPlot = m_mantidUI->importMatrixWorkspace(plotWSTitle, -1,
-                                                              -1, false, false);
-        m_mantidUI->deleteWorkspace(plotWSTitle);
+        auto matrixToPlot =
+            m_mantidUI->importMatrixWorkspace(matrixWS, -1, -1, false, false);
         auto plot = matrixToPlot->plotGraph3D(Qwt3D::PLOTSTYLE::FILLED);
 
-        // Default title is "Workspace __matrixToPlot". Change this:
+        // Change the default title
         QString title = QString("Surface plot for %1, spectrum %2")
                             .arg(wsGroup->name().c_str(),
                                  QString::number(options.plotIndex));
@@ -1582,30 +1580,22 @@ void MantidDockWidget::plotContour() {
       if (options.accepted) {
 
         // Set up one new matrix workspace to hold all the data for plotting
-        const QString plotWSTitle("__matrixToPlotContour");
-        const QString xLabelQ =
-            createWorkspaceForGroupPlot(plotWSTitle, wsGroup, options);
+        QString xLabelQ;
+        auto matrixWS = createWorkspaceForGroupPlot(wsGroup, options, &xLabelQ);
 
         // Convert to histogram data if not already
-        convertPointsToHisto(plotWSTitle);
+        convertPointsToHisto(matrixWS);
 
         // Plot the output workspace as a contour plot
-        auto matrixToPlot = m_mantidUI->importMatrixWorkspace(plotWSTitle, -1,
-                                                              -1, false, false);
-        m_mantidUI->deleteWorkspace(plotWSTitle);
-
-        // Copying the plot in this way ensures that the workspace can be
-        // deleted and the plot will not disappear
-        MultiLayer *plot = m_appParent->multilayerPlot(
-            m_appParent->generateUniqueName(tr("Graph")));
-        plot->removeLayer();
-        plot->copy(matrixToPlot->plotGraph2D(Graph::ColorMapContour));
+        auto matrixToPlot =
+            m_mantidUI->importMatrixWorkspace(matrixWS, -1, -1, false, false);
+        MultiLayer *plot = matrixToPlot->plotGraph2D(Graph::ColorMapContour);
 
         // Set the X, Y axis labels correctly
         plot->activeGraph()->setXAxisTitle(xLabelQ);
         plot->activeGraph()->setYAxisTitle(options.axisName);
 
-        // Default title is "__matrixToPlotContour". Change this:
+        // Change the default title
         QString title = QString("Contour plot for %1, spectrum %2")
                             .arg(wsGroup->name().c_str(),
                                  QString::number(options.plotIndex));
@@ -1617,21 +1607,23 @@ void MantidDockWidget::plotContour() {
 
 /**
  * Create a workspace for the surface/contour plot from the given workspace
- * group, and add it to the ADS. Returns title for the X axis.
+ * group. Returns title for the X axis.
  * Called by plotSurface() and plotContour().
  *
  * Note that only MatrixWorkspaces can be plotted, so if the group contains
  * Table or Peaks workspaces then it cannot be used.
  *
- * @param wsName :: [input] Name to give the resulting workspace
  * @param wsGroup :: [input] Pointer to workspace group to use as input
  * @param options :: [input] User input from dialog
- * @returns Title for the X axis, read from the workspaces in the group
+ * @param xAxisTitle :: [output] Title for the X axis, read from the workspaces
+ * in the group
+ * @returns Pointer to the created workspace
  */
-const QString MantidDockWidget::createWorkspaceForGroupPlot(
-    const QString &wsName, WorkspaceGroup_const_sptr wsGroup,
-    const MantidSurfacePlotDialog::UserInputSurface &options) {
-  QString xAxisTitle;
+const MatrixWorkspace_sptr MantidDockWidget::createWorkspaceForGroupPlot(
+    WorkspaceGroup_const_sptr wsGroup,
+    const MantidSurfacePlotDialog::UserInputSurface &options,
+    QString *xAxisTitle) {
+  MatrixWorkspace_sptr matrixWS;     // Workspace to return
   int index = options.plotIndex;     // which spectrum to plot from each WS
   QString logName = options.logName; // Log to read from for axis of XYZ plot
   if (wsGroup && groupIsAllMatrixWorkspaces(wsGroup)) {
@@ -1643,7 +1635,7 @@ const QString MantidDockWidget::createWorkspaceForGroupPlot(
           boost::dynamic_pointer_cast<const MatrixWorkspace>(wsGroup->getItem(
               0)); // Already checked group contains only MatrixWorkspaces
       std::string xAxisLabel, xAxisUnits;
-      MatrixWorkspace_sptr matrixWS = WorkspaceFactory::Instance().create(
+      matrixWS = WorkspaceFactory::Instance().create(
           firstWS, nWorkspaces, firstWS->blocksize(), firstWS->blocksize());
       matrixWS->setYUnitLabel(firstWS->YUnitLabel());
       xAxisLabel = firstWS->getXDimension()->getName();
@@ -1667,20 +1659,19 @@ const QString MantidDockWidget::createWorkspaceForGroupPlot(
             logValues.push_back(getSingleLogValue(i, ws, logName));
           }
         }
-        }
+      }
 
-        // Set log axis values by replacing the "spectra" axis
-        matrixWS->replaceAxis(1, new NumericAxis(logValues));
-        m_ads.add(wsName.toStdString(), matrixWS);
+      // Set log axis values by replacing the "spectra" axis
+      matrixWS->replaceAxis(1, new NumericAxis(logValues));
 
-        // Generate title for the X axis
-        xAxisTitle = xAxisLabel.empty() ? "X" : xAxisLabel.c_str();
-        if (!xAxisUnits.empty()) {
-          xAxisTitle.append(" (").append(xAxisUnits.c_str()).append(")");
-        }
+      // Generate title for the X axis
+      *xAxisTitle = xAxisLabel.empty() ? "X" : xAxisLabel.c_str();
+      if (!xAxisUnits.empty()) {
+        xAxisTitle->append(" (").append(xAxisUnits.c_str()).append(")");
+      }
     }
   }
-  return xAxisTitle;
+  return matrixWS;
 }
 
 /**
@@ -1746,36 +1737,34 @@ double MantidDockWidget::getSingleLogValue(
 /**
  * Utility method to convert a histogram workspace to points data
  * (centred bins) for surface plots.
- * @param wsName :: [input] Name of workspace to convert
+ * @param ws :: [input] Workspace to convert
  */
-void MantidDockWidget::convertHistoToPoints(const QString &wsName) const {
-  if (auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
-          m_mantidUI->getWorkspace(wsName))) {
-    if (matrixWS->isHistogramData()) {
-      auto alg = m_mantidUI->createAlgorithm("ConvertToPointData");
-      alg->initialize();
-      alg->setPropertyValue("InputWorkspace", wsName.toStdString());
-      alg->setProperty("OutputWorkspace", wsName.toStdString());
-      alg->execute();
-    }
+void MantidDockWidget::convertHistoToPoints(MatrixWorkspace_sptr ws) const {
+  if (ws && ws->isHistogramData()) {
+    auto alg = m_mantidUI->createAlgorithm("ConvertToPointData");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", "__NotUsed");
+    alg->execute();
+    ws = alg->getProperty("OutputWorkspace");
   }
 }
 
 /**
  * Utility method to convert a points workspace to histogram data
  * for contour plots.
- * @param wsName :: [input] Name of workspace to convert
+ * @param ws :: [input] Workspace to convert
  */
-void MantidDockWidget::convertPointsToHisto(const QString &wsName) const {
-  if (auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
-          m_mantidUI->getWorkspace(wsName))) {
-    if (!matrixWS->isHistogramData()) {
-      auto alg = m_mantidUI->createAlgorithm("ConvertToHistogram");
-      alg->initialize();
-      alg->setPropertyValue("InputWorkspace", wsName.toStdString());
-      alg->setProperty("OutputWorkspace", wsName.toStdString());
-      alg->execute();
-    }
+void MantidDockWidget::convertPointsToHisto(MatrixWorkspace_sptr ws) const {
+  if (ws && !ws->isHistogramData()) {
+    auto alg = m_mantidUI->createAlgorithm("ConvertToHistogram");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", "__NotUsed");
+    alg->execute();
+    ws = alg->getProperty("OutputWorkspace");
   }
 }
 
