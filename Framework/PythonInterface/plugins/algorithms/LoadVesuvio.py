@@ -394,7 +394,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         delay = mon_raw_t[2] - mon_raw_t[1]
         # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
         mon_raw_t = mon_raw_t - delay
-        self.mon_pt_times = mon_raw_t[0:] # previous mon_raw_t[1:]
+        self.mon_pt_times = mon_raw_t[0:]
         self.delta_tmon = (mon_raw_t[1:] - mon_raw_t[:-1])
 
 #----------------------------------------------------------------------------------------
@@ -443,16 +443,16 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
                 ms.DeleteWorkspace(out_name, EnableLogging=_LOGGING_)
                 ms.DeleteWorkspace(out_mon, EnableLogging=_LOGGING_)
-        '''
+
         ms.CropWorkspace(Inputworkspace= SUMMED_WS,
                          OutputWorkspace=SUMMED_WS,
-                         XMax=self._tof_max,
+                         XMax=800,
                          EnableLogging=_LOGGING_)
         ms.CropWorkspace(Inputworkspace= SUMMED_MON,
                          OutputWorkspace=SUMMED_MON,
-                         XMax=self._mon_tof_max,
+                         XMax=800,
                          EnableLogging=_LOGGING_)
-        '''
+
         summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_MON]
         self._load_diff_mode_parameters(summed_data)
         return summed_data, summed_mon
@@ -751,7 +751,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         else:
             raise RuntimeError("Unknown difference type requested: %d" % self._diff_opt)
 
-        self.foil_out.setX(wsindex, self.pt_times[:-1]) # previous: self.pt_times
+        self.foil_out.setX(wsindex, self.pt_times[:-1])
 
 #----------------------------------------------------------------------------------------
 
@@ -868,19 +868,28 @@ class LoadVesuvio(LoadEmptyVesuvio):
 class SpectraToFoilPeriodMap(object):
     """Defines the mapping between a spectrum number
     & the period index into a WorkspaceGroup for a foil state.
+
+    Backscattering :: _one_to_one
+        Only one mapping here due to stationary foil.
+
+    Forward scattering :: _odd_even + _even_odd
+        Two mapping types as the foils are swapped in and out to cover detectors.
+        There are 4 foils for 8 detector banks.
+    odd_even = all odd  numbered forward scattering banks (first being bank 1 (135-142))
+    even_odd = all even numbered forward scattering banks (first being bank 2 (143-150))
     """
 
     def __init__(self, nperiods=6):
         """Constructor. For nperiods set up the mappings"""
-        if nperiods == 2:
+        if nperiods == 2:       # Only forward scattering
             self._one_to_one = {1:1, 2:2}
             self._odd_even =  {1:1, 2:2}
             self._even_odd =  {1:2, 2:1}
-        elif nperiods == 3:
+        elif nperiods == 3:     # Only back scattering
             self._one_to_one = {1:1, 2:2, 3:3}
             self._odd_even =   {1:1, 2:3, 3:5}
             self._even_odd =   {1:2, 2:4, 3:6}
-        elif nperiods == 6:
+        elif nperiods == 6:     # Both forward and back scattering
             self._one_to_one = {1:1, 2:2, 3:3, 4:4, 5:5, 6:6}
             self._odd_even =   {1:1, 2:3, 3:5, 4:2, 5:4, 6:6}
             self._even_odd =   {1:2, 2:4, 3:6, 4:1, 5:3, 6:5}
@@ -987,7 +996,7 @@ class SpectraToFoilPeriodMap(object):
              (spectrum_no >= 151 and spectrum_no <= 158) or \
              (spectrum_no >= 167 and spectrum_no <= 174) or \
              (spectrum_no >= 183 and spectrum_no <= 190):
-             # foil_in = 1,3,5, foil out = 2,4,6
+             # For each alternating forward scattering bank :: foil_in = 1,3,5, foil out = 2,4,6
             foil_periods = self._odd_even
         else:
             # foil_in = 2,4,6 foil out = 1,3,5
