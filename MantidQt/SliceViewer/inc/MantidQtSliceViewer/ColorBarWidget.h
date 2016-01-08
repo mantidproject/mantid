@@ -78,6 +78,8 @@ public:
   void setExponent(double);
   double getExponent();
 
+  void setAutoScale(bool autoscale);
+  bool getAutoScale() const;
 
 public slots:
   void changedMinimum();

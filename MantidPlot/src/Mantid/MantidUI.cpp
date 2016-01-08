@@ -871,6 +871,9 @@ void MantidUI::showSliceViewer()
       w->getSlicer()->setTransparentZeros(false);
     }
 
+    // Global option for color bar autoscaling
+    w->getSlicer()->setColorBarAutoScale(m_appWindow->autoscale2DPlots);
+
     // Connect the MantidPlot close() event with the the window's close().
     QObject::connect(appWindow(), SIGNAL(destroyed()), w, SLOT(close()));
 
