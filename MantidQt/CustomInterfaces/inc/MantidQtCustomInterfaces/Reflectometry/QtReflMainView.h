@@ -47,12 +47,10 @@ class DLLExport QtReflMainView : public MantidQt::API::UserSubWindow,
 public:
   QtReflMainView(QWidget *parent = 0);
   virtual ~QtReflMainView();
-
   /// Name of the interface
   static std::string name() { return "ISIS Reflectometry (Polref)"; }
   // This interface's categories.
   static QString categoryInfo() { return "Reflectometry"; }
-
   // Connect the model
   virtual void showTable(QReflTableModel_sptr model);
   virtual void showSearch(ReflSearchModel_sptr model);
@@ -106,10 +104,14 @@ public:
   virtual std::string getTransferMethod() const;
 
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
+  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner> getAlgorithmRunner() const;
 
 private:
   // initialise the interface
   virtual void initLayout();
+
+  boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
+
   // the presenter
   boost::shared_ptr<IReflPresenter> m_presenter;
   // the models
@@ -145,6 +147,8 @@ private slots:
   void on_actionPlotRow_triggered();
   void on_actionPlotGroup_triggered();
   void on_actionSlitCalculator_triggered();
+
+  void on_icatSearchComplete_triggered();
 
   void on_comboSearchInstrument_currentIndexChanged(int index);
   void on_comboProcessInstrument_currentIndexChanged(int index);
