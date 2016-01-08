@@ -5,6 +5,7 @@ from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, \
 from mantid.simpleapi import *
 from mantid import config
 import os.path
+import shutil
 import stresstesting
 import unittest
 
@@ -13,7 +14,6 @@ import cry_focus
 
 DIFF_PLACES = 8
 DIRS = config['datasearch.directories'].split(';')
-
 
 class ISISPowderDiffractionGem(stresstesting.MantidStressTest):
     def requiredFiles(self):
@@ -87,13 +87,7 @@ class LoadTests(unittest.TestCase):
                 pass
         self.cleanup_names = []
 
-    # ============================ Success ==============================
-    def runTest(self):
-        expt = cry_ini.Files('GEM', RawDir=(DIRS[0] + "GEM/"), Analysisdir='test',
-                             forceRootDirFromScripts=False, inputInstDir=(DIRS[0]))
-        expt.initialize('Cycle_09_5', user='mantid_tester', prefFile='GEM_095_calibration.pref')
-        expt.tell()
-        cry_focus.focus_all(expt, "46489")
+    # ============================ Success =============================
 
     def test_calfile_with_workspace(self):
         self.wsname = "CalWorkspace1"
@@ -154,20 +148,20 @@ class LoadTests(unittest.TestCase):
 
         dat_data = []
         for i in range(0, len(dat_files)):
-            dat_data.append(LoadAscii(Filename=dat_files[i], OutputWorkspace="datWorkspace" + str(i+1)))
+            dat_data.append(LoadAscii(Filename=dat_files[i], OutputWorkspace="datWorkspace" + str(i + 1)))
 
         for _file in dat_data:
             self.assertTrue(isinstance(_file, MatrixWorkspace))
 
         for i in range(0, len(dat_data)):
-            self.assertTrue(("datWorkspace" + str(i+1)) in dat_data[i].getName())
+            self.assertTrue(("datWorkspace" + str(i + 1)) in dat_data[i].getName())
 
         for _file in dat_data:
             self.assertEquals(1, _file.getNumberHistograms())
 
         for i in range(0, len(dat_data), 2):
-            b_size_avg = ((dat_data[i].blocksize() + dat_data[i+1].blocksize()) / 2)
-            self.assertEquals(b_size_avg, dat_data[i+1].blocksize())
+            b_size_avg = ((dat_data[i].blocksize() + dat_data[i + 1].blocksize()) / 2)
+            self.assertEquals(b_size_avg, dat_data[i + 1].blocksize())
 
         self.assertAlmostEqual(0.43865, dat_data[0].readX(0)[2], places=DIFF_PLACES)
         self.assertAlmostEqual(dat_data[0].readY(0)[6], dat_data[1].readY(0)[6], places=DIFF_PLACES)
@@ -186,3 +180,77 @@ class LoadTests(unittest.TestCase):
 
         self.assertAlmostEqual(dat_data[10].readY(0)[50], dat_data[10].readY(0)[50], places=DIFF_PLACES)
         self.assertAlmostEqual(499.0768, dat_data[11].readX(0)[0], places=DIFF_PLACES)
+
+
+# ================ Below test cases use different pref file ==================
+# =================== when 'ExistingV' = 'no' in pref file ===================
+
+class ISISPowderDiffractionGem2(stresstesting.MantidStressTest):
+    def requiredFiles(self):
+        return set(["GEM/GEM48436.raw", "GEM/GEM48037.raw", "GEM/GEM48038.raw", "GEM/GEM48039.raw",
+        "GEM/VanaPeaks.dat", "GEM/test/GrpOff/offsets_2009_cycle094.cal",
+        "GEM/test/Cycle_09_5_No_ExtV/mantid_tester/GEM_095_calibration_noExtV.pref"])
+
+        # note: VanaPeaks.dat is used only if provided in the directory and is compulsory
+        # required here for GEM
+
+    def _clean_up_files(self, filenames, directories):
+        try:
+            for files in filenames:
+                path = os.path.join(directories[0], files)
+                os.remove(path)
+                cali_path = os.path.join(directories[0], "GEM/test/Cycle_09_5_No_ExistV/Calibration")
+            shutil.rmtree(cali_path)
+        except OSError, ose:
+            print 'could not delete generated file : ', ose.filename
+
+    def runTest(self):
+        self._success = False
+        expt = cry_ini.Files('GEM', RawDir=(DIRS[0] + "GEM"), Analysisdir='test',
+                             forceRootDirFromScripts=False, inputInstDir=DIRS[0])
+        expt.initialize('Cycle_09_5_No_ExtV', user='Mantid_tester', prefFile='GEM_095_calibration_noExtV.pref')
+        expt.tell()
+        cry_focus.focus_all(expt, "48436", Write_ExtV=False)
+
+        # Custom code to create and run this single test suite
+        # and then mark as success or failure
+        suite = unittest.TestSuite()
+        suite.addTest(unittest.makeSuite(LoadTests, "test"))
+        runner = unittest.TextTestRunner()
+        # Run using either runner
+        res = runner.run(suite)
+        if res.wasSuccessful():
+            self._success = True
+        else:
+            self._success = False
+
+    def validate(self):
+        return self._success
+
+    def cleanup(self):
+        filenames = []
+        filenames.extend(("GEM/test/Cycle_09_5_No_ExtV/mantid_tester/GEM48436.gss",
+                          "GEM/test/Cycle_09_5_No_ExtV/mantid_tester/GEM48436.nxs",
+                          'GEM/test/Cycle_09_5_No_ExtV/mantid_tester/offsets_2011_cycle111.cal'))
+
+        for i in range(1, 7):
+            filenames.append('GEM/test/Cycle_09_5_No_ExtV/mantid_tester/GEM48436_b' + str(i) + '_D.dat')
+            filenames.append('GEM/test/Cycle_09_5_No_ExtV/mantid_tester/GEM48436_b' + str(i) + '_TOF.dat')
+        self._clean_up_files(filenames, DIRS)
+
+
+# ======================================================================
+# work horse
+class LoadTests(unittest.TestCase):
+    wsname = "__LoadTest"
+    cleanup_names = []
+
+    def tearDown(self):
+        self.cleanup_names.append(self.wsname)
+        for name in self.cleanup_names:
+            try:
+                AnalysisDataService.remove(name)
+            except KeyError:
+                pass
+        self.cleanup_names = []
+
