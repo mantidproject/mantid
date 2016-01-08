@@ -758,11 +758,24 @@ class ISISReducer(Reducer):
         if ((idf_path_reducer == idf_path_workspace) and su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
             return
         else:
-            logger.warning("Updaint the IDF of the Reducer. Switching from " + str(idf_path_reducer) + " to " + str(idf_path_workspace))
+            logger.warning("Updating the IDF of the Reducer. Switching from " + str(idf_path_reducer) + " to " + str(idf_path_workspace))
             idf_path = os.path.basename(idf_path_workspace)
             instrument = self._get_correct_instrument(instrument_name, idf_path)
+
+            # Get detector of the old instrument
+            old_instrument = self.get_instrument()
+            old_detector_selection = old_instrument.get_detector_selection()
+
             if instrument is not None:
                 self.set_instrument(instrument)
+
+                # We need to update the instrument, by reloading the user file.
+                # This is pretty bad, but looking at the reducer architecture this
+                # seems to be the only reasonable way to do this.
+                self.user_settings.execute(self)
+
+                # Now we set the corret detector, this is also being done in the GUI
+                self.get_instrument.setDetector(old_detector_selection)
 
     def _get_correct_instrument(self, instrument_name, idf_path = None):
         '''

@@ -599,6 +599,9 @@ class ISISInstrument(BaseInstrument):
         elif self.cur_detector().isAlias(detName):
             return True
 
+    def get_detector_selection(self):
+        return self.det_selection
+
     def setDefaultDetector(self):
         self.lowAngDetSet = True
 
