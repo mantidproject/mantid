@@ -466,38 +466,51 @@ MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 @param makeVisible :: If true show the created MantidMatrix, hide otherwise.
 @return A pointer to the new MantidMatrix.
 */
-MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, int upper, bool showDlg, bool makeVisible)
-{
+MantidMatrix *MantidUI::importMatrixWorkspace(const QString &wsName, int lower,
+                                              int upper, bool showDlg,
+                                              bool makeVisible) {
   MatrixWorkspace_sptr ws;
-  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-  {
-    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
+  if (AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        wsName.toStdString());
   }
 
-  if (!ws.get()) return 0;
+  return importMatrixWorkspace(ws, lower, upper, showDlg, makeVisible);
+}
 
-  MantidMatrix* w = 0;
-  if (showDlg)
-  {
-    ImportWorkspaceDlg dlg(appWindow(), ws->getNumberHistograms());
-    if (dlg.exec() == QDialog::Accepted)
-    {
-      int start = dlg.getLowerLimit();
-      int end = dlg.getUpperLimit();
-
-      w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, start, end );
-      if (dlg.isFiltered())
-        w->setRange(0,dlg.getMaxValue());
+/**  Import a MatrixWorkspace into a MantidMatrix.
+@param workspace :: Workspace
+@param lower :: An optional lower boundary
+@param upper :: An optional upper boundary
+@param showDlg :: If true show a dialog box to set some import parameters
+@param makeVisible :: If true show the created MantidMatrix, hide otherwise.
+@return A pointer to the new MantidMatrix.
+*/
+MantidMatrix *
+MantidUI::importMatrixWorkspace(const MatrixWorkspace_sptr workspace, int lower,
+                                int upper, bool showDlg, bool makeVisible) {
+  MantidMatrix *matrix = 0;
+  if (workspace) {
+    const QString wsName(workspace->name().c_str());
+    if (showDlg) {
+      ImportWorkspaceDlg dlg(appWindow(), workspace->getNumberHistograms());
+      if (dlg.exec() == QDialog::Accepted) {
+        int start = dlg.getLowerLimit();
+        int end = dlg.getUpperLimit();
+        matrix = new MantidMatrix(workspace, appWindow(), "Mantid", wsName,
+                                  start, end);
+        if (dlg.isFiltered())
+          matrix->setRange(0, dlg.getMaxValue());
+      }
+    } else {
+      matrix = new MantidMatrix(workspace, appWindow(), "Mantid", wsName, lower,
+                                upper);
+    }
+    if (matrix) {
+      appWindow()->addMdiSubWindow(matrix, makeVisible);
     }
   }
-  else
-  {
-    w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
-  }
-  if ( !w ) return 0;
-
-  appWindow()->addMdiSubWindow(w,makeVisible);
-  return w;
+  return matrix;
 }
 
 /**  Import a Workspace into MantidPlot.
