@@ -27,11 +27,9 @@ LoadTOFRawNexus::LoadTOFRawNexus()
 //-------------------------------------------------------------------------------------------------
 /// Initialisation method.
 void LoadTOFRawNexus::init() {
-
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the NeXus file to load");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".nxs"}),
+      "The name of the NeXus file to load");
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
                   "The name of the Workspace2D to create.");

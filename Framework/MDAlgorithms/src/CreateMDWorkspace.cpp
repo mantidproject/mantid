@@ -85,11 +85,8 @@ void CreateMDWorkspace::init() {
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Name of the output MDEventWorkspace.");
-
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
+      new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
       "Optional: to use a file as the back end, give the path to the file to "
       "save.");
 

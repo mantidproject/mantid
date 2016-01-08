@@ -579,13 +579,8 @@ void LoadAscii2::fillInputValues(std::vector<double> &values,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadAscii2::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
-  exts.push_back(".txt");
-  exts.push_back(".csv");
-  exts.push_back("");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
+                                   {".dat", ".txt", ".csv", ""}),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be .txt, .dat, or "
                   ".csv");

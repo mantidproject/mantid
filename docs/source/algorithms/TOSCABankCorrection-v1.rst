@@ -51,6 +51,12 @@ misalignment of the peaks.
   measured spectra would look like if the sample was in the expected sample
   position.
 
+Workflow
+--------
+
+.. diagram:: TOSCABankCorrection-v1_wkflw.dot
+
+
 Usage
 -----
 

@@ -39,14 +39,10 @@ void LoadDetectorInfo::init() {
   declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
                   "The name of the workspace to that the detector information "
                   "will be loaded into.");
-  std::vector<std::string> exts;
-  // each of these allowed extensions must be dealt with in exec() below
-  exts.push_back(".dat");
-  exts.push_back(".raw");
-  exts.push_back(".sca");
-  exts.push_back(".nxs");
+
   declareProperty(
-      new FileProperty("DataFilename", "", FileProperty::Load, exts),
+      new FileProperty("DataFilename", "", FileProperty::Load,
+                       {".dat", ".raw", ".sca", ".nxs"}),
       "A **raw, dat, nxs** or **sca** file that contains information about the "
       "detectors in the "
       "workspace. The description of **dat** and **nxs** file format is "

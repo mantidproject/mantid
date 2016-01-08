@@ -52,11 +52,9 @@ const std::string LoadMcStas::category() const { return "DataHandling\\Nexus"; }
 /** Initialize the algorithm's properties.
  */
 void LoadMcStas::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".h5");
-  exts.push_back(".nxs");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the Nexus file to load");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".h5", ".nxs"}),
+      "The name of the Nexus file to load");
 
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output),

@@ -402,6 +402,9 @@ bool ConvertToMD::buildTargetWSDescription(
   bool LorentzCorrections = getProperty("LorentzCorrection");
   targWSDescr.setLorentsCorr(LorentzCorrections);
 
+  double m_AbsMin = getProperty("AbsMinQ");
+  targWSDescr.setAbsMin(m_AbsMin);
+
   // instantiate class, responsible for defining Mslice-type projection
   MDAlgorithms::MDWSTransform MsliceProj;
   // identify if u,v are present among input parameters and use defaults if not
