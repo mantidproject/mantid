@@ -1,0 +1,4 @@
+# For OS X only
+# Launch ipython notebooks using the mantidpython script
+
+./Applications/MantidPlot.app/Contents/MacOS/mantidpython notebook --notebook-dir=$HOME

@@ -1,0 +1,4 @@
+# For OS X only
+# Launch an ipython console using the mantidpython script
+
+./Applications/MantidPlot.app/Contents/MacOS/mantidpython qtconsole
