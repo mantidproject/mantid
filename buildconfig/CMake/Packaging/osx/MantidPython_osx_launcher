@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+#
 # For OS X only
 # Launch an ipython console using the mantidpython script
 

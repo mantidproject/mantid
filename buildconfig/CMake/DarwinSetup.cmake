@@ -202,7 +202,7 @@ install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx
           DESTINATION MantidPlot.app/Contents/MacOS/ 
           RENAME mantidpython )
 # Add launcher application for a Mantid IPython console
-install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidPython_osx
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidPython_osx_launcher
           DESTINATION MantidPython.app/Contents/MacOS/ 
           RENAME MantidPython )
 install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_Info.plist
@@ -211,7 +211,7 @@ install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_Info.plist
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPython.icns
           DESTINATION MantidPython.app/Contents/Resources/ )
 # Add launcher application for Mantid IPython notebooks
-install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidNotebook_osx
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidNotebook_osx_launcher
           DESTINATION MantidNotebook.app/Contents/MacOS/ 
           RENAME MantidNotebook )
 install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
