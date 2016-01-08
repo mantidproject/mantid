@@ -195,14 +195,18 @@ public:
   void dropEvent(QDropEvent *de);
   QList<boost::shared_ptr<const Mantid::API::MatrixWorkspace>>
   getSelectedMatrixWorkspaces() const;
-  MantidSurfacePlotDialog::UserInputSurface chooseSurfacePlotOptions() const;
-  MantidSurfacePlotDialog::UserInputSurface chooseContourPlotOptions() const;
+  MantidSurfacePlotDialog::UserInputSurface
+  chooseSurfacePlotOptions(int nWorkspaces) const;
+  MantidSurfacePlotDialog::UserInputSurface
+  chooseContourPlotOptions(int nWorkspaces) const;
 
 protected:
   void dragMoveEvent(QDragMoveEvent *de);
   void dragEnterEvent(QDragEnterEvent *de);
   MantidSurfacePlotDialog::UserInputSurface
-  choosePlotOptions(const QString &type) const;
+  choosePlotOptions(const QString &type, int nWorkspaces) const;
+  void validatePlotOptions(MantidSurfacePlotDialog::UserInputSurface &options,
+                           int nWorkspaces) const;
 
 private:
   QPoint m_dragStartPosition;

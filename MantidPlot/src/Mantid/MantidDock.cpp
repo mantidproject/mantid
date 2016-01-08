@@ -1530,7 +1530,8 @@ void MantidDockWidget::plotSurface() {
     const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(
         m_ads.retrieve(wsName.toStdString()));
     if (wsGroup) {
-      auto options = m_tree->chooseSurfacePlotOptions();
+      auto options =
+          m_tree->chooseSurfacePlotOptions(wsGroup->getNumberOfEntries());
       // If user clicked OK and not Cancel...
       if (options.accepted) {
 
@@ -1575,7 +1576,8 @@ void MantidDockWidget::plotContour() {
     const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(
         m_ads.retrieve(wsName.toStdString()));
     if (wsGroup) {
-      auto options = m_tree->chooseContourPlotOptions();
+      auto options =
+          m_tree->chooseContourPlotOptions(wsGroup->getNumberOfEntries());
       // If user clicked OK and not Cancel...
       if (options.accepted) {
 
@@ -2072,10 +2074,12 @@ MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
 * with a dialog box, and also allows choice of a log to plot against and a name
 * for this axis.
 * @param type :: [input] Type of plot (for dialog title)
+* @param nWorkspaces :: [input] Number of workspaces in selected group
 * @returns :: A structure listing the selected options
 */
 MantidSurfacePlotDialog::UserInputSurface
-MantidTreeWidget::choosePlotOptions(const QString &type) const {
+MantidTreeWidget::choosePlotOptions(const QString &type,
+                                    int nWorkspaces) const {
   auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
@@ -2084,29 +2088,58 @@ MantidTreeWidget::choosePlotOptions(const QString &type) const {
   MantidSurfacePlotDialog *dlg = new MantidSurfacePlotDialog(
       m_mantidUI, 0, selectedMatrixWsNameList, type);
   dlg->exec();
-  return dlg->getSelections();
+  auto selections = dlg->getSelections();
+  validatePlotOptions(selections, nWorkspaces);
+  return selections;
 }
 
 /**
 * Allows users to choose spectra from the selected workspaces by presenting them
 * with a dialog box, and also allows choice of a log to plot against and a name
 * for this axis.
+* @param nWorkspaces :: [input] Number of workspaces in selected group
 * @returns :: A structure listing the selected options
 */
 MantidSurfacePlotDialog::UserInputSurface
-MantidTreeWidget::chooseSurfacePlotOptions() const {
-  return choosePlotOptions("Surface");
+MantidTreeWidget::chooseSurfacePlotOptions(int nWorkspaces) const {
+  return choosePlotOptions("Surface", nWorkspaces);
 }
 
 /**
 * Allows users to choose spectra from the selected workspaces by presenting them
 * with a dialog box, and also allows choice of a log to plot against and a name
 * for this axis.
+* @param nWorkspaces :: [input] Number of workspaces in selected group
 * @returns :: A structure listing the selected options
 */
 MantidSurfacePlotDialog::UserInputSurface
-MantidTreeWidget::chooseContourPlotOptions() const {
-  return choosePlotOptions("Contour");
+MantidTreeWidget::chooseContourPlotOptions(int nWorkspaces) const {
+  return choosePlotOptions("Contour", nWorkspaces);
+}
+
+/**
+ * Performs validation of user's selected options.
+ * If errors detected, raises a message box and sets "accepted" to false.
+ * @param options :: [input] Selections made from dialog
+ * @param nWorkspaces :: [input] Number of workspaces in selected group
+ */
+void MantidTreeWidget::validatePlotOptions(
+    MantidSurfacePlotDialog::UserInputSurface &options, int nWorkspaces) const {
+  // If using custom log values, must have the same number of values as the
+  // number of workspaces in the group
+  if (options.accepted) {
+    if (options.logName == MantidSurfacePlotDialog::CUSTOM) {
+      if (options.customLogValues.size() != nWorkspaces) {
+        QMessageBox errorMessage;
+        errorMessage.setText(
+            "Number of custom log values must be equal to number "
+            "of workspaces in group");
+        errorMessage.setIcon(QMessageBox::Critical);
+        errorMessage.exec();
+        options.accepted = false;
+      }
+    }
+  }
 }
 
 void MantidTreeWidget::setSortScheme(MantidItemSortScheme sortScheme)
