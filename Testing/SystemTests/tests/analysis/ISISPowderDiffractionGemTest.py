@@ -15,6 +15,7 @@ import cry_focus
 DIFF_PLACES = 8
 DIRS = config['datasearch.directories'].split(';')
 
+
 class ISISPowderDiffractionGem(stresstesting.MantidStressTest):
     def requiredFiles(self):
         filenames = []
@@ -179,17 +180,18 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(458.71929, dat_data[9].readX(0)[10], places=DIFF_PLACES)
 
         self.assertAlmostEqual(dat_data[10].readY(0)[50], dat_data[10].readY(0)[50], places=DIFF_PLACES)
-        self.assertAlmostEqual(499.0768, dat_data[11].readX(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(499.0768, dat_data[11].readX(0)[0], places=DIFF_PLACES
 
 
-# ================ Below test cases use different pref file ==================
-# =================== when 'ExistingV' = 'no' in pref file ===================
+        # ================ Below test cases use different pref file ==================
+        # =================== when 'ExistingV' = 'no' in pref file ===================
+
 
 class ISISPowderDiffractionGem2(stresstesting.MantidStressTest):
     def requiredFiles(self):
         return set(["GEM/GEM48436.raw", "GEM/GEM48037.raw", "GEM/GEM48038.raw", "GEM/GEM48039.raw",
-        "GEM/VanaPeaks.dat", "GEM/test/GrpOff/offsets_2009_cycle094.cal",
-        "GEM/test/Cycle_09_5_No_ExtV/mantid_tester/GEM_095_calibration_noExtV.pref"])
+                    "GEM/VanaPeaks.dat", "GEM/test/GrpOff/offsets_2011_cycle111.cal",
+                    "GEM/test/Cycle_09_5_No_ExtV/mantid_tester/GEM_095_calibration_noExtV.pref"])
 
         # note: VanaPeaks.dat is used only if provided in the directory and is compulsory
         # required here for GEM
@@ -199,7 +201,7 @@ class ISISPowderDiffractionGem2(stresstesting.MantidStressTest):
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
-                cali_path = os.path.join(directories[0], "GEM/test/Cycle_09_5_No_ExistV/Calibration")
+                cali_path = os.path.join(directories[0], "GEM/test/Cycle_09_5_No_ExtV/Calibration")
             shutil.rmtree(cali_path)
         except OSError, ose:
             print 'could not delete generated file : ', ose.filename
@@ -239,6 +241,7 @@ class ISISPowderDiffractionGem2(stresstesting.MantidStressTest):
         self._clean_up_files(filenames, DIRS)
 
 
+# Deletion of invalid
 # ======================================================================
 # work horse
 class LoadTests(unittest.TestCase):
@@ -254,3 +257,43 @@ class LoadTests(unittest.TestCase):
                 pass
         self.cleanup_names = []
 
+    # ============================ Success ==============================
+
+    def test_calfile_with_workspace(self):
+        self.wsname = "CalWorkspace1"
+        calfile1 = (DIRS[0] + 'GEM/test/Cycle_09_5_No_ExtV/Calibration/offsets_2011_cycle111.cal')
+        calfile2 = (DIRS[0] + 'GEM/test/Cycle_09_5_No_ExtV/mantid_tester/offsets_2011_cycle111.cal')
+        data1 = LoadCalFile(InstrumentName="GEM", CalFilename=calfile1,
+                            WorkspaceName=self.wsname)
+        data2 = LoadCalFile(InstrumentName="GEM", CalFilename=calfile2,
+                            WorkspaceName="CalWorkspace2")
+
+        for i in range(0, 3):
+            self.assertTrue(isinstance(data1[i], MatrixWorkspace))
+        self.assertTrue(isinstance(data1[3], ITableWorkspace))
+
+        self.assertTrue("CalWorkspace1_group" in data1[0].getName())
+        self.assertTrue("CalWorkspace1_offsets" in data1[1].getName())
+        self.assertTrue("CalWorkspace1_mask" in data1[2].getName())
+        self.assertTrue("CalWorkspace1_cal" in data1[3].getName())
+
+        for i in range(0, 3):
+            self.assertTrue(isinstance(data2[i], MatrixWorkspace))
+            self.assertTrue(isinstance(data1[3], ITableWorkspace))
+
+        self.assertTrue("CalWorkspace2_group" in data2[0].getName())
+        self.assertTrue("CalWorkspace2_offsets" in data2[1].getName())
+        self.assertTrue("CalWorkspace2_mask" in data2[2].getName())
+        self.assertTrue("CalWorkspace2_cal" in data2[3].getName())
+
+    def test_nxsfile_with_workspace(self):
+        self.wsname = "NexusWorkspace"
+        nxsfile = (DIRS[0] + "GEM/test/Cycle_09_5_No_ExtV/mantid_tester/GEM48436.nxs")
+        data = LoadNexusProcessed(Filename=nxsfile, OutputWorkspace=self.wsname)
+
+        self.assertTrue(isinstance(data[0], WorkspaceGroup))
+        self.assertEquals(6, data[0].getNumberOfEntries())
+
+        for i in range(1, 7):
+            self.assertTrue(isinstance(data[i], MatrixWorkspace))
+            self.assertTrue("ResultTOF-" + str(i) in data[i].getName())
