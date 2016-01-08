@@ -752,7 +752,7 @@ void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,
   // Write out the Qconvention
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string m_QConvention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+      ws->getConvention();
   file->putAttr("QConvention", m_QConvention);
 
   // Write out the set display normalization

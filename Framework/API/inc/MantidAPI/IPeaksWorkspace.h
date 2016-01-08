@@ -65,6 +65,11 @@ public:
   virtual int getNumberPeaks() const = 0;
 
   //---------------------------------------------------------------------------------------------
+  /** @return the number of peaks
+   */
+  virtual std::string getConvention() const = 0;
+
+  //---------------------------------------------------------------------------------------------
   /** Removes the indicated peak
    * @param peakNum  the peak to remove. peakNum starts at 0
    */
@@ -155,6 +160,8 @@ public:
   peakInfo(Kernel::V3D QFrame, bool labCoords) const = 0;
   virtual int peakInfoNumber(Kernel::V3D qLabFrame, bool labCoords) const = 0;
 
+  std::string convention;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IPeaksWorkspace(const IPeaksWorkspace &other)
@@ -165,7 +172,6 @@ protected:
   virtual const std::string toString() const;
 
 private:
-  std::string convention;
   virtual IPeaksWorkspace *doClone() const = 0;
 };
 }

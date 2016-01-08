@@ -119,6 +119,8 @@ public:
   IMDIterator *
   createIterator(Mantid::Geometry::MDImplicitFunction *function = NULL) const;
 
+  std::string getConvention() const;
+
   signal_t getSignalAtVMD(const Mantid::Kernel::VMD &coords,
                           const Mantid::API::MDNormalization &normalization =
                               Mantid::API::VolumeNormalization) const;

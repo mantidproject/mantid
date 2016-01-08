@@ -43,6 +43,11 @@ IMDIterator *IMDWorkspace::createIterator(
   return iterators[0];
 }
 
+//---------------------------------------------------------------------------------------------
+/** @return the convention
+ */
+std::string IMDWorkspace::getConvention() const { return convention; }
+
 //-------------------------------------------------------------------------------------------
 /** Returns the signal (normalized by volume) at a given coordinates
  *
@@ -91,7 +96,7 @@ const std::string IMDWorkspace::toString() const {
     os << "Binned from '" << getOriginalWorkspace()->getName();
   }
   os << "\n";
-  if (convention == "Crystallography")
+  if (this->getConvention() == "Crystallography")
     os << "Crystallography: kf-ki";
   else
     os << "Inelastic: ki-kf";

@@ -128,6 +128,11 @@ void PeaksWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
 int PeaksWorkspace::getNumberPeaks() const { return int(peaks.size()); }
 
 //---------------------------------------------------------------------------------------------
+/** @return the convention
+ */
+std::string PeaksWorkspace::getConvention() const { return convention; }
+
+//---------------------------------------------------------------------------------------------
 /** Removes the indicated peak
  * @param peakNum  the peak to remove. peakNum starts at 0
  */
@@ -608,8 +613,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   // HKL is flipped by -1 due to different q convention in Crystallography.
   // Always write out in ki-kf so consistent with old files
   double qSign = 1.0;
-  std::string convention = ConfigService::Instance().getString("Q.convention");
-  if (convention == "Crystallography")
+  if (this->getConvention() == "Crystallography")
     qSign = -1.0;
 
   // Populate column vectors from Peak Workspace
