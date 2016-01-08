@@ -207,8 +207,6 @@ protected:
   QList <PlotMarker *> d_labels_list;
   //! Keeps track of the plot marker on which the user clicked when selecting the labels.
   PlotMarker *d_selected_label;
-  //! Flag for whether we autoscale color bar
-  bool d_color_map_autoscale;
 
   //! Keep track of the coordinates of the point where the user clicked when selecting the labels.
   double d_click_pos_x, d_click_pos_y;
@@ -228,6 +226,8 @@ protected:
   std::vector<unsigned char> mScaledValues;
   /// boolean flag to indicate intensity changed
   bool m_bIntensityChanged;
+  /// Flag for whether we autoscale color bar
+  bool d_color_map_autoscale;
 };
 
 class SpectrogramData: public QwtRasterData
