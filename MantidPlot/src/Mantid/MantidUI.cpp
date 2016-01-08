@@ -3410,7 +3410,18 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
 
   plot->setTitle(wsName);
 
-  Spectrogram *spgrm = new Spectrogram(wsName, workspace);
+  // Find out if this is live data
+  bool isLiveData(false);
+  auto liveAlgorithms =
+      AlgorithmManager::Instance().runningInstancesOf("MonitorLiveData");
+  for (auto liveAlg : liveAlgorithms) {
+    if (liveAlg->getPropertyValue("OutputWorkspace") == workspace->name()) {
+      isLiveData = true;
+      break;
+    }
+  }
+  Spectrogram *spgrm = new Spectrogram(wsName, workspace, isLiveData);
+
   plot->plotSpectrogram(spgrm, curveType);
   connect(spgrm, SIGNAL(removeMe(Spectrogram*)),
           plot, SLOT(removeSpectrogram(Spectrogram*)));

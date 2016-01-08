@@ -6193,7 +6193,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
         * spectrogram.
         */
         Spectrogram *s =
-            new Spectrogram(QString::fromUtf8(wsName.c_str()), wsPtr);
+            new Spectrogram(QString::fromUtf8(wsName.c_str()), wsPtr, false);
         plotSpectrogram(s, Graph::ColorMap);
         s->loadFromProject(*it);
         curveID++;

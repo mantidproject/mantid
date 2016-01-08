@@ -358,6 +358,9 @@ private:
   /// Logger
   Mantid::Kernel::Logger m_logger;
 
+  /// Names of the workspaces (if any) being used for live data
+  std::vector<std::string> m_liveDataWSNames;
+
   // -------------------------- Controllers ------------------------
   boost::shared_ptr<CompositePeaksPresenter>  m_peaksPresenter;
 

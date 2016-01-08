@@ -68,7 +68,9 @@ class Spectrogram: public QObject, public QwtPlotSpectrogram, public MantidQt::A
 public:
   Spectrogram();
   explicit Spectrogram(Matrix *m);
-  Spectrogram(const QString &wsName, const Mantid::API::IMDWorkspace_const_sptr & workspace);
+  Spectrogram(const QString &wsName,
+              const Mantid::API::IMDWorkspace_const_sptr &workspace,
+              const bool isLiveData);
   Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
   Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
   ~Spectrogram();
@@ -220,6 +222,8 @@ protected:
   std::vector<unsigned char> mScaledValues;
   /// boolean flag to indicate intensity changed
   bool m_bIntensityChanged;
+  /// Flag to indicate live data. If live, don't update colour scale
+  bool m_liveData;
 };
 
 class SpectrogramData: public QwtRasterData

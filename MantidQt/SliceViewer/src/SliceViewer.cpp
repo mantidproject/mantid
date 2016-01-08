@@ -123,6 +123,14 @@ SliceViewer::SliceViewer(QWidget *parent)
   // hide unused buttons
   ui.btnZoom->hide(); // hidden for a long time
 
+  // If live data being read, save the name of the workspace(s)
+  m_liveDataWSNames.clear();
+  auto liveAlgorithms =
+      AlgorithmManager::Instance().runningInstancesOf("MonitorLiveData");
+  for (auto liveAlg : liveAlgorithms) {
+    m_liveDataWSNames.push_back(liveAlg->getPropertyValue("OutputWorkspace"));
+  }
+
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
   QObject::connect(ui.btnClearLine, SIGNAL(clicked()), this, SLOT(clearLine()));
@@ -736,9 +744,16 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // Build up the widgets
   this->updateDimensionSliceWidgets();
 
-  // Find the full range. And use it
-  findRangeFull();
-  m_colorBar->setViewRange(m_colorRangeFull);
+  // Update color bar UNLESS this is live data
+  // (otherwise it keeps resetting itself)
+  bool liveData =
+      (std::find(m_liveDataWSNames.cbegin(), m_liveDataWSNames.cend(),
+                 ws->name()) != m_liveDataWSNames.end());
+  if (!m_firstWorkspaceOpen || !liveData) {
+    // Find the full range. And use it
+    findRangeFull();
+    m_colorBar->setViewRange(m_colorRangeFull);
+  }
   // Initial display update
   this->updateDisplay(
       !m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
