@@ -203,22 +203,22 @@ install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx
           RENAME mantidpython )
 # Add launcher application for a Mantid IPython console
 install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidPython_osx_launcher
-          DESTINATION MantidPython\ (optional).app/Contents/MacOS/ 
+          DESTINATION MantidPython\ \(optional\).app/Contents/MacOS/ 
           RENAME MantidPython )
 install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_Info.plist
-          DESTINATION MantidPython\ (optional).app/Contents/ 
+          DESTINATION MantidPython\ \(optional\).app/Contents/ 
           RENAME Info.plist )
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPython.icns
-          DESTINATION MantidPython\ (optional).app/Contents/Resources/ )
+          DESTINATION MantidPython\ \(optional\).app/Contents/Resources/ )
 # Add launcher application for Mantid IPython notebooks
 install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidNotebook_osx_launcher
-          DESTINATION MantidNotebook\ (optional).app/Contents/MacOS/ 
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/MacOS/ 
           RENAME MantidNotebook )
 install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
-          DESTINATION MantidNotebook\ (optional).app/Contents/ 
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/ 
           RENAME Info.plist )
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
-          DESTINATION MantidNotebook\ (optional).app/Contents/Resources/ )
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/ )
 
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
 set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/installers/MacInstaller/osx_DS_Store)
