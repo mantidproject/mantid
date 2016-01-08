@@ -52,8 +52,6 @@ ReflGenerateNotebook::generateNotebook(std::map<int, std::set<int>> groups,
   std::unique_ptr<Mantid::API::NotebookWriter> notebook(
       new Mantid::API::NotebookWriter());
 
-  notebook->codeCell(plotsFunctionString());
-
   notebook->markdownCell(titleString(m_wsName));
 
   notebook->markdownCell(tableString(m_model, col_nums, rows));
@@ -196,15 +194,6 @@ std::string tableString(QReflTableModel_sptr model, ColNumbers col_nums,
   }
 
   return table_string.str();
-}
-
-/**
-  Create string of python code for plotting functions
-  @return string containing the python code
-  */
-std::string plotsFunctionString() {
-  return "#Import some useful tools for plotting\n"
-         "from MantidIPython import *";
 }
 
 /**
