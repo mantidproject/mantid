@@ -134,8 +134,7 @@ protected:
 /// Performs a matrix multiplication v' = M * v, throws
 /// Kernel::Exception::MisMatch<size_t> if M does not have exactly 3 columns.
 template <typename T>
-V3R
-operator*(const Kernel::Matrix<T> &lhs, const V3R &rhs) {
+V3R operator*(const Kernel::Matrix<T> &lhs, const V3R &rhs) {
   size_t rows = lhs.numRows();
   size_t cols = lhs.numCols();
 
@@ -147,7 +146,8 @@ operator*(const Kernel::Matrix<T> &lhs, const V3R &rhs) {
   V3R result;
   for (size_t r = 0; r < rows; ++r) {
     for (size_t c = 0; c < cols; ++c) {
-      result[r] += static_cast<typename RationalNumber::int_type>(lhs[r][c]) * rhs[c];
+      result[r] +=
+          static_cast<typename RationalNumber::int_type>(lhs[r][c]) * rhs[c];
     }
   }
 
