@@ -7,6 +7,7 @@
 #include "FlowLayout.h"
 #include "WorkspaceIcons.h"
 #include "Graph3D.h"
+#include "MantidGroupPlotGenerator.h"
 
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/FileProperty.h>
@@ -16,6 +17,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
+#include <MantidKernel/make_unique.h>
 #include <MantidQtMantidWidgets/LineEditWithClear.h>
 #include <MantidQtAPI/InterfaceManager.h>
 #include <MantidQtAPI/Message.h>
@@ -652,7 +654,7 @@ void MantidDockWidget::addWorkspaceGroupMenuItems(
   // Only add these if there are >2 workspaces in group, and all are
   // MatrixWorkspaces (otherwise they can't be plotted)
   if (groupWS && groupWS->getNumberOfEntries() > 2) {
-    if (groupIsAllMatrixWorkspaces(groupWS)) {
+    if (MantidGroupPlotGenerator::groupIsAllMatrixWorkspaces(groupWS)) {
       menu->addAction(m_plotSurface);
       m_plotSurface->setEnabled(true);
       menu->addAction(m_plotContour);
@@ -1532,34 +1534,10 @@ void MantidDockWidget::plotSurface() {
     if (wsGroup) {
       auto options =
           m_tree->chooseSurfacePlotOptions(wsGroup->getNumberOfEntries());
-      // If user clicked OK and not Cancel...
-      if (options.accepted) {
 
-        // Set up one new matrix workspace to hold all the data for plotting
-        QString xLabelQ;
-        auto matrixWS = createWorkspaceForGroupPlot(wsGroup, options, &xLabelQ);
-
-        // Convert to point data if not already
-        convertHistoToPoints(matrixWS);
-
-        // Plot the output workspace in 3D
-        auto matrixToPlot =
-            m_mantidUI->importMatrixWorkspace(matrixWS, -1, -1, false, false);
-        auto plot = matrixToPlot->plotGraph3D(Qwt3D::PLOTSTYLE::FILLED);
-
-        // Change the default title
-        QString title = QString("Surface plot for %1, spectrum %2")
-                            .arg(wsGroup->name().c_str(),
-                                 QString::number(options.plotIndex));
-        plot->setTitle(title);
-
-        // Set the X, Y axis labels correctly
-        plot->setXAxisLabel(xLabelQ);
-        plot->setYAxisLabel(options.axisName);
-
-        // Sometimes resolution is auto-set too high and plot appears empty
-        plot->setResolution(1);
-      }
+      auto plotter =
+          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(m_mantidUI);
+      plotter->plotSurface(wsGroup, options);
     }
   }
 }
@@ -1576,223 +1554,12 @@ void MantidDockWidget::plotContour() {
     if (wsGroup) {
       auto options =
           m_tree->chooseContourPlotOptions(wsGroup->getNumberOfEntries());
-      // If user clicked OK and not Cancel...
-      if (options.accepted) {
 
-        // Set up one new matrix workspace to hold all the data for plotting
-        QString xLabelQ;
-        auto matrixWS = createWorkspaceForGroupPlot(wsGroup, options, &xLabelQ);
-
-        // Convert to histogram data if not already
-        convertPointsToHisto(matrixWS);
-
-        // Plot the output workspace as a contour plot
-        auto matrixToPlot =
-            m_mantidUI->importMatrixWorkspace(matrixWS, -1, -1, false, false);
-        MultiLayer *plot = matrixToPlot->plotGraph2D(Graph::ColorMapContour);
-
-        // Set the X, Y axis labels correctly
-        plot->activeGraph()->setXAxisTitle(xLabelQ);
-        plot->activeGraph()->setYAxisTitle(options.axisName);
-
-        // Change the default title
-        QString title = QString("Contour plot for %1, spectrum %2")
-                            .arg(wsGroup->name().c_str(),
-                                 QString::number(options.plotIndex));
-        plot->activeGraph()->setTitle(title);
-      }
+      auto plotter =
+          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(m_mantidUI);
+      plotter->plotContour(wsGroup, options);
     }
   }
-}
-
-/**
- * Create a workspace for the surface/contour plot from the given workspace
- * group. Returns title for the X axis.
- * Called by plotSurface() and plotContour().
- *
- * Note that only MatrixWorkspaces can be plotted, so if the group contains
- * Table or Peaks workspaces then it cannot be used.
- *
- * @param wsGroup :: [input] Pointer to workspace group to use as input
- * @param options :: [input] User input from dialog
- * @param xAxisTitle :: [output] Title for the X axis, read from the workspaces
- * in the group
- * @returns Pointer to the created workspace
- */
-const MatrixWorkspace_sptr MantidDockWidget::createWorkspaceForGroupPlot(
-    WorkspaceGroup_const_sptr wsGroup,
-    const MantidSurfacePlotDialog::UserInputSurface &options,
-    QString *xAxisTitle) {
-  MatrixWorkspace_sptr matrixWS;     // Workspace to return
-  int index = options.plotIndex;     // which spectrum to plot from each WS
-  QString logName = options.logName; // Log to read from for axis of XYZ plot
-  if (wsGroup && groupIsAllMatrixWorkspaces(wsGroup)) {
-    // Create workspace to hold the data
-    // Each "spectrum" will be the data from one workspace
-    int nWorkspaces = wsGroup->getNumberOfEntries();
-    if (nWorkspaces > 0) {
-      const auto firstWS =
-          boost::dynamic_pointer_cast<const MatrixWorkspace>(wsGroup->getItem(
-              0)); // Already checked group contains only MatrixWorkspaces
-      std::string xAxisLabel, xAxisUnits;
-      matrixWS = WorkspaceFactory::Instance().create(
-          firstWS, nWorkspaces, firstWS->blocksize(), firstWS->blocksize());
-      matrixWS->setYUnitLabel(firstWS->YUnitLabel());
-      xAxisLabel = firstWS->getXDimension()->getName();
-      xAxisUnits = firstWS->getXDimension()->getUnits();
-
-      // Vector holding log values to plot
-      std::vector<double> logValues;
-
-      // For each workspace in group, add data and log values
-      for (int i = 0; i < nWorkspaces; i++) {
-        const auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
-            wsGroup->getItem(i));
-        if (ws) {
-          auto X = ws->readX(index);
-          auto Y = ws->readY(index);
-          matrixWS->dataX(i).swap(X);
-          matrixWS->dataY(i).swap(Y);
-          if (logName == MantidSurfacePlotDialog::CUSTOM) {
-            logValues.push_back(getSingleLogValue(i, options.customLogValues));
-          } else {
-            logValues.push_back(getSingleLogValue(i, ws, logName));
-          }
-        }
-      }
-
-      // Set log axis values by replacing the "spectra" axis
-      matrixWS->replaceAxis(1, new NumericAxis(logValues));
-
-      // Generate title for the X axis
-      *xAxisTitle = xAxisLabel.empty() ? "X" : xAxisLabel.c_str();
-      if (!xAxisUnits.empty()) {
-        xAxisTitle->append(" (").append(xAxisUnits.c_str()).append(")");
-      }
-    }
-  }
-  return matrixWS;
-}
-
-/**
- * Gets the given log value from the given workspace as a double.
- * Should be a single-valued log!
- * @param wsIndex :: [input] Index of workspace in group
- * @param matrixWS :: [input] Workspace to find log from
- * @param logName :: [input] Name of log
- * @returns log value as a double, or workspace index
- * @throws invalid_argument if log is wrong type or not present
- */
-double
-MantidDockWidget::getSingleLogValue(const int wsIndex,
-                                    const MatrixWorkspace_const_sptr &matrixWS,
-                                    const QString &logName) const {
-  if (logName == MantidSurfacePlotDialog::WORKSPACE_INDEX) {
-    return wsIndex;
-  } else {
-    // MatrixWorkspace is an ExperimentInfo
-    if (auto ei = boost::dynamic_pointer_cast<const ExperimentInfo>(matrixWS)) {
-      auto log = ei->run().getLogData(logName.toStdString());
-      if (log) {
-        if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
-            dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
-          return std::stod(log->value());
-        } else {
-          throw std::invalid_argument(
-              "Log is of wrong type (expected single numeric value");
-        }
-      } else {
-        throw std::invalid_argument("Log not present in workspace");
-      }
-    } else {
-      throw std::invalid_argument("Bad input workspace type");
-    }
-  }
-}
-
-/**
- * Gets the custom, user-provided log value of the given index out of the
- * vector.
- * Attempts to convert to a numeric value.
- * If conversion fails, or not enough values in the vector, returns zero.
- * @param wsIndex :: [input] Index of log value to use
- * @param logValues :: [input] User-provided vector of log values
- * @returns Numeric log value, or zero
- */
-double MantidDockWidget::getSingleLogValue(
-    const int wsIndex, const std::vector<std::string> &logValues) const {
-  double value = 0;
-
-  try {
-    value = std::stod(logValues.at(wsIndex));
-  } catch (std::exception &) {
-    // Either value was not a number, or not enough entries in the vector.
-    // Whichever it was, we return zero.
-    value = 0;
-  }
-
-  return value;
-}
-
-/**
- * Utility method to convert a histogram workspace to points data
- * (centred bins) for surface plots.
- * @param ws :: [input] Workspace to convert
- */
-void MantidDockWidget::convertHistoToPoints(MatrixWorkspace_sptr ws) const {
-  if (ws && ws->isHistogramData()) {
-    auto alg = m_mantidUI->createAlgorithm("ConvertToPointData");
-    alg->initialize();
-    alg->setChild(true);
-    alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", "__NotUsed");
-    alg->execute();
-    ws = alg->getProperty("OutputWorkspace");
-  }
-}
-
-/**
- * Utility method to convert a points workspace to histogram data
- * for contour plots.
- * @param ws :: [input] Workspace to convert
- */
-void MantidDockWidget::convertPointsToHisto(MatrixWorkspace_sptr ws) const {
-  if (ws && !ws->isHistogramData()) {
-    auto alg = m_mantidUI->createAlgorithm("ConvertToHistogram");
-    alg->initialize();
-    alg->setChild(true);
-    alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", "__NotUsed");
-    alg->execute();
-    ws = alg->getProperty("OutputWorkspace");
-  }
-}
-
-/**
- * Check if the supplied group contains only MatrixWorkspaces
- * @param groupWS :: [input] Pointer to a WorkspaceGroup
- * @returns True if contains only MatrixWorkspaces, false if contains
- * other types or is empty
- */
-bool MantidDockWidget::groupIsAllMatrixWorkspaces(
-    const WorkspaceGroup_const_sptr &groupWS) const {
-  bool allMatrixWSes = true;
-  if (groupWS) {
-    if (groupWS->isEmpty()) {
-      allMatrixWSes = false;
-    } else {
-      for (int index = 0; index < groupWS->getNumberOfEntries(); index++) {
-        if (nullptr == boost::dynamic_pointer_cast<MatrixWorkspace>(
-                           groupWS->getItem(index))) {
-          allMatrixWSes = false;
-          break;
-        }
-      }
-    }
-  } else {
-    allMatrixWSes = false;
-  }
-  return allMatrixWSes;
 }
 
 //------------ MantidTreeWidget -----------------------//

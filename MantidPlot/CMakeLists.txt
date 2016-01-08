@@ -186,6 +186,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidSampleMaterialDialog.cpp
 				   src/Mantid/MantidSurfacePlotDialog.cpp
+				   src/Mantid/MantidGroupPlotGenerator.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/MantidWSIndexDialog.cpp
@@ -426,6 +427,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidSampleMaterialDialog.h
 				   src/Mantid/MantidSurfacePlotDialog.h
+				   src/Mantid/MantidGroupPlotGenerator.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h

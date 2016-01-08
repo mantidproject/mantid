@@ -114,20 +114,6 @@ private:
   void addClearMenuItems(QMenu* menu, const QString& wsName);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
-  const Mantid::API::MatrixWorkspace_sptr createWorkspaceForGroupPlot(
-      boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
-      const MantidSurfacePlotDialog::UserInputSurface &options,
-      QString *xAxisTitle);
-  double
-  getSingleLogValue(const int wsIndex,
-                    const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
-                    const QString &logName) const;
-  double getSingleLogValue(const int wsIndex,
-                           const std::vector<std::string> &values) const;
-  void convertHistoToPoints(Mantid::API::MatrixWorkspace_sptr ws) const;
-  void convertPointsToHisto(Mantid::API::MatrixWorkspace_sptr ws) const;
-  bool groupIsAllMatrixWorkspaces(
-      const Mantid::API::WorkspaceGroup_const_sptr &groupWS) const;
 
 protected:
   MantidTreeWidget * m_tree;
