@@ -197,8 +197,8 @@ install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
           DESTINATION MantidPlot.app/Contents/Resources/
 )
 
-install ( FILES ${CMAKE_MODULE_PATH}/Packaging/mantidpython_osx
-          DESTINATION MantidPlot.app/Contents/MacOS/mantidpython )
+install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython
+          DESTINATION MantidPlot.app/Contents/MacOS/ )
 # Needs to be executable
 execute_process ( COMMAND "chmod" "+x" "MantidPlot.app/Contents/MacOS/mantidpython"
                   OUTPUT_QUIET ERROR_QUIET )
