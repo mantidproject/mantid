@@ -323,11 +323,6 @@ public:
   }
 
   void test_OperatorSymOpString_correctness() {
-    auto vectorsEqual = [](const std::vector<std::string> &lhs,
-                           const std::vector<std::string> &rhs) {
-      return std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
-    };
-
     std::vector<std::string> strings{"a", "b", "c"};
 
     TS_ASSERT(
@@ -338,6 +333,19 @@ public:
         vectorsEqual(SymmetryOperation("y,x,z") * strings, {"b", "a", "c"}));
     TS_ASSERT(
         vectorsEqual(SymmetryOperation("-z,x,-y") * strings, {"c", "a", "b"}));
+  }
+
+  void test_OperatorSymOpString_too_long() {
+    std::vector<std::string> strings{"a", "b", "c", ":2", "something"};
+
+    TS_ASSERT(vectorsEqual(SymmetryOperation("x,y,z") * strings,
+                           {"a", "b", "c", ":2", "something"}));
+    TS_ASSERT(vectorsEqual(SymmetryOperation("-x,-y,-z") * strings,
+                           {"a", "b", "c", ":2", "something"}));
+    TS_ASSERT(vectorsEqual(SymmetryOperation("y,x,z") * strings,
+                           {"b", "a", "c", ":2", "something"}));
+    TS_ASSERT(vectorsEqual(SymmetryOperation("-z,x,-y") * strings,
+                           {"c", "a", "b", ":2", "something"}));
   }
 
   void test_OrthorhombicSymbolPermutations() {
@@ -370,6 +378,11 @@ private:
                         transformed, expectedTransformations[i]);
     }
   }
+
+  bool vectorsEqual(const std::vector<std::string> &lhs,
+                    const std::vector<std::string> &rhs) {
+    return std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+  };
 
   class TestableSpaceGroupFactory : public SpaceGroupFactoryImpl {
     friend class SpaceGroupFactoryTest;
