@@ -2,6 +2,7 @@
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtAPI/GraphOptions.h"
 #include "MantidQtAPI/PowerScaleEngine.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -12,7 +13,6 @@
 #include <QApplication>
 #include <qwt_scale_widget.h>
 #include <qwt_scale_engine.h>
-#include <DoubleSpinBox.h>
 #include <QLabel>
 
 /**

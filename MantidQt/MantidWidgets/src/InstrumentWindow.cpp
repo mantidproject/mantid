@@ -11,14 +11,12 @@
 #include "PanelsSurface.h"
 #include "SimpleWidget.h"
 #include "DetXMLFile.h"
-#include "../MantidUI.h"
-#include "../AlgorithmMonitor.h"
-#include "TSVSerialiser.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 
 #include <Poco/Path.h>
+#include <Poco/ActiveResult.h>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -29,9 +27,12 @@
 #include <QString>
 #include <QSplitter>
 #include <QDoubleValidator>
+#include <QDesktopServices>
 #include <QRadioButton>
 #include <QGroupBox>
+#include <QPushButton>
 #include <QGridLayout>
+#include <QLabel>
 #include <QComboBox>
 #include <QSettings>
 #include <QFileInfo>
@@ -75,10 +76,8 @@ public:
 /**
  * Constructor.
  */
-InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
-                                   ApplicationWindow *app, const QString &name,
-                                   Qt::WFlags f)
-    : MdiSubWindow(app, label, name, f), WorkspaceObserver(),
+InstrumentWindow::InstrumentWindow(const QString &wsName)
+    : QWidget(), WorkspaceObserver(),
       m_InstrumentDisplay(NULL), m_simpleDisplay(NULL), m_workspaceName(wsName),
       m_instrumentActor(NULL), m_surfaceType(FULL3D),
       m_savedialog_dir(QString::fromStdString(
@@ -149,7 +148,7 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
   connect(m_clearPeakOverlays, SIGNAL(activated()), this,
           SLOT(clearPeakOverlays()));
 
-  confirmClose(app->confirmCloseInstrWindow);
+  //confirmClose(app->confirmCloseInstrWindow);
 
   setAttribute(Qt::WA_DeleteOnClose);
 
@@ -158,11 +157,6 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
   observeAfterReplace();
   observeRename();
   observeADSClear();
-
-  connect(app->mantidUI->getAlgMonitor(), SIGNAL(algorithmStarted(void *)),
-          this, SLOT(block()));
-  connect(app->mantidUI->getAlgMonitor(), SIGNAL(allAlgorithmsStopped()), this,
-          SLOT(unblock()));
 
   const int windowWidth = 800;
   const int tabsSize = windowWidth / 4;
@@ -415,9 +409,8 @@ void InstrumentWindow::setSurfaceType(int type) {
     // init tabs with new surface
     foreach (InstrumentWindowTab *tab, m_tabs) { tab->initSurface(); }
 
-    // connect(surface,SIGNAL(multipleDetectorsSelected(QList<int>&)),this,SLOT(multipleDetectorsSelected(QList<int>&)));
     connect(surface, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),
-            this, SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)));
+            this, SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
     connect(surface, SIGNAL(updateInfoText()), this, SLOT(updateInfoText()),
             Qt::QueuedConnection);
     QApplication::restoreOverrideCursor();
@@ -696,85 +689,12 @@ void InstrumentWindow::saveSettings() {
 }
 
 /**
- * Closes the window if the associated workspace is deleted.
- * @param ws_name :: Name of the deleted workspace.
- * @param workspace_ptr :: Pointer to the workspace to be deleted
- */
-void InstrumentWindow::preDeleteHandle(
-    const std::string &ws_name,
-    const boost::shared_ptr<Workspace> workspace_ptr) {
-  if (ws_name == m_workspaceName.toStdString()) {
-    confirmClose(false);
-    close();
-    return;
-  }
-  Mantid::API::IPeaksWorkspace_sptr pws =
-      boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
-  if (pws) {
-    getSurface()->deletePeaksWorkspace(pws);
-    updateInstrumentView();
-    return;
-  }
-}
-
-void InstrumentWindow::afterReplaceHandle(
-    const std::string &wsName, const boost::shared_ptr<Workspace> workspace) {
-  // Replace current workspace
-  if (wsName == m_workspaceName.toStdString()) {
-    if (m_instrumentActor) {
-      // Check if it's still the same workspace underneath (as well as having
-      // the same name)
-      auto matrixWS =
-          boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
-      bool sameWS = false;
-      try {
-        sameWS = (matrixWS == m_instrumentActor->getWorkspace());
-      } catch (std::runtime_error &) {
-        // Carry on, sameWS should stay false
-      }
-
-      // try to detect if the instrument changes (unlikely if the workspace
-      // hasn't, but theoretically possible)
-      bool resetGeometry = matrixWS->getInstrument()->getNumberDetectors() !=
-                           m_instrumentActor->ndetectors();
-
-      // if workspace and instrument don't change keep the scaling
-      if (sameWS && !resetGeometry) {
-        m_instrumentActor->updateColors();
-      } else {
-        delete m_instrumentActor;
-        m_instrumentActor = NULL;
-        init(resetGeometry, true, 0.0, 0.0, false);
-        updateInstrumentDetectors();
-      }
-    }
-  }
-}
-
-void InstrumentWindow::renameHandle(const std::string &oldName,
-                                    const std::string &newName) {
-  if (oldName == m_workspaceName.toStdString()) {
-    m_workspaceName = QString::fromStdString(newName);
-    setWindowTitle(QString("Instrument - ") + m_workspaceName);
-  }
-}
-
-void InstrumentWindow::clearADSHandle() {
-  confirmClose(false);
-  close();
-}
-
-/**
  * Called just before a show event
  */
 void InstrumentWindow::showEvent(QShowEvent *e) {
-  MdiSubWindow::showEvent(e);
+  //MdiSubWindow::showEvent(e);
   // updateWindow();
 }
-
-void InstrumentWindow::block() { m_blocked = true; }
-
-void InstrumentWindow::unblock() { m_blocked = false; }
 
 void InstrumentWindow::helpClicked() {
   QDesktopServices::openUrl(
@@ -873,11 +793,20 @@ void InstrumentWindow::componentSelected(ComponentID id) {
 
 void InstrumentWindow::executeAlgorithm(const QString &alg_name,
                                         const QString &param_list) {
-  emit execMantidAlgorithm(alg_name, param_list, this);
+  //emit execMantidAlgorithm(alg_name, param_list, this);
 }
 
 void InstrumentWindow::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
-  emit execMantidAlgorithm(alg);
+	try
+	{
+		alg->executeAsync();
+	}
+	catch (Poco::NoThreadAvailableException &)
+	{
+		return;
+	}
+
+	return;
 }
 
 /**
@@ -965,7 +894,7 @@ bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev) {
     m_instrumentDisplayContextMenuOn = false;
     return true;
   }
-  return MdiSubWindow::eventFilter(obj, ev);
+  return QWidget::eventFilter(obj, ev);
 }
 
 /**
@@ -1237,26 +1166,4 @@ QString InstrumentWindow::getInstrumentSettingsGroupName() const {
   return QString::fromAscii(InstrumentWindowSettingsGroup) + "/" +
          QString::fromStdString(
              getInstrumentActor()->getInstrument()->getName());
-}
-
-void InstrumentWindow::loadFromProject(const std::string &lines,
-                                       ApplicationWindow *app,
-                                       const int fileVersion) {
-  Q_UNUSED(fileVersion);
-
-  TSVSerialiser tsv(lines);
-  if (tsv.hasLine("geometry")) {
-    const QString geometry =
-        QString::fromStdString(tsv.lineAsString("geometry"));
-    app->restoreWindowGeometry(app, this, geometry);
-  }
-}
-
-std::string InstrumentWindow::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
-  tsv.writeRaw("<instrumentwindow>");
-  tsv.writeLine("WorkspaceName") << m_workspaceName.toStdString();
-  tsv.writeRaw(app->windowGeometryInfo(this));
-  tsv.writeRaw("</instrumentwindow>");
-  return tsv.outputLines();
 }

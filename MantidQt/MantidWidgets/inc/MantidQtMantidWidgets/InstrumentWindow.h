@@ -1,18 +1,16 @@
 #ifndef INSTRUMENTWINDOW_H_
 #define INSTRUMENTWINDOW_H_
 
-#include "../../MdiSubWindow.h"
-#include "../MantidAlgorithmMetatype.h"
-
+#include "WidgetDllOption.h"
 #include "MantidGLWidget.h"
 #include "BinDialog.h"
 #include "InstrumentWindowTypes.h"
 
 #include "MantidQtAPI/GraphOptions.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtAPI/MantidAlgorithmMetatype.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmObserver.h"
-#include "Mantid/IProjectSerialisable.h"
 
 #include <string>
 #include <vector>
@@ -58,7 +56,7 @@ class QSettings;
   and needs to be updated whenever the instrument view functionality changes.
 
  */
-class InstrumentWindow : public MdiSubWindow, public MantidQt::API::WorkspaceObserver, public Mantid::API::AlgorithmObserver, public Mantid::IProjectSerialisable, public InstrumentWindowTypes
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindow : public QWidget, public MantidQt::API::WorkspaceObserver, public Mantid::API::AlgorithmObserver, public InstrumentWindowTypes
 {
   Q_OBJECT
 
@@ -66,7 +64,7 @@ public:
   enum SurfaceType{ FULL3D = 0, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z, SIDE_BY_SIDE, RENDERMODE_SIZE };
   enum Tab{RENDER = 0, PICK, MASK, TREE};
 
-  explicit InstrumentWindow(const QString& wsName, const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
+  explicit InstrumentWindow(const QString& wsName);
   ~InstrumentWindow();
   void init(bool resetGeometry = true, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0, bool setDefaultView = true);
   QString getWorkspaceName() const { return m_workspaceName; }
@@ -92,7 +90,6 @@ public:
   void setExponent(double nth_power);
   void setViewType(const QString& type);
   InstrumentActor* getInstrumentActor() const {return m_instrumentActor;}
-  bool blocked()const{return m_blocked;}
   void selectTab(int tab);
   void selectTab(Tab tab){selectTab(int(tab));}
   InstrumentWindowTab *getTab(const QString & title="") const;
@@ -104,15 +101,10 @@ public:
   /// Get a name for a instrument-specific settings group
   QString getInstrumentSettingsGroupName() const;
 
-  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
-  std::string saveToProject(ApplicationWindow* app);
-
 signals:
   void enableLighting(bool);
   void plot1D(const QString&,const std::set<int>&,bool);
   void createDetectorTable(const QString&,const std::vector<int>&,bool);
-  void execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*);
-  void execMantidAlgorithm(Mantid::API::IAlgorithm_sptr);
   void needSetIntegrationRange(double,double);
   void surfaceTypeChanged(int);
   void colorMapChanged();
@@ -171,11 +163,9 @@ public slots:
   void updateInfoText();
 
 private slots:
-  void block();
-  void unblock();
   void helpClicked();
 
-private:
+protected:
   /// Set newly created projection surface
   void setSurface(ProjectionSurface* surface);
   QWidget * createInstrumentTreeTab(QTabWidget* ControlsTab);
@@ -242,13 +232,6 @@ private:
   bool m_blocked;     
   QList<int> m_selectedDetectors;
   bool m_instrumentDisplayContextMenuOn;
-
-private:
-  /// ADS notification handlers
-  virtual void preDeleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
-  virtual void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
-  virtual void renameHandle(const std::string &oldName, const std::string &newName);
-  virtual void clearADSHandle();
 };
 
 #endif /*INSTRUMENTWINDOW_H_*/

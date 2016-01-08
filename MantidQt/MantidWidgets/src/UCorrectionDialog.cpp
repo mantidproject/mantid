@@ -1,5 +1,5 @@
 #include "UCorrectionDialog.h"
-#include "ui_UCorrectionDialog.h"
+#include <ui_UCorrectionDialog.h>
 
 UCorrectionDialog::UCorrectionDialog(QWidget *parent, QPointF oldValue, bool isManual) :
     QDialog(parent),

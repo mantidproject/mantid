@@ -3,8 +3,8 @@
 
 #include "Shape2DCollection.h"
 #include "PeakMarker2D.h"
-#include "../MantidAlgorithmMetatype.h"
 
+#include "MantidQtAPI/MantidAlgorithmMetatype.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 
 #include <QHash>

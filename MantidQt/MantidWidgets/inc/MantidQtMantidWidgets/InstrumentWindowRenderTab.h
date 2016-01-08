@@ -1,6 +1,7 @@
 #ifndef INSTRUMENTWINDOWRENDERTAB_H_
 #define INSTRUMENTWINDOWRENDERTAB_H_
 
+#include "WidgetDllOption.h"
 #include "InstrumentWindowTab.h"
 
 #include "MantidQtAPI/GraphOptions.h"
@@ -21,7 +22,7 @@ class QLineEdit;
 /**
   * Implements the Render tab in InstrumentWindow.
   */
-class InstrumentWindowRenderTab: public InstrumentWindowTab
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowRenderTab: public InstrumentWindowTab
 {
   Q_OBJECT
 

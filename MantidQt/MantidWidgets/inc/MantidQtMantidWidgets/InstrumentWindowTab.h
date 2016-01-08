@@ -1,6 +1,7 @@
 #ifndef INSTRUMENTWINDOWTAB_H
 #define INSTRUMENTWINDOWTAB_H
 
+#include "WidgetDllOption.h"
 #include "InstrumentWindowTypes.h"
 
 #include <QFrame>
@@ -15,7 +16,7 @@ class ProjectionSurface;
 class QSettings;
 class QMenu;
 
-class InstrumentWindowTab : public QFrame, public InstrumentWindowTypes
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowTab : public QFrame, public InstrumentWindowTypes
 {
     Q_OBJECT
 public:

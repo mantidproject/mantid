@@ -42,7 +42,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-#include "Mantid/InstrumentWidget/GLColor.h"
+#include "MantidQtMantidWidgets/InstrumentWindow.h"
 
 #include <fstream>
 #include <float.h>

@@ -1,6 +1,7 @@
 #ifndef INSTRUMENTACTOR_H_
 #define INSTRUMENTACTOR_H_
 
+#include "WidgetDllOption.h"
 #include "GLColor.h"
 #include "GLActor.h"
 #include "GLActorCollection.h"
@@ -47,7 +48,7 @@ class ObjComponentActor;
    operation for selective rendering of the instrument
 
 */
-class InstrumentActor: public GLActor
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentActor: public GLActor
 {
   Q_OBJECT
 public:

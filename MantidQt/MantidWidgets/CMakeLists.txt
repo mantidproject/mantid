@@ -7,6 +7,7 @@ set ( SRC_FILES
     src/DataSelector.cpp
     src/DiagResults.cpp
     src/DoubleDialogEditor.cpp
+    src/DoubleSpinBox.cpp
     src/ErrorCurve.cpp
     src/FilenameDialogEditor.cpp
     src/FindDialog.cpp
@@ -49,6 +50,51 @@ set ( SRC_FILES
     src/pqHelpWindow.cxx
     src/pythonCalc.cpp
     src/LineEditWithClear.cpp
+    src/BinDialog.cpp
+    src/CollapsiblePanel.cpp
+    src/ColorMapWidget.cpp
+    src/CompAssemblyActor.cpp
+    src/ComponentActor.cpp
+    src/DetXMLFile.cpp
+    src/GLActor.cpp
+    src/GLActorCollection.cpp
+    src/GLActorVisitor.cpp
+    src/GLColor.cpp
+    src/GLObject.cpp
+    src/ICompAssemblyActor.cpp
+    src/InstrumentActor.cpp
+    src/InstrumentTreeModel.cpp
+    src/InstrumentTreeWidget.cpp
+    src/InstrumentWindow.cpp
+    src/InstrumentWindowMaskTab.cpp
+    src/InstrumentWindowPickTab.cpp
+    src/InstrumentWindowRenderTab.cpp
+    src/InstrumentWindowTab.cpp
+    src/InstrumentWindowTreeTab.cpp
+    src/MantidGLWidget.cpp
+    src/MaskBinsData.cpp
+    src/ObjCompAssemblyActor.cpp
+    src/ObjComponentActor.cpp
+    src/OneCurvePlot.cpp
+    src/OpenGLError.cpp
+    src/PanelsSurface.cpp
+    src/PeakMarker2D.cpp
+    src/PeakOverlay.cpp
+    src/Projection3D.cpp
+    src/ProjectionSurface.cpp
+    src/RectangularDetectorActor.cpp
+    src/RectF.cpp
+    src/RotationSurface.cpp
+    src/SampleActor.cpp
+    src/Shape2D.cpp
+    src/Shape2DCollection.cpp
+    src/SimpleWidget.cpp
+    src/UCorrectionDialog.cpp
+    src/UnwrappedCylinder.cpp
+    src/UnwrappedSphere.cpp
+    src/UnwrappedSurface.cpp
+    src/Viewport.cpp
+    src/XIntegrationControl.cpp
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
@@ -58,6 +104,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
     inc/MantidQtMantidWidgets/DoubleDialogEditor.h
+    inc/MantidQtMantidWidgets/DoubleSpinBox.h
     inc/MantidQtMantidWidgets/FilenameDialogEditor.h
     inc/MantidQtMantidWidgets/FormulaDialogEditor.h
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
@@ -101,6 +148,27 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/WorkspaceEditorFactory.h
     inc/MantidQtMantidWidgets/WorkspaceSelector.h
     inc/MantidQtMantidWidgets/LineEditWithClear.h
+    inc/MantidQtMantidWidgets/XIntegrationControl.h
+    inc/MantidQtMantidWidgets/BinDialog.h
+    inc/MantidQtMantidWidgets/InstrumentTreeModel.h
+    inc/MantidQtMantidWidgets/InstrumentTreeWidget.h
+    inc/MantidQtMantidWidgets/InstrumentWindow.h
+    inc/MantidQtMantidWidgets/InstrumentWindowTab.h
+    inc/MantidQtMantidWidgets/InstrumentWindowRenderTab.h
+    inc/MantidQtMantidWidgets/InstrumentWindowPickTab.h
+    inc/MantidQtMantidWidgets/InstrumentWindowMaskTab.h
+    inc/MantidQtMantidWidgets/InstrumentWindowTreeTab.h
+    inc/MantidQtMantidWidgets/ColorMapWidget.h
+    inc/MantidQtMantidWidgets/MantidGLWidget.h
+    inc/MantidQtMantidWidgets/OneCurvePlot.h
+    inc/MantidQtMantidWidgets/CollapsiblePanel.h
+    inc/MantidQtMantidWidgets/InstrumentActor.h
+    inc/MantidQtMantidWidgets/PeakOverlay.h
+    inc/MantidQtMantidWidgets/ProjectionSurface.h
+    inc/MantidQtMantidWidgets/Projection3D.h
+    inc/MantidQtMantidWidgets/Shape2DCollection.h
+    inc/MantidQtMantidWidgets/UnwrappedSurface.h
+    inc/MantidQtMantidWidgets/UCorrectionDialog.h
 )
 
 # Add the include files are NOT already in MOC_FILES
@@ -111,6 +179,52 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/ErrorCurve.h
     inc/MantidQtMantidWidgets/WidgetDllOption.h
     inc/MantidQtMantidWidgets/HintStrategy.h
+    inc/MantidQtMantidWidgets/BinDialog.h
+    inc/MantidQtMantidWidgets/CollapsiblePanel.h
+    inc/MantidQtMantidWidgets/ColorMapWidget.h
+    inc/MantidQtMantidWidgets/CompAssemblyActor.h
+    inc/MantidQtMantidWidgets/ComponentActor.h
+    inc/MantidQtMantidWidgets/DetXMLFile.h
+    inc/MantidQtMantidWidgets/GLActor.h
+    inc/MantidQtMantidWidgets/GLActorCollection.h
+    inc/MantidQtMantidWidgets/GLActorVisitor.h
+    inc/MantidQtMantidWidgets/GLColor.h
+    inc/MantidQtMantidWidgets/GLObject.h
+    inc/MantidQtMantidWidgets/ICompAssemblyActor.h
+    inc/MantidQtMantidWidgets/InstrumentActor.h
+    inc/MantidQtMantidWidgets/InstrumentTreeModel.h
+    inc/MantidQtMantidWidgets/InstrumentTreeWidget.h
+    inc/MantidQtMantidWidgets/InstrumentWindow.h
+    inc/MantidQtMantidWidgets/InstrumentWindowMaskTab.h
+    inc/MantidQtMantidWidgets/InstrumentWindowPickTab.h
+    inc/MantidQtMantidWidgets/InstrumentWindowRenderTab.h
+    inc/MantidQtMantidWidgets/InstrumentWindowTab.h
+    inc/MantidQtMantidWidgets/InstrumentWindowTreeTab.h
+    inc/MantidQtMantidWidgets/InstrumentWindowTypes.h
+    inc/MantidQtMantidWidgets/MantidGLWidget.h
+    inc/MantidQtMantidWidgets/MaskBinsData.h
+    inc/MantidQtMantidWidgets/ObjCompAssemblyActor.h
+    inc/MantidQtMantidWidgets/ObjComponentActor.h
+    inc/MantidQtMantidWidgets/OneCurvePlot.h
+    inc/MantidQtMantidWidgets/OpenGLError.h
+    inc/MantidQtMantidWidgets/PanelsSurface.h
+    inc/MantidQtMantidWidgets/PeakMarker2D.h
+    inc/MantidQtMantidWidgets/PeakOverlay.h
+    inc/MantidQtMantidWidgets/Projection3D.h
+    inc/MantidQtMantidWidgets/ProjectionSurface.h
+    inc/MantidQtMantidWidgets/RectangularDetectorActor.h
+    inc/MantidQtMantidWidgets/RectF.h
+    inc/MantidQtMantidWidgets/RotationSurface.h
+    inc/MantidQtMantidWidgets/SampleActor.h
+    inc/MantidQtMantidWidgets/Shape2D.h
+    inc/MantidQtMantidWidgets/Shape2DCollection.h
+    inc/MantidQtMantidWidgets/SimpleWidget.h
+    inc/MantidQtMantidWidgets/UCorrectionDialog.h
+    inc/MantidQtMantidWidgets/UnwrappedCylinder.h
+    inc/MantidQtMantidWidgets/UnwrappedSphere.h
+    inc/MantidQtMantidWidgets/UnwrappedSurface.h
+    inc/MantidQtMantidWidgets/Viewport.h
+    inc/MantidQtMantidWidgets/XIntegrationControl.h
 )
 
 # QtDesigner UI files to process
@@ -133,6 +247,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/PeriodicTableWidget.ui
     inc/MantidQtMantidWidgets/PreviewPlot.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
+    inc/MantidQtMantidWidgets/UCorrectionDialog.ui
 )
 
 # Python unit tests
@@ -148,6 +263,12 @@ find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
 include(${QT_USE_FILE})
 
 include_directories ( ../../QtPropertyBrowser/src )
+include_directories ( ../../MantidQt/API/inc )
+include_directories ( ../../MantidQt/MantidWidgets/inc )
+include_directories ( ../../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets )
+include_directories ( ../../MantidQt/SliceViewer/inc )
+include_directories ( ../../MantidQt/SpectrumViewer/inc )
+include_directories ( ../../MantidQt/Factory/inc )
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
@@ -176,6 +297,8 @@ target_link_libraries ( MantidWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME
             ${QSCINTILLA_LIBRARIES}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
+            ${ZLIB_LIBRARIES}
+            ${OPENGL_LIBRARIES}
             )
 
 ###########################################################################

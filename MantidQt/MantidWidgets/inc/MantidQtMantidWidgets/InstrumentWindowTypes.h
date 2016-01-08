@@ -1,7 +1,9 @@
 #ifndef INSTRUMENTWINDOWTYPES_H_
 #define INSTRUMENTWINDOWTYPES_H_
 
-class InstrumentWindowTypes {
+#include "WidgetDllOption.h"
+
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowTypes {
 
 public:
   enum SurfaceType {

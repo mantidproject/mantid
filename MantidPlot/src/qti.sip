@@ -1378,7 +1378,7 @@ private:
 class InstrumentWindowTab: QFrame
 {
 %TypeHeaderCode
-#include "src/Mantid/InstrumentWidget/InstrumentWindowTab.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindowTab.h"
 %End
 public:
 	// This is a duplicate from the same enum in InstrumentWindow, just so you
@@ -1393,7 +1393,7 @@ private:
 class InstrumentWindow: MdiSubWindow
 {
 %TypeHeaderCode
-#include "src/Mantid/InstrumentWidget/InstrumentWindow.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindow.h"
 %End
 
 %Docstring
@@ -1487,7 +1487,7 @@ InstrumentWindow(const InstrumentWindow &);
 class InstrumentWindowRenderTab: InstrumentWindowTab
 {
 %TypeHeaderCode
-#include "src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindowRenderTab.h"
 %End
 
 public:
@@ -1613,7 +1613,7 @@ private:
 class InstrumentWindowPickTab: InstrumentWindowTab
 {
 %TypeHeaderCode
-#include "src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindowPickTab.h"
 %End
 
 public:
@@ -1635,7 +1635,7 @@ private:
 class InstrumentWindowMaskTab: InstrumentWindowTab
 {
 %TypeHeaderCode
-#include "src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindowMaskTab.h"
 %End
 
 public:
@@ -1666,7 +1666,7 @@ private:
 class InstrumentWindowTreeTab: InstrumentWindowTab
 {
 %TypeHeaderCode
-#include "src/Mantid/InstrumentWidget/InstrumentWindowTreeTab.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindowTreeTab.h"
 %End
 
 public:

@@ -1,6 +1,7 @@
 #ifndef INSTRUMENTWINDOWMASKTAB_H_
 #define INSTRUMENTWINDOWMASKTAB_H_
 
+#include "WidgetDllOption.h"
 #include "InstrumentWindowTab.h"
 #include "MantidGLWidget.h"
 
@@ -49,7 +50,7 @@ namespace Mantid
   * Contains controls to create, manipulate and apply masking and grouping to underlying workspace.
   *
   */
-class InstrumentWindowMaskTab: public InstrumentWindowTab
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowMaskTab: public InstrumentWindowTab
 {
   Q_OBJECT
 public:

@@ -6,7 +6,6 @@
 //----------------------------------
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
-#include "MantidAlgorithmMetatype.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
@@ -19,6 +18,7 @@
 
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtAPI/MantidAlgorithmMetatype.h"
 
 #include <Poco/NObserver.h>
 

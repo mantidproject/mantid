@@ -1,6 +1,7 @@
 #ifndef INSTRUMENTWINDOWTREETAB_H_
 #define INSTRUMENTWINDOWTREETAB_H_
 
+#include "WidgetDllOption.h"
 #include "InstrumentWindowTab.h"
 
 #include <QModelIndex>
@@ -10,7 +11,7 @@ class InstrumentTreeWidget;
 /**
   * Implements the instrument tree tab in InstrumentWindow
   */
-class InstrumentWindowTreeTab: public InstrumentWindowTab
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowTreeTab: public InstrumentWindowTab
 {
   Q_OBJECT
 public:

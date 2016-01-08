@@ -1,6 +1,7 @@
 #ifndef INSTRUMENTWINDOWPICKTAB_H_
 #define INSTRUMENTWINDOWPICKTAB_H_
 
+#include "WidgetDllOption.h"
 #include "InstrumentWindowTab.h"
 #include "MantidGLWidget.h"
 
@@ -34,7 +35,7 @@ class QMenu;
   *  - select and remove peaks
   *
   */
-class InstrumentWindowPickTab: public InstrumentWindowTab
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowPickTab: public InstrumentWindowTab
 {
   Q_OBJECT
 public:

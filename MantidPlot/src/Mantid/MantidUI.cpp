@@ -25,9 +25,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
+#include "Mantid\InstrumentWidget\MantidInstrumentWindow.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitConversion.h"
-#include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtAPI/AlgorithmInputHistory.h"
@@ -2027,7 +2027,12 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   //Need a new window
   const QString windowName(QString("InstrumentWindow:") + wsName);
-  InstrumentWindow *insWin = new InstrumentWindow(wsName,QString("Instrument"),appWindow(),windowName);
+  MantidInstrumentWindow *insWin = new MantidInstrumentWindow(wsName);
+  MdiSubWindow *subWindow = new MdiSubWindow(appWindow(), QString("Instrument"), windowName);
+
+  subWindow->setWidget(insWin);
+  insWin->setParent(subWindow);
+
   try
   {
     insWin->init();
@@ -2039,18 +2044,15 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
     QMessageBox::critical(appWindow(),"MantidPlot - Error",errorMessage);
     if (insWin)
     {
-      appWindow()->closeWindow(insWin);
-      insWin->close();
+      appWindow()->closeWindow(subWindow);
+	  subWindow->close();
     }
     return NULL;
   }
 
   insWin->selectTab(tab);
 
-  appWindow()->addMdiSubWindow(insWin);
-
-  connect(insWin, SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
-    SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
+  appWindow()->addMdiSubWindow(subWindow);
 
   QApplication::restoreOverrideCursor();
   return insWin;
@@ -2074,14 +2076,14 @@ void MantidUI::showMantidInstrument(const QString& wsName)
       m_lastShownInstrumentWin->close();
       QPoint p = m_lastShownInstrumentWin->pos();
       delete m_lastShownInstrumentWin;
-      insWin->move(p);
+	  insWin->move(p);
     }
   }
   m_lastShownInstrumentWin = insWin;
 
   if (!insWin->isVisible())
   {
-    insWin->show();
+	  insWin->show();
   }
 }
 

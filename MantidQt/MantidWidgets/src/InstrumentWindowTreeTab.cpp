@@ -5,6 +5,7 @@
 #include "ProjectionSurface.h"
 #include "GLActorVisitor.h"
 
+#include <QVBoxLayout>
 #include <QMessageBox>
 
 InstrumentWindowTreeTab::InstrumentWindowTreeTab(InstrumentWindow *instrWindow)

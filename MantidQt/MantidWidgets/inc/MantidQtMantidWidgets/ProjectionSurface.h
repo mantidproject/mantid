@@ -1,15 +1,16 @@
 #ifndef PROJECTIONSURFACE_H
 #define PROJECTIONSURFACE_H
 
+#include "WidgetDllOption.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidQtAPI/MantidAlgorithmMetatype.h"
 
 #include "InstrumentActor.h"
 #include "Shape2DCollection.h"
 #include "PeakOverlay.h"
 #include "RectF.h"
-#include "../MantidAlgorithmMetatype.h"
 
 #include <QImage>
 #include <QList>
@@ -52,7 +53,7 @@ class QWheelEvent;
   * rectangle in surface coordinates.
   */
 
-class ProjectionSurface: public QObject
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ProjectionSurface: public QObject
 {
   Q_OBJECT
 public:
