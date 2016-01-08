@@ -612,7 +612,7 @@ DECLARE_ORTHORHOMBIC_SPACE_GROUP(58, "P n n m",
 DECLARE_ORTHORHOMBIC_SPACE_GROUP(59, "P m m n",
                                  "-x,-y,z; -x+1/2,y+1/2,-z; -x+1/2,-y+1/2,-z")
 DECLARE_TRANSFORMED_ORTHORHOMBIC_SPACE_GROUP(59, "P m m n :2",
-                                             "P b a n | x-1/4,y-1/4,z")
+                                             "P m m n | x-1/4,y-1/4,z")
 
 DECLARE_ORTHORHOMBIC_SPACE_GROUP(60, "P b c n",
                                  "-x+1/2,-y+1/2,z+1/2; -x,y,-z+1/2; -x,-y,-z")
