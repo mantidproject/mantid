@@ -197,6 +197,8 @@ public:
   MatrixVectorPairParser(MatrixVectorPairBuilder &builder)
       : MatrixVectorPairParser::base_type(m_parser) {
 
+    using boost::spirit::unused_type;
+
     namespace qi = boost::spirit::qi;
 
     using qi::int_;
@@ -209,23 +211,32 @@ public:
      * all semantic parse actions are formulated like that.
      */
     auto positiveSignAction =
-        [&builder]() { builder.setCurrentSignPositive(); };
-
-    auto negativeSignAction =
-        [&builder]() { builder.setCurrentSignNegative(); };
-
-    auto currentFactorAction =
-        [&builder](const ParsedRationalNumber &rationalNumberComponents) {
-          builder.setCurrentFactor(rationalNumberComponents);
+        [&builder](unused_type, unused_type, unused_type) {
+          builder.setCurrentSignPositive();
         };
 
+    auto negativeSignAction =
+        [&builder](unused_type, unused_type, unused_type) {
+          builder.setCurrentSignNegative();
+        };
+
+    auto currentFactorAction = [&builder](
+        const ParsedRationalNumber &rationalNumberComponents, unused_type,
+        unused_type) { builder.setCurrentFactor(rationalNumberComponents); };
+
     auto currentDirectionAction =
-        [&builder](const std::string &s) { builder.setCurrentDirection(s); };
+        [&builder](const std::string &s, unused_type, unused_type) {
+          builder.setCurrentDirection(s);
+        };
 
     auto addCurrentStateToResultAction =
-        [&builder]() { builder.addCurrentStateToResult(); };
+        [&builder](unused_type, unused_type, unused_type) {
+          builder.addCurrentStateToResult();
+        };
 
-    auto advanceRowAction = [&builder]() { builder.advanceRow(); };
+    auto advanceRowAction = [&builder](unused_type, unused_type, unused_type) {
+      builder.advanceRow();
+    };
 
     // Switch sign in the builder
     m_sign = lit('+')[positiveSignAction] | lit('-')[negativeSignAction];
