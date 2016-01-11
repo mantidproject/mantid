@@ -125,10 +125,6 @@ public:
 
     vtkNew<vtkIdList> idList1, idList2;
 
-    signal->LookupValue(0.0, idList1.GetPointer());
-    TSM_ASSERT_EQUALS("IDs for the 3 masked points should have been found",
-                      idList1->GetNumberOfIds(), 3);
-
     signal->LookupTypedValue(1.0, idList2.GetPointer());
     TSM_ASSERT_EQUALS("IDs for the 61 unmasked points should have been found",
                       idList2->GetNumberOfIds(), 61);

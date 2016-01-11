@@ -321,10 +321,9 @@ public:
     TSM_ASSERT_DELTA(
         "Value ignoring mask is 1.0",
         ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
-    TSM_ASSERT_DELTA(
-        "Masked returns 0",
-        ew->getSignalWithMaskAtCoord(coords1, Mantid::API::NoNormalization),
-        0.0, 1e-5);
+    TSM_ASSERT("Masked returns NaN",
+               boost::math::isnan(ew->getSignalWithMaskAtCoord(
+                   coords1, Mantid::API::NoNormalization)));
   }
 
   //-------------------------------------------------------------------------------------
@@ -606,7 +605,7 @@ public:
     std::vector<signal_t> y, e;
     ew->getLinePlot(start, end, NoNormalization, x, y, e);
     TS_ASSERT_EQUALS(y.size(), 200);
-    TS_ASSERT_EQUALS(y[60], 0.0);  // Masked data is zero
+    TS_ASSERT(boost::math::isnan(y[60]));  // Masked data is NaN
     TS_ASSERT_EQUALS(y[180], 3.0); // Unmasked data
   }
 

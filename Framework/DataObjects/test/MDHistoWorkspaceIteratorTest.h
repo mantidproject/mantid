@@ -174,8 +174,8 @@ public:
                       " are unmasked",
                       3.0, histoIt->getNormalizedSignalWithMask());
     histoIt->jumpTo(2);
-    TSM_ASSERT_EQUALS("Should return 0 here as data at the iterator are masked",
-                      0.0, histoIt->getNormalizedSignalWithMask());
+    TSM_ASSERT("Should return NaN here as data at the iterator are masked",
+               boost::math::isnan(histoIt->getNormalizedSignalWithMask()));
     histoIt->jumpTo(3);
     TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
                       " are unmasked",

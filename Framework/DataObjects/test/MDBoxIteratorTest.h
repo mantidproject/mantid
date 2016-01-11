@@ -632,7 +632,7 @@ public:
     // Mask box 0, unmask box 1 and mask box 2.
     // For masked boxes, getNormalizedSignalWithMask() should return 0.
     it->getBox()->mask();
-    TS_ASSERT_DELTA(it->getNormalizedSignalWithMask(), 0.0, 1e-5);
+    TS_ASSERT(boost::math::isnan(it->getNormalizedSignalWithMask()));
     TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
     it->next();
     it->getBox()->unmask();
@@ -640,7 +640,7 @@ public:
     TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
     it->next();
     it->getBox()->mask();
-    TS_ASSERT_DELTA(it->getNormalizedSignalWithMask(), 0.0, 1e-5);
+    TS_ASSERT(boost::math::isnan(it->getNormalizedSignalWithMask()));
     TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
 
     delete it;
