@@ -117,12 +117,12 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal_normalized));
 
-        coord_t *coords =
-            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get());
+        auto coords = std::unique_ptr<coord_t>(
+            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get()));
 
         // Iterate through all coordinates. Candidate for speed improvement.
         for (size_t v = 0; v < nVertexes; ++v) {
-          coord_t *coord = coords + v * 1;
+          coord_t *coord = coords.get() + v * 1;
           size_t id = iBox * 2 + v;
           if (m_useTransform) {
             transform->apply(coord, out);
@@ -131,8 +131,6 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
             points->SetPoint(id, coord[0], 0, 0);
           }
         }
-        // Free memory
-        delete[] coords;
       } // valid number of vertexes returned
       else {
         useBox[iBox] = false;
