@@ -252,7 +252,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
 
         if mode == "DoubleDifference":
-            if (not back_scattering):
+            if not back_scattering:
                 raise RuntimeError("Double Difference can only be used for Back scattering spectra")
 
 #----------------------------------------------------------------------------------------
@@ -325,7 +325,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             Loads an empty VESUVIO instrument and attaches the necessary
             parameters as attributes
         """
-        if(self._load_common_called):
+        if self._load_common_called:
             return
         isis = config.getFacility("ISIS")
         empty_vesuvio_ws = self._load_empty_evs()
