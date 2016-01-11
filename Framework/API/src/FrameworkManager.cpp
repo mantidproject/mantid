@@ -425,7 +425,7 @@ void FrameworkManagerImpl::setupUsageReporting() {
     Kernel::UsageService::Instance().setInterval(interval);
   }
   retVal = Kernel::ConfigService::Instance().getValue("usagereports.enabled", enabled);
-  Kernel::UsageService::Instance().setEnabled((retVal == 0) || (enabled == 0));
+  Kernel::UsageService::Instance().setEnabled((retVal == 1) && (enabled > 0));
   Kernel::UsageService::Instance().registerStartup();
 }
 
