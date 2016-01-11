@@ -1565,6 +1565,26 @@ def createUnmanagedAlgorithm(name, **kwargs):
         alg.setProperty(key, value)
     return alg
 
+def extract_fit_parameters(rAnds):
+    '''
+    @param rAnds: a rescale and shift object
+    @returns a scale factor, a shift factor and a fit mode
+    '''
+    scale_factor = rAnds.scale
+    shift_factor = rAnds.shift
+
+    # Set the fit mode
+    fit_mode = None
+    if rAnds.fitScale and rAnds.fitShift:
+        fit_mode = "Both"
+    elif rAnds.fitScale:
+        fit_mode = "ScaleOnly"
+    elif rAnds.fitShift:
+        fit_mode = "ShiftOnly"
+    else:
+        fit_mode = "None"
+    return scale_factor, shift_factor, fit_mode
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

@@ -406,11 +406,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # if 'merged' then when cross section is calculated output the two individual parts
     # of the cross section. These additional outputs are required to calculate
     # the merged workspace
-    # The fitRequired part is a hack which is needed as long as the fitting and
-    # the stitching for merged
-    # workspaces live in the same algorithm. We need to separte the two then we
-    # can remove the partial outoputs
-    if merge_flag or fitRequired:
+    if merge_flag:
         ReductionSingleton().to_Q.outputParts = True
 
     # do reduce rear bank data
@@ -452,8 +448,10 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         retWSname_front = _WavRangeReduction(name_suffix)
         retWSname = retWSname_front
 
-    # This section provides a the REAR -- FRONT fitting and a stitched workspace
-    if fitRequired or merge_flag:
+    # This section provides a the REAR -- FRONT fitting and a stitched workspace.
+    # If merge_flag is selected we use SANSStitch and get the fitting for free
+    # If fitRequired is selected, then we explicity call the SANSFitScale algorithm
+    if merge_flag:
         # Prepare the Norm and Count workspaces for the FRONT and the REAR detectors
         retWSname_merged = retWSname_rear
         if retWSname_merged.count('rear') == 1:
@@ -477,20 +475,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             #The CAN was not specified
             consider_can = False
 
-        # Set the scale and shift factor
-        scale_factor = rAnds.scale
-        shift_factor = rAnds.shift
-
-        # Set the fit mode
-        fit_mode = None
-        if rAnds.fitScale and rAnds.fitShift:
-            fit_mode = "Both"
-        elif rAnds.fitScale:
-            fit_mode = "ScaleOnly"
-        elif rAnds.fitShift:
-            fit_mode = "ShiftOnly"
-        else:
-            fit_mode = "None"
+        # Get fit paramters
+        scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
 
         kwargs_stitch = {"HABCountsSample" : Cf,
                          "HABNormSample" : Nf,
@@ -518,23 +504,22 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift_from_alg
         ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale_from_alg
 
-        if merge_flag:
-            # Get the merged workspace
-            mergedQ = alg_stitch.getProperty("OutputWorkspace").value
-            # Add the ouput to the Analysis Data Service
-            AnalysisDataService.addOrReplace(retWSname_merged, mergedQ)
+        # Get the merged workspace
+        mergedQ = alg_stitch.getProperty("OutputWorkspace").value
+        # Add the ouput to the Analysis Data Service
+        AnalysisDataService.addOrReplace(retWSname_merged, mergedQ)
 
-            # save the properties Transmission and TransmissionCan inside the merged workspace
-            # get these values from the rear_workspace because they are the same value as the front one.
-            # ticket #6929
-            rear_ws = mtd[retWSname_rear]
-            for prop in ['Transmission','TransmissionCan']:
-                if rear_ws.getRun().hasProperty(prop):
-                    ws_name = rear_ws.getRun().getLogData(prop).value
-                    if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
-                        AddSampleLog(Workspace=retWSname_merged,LogName= prop, LogText=ws_name)
+        # save the properties Transmission and TransmissionCan inside the merged workspace
+        # get these values from the rear_workspace because they are the same value as the front one.
+        # ticket #6929
+        rear_ws = mtd[retWSname_rear]
+        for prop in ['Transmission','TransmissionCan']:
+            if rear_ws.getRun().hasProperty(prop):
+                ws_name = rear_ws.getRun().getLogData(prop).value
+                if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
+                    AddSampleLog(Workspace=retWSname_merged,LogName= prop, LogText=ws_name)
 
-            retWSname = retWSname_merged
+        retWSname = retWSname_merged
 
         # Remove the partial workspaces, this needs to be done for when we merge and/or fit
         delete_workspaces(retWSname_rear+"_sumOfCounts")
@@ -546,6 +531,25 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             delete_workspaces(retWSname_rear+"_can_tmp_sumOfNormFactors")
             delete_workspaces(retWSname_front+"_can_tmp_sumOfCounts")
             delete_workspaces(retWSname_rear+"_can_tmp_sumOfCounts")
+
+    elif fitRequired:
+        # Get fit paramters
+        scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
+
+        # Since only the fit is required we use only the SANSFitScale algorithm
+        kwargs_fit = {"HABWorkspace" : mtd[retWSname_front],
+                      "LABWorkspace" : mtd[retWSname_rear],
+                      "Mode" : fit_mode,
+                      "ScaleFactor" : scale_factor,
+                      "ShiftFactor" : shift_factor}
+        alg_fit = su.createUnmanagedAlgorithm("SANSFitShiftScale", **kwargs_fit)
+        alg_fit.execute()
+
+        # Get the fit values
+        shift_from_alg = alg_fit.getProperty("OutShiftFactor").value
+        scale_from_alg = alg_fit.getProperty("OutScaleFactor").value
+        ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift_from_alg
+        ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale_from_alg
 
     shift = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift
     scale = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale
