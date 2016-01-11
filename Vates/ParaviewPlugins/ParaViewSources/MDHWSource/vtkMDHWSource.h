@@ -4,16 +4,9 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "vtkStructuredGridAlgorithm.h"
+#include "MantidVatesAPI/MDLoadingPresenter.h"
 
 #include <string>
-
-namespace Mantid
-{
-  namespace VATES
-  {
-    class MDLoadingPresenter;
-  }
-}
 
 /*  Source for fetching Multidimensional Workspace out of the Mantid Analysis Data Service
     and converting them into vtkDataSets as part of the pipeline source.

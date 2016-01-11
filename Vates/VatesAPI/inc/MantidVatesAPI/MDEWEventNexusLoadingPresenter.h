@@ -2,6 +2,7 @@
 #define MANTID_VATES_MDEW_EVENT_NEXUS_LOADING_PRESENTER
 
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
+#include "MantidVatesAPI/MDLoadingView.h"
 
 namespace Mantid
 {
@@ -34,7 +35,6 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-    class MDLoadingView;
     class DLLExport MDEWEventNexusLoadingPresenter : public MDEWLoadingPresenter
     {
     public:
