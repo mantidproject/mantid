@@ -39,6 +39,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
     foil_map = None
     _inst_prefix = None
     _back_scattering = None
+    _load_common_called = False
     _mon_spectra = None
     _mon_index = None
     _backward_spectra_list = None
@@ -140,6 +141,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 #----------------------------------------------------------------------------------------
 
     def validateInputs(self):
+        self._load_common_inst_parameters()
         issues = {}
 
         # Validate run number ranges
@@ -152,7 +154,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         # Validate SpectrumList
         speclists_str = self.getProperty(SPECTRA_PROP).value
-
+        specMin = self._backward_spectra_list[0]
+        specMax = self._forward_spectra_list[len(self._forward_spectra_list) - 1]
         if ";" in speclists_str:
             # Split if in 2-3;6-7 format
             speclists_str = speclists_str.split(";")
@@ -169,9 +172,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 if upper < lower:
                     issues[SPECTRA_PROP] = "Range must be in format lower-upper"
                 # Check Min/Max boundaries
-                if lower < 3:
+                if lower < specMin:
                     issues[SPECTRA_PROP] = "Lower limit for spectra is 3"
-                if upper > 198:
+                if upper > specMax:
                     issues[SPECTRA_PROP] = "Upper limit for spectra is 198"
             # Check comma separated lists
             if "," in speclist_str:
@@ -179,12 +182,11 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 for spec in spectra_list:
                     spec = int(spec)
                     # Check Min/Max boundaries
-                    if spec < 3 or spec > 198:
+                    if spec < specMin or spec > specMax:
                         issues[SPECTRA_PROP] = "All Spectra must be between 3 and 198"
 
         return issues
 
-#----------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------------------
 
@@ -325,6 +327,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
             Loads an empty VESUVIO instrument and attaches the necessary
             parameters as attributes
         """
+        if(self._load_common_called):
+            return
         isis = config.getFacility("ISIS")
         empty_vesuvio_ws = self._load_empty_evs()
         empty_vesuvio = empty_vesuvio_ws.getInstrument()
@@ -371,6 +375,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self._forw_period_sum1 = to_range_tuple(self.forward_period_sum1)
         self._forw_period_sum2 = to_range_tuple(self.forward_period_sum2)
         self._forw_foil_out_norm = to_range_tuple(self.forward_foil_out_norm)
+        self._load_common_called = True
 
 #----------------------------------------------------------------------------------------
 
