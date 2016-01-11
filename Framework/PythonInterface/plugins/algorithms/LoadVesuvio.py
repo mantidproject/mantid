@@ -912,6 +912,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
 class SpectraToFoilPeriodMap(object):
     """Defines the mapping between a spectrum number
     & the period index into a WorkspaceGroup for a foil state.
+    2 period only runs in forward scattering - odd_even & even_odd
+    3 period only runs in back scattering - one_to_one
+    6 period runs in both backward and forward scattering
     """
 
     def __init__(self, nperiods=6):
