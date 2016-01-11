@@ -73,8 +73,7 @@ void BinaryOperationMD::exec() {
   m_lhs = getProperty(inputPropName1());
   m_rhs = getProperty(inputPropName2());
   m_out = getProperty(outputPropName());
-  if (m_lhs->getConvention() !=  m_rhs->getConvention())
-  {
+  if (m_lhs->getConvention() != m_rhs->getConvention()) {
     // Convert to the Qconvention from Preferences
     // ki-kf for Inelastic convention; kf-ki for Crystallography convention
     std::string pref_QConvention =
@@ -83,17 +82,16 @@ void BinaryOperationMD::exec() {
     if (pref_QConvention != m_lhs->getConvention()) {
       g_log.information() << "Transforming Q in lhs" << std::endl;
       Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
-      transform_alg->setProperty("InputWorkspace",
-                                 boost::dynamic_pointer_cast<IMDWorkspace>(m_lhs));
+      transform_alg->setProperty(
+          "InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(m_lhs));
       transform_alg->setProperty("Scaling", "-1.0");
       transform_alg->executeAsChildAlg();
       m_lhs = transform_alg->getProperty("OutputWorkspace");
-    }
-    else {
+    } else {
       g_log.information() << "Transforming Q in rhs" << std::endl;
       Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
-      transform_alg->setProperty("InputWorkspace",
-                                 boost::dynamic_pointer_cast<IMDWorkspace>(m_rhs));
+      transform_alg->setProperty(
+          "InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(m_rhs));
       transform_alg->setProperty("Scaling", "-1.0");
       transform_alg->executeAsChildAlg();
       m_rhs = transform_alg->getProperty("OutputWorkspace");
