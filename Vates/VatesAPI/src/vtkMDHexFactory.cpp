@@ -87,16 +87,15 @@ void vtkMDHexFactory::doCreate(
   signals->SetNumberOfComponents(1);
 
   // To cache the signal
-  std::vector<float> signalCache;
-  signalCache.assign(numBoxes, 0);
+  std::vector<float> signalCache(numBoxes, 0);
 
   // True for boxes that we will use
   auto useBox = Mantid::Kernel::make_unique<bool[]>(numBoxes);
   memset(useBox.get(), 0, sizeof(bool) * numBoxes);
 
   // Create the data set (will outlive this object - output of create)
-  vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
-  this->dataSet = visualDataSet;
+  auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
+  this->dataSet = visualDataSet.GetPointer();
   visualDataSet->Allocate(numBoxes);
 
   vtkNew<vtkIdList> hexPointList;
@@ -122,29 +121,27 @@ void vtkMDHexFactory::doCreate(
 
         // Get the coordinates.
         size_t numVertexes = 0;
-        coord_t *coords; // raw pointer as comment below suggests it is
-                         // speed-critical
+        std::unique_ptr<coord_t> coords;
 
         // If slicing down to 3D, specify which dimensions to keep.
-        if (this->slice)
+        if (this->slice) {
+          coords = std::unique_ptr<coord_t>(
+              box->getVertexesArray(numVertexes, 3, this->sliceMask.get()));
+        } else {
           coords =
-              box->getVertexesArray(numVertexes, 3, this->sliceMask.get());
-        else
-          coords = box->getVertexesArray(numVertexes);
+              std::unique_ptr<coord_t>(box->getVertexesArray(numVertexes));
+        }
 
         if (numVertexes == 8) {
           // Iterate through all coordinates. Candidate for speed improvement.
           for (size_t v = 0; v < numVertexes; v++) {
-            coord_t *coord = coords + v * 3;
+            coord_t *coord = coords.get() + v * 3;
             // Set the point at that given ID
             points->SetPoint(i * 8 + v, coord[0], coord[1], coord[2]);
             std::string msg;
           }
 
         } // valid number of vertexes returned
-
-        // Free memory
-        delete[] coords;
       } else {
         useBox[i] = false;
       }

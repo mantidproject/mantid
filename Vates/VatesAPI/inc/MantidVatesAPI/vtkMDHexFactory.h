@@ -10,6 +10,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include <vtkNew.h>
+#include <vtkSmartPointer.h>
 #include <boost/shared_ptr.hpp>
 #include <vector>
 

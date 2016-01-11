@@ -22,7 +22,7 @@ vtkDataSetFactory::~vtkDataSetFactory()
  @throw std::invalid_argument if successor is nullptr
  */
 void vtkDataSetFactory::SetSuccessor(vtkDataSetFactory_uptr pSuccessor) {
-  if (pSuccessor != nullptr) {
+  if (pSuccessor) {
     // Assignment peformed first (RAII) to guarantee no side effects.
     m_successor = std::move(pSuccessor);
     // Unless overriden, successors should not be the same type as the present

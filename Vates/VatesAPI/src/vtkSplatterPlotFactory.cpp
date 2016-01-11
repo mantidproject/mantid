@@ -27,6 +27,7 @@
 #include <vtkSystemIncludes.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkNew.h>
+#include <vtkSmartPointer.h>
 
 #include <algorithm>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -248,17 +249,16 @@ void vtkSplatterPlotFactory::doCreate(
   }
 
   // Create the point list, one position for each point actually used
-  vtkPoints *points = vtkPoints::New();
+  auto points = vtkSmartPointer<vtkPoints>::New();
   points->Allocate(numPoints);
   points->SetNumberOfPoints(numPoints);
 
   // The list of IDs of points used, one ID per point, since points
   // are not reused to form polygon facets, etc.
-  std::vector<vtkIdType> ids;
-  ids.assign(numPoints, 0);
+  std::vector<vtkIdType> ids(numPoints, 0);
 
   // Only one scalar for each cell, NOT one per point
-  vtkFloatArray *signal = vtkFloatArray::New();
+  auto signal = vtkSmartPointer<vtkFloatArray>::New();
   signal->Allocate(numCells);
   signal->SetName(m_scalarName.c_str());
 

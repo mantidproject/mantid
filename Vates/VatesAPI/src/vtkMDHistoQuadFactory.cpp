@@ -172,8 +172,7 @@ namespace Mantid
         in[2] = 0;
 
         // Array with the point IDs (only set where needed)
-        std::vector<vtkIdType> pointIDs;
-        pointIDs.assign(nPointsX * nPointsY, 0);
+        std::vector<vtkIdType> pointIDs(nPointsX * nPointsY, 0);
         index = 0;
         for (int i = 0; i < nPointsX; i++)
         {
