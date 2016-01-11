@@ -102,7 +102,7 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     }
 
     Mantid::coord_t out[1];
-    auto useBox = Mantid::Kernel::make_unique<bool[]>(it->getDataSize());
+    auto useBox = std::vector<bool>(it->getDataSize());
 
     double progressFactor = 0.5 / double(it->getDataSize());
     double progressOffset = 0.5;

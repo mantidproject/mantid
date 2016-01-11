@@ -90,8 +90,7 @@ void vtkMDHexFactory::doCreate(
   std::vector<float> signalCache(numBoxes, 0);
 
   // True for boxes that we will use
-  auto useBox = Mantid::Kernel::make_unique<bool[]>(numBoxes);
-  memset(useBox.get(), 0, sizeof(bool) * numBoxes);
+  auto useBox = std::vector<bool>(numBoxes, false);
 
   // Create the data set (will outlive this object - output of create)
   auto visualDataSet = vtkUnstructuredGrid::New();
