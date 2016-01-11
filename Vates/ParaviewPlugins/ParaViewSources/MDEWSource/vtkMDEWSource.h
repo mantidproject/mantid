@@ -80,7 +80,6 @@ public:
 
 protected:
   vtkMDEWSource();
-  ~vtkMDEWSource();
   int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 

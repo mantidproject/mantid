@@ -44,7 +44,6 @@ namespace Mantid
                                   ProgressAction &rebinningProgressUpdate,
                                   ProgressAction &drawingProgressUpdate);
       virtual void executeLoadMetadata();
-      virtual ~MDEWEventNexusLoadingPresenter();
       virtual bool canReadFile() const;
       virtual std::string getWorkspaceTypeName();
     private:

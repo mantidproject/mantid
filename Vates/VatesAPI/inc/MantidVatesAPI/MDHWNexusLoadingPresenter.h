@@ -45,7 +45,6 @@ public:
                               ProgressAction& rebinningProgressUpdate,
                               ProgressAction& drawingProgressUpdate);
   virtual void executeLoadMetadata();
-  virtual ~MDHWNexusLoadingPresenter();
   virtual bool canReadFile() const;
   virtual std::string getWorkspaceTypeName();
   std::vector<int> getExtents();

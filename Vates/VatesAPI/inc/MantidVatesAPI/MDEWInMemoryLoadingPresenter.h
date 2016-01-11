@@ -49,7 +49,6 @@ namespace Mantid
                                    std::string wsName);
       virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningProgressUpdate, ProgressAction& drawingProgressUpdate);
       virtual void executeLoadMetadata();
-      virtual ~MDEWInMemoryLoadingPresenter();
       virtual bool canReadFile() const;
       virtual std::string getWorkspaceTypeName();
       virtual int getSpecialCoordinates();
