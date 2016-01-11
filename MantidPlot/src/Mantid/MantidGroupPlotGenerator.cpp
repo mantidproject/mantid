@@ -55,7 +55,7 @@ void MantidGroupPlotGenerator::plot(
 
     // Import the data for plotting
     auto matrixToPlot =
-        m_mantidUI->importMatrixWorkspace(matrixWS, -1, -1, false, false);
+        m_mantidUI->importMatrixWorkspace(matrixWS, -1, -1, false);
 
     // Change the default plot title
     QString title =
@@ -183,7 +183,7 @@ bool MantidGroupPlotGenerator::groupIsAllMatrixWorkspaces(
  * @returns Numeric log value, or zero
  */
 double MantidGroupPlotGenerator::getSingleLogValue(
-    const int wsIndex, const std::vector<std::string> &logValues) const {
+    int wsIndex, const std::vector<std::string> &logValues) const {
   double value = 0;
 
   try {
@@ -207,7 +207,7 @@ double MantidGroupPlotGenerator::getSingleLogValue(
  * @throws invalid_argument if log is wrong type or not present
  */
 double MantidGroupPlotGenerator::getSingleLogValue(
-    const int wsIndex, const MatrixWorkspace_const_sptr &matrixWS,
+    int wsIndex, const MatrixWorkspace_const_sptr &matrixWS,
     const QString &logName) const {
   if (logName == MantidSurfacePlotDialog::WORKSPACE_INDEX) {
     return wsIndex;

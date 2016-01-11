@@ -46,12 +46,12 @@ private:
 
   /// Returns a single log value from the given workspace
   double
-  getSingleLogValue(const int wsIndex,
+  getSingleLogValue(int wsIndex,
                     const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
                     const QString &logName) const;
 
   /// Returns a single log value from supplied custom log
-  double getSingleLogValue(const int wsIndex,
+  double getSingleLogValue(int wsIndex,
                            const std::vector<std::string> &values) const;
 
   /// Converts histogram to point data, if not already

@@ -1885,7 +1885,7 @@ void MantidTreeWidget::validatePlotOptions(
   // number of workspaces in the group
   if (options.accepted) {
     if (options.logName == MantidSurfacePlotDialog::CUSTOM) {
-      if (options.customLogValues.size() != nWorkspaces) {
+      if (static_cast<int>(options.customLogValues.size()) != nWorkspaces) {
         QMessageBox errorMessage;
         errorMessage.setText(
             "Number of custom log values must be equal to number "

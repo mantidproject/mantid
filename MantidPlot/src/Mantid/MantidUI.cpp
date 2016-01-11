@@ -475,8 +475,7 @@ MantidMatrix *MantidUI::importMatrixWorkspace(const QString &wsName, int lower,
         wsName.toStdString());
   }
 
-  MantidMatrix *matrix =
-      importMatrixWorkspace(ws, lower, upper, showDlg, makeVisible);
+  MantidMatrix *matrix = importMatrixWorkspace(ws, lower, upper, showDlg);
   if (matrix) {
     appWindow()->addMdiSubWindow(matrix, makeVisible);
   }
@@ -488,12 +487,11 @@ MantidMatrix *MantidUI::importMatrixWorkspace(const QString &wsName, int lower,
 @param lower :: An optional lower boundary
 @param upper :: An optional upper boundary
 @param showDlg :: If true show a dialog box to set some import parameters
-@param makeVisible :: If true show the created MantidMatrix, hide otherwise.
 @return A pointer to the new MantidMatrix.
 */
 MantidMatrix *
 MantidUI::importMatrixWorkspace(const MatrixWorkspace_sptr workspace, int lower,
-                                int upper, bool showDlg, bool makeVisible) {
+                                int upper, bool showDlg) {
   MantidMatrix *matrix = 0;
   if (workspace) {
     const QString wsName(workspace->name().c_str());
