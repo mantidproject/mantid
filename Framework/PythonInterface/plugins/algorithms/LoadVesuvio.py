@@ -150,24 +150,35 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         # Validate SpectrumList
         speclist_str = self.getProperty(SPECTRA_PROP).value
+        # Check ranges
         if "-" in speclist_str:
             lower, upper = speclist_str.split("-")
             lower = int(lower)
             upper = int(upper)
+            # Check format
             if upper < lower:
                 issues[SPECTRA_PROP] = "Range must be in format lower-upper"
+            # Check Min/Max boundaries
             if lower < 3:
                 issues[SPECTRA_PROP] = "Lower limit for spectra is 3"
             if upper > 198:
                 issues[SPECTRA_PROP] = "Upper limit for spectra is 198"
+            # Check forward/backward mixing
             if lower < 135 and upper > 134:
                 issues[SPECTRA_PROP] = "Mixing backward and forward spectra is not permitted"
+        # Check comma separated lists
         if "," in speclist_str:
             spectra_list = speclist_str.split(",")
-            map(int, spectra_list)
+            scattering = int(spectra_list[0]) < 135 # Check scattering of first spectra
             for spec in spectra_list:
+                spec = int(spec)
+                # Check Min/Max boundaries
                 if spec < 3 or spec > 198:
-                    issues[SPECTRA_PROP] = "Invalid Spectra. All Spectra must be between 3 and 198"
+                    issues[SPECTRA_PROP] = "All Spectra must be between 3 and 198"
+                # Check forward/backward mixing
+                spec_scattering = spec < 135
+                if spec_scattering != scattering:
+                    issues[SPECTRA_PROP] = "Mixing backward and forward spectra is not permitted"
 
         return issues
 
