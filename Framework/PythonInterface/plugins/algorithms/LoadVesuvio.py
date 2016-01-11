@@ -152,17 +152,21 @@ class LoadVesuvio(LoadEmptyVesuvio):
         speclist_str = self.getProperty(SPECTRA_PROP).value
         if "-" in speclist_str:
             lower, upper = speclist_str.split("-")
+            lower = int(lower)
+            upper = int(upper)
             if upper < lower:
                 issues[SPECTRA_PROP] = "Range must be in format lower-upper"
             if lower < 3:
                 issues[SPECTRA_PROP] = "Lower limit for spectra is 3"
             if upper > 198:
                 issues[SPECTRA_PROP] = "Upper limit for spectra is 198"
-        elif "," in speclist_str:
+            if lower < 135 and upper > 134:
+                issues[SPECTRA_PROP] = "Mixing backward and forward spectra is not permitted"
+        if "," in speclist_str:
             spectra_list = speclist_str.split(",")
-            logger.information("spectra_list = " + str(spectra_list))
+            map(int, spectra_list)
             for spec in spectra_list:
-                if int(spec) < 3 or int(spec) > 198:
+                if spec < 3 or spec > 198:
                     issues[SPECTRA_PROP] = "Invalid Spectra. All Spectra must be between 3 and 198"
 
         return issues
