@@ -586,11 +586,11 @@ bool Algorithm::execute() {
       Timer timer;
       // Call the concrete algorithm's exec method
       this->exec();
+      registerFeatureUsage();
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
       // Get how long this algorithm took to run
       const float duration = timer.elapsed();
-
       // need it to throw before trying to run fillhistory() on an algorithm
       // which has failed
       if (trackingHistory() && m_history) {
@@ -605,7 +605,6 @@ bool Algorithm::execute() {
       if (!isChild() || m_alwaysStoreInADS)
         this->store();
 
-      registerFeatureUsage(duration);
       // RJT, 19/3/08: Moved this up from below the catch blocks
       setExecuted(true);
 
@@ -1578,14 +1577,13 @@ void Algorithm::reportCompleted(const double &duration,
 }
 
 /** Registers the usage of the algorithm with the UsageService
-@param enabled : true to enable logging, false to disable
 */
-void Algorithm::registerFeatureUsage(const float &duration) const
-{
+void Algorithm::registerFeatureUsage() const {
   if (UsageService::Instance().isEnabled()) {
     std::ostringstream oss;
     oss << this->name() << ".v" << this->version();
-    UsageService::Instance().registerFeatureUsage("Algorithm", oss.str(), isChild());
+    UsageService::Instance().registerFeatureUsage("Algorithm", oss.str(),
+                                                  isChild());
   }
 }
 

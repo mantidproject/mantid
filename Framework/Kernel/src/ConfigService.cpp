@@ -636,22 +636,18 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
         std::fstream::out);
 
     filestr << "# This file can be used to override any properties for this "
-               "installation."
-            << std::endl;
+               "installation." << std::endl;
     filestr << "# Any properties found in this file will override any that are "
-               "found in the Mantid.Properties file"
-            << std::endl;
+               "found in the Mantid.Properties file" << std::endl;
     filestr << "# As this file will not be replaced with futher installations "
-               "of Mantid it is a safe place to put "
-            << std::endl;
+               "of Mantid it is a safe place to put " << std::endl;
     filestr << "# properties that suit your particular installation."
             << std::endl;
     filestr << "#" << std::endl;
     filestr << "# See here for a list of possible options:" << std::endl;
     filestr << "# "
                "http://www.mantidproject.org/"
-               "Properties_File#Mantid.User.Properties"
-            << std::endl;
+               "Properties_File#Mantid.User.Properties" << std::endl;
     filestr << std::endl;
     filestr << "##" << std::endl;
     filestr << "## GENERAL" << std::endl;
@@ -686,13 +682,11 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "##" << std::endl;
     filestr << std::endl;
     filestr << "## Sets a list of directories (separated by semi colons) to "
-               "search for data"
-            << std::endl;
+               "search for data" << std::endl;
     filestr << "#datasearch.directories=../data;../isis/data" << std::endl;
     filestr << std::endl;
     filestr << "## Set a list (separated by semi colons) of directories to "
-               "look for additional Python scripts"
-            << std::endl;
+               "look for additional Python scripts" << std::endl;
     filestr << "#pythonscripts.directories=../scripts;../docs/MyScripts"
             << std::endl;
     filestr << std::endl;
@@ -733,8 +727,7 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "#MantidOptions.ReusePlotInstances=Off" << std::endl;
     filestr << std::endl;
     filestr << "## Uncomment to disable use of OpenGL to render unwrapped "
-               "instrument views"
-            << std::endl;
+               "instrument views" << std::endl;
     filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off" << std::endl;
 
     filestr.close();
@@ -1969,10 +1962,9 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   return m_proxyInfo;
 }
 
-
-  /** Sets the log level priority for the File log channel
-  * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
-  */
+/** Sets the log level priority for the File log channel
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+*/
 void ConfigServiceImpl::setFileLogLevel(int logLevel) {
   setFilterChannelLogLevel("fileFilterChannel", logLevel);
 }

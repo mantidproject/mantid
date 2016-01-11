@@ -11,23 +11,20 @@ using Mantid::Kernel::UsageServiceImpl;
 
 class TestableUsageService : public UsageServiceImpl {
 public:
-  TestableUsageService() :UsageServiceImpl() {
-  }
+  TestableUsageService() : UsageServiceImpl() {}
 
   /// generates the message body for a startup message
-  std::string generateStartupMessage()
-  {
+  std::string generateStartupMessage() {
     return UsageServiceImpl::generateStartupMessage();
   }
   /// generates the message body for a feature usage message
-  std::string generateFeatureUsageMessage()
-  {
+  std::string generateFeatureUsageMessage() {
     return UsageServiceImpl::generateFeatureUsageMessage();
   }
+
 protected:
   /// sends a report over the internet
-  int sendReport(const std::string &message, const std::string &url)
-  {
+  int sendReport(const std::string &message, const std::string &url) {
     // do nothing
     return 200;
   }
@@ -38,10 +35,9 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static UsageServiceTest *createSuite() { return new UsageServiceTest(); }
-  static void destroySuite( UsageServiceTest *suite ) { delete suite; }
+  static void destroySuite(UsageServiceTest *suite) { delete suite; }
 
-  void test_enabled()
-  {
+  void test_enabled() {
     TestableUsageService usageService;
     TS_ASSERT_EQUALS(usageService.isEnabled(), false);
     usageService.setEnabled(false);
@@ -67,18 +63,12 @@ public:
     reader.parse(message, root);
     auto members = root.getMemberNames();
     std::vector<std::string> expectedMembers{
-      "ParaView",
-      "application",
-      "host",
-      "mantidSha1",
-      "mantidVersion",
-      "osArch",
-      "osName",
-      "osReadable",
-      "osVersion",
-      "uid"};
+        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
+        "osArch",   "osName",      "osReadable", "osVersion",  "uid"};
     for (auto expectedMember : expectedMembers) {
-      TSM_ASSERT(expectedMember + " not found", std::find(members.begin(), members.end(), expectedMember) != members.end());
+      TSM_ASSERT(expectedMember + " not found",
+                 std::find(members.begin(), members.end(), expectedMember) !=
+                     members.end());
     }
 
     TS_ASSERT_EQUALS(root["application"].asString(), name);
@@ -101,11 +91,11 @@ public:
     ::Json::Value root;
     reader.parse(message, root);
     auto members = root.getMemberNames();
-    std::vector<std::string> expectedMembers{
-      "mantidVersion",
-      "features" };
+    std::vector<std::string> expectedMembers{"mantidVersion", "features"};
     for (auto expectedMember : expectedMembers) {
-      TSM_ASSERT(expectedMember + " not found", std::find(members.begin(), members.end(), expectedMember) != members.end());
+      TSM_ASSERT(expectedMember + " not found",
+                 std::find(members.begin(), members.end(), expectedMember) !=
+                     members.end());
     }
 
     auto features = root["features"];
@@ -117,18 +107,22 @@ public:
 
       bool correct = false;
 
-      if (type == "Algorithm" && name == "MyAlg.v1" && internal == true && count == 1)
+      if (type == "Algorithm" && name == "MyAlg.v1" && internal == true &&
+          count == 1)
         correct = true;
-      if (type == "Interface" && name == "MyAlg.v1" && internal == true && count == 1)
+      if (type == "Interface" && name == "MyAlg.v1" && internal == true &&
+          count == 1)
         correct = true;
-      if (type == "Algorithm" && name == "MyLoopAlg.v1" && internal == false && count == 10000)
+      if (type == "Algorithm" && name == "MyLoopAlg.v1" && internal == false &&
+          count == 10000)
         correct = true;
-      if (type == "Algorithm" && name == "MyLoopAlg.v1" && internal == true && count == 1)
+      if (type == "Algorithm" && name == "MyLoopAlg.v1" && internal == true &&
+          count == 1)
         correct = true;
-      TSM_ASSERT("Usage record was not as expected",correct)
+      TSM_ASSERT("Usage record was not as expected", correct)
     }
   }
-  
+
   void test_Flush() {
     TestableUsageService usageService;
     usageService.setInterval(10000);
@@ -136,10 +130,10 @@ public:
     for (size_t i = 0; i < 10; i++) {
       usageService.registerFeatureUsage("Algorithm", "MyLoopAlg.v1", false);
     }
-    //this should empty the feature usage list
+    // this should empty the feature usage list
     usageService.flush();
-    //so this should no be empty
-    TS_ASSERT_EQUALS(usageService.generateFeatureUsageMessage(),"");
+    // so this should no be empty
+    TS_ASSERT_EQUALS(usageService.generateFeatureUsageMessage(), "");
   }
 
   void test_Shutdown() {
@@ -149,24 +143,23 @@ public:
     for (size_t i = 0; i < 10; i++) {
       usageService.registerFeatureUsage("Algorithm", "MyLoopAlg.v1", false);
     }
-    //this should empty the feature usage list
+    // this should empty the feature usage list
     usageService.shutdown();
-    //so this should no be empty
+    // so this should no be empty
     TS_ASSERT_EQUALS(usageService.generateFeatureUsageMessage(), "");
-    //and it should be disabled
+    // and it should be disabled
     TS_ASSERT_EQUALS(usageService.isEnabled(), false);
   }
 
   void test_setApplicationName() {
     TestableUsageService usageService;
-    //test default first
+    // test default first
     TS_ASSERT_EQUALS(usageService.getApplication(), "python");
 
     std::string name = "My testing application name";
     usageService.setApplication(name);
-    TS_ASSERT_EQUALS(usageService.getApplication(),name);
+    TS_ASSERT_EQUALS(usageService.getApplication(), name);
   }
 };
-
 
 #endif /* MANTID_API_USAGESERVICETEST_H_ */

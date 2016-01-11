@@ -406,7 +406,7 @@ private:
   void reportCompleted(const double &duration,
                        const bool groupProcessing = false);
 
-  void registerFeatureUsage(const float &duration) const;
+  void registerFeatureUsage() const;
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.

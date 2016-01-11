@@ -19,37 +19,41 @@ namespace Kernel {
 Kernel::Logger g_log("UsageServiceImpl");
 
 const std::string STARTUP_URL("http://reports.mantidproject.org/api/usage");
-//const std::string STARTUP_URL(
+// const std::string STARTUP_URL(
 //    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
 // http://posttestserver.com/data/
 const std::string FEATURE_URL("http://reports.mantidproject.org/api/feature");
-//const std::string FEATURE_URL(
+// const std::string FEATURE_URL(
 //    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
 
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
 */
 FeatureUsage::FeatureUsage(const std::string &type, const std::string &name,
-    const bool internal)
+                           const bool internal)
     : type(type), name(name), internal(internal) {}
 
 // Better brute force.
-bool FeatureUsage::operator<(const FeatureUsage& r) const
-{
-  if (type < r.type)  return true;
-  if (type > r.type)  return false;
+bool FeatureUsage::operator<(const FeatureUsage &r) const {
+  if (type < r.type)
+    return true;
+  if (type > r.type)
+    return false;
   // Otherwise type are equal
-  if (name < r.name)  return true;
-  if (name > r.name)  return false;
+  if (name < r.name)
+    return true;
+  if (name > r.name)
+    return false;
   // Otherwise name are equal
- if (static_cast<int>(internal) < static_cast<int>(r.internal))  return true;
- if (static_cast<int>(internal) > static_cast<int>(r.internal))  return false;
+  if (static_cast<int>(internal) < static_cast<int>(r.internal))
+    return true;
+  if (static_cast<int>(internal) > static_cast<int>(r.internal))
+    return false;
   // Otherwise all are equal
   return false;
 }
 
-::Json::Value FeatureUsage::asJson() const
-{
+::Json::Value FeatureUsage::asJson() const {
   ::Json::Value retVal;
 
   retVal["type"] = type;
@@ -78,9 +82,7 @@ void UsageServiceImpl::setApplication(const std::string &name) {
   m_application = name;
 }
 
-std::string UsageServiceImpl::getApplication() const {
-  return m_application;
-}
+std::string UsageServiceImpl::getApplication() const { return m_application; }
 
 void UsageServiceImpl::setInterval(const uint32_t seconds) {
   // set the ticks target to by 24 hours / interval
@@ -96,7 +98,7 @@ void UsageServiceImpl::registerStartup() {
   }
 }
 
-/** registerFeatureUsage 
+/** registerFeatureUsage
 */
 void UsageServiceImpl::registerFeatureUsage(const std::string &type,
                                             const std::string &name,
@@ -203,10 +205,10 @@ std::string UsageServiceImpl::generateStartupMessage() {
 
   // username
   message["uid"] = Kernel::ChecksumHelper::md5FromString(
-    ConfigService::Instance().getUsername());
+      ConfigService::Instance().getUsername());
   // hostname
   message["host"] = Kernel::ChecksumHelper::md5FromString(
-    ConfigService::Instance().getComputerName());
+      ConfigService::Instance().getComputerName());
 
   // os name, version, and architecture
   message["osName"] = ConfigService::Instance().getOSName();
@@ -236,7 +238,7 @@ std::string UsageServiceImpl::generateStartupMessage() {
 
 std::string UsageServiceImpl::generateFeatureUsageMessage() {
 
-  std::map<FeatureUsage, size_t> featureCountMap;
+  std::map<FeatureUsage, int> featureCountMap;
 
   if (!m_FeatureQueue.empty()) {
     // lock around emptying of the Q so any further threads have to wait
@@ -253,11 +255,11 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
     }
   }
 
-  if (featureCountMap.size() > 0) {
+  if (featureCountMap.empty()) {
     ::Json::FastWriter writer;
     ::Json::Value features;
     auto message = this->generateFeatureHeader();
-    for (auto const& featureItem : featureCountMap) {
+    for (auto const &featureItem : featureCountMap) {
       ::Json::Value thisFeature = featureItem.first.asJson();
       thisFeature["count"] = featureItem.second;
       features.append(thisFeature);

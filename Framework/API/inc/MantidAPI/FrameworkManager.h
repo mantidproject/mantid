@@ -100,6 +100,7 @@ public:
 
   /// Deletes a workspace from the framework
   bool deleteWorkspace(const std::string &wsName);
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FrameworkManagerImpl>;
 

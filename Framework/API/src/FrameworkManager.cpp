@@ -219,8 +219,7 @@ void FrameworkManagerImpl::clear() {
   clearPropertyManagers();
 }
 
-void FrameworkManagerImpl::shutdown()
-{
+void FrameworkManagerImpl::shutdown() {
   Kernel::UsageService::Instance().shutdown();
   clear();
 }
@@ -253,8 +252,6 @@ void FrameworkManagerImpl::clearInstruments() {
 void FrameworkManagerImpl::clearPropertyManagers() {
   PropertyManagerDataService::Instance().clear();
 }
-
-
 
 /** Creates and initialises an instance of an algorithm
  *
@@ -420,11 +417,13 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
 void FrameworkManagerImpl::setupUsageReporting() {
   int enabled = 0;
   int interval = 0;
-  int retVal = Kernel::ConfigService::Instance().getValue("Usage.BufferCheckInterval", interval);
+  int retVal = Kernel::ConfigService::Instance().getValue(
+      "Usage.BufferCheckInterval", interval);
   if ((retVal == 1) && (interval > 0)) {
     Kernel::UsageService::Instance().setInterval(interval);
   }
-  retVal = Kernel::ConfigService::Instance().getValue("usagereports.enabled", enabled);
+  retVal = Kernel::ConfigService::Instance().getValue("usagereports.enabled",
+                                                      enabled);
   Kernel::UsageService::Instance().setEnabled((retVal == 1) && (enabled > 0));
   Kernel::UsageService::Instance().registerStartup();
 }

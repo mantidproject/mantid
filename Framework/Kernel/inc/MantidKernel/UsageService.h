@@ -51,8 +51,8 @@ class FeatureUsage {
 public:
   /// Constructor
   FeatureUsage(const std::string &type, const std::string &name,
-    const bool internal);
-  bool operator<(const FeatureUsage& r) const;
+               const bool internal);
+  bool operator<(const FeatureUsage &r) const;
 
   ::Json::Value asJson() const;
 
@@ -64,7 +64,7 @@ public:
 class MANTID_KERNEL_DLL UsageServiceImpl {
 public:
   /// Sets the application name that has invoked Mantid
-  void setApplication(const std::string& name);
+  void setApplication(const std::string &name);
   /// Returns the application name that has invoked Mantid
   std::string getApplication() const;
   /// Sets the interval that the timer checks for tasks
@@ -73,7 +73,7 @@ public:
   void registerStartup();
   /// Registers the use of a feature in mantid
   void registerFeatureUsage(const std::string &type, const std::string &name,
-    const bool internal);
+                            const bool internal);
 
   /// Returns true if usage reporting is enabled
   bool isEnabled() const;
@@ -95,13 +95,13 @@ protected:
   virtual std::string generateFeatureUsageMessage();
   /// sends a report over the internet
   virtual int sendReport(const std::string &message, const std::string &url);
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<UsageServiceImpl>;
   /// Private, unimplemented copy constructor
   UsageServiceImpl(const UsageServiceImpl &);
   /// Private, unimplemented copy assignment operator
   UsageServiceImpl &operator=(const UsageServiceImpl &);
-
 
   /// Send startup Report
   void sendStartupReport();
@@ -111,7 +111,7 @@ private:
   /// A method to handle the timerCallbacks
   void timerCallback(Poco::Timer &);
 
-  //generate Json header for feature calls
+  // generate Json header for feature calls
   ::Json::Value generateFeatureHeader();
 
   Poco::ActiveResult<int> sendStartupAsync(const std::string &message);
@@ -139,11 +139,10 @@ private:
 #if defined(__APPLE__) && defined(__INTEL_COMPILER)
 inline
 #endif
-template class MANTID_KERNEL_DLL
-Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
+    template class MANTID_KERNEL_DLL
+        Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
 typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<UsageServiceImpl>
-UsageService;
-
+    UsageService;
 
 } // namespace API
 } // namespace Mantid
