@@ -233,6 +233,7 @@ def getFilePathFromWorkspace(ws):
             try:
                 if 'Load' in hist.name():
                     file_path = hist.getPropertyValue('Filename')
+            # pylint: disable=bare-except
             except:
                 pass
     except:

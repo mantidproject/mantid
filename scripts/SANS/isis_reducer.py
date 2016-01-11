@@ -81,6 +81,7 @@ class Sample(object):
     def get_monitor(self, index=None):
         try:
             _ws = mtd[self.loader.wksp_name + "_monitors"]
+        # pylint: disable=bare-except
         except:
             _ws = mtd[self.loader.wksp_name]
 
@@ -682,6 +683,7 @@ class ISISReducer(Reducer):
             try:
                 if wk and wk in mtd:
                     DeleteWorkspace(Workspace=wk)
+            # pylint: disable=bare-except
             except:
                 #if the workspace can't be deleted this function does nothing
                 pass
@@ -755,7 +757,7 @@ class ISISReducer(Reducer):
 
         # Now check if both idf paths and underlying files. If they are, then don't do anything
         # else switch the underlying instrument
-        if ((idf_path_reducer == idf_path_workspace) and su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
+        if idf_path_reducer == idf_path_workspace and su.are_two_files_identical(idf_path_reducer, idf_path_reducer):
             return
         else:
             logger.warning("Updating the IDF of the Reducer. Switching from " + str(idf_path_reducer) + " to " + str(idf_path_workspace))
@@ -791,6 +793,7 @@ class ISISReducer(Reducer):
                 instrument = isis_instrument.SANS2D(idf_path)
             elif instrument_name.upper() == "LOQ":
                 instrument = isis_instrument.LOQ(idf_path)
+        # pylint: disable=bare-except
         except:
             instrument = None
         return instrument

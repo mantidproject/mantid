@@ -27,7 +27,6 @@ except:
     mantidplot = None
     #this should happen when this is called from outside Mantidplot and only then,
     #the result is that attempting to plot will raise an exception
-    pass
 
 try:
     from PyQt4.QtGui import qApp
@@ -78,7 +77,8 @@ def SANS2D(idf_path=None):
     _printMessage('SANS2D()')
     try:
         instrument = isis_instrument.SANS2D(idf_path)
-
+        if instrument is None:
+            raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument']='SANS2D'
     except:
@@ -100,6 +100,8 @@ def LOQ(idf_path='LOQ_Definition_20020226-.xml'):
     _printMessage('LOQ()')
     try:
         instrument = isis_instrument.LOQ(idf_path)
+        if instrument is None:
+            raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument']='LOQ'
     except:
@@ -116,6 +118,8 @@ def LARMOR(idf_path = None):
     _printMessage('LARMOR()')
     try:
         instrument = isis_instrument.LARMOR(idf_path)
+        if instrument is None:
+            raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument']='LARMOR'
     except:

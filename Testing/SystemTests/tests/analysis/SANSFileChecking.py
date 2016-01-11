@@ -7,7 +7,6 @@ import unittest
 import stresstesting
 from mantid.simpleapi import *
 import SANSUtility as su
-import isis_reducer
 import os
 from ISISCommandInterface import *
 
@@ -25,9 +24,9 @@ def get_full_path_SANS_system_test(filename):
         return "Data" in direc
 
     dirs = config['datasearch.directories'].split(';')
-    for dir in dirs:
-        full_path = os.path.join(dir, filename)
-        if _useDir(dir) and os.path.isfile(full_path):
+    for directory in dirs:
+        full_path = os.path.join(directory, filename)
+        if _useDir(directory) and os.path.isfile(full_path):
             return True, full_path
     return False, ""
 
@@ -129,7 +128,6 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
         self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
 
-    '''
     def test_that_reducer_for_LARMOR_switches_to_correct_IDF_when_outdated(self):
         # Arrange
         Clean()
@@ -178,7 +176,6 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         idf_reducer_after = ReductionSingleton().get_idf_file_path()
         self.assertNotEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
         self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
-    '''
 
     def test_that_reducer_for_LOQ_stays_when_already_the_same_as_in_workspace(self):
         # Arrange

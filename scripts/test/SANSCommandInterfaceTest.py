@@ -415,18 +415,12 @@ class TestLARMORCommand(unittest.TestCase):
         expected_name = selected_idf
         self.assertEqual(file_name, expected_name)
 
-    def test_that_gets_default_for_non_existing_idf(self):
+    def test_that_for_non_existing_false_is_returned(self):
         command_iface.Clean()
         selected_idf = "LARMOR_Definition_NONEXIST.xml"
-        # Act
-        command_iface.LARMOR(selected_idf)
-        # Assert
-        instrument = ReductionSingleton().get_instrument()
-        idf_file_path = instrument.get_idf_file_path()
-        file_name = os.path.basename(idf_file_path)
-
-        expected_name = "LARMOR_Definition.xml"
-        self.assertEqual(file_name, expected_name)
+        # Act + Assert
+        self.assertFalse(command_iface.LARMOR(selected_idf),
+                         "A non existant idf path should return false")
 
 class TestMaskFile(unittest.TestCase):
     def test_throws_for_user_file_with_invalid_extension(self):
