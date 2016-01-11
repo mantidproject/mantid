@@ -255,7 +255,7 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
     }
   }
 
-  if (featureCountMap.empty()) {
+  if (!featureCountMap.empty()) {
     ::Json::FastWriter writer;
     ::Json::Value features;
     auto message = this->generateFeatureHeader();
