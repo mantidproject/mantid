@@ -38,6 +38,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
     _spectrum_no = None
     foil_map = None
     _inst_prefix = None
+    _back_scattering = None
     _mon_spectra = None
     _mon_index = None
     _backward_spectra_list = None
@@ -148,6 +149,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             if upper < lower:
                 issues[RUN_PROP] = "Range must be in format lower-upper"
 
+
         # Validate SpectrumList
         speclist_str = self.getProperty(SPECTRA_PROP).value
         # Check ranges
@@ -185,6 +187,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         try:
             all_spectra = [item for sublist in self._spectra for item in sublist]
             self._raise_error_if_mix_fwd_back(all_spectra)
+            self._raise_error_if_non_valid_mode(self._diff_opt, self._back_scattering)
             self._set_spectra_type(all_spectra[0])
             self._setup_raw(all_spectra)
             self._create_foil_workspaces()
@@ -226,6 +229,22 @@ class LoadVesuvio(LoadEmptyVesuvio):
             if all_back and self._is_fwd_scattering(spec_no):
                 raise RuntimeError("Mixing backward and forward spectra is not permitted."
                                    "Please correct the SpectrumList property.")
+        self._back_scattering = all_back
+
+#----------------------------------------------------------------------------------------
+
+    def _raise_error_if_non_valid_mode(self, mode, back_scattering):
+        """
+        Checks that the input are valid for the Mode of operation selected
+        SingleDifference - Forward Scattering
+        DoubleDifference - Back Scattering
+        """
+        if mode == "SingleDifference":
+            if(back_scattering):
+                raise RuntimeError("Single Difference can only be used for Forward scattering spectra")
+        elif mode == "DoubleDifference":
+            if (not back_scattering):
+                raise RuntimeError("Double Difference can only be used for Back scattering spectra")
 
 #----------------------------------------------------------------------------------------
 
