@@ -37,7 +37,7 @@ private:
       void());
     MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
     void SetSuccessorConcrete(std::unique_ptr<vtkDataSetFactory> pSuccessor) {
-      return vtkDataSetFactory::SetSuccessor(std::move(pSuccessor));
+      vtkDataSetFactory::SetSuccessor(std::move(pSuccessor));
     }
     bool hasSuccessorConcrete() const {
       return vtkDataSetFactory::hasSuccessor();
@@ -56,7 +56,6 @@ public:
   void testSetSuccessor() {
     MockvtkDataSetFactory factory;
     auto successor = Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
-    MockvtkDataSetFactory *pSuccessor = successor.get();
 
     EXPECT_CALL(factory, getFactoryTypeName())
         .WillOnce(testing::Return("TypeA"));
@@ -67,13 +66,12 @@ public:
 
     TSM_ASSERT("Successor should have been set", factory.hasSuccessor());
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&factory));
-    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(pSuccessor));
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(successor.get()));
   }
 
   void testSetSuccessorThrows() {
     MockvtkDataSetFactory factory;
     auto successor = Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
-    MockvtkDataSetFactory *pSuccessor = successor.get();
     EXPECT_CALL(factory, getFactoryTypeName())
         .WillOnce(testing::Return("TypeA"));
     EXPECT_CALL(*successor, getFactoryTypeName())
@@ -83,7 +81,7 @@ public:
                       factory.SetSuccessor(std::move(successor)),
                       std::runtime_error);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&factory));
-    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(pSuccessor));
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(successor.get()));
   }
 
   void testEnumValues()
