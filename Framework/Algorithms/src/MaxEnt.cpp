@@ -41,7 +41,11 @@ const std::string MaxEnt::category() const { return "Arithmetic\\FFT"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MaxEnt::summary() const {
-  return "Runs Maximum Entropy method on an input workspace";
+  return "Runs Maximum Entropy method on an input workspace. "
+    "Note this algorithm is still in development, and its interface is "
+    "likely to change. It currently work for the case where the "
+    "number of data points equal the number of reconstructed (image) points "
+    "and data and image are related by Fourier transform.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -57,7 +61,7 @@ void MaxEnt::init() {
   mustBeNonNegative->setLower(1E-12);
   declareProperty(new PropertyWithValue<double>(
                       "Background", 0.4, mustBeNonNegative, Direction::Input),
-                  "Default level above which the image is significant");
+                  "A maximum entropy constant");
 
   declareProperty(new PropertyWithValue<double>(
                       "ChiTarget", 100.0, mustBeNonNegative, Direction::Input),
