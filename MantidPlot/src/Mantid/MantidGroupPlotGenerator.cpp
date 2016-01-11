@@ -207,7 +207,7 @@ double MantidGroupPlotGenerator::getSingleLogValue(
  * @throws invalid_argument if log is wrong type or not present
  */
 double MantidGroupPlotGenerator::getSingleLogValue(
-    int wsIndex, const MatrixWorkspace_const_sptr &matrixWS,
+    int wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
     const QString &logName) const {
   if (logName == MantidSurfacePlotDialog::WORKSPACE_INDEX) {
     return wsIndex;
