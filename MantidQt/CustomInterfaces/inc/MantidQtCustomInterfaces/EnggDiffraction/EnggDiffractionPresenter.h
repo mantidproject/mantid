@@ -173,6 +173,8 @@ private:
 
   std::string outputFocusCroppedFilename(const std::string &runNo);
 
+  std::vector<std::string> sumOfFilesLoadVec();
+
   std::vector<std::string>
   outputFocusTextureFilenames(const std::string &runNo,
                               const std::vector<size_t> &bankIDs);
@@ -254,6 +256,9 @@ private:
 
   /// whether to break the thread
   static bool g_abortThread;
+
+  /// whether to run Sum Of Files & which focus run number to use
+  static std::string g_sumOfFilesFocus;
 
   /// saves the last valid run number
   static std::string g_lastValidRun;

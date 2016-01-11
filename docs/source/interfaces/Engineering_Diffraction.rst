@@ -191,6 +191,13 @@ in Mantid. These files can be found with appropriate name at location:
 C:\EnginX_Mantid\User\236516\Focus on Windows, the
 EnginX_Mantid folder can be found on Desktop/Home on other platforms.
 
+The Multiple Runs Focus Mode combo-box enables two alternative
+focus mode. `Focus Individual Run Files Separately` is the default
+option set, which allows user to run focus with multi-run files.
+Whereas the `Focus Sum Of Files` option merges all the multi-run
+number files together and applies the Focus Process to the merged
+file.
+
 Pre-processing
 --------------
 

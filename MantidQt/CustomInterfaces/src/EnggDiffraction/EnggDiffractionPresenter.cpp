@@ -41,6 +41,7 @@ int EnggDiffractionPresenter::g_plottingCounter = 0;
 bool EnggDiffractionPresenter::g_abortThread = false;
 std::string EnggDiffractionPresenter::g_lastValidRun = "";
 std::string EnggDiffractionPresenter::g_calibCropIdentifier = "SpectrumNumbers";
+std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -238,12 +239,13 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
 }
 
 void EnggDiffractionPresenter::processFocusBasic() {
-  const std::vector<std::string> multi_RunNo =
+  std::vector<std::string> multi_RunNo =
       isValidMultiRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
 
   // reset global values
   g_abortThread = false;
+  g_sumOfFilesFocus = "";
   g_plottingCounter = 0;
 
   // check if valid run number provided before focusin
@@ -265,9 +267,13 @@ void EnggDiffractionPresenter::processFocusBasic() {
 
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
-    /**
-    Todo
-    **/
+    g_sumOfFilesFocus = "basic";
+    std::vector<std::string> firstRun;
+    firstRun.push_back(multi_RunNo[0]);
+
+    // to avoid multiple loops, use firstRun instead as the
+    // multi-run number is not required for sumOfFiles
+    startFocusing(firstRun, banks, "", "");
   }
 }
 
@@ -279,6 +285,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
 
   // reset global values
   g_abortThread = false;
+  g_sumOfFilesFocus = "";
   g_plottingCounter = 0;
 
   // check if valid run number provided before focusin
@@ -300,6 +307,13 @@ void EnggDiffractionPresenter::processFocusCropped() {
 
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+    g_sumOfFilesFocus = "cropped";
+    std::vector<std::string> firstRun;
+    firstRun.push_back(multi_RunNo[0]);
+
+    // to avoid multiple loops, use firstRun instead as the
+    // multi-run number is not required for sumOfFiles
+    startFocusing(firstRun, banks, specNos, "");
   }
 }
 
@@ -310,6 +324,7 @@ void EnggDiffractionPresenter::processFocusTexture() {
 
   // reset global values
   g_abortThread = false;
+  g_sumOfFilesFocus = "";
   g_plottingCounter = 0;
 
   // check if valid run number provided before focusing
@@ -330,6 +345,13 @@ void EnggDiffractionPresenter::processFocusTexture() {
 
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+    g_sumOfFilesFocus = "texture";
+    std::vector<std::string> firstRun;
+    firstRun.push_back(multi_RunNo[0]);
+
+    // to avoid multiple loops, use firstRun instead as the
+    // multi-run number is not required for sumOfFiles
+    startFocusing(firstRun, std::vector<bool>(), "", dgFile);
   }
 }
 
@@ -1127,6 +1149,19 @@ EnggDiffractionPresenter::outputFocusCroppedFilename(const std::string &runNo) {
   return instStr + "_" + runNo + "_focused_cropped.nxs";
 }
 
+std::vector<std::string> EnggDiffractionPresenter::sumOfFilesLoadVec() {
+  std::vector<std::string> multi_RunNo;
+
+  if (g_sumOfFilesFocus == "basic")
+    multi_RunNo = isValidMultiRunNumber(m_view->focusingRunNo());
+  else if (g_sumOfFilesFocus == "cropped")
+    multi_RunNo = isValidMultiRunNumber(m_view->focusingCroppedRunNo());
+  else if (g_sumOfFilesFocus == "texture")
+    multi_RunNo = isValidMultiRunNumber(m_view->focusingTextureRunNo());
+
+  return multi_RunNo;
+}
+
 std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
     const std::string &runNo, const std::vector<size_t> &bankIDs) {
   const std::string instStr = m_view->currentInstrument();
@@ -1414,24 +1449,73 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   const std::string inWSName = "engggui_focusing_input_ws";
   const std::string instStr = m_view->currentInstrument();
-  try {
-    auto load =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
-    load->initialize();
-    load->setPropertyValue("Filename", instStr + runNo);
-    load->setPropertyValue("OutputWorkspace", inWSName);
-    load->execute();
+  std::vector<std::string> multi_RunNo = sumOfFilesLoadVec();
+  std::string loadInput = "";
 
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
-  } catch (std::runtime_error &re) {
-    g_log.error()
-        << "Error while loading sample data for focusing. "
-           "Could not run the algorithm Load succesfully for the focusing "
-           "sample (run number: " +
-               runNo + "). Error description: " + re.what() +
-               " Please check also the previous log messages for details.";
-    throw;
+  for (size_t i = 0; i < multi_RunNo.size(); i++) {
+    // if last run number in list
+    if (i + 1 == multi_RunNo.size())
+      loadInput += instStr + multi_RunNo[i];
+    else
+      loadInput += instStr + multi_RunNo[i] + '+';
+  }
+
+  // if its not empty the global variable is set for sumOfFiles
+  if (!g_sumOfFilesFocus.empty()) {
+
+    try {
+      auto load =
+          Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      load->initialize();
+      load->setPropertyValue("Filename", loadInput);
+
+      load->setPropertyValue("OutputWorkspace", inWSName);
+      load->execute();
+
+      AnalysisDataServiceImpl &ADS =
+          Mantid::API::AnalysisDataService::Instance();
+      inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
+    } catch (std::runtime_error &re) {
+      g_log.error()
+          << "Error while loading files provided. "
+             "Could not run the algorithm Load succesfully for the focus "
+             "(run number provided. Error description:"
+             "Please check also the previous log messages for details." +
+                 static_cast<std::string>(re.what());
+      throw;
+    }
+
+    if (multi_RunNo.size() == 1) {
+      g_log.notice() << "Only single file has been listed, the Sum Of Files"
+                        "cannot not be processed"
+                     << std::endl;
+    } else {
+      g_log.notice()
+          << "Load alogirthm has successfully merged the files provided"
+          << std::endl;
+    }
+
+  } else {
+    try {
+      auto load =
+          Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      load->initialize();
+      load->setPropertyValue("Filename", instStr + runNo);
+      load->setPropertyValue("OutputWorkspace", inWSName);
+      load->execute();
+
+      AnalysisDataServiceImpl &ADS =
+          Mantid::API::AnalysisDataService::Instance();
+      inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
+    } catch (std::runtime_error &re) {
+      g_log.error()
+          << "Error while loading sample data for focusing. "
+             "Could not run the algorithm Load succesfully for the focusing "
+             "sample (run number: " +
+                 runNo + "). Error description: " + re.what() +
+                 " Please check also the previous log messages for details.";
+      throw;
+    }
   }
 
   std::string outWSName;
@@ -1524,6 +1608,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     }
   }
 }
+
 /**
 * Produce the two workspaces that are required to apply Vanadium
 * corrections. Try to load them if precalculated results are
