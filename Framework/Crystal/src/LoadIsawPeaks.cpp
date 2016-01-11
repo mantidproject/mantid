@@ -88,11 +88,9 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadIsawPeaks::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".peaks");
-  exts.push_back(".integrate");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
+                                   {".peaks", ".integrate"}),
                   "Path to an ISAW-style .peaks filename.");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -392,7 +390,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 
   Inti = strtod(getWord(in, false).c_str(), 0);
   SigI = strtod(getWord(in, false).c_str(), 0);
-  atoi(getWord(in, false).c_str()); // iReflag
+  static_cast<void>(atoi(getWord(in, false).c_str())); // iReflag
 
   // Finish the line and get the first word of next line
   readToEndOfLine(in, true);

@@ -8,6 +8,9 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/CompositeFunction.h"
 
+#include <Poco/ActiveResult.h>
+#include <QApplication>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -56,7 +59,15 @@ namespace CustomInterfaces
     fit->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
     fit->setProperty("CreateOutput", true);
     fit->setProperty("OutputCompositeMembers", true);
-    fit->execute();
+
+    // Execute async so we can show progress bar
+    Poco::ActiveResult<bool> result(fit->executeAsync());
+    while (!result.available()) {
+      QCoreApplication::processEvents();
+    }
+    if (!result.error().empty()) {
+      throw std::runtime_error(result.error());
+    }
 
     m_data = fit->getProperty("OutputWorkspace");
     m_parameterTable = fit->getProperty("OutputParameters");

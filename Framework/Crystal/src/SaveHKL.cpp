@@ -6,9 +6,11 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/AnvredCorrection.h"
+
 #include <fstream>
-#include "Poco/File.h"
-#include "boost/assign.hpp"
+
+#include <Poco/File.h>
+#include <boost/assign.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Geometry;
@@ -75,11 +77,9 @@ void SaveHKL::init() {
                                    API::FileProperty::OptionalLoad, ".dat"),
                   " Spectrum data read from a spectrum file.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".hkl");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
-                  "Path to an hkl file to save.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Save, {".hkl"}),
+      "Path to an hkl file to save.");
 
   std::vector<std::string> histoTypes;
   histoTypes.push_back("Bank");

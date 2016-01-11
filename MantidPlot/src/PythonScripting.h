@@ -110,7 +110,7 @@ public:
 
 private:
   /// Constructor
-  PythonScripting(ApplicationWindow *parent);
+  explicit PythonScripting(ApplicationWindow *parent);
   /// Default constructor
   PythonScripting();
   /// Start the environment

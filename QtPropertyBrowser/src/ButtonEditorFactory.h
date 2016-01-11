@@ -49,7 +49,7 @@ protected:
     // Do nothing
   }
 
-  QWidget *createEditor(ManagerType *manager, QtProperty *property, QWidget *parent)
+  QWidget *createEditorForManager(ManagerType *manager, QtProperty *property, QWidget *parent)
   {
     (void) manager; // Unused
     auto button = new ButtonEditor(property, parent);

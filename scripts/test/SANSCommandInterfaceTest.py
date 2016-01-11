@@ -9,6 +9,7 @@ from mantid.simpleapi import *
 from mantid.kernel import DateAndTime
 import random
 import math
+
 class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
     def test_that_gets_transmission_monitor(self):
         # Arrange
@@ -426,6 +427,17 @@ class TestLARMORCommand(unittest.TestCase):
 
         expected_name = "LARMOR_Definition.xml"
         self.assertEqual(file_name, expected_name)
+
+class TestMaskFile(unittest.TestCase):
+    def test_throws_for_user_file_with_invalid_extension(self):
+        # Arrange
+        file_name = "/path1/path2/user_file.abc"
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act + Assert
+        args = [file_name]
+        self.assertRaises(RuntimeError, command_iface.MaskFile, *args)
+
 
 if __name__ == "__main__":
     unittest.main()

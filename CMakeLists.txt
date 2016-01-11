@@ -240,7 +240,7 @@ if ( ENABLE_CPACK )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-ipython >= 1.1.0" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-ipython >= 1.1.0,python-ipython-notebook" )
       # scipy & matplotlib
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp" )
@@ -251,7 +251,7 @@ if ( ENABLE_CPACK )
         # On RHEL6 we are using SCL packages for Qt
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4" )
       else()
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla, qwt5-qt4" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python-matplotlib-qt4" )
       endif()
 
       # Add software collections for RHEL
@@ -264,29 +264,34 @@ if ( ENABLE_CPACK )
         set ( DEPENDS_LIST "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-                           "libnexus0 (>= 4.3),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),"
-                           "libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),qt4-dev-tools,"
-                           "libqwt5-qt4,libqwtplot3d-qt4-0,python-numpy,python-sip,python-qt4,python-nxs (>= 4.3),libjsoncpp0" )
-        set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools0 (>= 1.7)" )
-        if( "${UNIX_CODENAME}" MATCHES "lucid" )
-          list ( APPEND DEPENDS_LIST ",libqscintilla2-5,"
-                                     "libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),"
-                                     "libmuparser0,libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9" )
-        elseif( "${UNIX_CODENAME}" MATCHES "precise" )
-          list ( APPEND DEPENDS_LIST ",libqscintilla2-8,"
-                                     "libopencascade-foundation-6.5.0 (>= 6.5.0),libopencascade-modeling-6.5.0 (>= 6.5.0),"
-                                     "libmuparser0debian1,"
-                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
-                                     "libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9")
-        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" OR "${UNIX_CODENAME}" STREQUAL "utopic" OR "${UNIX_CODENAME}" STREQUAL "vivid" OR "${UNIX_CODENAME}" STREQUAL "wily")
-          list ( APPEND DEPENDS_LIST ",libqscintilla2-11,"
-                                     "liboce-foundation8,liboce-modeling8,"
-                                     "libmuparser2,"
-                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
-                                     "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11")
-          set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
-        else()
-          message( WARNING "Mantid does not support packaging of this Ubuntu version: ${UNIX_CODENAME}")
+                           "libnexus0 (>= 4.3),"
+                           "libgsl0ldbl,"
+                           "libqtcore4 (>= 4.2),"
+                           "libqtgui4 (>= 4.2),"
+                           "libqt4-opengl (>= 4.2),"
+                           "libqt4-xml (>= 4.2),"
+                           "libqt4-svg (>= 4.2),"
+                           "libqt4-qt3support (>= 4.2),"
+                           "qt4-dev-tools,"
+                           "libqwt5-qt4,"
+                           "libqwtplot3d-qt4-0,"
+                           "python-numpy,"
+                           "python-sip,"
+                           "python-qt4,"
+                           "python-nxs (>= 4.3),"
+                           "libjsoncpp0,"
+                           "libqscintilla2-11,"
+                           "liboce-foundation8,liboce-modeling8,"
+                           "libmuparser2,"
+                           "ipython-qtconsole (>= 1.1),"
+                           "ipython-notebook,"
+                           "python-matplotlib,"
+                           "python-scipy,"
+                           "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11" )
+        set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
+        if( "${UNIX_CODENAME}" STREQUAL "wily"  OR "${UNIX_CODENAME}" STREQUAL "xenial")
+            list ( APPEND DEPENDS_LIST ", libnexus0v5 (>= 4.3),libjsoncpp0v5,libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5")
+            list (REMOVE_ITEM DEPENDS_LIST "libjsoncpp0," "libqscintilla2-11," "libmuparser2," "libnexus0 (>= 4.3)," "libqwtplot3d-qt4-0,")
         endif()
         # parse list to string required for deb package
         string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )

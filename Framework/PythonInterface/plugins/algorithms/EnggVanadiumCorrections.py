@@ -40,6 +40,17 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                                                      PropertyMode.Optional),
                              'Output curves workspace produced when given an input Vanadium workspace')
 
+        # ~10 break points is still poor, there is no point in using less than that
+        self.declareProperty("SplineBreakPoints", defaultValue=50,
+                             validator=IntBoundedValidator(10),
+                             doc="Number of break points used when fitting the bank profiles with a spline "
+                             "function.")
+
+        out_vana_grp = 'Output parameters (for when calculating corrections)'
+        self.setPropertyGroup('OutIntegrationWorkspace', out_vana_grp)
+        self.setPropertyGroup('OutCurvesWorkspace', out_vana_grp)
+        self.setPropertyGroup('SplineBreakPoints', out_vana_grp)
+
         self.declareProperty(ITableWorkspaceProperty("IntegrationWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),
                              "Workspace with the integrated values for every spectra of the reference "
@@ -51,6 +62,10 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                              'data, one per bank. This workspace has three spectra per bank, as produced '
                              'by the algorithm Fit. This is meant to be used as an alternative input '
                              'VanadiumWorkspace')
+
+        in_vana_grp = 'Input parameters (for when applying pre-calculated corrections)'
+        self.setPropertyGroup('IntegrationWorkspace', in_vana_grp)
+        self.setPropertyGroup('CurvesWorkspace', in_vana_grp)
 
     def PyExec(self):
         """
@@ -71,6 +86,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         vanWS = self.getProperty('VanadiumWorkspace').value
         integWS = self.getProperty('IntegrationWorkspace').value
         curvesWS = self.getProperty('CurvesWorkspace').value
+        spline_breaks = self.getProperty('SplineBreakPoints').value
 
         preports = 1
         if ws:
@@ -82,7 +98,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         if vanWS:
             self.log().information("A workspace with reference Vanadium data was passed. Calculating "
                                    "corrections")
-            integWS, curvesWS = self._calcVanadiumCorrection(vanWS)
+            integWS, curvesWS = self._calcVanadiumCorrection(vanWS, spline_breaks)
             self.setProperty('OutIntegrationWorkspace', integWS)
             self.setProperty('OutCurvesWorkspace', curvesWS)
 
@@ -143,12 +159,13 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         self._divideByCurves(ws, curvesDict)
 
-    def _calcVanadiumCorrection(self, vanWS):
+    def _calcVanadiumCorrection(self, vanWS, spline_breaks):
         """
         Calculates the features that are required to perform vanadium corrections: integration
         of the vanadium data spectra, and per-bank curves fitted to the summed spectra
 
         @param vanWS :: workspace with data from a Vanadium run
+        @param spline_breaks :: number of break points when fitting spline functions
 
         @returns two workspaces: the integration and the curves. The integration workspace is a
         matrix workspace as produced by the algotithm 'Integration'. The curves workspace is a
@@ -158,7 +175,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         integWS = self._calcIntegrationSpectra(vanWS)
 
         # Have to calculate curves. get one curve per bank, in d-spacing
-        curvesWS = self._fitCurvesPerBank(vanWS, self._ENGINX_BANKS_FOR_PIXBYPIX_CORR)
+        curvesWS = self._fitCurvesPerBank(vanWS, self._ENGINX_BANKS_FOR_PIXBYPIX_CORR, spline_breaks)
 
         return integWS, curvesWS
 
@@ -193,13 +210,14 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         return integTbl
 
-    def _fitCurvesPerBank(self, vanWS, banks):
+    def _fitCurvesPerBank(self, vanWS, banks, spline_breaks):
         """
         Fits one curve to every bank (where for every bank the data fitted is the result of
         summing up all the spectra of the bank). The fitting is done in d-spacing.
 
         @param vanWS :: Vanadium run workspace to fit, expected in TOF units as they are archived
         @param banks :: list of banks to consider which is normally all the banks of the instrument
+        @param spline_breaks :: number of break points when fitting spline functions
 
         @returns a workspace with fitting results for all banks (3 spectra per bank). The spectra
         are in dSpacing units.
@@ -216,19 +234,20 @@ class EnggVanadiumCorrections(PythonAlgorithm):
             wsToFit = EnggUtils.convertToDSpacing(self, wsToFit)
             wsToFit = EnggUtils.sumSpectra(self, wsToFit)
 
-            fitWS = self._fitBankCurve(wsToFit, b)
+            fitWS = self._fitBankCurve(wsToFit, b, spline_breaks)
             curves.update({b: fitWS})
 
         curvesWS = self._prepareCurvesWS(curves)
 
         return curvesWS
 
-    def _fitBankCurve(self, vanWS, bank):
+    def _fitBankCurve(self, vanWS, bank, spline_breaks):
         """
         Fits a spline to a single-spectrum workspace (in d-spacing)
 
         @param vanWS :: Vanadium workspace to fit (normally this contains spectra for a single bank)
         @param bank :: instrument bank this is fitting is done for
+        @param spline_breaks :: number of break points when fitting spline functions
 
         @returns fit workspace (MatrixWorkspace), with the same number of bins as the input
         workspace, and the Y values simulated from the fitted curve
@@ -246,7 +265,8 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         xvec = vanWS.readX(0)
         startX = min(xvec)
         endX = max(xvec)
-        functionDesc = 'name=BSpline, Order=3, StartX=' + str(startX) +', EndX=' + str(endX) + ', NBreak=12'
+        functionDesc = ('name=BSpline, Order=3, StartX={0}, EndX={1}, NBreak={2}'.
+                        format(startX, endX, spline_breaks))
         fitAlg = self.createChildAlgorithm('Fit')
         fitAlg.setProperty('Function', functionDesc)
         fitAlg.setProperty('InputWorkspace', vanWS)

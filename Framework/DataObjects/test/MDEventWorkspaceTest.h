@@ -295,6 +295,58 @@ public:
   }
 
   //-------------------------------------------------------------------------------------
+  /** Get the signal at a given coord or 0 if masked */
+  void test_getSignalWithMaskAtCoord() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+    coord_t coords1[3] = {0.5, 0.5, 0.5};
+    coord_t coords2[3] = {2.5, 2.5, 2.5};
+    ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
+
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(1.5);
+    max.push_back(1.5);
+    max.push_back(1.5);
+
+    // Create a function to mask some of the workspace.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ew->setMDMasking(function);
+    ew->refreshCache();
+
+    TSM_ASSERT_DELTA(
+        "Value ignoring mask is 1.0",
+        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
+    TSM_ASSERT_DELTA(
+        "Masked returns 0",
+        ew->getSignalWithMaskAtCoord(coords1, Mantid::API::NoNormalization),
+        0.0, 1e-5);
+  }
+
+  //-------------------------------------------------------------------------------------
+  /** hasMask should return true when the workspace has a mask */
+  void test_hasMask() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+
+    TSM_ASSERT("Should return false as the workspace does not have a mask",
+               !ew->hasMask());
+
+    std::vector<coord_t> min{0, 0, 0};
+    std::vector<coord_t> max{1.5, 1.5, 1.5};
+
+    // Create a function to mask some of the workspace.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ew->setMDMasking(function);
+
+    TSM_ASSERT("Should return true as the workspace has a mask", ew->hasMask());
+  }
+
+  //-------------------------------------------------------------------------------------
   void test_estimateResolution() {
     MDEventWorkspace2Lean::sptr b =
         MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
@@ -533,6 +585,29 @@ public:
     for (size_t i = 0; i < y.size(); i += 10) {
       TS_ASSERT_EQUALS(y[i], 1.0);
     }
+  }
+
+  void test_getLinePlotWithMaskedData() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+
+    // Mask some of the workspace
+    std::vector<coord_t> min{0, 0, 0};
+    std::vector<coord_t> max{0.5, 0.5, 0.5};
+
+    // Create an function to mask some of the workspace.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ew->setMDMasking(function);
+    ew->refreshCache();
+
+    Mantid::Kernel::VMD start(0, 0, 0);
+    Mantid::Kernel::VMD end(2, 0, 0);
+    std::vector<coord_t> x;
+    std::vector<signal_t> y, e;
+    ew->getLinePlot(start, end, NoNormalization, x, y, e);
+    TS_ASSERT_EQUALS(y.size(), 200);
+    TS_ASSERT_EQUALS(y[60], 0.0);  // Masked data is zero
+    TS_ASSERT_EQUALS(y[180], 3.0); // Unmasked data
   }
 
   void test_that_sets_default_normalization_flags_to_volume_normalization() {

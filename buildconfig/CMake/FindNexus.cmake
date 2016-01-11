@@ -11,11 +11,8 @@
 # Search for the include files. Newer versions of Nexus have a nexus sub directory 
 # containing the headers but older versions just have napi.h in the root include path
 # Try for nexus/napi.h first
-find_path ( NEXUS_INCLUDE_DIR nexus/napi.h )
-if( NOT NEXUS_INCLUDE_DIR )
-  # The old path
-  find_path ( NEXUS_INCLUDE_DIR napi.h )
-endif()
+find_path ( NEXUS_INCLUDE_DIR napi.h
+        PATH_SUFFIXES nexus)
 
 # Find the C libraries
 find_library ( NEXUS_C_LIBRARIES NAMES NeXus libNeXus-0 )

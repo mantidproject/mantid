@@ -19,9 +19,9 @@ set ( TEST_PY_FILES
   CylinderPaalmanPingsCorrectionTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
+  DNSComputeDetEffCorrCoefsTest.py
   DNSMergeRunsTest.py
   DNSFlippingRatioCorrTest.py
-  DNSDetEffCorrVanaTest.py
   DSFinterpTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
@@ -62,6 +62,8 @@ set ( TEST_PY_FILES
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
+  SANSFitShiftScaleTest.py
+  SANSStitchTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
   SaveVulcanGSSTest.py
@@ -72,10 +74,13 @@ set ( TEST_PY_FILES
   SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py
   Stitch1DManyTest.py
+  StringToPngTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
+  SwapWidthsTest.py
   SymmetriseTest.py
   UpdatePeakParameterTableValueTest.py
+  SANSDarkRunBackgroundCorrectionTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
   TOFTOFConvertTofToDeltaETest.py

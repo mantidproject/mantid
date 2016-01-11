@@ -27,11 +27,9 @@ LoadTOFRawNexus::LoadTOFRawNexus()
 //-------------------------------------------------------------------------------------------------
 /// Initialisation method.
 void LoadTOFRawNexus::init() {
-
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the NeXus file to load");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".nxs"}),
+      "The name of the NeXus file to load");
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
                   "The name of the Workspace2D to create.");
@@ -64,8 +62,7 @@ void LoadTOFRawNexus::init() {
 int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
   if (descriptor.pathOfTypeExists("/entry", "NXentry") ||
-      descriptor.pathOfTypeExists("/entry-state0", "NXentry") ||
-      descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
+      descriptor.pathOfTypeExists("/entry-state0", "NXentry")) {
     const bool hasEventData = descriptor.classTypeExists("NXevent_data");
     const bool hasData = descriptor.classTypeExists("NXdata");
     if (hasData && hasEventData)

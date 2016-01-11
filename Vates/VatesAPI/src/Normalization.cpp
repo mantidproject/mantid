@@ -12,11 +12,13 @@ requested normalisation.
 This is used for visualisation of IMDEventWorkspaces.
 @param normalizationOption : Visual Normalization option desired
 @param ws : workspace to fetch defaults from if needed
+@param hasMask : true if the workspace has a mask
 @return member function to use on IMDNodes
 */
-NormFuncIMDNodePtr makeMDEventNormalizationFunction(
-    VisualNormalization normalizationOption,
-    Mantid::API::IMDEventWorkspace const *const ws) {
+NormFuncIMDNodePtr
+makeMDEventNormalizationFunction(VisualNormalization normalizationOption,
+                                 Mantid::API::IMDEventWorkspace const *const ws,
+                                 const bool hasMask) {
 
   using namespace Mantid::API;
 
@@ -29,12 +31,24 @@ NormFuncIMDNodePtr makeMDEventNormalizationFunction(
 
   NormFuncIMDNodePtr normalizationFunction;
 
-  if (normalizationOption == Mantid::VATES::NumEventsNormalization) {
-    normalizationFunction = &IMDNode::getSignalByNEvents;
-  } else if (normalizationOption == Mantid::VATES::NoNormalization) {
-    normalizationFunction = &IMDNode::getSignal;
+  // Avoid checking every box for a mask if there is no mask in the workspace
+  // by using different functions
+  if (hasMask) {
+    if (normalizationOption == Mantid::VATES::NumEventsNormalization) {
+      normalizationFunction = &IMDNode::getSignalByNEventsWithMask;
+    } else if (normalizationOption == Mantid::VATES::NoNormalization) {
+      normalizationFunction = &IMDNode::getSignalWithMask;
+    } else {
+      normalizationFunction = &IMDNode::getSignalNormalizedWithMask;
+    }
   } else {
-    normalizationFunction = &IMDNode::getSignalNormalized;
+    if (normalizationOption == Mantid::VATES::NumEventsNormalization) {
+      normalizationFunction = &IMDNode::getSignalByNEvents;
+    } else if (normalizationOption == Mantid::VATES::NoNormalization) {
+      normalizationFunction = &IMDNode::getSignal;
+    } else {
+      normalizationFunction = &IMDNode::getSignalNormalized;
+    }
   }
 
   return normalizationFunction;
@@ -57,21 +71,17 @@ createIteratorWithNormalization(const VisualNormalization normalizationOption,
   if (normalizationOption == AutoSelect) {
     // enum to enum.
     targetNormalization =
-      static_cast<MDNormalization>(ws->displayNormalization());
-  }
-  else {
+        static_cast<MDNormalization>(ws->displayNormalization());
+  } else {
     targetNormalization = static_cast<MDNormalization>(normalizationOption);
   }
 
   // Create the iterator
-  IMDIterator * iterator = ws->createIterator();
+  IMDIterator *iterator = ws->createIterator();
   // Set normalization
   iterator->setNormalization(targetNormalization);
   // Return it
   return iterator;
 }
-
-
-
 }
 }

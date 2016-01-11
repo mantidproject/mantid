@@ -22,7 +22,7 @@ DECLARE_ALGORITHM(SaveGSASInstrumentFile)
 
 class ChopperConfiguration {
 public:
-  ChopperConfiguration(vector<int> bankids);
+  explicit ChopperConfiguration(vector<int> bankids);
   ChopperConfiguration(const int freq, const std::string &bankidstr,
                        const std::string &cwlstr, const std::string &mndspstr,
                        const std::string &mxdspstr,
@@ -304,11 +304,8 @@ void SaveGSASInstrumentFile::init() {
   declareProperty(infileprop,
                   "Name of the input Fullprof resolution file (.irf).");
 
-  vector<string> exts;
-  exts.push_back(".iparam");
-  exts.push_back(".prm");
-  auto fileprop =
-      new FileProperty("OutputFileName", "", FileProperty::Save, exts);
+  auto fileprop = new FileProperty("OutputFileName", "", FileProperty::Save,
+                                   {".iparam", ".prm"});
   declareProperty(fileprop, "Name of the output GSAS instrument file.");
 
   declareProperty(

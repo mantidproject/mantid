@@ -1462,7 +1462,8 @@ TMDE(void MDGridBox)::integrateCylinder(
       // Distance from center to the peak integration center
       coord_t out[nd];
       radiusTransform.apply(boxCenter, out);
-      if ((nd >= 1) && out[0] < std::sqrt(diagonalSquared * 0.72 + radius * radius) &&
+      if ((nd >= 1) &&
+          out[0] < std::sqrt(diagonalSquared * 0.72 + radius * radius) &&
           (nd >= 2 &&
            std::fabs(out[1]) <
                std::sqrt(diagonalSquared * 0.72 + 0.25 * length * length))) {
@@ -1641,23 +1642,11 @@ TMDE(void MDGridBox)::buildAndAddEventUnsafe(const signal_t Signal,
  * @param event :: reference to a MDLeanEvent to add.
  * */
 TMDE(inline void MDGridBox)::addEvent(const MDE &event) {
-  size_t cindex = 0;
-  for (size_t d = 0; d < nd; d++) {
-    coord_t x = event.getCenter(d);
-    int i = int((x - this->extents[d].getMin()) / m_SubBoxSize[d]);
-    // NOTE: No bounds checking is done (for performance).
-    // if (i < 0 || i >= int(split[d])) return;
-
-    // Accumulate the index
-    cindex += (i * splitCumul[d]);
-  }
-
-  // Add it to the contained box
-  // avoid segfaults for floating point round-off errors.
-  if (cindex < numBoxes) {
+  size_t cindex = calculateChildIndex(event);
+  if (cindex < numBoxes)
     m_Children[cindex]->addEvent(event);
-  }
 }
+
 //-----------------------------------------------------------------------------------------------
 /** Add a single MDLeanEvent to the grid box. If the boxes
  * contained within are also gridded, this will recursively push the event
@@ -1675,19 +1664,9 @@ TMDE(inline void MDGridBox)::addEvent(const MDE &event) {
  * @param event :: reference to a MDEvent to add.
  * */
 TMDE(inline void MDGridBox)::addEventUnsafe(const MDE &event) {
-  size_t cindex = 0;
-  for (size_t d = 0; d < nd; d++) {
-
-    coord_t x = event.getCenter(d);
-    int i = int((x - this->extents[d].getMin()) / m_SubBoxSize[d]);
-    // Accumulate the index
-    cindex += (i * splitCumul[d]);
-  }
-
-  // Add it to the contained box
-  if (cindex < numBoxes) {
+  size_t cindex = calculateChildIndex(event);
+  if (cindex < numBoxes)
     m_Children[cindex]->addEventUnsafe(event);
-  }
 }
 
 /**Sets particular child MDgridBox at the index, specified by the input
@@ -1737,6 +1716,19 @@ TMDE(void MDGridBox)::clearFileBacked(bool loadDiskBackedData) {
   for (; it != it_end; it++) {
     (*it)->clearFileBacked(loadDiskBackedData);
   }
+}
+
+/**
+ * @param event A reference to an event
+ */
+TMDE(size_t MDGridBox)::calculateChildIndex(const MDE &event) const {
+  size_t cindex(0);
+  for (size_t d = 0; d < nd; d++) {
+    // Accumulate the index
+    auto offset = event.getCenter(d) - this->extents[d].getMin();
+    cindex += int(offset / (m_SubBoxSize[d])) * splitCumul[d];
+  }
+  return cindex;
 }
 } // namespace DataObjects
 

@@ -308,8 +308,11 @@ void MantidUI::shutdown()
       Poco::Thread::sleep(100);
     }
   }
-  bool prompt = false;
-  this->clearAllMemory(prompt);
+  // If any python objects need to be cleared away then the GIL needs to be held. This doesn't feel like
+  // it is in the right place but it will do no harm
+  ScopedPythonGIL gil;
+  // Relevant notifications are connected to signals that will close all dependent windows
+  Mantid::API::FrameworkManager::Instance().shutdown();
 }
 
 MantidUI::~MantidUI()
@@ -2046,8 +2049,6 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   appWindow()->addMdiSubWindow(insWin);
 
-  connect(insWin, SIGNAL(execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*)), this,
-    SLOT(executeAlgorithm(const QString&, const QString&,Mantid::API::AlgorithmObserver*)));
   connect(insWin, SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
     SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
 
@@ -2516,6 +2517,9 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   // Make both columns read-only
   t->setReadOnlyColumn(0, true);
   t->setReadOnlyColumn(1, true);
+  // Set numeric precision.
+  // It's the number of all digits
+  t->setNumericPrecision(16);
 
   if (useAbsoluteDate)
   {
@@ -2529,7 +2533,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     //Seconds offset
     t->setColName(0, "Time (sec)");
     t->setColumnType(0, Table::Numeric);
-    t->setNumericPrecision(16);   //it's the number of all digits
   }
 
   // The time when the first data was recorded.
@@ -2622,8 +2625,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
       }
       else
       {
-        t->setColumnType(2, Table::Numeric); //six digits after 0
-        t->setNumericPrecision(6); //six digits after 0
+        t->setColumnType(2, Table::Numeric);
       }
 
       t->setColPlotDesignation(2,Table::X);
@@ -2999,38 +3001,42 @@ Plots the spectra from the given workspaces
 @param ws_names :: List of ws names to plot
 @param indexList :: List of indices to plot for each workspace
 @param spectrumPlot :: True if indices should be interpreted as row indices
+@param distr :: if true, workspace plot as y data/bin width
 @param errs :: If true include the errors on the graph
 @param style :: Curve style for plot
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 @param waterfallPlot :: If true create a waterfall type plot
 */
-MultiLayer* MantidUI::plot1D(const QStringList& ws_names, const QList<int>& indexList, bool spectrumPlot, bool errs,
-                             Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow, bool waterfallPlot)
+MultiLayer *MantidUI::plot1D(const QStringList &ws_names, const QList<int> &indexList,
+					bool spectrumPlot, MantidQt::DistributionFlag distr,
+					bool errs, Graph::CurveType style, MultiLayer *plotWindow, 
+					bool clearWindow, bool waterfallPlot)
 {
-  // Convert the list into a map (with the same workspace as key in each case)
-  QMultiMap<QString,int> pairs;
-  QListIterator<QString> ws_itr(ws_names);
-  ws_itr.toBack();
-  QListIterator<int> spec_itr(indexList);
-  spec_itr.toBack();
+	// Convert the list into a map (with the same workspace as key in each case)
+	QMultiMap<QString, int> pairs;
+	QListIterator<QString> ws_itr(ws_names);
+	ws_itr.toBack();
+	QListIterator<int> spec_itr(indexList);
+	spec_itr.toBack();
 
-  // Need to iterate through the set in reverse order to get the curves in the correct order on the plot
-  while( ws_itr.hasPrevious() )
-  {
-    QString workspace_name = ws_itr.previous();
-    while( spec_itr.hasPrevious() )
-    {
-      pairs.insert(workspace_name, spec_itr.previous());
-    }
-    //Reset spectrum index pointer
-    spec_itr.toBack();
-  }
+	// Need to iterate through the set in reverse order to get the curves in the correct order on the plot
+	while (ws_itr.hasPrevious())
+	{
+		QString workspace_name = ws_itr.previous();
+		while (spec_itr.hasPrevious())
+		{
+			pairs.insert(workspace_name, spec_itr.previous());
+		}
+		//Reset spectrum index pointer
+		spec_itr.toBack();
+	}
 
-  // Pass over to the overloaded method
-  return plot1D(pairs,spectrumPlot,MantidQt::DistributionDefault, errs,style,plotWindow, clearWindow,
-                waterfallPlot);
+	// Pass over to the overloaded method
+	return plot1D(pairs, spectrumPlot, distr, errs, style, plotWindow, clearWindow,
+		waterfallPlot);
 }
+
 /** Create a 1D graph from the specified list of workspaces/spectra.
 @param toPlot :: Map of form ws -> [spectra_list]
 @param spectrumPlot :: True if indices should be interpreted as row indices
@@ -3232,6 +3238,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     g->checkValuesInAxisRange(firstCurve);
   }
   ml->toggleWaterfall(waterfallPlot);
+
   // Check if window does not contain any curves and should be closed
   ml->maybeNeedToClose();
 

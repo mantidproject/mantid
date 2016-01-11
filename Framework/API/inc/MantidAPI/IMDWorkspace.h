@@ -33,6 +33,8 @@ enum MDNormalization {
   NumEventsNormalization = 2
 };
 
+static const signal_t MDMaskValue = 0.0;
+
 /** Basic MD Workspace Abstract Class.
  *
  *  This defines the interface that allows one to iterate through several types
@@ -101,6 +103,12 @@ public:
   getSignalAtCoord(const coord_t *coords,
                    const Mantid::API::MDNormalization &normalization) const = 0;
 
+  /// Returns the (normalized) signal at a given coordinates or 0 if the value
+  // is masked, used for plotting
+  virtual signal_t getSignalWithMaskAtCoord(
+      const coord_t *coords,
+      const Mantid::API::MDNormalization &normalization) const = 0;
+
   /// Method to generate a line plot through a MD-workspace
   virtual void getLinePlot(const Mantid::Kernel::VMD &start,
                            const Mantid::Kernel::VMD &end,
@@ -114,6 +122,11 @@ public:
   signal_t getSignalAtVMD(const Mantid::Kernel::VMD &coords,
                           const Mantid::API::MDNormalization &normalization =
                               Mantid::API::VolumeNormalization) const;
+
+  signal_t
+  getSignalWithMaskAtVMD(const Mantid::Kernel::VMD &coords,
+                         const Mantid::API::MDNormalization &normalization =
+                             Mantid::API::VolumeNormalization) const;
 
   /// Setter for the masking region.
   virtual void

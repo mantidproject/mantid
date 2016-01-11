@@ -72,6 +72,7 @@ using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::Muon;
 using namespace Mantid::Geometry;
+using Mantid::API::Workspace_sptr;
 
 namespace
 {
@@ -87,22 +88,18 @@ const QString MuonAnalysis::FIRST_GOOD_BIN_DEFAULT("0.3");
 //----------------------
 // Public member functions
 //----------------------
-///Constructor
-MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), 
-  m_last_dir(), 
-  m_workspace_name("MuonAnalysis"), m_grouped_name(m_workspace_name + "Grouped"), 
-  m_currentDataName(),
-  m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), 
-  m_currentTab(NULL),
-  m_groupNames(), 
-  m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
-  m_updating(false), m_updatingGrouping(false), m_loaded(false), m_deadTimesChanged(false),
-  m_textToDisplay(""), 
-  m_optionTab(NULL), m_fitDataTab(NULL), m_resultTableTab(NULL), // Will be created in initLayout()
-  m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
-  m_currentLabel("NoLabelSet")
-{}
+/// Constructor
+MuonAnalysis::MuonAnalysis(QWidget *parent)
+    : UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"),
+      m_grouped_name(m_workspace_name + "Grouped"), m_currentDataName(),
+      m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), m_currentTab(NULL),
+      m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
+      m_updating(false), m_updatingGrouping(false), m_loaded(false),
+      m_deadTimesChanged(false), m_textToDisplay(""), m_optionTab(NULL),
+      m_fitDataTab(NULL),
+      m_resultTableTab(NULL), // Will be created in initLayout()
+      m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
+      m_currentLabel("NoLabelSet"), m_numPeriods(0) {}
 
 /**
  * Initialize local Python environmnet. 
@@ -228,8 +225,10 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.frontPlotFuncs, SIGNAL( activated(int) ),m_uiForm.groupTablePlotChoice, SLOT( setCurrentIndex(int) ) );
   connect(m_uiForm.groupTablePlotChoice, SIGNAL( activated(int) ), this, SLOT( syncGroupTablePlotTypeWithHome() ) );
 
-  connect(m_uiForm.homePeriodBox1, SIGNAL( currentIndexChanged(int) ), this, SLOT( checkForEqualPeriods() ));
-  connect(m_uiForm.homePeriodBox2, SIGNAL( currentIndexChanged(int) ), this, SLOT( checkForEqualPeriods() ));
+  connect(m_uiForm.homePeriodBox1, SIGNAL(textChanged(const QString &)), this,
+          SLOT(checkForEqualPeriods()));
+  connect(m_uiForm.homePeriodBox2, SIGNAL(textChanged(const QString &)), this,
+          SLOT(checkForEqualPeriods()));
 
   connect(m_uiForm.hideToolbars, SIGNAL( toggled(bool) ), this, SIGNAL( setToolbarsHidden(bool) ));
 
@@ -375,8 +374,8 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
   try 
   {
     // Create workspace and a raw (unbinned) version of it
-    MatrixWorkspace_sptr ws = createAnalysisWorkspace(itemType, tableRow, plotType);
-    MatrixWorkspace_sptr wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
+    auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
+    auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
 
     // Find names for new workspaces
     const std::string wsName = getNewAnalysisWSName(itemType, tableRow, plotType);
@@ -498,50 +497,62 @@ MuonAnalysis::PlotType MuonAnalysis::parsePlotType(QComboBox* selector)
  * @param plotType :: What kind of plot we want to analyse
  * @param isRaw    :: Whether binning should be applied to the workspace
  * @return Created workspace
- */ 
-MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, int tableRow, PlotType plotType,
-  bool isRaw)
-{
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("MuonCalculateAsymmetry");
+ */
+Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
+                                                     int tableRow,
+                                                     PlotType plotType,
+                                                     bool isRaw) {
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
 
   alg->initialize();
 
-  auto loadedWS = AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
+  // ---- Input workspace ----
+  auto loadedWS =
+      AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
+  auto inputGroup = boost::make_shared<WorkspaceGroup>();
 
-  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS) )
-  {
+  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS)) {
     // If is a group, will need to handle periods
-    
-    if ( MatrixWorkspace_sptr ws1 = getPeriodWorkspace(First, group) )
-    {
-      alg->setProperty( "FirstPeriodWorkspace", prepareAnalysisWorkspace(ws1, isRaw) );
+    for (int i = 0; i < group->getNumberOfEntries(); i++) {
+      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+      inputGroup->addWorkspace(ws);
     }
-    else
-    {
-      // First period should be selected no matter what
-      throw std::runtime_error("First period should be specified");
-    }
-
-    if ( MatrixWorkspace_sptr ws2 = getPeriodWorkspace(Second, group) )
-    {
-      // If second period was selected, set it up together with selected period arithmetics
-
-      alg->setProperty("SecondPeriodWorkspace", prepareAnalysisWorkspace(ws2, isRaw) );
- 
-      // Parse selected operation
-      const std::string op = m_uiForm.homePeriodBoxMath->currentText().toStdString();
-      alg->setProperty("PeriodOperation", op);
-    }
+    // Parse selected operation
+    const std::string summedPeriods =
+        m_uiForm.homePeriodBox1->text().toStdString();
+    const std::string subtractedPeriods =
+        m_uiForm.homePeriodBox2->text().toStdString();
+    alg->setProperty("SummedPeriodSet", summedPeriods);
+    alg->setProperty("SubtractedPeriodSet", subtractedPeriods);
+  } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
+    // Put this single WS into a group and set it as the input property
+    inputGroup->addWorkspace(ws);
+  } else {
+    throw std::runtime_error("Unsupported workspace type");
   }
-  else if ( auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS) )
-  {
-    alg->setProperty( "FirstPeriodWorkspace", prepareAnalysisWorkspace(ws, isRaw) );
-  }
-  else
-  {
-    throw std::runtime_error("Usupported workspace type");
+  alg->setProperty("InputWorkspace", inputGroup);
+  alg->setProperty("Mode", "Analyse");
+
+  // ---- Time zero correction ----
+  alg->setProperty("TimeZero", timeZero());           // user input
+  alg->setProperty("LoadedTimeZero", m_dataTimeZero); // from file
+
+  // ---- X axis options ----
+  alg->setProperty("Xmin", startTime());
+
+  double Xmax = finishTime();
+  if (Xmax != EMPTY_DBL()) {
+    alg->setProperty("Xmax", Xmax);
   }
 
+  // ---- Rebin parameters ----
+  std::string params = rebinParams(loadedWS);
+  if (!isRaw && !params.empty()) {
+    alg->setProperty("RebinParams", params);
+  }
+
+  // ---- Analysis ----
   if ( itemType == Group )
   {
     std::string outputType;
@@ -593,108 +604,6 @@ MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, in
   alg->execute();
 
   return alg->getProperty("OutputWorkspace");
-}
-
-/**
- * Crop/rebins/offsets the workspace according to interface settings.  
- * @param ws    :: Loaded data which to prepare
- * @param isRaw :: If true, Rebin is not applied
- * @return Prepared workspace
- */ 
-MatrixWorkspace_sptr MuonAnalysis::prepareAnalysisWorkspace(MatrixWorkspace_sptr ws, bool isRaw)
-{
-  // Adjust for time zero if necessary
-  if ( m_dataTimeZero != timeZero())
-  {
-      double shift = m_dataTimeZero - timeZero();
-
-      Mantid::API::IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("ChangeBinOffset");
-      alg->initialize();
-      alg->setChild(true);
-      alg->setProperty("InputWorkspace", ws);
-      alg->setProperty("Offset", shift);
-      alg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
-      alg->execute();    
-
-      ws = alg->getProperty("OutputWorkspace");
-  }
-
-  // Crop workspace
-  Mantid::API::IAlgorithm_sptr cropAlg = AlgorithmManager::Instance().createUnmanaged("CropWorkspace");
-  cropAlg->initialize();
-  cropAlg->setChild(true);
-  cropAlg->setProperty("InputWorkspace", ws);
-  cropAlg->setProperty("Xmin", startTime());
-
-  double Xmax = finishTime();
-  if(Xmax != EMPTY_DBL())
-  {
-    cropAlg->setProperty("Xmax", Xmax);
-  }
-
-  cropAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
-  cropAlg->execute();
-
-  ws = cropAlg->getProperty("OutputWorkspace");
-
-  std::string params = rebinParams(ws);
-
-  // Rebin data if option set in Plot Options and we don't want raw workspace
-  if ( !isRaw && !params.empty())
-  {
-    // Rebin data
-    IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().createUnmanaged("Rebin");
-    rebinAlg->initialize();
-    rebinAlg->setChild(true);
-    rebinAlg->setProperty("InputWorkspace", ws);
-    rebinAlg->setProperty("Params", params);
-    rebinAlg->setProperty("FullBinsOnly", true);
-    rebinAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
-    rebinAlg->execute();
-
-    ws = rebinAlg->getProperty("OutputWorkspace");
-  }
-
-  return ws;
-}
-
-
-/**
- * Selects a workspace from the group according to what is selected on the interface for the period.
- * @param periodType :: Which period we want
- * @param group      :: Workspace group as loaded from the data file
- * @return Selected workspace
- */ 
-MatrixWorkspace_sptr MuonAnalysis::getPeriodWorkspace(PeriodType periodType, WorkspaceGroup_sptr group)
-{
-  QComboBox* periodSelector;
- 
-  switch(periodType)
-  {
-    case First:
-      periodSelector = m_uiForm.homePeriodBox1; break;
-    case Second:
-      periodSelector = m_uiForm.homePeriodBox2; break;
-    default:
-      throw std::invalid_argument("Unsupported period type");
-  }
-
-  const QString periodLabel = periodSelector->currentText();
-
-  if ( periodLabel != "None" )
-  {
-    int periodNumber = periodLabel.toInt();
-    size_t periodIndex = static_cast<size_t>(periodNumber - 1);
-
-    if ( periodNumber < 1 || periodIndex >= group->size() )
-      throw std::runtime_error("Loaded group doesn't seem to have period " + periodLabel.toStdString());
-
-    return boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(periodIndex) );
-  }
-  else
-  {
-    return MatrixWorkspace_sptr();
-  }
 }
 
 /**
@@ -1435,12 +1344,12 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
 }
 
 /**
- * Groups the loaded workspace
+ * Get grouping for the loaded workspace
  * @param loadResult :: Various loaded parameters as returned by load()
- * @return Grouped workspace and used grouping for populating grouping table
+ * @return Used grouping for populating grouping table
  */
-boost::shared_ptr<GroupResult> MuonAnalysis::group(boost::shared_ptr<LoadResult> loadResult) const
-{
+boost::shared_ptr<GroupResult>
+MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
   auto result = boost::make_shared<GroupResult>();
 
   boost::shared_ptr<Grouping> groupingToUse;
@@ -1507,9 +1416,6 @@ boost::shared_ptr<GroupResult> MuonAnalysis::group(boost::shared_ptr<LoadResult>
 
   result->groupingUsed = groupingToUse;
 
-  ITableWorkspace_sptr groupingTableToUse = groupingToTable(groupingToUse);
-  result->groupedWorkspace = groupWorkspace(loadResult->loadedWorkspace, groupingTableToUse);
-
   return result;
 }
 
@@ -1529,26 +1435,45 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   boost::shared_ptr<LoadResult> loadResult;
   boost::shared_ptr<GroupResult> groupResult;
+  ITableWorkspace_sptr deadTimes;
+  Workspace_sptr correctedGroupedWS;
 
-  try
-  {
+  try {
+    // Load the new file(s)
     loadResult = load(files);
 
-    try // to apply dead time correction
+    try // to get the dead time correction
     {
-      applyDeadTimeCorrection(loadResult);
-    }
-    catch(std::exception& e)
-    {
-      // If dead correction wasn't applied we can still continue, though should make user be aware
-      // of that
-      g_log.warning() << "No dead time correction applied: " << e.what() << "\n";
+      deadTimes = getDeadTimeCorrection(loadResult);
+    } catch (std::exception &e) {
+      // If dead correction wasn't applied we can still continue, though should
+      // make user aware of that
+      g_log.warning() << "No dead time correction applied: " << e.what()
+                      << "\n";
     }
 
-    groupResult = group(loadResult);
-  }
-  catch(std::exception& e)
-  {
+    // Get the grouping
+    groupResult = getGrouping(loadResult);
+    ITableWorkspace_sptr groupingTable =
+        groupingToTable(groupResult->groupingUsed);
+
+    // Now apply DTC, if used, and grouping
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().createUnmanaged("MuonProcess");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", loadResult->loadedWorkspace);
+    alg->setProperty("Mode", "CorrectAndGroup");
+    if (deadTimes != nullptr) {
+      alg->setProperty("ApplyDeadTimeCorrection", true);
+      alg->setProperty("DeadTimeTable", deadTimes);
+    }
+    alg->setProperty("LoadedTimeZero", loadResult->timeZero);
+    alg->setProperty("DetectorGroupingTable", groupingTable);
+    alg->setChild(true);
+    alg->setPropertyValue("OutputWorkspace", "__NotUsed");
+    alg->execute();
+    correctedGroupedWS = alg->getProperty("OutputWorkspace");
+  } catch (std::exception &e) {
     g_log.error(e.what());
     QMessageBox::critical(this, "Loading failed", "Unable to load the file[s]. See log for details.");
 
@@ -1565,9 +1490,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   deleteWorkspaceIfExists(m_workspace_name);
   deleteWorkspaceIfExists(m_grouped_name);
 
-  AnalysisDataService::Instance().add(m_workspace_name, loadResult->loadedWorkspace);
-  AnalysisDataService::Instance().add(m_grouped_name, groupResult->groupedWorkspace);
-
   // Get hold of a pointer to a matrix workspace
   MatrixWorkspace_sptr matrix_workspace = firstPeriod(loadResult->loadedWorkspace);
 
@@ -1583,6 +1505,12 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   bool instrumentChanged = newInstrIndex != m_uiForm.instrSelector->currentIndex();
 
   m_uiForm.instrSelector->setCurrentIndex(newInstrIndex);
+
+  // Add workspaces to ADS *after* changing selected instrument (as that can
+  // clear them)
+  AnalysisDataService::Instance().add(m_workspace_name,
+                                      loadResult->loadedWorkspace);
+  AnalysisDataService::Instance().add(m_grouped_name, correctedGroupedWS);
 
   // Update the grouping table with the used grouping, if new grouping was loaded
   // XXX: this should be done after the instrument was changed, because changing the instrument will
@@ -1642,7 +1570,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   // If instrument or number of periods has changed -> update period widgets
   size_t numPeriods = MuonAnalysisHelper::numPeriods(loadResult->loadedWorkspace);
-  if(instrumentChanged || static_cast<int>(numPeriods) != m_uiForm.homePeriodBox1->count())
+  if(instrumentChanged || numPeriods != m_numPeriods)
   {
     updatePeriodWidgets(numPeriods);
   }
@@ -1706,8 +1634,8 @@ void MuonAnalysis::guessAlphaClicked()
       return;
 
     QString inputWS = m_workspace_name.c_str();
-    if ( m_uiForm.homePeriodBox2->isEnabled() )
-      inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
+    if (m_uiForm.homePeriodBox2->isEnabled())
+      inputWS += "_" + m_uiForm.homePeriodBox1->text();
 
     double alphaValue;
 
@@ -1838,37 +1766,25 @@ void MuonAnalysis::updateFrontAndCombo()
  * Updates widgets related to period algebra.
  * @param numPeriods Number of periods available
  */
-void MuonAnalysis::updatePeriodWidgets(size_t numPeriods)
-{
-  QString periodLabel = "Data collected in " + QString::number(numPeriods)
-                        + " periods. Plot/analyse period: ";
+void MuonAnalysis::updatePeriodWidgets(size_t numPeriods) {
+  QString periodLabel = "Data collected in " + QString::number(numPeriods) +
+                        " periods. Plot/analyse period(s): ";
   m_uiForm.homePeriodsLabel->setText(periodLabel);
 
-  // Remove all the previous items
-  m_uiForm.homePeriodBox1->clear();
+  // Reset the previous text
+  m_uiForm.homePeriodBox1->setText("1");
   m_uiForm.homePeriodBox2->clear();
 
-  m_uiForm.homePeriodBox2->addItem("None");
-
-  for ( size_t i = 1; i <= numPeriods; i++ )
-  {
-    m_uiForm.homePeriodBox1->addItem(QString::number(i));
-    m_uiForm.homePeriodBox2->addItem(QString::number(i));
-  }
-
   // We only need period widgets enabled if we have more than 1 period
-  if(numPeriods > 1)
-  {
+  if (numPeriods > 1) {
     m_uiForm.homePeriodBox2->setEnabled(true);
-    m_uiForm.homePeriodBoxMath->setEnabled(true);
-  }
-  else
-  {
+  } else {
     m_uiForm.homePeriodBox2->setEnabled(false);
-    m_uiForm.homePeriodBoxMath->setEnabled(false);
-  }  
-}
+  }
 
+  // cache number of periods
+  m_numPeriods = numPeriods;
+}
 
 /**
  * Return the group-number for the group in a row. Return -1 if
@@ -1952,19 +1868,15 @@ void MuonAnalysis::clearLoadedRun() {
  * @return Return empty string if no periods (well just one period). If more 
  *         one period then return "_#" string for the periods selected by user
  */
-QStringList MuonAnalysis::getPeriodLabels() const
-{
+QStringList MuonAnalysis::getPeriodLabels() const {
   QStringList retVal;
-  if ( m_uiForm.homePeriodBox2->isEnabled() && m_uiForm.homePeriodBox2->currentText()!="None" )
-  {
-    retVal.append( "_" + m_uiForm.homePeriodBox1->currentText());
-    retVal.append( "_" + m_uiForm.homePeriodBox2->currentText());
-  }
-  else if ( m_uiForm.homePeriodBox2->isEnabled() )
-  {
-    retVal.append( "_" + m_uiForm.homePeriodBox1->currentText());
-  }
-  else
+  if (m_uiForm.homePeriodBox2->isEnabled() &&
+      m_uiForm.homePeriodBox2->text() != "") {
+    retVal.append("_" + m_uiForm.homePeriodBox1->text());
+    retVal.append("_" + m_uiForm.homePeriodBox2->text());
+  } else if (m_uiForm.homePeriodBox2->isEnabled()) {
+    retVal.append("_" + m_uiForm.homePeriodBox1->text());
+  } else
     retVal.append("");
 
   return retVal;
@@ -1989,35 +1901,31 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
       hideAllPlotWindows();
     }
 
+    QStringList& s = acquireWindowScript; // To keep short
+    s << "ws = mtd['%WSNAME%']";
+    s << "altName = ws.name() + '-1'";
+
     if ( policy == MuonAnalysisOptionTab::PreviousWindow )
     {
-      QStringList& s = acquireWindowScript; // To keep short
-
-      s << "ew = graph('%WSNAME%-1')";
+      s << "ew = graph(altName)";
       s << "if '%WSNAME%' != '%PREV%' and ew != None:";
       s << "    ew.close()";
 
       s << "pw = graph('%PREV%-1')";
       s << "if pw == None:";
-      s << "  pw = newGraph('%WSNAME%-1', 0)";
-
-      s << "w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = pw, clearWindow = True)";
-      s << "w.setName('%WSNAME%-1')";
-      s << "w.setObjectName('%WSNAME%')";
-      s << "w.show()";
-      s << "w.setFocus()";
+      s << "  pw = newGraph(altName, 0)";
     }
     else if ( policy == MuonAnalysisOptionTab::NewWindow )
     {
-      QStringList& s = acquireWindowScript; // To keep short
-
-      s << "pw = newGraph('%WSNAME%-1', 0)";
-      s << "w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = pw, clearWindow = True)";
-      s << "w.setName('%WSNAME%-1')";
-      s << "w.setObjectName('%WSNAME%')";
-      s << "w.show()";
-      s << "w.setFocus()";
+      s << "pw = newGraph(altName, 0)";
     }
+
+    s << "w = plotSpectrum(ws.name(), 0, %ERRORS%, %CONNECT%, window = pw, "
+      "clearWindow = True)";
+    s << "w.setName(altName)";
+    s << "w.setObjectName(ws.name())";
+    s << "w.show()";
+    s << "w.setFocus()";
 
     QString pyS;
 
@@ -2028,17 +1936,17 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
     const QMap<QString, QString>& params = getPlotStyleParams(wsName);
 
     // Insert real values
-    pyS.replace("%WSNAME%", wsName);
+    QString safeWSName(wsName);
+    safeWSName.replace("'", "\'");
+    pyS.replace("%WSNAME%", safeWSName);
     pyS.replace("%PREV%", m_currentDataName);
     pyS.replace("%ERRORS%", params["ShowErrors"]);
     pyS.replace("%CONNECT%", params["ConnectType"]);
 
     // Update titles
     pyS += "l = w.activeLayer()\n"
-           "l.setCurveTitle(0, '%1')\n"
-           "l.setTitle('%2')\n";
-
-    pyS = pyS.arg(wsName).arg(m_title.c_str());
+           "l.setCurveTitle(0, ws.name())\n"
+           "l.setTitle(ws.getTitle())\n";
 
     // Set logarithmic scale if required
     if ( logScale )
@@ -2267,7 +2175,6 @@ void MuonAnalysis::startUpLook()
   m_uiForm.frontAlphaLabel->setVisible(false);
   m_uiForm.frontAlphaNumber->setVisible(false);
   m_uiForm.frontAlphaNumber->setEnabled(false);
-  m_uiForm.homePeriodBox2->setEditable(false);
   m_uiForm.homePeriodBox2->setEnabled(false);
 
   // Set validators for number-only boxes
@@ -2748,9 +2655,10 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
 
-  connect(m_uiForm.homePeriodBox1, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
-  connect(m_uiForm.homePeriodBoxMath, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
-  connect(m_uiForm.homePeriodBox2, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+  connect(m_uiForm.homePeriodBox1, SIGNAL(editingFinished()), this,
+          SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.homePeriodBox2, SIGNAL(editingFinished()), this,
+          SLOT(homeTabUpdatePlot()));
 
   connect(m_uiForm.deadTimeType, SIGNAL( activated(int) ), this, SLOT( deadTimeTypeAutoUpdate(int) ));
 
@@ -2841,13 +2749,14 @@ void MuonAnalysis::loadWidgetValue(QWidget* target, const QVariant& defaultValue
 }
 
 /**
- * Checks whether two specified periods are equal and, if they are, sets second one to None.
+ * Checks whether two specified period sets are equal and, if they are, unsets
+ * second one.
+ * At present, no check is made for if the same index appears in both lists -
+ * this is down to the user!
  */
-void MuonAnalysis::checkForEqualPeriods()
-{
-  if ( m_uiForm.homePeriodBox2->currentText() == m_uiForm.homePeriodBox1->currentText() )
-  {
-    m_uiForm.homePeriodBox2->setCurrentIndex(0);
+void MuonAnalysis::checkForEqualPeriods() {
+  if (m_uiForm.homePeriodBox2->text() == m_uiForm.homePeriodBox1->text()) {
+    m_uiForm.homePeriodBox2->clear();
   }
 }
 
@@ -3053,20 +2962,6 @@ void MuonAnalysis::setFirstGoodDataState(int checkBoxState)
 
 /**
  * Groups detectors in the workspace
- * @param ws :: Workspace to group
- * @param grouping :: Grouping table to use
- * @return Grouped workspace
- */
-Workspace_sptr MuonAnalysis::groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping) const
-{
-   ScopedWorkspace wsEntry(ws);
-   ScopedWorkspace groupingEntry(grouping);
-
-   return groupWorkspace(wsEntry.name(), groupingEntry.name());
-}
-
-/**
- * Groups detectors in the workspace
  * @param wsName :: ADS name of the workspace to group
  * @param groupingName :: ADS name of the grouping table to use
  * @return Grouped workspace
@@ -3198,45 +3093,48 @@ Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename) const
 }
 
 /**
- * Applies dead time correction to the loaded workspace. Updates loadedWorkspace in loadResult.
+ * Gets table of dead time corrections from the loaded workspace.
  * @param loadResult :: Struct with loaded parameters
+ * @returns Table of dead times, or nullptr if no correction used
  */
-void MuonAnalysis::applyDeadTimeCorrection(boost::shared_ptr<LoadResult> loadResult) const
-{
-  if (m_uiForm.deadTimeType->currentText() != "None")
-  {
-    // Dead time table which will be used
-    Workspace_sptr deadTimes;
+ITableWorkspace_sptr MuonAnalysis::getDeadTimeCorrection(
+    boost::shared_ptr<LoadResult> loadResult) const {
+  // Dead time table which will be used
+  Workspace_sptr deadTimes;
 
-    if (m_uiForm.deadTimeType->currentText() == "From Data File")
-    {
-      if( ! loadResult->loadedDeadTimes )
-        throw std::runtime_error("Data file doesn't appear to contain dead time values");
+  if (m_uiForm.deadTimeType->currentText() != "None") {
+    if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+      if (!loadResult->loadedDeadTimes)
+        throw std::runtime_error(
+            "Data file doesn't appear to contain dead time values");
 
       deadTimes = loadResult->loadedDeadTimes;
+    } else if (m_uiForm.deadTimeType->currentText() == "From Disk") {
+      deadTimes = loadDeadTimes(deadTimeFilename());
     }
-    else if (m_uiForm.deadTimeType->currentText() == "From Disk")
-    {
-      deadTimes = loadDeadTimes( deadTimeFilename() );
-    }
-
-    // Add workspaces to ADS so that they can be processed correctly in case they are groups
-    ScopedWorkspace loadedWsEntry(loadResult->loadedWorkspace);
-    ScopedWorkspace deadTimesEntry(deadTimes);
-
-    ScopedWorkspace correctedWsEntry;
-
-    IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
-    applyCorrAlg->initialize();
-    applyCorrAlg->setRethrows(true);
-    applyCorrAlg->setLogging(false);
-    applyCorrAlg->setPropertyValue("InputWorkspace", loadedWsEntry.name());
-    applyCorrAlg->setPropertyValue("DeadTimeTable", deadTimesEntry.name());
-    applyCorrAlg->setPropertyValue("OutputWorkspace", correctedWsEntry.name());
-    applyCorrAlg->execute();
-
-    loadResult->loadedWorkspace = correctedWsEntry.retrieve();
   }
+
+  return deadTimesToTable(deadTimes);
+}
+
+/**
+ * Converts dead times workspace to a TableWorkspace
+ * @param deadTimes :: [input] Loaded dead times Workspace_sptr
+ * @returns Table workspace of dead times
+ */
+ITableWorkspace_sptr
+MuonAnalysis::deadTimesToTable(const Workspace_sptr &deadTimes) const {
+  ITableWorkspace_sptr deadTimesTable;
+  if (deadTimes != nullptr) {
+    if (auto table = boost::dynamic_pointer_cast<ITableWorkspace>(deadTimes)) {
+      deadTimesTable = table;
+    } else if (auto group =
+                   boost::dynamic_pointer_cast<WorkspaceGroup>(deadTimes)) {
+      deadTimesTable =
+          boost::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
+    }
+  }
+  return deadTimesTable;
 }
 
 /**
@@ -3245,10 +3143,15 @@ void MuonAnalysis::applyDeadTimeCorrection(boost::shared_ptr<LoadResult> loadRes
  */
 Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 {
-  Algorithm_sptr loadAlg = AlgorithmManager::Instance().createUnmanaged("MuonLoad");
+  Algorithm_sptr loadAlg =
+      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
   loadAlg->initialize();
+  loadAlg->setProperty("Mode", "Combined");
 
   // -- Dead Time Correction --------------------------------------------------
+  // If ApplyDeadTimeCorrection is set, the algorithm must have DeadTimeTable
+  // set too. If it can't be set here (from disk file), the sequential fit
+  // must load the dead times from each file.
 
   if (m_uiForm.deadTimeType->currentIndex() != 0)
   {
@@ -3259,7 +3162,7 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 
       Workspace_sptr deadTimes = loadDeadTimes( deadTimeFilename() );
 
-      loadAlg->setProperty("CustomDeadTimeTable", deadTimes);
+      loadAlg->setProperty("DeadTimeTable", deadTimesToTable(deadTimes));
     }
   }
 
@@ -3320,19 +3223,13 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 
   // -- Period options --------------------------------------------------------
 
-  QString periodLabel1 = m_uiForm.homePeriodBox1->currentText();
+  QString periodLabel1 = m_uiForm.homePeriodBox1->text();
+  loadAlg->setProperty("SummedPeriodSet", periodLabel1.toStdString());
 
-  int periodIndex1 = periodLabel1.toInt() - 1;
-  loadAlg->setProperty("FirstPeriod", periodIndex1);
-
-  QString periodLabel2 = m_uiForm.homePeriodBox2->currentText();
+  QString periodLabel2 = m_uiForm.homePeriodBox2->text();
   if ( periodLabel2 != "None" )
   {
-    int periodIndex2 = periodLabel2.toInt() - 1;
-    loadAlg->setProperty("SecondPeriod", periodIndex2);
-
-    std::string op = m_uiForm.homePeriodBoxMath->currentText().toStdString();
-    loadAlg->setProperty("PeriodOperation", op);
+    loadAlg->setProperty("SubtractedPeriodSet", periodLabel2.toStdString());
   }
 
   return loadAlg;

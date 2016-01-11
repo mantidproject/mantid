@@ -56,13 +56,17 @@ public:
   enum Mode {Mask, Group, ROI};
   enum Activity {Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing,DrawFree};
 
-  InstrumentWindowMaskTab(InstrumentWindow* instrWindow);
+  explicit InstrumentWindowMaskTab(InstrumentWindow *instrWindow);
   void initSurface();
   void setMode(Mode mode);
   void selectTool(Activity tool);
 
 signals:
   void executeAlgorithm(const QString&, const QString&);
+
+public slots:
+  void changedIntegrationRange(double, double);
+
 protected slots:
   void setActivity();
   void shapeCreated();
@@ -73,7 +77,9 @@ protected slots:
   void clearShapes();
   void applyMask();
   void applyMaskToView();
-  void storeMask(bool isROI = false);
+  void storeDetectorMask(bool isROI = false);
+  void storeBinMask();
+  void storeMask();
   void clearMask();
   void saveInvertedMaskToWorkspace();
   void saveInvertedMaskToFile();
@@ -131,10 +137,11 @@ protected:
   QPushButton* m_ring_rectangle;
   QPushButton* m_free_draw;
 
-  QPushButton* m_apply;
-  QPushButton* m_apply_to_view;
-  QPushButton* m_clear_all;
+  QPushButton* m_applyToData;
+  QPushButton* m_applyToView;
+  QPushButton* m_clearAll;
   QPushButton* m_saveButton;
+  bool m_maskBins;
 
 
   QMenu* m_saveMask;

@@ -217,7 +217,8 @@ bool TomographyIfaceModel::facilitySupported() {
 bool TomographyIfaceModel::doPing(const std::string &compRes) {
   // This actually does more than a simple ping. Ping and check that a
   // transaction can be created succesfully
-  auto alg = Algorithm::fromString("StartRemoteTransaction");
+  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "StartRemoteTransaction");
   alg->initialize();
   alg->setProperty("ComputeResource", compRes);
   std::string tid;
@@ -246,7 +247,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
 void TomographyIfaceModel::doLogin(const std::string &compRes,
                                    const std::string &user,
                                    const std::string &pw) {
-  auto alg = Algorithm::fromString("Authenticate");
+  auto alg =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged("Authenticate");
   alg->initialize();
   alg->setPropertyValue("UserName", user);
   alg->setPropertyValue("ComputeResource", compRes);
@@ -265,7 +267,8 @@ void TomographyIfaceModel::doLogin(const std::string &compRes,
 
 void TomographyIfaceModel::doLogout(const std::string &compRes,
                                     const std::string &username) {
-  auto alg = Algorithm::fromString("Logout");
+  auto alg =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged("Logout");
   alg->initialize();
   alg->setProperty("ComputeResource", compRes);
   alg->setProperty("UserName", username);
@@ -285,7 +288,8 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
                                             std::vector<std::string> &names,
                                             std::vector<std::string> &status,
                                             std::vector<std::string> &cmds) {
-  auto alg = Algorithm::fromString("QueryAllRemoteJobs");
+  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "QueryAllRemoteJobs");
   alg->initialize();
   alg->setPropertyValue("ComputeResource", compRes);
   try {
@@ -304,8 +308,8 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
 /**
  * Handle the job submission request relies on a submit algorithm.
  */
-void
-TomographyIfaceModel::doSubmitReconstructionJob(const std::string &compRes) {
+void TomographyIfaceModel::doSubmitReconstructionJob(
+    const std::string &compRes) {
   std::string run, opt;
   try {
     makeRunnableWithOptions(compRes, run, opt);
@@ -317,7 +321,8 @@ TomographyIfaceModel::doSubmitReconstructionJob(const std::string &compRes) {
   }
 
   // with SCARF we use one (pseudo)-transaction for every submission
-  auto transAlg = Algorithm::fromString("StartRemoteTransaction");
+  auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "StartRemoteTransaction");
   transAlg->initialize();
   transAlg->setProperty("ComputeResource", compRes);
   std::string tid;
@@ -330,7 +335,8 @@ TomographyIfaceModel::doSubmitReconstructionJob(const std::string &compRes) {
                              std::string(e.what()));
   }
 
-  auto submitAlg = Algorithm::fromString("SubmitRemoteJob");
+  auto submitAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "SubmitRemoteJob");
   submitAlg->initialize();
   submitAlg->setProperty("ComputeResource", compRes);
   submitAlg->setProperty("TaskName", "Mantid tomographic reconstruction job");
@@ -350,7 +356,8 @@ void TomographyIfaceModel::doCancelJobs(const std::string &compRes,
                                         const std::vector<std::string> &ids) {
   for (size_t i = 0; i < ids.size(); i++) {
     const std::string id = ids[i];
-    auto algJob = Algorithm::fromString("AbortRemoteJob");
+    auto algJob = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "AbortRemoteJob");
     algJob->initialize();
     algJob->setPropertyValue("ComputeResource", compRes);
     algJob->setPropertyValue("JobID", id);
@@ -570,7 +577,6 @@ WorkspaceGroup_sptr
 TomographyIfaceModel::loadFITSImage(const std::string &path) {
   // get fits file into workspace and retrieve it from the ADS
   auto alg = AlgorithmManager::Instance().createUnmanaged("LoadFITS");
-  //Algorithm::fromString("LoadFITS");
   alg->initialize();
   alg->setPropertyValue("Filename", path);
   std::string wsName = "__fits_ws_tomography_gui";

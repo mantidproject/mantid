@@ -159,7 +159,7 @@ private:
   class ScriptTask : public QFutureInterface<bool>, public QRunnable
   {
   public:
-    ScriptTask(Script & script);
+    explicit ScriptTask(Script &script);
     QFuture<bool> start();
     void run();
 

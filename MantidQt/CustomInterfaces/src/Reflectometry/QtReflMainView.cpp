@@ -5,6 +5,7 @@
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -438,21 +439,54 @@ Show the user the dialog for an algorithm
 void QtReflMainView::showAlgorithmDialog(const std::string &algorithm) {
   std::stringstream pythonSrc;
   pythonSrc << "try:\n";
-  pythonSrc << "  " << algorithm << "Dialog()\n";
+  pythonSrc << "  algm = " << algorithm << "Dialog()\n";
   pythonSrc << "except:\n";
   pythonSrc << "  pass\n";
-  runPythonCode(QString::fromStdString(pythonSrc.str()));
+  runPythonCode(QString::fromStdString(pythonSrc.str()), false);
+}
+
+void QtReflMainView::showImportDialog() {
+  std::stringstream pythonSrc;
+  pythonSrc << "try:\n";
+  pythonSrc << "  algm = "
+            << "LoadReflTBL"
+            << "Dialog()\n";
+  pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
+  pythonSrc << "except:\n";
+  pythonSrc << "  pass\n";
+  // outputWorkspaceName will hold the name of the workspace
+  // otherwise this should be an empty string.
+  QString outputWorkspaceName =
+      runPythonCode(QString::fromStdString(pythonSrc.str()), false);
+  this->setModel(outputWorkspaceName.trimmed());
 }
 
 /**
 Show the user file dialog to choose save location of notebook
 */
 std::string QtReflMainView::requestNotebookPath() {
-  QString qfilename = QFileDialog::getSaveFileName(
-      0, "Save notebook file", QDir::currentPath(),
+
+  // We won't use QFileDialog directly here as using the NativeDialog option
+  // causes problems on MacOS.
+  QString qfilename = API::FileDialogHandler::getSaveFileName(
+      this, "Save notebook file", QDir::currentPath(),
       "IPython Notebook files (*.ipynb);;All files (*.*)",
       new QString("IPython Notebook files (*.ipynb)"));
-  return qfilename.toStdString();
+
+  // There is a Qt bug (QTBUG-27186) which means the filename returned
+  // from the dialog doesn't always the file extension appended.
+  // So we'll have to ensure this ourselves.
+  // Important, notebooks can't be loaded without this extension.
+  std::string filename = qfilename.toStdString();
+  if (filename.size() > 6) {
+    if (filename.substr(filename.size() - 6) != ".ipynb") {
+      filename.append(".ipynb");
+    }
+  } else {
+    filename.append(".ipynb");
+  }
+
+  return filename;
 }
 
 /**

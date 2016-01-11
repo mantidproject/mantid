@@ -52,13 +52,18 @@ public:
         5 ///< to specify a directory that does not have to exist
   };
 
-  /// Constructor
-  FileProperty(const std::string &name, const std::string &default_value,
+  /// Constructor taking a list of extensions as a vector
+  FileProperty(const std::string &name, const std::string &defaultValue,
                unsigned int action, const std::vector<std::string> &exts =
                                         std::vector<std::string>(),
                unsigned int direction = Kernel::Direction::Input);
+  /// Constructor taking a single extension as a string
   FileProperty(const std::string &name, const std::string &default_value,
                unsigned int action, const std::string &ext,
+               unsigned int direction = Kernel::Direction::Input);
+  /// Constructor taking a list of extensions as an initializer_list
+  FileProperty(const std::string &name, const std::string &default_value,
+               unsigned int action, std::initializer_list<std::string> exts,
                unsigned int direction = Kernel::Direction::Input);
 
   /// 'Virtual copy constructor
@@ -87,8 +92,6 @@ public:
 private:
   /// Returns a string depending on whether an empty value is valid
   std::string isEmptyValueValid() const;
-  /// Setup based on the default extension
-  void setUp(const std::string &defExt);
   /// Do the allowed values match the facility preference extensions for run
   /// files
   bool extsMatchRunFiles();

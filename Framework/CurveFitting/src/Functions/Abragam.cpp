@@ -36,7 +36,7 @@ void Abragam::function1D(double *out, const double *xValues,
   for (size_t i = 0; i < nData; i++) {
     double A1 = A * cos(w * xValues[i] + phi);
     double A2 =
-        -(sig * sig * t * t) * (exp(-xValues[i] / t) - 1 + (xValues[i] / t));
+        -(sig * sig * t * t) * (expm1(-xValues[i] / t) + (xValues[i] / t));
     double A3 = exp(A2);
 
     out[i] = A1 * A3;

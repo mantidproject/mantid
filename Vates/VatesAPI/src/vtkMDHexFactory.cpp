@@ -25,7 +25,6 @@ namespace Mantid {
 
 namespace VATES {
 
-
 /*Constructor
   @param thresholdRange : Threshold range strategy
   @param normalizationOption : Info object setting how normalization should be
@@ -103,7 +102,8 @@ void vtkMDHexFactory::doCreate(
   vtkIdList *hexPointList = vtkIdList::New();
   hexPointList->SetNumberOfIds(8);
 
-  NormFuncIMDNodePtr normFunction = makeMDEventNormalizationFunction(m_normalizationOption, ws.get());
+  NormFuncIMDNodePtr normFunction = makeMDEventNormalizationFunction(
+      m_normalizationOption, ws.get(), ws.get()->hasMask());
 
   // This can be parallelized
   // cppcheck-suppress syntaxError
@@ -112,7 +112,7 @@ void vtkMDHexFactory::doCreate(
       // Get the box here
       size_t i = size_t(ii);
       API::IMDNode *box = boxes[i];
-      Mantid::signal_t signal_normalized = (box->*normFunction)(); 
+      Mantid::signal_t signal_normalized = (box->*normFunction)();
 
       if (!isSpecial(signal_normalized) &&
           m_thresholdRange->inRange(signal_normalized)) {

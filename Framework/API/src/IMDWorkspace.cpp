@@ -53,6 +53,20 @@ signal_t IMDWorkspace::getSignalAtVMD(
   return this->getSignalAtCoord(coords.getBareArray(), normalization);
 }
 
+//-------------------------------------------------------------------------------------------
+/** Returns the signal (normalized by volume) at a given coordinates
+ * or 0 if masked
+ *
+ * @param coords :: coordinate as a VMD vector
+ * @param normalization :: how to normalize the signal returned
+ * @return normalized signal
+ */
+signal_t IMDWorkspace::getSignalWithMaskAtVMD(
+    const Mantid::Kernel::VMD &coords,
+    const Mantid::API::MDNormalization &normalization) const {
+  return this->getSignalWithMaskAtCoord(coords.getBareArray(), normalization);
+}
+
 //-----------------------------------------------------------------------------------------------
 
 /**

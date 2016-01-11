@@ -85,6 +85,7 @@ set ( SRC_FILES
 	src/Reflectometry/ReflNexusMeasurementItemSource.cpp
 	src/Reflectometry/ReflSearchModel.cpp
 	src/Reflectometry/ReflTableSchema.cpp
+    src/Reflectometry/TransferResults.cpp
 	src/SANSAddFiles.cpp
 	src/SANSConstants.cpp
 	src/SANSDiagnostics.cpp
@@ -98,11 +99,13 @@ set ( SRC_FILES
 	src/Tomography/ImageStackPreParams.cpp
 	src/Tomography/SavuConfigDialog.cpp
 	src/Tomography/StackOfImagesDirs.cpp
-	src/Tomography/TomoPathsConfig.cpp
-	src/Tomography/TomoToolConfigDialog.cpp
 	src/Tomography/TomographyIfaceModel.cpp
 	src/Tomography/TomographyIfacePresenter.cpp
 	src/Tomography/TomographyIfaceViewQtGUI.cpp
+	src/Tomography/TomoPathsConfig.cpp
+	src/Tomography/TomoReconPostprocSettings.cpp
+	src/Tomography/TomoReconPreprocSettings.cpp
+	src/Tomography/TomoToolConfigDialog.cpp
 	src/Tomography/ToolConfig.cpp
 	src/UserInputValidator.cpp
 	src/background.cpp
@@ -215,6 +218,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h
+    inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSConstants.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
@@ -231,13 +235,15 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
 	inc/MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoReconPostprocSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoReconPreprocSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h
@@ -396,6 +402,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
                inc/MantidQtCustomInterfaces/Tomography/ImageSelectCoRAndRegions.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtGUI.ui
+               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabFiltersSettings.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSetup.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabRun.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigAstra.ui

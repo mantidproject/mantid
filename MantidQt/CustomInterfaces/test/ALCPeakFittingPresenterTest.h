@@ -38,6 +38,8 @@ public:
   {
     emit parameterChanged(funcIndex, paramName);
   }
+  void plotGuess() { emit plotGuessRequested(); }
+  void clearGuess() { emit removeGuessRequested(); }
 
   MOCK_CONST_METHOD1(function, IFunction_const_sptr(QString));
   MOCK_CONST_METHOD0(currentFunctionIndex, boost::optional<QString>());
@@ -283,7 +285,38 @@ public:
     EXPECT_CALL(*m_view, help()).Times(1);
     m_view->help();
   }
-};
 
+  /**
+   * Test that clearing the guess from the view removes the fitted curve
+   */
+  void test_clearGuess() {
+    EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
+    m_view->clearGuess();
+  }
+
+  /**
+   * Test that clicking "Plot guess" with no function set plots nothing
+   */
+  void test_plotGuess_noFunction() {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
+    ON_CALL(*m_view, function(QString("")))
+        .WillByDefault(Return(IFunction_const_sptr()));
+    EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
+    m_view->plotGuess();
+  }
+
+  /**
+   * Test that "Plot guess" with a function set plots a function
+   */
+  void test_plotGuess() {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
+    IFunction_sptr peaks = createGaussian(1, 2, 3);
+    ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));
+    EXPECT_CALL(*m_view, setFittedCurve(_));
+    m_view->plotGuess();
+  }
+};
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGTEST_H_ */

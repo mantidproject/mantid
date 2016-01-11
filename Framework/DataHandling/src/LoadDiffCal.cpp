@@ -69,12 +69,8 @@ void LoadDiffCal::init() {
   // 3 properties for getting the right instrument
   LoadCalFile::getInstrument3WaysInit(this);
 
-  std::vector<std::string> exts;
-  exts.push_back(".h5");
-  exts.push_back(".hd5");
-  exts.push_back(".hdf");
-  exts.push_back(".cal");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
+                                   {".h5", ".hd5", ".hdf", ".cal"}),
                   "Path to the .h5 file.");
 
   declareProperty(new PropertyWithValue<bool>("MakeGroupingWorkspace", true,
@@ -95,7 +91,15 @@ void LoadDiffCal::init() {
       new PropertyWithValue<std::string>("WorkspaceName", "", Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
       "'_cal', '_mask' appended to them.");
+
+  std::string grpName("Calibration Validation");
+  declareProperty("TofMin", 0., "Minimum for TOF axis. Defaults to 0.");
+  declareProperty("TofMax", EMPTY_DBL(),
+                  "Maximum for TOF axis. Defaults to Unused.");
+  setPropertyGroup("TofMin", grpName);
+  setPropertyGroup("TofMax", grpName);
 }
+
 namespace { // anonymous
 
 std::string readString(H5File &file, const std::string &path) {
@@ -315,6 +319,37 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
   setMaskWSProperty(this, m_workspaceName, wksp);
 }
 
+namespace { // anonymous namespace
+
+double calcTofMin(const double difc, const double difa, const double tzero,
+                  const double tofmin) {
+  if (difa == 0.) {
+    if (tzero != 0.) {
+      // check for negative d-spacing
+      return std::max<double>(-1. * tzero, tofmin);
+    }
+  } else if (difa > 0) {
+    // check for imaginary part in quadratic equation
+    return std::max<double>(tzero - .25 * difc * difc / difa, tofmin);
+  }
+
+  // everything else is fine so just return supplied tofmin
+  return tofmin;
+}
+
+double calcTofMax(const double difc, const double difa, const double tzero,
+                  const double tofmax) {
+  if (difa < 0.) {
+    // check for imaginary part in quadratic equation
+    return std::min<double>(tzero - .25 * difc * difc / difa, tofmax);
+  }
+
+  // everything else is fine so just return supplied tofmax
+  return tofmax;
+}
+
+} // end of anonymous namespace
+
 void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
                                    const std::vector<double> &difc,
                                    const std::vector<double> &difa,
@@ -333,6 +368,10 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
   bool haveDasids = !dasids.empty();
   bool haveOffsets = !offsets.empty();
 
+  double tofMin = getProperty("TofMin");
+  double tofMax = getProperty("TofMax");
+  bool useTofMax = !isEmpty(tofMax);
+
   ITableWorkspace_sptr wksp = boost::make_shared<DataObjects::TableWorkspace>();
   wksp->setTitle(m_filename);
   wksp->addColumn("int", "detid");
@@ -345,6 +384,12 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
   if (haveOffsets)
     wksp->addColumn("double", "offset");
 
+  // columns for valid range of data
+  wksp->addColumn("double", "tofmin");
+  if (useTofMax)
+    wksp->addColumn("double", "tofmax");
+
+  size_t badCount = 0;
   for (size_t i = 0; i < numDet; ++i) {
     API::TableRow newrow = wksp->appendRow();
     newrow << detids[i];
@@ -356,7 +401,36 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
     if (haveOffsets)
       newrow << offsets[i];
 
+    // calculate tof range for information
+    const double tofMinRow = calcTofMin(difc[i], difa[i], tzero[i], tofMin);
+    std::stringstream msg;
+    if (tofMinRow != tofMin) {
+      msg << "TofMin shifted from " << tofMin << " to " << tofMinRow << " ";
+    }
+    newrow << tofMinRow;
+    if (useTofMax) {
+      const double tofMaxRow = calcTofMax(difc[i], difa[i], tzero[i], tofMax);
+      newrow << tofMaxRow;
+
+      if (tofMaxRow != tofMax) {
+        msg << "TofMax shifted from " << tofMax << " to " << tofMaxRow;
+      }
+    }
+    if (!msg.str().empty()) {
+      badCount += 1;
+      std::stringstream longMsg;
+      longMsg << "[detid=" << detids[i];
+      if (haveDasids)
+        longMsg << ", dasid=" << dasids[i];
+      longMsg << "] " << msg.str();
+      this->g_log.warning(longMsg.str());
+    }
+
     progress.report();
+  }
+  if (badCount > 0) {
+    this->g_log.warning() << badCount
+                          << " rows have reduced time-of-flight range\n";
   }
 
   setCalWSProperty(this, m_workspaceName, wksp);

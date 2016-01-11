@@ -87,7 +87,8 @@ void ProcessIndirectFitParameters::exec() {
   std::string parameterNamesProp = getProperty("ParameterNames");
   auto parameterNames = listToVector(parameterNamesProp);
   std::string xUnit = getProperty("XAxisUnit");
-  MatrixWorkspace_sptr outputWsName = getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
+  const std::string outputWsName = getPropertyValue("OutputWorkspace");
 
   // Search for any parameters in the table with the given parameter names,
   // ignoring their function index and output them to a workspace
@@ -166,7 +167,7 @@ void ProcessIndirectFitParameters::exec() {
   renamer->setProperty("OutputWorkspace", outputWsName);
   renamer->executeAsChildAlg();
   Workspace_sptr renameWs = renamer->getProperty("OutputWorkspace");
-  auto outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(renameWs);
+  outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(renameWs);
 
   // Replace axis on workspaces with text axis
   workflowProg.report("Converting text axis");

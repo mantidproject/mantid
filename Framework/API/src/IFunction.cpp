@@ -308,7 +308,7 @@ namespace {
  */
 class AttValue : public IFunction::ConstAttributeVisitor<std::string> {
 public:
-  AttValue(bool quoteString = false)
+  explicit AttValue(bool quoteString = false)
       : IFunction::ConstAttributeVisitor<std::string>(),
         m_quoteString(quoteString) {}
 
@@ -539,7 +539,7 @@ public:
    * Constructor
    * @param value :: The value to set
    */
-  SetValue(const std::string &value) : m_value(value) {}
+  explicit SetValue(const std::string &value) : m_value(value) {}
 
 protected:
   /// Apply if string

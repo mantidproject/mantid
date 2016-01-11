@@ -121,7 +121,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   initZoomer();
 
   // hide unused buttons
-  ui.btnZoom->hide();      // hidden for a long time
+  ui.btnZoom->hide(); // hidden for a long time
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
@@ -243,11 +243,6 @@ void SliceViewer::loadSettings() {
   bool transparentZeros = settings.value("TransparentZeros", 1).toInt();
   this->setTransparentZeros(transparentZeros);
 
-  int norm = settings.value("Normalization", 1).toInt();
-  Mantid::API::MDNormalization normaliz =
-      static_cast<Mantid::API::MDNormalization>(norm);
-  this->setNormalization(normaliz);
-
   const int aspectRatioOption = settings.value("LockAspectRatios", 0).toInt();
   this->setAspectRatio(static_cast<AspectRatioType>(aspectRatioOption));
 
@@ -265,8 +260,6 @@ void SliceViewer::saveSettings() {
   settings.setValue("LastSavedImagePath", m_lastSavedFile);
   settings.setValue("TransparentZeros",
                     (m_actionTransparentZeros->isChecked() ? 1 : 0));
-  settings.setValue("Normalization",
-                    static_cast<int>(this->getNormalization()));
 
   settings.setValue("LockAspectRatios", static_cast<int>(m_aspectRatioType));
   settings.endGroup();
@@ -675,6 +668,9 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
 
+  // Set the normalization appropriate
+  this->setNormalization(ws->displayNormalization(), false);
+
   // Only allow perpendicular lines if looking at a matrix workspace.
   bool matrix = bool(boost::dynamic_pointer_cast<MatrixWorkspace>(m_ws));
   m_lineOverlay->setAngleSnapMode(matrix);
@@ -721,7 +717,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   if (!mess.str().empty()) {
     mess << "Bad ranges could cause memory allocation errors. Please fix the "
             "workspace.";
-    mess << std::endl << "You can continue using Mantid.";
+    mess << std::endl
+         << "You can continue using Mantid.";
     throw std::out_of_range(mess.str());
   }
 
@@ -1096,14 +1093,15 @@ void SliceViewer::RebinMode_toggled(bool checked) {
     // Remove the overlay WS
     this->m_overlayWS.reset();
     this->m_data->setOverlayWorkspace(m_overlayWS);
-    this->updateDisplay();
+    // Set the normalization from the original workspace
+    this->setNormalization(m_ws->displayNormalization());
   } else {
     setIconFromString(ui.btnRebinMode, g_iconRebinOn, QIcon::Normal, QIcon::On);
     // Start the rebin
     this->rebinParamsChanged();
   }
+  this->updateDisplay();
 }
-
 
 //------------------------------------------------------------------------------
 /// Slot for zooming into
@@ -1359,7 +1357,7 @@ void SliceViewer::findRangeFull() {
   double minR = m_colorRangeFull.minValue();
   if (minR <= 0 && this->getColorScaleType() == 1) {
     double maxR = m_colorRangeFull.maxValue();
-    minR = pow(10., log10(maxR)-10.);
+    minR = pow(10., log10(maxR) - 10.);
     m_colorRangeFull = QwtDoubleInterval(minR, maxR);
   }
 }
@@ -1432,7 +1430,7 @@ void SliceViewer::showInfoAt(double x, double y) {
   coords[m_dimX] = VMD_t(x);
   coords[m_dimY] = VMD_t(y);
   signal_t signal =
-      m_ws->getSignalAtVMD(coords, this->m_data->getNormalization());
+      m_ws->getSignalWithMaskAtVMD(coords, this->m_data->getNormalization());
   ui.lblInfoX->setText(QString::number(x, 'g', 4));
   ui.lblInfoY->setText(QString::number(y, 'g', 4));
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));
@@ -2175,6 +2173,9 @@ void SliceViewer::dynamicRebinComplete(bool error) {
     if (AnalysisDataService::Instance().doesExist(m_overlayWSName))
       m_overlayWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
           m_overlayWSName);
+
+    // Set the normalization from the rebinned workspace.
+    this->setNormalization(m_overlayWS->displayNormalization());
   }
 
   // Make it so we refresh the display, with this workspace on TOP

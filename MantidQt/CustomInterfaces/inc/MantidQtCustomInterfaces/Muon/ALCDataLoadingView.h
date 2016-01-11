@@ -57,32 +57,43 @@ namespace CustomInterfaces
 
     // -- IALCDataLoadingView interface ------------------------------------------------------------
 
-    void initialize();
+    void initialize() override;
 
-    std::string firstRun() const;
-    std::string lastRun() const;
-    std::string log() const;
-    std::string function() const;
-    std::string deadTimeType() const;
-    std::string deadTimeFile() const;
-    std::string detectorGroupingType() const;
-    std::string getForwardGrouping() const;
-    std::string getBackwardGrouping() const;
-    std::string redPeriod() const;
-    std::string greenPeriod() const;
-    bool subtractIsChecked() const;
-    std::string calculationType() const;
-    boost::optional< std::pair<double,double> > timeRange() const;
+    std::string firstRun() const override;
+    std::string lastRun() const override;
+    std::string log() const override;
+    std::string function() const override;
+    std::string deadTimeType() const override;
+    std::string deadTimeFile() const override;
+    std::string detectorGroupingType() const override;
+    std::string getForwardGrouping() const override;
+    std::string getBackwardGrouping() const override;
+    std::string redPeriod() const override;
+    std::string greenPeriod() const override;
+    bool subtractIsChecked() const override;
+    std::string calculationType() const override;
+    boost::optional<std::pair<double, double>> timeRange() const override;
 
-    void setDataCurve(const QwtData &data, const std::vector<double> &errors);
-    void displayError(const std::string &error);
-    void setAvailableLogs(const std::vector<std::string> &logs);
-    void setAvailablePeriods(const std::vector<std::string> &periods);
-    void setTimeLimits(double tMin, double tMax);
-    void setTimeRange (double tMin, double tMax);
-    void help();
-    void disableAll();
-    void enableAll();
+    void setDataCurve(const QwtData &data,
+                      const std::vector<double> &errors) override;
+    void displayError(const std::string &error) override;
+    void setAvailableLogs(const std::vector<std::string> &logs) override;
+    void setAvailablePeriods(const std::vector<std::string> &periods) override;
+    void setTimeLimits(double tMin, double tMax) override;
+    void setTimeRange(double tMin, double tMax) override;
+    void help() override;
+    void disableAll() override;
+    void enableAll() override;
+    void checkBoxAutoChanged(int state) override;
+
+    /// returns the string "Auto"
+    std::string autoString() const override { return g_autoString; }
+
+    /// If Auto mode on, store name of currently loaded file
+    /// @param file :: [input] name of file loaded
+    void setCurrentAutoFile(const std::string &file) override {
+      m_currentAutoFile = file;
+    }
 
     // -- End of IALCDataLoadingView interface -----------------------------------------------------
 
@@ -99,6 +110,11 @@ namespace CustomInterfaces
     /// Loaded errors
     MantidQt::MantidWidgets::ErrorCurve* m_dataErrorCurve;
 
+    /// the string "Auto"
+    static const std::string g_autoString;
+
+    /// If Auto in use, the file last loaded
+    std::string m_currentAutoFile;
   };
 
 } // namespace CustomInterfaces

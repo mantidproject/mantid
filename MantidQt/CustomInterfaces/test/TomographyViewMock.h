@@ -73,7 +73,8 @@ public:
   MOCK_METHOD1(showImage, void(const std::string &path));
 
   // TomoPathsConfig currentPathsConfig() const {}
-  MOCK_CONST_METHOD0(currentPathsConfig, MantidQt::CustomInterfaces::TomoPathsConfig());
+  MOCK_CONST_METHOD0(currentPathsConfig,
+                     MantidQt::CustomInterfaces::TomoPathsConfig());
 
   // void showToolConfig(const std::string &name) {}
   MOCK_METHOD1(showToolConfig, void(const std::string &name));
@@ -88,6 +89,11 @@ public:
   // reconToolsSettings() const {}
   MOCK_CONST_METHOD0(reconToolsSettings,
                      MantidQt::CustomInterfaces::TomoReconToolsUserSettings());
+
+  // MantidQt::CustomInterfaces::TomoReconToolsUserSettings
+  // prePostProcSettings() const
+  MOCK_CONST_METHOD0(prePostProcSettings,
+                     MantidQt::CustomInterfaces::TomoReconFiltersSettings());
 };
 
 #endif // MANTID_CUSTOMINTERFACES_TOMOGRAPHYIFACEVIEWMOCK_H
