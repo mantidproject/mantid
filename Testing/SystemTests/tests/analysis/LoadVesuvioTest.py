@@ -300,6 +300,16 @@ class VesuvioTests(unittest.TestCase):
         self.assertRaises(ValueError, ms.LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name, Mode="",SpectrumList="3-134")
 
+    def test_back_scattering_spectra_with_single_difference_mode_raises_error(self):
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          Mode="SingleDifference",
+                          OutputWorkspace=self.ws_name, SpectrumList="10-20")
+
+    def test_forward_scattering_spectra_with_double_difference_mode_raises_error(self):
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          Mode="DoubleDifference",
+                          OutputWorkspace=self.ws_name, SpectrumList="140-150")
+
     def test_raising_error_removes_temporary_raw_workspaces(self):
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188,14199", # Second run is invalid
                           OutputWorkspace=self.ws_name, Mode="SingleDifference",SpectrumList="3-134")
