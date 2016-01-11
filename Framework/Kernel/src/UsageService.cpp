@@ -18,13 +18,13 @@ namespace Kernel {
 /// static logger
 Kernel::Logger g_log("UsageServiceImpl");
 
-// const std::string STARTUP_URL("http://reports.mantidproject.org/api/usage");
-const std::string STARTUP_URL(
-    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
+const std::string STARTUP_URL("http://reports.mantidproject.org/api/usage");
+//const std::string STARTUP_URL(
+//    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
 // http://posttestserver.com/data/
-// const std::string FEATURE_URL("http://reports.mantidproject.org/api/usage");
-const std::string FEATURE_URL(
-    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
+const std::string FEATURE_URL("http://reports.mantidproject.org/api/feature");
+//const std::string FEATURE_URL(
+//    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
 
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage

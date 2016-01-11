@@ -2,7 +2,6 @@
 #define MANTID_KERNEL_USAGESERVICE_H_
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/SingletonHolder.h"
 
