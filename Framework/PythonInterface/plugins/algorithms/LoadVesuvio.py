@@ -250,10 +250,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
         SingleDifference - Forward Scattering
         DoubleDifference - Back Scattering
         """
-        if mode == "SingleDifference":
-            if(back_scattering):
-                raise RuntimeError("Single Difference can only be used for Forward scattering spectra")
-        elif mode == "DoubleDifference":
+
+        if mode == "DoubleDifference":
             if (not back_scattering):
                 raise RuntimeError("Double Difference can only be used for Back scattering spectra")
 
