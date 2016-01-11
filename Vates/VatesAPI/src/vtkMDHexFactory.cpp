@@ -94,8 +94,8 @@ void vtkMDHexFactory::doCreate(
   memset(useBox.get(), 0, sizeof(bool) * numBoxes);
 
   // Create the data set (will outlive this object - output of create)
-  auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
-  this->dataSet = visualDataSet.GetPointer();
+  auto visualDataSet = vtkUnstructuredGrid::New();
+  this->dataSet = visualDataSet;
   visualDataSet->Allocate(numBoxes);
 
   vtkNew<vtkIdList> hexPointList;
