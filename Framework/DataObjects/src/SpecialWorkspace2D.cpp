@@ -114,7 +114,7 @@ const std::string SpecialWorkspace2D::toString() const {
  * @throw std::invalid_argument if the detector ID was not found
  */
 double SpecialWorkspace2D::getValue(const detid_t detectorID) const {
-  std::map<detid_t, size_t>::const_iterator it = detID_to_WI.find(detectorID);
+  auto it = detID_to_WI.find(detectorID);
 
   if (it == detID_to_WI.end()) {
     std::ostringstream os;
@@ -137,7 +137,7 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID) const {
  */
 double SpecialWorkspace2D::getValue(const detid_t detectorID,
                                     const double defaultValue) const {
-  std::map<detid_t, size_t>::const_iterator it = detID_to_WI.find(detectorID);
+  auto it = detID_to_WI.find(detectorID);
   if (it == detID_to_WI.end())
     return defaultValue;
   else {
@@ -162,7 +162,7 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID,
  */
 void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value,
                                   const double error) {
-  std::map<detid_t, size_t>::iterator it = detID_to_WI.find(detectorID);
+  auto it = detID_to_WI.find(detectorID);
   if (it == detID_to_WI.end()) {
     std::stringstream msg;
     msg << "SpecialWorkspace2D::setValue(): Input Detector ID = " << detectorID

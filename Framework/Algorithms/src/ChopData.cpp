@@ -90,7 +90,7 @@ void ChopData::exec() {
       progress->report();
     }
 
-    std::map<int, double>::iterator nlow = intMap.find(lowest - 1);
+    auto nlow = intMap.find(lowest - 1);
     if (nlow != intMap.end() && intMap[lowest] < (0.1 * nlow->second)) {
       prelow = nlow->first;
     }

@@ -10,10 +10,8 @@ HistoryView::HistoryView(const WorkspaceHistory &wsHist)
     : m_wsHist(wsHist), m_historyItems() {
   // add all of the top level algorithms to the view by default
   const auto algorithms = wsHist.getAlgorithmHistories();
-  AlgorithmHistories::const_iterator iter = algorithms.begin();
-  for (; iter != algorithms.end(); ++iter) {
-    HistoryItem item(*iter);
-    m_historyItems.push_back(item);
+  for (auto iter = algorithms.cbegin(); iter != algorithms.cend(); ++iter) {
+    m_historyItems.emplace_back(*iter);
   }
 }
 

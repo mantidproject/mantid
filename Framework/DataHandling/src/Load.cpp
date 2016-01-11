@@ -34,8 +34,7 @@ namespace {
  */
 bool isSingleFile(const std::vector<std::vector<std::string>> &fileNames) {
   if (fileNames.size() == 1) {
-    std::vector<std::vector<std::string>>::const_iterator first =
-        fileNames.begin();
+    auto first = fileNames.cbegin();
     if (first->size() == 1)
       return true;
   }
@@ -386,9 +385,7 @@ void Load::loadMultipleFiles() {
   std::transform(allFilenames.begin(), allFilenames.end(), wsNames.begin(),
                  generateWsNameFromFileNames);
 
-  std::vector<std::vector<std::string>>::const_iterator filenames =
-      allFilenames.begin();
-  std::vector<std::string>::const_iterator wsName = wsNames.begin();
+  auto wsName = wsNames.cbegin();
   assert(allFilenames.size() == wsNames.size());
 
   std::vector<API::Workspace_sptr> loadedWsList;
@@ -397,12 +394,13 @@ void Load::loadMultipleFiles() {
   Workspace_sptr tempWs;
 
   // Cycle through the filenames and wsNames.
-  for (; filenames != allFilenames.end(); ++filenames, ++wsName) {
-    std::vector<std::string>::const_iterator filename = filenames->begin();
+  for (auto filenames = allFilenames.cbegin(); filenames != allFilenames.cend();
+       ++filenames, ++wsName) {
+    auto filename = filenames->cbegin();
     Workspace_sptr sumWS = loadFileToWs(*filename, *wsName);
 
     ++filename;
-    for (; filename != filenames->end(); ++filename) {
+    for (; filename != filenames->cend(); ++filename) {
       tempWs = loadFileToWs(*filename, "__@loadsum_temp@");
       sumWS = plusWs(sumWS, tempWs);
     }
@@ -648,8 +646,7 @@ API::Workspace_sptr Load::loadFileToWs(const std::string &fileName,
   const std::vector<Kernel::Property *> &props = getProperties();
 
   // Loop through and set the properties on the Child Algorithm
-  std::vector<Kernel::Property *>::const_iterator prop = props.begin();
-  for (; prop != props.end(); ++prop) {
+  for (auto prop = props.cbegin(); prop != props.cend(); ++prop) {
     const std::string &propName = (*prop)->name();
 
     if (this->existsProperty(propName)) {

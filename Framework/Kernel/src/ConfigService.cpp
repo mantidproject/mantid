@@ -83,10 +83,9 @@ void splitPath(const std::string &path, std::vector<std::string> &splitted) {
 
   splitted.clear();
   Poco::StringTokenizer tokenizer(path, ";,", options);
-  Poco::StringTokenizer::Iterator iend = tokenizer.end();
+  auto iend = tokenizer.end();
   splitted.reserve(tokenizer.count());
-  for (Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend;
-       ++itr) {
+  for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
     if (!itr->empty()) {
       splitted.push_back(*itr);
     }
@@ -555,7 +554,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
 
   // C++ doesn't have a const version of operator[] for maps so I can't call
   // that here
-  std::map<std::string, bool>::const_iterator it = m_ConfigPaths.find(key);
+  auto it = m_ConfigPaths.find(key);
   bool required = false;
   if (it != m_ConfigPaths.end()) {
     required = it->second;
@@ -619,8 +618,8 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
   std::string correctedPath = path;
   replace(correctedPath.begin(), correctedPath.end(), '\\', '/');
 
-  std::vector<std::string>::const_iterator it =
-      std::find_if(m_DataSearchDirs.begin(), m_DataSearchDirs.end(),
+  auto it =
+      std::find_if(m_DataSearchDirs.cbegin(), m_DataSearchDirs.cend(),
                    std::bind2nd(std::equal_to<std::string>(), correctedPath));
   return (it != m_DataSearchDirs.end());
 }
@@ -913,9 +912,8 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
   // current user properties so append them
   if (!m_changed_keys.empty()) {
     updated_file += "\n";
-    std::set<std::string>::iterator key_end = m_changed_keys.end();
-    for (std::set<std::string>::iterator key_itr = m_changed_keys.begin();
-         key_itr != key_end;) {
+    auto key_end = m_changed_keys.end();
+    for (auto key_itr = m_changed_keys.begin(); key_itr != key_end;) {
       updated_file += *key_itr + "=";
       std::string value = getString(*key_itr, false);
       Poco::replaceInPlace(value, "\\", "\\\\"); // replace single \ with double
@@ -956,8 +954,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
 std::string ConfigServiceImpl::getString(const std::string &keyName,
                                          bool use_cache) const {
   if (use_cache) {
-    std::map<std::string, std::string>::const_iterator mitr =
-        m_AbsolutePaths.find(keyName);
+    auto mitr = m_AbsolutePaths.find(keyName);
     if (mitr != m_AbsolutePaths.end()) {
       return (*mitr).second;
     }
@@ -1806,8 +1803,7 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
   }
 
   // Now let's look through the other facilities
-  std::vector<FacilityInfo *>::const_iterator it = m_facilities.begin();
-  for (; it != m_facilities.end(); ++it) {
+  for (auto it = m_facilities.cbegin(); it != m_facilities.cend(); ++it) {
     try {
       g_log.debug() << "Looking for " << instrumentName << " at "
                     << (**it).name() << "." << std::endl;
@@ -1867,8 +1863,7 @@ ConfigServiceImpl::getFacility(const std::string &facilityName) const {
   if (facilityName.empty())
     return this->getFacility();
 
-  std::vector<FacilityInfo *>::const_iterator it = m_facilities.begin();
-  for (; it != m_facilities.end(); ++it) {
+  for (auto it = m_facilities.begin(); it != m_facilities.end(); ++it) {
     if ((**it).name() == facilityName) {
       return **it;
     }

@@ -559,8 +559,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
     for (size_t ic = 1; ic < colnames.size(); ++ic) {
       double logvalue = spicetablews->cell<double>(ir, ic);
       std::string &logname = colnames[ic];
-      TimeSeriesProperty<double> *newlogproperty =
-          new TimeSeriesProperty<double>(logname);
+      auto newlogproperty = new TimeSeriesProperty<double>(logname);
       newlogproperty->addValue(anytime, logvalue);
       matrixws->mutableRun().addProperty(newlogproperty);
     }

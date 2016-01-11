@@ -228,7 +228,7 @@ int getPartLine(std::istream &fh, std::string &Out, std::string &Excess,
                 const int spc) {
   // std::string Line;
   if (fh.good()) {
-    char *ss = new char[spc + 1];
+    auto ss = new char[spc + 1];
     const int clen = static_cast<int>(spc - Out.length());
     fh.getline(ss, clen, '\n');
     ss[clen + 1] = 0; // incase line failed to read completely
@@ -284,7 +284,7 @@ std::string removeSpace(const std::string &CLine) {
  *  @return String read.
  */
 std::string getLine(std::istream &fh, const int spc) {
-  char *ss = new char[spc + 1];
+  auto ss = new char[spc + 1];
   std::string Line;
   if (fh.good()) {
     fh.getline(ss, spc, '\n');
@@ -772,9 +772,9 @@ int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y,
   FX << "# " << Npts << " " << Epts << std::endl;
   FX.precision(10);
   FX.setf(std::ios::scientific, std::ios::floatfield);
-  typename V<T, A>::const_iterator xPt = X.begin();
-  typename V<T, A>::const_iterator yPt = Y.begin();
-  typename V<T, A>::const_iterator ePt = (Epts ? Err.begin() : Y.begin());
+  auto xPt = X.cbegin();
+  auto yPt = Y.cbegin();
+  auto ePt = (Epts ? Err.cbegin() : Y.cbegin());
 
   // Double loop to include/exclude a short error stack
   size_t eCount = 0;
@@ -977,8 +977,8 @@ size_t split_path(const std::string &path,
   // allocate target vector to keep folder structure and fill it in
   size_t n_folders = split_pos.size() - 1;
   path_components.resize(n_folders);
-  std::list<int64_t>::iterator it1 = split_pos.begin();
-  std::list<int64_t>::iterator it2 = it1;
+  auto it1 = split_pos.begin();
+  auto it2 = it1;
   ++it2;
 
   int64_t ic(0);
@@ -1075,8 +1075,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
   // Estimation of the resulting number of elements
   result.reserve(elements->count());
 
-  for (Tokenizer::Iterator it = elements->begin(); it != elements->end();
-       it++) {
+  for (auto it = elements->begin(); it != elements->end(); it++) {
     // See above for the reason space is added
     Tokenizer rangeElements(*it + " ", rangeSep, Tokenizer::TOK_TRIM);
 

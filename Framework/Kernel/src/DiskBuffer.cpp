@@ -168,7 +168,7 @@ void DiskBuffer::writeOldObjects() {
       // the value of the argument is
       // NOT GUARANTEED to be incremented or decremented before it is passed to
       // the function.
-      std::list<ISaveable *>::iterator it = --couldNotWrite.end();
+      auto it = --couldNotWrite.end();
       memoryNotWritten += obj->setBufferPosition(it);
       objectsNotWritten++;
     }
@@ -377,9 +377,8 @@ void DiskBuffer::setFreeSpaceVector(std::vector<uint64_t> &free) {
   if (free.size() % 2 != 0)
     throw std::length_error("Free vector size is not a factor of 2.");
 
-  for (std::vector<uint64_t>::iterator it = free.begin(); it != free.end();
-       it += 2) {
-    std::vector<uint64_t>::iterator it_next = boost::next(it);
+  for (auto it = free.begin(); it != free.end(); it += 2) {
+    auto it_next = boost::next(it);
 
     if (*it == 0 && *it_next == 0) {
       continue; // Not really a free space block!

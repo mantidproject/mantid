@@ -162,7 +162,7 @@ void CreatePSDBleedMask::exec() {
   PARALLEL_FOR2(inputWorkspace, outputWorkspace)
   for (int i = 0; i < numTubes; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    TubeIndex::iterator current = tubeMap.begin();
+    auto current = tubeMap.begin();
     std::advance(current, i);
     const TubeIndex::mapped_type tubeIndices = current->second;
     bool mask = performBleedTest(tubeIndices, inputWorkspace, maxRate,
@@ -269,10 +269,7 @@ bool CreatePSDBleedMask::performBleedTest(
 void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices,
                                   API::MatrixWorkspace_sptr workspace) {
   const double deadValue(1.0); // delete the data
-
-  std::vector<int>::const_iterator cend = tubeIndices.end();
-  for (std::vector<int>::const_iterator citr = tubeIndices.begin();
-       citr != cend; ++citr) {
+  for (auto citr = tubeIndices.cbegin(); citr != tubeIndices.cend(); ++citr) {
     workspace->dataY(*citr)[0] = deadValue;
   }
 }

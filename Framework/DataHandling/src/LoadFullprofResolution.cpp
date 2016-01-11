@@ -155,8 +155,8 @@ void LoadFullprofResolution::exec() {
                         << ") is negative.  It is not allowed and is  ignored. "
                         << ".\n";
       } else {
-        vector<int>::iterator fiter = lower_bound(
-            vec_bankinirf.begin(), vec_bankinirf.end(), outputbankid);
+        auto fiter = lower_bound(vec_bankinirf.begin(), vec_bankinirf.end(),
+                                 outputbankid);
         if (fiter == vec_bankinirf.end() || *fiter != outputbankid) {
           // Specified bank ID does not exist.
           stringstream errmsg;
@@ -693,7 +693,7 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
   if (numbanks == 0)
     throw runtime_error("Unable to generate a table from an empty map!");
 
-  map<int, map<string, double>>::iterator bankmapiter = bankparammap.begin();
+  auto bankmapiter = bankparammap.begin();
   size_t numparams = bankmapiter->second.size();
 
   // vector of all parameter name
