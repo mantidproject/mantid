@@ -172,18 +172,20 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 if upper < lower:
                     issues[SPECTRA_PROP] = "Range must be in format lower-upper"
                 # Check Min/Max boundaries
-                if lower < specMin:
-                    issues[SPECTRA_PROP] = "Lower limit for spectra is 3"
-                if upper > specMax:
-                    issues[SPECTRA_PROP] = "Upper limit for spectra is 198"
+                if "Difference" in self.getProperty(MODE_PROP).value:
+                    if lower < specMin:
+                        issues[SPECTRA_PROP] = "Lower limit for spectra is 3 in difference mode"
+                    if upper > specMax:
+                        issues[SPECTRA_PROP] = "Upper limit for spectra is 198 in difference mode"
             # Check comma separated lists
             if "," in speclist_str:
-                spectra_list = speclist_str.split(",")
-                for spec in spectra_list:
-                    spec = int(spec)
-                    # Check Min/Max boundaries
-                    if spec < specMin or spec > specMax:
-                        issues[SPECTRA_PROP] = "All Spectra must be between 3 and 198"
+                if "Difference" in self.getProperty(MODE_PROP).value:
+                    spectra_list = speclist_str.split(",")
+                    for spec in spectra_list:
+                        spec = int(spec)
+                        # Check Min/Max boundaries
+                        if spec < specMin or spec > specMax:
+                            issues[SPECTRA_PROP] = "All Spectra must be between 3 and 198 in difference mode"
 
         return issues
 
