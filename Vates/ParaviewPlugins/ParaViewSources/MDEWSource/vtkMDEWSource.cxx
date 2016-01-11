@@ -37,9 +37,6 @@ vtkStandardNewMacro(vtkMDEWSource)
   this->SetNumberOfOutputPorts(1);
 }
 
-/// Destructor
-vtkMDEWSource::~vtkMDEWSource() {}
-
 /*
  Setter for the recursion depth
  @param depth : recursion depth to use

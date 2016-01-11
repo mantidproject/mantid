@@ -30,9 +30,6 @@ vtkStandardNewMacro(vtkSplatterPlot)
   this->SetNumberOfOutputPorts(1);
 }
 
-/// Destructor
-vtkSplatterPlot::~vtkSplatterPlot() {}
-
 /**
  * Sets number of points.
  * @param nPoints : number of points.

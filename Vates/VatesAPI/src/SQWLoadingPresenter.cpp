@@ -163,9 +163,6 @@ namespace Mantid
       extractMetadata(eventWs);
     }
 
-    ///Destructor
-    SQWLoadingPresenter::~SQWLoadingPresenter() {}
-
     /*
     Getter for the workspace type name.
     @return Workspace Type Name
