@@ -198,11 +198,11 @@ private:
                                         std::string &preIntegFilename,
                                         std::string &preCurvesFilename,
                                         bool &found);
-  void
-  loadVanadiumPrecalcWorkspaces(const std::string &preIntegFilename,
-                                const std::string &preCurvesFilename,
-                                Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-                                Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
+
+  void loadVanadiumPrecalcWorkspaces(
+      const std::string &preIntegFilename, const std::string &preCurvesFilename,
+      Mantid::API::ITableWorkspace_sptr &vanIntegWS,
+      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, const std::string &vanNo);
 
   void calcVanadiumWorkspaces(const std::string &vanNo,
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,

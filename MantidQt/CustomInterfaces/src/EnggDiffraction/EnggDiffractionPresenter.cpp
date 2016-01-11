@@ -903,6 +903,9 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr ceriaWS;
 
+  // save vanIntegWS and vanCurvesWS as open genie
+  // see where spec number comes from
+
   loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
                                vanCurvesWS, cs.m_forceRecalcOverwrite);
 
@@ -1639,6 +1642,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
   findPrecalcVanadiumCorrFilenames(vanNo, inputDirCalib, preIntegFilename,
                                    preCurvesFilename, foundPrecalc);
 
+  // if pre caluclated not found ..
   if (forceRecalc || !foundPrecalc) {
     g_log.notice()
         << "Calculating Vanadium corrections. This may take a few seconds..."
@@ -1674,7 +1678,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                    << ", and " << preCurvesFilename << std::endl;
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
-                                    vanIntegWS, vanCurvesWS);
+                                    vanIntegWS, vanCurvesWS, vanNo);
     } catch (std::invalid_argument &ia) {
       g_log.error() << "Error while loading precalculated Vanadium corrections",
           "The files with precalculated Vanadium corection features (spectra "
@@ -1720,6 +1724,7 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
   found = false;
 
   const std::string runNo = std::string(2, '0').append(vanNo);
+
   preIntegFilename =
       g_enginxStr + "_precalculated_vanadium_run" + runNo + "_integration.nxs";
 
@@ -1755,10 +1760,14 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
 *
 * @param vanCurvesWS output (matrix) workspace loaded from the
 * precalculated Vanadium correction file, with the per-bank curves
+*
+* @param vanNo the Vanadium run number used for the openGenieAscii
+* output label
 */
 void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
     const std::string &preIntegFilename, const std::string &preCurvesFilename,
-    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS) {
+    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
+    const std::string &vanNo) {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
 
   auto alg =
@@ -1780,6 +1789,9 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
   algCurves->execute();
   // algCurves->getProperty("OutputWorkspace");
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
+
+  saveOpenGenie(curvesWSName, "1-1200", "North", vanNo);
+  saveOpenGenie(curvesWSName, "1201-2400", "South", vanNo);
 }
 
 /**
@@ -2203,8 +2215,15 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
   std::string fullFilename =
       outFileNameFactory(inputWorkspace, runNo, bank, ".his");
 
-  // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir("Focus");
+  Poco::Path saveDir;
+  if (inputWorkspace.std::string::find("curves") != std::string::npos ||
+      inputWorkspace.std::string::find("intgration") != std::string::npos) {
+    // Creates appropriate directory
+    saveDir = outFilesDir("Calibration");
+  } else {
+    // Creates appropriate directory
+    saveDir = outFilesDir("Focus");
+  }
 
   // append the full file name in the end
   saveDir.append(fullFilename);
@@ -2244,10 +2263,15 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
     std::string inputWorkspace, std::string runNo, std::string bank,
     std::string format) {
   std::string fullFilename;
-  if (inputWorkspace.std::string::find("texture") != std::string::npos) {
+
+  // calibration output files
+  if (inputWorkspace.std::string::find("curves") != std::string::npos) {
+    fullFilename = "ob+ENGINX_" + runNo + "_" + bank + "_bank" + format;
+
+    // focus output files
+  } else if (inputWorkspace.std::string::find("texture") != std::string::npos) {
     fullFilename = "ENGINX_" + runNo + "_texture_" + bank + format;
-  }
-  if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
+  } else if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
     fullFilename = "ENGINX_" + runNo + "_cropped_" +
                    boost::lexical_cast<std::string>(g_croppedCounter) + format;
     g_croppedCounter++;
