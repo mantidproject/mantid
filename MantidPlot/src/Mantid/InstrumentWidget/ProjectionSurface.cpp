@@ -692,7 +692,7 @@ void ProjectionSurface::setShowPeakLabelsFlag(bool on)
 /**
  * Enable or disable the show peak label flag
  */
-void ProjectionSurface::setShowPeakRelativeIntensity(bool on)
+void ProjectionSurface::setShowPeakRelativeIntensityFlag(bool on)
 {
     m_showPeakRelativeIntensity = on;
     for(int i=0;i < m_peakShapes.size(); ++i)

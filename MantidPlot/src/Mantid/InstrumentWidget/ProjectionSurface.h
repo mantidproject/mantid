@@ -205,8 +205,8 @@ public:
   bool getShowPeakRowsFlag()const {return m_showPeakRows;}
   void setShowPeakLabelsFlag(bool on);
   bool getShowPeakLabelsFlag()const {return m_showPeakLabels;}
-  void setShowPeakRelativeIntensity(bool on);
-  bool getShowPeakRelativeIntensity() const { return m_showPeakRelativeIntensity; }
+  void setShowPeakRelativeIntensityFlag(bool on);
+  bool getShowPeakRelativeIntensityFlag() const { return m_showPeakRelativeIntensity; }
 
 signals:
 

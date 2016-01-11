@@ -13,11 +13,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 //     Forward declarations
 ///////////////////////////////////////////////////////////////////////////////
-namespace Mantid{
-  namespace API{
-    class IPeak;
-    class IPeaksWorkspace;
-  }
+namespace Mantid {
+namespace API {
+class IPeak;
+class IPeaksWorkspace;
+}
 }
 
 class UnwrappedSurface;
@@ -28,50 +28,105 @@ class UnwrappedSurface;
  * A label shows three numbers h,k, and l. A combined label replaces non-equal
  * numbers of included markers with its letter.
  */
-class PeakHKL
-{
+class PeakHKL {
 public:
-  PeakHKL(PeakMarker2D* m,const QRectF& trect,bool sr);
-  bool add(PeakMarker2D* marker,const QRectF& trect);
-  void draw(QPainter& painter,int prec = 6);
-  void print()const;
+  PeakHKL(PeakMarker2D *m, const QRectF &trect, bool sr);
+  bool add(PeakMarker2D *marker, const QRectF &trect);
+  void draw(QPainter &painter, int prec = 6);
+  void print() const;
 
 private:
   static QString formatNumber(double h, int prec);
-  QPointF p; ///< untransformed marker origin
-  QRectF rect; ///< label's screen area in transformed coords
-  double h,k,l; ///< h,k, and l
-  bool nh,nk,nl; ///< true if h, k, or l is numeric
+  QPointF p;       ///< untransformed marker origin
+  QRectF rect;     ///< label's screen area in transformed coords
+  double h, k, l;  ///< h,k, and l
+  bool nh, nk, nl; ///< true if h, k, or l is numeric
   QList<int> rows; ///< row indices of the peaks in their PeaksWorkspace
   bool showRows;
+};
+
+class AbstractIntensityScale {
+public:
+  AbstractIntensityScale(
+      const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
+    setPeaksWorkspace(pws);
+  }
+
+  void
+  setPeaksWorkspace(const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
+
+  virtual PeakMarker2D::Style
+  getScaledMarker(double intensity,
+                  const PeakMarker2D::Style &baseStyle) const = 0;
+
+protected:
+  double m_maxIntensity = 0.0;
+  double m_minIntensity = 0.0;
+};
+
+class DefaultIntensityScale : public AbstractIntensityScale {
+public:
+  DefaultIntensityScale(
+      const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
+      : AbstractIntensityScale(pws) {}
+
+protected:
+  PeakMarker2D::Style
+  getScaledMarker(double intensity,
+                  const PeakMarker2D::Style &baseStyle) const {
+    UNUSED_ARG(intensity);
+
+    return baseStyle;
+  }
+};
+
+class QualitativeIntensityScale : public AbstractIntensityScale {
+public:
+  QualitativeIntensityScale(
+      const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
+      : AbstractIntensityScale(pws) {}
+
+protected:
+  PeakMarker2D::Style
+  getScaledMarker(double intensity,
+                  const PeakMarker2D::Style &baseStyle) const;
+
+private:
+  int getSize(double intensity) const;
+
+  // Scaling to weak < 0.1 <= medium <= 0.6 <= strong <= 0.9 <= very strong
+  std::vector<double> m_intensityLevels = {0.1, 0.6, 0.9};
 };
 
 /**
  * Class for managing peak markers on an unwrapped instrument surface.
  */
-class PeakOverlay: public Shape2DCollection, public MantidQt::API::WorkspaceObserver
-{
+class PeakOverlay : public Shape2DCollection,
+                    public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:
-  PeakOverlay(UnwrappedSurface* surface, boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
-  ~PeakOverlay(){}
+  PeakOverlay(UnwrappedSurface *surface,
+              boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
+  ~PeakOverlay() {}
   /// Override the drawing method
-  void draw(QPainter& painter) const;
-  virtual void removeShapes(const QList<Shape2D*>&);
+  void draw(QPainter &painter) const;
+  virtual void removeShapes(const QList<Shape2D *> &);
   virtual void clear();
 
   /// Create the markers
-  void createMarkers(const PeakMarker2D::Style& style);
-  void addMarker(PeakMarker2D* m);
-  QList<PeakMarker2D*> getMarkersWithID(int detID)const;
-  int getNumberPeaks()const;
-  Mantid::Geometry::IPeak& getPeak(int);
+  void createMarkers(const PeakMarker2D::Style &style);
+  void addMarker(PeakMarker2D *m);
+  QList<PeakMarker2D *> getMarkersWithID(int detID) const;
+  int getNumberPeaks() const;
+  Mantid::Geometry::IPeak &getPeak(int);
   /// Return PeaksWorkspace associated with this overlay.
-  boost::shared_ptr<Mantid::API::IPeaksWorkspace> getPeaksWorkspace() {return m_peaksWorkspace;}
+  boost::shared_ptr<Mantid::API::IPeaksWorkspace> getPeaksWorkspace() {
+    return m_peaksWorkspace;
+  }
   /// set HKL precision
-  void setPrecision(int prec) const {m_precision = prec;}
-  void setShowRowsFlag(bool yes) {m_showRows = yes;}
-  void setShowLabelsFlag(bool yes) {m_showLabels = yes;}
+  void setPrecision(int prec) const { m_precision = prec; }
+  void setShowRowsFlag(bool yes) { m_showRows = yes; }
+  void setShowLabelsFlag(bool yes) { m_showLabels = yes; }
   void setShowRelativeIntensityFlag(bool yes);
   static PeakMarker2D::Style getDefaultStyle(int index);
   void setPeakVisibility(double xmin, double xmax, QString units);
@@ -81,22 +136,23 @@ signals:
 
 private:
   /// A WorkspaceObserver handle implemented.
-  virtual void afterReplaceHandle(const std::string& wsName,
-    const Mantid::API::Workspace_sptr ws);
+  virtual void afterReplaceHandle(const std::string &wsName,
+                                  const Mantid::API::Workspace_sptr ws);
+  void recreateMarkers(const PeakMarker2D::Style &style);
 
-  double getMaximumIntensity() const;
-  void scaleMarkerSizesToIntensities();
-  int getMarkerSizeIncrement(double intensity, double maxIntensity) const;
-
-
-  QMultiHash<int,PeakMarker2D*> m_det2marker; ///< detector ID to PeakMarker2D map
+  QMultiHash<int, PeakMarker2D *>
+      m_det2marker; ///< detector ID to PeakMarker2D map
   mutable QList<PeakHKL> m_labels;
-  boost::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
-  UnwrappedSurface* m_surface; ///< pointer to the surface this overlay is applied to
+  boost::shared_ptr<Mantid::API::IPeaksWorkspace>
+      m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
+  UnwrappedSurface *
+      m_surface; ///< pointer to the surface this overlay is applied to
   mutable int m_precision;
   mutable bool m_showRows;   ///< flag to show peak row index
   mutable bool m_showLabels; ///< flag to show peak hkl labels
-  mutable bool m_showRelativeIntensity; ///< flag to show peak intensities
+
+  std::unique_ptr<AbstractIntensityScale> m_peakIntensityScale;
+
   static QList<PeakMarker2D::Style> g_defaultStyles; ///< default marker styles
 };
 
