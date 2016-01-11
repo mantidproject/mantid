@@ -38,7 +38,7 @@ void DeleteTableRows::exec() {
   std::vector<size_t> rows = getProperty("Rows");
   // sort the row indices in reverse order
   std::set<size_t, std::greater<size_t>> sortedRows(rows.begin(), rows.end());
-  std::set<size_t, std::greater<size_t>>::iterator it = sortedRows.begin();
+  auto it = sortedRows.begin();
   for (; it != sortedRows.end(); ++it) {
     if (*it >= tw->rowCount())
       continue;

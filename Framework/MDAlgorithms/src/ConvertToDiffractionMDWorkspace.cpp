@@ -261,8 +261,8 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     typename std::vector<T> &events = *events_ptr;
 
     // Iterators to start/end
-    typename std::vector<T>::iterator it = events.begin();
-    typename std::vector<T>::iterator it_end = events.end();
+    auto it = events.begin();
+    auto it_end = events.end();
 
     for (; it != it_end; it++) {
       // Get the wavenumber in ang^-1 using the previously calculated constant.

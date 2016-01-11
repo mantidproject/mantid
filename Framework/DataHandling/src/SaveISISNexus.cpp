@@ -327,7 +327,7 @@ int SaveISISNexus::saveStringVectorOpen(const char *name,
     }
   if (buff_size <= 0)
     buff_size = 1;
-  char *buff = new char[buff_size];
+  auto buff = new char[buff_size];
   int dim[2];
   dim[0] = static_cast<int>(str_vec.size());
   dim[1] = buff_size;

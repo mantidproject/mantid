@@ -85,8 +85,7 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
   std::vector<Kernel::DateAndTime> times1 = p1->timesAsVector();
   std::vector<Kernel::DateAndTime> times2 = p2->timesAsVector();
 
-  Kernel::TimeSeriesProperty<double> *rp =
-      new Kernel::TimeSeriesProperty<double>(ologname);
+  auto rp = new Kernel::TimeSeriesProperty<double>(ologname);
 
   // 2. Merge
   size_t index1 = 0;

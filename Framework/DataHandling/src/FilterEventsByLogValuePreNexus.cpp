@@ -515,8 +515,7 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   m_loadOnlySomeSpectra = (this->m_spectraList.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (std::vector<int64_t>::iterator it = m_spectraList.begin();
-       it != m_spectraList.end(); it++)
+  for (auto it = m_spectraList.begin(); it != m_spectraList.end(); it++)
     spectraLoadMap[*it] = true;
 
   //---------------------------------------------------------------------------
@@ -676,8 +675,7 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
 void FilterEventsByLogValuePreNexus::addToWorkspaceLog(std::string logtitle,
                                                        size_t mindex) {
   // Create TimeSeriesProperty
-  TimeSeriesProperty<double> *property =
-      new TimeSeriesProperty<double>(logtitle);
+  auto property = new TimeSeriesProperty<double>(logtitle);
 
   // Add entries
   size_t nbins = this->wrongdetid_pulsetimes[mindex].size();
@@ -1377,8 +1375,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
       // Obtain the global map index for this wrong detector ID events entry in
       // local map
       size_t mindex = 0;
-      std::map<PixelType, size_t>::iterator git =
-          this->wrongdetidmap.find(tmpid);
+      auto git = this->wrongdetidmap.find(tmpid);
       if (git == this->wrongdetidmap.end()) {
         // Create 'wrong detid' global map entry if not there
         size_t newindex = this->wrongdetid_pulsetimes.size();
@@ -1395,7 +1392,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
       }
 
       // Find local map index
-      std::map<PixelType, size_t>::iterator lit = local_pidindexmap.find(tmpid);
+      auto lit = local_pidindexmap.find(tmpid);
       size_t localindex = lit->second;
 
       // Append local (thread) loaded events (pulse + tof) to global wrong detid
@@ -2253,8 +2250,7 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
   eventws->getInstrument()->getDetectors(detector_map);
 
   // Set up
-  for (detid2det_map::iterator it = detector_map.begin();
-       it != detector_map.end(); it++) {
+  for (auto it = detector_map.begin(); it != detector_map.end(); it++) {
     if (!it->second->isMonitor()) {
       // Add non-monitor detector ID
       size_t workspaceIndex = m_pixelToWkspindex[it->first];

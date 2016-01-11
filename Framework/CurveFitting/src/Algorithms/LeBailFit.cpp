@@ -1623,8 +1623,7 @@ void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap,
   for (size_t icycle = 1; icycle <= maxcycles; ++icycle) {
     // Refine parameters (for all parameters in turn) to data with background
     // removed
-    for (map<int, vector<string>>::iterator giter = m_MCGroups.begin();
-         giter != m_MCGroups.end(); ++giter) {
+    for (auto giter = m_MCGroups.begin(); giter != m_MCGroups.end(); ++giter) {
       // Propose new value for ONE AND ONLY ONE Monte Carlo parameter group
       /*
       int igroup = giter->first; // group id
@@ -1822,7 +1821,7 @@ void LeBailFit::setupRandomWalkStrategyFromTable(
     }
 
     // 3. Set up MC parameters, A0, A1, non-negative
-    map<string, Parameter>::iterator piter = m_funcParameters.find(parname);
+    auto piter = m_funcParameters.find(parname);
     if (piter != m_funcParameters.end()) {
       piter->second.mcA0 = a0;
       piter->second.mcA1 = a1;
@@ -2171,7 +2170,7 @@ bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r,
   for (size_t i = 0; i < mcgroup.size(); ++i) {
     // Find out the i-th parameter to be refined or not
     string paramname = mcgroup[i];
-    map<string, Parameter>::iterator mapiter = curparammap.find(paramname);
+    auto mapiter = curparammap.find(paramname);
     if (mapiter == curparammap.end()) {
       stringstream errmsg;
       errmsg << "Parameter to update (" << paramname
@@ -2262,7 +2261,7 @@ bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r,
     }
 
     // Apply to new parameter map
-    map<string, Parameter>::iterator newmiter = newparammap.find(paramname);
+    auto newmiter = newparammap.find(paramname);
     if (newmiter == newparammap.end())
       throw runtime_error(
           "New parameter map does not contain parameter that is updated.");

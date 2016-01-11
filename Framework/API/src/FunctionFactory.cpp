@@ -83,7 +83,7 @@ IFunction_sptr FunctionFactoryImpl::createSimple(
   }
 
   const std::vector<Expression> &terms = expr.terms();
-  std::vector<Expression>::const_iterator term = terms.begin();
+  auto term = terms.cbegin();
 
   if (term->name() != "=")
     inputError(expr.str());
@@ -146,7 +146,7 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
   }
 
   const std::vector<Expression> &terms = expr.terms();
-  std::vector<Expression>::const_iterator it = terms.begin();
+  auto it = terms.cbegin();
   const Expression &term = it->bracketsRemoved();
 
   CompositeFunction_sptr cfun;
@@ -166,7 +166,7 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
       inputError(expr.str());
     }
   } else if (term.name() == ",") {
-    std::vector<Expression>::const_iterator firstTerm = term.terms().begin();
+    auto firstTerm = term.terms().cbegin();
     if (firstTerm->name() == "=") {
       if (firstTerm->terms()[0].name() == "composite") {
         cfun = boost::dynamic_pointer_cast<CompositeFunction>(

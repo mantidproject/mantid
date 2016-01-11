@@ -324,7 +324,7 @@ void AnvredCorrection::execEvent() {
     std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 
     std::vector<WeightedEventNoTime>::iterator itev;
-    std::vector<WeightedEventNoTime>::iterator itev_end = events.end();
+    auto itev_end = events.end();
 
     Mantid::Kernel::Units::Wavelength wl;
     std::vector<double> timeflight;
