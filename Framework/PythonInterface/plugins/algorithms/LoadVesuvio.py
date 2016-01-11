@@ -141,12 +141,19 @@ class LoadVesuvio(LoadEmptyVesuvio):
     def validateInputs(self):
         issues = {}
 
-        # Validtae run number ranges
+        # Validate run number ranges
         run_str = self.getProperty(RUN_PROP).value
         if "-" in run_str:
             lower, upper = run_str.split("-")
             if upper < lower:
                 issues[RUN_PROP] = "Range must be in format lower-upper"
+
+        # Validate SpectrumList
+        speclist_str = self.getProperty(SPECTRA_PROP).value
+        if "-" in speclist_str:
+            lower, upper = speclist_str.split("-")
+            if upper < lower:
+                issues[SPECTRA_PROP] = "Range must be in format lower-upper"
 
         return issues
 
