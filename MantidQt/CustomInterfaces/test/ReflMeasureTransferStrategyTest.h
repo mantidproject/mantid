@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
+#include "MantidKernel/make_unique.h"
 #include <memory>
 #include <gmock/gmock.h>
 #include <utility>
@@ -69,7 +70,7 @@ public:
 
     strategy.transferRuns(data, progress);
 
-    TS_ASSERT(Mock::VerifyAndClear(mockCatInfoi_ptr));
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
     TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
   }
 
@@ -357,15 +358,14 @@ public:
     auto result = transferRuns.getTransferRuns();
     TSM_ASSERT_EQUALS("Measurements where invalid. Results should be empty.", 0,
                       result.size());
-    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
   }
 
   void test_clone() {
 
     // Sub component ICatalogInfo will be cloned
     auto pCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
-    auto pCatInfo_ptr = pcatInfo.get();
     EXPECT_CALL(*pCatInfo, clone()).WillOnce(Return(new MockICatalogInfo));
 
     // Sub component Measurment source will be cloned
