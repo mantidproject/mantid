@@ -247,7 +247,7 @@ template <class Scalar> void vtkMDHWSignalArray<Scalar>::ClearLookup() {
 template <class Scalar>
 double *vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i) {
   m_iterator->jumpTo(m_offset + i);
-  m_temporaryTuple[0] = m_iterator->getNormalizedSignal();
+  m_temporaryTuple[0] = m_iterator->getNormalizedSignalWithMask();
   return &m_temporaryTuple[0];
 }
 
@@ -255,7 +255,7 @@ double *vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i) {
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i, double *tuple) {
   m_iterator->jumpTo(m_offset + i);
-  tuple[0] = m_iterator->getNormalizedSignal();
+  tuple[0] = m_iterator->getNormalizedSignalWithMask();
 }
 
 //------------------------------------------------------------------------------
@@ -293,13 +293,13 @@ vtkIdType vtkMDHWSignalArray<Scalar>::Lookup(const Scalar &val,
 template <class Scalar>
 Scalar vtkMDHWSignalArray<Scalar>::GetValue(vtkIdType idx) {
   m_iterator->jumpTo(m_offset + idx);
-  return m_iterator->getNormalizedSignal();
+  return m_iterator->getNormalizedSignalWithMask();
 }
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar &vtkMDHWSignalArray<Scalar>::GetValueReference(vtkIdType idx) {
   m_iterator->jumpTo(m_offset + idx);
-  m_temporaryTuple[0] = m_iterator->getNormalizedSignal();
+  m_temporaryTuple[0] = m_iterator->getNormalizedSignalWithMask();
   return m_temporaryTuple[0];
 }
 
@@ -308,7 +308,7 @@ template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::GetTupleValue(vtkIdType tupleId,
                                                Scalar *tuple) {
   m_iterator->jumpTo(m_offset + tupleId);
-  tuple[0] = m_iterator->getNormalizedSignal();
+  tuple[0] = m_iterator->getNormalizedSignalWithMask();
 }
 
 //------------------------------------------------------------------------------

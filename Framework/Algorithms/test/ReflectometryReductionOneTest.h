@@ -144,7 +144,7 @@ public:
 
     const double outTheta = alg->getProperty("ThetaOut");
 
-    TS_ASSERT_DELTA(45.0 / 2, outTheta, 0.00001);
+    TS_ASSERT_DELTA(45.0, outTheta, 0.00001);
   }
 };
 

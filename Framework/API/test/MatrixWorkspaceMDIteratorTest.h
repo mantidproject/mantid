@@ -126,6 +126,54 @@ public:
     }
     delete it;
   }
+
+  /*
+   * For MatrixWorkspaces, masks are applied by setting the actual data to 0
+   * rather than just returning 0 for masked data with
+   * getNormalizedSignalWithMask, therefore getNormalizedSignal and
+   * getNormalizedSignalWithMask should always return the same value.
+   */
+  void test_getNormalizedSignalWithMask() {
+    boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
+
+    // Mask a bin
+    ws->maskBin(0, 4, 1);
+
+    IMDIterator *it = NULL;
+    TS_ASSERT_THROWS_NOTHING(it = ws->createIterator(NULL));
+
+    TS_ASSERT_DELTA(it->getNormalizedSignal(),
+                    it->getNormalizedSignalWithMask(), 1e-5);
+    it->next();
+    TS_ASSERT_DELTA(it->getNormalizedSignal(),
+                    it->getNormalizedSignalWithMask(), 1e-5);
+
+    it->setNormalization(NoNormalization);
+    TS_ASSERT_DELTA(it->getNormalizedSignal(),
+                    it->getNormalizedSignalWithMask(), 1e-5);
+    // Area of each bin is 4.0
+    it->setNormalization(VolumeNormalization);
+    TS_ASSERT_DELTA(it->getNormalizedSignal(),
+                    it->getNormalizedSignalWithMask(), 1e-5);
+    it->setNormalization(NumEventsNormalization);
+    TS_ASSERT_DELTA(it->getNormalizedSignal(),
+                    it->getNormalizedSignalWithMask(), 1e-5);
+
+    it->next();
+    it->next();
+    it->next();
+    // This one is masked, the two functions should still return the same
+    TS_ASSERT_DELTA(it->getNormalizedSignal(),
+                    it->getNormalizedSignalWithMask(), 1e-5);
+    TS_ASSERT_DELTA(it->getNormalizedSignalWithMask(), 0.0, 1e-5);
+    it->next();
+    it->next();
+    // Workspace index 1, x index 1
+    TS_ASSERT_DELTA(it->getNormalizedSignal(),
+                    it->getNormalizedSignalWithMask(), 1e-5);
+
+    delete it;
+  }
 };
 
 #endif /* MANTID_API_MATRIXWORKSPACEMDITERATORTEST_H_ */

@@ -91,6 +91,8 @@ public:
 
   virtual signal_t getNormalizedError() const;
 
+  virtual signal_t getNormalizedSignalWithMask() const;
+
   virtual signal_t getSignal() const;
 
   virtual signal_t getError() const;
