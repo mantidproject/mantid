@@ -30,7 +30,7 @@ namespace Mantid
     if (m_wsName.empty()) {
       throw std::invalid_argument("The workspace name is empty.");
     }
-    if (NULL == repository) {
+    if (nullptr == repository) {
       throw std::invalid_argument("The repository is NULL");
     }
     if (nullptr == m_view) {
@@ -48,7 +48,7 @@ namespace Mantid
     if (!m_repository->canProvideWorkspace(m_wsName)) {
       // The workspace does not exist.
       bCanReadIt = false;
-    } else if (NULL ==
+    } else if (nullptr ==
                boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
                    m_repository->fetchWorkspace(m_wsName))
                    .get()) {

@@ -186,8 +186,9 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     lineFactory->SetSuccessor(std::move(zeroDFactory));
 
     hexahedronFactory->setTime(m_time);
-    vtkDataSet *product = m_presenter->execute(
-        hexahedronFactory.get(), loadingProgressUpdate, drawingProgressUpdate);
+    vtkSmartPointer<vtkDataSet> product;
+    product.TakeReference(m_presenter->execute(
+        hexahedronFactory.get(), loadingProgressUpdate, drawingProgressUpdate));
 
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
     vtkNew<vtkBox> box;
@@ -197,7 +198,8 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     clipper->SetClipFunction(box.GetPointer());
     clipper->SetInsideOut(true);
     clipper->Update();
-    vtkDataSet* clipperOutput = clipper->GetOutput();
+    auto clipperOutput =
+        vtkSmartPointer<vtkDataSet>::Take(clipper->GetOutput());
     //--------------------------------------------------------
 
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
