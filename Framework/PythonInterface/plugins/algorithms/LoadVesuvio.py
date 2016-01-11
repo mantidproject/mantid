@@ -912,9 +912,15 @@ class LoadVesuvio(LoadEmptyVesuvio):
 class SpectraToFoilPeriodMap(object):
     """Defines the mapping between a spectrum number
     & the period index into a WorkspaceGroup for a foil state.
-    2 period only runs in forward scattering - odd_even & even_odd
-    3 period only runs in back scattering - one_to_one
-    6 period runs in both backward and forward scattering
+    2 period :: forward scattering
+    3 period :: back scattering
+    6 period :: back & forward scattering
+
+    one_to_one          :: Only used in back scattering where there is a single
+                           static foil
+    odd_even/even_odd   :: Only used in forward scatter models when the foil
+                           is/isn't infront of each detector. First bank 135-142
+                           is odd_even, second (143-150) is even_odd and so on.
     """
 
     def __init__(self, nperiods=6):
