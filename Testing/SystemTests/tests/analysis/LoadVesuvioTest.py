@@ -32,20 +32,6 @@ class VesuvioTests(unittest.TestCase):
         self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False,
                                                diff_mode=diff_mode)
 
-    def test_load_with_back_scattering_spectra_produces_correct_workspace_using_single_difference(self):
-        diff_mode = "SingleDifference"
-        self._run_load("14188", "3-134", diff_mode)
-
-        # Check some data
-        evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.10197619851290973, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.13636377723938517, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.053028031396861852, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.070808659911133845, evs_raw.readE(131)[1188], places=DIFF_PLACES)
-
-        self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False,
-                                               diff_mode=diff_mode)
-
     def test_load_with_forward_scattering_spectra_produces_correct_workspace(self):
         diff_mode = "SingleDifference"
         self._run_load("14188", "135-198", diff_mode)
@@ -113,16 +99,6 @@ class VesuvioTests(unittest.TestCase):
         evs_raw = mtd[self.ws_name]
         self.assertAlmostEqual(37594.0, evs_raw.readY(0)[1], places=DIFF_PLACES)
         self.assertAlmostEqual(193.89172236070317, evs_raw.readE(0)[1], places=DIFF_PLACES)
-
-    def test_using_ip_file_adjusts_instrument_and_attaches_parameters_difference_mode(self):
-        self._run_load("14188", "3", "SingleDifference", "IP0005.dat")
-
-        # Check some data
-        evs_raw = mtd[self.ws_name]
-        det0 = evs_raw.getDetector(0)
-        param = det0.getNumberParameter("t0")
-        self.assertEqual(1, len(param))
-        self.assertAlmostEqual(-0.4157, param[0], places=4)
 
     def test_using_ip_file_adjusts_instrument_and_attaches_parameters_foil_mode(self):
         self._run_load("14188", "3", "FoilOut", "IP0005.dat")
