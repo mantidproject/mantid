@@ -154,6 +154,16 @@ class LoadVesuvio(LoadEmptyVesuvio):
             lower, upper = speclist_str.split("-")
             if upper < lower:
                 issues[SPECTRA_PROP] = "Range must be in format lower-upper"
+            if lower < 3:
+                issues[SPECTRA_PROP] = "Lower limit for spectra is 3"
+            if upper > 198:
+                issues[SPECTRA_PROP] = "Upper limit for spectra is 198"
+        elif "," in speclist_str:
+            spectra_list = speclist_str.split(",")
+            logger.information("spectra_list = " + str(spectra_list))
+            for spec in spectra_list:
+                if int(spec) < 3 or int(spec) > 198:
+                    issues[SPECTRA_PROP] = "Invalid Spectra. All Spectra must be between 3 and 198"
 
         return issues
 
