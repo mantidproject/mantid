@@ -92,52 +92,55 @@ public:
 
   void testCanLoadWithInvalidName()
   {
-    MockWorkspaceProvider* repository = new MockWorkspaceProvider;
+    auto repository = Mantid::Kernel::make_unique<MockWorkspaceProvider>();
     EXPECT_CALL(*repository, canProvideWorkspace(_)).WillOnce(Return(false)); //No matter what the argument, always returns false.
 
     //Give a dummy name corresponding to the workspace.
     MDEWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository, "_");
+        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository.release(),
+        "_");
 
     TSM_ASSERT("Should indicate that the workspace cannot be read-out since the name is not in the Repository.", !presenter.canReadFile());
   }
 
   void testCanLoadWithWrongWsType()
   {
-    MockWorkspaceProvider* repository = new MockWorkspaceProvider;
+    auto repository = Mantid::Kernel::make_unique<MockWorkspaceProvider>();
     Mantid::API::Workspace_sptr badWs = getBadWorkspace(); // Not an IMDEventWorkspace.
     EXPECT_CALL(*repository, canProvideWorkspace(_)).WillOnce(Return(true)); //No matter what the argument, always returns true.
     EXPECT_CALL(*repository, fetchWorkspace(_)).WillOnce(Return(badWs)); 
 
     //Give a dummy name corresponding to the workspace.
     MDEWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository, "_");
+        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository.release(),
+        "_");
 
     TSM_ASSERT("Should indicate that the workspace cannot be read-out since it is not of the right type.", !presenter.canReadFile());
   }
 
   void testCanLoadSucceeds()
   {
-    MockWorkspaceProvider* repository = new MockWorkspaceProvider;
+    auto repository = Mantid::Kernel::make_unique<MockWorkspaceProvider>();
     Mantid::API::Workspace_sptr goodWs = getReal4DWorkspace();
     EXPECT_CALL(*repository, canProvideWorkspace(_)).WillOnce(Return(true)); //No matter what the argument, always returns true.
     EXPECT_CALL(*repository, fetchWorkspace(_)).WillOnce(Return(goodWs)); 
 
     //Give a dummy name corresponding to the workspace.
     MDEWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository, "_");
+        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository.release(), "_");
 
     TSM_ASSERT("Should have worked! Workspace is of correct type and repository says ws is present.!", presenter.canReadFile());
   }
 
   void testExtractMetadata()
   {
-    MockWorkspaceProvider* repository = new MockWorkspaceProvider;
+    auto repository = Mantid::Kernel::make_unique<MockWorkspaceProvider>();
     Mantid::API::Workspace_sptr ws = getReal4DWorkspace();
     EXPECT_CALL(*repository, fetchWorkspace(_)).Times(1).WillRepeatedly(Return(ws));
 
     MDEWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository, "_");
+        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository.release(),
+        "_");
 
     //Test that it doesn't work when not setup.
     TSM_ASSERT_THROWS("::executeLoadMetadata is critical to setup, should throw if not run first.", presenter.getGeometryXML(), std::runtime_error);
@@ -152,11 +155,13 @@ public:
   void testExecution()
   {
     //Setup view
-    MockMDLoadingView *view = new MockMDLoadingView();
-    EXPECT_CALL(*view, getRecursionDepth()).Times(1);
-    EXPECT_CALL(*view, getLoadInMemory())
+    std::unique_ptr<MDLoadingView> view =
+        Mantid::Kernel::make_unique<MockMDLoadingView>();
+    auto mockView = dynamic_cast<MockMDLoadingView *>(view.get());
+    EXPECT_CALL(*mockView, getRecursionDepth()).Times(1);
+    EXPECT_CALL(*mockView, getLoadInMemory())
         .Times(0); // Not a question that needs asking for this presenter type.
-    EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*mockView, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
     //Setup rendering factory
     MockvtkDataSetFactory factory;
@@ -164,7 +169,7 @@ public:
     EXPECT_CALL(factory, create(_)).WillOnce(Return(vtkUnstructuredGrid::New()));
     EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
-    MockWorkspaceProvider* repository = new MockWorkspaceProvider;
+    auto repository = Mantid::Kernel::make_unique<MockWorkspaceProvider>();
     Mantid::API::Workspace_sptr ws = getReal4DWorkspace();
     EXPECT_CALL(*repository, fetchWorkspace(_)).Times(2).WillRepeatedly(Return(ws));
 
@@ -173,10 +178,8 @@ public:
     MockProgressAction mockDrawingProgressAction;
 
     //Create the presenter and run it!
-    std::unique_ptr<MDLoadingView> uniqueView(
-        dynamic_cast<MDLoadingView *>(view));
-    MDEWInMemoryLoadingPresenter presenter(std::move(uniqueView), repository,
-                                           "_");
+    MDEWInMemoryLoadingPresenter presenter(std::move(view),
+                                           repository.release(), "_");
     presenter.executeLoadMetadata();
     vtkSmartPointer<vtkDataSet> product = presenter.execute(
         &factory, mockLoadingProgressAction, mockDrawingProgressAction);
@@ -189,7 +192,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
     TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
     TSM_ASSERT("Special coordinate metadata failed.", -1 < presenter.getSpecialCoordinates());
-    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }
 

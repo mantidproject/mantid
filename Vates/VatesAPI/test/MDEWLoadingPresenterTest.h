@@ -81,85 +81,85 @@ public:
 
 void testShouldLoadFirstTimeRound()
 {
-  auto view = new MockMDLoadingView();
-  EXPECT_CALL(*view, getRecursionDepth()).Times(2); 
-  EXPECT_CALL(*view, getLoadInMemory()).Times(2); 
-  EXPECT_CALL(*view, getTime()).Times(2);
-  EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(0);
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
+  EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
+  EXPECT_CALL(*mockView, getLoadInMemory()).Times(2);
+  EXPECT_CALL(*mockView, getTime()).Times(2);
+  EXPECT_CALL(*mockView, updateAlgorithmProgress(_, _)).Times(0);
 
-  std::unique_ptr<MDLoadingView> uniqueView(
-      dynamic_cast<MDLoadingView *>(view));
-  ConcreteMDEWLoadingPresenter presenter(std::move(uniqueView));
+  ConcreteMDEWLoadingPresenter presenter(std::move(view));
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
   TSM_ASSERT("Should NOT request load on second usage. Should have it's state syncrhonised with view and the view hasn't changed!", !presenter.shouldLoad());
   
-  TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(view));
+  TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(mockView));
 }
 
 void testTimeChanged()
 {
-  auto view = new MockMDLoadingView();
-  EXPECT_CALL(*view, getRecursionDepth()).Times(2);
-  EXPECT_CALL(*view, getLoadInMemory()).Times(2);
-  EXPECT_CALL(*view, getTime())
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
+  EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
+  EXPECT_CALL(*mockView, getLoadInMemory()).Times(2);
+  EXPECT_CALL(*mockView, getTime())
       .Times(2)
       .WillOnce(Return(0))
       .WillOnce(Return(1)); // Time has changed on 2nd call
-  EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(0);
+  EXPECT_CALL(*mockView, updateAlgorithmProgress(_, _)).Times(0);
 
-  std::unique_ptr<MDLoadingView> uniqueView(
-      dynamic_cast<MDLoadingView *>(view));
-  ConcreteMDEWLoadingPresenter presenter(std::move(uniqueView));
+  ConcreteMDEWLoadingPresenter presenter(std::move(view));
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
   TSM_ASSERT("Time has changed, but that shouldn't trigger load",
              !presenter.shouldLoad());
 
   TSM_ASSERT("View not used as expected.",
-             Mock::VerifyAndClearExpectations(view));
+             Mock::VerifyAndClearExpectations(mockView));
 }
 
 void testLoadInMemoryChanged()
 {
-  auto view = new MockMDLoadingView();
-  EXPECT_CALL(*view, getRecursionDepth()).Times(2);
-  EXPECT_CALL(*view, getLoadInMemory())
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
+  EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
+  EXPECT_CALL(*mockView, getLoadInMemory())
       .Times(2)
       .WillOnce(Return(true))
       .WillOnce(Return(false)); // Load in memory changed
-  EXPECT_CALL(*view, getTime()).Times(2);
-  EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(0);
+  EXPECT_CALL(*mockView, getTime()).Times(2);
+  EXPECT_CALL(*mockView, updateAlgorithmProgress(_, _)).Times(0);
 
-  std::unique_ptr<MDLoadingView> uniqueView(
-      dynamic_cast<MDLoadingView *>(view));
-  ConcreteMDEWLoadingPresenter presenter(std::move(uniqueView));
+  ConcreteMDEWLoadingPresenter presenter(std::move(view));
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
   TSM_ASSERT("Load in memory changed. this SHOULD trigger re-load",
              presenter.shouldLoad());
 
   TSM_ASSERT("View not used as expected.",
-             Mock::VerifyAndClearExpectations(view));
+             Mock::VerifyAndClearExpectations(mockView));
 }
 
 void testDepthChanged()
 {
-  auto view = new MockMDLoadingView();
-  EXPECT_CALL(*view, getRecursionDepth())
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
+  EXPECT_CALL(*mockView, getRecursionDepth())
       .Times(2)
       .WillOnce(Return(10))
       .WillOnce(Return(100)); // Recursion depth changed.
-  EXPECT_CALL(*view, getLoadInMemory()).Times(2);
-  EXPECT_CALL(*view, getTime()).Times(2);
-  EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(0);
+  EXPECT_CALL(*mockView, getLoadInMemory()).Times(2);
+  EXPECT_CALL(*mockView, getTime()).Times(2);
+  EXPECT_CALL(*mockView, updateAlgorithmProgress(_, _)).Times(0);
 
-  std::unique_ptr<MDLoadingView> uniqueView(
-      dynamic_cast<MDLoadingView *>(view));
-  ConcreteMDEWLoadingPresenter presenter(std::move(uniqueView));
+  ConcreteMDEWLoadingPresenter presenter(std::move(view));
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
   TSM_ASSERT("Depth has changed, but that shouldn't trigger load",
              !presenter.shouldLoad());
 
   TSM_ASSERT("View not used as expected.",
-             Mock::VerifyAndClearExpectations(view));
+             Mock::VerifyAndClearExpectations(mockView));
 }
 
 void testhasTDimensionWhenIntegrated() {

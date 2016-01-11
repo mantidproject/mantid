@@ -73,11 +73,13 @@ void testCanReadFile()
 void testExecution()
 {
   //Setup view
-  MockMDLoadingView* view = new MockMDLoadingView();
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
-  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1));
-  EXPECT_CALL(*view, getTime()).Times(AtLeast(1));
-  EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  auto mockView = dynamic_cast<MockMDLoadingView *>(view.get());
+  EXPECT_CALL(*mockView, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(*mockView, getLoadInMemory()).Times(AtLeast(1));
+  EXPECT_CALL(*mockView, getTime()).Times(AtLeast(1));
+  EXPECT_CALL(*mockView, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
@@ -89,10 +91,7 @@ void testExecution()
   MockProgressAction mockDrawingProgressUpdate;
 
   //Create the presenter and runit!
-  std::unique_ptr<MDLoadingView> uniqueView(
-      dynamic_cast<MDLoadingView *>(view));
-  EventNexusLoadingPresenter presenter(std::move(uniqueView),
-                                       getSuitableFile());
+  EventNexusLoadingPresenter presenter(std::move(view), getSuitableFile());
   presenter.executeLoadMetadata();
   vtkSmartPointer<vtkDataSet> product = presenter.execute(&factory, mockLoadingProgressUpdate, mockDrawingProgressUpdate);
 
@@ -104,7 +103,7 @@ void testExecution()
   TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
   TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(mockView));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 }
 
