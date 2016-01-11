@@ -151,28 +151,36 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 
         # Validate SpectrumList
-        speclist_str = self.getProperty(SPECTRA_PROP).value
-        # Check ranges
-        if "-" in speclist_str:
-            lower, upper = speclist_str.split("-")
-            lower = int(lower)
-            upper = int(upper)
-            # Check format
-            if upper < lower:
-                issues[SPECTRA_PROP] = "Range must be in format lower-upper"
-            # Check Min/Max boundaries
-            if lower < 3:
-                issues[SPECTRA_PROP] = "Lower limit for spectra is 3"
-            if upper > 198:
-                issues[SPECTRA_PROP] = "Upper limit for spectra is 198"
-        # Check comma separated lists
-        if "," in speclist_str:
-            spectra_list = speclist_str.split(",")
-            for spec in spectra_list:
-                spec = int(spec)
+        speclists_str = self.getProperty(SPECTRA_PROP).value
+
+        if ";" in speclists_str:
+            # Split if in 2-3;6-7 format
+            speclists_str = speclists_str.split(";")
+        else:
+            # Treat spec as a list
+            speclists_str = [speclists_str]
+
+        for speclist_str in speclists_str:
+            if "-" in speclist_str:
+                lower, upper = speclist_str.split("-")
+                lower = int(lower)
+                upper = int(upper)
+                # Check format
+                if upper < lower:
+                    issues[SPECTRA_PROP] = "Range must be in format lower-upper"
                 # Check Min/Max boundaries
-                if spec < 3 or spec > 198:
-                    issues[SPECTRA_PROP] = "All Spectra must be between 3 and 198"
+                if lower < 3:
+                    issues[SPECTRA_PROP] = "Lower limit for spectra is 3"
+                if upper > 198:
+                    issues[SPECTRA_PROP] = "Upper limit for spectra is 198"
+            # Check comma separated lists
+            if "," in speclist_str:
+                spectra_list = speclist_str.split(",")
+                for spec in spectra_list:
+                    spec = int(spec)
+                    # Check Min/Max boundaries
+                    if spec < 3 or spec > 198:
+                        issues[SPECTRA_PROP] = "All Spectra must be between 3 and 198"
 
         return issues
 
@@ -223,6 +231,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         Assumes that the spectra is sorted sorted
         """
         if len(spectra) == 1:
+            self._back_scattering = self._is_back_scattering(spectra[0])
             return
         all_back = self._is_back_scattering(spectra[0])
         for spec_no in spectra[1:]:
