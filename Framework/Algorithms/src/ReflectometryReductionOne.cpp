@@ -349,13 +349,23 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   } else if (bCorrectPosition) {
     toConvert = correctPosition(toConvert, thetaInDeg.get(), isPointDetector);
   }
-  auto rotateSource = this->createChildAlgorithm("RotateSource");
-  rotateSource->setChild(true);
-  rotateSource->initialize();
-  rotateSource->setProperty("Workspace", toConvert);
-  rotateSource->setProperty("Angle", thetaInDeg.get());
-  rotateSource->execute();
 
+  auto instrument = toConvert->getInstrument();
+  auto instrumentSourcePosition =
+      toConvert->getInstrument()->getSource()->getPos();
+  auto instrumentUpVector =
+      toConvert->getInstrument()->getReferenceFrame()->vecPointingUp();
+  bool isSourcePerpendicularToUpVec =
+      instrumentSourcePosition.scalar_prod(instrumentUpVector) == 0;
+
+  if (isSourcePerpendicularToUpVec /*source hasn't rotated*/) {
+    auto rotateSource = this->createChildAlgorithm("RotateSource");
+    rotateSource->setChild(true);
+    rotateSource->initialize();
+    rotateSource->setProperty("Workspace", toConvert);
+    rotateSource->setProperty("Angle", thetaInDeg.get());
+    rotateSource->execute();
+  }
   // Always convert units.
   auto convertUnits = this->createChildAlgorithm("ConvertUnits");
   convertUnits->initialize();
@@ -647,7 +657,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
           stitchingDelta.is_initialized()) {
         const std::vector<double> params =
             boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-                stitchingEnd.get()).convert_to_container<std::vector<double>>();
+                stitchingEnd.get())
+                .convert_to_container<std::vector<double>>();
         alg->setProperty("Params", params);
       } else if (stitchingDelta.is_initialized()) {
         alg->setProperty("Params",

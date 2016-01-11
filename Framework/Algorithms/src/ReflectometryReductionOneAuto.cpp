@@ -154,7 +154,6 @@ void ReflectometryReductionOneAuto::init() {
   declareProperty("StrictSpectrumChecking", true,
                   "Strict checking between spectrum numbers in input "
                   "workspaces and transmission workspaces.");
-
   std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
       "None")("AutoDetect")("PolynomialCorrection")("ExponentialCorrection");
   declareProperty("CorrectionAlgorithm", "AutoDetect",
@@ -354,7 +353,6 @@ void ReflectometryReductionOneAuto::exec() {
                            wavelength_integration_max);
     refRedOne->setProperty("CorrectDetectorPositions", correct_positions);
     refRedOne->setProperty("StrictSpectrumChecking", strict_spectrum_checking);
-
     if (correction_algorithm == "PolynomialCorrection") {
       // Copy across the polynomial
       refRedOne->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
@@ -408,7 +406,8 @@ void ReflectometryReductionOneAuto::exec() {
       } catch (std::runtime_error &e) {
         g_log.warning() << "Could not autodetect polynomial correction method. "
                            "Polynomial correction will not be performed. "
-                           "Reason for failure: " << e.what() << std::endl;
+                           "Reason for failure: "
+                        << e.what() << std::endl;
         refRedOne->setProperty("CorrectionAlgorithm", "None");
       }
 
