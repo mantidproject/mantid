@@ -2385,7 +2385,15 @@ class SliceEvent(ReductionStep):
         if not isinstance(ws_pointer, IEventWorkspace):
             self.scale = 1
             return
-        start, stop = reducer.getCurrSliceLimit()
+
+        # If a sample data set is converted then we want to be able to slice
+        # If a can data set is being converted, the slice limits should not be applied
+        # but rather the full data set should be used. -1 is the no limit signal
+        if not reducer.is_can():
+            start, stop = reducer.getCurrSliceLimit()
+        else:
+            start = -1
+            stop = -1
 
         _monitor = reducer.get_sample().get_monitor()
 

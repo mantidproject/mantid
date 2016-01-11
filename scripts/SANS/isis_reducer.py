@@ -101,13 +101,6 @@ class Can(Sample):
 
         super(Can, self).set_run(run, reload, period, reducer)
 
-        # The Can is sliced in the same manner as the sample
-        # currently, no slices will be applied to Can #8535
-        #for period in reversed(range(self.loader.periods_in_file)):
-        #    self.loader.move2ws(period)
-        #    name = self.loader.wksp_name
-        #    if su.isEventWorkspace(name):
-        #        su.fromEvent2Histogram(mtd[name], self.get_monitor())
 
 class ISISReducer(Reducer):
     """
