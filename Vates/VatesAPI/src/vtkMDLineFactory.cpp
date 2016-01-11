@@ -79,11 +79,11 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
         createIteratorWithNormalization(m_normalizationOption, imdws.get()));
 
     // Create 2 points per box.
-        vtkNew<vtkPoints> points;
+    vtkNew<vtkPoints> points;
     points->SetNumberOfPoints(it->getDataSize() * 2);
 
     // One scalar per box
-        vtkNew<vtkFloatArray> signals;
+    vtkNew<vtkFloatArray> signals;
     signals->Allocate(it->getDataSize());
     signals->SetName(vtkDataSetFactory::ScalarName.c_str());
     signals->SetNumberOfComponents(1);
@@ -93,7 +93,7 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
     visualDataSet->Allocate(it->getDataSize());
 
-        vtkNew<vtkIdList> linePointList;
+    vtkNew<vtkIdList> linePointList;
     linePointList->SetNumberOfIds(2);
 
     Mantid::API::CoordTransform const *transform = NULL;
@@ -102,7 +102,7 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     }
 
     Mantid::coord_t out[1];
-        auto useBox = Mantid::Kernel::make_unique<bool[]>(it->getDataSize());
+    auto useBox = Mantid::Kernel::make_unique<bool[]>(it->getDataSize());
 
     double progressFactor = 0.5 / double(it->getDataSize());
     double progressOffset = 0.5;
@@ -149,15 +149,15 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
 
         linePointList->SetId(0, pointIds + 0); // xyx
         linePointList->SetId(1, pointIds + 1); // dxyz
-            visualDataSet->InsertNextCell(VTK_LINE, linePointList.GetPointer());
+        visualDataSet->InsertNextCell(VTK_LINE, linePointList.GetPointer());
       } // valid number of vertexes returned
     }
 
     signals->Squeeze();
     points->Squeeze();
 
-        visualDataSet->SetPoints(points.GetPointer());
-        visualDataSet->GetCellData()->SetScalars(signals.GetPointer());
+    visualDataSet->SetPoints(points.GetPointer());
+    visualDataSet->GetCellData()->SetScalars(signals.GetPointer());
     visualDataSet->Squeeze();
 
     // Hedge against empty data sets

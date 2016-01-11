@@ -254,8 +254,8 @@ void vtkSplatterPlotFactory::doCreate(
 
   // The list of IDs of points used, one ID per point, since points
   // are not reused to form polygon facets, etc.
-    std::vector<vtkIdType> ids; 
-    ids.assign(numPoints, 0);
+  std::vector<vtkIdType> ids;
+  ids.assign(numPoints, 0);
 
   // Only one scalar for each cell, NOT one per point
   vtkFloatArray *signal = vtkFloatArray::New();
@@ -352,12 +352,12 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
   const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
   // VTK structures
-    vtkNew<vtkFloatArray> signal;
+  vtkNew<vtkFloatArray> signal;
   signal->Allocate(imageSize);
   signal->SetName(m_scalarName.c_str());
   signal->SetNumberOfComponents(1);
 
-    vtkNew<vtkPoints> points;
+  vtkNew<vtkPoints> points;
   points->Allocate(static_cast<int>(imageSize));
 
   // Set up the actual vtkDataSet, here the vtkUnstructuredGrid, the cell type
@@ -367,7 +367,7 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
   visualDataSet->Allocate(imageSize);
 
   // Create the vertex structure.
-    vtkNew<vtkVertex> vertex;
+  vtkNew<vtkVertex> vertex;
 
   // Check if the workspace requires 4D handling.
   bool do4D = doMDHisto4D(workspace);
@@ -425,8 +425,8 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
     }
   }
 
-    visualDataSet->SetPoints(points.GetPointer());
-    visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
+  visualDataSet->SetPoints(points.GetPointer());
+  visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
   visualDataSet->Squeeze();
 }
 
@@ -628,12 +628,13 @@ void vtkSplatterPlotFactory::addMetadata() const {
 
     // Append metadata
     std::string jsonString = m_metadataJsonManager->getSerializedJson();
-      vtkNew<vtkFieldData> outputFD;
+    vtkNew<vtkFieldData> outputFD;
 
     // Add metadata to dataset.
     MetadataToFieldData convert;
-      convert(outputFD.GetPointer(), jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
-      dataSet->SetFieldData(outputFD.GetPointer());
+    convert(outputFD.GetPointer(), jsonString,
+            m_vatesConfigurations->getMetadataIdJson().c_str());
+    dataSet->SetFieldData(outputFD.GetPointer());
   }
 }
 
@@ -654,11 +655,13 @@ void vtkSplatterPlotFactory::setMetadata(vtkFieldData *fieldData,
 
   // Create a new field data array
   MetadataToFieldData convertMtoF;
-    vtkNew<vtkFieldData> outputFD;
+  vtkNew<vtkFieldData> outputFD;
   outputFD->ShallowCopy(fieldData);
-    convertMtoF(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId().c_str());
-    convertMtoF(outputFD.GetPointer(), jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
-    dataSet->SetFieldData(outputFD.GetPointer());
+  convertMtoF(outputFD.GetPointer(), xmlString,
+              XMLDefinitions::metaDataId().c_str());
+  convertMtoF(outputFD.GetPointer(), jsonString,
+              m_vatesConfigurations->getMetadataIdJson().c_str());
+  dataSet->SetFieldData(outputFD.GetPointer());
 }
 
 /**

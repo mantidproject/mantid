@@ -76,11 +76,11 @@ vtkDataSet *vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
         createIteratorWithNormalization(m_normalizationOption, imdws.get()));
 
     // Create 4 points per box.
-        vtkNew<vtkPoints> points;
+    vtkNew<vtkPoints> points;
     points->SetNumberOfPoints(it->getDataSize() * 4);
 
     // One scalar per box
-        vtkNew<vtkFloatArray> signals;
+    vtkNew<vtkFloatArray> signals;
     signals->Allocate(it->getDataSize());
     signals->SetName(vtkDataSetFactory::ScalarName.c_str());
     signals->SetNumberOfComponents(1);
@@ -90,7 +90,7 @@ vtkDataSet *vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
     vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
     visualDataSet->Allocate(it->getDataSize());
 
-        vtkNew<vtkIdList> quadPointList;
+    vtkNew<vtkIdList> quadPointList;
     quadPointList->SetNumberOfIds(4);
 
     Mantid::API::CoordTransform const *transform = NULL;
@@ -99,7 +99,7 @@ vtkDataSet *vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
     }
 
     Mantid::coord_t out[2];
-        auto useBox = Mantid::Kernel::make_unique<bool[]>(it->getDataSize());
+    auto useBox = Mantid::Kernel::make_unique<bool[]>(it->getDataSize());
 
     double progressFactor = 0.5 / double(it->getDataSize());
     double progressOffset = 0.5;
@@ -147,15 +147,15 @@ vtkDataSet *vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
         quadPointList->SetId(1, pointIds + 1); // dxyz
         quadPointList->SetId(2, pointIds + 3); // dxdyz
         quadPointList->SetId(3, pointIds + 2); // xdyz
-            visualDataSet->InsertNextCell(VTK_QUAD, quadPointList.GetPointer());
+        visualDataSet->InsertNextCell(VTK_QUAD, quadPointList.GetPointer());
       } // valid number of vertexes returned
     }
 
     signals->Squeeze();
     points->Squeeze();
 
-        visualDataSet->SetPoints(points.GetPointer());
-        visualDataSet->GetCellData()->SetScalars(signals.GetPointer());
+    visualDataSet->SetPoints(points.GetPointer());
+    visualDataSet->GetCellData()->SetScalars(signals.GetPointer());
     visualDataSet->Squeeze();
 
     // Hedge against empty data sets
