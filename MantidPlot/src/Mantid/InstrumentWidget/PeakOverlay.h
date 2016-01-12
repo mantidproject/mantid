@@ -45,6 +45,7 @@ private:
   bool showRows;
 };
 
+/// Helper class for scaling peak markers to intensities.
 class AbstractIntensityScale {
 public:
   AbstractIntensityScale(
@@ -64,6 +65,7 @@ protected:
   double m_minIntensity = 0.0;
 };
 
+/// Default intensity scale leaves all markers unchanged.
 class DefaultIntensityScale : public AbstractIntensityScale {
 public:
   DefaultIntensityScale(
@@ -71,6 +73,7 @@ public:
       : AbstractIntensityScale(pws) {}
 
 protected:
+  /// Returns the base style unmodified.
   PeakMarker2D::Style
   getScaledMarker(double intensity,
                   const PeakMarker2D::Style &baseStyle) const {
@@ -80,6 +83,8 @@ protected:
   }
 };
 
+/// Qualitative scaling of relative peak intensities to levels (weak, medium,
+/// strong, very strong).
 class QualitativeIntensityScale : public AbstractIntensityScale {
 public:
   QualitativeIntensityScale(
@@ -88,11 +93,10 @@ public:
 
 protected:
   PeakMarker2D::Style
-  getScaledMarker(double intensity,
-                  const PeakMarker2D::Style &baseStyle) const;
+  getScaledMarker(double intensity, const PeakMarker2D::Style &baseStyle) const;
 
 private:
-  int getSize(double intensity) const;
+  int getIntensityLevel(double intensity) const;
 
   // Scaling to weak < 0.1 <= medium <= 0.6 <= strong <= 0.9 <= very strong
   std::vector<double> m_intensityLevels = {0.1, 0.6, 0.9};
@@ -145,8 +149,8 @@ private:
   mutable QList<PeakHKL> m_labels;
   boost::shared_ptr<Mantid::API::IPeaksWorkspace>
       m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
-  UnwrappedSurface *
-      m_surface; ///< pointer to the surface this overlay is applied to
+  UnwrappedSurface
+      *m_surface; ///< pointer to the surface this overlay is applied to
   mutable int m_precision;
   mutable bool m_showRows;   ///< flag to show peak row index
   mutable bool m_showLabels; ///< flag to show peak hkl labels

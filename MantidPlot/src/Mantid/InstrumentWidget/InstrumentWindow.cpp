@@ -345,9 +345,11 @@ void InstrumentWindow::setSurfaceType(int type) {
           settings.value("Mantid/InstrumentWindow/ShowPeakRows", true).toBool();
       showPeakLabels = settings.value("Mantid/InstrumentWindow/ShowPeakLabels",
                                       true).toBool();
+
+      // By default this is should be off for now.
       showPeakRelativeIntensity =
           settings.value("Mantid/InstrumentWindow/ShowPeakRelativeIntensities",
-                         true).toBool();
+                         false).toBool();
     }
 
     // Surface factory

@@ -100,6 +100,7 @@ QString PeakHKL::formatNumber(double h, int prec) {
   return str;
 }
 
+/// Extract minimum and maximum intensity from peaks workspace for scaling.
 void AbstractIntensityScale::setPeaksWorkspace(
     const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
   if (pws) {
@@ -123,6 +124,9 @@ void AbstractIntensityScale::setPeaksWorkspace(
   }
 }
 
+/// Returns the scaled style by intensity. Only size is changed, the other
+/// properties are kept the same. If the max intensity is 0 or less, the
+/// style is returned as it is.
 PeakMarker2D::Style QualitativeIntensityScale::getScaledMarker(
     double intensity, const PeakMarker2D::Style &baseStyle) const {
   if (m_maxIntensity <= 0.0) {
@@ -130,10 +134,22 @@ PeakMarker2D::Style QualitativeIntensityScale::getScaledMarker(
   }
 
   return PeakMarker2D::Style(baseStyle.symbol, baseStyle.color,
-                             3 * getSize(intensity) + 1);
+                             3 * getIntensityLevel(intensity) + 1);
 }
 
-int QualitativeIntensityScale::getSize(double intensity) const {
+/**
+ * Returns the marker size corresponding to the supplied intensity
+ *
+ * Intensity levels are specified in m_intensityLevels. The method looks for
+ * the first element >= than the relative intensity and returns the distance
+ * from the beginning of list to that element + 1.
+ *
+ * For values less than the first element, 0 is returned.
+ *
+ * @param intensity :: Absolute intensity.
+ * @return Intensity level between 0 and the number of intensity levels + 1
+ */
+int QualitativeIntensityScale::getIntensityLevel(double intensity) const {
   auto intensityGreaterThan =
       std::lower_bound(m_intensityLevels.cbegin(), m_intensityLevels.cend(),
                        intensity / m_maxIntensity);
@@ -318,6 +334,7 @@ Mantid::Geometry::IPeak &PeakOverlay::getPeak(int i) {
   return m_peaksWorkspace->getPeak(i);
 }
 
+/// Sets the scaler that is used to determine the size of peak markers.
 void PeakOverlay::setShowRelativeIntensityFlag(bool yes) {
   if (yes) {
     m_peakIntensityScale =
