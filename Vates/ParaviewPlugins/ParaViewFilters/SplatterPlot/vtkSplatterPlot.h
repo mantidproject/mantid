@@ -4,7 +4,14 @@
 #include "MantidKernel/make_unique.h"
 #include "vtkUnstructuredGridAlgorithm.h"
 #include <string>
-#include "MantidVatesAPI/vtkSplatterPlotFactory.h"
+
+namespace Mantid
+{
+  namespace VATES
+  {
+    class vtkSplatterPlotFactory;
+  }
+}
 
 // cppcheck-suppress class_X_Y
 class VTK_EXPORT vtkSplatterPlot : public vtkUnstructuredGridAlgorithm
