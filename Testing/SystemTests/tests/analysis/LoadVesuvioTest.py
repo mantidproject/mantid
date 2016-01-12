@@ -32,6 +32,20 @@ class VesuvioTests(unittest.TestCase):
         self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False,
                                                diff_mode=diff_mode)
 
+    def test_load_with_back_scattering_spectra_produces_correct_workspace_using_single_difference(self):
+        diff_mode = "SingleDifference"
+        self._run_load("14188", "3-134", diff_mode)
+
+        # Check some data
+        evs_raw = mtd[self.ws_name]
+        self.assertAlmostEqual(0.10197619851290973, evs_raw.readY(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.13636377723938517, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.053028031396861852, evs_raw.readY(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.070808659911133845, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+
+        self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False,
+                                               diff_mode=diff_mode)
+
     def test_load_with_forward_scattering_spectra_produces_correct_workspace(self):
         diff_mode = "SingleDifference"
         self._run_load("14188", "135-198", diff_mode)
@@ -299,11 +313,6 @@ class VesuvioTests(unittest.TestCase):
     def test_load_with_difference_option_not_applicable_to_current_spectra_raises_error(self):
         self.assertRaises(ValueError, ms.LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name, Mode="",SpectrumList="3-134")
-
-    def test_back_scattering_spectra_with_single_difference_mode_raises_error(self):
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
-                          Mode="SingleDifference",
-                          OutputWorkspace=self.ws_name, SpectrumList="10-20")
 
     def test_forward_scattering_spectra_with_double_difference_mode_raises_error(self):
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
