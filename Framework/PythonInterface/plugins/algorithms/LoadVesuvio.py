@@ -148,7 +148,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         run_str = self.getProperty(RUN_PROP).value
         if "-" in run_str:
             lower, upper = run_str.split("-")
-            issues = self._validate_range_formatting(upper, lower, RUN_PROP, issues)
+            issues = self._validate_range_formatting(lower, upper, RUN_PROP, issues)
 
         # Validate SpectrumList
         grp_spectra_list = self.getProperty(SPECTRA_PROP).value
@@ -182,10 +182,12 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _validate_range_formatting(self, upper, lower, property_name, issues):
+    def _validate_range_formatting(self, lower, upper, property_name, issues):
         """
         Validates is a range style input is in the correct form of lower-upper
         """
+        upper = int(upper)
+        lower = int(lower)
         if upper < lower:
             issues[property_name] = "Range must be in format lower-upper"
         return issues
