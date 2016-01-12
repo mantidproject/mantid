@@ -11,7 +11,6 @@
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
 #include "vtkQuad.h"
-#include "vtkSmartPointer.h"
 #include "vtkNew.h"
 #include <vector>
 #include "MantidKernel/ReadLock.h"
@@ -69,11 +68,11 @@ namespace Mantid
     @param progressUpdating: Reporting object to pass progress information up the stack.
     @return fully constructed vtkDataSet.
     */
-    vtkDataSet* vtkMDHistoQuadFactory::create(ProgressAction& progressUpdating) const
-    {
-      vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 2>(m_workspace, progressUpdating);
-      if(product != NULL)
-      {
+    vtkSmartPointer<vtkDataSet>
+    vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
+      auto product = tryDelegatingCreation<MDHistoWorkspace, 2>(
+          m_workspace, progressUpdating);
+      if (product != nullptr) {
         return product;
       }
       else
@@ -195,7 +194,7 @@ namespace Mantid
 
         std::cout << tim << " to create the needed points." << std::endl;
 
-        vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+        auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
         visualDataSet->Allocate(imageSize);
         visualDataSet->SetPoints(points.GetPointer());
         visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
@@ -234,7 +233,8 @@ namespace Mantid
           visualDataSet = nullGrid.createNullData();
         }
 
-        return visualDataSet;
+        vtkSmartPointer<vtkDataSet> dataSet = visualDataSet;
+        return dataSet;
       }
     }
 

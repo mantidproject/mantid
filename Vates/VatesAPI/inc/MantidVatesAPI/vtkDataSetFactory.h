@@ -8,6 +8,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/make_unique.h"
 #include "vtkDataSet.h"
+#include "vtkSmartPointer.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <string>
@@ -72,13 +73,14 @@ public:
   virtual ~vtkDataSetFactory()=0;
 
   /// Factory Method. Should also handle delegation to successors.
-  virtual vtkDataSet* create(ProgressAction&) const=0;
+  virtual vtkSmartPointer<vtkDataSet> create(ProgressAction &) const = 0;
 
   /// Initalize with a target workspace.
   virtual void initialize(Mantid::API::Workspace_sptr)=0;
 
   /// Create the product in one step.
-  virtual vtkDataSet* oneStepCreate(Mantid::API::Workspace_sptr,ProgressAction&);
+  virtual vtkSmartPointer<vtkDataSet> oneStepCreate(Mantid::API::Workspace_sptr,
+                                                    ProgressAction &);
 
   /// Add a chain-of-responsibility successor to this factory. Handle case where the factory cannot render the MDWorkspace owing to its dimensionality.
   virtual void SetSuccessor(std::unique_ptr<vtkDataSetFactory> pSuccessor);
@@ -192,9 +194,11 @@ protected:
   @param bExactMatch : Check for an exact match if true.
   @return TRUE if delegation to successors has occured. Otherwise returns false.
   */
-  template<typename IMDWorkspaceType, size_t ExpectedNDimensions>
-  vtkDataSet* tryDelegatingCreation(Mantid::API::Workspace_sptr workspace, ProgressAction& progressUpdate, bool bExactMatch=true) const
-  {
+  template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
+  vtkSmartPointer<vtkDataSet>
+  tryDelegatingCreation(Mantid::API::Workspace_sptr workspace,
+                        ProgressAction &progressUpdate,
+                        bool bExactMatch = true) const {
     boost::shared_ptr<IMDWorkspaceType> imdws = castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace, bExactMatch);
     if(!imdws)
     {
@@ -208,7 +212,7 @@ protected:
         throw std::runtime_error(message);
       }
     }
-    return NULL;
+    return nullptr;
   }
 
   /// Typedef for internal unique pointer for successor types.

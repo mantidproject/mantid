@@ -72,8 +72,9 @@ Convenience function. Creates an output visualisation data set in one-shot.
 @param progressUpdater : object used to update the progress action.
 @result vtkDataSet* interpreted from input.
 */
-vtkDataSet* vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws, ProgressAction& progressUpdater)
-{
+vtkSmartPointer<vtkDataSet>
+vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws,
+                                 ProgressAction &progressUpdater) {
   this->initialize(ws);
   return this->create(progressUpdater);
 }

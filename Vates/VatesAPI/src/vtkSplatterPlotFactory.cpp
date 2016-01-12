@@ -27,7 +27,6 @@
 #include <vtkSystemIncludes.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkNew.h>
-#include <vtkSmartPointer.h>
 
 #include <algorithm>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -53,8 +52,7 @@ vtkSplatterPlotFactory::vtkSplatterPlotFactory(
     const size_t numPoints, const double percentToUse)
     : m_thresholdRange(thresholdRange), m_scalarName(scalarName),
       m_numPoints(numPoints), m_percentToUse(percentToUse),
-      m_buildSortedList(true), m_wsName(""), dataSet(NULL), slice(false),
-      m_time(0.0),
+      m_buildSortedList(true), m_wsName(""), slice(false), m_time(0.0),
       m_minValue(0.1), m_maxValue(0.1),
       m_metaDataExtractor(new MetaDataExtractorUtils()),
       m_metadataJsonManager(new MetadataJsonManager()),
@@ -484,7 +482,7 @@ bool vtkSplatterPlotFactory::doMDHisto4D(
  * the stack.
  * @return fully constructed vtkDataSet.
  */
-vtkDataSet *
+vtkSmartPointer<vtkDataSet>
 vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
   UNUSED_ARG(progressUpdating);
 
@@ -532,7 +530,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
 
   // Set the instrument
   m_instrument = m_metaDataExtractor->extractInstrument(m_workspace);
-  double *range = NULL;
+  double *range = nullptr;
 
   if (dataSet) {
     range = dataSet->GetScalarRange();
@@ -608,7 +606,7 @@ void vtkSplatterPlotFactory::addMetadata() const {
   const double defaultValue = 0.1;
 
   if (this->dataSet) {
-    double *range = NULL;
+    double *range = nullptr;
     range = dataSet->GetScalarRange();
 
     if (range) {

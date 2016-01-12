@@ -10,7 +10,6 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include <vtkNew.h>
-#include <vtkSmartPointer.h>
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
@@ -60,8 +59,9 @@ public:
   virtual ~vtkMDHexFactory();
 
   /// Factory Method. Should also handle delegation to successors.
-  virtual vtkDataSet* create(ProgressAction& progressUpdate) const;
-  
+  virtual vtkSmartPointer<vtkDataSet>
+  create(ProgressAction &progressUpdate) const;
+
   /// Initalize with a target workspace.
   virtual void initialize(Mantid::API::Workspace_sptr);
 

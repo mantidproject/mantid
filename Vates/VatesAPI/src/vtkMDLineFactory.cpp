@@ -45,10 +45,11 @@ Create the vtkStructuredGrid from the provided workspace
 stack.
 @return fully constructed vtkDataSet.
 */
-vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
-  vtkDataSet *product = tryDelegatingCreation<IMDEventWorkspace, 1>(
-      m_workspace, progressUpdating);
-  if (product != NULL) {
+vtkSmartPointer<vtkDataSet>
+vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
+  auto product = tryDelegatingCreation<IMDEventWorkspace, 1>(m_workspace,
+                                                             progressUpdating);
+  if (product != nullptr) {
     return product;
   } else {
     g_log.warning() << "Factory " << this->getFactoryTypeName()
@@ -90,7 +91,7 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
 
     size_t nVertexes;
 
-    vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+    auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
     visualDataSet->Allocate(it->getDataSize());
 
     vtkNew<vtkIdList> linePointList;
@@ -160,12 +161,12 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
 
     // Hedge against empty data sets
     if (visualDataSet->GetNumberOfPoints() <= 0) {
-      visualDataSet->Delete();
       vtkNullUnstructuredGrid nullGrid;
       visualDataSet = nullGrid.createNullData();
     }
 
-    return visualDataSet;
+    vtkSmartPointer<vtkDataSet> dataset = visualDataSet;
+    return dataset;
   }
 }
 
