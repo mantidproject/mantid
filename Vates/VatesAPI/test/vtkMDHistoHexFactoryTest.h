@@ -43,22 +43,22 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
         boost::make_shared<UserDefinedThresholdRange>(0, 2),
         Mantid::VATES::VolumeNormalization);
     inside.initialize(ws_sptr);
-    vtkSmartPointer<vtkStructuredGrid> insideProduct =
-        inside.create(progressUpdate);
+    auto insideData = inside.create(progressUpdate);
+    auto insideProduct = vtkStructuredGrid::SafeDownCast(insideData.Get());
 
     vtkMDHistoHexFactory below(
         boost::make_shared<UserDefinedThresholdRange>(0, 0.5),
         Mantid::VATES::VolumeNormalization);
     below.initialize(ws_sptr);
-    vtkSmartPointer<vtkStructuredGrid> belowProduct =
-        below.create(progressUpdate);
+    auto belowData = below.create(progressUpdate);
+    auto belowProduct = vtkStructuredGrid::SafeDownCast(belowData.Get());
 
     vtkMDHistoHexFactory above(
         boost::make_shared<UserDefinedThresholdRange>(2, 3),
         Mantid::VATES::VolumeNormalization);
     above.initialize(ws_sptr);
-    vtkSmartPointer<vtkStructuredGrid> aboveProduct =
-        above.create(progressUpdate);
+    auto aboveData = above.create(progressUpdate);
+    auto aboveProduct = vtkStructuredGrid::SafeDownCast(aboveData.Get());
 
     TS_ASSERT_EQUALS((10*10*10), insideProduct->GetNumberOfCells());
     for (auto i = 0; i < insideProduct->GetNumberOfCells(); ++i) {

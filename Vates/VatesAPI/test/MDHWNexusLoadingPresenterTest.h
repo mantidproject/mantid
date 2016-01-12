@@ -50,7 +50,8 @@ private:
     return temp;
   }
 
-  vtkDataSet *doExecute(std::string filename, bool performAsserts = true) {
+  vtkSmartPointer<vtkDataSet> doExecute(std::string filename,
+                                        bool performAsserts = true) {
     // Setup view
     std::unique_ptr<MDLoadingView> view =
         Mantid::Kernel::make_unique<MockMDLoadingView>();
@@ -75,7 +76,7 @@ private:
     // Create the presenter and runit!
     MDHWNexusLoadingPresenter presenter(std::move(view), filename);
     presenter.executeLoadMetadata();
-    vtkDataSet *product = presenter.execute(&factory, mockLoadingProgressAction,
+    auto product = presenter.execute(&factory, mockLoadingProgressAction,
                                             mockDrawingProgressAction);
 
     TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
@@ -129,7 +130,7 @@ public:
   void testExecution() {
     auto filename = getSuitableFile();
     vtkSmartPointer<vtkDataSet> product;
-    product.TakeReference(doExecute(filename));
+    product = doExecute(filename);
   }
 
   void testExecutionWithLegacyFile() {
@@ -176,8 +177,8 @@ public:
     factory->SetSuccessor(std::move(hexFactory));
 
     presenter.executeLoadMetadata();
-    auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
-        factory.get(), mockLoadingProgressAction, mockDrawingProgressAction));
+    auto product = presenter.execute(factory.get(), mockLoadingProgressAction,
+                                     mockDrawingProgressAction);
 
     // Set the COB
     try {
@@ -286,8 +287,8 @@ public:
     // Create the presenter and runit!
     MDHWNexusLoadingPresenter presenter(std::move(view), getSuitableFile());
     presenter.executeLoadMetadata();
-    auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
-        &factory, mockLoadingProgressAction, mockDrawingProgressAction));
+    auto product = presenter.execute(&factory, mockLoadingProgressAction,
+                                     mockDrawingProgressAction);
     TSM_ASSERT_EQUALS("Time label should be exact.",
                       presenter.getTimeStepLabel(), "DeltaE (DeltaE)");
 
@@ -320,8 +321,8 @@ public:
     // Create the presenter and runit!
     MDHWNexusLoadingPresenter presenter(std::move(view), getSuitableFile());
     presenter.executeLoadMetadata();
-    auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
-        &factory, mockLoadingProgressAction, mockDrawingProgressAction));
+    auto product = presenter.execute(&factory, mockLoadingProgressAction,
+                                     mockDrawingProgressAction);
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
 
     TSM_ASSERT_EQUALS("X Label should match exactly",

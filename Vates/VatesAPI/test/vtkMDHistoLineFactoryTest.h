@@ -56,8 +56,8 @@ public:
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
     vtkMDHistoLineFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), Mantid::VATES::VolumeNormalization);
     inside.initialize(ws_sptr);
-    vtkSmartPointer<vtkUnstructuredGrid> insideProduct =
-        inside.create(progressUpdate);
+    auto insideData = inside.create(progressUpdate);
+    auto insideProduct = vtkUnstructuredGrid::SafeDownCast(insideData.Get());
 
     TS_ASSERT_EQUALS(9, insideProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(10, insideProduct->GetNumberOfPoints());
@@ -75,8 +75,8 @@ public:
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall above and outside the minimum 0 and maximum 0.5.
     vtkMDHistoLineFactory above(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), Mantid::VATES::VolumeNormalization);
     above.initialize(ws_sptr);
-    vtkSmartPointer<vtkUnstructuredGrid> aboveProduct =
-        above.create(progressUpdate);
+    auto aboveData = above.create(progressUpdate);
+    auto aboveProduct = vtkUnstructuredGrid::SafeDownCast(aboveData.Get());
 
     TS_ASSERT_EQUALS(0, aboveProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(10, aboveProduct->GetNumberOfPoints());
@@ -91,8 +91,8 @@ public:
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall below and outside the minimum 1.5 and maximum 2.
     vtkMDHistoLineFactory below(ThresholdRange_scptr(new UserDefinedThresholdRange(1.5, 2)), Mantid::VATES::VolumeNormalization);
     below.initialize(ws_sptr);
-    vtkSmartPointer<vtkUnstructuredGrid> belowProduct =
-        below.create(progressUpdate);
+    auto belowData = below.create(progressUpdate);
+    auto belowProduct = vtkUnstructuredGrid::SafeDownCast(belowData.Get());
 
     TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(10, belowProduct->GetNumberOfPoints());

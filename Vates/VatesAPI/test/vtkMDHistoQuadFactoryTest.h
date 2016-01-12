@@ -66,8 +66,9 @@ public:
     auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 2);
     vtkMDHistoQuadFactory inside(pRange, Mantid::VATES::VolumeNormalization);
     inside.initialize(ws_sptr);
-    vtkSmartPointer<vtkUnstructuredGrid> insideProduct =
-        inside.create(progressUpdate);
+    auto product = inside.create(progressUpdate);
+    auto data = vtkDataSet::SafeDownCast(product.Get());
+    auto insideProduct = vtkSmartPointer<vtkDataSet>::Take(data);
 
     TS_ASSERT_EQUALS((10*10), insideProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS((11*11), insideProduct->GetNumberOfPoints());
@@ -84,8 +85,8 @@ public:
     auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 0.5);
     vtkMDHistoQuadFactory above(pRange, Mantid::VATES::VolumeNormalization);
     above.initialize(ws_sptr);
-    vtkSmartPointer<vtkUnstructuredGrid> aboveProduct =
-        above.create(progressUpdate);
+    auto aboveData = above.create(progressUpdate);
+    auto aboveProduct = vtkUnstructuredGrid::SafeDownCast(aboveData.Get());
 
     // This changed from previously, in order to ensure that we do not pass on empty 
     // workspaces. A single point is created in the center by the vtkNullUnstructuredGrid
@@ -105,8 +106,8 @@ public:
     vtkMDHistoQuadFactory below(pRange, Mantid::VATES::VolumeNormalization);
 
     below.initialize(ws_sptr);
-    vtkSmartPointer<vtkUnstructuredGrid> belowProduct =
-        below.create(progressUpdate);
+    auto belowData = below.create(progressUpdate);
+    auto belowProduct = vtkUnstructuredGrid::SafeDownCast(belowData.Get());
 
     // This changed from previously, in order to ensure that we do not pass on empty 
     // workspaces. A single point is created in the center by the vtkNullUnstructuredGrid

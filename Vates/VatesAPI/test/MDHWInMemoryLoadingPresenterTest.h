@@ -184,8 +184,8 @@ public:
     MDHWInMemoryLoadingPresenter presenter(std::move(view),
                                            repository.release(), "_");
     presenter.executeLoadMetadata();
-    auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
-        &factory, mockLoadingProgressAction, mockDrawingProgressAction));
+    auto product = presenter.execute(&factory, mockLoadingProgressAction,
+                                     mockDrawingProgressAction);
 
     TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
     TSM_ASSERT_EQUALS("Wrong type of output generated", "vtkUnstructuredGrid", std::string(product->GetClassName()));

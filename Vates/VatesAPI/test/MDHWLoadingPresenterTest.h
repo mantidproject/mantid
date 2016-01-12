@@ -43,11 +43,11 @@ private:
       MDHWLoadingPresenter::extractMetadata(histoWs);
     }
 
-    virtual vtkDataSet* execute(vtkDataSetFactory*, ProgressAction&,  ProgressAction&)
-    {
-      return vtkUnstructuredGrid::New(); 
+    virtual vtkSmartPointer<vtkDataSet>
+    execute(vtkDataSetFactory *, ProgressAction &, ProgressAction &) {
+      return vtkSmartPointer<vtkUnstructuredGrid>::New();
     }
-    
+
     virtual void executeLoadMetadata()
     {
     }
