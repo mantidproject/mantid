@@ -66,7 +66,7 @@ private:
     MockvtkDataSetFactory factory;
     EXPECT_CALL(factory, initialize(_)).Times(1);
     EXPECT_CALL(factory, create(_))
-        .WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+        .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
 
     // Setup progress updates objects
     MockProgressAction mockLoadingProgressAction;
@@ -277,7 +277,7 @@ public:
     MockvtkDataSetFactory factory;
     EXPECT_CALL(factory, initialize(_)).Times(1);
     EXPECT_CALL(factory, create(_))
-        .WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+        .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
 
     // Setup progress updates objects
     MockProgressAction mockLoadingProgressAction;
@@ -311,7 +311,7 @@ public:
     MockvtkDataSetFactory factory;
     EXPECT_CALL(factory, initialize(_)).Times(1);
     EXPECT_CALL(factory, create(_))
-        .WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+        .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
 
     // Setup progress updates objects
     MockProgressAction mockLoadingProgressAction;

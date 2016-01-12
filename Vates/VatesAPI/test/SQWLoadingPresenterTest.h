@@ -115,7 +115,8 @@ void testExecutionInMemory()
   //Setup rendering factory
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
-  EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+  EXPECT_CALL(factory, create(_))
+      .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates objects
@@ -127,8 +128,8 @@ void testExecutionInMemory()
   //Create the presenter and runit!
   SQWLoadingPresenter presenter(std::move(view), getSuitableFileNamePath());
   presenter.executeLoadMetadata();
-  auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
-      &factory, mockLoadingProgressAction, mockDrawingProgressAction));
+  auto product = presenter.execute(&factory, mockLoadingProgressAction,
+                                   mockDrawingProgressAction);
 
   std::string fileNameIfGenerated = getFileBackend(getSuitableFileNamePath());
   std::ifstream fileExists(fileNameIfGenerated.c_str(), ifstream::in);
@@ -210,7 +211,8 @@ void testTimeLabel()
   //Setup rendering factory
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
-  EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+  EXPECT_CALL(factory, create(_))
+      .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates objects
@@ -222,8 +224,8 @@ void testTimeLabel()
   //Create the presenter and runit!
   SQWLoadingPresenter presenter(std::move(view), getSuitableFileNamePath());
   presenter.executeLoadMetadata();
-  auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
-      &factory, mockLoadingProgressAction, mockDrawingProgressAction));
+  auto product = presenter.execute(&factory, mockLoadingProgressAction,
+                                   mockDrawingProgressAction);
   TSM_ASSERT_EQUALS("Time label should be exact.",
                     presenter.getTimeStepLabel(), "en (meV)");
 
@@ -248,7 +250,8 @@ void testAxisLabels()
   //Setup rendering factory
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
-  EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+  EXPECT_CALL(factory, create(_))
+      .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates objects
@@ -260,8 +263,8 @@ void testAxisLabels()
   //Create the presenter and runit!
   SQWLoadingPresenter presenter(std::move(view), getSuitableFileNamePath());
   presenter.executeLoadMetadata();
-  auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
-      &factory, mockLoadingProgressAction, mockDrawingProgressAction));
+  auto product = presenter.execute(&factory, mockLoadingProgressAction,
+                                   mockDrawingProgressAction);
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
   TSM_ASSERT_EQUALS("X Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForX"),

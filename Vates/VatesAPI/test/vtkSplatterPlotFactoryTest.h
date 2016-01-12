@@ -62,8 +62,7 @@ public:
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
-    TS_ASSERT_THROWS_NOTHING(
-        product.TakeReference(factory.create(progressUpdate)));
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
     // Expecting 5x5x5 points; Signal equal for each box => 1/(10^3/5^3)
     const size_t expected_n_points = binning*binning*binning;
@@ -91,8 +90,7 @@ public:
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
-    TS_ASSERT_THROWS_NOTHING(
-        product.TakeReference(factory.create(progressUpdate)));
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
     // Expecting 5x5x5 points; Signal equal for each box => 1/(10^4/5^4)
     const size_t expected_n_points = binning*binning*binning;
@@ -118,8 +116,7 @@ public:
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
-    TS_ASSERT_THROWS_NOTHING(
-        product.TakeReference(factory.create(progressUpdate)));
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
     /* original sizes for splatter plot test, before 5/28/2013
     const size_t expected_n_points = 1000;
@@ -148,7 +145,7 @@ public:
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
-    TS_ASSERT_THROWS_NOTHING(product.TakeReference(factory.create(progressUpdate)));
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
     // 6 is 5% of 125
     const size_t expected_n_points = 6;

@@ -56,7 +56,9 @@ public:
 
     auto mockSuccessor = Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
-    EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
+    EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdate)))
+        .Times(1)
+        .WillOnce(Return(vtkSmartPointer<vtkStructuredGrid>::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
     vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
@@ -116,8 +118,7 @@ public:
                              Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
-    auto product =
-        vtkSmartPointer<vtkDataSet>::Take(factory.create(mockProgressAction));
+    auto product = factory.create(mockProgressAction);
 
     TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) !=
               NULL);
@@ -168,8 +169,7 @@ public:
                              Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
-    auto product =
-        vtkSmartPointer<vtkDataSet>::Take(factory.create(progressAction));
+    auto product = factory.create(progressAction);
 
     TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) !=
               NULL);

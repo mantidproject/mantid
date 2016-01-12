@@ -169,7 +169,8 @@ public:
     //Setup rendering factory
     MockvtkDataSetFactory factory;
     EXPECT_CALL(factory, initialize(_)).Times(1);
-    EXPECT_CALL(factory, create(_)).WillOnce(Return(vtkUnstructuredGrid::New()));
+    EXPECT_CALL(factory, create(_))
+        .WillOnce(Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
 
     auto repository = Mantid::Kernel::make_unique<MockWorkspaceProvider>();
     Mantid::API::Workspace_sptr ws = getGoodWorkspace();

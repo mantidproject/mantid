@@ -68,7 +68,7 @@ Executes the underlying algorithm to create the MVP model.
 @param drawingProgressUpdate : Handler for GUI updates while
 vtkDataSetFactory::create occurs.
 */
-vtkDataSet *
+vtkSmartPointer<vtkDataSet>
 MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
                                       ProgressAction &,
                                       ProgressAction &drawingProgressUpdate) {
@@ -82,9 +82,10 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
   MDHWLoadingPresenter::transposeWs(histoWs, m_cachedVisualHistoWs);
 
   // factory->setRecursionDepth(this->m_view->getRecursionDepth());
-  vtkDataSet *visualDataSet = factory->oneStepCreate(
-      m_cachedVisualHistoWs, drawingProgressUpdate); // HACK: progressUpdate should be
-                                             // argument for drawing!
+  auto visualDataSet = factory->oneStepCreate(
+      m_cachedVisualHistoWs,
+      drawingProgressUpdate); // HACK: progressUpdate should be
+                              // argument for drawing!
 
   /*extractMetaData needs to be re-run here because the first execution of this
     from ::executeLoadMetadata will not have ensured that all dimensions

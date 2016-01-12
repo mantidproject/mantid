@@ -72,8 +72,10 @@ bool MDHWNexusLoadingPresenter::canReadFile() const
  * @param loadingProgressUpdate : Handler for GUI updates while algorithm progresses.
  * @param drawingProgressUpdate : Handler for GUI updates while vtkDataSetFactory::create occurs.
  */
-vtkDataSet* MDHWNexusLoadingPresenter::execute(vtkDataSetFactory* factory, ProgressAction& loadingProgressUpdate, ProgressAction& drawingProgressUpdate)
-{
+vtkSmartPointer<vtkDataSet>
+MDHWNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
+                                   ProgressAction &loadingProgressUpdate,
+                                   ProgressAction &drawingProgressUpdate) {
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
 
@@ -81,7 +83,7 @@ vtkDataSet* MDHWNexusLoadingPresenter::execute(vtkDataSetFactory* factory, Progr
     this->loadWorkspace(loadingProgressUpdate);
 
   // Create visualisation in one-shot.
-  vtkDataSet* visualDataSet = factory->oneStepCreate(m_histoWs, drawingProgressUpdate);
+  auto visualDataSet = factory->oneStepCreate(m_histoWs, drawingProgressUpdate);
 
   // extractMetaData needs to be re-run here because the first execution
   // of this from ::executeLoadMetadata will not have ensured that all

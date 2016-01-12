@@ -43,21 +43,21 @@ public:
 
 class MDLoadingPresenterTest : public CxxTest::TestSuite {
 private:
-  vtkUnstructuredGrid *makeDataSet() {
+  vtkSmartPointer<vtkUnstructuredGrid> makeDataSet() {
     FakeProgressAction progressUpdate;
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(8, -10.0, 10.0, 1);
     Mantid::VATES::vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange),
                             VolumeNormalization);
     factory.initialize(ws);
-    return vtkUnstructuredGrid::SafeDownCast(factory.create(progressUpdate));
+    return factory.create(progressUpdate);
   }
 public:
   void test_that_non_default_cob_is_created() {
     // Arrange
     MOCKMDLoadingPresenter presenter;
     vtkSmartPointer<vtkUnstructuredGrid> dataSet;
-    dataSet.TakeReference(makeDataSet());
+    dataSet = makeDataSet();
     // Act
     presenter.setDefaultCOBandBoundaries(dataSet);
     // Assert

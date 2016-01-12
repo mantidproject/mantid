@@ -87,7 +87,8 @@ void testExecution()
   //Setup rendering factory
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
-  EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+  EXPECT_CALL(factory, create(_))
+      .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates objects
@@ -161,7 +162,8 @@ void testTimeLabel()
   //Setup rendering factory
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
-  EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+  EXPECT_CALL(factory, create(_))
+      .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates objects
@@ -197,7 +199,8 @@ void testAxisLabels()
   //Setup rendering factory
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
-  EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+  EXPECT_CALL(factory, create(_))
+      .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates objects

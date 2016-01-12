@@ -41,18 +41,18 @@ public:
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), Mantid::VATES::VolumeNormalization, 0);
     inside.initialize(ws_sptr);
-    vtkStructuredGrid *insideProduct =
-        dynamic_cast<vtkStructuredGrid *>(inside.create(progressAction));
+    vtkSmartPointer<vtkStructuredGrid> insideProduct =
+        inside.create(progressAction);
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), Mantid::VATES::VolumeNormalization, 0);
     below.initialize(ws_sptr);
-    vtkStructuredGrid *belowProduct =
-        dynamic_cast<vtkStructuredGrid *>(below.create(progressAction));
+    vtkSmartPointer<vtkStructuredGrid> belowProduct =
+        below.create(progressAction);
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), Mantid::VATES::VolumeNormalization, 0);
     above.initialize(ws_sptr);
-    vtkStructuredGrid *aboveProduct =
-        dynamic_cast<vtkStructuredGrid *>(above.create(progressAction));
+    vtkSmartPointer<vtkStructuredGrid> aboveProduct =
+        above.create(progressAction);
 
     TS_ASSERT_EQUALS((10*10*10), insideProduct->GetNumberOfCells());
     for (auto i = 0; i < insideProduct->GetNumberOfCells(); ++i) {
@@ -81,8 +81,7 @@ public:
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(new NoThresholdRange), Mantid::VATES::VolumeNormalization, 0);
 
     factory.initialize(ws_sptr);
-    auto product =
-        vtkSmartPointer<vtkDataSet>::Take(factory.create(mockProgressAction));
+    auto product = factory.create(mockProgressAction);
 
     TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
   }
@@ -105,8 +104,7 @@ public:
             Mantid::VATES::VolumeNormalization, 0);
     factory.initialize(ws_sptr);
 
-    auto product =
-        vtkSmartPointer<vtkDataSet>::Take(factory.create(progressUpdate));
+    auto product = factory.create(progressUpdate);
     TSM_ASSERT_EQUALS(
         "A single array should be present on the product dataset.", 1,
         product->GetCellData()->GetNumberOfArrays());
@@ -200,7 +198,13 @@ public:
 
     auto pMockFactorySuccessor = Kernel::make_unique<MockvtkDataSetFactory>();
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
-    EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate)))
+        .Times(1)
+        .WillOnce(
+            Return(vtkSmartPointer<vtkStructuredGrid>::New())); // expect it
+                                                                // then to call
+                                                                // create on the
+                                                                // successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA"));
 
     auto pRange =

@@ -66,7 +66,8 @@ public:
     auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 2);
     vtkMDHistoQuadFactory inside(pRange, Mantid::VATES::VolumeNormalization);
     inside.initialize(ws_sptr);
-    vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create(progressUpdate));
+    vtkSmartPointer<vtkUnstructuredGrid> insideProduct =
+        inside.create(progressUpdate);
 
     TS_ASSERT_EQUALS((10*10), insideProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS((11*11), insideProduct->GetNumberOfPoints());
@@ -83,7 +84,8 @@ public:
     auto pRange = boost::make_shared<UserDefinedThresholdRange>(0, 0.5);
     vtkMDHistoQuadFactory above(pRange, Mantid::VATES::VolumeNormalization);
     above.initialize(ws_sptr);
-    vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create(progressUpdate));
+    vtkSmartPointer<vtkUnstructuredGrid> aboveProduct =
+        above.create(progressUpdate);
 
     // This changed from previously, in order to ensure that we do not pass on empty 
     // workspaces. A single point is created in the center by the vtkNullUnstructuredGrid
@@ -103,7 +105,8 @@ public:
     vtkMDHistoQuadFactory below(pRange, Mantid::VATES::VolumeNormalization);
 
     below.initialize(ws_sptr);
-    vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create(progressUpdate));
+    vtkSmartPointer<vtkUnstructuredGrid> belowProduct =
+        below.create(progressUpdate);
 
     // This changed from previously, in order to ensure that we do not pass on empty 
     // workspaces. A single point is created in the center by the vtkNullUnstructuredGrid
@@ -160,7 +163,13 @@ public:
         Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_))
         .Times(1); // expect it then to call initialize on the successor.
-    EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate)))
+        .Times(1)
+        .WillOnce(
+            Return(vtkSmartPointer<vtkStructuredGrid>::New())); // expect it
+                                                                // then to call
+                                                                // create on the
+                                                                // successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
@@ -195,8 +204,7 @@ public:
     vtkMDHistoQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), Mantid::VATES::VolumeNormalization);
 
     factory.initialize(ws_sptr);
-    auto product =
-        vtkSmartPointer<vtkDataSet>::Take(factory.create(mockProgressAction));
+    auto product = factory.create(mockProgressAction);
 
     TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
   }

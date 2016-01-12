@@ -40,9 +40,10 @@ namespace Mantid
     public:
       MDEWEventNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view,
                                      const std::string fileName);
-      virtual vtkDataSet *execute(vtkDataSetFactory *factory,
-                                  ProgressAction &rebinningProgressUpdate,
-                                  ProgressAction &drawingProgressUpdate);
+      virtual vtkSmartPointer<vtkDataSet>
+      execute(vtkDataSetFactory *factory,
+              ProgressAction &rebinningProgressUpdate,
+              ProgressAction &drawingProgressUpdate);
       virtual void executeLoadMetadata();
       virtual ~MDEWEventNexusLoadingPresenter();
       virtual bool canReadFile() const;

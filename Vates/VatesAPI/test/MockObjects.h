@@ -137,7 +137,8 @@ public:
   virtual void SetSuccessor(std::unique_ptr<vtkDataSetFactory> successor) {
     setSuccessorProxy(successor.get());
   }
-  MOCK_CONST_METHOD1(create, vtkDataSet *(Mantid::VATES::ProgressAction &));
+  MOCK_CONST_METHOD1(
+      create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
   MOCK_CONST_METHOD0(createMeshOnly,
     vtkDataSet*());
   MOCK_CONST_METHOD0(createScalarArray,

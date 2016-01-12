@@ -52,8 +52,10 @@ namespace Mantid
     @param loadingProgressUpdate : Handler for GUI updates while algorithm progresses.
     @param drawingProgressUpdate : Handler for GUI updates while vtkDataSetFactory::create occurs.
     */
-    vtkDataSet* SQWLoadingPresenter::execute(vtkDataSetFactory* factory, ProgressAction& loadingProgressUpdate, ProgressAction& drawingProgressUpdate)
-    {
+    vtkSmartPointer<vtkDataSet>
+    SQWLoadingPresenter::execute(vtkDataSetFactory *factory,
+                                 ProgressAction &loadingProgressUpdate,
+                                 ProgressAction &drawingProgressUpdate) {
       using namespace Mantid::API;
       using namespace Mantid::Geometry;
 
@@ -84,7 +86,7 @@ namespace Mantid
 
       factory->setRecursionDepth(this->m_view->getRecursionDepth());
       
-      vtkDataSet* visualDataSet = factory->oneStepCreate(eventWs, drawingProgressUpdate);
+      auto visualDataSet = factory->oneStepCreate(eventWs, drawingProgressUpdate);
 
       this->appendMetadata(visualDataSet, eventWs->getName());
       
