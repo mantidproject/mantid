@@ -10,8 +10,7 @@ digraph IndirectCylinderAbsorption {
     SampleWorkspace_Wave2   [label="SampleWorkspace_Wave"]
     SampleChemicalFormula
     SampleNumberDensity
-    SampleHeight1           [label="SampleHeight"]
-    SampleWidth1            [label="SampleWidth"]
+    SampleRadius
     SampleThickness
     AbsWorkspace1           [label="AbsorptionWorkspace"]
     AbsWorkspace2           [label="AbsorptionWorkspace"]
@@ -20,8 +19,7 @@ digraph IndirectCylinderAbsorption {
     CanScale
     CanChemicalFormula
     CanNumberDensity
-    CanFrontThickness
-    CanBackThickness
+    CanRadius
     CanScale
     ElementSize1            [label="ElementSize"]
     SampleLogs
@@ -66,9 +64,7 @@ digraph IndirectCylinderAbsorption {
   SampleChemicalFormula                 -> SetSampleMaterial1
   SampleNumberDensity                   -> SetSampleMaterial1
   SetSampleMaterial1               	    -> CylinderAbsorption1
-  SampleHeight1                      	-> CylinderAbsorption1
-  SampleWidth1                       	-> CylinderAbsorption1
-  SampleThickness                  	    -> CylinderAbsorption1
+  SampleRadius                       	-> CylinderAbsorption1
   ElementSize1                       	-> CylinderAbsorption1
   EFixed1                           	-> CylinderAbsorption1
   CylinderAbsorption1                  	-> AbsWorkspace1
@@ -86,8 +82,7 @@ digraph IndirectCylinderAbsorption {
         CanChemicalFormula                      -> SetSampleMaterial2
         CanNumberDensity                        -> SetSampleMaterial2
         SetSampleMaterial2                      -> CylinderAbsorption2
-        CanFrontThickness                       -> CylinderAbsorption2
-        CanBackThickness                        -> CylinderAbsorption2
+        CanRadius                               -> CylinderAbsorption2
         CylinderAbsorption2                     -> Divide1
         SetSampleMaterial2                      -> Divide1
         Divide1                                 -> Minus1
