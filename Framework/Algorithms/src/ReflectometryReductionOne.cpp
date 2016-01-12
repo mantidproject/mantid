@@ -300,6 +300,43 @@ ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr &toCorrect,
 
   return corrected;
 }
+/**
+* @param toConvert : workspace used to get instrument components
+* @param thetaOut : angle between sample and detectors
+* @return Theta : the value by which we rotate the source
+*/
+double ReflectometryReductionOne::getAngleForSourceRotation(
+    MatrixWorkspace_sptr toConvert, double thetaOut) {
+  auto instrument = toConvert->getInstrument();
+
+  //check for source being on the horizon
+  auto instrumentSourcePosition =
+      toConvert->getInstrument()->getSource()->getPos();
+  auto instrumentUpVector =
+      toConvert->getInstrument()->getReferenceFrame()->vecPointingUp();
+  bool isSourcePerpendicularToUpVec =
+      instrumentSourcePosition.scalar_prod(instrumentUpVector) == 0;
+  //check to see if calculated theta is the same as theta from instrument setup
+  auto instrumentBeamDirection = toConvert->getInstrument()->getBeamDirection();
+  double instAngle = std::abs(
+      90 - (instrumentUpVector.angle(instrumentBeamDirection) * (180 / M_PI)));
+  double theta = std::abs(thetaOut);
+  bool isInThetaEqualToOutTheta =
+      std::abs(instAngle - theta) < Mantid::Kernel::Tolerance;
+  //the angle by which we rotate the source
+  double rotationTheta = 0.0;
+  if (isSourcePerpendicularToUpVec /*source hasn't rotated*/
+      || !isInThetaEqualToOutTheta /*inTheta != outTheta*/) {
+    if (instAngle < theta) {
+      //rotate clockwise
+      rotationTheta = theta - (instAngle);
+    } else {
+      //rotate anticlockwise
+      rotationTheta = -1 * (instAngle - theta);
+    }
+  }
+  return rotationTheta;
+}
 
 /**
 * Convert an input workspace into an IvsQ workspace.
@@ -349,23 +386,16 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   } else if (bCorrectPosition) {
     toConvert = correctPosition(toConvert, thetaInDeg.get(), isPointDetector);
   }
-
-  auto instrument = toConvert->getInstrument();
-  auto instrumentSourcePosition =
-      toConvert->getInstrument()->getSource()->getPos();
-  auto instrumentUpVector =
-      toConvert->getInstrument()->getReferenceFrame()->vecPointingUp();
-  bool isSourcePerpendicularToUpVec =
-      instrumentSourcePosition.scalar_prod(instrumentUpVector) == 0;
-
-  if (isSourcePerpendicularToUpVec /*source hasn't rotated*/) {
+  double rotationTheta = getAngleForSourceRotation(toConvert, thetaInDeg.get());
+  if (rotationTheta != 0.0) {
     auto rotateSource = this->createChildAlgorithm("RotateSource");
     rotateSource->setChild(true);
     rotateSource->initialize();
     rotateSource->setProperty("Workspace", toConvert);
-    rotateSource->setProperty("Angle", thetaInDeg.get());
+    rotateSource->setProperty("Angle", rotationTheta);
     rotateSource->execute();
   }
+
   // Always convert units.
   auto convertUnits = this->createChildAlgorithm("ConvertUnits");
   convertUnits->initialize();
@@ -657,7 +687,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
           stitchingDelta.is_initialized()) {
         const std::vector<double> params =
             boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-                stitchingEnd.get()).convert_to_container<std::vector<double>>();
+                stitchingEnd.get())
+                .convert_to_container<std::vector<double>>();
         alg->setProperty("Params", params);
       } else if (stitchingDelta.is_initialized()) {
         alg->setProperty("Params",
