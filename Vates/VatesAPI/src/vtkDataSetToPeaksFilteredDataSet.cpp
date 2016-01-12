@@ -40,47 +40,45 @@ namespace VATES
     * @param input : The dataset to peaks filter
     * @param output : The resulting peaks filtered dataset
     */
-  vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(vtkUnstructuredGrid *input,
-                                                                     vtkUnstructuredGrid *output) :
-                                                                    m_inputData(input),
-                                                                    m_outputData(output),
-                                                                    m_isInitialised(false),
-                                                                    m_radiusNoShape(0.2),
-                                                                    m_radiusType(0),
-                                                                    m_radiusFactor(2),
-                                                                    m_defaultRadius(0.1),
-                                                                    m_coordinateSystem(0)
-  {
-    if (NULL == m_inputData)
-    {
-      throw std::runtime_error("Cannot construct vtkDataSetToPeaksFilteredDataSet with NULL input vtkUnstructuredGrid");
-    }
-    if (NULL == m_outputData)
-    {
-      throw std::runtime_error("Cannot construct vtkDataSetToPeaksFilteredDataSet with NULL output vtkUnstructuredGrid");
-    }
+vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(
+    vtkSmartPointer<vtkUnstructuredGrid> input,
+    vtkSmartPointer<vtkUnstructuredGrid> output)
+    : m_inputData(vtkSmartPointer<vtkUnstructuredGrid>::New()),
+      m_outputData(vtkSmartPointer<vtkUnstructuredGrid>::New()),
+      m_isInitialised(false), m_radiusNoShape(0.2), m_radiusType(0),
+      m_radiusFactor(2), m_defaultRadius(0.1), m_coordinateSystem(0) {
+  if (nullptr == input) {
+    throw std::runtime_error("Cannot construct "
+                             "vtkDataSetToPeaksFilteredDataSet with NULL input "
+                             "vtkUnstructuredGrid");
   }
-
-
-  vtkDataSetToPeaksFilteredDataSet::~vtkDataSetToPeaksFilteredDataSet()
-  {
-    
+  if (nullptr == output) {
+    throw std::runtime_error("Cannot construct "
+                             "vtkDataSetToPeaksFilteredDataSet with NULL "
+                             "output vtkUnstructuredGrid");
   }
+  m_inputData = input;
+  m_outputData = output;
+}
 
-  /**
-    * Set the value for the underlying peaks workspace
-    * @param peaksWorkspaces : A list of peak workspace names.
-    * @param radiusNoShape : The peak radius for no shape.
-    * @param radiusType : The type of the radius: Radius(0), Outer Radius(10, Inner Radius(1)
-    * @param coordinateSystem: A coordinate system.
-    */
-  void vtkDataSetToPeaksFilteredDataSet::initialize(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces, double radiusNoShape, int radiusType, int coordinateSystem)
-  {
-    m_peaksWorkspaces = peaksWorkspaces;
-    m_radiusNoShape = radiusNoShape;
-    m_radiusType = radiusType;
-    m_isInitialised = true;
-    m_coordinateSystem = coordinateSystem;
+vtkDataSetToPeaksFilteredDataSet::~vtkDataSetToPeaksFilteredDataSet() {}
+
+/**
+  * Set the value for the underlying peaks workspace
+  * @param peaksWorkspaces : A list of peak workspace names.
+  * @param radiusNoShape : The peak radius for no shape.
+  * @param radiusType : The type of the radius: Radius(0), Outer Radius(10,
+ * Inner Radius(1)
+  * @param coordinateSystem: A coordinate system.
+  */
+void vtkDataSetToPeaksFilteredDataSet::initialize(
+    std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces,
+    double radiusNoShape, int radiusType, int coordinateSystem) {
+  m_peaksWorkspaces = peaksWorkspaces;
+  m_radiusNoShape = radiusNoShape;
+  m_radiusType = radiusType;
+  m_isInitialised = true;
+  m_coordinateSystem = coordinateSystem;
   }
 
   /**

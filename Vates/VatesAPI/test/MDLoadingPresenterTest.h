@@ -56,7 +56,7 @@ private:
     factory.initialize(ws);
     auto dataset = factory.create(progressUpdate);
     auto grid = vtkUnstructuredGrid::SafeDownCast(dataset.Get());
-    return vtkSmartPointer<vtkUnstructuredGrid>::Take(grid);
+    return vtkSmartPointer<vtkUnstructuredGrid>(grid);
   }
 public:
   void test_that_non_default_cob_is_created() {

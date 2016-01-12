@@ -31,17 +31,20 @@ using namespace Mantid::VATES;
 
 class vtkDataSetToScaledDataSetTest : public CxxTest::TestSuite {
 private:
-  vtkUnstructuredGrid *makeDataSet() {
+  vtkSmartPointer<vtkUnstructuredGrid> makeDataSet() {
     FakeProgressAction progressUpdate;
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(8, -10.0, 10.0, 1);
     vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange),
                             VolumeNormalization);
     factory.initialize(ws);
-    return vtkUnstructuredGrid::SafeDownCast(factory.create(progressUpdate));
+    auto product = factory.create(progressUpdate);
+    auto data = vtkUnstructuredGrid::SafeDownCast(product.Get());
+    vtkSmartPointer<vtkUnstructuredGrid> grid(data);
+    return grid;
   }
 
-  vtkUnstructuredGrid *makeDataSetWithNonOrthogonal() {
+  vtkSmartPointer<vtkUnstructuredGrid> makeDataSetWithNonOrthogonal() {
     auto grid = makeDataSet();
     auto u = vtkVector3d(4, 4, 0);
     auto v = vtkVector3d(-2, 2, 0);
@@ -58,8 +61,8 @@ private:
     return grid;
   }
 
-  vtkUnstructuredGrid *makeDataSetWithJsonMetadata() {
-    vtkUnstructuredGrid *data = makeDataSet();
+  vtkSmartPointer<vtkUnstructuredGrid> makeDataSetWithJsonMetadata() {
+    auto data = makeDataSet();
 
     MetadataJsonManager manager;
     std::string instrument = "OSIRIS";
@@ -98,7 +101,7 @@ public:
   void testExecution() {
 
     vtkDataSetToScaledDataSet scaler;
-    auto in = vtkSmartPointer<vtkUnstructuredGrid>::Take(makeDataSet());
+    auto in = makeDataSet();
     auto out =
         vtkSmartPointer<vtkPointSet>::Take(scaler.execute(0.1, 0.5, 0.2, in));
 
@@ -148,8 +151,7 @@ public:
 
   void testJsonMetadataExtractionFromScaledDataSet() {
     // Arrange
-    auto in = vtkSmartPointer<vtkUnstructuredGrid>::Take(
-        makeDataSetWithJsonMetadata());
+    auto in = makeDataSetWithJsonMetadata();
 
     // Act
     vtkDataSetToScaledDataSet scaler;
@@ -171,8 +173,7 @@ public:
   void testExecutionWithNonOrthogonalDataSet() {
 
     vtkDataSetToScaledDataSet scaler;
-    auto in = vtkSmartPointer<vtkUnstructuredGrid>::Take(
-        makeDataSetWithNonOrthogonal());
+    auto in = makeDataSetWithNonOrthogonal();
     auto out = vtkSmartPointer<vtkPointSet>::Take(
         scaler.execute(0.25, 0.5, 0.125, in));
 
