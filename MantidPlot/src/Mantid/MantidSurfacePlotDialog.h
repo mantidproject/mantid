@@ -24,7 +24,7 @@ public:
     int plotIndex;
     QString axisName;
     QString logName;
-    std::vector<std::string> customLogValues;
+    std::set<double> customLogValues;
   };
 
   /// Constructor - same parameters as one of the parent constructors, along
@@ -35,6 +35,8 @@ public:
   UserInputSurface getSelections() const;
   /// Returns the workspace index to be plotted
   int getPlot() const;
+  /// Display an error message box
+  static void showPlotOptionsError(const QString &message);
   /// The string "Workspace index"
   static const QString WORKSPACE_INDEX;
   /// The string "Custom"
@@ -61,7 +63,7 @@ private:
   /// Gets input name for log to use
   const QString getLogName() const;
   /// Returns the input custom log values
-  const std::vector<std::string> getCustomLogValues() const;
+  const std::set<double> getCustomLogValues() const;
   /// A pointer to the parent MantidUI object
   MantidUI *m_mantidUI;
   /// A list of names of workspaces which are to be plotted.

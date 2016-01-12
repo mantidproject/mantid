@@ -29,6 +29,11 @@ public:
   static bool groupIsAllMatrixWorkspaces(
       const Mantid::API::WorkspaceGroup_const_sptr &wsGroup);
 
+  /// Validates the given options and returns an error string
+  static std::string
+  validatePlotOptions(MantidSurfacePlotDialog::UserInputSurface &options,
+                      int nWorkspaces);
+
 private:
   /// Type of graph to plot
   enum class Type { Surface, Contour };
@@ -51,8 +56,7 @@ private:
                     const QString &logName) const;
 
   /// Returns a single log value from supplied custom log
-  double getSingleLogValue(int wsIndex,
-                           const std::vector<std::string> &values) const;
+  double getSingleLogValue(int wsIndex, const std::set<double> &values) const;
 
   /// Converts histogram to point data, if not already
   void convertHistoToPoints(Mantid::API::MatrixWorkspace_sptr ws) const;

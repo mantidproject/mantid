@@ -1845,7 +1845,11 @@ MantidTreeWidget::choosePlotOptions(const QString &type,
       m_mantidUI, 0, selectedMatrixWsNameList, type);
   dlg->exec();
   auto selections = dlg->getSelections();
-  validatePlotOptions(selections, nWorkspaces);
+  std::string errors =
+      MantidGroupPlotGenerator::validatePlotOptions(selections, nWorkspaces);
+  if (!errors.empty()) {
+    MantidSurfacePlotDialog::showPlotOptionsError(errors.c_str());
+  }
   return selections;
 }
 
@@ -1871,31 +1875,6 @@ MantidTreeWidget::chooseSurfacePlotOptions(int nWorkspaces) const {
 MantidSurfacePlotDialog::UserInputSurface
 MantidTreeWidget::chooseContourPlotOptions(int nWorkspaces) const {
   return choosePlotOptions("Contour", nWorkspaces);
-}
-
-/**
- * Performs validation of user's selected options.
- * If errors detected, raises a message box and sets "accepted" to false.
- * @param options :: [input] Selections made from dialog
- * @param nWorkspaces :: [input] Number of workspaces in selected group
- */
-void MantidTreeWidget::validatePlotOptions(
-    MantidSurfacePlotDialog::UserInputSurface &options, int nWorkspaces) const {
-  // If using custom log values, must have the same number of values as the
-  // number of workspaces in the group
-  if (options.accepted) {
-    if (options.logName == MantidSurfacePlotDialog::CUSTOM) {
-      if (static_cast<int>(options.customLogValues.size()) != nWorkspaces) {
-        QMessageBox errorMessage;
-        errorMessage.setText(
-            "Number of custom log values must be equal to number "
-            "of workspaces in group");
-        errorMessage.setIcon(QMessageBox::Critical);
-        errorMessage.exec();
-        options.accepted = false;
-      }
-    }
-  }
 }
 
 void MantidTreeWidget::setSortScheme(MantidItemSortScheme sortScheme)

@@ -174,26 +174,23 @@ bool MantidGroupPlotGenerator::groupIsAllMatrixWorkspaces(
 }
 
 /**
- * Gets the custom, user-provided log value of the given index out of the
- * vector.
- * Attempts to convert to a numeric value.
- * If conversion fails, or not enough values in the vector, returns zero.
+ * Gets the custom, user-provided log value of the given index.
+ * i.e. the nth in order from smallest to largest.
+ * If the index is outside the range, returns 0.
+ * (Note: MantidDock has previously checked input to make sure that there are
+ * the correct number)
  * @param wsIndex :: [input] Index of log value to use
- * @param logValues :: [input] User-provided vector of log values
- * @returns Numeric log value, or zero
+ * @param logValues :: [input] User-provided set of log values
+ * @returns Numeric log value
  */
 double MantidGroupPlotGenerator::getSingleLogValue(
-    int wsIndex, const std::vector<std::string> &logValues) const {
-  double value = 0;
-
-  try {
-    value = std::stod(logValues.at(wsIndex));
-  } catch (std::exception &) {
-    // Either value was not a number, or not enough entries in the vector.
-    // Whichever it was, we return zero.
-    value = 0;
+    int wsIndex, const std::set<double> &logValues) const {
+  double value{0};
+  if (wsIndex < logValues.size()) {
+    auto it = logValues.begin();
+    std::advance(it, wsIndex);
+    value = *it;
   }
-
   return value;
 }
 
@@ -283,4 +280,30 @@ void MantidGroupPlotGenerator::convertPointsToHisto(
     alg->execute();
     ws = alg->getProperty("OutputWorkspace");
   }
+}
+
+/**
+ * Performs validation of user's selected options.
+ * If errors detected, sets "accepted" to false and returns an error string,
+ * otherwise returns an empty string.
+ * Checks made:
+ * - Custom values: must have same number as number of workspaces in group
+ * @param options :: [input] Selections made from dialog
+ * @param nWorkspaces :: [input] Number of workspaces in selected group
+ * @returns Error string, or empty string if no error
+ */
+std::string MantidGroupPlotGenerator::validatePlotOptions(
+    MantidSurfacePlotDialog::UserInputSurface &options, int nWorkspaces) {
+  std::stringstream err;
+  if (options.accepted) {
+    if (options.logName == MantidSurfacePlotDialog::CUSTOM) {
+      // Check number of values supplied
+      if (static_cast<int>(options.customLogValues.size()) != nWorkspaces) {
+        err << "Number of custom log values must be equal to "
+               "number of workspaces in group";
+        options.accepted = false;
+      }
+    }
+  }
+  return err.str();
 }

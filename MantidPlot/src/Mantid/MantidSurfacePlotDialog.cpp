@@ -1,6 +1,7 @@
 #include "MantidSurfacePlotDialog.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include <QMessageBox>
 
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDWorkspace_sptr;
@@ -156,7 +157,13 @@ MantidSurfacePlotDialog::getSelections() const {
   selections.axisName = getAxisName();
   selections.logName = getLogName();
   if (selections.logName == CUSTOM) {
-    selections.customLogValues = getCustomLogValues();
+    try {
+      selections.customLogValues = getCustomLogValues();
+    } catch (const std::invalid_argument &ex) {
+      QString error("Invalid log value supplied: ");
+      showPlotOptionsError(error.append(ex.what()));
+      selections.accepted = false;
+    }
   }
   return selections;
 }
@@ -204,17 +211,39 @@ void MantidSurfacePlotDialog::onLogSelected(const QString &logName) {
 
 /**
  * If "Custom" is selected as log, returns the list of values the user has input
- * into the edit box, otherwise returns an empty vector.
- * @returns Vector of numerical log values (as strings)
+ * into the edit box, otherwise returns an empty set.
+ * Note that the set is ordered by definition, and values are only added if they
+ * are successfully converted to a double.
+ * @returns Set of numerical log values
+ * @throws invalid_argument if values are not numeric
  */
-const std::vector<std::string>
-MantidSurfacePlotDialog::getCustomLogValues() const {
-  std::vector<std::string> logValues;
+const std::set<double> MantidSurfacePlotDialog::getCustomLogValues() const {
+  std::set<double> logValues;
   if (m_logSelector->currentText() == CUSTOM) {
     QStringList values = m_logValues->text().split(',');
     foreach (QString value, values) {
-      logValues.push_back(value.toStdString());
+      bool ok = false;
+      double number = value.toDouble(&ok);
+      if (ok) {
+        logValues.insert(number);
+      } else {
+        throw std::invalid_argument(value);
+        break;
+      }
     }
   }
   return logValues;
+}
+
+/**
+ * Displays a message box with the supplied error string.
+ * @param message :: [input] Error message to display
+ */
+void MantidSurfacePlotDialog::showPlotOptionsError(const QString &message) {
+  if (!message.isEmpty()) {
+    QMessageBox errorMessage;
+    errorMessage.setText(message);
+    errorMessage.setIcon(QMessageBox::Critical);
+    errorMessage.exec();
+  }
 }

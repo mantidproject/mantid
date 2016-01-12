@@ -191,8 +191,6 @@ protected:
   void dragEnterEvent(QDragEnterEvent *de);
   MantidSurfacePlotDialog::UserInputSurface
   choosePlotOptions(const QString &type, int nWorkspaces) const;
-  void validatePlotOptions(MantidSurfacePlotDialog::UserInputSurface &options,
-                           int nWorkspaces) const;
 
 private:
   QPoint m_dragStartPosition;
