@@ -151,7 +151,7 @@ public:
         std::make_pair<std::string, SearchResult>("113", SearchResult()));
 
     auto mockMeasurementItemSource =
-        std::make_unique<MockReflMeasurementItemSource>();
+        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
     auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
     // We have 2 with valid measurement ids and 1 with no measurement id
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
