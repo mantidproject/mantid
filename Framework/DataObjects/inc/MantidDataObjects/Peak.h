@@ -9,7 +9,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
-#include "MantidKernel/ConfigService.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 

@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include <algorithm>

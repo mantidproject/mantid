@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidKernel/RegistrationHelper.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

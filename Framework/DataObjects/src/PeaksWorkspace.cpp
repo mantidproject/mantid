@@ -610,20 +610,14 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
 
-  // HKL is flipped by -1 due to different q convention in Crystallography.
-  // Always write out in ki-kf so consistent with old files
-  double qSign = 1.0;
-  if (this->getConvention() == "Crystallography")
-    qSign = -1.0;
-
   // Populate column vectors from Peak Workspace
   size_t maxShapeJSONLength = 0;
   for (size_t i = 0; i < np; i++) {
     Peak p = peaks[i];
     detectorID[i] = p.getDetectorID();
-    H[i] = qSign * p.getH();
-    K[i] = qSign * p.getK();
-    L[i] = qSign * p.getL();
+    H[i] = p.getH();
+    K[i] = p.getK();
+    L[i] = p.getL();
     intensity[i] = p.getIntensity();
     sigmaIntensity[i] = p.getSigmaIntensity();
     binCount[i] = p.getBinCount();
@@ -662,6 +656,13 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
 
   // Coordinate system
   file->writeData("coordinate_system", static_cast<uint32_t>(m_coordSystem));
+
+
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string m_QConvention = this->getConvention();
+  file->putAttr("QConvention", m_QConvention);
+
 
   // Detectors column
   file->writeData("column_1", detectorID);

@@ -4,7 +4,6 @@
 #include "MantidMDAlgorithms/MDTransfInterface.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDTransfModQ.h"
-#include "MantidKernel/ConfigService.h"
 //
 namespace Mantid {
 namespace MDAlgorithms {

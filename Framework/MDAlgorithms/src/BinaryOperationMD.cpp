@@ -74,28 +74,9 @@ void BinaryOperationMD::exec() {
   m_rhs = getProperty(inputPropName2());
   m_out = getProperty(outputPropName());
   if (m_lhs->getConvention() != m_rhs->getConvention()) {
-    // Convert to the Qconvention from Preferences
-    // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-    std::string pref_QConvention =
-        Kernel::ConfigService::Instance().getString("Q.convention");
-
-    if (pref_QConvention != m_lhs->getConvention()) {
-      g_log.information() << "Transforming Q in lhs" << std::endl;
-      Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
-      transform_alg->setProperty(
-          "InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(m_lhs));
-      transform_alg->setProperty("Scaling", "-1.0");
-      transform_alg->executeAsChildAlg();
-      m_lhs = transform_alg->getProperty("OutputWorkspace");
-    } else {
-      g_log.information() << "Transforming Q in rhs" << std::endl;
-      Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
-      transform_alg->setProperty(
-          "InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(m_rhs));
-      transform_alg->setProperty("Scaling", "-1.0");
-      transform_alg->executeAsChildAlg();
-      m_rhs = transform_alg->getProperty("OutputWorkspace");
-    }
+    throw std::runtime_error(
+        "Workspaces have different conventions for Q. "
+        "Use algorithm ChangeQConvention on one workspace. ");
   }
 
   // Flip LHS and RHS if commutative and :
