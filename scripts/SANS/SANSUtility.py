@@ -1611,7 +1611,7 @@ def get_measurement_time_from_file(filename):
         DeleteWorkspace(file_info)
     else:
         sanslog.warning("Failed to retrieve the measurement time for " + str(filename))
-    return str(measurement_time)
+    return str(measurement_time).strip()
 
 def are_two_files_identical(file_path_1, file_path_2):
     '''

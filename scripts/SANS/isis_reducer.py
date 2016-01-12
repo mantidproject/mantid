@@ -743,7 +743,7 @@ class ISISReducer(Reducer):
                 ws = run[0]
             else:
                 ws = run
-            measurement_time = str(ws.getRun().endTime())
+            measurement_time = str(ws.getRun().endTime()).strip()
         else:
             if run is None or run == "":
                 return
