@@ -55,8 +55,7 @@ void TabulatedFunction::eval(double scaling, double xshift, double xscale,
 
   // shift and scale the domain over which the function is defined
   std::vector<double> xData(m_xData);
-  for (std::vector<double>::iterator it = xData.begin(); it != xData.end();
-       ++it) {
+  for (auto it = xData.begin(); it != xData.end(); ++it) {
     *it *= xscale;
     *it += xshift;
   }

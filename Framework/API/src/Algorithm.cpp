@@ -41,7 +41,8 @@ const std::string WORKSPACE_TYPES_SEPARATOR = ";";
 
 class WorkspacePropertyValueIs {
 public:
-  WorkspacePropertyValueIs(const std::string &value) : m_value(value){};
+  explicit WorkspacePropertyValueIs(const std::string &value)
+      : m_value(value){};
   bool operator()(IWorkspaceProperty *property) {
     Property *prop = dynamic_cast<Property *>(property);
     if (!prop)
@@ -201,15 +202,11 @@ void Algorithm::progress(double p, const std::string &msg, double estimatedTime,
 //---------------------------------------------------------------------------------------------
 /// Function to return all of the categories that contain this algorithm
 const std::vector<std::string> Algorithm::categories() const {
-  std::vector<std::string> res;
   Poco::StringTokenizer tokenizer(category(), categorySeparator(),
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
 
-  for (; h != tokenizer.end(); ++h) {
-    res.push_back(*h);
-  }
+  std::vector<std::string> res(tokenizer.begin(), tokenizer.end());
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);
@@ -1427,7 +1424,7 @@ struct AsyncFlagHolder {
   /** Constructor
   * @param A :: reference to the running flag
   */
-  AsyncFlagHolder(bool &running_flag) : m_running_flag(running_flag) {
+  explicit AsyncFlagHolder(bool &running_flag) : m_running_flag(running_flag) {
     m_running_flag = true;
   }
   /// Destructor
@@ -1600,8 +1597,8 @@ IPropertyManager::getValue<API::IAlgorithm_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message =
-        "Attempt to assign property " + name + " to incorrect type";
+    std::string message = "Attempt to assign property " + name +
+                          " to incorrect type. Expected shared_ptr<IAlgorithm>";
     throw std::runtime_error(message);
   }
 }
@@ -1623,7 +1620,8 @@ IPropertyManager::getValue<API::IAlgorithm_const_sptr>(
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name + " to incorrect type";
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<IAlgorithm>";
     throw std::runtime_error(message);
   }
 }

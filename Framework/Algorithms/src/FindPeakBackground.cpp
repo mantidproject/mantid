@@ -140,7 +140,7 @@ void FindPeakBackground::exec() {
 
   double Ymean, Yvariance, Ysigma;
   MantidVec maskedY;
-  MantidVec::const_iterator in = std::min_element(inpY.begin(), inpY.end());
+  auto in = std::min_element(inpY.cbegin(), inpY.cend());
   double bkg0 = inpY[in - inpY.begin()];
   for (size_t l = l0; l < n; ++l) {
     maskedY.push_back(inpY[l] - bkg0);

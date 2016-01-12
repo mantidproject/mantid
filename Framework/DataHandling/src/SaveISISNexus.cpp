@@ -46,28 +46,18 @@ SaveISISNexus::SaveISISNexus()
  *
  */
 void SaveISISNexus::init() {
-  std::vector<std::string> raw_exts;
-  raw_exts.push_back(".raw");
-  raw_exts.push_back(".s*");
-  raw_exts.push_back(".add");
   declareProperty(
-      new FileProperty("InputFilename", "", FileProperty::Load, raw_exts),
+      new FileProperty("InputFilename", "", FileProperty::Load,
+                       {".raw", ".s*", ".add"}),
       "The name of the RAW file to read, including its full or relative\n"
       "path. (N.B. case sensitive if running on Linux).");
 
   // Declare required parameters, filename with ext {.nx,.nx5,xml} and input
   // workspac
-  std::vector<std::string> nxs_exts;
-  nxs_exts.push_back(".nxs");
-  nxs_exts.push_back(".nx5");
-  nxs_exts.push_back(".xml");
-  declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::Save, nxs_exts),
-      "The name of the Nexus file to write, as a full or relative\n"
-      "path");
-  // declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace",
-  // "", Direction::Input),
-  //    "Name of the workspace to be saved");
+  declareProperty(new FileProperty("OutputFilename", "", FileProperty::Save,
+                                   {".nxs", ".nx5", ".xml"}),
+                  "The name of the Nexus file to write, as a full or relative\n"
+                  "path");
 }
 
 /**
@@ -337,7 +327,7 @@ int SaveISISNexus::saveStringVectorOpen(const char *name,
     }
   if (buff_size <= 0)
     buff_size = 1;
-  char *buff = new char[buff_size];
+  auto buff = new char[buff_size];
   int dim[2];
   dim[0] = static_cast<int>(str_vec.size());
   dim[1] = buff_size;

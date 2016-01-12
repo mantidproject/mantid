@@ -253,6 +253,23 @@ TMDE(signal_t MDBoxIterator)::getNormalizedError() const {
   return std::numeric_limits<signal_t>::quiet_NaN();
 }
 
+/// Returns the normalized signal for this box
+TMDE(signal_t MDBoxIterator)::getNormalizedSignalWithMask() const {
+  if (this->getIsMasked()) {
+    return MDMaskValue;
+  }
+  // What is our normalization factor?
+  switch (m_normalization) {
+  case NoNormalization:
+    return m_current->getSignal();
+  case VolumeNormalization:
+    return m_current->getSignal() * m_current->getInverseVolume();
+  case NumEventsNormalization:
+    return m_current->getSignal() / double(m_current->getNPoints());
+  }
+  return std::numeric_limits<signal_t>::quiet_NaN();
+}
+
 /// Returns the signal for this box
 TMDE(signal_t MDBoxIterator)::getSignal() const {
   return m_current->getSignal();

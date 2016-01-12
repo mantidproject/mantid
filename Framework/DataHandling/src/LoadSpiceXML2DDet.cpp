@@ -559,8 +559,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
     for (size_t ic = 1; ic < colnames.size(); ++ic) {
       double logvalue = spicetablews->cell<double>(ir, ic);
       std::string &logname = colnames[ic];
-      TimeSeriesProperty<double> *newlogproperty =
-          new TimeSeriesProperty<double>(logname);
+      auto newlogproperty = new TimeSeriesProperty<double>(logname);
       newlogproperty->addValue(anytime, logvalue);
       matrixws->mutableRun().addProperty(newlogproperty);
     }
@@ -676,7 +675,8 @@ void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws,
     loadinst->setProperty("Filename", idffilename);
   } else
     loadinst->setProperty("InstrumentName", "HB3A");
-  loadinst->setProperty("RewriteSpectraMap", true);
+  loadinst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(true));
   loadinst->execute();
   if (loadinst->isExecuted())
     matrixws = loadinst->getProperty("Workspace");

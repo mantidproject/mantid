@@ -688,12 +688,16 @@ void DgsReduction::exec() {
 
   // Put all properties except input files/workspaces into property manager.
   const std::vector<Property *> props = this->getProperties();
-  std::vector<Property *>::const_iterator iter = props.begin();
-  for (; iter != props.end(); ++iter) {
+  for (auto iter = props.cbegin(); iter != props.cend(); ++iter) {
     if (!boost::contains((*iter)->name(), "Input")) {
       this->reductionManager->declareProperty((*iter)->clone());
     }
   }
+
+  Progress progress(this, 0, 1, 7);
+
+  progress.report();
+
   // Determine the default facility
   const FacilityInfo defaultFacility = ConfigService::Instance().getFacility();
 
@@ -727,6 +731,8 @@ void DgsReduction::exec() {
     boost::erase_all(outputWsName, "_spe");
   }
 
+  progress.report("Loading hard mask...");
+
   // Load the hard mask if available
   MatrixWorkspace_sptr hardMaskWS = this->loadHardMask();
   if (hardMaskWS && showIntermedWS) {
@@ -735,6 +741,8 @@ void DgsReduction::exec() {
         "ReductionHardMask", hardMaskName, Direction::Output));
     this->setProperty("ReductionHardMask", hardMaskWS);
   }
+
+  progress.report("Loading grouping file...");
   // Load the grouping file if available
   MatrixWorkspace_sptr groupingWS = this->loadGroupingFile("");
   if (groupingWS && showIntermedWS) {
@@ -802,6 +810,7 @@ void DgsReduction::exec() {
     detVanWS.reset();
   }
 
+  progress.report("Converting to energy transfer...");
   IAlgorithm_sptr etConv =
       this->createChildAlgorithm("DgsConvertToEnergyTransfer");
   etConv->setProperty("InputWorkspace", sampleWS);
@@ -830,6 +839,8 @@ void DgsReduction::exec() {
   }
 
   Workspace_sptr absSampleWS = this->loadInputData("AbsUnitsSample", false);
+
+  progress.report("Absolute units reduction...");
 
   // Perform absolute normalisation if necessary
   if (absSampleWS) {
@@ -884,6 +895,8 @@ void DgsReduction::exec() {
     }
   }
 
+  progress.report();
+
   // Convert from DeltaE to powder S(Q,W)
   const bool doPowderConvert = this->getProperty("DoPowderDataConversion");
   if (doPowderConvert) {
@@ -918,6 +931,8 @@ void DgsReduction::exec() {
       saveNxs->executeAsChildAlg();
     }
   }
+
+  progress.report();
 
   this->setProperty("OutputWorkspace", outputWS);
 }

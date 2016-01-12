@@ -27,7 +27,7 @@ class AlgorithmMonitor: public QThread
 
 public:
   /// Constructor
-  AlgorithmMonitor(MantidUI *m);
+  explicit AlgorithmMonitor(MantidUI *m);
   /// Destructor
   ~AlgorithmMonitor();
   /// Add algorithm to monitor

@@ -76,16 +76,14 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
 
     WorkspaceNameType workspaces =
         sourceAlg->getProperty(this->m_workspacePropertyName);
-    WorkspaceNameType::iterator it = workspaces.begin();
 
     // Inspect all the input workspaces in the ArrayProperty input.
-    while (it != workspaces.end()) {
+    for (auto it = workspaces.begin(); it != workspaces.end(); ++it) {
       Workspace_sptr ws = AnalysisDataService::Instance().retrieve(*it);
       if (!ws) {
         throw Kernel::Exception::NotFoundError("Workspace", *it);
       }
       tryAddInputWorkspaceToInputGroups(ws, vecWorkspaceGroups);
-      ++it;
     }
   } else {
     typedef std::vector<boost::shared_ptr<Workspace>> WorkspaceVector;
@@ -93,10 +91,8 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
     WorkspaceVector outWorkspaces;
     sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
     UNUSED_ARG(outWorkspaces);
-    WorkspaceVector::iterator it = inWorkspaces.begin();
-    while (it != inWorkspaces.end()) {
+    for (auto it = inWorkspaces.begin(); it != inWorkspaces.end(); ++it) {
       tryAddInputWorkspaceToInputGroups(*it, vecWorkspaceGroups);
-      ++it;
     }
   }
 

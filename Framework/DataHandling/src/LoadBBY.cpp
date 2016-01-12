@@ -46,8 +46,7 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager,
                                       const std::string &name,
                                       const TYPE value) {
   // create time series property and add single value
-  Kernel::TimeSeriesProperty<TYPE> *p =
-      new Kernel::TimeSeriesProperty<TYPE>(name);
+  auto p = new Kernel::TimeSeriesProperty<TYPE>(name);
   p->addValue(time, value);
 
   // add to log manager
@@ -404,7 +403,8 @@ void LoadBBY::exec() {
       createChildAlgorithm("LoadInstrument");
   loadInstrumentAlg->setProperty("Workspace", eventWS);
   loadInstrumentAlg->setPropertyValue("InstrumentName", "BILBY");
-  loadInstrumentAlg->setProperty("RewriteSpectraMap", false);
+  loadInstrumentAlg->setProperty("RewriteSpectraMap",
+                                 Mantid::Kernel::OptionalBool(false));
   loadInstrumentAlg->executeAsChildAlg();
 
   setProperty("OutputWorkspace", eventWS);

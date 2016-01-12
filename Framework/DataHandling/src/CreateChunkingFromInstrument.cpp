@@ -1,3 +1,4 @@
+#include "MantidKernel/OptionalBool.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -81,12 +82,9 @@ void CreateChunkingFromInstrument::init() {
   // instrument selection
   string grp1Name("Specify the Instrument");
 
-  std::vector<std::string> exts;
-  exts.push_back("_event.nxs");
-  exts.push_back(".nxs.h5");
-  exts.push_back(".nxs");
   this->declareProperty(
-      new FileProperty(PARAM_IN_FILE, "", FileProperty::OptionalLoad, exts),
+      new FileProperty(PARAM_IN_FILE, "", FileProperty::OptionalLoad,
+                       {"_event.nxs", ".nxs.h5", ".nxs"}),
       "The name of the event nexus file to read, including its full or "
       "relative path.");
 
@@ -375,6 +373,8 @@ Instrument_const_sptr CreateChunkingFromInstrument::getInstrument() {
   childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
   childAlg->setPropertyValue("Filename", instFilename);
   childAlg->setPropertyValue("InstrumentName", instName);
+  childAlg->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(true));
   childAlg->executeAsChildAlg();
   return tempWS->getInstrument();
 }

@@ -8,6 +8,7 @@
 #include <fstream>
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include <Poco/File.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -40,15 +41,15 @@ void SaveIsawDetCal::init() {
       new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".DetCal");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
-                  "Path to an ISAW-style .detcal file to save.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Save, {".DetCal"}),
+      "Path to an ISAW-style .detcal file to save.");
 
   declareProperty("TimeOffset", 0.0, "Offsets to be applied to times");
   declareProperty(new ArrayProperty<string>("BankNames", Direction::Input),
                   "Optional: Only select the specified banks");
+  declareProperty("AppendFile", false, "Append to file if true.\n"
+                                       "If false, new file (default).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -71,8 +72,6 @@ void SaveIsawDetCal::exec() {
       g_log.notice() << "T0 = " << T0 << std::endl;
     }
   }
-  std::ofstream out;
-  out.open(filename.c_str());
 
   std::vector<std::string> bankNames = getProperty("BankNames");
 
@@ -125,24 +124,37 @@ void SaveIsawDetCal::exec() {
   double beamline_norm;
   V3D samplePos;
   inst->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
-  out << "# NEW CALIBRATION FILE FORMAT (in NeXus/SNS coordinates):"
-      << std::endl;
-  out << "# Lengths are in centimeters." << std::endl;
-  out << "# Base and up give directions of unit vectors for a local "
-      << std::endl;
-  out << "# x,y coordinate system on the face of the detector." << std::endl;
-  out << "#" << std::endl;
-  out << "#" << std::endl;
-  out << "# " << DateAndTime::getCurrentTime().toISO8601String() << std::endl;
 
-  out << "6         L1     T0_SHIFT" << std::endl;
-  out << "7 " << std::setw(10);
-  out << std::setprecision(4) << std::fixed << (l1 * 100);
-  out << std::setw(13) << std::setprecision(3) << T0 << std::endl;
+  std::ofstream out;
+  bool append = getProperty("AppendFile");
 
-  out << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
-         "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
-         "     UpZ" << std::endl;
+  // do not append if file does not exist
+  if (!Poco::File(filename.c_str()).exists())
+    append = false;
+
+  if (append) {
+    out.open(filename.c_str(), std::ios::app);
+  } else {
+    out.open(filename.c_str());
+    out << "# NEW CALIBRATION FILE FORMAT (in NeXus/SNS coordinates):"
+        << std::endl;
+    out << "# Lengths are in centimeters." << std::endl;
+    out << "# Base and up give directions of unit vectors for a local "
+        << std::endl;
+    out << "# x,y coordinate system on the face of the detector." << std::endl;
+    out << "#" << std::endl;
+    out << "#" << std::endl;
+    out << "# " << DateAndTime::getCurrentTime().toISO8601String() << std::endl;
+
+    out << "6         L1     T0_SHIFT" << std::endl;
+    out << "7 " << std::setw(10);
+    out << std::setprecision(4) << std::fixed << (l1 * 100);
+    out << std::setw(13) << std::setprecision(3) << T0 << std::endl;
+
+    out << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
+           "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
+           "     UpZ" << std::endl;
+  }
   // Here would save each detector...
   std::set<int>::iterator it;
   for (it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it) {

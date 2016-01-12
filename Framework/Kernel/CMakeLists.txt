@@ -67,6 +67,7 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
+	src/OptionalBool.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
 	src/ProgressText.cpp
@@ -215,6 +216,7 @@ set ( INC_FILES
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
 	inc/MantidKernel/NullValidator.h
+	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
 	inc/MantidKernel/PhysicalConstants.h
 	inc/MantidKernel/PocoVersion.h
@@ -346,6 +348,7 @@ set ( TEST_FILES
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
 	NullValidatorTest.h
+	OptionalBoolTest.h
 	ProgressBaseTest.h
 	ProgressTextTest.h
 	PropertyHistoryTest.h
@@ -411,8 +414,6 @@ if(UNITY_BUILD)
   enable_unity_build(Kernel SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-include_directories ( ${GSL_INCLUDE_DIR} )
-
 # Enable precompiled headers where supported (must be done before target is added)
 enable_precompiled_headers ( inc/MantidKernel/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
@@ -420,6 +421,8 @@ add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
+
+target_include_directories ( Kernel PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
@@ -572,10 +575,20 @@ else ()
   set ( MANTID_ROOT .. )
 endif ()
 
+# Whether or not to check for updates is tied to a patch version being defined
+# nighly/unstable is basically ISO8601 so it will be longer than 8 char.
+# This affects Mantid.properties.install only.
+string( LENGTH "VERSION_PATCH ${VERSION_PATCH}" VERSION_PATCH_LENGTH)
+set (ENABLE_WEB_UPDATES 0)
+if (${VERSION_PATCH_LENGTH} LESS 8)
+  set (ENABLE_WEB_UPDATES 1)
+endif()
+message( STATUS "For Mantid.properties.install: ENABLE_WEB_UPDATES=${ENABLE_WEB_UPDATES}")
+
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
-set ( UPDATE_INSTRUMENT_DEFINTITIONS "1" )
-set ( CHECK_FOR_NEW_MANTID_VERSION "1" )
+set ( UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_WEB_UPDATES}" )
+set ( CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_WEB_UPDATES}" )
 set ( ENABLE_USAGE_REPORTS "1" )
 set ( DATADIRS "" )
 set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository" )

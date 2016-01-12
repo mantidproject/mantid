@@ -31,7 +31,7 @@ ipython -- agg_energy_bands.py --input-path=~/test/LARMOR/test_few_angles/ --out
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
-import prep.energy_bands_aggregator as eba
+import IMAT.prep.energy_bands_aggregator as eba
 import argparse
 
 def _indices_to_tuple(indices):
@@ -48,7 +48,7 @@ def _indices_to_tuple(indices):
         if 2 != len(indices) or not isinstance(indices[0], int) or not isinstance(indices[1], int):
             tidx = (int(idxlist[0]), int(idxlist[1]))
         else:
-            raise ValueError("Wrong eneergy band indices given: {0}. "
+            raise ValueError("Wrong energy band indices given: {0}. "
                              "I expect two integers separated by a comma".format(
                                  indices))
     return tidx

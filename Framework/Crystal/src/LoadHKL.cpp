@@ -33,11 +33,9 @@ LoadHKL::~LoadHKL() {}
 /** Initialize the algorithm's properties.
  */
 void LoadHKL::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".hkl");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "Path to an hkl file to save.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".hkl"}),
+      "Path to an hkl file to save.");
 
   declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
                                                         Direction::Output),
@@ -90,11 +88,11 @@ void LoadHKL::exec() {
     double wl = atof(line.substr(32, 8).c_str());
     double tbar = atof(line.substr(40, 7).c_str()); // tbar
     int run = atoi(line.substr(47, 7).c_str());
-    atoi(line.substr(54, 7).c_str());                // seqNum
-    double trans = atof(line.substr(61, 7).c_str()); // transmission
+    static_cast<void>(atoi(line.substr(54, 7).c_str())); // seqNum
+    double trans = atof(line.substr(61, 7).c_str());     // transmission
     int bank = atoi(line.substr(68, 4).c_str());
     double scattering = atof(line.substr(72, 9).c_str());
-    atof(line.substr(81, 9).c_str()); // dspace
+    static_cast<void>(atof(line.substr(81, 9).c_str())); // dspace
     if (first) {
       mu1 = -(double)std::log(trans) / tbar;
       wl1 = wl / 1.8;

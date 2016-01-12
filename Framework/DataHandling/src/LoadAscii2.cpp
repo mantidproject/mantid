@@ -555,10 +555,8 @@ int LoadAscii2::splitIntoColumns(std::list<std::string> &columns,
 void LoadAscii2::fillInputValues(std::vector<double> &values,
                                  const std::list<std::string> &columns) const {
   values.resize(columns.size());
-  std::list<std::string>::const_iterator iend = columns.end();
   int i = 0;
-  for (std::list<std::string>::const_iterator itr = columns.begin();
-       itr != iend; ++itr) {
+  for (auto itr = columns.cbegin(); itr != columns.cend(); ++itr) {
     std::string value = *itr;
     boost::trim(value);
     boost::to_lower(value);
@@ -579,13 +577,8 @@ void LoadAscii2::fillInputValues(std::vector<double> &values,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadAscii2::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
-  exts.push_back(".txt");
-  exts.push_back(".csv");
-  exts.push_back("");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
+                                   {".dat", ".txt", ".csv", ""}),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be .txt, .dat, or "
                   ".csv");
@@ -670,8 +663,7 @@ void LoadAscii2::exec() {
   }
   // Else if the separator drop down choice is not UserDefined then we use that.
   else if (choice != "UserDefined") {
-    std::map<std::string, std::string>::iterator it =
-        m_separatorIndex.find(choice);
+    auto it = m_separatorIndex.find(choice);
     sep = it->second;
   }
   // If we still have nothing, then we are forced to use a default.

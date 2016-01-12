@@ -574,8 +574,7 @@ void LoadEventPreNexus2::processImbedLogs() {
 void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
                                            size_t mindex) {
   // Create TimeSeriesProperty
-  TimeSeriesProperty<double> *property =
-      new TimeSeriesProperty<double>(logtitle);
+  auto property = new TimeSeriesProperty<double>(logtitle);
 
   // Add entries
   size_t nbins = this->wrongdetid_pulsetimes[mindex].size();
@@ -631,7 +630,8 @@ void LoadEventPreNexus2::runLoadInstrument(
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   loadInst->setPropertyValue("InstrumentName", instrument);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-  loadInst->setProperty("RewriteSpectraMap", false);
+  loadInst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(false));
   loadInst->executeAsChildAlg();
 
   // Populate the instrument parameters in this workspace - this works around a
@@ -729,8 +729,7 @@ void LoadEventPreNexus2::procEvents(
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (std::vector<int64_t>::iterator it = spectra_list.begin();
-       it != spectra_list.end(); it++)
+  for (auto it = spectra_list.begin(); it != spectra_list.end(); it++)
     spectraLoadMap[*it] = true;
 
   CPUTimer tim;
@@ -1165,8 +1164,7 @@ void LoadEventPreNexus2::procEventsLinear(
 
       // Create class map entry if not there
       size_t mindex = 0;
-      std::map<PixelType, size_t>::iterator git =
-          this->wrongdetidmap.find(tmpid);
+      auto git = this->wrongdetidmap.find(tmpid);
       if (git == this->wrongdetidmap.end()) {
         // create entry
         size_t newindex = this->wrongdetid_pulsetimes.size();
@@ -1183,7 +1181,7 @@ void LoadEventPreNexus2::procEventsLinear(
       }
 
       // 2. Find local
-      std::map<PixelType, size_t>::iterator lit = local_pidindexmap.find(tmpid);
+      auto lit = local_pidindexmap.find(tmpid);
       size_t localindex = lit->second;
 
       for (size_t iv = 0; iv < local_pulsetimes[localindex].size(); iv++) {
@@ -1237,7 +1235,9 @@ void LoadEventPreNexus2::setProtonCharge(
 
   /// TODO set the units for the log
   run.addLogData(log);
-  double integ = run.integrateProtonCharge();
+  // Force re-integration
+  run.integrateProtonCharge();
+  double integ = run.getProtonCharge();
 
   g_log.information() << "Total proton charge of " << integ
                       << " microAmp*hours found by integrating.\n";

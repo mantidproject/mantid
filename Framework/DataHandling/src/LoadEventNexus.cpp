@@ -196,15 +196,9 @@ public:
     size_t my_discarded_events(0);
 
     prog->report(entry_name + ": precount");
-
     // ---- Pre-counting events per pixel ID ----
     auto &outputWS = *(alg->m_ws);
     if (alg->precount) {
-
-      if (alg->m_specMin != EMPTY_INT() && alg->m_specMax != EMPTY_INT()) {
-        m_min_id = alg->m_specMin;
-        m_max_id = alg->m_specMax;
-      }
 
       std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
       for (size_t i = 0; i < numEvents; i++) {
@@ -677,9 +671,8 @@ public:
       file.closeData();
 
       // determine the range of pixel ids
-      uint32_t temp;
       for (auto i = 0; i < m_loadSize[0]; ++i) {
-        temp = m_event_id[i];
+        uint32_t temp = m_event_id[i];
         if (temp < m_min_id)
           m_min_id = temp;
         if (temp > m_max_id)
@@ -706,7 +699,7 @@ public:
   */
   void loadTof(::NeXus::File &file) {
     // Allocate the array
-    float *temp = new float[m_loadSize[0]];
+    auto temp = new float[m_loadSize[0]];
     delete[] m_event_time_of_flight;
     m_event_time_of_flight = temp;
 
@@ -767,7 +760,7 @@ public:
     m_have_weight = true;
 
     // Allocate the array
-    float *temp = new float[m_loadSize[0]];
+    auto temp = new float[m_loadSize[0]];
     delete[] m_event_weight;
     m_event_weight = temp;
 
@@ -800,7 +793,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   void run() {
     // The vectors we will be filling
-    std::vector<uint64_t> *event_index_ptr = new std::vector<uint64_t>();
+    auto event_index_ptr = new std::vector<uint64_t>();
     std::vector<uint64_t> &event_index = *event_index_ptr;
 
     // These give the limits in each file as to which events we actually load
@@ -899,6 +892,41 @@ public:
       return;
     }
 
+    const auto bank_size = m_max_id - m_min_id;
+    const uint32_t minSpectraToLoad = static_cast<uint32_t>(alg->m_specMin);
+    const uint32_t maxSpectraToLoad = static_cast<uint32_t>(alg->m_specMax);
+    const uint32_t emptyInt = static_cast<uint32_t>(EMPTY_INT());
+    // check that if a range of spectra were requested that these fit within
+    // this bank
+    if (minSpectraToLoad != emptyInt && m_min_id < minSpectraToLoad) {
+      if (minSpectraToLoad > m_max_id) { // the minimum spectra to load is more
+                                         // than the max of this bank
+        return;
+      }
+      // the min spectra to load is higher than the min for this bank
+      m_min_id = minSpectraToLoad;
+    }
+    if (maxSpectraToLoad != emptyInt && m_max_id > maxSpectraToLoad) {
+      if (maxSpectraToLoad > m_min_id) {
+        // the maximum spectra to load is less than the minimum of this bank
+        return;
+      }
+      // the max spectra to load is lower than the max for this bank
+      m_max_id = maxSpectraToLoad;
+    }
+    if (m_min_id > m_max_id) {
+      // the min is now larger than the max, this means the entire block of
+      // spectra to load is outside this bank
+      return;
+    }
+
+    // schedule the job to generate the event lists
+    auto mid_id = m_max_id;
+    if (alg->splitProcessing && m_max_id > (m_min_id + (bank_size / 4)))
+      // only split if told to and the section to load is at least 1/4 the size
+      // of the whole bank
+      mid_id = (m_max_id + m_min_id) / 2;
+
     // No error? Launch a new task to process that data.
     size_t numEvents = m_loadSize[0];
     size_t startAt = m_loadStart[0];
@@ -910,17 +938,12 @@ public:
     boost::shared_array<float> event_weight_shrd(m_event_weight);
     boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index_ptr);
 
-    // schedule the job to generate the event lists
-    auto mid_id = m_max_id;
-    if (alg->splitProcessing)
-      mid_id = (m_max_id + m_min_id) / 2;
-
     ProcessBankData *newTask1 = new ProcessBankData(
         alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
         numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
         event_weight_shrd, m_min_id, mid_id);
     scheduler->push(newTask1);
-    if (alg->splitProcessing) {
+    if (alg->splitProcessing && (mid_id < m_max_id)) {
       ProcessBankData *newTask2 = new ProcessBankData(
           alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
           numEvents, startAt, event_index_shrd, thisBankPulseTimes,
@@ -1031,12 +1054,9 @@ int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialisation method.
 */
 void LoadEventNexus::init() {
-  std::vector<std::string> exts;
-  exts.push_back("_event.nxs");
-  exts.push_back(".nxs.h5");
-  exts.push_back(".nxs");
   this->declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load,
+                       {"_event.nxs", ".nxs.h5", ".nxs"}),
       "The name of the Event NeXus file to read, including its full or "
       "relative path. "
       "The file name is typically of the form INST_####_event.nxs (N.B. case "
@@ -1927,7 +1947,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   size_t numProg = bankNames.size() * (1 + 3); // 1 = disktask, 3 = proc task
   if (splitProcessing)
     numProg += bankNames.size() * 3; // 3 = second proc task
-  Progress *prog2 = new Progress(this, 0.3, 1.0, numProg);
+  auto prog2 = new Progress(this, 0.3, 1.0, numProg);
 
   const std::vector<int> periodLogVec = periodLog->valuesAsVector();
 
@@ -2701,8 +2721,8 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
       continue;
     size_t n = tof.size();
     // iterate over the events and time bins
-    std::vector<TofEvent>::iterator ev = events.begin();
-    std::vector<TofEvent>::iterator ev_end = events.end();
+    auto ev = events.begin();
+    auto ev_end = events.end();
     for (size_t i = 1; i < n; ++i) {
       double right = double(tof[i]);
       // find the right boundary for the current event
@@ -2721,14 +2741,13 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
         // spread the events uniformly inside the bin
         boost::uniform_real<> distribution(left, right);
         std::vector<double> random_numbers(m);
-        for (std::vector<double>::iterator it = random_numbers.begin();
-             it != random_numbers.end(); ++it) {
+        for (auto it = random_numbers.begin(); it != random_numbers.end();
+             ++it) {
           *it = distribution(rand_gen);
         }
         std::sort(random_numbers.begin(), random_numbers.end());
-        std::vector<double>::iterator it = random_numbers.begin();
-        for (std::vector<TofEvent>::iterator ev1 = ev - m; ev1 != ev;
-             ++ev1, ++it) {
+        auto it = random_numbers.begin();
+        for (auto ev1 = ev - m; ev1 != ev; ++ev1, ++it) {
           ev1->m_tof = *it;
         }
       }
@@ -2824,9 +2843,8 @@ void LoadEventNexus::createSpectraList(int32_t min, int32_t max) {
 
     if (!m_specList.empty()) {
       // Check no negative/zero numbers have been passed
-      std::vector<int32_t>::iterator itr =
-          std::find_if(m_specList.begin(), m_specList.end(),
-                       std::bind2nd(std::less<int32_t>(), 1));
+      auto itr = std::find_if(m_specList.begin(), m_specList.end(),
+                              std::bind2nd(std::less<int32_t>(), 1));
       if (itr != m_specList.end()) {
         throw std::invalid_argument(
             "Negative/Zero SpectraList property encountered.");

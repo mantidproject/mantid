@@ -9,11 +9,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using namespace Mantid::Geometry;
 using namespace WorkspaceCreationHelper;
 
 class ReflectometryReductionOneTest : public CxxTest::TestSuite {
@@ -110,12 +112,12 @@ public:
     alg->initialize();
     alg->setProperty("InputWorkspace", m_tinyReflWS);
     alg->setProperty("WavelengthMin", 1.0);
-    alg->setProperty("WavelengthMax", 15.0);
-    alg->setProperty("I0MonitorIndex", 0);
-    alg->setProperty("MonitorBackgroundWavelengthMin", 14.0);
-    alg->setProperty("MonitorBackgroundWavelengthMax", 15.0);
-    alg->setProperty("MonitorIntegrationWavelengthMin", 4.0);
-    alg->setProperty("MonitorIntegrationWavelengthMax", 10.0);
+    alg->setProperty("WavelengthMax", 2.0);
+    alg->setProperty("I0MonitorIndex", 1);
+    alg->setProperty("MonitorBackgroundWavelengthMin", 1.0);
+    alg->setProperty("MonitorBackgroundWavelengthMax", 2.0);
+    alg->setProperty("MonitorIntegrationWavelengthMin", 1.2);
+    alg->setProperty("MonitorIntegrationWavelengthMax", 1.5);
     alg->setPropertyValue("ProcessingInstructions", "1");
     alg->setPropertyValue("OutputWorkspace", "x");
     alg->setPropertyValue("OutputWorkspaceWavelength", "y");
@@ -142,9 +144,151 @@ public:
     alg->execute();
     // Should not throw
 
-    const double outTheta = alg->getProperty("ThetaOut");
+    const double outTwoTheta = alg->getProperty("ThetaOut");
+    TS_ASSERT_DELTA(45.0, outTwoTheta, 0.00001);
+  }
 
-    TS_ASSERT_DELTA(45.0 / 2, outTheta, 0.00001);
+  void test_source_rotation_after_second_reduction() {
+    // set up the axis for the instrument
+    Instrument_sptr instrument = boost::make_shared<Instrument>();
+    instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+        Y /*up*/, Z /*along*/, Right, "0,0,0"));
+
+    // add a source
+    ObjComponent *source = new ObjComponent("source");
+    source->setPos(V3D(0, 0, -1));
+    instrument->add(source);
+    instrument->markAsSource(source);
+
+    // add a sample
+    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    sample->setPos(V3D(0, 0, 0));
+    instrument->add(sample);
+    instrument->markAsSamplePos(sample);
+
+    // add a detector
+    Detector *det = new Detector("point-detector", 1, NULL);
+    det->setPos(V3D(0, 1, 1));
+    instrument->add(det);
+    instrument->markAsDetector(det);
+
+    // set the instrument to this workspace
+    m_tinyReflWS->setInstrument(instrument);
+    // set this detector ready for processing instructions
+    m_tinyReflWS->getSpectrum(0)->setDetectorID(det->getID());
+
+    auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
+    alg->setRethrows(true);
+    alg->setChild(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", m_tinyReflWS);
+    alg->setProperty("WavelengthMin", 1.0);
+    alg->setProperty("WavelengthMax", 15.0);
+    alg->setProperty("WavelengthStep", 0.1);
+    alg->setProperty("I0MonitorIndex", 0);
+    alg->setProperty("MonitorBackgroundWavelengthMin", 0.0);
+    alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);
+    alg->setProperty("MonitorIntegrationWavelengthMin", 0.0);
+    alg->setProperty("MonitorIntegrationWavelengthMax", 0.0);
+    alg->setProperty("NormalizeByIntegratedMonitors", false);
+    alg->setProperty("CorrectDetectorPositions", true);
+    alg->setProperty("CorrectionAlgorithm", "None");
+    alg->setPropertyValue("ProcessingInstructions", "1");
+    alg->setPropertyValue("OutputWorkspace", "x");
+    alg->setPropertyValue("OutputWorkspaceWavelength", "y");
+    alg->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
+    alg->setProperty("InputWorkspace", outLam);
+    alg->setProperty("OutputWorkspace", "IvsQ");
+    alg->setProperty("OutputWorkspaceWavelength", "IvsLam");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
+
+    TS_ASSERT_DIFFERS(m_tinyReflWS->getInstrument()->getSource()->getPos(),
+                      outLam->getInstrument()->getSource()->getPos());
+    TS_ASSERT_EQUALS(outLam->getInstrument()->getSource()->getPos(),
+                     outQ->getInstrument()->getSource()->getPos());
+  }
+
+  void test_Qrange() {
+    // set up the axis for the instrument
+    Instrument_sptr instrument = boost::make_shared<Instrument>();
+    instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+        Y /*up*/, Z /*along*/, Right, "0,0,0"));
+
+    // add a source
+    ObjComponent *source = new ObjComponent("source");
+    source->setPos(V3D(0, 0, -1));
+    instrument->add(source);
+    instrument->markAsSource(source);
+
+    // add a sample
+    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    sample->setPos(V3D(0, 0, 0));
+    instrument->add(sample);
+    instrument->markAsSamplePos(sample);
+
+    // add a detector
+    Detector *det = new Detector("point-detector", 1, NULL);
+    det->setPos(V3D(0, 1, 1));
+    instrument->add(det);
+    instrument->markAsDetector(det);
+
+    // set the instrument to this workspace
+    m_tinyReflWS->setInstrument(instrument);
+    // set this detector ready for processing instructions
+    m_tinyReflWS->getSpectrum(0)->setDetectorID(det->getID());
+
+    auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
+    alg->setRethrows(true);
+    alg->setChild(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", m_tinyReflWS);
+    alg->setProperty("WavelengthMin", 1.0);
+    alg->setProperty("WavelengthMax", 15.0);
+    alg->setProperty("WavelengthStep", 0.1);
+    alg->setProperty("I0MonitorIndex", 0);
+    alg->setProperty("MonitorBackgroundWavelengthMin", 0.0);
+    alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);
+    alg->setProperty("MonitorIntegrationWavelengthMin", 0.0);
+    alg->setProperty("MonitorIntegrationWavelengthMax", 0.0);
+    alg->setProperty("NormalizeByIntegratedMonitors", false);
+    alg->setProperty("CorrectDetectorPositions", true);
+    alg->setProperty("CorrectionAlgorithm", "None");
+    alg->setPropertyValue("ProcessingInstructions", "1");
+    alg->setPropertyValue("OutputWorkspace", "x");
+    alg->setPropertyValue("OutputWorkspaceWavelength", "y");
+    alg->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    // retrieve the IvsLam workspace
+    MatrixWorkspace_sptr inLam = alg->getProperty("OutputWorkspaceWavelength");
+    // retrieve the IvsQ workspace
+    MatrixWorkspace_sptr inQ = alg->getProperty("OutputWorkspace");
+    // retrieve our Theta
+    double outTheta = alg->getProperty("ThetaOut");
+
+    TS_ASSERT_DELTA(45.0, outTheta, 0.00001);
+    TS_ASSERT_DIFFERS(source->getPos(),
+                      inQ->getInstrument()->getSource()->getPos())
+    // convert from degrees to radians for sin() function
+    double outThetaInRadians = outTheta * M_PI / 180;
+
+    double lamMin = inLam->readX(0).front();
+    double lamMax = inLam->readX(0).back();
+
+    // Derive our QMin and QMax from the equation
+    double qMinFromEQ = (4 * M_PI * sin(outThetaInRadians)) / lamMax;
+    double qMaxFromEQ = (4 * M_PI * sin(outThetaInRadians)) / lamMin;
+
+    // Get our QMin and QMax from the workspace
+    auto qMinFromWS = inQ->readX(0).front();
+    auto qMaxFromWS = inQ->readX(0).back();
+
+    // Compare the two values (they should be identical)
+    TS_ASSERT_DELTA(qMinFromEQ, qMinFromWS, 0.00001);
+    TS_ASSERT_DELTA(qMaxFromEQ, qMaxFromWS, 0.00001);
   }
 };
 

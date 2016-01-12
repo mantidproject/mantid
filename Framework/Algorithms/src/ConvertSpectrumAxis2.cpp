@@ -26,9 +26,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-ConvertSpectrumAxis2::ConvertSpectrumAxis2()
-    : API::Algorithm(), m_inputWS(), m_indexMap(), m_nBins(0), m_nxBins(0),
-      m_nHist(0) {}
+ConvertSpectrumAxis2::ConvertSpectrumAxis2() : API::Algorithm(), m_indexMap() {}
 
 void ConvertSpectrumAxis2::init() {
   // Validator for Input Workspace
@@ -73,54 +71,63 @@ void ConvertSpectrumAxis2::init() {
 
 void ConvertSpectrumAxis2::exec() {
   // Get the input workspace.
-  m_inputWS = getProperty("InputWorkspace");
+  API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   // Assign value to the member variable storing the number of histograms.
-  m_nHist = m_inputWS->getNumberHistograms();
+  size_t nHist = inputWS->getNumberHistograms();
 
   // Assign values to the member variables to store number of bins.
-  m_nBins = m_inputWS->blocksize();
+  size_t nBins = inputWS->blocksize();
 
-  const bool isHist = m_inputWS->isHistogramData();
+  const bool isHist = inputWS->isHistogramData();
 
-  if (isHist) {
-    m_nxBins = m_nBins + 1;
-  } else {
-    m_nxBins = m_nBins;
-  }
+  size_t nxBins = isHist ? nBins + 1 : nBins;
 
   // The unit to convert to.
   const std::string unitTarget = getProperty("Target");
 
+  Progress progress(this, 0, 1, inputWS->getNumberHistograms());
+
   // Call the functions to convert to the different forms of theta or Q.
   if (unitTarget == "theta" || unitTarget == "Theta" ||
       unitTarget == "signed_theta" || unitTarget == "SignedTheta") {
-    createThetaMap(unitTarget);
+    createThetaMap(progress, unitTarget, inputWS, nHist);
   } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared") {
-    createElasticQMap(unitTarget);
+    createElasticQMap(progress, unitTarget, inputWS, nHist);
   }
 
   // Create an output workspace and set the property for it.
-  MatrixWorkspace_sptr outputWS = createOutputWorkspace(unitTarget);
+  MatrixWorkspace_sptr outputWS = createOutputWorkspace(
+      progress, unitTarget, inputWS, nHist, nBins, nxBins);
   setProperty("OutputWorkspace", outputWS);
 }
 
-void ConvertSpectrumAxis2::createThetaMap(const std::string &targetUnit) {
+/** Converts X axis to theta representation
+* @param progress :: Progress indicator
+* @param targetUnit :: Target conversion unit
+* @param inputWS :: Input Workspace
+* @param nHist :: Stores the number of histograms
+*/
+void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
+                                          const std::string &targetUnit,
+                                          API::MatrixWorkspace_sptr &inputWS,
+                                          size_t nHist) {
   // Set up binding to member funtion. Avoids condition as part of loop over
   // nHistograms.
   boost::function<double(IDetector_const_sptr)> thetaFunction;
   if (targetUnit.compare("signed_theta") == 0 ||
       targetUnit.compare("SignedTheta") == 0) {
     thetaFunction =
-        boost::bind(&MatrixWorkspace::detectorSignedTwoTheta, m_inputWS, _1);
+        boost::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
   } else if (targetUnit == "theta" || targetUnit == "Theta") {
     thetaFunction =
-        boost::bind(&MatrixWorkspace::detectorTwoTheta, m_inputWS, _1);
+        boost::bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
   }
 
   bool warningGiven = false;
-  for (size_t i = 0; i < m_nHist; ++i) {
+
+  for (size_t i = 0; i < nHist; ++i) {
     try {
-      IDetector_const_sptr det = m_inputWS->getDetector(i);
+      IDetector_const_sptr det = inputWS->getDetector(i);
       // Invoke relevant member function.
       m_indexMap.insert(std::make_pair(thetaFunction(det) * 180.0 / M_PI, i));
     } catch (Exception::NotFoundError &) {
@@ -129,12 +136,23 @@ void ConvertSpectrumAxis2::createThetaMap(const std::string &targetUnit) {
                       "dropped from output");
       warningGiven = true;
     }
+
+    progress.report("Converting to theta...");
   }
 }
 
-void ConvertSpectrumAxis2::createElasticQMap(const std::string &targetUnit) {
-  IComponent_const_sptr source = m_inputWS->getInstrument()->getSource();
-  IComponent_const_sptr sample = m_inputWS->getInstrument()->getSample();
+/** Convert X axis to Elastic Q representation
+* @param progress :: Progress indicator
+* @param targetUnit :: Target conversion unit
+* @param inputWS :: Input workspace
+* @param nHist :: Stores the number of histograms
+*/
+void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
+                                             const std::string &targetUnit,
+                                             API::MatrixWorkspace_sptr &inputWS,
+                                             size_t nHist) {
+  IComponent_const_sptr source = inputWS->getInstrument()->getSource();
+  IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
 
   const std::string emodeStr = getProperty("EMode");
   int emode = 0;
@@ -143,12 +161,12 @@ void ConvertSpectrumAxis2::createElasticQMap(const std::string &targetUnit) {
   else if (emodeStr == "Indirect")
     emode = 2;
 
-  for (size_t i = 0; i < m_nHist; i++) {
-    IDetector_const_sptr detector = m_inputWS->getDetector(i);
+  for (size_t i = 0; i < nHist; i++) {
+    IDetector_const_sptr detector = inputWS->getDetector(i);
     double twoTheta(0.0), efixed(0.0);
     if (!detector->isMonitor()) {
-      twoTheta = m_inputWS->detectorTwoTheta(detector) / 2.0;
-      efixed = getEfixed(detector, m_inputWS, emode); // get efixed
+      twoTheta = inputWS->detectorTwoTheta(detector) / 2.0;
+      efixed = getEfixed(detector, inputWS, emode); // get efixed
     } else {
       twoTheta = 0.0;
       efixed = DBL_MIN;
@@ -166,20 +184,36 @@ void ConvertSpectrumAxis2::createElasticQMap(const std::string &targetUnit) {
 
       m_indexMap.insert(std::make_pair(elasticQSquaredInAngstroms, i));
     }
+
+    progress.report("Converting to Elastic Q...");
   }
 }
 
-MatrixWorkspace_sptr
-ConvertSpectrumAxis2::createOutputWorkspace(const std::string &targetUnit) {
+/** Create the final output workspace after converting the X axis
+* @returns the final output workspace
+*
+* @param progress :: Progress indicator
+* @param targetUnit :: Target conversion unit
+* @param inputWS :: Input workspace
+* @param nHist :: Stores the number of histograms
+* @param nBins :: Stores the number of bins
+* @param nxBins :: Stores the number of x bins
+*/
+MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
+    API::Progress &progress, const std::string &targetUnit,
+    API::MatrixWorkspace_sptr &inputWS, size_t nHist, size_t nBins,
+    size_t nxBins) {
   // Create the output workspace. Can not re-use the input one because the
   // spectra are re-ordered.
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      m_inputWS, m_indexMap.size(), m_nxBins, m_nBins);
+      inputWS, m_indexMap.size(), nxBins, nBins);
 
   // Now set up a new numeric axis holding the theta values corresponding to
   // each spectrum.
-  NumericAxis *const newAxis = new NumericAxis(m_indexMap.size());
+  auto const newAxis = new NumericAxis(m_indexMap.size());
   outputWorkspace->replaceAxis(1, newAxis);
+
+  progress.setNumSteps(nHist + m_indexMap.size());
 
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
@@ -197,13 +231,15 @@ ConvertSpectrumAxis2::createOutputWorkspace(const std::string &targetUnit) {
     // Set the axis value.
     newAxis->setValue(currentIndex, it->first);
     // Copy over the data.
-    outputWorkspace->dataX(currentIndex) = m_inputWS->dataX(it->second);
-    outputWorkspace->dataY(currentIndex) = m_inputWS->dataY(it->second);
-    outputWorkspace->dataE(currentIndex) = m_inputWS->dataE(it->second);
+    outputWorkspace->dataX(currentIndex) = inputWS->dataX(it->second);
+    outputWorkspace->dataY(currentIndex) = inputWS->dataY(it->second);
+    outputWorkspace->dataE(currentIndex) = inputWS->dataE(it->second);
     // We can keep the spectrum numbers etc.
     outputWorkspace->getSpectrum(currentIndex)
-        ->copyInfoFrom(*m_inputWS->getSpectrum(it->second));
+        ->copyInfoFrom(*inputWS->getSpectrum(it->second));
     ++currentIndex;
+
+    progress.report("Creating output workspace...");
   }
   return outputWorkspace;
 }

@@ -21,6 +21,7 @@ set ( TEST_PY_FILES
   MandatoryValidatorTest.py
   MemoryStatsTest.py
   NullValidatorTest.py
+  OptionalBoolTest.py
   ProgressBaseTest.py
   PropertyHistoryTest.py
   PropertyWithValueTest.py

@@ -111,7 +111,7 @@ class MantidUI:public QObject
 public:
 
   // Constructor
-  MantidUI(ApplicationWindow *aw);
+  explicit MantidUI(ApplicationWindow *aw);
 
   // Destructor
   ~MantidUI();
@@ -210,9 +210,11 @@ public:
 
   public slots:
     // Create a 1d graph form specified MatrixWorkspace and index
-  MultiLayer* plot1D(const QStringList& wsnames, const QList<int>& indexList, bool spectrumPlot,
-                     bool errs=true, Graph::CurveType style = Graph::Unspecified,
-                     MultiLayer* plotWindow = NULL, bool clearWindow = false, bool waterfallPlot = false);
+  MultiLayer *plot1D(const QStringList &wsnames, const QList<int> &indexList, bool spectrumPlot,
+					 MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+					 bool errs = true, Graph::CurveType style = Graph::Unspecified,
+					 MultiLayer *plotWindow = NULL, bool clearWindow = false,
+					 bool waterfallPlot = false);
 
   MultiLayer* plot1D(const QString& wsName, const std::set<int>& indexList, bool spectrumPlot,
                      MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,

@@ -348,6 +348,22 @@ behaviour.
 int DownloadInstrument::doDownloadFile(const std::string &urlFile,
                                        const std::string &localFilePath,
                                        const StringToStringMap &headers) {
+  Poco::File localFile(localFilePath);
+  if (localFile.exists()) {
+    if (!localFile.canWrite()) {
+      std::stringstream msg;
+      msg << "Cannot write file \"" << localFilePath << "\"";
+      throw std::runtime_error(msg.str());
+    }
+  } else {
+    localFile = Poco::File(Poco::Path(localFilePath).parent().toString());
+    if (!localFile.canWrite()) {
+      std::stringstream msg;
+      msg << "Cannot write file \"" << localFilePath << "\"";
+      throw std::runtime_error(msg.str());
+    }
+  }
+
   int retStatus = 0;
   InternetHelper inetHelper;
   inetHelper.headers() = headers;

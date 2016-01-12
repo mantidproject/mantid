@@ -321,7 +321,7 @@ coord_t *MDHistoWorkspace::getVertexesArray(size_t linearIndex,
       numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
 
   // The output vertexes coordinates
-  coord_t *out = new coord_t[numDimensions * numVertices];
+  auto out = new coord_t[numDimensions * numVertices];
   for (size_t i = 0; i < numVertices; ++i) {
     size_t outIndex = i * numDimensions;
     // Offset the 0th box by the position of this linear index, in each
@@ -369,19 +369,29 @@ signal_t MDHistoWorkspace::getSignalAtCoord(
     const Mantid::API::MDNormalization &normalization) const {
   size_t linearIndex = this->getLinearIndexAtCoord(coords);
   if (linearIndex < m_length) {
-    // What is our normalization factor?
-    switch (normalization) {
-    case NoNormalization:
-      return m_signals[linearIndex];
-    case VolumeNormalization:
-      return m_signals[linearIndex] * m_inverseVolume;
-    case NumEventsNormalization:
-      return m_signals[linearIndex] / m_numEvents[linearIndex];
-    }
-    // Should not reach here
-    return m_signals[linearIndex];
+    signal_t normalizer = getNormalizationFactor(normalization, linearIndex);
+    return m_signals[linearIndex] * normalizer;
   } else
     return std::numeric_limits<signal_t>::quiet_NaN();
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get the signal at a particular coordinate in the workspace
+ * or return 0 if masked
+ *
+ * @param coords :: numDimensions-sized array of the coordinates to look at
+ * @param normalization : Normalisation to use.
+ * @return the (normalized) signal at a given coordinates.
+ *         NaN if outside the range of this workspace
+ */
+signal_t MDHistoWorkspace::getSignalWithMaskAtCoord(
+    const coord_t *coords,
+    const Mantid::API::MDNormalization &normalization) const {
+  size_t linearIndex = this->getLinearIndexAtCoord(coords);
+  if (this->getIsMaskedAt(linearIndex)) {
+    return MDMaskValue;
+  }
+  return getSignalAtCoord(coords, normalization);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -537,37 +547,8 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
     numBins[d] = dim->getNBins();
   }
 
-  // Ordered list of boundaries in position-along-the-line coordinates
-  std::set<coord_t> boundaries;
-
-  // Start with the start/end points, if they are within range.
-  if (pointInWorkspace(this, start))
-    boundaries.insert(0.0f);
-  if (pointInWorkspace(this, end))
-    boundaries.insert(length);
-
-  // Next, we go through each dimension and see where the bin boundaries
-  // intersect the line.
-  for (size_t d = 0; d < nd; d++) {
-    IMDDimension_const_sptr dim = this->getDimension(d);
-    coord_t lineStartX = start[d];
-
-    if (dir[d] != 0.0) {
-      for (size_t i = 0; i <= dim->getNBins(); i++) {
-        // Position in this coordinate
-        coord_t thisX = dim->getX(i);
-        // Position along the line. Is this between the start and end of it?
-        coord_t linePos = (thisX - lineStartX) / dir[d];
-        if (linePos >= 0 && linePos <= length) {
-          // Full position
-          VMD pos = start + (dir * linePos);
-          // This is a boundary if the line point is inside the workspace
-          if (pointInWorkspace(this, pos))
-            boundaries.insert(linePos);
-        }
-      }
-    }
-  }
+  std::set<coord_t> boundaries =
+      getBinBoundariesOnLine(start, end, nd, dir, length);
 
   if (boundaries.empty()) {
     // Nothing at all!
@@ -602,26 +583,22 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
       // Find the signal in this bin
       size_t linearIndex = this->getLinearIndexAtCoord(middle.getBareArray());
       if (linearIndex < m_length) {
-        // What is our normalization factor?
-        signal_t normalizer = 1.0;
-        switch (normalize) {
-        case NoNormalization:
-          break;
-        case VolumeNormalization:
-          normalizer = m_inverseVolume;
-          break;
-        case NumEventsNormalization:
-          normalizer = 1.0 / m_numEvents[linearIndex];
-          break;
+
+        // Is the signal here masked?
+        if (this->getIsMaskedAt(linearIndex)) {
+          y.push_back(MDMaskValue);
+          e.push_back(MDMaskValue);
+        } else {
+          signal_t normalizer = getNormalizationFactor(normalize, linearIndex);
+          // And add the normalized signal/error to the list too
+          auto signal = this->getSignalAt(linearIndex) * normalizer;
+          if (boost::math::isinf(signal)) {
+            // The plotting library (qwt) doesn't like infs.
+            signal = std::numeric_limits<signal_t>::quiet_NaN();
+          }
+          y.push_back(signal);
+          e.push_back(this->getErrorAt(linearIndex) * normalizer);
         }
-        // And add the normalized signal/error to the list too
-        auto signal = this->getSignalAt(linearIndex) * normalizer;
-        if (boost::math::isinf(signal)) {
-          // The plotting library (qwt) doesn't like infs.
-          signal = std::numeric_limits<signal_t>::quiet_NaN();
-        }
-        y.push_back(signal);
-        e.push_back(this->getErrorAt(linearIndex) * normalizer);
         // Save the position for next bin
         lastPos = pos;
       } else {
@@ -631,7 +608,77 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
       }
     } // for each unique boundary
   }   // if there is at least one point
-} // (end function)
+}
+
+//----------------------------------------------------------------------------------------------
+/** Find the normalization factor
+ *
+ * @param normalize :: how to normalize the signal
+ * @param linearIndex :: the position in the workspace of the signal value to be
+ *normalized
+ * @returns :: the normalization factor
+ */
+signal_t
+MDHistoWorkspace::getNormalizationFactor(const MDNormalization &normalize,
+                                         size_t linearIndex) const {
+  signal_t normalizer = 1.0;
+  switch (normalize) {
+  case NoNormalization:
+    return normalizer;
+  case VolumeNormalization:
+    return m_inverseVolume;
+  case NumEventsNormalization:
+    return 1.0 / m_numEvents[linearIndex];
+  }
+  return normalizer;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get ordered list of boundaries in position-along-the-line coordinates
+ *
+ * @param start :: start of the line
+ * @param end :: end of the line
+ * @param nd :: number of dimensions
+ * @param dir :: vector of the direction
+ * @param length :: unit-vector of the direction
+ * @returns :: ordered list of boundaries
+ */
+std::set<coord_t>
+MDHistoWorkspace::getBinBoundariesOnLine(const VMD &start, const VMD &end,
+                                         size_t nd, const VMD &dir,
+                                         coord_t length) const {
+  std::set<coord_t> boundaries;
+
+  // Start with the start/end points, if they are within range.
+  if (pointInWorkspace(this, start))
+    boundaries.insert(0.0f);
+  if (pointInWorkspace(this, end))
+    boundaries.insert(length);
+
+  // Next, we go through each dimension and see where the bin boundaries
+  // intersect the line.
+  for (size_t d = 0; d < nd; d++) {
+    IMDDimension_const_sptr dim = getDimension(d);
+    coord_t lineStartX = start[d];
+
+    if (dir[d] != 0.0) {
+      for (size_t i = 0; i <= dim->getNBins(); i++) {
+        // Position in this coordinate
+        coord_t thisX = dim->getX(i);
+        // Position along the line. Is this between the start and end of it?
+        coord_t linePos = (thisX - lineStartX) / dir[d];
+        if (linePos >= 0 && linePos <= length) {
+          // Full position
+          VMD pos = start + (dir * linePos);
+          // This is a boundary if the line point is inside the workspace
+          if (pointInWorkspace(this, pos))
+            boundaries.insert(linePos);
+        }
+      }
+    }
+  }
+  return boundaries;
+}
 
 //==============================================================================================
 //============================== ARITHMETIC OPERATIONS

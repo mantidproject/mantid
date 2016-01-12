@@ -409,8 +409,7 @@ void MDBoxFlatTree::loadExperimentInfos(
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
   std::list<uint16_t> ExperimentBlockNum;
-  std::map<std::string, std::string>::iterator it = entries.begin();
-  for (; it != entries.end(); ++it) {
+  for (auto it = entries.begin(); it != entries.end(); ++it) {
     std::string name = it->first;
     if (boost::starts_with(name, "experiment")) {
       try {

@@ -302,7 +302,8 @@ bool MDHistoWorkspaceIterator::valid() const { return (m_pos < m_max); }
 /// @return true if you can continue iterating
 bool MDHistoWorkspaceIterator::next() {
   if (m_function) {
-    bool allIncremented = false;
+    bool allIncremented;
+
     do {
       m_pos++;
       allIncremented =
@@ -311,24 +312,20 @@ bool MDHistoWorkspaceIterator::next() {
       for (size_t d = 0; d < m_nd; d++) {
         m_center[d] =
             m_origin[d] + (coord_t(m_index[d]) + 0.5f) * m_binWidth[d];
-        //          std::cout << m_center[d] << ",";
       }
-      //        std::cout<<std::endl;
-      // Keep incrementing until you are in the implicit function
-    } while (!allIncremented && !m_function->isPointContained(m_center) &&
-             m_pos < m_max);
+      // Keep incrementing until you are in the implicit function and not masked
+    } while (m_pos < m_max &&
+             ((!allIncremented && !m_function->isPointContained(m_center)) ||
+              m_skippingPolicy->keepGoing()));
   } else {
-    ++m_pos;
+    // Keep moving to next position if the current position is masked and
+    // still valid.
+    do {
+      m_pos++;
+    } while (m_skippingPolicy->keepGoing() && m_pos < m_max);
   }
+
   bool ret = m_pos < m_max;
-  if (ret) {
-    // Keep calling next if the current position is masked and still valid.
-    while (m_skippingPolicy->keepGoing()) {
-      ret = this->next();
-      if (!ret)
-        break;
-    }
-  }
   // Go through every point;
   return ret;
 }
@@ -369,6 +366,25 @@ signal_t MDHistoWorkspaceIterator::getNormalizedError() const {
     return m_ws->getErrorAt(m_pos) * m_ws->getInverseVolume();
   case NumEventsNormalization:
     return m_ws->getErrorAt(m_pos) / m_ws->getNumEventsAt(m_pos);
+  }
+  // Should not reach here
+  return std::numeric_limits<signal_t>::quiet_NaN();
+}
+
+//----------------------------------------------------------------------------------------------
+/// Returns the normalized signal for this box
+signal_t MDHistoWorkspaceIterator::getNormalizedSignalWithMask() const {
+  if (this->getIsMasked()) {
+    return MDMaskValue;
+  }
+  // What is our normalization factor?
+  switch (m_normalization) {
+  case NoNormalization:
+    return m_ws->getSignalAt(m_pos);
+  case VolumeNormalization:
+    return m_ws->getSignalAt(m_pos) * m_ws->getInverseVolume();
+  case NumEventsNormalization:
+    return m_ws->getSignalAt(m_pos) / m_ws->getNumEventsAt(m_pos);
   }
   // Should not reach here
   return std::numeric_limits<signal_t>::quiet_NaN();
@@ -566,7 +582,7 @@ bool MDHistoWorkspaceIterator::isWithinBounds(size_t index) const {
 std::vector<int64_t> MDHistoWorkspaceIterator::createPermutations(
     const std::vector<int> &widths) const {
   // look-up
-  PermutationsMap::iterator it = m_permutationsVertexTouchingMap.find(widths);
+  auto it = m_permutationsVertexTouchingMap.find(widths);
   if (it == m_permutationsVertexTouchingMap.end()) {
 
     if (widths[0] % 2 == 0) {

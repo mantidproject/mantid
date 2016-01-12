@@ -55,6 +55,8 @@ private:
   double checkForDefault(std::string propName,
                          Mantid::Geometry::Instrument_const_sptr instrument,
                          std::string idf_name = "") const;
+  Mantid::API::Workspace_sptr
+  sumOverTransmissionGroup(Mantid::API::WorkspaceGroup_sptr &transGroup);
 
   std::string pNRLabel() const { return "PNR"; }
   std::string pALabel() const { return "PA"; }

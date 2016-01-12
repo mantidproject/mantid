@@ -81,11 +81,8 @@ int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
 */
 void LoadMD::init() {
-
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load, {".nxs"}),
       "The name of the Nexus file to load, as a full or relative path");
 
   declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
@@ -442,7 +439,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                 ": this is not possible.");
 
   CPUTimer tim;
-  Progress *prog = new Progress(this, 0.0, 1.0, 100);
+  auto prog = new Progress(this, 0.0, 1.0, 100);
 
   prog->report("Opening file.");
   std::string title;
@@ -608,7 +605,7 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
   Matrix<coord_t> mat(vec);
   CoordTransform *transform = NULL;
   if (("CoordTransformAffine" == type) || ("CoordTransformAligned" == type)) {
-    CoordTransformAffine *affine = new CoordTransformAffine(inD, outD);
+    auto affine = new CoordTransformAffine(inD, outD);
     affine->setMatrix(mat);
     transform = affine;
   } else {

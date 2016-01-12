@@ -60,6 +60,7 @@ public:
     wksp->addColumn("double", "difc");
     wksp->addColumn("double", "difa");
     wksp->addColumn("double", "tzero");
+    wksp->addColumn("double", "tofmin");
 
     for (size_t i = 0; i < numRows; ++i) {
       TableRow row = wksp->appendRow();
@@ -67,7 +68,8 @@ public:
       row << static_cast<int>(i) // detid
           << 0.                  // difc
           << 0.                  // difa
-          << 0.;                 // tzero
+          << 0.                  // tzero
+          << 0.;                 // tofmin
     }
     return wksp;
   }

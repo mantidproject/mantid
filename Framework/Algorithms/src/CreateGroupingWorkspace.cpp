@@ -246,8 +246,7 @@ void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst,
   // Trim and assign incremental number to each group
   std::map<std::string, int> group_map;
   int index = 0;
-  for (std::vector<std::string>::iterator it = vgroups.begin();
-       it != vgroups.end(); ++it) {
+  for (auto it = vgroups.begin(); it != vgroups.end(); ++it) {
     boost::trim(*it);
     group_map[(*it)] = ++index;
   }
@@ -358,6 +357,8 @@ void CreateGroupingWorkspace::exec() {
     MatrixWorkspace_sptr tempWS(new Workspace2D());
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
+    childAlg->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     childAlg->setPropertyValue("InstrumentName", InstrumentName);
     childAlg->executeAsChildAlg();
     inst = tempWS->getInstrument();

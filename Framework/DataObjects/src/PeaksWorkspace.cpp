@@ -72,7 +72,7 @@ public:
    * @param criteria : a vector with a list of pairs: column name, bool;
    *        where bool = true for ascending, false for descending sort.
    */
-  PeakComparator(std::vector<std::pair<std::string, bool>> &criteria)
+  explicit PeakComparator(std::vector<std::pair<std::string, bool>> &criteria)
       : criteria(criteria) {}
 
   /** Compare two peaks using the stored criteria */
@@ -783,7 +783,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->makeData(name, NeXus::CHAR, dims, false);
   file->openData(name);
 
-  char *toNexus = new char[maxShapeJSONLength * np];
+  auto toNexus = new char[maxShapeJSONLength * np];
   for (size_t ii = 0; ii < np; ii++) {
     std::string rowStr = shapes[ii];
     for (size_t ic = 0; ic < rowStr.size(); ic++)
@@ -856,8 +856,9 @@ IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected PeaksWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<PeaksWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -873,8 +874,9 @@ IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const PeaksWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<PeaksWorkspace>.";
     throw std::runtime_error(message);
   }
 }

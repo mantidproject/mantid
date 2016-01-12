@@ -109,6 +109,16 @@ bpl::list keys(Run &self) {
   return names;
 }
 }
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(integrateProtonCharge_Overload,
+                                       integrateProtonCharge, 0, 1)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 void export_Run() {
   // Pointer
@@ -119,8 +129,11 @@ void export_Run() {
       .def("getProtonCharge", &Run::getProtonCharge, arg("self"),
            "Return the total good proton charge for the run")
 
-      .def("integrateProtonCharge", &Run::integrateProtonCharge, arg("self"),
-           "Return the total good proton charge for the run")
+      .def("integrateProtonCharge", &Run::integrateProtonCharge,
+           integrateProtonCharge_Overload(
+               "Set the total good proton charge for the run, from the proton "
+               "charge log",
+               (arg("self"), arg("logname") = "proton_charge")))
 
       .def("hasProperty", &Run::hasProperty, (arg("self"), arg("name")),
            "Returns True if the given log value is contained within the run")

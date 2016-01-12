@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+﻿#pylint: disable=no-init,invalid-name
 import mantid.simpleapi
 import mantid.kernel
 import mantid.api
@@ -24,8 +24,9 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         return "Algorithm to mask detectors with scattering angles in a given interval (in degrees)."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input,
-                                                          validator=mantid.api.InstrumentValidator()), "Input workspace")
+        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input),
+                             "Input workspace")
+
         angleValidator=mantid.kernel.FloatBoundedValidator()
         angleValidator.setBounds(0.,180.)
         self.declareProperty(name="MinAngle", defaultValue=0.0, validator=angleValidator,
@@ -34,6 +35,22 @@ class MaskAngle(mantid.api.PythonAlgorithm):
                              direction=mantid.kernel.Direction.Input, doc="Angles above StartAngle are going to be masked")
         self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output),
                              doc="List of detector masked, with scatterin angles between MinAngle and MaxAngle")
+
+    def validateInputs(self):
+        issues = dict()
+
+        ws = self.getProperty("Workspace").value
+
+        try:
+            if type(ws).__name__ == "WorkspaceGroup":
+                for w in ws:
+                    w.getInstrument().getSource().getPos()
+            else:
+                ws.getInstrument().getSource().getPos()
+        except (RuntimeError, ValueError, AttributeError, TypeError):
+            issues["Workspace"] = "Workspace must have an associated instrument."
+
+        return issues
 
     def PyExec(self):
         ws = self.getProperty("Workspace").value

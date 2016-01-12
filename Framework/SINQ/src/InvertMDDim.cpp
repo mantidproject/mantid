@@ -43,7 +43,7 @@ void InvertMDDim::exec() {
   outWS->setTo(.0, .0, .0);
 
   int rank = static_cast<int>(inWS->getNumDims());
-  int *idx = new int[rank];
+  auto idx = new int[rank];
   if (idx == NULL || outWS == NULL) {
     throw std::runtime_error("Out of memory in InvertMDDim");
   }

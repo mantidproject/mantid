@@ -7,6 +7,7 @@
 #include "MantidKernel/System.h"
 #include <cfloat>
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Rules.h"
@@ -27,46 +28,40 @@ public:
   void testMakeFullDNF() {}
 
   void testMakeCNF() {
-    Rule *tree = createAMixedTree();
+    auto tree = createAMixedTree();
     TS_ASSERT_EQUALS(tree->display(), "(10 11) : (12 10)");
     // TS_ASSERT_EQUALS(Rule::makeCNFcopy(tree),1);
     // TS_ASSERT_EQUALS(tree->display(),"(10 11) : (12 10)");
-    delete tree;
   }
 
   void testRemoveComplementary() {
-    Rule *tree = createAUnionTree();
+    auto tree = createAUnionTree();
     TS_ASSERT_EQUALS(tree->display(), "10 : 10 : 12 : 11");
     TS_ASSERT_EQUALS(tree->removeComplementary(tree), 1);
     //		TS_ASSERT_EQUALS(tree->display(),"10 : 12 : 11"); //Problem: The
     // comments don't match to the functionaility it is supposed to do
-    delete tree;
   }
 
   void testRemoveItem() { // Problem: in removing the item of the tree that has
-                          // more than one instances,possibly double deletion
-    Rule *tree = createAUnionTree();
+    // more than one instances,possibly double deletion
+    auto tree = createAUnionTree();
     TS_ASSERT_EQUALS(tree->removeItem(tree, 11), 1);
     //		TS_ASSERT_EQUALS(tree->removeItem(tree,10),2);
     TS_ASSERT_EQUALS(tree->removeItem(tree, 11), 0);
     TS_ASSERT_EQUALS(tree->removeItem(tree, 12), 1);
-    delete tree;
   }
 
   void testCommonType() {
-    Rule *uTree = createAUnionTree();
+    auto uTree = createAUnionTree();
     TS_ASSERT_EQUALS(uTree->commonType(), -1);
-    Rule *iTree = createAIntersectionTree();
+    auto iTree = createAIntersectionTree();
     TS_ASSERT_EQUALS(iTree->commonType(), 1);
-    Rule *mTree = createAMixedTree();
+    auto mTree = createAMixedTree();
     TS_ASSERT_EQUALS(mTree->commonType(), 0);
-    delete uTree;
-    delete iTree;
-    delete mTree;
   }
 
   void testSubstituteSurf() {
-    Rule *uTree = createAUnionTree();
+    auto uTree = createAUnionTree();
     TS_ASSERT_EQUALS(uTree->substituteSurf(11, 13, boost::make_shared<Cone>()),
                      1);
     TS_ASSERT_EQUALS(uTree->display(), "10 : 10 : 12 : 13");
@@ -74,87 +69,74 @@ public:
         uTree->substituteSurf(10, 14, boost::make_shared<Sphere>()),
         2); // its suppose to return 2
     TS_ASSERT_EQUALS(uTree->display(), "14 : 14 : 12 : 13");
-    delete uTree;
   }
 
   void testEliminate() {}
 
 private:
-  Rule *createAUnionTree() { // A:B:C:A
-    // A Node
-    SurfPoint *A, *B, *C;
-    A = new SurfPoint();
+  std::unique_ptr<Rule> createAUnionTree() { // A:B:C:A
+                                             // A Node
+    // SurfPoint *A, *B, *C;
+    auto A = Mantid::Kernel::make_unique<SurfPoint>();
     A->setKey(boost::make_shared<Plane>());
     A->setKeyN(10);
-    B = new SurfPoint();
+    auto B = Mantid::Kernel::make_unique<SurfPoint>();
     B->setKey(boost::make_shared<Sphere>());
     B->setKeyN(11);
-    C = new SurfPoint();
+    auto C = Mantid::Kernel::make_unique<SurfPoint>();
     C->setKey(boost::make_shared<Cylinder>());
     C->setKeyN(12);
 
-    Union *Left;
-    Left = new Union(A, A->clone());
-
-    Union *Right;
-    Right = new Union(C, B);
-
-    Union *Root;
-    Root = new Union(Left, Right);
-    return Root;
+    auto Left = Mantid::Kernel::make_unique<Union>(A->clone(), A->clone());
+    auto Right = Mantid::Kernel::make_unique<Union>(std::move(C), std::move(B));
+    return Mantid::Kernel::make_unique<Union>(std::move(Left),
+                                              std::move(Right));
   }
 
-  Rule *createAIntersectionTree() { // A B C A
+  std::unique_ptr<Rule> createAIntersectionTree() { // A B C A
     // A Node
-    SurfPoint *A, *B, *C;
-    A = new SurfPoint();
+    auto A = Mantid::Kernel::make_unique<SurfPoint>();
     A->setKey(boost::make_shared<Plane>());
     A->setKeyN(10);
-    B = new SurfPoint();
+    auto B = Mantid::Kernel::make_unique<SurfPoint>();
     B->setKey(boost::make_shared<Sphere>());
     B->setKeyN(11);
-    C = new SurfPoint();
+    auto C = Mantid::Kernel::make_unique<SurfPoint>();
     C->setKey(boost::make_shared<Cylinder>());
     C->setKeyN(12);
-    Intersection *Root;
-    Root = new Intersection();
 
-    Intersection *Left;
-    Left = new Intersection();
-    Left->setLeaves(A, B);
+    auto Left = Mantid::Kernel::make_unique<Intersection>();
 
-    Intersection *Right;
-    Right = new Intersection();
-    Right->setLeaves(C, A->clone());
+    Left->setLeaves(A->clone(), std::move(B));
 
-    Root->setLeaves(Left, Right);
-    return Root;
+    auto Right = Mantid::Kernel::make_unique<Intersection>();
+    Right->setLeaves(std::move(C), std::move(A));
+
+    return Mantid::Kernel::make_unique<Intersection>(std::move(Left),
+                                                     std::move(Right));
   }
 
-  Rule *createAMixedTree() { // A B : C A
-    SurfPoint *A, *B, *C;
-    A = new SurfPoint();
+  std::unique_ptr<Rule> createAMixedTree() { // A B : C A
+    auto A = Mantid::Kernel::make_unique<SurfPoint>();
     A->setKey(boost::make_shared<Plane>());
     A->setKeyN(10);
-    B = new SurfPoint();
+    auto B = Mantid::Kernel::make_unique<SurfPoint>();
     B->setKey(boost::make_shared<Sphere>());
     B->setKeyN(11);
-    C = new SurfPoint();
+    auto C = Mantid::Kernel::make_unique<SurfPoint>();
     C->setKey(boost::make_shared<Cylinder>());
     C->setKeyN(12);
-    Union *Root;
-    Root = new Union();
 
-    Intersection *Left;
-    Left = new Intersection();
-    Left->setLeaves(A, B);
+    auto Root = Mantid::Kernel::make_unique<Union>();
 
-    Intersection *Right;
-    Right = new Intersection();
-    Right->setLeaves(C, A->clone());
+    auto Left = Mantid::Kernel::make_unique<Intersection>();
+    Left->setLeaves(A->clone(), std::move(B));
 
-    Root->setLeaves(Left, Right);
-    return Root;
+    auto Right = Mantid::Kernel::make_unique<Intersection>();
+    Right->setLeaves(std::move(C), std::move(A));
+
+    Root->setLeaves(std::move(Left), std::move(Right));
+    return std::move(Root);
   }
 };
 

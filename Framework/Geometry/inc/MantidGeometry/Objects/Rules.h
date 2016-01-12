@@ -45,26 +45,32 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 
 class MANTID_GEOMETRY_DLL Rule {
 private:
-  Rule *Parent; ///< Parent object (for tree)
+  Rule *Parent;                      ///< Parent object (for tree)
+  virtual Rule *doClone() const = 0; ///< abstract clone object
 
   static int addToKey(std::vector<int> &AV, const int passN = -1);
 
   int getBaseKeys(
       std::vector<int> &) const; ///< Fills the vector with the surfaces
+protected:
+  Rule(const Rule &);
+  Rule &operator=(const Rule &);
 
 public:
-  static int makeCNFcopy(Rule *&); ///< Make Rule into a CNF format (slow)
-  static int makeFullDNF(Rule *&); ///< Make Rule into a full DNF format
-  static int makeCNF(Rule *&);     ///< Make Rule into a CNF format
-  static int removeComplementary(Rule *&); ///< NOT WORKING
-  static int removeItem(Rule *&TRule, const int SurfN);
+  static int
+  makeCNFcopy(std::unique_ptr<Rule> &); ///< Make Rule into a CNF format (slow)
+  static int
+  makeFullDNF(std::unique_ptr<Rule> &); ///< Make Rule into a full DNF format
+  static int makeCNF(std::unique_ptr<Rule> &); ///< Make Rule into a CNF format
+  static int removeComplementary(std::unique_ptr<Rule> &); ///< NOT WORKING
+  static int removeItem(std::unique_ptr<Rule> &TRule, const int SurfN);
 
   Rule();
   Rule(Rule *);
-  Rule(const Rule &);
-  Rule &operator=(const Rule &);
+  std::unique_ptr<Rule> clone() const {
+    return std::unique_ptr<Rule>(doClone());
+  }
   virtual ~Rule();
-  virtual Rule *clone() const = 0; ///< abstract clone object
   virtual std::string className() const {
     return "Rule";
   } ///< Returns class name as string
@@ -78,11 +84,13 @@ public:
   int getKeyList(std::vector<int> &) const;
   int commonType() const; ///< Gets a common type
 
-  virtual void setLeaves(Rule *, Rule *) = 0;      ///< abstract set leaves
-  virtual void setLeaf(Rule *, const int = 0) = 0; ///< Abstract set
-  virtual int findLeaf(const Rule *) const = 0;    ///< Abstract find
-  virtual Rule *findKey(const int) = 0;            ///< Abstract key find
-  virtual int type() const { return 0; }           ///< Null rule
+  virtual void setLeaves(std::unique_ptr<Rule>,
+                         std::unique_ptr<Rule>) = 0; ///< abstract set leaves
+  virtual void setLeaf(std::unique_ptr<Rule>,
+                       const int = 0) = 0;      ///< Abstract set
+  virtual int findLeaf(const Rule *) const = 0; ///< Abstract find
+  virtual Rule *findKey(const int) = 0;         ///< Abstract key find
+  virtual int type() const { return 0; }        ///< Null rule
 
   /// Abstract: The point is within the object
   virtual bool isValid(const Kernel::V3D &) const = 0;
@@ -125,26 +133,28 @@ valid rule B
 class MANTID_GEOMETRY_DLL Intersection : public Rule {
 
 private:
-  Rule *A; ///< Rule 1
-  Rule *B; ///< Rule 2
+  std::unique_ptr<Rule> A;       ///< Rule 1
+  std::unique_ptr<Rule> B;       ///< Rule 2
+  Intersection *doClone() const; ///< Makes a copy of the whole downward tree
+protected:
+  Intersection(const Intersection &);
+  Intersection &operator=(const Intersection &);
 
 public:
   Intersection();
-  explicit Intersection(Rule *, Rule *);
-  explicit Intersection(Rule *, Rule *, Rule *);
-  Intersection *clone() const; ///< Makes a copy of the whole downward tree
+  explicit Intersection(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
+  explicit Intersection(Rule *, std::unique_ptr<Rule>, std::unique_ptr<Rule>);
+  std::unique_ptr<Intersection>
+  clone() const; ///< Makes a copy of the whole downward tree
   virtual std::string className() const {
     return "Intersection";
   } ///< Returns class name as string
 
-  Intersection(const Intersection &);
-  Intersection &operator=(const Intersection &);
-  ~Intersection();
   Rule *leaf(const int ipt = 0) const {
-    return ipt ? B : A;
-  }                                           ///< selects leaf component
-  void setLeaves(Rule *, Rule *);             ///< set leaves
-  void setLeaf(Rule *nR, const int side = 0); ///< set one leaf.
+    return ipt ? B.get() : A.get();
+  } ///< selects leaf component
+  void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>); ///< set leaves
+  void setLeaf(std::unique_ptr<Rule> nR, const int side = 0); ///< set one leaf.
   int findLeaf(const Rule *) const;
   Rule *findKey(const int KeyN);
   int isComplementary() const;
@@ -177,27 +187,29 @@ valid rule B
 class MANTID_GEOMETRY_DLL Union : public Rule {
 
 private:
-  Rule *A; ///< Leaf rule A
-  Rule *B; ///< Leaf rule B
+  std::unique_ptr<Rule> A; ///< Leaf rule A
+  std::unique_ptr<Rule> B; ///< Leaf rule B
+  Union *doClone() const;
+
+protected:
+  Union(const Union &);
+  Union &operator=(const Union &);
 
 public:
   Union();
-  explicit Union(Rule *, Rule *);
-  explicit Union(Rule *, Rule *, Rule *);
-  Union(const Union &);
+  explicit Union(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
+  explicit Union(Rule *, std::unique_ptr<Rule>, std::unique_ptr<Rule>);
 
-  Union *clone() const;
-  Union &operator=(const Union &);
-  ~Union();
+  std::unique_ptr<Union> clone() const;
   virtual std::string className() const {
     return "Union";
   } ///< Returns class name as string
 
   Rule *leaf(const int ipt = 0) const {
-    return ipt ? B : A;
-  }                               ///< Select a leaf component
-  void setLeaves(Rule *, Rule *); ///< set leaves
-  void setLeaf(Rule *nR, const int side = 0);
+    return ipt ? B.get() : A.get();
+  } ///< Select a leaf component
+  void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>); ///< set leaves
+  void setLeaf(std::unique_ptr<Rule>, const int side = 0);
   int findLeaf(const Rule *) const;
   Rule *findKey(const int KeyN);
 
@@ -231,18 +243,19 @@ be calculated
 class MANTID_GEOMETRY_DLL SurfPoint : public Rule {
 private:
   boost::shared_ptr<Surface> m_key; ///< Actual Surface Base Object
-  int keyN;                         ///< Key Number (identifer)
-  int sign;                         ///< +/- in Object unit
+  SurfPoint *doClone() const;
+  int keyN; ///< Key Number (identifer)
+  int sign; ///< +/- in Object unit
 public:
   SurfPoint();
-  SurfPoint *clone() const;
   virtual std::string className() const {
     return "SurfPoint";
   } ///< Returns class name as string
+  std::unique_ptr<SurfPoint> clone() const;
 
   Rule *leaf(const int = 0) const { return 0; } ///< No Leaves
-  void setLeaves(Rule *, Rule *);
-  void setLeaf(Rule *, const int = 0);
+  void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
+  void setLeaf(std::unique_ptr<Rule>, const int = 0);
   int findLeaf(const Rule *) const;
   Rule *findKey(const int KeyNum);
 
@@ -282,19 +295,21 @@ class MANTID_GEOMETRY_DLL CompObj : public Rule {
 private:
   int objN;    ///< Object number
   Object *key; ///< Object Pointer
+  CompObj *doClone() const;
+
+protected:
+  CompObj(const CompObj &);
+  CompObj &operator=(const CompObj &);
 
 public:
   CompObj();
-  CompObj(const CompObj &);
-  CompObj *clone() const;
-  CompObj &operator=(const CompObj &);
-  ~CompObj();
+  std::unique_ptr<CompObj> clone() const;
   virtual std::string className() const {
     return "CompObj";
   } ///< Returns class name as string
 
-  void setLeaves(Rule *, Rule *);
-  void setLeaf(Rule *, const int = 0);
+  void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
+  void setLeaf(std::unique_ptr<Rule>, const int = 0);
   int findLeaf(const Rule *) const;
   Rule *findKey(const int i);
 
@@ -333,22 +348,24 @@ Care must be taken to avoid a cyclic loop
 
 class MANTID_GEOMETRY_DLL CompGrp : public Rule {
 private:
-  Rule *A; ///< The rule
+  std::unique_ptr<Rule> A; ///< The rule
+  CompGrp *doClone() const;
+
+protected:
+  CompGrp(const CompGrp &);
+  CompGrp &operator=(const CompGrp &);
 
 public:
   CompGrp();
-  explicit CompGrp(Rule *, Rule *);
-  CompGrp(const CompGrp &);
-  CompGrp *clone() const;
-  CompGrp &operator=(const CompGrp &);
-  ~CompGrp();
+  explicit CompGrp(Rule *, std::unique_ptr<Rule>);
+  std::unique_ptr<CompGrp> clone() const;
   virtual std::string className() const {
     return "CompGrp";
   } ///< Returns class name as string
 
-  Rule *leaf(const int) const { return A; } ///< selects leaf component
-  void setLeaves(Rule *, Rule *);
-  void setLeaf(Rule *nR, const int side = 0);
+  Rule *leaf(const int) const { return A.get(); } ///< selects leaf component
+  void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
+  void setLeaf(std::unique_ptr<Rule> nR, const int side = 0);
   int findLeaf(const Rule *) const;
   Rule *findKey(const int i);
 
@@ -382,20 +399,22 @@ but can be true/false/unknown.
 class MANTID_GEOMETRY_DLL BoolValue : public Rule {
 private:
   int status; ///< Three values 0 False : 1 True : -1 doesn't matter
+  BoolValue *doClone() const;
+
+protected:
+  BoolValue(const BoolValue &);
+  BoolValue &operator=(const BoolValue &);
 
 public:
   BoolValue();
-  BoolValue(const BoolValue &);
-  BoolValue *clone() const;
-  BoolValue &operator=(const BoolValue &);
-  ~BoolValue();
+  std::unique_ptr<BoolValue> clone() const;
   virtual std::string className() const {
     return "BoolValue";
   } ///< Returns class name as string
 
   Rule *leaf(const int = 0) const { return 0; } ///< No leaves
-  void setLeaves(Rule *, Rule *);
-  void setLeaf(Rule *, const int = 0);
+  void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
+  void setLeaf(std::unique_ptr<Rule>, const int = 0);
   int findLeaf(const Rule *) const;
   Rule *findKey(const int) { return 0; }
 

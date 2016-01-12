@@ -54,10 +54,6 @@ namespace CustomInterfaces
     /// Loads the tab's settings.
     void loadTabSettings(const QSettings & settings);
 
-  signals:
-		/// Send signal to parent window to show a message box to user
-		void showMessageBox(const QString& message);
-
   protected:
     /// Function to run a string as python code
     void runPythonScript(const QString& pyInput);

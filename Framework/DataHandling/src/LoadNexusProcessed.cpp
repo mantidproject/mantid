@@ -216,12 +216,9 @@ int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadNexusProcessed::init() {
   // Declare required input parameters for algorithm
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".nx5");
-  exts.push_back(".xml");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load,
+                       {".nxs", ".nx5", ".xml"}),
       "The name of the Nexus file to read, as a full or relative path.");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -1044,7 +1041,6 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
   // Coordinates - Older versions did not have the separate field but used a log
   // value
-  uint32_t loadCoord(0);
   const std::string peaksWSName = "peaks_workspace";
   try {
     m_cppFile->openGroup(peaksWSName, "NXentry");
@@ -1055,6 +1051,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         peaksWSName + ". Lower level error description: " + re.what());
   }
   try {
+    uint32_t loadCoord(0);
     m_cppFile->readData("coordinate_system", loadCoord);
     peakWS->setCoordinateSystem(
         static_cast<Kernel::SpecialCoordinateSystem>(loadCoord));
@@ -1343,7 +1340,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
       // if spectrum list property is set read each spectrum separately by
       // setting blocksize=1
       if (m_list) {
-        std::vector<int64_t>::iterator itr = m_spec_list.begin();
+        auto itr = m_spec_list.begin();
         for (; itr != m_spec_list.end(); ++itr) {
           int64_t specIndex = (*itr) - 1;
           progress(progressBegin +
@@ -1402,7 +1399,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
       }
       //
       if (m_list) {
-        std::vector<int64_t>::iterator itr = m_spec_list.begin();
+        auto itr = m_spec_list.begin();
         for (; itr != m_spec_list.end(); ++itr) {
           int64_t specIndex = (*itr) - 1;
           progress(progressBegin +
@@ -1540,7 +1537,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
 
   // Setting a unit onto a TextAxis makes no sense.
   if (unit2 == "TextAxis") {
-    Mantid::API::TextAxis *newAxis = new Mantid::API::TextAxis(nspectra);
+    auto newAxis = new Mantid::API::TextAxis(nspectra);
     local_workspace->replaceAxis(1, newAxis);
   } else if (unit2 != "spectraNumber") {
     try {
@@ -1632,11 +1629,20 @@ void LoadNexusProcessed::readInstrumentGroup(
 
   // Now build the spectra list
   int index = 0;
+  bool haveSpectraAxis = local_workspace->getAxis(1)->isSpectra();
 
   for (int i = 1; i <= spectraInfo.nSpectra; ++i) {
     int spectrum(-1);
+    // prefer the spectra number from the instrument section
+    // over anything else. If not there then use a spectra axis
+    // number if we have one, else make one up as nothing was
+    // written to the file. We should always set it so that
+    // CompareWorkspaces gives the expected answer on a Save/Load
+    // round trip.
     if (spectraInfo.hasSpectra) {
       spectrum = spectraInfo.spectraNumbers[i - 1];
+    } else if (haveSpectraAxis && !m_axis1vals.empty()) {
+      spectrum = static_cast<specid_t>(m_axis1vals[i - 1]);
     } else {
       spectrum = i + 1;
     }
@@ -1646,11 +1652,7 @@ void LoadNexusProcessed::readInstrumentGroup(
          find(m_spec_list.begin(), m_spec_list.end(), i) !=
              m_spec_list.end())) {
       ISpectrum *spec = local_workspace->getSpectrum(index);
-      if (m_axis1vals.empty()) {
-        spec->setSpectrumNo(spectrum);
-      } else {
-        spec->setSpectrumNo(static_cast<specid_t>(m_axis1vals[i - 1]));
-      }
+      spec->setSpectrumNo(spectrum);
       ++index;
 
       int start = spectraInfo.detectorIndex[i - 1];
@@ -2132,8 +2134,7 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
 
     if (m_list) {
       if (m_interval) {
-        for (std::vector<int64_t>::iterator it = m_spec_list.begin();
-             it != m_spec_list.end();)
+        for (auto it = m_spec_list.begin(); it != m_spec_list.end();)
           if (*it >= m_spec_min && *it < m_spec_max) {
             it = m_spec_list.erase(it);
           } else

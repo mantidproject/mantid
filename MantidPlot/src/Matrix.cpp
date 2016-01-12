@@ -457,7 +457,7 @@ bool Matrix::canCalculate(bool useMuParser)
     double *x = mup->defineVariable("x");
     double *y = mup->defineVariable("y");
 
-    if (!mup->compile(formula_str))
+    if (!mup->compile(ScriptCode(formula_str)))
       return false;
 
     double r = 1.0;
@@ -467,7 +467,7 @@ bool Matrix::canCalculate(bool useMuParser)
     if (codeLines == 1 && gsl_isnan(mup->evalSingleLine()))
       return false;
     else if (codeLines > 1){
-      QVariant res = mup->evaluate(formula_str);
+      QVariant res = mup->evaluate(ScriptCode(formula_str));
       if (!res.canConvert(QVariant::Double))
         return false;
     }
@@ -487,7 +487,7 @@ bool Matrix::canCalculate(bool useMuParser)
     double y = 1.0;
     script->setDouble(y, "y");
 
-    QVariant res = script->evaluate(formula_str);
+    QVariant res = script->evaluate(ScriptCode(formula_str));
     if (!res.canConvert(QVariant::Double))
       return false;
   }

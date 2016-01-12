@@ -67,12 +67,8 @@ const std::string LoadMLZ::category() const { return "DataHandling\\Nexus"; }
 /** Initialize the algorithm's properties.
  */
 void LoadMLZ::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".hdf");
-  exts.push_back(".hd5");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
+                                   {".nxs", ".hdf", ".hd5"}),
                   "File path of the Data file to load");
 
   declareProperty(
@@ -444,6 +440,8 @@ void LoadMLZ::runLoadInstrument() {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     g_log.debug() << "InstrumentName" << m_instrumentName << std::endl;
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");

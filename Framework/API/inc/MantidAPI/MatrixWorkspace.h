@@ -83,9 +83,7 @@ public:
   virtual ~MatrixWorkspace();
 
   /// Returns a clone of the workspace
-  std::unique_ptr<MatrixWorkspace> clone() const {
-    return std::unique_ptr<MatrixWorkspace>(doClone());
-  }
+  MatrixWorkspace_uptr clone() const { return MatrixWorkspace_uptr(doClone()); }
 
   using IMDWorkspace::toString;
   /// String description of state
@@ -418,6 +416,10 @@ public:
   virtual signal_t
   getSignalAtCoord(const coord_t *coords,
                    const Mantid::API::MDNormalization &normalization) const;
+  /// Get the signal at a coordinate in the workspace
+  virtual signal_t getSignalWithMaskAtCoord(
+      const coord_t *coords,
+      const Mantid::API::MDNormalization &normalization) const;
   /// Create iterators. Partitions the iterators according to the number of
   /// cores.
   virtual std::vector<IMDIterator *>

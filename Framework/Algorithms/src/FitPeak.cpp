@@ -322,6 +322,9 @@ bool FitOneSinglePeak::simpleFit() {
 
   // Fit with different starting values of peak width
   size_t numfits = m_vecFWHM.size();
+
+  Progress progress(this, 0, 1, numfits);
+
   for (size_t i = 0; i < numfits; ++i) {
     // set FWHM
     m_sstream << "[SingleStepFit] FWHM = " << m_vecFWHM[i] << "\n";
@@ -337,6 +340,8 @@ bool FitOneSinglePeak::simpleFit() {
       pop(m_bkupPeakFunc, m_peakFunc);
       pop(m_bkupBkgdFunc, m_bkgdFunc);
     }
+
+    progress.report();
   }
 
   // Retrieve the best result stored
@@ -533,6 +538,8 @@ void FitOneSinglePeak::highBkgdFit() {
   // Store starting setup
   push(m_peakFunc, m_bkupPeakFunc);
 
+  Progress progress(this, 0, 1, m_vecFWHM.size());
+
   // Fit with different starting values of peak width
   for (size_t i = 0; i < m_vecFWHM.size(); ++i) {
     // Restore
@@ -552,6 +559,8 @@ void FitOneSinglePeak::highBkgdFit() {
 
     // Store result
     processNStoreFitResult(rwp, false);
+
+    progress.report();
   }
 
   // Get best fitting peak function and Make a combo fit

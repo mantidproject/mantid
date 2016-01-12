@@ -31,8 +31,8 @@ public:
 
   void testIterator() {
     Track A(V3D(1, 1, 1), V3D(1.0, 0.0, 0.0));
-    Track::LType::const_iterator iterBegin = A.begin();
-    Track::LType::const_iterator iterEnd = A.end();
+    Track::LType::const_iterator iterBegin = A.cbegin();
+    Track::LType::const_iterator iterEnd = A.cend();
     TS_ASSERT_EQUALS(iterBegin, iterEnd);
   }
 
@@ -40,8 +40,8 @@ public:
     Track A(V3D(1, 1, 1), V3D(1.0, 0.0, 0.0));
     Object shape;
     A.addLink(V3D(2, 2, 2), V3D(3, 3, 3), 2.0, shape, NULL);
-    Track::LType::const_iterator iterBegin = A.begin();
-    Track::LType::const_iterator iterEnd = A.end();
+    Track::LType::const_iterator iterBegin = A.cbegin();
+    Track::LType::const_iterator iterEnd = A.cend();
     iterBegin++;
     TS_ASSERT_EQUALS(iterBegin, iterEnd);
   }
@@ -78,7 +78,7 @@ public:
     A.buildLink();
     // Check track length
     int index = 0;
-    for (Track::LType::const_iterator it = A.begin(); it != A.end(); ++it) {
+    for (Track::LType::const_iterator it = A.cbegin(); it != A.cend(); ++it) {
       TS_ASSERT_DELTA(it->distFromStart, 7, 0.0001);
       TS_ASSERT_DELTA(it->distInsideObject, 4, 0.0001);
       TS_ASSERT_EQUALS(it->componentID, (Component *)NULL);
@@ -96,14 +96,14 @@ public:
     A.addLink(V3D(2.0001, 2.0001, 2.0001), V3D(3, 3, 3), 2.001, shape);
     // Check track length
     int index = 0;
-    for (Track::LType::const_iterator it = A.begin(); it != A.end(); ++it) {
+    for (Track::LType::const_iterator it = A.cbegin(); it != A.cend(); ++it) {
       index++;
     }
     TS_ASSERT_EQUALS(index, 2);
     A.removeCojoins();
     index = 0;
     {
-      for (Track::LType::const_iterator it = A.begin(); it != A.end(); ++it) {
+      for (Track::LType::const_iterator it = A.cbegin(); it != A.cend(); ++it) {
         index++;
       }
     }

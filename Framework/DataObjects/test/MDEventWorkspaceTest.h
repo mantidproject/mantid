@@ -17,6 +17,7 @@
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "PropertyManagerHelper.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
@@ -294,6 +295,58 @@ public:
   }
 
   //-------------------------------------------------------------------------------------
+  /** Get the signal at a given coord or 0 if masked */
+  void test_getSignalWithMaskAtCoord() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+    coord_t coords1[3] = {0.5, 0.5, 0.5};
+    coord_t coords2[3] = {2.5, 2.5, 2.5};
+    ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
+
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(1.5);
+    max.push_back(1.5);
+    max.push_back(1.5);
+
+    // Create a function to mask some of the workspace.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ew->setMDMasking(function);
+    ew->refreshCache();
+
+    TSM_ASSERT_DELTA(
+        "Value ignoring mask is 1.0",
+        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
+    TSM_ASSERT_DELTA(
+        "Masked returns 0",
+        ew->getSignalWithMaskAtCoord(coords1, Mantid::API::NoNormalization),
+        0.0, 1e-5);
+  }
+
+  //-------------------------------------------------------------------------------------
+  /** hasMask should return true when the workspace has a mask */
+  void test_hasMask() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+
+    TSM_ASSERT("Should return false as the workspace does not have a mask",
+               !ew->hasMask());
+
+    std::vector<coord_t> min{0, 0, 0};
+    std::vector<coord_t> max{1.5, 1.5, 1.5};
+
+    // Create a function to mask some of the workspace.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ew->setMDMasking(function);
+
+    TSM_ASSERT("Should return true as the workspace has a mask", ew->hasMask());
+  }
+
+  //-------------------------------------------------------------------------------------
   void test_estimateResolution() {
     MDEventWorkspace2Lean::sptr b =
         MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
@@ -534,6 +587,29 @@ public:
     }
   }
 
+  void test_getLinePlotWithMaskedData() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+
+    // Mask some of the workspace
+    std::vector<coord_t> min{0, 0, 0};
+    std::vector<coord_t> max{0.5, 0.5, 0.5};
+
+    // Create an function to mask some of the workspace.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ew->setMDMasking(function);
+    ew->refreshCache();
+
+    Mantid::Kernel::VMD start(0, 0, 0);
+    Mantid::Kernel::VMD end(2, 0, 0);
+    std::vector<coord_t> x;
+    std::vector<signal_t> y, e;
+    ew->getLinePlot(start, end, NoNormalization, x, y, e);
+    TS_ASSERT_EQUALS(y.size(), 200);
+    TS_ASSERT_EQUALS(y[60], 0.0);  // Masked data is zero
+    TS_ASSERT_EQUALS(y[180], 3.0); // Unmasked data
+  }
+
   void test_that_sets_default_normalization_flags_to_volume_normalization() {
     // Arrange + Act
     MDEventWorkspace3Lean::sptr ew =
@@ -578,6 +654,38 @@ public:
     TSM_ASSERT_EQUALS(
         "Should be set to number of events normalizationnormalization",
         ew->displayNormalizationHisto(), histoSetting);
+  }
+
+  /**
+  * Test declaring an input IMDEventWorkspace and retrieving as const_sptr or
+  * sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    IMDEventWorkspace_sptr wsInput(new MDEventWorkspace<MDLeanEvent<3>, 3>());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    IMDEventWorkspace_const_sptr wsConst;
+    IMDEventWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<IMDEventWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(
+        wsNonConst = manager.getValue<IMDEventWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    IMDEventWorkspace_const_sptr wsCastConst;
+    IMDEventWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (IMDEventWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IMDEventWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
 
