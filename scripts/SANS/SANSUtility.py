@@ -1567,25 +1567,34 @@ def get_measurement_time_from_file(filename):
         date_and_time = DateAndTime(date_and_time_string)
         return date_and_time.__str__().strip()
 
+    def get_file_path(run_string):
+        listOfFiles = FileFinder.findRuns(run_string)
+        firstFile = listOfFiles[0]
+        return firstFile
+
     measurement_time = ""
     filename_capital = filename.upper()
-    filename = FileFinder.getFullPath(filename)
+
+    filename_full = get_file_path(filename)
 
     if filename_capital.endswith(".NXS"):
         if CAN_IMPORT_NXS:
-            # pylint: disable=bare-except
             try:
-                nxs_file =nxs.open(filename, 'r')
-                rootKeys =  nxs_file.getentries().keys()
-                nxs_file.opengroup(rootKeys[0])
-                nxs_file.opendata('end_time')
-                measurement_time  = nxs_file.getdata()
-            except:
-                sanslog.warning("Failed to retrieve the measurement time for " + str(filename))
-            finally:
-                nxs_file.close()
+                nxs_file = nxs.open(filename_full, 'r')
+            # pylint: disable=bare-except
+                try:
+                    rootKeys =  nxs_file.getentries().keys()
+                    nxs_file.opengroup(rootKeys[0])
+                    nxs_file.opendata('end_time')
+                    measurement_time  = nxs_file.getdata()
+                except:
+                    sanslog.warning("Failed to retrieve the measurement time for " + str(filename))
+                finally:
+                    nxs_file.close()
+            except ValueError, NeXusError:
+                sanslog.warning("Failed to open the file: " + str(filename))
     elif filename_capital.endswith(".RAW"):
-        RawFileInfo(Filename = filename, GetRunParameters = True)
+        RawFileInfo(Filename = filename_full, GetRunParameters = True)
         time_id = "r_endtime"
         date_id = "r_enddate"
         file_info = mtd['Raw_RPB']
@@ -1602,8 +1611,7 @@ def get_measurement_time_from_file(filename):
         DeleteWorkspace(file_info)
     else:
         sanslog.warning("Failed to retrieve the measurement time for " + str(filename))
-    return measurement_time
-
+    return str(measurement_time)
 
 def are_two_files_identical(file_path_1, file_path_2):
     '''

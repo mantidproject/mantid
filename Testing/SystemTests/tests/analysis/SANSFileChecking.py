@@ -1,4 +1,5 @@
 ﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=too-many-public-methods
 """
 Check that file manipulation works fine
 """
@@ -214,6 +215,10 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
 
 
 class SANSSwitchIDFTestRunner(stresstesting.MantidStressTest):
+    def __init__(self):
+        stresstesting.MantidStressTest.__init__(self)
+        self._success = False
+
     def runTest(self):
         self._success = False
         suite = unittest.TestSuite()

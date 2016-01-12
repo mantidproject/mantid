@@ -17,7 +17,6 @@ from mantid.api import IEventWorkspace
 import SANSUtility as su
 import os
 import copy
-
 import sys
 
 logger = Logger("ISISReducer")
@@ -734,6 +733,9 @@ class ISISReducer(Reducer):
         # the IDF
         measurement_time = None
         instrument_name = self.get_instrument_name()
+        # We need to be able to handle file-based and workspace-based queries
+        # If we have a workspace we look at the end time, else we
+        # need a sophisticated extraciton mechanism
         if isinstance(run, Workspace):
             ws = None
             if isinstance(run, WorkspaceGroup):
@@ -741,7 +743,7 @@ class ISISReducer(Reducer):
                 ws = run[0]
             else:
                 ws = run
-            measurement_time = ws.getRun().endTime()
+            measurement_time = str(ws.getRun().endTime())
         else:
             if run is None or run == "":
                 return
@@ -777,7 +779,7 @@ class ISISReducer(Reducer):
                 self.user_settings.execute(self)
 
                 # Now we set the corret detector, this is also being done in the GUI
-                self.get_instrument.setDetector(old_detector_selection)
+                self.get_instrument().setDetector(old_detector_selection)
 
     def _get_correct_instrument(self, instrument_name, idf_path = None):
         '''
