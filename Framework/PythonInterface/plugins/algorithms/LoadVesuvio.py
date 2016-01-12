@@ -165,7 +165,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 # Split ranges
                 spectra_list = spectra_grp.split("-")
                 # Validate format
-                issues = self._validate_range_formatting(spectra_list[0], spectra_list[0], SPECTRA_PROP, issues)
+                issues = self._validate_range_formatting(spectra_list[0], spectra_list[1], SPECTRA_PROP, issues)
             elif "," in spectra_grp:
                 # Split comma separated lists
                 spectra_list = spectra_grp.split(",")
@@ -199,7 +199,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         # Only validate boundaries if in difference Mode
         if "Difference" in self.getProperty(MODE_PROP).value:
             specMin = self._backward_spectra_list[0]
-            specMax = self._forward_spectra_list[len(self._forward_spectra_list) - 1]
+            specMax = self._forward_spectra_list[-1]
             if spectra < specMin:
                 issues[SPECTRA_PROP] = ("Lower limit for spectra is %d in difference mode" % specMin)
             if spectra > specMax:
