@@ -2,7 +2,6 @@
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEW_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
@@ -94,7 +93,6 @@ public:
   virtual std::string getTransferMethod() const = 0;
 
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const = 0;
-  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner> getAlgorithmRunner() const = 0;
 };
 }
 }
