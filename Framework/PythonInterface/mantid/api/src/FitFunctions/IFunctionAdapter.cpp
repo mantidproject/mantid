@@ -73,6 +73,10 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
                                         const object &defaultValue) {
   auto attr = createAttributeFromPythonValue(defaultValue);
   IFunction::declareAttribute(name, attr);
+  if (PyObject_HasAttrString(getSelf(), "setAttributeValue")) {
+    CallMethod2<void, std::string, object>::dispatchWithException(
+        getSelf(), "setAttributeValue", name, defaultValue);
+  }
 }
 
 /**
