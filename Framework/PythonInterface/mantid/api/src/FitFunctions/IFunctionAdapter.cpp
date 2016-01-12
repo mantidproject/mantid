@@ -14,10 +14,12 @@ namespace {
 
 /**
  * Create an Attribute from a python value.
- * @param value :: A value python object. Allowed python types: float,int,str,bool.
+ * @param value :: A value python object. Allowed python types:
+ * float,int,str,bool.
  * @return :: The created attribute.
  */
-Mantid::API::IFunction::Attribute createAttributeFromPythonValue(const object &value) {
+Mantid::API::IFunction::Attribute
+createAttributeFromPythonValue(const object &value) {
   PyObject *rawptr = value.ptr();
   Mantid::API::IFunction::Attribute attr;
 
@@ -135,7 +137,7 @@ void IFunctionAdapter::setAttribute(const std::string &attName,
  * @param value :: The value to store
  */
 void IFunctionAdapter::storeAttributePythonValue(const std::string &name,
-                                           const object &value) {
+                                                 const object &value) {
   auto attr = createAttributeFromPythonValue(value);
   storeAttributeValue(name, attr);
 }
