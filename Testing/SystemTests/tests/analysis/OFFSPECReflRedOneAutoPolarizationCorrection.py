@@ -35,9 +35,9 @@ class OFFSPECReflRedOneAutoPolarizationCorrection(stresstesting.MantidStressTest
         return True
 
     def validate(self):
-        return ("_IvsLam_polCorr", "OFFSPECReflRedOneAutoPolarizationCorrection_good.nxs")
+        return ("_IvsLam_polCorr", "OFFSPECReflRedOneAutoPolarizationCorrection_good_v2.nxs")
 
     def requiredFiles(self):
         return ["OFFSPEC00033767.nxs",
                 "OFFSPEC00033772.nxs",
-                "OFFSPECReflRedOneAutoPolarizationCorrection_good.nxs"]
+                "OFFSPECReflRedOneAutoPolarizationCorrection_good_v2.nxs"]
