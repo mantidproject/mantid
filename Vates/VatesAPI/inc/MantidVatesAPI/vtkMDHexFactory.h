@@ -97,7 +97,7 @@ private:
   size_t m_maxDepth;
 
   /// Data set that will be generated
-  mutable vtkDataSet * dataSet;
+  mutable vtkSmartPointer<vtkDataSet> dataSet;
 
   /// We are slicing down from > 3 dimensions
   mutable bool slice;

@@ -13,6 +13,7 @@
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
 #include <vtkPoints.h>
+#include <vtkSmartPointer.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -138,7 +139,7 @@ private:
   mutable std::string m_wsName;
 
   /// Data set that will be generated
-  mutable vtkDataSet *dataSet;
+  mutable vtkSmartPointer<vtkDataSet> dataSet;
 
   /// We are slicing down from > 3 dimensions
   mutable bool slice;

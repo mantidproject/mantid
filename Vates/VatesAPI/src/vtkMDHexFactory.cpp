@@ -37,7 +37,7 @@ vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange,
                                  const size_t maxDepth)
     : m_thresholdRange(thresholdRange),
       m_normalizationOption(normalizationOption), m_maxDepth(maxDepth),
-      dataSet(NULL), slice(false), m_time(0) {}
+      slice(false), m_time(0) {}
 
 /// Destructor
 vtkMDHexFactory::~vtkMDHexFactory() {}
@@ -93,7 +93,7 @@ void vtkMDHexFactory::doCreate(
   auto useBox = std::vector<bool>(numBoxes, false);
 
   // Create the data set (will outlive this object - output of create)
-  auto visualDataSet = vtkUnstructuredGrid::New();
+  auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
   this->dataSet = visualDataSet;
   visualDataSet->Allocate(numBoxes);
 
@@ -192,7 +192,6 @@ void vtkMDHexFactory::doCreate(
 
     // Hedge against empty data sets
     if (visualDataSet->GetNumberOfPoints() <= 0) {
-      visualDataSet->Delete();
       vtkNullUnstructuredGrid nullGrid;
       visualDataSet = nullGrid.createNullData();
       this->dataSet = visualDataSet;

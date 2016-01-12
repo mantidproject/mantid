@@ -263,7 +263,7 @@ void vtkSplatterPlotFactory::doCreate(
   signal->SetName(m_scalarName.c_str());
 
   // Create the data set.  Need space for each cell, not for each point
-  vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+  auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
   this->dataSet = visualDataSet;
   visualDataSet->Allocate(numCells);
   // Now copy the saved point, cell and signal info into vtk data structures
@@ -362,7 +362,7 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
 
   // Set up the actual vtkDataSet, here the vtkUnstructuredGrid, the cell type
   // we choose here is the vtk_poly_vertex
-  vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+  auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
   this->dataSet = visualDataSet;
   visualDataSet->Allocate(imageSize);
 
