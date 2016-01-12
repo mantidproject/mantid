@@ -88,8 +88,7 @@ void BinaryOperationMD::exec() {
   }
 
   // Do not compare conventions if one is single value
-  if (!boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs))
-  {
+  if (!boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs)) {
     if (m_lhs->getConvention() != m_rhs->getConvention()) {
       throw std::runtime_error(
           "Workspaces have different conventions for Q. "
