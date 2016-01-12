@@ -42,12 +42,10 @@ public:
     // There are this many boxes, so this is the max ID.
     TS_ASSERT_EQUALS(ws->getBoxController()->getMaxId(), 1001);
 
-
     ChangeQConvention alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", wsName));
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
@@ -55,7 +53,5 @@ public:
     TS_ASSERT_EQUALS("Crystallography", ws2->getConvention());
   }
 };
-
-
 
 #endif /* MANTID_MDEVENTS_ChangeQConventionTEST_H_ */

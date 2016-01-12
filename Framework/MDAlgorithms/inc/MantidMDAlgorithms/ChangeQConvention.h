@@ -56,7 +56,6 @@ private:
   void init();
   /// Run the algorithm
   void exec();
-
 };
 
 } // namespace DataObjects

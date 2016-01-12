@@ -657,12 +657,10 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   // Coordinate system
   file->writeData("coordinate_system", static_cast<uint32_t>(m_coordSystem));
 
-
   // Write out the Qconvention
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string m_QConvention = this->getConvention();
   file->putAttr("QConvention", m_QConvention);
-
 
   // Detectors column
   file->writeData("column_1", detectorID);

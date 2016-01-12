@@ -52,8 +52,10 @@ std::string IMDWorkspace::getConvention() const { return convention; }
 /** @return the convention
  */
 std::string IMDWorkspace::changeQConvention() {
-  if (this->getConvention() == "Crystallography")convention = "Inelastic";
-  else convention = "Crystallography";
+  if (this->getConvention() == "Crystallography")
+    convention = "Inelastic";
+  else
+    convention = "Crystallography";
   return convention;
 }
 

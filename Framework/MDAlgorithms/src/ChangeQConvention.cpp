@@ -16,7 +16,6 @@
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidKernel/ConfigService.h"
 
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -47,7 +46,6 @@ void ChangeQConvention::init() {
   declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
                                                       Direction::InOut),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
-
 }
 
 //----------------------------------------------------------------------------------------------
