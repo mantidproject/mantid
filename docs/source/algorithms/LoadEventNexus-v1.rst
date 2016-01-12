@@ -53,7 +53,7 @@ Veto pulses can be filtered out in a separate step using
 Data Loaded from Nexus File
 ###########################
 
-The nexus file must have ``/raw_data_1`` or ``entry`` as its main group and
+The nexus file must have ``/raw_data_1`` or ``/entry`` as its main group and
 that group be of type ``NXentry``. It also needs a group of type ``NXevent_data``.
 
 The data is read from each group of type ``NXevent_data``.
