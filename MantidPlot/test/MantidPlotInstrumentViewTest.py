@@ -1,4 +1,4 @@
-"""
+﻿"""
 Test the interaction with the instrument view.
 Assertion that things work is difficult so mosts
 test will just that things don't crash.
@@ -74,7 +74,7 @@ class MantidPlotInstrumentViewTest(unittest.TestCase):
         render_tab.setScaleType(GraphOptions.Log10)
         
     def test_closing_window_invalidates_reference(self):
-        inst = getInstrumentView("loq_inst")
+        inst = getInstrumentWindow("loq_inst")
         inst.close()
         self.assertTrue(inst._getHeldObject() is None)
 

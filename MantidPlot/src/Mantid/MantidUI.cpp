@@ -2058,6 +2058,11 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
   return insWin;
 }
 
+MdiSubWindow *MantidUI::getInstrumentWindow(const QString & wsName, int tab)
+{
+	return dynamic_cast<MdiSubWindow *>(getInstrumentView(wsName, tab)->parentWidget());
+}
+
 
 void MantidUI::showMantidInstrument(const QString& wsName)
 {

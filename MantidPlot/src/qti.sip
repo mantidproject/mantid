@@ -1712,7 +1712,11 @@ public:
 
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);
-
+  MdiSubWindow* getInstrumentWindow(const QString &, int tab = -1);
+%MethodCode
+  sipRes = sipCpp->getInstrumentWindow(*a0,a1);
+  if(sipRes) sipRes->hide();
+%End
   // Methods relating to creating or getting handles to GUI objects
   MantidMatrix* getMantidMatrix(const QString &);
   QString getSelectedWorkspaceName();

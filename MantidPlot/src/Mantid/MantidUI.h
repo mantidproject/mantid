@@ -415,6 +415,8 @@ signals:
     //Python related functions
     InstrumentWindow* getInstrumentView(const QString & wsName, int tab = -1);
 
+	MdiSubWindow *getInstrumentWindow(const QString & wsName, int tab = -1);
+
     void showMantidInstrument();
 
     // Show instrument for the selected workspace

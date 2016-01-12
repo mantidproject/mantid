@@ -25,6 +25,8 @@ public:
                        const int fileVersion);
   std::string saveToProject(ApplicationWindow *app);
 
+protected:
+	virtual void closeEvent(QCloseEvent *e);
 private:
   /// ADS notification handlers
   virtual void preDeleteHandle(

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Test the use of proxy objects in MantidPlot that
 prevent crashes when accessing the python object
 after deletion of the object
@@ -39,7 +39,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
         access the variable to see if it has been set to None """
         self.assertFalse(obj._getHeldObject() is None, msg + "'s return value was not None to begin with")
         # No closing dialog
-        obj.confirmClose(False)
+        #obj.confirmClose(False)
         # This should close (and hopefully delete) obj
         obj.close()
         # Make sure the event passes
@@ -133,7 +133,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
         self.try_closing(g, "importMatrixWorkspace().plotGraph3D()")
 
     def test_closing_getInstrumentView(self):
-        iv = getInstrumentView("IRS26173")
+        iv = getInstrumentWindow("IRS26173")
         self.try_closing(iv, "getInstrumentView()")
 
     def test_convertToWaterfall(self):
@@ -155,7 +155,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
         mm.close()
 
     def test_dock_method_produces_docked_window_on_instrument_view(self):
-        iv = getInstrumentView("IRS26173")
+        iv = getInstrumentWindow("IRS26173")
         self.do_dock_test_and_close(iv)
 
     def do_dock_test_and_close(self, win):

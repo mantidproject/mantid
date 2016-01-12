@@ -38,6 +38,14 @@ std::string MantidInstrumentWindow::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
+void MantidInstrumentWindow::closeEvent(QCloseEvent *e)
+{
+	if (m_mdiSubWindowParent->close())
+		e->accept();
+	else
+		e->ignore();
+}
+
 /**
 * Closes the window if the associated workspace is deleted.
 * @param ws_name :: Name of the deleted workspace.
