@@ -1552,6 +1552,38 @@ def is_valid_user_file_extension(user_file):
         is_allowed = True
     return is_allowed
 
+def createUnmanagedAlgorithm(name, **kwargs):
+    '''
+    This creates an unmanged child algorithm with the
+    provided proeprties set. The returned algorithm has
+    not been executed yet.
+    '''
+    alg = AlgorithmManager.createUnmanaged(name)
+    alg.initialize()
+    alg.setChild(True)
+    for key, value in kwargs.iteritems():
+        alg.setProperty(key, value)
+    return alg
+
+def extract_fit_parameters(rAnds):
+    '''
+    @param rAnds: a rescale and shift object
+    @returns a scale factor, a shift factor and a fit mode
+    '''
+    scale_factor = rAnds.scale
+    shift_factor = rAnds.shift
+
+    # Set the fit mode
+    fit_mode = None
+    if rAnds.fitScale and rAnds.fitShift:
+        fit_mode = "Both"
+    elif rAnds.fitScale:
+        fit_mode = "ScaleOnly"
+    elif rAnds.fitShift:
+        fit_mode = "ShiftOnly"
+    else:
+        fit_mode = "None"
+    return scale_factor, shift_factor, fit_mode
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
