@@ -1,9 +1,9 @@
 digraph IndirectFlatePlateAbsorption {
   label="IndirectFlatePlateAbsorption Flowchart"
-  //$global_style
+  $global_style
 
   subgraph params  {
-    //$param_style
+    $param_style
     SampleWorkspace1        [label="SampleWorkspace"]
     SampleWorkspace2        [label="SampleWorkspace"]
     SampleWorkspace_Wave
@@ -31,7 +31,7 @@ digraph IndirectFlatePlateAbsorption {
   }
 
   subgraph algorithms  {
-    //$algorithm_style
+    $algorithm_style
     GetEFixed
     ConvertUnits1           [label="ConvertUnits"]
     ConvertUnits2           [label="ConvertUnits"]
@@ -51,7 +51,7 @@ digraph IndirectFlatePlateAbsorption {
   }
   
   subgraph decisions {
-    //$decision_style
+    $decision_style
     canGiven          [label="Can Workspace?"]
     canScale          [label="Can Scale?"]
     useCorrections    [label="Can Corrections?"]
