@@ -80,11 +80,11 @@ int Track::nonComplete() const {
   if (m_links.size() < 2) {
     return 0;
   }
-  LType::const_iterator ac = m_links.begin();
+  auto ac = m_links.cbegin();
   if (m_startPoint.distance(ac->entryPoint) > Tolerance) {
     return 1;
   }
-  LType::const_iterator bc = ac;
+  auto bc = ac;
   ++bc;
 
   while (bc != m_links.end()) {
@@ -106,8 +106,8 @@ void Track::removeCojoins() {
   if (m_links.empty()) {
     return;
   }
-  LType::iterator prevNode = m_links.begin();
-  LType::iterator nextNode = m_links.begin();
+  auto prevNode = m_links.begin();
+  auto nextNode = m_links.begin();
   ++nextNode;
   while (nextNode != m_links.end()) {
     if (prevNode->componentID == nextNode->componentID) {
@@ -141,7 +141,7 @@ void Track::addPoint(const int directionFlag, const V3D &endPoint,
                      const Object &obj, const ComponentID compID) {
   IntersectionPoint newPoint(directionFlag, endPoint,
                              endPoint.distance(m_startPoint), obj, compID);
-  PType::iterator lowestPtr =
+  auto lowestPtr =
       std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
   m_surfPoints.insert(lowestPtr, newPoint);
 }
@@ -166,8 +166,7 @@ int Track::addLink(const V3D &firstPoint, const V3D &secondPoint,
     m_links.push_back(newLink);
     index = 0;
   } else {
-    LType::iterator linkPtr =
-        std::lower_bound(m_links.begin(), m_links.end(), newLink);
+    auto linkPtr = std::lower_bound(m_links.begin(), m_links.end(), newLink);
     // must extract the distance before you insert otherwise the iterators are
     // incompatible
     index = static_cast<int>(std::distance(m_links.begin(), linkPtr));
@@ -187,8 +186,8 @@ void Track::buildLink() {
 
   // The surface points were added in order when they were built so no sorting
   // is required here.
-  PType::const_iterator ac = m_surfPoints.begin();
-  PType::const_iterator bc = ac;
+  auto ac = m_surfPoints.cbegin();
+  auto bc = ac;
   ++bc;
   V3D workPt = m_startPoint; // last good point
   // First point is not necessarily in an object

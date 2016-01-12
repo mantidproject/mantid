@@ -148,8 +148,7 @@ void RemoveLowResTOF::exec() {
     // calculate where to zero out to
     double tofMin = this->calcTofMin(workspaceIndex);
     const MantidVec &X = m_inputWS->readX(0);
-    MantidVec::const_iterator last =
-        std::lower_bound(X.begin(), X.end(), tofMin);
+    auto last = std::lower_bound(X.cbegin(), X.cend(), tofMin);
     if (last == X.end())
       --last;
     size_t endBin = last - X.begin();
@@ -309,8 +308,7 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex) {
     }
   } else {
     double l2 = 0;
-    for (std::set<detid_t>::const_iterator it = detSet.begin();
-         it != detSet.end(); ++it) {
+    for (auto it = detSet.cbegin(); it != detSet.cend(); ++it) {
       l2 += m_instrument->getDetector(*it)->getDistance(*m_sample);
     }
     l2 /= static_cast<double>(detSet.size());

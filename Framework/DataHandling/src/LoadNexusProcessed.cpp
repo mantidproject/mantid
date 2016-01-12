@@ -1340,7 +1340,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
       // if spectrum list property is set read each spectrum separately by
       // setting blocksize=1
       if (m_list) {
-        std::vector<int64_t>::iterator itr = m_spec_list.begin();
+        auto itr = m_spec_list.begin();
         for (; itr != m_spec_list.end(); ++itr) {
           int64_t specIndex = (*itr) - 1;
           progress(progressBegin +
@@ -1399,7 +1399,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
       }
       //
       if (m_list) {
-        std::vector<int64_t>::iterator itr = m_spec_list.begin();
+        auto itr = m_spec_list.begin();
         for (; itr != m_spec_list.end(); ++itr) {
           int64_t specIndex = (*itr) - 1;
           progress(progressBegin +
@@ -1537,7 +1537,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
 
   // Setting a unit onto a TextAxis makes no sense.
   if (unit2 == "TextAxis") {
-    Mantid::API::TextAxis *newAxis = new Mantid::API::TextAxis(nspectra);
+    auto newAxis = new Mantid::API::TextAxis(nspectra);
     local_workspace->replaceAxis(1, newAxis);
   } else if (unit2 != "spectraNumber") {
     try {
@@ -2134,8 +2134,7 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
 
     if (m_list) {
       if (m_interval) {
-        for (std::vector<int64_t>::iterator it = m_spec_list.begin();
-             it != m_spec_list.end();)
+        for (auto it = m_spec_list.begin(); it != m_spec_list.end();)
           if (*it >= m_spec_min && *it < m_spec_max) {
             it = m_spec_list.erase(it);
           } else

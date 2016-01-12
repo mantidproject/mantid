@@ -55,9 +55,9 @@ namespace CustomInterfaces
 
     // -- IALCPeakFitting interface ----------------------------------------------------------------
 
-    IFunction_const_sptr function(QString index) const;
-    boost::optional<QString> currentFunctionIndex() const;
-    IPeakFunction_const_sptr peakPicker() const;
+    IFunction_const_sptr function(QString index) const override;
+    boost::optional<QString> currentFunctionIndex() const override;
+    IPeakFunction_const_sptr peakPicker() const override;
     void emitFitRequested();
 
   public:
@@ -66,15 +66,17 @@ namespace CustomInterfaces
 
   public slots:
 
-    void initialize();
-    void setDataCurve(const QwtData &data, const std::vector<double> &errors);
-    void setFittedCurve(const QwtData& data);
-    void setFunction(const IFunction_const_sptr& newFunction);
-    void setParameter(const QString& funcIndex, const QString& paramName, double value);
-    void setPeakPickerEnabled(bool enabled);
-    void setPeakPicker(const IPeakFunction_const_sptr& peak);
-    void displayError(const QString& message);
-    void help();
+    void initialize() override;
+    void setDataCurve(const QwtData &data,
+                      const std::vector<double> &errors) override;
+    void setFittedCurve(const QwtData &data) override;
+    void setFunction(const IFunction_const_sptr &newFunction) override;
+    void setParameter(const QString &funcIndex, const QString &paramName,
+                      double value) override;
+    void setPeakPickerEnabled(bool enabled) override;
+    void setPeakPicker(const IPeakFunction_const_sptr &peak) override;
+    void displayError(const QString &message) override;
+    void help() override;
     void plotGuess() override;
 
     // -- End of IALCPeakFitting interface ---------------------------------------------------------

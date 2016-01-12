@@ -475,8 +475,7 @@ void GeneratePeaks::generatePeaks(
         if (leftbound < middle)
           leftbound = middle;
       }
-      std::vector<double>::const_iterator left =
-          std::lower_bound(X.begin(), X.end(), leftbound);
+      auto left = std::lower_bound(X.cbegin(), X.cend(), leftbound);
       if (left == X.end())
         left = X.begin();
 
@@ -489,8 +488,7 @@ void GeneratePeaks::generatePeaks(
         if (rightbound > middle)
           rightbound = middle;
       }
-      std::vector<double>::const_iterator right =
-          std::lower_bound(left + 1, X.end(), rightbound);
+      auto right = std::lower_bound(left + 1, X.cend(), rightbound);
 
       // Build domain & function
       API::FunctionDomain1DVector domain(left,

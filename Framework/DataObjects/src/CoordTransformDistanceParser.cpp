@@ -74,7 +74,7 @@ Mantid::API::CoordTransform *CoordTransformDistanceParser::createTransform(
       dimsUsedVecParm(dimsUsedParser.createWithoutDelegation(parameter));
 
   ////Generate the coordinate transform and return
-  CoordTransformDistance *transform = new CoordTransformDistance(
+  auto transform = new CoordTransformDistance(
       inDimParameter->getValue(), coordCenterParam->getPointerToStart(),
       dimsUsedVecParm->getPointerToStart());
 

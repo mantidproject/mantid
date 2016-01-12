@@ -439,7 +439,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                 ": this is not possible.");
 
   CPUTimer tim;
-  Progress *prog = new Progress(this, 0.0, 1.0, 100);
+  auto prog = new Progress(this, 0.0, 1.0, 100);
 
   prog->report("Opening file.");
   std::string title;
@@ -605,7 +605,7 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
   Matrix<coord_t> mat(vec);
   CoordTransform *transform = NULL;
   if (("CoordTransformAffine" == type) || ("CoordTransformAligned" == type)) {
-    CoordTransformAffine *affine = new CoordTransformAffine(inD, outD);
+    auto affine = new CoordTransformAffine(inD, outD);
     affine->setMatrix(mat);
     transform = affine;
   } else {
