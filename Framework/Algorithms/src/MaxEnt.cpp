@@ -43,7 +43,7 @@ const std::string MaxEnt::category() const { return "Arithmetic\\FFT"; }
 const std::string MaxEnt::summary() const {
   return "Runs Maximum Entropy method on an input workspace. "
          "Note this algorithm is still in development, and its interface is "
-         "likely to change. It currently work for the case where the "
+         "likely to change. It currently works for the case where the "
          "number of data points equal the number of reconstructed (image) "
          "points "
          "and data and image are related by Fourier transform.";
@@ -60,8 +60,8 @@ void MaxEnt::init() {
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
   mustBeNonNegative->setLower(1E-12);
-  declareProperty(new PropertyWithValue<double>(
-                      "Background", 0.4, mustBeNonNegative, Direction::Input),
+  declareProperty(new PropertyWithValue<double>("A", 0.4, mustBeNonNegative,
+                                                Direction::Input),
                   "A maximum entropy constant");
 
   declareProperty(new PropertyWithValue<double>(
@@ -135,7 +135,7 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 
   // Background (default level, sky background, etc)
-  double background = getProperty("Background");
+  double background = getProperty("A");
   // Chi target
   double chiTarget = getProperty("ChiTarget");
   // Required precision for Chi arget
