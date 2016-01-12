@@ -586,8 +586,8 @@ public:
     std::vector<signal_t> y, e;
     ew->getLinePlot(start, end, NoNormalization, x, y, e);
     TS_ASSERT_EQUALS(y.size(), 200);
-    TS_ASSERT(boost::math::isnan(y[60]));  // Masked data is NaN
-    TS_ASSERT_EQUALS(y[180], 3.0); // Unmasked data
+    TS_ASSERT(boost::math::isnan(y[60])); // Masked data is NaN
+    TS_ASSERT_EQUALS(y[180], 3.0);        // Unmasked data
   }
 
   void test_that_sets_default_normalization_flags_to_volume_normalization() {
