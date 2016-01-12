@@ -156,7 +156,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             # Split on ';' if in form of 2-3;6-7
             grp_spectra_list = grp_spectra_list.split(";")
         else:
-            # Treat input as a list
+            # Treat input as a list (for use in loop)
             grp_spectra_list = [grp_spectra_list]
 
         for spectra_grp in grp_spectra_list:
@@ -170,8 +170,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 # Split comma separated lists
                 spectra_list = spectra_grp.split(",")
             else:
-                # Single spectra
-                spectra_list = spectra_grp
+                # Single spectra (put into list for use in loop)
+                spectra_list = [spectra_grp]
 
             # Validate boundaries
             for spec in spectra_list:
