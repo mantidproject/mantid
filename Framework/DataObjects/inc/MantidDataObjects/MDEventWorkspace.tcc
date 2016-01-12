@@ -833,13 +833,6 @@ TMDE(void MDEventWorkspace)::clearMDMasking() {
 }
 
 /**
-Return true if there is any mask on the workspace
-*/
-TMDE(bool MDEventWorkspace)::hasMask() {
-  return false;
-}
-
-/**
 Get the coordinate system (if any) to use.
 @return An enumeration specifying the coordinate system if any.
 */

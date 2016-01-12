@@ -327,25 +327,6 @@ public:
   }
 
   //-------------------------------------------------------------------------------------
-  /** hasMask should return true when the workspace has a mask */
-  void test_hasMask() {
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
-
-    TSM_ASSERT("Should return false as the workspace does not have a mask",
-               !ew->hasMask());
-
-    std::vector<coord_t> min{0, 0, 0};
-    std::vector<coord_t> max{1.5, 1.5, 1.5};
-
-    // Create a function to mask some of the workspace.
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
-    ew->setMDMasking(function);
-
-    TSM_ASSERT("Should return true as the workspace has a mask", ew->hasMask());
-  }
-
-  //-------------------------------------------------------------------------------------
   void test_estimateResolution() {
     MDEventWorkspace2Lean::sptr b =
         MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);

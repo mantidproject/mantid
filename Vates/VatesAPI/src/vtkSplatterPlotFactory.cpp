@@ -77,13 +77,7 @@ void vtkSplatterPlotFactory::doCreate(
   // from algos modifying ws)
   ReadLock lock(*ws);
 
-  // Avoid checking if each box is masked if there is no mask on the workspace
-  SigFuncIMDNodePtr getSignalFunction;
-  if (ws->hasMask()) {
-    getSignalFunction = &IMDNode::getSignalNormalizedWithMask;
-  } else {
-    getSignalFunction = &IMDNode::getSignalNormalized;
-  }
+  SigFuncIMDNodePtr getSignalFunction = &IMDNode::getSignalNormalized;
 
   // Find out how many events to plot, and the percentage of the largest
   // boxes to use.
