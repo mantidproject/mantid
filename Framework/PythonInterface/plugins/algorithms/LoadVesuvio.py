@@ -348,7 +348,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             return
 
         isis = config.getFacility("ISIS")
-        empty_vesuvio_ws = LoadEmptyVesuvio()
+        empty_vesuvio_ws = self._load_empty_evs()
         empty_vesuvio = empty_vesuvio_ws.getInstrument()
 
         def to_int_list(str_param):
@@ -393,7 +393,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self._forw_period_sum1 = to_range_tuple(self.forward_period_sum1)
         self._forw_period_sum2 = to_range_tuple(self.forward_period_sum2)
         self._forw_foil_out_norm = to_range_tuple(self.forward_foil_out_norm)
-        ms.DeleteWorkspace(Workspace="empty_vesuvio_ws")
         self._load_common_called = True
 
 #----------------------------------------------------------------------------------------
