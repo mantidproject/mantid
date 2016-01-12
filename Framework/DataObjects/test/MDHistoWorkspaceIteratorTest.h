@@ -140,7 +140,7 @@ public:
     delete histoIt;
   }
 
-  void test_getNormalizedSignalWIthMask() {
+  void test_getNormalizedSignal_with_mask() {
     // std::vector<coord_t> normal_vector{1.};
     // std::vector<coord_t> bound_vector{3.};
 
@@ -172,14 +172,14 @@ public:
 
     TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
                       " are unmasked",
-                      3.0, histoIt->getNormalizedSignalWithMask());
+                      3.0, histoIt->getNormalizedSignal());
     histoIt->jumpTo(2);
     TSM_ASSERT("Should return NaN here as data at the iterator are masked",
-               boost::math::isnan(histoIt->getNormalizedSignalWithMask()));
+               boost::math::isnan(histoIt->getNormalizedSignal()));
     histoIt->jumpTo(3);
     TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
                       " are unmasked",
-                      3.0, histoIt->getNormalizedSignalWithMask());
+                      3.0, histoIt->getNormalizedSignal());
 
     delete histoIt;
   }

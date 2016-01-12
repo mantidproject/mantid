@@ -622,7 +622,7 @@ public:
                testing::Mock::VerifyAndClearExpectations(mockPolicy));
   }
 
-  void test_getNormalizedSignalWithMask_returns_zero_for_masked() {
+  void test_getNormalizedSignal_with_mask() {
     // Make a MDBox with 10 events
     ibox_t *A = MDEventsTestHelper::makeMDBox1();
     MDEventsTestHelper::feedMDBox<1>(A, 1, 10, 0.5, 1.0);
@@ -630,18 +630,15 @@ public:
         new MDBoxIterator<MDLeanEvent<1>, 1>(A, 20, true);
 
     // Mask box 0, unmask box 1 and mask box 2.
-    // For masked boxes, getNormalizedSignalWithMask() should return 0.
+    // For masked boxes, getNormalizedSignal() should return NaN.
     it->getBox()->mask();
-    TS_ASSERT(boost::math::isnan(it->getNormalizedSignalWithMask()));
-    TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
+    TS_ASSERT(boost::math::isnan(it->getNormalizedSignal()));
     it->next();
     it->getBox()->unmask();
-    TS_ASSERT_DELTA(it->getNormalizedSignalWithMask(), 1.0, 1e-5);
     TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
     it->next();
     it->getBox()->mask();
-    TS_ASSERT(boost::math::isnan(it->getNormalizedSignalWithMask()));
-    TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
+    TS_ASSERT(boost::math::isnan(it->getNormalizedSignal()));
 
     delete it;
   }
