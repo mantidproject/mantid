@@ -131,6 +131,9 @@ namespace Mantid
       AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
     }
 
+    /// Destructor
+    MDEWEventNexusLoadingPresenter::~MDEWEventNexusLoadingPresenter() {}
+
     /*
 Getter for the workspace type name.
 @return Workspace Type Name

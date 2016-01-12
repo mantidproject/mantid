@@ -33,6 +33,9 @@ vtkStandardNewMacro(vtkMDHWSource)
   this->SetNumberOfOutputPorts(1);
 }
 
+/// Destructor
+vtkMDHWSource::~vtkMDHWSource() {}
+
 /*
   Setter for the workspace name.
   @param name : workspace name to extract from ADS.

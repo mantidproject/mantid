@@ -124,6 +124,9 @@ namespace Mantid
       this->extractMetadata(eventWs);
     }
 
+    /// Destructor
+    MDEWInMemoryLoadingPresenter::~MDEWInMemoryLoadingPresenter() {}
+
     /*
      Getter for the workspace type name.
      @return Workspace Type Name

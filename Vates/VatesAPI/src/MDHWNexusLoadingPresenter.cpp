@@ -110,6 +110,12 @@ void MDHWNexusLoadingPresenter::executeLoadMetadata()
 }
 
 /**
+ * Destructor
+ * @return
+ */
+MDHWNexusLoadingPresenter::~MDHWNexusLoadingPresenter() {}
+
+/**
  * Getter for the workspace type name.
  * @return Workspace Type Name
  */

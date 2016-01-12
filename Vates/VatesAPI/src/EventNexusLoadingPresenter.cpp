@@ -160,6 +160,9 @@ namespace Mantid
       throw std::runtime_error("Does not have a 4th Dimension, so can be no T-axis");
     }
 
+    /// Destructor
+    EventNexusLoadingPresenter::~EventNexusLoadingPresenter() {}
+
     /**
      Executes any meta-data loading required.
      */

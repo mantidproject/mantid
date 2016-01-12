@@ -138,6 +138,9 @@ void MDHWInMemoryLoadingPresenter::executeLoadMetadata() {
   this->extractMetadata(m_cachedVisualHistoWs);
 }
 
+/// Destructor
+MDHWInMemoryLoadingPresenter::~MDHWInMemoryLoadingPresenter() {}
+
 /*
  * Getter for the workspace type name.
  * @return Workspace Type Name

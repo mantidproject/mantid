@@ -32,6 +32,9 @@ namespace Mantid
     Mantid::API::FrameworkManager::Instance();
   }
 
+  /// Destructor
+  MDEWLoadingPresenter::~MDEWLoadingPresenter() {}
+
   /*
  Extract the geometry and function information
  @param eventWs : event workspace to get the information from.
