@@ -25,6 +25,8 @@ public:
 protected:
   /// sends a report over the internet
   int sendReport(const std::string &message, const std::string &url) {
+    UNUSED_ARG(message);
+    UNUSED_ARG(url);
     // do nothing
     return 200;
   }
@@ -99,7 +101,7 @@ public:
     }
 
     auto features = root["features"];
-    for (int i = 0; i < features.size(); i++) {
+    for (Json::ArrayIndex i = 0; i < features.size(); i++) {
       std::string name = features[i]["name"].asString();
       std::string type = features[i]["type"].asString();
       bool internal = features[i]["internal"].asBool();
