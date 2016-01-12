@@ -379,8 +379,7 @@ public:
                                          std::move(pMeasurementItemSource));
     // Clone it
     auto clone = strategy.clone();
-    TS_ASSERT(dynamic_cast<ReflMeasureTransferStrategy *>(clone));
-    delete clone;
+    TS_ASSERT(dynamic_cast<ReflMeasureTransferStrategy *>(clone.get()));
   }
 
   void test_filtering() {
