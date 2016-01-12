@@ -190,8 +190,8 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
 
     hexahedronFactory->setTime(m_time);
     vtkSmartPointer<vtkDataSet> product;
-    product.TakeReference(m_presenter->execute(
-        hexahedronFactory.get(), loadingProgressUpdate, drawingProgressUpdate));
+    product = m_presenter->execute(
+        hexahedronFactory.get(), loadingProgressUpdate, drawingProgressUpdate);
 
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
     vtkNew<vtkBox> box;

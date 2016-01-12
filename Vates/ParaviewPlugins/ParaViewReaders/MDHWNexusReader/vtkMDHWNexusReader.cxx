@@ -127,8 +127,8 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
           thresholdRange, m_normalizationOption, m_time);
   factory->SetSuccessor(std::move(successor));
 
-  auto product = vtkSmartPointer<vtkDataSet>::Take(m_presenter->execute(
-      factory.get(), loadingProgressAction, drawingProgressAction));
+  auto product = m_presenter->execute(factory.get(), loadingProgressAction,
+                                      drawingProgressAction);
 
   vtkDataSet* output = vtkDataSet::GetData(outInfo);
   output->ShallowCopy(product);

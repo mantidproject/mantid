@@ -177,8 +177,8 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     quadFactory->SetSuccessor(std::move(lineFactory));
     lineFactory->SetSuccessor(std::move(zeroDFactory));
 
-    auto product = vtkSmartPointer<vtkDataSet>::Take(m_presenter->execute(
-        factory.get(), loadingProgressUpdate, drawingProgressUpdate));
+    auto product = m_presenter->execute(factory.get(), loadingProgressUpdate,
+                                        drawingProgressUpdate);
 
     vtkDataSet* output = vtkDataSet::GetData(outInfo);
     output->ShallowCopy(product);
