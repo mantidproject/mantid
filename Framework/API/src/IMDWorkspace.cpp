@@ -19,7 +19,9 @@ IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {
 //-----------------------------------------------------------------------------------------------
 /** Copy constructor */
 IMDWorkspace::IMDWorkspace(const IMDWorkspace &other)
-    : Workspace(other), Mantid::API::MDGeometry(other) {}
+    : Workspace(other), Mantid::API::MDGeometry(other) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+}
 
 /// Destructor
 IMDWorkspace::~IMDWorkspace() {}

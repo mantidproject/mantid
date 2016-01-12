@@ -73,11 +73,6 @@ void BinaryOperationMD::exec() {
   m_lhs = getProperty(inputPropName1());
   m_rhs = getProperty(inputPropName2());
   m_out = getProperty(outputPropName());
-  if (m_lhs->getConvention() != m_rhs->getConvention()) {
-    throw std::runtime_error(
-        "Workspaces have different conventions for Q. "
-        "Use algorithm ChangeQConvention on one workspace. ");
-  }
 
   // Flip LHS and RHS if commutative and :
   //  1. A = B + A -> becomes -> A += B
@@ -90,6 +85,16 @@ void BinaryOperationMD::exec() {
     Mantid::API::IMDWorkspace_sptr temp = m_lhs;
     m_lhs = m_rhs;
     m_rhs = temp;
+  }
+
+  // Do not compare conventions if one is single value
+  if (!boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs))
+  {
+    if (m_lhs->getConvention() != m_rhs->getConvention()) {
+      throw std::runtime_error(
+          "Workspaces have different conventions for Q. "
+          "Use algorithm ChangeQConvention on one workspace. ");
+    }
   }
 
   // Can't do A = 1 / B
