@@ -150,35 +150,33 @@ class LoadVesuvio(LoadEmptyVesuvio):
             lower, upper = run_str.split("-")
             issues = self._validate_range_formatting(upper, lower, RUN_PROP, issues)
 
-
         # Validate SpectrumList
-        speclists_str = self.getProperty(SPECTRA_PROP).value
-
-        if ";" in speclists_str:
-            # Split if in 2-3;6-7 format
-            speclists_str = speclists_str.split(";")
+        grp_spectra_list = self.getProperty(SPECTRA_PROP).value
+        if ";" in grp_spectra_list:
+            # Split on ';' if in form of 2-3;6-7
+            grp_spectra_list = grp_spectra_list.split(";")
         else:
-            # Treat spec as a list
-            speclists_str = [speclists_str]
+            # Treat input as a list
+            grp_spectra_list = [grp_spectra_list]
 
-        for speclist_str in speclists_str:
-            if "-" in speclist_str:
-                lower, upper = speclist_str.split("-")
-                lower = int(lower)
-                upper = int(upper)
-                # Check format
-                issues = self._validate_range_formatting(upper, lower, SPECTRA_PROP, issues)
-                # Check Min/Max boundaries
-                if "Difference" in self.getProperty(MODE_PROP).value:
-                    issues = self._validate_spec_min_max(lower, issues)
-                    issues = self._validate_spec_min_max(upper, issues)
-            # Check comma separated lists
-            if "," in speclist_str:
-                if "Difference" in self.getProperty(MODE_PROP).value:
-                    spectra_list = speclist_str.split(",")
-                    for spec in spectra_list:
-                        spec = int(spec)
-                        issues = self._validate_spec_min_max(spec, issues)
+        for spectra_grp in grp_spectra_list:
+            spectra_list = None
+            if "-" in spectra_grp:
+                # Split ranges
+                spectra_list = spectra_grp.split("-")
+                # Validate format
+                issues = self._validate_range_formatting(spectra_list[0], spectra_list[0], SPECTRA_PROP, issues)
+            elif "," in spectra_grp:
+                # Split comma separated lists
+                spectra_list = spectra_grp.split(",")
+            else:
+                # Single spectra
+                spectra_list = spectra_grp
+
+            # Validate boundaries
+            for spec in spectra_list:
+                spec = int(spec)
+                issues = self._validate_spec_min_max(spec, issues)
 
         return issues
 
@@ -198,12 +196,15 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         Validates if the spectra is with the minimum and maximum boundaries
         """
-        specMin = self._backward_spectra_list[0]
-        specMax = self._forward_spectra_list[len(self._forward_spectra_list) - 1]
-        if spectra < specMin:
-            issues[SPECTRA_PROP] = ("Lower limit for spectra is %d in difference mode" % specMin)
-        if spectra > specMax:
-            issues[SPECTRA_PROP] = ("Upper limit for spectra is %d in difference mode" % specMax)
+        # Only validate boundaries if in difference Mode
+        if "Difference" in self.getProperty(MODE_PROP).value:
+            specMin = self._backward_spectra_list[0]
+            specMax = self._forward_spectra_list[len(self._forward_spectra_list) - 1]
+            if spectra < specMin:
+                issues[SPECTRA_PROP] = ("Lower limit for spectra is %d in difference mode" % specMin)
+            if spectra > specMax:
+                issues[SPECTRA_PROP] = ("Upper limit for spectra is %d in difference mode" % specMax)
+
         return issues
 
 #----------------------------------------------------------------------------------------
