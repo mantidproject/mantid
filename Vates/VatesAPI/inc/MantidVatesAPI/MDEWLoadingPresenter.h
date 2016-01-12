@@ -52,6 +52,7 @@ namespace Mantid
       virtual std::vector<double> getTimeStepValues() const;
       virtual std::string getTimeStepLabel() const;
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
+      virtual ~MDEWLoadingPresenter();
       virtual const std::string& getInstrument();
       virtual double getMinValue();
       virtual double getMaxValue();

@@ -53,6 +53,7 @@ public:
                               ProgressAction &rebinningProgressUpdate,
                               ProgressAction &drawingProgressUpdate);
   virtual void executeLoadMetadata();
+  virtual ~MDHWInMemoryLoadingPresenter();
   virtual bool canReadFile() const;
   virtual std::string getWorkspaceTypeName();
   virtual int getSpecialCoordinates();

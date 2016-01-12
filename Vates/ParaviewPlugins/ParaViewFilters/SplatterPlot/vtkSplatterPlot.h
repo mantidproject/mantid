@@ -32,6 +32,7 @@ public:
   const char* GetInstrument();
 protected:
   vtkSplatterPlot();
+  ~vtkSplatterPlot();
   int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 

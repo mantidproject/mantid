@@ -45,6 +45,7 @@ namespace Mantid
       virtual void executeLoadMetadata();
       virtual bool hasTDimensionAvailable() const;
       virtual std::vector<double> getTimeStepValues() const;
+      virtual ~EventNexusLoadingPresenter();
       virtual bool canReadFile() const;
       virtual std::string getWorkspaceTypeName();
     private:

@@ -79,6 +79,7 @@ public:
 
 protected:
   vtkMDHWSource();
+  ~vtkMDHWSource();
   int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 

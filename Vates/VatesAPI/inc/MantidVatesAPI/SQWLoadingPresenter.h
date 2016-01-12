@@ -42,6 +42,7 @@ namespace Mantid
       virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningProgressUpdate, ProgressAction& drawingProgressUpdate);
       virtual void extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs);
       virtual void executeLoadMetadata();
+      virtual ~SQWLoadingPresenter();
       virtual bool canReadFile() const;
       virtual std::string getWorkspaceTypeName();
     private:
