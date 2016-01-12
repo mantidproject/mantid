@@ -160,7 +160,6 @@ namespace Mantid
         // Hedge against empty data sets
         if (visualDataSet->GetNumberOfPoints() <= 0)
         {
-          visualDataSet->Delete();
           vtkNullUnstructuredGrid nullGrid;
           visualDataSet = nullGrid.createNullData();
         }

@@ -194,7 +194,6 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   // Hedge against empty data sets
   if (visualDataSet->GetNumberOfPoints() <= 0) {
-    visualDataSet->Delete();
     vtkNullStructuredGrid nullGrid;
     visualDataSet = nullGrid.createNullData();
   }
