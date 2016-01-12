@@ -90,7 +90,10 @@ void vtkMDHexFactory::doCreate(
   std::vector<float> signalCache(numBoxes, 0);
 
   // True for boxes that we will use
-  auto useBox = std::vector<bool>(numBoxes, false);
+  // We do not use vector<bool> here because of the parallelization below
+  // Simultaneous access to different elements of vector<bool> is not safe
+  auto useBox = Mantid::Kernel::make_unique<bool[]>(numBoxes);
+  memset(useBox.get(), 0, sizeof(bool) * numBoxes);
 
   // Create the data set (will outlive this object - output of create)
   auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
