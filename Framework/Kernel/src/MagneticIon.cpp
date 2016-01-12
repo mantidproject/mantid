@@ -872,8 +872,7 @@ void createIonLookup(IonIndex &ion_map) {
  */
 const MagneticIon &getMagneticIon(const std::string &symbol) {
   const IonIndex &ionIndex = ionMap();
-  std::map<std::string, MagneticIon>::const_iterator cit =
-      ionIndex.find(symbol);
+  auto cit = ionIndex.find(symbol);
 
   if (cit == ionIndex.end()) {
     // no such combination

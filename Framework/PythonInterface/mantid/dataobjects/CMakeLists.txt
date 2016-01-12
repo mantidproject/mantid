@@ -8,6 +8,7 @@ set ( MODULE_TEMPLATE src/dataobjects.cpp.in )
 # -- Do NOT sort this list. The order defines the order in which the export
 #    definitions occur and some depend on their base classes being exported first --
 set ( EXPORT_FILES
+  src/Exports/EventList.cpp
   src/Exports/EventWorkspace.cpp
   src/Exports/Workspace2D.cpp
   src/Exports/RebinnedOutput.cpp

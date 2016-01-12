@@ -74,7 +74,7 @@ void FacilityInfo::fillExtensions(const Poco::XML::Element *elem) {
   typedef Poco::StringTokenizer tokenizer;
   tokenizer exts(extsStr, ",",
                  tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-  for (tokenizer::Iterator it = exts.begin(); it != exts.end(); ++it) {
+  for (auto it = exts.begin(); it != exts.end(); ++it) {
     addExtension(*it);
   }
 }
@@ -190,8 +190,7 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
     }
   }
 
-  std::vector<InstrumentInfo>::const_iterator it = m_instruments.begin();
-  for (; it != m_instruments.end(); ++it) {
+  for (auto it = m_instruments.cbegin(); it != m_instruments.cend(); ++it) {
     if (boost::iequals(it->name(), iName)) // Case-insensitive search
     {
       g_log.debug() << "Instrument '" << iName << "' found as " << it->name()
@@ -201,7 +200,7 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
   }
 
   // if unsuccessful try shortname
-  for (it = m_instruments.begin(); it != m_instruments.end(); ++it) {
+  for (auto it = m_instruments.begin(); it != m_instruments.end(); ++it) {
     if (boost::iequals(it->shortName(), iName)) // Case-insensitive search
     {
       g_log.debug() << "Instrument '" << iName << "' found as " << it->name()
@@ -245,7 +244,7 @@ FacilityInfo::instruments(const std::string &tech) const {
   */
 std::vector<std::string> FacilityInfo::computeResources() const {
   std::vector<std::string> names;
-  ComputeResourcesMap::const_iterator it = m_computeResources.begin();
+  auto it = m_computeResources.begin();
   while (it != m_computeResources.end()) {
     names.push_back((*it).first);
     ++it;

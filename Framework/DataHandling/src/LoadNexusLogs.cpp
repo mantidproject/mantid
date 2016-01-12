@@ -573,7 +573,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
       throw;
     }
     // Make an int TSP
-    TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>(prop_name);
+    auto tsp = new TimeSeriesProperty<int>(prop_name);
     tsp->create(start_time, time_double, values);
     tsp->setUnits(value_units);
     g_log.debug() << "   done reading \"value\" array\n";
@@ -595,8 +595,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     // The string may contain non-printable (i.e. control) characters, replace
     // these
     std::replace_if(values.begin(), values.end(), iscntrl, ' ');
-    TimeSeriesProperty<std::string> *tsp =
-        new TimeSeriesProperty<std::string>(prop_name);
+    auto tsp = new TimeSeriesProperty<std::string>(prop_name);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);
     const size_t ntimes = times.size();
@@ -617,7 +616,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
       file.closeData();
       throw;
     }
-    TimeSeriesProperty<double> *tsp = new TimeSeriesProperty<double>(prop_name);
+    auto tsp = new TimeSeriesProperty<double>(prop_name);
     tsp->create(start_time, time_double, values);
     tsp->setUnits(value_units);
     g_log.debug() << "   done reading \"value\" array\n";

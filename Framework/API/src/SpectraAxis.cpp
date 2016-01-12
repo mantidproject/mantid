@@ -28,7 +28,7 @@ SpectraAxis::SpectraAxis(const MatrixWorkspace *const parentWorkspace)
  *  @return A pointer to a copy of the SpectraAxis on which the method is called
  */
 Axis *SpectraAxis::clone(const MatrixWorkspace *const parentWorkspace) {
-  SpectraAxis *newAxis = new SpectraAxis(parentWorkspace);
+  auto newAxis = new SpectraAxis(parentWorkspace);
   // A couple of base class members need copying over manually
   newAxis->title() = this->title();
   newAxis->unit() = this->unit();

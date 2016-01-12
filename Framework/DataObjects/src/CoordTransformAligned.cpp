@@ -101,8 +101,8 @@ CoordTransformAligned::CoordTransformAligned(
 /** Virtual cloner
  * @return a copy of this object  */
 CoordTransform *CoordTransformAligned::clone() const {
-  CoordTransformAligned *out = new CoordTransformAligned(
-      inD, outD, m_dimensionToBinFrom, m_origin, m_scaling);
+  auto out = new CoordTransformAligned(inD, outD, m_dimensionToBinFrom,
+                                       m_origin, m_scaling);
   return out;
 }
 

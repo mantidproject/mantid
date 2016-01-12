@@ -82,10 +82,8 @@ std::vector<Kernel::V3D> PeakShapeEllipsoid::getDirectionInSpecificFrame(
                                 "compatible with the direction vector");
   }
 
-  for (std::vector<Kernel::V3D>::const_iterator it = m_directions.begin();
-       it != m_directions.end(); ++it) {
+  for (auto it = m_directions.cbegin(); it != m_directions.cend(); ++it) {
     directionsInFrame.push_back(invertedGoniometerMatrix * (*it));
-    Mantid::Kernel::V3D d = invertedGoniometerMatrix * (*it);
   }
 
   return directionsInFrame;

@@ -47,8 +47,6 @@ void MDGeometryXMLParser::validate() const {
 Peforms the processing associated with these transformations.
 */
 void MDGeometryXMLParser::execute() {
-  typedef std::vector<Mantid::Geometry::IMDDimension_sptr>::iterator Iterator;
-
   Poco::XML::DOMParser pParser;
   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(m_xmlToProcess);
   Poco::XML::Element *pRootElem = pDoc->documentElement();
@@ -89,7 +87,7 @@ void MDGeometryXMLParser::execute() {
                 MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
   if (!xDimId.empty()) {
-    Iterator xDimensionIt =
+    auto xDimensionIt =
         find_if(vecAllDims.begin(), vecAllDims.end(), findID(xDimId));
     if (xDimensionIt == vecAllDims.end()) {
       throw std::invalid_argument("Cannot determine x-dimension mapping.");
@@ -108,7 +106,7 @@ void MDGeometryXMLParser::execute() {
           ->innerText();
 
   if (!yDimId.empty()) {
-    Iterator yDimensionIt =
+    auto yDimensionIt =
         find_if(vecAllDims.begin(), vecAllDims.end(), findID(yDimId));
     if (yDimensionIt == vecAllDims.end()) {
       throw std::invalid_argument("Cannot determine y-dimension mapping.");
@@ -127,7 +125,7 @@ void MDGeometryXMLParser::execute() {
           ->innerText();
 
   if (!zDimId.empty()) {
-    Iterator zDimensionIt =
+    auto zDimensionIt =
         find_if(vecAllDims.begin(), vecAllDims.end(), findID(zDimId));
     if (zDimensionIt == vecAllDims.end()) {
       throw std::invalid_argument("Cannot determine z-dimension mapping.");
@@ -145,7 +143,7 @@ void MDGeometryXMLParser::execute() {
                 MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
   if (!tDimId.empty()) {
-    Iterator tDimensionIt =
+    auto tDimensionIt =
         find_if(vecAllDims.begin(), vecAllDims.end(), findID(tDimId));
     if (tDimensionIt == vecAllDims.end()) {
       throw std::invalid_argument("Cannot determine t-dimension mapping.");

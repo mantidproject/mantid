@@ -815,7 +815,7 @@ bool SurfPoint::isValid(const std::map<int, int> &MX) const
   @return MX.second if key found or 0
 */
 {
-  std::map<int, int>::const_iterator lx = MX.find(keyN);
+  auto lx = MX.find(keyN);
   if (lx == MX.end())
     return false;
   const int rtype = (lx->second) ? 1 : -1;

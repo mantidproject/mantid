@@ -1,12 +1,10 @@
 #include "MantidCrystal/ClusterRegister.h"
 #include "MantidCrystal/Cluster.h"
 #include "MantidCrystal/CompositeCluster.h"
-#include "MantidCrystal/DisjointElement.h"
 #include <boost/make_shared.hpp>
 #include <boost/functional/hash.hpp>
 #include <list>
 #include <set>
-#include <stdexcept>
 
 namespace {
 template <typename T> std::pair<T, T> ordered_pair(const T &a, const T &b) {
@@ -57,7 +55,7 @@ public:
     GroupType containingAny;
     GroupType containingNone;
     // ------------- Find equivalent sets
-    for (GroupType::iterator i = m_groups.begin(); i != m_groups.end(); ++i) {
+    for (auto i = m_groups.begin(); i != m_groups.end(); ++i) {
       GroupType::value_type &cluster = *i;
       if (cluster.find(aLabel) != cluster.end()) {
         containingAny.push_back(cluster);

@@ -66,12 +66,10 @@
 %End
 };
 
-
 namespace Mantid
 {
 namespace API
 {
-
 
 enum MDNormalization
 {

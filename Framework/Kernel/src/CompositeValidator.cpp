@@ -20,9 +20,7 @@ std::vector<std::string> CompositeValidator::allowedValues() const {
   std::multiset<std::string> elem_all;
   // how many validators return non-empty list of allowed values
   int n_combinations(0);
-  std::list<IValidator_sptr>::const_iterator itrEnd = m_children.end();
-  for (std::list<IValidator_sptr>::const_iterator itr = m_children.begin();
-       itr != itrEnd; ++itr) {
+  for (auto itr = m_children.cbegin(); itr != m_children.cend(); ++itr) {
     std::vector<std::string> subs = (*itr)->allowedValues();
     if (subs.empty())
       continue;
@@ -34,14 +32,12 @@ std::vector<std::string> CompositeValidator::allowedValues() const {
   if (n_combinations < 2)
     return std::vector<std::string>(elem_unique.begin(), elem_unique.end());
   // there is more then one combination and we have to identify its union;
-  for (std::set<std::string>::const_iterator its = elem_unique.begin();
-       its != elem_unique.end(); ++its) {
-    std::multiset<std::string>::iterator im = elem_all.find(*its);
+  for (auto its = elem_unique.cbegin(); its != elem_unique.cend(); ++its) {
+    auto im = elem_all.find(*its);
     elem_all.erase(im);
   }
   std::set<std::string> rez;
-  for (std::multiset<std::string>::const_iterator im = elem_all.begin();
-       im != elem_all.end(); ++im) {
+  for (auto im = elem_all.cbegin(); im != elem_all.cend(); ++im) {
     rez.insert(*im);
   }
   return std::vector<std::string>(rez.begin(), rez.end());
@@ -54,9 +50,7 @@ std::vector<std::string> CompositeValidator::allowedValues() const {
 Kernel::IValidator_sptr CompositeValidator::clone() const {
   boost::shared_ptr<CompositeValidator> copy =
       boost::make_shared<CompositeValidator>();
-  std::list<IValidator_sptr>::const_iterator itrEnd = m_children.end();
-  for (std::list<IValidator_sptr>::const_iterator itr = m_children.begin();
-       itr != itrEnd; ++itr) {
+  for (auto itr = m_children.cbegin(); itr != m_children.end(); ++itr) {
     copy->add((*itr)->clone());
   }
   return copy;
@@ -74,9 +68,8 @@ void CompositeValidator::add(Kernel::IValidator_sptr child) {
  *  @return A user level description of the first problem it finds otherwise ""
  */
 std::string CompositeValidator::check(const boost::any &value) const {
-  std::list<IValidator_sptr>::const_iterator itrEnd = m_children.end();
-  for (std::list<IValidator_sptr>::const_iterator itr = m_children.begin();
-       itr != itrEnd; ++itr) {
+  auto itrEnd = m_children.end();
+  for (auto itr = m_children.begin(); itr != itrEnd; ++itr) {
     std::string error = (*itr)->check(value);
     // exit on the first error, to avoid passing doing more tests on invalid
     // objects that could fail
