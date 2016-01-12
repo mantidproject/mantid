@@ -1681,8 +1681,7 @@ def MatchIDFInReducerAndWorkspace(file_name):
     idf_path_workspace = os.path.normpath(idf_path_workspace)
 
     # Get the idf from the reducer
-    idf_path_reducer = ReductionSingleton().get_idf_file_path()
-    idf_path_reducer = os.path.normpath(idf_path_reducer)
+    idf_path_reducer = get_current_idf_path_in_reducer()
 
     if ((idf_path_reducer == idf_path_workspace) and
         su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
@@ -1701,6 +1700,18 @@ def has_user_file_valid_extension(file_name):
     is_valid = su.is_valid_user_file_extension(file_name)
     print str(is_valid)
     return is_valid
+
+def get_current_idf_path_in_reducer():
+    '''
+    This function returns the path to the IDF which is currently being used by the
+    instrument stored in the reducer
+    @returns a string with the path to the IDF which is currently being used.
+    '''
+    idf_path_reducer = ReductionSingleton().get_idf_file_path()
+    idf_path_reducer = os.path.normpath(idf_path_reducer)
+    print str(idf_path_reducer)
+    return idf_path_reducer
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
