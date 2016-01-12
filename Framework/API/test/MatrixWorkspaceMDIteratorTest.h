@@ -126,7 +126,6 @@ public:
     }
     delete it;
   }
-
 };
 
 #endif /* MANTID_API_MATRIXWORKSPACEMDITERATORTEST_H_ */
