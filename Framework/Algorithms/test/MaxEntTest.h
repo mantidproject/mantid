@@ -30,7 +30,7 @@ public:
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
-    alg->setProperty("Background", 0.01);
+    alg->setProperty("A", 0.01);
     alg->setProperty("ChiTarget", 50.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
@@ -63,7 +63,7 @@ public:
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
-    alg->setProperty("Background", 0.01);
+    alg->setProperty("A", 0.01);
     alg->setProperty("ChiTarget", 50.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
