@@ -106,7 +106,7 @@ Usage
        E.append(0.1)
 
    ws = CreateWorkspace(DataX=X, DataY=Y, DataE=E)
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', Background=0.01, ChiTarget=50)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', A=0.01, ChiTarget=50)
 
    print "Original data %.4f" % (ws.readY(0)[25])
    print "Reconstructed data %.4f" % (data.readY(0)[25])
