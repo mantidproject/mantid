@@ -588,7 +588,7 @@ std::vector<int64_t> MDHistoWorkspaceIterator::createPermutations(
     if (widths[0] % 2 == 0) {
       throw std::invalid_argument("MDHistoWorkspaceIterator::"
                                   "findNeighbourIndexesByWidth, width must "
-                                  "always be an even number");
+                                  "always be an odd number");
     }
     if (widths.size() != m_nd) {
       throw std::invalid_argument("MDHistoWorkspaceIterator::"
