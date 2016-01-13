@@ -142,6 +142,8 @@ private:
   /// A WorkspaceObserver handle implemented.
   virtual void afterReplaceHandle(const std::string &wsName,
                                   const Mantid::API::Workspace_sptr ws);
+
+  PeakMarker2D::Style getCurrentStyle() const;
   void recreateMarkers(const PeakMarker2D::Style &style);
 
   QMultiHash<int, PeakMarker2D *>

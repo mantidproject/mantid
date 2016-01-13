@@ -345,7 +345,21 @@ void PeakOverlay::setShowRelativeIntensityFlag(bool yes) {
         Mantid::Kernel::make_unique<DefaultIntensityScale>(m_peaksWorkspace);
   }
 
-  recreateMarkers(getDefaultStyle(0));
+  recreateMarkers(getCurrentStyle());
+}
+
+/// Returns the current style or the default style is no markers are present.
+PeakMarker2D::Style PeakOverlay::getCurrentStyle() const {
+  auto baseStyle = getDefaultStyle(0);
+
+  if (isEmpty()) {
+    return baseStyle;
+  }
+
+  auto currentStyle = m_det2marker.begin().value()->getStyle();
+
+  return PeakMarker2D::Style(currentStyle.symbol, currentStyle.color,
+                             baseStyle.size);
 }
 
 /** ---------------------------------------------------------------------
@@ -358,12 +372,9 @@ void PeakOverlay::afterReplaceHandle(const std::string &wsName,
   Q_UNUSED(wsName);
   auto peaksWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
   if (peaksWS && peaksWS == m_peaksWorkspace && m_surface) {
-    auto style = isEmpty() ? getDefaultStyle(0)
-                           : m_det2marker.begin().value()->getStyle();
-
     m_peakIntensityScale->setPeaksWorkspace(peaksWS);
 
-    recreateMarkers(style);
+    recreateMarkers(getCurrentStyle());
   }
 }
 
