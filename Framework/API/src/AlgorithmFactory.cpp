@@ -39,7 +39,7 @@ AlgorithmFactoryImpl::create(const std::string &name,
   if (version < 0) {
     if (version == -1) // get latest version since not supplied
     {
-      VersionMap::const_iterator it = m_vmap.find(name);
+      auto it = m_vmap.find(name);
       if (!name.empty()) {
         if (it == m_vmap.end())
           throw std::runtime_error("Algorithm not registered " + name);
@@ -53,7 +53,7 @@ AlgorithmFactoryImpl::create(const std::string &name,
   try {
     return this->createAlgorithm(name, local_version);
   } catch (Kernel::Exception::NotFoundError &) {
-    VersionMap::const_iterator it = m_vmap.find(name);
+    auto it = m_vmap.find(name);
     if (it == m_vmap.end())
       throw std::runtime_error("algorithm not registered " + name);
     else {
@@ -79,7 +79,7 @@ void AlgorithmFactoryImpl::unsubscribe(const std::string &algorithmName,
   try {
     Kernel::DynamicFactory<Algorithm>::unsubscribe(key);
     // Update version map accordingly
-    VersionMap::iterator it = m_vmap.find(algorithmName);
+    auto it = m_vmap.find(algorithmName);
     if (it != m_vmap.end()) {
       int highest_version = it->second;
       if (highest_version > 1 &&
@@ -223,7 +223,7 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
  */
 int AlgorithmFactoryImpl::highestVersion(
     const std::string &algorithmName) const {
-  VersionMap::const_iterator viter = m_vmap.find(algorithmName);
+  auto viter = m_vmap.find(algorithmName);
   if (viter != m_vmap.end())
     return viter->second;
   else {
@@ -394,11 +394,8 @@ void AlgorithmFactoryImpl::fillHiddenCategories(
   Poco::StringTokenizer tokenizer(categoryString, ";",
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
-
-  for (; h != tokenizer.end(); ++h) {
-    categorySet->insert(*h);
-  }
+  std::copy(tokenizer.begin(), tokenizer.end(),
+            std::inserter(*categorySet, categorySet->end()));
 }
 
 /** Extract the name of an algorithm

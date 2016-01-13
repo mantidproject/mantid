@@ -621,7 +621,7 @@ bool CalculateMSVesuvio::generateScatter(const Kernel::V3D &startPos,
     return false;
   }
   // Find distance inside object and compute probability of scattering
-  const auto &link = scatterTrack.begin();
+  const auto &link = scatterTrack.cbegin();
   double totalObjectDist = link->distInsideObject;
   const double scatterProb = 1.0 - exp(-m_sampleProps->mu * totalObjectDist);
   // Select a random point on the track that is the actual scatter point
@@ -758,7 +758,7 @@ V3D CalculateMSVesuvio::generateDetectorPos(
     Geometry::Track scatterToDet(scatterPt, scToDet);
     if (m_sampleShape->interceptSurface(scatterToDet) > 0) {
       scang = direcBeforeSc.angle(scToDet);
-      const auto &link = scatterToDet.begin();
+      const auto &link = scatterToDet.cbegin();
       distToExit = link->distInsideObject;
       break;
     }

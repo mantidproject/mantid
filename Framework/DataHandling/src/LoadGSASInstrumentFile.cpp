@@ -181,8 +181,7 @@ void LoadGSASInstrumentFile::exec() {
       }
     } else {
       // Else, use all available banks
-      for (map<size_t, map<string, double>>::iterator it = bankparammap.begin();
-           it != bankparammap.end(); ++it) {
+      for (auto it = bankparammap.begin(); it != bankparammap.end(); ++it) {
         bankIds.push_back(static_cast<int>(it->first));
       }
     }
@@ -410,7 +409,7 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
   if (numbanks == 0)
     throw runtime_error("Unable to generate a table from an empty map!");
 
-  map<size_t, map<string, double>>::iterator bankmapiter = bankparammap.begin();
+  auto bankmapiter = bankparammap.begin();
   size_t numparams = bankmapiter->second.size();
 
   // vector of all parameter name

@@ -384,7 +384,7 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
 void PlotAsymmetryByLogValue::populateOutputWorkspace(
     MatrixWorkspace_sptr &outWS, int nplots) {
 
-  TextAxis *tAxis = new TextAxis(nplots);
+  auto tAxis = new TextAxis(nplots);
   if (nplots == 1) {
     size_t i = 0;
     for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {

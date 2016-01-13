@@ -33,10 +33,8 @@ CompositeDomainMD::CompositeDomainMD(IMDWorkspace_const_sptr ws,
  * Destructor.
  */
 CompositeDomainMD::~CompositeDomainMD() {
-  std::vector<FunctionDomainMD *>::iterator it = m_domains.begin();
-  for (; it != m_domains.end(); ++it) {
-    delete *it;
-  }
+  for (auto domain : m_domains)
+    delete domain;
 }
 
 /// Return i-th domain reset to its start.

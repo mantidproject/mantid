@@ -137,7 +137,7 @@ void LoadLogsForSNSPulsedMagnet::ParseDelayTimeLogFile() {
                 << " Old format = " << m_delayfileinoldformat << std::endl;
 
   // 3. Build data structure
-  unsigned int **delaytimes = new unsigned int *[numpulses];
+  auto delaytimes = new unsigned int *[numpulses];
   for (unsigned int i = 0; i < numpulses; i++)
     delaytimes[i] = new unsigned int[m_numchoppers];
 
@@ -208,8 +208,7 @@ void LoadLogsForSNSPulsedMagnet::ParsePulseIDLogFile() {
   BinaryFile<Pulse> pulseFile(m_pulseidfilename);
   this->m_numpulses = pulseFile.getNumElements();
   pulses = pulseFile.loadAll();
-  for (std::vector<Pulse>::iterator it = pulses->begin(); it != pulses->end();
-       ++it) {
+  for (auto it = pulses->begin(); it != pulses->end(); ++it) {
     this->m_pulseidseconds.push_back(it->seconds);
     this->m_pulseidnanoseconds.push_back(it->nanoseconds);
   }
@@ -223,7 +222,7 @@ void LoadLogsForSNSPulsedMagnet::addProperty() {
   //    std::vector<double> times;
   //    std::vector<double> values;*/
 
-  TimeSeriesProperty<double> **property = new TimeSeriesProperty<double> *[4];
+  auto property = new TimeSeriesProperty<double> *[4];
   for (int i = 0; i < 4; i++) {
     std::stringstream namess;
     namess << "PulsedMagnetDelay" << i;

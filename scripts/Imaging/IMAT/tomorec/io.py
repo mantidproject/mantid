@@ -61,7 +61,7 @@ def _import_skimage_io():
                           "several image formats. Error details: {0}".format(exc))
     return skio
 
-def _make_dirs_if_needed(dirname):
+def make_dirs_if_needed(dirname):
     """
     Makes sure that the directory needed (for example to save a file)
     exists, otherwise creates it.
@@ -74,8 +74,8 @@ def _make_dirs_if_needed(dirname):
         os.makedirs(absname)
 
 #pylint: disable=too-many-arguments
-def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=None,
-                 rescale_intensity=False):
+def write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=None,
+                rescale_intensity=False):
     """
     Output image data, given as a numpy array, to a file, in a given image format.
     Assumes that the output directory exists (must be checked before). The pixel
@@ -132,6 +132,8 @@ def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=No
     # freeimage plugin with use_plugin!
     _USING_PLUGIN_TIFFFILE = True
     if img_format == 'tiff' and _USING_PLUGIN_TIFFFILE:
+        # compression option intentionally not used: compress=6, 3rd party tools have
+        # issues loading compressed tiff files)
         skio.imsave(filename, img_data, plugin='tifffile')
     else:
         skio.imsave(filename, img_data, plugin='freeimage')
@@ -260,13 +262,14 @@ def _read_img(filename, file_extension=None):
 
     return img_arr
 
-def _read_listed_files(files, slice_img_shape, dtype):
+def _read_listed_files(files, slice_img_shape, file_extension, dtype):
     """
     Read several images in a row into a 3d numpy array. Useful when reading all the sample
     images, or all the flat or dark images.
 
     @param files :: list of image file paths given as strings
     @param slice_img_shape :: shape of every image
+    @param file_extension :: file name extension if fixed (to set the expected image format)
     @param dtype :: data type for the output numpy array
 
     Returns:: a 3d data volume with the size of the first (outermost) dimension equal
@@ -276,7 +279,7 @@ def _read_listed_files(files, slice_img_shape, dtype):
     data = np.zeros((len(files), slice_img_shape[0], slice_img_shape[1]), dtype=dtype)
     for idx, in_file in enumerate(files):
         try:
-            data[idx, :, :] = _read_img(in_file, 'tiff')
+            data[idx, :, :] = _read_img(in_file, file_extension)
         except IOError as exc:
             raise RuntimeError("Could not load file {0} from {1}. Error details: {2}".
                                format(ifile, sample_path, str(exc)))
@@ -307,7 +310,7 @@ def get_flat_dark_stack(field_path, field_prefix, file_prefix, file_extension, i
             print("Could not find any flat field / open beam image files in: {0}".
                   format(flat_field_prefix))
         else:
-            imgs_stack = _read_listed_files(files_match, img_shape, data_dtype)
+            imgs_stack = _read_listed_files(files_match, img_shape, file_extension, data_dtype)
             avg = np.mean(imgs_stack, axis=0)
 
     return avg
@@ -367,7 +370,8 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
     files_match = glob.glob(os.path.join(sample_path,
                                          "{0}*.{1}".format(file_prefix, file_extension)))
     if len(files_match) <= 0:
-        raise RuntimeError("Could not find any image files in " + sample_path)
+        raise RuntimeError("Could not find any image files in {0}, with prefix: {1}, extension: {2}".
+                           format(sample_path, file_prefix, file_extension))
 
     files_match.sort(key=_alphanum_key_split)
 
@@ -388,7 +392,7 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
         data_dtype = np.uint16
 
     img_shape = first_img.shape
-    sample_data = _read_listed_files(files_match, img_shape, data_dtype)
+    sample_data = _read_listed_files(files_match, img_shape, file_extension, data_dtype)
 
     flat_avg = get_flat_dark_stack(flat_field_path, flat_field_prefix,
                                    flat_field_prefix, file_extension,
@@ -399,3 +403,111 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
                                    img_shape, data_dtype)
 
     return sample_data, flat_avg, dark_avg
+
+def save_recon_as_vertical_slices(recon_data, output_dir, img_format='tiff',
+                                  name_prefix='out_recon_slice', zero_fill=6):
+    """
+    Save reconstructed volume (3d) into a series of slices along the Z axis (outermost numpy dimension)
+
+    @param data :: data as images/slices stores in numpy array
+    @param output_dir :: where to save the files
+    @param name_prefix :: prefix for the names of the images - an index is appended to this prefix
+    @param zero_fill :: number of zeros to pad the image/slice index number
+    """
+    make_dirs_if_needed(output_dir)
+    min_pix = np.amin(recon_data)
+    max_pix = np.amax(recon_data)
+    for idx in range(0, recon_data.shape[0]):
+        write_image(recon_data[idx, :, :], min_pix, max_pix,
+                    os.path.join(output_dir, name_prefix + str(idx).zfill(zero_fill)),
+                    img_format=img_format, dtype='uint16')
+
+def save_recon_as_horizontal_slices(recon_data, out_horiz_dir, img_format='tiff',
+                                    name_prefix='out_recon_horiz_slice', zero_fill=6):
+    """
+    Save reconstructed volume (3d) into a series of slices along the Y axis (second numpy dimension)
+
+    @param data :: data as images/slices stores in numpy array
+    @param output_dir :: where to save the files
+    @param name_prefix :: prefix for the names of the images throughout the horizontal axis
+    @param zero_fill :: number of zeros to pad the image/slice index number. This index is appended to
+    the prefix
+    """
+    make_dirs_if_needed(out_horiz_dir)
+    for idx in range(0, recon_data.shape[1]):
+        write_image(recon_data[:, idx, :], np.amin(recon_data), np.amax(recon_data),
+                    os.path.join(out_horiz_dir, name_prefix + str(idx).zfill(zero_fill)),
+                    img_format=img_format, dtype='uint16')
+
+def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
+    """
+    A netCDF, for compatibility/easier interoperation with other tools
+
+    @param recon_data :: reconstructed data volume. A sequence of images will be saved from this
+    @param output_dir :: where the outputs are being saved
+    @param filename :: name for the NetCDF file
+    """
+    try:
+        from scipy.io import netcdf_file
+    except ImportError as exc:
+        print " WARNING: could not save NetCDF file. Import error: {0}".format(exc)
+
+    xsize = recon_data.shape[0]
+    ysize = recon_data.shape[1]
+    zsize = recon_data.shape[2]
+
+    nc_path = os.path.join(output_dir, filename)
+    ncfile = netcdf_file(nc_path, 'w')
+    ncfile.createDimension('x', xsize)
+    ncfile.createDimension('y', ysize)
+    ncfile.createDimension('z', zsize)
+    print " Creating netCDF volume data variable"
+    dtype = 'int16'
+    data = ncfile.createVariable('data', np.dtype(dtype).char, ('x','y','z'))
+    print " Data shape: {0}".format(data.shape)
+    print " Loading/assigning data..."
+
+    # handle differences in pixel type
+    save_data = recon_data
+    if recon_data.dtype != dtype:
+        save_data = np.zeros(recon_data.shape, dtype='float32')
+        max_vol = np.amax(recon_data)
+        min_vol = np.amin(recon_data)
+        vol_range = max_vol - min_vol
+        scale_factor = (np.iinfo(dtype).max - np.iinfo(dtype).min) / vol_range
+        save_data = scale_factor * (recon_data - min_vol)
+        save_data = save_data.astype(dtype=dtype)
+
+    data[:, :, :] = save_data[0:xsize, 0:ysize, 0:zsize]
+    print " Closing netCDF file: {0}".format(nc_path)
+    ncfile.close()
+
+def self_save_zipped_scripts(output_path, this_path):
+    """
+    Self-save a python file and its subpackages.
+
+    @param output_path :: path where to save
+    @param this_path :: full path to 'this' file, the file that wants to self-save itself.
+    """
+
+    def _zipdir(path, ziph):
+        # ziph is zipfile handle
+        for root, _, files in os.walk(path):
+            for indiv_file in files:
+                # Write all files, with the exception of the pyc's
+                exclude_extensions = ['pyc']
+                if not indiv_file.endswith(tuple(exclude_extensions)):
+                    ziph.write(os.path.join(root, indiv_file))
+
+    scripts_path = os.path.dirname(this_path)
+
+    make_dirs_if_needed(output_path)
+    print ("Saving myself (reconstruction scripts) from: {0} in: {1}".
+           format(scripts_path, os.path.abspath(output_path)))
+    import zipfile
+    # os.path.join(output_path, ... )
+    RECON_SCRIPTS_PKG_NAME = '0.reconstruction_scripts.zip'
+    with zipfile.ZipFile(os.path.join(output_path, RECON_SCRIPTS_PKG_NAME), 'w',
+                         zipfile.ZIP_DEFLATED) as zip_scripts:
+        # To write just this file: zipscr.write(this_path)
+        _zipdir(scripts_path, zip_scripts)

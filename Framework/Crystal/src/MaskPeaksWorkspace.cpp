@@ -244,8 +244,7 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
     if (x - 1 >= NCOLS || x - 1 < 0 || y - 1 >= NROWS || y - 1 < 0)
       return EMPTY_INT();
     std::string bankName = comp->getName();
-    detid2index_map::const_iterator it =
-        pixel_to_wi.find(findPixelID(bankName, x, y));
+    auto it = pixel_to_wi.find(findPixelID(bankName, x, y));
     if (it == pixel_to_wi.end())
       return EMPTY_INT();
     return (it->second);

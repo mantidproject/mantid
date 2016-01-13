@@ -521,7 +521,7 @@ PlotPeakByLogValue::makeNames() const {
   typedef Poco::StringTokenizer tokenizer;
   tokenizer names(inputList, ";",
                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-  for (tokenizer::Iterator it = names.begin(); it != names.end(); ++it) {
+  for (auto it = names.begin(); it != names.end(); ++it) {
     tokenizer params(*it, ",", tokenizer::TOK_TRIM);
     std::string name = params[0];
     int wi = default_wi;
@@ -574,8 +574,7 @@ PlotPeakByLogValue::makeNames() const {
           boost::dynamic_pointer_cast<API::WorkspaceGroup>(ws);
       if (wsg) {
         std::vector<std::string> wsNames = wsg->getNames();
-        for (std::vector<std::string>::iterator i = wsNames.begin();
-             i != wsNames.end(); ++i) {
+        for (auto i = wsNames.begin(); i != wsNames.end(); ++i) {
           nameList.push_back(InputData(*i, wi, -1, period, start, end));
         }
         continue;
