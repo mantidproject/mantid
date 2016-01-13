@@ -309,29 +309,29 @@ double ReflectometryReductionOne::getAngleForSourceRotation(
     MatrixWorkspace_sptr toConvert, double thetaOut) {
   auto instrument = toConvert->getInstrument();
 
-  //check for source being on the horizon
+  // check for source being on the horizon
   auto instrumentSourcePosition =
       toConvert->getInstrument()->getSource()->getPos();
   auto instrumentUpVector =
       toConvert->getInstrument()->getReferenceFrame()->vecPointingUp();
   bool isSourcePerpendicularToUpVec =
       instrumentSourcePosition.scalar_prod(instrumentUpVector) == 0;
-  //check to see if calculated theta is the same as theta from instrument setup
+  // check to see if calculated theta is the same as theta from instrument setup
   auto instrumentBeamDirection = toConvert->getInstrument()->getBeamDirection();
   double instAngle = std::abs(
       90 - (instrumentUpVector.angle(instrumentBeamDirection) * (180 / M_PI)));
   double theta = std::abs(thetaOut);
   bool isInThetaEqualToOutTheta =
       std::abs(instAngle - theta) < Mantid::Kernel::Tolerance;
-  //the angle by which we rotate the source
+  // the angle by which we rotate the source
   double rotationTheta = 0.0;
   if (isSourcePerpendicularToUpVec /*source hasn't rotated*/
       || !isInThetaEqualToOutTheta /*inTheta != outTheta*/) {
     if (instAngle < theta) {
-      //rotate clockwise
+      // rotate clockwise
       rotationTheta = theta - (instAngle);
     } else {
-      //rotate anticlockwise
+      // rotate anticlockwise
       rotationTheta = -1 * (instAngle - theta);
     }
   }
@@ -687,8 +687,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
           stitchingDelta.is_initialized()) {
         const std::vector<double> params =
             boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-                stitchingEnd.get())
-                .convert_to_container<std::vector<double>>();
+                stitchingEnd.get()).convert_to_container<std::vector<double>>();
         alg->setProperty("Params", params);
       } else if (stitchingDelta.is_initialized()) {
         alg->setProperty("Params",
