@@ -4824,10 +4824,10 @@ void ApplicationWindow::openProjectFolder(std::string lines,
       TSVSerialiser iws(*it);
       if (iws.selectLine("WorkspaceName")) {
         std::string wsName = iws.asString(1);
-        MantidInstrumentWindow *iw =
-            (MantidInstrumentWindow *)mantidUI->getInstrumentView(QString::fromStdString(wsName));
-		if (iw) {
-			iw->loadFromProject(*it, this, fileVersion);
+        MantidInstrumentWindow *iw = dynamic_cast<MantidInstrumentWindow *>(
+            mantidUI->getInstrumentView(QString::fromStdString(wsName)));
+        if (iw) {
+          iw->loadFromProject(*it, this, fileVersion);
 		}
       }
     }
