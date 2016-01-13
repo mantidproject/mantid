@@ -143,7 +143,7 @@ namespace IDA
         return;
       QString pyInput = "from mantidplot import newTiledWindow\n";
       pyInput += "newTiledWindow(sources=[";
-      for (int index = 0; index < nPlots; ++index) {
+      for (size_t index = 0; index < nPlots; ++index) {
         if (index > 0) {
           pyInput += ",";
         }
