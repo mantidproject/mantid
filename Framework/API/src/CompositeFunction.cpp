@@ -419,8 +419,7 @@ void CompositeFunction::removeFunction(size_t i) {
   }
 
   // Shift down the function indeces for parameters
-  for (std::vector<size_t>::iterator it = m_IFunction.begin();
-       it != m_IFunction.end();) {
+  for (auto it = m_IFunction.begin(); it != m_IFunction.end();) {
 
     if (*it == i) {
       it = m_IFunction.erase(it);
@@ -475,8 +474,7 @@ void CompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
   // Modify function indeces: The new function may have different number of
   // parameters
   {
-    std::vector<size_t>::iterator itFun =
-        std::find(m_IFunction.begin(), m_IFunction.end(), i);
+    auto itFun = std::find(m_IFunction.begin(), m_IFunction.end(), i);
     if (itFun != m_IFunction.end()) // functions must have at least 1 parameter
     {
       if (np_old > np_new) {

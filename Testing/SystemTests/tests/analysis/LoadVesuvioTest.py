@@ -4,6 +4,7 @@ import stresstesting
 from mantid.api import MatrixWorkspace, mtd
 import mantid.simpleapi as ms
 
+import math
 import unittest
 
 DIFF_PLACES = 12
@@ -219,30 +220,32 @@ class VesuvioTests(unittest.TestCase):
     def _verify_correct_detector_parameters(self, detector, forward_scatter, diff_mode):
         # resolution
         tol = 1e-04
+        # using decimal 'places' keyword, as delta= is not supported on Python < 2.7
+        tol_places = round(-math.log10(tol), ndigits=0)
         sigma_l1 = detector.getNumberParameter("sigma_l1")[0]
         sigma_l2 = detector.getNumberParameter("sigma_l2")[0]
         sigma_tof = detector.getNumberParameter("sigma_tof")[0]
         sigma_theta = detector.getNumberParameter("sigma_theta")[0]
         sigma_gauss = detector.getNumberParameter("sigma_gauss")[0]
         hwhm_lorentz = detector.getNumberParameter("hwhm_lorentz")[0]
-        self.assertAlmostEqual(sigma_l1, 0.021, delta=tol)
-        self.assertAlmostEqual(sigma_l2, 0.023, delta=tol)
-        self.assertAlmostEqual(sigma_tof, 0.370, delta=tol)
+        self.assertAlmostEqual(sigma_l1, 0.021, places=tol_places)
+        self.assertAlmostEqual(sigma_l2, 0.023, places=tol_places)
+        self.assertAlmostEqual(sigma_tof, 0.370, places=tol_places)
         if forward_scatter:
-            self.assertAlmostEqual(sigma_theta, 0.040, delta=tol)
+            self.assertAlmostEqual(sigma_theta, 0.040, places=tol_places)
             if diff_mode == "DoubleDifference":
                 raise ValueError("Double difference is not compataible with forward scattering spectra")
             else:
-                self.assertAlmostEqual(sigma_gauss, 73, delta=tol)
-                self.assertAlmostEqual(hwhm_lorentz, 24, delta=tol)
+                self.assertAlmostEqual(sigma_gauss, 73, places=tol_places)
+                self.assertAlmostEqual(hwhm_lorentz, 24, places=tol_places)
         else:
-            self.assertAlmostEqual(sigma_theta, 0.0227, delta=tol)
+            self.assertAlmostEqual(sigma_theta, 0.0227, places=tol_places)
             if diff_mode == "DoubleDifference":
-                self.assertAlmostEqual(sigma_gauss, 88.7, delta=tol)
-                self.assertAlmostEqual(hwhm_lorentz, 40.3, delta=tol)
+                self.assertAlmostEqual(sigma_gauss, 88.7, places=tol_places)
+                self.assertAlmostEqual(hwhm_lorentz, 40.3, places=tol_places)
             else:
-                self.assertAlmostEqual(sigma_gauss, 52.3, delta=tol)
-                self.assertAlmostEqual(hwhm_lorentz, 141.2, delta=tol)
+                self.assertAlmostEqual(sigma_gauss, 52.3, places=tol_places)
+                self.assertAlmostEqual(hwhm_lorentz, 141.2, places=tol_places)
 
     def _run_load(self, runs, spectra, diff_opt, ip_file="", sum_runs=False):
         ms.LoadVesuvio(Filename=runs,OutputWorkspace=self.ws_name,

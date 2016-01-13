@@ -196,7 +196,7 @@ def grab_preproc_options(args):
         pre_config.crop_coords = ast.literal_eval(args.air_region)
 
     if args.median_filter_size:
-        if not args.num_iter.isdigit():
+        if not args.median_filter.isdigit():
             raise RuntimeError("The median filter size/width must be an integer")
         pre_config.median_filter_size = args.median_filter_size
 
@@ -253,8 +253,8 @@ def main_tomo_rec():
     # distributions, as found for example on rhel6
     vers = sys.version_info
     if vers < (2,7,0):
-        raise("Not running this test as it requires Python >= 2.7. Version found: {0}".
-              format(vers))
+        raise RuntimeErrorn("Not running this test as it requires Python >= 2.7. Version found: {0}".
+                            format(vers))
 
     import inspect
 

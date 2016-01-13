@@ -146,7 +146,7 @@ class PostProcConfig(object):
             mystr += "Output path (absolute): {0}\n".format(os.path.abspath(self.output_dir))
         else:
             mystr += "Output path (absolute): {0}\n".format('cannot find because the input '
-                                                           'path has not been set')
+                                                            'path has not been set')
         mystr += "Circular mask: {0}\n".format(self.circular_mask)
         mystr += "Cut-off on reconstructed volume: {0}\n".format(self.cut_off_level)
         mystr += "Gaussian filter: {0}\n".format(self.gaussian_filter_par)

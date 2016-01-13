@@ -72,20 +72,19 @@ void CrossCorrelate::exec() {
 
   // Now check if the range between x_min and x_max is valid
   const MantidVec &referenceX = inputWS->readX(index_ref);
-  MantidVec::const_iterator minIt =
-      std::find_if(referenceX.begin(), referenceX.end(),
-                   std::bind2nd(std::greater<double>(), xmin));
-  if (minIt == referenceX.end())
+  auto minIt = std::find_if(referenceX.cbegin(), referenceX.cend(),
+                            std::bind2nd(std::greater<double>(), xmin));
+  if (minIt == referenceX.cend())
     throw std::runtime_error("No daWorkspaceIndexMaxta above XMin");
-  MantidVec::const_iterator maxIt = std::find_if(
-      minIt, referenceX.end(), std::bind2nd(std::greater<double>(), xmax));
+  auto maxIt = std::find_if(minIt, referenceX.cend(),
+                            std::bind2nd(std::greater<double>(), xmax));
   if (minIt == maxIt)
     throw std::runtime_error("Range is not valid");
 
   MantidVec::difference_type difminIt =
-      std::distance(referenceX.begin(), minIt);
+      std::distance(referenceX.cbegin(), minIt);
   MantidVec::difference_type difmaxIt =
-      std::distance(referenceX.begin(), maxIt);
+      std::distance(referenceX.cbegin(), maxIt);
 
   // Now loop on the spectra in the range spectra_min and spectra_max and get
   // valid spectra
@@ -128,10 +127,10 @@ void CrossCorrelate::exec() {
   mess << "min max" << refX.front() << " " << refX.back();
   g_log.information(mess.str());
   mess.str("");
-  std::copy(referenceY.begin() + difminIt, referenceY.begin() + (difmaxIt - 1),
-            refY.begin());
-  std::copy(referenceE.begin() + difminIt, referenceE.begin() + (difmaxIt - 1),
-            refE.begin());
+  std::copy(referenceY.cbegin() + difminIt,
+            referenceY.cbegin() + (difmaxIt - 1), refY.begin());
+  std::copy(referenceE.cbegin() + difminIt,
+            referenceE.cbegin() + (difmaxIt - 1), refE.begin());
 
   // Now start the real stuff
   // Create a 2DWorkspace that will hold the result
@@ -142,13 +141,13 @@ void CrossCorrelate::exec() {
 
   // Calculate the mean value of the reference spectrum and associated error
   // squared
-  double refMean = std::accumulate(refY.begin(), refY.end(), 0.0);
-  double refMeanE2 = std::accumulate(refE.begin(), refE.end(), 0.0,
+  double refMean = std::accumulate(refY.cbegin(), refY.cend(), 0.0);
+  double refMeanE2 = std::accumulate(refE.cbegin(), refE.cend(), 0.0,
                                      VectorHelper::SumSquares<double>());
   refMean /= static_cast<double>(nY);
   refMeanE2 /= static_cast<double>(nY * nY);
-  std::vector<double>::iterator itY = refY.begin();
-  std::vector<double>::iterator itE = refE.begin();
+  auto itY = refY.begin();
+  auto itE = refE.begin();
 
   double refVar = 0.0, refVarE = 0.0;
   for (; itY != refY.end(); ++itY, ++itE) {

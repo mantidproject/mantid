@@ -176,8 +176,8 @@ std::string Algebra::writeMCNPX() const
   std::ostringstream cx;
   for (int i = 0; i < lenOut; i++) {
     if (islower(Out[i]) || isupper(Out[i])) {
-      std::map<int, std::string>::const_iterator vc = find_if(
-          SurfMap.begin(), SurfMap.end(),
+      auto vc = find_if(
+          SurfMap.cbegin(), SurfMap.cend(),
           MapSupport::valEqual<int, std::string>(std::string(1, Out[i])));
       if (vc == SurfMap.end()) {
         std::cout << "SurfMap size == " << SurfMap.size() << std::endl;
@@ -246,7 +246,7 @@ int Algebra::setFunctionObjStr(const std::string &A)
           N *= -1;
           neg = 1;
         }
-        std::map<int, std::string>::iterator mc = SurfMap.find(N);
+        auto mc = SurfMap.find(N);
         if (mc == SurfMap.end()) {
           if (!bigFlag) {
             SurfMap[N] = nLiteral;

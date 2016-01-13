@@ -535,7 +535,7 @@ void TOPAZLiveEventDataListener::appendEvent(
 {
   // It'd be nice to use operator[], but we might end up inserting a value....
   // Have to use find() instead.
-  detid2index_map::iterator it = m_indexMap.find(pixelId);
+  auto it = m_indexMap.find(pixelId);
   if (it != m_indexMap.end()) {
     std::size_t workspaceIndex = it->second;
     Mantid::DataObjects::TofEvent event(tof, pulseTime);

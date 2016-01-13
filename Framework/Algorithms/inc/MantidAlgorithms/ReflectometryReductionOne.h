@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE_H_
 
 #include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"

@@ -316,7 +316,7 @@ const void *PeakColumn::void_pointer(size_t index) const {
 }
 
 PeakColumn *PeakColumn::clone() const {
-  PeakColumn *temp = new PeakColumn(this->m_peaks, this->m_name);
+  auto temp = new PeakColumn(this->m_peaks, this->m_name);
   return temp;
 }
 

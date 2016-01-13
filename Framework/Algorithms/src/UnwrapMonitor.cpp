@@ -370,16 +370,15 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
   }
   if (rangeBounds[0] != -1 && rangeBounds[1] > 0) {
     // Now append the lower range
-    MantidVec::const_iterator YStart = YIn.begin();
-    MantidVec::const_iterator EStart = EIn.begin();
+    auto YStart = YIn.begin();
+    auto EStart = EIn.begin();
     Y.insert(Y.end(), YStart + rangeBounds[0], YStart + rangeBounds[1]);
     E.insert(E.end(), EStart + rangeBounds[0], EStart + rangeBounds[1]);
     // Propagate masking, if necessary
     if (m_inputWS->hasMaskedBins(spectrum)) {
       const MatrixWorkspace::MaskList &inputMasks =
           m_inputWS->maskedBins(spectrum);
-      MatrixWorkspace::MaskList::const_iterator it;
-      for (it = inputMasks.begin(); it != inputMasks.end(); ++it) {
+      for (auto it = inputMasks.cbegin(); it != inputMasks.cend(); ++it) {
         const int maskIndex = static_cast<int>((*it).first);
         if (maskIndex >= rangeBounds[0] && maskIndex < rangeBounds[1])
           tempWS->flagMasked(spectrum, maskIndex - rangeBounds[0],

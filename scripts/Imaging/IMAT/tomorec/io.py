@@ -132,7 +132,9 @@ def write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=Non
     # freeimage plugin with use_plugin!
     _USING_PLUGIN_TIFFFILE = True
     if img_format == 'tiff' and _USING_PLUGIN_TIFFFILE:
-        skio.imsave(filename, img_data, plugin='tifffile', compress=6)
+        # compression option intentionally not used: compress=6, 3rd party tools have
+        # issues loading compressed tiff files)
+        skio.imsave(filename, img_data, plugin='tifffile')
     else:
         skio.imsave(filename, img_data, plugin='freeimage')
 
