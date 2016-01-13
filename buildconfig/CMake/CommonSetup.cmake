@@ -85,6 +85,8 @@ endif()
 
 find_package ( PythonInterp )
 
+find_package ( OpenSSL REQUIRED )
+
 ###########################################################################
 # Look for Git. Used for version headers - faked if not found.
 # Also makes sure our commit hooks are linked in the right place.

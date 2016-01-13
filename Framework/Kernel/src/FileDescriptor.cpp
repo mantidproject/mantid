@@ -75,7 +75,7 @@ bool FileDescriptor::isAscii(std::istream &data, const size_t nbytes) {
 */
 bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
   // read the data and reset the seek index back to the beginning
-  char *data = new char[nbytes];
+  auto data = new char[nbytes];
   char *pend = &data[fread(data, 1, nbytes, file)];
   int retval = fseek(file, 0, SEEK_SET);
   if (retval < 0)

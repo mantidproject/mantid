@@ -48,8 +48,7 @@ SaveToSNSHistogramNexus::SaveToSNSHistogramNexus()
 void SaveToSNSHistogramNexus::init() {
   // Declare required parameters, filename with ext {.nx,.nx5,xml} and input
   // workspac
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
+  std::initializer_list<std::string> exts = {".nxs"};
 
   declareProperty(
       new FileProperty("InputFilename", "", FileProperty::Load, exts),
@@ -274,7 +273,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
   double saveTime = 0;
 
   // Make a buffer of floats will all the counts in that bank.
-  float *data =
+  auto data =
       new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];
 
   // Only allocate an array for errors if it is needed

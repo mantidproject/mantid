@@ -142,7 +142,9 @@ bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
  *  @param file_name        Name of the NeXus file to load
  *  @param ev_ws_name       Name of the event workspace to create
  *  @param md_ws_name       Name of the MD workspace to create
- *  @param minQ             The smallest absolute value of any component
+ *  @param modQ             The smallest absolute value of any component
+ *                          of Q to include.
+ *  @param minQ             The smallest value of any component
  *                          of Q to include.
  *  @param maxQ             The largest absolute value of any component
  *                          of Q to include. When ConvertToMD is called,
@@ -163,6 +165,7 @@ bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
 bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
                                          const std::string & ev_ws_name,
                                          const std::string & md_ws_name,
+                                         const double        modQ,
                                          const double        minQ,
                                          const double        maxQ,
                                          const bool          do_lorentz_corr,
@@ -215,6 +218,7 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
     alg->setProperty("QConversionScales","Q in A^-1");
     alg->setProperty("Q3DFrames","Q_sample");
     alg->setProperty("LorentzCorrection",do_lorentz_corr);
+    alg->setProperty("AbsMinQ", modQ);
     alg->setProperty("MinValues",min_str.str());
     alg->setProperty("MaxValues",max_str.str());
     alg->setProperty("SplitInto","2");
@@ -256,7 +260,8 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
  *                        MD box to be a possible peak.  If this
  *                        is 10000, only boxes with intensity 10000 times
  *                        the average intensity will be considered.
- *
+ *  @param minQPeaks   Filter with ModQ min
+ *  @param maxQPeaks  Filter with ModQmax
  *  @return true if FindPeaksMD completed successfully.
  */
 bool MantidEVWorker::findPeaks( const std::string & ev_ws_name,
@@ -264,7 +269,9 @@ bool MantidEVWorker::findPeaks( const std::string & ev_ws_name,
                                 const std::string & peaks_ws_name,
                                       double        max_abc,
                                       size_t        num_to_find,
-                                      double        min_intensity )
+                                      double        min_intensity,
+                                      double minQPeaks,
+                                      double maxQPeaks)
 {
   try
   {
@@ -313,6 +320,29 @@ bool MantidEVWorker::findPeaks( const std::string & ev_ws_name,
 		  else
 			peak.setMonitorCount( proton_charge );
 		}
+
+		if (minQPeaks != Mantid::EMPTY_DBL())
+		{
+      IAlgorithm_sptr filter_alg = AlgorithmManager::Instance().create("FilterPeaks");
+      filter_alg->setProperty("InputWorkspace", peaks_ws );
+      filter_alg->setProperty("FilterVariable", "QMod" );
+      filter_alg->setProperty("FilterValue", minQPeaks );
+      filter_alg->setProperty("Operator", ">" );
+      filter_alg->setPropertyValue("OutputWorkspace", peaks_ws_name);
+      filter_alg->execute();
+      peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+		}
+    if (maxQPeaks != Mantid::EMPTY_DBL())
+    {
+      IAlgorithm_sptr filter_alg = AlgorithmManager::Instance().create("FilterPeaks");
+      filter_alg->setProperty("InputWorkspace", peaks_ws );
+      filter_alg->setProperty("FilterVariable", "QMod" );
+      filter_alg->setProperty("FilterValue", maxQPeaks );
+      filter_alg->setProperty("Operator", "<" );
+      filter_alg->setPropertyValue("OutputWorkspace", peaks_ws_name );
+      filter_alg->execute();
+      peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+    }
       return true;
     }
   }

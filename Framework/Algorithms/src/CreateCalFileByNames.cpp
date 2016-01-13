@@ -80,8 +80,7 @@ void CreateCalFileByNames::exec() {
   // Assign incremental number to each group
   std::map<std::string, int> group_map;
   int index = 0;
-  for (std::vector<std::string>::iterator it = vgroups.begin();
-       it != vgroups.end(); ++it) {
+  for (auto it = vgroups.begin(); it != vgroups.end(); ++it) {
     boost::trim(*it);
     group_map[(*it)] = ++index;
   }
@@ -212,7 +211,7 @@ void CreateCalFileByNames::saveGroupingFile(const std::string &filename,
         continue;
       std::istringstream istr(str);
       istr >> number >> udet >> offset >> select >> group;
-      instrcalmap::const_iterator it = instrcalib.find(udet);
+      auto it = instrcalib.find(udet);
       if (it == instrcalib.end()) // Not found, don't assign a group
         group = 0;
       else
@@ -222,8 +221,7 @@ void CreateCalFileByNames::saveGroupingFile(const std::string &filename,
     }
   } else //
   {
-    instrcalmap::const_iterator it = instrcalib.begin();
-    for (; it != instrcalib.end(); ++it)
+    for (auto it = instrcalib.cbegin(); it != instrcalib.cend(); ++it)
       writeCalEntry(outfile, (*it).first, ((*it).second).first, 0.0, 1,
                     ((*it).second).second);
   }

@@ -106,9 +106,9 @@ void GroupDetectors::exec() {
     firstSpectrum->addDetectorIDs(spec->getDetectorIDs());
 
     // Add up all the Y spectra and store the result in the first one
-    MantidVec::iterator fEit = firstSpectrum->dataE().begin();
-    MantidVec::iterator Yit = spec->dataY().begin();
-    MantidVec::iterator Eit = spec->dataE().begin();
+    auto fEit = firstSpectrum->dataE().begin();
+    auto Yit = spec->dataY().begin();
+    auto Eit = spec->dataE().begin();
     for (auto fYit = firstY.begin(); fYit != firstY.end();
          ++fYit, ++fEit, ++Yit, ++Eit) {
       *fYit += *Yit;

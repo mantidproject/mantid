@@ -34,6 +34,10 @@ class EnggFitPeaks(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
+        peaks_grp = 'Peaks to fit'
+        self.setPropertyGroup('ExpectedPeaks', peaks_grp)
+        self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
+
         self.declareProperty('OutParametersTable', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the fitted values calculated by '
                              'this algorithm (Difc and Zero parameters) for GSAS. '
@@ -55,8 +59,8 @@ class EnggFitPeaks(PythonAlgorithm):
         import EnggUtils
 
         # Get peaks in dSpacing from file
-        expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                       self.getProperty('ExpectedPeaks').value)
+        expectedPeaksD = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                          self.getProperty('ExpectedPeaks').value)
 
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
@@ -87,11 +91,10 @@ class EnggFitPeaks(PythonAlgorithm):
 
     def _getDefaultPeaks(self):
         """ Gets default peaks for Engg algorithm. Values from CeO2 """
-        defaultPeaks = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415,
-                        1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556,
-                        0.8252, 0.8158, 0.7811]
 
-        return defaultPeaks
+        import EnggUtils
+
+        return EnggUtils.default_ceria_expected_peaks()
 
     def _produceOutputs(self, difc, zero):
         """
@@ -113,9 +116,34 @@ class EnggFitPeaks(PythonAlgorithm):
             EnggUtils.generateOutputParTable(tblName, difc, zero)
             self.log().information("Output parameters added into a table workspace: %s" % tblName)
 
+    def _estimate_start_end_fitting_range(self, centre, width):
+        """
+        Try to predict a fit window for the peak (using magic numbers). The heuristic
+        +-COEF_LEFT/RIGHT sometimes produces ranges that are too narrow and contain too few
+        samples (one or a handful) for the fitting to run correctly. A minimum is enforced.
+
+        @Returns :: a tuple with the range (start and end values) for fitting a peak.
+        """
+        # Magic numbers, approx. represanting the shape/proportions of a B2BExponential peak
+        COEF_LEFT = 2
+        COEF_RIGHT = 3
+        MIN_RANGE_WIDTH = 175
+
+        startx = centre - (width * COEF_LEFT)
+        endx = centre + (width * COEF_RIGHT)
+        # force startx-endx > 175, etc
+        x_diff = endx-startx
+        min_width = MIN_RANGE_WIDTH
+        if x_diff < min_width:
+            inc = (min_width-x_diff)/2
+            endx = endx + inc
+            startx = startx - inc
+
+        return (startx, endx)
+
     def _fitAllPeaks(self, inWS, wsIndex, peaks, peaksTableName):
         """
-        This method is the core of EnggFitPeaks. Ittries to fit as many peaks as there are in the list of
+        This method is the core of EnggFitPeaks. It tries to fit as many peaks as there are in the list of
         expected peaks passed to the algorithm.
 
         The parameters from the (Gaussian) peaks fitted by FindPeaks elsewhere (before calling this method)
@@ -170,19 +198,20 @@ class EnggFitPeaks(PythonAlgorithm):
             peak.setParameter('S', sigma)
             peak.setParameter('I', intensity)
 
-            # Magic numbers
-            COEF_LEFT = 2
-            COEF_RIGHT = 3
-
             # Fit using predicted window and a proper function with approximated initital values
             fitAlg = self.createChildAlgorithm('Fit')
-            fitAlg.setProperty('Function', 'name=LinearBackground;' + str(peak))
+            fit_function = 'name=LinearBackground;{0}'.format(peak)
+            fitAlg.setProperty('Function', fit_function)
             fitAlg.setProperty('InputWorkspace', inWS)
             fitAlg.setProperty('WorkspaceIndex', wsIndex)
             fitAlg.setProperty('CreateOutput', True)
-            # Try to predict a fit window for the peak (using magic numbers)
-            fitAlg.setProperty('StartX', centre - (width * COEF_LEFT))
-            fitAlg.setProperty('EndX', centre + (width * COEF_RIGHT))
+
+            (startx, endx) = self._estimate_start_end_fitting_range(centre, width)
+            fitAlg.setProperty('StartX', startx)
+            fitAlg.setProperty('EndX', endx)
+            self.log().debug("Fitting for peak expectd in (d-spacing): {0}, Fitting peak function: "
+                             "{1}, with startx: {2}, endx: {3}".
+                             format(peaks[1][i], fit_function, startx, endx))
             fitAlg.execute()
             paramTable = fitAlg.getProperty('OutputParameters').value
 

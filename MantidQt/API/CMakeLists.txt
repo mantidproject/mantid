@@ -82,6 +82,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/DllOption.h
 	inc/MantidQtAPI/FileDialogHandler.h
 	inc/MantidQtAPI/GraphOptions.h
+    inc/MantidQtAPI/DistributionOptions.h
 	inc/MantidQtAPI/HelpWindow.h
 	inc/MantidQtAPI/InterfaceFactory.h
 	inc/MantidQtAPI/InterfaceManager.h

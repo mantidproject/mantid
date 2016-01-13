@@ -77,7 +77,6 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Add ssl dependency
-find_package ( OpenSSL REQUIRED )
 include_directories ( ${OPENSSL_INCLUDE_DIR} )
 add_definitions ( -DWITH_OPENSSL -DWITH_NONAMESPACES )
 

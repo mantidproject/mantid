@@ -189,14 +189,14 @@ void MergeRuns::buildAdditionTables() {
         // Didn't find it. Try to use the LHS map.
 
         // First, we have to get the (single) detector ID of the RHS
-        std::set<detid_t>::iterator inDets_it = inDets.begin();
+        auto inDets_it = inDets.begin();
         detid_t rhs_detector_ID = *inDets_it;
 
         // Now we use the LHS map to find it. This only works if both the lhs
         // and rhs have 1 detector per pixel
         detid2index_map::const_iterator map_it =
             lhs_det_to_wi.find(rhs_detector_ID);
-        if (map_it != lhs_det_to_wi.end()) {
+        if (map_it != lhs_det_to_wi.cend()) {
           outWI = static_cast<int>(map_it->second); // This is the workspace
                                                     // index in the LHS that
                                                     // matched rhs_detector_ID

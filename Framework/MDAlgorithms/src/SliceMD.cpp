@@ -48,10 +48,9 @@ void SliceMD::init() {
                                                    Direction::Output),
                   "Name of the output MDEventWorkspace.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
   declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::OptionalSave, exts),
+      new FileProperty("OutputFilename", "", FileProperty::OptionalSave,
+                       {".nxs"}),
       "Optional: Specify a NeXus file to write if you want the output "
       "workspace to be file-backed.");
 
@@ -197,7 +196,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (fileBackedWS)
     API::IMDNode::sortObjByID(boxes);
 
-  Progress *prog = new Progress(this, 0.0, 1.0, boxes.size());
+  auto prog = new Progress(this, 0.0, 1.0, boxes.size());
 
   // The root of the output workspace
   MDBoxBase<OMDE, ond> *outRootBox = outWS->getBox();
@@ -217,9 +216,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       const std::vector<MDE> &events = box->getConstEvents();
 
-      typename std::vector<MDE>::const_iterator it = events.begin();
-      typename std::vector<MDE>::const_iterator it_end = events.end();
-      for (; it != it_end; it++) {
+      for (auto it = events.cbegin(); it != events.cend(); ++it) {
         // Cache the center of the event (again for speed)
         const coord_t *inCenter = it->getCenter();
 

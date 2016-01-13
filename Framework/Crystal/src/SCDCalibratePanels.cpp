@@ -183,8 +183,7 @@ void SCDCalibratePanels::CalculateGroups(
   Groups.clear();
 
   if (Grouping == "OnePanelPerGroup") {
-    for (set<string>::iterator it = AllBankNames.begin();
-         it != AllBankNames.end(); ++it) {
+    for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
       string bankName = (*it);
       vector<string> vbankName;
       vbankName.push_back(bankName);
@@ -194,8 +193,7 @@ void SCDCalibratePanels::CalculateGroups(
   } else if (Grouping == "AllPanelsInOneGroup") {
     vector<string> vbankName;
 
-    for (set<string>::iterator it = AllBankNames.begin();
-         it != AllBankNames.end(); ++it) {
+    for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
       string bankName = (*it);
 
       vbankName.push_back(bankName);
@@ -319,8 +317,7 @@ boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
   boost::shared_ptr<const ParameterMap> pmap0 = instrument->getParameterMap();
   boost::shared_ptr<ParameterMap> pmap1(new ParameterMap());
 
-  for (vector<string>::iterator vit = AllBankNames.begin();
-       vit != AllBankNames.end(); ++vit) {
+  for (auto vit = AllBankNames.begin(); vit != AllBankNames.end(); ++vit) {
     string bankName = (*vit);
     updateBankParams(instrument->getComponentByName(bankName), pmap1, pmap0);
   }
@@ -1408,17 +1405,13 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("InitialTimeOffset", PREPROC);
 
   // ---------- outputs
-  vector<string> exts;
-  exts.push_back(".DetCal");
-  exts.push_back(".Det_Cal");
-  declareProperty(
-      new FileProperty("DetCalFilename", "", FileProperty::OptionalSave, exts),
-      "Path to an ISAW-style .detcal file to save.");
+  declareProperty(new FileProperty("DetCalFilename", "",
+                                   FileProperty::OptionalSave,
+                                   {".DetCal", ".Det_Cal"}),
+                  "Path to an ISAW-style .detcal file to save.");
 
-  vector<string> exts1;
-  exts1.push_back(".xml");
   declareProperty(
-      new FileProperty("XmlFilename", "", FileProperty::OptionalSave, exts1),
+      new FileProperty("XmlFilename", "", FileProperty::OptionalSave, {".xml"}),
       "Path to an Mantid .xml description(for LoadParameterFile) file to "
       "save.");
 
@@ -1650,8 +1643,7 @@ void SCDCalibratePanels::FixUpBankParameterMap(
     boost::shared_ptr<const ParameterMap> const pmapOld, bool RotCenters) {
   boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
 
-  for (vector<string>::const_iterator it1 = bankNames.begin();
-       it1 != bankNames.end(); ++it1) {
+  for (auto it1 = bankNames.cbegin(); it1 != bankNames.cend(); ++it1) {
 
     const string bankName = (*it1);
 
@@ -1737,10 +1729,8 @@ void SCDCalibratePanels::saveXmlFile(
   ParameterMap_sptr pmap = instrument->getParameterMap();
 
   // write out the detector banks
-  for (vector<vector<string>>::const_iterator it = Groups.begin();
-       it != Groups.end(); ++it) {
-    for (vector<string>::const_iterator it1 = (*it).begin(); it1 != (*it).end();
-         ++it1) {
+  for (auto it = Groups.begin(); it != Groups.end(); ++it) {
+    for (auto it1 = (*it).begin(); it1 != (*it).end(); ++it1) {
       string bankName = (*it1);
 
       oss3 << "<component-link name=\"" << bankName << "\">" << endl;

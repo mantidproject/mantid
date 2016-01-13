@@ -177,13 +177,9 @@ void AlignDetectors::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
-  std::vector<std::string> exts;
-  exts.push_back(".h5");
-  exts.push_back(".hd5");
-  exts.push_back(".hdf");
-  exts.push_back(".cal");
   declareProperty(
-      new FileProperty("CalibrationFile", "", FileProperty::OptionalLoad, exts),
+      new FileProperty("CalibrationFile", "", FileProperty::OptionalLoad,
+                       {".h5", ".hd5", ".hdf", ".cal"}),
       "Optional: The .cal file containing the position correction factors. "
       "Either this or OffsetsWorkspace needs to be specified.");
 

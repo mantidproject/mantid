@@ -57,8 +57,13 @@ if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
   set BUILDPKG=yes
 )
 
+:: BUILD_PACKAGE can be provided as a job parameter on the pull requests
 if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
-  set BUILDPKG=no
+  if not "%BUILD_PACKAGE%" == "%BUILD_PACKAGE:true=%" (
+    set BUILDPKG=yes
+  ) else (
+    set BUILDPKG=no
+  )
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
