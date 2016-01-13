@@ -13,6 +13,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
