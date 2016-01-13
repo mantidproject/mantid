@@ -287,7 +287,7 @@ protected:
   mutable int m_peakLabelPrecision;
   mutable bool m_showPeakRows;        ///< flag to show peak row index
   mutable bool m_showPeakLabels;     ///< flag to show peak hkl labels
-  mutable bool m_showPeakRelativeIntensity;     ///< flag to show peak hkl labels
+  bool m_showPeakRelativeIntensity;     ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle;     ///< index of a default PeakMarker2D style to use with a new PeakOverlay.
 
 private:

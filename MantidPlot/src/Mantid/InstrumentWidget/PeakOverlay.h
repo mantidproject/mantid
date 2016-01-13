@@ -53,6 +53,8 @@ public:
     setPeaksWorkspace(pws);
   }
 
+  virtual ~AbstractIntensityScale() {}
+
   void
   setPeaksWorkspace(const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
 
@@ -76,7 +78,7 @@ protected:
   /// Returns the base style unmodified.
   PeakMarker2D::Style
   getScaledMarker(double intensity,
-                  const PeakMarker2D::Style &baseStyle) const {
+                  const PeakMarker2D::Style &baseStyle) const override {
     UNUSED_ARG(intensity);
 
     return baseStyle;
@@ -93,7 +95,8 @@ public:
 
 protected:
   PeakMarker2D::Style
-  getScaledMarker(double intensity, const PeakMarker2D::Style &baseStyle) const;
+  getScaledMarker(double intensity,
+                  const PeakMarker2D::Style &baseStyle) const override;
 
 private:
   int getIntensityLevel(double intensity) const;
