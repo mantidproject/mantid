@@ -97,15 +97,16 @@ void MantidSurfacePlotDialog::initButtons() {
 
 /**
  * Populate the log combo box with all log names that
- * have single numeric value per workspace
+ * have single numeric value per workspace (and occur
+ * in every workspace)
  */
 void MantidSurfacePlotDialog::populateLogComboBox() {
   // First item should be "Workspace index"
   m_logSelector->addItem(WORKSPACE_INDEX);
 
-  // We have been given a list of names of MatrixWorkspaces (m_wsNames)
-  // Get the log names out of all of them
-  std::set<std::string> logNames;
+  // Create a table of all single-value numeric log names versus
+  // how many workspaces they appear in
+  std::map<std::string, int> logCounts;
   for (auto wsName : m_wsNames) {
     auto ws = m_mantidUI->getWorkspace(wsName);
     if (ws) {
@@ -115,18 +116,27 @@ void MantidSurfacePlotDialog::populateLogComboBox() {
         const std::vector<Mantid::Kernel::Property *> &logData =
             ei->run().getLogData();
         for (auto log : logData) {
-          // If this is a single-value numeric log, add it to the list
+          // If this is a single-value numeric log, add it to the list of counts
           if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
               dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
-            logNames.insert(log->name());
+            const std::string name = log->name();
+            if (logCounts.find(name) != logCounts.end()) {
+              logCounts[name]++;
+            } else {
+              logCounts[name] = 1;
+            }
           }
         }
       }
     }
   }
-  // Add the log names to the combo box
-  for (std::string name : logNames) {
-    m_logSelector->addItem(name.c_str());
+
+  // Add the log names to the combo box if they appear in all workspaces
+  const int nWorkspaces = m_wsNames.size();
+  for (auto logCount : logCounts) {
+    if (logCount.second == nWorkspaces) {
+      m_logSelector->addItem(logCount.first.c_str());
+    }
   }
 
   // Add "Custom" at the end of the list
