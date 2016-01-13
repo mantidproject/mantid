@@ -1126,8 +1126,7 @@ void ConvFit::plotGuess() {
 
 
 /**
- * Runs the single fit algorithm after the workspace has been extended
- * @param error :: if the resolution extension algorithm was successful
+ * Runs the single fit algorithm
  */
 void ConvFit::singleFit() {
   // disconnect signal for single fit
