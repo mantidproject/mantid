@@ -302,8 +302,8 @@ ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr &toCorrect,
 }
 /**
 * @param toConvert : workspace used to get instrument components
-* @param thetaOut : angle between sample and detectors
-* @return Theta : the value by which we rotate the source
+* @param thetaOut : angle between sample and detectors (in Degrees)
+* @return Theta : the value by which we rotate the source (in Degrees)
 */
 double ReflectometryReductionOne::getAngleForSourceRotation(
     MatrixWorkspace_sptr toConvert, double thetaOut) {
@@ -311,14 +311,15 @@ double ReflectometryReductionOne::getAngleForSourceRotation(
   auto instrumentUpVector = instrument->getReferenceFrame()->vecPointingUp();
   // check to see if calculated theta is the same as theta from instrument setup
   auto instrumentBeamDirection = instrument->getBeamDirection();
-  double instAngle =
+  double currentThetaInFromInstrument =
       instrumentUpVector.angle(instrumentBeamDirection) * (180 / M_PI) - 90;
   bool isInThetaEqualToOutTheta =
-      std::abs(std::abs(instAngle) - thetaOut) < Mantid::Kernel::Tolerance;
+      std::abs(currentThetaInFromInstrument - thetaOut) <
+      Mantid::Kernel::Tolerance;
   // the angle by which we rotate the source
   double rotationTheta = 0.0;
   if (!isInThetaEqualToOutTheta /*source needs rotation*/) {
-    rotationTheta = thetaOut - (instAngle);
+    rotationTheta = thetaOut - currentThetaInFromInstrument;
   }
   return rotationTheta;
 }
