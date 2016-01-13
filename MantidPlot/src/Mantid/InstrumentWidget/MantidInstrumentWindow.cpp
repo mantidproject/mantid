@@ -4,7 +4,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <MdiSubWindow.h>
-#include <MantidQtMantidWidgets\ProjectionSurface.h>
+#include <ProjectionSurface.h>
 
 using namespace Mantid::API;
 
