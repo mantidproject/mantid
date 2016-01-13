@@ -100,7 +100,7 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
 
         result = simpleapi.CompareWorkspaces(workspace1_test, workspace2_test)
      
-        self.assertIsInstance(result, tuple)
+        self.assertTrue(isinstance(result, tuple))
 
         simpleapi.DeleteWorkspace(ws1_name)
         simpleapi.DeleteWorkspace(ws2_name)
