@@ -244,7 +244,7 @@ const std::set<double> MantidSurfacePlotDialog::getCustomLogValues() const {
       if (ok) {
         logValues.insert(number);
       } else {
-        throw std::invalid_argument(value);
+        throw std::invalid_argument(value.toStdString());
       }
     }
   }
