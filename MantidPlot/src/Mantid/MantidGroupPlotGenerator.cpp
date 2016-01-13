@@ -185,7 +185,7 @@ bool MantidGroupPlotGenerator::groupIsAllMatrixWorkspaces(
  */
 double MantidGroupPlotGenerator::getSingleLogValue(
     int wsIndex, const std::set<double> &logValues) const {
-  double value{0};
+  double value = 0;
   if (wsIndex < logValues.size()) {
     auto it = logValues.begin();
     std::advance(it, wsIndex);
