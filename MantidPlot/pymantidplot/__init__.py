@@ -693,6 +693,22 @@ def getInstrumentView(name, tab=InstrumentWindow.RENDER):
         raise ValueError("Workspace '%s' does not exist" % name)
     return new_proxy(proxies.InstrumentWindow, _qti.app.mantidUI.getInstrumentView, name, tab)
 
+def getInstrumentWindow(name, tab=InstrumentWindow.RENDER):
+    """Create an instrument view window based on the given workspace.
+
+    Args:
+        name: The name of the workspace.
+        tab: The index of the tab to display initially, (default=InstrumentWindow.RENDER)
+
+    Returns:
+        A handle to the created MDIWindow which contains the instrument view widget.
+    """
+    ads = _get_analysis_data_service()
+
+    if name not in ads:
+        raise ValueError("Warkspace '%s' does not exist" % name)
+
+    return new_proxy(proxies.MDIWindow, _qti.app.mantidUI.getInstrumentWindow, name, tab)
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
     """Create a MantidMatrix object from the named workspace.
