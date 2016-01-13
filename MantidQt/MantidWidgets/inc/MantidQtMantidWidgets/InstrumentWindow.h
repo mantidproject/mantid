@@ -64,7 +64,7 @@ public:
   enum SurfaceType{ FULL3D = 0, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z, SIDE_BY_SIDE, RENDERMODE_SIZE };
   enum Tab{RENDER = 0, PICK, MASK, TREE};
 
-  explicit InstrumentWindow(const QString& wsName);
+  explicit InstrumentWindow(const QString& wsName, QWidget *parent=nullptr);
   ~InstrumentWindow();
   void init(bool resetGeometry = true, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0, bool setDefaultView = true);
   QString getWorkspaceName() const { return m_workspaceName; }
@@ -118,8 +118,6 @@ signals:
   void requestSelectComponent(const QString&);
 
 protected:
-  /// Called just before a show event
-  virtual void showEvent(QShowEvent* event);
   /// Implements AlgorithmObserver's finish handler
   void finishHandle(const Mantid::API::IAlgorithm* alg);
   void dragEnterEvent( QDragEnterEvent* e );

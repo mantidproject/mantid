@@ -3,18 +3,18 @@
 #include "TSVSerialiser.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include <MdiSubWindow.h>
 #include <MantidQtMantidWidgets\ProjectionSurface.h>
 
 using namespace Mantid::API;
 
-MantidInstrumentWindow::MantidInstrumentWindow(const QString &wsName)
-    : InstrumentWindow(wsName), m_mdiSubWindowParent(nullptr) {}
+MantidInstrumentWindow::MantidInstrumentWindow(MdiSubWindow *parent, const QString &wsName)
+    : InstrumentWindow(wsName, parent)
+{
+	m_mdiSubWindowParent = parent;
+}
 
 MantidInstrumentWindow::~MantidInstrumentWindow() {}
-
-void MantidInstrumentWindow::setParent(MdiSubWindow *parent) {
-  m_mdiSubWindowParent = parent;
-}
 
 void MantidInstrumentWindow::loadFromProject(const std::string &lines,
                                              ApplicationWindow *app,
@@ -40,7 +40,7 @@ std::string MantidInstrumentWindow::saveToProject(ApplicationWindow *app) {
 
 void MantidInstrumentWindow::closeEvent(QCloseEvent *e)
 {
-	if (m_mdiSubWindowParent->close())
+	if (m_mdiSubWindowParent && m_mdiSubWindowParent->close())
 		e->accept();
 	else
 		e->ignore();

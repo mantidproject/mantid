@@ -76,8 +76,8 @@ public:
 /**
  * Constructor.
  */
-InstrumentWindow::InstrumentWindow(const QString &wsName)
-    : QWidget(), WorkspaceObserver(),
+InstrumentWindow::InstrumentWindow(const QString &wsName, QWidget *parent)
+    : QWidget(parent), WorkspaceObserver(),
       m_InstrumentDisplay(NULL), m_simpleDisplay(NULL), m_workspaceName(wsName),
       m_instrumentActor(NULL), m_surfaceType(FULL3D),
       m_savedialog_dir(QString::fromStdString(
@@ -686,14 +686,6 @@ void InstrumentWindow::saveSettings() {
     foreach (InstrumentWindowTab *tab, m_tabs) { tab->saveSettings(settings); }
   }
   settings.endGroup();
-}
-
-/**
- * Called just before a show event
- */
-void InstrumentWindow::showEvent(QShowEvent *e) {
-  //MdiSubWindow::showEvent(e);
-  // updateWindow();
 }
 
 void InstrumentWindow::helpClicked() {

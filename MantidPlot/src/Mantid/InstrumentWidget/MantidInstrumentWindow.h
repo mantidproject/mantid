@@ -2,14 +2,14 @@
 #define MANTIDINSTRUMENTWINDOW_H
 
 #include <Mantid/IProjectSerialisable.h>
-#include <MantidQtMantidWidgets\InstrumentWindow.h>
-#include <MdiSubWindow.h>
+#include <InstrumentWindow.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmObserver.h"
 
 #include <boost/shared_ptr.hpp>
 
 class ApplicationWindow;
+class MdiSubWindow;
 
 using namespace Mantid;
 
@@ -17,10 +17,9 @@ class MantidInstrumentWindow : public InstrumentWindow,
                                public IProjectSerialisable {
   Q_OBJECT
 public:
-  explicit MantidInstrumentWindow(const QString &wsName);
+  explicit MantidInstrumentWindow(MdiSubWindow *parent, const QString &wsName);
   ~MantidInstrumentWindow();
 
-  void setParent(MdiSubWindow *parent);
   void loadFromProject(const std::string &lines, ApplicationWindow *app,
                        const int fileVersion);
   std::string saveToProject(ApplicationWindow *app);
