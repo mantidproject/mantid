@@ -32,10 +32,15 @@ void NormaliseByCurrent::init() {
 }
 
 /**
-Extract a value for the charge from the input workspace. Handles either single
-period or multi-period data.
-@param inputWS :: The input workspace to extract the log details from.
-*/
+ * Extract a value for the charge from the input workspace. Handles either
+ * single period or multi-period data.
+ *
+ * @param inputWS :: The input workspace to extract the log details from.
+ *
+ * @throws Exception::NotFoundError, std::domain_error or
+ * std::runtime_error if the charge value(s) are not set in the
+ * workspace logs or if the values are invalid (0)
+ */
 double NormaliseByCurrent::extractCharge(
     boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS) const {
   // Get the good proton charge and check it's valid
@@ -55,7 +60,7 @@ double NormaliseByCurrent::extractCharge(
   if (nPeriods > 1) {
     // Fetch the period property
     Property *currentPeriodNumberProperty = run.getLogData("current_period");
-    int periodNumber = atoi(currentPeriodNumberProperty->value().c_str());
+    int periodNumber = std::atoi(currentPeriodNumberProperty->value().c_str());
 
     // Fetch the charge property
     Property *chargeProperty = run.getLogData("proton_charge_by_period");
@@ -64,8 +69,22 @@ double NormaliseByCurrent::extractCharge(
     if (chargePropertyArray) {
       charge = chargePropertyArray->operator()()[periodNumber - 1];
     } else {
-      throw std::runtime_error("Proton charge log not found.");
+      throw Exception::NotFoundError(
+          "Proton charge log (proton_charge_by_period) not found for this "
+          "multiperiod data workspace",
+          "proton_charge_by_period");
     }
+
+    if (charge == 0) {
+      throw std::domain_error("The proton charge found for period number " +
+                              std::to_string(periodNumber) +
+                              " in the input workspace "
+                              "run information is zero. When applying "
+                              "NormaliseByCurrent on multiperiod data, a "
+                              "non-zero value is required for every period in "
+                              "the proton_charge_by_period log.");
+    }
+
   } else {
     try {
       charge = inputWS->run().getProtonCharge();
@@ -73,6 +92,11 @@ double NormaliseByCurrent::extractCharge(
       g_log.error() << "The proton charge is not set for the run attached to "
                        "this workspace\n";
       throw;
+    }
+
+    if (charge == 0) {
+      throw std::domain_error("The proton charge found in the input workspace "
+                              "run information is zero");
     }
   }
   return charge;
@@ -85,10 +109,6 @@ void NormaliseByCurrent::exec() {
 
   // Get the good proton charge and check it's valid
   double charge = extractCharge(inputWS);
-
-  if (charge == 0) {
-    throw std::domain_error("The proton charge is zero");
-  }
 
   g_log.information() << "Normalisation current: " << charge << " uamps"
                       << std::endl;
