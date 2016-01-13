@@ -46,7 +46,7 @@ public:
 
     pAlg->setRethrows(false);
     pAlg->execute();
-    TSM_ASSERT("Shoud finish succesfully", pAlg->isExecuted());
+    TSM_ASSERT("Should finish succesfully", pAlg->isExecuted());
     Mantid::API::Workspace_sptr spws;
     TS_ASSERT_THROWS_NOTHING(
         spws = AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
@@ -55,7 +55,7 @@ public:
     boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<3>, 3>>
         ws = boost::dynamic_pointer_cast<
             DataObjects::MDEventWorkspace<DataObjects::MDEvent<3>, 3>>(spws);
-    TSM_ASSERT("It shoudl be 3D MD workspace", ws.get());
+    TSM_ASSERT("It should be 3D MD workspace", ws.get());
 
     if (ws.get()) {
       TS_ASSERT_EQUALS(900, ws->getNPoints());
