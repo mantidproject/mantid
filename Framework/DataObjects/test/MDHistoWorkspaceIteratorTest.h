@@ -15,6 +15,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
