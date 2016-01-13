@@ -68,9 +68,14 @@ Workspace2D_sptr Create1DWorkspaceRand(int size) {
   MantidVecPtr x1, y1, e1;
   x1.access().resize(size, 1);
   y1.access().resize(size);
-  std::generate(y1.access().begin(), y1.access().end(), rand);
+
+  MersenneTwister randomGen(DateAndTime::getCurrentTime().nanoseconds(), 0,
+                            std::numeric_limits<int>::max());
+  auto randFunc = [&randomGen] { return randomGen.nextValue(); };
+
+  std::generate(y1.access().begin(), y1.access().end(), randFunc);
   e1.access().resize(size);
-  std::generate(e1.access().begin(), e1.access().end(), rand);
+  std::generate(e1.access().begin(), e1.access().end(), randFunc);
   Workspace2D_sptr retVal(new Workspace2D);
   retVal->initialize(1, size, size);
   retVal->setX(0, x1);
@@ -760,13 +765,16 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   }
   pAxis0->setUnit("TOF");
 
+  MersenneTwister randomGen(DateAndTime::getCurrentTime().nanoseconds(), 0,
+                            std::numeric_limits<int>::max());
   // Make up some data for each pixels
   for (size_t i = 0; i < numpixels; i++) {
     // Create one event for each bin
     EventList &events = retVal->getEventList(static_cast<detid_t>(i));
     for (std::size_t ie = 0; ie < numbins; ie++) {
       // Create a list of events, randomize
-      events += TofEvent(std::rand(), std::rand());
+      events += TofEvent(static_cast<double>(randomGen.nextValue()),
+                         static_cast<int64_t>(randomGen.nextValue()));
     }
     events.addDetectorID(detid_t(i));
   }
