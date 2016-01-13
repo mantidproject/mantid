@@ -139,7 +139,7 @@ namespace IDA
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
               m_pythonExportWsName);
       const size_t nPlots = outWs->getNumberHistograms();
-      if (nPlots <= 0)
+      if (nPlots == 0)
         return;
       QString pyInput = "from mantidplot import newTiledWindow\n";
       pyInput += "newTiledWindow(sources=[";
