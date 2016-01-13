@@ -294,20 +294,9 @@ void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
-  // disable 'local' for now - not anymore
+  // 'local' - not disabled any longer
   // m_uiTabSetup.tabWidget_comp_resource->setTabEnabled(false, 1);
   // m_uiTabSetup.tab_local->setEnabled(false);
-
-  // TODO: use Qsettings
-  m_localExternalPythonPath = g_defLocalExternalPythonPath;
-  m_defAddPathPython = g_defAddPathPython;
-
-  // TODO: take g_def values first time, when Qsettings are empty, then from
-  // QSettings
-  m_setupPathComponentPhase = g_defPathComponentPhase;
-  m_setupRBNumber = g_defRBNumber;
-  m_setupPathReconScripts = g_defPathReconScripts;
-  m_setupPathReconOut = g_defPathReconOut;
 
   resetRemoteSetup();
 
@@ -666,6 +655,7 @@ void TomographyIfaceViewQtGUI::readSettings() {
   m_settings.useKeepAlive =
       qs.value("use-keep-alive", m_settings.useKeepAlive).toInt();
 
+  // Get all the pre-/post-processing options from a stream
   QByteArray rawFiltersSettings = qs.value("filters-settings").toByteArray();
   QDataStream stream(rawFiltersSettings);
   TomoReconFiltersSettings filtersSettings;
@@ -679,6 +669,43 @@ void TomographyIfaceViewQtGUI::readSettings() {
     setPrePostProcSettings(def);
   }
 
+  // User parameters for reconstructions
+  m_setupRBNumber = qs.value("RB-number", QString::fromStdString(g_defRBNumber))
+                        .toString()
+                        .toStdString();
+
+  m_localExternalPythonPath =
+      qs.value("path-local-external-python",
+               QString::fromStdString(g_defLocalExternalPythonPath))
+          .toString()
+          .toStdString();
+
+  int pathSize = qs.beginReadArray("path-default-add-for-python");
+  for (int i = 0; i < pathSize; ++i) {
+    qs.setArrayIndex(i);
+    m_defAddPathPython.push_back(
+        qs.value("value", "").toString().toStdString());
+  }
+  if (0 == m_defAddPathPython.size())
+    m_defAddPathPython = g_defAddPathPython;
+  qs.endArray();
+
+  m_setupPathComponentPhase =
+      qs.value("path-default-phase-component",
+               QString::fromStdString(g_defPathComponentPhase))
+          .toString()
+          .toStdString();
+  m_setupPathReconScripts =
+      qs.value("path-reconstruction-scripts",
+               QString::fromStdString(g_defPathReconScripts))
+          .toString()
+          .toStdString();
+  m_setupPathReconOut = qs.value("path-reconstruction-output",
+                                 QString::fromStdString(g_defPathReconOut))
+                            .toString()
+                            .toStdString();
+
+  // general GUI state
   m_ui.tabMain->setCurrentIndex(qs.value("selected-tab-index").toInt());
 
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
@@ -725,11 +752,35 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
               m_settings.onCloseAskForConfirmation);
   qs.setValue("use-keep-alive", m_settings.useKeepAlive);
 
+  // Save all the pre-/post-processing options through a stream
   QByteArray filtersSettings;
   QDataStream stream(&filtersSettings, QIODevice::WriteOnly);
   stream << grabPrePostProcSettings();
   qs.setValue("filters-settings", filtersSettings);
 
+  // User parameters for reconstructions
+  qs.setValue("RB-number", QString::fromStdString(m_setupRBNumber));
+
+  qs.setValue("path-local-external-python",
+              QString::fromStdString(m_localExternalPythonPath));
+
+  qs.beginWriteArray("path-default-add-for-python");
+  for (size_t i = 0; i < m_defAddPathPython.size(); ++i) {
+    qs.setArrayIndex(static_cast<int>(i));
+    qs.setValue("value", QString::fromStdString(m_defAddPathPython[i]));
+  }
+  qs.endArray();
+
+  qs.setValue("path-default-phase-component",
+              QString::fromStdString(m_setupPathComponentPhase));
+
+  qs.setValue("path-reconstruction-scripts",
+              QString::fromStdString(m_setupPathReconScripts));
+
+  qs.setValue("path-reconstruction-output",
+              QString::fromStdString(m_setupPathReconOut));
+
+  // general GUI status
   qs.setValue("selected-tab-index", m_ui.tabMain->currentIndex());
 
   qs.setValue("interface-win-geometry", saveGeometry());
@@ -1085,6 +1136,7 @@ void TomographyIfaceViewQtGUI::processLocalRunRecon() {
 void TomographyIfaceViewQtGUI::makeRunnableWithOptions(const std::string &comp,
                                                        std::string &run,
                                                        std::string &opt) {
+  UNUSED_ARG(comp);
   run = "bin";
   opt = "--help";
 
