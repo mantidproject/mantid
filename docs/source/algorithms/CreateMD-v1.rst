@@ -46,7 +46,7 @@ Workflow
 .. diagram:: CreateMD-v1_wkflw.dot
 
 **Conversion Of Multiple Input Files Example**
-##########################################
+##############################################
 
 .. code-block:: python
 
@@ -62,7 +62,7 @@ Workflow
    md_ws = CreateMD(input_runs, Emode='Direct', Alatt=[2.87, 2.87, 2.87], Angdeg=[90, 90, 90], u=[1, 0, 0,], v=[0, 1, 0], Psi=psi_array, EFix=400.0)
 
 **Conversion Of A Single Input Workspace Example**
-##########################################
+##################################################
 
 .. code-block:: python
 
@@ -90,7 +90,7 @@ Output
    DeltaE
 
 **Conversion Of Multiple Input Workspaces Example**
-##########################################
+###################################################
 
 .. code-block:: python
 
@@ -126,7 +126,7 @@ Output
    DeltaE
 
 **Multi Conversion Example Without Altering Original Workspaces (InPlace=False)**
-##########################################
+#################################################################################
 
 .. code-block:: python
 
