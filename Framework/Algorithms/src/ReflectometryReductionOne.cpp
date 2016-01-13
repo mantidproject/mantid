@@ -308,32 +308,17 @@ ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr &toCorrect,
 double ReflectometryReductionOne::getAngleForSourceRotation(
     MatrixWorkspace_sptr toConvert, double thetaOut) {
   auto instrument = toConvert->getInstrument();
-
-  // check for source being on the horizon
-  auto instrumentSourcePosition =
-      toConvert->getInstrument()->getSource()->getPos();
-  auto instrumentUpVector =
-      toConvert->getInstrument()->getReferenceFrame()->vecPointingUp();
-  bool isSourcePerpendicularToUpVec =
-      instrumentSourcePosition.scalar_prod(instrumentUpVector) == 0;
+  auto instrumentUpVector = instrument->getReferenceFrame()->vecPointingUp();
   // check to see if calculated theta is the same as theta from instrument setup
-  auto instrumentBeamDirection = toConvert->getInstrument()->getBeamDirection();
-  double instAngle = std::abs(
-      90 - (instrumentUpVector.angle(instrumentBeamDirection) * (180 / M_PI)));
-  double theta = std::abs(thetaOut);
+  auto instrumentBeamDirection = instrument->getBeamDirection();
+  double instAngle =
+      instrumentUpVector.angle(instrumentBeamDirection) * (180 / M_PI) - 90;
   bool isInThetaEqualToOutTheta =
-      std::abs(instAngle - theta) < Mantid::Kernel::Tolerance;
+      std::abs(std::abs(instAngle) - thetaOut) < Mantid::Kernel::Tolerance;
   // the angle by which we rotate the source
   double rotationTheta = 0.0;
-  if (isSourcePerpendicularToUpVec /*source hasn't rotated*/
-      || !isInThetaEqualToOutTheta /*inTheta != outTheta*/) {
-    if (instAngle < theta) {
-      // rotate clockwise
-      rotationTheta = theta - (instAngle);
-    } else {
-      // rotate anticlockwise
-      rotationTheta = -1 * (instAngle - theta);
-    }
+  if (!isInThetaEqualToOutTheta /*source needs rotation*/) {
+    rotationTheta = thetaOut - (instAngle);
   }
   return rotationTheta;
 }
