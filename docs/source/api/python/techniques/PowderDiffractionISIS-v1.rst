@@ -146,7 +146,7 @@ correction available yet for the vanadium).  If a file name is not specified in 
 which contains both the vanadium and the background run numbers.
 
 Default Directory
-----------------
+-----------------
 
 With the mantid feature `Manage User Directories <http://www.mantidproject.org/
 ManageUserDirectories>`_, users are able to reveal the instrument directory to mantid,
