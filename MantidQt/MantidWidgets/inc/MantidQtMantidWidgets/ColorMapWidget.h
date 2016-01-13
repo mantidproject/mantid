@@ -2,7 +2,6 @@
 #define COLORMAPWIDGET_H_
 
 #include <QFrame>
-#include <MantidQtMantidWidgets\DoubleSpinBox.h>
 
 class MantidColorMap;
 
