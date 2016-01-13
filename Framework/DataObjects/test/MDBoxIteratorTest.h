@@ -629,15 +629,14 @@ public:
     MDBoxIterator<MDLeanEvent<1>, 1> *it =
         new MDBoxIterator<MDLeanEvent<1>, 1>(A, 20, true);
 
-    // Mask box 0, unmask box 1 and mask box 2.
-    // For masked boxes, getNormalizedSignal() should return NaN.
-    it->getBox()->mask();
-    TS_ASSERT(boost::math::isnan(it->getNormalizedSignal()));
-    it->next();
-    it->getBox()->unmask();
+    // Initially the box is unmasked
     TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
+
     it->next();
+
+    // Now mask the box
     it->getBox()->mask();
+    // For masked boxes, getNormalizedSignal() should return NaN.
     TS_ASSERT(boost::math::isnan(it->getNormalizedSignal()));
 
     delete it;

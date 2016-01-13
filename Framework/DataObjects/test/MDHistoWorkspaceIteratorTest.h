@@ -159,11 +159,11 @@ public:
     ws->setSignalAt(3, 3.0);
     ws->setSignalAt(4, 3.0);
 
-    ws->setMaskValueAt(0, false); // Unmasked
-    ws->setMaskValueAt(1, false); // Unmasked
-    ws->setMaskValueAt(2, true);  // Masked
-    ws->setMaskValueAt(3, false); // Unmasked
-    ws->setMaskValueAt(4, true);  // Masked
+    ws->setMDMaskAt(0, false); // Unmasked
+    ws->setMDMaskAt(1, false); // Unmasked
+    ws->setMDMaskAt(2, true);  // Masked
+    ws->setMDMaskAt(3, false); // Unmasked
+    ws->setMDMaskAt(4, true);  // Masked
 
     Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
 
