@@ -299,13 +299,11 @@ void PeakOverlay::draw(QPainter &painter) const {
       m_labels.append(hkl);
     }
   }
-  // std::cerr << m_labels.size() << " labels " << color.red() << ' ' <<
-  // color.green() << ' ' << color.blue() << "\n";
+
   painter.setPen(color);
   for (int i = 0; i < m_labels.size(); ++i) {
     PeakHKL &hkl = m_labels[i];
     hkl.draw(painter, m_precision);
-    // hkl.print();
   }
 }
 
