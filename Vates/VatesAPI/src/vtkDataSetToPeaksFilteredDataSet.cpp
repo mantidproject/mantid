@@ -43,10 +43,9 @@ namespace VATES
 vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(
     vtkSmartPointer<vtkUnstructuredGrid> input,
     vtkSmartPointer<vtkUnstructuredGrid> output)
-    : m_inputData(vtkSmartPointer<vtkUnstructuredGrid>::New()),
-      m_outputData(vtkSmartPointer<vtkUnstructuredGrid>::New()),
-      m_isInitialised(false), m_radiusNoShape(0.2), m_radiusType(0),
-      m_radiusFactor(2), m_defaultRadius(0.1), m_coordinateSystem(0) {
+    : m_inputData(input), m_outputData(output), m_isInitialised(false),
+      m_radiusNoShape(0.2), m_radiusType(0), m_radiusFactor(2),
+      m_defaultRadius(0.1), m_coordinateSystem(0) {
   if (nullptr == input) {
     throw std::runtime_error("Cannot construct "
                              "vtkDataSetToPeaksFilteredDataSet with NULL input "
@@ -57,8 +56,6 @@ vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(
                              "vtkDataSetToPeaksFilteredDataSet with NULL "
                              "output vtkUnstructuredGrid");
   }
-  m_inputData = input;
-  m_outputData = output;
 }
 
 vtkDataSetToPeaksFilteredDataSet::~vtkDataSetToPeaksFilteredDataSet() {}
