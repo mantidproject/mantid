@@ -17,10 +17,12 @@ class CrystalStructureBuilder(object):
     def _getSpaceGroup(self):
         try:
             return self._getSpaceGroupFromString()
-        except RuntimeError:
+        except RuntimeError as error:
+            print error.message
             try:
                 return self._getSpaceGroupFromNumber()
-            except RuntimeError:
+            except RuntimeError as e:
+                print e.message
                 raise RuntimeError(
                         'Can create space group from supplied CIF-file. You could try to modify the HM-symbol' \
                         'to contain spaces between the components.\n' \
@@ -30,7 +32,7 @@ class CrystalStructureBuilder(object):
         # Try two possibilities for space group symbol. If neither is present, throw a RuntimeError.
         rawSpaceGroupSymbol = [self._cifData[x] for x in
                                ['_space_group_name_H-M_alt', '_symmetry_space_group_name_H-M'] if
-                               x in self._cifData]
+                               x in self._cifData.keys()]
 
         if len(rawSpaceGroupSymbol) == 0:
             raise RuntimeError('No space group symbol in CIF.')
@@ -48,7 +50,7 @@ class CrystalStructureBuilder(object):
     def _getSpaceGroupFromNumber(self):
         spaceGroupNumber = int([self._cifData[x] for x in
                                 ['_space_group_IT_number', '_symmetry_Int_Tables_number'] if
-                                x in self._cifData][0])
+                                x in self._cifData.keys()][0])
 
         possibleSpaceGroupSymbols = SpaceGroupFactory.subscribedSpaceGroupSymbols(spaceGroupNumber)
 
@@ -66,7 +68,8 @@ class CrystalStructureBuilder(object):
                           '_cell_length_c': '_cell_length_a',
                           '_cell_angle_alpha': '90.0', '_cell_angle_beta': '90.0', '_cell_angle_gamma': '90.0'}
 
-        unitCellValueMap = dict([(x, self._cifData[x]) if x in self._cifData else None for x in unitCellComponents])
+        unitCellValueMap = dict(
+                [(x, self._cifData[x]) if x in self._cifData.keys() else None for x in unitCellComponents])
 
         if unitCellValueMap['_cell_length_a'] is None:
             raise RuntimeError('The a-parameter of the unit cell is not specified in the supplied CIF.\n' \
@@ -103,24 +106,21 @@ class CrystalStructureBuilder(object):
             cleanLine = [self._getCleanAtomSymbol(atomLine[0])] + list(atomLine[1:])
             atomLines.append(atomLine.join(' '))
 
-
     def _getCleanAtomSymbol(self, atomSymbol):
-        nonCharacterRe = re.compile('^([a-z]{1,2})', re.IGNORECASE)
+        nonCharacterRe = re.compile('[^a-z]', re.IGNORECASE)
 
-        return re.spl
-
+        return re.sub(nonCharacterRe, '', atomSymbol)
 
 
 class LoadCIF(PythonAlgorithm):
     def category(self):
-        return 'Diffraction\\DataHandling'
+        return "Diffraction\\DataHandling"
 
     def name(self):
-        return 'LoadCIF'
+        return "LoadCIF"
 
     def summary(self):
-        return
-        'This algorithm loads a CIF file using the PyCifRW package and assigns a CrystalStructure to the sample of the workspace.'
+        return "This algorithm loads a CIF file using the PyCifRW package and assigns a CrystalStructure to the sample of the workspace."
 
     def PyInit(self):
         self.declareProperty(
@@ -139,8 +139,6 @@ class LoadCIF(PythonAlgorithm):
                                   defaultValue='', direction=Direction.InOut),
                 doc='Workspace into which the crystal structure is placed.')
 
-        self._parser = PoldiCrystalFileParser()
-
     def PyExec(self):
         cifFileName = self.getProperty('InputFile').value
 
@@ -148,8 +146,16 @@ class LoadCIF(PythonAlgorithm):
 
     def _getCrystalStructureFromFile(self, filename):
         parsedCifFile = ReadCif(filename)
+        self._getCrystalStructureFromCifFile(parsedCifFile)
 
     def _getCrystalStructureFromCifFile(self, cifFile):
+        a = CrystalStructureBuilder(cifFile)
+
+        print a._getCleanAtomSymbol('O1')
+        print a._getCleanAtomSymbol('O1+')
+        print a._getCleanAtomSymbol('Os4-')
+        print a._getCleanAtomSymbol('Ni-1')
+        print a._getCleanAtomSymbol('Ni(Bla)')
 
 
 try:
