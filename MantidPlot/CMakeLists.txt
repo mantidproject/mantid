@@ -429,7 +429,6 @@ set ( SIP_HDRS src/MdiSubWindow.h
                src/Mantid/ErrorBarSettings.h
                src/Mantid/MantidUI.h
                src/Mantid/MantidMatrix.h
-               src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 
 set( SRC_UNITY_IGNORE_FILES )
@@ -603,7 +602,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidMatrixDialog.h
                        src/Mantid/MantidMatrix.h
                        src/Mantid/MantidMatrixFunction.h
-		       src/Mantid/MantidMatrixModel.h
+		               src/Mantid/MantidMatrixModel.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidSampleMaterialDialog.h
                        src/Mantid/MantidUI.h
