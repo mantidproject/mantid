@@ -1449,8 +1449,6 @@ void ReflMainViewPresenter::pasteSelected() {
 /** Searches for runs that can be used */
 void ReflMainViewPresenter::search() {
   const std::string searchString = m_view->getSearchString();
-  const std::string searchInstr = m_view->getSearchInstrument();
-
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return;
@@ -1472,11 +1470,7 @@ void ReflMainViewPresenter::search() {
       algSearch->setProperty("InvestigationId", searchString);
       algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
       auto algRunner = m_view->getAlgorithmRunner();
-      
-      algRunner->startAlgorithm(algSearch);
-      
-      IAlgorithm_sptr currentAlg = algRunner->getAlgorithm();
-       
+      algRunner->startAlgorithm(algSearch);       
 /*      
       while (!currentAlg->isExecuted())
       {
