@@ -146,7 +146,7 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 
       if (useWeights) {
 
-        // Check that we could measuer here.
+        // Check that we could measure here.
         if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
 
           outWS->setSignalAt(iteratorIndex,
@@ -261,7 +261,7 @@ void SmoothMD::exec() {
     widthVector = std::vector<int>(toSmooth->getNumDims(), widthVector.front());
   }
 
-  // Find the choosen smooth operation
+  // Find the chosen smooth operation
   const std::string smoothFunctionName = this->getProperty("Function");
   SmoothFunctionMap functionMap = makeFunctionMap(this);
   SmoothFunction smoothFunction = functionMap[smoothFunctionName];
