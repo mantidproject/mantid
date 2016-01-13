@@ -1474,7 +1474,6 @@ void ReflMainViewPresenter::search() {
 /*      
       while (!currentAlg->isExecuted())
       {
-          /*
 
             THIS WORKS FUNCTIONALLY BUT YOU NEED TO 
             FIND A BETTER WAY TO SEE IF ALGORITHM
@@ -1491,9 +1490,6 @@ void ReflMainViewPresenter::search() {
               new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
           m_view->showSearch(m_searchModel);
       }
-      */
-
-  /*
       //ITableWorkspace_sptr results = algSearch->getProperty("OutputWorkspace");
     //auto results = m_searcher->search(searchString);
     m_searchModel = ReflSearchModel_sptr(
