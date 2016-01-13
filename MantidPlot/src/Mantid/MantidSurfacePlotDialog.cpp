@@ -13,6 +13,9 @@ const QString MantidSurfacePlotDialog::WORKSPACE_INDEX = "Workspace index";
 /// The string "Custom"
 const QString MantidSurfacePlotDialog::CUSTOM = "Custom";
 
+/// Minimum width for dialog to fit the title string in
+const int MantidSurfacePlotDialog::MINIMUM_WIDTH = 275;
+
 /**
  * Construct an object of this type
  * @param mui :: The MantidUI area
@@ -43,6 +46,7 @@ void MantidSurfacePlotDialog::init(const QString &plotType) {
   initLogs();
   initButtons();
   setLayout(m_outer);
+  this->setMinimumWidth(MINIMUM_WIDTH);
 }
 
 /**

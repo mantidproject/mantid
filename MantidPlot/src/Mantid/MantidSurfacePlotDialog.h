@@ -77,6 +77,8 @@ private:
   QComboBox *m_logSelector;
   QLineEdit *m_axisNameEdit, *m_logValues;
   QLabel *m_logLabel, *m_axisLabel, *m_customLogLabel;
+  /// Minimum width for dialog to fit title in
+  static const int MINIMUM_WIDTH;
 };
 
 #endif
