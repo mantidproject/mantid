@@ -128,7 +128,7 @@
 #include "Mantid/MantidTable.h"
 #include "Mantid/MantidMatrixCurve.h"
 #include "ContourLinesEditor.h"
-#include "Mantid\InstrumentWidget\MantidInstrumentWindow.h"
+#include "Mantid/InstrumentWidget/MantidInstrumentWindow.h"
 #include "Mantid/RemoveErrorsDialog.h"
 
 #include <stdio.h>
