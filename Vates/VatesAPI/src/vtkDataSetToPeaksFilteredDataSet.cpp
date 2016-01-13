@@ -76,125 +76,139 @@ void vtkDataSetToPeaksFilteredDataSet::initialize(
   m_radiusType = radiusType;
   m_isInitialised = true;
   m_coordinateSystem = coordinateSystem;
+}
+
+/**
+  * Process the input data. First, get all the peaks and their associated
+  * geometry. Then filter
+  * through the input to find the peaks which lie within a peak. Then apply then
+  * to the output data.
+  * Then update the metadata. See
+  * http://www.vtk.org/Wiki/VTK/Examples/Cxx/PolyData/ExtractSelection
+  * @param progressUpdating The handle for the progress bar.
+  */
+void vtkDataSetToPeaksFilteredDataSet::execute(
+    ProgressAction &progressUpdating) {
+  if (!m_isInitialised) {
+    throw std::runtime_error("vtkDataSetToPeaksFilteredDataSet needs "
+                             "initialize run before executing");
   }
 
-  /**
-    * Process the input data. First, get all the peaks and their associated geometry. Then filter 
-    * through the input to find the peaks which lie within a peak. Then apply then to the output data.
-    * Then update the metadata. See http://www.vtk.org/Wiki/VTK/Examples/Cxx/PolyData/ExtractSelection
-    * @param progressUpdating The handle for the progress bar.
-    */
-  void vtkDataSetToPeaksFilteredDataSet::execute(ProgressAction& progressUpdating)
-  {
-    if (!m_isInitialised)
-    {
-      throw std::runtime_error("vtkDataSetToPeaksFilteredDataSet needs initialize run before executing");
-    }
+  // Get the peaks location and the radius information
+  std::vector<std::pair<Mantid::Kernel::V3D, double>> peaksInfo =
+      getPeaksInfo(m_peaksWorkspaces);
 
-    // Get the peaks location and the radius information
-    std::vector<std::pair<Mantid::Kernel::V3D, double>> peaksInfo = getPeaksInfo(m_peaksWorkspaces);
+  // Compare each element of the vtk data set and check which ones to keep
+  vtkPoints *points = m_inputData->GetPoints();
 
-    // Compare each element of the vtk data set and check which ones to keep
-    vtkPoints *points = m_inputData->GetPoints();
+  vtkSmartPointer<vtkIdTypeArray> ids = vtkSmartPointer<vtkIdTypeArray>::New();
+  ids->SetNumberOfComponents(1);
 
-    vtkSmartPointer<vtkIdTypeArray> ids = vtkSmartPointer<vtkIdTypeArray>::New();
-    ids->SetNumberOfComponents(1);
+  double progressFactor = 1.0 / double(points->GetNumberOfPoints());
+  for (int i = 0; i < points->GetNumberOfPoints(); i++) {
+    progressUpdating.eventRaised(double(i) * progressFactor);
+    double point[3];
+    points->GetPoint(i, point);
 
-    double progressFactor = 1.0/double(points->GetNumberOfPoints());
-    for(int i = 0; i < points->GetNumberOfPoints(); i++)
-    {
-      progressUpdating.eventRaised(double(i)*progressFactor);
-      double point[3];
-      points->GetPoint(i, point);
-
-      // Compare to Peaks
-      const size_t numberOfPeaks = peaksInfo.size();
-      size_t counter = 0;
-      while (counter < numberOfPeaks)
-      {
-        // Calcuate the differnce between the vtkDataSet point and the peak. Needs to be smaller than the radius
-        double squaredDifference = 0;
-        for (int k = 0; k <3; k++)
-        {
-          squaredDifference += (point[k] - peaksInfo[counter].first[k])* (point[k] - peaksInfo[counter].first[k]);
-        }
-
-        if (squaredDifference <= (peaksInfo[counter].second*peaksInfo[counter].second))
-        {
-          ids->InsertNextValue(i);
-          break;
-        }
-        counter++;
-      }
-    }
-
-    // Now we have all ids for the points,  we need to retrieve the ids of the cells
-    std::map<vtkIdType, vtkIdType> uniqueCellTester;
-    vtkSmartPointer<vtkIdTypeArray> cellIds = vtkSmartPointer<vtkIdTypeArray>::New();
-
-    for (int i = 0; i < ids->GetNumberOfTuples(); i++) {
-      vtkIdType pId = ids->GetValue(i);
-
-      vtkSmartPointer<vtkIdList> cIdList = vtkSmartPointer<vtkIdList>::New();
-      cIdList->Initialize();
-  
-      m_inputData->GetPointCells(pId, cIdList);
-      
-      if (cIdList->GetNumberOfIds() == 0) {
-        continue;
+    // Compare to Peaks
+    const size_t numberOfPeaks = peaksInfo.size();
+    size_t counter = 0;
+    while (counter < numberOfPeaks) {
+      // Calcuate the differnce between the vtkDataSet point and the peak. Needs
+      // to be smaller than the radius
+      double squaredDifference = 0;
+      for (int k = 0; k < 3; k++) {
+        squaredDifference += (point[k] - peaksInfo[counter].first[k]) *
+                             (point[k] - peaksInfo[counter].first[k]);
       }
 
-      vtkIdType cId = cIdList->GetId(0);
-
-      if (uniqueCellTester.count(cId) == 0) {
-        cellIds->InsertNextValue(cId);
-        uniqueCellTester.insert(std::pair<vtkIdType, vtkIdType>(cId, cId));
+      if (squaredDifference <=
+          (peaksInfo[counter].second * peaksInfo[counter].second)) {
+        ids->InsertNextValue(i);
+        break;
       }
+      counter++;
     }
-
-    // Create the selection node and tell it the type of selection
-    vtkSmartPointer<vtkSelectionNode> selectionNode = vtkSmartPointer<vtkSelectionNode>::New();
-    selectionNode->SetFieldType(vtkSelectionNode::CELL);
-    selectionNode->SetContentType(vtkSelectionNode::INDICES);
-    selectionNode->SetSelectionList(cellIds);
-
-    vtkSmartPointer<vtkSelection> selection = vtkSmartPointer<vtkSelection>::New();
-    selection->AddNode(selectionNode);
-
-    // We are not setting up a pipeline here, cannot access vtkAlgorithmOutput
-    vtkSmartPointer<vtkExtractSelection> extractSelection = vtkSmartPointer<vtkExtractSelection>::New();
-    extractSelection->SetInputData(0,m_inputData);
-    extractSelection->SetInputData(1, selection);
-    extractSelection->Update();
-    
-    //Extract
-    m_outputData->ShallowCopy(extractSelection->GetOutput());
   }
 
-  /**
-   * Get the peaks information which is the position and the largest radius of the peak.
-   * @param peaksWorkspaces A list of peaks workspaces
-   * @returns A list of pair information which contains the position and the radius.
-   */
-  std::vector<std::pair<Mantid::Kernel::V3D, double>> vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces)
-  {
-    std::vector<std::pair<Mantid::Kernel::V3D, double>> peaksInfo;
-    // Iterate over all peaksworkspaces and add the their info to the output vector
-    for (std::vector<Mantid::API::IPeaksWorkspace_sptr>::iterator it = peaksWorkspaces.begin(); it != peaksWorkspaces.end(); ++it)
-    {
-      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = static_cast<Mantid::Kernel::SpecialCoordinateSystem>(m_coordinateSystem);
-      int numPeaks = (*it)->getNumberPeaks();
-       
-      // Iterate over all peaks for the workspace
-      for (int i = 0; i < numPeaks ; i++)
-      {
-        Mantid::Geometry::IPeak* peak = (*it)->getPeakPtr(i);
+  // Now we have all ids for the points,  we need to retrieve the ids of the
+  // cells
+  std::map<vtkIdType, vtkIdType> uniqueCellTester;
+  vtkSmartPointer<vtkIdTypeArray> cellIds =
+      vtkSmartPointer<vtkIdTypeArray>::New();
 
-        addSinglePeak(peak, coordinateSystem, peaksInfo);
-      }
+  for (int i = 0; i < ids->GetNumberOfTuples(); i++) {
+    vtkIdType pId = ids->GetValue(i);
+
+    vtkSmartPointer<vtkIdList> cIdList = vtkSmartPointer<vtkIdList>::New();
+    cIdList->Initialize();
+
+    m_inputData->GetPointCells(pId, cIdList);
+
+    if (cIdList->GetNumberOfIds() == 0) {
+      continue;
     }
-    return peaksInfo;
+
+    vtkIdType cId = cIdList->GetId(0);
+
+    if (uniqueCellTester.count(cId) == 0) {
+      cellIds->InsertNextValue(cId);
+      uniqueCellTester.insert(std::pair<vtkIdType, vtkIdType>(cId, cId));
+    }
   }
+
+  // Create the selection node and tell it the type of selection
+  vtkSmartPointer<vtkSelectionNode> selectionNode =
+      vtkSmartPointer<vtkSelectionNode>::New();
+  selectionNode->SetFieldType(vtkSelectionNode::CELL);
+  selectionNode->SetContentType(vtkSelectionNode::INDICES);
+  selectionNode->SetSelectionList(cellIds);
+
+  vtkSmartPointer<vtkSelection> selection =
+      vtkSmartPointer<vtkSelection>::New();
+  selection->AddNode(selectionNode);
+
+  // We are not setting up a pipeline here, cannot access vtkAlgorithmOutput
+  vtkSmartPointer<vtkExtractSelection> extractSelection =
+      vtkSmartPointer<vtkExtractSelection>::New();
+  extractSelection->SetInputData(0, m_inputData);
+  extractSelection->SetInputData(1, selection);
+  extractSelection->Update();
+
+  // Extract
+  m_outputData->ShallowCopy(extractSelection->GetOutput());
+}
+
+/**
+ * Get the peaks information which is the position and the largest radius of the
+ * peak.
+ * @param peaksWorkspaces A list of peaks workspaces
+ * @returns A list of pair information which contains the position and the
+ * radius.
+ */
+std::vector<std::pair<Mantid::Kernel::V3D, double>>
+vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(
+    std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces) {
+  std::vector<std::pair<Mantid::Kernel::V3D, double>> peaksInfo;
+  // Iterate over all peaksworkspaces and add the their info to the output
+  // vector
+  for (std::vector<Mantid::API::IPeaksWorkspace_sptr>::iterator it =
+           peaksWorkspaces.begin();
+       it != peaksWorkspaces.end(); ++it) {
+    const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem =
+        static_cast<Mantid::Kernel::SpecialCoordinateSystem>(
+            m_coordinateSystem);
+    int numPeaks = (*it)->getNumberPeaks();
+
+    // Iterate over all peaks for the workspace
+    for (int i = 0; i < numPeaks; i++) {
+      Mantid::Geometry::IPeak *peak = (*it)->getPeakPtr(i);
+
+      addSinglePeak(peak, coordinateSystem, peaksInfo);
+    }
+  }
+  return peaksInfo;
+}
 
 GCC_DIAG_OFF(strict-aliasing)
   /**
