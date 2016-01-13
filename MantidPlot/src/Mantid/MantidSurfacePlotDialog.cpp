@@ -60,6 +60,7 @@ void MantidSurfacePlotDialog::initLogs() {
   populateLogComboBox();
   m_axisLabel = new QLabel(tr("<br>Label for plot axis:"));
   m_axisNameEdit = new QLineEdit();
+  m_axisNameEdit->setText(m_logSelector->currentText());
   m_customLogLabel = new QLabel(tr("<br>Custom log values:"));
   m_logValues = new QLineEdit();
 
@@ -216,11 +217,13 @@ void MantidSurfacePlotDialog::plot() {
  * Called when log selection changed
  * If "Custom" selected, enable the custom log input box.
  * Otherwise, it is read-only.
+ * Also put the log name into the axis name box as a default choice.
  * @param logName :: [input] Text selected in combo box
  */
 void MantidSurfacePlotDialog::onLogSelected(const QString &logName) {
   m_logValues->setEnabled(logName == CUSTOM);
   m_logValues->clear();
+  m_axisNameEdit->setText(logName);
 }
 
 /**
