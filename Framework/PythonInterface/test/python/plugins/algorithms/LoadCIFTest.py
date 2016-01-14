@@ -1,112 +1,151 @@
 # pylint: disable=no-init,invalid-name,too-many-public-methods
 import unittest
-from testhelpers import assertRaisesNothing, run_algorithm
-from testhelpers.tempfile_wrapper import TemporaryFileHelper
+from testhelpers import assertRaisesNothing
 
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from LoadCIF import UBMatrixBuilder, CrystalStructureBuilder
 
-class CrystalStructureBuilderTest(unittest.TestCase):
+from mantid.api import AlgorithmFactory
+
+
+def merge_dicts(lhs, rhs):
+    merged = lhs.copy()
+    merged.update(rhs)
+
+    return merged
+
+
+class CrystalStructureBuilderTestSpaceGroup(unittest.TestCase):
     def setUp(self):
-        self.base_file = 'data_test'
+        self.builder = CrystalStructureBuilder()
 
-        self.valid_space_group_new = ['_space_group_name_h-m_alt \'P m -3 m\'']
-        self.valid_space_group_old = ['_symmetry_space_group_name_h-m \'P m -3 m\'']
-        self.invalid_space_group_wrong_new = ['_space_group_name_h-m_alt \'doesnotexist\'']
-        self.invalid_space_group_wrong_old = ['_symmetry_space_group_name_h-m \'doesnotExistEither\'']
+    def test_getSpaceGroupFromString_valid_no_exceptions(self):
+        valid_new = {u'_space_group_name_h-m_alt': u'P m -3 m'}
+        valid_old = {u'_symmetry_space_group_name_h-m': u'P m -3 m'}
 
-        self.valid_space_group_number_new = ['_space_group_it_number 230']
-        self.valid_space_group_number_old = ['_symmetry_int_tables_number 230']
-        self.invalid_space_group_number_new = ['_space_group_it_number 13']
-        self.invalid_space_group_number_old = ['_symmetry_int_tables_number 13']
+        assertRaisesNothing(self, self.builder._getSpaceGroupFromString, cifData=valid_old)
+        assertRaisesNothing(self, self.builder._getSpaceGroupFromString, cifData=valid_new)
+        assertRaisesNothing(self, self.builder._getSpaceGroupFromString, cifData=merge_dicts(valid_new, valid_old))
+
+    def test_getSpaceGroupFromString_valid_correct_value(self):
+        valid_new = {u'_space_group_name_h-m_alt': u'P m -3 m'}
+        valid_old = {u'_symmetry_space_group_name_h-m': u'P m -3 m'}
+        valid_old_different = {u'_symmetry_space_group_name_h-m': u'F d d d'}
+        invalid_old = {u'_symmetry_space_group_name_h-m': u'invalid'}
+
+        self.assertEqual(self.builder._getSpaceGroupFromString(valid_new), 'P m -3 m')
+        self.assertEqual(self.builder._getSpaceGroupFromString(valid_old), 'P m -3 m')
+        self.assertEqual(self.builder._getSpaceGroupFromString(merge_dicts(valid_new, valid_old)), 'P m -3 m')
+        self.assertEqual(self.builder._getSpaceGroupFromString(merge_dicts(valid_new, valid_old_different)), 'P m -3 m')
+        self.assertEqual(self.builder._getSpaceGroupFromString(merge_dicts(valid_new, invalid_old)), 'P m -3 m')
+
+    def test_getSpaceGroupFromString_invalid(self):
+        valid_new = {u'_space_group_name_h-m_alt': u'P m -3 m'}
+        valid_old = {u'_symmetry_space_group_name_h-m': u'P m -3 m'}
+        invalid_new = {u'_space_group_name_h-m_alt': u'invalid'}
+        invalid_old = {u'_symmetry_space_group_name_h-m': u'invalid'}
+
+        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromString, cifData={})
+        self.assertRaises(ValueError, self.builder._getSpaceGroupFromString, cifData=invalid_new)
+        self.assertRaises(ValueError, self.builder._getSpaceGroupFromString, cifData=invalid_old)
+        self.assertRaises(ValueError, self.builder._getSpaceGroupFromString,
+                          cifData=merge_dicts(invalid_new, valid_old))
+
+    def test_getCleanSpaceGroupSymbol(self):
+        fn = self.builder._getCleanSpaceGroupSymbol
+
+        self.assertEqual(fn('P m -3 m :1'), 'P m -3 m')
+        self.assertEqual(fn('P m -3 m :H'), 'P m -3 m')
+
+    def test_getSpaceGroupFromNumber_invalid(self):
+        invalid_old = {u'_symmetry_int_tables_number': u'400'}
+        invalid_new = {u'_space_group_it_number': u'400'}
+
+        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromNumber, cifData={})
+        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromNumber, cifData=invalid_old)
+        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromNumber, cifData=invalid_new)
 
 
-        self.cell_a = ['_cell_length_a 5.6']
-        self.cell_b = ['_cell_length_b 3.6']
-        self.cell_c = ['_cell_length_c 1.6']
-        self.cell_alpha = ['_cell_angle_alpha 101.1']
-        self.cell_beta = ['_cell_angle_beta 105.4']
-        self.cell_gamma = ['_cell_angle_gamma 102.2']
+class CrystalStructureBuilderTestUnitCell(unittest.TestCase):
+    def setUp(self):
+        self.builder = CrystalStructureBuilder()
 
-        self.valid_atoms = ['''
-loop_
-_atom_site_label
-_atom_site_fract_x
-_atom_site_fract_y
-_atom_site_fract_z
-_atom_site_occupancy
-_atom_site_U_iso_or_equiv
+    def test_getUnitCell_invalid(self):
+        invalid_no_a = {u'_cell_length_b': u'5.6'}
+        self.assertRaises(RuntimeError, self.builder._getUnitCell, cifData={})
+        self.assertRaises(RuntimeError, self.builder._getUnitCell, cifData=invalid_no_a)
 
-Si 1/8 1/8 1/8 1.0 0.02
-Al 0.232 0.2112 0.43 0.5 0.01
-        ''']
+    def test_getUnitCell_cubic(self):
+        cell = {u'_cell_length_a': u'5.6'}
 
-        self.valid_ub = ['''
-_diffrn_orient_matrix_UB_11 -0.03788345
-_diffrn_orient_matrix_UB_12 0.13866313
-_diffrn_orient_matrix_UB_13 0.31593824
-_diffrn_orient_matrix_UB_21 0.01467139
-_diffrn_orient_matrix_UB_22 -0.31690207
-_diffrn_orient_matrix_UB_23 0.14084537
-_diffrn_orient_matrix_UB_31 0.34471609
-_diffrn_orient_matrix_UB_32 0.02872634
-_diffrn_orient_matrix_UB_33 0.02872634
-        ''']
+        self.assertEqual(self.builder._getUnitCell(cell), '5.6 5.6 5.6 90.0 90.0 90.0')
 
-        self.workspace = CreateSingleValuedWorkspace(OutputWorkspace='testws', DataValue=100)
+    def test_getUnitCell_tetragonal(self):
+        cell = {u'_cell_length_a': u'5.6', u'_cell_length_c': u'2.3'}
 
-    def testGetSpaceGroup(self):
-        otherComponents = self.cell_a + self.valid_atoms
+        self.assertEqual(self.builder._getUnitCell(cell), '5.6 5.6 2.3 90.0 90.0 90.0')
 
-        self._checkRaisesNothing(otherComponents + self.valid_space_group_new)
-        self._checkRaisesNothing(otherComponents + self.valid_space_group_old)
-        self._checkRaisesNothing(otherComponents + self.valid_space_group_new)
-        self._checkRaisesNothing(otherComponents + self.valid_space_group_new + self.valid_space_group_old)
+    def test_getUnitCell_orthorhombic(self):
+        cell = {u'_cell_length_a': u'5.6', u'_cell_length_b': u'1.6', u'_cell_length_c': u'2.3'}
 
-        self._checkRaisesRuntimeError(otherComponents + self.invalid_space_group_wrong_new)
-        self._checkRaisesRuntimeError(otherComponents + self.invalid_space_group_wrong_old)
+        self.assertEqual(self.builder._getUnitCell(cell), '5.6 1.6 2.3 90.0 90.0 90.0')
 
-        self._checkRaisesNothing(otherComponents + self.valid_space_group_number_new)
-        self._checkRaisesNothing(otherComponents + self.valid_space_group_number_old)
-        self._checkRaisesNothing(otherComponents + self.valid_space_group_old + self.valid_space_group_number_new)
+    def test_getUnitCell_hexagonal(self):
+        cell = {u'_cell_length_a': u'5.6', u'_cell_length_c': u'2.3', u'_cell_angle_gamma': u'120.0'}
 
-        # These tests need to be re-enabled once PR 14913 is merged.
-        # self._checkRaisesRuntimeError(otherComponents + self.invalid_space_group_number_new)
-        # self._checkRaisesRuntimeError(otherComponents + self.invalid_space_group_number_old)
+        self.assertEqual(self.builder._getUnitCell(cell), '5.6 5.6 2.3 90.0 90.0 120.0')
 
-    def testGetUnitCell(self):
-        otherComponents = self.valid_space_group_new + self.valid_atoms
 
-        self._checkRaisesNothing(otherComponents + self.cell_a)
-        self._checkRaisesNothing(otherComponents + self.cell_a + self.cell_c)
-        self._checkRaisesNothing(otherComponents + self.cell_a + self.cell_b + self.cell_c)
-        self._checkRaisesNothing(otherComponents + self.cell_a + self.cell_b + self.cell_c + self.cell_beta)
-        self._checkRaisesNothing(otherComponents + self.cell_a + self.cell_b + self.cell_c + self.cell_alpha)
-        self._checkRaisesNothing(otherComponents + self.cell_a + self.cell_b + self.cell_c + self.cell_gamma)
-        self._checkRaisesNothing(otherComponents + self.cell_a + self.cell_b + self.cell_c + self.cell_alpha +
-                                 self.cell_gamma + self.cell_beta)
+class CrystalStructureBuilderTestAtoms(unittest.TestCase):
+    def setUp(self):
+        self.builder = CrystalStructureBuilder()
 
-    def _checkRaisesNothing(self, iterable):
-        validCif = self._getCifFromList(iterable)
-        validFile = TemporaryFileHelper(validCif)
+    def test_getAtoms_required_keys(self):
+        mandatoryKeys = dict([(u'_atom_site_label', [u'Si']),
+                              (u'_atom_site_fract_x', [u'1/8']),
+                              (u'_atom_site_fract_y', [u'1/8']),
+                              (u'_atom_site_fract_z', [u'1/8'])])
 
-        assertRaisesNothing(self, LoadCIF,
-                            Workspace = self.workspace,
-                            InputFile = validFile.getName())
+        for key in mandatoryKeys:
+            tmp = mandatoryKeys.copy()
+            del tmp[key]
+            self.assertRaises(RuntimeError, self.builder._getAtoms, cifData=tmp)
 
-    def _checkRaisesRuntimeError(self, iterable):
-        invalidCif = self._getCifFromList(iterable)
-        invalidFile = TemporaryFileHelper(invalidCif)
+    def test_getAtoms_correct(self):
+        data = dict([(u'_atom_site_label', [u'Si', u'Al']),
+                     (u'_atom_site_fract_x', [u'1/8', u'0.34']),
+                     (u'_atom_site_fract_y', [u'1/8', u'0.56']),
+                     (u'_atom_site_fract_z', [u'1/8', u'0.23']),
+                     (u'_atom_site_occupancy', [u'1.0', u'1.0']),
+                     (u'_atom_site_U_iso_or_equiv', [u'0.01', u'0.02'])])
 
-        self.assertRaises(RuntimeError, LoadCIF,
-                            Workspace = self.workspace,
-                            InputFile = invalidFile.getName())
+        self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
 
-    def _getCifFromList(self, iterable):
-        return '''{}\n{}'''.format(self.base_file, '\n'.join(iterable))
+
+class UBMatrixBuilderTest(unittest.TestCase):
+    def setUp(self):
+        self.builder = UBMatrixBuilder()
+        self.valid_matrix = {u'_diffrn_orient_matrix_ub_11': u'-0.03',
+                             u'_diffrn_orient_matrix_ub_12': u'0.13',
+                             u'_diffrn_orient_matrix_ub_13': u'0.31',
+                             u'_diffrn_orient_matrix_ub_21': u'0.01',
+                             u'_diffrn_orient_matrix_ub_22': u'-0.31',
+                             u'_diffrn_orient_matrix_ub_23': u'0.14',
+                             u'_diffrn_orient_matrix_ub_31': u'0.34',
+                             u'_diffrn_orient_matrix_ub_32': u'0.02',
+                             u'_diffrn_orient_matrix_ub_33': u'0.02'}
+
+    def test_getUBMatrix_invalid(self):
+        for key in self.valid_matrix:
+            tmp = self.valid_matrix.copy()
+            del tmp[key]
+
+            self.assertRaises(RuntimeError, self.builder._getUBMatrix, cifData=tmp)
+
+    def test_getUBMatrix_correct(self):
+        self.assertEqual(self.builder._getUBMatrix(self.valid_matrix), '-0.03,0.13,0.31,0.01,-0.31,0.14,0.34,0.02,0.02')
+
 
 if __name__ == '__main__':
-    # Only test if algorithm is registered (pyparsing dependency).
+    # Only test if algorithm is registered (PyCifRW dependency).
     if AlgorithmFactory.exists("LoadCIF"):
         unittest.main()
