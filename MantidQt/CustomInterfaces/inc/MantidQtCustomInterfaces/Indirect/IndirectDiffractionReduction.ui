@@ -686,6 +686,9 @@
   <tabstop>leRebinStart</tabstop>
   <tabstop>leRebinWidth</tabstop>
   <tabstop>leRebinEnd</tabstop>
+  <tabstop>leRebinStart_CalibOnly</tabstop>
+  <tabstop>leRebinWidth_CalibOnly</tabstop>
+  <tabstop>leRebinEnd_CalibOnly</tabstop>
   <tabstop>ckManualDRange</tabstop>
   <tabstop>spDRange</tabstop>
   <tabstop>ckIndividualGrouping</tabstop>

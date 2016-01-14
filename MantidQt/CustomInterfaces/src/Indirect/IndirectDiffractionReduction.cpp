@@ -101,14 +101,22 @@ void IndirectDiffractionReduction::run() {
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
-  if (instName == "OSIRIS" && mode == "diffonly") {
-    if (!m_uiForm.rfSampleFiles->isValid() || !validateVanCal()) {
-      showInformationBox(
-          "Invalid input.\nIncorrect entries marked with red star.");
-      return;
+  if (instName == "OSIRIS") {
+    if (mode == "diffonly") {
+      if (!m_uiForm.rfSampleFiles->isValid() || !validateVanCal()) {
+        showInformationBox(
+            "Invalid input.\nIncorrect entries marked with red star.");
+        return;
+      }
+      runOSIRISdiffonlyReduction();
+    } else {
+		if (!m_uiForm.rfSampleFiles->isValid() || !validateCalOnly()) {
+			showInformationBox(
+				"Invalid input.\nIncorrect entries marked with red star.");
+			return;
+		}
+		//runOSIRISdiffspecReduction();
     }
-
-    runOSIRISdiffonlyReduction();
   } else {
     if (!m_uiForm.rfSampleFiles->isValid() || !validateRebin()) {
       showInformationBox(
@@ -634,6 +642,25 @@ bool IndirectDiffractionReduction::validateVanCal() {
     return false;
 
   return true;
+}
+
+/**
+* Checks to see if the cal file and optional rebin fields are valid.
+*
+* @returns True fo vanadium and calibration files are valid, false otherwise
+*/
+bool IndirectDiffractionReduction::validateCalOnly() {
+	if (!m_uiForm.rfCalFile->isValid())
+		return false;
+
+	QString rebStartTxt = m_uiForm.leRebinStart_CalibOnly->text();
+	QString rebStepTxt = m_uiForm.leRebinWidth_CalibOnly->text();
+	QString rebEndTxt = m_uiForm.leRebinEnd_CalibOnly->text();
+
+	bool rebinValid = true;
+	// Need all or none
+
+	return true;
 }
 
 /**
