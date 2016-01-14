@@ -30,7 +30,6 @@
 #include <pqServerManagerModel.h>
 #include <pqView.h>
 #include <QVTKWidget.h>
-#include <vtkEventQtSlotConnect.h>
 #include <vtkRendererCollection.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
@@ -70,8 +69,7 @@ ViewBase::ViewBase(QWidget *parent,
                    RebinnedSourcesManager *rebinnedSourcesManager)
     : QWidget(parent), m_rebinnedSourcesManager(rebinnedSourcesManager),
       m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"),
-      m_vtkConnections(vtkSmartPointer<vtkEventQtSlotConnect>::New()),
-      m_pythonGIL(), m_colorScaleLock(NULL) {}
+      m_colorScaleLock(NULL) {}
 
 /**
  * This function creates a single standard ParaView view instance.
@@ -98,9 +96,6 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
 
   // Place the widget for the render view in the frame provided.
   hbox->addWidget(view->widget());
-
-  this->setupVTKEventConnections(view);
-
   return view;
 }
 
@@ -164,96 +159,6 @@ void ViewBase::setAutoColorScale()
   // Set the color scale widget
   emit this->dataRange(colorScale.minValue, colorScale.maxValue);
   emit this->setLogScale(colorScale.useLogScale);
-}
-
-/**
- * Connect the relevant VTK signals to the appropriate slots
- * @param view A pointer to the view to connect
- */
-void ViewBase::setupVTKEventConnections(pqRenderView* view) {
-  // @todo This needs factoring out to put the widget specfic stuff in the
-  // right class.
-  // Python locks
-  QObject::connect(view, SIGNAL(beginRender()), this, SLOT(lockPyGIL()),
-                   Qt::DirectConnection);
-  QObject::connect(view, SIGNAL(endRender()), this, SLOT(releasePyGIL()),
-                   Qt::DirectConnection);
-  vtkRenderWindow *renderWindow = view->getViewProxy()->GetRenderWindow();
-  m_vtkConnections->Connect(renderWindow,
-                            vtkCommand::StartEvent,
-                            this,
-                            SLOT(lockPyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-  m_vtkConnections->Connect(renderWindow,
-                            vtkCommand::EndEvent,
-                            this,
-                            SLOT(releasePyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-    QGridLayout *layout = dynamic_cast<QGridLayout*>(view->widget()->layout());
-    if(layout) {
-      for(int i = 0; i < layout->count(); ++i) {
-        if(auto *axisWidget = qobject_cast<pqMultiSliceAxisWidget*>(layout->itemAt(i)->widget())) {
-          renderWindow = axisWidget->getVTKWidget()->GetRenderWindow();
-          m_vtkConnections->Connect(renderWindow,
-                                    vtkCommand::StartEvent,
-                                    this,
-                                    SLOT(lockPyGIL()),
-                                    NULL, 1.0f, Qt::DirectConnection);
-          m_vtkConnections->Connect(renderWindow,
-                                    vtkCommand::EndEvent,
-                                    this,
-                                    SLOT(releasePyGIL()),
-                                    NULL, 1.0f, Qt::DirectConnection);
-        }
-      }
-    }
-
-   m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                             vtkCommand::StartEvent,
-                             this,
-                             SLOT(lockPyGIL()),
-                             NULL, 1.0f, Qt::DirectConnection);
-   m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                             vtkCommand::EndEvent,
-                             this,
-                             SLOT(releasePyGIL()),
-                             NULL, 1.0f, Qt::DirectConnection);
-  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                            vtkCommand::LeftButtonPressEvent,
-                            this,
-                            SLOT(lockPyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                            vtkCommand::LeftButtonReleaseEvent,
-                            this,
-                            SLOT(releasePyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-  // get right mouse pressed with high priority
-  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                            vtkCommand::RightButtonPressEvent,
-                            this,
-                            SLOT(lockPyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                            vtkCommand::RightButtonReleaseEvent,
-                            this,
-                            SLOT(releasePyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-
-  // Make a connection to the view's endRender signal for later checking.
-  QObject::connect(view, SIGNAL(endRender()),
-                   this, SIGNAL(renderingDone()));
-  
-}
-
-/// Called when the rendering begins
-void ViewBase::lockPyGIL() {
-  m_pythonGIL.acquire();
-}
-
-/// Called when the rendering finishes
-void ViewBase::releasePyGIL() {
-  m_pythonGIL.release();
 }
 
 /**

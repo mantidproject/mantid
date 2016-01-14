@@ -1,7 +1,6 @@
 #ifndef VIEWBASE_H_
 #define VIEWBASE_H_
 
-#include "MantidQtAPI/PythonThreading.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -17,7 +16,6 @@ class pqPipelineSource;
 class pqPipelineRepresentation;
 class pqRenderView;
 class vtkSMDoubleVectorProperty;
-class vtkEventQtSlotConnect;
 
 class QString;
 
@@ -240,13 +238,6 @@ protected:
   /// Set the Axes Grid
   void setAxesGrid();
 
-private slots:
-  void setupVTKEventConnections(pqRenderView* view);
-  /// Called when the rendering begins
-  void lockPyGIL();
-  /// Called when the rendering finishes
-  void releasePyGIL();
-
 private:
   Q_DISABLE_COPY(ViewBase)
 
@@ -266,8 +257,6 @@ private:
 
   QString m_internallyRebinnedWorkspaceIdentifier;
 
-  vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
-  RecursivePythonGIL m_pythonGIL;
   Mantid::VATES::ColorScaleLock* m_colorScaleLock;
 
 };
