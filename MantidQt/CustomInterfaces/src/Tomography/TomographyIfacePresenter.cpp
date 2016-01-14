@@ -162,7 +162,6 @@ void TomographyIfacePresenter::processCompResourceChange() {
     const bool status = !m_model->loggedIn().empty();
     m_view->enableLoggedActions(status);
   }
-
 }
 
 void TomographyIfacePresenter::processToolChange() {

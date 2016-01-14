@@ -41,8 +41,7 @@ public:
 
   ToolConfigTomoPy(const std::string &runnable, const std::string &pathOut,
                    const std::string &pathDark, const std::string &pathOpen,
-                   const std::string &pathSample, double centerRot,
-                   double angleMin, double angleMax);
+                   const std::string &pathSample);
 
   ~ToolConfigTomoPy() {}
 
@@ -56,9 +55,6 @@ private:
   std::string m_pathDark;
   std::string m_pathOpen;
   std::string m_pathSample;
-  double m_centerRot;
-  double m_angleMin;
-  double m_angleMax;
 };
 
 } // namespace CustomInterfaces

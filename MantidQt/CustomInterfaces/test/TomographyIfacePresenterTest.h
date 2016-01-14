@@ -368,12 +368,13 @@ public:
                       "expected (maximum angle)",
                       def.prep.maxAngle, 360.0);
 
-    TSM_ASSERT_LESS_THAN_EQUALS("Pre-processing settings default values should be as "
-                      "expected (scale down)",
-                      def.prep.scaleDownFactor, 1);
+    TSM_ASSERT_LESS_THAN_EQUALS(
+        "Pre-processing settings default values should be as "
+        "expected (scale down)",
+        def.prep.scaleDownFactor, 1);
 
     TSM_ASSERT_DELTA("Post-processing settings default values should be as "
-                      "expected (circular mask)",
+                     "expected (circular mask)",
                      def.postp.circMaskRadius, 0.94, 1e-5);
 
     TSM_ASSERT_EQUALS("Post-processing settings default values should be as "

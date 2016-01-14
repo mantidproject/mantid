@@ -1022,6 +1022,9 @@ std::string boxCoordinatesToCSV(ImageStackPreParams::Box2D &coords) {
  *
  * @param filters Settings for the pre-post processing steps/filters
  *
+ * @param corRegions center and regions selected by the user (region
+ * of intererst/analysis area and normalization or air region).
+ *
  * This doesn't belong here and should be move to more appropriate
  * place.
  */
@@ -1033,9 +1036,6 @@ TomographyIfaceViewQtGUI::filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
   opts +=
       " --region-of-interest='[" + boxCoordinatesToCSV(corRegions.roi) + "]'";
 
-  auto air = corRegions.normalizationRegion;
-  std::string airX1 = std::to_string(air.first.X());
-  std::string airY1, airX2, airY2;
   opts += " --air-region='[" +
           boxCoordinatesToCSV(corRegions.normalizationRegion) + "]'";
 
@@ -1143,9 +1143,9 @@ void TomographyIfaceViewQtGUI::processLocalRunRecon() {
       info.cmdLine = run + " " + args;
       m_localJobsStatus.push_back(info);
     } catch (Poco::SystemException &sexc) {
-      // userWarning("Execution failed", "Could not run the tool. Error details:
-      // " +
-      //                                    std::string(sexc.what()));
+      userWarning("Execution failed",
+                  "Could not run the tool. Error details: " +
+                      std::string(sexc.what()));
       Mantid::API::IRemoteJobManager::RemoteJobInfo info;
       info.id = boost::lexical_cast<std::string>(std::rand());
       info.name = "Mantid_Local";
@@ -1701,7 +1701,8 @@ void TomographyIfaceViewQtGUI::sendToParaviewClicked() {
  *
  * @param toolName Human understandable name of the tool/program
  * @param pathString Path where the tool is installed
- * @param string to append to the path if required, example: bin/tool.exe
+ * @param appendBin string to append to the path if required, example:
+ * bin/tool.exe
  */
 void TomographyIfaceViewQtGUI::sendToVisTool(const std::string &toolName,
                                              const std::string &pathString,
@@ -1799,27 +1800,29 @@ void TomographyIfaceViewQtGUI::browseVisToolOctopusClicked() {
 }
 
 void TomographyIfaceViewQtGUI::browseImgInputConvertClicked() {
-  const std::string path =
-      checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
+  // Not using this path to update the "current" path where to load from, but
+  // it could be an option.
+  // const std::string path =
+  checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
   // m_pathsConfig.updatePathDark(str);
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::browseImgOutputConvertClicked() {
-  const std::string path =
-      checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_output);
+  // Not using this path to update the "current" path where to load from, but
+  // it could be an option.
+  // const std::string path =
+  checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_output);
   // m_pathsConfig.updatePathDark(str);
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::browseEnergyInputClicked() {
-  const std::string path =
-      checkUserBrowsePath(m_uiTabEnergy.lineEdit_input_path);
+  checkUserBrowsePath(m_uiTabEnergy.lineEdit_input_path);
 }
 
 void TomographyIfaceViewQtGUI::browseEnergyOutputClicked() {
-  const std::string path =
-      checkUserBrowsePath(m_uiTabEnergy.lineEdit_output_path);
+  checkUserBrowsePath(m_uiTabEnergy.lineEdit_output_path);
 }
 
 std::string

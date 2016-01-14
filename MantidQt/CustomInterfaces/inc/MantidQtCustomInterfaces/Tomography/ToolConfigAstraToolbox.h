@@ -40,9 +40,7 @@ class DLLExport ToolConfigAstraToolbox : public TomoRecToolConfig {
 public:
   ToolConfigAstraToolbox();
 
-  ToolConfigAstraToolbox(const std::string &runnable, double centerRot,
-                         double angleMin, double angleMax,
-                         const std::string &pathOut,
+  ToolConfigAstraToolbox(const std::string &runnable const std::string &pathOut,
                          const std::string &pathDark,
                          const std::string &pathOpen,
                          const std::string &pathSample);
@@ -55,9 +53,6 @@ protected:
   virtual std::string makeExecutable() const { return m_runnable; };
 
 private:
-  double m_centerRot;
-  double m_angleMin;
-  double m_angleMax;
   std::string m_pathOut;
   std::string m_pathDark;
   std::string m_pathOpen;

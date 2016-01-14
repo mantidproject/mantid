@@ -79,9 +79,7 @@ public:
   /// and a human-readable-name
   typedef std::vector<std::pair<std::string, std::string>> TomoReconAlgs;
 
-  virtual TomoReconAlgs algorithmsAvailable() const {
-    return m_algs;
-  };
+  virtual TomoReconAlgs algorithmsAvailable() const { return m_algs; };
 
   virtual void appendOptions(std::string &opts) {
     m_appendix = m_appendix + " " + opts;
