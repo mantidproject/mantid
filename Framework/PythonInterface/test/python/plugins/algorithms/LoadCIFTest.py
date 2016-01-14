@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name,too-many-public-methods
+# pylint: disable=no-init,too-many-public-methods,invalid-name,protected-access
 import unittest
 from testhelpers import assertRaisesNothing
 
@@ -39,7 +39,6 @@ class CrystalStructureBuilderTestSpaceGroup(unittest.TestCase):
         self.assertEqual(self.builder._getSpaceGroupFromString(merge_dicts(valid_new, invalid_old)), 'P m -3 m')
 
     def test_getSpaceGroupFromString_invalid(self):
-        valid_new = {u'_space_group_name_h-m_alt': u'P m -3 m'}
         valid_old = {u'_symmetry_space_group_name_h-m': u'P m -3 m'}
         invalid_new = {u'_space_group_name_h-m_alt': u'invalid'}
         invalid_old = {u'_symmetry_space_group_name_h-m': u'invalid'}

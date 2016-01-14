@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name,too-few-public-methods,unused-import
+# pylint: disable=no-init,too-few-public-methods
 from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *
@@ -30,14 +30,16 @@ class CrystalStructureBuilder(object):
     def _getSpaceGroup(self, cifData):
         try:
             return self._getSpaceGroupFromString(cifData)
+        # pylint: disable=unused-variable
         except (RuntimeError, ValueError) as error:
             try:
                 return self._getSpaceGroupFromNumber(cifData)
+            # pylint: disable=unused-variable,invalid-name
             except RuntimeError as e:
                 raise RuntimeError(
-                        'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol' \
-                        'to contain spaces between the components.\n' \
-                        'Keys to look for: _space_group_name_H-M_alt, _symmetry_space_group_name_H-M')
+                    'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol'\
+                    'to contain spaces between the components.\n'\
+                    'Keys to look for: _space_group_name_H-M_alt, _symmetry_space_group_name_H-M')
 
     def _getSpaceGroupFromString(self, cifData):
         # Try two possibilities for space group symbol. If neither is present, throw a RuntimeError.
@@ -70,7 +72,7 @@ class CrystalStructureBuilder(object):
 
         if len(possibleSpaceGroupSymbols) != 1:
             raise RuntimeError(
-                    'Can not use space group number to determine space group for no. {0}'.format(spaceGroupNumber))
+                'Can not use space group number to determine space group for no. {0}'.format(spaceGroupNumber))
 
         return SpaceGroupFactory.createSpaceGroup(possibleSpaceGroupSymbols[0]).getHMSymbol()
 
@@ -78,9 +80,8 @@ class CrystalStructureBuilder(object):
         unitCellComponents = [u'_cell_length_a', u'_cell_length_b', u'_cell_length_c',
                               u'_cell_angle_alpha', u'_cell_angle_beta', u'_cell_angle_gamma']
 
-        unitCellValueMap = dict(
-                [(str(x), str(cifData[x])) if x in cifData.keys() else (str(x), None) for x in
-                 unitCellComponents])
+        unitCellValueMap = dict([(str(x), str(cifData[x])) if x in cifData.keys() else (str(x), None) for x in
+                                 unitCellComponents])
 
         if unitCellValueMap['_cell_length_a'] is None:
             raise RuntimeError('The a-parameter of the unit cell is not specified in the supplied CIF.\n' \
@@ -113,8 +114,8 @@ class CrystalStructureBuilder(object):
             else:
                 if required:
                     raise RuntimeError(
-                            'Mandatory field {0} not found in CIF-file.' \
-                            'Please check the atomic position definitions.'.format(field))
+                        'Mandatory field {0} not found in CIF-file.' \
+                        'Please check the atomic position definitions.'.format(field))
 
         atomLists = [cifData[x] for x in atomFields]
 
@@ -134,7 +135,7 @@ class CrystalStructureBuilder(object):
 
 
 class UBMatrixBuilder(object):
-    def __init__(self, cifFile = None):
+    def __init__(self, cifFile=None):
         if cifFile is not None:
             cifData = cifFile[cifFile.keys()[0]]
 
@@ -168,20 +169,20 @@ class LoadCIF(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-                FileProperty(name='InputFile',
-                             defaultValue='',
-                             action=FileAction.Load,
-                             extensions=['cif']),
-                doc='A CIF file containing a crystal structure.')
+            FileProperty(name='InputFile',
+                         defaultValue='',
+                         action=FileAction.Load,
+                         extensions=['cif']),
+            doc='A CIF file containing a crystal structure.')
 
         self.declareProperty('LoadUBMatrix', False,
                              direction=Direction.Input,
                              doc='Load UB-matrix from CIF file if available.')
 
         self.declareProperty(
-                WorkspaceProperty(name='Workspace',
-                                  defaultValue='', direction=Direction.InOut),
-                doc='Workspace into which the crystal structure is placed.')
+            WorkspaceProperty(name='Workspace',
+                              defaultValue='', direction=Direction.InOut),
+            doc='Workspace into which the crystal structure is placed.')
 
     def PyExec(self):
         cifFileName = self.getProperty('InputFile').value
@@ -204,8 +205,7 @@ class LoadCIF(PythonAlgorithm):
         builder = CrystalStructureBuilder(cifFile)
         crystalStructure = builder.getCrystalStructure()
 
-        self.log().information(
-                '''Loaded the following crystal structure:
+        self.log().information('''Loaded the following crystal structure:
                         Unit cell: {0}
                         Space group: {1}
                         Atoms: {2}
