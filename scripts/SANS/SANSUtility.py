@@ -16,11 +16,13 @@ import types
 import numpy as np
 
 sanslog = Logger("SANS")
+ADDED_TAG = '-add'
 ADDED_EVENT_DATA_TAG = '_added_event_data'
-REG_DATA_NAME = '-add' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
+REG_DATA_NAME = ADDED_TAG + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 REG_DATA_MONITORS_NAME = '-add_monitors' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 ZERO_ERROR_DEFAULT = 1e6
 INCIDENT_MONITOR_TAG = '_incident_monitor'
+MANTID_PROCESSED_WORKSPACE_TAG = 'Mantid Processed Workspace'
 
 # WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- START
 CAN_IMPORT_NXS = True
@@ -1533,6 +1535,56 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
     output_ws.setDx(0, q_resolution)
 
 
+class MeasurementTimeFromNexusFileExtractor(object):
+    '''
+    Extracts the measurement from a nexus file
+    '''
+    def __init__(self):
+        super(MeasurementTimeFromNexusFileExtractor, self).__init__()
+
+    def _get_measurement_time_processed_file(self, nxs_file):
+        nxs_file.opengroup('logs')
+        nxs_file.opengroup('end_time')
+        nxs_file.opendata('value')
+        data =  nxs_file.getdata()
+        return data
+
+    def _get_measurement_time_for_non_processed_file(self, nxs_file):
+        nxs_file.opendata('end_time')
+        return nxs_file.getdata()
+
+    def _check_if_processed_nexus_file(self, nxs_file):
+        nxs_file.opendata('definition')
+        mantid_definition = nxs_file.getdata()
+        nxs_file.closedata()
+
+        is_processed = True if MANTID_PROCESSED_WORKSPACE_TAG in mantid_definition else False
+        return is_processed
+
+    def get_measurement_time(self, filename_full):
+        measurement_time = ''
+        # Need to make sure that NXS module can be imported
+        if CAN_IMPORT_NXS:
+            try:
+                nxs_file = nxs.open(filename_full, 'r')
+            # pylint: disable=bare-except
+                try:
+                    rootKeys =  nxs_file.getentries().keys()
+                    nxs_file.opengroup(rootKeys[0])
+                    is_processed_file = self._check_if_processed_nexus_file(nxs_file)
+                    if is_processed_file:
+                        measurement_time = self._get_measurement_time_processed_file(nxs_file)
+                    else:
+                        measurement_time = self._get_measurement_time_for_non_processed_file(nxs_file)
+                except:
+                    sanslog.warning("Failed to retrieve the measurement time for " + str(filename_full))
+                finally:
+                    nxs_file.close()
+            except ValueError, NeXusError:
+                sanslog.warning("Failed to open the file: " + str(filename_full))
+        return measurement_time
+
+
 def get_measurement_time_from_file(filename):
     '''
     This function extracts the measurement time from either a Nexus or a
@@ -1577,23 +1629,7 @@ def get_measurement_time_from_file(filename):
 
     filename_full = get_file_path(filename)
 
-    if filename_capital.endswith(".NXS"):
-        if CAN_IMPORT_NXS:
-            try:
-                nxs_file = nxs.open(filename_full, 'r')
-            # pylint: disable=bare-except
-                try:
-                    rootKeys =  nxs_file.getentries().keys()
-                    nxs_file.opengroup(rootKeys[0])
-                    nxs_file.opendata('end_time')
-                    measurement_time  = nxs_file.getdata()
-                except:
-                    sanslog.warning("Failed to retrieve the measurement time for " + str(filename))
-                finally:
-                    nxs_file.close()
-            except ValueError, NeXusError:
-                sanslog.warning("Failed to open the file: " + str(filename))
-    elif filename_capital.endswith(".RAW"):
+    if filename_capital.endswith(".RAW"):
         RawFileInfo(Filename = filename_full, GetRunParameters = True)
         time_id = "r_endtime"
         date_id = "r_enddate"
@@ -1610,7 +1646,8 @@ def get_measurement_time_from_file(filename):
         measurement_time = get_raw_measurement_time(date, time)
         DeleteWorkspace(file_info)
     else:
-        sanslog.warning("Failed to retrieve the measurement time for " + str(filename))
+        nxs_extractor = MeasurementTimeFromNexusFileExtractor()
+        measurement_time = nxs_extractor.get_measurement_time(filename_full)
     return str(measurement_time).strip()
 
 def are_two_files_identical(file_path_1, file_path_2):
