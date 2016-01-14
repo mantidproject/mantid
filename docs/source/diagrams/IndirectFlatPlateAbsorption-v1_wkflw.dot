@@ -8,6 +8,7 @@ digraph IndirectFlatePlateAbsorption {
     SampleWorkspace2        [label="SampleWorkspace"]
     SampleWorkspace_Wave
     SampleWorkspace_Wave2   [label="SampleWorkspace_Wave"]
+    SampleWorkspace_Wave3   [label="SampleWorkspace_Wave"]
     SampleChemicalFormula
     SampleNumberDensity
     SampleHeight1           [label="SampleHeight"]
@@ -96,7 +97,8 @@ digraph IndirectFlatePlateAbsorption {
         SampleWorkspace2                        -> Minus2
         Minus2                                  -> Divide2
         AbsWorkspace2                           -> Divide2
-  canGiven                    	        -> Divide3                        	[label="No"]
+  canGiven                    	        -> Divide3                       	[label="No"]
+  SampleWorkspace_Wave3                 -> Divide3
   Minus1                                -> SampleWorkspace_Wave2
   Divide2                               -> SampleWorkspace_Wave2
   Divide3                               -> SampleWorkspace_Wave2
