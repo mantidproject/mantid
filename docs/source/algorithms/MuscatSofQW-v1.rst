@@ -26,7 +26,7 @@ present when using ConvFit to fit either one or two Lorentzians:
 Workflow
 --------
 
-.. diagram:: MuscatSofWQ-v1_wkflw.dot
+.. diagram:: MuscatSofQW-v1_wkflw.dot
 
 
 Usage
