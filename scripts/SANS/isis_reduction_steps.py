@@ -3083,10 +3083,11 @@ class SliceEvent(ReductionStep):
 
     def execute(self, reducer, workspace):
         ws_pointer = getWorkspaceReference(workspace)
+
         # it applies only for event workspace
         if not isinstance(ws_pointer, IEventWorkspace):
             self.scale = 1
-        else:
+            return
 
         # If a sample data set is converted then we want to be able to slice
         # If a can data set is being converted, the slice limits should not be applied
@@ -3097,14 +3098,14 @@ class SliceEvent(ReductionStep):
             start = -1
             stop = -1
 
-            _monitor = reducer.get_sample().get_monitor()
+        _monitor = reducer.get_sample().get_monitor()
 
-            if "events.binning" in reducer.settings:
-                binning = reducer.settings["events.binning"]
-            else:
-                binning = ""
-            dummy_hist, (dummy_tot_t, tot_c, dummy_part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
-            self.scale = part_c / tot_c
+        if "events.binning" in reducer.settings:
+            binning = reducer.settings["events.binning"]
+        else:
+            binning = ""
+        _hist, (_tot_t, tot_c, _part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
+        self.scale = part_c / tot_c
 
 class BaseBeamFinder(ReductionStep):
     """
