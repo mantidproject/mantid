@@ -121,7 +121,7 @@ void IndirectDiffractionReduction::run() {
             "Invalid input.\nIncorrect entries marked with red star.");
         return;
       }
-      // runOSIRISdiffspecReduction();
+      runGenericReduction("OSIRIS", "diffspec");
     }
   } else {
     if (!m_uiForm.rfSampleFiles->isValid() || !validateRebin()) {
@@ -282,6 +282,17 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   // Set algorithm properties
   msgDiffReduction->setProperty("Instrument", instName.toStdString());
   msgDiffReduction->setProperty("Mode", mode.toStdString());
+
+  // Check if Cal file is used
+  if (instName == "OSIRIS") {
+    if (mode == "diffspec") {
+      if (m_uiForm.ckUseCalib->isChecked()) {
+        std::string calFile =
+            m_uiForm.rfCalFile->getFirstFilename().toStdString();
+        msgDiffReduction->setProperty("CalFile", calFile);
+      }
+    }
+  }
   msgDiffReduction->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   msgDiffReduction->setProperty("LoadLogFiles",
                                 m_uiForm.ckLoadLogs->isChecked());

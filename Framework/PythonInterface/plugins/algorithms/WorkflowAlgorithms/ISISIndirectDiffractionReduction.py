@@ -11,6 +11,7 @@ import os
 class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
     _workspace_names = None
+    _cal_file = None
     _chopped_data = None
     _output_ws = None
     _data_files = None
@@ -46,6 +47,10 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self.declareProperty('ContainerScaleFactor', 1.0,
                              doc='Factor by which to scale the container runs.')
+
+        self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad),
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+\
+                                 '[[DiffractionFocussing]] child algorithms.')
 
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Enabled to sum spectra from each input file.')
@@ -230,6 +235,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._data_files = self.getProperty('InputFiles').value
         self._container_data_files = self.getProperty('ContainerFiles').value
+        self._cal_file = self.getProperty('CalFile').value
         self._container_scale_factor = self.getProperty('ContainerScaleFactor').value
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._instrument_name = self.getPropertyValue('Instrument')

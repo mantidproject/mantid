@@ -55,7 +55,6 @@ private:
   void runGenericReduction(QString instName, QString mode);
   void saveGenericReductions();
   void runOSIRISdiffonlyReduction();
-  void runOSIRISdiffspecReduction();
 
 private:
   Ui::IndirectDiffractionReduction
