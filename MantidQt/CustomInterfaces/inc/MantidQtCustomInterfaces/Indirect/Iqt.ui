@@ -142,6 +142,13 @@
        </widget>
       </item>
       <item>
+        <widget class="QCheckBox" name="ckTile">
+          <property name="text">
+            <string>TilePlot</string>
+          </property>
+        </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_1">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

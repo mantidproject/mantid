@@ -33,7 +33,7 @@ enum MDNormalization {
   NumEventsNormalization = 2
 };
 
-static const signal_t MDMaskValue = 0.0;
+static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 
 /** Basic MD Workspace Abstract Class.
  *

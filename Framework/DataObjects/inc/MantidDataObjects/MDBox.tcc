@@ -704,7 +704,11 @@ TMDE(void MDBox)::transformDimensions(std::vector<double> &scaling,
 }
 
 /// Setter for masking the box
-TMDE(void MDBox)::mask() { m_bIsMasked = true; }
+TMDE(void MDBox)::mask() {
+  this->setSignal(MDMaskValue);
+  this->setErrorSquared(MDMaskValue);
+  m_bIsMasked = true;
+}
 
 /// Setter for unmasking the box
 TMDE(void MDBox)::unmask() { m_bIsMasked = false; }
