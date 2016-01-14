@@ -72,6 +72,7 @@ presenter
 */
 void QtReflMainView::setModel(QString name) {
   m_toOpen = name.toStdString();
+  std::cout << "set model is called";
   m_presenter->notify(IReflPresenter::OpenTableFlag);
 }
 
@@ -119,7 +120,6 @@ Set the list of tables the user is offered to open
 */
 void QtReflMainView::setTableList(const std::set<std::string> &tables) {
   ui.menuOpenTable->clear();
-
   for (auto it = tables.begin(); it != tables.end(); ++it) {
     QAction *openTable =
         ui.menuOpenTable->addAction(QString::fromStdString(*it));
@@ -127,7 +127,16 @@ void QtReflMainView::setTableList(const std::set<std::string> &tables) {
 
     // Map this action to the table name
     m_openMap->setMapping(openTable, QString::fromStdString(*it));
-
+    // we disconnect the signals first so that there are not repeated
+    // connections.
+    // When repeated corrections happen the QMessageBox from openTable()
+    // method in ReflMainViewPresenter will be called multiple times
+    // when 'no' is clicked.
+    disconnect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()));
+    disconnect(m_openMap, SIGNAL(mapped(QString)), this,
+               SLOT(setModel(QString)));
+    // reconnecting the signals after disconnecting them to ensure
+    // each object has only one of these signals.
     connect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()));
     connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)));
   }

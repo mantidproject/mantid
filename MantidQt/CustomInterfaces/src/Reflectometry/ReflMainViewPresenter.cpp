@@ -1113,9 +1113,6 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
   case IReflPresenter::GroupRowsFlag:
     groupRows();
     break;
-  case IReflPresenter::OpenTableFlag:
-    openTable();
-    break;
   case IReflPresenter::NewTableFlag:
     newTable();
     break;
@@ -1148,6 +1145,9 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
     break;
   case IReflPresenter::ImportTableFlag:
     importTable();
+    break;
+  case IReflPresenter::OpenTableFlag:
+    openTable();
     break;
   case IReflPresenter::ExportTableFlag:
     exportTable();
