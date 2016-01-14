@@ -657,6 +657,7 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const int &width) const {
 
 /**
  * Find vertex-touching neighbours.
+ * NB, the index of the central pixel is included in the output array.
  * @param widths : Vector containing odd number of pixels per dimension. Entries
  * match dimensions of iterator.
  * @return collection of indexes.
@@ -675,9 +676,6 @@ std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(
   std::vector<size_t> neighbourIndexes(permutationsVertexTouching.size());
   size_t nextFree = 0;
   for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
-    if (permutationsVertexTouching[i] == 0) {
-      continue;
-    }
 
     size_t neighbour_index = m_pos + permutationsVertexTouching[i];
     if (neighbour_index < m_ws->getNPoints() &&

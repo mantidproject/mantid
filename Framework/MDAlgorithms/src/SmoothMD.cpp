@@ -2,42 +2,29 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/Progress.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include <boost/make_shared.hpp>
-#include <vector>
-#include <map>
-#include <string>
-#include <sstream>
-#include <utility>
-#include <limits>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-// Typedef for with vector
+// Typedef for width vector
 typedef std::vector<int> WidthVector;
+
+// Typedef for kernel vector
+typedef std::vector<double> KernelVector;
 
 // Typedef for an optional md histo workspace
 typedef boost::optional<IMDHistoWorkspace_const_sptr>
     OptionalIMDHistoWorkspace_const_sptr;
 
 // Typedef for a smoothing function
-typedef boost::function<IMDHistoWorkspace_sptr(
-    IMDHistoWorkspace_const_sptr, const WidthVector &,
-    OptionalIMDHistoWorkspace_const_sptr)> SmoothFunction;
+typedef boost::function<KernelVector(const WidthVector &)> SmoothFunction;
 
 // Typedef for a smoothing function map keyed by name.
 typedef std::map<std::string, SmoothFunction> SmoothFunctionMap;
@@ -51,19 +38,22 @@ namespace {
 std::vector<std::string> functions() {
   std::vector<std::string> propOptions;
   propOptions.push_back("Hat");
-  // propOptions.push_back("Gaussian");
+  propOptions.push_back("Gaussian");
   return propOptions;
 }
 
 /**
- * Maps a function name to a smoothing function
+ * Maps a function name to a function to create the corresponding kernel
  * @return function map
  */
 SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
   SmoothFunctionMap map;
   map.insert(std::make_pair(
-      "Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
-                         _1, _2, _3)));
+      "Hat",
+      boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatKernel, instance, _1)));
+  map.insert(std::make_pair(
+      "Gaussian", boost::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianKernel,
+                              instance, _1)));
   return map;
 }
 }
@@ -103,17 +93,18 @@ const std::string SmoothMD::summary() const {
 }
 
 /**
- * Hat function smoothing. All weights even. Hat function boundaries beyond
- * width.
+ * Smoothing performed with given kernel
  * @param toSmooth : Workspace to smooth
  * @param widthVector : Width vector
  * @param weightingWS : Weighting workspace (optional)
+ * @param kernel : Kernel with which to perform smoothing
  * @return Smoothed MDHistoWorkspace
  */
 IMDHistoWorkspace_sptr
-SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
-                    const WidthVector &widthVector,
-                    OptionalIMDHistoWorkspace_const_sptr weightingWS) {
+SmoothMD::doSmooth(IMDHistoWorkspace_const_sptr toSmooth,
+                   const WidthVector &widthVector,
+                   OptionalIMDHistoWorkspace_const_sptr weightingWS,
+                   const KernelVector &kernel) {
 
   const bool useWeights = weightingWS.is_initialized();
   uint64_t nPoints = toSmooth->getNPoints();
@@ -163,8 +154,8 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
           iterator->findNeighbourIndexesByWidth(widthVector);
 
       size_t nNeighbours = neighbourIndexes.size();
-      double sumSignal = iterator->getSignal();
-      double sumSqError = iterator->getError();
+      double sumSignal = 0;
+      double sumSqError = 0;
       for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
         if (useWeights) {
           if ((*weightingWS)->getSignalAt(neighbourIndexes[i]) == 0) {
@@ -179,10 +170,10 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
       }
 
       // Calculate the mean
-      outWS->setSignalAt(iteratorIndex, sumSignal / double(nNeighbours + 1));
+      outWS->setSignalAt(iteratorIndex, sumSignal / double(nNeighbours));
       // Calculate the sample variance
       outWS->setErrorSquaredAt(iteratorIndex,
-                               sumSqError / double(nNeighbours + 1));
+                               sumSqError / double(nNeighbours));
 
       progress.report();
 
@@ -261,12 +252,16 @@ void SmoothMD::exec() {
     widthVector = std::vector<int>(toSmooth->getNumDims(), widthVector.front());
   }
 
-  // Find the chosen smooth operation
+  // Find the function to generate the chosen kernel
   const std::string smoothFunctionName = this->getProperty("Function");
   SmoothFunctionMap functionMap = makeFunctionMap(this);
   SmoothFunction smoothFunction = functionMap[smoothFunctionName];
-  // invoke the smoothing operation
-  auto smoothed = smoothFunction(toSmooth, widthVector, optionalWeightingWS);
+
+  auto smoothing_kernel = smoothFunction(widthVector);
+
+  // Actually perform the smoothing (convolve kernel with signal array)
+  auto smoothed =
+      doSmooth(toSmooth, widthVector, optionalWeightingWS, smoothing_kernel);
 
   setProperty("OutputWorkspace", smoothed);
 }
@@ -342,6 +337,38 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
   }
 
   return product;
+}
+
+/*
+ * Create a Gaussian kernel. The returned kernel is a 1D vector,
+ * the order of which matches the linear indices returned by
+ * the findNeighbourIndexesByWidth method.
+ * @param widths : Width vector
+ * @return The Gaussian kernel
+ */
+KernelVector SmoothMD::gaussianKernel(const WidthVector &widths) {
+  // TODO implement
+  KernelVector kernel;
+  return kernel;
+}
+
+/*
+ * Create a top hat kernel. The returned kernel is a 1D vector,
+ * the order of which doesn't matter because all elements are
+ * the same.
+ * @param widths : Width vector
+ * @return The hat kernel
+ */
+KernelVector SmoothMD::hatKernel(const WidthVector &widths) {
+  size_t kernel_length = 1;
+  for (auto width : widths) {
+    kernel_length *= width;
+  }
+
+  // Explicitly cast the length to avoid compiler warnings
+  double hat_amplitude_normalised = 1.0 / static_cast<double>(kernel_length);
+  KernelVector kernel(kernel_length, hat_amplitude_normalised);
+  return kernel;
 }
 
 } // namespace MDAlgorithms
