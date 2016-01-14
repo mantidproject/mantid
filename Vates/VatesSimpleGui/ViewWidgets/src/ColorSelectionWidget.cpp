@@ -19,6 +19,7 @@
 
 #include <vtkPVXMLElement.h>
 #include <vtkPVXMLParser.h>
+#include <vtkNew.h>
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
@@ -104,38 +105,38 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
   // Associate the colormap value with the index a continuous index
 
   // create xml parser
-  vtkPVXMLParser *xmlParser = vtkPVXMLParser::New();
+  vtkNew<vtkPVXMLParser> xmlParser;
 
   // 1. Get builtinw color maps (Reading fragment requires: InitializeParser, ParseChunk, CleanupParser) 
   const char *xml = pqComponentsGetColorMapsXML();
   xmlParser->InitializeParser();
   xmlParser->ParseChunk(xml, static_cast<unsigned>(strlen(xml)));
   xmlParser->CleanupParser();
-  this->addColorMapsFromXML(xmlParser, presetModel);
- 
-  // 2. Add color maps from Slice Viewer, IDL and Matplotlib
-  this->addColorMapsFromFile("All_slice_viewer_cmaps_for_vsi.xml", xmlParser, presetModel);
-  this->addColorMapsFromFile("All_idl_cmaps.xml", xmlParser, presetModel);
-  this->addColorMapsFromFile("All_mpl_cmaps.xml", xmlParser, presetModel);
+  this->addColorMapsFromXML(xmlParser.GetPointer(), presetModel);
 
-  // cleanup parser
-  xmlParser->Delete();
+  // 2. Add color maps from Slice Viewer, IDL and Matplotlib
+  this->addColorMapsFromFile("All_slice_viewer_cmaps_for_vsi.xml",
+                             xmlParser.GetPointer(), presetModel);
+  this->addColorMapsFromFile("All_idl_cmaps.xml", xmlParser.GetPointer(),
+                             presetModel);
+  this->addColorMapsFromFile("All_mpl_cmaps.xml", xmlParser.GetPointer(),
+                             presetModel);
 }
 
- /**
-  * Load the default color map
-  * @param viewSwitched Flag if the view has switched or not.
-  */
-  void ColorSelectionWidget::loadColorMap(bool viewSwitched)
-  {
-    int defaultColorMapIndex = this->colorMapManager->getDefaultColorMapIndex(viewSwitched);
+/**
+ * Load the default color map
+ * @param viewSwitched Flag if the view has switched or not.
+ */
+void ColorSelectionWidget::loadColorMap(bool viewSwitched) {
+  int defaultColorMapIndex =
+      this->colorMapManager->getDefaultColorMapIndex(viewSwitched);
 
-    const pqColorMapModel *colorMap = this->m_presets->getModel()->getColorMap(defaultColorMapIndex);
+  const pqColorMapModel *colorMap =
+      this->m_presets->getModel()->getColorMap(defaultColorMapIndex);
 
-    if (colorMap)
-    {
-      emit this->colorMapChanged(colorMap);
-    }
+  if (colorMap) {
+    emit this->colorMapChanged(colorMap);
+  }
   }
 
 /**

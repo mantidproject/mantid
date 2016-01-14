@@ -24,14 +24,14 @@ namespace VATES
  * @throw invalid_arument if view is null
  * @throw logic_error if cannot use the reader-presenter for this filetype.
  */
-MDHWNexusLoadingPresenter::MDHWNexusLoadingPresenter(MDLoadingView* view, const std::string filename) : MDHWLoadingPresenter(view), m_filename(filename), m_wsTypeName("")
-{
-  if(this->m_filename.empty())
-  {
+MDHWNexusLoadingPresenter::MDHWNexusLoadingPresenter(
+    std::unique_ptr<MDLoadingView> view, const std::string filename)
+    : MDHWLoadingPresenter(std::move(view)), m_filename(filename),
+      m_wsTypeName("") {
+  if (this->m_filename.empty()) {
     throw std::invalid_argument("File name is an empty string.");
   }
-  if(NULL == this->m_view)
-  {
+  if (nullptr == this->m_view) {
     throw std::invalid_argument("View is NULL.");
   }
 }
@@ -72,8 +72,10 @@ bool MDHWNexusLoadingPresenter::canReadFile() const
  * @param loadingProgressUpdate : Handler for GUI updates while algorithm progresses.
  * @param drawingProgressUpdate : Handler for GUI updates while vtkDataSetFactory::create occurs.
  */
-vtkDataSet* MDHWNexusLoadingPresenter::execute(vtkDataSetFactory* factory, ProgressAction& loadingProgressUpdate, ProgressAction& drawingProgressUpdate)
-{
+vtkSmartPointer<vtkDataSet>
+MDHWNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
+                                   ProgressAction &loadingProgressUpdate,
+                                   ProgressAction &drawingProgressUpdate) {
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
 
@@ -81,7 +83,7 @@ vtkDataSet* MDHWNexusLoadingPresenter::execute(vtkDataSetFactory* factory, Progr
     this->loadWorkspace(loadingProgressUpdate);
 
   // Create visualisation in one-shot.
-  vtkDataSet* visualDataSet = factory->oneStepCreate(m_histoWs, drawingProgressUpdate);
+  auto visualDataSet = factory->oneStepCreate(m_histoWs, drawingProgressUpdate);
 
   // extractMetaData needs to be re-run here because the first execution
   // of this from ::executeLoadMetadata will not have ensured that all
@@ -113,10 +115,7 @@ void MDHWNexusLoadingPresenter::executeLoadMetadata()
  * Destructor
  * @return
  */
-MDHWNexusLoadingPresenter::~MDHWNexusLoadingPresenter()
-{
-  delete m_view;
-}
+MDHWNexusLoadingPresenter::~MDHWNexusLoadingPresenter() {}
 
 /**
  * Getter for the workspace type name.

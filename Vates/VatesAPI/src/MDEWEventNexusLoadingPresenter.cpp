@@ -24,47 +24,43 @@ namespace Mantid
     @throw invalid_arument if view is null
     @throw logic_error if cannot use the reader-presenter for this filetype.
     */
-    MDEWEventNexusLoadingPresenter::MDEWEventNexusLoadingPresenter(MDLoadingView* view, const std::string filename) : MDEWLoadingPresenter(view), m_filename(filename), m_wsTypeName("")
-    {
-      if(this->m_filename.empty())
-      {
-        throw std::invalid_argument("File name is an empty string.");
-      }
-      if(NULL == this->m_view)
-      {
-        throw std::invalid_argument("View is NULL.");
-      }
+  MDEWEventNexusLoadingPresenter::MDEWEventNexusLoadingPresenter(
+      std::unique_ptr<MDLoadingView> view, const std::string filename)
+      : MDEWLoadingPresenter(std::move(view)), m_filename(filename),
+        m_wsTypeName("") {
+    if (this->m_filename.empty()) {
+      throw std::invalid_argument("File name is an empty string.");
+    }
+    if (nullptr == this->m_view) {
+      throw std::invalid_argument("View is NULL.");
+    }
+  }
+
+  /*
+ Indicates whether this presenter is capable of handling the type of file that
+ is attempted to be loaded.
+ @return false if the file cannot be read.
+ */
+  bool MDEWEventNexusLoadingPresenter::canReadFile() const {
+    // Quick check based on extension.
+    if (!canLoadFileBasedOnExtension(m_filename, ".nxs")) {
+      return 0;
     }
 
-     /*
-    Indicates whether this presenter is capable of handling the type of file that is attempted to be loaded.
-    @return false if the file cannot be read.
-    */
-    bool MDEWEventNexusLoadingPresenter::canReadFile() const
-    {
-      // Quick check based on extension.
-      if(!canLoadFileBasedOnExtension(m_filename, ".nxs"))
-      {
-        return 0;
-      }
+    ::NeXus::File *file = NULL;
 
-      ::NeXus::File * file = NULL;
-
-      file = new ::NeXus::File(this->m_filename);
-      // MDEventWorkspace file has a different name for the entry
-      try
-      {
-        file->openGroup("MDEventWorkspace", "NXentry");
-        file->close();
-        return 1;
-      }
-      catch(::NeXus::Exception &)
-      {
-        // If the entry name does not match, then it can't read the file.
-        file->close();
-        return 0;
-      }
+    file = new ::NeXus::File(this->m_filename);
+    // MDEventWorkspace file has a different name for the entry
+    try {
+      file->openGroup("MDEventWorkspace", "NXentry");
+      file->close();
+      return 1;
+    } catch (::NeXus::Exception &) {
+      // If the entry name does not match, then it can't read the file.
+      file->close();
       return 0;
+    }
+    return 0;
     }
 
     /*
@@ -73,8 +69,9 @@ namespace Mantid
     @param loadingProgressUpdate : Handler for GUI updates while algorithm progresses.
     @param drawingProgressUpdate : Handler for GUI updates while vtkDataSetFactory::create occurs.
     */
-    vtkDataSet* MDEWEventNexusLoadingPresenter::execute(vtkDataSetFactory* factory, ProgressAction& loadingProgressUpdate, ProgressAction& drawingProgressUpdate)
-    {
+    vtkSmartPointer<vtkDataSet> MDEWEventNexusLoadingPresenter::execute(
+        vtkDataSetFactory *factory, ProgressAction &loadingProgressUpdate,
+        ProgressAction &drawingProgressUpdate) {
       using namespace Mantid::API;
       using namespace Mantid::Geometry;
 
@@ -98,7 +95,7 @@ namespace Mantid
 
       factory->setRecursionDepth(this->m_view->getRecursionDepth());
       //Create visualisation in one-shot.
-      vtkDataSet* visualDataSet = factory->oneStepCreate(eventWs, drawingProgressUpdate);
+      auto visualDataSet = factory->oneStepCreate(eventWs, drawingProgressUpdate);
       
       /*extractMetaData needs to be re-run here because the first execution of this from ::executeLoadMetadata will not have ensured that all dimensions
         have proper range extents set.
@@ -135,16 +132,13 @@ namespace Mantid
       AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
     }
 
-    ///Destructor
-    MDEWEventNexusLoadingPresenter::~MDEWEventNexusLoadingPresenter()
-    {
-      delete m_view;
-    }
+    /// Destructor
+    MDEWEventNexusLoadingPresenter::~MDEWEventNexusLoadingPresenter() {}
 
-        /*
-    Getter for the workspace type name.
-    @return Workspace Type Name
-    */
+    /*
+Getter for the workspace type name.
+@return Workspace Type Name
+*/
     std::string MDEWEventNexusLoadingPresenter::getWorkspaceTypeName()
     {
       return m_wsTypeName;
