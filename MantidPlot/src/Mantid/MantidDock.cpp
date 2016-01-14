@@ -651,16 +651,21 @@ void MantidDockWidget::addWorkspaceGroupMenuItems(
   m_colorFill->setEnabled(true);
 
   // If appropriate, add "plot surface" and "plot contour" options
-  // Only add these if there are >2 workspaces in group, and all are
-  // MatrixWorkspaces (otherwise they can't be plotted)
-  if (groupWS && groupWS->getNumberOfEntries() > 2) {
-    if (MantidGroupPlotGenerator::groupIsAllMatrixWorkspaces(groupWS)) {
-      menu->addAction(m_plotSurface);
-      m_plotSurface->setEnabled(true);
-      menu->addAction(m_plotContour);
-      m_plotContour->setEnabled(true);
+  // Only add these if:
+  // - there are >2 workspaces in group
+  // - all are MatrixWorkspaces (otherwise they can't be plotted)
+  // - only one group is selected
+  if (m_tree->selectedItems().size() == 1) {
+    if (groupWS && groupWS->getNumberOfEntries() > 2) {
+      if (MantidGroupPlotGenerator::groupIsAllMatrixWorkspaces(groupWS)) {
+        menu->addAction(m_plotSurface);
+        m_plotSurface->setEnabled(true);
+        menu->addAction(m_plotContour);
+        m_plotContour->setEnabled(true);
+      }
     }
   }
+
   menu->addSeparator();
   menu->addAction(m_saveNexus);
 }
