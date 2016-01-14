@@ -783,8 +783,8 @@ void InstrumentWindow::componentSelected(ComponentID id) {
   }
 }
 
-void InstrumentWindow::executeAlgorithm(const QString &alg_name,
-                                        const QString &param_list) {
+void InstrumentWindow::executeAlgorithm(const QString &,
+                                        const QString &) {
   //emit execMantidAlgorithm(alg_name, param_list, this);
 }
 
