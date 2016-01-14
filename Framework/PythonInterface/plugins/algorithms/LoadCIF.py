@@ -2,42 +2,52 @@
 from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *
-from mantid.geometry import SpaceGroupFactory
+from mantid.geometry import SpaceGroupFactory, CrystalStructure
 
 import re
 
 
 class CrystalStructureBuilder(object):
+    '''
+    Helper class that builds a CrystalStructure file from the result
+    of the ReadCif-function provided by PyCifRW.
+
+    For testing purposes, dictionaries with the appropriate data can
+    be passed in as well, so the source of the parsed data is replaceable.
+    '''
+
     def __init__(self, cifFile):
-        self._cifData = cifFile[cifFile.keys()[0]]
+        cifData = cifFile[cifFile.keys()[0]]
 
-        self._spaceGroup = self._getSpaceGroup()
-        self._unitCell = self._getUnitCell()
+        self.spaceGroup = self._getSpaceGroup(cifData)
+        self.unitCell = self._getUnitCell(cifData)
+        self.atoms = self._getAtoms(cifData)
 
-    def _getSpaceGroup(self):
+    def getCrystalStructure(self):
+        return CrystalStructure(self.unitCell, self.spaceGroup, self.atoms)
+
+    def _getSpaceGroup(self, cifData):
         try:
-            return self._getSpaceGroupFromString()
+            return self._getSpaceGroupFromString(cifData)
         except RuntimeError as error:
-            print error.message
             try:
-                return self._getSpaceGroupFromNumber()
+                return self._getSpaceGroupFromNumber(cifData)
             except RuntimeError as e:
-                print e.message
                 raise RuntimeError(
-                        'Can create space group from supplied CIF-file. You could try to modify the HM-symbol' \
+                        'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol' \
                         'to contain spaces between the components.\n' \
                         'Keys to look for: _space_group_name_H-M_alt, _symmetry_space_group_name_H-M')
 
-    def _getSpaceGroupFromString(self):
+    def _getSpaceGroupFromString(self, cifData):
         # Try two possibilities for space group symbol. If neither is present, throw a RuntimeError.
-        rawSpaceGroupSymbol = [self._cifData[x] for x in
-                               ['_space_group_name_H-M_alt', '_symmetry_space_group_name_H-M'] if
-                               x in self._cifData.keys()]
+        rawSpaceGroupSymbol = [str(cifData[x]) for x in
+                               [u'_space_group_name_h-m_alt', u'_symmetry_space_group_name_h-m'] if
+                               x in cifData.keys()]
 
         if len(rawSpaceGroupSymbol) == 0:
             raise RuntimeError('No space group symbol in CIF.')
 
-        cleanSpaceGroupSymbol = self._getCleanSpaceGroupSymbol(rawSpaceGroupSymbol)
+        cleanSpaceGroupSymbol = self._getCleanSpaceGroupSymbol(rawSpaceGroupSymbol[0])
 
         # If the symbol is not registered, throw as well.
         return SpaceGroupFactory.createSpaceGroup(cleanSpaceGroupSymbol).getHMSymbol()
@@ -47,10 +57,10 @@ class CrystalStructureBuilder(object):
         removalRe = re.compile(':[1H]', re.IGNORECASE)
         return re.sub(removalRe, '', rawSpaceGroupSymbol)
 
-    def _getSpaceGroupFromNumber(self):
-        spaceGroupNumber = int([self._cifData[x] for x in
-                                ['_space_group_IT_number', '_symmetry_Int_Tables_number'] if
-                                x in self._cifData.keys()][0])
+    def _getSpaceGroupFromNumber(self, cifData):
+        spaceGroupNumber = [int(cifData[x]) for x in
+                                [u'_space_group_it_number', u'_symmetry_int_tables_number'] if
+                                x in cifData.keys()][0]
 
         possibleSpaceGroupSymbols = SpaceGroupFactory.subscribedSpaceGroupSymbols(spaceGroupNumber)
 
@@ -60,38 +70,40 @@ class CrystalStructureBuilder(object):
 
         return SpaceGroupFactory.createSpaceGroup(possibleSpaceGroupSymbols[0]).getHMSymbol()
 
-    def _getUnitCell(self):
-        unitCellComponents = ['_cell_length_a', '_cell_length_b', '_cell_length_c',
-                              '_cell_angla_alpha', '_cell_angle_beta', '_cell_angle_gamma']
-
-        replacementMap = {'_cell_length_b': '_cell_length_a',
-                          '_cell_length_c': '_cell_length_a',
-                          '_cell_angle_alpha': '90.0', '_cell_angle_beta': '90.0', '_cell_angle_gamma': '90.0'}
+    def _getUnitCell(self, cifData):
+        unitCellComponents = [u'_cell_length_a', u'_cell_length_b', u'_cell_length_c',
+                              u'_cell_angle_alpha', u'_cell_angle_beta', u'_cell_angle_gamma']
 
         unitCellValueMap = dict(
-                [(x, self._cifData[x]) if x in self._cifData.keys() else None for x in unitCellComponents])
+                [(str(x), str(cifData[x])) if x in cifData.keys() else (str(x), None) for x in
+                    unitCellComponents])
 
         if unitCellValueMap['_cell_length_a'] is None:
             raise RuntimeError('The a-parameter of the unit cell is not specified in the supplied CIF.\n' \
                                'Key to look for: _cell_length_a')
 
-        unitCellValues = [value if value is not None else replacementMap[key] for key, value in
-                          unitCellValueMap.iteritems()]
+        replacementMap = {
+                  '_cell_length_b': str(unitCellValueMap['_cell_length_a']),
+                  '_cell_length_c': str(unitCellValueMap['_cell_length_a']),
+                  '_cell_angle_alpha': '90.0', '_cell_angle_beta': '90.0', '_cell_angle_gamma': '90.0'}
 
-        return unitCellValues.join(' ')
 
-    def _getAtoms(self):
-        atomFieldsRequirements = [('_atom_site_label', True),
-                                  ('_atom_site_fract_x', True),
-                                  ('_atom_site_fract_y', True),
-                                  ('_atom_site_fract_z', True),
-                                  ('_atom_site_occupancy', False),
-                                  ('_atom_site_U_iso_or_equiv', False)]
+        unitCellValues = [unitCellValueMap[str(key)] if unitCellValueMap[str(key)] is not None else replacementMap[str(key)] for key in unitCellComponents]
+
+        return ' '.join(unitCellValues)
+
+    def _getAtoms(self, cifData):
+        atomFieldsRequirements = [(u'_atom_site_label', True),
+                                  (u'_atom_site_fract_x', True),
+                                  (u'_atom_site_fract_y', True),
+                                  (u'_atom_site_fract_z', True),
+                                  (u'_atom_site_occupancy', False),
+                                  (u'_atom_site_U_iso_or_equiv', False)]
 
         atomFields = []
 
         for field, required in atomFieldsRequirements:
-            if field in self._cifData:
+            if field in cifData.keys():
                 atomFields.append(field)
             else:
                 if required:
@@ -99,18 +111,43 @@ class CrystalStructureBuilder(object):
                             'Mandatory field {0} not found in CIF-file.' \
                             'Please check the atomic position definitions.'.format(field))
 
-        atomLists = [self._cifData[x] for x in atomFields]
+        atomLists = [cifData[x] for x in atomFields]
 
         atomLines = []
-        for atomLine in zip(atomLists):
-            cleanLine = [self._getCleanAtomSymbol(atomLine[0])] + list(atomLine[1:])
-            atomLines.append(atomLine.join(' '))
+        for atomLine in zip(*atomLists):
+            stringAtomLine = [str(x) for x in atomLine]
+
+            cleanLine = [self._getCleanAtomSymbol(stringAtomLine[0])] + list(stringAtomLine[1:])
+            atomLines.append(' '.join(cleanLine))
+
+        return ';'.join(atomLines)
 
     def _getCleanAtomSymbol(self, atomSymbol):
         nonCharacterRe = re.compile('[^a-z]', re.IGNORECASE)
 
         return re.sub(nonCharacterRe, '', atomSymbol)
 
+
+class UBMatrixBuilder(object):
+    def __init__(self, cifFile):
+        cifData = cifFile[cifFile.keys()[0]]
+
+        self._ubMatrix = self._getUBMatrix(cifData)
+
+    def getUBMatrix(self):
+        return self._ubMatrix
+
+    def _getUBMatrix(self, cifData):
+        ubMatrixKeys = [u'_diffrn_orient_matrix_ub_11', u'_diffrn_orient_matrix_ub_12', u'_diffrn_orient_matrix_ub_13',
+                        u'_diffrn_orient_matrix_ub_21', u'_diffrn_orient_matrix_ub_22', u'_diffrn_orient_matrix_ub_23',
+                        u'_diffrn_orient_matrix_ub_31', u'_diffrn_orient_matrix_ub_32', u'_diffrn_orient_matrix_ub_33']
+
+        ubValues = [str(cifData[key]) if key in cifData.keys() else None for key in ubMatrixKeys]
+
+        if None in ubValues:
+            raise RuntimeError('Can not load UB matrix from CIF, values are missing.')
+
+        return ','.join(ubValues)
 
 class LoadCIF(PythonAlgorithm):
     def category(self):
@@ -141,21 +178,46 @@ class LoadCIF(PythonAlgorithm):
 
     def PyExec(self):
         cifFileName = self.getProperty('InputFile').value
+        workspace = self.getProperty('Workspace').value
 
-        crystalStructure = self._getCrystalStructureFromFile(cifFileName)
+        # Try to parse cif file using PyCifRW
+        parsedCifFile = ReadCif(cifFileName)
 
-    def _getCrystalStructureFromFile(self, filename):
-        parsedCifFile = ReadCif(filename)
-        self._getCrystalStructureFromCifFile(parsedCifFile)
+        self._setCrystalStructureFromCifFile(workspace, parsedCifFile)
+
+        ubOption = self.getProperty('LoadUBMatrix').value
+        if ubOption:
+            self._setUBMatrixFromCifFile(workspace, parsedCifFile)
+
+    def _setCrystalStructureFromCifFile(self, workspace, cifFile):
+        crystalStructure = self._getCrystalStructureFromCifFile(cifFile)
+        workspace.sample().setCrystalStructure(crystalStructure)
 
     def _getCrystalStructureFromCifFile(self, cifFile):
-        a = CrystalStructureBuilder(cifFile)
+        builder = CrystalStructureBuilder(cifFile)
+        crystalStructure = builder.getCrystalStructure()
 
-        print a._getCleanAtomSymbol('O1')
-        print a._getCleanAtomSymbol('O1+')
-        print a._getCleanAtomSymbol('Os4-')
-        print a._getCleanAtomSymbol('Ni-1')
-        print a._getCleanAtomSymbol('Ni(Bla)')
+        self.log().information(
+            '''Loaded the following crystal structure:
+                    Unit cell: {0}
+                    Space group: {1}
+                    Atoms: {2}
+            '''.format(builder.unitCell, builder.spaceGroup, builder.atoms))
+
+        return crystalStructure
+
+    def _setUBMatrixFromCifFile(self, workspace, cifFile):
+        ubMatrix = self._getUBMatrixFromCifFile(cifFile)
+
+        setUBAlgorithm = self.createChildAlgorithm('SetUB')
+        setUBAlgorithm.setProperty('Workspace', workspace)
+        setUBAlgorithm.setProperty('UB', ubMatrix)
+        setUBAlgorithm.execute()
+
+    def _getUBMatrixFromCifFile(self, cifFile):
+        builder = UBMatrixBuilder(cifFile)
+
+        return builder.getUBMatrix()
 
 
 try:
