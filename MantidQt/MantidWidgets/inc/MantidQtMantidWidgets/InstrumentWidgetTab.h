@@ -1,5 +1,5 @@
-#ifndef INSTRUMENTWINDOWTAB_H
-#define INSTRUMENTWINDOWTAB_H
+#ifndef INSTRUMENTWIDGETTAB_H
+#define INSTRUMENTWIDGETTAB_H
 
 #include "WidgetDllOption.h"
 #include "InstrumentWidgetTypes.h"
@@ -39,4 +39,4 @@ protected:
 
 };
 
-#endif // INSTRUMENTWINDOWTAB_H
+#endif // INSTRUMENTWIDGETTAB_H

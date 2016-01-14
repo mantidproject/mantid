@@ -1,5 +1,5 @@
-#ifndef INSTRUMENTWINDOWMASKTAB_H_
-#define INSTRUMENTWINDOWMASKTAB_H_
+#ifndef INSTRUMENTWIDGETMASKTAB_H_
+#define INSTRUMENTWIDGETMASKTAB_H_
 
 #include "WidgetDllOption.h"
 #include "InstrumentWidgetTab.h"
@@ -183,4 +183,4 @@ protected:
 };
 
 
-#endif /*INSTRUMENTWINDOWMASKTAB_H_*/
+#endif /*INSTRUMENTWIDGETMASKTAB_H_*/

@@ -1,5 +1,5 @@
-#ifndef INSTRUMENTWINDOWRENDERTAB_H_
-#define INSTRUMENTWINDOWRENDERTAB_H_
+#ifndef INSTRUMENTWIDGETRENDERTAB_H_
+#define INSTRUMENTWIDGETRENDERTAB_H_
 
 #include "WidgetDllOption.h"
 #include "InstrumentWidgetTab.h"
@@ -114,4 +114,4 @@ private:
 };
 
 
-#endif /*INSTRUMENTWINDOWRENDERTAB_H_*/
+#endif /*INSTRUMENTWIDGETRENDERTAB_H_*/

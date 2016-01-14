@@ -1,4 +1,4 @@
-61#include "InstrumentWidget.h"
+#include "InstrumentWidget.h"
 #include "InstrumentWidgetPickTab.h"
 #include "OneCurvePlot.h"
 #include "CollapsiblePanel.h"

@@ -1,5 +1,5 @@
-#ifndef MANTIDINSTRUMENTWINDOW_H
-#define MANTIDINSTRUMENTWINDOW_H
+#ifndef INSTRUMENTWINDOW_H
+#define INSTRUMENTWINDOW_H
 
 #include <Mantid/IProjectSerialisable.h>
 #include <InstrumentWidget.h>
@@ -13,12 +13,12 @@ class MdiSubWindow;
 
 using namespace Mantid;
 
-class MantidInstrumentWindow : public InstrumentWidget,
+class InstrumentWindow : public InstrumentWidget,
                                public IProjectSerialisable {
   Q_OBJECT
 public:
-  explicit MantidInstrumentWindow(MdiSubWindow *parent, const QString &wsName);
-  ~MantidInstrumentWindow();
+  explicit InstrumentWindow(MdiSubWindow *parent, const QString &wsName);
+  ~InstrumentWindow();
 
   void loadFromProject(const std::string &lines, ApplicationWindow *app,
                        const int fileVersion);
@@ -42,4 +42,4 @@ private:
   MdiSubWindow *m_mdiSubWindowParent;
 };
 
-#endif // MANTIDINSTRUMENTWINDOW_H
+#endif // INSTRUMENTWINDOW_H

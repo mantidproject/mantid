@@ -1,5 +1,5 @@
-#ifndef INSTRUMENTWINDOW_H_
-#define INSTRUMENTWINDOW_H_
+#ifndef INSTRUMENTWIDGET_H_
+#define INSTRUMENTWIDGET_H_
 
 #include "WidgetDllOption.h"
 #include "MantidGLWidget.h"
@@ -232,5 +232,5 @@ protected:
   bool m_instrumentDisplayContextMenuOn;
 };
 
-#endif /*INSTRUMENTWINDOW_H_*/
+#endif /*INSTRUMENTWIDGET_H_*/
 

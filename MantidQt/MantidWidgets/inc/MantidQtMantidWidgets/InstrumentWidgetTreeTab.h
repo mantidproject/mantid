@@ -1,5 +1,5 @@
-#ifndef INSTRUMENTWINDOWTREETAB_H_
-#define INSTRUMENTWINDOWTREETAB_H_
+#ifndef INSTRUMENTWIDGETTREETAB_H_
+#define INSTRUMENTWIDGETTREETAB_H_
 
 #include "WidgetDllOption.h"
 #include "InstrumentWidgetTab.h"
@@ -26,4 +26,4 @@ private:
 };
 
 
-#endif /*INSTRUMENTWINDOWTREETAB_H_*/
+#endif /*INSTRUMENTWIDGETTREETAB_H_*/

@@ -25,7 +25,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
-#include "Mantid/InstrumentWidget/MantidInstrumentWindow.h"
+#include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -2028,7 +2028,7 @@ InstrumentWidget* MantidUI::getInstrumentView(const QString & wsName, int tab)
   //Need a new window
   const QString windowName(QString("InstrumentWindow:") + wsName);
   MdiSubWindow *subWindow = new MdiSubWindow(appWindow(), QString("Instrument"), windowName);
-  MantidInstrumentWindow *insWin = new MantidInstrumentWindow(subWindow, wsName);
+  InstrumentWindow *insWin = new InstrumentWindow(subWindow, wsName);
 
   subWindow->setWidget(insWin);
 

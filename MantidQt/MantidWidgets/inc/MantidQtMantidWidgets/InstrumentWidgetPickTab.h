@@ -1,5 +1,5 @@
-#ifndef INSTRUMENTWINDOWPICKTAB_H_
-#define INSTRUMENTWINDOWPICKTAB_H_
+#ifndef INSTRUMENTWIDGETPICKTAB_H_
+#define INSTRUMENTWIDGETPICKTAB_H_
 
 #include "WidgetDllOption.h"
 #include "InstrumentWidgetTab.h"
@@ -224,4 +224,4 @@ private:
 };
 
 
-#endif /*INSTRUMENTWINDOWPICKTAB_H_*/
+#endif /*INSTRUMENTWIDGETPICKTAB_H_*/

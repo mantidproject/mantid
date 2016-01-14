@@ -192,7 +192,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/WorkspaceIcons.cpp
-                   src/Mantid/InstrumentWidget/MantidInstrumentWindow.cpp
+                   src/Mantid/InstrumentWidget/InstrumentWindow.cpp
 )
 
 ###########################################################################
@@ -386,7 +386,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/WorkspaceIcons.h
                    src/Mantid/IProjectSerialisable.h
-                   src/Mantid/InstrumentWidget/MantidInstrumentWindow.h
+                   src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 
 ###########################################################################
@@ -611,7 +611,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
                        src/Mantid/UserFitFunctionDialog.h
-                       src/Mantid/InstrumentWidget/MantidInstrumentWindow.h
+                       src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui

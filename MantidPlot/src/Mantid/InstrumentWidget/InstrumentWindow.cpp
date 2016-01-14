@@ -1,4 +1,4 @@
-#include "MantidInstrumentWindow.h"
+#include "InstrumentWindow.h"
 #include "ApplicationWindow.h"
 #include "TSVSerialiser.h"
 #include "MantidAPI/Workspace.h"
@@ -8,15 +8,15 @@
 
 using namespace Mantid::API;
 
-MantidInstrumentWindow::MantidInstrumentWindow(MdiSubWindow *parent, const QString &wsName)
+InstrumentWindow::InstrumentWindow(MdiSubWindow *parent, const QString &wsName)
     : InstrumentWidget(wsName, parent),
 	m_mdiSubWindowParent(parent)
 {
 }
 
-MantidInstrumentWindow::~MantidInstrumentWindow() {}
+InstrumentWindow::~InstrumentWindow() {}
 
-void MantidInstrumentWindow::loadFromProject(const std::string &lines,
+void InstrumentWindow::loadFromProject(const std::string &lines,
                                              ApplicationWindow *app,
                                              const int fileVersion) {
   Q_UNUSED(fileVersion);
@@ -29,7 +29,7 @@ void MantidInstrumentWindow::loadFromProject(const std::string &lines,
   }
 }
 
-std::string MantidInstrumentWindow::saveToProject(ApplicationWindow *app) {
+std::string InstrumentWindow::saveToProject(ApplicationWindow *app) {
   TSVSerialiser tsv;
   tsv.writeRaw("<instrumentwindow>");
   tsv.writeLine("WorkspaceName") << m_workspaceName.toStdString();
@@ -38,7 +38,7 @@ std::string MantidInstrumentWindow::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
-void MantidInstrumentWindow::closeEvent(QCloseEvent *e)
+void InstrumentWindow::closeEvent(QCloseEvent *e)
 {
 	if (m_mdiSubWindowParent && m_mdiSubWindowParent->close())
 		e->accept();
@@ -51,7 +51,7 @@ void MantidInstrumentWindow::closeEvent(QCloseEvent *e)
 * @param ws_name :: Name of the deleted workspace.
 * @param workspace_ptr :: Pointer to the workspace to be deleted
 */
-void MantidInstrumentWindow::preDeleteHandle(
+void InstrumentWindow::preDeleteHandle(
     const std::string &ws_name,
     const boost::shared_ptr<Workspace> workspace_ptr) {
   if (ws_name == m_workspaceName.toStdString()) {
@@ -68,7 +68,7 @@ void MantidInstrumentWindow::preDeleteHandle(
   }
 }
 
-void MantidInstrumentWindow::afterReplaceHandle(
+void InstrumentWindow::afterReplaceHandle(
     const std::string &wsName, const boost::shared_ptr<Workspace> workspace) {
   // Replace current workspace
   if (wsName == m_workspaceName.toStdString()) {
@@ -102,7 +102,7 @@ void MantidInstrumentWindow::afterReplaceHandle(
   }
 }
 
-void MantidInstrumentWindow::renameHandle(const std::string &oldName,
+void InstrumentWindow::renameHandle(const std::string &oldName,
                                           const std::string &newName) {
   if (oldName == m_workspaceName.toStdString()) {
     m_workspaceName = QString::fromStdString(newName);
@@ -111,7 +111,7 @@ void MantidInstrumentWindow::renameHandle(const std::string &oldName,
   }
 }
 
-void MantidInstrumentWindow::clearADSHandle() {
+void InstrumentWindow::clearADSHandle() {
   m_mdiSubWindowParent->confirmClose(false);
   m_mdiSubWindowParent->close();
 }

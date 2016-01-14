@@ -128,7 +128,7 @@
 #include "Mantid/MantidTable.h"
 #include "Mantid/MantidMatrixCurve.h"
 #include "ContourLinesEditor.h"
-#include "Mantid/InstrumentWidget/MantidInstrumentWindow.h"
+#include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "Mantid/RemoveErrorsDialog.h"
 
 #include <stdio.h>
@@ -4824,7 +4824,7 @@ void ApplicationWindow::openProjectFolder(std::string lines,
       TSVSerialiser iws(*it);
       if (iws.selectLine("WorkspaceName")) {
         std::string wsName = iws.asString(1);
-        MantidInstrumentWindow *iw = dynamic_cast<MantidInstrumentWindow *>(
+        InstrumentWindow *iw = dynamic_cast<InstrumentWindow *>(
             mantidUI->getInstrumentView(QString::fromStdString(wsName)));
         if (iw) {
           iw->loadFromProject(*it, this, fileVersion);
