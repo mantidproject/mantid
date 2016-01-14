@@ -173,6 +173,14 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                           RHSWorkspace=self._container_workspace,
                           OutputWorkspace=ws_name)
 
+                if self._cal_file is not '':
+                    AlignDetectors(InputWorkspace=ws_name,
+                                   OutputWorkspace=ws_name,
+                                   CalibrationFile=self._cal_file)
+                    DiffractionFocussing(InputWorkspace=ws_name,
+                                         OutputWorkspace=ws_name,
+                                         GroupingFileName=self._cal_file)
+
                 monitor_ws_name = ws_name + '_mon'
 
                 # Process monitor
