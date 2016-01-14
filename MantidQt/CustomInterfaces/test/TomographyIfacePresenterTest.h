@@ -212,11 +212,19 @@ public:
     tools.push_back(g_ccpi);
     tools.push_back("Savu");
 
-    for (size_t i = 0; i < tools.size(); i++) {
+    TSM_ASSERT_EQUALS("There should be 4 tools in this test", tools.size(), 4);
+    // up to this index the tools are supported
+    const size_t indexToolsWork = 1;
+    for (size_t i = 0; i < 3; i++) {
       EXPECT_CALL(mockView, currentReconTool())
           .Times(1)
           .WillOnce(Return(tools[i]));
-      EXPECT_CALL(mockView, currentComputeResource()).Times(0);
+      if (i <= indexToolsWork) {
+        EXPECT_CALL(mockView, currentComputeResource()).Times(1);
+      } else {
+        EXPECT_CALL(mockView, currentComputeResource()).Times(0);
+      }
+
       EXPECT_CALL(mockView, enableRunReconstruct(testing::_)).Times(1);
       EXPECT_CALL(mockView, enableConfigTool(testing::_)).Times(1);
 
@@ -309,7 +317,7 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     EXPECT_CALL(mockView, currentComputeResource()).Times(0);
-    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_)).Times(0);
+    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_)).Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -323,7 +331,7 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     EXPECT_CALL(mockView, currentComputeResource()).Times(0);
-    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_)).Times(0);
+    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_)).Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
