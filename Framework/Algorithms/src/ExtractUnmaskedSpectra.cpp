@@ -1,5 +1,6 @@
-#include "MantidAlgorithms/ExtractUnmaskedSpectra.h"
+#include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/ExtractUnmaskedSpectra.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -48,6 +49,9 @@ void ExtractUnmaskedSpectra::init() {
   declareProperty(
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
+  declareProperty(new WorkspaceProperty<>("MaskWorkspace", "", Direction::Input,
+                                          API::PropertyMode::Optional),
+                  "An optional mask workspace.");
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "An output workspace.");
@@ -59,19 +63,34 @@ void ExtractUnmaskedSpectra::init() {
 void ExtractUnmaskedSpectra::exec() {
   // Get the input workspace
   API::MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  // Get the masked workspace (optional).
+  API::MatrixWorkspace_sptr maskedWorkspace = getProperty("MaskWorkspace");
 
-  auto extractMask = createChildAlgorithm("ExtractMask");
-  extractMask->setProperty("InputWorkspace", inputWorkspace);
-  extractMask->executeAsChildAlg();
-  API::MatrixWorkspace_sptr mask = extractMask->getProperty("OutputWorkspace");
+  // Define the mask
+  API::MatrixWorkspace_sptr mask;
+  if (maskedWorkspace) {
+    if (boost::dynamic_pointer_cast<API::IMaskWorkspace>(maskedWorkspace)) {
+      mask = maskedWorkspace;
+    } else {
+      auto extractMask = createChildAlgorithm("ExtractMask");
+      extractMask->setProperty("InputWorkspace", maskedWorkspace);
+      extractMask->executeAsChildAlg();
+      mask = extractMask->getProperty("OutputWorkspace");
+    }
+  } else {
+    auto extractMask = createChildAlgorithm("ExtractMask");
+    extractMask->setProperty("InputWorkspace", inputWorkspace);
+    extractMask->executeAsChildAlg();
+    mask = extractMask->getProperty("OutputWorkspace");
+  }
 
   std::vector<size_t> indicesToExtract;
   auto nSpectra = inputWorkspace->getNumberHistograms();
   indicesToExtract.reserve(nSpectra);
 
   // Find the unmasked spectra
-  for(size_t index = 0; index < nSpectra; ++index) {
-    if (mask->readY(index)[0] == 1.0) {
+  for (size_t index = 0; index < nSpectra; ++index) {
+    if (mask->readY(index)[0] < 1.0) {
       indicesToExtract.push_back(index);
     }
   }
@@ -80,9 +99,11 @@ void ExtractUnmaskedSpectra::exec() {
   auto extractSpectra = createChildAlgorithm("ExtractSpectra");
   extractSpectra->setProperty("InputWorkspace", inputWorkspace);
   extractSpectra->setProperty("WorkspaceIndexList", indicesToExtract);
+  extractSpectra->executeAsChildAlg();
 
   // Store the output
-  API::MatrixWorkspace_sptr outputWorkspace = extractSpectra->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr outputWorkspace =
+      extractSpectra->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
