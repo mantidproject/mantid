@@ -60,9 +60,9 @@ namespace MantidQt{
 #ifdef MAKE_VATES
       vtkNew<vtkSMTransferFunctionPresets> presets;
 
-      // Check for colormap "Viridis". If preset, assume custom colormaps have
+      // Check for colormap "hot". If preset, assume custom colormaps have
       // already been loaded.
-      auto viridisColormap = presets->GetFirstPresetWithName("Viridis");
+      auto viridisColormap = presets->GetFirstPresetWithName("hot");
       if (viridisColormap.empty()) {
         const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
                                           "All_idl_cmaps.json",
