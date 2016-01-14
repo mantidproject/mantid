@@ -281,6 +281,55 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="pageCalibOnly">
+         <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+           </sizepolicy>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+           <property name="margin">
+             <number>0</number>
+           </property>
+           <item>
+             <widget class="QGroupBox" name="gbCalibOnly">
+               <property name="title">
+                 <string>Calibration</string>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_5">
+                 <property name="margin">
+                   <number>6</number>
+                 </property>
+                 <item row="3" column="0" colspan="2">
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalFile_only" native="true">
+                     <property name="minimumSize">
+                       <size>
+                         <width>0</width>
+                         <height>21</height>
+                       </size>
+                     </property>
+                     <property name="label" stdset="0">
+                       <string>Cal File</string>
+                     </property>
+                     <property name="multipleFiles" stdset="0">
+                       <bool>false</bool>
+                     </property>
+                     <property name="optional" stdset="0">
+                       <bool>false</bool>
+                     </property>
+                     <property name="fileExtensions" stdset="0">
+                       <stringlist>
+                         <string>.cal</string>
+                       </stringlist>
+                     </property>
+                   </widget>
+                 </item>
+               </layout>
+             </widget>
+           </item>
+         </layout>
+       </widget>
       <widget class="QWidget" name="pageDSpaceRebin">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">

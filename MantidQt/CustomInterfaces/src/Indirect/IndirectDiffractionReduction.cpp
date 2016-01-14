@@ -492,13 +492,18 @@ void IndirectDiffractionReduction::instrumentSelected(
   std::vector<std::string> correctionVector =
       instrument->getStringParameter("Workflow.Diffraction.Correction");
   bool vanadiumNeeded = false;
-  if (correctionVector.size() > 0)
+  bool calibNeeded = false;
+  if (correctionVector.size() > 0) {
     vanadiumNeeded = (correctionVector[0] == "Vanadium");
+    calibNeeded = (correctionVector[0] == "Calibration");
+  }
 
   if (vanadiumNeeded)
     m_uiForm.swVanadium->setCurrentIndex(0);
-  else
+  else if (calibNeeded)
     m_uiForm.swVanadium->setCurrentIndex(1);
+  else
+    m_uiForm.swVanadium->setCurrentIndex(2);
 
   // Hide options that the current instrument config cannot process
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
