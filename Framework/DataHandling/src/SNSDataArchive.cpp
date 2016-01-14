@@ -39,14 +39,13 @@ DECLARE_ARCHIVESEARCH(SNSDataArchive, SNSDataSearch)
 std::string
 SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
                                const std::vector<std::string> &exts) const {
-  std::set<std::string>::const_iterator iter = filenames.begin();
+  auto iter = filenames.cbegin();
   std::string filename = *iter;
 
   // ICAT4 web service take upper case filename such as HYSA_2662
   std::transform(filename.begin(), filename.end(), filename.begin(), toupper);
 
-  std::vector<std::string>::const_iterator iter2 = exts.begin();
-  for (; iter2 != exts.end(); ++iter2) {
+  for (auto iter2 = exts.cbegin(); iter2 != exts.cend(); ++iter2) {
     g_log.debug() << *iter2 << ";";
   }
   g_log.debug() << "\n";
@@ -80,8 +79,7 @@ SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
     }
   }
 
-  std::vector<std::string>::const_iterator ext = exts.begin();
-  for (; ext != exts.end(); ++ext) {
+  for (auto ext = exts.begin(); ext != exts.cend(); ++ext) {
     std::string datafile = filename + *ext;
     std::vector<std::string>::const_iterator iter = locations.begin();
     for (; iter != locations.end(); ++iter) {

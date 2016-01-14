@@ -62,7 +62,7 @@ set ( TEST_PY_FILES
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
-  SANSDarkRunBackgroundCorrectionTest.py
+  SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
   SaveVulcanGSSTest.py
@@ -79,6 +79,7 @@ set ( TEST_PY_FILES
   SwapWidthsTest.py
   SymmetriseTest.py
   UpdatePeakParameterTableValueTest.py
+  SANSDarkRunBackgroundCorrectionTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
   TOFTOFConvertTofToDeltaETest.py

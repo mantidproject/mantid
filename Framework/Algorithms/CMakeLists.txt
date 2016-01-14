@@ -153,6 +153,7 @@ set ( SRC_FILES
 	src/MaskBinsFromTable.cpp
 	src/MaskDetectorsIf.cpp
 	src/Max.cpp
+	src/MaxEnt.cpp
 	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
@@ -431,6 +432,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/Max.h
+	inc/MantidAlgorithms/MaxEnt.h
 	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
@@ -710,6 +712,7 @@ set ( TEST_FILES
 	LorentzCorrectionTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
+	MaxEntTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h

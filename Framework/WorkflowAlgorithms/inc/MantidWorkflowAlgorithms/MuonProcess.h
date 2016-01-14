@@ -35,24 +35,24 @@ public:
   MuonProcess();
   virtual ~MuonProcess();
 
-  virtual const std::string name() const;
+  virtual const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  virtual const std::string summary() const override {
     return "Processes and analyses Muon workspace.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  virtual int version() const override;
+  virtual const std::string category() const override;
 
   /// Perform validation of inputs to the algorithm
   virtual std::map<std::string, std::string> validateInputs() override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   // We dont' want processGroups to be called
-  virtual bool checkGroups() { return false; }
+  virtual bool checkGroups() override { return false; }
 
   /// Groups specified workspace group according to specified
   /// DetectorGroupingTable.

@@ -353,8 +353,7 @@ std::string DetectorGroup::getParameterAsString(const std::string &pname,
 void DetectorGroup::getBoundingBox(BoundingBox &boundingBox) const {
   // boundingBox = BoundingBox(); // this change may modify a lot of behaviour
   // -> verify
-  for (DetCollection::const_iterator cit = m_detectors.begin();
-       cit != m_detectors.end(); ++cit) {
+  for (auto cit = m_detectors.cbegin(); cit != m_detectors.cend(); ++cit) {
     BoundingBox memberBox;
     if (!boundingBox.isAxisAligned()) {
       // coordinate system

@@ -88,6 +88,19 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         if not applyToDetectors and not applyToMonitors:
             error_msg = 'Must provide either ApplyToDetectors or ApplyToMonitors or both'
             issues['ApplyToDetectors'] = error_msg
+
+        # We only allow Workspace2D, ie not IEventWorkspaces
+        ws1 = self.getProperty("InputWorkspace").value
+        ws2 = self.getProperty("DarkRun").value
+
+        if isinstance(ws1, IEventWorkspace):
+            error_msg = 'The InputWorkspace must be a Workspace2D.'
+            issues["InputWorkspace"] = error_msg
+
+        if isinstance(ws2, IEventWorkspace):
+            error_msg = 'The DarkRun worksapce must be a Workspace2D.'
+            issues["DarkRun"] = error_msg
+
         return issues
 
     def _subtract_dark_run_from_sans_data(self, workspace, dark_run):

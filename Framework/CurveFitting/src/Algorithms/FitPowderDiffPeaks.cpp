@@ -1677,7 +1677,7 @@ void FitPowderDiffPeaks::restoreFunctionParameters(
   vector<string> paramnames = function->getParameterNames();
   for (size_t i = 0; i < paramnames.size(); ++i) {
     string &parname = paramnames[i];
-    map<string, double>::iterator miter = parammap.find(parname);
+    auto miter = parammap.find(parname);
     if (miter != parammap.end())
       function->setParameter(parname, miter->second);
   }
@@ -2516,7 +2516,7 @@ Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace() {
   // 4. Set Axis label
   paramws->getAxis(0)->setUnit("dSpacing");
 
-  TextAxis *taxis = new TextAxis(4);
+  auto taxis = new TextAxis(4);
   taxis->setLabel(0, "X0");
   taxis->setLabel(1, "A");
   taxis->setLabel(2, "B");
@@ -2549,7 +2549,7 @@ FitPowderDiffPeaks::genPeakParametersWorkspace() {
       vecsigma(numpeaks);
 
   // 2. Generate the TableWorkspace for peak parameters
-  TableWorkspace *tablewsptr = new TableWorkspace();
+  auto tablewsptr = new TableWorkspace();
   TableWorkspace_sptr tablews = TableWorkspace_sptr(tablewsptr);
 
   tablews->addColumn("int", "H");
@@ -2627,7 +2627,7 @@ FitPowderDiffPeaks::genPeakParametersWorkspace() {
   vector<double> zsigma = Kernel::getZscore(vecsigma);
 
   // ii.  Build table workspace for Z scores
-  TableWorkspace *ztablewsptr = new TableWorkspace();
+  auto ztablewsptr = new TableWorkspace();
   TableWorkspace_sptr ztablews = TableWorkspace_sptr(ztablewsptr);
 
   ztablews->addColumn("int", "H");
@@ -3011,9 +3011,8 @@ void FitPowderDiffPeaks::plotFunction(IFunction_sptr peakfunction,
   // 1. Determine range
   const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
   double x0 = domain[0];
-  vector<double>::const_iterator viter =
-      lower_bound(vecX.begin(), vecX.end(), x0);
-  int ix0 = static_cast<int>(viter - vecX.begin());
+  auto viter = lower_bound(vecX.cbegin(), vecX.cend(), x0);
+  int ix0 = static_cast<int>(std::distance(vecX.cbegin(), viter));
 
   // Check boundary
   if ((static_cast<int>(domain.size()) + ix0) >

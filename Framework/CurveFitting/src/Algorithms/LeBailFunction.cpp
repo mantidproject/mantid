@@ -166,9 +166,8 @@ void LeBailFunction::calPeak(size_t ipk, std::vector<double> &out,
  * @param paramname :: parameter name to check with
  */
 bool LeBailFunction::hasProfileParameter(std::string paramname) {
-  vector<string>::iterator fiter =
-      lower_bound(m_orderedProfileParameterNames.begin(),
-                  m_orderedProfileParameterNames.end(), paramname);
+  auto fiter = lower_bound(m_orderedProfileParameterNames.cbegin(),
+                           m_orderedProfileParameterNames.cend(), paramname);
 
   bool found = true;
   if (fiter == m_orderedProfileParameterNames.end()) {
@@ -1101,9 +1100,8 @@ double
 LeBailFunction::getPeakParameterValue(API::IPowderDiffPeakFunction_sptr peak,
                                       std::string parname) const {
   // Locate the category of the parameter name
-  vector<string>::const_iterator vsiter =
-      lower_bound(m_orderedProfileParameterNames.begin(),
-                  m_orderedProfileParameterNames.end(), parname);
+  auto vsiter = lower_bound(m_orderedProfileParameterNames.cbegin(),
+                            m_orderedProfileParameterNames.cend(), parname);
 
   double parvalue = EMPTY_DBL();
 

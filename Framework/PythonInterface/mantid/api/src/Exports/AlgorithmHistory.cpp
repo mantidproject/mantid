@@ -28,8 +28,7 @@ boost::python::object
 getChildrenAsList(boost::shared_ptr<AlgorithmHistory> self) {
   boost::python::list names;
   const auto histories = self->getChildHistories();
-  Mantid::API::AlgorithmHistories::const_iterator itr = histories.begin();
-  for (; itr != histories.end(); ++itr) {
+  for (auto itr = histories.cbegin(); itr != histories.cend(); ++itr) {
     names.append(*itr);
   }
   return names;
@@ -44,11 +43,7 @@ getChildrenAsList(boost::shared_ptr<AlgorithmHistory> self) {
 boost::python::object getPropertiesAsList(AlgorithmHistory &self) {
   boost::python::list names;
   const auto histories = self.getProperties();
-  std::vector<Mantid::Kernel::PropertyHistory_sptr>::const_iterator iend =
-      histories.end();
-  for (std::vector<Mantid::Kernel::PropertyHistory_sptr>::const_iterator itr =
-           histories.begin();
-       itr != iend; ++itr) {
+  for (auto itr = histories.cbegin(); itr != histories.cend(); ++itr) {
     names.append(*itr);
   }
   return names;

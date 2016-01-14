@@ -278,10 +278,8 @@ int LoadAscii::splitIntoColumns(std::list<std::string> &columns,
 void LoadAscii::fillInputValues(std::vector<double> &values,
                                 const std::list<std::string> &columns) const {
   values.resize(columns.size());
-  std::list<std::string>::const_iterator iend = columns.end();
   int i = 0;
-  for (std::list<std::string>::const_iterator itr = columns.begin();
-       itr != iend; ++itr) {
+  for (auto itr = columns.cbegin(); itr != columns.cend(); ++itr) {
     std::string value = *itr;
     boost::trim(value);
     boost::to_lower(value);
@@ -302,13 +300,8 @@ void LoadAscii::fillInputValues(std::vector<double> &values,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadAscii::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
-  exts.push_back(".txt");
-  exts.push_back(".csv");
-  exts.push_back("");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
+                                   {".dat", ".txt", ".csv", ""}),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be .tst, .dat, or "
                   ".csv");

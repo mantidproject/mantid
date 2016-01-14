@@ -343,6 +343,26 @@ Measure based search transfer uses the log-values within nexus files from the ex
   placed into the same group.
 - Any runs with the ``same measurement_id`` and the same ``measurement_subid`` logs, will be merged into a single row, with all the runs listed in the **Run(s)** column in the format, ``123+124+125``. 
 
+Failed transfers
+================
+When transferring a run from the Search table to the Processing table there may exist invalid runs. For example, if a Measure-based run has an invalid measurement id.
+In the image below we select two runs from the Search table that we wish to transfer to the processing table.
+
+.. figure:: /images/ISISReflectometryPolref_selecting_transfer_runs.JPG
+   :alt: Selecting runs from search table to transfer to processing table
+
+Attempting to transfer an invalid run will result in that run not being transferred to the processing table. If the transfer was not successful then that specific
+run will be highlighted in the Search table.
+
+.. figure:: /images/ISISReflectometryPolref_failed_transfer_run.JPG
+   :alt: Failed transfer will be highlighted in orange, successful transfer is put into processing table
+   
+Hovering over the highlighted run with your cursor will allow you to see why the run was invalid.
+
+.. figure:: /images/ISISReflectometryPolref_tooltip_failed_run.jpg
+   :alt: Showing tooltip from failed transfer.
+
+
 .. _ISIS_Reflectomety-Options:
 
 Options

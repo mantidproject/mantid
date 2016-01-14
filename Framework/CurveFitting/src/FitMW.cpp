@@ -173,7 +173,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
   Mantid::MantidVec::const_iterator from;
   size_t n = 0;
   getStartIterator(X, from, n, m_matrixWorkspace->isHistogramData());
-  Mantid::MantidVec::const_iterator to = from + n;
+  auto to = from + n;
 
   if (m_domainType != Simple) {
     if (m_maxSize < n) {
@@ -182,7 +182,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
       size_t m = 0;
       while (m < n) {
         // create a simple creator
-        FitMW *creator = new FitMW;
+        auto creator = new FitMW;
         creator->setWorkspace(m_matrixWorkspace);
         creator->setWorkspaceIndex(m_workspaceIndex);
         size_t k = m + m_maxSize;
@@ -201,7 +201,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
   // set function domain
   if (m_matrixWorkspace->isHistogramData()) {
     std::vector<double> x(static_cast<size_t>(to - from));
-    Mantid::MantidVec::const_iterator it = from;
+    auto it = from;
     for (size_t i = 0; it != to; ++it, ++i) {
       x[i] = (*it + *(it + 1)) / 2;
     }
@@ -220,7 +220,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
   bool shouldNormalise = m_normalise && m_matrixWorkspace->isHistogramData();
 
   // set the data to fit to
-  m_startIndex = static_cast<size_t>(from - X.begin());
+  m_startIndex = std::distance(X.cbegin(), from);
   assert(n == domain->size());
   size_t ito = m_startIndex + n;
   const Mantid::MantidVec &Y = m_matrixWorkspace->readY(m_workspaceIndex);
@@ -536,7 +536,7 @@ API::MatrixWorkspace_sptr FitMW::createEmptyResultWS(const size_t nhistograms,
   ws->setYUnitLabel(m_matrixWorkspace->YUnitLabel());
   ws->setYUnit(m_matrixWorkspace->YUnit());
   ws->getAxis(0)->unit() = m_matrixWorkspace->getAxis(0)->unit();
-  API::TextAxis *tAxis = new API::TextAxis(nhistograms);
+  auto tAxis = new API::TextAxis(nhistograms);
   ws->replaceAxis(1, tAxis);
 
   const MantidVec &inputX = m_matrixWorkspace->readX(m_workspaceIndex);

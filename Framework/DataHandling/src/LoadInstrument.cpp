@@ -176,7 +176,7 @@ void LoadInstrument::exec() {
           InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      Progress *prog = new Progress(this, 0, 1, 100);
+      auto prog = new Progress(this, 0, 1, 100);
       instrument = parser.parseXML(prog);
       delete prog;
       // Add to data service for later retrieval

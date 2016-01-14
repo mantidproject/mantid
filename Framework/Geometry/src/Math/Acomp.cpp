@@ -533,7 +533,7 @@ It requires that the Intersect is the same for both
     return -1;
 
   if (!A.Units.empty()) {
-    std::vector<int>::iterator Ept = Units.end();
+    auto Ept = Units.end();
     Units.resize(Units.size() + A.Units.size());
     copy(A.Units.begin(), A.Units.end(), Ept);
     std::sort(Units.begin(), Units.end());
@@ -841,7 +841,7 @@ Remove identical items.
   // Units are sorted
 
   sort(Units.begin(), Units.end());
-  std::vector<int>::iterator ux = unique(Units.begin(), Units.end());
+  auto ux = unique(Units.begin(), Units.end());
   cnt += static_cast<int>(std::distance(ux, Units.end()));
   Units.erase(ux, Units.end());
   return cnt;
@@ -888,7 +888,7 @@ i.e. one pass.
     std::vector<BnId>::iterator vc;
     for (vc = Work.begin(); vc != Work.end(); ++vc) {
       const int GrpIndex(vc->TrueCount() + 1);
-      std::vector<BnId>::iterator oc = vc + 1;
+      auto oc = vc + 1;
       for (oc = vc + 1; oc != Work.end(); ++oc) {
         const int OCnt = oc->TrueCount();
         if (OCnt > GrpIndex)

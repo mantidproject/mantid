@@ -203,7 +203,7 @@ void CreateWorkspace::exec() {
   // mapping
   if (vUnit != "SpectraNumber") {
     if (vUnit == "Text") {
-      TextAxis *const newAxis = new TextAxis(vAxis.size());
+      auto const newAxis = new TextAxis(vAxis.size());
       outputWS->replaceAxis(1, newAxis);
       for (size_t i = 0; i < vAxis.size(); i++) {
         newAxis->setLabel(i, vAxis[i]);
