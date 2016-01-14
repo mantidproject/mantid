@@ -925,9 +925,6 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
     if (QDialog::Accepted == res) {
       // TODO: move this
       int mi = m_uiTomoPy.comboBox_method->currentIndex();
-      double cor = 0;      // m_uiTomoPy.doubleSpinBox_center_rot->value();
-      double minAngle = 0; // m_uiTomoPy.doubleSpinBox_angle_min->value();
-      double maxAngle = 0; // m_uiTomoPy.doubleSpinBox_angle_max->value();
 
       TomoPathsConfig paths = currentPathsConfig();
       // TODO: for the output path, probably better to take the sample path,
@@ -938,8 +935,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
               m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
               m_uiTabRun.lineEdit_rb_number->text().toStdString() +
               localOutNameAppendix,
-          paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples(), cor,
-          minAngle, maxAngle);
+          paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples());
       m_tomopyMethod = g_tomopy_methods[mi].first;
     }
   } else if (g_AstraTool == name) {
@@ -955,15 +951,12 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
     if (QDialog::Accepted == res) {
       // TODO: move this
       int mi = m_uiAstra.comboBox_method->currentIndex();
-      double cor = 0;      // m_uiAstra.doubleSpinBox_center_rot->value();
-      double minAngle = 0; // m_uiAstra.doubleSpinBox_angle_min->value();
-      double maxAngle = 0; // m_uiAstra.doubleSpinBox_angle_max->value();
 
       TomoPathsConfig paths = currentPathsConfig();
       // TODO: for the output path, probably better to take the sample path,
       // then up one level
       m_toolsSettings.astra = ToolConfigAstraToolbox(
-          run.toStdString(), cor, minAngle, maxAngle,
+          run.toStdString(),
           Poco::Path::expand(
               g_defOutPathLocal + "/" +
               m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
