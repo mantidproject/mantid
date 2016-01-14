@@ -80,6 +80,9 @@ void IndirectDiffractionReduction::initLayout() {
   m_uiForm.leRebinStart->setValidator(m_valDbl);
   m_uiForm.leRebinWidth->setValidator(m_valDbl);
   m_uiForm.leRebinEnd->setValidator(m_valDbl);
+  m_uiForm.leRebinStart_CalibOnly->setValidator(m_valDbl);
+  m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
+  m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
 
   // Update the list of plot options when individual grouping is toggled
   connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this,
@@ -89,6 +92,9 @@ void IndirectDiffractionReduction::initLayout() {
 
   // Update invalid rebinning markers
   validateRebin();
+
+  // Update invalid markers
+  validateCalOnly();
 
   // Update instrument dependant widgets
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
@@ -110,12 +116,12 @@ void IndirectDiffractionReduction::run() {
       }
       runOSIRISdiffonlyReduction();
     } else {
-		if (!m_uiForm.rfSampleFiles->isValid() || !validateCalOnly()) {
-			showInformationBox(
-				"Invalid input.\nIncorrect entries marked with red star.");
-			return;
-		}
-		//runOSIRISdiffspecReduction();
+      if (!m_uiForm.rfSampleFiles->isValid() || !validateCalOnly()) {
+        showInformationBox(
+            "Invalid input.\nIncorrect entries marked with red star.");
+        return;
+      }
+      // runOSIRISdiffspecReduction();
     }
   } else {
     if (!m_uiForm.rfSampleFiles->isValid() || !validateRebin()) {
@@ -647,20 +653,51 @@ bool IndirectDiffractionReduction::validateVanCal() {
 /**
 * Checks to see if the cal file and optional rebin fields are valid.
 *
-* @returns True fo vanadium and calibration files are valid, false otherwise
+* @returns True if calibration file and rebin values are valid, false otherwise
 */
 bool IndirectDiffractionReduction::validateCalOnly() {
-	if (!m_uiForm.rfCalFile->isValid())
-		return false;
+  // Check Calib file valid
+  if (m_uiForm.ckUseCalib->isChecked()) {
+    if (!m_uiForm.rfCalFile->isValid())
+      return false;
+  }
 
-	QString rebStartTxt = m_uiForm.leRebinStart_CalibOnly->text();
-	QString rebStepTxt = m_uiForm.leRebinWidth_CalibOnly->text();
-	QString rebEndTxt = m_uiForm.leRebinEnd_CalibOnly->text();
+  // Check rebin values valid
+  QString rebStartTxt = m_uiForm.leRebinStart_CalibOnly->text();
+  QString rebStepTxt = m_uiForm.leRebinWidth_CalibOnly->text();
+  QString rebEndTxt = m_uiForm.leRebinEnd_CalibOnly->text();
 
-	bool rebinValid = true;
-	// Need all or none
+  bool rebinValid = true;
+  // Need all or none
+  if (rebStartTxt.isEmpty() && rebStepTxt.isEmpty() && rebEndTxt.isEmpty()) {
+    rebinValid = true;
+    m_uiForm.valRebinStart_CalibOnly->setText("");
+    m_uiForm.valRebinWidth_CalibOnly->setText("");
+    m_uiForm.valRebinEnd_CalibOnly->setText("");
+  } else {
+#define CHECK_VALID(text, validator)                                           \
+  if (text.isEmpty()) {                                                        \
+    rebinValid = false;                                                        \
+    validator->setText("*");                                                   \
+  } else {                                                                     \
+    rebinValid = true;                                                         \
+    validator->setText("");                                                    \
+  }
 
-	return true;
+    CHECK_VALID(rebStartTxt, m_uiForm.valRebinStart_CalibOnly);
+    CHECK_VALID(rebStepTxt, m_uiForm.valRebinWidth_CalibOnly);
+    CHECK_VALID(rebEndTxt, m_uiForm.valRebinEnd_CalibOnly);
+
+    if (rebinValid && rebStartTxt.toDouble() >= rebEndTxt.toDouble()) {
+      rebinValid = false;
+      m_uiForm.valRebinStart_CalibOnly->setText("*");
+      m_uiForm.valRebinEnd_CalibOnly->setText("*");
+    }
+  }
+
+  return rebinValid;
+
+  return true;
 }
 
 /**
