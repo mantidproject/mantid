@@ -109,7 +109,7 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     do {
       progressUpdating.eventRaised(double(iBox) * progressFactor);
 
-      Mantid::signal_t signal_normalized = it->getNormalizedSignalWithMask();
+      Mantid::signal_t signal_normalized = it->getNormalizedSignal();
       if (!isSpecial(signal_normalized) &&
           m_thresholdRange->inRange(signal_normalized)) {
         useBox[iBox] = true;

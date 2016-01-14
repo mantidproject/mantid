@@ -103,7 +103,7 @@ void vtkMDHexFactory::doCreate(
   hexPointList->SetNumberOfIds(8);
 
   NormFuncIMDNodePtr normFunction = makeMDEventNormalizationFunction(
-      m_normalizationOption, ws.get(), ws.get()->hasMask());
+      m_normalizationOption, ws.get());
 
   // This can be parallelized
   // cppcheck-suppress syntaxError

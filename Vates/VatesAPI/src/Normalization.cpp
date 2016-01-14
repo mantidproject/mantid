@@ -12,13 +12,11 @@ requested normalisation.
 This is used for visualisation of IMDEventWorkspaces.
 @param normalizationOption : Visual Normalization option desired
 @param ws : workspace to fetch defaults from if needed
-@param hasMask : true if the workspace has a mask
 @return member function to use on IMDNodes
 */
-NormFuncIMDNodePtr
-makeMDEventNormalizationFunction(VisualNormalization normalizationOption,
-                                 Mantid::API::IMDEventWorkspace const *const ws,
-                                 const bool hasMask) {
+NormFuncIMDNodePtr makeMDEventNormalizationFunction(
+    VisualNormalization normalizationOption,
+    Mantid::API::IMDEventWorkspace const *const ws) {
 
   using namespace Mantid::API;
 
@@ -31,24 +29,12 @@ makeMDEventNormalizationFunction(VisualNormalization normalizationOption,
 
   NormFuncIMDNodePtr normalizationFunction;
 
-  // Avoid checking every box for a mask if there is no mask in the workspace
-  // by using different functions
-  if (hasMask) {
-    if (normalizationOption == Mantid::VATES::NumEventsNormalization) {
-      normalizationFunction = &IMDNode::getSignalByNEventsWithMask;
-    } else if (normalizationOption == Mantid::VATES::NoNormalization) {
-      normalizationFunction = &IMDNode::getSignalWithMask;
-    } else {
-      normalizationFunction = &IMDNode::getSignalNormalizedWithMask;
-    }
+  if (normalizationOption == Mantid::VATES::NumEventsNormalization) {
+    normalizationFunction = &IMDNode::getSignalByNEvents;
+  } else if (normalizationOption == Mantid::VATES::NoNormalization) {
+    normalizationFunction = &IMDNode::getSignal;
   } else {
-    if (normalizationOption == Mantid::VATES::NumEventsNormalization) {
-      normalizationFunction = &IMDNode::getSignalByNEvents;
-    } else if (normalizationOption == Mantid::VATES::NoNormalization) {
-      normalizationFunction = &IMDNode::getSignal;
-    } else {
-      normalizationFunction = &IMDNode::getSignalNormalized;
-    }
+    normalizationFunction = &IMDNode::getSignalNormalized;
   }
 
   return normalizationFunction;
