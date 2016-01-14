@@ -39,15 +39,15 @@ digraph MuscatSofQW {
   
   subgraph decisions  {
     $decision_style
-    isConvFitProg ["is ConvFit Fit Program?"]
-    hasLor        ["Number of Lorentzians?"]
-    processedAll  ["Have all the spectra been processed?"]
+    isConvFitProg [label="ConvFit Fit Program"]
+    hasLor        [label="Number of Lorentzians"]
+    processedAll  [label="Have all the spectra been processed"]
   }
 
   //Validation
-  ParameterWorkspace1           -> isConvFitProg                  [label="Extract 'fit_program'"]
+  ParameterWorkspace1           -> isConvFitProg                  [label="Extract fit_program"]
   isConvFitProg                 -> End                            [label="No : Program must be ConvFit"]
-  isConvFitProg                 -> Delta                          [label="Extract 'delta_function'"]
+  isConvFitProg                 -> Delta                          [label="Extract delta_function"]
   ParameterWorkspace1           -> hasLor
   hasLor                        -> End                            [label="0 : Must have Lorentzians"]
   hasLor                        -> Lorentzians                    [label="1 or 2"]
