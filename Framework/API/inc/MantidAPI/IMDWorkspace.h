@@ -120,6 +120,7 @@ public:
   createIterator(Mantid::Geometry::MDImplicitFunction *function = NULL) const;
 
   std::string getConvention() const;
+  void setConvention(std::string m_convention);
   std::string changeQConvention();
 
   signal_t getSignalAtVMD(const Mantid::Kernel::VMD &coords,
@@ -165,7 +166,7 @@ protected:
   virtual const std::string toString() const;
 
 private:
-  std::string convention;
+  std::string m_convention;
   virtual IMDWorkspace *doClone() const = 0;
 };
 

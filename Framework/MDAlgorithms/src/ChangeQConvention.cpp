@@ -53,15 +53,19 @@ void ChangeQConvention::init() {
  */
 void ChangeQConvention::exec() {
   IMDWorkspace_sptr ws = getProperty("InputWorkspace");
+  std::string convention = ws->getConvention();
 
   g_log.information() << "Transforming Q in workspace" << std::endl;
+
   Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
   transform_alg->setProperty("InputWorkspace",
                              boost::dynamic_pointer_cast<IMDWorkspace>(ws));
   transform_alg->setProperty("Scaling", "-1.0");
   transform_alg->executeAsChildAlg();
   ws = transform_alg->getProperty("OutputWorkspace");
+  ws->setConvention(convention);
   ws->changeQConvention();
+
   setProperty("InputWorkspace", ws);
 }
 

@@ -13,14 +13,14 @@ namespace API {
 //-----------------------------------------------------------------------------------------------
 /** Default constructor */
 IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
 //-----------------------------------------------------------------------------------------------
 /** Copy constructor */
 IMDWorkspace::IMDWorkspace(const IMDWorkspace &other)
     : Workspace(other), Mantid::API::MDGeometry(other) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  m_convention = other.getConvention();
 }
 
 /// Destructor
@@ -48,17 +48,24 @@ IMDIterator *IMDWorkspace::createIterator(
 //---------------------------------------------------------------------------------------------
 /** @return the convention
  */
-std::string IMDWorkspace::getConvention() const { return convention; }
+std::string IMDWorkspace::getConvention() const { return m_convention; }
+
+//---------------------------------------------------------------------------------------------
+/** @return the convention
+ */
+void IMDWorkspace::setConvention(std::string convention) {
+  m_convention = convention;
+}
 
 //---------------------------------------------------------------------------------------------
 /** @return the convention
  */
 std::string IMDWorkspace::changeQConvention() {
   if (this->getConvention() == "Crystallography")
-    convention = "Inelastic";
+    m_convention = "Inelastic";
   else
-    convention = "Crystallography";
-  return convention;
+    m_convention = "Crystallography";
+  return m_convention;
 }
 
 //-------------------------------------------------------------------------------------------
