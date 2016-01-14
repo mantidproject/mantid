@@ -36,12 +36,14 @@ digraph SansStitch {
         subtractCanHAB [label="Subtract"];
         subtractCanLAB [label="Subtract"];
         sansFitShiftScale [label="SANSFitShiftScale"];
+        subtractMerged [label="Subtract"];
     }
 
     subgraph processes {
         $process_style
         errorCorrection [label="Error Correction Merged Workspace"];
         calculateMergedQ [label="Calculate Merged Q"];
+        calculateMergedQCan [label="Calculate Merged Q Can"];
         readCanInputs [label="Read Can Inputs"];
         copyShiftFactor [label="Copy Shift Factor"];
         copyScaleFactor [label="Copy Scale Factor"];
@@ -61,12 +63,18 @@ digraph SansStitch {
         lABNormCan -> divideLABCan;
         divideHABCan -> subtractCanHAB;
         divideLABCan -> subtractCanLAB;
+        hABCountsCan -> calculateMergedQCan;
+        hABNormCan -> calculateMergedQCan;
+        lABCountsCan -> calculateMergedQCan;
+        lABNormCan -> calculateMergedQCan;
+        calculateMergedQCan -> subtractMerged;
     }
 
     subgraph values {
         $value_style
         valQLAB [label="LAB Normalized"];
         valQHAB [label="HAB Normalized"];
+        mergedQ [label="Merged"];
     }
 
     hABCountsSample -> divideHABSample;
@@ -97,10 +105,14 @@ digraph SansStitch {
     copyShiftFactor -> outShiftFactor;
     outScaleFactor -> calculateMergedQ;
     outShiftFactor -> calculateMergedQ;
+    outScaleFactor -> calculateMergedQCan;
     hABCountsSample -> calculateMergedQ;
     hABNormSample -> calculateMergedQ;
     lABCountsSample -> calculateMergedQ;
     lABNormSample -> calculateMergedQ;
-    calculateMergedQ -> errorCorrection;
+    calculateMergedQ -> subtractMerged;
+    calculateMergedQ -> mergedQ
+    subtractMerged -> mergedQ;
+    mergedQ -> errorCorrection;
     errorCorrection -> outputWorkspace;
 }
