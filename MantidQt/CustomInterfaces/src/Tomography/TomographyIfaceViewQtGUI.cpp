@@ -1001,6 +1001,22 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
 }
 
 /**
+ * Produces a comma separated list of coordinates as a string of real values
+ *
+ * @param coords Coordinates given as point 1 (x,y), point 2 (x,y)
+ *
+ * @returns A string like "x1, y1, x2, y2"
+ */
+std::string boxCoordinatesToCSV(ImageStackPreParams::Box2D &coords) {
+  std::string x1 = std::to_string(coords.first.X());
+  std::string y1 = std::to_string(coords.first.Y());
+  std::string x2 = std::to_string(coords.second.X());
+  std::string y2 = std::to_string(coords.second.Y());
+
+  return x1 + ", " + y1 + ", " + x2 + ", " + y2;
+}
+
+/**
  * Build options string to send them to the tomographic reconstruction
  * scripts command line.
  *
@@ -1014,10 +1030,30 @@ TomographyIfaceViewQtGUI::filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
                                               ImageStackPreParams &corRegions) {
   std::string opts;
 
-  corRegions.cor.X();
-  corRegions.cor.Y();
-  corRegions.normalizationRegion;
-  corRegions.medianFilter;
+  opts +=
+      " --region-of-interest='[" + boxCoordinatesToCSV(corRegions.roi) + "]'";
+
+  auto air = corRegions.normalizationRegion;
+  std::string airX1 = std::to_string(air.first.X());
+  std::string airY1, airX2, airY2;
+  opts += " --air-region='[" +
+          boxCoordinatesToCSV(corRegions.normalizationRegion) + "]'";
+
+  // TODO: (requires IMAT specific headers to become available soon)
+  // filters.prep.normalizeByProtonCharge
+
+  if (filters.prep.normalizeByFlatDark) {
+    const std::string flat = m_pathsConfig.pathOpenBeam();
+    if (!flat.empty())
+      opts += " --input-path-flat=" + flat;
+
+    const std::string dark = m_pathsConfig.pathDark();
+    if (!dark.empty())
+      opts += " --input-path-dark=" + dark;
+  }
+
+  opts +=
+      " --median-filter-size=" + std::to_string(filters.prep.medianFilterWidth);
 
   int rotationIdx = filters.prep.rotation / 90;
   double cor = 0;
@@ -1026,29 +1062,22 @@ TomographyIfaceViewQtGUI::filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
   } else {
     cor = corRegions.cor.X();
   }
-  opts += "--cor='[" + std::to_string(cor) + "']";
-
-  // filters.prep.normalizeByProtonCharge
-
-  // filters.prep.normalizeByFlatDark
+  opts += " --cor='[" + std::to_string(cor) + "']";
 
   // filters.prep.rotation
   opts += "--rotation=" + std::to_string(rotationIdx);
 
-  opts +=
-      " --median-filter-size=" + std::to_string(filters.prep.medianFilterWidth);
-
   // filters.prep.maxAngle
   opts += " --max-angle=" + std::to_string(filters.prep.maxAngle);
 
-  // opts.prep.scaleDownFactor
+  // prep.scaleDownFactor
   if (filters.prep.scaleDownFactor > 1)
     opts += " --scale-down=" + std::to_string(filters.prep.scaleDownFactor);
 
-  // opts.postp.circMaskRadius
+  // postp.circMaskRadius
   opts += " --circular-mask=" + std::to_string(filters.postp.circMaskRadius);
 
-  // opts.postp.cutOffLevel
+  // postp.cutOffLevel
   if (filters.postp.cutOffLevel > 0.0)
     opts += " --cut-off" + std::to_string(filters.postp.cutOffLevel);
 
@@ -1085,8 +1114,8 @@ void TomographyIfaceViewQtGUI::processLocalRunRecon() {
     // options with all the info from filters and regions
     const std::string cmdOpts = filtersCfgToCmdOpts(filters, corRegions);
 
-    std::string toolMethodStr =
-        m_setupPathReconScripts + "/Imaging/IMAT/tomo_reconstruct.py";
+    const std::string mainScript = "/Imaging/IMAT/tomo_reconstruct.py";
+    std::string toolMethodStr = m_setupPathReconScripts + mainScript;
     if (g_TomoPyTool == toolName)
       toolMethodStr += " --tool=tomopy --algorithm=" + m_tomopyMethod;
     else if (g_AstraTool == toolName)

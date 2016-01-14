@@ -100,6 +100,12 @@ def setup_cmd_options():
 
     grp_pre = parser.add_argument_group('Pre-processing of input raw images/projections')
 
+    grp_pre.add_argument("--input-path-flat", required=False, default=None, type=str,
+                         help="Input directory for flat images")
+
+    grp_pre.add_argument("--input-path-flat", required=False, default=None,
+                         type=str, help="Input directory for flat images")
+
     img_formats = ['tiff', 'fits', 'tif', 'fit', 'png']
     grp_pre.add_argument("--in-img-format", required=False, default='fits', type=str,
                          help="Format/file extension expected for the input images. Supported: {0}".
@@ -171,6 +177,8 @@ def grab_preproc_options(args):
 
     pre_config = tomocfg.PreProcConfig()
     pre_config.input_dir = args.input_path
+    pre_config.input_dir_flat = args.input_path_flat
+    pre_config.input_dir_dark = args.input_path_dark
 
     if args.in_img_format:
         pre_config.in_img_format = args.in_img_format
