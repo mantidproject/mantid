@@ -81,13 +81,13 @@ digraph SansStitch {
     hABNormSample -> divideHABSample;
     lABCountsSample -> divideLABSample;
     lABNormSample -> divideLABSample;
-    divideLABSample -> valQLAB;
-    divideHABSample -> valQHAB;
+    divideLABSample -> valQLAB  [label="If can is not processed."];
+    divideHABSample -> valQHAB  [label="If can is not processed."];
     processCan -> checkProcessCan;
     divideHABSample -> subtractCanHAB;
     divideLABSample -> subtractCanLAB;
-    subtractCanHAB -> valQHAB;
-    subtractCanLAB -> valQLAB;
+    subtractCanHAB -> valQHAB  [label="If can is processed."];
+    subtractCanLAB -> valQLAB  [label="If can is processed."];
     checkProcessCan -> readCanInputs  [label="yes"];
     mode -> checkModeForFit;
     checkModeForFit -> sansFitShiftScale  [label="yes"];
@@ -111,8 +111,8 @@ digraph SansStitch {
     lABCountsSample -> calculateMergedQ;
     lABNormSample -> calculateMergedQ;
     calculateMergedQ -> subtractMerged;
-    calculateMergedQ -> mergedQ
-    subtractMerged -> mergedQ;
+    calculateMergedQ -> mergedQ  [label="If can is processed."];
+    subtractMerged -> mergedQ  [label="If can is not processed."];
     mergedQ -> errorCorrection;
     errorCorrection -> outputWorkspace;
 }
