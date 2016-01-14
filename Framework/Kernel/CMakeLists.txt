@@ -102,6 +102,7 @@ set ( SRC_FILES
 	src/UnitFactory.cpp
 	src/UnitLabel.cpp
 	src/UnitLabelTypes.cpp
+	src/UsageService.cpp
 	src/UserCatalogInfo.cpp
 	src/UserStringParser.cpp
 	src/Utils.cpp
@@ -192,7 +193,6 @@ set ( INC_FILES
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
-	inc/MantidKernel/make_unique.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
@@ -262,6 +262,7 @@ set ( INC_FILES
 	inc/MantidKernel/UnitFactory.h
 	inc/MantidKernel/UnitLabel.h
 	inc/MantidKernel/UnitLabelTypes.h
+	inc/MantidKernel/UsageService.h
 	inc/MantidKernel/UserCatalogInfo.h
 	inc/MantidKernel/UserStringParser.h
 	inc/MantidKernel/Utils.h
@@ -274,6 +275,7 @@ set ( INC_FILES
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
+	inc/MantidKernel/make_unique.h
 )
 
 set ( TEST_FILES
@@ -382,6 +384,7 @@ set ( TEST_FILES
 	UnitFactoryTest.h
 	UnitLabelTest.h
 	UnitTest.h
+	UsageServiceTest.h
 	UserCatalogInfoTest.h
 	UserStringParserTest.h
 	UtilsTest.h

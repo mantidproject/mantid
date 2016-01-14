@@ -146,7 +146,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
       // Use a different user properties file for an mpi-enabled build to avoid
-      // confusion if both are used on the same filesystem
+      // confusion if both are used on the same file system
       m_user_properties_file_name("Mantid-mpi.user.properties"),
 #else
       m_user_properties_file_name("Mantid.user.properties"),
