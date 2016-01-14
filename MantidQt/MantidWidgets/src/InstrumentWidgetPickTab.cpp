@@ -1,4 +1,4 @@
-#include "InstrumentWidget.h"
+61#include "InstrumentWidget.h"
 #include "InstrumentWidgetPickTab.h"
 #include "OneCurvePlot.h"
 #include "CollapsiblePanel.h"
@@ -59,7 +59,7 @@ struct Sqrt
 
 /**
  * Constructor.
- * @param instrWindow :: Parent InstrumentWindow.
+ * @param instrWidget :: Parent InstrumentWidget.
  */
 InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget* instrWidget):
 InstrumentWidgetTab(instrWidget),
