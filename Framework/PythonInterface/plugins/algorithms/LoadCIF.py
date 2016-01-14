@@ -169,6 +169,11 @@ class LoadCIF(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
+            WorkspaceProperty(name='Workspace',
+                              defaultValue='', direction=Direction.InOut),
+            doc='Workspace into which the crystal structure is placed.')
+
+        self.declareProperty(
             FileProperty(name='InputFile',
                          defaultValue='',
                          action=FileAction.Load,
@@ -178,11 +183,6 @@ class LoadCIF(PythonAlgorithm):
         self.declareProperty('LoadUBMatrix', False,
                              direction=Direction.Input,
                              doc='Load UB-matrix from CIF file if available.')
-
-        self.declareProperty(
-            WorkspaceProperty(name='Workspace',
-                              defaultValue='', direction=Direction.InOut),
-            doc='Workspace into which the crystal structure is placed.')
 
     def PyExec(self):
         cifFileName = self.getProperty('InputFile').value
