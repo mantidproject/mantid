@@ -1,5 +1,5 @@
-#include "InstrumentWindow.h"
-#include "InstrumentWindowTreeTab.h"
+#include "InstrumentWidget.h"
+#include "InstrumentWidgetTreeTab.h"
 #include "InstrumentTreeWidget.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
@@ -8,22 +8,22 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 
-InstrumentWindowTreeTab::InstrumentWindowTreeTab(InstrumentWindow *instrWindow)
-    : InstrumentWindowTab(instrWindow) {
+InstrumentWidgetTreeTab::InstrumentWidgetTreeTab(InstrumentWidget *instrWidget)
+    : InstrumentWidgetTab(instrWidget) {
   QVBoxLayout *layout = new QVBoxLayout(this);
   // Tree Controls
   m_instrumentTree = new InstrumentTreeWidget(0);
   layout->addWidget(m_instrumentTree);
   connect(m_instrumentTree,
           SIGNAL(componentSelected(Mantid::Geometry::ComponentID)),
-          m_instrWindow,
+          m_instrWidget,
           SLOT(componentSelected(Mantid::Geometry::ComponentID)));
-  connect(m_instrWindow, SIGNAL(requestSelectComponent(QString)), this,
+  connect(m_instrWidget, SIGNAL(requestSelectComponent(QString)), this,
           SLOT(selectComponentByName(QString)));
 }
 
-void InstrumentWindowTreeTab::initSurface() {
-  m_instrumentTree->setInstrumentActor(m_instrWindow->getInstrumentActor());
+void InstrumentWidgetTreeTab::initSurface() {
+  m_instrumentTree->setInstrumentActor(m_instrWidget->getInstrumentActor());
 }
 
 /**
@@ -33,7 +33,7 @@ void InstrumentWindowTreeTab::initSurface() {
   *
   * @param name :: Name of an instrument component.
   */
-void InstrumentWindowTreeTab::selectComponentByName(const QString &name) {
+void InstrumentWidgetTreeTab::selectComponentByName(const QString &name) {
   QModelIndex component = m_instrumentTree->findComponentByName(name);
   if (!component.isValid()) {
     QMessageBox::warning(this, "Instrument Window - Tree Tab - Error",
@@ -53,6 +53,6 @@ void InstrumentWindowTreeTab::selectComponentByName(const QString &name) {
 /**
   * Update surface when tab becomes visible.
   */
-void InstrumentWindowTreeTab::showEvent(QShowEvent *) {
+void InstrumentWidgetTreeTab::showEvent(QShowEvent *) {
   getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
 }

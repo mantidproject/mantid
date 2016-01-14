@@ -1,5 +1,5 @@
 #include "XIntegrationControl.h"
-#include "InstrumentWindow.h"
+#include "InstrumentWidget.h"
 
 #include "MantidKernel/ConfigService.h"
 
@@ -219,7 +219,7 @@ void XIntegrationScrollBar::updateMinMax()
 
 //---------------------------------------------------------------------------------//
 
-XIntegrationControl::XIntegrationControl(InstrumentWindow* instrWindow):
+XIntegrationControl::XIntegrationControl(InstrumentWidget* instrWindow):
 QFrame(instrWindow),
 m_instrWindow(instrWindow),
 m_totalMinimum(0),

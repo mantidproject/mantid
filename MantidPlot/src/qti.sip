@@ -1375,48 +1375,48 @@ private:
   MantidMatrix(const MantidMatrix&);
 };
 
-class InstrumentWindowTab: QFrame
+class InstrumentWidgetTab: QFrame
 {
 %TypeHeaderCode
-#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindowTab.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWidgetTab.h"
 %End
 public:
-	// This is a duplicate from the same enum in InstrumentWindow, just so you
-	// can do like InstrumentWindowRenderTab.FULL3D
+	// This is a duplicate from the same enum in InstrumentWidget, just so you
+	// can do like InstrumentWidgetRenderTab.FULL3D
 	enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z,
                      SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
                      RENDERMODE_SIZE };
 private:
-  InstrumentWindowTab(const InstrumentWindowTab &);
+  InstrumentWidgetTab(const InstrumentWidgetTab &);
 };
 
-class InstrumentWindow: MdiSubWindow
+class InstrumentWidget: MdiSubWindow
 {
 %TypeHeaderCode
-#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindow.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWidget.h"
 %End
 
 %Docstring
-    The InstrumentWindow contains functionality for exploring
+    The InstrumentWidget contains functionality for exploring
     a 3D model of an instrument. It is a tabbed widget offering
     rendering, picking, masking and grouping functions. There is
     also a tree view of the instrument hierarchy.
 
     For further help see the functions defined on each of the following
-        - InstrumentWindowRenderTab
-        - InstrumentWindowPickTab
-        - InstrumentWindowMaskTab
+        - InstrumentWidgetRenderTab
+        - InstrumentWidgetPickTab
+        - InstrumentWidgetMaskTab
 %End
 
 public:
-  // Note this enum is also defined in InstrumentWindowTab
+  // Note this enum is also defined in InstrumentWidgetTab
   enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z,
                      SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
                      RENDERMODE_SIZE };
   enum Tab { RENDER, PICK, MASK, TREE };
 
 
-  InstrumentWindowTab * getTab(const QString & title) const;
+  InstrumentWidgetTab * getTab(const QString & title) const;
 %Docstring
     Returns a handler to the requested tab
 
@@ -1429,14 +1429,14 @@ public:
 
 %End
 
-  InstrumentWindowTab * getTab(const Tab tab) const;
+  InstrumentWidgetTab * getTab(const Tab tab) const;
 %Docstring
     Returns a handler to the requested tab
 
     Args:
         tab One of the Tab enumeration types:
-	    InstrumentWindow.RENDER,InstrumentWindow.PICK,
-	    InstrumentWindow.MASK,InstrumentWindow.TREE
+	    InstrumentWidget.RENDER,InstrumentWidget.PICK,
+	    InstrumentWidget.MASK,InstrumentWidget.TREE
 
     Returns:
         a pointer to the requested tab widget
@@ -1480,14 +1480,14 @@ public:
   void setViewType(const QString &);
 
 private:
-InstrumentWindow();
-InstrumentWindow(const InstrumentWindow &);
+InstrumentWidget();
+InstrumentWidget(const InstrumentWidget &);
 };
 
-class InstrumentWindowRenderTab: InstrumentWindowTab
+class InstrumentWidgetRenderTab: InstrumentWidgetTab
 {
 %TypeHeaderCode
-#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindowRenderTab.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWidgetRenderTab.h"
 %End
 
 public:
@@ -1606,14 +1606,14 @@ public:
 %End
 
 private:
-  InstrumentWindowRenderTab();
-  InstrumentWindowRenderTab(const InstrumentWindowRenderTab &);
+  InstrumentWidgetRenderTab();
+  InstrumentWidgetRenderTab(const InstrumentWidgetRenderTab &);
 };
 
-class InstrumentWindowPickTab: InstrumentWindowTab
+class InstrumentWidgetPickTab: InstrumentWidgetTab
 {
 %TypeHeaderCode
-#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindowPickTab.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWidgetPickTab.h"
 %End
 
 public:
@@ -1624,18 +1624,18 @@ public:
     Select the active tool.
 
     Args:
-        tool One of InstrumentWindowPickTab.{Zoom, PixelSelect, TubeSelect, PeakSelect, PeakErase}
+        tool One of InstrumentWidgetPickTab.{Zoom, PixelSelect, TubeSelect, PeakSelect, PeakErase}
 %End
 
 private:
-  InstrumentWindowPickTab();
-  InstrumentWindowPickTab(const InstrumentWindowPickTab &);
+  InstrumentWidgetPickTab();
+  InstrumentWidgetPickTab(const InstrumentWidgetPickTab &);
 };
 
-class InstrumentWindowMaskTab: InstrumentWindowTab
+class InstrumentWidgetMaskTab: InstrumentWidgetTab
 {
 %TypeHeaderCode
-#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindowMaskTab.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWidgetMaskTab.h"
 %End
 
 public:
@@ -1647,7 +1647,7 @@ public:
   Set the mode to either group/mask
 
   Args:
-      mode One of the Mode enumerations InstrumentWindowMaskTab.{Mask, Group}
+      mode One of the Mode enumerations InstrumentWidgetMaskTab.{Mask, Group}
 %End
 
   void selectTool(Activity tool);
@@ -1655,18 +1655,18 @@ public:
   Set the mode to either group/mask
 
   Args:
-      tool One of the Activity enumerations InstrumentWindowMaskTab.{Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing}
+      tool One of the Activity enumerations InstrumentWidgetMaskTab.{Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing}
 %End
 
 private:
-  InstrumentWindowMaskTab();
-  InstrumentWindowMaskTab(const InstrumentWindowMaskTab &);
+  InstrumentWidgetMaskTab();
+  InstrumentWidgetMaskTab(const InstrumentWidgetMaskTab &);
 };
 
-class InstrumentWindowTreeTab: InstrumentWindowTab
+class InstrumentWidgetTreeTab: InstrumentWidgetTab
 {
 %TypeHeaderCode
-#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWindowTreeTab.h"
+#include "../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentWidgetTreeTab.h"
 %End
 
 public:
@@ -1679,8 +1679,8 @@ public:
 %End
 
 private:
-  InstrumentWindowTreeTab();
-  InstrumentWindowTreeTab(const InstrumentWindowTreeTab &);
+  InstrumentWidgetTreeTab();
+  InstrumentWidgetTreeTab(const InstrumentWidgetTreeTab &);
 };
 
 class MantidUI: QObject
@@ -1720,7 +1720,7 @@ public:
   // Methods relating to creating or getting handles to GUI objects
   MantidMatrix* getMantidMatrix(const QString &);
   QString getSelectedWorkspaceName();
-  InstrumentWindow* getInstrumentView(const QString &, int tab = -1);
+  InstrumentWidget* getInstrumentView(const QString &, int tab = -1);
 %MethodCode
   sipRes = sipCpp->getInstrumentView(*a0,a1);
   if(sipRes) sipRes->hide();

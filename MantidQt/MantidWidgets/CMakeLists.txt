@@ -65,12 +65,12 @@ set ( SRC_FILES
     src/InstrumentActor.cpp
     src/InstrumentTreeModel.cpp
     src/InstrumentTreeWidget.cpp
-    src/InstrumentWindow.cpp
-    src/InstrumentWindowMaskTab.cpp
-    src/InstrumentWindowPickTab.cpp
-    src/InstrumentWindowRenderTab.cpp
-    src/InstrumentWindowTab.cpp
-    src/InstrumentWindowTreeTab.cpp
+    src/InstrumentWidget.cpp
+    src/InstrumentWidgetMaskTab.cpp
+    src/InstrumentWidgetPickTab.cpp
+    src/InstrumentWidgetRenderTab.cpp
+    src/InstrumentWidgetTab.cpp
+    src/InstrumentWidgetTreeTab.cpp
     src/MantidGLWidget.cpp
     src/MaskBinsData.cpp
     src/ObjCompAssemblyActor.cpp
@@ -152,12 +152,12 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/BinDialog.h
     inc/MantidQtMantidWidgets/InstrumentTreeModel.h
     inc/MantidQtMantidWidgets/InstrumentTreeWidget.h
-    inc/MantidQtMantidWidgets/InstrumentWindow.h
-    inc/MantidQtMantidWidgets/InstrumentWindowTab.h
-    inc/MantidQtMantidWidgets/InstrumentWindowRenderTab.h
-    inc/MantidQtMantidWidgets/InstrumentWindowPickTab.h
-    inc/MantidQtMantidWidgets/InstrumentWindowMaskTab.h
-    inc/MantidQtMantidWidgets/InstrumentWindowTreeTab.h
+    inc/MantidQtMantidWidgets/InstrumentWidget.h
+    inc/MantidQtMantidWidgets/InstrumentWidgetTab.h
+    inc/MantidQtMantidWidgets/InstrumentWidgetRenderTab.h
+    inc/MantidQtMantidWidgets/InstrumentWidgetPickTab.h
+    inc/MantidQtMantidWidgets/InstrumentWidgetMaskTab.h
+    inc/MantidQtMantidWidgets/InstrumentWidgetTreeTab.h
     inc/MantidQtMantidWidgets/ColorMapWidget.h
     inc/MantidQtMantidWidgets/MantidGLWidget.h
     inc/MantidQtMantidWidgets/OneCurvePlot.h
@@ -194,13 +194,13 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/InstrumentActor.h
     inc/MantidQtMantidWidgets/InstrumentTreeModel.h
     inc/MantidQtMantidWidgets/InstrumentTreeWidget.h
-    inc/MantidQtMantidWidgets/InstrumentWindow.h
-    inc/MantidQtMantidWidgets/InstrumentWindowMaskTab.h
-    inc/MantidQtMantidWidgets/InstrumentWindowPickTab.h
-    inc/MantidQtMantidWidgets/InstrumentWindowRenderTab.h
-    inc/MantidQtMantidWidgets/InstrumentWindowTab.h
-    inc/MantidQtMantidWidgets/InstrumentWindowTreeTab.h
-    inc/MantidQtMantidWidgets/InstrumentWindowTypes.h
+    inc/MantidQtMantidWidgets/InstrumentWidget.h
+    inc/MantidQtMantidWidgets/InstrumentWidgetMaskTab.h
+    inc/MantidQtMantidWidgets/InstrumentWidgetPickTab.h
+    inc/MantidQtMantidWidgets/InstrumentWidgetRenderTab.h
+    inc/MantidQtMantidWidgets/InstrumentWidgetTab.h
+    inc/MantidQtMantidWidgets/InstrumentWidgetTreeTab.h
+    inc/MantidQtMantidWidgets/InstrumentWidgetTypes.h
     inc/MantidQtMantidWidgets/MantidGLWidget.h
     inc/MantidQtMantidWidgets/MaskBinsData.h
     inc/MantidQtMantidWidgets/ObjCompAssemblyActor.h

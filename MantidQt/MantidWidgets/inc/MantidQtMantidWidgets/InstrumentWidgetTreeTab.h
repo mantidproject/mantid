@@ -2,7 +2,7 @@
 #define INSTRUMENTWINDOWTREETAB_H_
 
 #include "WidgetDllOption.h"
-#include "InstrumentWindowTab.h"
+#include "InstrumentWidgetTab.h"
 
 #include <QModelIndex>
 
@@ -11,11 +11,11 @@ class InstrumentTreeWidget;
 /**
   * Implements the instrument tree tab in InstrumentWindow
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowTreeTab: public InstrumentWindowTab
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetTreeTab: public InstrumentWidgetTab
 {
   Q_OBJECT
 public:
-  explicit InstrumentWindowTreeTab(InstrumentWindow *instrWindow);
+  explicit InstrumentWidgetTreeTab(InstrumentWidget *instrWidget);
   void initSurface();
 public slots:
   void selectComponentByName(const QString& name);

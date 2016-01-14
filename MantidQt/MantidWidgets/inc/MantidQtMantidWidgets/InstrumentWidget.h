@@ -4,7 +4,7 @@
 #include "WidgetDllOption.h"
 #include "MantidGLWidget.h"
 #include "BinDialog.h"
-#include "InstrumentWindowTypes.h"
+#include "InstrumentWidgetTypes.h"
 
 #include "MantidQtAPI/GraphOptions.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
@@ -22,11 +22,11 @@
 class InstrumentActor;
 class OneCurvePlot;
 class CollapsiblePanel;
-class InstrumentWindowTab;
+class InstrumentWidgetTab;
 class XIntegrationControl;
 class SimpleWidget;
 class ProjectionSurface;
-class InstrumentWindowRenderTab;
+class InstrumentWidgetRenderTab;
 
 // Qt forward declarations
 class QPushButton;
@@ -56,7 +56,7 @@ class QSettings;
   and needs to be updated whenever the instrument view functionality changes.
 
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindow : public QWidget, public MantidQt::API::WorkspaceObserver, public Mantid::API::AlgorithmObserver, public InstrumentWindowTypes
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidget : public QWidget, public MantidQt::API::WorkspaceObserver, public Mantid::API::AlgorithmObserver, public InstrumentWidgetTypes
 {
   Q_OBJECT
 
@@ -64,8 +64,8 @@ public:
   enum SurfaceType{ FULL3D = 0, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z, SIDE_BY_SIDE, RENDERMODE_SIZE };
   enum Tab{RENDER = 0, PICK, MASK, TREE};
 
-  explicit InstrumentWindow(const QString& wsName, QWidget *parent=nullptr);
-  ~InstrumentWindow();
+  explicit InstrumentWidget(const QString& wsName, QWidget *parent=nullptr);
+  ~InstrumentWidget();
   void init(bool resetGeometry = true, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0, bool setDefaultView = true);
   QString getWorkspaceName() const { return m_workspaceName; }
 
@@ -92,8 +92,8 @@ public:
   InstrumentActor* getInstrumentActor() const {return m_instrumentActor;}
   void selectTab(int tab);
   void selectTab(Tab tab){selectTab(int(tab));}
-  InstrumentWindowTab *getTab(const QString & title="") const;
-  InstrumentWindowTab *getTab(const Tab tab) const;
+  InstrumentWidgetTab *getTab(const QString & title="") const;
+  InstrumentWidgetTab *getTab(const Tab tab) const;
   /// Get a filename for saving
   QString getSaveFileName(const QString& title, const QString& filters, QString* selectedFilter = NULL);
   /// Get a name for settings group
@@ -191,8 +191,8 @@ protected:
   QLabel*      mInteractionInfo;
   QTabWidget*  mControlsTab;
   /// Control tabs
-  QList<InstrumentWindowTab *> m_tabs;
-  InstrumentWindowRenderTab *m_renderTab;
+  QList<InstrumentWidgetTab *> m_tabs;
+  InstrumentWidgetRenderTab *m_renderTab;
   XIntegrationControl * m_xIntegration;
   /// The OpenGL widget to display the instrument
   MantidGLWidget* m_InstrumentDisplay;

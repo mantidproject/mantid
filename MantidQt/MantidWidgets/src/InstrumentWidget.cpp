@@ -1,8 +1,8 @@
-#include "InstrumentWindow.h"
-#include "InstrumentWindowRenderTab.h"
-#include "InstrumentWindowPickTab.h"
-#include "InstrumentWindowMaskTab.h"
-#include "InstrumentWindowTreeTab.h"
+#include "InstrumentWidget.h"
+#include "InstrumentWidgetRenderTab.h"
+#include "InstrumentWidgetPickTab.h"
+#include "InstrumentWidgetMaskTab.h"
+#include "InstrumentWidgetTreeTab.h"
 #include "XIntegrationControl.h"
 #include "InstrumentActor.h"
 #include "UnwrappedCylinder.h"
@@ -58,7 +58,7 @@ using namespace Mantid::Geometry;
 using namespace MantidQt::API;
 
 // Name of the QSettings group to store the InstrumentWindw settings
-const char *InstrumentWindowSettingsGroup = "Mantid/InstrumentWindow";
+const char *InstrumentWidgetSettingsGroup = "Mantid/InstrumentWidget";
 
 namespace {
 /**
@@ -76,7 +76,7 @@ public:
 /**
  * Constructor.
  */
-InstrumentWindow::InstrumentWindow(const QString &wsName, QWidget *parent)
+InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent)
     : QWidget(parent), WorkspaceObserver(),
       m_InstrumentDisplay(NULL), m_simpleDisplay(NULL), m_workspaceName(wsName),
       m_instrumentActor(NULL), m_surfaceType(FULL3D),
@@ -132,7 +132,7 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, QWidget *parent)
   mainLayout->addLayout(infoLayout);
 
   QSettings settings;
-  settings.beginGroup("Mantid/InstrumentWindow");
+  settings.beginGroup("Mantid/InstrumentWidget");
 
   // Background colour
   setBackgroundColor(
@@ -180,7 +180,7 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, QWidget *parent)
 /**
  * Destructor
  */
-InstrumentWindow::~InstrumentWindow() {
+InstrumentWidget::~InstrumentWidget() {
   if (m_instrumentActor) {
     saveSettings();
     delete m_instrumentActor;
@@ -200,7 +200,7 @@ InstrumentWindow::~InstrumentWindow() {
  * autoscaling == true.
  * @param setDefaultView :: Set the default surface type
  */
-void InstrumentWindow::init(bool resetGeometry, bool autoscaling,
+void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
                             double scaleMin, double scaleMax,
                             bool setDefaultView) {
   // Previously in (now removed) setWorkspaceName method
@@ -237,7 +237,7 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling,
 /**
  * Select the tab to be displayed
  */
-void InstrumentWindow::selectTab(int tab) {
+void InstrumentWidget::selectTab(int tab) {
   mControlsTab->setCurrentIndex(tab);
 }
 
@@ -245,7 +245,7 @@ void InstrumentWindow::selectTab(int tab) {
  * Returns the named tab or the current tab if none supplied
  * @param title Optional title of a tab (default="")
  */
-InstrumentWindowTab *InstrumentWindow::getTab(const QString &title) const {
+InstrumentWidgetTab *InstrumentWidget::getTab(const QString &title) const {
   QWidget *tab(NULL);
   if (title.isEmpty())
     tab = mControlsTab->currentWidget();
@@ -259,7 +259,7 @@ InstrumentWindowTab *InstrumentWindow::getTab(const QString &title) const {
   }
 
   if (tab)
-    return qobject_cast<InstrumentWindowTab *>(tab);
+    return qobject_cast<InstrumentWidgetTab *>(tab);
   else
     return NULL;
 }
@@ -268,10 +268,10 @@ InstrumentWindowTab *InstrumentWindow::getTab(const QString &title) const {
  * @param tab An enumeration for the tab to select
  * @returns A pointer to the requested tab
  */
-InstrumentWindowTab *InstrumentWindow::getTab(const Tab tab) const {
+InstrumentWidgetTab *InstrumentWidget::getTab(const Tab tab) const {
   QWidget *widget = mControlsTab->widget(static_cast<int>(tab));
   if (widget)
-    return qobject_cast<InstrumentWindowTab *>(widget);
+    return qobject_cast<InstrumentWidgetTab *>(widget);
   else
     return NULL;
 }
@@ -285,7 +285,7 @@ InstrumentWindowTab *InstrumentWindow::getTab(const Tab tab) const {
   * @param filters :: The filters
   * @param selectedFilter :: The selected filter.
   */
-QString InstrumentWindow::getSaveFileName(const QString &title,
+QString InstrumentWidget::getSaveFileName(const QString &title,
                                           const QString &filters,
                                           QString *selectedFilter) {
   QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(
@@ -303,9 +303,9 @@ QString InstrumentWindow::getSaveFileName(const QString &title,
 /**
   * Update the info text displayed at the bottom of the window.
   */
-void InstrumentWindow::updateInfoText() { setInfoText(getSurfaceInfoText()); }
+void InstrumentWidget::updateInfoText() { setInfoText(getSurfaceInfoText()); }
 
-void InstrumentWindow::setSurfaceType(int type) {
+void InstrumentWidget::setSurfaceType(int type) {
   // we cannot do 3D without OpenGL
   if (type == FULL3D && !isGLEnabled()) {
     QMessageBox::warning(
@@ -331,12 +331,12 @@ void InstrumentWindow::setSurfaceType(int type) {
     } else {
       QSettings settings;
       peakLabelPrecision =
-          settings.value("Mantid/InstrumentWindow/PeakLabelPrecision", 2)
+          settings.value("Mantid/InstrumentWidget/PeakLabelPrecision", 2)
               .toInt();
       showPeakRow =
-          settings.value("Mantid/InstrumentWindow/ShowPeakRows", true).toBool();
+          settings.value("Mantid/InstrumentWidget/ShowPeakRows", true).toBool();
       showPeakLabels =
-          settings.value("Mantid/InstrumentWindow/ShowPeakLabels", true)
+          settings.value("Mantid/InstrumentWidget/ShowPeakLabels", true)
               .toBool();
     }
 
@@ -407,7 +407,7 @@ void InstrumentWindow::setSurfaceType(int type) {
     setSurface(surface);
 
     // init tabs with new surface
-    foreach (InstrumentWindowTab *tab, m_tabs) { tab->initSurface(); }
+    foreach (InstrumentWidgetTab *tab, m_tabs) { tab->initSurface(); }
 
     connect(surface, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),
             this, SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
@@ -425,7 +425,7 @@ void InstrumentWindow::setSurfaceType(int type) {
  * @param typeStr :: Symbolic name of the surface type: same as the names in
  * SurfaceType enum. Caseless.
  */
-void InstrumentWindow::setSurfaceType(const QString &typeStr) {
+void InstrumentWidget::setSurfaceType(const QString &typeStr) {
   int typeIndex = 0;
   QString upperCaseStr = typeStr.toUpper();
   if (upperCaseStr == "FULL3D" || upperCaseStr == "3D") {
@@ -451,18 +451,18 @@ void InstrumentWindow::setSurfaceType(const QString &typeStr) {
 /**
  * Update the colormap on the render tab.
  */
-void InstrumentWindow::setupColorMap() { emit colorMapChanged(); }
+void InstrumentWidget::setupColorMap() { emit colorMapChanged(); }
 
 /**
   * Connected to QTabWidget::currentChanged signal
   */
-void InstrumentWindow::tabChanged(int) { updateInfoText(); }
+void InstrumentWidget::tabChanged(int) { updateInfoText(); }
 
 /**
  * Change color map button slot. This provides the file dialog box to select
  * colormap or sets it directly a string is provided
  */
-void InstrumentWindow::changeColormap(const QString &filename) {
+void InstrumentWidget::changeColormap(const QString &filename) {
   if (!m_instrumentActor)
     return;
   QString fileselection;
@@ -489,7 +489,7 @@ void InstrumentWindow::changeColormap(const QString &filename) {
   }
 }
 
-QString InstrumentWindow::confirmDetectorOperation(const QString &opName,
+QString InstrumentWidget::confirmDetectorOperation(const QString &opName,
                                                    const QString &inputWS,
                                                    int ndets) {
   QString message("This operation will affect %1 detectors.\nSelect output "
@@ -515,7 +515,7 @@ QString InstrumentWindow::confirmDetectorOperation(const QString &opName,
 /**
  * Convert a list of integers to a comma separated string of numbers
  */
-QString InstrumentWindow::asString(const std::vector<int> &numbers) const {
+QString InstrumentWidget::asString(const std::vector<int> &numbers) const {
   QString num_str;
   std::vector<int>::const_iterator iend = numbers.end();
   for (std::vector<int>::const_iterator itr = numbers.begin(); itr < iend;
@@ -528,19 +528,19 @@ QString InstrumentWindow::asString(const std::vector<int> &numbers) const {
 }
 
 /// Set a maximum and minimum for the colour map range
-void InstrumentWindow::setColorMapRange(double minValue, double maxValue) {
+void InstrumentWidget::setColorMapRange(double minValue, double maxValue) {
   emit colorMapRangeChanged(minValue, maxValue);
   update();
 }
 
 /// Set the minimum value of the colour map
-void InstrumentWindow::setColorMapMinValue(double minValue) {
+void InstrumentWidget::setColorMapMinValue(double minValue) {
   emit colorMapMinValueChanged(minValue);
   update();
 }
 
 /// Set the maximumu value of the colour map
-void InstrumentWindow::setColorMapMaxValue(double maxValue) {
+void InstrumentWidget::setColorMapMaxValue(double maxValue) {
   emit colorMapMaxValueChanged(maxValue);
   update();
 }
@@ -548,7 +548,7 @@ void InstrumentWindow::setColorMapMaxValue(double maxValue) {
 /**
  * This is the callback for the combo box that selects the view direction
  */
-void InstrumentWindow::setViewDirection(const QString &input) {
+void InstrumentWidget::setViewDirection(const QString &input) {
   auto p3d = boost::dynamic_pointer_cast<Projection3D>(getSurface());
   if (p3d) {
     p3d->setViewDirection(input);
@@ -561,7 +561,7 @@ void InstrumentWindow::setViewDirection(const QString &input) {
  *  For the scripting API. Selects a component in the tree and zooms to it.
  *  @param name The name of the component
  */
-void InstrumentWindow::selectComponent(const QString &name) {
+void InstrumentWidget::selectComponent(const QString &name) {
   emit requestSelectComponent(name);
 }
 
@@ -569,7 +569,7 @@ void InstrumentWindow::selectComponent(const QString &name) {
  * Set the scale type programmatically
  * @param type :: The scale choice
  */
-void InstrumentWindow::setScaleType(GraphOptions::ScaleType type) {
+void InstrumentWidget::setScaleType(GraphOptions::ScaleType type) {
   emit scaleTypeChanged(type);
 }
 
@@ -577,7 +577,7 @@ void InstrumentWindow::setScaleType(GraphOptions::ScaleType type) {
  * Set the exponent for the Power scale type
  * @param nth_power :: The exponent choice
  */
-void InstrumentWindow::setExponent(double nth_power) {
+void InstrumentWidget::setExponent(double nth_power) {
   emit nthPowerChanged(nth_power);
 }
 
@@ -585,7 +585,7 @@ void InstrumentWindow::setExponent(double nth_power) {
  * This method opens a color dialog to pick the background color,
  * and then sets it.
  */
-void InstrumentWindow::pickBackgroundColor() {
+void InstrumentWidget::pickBackgroundColor() {
   QColor color = QColorDialog::getColor(Qt::green, this);
   setBackgroundColor(color);
 }
@@ -594,7 +594,7 @@ void InstrumentWindow::pickBackgroundColor() {
  * Saves the current image buffer as a png file.
  * @param filename Optional filename. Empty string raises a save dialog
  */
-void InstrumentWindow::saveImage(QString filename) {
+void InstrumentWidget::saveImage(QString filename) {
   QString defaultExt = ".png";
   QList<QByteArray> formats = QImageWriter::supportedImageFormats();
   if (filename.isEmpty()) {
@@ -643,7 +643,7 @@ void InstrumentWindow::saveImage(QString filename) {
 /**
  * Use the file dialog to select a filename to save grouping.
  */
-QString InstrumentWindow::getSaveGroupingFilename() {
+QString InstrumentWidget::getSaveGroupingFilename() {
   QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(
       this, "Save grouping file", m_savedialog_dir,
       "Grouping (*.xml);;All files (*.*)");
@@ -662,16 +662,16 @@ QString InstrumentWindow::getSaveGroupingFilename() {
 // * Update the text display that informs the user of the current mode and
 // details about it
 // */
-void InstrumentWindow::setInfoText(const QString &text) {
+void InstrumentWidget::setInfoText(const QString &text) {
   mInteractionInfo->setText(text);
 }
 
 /**
  * Save properties of the window a persistent store
  */
-void InstrumentWindow::saveSettings() {
+void InstrumentWidget::saveSettings() {
   QSettings settings;
-  settings.beginGroup("Mantid/InstrumentWindow");
+  settings.beginGroup("Mantid/InstrumentWidget");
   if (m_InstrumentDisplay)
     settings.setValue("BackgroundColor",
                       m_InstrumentDisplay->currentBackgroundColor());
@@ -683,17 +683,17 @@ void InstrumentWindow::saveSettings() {
                       getSurface()->getPeakLabelPrecision());
     settings.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
     settings.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
-    foreach (InstrumentWindowTab *tab, m_tabs) { tab->saveSettings(settings); }
+    foreach (InstrumentWidgetTab *tab, m_tabs) { tab->saveSettings(settings); }
   }
   settings.endGroup();
 }
 
-void InstrumentWindow::helpClicked() {
+void InstrumentWidget::helpClicked() {
   QDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/MantidPlot:_Instrument_View"));
 }
 
-void InstrumentWindow::set3DAxesState(bool on) {
+void InstrumentWidget::set3DAxesState(bool on) {
   auto p3d = boost::dynamic_pointer_cast<Projection3D>(getSurface());
   if (p3d) {
     p3d->set3DAxesState(on);
@@ -701,7 +701,7 @@ void InstrumentWindow::set3DAxesState(bool on) {
   }
 }
 
-void InstrumentWindow::finishHandle(const Mantid::API::IAlgorithm *alg) {
+void InstrumentWidget::finishHandle(const Mantid::API::IAlgorithm *alg) {
   UNUSED_ARG(alg);
   emit needSetIntegrationRange(m_instrumentActor->minBinValue(),
                                m_instrumentActor->maxBinValue());
@@ -709,19 +709,19 @@ void InstrumentWindow::finishHandle(const Mantid::API::IAlgorithm *alg) {
   // m_InstrumentDisplay->refreshView();
 }
 
-void InstrumentWindow::changeScaleType(int type) {
+void InstrumentWidget::changeScaleType(int type) {
   m_instrumentActor->changeScaleType(type);
   setupColorMap();
   updateInstrumentView();
 }
 
-void InstrumentWindow::changeNthPower(double nth_power) {
+void InstrumentWidget::changeNthPower(double nth_power) {
   m_instrumentActor->changeNthPower(nth_power);
   setupColorMap();
   updateInstrumentView();
 }
 
-void InstrumentWindow::changeColorMapMinValue(double minValue) {
+void InstrumentWidget::changeColorMapMinValue(double minValue) {
   m_instrumentActor->setAutoscaling(false);
   m_instrumentActor->setMinValue(minValue);
   setupColorMap();
@@ -729,20 +729,20 @@ void InstrumentWindow::changeColorMapMinValue(double minValue) {
 }
 
 /// Set the maximumu value of the colour map
-void InstrumentWindow::changeColorMapMaxValue(double maxValue) {
+void InstrumentWidget::changeColorMapMaxValue(double maxValue) {
   m_instrumentActor->setAutoscaling(false);
   m_instrumentActor->setMaxValue(maxValue);
   setupColorMap();
   updateInstrumentView();
 }
 
-void InstrumentWindow::changeColorMapRange(double minValue, double maxValue) {
+void InstrumentWidget::changeColorMapRange(double minValue, double maxValue) {
   m_instrumentActor->setMinMaxRange(minValue, maxValue);
   setupColorMap();
   updateInstrumentView();
 }
 
-void InstrumentWindow::setWireframe(bool on) {
+void InstrumentWidget::setWireframe(bool on) {
   auto p3d = boost::dynamic_pointer_cast<Projection3D>(getSurface());
   if (p3d) {
     p3d->setWireframe(on);
@@ -754,7 +754,7 @@ void InstrumentWindow::setWireframe(bool on) {
  * Set new integration range but don't update XIntegrationControl (because the
  * control calls this slot)
  */
-void InstrumentWindow::setIntegrationRange(double xmin, double xmax) {
+void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
   m_instrumentActor->setIntegrationRange(xmin, xmax);
   setupColorMap();
   updateInstrumentDetectors();
@@ -765,7 +765,7 @@ void InstrumentWindow::setIntegrationRange(double xmin, double xmax) {
  * Set new integration range and update XIntegrationControl. To be called from
  * python.
  */
-void InstrumentWindow::setBinRange(double xmin, double xmax) {
+void InstrumentWidget::setBinRange(double xmin, double xmax) {
   m_xIntegration->setRange(xmin, xmax);
 }
 
@@ -774,7 +774,7 @@ void InstrumentWindow::setBinRange(double xmin, double xmax) {
   * is visible the rest of the instrument is hidden.
   * @param id :: The component id.
   */
-void InstrumentWindow::componentSelected(ComponentID id) {
+void InstrumentWidget::componentSelected(ComponentID id) {
   auto surface = getSurface();
   if (surface) {
     surface->componentSelected(id);
@@ -783,12 +783,12 @@ void InstrumentWindow::componentSelected(ComponentID id) {
   }
 }
 
-void InstrumentWindow::executeAlgorithm(const QString &,
+void InstrumentWidget::executeAlgorithm(const QString &,
                                         const QString &) {
   //emit execMantidAlgorithm(alg_name, param_list, this);
 }
 
-void InstrumentWindow::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
+void InstrumentWidget::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
 	try
 	{
 		alg->executeAsync();
@@ -807,7 +807,7 @@ void InstrumentWindow::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
  * FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X,
  * SPHERICAL_Y, SPHERICAL_Z
  */
-void InstrumentWindow::setViewType(const QString &type) {
+void InstrumentWidget::setViewType(const QString &type) {
   QString type_upper = type.toUpper();
   SurfaceType itype = FULL3D;
   if (type_upper == "FULL3D") {
@@ -828,7 +828,7 @@ void InstrumentWindow::setViewType(const QString &type) {
   setSurfaceType(itype);
 }
 
-void InstrumentWindow::dragEnterEvent(QDragEnterEvent *e) {
+void InstrumentWidget::dragEnterEvent(QDragEnterEvent *e) {
   QString name = e->mimeData()->objectName();
   if (name == "MantidWorkspace") {
     e->accept();
@@ -837,7 +837,7 @@ void InstrumentWindow::dragEnterEvent(QDragEnterEvent *e) {
   }
 }
 
-void InstrumentWindow::dropEvent(QDropEvent *e) {
+void InstrumentWidget::dropEvent(QDropEvent *e) {
   QString name = e->mimeData()->objectName();
   if (name == "MantidWorkspace") {
     QString text = e->mimeData()->text();
@@ -863,7 +863,7 @@ void InstrumentWindow::dropEvent(QDropEvent *e) {
  * @param obj :: Object which events will be filtered.
  * @param ev :: An ingoing event.
  */
-bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev) {
+bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
   if (ev->type() == QEvent::ContextMenu &&
       (dynamic_cast<MantidGLWidget *>(obj) == m_InstrumentDisplay ||
        dynamic_cast<SimpleWidget *>(obj) == m_simpleDisplay) &&
@@ -874,7 +874,7 @@ bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev) {
     m_instrumentDisplayContextMenuOn = true;
     QMenu context(this);
     // add tab specific actions
-    InstrumentWindowTab *tab = getTab();
+    InstrumentWidgetTab *tab = getTab();
     tab->addToDisplayContextMenu(context);
     if (getSurface()->hasPeakOverlays()) {
       context.addSeparator();
@@ -893,7 +893,7 @@ bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev) {
  * Set on / off autoscaling of the color map on the render tab.
  * @param on :: On or Off.
  */
-void InstrumentWindow::setColorMapAutoscaling(bool on) {
+void InstrumentWidget::setColorMapAutoscaling(bool on) {
   m_instrumentActor->setAutoscaling(on);
   setupColorMap();
   updateInstrumentView();
@@ -904,7 +904,7 @@ void InstrumentWindow::setColorMapAutoscaling(bool on) {
  * @param wsName The name of a workspace in the ADS
  * @returns True if the overlay was successful, false otherwise
  */
-bool InstrumentWindow::overlay(const QString &wsName) {
+bool InstrumentWidget::overlay(const QString &wsName) {
   using namespace Mantid::API;
   Workspace_sptr workspace;
   bool success(false);
@@ -944,7 +944,7 @@ bool InstrumentWindow::overlay(const QString &wsName) {
 /**
  * Remove all peak overlays from the instrument display.
  */
-void InstrumentWindow::clearPeakOverlays() {
+void InstrumentWidget::clearPeakOverlays() {
   getSurface()->clearPeakOverlays();
   updateInstrumentView();
 }
@@ -954,7 +954,7 @@ void InstrumentWindow::clearPeakOverlays() {
  * displayed.
  * @param n :: Precision, > 0
  */
-void InstrumentWindow::setPeakLabelPrecision(int n) {
+void InstrumentWidget::setPeakLabelPrecision(int n) {
   getSurface()->setPeakLabelPrecision(n);
   updateInstrumentView();
 }
@@ -963,7 +963,7 @@ void InstrumentWindow::setPeakLabelPrecision(int n) {
  * Enable or disable the show peak row flag
  * @param on :: True to show, false to hide.
  */
-void InstrumentWindow::setShowPeakRowFlag(bool on) {
+void InstrumentWidget::setShowPeakRowFlag(bool on) {
   getSurface()->setShowPeakRowsFlag(on);
   updateInstrumentView();
 }
@@ -972,7 +972,7 @@ void InstrumentWindow::setShowPeakRowFlag(bool on) {
  * Enable or disable the show peak hkl labels flag
  * @param on :: True to show, false to hide.
  */
-void InstrumentWindow::setShowPeakLabelsFlag(bool on) {
+void InstrumentWidget::setShowPeakLabelsFlag(bool on) {
   getSurface()->setShowPeakLabelsFlag(on);
   updateInstrumentView();
 }
@@ -981,7 +981,7 @@ void InstrumentWindow::setShowPeakLabelsFlag(bool on) {
  * Set background color of the instrument display
  * @param color :: New background colour.
  */
-void InstrumentWindow::setBackgroundColor(const QColor &color) {
+void InstrumentWidget::setBackgroundColor(const QColor &color) {
   if (m_InstrumentDisplay)
     m_InstrumentDisplay->setBackgroundColor(color);
 }
@@ -989,7 +989,7 @@ void InstrumentWindow::setBackgroundColor(const QColor &color) {
 /**
  * Get the surface info string
  */
-QString InstrumentWindow::getSurfaceInfoText() const {
+QString InstrumentWidget::getSurfaceInfoText() const {
   ProjectionSurface *surface = getSurface().get();
   return surface ? surface->getInfoText() : "";
 }
@@ -997,7 +997,7 @@ QString InstrumentWindow::getSurfaceInfoText() const {
 /**
  * Get pointer to the projection surface
  */
-ProjectionSurface_sptr InstrumentWindow::getSurface() const {
+ProjectionSurface_sptr InstrumentWidget::getSurface() const {
   if (m_InstrumentDisplay) {
     return m_InstrumentDisplay->getSurface();
   } else if (m_simpleDisplay) {
@@ -1010,7 +1010,7 @@ ProjectionSurface_sptr InstrumentWindow::getSurface() const {
  * Set newly created projection surface
  * @param surface :: Pointer to the new surace.
  */
-void InstrumentWindow::setSurface(ProjectionSurface *surface) {
+void InstrumentWidget::setSurface(ProjectionSurface *surface) {
   ProjectionSurface_sptr sharedSurface(surface);
   if (m_InstrumentDisplay) {
     m_InstrumentDisplay->setSurface(sharedSurface);
@@ -1028,7 +1028,7 @@ void InstrumentWindow::setSurface(ProjectionSurface *surface) {
 }
 
 /// Return the width of the instrunemt display
-int InstrumentWindow::getInstrumentDisplayWidth() const {
+int InstrumentWidget::getInstrumentDisplayWidth() const {
   if (m_InstrumentDisplay) {
     return m_InstrumentDisplay->width();
   } else if (m_simpleDisplay) {
@@ -1038,7 +1038,7 @@ int InstrumentWindow::getInstrumentDisplayWidth() const {
 }
 
 /// Return the height of the instrunemt display
-int InstrumentWindow::getInstrumentDisplayHeight() const {
+int InstrumentWidget::getInstrumentDisplayHeight() const {
   if (m_InstrumentDisplay) {
     return m_InstrumentDisplay->height();
   } else if (m_simpleDisplay) {
@@ -1051,7 +1051,7 @@ int InstrumentWindow::getInstrumentDisplayHeight() const {
 /// @param picking :: Set to true to update the picking image regardless the
 /// interaction
 ///   mode of the surface.
-void InstrumentWindow::updateInstrumentView(bool picking) {
+void InstrumentWidget::updateInstrumentView(bool picking) {
   if (m_InstrumentDisplay &&
       m_instrumentDisplayLayout->currentWidget() ==
           dynamic_cast<QWidget *>(m_InstrumentDisplay)) {
@@ -1062,7 +1062,7 @@ void InstrumentWindow::updateInstrumentView(bool picking) {
 }
 
 /// Recalculate the colours and redraw the instrument view
-void InstrumentWindow::updateInstrumentDetectors() {
+void InstrumentWidget::updateInstrumentDetectors() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   if (m_InstrumentDisplay &&
       m_instrumentDisplayLayout->currentWidget() ==
@@ -1078,7 +1078,7 @@ void InstrumentWindow::updateInstrumentDetectors() {
  * Choose which widget to use.
  * @param yes :: True to use the OpenGL one or false to use the Simple
  */
-void InstrumentWindow::selectOpenGLDisplay(bool yes) {
+void InstrumentWidget::selectOpenGLDisplay(bool yes) {
   int widgetIndex = yes ? 0 : 1;
   const int oldIndex = m_instrumentDisplayLayout->currentIndex();
   if (oldIndex == widgetIndex)
@@ -1091,26 +1091,26 @@ void InstrumentWindow::selectOpenGLDisplay(bool yes) {
 }
 
 /// Public slot to toggle between the GL and simple instrument display widgets
-void InstrumentWindow::enableOpenGL(bool on) {
+void InstrumentWidget::enableOpenGL(bool on) {
   enableGL(on);
   emit glOptionChanged(on);
 }
 
 /// Private slot to toggle between the GL and simple instrument display widgets
-void InstrumentWindow::enableGL(bool on) {
+void InstrumentWidget::enableGL(bool on) {
   m_useOpenGL = on;
   selectOpenGLDisplay(isGLEnabled());
 }
 
 /// True if the GL instrument display is currently on
-bool InstrumentWindow::isGLEnabled() const { return m_useOpenGL; }
+bool InstrumentWidget::isGLEnabled() const { return m_useOpenGL; }
 
 /**
   * Create and add the tab widgets.
   */
-void InstrumentWindow::createTabs(QSettings &settings) {
+void InstrumentWidget::createTabs(QSettings &settings) {
   // Render Controls
-  m_renderTab = new InstrumentWindowRenderTab(this);
+  m_renderTab = new InstrumentWidgetRenderTab(this);
   connect(m_renderTab, SIGNAL(setAutoscaling(bool)), this,
           SLOT(setColorMapAutoscaling(bool)));
   connect(m_renderTab, SIGNAL(rescaleColorMap()), this, SLOT(setupColorMap()));
@@ -1118,12 +1118,12 @@ void InstrumentWindow::createTabs(QSettings &settings) {
   m_renderTab->loadSettings(settings);
 
   // Pick controls
-  InstrumentWindowPickTab *pickTab = new InstrumentWindowPickTab(this);
+  InstrumentWidgetPickTab *pickTab = new InstrumentWidgetPickTab(this);
   mControlsTab->addTab(pickTab, QString("Pick"));
   pickTab->loadSettings(settings);
 
   // Mask controls
-  InstrumentWindowMaskTab *maskTab = new InstrumentWindowMaskTab(this);
+  InstrumentWidgetMaskTab *maskTab = new InstrumentWidgetMaskTab(this);
   mControlsTab->addTab(maskTab, QString("Draw"));
   connect(maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
@@ -1132,7 +1132,7 @@ void InstrumentWindow::createTabs(QSettings &settings) {
   maskTab->loadSettings(settings);
 
   // Instrument tree controls
-  InstrumentWindowTreeTab *treeTab = new InstrumentWindowTreeTab(this);
+  InstrumentWidgetTreeTab *treeTab = new InstrumentWidgetTreeTab(this);
   mControlsTab->addTab(treeTab, QString("Instrument"));
   treeTab->loadSettings(settings);
 
@@ -1143,19 +1143,19 @@ void InstrumentWindow::createTabs(QSettings &settings) {
 }
 
 /**
-  * Return a name for a group in QSettings to store InstrumentWindow
+  * Return a name for a group in QSettings to store InstrumentWidget
  * configuration.
   */
-QString InstrumentWindow::getSettingsGroupName() const {
-  return QString::fromAscii(InstrumentWindowSettingsGroup);
+QString InstrumentWidget::getSettingsGroupName() const {
+  return QString::fromAscii(InstrumentWidgetSettingsGroup);
 }
 
 /**
   * Construct a name for a group in QSettings to store instrument-specific
  * configuration.
   */
-QString InstrumentWindow::getInstrumentSettingsGroupName() const {
-  return QString::fromAscii(InstrumentWindowSettingsGroup) + "/" +
+QString InstrumentWidget::getInstrumentSettingsGroupName() const {
+  return QString::fromAscii(InstrumentWidgetSettingsGroup) + "/" +
          QString::fromStdString(
              getInstrumentActor()->getInstrument()->getName());
 }

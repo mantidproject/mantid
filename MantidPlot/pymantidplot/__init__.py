@@ -21,8 +21,8 @@ import mantidqtpython
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
 from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker,
-                  GraphOptions, InstrumentWindow, InstrumentWindowRenderTab, InstrumentWindowPickTab,
-                  InstrumentWindowMaskTab)
+                  GraphOptions, InstrumentWidget, InstrumentWidgetRenderTab, InstrumentWidgetPickTab,
+                  InstrumentWidgetMaskTab)
 
 # Make the ApplicationWindow instance accessible from the mantidplot namespace
 from _qti import app
@@ -678,12 +678,12 @@ def getMantidMatrix(name):
     return new_proxy(proxies.MantidMatrix, _qti.app.mantidUI.getMantidMatrix, name)
 
 
-def getInstrumentView(name, tab=InstrumentWindow.RENDER):
+def getInstrumentView(name, tab=InstrumentWidget.RENDER):
     """Create an instrument view window based on the given workspace.
 
     Args:
         name: The name of the workspace.
-        tab: The index of the tab to display initially, (default=InstrumentWindow.RENDER)
+        tab: The index of the tab to display initially, (default=InstrumentWidget.RENDER)
 
     Returns:
         A handle to the created instrument view widget.
@@ -691,14 +691,14 @@ def getInstrumentView(name, tab=InstrumentWindow.RENDER):
     ads = _get_analysis_data_service()
     if name not in ads:
         raise ValueError("Workspace '%s' does not exist" % name)
-    return new_proxy(proxies.InstrumentWindow, _qti.app.mantidUI.getInstrumentView, name, tab)
+    return new_proxy(proxies.InstrumentWidget, _qti.app.mantidUI.getInstrumentView, name, tab)
 
-def getInstrumentWindow(name, tab=InstrumentWindow.RENDER):
+def getInstrumentWindow(name, tab=InstrumentWidget.RENDER):
     """Create an instrument view window based on the given workspace.
 
     Args:
         name: The name of the workspace.
-        tab: The index of the tab to display initially, (default=InstrumentWindow.RENDER)
+        tab: The index of the tab to display initially, (default=InstrumentWidget.RENDER)
 
     Returns:
         A handle to the created MDIWindow which contains the instrument view widget.

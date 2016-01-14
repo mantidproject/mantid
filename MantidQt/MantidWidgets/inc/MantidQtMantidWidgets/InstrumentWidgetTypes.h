@@ -3,7 +3,7 @@
 
 #include "WidgetDllOption.h"
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowTypes {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetTypes {
 
 public:
   enum SurfaceType {

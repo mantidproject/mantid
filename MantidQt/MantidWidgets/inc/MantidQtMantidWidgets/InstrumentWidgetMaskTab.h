@@ -2,7 +2,7 @@
 #define INSTRUMENTWINDOWMASKTAB_H_
 
 #include "WidgetDllOption.h"
-#include "InstrumentWindowTab.h"
+#include "InstrumentWidgetTab.h"
 #include "MantidGLWidget.h"
 
 #include "MantidGeometry/Instrument.h"
@@ -50,14 +50,14 @@ namespace Mantid
   * Contains controls to create, manipulate and apply masking and grouping to underlying workspace.
   *
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowMaskTab: public InstrumentWindowTab
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetMaskTab: public InstrumentWidgetTab
 {
   Q_OBJECT
 public:
   enum Mode {Mask, Group, ROI};
   enum Activity {Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing,DrawFree};
 
-  explicit InstrumentWindowMaskTab(InstrumentWindow *instrWindow);
+  explicit InstrumentWidgetMaskTab(InstrumentWidget *instrWidget);
   void initSurface();
   void setMode(Mode mode);
   void selectTool(Activity tool);

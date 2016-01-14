@@ -2,7 +2,7 @@
 #define INSTRUMENTWINDOWRENDERTAB_H_
 
 #include "WidgetDllOption.h"
-#include "InstrumentWindowTab.h"
+#include "InstrumentWidgetTab.h"
 
 #include "MantidQtAPI/GraphOptions.h"
 
@@ -22,13 +22,13 @@ class QLineEdit;
 /**
   * Implements the Render tab in InstrumentWindow.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowRenderTab: public InstrumentWindowTab
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetRenderTab: public InstrumentWidgetTab
 {
   Q_OBJECT
 
 public:
-  explicit InstrumentWindowRenderTab(InstrumentWindow *instrWindow);
-  ~InstrumentWindowRenderTab();
+  explicit InstrumentWidgetRenderTab(InstrumentWidget *instrWindow);
+  ~InstrumentWidgetRenderTab();
   void initSurface();
   void saveSettings(QSettings&)const;
   void loadSettings(const QSettings&);
@@ -109,7 +109,7 @@ private:
   QActionGroup *m_precisionActionGroup;
   QList<QAction*> m_precisionActions;
 
-  friend class InstrumentWindow;
+  friend class InstrumentWidget;
   
 };
 

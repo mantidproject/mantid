@@ -4,7 +4,7 @@
 #include <QFrame>
 #include <QScrollBar>
 
-class InstrumentWindow;
+class InstrumentWidget;
 class Instrument3DWidget;
 
 class QScrollBar;
@@ -50,7 +50,7 @@ class XIntegrationControl: public QFrame
 {
   Q_OBJECT
 public:
-  explicit XIntegrationControl(InstrumentWindow *instrWindow);
+  explicit XIntegrationControl(InstrumentWidget *instrWindow);
   void setTotalRange(double minimum,double maximum);
   void setUnits(const QString& units);
   void setRange(double minimum,double maximum);
@@ -68,7 +68,7 @@ private slots:
   void setMaximum();
 private:
   void updateTextBoxes();
-  InstrumentWindow* m_instrWindow;
+  InstrumentWidget* m_instrWindow;
   XIntegrationScrollBar* m_scrollBar;
   QLineEdit* m_minText;
   QLineEdit* m_maxText;

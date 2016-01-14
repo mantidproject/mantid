@@ -9,9 +9,9 @@
 using namespace Mantid::API;
 
 MantidInstrumentWindow::MantidInstrumentWindow(MdiSubWindow *parent, const QString &wsName)
-    : InstrumentWindow(wsName, parent)
+    : InstrumentWidget(wsName, parent),
+	m_mdiSubWindowParent(parent)
 {
-	m_mdiSubWindowParent = parent;
 }
 
 MantidInstrumentWindow::~MantidInstrumentWindow() {}

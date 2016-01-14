@@ -2011,7 +2011,7 @@ void MantidUI::manageMantidWorkspaces()
 *  @param tab    The index of the tab (starting from 0) to initially display (default: 0)
 *  @return A pointer to the instrument window widget if created. NULL otherwise.
 */
-InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
+InstrumentWidget* MantidUI::getInstrumentView(const QString & wsName, int tab)
 {
   if( !Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()) ) return NULL;
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
@@ -2065,7 +2065,7 @@ MdiSubWindow *MantidUI::getInstrumentWindow(const QString & wsName, int tab)
 
 void MantidUI::showMantidInstrument(const QString& wsName)
 {
-  InstrumentWindow *insWin = getInstrumentView(wsName);
+  InstrumentWidget *insWin = getInstrumentView(wsName);
   if (!insWin)
   {
     m_lastShownInstrumentWin = NULL;

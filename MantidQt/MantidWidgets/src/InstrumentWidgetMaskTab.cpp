@@ -1,5 +1,5 @@
-#include "InstrumentWindow.h"
-#include "InstrumentWindowMaskTab.h"
+#include "InstrumentWidget.h"
+#include "InstrumentWidgetMaskTab.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
 #include "DetXMLFile.h"
@@ -58,8 +58,8 @@
 #include <algorithm>
 #include <fstream>
 
-InstrumentWindowMaskTab::InstrumentWindowMaskTab(InstrumentWindow* instrWindow):
-InstrumentWindowTab(instrWindow),
+InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget* instrWidget):
+InstrumentWidgetTab(instrWidget),
 m_activity(Select),
 m_hasMaskToApply(false),
 m_maskBins(false),
@@ -305,13 +305,13 @@ m_left(NULL), m_top(NULL), m_right(NULL), m_bottom(NULL)
 /**
   * Initialize the tab when new projection surface is created.
   */
-void InstrumentWindowMaskTab::initSurface()
+void InstrumentWidgetMaskTab::initSurface()
 {
-  connect(m_instrWindow->getSurface().get(),SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
-  connect(m_instrWindow->getSurface().get(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
-  connect(m_instrWindow->getSurface().get(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
-  connect(m_instrWindow->getSurface().get(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
-  connect(m_instrWindow->getSurface().get(),SIGNAL(shapesCleared()),this,SLOT(shapesCleared()));
+  connect(m_instrWidget->getSurface().get(),SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
+  connect(m_instrWidget->getSurface().get(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
+  connect(m_instrWidget->getSurface().get(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
+  connect(m_instrWidget->getSurface().get(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
+  connect(m_instrWidget->getSurface().get(),SIGNAL(shapesCleared()),this,SLOT(shapesCleared()));
   enableApplyButtons();
 }
 
@@ -319,7 +319,7 @@ void InstrumentWindowMaskTab::initSurface()
  * Selects between masking/grouping
  * @param mode The required mode, @see Mode
  */
-void InstrumentWindowMaskTab::setMode(Mode mode)
+void InstrumentWidgetMaskTab::setMode(Mode mode)
 {
   switch(mode)
   {
@@ -334,7 +334,7 @@ void InstrumentWindowMaskTab::setMode(Mode mode)
   toggleMaskGroup();
 }
 
-void InstrumentWindowMaskTab::selectTool(Activity tool)
+void InstrumentWidgetMaskTab::selectTool(Activity tool)
 {
   switch(tool)
   {
@@ -361,7 +361,7 @@ void InstrumentWindowMaskTab::selectTool(Activity tool)
 /**
   * Set tab's activity based on the currently selected tool button.
   */
-void InstrumentWindowMaskTab::setActivity()
+void InstrumentWidgetMaskTab::setActivity()
 {
   const QColor borderColor = getShapeBorderColor();
   const QColor fillColor = getShapeFillColor();
@@ -369,57 +369,57 @@ void InstrumentWindowMaskTab::setActivity()
   if (m_move->isChecked())
   {
     m_activity = Move;
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
     m_activeTool->setText("Tool: Navigation");
   }
   else if (m_pointer->isChecked())
   {
     m_activity = Select;
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Shape editing. " + whatIsBeingSelected);
   }
   else if (m_ellipse->isChecked())
   {
     m_activity = DrawEllipse;
-    m_instrWindow->getSurface()->startCreatingShape2D("ellipse",borderColor,fillColor);
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->startCreatingShape2D("ellipse",borderColor,fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Ellipse. " + whatIsBeingSelected);
   }
   else if (m_rectangle->isChecked())
   {
     m_activity = DrawRectangle;
-    m_instrWindow->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Rectangle. " + whatIsBeingSelected);
   }
   else if (m_ring_ellipse->isChecked())
   {
     m_activity = DrawEllipticalRing;
-    m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Elliptical ring. " + whatIsBeingSelected);
   }
   else if (m_ring_rectangle->isChecked())
   {
     m_activity = DrawRectangularRing;
-    m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Rectangular ring. " + whatIsBeingSelected);
   }
   else if (m_free_draw->isChecked())
   {
     m_activity = DrawFree;
-    m_instrWindow->getSurface()->startCreatingFreeShape(borderColor,fillColor);
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawFreeMode);
+    m_instrWidget->getSurface()->startCreatingFreeShape(borderColor,fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawFreeMode);
     m_activeTool->setText("Tool: Free draw. " + whatIsBeingSelected);
   }
-  m_instrWindow->updateInfoText();
+  m_instrWidget->updateInfoText();
 }
 
 /**
   * Slot responding on creation of a new masking shape.
   */
-void InstrumentWindowMaskTab::shapeCreated()
+void InstrumentWidgetMaskTab::shapeCreated()
 {
   if (!isVisible()) return;
   if (m_activity != DrawFree)
@@ -432,7 +432,7 @@ void InstrumentWindowMaskTab::shapeCreated()
 /**
   * Slot responding on selection of a new masking shape.
   */
-void InstrumentWindowMaskTab::shapeSelected()
+void InstrumentWidgetMaskTab::shapeSelected()
 {
   setProperties();
 }
@@ -440,7 +440,7 @@ void InstrumentWindowMaskTab::shapeSelected()
 /**
   * Slot responding on deselecting all masking shapes.
   */
-void InstrumentWindowMaskTab::shapesDeselected()
+void InstrumentWidgetMaskTab::shapesDeselected()
 {
   clearProperties();
 }
@@ -448,25 +448,25 @@ void InstrumentWindowMaskTab::shapesDeselected()
 /**
   * Slot responding on a change of a masking shape.
   */
-void InstrumentWindowMaskTab::shapeChanged()
+void InstrumentWidgetMaskTab::shapeChanged()
 {
   if (!m_left) return; // check that everything is ok
   m_userEditing = false; // this prevents resetting shape properties by doubleChanged(...)
-  RectF rect = m_instrWindow->getSurface()->getCurrentBoundingRect();
+  RectF rect = m_instrWidget->getSurface()->getCurrentBoundingRect();
   m_doubleManager->setValue(m_left,rect.x0());
   m_doubleManager->setValue(m_top,rect.y1());
   m_doubleManager->setValue(m_right,rect.x1());
   m_doubleManager->setValue(m_bottom,rect.y0());
   for(QMap<QtProperty *,QString>::iterator it = m_doublePropertyMap.begin(); it != m_doublePropertyMap.end(); ++it)
   {
-    m_doubleManager->setValue(it.key(),m_instrWindow->getSurface()->getCurrentDouble(it.value()));
+    m_doubleManager->setValue(it.key(),m_instrWidget->getSurface()->getCurrentDouble(it.value()));
   }
   for(QMap<QString,QtProperty *>::iterator it = m_pointPropertyMap.begin(); it != m_pointPropertyMap.end(); ++it)
   {
     QtProperty* prop = it.value();
     QList<QtProperty*> subs = prop->subProperties();
     if (subs.size() != 2) continue;
-    QPointF p = m_instrWindow->getSurface()->getCurrentPoint(it.key());
+    QPointF p = m_instrWidget->getSurface()->getCurrentPoint(it.key());
     m_doubleManager->setValue(subs[0],p.x());
     m_doubleManager->setValue(subs[1],p.y());
   }
@@ -476,7 +476,7 @@ void InstrumentWindowMaskTab::shapeChanged()
 /**
   * Slot responding on removing all masking shapes.
   */
-void InstrumentWindowMaskTab::shapesCleared()
+void InstrumentWidgetMaskTab::shapesCleared()
 {
     enableApplyButtons();
 }
@@ -484,22 +484,22 @@ void InstrumentWindowMaskTab::shapesCleared()
 /**
   * Removes the mask shapes from the screen.
   */
-void InstrumentWindowMaskTab::clearShapes()
+void InstrumentWidgetMaskTab::clearShapes()
 {
-    m_instrWindow->getSurface()->clearMask();
+    m_instrWidget->getSurface()->clearMask();
     setSelectActivity();
 }
 
-void InstrumentWindowMaskTab::showEvent (QShowEvent *)
+void InstrumentWidgetMaskTab::showEvent (QShowEvent *)
 {
   setActivity();
-  m_instrWindow->setMouseTracking(true);
+  m_instrWidget->setMouseTracking(true);
   enableApplyButtons();
-  m_instrWindow->updateInstrumentView(true);
-  m_instrWindow->getSurface()->changeBorderColor( getShapeBorderColor() );
+  m_instrWidget->updateInstrumentView(true);
+  m_instrWidget->getSurface()->changeBorderColor( getShapeBorderColor() );
 }
 
-void InstrumentWindowMaskTab::clearProperties()
+void InstrumentWidgetMaskTab::clearProperties()
 {
   m_browser->clear();
   m_doublePropertyMap.clear();
@@ -511,7 +511,7 @@ void InstrumentWindowMaskTab::clearProperties()
   m_bottom = NULL;
 }
 
-void InstrumentWindowMaskTab::setProperties()
+void InstrumentWidgetMaskTab::setProperties()
 {
   clearProperties();
   m_userEditing = false;
@@ -529,7 +529,7 @@ void InstrumentWindowMaskTab::setProperties()
   boundingRectGroup->addSubProperty(m_bottom);
 
   // point properties
-  QStringList pointProperties = m_instrWindow->getSurface()->getCurrentPointNames();
+  QStringList pointProperties = m_instrWidget->getSurface()->getCurrentPointNames();
   foreach(QString name,pointProperties)
   {
     QtProperty* point = m_groupManager->addProperty(name);
@@ -544,7 +544,7 @@ void InstrumentWindowMaskTab::setProperties()
   }
 
   // double properties
-  QStringList doubleProperties = m_instrWindow->getSurface()->getCurrentDoubleNames();
+  QStringList doubleProperties = m_instrWidget->getSurface()->getCurrentDoubleNames();
   foreach(QString name,doubleProperties)
   {
     QtProperty* prop = addDoubleProperty(name);
@@ -555,21 +555,21 @@ void InstrumentWindowMaskTab::setProperties()
   shapeChanged();
 }
 
-void InstrumentWindowMaskTab::doubleChanged(QtProperty* prop)
+void InstrumentWidgetMaskTab::doubleChanged(QtProperty* prop)
 {
   if (!m_userEditing) return;
   if (prop == m_left || prop == m_top || prop == m_right || prop == m_bottom)
   {
     QRectF rect(QPointF(m_doubleManager->value(m_left),m_doubleManager->value(m_top)),
                 QPointF(m_doubleManager->value(m_right),m_doubleManager->value(m_bottom)));
-    m_instrWindow->getSurface()->setCurrentBoundingRect(RectF(rect));
+    m_instrWidget->getSurface()->setCurrentBoundingRect(RectF(rect));
   }
   else
   {
     QString name = m_doublePropertyMap[prop];
     if (!name.isEmpty())
     {
-      m_instrWindow->getSurface()->setCurrentDouble(name,m_doubleManager->value(prop));
+      m_instrWidget->getSurface()->setCurrentDouble(name,m_doubleManager->value(prop));
     }
     else
     {
@@ -580,21 +580,21 @@ void InstrumentWindowMaskTab::doubleChanged(QtProperty* prop)
         QList<QtProperty*> subs = point_prop->subProperties();
         if (subs.size() != 2) return;
         QPointF p(m_doubleManager->value(subs[0]),m_doubleManager->value(subs[1]));
-        m_instrWindow->getSurface()->setCurrentPoint(name,p);
+        m_instrWidget->getSurface()->setCurrentPoint(name,p);
       }
     }
   }
-  m_instrWindow->update();
+  m_instrWidget->update();
 }
 
 /**
   * Apply the constructed mask to the data workspace. This operation cannot be reverted.
   */
-void InstrumentWindowMaskTab::applyMask()
+void InstrumentWidgetMaskTab::applyMask()
 {
   storeMask();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  m_instrWindow->getInstrumentActor()->applyMaskWorkspace();
+  m_instrWidget->getInstrumentActor()->applyMaskWorkspace();
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
 }
@@ -602,7 +602,7 @@ void InstrumentWindowMaskTab::applyMask()
 /**
   * Apply the constructed mask to the view only.
   */
-void InstrumentWindowMaskTab::applyMaskToView()
+void InstrumentWidgetMaskTab::applyMaskToView()
 {
   storeMask();
   enableApplyButtons();
@@ -611,11 +611,11 @@ void InstrumentWindowMaskTab::applyMaskToView()
 /**
   * Remove all masking that has not been applied to the data workspace.
   */
-void InstrumentWindowMaskTab::clearMask()
+void InstrumentWidgetMaskTab::clearMask()
 {
   clearShapes();
-  m_instrWindow->getInstrumentActor()->clearMasks();
-  m_instrWindow->updateInstrumentView();
+  m_instrWidget->getInstrumentActor()->clearMasks();
+  m_instrWidget->updateInstrumentView();
   enableApplyButtons();
 }
 
@@ -624,10 +624,10 @@ void InstrumentWindowMaskTab::clearMask()
  * @param invertMask ::  if true, the selected mask will be inverted; if false, the mask will be used as is
  * @param temp :: Set true to create a temporary workspace with a fixed name. If false the name will be unique.
  */
-Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(bool invertMask, bool temp)
+Mantid::API::MatrixWorkspace_sptr InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp)
 {
-  m_instrWindow->updateInstrumentView(); // to refresh the pick image
-  Mantid::API::MatrixWorkspace_sptr inputWS = m_instrWindow->getInstrumentActor()->getMaskMatrixWorkspace();
+  m_instrWidget->updateInstrumentView(); // to refresh the pick image
+  Mantid::API::MatrixWorkspace_sptr inputWS = m_instrWidget->getInstrumentActor()->getMaskMatrixWorkspace();
   Mantid::API::MatrixWorkspace_sptr outputWS;
   const std::string outputWorkspaceName = generateMaskWorkspaceName(temp);
 
@@ -656,37 +656,37 @@ Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(b
   return outputWS;
 }
 
-void InstrumentWindowMaskTab::saveInvertedMaskToWorkspace()
+void InstrumentWidgetMaskTab::saveInvertedMaskToWorkspace()
 {
   saveMaskingToWorkspace(true);
 }
 
-void InstrumentWindowMaskTab::saveMaskToWorkspace()
+void InstrumentWidgetMaskTab::saveMaskToWorkspace()
 {
   saveMaskingToWorkspace(false);
 }
 
-void InstrumentWindowMaskTab::saveInvertedMaskToFile()
+void InstrumentWidgetMaskTab::saveInvertedMaskToFile()
 {
   saveMaskingToFile(true);
 }
 
-void InstrumentWindowMaskTab::saveMaskToFile()
+void InstrumentWidgetMaskTab::saveMaskToFile()
 {
     saveMaskingToFile(false);
 }
 
-void InstrumentWindowMaskTab::saveMaskToCalFile()
+void InstrumentWidgetMaskTab::saveMaskToCalFile()
 {
     saveMaskingToCalFile(false);
 }
 
-void InstrumentWindowMaskTab::saveInvertedMaskToCalFile()
+void InstrumentWidgetMaskTab::saveInvertedMaskToCalFile()
 {
     saveMaskingToCalFile(true);
 }
 
-void InstrumentWindowMaskTab::saveMaskToTable()
+void InstrumentWidgetMaskTab::saveMaskToTable()
 {
   saveMaskingToTableWorkspace(false);
 }
@@ -694,16 +694,16 @@ void InstrumentWindowMaskTab::saveMaskToTable()
 /**
   * Extract selected detectors to a new workspace
   */
-void InstrumentWindowMaskTab::extractDetsToWorkspace()
+void InstrumentWidgetMaskTab::extractDetsToWorkspace()
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QList<int> dets;
-    m_instrWindow->getSurface()->getMaskedDetectors(dets);
+    m_instrWidget->getSurface()->getMaskedDetectors(dets);
     DetXMLFile mapFile(dets);
     std::string fname = mapFile();
     if (!fname.empty())
     {
-      std::string workspaceName = m_instrWindow->getWorkspaceName().toStdString();
+      std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
       Mantid::API::IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("GroupDetectors");
       alg->setPropertyValue("InputWorkspace",workspaceName);
       alg->setPropertyValue("MapFile",fname);
@@ -716,17 +716,17 @@ void InstrumentWindowMaskTab::extractDetsToWorkspace()
 /**
   * Sum selected detectors to a new workspace
   */
-void InstrumentWindowMaskTab::sumDetsToWorkspace()
+void InstrumentWidgetMaskTab::sumDetsToWorkspace()
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QList<int> dets;
-    m_instrWindow->getSurface()->getMaskedDetectors(dets);
+    m_instrWidget->getSurface()->getMaskedDetectors(dets);
     DetXMLFile mapFile(dets,DetXMLFile::Sum);
     std::string fname = mapFile();
 
     if (!fname.empty())
     {
-      std::string workspaceName = m_instrWindow->getWorkspaceName().toStdString();
+      std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
       Mantid::API::IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("GroupDetectors");
       alg->setPropertyValue("InputWorkspace",workspaceName);
       alg->setPropertyValue("MapFile",fname);
@@ -736,29 +736,29 @@ void InstrumentWindowMaskTab::sumDetsToWorkspace()
     QApplication::restoreOverrideCursor();
 }
 
-void InstrumentWindowMaskTab::saveIncludeGroupToFile()
+void InstrumentWidgetMaskTab::saveIncludeGroupToFile()
 {
-    QString fname = m_instrWindow->getSaveFileName("Save grouping file", "XML files (*.xml);;All (*.* *)");
+    QString fname = m_instrWidget->getSaveFileName("Save grouping file", "XML files (*.xml);;All (*.* *)");
     if (!fname.isEmpty())
     {
         QList<int> dets;
-        m_instrWindow->getSurface()->getMaskedDetectors(dets);
+        m_instrWidget->getSurface()->getMaskedDetectors(dets);
         DetXMLFile mapFile(dets,DetXMLFile::Sum,fname);
     }
 }
 
-void InstrumentWindowMaskTab::saveExcludeGroupToFile()
+void InstrumentWidgetMaskTab::saveExcludeGroupToFile()
 {
-    QString fname = m_instrWindow->getSaveFileName("Save grouping file", "XML files (*.xml);;All (*.* *)");
+    QString fname = m_instrWidget->getSaveFileName("Save grouping file", "XML files (*.xml);;All (*.* *)");
     if (!fname.isEmpty())
     {
         QList<int> dets;
-        m_instrWindow->getSurface()->getMaskedDetectors(dets);
-        DetXMLFile mapFile(m_instrWindow->getInstrumentActor()->getAllDetIDs(),dets,fname);
+        m_instrWidget->getSurface()->getMaskedDetectors(dets);
+        DetXMLFile mapFile(m_instrWidget->getInstrumentActor()->getAllDetIDs(),dets,fname);
     }
 }
 
-void InstrumentWindowMaskTab::showSaveMenuTooltip(QAction *action)
+void InstrumentWidgetMaskTab::showSaveMenuTooltip(QAction *action)
 {
     QToolTip::showText(QCursor::pos(),action->toolTip(),this);
 }
@@ -767,7 +767,7 @@ void InstrumentWindowMaskTab::showSaveMenuTooltip(QAction *action)
   * Toggle between different modes
   *
   */
-void InstrumentWindowMaskTab::toggleMaskGroup( )
+void InstrumentWidgetMaskTab::toggleMaskGroup( )
 {
   Mode mode = getMode();
 
@@ -788,8 +788,8 @@ void InstrumentWindowMaskTab::toggleMaskGroup( )
       m_saveButton->setMenu(m_saveGroup);
       m_saveButton->setText("Save");
   }
-  m_instrWindow->getSurface()->changeBorderColor(getShapeBorderColor());
-  m_instrWindow->updateInstrumentView();
+  m_instrWidget->getSurface()->changeBorderColor(getShapeBorderColor());
+  m_instrWidget->updateInstrumentView();
 
 }
 
@@ -798,7 +798,7 @@ void InstrumentWindowMaskTab::toggleMaskGroup( )
   * The mask is not applied to the data workspace being displayed.
   * @param invertMask ::  if true, the selected mask will be inverted; if false, the mask will be used as is
   */
-void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
+void InstrumentWidgetMaskTab::saveMaskingToWorkspace(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   // Make sure we have stored the Mask in the helper MaskWorkspace
@@ -808,8 +808,8 @@ void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
 
 #if 0
   // TESTCASE
-  double minbinvalue = m_instrWindow->getInstrumentActor()->minBinValue();
-  double maxbinvalue = m_instrWindow->getInstrumentActor()->maxBinValue();
+  double minbinvalue = m_instrWidget->getInstrumentActor()->minBinValue();
+  double maxbinvalue = m_instrWidget->getInstrumentActor()->maxBinValue();
   std::cout << "Range of X: " << minbinvalue << ", " << maxbinvalue << ".\n";
 
 #endif
@@ -823,7 +823,7 @@ void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
   * The mask is not applied to the data workspace being displayed.
   * @param invertMask ::  if true, the selected mask will be inverted; if false, the mask will be used as is
   */
-void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
+void InstrumentWidgetMaskTab::saveMaskingToFile(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -836,7 +836,7 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
     clearShapes();
     
     QApplication::restoreOverrideCursor();
-    QString fileName = m_instrWindow->getSaveFileName("Select location and name for the mask file", "XML files (*.xml);;All (*.* *)");
+    QString fileName = m_instrWidget->getSaveFileName("Select location and name for the mask file", "XML files (*.xml);;All (*.* *)");
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     if (!fileName.isEmpty())
@@ -859,7 +859,7 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
   * The mask is not applied to the data workspace being displayed.
   * @param invertMask ::  if true, the selected mask will be inverted; if false, the mask will be used as is
   */
-void InstrumentWindowMaskTab::saveMaskingToCalFile(bool invertMask)
+void InstrumentWidgetMaskTab::saveMaskingToCalFile(bool invertMask)
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -871,7 +871,7 @@ void InstrumentWindowMaskTab::saveMaskingToCalFile(bool invertMask)
     if (outputWS)
     {
       clearShapes();
-      QString fileName = m_instrWindow->getSaveFileName("Select location and name for the mask file", "cal files (*.cal)");
+      QString fileName = m_instrWidget->getSaveFileName("Select location and name for the mask file", "cal files (*.cal)");
       if (!fileName.isEmpty())
       {
         Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("MaskWorkspaceToCalFile",-1);
@@ -890,7 +890,7 @@ void InstrumentWindowMaskTab::saveMaskingToCalFile(bool invertMask)
   * Apply and save the mask to a TableWorkspace with X-range
   * @param invertMask :: if true, the selected mask will be inverted; if false, the mask will be used as is
   */
-void InstrumentWindowMaskTab::saveMaskingToTableWorkspace(bool invertMask)
+void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask)
 {
   UNUSED_ARG(invertMask);
 
@@ -902,7 +902,7 @@ void InstrumentWindowMaskTab::saveMaskingToTableWorkspace(bool invertMask)
   setSelectActivity();
 
   // Apply the view (no workspace) to a buffered mask workspace
-  Mantid::API::MatrixWorkspace_sptr inputWS = m_instrWindow->getInstrumentActor()->getMaskMatrixWorkspace();
+  Mantid::API::MatrixWorkspace_sptr inputWS = m_instrWidget->getInstrumentActor()->getMaskMatrixWorkspace();
 
   /*
   Mantid::Geometry::Instrument_const_sptr instrument = outputMaskWS->getInstrument();
@@ -919,8 +919,8 @@ void InstrumentWindowMaskTab::saveMaskingToTableWorkspace(bool invertMask)
   */
 
   // Extract from MaskWorkspace to a TableWorkspace
-  double xmin = m_instrWindow->getInstrumentActor()->minBinValue();
-  double xmax = m_instrWindow->getInstrumentActor()->maxBinValue();
+  double xmin = m_instrWidget->getInstrumentActor()->minBinValue();
+  double xmax = m_instrWidget->getInstrumentActor()->maxBinValue();
   // std::cout << "[DB] Selected x-range: " << xmin << ", " << xmax << ".\n";
 
   // Always use the same name
@@ -977,7 +977,7 @@ void InstrumentWindowMaskTab::saveMaskingToTableWorkspace(bool invertMask)
   * Generate a unique name for the mask worspace which will be saved in the ADS.
   * It will have a form MaskWorkspace[_#]
   */
-std::string InstrumentWindowMaskTab::generateMaskWorkspaceName(bool temp) const
+std::string InstrumentWidgetMaskTab::generateMaskWorkspaceName(bool temp) const
 {
     if ( temp ) return "__MaskTab_MaskWorkspace";
     std::set<std::string> wsNames = Mantid::API::AnalysisDataService::Instance().getObjectNames();
@@ -1004,13 +1004,13 @@ std::string InstrumentWindowMaskTab::generateMaskWorkspaceName(bool temp) const
   * Sets the m_hasMaskToApply flag and
   * enables/disables the apply and clear buttons.
   */
-void InstrumentWindowMaskTab::enableApplyButtons()
+void InstrumentWidgetMaskTab::enableApplyButtons()
 {
-    auto instrActor = m_instrWindow->getInstrumentActor();
+    auto instrActor = m_instrWidget->getInstrumentActor();
     auto mode = getMode();
 
-    m_maskBins = ! m_instrWindow->getInstrumentActor()->wholeRange();
-    bool hasMaskShapes = m_instrWindow->getSurface()->hasMasks();
+    m_maskBins = ! m_instrWidget->getInstrumentActor()->wholeRange();
+    bool hasMaskShapes = m_instrWidget->getSurface()->hasMasks();
     bool hasMaskWorkspace = instrActor->hasMaskWorkspace();
     bool hasBinMask = instrActor->hasBinMask();
     bool hasDetectorMask = hasMaskShapes || hasMaskWorkspace;
@@ -1046,7 +1046,7 @@ void InstrumentWindowMaskTab::enableApplyButtons()
 /**
   * Sets tab activity to Select: select and modify shapes.
   */
-void InstrumentWindowMaskTab::setSelectActivity()
+void InstrumentWidgetMaskTab::setSelectActivity()
 {
     m_pointer->setChecked(true);
     setActivity();
@@ -1055,7 +1055,7 @@ void InstrumentWindowMaskTab::setSelectActivity()
 /**
   * It tab in masking, ROI or grouping mode?
   */
-InstrumentWindowMaskTab::Mode InstrumentWindowMaskTab::getMode() const
+InstrumentWidgetMaskTab::Mode InstrumentWidgetMaskTab::getMode() const
 {
   if (m_masking_on->isOn())
     return Mode::Mask;
@@ -1070,7 +1070,7 @@ InstrumentWindowMaskTab::Mode InstrumentWindowMaskTab::getMode() const
 /**
   * Border color.
   */
-QColor InstrumentWindowMaskTab::getShapeBorderColor() const
+QColor InstrumentWidgetMaskTab::getShapeBorderColor() const
 {
     if ( getMode()==Mode::Mask ) return Qt::red;
     if ( getMode()==Mode::ROI ) return Qt::yellow;
@@ -1080,12 +1080,12 @@ QColor InstrumentWindowMaskTab::getShapeBorderColor() const
 /**
   * Shape fill color.
   */
-QColor InstrumentWindowMaskTab::getShapeFillColor() const
+QColor InstrumentWidgetMaskTab::getShapeFillColor() const
 {
     return QColor(255,255,255,100);
 }
 
-QtProperty *InstrumentWindowMaskTab::addDoubleProperty(const QString &name) const
+QtProperty *InstrumentWidgetMaskTab::addDoubleProperty(const QString &name) const
 {
     QtProperty* prop = m_doubleManager->addProperty( name );
     m_doubleManager->setDecimals(prop, 6);
@@ -1095,20 +1095,20 @@ QtProperty *InstrumentWindowMaskTab::addDoubleProperty(const QString &name) cons
 /**
  * Store the mask defined by the shape tools to the helper m_maskWorkspace.
  */
-void InstrumentWindowMaskTab::storeDetectorMask(bool isROI)
+void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   m_pointer->setChecked(true);
   setActivity();
-  m_instrWindow->updateInstrumentView(); // to refresh the pick image
+  m_instrWidget->updateInstrumentView(); // to refresh the pick image
   Mantid::API::IMaskWorkspace_sptr wsFresh;
 
   QList<int> dets;
   // get detectors covered by the shapes
-  m_instrWindow->getSurface()->getMaskedDetectors(dets);
+  m_instrWidget->getSurface()->getMaskedDetectors(dets);
   if (!dets.isEmpty())
   {
-    auto wsMask = m_instrWindow->getInstrumentActor()->getMaskWorkspace();
+    auto wsMask = m_instrWidget->getInstrumentActor()->getMaskWorkspace();
     //have to cast up to the MaskWorkspace to get access to clone()
 
     std::set<Mantid::detid_t> detList;
@@ -1119,8 +1119,8 @@ void InstrumentWindowMaskTab::storeDetectorMask(bool isROI)
       if (wsMask->getNumberMasked() >0 )
       {
         wsFresh = boost::dynamic_pointer_cast<Mantid::API::IMaskWorkspace>(
-          m_instrWindow->getInstrumentActor()->extractCurrentMask());
-        m_instrWindow->getInstrumentActor()->invertMaskWorkspace();
+          m_instrWidget->getInstrumentActor()->extractCurrentMask());
+        m_instrWidget->getInstrumentActor()->invertMaskWorkspace();
       }
     }
     foreach(int id,dets)
@@ -1150,14 +1150,14 @@ void InstrumentWindowMaskTab::storeDetectorMask(bool isROI)
       if (isROI)
       { 
         if (wsFresh)
-          m_instrWindow->getInstrumentActor()->setMaskMatrixWorkspace(
+          m_instrWidget->getInstrumentActor()->setMaskMatrixWorkspace(
             boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsFresh));
         //need to invert the mask before displaying
-        m_instrWindow->getInstrumentActor()->invertMaskWorkspace();
+        m_instrWidget->getInstrumentActor()->invertMaskWorkspace();
       }
       // update detector colours
-      m_instrWindow->getInstrumentActor()->updateColors();
-      m_instrWindow->updateInstrumentDetectors();
+      m_instrWidget->getInstrumentActor()->updateColors();
+      m_instrWidget->updateInstrumentDetectors();
     }
   }
   // remove masking shapes
@@ -1166,20 +1166,20 @@ void InstrumentWindowMaskTab::storeDetectorMask(bool isROI)
 }
 
 
-void InstrumentWindowMaskTab::storeBinMask()
+void InstrumentWidgetMaskTab::storeBinMask()
 {
   QList<int> dets;
   // get detectors covered by the shapes
-  m_instrWindow->getSurface()->getMaskedDetectors(dets);
+  m_instrWidget->getSurface()->getMaskedDetectors(dets);
   // mask some bins
-  m_instrWindow->getInstrumentActor()->addMaskBinsData(dets);
+  m_instrWidget->getInstrumentActor()->addMaskBinsData(dets);
   // remove masking shapes
   clearShapes();
   enableApplyButtons();
 }
 
 /// Store current shapes as a mask (detector or bin)
-void InstrumentWindowMaskTab::storeMask()
+void InstrumentWidgetMaskTab::storeMask()
 {
   if (m_maskBins && getMode() == Mode::Mask)
   {
@@ -1191,7 +1191,7 @@ void InstrumentWindowMaskTab::storeMask()
   }
 }
 
-void InstrumentWindowMaskTab::changedIntegrationRange(double, double)
+void InstrumentWidgetMaskTab::changedIntegrationRange(double, double)
 {
   enableApplyButtons();
 }

@@ -1,5 +1,5 @@
-#include "InstrumentWindow.h"
-#include "InstrumentWindowPickTab.h"
+#include "InstrumentWidget.h"
+#include "InstrumentWidgetPickTab.h"
 #include "OneCurvePlot.h"
 #include "CollapsiblePanel.h"
 #include "InstrumentActor.h"
@@ -61,15 +61,15 @@ struct Sqrt
  * Constructor.
  * @param instrWindow :: Parent InstrumentWindow.
  */
-InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
-InstrumentWindowTab(instrWindow),
+InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget* instrWidget):
+InstrumentWidgetTab(instrWidget),
 m_freezePlot(false),
 m_tubeXUnitsCache(0),
 m_plotTypeCache(0)
 {
 
   // connect to InstrumentWindow signals
-  connect(m_instrWindow,SIGNAL(integrationRangeChanged(double,double)),this,SLOT(changedIntegrationRange(double,double)));
+  connect(m_instrWidget,SIGNAL(integrationRangeChanged(double,double)),this,SLOT(changedIntegrationRange(double,double)));
 
   m_plotSum = true;
 
@@ -257,7 +257,7 @@ m_plotTypeCache(0)
 /**
   * Returns true if the plot can be updated when the mouse moves over detectors
   */
-bool InstrumentWindowPickTab::canUpdateTouchedDetector()const
+bool InstrumentWidgetPickTab::canUpdateTouchedDetector()const
 {
   return ! m_peak->isChecked();
 }
@@ -266,7 +266,7 @@ bool InstrumentWindowPickTab::canUpdateTouchedDetector()const
 /**
  * Display the miniplot's context menu.
  */
-void InstrumentWindowPickTab::plotContextMenu()
+void InstrumentWidgetPickTab::plotContextMenu()
 {
   QMenu context(this);
 
@@ -346,7 +346,7 @@ void InstrumentWindowPickTab::plotContextMenu()
 /**
  * Update the plot caption. The captions shows the selection type.
  */
-void InstrumentWindowPickTab::setPlotCaption()
+void InstrumentWidgetPickTab::setPlotCaption()
 {
   m_plotPanel->setCaption(m_plotController->getPlotCaption());
 }
@@ -354,7 +354,7 @@ void InstrumentWindowPickTab::setPlotCaption()
 /**
  * Switch to the detectors summing regime.
  */
-void InstrumentWindowPickTab::sumDetectors()
+void InstrumentWidgetPickTab::sumDetectors()
 {
   m_plotController->setPlotType( DetectorPlotController::TubeSum  );
   m_plotController->updatePlot();
@@ -364,7 +364,7 @@ void InstrumentWindowPickTab::sumDetectors()
 /**
  * Switch to the time bin integration regime.
  */
-void InstrumentWindowPickTab::integrateTimeBins()
+void InstrumentWidgetPickTab::integrateTimeBins()
 {
   m_plotController->setPlotType( DetectorPlotController::TubeIntegral );
   m_plotController->updatePlot();
@@ -374,7 +374,7 @@ void InstrumentWindowPickTab::integrateTimeBins()
 /**
  * Set the selection type according to which tool button is checked.
  */
-void InstrumentWindowPickTab::setSelectionType()
+void InstrumentWidgetPickTab::setSelectionType()
 {
   ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickSingleMode;
   auto plotType = m_plotController->getPlotType();
@@ -420,7 +420,7 @@ void InstrumentWindowPickTab::setSelectionType()
     m_activeTool->setText("Tool: Rectangle");
     surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
-    m_instrWindow->getSurface()->startCreatingShape2D("rectangle",Qt::green,QColor(255,255,255,80));
+    m_instrWidget->getSurface()->startCreatingShape2D("rectangle",Qt::green,QColor(255,255,255,80));
   }
   else if (m_ellipse->isChecked())
   {
@@ -428,7 +428,7 @@ void InstrumentWindowPickTab::setSelectionType()
     m_activeTool->setText("Tool: Ellipse");
     surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
-    m_instrWindow->getSurface()->startCreatingShape2D("ellipse",Qt::green,QColor(255,255,255,80));
+    m_instrWidget->getSurface()->startCreatingShape2D("ellipse",Qt::green,QColor(255,255,255,80));
   }
   else if (m_ring_ellipse->isChecked())
   {
@@ -436,7 +436,7 @@ void InstrumentWindowPickTab::setSelectionType()
     m_activeTool->setText("Tool: Elliptical ring");
     surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
-    m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",Qt::green,QColor(255,255,255,80));
+    m_instrWidget->getSurface()->startCreatingShape2D("ring ellipse",Qt::green,QColor(255,255,255,80));
   }
   else if (m_ring_rectangle->isChecked())
   {
@@ -444,7 +444,7 @@ void InstrumentWindowPickTab::setSelectionType()
     m_activeTool->setText("Tool: Rectangular ring");
     surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
-    m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",Qt::green,QColor(255,255,255,80));
+    m_instrWidget->getSurface()->startCreatingShape2D("ring rectangle",Qt::green,QColor(255,255,255,80));
   }
   else if (m_free_draw->isChecked())
   {
@@ -452,7 +452,7 @@ void InstrumentWindowPickTab::setSelectionType()
     m_activeTool->setText("Tool: Arbitrary shape");
     surfaceMode = ProjectionSurface::DrawFreeMode;
     plotType = DetectorPlotController::Single;
-    m_instrWindow->getSurface()->startCreatingFreeShape(Qt::green,QColor(255,255,255,80));
+    m_instrWidget->getSurface()->startCreatingFreeShape(Qt::green,QColor(255,255,255,80));
   }
   else if (m_edit->isChecked())
   {
@@ -462,7 +462,7 @@ void InstrumentWindowPickTab::setSelectionType()
     plotType = DetectorPlotController::Single;
   }
   m_plotController->setPlotType( plotType );
-  auto surface = m_instrWindow->getSurface();
+  auto surface = m_instrWidget->getSurface();
   if ( surface ) 
   {
     surface->setInteractionMode( surfaceMode );
@@ -478,25 +478,25 @@ void InstrumentWindowPickTab::setSelectionType()
     }
     setPlotCaption();
   }
-  m_instrWindow->updateInfoText();
+  m_instrWidget->updateInfoText();
 }
 
 /**
  * Respond to the show event.
  */
-void InstrumentWindowPickTab::showEvent (QShowEvent *)
+void InstrumentWidgetPickTab::showEvent (QShowEvent *)
 {
   // Make the state of the display view consistent with the current selection type
   setSelectionType();
   // make sure picking updated
-  m_instrWindow->updateInstrumentView(true);
-  m_instrWindow->getSurface()->changeBorderColor( getShapeBorderColor() );
+  m_instrWidget->updateInstrumentView(true);
+  m_instrWidget->getSurface()->changeBorderColor( getShapeBorderColor() );
 }
 
 /**
  * Keep current curve permanently displayed on the plot.
  */
-void InstrumentWindowPickTab::storeCurve()
+void InstrumentWidgetPickTab::storeCurve()
 {
   m_plot->store();
 }
@@ -505,7 +505,7 @@ void InstrumentWindowPickTab::storeCurve()
  * Remove a stored curve.
  * @param label :: The label of the curve to remove
  */
-void InstrumentWindowPickTab::removeCurve(const QString & label)
+void InstrumentWidgetPickTab::removeCurve(const QString & label)
 {
   m_plot->removeCurve(label);
   m_plot->replot();
@@ -515,7 +515,7 @@ void InstrumentWindowPickTab::removeCurve(const QString & label)
  * Set the x units for the integrated tube plot.
  * @param units :: The x units in terms of TubeXUnits.
  */
-void InstrumentWindowPickTab::setTubeXUnits(int units)
+void InstrumentWidgetPickTab::setTubeXUnits(int units)
 {
   if (units < 0 || units >= DetectorPlotController::NUMBER_OF_UNITS) return;
   auto tubeXUnits = static_cast<DetectorPlotController::TubeXUnits>(units);
@@ -528,7 +528,7 @@ void InstrumentWindowPickTab::setTubeXUnits(int units)
  * Get the color of the overlay shapes in this tab.
  * @return
  */
-QColor InstrumentWindowPickTab::getShapeBorderColor() const
+QColor InstrumentWidgetPickTab::getShapeBorderColor() const
 {
     return QColor( Qt::green );
 }
@@ -538,10 +538,10 @@ QColor InstrumentWindowPickTab::getShapeBorderColor() const
 /**
  * Do something when the time bin integraion range has changed.
  */
-void InstrumentWindowPickTab::changedIntegrationRange(double,double)
+void InstrumentWidgetPickTab::changedIntegrationRange(double,double)
 {
   m_plotController->updatePlot();
-  auto surface = m_instrWindow->getSurface();
+  auto surface = m_instrWidget->getSurface();
   if ( surface )
   {
     auto interactionMode = surface->getInteractionMode();
@@ -552,7 +552,7 @@ void InstrumentWindowPickTab::changedIntegrationRange(double,double)
   }
 }
 
-void InstrumentWindowPickTab::initSurface()
+void InstrumentWidgetPickTab::initSurface()
 {
   ProjectionSurface *surface = getSurface().get();
   connect(surface,SIGNAL(singleComponentTouched(size_t)),this,SLOT(singleComponentTouched(size_t)));
@@ -568,8 +568,8 @@ void InstrumentWindowPickTab::initSurface()
   {
       connect(p3d,SIGNAL(finishedMove()),this,SLOT(updatePlotMultipleDetectors()));
   }
-  m_infoController = new ComponentInfoController(this, m_instrWindow->getInstrumentActor(),m_selectionInfoDisplay);
-  m_plotController = new DetectorPlotController(this, m_instrWindow->getInstrumentActor(),m_plot);
+  m_infoController = new ComponentInfoController(this, m_instrWidget->getInstrumentActor(),m_selectionInfoDisplay);
+  m_plotController = new DetectorPlotController(this, m_instrWidget->getInstrumentActor(),m_plot);
   m_plotController->setTubeXUnits( static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache) );
   m_plotController->setPlotType( static_cast<DetectorPlotController::PlotType>(m_plotTypeCache) );
 }
@@ -577,15 +577,15 @@ void InstrumentWindowPickTab::initSurface()
 /**
  * Return current ProjectionSurface.
  */
-boost::shared_ptr<ProjectionSurface> InstrumentWindowPickTab::getSurface() const
+boost::shared_ptr<ProjectionSurface> InstrumentWidgetPickTab::getSurface() const
 {
-  return m_instrWindow->getSurface();
+  return m_instrWidget->getSurface();
 }
 
 /**
   * Save tab's persistent settings to the provided QSettings instance
   */
-void InstrumentWindowPickTab::saveSettings(QSettings &settings) const
+void InstrumentWidgetPickTab::saveSettings(QSettings &settings) const
 {
   settings.setValue("TubeXUnits",m_plotController->getTubeXUnits());
   settings.setValue("PlotType", m_plotController->getPlotType());
@@ -594,7 +594,7 @@ void InstrumentWindowPickTab::saveSettings(QSettings &settings) const
 /**
  * Restore (read and apply) tab's persistent settings from the provided QSettings instance
  */
-void InstrumentWindowPickTab::loadSettings(const QSettings &settings)
+void InstrumentWidgetPickTab::loadSettings(const QSettings &settings)
 {
   // loadSettings is called when m_plotController is not created yet.
   // Cache the settings and apply them later
@@ -606,7 +606,7 @@ void InstrumentWindowPickTab::loadSettings(const QSettings &settings)
   * Fill in the context menu.
   * @param context :: A menu to fill.
   */
-bool InstrumentWindowPickTab::addToDisplayContextMenu(QMenu &context) const
+bool InstrumentWidgetPickTab::addToDisplayContextMenu(QMenu &context) const
 {
     m_freezePlot = true;
     bool res = false;
@@ -627,7 +627,7 @@ bool InstrumentWindowPickTab::addToDisplayContextMenu(QMenu &context) const
  * Select a tool on the tab
  * @param tool One of the enumerated tool types, @see ToolType
  */
-void InstrumentWindowPickTab::selectTool(const ToolType tool)
+void InstrumentWidgetPickTab::selectTool(const ToolType tool)
 {
   switch(tool)
   {
@@ -655,7 +655,7 @@ void InstrumentWindowPickTab::selectTool(const ToolType tool)
 }
 
 
-void InstrumentWindowPickTab::singleComponentTouched(size_t pickID)
+void InstrumentWidgetPickTab::singleComponentTouched(size_t pickID)
 {
   if (canUpdateTouchedDetector())
   {
@@ -665,7 +665,7 @@ void InstrumentWindowPickTab::singleComponentTouched(size_t pickID)
   }
 }
 
-void InstrumentWindowPickTab::singleComponentPicked(size_t pickID)
+void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID)
 {
     m_infoController->displayInfo( pickID );
     m_plotController->setPlotData( pickID );
@@ -676,7 +676,7 @@ void InstrumentWindowPickTab::singleComponentPicked(size_t pickID)
   * Update the selection display using currently selected detector.
   * Updates non-detector information on it.
   */
-void InstrumentWindowPickTab::updateSelectionInfoDisplay()
+void InstrumentWidgetPickTab::updateSelectionInfoDisplay()
 {
     //updateSelectionInfo(m_currentDetID);
 }
@@ -684,7 +684,7 @@ void InstrumentWindowPickTab::updateSelectionInfoDisplay()
 /**
  * Respond to the shapeCreated signal from the surface.
  */
-void InstrumentWindowPickTab::shapeCreated()
+void InstrumentWidgetPickTab::shapeCreated()
 {
   if ( !isVisible() ) return;
   if (!m_free_draw->isChecked())
@@ -697,7 +697,7 @@ void InstrumentWindowPickTab::shapeCreated()
  * Update the mini-plot with information from multiple detector
  * selected with drawn shapes.
  */
-void InstrumentWindowPickTab::updatePlotMultipleDetectors()
+void InstrumentWidgetPickTab::updatePlotMultipleDetectors()
 {
     if ( !isVisible() ) return;
     ProjectionSurface &surface = *getSurface();
@@ -717,7 +717,7 @@ void InstrumentWindowPickTab::updatePlotMultipleDetectors()
 /**
  * Save data plotted on the miniplot into a MatrixWorkspace.
  */
-void InstrumentWindowPickTab::savePlotToWorkspace()
+void InstrumentWidgetPickTab::savePlotToWorkspace()
 {
   m_plotController->savePlotToWorkspace();
 }
@@ -730,13 +730,13 @@ void InstrumentWindowPickTab::savePlotToWorkspace()
  * @param instrActor :: A pointer to the InstrumentActor instance.
  * @param infoDisplay :: Widget on which to display the information.
  */
-ComponentInfoController::ComponentInfoController(InstrumentWindowPickTab *tab, InstrumentActor* instrActor, QTextEdit* infoDisplay):
+ComponentInfoController::ComponentInfoController(InstrumentWidgetPickTab *tab, InstrumentActor* instrActor, QTextEdit* infoDisplay):
   QObject(tab),
   m_tab(tab),
   m_instrActor(instrActor),
   m_selectionInfoDisplay(infoDisplay),
   m_freezePlot(false),
-  m_instrWindowBlocked(false),
+  m_instrWidgetBlocked(false),
   m_currentPickID(-1)
 {
 }
@@ -786,7 +786,7 @@ void ComponentInfoController::displayInfo(size_t pickID)
  */
 QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid)
 {
-  if ( m_instrWindowBlocked ) 
+  if ( m_instrWidgetBlocked ) 
   {
     clear();
     return "";
@@ -940,7 +940,7 @@ void ComponentInfoController::clear()
  * @param instrActor :: A pointer to the InstrumentActor.
  * @param plot :: The plot widget.
  */
-DetectorPlotController::DetectorPlotController(InstrumentWindowPickTab *tab, InstrumentActor* instrActor, OneCurvePlot* plot):
+DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab, InstrumentActor* instrActor, OneCurvePlot* plot):
   QObject(tab),
   m_tab(tab),
   m_instrActor(instrActor),

@@ -2,7 +2,7 @@
 #define INSTRUMENTWINDOWPICKTAB_H_
 
 #include "WidgetDllOption.h"
-#include "InstrumentWindowTab.h"
+#include "InstrumentWidgetTab.h"
 #include "MantidGLWidget.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -35,7 +35,7 @@ class QMenu;
   *  - select and remove peaks
   *
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowPickTab: public InstrumentWindowTab
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetPickTab: public InstrumentWidgetTab
 {
   Q_OBJECT
 public:
@@ -50,7 +50,7 @@ public:
   enum SelectionType {Single=0,AddPeak,ErasePeak,SingleDetectorSelection,Tube, Draw};
   enum ToolType {Zoom,PixelSelect,TubeSelect,PeakSelect,PeakErase, DrawEllipse, DrawRectangle, DrawFree, EditShape};
 
-  explicit InstrumentWindowPickTab(InstrumentWindow *instrWindow);
+  explicit InstrumentWidgetPickTab(InstrumentWidget *instrWidget);
   bool canUpdateTouchedDetector()const;
   void initSurface();
   void saveSettings(QSettings& settings) const;
@@ -136,7 +136,7 @@ class ComponentInfoController: public QObject
   Q_OBJECT
 public:
   /// Constructor.
-  ComponentInfoController(InstrumentWindowPickTab *tab, InstrumentActor* instrActor, QTextEdit* infoDisplay);
+  ComponentInfoController(InstrumentWidgetPickTab *tab, InstrumentActor* instrActor, QTextEdit* infoDisplay);
 public slots:
   void displayInfo(size_t pickID);
   void clear();
@@ -146,12 +146,12 @@ private:
   QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
   QString getPeakOverlayInfo();
 
-  InstrumentWindowPickTab* m_tab;
+  InstrumentWidgetPickTab* m_tab;
   InstrumentActor* m_instrActor;
   QTextEdit* m_selectionInfoDisplay;
 
   bool m_freezePlot;
-  bool m_instrWindowBlocked;
+  bool m_instrWidgetBlocked;
   size_t m_currentPickID;
   QString m_xUnits;
 
@@ -169,7 +169,7 @@ public:
   enum PlotType {Single = 0, DetectorSum, TubeSum, TubeIntegral};
   enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,OUT_OF_PLANE_ANGLE,NUMBER_OF_UNITS};
 
-  DetectorPlotController(InstrumentWindowPickTab *tab, InstrumentActor* instrActor, OneCurvePlot* plot);
+  DetectorPlotController(InstrumentWidgetPickTab *tab, InstrumentActor* instrActor, OneCurvePlot* plot);
   void setEnabled( bool on ) { m_enabled = on; }
   void setPlotData(size_t pickID);
   void setPlotData(QList<int> detIDs);
@@ -212,7 +212,7 @@ private:
     std::vector<double>* err = NULL);
   static double getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal);
 
-  InstrumentWindowPickTab* m_tab;
+  InstrumentWidgetPickTab* m_tab;
   InstrumentActor* m_instrActor;
   OneCurvePlot* m_plot;
 

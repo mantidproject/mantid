@@ -2,7 +2,7 @@
 #define MANTIDINSTRUMENTWINDOW_H
 
 #include <Mantid/IProjectSerialisable.h>
-#include <InstrumentWindow.h>
+#include <InstrumentWidget.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmObserver.h"
 
@@ -13,7 +13,7 @@ class MdiSubWindow;
 
 using namespace Mantid;
 
-class MantidInstrumentWindow : public InstrumentWindow,
+class MantidInstrumentWindow : public InstrumentWidget,
                                public IProjectSerialisable {
   Q_OBJECT
 public:

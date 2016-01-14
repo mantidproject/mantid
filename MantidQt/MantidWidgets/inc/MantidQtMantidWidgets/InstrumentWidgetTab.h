@@ -2,7 +2,7 @@
 #define INSTRUMENTWINDOWTAB_H
 
 #include "WidgetDllOption.h"
-#include "InstrumentWindowTypes.h"
+#include "InstrumentWidgetTypes.h"
 
 #include <QFrame>
 #include <boost/shared_ptr.hpp>
@@ -10,17 +10,17 @@
 //--------------------------------------------------
 //  Forward declarations
 //--------------------------------------------------
-class InstrumentWindow;
+class InstrumentWidget;
 class ProjectionSurface;
 
 class QSettings;
 class QMenu;
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWindowTab : public QFrame, public InstrumentWindowTypes
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetTab : public QFrame, public InstrumentWidgetTypes
 {
     Q_OBJECT
 public:
-    explicit InstrumentWindowTab(InstrumentWindow *parent);
+    explicit InstrumentWidgetTab(InstrumentWidget *parent);
     /// Called by InstrumentWindow after the projection surface crated
     /// Use it for surface-specific initialization
     virtual void initSurface() {}
@@ -35,7 +35,7 @@ public:
     boost::shared_ptr<ProjectionSurface> getSurface() const;
 protected:
     /// The parent InstrumentWindow
-    InstrumentWindow* m_instrWindow;
+    InstrumentWidget* m_instrWidget;
 
 };
 
