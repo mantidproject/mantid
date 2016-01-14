@@ -97,11 +97,10 @@ void TransformMD::doTransform(
 /** Swap the array elements
 *
 * @param array :: signal array
+* @param arrayLength :: length of signal array
 */
-void TransformMD::reverse(signal_t *array, size_t arrayLength)
-{
-  for (size_t i = 0; i < (arrayLength / 2); i++)
-  {
+void TransformMD::reverse(signal_t *array, size_t arrayLength) {
+  for (size_t i = 0; i < (arrayLength / 2); i++) {
     signal_t temp = array[i];
     array[i] = array[(arrayLength - 1) - i];
     array[(arrayLength - 1) - i] = temp;
@@ -164,7 +163,7 @@ void TransformMD::exec() {
   if (histo) {
     // Recalculate all the values since the dimensions changed.
     histo->cacheValues();
-    if (m_scaling[0] < 0.0){
+    if (m_scaling[0] < 0.0) {
       signal_t *signals = histo->getSignalArray();
       signal_t *errorsSq = histo->getErrorSquaredArray();
 
