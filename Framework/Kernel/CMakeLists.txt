@@ -586,7 +586,6 @@ set (ENABLE_WEB_UPDATES 0)
 if (${VERSION_PATCH_LENGTH} LESS 8)
   set (ENABLE_WEB_UPDATES 1)
 endif()
-message( STATUS "For Mantid.properties.install: ENABLE_WEB_UPDATES=${ENABLE_WEB_UPDATES}")
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
