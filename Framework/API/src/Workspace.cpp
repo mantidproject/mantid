@@ -9,14 +9,17 @@ namespace API {
 
 /// Default constructor
 Workspace::Workspace()
-    : DataItem(), m_title(), m_comment(), m_name(), m_history() {}
+    : DataItem(), m_title(), m_comment(), m_name(), m_history() {
+  setStorageMode(MPI::StorageMode::Cloned);
+}
 
 /** Copy constructor
  * @param other :: workspace to copy
  */
 Workspace::Workspace(const Workspace &other)
     : DataItem(other), m_title(other.m_title), m_comment(other.m_comment),
-      m_name(other.m_name), m_history(other.m_history) {}
+      m_name(other.m_name), m_history(other.m_history),
+      m_storageMode(other.m_storageMode) {}
 
 /// Workspace destructor
 Workspace::~Workspace() {}
@@ -80,6 +83,12 @@ std::string Workspace::getMemorySizeAsStr() const {
   return Mantid::Kernel::memToString<uint64_t>(
       static_cast<uint64_t>(getMemorySize()) / 1024);
 }
+
+void Workspace::setStorageMode(MPI::StorageMode storageMode) {
+  m_storageMode = storageMode;
+}
+
+MPI::StorageMode Workspace::getStorageMode() const { return m_storageMode; }
 
 } // namespace API
 } // Namespace Mantid

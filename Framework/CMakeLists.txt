@@ -77,6 +77,10 @@ set ( MANTIDLIBS ${MANTIDLIBS} ${MUPARSER_LIBRARIES} )
 add_subdirectory (Geometry)
 set ( MANTIDLIBS ${MANTIDLIBS} Geometry )
 
+add_subdirectory ( MPI )
+include_directories ( MPI/inc )
+set ( MANTIDLIBS ${MANTIDLIBS} MPI )
+
 include_directories (API/inc)
 add_subdirectory (API)
 set ( MANTIDLIBS ${MANTIDLIBS} API )

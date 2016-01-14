@@ -24,6 +24,9 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidKernel/Timer.h"
+#ifdef MPI_BUILD
+#include "MantidMPI/SplittingFunctions.h"
+#endif
 
 using std::endl;
 using std::map;
@@ -1219,6 +1222,12 @@ void LoadEventNexus::init() {
   declareProperty(
       new PropertyWithValue<bool>("LoadLogs", true, Direction::Input),
       "Load the Sample/DAS logs from the file (default True).");
+
+  declareProperty(
+      new PropertyWithValue<bool>("LoadCompleteWorkspaceOnMasterRank", false,
+                                  Direction::Input),
+      "In a run with MPI, loads data for all detectors instead of only data "
+      "for the subset corresponding to a rank.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1320,6 +1329,7 @@ void LoadEventNexus::exec() {
   m_ws = boost::make_shared<EventWorkspaceCollection>(); // Algorithm currently
                                                          // relies on an
   // object-level workspace ptr
+  m_ws->setStorageMode(getStorageModeForOutputWorkspace("OutputWorkspace"));
   loadEvents(&prog, false); // Do not load monitor blocks
 
   if (discarded_events > 0) {
@@ -2875,6 +2885,14 @@ void LoadEventNexus::createSpectraList(int32_t min, int32_t max) {
                                     "selected spectra correspond to monitors.");
       }
     }
+  } else if (!getProperty("LoadCompleteWorkspaceOnMasterRank")) {
+    bool skipMonitors = true;
+    const auto &allDetectors = m_ws->getInstrument()->getDetectorIDs(skipMonitors);
+    for(const auto & det : allDetectors) {
+      if (Mantid::MPI::indexIsOnThisRank(det))
+        // Why + 1? This is a hack to work around the way EventWorkspace::padSpectra works.
+        m_specList.emplace_back(det + 1);
+    }
   }
 }
 
@@ -2898,6 +2916,26 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
                              "file: " +
                              fname);
   }
+}
+
+MPI::ExecutionMode LoadEventNexus::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  // We have no input workspace, so we do not use the map.
+  UNUSED_ARG(storageModes)
+  if (getProperty("LoadCompleteWorkspaceOnMasterRank"))
+    return MPI::ExecutionMode::MasterOnly;
+  else
+    return MPI::ExecutionMode::Distributed;
+}
+
+MPI::StorageMode LoadEventNexus::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  // We have only one output workspace, so we ignore propertyName.
+  UNUSED_ARG(propertyName)
+  if (getProperty("LoadCompleteWorkspaceOnMasterRank"))
+    return MPI::StorageMode::MasterOnly;
+  else
+    return MPI::StorageMode::Distributed;
 }
 
 } // namespace DataHandling

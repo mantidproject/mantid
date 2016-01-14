@@ -4,7 +4,7 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MasterOnlyAlgorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -60,7 +60,7 @@ namespace DataHandling {
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport SaveGSS : public Mantid::API::Algorithm {
+class DLLExport SaveGSS : public Mantid::API::MasterOnlyAlgorithm {
 public:
   /// Constructor
   SaveGSS();

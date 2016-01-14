@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Exception.h"
+#include "MantidMPI/Types.h"
 
 namespace Mantid {
 
@@ -104,6 +105,11 @@ public:
   /// Returns a reference to the WorkspaceHistory const
   const WorkspaceHistory &getHistory() const { return m_history; }
 
+  /// Set the storage mode (used for MPI runs)
+  void setStorageMode(MPI::StorageMode mode);
+  /// Get the storage mode (used for MPI runs)
+  MPI::StorageMode getStorageMode() const;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace(const Workspace &other);
@@ -121,6 +127,8 @@ private:
   std::string m_name;
   /// The history of the workspace, algorithm and environment
   WorkspaceHistory m_history;
+  /// Storage mode of the Workspace (used for MPI runs)
+  MPI::StorageMode m_storageMode;
 
   /// Virtual clone method. Not implemented to force implementation in childs.
   virtual Workspace *doClone() const = 0;

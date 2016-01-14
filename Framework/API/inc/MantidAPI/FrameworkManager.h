@@ -8,6 +8,7 @@
 
 #ifdef MPI_BUILD
 #include <boost/mpi/environment.hpp>
+#include <boost/mpi/collectives_fwd.hpp>
 #endif
 
 #include "MantidAPI/DllConfig.h"
@@ -102,6 +103,11 @@ public:
   /// Deletes a workspace from the framework
   bool deleteWorkspace(const std::string &wsName);
 
+#ifdef MPI_BUILD
+  /// Returns the MPI communicator
+  boost::mpi::communicator &getMPICommunicator();
+#endif
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FrameworkManagerImpl>;
 
@@ -135,6 +141,10 @@ private:
    * class interface.
    */
   boost::mpi::environment m_mpi_environment;
+  /** The MPI communicator that will be used by all MPI-aware code. Currently
+   * this is always MPI_COMM_WORLD.
+   */
+  boost::mpi::communicator m_mpi_communicator;
 #endif
 };
 

@@ -276,5 +276,17 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
   }
 }
 
+MPI::ExecutionMode PDLoadCharacterizations::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  UNUSED_ARG(storageModes)
+  return MPI::ExecutionMode::Identical;
+}
+
+MPI::StorageMode PDLoadCharacterizations::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  UNUSED_ARG(propertyName)
+  return MPI::StorageMode::Cloned;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

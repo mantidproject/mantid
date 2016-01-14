@@ -101,6 +101,13 @@ public:
     return "Diffraction\\Focussing";
   }
 
+protected:
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
 private:
   // Overridden Algorithm methods
   void init();

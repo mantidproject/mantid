@@ -17,6 +17,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
 
+#include "MantidMPI/Helpers.h"
+
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -567,6 +569,8 @@ bool Algorithm::execute() {
   // Read or write locks every input/output workspace
   this->lockWorkspaces();
 
+  MPI::ExecutionMode executionMode = getExecutionMode();
+
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
     try {
@@ -579,7 +583,7 @@ bool Algorithm::execute() {
       // Start a timer
       Timer timer;
       // Call the concrete algorithm's exec method
-      this->exec();
+      this->exec(executionMode);
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
       // Get how long this algorithm took to run
@@ -593,6 +597,8 @@ bool Algorithm::execute() {
         fillHistory();
         linkHistoryWithLastChild();
       }
+
+      propagateWorkspaceStorageMode();
 
       // Put any output workspaces into the AnalysisDataService - if this is not
       // a child algorithm
@@ -694,6 +700,29 @@ void Algorithm::executeAsChildAlg() {
     throw std::runtime_error("Unable to successfully run ChildAlgorithm " +
                              this->name());
   }
+}
+
+void Algorithm::exec(MPI::ExecutionMode executionMode) {
+  switch (executionMode) {
+  case MPI::ExecutionMode::Serial:
+  case MPI::ExecutionMode::Identical:
+    return exec();
+  case MPI::ExecutionMode::Distributed:
+    return execDistributed();
+  case MPI::ExecutionMode::MasterOnly:
+    return execMasterOnly();
+  default:
+    throw(std::runtime_error("Algorithm " + name() +
+                             " does not support execution mode " +
+                             MPI::toString(executionMode)));
+  }
+}
+
+void Algorithm::execMasterOnly() {
+  if (MPI::isRoot())
+    return exec();
+  else
+    return execNonMaster();
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1575,6 +1604,89 @@ void Algorithm::setAlgStartupLogging(const bool enabled) {
 bool Algorithm::getAlgStartupLogging() const {
   return m_isAlgStartupLoggingEnabled;
 }
+
+MPI::ExecutionMode Algorithm::getExecutionMode() const {
+  if(MPI::numberOfRanks() == 1)
+    return MPI::ExecutionMode::Serial;
+
+  const auto storageModes = getInputWorkspaceStorageModes();
+  const auto executionMode = getParallelExecutionMode(storageModes);
+  if(executionMode == MPI::ExecutionMode::Invalid) {
+    std::string error("Algorithm does not support execution with input "
+                      "workspaces of the following storage types: " +
+                      MPI::toString(storageModes) + ".");
+    getLogger().error() << error << "\n";
+    throw(std::runtime_error(error));
+  }
+  getLogger().notice() << "Running with " + MPI::toString(executionMode) + ".\n";
+  return executionMode;
+}
+
+std::map<std::string, MPI::StorageMode> Algorithm::getInputWorkspaceStorageModes() const {
+  std::map<std::string, MPI::StorageMode> map;
+  for (const auto &wsProp : m_inputWorkspaceProps) {
+    // This is the reverse cast of what is done in cacheWorkspaceProperties(),
+    // so it should never fail.
+    const Property &prop = dynamic_cast<Property &>(*wsProp);
+    // Check if we actually have that input workspace
+    if(wsProp->getWorkspace())
+      map.emplace(prop.name(), wsProp->getWorkspace()->getStorageMode());
+  }
+  return map;
+}
+
+void Algorithm::propagateWorkspaceStorageMode() const {
+  if(MPI::numberOfRanks() == 1) {
+    for (const auto &wsProp : m_outputWorkspaceProps)
+      if (wsProp->getWorkspace())
+        wsProp->getWorkspace()->setStorageMode(MPI::StorageMode::Cloned);
+  } else {
+    for (const auto &wsProp : m_outputWorkspaceProps) {
+      if (!wsProp->getWorkspace())
+        continue;
+      // This is the reverse cast of what is done in cacheWorkspaceProperties(),
+      // so it should never fail.
+      const Property &prop = dynamic_cast<Property &>(*wsProp);
+      MPI::StorageMode mode = getStorageModeForOutputWorkspace(prop.name());
+      wsProp->getWorkspace()->setStorageMode(mode);
+      getLogger().notice() << "Set storage mode of output \"" + prop.name() +
+                                  "\" to " + MPI::toString(mode) + ".\n";
+    }
+  }
+}
+
+MPI::ExecutionMode Algorithm::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  UNUSED_ARG(storageModes)
+  // By default no parallel execution is possible.
+  return MPI::ExecutionMode::Invalid;
+}
+
+MPI::StorageMode Algorithm::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  if(m_inputWorkspaceProps.size() == 1)
+    if (m_inputWorkspaceProps.front()->getWorkspace())
+      return m_inputWorkspaceProps.front()->getWorkspace()->getStorageMode();
+  std::string error("Could not determine StorageMode for output workspace " +
+                    propertyName + ".");
+  getLogger().error() << error << "\n";
+  throw(std::runtime_error(error));
+}
+
+MPI::ExecutionMode
+Algorithm::getCorrespondingExecutionMode(MPI::StorageMode storageMode) const {
+  switch (storageMode) {
+  case MPI::StorageMode::Cloned:
+    return MPI::ExecutionMode::Identical;
+  case MPI::StorageMode::Distributed:
+    return MPI::ExecutionMode::Distributed;
+  case MPI::StorageMode::MasterOnly:
+    return MPI::ExecutionMode::MasterOnly;
+  default:
+    return MPI::ExecutionMode::Invalid;
+  }
+}
+
 } // namespace API
 
 //---------------------------------------------------------------------------
