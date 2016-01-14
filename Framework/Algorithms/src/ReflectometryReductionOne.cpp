@@ -300,6 +300,29 @@ ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr &toCorrect,
 
   return corrected;
 }
+/**
+* @param toConvert : workspace used to get instrument components
+* @param thetaOut : angle between sample and detectors (in Degrees)
+* @return Theta : the value by which we rotate the source (in Degrees)
+*/
+double ReflectometryReductionOne::getAngleForSourceRotation(
+    MatrixWorkspace_sptr toConvert, double thetaOut) {
+  auto instrument = toConvert->getInstrument();
+  auto instrumentUpVector = instrument->getReferenceFrame()->vecPointingUp();
+  // check to see if calculated theta is the same as theta from instrument setup
+  auto instrumentBeamDirection = instrument->getBeamDirection();
+  double currentThetaInFromInstrument =
+      instrumentUpVector.angle(instrumentBeamDirection) * (180 / M_PI) - 90;
+  bool isInThetaEqualToOutTheta =
+      std::abs(currentThetaInFromInstrument - thetaOut) <
+      Mantid::Kernel::Tolerance;
+  // the angle by which we rotate the source
+  double rotationTheta = 0.0;
+  if (!isInThetaEqualToOutTheta /*source needs rotation*/) {
+    rotationTheta = thetaOut - currentThetaInFromInstrument;
+  }
+  return rotationTheta;
+}
 
 /**
 * Convert an input workspace into an IvsQ workspace.
@@ -349,23 +372,16 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   } else if (bCorrectPosition) {
     toConvert = correctPosition(toConvert, thetaInDeg.get(), isPointDetector);
   }
-
-  auto instrument = toConvert->getInstrument();
-  auto instrumentSourcePosition =
-      toConvert->getInstrument()->getSource()->getPos();
-  auto instrumentUpVector =
-      toConvert->getInstrument()->getReferenceFrame()->vecPointingUp();
-  bool isSourcePerpendicularToUpVec =
-      instrumentSourcePosition.scalar_prod(instrumentUpVector) == 0;
-
-  if (isSourcePerpendicularToUpVec /*source hasn't rotated*/) {
+  double rotationTheta = getAngleForSourceRotation(toConvert, thetaInDeg.get());
+  if (rotationTheta != 0.0) {
     auto rotateSource = this->createChildAlgorithm("RotateSource");
     rotateSource->setChild(true);
     rotateSource->initialize();
     rotateSource->setProperty("Workspace", toConvert);
-    rotateSource->setProperty("Angle", thetaInDeg.get());
+    rotateSource->setProperty("Angle", rotationTheta);
     rotateSource->execute();
   }
+
   // Always convert units.
   auto convertUnits = this->createChildAlgorithm("ConvertUnits");
   convertUnits->initialize();

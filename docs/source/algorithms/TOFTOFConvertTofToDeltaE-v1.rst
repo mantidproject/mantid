@@ -38,7 +38,7 @@ This algorithm offers three options for calculation of the elastic peak position
 If position of the elastic peak cannot be determined or :math:`t_{el} = 0` for a particular detector, this detector will be masked in the output workspace and warning will be produced. 
 
 Restrictions on the input workspaces
-###################################
+####################################
 
 -  The unit of the X-axis must be **Time-of-flight**.
 

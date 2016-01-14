@@ -833,22 +833,6 @@ TMDE(void MDEventWorkspace)::clearMDMasking() {
 }
 
 /**
-Return true if there is any mask on the workspace
-*/
-TMDE(bool MDEventWorkspace)::hasMask() {
-  auto *it = this->createIterator();
-  size_t counter = 0;
-  for (; counter < it->getDataSize(); ++counter) {
-    if (it->getIsMasked()) {
-      delete it;
-      return true;
-    }
-  }
-  delete it;
-  return false;
-}
-
-/**
 Get the coordinate system (if any) to use.
 @return An enumeration specifying the coordinate system if any.
 */

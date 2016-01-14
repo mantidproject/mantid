@@ -32,11 +32,11 @@ namespace Mantid
     @param progressUpdating: Reporting object to pass progress information up the stack.
     @return fully constructed vtkDataSet.
     */
-    vtkDataSet* vtkMD0DFactory::create(ProgressAction&) const
-    {
+    vtkSmartPointer<vtkDataSet> vtkMD0DFactory::create(ProgressAction &) const {
       g_log.warning() << "Factory " << this->getFactoryTypeName() << " is being used. You are viewing data with less than three dimensions in the VSI. \n";
       vtkNullUnstructuredGrid nullGrid;
-      vtkUnstructuredGrid *visualDataSet = nullGrid.createNullData();
+      auto visualDataSet =
+          vtkSmartPointer<vtkDataSet>::Take(nullGrid.createNullData());
       return visualDataSet;
     }
 
