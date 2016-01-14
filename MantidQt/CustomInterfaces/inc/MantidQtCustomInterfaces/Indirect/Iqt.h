@@ -32,6 +32,8 @@ namespace IDA
     void calculateBinning();
 
   private:
+    QString makePyPlotSource(const int &index);
+
     Ui::Iqt m_uiForm;
     QtTreePropertyBrowser* m_furTree;
     bool m_furyResFileType;
