@@ -48,8 +48,8 @@ static bool checkIntersection(std::vector<std::string> v1,
 
   // Check intersectiom
   std::vector<std::string> intersectvec(v1.size() + v2.size());
-  std::vector<std::string>::iterator outiter = std::set_intersection(
-      v1.begin(), v1.end(), v2.begin(), v2.end(), intersectvec.begin());
+  auto outiter = std::set_intersection(v1.begin(), v1.end(), v2.begin(),
+                                       v2.end(), intersectvec.begin());
   if (static_cast<int>(outiter - intersectvec.begin()) == 0)
     return false;
 
@@ -98,11 +98,8 @@ const std::string LoadSpiceAscii::summary() const {
 /** Declaration of properties
  */
 void LoadSpiceAscii::init() {
-  // Input files
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
   declareProperty(
-      new FileProperty("Filename", "", API::FileProperty::Load, exts),
+      new FileProperty("Filename", "", API::FileProperty::Load, {".dat"}),
       "Name of SPICE data file.");
 
   // Logs to be float type sample log

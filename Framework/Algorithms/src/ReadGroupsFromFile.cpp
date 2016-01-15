@@ -52,11 +52,9 @@ void ReadGroupsFromFile::init() {
                   "workspace.");
 
   // The calibration file that contains the grouping information
-  std::vector<std::string> exts;
-  exts.push_back(".cal");
-  exts.push_back(".xml");
   declareProperty(
-      new FileProperty("GroupingFileName", "", FileProperty::Load, exts),
+      new FileProperty("GroupingFileName", "", FileProperty::Load,
+                       {".cal", ".xml"}),
       "Either as a XML grouping file (see [[GroupDetectors]]) or as a "
       "[[CalFile]] (.cal extension).");
   // Flag to consider unselected detectors in the cal file
@@ -227,8 +225,7 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
     Poco::StringTokenizer data(ids, ",", Poco::StringTokenizer::TOK_TRIM);
 
     if (data.begin() != data.end()) {
-      for (Poco::StringTokenizer::Iterator it = data.begin(); it != data.end();
-           ++it) {
+      for (auto it = data.begin(); it != data.end(); ++it) {
         // cast the string to an int
         int detID;
         try {

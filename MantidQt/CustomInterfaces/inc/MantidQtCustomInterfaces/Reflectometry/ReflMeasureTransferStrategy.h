@@ -56,17 +56,19 @@ public:
 
   ReflMeasureTransferStrategy(const ReflMeasureTransferStrategy &other);
 
-  virtual std::vector<std::map<std::string, std::string>>
+  virtual TransferResults
   transferRuns(SearchResultMap &searchResults,
                Mantid::Kernel::ProgressBase &progress);
 
-  virtual ReflMeasureTransferStrategy *clone() const;
+  std::unique_ptr<ReflMeasureTransferStrategy> clone() const;
 
   virtual bool knownFileType(const std::string &filename) const;
 
   virtual ~ReflMeasureTransferStrategy();
 
 private:
+  virtual ReflMeasureTransferStrategy *doClone() const;
+
   /// Catalog information needed for transformations
   std::unique_ptr<Mantid::Kernel::ICatalogInfo> m_catInfo;
 

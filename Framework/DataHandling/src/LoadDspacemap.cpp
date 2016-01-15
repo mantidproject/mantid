@@ -41,12 +41,9 @@ void LoadDspacemap::init() {
   // 3 properties for getting the right instrument
   LoadCalFile::getInstrument3WaysInit(this);
 
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
-  exts.push_back(".bin");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The DspacemapFile containing the d-space mapping.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".dat", ".bin"}),
+      "The DspacemapFile containing the d-space mapping.");
 
   std::vector<std::string> propOptions;
   propOptions.push_back("POWGEN");
@@ -206,8 +203,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
   Kernel::V3D referencePos;
   detid_t anydetinrefmodule = 21 * 1250 + 5;
 
-  std::map<detid_t, Geometry::IDetector_const_sptr>::iterator det_iter =
-      allDetectors.find(anydetinrefmodule);
+  auto det_iter = allDetectors.find(anydetinrefmodule);
 
   if (det_iter == allDetectors.end()) {
     throw std::invalid_argument("Any Detector ID is Instrument's detector");
@@ -379,8 +375,7 @@ void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName,
   BinaryFile<VulcanCorrectionFactor> file(fileName);
   std::vector<VulcanCorrectionFactor> *results = file.loadAll();
   if (results) {
-    for (std::vector<VulcanCorrectionFactor>::iterator it = results->begin();
-         it != results->end(); ++it) {
+    for (auto it = results->begin(); it != results->end(); ++it) {
       // std::cout << it->pixelID << " :! " << it->factor << std::endl;
       vulcan[static_cast<detid_t>(it->pixelID)] = it->factor;
     }

@@ -36,6 +36,11 @@ message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 # Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
+execute_process(COMMAND python-config --prefix OUTPUT_VARIABLE PYTHON_PREFIX)
+string(STRIP ${PYTHON_PREFIX} PYTHON_PREFIX)
+set( PYTHON_LIBRARY "${PYTHON_PREFIX}/lib/libpython2.7.dylib" CACHE FILEPATH "PYTHON_LIBRARY")
+set( PYTHON_INCLUDE_DIR "${PYTHON_PREFIX}/include/python2.7" CACHE PATH "PYTHON_INCLUDE_DIR")
+
 ###########################################################################
 # Use the system-installed version of Python.
 ###########################################################################
@@ -191,6 +196,29 @@ endif ()
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
           DESTINATION MantidPlot.app/Contents/Resources/
 )
+
+# Add launcher script for mantid python
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx
+          DESTINATION MantidPlot.app/Contents/MacOS/ 
+          RENAME mantidpython )
+# Add launcher application for a Mantid IPython console
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidPython_osx_launcher
+          DESTINATION MantidPython\ \(optional\).app/Contents/MacOS/ 
+          RENAME MantidPython )
+install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_Info.plist
+          DESTINATION MantidPython\ \(optional\).app/Contents/ 
+          RENAME Info.plist )
+install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPython.icns
+          DESTINATION MantidPython\ \(optional\).app/Contents/Resources/ )
+# Add launcher application for Mantid IPython notebooks
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidNotebook_osx_launcher
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/MacOS/ 
+          RENAME MantidNotebook )
+install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/ 
+          RENAME Info.plist )
+install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/ )
 
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
 set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/installers/MacInstaller/osx_DS_Store)

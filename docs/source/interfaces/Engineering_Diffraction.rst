@@ -7,7 +7,7 @@ Engineering Diffraction
 Overview
 --------
 
-This custom interface integrates several tasks related to engineeering
+This custom interface integrates several tasks related to engineering
 diffraction. It provides functionality for calibration, focusing, and
 pre-processing of event mode data. Further extensions can be expected
 for next releases as it is under active development. Feedback is very
@@ -29,6 +29,17 @@ Instrument
 Close
   Close the interface
 
+RB Number
+  To enable the GUI specify a RB Number, the RB number will be used for the
+  output paths, so that files from different users and/or experiments can
+  be kept separate.
+
+* Red Star Sign
+  If a red star sign is displayed next to the Browse Button, it is mostly
+  likely because the file specified has not been found. Error message
+  can be viewed by hovering over the red star sign.
+
+
 Calibration
 -----------
 
@@ -38,6 +49,10 @@ visualize them.
 It is possible to load an existing calibration (as a CSV file) and to
 generate a new calibration file (which becomes the new current
 calibration).
+
+With the help of Cropped Calibration user can also calibrate according
+to bank or by setting the SpectrumIDs once the Cropped Calibration group
+box has been enabled.
 
 Parameters
 ^^^^^^^^^^
@@ -52,11 +67,34 @@ Calibration sample #
   Number of the calibration sample run (for example Ceria run) used to
   calibrate experiment runs.
 
+Bank Name:
+  This parameter is only required when Cropped Calibration is being
+  carried out. The bank name can be selected from a drop down list with
+  option of North and South, which are equivalently to 1 and 2
+  respectively. The Bank Name drop down list is set to `Enable Spectrum-IDs`
+  by default. This option cannot be used together with Spectrum IDs,
+  as they overlap.
+
+SpectrumIDs:
+  This parameter is only required when Cropped Calibration is being
+  carried out, the parameter will set the spectrum numbers of the
+  detectors, that should be considered in the calibration while all
+  others will be ignored. This option cannot be used together with
+  Bank Name, as they overlap. You may also give multiple ranges, for
+  example: "0-100", or "0-9", "150-750".
+
+The calibration process depends on several additional parameters and
+settings which can be modified in the *Settings* section (tab), see
+below for details.
+
 Focus
 -----
 
-Here it is possible to focus run files, provided a run number or run
-file. The focusing process uses the algorithm :ref:`EnggFocus
+Here it is possible to focus run files, by providing a run number or a
+range of run number to enable multi-run focusing, along with that the
+user may also select the files with the help of Browse button.
+
+The focusing process uses the algorithm :ref:`EnggFocus
 <algm-EnggFocus>`. In the documentation of the algorithm you can find
 the details on how the input runs are focused.
 
@@ -73,7 +111,7 @@ Three focusing alternatives are provided:
 2. Cropped focusing, where several spectra or ranges of spectra can
    be specified, as a list separated by commas.
 3. Texture focusing, where the *texture* group of detectors is given
-   in a Detector Gropuing File.
+   in a Detector Grouping File.
 
 Depending on the alternative chosen, the focusing operation will
 include different banks and/or combinations of spectra (detectors). In
@@ -89,6 +127,10 @@ for normal focusing, *_cropped* for cropped focusing, and
 *_texture_bank_1, _texture_bank_2*, and so on for texture focusing
 (using the bank IDs given in the detector grouping file).
 
+Cropped focusing and Texture focusing have been disabled by default to
+declutter the interface, but each section can be enabled simply by
+ticking the check-box next to Focus Cropped and Focus Texture.
+
 For texture focusing, the detector grouping file is a text (csv) file
 with one line per bank. Each line must contain at least two numeric
 fields, where the first one specifies the bank ID, and the second and
@@ -99,6 +141,31 @@ numbers. For example::
    1, 205-210
    2, 100, 102, 107
    3, 300, 310, 320-329, 350-370
+
+When a focus run process is being carried out, Focus Stop button will
+be enabled. Focus Stop button will allow the user to abort once the
+current focus run process has been completed. Inside the *Result Log*
+a warning message will be displayed with last successful run and total
+number of focus runs that could not be processed.
+
+Run Number
+^^^^^^^^^^
+The run provided to focus can be for example 228061-228063, this will
+run all the files within the given range as long as the file
+directories are included in the
+`User Directories <http://www.mantidproject.org/SplittersWorkspace>`_.
+The user may also provide an input of 228061-3 or 228061, 228062,
+2280623 which should work the same way.
+
+If a red star sign is displayed next to the Browse Button, it is mostly
+likely because the file specified has not been found. Error message
+can be viewed by hovering over the red star sign.
+
+Checking the availability of all the files can take some time, for this
+reason it is also possible that a file may not have been found but the
+red star sign has not been displayed. If you manage to click Focus
+before red sign is displayed, the interface will process the last valid
+focus run instead.
 
 Output
 ^^^^^^
@@ -123,6 +190,13 @@ generated three different files for each focused output workspace
 in Mantid. These files can be found with appropriate name at location:
 C:\EnginX_Mantid\User\236516\Focus on Windows, the
 EnginX_Mantid folder can be found on Desktop/Home on other platforms.
+
+The Multiple Runs Focus Mode combo-box enables two alternative
+focus mode. `Focus Individual Run Files Separately` is the default
+option set, which allows user to run focus with multi-run files.
+Whereas the `Focus Sum Of Files` option merges all the multi-run
+number files together and applies the Focus Process to the merged
+file.
 
 Pre-processing
 --------------
@@ -178,16 +252,21 @@ Calibration Parameters
 The calibration settings are organized in three blocks:
 
 1. Input directories
-2. Pixel calibration
+2. Pixel (full) calibration
 3. Advanced settings
 
 The input directories will be used when looking for run files
-(Vanadium and Ceria). They effectivel ybecome part of the search path
+(Vanadium and Ceria). They effectively become part of the search path
 of Mantid when using this interface.
 
-The pixel calibration file contains the calibration of every pixel of
-all banks, as produced by the algorithm :ref:`EnggCalibrateFull
-<algm-EnggCalibrateFull>`.
+The pixel (full) calibration file contains the calibration details of
+every pixel of all banks, as produced by the algorithm
+:ref:`EnggCalibrateFull <algm-EnggCalibrateFull>`. A default pixel
+calibration file is provided with Mantid packages. This calibration
+has been produced for the Vanadium and calibration sample (Ceria) runs
+indicated in the name of the calibration file. Note that this
+calibration is currently subject to changes, as the fitting of peaks
+is being refined.
 
 The Following advanced settings are available to customize the
 behavior of this interface:
@@ -199,7 +278,7 @@ Force recalculate
   original Vanadium run file, or there is a change in the algorithms
   that calculate the corrections
 
-Tempalte .prm file
+Template .prm file
   By changing this option you can Use a different template file for the
   output GSAS IPAR that is generated in the Calibration tab.
 

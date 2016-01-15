@@ -351,6 +351,9 @@ public:
     g_log.debug() << typeid(this).name() << " cleared.\n";
   }
 
+  /// Prepare for shutdown
+  virtual void shutdown() { clear(); }
+
   //--------------------------------------------------------------------------
   /** Get a shared pointer to a stored data object
    * @param name :: name of the object */

@@ -21,7 +21,9 @@ jobs to a remote compute resource (a compute cluster for
 example). Currently remote jobs are run on the `SCARF cluster
 <http://www.scarf.rl.ac.uk/>`_, administered by the Scientific
 Computing Department of STFC. You can also use this cluster via remote
-login and through its `web portal <https://portal.scarf.rl.ac.uk/>`_.
+login and through its `web portal
+<https://portal.scarf.rl.ac.uk/>`_. This resource is available for
+ISIS users.
 
 .. warning:: This interface is undergoing heavy works. New functionality
              is being added and the pre-post-processing and reconstruction
@@ -67,11 +69,11 @@ Dark field directory
   :align: right
   :width: 300
 
-In principle, the use of this interface is straightforward. **NB**: as
-this interface is in an early stage and under heavy development,
-several practical details are missing. This implies that there may be
-usability issues at times and some steps may not be as intuitive or
-simple as they could. Please, do not hesitate to provide feedback.
+**NB**: as this interface is in an early stage and under heavy
+development, several practical details are missing. This implies that
+there may be usability issues at times and some steps may not be as
+intuitive or simple as they could. Please, do not hesitate to provide
+suggestions and feedback.
 
 The next sections provide further details that might be needed to
 fully understand the process of generating tomographic reconstructions
@@ -81,16 +83,43 @@ Tools
 -----
 
 At the moment two reconstruction tools are being set up and trialed on
-SCARF:
+SCARF and some ISIS machines:
 
 * `TomoPy
   <https://www1.aps.anl.gov/Science/Scientific-Software/TomoPy>`_
 
-* `Astra Toolbox <http://sourceforge.net/p/astra-toolbox/wiki/Home/>`_
+* `Astra Toolbox <http://visielab.uantwerpen.be/software>`_ found from
+  `here <http://sourceforge.net/p/astra-toolbox/wiki/Home/>`_.
 
-In the near future it is expected that support will be added for `Savu
+References for the Astra Toolbox:
+
+* W. van Aarle, W J. Palenstijn, J. De
+  Beenhouwer, T. Altantzis, S. Bals, K. J. Batenburg, and J. Sijbers,
+  "The ASTRA Toolbox: a platform for advanced algorithm development in
+  electron tomography", Ultramicroscopy, Vol. 147, p. 35–47, (2015)
+
+* W J. Palenstijn, K J. Batenburg, and J. Sijbers, "Performance
+  improvements for iterative electron tomography reconstruction using
+  graphics processing units (GPUs)", Journal of structural biology,
+  vol. 176, issue 2, pp. 250-253, 2011
+
+References for TomoPy:
+
+* Gursoy D, De Carlo F, Xiao X, Jacobsen C. (2014). TomoPy: a
+  framework for the analysis of synchrotron tomographic
+  data. J. Synchrotron Rad. 21. 1188-1193
+  doi:10.1107/S1600577514013939
+
+In the near future it is expected that support will be added for
+`Savu: Tomography Reconstruction Pipeline
 <https://github.com/DiamondLightSource/Savu>`_, developed at the
 Diamond Light Source.
+
+References for Savu:
+
+* Atwood R C, Bodey A J, Price S W T, Basham M and Drakopoulos M
+  2015 A high-throughput system for high-quality tomographic reconstruction of
+  large datasets at diamond light source Philosophical Transactions A 373 20140398
 
 Data formats
 ------------
@@ -208,6 +237,23 @@ The settings are rememberd between session, and it is possible to
 reset all the settings to their factory default by clicking on the
 reset button.
 
+Results from reconstruction jobs
+--------------------------------
+
+The results are written into the output paths selected in the
+interface (in the *setup* section or tab). For every reconstructed
+volume a sequence of images (slices along the vertical axis) are
+written. In addition, two complementary outputs are generated in the
+same location:
+
+* A *readme* file with detailed information on the reconstruction and
+  settings (0.README_reconstruction.txt), including paths, algorithms,
+  filters and parameters used.
+
+* A compressed package file that contains the scripts and subpackages
+  used for the reconstruction job, for reproducibility and to make it
+  easier to track down potential issues. This file is written as
+  0.reconstruction_scripts.zip
 
 Running jobs locally
 --------------------

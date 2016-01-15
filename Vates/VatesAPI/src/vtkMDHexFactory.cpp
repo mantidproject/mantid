@@ -14,6 +14,7 @@
 #include <vtkPoints.h>
 #include <vtkUnstructuredGrid.h>
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -24,7 +25,6 @@ using Mantid::Kernel::ReadLock;
 namespace Mantid {
 
 namespace VATES {
-
 
 /*Constructor
   @param thresholdRange : Threshold range strategy
@@ -37,8 +37,7 @@ vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange,
                                  const size_t maxDepth)
     : m_thresholdRange(thresholdRange),
       m_normalizationOption(normalizationOption), m_maxDepth(maxDepth),
-      dataSet(NULL), slice(false), sliceMask(NULL), sliceImplicitFunction(NULL),
-      m_time(0) {}
+      slice(false), m_time(0) {}
 
 /// Destructor
 vtkMDHexFactory::~vtkMDHexFactory() {}
@@ -65,7 +64,7 @@ void vtkMDHexFactory::doCreate(
   std::vector<API::IMDNode *> boxes;
   if (this->slice)
     ws->getBox()->getBoxes(boxes, m_maxDepth, true,
-                           this->sliceImplicitFunction);
+                           this->sliceImplicitFunction.get());
   else
     ws->getBox()->getBoxes(boxes, m_maxDepth, true);
 
@@ -77,33 +76,35 @@ void vtkMDHexFactory::doCreate(
               << " boxes down to depth " << m_maxDepth << std::endl;
 
   // Create 8 points per box.
-  vtkPoints *points = vtkPoints::New();
+  vtkNew<vtkPoints> points;
   points->Allocate(numBoxes * 8);
   points->SetNumberOfPoints(numBoxes * 8);
 
   // One scalar per box
-  vtkFloatArray *signals = vtkFloatArray::New();
+  vtkNew<vtkFloatArray> signals;
   signals->Allocate(numBoxes);
   signals->SetName(ScalarName.c_str());
   signals->SetNumberOfComponents(1);
-  // signals->SetNumberOfValues(numBoxes);
 
   // To cache the signal
-  float *signalArray = new float[numBoxes];
+  std::vector<float> signalCache(numBoxes, 0);
 
   // True for boxes that we will use
-  bool *useBox = new bool[numBoxes];
-  memset(useBox, 0, sizeof(bool) * numBoxes);
+  // We do not use vector<bool> here because of the parallelization below
+  // Simultaneous access to different elements of vector<bool> is not safe
+  auto useBox = Mantid::Kernel::make_unique<bool[]>(numBoxes);
+  memset(useBox.get(), 0, sizeof(bool) * numBoxes);
 
-  // Create the data set
-  vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+  // Create the data set (will outlive this object - output of create)
+  auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
   this->dataSet = visualDataSet;
   visualDataSet->Allocate(numBoxes);
 
-  vtkIdList *hexPointList = vtkIdList::New();
+  vtkNew<vtkIdList> hexPointList;
   hexPointList->SetNumberOfIds(8);
 
-  NormFuncIMDNodePtr normFunction = makeMDEventNormalizationFunction(m_normalizationOption, ws.get());
+  NormFuncIMDNodePtr normFunction = makeMDEventNormalizationFunction(
+      m_normalizationOption, ws.get());
 
   // This can be parallelized
   // cppcheck-suppress syntaxError
@@ -112,44 +113,46 @@ void vtkMDHexFactory::doCreate(
       // Get the box here
       size_t i = size_t(ii);
       API::IMDNode *box = boxes[i];
-      Mantid::signal_t signal_normalized = (box->*normFunction)(); 
+      Mantid::signal_t signal_normalized = (box->*normFunction)();
 
       if (!isSpecial(signal_normalized) &&
           m_thresholdRange->inRange(signal_normalized)) {
         // Cache the signal and using of it
-        signalArray[i] = float(signal_normalized);
+        signalCache[i] = float(signal_normalized);
         useBox[i] = true;
 
         // Get the coordinates.
         size_t numVertexes = 0;
-        coord_t *coords;
+        std::unique_ptr<coord_t> coords;
 
         // If slicing down to 3D, specify which dimensions to keep.
-        if (this->slice)
-          coords = box->getVertexesArray(numVertexes, 3, this->sliceMask);
-        else
-          coords = box->getVertexesArray(numVertexes);
+        if (this->slice) {
+          coords = std::unique_ptr<coord_t>(
+              box->getVertexesArray(numVertexes, 3, this->sliceMask.get()));
+        } else {
+          coords =
+              std::unique_ptr<coord_t>(box->getVertexesArray(numVertexes));
+        }
 
         if (numVertexes == 8) {
           // Iterate through all coordinates. Candidate for speed improvement.
           for (size_t v = 0; v < numVertexes; v++) {
-            coord_t *coord = coords + v * 3;
+            coord_t *coord = coords.get() + v * 3;
             // Set the point at that given ID
             points->SetPoint(i * 8 + v, coord[0], coord[1], coord[2]);
             std::string msg;
           }
 
         } // valid number of vertexes returned
-
-        // Free memory
-        delete[] coords;
+      } else {
+        useBox[i] = false;
       }
     } // For each box
 
     if (VERBOSE)
       std::cout << tim << " to create the necessary points." << std::endl;
     // Add points
-    visualDataSet->SetPoints(points);
+    visualDataSet->SetPoints(points.GetPointer());
 
     for (size_t i = 0; i < boxes.size(); i++) {
       if (useBox[i]) {
@@ -157,7 +160,7 @@ void vtkMDHexFactory::doCreate(
         vtkIdType pointIds = i * 8;
 
         // Add signal
-        signals->InsertNextValue(signalArray[i]);
+        signals->InsertNextValue(signalCache[i]);
 
         hexPointList->SetId(0, pointIds + 0); // xyx
         hexPointList->SetId(1, pointIds + 1); // dxyz
@@ -169,7 +172,8 @@ void vtkMDHexFactory::doCreate(
         hexPointList->SetId(7, pointIds + 6); // xdydz
 
         // Add cells
-        visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexPointList);
+        visualDataSet->InsertNextCell(VTK_HEXAHEDRON,
+                                      hexPointList.GetPointer());
 
         double bounds[6];
 
@@ -182,19 +186,15 @@ void vtkMDHexFactory::doCreate(
       }
     } // for each box.
 
-    delete[] signalArray;
-    delete[] useBox;
-
     // Shrink to fit
     signals->Squeeze();
     visualDataSet->Squeeze();
 
     // Add scalars
-    visualDataSet->GetCellData()->SetScalars(signals);
+    visualDataSet->GetCellData()->SetScalars(signals.GetPointer());
 
     // Hedge against empty data sets
     if (visualDataSet->GetNumberOfPoints() <= 0) {
-      visualDataSet->Delete();
       vtkNullUnstructuredGrid nullGrid;
       visualDataSet = nullGrid.createNullData();
       this->dataSet = visualDataSet;
@@ -213,7 +213,8 @@ stack.
 @Return a fully constructed vtkUnstructuredGrid containing geometric and scalar
 data.
 */
-vtkDataSet *vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
+vtkSmartPointer<vtkDataSet>
+vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
   this->dataSet = tryDelegatingCreation<IMDEventWorkspace, 3>(
       m_workspace, progressUpdating, false);
   if (this->dataSet != NULL) {
@@ -226,8 +227,8 @@ vtkDataSet *vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
     if (nd > 3) {
       // Slice from >3D down to 3D
       this->slice = true;
-      this->sliceMask = new bool[nd];
-      this->sliceImplicitFunction = new MDImplicitFunction();
+      this->sliceMask = Mantid::Kernel::make_unique<bool[]>(nd);
+      this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
 
       // Make the mask of dimensions
       // TODO: Smarter mapping
@@ -260,12 +261,6 @@ vtkDataSet *vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
     // Macro to call the right instance of the
     CALL_MDEVENT_FUNCTION(this->doCreate, imdws);
     progressUpdating.eventRaised(1.0);
-
-    // Clean up
-    if (this->slice) {
-      delete[] this->sliceMask;
-      delete this->sliceImplicitFunction;
-    }
 
     // The macro does not allow return calls, so we used a member variable.
     return this->dataSet;

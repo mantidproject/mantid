@@ -476,7 +476,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
   fgetpos(file, &dhdr_pos);
   ioRAW(file, &dhdr, 1, from_file);
   int ndes, nout, nwords, outbuff_size = 100000, offset;
-  char *outbuff = new char[outbuff_size];
+  auto outbuff = new char[outbuff_size];
   if (!read_data) {
     ndes = ndata = 0;
     dat1 = NULL;

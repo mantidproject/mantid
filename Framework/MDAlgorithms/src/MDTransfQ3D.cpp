@@ -90,6 +90,10 @@ bool MDTransfQ3D::calcMatrixCoord3DInelastic(
   if (Coord[2] < m_DimMin[2] || Coord[2] >= m_DimMax[2])
     return false;
 
+  if (std::sqrt(Coord[0] * Coord[0] + Coord[1] * Coord[1] +
+                Coord[2] * Coord[2]) < m_AbsMin)
+    return false;
+
   return true;
 }
 /** function calculates workspace-dependent coordinates in elastic case.
@@ -116,7 +120,6 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
   double qx = -m_ex * k0;
   double qy = -m_ey * k0;
   double qz = (1 - m_ez) * k0;
-
   Coord[0] = (coord_t)(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
   if (Coord[0] < m_DimMin[0] || Coord[0] >= m_DimMax[0])
     return false;
@@ -127,6 +130,10 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
 
   Coord[2] = (coord_t)(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
   if (Coord[2] < m_DimMin[2] || Coord[2] >= m_DimMax[2])
+    return false;
+
+  if (std::sqrt(Coord[0] * Coord[0] + Coord[1] * Coord[1] +
+                Coord[2] * Coord[2]) < m_AbsMin)
     return false;
 
   /*Apply Lorentz corrections if necessary */
@@ -246,6 +253,7 @@ void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
   }
   // use detectors masks untill signals are masked by 0 instead of NaN
   m_pDetMasks = ConvParams.m_PreprDetTable->getColDataArray<int>("detMask");
+  m_AbsMin = ConvParams.absMin();
 }
 /**method returns default ID-s for ModQ elastic and inelastic modes. The ID-s
 are related to the units,
@@ -311,7 +319,7 @@ MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode,
 /// constructor;
 MDTransfQ3D::MDTransfQ3D()
     : m_isLorentzCorrected(false), m_SinThetaSqArray(NULL), SinThetaSq(),
-      m_SinThetaSq(0.) {}
+      m_SinThetaSq(0.), m_AbsMin(0.) {}
 
 } // End MDAlgorighms namespace
 } // End Mantid namespace

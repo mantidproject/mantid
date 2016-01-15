@@ -8,6 +8,7 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/UsageService.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
@@ -15,8 +16,6 @@
 #include "MantidKernel/MultiThreaded.h"
 
 #include <Poco/ActiveResult.h>
-
-#include <json/json.h>
 
 #include <cstdarg>
 
@@ -112,9 +111,7 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
     g_log.information() << "Version check disabled." << std::endl;
   }
 
-  // the algorithm will see if it should run
-
-  SendStartupUsageInfo();
+  setupUsageReporting();
 }
 
 /// Update instrument definitions from github
@@ -139,27 +136,6 @@ void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
                      "check if a newer version is available." << std::endl;
-  }
-}
-
-/// Sends startup information about OS and Mantid version
-void FrameworkManagerImpl::SendStartupUsageInfo() {
-  // see whether or not to send
-  int sendStartupUsageInfo = 0;
-  int retVal = Kernel::ConfigService::Instance().getValue(
-      "usagereports.enabled", sendStartupUsageInfo);
-  if ((retVal == 0) || (sendStartupUsageInfo == 0)) {
-    return; // exit early
-  }
-
-  // do it
-  try {
-    IAlgorithm *algSendStartupUsage = this->createAlgorithm("SendUsage");
-    algSendStartupUsage->setAlgStartupLogging(false);
-    Poco::ActiveResult<bool> result = algSendStartupUsage->executeAsync();
-  } catch (Kernel::Exception::NotFoundError &) {
-    g_log.debug() << "SendUsage algorithm is not available - cannot update "
-                     "send usage information." << std::endl;
   }
 }
 
@@ -241,6 +217,11 @@ void FrameworkManagerImpl::clear() {
   clearInstruments();
   clearData();
   clearPropertyManagers();
+}
+
+void FrameworkManagerImpl::shutdown() {
+  Kernel::UsageService::Instance().shutdown();
+  clear();
 }
 
 /**
@@ -431,6 +412,20 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
   }
   Mantid::API::MemoryManager::Instance().releaseFreeMemory();
   return retVal;
+}
+
+void FrameworkManagerImpl::setupUsageReporting() {
+  int enabled = 0;
+  int interval = 0;
+  int retVal = Kernel::ConfigService::Instance().getValue(
+      "Usage.BufferCheckInterval", interval);
+  if ((retVal == 1) && (interval > 0)) {
+    Kernel::UsageService::Instance().setInterval(interval);
+  }
+  retVal = Kernel::ConfigService::Instance().getValue("usagereports.enabled",
+                                                      enabled);
+  Kernel::UsageService::Instance().setEnabled((retVal == 1) && (enabled > 0));
+  Kernel::UsageService::Instance().registerStartup();
 }
 
 } // namespace API

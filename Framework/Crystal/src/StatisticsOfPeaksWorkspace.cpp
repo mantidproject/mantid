@@ -1,5 +1,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/StatisticsOfPeaksWorkspace.h"
+#include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -48,6 +49,15 @@ void StatisticsOfPeaksWorkspace::init() {
   declareProperty("PointGroup", propOptions[0],
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which point group applies to this crystal?");
+
+  std::vector<std::string> centeringOptions;
+  std::vector<ReflectionCondition_sptr> reflectionConditions =
+      getAllReflectionConditions();
+  for (size_t i = 0; i < reflectionConditions.size(); ++i)
+    centeringOptions.push_back(reflectionConditions[i]->getName());
+  declareProperty("LatticeCentering", centeringOptions[0],
+                  boost::make_shared<StringListValidator>(centeringOptions),
+                  "Appropriate lattice centering for the peaks.");
 
   declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
                                                         Direction::Output),
@@ -162,6 +172,7 @@ void StatisticsOfPeaksWorkspace::exec() {
 void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
                                            std::string runName) {
   std::string pointGroup = getPropertyValue("PointGroup");
+  std::string latticeCentering = getPropertyValue("LatticeCentering");
   std::string wkspName = getPropertyValue("OutputWorkspace");
   std::string tableName = getPropertyValue("StatisticsTable");
   API::IAlgorithm_sptr statsAlg = createChildAlgorithm("SortHKL");
@@ -169,6 +180,7 @@ void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
   statsAlg->setPropertyValue("OutputWorkspace", wkspName);
   statsAlg->setPropertyValue("StatisticsTable", tableName);
   statsAlg->setProperty("PointGroup", pointGroup);
+  statsAlg->setProperty("LatticeCentering", latticeCentering);
   statsAlg->setProperty("RowName", runName);
   if (runName.compare("Overall") != 0)
     statsAlg->setProperty("Append", true);

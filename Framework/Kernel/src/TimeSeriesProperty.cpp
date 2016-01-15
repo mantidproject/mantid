@@ -456,7 +456,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
   size_t i_property = 0;
 
   //    And at the same time, iterate through the splitter
-  Kernel::TimeSplitterType::iterator itspl = splitter.begin();
+  auto itspl = splitter.begin();
 
   size_t counter = 0;
   g_log.debug() << "[DB] Number of time series entries = " << m_values.size()
@@ -752,8 +752,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
 
   double numerator(0.0), totalTime(0.0);
   // Loop through the filter ranges
-  for (TimeSplitterType::const_iterator it = filter.begin(); it != filter.end();
-       ++it) {
+  for (auto it = filter.cbegin(); it != filter.cend(); ++it) {
     // Calculate the total time duration (in seconds) within by the filter
     totalTime += it->duration();
 
@@ -997,6 +996,19 @@ void TimeSeriesProperty<TYPE>::addValues(
     m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
 
   return;
+}
+
+/** replace vectors of values to the map. First we clear the vectors
+ * and then we run addValues
+*  @param times :: The time as a boost::posix_time::ptime value
+*  @param values :: The associated value
+*/
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::replaceValues(
+    const std::vector<Kernel::DateAndTime> &times,
+    const std::vector<TYPE> &values) {
+  clear();
+  addValues(times, values);
 }
 
 /**

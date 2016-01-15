@@ -5,6 +5,7 @@
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -75,9 +76,9 @@ void QtReflMainView::setModel(QString name) {
 }
 
 /**
- * Set all possible tranfer methods
- * @param methods : All possible transfer methods.
- */
+* Set all possible tranfer methods
+* @param methods : All possible transfer methods.
+*/
 void QtReflMainView::setTransferMethods(const std::set<std::string> &methods) {
   for (auto method = methods.begin(); method != methods.end(); ++method) {
     ui.comboTransferMethod->addItem((*method).c_str());
@@ -96,6 +97,10 @@ void QtReflMainView::showTable(QReflTableModel_sptr model) {
           SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
   ui.viewTable->setModel(m_model.get());
   ui.viewTable->resizeColumnsToContents();
+  std::string windowTitle = "ISIS Reflectometry (Polref) - " + m_toOpen;
+  auto mainWindowWidget = this->topLevelWidget();
+  mainWindowWidget->setWindowTitle(QString::fromStdString(windowTitle + "[*]"));
+  this->setWindowModified(false);
 }
 
 /**
@@ -438,27 +443,64 @@ Show the user the dialog for an algorithm
 void QtReflMainView::showAlgorithmDialog(const std::string &algorithm) {
   std::stringstream pythonSrc;
   pythonSrc << "try:\n";
-  pythonSrc << "  " << algorithm << "Dialog()\n";
+  pythonSrc << "  algm = " << algorithm << "Dialog()\n";
   pythonSrc << "except:\n";
   pythonSrc << "  pass\n";
-  runPythonCode(QString::fromStdString(pythonSrc.str()));
+  runPythonCode(QString::fromStdString(pythonSrc.str()), false);
+}
+
+void QtReflMainView::showImportDialog() {
+  std::stringstream pythonSrc;
+  pythonSrc << "try:\n";
+  pythonSrc << "  algm = "
+            << "LoadReflTBL"
+            << "Dialog()\n";
+  pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
+  pythonSrc << "except:\n";
+  pythonSrc << "  pass\n";
+  // outputWorkspaceName will hold the name of the workspace
+  // otherwise this should be an empty string.
+  QString outputWorkspaceName =
+      runPythonCode(QString::fromStdString(pythonSrc.str()), false);
+  m_toOpen = outputWorkspaceName.trimmed().toStdString();
+  // notifying the presenter that a new table should be opened
+  // The presenter will ask about any unsaved changes etc
+  // before opening the new table
+  m_presenter->notify(ReflMainViewPresenter::OpenTableFlag);
 }
 
 /**
 Show the user file dialog to choose save location of notebook
 */
 std::string QtReflMainView::requestNotebookPath() {
-  QString qfilename = QFileDialog::getSaveFileName(
-      0, "Save notebook file", QDir::currentPath(),
+
+  // We won't use QFileDialog directly here as using the NativeDialog option
+  // causes problems on MacOS.
+  QString qfilename = API::FileDialogHandler::getSaveFileName(
+      this, "Save notebook file", QDir::currentPath(),
       "IPython Notebook files (*.ipynb);;All files (*.*)",
       new QString("IPython Notebook files (*.ipynb)"));
-  return qfilename.toStdString();
+
+  // There is a Qt bug (QTBUG-27186) which means the filename returned
+  // from the dialog doesn't always the file extension appended.
+  // So we'll have to ensure this ourselves.
+  // Important, notebooks can't be loaded without this extension.
+  std::string filename = qfilename.toStdString();
+  if (filename.size() > 6) {
+    if (filename.substr(filename.size() - 6) != ".ipynb") {
+      filename.append(".ipynb");
+    }
+  } else {
+    filename.append(".ipynb");
+  }
+
+  return filename;
 }
 
 /**
- Save settings
- @param options : map of user options to save
- */
+Save settings
+@param options : map of user options to save
+*/
 void QtReflMainView::saveSettings(
     const std::map<std::string, QVariant> &options) {
   QSettings settings;
@@ -469,9 +511,9 @@ void QtReflMainView::saveSettings(
 }
 
 /**
- Load settings
- @param options : map of user options to load into
- */
+Load settings
+@param options : map of user options to load into
+*/
 void QtReflMainView::loadSettings(std::map<std::string, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(ReflSettingsGroup);
@@ -517,9 +559,9 @@ void QtReflMainView::setProgress(int progress) {
 }
 
 /**
- Get status of checkbox which determines whether an ipython notebook is produced
- @return true if a notebook should be output on process, false otherwise
- */
+Get status of checkbox which determines whether an ipython notebook is produced
+@return true if a notebook should be output on process, false otherwise
+*/
 bool QtReflMainView::getEnableNotebook() {
   return ui.checkEnableNotebook->isChecked();
 }
@@ -656,13 +698,13 @@ std::string QtReflMainView::getSearchString() const {
 }
 
 /**
- * Clear the progress
- */
+* Clear the progress
+*/
 void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
 
 /**
- * @return the transfer method selected.
- */
+* @return the transfer method selected.
+*/
 std::string QtReflMainView::getTransferMethod() const {
   return ui.comboTransferMethod->currentText().toStdString();
 }

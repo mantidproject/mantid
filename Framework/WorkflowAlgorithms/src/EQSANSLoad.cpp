@@ -123,13 +123,12 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
 
   const std::vector<std::string> &searchPaths =
       Kernel::ConfigService::Instance().getDataSearchDirs();
-  std::vector<std::string>::const_iterator it = searchPaths.begin();
 
   int max_run_number = 0;
   std::string config_file = "";
   static boost::regex re1("eqsans_configuration\\.([0-9]+)$");
   boost::smatch matches;
-  for (; it != searchPaths.end(); ++it) {
+  for (auto it = searchPaths.cbegin(); it != searchPaths.cend(); ++it) {
     Poco::DirectoryIterator file_it(*it);
     Poco::DirectoryIterator end;
     for (; file_it != end; ++file_it) {

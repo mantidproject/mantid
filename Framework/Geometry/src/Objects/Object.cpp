@@ -183,7 +183,7 @@ std::string Object::cellStr(const std::map<int, Object> &MList) const {
         Mantid::Kernel::Strings::convPartNum(TopStr.substr(pos), cN);
     if (nLen > 0) {
       cx << "(";
-      std::map<int, Object>::const_iterator vc = MList.find(cN);
+      auto vc = MList.find(cN);
       if (vc == MList.end())
         throw Kernel::Exception::NotFoundError(
             "Not found in the list of indexable hulls (Object::cellStr)", cN);
@@ -279,8 +279,7 @@ int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
       SurfPoint *KV = dynamic_cast<SurfPoint *>(T1);
       if (KV) {
         // Ensure that we have a it in the surface list:
-        std::map<int, boost::shared_ptr<Surface>>::const_iterator mf =
-            Smap.find(KV->getKeyN());
+        auto mf = Smap.find(KV->getKeyN());
         if (mf != Smap.end()) {
           KV->setKey(mf->second);
           Rcount++;
@@ -1338,8 +1337,8 @@ double Object::ConeSolidAngle(const V3D &observer,
   const int nslices(Mantid::Geometry::Cone::g_nslices);
   const double angle_step = 2 * M_PI / (double)nslices;
   // Store the (x,y) points as they are used quite frequently
-  double *cos_table = new double[nslices];
-  double *sin_table = new double[nslices];
+  auto cos_table = new double[nslices];
+  auto sin_table = new double[nslices];
 
   double solid_angle(0.0);
   for (int sl = 0; sl < nslices; ++sl) {
@@ -1823,7 +1822,7 @@ int Object::searchForObject(Kernel::V3D &point) const {
   for (dir = axes.begin(); dir != axes.end(); ++dir) {
     Geometry::Track tr(point, (*dir));
     if (this->interceptSurface(tr) > 0) {
-      point = tr.begin()->entryPoint;
+      point = tr.cbegin()->entryPoint;
       return 1;
     }
   }
@@ -1878,6 +1877,7 @@ void Object::setVtkGeometryCacheWriter(
 void Object::setVtkGeometryCacheReader(
     boost::shared_ptr<vtkGeometryCacheReader> reader) {
   vtkCacheReader = reader;
+  updateGeometryHandler();
 }
 
 /**

@@ -40,10 +40,10 @@ FixGSASInstrumentFile::~FixGSASInstrumentFile() {}
 /** Implement abstract Algorithm methods
  */
 void FixGSASInstrumentFile::init() {
+
+  std::initializer_list<std::string> exts = {".prm", ".iparm"};
+
   // Input file
-  vector<std::string> exts;
-  exts.push_back(".prm");
-  exts.push_back(".iparm");
   declareProperty(
       new FileProperty("InputFilename", "", FileProperty::Load, exts),
       "Name of the GSAS instrument parameter file to get fixed for format. ");

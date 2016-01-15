@@ -107,22 +107,30 @@ namespace CustomInterfaces
     return true;
   }
 
-  void IndirectMoments::handleSampleInputReady(const QString& filename)
-  {
-    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
+  /**
+   * Clears previous plot data (in both preview and raw plot) and sets the new
+   * range bars
+   */
+  void IndirectMoments::handleSampleInputReady(const QString &filename) {
+    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+               SLOT(updateProperties(QtProperty *, double)));
 
+    // Clears previous plotted data
     m_uiForm.ppRawPlot->clear();
+    m_uiForm.ppMomentsPreview->clear();
+
+    // Update plot and change data in interface
     m_uiForm.ppRawPlot->addSpectrum("Raw", filename, 0);
     QPair<double, double> range = m_uiForm.ppRawPlot->getCurveRange("Raw");
 
     auto xRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
-    setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
-    setPlotPropertyRange(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+    setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
+                     range);
+    setPlotPropertyRange(xRangeSelector, m_properties["EMin"],
+                         m_properties["EMax"], range);
 
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
-
-    // Update the results preview plot
-    updatePreviewPlot();
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+            SLOT(updateProperties(QtProperty *, double)));
   }
 
   /**
@@ -171,42 +179,6 @@ namespace CustomInterfaces
         m_uiForm.ppRawPlot->getRangeSelector("XRange")->setMaximum(val);
       }
     }
-
-    updatePreviewPlot();
-  }
-
-  /**
-   * Runs the moments algorithm with preview properties.
-   */
-  void IndirectMoments::updatePreviewPlot(QString workspaceName)
-  {
-    if(workspaceName.isEmpty())
-      workspaceName = m_uiForm.dsInput->getCurrentDataName();
-
-    QString outputName = workspaceName.left(workspaceName.length() - 4);
-    double scale = m_uiForm.spScale->value();
-    double eMin = m_dblManager->value(m_properties["EMin"]);
-    double eMax = m_dblManager->value(m_properties["EMax"]);
-
-    std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
-
-    IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments");
-    momentsAlg->initialize();
-    momentsAlg->setProperty("Sample", workspaceName.toStdString());
-    momentsAlg->setProperty("EnergyMin", eMin);
-    momentsAlg->setProperty("EnergyMax", eMax);
-    momentsAlg->setProperty("Plot", false);
-    momentsAlg->setProperty("Save", false);
-    momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
-
-    if(m_uiForm.ckScale->isChecked())
-      momentsAlg->setProperty("Scale", scale);
-
-    // Make sure there are no other algorithms in the queue.
-    // It seems to be possible to have the selctionChangedLazy signal fire multiple times
-    // if the renage selector is moved in a certain way.
-    if(m_batchAlgoRunner->queueLength() == 0)
-      runAlgorithm(momentsAlg);
   }
 
   /**

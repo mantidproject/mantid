@@ -21,53 +21,53 @@ class CompareTwoNXSDataForSFcalculator(object):
     nexusToCompareWithRun = None
     nexusToPositionRun = None
     resultComparison = 0
-    
+
     def __init__(self, nxsdataToCompareWith, nxsdataToPosition):
         self.nexusToCompareWithRun = nxsdataToCompareWith.getRun()
         self.nexusToPositionRun = nxsdataToPosition.getRun()
-                
+
         compare1 = self.compareParameter('LambdaRequest', 'descending')
         if compare1 != 0:
             self.resultComparison = compare1
             return
-        
+
         compare2 = self.compareParameter('vATT', 'ascending')
         if compare2 != 0:
             self.resultComparison = compare2
             return
-        
+
         pcharge1 = self.nexusToCompareWithRun.getProperty('gd_prtn_chrg').value/nxsdataToCompareWith.getNEvents()
         pcharge2 = self.nexusToPositionRun.getProperty('gd_prtn_chrg').value/nxsdataToPosition.getNEvents()
 
         self.resultComparison = -1 if pcharge1 < pcharge2 else 1
-        
+
     def compareParameter(self, param, order):
         """
             Compare parameters for the two runs
         """
         _nexusToCompareWithRun = self.nexusToCompareWithRun
         _nexusToPositionRun = self.nexusToPositionRun
-        
+
         _paramNexusToCompareWith = float(_nexusToCompareWithRun.getProperty(param).value[0])
         _paramNexusToPosition = float(_nexusToPositionRun.getProperty(param).value[0])
-            
+
         if order == 'ascending':
             resultLessThan = -1
             resultMoreThan = 1
         else:
             resultLessThan = 1
             resultMoreThan = -1
-        
+
         if (_paramNexusToPosition < _paramNexusToCompareWith):
             return resultLessThan
         elif (_paramNexusToPosition > _paramNexusToCompareWith):
             return resultMoreThan
         else:
             return 0
-        
+
     def result(self):
         return self.resultComparison
-        
+
 def sorter_function(r1, r2):
     """
         Sorter function used by with the 'sorted' call to sort the direct beams.
@@ -99,11 +99,11 @@ class LRDirectBeamSort(PythonAlgorithm):
         self.declareProperty("ComputeScalingFactors", True, direction=Direction.Input,
                              doc="If True, the scaling factors will be computed")
         self.declareProperty("TOFSteps", 200.0, doc="TOF bin width")
+        self.declareProperty("IncidentMedium", "Air", doc="Name of the incident medium")
         self.declareProperty(FileProperty("ScalingFactorFile","",
                                           action=FileAction.OptionalSave,
                                           extensions=['cfg']),
                              "Scaling factor file to be created")
-        
         self.declareProperty(IntArrayProperty("OrderedRunList", [], direction=Direction.Output),
                              "Ordered list of run numbers")
         self.declareProperty(StringArrayProperty("OrderedNameList", [], direction=Direction.Output),
@@ -121,9 +121,9 @@ class LRDirectBeamSort(PythonAlgorithm):
             ws_list = self.getProperty("WorkspaceList").value
             for ws in ws_list:
                 lr_data.append(mtd[ws])
-            
+
         lr_data_sorted = sorted(lr_data, cmp=sorter_function)
-        
+
         # Set the output properties
         run_numbers = [r.getRunNumber() for r in lr_data_sorted]
         ws_names = [str(r) for r in lr_data_sorted]
@@ -137,52 +137,51 @@ class LRDirectBeamSort(PythonAlgorithm):
                 logger.error("Scaling factors were requested but no output file was set")
             else:
                 self._compute_scaling_factors(lr_data_sorted)
-            
+
     def _compute_scaling_factors(self, lr_data_sorted):
         """
             If we need to compute the scaling factors, group the runs by their wavelength request 
             @param lr_data_sorted: ordered list of workspaces
         """
-        #TODO: change LRScalingFactor so that it reads the number of attenuators from the file.
         group_list = []
         current_group = []
         group_wl = None
         for r in lr_data_sorted:
             wl = r.getRun().getProperty('LambdaRequest').value[0]
-            
+
             if not group_wl == wl:
                 # New group
                 group_wl = wl
                 if len(current_group)>0:
                     group_list.append(current_group)
                 current_group = []
-                                
+    
             current_group.append(r)
-            
+
         # Add in the last group
         group_list.append(current_group)
-                
+
         tof_steps = self.getProperty("TOFSteps").value
         scaling_file = self.getProperty("ScalingFactorFile").value
         use_low_res_cut = self.getProperty("UseLowResCut").value
+        incident_medium = self.getProperty("IncidentMedium").value
         summary = ""
         for g in group_list:
             if len(g) == 0:
                 continue
             runs = [r.getRunNumber() for r in g]
             logger.notice(str(runs))
-            
+
             direct_beam_runs = []
-            attenuators = []
             peak_ranges = []
             x_ranges = []
             bck_ranges = []
-            
+
             for run in g:
                 # Create peak workspace
                 number_of_pixels_x = int(run.getInstrument().getNumberParameter("number-of-x-pixels")[0])
                 number_of_pixels_y = int(run.getInstrument().getNumberParameter("number-of-y-pixels")[0])
-                
+
                 # Direct beam signal
                 workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
                                    NXPixel=number_of_pixels_x,
@@ -203,11 +202,8 @@ class LRDirectBeamSort(PythonAlgorithm):
                     _, low_res, _ = LRPeakSelection(InputWorkspace=workspace)
                 else:
                     low_res = [0, number_of_pixels_x]
-                
-                # TOF range         
+
                 att = run.getRun().getProperty('vATT').value[0]-1
-                attenuators.append(int(att))
-                
                 direct_beam_runs.append(run.getRunNumber())
                 peak_ranges.append(int(peak[0]))
                 peak_ranges.append(int(peak[1]))
@@ -215,9 +211,9 @@ class LRDirectBeamSort(PythonAlgorithm):
                 x_ranges.append(int(low_res[1]))
                 bck_ranges.append(int(peak[0])-3)
                 bck_ranges.append(int(peak[1])+3)
-                
+
                 summary += "%10s %s %5s,%5s %5s,%5s\n" % (run.getRunNumber(), att, peak[0], peak[1], low_res[0], low_res[1])
-                
+
             # Determine TOF range from first file
             sample = g[0].getInstrument().getSample()
             source = g[0].getInstrument().getSource()
@@ -228,19 +224,20 @@ class LRDirectBeamSort(PythonAlgorithm):
             h = 6.626e-34  # m^2 kg s^-1
             m = 1.675e-27  # kg
             wl = g[0].getRun().getProperty('LambdaRequest').value[0]
-            tof_min = source_detector_distance / h * m * (wl + 0.5 - 1.7) * 1e-4
-            tof_max = source_detector_distance / h * m * (wl + 0.5 + 1.7) * 1e-4
+            chopper_speed = g[0].getRun().getProperty('SpeedRequest1').value[0]
+            tof_min = source_detector_distance / h * m * (wl + 0.5*60.0/chopper_speed - 1.7*60.0/chopper_speed) * 1e-4
+            tof_max = source_detector_distance / h * m * (wl + 0.5*60.0/chopper_speed + 1.7*60.0/chopper_speed) * 1e-4
             tof_range = [tof_min, tof_max]
-            
+
             summary += "TOF: %s\n\n" % tof_range
-            
+
             # Compute the scaling factors
             LRScalingFactors(DirectBeamRuns=direct_beam_runs,
-                             Attenuators = attenuators,
                              TOFRange=tof_range, TOFSteps=tof_steps,
                              SignalPeakPixelRange=peak_ranges,
                              SignalBackgroundPixelRange=bck_ranges,
                              LowResolutionPixelRange=x_ranges,
+                             IncidentMedium=incident_medium,
                              ScalingFactorFile=scaling_file)
         logger.notice(summary)
 

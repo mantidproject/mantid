@@ -38,6 +38,10 @@ const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
     "engggui_vanadium_integration_ws";
 int EnggDiffractionPresenter::g_croppedCounter = 0;
 int EnggDiffractionPresenter::g_plottingCounter = 0;
+bool EnggDiffractionPresenter::g_abortThread = false;
+std::string EnggDiffractionPresenter::g_lastValidRun = "";
+std::string EnggDiffractionPresenter::g_calibCropIdentifier = "SpectrumNumbers";
+std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -90,6 +94,10 @@ void EnggDiffractionPresenter::notify(
     processCalcCalib();
     break;
 
+  case IEnggDiffractionPresenter::CropCalib:
+    ProcessCropCalib();
+    break;
+
   case IEnggDiffractionPresenter::FocusRun:
     processFocusBasic();
     break;
@@ -128,6 +136,10 @@ void EnggDiffractionPresenter::notify(
 
   case IEnggDiffractionPresenter::ShutDown:
     processShutDown();
+    break;
+
+  case IEnggDiffractionPresenter::StopFocus:
+    processStopFocus();
     break;
   }
 }
@@ -173,15 +185,68 @@ void EnggDiffractionPresenter::processCalcCalib() {
 
   m_view->enableCalibrateAndFocusActions(false);
   // alternatively, this would be GUI-blocking:
-  // doNewCalibration(outFilename, vanNo, ceriaNo);
+  // doNewCalibration(outFilename, vanNo, ceriaNo, specNos);
   // calibrationFinished()
-  startAsyncCalibWorker(outFilename, vanNo, ceriaNo);
+  startAsyncCalibWorker(outFilename, vanNo, ceriaNo, "");
+}
+
+void EnggDiffractionPresenter::ProcessCropCalib() {
+  const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
+  const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
+  int specIdNum = m_view->currentCropCalibBankName();
+  enum BankMode { SPECIDS = 0, NORTH = 1, SOUTH = 2 };
+
+  try {
+    if (m_view->currentCalibSpecNos().empty() &&
+        specIdNum == BankMode::SPECIDS) {
+      throw std::invalid_argument(
+          "The Spectrum IDs cannot be empty, must be a"
+          "valid range or a Bank Name can be selected instead");
+
+      inputChecksBeforeCalibrate(vanNo, ceriaNo);
+    }
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning("Error in the inputs required for calibrate",
+                        ia.what());
+    return;
+  }
+
+  g_log.notice()
+      << "EnggDiffraction GUI: starting cropped calibration. This may "
+         "take a few seconds... "
+      << std::endl;
+
+  const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
+
+  std::string specId = "";
+  if (specIdNum == BankMode::NORTH) {
+    specId = "North";
+    g_calibCropIdentifier = "Bank";
+
+  } else if (specIdNum == BankMode::SOUTH) {
+    specId = "South";
+    g_calibCropIdentifier = "Bank";
+
+  } else if (specIdNum == BankMode::SPECIDS) {
+    specId = m_view->currentCalibSpecNos();
+  }
+
+  m_view->enableCalibrateAndFocusActions(false);
+  // alternatively, this would be GUI-blocking:
+  // doNewCalibration(outFilename, vanNo, ceriaNo, specID/bankName);
+  // calibrationFinished()
+  startAsyncCalibWorker(outFilename, vanNo, ceriaNo, specId);
 }
 
 void EnggDiffractionPresenter::processFocusBasic() {
-  const std::vector<std::string> multi_RunNo =
+  std::vector<std::string> multi_RunNo =
       isValidMultiRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
+
+  // reset global values
+  g_abortThread = false;
+  g_sumOfFilesFocus = "";
+  g_plottingCounter = 0;
 
   // check if valid run number provided before focusin
   try {
@@ -200,14 +265,15 @@ void EnggDiffractionPresenter::processFocusBasic() {
     // start focusing
     startFocusing(multi_RunNo, banks, "", "");
 
-    // counter resetted to prepare for the next focusing run
-    g_plottingCounter = 0;
-
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
-    /**
-    Todo
-    **/
+    g_sumOfFilesFocus = "basic";
+    std::vector<std::string> firstRun;
+    firstRun.push_back(multi_RunNo[0]);
+
+    // to avoid multiple loops, use firstRun instead as the
+    // multi-run number is not required for sumOfFiles
+    startFocusing(firstRun, banks, "", "");
   }
 }
 
@@ -216,6 +282,11 @@ void EnggDiffractionPresenter::processFocusCropped() {
       isValidMultiRunNumber(m_view->focusingCroppedRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
   const std::string specNos = m_view->focusingCroppedSpectrumIDs();
+
+  // reset global values
+  g_abortThread = false;
+  g_sumOfFilesFocus = "";
+  g_plottingCounter = 0;
 
   // check if valid run number provided before focusin
   try {
@@ -234,11 +305,15 @@ void EnggDiffractionPresenter::processFocusCropped() {
 
     startFocusing(multi_RunNo, banks, specNos, "");
 
-    // counter resetted to prepare for the next focusing run
-    g_plottingCounter = 0;
-
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+    g_sumOfFilesFocus = "cropped";
+    std::vector<std::string> firstRun;
+    firstRun.push_back(multi_RunNo[0]);
+
+    // to avoid multiple loops, use firstRun instead as the
+    // multi-run number is not required for sumOfFiles
+    startFocusing(firstRun, banks, specNos, "");
   }
 }
 
@@ -246,6 +321,11 @@ void EnggDiffractionPresenter::processFocusTexture() {
   const std::vector<std::string> multi_RunNo =
       isValidMultiRunNumber(m_view->focusingTextureRunNo());
   const std::string dgFile = m_view->focusingTextureGroupingFile();
+
+  // reset global values
+  g_abortThread = false;
+  g_sumOfFilesFocus = "";
+  g_plottingCounter = 0;
 
   // check if valid run number provided before focusing
   try {
@@ -263,11 +343,15 @@ void EnggDiffractionPresenter::processFocusTexture() {
                   << std::endl;
     startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
 
-    // counter resetted to prepare for the next focusing run
-    g_plottingCounter = 0;
-
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+    g_sumOfFilesFocus = "texture";
+    std::vector<std::string> firstRun;
+    firstRun.push_back(multi_RunNo[0]);
+
+    // to avoid multiple loops, use firstRun instead as the
+    // multi-run number is not required for sumOfFiles
+    startFocusing(firstRun, std::vector<bool>(), "", dgFile);
   }
 }
 
@@ -385,6 +469,21 @@ void EnggDiffractionPresenter::processRBNumberChange() {
 void EnggDiffractionPresenter::processShutDown() {
   m_view->saveSettings();
   cleanup();
+}
+
+void EnggDiffractionPresenter::processStopFocus() {
+  if (m_workerThread) {
+    if (m_workerThread->isRunning()) {
+      g_log.notice() << "A focus process is currently running, shutting "
+                        "it down as soon as possible..."
+                     << std::endl;
+
+      g_abortThread = true;
+      g_log.warning() << "Focus Stop has been clicked, please wait until "
+                         "current focus run process has been completed. "
+                      << std::endl;
+    }
+  }
 }
 
 /**
@@ -659,14 +758,15 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
 * @param outFilename name for the output GSAS calibration file
 * @param vanNo vanadium run number
 * @param ceriaNo ceria run number
+* @param specNos specIDs or bank name to be passed
 */
 void EnggDiffractionPresenter::startAsyncCalibWorker(
     const std::string &outFilename, const std::string &vanNo,
-    const std::string &ceriaNo) {
+    const std::string &ceriaNo, const std::string &specNos) {
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
-      new EnggDiffWorker(this, outFilename, vanNo, ceriaNo);
+      new EnggDiffWorker(this, outFilename, vanNo, ceriaNo, specNos);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(calibrate()));
@@ -686,10 +786,12 @@ void EnggDiffractionPresenter::startAsyncCalibWorker(
 * @param outFilename name for the output GSAS calibration file
 * @param vanNo vanadium run number
 * @param ceriaNo ceria run number
+* @param specNos specIDs or bank name to be passed
 */
 void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
                                                 const std::string &vanNo,
-                                                const std::string &ceriaNo) {
+                                                const std::string &ceriaNo,
+                                                const std::string &specNos) {
   g_log.notice() << "Generating new calibration file: " << outFilename
                  << std::endl;
 
@@ -707,7 +809,7 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
 
   try {
     m_calibFinishedOK = false;
-    doCalib(cs, vanNo, ceriaNo, outFilename);
+    doCalib(cs, vanNo, ceriaNo, outFilename, specNos);
     m_calibFinishedOK = true;
   } catch (std::runtime_error &) {
     g_log.error() << "The calibration calculations failed. One of the "
@@ -790,14 +892,19 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
 * @param vanNo Vanadium run number
 * @param ceriaNo Ceria run number
 * @param outFilename output filename chosen by the user
+* @param specNos specIDs or bank name to be passed
 */
 void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &vanNo,
                                        const std::string &ceriaNo,
-                                       const std::string &outFilename) {
+                                       const std::string &outFilename,
+                                       const std::string &specNos) {
   ITableWorkspace_sptr vanIntegWS;
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr ceriaWS;
+
+  // save vanIntegWS and vanCurvesWS as open genie
+  // see where spec number comes from
 
   loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
                                vanCurvesWS, cs.m_forceRecalcOverwrite);
@@ -825,10 +932,20 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   }
 
   // Bank 1 and 2 - ENGIN-X
-  const size_t numBanks = 2;
+  // bank 1 - loops once & used for cropped calibration
+  // bank 2 - loops twice, one with each bank & used for new calibration
+  const size_t bankNo1 = 1;
+  const size_t bankNo2 = 2;
   std::vector<double> difc, tzero;
-  difc.resize(numBanks);
-  tzero.resize(numBanks);
+
+  if (specNos != "") {
+    difc.resize(bankNo1);
+    tzero.resize(bankNo1);
+  } else {
+    difc.resize(bankNo2);
+    tzero.resize(bankNo2);
+  }
+
   for (size_t i = 0; i < difc.size(); i++) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "EnggCalibrate");
@@ -837,7 +954,11 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       alg->setProperty("InputWorkspace", ceriaWS);
       alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
       alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-      alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
+      if (specNos != "")
+        alg->setPropertyValue(g_calibCropIdentifier,
+                              boost::lexical_cast<std::string>(specNos));
+      else
+        alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
       // TODO: figure out what should be done about the list of expected peaks
       // to EnggCalibrate => it should be a default, as in EnggFitPeaks, that
       // should be fixed in a nother ticket/issue
@@ -1031,6 +1152,19 @@ EnggDiffractionPresenter::outputFocusCroppedFilename(const std::string &runNo) {
   return instStr + "_" + runNo + "_focused_cropped.nxs";
 }
 
+std::vector<std::string> EnggDiffractionPresenter::sumOfFilesLoadVec() {
+  std::vector<std::string> multi_RunNo;
+
+  if (g_sumOfFilesFocus == "basic")
+    multi_RunNo = isValidMultiRunNumber(m_view->focusingRunNo());
+  else if (g_sumOfFilesFocus == "cropped")
+    multi_RunNo = isValidMultiRunNumber(m_view->focusingCroppedRunNo());
+  else if (g_sumOfFilesFocus == "texture")
+    multi_RunNo = isValidMultiRunNumber(m_view->focusingTextureRunNo());
+
+  return multi_RunNo;
+}
+
 std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
     const std::string &runNo, const std::vector<size_t> &bankIDs) {
   const std::string instStr = m_view->currentInstrument();
@@ -1058,13 +1192,13 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
 */
 void EnggDiffractionPresenter::startAsyncFocusWorker(
     const std::string &dir, const std::vector<std::string> &multi_RunNo,
-    const std::vector<bool> &banks, const std::string &specNos,
-    const std::string &dgFile) {
+    const std::vector<bool> &banks, const std::string &dgFile,
+    const std::string &specNos) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
-      new EnggDiffWorker(this, dir, multi_RunNo, banks, specNos, dgFile);
+      new EnggDiffWorker(this, dir, multi_RunNo, banks, dgFile, specNos);
   worker->moveToThread(m_workerThread);
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(focus()));
   connect(worker, SIGNAL(finished()), this, SLOT(focusingFinished()));
@@ -1098,88 +1232,95 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
 
-  g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                    "this directory: "
-                 << dir << std::endl;
+  if (!g_abortThread) {
 
-  // TODO: this is almost 100% common with doNewCalibrate() - refactor
-  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
-  Mantid::Kernel::ConfigServiceImpl &conf =
-      Mantid::Kernel::ConfigService::Instance();
-  const std::vector<std::string> tmpDirs = conf.getDataSearchDirs();
-  // in principle, the run files will be found from 'DirRaw', and the
-  // pre-calculated Vanadium corrections from 'DirCalib'
-  if (!cs.m_inputDirCalib.empty() && Poco::File(cs.m_inputDirCalib).exists()) {
-    conf.appendDataSearchDir(cs.m_inputDirCalib);
-  }
-  if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists()) {
-    conf.appendDataSearchDir(cs.m_inputDirRaw);
-  }
+    // to track last valid run
+    g_lastValidRun = runNo;
 
-  // Prepare special inputs for "texture" focusing
-  std::vector<size_t> bankIDs;
-  std::vector<std::string> effectiveFilenames;
-  std::vector<std::string> specs;
-  if (!specNos.empty()) {
-    // Cropped focusing
-    // just to iterate once, but there's no real bank here
-    bankIDs.push_back(0);
-    specs.push_back(specNos); // one spectrum IDs list given by the user
-    effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
-  } else {
-    if (dgFile.empty()) {
-      // Basic/normal focusing
-      for (size_t bidx = 0; bidx < banks.size(); bidx++) {
-        if (banks[bidx]) {
-          bankIDs.push_back(bidx + 1);
-          specs.push_back("");
-          effectiveFilenames = outputFocusFilenames(runNo, banks);
-        }
-      }
+    g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
+                      "this directory: "
+                   << dir << std::endl;
+
+    // TODO: this is almost 100% common with doNewCalibrate() - refactor
+    EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+    Mantid::Kernel::ConfigServiceImpl &conf =
+        Mantid::Kernel::ConfigService::Instance();
+    const std::vector<std::string> tmpDirs = conf.getDataSearchDirs();
+    // in principle, the run files will be found from 'DirRaw', and the
+    // pre-calculated Vanadium corrections from 'DirCalib'
+    if (!cs.m_inputDirCalib.empty() &&
+        Poco::File(cs.m_inputDirCalib).exists()) {
+      conf.appendDataSearchDir(cs.m_inputDirCalib);
+    }
+    if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists()) {
+      conf.appendDataSearchDir(cs.m_inputDirRaw);
+    }
+
+    // Prepare special inputs for "texture" focusing
+    std::vector<size_t> bankIDs;
+    std::vector<std::string> effectiveFilenames;
+    std::vector<std::string> specs;
+    if (!specNos.empty()) {
+      // Cropped focusing
+      // just to iterate once, but there's no real bank here
+      bankIDs.push_back(0);
+      specs.push_back(specNos); // one spectrum IDs list given by the user
+      effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
     } else {
-      // texture focusing
-      try {
-        loadDetectorGroupingCSV(dgFile, bankIDs, specs);
-      } catch (std::runtime_error &re) {
-        g_log.error() << "Error loading detector grouping file: " + dgFile +
-                             ". Detailed error: " + re.what()
-                      << std::endl;
-        bankIDs.clear();
-        specs.clear();
+      if (dgFile.empty()) {
+        // Basic/normal focusing
+        for (size_t bidx = 0; bidx < banks.size(); bidx++) {
+          if (banks[bidx]) {
+            bankIDs.push_back(bidx + 1);
+            specs.push_back("");
+            effectiveFilenames = outputFocusFilenames(runNo, banks);
+          }
+        }
+      } else {
+        // texture focusing
+        try {
+          loadDetectorGroupingCSV(dgFile, bankIDs, specs);
+        } catch (std::runtime_error &re) {
+          g_log.error() << "Error loading detector grouping file: " + dgFile +
+                               ". Detailed error: " + re.what()
+                        << std::endl;
+          bankIDs.clear();
+          specs.clear();
+        }
+        effectiveFilenames = outputFocusTextureFilenames(runNo, bankIDs);
       }
-      effectiveFilenames = outputFocusTextureFilenames(runNo, bankIDs);
     }
-  }
 
-  // focus all requested banks
-  for (size_t idx = 0; idx < bankIDs.size(); idx++) {
+    // focus all requested banks
+    for (size_t idx = 0; idx < bankIDs.size(); idx++) {
 
-    Poco::Path fpath(dir);
-    const std::string fullFilename =
-        fpath.append(effectiveFilenames[idx]).toString();
-    g_log.notice() << "Generating new focused file (bank " +
-                          boost::lexical_cast<std::string>(bankIDs[idx]) +
-                          ") for run " + runNo + " into: "
-                   << effectiveFilenames[idx] << std::endl;
-    try {
-      m_focusFinishedOK = false;
-      doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
-      m_focusFinishedOK = true;
-    } catch (std::runtime_error &) {
-      g_log.error()
-          << "The focusing calculations failed. One of the algorithms"
-             "did not execute correctly. See log messages for details."
-          << std::endl;
-    } catch (std::invalid_argument &ia) {
-      g_log.error()
-          << "The focusing failed. Some input properties were not valid. "
-             "See log messages for details. Error: "
-          << ia.what() << std::endl;
+      Poco::Path fpath(dir);
+      const std::string fullFilename =
+          fpath.append(effectiveFilenames[idx]).toString();
+      g_log.notice() << "Generating new focused file (bank " +
+                            boost::lexical_cast<std::string>(bankIDs[idx]) +
+                            ") for run " + runNo + " into: "
+                     << effectiveFilenames[idx] << std::endl;
+      try {
+        m_focusFinishedOK = false;
+        doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
+        m_focusFinishedOK = true;
+      } catch (std::runtime_error &) {
+        g_log.error()
+            << "The focusing calculations failed. One of the algorithms"
+               "did not execute correctly. See log messages for details."
+            << std::endl;
+      } catch (std::invalid_argument &ia) {
+        g_log.error() << "The focusing failed. Some input properties "
+                         "were not valid. "
+                         "See log messages for details. Error: "
+                      << ia.what() << std::endl;
+      }
     }
-  }
 
-  // restore initial data search paths
-  conf.setDataSearchDirs(tmpDirs);
+    // restore initial data search paths
+    conf.setDataSearchDirs(tmpDirs);
+  }
 }
 
 void EnggDiffractionPresenter::loadDetectorGroupingCSV(
@@ -1258,6 +1399,23 @@ void EnggDiffractionPresenter::focusingFinished() {
     delete m_workerThread;
     m_workerThread = NULL;
   }
+
+  // display warning and information to the users regarding Stop Focus
+  if (g_abortThread) {
+    // will get the last number in the list
+    std::string last_RunNo = isValidRunNumber(m_view->focusingRunNo());
+    double lastRun = boost::lexical_cast<double>(last_RunNo);
+    double lastValid = boost::lexical_cast<double>(g_lastValidRun);
+
+    if (lastRun != lastValid) {
+      g_log.warning()
+          << "Focussing process has been stopped, last successful "
+             "run number: "
+          << g_lastValidRun
+          << " , total number of focus run that could not be processed: "
+          << (lastRun - lastValid) << std::endl;
+    }
+  }
 }
 
 /**
@@ -1294,24 +1452,73 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   const std::string inWSName = "engggui_focusing_input_ws";
   const std::string instStr = m_view->currentInstrument();
-  try {
-    auto load =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
-    load->initialize();
-    load->setPropertyValue("Filename", instStr + runNo);
-    load->setPropertyValue("OutputWorkspace", inWSName);
-    load->execute();
+  std::vector<std::string> multi_RunNo = sumOfFilesLoadVec();
+  std::string loadInput = "";
 
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
-  } catch (std::runtime_error &re) {
-    g_log.error()
-        << "Error while loading sample data for focusing. "
-           "Could not run the algorithm Load succesfully for the focusing "
-           "sample (run number: " +
-               runNo + "). Error description: " + re.what() +
-               " Please check also the previous log messages for details.";
-    throw;
+  for (size_t i = 0; i < multi_RunNo.size(); i++) {
+    // if last run number in list
+    if (i + 1 == multi_RunNo.size())
+      loadInput += instStr + multi_RunNo[i];
+    else
+      loadInput += instStr + multi_RunNo[i] + '+';
+  }
+
+  // if its not empty the global variable is set for sumOfFiles
+  if (!g_sumOfFilesFocus.empty()) {
+
+    try {
+      auto load =
+          Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      load->initialize();
+      load->setPropertyValue("Filename", loadInput);
+
+      load->setPropertyValue("OutputWorkspace", inWSName);
+      load->execute();
+
+      AnalysisDataServiceImpl &ADS =
+          Mantid::API::AnalysisDataService::Instance();
+      inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
+    } catch (std::runtime_error &re) {
+      g_log.error()
+          << "Error while loading files provided. "
+             "Could not run the algorithm Load succesfully for the focus "
+             "(run number provided. Error description:"
+             "Please check also the previous log messages for details." +
+                 static_cast<std::string>(re.what());
+      throw;
+    }
+
+    if (multi_RunNo.size() == 1) {
+      g_log.notice() << "Only single file has been listed, the Sum Of Files"
+                        "cannot not be processed"
+                     << std::endl;
+    } else {
+      g_log.notice()
+          << "Load alogirthm has successfully merged the files provided"
+          << std::endl;
+    }
+
+  } else {
+    try {
+      auto load =
+          Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      load->initialize();
+      load->setPropertyValue("Filename", instStr + runNo);
+      load->setPropertyValue("OutputWorkspace", inWSName);
+      load->execute();
+
+      AnalysisDataServiceImpl &ADS =
+          Mantid::API::AnalysisDataService::Instance();
+      inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
+    } catch (std::runtime_error &re) {
+      g_log.error()
+          << "Error while loading sample data for focusing. "
+             "Could not run the algorithm Load succesfully for the focusing "
+             "sample (run number: " +
+                 runNo + "). Error description: " + re.what() +
+                 " Please check also the previous log messages for details.";
+      throw;
+    }
   }
 
   std::string outWSName;
@@ -1404,6 +1611,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     }
   }
 }
+
 /**
 * Produce the two workspaces that are required to apply Vanadium
 * corrections. Try to load them if precalculated results are
@@ -1434,6 +1642,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
   findPrecalcVanadiumCorrFilenames(vanNo, inputDirCalib, preIntegFilename,
                                    preCurvesFilename, foundPrecalc);
 
+  // if pre caluclated not found ..
   if (forceRecalc || !foundPrecalc) {
     g_log.notice()
         << "Calculating Vanadium corrections. This may take a few seconds..."
@@ -1469,7 +1678,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                    << ", and " << preCurvesFilename << std::endl;
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
-                                    vanIntegWS, vanCurvesWS);
+                                    vanIntegWS, vanCurvesWS, vanNo);
     } catch (std::invalid_argument &ia) {
       g_log.error() << "Error while loading precalculated Vanadium corrections",
           "The files with precalculated Vanadium corection features (spectra "
@@ -1515,6 +1724,7 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
   found = false;
 
   const std::string runNo = std::string(2, '0').append(vanNo);
+
   preIntegFilename =
       g_enginxStr + "_precalculated_vanadium_run" + runNo + "_integration.nxs";
 
@@ -1550,10 +1760,14 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
 *
 * @param vanCurvesWS output (matrix) workspace loaded from the
 * precalculated Vanadium correction file, with the per-bank curves
+*
+* @param vanNo the Vanadium run number used for the openGenieAscii
+* output label
 */
 void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
     const std::string &preIntegFilename, const std::string &preCurvesFilename,
-    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS) {
+    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
+    const std::string &vanNo) {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
 
   auto alg =
@@ -1575,6 +1789,9 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
   algCurves->execute();
   // algCurves->getProperty("OutputWorkspace");
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
+
+  saveOpenGenie(curvesWSName, "1-1200", "North", vanNo);
+  saveOpenGenie(curvesWSName, "1201-2400", "South", vanNo);
 }
 
 /**
@@ -1998,8 +2215,15 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
   std::string fullFilename =
       outFileNameFactory(inputWorkspace, runNo, bank, ".his");
 
-  // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir("Focus");
+  Poco::Path saveDir;
+  if (inputWorkspace.std::string::find("curves") != std::string::npos ||
+      inputWorkspace.std::string::find("intgration") != std::string::npos) {
+    // Creates appropriate directory
+    saveDir = outFilesDir("Calibration");
+  } else {
+    // Creates appropriate directory
+    saveDir = outFilesDir("Focus");
+  }
 
   // append the full file name in the end
   saveDir.append(fullFilename);
@@ -2039,10 +2263,15 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
     std::string inputWorkspace, std::string runNo, std::string bank,
     std::string format) {
   std::string fullFilename;
-  if (inputWorkspace.std::string::find("texture") != std::string::npos) {
+
+  // calibration output files
+  if (inputWorkspace.std::string::find("curves") != std::string::npos) {
+    fullFilename = "ob+ENGINX_" + runNo + "_" + bank + "_bank" + format;
+
+    // focus output files
+  } else if (inputWorkspace.std::string::find("texture") != std::string::npos) {
     fullFilename = "ENGINX_" + runNo + "_texture_" + bank + format;
-  }
-  if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
+  } else if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
     fullFilename = "ENGINX_" + runNo + "_cropped_" +
                    boost::lexical_cast<std::string>(g_croppedCounter) + format;
     g_croppedCounter++;

@@ -49,6 +49,7 @@ set ( EXPORT_FILES
   src/Exports/Material.cpp
   src/Exports/Statistics.cpp
   src/Exports/OptionalBool.cpp
+  src/Exports/UsageService.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )
@@ -77,6 +78,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
+  ${HEADER_DIR}/kernel/Converters/MapToPyDictionary.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
   ${HEADER_DIR}/kernel/Converters/NumpyFunctions.h
   ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
@@ -107,7 +109,6 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/PropertyWithValueExporter.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
-  ${HEADER_DIR}/kernel/TrackingInstanceMethod.h
   ${HEADER_DIR}/kernel/TypedValidatorExporter.h
 )
 

@@ -6,14 +6,18 @@
 #include "MantidWSIndexDialog.h"
 #include "FlowLayout.h"
 #include "WorkspaceIcons.h"
+#include "Graph3D.h"
+#include "MantidGroupPlotGenerator.h"
 
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/FileProperty.h>
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <MantidAPI/WorkspaceGroup.h>
+#include "MantidAPI/NumericAxis.h"
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
+#include <MantidKernel/make_unique.h>
 #include <MantidQtMantidWidgets/LineEditWithClear.h>
 #include <MantidQtAPI/InterfaceManager.h>
 #include <MantidQtAPI/Message.h>
@@ -241,6 +245,12 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_clearUB = new QAction(tr("Clear UB Matrix"), this);
   connect(m_clearUB, SIGNAL(activated()), this, SLOT(clearUB()));
+
+  m_plotSurface = new QAction(tr("Plot Surface from Group"), this);
+  connect(m_plotSurface, SIGNAL(triggered()), this, SLOT(plotSurface()));
+
+  m_plotContour = new QAction(tr("Plot Contour from Group"), this);
+  connect(m_plotContour, SIGNAL(triggered()), this, SLOT(plotContour()));
 }
 
 /**
@@ -627,17 +637,35 @@ void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API
 }
 
 /**
-* Add the actions that are appropriate for a MatrixWorkspace
+* Add the actions that are appropriate for a WorkspaceGroup
 * @param menu :: The menu to store the items
+* @param groupWS :: [input] Workspace group related to the menu
 */
-void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
-{
+void MantidDockWidget::addWorkspaceGroupMenuItems(
+    QMenu *menu, const WorkspaceGroup_const_sptr &groupWS) const {
   m_plotSpec->setEnabled(true);
   menu->addAction(m_plotSpec);
   m_plotSpecErr->setEnabled(true);
   menu->addAction(m_plotSpecErr);
   menu->addAction(m_colorFill);
   m_colorFill->setEnabled(true);
+
+  // If appropriate, add "plot surface" and "plot contour" options
+  // Only add these if:
+  // - there are >2 workspaces in group
+  // - all are MatrixWorkspaces (otherwise they can't be plotted)
+  // - only one group is selected
+  if (m_tree->selectedItems().size() == 1) {
+    if (groupWS && groupWS->getNumberOfEntries() > 2) {
+      if (MantidGroupPlotGenerator::groupIsAllMatrixWorkspaces(groupWS)) {
+        menu->addAction(m_plotSurface);
+        m_plotSurface->setEnabled(true);
+        menu->addAction(m_plotContour);
+        m_plotContour->setEnabled(true);
+      }
+    }
+  }
+
   menu->addSeparator();
   menu->addAction(m_saveNexus);
 }
@@ -1256,13 +1284,11 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     else if( IPeaksWorkspace_const_sptr peaksWS = boost::dynamic_pointer_cast<const IPeaksWorkspace>(ws) )
     {
       addPeaksWorkspaceMenuItems(menu, peaksWS);
-    }
-    else if( boost::dynamic_pointer_cast<const WorkspaceGroup>(ws) ) 
-    {
-      addWorkspaceGroupMenuItems(menu);
-    }
-    else if( boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(ws) )
-    {
+    } else if (WorkspaceGroup_const_sptr groupWS =
+                   boost::dynamic_pointer_cast<const WorkspaceGroup>(ws)) {
+      addWorkspaceGroupMenuItems(menu, groupWS);
+    } else if (boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(
+                   ws)) {
       addTableWorkspaceMenuItems(menu);
     }
     addClearMenuItems(menu, selectedWsName);
@@ -1500,6 +1526,47 @@ void MantidDockWidget::dropEvent(QDropEvent *de)
   m_tree->dropEvent(de);
 }
 
+/**
+ * Create a 3D surface plot from the selected workspace group
+ */
+void MantidDockWidget::plotSurface() {
+  // find the workspace group clicked on
+  const QStringList wsNames = m_tree->getSelectedWorkspaceNames();
+  if (!wsNames.empty()) {
+    const auto wsName = wsNames[0];
+    const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(
+        m_ads.retrieve(wsName.toStdString()));
+    if (wsGroup) {
+      auto options =
+          m_tree->chooseSurfacePlotOptions(wsGroup->getNumberOfEntries());
+
+      auto plotter =
+          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(m_mantidUI);
+      plotter->plotSurface(wsGroup, options);
+    }
+  }
+}
+
+/**
+ * Create a contour plot from the selected workspace group
+ */
+void MantidDockWidget::plotContour() {
+  const QStringList wsNames = m_tree->getSelectedWorkspaceNames();
+  if (!wsNames.empty()) {
+    const auto wsName = wsNames[0];
+    const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(
+        m_ads.retrieve(wsName.toStdString()));
+    if (wsGroup) {
+      auto options =
+          m_tree->chooseContourPlotOptions(wsGroup->getNumberOfEntries());
+
+      auto plotter =
+          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(m_mantidUI);
+      plotter->plotContour(wsGroup, options);
+    }
+  }
+}
+
 //------------ MantidTreeWidget -----------------------//
 
 MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
@@ -1669,38 +1736,26 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 }
 
 /**
-* Allows users to choose spectra from the selected workspaces by presenting them
-* with a dialog box.  Skips showing the dialog box and automatically chooses
-* workspace index 0 for all selected workspaces if one or more of the them are
-* single-spectrum workspaces.
-*
-* We also must filter the list of selected workspace names to account for any
-* non-MatrixWorkspaces that may have been selected.  In particular WorkspaceGroups
-* (the children of which are to be included if they are MatrixWorkspaces) and
-* TableWorkspaces (which are implicitly excluded).  We only want workspaces we
-* can actually plot!
-*
-* @param showWaterfallOpt If true, show the waterfall option on the dialog
-* @return :: A MantidWSIndexDialog::UserInput structure listing the selected options
-*/
-MantidWSIndexDialog::UserInput MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt) const
-{
+ * Filter the list of selected workspace names to account for any
+ * non-MatrixWorkspaces that may have been selected.  In particular
+ * WorkspaceGroups (the children of which are to be included if they are
+ * MatrixWorkspaces) and TableWorkspaces (which are implicitly excluded).
+ * We only want workspaces we can actually plot!
+ */
+QList<MatrixWorkspace_const_sptr>
+MantidTreeWidget::getSelectedMatrixWorkspaces() const {
   // Check for any selected WorkspaceGroup names and replace with the names of
   // their children.
   QSet<QString> selectedWsNames;
-  foreach( const QString wsName, this->getSelectedWorkspaceNames() )
-  {
-    const auto groupWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
-    if( groupWs )
-    {
+  foreach (const QString wsName, this->getSelectedWorkspaceNames()) {
+    const auto groupWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(
+        m_ads.retrieve(wsName.toStdString()));
+    if (groupWs) {
       const auto childWsNames = groupWs->getNames();
-      for( auto childWsName = childWsNames.begin(); childWsName != childWsNames.end(); ++childWsName )
-      {
-        selectedWsNames.insert(QString::fromStdString(*childWsName));
+      for (auto childWsName : childWsNames) {
+        selectedWsNames.insert(QString::fromStdString(childWsName));
       }
-    }
-    else
-    {
+    } else {
       selectedWsNames.insert(wsName);
     }
   }
@@ -1708,14 +1763,35 @@ MantidWSIndexDialog::UserInput MantidTreeWidget::chooseSpectrumFromSelected(bool
   // Get the names of, and pointers to, the MatrixWorkspaces only.
   QList<MatrixWorkspace_const_sptr> selectedMatrixWsList;
   QList<QString> selectedMatrixWsNameList;
-  foreach( const auto selectedWsName, selectedWsNames )
-  {
-    const auto matrixWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(m_ads.retrieve(selectedWsName.toStdString()));
-    if( matrixWs )
-    {
+  foreach (const auto selectedWsName, selectedWsNames) {
+    const auto matrixWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+        m_ads.retrieve(selectedWsName.toStdString()));
+    if (matrixWs) {
       selectedMatrixWsList.append(matrixWs);
-      selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
     }
+  }
+  return selectedMatrixWsList;
+}
+
+/**
+* Allows users to choose spectra from the selected workspaces by presenting them
+* with a dialog box.  Skips showing the dialog box and automatically chooses
+* workspace index 0 for all selected workspaces if one or more of the them are
+* single-spectrum workspaces.
+*
+* @param showWaterfallOpt If true, show the waterfall option on the dialog
+* @param showPlotAll :: [input] If true, show the "Plot All" button on the
+* dialog
+* @return :: A MantidWSIndexDialog::UserInput structure listing the selected
+* options
+*/
+MantidWSIndexWidget::UserInput
+MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
+                                             bool showPlotAll) const {
+  auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
+  QList<QString> selectedMatrixWsNameList;
+  foreach (const auto matrixWs, selectedMatrixWsList) {
+    selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
   }
 
   // Check to see if all workspaces have only a single spectrum ...
@@ -1741,17 +1817,69 @@ MantidWSIndexDialog::UserInput MantidTreeWidget::chooseSpectrumFromSelected(bool
         SINGLE_SPECTRUM
         );
     }
-    MantidWSIndexDialog::UserInput selections;
+    MantidWSIndexWidget::UserInput selections;
     selections.plots = spectrumToPlot;
     selections.waterfall = false;
     return selections;
   }
 
   // Else, one or more workspaces
-  MantidWSIndexDialog *dio = new MantidWSIndexDialog(m_mantidUI, 0, selectedMatrixWsNameList,
-                                                     showWaterfallOpt);
+  MantidWSIndexDialog *dio = new MantidWSIndexDialog(
+      m_mantidUI, 0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll);
   dio->exec();
   return dio->getSelections();
+}
+
+/**
+* Allows users to choose spectra from the selected workspaces by presenting them
+* with a dialog box, and also allows choice of a log to plot against and a name
+* for this axis.
+* @param type :: [input] Type of plot (for dialog title)
+* @param nWorkspaces :: [input] Number of workspaces in selected group
+* @returns :: A structure listing the selected options
+*/
+MantidSurfacePlotDialog::UserInputSurface
+MantidTreeWidget::choosePlotOptions(const QString &type,
+                                    int nWorkspaces) const {
+  auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
+  QList<QString> selectedMatrixWsNameList;
+  foreach (const auto matrixWs, selectedMatrixWsList) {
+    selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
+  }
+  MantidSurfacePlotDialog *dlg = new MantidSurfacePlotDialog(
+      m_mantidUI, 0, selectedMatrixWsNameList, type);
+  dlg->exec();
+  auto selections = dlg->getSelections();
+  std::string errors =
+      MantidGroupPlotGenerator::validatePlotOptions(selections, nWorkspaces);
+  if (!errors.empty()) {
+    MantidSurfacePlotDialog::showPlotOptionsError(errors.c_str());
+  }
+  return selections;
+}
+
+/**
+* Allows users to choose spectra from the selected workspaces by presenting them
+* with a dialog box, and also allows choice of a log to plot against and a name
+* for this axis.
+* @param nWorkspaces :: [input] Number of workspaces in selected group
+* @returns :: A structure listing the selected options
+*/
+MantidSurfacePlotDialog::UserInputSurface
+MantidTreeWidget::chooseSurfacePlotOptions(int nWorkspaces) const {
+  return choosePlotOptions("Surface", nWorkspaces);
+}
+
+/**
+* Allows users to choose spectra from the selected workspaces by presenting them
+* with a dialog box, and also allows choice of a log to plot against and a name
+* for this axis.
+* @param nWorkspaces :: [input] Number of workspaces in selected group
+* @returns :: A structure listing the selected options
+*/
+MantidSurfacePlotDialog::UserInputSurface
+MantidTreeWidget::chooseContourPlotOptions(int nWorkspaces) const {
+  return choosePlotOptions("Contour", nWorkspaces);
 }
 
 void MantidTreeWidget::setSortScheme(MantidItemSortScheme sortScheme)

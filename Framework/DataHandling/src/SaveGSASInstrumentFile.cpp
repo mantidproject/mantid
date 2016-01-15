@@ -145,8 +145,7 @@ bool ChopperConfiguration::hasBank(unsigned int bankid) const {
 double ChopperConfiguration::getParameter(unsigned int bankid,
                                           const string &paramname) const {
   // Obtain index for the bank
-  map<unsigned int, size_t>::const_iterator biter =
-      m_bankIDIndexMap.find(bankid);
+  auto biter = m_bankIDIndexMap.find(bankid);
   if (biter == m_bankIDIndexMap.end()) {
     stringstream errss;
     errss << "Bank ID and index map does not have entry for bank " << bankid;
@@ -187,7 +186,7 @@ double ChopperConfiguration::getParameter(unsigned int bankid,
   */
 void ChopperConfiguration::setParameter(unsigned int bankid,
                                         const string &paramname, double value) {
-  map<unsigned, size_t>::iterator biter = m_bankIDIndexMap.find(bankid);
+  auto biter = m_bankIDIndexMap.find(bankid);
 
   if (biter == m_bankIDIndexMap.end()) {
     stringstream errss;
@@ -304,11 +303,8 @@ void SaveGSASInstrumentFile::init() {
   declareProperty(infileprop,
                   "Name of the input Fullprof resolution file (.irf).");
 
-  vector<string> exts;
-  exts.push_back(".iparam");
-  exts.push_back(".prm");
-  auto fileprop =
-      new FileProperty("OutputFileName", "", FileProperty::Save, exts);
+  auto fileprop = new FileProperty("OutputFileName", "", FileProperty::Save,
+                                   {".iparam", ".prm"});
   declareProperty(fileprop, "Name of the output GSAS instrument file.");
 
   declareProperty(
@@ -369,8 +365,7 @@ void SaveGSASInstrumentFile::exec() {
   // Deal with a default
   if (m_vecBankID2File.empty()) {
     // Default is to export all banks
-    for (map<unsigned int, map<string, double>>::iterator miter =
-             bankprofileparammap.begin();
+    for (auto miter = bankprofileparammap.begin();
          miter != bankprofileparammap.end(); ++miter) {
       unsigned int bankid = miter->first;
       m_vecBankID2File.push_back(bankid);
@@ -765,8 +760,7 @@ void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
     const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
     unsigned int bankid) {
   // Locate the profile map
-  map<unsigned int, map<string, double>>::const_iterator biter =
-      bankprofilemap.find(bankid);
+  auto biter = bankprofilemap.find(bankid);
   if (biter == bankprofilemap.end())
     throw runtime_error("Bank ID cannot be found in bank-profile-map-map. 001");
   const map<string, double> &profilemap = biter->second;
@@ -869,8 +863,7 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
     const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
     unsigned int bankid, const std::string &prmfilename) {
   // Get access to the profile map
-  map<unsigned int, map<string, double>>::const_iterator biter =
-      bankprofilemap.find(bankid);
+  auto biter = bankprofilemap.find(bankid);
   if (biter == bankprofilemap.end())
     throw runtime_error("Bank does not exist in bank-profile-map. 002");
 
@@ -1079,13 +1072,13 @@ SaveGSASInstrumentFile::getValueFromMap(const map<string, double> &profilemap,
   */
 double SaveGSASInstrumentFile::getProfileParameterValue(
     const map<string, double> &profilemap, const string &paramname) {
-  map<string, double>::const_iterator piter = profilemap.find(paramname);
+  auto piter = profilemap.find(paramname);
   if (piter == profilemap.end()) {
     stringstream errss;
     errss << "Profile map does not contain parameter " << paramname
           << ". Available parameters are ";
-    for (map<string, double>::const_iterator piter = profilemap.begin();
-         piter != profilemap.end(); ++piter) {
+    for (auto piter = profilemap.cbegin(); piter != profilemap.cend();
+         ++piter) {
       errss << piter->first << ", ";
     }
     g_log.error(errss.str());
