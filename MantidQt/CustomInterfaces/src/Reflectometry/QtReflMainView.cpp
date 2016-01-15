@@ -72,7 +72,6 @@ presenter
 */
 void QtReflMainView::setModel(QString name) {
   m_toOpen = name.toStdString();
-  std::cout << "set model is called";
   m_presenter->notify(IReflPresenter::OpenTableFlag);
 }
 
