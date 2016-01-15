@@ -637,7 +637,7 @@ void LoadSQW2::readPixelData() {
     }
     pixelsLeftToRead -= chunkSize;
     ++chunksRead;
-    if (chunksRead == NCHUNKS_SPLIT) {
+    if ((chunksRead % NCHUNKS_SPLIT) == 0) {
       splitAllBoxes();
     }
   }
