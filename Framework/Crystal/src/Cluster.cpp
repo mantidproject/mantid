@@ -59,7 +59,7 @@ void Cluster::addIndex(const size_t &index) { m_indexes.push_back(index); }
  */
 void Cluster::writeTo(Mantid::API::IMDHistoWorkspace_sptr ws) const {
   const size_t label = this->getLabel();
-  for (unsigned long m_indexe : m_indexes) {
+  for (auto m_indexe : m_indexes) {
     ws->setSignalAt(m_indexe, static_cast<Mantid::signal_t>(label));
     ws->setErrorSquaredAt(m_indexe, 0);
   }
@@ -75,7 +75,7 @@ Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws) const {
   double errorIntSQ = 0;
   double sigInt = 0;
   // Integrate accross indexes owned by this workspace.
-  for (unsigned long m_indexe : m_indexes) {
+  for (auto m_indexe : m_indexes) {
     sigInt += ws->getSignalAt(m_indexe);
     double errorSQ = ws->getErrorAt(m_indexe);
     errorSQ *= errorSQ;

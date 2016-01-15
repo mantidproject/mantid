@@ -329,11 +329,11 @@ void ReplicateMD::exec() {
   auto iterators = outputWS->createIterators(nThreads, NULL);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (auto &iterator : iterators) {
+  for (int it = 0; it < int(iterators.size()); ++it) {
 
     PARALLEL_START_INTERUPT_REGION
     auto outIt = std::unique_ptr<MDHistoWorkspaceIterator>(
-        dynamic_cast<MDHistoWorkspaceIterator *>(iterator));
+        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
 
     // Iterate over the output workspace
     do {

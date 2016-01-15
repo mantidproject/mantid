@@ -368,7 +368,7 @@ void DiffractionFocussing2::execEvent() {
     const vector<size_t> &indices = this->m_wsIndices[group];
 
     totalHistProcess += static_cast<int>(indices.size());
-    for (unsigned long indice : indices) {
+    for (auto indice : indices) {
       size_required[iGroup] += m_eventW->getEventList(indice).getNumberEvents();
     }
     prog->report(1, "Pre-counting");
@@ -454,7 +454,7 @@ void DiffractionFocussing2::execEvent() {
       PARALLEL_START_INTERUPT_REGION
       const int group = this->m_validGroups[iGroup];
       const std::vector<size_t> &indices = this->m_wsIndices[group];
-      for (unsigned long wi : indices) {
+      for (auto wi : indices) {
         // In workspace index iGroup, put what was in the OLD workspace index wi
         out->getOrAddEventList(iGroup) += m_eventW->getEventList(wi);
 

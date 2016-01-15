@@ -515,7 +515,7 @@ void FindPeaksMD::findPeaksHisto(
 
       // Compare to all boxes already picked.
       bool badBox = false;
-      for (unsigned long &peakBoxe : peakBoxes) {
+      for (auto &peakBoxe : peakBoxes) {
         VMD otherCenter = ws->getCenter(peakBoxe);
 
         // Distance between this box and a box we already put in.
@@ -549,7 +549,7 @@ void FindPeaksMD::findPeaksHisto(
       }
     }
     // --- Convert the "boxes" to peaks ----
-    for (unsigned long index : peakBoxes) {
+    for (auto index : peakBoxes) {
       // The center of the box = Q in the lab frame
       VMD boxCenter = ws->getCenter(index);
 

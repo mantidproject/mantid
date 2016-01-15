@@ -298,7 +298,7 @@ void SaveIsawPeaks::exec() {
         out << header << std::endl;
 
         // Go through each peak at this run / bank
-        for (unsigned long wi : ids) {
+        for (auto wi : ids) {
           Peak &p = peaks[wi];
 
           // Sequence (run) number

@@ -420,7 +420,7 @@ void LoadVulcanCalFile::processOffsets(
   static const size_t arr[] = {21, 22, 23, 26, 27, 28};
   vector<size_t> vec_banks(arr, arr + sizeof(arr) / sizeof(arr[0]));
 
-  for (unsigned long bankindex : vec_banks) {
+  for (auto bankindex : vec_banks) {
     for (size_t j = 0; j < NUMBERDETECTORPERMODULE; ++j) {
       detid_t detindex =
           static_cast<detid_t>(bankindex * NUMBERRESERVEDPERMODULE + j);

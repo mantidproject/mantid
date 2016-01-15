@@ -638,19 +638,19 @@ void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws) {
     // Copy over the data
     MantidVec &sourceY = ws->dataY(i);
 
-    for (unsigned long j : m_nanYIndexes[i]) {
+    for (auto j : m_nanYIndexes[i]) {
       sourceY[j] = std::numeric_limits<double>::quiet_NaN();
     }
 
-    for (unsigned long j : m_infYIndexes[i]) {
+    for (auto j : m_infYIndexes[i]) {
       sourceY[j] = std::numeric_limits<double>::infinity();
     }
 
-    for (unsigned long j : m_nanEIndexes[i]) {
+    for (auto j : m_nanEIndexes[i]) {
       sourceY[j] = std::numeric_limits<double>::quiet_NaN();
     }
 
-    for (unsigned long j : m_infEIndexes[i]) {
+    for (auto j : m_infEIndexes[i]) {
       sourceY[j] = std::numeric_limits<double>::infinity();
     }
 

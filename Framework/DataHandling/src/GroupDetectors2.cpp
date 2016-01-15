@@ -957,7 +957,7 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
     size_t nonMaskedSpectra(0);
     beh->dataX(outIndex)[0] = 0.0;
     beh->dataE(outIndex)[0] = 0.0;
-    for (unsigned long originalWI : it->second) {
+    for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
       const ISpectrum *fromSpectrum = inputWS->getSpectrum(originalWI);
 
@@ -1062,7 +1062,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
     size_t nonMaskedSpectra(0);
     beh->dataX(outIndex)[0] = 0.0;
     beh->dataE(outIndex)[0] = 0.0;
-    for (unsigned long originalWI : it->second) {
+    for (auto originalWI : it->second) {
       const EventList &fromEL = inputWS->getEventList(originalWI);
       // Add the event lists with the operator
       outEL += fromEL;

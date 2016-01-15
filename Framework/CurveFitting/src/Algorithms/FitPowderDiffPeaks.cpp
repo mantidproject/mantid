@@ -1215,7 +1215,7 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
     } else {
       // Fit overlapped peaks
       vector<BackToBackExponential_sptr> peaksgroup;
-      for (unsigned long ipk : indexpeakgroup) {
+      for (auto ipk : indexpeakgroup) {
         BackToBackExponential_sptr temppeak =
             m_vecPeakFunctions[ipk].second.second;
         peaksgroup.push_back(temppeak);

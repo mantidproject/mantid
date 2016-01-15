@@ -120,7 +120,7 @@ void findFacesAtIndex(const size_t linearIndex, IMDIterator *mdIterator,
                                                    indexes);
 
   const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
-  for (unsigned long neighbourLinearIndex : neighbours) {
+  for (auto neighbourLinearIndex : neighbours) {
     const int neighbourId =
         static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
 

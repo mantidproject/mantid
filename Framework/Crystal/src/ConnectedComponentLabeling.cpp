@@ -134,7 +134,7 @@ size_t doConnectedComponentLabeling(IMDIterator *iterator,
       nonEmptyNeighbourIndexes.reserve(maxNeighbours);
       SetIds neighbourIds;
       // Discover non-empty neighbours
-      for (unsigned long neighIndex : neighbourIndexes) {
+      for (auto neighIndex : neighbourIndexes) {
         if (!iterator->isWithinBounds(neighIndex)) {
           /* Record labels which appear to belong to the same cluster, but
            cannot be combined in this
@@ -180,7 +180,7 @@ size_t doConnectedComponentLabeling(IMDIterator *iterator,
         DisjointElement &parentElement =
             neighbourElements[candidateSourceParentIndex];
         // Union remainder parents with the chosen parent
-        for (unsigned long neighIndex : nonEmptyNeighbourIndexes) {
+        for (auto neighIndex : nonEmptyNeighbourIndexes) {
           if (neighIndex != candidateSourceParentIndex) {
             neighbourElements[neighIndex].unionWith(&parentElement);
           }

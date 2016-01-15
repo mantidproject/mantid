@@ -246,25 +246,25 @@ int MedianDetectorTest::maskOutliers(
   }
 
   for (size_t i = 0; i < indexmap.size(); ++i) {
-    std::vector<size_t> hists = indexmap.at(i);
+    std::vector<size_t> hists = indexmap[i];
     double median = medianvec.at(i);
 
     PARALLEL_FOR1(countsWS)
-    for (unsigned long hist : hists) {
-      const double value = countsWS->readY(hist)[0];
+    for (int j = 0; j < static_cast<int>(hists.size()); ++j) {
+      const double value = countsWS->readY(hists[j])[0];
       if ((value == 0.) && checkForMask) {
         const std::set<detid_t> &detids =
-            countsWS->getSpectrum(hist)->getDetectorIDs();
+            countsWS->getSpectrum(hists[j])->getDetectorIDs();
         if (instrument->isDetectorMasked(detids)) {
           numFailed -= 1; // it was already masked
         }
       }
       if ((value < out_lo * median) && (value > 0.0)) {
-        countsWS->maskWorkspaceIndex(hist);
+        countsWS->maskWorkspaceIndex(hists[j]);
         PARALLEL_ATOMIC
         ++numFailed;
       } else if (value > out_hi * median) {
-        countsWS->maskWorkspaceIndex(hist);
+        countsWS->maskWorkspaceIndex(hists[j]);
         PARALLEL_ATOMIC
         ++numFailed;
       }
