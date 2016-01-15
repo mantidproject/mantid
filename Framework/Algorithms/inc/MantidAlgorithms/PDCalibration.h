@@ -55,10 +55,10 @@ private:
                                     std::function<double(double)> toTof);
   std::vector<double> dSpacingWindows(const std::vector<double> &centres,
                                       const double widthMax);
+  void setCalibrationValues(const detid_t detid, const double difc, const double difa, const double tzero);
 
   API::MatrixWorkspace_sptr m_uncalibratedWS;
-  API::ITableWorkspace_sptr m_calibrationTableNew;
-  API::ITableWorkspace_sptr m_calibrationTableOld;
+  API::ITableWorkspace_sptr m_calibrationTable;
   std::vector<double> m_peaksInDspacing;
   std::map<detid_t, size_t> m_detidToRow;
   double m_tofMin;

@@ -155,7 +155,6 @@ void PDCalibration::exec() {
        const detid_t detid = *(detIds.begin());
 
        if (isEvent && uncalibratedEWS->getEventList(wkspIndex).empty()) {
-         // TODO copy old results
          //std::cout << "Empty event list at wkspIndex = " << wkspIndex << std::endl;
          continue;
        }
@@ -217,9 +216,11 @@ void PDCalibration::exec() {
          }
        }
        if (difc_count > 0) {
+           setCalibrationValues(detid, (difc_cumm/static_cast<double>(difc_count)), 0., 0.);
+
            std::cout << "avg difc = " << (difc_cumm/static_cast<double>(difc_count)) << std::endl;
        } else {
-           std::cout << "failed to fit - zero peaks found" << std::endl;
+           std::cout << "failed to fit - zero peaks found in " << detid << std::endl;
        }
 
        //break;
@@ -285,9 +286,10 @@ vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres
 std::function<double(double)> PDCalibration::getDSpacingToTof(const detid_t detid) {
     auto rowNum = m_detidToRow[detid];
 
-    const double difa = m_calibrationTableOld->getRef<double>("difa", rowNum);
-    const double difc = m_calibrationTableOld->getRef<double>("difc", rowNum);
-    const double tzero = m_calibrationTableOld->getRef<double>("tzero", rowNum);
+    // to start this is the old calibration values
+    const double difa = m_calibrationTable->getRef<double>("difa", rowNum);
+    const double difc = m_calibrationTable->getRef<double>("difc", rowNum);
+    const double tzero = m_calibrationTable->getRef<double>("tzero", rowNum);
 
     return d_to_tof(difc, difa, tzero);
 }
@@ -302,6 +304,23 @@ vector<double> PDCalibration::dSpacingToTof(const vector<double> &dSpacing,
   std::transform(dSpacing.begin(), dSpacing.end(), tof.begin(), toTof);
 
   return tof;
+}
+
+void PDCalibration::setCalibrationValues(const detid_t detid, const double difc, const double difa, const double tzero) {
+  auto rowNum = m_detidToRow[detid];
+
+  // detid is already there
+  m_calibrationTable->cell<double>(rowNum, 1) = difc;
+  m_calibrationTable->cell<double>(rowNum, 2) = difa;
+  m_calibrationTable->cell<double>(rowNum, 3) = tzero;
+
+  size_t hasDasIdsOffset = 0; // because it adds a column
+  if (m_hasDasIds)
+      hasDasIdsOffset++;
+
+  // TODO calculate values
+  m_calibrationTable->cell<double>(rowNum, 4+hasDasIdsOffset) = 0.; // tofmin
+  m_calibrationTable->cell<double>(rowNum, 5+hasDasIdsOffset) = 0.; // tofmax
 }
 
 MatrixWorkspace_sptr PDCalibration::load(const std::string filename) {
@@ -399,36 +418,43 @@ void PDCalibration::loadOldCalibration() {
     alg->setProperty("TofMin", m_tofMin);
     alg->setProperty("TofMax", m_tofMax);
     alg->executeAsChildAlg();
-    m_calibrationTableOld = alg->getProperty("OutputCalWorkspace");
+    API::ITableWorkspace_sptr calibrationTableOld = alg->getProperty("OutputCalWorkspace");
 
-    m_hasDasIds = hasDasIDs(m_calibrationTableOld);
+    m_hasDasIds = hasDasIDs(calibrationTableOld);
 
     // generate the map of detid -> row
-    API::ColumnVector<int> detIDs = m_calibrationTableOld->getVector("detid");
+    API::ColumnVector<int> detIDs = calibrationTableOld->getVector("detid");
     const size_t numDets = detIDs.size();
     for (size_t i = 0; i < numDets; ++i) {
       m_detidToRow[static_cast<detid_t>(detIDs[i])] = i;
     }
 
     // create a new workspace
-    m_calibrationTableNew = boost::make_shared<DataObjects::TableWorkspace>();
+    m_calibrationTable = boost::make_shared<DataObjects::TableWorkspace>();
     // TODO m_calibrationTable->setTitle("");
-    m_calibrationTableNew->addColumn("int", "detid");
-    m_calibrationTableNew->addColumn("double", "difc");
-    m_calibrationTableNew->addColumn("double", "difa");
-    m_calibrationTableNew->addColumn("double", "tzero");
+    m_calibrationTable->addColumn("int", "detid");
+    m_calibrationTable->addColumn("double", "difc");
+    m_calibrationTable->addColumn("double", "difa");
+    m_calibrationTable->addColumn("double", "tzero");
     if (m_hasDasIds)
-      m_calibrationTableNew->addColumn("int", "dasid");
-    m_calibrationTableNew->addColumn("double", "tofmin");
-    m_calibrationTableNew->addColumn("double", "tofmax");
-    setProperty("OutputCalibrationTable", m_calibrationTableNew);
+      m_calibrationTable->addColumn("int", "dasid");
+    m_calibrationTable->addColumn("double", "tofmin");
+    m_calibrationTable->addColumn("double", "tofmax");
+    setProperty("OutputCalibrationTable", m_calibrationTable);
 
     // copy over the values
-//    for (std::size_t i = 0; i < oldCalibrationTable->rowCount(); ++i) {
-//        API::TableRow newRow = m_calibrationTable->appendRow();
-//        newRow << oldCalibrationTable->getRef<int>("detid", i);
+    for (std::size_t rowNum = 0; rowNum < calibrationTableOld->rowCount(); ++rowNum) {
+        API::TableRow newRow = m_calibrationTable->appendRow();
 
-//    }
+        newRow << calibrationTableOld->getRef<int>("detid", rowNum);
+        newRow << calibrationTableOld->getRef<double>("difc", rowNum);
+        newRow << calibrationTableOld->getRef<double>("difa", rowNum);
+        newRow << calibrationTableOld->getRef<double>("tzero", rowNum);
+        if (m_hasDasIds)
+            newRow << calibrationTableOld->getRef<int>("dasid", rowNum);
+        newRow << 0.; // tofmin   TODO
+        newRow << 0.; // tofmax   TODO
+    }
 }
 
 } // namespace Algorithms
