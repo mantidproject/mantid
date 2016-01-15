@@ -86,37 +86,74 @@ References
 Usage
 -----
 
-**Example - Reconstruct a cosine function**
+**Example - Reconstruct Fourier coefficients**
 
-.. testcode:: MaxEntCosine
+In the example below, a workspace containing five Fourier coefficients is created and
+used as input to :ref:`algm-MaxEnt`. In the figure we show the original and reconstructed data (left),
+and the reconstructed image, i.e. Fourier transform (right).
 
-   from math import pi, cos
+.. code-block:: python
 
-   # Create a workspace
+   # Create an empty workspace
    X = []
    Y = []
    E = []
-   N = 50
-   w = 1.6
-
+   N = 200
    for i in range(0,N):
-       x = 2*pi*i/N
+       x = ((i-N/2) *1./N)
        X.append(x)
-       Y.append(cos(w*2*pi*i/N))
-       E.append(0.1)
+       Y.append(0)
+       E.append(0.001)
 
-   ws = CreateWorkspace(DataX=X, DataY=Y, DataE=E)
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', A=0.01, ChiTarget=50)
+   # Fill in five Fourier coefficients
+   # The input signal must be symmetric
+   Y[5] = Y[195] = 0.85
+   Y[10] = Y[190] = 0.85
+   Y[20] = Y[180] = 0.85
+   Y[12] = Y[188] = 0.90
+   Y[14] = Y[186] = 0.90
+   CreateWorkspace(OutputWorkspace='inputws',DataX=X,DataY=Y,DataE=E,NSpec=1)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', chiTarget=N, A=0.0001)
 
-   print "Original data %.4f" % (ws.readY(0)[25])
-   print "Reconstructed data %.4f" % (data.readY(0)[25])
+.. figure:: ../images/MaxEntFourierCoefficients.png
+   :align: center
 
-Output:
+**Example - Reconstruct a real muon dataset**
 
-.. testoutput:: MaxEntCosine
 
-  Original data 0.3090
-  Reconstructed data 0.3112
+In this example, :ref:`algm-FFT` is run on a pre-analyzed muon dataset. The corresponding figure shows
+the original and reconstructed data (left), and the real part of the image obtained with :ref:`algm-MaxEnt`
+and :ref:`algm-FFT` (right).
+
+.. code-block:: python
+
+   Load(Filename=r'MUSR00022725.nxs', OutputWorkspace='MUSR00022725')
+   CropWorkspace(InputWorkspace='MUSR00022725', OutputWorkspace='MUSR00022725', XMin=0.11, XMax=1.6, EndWorkspaceIndex=0)
+   RemoveExpDecay(InputWorkspace='MUSR00022725', OutputWorkspace='MUSR00022725')
+   Rebin(InputWorkspace='MUSR00022725', OutputWorkspace='MUSR00022725', Params='0.016')
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='MUSR00022725', A=0.005, ChiTarget=90)
+   # Compare MaxEnt to FFT
+   imageFFT = FFT(InputWorkspace='MUSR00022725')
+
+.. figure:: ../images/MaxEntMUSR00022725.png
+   :align: center
+
+In this last example, :ref:`algm-FFT` is run on a different muon dataset. The figure shows
+the original and reconstructed data (left), the real part of the image (middle)
+and its imaginary part (right).
+
+.. code-block:: python
+
+   Load(Filename=r'EMU00020884.nxs', OutputWorkspace='EMU00020884')
+   CropWorkspace(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
+   RemoveExpDecay(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884')
+   Rebin(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884', Params='0.016')
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='EMU00020884', A=0.0001, ChiTarget=300, MaxIterations=2500)
+   # Compare MaxEnt to FFT
+   imageFFT = FFT(InputWorkspace='EMU00020884')
+
+.. figure:: ../images/MaxEntMUSR00020884.png
+   :align: center
 
 .. categories::
 
