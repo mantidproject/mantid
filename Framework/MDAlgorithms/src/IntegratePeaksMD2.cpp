@@ -678,8 +678,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 void IntegratePeaksMD2::calculateE1(Geometry::Instrument_const_sptr inst) {
   std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
 
-  for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID) {
-    Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(*detID);
+  for (int &detectorID : detectorIDs) {
+    Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(detectorID);
     if (det->isMonitor())
       continue; // skip monitor
     if (!det->isMasked())
@@ -705,10 +705,10 @@ void IntegratePeaksMD2::calculateE1(Geometry::Instrument_const_sptr inst) {
  */
 bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
 
-  for (auto E1 = E1Vec.begin(); E1 != E1Vec.end(); ++E1) {
+  for (auto &E1 : E1Vec) {
     V3D distv = QLabFrame -
-                *E1 * (QLabFrame.scalar_prod(
-                          *E1)); // distance to the trajectory as a vector
+                E1 * (QLabFrame.scalar_prod(
+                         E1)); // distance to the trajectory as a vector
     if (distv.norm() < r) {
       return false;
     }

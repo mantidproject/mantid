@@ -666,10 +666,9 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
     // Set the MDFrames for each axes
     Algorithm_sptr setMDFrameAlg = this->createChildAlgorithm("SetMDFrame");
     int axesCounter = 0;
-    for (auto frame = framesToSet.begin(); frame != framesToSet.end();
-         ++frame) {
+    for (auto &frame : framesToSet) {
       setMDFrameAlg->setProperty("InputWorkspace", ws);
-      setMDFrameAlg->setProperty("MDFrame", *frame);
+      setMDFrameAlg->setProperty("MDFrame", frame);
       setMDFrameAlg->setProperty("Axes", std::vector<int>(1, axesCounter));
       ++axesCounter;
       setMDFrameAlg->executeAsChildAlg();
@@ -680,9 +679,9 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
     // Revert to the old frames.
     Algorithm_sptr setMDFrameAlg = this->createChildAlgorithm("SetMDFrame");
     int axesCounter = 0;
-    for (auto frame = oldFrames.begin(); frame != oldFrames.end(); ++frame) {
+    for (auto &oldFrame : oldFrames) {
       setMDFrameAlg->setProperty("InputWorkspace", ws);
-      setMDFrameAlg->setProperty("MDFrame", *frame);
+      setMDFrameAlg->setProperty("MDFrame", oldFrame);
       setMDFrameAlg->setProperty("Axes", std::vector<int>(1, axesCounter));
       ++axesCounter;
       setMDFrameAlg->executeAsChildAlg();

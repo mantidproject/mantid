@@ -138,10 +138,10 @@ void TransposeMD::exec() {
   auto iterators = inWS->createIterators(nThreads, NULL);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int it = 0; it < int(iterators.size()); ++it) {
+  for (auto &iterator : iterators) {
 
     PARALLEL_START_INTERUPT_REGION
-    auto inIterator = std::unique_ptr<IMDIterator>(iterators[it]);
+    auto inIterator = std::unique_ptr<IMDIterator>(iterator);
     do {
       auto center = inIterator->getCenter();
       const coord_t *incoords = center.getBareArray();

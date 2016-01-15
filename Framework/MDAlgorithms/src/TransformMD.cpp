@@ -81,9 +81,9 @@ void TransformMD::doTransform(
     API::IMDNode::sortObjByID(boxes);
 
   PARALLEL_FOR_IF(!ws->isFileBacked())
-  for (int i = 0; i < int(boxes.size()); i++) {
+  for (auto &boxe : boxes) {
     PARALLEL_START_INTERUPT_REGION
-    MDBoxBase<MDE, nd> *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxes[i]);
+    MDBoxBase<MDE, nd> *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxe);
     if (box) {
       box->transformDimensions(m_scaling, m_offset);
     }

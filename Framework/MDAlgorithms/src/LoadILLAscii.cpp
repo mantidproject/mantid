@@ -248,16 +248,16 @@ void LoadILLAscii::loadsDataIntoTheWS(API::MatrixWorkspace_sptr &thisWorkspace,
   thisWorkspace->dataX(0)[1] = m_wavelength + 0.001;
 
   size_t spec = 0;
-  for (size_t i = 0; i < thisSpectrum.size(); ++i) {
+  for (int i : thisSpectrum) {
 
     if (spec > 0) {
       // just copy the time binning axis to every spectra
       thisWorkspace->dataX(spec) = thisWorkspace->readX(0);
     }
     // Assign Y
-    thisWorkspace->dataY(spec)[0] = thisSpectrum[i];
+    thisWorkspace->dataY(spec)[0] = i;
     // Assign Error
-    thisWorkspace->dataE(spec)[0] = thisSpectrum[i] * thisSpectrum[i];
+    thisWorkspace->dataE(spec)[0] = i * i;
 
     ++spec;
   }

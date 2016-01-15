@@ -53,8 +53,8 @@ double PoldiAnalyseResiduals::sumCounts(
     const DataObjects::Workspace2D_sptr &workspace,
     const std::vector<int> &workspaceIndices) const {
   double sum = 0.0;
-  for (size_t i = 0; i < workspaceIndices.size(); ++i) {
-    const MantidVec &counts = workspace->readY(workspaceIndices[i]);
+  for (int workspaceIndice : workspaceIndices) {
+    const MantidVec &counts = workspace->readY(workspaceIndice);
     sum += std::accumulate(counts.begin(), counts.end(), 0.0);
   }
 
@@ -67,8 +67,8 @@ size_t PoldiAnalyseResiduals::numberOfPoints(
     const DataObjects::Workspace2D_sptr &workspace,
     const std::vector<int> &workspaceIndices) const {
   size_t sum = 0;
-  for (size_t i = 0; i < workspaceIndices.size(); ++i) {
-    const MantidVec &counts = workspace->readY(workspaceIndices[i]);
+  for (int workspaceIndice : workspaceIndices) {
+    const MantidVec &counts = workspace->readY(workspaceIndice);
     sum += counts.size();
   }
 
@@ -80,10 +80,10 @@ size_t PoldiAnalyseResiduals::numberOfPoints(
 void PoldiAnalyseResiduals::addValue(
     DataObjects::Workspace2D_sptr &workspace, double value,
     const std::vector<int> &workspaceIndices) const {
-  for (size_t i = 0; i < workspaceIndices.size(); ++i) {
-    MantidVec &counts = workspace->dataY(workspaceIndices[i]);
-    for (size_t j = 0; j < counts.size(); ++j) {
-      counts[j] += value;
+  for (int workspaceIndice : workspaceIndices) {
+    MantidVec &counts = workspace->dataY(workspaceIndice);
+    for (double &count : counts) {
+      count += value;
     }
   }
 }
@@ -196,8 +196,8 @@ double PoldiAnalyseResiduals::relativeCountChange(
     const DataObjects::Workspace2D_sptr &sum, double totalMeasuredCounts) {
   const MantidVec &corrCounts = sum->readY(0);
   double csum = 0.0;
-  for (auto it = corrCounts.begin(); it != corrCounts.end(); ++it) {
-    csum += fabs(*it);
+  for (double corrCount : corrCounts) {
+    csum += fabs(corrCount);
   }
 
   return csum / totalMeasuredCounts * 100.0;

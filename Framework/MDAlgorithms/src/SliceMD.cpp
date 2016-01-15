@@ -121,8 +121,8 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Create the ouput workspace
   typename MDEventWorkspace<OMDE, ond>::sptr outWS(
       new MDEventWorkspace<OMDE, ond>());
-  for (size_t od = 0; od < m_binDimensions.size(); od++) {
-    outWS->addDimension(m_binDimensions[od]);
+  for (auto &m_binDimension : m_binDimensions) {
+    outWS->addDimension(m_binDimension);
   }
   outWS->setCoordinateSystem(ws->getSpecialCoordinateSystem());
   outWS->initialize();

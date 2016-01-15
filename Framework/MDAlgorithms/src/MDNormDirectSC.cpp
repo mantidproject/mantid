@@ -212,9 +212,9 @@ std::string MDNormDirectSC::inputEnergyMode() const {
     // get dEAnalysisMode
     PropertyHistories histvec =
         hist.getAlgorithmHistory(nalgs - 2)->getProperties();
-    for (auto it = histvec.begin(); it != histvec.end(); ++it) {
-      if ((*it)->name() == "dEAnalysisMode") {
-        emode = (*it)->value();
+    for (auto &it : histvec) {
+      if (it->name() == "dEAnalysisMode") {
+        emode = it->value();
         break;
       }
     }
@@ -234,11 +234,11 @@ MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
   const auto &props = getProperties();
   IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
   binMD->setPropertyValue("AxisAligned", "1");
-  for (auto it = props.begin(); it != props.end(); ++it) {
-    const auto &propName = (*it)->name();
+  for (auto prop : props) {
+    const auto &propName = prop->name();
     if (propName != "SolidAngleWorkspace" &&
         propName != "OutputNormalizationWorkspace") {
-      binMD->setPropertyValue(propName, (*it)->value());
+      binMD->setPropertyValue(propName, prop->value());
     }
   }
   binMD->executeAsChildAlg();
@@ -552,8 +552,7 @@ MDNormDirectSC::removeGroupedIDs(const ExperimentInfo &exptInfo,
                                  // double to the correct size once
   std::set<detid_t> groupedIDs;
 
-  for (auto iter = detIDs.begin(); iter != detIDs.end(); ++iter) {
-    detid_t curID = *iter;
+  for (int curID : detIDs) {
     if (groupedIDs.count(curID) == 1)
       continue; // Already been processed
 

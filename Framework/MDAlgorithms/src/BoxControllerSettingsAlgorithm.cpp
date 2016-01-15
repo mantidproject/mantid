@@ -41,8 +41,8 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   value.clear();
   value.reserve(values.count());
-  for (auto it = values.begin(); it != values.end(); ++it)
-    value.push_back(boost::lexical_cast<int>(*it));
+  for (const auto &it : values)
+    value.push_back(boost::lexical_cast<int>(it));
 
   declareProperty(
       new ArrayProperty<int>("SplitInto", value),

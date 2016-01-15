@@ -160,10 +160,10 @@ PoldiFitPeaks2D::getNormalizedPeakCollections(
 
   std::vector<PoldiPeakCollection_sptr> normalizedPeakCollections;
 
-  for (auto pc = peakCollections.begin(); pc != peakCollections.end(); ++pc) {
+  for (const auto &peakCollection : peakCollections) {
     // First integrate peak collection, then normalize and append to vector
     PoldiPeakCollection_sptr integratedPeakCollection =
-        getIntegratedPeakCollection(*pc);
+        getIntegratedPeakCollection(peakCollection);
 
     normalizedPeakCollections.push_back(
         getNormalizedPeakCollection(integratedPeakCollection));
@@ -671,21 +671,20 @@ PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn) {
     std::vector<std::string> parameters = poldiFn->getParameterNames();
 
     std::vector<std::string> tieComponents;
-    for (auto it = tieParameters.begin(); it != tieParameters.end(); ++it) {
-      if (!(*it).empty()) {
+    for (auto &tieParameter : tieParameters) {
+      if (!tieParameter.empty()) {
         std::vector<std::string> matchedParameters;
 
-        for (auto parName = parameters.begin(); parName != parameters.end();
-             ++parName) {
-          if (boost::algorithm::ends_with(*parName, *it)) {
-            matchedParameters.push_back(*parName);
+        for (auto &parameter : parameters) {
+          if (boost::algorithm::ends_with(parameter, tieParameter)) {
+            matchedParameters.push_back(parameter);
           }
         }
 
         switch (matchedParameters.size()) {
         case 0:
-          g_log.warning("Function does not have a parameter called '" + *it +
-                        "', ignoring.");
+          g_log.warning("Function does not have a parameter called '" +
+                        tieParameter + "', ignoring.");
           break;
         case 1:
           g_log.warning("There is only one peak, no ties necessary.");
@@ -983,9 +982,9 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
   Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
 
   // Add one Poldi2DFunction for each peak collection
-  for (auto pc = normalizedPeakCollections.begin();
-       pc != normalizedPeakCollections.end(); ++pc) {
-    mdFunction->addFunction(getFunctionFromPeakCollection(*pc));
+  for (auto &normalizedPeakCollection : normalizedPeakCollections) {
+    mdFunction->addFunction(
+        getFunctionFromPeakCollection(normalizedPeakCollection));
   }
 
   // And finally background terms
@@ -1267,8 +1266,8 @@ void PoldiFitPeaks2D::exec() {
   Property *profileFunctionProperty =
       getPointerToProperty("PeakProfileFunction");
   if (!profileFunctionProperty->isDefault()) {
-    for (auto pc = peakCollections.begin(); pc != peakCollections.end(); ++pc) {
-      (*pc)->setProfileFunctionName(profileFunctionProperty->value());
+    for (auto &peakCollection : peakCollections) {
+      peakCollection->setProfileFunctionName(profileFunctionProperty->value());
     }
   }
 
@@ -1299,8 +1298,8 @@ void PoldiFitPeaks2D::exec() {
   } else {
     WorkspaceGroup_sptr peaksGroup = boost::make_shared<WorkspaceGroup>();
 
-    for (auto pc = integralPeaks.begin(); pc != integralPeaks.end(); ++pc) {
-      peaksGroup->addWorkspace((*pc)->asTableWorkspace());
+    for (auto &integralPeak : integralPeaks) {
+      peaksGroup->addWorkspace(integralPeak->asTableWorkspace());
     }
 
     setProperty("RefinedPoldiPeakWorkspace", peaksGroup);
@@ -1333,8 +1332,8 @@ void PoldiFitPeaks2D::exec() {
       } else {
         WorkspaceGroup_sptr cellsGroup = boost::make_shared<WorkspaceGroup>();
 
-        for (auto it = cells.begin(); it != cells.end(); ++it) {
-          cellsGroup->addWorkspace(*it);
+        for (auto &cell : cells) {
+          cellsGroup->addWorkspace(cell);
         }
 
         setProperty("RefinedCellParameters", cellsGroup);

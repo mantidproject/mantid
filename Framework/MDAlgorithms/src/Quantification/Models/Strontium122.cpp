@@ -34,13 +34,13 @@ void Strontium122::init() {
   setFormFactorIon("Fe2");
 
   // Declare parameters that participate in fitting
-  for (unsigned int i = 0; i < NPARAMS; ++i) {
-    declareParameter(PAR_NAMES[i], 0.0);
+  for (auto &i : PAR_NAMES) {
+    declareParameter(i, 0.0);
   }
 
   // Declare fixed attributes
-  for (unsigned int i = 0; i < NATTS; ++i) {
-    declareAttribute(ATTR_NAMES[i], API::IFunction::Attribute(1));
+  for (auto &i : ATTR_NAMES) {
+    declareAttribute(i, API::IFunction::Attribute(1));
   }
 }
 

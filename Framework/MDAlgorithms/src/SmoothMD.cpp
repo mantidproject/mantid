@@ -129,11 +129,11 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
   auto iterators = toSmooth->createIterators(nThreads, NULL);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int it = 0; it < int(iterators.size()); ++it) {
+  for (auto &it : iterators) {
 
     PARALLEL_START_INTERUPT_REGION
     boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
+        dynamic_cast<MDHistoWorkspaceIterator *>(it));
 
     if (!iterator) {
       throw std::logic_error(
@@ -165,16 +165,16 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
       size_t nNeighbours = neighbourIndexes.size();
       double sumSignal = iterator->getSignal();
       double sumSqError = iterator->getError();
-      for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
+      for (unsigned long neighbourIndexe : neighbourIndexes) {
         if (useWeights) {
-          if ((*weightingWS)->getSignalAt(neighbourIndexes[i]) == 0) {
+          if ((*weightingWS)->getSignalAt(neighbourIndexe) == 0) {
             // Nothing measured here. We cannot use that neighbouring point.
             nNeighbours -= 1;
             continue;
           }
         }
-        sumSignal += toSmooth->getSignalAt(neighbourIndexes[i]);
-        double error = toSmooth->getErrorAt(neighbourIndexes[i]);
+        sumSignal += toSmooth->getSignalAt(neighbourIndexe);
+        double error = toSmooth->getErrorAt(neighbourIndexe);
         sumSqError += (error * error);
       }
 
@@ -293,8 +293,7 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
                                       "have entries for each dimension of the "
                                       "InputWorkspace."));
   } else {
-    for (auto it = widthVector.begin(); it != widthVector.end(); ++it) {
-      const int widthEntry = *it;
+    for (int widthEntry : widthVector) {
       if (widthEntry % 2 == 0) {
         std::stringstream message;
         message << widthVectorPropertyName
