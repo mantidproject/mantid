@@ -94,9 +94,8 @@ void MaskPeaksWorkspace::exec() {
   // Loop over peaks
   const std::vector<Peak> &peaks = peaksW->getPeaks();
   PARALLEL_FOR3(m_inputW, peaksW, tablews)
-  for (int i = 0; i < static_cast<int>(peaks.size()); i++) {
+  for (auto peak : peaks) {
     PARALLEL_START_INTERUPT_REGION
-    Peak peak = peaks[i];
     // get the peak location on the detector
     double col = peak.getCol();
     double row = peak.getRow();

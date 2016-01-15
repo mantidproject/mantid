@@ -127,8 +127,8 @@ IntegratePeakTimeSlices::IntegratePeakTimeSlices()
   // for (int i = 0; i < NAttributes; i++)
   //   m_AttributeValues[i] = 0;
 
-  for (int i = 0; i < NParameters; i++)
-    m_ParameterValues[i] = 0;
+  for (double &m_ParameterValue : m_ParameterValues)
+    m_ParameterValue = 0;
 }
 
 double SQRT(double v) {

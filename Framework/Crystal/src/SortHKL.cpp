@@ -45,15 +45,15 @@ void SortHKL::init() {
   /* TODO: These two properties with string lists keep appearing -
    * Probably there should be a dedicated Property type or validator. */
   std::vector<std::string> pgOptions;
-  for (size_t i = 0; i < m_pointGroups.size(); ++i)
-    pgOptions.push_back(m_pointGroups[i]->getName());
+  for (auto &m_pointGroup : m_pointGroups)
+    pgOptions.push_back(m_pointGroup->getName());
   declareProperty("PointGroup", pgOptions[0],
                   boost::make_shared<StringListValidator>(pgOptions),
                   "Which point group applies to this crystal?");
 
   std::vector<std::string> centeringOptions;
-  for (size_t i = 0; i < m_refConds.size(); ++i)
-    centeringOptions.push_back(m_refConds[i]->getName());
+  for (auto &m_refCond : m_refConds)
+    centeringOptions.push_back(m_refCond->getName());
   declareProperty("LatticeCentering", centeringOptions[0],
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
@@ -169,9 +169,9 @@ ReflectionCondition_sptr SortHKL::getCentering() const {
       boost::make_shared<ReflectionConditionPrimitive>();
 
   std::string refCondName = getPropertyValue("LatticeCentering");
-  for (size_t i = 0; i < m_refConds.size(); ++i)
-    if (m_refConds[i]->getName() == refCondName)
-      centering = m_refConds[i];
+  for (const auto &m_refCond : m_refConds)
+    if (m_refCond->getName() == refCondName)
+      centering = m_refCond;
 
   return centering;
 }
@@ -183,9 +183,9 @@ PointGroup_sptr SortHKL::getPointgroup() const {
       PointGroupFactory::Instance().createPointGroup("-1");
 
   std::string pointGroupName = getPropertyValue("PointGroup");
-  for (size_t i = 0; i < m_pointGroups.size(); ++i)
-    if (m_pointGroups[i]->getName() == pointGroupName)
-      pointGroup = m_pointGroups[i];
+  for (const auto &m_pointGroup : m_pointGroups)
+    if (m_pointGroup->getName() == pointGroupName)
+      pointGroup = m_pointGroup;
 
   return pointGroup;
 }

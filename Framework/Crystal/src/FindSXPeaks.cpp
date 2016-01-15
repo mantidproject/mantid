@@ -212,26 +212,26 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv) {
   double resol = getProperty("Resolution");
   peakvector finalv;
   bool found = false;
-  for (std::size_t i = 0; i < pcv.size(); i++) {
-    for (std::size_t j = 0; j < finalv.size(); j++) {
-      if (pcv[i].compare(finalv[j], resol)) {
-        finalv[j] += pcv[i];
+  for (const auto &i : pcv) {
+    for (auto &j : finalv) {
+      if (i.compare(j, resol)) {
+        j += i;
         found = true;
         break;
       }
     }
     if (!found)
-      finalv.push_back(pcv[i]);
+      finalv.push_back(i);
     found = false;
   }
 
-  for (std::size_t i = 0; i < finalv.size(); i++) {
-    finalv[i].reduce();
+  for (auto &i : finalv) {
+    i.reduce();
     try {
-      Geometry::IPeak *peak = m_peaks->createPeak(finalv[i].getQ());
+      Geometry::IPeak *peak = m_peaks->createPeak(i.getQ());
       if (peak) {
-        peak->setIntensity(finalv[i].getIntensity());
-        peak->setDetectorID(finalv[i].getDetectorId());
+        peak->setIntensity(i.getIntensity());
+        peak->setDetectorID(i.getDetectorId());
         m_peaks->addPeak(*peak);
         delete peak;
       }
