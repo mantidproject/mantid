@@ -1,20 +1,18 @@
 #pylint: disable=no-init
+import math
+import numpy as np
+from scipy.stats import chisquare
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, \
     ITableWorkspaceProperty, FileAction, FileProperty, WorkspaceProperty, InstrumentValidator, Progress
 from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, logger, Quat, V3D, StringArrayProperty
 import mantid.simpleapi as api
-from scipy.stats import chisquare
-from scipy.optimize import minimize
-import numpy as np
-import math
-
 
 class AlignComponents(PythonAlgorithm):
     """
     Class to align components
     """
 
-    _optionsList = ["PosX", "PosY", "PosZ", "RotX", "RotY", "RotZ"]
+    _optionsList = ["Xposition", "Yposition", "Zposition", "Xrotation", "Yrotation", "Zrotation"]
     _optionsDict = {}
     _initialPos = None
     _move = False
@@ -79,82 +77,82 @@ class AlignComponents(PythonAlgorithm):
                              doc="Comma separated list on instrument components to refine.")
 
         # X position
-        self.declareProperty(name="PosX", defaultValue=True,
-                             doc="Refine X position")
-        condition = EnabledWhenProperty("PosX", PropertyCriterion.IsDefault)
-        self.declareProperty(name="MinX", defaultValue=-0.1,
+        self.declareProperty(name="Xposition", defaultValue=True,
+                             doc="Refine Xposition")
+        condition = EnabledWhenProperty("Xposition", PropertyCriterion.IsDefault)
+        self.declareProperty(name="MinXposition", defaultValue=-0.1,
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Minimum relative X bound (m)")
-        self.setPropertySettings("MinX", condition)
-        self.declareProperty(name="MaxX", defaultValue=0.1,
+        self.setPropertySettings("MinXposition", condition)
+        self.declareProperty(name="MaxXposition", defaultValue=0.1,
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Maximum relative X bound (m)")
-        self.setPropertySettings("MaxX", condition)
+        self.setPropertySettings("MaxXposition", condition)
 
         # Y position
-        self.declareProperty(name="PosY", defaultValue=True,
-                             doc="Refine Y position")
-        condition = EnabledWhenProperty("PosY", PropertyCriterion.IsDefault)
-        self.declareProperty(name="MinY", defaultValue=-0.1,
+        self.declareProperty(name="Yposition", defaultValue=True,
+                             doc="Refine Yposition")
+        condition = EnabledWhenProperty("Yposition", PropertyCriterion.IsDefault)
+        self.declareProperty(name="MinYposition", defaultValue=-0.1,
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Minimum relative Y bound (m)")
-        self.setPropertySettings("MinY", condition)
-        self.declareProperty(name="MaxY", defaultValue=0.1,
+        self.setPropertySettings("MinYposition", condition)
+        self.declareProperty(name="MaxYposition", defaultValue=0.1,
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Maximum relative Y bound (m)")
-        self.setPropertySettings("MaxY", condition)
+        self.setPropertySettings("MaxYposition", condition)
 
         # Z position
-        self.declareProperty(name="PosZ", defaultValue=True,
-                             doc="Refine Z position")
-        condition = EnabledWhenProperty("PosZ", PropertyCriterion.IsDefault)
-        self.declareProperty(name="MinZ", defaultValue=-0.1,
+        self.declareProperty(name="Zposition", defaultValue=True,
+                             doc="Refine Zposition")
+        condition = EnabledWhenProperty("Zposition", PropertyCriterion.IsDefault)
+        self.declareProperty(name="MinZposition", defaultValue=-0.1,
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Minimum relative Z bound (m)")
-        self.setPropertySettings("MinZ", condition)
-        self.declareProperty(name="MaxZ", defaultValue=0.1,
+        self.setPropertySettings("MinZposition", condition)
+        self.declareProperty(name="MaxZposition", defaultValue=0.1,
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Maximum relative Z bound (m)")
-        self.setPropertySettings("MaxZ", condition)
+        self.setPropertySettings("MaxZposition", condition)
 
         # X rotation
-        self.declareProperty(name="RotX", defaultValue=True,
-                             doc="Refine rotation around X")
-        condition = EnabledWhenProperty("RotX", PropertyCriterion.IsDefault)
-        self.declareProperty(name="MinRotX", defaultValue=-10.0,
+        self.declareProperty(name="Xrotation", defaultValue=True,
+                             doc="Refinerotation around X")
+        condition = EnabledWhenProperty("Xrotation", PropertyCriterion.IsDefault)
+        self.declareProperty(name="MinXrotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Minimum relative X rotation (deg)")
-        self.setPropertySettings("MinRotX", condition)
-        self.declareProperty(name="MaxRotX", defaultValue=10.0,
+                             doc="Minimum relative Xrotation (deg)")
+        self.setPropertySettings("MinXrotation", condition)
+        self.declareProperty(name="MaxXrotation", defaultValue=10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Maximum relative X rotation (deg)")
-        self.setPropertySettings("MaxRotX", condition)
+                             doc="Maximum relative Xrotation (deg)")
+        self.setPropertySettings("MaxXrotation", condition)
 
         # Y rotation
-        self.declareProperty(name="RotY", defaultValue=True,
-                             doc="Refine rotation around Y")
-        condition = EnabledWhenProperty("RotY", PropertyCriterion.IsDefault)
-        self.declareProperty(name="MinRotY", defaultValue=-10.0,
+        self.declareProperty(name="Yrotation", defaultValue=True,
+                             doc="Refinerotation around Y")
+        condition = EnabledWhenProperty("Yrotation", PropertyCriterion.IsDefault)
+        self.declareProperty(name="MinYrotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Minimum relative Y rotation (deg)")
-        self.setPropertySettings("MinRotY", condition)
-        self.declareProperty(name="MaxRotY", defaultValue=10.0,
+                             doc="Minimum relative Yrotation (deg)")
+        self.setPropertySettings("MinYrotation", condition)
+        self.declareProperty(name="MaxYrotation", defaultValue=10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Maximum relative Y rotation (deg)")
-        self.setPropertySettings("MaxRotY", condition)
+                             doc="Maximum relative Yrotation (deg)")
+        self.setPropertySettings("MaxYrotation", condition)
 
         # Z rotation
-        self.declareProperty(name="RotZ", defaultValue=True,
-                             doc="Refine rotation around Z")
-        condition = EnabledWhenProperty("RotZ", PropertyCriterion.IsDefault)
-        self.declareProperty(name="MinRotZ", defaultValue=-10.0,
+        self.declareProperty(name="Zrotation", defaultValue=True,
+                             doc="Refinerotation around Z")
+        condition = EnabledWhenProperty("Zrotation", PropertyCriterion.IsDefault)
+        self.declareProperty(name="MinZrotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Minimum relative Z rotation (deg)")
-        self.setPropertySettings("MinRotZ", condition)
-        self.declareProperty(name="MaxRotZ", defaultValue=10.0,
+                             doc="Minimum relative Zrotation (deg)")
+        self.setPropertySettings("MinZrotation", condition)
+        self.declareProperty(name="MaxZrotation", defaultValue=10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Maximum relative Z rotation (deg)")
-        self.setPropertySettings("MaxRotZ", condition)
+                             doc="Maximum relative Zrotation (deg)")
+        self.setPropertySettings("MaxZrotation", condition)
 
     def validateInputs(self):
         """
@@ -194,10 +192,10 @@ class AlignComponents(PythonAlgorithm):
                                        + ','.join(components) + "\""
 
         # This checks that something will actually be refined,
-        if not (self.getProperty("PosX").value or self.getProperty("PosY").value or self.getProperty("PosZ").value or
-                self.getProperty("RotX").value or self.getProperty("RotY").value or self.getProperty("RotZ").value or
+        if not (self.getProperty("Xposition").value or self.getProperty("Yposition").value or self.getProperty("Zposition").value or
+                self.getProperty("Xrotation").value or self.getProperty("Yrotation").value or self.getProperty("Zrotation").value or
                 self.getProperty("FitSourcePosition").value or self.getProperty("FitSamplePosition").value):
-            issues["PosX"] = "You must calibrate at least one property"
+            issues["Xposition"] = "You must calibrate at least one property"
 
         return issues
 
@@ -261,10 +259,10 @@ class AlignComponents(PythonAlgorithm):
         for opt in self._optionsList:
             self._optionsDict[opt] = self.getProperty(opt).value
 
-        if self._optionsDict["PosX"] or self._optionsDict["PosY"] or self._optionsDict["PosZ"]:
+        if self._optionsDict["Xposition"] or self._optionsDict["Yposition"] or self._optionsDict["Zposition"]:
             self._move = True
 
-        if self._optionsDict["RotX"] or self._optionsDict["RotY"] or self._optionsDict["RotZ"]:
+        if self._optionsDict["Xrotation"] or self._optionsDict["Yrotation"] or self._optionsDict["Zrotation"]:
             self._rotate = True
 
         prog = Progress(self, start=0, end=1, nreports=len(components))
@@ -297,30 +295,30 @@ class AlignComponents(PythonAlgorithm):
             else:
                 mask_out = None
 
-            if self._optionsDict["PosX"]:
+            if self._optionsDict["Xposition"]:
                 x0List.append(self._initialPos[0])
-                boundsList.append((self._initialPos[0] + self.getProperty("MinX").value,
-                                   self._initialPos[0] + self.getProperty("MaxX").value))
-            if self._optionsDict["PosY"]:
+                boundsList.append((self._initialPos[0] + self.getProperty("MinXposition").value,
+                                   self._initialPos[0] + self.getProperty("MaxXposition").value))
+            if self._optionsDict["Yposition"]:
                 x0List.append(self._initialPos[1])
-                boundsList.append((self._initialPos[1] + self.getProperty("MinY").value,
-                                   self._initialPos[1] + self.getProperty("MaxY").value))
-            if self._optionsDict["PosZ"]:
+                boundsList.append((self._initialPos[1] + self.getProperty("MinYposition").value,
+                                   self._initialPos[1] + self.getProperty("MaxYposition").value))
+            if self._optionsDict["Zposition"]:
                 x0List.append(self._initialPos[2])
-                boundsList.append((self._initialPos[2] + self.getProperty("MinZ").value,
-                                   self._initialPos[2] + self.getProperty("MaxZ").value))
-            if self._optionsDict["RotX"]:
+                boundsList.append((self._initialPos[2] + self.getProperty("MinZposition").value,
+                                   self._initialPos[2] + self.getProperty("MaxZposition").value))
+            if self._optionsDict["Xrotation"]:
                 x0List.append(self._initialPos[3])
-                boundsList.append((self._initialPos[3] + self.getProperty("MinRotX").value,
-                                   self._initialPos[3] + self.getProperty("MaxRotX").value))
-            if self._optionsDict["RotY"]:
+                boundsList.append((self._initialPos[3] + self.getProperty("MinXrotation").value,
+                                   self._initialPos[3] + self.getProperty("MaxXrotation").value))
+            if self._optionsDict["Yrotation"]:
                 x0List.append(self._initialPos[4])
-                boundsList.append((self._initialPos[4] + self.getProperty("MinRotY").value,
-                                   self._initialPos[4] + self.getProperty("MaxRotY").value))
-            if self._optionsDict["RotZ"]:
+                boundsList.append((self._initialPos[4] + self.getProperty("MinYrotation").value,
+                                   self._initialPos[4] + self.getProperty("MaxYrotation").value))
+            if self._optionsDict["Zrotation"]:
                 x0List.append(self._initialPos[5])
-                boundsList.append((self._initialPos[5] + self.getProperty("MinRotZ").value,
-                                   self._initialPos[5] + self.getProperty("MaxRotZ").value))
+                boundsList.append((self._initialPos[5] + self.getProperty("MinZrotation").value,
+                                   self._initialPos[5] + self.getProperty("MaxZrotation").value))
 
             results = minimize(self._minimisation_func, x0=x0List,
                                args=(wks_name,
@@ -451,6 +449,7 @@ class AlignComponents(PythonAlgorithm):
         return deg, ax0, ax1, ax2
 
 
+#pylint: disable=wrong-import-position, wrong-import-order
 try:
     from scipy.optimize import minimize
     AlgorithmFactory.subscribe(AlignComponents)
