@@ -58,11 +58,12 @@ void QtReflMainView::initLayout() {
   connect(ui.tableSearchResults,
           SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showSearchContextMenu(const QPoint &)));
-
   // Finally, create a presenter to do the thinking for us
   m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(
       this /*main view*/,
       this /*currently this concrete view is also responsibile for prog reporting*/));
+  m_algoRunner = boost::shared_ptr<MantidQt::API::AlgorithmRunner>(
+      new MantidQt::API::AlgorithmRunner(this));
 }
 
 /**
@@ -131,6 +132,10 @@ void QtReflMainView::setTableList(const std::set<std::string> &tables) {
     connect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()));
     connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)));
   }
+}
+
+void QtReflMainView::icatSearchComplete() {
+  m_presenter->notify(IReflPresenter::ICATSearchCompleteFlag);
 }
 
 /**
@@ -241,6 +246,8 @@ This slot notifies the presenter that the "search" button has been pressed
 */
 void QtReflMainView::on_actionSearch_triggered() {
   m_presenter->notify(IReflPresenter::SearchFlag);
+  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+          SLOT(icatSearchComplete()));
 }
 
 /**
@@ -679,6 +686,11 @@ Get a pointer to the presenter that's currently controlling this view.
 */
 boost::shared_ptr<IReflPresenter> QtReflMainView::getPresenter() const {
   return m_presenter;
+}
+
+boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+QtReflMainView::getAlgorithmRunner() const {
+  return m_algoRunner;
 }
 
 /**

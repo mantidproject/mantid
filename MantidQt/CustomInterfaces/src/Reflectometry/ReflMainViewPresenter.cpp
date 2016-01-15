@@ -1143,6 +1143,11 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
   case IReflPresenter::SearchFlag:
     search();
     break;
+  case IReflPresenter::ICATSearchCompleteFlag: {
+    auto algRunner = m_view->getAlgorithmRunner();
+    IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
+    populateSearch(searchAlg);
+  } break;
   case IReflPresenter::TransferFlag:
     transfer();
     break;
@@ -1442,8 +1447,6 @@ void ReflMainViewPresenter::pasteSelected() {
 /** Searches for runs that can be used */
 void ReflMainViewPresenter::search() {
   const std::string searchString = m_view->getSearchString();
-  const std::string searchInstr = m_view->getSearchInstrument();
-
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return;
@@ -1454,14 +1457,55 @@ void ReflMainViewPresenter::search() {
   if (CatalogManager::Instance().getActiveSessions().empty())
     m_view->showAlgorithmDialog("CatalogLogin");
 
-  try {
-    auto results = m_searcher->search(searchString);
-    m_searchModel = ReflSearchModel_sptr(
-        new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
-    m_view->showSearch(m_searchModel);
+  auto sessionId =
+      CatalogManager::Instance().getActiveSessions().front()->getSessionId();
+
+  // try {
+  auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
+  algSearch->initialize();
+  algSearch->setChild(true);
+  algSearch->setLogging(false);
+  algSearch->setProperty("Session", sessionId);
+  algSearch->setProperty("InvestigationId", searchString);
+  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
+  auto algRunner = m_view->getAlgorithmRunner();
+  algRunner->startAlgorithm(algSearch);
+  /*
+  while (!currentAlg->isExecuted())
+  {
+
+  THIS WORKS FUNCTIONALLY BUT YOU NEED TO
+  FIND A BETTER WAY TO SEE IF ALGORITHM
+  HAS BEEN EXECUTED AS THIS STILL INTRODUCES
+  A SERIAL-TYPE LAG
+
+
+
+  }
+  if (currentAlg->isExecuted())
+  {
+  ITableWorkspace_sptr results = currentAlg->getProperty("OutputWorkspace");
+  m_searchModel = ReflSearchModel_sptr(
+  new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
+  m_view->showSearch(m_searchModel);
+  }
+  //ITableWorkspace_sptr results = algSearch->getProperty("OutputWorkspace");
+  //auto results = m_searcher->search(searchString);
+  m_searchModel = ReflSearchModel_sptr(
+  new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
+  m_view->showSearch(m_searchModel);
   } catch (std::runtime_error &e) {
-    m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),
-                             "Search Failed");
+  m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),
+  "Search Failed");
+  }*/
+}
+
+void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
+  if (searchAlg->isExecuted()) {
+    ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
+    m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
+        *getTransferStrategy(), results, m_view->getSearchInstrument()));
+    m_view->showSearch(m_searchModel);
   }
 }
 
