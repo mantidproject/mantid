@@ -101,6 +101,19 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             if detector_range[0] > detector_range[1]:
                 issues['SpectraRange'] = 'SpectraRange must be in format [lower_index,upper_index]'
 
+        cal_file = self.getProperty('CalFile').value
+        inst = self.getProperty('Instrument').value
+        mode = self.getProperty('Mode').value
+        if cal_file != '':
+            if inst != 'OSIRIS':
+                logger.warning('NOT OSIRIS, inst = ' + str(inst))
+                logger.warning('type = ' + str(type(inst)))
+                issues['CalFile'] = 'Cal Files are currently only available for use in OSIRIS diffspec mode'
+            if mode != 'diffspec':
+                logger.warning('NOT DIFFSPEC, mode = ' + str(mode))
+                logger.warning('type = ' + str(type(mode)))
+                issues['CalFile'] = 'Cal Files are currently only available for use in OSIRIS diffspec mode'
+
         return issues
 
 #------------------------------------------------------------------------------
