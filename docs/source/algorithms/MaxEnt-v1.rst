@@ -121,7 +121,7 @@ and the reconstructed image, i.e. Fourier transform (right).
 **Example - Reconstruct a real muon dataset**
 
 
-In this example, :ref:`algm-FFT` is run on a pre-analyzed muon dataset. The corresponding figure shows
+In this example, :ref:`algm-MaxEnt` is run on a pre-analyzed muon dataset. The corresponding figure shows
 the original and reconstructed data (left), and the real part of the image obtained with :ref:`algm-MaxEnt`
 and :ref:`algm-FFT` (right).
 
@@ -138,7 +138,7 @@ and :ref:`algm-FFT` (right).
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
 
-In this last example, :ref:`algm-FFT` is run on a different muon dataset. The figure shows
+In this last example, :ref:`algm-MaxEnt` is run on a different muon dataset. The figure shows
 the original and reconstructed data (left), the real part of the image (middle)
 and its imaginary part (right).
 
