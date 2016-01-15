@@ -98,8 +98,8 @@ void MultipleExperimentInfos::copyExperimentInfos(
     const MultipleExperimentInfos &other) {
   m_expInfos.clear();
   // Do a deep copy of ExperimentInfo's
-  for (size_t i = 0; i < other.m_expInfos.size(); i++) {
-    ExperimentInfo_sptr copy(new ExperimentInfo(*other.m_expInfos[i]));
+  for (const auto &m_expInfo : other.m_expInfos) {
+    ExperimentInfo_sptr copy(new ExperimentInfo(*m_expInfo));
     m_expInfos.push_back(copy);
   }
 }

@@ -231,8 +231,8 @@ bool FileProperty::extsMatchRunFiles() {
     auto facilityExtsEnd = facilityExts.cend();
     const std::vector<std::string> allowedExts = this->allowedValues();
 
-    for (auto it = allowedExts.begin(); it != allowedExts.end(); ++it) {
-      if (std::find(facilityExtsBegin, facilityExtsEnd, *it) !=
+    for (const auto &allowedExt : allowedExts) {
+      if (std::find(facilityExtsBegin, facilityExtsEnd, allowedExt) !=
           facilityExtsEnd) {
         match = true;
         break;
@@ -279,12 +279,14 @@ std::string FileProperty::setLoadProperty(const std::string &propValue) {
                        toupper);
         addExtension(upper, exts);
       }
-      for (auto it = allowedExts.begin(); it != allowedExts.end(); ++it) {
-        std::string lower(*it);
-        std::string upper(*it);
-        std::transform(it->begin(), it->end(), lower.begin(), tolower);
-        std::transform(it->begin(), it->end(), upper.begin(), toupper);
-        addExtension(*it, exts);
+      for (auto &allowedExt : allowedExts) {
+        std::string lower(allowedExt);
+        std::string upper(allowedExt);
+        std::transform(allowedExt.begin(), allowedExt.end(), lower.begin(),
+                       tolower);
+        std::transform(allowedExt.begin(), allowedExt.end(), upper.begin(),
+                       toupper);
+        addExtension(allowedExt, exts);
         addExtension(lower, exts);
         addExtension(upper, exts);
       }

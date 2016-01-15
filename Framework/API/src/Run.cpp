@@ -102,14 +102,14 @@ Run &Run::operator+=(const Run &rhs) {
   mergeMergables(m_manager, rhs.m_manager);
 
   // Other properties are added together if they are on the approved list
-  for (int i = 0; i < ADDABLES; ++i) {
-    if (rhs.m_manager.existsProperty(ADDABLE[i])) {
+  for (const auto &i : ADDABLE) {
+    if (rhs.m_manager.existsProperty(i)) {
       // get a pointer to the property on the right-hand side workspace
-      Property *right = rhs.m_manager.getProperty(ADDABLE[i]);
+      Property *right = rhs.m_manager.getProperty(i);
 
       // now deal with the left-hand side
-      if (m_manager.existsProperty(ADDABLE[i])) {
-        Property *left = m_manager.getProperty(ADDABLE[i]);
+      if (m_manager.existsProperty(i)) {
+        Property *left = m_manager.getProperty(i);
         left->operator+=(right);
       } else
         // no property on the left-hand side, create one and copy the
@@ -398,9 +398,9 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
+  for (auto &entrie : entries) {
     // Get the name/class pair
-    const std::pair<std::string, std::string> &name_class = *it;
+    const std::pair<std::string, std::string> &name_class = entrie;
     if (name_class.second == "NXpositioner") {
       // Goniometer class
       m_goniometer.loadNexus(file, name_class.first);
@@ -506,15 +506,15 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
   // get pointers to all the properties on the right-handside and prepare to
   // loop through them
   const std::vector<Property *> inc = toAdd.getProperties();
-  for (auto it = inc.cbegin(); it != inc.cend(); ++it) {
-    const std::string rhs_name = (*it)->name();
+  for (auto it : inc) {
+    const std::string rhs_name = it->name();
     try {
       // now get pointers to the same properties on the left-handside
       Property *lhs_prop(sum.getProperty(rhs_name));
-      lhs_prop->merge(*it);
+      lhs_prop->merge(it);
     } catch (Exception::NotFoundError &) {
       // copy any properties that aren't already on the left hand side
-      Property *copy = (*it)->clone();
+      Property *copy = it->clone();
       // And we add a copy of that property to *this
       sum.declareProperty(copy, "");
     }

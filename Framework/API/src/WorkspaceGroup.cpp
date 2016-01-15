@@ -37,8 +37,8 @@ WorkspaceGroup::~WorkspaceGroup() { observeADSNotifications(false); }
 const std::string WorkspaceGroup::toString() const {
   std::string descr = this->id() + "\n";
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
-    descr += " -- " + (*it)->name() + "\n";
+  for (const auto &m_workspace : m_workspaces) {
+    descr += " -- " + m_workspace->name() + "\n";
   }
   return descr;
 }
@@ -76,9 +76,9 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
  */
 bool WorkspaceGroup::isInChildGroup(const Workspace &workspace) const {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  for (auto ws = m_workspaces.begin(); ws != m_workspaces.end(); ++ws) {
+  for (const auto &m_workspace : m_workspaces) {
     // check child groups only
-    WorkspaceGroup *group = dynamic_cast<WorkspaceGroup *>(ws->get());
+    WorkspaceGroup *group = dynamic_cast<WorkspaceGroup *>(m_workspace.get());
     if (group) {
       if (group->isInGroup(workspace))
         return true;
@@ -112,8 +112,8 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace) {
  */
 bool WorkspaceGroup::contains(const std::string &wsName) const {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
-    if ((**it).name() == wsName)
+  for (const auto &m_workspace : m_workspaces) {
+    if ((*m_workspace).name() == wsName)
       return true;
   }
   return false;
@@ -147,8 +147,8 @@ void WorkspaceGroup::reportMembers(std::set<Workspace_sptr> &memberList) const {
 std::vector<std::string> WorkspaceGroup::getNames() const {
   Poco::Mutex::ScopedLock _lock(m_mutex);
   std::vector<std::string> out;
-  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
-    out.push_back((**it).name());
+  for (const auto &m_workspace : m_workspaces) {
+    out.push_back((*m_workspace).name());
   }
   return out;
 }
@@ -177,9 +177,9 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
  */
 Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
-    if ((**it).name() == wsName)
-      return *it;
+  for (const auto &m_workspace : m_workspaces) {
+    if ((*m_workspace).name() == wsName)
+      return m_workspace;
   }
   throw std::out_of_range("Workspace " + wsName +
                           " not contained in the group");
@@ -208,9 +208,9 @@ void WorkspaceGroup::removeByADS(const std::string &wsName) {
 /// level)
 void WorkspaceGroup::print() const {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  for (auto itr = m_workspaces.begin(); itr != m_workspaces.end(); ++itr) {
-    g_log.debug() << "Workspace name in group vector =  " << (**itr).name()
-                  << std::endl;
+  for (const auto &m_workspace : m_workspaces) {
+    g_log.debug() << "Workspace name in group vector =  "
+                  << (*m_workspace).name() << std::endl;
   }
 }
 
@@ -273,9 +273,9 @@ void WorkspaceGroup::workspaceReplaceHandle(
   Poco::Mutex::ScopedLock _lock(m_mutex);
 
   const std::string replacedName = notice->objectName();
-  for (auto citr = m_workspaces.begin(); citr != m_workspaces.end(); ++citr) {
-    if ((**citr).name() == replacedName) {
-      *citr = notice->newObject();
+  for (auto &m_workspace : m_workspaces) {
+    if ((*m_workspace).name() == replacedName) {
+      m_workspace = notice->newObject();
       break;
     }
   }
@@ -303,8 +303,8 @@ bool WorkspaceGroup::areNamesSimilar() const {
     return false;
 
   // Check all the members are of similar names
-  for (auto citr = m_workspaces.begin(); citr != m_workspaces.end(); ++citr) {
-    const std::string wsName = (**citr).name();
+  for (const auto &m_workspace : m_workspaces) {
+    const std::string wsName = (*m_workspace).name();
     // Find the last underscore _
     std::size_t pos = wsName.find_last_of("_");
     // No underscore = not similar
@@ -331,10 +331,9 @@ bool WorkspaceGroup::isMultiperiod() const {
     return false;
   }
   // Loop through all inner workspaces, checking each one in turn.
-  for (auto iterator = m_workspaces.cbegin(); iterator != m_workspaces.cend();
-       ++iterator) {
+  for (const auto &m_workspace : m_workspaces) {
     if (MatrixWorkspace_sptr ws =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(*iterator)) {
+            boost::dynamic_pointer_cast<MatrixWorkspace>(m_workspace)) {
       try {
         Kernel::Property *nPeriodsProp = ws->run().getLogData("nperiods");
         int num = -1;
@@ -370,10 +369,10 @@ bool WorkspaceGroup::isInGroup(const Workspace &workspace, size_t level) const {
     throw std::runtime_error("WorkspaceGroup nesting level is too deep.");
   }
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  for (auto ws = m_workspaces.begin(); ws != m_workspaces.end(); ++ws) {
-    if (ws->get() == &workspace)
+  for (const auto &m_workspace : m_workspaces) {
+    if (m_workspace.get() == &workspace)
       return true;
-    WorkspaceGroup *group = dynamic_cast<WorkspaceGroup *>(ws->get());
+    WorkspaceGroup *group = dynamic_cast<WorkspaceGroup *>(m_workspace.get());
     if (group) {
       if (group->isInGroup(workspace, level + 1))
         return true;

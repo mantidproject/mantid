@@ -19,16 +19,16 @@ size_t GridDomain::size() const {
   if (!m_grids.size())
     return 0;
   size_t n = 1;
-  for (auto it = m_grids.begin(); it != m_grids.end(); it++)
-    n *= (*it)->size();
+  for (const auto &m_grid : m_grids)
+    n *= m_grid->size();
   return n;
 }
 
 /// number of dimensions of the grid
 size_t GridDomain::nDimensions() {
   size_t n = 0;
-  for (auto it = m_grids.begin(); it != m_grids.end(); it++)
-    n += (*it)->nDimensions();
+  for (auto &m_grid : m_grids)
+    n += m_grid->nDimensions();
   return n;
 }
 
@@ -46,8 +46,8 @@ GridDomain_sptr GridDomain::getGrid(size_t index) {
 }
 
 void GridDomain::reScale(const std::string &scaling) {
-  for (auto it = m_grids.begin(); it != m_grids.end(); it++)
-    (*it)->reScale(scaling);
+  for (auto &m_grid : m_grids)
+    m_grid->reScale(scaling);
 }
 
 } // namespace API

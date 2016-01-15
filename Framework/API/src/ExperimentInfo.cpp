@@ -73,9 +73,8 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   if (other->m_moderatorModel)
     m_moderatorModel = other->m_moderatorModel->clone();
   m_choppers.clear();
-  for (auto iter = other->m_choppers.begin(); iter != other->m_choppers.end();
-       ++iter) {
-    m_choppers.push_back((*iter)->clone());
+  for (const auto &m_chopper : other->m_choppers) {
+    m_choppers.push_back(m_chopper->clone());
   }
 }
 
@@ -106,9 +105,8 @@ const std::string ExperimentInfo::toString() const {
 
   // parameter files loaded
   auto paramFileVector = this->instrumentParameters().getParameterFilenames();
-  for (auto itFilename = paramFileVector.begin();
-       itFilename != paramFileVector.end(); ++itFilename) {
-    out << "Parameters from: " << *itFilename;
+  for (auto &itFilename : paramFileVector) {
+    out << "Parameters from: " << itFilename;
     out << "\n";
   }
 
@@ -851,11 +849,9 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
                                                       // the most recently
                                                       // starting matching IDF
-  for (auto instDirs_itr = directoryNames.begin();
-       instDirs_itr != directoryNames.end(); ++instDirs_itr) {
+  for (auto directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first beat file
-    std::string directoryName = *instDirs_itr;
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
          ++dir_itr) {
       if (!Poco::File(dir_itr->path()).isFile())

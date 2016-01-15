@@ -9,8 +9,8 @@ namespace API {
 /// member domains.
 size_t JointDomain::size() const {
   size_t n = 0;
-  for (auto d = m_domains.begin(); d != m_domains.end(); ++d) {
-    n += (**d).size();
+  for (const auto &m_domain : m_domains) {
+    n += (*m_domain).size();
   };
   return n;
 }

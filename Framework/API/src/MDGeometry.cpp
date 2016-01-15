@@ -131,9 +131,9 @@ MDGeometry::getDimension(size_t index) const {
  */
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MDGeometry::getDimensionWithId(std::string id) const {
-  for (size_t i = 0; i < m_dimensions.size(); ++i)
-    if (m_dimensions[i]->getDimensionId() == id)
-      return m_dimensions[i];
+  for (const auto &m_dimension : m_dimensions)
+    if (m_dimension->getDimensionId() == id)
+      return m_dimension;
   throw std::invalid_argument("Dimension tagged " + id +
                               " was not found in the Workspace");
 }
@@ -146,9 +146,7 @@ Mantid::Geometry::VecIMDDimension_const_sptr
 MDGeometry::getNonIntegratedDimensions() const {
   using namespace Mantid::Geometry;
   VecIMDDimension_const_sptr vecCollapsedDimensions;
-  for (auto it = this->m_dimensions.cbegin(); it != this->m_dimensions.cend();
-       ++it) {
-    IMDDimension_sptr current = (*it);
+  for (auto current : this->m_dimensions) {
     if (!current->getIsIntegrated()) {
       vecCollapsedDimensions.push_back(current);
     }
@@ -283,8 +281,8 @@ void MDGeometry::setBasisVector(size_t index, const Mantid::Kernel::VMD &vec) {
  */
 bool MDGeometry::allBasisNormalized() const {
   bool allNormalized = true;
-  for (auto it = m_basisVectors.begin(); it != m_basisVectors.end(); ++it) {
-    if (it->length() != 1.0) {
+  for (const auto &m_basisVector : m_basisVectors) {
+    if (m_basisVector.length() != 1.0) {
       allNormalized = false;
       break;
     }
@@ -397,14 +395,14 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
  */
 void MDGeometry::deleteNotificationReceived(
     Mantid::API::WorkspacePreDeleteNotification_ptr notice) {
-  for (size_t i = 0; i < m_originalWorkspaces.size(); i++) {
-    Workspace_sptr original = m_originalWorkspaces[i];
+  for (auto &m_originalWorkspace : m_originalWorkspaces) {
+    Workspace_sptr original = m_originalWorkspace;
     if (original) {
       // Compare the pointer being deleted to the one stored as the original.
       Workspace_sptr deleted = notice->object();
       if (original == deleted) {
         // Clear the reference
-        m_originalWorkspaces[i].reset();
+        m_originalWorkspace.reset();
       }
     }
   }

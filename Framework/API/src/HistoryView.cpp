@@ -10,8 +10,8 @@ HistoryView::HistoryView(const WorkspaceHistory &wsHist)
     : m_wsHist(wsHist), m_historyItems() {
   // add all of the top level algorithms to the view by default
   const auto algorithms = wsHist.getAlgorithmHistories();
-  for (auto iter = algorithms.cbegin(); iter != algorithms.cend(); ++iter) {
-    m_historyItems.emplace_back(*iter);
+  for (const auto &algorithm : algorithms) {
+    m_historyItems.emplace_back(algorithm);
   }
 }
 
@@ -60,9 +60,8 @@ void HistoryView::unroll(std::list<HistoryItem>::iterator it) {
 
     ++it; // move iterator forward to insertion position
     // insert each of the records, in order, at this position
-    for (auto childIter = childHistories.begin();
-         childIter != childHistories.end(); ++childIter) {
-      HistoryItem item(*childIter);
+    for (const auto &childHistorie : childHistories) {
+      HistoryItem item(childHistorie);
       m_historyItems.insert(it, item);
     }
   }

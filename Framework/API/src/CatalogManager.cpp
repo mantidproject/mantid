@@ -55,17 +55,15 @@ ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string &sessionID) {
 
   if (sessionID.empty()) {
     auto composite = boost::make_shared<CompositeCatalog>();
-    for (auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end();
-         ++item) {
-      composite->add(item->second);
+    for (auto &m_activeCatalog : m_activeCatalogs) {
+      composite->add(m_activeCatalog.second);
     }
     return composite;
   }
 
-  for (auto iter = m_activeCatalogs.begin(); iter != m_activeCatalogs.end();
-       ++iter) {
-    if (sessionID == iter->first->getSessionId())
-      return iter->second;
+  for (auto &m_activeCatalog : m_activeCatalogs) {
+    if (sessionID == m_activeCatalog.first->getSessionId())
+      return m_activeCatalog.second;
   }
 
   // If we reached this point then the session is corrupt/invalid.
@@ -81,9 +79,8 @@ ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string &sessionID) {
  */
 void CatalogManagerImpl::destroyCatalog(const std::string &sessionID) {
   if (sessionID.empty()) {
-    for (auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end();
-         ++item) {
-      item->second->logout();
+    for (auto &m_activeCatalog : m_activeCatalogs) {
+      m_activeCatalog.second->logout();
     }
     m_activeCatalogs.clear();
   }
@@ -104,9 +101,8 @@ void CatalogManagerImpl::destroyCatalog(const std::string &sessionID) {
 std::vector<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions() {
   std::vector<CatalogSession_sptr> sessions;
 
-  for (auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end();
-       ++item) {
-    sessions.push_back(item->first);
+  for (auto &m_activeCatalog : m_activeCatalogs) {
+    sessions.push_back(m_activeCatalog.first);
   }
 
   return sessions;

@@ -21,12 +21,12 @@ Kernel::Logger g_log("ParamFunction");
 
 /// Destructor
 ParamFunction::~ParamFunction() {
-  for (auto it = m_ties.begin(); it != m_ties.end(); ++it) {
-    delete *it;
+  for (auto &m_tie : m_ties) {
+    delete m_tie;
   }
   m_ties.clear();
-  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
-    delete *it;
+  for (auto &m_constraint : m_constraints) {
+    delete m_constraint;
   }
   m_constraints.clear();
 }
@@ -108,8 +108,8 @@ void ParamFunction::setParameter(const std::string &name, const double &value,
         << ") "
         << "of function " << this->name();
     msg << "\nAllowed parameters: ";
-    for (size_t ist = 0; ist < m_parameterNames.size(); ++ist) {
-      msg << m_parameterNames[ist] << ", ";
+    for (auto &m_parameterName : m_parameterNames) {
+      msg << m_parameterName << ", ";
     }
     throw std::invalid_argument(msg.str());
   }
@@ -133,8 +133,8 @@ void ParamFunction::setParameterDescription(const std::string &name,
     msg << "ParamFunction tries to set description to non-exist parameter ("
         << ucName << "). ";
     msg << "\nAllowed parameters: ";
-    for (size_t ist = 0; ist < m_parameterNames.size(); ++ist)
-      msg << m_parameterNames[ist] << ", ";
+    for (auto &m_parameterName : m_parameterNames)
+      msg << m_parameterName << ", ";
     throw std::invalid_argument(msg.str());
   }
   setParameterDescription(static_cast<int>(it - m_parameterNames.begin()),
@@ -157,8 +157,8 @@ double ParamFunction::getParameter(const std::string &name) const {
         << ucName << ") "
         << "to function " << this->name();
     msg << "\nAllowed parameters: ";
-    for (size_t ist = 0; ist < m_parameterNames.size(); ++ist)
-      msg << m_parameterNames[ist] << ", ";
+    for (const auto &m_parameterName : m_parameterNames)
+      msg << m_parameterName << ", ";
     throw std::invalid_argument(msg.str());
   }
 
@@ -300,11 +300,11 @@ void ParamFunction::unfix(size_t i) {
 void ParamFunction::addTie(ParameterTie *tie) {
   size_t iPar = tie->getIndex();
   bool found = false;
-  for (std::vector<ParameterTie *>::size_type i = 0; i < m_ties.size(); i++) {
-    if (m_ties[i]->getIndex() == iPar) {
+  for (auto &m_tie : m_ties) {
+    if (m_tie->getIndex() == iPar) {
       found = true;
-      delete m_ties[i];
-      m_ties[i] = tie;
+      delete m_tie;
+      m_tie = tie;
       break;
     }
   }
@@ -317,8 +317,8 @@ void ParamFunction::addTie(ParameterTie *tie) {
  * Apply the ties.
  */
 void ParamFunction::applyTies() {
-  for (auto tie = m_ties.begin(); tie != m_ties.end(); ++tie) {
-    (**tie).eval();
+  for (auto &m_tie : m_ties) {
+    (*m_tie).eval();
   }
 }
 
@@ -374,10 +374,10 @@ ParameterTie *ParamFunction::getTie(size_t i) const {
 /** Remove all ties
  */
 void ParamFunction::clearTies() {
-  for (auto it = m_ties.begin(); it != m_ties.end(); ++it) {
-    size_t i = getParameterIndex(**it);
+  for (auto &m_tie : m_ties) {
+    size_t i = getParameterIndex(*m_tie);
     unfix(i);
-    delete *it;
+    delete m_tie;
   }
   m_ties.clear();
 }
@@ -388,12 +388,11 @@ void ParamFunction::clearTies() {
 void ParamFunction::addConstraint(IConstraint *ic) {
   size_t iPar = ic->getIndex();
   bool found = false;
-  for (std::vector<IConstraint *>::size_type i = 0; i < m_constraints.size();
-       i++) {
-    if (m_constraints[i]->getIndex() == iPar) {
+  for (auto &m_constraint : m_constraints) {
+    if (m_constraint->getIndex() == iPar) {
       found = true;
-      delete m_constraints[i];
-      m_constraints[i] = ic;
+      delete m_constraint;
+      m_constraint = ic;
       break;
     }
   }
@@ -433,19 +432,19 @@ void ParamFunction::removeConstraint(const std::string &parName) {
 }
 
 void ParamFunction::setUpForFit() {
-  for (size_t i = 0; i < m_constraints.size(); i++) {
-    m_constraints[i]->setParamToSatisfyConstraint();
+  for (auto &m_constraint : m_constraints) {
+    m_constraint->setParamToSatisfyConstraint();
   }
 }
 
 /// Nonvirtual member which removes all declared parameters
 void ParamFunction::clearAllParameters() {
-  for (auto it = m_ties.begin(); it != m_ties.end(); ++it) {
-    delete *it;
+  for (auto &m_tie : m_ties) {
+    delete m_tie;
   }
   m_ties.clear();
-  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
-    delete *it;
+  for (auto &m_constraint : m_constraints) {
+    delete m_constraint;
   }
   m_constraints.clear();
 
