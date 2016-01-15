@@ -109,7 +109,7 @@ void SetMDFrame::exec() {
     return;
   }
 
-  for (unsigned long &axe : axes) {
+  for (auto &axe : axes) {
     // Get associated dimension
     auto dimension = inputWorkspace->getDimension(axe);
 

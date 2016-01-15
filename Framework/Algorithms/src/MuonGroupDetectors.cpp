@@ -106,7 +106,7 @@ void MuonGroupDetectors::exec() {
     // We will be setting them anew
     outWS->getSpectrum(groupIndex)->clearDetectorIDs();
 
-    for (unsigned long &wsIndice : wsIndices) {
+    for (auto &wsIndice : wsIndices) {
       for (size_t i = 0; i < inWS->blocksize(); ++i) {
         // Sum the y values
         outWS->dataY(groupIndex)[i] += inWS->dataY(wsIndice)[i];

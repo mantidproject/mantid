@@ -158,9 +158,9 @@ void PredictFractionalPeaks::exec() {
   bool done = false;
   int ErrPos = 1; // Used to determine position in code of a throw
   while (!done) {
-    for (double hOffset : hOffsets)
-      for (double kOffset : kOffsets)
-        for (double lOffset : lOffsets)
+    for (double hOffset : hOffsets) {
+      for (double kOffset : kOffsets) {
+        for (double lOffset : lOffsets) {
           try {
             V3D hkl1(hkl);
             ErrPos = 0;
@@ -207,6 +207,9 @@ void PredictFractionalPeaks::exec() {
             if (ErrPos != 1) // setQLabFrame in createPeak throws exception
               throw new std::invalid_argument("Invalid data at this point");
           }
+        }
+      }
+    }
     if (includePeaksInRange) {
       hkl[0]++;
       if (hkl[0] > Hmax) {

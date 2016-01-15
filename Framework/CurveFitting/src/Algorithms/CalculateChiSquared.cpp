@@ -668,7 +668,7 @@ void CalculateChiSquared::unfixParameters() {
 
 /// Restore the "fixed" status of previously unfixed paramters.
 void CalculateChiSquared::refixParameters() {
-  for (unsigned long &m_fixedParameter : m_fixedParameters) {
+  for (auto &m_fixedParameter : m_fixedParameters) {
     m_function->fix(m_fixedParameter);
   }
 }

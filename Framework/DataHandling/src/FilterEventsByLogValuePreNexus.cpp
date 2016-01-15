@@ -513,7 +513,7 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   m_loadOnlySomeSpectra = (this->m_spectraList.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (long long &it : m_spectraList)
+  for (auto &it : m_spectraList)
     spectraLoadMap[it] = true;
 
   //---------------------------------------------------------------------------
@@ -1432,7 +1432,7 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
       uint64_t eventindex = m_vecEventIndex[i];
       if (eventindex > static_cast<uint64_t>(m_numEvents)) {
         uint64_t realeventindex = eventindex & VETOFLAG;
-        i = realeventindex;
+        m_vecEventIndex[i] = realeventindex;
       }
       PARALLEL_END_INTERUPT_REGION
     }
