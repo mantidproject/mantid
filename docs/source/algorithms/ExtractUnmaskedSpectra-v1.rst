@@ -10,35 +10,36 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
-
+This algorithm is useful for removing unwanted spectra using masks. If `MaskWorkspace`
+is provided it is used to select the spectra to remove. Otherwise the internal mask
+in the `InputWorkspace` is used.
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - ExtractUnmaskedSpectra**
 
 .. testcode:: ExtractUnmaskedSpectraExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+    # Create histogram workspace
+    ws = CreateSampleWorkspace()
 
-   wsOut = ExtractUnmaskedSpectra()
+    # Mask 10 spectra
+    MaskDetectors(ws, [1,2,3,4,5,6,7,8,9,10])
 
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+    # Extract unmasked into a new workspace
+    ows = ExtractUnmaskedSpectra(ws)
+
+    # Compare workspace sizes
+    print 'Number of spectra in original workspace', ws.getNumberHistograms()
+    print 'Number of spectra in cropped  workspace', ows.getNumberHistograms()
 
 Output:
 
 .. testoutput:: ExtractUnmaskedSpectraExample
 
-  The output workspace has ?? spectra
+    Number of spectra in original workspace 200
+    Number of spectra in cropped  workspace 190
 
 .. categories::
 
