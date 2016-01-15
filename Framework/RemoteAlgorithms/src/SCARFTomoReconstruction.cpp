@@ -1466,8 +1466,8 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
       while (std::getline(ss, PACname, ';')) {
         filePACNames.push_back(PACname);
       }
-      for (size_t i = 0; i < filePACNames.size(); i++) {
-        getOneJobFile(jobId, filePACNames[i], localDir, t);
+      for (auto &filePACName : filePACNames) {
+        getOneJobFile(jobId, filePACName, localDir, t);
       }
     }
   } else {

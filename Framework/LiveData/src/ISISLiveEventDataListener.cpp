@@ -387,9 +387,9 @@ void ISISLiveEventDataListener::saveEvents(
     period = 0;
   }
 
-  for (auto it = data.begin(); it != data.end(); ++it) {
-    Mantid::DataObjects::TofEvent event(it->time_of_flight, pulseTime);
-    m_eventBuffer[period]->getEventList(it->spectrum).addEventQuickly(event);
+  for (auto it : data) {
+    Mantid::DataObjects::TofEvent event(it.time_of_flight, pulseTime);
+    m_eventBuffer[period]->getEventList(it.spectrum).addEventQuickly(event);
   }
 }
 
