@@ -504,7 +504,7 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
   if (detector_ids.empty())
     return false;
 
-  for (value_type detector_id : detector_ids) {
+  for (auto detector_id : detector_ids) {
     if (this->isMonitor(detector_id))
       return true;
   }
@@ -551,7 +551,7 @@ bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const {
   if (detector_ids.empty())
     return false;
 
-  for (value_type detector_id : detector_ids) {
+  for (auto detector_id : detector_ids) {
     if (!this->isDetectorMasked(detector_id))
       return false;
   }

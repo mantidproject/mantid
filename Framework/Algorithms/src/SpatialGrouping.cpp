@@ -174,7 +174,7 @@ void SpatialGrouping::exec() {
           inputWorkspace->getIndexFromSpectrumNumber((*grpIt)[i]);
       const std::set<detid_t> &detIds =
           inputWorkspace->getSpectrum(workspaceIndex)->getDetectorIDs();
-      for (value_type detId : detIds) {
+      for (auto detId : detIds) {
         xml << "," << detId;
       }
     }

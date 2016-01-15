@@ -59,7 +59,7 @@ void GroupingWorkspace::makeDetectorIDToGroupMap(
     if (group == 0)
       group = -1;
     std::set<detid_t> detIDs = this->getDetectorIDs(wi);
-    for (value_type detID : detIDs) {
+    for (auto detID : detIDs) {
       detIDToGroup[detID] = group;
       if (group > ngroups)
         ngroups = group;
@@ -85,7 +85,7 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(
     if (group == 0)
       group = -1;
     std::set<detid_t> detIDs = this->getDetectorIDs(wi);
-    for (value_type detID : detIDs) {
+    for (auto detID : detIDs) {
       if (detID <
           0) // if you need negative detector ids, use the other function
         continue;

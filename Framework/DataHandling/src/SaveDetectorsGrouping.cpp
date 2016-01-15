@@ -119,7 +119,7 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
       throw;
     }
     detid_t detid = 0;
-    for (value_type it : detids) {
+    for (auto it : detids) {
       detid = it;
     }
     it->second.push_back(detid);

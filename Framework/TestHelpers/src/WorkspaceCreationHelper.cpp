@@ -714,13 +714,24 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
                             double binDelta) {
 
   EventWorkspace_sptr retVal(new EventWorkspace);
-  redetl->initialize(1, 2, 1);
+  retVal->initialize(1, 2, 1);
 
-  det(size_t g = 0; g < groups.dete(); g++) {
-    retVal->getdetddEventList(g).clearDetectodets();
-    std::vector<int> ddet = groups[g];
-    for (int &det : dets)
-      xRef[i] = x0 + i * binDelta;
+  for (size_t g = 0; g < groups.size(); g++) {
+    retVal->getOrAddEventList(g).clearDetectorIDs();
+    std::vector<int> dets = groups[g];
+    for (auto det : dets) {
+      for (int i = 0; i < numBins; i++)
+        retVal->getOrAddEventList(g) += TofEvent((i + 0.5) * binDelta, 1);
+      retVal->getOrAddEventList(g).addDetectorID(det);
+    }
+  }
+  // Create the x-axis for histogramming.
+  MantidVecPtr x1;
+  MantidVec &xRef = x1.access();
+  double x0 = 0;
+  xRef.resize(numBins);
+  for (int i = 0; i < numBins; ++i) {
+    xRef[i] = x0 + i * binDelta;
   }
 
   // Set all the histograms at once.

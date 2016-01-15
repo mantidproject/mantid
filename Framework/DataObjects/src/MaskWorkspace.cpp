@@ -197,7 +197,7 @@ bool MaskWorkspace::isMasked(const std::set<detid_t> &detectorIDs) const {
   }
 
   bool masked(true);
-  for (value_type detectorID : detectorIDs) {
+  for (auto detectorID : detectorIDs) {
     if (!this->isMasked(detectorID)) {
       masked = false;
       break; // allows space for a debug print statement
@@ -234,7 +234,7 @@ void MaskWorkspace::setMasked(const detid_t detectorID, const bool mask) {
  */
 void MaskWorkspace::setMasked(const std::set<detid_t> &detectorIDs,
                               const bool mask) {
-  for (value_type detectorID : detectorIDs) {
+  for (auto detectorID : detectorIDs) {
     this->setMasked(detectorID, mask);
   }
 }

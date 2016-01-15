@@ -1129,7 +1129,7 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
                      static_cast<double>(unGroupedSet.size());
 
   // go thorugh all the spectra in the input workspace
-  for (value_type copyFrIt : unGroupedSet) {
+  for (auto copyFrIt : unGroupedSet) {
     if (copyFrIt == USED)
       continue; // Marked as not to be used
     size_t sourceIndex = static_cast<size_t>(copyFrIt);
@@ -1186,7 +1186,7 @@ void GroupDetectors2::moveOthersEvent(
                      static_cast<double>(unGroupedSet.size());
 
   // go thorugh all the spectra in the input workspace
-  for (value_type copyFrIt : unGroupedSet) {
+  for (auto copyFrIt : unGroupedSet) {
     if (copyFrIt == USED)
       continue; // Marked as not to be used
     size_t sourceIndex = static_cast<size_t>(copyFrIt);

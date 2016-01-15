@@ -101,7 +101,7 @@ public:
     std::list<boost::shared_ptr<CompositeCluster>> composites;
     for (auto &labelSet : m_groups) {
       auto composite = boost::make_shared<CompositeCluster>();
-      for (value_type j : labelSet) {
+      for (auto j : labelSet) {
         boost::shared_ptr<ICluster> &cluster = m_register[j];
         composite->add(cluster);
       }

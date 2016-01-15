@@ -91,7 +91,7 @@ public:
     double difc = 0.;
     double difa = 0.;
     double tzero = 0.;
-    for (value_type row : rows) {
+    for (auto row : rows) {
       difc += m_difcCol->toDouble(row);
       difa += m_difaCol->toDouble(row);
       tzero += m_tzeroCol->toDouble(row);
@@ -125,7 +125,7 @@ private:
 
   std::set<size_t> getRow(const std::set<detid_t> &detIds) {
     std::set<size_t> rows;
-    for (value_type detId : detIds) {
+    for (auto detId : detIds) {
       auto rowIter = m_detidToRow.find(detId);
       if (rowIter != m_detidToRow.end()) { // skip if not found
         rows.insert(rowIter->second);

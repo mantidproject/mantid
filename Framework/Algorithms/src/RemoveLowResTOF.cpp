@@ -308,7 +308,7 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex) {
     }
   } else {
     double l2 = 0;
-    for (value_type it : detSet) {
+    for (auto it : detSet) {
       l2 += m_instrument->getDetector(it)->getDistance(*m_sample);
     }
     l2 /= static_cast<double>(detSet.size());

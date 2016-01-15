@@ -181,7 +181,7 @@ void SaveAscii::exec() {
           file << " , DX" << spec;
       }
     else
-      for (value_type spec : idx) {
+      for (auto spec : idx) {
         file << comstr << "Y" << spec << comstr << errstr << spec << errstr2;
         if (write_dx)
           file << " , DX" << spec;
@@ -214,7 +214,7 @@ void SaveAscii::exec() {
         file << ws->readE(spec)[bin];
       }
     else
-      for (value_type spec : idx) {
+      for (auto spec : idx) {
         file << sep;
         file << ws->readY(spec)[bin];
         file << sep;

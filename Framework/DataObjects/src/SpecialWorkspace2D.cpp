@@ -46,7 +46,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
   detID_to_WI.clear();
   for (size_t wi = 0; wi < m_noVectors; wi++) {
     set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
-    for (value_type det : dets) {
+    for (auto det : dets) {
       detID_to_WI[det] = wi;
     }
   }
@@ -66,7 +66,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
   detID_to_WI.clear();
   for (size_t wi = 0; wi < m_noVectors; wi++) {
     set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
-    for (value_type det : dets) {
+    for (auto det : dets) {
       detID_to_WI[det] = wi;
     }
   }
@@ -186,7 +186,7 @@ void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value,
  */
 void SpecialWorkspace2D::setValue(const set<detid_t> &detectorIDs,
                                   const double value, const double error) {
-  for (value_type detectorID : detectorIDs) {
+  for (auto detectorID : detectorIDs) {
     this->setValue(detectorID, value, error);
   }
 }
