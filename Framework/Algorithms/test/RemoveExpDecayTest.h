@@ -63,7 +63,7 @@ public:
     // Test some Y values
     TS_ASSERT_DELTA(outWS->readY(0)[10], -0.0992, 0.0001);
     TS_ASSERT_DELTA(outWS->readY(0)[19], -0.0111, 0.0001);
-    TS_ASSERT_DELTA(outWS->readY(0)[49], -0.0622, 0.0001);
+    TS_ASSERT_DELTA(outWS->readY(0)[49], -0.0625, 0.0001);
     // Test some E values
     TS_ASSERT_DELTA(outWS->readE(0)[10], 0.0054, 0.0001);
     TS_ASSERT_DELTA(outWS->readE(0)[19], 0.0059, 0.0001);
@@ -75,9 +75,9 @@ public:
     TS_ASSERT_DELTA(outWS->readX(1)[19], 0.3800, 0.0001);
     TS_ASSERT_DELTA(outWS->readX(1)[49], 0.9800, 0.0001);
     // Test some Y values
-    TS_ASSERT_DELTA(outWS->readY(1)[10], 0.0274, 0.0001);
+    TS_ASSERT_DELTA(outWS->readY(1)[10], 0.0276, 0.0001);
     TS_ASSERT_DELTA(outWS->readY(1)[19], -0.1003, 0.0001);
-    TS_ASSERT_DELTA(outWS->readY(1)[49], 0.0802, 0.0001);
+    TS_ASSERT_DELTA(outWS->readY(1)[49], 0.0798, 0.0001);
     // Test some E values
     TS_ASSERT_DELTA(outWS->readE(1)[10], 0.0054, 0.0001);
     TS_ASSERT_DELTA(outWS->readE(1)[19], 0.0059, 0.0001);
