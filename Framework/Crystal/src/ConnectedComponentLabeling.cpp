@@ -440,8 +440,8 @@ ClusterTuple ConnectedComponentLabeling::executeAndFetchClusters(
   }
   // Write each cluster out to the output workspace
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (unsigned long &key : keys) {
-    clusters[key]->writeTo(outWS);
+  for (int i = 0; i < static_cast<int>(keys.size()); ++i) {
+    clusters[keys[i]]->writeTo(outWS);
   }
 
   return ClusterTuple(outWS, clusters);
