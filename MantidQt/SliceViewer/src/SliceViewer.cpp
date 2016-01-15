@@ -736,9 +736,13 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // Build up the widgets
   this->updateDimensionSliceWidgets();
 
-  // Find the full range. And use it
-  findRangeFull();
-  m_colorBar->setViewRange(m_colorRangeFull);
+  // Only autoscale color bar if box is checked
+  if (m_colorBar->getAutoScale()) {
+    // Find the full range. And use it
+    findRangeFull();
+    m_colorBar->setViewRange(m_colorRangeFull);
+    m_colorBar->updateColorMap();
+  }
   // Initial display update
   this->updateDisplay(
       !m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
@@ -2519,6 +2523,14 @@ void SliceViewer::dropEvent(QDropEvent *e) {
       this->setPeaksWorkspaces(wsNames);
     }
   }
+}
+
+/**
+ * Set autoscaling for the color bar on or off
+ * @param autoscale :: [input] On/off status for autoscaling
+ */
+void SliceViewer::setColorBarAutoScale(bool autoscale) {
+  m_colorBar->setAutoScale(autoscale);
 }
 
 } // namespace
