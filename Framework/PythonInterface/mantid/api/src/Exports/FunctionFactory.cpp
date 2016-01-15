@@ -34,8 +34,8 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
       self.getFunctionNames<Mantid::API::IFunction>();
 
   PyObject *registered = PyList_New(0);
-  for (auto name = names.begin(); name != names.end(); ++name) {
-    PyObject *value = PyString_FromString(name->c_str());
+  for (const auto &name : names) {
+    PyObject *value = PyString_FromString(name.c_str());
     if (PyList_Append(registered, value))
       throw std::runtime_error("Failed to insert value into PyList");
   }

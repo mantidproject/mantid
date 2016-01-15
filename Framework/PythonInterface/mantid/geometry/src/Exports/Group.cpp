@@ -19,8 +19,8 @@ std::vector<std::string> getSymmetryOperationStrings(Group &self) {
   const std::vector<SymmetryOperation> &symOps = self.getSymmetryOperations();
 
   std::vector<std::string> pythonSymOps;
-  for (auto it = symOps.begin(); it != symOps.end(); ++it) {
-    pythonSymOps.push_back((*it).identifier());
+  for (const auto &symOp : symOps) {
+    pythonSymOps.push_back(symOp.identifier());
   }
 
   return pythonSymOps;
