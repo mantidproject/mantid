@@ -376,7 +376,7 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
  * @param widths : Width vector
  * @return The Gaussian kernel
  */
-KernelVector SmoothMD::gaussianKernel(const WidthVector &widths) {
+KernelVector SmoothMD::gaussianKernel(const WidthVector &widths) const {
   // TODO implement
   KernelVector kernel;
   return kernel;

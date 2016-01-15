@@ -370,9 +370,27 @@ public:
                boost::math::isnan(out->getSignalAt(9)));
   }
 
+  void test_gaussian_kernel() {
+    const std::vector<int> widths{5, 5};
+    const std::vector<double> kernel =
+        Mantid::MDAlgorithms::gaussianKernel(widths);
+
+    std::vector<double> expected_kernel{1,  4, 7,  4,  1,  4, 16, 26, 16,
+                                        4,  7, 26, 41, 26, 7, 4,  16, 26,
+                                        16, 4, 1,  4,  7,  4, 1};
+    std::transform(expected_kernel.begin(), expected_kernel.end(),
+                   expected_kernel.begin(),
+                   std::bind1st(std::divides<double>(), 273));
+
+    for (size_t i = 0; i < expected_kernel.size(); ++i) {
+      TSM_ASSERT_DELTA("Calculated value should match expected value",
+                       kernel[i], expected_kernel[i], 0.01)
+    }
+  }
+
   void test_simple_smooth_gaussian_function() {
     auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-      1 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
+        1 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
 
     /*
      2D MDHistoWorkspace Input
@@ -405,7 +423,6 @@ public:
       TS_ASSERT_EQUALS(1, out->getErrorAt(i));
     }
   }
-
 };
 
 class SmoothMDTestPerformance : public CxxTest::TestSuite {

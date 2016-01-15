@@ -12,6 +12,8 @@ class IMDHistoWorkspace;
 }
 namespace MDAlgorithms {
 
+DLLExport std::vector<double> gaussianKernel(const std::vector<int> &widths);
+
 /** SmoothMD : Algorithm for smoothing MDHistoWorkspaces
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -59,8 +61,6 @@ public:
           weightingWS);
 
 private:
-  std::vector<double> gaussianKernel(const std::vector<int> &widths);
-
   void init();
   void exec();
 };
