@@ -86,6 +86,7 @@ private:
   void setupBoxController();
   void setupFileBackend(std::string filebackPath);
   void readPixelData();
+  void splitAllBoxes();
   void warnIfMemoryInsufficient(int64_t npixtot);
   void addEventFromBuffer(const float *pixel);
   void toOutputFrame(const uint16_t runIndex, float &u1, float &u2, float &u3);

@@ -42,6 +42,9 @@ namespace {
 /// number of pixels to read in a single call. A single pixel is 9 float
 /// fields. 150000 is ~5MB buffer
 constexpr int64_t NPIX_CHUNK = 150000;
+/// The MD workspace will have its boxes split after reading this many
+/// chunks of events;
+constexpr int64_t NCHUNKS_SPLIT = 125;
 /// Defines the number of fields that define a single pixel
 constexpr int32_t FIELDS_PER_PIXEL = 9;
 /// 1/2pi
@@ -616,10 +619,12 @@ void LoadSQW2::readPixelData() {
   m_progress->setNumSteps(npixtot);
 
   // Each pixel has 9 float fields. Do a chunked read to avoid
-  // using too much memory for the buffer
+  // using too much memory for the buffer and also split the
+  // boxes regularly to ensure that larger workspaces can be loaded
+  // without blowing the memory requirements
   constexpr int64_t bufferSize(FIELDS_PER_PIXEL * NPIX_CHUNK);
   std::vector<float> pixBuffer(bufferSize);
-  int64_t pixelsLeftToRead(npixtot);
+  int64_t pixelsLeftToRead(npixtot), chunksRead(0);
   while (pixelsLeftToRead > 0) {
     int64_t chunkSize(pixelsLeftToRead);
     if (chunkSize > NPIX_CHUNK) {
@@ -631,9 +636,25 @@ void LoadSQW2::readPixelData() {
       m_progress->report();
     }
     pixelsLeftToRead -= chunkSize;
+    ++chunksRead;
+    if (chunksRead == NCHUNKS_SPLIT) {
+      splitAllBoxes();
+    }
   }
   assert(pixelsLeftToRead == 0);
   g_log.debug() << "Time to read all pixels: " << timer.elapsed() << "s\n";
+}
+
+/**
+ * Split boxes in the output workspace if required
+ */
+void LoadSQW2::splitAllBoxes() {
+  using Kernel::ThreadPool;
+  using Kernel::ThreadSchedulerFIFO;
+  auto *ts = new ThreadSchedulerFIFO();
+  ThreadPool tp(ts);
+  m_outputWS->splitAllIfNeeded(ts);
+  tp.joinAll();
 }
 
 /**
@@ -701,14 +722,8 @@ void LoadSQW2::toOutputFrame(const uint16_t runIndex, float &u1, float &u2,
  * necessary after everything else has run successfully
  */
 void LoadSQW2::finalize() {
-  using Kernel::ThreadPool;
-  using Kernel::ThreadSchedulerFIFO;
-  auto *ts = new ThreadSchedulerFIFO();
-  ThreadPool tp(ts);
-  m_outputWS->splitAllIfNeeded(ts);
-  tp.joinAll();
+  splitAllBoxes();
   m_outputWS->refreshCache();
-
   if (m_outputWS->isFileBacked()) {
     auto savemd = this->createChildAlgorithm("SaveMD", 0.76, 1.00);
     savemd->setProperty("InputWorkspace", m_outputWS);
