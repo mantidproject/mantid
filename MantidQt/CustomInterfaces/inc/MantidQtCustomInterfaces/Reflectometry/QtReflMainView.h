@@ -148,8 +148,7 @@ private slots:
   void on_actionPlotRow_triggered();
   void on_actionPlotGroup_triggered();
   void on_actionSlitCalculator_triggered();
-
-  void on_icatSearchComplete_triggered();
+  void icatSearchComplete();
 
   void on_comboSearchInstrument_currentIndexChanged(int index);
   void on_comboProcessInstrument_currentIndexChanged(int index);

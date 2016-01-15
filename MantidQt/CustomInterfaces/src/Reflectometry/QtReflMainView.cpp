@@ -134,7 +134,7 @@ void QtReflMainView::setTableList(const std::set<std::string> &tables) {
   }
 }
 
-void QtReflMainView::on_icatSearchComplete_triggered() {
+void QtReflMainView::icatSearchComplete() {
   m_presenter->notify(IReflPresenter::ICATSearchCompleteFlag);
 }
 
@@ -247,7 +247,7 @@ This slot notifies the presenter that the "search" button has been pressed
 void QtReflMainView::on_actionSearch_triggered() {
   m_presenter->notify(IReflPresenter::SearchFlag);
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(on_icatSearchComplete_triggered()));
+          SLOT(icatSearchComplete()));
 }
 
 /**
