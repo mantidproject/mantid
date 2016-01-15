@@ -85,19 +85,19 @@ void IntegrateByComponent::exec() {
           integratedWS->getInstrument();
 
       PARALLEL_FOR1(integratedWS)
-      for (unsigned long hist : hists) {
+      for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
         PARALLEL_START_INTERUPT_REGION
 
         const std::set<detid_t> &detids =
-            integratedWS->getSpectrum(hist)
+            integratedWS->getSpectrum(hists[i])
                 ->getDetectorIDs(); // should be only one detector per spectrum
         if (instrument->isDetectorMasked(detids))
           continue;
         if (instrument->isMonitor(detids))
           continue;
 
-        const double yValue = integratedWS->readY(hist)[0];
-        const double eValue = integratedWS->readE(hist)[0];
+        const double yValue = integratedWS->readY(hists[i])[0];
+        const double eValue = integratedWS->readE(hists[i])[0];
 
         if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
             boost::math::isnan(eValue) ||

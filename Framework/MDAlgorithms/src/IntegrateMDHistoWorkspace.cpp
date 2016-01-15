@@ -355,11 +355,10 @@ void IntegrateMDHistoWorkspace::exec() {
     auto outIterators = outWS->createIterators(nThreads, NULL);
 
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (auto &i : outIterators) {
-
+    for (int i = 0; i < int(outIterators.size()); ++i) {
       PARALLEL_START_INTERUPT_REGION
       boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
-          dynamic_cast<MDHistoWorkspaceIterator *>(i));
+          dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i]));
 
       if (!outIterator) {
         throw std::logic_error(
