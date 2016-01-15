@@ -523,8 +523,8 @@ void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
       int index = it + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
-                         "): detector ID found ("
-                      << it << " at workspace index " << workspaceIndex
+                         "): detector ID found (" << it
+                      << " at workspace index " << workspaceIndex
                       << ") is invalid." << std::endl;
       } else
         // Save it at that point.
