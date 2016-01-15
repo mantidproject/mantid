@@ -884,6 +884,9 @@ void MantidUI::showSliceViewer()
       w->getSlicer()->setTransparentZeros(false);
     }
 
+    // Global option for color bar autoscaling
+    w->getSlicer()->setColorBarAutoScale(m_appWindow->autoscale2DPlots);
+
     // Connect the MantidPlot close() event with the the window's close().
     QObject::connect(appWindow(), SIGNAL(destroyed()), w, SLOT(close()));
 
@@ -3432,6 +3435,14 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
 
   appWindow()->setSpectrogramTickStyle(plot);
   plot->setAutoScale();
+  /* The 'setAutoScale' above is needed to make sure that the plot initially
+   * encompasses all the data points. However, this has the side-effect
+   * suggested by its name: all the axes become auto-scaling if the data
+   * changes. If, in the plot preferences, autoscaling has been disabled then
+   * the next line re-fixes the axes
+   */
+  if (!appWindow()->autoscale2DPlots)
+    plot->enableAutoscaling(false);
 
   QApplication::restoreOverrideCursor();
   return window;
