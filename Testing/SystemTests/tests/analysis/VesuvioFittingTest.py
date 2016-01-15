@@ -58,14 +58,14 @@ def _do_fit(function_str, k_is_free):
 def tolerance():
     # Not too happy about this but the gsl seems to behave slightly differently on Windows/Mac but the reference result is from Linux
     # The results however are still acceptable
+    # GCC >= 5 also requires larger tolerance
     system = platform.system()
     if system == "Windows":
-        if platform.architecture()[0] == "64bit":
-            return 1e-2 # Other fitting tests seem to require this level too.
-        else:
-            return 1e-1
+        return 1e-2 # Other fitting tests seem to require this level too.
     elif system == "Darwin":
         return 1e-1 # Other fitting tests seem to require this level too.
+    elif system == "Linux" and int(platform.python_compiler().split()[1][0])>=5: # For gcc >= 5
+        return 1e-2
     else:
         return 1e-6
 
