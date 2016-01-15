@@ -106,27 +106,28 @@ void IndirectDiffractionReduction::initLayout() {
 void IndirectDiffractionReduction::run() {
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
-
+  if (!m_uiForm.rfSampleFiles->isValid()) {
+	showInformationBox("Sample files input is invalid.");
+    return;
+  }
   if (instName == "OSIRIS") {
     if (mode == "diffonly") {
-      if (!m_uiForm.rfSampleFiles->isValid() || !validateVanCal()) {
-        showInformationBox(
-            "Invalid input.\nIncorrect entries marked with red star.");
+      if (!validateVanCal()) {
+        showInformationBox("Vaniduium and Calibration input is invalid.");
         return;
       }
       runOSIRISdiffonlyReduction();
     } else {
-      if (!m_uiForm.rfSampleFiles->isValid() || !validateCalOnly()) {
+      if (!validateCalOnly()) {
         showInformationBox(
-            "Invalid input.\nIncorrect entries marked with red star.");
+            "Calibration and rebinning parameters are incorrect.");
         return;
       }
       runGenericReduction("OSIRIS", "diffspec");
     }
   } else {
-    if (!m_uiForm.rfSampleFiles->isValid() || !validateRebin()) {
-      showInformationBox(
-          "Invalid input.\nIncorrect entries marked with red star.");
+    if (!validateRebin()) {
+      showInformationBox("Rebinning parameters are incorrect.");
       return;
     }
 
