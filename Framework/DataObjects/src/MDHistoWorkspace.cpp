@@ -132,8 +132,8 @@ MDHistoWorkspace::~MDHistoWorkspace() {
 void MDHistoWorkspace::init(
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions) {
   std::vector<IMDDimension_sptr> dim2;
-  for (size_t i = 0; i < dimensions.size(); i++)
-    dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimensions[i]));
+  for (auto &dimension : dimensions)
+    dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimension));
   this->init(dim2);
   m_nEventsContributed = 0;
 }

@@ -378,8 +378,8 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
 /// @returns The total number of events
 size_t EventWorkspace::getNumberEvents() const {
   size_t total = 0;
-  for (auto it = this->data.begin(); it != this->data.end(); ++it) {
-    total += (*it)->getNumberEvents();
+  for (auto it : this->data) {
+    total += it->getNumberEvents();
   }
   return total;
 }
@@ -391,8 +391,8 @@ size_t EventWorkspace::getNumberEvents() const {
  */
 Mantid::API::EventType EventWorkspace::getEventType() const {
   Mantid::API::EventType out = Mantid::API::TOF;
-  for (auto it = this->data.begin(); it != this->data.end(); ++it) {
-    Mantid::API::EventType thisType = (*it)->getEventType();
+  for (auto it : this->data) {
+    Mantid::API::EventType thisType = it->getEventType();
     if (static_cast<int>(out) < static_cast<int>(thisType)) {
       out = thisType;
       // This is the most-specialized it can get.
@@ -453,8 +453,8 @@ size_t EventWorkspace::getMemorySize() const {
   // TODO: Add the MRU buffer
 
   // Add the memory from all the event lists
-  for (auto it = this->data.begin(); it != this->data.end(); ++it) {
-    total += (*it)->getMemorySize();
+  for (auto it : this->data) {
+    total += it->getMemorySize();
   }
 
   total += run().getMemorySize();
