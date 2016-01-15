@@ -107,6 +107,7 @@ set ( SRC_FILES
 	src/ExtractMaskToTable.cpp
 	src/ExtractSingleSpectrum.cpp
 	src/ExtractSpectra.cpp
+	src/ExtractUnmaskedSpectra.cpp
 	src/FFT.cpp
 	src/FFTDerivative.cpp
 	src/FFTSmooth.cpp
@@ -385,6 +386,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ExtractMaskToTable.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
 	inc/MantidAlgorithms/ExtractSpectra.h
+	inc/MantidAlgorithms/ExtractUnmaskedSpectra.h
 	inc/MantidAlgorithms/FFT.h
 	inc/MantidAlgorithms/FFTDerivative.h
 	inc/MantidAlgorithms/FFTSmooth.h
@@ -671,6 +673,7 @@ set ( TEST_FILES
 	ExtractMaskToTableTest.h
 	ExtractSingleSpectrumTest.h
 	ExtractSpectraTest.h
+	ExtractUnmaskedSpectraTest.h
 	FFTDerivativeTest.h
 	FFTSmooth2Test.h
 	FFTTest.h
@@ -833,7 +836,8 @@ enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES 
 # Add the target for this directory
 add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms )
+set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms
+						           COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS" )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
