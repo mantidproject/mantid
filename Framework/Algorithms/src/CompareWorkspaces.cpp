@@ -216,8 +216,7 @@ void CompareWorkspaces::processGroups(
   const std::vector<Property *> &allProps = this->getProperties();
   std::vector<Property *> nonDefaultProps;
   nonDefaultProps.reserve(allProps.size());
-  for (size_t i = 0; i < allProps.size(); ++i) {
-    Property *p = allProps[i];
+  for (auto p : allProps) {
     const std::string &propName = p->name();
     // Skip those not set and the input workspaces
     if (p->isDefault() || propName == "Workspace1" || propName == "Workspace2")

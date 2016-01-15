@@ -196,9 +196,9 @@ SumSpectra::getOutputSpecId(MatrixWorkspace_const_sptr localworkspace) {
   int totalSpec = static_cast<int>(localworkspace->getNumberHistograms());
 
   specid_t temp;
-  for (auto it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
-    if (*(it) < totalSpec) {
-      temp = localworkspace->getSpectrum(*(it))->getSpectrumNo();
+  for (value_type m_indice : this->m_indices) {
+    if (m_indice < totalSpec) {
+      temp = localworkspace->getSpectrum(m_indice)->getSpectrumNo();
       if (temp < specId)
         specId = temp;
     }

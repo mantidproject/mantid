@@ -78,27 +78,26 @@ void IntegrateByComponent::exec() {
     std::vector<std::vector<size_t>> specmap = makeMap(integratedWS, parents);
     API::Progress prog(this, 0.3, 1.0, specmap.size());
     // calculate averages
-    for (size_t j = 0; j < specmap.size(); ++j) {
+    for (auto hists : specmap) {
       prog.report();
-      std::vector<size_t> hists = specmap.at(j);
       std::vector<double> averageYInput, averageEInput;
       Geometry::Instrument_const_sptr instrument =
           integratedWS->getInstrument();
 
       PARALLEL_FOR1(integratedWS)
-      for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
+      for (unsigned long hist : hists) {
         PARALLEL_START_INTERUPT_REGION
 
         const std::set<detid_t> &detids =
-            integratedWS->getSpectrum(hists[i])
+            integratedWS->getSpectrum(hist)
                 ->getDetectorIDs(); // should be only one detector per spectrum
         if (instrument->isDetectorMasked(detids))
           continue;
         if (instrument->isMonitor(detids))
           continue;
 
-        const double yValue = integratedWS->readY(hists[i])[0];
-        const double eValue = integratedWS->readE(hists[i])[0];
+        const double yValue = integratedWS->readY(hist)[0];
+        const double eValue = integratedWS->readE(hist)[0];
 
         if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
             boost::math::isnan(eValue) ||
@@ -128,18 +127,18 @@ void IntegrateByComponent::exec() {
       }
 
       PARALLEL_FOR1(integratedWS)
-      for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
+      for (unsigned long hist : hists) {
         PARALLEL_START_INTERUPT_REGION
         const std::set<detid_t> &detids =
-            integratedWS->getSpectrum(hists[i])
+            integratedWS->getSpectrum(hist)
                 ->getDetectorIDs(); // should be only one detector per spectrum
         if (instrument->isDetectorMasked(detids))
           continue;
         if (instrument->isMonitor(detids))
           continue;
 
-        const double yValue = integratedWS->readY(hists[i])[0];
-        const double eValue = integratedWS->readE(hists[i])[0];
+        const double yValue = integratedWS->readY(hist)[0];
+        const double eValue = integratedWS->readE(hist)[0];
         if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
             boost::math::isnan(eValue) ||
             boost::math::isinf(eValue)) // NaNs/Infs
@@ -147,8 +146,8 @@ void IntegrateByComponent::exec() {
 
         // Now we have a good value
         PARALLEL_CRITICAL(IntegrateByComponent_setaverage) {
-          integratedWS->dataY(hists[i])[0] = averageY;
-          integratedWS->dataE(hists[i])[0] = averageE;
+          integratedWS->dataY(hist)[0] = averageY;
+          integratedWS->dataE(hist)[0] = averageE;
         }
 
         PARALLEL_END_INTERUPT_REGION

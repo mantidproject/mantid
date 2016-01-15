@@ -378,11 +378,11 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
     if (m_inputWS->hasMaskedBins(spectrum)) {
       const MatrixWorkspace::MaskList &inputMasks =
           m_inputWS->maskedBins(spectrum);
-      for (auto it = inputMasks.cbegin(); it != inputMasks.cend(); ++it) {
-        const int maskIndex = static_cast<int>((*it).first);
+      for (const auto &inputMask : inputMasks) {
+        const int maskIndex = static_cast<int>(inputMask.first);
         if (maskIndex >= rangeBounds[0] && maskIndex < rangeBounds[1])
           tempWS->flagMasked(spectrum, maskIndex - rangeBounds[0],
-                             (*it).second);
+                             inputMask.second);
       }
     }
   }

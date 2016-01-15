@@ -250,21 +250,21 @@ int MedianDetectorTest::maskOutliers(
     double median = medianvec.at(i);
 
     PARALLEL_FOR1(countsWS)
-    for (int j = 0; j < static_cast<int>(hists.size()); ++j) {
-      const double value = countsWS->readY(hists.at(j))[0];
+    for (unsigned long hist : hists) {
+      const double value = countsWS->readY(hist)[0];
       if ((value == 0.) && checkForMask) {
         const std::set<detid_t> &detids =
-            countsWS->getSpectrum(hists.at(j))->getDetectorIDs();
+            countsWS->getSpectrum(hist)->getDetectorIDs();
         if (instrument->isDetectorMasked(detids)) {
           numFailed -= 1; // it was already masked
         }
       }
       if ((value < out_lo * median) && (value > 0.0)) {
-        countsWS->maskWorkspaceIndex(hists.at(j));
+        countsWS->maskWorkspaceIndex(hist);
         PARALLEL_ATOMIC
         ++numFailed;
       } else if (value > out_hi * median) {
-        countsWS->maskWorkspaceIndex(hists.at(j));
+        countsWS->maskWorkspaceIndex(hist);
         PARALLEL_ATOMIC
         ++numFailed;
       }

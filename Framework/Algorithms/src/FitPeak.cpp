@@ -1275,16 +1275,16 @@ std::vector<std::string>
 FitPeak::addFunctionParameterNames(std::vector<std::string> funcnames) {
   vector<string> vec_funcparnames;
 
-  for (size_t i = 0; i < funcnames.size(); ++i) {
+  for (auto &funcname : funcnames) {
     // Add original name in
-    vec_funcparnames.push_back(funcnames[i]);
+    vec_funcparnames.push_back(funcname);
 
     // Add a full function name and parameter names in
     IFunction_sptr tempfunc =
-        FunctionFactory::Instance().createFunction(funcnames[i]);
+        FunctionFactory::Instance().createFunction(funcname);
 
     stringstream parnamess;
-    parnamess << funcnames[i] << " (";
+    parnamess << funcname << " (";
     vector<string> funcpars = tempfunc->getParameterNames();
     for (size_t j = 0; j < funcpars.size(); ++j) {
       parnamess << funcpars[j];
@@ -1593,8 +1593,8 @@ void FitPeak::setupOutput(
 
   // Parameter vector
   vector<double> vec_fitpeak;
-  for (size_t i = 0; i < m_peakParameterNames.size(); ++i) {
-    double value = m_peakFunc->getParameter(m_peakParameterNames[i]);
+  for (auto &m_peakParameterName : m_peakParameterNames) {
+    double value = m_peakFunc->getParameter(m_peakParameterName);
     vec_fitpeak.push_back(value);
   }
 
@@ -1602,8 +1602,8 @@ void FitPeak::setupOutput(
 
   // Background
   vector<double> vec_fitbkgd;
-  for (size_t i = 0; i < m_bkgdParameterNames.size(); ++i) {
-    double value = m_bkgdFunc->getParameter(m_bkgdParameterNames[i]);
+  for (auto &m_bkgdParameterName : m_bkgdParameterNames) {
+    double value = m_bkgdFunc->getParameter(m_bkgdParameterName);
     vec_fitbkgd.push_back(value);
   }
 
@@ -1684,8 +1684,7 @@ TableWorkspace_sptr FitPeak::genOutputTableWS(
 
   if (m_outputRawParams) {
     vector<string> peakparnames = peakfunc->getParameterNames();
-    for (size_t i = 0; i < peakparnames.size(); ++i) {
-      string &parname = peakparnames[i];
+    for (auto &parname : peakparnames) {
       double parvalue = peakfunc->getParameter(parname);
       double error = peakerrormap[parname];
       newrow = outtablews->appendRow();
@@ -1708,8 +1707,7 @@ TableWorkspace_sptr FitPeak::genOutputTableWS(
 
   if (m_outputRawParams) {
     vector<string> bkgdparnames = bkgdfunc->getParameterNames();
-    for (size_t i = 0; i < bkgdparnames.size(); ++i) {
-      string &parname = bkgdparnames[i];
+    for (auto &parname : bkgdparnames) {
       double parvalue = bkgdfunc->getParameter(parname);
       double error = bkgderrormap[parname];
       newrow = outtablews->appendRow();

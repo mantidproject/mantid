@@ -63,11 +63,11 @@ void Fit::initConcrete() {
   std::vector<std::string> costFuncOptions =
       API::CostFunctionFactory::Instance().getKeys();
   // select only CostFuncFitting variety
-  for (auto it = costFuncOptions.begin(); it != costFuncOptions.end(); ++it) {
+  for (auto &costFuncOption : costFuncOptions) {
     auto costFunc = boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-        API::CostFunctionFactory::Instance().create(*it));
+        API::CostFunctionFactory::Instance().create(costFuncOption));
     if (!costFunc) {
-      *it = "";
+      costFuncOption = "";
     }
   }
   declareProperty(
@@ -109,10 +109,10 @@ void Fit::initConcrete() {
   */
 void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
   auto &properties = minimizer.getProperties();
-  for (auto prop = properties.begin(); prop != properties.end(); ++prop) {
-    if ((**prop).direction() == Kernel::Direction::Output &&
-        (**prop).isValid() == "") {
-      Kernel::Property *property = (**prop).clone();
+  for (auto propertie : properties) {
+    if ((*propertie).direction() == Kernel::Direction::Output &&
+        (*propertie).isValid() == "") {
+      Kernel::Property *property = (*propertie).clone();
       declareProperty(property);
     }
   }

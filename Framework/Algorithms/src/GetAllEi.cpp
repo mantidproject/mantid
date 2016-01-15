@@ -272,8 +272,8 @@ void GetAllEi::exec() {
   destUnit->initialize(mon1Distance, 0., 0.,
                        static_cast<int>(Kernel::DeltaEMode::Elastic), 0.,
                        unused);
-  for (size_t i = 0; i < guess_opening.size(); i++) {
-    double eGuess = destUnit->singleFromTOF(guess_opening[i]);
+  for (double i : guess_opening) {
+    double eGuess = destUnit->singleFromTOF(i);
     if (eGuess > eMin && eGuess < eMax) {
       guess_ei.push_back(eGuess);
     }
@@ -282,8 +282,8 @@ void GetAllEi::exec() {
                        boost::lexical_cast<std::string>(guess_ei.size()) +
                        " fell within both monitor's recording energy range\n";
   g_log.debug() << " Guess Energies are:\n";
-  for (size_t i = 0; i < guess_ei.size(); i++) {
-    g_log.debug() << boost::str(boost::format(" %8.2f; ") % guess_ei[i]);
+  for (double &i : guess_ei) {
+    g_log.debug() << boost::str(boost::format(" %8.2f; ") % i);
   }
   g_log.debug() << std::endl;
 
@@ -399,13 +399,13 @@ void GetAllEi::printDebugModeInfo(const std::vector<double> &guess_opening,
                 << " chopper prospective opening within time frame: "
                 << TOF_range.first << " to: " << TOF_range.second << std::endl;
   g_log.debug() << " Timings are:\n";
-  for (size_t i = 0; i < guess_opening.size(); i++) {
-    g_log.debug() << boost::str(boost::format(" %8.2f; ") % guess_opening[i]);
+  for (double i : guess_opening) {
+    g_log.debug() << boost::str(boost::format(" %8.2f; ") % i);
   }
   g_log.debug() << std::endl;
   g_log.debug() << " Corresponding to energies:\n";
-  for (size_t i = 0; i < guess_opening.size(); i++) {
-    double ei = destUnit->singleFromTOF(guess_opening[i]);
+  for (double i : guess_opening) {
+    double ei = destUnit->singleFromTOF(i);
     g_log.debug() << boost::str(boost::format(" %8.2f; ") % ei);
   }
   g_log.debug() << std::endl;

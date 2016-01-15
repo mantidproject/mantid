@@ -619,10 +619,8 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
   std::vector<double> medianvec;
   g_log.debug("Calculating the median count rate of the spectra");
 
-  for (size_t j = 0; j < indexmap.size(); ++j) {
+  for (auto hists : indexmap) {
     std::vector<double> medianInput;
-    std::vector<size_t> hists = indexmap.at(j);
-
     const int nhists = static_cast<int>(hists.size());
     // The maximum possible length is that of workspace length
     medianInput.reserve(nhists);
@@ -635,19 +633,19 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
     }
 
     PARALLEL_FOR1(input)
-    for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
+    for (unsigned long hist : hists) {
       PARALLEL_START_INTERUPT_REGION
 
       if (checkForMask) {
         const std::set<detid_t> &detids =
-            input->getSpectrum(hists[i])->getDetectorIDs();
+            input->getSpectrum(hist)->getDetectorIDs();
         if (instrument->isDetectorMasked(detids))
           continue;
         if (instrument->isMonitor(detids))
           continue;
       }
 
-      const double yValue = input->readY(hists[i])[0];
+      const double yValue = input->readY(hist)[0];
       if (yValue < 0.0) {
         throw std::out_of_range("Negative number of counts found, could be "
                                 "corrupted raw counts or solid angle data");

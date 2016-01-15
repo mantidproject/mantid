@@ -153,8 +153,8 @@ void ResetNegatives::pushMinimum(MatrixWorkspace_const_sptr minWS,
     if (minValue <= 0) {
       minValue *= -1.;
       MantidVec &y = wksp->dataY(i);
-      for (auto it = y.begin(); it != y.end(); ++it) {
-        *it = fixZero(*it + minValue);
+      for (double &it : y) {
+        it = fixZero(it + minValue);
       }
     }
     prog.report();
@@ -184,11 +184,11 @@ void ResetNegatives::changeNegatives(MatrixWorkspace_const_sptr minWS,
         0.) // quick check to see if there is a reason to bother
     {
       MantidVec &y = wksp->dataY(i);
-      for (auto it = y.begin(); it != y.end(); ++it) {
-        if (*it < 0.) {
-          *it = value;
+      for (double &it : y) {
+        if (it < 0.) {
+          it = value;
         } else
-          *it = fixZero(*it);
+          it = fixZero(it);
       }
     }
     prog.report();

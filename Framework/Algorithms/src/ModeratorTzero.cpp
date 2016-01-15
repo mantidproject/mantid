@@ -348,23 +348,23 @@ void ModeratorTzero::execEvent(const std::string &emode) {
             double tof;
             // fix the histogram bins
             MantidVec &x = evlist.dataX();
-            for (auto iter = x.begin(); iter != x.end(); ++iter) {
-              tof = *iter;
+            for (double &iter : x) {
+              tof = iter;
               if (tof < m_t1min + t2)
                 tof -= min_t0_next;
               else
                 tof -= CalculateT0indirect(tof, L1, t2, E1, parser);
-              *iter = tof;
+              iter = tof;
             }
 
             MantidVec tofs = evlist.getTofs();
-            for (unsigned int itof = 0; itof < tofs.size(); itof++) {
-              tof = tofs[itof];
+            for (double &itof : tofs) {
+              tof = itof;
               if (tof < m_t1min + t2)
                 tof -= min_t0_next;
               else
                 tof -= CalculateT0indirect(tof, L1, t2, E1, parser);
-              tofs[itof] = tof;
+              itof = tof;
             }
             evlist.setTofs(tofs);
             evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
@@ -374,25 +374,25 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           double tof;
           // Apply t0 correction to histogram bins
           MantidVec &x = evlist.dataX();
-          for (auto iter = x.begin(); iter != x.end(); ++iter) {
-            tof = *iter;
+          for (double &iter : x) {
+            tof = iter;
             if (tof < m_t1min * (L1 + L2) / L1)
               tof -= min_t0_next;
             else
               tof -= CalculateT0elastic(tof, L1 + L2, E1, parser);
-            *iter = tof;
+            iter = tof;
           }
 
           MantidVec tofs = evlist.getTofs();
-          for (unsigned int itof = 0; itof < tofs.size(); itof++) {
+          for (double &itof : tofs) {
             // add a [-0.1,0.1] microsecond noise to avoid artifacts
             // resulting from original tof data
-            tof = tofs[itof];
+            tof = itof;
             if (tof < m_t1min * (L1 + L2) / L1)
               tof -= min_t0_next;
             else
               tof -= CalculateT0elastic(tof, L1 + L2, E1, parser);
-            tofs[itof] = tof;
+            itof = tof;
           }
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
@@ -403,13 +403,13 @@ void ModeratorTzero::execEvent(const std::string &emode) {
         else if (emode == "Direct") {
           // fix the histogram bins
           MantidVec &x = evlist.dataX();
-          for (auto iter = x.begin(); iter != x.end(); ++iter) {
-            *iter -= t0_direct;
+          for (double &iter : x) {
+            iter -= t0_direct;
           }
 
           MantidVec tofs = evlist.getTofs();
-          for (unsigned int itof = 0; itof < tofs.size(); itof++) {
-            tofs[itof] -= t0_direct;
+          for (double &tof : tofs) {
+            tof -= t0_direct;
           }
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);

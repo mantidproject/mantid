@@ -106,20 +106,20 @@ void MuonGroupDetectors::exec() {
     // We will be setting them anew
     outWS->getSpectrum(groupIndex)->clearDetectorIDs();
 
-    for (auto detIt = wsIndices.begin(); detIt != wsIndices.end(); detIt++) {
+    for (unsigned long &wsIndice : wsIndices) {
       for (size_t i = 0; i < inWS->blocksize(); ++i) {
         // Sum the y values
-        outWS->dataY(groupIndex)[i] += inWS->dataY(*detIt)[i];
+        outWS->dataY(groupIndex)[i] += inWS->dataY(wsIndice)[i];
 
         // Sum the errors in quadrature
         outWS->dataE(groupIndex)[i] = sqrt(pow(outWS->dataE(groupIndex)[i], 2) +
-                                           pow(inWS->dataE(*detIt)[i], 2));
+                                           pow(inWS->dataE(wsIndice)[i], 2));
       }
 
       // Detectors list of the group should contain all the detectors of it's
       // elements
       outWS->getSpectrum(groupIndex)
-          ->addDetectorIDs(inWS->getSpectrum(*detIt)->getDetectorIDs());
+          ->addDetectorIDs(inWS->getSpectrum(wsIndice)->getDetectorIDs());
     }
 
     // Using the first detector X values

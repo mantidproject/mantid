@@ -101,8 +101,8 @@ double ConvertToYSpace::getComponentParameter(
           boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(comp)) {
     const auto dets = group->getDetectors();
     double avg(0.0);
-    for (auto it = dets.begin(); it != dets.end(); ++it) {
-      auto param = pmap.getRecursive((*it)->getComponentID(), name);
+    for (const auto &det : dets) {
+      auto param = pmap.getRecursive(det->getComponentID(), name);
       if (param)
         avg += param->value<double>();
       else

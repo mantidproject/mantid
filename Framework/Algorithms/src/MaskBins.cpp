@@ -78,8 +78,7 @@ void MaskBins::exec() {
   if (this->spectra_list.size() > 0) {
     const int numHist = static_cast<int>(inputWS->getNumberHistograms());
     //--- Validate spectra list ---
-    for (size_t i = 0; i < this->spectra_list.size(); ++i) {
-      int wi = this->spectra_list[i];
+    for (int wi : this->spectra_list) {
       if ((wi < 0) || (wi >= numHist)) {
         std::ostringstream oss;
         oss << "One of the workspace indices specified, " << wi
@@ -205,9 +204,9 @@ void MaskBins::execEvent() {
   if (this->spectra_list.size() > 0) {
     // Specific spectra were specified
     PARALLEL_FOR1(outputWS)
-    for (int i = 0; i < static_cast<int>(this->spectra_list.size()); ++i) {
+    for (int i : this->spectra_list) {
       PARALLEL_START_INTERUPT_REGION
-      outputWS->getEventList(this->spectra_list[i]).maskTof(m_startX, m_endX);
+      outputWS->getEventList(i).maskTof(m_startX, m_endX);
       progress.report();
       PARALLEL_END_INTERUPT_REGION
     }
