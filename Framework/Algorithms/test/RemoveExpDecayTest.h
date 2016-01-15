@@ -146,8 +146,8 @@ public:
   MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
 
     // Create a fake muon dataset
-    double a = 0.1;   // Amplitude of the oscillations
-    double w = 25.;   // Frequency of the oscillations
+    double a = 0.1; // Amplitude of the oscillations
+    double w = 25.; // Frequency of the oscillations
     double tau = Mantid::PhysicalConstants::MuonLifetime *
                  1e6; // Muon life time in microseconds
 
