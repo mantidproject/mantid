@@ -59,16 +59,17 @@ std::string SpaceGroup::hmSymbol() const { return m_hmSymbol; }
  * @return :: true if the reflection is allowed, false otherwise.
  */
 bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    if ((*op).hasTranslation()) {
+  for (const auto &m_allOperation : m_allOperations) {
+    if (m_allOperation.hasTranslation()) {
       /* Floating point precision problem:
        *    (H . v) % 1.0 is not always exactly 0, so instead:
        *    | [(H . v) + delta] % 1.0 | > 1e-14 is checked
        * The transformation is only performed if necessary.
        */
-      if ((fabs(fmod(fabs(hkl.scalar_prod((*op).reducedVector())) + 1e-15,
+      if ((fabs(fmod(fabs(hkl.scalar_prod(m_allOperation.reducedVector())) +
+                         1e-15,
                      1.0)) > 1e-14) &&
-          ((*op).transformHKL(hkl) == hkl)) {
+          (m_allOperation.transformHKL(hkl) == hkl)) {
         return false;
       }
     }
@@ -105,10 +106,10 @@ Group_const_sptr SpaceGroup::getSiteSymmetryGroup(const V3D &position) const {
 
   std::vector<SymmetryOperation> siteSymmetryOps;
 
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    if (Geometry::getWrappedVector((*op) * wrappedPosition) ==
+  for (const auto &m_allOperation : m_allOperations) {
+    if (Geometry::getWrappedVector(m_allOperation * wrappedPosition) ==
         wrappedPosition) {
-      siteSymmetryOps.push_back(*op);
+      siteSymmetryOps.push_back(m_allOperation);
     }
   }
 

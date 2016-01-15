@@ -105,8 +105,8 @@ std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
   std::vector<V3D> equivalents;
   equivalents.reserve(m_allOperations.size());
 
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    equivalents.push_back((*op).transformHKL(hkl));
+  for (const auto &m_allOperation : m_allOperations) {
+    equivalents.push_back(m_allOperation.transformHKL(hkl));
   }
 
   std::sort(equivalents.begin(), equivalents.end(), std::greater<V3D>());
@@ -131,10 +131,11 @@ std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
 PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
   std::map<std::string, std::set<V3D>> symbolMap;
 
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
+  for (const auto &m_allOperation : m_allOperations) {
     SymmetryElementWithAxis_sptr element =
         boost::dynamic_pointer_cast<SymmetryElementWithAxis>(
-            SymmetryElementFactory::Instance().createSymElement(*op));
+            SymmetryElementFactory::Instance().createSymElement(
+                m_allOperation));
 
     if (element) {
       std::string symbol = element->hmSymbol();
@@ -214,8 +215,8 @@ std::vector<PointGroup_sptr> getAllPointGroups() {
       PointGroupFactory::Instance().getAllPointGroupSymbols();
 
   std::vector<PointGroup_sptr> out;
-  for (auto it = allSymbols.begin(); it != allSymbols.end(); ++it) {
-    out.push_back(PointGroupFactory::Instance().createPointGroup(*it));
+  for (auto &allSymbol : allSymbols) {
+    out.push_back(PointGroupFactory::Instance().createPointGroup(allSymbol));
   }
 
   return out;
@@ -226,8 +227,8 @@ PointGroupCrystalSystemMap getPointGroupsByCrystalSystem() {
   PointGroupCrystalSystemMap map;
 
   std::vector<PointGroup_sptr> pointGroups = getAllPointGroups();
-  for (size_t i = 0; i < pointGroups.size(); ++i) {
-    map.insert(std::make_pair(pointGroups[i]->crystalSystem(), pointGroups[i]));
+  for (auto &pointGroup : pointGroups) {
+    map.insert(std::make_pair(pointGroup->crystalSystem(), pointGroup));
   }
 
   return map;

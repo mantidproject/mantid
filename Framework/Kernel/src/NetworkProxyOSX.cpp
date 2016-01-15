@@ -216,11 +216,11 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
   ProxyInfoVec info = proxyInformationFromPac(dict, targetURLString, logger);
 
   bool foundHttpProxy = false;
-  for (auto it = info.begin(); it != info.end(); ++it) {
-    ProxyInfo proxyInfo = *it;
+  for (auto &it : info) {
+    ProxyInfo proxyInfo = it;
     if (proxyInfo.isHttpProxy()) {
       foundHttpProxy = true;
-      httpProxy = *it;
+      httpProxy = it;
       break;
     }
   }

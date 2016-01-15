@@ -78,8 +78,8 @@ ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &ass)
 ObjCompAssembly::~ObjCompAssembly() {
   // Iterate over pointers in group, deleting them
   // std::vector<IComponent*>::iterator it;
-  for (auto it = group.begin(); it != group.end(); ++it) {
-    delete *it;
+  for (auto &it : group) {
+    delete it;
   }
   group.clear();
 }

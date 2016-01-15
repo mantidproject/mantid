@@ -182,10 +182,10 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
     const detid2det_map &in_dets =
         static_cast<const Instrument *>(m_base)->m_detectorCache;
     // And turn them into parametrized versions
-    for (auto it = in_dets.cbegin(); it != in_dets.cend(); ++it) {
+    for (const auto &in_det : in_dets) {
       out_map.insert(std::pair<detid_t, IDetector_sptr>(
-          it->first,
-          ParComponentFactory::createDetector(it->second.get(), m_map)));
+          in_det.first,
+          ParComponentFactory::createDetector(in_det.second.get(), m_map)));
     }
   } else {
     // You can just return the detector cache directly.
@@ -200,14 +200,14 @@ std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
   if (m_map) {
     const detid2det_map &in_dets =
         static_cast<const Instrument *>(m_base)->m_detectorCache;
-    for (auto it = in_dets.cbegin(); it != in_dets.cend(); ++it)
-      if (!skipMonitors || !it->second->isMonitor())
-        out.push_back(it->first);
+    for (const auto &in_det : in_dets)
+      if (!skipMonitors || !in_det.second->isMonitor())
+        out.push_back(in_det.first);
   } else {
     const detid2det_map &in_dets = m_detectorCache;
-    for (auto it = in_dets.cbegin(); it != in_dets.cend(); ++it)
-      if (!skipMonitors || !it->second->isMonitor())
-        out.push_back(it->first);
+    for (const auto &in_det : in_dets)
+      if (!skipMonitors || !in_det.second->isMonitor())
+        out.push_back(in_det.first);
   }
   return out;
 }
@@ -228,13 +228,13 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
     if (m_map) {
       const detid2det_map &in_dets =
           static_cast<const Instrument *>(m_base)->m_detectorCache;
-      for (auto it = in_dets.cbegin(); it != in_dets.cend(); ++it)
-        if (it->second->isMonitor())
+      for (const auto &in_det : in_dets)
+        if (in_det.second->isMonitor())
           monitors += 1;
     } else {
       const detid2det_map &in_dets = m_detectorCache;
-      for (auto it = in_dets.begin(); it != in_dets.end(); ++it)
-        if (it->second->isMonitor())
+      for (const auto &in_det : in_dets)
+        if (in_det.second->isMonitor())
           monitors += 1;
     }
     return (numDetIDs - monitors);
@@ -504,8 +504,8 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
   if (detector_ids.empty())
     return false;
 
-  for (auto it = detector_ids.cbegin(); it != detector_ids.cend(); ++it) {
-    if (this->isMonitor(*it))
+  for (value_type detector_id : detector_ids) {
+    if (this->isMonitor(detector_id))
       return true;
   }
   return false;
@@ -551,8 +551,8 @@ bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const {
   if (detector_ids.empty())
     return false;
 
-  for (auto it = detector_ids.cbegin(); it != detector_ids.cend(); ++it) {
-    if (!this->isDetectorMasked(*it))
+  for (value_type detector_id : detector_ids) {
+    if (!this->isDetectorMasked(detector_id))
       return false;
   }
   return true;
@@ -824,9 +824,8 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
       m_cachedBoundingBox = new BoundingBox();
       ComponentID sourceID = getSource()->getComponentID();
       // Loop over the children and define a box large enough for all of them
-      for (auto it = m_children.cbegin(); it != m_children.cend(); ++it) {
+      for (auto component : m_children) {
         BoundingBox compBox;
-        IComponent *component = *it;
         if (component && component->getComponentID() != sourceID) {
           component->getBoundingBox(compBox);
           m_cachedBoundingBox->grow(compBox);
@@ -949,15 +948,15 @@ double Instrument::calcConversion(
     const std::map<detid_t, double> &offsets) {
   double factor = 0.;
   double offset;
-  for (auto iter = detectors.cbegin(); iter != detectors.cend(); ++iter) {
-    auto off_iter = offsets.find(*iter);
+  for (int detector : detectors) {
+    auto off_iter = offsets.find(detector);
     if (off_iter != offsets.cend()) {
-      offset = offsets.find(*iter)->second;
+      offset = offsets.find(detector)->second;
     } else {
       offset = 0.;
     }
     factor += calcConversion(l1, beamline, beamline_norm, samplePos,
-                             instrument->getDetector(*iter), offset);
+                             instrument->getDetector(detector), offset);
   }
   return factor / static_cast<double>(detectors.size());
 }

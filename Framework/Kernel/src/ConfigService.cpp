@@ -998,12 +998,12 @@ void ConfigServiceImpl::getKeysRecursive(
   if (rootKeys.empty())
     allKeys.push_back(root);
 
-  for (auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
+  for (auto &rootKey : rootKeys) {
     std::string searchString;
     if (root.empty()) {
-      searchString = *rkIt;
+      searchString = rootKey;
     } else {
-      searchString = root + "." + *rkIt;
+      searchString = root + "." + rootKey;
     }
 
     getKeysRecursive(searchString, allKeys);
@@ -1773,8 +1773,8 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
 /// Empty the list of facilities, deleting the FacilityInfo objects in the
 /// process
 void ConfigServiceImpl::clearFacilities() {
-  for (auto it = m_facilities.begin(); it != m_facilities.end(); ++it) {
-    delete *it;
+  for (auto &m_facilitie : m_facilities) {
+    delete m_facilitie;
   }
   m_facilities.clear();
 }
@@ -1803,11 +1803,11 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
   }
 
   // Now let's look through the other facilities
-  for (auto it = m_facilities.cbegin(); it != m_facilities.cend(); ++it) {
+  for (auto m_facilitie : m_facilities) {
     try {
       g_log.debug() << "Looking for " << instrumentName << " at "
-                    << (**it).name() << "." << std::endl;
-      return (**it).instrument(instrumentName);
+                    << (*m_facilitie).name() << "." << std::endl;
+      return (*m_facilitie).instrument(instrumentName);
     } catch (Exception::NotFoundError &) {
       // Well the instName doesn't exist for this facility...
       // Move along, there's nothing to see here...
@@ -1863,9 +1863,9 @@ ConfigServiceImpl::getFacility(const std::string &facilityName) const {
   if (facilityName.empty())
     return this->getFacility();
 
-  for (auto it = m_facilities.begin(); it != m_facilities.end(); ++it) {
-    if ((**it).name() == facilityName) {
-      return **it;
+  for (auto m_facilitie : m_facilities) {
+    if ((*m_facilitie).name() == facilityName) {
+      return *m_facilitie;
     }
   }
 

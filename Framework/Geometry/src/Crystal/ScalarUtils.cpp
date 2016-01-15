@@ -95,8 +95,8 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(const DblMatrix &UB,
       temp.clear();
       temp.push_back(info);
     }
-    for (size_t k = 0; k < temp.size(); k++)
-      AddIfBest(result, temp[k]);
+    for (auto &k : temp)
+      AddIfBest(result, k);
   }
 
   return result;
@@ -143,12 +143,12 @@ ScalarUtils::GetCells(const DblMatrix &UB, const std::string &cell_type,
     UB_list.push_back(UB);
   }
 
-  for (size_t k = 0; k < UB_list.size(); k++) {
+  for (auto &k : UB_list) {
     std::vector<ConventionalCell> temp =
-        GetCellsUBOnly(UB_list[k], cell_type, centering, allowPermutations);
+        GetCellsUBOnly(k, cell_type, centering, allowPermutations);
 
-    for (size_t i = 0; i < temp.size(); i++)
-      AddIfBest(result, temp[i]);
+    for (auto &i : temp)
+      AddIfBest(result, i);
   }
 
   return result;
@@ -234,8 +234,8 @@ ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB,
     // Get exact form requested and not permutations
     UB_list.push_back(UB);
   }
-  for (size_t i = 0; i < UB_list.size(); i++) {
-    IndexingUtils::GetLatticeParameters(UB_list[i], l_params);
+  for (auto &i : UB_list) {
+    IndexingUtils::GetLatticeParameters(i, l_params);
 
     form_0 = ReducedCell(0, l_params[0], l_params[1], l_params[2], l_params[3],
                          l_params[4], l_params[5]);
@@ -245,7 +245,7 @@ ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB,
 
     double error = form_0.WeightedDistance(form);
     if (error < min_error) {
-      info = ConventionalCell(UB_list[i], form_num, allowPermutations);
+      info = ConventionalCell(i, form_num, allowPermutations);
       min_error = error;
     }
   }
@@ -268,13 +268,13 @@ void ScalarUtils::RemoveHighErrorForms(std::vector<ConventionalCell> &list,
 
   std::vector<ConventionalCell> new_list;
 
-  for (size_t i = 0; i < list.size(); i++)
-    if (list[i].GetError() <= level)
-      new_list.push_back(list[i]);
+  for (auto &i : list)
+    if (i.GetError() <= level)
+      new_list.push_back(i);
 
   list.clear();
-  for (size_t i = 0; i < new_list.size(); i++)
-    list.push_back(new_list[i]);
+  for (const auto &i : new_list)
+    list.push_back(i);
 }
 
 /**
@@ -302,12 +302,12 @@ ScalarUtils::GetCellBestError(const std::vector<ConventionalCell> &list,
   std::string type;
 
   bool min_found = false;
-  for (size_t i = 0; i < list.size(); i++) {
-    type = list[i].GetCellType();
-    double error = list[i].GetError();
+  for (const auto &i : list) {
+    type = i.GetCellType();
+    double error = i.GetError();
     if ((use_triclinic || type != ReducedCell::TRICLINIC()) &&
         error < min_error) {
-      info = list[i];
+      info = i;
       min_error = error;
       min_found = true;
     }
@@ -411,10 +411,10 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB,
                                 {c_temp, a_temp, b_temp},
                                 {m_c_temp, b_temp, a_temp}};
 
-      for (size_t perm = 0; perm < 6; perm++) {
-        a = permutations[perm][0];
-        b = permutations[perm][1];
-        c = permutations[perm][2];
+      for (auto &permutation : permutations) {
+        a = permutation[0];
+        b = permutation[1];
+        c = permutation[2];
         if (a.norm() <= factor * b.norm() &&
             b.norm() <= factor * c.norm()) // could be Niggli within
         {                                  // experimental error

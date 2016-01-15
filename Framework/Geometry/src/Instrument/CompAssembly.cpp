@@ -65,8 +65,8 @@ CompAssembly::~CompAssembly() {
   if (m_cachedBoundingBox)
     delete m_cachedBoundingBox;
   // Iterate over pointers in m_children, deleting them
-  for (auto it = m_children.begin(); it != m_children.end(); ++it) {
-    delete *it;
+  for (auto &it : m_children) {
+    delete it;
   }
   m_children.clear();
 }
@@ -371,10 +371,10 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
     if (!m_cachedBoundingBox) {
       m_cachedBoundingBox = new BoundingBox();
       // Loop over the children and define a box large enough for all of them
-      for (auto it = m_children.cbegin(); it != m_children.cend(); ++it) {
+      for (auto it : m_children) {
         BoundingBox compBox;
-        if (*it) {
-          (*it)->getBoundingBox(compBox);
+        if (it) {
+          it->getBoundingBox(compBox);
           m_cachedBoundingBox->grow(compBox);
         }
       }

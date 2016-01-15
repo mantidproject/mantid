@@ -108,9 +108,8 @@ void InternetHelper::createRequest(Poco::URI &uri) {
     m_request->setContentLength(m_contentLength);
   }
 
-  for (auto itHeaders = m_headers.begin(); itHeaders != m_headers.end();
-       ++itHeaders) {
-    m_request->set(itHeaders->first, itHeaders->second);
+  for (auto &m_header : m_headers) {
+    m_request->set(m_header.first, m_header.second);
   }
 
   if (m_method == "POST") {

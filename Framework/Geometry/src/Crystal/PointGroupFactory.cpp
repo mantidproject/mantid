@@ -58,8 +58,8 @@ std::vector<std::string>
 PointGroupFactoryImpl::getAllPointGroupSymbols() const {
   std::vector<std::string> pointGroups;
 
-  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
-    pointGroups.push_back(it->first);
+  for (const auto &it : m_generatorMap) {
+    pointGroups.push_back(it.first);
   }
 
   return pointGroups;
@@ -71,11 +71,11 @@ std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(
     const PointGroup::CrystalSystem &crystalSystem) {
   std::vector<std::string> pointGroups;
 
-  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
-    PointGroup_sptr pointGroup = getPrototype(it->first);
+  for (auto &it : m_generatorMap) {
+    PointGroup_sptr pointGroup = getPrototype(it.first);
 
     if (pointGroup->crystalSystem() == crystalSystem) {
-      pointGroups.push_back(it->first);
+      pointGroups.push_back(it.first);
     }
   }
 

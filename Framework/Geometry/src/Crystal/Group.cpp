@@ -71,11 +71,9 @@ Group Group::operator*(const Group &other) const {
   std::vector<SymmetryOperation> result;
   result.reserve(order() * other.order());
 
-  for (auto selfOp = m_allOperations.begin(); selfOp != m_allOperations.end();
-       ++selfOp) {
-    for (auto otherOp = other.m_allOperations.begin();
-         otherOp != other.m_allOperations.end(); ++otherOp) {
-      result.push_back((*selfOp) * (*otherOp));
+  for (const auto &m_allOperation : m_allOperations) {
+    for (const auto &otherOp : other.m_allOperations) {
+      result.push_back(m_allOperation * otherOp);
     }
   }
 
@@ -87,8 +85,8 @@ Group Group::operator*(const Group &other) const {
 std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
   std::vector<Kernel::V3D> result;
 
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    result.push_back(Geometry::getWrappedVector((*op) * vector));
+  for (const auto &m_allOperation : m_allOperations) {
+    result.push_back(Geometry::getWrappedVector(m_allOperation * vector));
   }
 
   std::sort(result.begin(), result.end(), FuzzyV3DLessThan());
@@ -159,9 +157,8 @@ void Group::setSymmetryOperations(
 /// systems have 4 non-zero elements in the matrix, orthogonal have 6.
 Group::CoordinateSystem Group::getCoordinateSystemFromOperations(
     const std::vector<SymmetryOperation> &symmetryOperations) const {
-  for (auto op = symmetryOperations.begin(); op != symmetryOperations.end();
-       ++op) {
-    std::vector<int> matrix = (*op).matrix();
+  for (const auto &symmetryOperation : symmetryOperations) {
+    std::vector<int> matrix = symmetryOperation.matrix();
     if (std::count(matrix.begin(), matrix.end(), 0) == 5) {
       return Group::Hexagonal;
     }
@@ -199,8 +196,8 @@ bool Group::hasIdentity() const {
 /// Returns true if the inverse of each element is in the group
 bool Group::eachElementHasInverse() const {
   // Iterate through all operations, check that the inverse is in the group.
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    if (!containsOperation((*op).inverse())) {
+  for (const auto &m_allOperation : m_allOperations) {
+    if (!containsOperation(m_allOperation.inverse())) {
       return false;
     }
   }

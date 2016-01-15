@@ -353,14 +353,14 @@ std::string DetectorGroup::getParameterAsString(const std::string &pname,
 void DetectorGroup::getBoundingBox(BoundingBox &boundingBox) const {
   // boundingBox = BoundingBox(); // this change may modify a lot of behaviour
   // -> verify
-  for (auto cit = m_detectors.cbegin(); cit != m_detectors.cend(); ++cit) {
+  for (const auto &m_detector : m_detectors) {
     BoundingBox memberBox;
     if (!boundingBox.isAxisAligned()) {
       // coordinate system
       const std::vector<V3D> *cs = &(boundingBox.getCoordSystem());
       memberBox.realign(cs);
     }
-    IComponent_const_sptr det = cit->second;
+    IComponent_const_sptr det = m_detector.second;
     det->getBoundingBox(memberBox);
     boundingBox.grow(memberBox);
   }

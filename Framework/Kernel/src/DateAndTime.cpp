@@ -863,9 +863,9 @@ void DateAndTime::createVector(const DateAndTime start,
   size_t num = seconds.size();
   out.resize(num);
   size_t i = 0;
-  for (auto it = seconds.begin(); it != seconds.end(); ++it) {
+  for (double second : seconds) {
     out[i]._nanoseconds =
-        startnano + static_cast<int64_t>((*it) * 1000000000.0);
+        startnano + static_cast<int64_t>(second * 1000000000.0);
     i++;
   }
 }
