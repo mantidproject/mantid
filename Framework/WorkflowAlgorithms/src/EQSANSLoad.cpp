@@ -128,8 +128,8 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
   std::string config_file = "";
   static boost::regex re1("eqsans_configuration\\.([0-9]+)$");
   boost::smatch matches;
-  for (auto it = searchPaths.cbegin(); it != searchPaths.cend(); ++it) {
-    Poco::DirectoryIterator file_it(*it);
+  for (const auto &searchPath : searchPaths) {
+    Poco::DirectoryIterator file_it(searchPath);
     Poco::DirectoryIterator end;
     for (; file_it != end; ++file_it) {
       if (boost::regex_search(file_it.name(), matches, re1)) {
