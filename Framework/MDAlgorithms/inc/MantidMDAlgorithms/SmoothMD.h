@@ -46,18 +46,21 @@ public:
   virtual const std::string summary() const;
   std::map<std::string, std::string> validateInputs();
 
-  boost::shared_ptr<Mantid::API::IMDHistoWorkspace> doSmooth(
+  boost::shared_ptr<Mantid::API::IMDHistoWorkspace> hatSmooth(
       boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> toSmooth,
       const std::vector<int> &widthVector,
       boost::optional<boost::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
-          weightingWS,
-      const std::vector<double> &kernel);
+          weightingWS);
 
-  std::vector<double> hatKernel(const std::vector<int> &widths);
-
-  std::vector<double> gaussianKernel(const std::vector<int> &widths);
+  boost::shared_ptr<Mantid::API::IMDHistoWorkspace> gaussianSmooth(
+      boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> toSmooth,
+      const std::vector<int> &widthVector,
+      boost::optional<boost::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
+          weightingWS);
 
 private:
+  std::vector<double> gaussianKernel(const std::vector<int> &widths);
+
   void init();
   void exec();
 };

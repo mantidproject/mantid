@@ -369,6 +369,43 @@ public:
     TSM_ASSERT("Last index should have a smoothed Value of NaN",
                boost::math::isnan(out->getSignalAt(9)));
   }
+
+  void test_simple_smooth_gaussian_function() {
+    auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+      1 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
+
+    /*
+     2D MDHistoWorkspace Input
+
+     1 - 1 - 1
+     1 - 1 - 1
+     1 - 1 - 1
+    */
+
+    SmoothMD alg;
+    alg.setChild(true);
+    alg.initialize();
+    std::vector<int> widthVector(1, 3);
+    alg.setProperty("WidthVector", widthVector);
+    alg.setProperty("InputWorkspace", toSmooth);
+    alg.setProperty("Function", "Gaussian");
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDHistoWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+
+    /*
+     2D MDHistoWorkspace Expected
+
+     1 - 1 - 1
+     1 - 1 - 1
+     1 - 1 - 1
+    */
+    for (size_t i = 0; i < out->getNPoints(); ++i) {
+      TS_ASSERT_EQUALS(1, out->getSignalAt(i));
+      TS_ASSERT_EQUALS(1, out->getErrorAt(i));
+    }
+  }
+
 };
 
 class SmoothMDTestPerformance : public CxxTest::TestSuite {
