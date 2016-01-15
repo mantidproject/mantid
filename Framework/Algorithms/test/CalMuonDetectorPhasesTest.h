@@ -96,7 +96,8 @@ public:
     // Create a fake muon dataset
     double a = 0.1;   // Amplitude of the oscillations
     double w = 25.;   // Frequency of the oscillations
-    double tau = 2.2; // Muon life time
+    double tau = Mantid::PhysicalConstants::MuonLifetime *
+                 1e6; // Muon life time in microseconds
 
     MantidVec X;
     MantidVec Y;
