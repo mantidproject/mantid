@@ -10,7 +10,8 @@ import math
 
 
 class AlignComponents(PythonAlgorithm):
-    """ Class to align components
+    """
+    Class to align components
     """
 
     _optionsList = ["PosX", "PosY", "PosZ", "RotX", "RotY", "RotZ"]
@@ -21,17 +22,20 @@ class AlignComponents(PythonAlgorithm):
     _masking = False
 
     def category(self):
-        """ Mantid required
+        """
+        Mantid required
         """
         return "PythonAlgorithms;Diffraction"
 
     def name(self):
-        """ Mantid required
+        """
+        Mantid required
         """
         return "AlignComponents"
 
     def summary(self):
-        """ Mantid required
+        """
+        Mantid required
         """
         return "Align a component by minimising difference to an offset workspace"
 
@@ -167,6 +171,7 @@ class AlignComponents(PythonAlgorithm):
         if maskWS is not None and maskWS.id() != 'MaskWorkspace':
             issues['MaskWorkspace'] = "MaskWorkspace must be empty or of type \"MaskWorkspace\""
 
+        # Need to get instrument in order to check components are valid
         wks = self.getProperty("InputWorkspace").value
         if wks is None:
             inputFilename = self.getProperty("InstrumentFilename").value
@@ -177,6 +182,7 @@ class AlignComponents(PythonAlgorithm):
                 wks = api.LoadEmptyInstrument(Filename=inputFilename,
                                               OutputWorkspace="alignedWorkspace")
 
+        # Check if each component listed is defined in the instrument
         components = self.getProperty("ComponentList").value
         if len(components) <= 0 and not self.getProperty("FitSourcePosition").value and not self.getProperty("FitSamplePosition").value:
             issues['ComponentList'] = "Must supply components"
@@ -187,6 +193,7 @@ class AlignComponents(PythonAlgorithm):
                 issues['ComponentList'] = "Instrument has no component \"" \
                                        + ','.join(components) + "\""
 
+        # This checks that something will actually be refined,
         if not (self.getProperty("PosX").value or self.getProperty("PosY").value or self.getProperty("PosZ").value or
                 self.getProperty("RotX").value or self.getProperty("RotY").value or self.getProperty("RotZ").value or
                 self.getProperty("FitSourcePosition").value or self.getProperty("FitSamplePosition").value):
@@ -216,7 +223,7 @@ class AlignComponents(PythonAlgorithm):
                                           OutputWorkspace="alignedWorkspace")
         wks_name=wks.getName()
 
-        # First fit L1 if selected
+        # First fit L1 if selected for Source and/or Sample
         for component in "Source", "Sample":
             if self.getProperty("Fit"+component+"Position").value:
                 wks=api.mtd[wks_name]
@@ -347,6 +354,10 @@ class AlignComponents(PythonAlgorithm):
 
     #pylint: disable=too-many-arguments
     def _minimisation_func(self, x_0, wks_name, component, firstIndex, lastIndex, difc, mask):
+        """
+        Basic minimization function used. Returns the chisquared difference between the expected
+        difc and the new difc after the component has been moved or rotated.
+        """
         xmap = self._mapOptions(x_0)
 
         if self._move:
@@ -367,6 +378,9 @@ class AlignComponents(PythonAlgorithm):
         return chisquare(f_obs=difc, f_exp=difc_new)[0]
 
     def _minimisation_func_L1(self, x_0, wks_name, component, firstIndex, lastIndex, difc, mask):
+        """
+        Minimization function for moving component along Z only.
+        """
         api.MoveInstrumentComponent(wks_name, component, Z=x_0[0], RelativePosition=False)
         wks_new = api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name)
 
@@ -379,7 +393,7 @@ class AlignComponents(PythonAlgorithm):
 
     def _getFirstDetID(self, component):
         """
-        recursive search to find first detID
+        recursive search to find first detID of a component
         """
         if component.type() == 'DetectorComponent' or component.type() == 'RectangularDetectorPixel':
             return component.getID()
@@ -388,7 +402,7 @@ class AlignComponents(PythonAlgorithm):
 
     def _getLastDetID(self, component):
         """
-        recursive search to find last detID
+        recursive search to find last detID of a component
         """
         if component.type() == 'DetectorComponent' or component.type() == 'RectangularDetectorPixel':
             return component.getID()
@@ -398,6 +412,10 @@ class AlignComponents(PythonAlgorithm):
     def _mapOptions(self, inX):
         """
         Creates an array combining the refining and constant variables
+        This is required because scipy.optimise.minimise expect a constant
+        number of variable, so need to be able to maps any number of
+        inputs to six outputs.
+
         """
         x0_index = 0
         out = []
