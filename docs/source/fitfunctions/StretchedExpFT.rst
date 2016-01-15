@@ -23,3 +23,4 @@ tau is expressed in nano-seconds.
 .. categories::
 
 .. sourcelink::
+   :python: Framework/PythonInterface/plugins/functions/StretchedExpFT.py
