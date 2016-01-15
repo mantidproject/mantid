@@ -85,9 +85,9 @@ void LoadMcStasNexus::exec() {
     nxFile.openGroup(name, type);
     auto dataEntries = nxFile.getEntries();
 
-    for (auto eit = dataEntries.begin(); eit != dataEntries.end(); ++eit) {
-      std::string dataName = eit->first;
-      std::string dataType = eit->second;
+    for (auto &dataEntrie : dataEntries) {
+      std::string dataName = dataEntrie.first;
+      std::string dataType = dataEntrie.second;
       if (dataName == "content_nxs" || dataType != "NXdata")
         continue;
       g_log.debug() << "Opening " << dataName << "   " << dataType << std::endl;
@@ -97,18 +97,17 @@ void LoadMcStasNexus::exec() {
       // Find the axis names
       auto nxdataEntries = nxFile.getEntries();
       std::string axis1Name, axis2Name;
-      for (auto nit = nxdataEntries.begin(); nit != nxdataEntries.end();
-           ++nit) {
-        if (nit->second == "NXparameters")
+      for (auto &nxdataEntrie : nxdataEntries) {
+        if (nxdataEntrie.second == "NXparameters")
           continue;
-        nxFile.openData(nit->first);
+        nxFile.openData(nxdataEntrie.first);
         if (nxFile.hasAttr("axis")) {
           int axisNo(0);
           nxFile.getAttr("axis", axisNo);
           if (axisNo == 1)
-            axis1Name = nit->first;
+            axis1Name = nxdataEntrie.first;
           else if (axisNo == 2)
-            axis2Name = nit->first;
+            axis2Name = nxdataEntrie.first;
           else
             throw std::invalid_argument("Unknown axis number");
         }

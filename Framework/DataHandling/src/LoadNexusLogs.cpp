@@ -229,9 +229,9 @@ void LoadNexusLogs::exec() {
       ptime.reserve(event_frame_number.size());
       std::vector<Mantid::Kernel::DateAndTime> plogt = plog->timesAsVector();
       std::vector<double> plogv = plog->valuesAsVector();
-      for (size_t i = 0; i < event_frame_number.size(); ++i) {
-        ptime.push_back(plogt[event_frame_number[i]]);
-        pval.push_back(plogv[event_frame_number[i]]);
+      for (int i : event_frame_number) {
+        ptime.push_back(plogt[i]);
+        pval.push_back(plogv[i]);
       }
       pcharge->create(ptime, pval);
       pcharge->setUnits("uAh");

@@ -119,8 +119,8 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
       throw;
     }
     detid_t detid = 0;
-    for (auto it = detids.begin(); it != detids.end(); ++it) {
-      detid = *it;
+    for (value_type it : detids) {
+      detid = it;
     }
     it->second.push_back(detid);
   }
@@ -135,21 +135,21 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
     std::map<int, std::vector<detid_t>> groupdetidsmap,
     std::map<int, std::vector<detid_t>> &groupdetidrangemap) {
 
-  for (auto it = groupdetidsmap.begin(); it != groupdetidsmap.end(); ++it) {
+  for (auto &it : groupdetidsmap) {
 
     // a) Get handler of group ID and detector Id vector
-    int groupid = it->first;
-    sort(it->second.begin(), it->second.end());
+    int groupid = it.first;
+    sort(it.second.begin(), it.second.end());
 
-    g_log.debug() << "Group " << groupid << "  has " << it->second.size()
+    g_log.debug() << "Group " << groupid << "  has " << it.second.size()
                   << " detectors. " << std::endl;
 
     // b) Group to ranges
     std::vector<detid_t> detranges;
-    detid_t st = it->second[0];
+    detid_t st = it.second[0];
     detid_t ed = st;
-    for (size_t i = 1; i < it->second.size(); i++) {
-      detid_t detid = it->second[i];
+    for (size_t i = 1; i < it.second.size(); i++) {
+      detid_t detid = it.second[i];
       if (detid == ed + 1) {
         // consecutive
         ed = detid;
@@ -197,11 +197,10 @@ void SaveDetectorsGrouping::printToXML(
   }
 
   // 3. Append Groups
-  for (auto it = groupdetidrangemap.begin(); it != groupdetidrangemap.end();
-       ++it) {
+  for (auto &it : groupdetidrangemap) {
 
     // a) Group Node
-    int groupid = it->first;
+    int groupid = it.first;
     std::stringstream sid;
     sid << groupid;
 
@@ -222,12 +221,12 @@ void SaveDetectorsGrouping::printToXML(
     // b) Detector ID Child Nodes
     std::stringstream ss;
 
-    for (size_t i = 0; i < it->second.size() / 2; i++) {
+    for (size_t i = 0; i < it.second.size() / 2; i++) {
       // i. Generate text value
 
       bool writedata = true;
-      detid_t ist = it->second[i * 2];
-      detid_t ied = it->second[i * 2 + 1];
+      detid_t ist = it.second[i * 2];
+      detid_t ied = it.second[i * 2 + 1];
       // "a-b" or "a"
       if (ist < ied) {
         ss << ist << "-" << ied;
@@ -239,12 +238,12 @@ void SaveDetectorsGrouping::printToXML(
         throw std::invalid_argument("Impossible to have this sitaution!");
       }
       // add ","
-      if (writedata && i < it->second.size() / 2 - 1) {
+      if (writedata && i < it.second.size() / 2 - 1) {
         ss << ",";
       }
 
-      g_log.debug() << "Detectors:  " << it->second[i * 2] << ", "
-                    << it->second[i * 2 + 1] << std::endl;
+      g_log.debug() << "Detectors:  " << it.second[i * 2] << ", "
+                    << it.second[i * 2 + 1] << std::endl;
     } // FOREACH Detectors Range Set
 
     std::string textvalue = ss.str();

@@ -107,9 +107,9 @@ void DownloadInstrument::exec() {
                    << " from the instrument repository" << std::endl;
   }
 
-  for (auto itMap = fileMap.begin(); itMap != fileMap.end(); ++itMap) {
+  for (auto &itMap : fileMap) {
     // download a file
-    doDownloadFile(itMap->first, itMap->second);
+    doDownloadFile(itMap.first, itMap.second);
   }
 
   setProperty("FileDownloadCount", static_cast<int>(fileMap.size()));
@@ -180,8 +180,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
 
   std::set<std::string> repoFilenames;
 
-  for (Json::ArrayIndex i = 0; i < serverContents.size(); ++i) {
-    const auto &serverElement = serverContents[i];
+  for (auto &serverElement : serverContents) {
     std::string name = serverElement.get("name", "").asString();
     repoFilenames.insert(name);
     Poco::Path filePath(localPath, name);
@@ -303,8 +302,8 @@ size_t DownloadInstrument::removeOrphanedFiles(
 
   // delete any identified files
   try {
-    for (auto it = filesToDelete.begin(); it != filesToDelete.end(); ++it) {
-      Poco::File file(*it);
+    for (const auto &it : filesToDelete) {
+      Poco::File file(it);
       file.remove();
     }
   } catch (Poco::Exception &ex) {

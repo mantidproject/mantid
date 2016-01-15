@@ -375,9 +375,9 @@ void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName,
   BinaryFile<VulcanCorrectionFactor> file(fileName);
   std::vector<VulcanCorrectionFactor> *results = file.loadAll();
   if (results) {
-    for (auto it = results->begin(); it != results->end(); ++it) {
+    for (auto &result : *results) {
       // std::cout << it->pixelID << " :! " << it->factor << std::endl;
-      vulcan[static_cast<detid_t>(it->pixelID)] = it->factor;
+      vulcan[static_cast<detid_t>(result.pixelID)] = result.factor;
     }
   }
 

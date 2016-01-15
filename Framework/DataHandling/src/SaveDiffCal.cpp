@@ -238,8 +238,8 @@ void SaveDiffCal::generateDetidToIndex() {
 
 bool SaveDiffCal::tableHasColumn(const std::string name) const {
   const std::vector<std::string> names = m_calibrationWS->getColumnNames();
-  for (auto it = names.begin(); it != names.end(); ++it) {
-    if (name == (*it))
+  for (const auto &it : names) {
+    if (name == it)
       return true;
   }
 

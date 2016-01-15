@@ -144,10 +144,9 @@ void LoadDetectorsGroupingFile::exec() {
     // 6. Add group names, if user has specified any
     std::map<int, std::string> groupNamesMap = loader.getGroupNamesMap();
 
-    for (auto it = groupNamesMap.begin(); it != groupNamesMap.end(); it++) {
-      std::string groupIdStr = boost::lexical_cast<std::string>(it->first);
-      m_groupWS->mutableRun().addProperty("GroupName_" + groupIdStr,
-                                          it->second);
+    for (auto &it : groupNamesMap) {
+      std::string groupIdStr = boost::lexical_cast<std::string>(it.first);
+      m_groupWS->mutableRun().addProperty("GroupName_" + groupIdStr, it.second);
     }
   } else if (ext == "map") {
     // Deal with file as map
@@ -208,16 +207,15 @@ void LoadDetectorsGroupingFile::setByComponents() {
       m_groupWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Set
-  for (auto it = m_groupComponentsMap.begin(); it != m_groupComponentsMap.end();
-       ++it) {
-    g_log.debug() << "Group ID = " << it->first << " With " << it->second.size()
+  for (auto &it : m_groupComponentsMap) {
+    g_log.debug() << "Group ID = " << it.first << " With " << it.second.size()
                   << " Components" << std::endl;
 
-    for (size_t i = 0; i < it->second.size(); i++) {
+    for (size_t i = 0; i < it.second.size(); i++) {
 
       // a) get component
       Geometry::IComponent_const_sptr component =
-          m_instrument->getComponentByName(it->second[i]);
+          m_instrument->getComponentByName(it.second[i]);
 
       // b) component -> component assembly --> children (more than detectors)
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -225,13 +223,12 @@ void LoadDetectorsGroupingFile::setByComponents() {
       std::vector<Geometry::IComponent_const_sptr> children;
       asmb->getChildren(children, true);
 
-      g_log.debug() << "Component Name = " << it->second[i]
+      g_log.debug() << "Component Name = " << it.second[i]
                     << "  Component ID = " << component->getComponentID()
                     << "Number of Children = " << children.size() << std::endl;
 
-      for (size_t ic = 0; ic < children.size(); ic++) {
+      for (auto child : children) {
         // c) convert component to detector
-        Geometry::IComponent_const_sptr child = children[ic];
         Geometry::IDetector_const_sptr det =
             boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
 
@@ -241,7 +238,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
           auto itx = indexmap.find(detid);
           if (itx != indexmap.end()) {
             size_t wsindex = itx->second;
-            m_groupWS->dataY(wsindex)[0] = it->first;
+            m_groupWS->dataY(wsindex)[0] = it.first;
           } else {
             g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located"
                           << std::endl;
@@ -285,17 +282,16 @@ void LoadDetectorsGroupingFile::setByDetectors() {
       m_groupWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Set GroupingWorkspace
-  for (auto it = m_groupDetectorsMap.begin(); it != m_groupDetectorsMap.end();
-       ++it) {
-    g_log.debug() << "Group ID = " << it->first << std::endl;
+  for (auto &it : m_groupDetectorsMap) {
+    g_log.debug() << "Group ID = " << it.first << std::endl;
 
-    for (size_t i = 0; i < it->second.size(); i++) {
-      detid_t detid = it->second[i];
+    for (size_t i = 0; i < it.second.size(); i++) {
+      detid_t detid = it.second[i];
       auto itx = indexmap.find(detid);
 
       if (itx != indexmap.end()) {
         size_t wsindex = itx->second;
-        m_groupWS->dataY(wsindex)[0] = it->first;
+        m_groupWS->dataY(wsindex)[0] = it.first;
       } else {
         g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located"
                       << std::endl;
@@ -320,8 +316,7 @@ void LoadDetectorsGroupingFile::setBySpectrumIDs() {
   for (gsiter = m_groupSpectraMap.begin(); gsiter != m_groupSpectraMap.end();
        ++gsiter) {
     int groupid = gsiter->first;
-    for (size_t isp = 0; isp < gsiter->second.size(); isp++) {
-      int specid = gsiter->second[isp];
+    for (int specid : gsiter->second) {
       s2iter = s2imap.find(specid);
       if (s2iter == s2imap.end()) {
         g_log.error()
@@ -376,10 +371,9 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
   for (groupspeciter = m_groupSpectraMap.begin();
        groupspeciter != m_groupSpectraMap.end(); ++groupspeciter) {
     int groupid = groupspeciter->first;
-    for (size_t i = 0; i < groupspeciter->second.size(); i++) {
-      spectrumidgroupmap.insert(
-          std::pair<int, int>(groupspeciter->second[i], groupid));
-      specids.push_back(groupspeciter->second[i]);
+    for (int &i : groupspeciter->second) {
+      spectrumidgroupmap.insert(std::pair<int, int>(i, groupid));
+      specids.push_back(i);
     }
   }
 

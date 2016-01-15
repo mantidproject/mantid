@@ -260,10 +260,10 @@ void LoadMuonNexus1::exec() {
     }
     // Read in the spectra in the optional list parameter, if set
     if (m_list) {
-      for (size_t i = 0; i < m_spec_list.size(); ++i) {
+      for (int i : m_spec_list) {
         specid_t histToRead =
-            static_cast<specid_t>(m_spec_list[i] - 1 + period * nxload.t_nsp1);
-        specid_t specNo = static_cast<specid_t>(m_spec_list[i]);
+            static_cast<specid_t>(i - 1 + period * nxload.t_nsp1);
+        specid_t specNo = static_cast<specid_t>(i);
         loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                  localWorkspace);
         counter++;
@@ -349,8 +349,8 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
       for (int64_t i = m_spec_min; i < m_spec_max; i++) {
         specToLoad.push_back(static_cast<int>(i));
       }
-      for (auto it = m_spec_list.begin(); it != m_spec_list.end(); ++it) {
-        specToLoad.push_back(*it);
+      for (int &it : m_spec_list) {
+        specToLoad.push_back(it);
       }
     } else {
       // Load all the spectra
@@ -379,8 +379,8 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
         // Simpliest case - one dead time for one detector
 
         // Populate deadTimes
-        for (auto it = specToLoad.begin(); it != specToLoad.end(); ++it) {
-          deadTimes.push_back(deadTimesData[*it - 1]);
+        for (int &it : specToLoad) {
+          deadTimes.push_back(deadTimesData[it - 1]);
         }
         // Load into table
         TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
@@ -394,8 +394,8 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
         for (int64_t i = 0; i < m_numberOfPeriods; i++) {
 
           // Populate deadTimes
-          for (auto it = specToLoad.begin(); it != specToLoad.end(); ++it) {
-            int index = static_cast<int>(*it - 1 + i * m_numberOfSpectra);
+          for (int &it : specToLoad) {
+            int index = static_cast<int>(it - 1 + i * m_numberOfSpectra);
             deadTimes.push_back(deadTimesData[index]);
           }
 
@@ -438,8 +438,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
       for (int64_t i = m_spec_min; i < m_spec_max; i++) {
         specToLoad.push_back(static_cast<int>(i));
       }
-      for (auto it = m_spec_list.begin(); it != m_spec_list.end(); ++it) {
-        specToLoad.push_back(*it);
+      for (int &it : m_spec_list) {
+        specToLoad.push_back(it);
       }
     } else {
       // Load all the spectra
@@ -471,15 +471,15 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
           // m_entrynumber = 0 && m_numberOfPeriods = 1 means that user did not
           // select
           // any periods but there is only one in the dataset
-          for (auto it = specToLoad.begin(); it != specToLoad.end(); ++it) {
-            int index = *it - 1;
+          for (int &it : specToLoad) {
+            int index = it - 1;
             grouping.push_back(groupingData[index]);
           }
         } else {
           // User selected an entry number
-          for (auto it = specToLoad.begin(); it != specToLoad.end(); ++it) {
-            int index = *it - 1 + static_cast<int>((m_entrynumber - 1) *
-                                                   m_numberOfSpectra);
+          for (int &it : specToLoad) {
+            int index = it - 1 + static_cast<int>((m_entrynumber - 1) *
+                                                  m_numberOfSpectra);
             grouping.push_back(groupingData[index]);
           }
         }
@@ -499,8 +499,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
 
           // Get the grouping
           grouping.clear();
-          for (auto it = specToLoad.begin(); it != specToLoad.end(); ++it) {
-            int index = *it - 1 + i * static_cast<int>(m_numberOfSpectra);
+          for (int &it : specToLoad) {
+            int index = it - 1 + i * static_cast<int>(m_numberOfSpectra);
             grouping.push_back(groupingData[index]);
           }
 
@@ -573,11 +573,11 @@ LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
     groupingMap[grouping[i]].push_back(specToLoad[i]);
   }
 
-  for (auto it = groupingMap.begin(); it != groupingMap.end(); ++it) {
-    if (it->first != 0) // Skip 0 group
+  for (auto &it : groupingMap) {
+    if (it.first != 0) // Skip 0 group
     {
       TableRow newRow = detectorGroupingTable->appendRow();
-      newRow << it->second;
+      newRow << it.second;
     }
   }
 

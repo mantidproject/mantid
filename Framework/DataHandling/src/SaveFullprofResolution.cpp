@@ -166,8 +166,8 @@ void SaveFullprofResolution::parseTableWorkspace() {
   size_t numcols = colnames.size();
 
   stringstream dbmsgss("Input table's column names: ");
-  for (size_t i = 0; i < colnames.size(); ++i) {
-    dbmsgss << setw(20) << colnames[i];
+  for (auto &colname : colnames) {
+    dbmsgss << setw(20) << colname;
   }
   g_log.debug(dbmsgss.str());
 

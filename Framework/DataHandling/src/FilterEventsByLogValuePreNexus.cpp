@@ -173,14 +173,12 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   const string CAL("_CAL");
   const size_t CAL_LEN = CAL.length(); // cache to make life easier
   vector<string> files;
-  for (size_t i = 0; i < dirs.size(); ++i) {
-    if ((dirs[i].length() > CAL_LEN) &&
-        (dirs[i].compare(dirs[i].length() - CAL.length(), CAL.length(), CAL) ==
-         0)) {
-      if (Poco::File(base.path() + "/" + dirs[i] + "/calibrations/" + mapping)
+  for (auto &dir : dirs) {
+    if ((dir.length() > CAL_LEN) &&
+        (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
+      if (Poco::File(base.path() + "/" + dir + "/calibrations/" + mapping)
               .exists())
-        files.push_back(base.path() + "/" + dirs[i] + "/calibrations/" +
-                        mapping);
+        files.push_back(base.path() + "/" + dir + "/calibrations/" + mapping);
     }
   }
 
@@ -515,8 +513,8 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   m_loadOnlySomeSpectra = (this->m_spectraList.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (auto it = m_spectraList.begin(); it != m_spectraList.end(); it++)
-    spectraLoadMap[*it] = true;
+  for (long long &it : m_spectraList)
+    spectraLoadMap[it] = true;
 
   //---------------------------------------------------------------------------
   // Other features
@@ -783,8 +781,8 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   std::reverse(eventExts.begin(), eventExts.end());
 
-  for (size_t i = 0; i < eventExts.size(); ++i) {
-    size_t pos = instrument.find(eventExts[i]);
+  for (auto &eventExt : eventExts) {
+    size_t pos = instrument.find(eventExt);
     if (pos != string::npos) {
       instrument = instrument.substr(0, pos);
       break;
@@ -1428,13 +1426,13 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
   size_t numerror = 0;
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-    for (int i = 0; i < static_cast<int>(m_vecEventIndex.size()); ++i) {
+    for (unsigned long long &i : m_vecEventIndex) {
       PARALLEL_START_INTERUPT_REGION
 
-      uint64_t eventindex = m_vecEventIndex[i];
+      uint64_t eventindex = i;
       if (eventindex > static_cast<uint64_t>(m_numEvents)) {
         uint64_t realeventindex = eventindex & VETOFLAG;
-        m_vecEventIndex[i] = realeventindex;
+        i = realeventindex;
       }
       PARALLEL_END_INTERUPT_REGION
     }
@@ -2250,13 +2248,13 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
   eventws->getInstrument()->getDetectors(detector_map);
 
   // Set up
-  for (auto it = detector_map.begin(); it != detector_map.end(); it++) {
-    if (!it->second->isMonitor()) {
+  for (auto &it : detector_map) {
+    if (!it.second->isMonitor()) {
       // Add non-monitor detector ID
-      size_t workspaceIndex = m_pixelToWkspindex[it->first];
+      size_t workspaceIndex = m_pixelToWkspindex[it.first];
       // this->m_pixelToWkspindex[it->first] = workspaceIndex;
       EventList &spec = eventws->getOrAddEventList(workspaceIndex);
-      spec.addDetectorID(it->first);
+      spec.addDetectorID(it.first);
       // Start the spectrum number at 1
       spec.setSpectrumNo(specid_t(workspaceIndex + 1));
     }
