@@ -120,7 +120,6 @@ Set the list of tables the user is offered to open
 */
 void QtReflMainView::setTableList(const std::set<std::string> &tables) {
   ui.menuOpenTable->clear();
-
   for (auto it = tables.begin(); it != tables.end(); ++it) {
     QAction *openTable =
         ui.menuOpenTable->addAction(QString::fromStdString(*it));
@@ -128,9 +127,15 @@ void QtReflMainView::setTableList(const std::set<std::string> &tables) {
 
     // Map this action to the table name
     m_openMap->setMapping(openTable, QString::fromStdString(*it));
-
-    connect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()));
-    connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)));
+    // When repeated corrections happen the QMessageBox from openTable()
+    // method in ReflMainViewPresenter will be called multiple times
+    // when 'no' is clicked.
+    // ConnectionType = UniqueConnection ensures that
+    // each object has only one of these signals.
+    connect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()),
+            Qt::UniqueConnection);
+    connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)),
+            Qt::UniqueConnection);
   }
 }
 
