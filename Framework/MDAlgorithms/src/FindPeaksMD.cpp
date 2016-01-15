@@ -387,7 +387,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     // --- Convert the "boxes" to peaks ----
     for (auto box : peakBoxes) {
-      // The center of the box = Q in the lab frame
+// The center of the box = Q in the lab frame
 
 #ifndef MDBOX_TRACK_CENTROID
       coord_t boxCenter[nd];

@@ -124,7 +124,7 @@ void MultiDomainFunction::function(const FunctionDomain &domain,
     std::vector<size_t> domains;
     getDomainIndices(iFun, cd.getNParts(), domains);
 
-    for (unsigned long &domain : domains) {
+    for (auto &domain : domains) {
       const FunctionDomain &d = cd.getDomain(domain);
       FunctionValues tmp(d);
       getFunction(iFun)->function(d, tmp);
@@ -162,7 +162,7 @@ void MultiDomainFunction::functionDeriv(const FunctionDomain &domain,
       std::vector<size_t> domains;
       getDomainIndices(iFun, cd.getNParts(), domains);
 
-      for (unsigned long &domain : domains) {
+      for (auto &domain : domains) {
         const FunctionDomain &d = cd.getDomain(domain);
         PartialJacobian J(&jacobian, m_valueOffsets[domain], paramOffset(iFun));
         getFunction(iFun)->functionDeriv(d, J);
@@ -319,7 +319,7 @@ MultiDomainFunction::createEquivalentFunctions() const {
     std::vector<size_t> domains;
     getDomainIndices(iFun, nDomains, domains);
 
-    for (unsigned long j : domains) {
+    for (auto j : domains) {
       CompositeFunction_sptr cf = compositeFunctions[j];
       if (!cf) {
         // create a composite function for each domain

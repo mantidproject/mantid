@@ -147,7 +147,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
       }
 #ifdef _WIN32
     } else {
-      Poco::Path path(*it, fName);
+      Poco::Path path(searchPath, fName);
       Poco::File file(path);
       if (file.exists() && !(ignoreDirs && file.isDirectory())) {
         return path.toString();

@@ -633,19 +633,19 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
     }
 
     PARALLEL_FOR1(input)
-    for (unsigned long hist : hists) {
+    for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
       PARALLEL_START_INTERUPT_REGION
 
       if (checkForMask) {
         const std::set<detid_t> &detids =
-            input->getSpectrum(hist)->getDetectorIDs();
+            input->getSpectrum(hists[i])->getDetectorIDs();
         if (instrument->isDetectorMasked(detids))
           continue;
         if (instrument->isMonitor(detids))
           continue;
       }
 
-      const double yValue = input->readY(hist)[0];
+      const double yValue = input->readY(hists[i])[0];
       if (yValue < 0.0) {
         throw std::out_of_range("Negative number of counts found, could be "
                                 "corrupted raw counts or solid angle data");

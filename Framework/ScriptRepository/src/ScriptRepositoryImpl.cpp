@@ -658,10 +658,10 @@ void ScriptRepositoryImpl::download_directory(
       it.second.downloaded_pubdate = it.second.pub_date;
       updateLocalJson(it.first, it.second);
 
-    }                                   // end downloading directory
-                                        // update the status
-    it.second.status = BOTH_UNCHANGED;  // update this entry
-  }                                     // end interaction with all entries
+    }                                  // end downloading directory
+                                       // update the status
+    it.second.status = BOTH_UNCHANGED; // update this entry
+  }                                    // end interaction with all entries
 }
 
 /**
