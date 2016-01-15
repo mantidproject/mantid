@@ -90,8 +90,11 @@ class CrystalStructureBuilderTestUnitCell(unittest.TestCase):
 
     def test_getUnitCell_hexagonal(self):
         cell = {u'_cell_length_a': u'5.6', u'_cell_length_c': u'2.3', u'_cell_angle_gamma': u'120.0'}
+        cell_errors = {u'_cell_length_a': u'5.6(1)', u'_cell_length_c': u'2.3(1)', u'_cell_angle_gamma': u'120.0'}
 
         self.assertEqual(self.builder._getUnitCell(cell), '5.6 5.6 2.3 90.0 90.0 120.0')
+        self.assertEqual(self.builder._getUnitCell(cell_errors), '5.6 5.6 2.3 90.0 90.0 120.0')
+
 
 
 class CrystalStructureBuilderTestAtoms(unittest.TestCase):
@@ -111,10 +114,10 @@ class CrystalStructureBuilderTestAtoms(unittest.TestCase):
 
     def test_getAtoms_correct(self):
         data = dict([(u'_atom_site_label', [u'Si', u'Al']),
-                     (u'_atom_site_fract_x', [u'1/8', u'0.34']),
-                     (u'_atom_site_fract_y', [u'1/8', u'0.56']),
-                     (u'_atom_site_fract_z', [u'1/8', u'0.23']),
-                     (u'_atom_site_occupancy', [u'1.0', u'1.0']),
+                     (u'_atom_site_fract_x', [u'1/8', u'0.34(1)']),
+                     (u'_atom_site_fract_y', [u'1/8', u'0.56(2)']),
+                     (u'_atom_site_fract_z', [u'1/8', u'0.23(2)']),
+                     (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
                      (u'_atom_site_U_iso_or_equiv', [u'0.01', u'0.02'])])
 
         self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')

@@ -6,6 +6,15 @@ from mantid.geometry import SpaceGroupFactory, CrystalStructure
 
 import re
 
+# pylint: disable=invalid-name
+def removeErrorEstimateFromNumber(numberString):
+    errorBegin = numberString.find('(')
+
+    if errorBegin == -1:
+        return numberString
+
+    return numberString[:errorBegin]
+
 
 class CrystalStructureBuilder(object):
     '''
@@ -80,7 +89,8 @@ class CrystalStructureBuilder(object):
         unitCellComponents = [u'_cell_length_a', u'_cell_length_b', u'_cell_length_c',
                               u'_cell_angle_alpha', u'_cell_angle_beta', u'_cell_angle_gamma']
 
-        unitCellValueMap = dict([(str(x), str(cifData[x])) if x in cifData.keys() else (str(x), None) for x in
+        unitCellValueMap = dict([(str(x), removeErrorEstimateFromNumber(str(cifData[x]))) if x in cifData.keys()
+                                 else (str(x), None) for x in
                                  unitCellComponents])
 
         if unitCellValueMap['_cell_length_a'] is None:
@@ -123,7 +133,8 @@ class CrystalStructureBuilder(object):
         for atomLine in zip(*atomLists):
             stringAtomLine = [str(x) for x in atomLine]
 
-            cleanLine = [self._getCleanAtomSymbol(stringAtomLine[0])] + list(stringAtomLine[1:])
+            cleanLine = [self._getCleanAtomSymbol(stringAtomLine[0])] + [removeErrorEstimateFromNumber(x) for x in
+                                                                         list(stringAtomLine[1:])]
             atomLines.append(' '.join(cleanLine))
 
         return ';'.join(atomLines)
