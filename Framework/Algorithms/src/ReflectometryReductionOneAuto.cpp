@@ -507,8 +507,6 @@ double ReflectometryReductionOneAuto::checkForDefault(
 }
 
 bool ReflectometryReductionOneAuto::checkGroups() {
-  std::string wsName = getPropertyValue("InputWorkspace");
-
   try {
     WorkspaceGroup_sptr ws = getProperty("InputWorkspace");
     if (ws)
