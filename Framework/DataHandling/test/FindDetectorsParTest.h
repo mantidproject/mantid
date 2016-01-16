@@ -10,6 +10,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
+#include <array>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -386,13 +387,7 @@ public:
 #else
 //   TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
 #endif
-    std::vector<double> pattern(6, 0);
-    pattern[0] = 10;
-    pattern[1] = 0;
-    pattern[2] = 5;
-    pattern[3] = 6;
-    pattern[4] = 7;
-    pattern[5] = 8;
+    std::vector<double> pattern{10, 0, 5, 6, 7, 8};
     for (size_t j = 0; j < descr.nData_records; j++) {
       for (size_t i = 0; i < 6; i++) {
         TS_ASSERT_DELTA(pattern[i], result[i + j * 6], FLT_EPSILON)
@@ -541,7 +536,7 @@ private:
     std::string polw_pattern("0.804071,0.804258,0.804442,");
     std::string azw_pattern("5.72472,5.72472,5.72472,");
 
-    std::vector<std::stringstream> bufs(5);
+    std::array<std::stringstream, 5> bufs;
     for (int j = 0; j < 5; j++) {
       for (int i = 0; i < 3; i++) {
         bufs[j] << spResult->cell<double>(i, j) << ",";
