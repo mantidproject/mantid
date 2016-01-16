@@ -9,6 +9,9 @@
 Description
 -----------
 This algorithm changes the sign of Q and the label of the workspace convention.
+This should only be used on MD workspaces that contain only Q or HKL dimensions.  If there are other dimensions,
+user should still run this algorithm (so that the convention flag is changed), but then run TransformMD with -1 
+for the non-Q dimensions.
 
 
 Usage
