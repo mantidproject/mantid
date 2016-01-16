@@ -43,8 +43,8 @@ ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
       Append(true), // append data to existing target MD workspace if one exist
       LorentzCorrection(false), // not doing Lorents
       l1(1.), beamline_norm(1.), failedDetectorLookupCount(0),
-      m_extentsMin(NULL),
-      m_extentsMax(NULL) // will be allocated in exec using nDims
+      m_extentsMin(nullptr),
+      m_extentsMax(nullptr) // will be allocated in exec using nDims
 {}
 
 //----------------------------------------------------------------------------------------------

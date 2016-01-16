@@ -43,7 +43,7 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
 void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
   Mutex::ScopedLock _lock(m_changeMruListsMutexE);
   if (m_bufferedDataE.size() <= thread_num) {
-    m_bufferedDataE.resize(thread_num + 1, NULL);
+    m_bufferedDataE.resize(thread_num + 1, nullptr);
     for (size_t i = 0; i < m_bufferedDataE.size(); i++) {
       if (!m_bufferedDataE[i])
         m_bufferedDataE[i] =
@@ -59,7 +59,7 @@ void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
 void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
   Mutex::ScopedLock _lock(m_changeMruListsMutexY);
   if (m_bufferedDataY.size() <= thread_num) {
-    m_bufferedDataY.resize(thread_num + 1, NULL);
+    m_bufferedDataY.resize(thread_num + 1, nullptr);
     for (size_t i = 0; i < m_bufferedDataY.size(); i++) {
       if (!m_bufferedDataY[i])
         m_bufferedDataY[i] =

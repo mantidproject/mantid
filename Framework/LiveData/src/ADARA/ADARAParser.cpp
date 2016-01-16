@@ -54,7 +54,7 @@ int Parser::bufferParse(std::string &log_info, unsigned int max_packets) {
     chunk_len = m_oversize_len;
     if (valid_len < chunk_len)
       chunk_len = valid_len;
-    stopped = rxOversizePkt(NULL, p, m_oversize_offset, chunk_len);
+    stopped = rxOversizePkt(nullptr, p, m_oversize_offset, chunk_len);
     m_oversize_offset += chunk_len;
     m_oversize_len -= chunk_len;
     valid_len -= chunk_len;
@@ -256,7 +256,7 @@ bool Parser::rxOversizePkt(const PacketHeader *hdr, const uint8_t *,
                            unsigned int, unsigned int) {
   // NOTE: ADARA::PacketHeader *hdr can be NULL...! ;-o
   /* Default is to discard the data */
-  if (hdr != NULL)
+  if (hdr != nullptr)
     (m_discarded_packets[hdr->type()])++;
   return false;
 }

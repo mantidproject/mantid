@@ -100,7 +100,7 @@ void SaveISISNexus::exec() {
 
   m_isisRaw = new ISISRAW2;
   rawFile = fopen(inputFilename.c_str(), "rb");
-  if (rawFile == NULL) {
+  if (rawFile == nullptr) {
     throw Exception::FileError("Cannot open file ", inputFilename);
   }
   m_isisRaw->ioRAW(rawFile, true);

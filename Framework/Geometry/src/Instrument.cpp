@@ -19,15 +19,15 @@ Kernel::Logger g_log("Instrument");
 
 /// Default constructor
 Instrument::Instrument()
-    : CompAssembly(), m_detectorCache(), m_sourceCache(0),
-      m_chopperPoints(new std::vector<const ObjComponent *>), m_sampleCache(0),
+    : CompAssembly(), m_detectorCache(), m_sourceCache(nullptr),
+      m_chopperPoints(new std::vector<const ObjComponent *>), m_sampleCache(nullptr),
       m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(new ReferenceFrame) {}
 
 /// Constructor with name
 Instrument::Instrument(const std::string &name)
-    : CompAssembly(name), m_detectorCache(), m_sourceCache(0),
-      m_chopperPoints(new std::vector<const ObjComponent *>), m_sampleCache(0),
+    : CompAssembly(name), m_detectorCache(), m_sourceCache(nullptr),
+      m_chopperPoints(new std::vector<const ObjComponent *>), m_sampleCache(nullptr),
       m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(new ReferenceFrame) {}
 
@@ -50,9 +50,9 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
  *  in indirect instruments.
  */
 Instrument::Instrument(const Instrument &instr)
-    : CompAssembly(instr), m_sourceCache(NULL),
+    : CompAssembly(instr), m_sourceCache(nullptr),
       m_chopperPoints(new std::vector<const ObjComponent *>),
-      m_sampleCache(NULL), /* Should only be temporarily null */
+      m_sampleCache(nullptr), /* Should only be temporarily null */
       m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
       m_monitorCache(instr.m_monitorCache), m_defaultView(instr.m_defaultView),
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(),
@@ -483,7 +483,7 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
 const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
   auto it = m_instr->m_detectorCache.find(detector_id);
   if (it == m_instr->m_detectorCache.end()) {
-    return NULL;
+    return nullptr;
   }
   return it->second.get();
 }
@@ -495,7 +495,7 @@ bool Instrument::isMonitor(const detid_t &detector_id) const {
     return false;
   // This is the detector
   const Detector *det = dynamic_cast<const Detector *>(it->second.get());
-  if (det == NULL)
+  if (det == nullptr)
     return false;
   return det->isMonitor();
 }
@@ -527,7 +527,7 @@ bool Instrument::isDetectorMasked(const detid_t &detector_id) const {
     return false;
   // This is the detector
   const Detector *det = dynamic_cast<const Detector *>(it->second.get());
-  if (det == NULL)
+  if (det == nullptr)
     return false;
   // Access the parameter map directly.
   Parameter_sptr maskedParam = m_map->get(det, "masked");
@@ -976,7 +976,7 @@ void Instrument::getInstrumentParameters(double &l1, Kernel::V3D &beamline,
                                          Kernel::V3D &samplePos) const {
   // Get some positions
   const IComponent_const_sptr sourceObj = this->getSource();
-  if (sourceObj == NULL) {
+  if (sourceObj == nullptr) {
     throw Exception::InstrumentDefinitionError(
         "Failed to get source component from instrument");
   }

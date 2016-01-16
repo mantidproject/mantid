@@ -629,9 +629,9 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
 
     bool checkForMask = false;
     Geometry::Instrument_const_sptr instrument = input->getInstrument();
-    if (instrument != NULL) {
-      checkForMask = ((instrument->getSource() != NULL) &&
-                      (instrument->getSample() != NULL));
+    if (instrument != nullptr) {
+      checkForMask = ((instrument->getSource() != nullptr) &&
+                      (instrument->getSample() != nullptr));
     }
 
     PARALLEL_FOR1(input)

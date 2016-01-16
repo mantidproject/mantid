@@ -141,7 +141,7 @@ private:
 
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl()
-    : m_pConf(NULL), m_pSysConfig(NULL), m_changed_keys(), m_ConfigPaths(),
+    : m_pConf(nullptr), m_pSysConfig(nullptr), m_changed_keys(), m_ConfigPaths(),
       m_AbsolutePaths(), m_strBaseDir(""), m_PropertyString(""),
       m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
@@ -155,7 +155,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
-  m_pConf = 0;
+  m_pConf = nullptr;
 
   // Register the FilterChannel with the Poco logging factory
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
@@ -405,7 +405,7 @@ void ConfigServiceImpl::configureLogging() {
 
         // Try to create or append to the file. If it fails, use the default
         FILE *fp = fopen(m_logFilePath.c_str(), "a+");
-        if (fp == NULL) {
+        if (fp == nullptr) {
           std::cerr
               << "Error writing to log file path given in properties file: \""
               << m_logFilePath << "\". Will use a default path instead."
@@ -1311,7 +1311,7 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
     try {
       Poco::Pipe outPipe, errorPipe;
       Poco::ProcessHandle ph =
-          Poco::Process::launch(cmd, args, 0, &outPipe, &errorPipe);
+          Poco::Process::launch(cmd, args, nullptr, &outPipe, &errorPipe);
       const int rc = ph.wait();
       // Only if the command returned successfully.
       if (rc == 0) {
@@ -1978,7 +1978,7 @@ void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
 */
 void ConfigServiceImpl::setFilterChannelLogLevel(
     const std::string &filterChannelName, int logLevel) {
-  Poco::Channel *channel = NULL;
+  Poco::Channel *channel = nullptr;
   try {
     channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
         filterChannelName);

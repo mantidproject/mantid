@@ -193,8 +193,8 @@ bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
 /** function initalizes all variables necessary for converting workspace
  * variables into MD variables in ModQ (elastic/inelastic) cases  */
 void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
-  m_pEfixedArray = NULL;
-  m_pDetMasks = NULL;
+  m_pEfixedArray = nullptr;
+  m_pDetMasks = nullptr;
   //********** Generic part of initialization, common for elastic and inelastic
   // modes:
   // get transformation matrix (needed for CrystalAsPoder mode)
@@ -225,7 +225,7 @@ void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
     // the wave vector of incident neutrons;
     m_Ki = sqrt(m_Ei / PhysicalConstants::E_mev_toNeutronWavenumberSq);
 
-    m_pEfixedArray = NULL;
+    m_pEfixedArray = nullptr;
     if (m_Emode == (int)Kernel::DeltaEMode::Indirect)
       m_pEfixedArray =
           ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
@@ -318,7 +318,7 @@ MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode,
 
 /// constructor;
 MDTransfQ3D::MDTransfQ3D()
-    : m_isLorentzCorrected(false), m_SinThetaSqArray(NULL), SinThetaSq(),
+    : m_isLorentzCorrected(false), m_SinThetaSqArray(nullptr), SinThetaSq(),
       m_SinThetaSq(0.), m_AbsMin(0.) {}
 
 } // End MDAlgorighms namespace

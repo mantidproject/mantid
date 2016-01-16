@@ -120,7 +120,7 @@ SourceListPkt::SourceListPkt(const SourceListPkt &pkt) : Packet(pkt) {}
 
 BankedEventPkt::BankedEventPkt(const uint8_t *data, uint32_t len)
     : Packet(data, len), m_fields((const uint32_t *)payload()),
-      m_curEvent(NULL), m_lastFieldIndex(0), m_curFieldIndex(0),
+      m_curEvent(nullptr), m_lastFieldIndex(0), m_curFieldIndex(0),
       m_sourceStartIndex(0), m_bankCount(0), m_TOFOffset(0),
       m_isCorrected(false), m_bankNum(0), m_bankStartIndex(0), m_bankId(0),
       m_eventCount(0) {
@@ -131,7 +131,7 @@ BankedEventPkt::BankedEventPkt(const uint8_t *data, uint32_t len)
 }
 
 BankedEventPkt::BankedEventPkt(const BankedEventPkt &pkt)
-    : Packet(pkt), m_fields((const uint32_t *)payload()), m_curEvent(NULL),
+    : Packet(pkt), m_fields((const uint32_t *)payload()), m_curEvent(nullptr),
       m_lastFieldIndex(0), m_curFieldIndex(0), m_sourceStartIndex(0),
       m_bankCount(0), m_TOFOffset(0), m_isCorrected(false), m_bankNum(0),
       m_bankStartIndex(0), m_bankId(0), m_eventCount(0) {
@@ -149,9 +149,9 @@ BankedEventPkt::BankedEventPkt(const BankedEventPkt &pkt)
 // That means the only payload we're guarenteed to have is the first 4 fields.
 // After that, we've got to start checking against the payload len...
 const Event *BankedEventPkt::firstEvent() const {
-  m_curEvent = NULL;
+  m_curEvent = nullptr;
   m_curFieldIndex = 4;
-  while (m_curEvent == NULL && m_curFieldIndex <= m_lastFieldIndex) {
+  while (m_curEvent == nullptr && m_curFieldIndex <= m_lastFieldIndex) {
     // Start of a new source
     firstEventInSource();
   }
@@ -163,7 +163,7 @@ const Event *BankedEventPkt::nextEvent() const {
   if (m_curEvent) // If we're null, it's because we've already incremented past
                   // the last event
   {
-    m_curEvent = NULL;
+    m_curEvent = nullptr;
     m_curFieldIndex +=
         2; // go to where the next event will start (if there is a next event)
 
@@ -173,9 +173,9 @@ const Event *BankedEventPkt::nextEvent() const {
       m_curEvent = (const Event *)&m_fields[m_curFieldIndex];
     } else {
       m_bankNum++;
-      while (m_bankNum <= m_bankCount && m_curEvent == NULL) {
+      while (m_bankNum <= m_bankCount && m_curEvent == nullptr) {
         firstEventInBank();
-        if (m_curEvent == NULL) {
+        if (m_curEvent == nullptr) {
           // Increment banknum because there were no events in the bank we
           // just tested
           m_bankNum++;
@@ -183,7 +183,7 @@ const Event *BankedEventPkt::nextEvent() const {
       }
 
       // If we still haven't found an event, check for more source sections
-      while (m_curEvent == NULL && m_curFieldIndex < m_lastFieldIndex) {
+      while (m_curEvent == nullptr && m_curFieldIndex < m_lastFieldIndex) {
         firstEventInSource();
       }
     }
@@ -210,9 +210,9 @@ void BankedEventPkt::firstEventInSource() const {
     m_bankNum = 1; // banks are numbered from 1 to m_bankCount.
     m_curFieldIndex = m_sourceStartIndex + 4;
 
-    while (m_bankNum <= m_bankCount && m_curEvent == NULL) {
+    while (m_bankNum <= m_bankCount && m_curEvent == nullptr) {
       firstEventInBank();
-      if (m_curEvent == NULL) {
+      if (m_curEvent == nullptr) {
         // Increment banknum because there were no events in the bank we
         // just tested
         m_bankNum++;
@@ -221,7 +221,7 @@ void BankedEventPkt::firstEventInSource() const {
   } else // no banks in this source, skip to the next source
   {
     m_curFieldIndex += 4;
-    m_curEvent = NULL;
+    m_curEvent = nullptr;
   }
 }
 
@@ -239,7 +239,7 @@ void BankedEventPkt::firstEventInBank() const {
   if (m_eventCount > 0) {
     m_curEvent = (const Event *)&m_fields[m_curFieldIndex];
   } else {
-    m_curEvent = NULL;
+    m_curEvent = nullptr;
   }
 }
 
@@ -511,7 +511,7 @@ BeamMonitorConfigPkt::BeamMonitorConfigPkt(const BeamMonitorConfigPkt &pkt)
 
 DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
     : Packet(data, len), m_fields((const uint32_t *)payload()),
-      m_sectionOffsets(NULL), m_after_banks_offset(NULL) {
+      m_sectionOffsets(nullptr), m_after_banks_offset(nullptr) {
   // Get Number of Detector Bank Sets...
   //    - Basic Packet Size Sanity Check
 
@@ -564,9 +564,9 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
       msg += " payload_len=";
       msg += boost::lexical_cast<std::string>(m_payload_len);
       delete[] m_sectionOffsets;
-      m_sectionOffsets = (uint32_t *)NULL;
+      m_sectionOffsets = (uint32_t *)nullptr;
       delete[] m_after_banks_offset;
-      m_after_banks_offset = (uint32_t *)NULL;
+      m_after_banks_offset = (uint32_t *)nullptr;
       throw invalid_packet(msg);
     }
 
@@ -593,16 +593,16 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
     msg += " payload_len=";
     msg += boost::lexical_cast<std::string>(m_payload_len);
     delete[] m_sectionOffsets;
-    m_sectionOffsets = (uint32_t *)NULL;
+    m_sectionOffsets = (uint32_t *)nullptr;
     delete[] m_after_banks_offset;
-    m_after_banks_offset = (uint32_t *)NULL;
+    m_after_banks_offset = (uint32_t *)nullptr;
     throw invalid_packet(msg);
   }
 }
 
 DetectorBankSetsPkt::DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt)
     : Packet(pkt), m_fields((const uint32_t *)payload()),
-      m_sectionOffsets(NULL), m_after_banks_offset(NULL) {
+      m_sectionOffsets(nullptr), m_after_banks_offset(nullptr) {
   uint32_t numSets = detBankSetCount();
 
   // Don't Allocate Anything if there are No Detector Bank Sets...

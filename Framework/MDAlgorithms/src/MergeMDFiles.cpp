@@ -28,7 +28,7 @@ DECLARE_ALGORITHM(MergeMDFiles)
 MergeMDFiles::MergeMDFiles()
     : m_nDims(0), m_MDEventType(), m_fileBasedTargetWS(false), m_Filenames(),
       m_EventLoader(), m_OutIWS(), totalEvents(0), totalLoaded(0), fileMutex(),
-      statsMutex(), prog(NULL) {}
+      statsMutex(), prog(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -77,7 +77,7 @@ void MergeMDFiles::loadBoxData() {
   totalEvents = 0;
 
   m_fileComponentsStructure.resize(m_Filenames.size());
-  m_EventLoader.assign(m_Filenames.size(), NULL);
+  m_EventLoader.assign(m_Filenames.size(), nullptr);
 
   try {
     for (size_t i = 0; i < m_Filenames.size(); i++) {
@@ -242,7 +242,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
   auto ts = new ThreadSchedulerFIFO();
   ThreadPool tp(ts);
 
-  Kernel::DiskBuffer *DiskBuf(NULL);
+  Kernel::DiskBuffer *DiskBuf(nullptr);
   if (m_fileBasedTargetWS) {
     DiskBuf = bc->getFileIO();
   }
@@ -402,7 +402,7 @@ void MergeMDFiles::clearEventLoaders() {
   for (size_t i = 0; i < m_EventLoader.size(); i++) {
     if (m_EventLoader[i]) {
       delete m_EventLoader[i];
-      m_EventLoader[i] = NULL;
+      m_EventLoader[i] = nullptr;
     }
   }
 }

@@ -54,7 +54,7 @@ SpectrumDetectorMapping::SpectrumDetectorMapping(
     const specid_t *const spectrumNumbers, const detid_t *const detectorIDs,
     size_t arrayLengths)
     : m_indexIsSpecNo(true) {
-  if (spectrumNumbers == NULL || detectorIDs == NULL) {
+  if (spectrumNumbers == nullptr || detectorIDs == nullptr) {
     throw std::invalid_argument(
         "SpectrumDetectorMapping: Null array pointer passed");
   }

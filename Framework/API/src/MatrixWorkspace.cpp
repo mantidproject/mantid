@@ -43,7 +43,7 @@ MatrixWorkspace::MatrixWorkspace(
       m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks(),
       m_indexCalculator(),
       m_nearestNeighboursFactory(
-          (nnFactory == NULL) ? new NearestNeighboursFactory : nnFactory),
+          (nnFactory == nullptr) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
@@ -797,7 +797,7 @@ double MatrixWorkspace::detectorSignedTwoTheta(
 
   Geometry::IComponent_const_sptr source = instrument->getSource();
   Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
         "sample");
@@ -827,7 +827,7 @@ double
 MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const {
   Geometry::IComponent_const_sptr source = getInstrument()->getSource();
   Geometry::IComponent_const_sptr sample = getInstrument()->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
         "sample");
@@ -1277,7 +1277,7 @@ class MWDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWDimension(const Axis *axis, const std::string &dimensionId)
       : m_axis(*axis), m_dimensionId(dimensionId),
-        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL),
+        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
         m_frame(new Geometry::GeneralFrame(m_axis.unit()->label(),
                                            m_axis.unit()->label())) {}
 
@@ -1445,7 +1445,7 @@ MatrixWorkspace::getDimension(size_t index) const {
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimensionWithId(std::string id) const {
   int nAxes = this->axes();
-  IMDDimension *dim = NULL;
+  IMDDimension *dim = nullptr;
   for (int i = 0; i < nAxes; i++) {
     Axis *xAxis = this->getAxis(i);
     const std::string &knownId = getDimensionIdFromAxis(i);
@@ -1454,7 +1454,7 @@ MatrixWorkspace::getDimensionWithId(std::string id) const {
       break;
     }
   }
-  if (NULL == dim) {
+  if (nullptr == dim) {
     std::string message = "Cannot find id : " + id;
     throw std::overflow_error(message);
   }

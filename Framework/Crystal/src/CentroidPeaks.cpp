@@ -339,7 +339,7 @@ void CentroidPeaks::exec() {
 
   eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inWS);
   if (eventW) {
-    eventW->sortAll(TOF_SORT, NULL);
+    eventW->sortAll(TOF_SORT, nullptr);
     this->integrateEvent();
   } else {
     this->integrate();

@@ -31,7 +31,7 @@ DECLARE_ALGORITHM(CreateSampleWorkspace)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-CreateSampleWorkspace::CreateSampleWorkspace() : m_randGen(NULL) {}
+CreateSampleWorkspace::CreateSampleWorkspace() : m_randGen(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -199,7 +199,7 @@ void CreateSampleWorkspace::exec() {
   if (!m_randGen) {
     int seedValue = 0;
     if (isRandom) {
-      seedValue = static_cast<int>(std::time(0));
+      seedValue = static_cast<int>(std::time(nullptr));
     }
     m_randGen = new Kernel::MersenneTwister(seedValue);
   }

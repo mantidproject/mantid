@@ -127,7 +127,7 @@ bool ISISLiveEventDataListener::connect(
     retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle);
   }
   if (retVal != 0) {
-    m_daeHandle = NULL;
+    m_daeHandle = nullptr;
     return false;
   }
 

@@ -155,7 +155,7 @@ void MDNormDirectSC::cacheInputs() {
   const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
   auto source = exptInfoZero.getInstrument()->getSource();
   auto sample = exptInfoZero.getInstrument()->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
         "sample");
@@ -449,7 +449,7 @@ void MDNormDirectSC::calculateNormalization(
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");
   detid2index_map solidAngDetToIdx;
-  if (solidAngleWS != NULL) {
+  if (solidAngleWS != nullptr) {
     haveSA = true;
     solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
   }

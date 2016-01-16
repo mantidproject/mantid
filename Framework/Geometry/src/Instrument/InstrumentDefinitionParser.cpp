@@ -52,7 +52,7 @@ Kernel::Logger g_log("InstrumentDefinitionParser");
  */
 InstrumentDefinitionParser::InstrumentDefinitionParser()
     : m_xmlFile(boost::make_shared<NullIDFObject>()),
-      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
+      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
       m_deltaOffsets(false), m_angleConvertConst(1.0),
       m_indirectPositions(false), m_cachingOption(NoneApplied) {
@@ -69,7 +69,7 @@ InstrumentDefinitionParser::InstrumentDefinitionParser(
     const std::string &filename, const std::string &instName,
     const std::string &xmlText)
     : m_xmlFile(boost::make_shared<NullIDFObject>()),
-      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
+      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
       m_deltaOffsets(false), m_angleConvertConst(1.0),
       m_indirectPositions(false), m_cachingOption(NoneApplied) {
@@ -89,7 +89,7 @@ InstrumentDefinitionParser::InstrumentDefinitionParser(
     const IDFObject_const_sptr expectedCacheFile, const std::string &instName,
     const std::string &xmlText)
     : m_xmlFile(boost::make_shared<NullIDFObject>()),
-      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
+      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
       m_deltaOffsets(false), m_angleConvertConst(1.0),
       m_indirectPositions(false), m_cachingOption(NoneApplied) {
@@ -221,7 +221,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   // Get all the type and component element pointers.
   std::vector<Element *> typeElems;
   std::vector<Element *> compElems;
-  for (Node *pNode = pRootElem->firstChild(); pNode != 0;
+  for (Node *pNode = pRootElem->firstChild(); pNode != nullptr;
        pNode = pNode->nextSibling()) {
     auto pElem = dynamic_cast<Element *>(pNode);
     if (pElem) {
@@ -395,7 +395,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
       // order they are listed in the IDF. The latter needed to get detector IDs
       // assigned
       // as expected
-      for (Node *pNode = pElem->firstChild(); pNode != 0;
+      for (Node *pNode = pElem->firstChild(); pNode != nullptr;
            pNode = pNode->nextSibling()) {
         auto pChildElem = dynamic_cast<Element *>(pNode);
         if (!pChildElem)
@@ -571,7 +571,7 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
   // Check if sub-elements <trans> or <rot> of present - for now ignore these if
   // m_deltaOffset = true
 
-  Element *pRecursive = NULL;
+  Element *pRecursive = nullptr;
   Element *tElem = pElem->getChildElement("trans");
   Element *rElem = pElem->getChildElement("rot");
   bool stillTransElement = true;
@@ -589,7 +589,7 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
 
     if (tElem && rElem) {
       // if both a <trans> and <rot> child element present. Ignore <rot> element
-      rElem = NULL;
+      rElem = nullptr;
     }
 
     if (!tElem && !rElem) {
@@ -1024,7 +1024,7 @@ void InstrumentDefinitionParser::appendAssembly(
       Element *pFound =
           pCompElem->ownerDocument()->getElementById(idlist, "idname");
 
-      if (pFound == NULL) {
+      if (pFound == nullptr) {
         throw Kernel::Exception::InstrumentDefinitionError(
             "No <idlist> with name idname=\"" + idlist +
                 "\" present in instrument definition file.",
@@ -1196,7 +1196,7 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
       Element *pFound =
           pCompElem->ownerDocument()->getElementById(idlist, "idname");
 
-      if (pFound == NULL) {
+      if (pFound == nullptr) {
         throw Kernel::Exception::InstrumentDefinitionError(
             "No <idlist> with name idname=\"" + idlist +
                 "\" present in instrument definition file.",
@@ -2393,7 +2393,7 @@ void InstrumentDefinitionParser::adjust(
   // check if a <translate-rotate-combined-shape-to> is defined
   Poco::AutoPtr<NodeList> pNL_TransRot =
       pElem->getElementsByTagName("translate-rotate-combined-shape-to");
-  Element *pTransRot = 0;
+  Element *pTransRot = nullptr;
   if (pNL_TransRot->length() == 1) {
     pTransRot = static_cast<Element *>(pNL_TransRot->item(0));
   }
@@ -2429,7 +2429,7 @@ void InstrumentDefinitionParser::adjust(
     CompAssembly *baseCoor = new CompAssembly(
         "base"); // dummy assembly used to get to end assembly if nested
     ICompAssembly *endComponent =
-        0; // end assembly, its purpose is to hold the shape coordinate system
+        nullptr; // end assembly, its purpose is to hold the shape coordinate system
     // get shape coordinate system, returned as endComponent, as defined by pLoc
     // and nested <location> elements
     // of pLoc

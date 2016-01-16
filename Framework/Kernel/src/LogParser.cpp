@@ -38,7 +38,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
   std::ifstream file(logFName.c_str());
   if (!file) {
     g_log.warning() << "Cannot open log file " << logFName << "\n";
-    return 0;
+    return nullptr;
   }
 
   // Change times and new values read from file
@@ -95,7 +95,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
   }
 
   if (change_times.empty())
-    return 0;
+    return nullptr;
 
   if (isNumeric) {
     auto logv = new Kernel::TimeSeriesProperty<double>(name);
@@ -115,7 +115,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
     }
     return logv;
   }
-  return 0;
+  return nullptr;
 }
 
 /**

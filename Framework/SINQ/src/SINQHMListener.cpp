@@ -221,7 +221,7 @@ void SINQHMListener::recurseDim(int *data, IMDHistoWorkspace_sptr ws,
 }
 
 void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws) {
-  int *data = NULL, length = 1;
+  int *data = nullptr, length = 1;
   coord_t *idx;
 
   for (int i = 0; i < rank; i++) {
@@ -232,7 +232,7 @@ void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws) {
   std::istream &istr = httpRequest(pathBuffer.str());
 
   data = (int *)malloc(length * sizeof(int));
-  if (data == NULL) {
+  if (data == nullptr) {
     throw std::runtime_error("Out of memory reading HM data");
   }
   istr.read((char *)data, length * sizeof(int));

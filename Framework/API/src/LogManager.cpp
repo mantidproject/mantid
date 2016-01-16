@@ -158,7 +158,7 @@ void LogManager::splitByTime(TimeSplitterType &splitter,
                              std::vector<LogManager *> outputs) const {
   // Make a vector of managers for the splitter. Fun!
   const size_t n = outputs.size();
-  std::vector<PropertyManager *> output_managers(outputs.size(), NULL);
+  std::vector<PropertyManager *> output_managers(outputs.size(), nullptr);
   for (size_t i = 0; i < n; i++) {
     if (outputs[i]) {
       output_managers[i] = &(outputs[i]->m_manager);

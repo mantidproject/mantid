@@ -247,7 +247,7 @@ void LoadBBY::exec() {
   // load events
   size_t numberHistograms = eventWS->getNumberHistograms();
 
-  std::vector<EventVector_pt> eventVectors(numberHistograms, NULL);
+  std::vector<EventVector_pt> eventVectors(numberHistograms, nullptr);
   std::vector<size_t> eventCounts(numberHistograms, 0);
 
   // phase correction

@@ -145,7 +145,7 @@ void DiffractionFocussing2::exec() {
   double eventXMax = 0.;
 
   m_eventW = boost::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
-  if (m_eventW != NULL) {
+  if (m_eventW != nullptr) {
     if (getProperty("PreserveEvents")) {
       // Input workspace is an event workspace. Use the other exec method
       this->execEvent();
@@ -153,7 +153,7 @@ void DiffractionFocussing2::exec() {
       return;
     } else {
       // get the full d-spacing range
-      m_eventW->sortAll(DataObjects::TOF_SORT, NULL);
+      m_eventW->sortAll(DataObjects::TOF_SORT, nullptr);
       m_matrixInputW->getXMinMax(eventXMin, eventXMax);
     }
   }
@@ -575,9 +575,9 @@ void DiffractionFocussing2::determineRebinParameters() {
   // whether or not to bother checking for a mask
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = m_matrixInputW->getInstrument();
-  if (instrument != NULL) {
-    checkForMask = ((instrument->getSource() != NULL) &&
-                    (instrument->getSample() != NULL));
+  if (instrument != nullptr) {
+    checkForMask = ((instrument->getSource() != nullptr) &&
+                    (instrument->getSample() != nullptr));
   }
 
   groupAtWorkspaceIndex.resize(nHist);
@@ -591,7 +591,7 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     // the spectrum is the real thing we want to work with
     const ISpectrum *spec = m_matrixInputW->getSpectrum(wi);
-    if (spec == NULL) {
+    if (spec == nullptr) {
       groupAtWorkspaceIndex[wi] = -1;
       continue;
     }

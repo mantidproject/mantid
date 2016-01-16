@@ -159,8 +159,7 @@ createDetectorGroupWith5CylindricalDetectors() {
   for (int i = 0; i < ndets; ++i) {
     std::ostringstream os;
     os << "d" << i;
-    boost::shared_ptr<Detector> det(
-        new Detector(os.str(), i + 1, detShape, NULL));
+    auto det = boost::make_shared<Detector>(os.str(), i + 1, detShape, nullptr);
     det->setPos((double)(i + 1), 2.0, 2.0);
     groupMembers[i] = det;
   }
@@ -184,8 +183,7 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
   for (unsigned int i = 0; i < nDet; ++i) {
     std::ostringstream os;
     os << "d" << i;
-    boost::shared_ptr<Detector> det(
-        new Detector(os.str(), i + 1, detShape, NULL));
+    auto det = boost::make_shared<Detector>(os.str(), i + 1, detShape, nullptr);
     det->setPos(double(-0.5 * nDet + i) + gap, 2.0, 2.0);
     groupMembers[i] = det;
   }
@@ -225,8 +223,7 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
       if (Rsq >= Rmin2 && Rsq < Rmax2) {
         std::ostringstream os;
         os << "d" << ic;
-        boost::shared_ptr<Detector> det(
-            new Detector(os.str(), ic + 1, detShape, NULL));
+        auto det = boost::make_shared<Detector>(os.str(), ic + 1, detShape, nullptr);
         det->setPos(x, y, z0);
         groupMembers.push_back(det);
       }
@@ -248,7 +245,7 @@ boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors() {
   for (int i = 0; i < ndets; ++i) {
     std::ostringstream os;
     os << "m" << i;
-    boost::shared_ptr<Detector> det(new Detector(os.str(), i + 1, NULL));
+    auto det = boost::make_shared<Detector>(os.str(), i + 1, nullptr);
     det->setPos((double)(i + 1), 2.0, 2.0);
     det->markAsMonitor();
     groupMembers[i] = det;
@@ -584,7 +581,7 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
   instrument->markAsSamplePos(sample);
 
   // A detector
-  Detector *det = new Detector("point-detector", 1 /*detector id*/, NULL);
+  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
   det->setPos(detectorPos);
   det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(det);

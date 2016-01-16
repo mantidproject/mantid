@@ -25,7 +25,7 @@ BitmapGeometryHandler::BitmapGeometryHandler(RectangularDetector *comp)
 }
 
 BitmapGeometryHandler::BitmapGeometryHandler()
-    : GeometryHandler((Object *)NULL), m_rectDet(NULL) {}
+    : GeometryHandler((Object *)nullptr), m_rectDet(nullptr) {}
 
 /// Destructor
 BitmapGeometryHandler::~BitmapGeometryHandler() {}

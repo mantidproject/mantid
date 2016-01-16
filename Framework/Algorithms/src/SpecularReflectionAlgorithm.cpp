@@ -135,7 +135,7 @@ SpecularReflectionAlgorithm::getSurfaceSampleComponent(
     sampleComponent = this->getPropertyValue("SampleComponentName");
   }
   auto searchResult = inst->getComponentByName(sampleComponent);
-  if (searchResult == NULL) {
+  if (searchResult == nullptr) {
     throw std::invalid_argument(sampleComponent +
                                 " does not exist. Check input properties.");
   }
@@ -188,7 +188,7 @@ SpecularReflectionAlgorithm::getDetectorComponent(
       componentToCorrect = this->getPropertyValue("DetectorComponentName");
     }
     searchResult = inst->getComponentByName(componentToCorrect);
-    if (searchResult == NULL) {
+    if (searchResult == nullptr) {
       throw std::invalid_argument(componentToCorrect +
                                   " does not exist. Check input properties.");
     }

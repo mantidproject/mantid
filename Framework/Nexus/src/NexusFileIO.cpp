@@ -36,7 +36,7 @@ Logger g_log("NexusFileIO");
 
 /// Empty default constructor
 NexusFileIO::NexusFileIO()
-    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW), m_progress(0),
+    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW), m_progress(nullptr),
       m_filename() {}
 
 /// Constructor that supplies a progress object
@@ -343,7 +343,7 @@ int NexusFileIO::writeNexusProcessedData2D(
                 start, asize);
       start[0]++;
     }
-    if (m_progress != 0)
+    if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
     int signal = 1;
     NXputattr(fileID, "signal", &signal, 1, NX_INT32);
@@ -376,7 +376,7 @@ int NexusFileIO::writeNexusProcessedData2D(
       start[0]++;
     }
 
-    if (m_progress != 0)
+    if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
 
     // Fractional area for RebinnedOutput
@@ -395,7 +395,7 @@ int NexusFileIO::writeNexusProcessedData2D(
                   start, asize);
         start[0]++;
       }
-      if (m_progress != 0)
+      if (m_progress != nullptr)
         m_progress->reportIncrement(1, "Writing data");
     }
 

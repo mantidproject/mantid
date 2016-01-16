@@ -368,7 +368,7 @@ ParameterTie *ParamFunction::getTie(size_t i) const {
   if (it != m_ties.cend()) {
     return *it;
   }
-  return NULL;
+  return nullptr;
 }
 
 /** Remove all ties
@@ -415,7 +415,7 @@ IConstraint *ParamFunction::getConstraint(size_t i) const {
   if (it != m_constraints.cend()) {
     return *it;
   }
-  return NULL;
+  return nullptr;
 }
 
 /** Remove a constraint

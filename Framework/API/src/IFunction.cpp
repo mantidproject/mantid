@@ -46,7 +46,7 @@ IFunction::~IFunction() {
   m_attrs.clear();
   if (m_handler) {
     delete m_handler;
-    m_handler = NULL;
+    m_handler = nullptr;
   }
 }
 
@@ -737,7 +737,7 @@ void IFunction::setMatrixWorkspace(
             // update value
             IFunctionWithLocation *testWithLocation =
                 dynamic_cast<IFunctionWithLocation *>(this);
-            if (testWithLocation == NULL ||
+            if (testWithLocation == nullptr ||
                 (fitParam.getLookUpTable().containData() == false &&
                  fitParam.getFormula().compare("") == 0)) {
               setParameter(i, fitParam.getValue());
@@ -930,7 +930,7 @@ void IFunction::convertValue(std::vector<double> &values,
     // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
     Instrument_const_sptr instrument = ws->getInstrument();
     Geometry::IComponent_const_sptr sample = instrument->getSample();
-    if (sample == NULL) {
+    if (sample == nullptr) {
       g_log.error()
           << "No sample defined instrument. Cannot convert units for function\n"
           << "Ignore convertion.";

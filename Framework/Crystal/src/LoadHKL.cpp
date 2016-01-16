@@ -59,7 +59,7 @@ void LoadHKL::exec() {
   //    DN, TWOTH, DSP))
   // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
   Instrument_sptr inst(new Geometry::Instrument);
-  Detector *detector = new Detector("det1", -1, 0);
+  Detector *detector = new Detector("det1", -1, nullptr);
   detector->setPos(0.0, 0.0, 0.0);
   inst->add(detector); // This takes care of deletion
   inst->markAsDetector(detector);

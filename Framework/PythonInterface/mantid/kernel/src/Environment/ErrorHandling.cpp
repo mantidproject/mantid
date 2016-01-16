@@ -15,7 +15,7 @@ namespace Environment {
 namespace {
 void tracebackToMsg(std::stringstream &msg, PyTracebackObject *traceback,
                     bool root = true) {
-  if (traceback == NULL)
+  if (traceback == nullptr)
     return;
   msg << "\n  ";
   if (root)
@@ -41,7 +41,7 @@ void throwRuntimeError(const bool withTrace) {
     throw std::runtime_error(
         "ErrorHandling::throwRuntimeError - No Python error state set!");
   }
-  PyObject *exception(NULL), *value(NULL), *traceback(NULL);
+  PyObject *exception(nullptr), *value(nullptr), *traceback(nullptr);
   PyErr_Fetch(&exception, &value, &traceback);
   PyErr_NormalizeException(&exception, &value, &traceback);
   PyErr_Clear();

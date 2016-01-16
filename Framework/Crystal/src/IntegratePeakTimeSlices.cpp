@@ -188,7 +188,7 @@ void IntegratePeakTimeSlices::init() {
 void IntegratePeakTimeSlices::exec() {
   time_t seconds1;
 
-  seconds1 = time(NULL);
+  seconds1 = time(nullptr);
 
   double dQ = getProperty("PeakQspan");
 
@@ -630,7 +630,7 @@ void IntegratePeakTimeSlices::exec() {
     setProperty("SigmaIntensity", SQRT(TotVariance));
     time_t seconds2;
 
-    seconds2 = time(NULL);
+    seconds2 = time(nullptr);
     double dif = difftime(seconds2, seconds1);
     g_log.debug() << "Finished Integr peak number " << indx << " in " << dif
                   << " seconds" << std::endl;

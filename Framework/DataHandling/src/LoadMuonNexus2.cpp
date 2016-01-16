@@ -297,7 +297,7 @@ void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt &counts,
   X.assign(timeBins.begin(), timeBins.end());
 
   int nBins = 0;
-  int *data = NULL;
+  int *data = nullptr;
 
   if (counts.rank() == 3) {
     nBins = counts.dim2();

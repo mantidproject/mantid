@@ -156,7 +156,7 @@ const std::string AlignDetectors::summary() const {
 
 /// (Empty) Constructor
 AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
-  this->tofToDmap = NULL;
+  this->tofToDmap = nullptr;
 }
 
 /// Destructor
@@ -300,7 +300,7 @@ void AlignDetectors::exec() {
   // Check if its an event workspace
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL) {
+  if (eventW != nullptr) {
     this->execEvent();
     return;
   }

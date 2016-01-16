@@ -195,8 +195,8 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
                                      std::string logFileName, API::Run &run) {
   std::string str;
   std::string propname;
-  Mantid::Kernel::TimeSeriesProperty<double> *logd = 0;
-  Mantid::Kernel::TimeSeriesProperty<std::string> *logs = 0;
+  Mantid::Kernel::TimeSeriesProperty<double> *logd = nullptr;
+  Mantid::Kernel::TimeSeriesProperty<std::string> *logs = nullptr;
   std::map<std::string, Kernel::TimeSeriesProperty<double> *> dMap;
   std::map<std::string, Kernel::TimeSeriesProperty<std::string> *> sMap;
   typedef std::pair<std::string, Kernel::TimeSeriesProperty<double> *> dpair;

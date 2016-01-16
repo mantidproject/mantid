@@ -217,7 +217,7 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
     ShapeFactory sFactory;
     boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
     for (int i = 0; i < nhist; ++i) {
-      Detector *det = new Detector("det", detid_t(i), shape, NULL);
+      Detector *det = new Detector("det", detid_t(i), shape, nullptr);
       det->setPos(i, i + 1, 1);
       instrument->add(det);
       instrument->markAsDetector(det);
@@ -533,7 +533,7 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   instrument->add(source);
   instrument->markAsSource(source);
 
-  Detector *monitor = new Detector("Monitor", 1, NULL);
+  Detector *monitor = new Detector("Monitor", 1, nullptr);
   monitor->setPos(14, 0, 0);
   instrument->add(monitor);
   instrument->markAsMonitor(monitor);
@@ -546,7 +546,7 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   // Where 0.01 is half detector width etc.
   Detector *det = new Detector(
       "point-detector", 2,
-      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), NULL);
+      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
   det->setPos(20, (20 - sample->getPos().X()), 0);
   instrument->add(det);
   instrument->markAsDetector(det);
@@ -589,7 +589,7 @@ void createInstrumentForWorkspaceWithDistances(
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {
     std::stringstream buffer;
     buffer << "detector_" << i;
-    Detector *det = new Detector(buffer.str(), i, NULL);
+    Detector *det = new Detector(buffer.str(), i, nullptr);
     det->setPos(detectorPositions[i]);
     instrument->add(det);
     instrument->markAsDetector(det);

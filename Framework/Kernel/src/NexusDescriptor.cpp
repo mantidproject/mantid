@@ -113,7 +113,7 @@ bool NexusDescriptor::isHDF(const std::string &filename,
  */
 NexusDescriptor::NexusDescriptor(const std::string &filename)
     : m_filename(), m_extension(), m_firstEntryNameType(), m_rootAttrs(),
-      m_pathsToTypes(), m_file(NULL) {
+      m_pathsToTypes(), m_file(nullptr) {
   if (filename.empty()) {
     throw std::invalid_argument("NexusDescriptor() - Empty filename '" +
                                 filename + "'");

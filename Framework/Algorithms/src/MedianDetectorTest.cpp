@@ -101,7 +101,7 @@ void MedianDetectorTest::exec() {
   // 0. Correct for solid angle, if desired
   if (m_solidAngle) {
     MatrixWorkspace_sptr solidAngle = getSolidAngles(m_minSpec, m_maxSpec);
-    if (solidAngle != NULL) {
+    if (solidAngle != nullptr) {
       countsWS = countsWS / solidAngle;
     }
   }
@@ -240,9 +240,9 @@ int MedianDetectorTest::maskOutliers(
 
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
-  if (instrument != NULL) {
-    checkForMask = ((instrument->getSource() != NULL) &&
-                    (instrument->getSample() != NULL));
+  if (instrument != nullptr) {
+    checkForMask = ((instrument->getSource() != nullptr) &&
+                    (instrument->getSample() != nullptr));
   }
 
   for (size_t i = 0; i < indexmap.size(); ++i) {
@@ -308,9 +308,9 @@ int MedianDetectorTest::doDetectorTests(
 
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
-  if (instrument != NULL) {
-    checkForMask = ((instrument->getSource() != NULL) &&
-                    (instrument->getSample() != NULL));
+  if (instrument != nullptr) {
+    checkForMask = ((instrument->getSource() != nullptr) &&
+                    (instrument->getSample() != nullptr));
   }
 
   PARALLEL_FOR2(countsWS, maskWS)

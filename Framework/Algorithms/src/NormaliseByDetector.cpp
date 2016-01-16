@@ -72,7 +72,7 @@ void NormaliseByDetector::init() {
 
 const Geometry::FitParameter NormaliseByDetector::tryParseFunctionParameter(
     Geometry::Parameter_sptr parameter, Geometry::IDetector_const_sptr det) {
-  if (parameter == NULL) {
+  if (parameter == nullptr) {
     std::stringstream stream;
     stream << det->getName() << " and all of it's parent components, have no "
                                 "fitting type parameters. This algorithm "

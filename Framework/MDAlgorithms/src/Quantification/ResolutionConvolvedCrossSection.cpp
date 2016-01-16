@@ -67,7 +67,7 @@ Kernel::Logger g_log("ResolutionConvolvedCrossSection");
  * Constructor
  */
 ResolutionConvolvedCrossSection::ResolutionConvolvedCrossSection()
-    : ParamFunction(), IFunctionMD(), m_simulation(false), m_convolution(NULL),
+    : ParamFunction(), IFunctionMD(), m_simulation(false), m_convolution(nullptr),
       m_inputWS() {}
 
 /**

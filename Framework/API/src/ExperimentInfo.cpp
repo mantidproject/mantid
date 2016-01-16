@@ -1076,7 +1076,7 @@ void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename,
       instr = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      instr = parser.parseXML(NULL);
+      instr = parser.parseXML(nullptr);
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instr);
     }
@@ -1148,7 +1148,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     // if( comp_name == prev_name ) continue; this blocks reading in different
     // parameters of the same component. RNT
     // prev_name = comp_name;
-    const Geometry::IComponent *comp = NULL;
+    const Geometry::IComponent *comp = nullptr;
     if (comp_name.find("detID:") != std::string::npos) {
       int detID = atoi(comp_name.substr(6).c_str());
       comp = instr->getDetector(detID).get();
@@ -1194,7 +1194,7 @@ void ExperimentInfo::populateWithParameter(
   ParameterValue paramValue(paramInfo,
                             runData); // Defines implicit conversion operator
 
-  const std::string *pDescription = NULL;
+  const std::string *pDescription = nullptr;
   if (!paramInfo.m_description.empty())
     pDescription = &paramInfo.m_description;
 
