@@ -320,31 +320,31 @@ Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
   MDHistoWorkspace_sptr ws_sptr;
   if (numDims == 1) {
     ws_sptr = boost::make_shared<MDHistoWorkspace>(
-        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0, max,
+        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
                                              numBins));
   } else if (numDims == 2) {
     ws_sptr = boost::make_shared<MDHistoWorkspace>(
-        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0, max,
+        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
                                              numBins),
-        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0, max,
+        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max,
                                              numBins));
   } else if (numDims == 3) {
     ws_sptr = boost::make_shared<MDHistoWorkspace>(
-        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0, max,
+        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
                                              numBins),
-        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0, max,
+        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max,
                                              numBins),
-        boost::make_shared<MDHistoDimension>("z", "z", frame, 0.0, max,
+        boost::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max,
                                              numBins));
   } else if (numDims == 4) {
     ws_sptr = boost::make_shared<MDHistoWorkspace>(
-        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0, max,
+        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
                                              numBins),
-        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0, max,
+        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max,
                                              numBins),
-        boost::make_shared<MDHistoDimension>("z", "z", frame, 0.0, max,
+        boost::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max,
                                              numBins),
-        boost::make_shared<MDHistoDimension>("t", "t", frame, 0.0, max,
+        boost::make_shared<MDHistoDimension>("t", "t", frame, 0.0f, max,
                                              numBins));
   }
 
