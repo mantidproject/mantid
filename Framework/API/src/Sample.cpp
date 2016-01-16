@@ -33,9 +33,10 @@ Sample::Sample()
  */
 Sample::Sample(const Sample &copy)
     : m_name(copy.m_name), m_shape(copy.m_shape),
-      m_environment(copy.m_environment), m_lattice(nullptr), m_crystalStructure(),
-      m_samples(copy.m_samples), m_geom_id(copy.m_geom_id),
-      m_thick(copy.m_thick), m_height(copy.m_height), m_width(copy.m_width) {
+      m_environment(copy.m_environment), m_lattice(nullptr),
+      m_crystalStructure(), m_samples(copy.m_samples),
+      m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), m_height(copy.m_height),
+      m_width(copy.m_width) {
   if (copy.m_lattice)
     m_lattice = new OrientedLattice(copy.getOrientedLattice());
 

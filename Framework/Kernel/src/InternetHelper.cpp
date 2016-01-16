@@ -54,8 +54,8 @@ Logger g_log("InternetHelper");
 InternetHelper::InternetHelper()
     : m_proxyInfo(), m_isProxySet(false), m_timeout(30), m_isTimeoutSet(false),
       m_contentLength(0), m_method(HTTPRequest::HTTP_GET),
-      m_contentType("application/json"), m_body(), m_headers(), m_request(nullptr),
-      m_response(nullptr) {}
+      m_contentType("application/json"), m_body(), m_headers(),
+      m_request(nullptr), m_response(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -248,7 +248,8 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
     // Create a singleton for holding the default context.
     // e.g. any future requests to publish are made to this certificate and
     // context.
-    SSLManager::instance().initializeClient(nullptr, certificateHandler, context);
+    SSLManager::instance().initializeClient(nullptr, certificateHandler,
+                                            context);
     // Create the session
     HTTPSClientSession session(uri.getHost(),
                                static_cast<Poco::UInt16>(uri.getPort()));

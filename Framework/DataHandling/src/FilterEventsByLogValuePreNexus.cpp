@@ -202,15 +202,15 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
 */
 FilterEventsByLogValuePreNexus::FilterEventsByLogValuePreNexus()
     : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), m_prog(nullptr),
-      m_protonChargeTot(0), m_detid_max(0), m_eventFile(nullptr), m_numEvents(0),
-      m_numPulses(0), m_numPixel(0), m_numGoodEvents(0), m_numErrorEvents(0),
-      m_numBadEvents(0), m_numWrongdetidEvents(0), m_numIgnoredEvents(0),
-      m_firstEvent(0), m_maxNumEvents(0), m_usingMappingFile(false),
-      m_loadOnlySomeSpectra(false), m_longestTof(0.0), m_shortestTof(0.0),
-      m_parallelProcessing(false), m_pulseTimesIncreasing(false),
-      m_throwError(true), m_examEventLog(false), m_pixelid2exam(0),
-      m_numevents2write(0), m_freqHz(0), m_istep(0), m_dbPixelID(0),
-      m_useDBOutput(false), m_corretctTOF(false) {}
+      m_protonChargeTot(0), m_detid_max(0), m_eventFile(nullptr),
+      m_numEvents(0), m_numPulses(0), m_numPixel(0), m_numGoodEvents(0),
+      m_numErrorEvents(0), m_numBadEvents(0), m_numWrongdetidEvents(0),
+      m_numIgnoredEvents(0), m_firstEvent(0), m_maxNumEvents(0),
+      m_usingMappingFile(false), m_loadOnlySomeSpectra(false),
+      m_longestTof(0.0), m_shortestTof(0.0), m_parallelProcessing(false),
+      m_pulseTimesIncreasing(false), m_throwError(true), m_examEventLog(false),
+      m_pixelid2exam(0), m_numevents2write(0), m_freqHz(0), m_istep(0),
+      m_dbPixelID(0), m_useDBOutput(false), m_corretctTOF(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Desctructor

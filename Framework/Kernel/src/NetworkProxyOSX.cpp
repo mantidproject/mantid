@@ -110,8 +110,9 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
       CFURLRef pacURL =
           CFURLCreateWithString(kCFAllocatorDefault, cfPacLocation, nullptr);
       SInt32 errorCode;
-      if (!CFURLCreateDataAndPropertiesFromResource(
-              kCFAllocatorDefault, pacURL, &pacData, nullptr, nullptr, &errorCode)) {
+      if (!CFURLCreateDataAndPropertiesFromResource(kCFAllocatorDefault, pacURL,
+                                                    &pacData, nullptr, nullptr,
+                                                    &errorCode)) {
         logger.debug() << "Unable to get the PAC script at "
                        << toString(cfPacLocation) << "Error code: " << errorCode
                        << std::endl;

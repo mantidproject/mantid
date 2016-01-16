@@ -29,9 +29,10 @@ unsigned int TobyFitYVector::length() { return 11; }
  */
 TobyFitYVector::TobyFitYVector()
     : m_yvector(length(), 0.0), m_curRandNums(nullptr), m_randIndex(0),
-      m_curObs(nullptr), m_curQOmega(nullptr), m_moderator(true), m_aperture(true),
-      m_chopper(true), m_chopperJitter(true), m_sampleVolume(true),
-      m_detectorDepth(true), m_detectorArea(true), m_detectionTime(true) {}
+      m_curObs(nullptr), m_curQOmega(nullptr), m_moderator(true),
+      m_aperture(true), m_chopper(true), m_chopperJitter(true),
+      m_sampleVolume(true), m_detectorDepth(true), m_detectorArea(true),
+      m_detectionTime(true) {}
 
 /**
  * Adds the attributes from the vector to the given model

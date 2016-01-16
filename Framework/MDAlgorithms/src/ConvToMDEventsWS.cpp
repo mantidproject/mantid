@@ -170,8 +170,9 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
           tp.joinAll();
       } else {
         m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(
-            nullptr); // it is done this way as it is possible trying to do single
-                   // threaded split more efficiently
+            nullptr); // it is done this way as it is possible trying to do
+                      // single
+                      // threaded split more efficiently
       }
       // Count the new # of boxes.
       lastNumBoxes = m_OutWSWrapper->pWorkspace()

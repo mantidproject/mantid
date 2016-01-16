@@ -135,11 +135,12 @@ int ISISRAW::addItems() {
 /// stuff
 ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt)
     : m_crpt(crpt), frmt_ver_no(0), data_format(0), ver2(0), r_number(0),
-      ver3(0), i_det(0), i_mon(0), i_use(0), mdet(nullptr), monp(nullptr), spec(nullptr), delt(nullptr),
-      len2(nullptr), code(nullptr), tthe(nullptr), ut(nullptr), ver4(0), ver5(0), crat(nullptr), modn(nullptr),
-      mpos(nullptr), timr(nullptr), udet(nullptr), ver6(0), t_ntrg(0), t_nfpp(0), t_nper(0),
-      t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(nullptr), ver7(0), u_dat(nullptr), ver8(0),
-      ddes(nullptr), dat1(nullptr) {
+      ver3(0), i_det(0), i_mon(0), i_use(0), mdet(nullptr), monp(nullptr),
+      spec(nullptr), delt(nullptr), len2(nullptr), code(nullptr), tthe(nullptr),
+      ut(nullptr), ver4(0), ver5(0), crat(nullptr), modn(nullptr),
+      mpos(nullptr), timr(nullptr), udet(nullptr), ver6(0), t_ntrg(0),
+      t_nfpp(0), t_nper(0), t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(nullptr),
+      ver7(0), u_dat(nullptr), ver8(0), ddes(nullptr), dat1(nullptr) {
   memset(r_title, ' ', sizeof(r_title));
   memset(i_inst, ' ', sizeof(i_inst));
   for (int i = 0; i < 256; i++) {
@@ -160,11 +161,12 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt)
 /// stuff
 ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt, bool doUpdateFromCRPT)
     : m_crpt(crpt), frmt_ver_no(0), data_format(0), ver2(0), r_number(0),
-      ver3(0), i_det(0), i_mon(0), i_use(0), mdet(nullptr), monp(nullptr), spec(nullptr), delt(nullptr),
-      len2(nullptr), code(nullptr), tthe(nullptr), ut(nullptr), ver4(0), ver5(0), crat(nullptr), modn(nullptr),
-      mpos(nullptr), timr(nullptr), udet(nullptr), ver6(0), t_ntrg(0), t_nfpp(0), t_nper(0),
-      t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(nullptr), ver7(0), u_dat(nullptr), ver8(0),
-      ddes(nullptr), dat1(nullptr) {
+      ver3(0), i_det(0), i_mon(0), i_use(0), mdet(nullptr), monp(nullptr),
+      spec(nullptr), delt(nullptr), len2(nullptr), code(nullptr), tthe(nullptr),
+      ut(nullptr), ver4(0), ver5(0), crat(nullptr), modn(nullptr),
+      mpos(nullptr), timr(nullptr), udet(nullptr), ver6(0), t_ntrg(0),
+      t_nfpp(0), t_nper(0), t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(nullptr),
+      ver7(0), u_dat(nullptr), ver8(0), ddes(nullptr), dat1(nullptr) {
   memset(r_title, ' ', sizeof(r_title));
   memset(i_inst, ' ', sizeof(i_inst));
   for (int i = 0; i < 256; i++) {

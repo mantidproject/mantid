@@ -45,8 +45,8 @@ DECLARE_ALGORITHM(LoadMask)
 /** Constructor
  */
 LoadMask::LoadMask()
-    : m_maskWS(), m_instrumentPropValue(""), m_pDoc(nullptr), m_pRootElem(nullptr),
-      m_defaultToUse(true) {}
+    : m_maskWS(), m_instrumentPropValue(""), m_pDoc(nullptr),
+      m_pRootElem(nullptr), m_defaultToUse(true) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

@@ -90,8 +90,8 @@ DerivMinimizer::DerivMinimizer()
  * @param tolerance :: Tolerance.
  */
 DerivMinimizer::DerivMinimizer(const double stepSize, const double tolerance)
-    : m_gslSolver(nullptr), m_x(nullptr), m_stopGradient(1e-3), m_stepSize(stepSize),
-      m_tolerance(tolerance) {
+    : m_gslSolver(nullptr), m_x(nullptr), m_stopGradient(1e-3),
+      m_stepSize(stepSize), m_tolerance(tolerance) {
   initGSLMMin();
 }
 

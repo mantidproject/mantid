@@ -223,7 +223,8 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
       if (Rsq >= Rmin2 && Rsq < Rmax2) {
         std::ostringstream os;
         os << "d" << ic;
-        auto det = boost::make_shared<Detector>(os.str(), ic + 1, detShape, nullptr);
+        auto det =
+            boost::make_shared<Detector>(os.str(), ic + 1, detShape, nullptr);
         det->setPos(x, y, z0);
         groupMembers.push_back(det);
       }

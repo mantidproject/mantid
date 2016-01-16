@@ -28,7 +28,8 @@ Component::Component(const IComponent *base, const ParameterMap *map)
 *  Create a component with null parent
 */
 Component::Component()
-    : m_parent(nullptr), m_base(nullptr), m_map(nullptr), m_name(), m_pos(), m_rot() {}
+    : m_parent(nullptr), m_base(nullptr), m_map(nullptr), m_name(), m_pos(),
+      m_rot() {}
 
 /** Constructor by value
 *  @param name :: Component name

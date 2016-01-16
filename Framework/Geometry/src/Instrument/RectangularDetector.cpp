@@ -21,8 +21,8 @@ using Kernel::Matrix;
 /** Empty constructor
  */
 RectangularDetector::RectangularDetector()
-    : CompAssembly(), IObjComponent(nullptr), m_rectBase(nullptr), m_minDetId(0),
-      m_maxDetId(0) {
+    : CompAssembly(), IObjComponent(nullptr), m_rectBase(nullptr),
+      m_minDetId(0), m_maxDetId(0) {
 
   init();
   setGeometryHandler(new BitmapGeometryHandler(this));

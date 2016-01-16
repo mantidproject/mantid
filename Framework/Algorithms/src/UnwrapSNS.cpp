@@ -124,7 +124,7 @@ void UnwrapSNS::exec() {
   // go off and do the event version if appropriate
   m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
   if ((m_inputEvWS != nullptr)) // && ! this->getProperty("ForceHist")) // TODO
-                             // remove ForceHist option
+                                // remove ForceHist option
   {
     this->execEvent();
     return;

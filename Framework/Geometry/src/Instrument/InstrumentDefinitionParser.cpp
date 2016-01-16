@@ -2428,8 +2428,8 @@ void InstrumentDefinitionParser::adjust(
     // create dummy component to hold coord. sys. of cuboid
     CompAssembly *baseCoor = new CompAssembly(
         "base"); // dummy assembly used to get to end assembly if nested
-    ICompAssembly *endComponent =
-        nullptr; // end assembly, its purpose is to hold the shape coordinate system
+    ICompAssembly *endComponent = nullptr; // end assembly, its purpose is to
+                                           // hold the shape coordinate system
     // get shape coordinate system, returned as endComponent, as defined by pLoc
     // and nested <location> elements
     // of pLoc

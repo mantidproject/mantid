@@ -35,8 +35,9 @@ using namespace Mantid::DataObjects;
 /** Constructor
  */
 BinMD::BinMD()
-    : outWS(), prog(nullptr), implicitFunction(nullptr), indexMultiplier(nullptr),
-      signals(nullptr), errors(nullptr), numEvents(nullptr) {}
+    : outWS(), prog(nullptr), implicitFunction(nullptr),
+      indexMultiplier(nullptr), signals(nullptr), errors(nullptr),
+      numEvents(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

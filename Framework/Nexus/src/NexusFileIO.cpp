@@ -36,8 +36,8 @@ Logger g_log("NexusFileIO");
 
 /// Empty default constructor
 NexusFileIO::NexusFileIO()
-    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW), m_progress(nullptr),
-      m_filename() {}
+    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW),
+      m_progress(nullptr), m_filename() {}
 
 /// Constructor that supplies a progress object
 NexusFileIO::NexusFileIO(Progress *prog)

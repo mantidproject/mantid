@@ -141,9 +141,9 @@ private:
 
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl()
-    : m_pConf(nullptr), m_pSysConfig(nullptr), m_changed_keys(), m_ConfigPaths(),
-      m_AbsolutePaths(), m_strBaseDir(""), m_PropertyString(""),
-      m_properties_file_name("Mantid.properties"),
+    : m_pConf(nullptr), m_pSysConfig(nullptr), m_changed_keys(),
+      m_ConfigPaths(), m_AbsolutePaths(), m_strBaseDir(""),
+      m_PropertyString(""), m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
       // Use a different user properties file for an mpi-enabled build to avoid
       // confusion if both are used on the same file system

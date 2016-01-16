@@ -149,8 +149,8 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
                 // from int > zero.
 
   Element *lastElement = nullptr; // This is to store element for the fixed
-                               // complete objects such as sphere,cone,cylinder
-                               // and cuboid
+  // complete objects such as sphere,cone,cylinder
+  // and cuboid
   for (unsigned int i = 0; i < pNL_length; i++) {
     if ((pNL->item(i))->nodeType() == Node::ELEMENT_NODE) {
       Element *pE = static_cast<Element *>(pNL->item(i));

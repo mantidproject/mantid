@@ -22,7 +22,8 @@ using Environment::CallMethod0;
  */
 template <typename BaseAlgorithm>
 AlgorithmAdapter<BaseAlgorithm>::AlgorithmAdapter(PyObject *self)
-    : BaseAlgorithm(), m_self(self), m_isRunningObj(nullptr), m_wikiSummary("") {
+    : BaseAlgorithm(), m_self(self), m_isRunningObj(nullptr),
+      m_wikiSummary("") {
   // Cache the isRunning call to save the lookup each time it is called
   // as it is most likely called in a loop
 
