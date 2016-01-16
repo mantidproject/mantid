@@ -100,7 +100,7 @@ void SaveReflTBL::exec() {
 
   // now do the same for the ungrouped
 
-  for (unsigned long &iterator : m_nogroup) {
+  for (auto &iterator : m_nogroup) {
     TableRow row = ws->getRow(iterator);
     for (int j = 0; j < 5; ++j) {
       writeVal(row.cell<std::string>(j), file);
