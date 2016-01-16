@@ -15,7 +15,7 @@
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 
-typedef std::unique_ptr< ::NeXus::File> file_holder_type;
+typedef std::unique_ptr<::NeXus::File> file_holder_type;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

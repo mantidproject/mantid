@@ -5,7 +5,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include <Poco/File.h>
 
-typedef std::unique_ptr< ::NeXus::File> file_holder_type;
+typedef std::unique_ptr<::NeXus::File> file_holder_type;
 
 namespace Mantid {
 namespace DataObjects {
