@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid {
 namespace API {
@@ -14,6 +15,11 @@ IPeaksWorkspace::~IPeaksWorkspace() {}
 const std::string IPeaksWorkspace::toString() const {
   std::ostringstream os;
   os << ITableWorkspace::toString() << "\n" << ExperimentInfo::toString();
+  if (convention == "Crystallography")
+    os << "Crystallography: kf-ki";
+  else
+    os << "Inelastic: ki-kf";
+  os << "\n";
 
   return os.str();
 }

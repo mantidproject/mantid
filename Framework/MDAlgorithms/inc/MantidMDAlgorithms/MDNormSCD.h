@@ -91,6 +91,8 @@ private:
   Kernel::V3D m_samplePos;
   /// Beam direction
   Kernel::V3D m_beamDir;
+  /// ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention;
 };
 
 } // namespace MDAlgorithms
