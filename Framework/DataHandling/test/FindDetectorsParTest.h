@@ -541,18 +541,17 @@ private:
     std::string polw_pattern("0.804071,0.804258,0.804442,");
     std::string azw_pattern("5.72472,5.72472,5.72472,");
 
-    std::auto_ptr<std::stringstream> bufs[5];
+    std::vector<std::stringstream> bufs(5);
     for (int j = 0; j < 5; j++) {
-      bufs[j] = std::auto_ptr<std::stringstream>(new std::stringstream);
       for (int i = 0; i < 3; i++) {
-        *(bufs[j]) << spResult->cell<double>(i, j) << ",";
+        bufs[j] << spResult->cell<double>(i, j) << ",";
       }
     }
-    TSM_ASSERT_EQUALS("azimut wrong", pol_pattern, bufs[0]->str());
-    TSM_ASSERT_EQUALS("polar wrong ", azim_pattern, bufs[1]->str());
-    TSM_ASSERT_EQUALS("flight path wrong ", sfp_pattern, bufs[2]->str());
-    TSM_ASSERT_EQUALS("polar width wrong ", polw_pattern, bufs[3]->str());
-    TSM_ASSERT_EQUALS("azimuthal width wrong ", azw_pattern, bufs[4]->str());
+    TSM_ASSERT_EQUALS("azimut wrong", pol_pattern, bufs[0].str());
+    TSM_ASSERT_EQUALS("polar wrong ", azim_pattern, bufs[1].str());
+    TSM_ASSERT_EQUALS("flight path wrong ", sfp_pattern, bufs[2].str());
+    TSM_ASSERT_EQUALS("polar width wrong ", polw_pattern, bufs[3].str());
+    TSM_ASSERT_EQUALS("azimuthal width wrong ", azw_pattern, bufs[4].str());
   }
 };
 #endif

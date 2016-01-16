@@ -26,11 +26,7 @@
 #include <boost/algorithm/string.hpp>
 #include <vector>
 
-#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
 typedef std::unique_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
-#else
-typedef std::auto_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
-#endif
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
