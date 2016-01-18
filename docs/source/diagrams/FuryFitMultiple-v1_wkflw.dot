@@ -1,0 +1,66 @@
+digraph FuryFitMultiple {
+  label="FuryFitMultiple Flowchart"
+  $global_style
+  
+  subgraph params {
+    $param_style
+    InputWorkspace
+    InputWorkspace2     [label="InputWorkspace"]
+    Function
+    StartX
+    EndX
+    SpecMin
+    SpecMax
+    Minimizer
+    MaxIterations
+    ParameterTable
+    ParameterNames
+    FitGroup
+    SampleLogs
+    OutputWorkspaces
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    CropWorkspace
+    Fit
+    ConvertToHistogram
+    AddSampleLogMultiple
+    CopyLogs
+  }
+  
+  subgraph decisions {
+    $decision_style
+  }
+  
+  subgraph process  {
+    $process_style
+    ConvertToElasticQ
+    TransposeFitParametersTable
+    ConvertParametersToWorkspace
+  }
+  
+  InputWorkspace                -> CropWorkspace
+  StartX                        -> CropWorkspace
+  EndX                          -> CropWorkspace
+  SpecMin                       -> CropWorkspace
+  SpecMax                       -> CropWorkspace
+  CropWorkspace                 -> ConvertToHistogram
+  ConvertToHistogram            -> ConvertToElasticQ        [label="Convert spectrum axis to ElaticQ"]
+  ConvertToElasticQ             -> Fit
+  Function                      -> Fit
+  Minimizer                     -> Fit
+  MaxIterations                 -> Fit
+  Fit                           -> ParameterTable
+  Fit                           -> FitGroup
+  ParameterTable                -> TransposeFitParametersTable  [label="Makes output consistent with PlotPeakByLogValue"]
+  TransposeFitParametersTable   -> ConvertParametersToWorkspace
+  ParameterNames                -> ConvertParametersToWorkspace [label="Convert parameter table to a MatrixWorkspace containing paramNames"]
+  InputWorkspace2                -> CopyLogs
+  ConvertParametersToWorkspace  -> CopyLogs
+  FitGroup                      -> CopyLogs
+  CopyLogs                      -> AddSampleLogMultiple
+  SampleLogs                    -> AddSampleLogMultiple
+  FitGroup                      -> AddSampleLogMultiple
+  AddSampleLogMultiple          -> OutputWorkspaces
+}
