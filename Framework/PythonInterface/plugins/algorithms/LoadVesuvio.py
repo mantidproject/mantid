@@ -957,8 +957,8 @@ class SpectraToFoilPeriodMap(object):
     def __init__(self, nperiods=6):
         """Constructor. For nperiods set up the mappings"""
         if nperiods == 2:
-            self._odd_even =  {1:1, 2:3}
-            self._even_odd =  {1:2, 2:4}
+            self._odd_even =  {1:1, 2:2}
+            self._even_odd =  {1:2, 2:1}
         elif nperiods == 3:
             self._one_to_one = {1:1, 2:2, 3:3}
         elif nperiods == 6:
