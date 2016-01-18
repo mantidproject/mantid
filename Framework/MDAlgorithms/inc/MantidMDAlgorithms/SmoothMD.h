@@ -12,7 +12,7 @@ class IMDHistoWorkspace;
 }
 namespace MDAlgorithms {
 
-DLLExport std::vector<double> gaussianKernel(const std::vector<int> &widths);
+DLLExport std::vector<double> gaussianKernel(const double fwhm);
 
 /** SmoothMD : Algorithm for smoothing MDHistoWorkspaces
 

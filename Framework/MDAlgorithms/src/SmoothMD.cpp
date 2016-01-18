@@ -13,6 +13,7 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include <boost/make_shared.hpp>
 #include <vector>
+#include <stack>
 #include <map>
 #include <string>
 #include <sstream>
@@ -76,6 +77,52 @@ SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
 
 namespace Mantid {
 namespace MDAlgorithms {
+
+/*
+ * Create a Gaussian kernel. The returned kernel is a 1D vector,
+ * the order of which matches the linear indices returned by
+ * the findNeighbourIndexesByWidth1D method.
+ * @param fwhm : Full Width Half Maximum of the Gaussian (in units of pixels)
+ * @return The Gaussian kernel
+ */
+KernelVector gaussianKernel(const double fwhm) {
+
+  // Calculate 1/sigma
+  // FWHM = 2 sqrt(2 * ln(2)) * sigma
+  const double sigma_recip = 1.0/(fwhm * 0.42463);
+  const double sigma_factor = M_SQRT1_2 * sigma_recip;
+
+  KernelVector kernel_one_side;
+  // Start from centre and calculate values going outwards until value < 0.02
+  // Use erf to get the value of the Gaussian integrated over the width of the
+  // pixel, more accurate than just using centre value of pixel
+  double pixel_value = std::erf(0.5 * sigma_factor) * (1/(2*sigma_recip));
+  int pixel_count = 0;
+  while (pixel_value > 0.02) {
+    kernel_one_side.push_back(pixel_value);
+    pixel_count++;
+    pixel_value = (std::erf((pixel_count + 0.5) * sigma_factor) -
+                   std::erf((pixel_count - 0.5) * sigma_factor)) *
+                  0.5 * (1/(2*sigma_recip));
+  }
+
+  // Create the symmetric kernel vector
+  KernelVector kernel;
+  kernel.resize(kernel_one_side.size() * 2 - 1);
+  std::reverse_copy(kernel_one_side.cbegin(), kernel_one_side.cend(),
+                    kernel.begin());
+  std::copy(kernel_one_side.cbegin() + 1, kernel_one_side.cend(),
+            kernel.begin() + kernel_one_side.size());
+
+  // Normalise the kernel so that sum of elements is unity
+  double sum_kernel_recip =
+      1.0 / std::accumulate(kernel.cbegin(), kernel.cend(), 0.0);
+  for (auto &pixel : kernel) {
+    pixel *= sum_kernel_recip;
+  }
+
+  return kernel;
+}
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SmoothMD)
@@ -367,19 +414,6 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
   }
 
   return product;
-}
-
-/*
- * Create a Gaussian kernel. The returned kernel is a 1D vector,
- * the order of which matches the linear indices returned by
- * the findNeighbourIndexesByWidth1D method.
- * @param widths : Width vector
- * @return The Gaussian kernel
- */
-KernelVector SmoothMD::gaussianKernel(const WidthVector &widths) const {
-  // TODO implement
-  KernelVector kernel;
-  return kernel;
 }
 
 } // namespace MDAlgorithms

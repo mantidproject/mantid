@@ -370,17 +370,28 @@ public:
                boost::math::isnan(out->getSignalAt(9)));
   }
 
-  void test_gaussian_kernel() {
-    const std::vector<int> widths{5, 5};
+  void test_gaussian_kernel_sigma_1() {
+    // FWHM of 2.355 equivalent to sigma=1
     const std::vector<double> kernel =
-        Mantid::MDAlgorithms::gaussianKernel(widths);
+        Mantid::MDAlgorithms::gaussianKernel(2.355);
 
-    std::vector<double> expected_kernel{1,  4, 7,  4,  1,  4, 16, 26, 16,
-                                        4,  7, 26, 41, 26, 7, 4,  16, 26,
-                                        16, 4, 1,  4,  7,  4, 1};
-    std::transform(expected_kernel.begin(), expected_kernel.end(),
-                   expected_kernel.begin(),
-                   std::bind1st(std::divides<double>(), 273));
+    // Expected kernel for sigma = 1
+    std::vector<double> expected_kernel{0.061, 0.242, 0.383, 0.242, 0.061};
+
+    for (size_t i = 0; i < expected_kernel.size(); ++i) {
+      TSM_ASSERT_DELTA("Calculated value should match expected value",
+                       kernel[i], expected_kernel[i], 0.01)
+    }
+  }
+
+  void test_gaussian_kernel_sigma_1_5() {
+    // FWHM equivalent to sigma=1.5
+    const std::vector<double> kernel =
+        Mantid::MDAlgorithms::gaussianKernel(1.5 * 2.355);
+
+    // Expected kernel for sigma = 1.5
+    std::vector<double> expected_kernel{0.039, 0.113, 0.215, 0.266, 0.215,
+                                        0.113, 0.039};
 
     for (size_t i = 0; i < expected_kernel.size(); ++i) {
       TSM_ASSERT_DELTA("Calculated value should match expected value",
