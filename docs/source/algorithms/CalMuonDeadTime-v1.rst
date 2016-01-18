@@ -53,7 +53,7 @@ Output:
 
     First five dead times:
       Spectrum 1 -> -0.3135
-      Spectrum 2 -> -0.2903
+      Spectrum 2 -> -0.2902
       Spectrum 3 -> -0.2746
       Spectrum 4 -> -0.3151
       Spectrum 5 -> -0.5266
