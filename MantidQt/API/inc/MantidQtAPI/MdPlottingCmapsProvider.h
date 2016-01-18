@@ -68,13 +68,6 @@ namespace MantidQt
          */
         void appendAllFileNamesForFileType(QStringList& colorMapNames, QStringList& colorMapFiles, QString colorMapDirectory, QString fileType);
 
-         /** 
-         * Gets all the color map names 
-         * @param colorMapNames Reference to a list of color map names.
-         * @param fullFilePath File path to the xml files with the color map definitions.
-         */
-        void appendVSIColorMaps(QStringList& colorMapNames,  QString fullFilePath);
-
         /**
          * Compare the colormap names of the Slice Viewer and the VSI and extract all indicees of the list of Slice Viewer color maps
          * which also exist in the list of the VSI color maps.

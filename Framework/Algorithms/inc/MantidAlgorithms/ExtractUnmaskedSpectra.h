@@ -1,16 +1,16 @@
-#ifndef MANTID_WORKFLOWALGORITHMS_SENDUSAGE_H_
-#define MANTID_WORKFLOWALGORITHMS_SENDUSAGE_H_
+#ifndef MANTID_ALGORITHMS_EXTRACTUNMASKEDSPECTRA_H_
+#define MANTID_ALGORITHMS_EXTRACTUNMASKEDSPECTRA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Algorithms {
 
-/** SendUsage : TODO: DESCRIPTION
+/** ExtractUnmaskedSpectra : TODO: DESCRIPTION
 
-  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge
-  National Laboratory
+  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -30,10 +30,10 @@ namespace WorkflowAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SendUsage : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ExtractUnmaskedSpectra : public API::Algorithm {
 public:
-  SendUsage();
-  virtual ~SendUsage();
+  ExtractUnmaskedSpectra();
+  virtual ~ExtractUnmaskedSpectra();
 
   virtual const std::string name() const;
   virtual int version() const;
@@ -43,14 +43,9 @@ public:
 private:
   void init();
   void exec();
-  void generateHeader();
-  std::string generateJson();
-  void sendReport(const std::string &json);
-
-  static std::string g_header;
 };
 
-} // namespace WorkflowAlgorithms
+} // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_WORKFLOWALGORITHMS_SENDUSAGE_H_ */
+#endif /* MANTID_ALGORITHMS_EXTRACTUNMASKEDSPECTRA_H_ */

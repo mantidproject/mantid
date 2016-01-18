@@ -106,9 +106,9 @@ Output:
 
 .. testoutput:: ExampleCalib
 
-   Difc1: 18400.71
-   Zero1: -3.17
+   Difc1: 18400.19
+   Zero1: -2.06
    The output table has 1 row(s)
-   Parameters from the table, Difc1: 18400.71, Zero1: -3.17
+   Parameters from the table, Difc1: 18400.19, Zero1: -2.06
    Output GSAS iparam file was written? True
    Number of lines of the GSAS iparam file: 35

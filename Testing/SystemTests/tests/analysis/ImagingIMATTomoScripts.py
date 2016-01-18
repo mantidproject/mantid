@@ -93,7 +93,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         # In the Mantid workspaces we have the usual double/float64 values
         # but reconstruction tools effectively work on float32
-        return data_vol.astype(dtype='float32')
+        return data_vol.astype('float32')
 
     def test_scale_down_errors(self):
         import IMAT.prep as iprep

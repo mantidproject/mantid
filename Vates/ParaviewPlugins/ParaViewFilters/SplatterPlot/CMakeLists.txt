@@ -14,8 +14,9 @@ target_link_libraries( MantidParaViewSplatterPlotSMPlugin LINK_PRIVATE ${TCMALLO
 ${MANTID_SUBPROJECT_LIBS}
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
-${JSONCPP_LIBRARIES}
-${QWT_LIBRARIES})
+${QWT_LIBRARIES}
+${vtkjsoncpp_LIBRARIES}
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidParaViewSplatterPlotSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../Contents/Libraries;@loader_path/../../Contents/MacOS")

@@ -357,6 +357,7 @@ void SequentialFitDialog::accept()
   }
   alg->setPropertyValue("Minimizer",m_fitBrowser->minimizer());
   alg->setPropertyValue("CostFunction",m_fitBrowser->costFunction());
+  alg->setProperty("MaxIterations",m_fitBrowser->maxIterations());
   if (ui.rbIndividual->isChecked())
   {
     alg->setPropertyValue("FitType","Individual");

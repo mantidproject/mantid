@@ -1219,7 +1219,7 @@ void MDHistoWorkspace::setMDMasking(
       // If the function masks the point, then mask it, otherwise leave it as it
       // is.
       if (maskingRegion->isPointContained(this->getCenter(i))) {
-        m_masks[i] = true;
+        this->setMDMaskAt(i, true);
       }
     }
     delete maskingRegion;
@@ -1233,9 +1233,18 @@ void MDHistoWorkspace::setMDMasking(
  */
 void MDHistoWorkspace::setMDMaskAt(const size_t &index, bool mask) {
   m_masks[index] = mask;
+  if (mask) {
+    // Set signal and error of masked points to the value of MDMaskValue
+    this->setSignalAt(index, MDMaskValue);
+    this->setErrorSquaredAt(index, MDMaskValue);
+  }
 }
 
-/// Clear any existing masking.
+/**
+ * Clear any existing masking.
+ * Note that this clears the mask flag but does not restore the data
+ * which was set to NaN when it was masked.
+ */
 void MDHistoWorkspace::clearMDMasking() {
   for (size_t i = 0; i < this->getNPoints(); ++i) {
     m_masks[i] = false;

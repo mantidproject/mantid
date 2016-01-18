@@ -1,6 +1,7 @@
 #ifndef _vtkSplatterPlot_h
 #define _vtkSplatterPlot_h
 
+#include "MantidKernel/make_unique.h"
 #include "vtkUnstructuredGridAlgorithm.h"
 #include <string>
 
@@ -41,7 +42,7 @@ private:
   /// Percent of densest boxes to keep
   double m_topPercentile;
   /// MVP presenter
-  Mantid::VATES::vtkSplatterPlotFactory *m_presenter;
+  std::unique_ptr<Mantid::VATES::vtkSplatterPlotFactory> m_presenter;
   /// Holder for the workspace name
   std::string m_wsName;
   /// Time.
