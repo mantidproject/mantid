@@ -38,7 +38,7 @@ class QECoverageGUI(QtGui.QWidget):
     # Rewritten as a Mantid interface by Duc Le (2016)
 
     def __init__(self, parent=None):
-        QtGui.QMainWindow.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
         self.setWindowTitle("QECoverage")
         self.grid = QtGui.QVBoxLayout()
         self.setLayout(self.grid)
@@ -250,12 +250,10 @@ class QECoverageGUI(QtGui.QWidget):
             s2 = float(text)
         except ValueError:
             s2 = 0
-        #self.tthlims = [16.795+s2, 76.174+s2]
-        s0 = (16.795+76.174)/2
-        if abs(s2) > 30:
-            s2 = sign(s2)*30
-            self.direct_s2_input.setText(str(s2))
-        self.tthlims = [s2-30+s0, s2+30+s0]
+        if abs(s2) <= 30:
+            self.tthlims = [0, abs(s2)+30]
+        else:
+            self.tthlims = [abs(s2)-30, abs(s2)+30]
 
     def onClickDirectPlot(self):
         overplot = self.direct_plotover.isChecked()
