@@ -56,7 +56,7 @@ digraph FuryFitMultiple {
   ParameterTable                -> TransposeFitParametersTable  [label="Makes output consistent with PlotPeakByLogValue"]
   TransposeFitParametersTable   -> ConvertParametersToWorkspace
   ParameterNames                -> ConvertParametersToWorkspace [label="Convert parameter table to a MatrixWorkspace containing paramNames"]
-  InputWorkspace2                -> CopyLogs
+  InputWorkspace2               -> CopyLogs
   ConvertParametersToWorkspace  -> CopyLogs
   FitGroup                      -> CopyLogs
   CopyLogs                      -> AddSampleLogMultiple
