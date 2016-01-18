@@ -131,8 +131,8 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   auto lineFactory = Mantid::Kernel::make_unique<vtkMDLineFactory>(
       thresholdRange, m_normalization);
 
-  hexahedronFactory->SetSuccessor(std::move(quadFactory));
   quadFactory->SetSuccessor(std::move(lineFactory));
+  hexahedronFactory->SetSuccessor(std::move(quadFactory));
   hexahedronFactory->setTime(m_time);
   vtkDataSet *product = m_presenter->execute(
       hexahedronFactory.get(), loadingProgressAction, drawingProgressAction);

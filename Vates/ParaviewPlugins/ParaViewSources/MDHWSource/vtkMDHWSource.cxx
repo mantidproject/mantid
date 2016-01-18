@@ -172,10 +172,10 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
         Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
             thresholdRange, m_normalizationOption, m_time);
 
-    factory->SetSuccessor(std::move(hexFactory));
-    hexFactory->SetSuccessor(std::move(quadFactory));
-    quadFactory->SetSuccessor(std::move(lineFactory));
     lineFactory->SetSuccessor(std::move(zeroDFactory));
+    quadFactory->SetSuccessor(std::move(lineFactory));
+    hexFactory->SetSuccessor(std::move(quadFactory));
+    factory->SetSuccessor(std::move(hexFactory));
 
     auto product = m_presenter->execute(factory.get(), loadingProgressUpdate,
                                         drawingProgressUpdate);

@@ -184,9 +184,9 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     auto lineFactory = Mantid::Kernel::make_unique<vtkMDLineFactory>(
         thresholdRange, m_normalization);
 
-    hexahedronFactory->SetSuccessor(std::move(quadFactory));
-    quadFactory->SetSuccessor(std::move(lineFactory));
     lineFactory->SetSuccessor(std::move(zeroDFactory));
+    quadFactory->SetSuccessor(std::move(lineFactory));
+    hexahedronFactory->SetSuccessor(std::move(quadFactory));
 
     hexahedronFactory->setTime(m_time);
     vtkSmartPointer<vtkDataSet> product;
@@ -194,15 +194,14 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
         hexahedronFactory.get(), loadingProgressUpdate, drawingProgressUpdate);
 
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
-    vtkNew<vtkBox> box;
+    auto box = vtkSmartPointer<vtkBox>::New();
     box->SetBounds(product->GetBounds());
-    vtkNew<vtkPVClipDataSet> clipper;
+    auto clipper = vtkSmartPointer<vtkPVClipDataSet>::New();
     clipper->SetInputData(product);
-    clipper->SetClipFunction(box.GetPointer());
+    clipper->SetClipFunction(box);
     clipper->SetInsideOut(true);
     clipper->Update();
-    auto clipperOutput =
-        vtkSmartPointer<vtkDataSet>::Take(clipper->GetOutput());
+    auto clipperOutput = clipper->GetOutput();
     //--------------------------------------------------------
 
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
