@@ -2085,9 +2085,9 @@ void MantidUI::showMantidInstrument(const QString& wsName)
   }
   m_lastShownInstrumentWin = insWin;
 
-  if (!insWin->isVisible())
+  if (!insWin->parentWidget()->isVisible())
   {
-	  insWin->show();
+	  insWin->parentWidget()->show();
   }
 }
 
