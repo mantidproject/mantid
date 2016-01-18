@@ -83,8 +83,8 @@ class QECoverageGUI(QtGui.QWidget):
         self.direct_s2.setLayout(self.direct_s2_grid)
         self.direct_s2_label = QtGui.QLabel("s2", self.direct_s2)
         self.direct_s2_grid.addWidget(self.direct_s2_label)
-        self.direct_s2_input = QtGui.QLineEdit("0", self.direct_s2)
-        self.direct_s2_input.setToolTip("Scattering angle of middle of the HYSPEC detector bank. Must be between -30 and 30 degrees")
+        self.direct_s2_input = QtGui.QLineEdit("30", self.direct_s2)
+        self.direct_s2_input.setToolTip("Scattering angle of middle of the HYSPEC detector bank.")
         self.direct_s2_grid.addWidget(self.direct_s2_input)
         self.direct_s2_input.textChanged[str].connect(self.onS2Changed)
         self.direct_grid.addWidget(self.direct_s2)
@@ -191,9 +191,9 @@ class QECoverageGUI(QtGui.QWidget):
             self.tthlims = [2.373, 135.955]
         elif Inst == 'CNCS':
             self.tthlims = [3.806, 132.609]
-        # HYSPEC special case - detectors can rotate about sample. Actual coverage with rotation at 0 is [16.795, 76.174]
+        # HYSPEC special case - detectors can rotate about sample. Coverage is approximately +/-30deg either side of center.
         elif Inst == 'HYSPEC':
-            self.tthlims = [16.795, 76.174]
+            self.tthlims = [0, 60]
             self.direct_s2.show()
         elif Inst == 'SEQUOIA':
             self.tthlims = [1.997, 61.926]

@@ -26,6 +26,8 @@ To overplot the calculated Q-E trajectories, set the "Plot Over" check box.
 
 You can choose to create a 1D Mantid workspace for latter plotting using the "Create Workspace" check box.
 
-In addition, for HYSPEC, where the detector bank can be rotated, an additional parameter **S2** is required. 
+In addition, for HYSPEC, where the detector bank can be rotated, an additional parameter **S2** denoting the
+scattering angle of the center of the detector bank is required. The detectors extend over 60 degrees, so
+the two theta limits will be taken from min([0, abs(s2)-30]) to abs(s2)+30.
 
 .. categories:: Interfaces
