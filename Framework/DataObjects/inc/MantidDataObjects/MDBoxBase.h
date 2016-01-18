@@ -255,16 +255,6 @@ public:
   virtual signal_t getError() const { return sqrt(m_errorSquared); }
 
   //-----------------------------------------------------------------------------------------------
-  /** Returns the integrated signal from all points within or mask value.
-   */
-  virtual signal_t getSignalWithMask() const {
-    if (this->getIsMasked()) {
-      return Mantid::API::MDMaskValue;
-    }
-    return m_signal;
-  }
-
-  //-----------------------------------------------------------------------------------------------
   /** Returns the integrated error squared from all points within.
    */
   virtual signal_t getErrorSquared() const { return m_errorSquared; }
@@ -311,17 +301,6 @@ public:
    */
   virtual signal_t getErrorSquaredNormalized() const {
     return m_errorSquared * m_inverseVolume;
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Returns the integrated signal from all points within, normalized for the
-   * cell volume
-   */
-  virtual signal_t getSignalNormalizedWithMask() const {
-    if (this->getIsMasked()) {
-      return Mantid::API::MDMaskValue;
-    }
-    return m_signal * m_inverseVolume;
   }
 
   //-----------------------------------------------------------------------------------------------

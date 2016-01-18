@@ -1,0 +1,261 @@
+digraph PowderDiffractionISIS {
+  label="PowderDiffractionISIS"
+  $global_style
+
+  LoadSac_Start               [label="Load Sac Eff"]
+  CorrectAbs_Start            [label="Van Absorption Correction"]
+  C_Vana_Start                [label="Create Vana"]
+  S_Vana_Start                [label="Strip Vanadium Peaks"]
+  GetDataSum_Start            [label="Load Vana (Get Data Sum)"]
+  Focus_one_Start             [label="Start Focusing"]
+  Focus_All_Start             [label="Focus All (Run)"]
+
+  subgraph processes {
+    $process_style
+
+    C_Vana_RunCorrectAbs      [label="Van Absorption Correction"]
+    C_Vana_RunLoadSacEff1     [label="Load Sac Eff"]
+    C_Vana_RunLoadSacEff2     [label="Load Sac Eff (NoSac=true)"]
+    C_Vana_RunStripPeaks      [label="Strip Vanadium Peaks"]
+
+    SacEff_RunGetDataSum      [label="Load Vana (Get Data Sum)"]
+
+    Focus_one_RunGetDataSum   [label="Load Vana (Get Data Sum)"]
+    Focus_one_RunCreateVana   [label="Create Vana"]
+    Focus_one_RunCorrectAbs   [label="Van Absorption Correction"]
+
+    Focus_All_LoadSac1        [label="Load Sac Eff"]
+    Focus_All_LoadSac2        [label="Load Sac Eff"]
+    Focus_All_C_Vana          [label="Create Vana"]
+    Focus_All_Focus_one       [label="Start Focusing"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+
+    LoadSac_CreateSingle_1                [label="CreateSingleValuedWorkspace"]
+    LoadSac_CreateSingle_2                [label="CreateSingleValuedWorkspace"]
+    LoadSac_CreateSingle_3                [label="CreateSingleValuedWorkspace"]
+    LoadSac_Divide_1                      [label="Divide"]
+    LoadSac_Divide_2                      [label="Divide"]
+    LoadSac_Integrate_1                   [label="Integrate"]
+    LoadSac_Multiply_1                    [label="Multiply"]
+
+    CorrAbs_ConvertUnits                  [label="ConvertUnits"]
+    CorrAbs_CylinderAbsorption            [label="CylinderAbsorption"]
+    CorrAbs_Divide                        [label="Divide"]
+    CorrAbs_ConvertUnits2                 [label="ConvertUnits"]
+
+    C_Vana_Minus                          [label="Minus"]
+    C_Vana_AlignDetectors                 [label="AlignDetectors"]
+    C_Vana_Divide                         [label="Divide"]
+    C_Vana_DiffractionFocusing            [label="DiffractionFocusing"]
+    C_Vana_ReplaceSpecialValues           [label="ReplaceSpecialValues"]
+    C_Vana_SaveNexusProcessed             [label="SaveNexusProcessed"]
+    C_Vana_SaveFocusedXYE                 [label="SaveFocusedXYE"]
+
+    S_Vana_LoadNexusProcessed             [label="LoadNexusProcessed"]
+    S_Vana_CropWorkspace                  [label="CropWorkspace"]
+    S_Vana_SmoothData                     [label="SmoothData"]
+    S_Vana_RemoveBins                     [label="RemoveBins"]
+    S_Vana_StripPeaks                     [label="StripPeaks"]
+    S_Vana_MaskBins                       [label="MaskBins"]
+    S_Vana_SplineBackground1               [label="SplineBackground"]
+    S_Vana_SplineBackground2               [label="SplineBackground"]
+    S_Vana_SaveFocusedXYE1                [label="SaveFocusedXYE"]
+    S_Vana_SaveFocusedXYE2                [label="SaveFocusedXYE"]
+    S_Vana_SaveFocusedXYE3                [label="SaveFocusedXYE"]
+    S_Vana_SaveFocusedXYE4                [label="SaveFocusedXYE"]
+    S_Vana_SaveFocusedXYE5                [label="SaveFocusedXYE"]
+
+    Focus_one_Integration                 [label="Integration"]
+    Focus_one_MaskDetectorIf              [label="MaskDetectorIf"]
+    Focus_one_Minus                       [label="Minus"]
+    Focus_one_AlignDetectors              [label="AlignDetectors"]
+    Focus_one_Divide1                     [label="Divide"]
+    Focus_one_Divide2                     [label="Divide"]
+    Focus_one_Divide3                     [label="Divide"]
+    Focus_one_CreSingleValWS              [label="CreateSingleValuedWorkspace"]
+    Focus_one_Multiply                    [label="Multiply"]
+    Focus_one_ConvertUnits1               [label="ConvertUnits"]
+    Focus_one_ConvertUnits2               [label="ConvertUnits"]
+    Focus_one_ConvertUnits3               [label="ConvertUnits"]
+    Focus_one_DiffractionFocus            [label="DiffractionFocussing"]
+    Focus_one_Rebin                       [label="Rebin"]
+    Focus_one_CropWorkspace               [label="CropWorkspace"]
+    Focus_one_RebinToWorkspace            [label="RebinToWorkspace"]
+    Focus_one_RenameWorkspace             [label="RenameWorkspace"]
+    Focus_one_ReplaceSpecValues1          [label="ReplaceSpecialValues"]
+    Focus_one_ReplaceSpecValues2          [label="ReplaceSpecialValues"]
+    Focus_one_GroupWorkspaces             [label="GroupWorkspaces"]
+    Focus_one_SaveGSS                     [label="SaveGSS"]
+    Focus_one_SaveNexusProcessed          [label="SaveNexusProcessed"]
+    Focus_one_SaveFocusedXYE1             [label="SaveFocusedXYE"]
+    Focus_one_SaveFocusedXYE2             [label="SaveFocusedXYE"]
+
+  }
+
+  subgraph decisions {
+    $decision_style
+    NoSac                             [label="if NoSac"]
+    Eff                               [label="if Eff"]
+    FirstNonZeroNotFound              [label="FirstNonZeroNotFound"]
+    UampsotalLess                     [label="if UampsTotal < 1e-6"]
+    IfHrpd                            [label="if HRPD"]
+
+    C_Vana_UampsotalGreater           [label="if UampsTotal > 1e-6"]
+    C_Vana_NoAbs                      [label="if NoAbs"]
+
+    S_Vana_LoadUnstrip                [label="if Load Unstripped"]
+    S_Vana_VanPeakRemove              [label="Van peak stripping"]
+
+    Focus_one_VGrpFocus               [label="If VGrpFocus is sam"]
+    Focus_one_SEmptyFile              [label="If SEmptyFile is not none"]
+    Focus_one_CorrectSampleAbs        [label="If CorrectSampleAbs is yes"]
+    Focus_one_Norm                    [label="If Normalization required"]
+
+    Focus_All_Norm                    [label="If Normalization required"]
+    Focus_Al_ExistingV                [label="ExistingV in .pref"]
+
+  }
+
+  subgraph get_data_sum {
+  GetDataSum_Start              -> LoadRaw
+  FileName                      -> LoadRaw
+  LoadRaw                       -> IfHrpd
+  IfHrpd                        -> MaskBins                           [label="true"]
+  MaskBins                      -> FirstNonZeroNotFound
+  IfHrpd                        -> FirstNonZeroNotFound               [label="else"]
+  FirstNonZeroNotFound          -> CreateSingleValuedWorkspace         [label="true"]
+  FirstNonZeroNotFound          -> Plus                               [label="else"]
+  Plus                          -> CreateSingleValuedWorkspace
+  CreateSingleValuedWorkspace   -> Divide
+
+  }
+
+  subgraph load_sac_eff {
+  LoadSac_Start                 -> NoSac
+  NoSac                         -> CreateSingleValueWorkspace         [label="true"]
+  NoSac                         -> SacEff_RunGetDataSum               [label="else"]
+  SacEff_RunGetDataSum           -> UampsotalLess
+  UampsotalLess                 -> LoadSac_CreateSingle_1             [label="true"]
+  UampsotalLess                 -> LoadSac_Integrate_1                [label="else"]
+  LoadSac_Integrate_1           -> MaskDetectorIf
+  MaskDetectorIf                -> SolidAngle
+  SolidAngle                    -> LoadSac_CreateSingle_2
+  LoadSac_CreateSingle_2        -> Multiply
+  Multiply                      -> Eff
+  Eff                           -> LoadSac_Divide_1                   [label="true"]
+  LoadSac_Divide_1              -> ConvertUnits
+  ConvertUnits                  -> Integration
+  Integration                   -> LoadSac_Multiply_1
+  LoadSac_Multiply_1            -> LoadSac_CreateSingle_3
+  LoadSac_CreateSingle_3        -> LoadSac_Divide_2
+
+  }
+
+  subgraph correct_abs {
+  CorrectAbs_Start              -> CorrAbs_ConvertUnits
+  CorrAbs_ConvertUnits          -> CorrAbs_CylinderAbsorption
+  CorrAbs_CylinderAbsorption    -> CorrAbs_Divide
+  CorrAbs_Divide                -> CorrAbs_ConvertUnits2
+
+  }
+
+  subgraph create_vana {
+  C_Vana_Start                  -> C_Vana_RunLoadSacEff1
+  VanadiumFile                  -> C_Vana_RunLoadSacEff1
+  C_Vana_RunLoadSacEff1         -> C_Vana_RunLoadSacEff2
+  VEmptyFile                    -> C_Vana_RunLoadSacEff2
+  C_Vana_RunLoadSacEff2         -> C_Vana_UampsotalGreater
+  C_Vana_UampsotalGreater       -> C_Vana_Minus                         [label="true"]
+  C_Vana_UampsotalGreater       -> C_Vana_AlignDetectors                [label="else"]
+  C_Vana_Minus                  -> C_Vana_AlignDetectors
+  C_Vana_AlignDetectors         -> C_Vana_Divide
+  C_Vana_Divide                 -> C_Vana_NoAbs
+  C_Vana_NoAbs                  -> C_Vana_RunCorrectAbs                 [label="true"]
+  C_Vana_NoAbs                  -> C_Vana_DiffractionFocusing           [label="else"]
+  C_Vana_RunCorrectAbs          -> C_Vana_DiffractionFocusing
+  C_Vana_DiffractionFocusing    -> C_Vana_ReplaceSpecialValues
+  C_Vana_ReplaceSpecialValues   -> C_Vana_SaveNexusProcessed
+  C_Vana_SaveNexusProcessed     -> C_Vana_SaveFocusedXYE
+  C_Vana_SaveFocusedXYE         -> C_Vana_RunStripPeaks
+
+  }
+
+  subgraph strip_the_vana {
+  S_Vana_Start                  -> S_Vana_LoadUnstrip
+  S_Vana_LoadUnstrip            -> S_Vana_LoadNexusProcessed            [label="true"]
+  S_Vana_LoadUnstrip            -> S_Vana_CropWorkspace                 [label="else"]
+  S_Vana_CropWorkspace          -> S_Vana_VanPeakRemove
+  S_Vana_LoadNexusProcessed     -> S_Vana_VanPeakRemove
+  S_Vana_VanPeakRemove          -> S_Vana_SmoothData                    [label="interpol"]
+  S_Vana_SmoothData             -> S_Vana_RemoveBins
+  S_Vana_RemoveBins             -> S_Vana_SaveFocusedXYE1
+  S_Vana_VanPeakRemove          -> S_Vana_StripPeaks                    [label="strip"]
+  S_Vana_StripPeaks             -> S_Vana_SaveFocusedXYE2
+  S_Vana_VanPeakRemove          -> S_Vana_MaskBins                      [label="spline"]
+  S_Vana_MaskBins               -> S_Vana_SplineBackground1
+  S_Vana_SplineBackground1      -> S_Vana_SaveFocusedXYE3
+  S_Vana_VanPeakRemove          -> S_Vana_SplineBackground2             [label="spline only"]
+  S_Vana_SplineBackground2      -> S_Vana_SaveFocusedXYE4
+  S_Vana_SaveFocusedXYE1        -> S_Vana_SaveFocusedXYE5
+  S_Vana_SaveFocusedXYE2        -> S_Vana_SaveFocusedXYE5
+  S_Vana_SaveFocusedXYE3        -> S_Vana_SaveFocusedXYE5
+  S_Vana_SaveFocusedXYE4        -> S_Vana_SaveFocusedXYE5
+
+  }
+
+  subgraph focus_one {
+  Focus_one_Start               -> Focus_one_RunGetDataSum
+  Focus_one_RunGetDataSum       -> Focus_one_Integration
+  Focus_one_Integration         -> Focus_one_MaskDetectorIf
+  Focus_one_MaskDetectorIf      -> Focus_one_VGrpFocus
+  Focus_one_VGrpFocus           -> Focus_one_RunCreateVana              [label="true"]
+  Focus_one_RunCreateVana       -> Focus_one_SEmptyFile
+  Focus_one_VGrpFocus           -> Focus_one_SEmptyFile                 [label="else"]
+  Focus_one_SEmptyFile          -> Focus_one_Minus                      [label="true"]
+  Focus_one_SEmptyFile          -> Focus_one_AlignDetectors             [label="else"]
+  Focus_one_Minus               -> Focus_one_AlignDetectors
+  Focus_one_AlignDetectors      -> Focus_one_Divide1
+  Focus_one_Divide1             -> Focus_one_CreSingleValWS
+  Focus_one_CreSingleValWS      -> Focus_one_Multiply
+  Focus_one_Multiply            -> Focus_one_CorrectSampleAbs
+  Focus_one_CorrectSampleAbs    -> Focus_one_RunCorrectAbs              [label="true"]
+  Focus_one_RunCorrectAbs       -> Focus_one_ConvertUnits1
+  Focus_one_ConvertUnits1       -> Focus_one_Divide2
+  Focus_one_Divide2             -> Focus_one_ConvertUnits2
+  Focus_one_ConvertUnits2       -> Focus_one_DiffractionFocus
+  Focus_one_CorrectSampleAbs    -> Focus_one_DiffractionFocus           [label="else"]
+  Focus_one_DiffractionFocus    -> Focus_one_CropWorkspace
+  Focus_one_CropWorkspace       -> Focus_one_Norm
+  Focus_one_Norm                -> Focus_one_RebinToWorkspace            [label="true"]
+  Focus_one_RebinToWorkspace    -> Focus_one_Divide3
+  Focus_one_Norm                -> Focus_one_RenameWorkspace             [label="else"]
+  Focus_one_Divide3             -> Focus_one_Rebin
+  Focus_one_RenameWorkspace     -> Focus_one_Rebin
+  Focus_one_Rebin               -> Focus_one_ConvertUnits3
+  Focus_one_ConvertUnits3       -> Focus_one_ReplaceSpecValues1
+  Focus_one_ReplaceSpecValues1  -> Focus_one_ReplaceSpecValues2
+  Focus_one_ReplaceSpecValues2  -> Focus_one_GroupWorkspaces
+  Focus_one_GroupWorkspaces     -> Focus_one_SaveGSS
+  Focus_one_SaveGSS             -> Focus_one_SaveNexusProcessed
+  Focus_one_SaveNexusProcessed  -> Focus_one_SaveFocusedXYE1
+  Focus_one_SaveFocusedXYE1     -> Focus_one_SaveFocusedXYE2
+
+  }
+
+  subgraph focus_one {
+  Focus_All_Start              -> Focus_All_Norm
+  Focus_All_Norm               -> Focus_All_LoadSac1                   [label="true"]
+  Focus_All_Norm               -> Focus_All_LoadSac2                   [label="else"]
+  Focus_All_LoadSac1           -> Focus_Al_ExistingV
+  Focus_Al_ExistingV           -> LoadNexusProcessed                   [label="load"]
+  Focus_Al_ExistingV           -> Focus_All_C_Vana                     [label="no"]
+  Focus_All_LoadSac2           -> Focus_All_Focus_one
+  LoadNexusProcessed           -> Focus_All_Focus_one
+  Focus_All_C_Vana             -> Focus_All_Focus_one
+
+  }
+
+}

@@ -63,7 +63,6 @@ set ( TEST_PY_FILES
   ResNorm2Test.py
   RetrieveRunInfoTest.py
   SANSFitShiftScaleTest.py
-  SANSStitchTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
   SaveVulcanGSSTest.py

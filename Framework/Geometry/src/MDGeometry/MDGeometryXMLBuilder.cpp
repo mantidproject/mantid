@@ -46,8 +46,8 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(
   bool bAdded = false; // Addition fails by default.
   if (dimensionToAdd.get() != NULL) {
     CompareIMDDimension_const_sptr comparitor(dimensionToAdd);
-    DimensionContainerType::iterator location = std::find_if(
-        m_vecDimensions.begin(), m_vecDimensions.end(), comparitor);
+    auto location = std::find_if(m_vecDimensions.begin(), m_vecDimensions.end(),
+                                 comparitor);
     if (location == m_vecDimensions.end()) {
       m_vecDimensions.push_back(dimensionToAdd);
       bAdded = true;
@@ -64,8 +64,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(
 template <typename CheckDimensionPolicy>
 void MDGeometryBuilderXML<CheckDimensionPolicy>::addManyOrdinaryDimensions(
     VecIMDDimension_sptr manyDims) const {
-  VecIMDDimension_sptr::iterator it = manyDims.begin();
-  for (; it != manyDims.end(); ++it) {
+  for (auto it = manyDims.begin(); it != manyDims.end(); ++it) {
     addOrdinaryDimension(*it);
   }
 }
@@ -205,9 +204,7 @@ const std::string &MDGeometryBuilderXML<CheckDimensionPolicy>::create() const {
     // Loop through dimensions and generate xml for each.
     std::string dimensionXMLString;
 
-    DimensionContainerType::iterator it = m_vecDimensions.begin();
-
-    for (; it != m_vecDimensions.end(); ++it) {
+    for (auto it = m_vecDimensions.begin(); it != m_vecDimensions.end(); ++it) {
       dimensionXMLString += (*it)->toXMLString();
     }
 

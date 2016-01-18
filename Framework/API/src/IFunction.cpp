@@ -109,7 +109,7 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
  */
 ParameterTie *IFunction::tie(const std::string &parName,
                              const std::string &expr, bool isDefault) {
-  ParameterTie *ti = new ParameterTie(this, parName, expr, isDefault);
+  auto ti = new ParameterTie(this, parName, expr, isDefault);
   addTie(ti);
   this->fix(getParameterIndex(*ti));
   return ti;
@@ -253,17 +253,10 @@ void IFunction::setHandler(FunctionHandler *handler) {
 
 /// Function to return all of the categories that contain this function
 const std::vector<std::string> IFunction::categories() const {
-  std::vector<std::string> res;
   Poco::StringTokenizer tokenizer(category(), categorySeparator(),
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
-
-  for (; h != tokenizer.end(); ++h) {
-    res.push_back(*h);
-  }
-
-  return res;
+  return std::vector<std::string>(tokenizer.begin(), tokenizer.end());
 }
 
 /**

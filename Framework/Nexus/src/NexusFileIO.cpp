@@ -105,7 +105,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
       g_log.error("Unable to open file " + fileName);
       throw Exception::FileError("Unable to open File:", fileName);
     }
-    ::NeXus::File *file = new ::NeXus::File(fileID, true);
+    auto file = new ::NeXus::File(fileID, true);
     // clang-format off
     m_filehandle = boost::shared_ptr< ::NeXus::File>(file);
     // clang-format on
@@ -231,7 +231,7 @@ bool NexusFileIO::writeNxStringArray(
     NXputattr(fileID, attributes[it].c_str(),
               reinterpret_cast<void *>(const_cast<char *>(avalues[it].c_str())),
               static_cast<int>(avalues[it].size() + 1), NX_CHAR);
-  char *strs = new char[values.size() * maxlen];
+  auto strs = new char[values.size() * maxlen];
   for (size_t i = 0; i < values.size(); i++) {
     strncpy(&strs[i * maxlen], values[i].c_str(), maxlen);
   }
@@ -541,7 +541,7 @@ void NexusFileIO::writeTableColumn(int type, const std::string &interpret_as,
   const int nRows = static_cast<int>(col.size());
   int dims_array[1] = {nRows};
 
-  NexusT *toNexus = new NexusT[nRows];
+  auto toNexus = new NexusT[nRows];
   for (int ii = 0; ii < nRows; ii++)
     toNexus[ii] = static_cast<NexusT>(col.cell<ColumnT>(ii));
   NXwritedata(columnName.c_str(), type, 1, dims_array, (void *)(toNexus),
@@ -698,7 +698,7 @@ int NexusFileIO::writeNexusTableWorkspace(
 
       NXcompmakedata(fileID, str.c_str(), NX_CHAR, 2, dims_array, false, asize);
       NXopendata(fileID, str.c_str());
-      char *toNexus = new char[maxStr * nRows];
+      auto toNexus = new char[maxStr * nRows];
       for (int ii = 0; ii < nRows; ii++) {
         std::string rowStr = col->cell<std::string>(ii);
         for (size_t ic = 0; ic < rowStr.size(); ic++)
@@ -859,10 +859,10 @@ void NexusFileIO::writeEventListData(std::vector<T> events, bool writeTOF,
     return;
 
   size_t num = events.size();
-  double *tofs = new double[num];
-  double *weights = new double[num];
-  double *errorSquareds = new double[num];
-  int64_t *pulsetimes = new int64_t[num];
+  auto tofs = new double[num];
+  auto weights = new double[num];
+  auto errorSquareds = new double[num];
+  auto pulsetimes = new int64_t[num];
 
   typename std::vector<T>::const_iterator it;
   typename std::vector<T>::const_iterator it_end = events.end();
@@ -1199,8 +1199,7 @@ bool NexusFileIO::writeNexusBinMasking(
       const API::MatrixWorkspace::MaskList &mList = ws->maskedBins(i);
       spectra.push_back(spectra_count);
       spectra.push_back(offset);
-      API::MatrixWorkspace::MaskList::const_iterator it = mList.begin();
-      for (; it != mList.end(); ++it) {
+      for (auto it = mList.cbegin(); it != mList.cend(); ++it) {
         bins.push_back(it->first);
         weights.push_back(it->second);
       }
@@ -1320,7 +1319,7 @@ int getNexusEntryTypes(const std::string &fileName,
           stat = NXgetinfo(fileH, &rank, dims, &type);
           if (stat == NX_ERROR)
             continue;
-          char *value = new char[dims[0] + 1];
+          auto value = new char[dims[0] + 1];
           stat = NXgetdata(fileH, value);
           if (stat == NX_ERROR)
             continue;

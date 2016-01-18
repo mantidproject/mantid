@@ -371,7 +371,7 @@ public:
   void checkTrackIntercept(Track &track,
                            const std::vector<Link> &expectedResults) {
     int index = 0;
-    for (Track::LType::const_iterator it = track.begin(); it != track.end();
+    for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
          ++it) {
       TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
                       1e-6);
@@ -1024,10 +1024,8 @@ private:
     if (desired.find("73") != std::string::npos)
       SurfLine.push_back(SCompT(73, "s 0.6 0 0 0.4"));
 
-    std::vector<SCompT>::const_iterator vc;
-
     // Note that the testObject now manages the "new Plane"
-    for (vc = SurfLine.begin(); vc != SurfLine.end(); vc++) {
+    for (auto vc = SurfLine.cbegin(); vc != SurfLine.cend(); ++vc) {
       auto A = Geometry::SurfaceFactory::Instance()->processLine(vc->second);
       if (!A) {
         std::cerr << "Failed to process line " << vc->second << std::endl;

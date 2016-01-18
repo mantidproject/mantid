@@ -145,7 +145,7 @@ std::list<MantidVec::const_iterator>
 PoldiPeakSearch::findPeaksRecursive(MantidVec::const_iterator begin,
                                     MantidVec::const_iterator end) const {
   // find the maximum intensity in the range (begin - end)...
-  MantidVec::const_iterator maxInRange = std::max_element(begin, end);
+  auto maxInRange = std::max_element(begin, end);
 
   std::list<MantidVec::const_iterator> peaks;
   peaks.push_back(maxInRange);
@@ -281,7 +281,7 @@ PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
    * - average positions i-1 and i as guess for position of fwhm
    * - return difference to peak position * 2
    */
-  MantidVec::const_iterator nextIntensity = peakPosition;
+  auto nextIntensity = peakPosition;
   while (nextIntensity != baseListEnd && (*nextIntensity > halfPeakIntensity)) {
     nextIntensity += 1;
   }
@@ -332,8 +332,8 @@ MantidVec PoldiPeakSearch::getBackground(
   MantidVec background;
   background.reserve(backgroundPoints);
 
-  for (MantidVec::const_iterator point = correlationCounts.begin() + 1;
-       point != correlationCounts.end() - 1; ++point) {
+  for (auto point = correlationCounts.cbegin() + 1;
+       point != correlationCounts.cend() - 1; ++point) {
     if (distanceToPeaksGreaterThanMinimum(peakPositions, point)) {
       background.push_back(*point);
     }

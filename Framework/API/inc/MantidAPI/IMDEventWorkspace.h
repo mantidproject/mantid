@@ -65,9 +65,6 @@ public:
   /// Refresh the cache (integrated signal of each box)
   virtual void refreshCache() = 0;
 
-  /// Return true if there is any mask on the workspace
-  virtual bool hasMask() = 0;
-
   /// Recurse down to a minimum depth
   virtual void setMinRecursionDepth(size_t depth) = 0;
 

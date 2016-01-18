@@ -11,10 +11,10 @@ set_property( TARGET MantidParaViewMDEWNexusReaderSMPlugin PROPERTY FOLDER "Mant
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
 target_link_libraries( MantidParaViewMDEWNexusReaderSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+${vtkjsoncpp_LIBRARIES}
 ${MANTID_SUBPROJECT_LIBS} 
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
-${JSONCPP_LIBRARIES}
 ${QWT_LIBRARIES})
 
 if (OSX_VERSION VERSION_GREATER 10.8)

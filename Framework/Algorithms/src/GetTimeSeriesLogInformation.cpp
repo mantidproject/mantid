@@ -413,8 +413,7 @@ Workspace2D_sptr GetTimeSeriesLogInformation::calDistributions(
     if (dt < 0 && m_ignoreNegativeTime) {
       index = 0;
     } else {
-      vector<double>::iterator viter =
-          lower_bound(vecDeltaT.begin(), vecDeltaT.end(), dt);
+      auto viter = lower_bound(vecDeltaT.begin(), vecDeltaT.end(), dt);
       index = static_cast<int>(viter - vecDeltaT.begin());
       if (index >= static_cast<int>(vecDeltaT.size())) {
         // Out of upper boundary

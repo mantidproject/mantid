@@ -4,6 +4,7 @@ import stresstesting
 from mantid.api import MatrixWorkspace, mtd
 import mantid.simpleapi as ms
 
+import math
 import unittest
 
 DIFF_PLACES = 12
@@ -113,16 +114,6 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(37594.0, evs_raw.readY(0)[1], places=DIFF_PLACES)
         self.assertAlmostEqual(193.89172236070317, evs_raw.readE(0)[1], places=DIFF_PLACES)
 
-    def test_using_ip_file_adjusts_instrument_and_attaches_parameters_difference_mode(self):
-        self._run_load("14188", "3", "SingleDifference", "IP0005.dat")
-
-        # Check some data
-        evs_raw = mtd[self.ws_name]
-        det0 = evs_raw.getDetector(0)
-        param = det0.getNumberParameter("t0")
-        self.assertEqual(1, len(param))
-        self.assertAlmostEqual(-0.4157, param[0], places=4)
-
     def test_using_ip_file_adjusts_instrument_and_attaches_parameters_foil_mode(self):
         self._run_load("14188", "3", "FoilOut", "IP0005.dat")
 
@@ -219,30 +210,32 @@ class VesuvioTests(unittest.TestCase):
     def _verify_correct_detector_parameters(self, detector, forward_scatter, diff_mode):
         # resolution
         tol = 1e-04
+        # using decimal 'places' keyword, as delta= is not supported on Python < 2.7
+        tol_places = round(-math.log10(tol), ndigits=0)
         sigma_l1 = detector.getNumberParameter("sigma_l1")[0]
         sigma_l2 = detector.getNumberParameter("sigma_l2")[0]
         sigma_tof = detector.getNumberParameter("sigma_tof")[0]
         sigma_theta = detector.getNumberParameter("sigma_theta")[0]
         sigma_gauss = detector.getNumberParameter("sigma_gauss")[0]
         hwhm_lorentz = detector.getNumberParameter("hwhm_lorentz")[0]
-        self.assertAlmostEqual(sigma_l1, 0.021, delta=tol)
-        self.assertAlmostEqual(sigma_l2, 0.023, delta=tol)
-        self.assertAlmostEqual(sigma_tof, 0.370, delta=tol)
+        self.assertAlmostEqual(sigma_l1, 0.021, places=tol_places)
+        self.assertAlmostEqual(sigma_l2, 0.023, places=tol_places)
+        self.assertAlmostEqual(sigma_tof, 0.370, places=tol_places)
         if forward_scatter:
-            self.assertAlmostEqual(sigma_theta, 0.040, delta=tol)
+            self.assertAlmostEqual(sigma_theta, 0.040, places=tol_places)
             if diff_mode == "DoubleDifference":
                 raise ValueError("Double difference is not compataible with forward scattering spectra")
             else:
-                self.assertAlmostEqual(sigma_gauss, 73, delta=tol)
-                self.assertAlmostEqual(hwhm_lorentz, 24, delta=tol)
+                self.assertAlmostEqual(sigma_gauss, 73, places=tol_places)
+                self.assertAlmostEqual(hwhm_lorentz, 24, places=tol_places)
         else:
-            self.assertAlmostEqual(sigma_theta, 0.0227, delta=tol)
+            self.assertAlmostEqual(sigma_theta, 0.0227, places=tol_places)
             if diff_mode == "DoubleDifference":
-                self.assertAlmostEqual(sigma_gauss, 88.7, delta=tol)
-                self.assertAlmostEqual(hwhm_lorentz, 40.3, delta=tol)
+                self.assertAlmostEqual(sigma_gauss, 88.7, places=tol_places)
+                self.assertAlmostEqual(hwhm_lorentz, 40.3, places=tol_places)
             else:
-                self.assertAlmostEqual(sigma_gauss, 52.3, delta=tol)
-                self.assertAlmostEqual(hwhm_lorentz, 141.2, delta=tol)
+                self.assertAlmostEqual(sigma_gauss, 52.3, places=tol_places)
+                self.assertAlmostEqual(hwhm_lorentz, 141.2, places=tol_places)
 
     def _run_load(self, runs, spectra, diff_opt, ip_file="", sum_runs=False):
         ms.LoadVesuvio(Filename=runs,OutputWorkspace=self.ws_name,
@@ -320,6 +313,11 @@ class VesuvioTests(unittest.TestCase):
     def test_load_with_difference_option_not_applicable_to_current_spectra_raises_error(self):
         self.assertRaises(ValueError, ms.LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name, Mode="",SpectrumList="3-134")
+
+    def test_forward_scattering_spectra_with_double_difference_mode_raises_error(self):
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          Mode="DoubleDifference",
+                          OutputWorkspace=self.ws_name, SpectrumList="140-150")
 
     def test_raising_error_removes_temporary_raw_workspaces(self):
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188,14199", # Second run is invalid

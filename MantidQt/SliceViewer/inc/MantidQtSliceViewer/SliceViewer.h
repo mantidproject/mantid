@@ -113,6 +113,7 @@ public:
   void toggleLineMode(bool);
   void setNormalization(Mantid::API::MDNormalization norm, bool update=true);
   Mantid::API::MDNormalization getNormalization() const;
+  void setColorBarAutoScale(bool autoscale);
 
   /// Dynamic Rebinning-related Python bindings
   void setRebinThickness(int dim, double thickness);

@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name, too-many-arguments
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import math
@@ -218,6 +218,7 @@ class DataReflWidget(BaseWidget):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
 
     def _edit_event(self, text=None, ctrl=None):
+        _text = text
         self._summary.edited_warning_label.show()
         util.set_edited(ctrl,True)
 
@@ -480,16 +481,18 @@ class DataReflWidget(BaseWidget):
         self._edit_event(None, self._summary.norm_switch)
 
     def _plot_count_vs_y(self, is_peak=True):
+        # removes un-used argument warning for pylint
+        _is_peak = is_peak
         """
             Plot counts as a function of high-resolution pixels
             and select peak range
             For REFM, this is X
             For REFL, this is Y
         """
-        min, max = self._integrated_plot(True,
-                                         self._summary.data_run_number_edit,
-                                         self._summary.data_peak_from_pixel,
-                                         self._summary.data_peak_to_pixel)
+        _min, _max = self._integrated_plot(True,
+                                           self._summary.data_run_number_edit,
+                                           self._summary.data_peak_from_pixel,
+                                           self._summary.data_peak_to_pixel)
 
     def _plot_count_vs_y_bck(self):
         """
@@ -509,16 +512,16 @@ class DataReflWidget(BaseWidget):
             For REFM, this is Y
             For REFL, this is X
         """
-        min, max = self._integrated_plot(False,
-                                         self._summary.data_run_number_edit,
-                                         self._summary.x_min_edit,
-                                         self._summary.x_max_edit)
+        _min, _max = self._integrated_plot(False,
+                                           self._summary.data_run_number_edit,
+                                           self._summary.x_min_edit,
+                                           self._summary.x_max_edit)
 
     def _norm_count_vs_y(self):
-        min, max = self._integrated_plot(True,
-                                         self._summary.norm_run_number_edit,
-                                         self._summary.norm_peak_from_pixel,
-                                         self._summary.norm_peak_to_pixel)
+        _min, _max = self._integrated_plot(True,
+                                           self._summary.norm_run_number_edit,
+                                           self._summary.norm_peak_from_pixel,
+                                           self._summary.norm_peak_to_pixel)
 
     def _norm_count_vs_y_bck(self):
         self._integrated_plot(True,
@@ -527,10 +530,10 @@ class DataReflWidget(BaseWidget):
                               self._summary.norm_background_to_pixel1)
 
     def _norm_count_vs_x(self):
-        min, max = self._integrated_plot(False,
-                                         self._summary.norm_run_number_edit,
-                                         self._summary.norm_x_min_edit,
-                                         self._summary.norm_x_max_edit)
+        _min, _max = self._integrated_plot(False,
+                                           self._summary.norm_run_number_edit,
+                                           self._summary.norm_x_min_edit,
+                                           self._summary.norm_x_max_edit)
 
     def _integrated_plot(self, is_high_res, file_ctrl, min_ctrl, max_ctrl):
         """
@@ -579,7 +582,7 @@ class DataReflWidget(BaseWidget):
             tof_min = int(self._summary.data_from_tof.text())
             tof_max = int(self._summary.data_to_tof.text())
 
-            print 'file requested is: ' , f[0]
+            print 'file requested is: ', f[0]
 
             min, max = data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y,
                                                                       callback=call_back,
@@ -600,7 +603,7 @@ class DataReflWidget(BaseWidget):
         range_min = int(self._summary.data_from_tof.text())
         range_max = int(self._summary.data_to_tof.text())
 
-        if len(f)>0 and os.path.isfile(f[0]):
+        if len(f) > 0 and os.path.isfile(f[0]):
             def call_back(xmin, xmax):
                 self._summary.data_from_tof.setText("%-d" % int(xmin))
                 self._summary.data_to_tof.setText("%-d" % int(xmax))
@@ -610,13 +613,13 @@ class DataReflWidget(BaseWidget):
 
     def _add_data(self):
         state = self.get_editing_state()
-        in_list = False
+        _in_list = False
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
-        if len(list_items)>0:
+        if len(list_items) > 0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
-            in_list = True
+            _in_list = True
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             item_widget.setData(QtCore.Qt.UserRole, state)
@@ -964,8 +967,12 @@ class DataReflWidget(BaseWidget):
 #            self._summary.x_max_edit.setText("%-d" % int(tofmax))
 
         # mantidplot.app should be used instead of _qti.app (it's just an alias)
-        #mantidplot.app.connect(mantidplot.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
-        #mantidplot.app.connect(mantidplot.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+
+        # mantidplot.app.connect(mantidplot.app.mantidUI,
+        # QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+
+        # mantidplot.app.connect(mantidplot.app.RefDetectorViewer,
+        # QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
 
         peak_min = int(self._summary.data_peak_from_pixel.text())
         peak_max = int(self._summary.data_peak_to_pixel.text())
@@ -975,8 +982,12 @@ class DataReflWidget(BaseWidget):
         tof_max = int(self._summary.data_to_tof.text())
 
         import mantidqtpython
-        self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base_ff+'_2D', peak_min, peak_max, back_min, back_max, tof_min, tof_max)
-        QtCore.QObject.connect(self.ref_det_view.getConnections(), QtCore.SIGNAL("peakBackTofRangeUpdate(double,double,double,double,double,double)"), self.call_back)
+        self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base_ff+'_2D',
+                                                                                           peak_min, peak_max, back_min,
+                                                                                           back_max, tof_min, tof_max)
+        QtCore.QObject.connect(self.ref_det_view.getConnections(),
+                               QtCore.SIGNAL("peakBackTofRangeUpdate(double,double,double,double,double,double)"),
+                               self.call_back)
 
     def call_back(self, peakmin, peakmax, backmin, backmax, tofmin, tofmax):
         self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))

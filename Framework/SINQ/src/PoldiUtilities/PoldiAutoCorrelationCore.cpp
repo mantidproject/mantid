@@ -267,9 +267,8 @@ std::vector<double> PoldiAutoCorrelationCore::calculateDWeights(
   std::vector<double> tofs;
   tofs.reserve(tofsFor1Angstrom.size());
 
-  for (std::vector<double>::const_iterator tofFor1Angstrom =
-           tofsFor1Angstrom.begin();
-       tofFor1Angstrom != tofsFor1Angstrom.end(); ++tofFor1Angstrom) {
+  for (auto tofFor1Angstrom = tofsFor1Angstrom.cbegin();
+       tofFor1Angstrom != tofsFor1Angstrom.cend(); ++tofFor1Angstrom) {
     tofs.push_back(*tofFor1Angstrom * deltaD);
   }
 
@@ -302,9 +301,8 @@ PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
     std::vector<UncertainValue> current;
     current.reserve(m_chopper->slitTimes().size());
 
-    for (std::vector<double>::const_iterator slitOffset =
-             m_chopper->slitTimes().begin();
-         slitOffset != m_chopper->slitTimes().end(); ++slitOffset) {
+    for (auto slitOffset = m_chopper->slitTimes().cbegin();
+         slitOffset != m_chopper->slitTimes().cend(); ++slitOffset) {
       /* For each offset, the sum of correlation intensity and error (for each
        * detector element)
        * is computed from the counts in the space/time location possible for
@@ -576,8 +574,8 @@ PoldiAutoCorrelationCore::getDistances(const std::vector<int> &elements) const {
   std::vector<double> distances;
   distances.reserve(elements.size());
 
-  for (std::vector<int>::const_iterator element = elements.begin();
-       element != elements.end(); ++element) {
+  for (auto element = elements.cbegin(); element != elements.cend();
+       ++element) {
     distances.push_back(chopperDistance +
                         m_detector->distanceFromSample(*element));
   }
@@ -686,8 +684,8 @@ double PoldiAutoCorrelationCore::getSumOfCounts(
   double sum = 0.0;
 
   for (int t = 0; t < timeBinCount; ++t) {
-    for (std::vector<int>::const_iterator e = detectorElements.begin();
-         e != detectorElements.end(); ++e) {
+    for (auto e = detectorElements.cbegin(); e != detectorElements.cend();
+         ++e) {
       sum += getCounts(*e, t);
     }
   }

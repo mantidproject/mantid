@@ -80,12 +80,20 @@ void CalculateChiSquared::initConcrete() {
                   "number of degrees of freedom (NofData "
                   "- nOfParams).",
                   Direction::Output);
+  declareProperty("ChiSquaredDividedByNData", 0.0,
+                  "Output value of chi squared divided by the "
+                  "number of data points).",
+                  Direction::Output);
   declareProperty("ChiSquaredWeighted", 0.0,
                   "Output value of weighted chi squared.", Direction::Output);
   declareProperty("ChiSquaredWeightedDividedByDOF", 0.0,
                   "Output value of weighted chi squared divided by the "
                   "number of degrees of freedom (NofData "
                   "- nOfParams).",
+                  Direction::Output);
+  declareProperty("ChiSquaredWeightedDividedByNData", 0.0,
+                  "Output value of weighted chi squared divided by the "
+                  "number of  data points).",
                   Direction::Output);
   declareProperty("Output", "", "A base name for output workspaces.");
   declareProperty("Weighted", false, "Option to use the weighted chi squared "
@@ -122,29 +130,41 @@ void CalculateChiSquared::execConcrete() {
   double dof = 0.0;
   calcChiSquared(*m_function, nParams, *domain, *values, chiSquared,
                  chiSquaredWeighted, dof);
-  g_log.notice() << "Chi squared " << chiSquared << std::endl;
-  g_log.notice() << "Chi squared weighted " << chiSquaredWeighted << std::endl;
+  g_log.notice() << "Chi squared " << chiSquared << "\n"
+                 << "Chi squared weighted " << chiSquaredWeighted << "\n";
 
   // Store the result.
   setProperty("ChiSquared", chiSquared);
   setProperty("chiSquaredWeighted", chiSquaredWeighted);
 
-  // Divide by the DOF
-  if (dof <= 0.0) {
-    dof = 1.0;
-    g_log.warning() << "DOF has a non-positive value, changing to 1.0."
-                    << std::endl;
-  }
-  chiSquared /= dof;
-  chiSquaredWeighted /= dof;
-  g_log.notice() << "Chi squared / DOF " << chiSquared << std::endl;
-  g_log.notice() << "Chi squared weighed / DOF " << chiSquaredWeighted
-                 << std::endl;
-  g_log.notice() << "DOF " << dof << std::endl;
+  // Divided by NParams
+  double nData = dof + static_cast<double>(nParams);
+  const double chiSquaredNData = chiSquared / nData;
+  const double chiSquaredWeightedNData = chiSquaredWeighted / nData;
+  g_log.notice() << "Chi squared / NData " << chiSquaredNData << "\n"
+                 << "Chi squared weighed / NData " << chiSquaredWeightedNData
+                 << "\n"
+                 << "NParams " << nParams << "\n";
 
   // Store the result.
-  setProperty("ChiSquaredDividedByDOF", chiSquared);
-  setProperty("ChiSquaredWeightedDividedByDOF", chiSquaredWeighted);
+  setProperty("ChiSquaredDividedByNData", chiSquaredNData);
+  setProperty("ChiSquaredWeightedDividedByNData", chiSquaredWeightedNData);
+
+  // Divided by the DOF
+  if (dof <= 0.0) {
+    dof = 1.0;
+    g_log.warning("DOF has a non-positive value, changing to 1.0");
+  }
+  const double chiSquaredDOF = chiSquared / dof;
+  const double chiSquaredWeightedDOF = chiSquaredWeighted / dof;
+  g_log.notice() << "Chi squared / DOF " << chiSquaredDOF << "\n"
+                 << "Chi squared weighed / DOF " << chiSquaredWeightedDOF
+                 << "\n"
+                 << "DOF " << dof << "\n";
+
+  // Store the result.
+  setProperty("ChiSquaredDividedByDOF", chiSquaredDOF);
+  setProperty("ChiSquaredWeightedDividedByDOF", chiSquaredWeightedDOF);
 
   std::string baseName = getProperty("Output");
   if (!baseName.empty()) {

@@ -11,8 +11,6 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 
@@ -179,7 +177,7 @@ void OptimizeCrystalPlacement::exec() {
   for (int i = 0; i < Peaks->getNumberPeaks(); i++) {
     IPeak &peak = Peaks->getPeak(i);
     int runNum = peak.getRunNumber();
-    std::vector<int>::iterator it = RunNumList.begin();
+    auto it = RunNumList.begin();
     for (; it != RunNumList.end() && *it != runNum; ++it) {
     }
 
@@ -243,11 +241,10 @@ void OptimizeCrystalPlacement::exec() {
   //---------------
   std::vector<std::string> ChRunNumList;
   std::string predChar = "";
-  for (std::vector<int>::iterator it = RunNumList.begin();
-       it != RunNumList.end(); ++it) {
+  for (auto it = RunNumList.begin(); it != RunNumList.end(); ++it) {
     int runNum = *it;
 
-    std::vector<int>::iterator it1 = NOoptimizeRuns.begin();
+    auto it1 = NOoptimizeRuns.begin();
     for (; it1 != NOoptimizeRuns.end() && *it1 != runNum; ++it1) {
     }
 

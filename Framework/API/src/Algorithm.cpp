@@ -11,11 +11,13 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/UsageService.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
@@ -202,15 +204,11 @@ void Algorithm::progress(double p, const std::string &msg, double estimatedTime,
 //---------------------------------------------------------------------------------------------
 /// Function to return all of the categories that contain this algorithm
 const std::vector<std::string> Algorithm::categories() const {
-  std::vector<std::string> res;
   Poco::StringTokenizer tokenizer(category(), categorySeparator(),
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
 
-  for (; h != tokenizer.end(); ++h) {
-    res.push_back(*h);
-  }
+  std::vector<std::string> res(tokenizer.begin(), tokenizer.end());
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);
@@ -584,11 +582,11 @@ bool Algorithm::execute() {
       Timer timer;
       // Call the concrete algorithm's exec method
       this->exec();
+      registerFeatureUsage();
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
       // Get how long this algorithm took to run
       const float duration = timer.elapsed();
-
       // need it to throw before trying to run fillhistory() on an algorithm
       // which has failed
       if (trackingHistory() && m_history) {
@@ -819,19 +817,27 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
 
 /**
  * Serialize this object to a string. The format is
- * AlgorithmName.version(prop1=value1,prop2=value2,...)
+ * a json formatted string.
  * @returns This object serialized as a string
  */
 std::string Algorithm::toString() const {
-  ::Json::Value root;
   ::Json::FastWriter writer;
-  ::Json::Reader reader;
+
+  return writer.write(toJson());
+}
+
+/**
+* Serialize this object to a json object)
+* @returns This object serialized as a json object
+*/
+::Json::Value Algorithm::toJson() const {
+  ::Json::Value root;
 
   root["name"] = name();
   root["version"] = this->version();
   root["properties"] = Kernel::PropertyManagerOwner::asJson(false);
 
-  return writer.write(root);
+  return root;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -1564,6 +1570,17 @@ void Algorithm::reportCompleted(const double &duration,
                         << std::endl;
   }
   m_running = false;
+}
+
+/** Registers the usage of the algorithm with the UsageService
+*/
+void Algorithm::registerFeatureUsage() const {
+  if (UsageService::Instance().isEnabled()) {
+    std::ostringstream oss;
+    oss << this->name() << ".v" << this->version();
+    UsageService::Instance().registerFeatureUsage("Algorithm", oss.str(),
+                                                  isChild());
+  }
 }
 
 /** Enable or disable Logging of start and end messages

@@ -13,6 +13,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -622,26 +623,22 @@ public:
                testing::Mock::VerifyAndClearExpectations(mockPolicy));
   }
 
-  void test_getNormalizedSignalWithMask_returns_zero_for_masked() {
+  void test_getNormalizedSignal_with_mask() {
     // Make a MDBox with 10 events
     ibox_t *A = MDEventsTestHelper::makeMDBox1();
     MDEventsTestHelper::feedMDBox<1>(A, 1, 10, 0.5, 1.0);
     MDBoxIterator<MDLeanEvent<1>, 1> *it =
         new MDBoxIterator<MDLeanEvent<1>, 1>(A, 20, true);
 
-    // Mask box 0, unmask box 1 and mask box 2.
-    // For masked boxes, getNormalizedSignalWithMask() should return 0.
-    it->getBox()->mask();
-    TS_ASSERT_DELTA(it->getNormalizedSignalWithMask(), 0.0, 1e-5);
+    // Initially the box is unmasked
     TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
+
     it->next();
-    it->getBox()->unmask();
-    TS_ASSERT_DELTA(it->getNormalizedSignalWithMask(), 1.0, 1e-5);
-    TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
-    it->next();
+
+    // Now mask the box
     it->getBox()->mask();
-    TS_ASSERT_DELTA(it->getNormalizedSignalWithMask(), 0.0, 1e-5);
-    TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
+    // For masked boxes, getNormalizedSignal() should return NaN.
+    TS_ASSERT(boost::math::isnan(it->getNormalizedSignal()));
 
     delete it;
   }

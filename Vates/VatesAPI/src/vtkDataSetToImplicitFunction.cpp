@@ -4,6 +4,7 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
+#include "MantidKernel/make_unique.h"
 #include <vtkDataSet.h>
 
 namespace Mantid
@@ -42,7 +43,8 @@ namespace Mantid
     {
       using Mantid::Geometry::NullImplicitFunction;
       using Mantid::Geometry::MDGeometryXMLDefinitions;
-      Mantid::Geometry::MDImplicitFunction* function = new NullImplicitFunction;
+      std::unique_ptr<Mantid::Geometry::MDImplicitFunction> function =
+          Mantid::Kernel::make_unique<NullImplicitFunction>();
 
       FieldDataToMetadata convert;
       std::string xmlString = convert(m_dataset->GetFieldData(), XMLDefinitions::metaDataId()); 
@@ -54,11 +56,14 @@ namespace Mantid
         Poco::XML::Element* functionElem = pRootElem->getChildElement(MDGeometryXMLDefinitions::functionElementName());
         if(NULL != functionElem)
         {
-          delete function;
-          function = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(functionElem);
+          auto existingFunction =
+              std::unique_ptr<Mantid::Geometry::MDImplicitFunction>(
+                  Mantid::API::ImplicitFunctionFactory::Instance()
+                      .createUnwrapped(functionElem));
+          function.swap(existingFunction);
         }
       }
-      return function;
+      return function.release();
     }
 
     /// Destructor.

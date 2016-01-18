@@ -14,6 +14,7 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidKernel/ConfigService.h"
 
 // clang-format off
 #if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
@@ -104,6 +105,12 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   // Write out the coordinate system
   file->writeData("coordinate_system",
                   static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
+
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string m_QConvention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+  file->putAttr("QConvention", m_QConvention);
 
   // Write out the visual normalization
   file->writeData("visual_normalization",

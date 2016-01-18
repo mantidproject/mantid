@@ -105,8 +105,8 @@ std::istream &MantidWebServiceAPIHelper::httpPost(
   // Need to be able to specify the content length, so build up the post body
   // here.
   std::ostringstream postBody;
-  PostDataMap::const_iterator it = postData.begin();
-  while (it != postData.end()) {
+  auto it = postData.cbegin();
+  while (it != postData.cend()) {
     postBody << boundaryLine;
     postBody << "Content-Disposition: form-data; name=\"" << (*it).first
              << "\"";

@@ -43,6 +43,11 @@ Merging of front and rear banks for the can is achieved using a different form f
 
 where *C* denotes counts, *N* denotes normalization and *f* and *r* relate to forward (high-angle) and rear (low-angle) respectively. The can workspace is subtracted from the merged sample workspace to generate the output.
 
+Workflow
+########
+
+.. diagram:: SANSStitch-v1_wkflw.dot
+
 Usage
 -----
 
