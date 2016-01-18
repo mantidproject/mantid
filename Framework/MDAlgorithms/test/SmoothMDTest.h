@@ -390,8 +390,8 @@ public:
         Mantid::MDAlgorithms::gaussianKernel(1.5 * 2.355);
 
     // Expected kernel for sigma = 1.5
-    std::vector<double> expected_kernel{0.039, 0.113, 0.215, 0.266, 0.215,
-                                        0.113, 0.039};
+    std::vector<double> expected_kernel{0.039, 0.113, 0.215, 0.266,
+                                        0.215, 0.113, 0.039};
 
     for (size_t i = 0; i < expected_kernel.size(); ++i) {
       TSM_ASSERT_DELTA("Calculated value should match expected value",

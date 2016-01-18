@@ -87,23 +87,23 @@ namespace MDAlgorithms {
  */
 KernelVector gaussianKernel(const double fwhm) {
 
-  // Calculate 1/sigma
+  // Calculate sigma from FWHM
   // FWHM = 2 sqrt(2 * ln(2)) * sigma
-  const double sigma_recip = 1.0/(fwhm * 0.42463);
-  const double sigma_factor = M_SQRT1_2 * sigma_recip;
+  const double sigma = (fwhm * 0.42463) / 2.0;
+  const double sigma_factor = M_SQRT1_2 / (fwhm * 0.42463);
 
   KernelVector kernel_one_side;
   // Start from centre and calculate values going outwards until value < 0.02
   // Use erf to get the value of the Gaussian integrated over the width of the
   // pixel, more accurate than just using centre value of pixel
-  double pixel_value = std::erf(0.5 * sigma_factor) * (1/(2*sigma_recip));
+  double pixel_value = std::erf(0.5 * sigma_factor) * sigma;
   int pixel_count = 0;
   while (pixel_value > 0.02) {
     kernel_one_side.push_back(pixel_value);
     pixel_count++;
     pixel_value = (std::erf((pixel_count + 0.5) * sigma_factor) -
                    std::erf((pixel_count - 0.5) * sigma_factor)) *
-                  0.5 * (1/(2*sigma_recip));
+                  0.5 * sigma;
   }
 
   // Create the symmetric kernel vector
