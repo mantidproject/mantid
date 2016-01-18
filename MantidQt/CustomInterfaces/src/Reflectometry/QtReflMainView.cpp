@@ -76,9 +76,9 @@ void QtReflMainView::setModel(QString name) {
 }
 
 /**
- * Set all possible tranfer methods
- * @param methods : All possible transfer methods.
- */
+* Set all possible tranfer methods
+* @param methods : All possible transfer methods.
+*/
 void QtReflMainView::setTransferMethods(const std::set<std::string> &methods) {
   for (auto method = methods.begin(); method != methods.end(); ++method) {
     ui.comboTransferMethod->addItem((*method).c_str());
@@ -97,6 +97,10 @@ void QtReflMainView::showTable(QReflTableModel_sptr model) {
           SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
   ui.viewTable->setModel(m_model.get());
   ui.viewTable->resizeColumnsToContents();
+  std::string windowTitle = "ISIS Reflectometry (Polref) - " + m_toOpen;
+  auto mainWindowWidget = this->topLevelWidget();
+  mainWindowWidget->setWindowTitle(QString::fromStdString(windowTitle + "[*]"));
+  this->setWindowModified(false);
 }
 
 /**
@@ -458,7 +462,11 @@ void QtReflMainView::showImportDialog() {
   // otherwise this should be an empty string.
   QString outputWorkspaceName =
       runPythonCode(QString::fromStdString(pythonSrc.str()), false);
-  this->setModel(outputWorkspaceName.trimmed());
+  m_toOpen = outputWorkspaceName.trimmed().toStdString();
+  // notifying the presenter that a new table should be opened
+  // The presenter will ask about any unsaved changes etc
+  // before opening the new table
+  m_presenter->notify(ReflMainViewPresenter::OpenTableFlag);
 }
 
 /**
@@ -490,9 +498,9 @@ std::string QtReflMainView::requestNotebookPath() {
 }
 
 /**
- Save settings
- @param options : map of user options to save
- */
+Save settings
+@param options : map of user options to save
+*/
 void QtReflMainView::saveSettings(
     const std::map<std::string, QVariant> &options) {
   QSettings settings;
@@ -503,9 +511,9 @@ void QtReflMainView::saveSettings(
 }
 
 /**
- Load settings
- @param options : map of user options to load into
- */
+Load settings
+@param options : map of user options to load into
+*/
 void QtReflMainView::loadSettings(std::map<std::string, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(ReflSettingsGroup);
@@ -551,9 +559,9 @@ void QtReflMainView::setProgress(int progress) {
 }
 
 /**
- Get status of checkbox which determines whether an ipython notebook is produced
- @return true if a notebook should be output on process, false otherwise
- */
+Get status of checkbox which determines whether an ipython notebook is produced
+@return true if a notebook should be output on process, false otherwise
+*/
 bool QtReflMainView::getEnableNotebook() {
   return ui.checkEnableNotebook->isChecked();
 }
@@ -690,13 +698,13 @@ std::string QtReflMainView::getSearchString() const {
 }
 
 /**
- * Clear the progress
- */
+* Clear the progress
+*/
 void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
 
 /**
- * @return the transfer method selected.
- */
+* @return the transfer method selected.
+*/
 std::string QtReflMainView::getTransferMethod() const {
   return ui.comboTransferMethod->currentText().toStdString();
 }

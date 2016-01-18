@@ -333,7 +333,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
   // Insert previous data.
   nxFile.openData("data");
 
-  double *dataArr = new double[m_spectraCount];
+  auto dataArr = new double[m_spectraCount];
 
   for (int64_t i = 0; i < m_dimensions[1]; ++i) {
     for (int64_t j = 0; j < m_dimensions[2]; ++j) {
@@ -422,7 +422,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
 
       size_t strSize = prop->value().length();
 
-      char *val = new char[80]();
+      auto val = new char[80]();
 
       // If log value is from FITS file as it should be,
       // it won't be greater than this. Otherwise Shorten it

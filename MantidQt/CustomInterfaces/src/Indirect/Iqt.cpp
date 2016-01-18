@@ -125,13 +125,34 @@ namespace IDA
    *
    * @param error If the algorithm failed
    */
-  void Iqt::algorithmComplete(bool error)
-  {
-    if(error)
+  void Iqt::algorithmComplete(bool error) {
+    if (error)
       return;
 
-    if(m_uiForm.ckPlot->isChecked())
+	// Regular Plot
+    if (m_uiForm.ckPlot->isChecked())
       plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+	// Tile plot
+    if (m_uiForm.ckTile->isChecked()) {
+      MatrixWorkspace_const_sptr outWs =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              m_pythonExportWsName);
+      const size_t nPlots = outWs->getNumberHistograms();
+      if (nPlots == 0)
+        return;
+      QString pyInput = "from mantidplot import newTiledWindow\n";
+      pyInput += "newTiledWindow(sources=[";
+      for (size_t index = 0; index < nPlots; ++index) {
+        if (index > 0) {
+          pyInput += ",";
+        }
+		const std::string pyInStr = "(['" + m_pythonExportWsName + "'], " + std::to_string(index) + ")";
+        pyInput += QString::fromStdString(pyInStr);
+      }
+	  pyInput += "])\n";
+      runPythonCode(pyInput);
+    }
   }
 
   /**

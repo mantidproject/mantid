@@ -865,6 +865,37 @@ public:
     delete bcc;
   }
 
+  //-------------------------------------------------------------------------------------
+  void
+  test_addEvents_min_event_boundary_kept_and_on_max_boxboundary_thrown_away() {
+    auto b = MDEventsTestHelper::makeMDGridBox<2>();
+    std::vector<MDLeanEvent<2>> events;
+    coord_t centers[2] = {0.0f, 0.0f};
+    events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+    centers[1] = 10.0f;
+    events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+    centers[0] = 10.0f;
+    centers[1] = 0.0f;
+    events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+    centers[0] = 10.0f;
+    centers[1] = 10.0f;
+    events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+
+    size_t numbad(-1);
+    TS_ASSERT_THROWS_NOTHING(numbad = b->addEvents(events));
+    TS_ASSERT_EQUALS(numbad, 3);
+
+    b->refreshCache(NULL);
+    TS_ASSERT_EQUALS(b->getNPoints(), 1);
+    TS_ASSERT_EQUALS(b->getSignal(), 2.0);
+    TS_ASSERT_EQUALS(b->getErrorSquared(), 2.0);
+
+    // clean up  behind
+    BoxController *const bcc = b->getBoxController();
+    delete b;
+    delete bcc;
+  }
+
   ////-------------------------------------------------------------------------------------
   ///** Tests add_events with limits into the vectorthat bad events are thrown
   /// out when using addEvents.

@@ -475,8 +475,7 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
   // and also fill up the output vector (in reverse order)
   Mantid::API::SCRIPTSTATUS acc_status = Mantid::API::BOTH_UNCHANGED;
   std::string last_directory = "";
-  for (Repository::reverse_iterator it = repo.rbegin(); it != repo.rend();
-       ++it) {
+  for (auto it = repo.rbegin(); it != repo.rend(); ++it) {
     // for every entry, it takes the path and RepositoryEntry
     std::string entry_path = it->first;
     RepositoryEntry &entry = it->second;
@@ -619,7 +618,7 @@ void ScriptRepositoryImpl::download_directory(
   std::string directory_path_with_slash =
       std::string(directory_path).append("/");
   bool found = false;
-  for (Repository::iterator it = repo.begin(); it != repo.end(); ++it) {
+  for (auto it = repo.begin(); it != repo.end(); ++it) {
     // skip all entries that are not children of directory_path
     // the map will list the entries in alphabetical order, so,
     // when it first find the directory, it will list all the
@@ -840,7 +839,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
     form.add("path", folder);
 
     // inserting the file
-    FilePartSource *m_file = new FilePartSource(absolute_path);
+    auto m_file = new FilePartSource(absolute_path);
     form.addPart("file", m_file);
 
     inetHelper.setBody(form);
@@ -1256,7 +1255,7 @@ std::vector<std::string> ScriptRepositoryImpl::check4Update(void) {
   std::vector<std::string> output_list;
   // look for all the files in the list, to check those that
   // has the auto_update and check it they have changed.
-  for (Repository::iterator it = repo.begin(); it != repo.end(); ++it) {
+  for (auto it = repo.begin(); it != repo.end(); ++it) {
     if (it->second.auto_update) {
       // THE SAME AS it->status in (REMOTE_CHANGED, BOTH_CHANGED)
       if (it->second.status & REMOTE_CHANGED) {
@@ -1312,8 +1311,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
   ensureValidRepository();
   std::string path = convertPath(input_path);
   std::vector<std::string> files_to_update;
-  for (Repository::reverse_iterator it = repo.rbegin(); it != repo.rend();
-       ++it) {
+  for (auto it = repo.rbegin(); it != repo.rend(); ++it) {
     // for every entry, it takes the path and RepositoryEntry
     std::string entry_path = it->first;
     RepositoryEntry &entry = it->second;
@@ -1551,8 +1549,8 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
         }
       }
 
-      for (std::vector<std::string>::iterator it = entries_to_delete.begin();
-           it != entries_to_delete.end(); ++it) {
+      for (auto it = entries_to_delete.begin(); it != entries_to_delete.end();
+           ++it) {
         // remove this entry
         pt.removeMember(*it);
       }

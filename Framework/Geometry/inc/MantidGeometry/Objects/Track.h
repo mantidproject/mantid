@@ -178,9 +178,9 @@ public:
   /// Returns the direction as a unit vector
   const Kernel::V3D &direction() const { return m_unitVector; }
   /// Returns an interator to the start of the set of links
-  LType::const_iterator begin() const { return m_links.begin(); }
+  LType::const_iterator cbegin() const { return m_links.cbegin(); }
   /// Returns an interator to one-past-the-end of the set of links
-  LType::const_iterator end() const { return m_links.end(); }
+  LType::const_iterator cend() const { return m_links.cend(); }
   /// Returns the number of links
   int count() const { return static_cast<int>(m_links.size()); }
   /// Is the link complete?

@@ -97,7 +97,7 @@ Axis *NumericAxis::clone(const MatrixWorkspace *const parentWorkspace) {
 Axis *NumericAxis::clone(const std::size_t length,
                          const MatrixWorkspace *const parentWorkspace) {
   UNUSED_ARG(parentWorkspace)
-  NumericAxis *newAxis = new NumericAxis(*this);
+  auto newAxis = new NumericAxis(*this);
   newAxis->m_values.clear();
   newAxis->m_values.resize(length);
   newAxis->m_edges.clear();

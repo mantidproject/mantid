@@ -113,7 +113,7 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
         "Unable to read " + setName + " dataset info:", m_filename);
   }
   int nq = static_cast<int>(dims[0]); // number of q-vectors
-  double *buf = new double[nq * 3];
+  auto buf = new double[nq * 3];
   this->dataSetDouble(h5file, "qvectors", buf);
 
   MantidVec qvmod; // store the modulus of the vector
@@ -181,7 +181,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   const std::string wsName = gwsName + std::string("_") + setName;
   ws->setTitle(wsName);
 
-  double *buf = new double[nq * 2];
+  auto buf = new double[nq * 2];
   this->dataSetDouble(h5file, setName, buf);
   MantidVec &re = ws->dataY(0); // store the real part
   ws->dataX(0) = qvmod;         // X-axis values are the modulus of the q vector
@@ -234,7 +234,7 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   int nnt = static_cast<int>(dims[1]); // number of non-negative time points
   int nt = 2 * nnt - 1;                // number of time points
   int origin = nnt - 1;
-  double *buf = new double[nq * nnt * 2];
+  auto buf = new double[nq * nnt * 2];
   this->dataSetDouble(h5file, setName, buf);
 
   DataObjects::Workspace2D_sptr wsRe =

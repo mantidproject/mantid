@@ -14,6 +14,12 @@ A version of :ref:`ISISIndirectDiffractionReduction
 data, the reduction is performed in the same way however there is the additional
 option to load a PAR file.
 
+Workflow
+--------
+
+.. diagram:: EVSDiffractionReduction-v1_wkflw.dot
+
+
 Usage
 -----
 
