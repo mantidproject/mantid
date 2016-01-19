@@ -1068,12 +1068,28 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       }
     }
   }
+
+  std::string m_QConvention = "Inelastic";
+  try {
+    m_cppFile->getAttr("QConvention", m_QConvention);
+  } catch (std::exception &) {
+  }
+
   // peaks_workspace
   m_cppFile->closeGroup();
 
+  // Change convention of loaded file to that in Preferen
+  double qSign = 1.0;
+  std::string convention = ConfigService::Instance().getString("Q.convention");
+  if (convention != m_QConvention)
+    qSign = -1.0;
+
   for (int r = 0; r < numberPeaks; r++) {
     Kernel::V3D v3d;
-    v3d[2] = 1.0;
+    if (convention == "Crystallography")
+      v3d[2] = -1.0;
+    else
+      v3d[2] = 1.0;
     Geometry::IPeak *p;
     p = peakWS->createPeak(v3d);
     peakWS->addPeak(*p);
@@ -1097,7 +1113,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
-        double val = nxDouble[r];
+        double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setH(val);
       }
     }
@@ -1107,7 +1123,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
-        double val = nxDouble[r];
+        double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setK(val);
       }
     }
@@ -1117,7 +1133,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
-        double val = nxDouble[r];
+        double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setL(val);
       }
     }

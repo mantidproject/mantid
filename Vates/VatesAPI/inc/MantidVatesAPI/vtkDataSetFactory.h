@@ -5,6 +5,7 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/Chainable.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/make_unique.h"
 #include "vtkDataSet.h"
@@ -61,16 +62,13 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport vtkDataSetFactory
+class DLLExport vtkDataSetFactory : public Mantid::Kernel::Chainable<vtkDataSetFactory>
 {
 
 public:
 
   /// Constructor
   vtkDataSetFactory();
-
-  /// Destructor
-  virtual ~vtkDataSetFactory()=0;
 
   /// Factory Method. Should also handle delegation to successors.
   virtual vtkSmartPointer<vtkDataSet> create(ProgressAction &) const = 0;
@@ -81,12 +79,6 @@ public:
   /// Create the product in one step.
   virtual vtkSmartPointer<vtkDataSet> oneStepCreate(Mantid::API::Workspace_sptr,
                                                     ProgressAction &);
-
-  /// Add a chain-of-responsibility successor to this factory. Handle case where the factory cannot render the MDWorkspace owing to its dimensionality.
-  virtual void SetSuccessor(std::unique_ptr<vtkDataSetFactory> pSuccessor);
-
-  /// Determine whether a successor factory has been provided.
-  virtual bool hasSuccessor() const;
 
   /// Get the name of the type.
   virtual std::string getFactoryTypeName() const =0;
@@ -215,13 +207,11 @@ protected:
     return nullptr;
   }
 
-  /// Typedef for internal unique pointer for successor types.
-  typedef std::unique_ptr<vtkDataSetFactory> SuccessorType;
-
-  vtkDataSetFactory::SuccessorType m_successor;
-
   /// Template Method pattern to validate the factory before use.
   virtual void validate() const = 0;
+
+  /// Checks successor when set and throws if bad
+  virtual void checkSuccessor() const override;
 
   /// Flag indicating whether a transformation should be used.
   bool m_useTransform;

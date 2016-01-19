@@ -1,18 +1,17 @@
-#ifndef MANTID_MDALGORITHMS_TRANSFORMMD_H_
-#define MANTID_MDALGORITHMS_TRANSFORMMD_H_
+#ifndef MANTID_MDALGORITHMS_ChangeQConvention_H_
+#define MANTID_MDALGORITHMS_ChangeQConvention_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 
 namespace Mantid {
+
 namespace MDAlgorithms {
 
-/** Scale and/or offset the coordinates of a MDWorkspace
+/** Save a MDEventWorkspace to a .nxs file.
 
-  @date 2012-01-18
-
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -33,34 +32,33 @@ namespace MDAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TransformMD : public API::Algorithm {
+class DLLExport ChangeQConvention : public API::Algorithm {
 public:
-  TransformMD();
-  virtual ~TransformMD();
+  ChangeQConvention();
+  ~ChangeQConvention();
 
-  virtual const std::string name() const;
+  /// Algorithm's name for identification
+  virtual const std::string name() const { return "ChangeQConvention"; };
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Scale and/or offset the coordinates of a MDWorkspace";
+    return "Change the convention of MD workspace.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  /// Algorithm's version for identification
+  virtual int version() const { return 1; };
+  /// Algorithm's category for identification
+  virtual const std::string category() const {
+    return "MDAlgorithms\\DataHandling";
+  }
 
 private:
+  /// Initialise the properties
   void init();
+  /// Run the algorithm
   void exec();
-  void reverse(signal_t *array, size_t arrayLength);
-
-  template <typename MDE, size_t nd>
-  void
-  doTransform(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
-
-  std::vector<double> m_scaling;
-  std::vector<double> m_offset;
 };
 
-} // namespace MDAlgorithms
+} // namespace DataObjects
 } // namespace Mantid
 
-#endif /* MANTID_MDALGORITHMS_TRANSFORMMD_H_ */
+#endif /* MANTID_MDALGORITHMS_ChangeQConvention_H_ */

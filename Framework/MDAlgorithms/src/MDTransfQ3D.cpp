@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidKernel/RegistrationHelper.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -80,7 +81,14 @@ bool MDTransfQ3D::calcMatrixCoord3DInelastic(
   double qy = -m_ey * k_tr;
   double qz = m_Ki - m_ez * k_tr;
 
+  if (convention == "Crystallography") {
+    qx = -qx;
+    qy = -qy;
+    qz = -qz;
+  }
+
   Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
+
   if (Coord[0] < m_DimMin[0] || Coord[0] >= m_DimMax[0])
     return false;
   Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
@@ -120,7 +128,17 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
   double qx = -m_ex * k0;
   double qy = -m_ey * k0;
   double qz = (1 - m_ez) * k0;
+<<<<<<< HEAD
   Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
+=======
+  if (convention == "Crystallography") {
+    qx = -qx;
+    qy = -qy;
+    qz = -qz;
+  }
+
+  Coord[0] = (coord_t)(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
+>>>>>>> origin/master
   if (Coord[0] < m_DimMin[0] || Coord[0] >= m_DimMax[0])
     return false;
 
@@ -193,6 +211,7 @@ bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
 /** function initalizes all variables necessary for converting workspace
  * variables into MD variables in ModQ (elastic/inelastic) cases  */
 void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   m_pEfixedArray = NULL;
   m_pDetMasks = NULL;
   //********** Generic part of initialization, common for elastic and inelastic

@@ -87,6 +87,15 @@ void BinaryOperationMD::exec() {
     m_rhs = temp;
   }
 
+  // Do not compare conventions if one is single value
+  if (!boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs)) {
+    if (m_lhs->getConvention() != m_rhs->getConvention()) {
+      throw std::runtime_error(
+          "Workspaces have different conventions for Q. "
+          "Use algorithm ChangeQConvention on one workspace. ");
+    }
+  }
+
   // Can't do A = 1 / B
   if (boost::dynamic_pointer_cast<MatrixWorkspace>(m_lhs))
     throw std::invalid_argument("BinaryOperationMD: can't have a "
