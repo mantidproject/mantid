@@ -535,14 +535,18 @@ public:
     ws->setMDMasking(function);
 
     IMDWorkspace_sptr iws(ws);
-    TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(0.5, 0.5)), 0.0, 1e-6);
-    TS_ASSERT_DELTA(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5)), 0.0, 1e-6);
 
-    TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization),
-                    0.25, 1e-6);
-    TS_ASSERT_DELTA(
-        iws->getSignalWithMaskAtVMD(VMD(3.5, 0.5), VolumeNormalization), 0.0,
-        1e-6);
+    // Testing with isnan() as following commented line doesn't work
+    // when MDMaskValue is NaN.
+    // TS_ASSERT_DELTA(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5)), MDMaskValue,
+    // 1e-6);
+    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(0.5, 0.5))));
+    TS_ASSERT(boost::math::isnan(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5))));
+
+    TS_ASSERT(boost::math::isnan(
+        iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
+    TS_ASSERT(boost::math::isnan(
+        iws->getSignalWithMaskAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -594,7 +598,7 @@ public:
 
     TS_ASSERT_EQUALS(y.size(), 10);
     // Masked value should be zero
-    TS_ASSERT_DELTA(y[2], 0.0, 1e-5);
+    TS_ASSERT(boost::math::isnan(y[2]));
     // Unmasked value
     TS_ASSERT_DELTA(y[9], 9.0, 1e-5);
   }

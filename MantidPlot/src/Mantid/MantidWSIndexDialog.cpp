@@ -14,6 +14,321 @@
 #include <QPalette>
 
 //----------------------------------
+// MantidWSIndexWidget methods
+//----------------------------------
+/**
+ * Construct a widget of this type
+ * @param parent :: The owning dialog
+ * @param flags :: Window flags that are passed the the QWidget constructor
+ * @param wsNames :: the names of the workspaces to be plotted
+ * @param showWaterfallOption :: If true the waterfall checkbox is created
+ */
+MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
+                                         QList<QString> wsNames,
+                                         const bool showWaterfallOption)
+    : QWidget(parent, flags), m_spectra(false),
+      m_waterfall(showWaterfallOption), m_wsNames(wsNames),
+      m_wsIndexIntervals(), m_spectraIdIntervals(), m_wsIndexChoice(),
+      m_spectraIdChoice() {
+  checkForSpectraAxes();
+  // Generate the intervals allowed to be plotted by the user.
+  generateWsIndexIntervals();
+  if (m_spectra) {
+    generateSpectraIdIntervals();
+  }
+  init();
+}
+
+/**
+ * Returns the user-selected options
+ * @returns Struct containing user options
+ */
+MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() const {
+  UserInput options;
+  options.plots = getPlots();
+  options.waterfall = waterfallPlotRequested();
+  return options;
+}
+
+/**
+ * Returns the user-selected plots 
+ * @returns Plots selected by user
+ */
+QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
+  // Map of workspace names to set of indices to be plotted.
+  QMultiMap<QString, std::set<int>> plots;
+
+  // If the user typed in the wsField ...
+  if (m_wsIndexChoice.getList().size() > 0) {
+
+    for (int i = 0; i < m_wsNames.size(); i++) {
+      std::set<int> intSet = m_wsIndexChoice.getIntSet();
+      plots.insert(m_wsNames[i], intSet);
+    }
+  }
+  // Else if the user typed in the spectraField ...
+  else if (m_spectraIdChoice.getList().size() > 0) {
+    for (int i = 0; i < m_wsNames.size(); i++) {
+      // Convert the spectra choices of the user into workspace indices for us
+      // to use.
+      Mantid::API::MatrixWorkspace_const_sptr ws =
+          boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+              Mantid::API::AnalysisDataService::Instance().retrieve(
+                  m_wsNames[i].toStdString()));
+      if (NULL == ws)
+        continue;
+
+      const Mantid::spec2index_map spec2index =
+          ws->getSpectrumToWorkspaceIndexMap();
+
+      std::set<int> origSet = m_spectraIdChoice.getIntSet();
+      std::set<int>::iterator it = origSet.begin();
+      std::set<int> convertedSet;
+
+      for (; it != origSet.end(); ++it) {
+        int origInt = (*it);
+        int convertedInt = static_cast<int>(spec2index.find(origInt)->second);
+        convertedSet.insert(convertedInt);
+      }
+
+      plots.insert(m_wsNames[i], convertedSet);
+    }
+  }
+
+  return plots;
+}
+
+/**
+ * Whether the user checked the "waterfall" box
+ * @returns True if waterfall plot selected
+ */
+bool MantidWSIndexWidget::waterfallPlotRequested() const {
+  return m_waterfallOpt->isChecked();
+}
+
+/**
+ * Called when user edits workspace field
+ */
+void MantidWSIndexWidget::editedWsField() {
+  if (usingSpectraIDs()) {
+    m_spectraField->lineEdit()->clear();
+    m_spectraField->setError("");
+  }
+}
+
+/**
+ * Called when user edits spectra field
+ */
+void MantidWSIndexWidget::editedSpectraField() {
+  m_wsField->lineEdit()->clear();
+  m_wsField->setError("");
+}
+
+/**
+ * Called when dialog requests a plot
+ * @returns True to accept, false to raise error
+ */
+bool MantidWSIndexWidget::plotRequested() {
+  bool acceptable = false;
+  int npos = 0;
+  QString wsText = m_wsField->lineEdit()->text();
+  QString spectraTest = m_spectraField->lineEdit()->text();
+  QValidator::State wsState =
+      m_wsField->lineEdit()->validator()->validate(wsText, npos);
+  QValidator::State spectraState =
+      m_spectraField->lineEdit()->validator()->validate(spectraTest, npos);
+  if (wsState == QValidator::Acceptable) {
+    m_wsIndexChoice.addIntervals(m_wsField->lineEdit()->text());
+    acceptable = true;
+  }
+  // Else if the user typed in the spectraField ...
+  else if (spectraState == QValidator::Acceptable) {
+    m_spectraIdChoice.addIntervals(m_spectraField->lineEdit()->text());
+    acceptable = true;
+  } else {
+    QString error_message("Invalid input. It is not in the range available");
+    if (!wsText.isEmpty())
+      m_wsField->setError(error_message);
+    if (!spectraTest.isEmpty())
+      m_spectraField->setError(error_message);
+  }
+  return acceptable;
+}
+
+/**
+ * Called when dialog requests to plot all
+ */
+void MantidWSIndexWidget::plotAllRequested() {
+  m_wsIndexChoice = m_wsIndexIntervals;
+}
+
+/**
+ * Set up widget UI
+ */
+void MantidWSIndexWidget::init() {
+  m_outer = new QVBoxLayout;
+  initSpectraBox();
+  initWorkspaceBox();
+  initOptionsBoxes();
+  setLayout(m_outer);
+}
+
+/**
+ * Set up Workspace box UI
+ */
+void MantidWSIndexWidget::initWorkspaceBox() {
+  m_wsBox = new QVBoxLayout;
+  m_wsMessage = new QLabel(
+      tr("Enter Workspace Indices: " + m_wsIndexIntervals.toQString()));
+  m_wsField = new QLineEditWithErrorMark();
+
+  m_wsField->lineEdit()->setValidator(
+      new IntervalListValidator(this, m_wsIndexIntervals));
+  m_wsBox->add(m_wsMessage);
+  m_wsBox->add(m_wsField);
+  m_outer->addItem(m_wsBox);
+
+  connect(m_wsField->lineEdit(), SIGNAL(textEdited(const QString &)), this,
+          SLOT(editedWsField()));
+}
+
+/**
+ * Set up Spectra box UI
+ */
+void MantidWSIndexWidget::initSpectraBox() {
+  m_spectraBox = new QVBoxLayout;
+  m_spectraMessage =
+      new QLabel(tr("Enter Spectra IDs: " + m_spectraIdIntervals.toQString()));
+  m_spectraField = new QLineEditWithErrorMark();
+  m_orMessage = new QLabel(tr("<br>Or"));
+
+  m_spectraField->lineEdit()->setValidator(
+      new IntervalListValidator(this, m_spectraIdIntervals));
+  m_spectraBox->add(m_spectraMessage);
+  m_spectraBox->add(m_spectraField);
+  m_spectraBox->add(m_orMessage);
+
+  if (usingSpectraIDs())
+    m_outer->addItem(m_spectraBox);
+
+  connect(m_spectraField->lineEdit(), SIGNAL(textEdited(const QString &)), this,
+          SLOT(editedSpectraField()));
+}
+
+/**
+ * Set up Options boxes UI
+ */
+void MantidWSIndexWidget::initOptionsBoxes() {
+  m_optionsBox = new QHBoxLayout;
+  m_waterfallOpt = new QCheckBox("Waterfall Plot");
+  if (m_waterfall)
+    m_optionsBox->add(m_waterfallOpt);
+  else
+    m_waterfallOpt->setChecked(true);
+
+  m_outer->addItem(m_optionsBox);
+}
+
+/**
+* Check to see if *all* workspaces have a spectrum axis.
+* If even one does not have a spectra axis, then we wont
+* ask the user to enter spectra IDs - only workspace indices.
+*/
+void MantidWSIndexWidget::checkForSpectraAxes() {
+  QList<QString>::const_iterator it = m_wsNames.constBegin();
+  m_spectra = true;
+
+  for (; it != m_wsNames.constEnd(); ++it) {
+    Mantid::API::MatrixWorkspace_const_sptr ws =
+        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(
+                (*it).toStdString()));
+    if (NULL == ws)
+      continue;
+    bool hasSpectra = false;
+    for (int i = 0; i < ws->axes(); i++) {
+      if (ws->getAxis(i)->isSpectra())
+        hasSpectra = true;
+    }
+    if (hasSpectra == false) {
+      m_spectra = false;
+      break;
+    }
+  }
+}
+
+/**
+ * Get the available interval for each of the workspaces, and then
+ * present the user with interval which is the INTERSECTION of each of
+ * those intervals.
+ */
+void MantidWSIndexWidget::generateWsIndexIntervals() {
+  QList<QString>::const_iterator it = m_wsNames.constBegin();
+
+  // Cycle through the workspaces ...
+  for (; it != m_wsNames.constEnd(); ++it) {
+    Mantid::API::MatrixWorkspace_const_sptr ws =
+        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(
+                (*it).toStdString()));
+    if (NULL == ws)
+      continue;
+
+    const int endWs = static_cast<int>(ws->getNumberHistograms() -
+                                       1); //= static_cast<int> (end->first);
+
+    Interval interval(0, endWs);
+    // If no interval has been added yet, just add it ...
+    if (it == m_wsNames.constBegin())
+      m_wsIndexIntervals.addInterval(interval);
+    // ... else set the list as the intersection of what's already there
+    // and what has just been added.
+    else
+      m_wsIndexIntervals.setIntervalList(
+          IntervalList::intersect(m_wsIndexIntervals, interval));
+  }
+}
+
+/**
+ * Get available intervals for spectra IDs
+ */
+void MantidWSIndexWidget::generateSpectraIdIntervals() {
+  bool firstWs = true;
+  foreach (const QString wsName, m_wsNames) {
+    Mantid::API::MatrixWorkspace_const_sptr ws =
+        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(
+                wsName.toStdString()));
+    if (!ws)
+      continue; // Belt and braces.
+
+    const Mantid::spec2index_map spec2index =
+        ws->getSpectrumToWorkspaceIndexMap();
+
+    IntervalList spectraIntervalList;
+    for (auto pair = spec2index.begin(); pair != spec2index.end(); ++pair) {
+      spectraIntervalList.addInterval(static_cast<int>(pair->first));
+    }
+
+    if (firstWs) {
+      m_spectraIdIntervals = spectraIntervalList;
+      firstWs = false;
+    } else {
+      m_spectraIdIntervals.setIntervalList(
+          IntervalList::intersect(m_spectraIdIntervals, spectraIntervalList));
+    }
+  }
+}
+
+/**
+ * Whether widget is using spectra IDs or workspace indices
+ * @returns True if using spectra IDs
+ */
+bool MantidWSIndexWidget::usingSpectraIDs() const {
+  return m_spectra && m_spectraIdIntervals.getList().size() > 0;
+}
+
+//----------------------------------
 // MantidWSIndexDialog public methods
 //----------------------------------
 /**
@@ -22,136 +337,62 @@
  * @param flags :: Window flags that are passed the the QDialog constructor
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: If true the waterfall checkbox is created
+ * @param showPlotAll :: If true the "Plot all" button is created
  */
-MantidWSIndexDialog::MantidWSIndexDialog(MantidUI* mui, Qt::WFlags flags, QList<QString> wsNames, const bool showWaterfallOption) 
-  : QDialog(mui->appWindow(), flags), 
-  m_mantidUI(mui),
-  m_spectra(false),
-  m_waterfall(showWaterfallOption),
-  m_wsNames(wsNames),
-  m_wsIndexIntervals(),
-  m_spectraIdIntervals(),
-  m_wsIndexChoice(), 
-  m_spectraIdChoice()
-{
-  checkForSpectraAxes();
-
-  // Generate the intervals allowed to be plotted by the user.
-  generateWsIndexIntervals();
-  if(m_spectra)
-  {
-    generateSpectraIdIntervals();
-  }
+MantidWSIndexDialog::MantidWSIndexDialog(MantidUI *mui, Qt::WFlags flags,
+                                         QList<QString> wsNames,
+                                         const bool showWaterfallOption,
+                                         const bool showPlotAll)
+    : QDialog(mui->appWindow(), flags),
+      m_widget(this, flags, wsNames, showWaterfallOption), m_mantidUI(mui),
+      m_plotAll(showPlotAll) {
   // Set up UI.
   init();
 }
 
-MantidWSIndexDialog::UserInput MantidWSIndexDialog::getSelections() const
-{
-  UserInput options;
-  options.plots = getPlots();
-  options.waterfall = waterfallPlotRequested();
-  return options;
+/**
+ * Returns the user-selected options
+ * @returns Struct containing user options
+ */
+MantidWSIndexWidget::UserInput MantidWSIndexDialog::getSelections() const {
+  return m_widget.getSelections();
 }
 
-QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
-{
-  // Map of workspace names to set of indices to be plotted.
-  QMultiMap<QString,std::set<int> > plots;
+/**
+ * Returns the user-selected plots from the widget
+ * @returns Plots selected by user
+ */
+QMultiMap<QString, std::set<int>> MantidWSIndexDialog::getPlots() const {
 
-  // If the user typed in the wsField ...
-  if(m_wsIndexChoice.getList().size() > 0)
-  {
-    
-    for(int i = 0; i < m_wsNames.size(); i++)
-    {
-      std::set<int> intSet = m_wsIndexChoice.getIntSet();
-      plots.insert(m_wsNames[i],intSet);
-    }
-  }
-  // Else if the user typed in the spectraField ...
-  else if(m_spectraIdChoice.getList().size() > 0)
-  {
-    for(int i = 0; i < m_wsNames.size(); i++)
-    {
-      // Convert the spectra choices of the user into workspace indices for us to use.
-      Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_wsNames[i].toStdString()));
-      if ( NULL == ws ) continue;
-
-      const Mantid::spec2index_map spec2index = ws->getSpectrumToWorkspaceIndexMap();
-
-      std::set<int> origSet = m_spectraIdChoice.getIntSet();
-      std::set<int>::iterator it = origSet.begin();
-      std::set<int> convertedSet;
-
-      for( ; it != origSet.end(); ++it)
-      {
-        int origInt = (*it);
-        int convertedInt = static_cast<int>(spec2index.find(origInt)->second);
-        convertedSet.insert(convertedInt);
-      }
-
-      plots.insert(m_wsNames[i],convertedSet);
-    }
-  }
-
-  return plots;
+  return m_widget.getPlots();
 }
 
-bool MantidWSIndexDialog::waterfallPlotRequested() const
-{
-  return m_waterfallOpt->isChecked();
+/**
+ * Whether the user checked the "waterfall" box
+ * @returns True if waterfall plot selected
+ */
+bool MantidWSIndexDialog::waterfallPlotRequested() const {
+  return m_widget.waterfallPlotRequested();
 }
 
 //----------------------------------
 // MantidWSIndexDialog private slots
 //----------------------------------
-void MantidWSIndexDialog::plot()
-{    
-  int npos = 0;
-  QString wsText = m_wsField->lineEdit()->text();
-  QString spectraTest = m_spectraField->lineEdit()->text();
-  QValidator::State wsState = m_wsField->lineEdit()->validator()->validate(wsText, npos);
-  QValidator::State spectraState = m_spectraField->lineEdit()->validator()->validate(spectraTest, npos);
-  
-  // If the user typed in the wsField ...
-  if(wsState == QValidator::Acceptable)
-  {
-    m_wsIndexChoice.addIntervals(m_wsField->lineEdit()->text());
+/**
+ * Called when OK button pressed
+ */
+void MantidWSIndexDialog::plot() {
+  if (m_widget.plotRequested()) {
     accept();
-  }
-  // Else if the user typed in the spectraField ...
-  else if(spectraState == QValidator::Acceptable)
-  {
-    m_spectraIdChoice.addIntervals(m_spectraField->lineEdit()->text());
-    accept();
-  }else{
-    QString error_message("Invalid input. It is not in the range available"); 
-    if (!wsText.isEmpty())
-      m_wsField->setError(error_message); 
-    if (!spectraTest.isEmpty())
-      m_spectraField->setError(error_message); 
   }
 }
 
-void MantidWSIndexDialog::plotAll()
-{
-  m_wsIndexChoice = m_wsIndexIntervals;
+/**
+ * Called when "Plot all" button pressed
+ */
+void MantidWSIndexDialog::plotAll() {
+  m_widget.plotAllRequested();
   accept();
-}
-
-void MantidWSIndexDialog::editedWsField()
-{
-  if(usingSpectraIDs()) {
-    m_spectraField->lineEdit()->clear();
-    m_spectraField->setError(""); 
-  }
-}
-
-void MantidWSIndexDialog::editedSpectraField()
-{
-  m_wsField->lineEdit()->clear();
-  m_wsField->setError(""); 
 }
 
 //----------------------------------
@@ -162,55 +403,9 @@ void MantidWSIndexDialog::init()
   m_outer = new QVBoxLayout;
 
   setWindowTitle(tr("MantidPlot"));
-  initSpectraBox();
-  initWorkspaceBox();
-  initOptionsBoxes();
+  m_outer->insertWidget(1, &m_widget);
   initButtons();
   setLayout(m_outer);
-}
-
-void MantidWSIndexDialog::initWorkspaceBox()
-{
-  m_wsBox = new QVBoxLayout;
-  m_wsMessage = new QLabel(tr("Enter Workspace Indices: " + m_wsIndexIntervals.toQString()));
-  m_wsField = new QLineEditWithErrorMark();
-
-  m_wsField->lineEdit()->setValidator(new IntervalListValidator(this, m_wsIndexIntervals));
-  m_wsBox->add(m_wsMessage);
-  m_wsBox->add(m_wsField);
-  m_outer->addItem(m_wsBox);
-
-  connect(m_wsField->lineEdit(), SIGNAL(textEdited(const QString &)), this, SLOT(editedWsField()));
-}
-
-void MantidWSIndexDialog::initSpectraBox()
-{
-  m_spectraBox = new QVBoxLayout;
-  m_spectraMessage = new QLabel(tr("Enter Spectra IDs: " + m_spectraIdIntervals.toQString()));
-  m_spectraField = new QLineEditWithErrorMark();
-  m_orMessage = new QLabel(tr("<br>Or"));
-
-  m_spectraField->lineEdit()->setValidator(new IntervalListValidator(this, m_spectraIdIntervals));
-  m_spectraBox->add(m_spectraMessage);
-  m_spectraBox->add(m_spectraField);
-  m_spectraBox->add(m_orMessage);
-  
-  if( usingSpectraIDs() )
-    m_outer->addItem(m_spectraBox);
-
-  connect(m_spectraField->lineEdit(), SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
-}
-
-void MantidWSIndexDialog::initOptionsBoxes()
-{
-  m_optionsBox = new QHBoxLayout;
-  m_waterfallOpt = new QCheckBox("Waterfall Plot");
-  if(m_waterfall)
-    m_optionsBox->add(m_waterfallOpt);
-  else
-    m_waterfallOpt->setChecked(true);
-
-  m_outer->addItem(m_optionsBox);
 }
 
 void MantidWSIndexDialog::initButtons()
@@ -223,98 +418,15 @@ void MantidWSIndexDialog::initButtons()
 
   m_buttonBox->addWidget(m_okButton);
   m_buttonBox->addWidget(m_cancelButton);
-  m_buttonBox->addWidget(m_plotAllButton);
+  if (m_plotAll)
+    m_buttonBox->addWidget(m_plotAllButton);
 
   m_outer->addItem(m_buttonBox);
 
   connect(m_okButton, SIGNAL(clicked()), this, SLOT(plot()));
   connect(m_cancelButton, SIGNAL(clicked()), this, SLOT(close()));
-  connect(m_plotAllButton, SIGNAL(clicked()), this, SLOT(plotAll()));
-}
-
-void MantidWSIndexDialog::checkForSpectraAxes()
-{
-  // Check to see if *all* workspaces have a spectrum axis.
-  // If even one does not have a spectra axis, then we wont
-  // ask the user to enter spectra IDs - only workspace indices.
-  QList<QString>::const_iterator it = m_wsNames.constBegin();
-  m_spectra = true;
-
-  for ( ; it != m_wsNames.constEnd(); ++it )
-  {
-    Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve((*it).toStdString()));
-    if ( NULL == ws ) continue;
-    bool hasSpectra = false;
-    for(int i = 0; i < ws->axes(); i++)
-    {
-      if(ws->getAxis(i)->isSpectra()) 
-        hasSpectra = true;
-    }
-    if(hasSpectra == false)
-    {
-      m_spectra = false;
-      break;
-    }
-  }
-}
-
-void MantidWSIndexDialog::generateWsIndexIntervals()
-{
-  // Get the available interval for each of the workspaces, and then
-  // present the user with interval which is the INTERSECTION of each of
-  // those intervals.
-  QList<QString>::const_iterator it = m_wsNames.constBegin();
-  
-  // Cycle through the workspaces ...
-  for ( ; it != m_wsNames.constEnd(); ++it )
-  {
-    Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve((*it).toStdString()));
-    if ( NULL == ws ) continue;
-    
-    const int endWs = static_cast<int>(ws->getNumberHistograms() - 1);//= static_cast<int> (end->first);
-
-    Interval interval(0,endWs);
-    // If no interval has been added yet, just add it ...
-    if(it == m_wsNames.constBegin())
-      m_wsIndexIntervals.addInterval(interval);
-    // ... else set the list as the intersection of what's already there
-    // and what has just been added.
-    else
-      m_wsIndexIntervals.setIntervalList(IntervalList::intersect(m_wsIndexIntervals,interval));
-  }
-}
-
-void MantidWSIndexDialog::generateSpectraIdIntervals()
-{
-  bool firstWs = true;
-  foreach( const QString wsName, m_wsNames )
-  {
-    Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
-    if( !ws ) continue; // Belt and braces.
-
-    const Mantid::spec2index_map spec2index = ws->getSpectrumToWorkspaceIndexMap();
-
-    IntervalList spectraIntervalList;
-    for( auto pair = spec2index.begin(); pair != spec2index.end(); ++pair )
-    {
-      spectraIntervalList.addInterval(static_cast<int>(pair->first));
-    }
-
-    if( firstWs )
-    {
-      m_spectraIdIntervals = spectraIntervalList;
-      firstWs = false;
-    }
-    else
-    {
-      m_spectraIdIntervals.setIntervalList(IntervalList::intersect(m_spectraIdIntervals, spectraIntervalList));
-    }
-  }
-}
-
-bool MantidWSIndexDialog::usingSpectraIDs() const
-{
-  return m_spectra && m_spectraIdIntervals.getList().size() > 0;
+  if (m_plotAll)
+    connect(m_plotAllButton, SIGNAL(clicked()), this, SLOT(plotAll()));
 }
 
 //----------------------------------
@@ -779,29 +891,29 @@ QValidator::State IntervalListValidator::validate(QString &input, int &pos) cons
   return QValidator::Invalid;
 }
 
-
-
 //////////////////////////////////////
 // QLineEditWithErrorMark
 //////////////////////////////////////
-MantidWSIndexDialog::QLineEditWithErrorMark::QLineEditWithErrorMark(QWidget * parent): QWidget(parent){
-  QGridLayout * layout = new QGridLayout(); 
-  _lineEdit = new QLineEdit(); 
+MantidWSIndexWidget::QLineEditWithErrorMark::QLineEditWithErrorMark(
+    QWidget *parent)
+    : QWidget(parent) {
+  QGridLayout *layout = new QGridLayout();
+  _lineEdit = new QLineEdit();
   m_validLbl = new QLabel("*"); // make it red
-  QPalette pal = m_validLbl->palette(); 
-  pal.setColor(QPalette::WindowText, Qt::darkRed); 
-  m_validLbl->setPalette(pal); 
-  layout->addWidget(_lineEdit,0,0); 
-  layout->addWidget(m_validLbl,0,1);
+  QPalette pal = m_validLbl->palette();
+  pal.setColor(QPalette::WindowText, Qt::darkRed);
+  m_validLbl->setPalette(pal);
+  layout->addWidget(_lineEdit, 0, 0);
+  layout->addWidget(m_validLbl, 0, 1);
   m_validLbl->setVisible(false);
   setLayout(layout);
 }
 
-void MantidWSIndexDialog::QLineEditWithErrorMark::setError(QString error){
-  if(error.isEmpty()){
-    m_validLbl->setVisible(false); 
-  }else{
-    m_validLbl->setVisible(true); 
-    m_validLbl->setToolTip(error.trimmed()); 
+void MantidWSIndexWidget::QLineEditWithErrorMark::setError(QString error) {
+  if (error.isEmpty()) {
+    m_validLbl->setVisible(false);
+  } else {
+    m_validLbl->setVisible(true);
+    m_validLbl->setToolTip(error.trimmed());
   }
 }

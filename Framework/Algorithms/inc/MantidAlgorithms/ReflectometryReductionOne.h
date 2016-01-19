@@ -109,6 +109,9 @@ private:
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
                           API::MatrixWorkspace_const_sptr ws2,
                           const bool severe = false);
+  /// returns angle for source rotation
+  double getAngleForSourceRotation(API::MatrixWorkspace_sptr toConvert,
+                                   double thetaOut);
 };
 
 } // namespace Algorithms

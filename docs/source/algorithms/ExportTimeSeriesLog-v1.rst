@@ -11,6 +11,17 @@ Description
 
 Export a sample log, which is of type TimeSeriesProperty, in a Workspace to a MatrixWorkspace.
 
+The output workspace can be either a MatrixWorkspace or an EventWorkspace.
+If the output workspace is choosen to be an EventWorkspace, there are some limitations to it.
+
+Output TimeSeries Log to MatrixWorkspace
+########################################
+
+The output MatrixWorkspace has one spectrum.  
+X-vector and Y-vector have the same size, which is the size of exported TimeSeriesProperty.
+
+The unit of X-vector is either *second* or *nano second*.
+
 Output TimeSeries Log As Events
 ###############################
 
@@ -18,6 +29,12 @@ The log values can be exported as a set of events.
 Each entry in the time series log will be converted to an event, , whose TOF are the log times.
 It is helpful if the log series has large number of entries.
 User should rebin the EventWorkspace afterwards.
+
+Limitation
+++++++++++
+
+The time of each event in the output EventWorkspace is same as log time.
+It is not affected by the specified unit of time for the output.
 
 
 Usage

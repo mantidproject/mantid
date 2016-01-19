@@ -8,6 +8,7 @@
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include <vtkNew.h>
 
 namespace Mantid
 {
@@ -56,7 +57,8 @@ namespace Mantid
       virtual ~vtkMDHistoLineFactory();
 
       /// Factory Method.
-      virtual vtkDataSet* create(ProgressAction& progressUpdating) const;
+      virtual vtkSmartPointer<vtkDataSet>
+      create(ProgressAction &progressUpdating) const;
 
       virtual void initialize(Mantid::API::Workspace_sptr);
 

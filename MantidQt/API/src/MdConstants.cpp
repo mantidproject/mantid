@@ -37,6 +37,7 @@ namespace MantidQt
       m_defaultBackgroundColor = QColor(84,89,109);
 
       // Populate the optional color maps
+      m_vsiColorMaps.append("Viridis (matplotlib)");
       m_vsiColorMaps.append("Cool to Warm");
       m_vsiColorMaps.append("Blue to Red Rainbow");
       m_vsiColorMaps.append("Red to Blue Rainbow");
