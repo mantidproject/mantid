@@ -40,10 +40,11 @@ class EnggDiffWorker : public QObject {
 public:
   /// for calibration
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outFilename,
-                 const std::string &vanNo, const std::string &ceriaNo)
+                 const std::string &vanNo, const std::string &ceriaNo,
+                 const std::string &specNos)
       : m_pres(pres), m_outFilenames(), m_outCalibFilename(outFilename),
-        m_vanNo(vanNo), m_ceriaNo(ceriaNo), m_banks(), m_bin(.0),
-        m_nperiods(0) {}
+        m_vanNo(vanNo), m_ceriaNo(ceriaNo), m_CalibSpecIDs(specNos), m_banks(),
+        m_bin(.0), m_nperiods(0) {}
 
   /// for focusing
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outDir,
@@ -73,7 +74,8 @@ private slots:
    * signal.
    */
   void calibrate() {
-    m_pres->doNewCalibration(m_outCalibFilename, m_vanNo, m_ceriaNo);
+    m_pres->doNewCalibration(m_outCalibFilename, m_vanNo, m_ceriaNo,
+                             m_CalibSpecIDs);
     emit finished();
   }
 
@@ -110,6 +112,8 @@ private:
   /// parameters for calibration
   const std::vector<std::string> m_outFilenames;
   const std::string m_outCalibFilename, m_vanNo, m_ceriaNo;
+  // parameters for specific types of calibration: "cropped"
+  const std::string m_CalibSpecIDs;
   /// sample run to process
   const std::string m_runNo;
   // sample multi-run to process

@@ -27,7 +27,7 @@ Axis *TextAxis::clone(const MatrixWorkspace *const parentWorkspace) {
 Axis *TextAxis::clone(const std::size_t length,
                       const MatrixWorkspace *const parentWorkspace) {
   UNUSED_ARG(parentWorkspace)
-  TextAxis *newAxis = new TextAxis(*this);
+  auto newAxis = new TextAxis(*this);
   newAxis->m_values.clear();
   newAxis->m_values.resize(length);
   return newAxis;

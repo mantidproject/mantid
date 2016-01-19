@@ -251,7 +251,7 @@ void FakeMD::addFakeRandomData(const std::vector<double> &params,
           "UniformParams: min must be < max for all dimensions.");
 
     boost::uniform_real<double> u(min, max); // Range
-    gen_t *gen = new gen_t(rng, u);
+    auto gen = new gen_t(rng, u);
     gens[d] = gen;
   }
 

@@ -43,6 +43,7 @@ digraph ReflectometryReductionOne {
   subgraph processes {
     $process_style
     directBeamNorm  [label="Perform Direct\nBeam Normalisation"]
+    rotateSource       [label="Rotate Source by ThetaIn"]
   }
 
   subgraph values {
@@ -91,6 +92,7 @@ digraph ReflectometryReductionOne {
   checkCorDetPos    -> specRefPosCor    [label="Yes"]
   checkCorDetPos    -> outputWorkspaceWL[label="No"]
   specRefPosCor     -> outputWorkspaceWL
-  outputWorkspaceWL -> convertToMT
+  outputWorkspaceWL -> rotateSource
+  rotateSource        -> convertToMT
   convertToMT       -> outputWorkspaceMT
 }

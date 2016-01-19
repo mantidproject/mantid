@@ -94,6 +94,9 @@ void export_FunctionFactory() {
       .def("createFunction", &FunctionFactoryImpl::createFunction,
            (arg("self"), arg("type")),
            "Return a pointer to the requested function")
+      .def("createInitialized", &FunctionFactoryImpl::createInitialized,
+           (arg("self"), arg("init_expr")),
+           "Return a pointer to the requested function")
       .def("subscribe", &subscribe, (arg("self"), arg("object")),
            "Register a Python class derived from IFunction into the factory")
       .def("unsubscribe", &FunctionFactoryImpl::unsubscribe,

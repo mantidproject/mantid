@@ -515,7 +515,7 @@ void FilterEvents::createOutputWorkspaces() {
 
   // Determine the minimum group index number
   int minwsgroup = INT_MAX;
-  for (set<int>::iterator groupit = m_workGroupIndexes.begin();
+  for (auto groupit = m_workGroupIndexes.begin();
        groupit != m_workGroupIndexes.end(); ++groupit) {
     int wsgroup = *groupit;
     if (wsgroup < minwsgroup && wsgroup >= 0)

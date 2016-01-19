@@ -26,8 +26,7 @@ namespace Policies = Mantid::PythonInterface::Policies;
 boost::python::object getHistoriesAsList(WorkspaceHistory &self) {
   boost::python::list names;
   const auto histories = self.getAlgorithmHistories();
-  Mantid::API::AlgorithmHistories::const_iterator itr = histories.begin();
-  for (; itr != histories.end(); ++itr) {
+  for (auto itr = histories.cbegin(); itr != histories.cend(); ++itr) {
     names.append(*itr);
   }
   return names;

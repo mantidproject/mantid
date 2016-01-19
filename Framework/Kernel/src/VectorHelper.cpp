@@ -262,20 +262,18 @@ void rebinHistogram(const std::vector<double> &xold,
   size_t iold = 0, inew = 0; // iold/inew is the bin number under consideration
                              // (counting from 1, so index+1)
   if (xnew.front() > xold.front()) {
-    std::vector<double>::const_iterator it =
-        std::upper_bound(xold.begin(), xold.end(), xnew.front());
+    auto it = std::upper_bound(xold.cbegin(), xold.cend(), xnew.front());
     if (it == xold.end())
       return;
     //      throw std::runtime_error("No overlap: max of X-old < min of X-new");
     iold = std::distance(xold.begin(), it) -
            1; // Old bin to start at (counting from 0)
   } else {
-    std::vector<double>::const_iterator it =
-        std::upper_bound(xnew.begin(), xnew.end(), xold.front());
-    if (it == xnew.end())
+    auto it = std::upper_bound(xnew.cbegin(), xnew.cend(), xold.front());
+    if (it == xnew.cend())
       return;
     //      throw std::runtime_error("No overlap: max of X-new < min of X-old");
-    inew = std::distance(xnew.begin(), it) -
+    inew = std::distance(xnew.cbegin(), it) -
            1; // New bin to start at (counting from 0)
   }
 
@@ -410,9 +408,9 @@ void convertToBinBoundary(const std::vector<double> &bin_centers,
 */
 bool isConstantValue(const std::vector<double> &arra) {
   // make comparisons with the first value
-  std::vector<double>::const_iterator i = arra.begin();
+  auto i = arra.cbegin();
 
-  if (i == arra.end()) { // empty array
+  if (i == arra.cend()) { // empty array
     return true;
   }
 
@@ -421,14 +419,14 @@ bool isConstantValue(const std::vector<double> &arra) {
   // != nan, deal with these first
   for (; val != val;) {
     ++i;
-    if (i == arra.end()) {
+    if (i == arra.cend()) {
       // all values are contant (NAN)
       return true;
     }
     val = *i;
   }
 
-  for (; i != arra.end(); ++i) {
+  for (; i != arra.cend(); ++i) {
     if (*i != val) {
       return false;
     }
@@ -453,8 +451,7 @@ std::vector<NumT> splitStringIntoVector(std::string listString) {
   split_vector_type strs;
 
   boost::split(strs, listString, boost::is_any_of(", "));
-  for (std::vector<std::string>::iterator it = strs.begin(); it != strs.end();
-       ++it) {
+  for (auto it = strs.begin(); it != strs.end(); ++it) {
     if (!it->empty()) {
       // String not empty
       std::stringstream oneNumber(*it);

@@ -632,7 +632,7 @@ int Rule::getKeyList(std::vector<int> &IList) const
     }
   }
   std::sort(IList.begin(), IList.end());
-  std::vector<int>::iterator px = std::unique(IList.begin(), IList.end());
+  auto px = std::unique(IList.begin(), IList.end());
   IList.erase(px, IList.end());
   return static_cast<int>(IList.size());
 }

@@ -152,8 +152,8 @@ void MuonRemoveExpDecay::exec() {
 }
 
 /** This method corrects the errors for one spectra.
- *	 The muon lifetime is in microseconds not seconds, i.e. 2.2 rather than
- *0.0000022.
+ *	 The muon lifetime is in microseconds not seconds, i.e. 2.1969811 rather
+ *   than 0.0000021969811.
  *   This is because the data is in microseconds.
  *   @param inX ::  The X vector
  *   @param inY ::  The input error vector
@@ -176,8 +176,8 @@ void MuonRemoveExpDecay::removeDecayError(const MantidVec &inX,
 }
 
 /** This method corrects the data for one spectra.
- *	 The muon lifetime is in microseconds not seconds, i.e. 2.2 rather than
- *0.0000022.
+ *	 The muon lifetime is in microseconds not seconds, i.e. 2.1969811 rather
+ *   than 0.0000021969811.
  *   This is because the data is in microseconds.
  *   @param inX ::  The X vector
  *   @param inY ::  The input data vector

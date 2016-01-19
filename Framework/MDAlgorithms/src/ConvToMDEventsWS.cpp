@@ -47,11 +47,7 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
   const typename std::vector<T> &events = *events_ptr;
 
   // Iterators to start/end
-  typename std::vector<T>::const_iterator it = events.begin();
-  typename std::vector<T>::const_iterator it_end = events.end();
-
-  it = events.begin();
-  for (; it != it_end; it++) {
+  for (auto it = events.cbegin(); it != events.cend(); it++) {
     double val = localUnitConv.convertUnits(it->tof());
     double signal = it->weight();
     double errorSq = it->errorSquared();

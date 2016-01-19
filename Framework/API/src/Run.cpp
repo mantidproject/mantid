@@ -398,9 +398,7 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
-  std::map<std::string, std::string>::iterator it = entries.begin();
-  std::map<std::string, std::string>::iterator it_end = entries.end();
-  for (; it != it_end; ++it) {
+  for (auto it = entries.begin(); it != entries.end(); ++it) {
     // Get the name/class pair
     const std::pair<std::string, std::string> &name_class = *it;
     if (name_class.second == "NXpositioner") {
@@ -508,9 +506,7 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
   // get pointers to all the properties on the right-handside and prepare to
   // loop through them
   const std::vector<Property *> inc = toAdd.getProperties();
-  std::vector<Property *>::const_iterator end = inc.end();
-  for (std::vector<Property *>::const_iterator it = inc.begin(); it != end;
-       ++it) {
+  for (auto it = inc.cbegin(); it != inc.cend(); ++it) {
     const std::string rhs_name = (*it)->name();
     try {
       // now get pointers to the same properties on the left-handside

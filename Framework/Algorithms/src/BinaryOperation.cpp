@@ -1040,13 +1040,12 @@ BinaryOperation::buildBinaryOperationTable(
       // Didn't find it. Try to use the RHS map.
 
       // First, we have to get the (single) detector ID of the LHS
-      std::set<detid_t>::const_iterator lhsDets_it = lhsDets.begin();
+      auto lhsDets_it = lhsDets.cbegin();
       detid_t lhs_detector_ID = *lhsDets_it;
 
       // Now we use the RHS map to find it. This only works if both the lhs and
       // rhs have 1 detector per pixel
-      detid2index_map::const_iterator map_it =
-          rhs_det_to_wi.find(lhs_detector_ID);
+      auto map_it = rhs_det_to_wi.find(lhs_detector_ID);
       if (map_it != rhs_det_to_wi.end()) {
         rhsWI = map_it->second; // This is the workspace index in the RHS that
                                 // matched lhs_detector_ID

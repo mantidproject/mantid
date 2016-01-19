@@ -438,12 +438,10 @@ void ThermalNeutronBk2BkExpConvPVoigt::function(
 
   // calculate where to start calculating
   const double LEFT_VALUE = m_centre - RANGE;
-  vector<double>::const_iterator iter =
-      std::lower_bound(xValues.begin(), xValues.end(), LEFT_VALUE);
+  auto iter = std::lower_bound(xValues.begin(), xValues.end(), LEFT_VALUE);
 
   const double RIGHT_VALUE = m_centre + RANGE;
-  vector<double>::const_iterator iter_end =
-      std::lower_bound(iter, xValues.end(), RIGHT_VALUE);
+  auto iter_end = std::lower_bound(iter, xValues.end(), RIGHT_VALUE);
 
   // 2. Calcualte
   std::size_t pos(std::distance(xValues.begin(), iter)); // second loop variable

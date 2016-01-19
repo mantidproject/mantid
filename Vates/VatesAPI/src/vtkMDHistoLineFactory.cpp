@@ -5,7 +5,6 @@
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
-#include "vtkSmartPointer.h"
 #include "vtkLine.h"
 #include <vector>
 #include "MantidAPI/IMDWorkspace.h"
@@ -66,11 +65,11 @@ namespace Mantid
     @param progressUpdating: Reporting object to pass progress information up the stack.
     @return fully constructed vtkDataSet.
     */
-    vtkDataSet* vtkMDHistoLineFactory::create(ProgressAction& progressUpdating) const
-    {
-      vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 1>(m_workspace, progressUpdating);
-      if(product != NULL)
-      {
+    vtkSmartPointer<vtkDataSet>
+    vtkMDHistoLineFactory::create(ProgressAction &progressUpdating) const {
+      auto product = tryDelegatingCreation<MDHistoWorkspace, 1>(
+          m_workspace, progressUpdating);
+      if (product != nullptr) {
         return product;
       }
       else
@@ -86,10 +85,10 @@ namespace Mantid
         coord_t incrementX = (maxX - minX) / coord_t(nBinsX-1);
 
         const int imageSize = nBinsX;
-        vtkPoints *points = vtkPoints::New();
+        vtkNew<vtkPoints> points;
         points->Allocate(static_cast<int>(imageSize));
 
-        vtkFloatArray * signal = vtkFloatArray::New();
+        vtkNew<vtkFloatArray> signal;
         signal->Allocate(imageSize);
         signal->SetName(vtkDataSetFactory::ScalarName.c_str());
         signal->SetNumberOfComponents(1);
@@ -138,10 +137,10 @@ namespace Mantid
         points->Squeeze();
         signal->Squeeze();
 
-        vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+        auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
         visualDataSet->Allocate(imageSize);
-        visualDataSet->SetPoints(points);
-        visualDataSet->GetCellData()->SetScalars(signal);
+        visualDataSet->SetPoints(points.GetPointer());
+        visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
 
         for (int i = 0; i < nBinsX - 1; i++)
         {
@@ -156,19 +155,17 @@ namespace Mantid
           }
         }
 
-        points->Delete();
-        signal->Delete();
         visualDataSet->Squeeze();
 
         // Hedge against empty data sets
         if (visualDataSet->GetNumberOfPoints() <= 0)
         {
-          visualDataSet->Delete();
           vtkNullUnstructuredGrid nullGrid;
           visualDataSet = nullGrid.createNullData();
         }
 
-        return visualDataSet;
+        vtkSmartPointer<vtkDataSet> dataset = visualDataSet;
+        return dataset;
       }
     }
 

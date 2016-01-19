@@ -1,0 +1,61 @@
+digraph CreateMD {
+  label="CreateMD Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    DataSources
+    EFix
+    EMode
+    Alatt
+    Angdeg
+    u
+    v
+    Psi
+    Gl
+    Gs
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    convertToMD             [label="ConvertToMD v1"]
+    setGoniometer           [label="SetGoniometer v1"]
+    addSampleLogEFix        [label="AddSampleLog v1"]
+    addSampleLogGl          [label="AddSampleLog v1"]
+    addSampleLogGs          [label="AddSampleLog v1"]
+    addSampleLogPsi         [label="AddSampleLog v1"]
+    load                    [label="Load v1"]
+    setUB                   [label="SetUB v1"]
+    convertToMDMinMaxGlobal [label="ConvertToMDMinMaxGlobal v1"]
+    convertToMD             [label="ConvertToMD v1"]
+  }
+
+  Gl      ->  addSampleLogGl
+  Gs      ->  addSampleLogGs
+  EFix    ->  addSampleLogEFix
+  Psi     ->  addSampleLogPsi
+  
+  Alatt     ->    setUB
+  Angdeg    ->    setUB
+  u         ->    setUB
+  v         ->    setUB
+  
+  EMode ->    convertToMD
+  
+  EMode ->    convertToMDMinMaxGlobal
+
+  DataSources               ->  setUB           [label="if workspace"]
+  DataSources               ->  load            [label="if filename"]
+  load                      ->  setUB
+  setUB                     ->  setGoniometer
+  setGoniometer             ->  addSampleLogEFix
+  addSampleLogEFix          ->  addSampleLogGl
+  addSampleLogGl            ->  addSampleLogGs
+  addSampleLogGs            ->  addSampleLogPsi
+  addSampleLogPsi           ->  convertToMDMinMaxGlobal
+  convertToMDMinMaxGlobal   ->  convertToMD
+  convertToMD               ->  OutputWorkspace
+
+}
+

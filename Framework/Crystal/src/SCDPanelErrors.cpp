@@ -664,8 +664,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     AllBankNames.insert(m_peaks->getPeak(i).getBankName());
 
   Instrument_sptr instrNew = getNewInstrument(m_peaks->getPeak(0));
-  for (std::set<string>::iterator it = AllBankNames.begin();
-       it != AllBankNames.end(); ++it) {
+  for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
     std::string bankName = (*it);
     boost::shared_ptr<const IComponent> panel =
         instrNew->getComponentByName(bankName);
@@ -779,8 +778,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   for (size_t gr = 0; gr < Groups.size(); ++gr) {
     vector<string> banknames;
     boost::split(banknames, Groups[gr], boost::is_any_of("/"));
-    for (vector<string>::iterator it = banknames.begin(); it != banknames.end();
-         ++it)
+    for (auto it = banknames.begin(); it != banknames.end(); ++it)
       bankName2Group[(*it)] = gr;
   }
   // derivative formulas documentation

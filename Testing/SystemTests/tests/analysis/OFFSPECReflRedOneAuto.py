@@ -29,15 +29,15 @@ class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
 
         ivq_75_76, __ = Stitch1D(ivq_75, ivq_76, Params="1e-3")
         #pylint: disable=unused-variable
-        ivq_75_76_78, __ = Stitch1D(ivq_75_76, ivq_78, Params="0,1e-3,0.08")
+        ivq_75_76_78, __ = Stitch1D(ivq_75_76, ivq_78, Params="0,1e-3,0.165")
         return True
 
     def validate(self):
-        return ("ivq_75_76_78","OFFSPECReflRedOneAuto_good.nxs")
+        return ("ivq_75_76_78","OFFSPECReflRedOneAuto_good_v2.nxs")
 
     def requiredFiles(self):
         return ["OFFSPEC00027575.raw",
                 "OFFSPEC00027576.raw",
                 "OFFSPEC00027578.raw",
                 "OFFSPEC00027585.raw",
-                "OFFSPECReflRedOneAuto_good.nxs"]
+                "OFFSPECReflRedOneAuto_good_v2.nxs"]
