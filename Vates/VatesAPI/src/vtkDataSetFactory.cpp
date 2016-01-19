@@ -11,6 +11,23 @@ vtkDataSetFactory::vtkDataSetFactory() : m_useTransform(false), m_bCheckDimensio
 {
 }
 
+/**
+ * Checks the successor and throws if invalid.
+ * @throw std::runtime_error if types are the same
+ * @throw std::invalid_argument if successor is nullptr
+ */
+void vtkDataSetFactory::checkSuccessor() const {
+  if (m_successor) {
+    if (m_successor->getFactoryTypeName() == this->getFactoryTypeName()) {
+      throw std::runtime_error("Cannot assign a successor to vtkDataSetFactory "
+                               "with the same type as the present "
+                               "vtkDataSetFactory type.");
+    }
+  } else {
+    throw std::invalid_argument("Null pointer passed as successor");
+  }
+}
+
 /*
 Set a flag indicating whether dimensionality should be checked
 @param flag : TRUE to check dimensionality otherwise FALSE.
