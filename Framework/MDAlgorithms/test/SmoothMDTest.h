@@ -414,7 +414,8 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<int> widthVector(1, 3);
+    // widthVector is the FWHM of the Gaussian in pixels in each dimension
+    std::vector<int> widthVector(1, 1);
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", toSmooth);
     alg.setProperty("Function", "Gaussian");
@@ -430,8 +431,49 @@ public:
      1 - 1 - 1
     */
     for (size_t i = 0; i < out->getNPoints(); ++i) {
-      TS_ASSERT_EQUALS(1, out->getSignalAt(i));
-      TS_ASSERT_EQUALS(1, out->getErrorAt(i));
+      TS_ASSERT_DELTA(1.0, out->getSignalAt(i), 0.001);
+      TS_ASSERT_DELTA(1.0, out->getErrorAt(i), 0.001);
+    }
+  }
+
+  void test_simple_smooth_gaussian_3_pix_width() {
+    auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        0 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
+    toSmooth->setSignalAt(4, 1.0);
+
+    /*
+     2D MDHistoWorkspace Input
+
+     0 - 0 - 0
+     0 - 1 - 0
+     0 - 0 - 0
+    */
+
+    SmoothMD alg;
+    alg.setChild(true);
+    alg.initialize();
+    // widthVector is the FWHM of the Gaussian in pixels in each dimension
+    // This should result in a 3x3 kernel
+    std::vector<int> widthVector(1, 1);
+    alg.setProperty("WidthVector", widthVector);
+    alg.setProperty("InputWorkspace", toSmooth);
+    alg.setProperty("Function", "Gaussian");
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDHistoWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+
+    /*
+     2D MDHistoWorkspace Expected
+
+     0.182 - 0.117 - 0.182
+     0.117 - 0.748 - 0.117
+     0.182 - 0.117 - 0.182
+    */
+    std::vector<double> expected_signal{0.182, 0.117, 0.182, 0.117, 0.748,
+                                        0.117, 0.182, 0.117, 0.182};
+    for (size_t i = 0; i < out->getNPoints(); ++i) {
+      TS_ASSERT_DELTA(expected_signal[i], out->getSignalAt(i), 0.001);
+      TS_ASSERT_DELTA(1.0, out->getErrorAt(i), 0.001);
     }
   }
 };

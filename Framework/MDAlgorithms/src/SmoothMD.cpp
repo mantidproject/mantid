@@ -95,7 +95,7 @@ KernelVector gaussianKernel(const double fwhm) {
   KernelVector kernel_one_side;
   // Start from centre and calculate values going outwards until value < 0.02
   // Use erf to get the value of the Gaussian integrated over the width of the
-  // pixel, more accurate than just using centre value of pixel
+  // pixel, more accurate than just using centre value of pixel and erf is fast
   double pixel_value = std::erf(0.5 * sigma_factor) * sigma;
   int pixel_count = 0;
   while (pixel_value > 0.02) {
@@ -114,7 +114,35 @@ KernelVector gaussianKernel(const double fwhm) {
   std::copy(kernel_one_side.cbegin() + 1, kernel_one_side.cend(),
             kernel.begin() + kernel_one_side.size());
 
-  // Normalise the kernel so that sum of elements is unity
+  return normaliseKernel(kernel);
+}
+
+/*
+ * Normalise the kernel
+ * It is necessary to renormlise where the kernel overlaps edges of the
+ * workspace
+ * The contributing elements should sum to unity
+ */
+KernelVector renormaliseKernel(KernelVector kernel,
+                               std::vector<bool> validity) {
+
+  if (std::accumulate(validity.cbegin(), validity.cend(), 0.0) <
+      kernel.size()) {
+    // Use validity as a mask
+    for (size_t i = 0; i < kernel.size(); ++i) {
+      kernel[i] *= validity[i];
+    }
+
+    kernel = normaliseKernel(kernel);
+  }
+
+  return kernel;
+}
+
+/*
+ * Normalise the kernel so that sum of valid elements is unity
+ */
+KernelVector normaliseKernel(KernelVector kernel) {
   double sum_kernel_recip =
       1.0 / std::accumulate(kernel.cbegin(), kernel.cend(), 0.0);
   for (auto &pixel : kernel) {
@@ -250,9 +278,9 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 /**
  * Gaussian function smoothing.
  * The Gaussian function is linearly separable, allowing convolution
- * of a Gaussian kernel with the workspace to be carried out by a
- * convolution with a 1D Gaussian kernel in each dimension. This
- * calculation is less costly than using a multidimensional kernel.
+ * of a multidimensional Gaussian kernel with the workspace to be carried out by
+ * a convolution with a 1D Gaussian kernel in each dimension. This
+ * reduces the number of calculations overall.
  * @param toSmooth : Workspace to smooth
  * @param widthVector : Width vector
  * @param weightingWS : Weighting workspace (optional)
@@ -263,7 +291,92 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
                          const WidthVector &widthVector,
                          OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 
-  throw std::runtime_error("Function not yet implemented");
+  const bool useWeights = weightingWS.is_initialized();
+  uint64_t nPoints = toSmooth->getNPoints();
+  Progress progress(this, 0, 1, size_t(double(nPoints) * 1.1));
+  // Create the output workspace.
+  IMDHistoWorkspace_sptr outWS(toSmooth->clone().release());
+  progress.reportIncrement(
+      size_t(double(nPoints) * 0.1)); // Report ~10% progress
+
+  // Create a kernel for each dimension and
+  std::vector<KernelVector> gaussian_kernels;
+  gaussian_kernels.reserve(widthVector.size());
+  for (size_t dimension_number = 0; dimension_number < widthVector.size();
+       ++dimension_number) {
+    gaussian_kernels.push_back(gaussianKernel(widthVector[dimension_number]));
+  }
+
+  const int nThreads = Mantid::API::FrameworkManager::Instance()
+                           .getNumOMPThreads(); // NThreads to Request
+
+  auto iterators = toSmooth->createIterators(nThreads, NULL);
+
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int it = 0; it < int(iterators.size()); ++it) {
+
+    PARALLEL_START_INTERUPT_REGION
+    boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
+        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
+
+    if (!iterator) {
+      throw std::logic_error(
+          "Failed to cast IMDIterator to MDHistoWorkspaceIterator");
+    }
+
+    do {
+
+      // Gets linear index at current position
+      size_t iteratorIndex = iterator->getLinearIndex();
+
+      if (useWeights) {
+
+        // Check that we could measure here.
+        if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
+
+          outWS->setSignalAt(iteratorIndex,
+                             std::numeric_limits<double>::quiet_NaN());
+
+          outWS->setErrorSquaredAt(iteratorIndex,
+                                   std::numeric_limits<double>::quiet_NaN());
+
+          continue; // Skip we couldn't measure here.
+        }
+      }
+
+      // TODO calculate error
+      outWS->setErrorSquaredAt(iteratorIndex, 1.0);
+
+      for (size_t dimension_number = 0; dimension_number < widthVector.size();
+           ++dimension_number) {
+
+        std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity =
+            iterator->findNeighbourIndexesByWidth1D(
+                static_cast<int>(gaussian_kernels[dimension_number].size()),
+                static_cast<int>(dimension_number));
+        std::vector<size_t> neighbourIndexes = std::get<0>(indexesAndValidity);
+        std::vector<bool> indexValidity = std::get<1>(indexesAndValidity);
+        auto normalised_kernel = renormaliseKernel(
+            gaussian_kernels[dimension_number], indexValidity);
+
+        // Convolve signal with kernel
+        double sumSignal = 0;
+        for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
+          if (indexValidity[i]) {
+            sumSignal += outWS->getSignalAt(neighbourIndexes[i]) *
+                         normalised_kernel[i];
+          }
+        }
+        outWS->setSignalAt(iteratorIndex, sumSignal);
+      }
+      progress.report();
+
+    } while (iterator->next());
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+
+  return outWS;
 }
 
 //----------------------------------------------------------------------------------------------
