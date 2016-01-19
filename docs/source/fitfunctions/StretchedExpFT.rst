@@ -24,12 +24,13 @@ tau is expressed in nano-seconds.
 
 Usage
 -----
+.. include:: ../usagedata-note.txt
 
-**Example - Fit to a QENS signal
+**Example - Fit to a QENS signal:**
 
-The QENS signal is modeled by the convolution
-of a resolution function with elastic and StretchedExpFT components. Noise is
-modeled by a linear background:
+The QENS signal is modeled by the convolution of a resolution function
+with elastic and StretchedExpFT components.
+Noise is modeled by a linear background:
 
 $S(E) = R(E) \otimes (\alpha \delta(E) + StretchedExpFT(E) + (a+bE)$
 
@@ -41,6 +42,10 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
 
 .. testcode:: ExampleStretchedExpFT
 
+   # Load resolution function and scattered signal
+   resolution = LoadNexus(Filename="resolution_14955.nxs")
+   qens_data = LoadNexus(Filename="qens_data_14955.nxs")
+
    # This function_string is obtained by constructing the model
    # with the Fit Function window of MantidPlot, then
    # Setup--> Manage Setup --> Copy to Clipboard
@@ -50,15 +55,16 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
    function_string += "name=StretchedExpFT,height=0.1,tau=100,beta=0.98,origin=0));"
    function_string += "name=LinearBackground,A0=0,A1=0"
 
-   # Carry out the fit
+   # Carry out the fit. Produces workspaces  fit_results_Parameters,
+   #  fit_results_Workspace, and fit_results_NormalisedCovarianceMatrix.
    Fit(Function=function_string,
       InputWorkspace="qens_data",
       WorkspaceIndex=0,
       StartX=-0.15, EndX=0.15,
-      CreateOputput=1,
+      CreateOutput=1,
       Output="fit_results")
 
-   # Print parameters for StrechtedExpFT
+   # Collect and print parameters for StrechtedExpFT
    parameters_of_interest = ("tau", "beta")
    values_found = {}
    ws = mtd["fit_results_Parameters"]  # Workspace containing optimized parameters
@@ -68,16 +74,24 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
          if parameter in full_parameter_name:
             values_found[parameter] = ws.row(row_index)["Value"]
             break
-   print "The optimial parameters are tau={0:4.1f} and beta={1:4.2f}"\
+   print "The optimal parameters are tau={0:4.1f} and beta={1:4.2f}"\
       .format(values_found["tau"], values_found["beta"])
+
+.. testcleanup:: ExampleStretchedExpFT
+
+   DeleteWorkspace("resolution")
+   DeleteWorkspace("qens_data")
+   DeleteWorkspace("fit_results_Parameters")
+   DeleteWorkspace("fit_results_Workspace")
+   DeleteWorkspace("fit_results_NormalisedCovarianceMatrix")
 
 Output:
 
-.. testoutput::
+.. testoutput:: ExampleStretchedExpFT
 
-   The optimial parameters are tau=57.2 and beta=0.68
+   The optimal parameters are tau=57.2 and beta=0.68
 
 .. categories::
 
 .. sourcelink::
-   :python: Framework/PythonInterface/plugins/functions/StretchedExpFT.py
+   :py: Framework/PythonInterface/plugins/functions/StretchedExpFT.py
