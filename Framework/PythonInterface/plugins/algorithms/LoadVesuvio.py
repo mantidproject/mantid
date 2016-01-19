@@ -86,6 +86,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
     foil_thick = None
     mon_thick = None
     foil_out = None
+    raw_t = None
 
 #----------------------------------------------------------------------------------------
 
@@ -459,6 +460,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         # Cache delta_t values
         raw_t = first_ws.readX(0)
+        self.raw_t = raw_t
         delay = raw_t[1] - raw_t[0]
         # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
         raw_t = raw_t - delay
@@ -826,7 +828,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         else:
             raise RuntimeError("Unknown difference type requested: %d" % self._diff_opt)
 
-        self.foil_out.setX(wsindex, self.pt_times[:-1])
+        self.foil_out.setX(wsindex, self.raw_t[:-1])
 
 #----------------------------------------------------------------------------------------
 
