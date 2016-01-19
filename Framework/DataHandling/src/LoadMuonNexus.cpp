@@ -51,12 +51,12 @@ void LoadMuonNexus::init() {
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(1);
-  declareProperty("SpectrumMin", static_cast<int64_t>(EMPTY_INT()), mustBePositive,
-                  "Index number of the first spectrum to read\n"
-                  "(default 1)");
-  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()), mustBePositive,
-                  "Index of last spectrum to read\n"
-                  "(default the last spectrum)");
+  declareProperty("SpectrumMin", static_cast<int64_t>(EMPTY_INT()),
+                  mustBePositive, "Index number of the first spectrum to read\n"
+                                  "(default 1)");
+  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
+                  mustBePositive, "Index of last spectrum to read\n"
+                                  "(default the last spectrum)");
 
   declareProperty(new ArrayProperty<specid_t>("SpectrumList"),
                   "Array, or comma separated list, of indexes of spectra to\n"

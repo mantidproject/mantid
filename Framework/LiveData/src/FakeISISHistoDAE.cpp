@@ -170,7 +170,8 @@ public:
     comm.dims_array[0] = static_cast<int>(arr.size());
     strncpy(comm.command, "OK", sizeof(comm.command));
     socket().sendBytes(&comm, sizeof(comm));
-    socket().sendBytes(arr.data(), static_cast<int>(sizeof(float) * arr.size()));
+    socket().sendBytes(arr.data(),
+                       static_cast<int>(sizeof(float) * arr.size()));
   }
   /**
    * Send an array of int numbers

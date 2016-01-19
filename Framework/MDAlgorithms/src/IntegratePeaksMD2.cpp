@@ -766,7 +766,8 @@ void IntegratePeaksMD2::exec() {
 
 double f_eval2(double x, void *params) {
   boost::shared_ptr<const API::CompositeFunction> fun =
-      *reinterpret_cast<boost::shared_ptr<const API::CompositeFunction> *>(params);
+      *reinterpret_cast<boost::shared_ptr<const API::CompositeFunction> *>(
+          params);
   FunctionDomain1DVector domain(x);
   FunctionValues yval(domain);
   fun->function(domain, yval);

@@ -31,7 +31,8 @@ double readInstrumentParameter(const std::string &parameter,
  */
 int getDetectorFromPixel(const int &pixel_x, const int &pixel_y,
                          API::MatrixWorkspace_sptr dataWS) {
-  int ny_pixels = static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
+  int ny_pixels =
+      static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
   return ny_pixels * pixel_x + pixel_y;
 }
 

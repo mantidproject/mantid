@@ -406,8 +406,8 @@ double BivariateNormal::initCommon() {
   MantidVec Y = ws->dataY(2);
 
   if (NCells < 0) {
-    NCells =
-        static_cast<int>(std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size())));
+    NCells = static_cast<int>(
+        std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size())));
     CommonsOK = false;
   }
 
@@ -662,8 +662,8 @@ double BivariateNormal::initCoeff(const MantidVec &D, const MantidVec &X,
       uu = .01;
   }
 
-  NCells =
-      static_cast<int>(std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size())));
+  NCells = static_cast<int>(
+      std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size())));
   if (zeroDenom) {
     coefNorm = expCoeffx2 = expCoeffy2 = 1;
     expCoeffxy = 0;

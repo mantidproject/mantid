@@ -135,7 +135,8 @@ void PredictFractionalPeaks::exec() {
 
   int N = NPeaks;
   if (includePeaksInRange) {
-    N = static_cast<int>((Hmax - Hmin + 1) * (Kmax - Kmin + 1) * (Lmax - Lmin + 1) + .5);
+    N = static_cast<int>(
+        (Hmax - Hmin + 1) * (Kmax - Kmin + 1) * (Lmax - Lmin + 1) + .5);
     N = max<int>(100, N);
   }
   IPeak &peak0 = Peaks->getPeak(0);

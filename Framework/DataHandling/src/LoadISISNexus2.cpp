@@ -81,7 +81,8 @@ void LoadISISNexus2::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
   declareProperty("SpectrumMin", static_cast<int64_t>(0), mustBePositive);
-  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()), mustBePositive);
+  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
+                  mustBePositive);
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "

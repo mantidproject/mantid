@@ -43,7 +43,8 @@ void export_UnitCell() {
           (arg("self"), arg("_a"), arg("_b"), arg("_c"))))
       .def(init<double, double, double, double, double, double, optional<int>>(
           (arg("self"), arg("_a"), arg("_b"), arg("_c"), arg("_alpha"),
-           arg("_beta"), arg("_gamma"), arg("Unit") = static_cast<int>(angDegrees))))
+           arg("_beta"), arg("_gamma"),
+           arg("Unit") = static_cast<int>(angDegrees))))
       .def("a", (double (UnitCell::*)() const) & UnitCell::a, arg("self"))
       .def("a1", (double (UnitCell::*)() const) & UnitCell::a1, arg("self"))
       .def("a2", (double (UnitCell::*)() const) & UnitCell::a2, arg("self"))
@@ -116,22 +117,26 @@ void export_UnitCell() {
                                       double, int const)) &
                       UnitCell::set,
            (arg("self"), arg("_a"), arg("_b"), arg("_c"), arg("_alpha"),
-            arg("_beta"), arg("_gamma"), arg("Unit") = static_cast<int>(angDegrees)))
+            arg("_beta"), arg("_gamma"),
+            arg("Unit") = static_cast<int>(angDegrees)))
       .def("seta", (void (UnitCell::*)(double))(&UnitCell::seta),
            (arg("self"), arg("_a")))
       .def("setalpha",
            (void (UnitCell::*)(double, int const))(&UnitCell::setalpha),
-           (arg("self"), arg("_alpha"), arg("Unit") = static_cast<int>(angDegrees)))
+           (arg("self"), arg("_alpha"),
+            arg("Unit") = static_cast<int>(angDegrees)))
       .def("setb", (void (UnitCell::*)(double))(&UnitCell::setb),
            (arg("self"), arg("_b")))
       .def("setbeta",
            (void (UnitCell::*)(double, int const))(&UnitCell::setbeta),
-           (arg("self"), arg("_beta"), arg("Unit") = static_cast<int>(angDegrees)))
+           (arg("self"), arg("_beta"),
+            arg("Unit") = static_cast<int>(angDegrees)))
       .def("setc", (void (UnitCell::*)(double))(&UnitCell::setc),
            (arg("self"), arg("_c")))
       .def("setgamma",
            (void (UnitCell::*)(double, int const))(&UnitCell::setgamma),
-           (arg("self"), arg("_gamma"), arg("Unit") = static_cast<int>(angDegrees)))
+           (arg("self"), arg("_gamma"),
+            arg("Unit") = static_cast<int>(angDegrees)))
       .def("setError", (void (UnitCell::*)(double, double, double, double,
                                            double, double, int const)) &
                            UnitCell::setError,
@@ -142,17 +147,20 @@ void export_UnitCell() {
            (arg("self"), arg("_aerr")))
       .def("setErroralpha",
            (void (UnitCell::*)(double, int const))(&UnitCell::setErroralpha),
-           (arg("self"), arg("_alphaerr"), arg("Unit") = static_cast<int>(angDegrees)))
+           (arg("self"), arg("_alphaerr"),
+            arg("Unit") = static_cast<int>(angDegrees)))
       .def("setErrorb", (void (UnitCell::*)(double))(&UnitCell::setErrorb),
            (arg("self"), arg("_berr")))
       .def("setErrorbeta",
            (void (UnitCell::*)(double, int const))(&UnitCell::setErrorbeta),
-           (arg("self"), arg("_betaerr"), arg("Unit") = static_cast<int>(angDegrees)))
+           (arg("self"), arg("_betaerr"),
+            arg("Unit") = static_cast<int>(angDegrees)))
       .def("setErrorc", (void (UnitCell::*)(double))(&UnitCell::setErrorc),
            (arg("self"), arg("_cerr")))
       .def("setErrorgamma",
            (void (UnitCell::*)(double, int const))(&UnitCell::setErrorgamma),
-           (arg("self"), arg("_gammaerr"), arg("Unit") = static_cast<int>(angDegrees)))
+           (arg("self"), arg("_gammaerr"),
+            arg("Unit") = static_cast<int>(angDegrees)))
       .def("volume", (double (UnitCell::*)() const) & UnitCell::volume,
            arg("self"))
       .def("getG", &UnitCell::getG, arg("self"), return_readonly_numpy())

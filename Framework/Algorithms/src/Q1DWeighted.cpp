@@ -207,8 +207,9 @@ void Q1DWeighted::exec() {
         double sub_y = pixelSizeY *
                        ((isub % nSubPixels) - (nSubPixels - 1.0) / 2.0) /
                        nSubPixels;
-        double sub_x = pixelSizeX * (floor(static_cast<double>(isub) / nSubPixels) -
-                                     (nSubPixels - 1.0) / 2.0) /
+        double sub_x = pixelSizeX *
+                       (floor(static_cast<double>(isub) / nSubPixels) -
+                        (nSubPixels - 1.0) / 2.0) /
                        nSubPixels;
 
         // Find the position of this sub-pixel in real space and compute Q
@@ -226,12 +227,13 @@ void Q1DWeighted::exec() {
           if (binParams[1] > 0.0) {
             iq = static_cast<int>(floor((q - binParams[0]) / binParams[1]));
           } else {
-            iq = static_cast<int>(floor(log(q / binParams[0]) / log(1.0 - binParams[1])));
+            iq = static_cast<int>(
+                floor(log(q / binParams[0]) / log(1.0 - binParams[1])));
           }
           // If we got a more complicated binning, find the q bin the slow way
         } else {
-          for (int i_qbin = 0; i_qbin < static_cast<int>(XOut.access().size()) - 1;
-               i_qbin++) {
+          for (int i_qbin = 0;
+               i_qbin < static_cast<int>(XOut.access().size()) - 1; i_qbin++) {
             if (q >= XOut.access()[i_qbin] && q < XOut.access()[(i_qbin + 1)]) {
               iq = i_qbin;
               break;

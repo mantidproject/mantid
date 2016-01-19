@@ -164,7 +164,8 @@ MantidVec createXAxis(MatrixWorkspace *const ws, const double gradX,
   xAxis->title() = caption;
   MantidVec xAxisVec(nBins);
   for (size_t i = 0; i < nBins; ++i) {
-    double qxIncrement = ((1 / gradX) * (static_cast<double>(i) + 1) + cxToUnit);
+    double qxIncrement =
+        ((1 / gradX) * (static_cast<double>(i) + 1) + cxToUnit);
     xAxis->setValue(i, qxIncrement);
     xAxisVec[i] = qxIncrement;
   }
@@ -196,7 +197,8 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
   verticalAxis->title() = caption;
   for (size_t i = 0; i < nBins; ++i) {
     ws->setX(i, xAxisVec);
-    double qzIncrement = ((1 / gradY) * (static_cast<double>(i) + 1) + cyToUnit);
+    double qzIncrement =
+        ((1 / gradY) * (static_cast<double>(i) + 1) + cyToUnit);
     verticalAxis->setValue(i, qzIncrement);
   }
 }

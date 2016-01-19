@@ -212,12 +212,14 @@ void SNSLiveEventDataListener::run() {
     // First thing to do is send a hello packet
     uint32_t helloPkt[5] = {4, ADARA::PacketType::CLIENT_HELLO_V0, 0, 0, 0};
     Poco::Timestamp now;
-    uint32_t now_usec = static_cast<uint32_t>(now.epochMicroseconds() - now.epochTime());
-    helloPkt[2] = static_cast<uint32_t>(now.epochTime() - ADARA::EPICS_EPOCH_OFFSET);
+    uint32_t now_usec =
+        static_cast<uint32_t>(now.epochMicroseconds() - now.epochTime());
+    helloPkt[2] =
+        static_cast<uint32_t>(now.epochTime() - ADARA::EPICS_EPOCH_OFFSET);
     helloPkt[3] = now_usec * 1000;
-    helloPkt[4] =
-        static_cast<uint32_t>(m_startTime.totalNanoseconds() /
-                   1000000000); // divide by a billion to get time in seconds
+    helloPkt[4] = static_cast<uint32_t>(
+        m_startTime.totalNanoseconds() /
+        1000000000); // divide by a billion to get time in seconds
 
     if (m_socket.sendBytes(helloPkt, sizeof(helloPkt)) != sizeof(helloPkt))
     // Yes, I know a send isn't guaranteed to send the whole buffer in one call.
@@ -485,8 +487,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
                     << std::endl;
     } else {
       std::string monName("monitor");
-      monName +=
-          static_cast<char>(monitorID + 48); // The +48 converts to the ASCII character
+      monName += static_cast<char>(
+          monitorID + 48); // The +48 converts to the ASCII character
       monName += "_counts";
       // Note: The monitor name must exactly match one of the entries in the
       // ADDABLE

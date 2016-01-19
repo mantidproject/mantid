@@ -678,9 +678,10 @@ void GetEi2::integrate(double &integral_val, double &integral_err,
   MantidVec::size_type nx(x.size());
   if (mu < ml) {
     // special case of no data points in the integration range
-    unsigned int ilo = std::max<unsigned int>(static_cast<unsigned int>(ml) - 1, 0);
-    unsigned int ihi =
-        std::min<unsigned int>(static_cast<unsigned int>(mu) + 1, static_cast<unsigned int>(nx));
+    unsigned int ilo =
+        std::max<unsigned int>(static_cast<unsigned int>(ml) - 1, 0);
+    unsigned int ihi = std::min<unsigned int>(static_cast<unsigned int>(mu) + 1,
+                                              static_cast<unsigned int>(nx));
     double fraction = (xmax - xmin) / (x[ihi] - x[ilo]);
     integral_val =
         0.5 * fraction * (s[ihi] * ((xmax - x[ilo]) + (xmin - x[ilo])) +

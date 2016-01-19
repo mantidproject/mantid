@@ -253,7 +253,8 @@ void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp,
     throw std::invalid_argument("Not enough peaks to fit ");
   }
 
-  if ((m_startX > static_cast<int>(nData) - 1) || (m_endX > static_cast<int>(nData) - 1)) {
+  if ((m_startX > static_cast<int>(nData) - 1) ||
+      (m_endX > static_cast<int>(nData) - 1)) {
     throw std::invalid_argument(X_START + " and " + X_END +
                                 " attributes are out of range");
   }
@@ -824,7 +825,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     size_t StartPos =
         parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xoffset");
 
-    for (size_t param = StartPos; param <= StartPos + static_cast<size_t>(2); ++param) {
+    for (size_t param = StartPos; param <= StartPos + static_cast<size_t>(2);
+         ++param) {
 
       V3D parxyz(0, 0, 0);
       parxyz[param - StartPos] = 1.;

@@ -235,8 +235,8 @@ void LoadNexusProcessed::init() {
 
   declareProperty("SpectrumMin", static_cast<int64_t>(1), mustBePositive,
                   "Number of first spectrum to read.");
-  declareProperty("SpectrumMax", static_cast<int64_t>(Mantid::EMPTY_INT()), mustBePositive,
-                  "Number of last spectrum to read.");
+  declareProperty("SpectrumMax", static_cast<int64_t>(Mantid::EMPTY_INT()),
+                  mustBePositive, "Number of last spectrum to read.");
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"),
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,

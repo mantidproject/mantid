@@ -338,10 +338,10 @@ void EQSANSLoad::moveToBeamCenter() {
   }
 
   // Check that the center of the detector really is at (0,0)
-  int nx_pixels = static_cast<int>(dataWS->getInstrument()->getNumberParameter(
-      "number-of-x-pixels")[0]);
-  int ny_pixels = static_cast<int>(dataWS->getInstrument()->getNumberParameter(
-      "number-of-y-pixels")[0]);
+  int nx_pixels = static_cast<int>(
+      dataWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
+  int ny_pixels = static_cast<int>(
+      dataWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
   V3D pixel_first = dataWS->getInstrument()->getDetector(0)->getPos();
   int detIDx = EQSANSInstrument::getDetectorFromPixel(nx_pixels - 1, 0, dataWS);
   int detIDy = EQSANSInstrument::getDetectorFromPixel(0, ny_pixels - 1, dataWS);

@@ -527,8 +527,8 @@ void RadiusSum::numBinsIsReasonable() {
                     << "It corresponds to a separation smaller than the image "
                        "resolution (detector size). "
                     << "A resonable number is smaller than "
-                    << static_cast<int>((max_radius - min_radius) / min_bin_size)
-                    << std::endl;
+                    << static_cast<int>((max_radius - min_radius) /
+                                        min_bin_size) << std::endl;
 }
 
 double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {

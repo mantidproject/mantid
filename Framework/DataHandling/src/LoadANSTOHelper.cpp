@@ -176,8 +176,8 @@ template <size_t N> int64_t octalToInt(char(&str)[N]) {
 
 // construction
 File::File(const std::string &path)
-    : m_good(true), m_file(path.c_str()), m_selected(static_cast<size_t>(-1)), m_position(0),
-      m_size(0), m_bufferPosition(0), m_bufferAvailable(0) {
+    : m_good(true), m_file(path.c_str()), m_selected(static_cast<size_t>(-1)),
+      m_position(0), m_size(0), m_bufferPosition(0), m_bufferAvailable(0) {
 
   m_good = m_file.handle() != NULL;
   while (m_good) {
@@ -290,8 +290,8 @@ size_t File::read(void *dst, size_t size) {
   }
 
   while (size != 0) {
-    auto bytesToRead =
-        static_cast<uint32_t>(std::min<size_t>(size, std::numeric_limits<uint32_t>::max()));
+    auto bytesToRead = static_cast<uint32_t>(
+        std::min<size_t>(size, std::numeric_limits<uint32_t>::max()));
 
     m_good &= m_file.read(ptr, bytesToRead);
     if (!m_good)
@@ -317,8 +317,8 @@ int File::read_byte() {
     m_bufferPosition = 0;
     m_bufferAvailable = 0;
 
-    uint32_t size =
-        static_cast<uint32_t>(std::min<int64_t>(sizeof(m_buffer), m_size - m_position));
+    uint32_t size = static_cast<uint32_t>(
+        std::min<int64_t>(sizeof(m_buffer), m_size - m_position));
     m_good &= m_file.read(m_buffer, size);
 
     if (m_good)

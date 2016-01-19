@@ -75,7 +75,8 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   //===================================
 
   def("createPeaksWorkspace",
-      reinterpret_cast<PeaksWorkspace_sptr (*)(const int)>(createPeaksWorkspace),
+      reinterpret_cast<PeaksWorkspace_sptr (*)(const int)>(
+          createPeaksWorkspace),
       return_value_policy<AsType<Workspace_sptr>>());
   def("createPeaksWorkspace",
       (PeaksWorkspace_sptr (*)(const int, const bool))createPeaksWorkspace,

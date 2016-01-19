@@ -92,7 +92,8 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
   mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
 
   if (KERN_SUCCESS != task_info(mach_task_self(), TASK_BASIC_INFO,
-                                reinterpret_cast<task_info_t>(&t_info), &t_info_count)) {
+                                reinterpret_cast<task_info_t>(&t_info),
+                                &t_info_count)) {
     return;
   }
   // Need to find out the system page size for next part
@@ -243,7 +244,8 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
   vm_statistics vmStats;
   mach_msg_type_number_t count;
   count = sizeof(vm_statistics) / sizeof(natural_t);
-  err = host_statistics(port, HOST_VM_INFO, reinterpret_cast<host_info_t>(&vmStats), &count);
+  err = host_statistics(port, HOST_VM_INFO,
+                        reinterpret_cast<host_info_t>(&vmStats), &count);
   if (err)
     g_log.warning("Unable to obtain memory statistics for this Mac.");
   sys_avail = pageSize * (vmStats.free_count + vmStats.inactive_count) / 1024;
@@ -552,7 +554,8 @@ size_t MemoryStats::getCurrentRSS() const {
   /* OSX ------------------------------------------------------ */
   struct mach_task_basic_info info;
   mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
-  if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&info),
+  if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
+                reinterpret_cast<task_info_t>(&info),
                 &infoCount) != KERN_SUCCESS)
     return static_cast<size_t>(0L); /* Can't access? */
   return static_cast<size_t>(info.resident_size);

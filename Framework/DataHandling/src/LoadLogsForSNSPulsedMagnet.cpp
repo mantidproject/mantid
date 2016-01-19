@@ -159,8 +159,10 @@ void LoadLogsForSNSPulsedMagnet::ParseDelayTimeLogFile() {
 
       } else {
         // New format
-        logFile.read(reinterpret_cast<char *>(&chopperindex), sizeof(unsigned int));
-        logFile.read(reinterpret_cast<char *>(&delaytime), sizeof(unsigned int));
+        logFile.read(reinterpret_cast<char *>(&chopperindex),
+                     sizeof(unsigned int));
+        logFile.read(reinterpret_cast<char *>(&delaytime),
+                     sizeof(unsigned int));
       }
       if (delaytime != 0) {
         g_log.debug() << "Pulse Index =  " << index

@@ -336,7 +336,8 @@ boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
   if (xml) {
     vector<int> detIDs = instrument->getDetectorIDs();
     MatrixWorkspace_sptr wsM = WorkspaceFactory::Instance().create(
-        "Workspace2D", detIDs.size(), static_cast<size_t>(100), static_cast<size_t>(100));
+        "Workspace2D", detIDs.size(), static_cast<size_t>(100),
+        static_cast<size_t>(100));
 
     Workspace2D_sptr ws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(wsM);
@@ -901,7 +902,8 @@ void SCDCalibratePanels::exec() {
 
       //--------------------- Create Result Table Workspace-------------------
       this->progress(.92, "Creating Results table");
-      createResultWorkspace(static_cast<int>(Groups.size()), iGr + 1, names, params, errs);
+      createResultWorkspace(static_cast<int>(Groups.size()), iGr + 1, names,
+                            params, errs);
 
       //---------------- Create new instrument with ------------------------
       //--------------new parameters to SAVE to files---------------------

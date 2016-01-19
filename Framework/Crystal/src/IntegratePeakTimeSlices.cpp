@@ -289,11 +289,11 @@ void IntegratePeakTimeSlices::exec() {
 
     neighborRadius =
         min<double>(MaxNeighborhoodRadius, NeighborhoodRadiusDivPeakRadius * R);
-    int Nneighbors =
-        static_cast<int>(neighborRadius * neighborRadius / m_cellWidth / m_cellHeight * 4);
+    int Nneighbors = static_cast<int>(neighborRadius * neighborRadius /
+                                      m_cellWidth / m_cellHeight * 4);
 
-    Nneighbors =
-        min<int>(Nneighbors, static_cast<int>(inpWkSpace->getNumberHistograms()) - 2);
+    Nneighbors = min<int>(
+        Nneighbors, static_cast<int>(inpWkSpace->getNumberHistograms()) - 2);
     delete[] m_NeighborIDs;
 
     m_NeighborIDs = new int[Nneighbors + 2];
@@ -319,7 +319,8 @@ void IntegratePeakTimeSlices::exec() {
         if (dir < 0 && t == 0) {
           Centy = Row0;
           Centx = Col0;
-        } else if (Chan + dir * t < 0 || Chan + dir * t >= static_cast<int>(X.size()))
+        } else if (Chan + dir * t < 0 ||
+                   Chan + dir * t >= static_cast<int>(X.size()))
           done = true;
         else {
 
@@ -401,7 +402,8 @@ void IntegratePeakTimeSlices::exec() {
           if (TabWS->rowCount() > 0)
             LastTableRow = 0;
 
-        } else if (Chan + dir * chan < 0 || Chan + dir * chan >= static_cast<int>(X.size()))
+        } else if (Chan + dir * chan < 0 ||
+                   Chan + dir * chan >= static_cast<int>(X.size()))
           done = true;
         else {
 
@@ -539,7 +541,8 @@ void IntegratePeakTimeSlices::exec() {
 
             if (!done && isGoodFit(params, errs, names, chisqOverDOF)) {
 
-              if (LastTableRow >= 0 && LastTableRow < static_cast<int>(TabWS->rowCount()))
+              if (LastTableRow >= 0 &&
+                  LastTableRow < static_cast<int>(TabWS->rowCount()))
                 TabWS->removeRow(LastTableRow);
               else
                 LastTableRow = -1;
@@ -560,10 +563,10 @@ void IntegratePeakTimeSlices::exec() {
               double TotSliceVariance =
                   m_AttributeValues->StatBaseVals(IVariance);
 
-              updatePeakInformation(params, errs, names, TotVariance,
-                                    TotIntensity, TotSliceIntensity,
-                                    TotSliceVariance, chisqOverDOF,
-                                    static_cast<int>(m_AttributeValues->StatBaseVals(ISS1)));
+              updatePeakInformation(
+                  params, errs, names, TotVariance, TotIntensity,
+                  TotSliceIntensity, TotSliceVariance, chisqOverDOF,
+                  static_cast<int>(m_AttributeValues->StatBaseVals(ISS1)));
 
               // lastAttributeList= m_AttributeValues;
 
@@ -1728,7 +1731,8 @@ int IntegratePeakTimeSlices::find(Mantid::MantidVec const &X,
     return static_cast<int>(X.size()) - 1;
 
   for (size_t i = 0; i < (size_t)X.size() - static_cast<size_t>(1); i++) {
-    if (sgn * (time - X[i]) >= 0 && sgn * (X[i + static_cast<size_t>(1)] - time) >= 0)
+    if (sgn * (time - X[i]) >= 0 &&
+        sgn * (X[i + static_cast<size_t>(1)] - time) >= 0)
       return static_cast<int>(i);
   }
 

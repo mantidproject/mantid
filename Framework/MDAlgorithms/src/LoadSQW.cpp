@@ -723,12 +723,14 @@ void dataPositions::parse_sqw_main_header(
   std::vector<char> data_buffer(4 * 3);
   dataStream.read(&data_buffer[0], 4);
 
-  unsigned int file_name_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_name_length =
+      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
   // skip main header file name
   dataStream.seekg(file_name_length, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int file_path_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_path_length =
+      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
 
   // skip main header file path
   dataStream.seekg(file_path_length, std::ios_base::cur);
@@ -774,12 +776,14 @@ std::streamoff dataPositions::parse_component_header(
 
   dataStream.read(&data_buffer[0], 4);
 
-  unsigned int file_name_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_name_length =
+      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
   // skip component header file name
   dataStream.seekg(file_name_length, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int file_path_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_path_length =
+      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
 
   // skip component header file path
   dataStream.seekg(file_path_length, std::ios_base::cur);
@@ -825,12 +829,14 @@ dataPositions::parse_sqw_detpar(std::ifstream &dataStream,
   dataStream.seekg(shift, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int file_name_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_name_length =
+      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
   // skip component header file name
   dataStream.seekg(file_name_length, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int file_path_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_path_length =
+      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
   // skip component header file path
   dataStream.seekg(file_path_length, std::ios_base::cur);
 
@@ -860,18 +866,21 @@ void dataPositions::parse_data_locations(std::ifstream &dataStream,
 
   dataStream.read(&data_buffer[0], 4);
 
-  unsigned int file_name_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_name_length =
+      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
   // skip dummy file name
   dataStream.seekg(file_name_length, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int file_path_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_path_length =
+      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
 
   // skip dummy file path
   dataStream.seekg(file_path_length, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int data_title_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int data_title_length =
+      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
 
   // skip data title
   dataStream.seekg(data_title_length, std::ios_base::cur);
@@ -906,7 +915,8 @@ void dataPositions::parse_data_locations(std::ifstream &dataStream,
     for (unsigned int i = 0; i < npax; i++) {
       dataStream.read(&data_buffer[0], 4);
 
-      unsigned int nAxisPoints = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+      unsigned int nAxisPoints =
+          *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
       nBins[i] = nAxisPoints - 1;
       mdImageSize *= nBins[i];
       dataStream.seekg(nAxisPoints * 4, std::ios_base::cur);
@@ -956,7 +966,8 @@ void dataPositions::parse_data_locations(std::ifstream &dataStream,
   // skip redundant field and read nPix (number of data points)
   dataStream.read(&data_buffer[0], 12);
 
-  nDataPoints = static_cast<size_t>(*(reinterpret_cast<uint64_t *>(&data_buffer[4])));
+  nDataPoints =
+      static_cast<size_t>(*(reinterpret_cast<uint64_t *>(&data_buffer[4])));
   this->pix_start = dataStream.tellg();
 }
 

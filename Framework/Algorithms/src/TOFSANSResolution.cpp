@@ -173,7 +173,8 @@ void TOFSANSResolution::exec() {
       if (binParams[1] > 0.0) {
         iq = static_cast<int>(floor((q - binParams[0]) / binParams[1]));
       } else {
-        iq = static_cast<int>(floor(log(q / binParams[0]) / log(1.0 - binParams[1])));
+        iq = static_cast<int>(
+            floor(log(q / binParams[0]) / log(1.0 - binParams[1])));
       }
 
       const double L2 = scattered_flight_path.norm();

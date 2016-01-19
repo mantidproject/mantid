@@ -349,10 +349,11 @@ void TOPAZLiveEventDataListener::run() {
                     << num_pulse_ids << " pulses  " << num_events << " events"
                     << std::endl;
 
-      PULSE_ID_PTR pid = reinterpret_cast<PULSE_ID_PTR>(m_udpBuf + sizeof(COMMAND_HEADER));
-      NEUTRON_EVENT_PTR events =
-          reinterpret_cast<NEUTRON_EVENT_PTR>(m_udpBuf + sizeof(COMMAND_HEADER) +
-                              (num_pulse_ids * sizeof(PULSE_ID)));
+      PULSE_ID_PTR pid =
+          reinterpret_cast<PULSE_ID_PTR>(m_udpBuf + sizeof(COMMAND_HEADER));
+      NEUTRON_EVENT_PTR events = reinterpret_cast<NEUTRON_EVENT_PTR>(
+          m_udpBuf + sizeof(COMMAND_HEADER) +
+          (num_pulse_ids * sizeof(PULSE_ID)));
 
       for (unsigned i = 0; i < num_pulse_ids; i++) {
         g_log.debug() << "Pulse ID: " << pid[i].pulseIDhigh << ", "

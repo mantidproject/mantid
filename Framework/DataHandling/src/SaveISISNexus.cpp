@@ -444,7 +444,8 @@ void SaveISISNexus::write_isis_vms_compat() {
   std::string user_info(160, ' ');
   if (m_isisRaw->u_len > 0) {
     std::copy(reinterpret_cast<char *>(&m_isisRaw->user),
-              reinterpret_cast<char *>(&m_isisRaw->user) + m_isisRaw->u_len, user_info.begin());
+              reinterpret_cast<char *>(&m_isisRaw->user) + m_isisRaw->u_len,
+              user_info.begin());
   }
   saveString("USER", user_info);
   saveInt("VER1", &m_isisRaw->frmt_ver_no);

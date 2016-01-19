@@ -106,21 +106,25 @@ struct FitData {
 */
 static int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
 
-  for (size_t i = 0, j = 0; i < (reinterpret_cast<struct FitData *>(params))->active.size(); i++)
+  for (size_t i = 0, j = 0;
+       i < (reinterpret_cast<struct FitData *>(params))->active.size(); i++)
     if ((reinterpret_cast<struct FitData *>(params))->active[i])
-      (reinterpret_cast<struct FitData *>(params))->parameters[i] = x->data[j++];
+      (reinterpret_cast<struct FitData *>(params))->parameters[i] =
+          x->data[j++];
 
   (reinterpret_cast<struct FitData *>(params))
-      ->fit1D->function((reinterpret_cast<struct FitData *>(params))->parameters, f->data,
-                        (reinterpret_cast<struct FitData *>(params))->X,
-                        (reinterpret_cast<struct FitData *>(params))->n);
+      ->fit1D->function(
+          (reinterpret_cast<struct FitData *>(params))->parameters, f->data,
+          (reinterpret_cast<struct FitData *>(params))->X,
+          (reinterpret_cast<struct FitData *>(params))->n);
 
   // function() return calculated data values. Need to convert this values into
   // calculated-observed devided by error values used by GSL
 
   for (size_t i = 0; i < (reinterpret_cast<struct FitData *>(params))->n; i++)
-    f->data[i] = (f->data[i] - (reinterpret_cast<struct FitData *>(params))->Y[i]) /
-                 (reinterpret_cast<struct FitData *>(params))->sigmaData[i];
+    f->data[i] =
+        (f->data[i] - (reinterpret_cast<struct FitData *>(params))->Y[i]) /
+        (reinterpret_cast<struct FitData *>(params))->sigmaData[i];
 
   return GSL_SUCCESS;
 }
@@ -133,26 +137,30 @@ static int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
 */
 static int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
-  for (size_t i = 0, j = 0; i < (reinterpret_cast<struct FitData *>(params))->active.size();
-       i++) {
+  for (size_t i = 0, j = 0;
+       i < (reinterpret_cast<struct FitData *>(params))->active.size(); i++) {
     if ((reinterpret_cast<struct FitData *>(params))->active[i])
-      (reinterpret_cast<struct FitData *>(params))->parameters[i] = x->data[j++];
+      (reinterpret_cast<struct FitData *>(params))->parameters[i] =
+          x->data[j++];
   }
 
   (reinterpret_cast<struct FitData *>(params))->J.setJ(J);
 
   (reinterpret_cast<struct FitData *>(params))
-      ->fit1D->functionDeriv((reinterpret_cast<struct FitData *>(params))->parameters,
-                             &(reinterpret_cast<struct FitData *>(params))->J,
-                             (reinterpret_cast<struct FitData *>(params))->X,
-                             (reinterpret_cast<struct FitData *>(params))->n);
+      ->fit1D->functionDeriv(
+          (reinterpret_cast<struct FitData *>(params))->parameters,
+          &(reinterpret_cast<struct FitData *>(params))->J,
+          (reinterpret_cast<struct FitData *>(params))->X,
+          (reinterpret_cast<struct FitData *>(params))->n);
 
   // functionDeriv() return derivatives of calculated data values. Need to
   // convert this values into
   // derivatives of calculated-observed devided by error values used by GSL
 
-  for (size_t iY = 0; iY < (reinterpret_cast<struct FitData *>(params))->n; iY++)
-    for (size_t iP = 0; iP < (reinterpret_cast<struct FitData *>(params))->p; iP++)
+  for (size_t iY = 0; iY < (reinterpret_cast<struct FitData *>(params))->n;
+       iY++)
+    for (size_t iP = 0; iP < (reinterpret_cast<struct FitData *>(params))->p;
+         iP++)
       J->data[iY * (reinterpret_cast<struct FitData *>(params))->p + iP] /=
           (reinterpret_cast<struct FitData *>(params))->sigmaData[iY];
 
@@ -182,27 +190,33 @@ static int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f,
 */
 static double gsl_costFunction(const gsl_vector *x, void *params) {
 
-  double *l_forSimplexLSwrap = (reinterpret_cast<struct FitData *>(params))->forSimplexLSwrap;
+  double *l_forSimplexLSwrap =
+      (reinterpret_cast<struct FitData *>(params))->forSimplexLSwrap;
 
-  for (size_t i = 0, j = 0; i < (reinterpret_cast<struct FitData *>(params))->active.size(); i++)
+  for (size_t i = 0, j = 0;
+       i < (reinterpret_cast<struct FitData *>(params))->active.size(); i++)
     if ((reinterpret_cast<struct FitData *>(params))->active[i])
-      (reinterpret_cast<struct FitData *>(params))->parameters[i] = x->data[j++];
+      (reinterpret_cast<struct FitData *>(params))->parameters[i] =
+          x->data[j++];
 
   (reinterpret_cast<struct FitData *>(params))
-      ->fit1D->function((reinterpret_cast<struct FitData *>(params))->parameters,
-                        l_forSimplexLSwrap, (reinterpret_cast<struct FitData *>(params))->X,
-                        (reinterpret_cast<struct FitData *>(params))->n);
+      ->fit1D->function(
+          (reinterpret_cast<struct FitData *>(params))->parameters,
+          l_forSimplexLSwrap, (reinterpret_cast<struct FitData *>(params))->X,
+          (reinterpret_cast<struct FitData *>(params))->n);
 
   // function() return calculated data values. Need to convert this values into
   // calculated-observed devided by error values used by GSL
   for (size_t i = 0; i < (reinterpret_cast<struct FitData *>(params))->n; i++)
     l_forSimplexLSwrap[i] =
-        (l_forSimplexLSwrap[i] - (reinterpret_cast<struct FitData *>(params))->Y[i]) /
+        (l_forSimplexLSwrap[i] -
+         (reinterpret_cast<struct FitData *>(params))->Y[i]) /
         (reinterpret_cast<struct FitData *>(params))->sigmaData[i];
 
   double retVal = 0.0;
 
-  for (unsigned int i = 0; i < (reinterpret_cast<struct FitData *>(params))->n; i++)
+  for (unsigned int i = 0; i < (reinterpret_cast<struct FitData *>(params))->n;
+       i++)
     retVal += l_forSimplexLSwrap[i] * l_forSimplexLSwrap[i];
 
   return retVal;

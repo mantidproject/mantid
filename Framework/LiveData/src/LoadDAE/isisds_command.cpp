@@ -146,14 +146,16 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     return INVALID_SOCKET;
   }
 
-  int zero = setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, reinterpret_cast<char *>(&setkeepalive),
-                        sizeof(setkeepalive));
+  int zero =
+      setsockopt(s, SOL_SOCKET, SO_KEEPALIVE,
+                 reinterpret_cast<char *>(&setkeepalive), sizeof(setkeepalive));
   if (0 != zero) {
     closesocket(s);
     return INVALID_SOCKET;
   }
 
-  if (connect(s, reinterpret_cast<struct sockaddr *>(&address), sizeof(address)) == -1) {
+  if (connect(s, reinterpret_cast<struct sockaddr *>(&address),
+              sizeof(address)) == -1) {
     closesocket(s);
     return INVALID_SOCKET;
   }
@@ -172,8 +174,8 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     return INVALID_SOCKET;
   }
   comm = NULL;
-  if (isisds_recv_command_alloc(s, &comm, reinterpret_cast<void **>(&comm_data), &data_type,
-                                dims_array, &ndims) <= 0) {
+  if (isisds_recv_command_alloc(s, &comm, reinterpret_cast<void **>(&comm_data),
+                                &data_type, dims_array, &ndims) <= 0) {
     closesocket(s);
     free(comm);
     return INVALID_SOCKET;
@@ -197,7 +199,8 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
  */
 int isisds_recv_open(SOCKET s, ISISDSAccessMode *access_type) {
   isisds_open_t op;
-  if ((recv_all(s, reinterpret_cast<char *>(&op), sizeof(op), 0)) != sizeof(op)) {
+  if ((recv_all(s, reinterpret_cast<char *>(&op), sizeof(op), 0)) !=
+      sizeof(op)) {
     return -1;
   }
   if (op.len != sizeof(op)) {

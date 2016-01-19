@@ -45,7 +45,8 @@ template <> struct fill_vector<std::string> {
     using namespace boost::python;
     PyObject *flattened = PyArray_Ravel(arr, NPY_CORDER);
     object nparray = object(handle<>(flattened));
-    const Py_ssize_t nelements = PyArray_Size(reinterpret_cast<PyObject *>(arr));
+    const Py_ssize_t nelements =
+        PyArray_Size(reinterpret_cast<PyObject *>(arr));
     for (Py_ssize_t i = 0; i < nelements; ++i) {
       boost::python::object item = nparray[i];
       PyObject *s = PyObject_Str(item.ptr());

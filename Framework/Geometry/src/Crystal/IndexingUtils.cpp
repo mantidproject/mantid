@@ -618,7 +618,8 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
         derivs[c][l] = (latNew[l] - latOrig[l]) / SMALL;
     }
 
-    for (size_t l = 0; l < std::min<size_t>(static_cast<size_t>(7), sigabc.size()); l++)
+    for (size_t l = 0;
+         l < std::min<size_t>(static_cast<size_t>(7), sigabc.size()); l++)
       for (int m = 0; m < 3; m++)
         for (int n = 0; n < 3; n++)
           sigabc[l] += (derivs[m][l] * HKLTHKL[m][n] * derivs[n][l]);

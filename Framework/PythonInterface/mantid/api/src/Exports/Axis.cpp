@@ -67,7 +67,8 @@ PyObject *extractAxisValues(Axis &self) {
       PyObject *value =
           PyFloat_FromDouble(self.getValue(static_cast<size_t>(i)));
       void *pos = PyArray_GETPTR1((PyArrayObject *)array, i);
-      PyArray_SETITEM(reinterpret_cast<PyArrayObject *>(array), reinterpret_cast<char *>(pos), value);
+      PyArray_SETITEM(reinterpret_cast<PyArrayObject *>(array),
+                      reinterpret_cast<char *>(pos), value);
     } else {
       const std::string s = self.label(static_cast<size_t>(i));
       PyObject *value = PyString_FromString(s.c_str());

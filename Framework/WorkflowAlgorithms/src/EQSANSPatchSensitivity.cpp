@@ -29,10 +29,10 @@ void EQSANSPatchSensitivity::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("Workspace");
   MatrixWorkspace_sptr patchWS = getProperty("PatchWorkspace");
   bool useRegression = getProperty("UseLinearRegression");
-  const int nx_pixels = static_cast<int>(inputWS->getInstrument()->getNumberParameter(
-      "number-of-x-pixels")[0]);
-  const int ny_pixels = static_cast<int>(inputWS->getInstrument()->getNumberParameter(
-      "number-of-y-pixels")[0]);
+  const int nx_pixels = static_cast<int>(
+      inputWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
+  const int ny_pixels = static_cast<int>(
+      inputWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
 
   const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
   // Need to get hold of the parameter map

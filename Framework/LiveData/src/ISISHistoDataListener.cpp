@@ -356,7 +356,8 @@ void ISISHistoDataListener::calculateIndicesForReading(
   const int numberOfBins = m_numberOfBins[m_timeRegime];
   const int numberOfSpectra = m_numberOfSpectra[m_timeRegime];
   // max number of spectra that could be read in in one go
-  int maxNumberOfSpectra = 1024 * 1024 / (numberOfBins * static_cast<int>(sizeof(int)));
+  int maxNumberOfSpectra =
+      1024 * 1024 / (numberOfBins * static_cast<int>(sizeof(int)));
   if (maxNumberOfSpectra == 0) {
     maxNumberOfSpectra = 1;
   }

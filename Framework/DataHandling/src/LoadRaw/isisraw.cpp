@@ -125,8 +125,10 @@ int ISISRAW::addItems() {
   static const int hdr_size = sizeof(hdr) / sizeof(char);
   static const int rrpb_size = sizeof(rpb) / sizeof(float);
   static const int irpb_size = sizeof(rpb) / sizeof(int);
-  m_char_items.addItem("HDR", reinterpret_cast<const char *>(&hdr), false, &hdr_size);
-  m_real_items.addItem("RRPB", reinterpret_cast<float *>(&rpb), false, &rrpb_size);
+  m_char_items.addItem("HDR", reinterpret_cast<const char *>(&hdr), false,
+                       &hdr_size);
+  m_real_items.addItem("RRPB", reinterpret_cast<float *>(&rpb), false,
+                       &rrpb_size);
   m_int_items.addItem("IRPB", reinterpret_cast<int *>(&rpb), false, &irpb_size);
   return 0;
 }
@@ -509,11 +511,12 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
       if (from_file) {
         nwords = ddes[i].nwords;
         ioRAW(file, outbuff, 4 * nwords, from_file);
-        byte_rel_expn(outbuff, 4 * nwords, 0, reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]),
+        byte_rel_expn(outbuff, 4 * nwords, 0,
+                      reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]),
                       t_ntc1 + 1);
       } else {
-        byte_rel_comp(reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]), t_ntc1 + 1, outbuff,
-                      outbuff_size, nout);
+        byte_rel_comp(reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]),
+                      t_ntc1 + 1, outbuff, outbuff_size, nout);
         nwords = (3 + nout) / 4; // round up to words
         ddes[i].nwords = nwords;
         ddes[i].offset = offset + ndata;
@@ -536,8 +539,10 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     int uncomp_data_size = 33 + t_nper * (t_nsp1 + 1) * (t_ntc1 + 1);
     int curr_filesize = add.ad_end - 1;
     int uncomp_filesize = add.ad_data - 1 + uncomp_data_size + len_log;
-    dhdr.d_crdata = static_cast<float>(uncomp_data_size) / static_cast<float>(curr_data_size);
-    dhdr.d_crfile = static_cast<float>(uncomp_filesize) / static_cast<float>(curr_filesize);
+    dhdr.d_crdata = static_cast<float>(uncomp_data_size) /
+                    static_cast<float>(curr_data_size);
+    dhdr.d_crfile =
+        static_cast<float>(uncomp_filesize) / static_cast<float>(curr_filesize);
     dhdr.d_exp_filesize =
         uncomp_filesize /
         128; // in 512 byte blocks (vms default allocation unit)
@@ -585,13 +590,15 @@ int ISISRAW::ioRAW(FILE *file, HDR_STRUCT *s, int len, bool from_file) {
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, ADD_STRUCT *s, int len, bool from_file) {
-  ioRAW(file, reinterpret_cast<int *>(s), (sizeof(ADD_STRUCT) * len / sizeof(int)), from_file);
+  ioRAW(file, reinterpret_cast<int *>(s),
+        (sizeof(ADD_STRUCT) * len / sizeof(int)), from_file);
   return 0;
 }
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, USER_STRUCT *s, int len, bool from_file) {
-  ioRAW(file, reinterpret_cast<char *>(s), sizeof(USER_STRUCT) * len, from_file);
+  ioRAW(file, reinterpret_cast<char *>(s), sizeof(USER_STRUCT) * len,
+        from_file);
   return 0;
 }
 
@@ -656,7 +663,8 @@ int ISISRAW::ioRAW(FILE *file, SE_STRUCT *s, int len, bool from_file) {
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, DAEP_STRUCT *s, int len, bool from_file) {
-  ioRAW(file, reinterpret_cast<int *>(s), sizeof(DAEP_STRUCT) * len / sizeof(int), from_file);
+  ioRAW(file, reinterpret_cast<int *>(s),
+        sizeof(DAEP_STRUCT) * len / sizeof(int), from_file);
   return 0;
 }
 
