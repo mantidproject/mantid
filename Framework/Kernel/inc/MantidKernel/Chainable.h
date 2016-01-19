@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include <memory>
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {
@@ -51,13 +52,11 @@ protected:
 
 public:
   /// Set the successor
-  Chainable &setSuccessor(std::unique_ptr<ChainableType> &successor) {
-    m_successor = std::move(successor);
-    return *m_successor;
-  }
-  Chainable &setSuccessor(std::unique_ptr<ChainableType> &&successor) {
-    m_successor = std::move(successor);
-    return *m_successor;
+  template
+  <typename T>
+  Chainable &setSuccessor(T &&successor){
+      m_successor = std::forward<T>(successor);
+      return *m_successor;
   }
   bool hasSuccessor() const { return m_successor.get() != NULL; }
   virtual ~Chainable() = 0;
