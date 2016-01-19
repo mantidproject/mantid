@@ -1920,8 +1920,9 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
       s << "pw = newGraph(altName, 0)";
     }
 
-    s << "w = plotSpectrum(ws.name(), 0, %ERRORS%, %CONNECT%, window = pw, "
-      "clearWindow = True)";
+    s << "w = plotSpectrum(ws.name(), 0, error_bars = %ERRORS%, type = "
+         "%CONNECT%, window = pw, "
+         "clearWindow = True)";
     s << "w.setName(altName)";
     s << "w.setObjectName(ws.name())";
     s << "w.show()";
