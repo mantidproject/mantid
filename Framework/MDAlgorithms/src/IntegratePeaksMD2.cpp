@@ -641,7 +641,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       edgeMultiplier = volumeBkg/(volumeBkg-f1);
       }
       if(edge < PeakRadius) {
-      double sigma = PeakRadius/2.5;
+      double sigma = PeakRadius/3.0;
       // assume gaussian peak
       double e1=std::exp(-std::pow(edge,2)/(2*sigma*sigma))*PeakRadius;
       // volume of cap of sphere with h = edge
@@ -747,7 +747,8 @@ double IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
 void IntegratePeaksMD2::runMaskDetectors(
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
     std::string values) {
-  if(property == "tubes" && peakWS->getInstrument()->getName() == "CORELLI") {
+  // For CORELLI do not count as edge if next to another detector bank
+  if(property == "Tube" && peakWS->getInstrument()->getName() == "CORELLI") {
   IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
   alg->setProperty<Workspace_sptr>("Workspace", peakWS);
   alg->setProperty("Bank", "1,7,12,17,22,27,30,59,63,69,74,79,84,89");
