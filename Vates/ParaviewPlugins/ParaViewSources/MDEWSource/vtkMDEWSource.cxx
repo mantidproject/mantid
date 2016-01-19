@@ -176,17 +176,15 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
 
     ThresholdRange_scptr thresholdRange =
         boost::make_shared<IgnoreZerosThresholdRange>();
-    auto zeroDFactory = Mantid::Kernel::make_unique<vtkMD0DFactory>();
     auto hexahedronFactory = Mantid::Kernel::make_unique<vtkMDHexFactory>(
         thresholdRange, m_normalization);
-    auto quadFactory = Mantid::Kernel::make_unique<vtkMDQuadFactory>(
-        thresholdRange, m_normalization);
-    auto lineFactory = Mantid::Kernel::make_unique<vtkMDLineFactory>(
-        thresholdRange, m_normalization);
 
-    lineFactory->SetSuccessor(std::move(zeroDFactory));
-    quadFactory->SetSuccessor(std::move(lineFactory));
-    hexahedronFactory->SetSuccessor(std::move(quadFactory));
+    hexahedronFactory->setSuccessor(
+                         Mantid::Kernel::make_unique<vtkMDQuadFactory>(
+                             thresholdRange, m_normalization))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
+            thresholdRange, m_normalization))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
 
     hexahedronFactory->setTime(m_time);
     vtkSmartPointer<vtkDataSet> product;
