@@ -161,7 +161,7 @@ createDetectorGroupWith5CylindricalDetectors() {
     os << "d" << i;
     boost::shared_ptr<Detector> det(
         new Detector(os.str(), i + 1, detShape, NULL));
-    det->setPos((double)(i + 1), 2.0, 2.0);
+    det->setPos(static_cast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>(i + 1), 2.0, 2.0);
     groupMembers[i] = det;
   }
 
@@ -249,7 +249,7 @@ boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors() {
     std::ostringstream os;
     os << "m" << i;
     boost::shared_ptr<Detector> det(new Detector(os.str(), i + 1, NULL));
-    det->setPos((double)(i + 1), 2.0, 2.0);
+    det->setPos(static_cast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>ast<double>(i + 1), 2.0, 2.0);
     det->markAsMonitor();
     groupMembers[i] = det;
   }

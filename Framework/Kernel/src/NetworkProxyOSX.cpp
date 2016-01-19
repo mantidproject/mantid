@@ -55,7 +55,7 @@ ProxyInfo proxyFromDictionary(CFDictionaryRef dict) {
   ProxyType proxyType = NoProxy;
 
   CFStringRef cfProxyType =
-      (CFStringRef)CFDictionaryGetValue(dict, kCFProxyTypeKey);
+      reinterpret_cast<CFStringRef>(CFDictionaryGetValue(dict, kCFProxyTypeKey));
 
   if (CFStringCompare(cfProxyType, kCFProxyTypeFTP, 0) == kCFCompareEqualTo) {
     proxyType = FtpCachingProxy;
@@ -72,9 +72,9 @@ ProxyInfo proxyFromDictionary(CFDictionaryRef dict) {
 
   int port = 0;
   std::string hostName =
-      toString((CFStringRef)CFDictionaryGetValue(dict, kCFProxyHostNameKey));
+      toString(reinterpret_cast<CFStringRef>(CFDictionaryGetValue(dict, kCFProxyHostNameKey)));
   CFNumberRef portNumber =
-      (CFNumberRef)CFDictionaryGetValue(dict, kCFProxyPortNumberKey);
+      reinterpret_cast<CFNumberRef>(CFDictionaryGetValue(dict, kCFProxyPortNumberKey));
   if (portNumber) {
     CFNumberGetValue(portNumber, kCFNumberSInt16Type, &port);
   }
@@ -99,13 +99,13 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
 
   // is there a PAC enabled? If so, use it first.
   CFNumberRef pacEnabled;
-  if ((pacEnabled = (CFNumberRef)CFDictionaryGetValue(
-           dict, kSCPropNetProxiesProxyAutoConfigEnable))) {
+  if ((pacEnabled = reinterpret_cast<CFNumberRef>(CFDictionaryGetValue(
+           dict, kSCPropNetProxiesProxyAutoConfigEnable)))) {
     int enabled;
     if (CFNumberGetValue(pacEnabled, kCFNumberIntType, &enabled) && enabled) {
       // PAC is enabled
-      CFStringRef cfPacLocation = (CFStringRef)CFDictionaryGetValue(
-          dict, kSCPropNetProxiesProxyAutoConfigURLString);
+      CFStringRef cfPacLocation = reinterpret_cast<CFStringRef>(CFDictionaryGetValue(
+          dict, kSCPropNetProxiesProxyAutoConfigURLString));
       CFDataRef pacData;
       CFURLRef pacURL =
           CFURLCreateWithString(kCFAllocatorDefault, cfPacLocation, NULL);
@@ -144,7 +144,7 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
       CFIndex size = CFArrayGetCount(proxies);
       for (CFIndex i = 0; i < size; ++i) {
         CFDictionaryRef proxy =
-            (CFDictionaryRef)CFArrayGetValueAtIndex(proxies, i);
+            reinterpret_cast<CFDictionaryRef>(CFArrayGetValueAtIndex(proxies, i));
         proxyInfoVec.push_back(proxyFromDictionary(proxy));
       }
     }
@@ -167,9 +167,9 @@ ProxyInfo proxyFromDictionary(CFDictionaryRef dict, CFStringRef enableKey,
   CFNumberRef protoPort;
   CFStringRef protoHost;
   if (enableKey &&
-      (protoEnabled = (CFNumberRef)CFDictionaryGetValue(dict, enableKey)) &&
-      (protoHost = (CFStringRef)CFDictionaryGetValue(dict, hostKey)) &&
-      (protoPort = (CFNumberRef)CFDictionaryGetValue(dict, portKey))) {
+      (protoEnabled = reinterpret_cast<CFNumberRef>(CFDictionaryGetValue(dict, enableKey))) &&
+      (protoHost = reinterpret_cast<CFStringRef>(CFDictionaryGetValue(dict, hostKey))) &&
+      (protoPort = reinterpret_cast<CFNumberRef>(CFDictionaryGetValue(dict, portKey)))) {
     int enabled;
     if (CFNumberGetValue(protoEnabled, kCFNumberIntType, &enabled) && enabled) {
       std::string host = toString(protoHost);

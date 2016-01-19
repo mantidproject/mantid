@@ -234,9 +234,9 @@ void SANSBeamFinder::exec() {
  */
 void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
                                int low, int left, int right) {
-  const int nx_pixels = (int)(HFIRInstrument::readInstrumentParameter(
+  const int nx_pixels = static_cast<int>(HFIRInstrument::readInstrumentParameter(
       "number-of-x-pixels", beamCenterWS));
-  const int ny_pixels = (int)(HFIRInstrument::readInstrumentParameter(
+  const int ny_pixels = static_cast<int>(HFIRInstrument::readInstrumentParameter(
       "number-of-y-pixels", beamCenterWS));
   std::vector<int> IDs;
 

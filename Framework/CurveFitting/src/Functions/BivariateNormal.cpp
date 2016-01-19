@@ -106,7 +106,7 @@ void BivariateNormal::function1D(double *out, const double *xValues,
     inf << "," << Varxx << "," << Varyy << "," << Varxy;
   inf << std::endl;
 
-  NCells = std::min<int>((int)nData, NCells);
+  NCells = std::min<int>(static_cast<int>(nData), NCells);
 
   double Background = getParameter(IBACK);
   double Intensity = getParameter(ITINTENS);
@@ -149,7 +149,7 @@ void BivariateNormal::function1D(double *out, const double *xValues,
   }
   inf << "Constr:";
   for (size_t i = 0; i < nParams(); i++) {
-    IConstraint *constr = getConstraint((size_t)i);
+    IConstraint *constr = getConstraint(i);
     if (constr)
       inf << i << "=" << constr->check() << ";";
   }
@@ -163,7 +163,7 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
                                       const size_t nData) {
   UNUSED_ARG(xValues);
   UNUSED_ARG(nData);
-  if (nData <= (size_t)0)
+  if (nData <= static_cast<size_t>(0))
     return;
   double penDeriv = initCommon();
 
@@ -407,7 +407,7 @@ double BivariateNormal::initCommon() {
 
   if (NCells < 0) {
     NCells =
-        (int)std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size()));
+        static_cast<int>(std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size())));
     CommonsOK = false;
   }
 
@@ -663,7 +663,7 @@ double BivariateNormal::initCoeff(const MantidVec &D, const MantidVec &X,
   }
 
   NCells =
-      (int)std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size()));
+      static_cast<int>(std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size())));
   if (zeroDenom) {
     coefNorm = expCoeffx2 = expCoeffy2 = 1;
     expCoeffxy = 0;

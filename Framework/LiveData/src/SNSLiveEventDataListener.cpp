@@ -44,7 +44,7 @@ using namespace Mantid::API;
 
 // Helper function to get a DateAndTime value from an ADARA packet header
 Mantid::Kernel::DateAndTime timeFromPacket(const ADARA::PacketHeader &hdr) {
-  uint32_t seconds = (uint32_t)(hdr.pulseId() >> 32);
+  uint32_t seconds = static_cast<uint32_t>(hdr.pulseId() >> 32);
   uint32_t nanoseconds = hdr.pulseId() & 0xFFFFFFFF;
 
   // Make sure we pick the correct constructor (the Mac gets an ambiguous error)
@@ -212,11 +212,11 @@ void SNSLiveEventDataListener::run() {
     // First thing to do is send a hello packet
     uint32_t helloPkt[5] = {4, ADARA::PacketType::CLIENT_HELLO_V0, 0, 0, 0};
     Poco::Timestamp now;
-    uint32_t now_usec = (uint32_t)(now.epochMicroseconds() - now.epochTime());
-    helloPkt[2] = (uint32_t)(now.epochTime() - ADARA::EPICS_EPOCH_OFFSET);
-    helloPkt[3] = (uint32_t)now_usec * 1000;
+    uint32_t now_usec = static_cast<uint32_t>(now.epochMicroseconds() - now.epochTime());
+    helloPkt[2] = static_cast<uint32_t>(now.epochTime() - ADARA::EPICS_EPOCH_OFFSET);
+    helloPkt[3] = now_usec * 1000;
     helloPkt[4] =
-        (uint32_t)(m_startTime.totalNanoseconds() /
+        static_cast<uint32_t>(m_startTime.totalNanoseconds() /
                    1000000000); // divide by a billion to get time in seconds
 
     if (m_socket.sendBytes(helloPkt, sizeof(helloPkt)) != sizeof(helloPkt))
@@ -486,7 +486,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
     } else {
       std::string monName("monitor");
       monName +=
-          (char)(monitorID + 48); // The +48 converts to the ASCII character
+          static_cast<char>(monitorID + 48); // The +48 converts to the ASCII character
       monName += "_counts";
       // Note: The monitor name must exactly match one of the entries in the
       // ADDABLE

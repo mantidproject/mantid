@@ -307,7 +307,7 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
       // For Linux with tcmalloc, make sure memory goes back, if you've cleared
       // 200 Megs
       MemoryManager::Instance().releaseFreeMemoryIfAccumulated(memoryCleared,
-                                                               (size_t)2e8);
+                                                               static_cast<size_t>(2e8));
     }
   }
   prog->reportIncrement(numEvents, "Adding Events");

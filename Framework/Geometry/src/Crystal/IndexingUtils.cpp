@@ -125,7 +125,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     // either do an initial sort and use
     // default mid index, or use the index
     // specified by the base_peak parameter
-    if (base_index < 0 || base_index >= (int)q_vectors.size()) {
+    if (base_index < 0 || base_index >= static_cast<int>(q_vectors.size())) {
       std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude);
     } else {
       mid_ind = base_index;
@@ -315,7 +315,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     // either do an initial sort and use
     // default mid index, or use the index
     // specified by the base_peak parameter
-    if (base_index < 0 || base_index >= (int)q_vectors.size()) {
+    if (base_index < 0 || base_index >= static_cast<int>(q_vectors.size())) {
       std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude);
     } else {
       mid_ind = base_index;
@@ -618,13 +618,13 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
         derivs[c][l] = (latNew[l] - latOrig[l]) / SMALL;
     }
 
-    for (size_t l = 0; l < std::min<size_t>((size_t)7, sigabc.size()); l++)
+    for (size_t l = 0; l < std::min<size_t>(static_cast<size_t>(7), sigabc.size()); l++)
       for (int m = 0; m < 3; m++)
         for (int n = 0; n < 3; n++)
           sigabc[l] += (derivs[m][l] * HKLTHKL[m][n] * derivs[n][l]);
   }
 
-  double delta = result / (double)nDOF;
+  double delta = result / static_cast<double>(nDOF);
 
   for (size_t i = 0; i < std::min<size_t>(7, sigabc.size()); i++)
     sigabc[i] = sqrt(delta * sigabc[i]);
@@ -1459,7 +1459,7 @@ double IndexingUtils::GetFirstMaxIndex(const double magnitude_fft[], size_t N,
     double sum = 0;
     double w_sum = 0;
     for (size_t j = i - 2; j <= i + 2; j++) {
-      sum += (double)j * magnitude_fft[j];
+      sum += static_cast<double>(j) * magnitude_fft[j];
       w_sum += magnitude_fft[j];
     }
     return sum / w_sum;
@@ -1798,7 +1798,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
             NumberIndexed_1D(temp[i], q_vectors, required_tolerance);
         if (num_indexed > max_indexed) {
           max_indexed = num_indexed;
-          max_i = (int)i;
+          max_i = static_cast<int>(i);
         }
       }
 
@@ -1824,7 +1824,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
 void IndexingUtils::RoundHKLs(std::vector<V3D> &hkl_list) {
   for (size_t entry = 0; entry < hkl_list.size(); entry++) {
     for (size_t i = 0; i < 3; i++) {
-      hkl_list[entry][i] = (double)(round(hkl_list[entry][i]));
+      hkl_list[entry][i] = static_cast<double>(round(hkl_list[entry][i]));
     }
   }
 }
@@ -1896,7 +1896,7 @@ int IndexingUtils::NumberOfValidIndexes(const std::vector<V3D> &hkls,
   }
 
   if (count > 0)
-    average_error = total_error / (3.0 * (double)count);
+    average_error = total_error / (3.0 * static_cast<double>(count));
   else
     average_error = 0.0;
 
@@ -1930,7 +1930,7 @@ double IndexingUtils::IndexingError(const DblMatrix &UB,
   }
 
   if (hkls.size() > 0)
-    return total_error / (3.0 * (double)hkls.size());
+    return total_error / (3.0 * static_cast<double>(hkls.size()));
   else
     return 0;
 }
@@ -2406,7 +2406,7 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections(int n_steps) {
     double phi = static_cast<double>(iPhi) * angle_step;
     double r = sin(phi);
 
-    int n_theta = (int)(2. * M_PI * r / angle_step + 0.5);
+    int n_theta = static_cast<int>(2. * M_PI * r / angle_step + 0.5);
 
     double theta_step;
     if (n_theta == 0) {            // n = ( 0, 1, 0 ).  Just
