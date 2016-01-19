@@ -62,9 +62,8 @@ std::string CompositeFunction::asString() const {
       getAttribute("NumDeriv").asBool() == true) {
     ostr << "composite=" << name();
     std::vector<std::string> attr = this->getAttributeNames();
-    for (auto &i : attr) {
-      std::string attName = i;
-      std::string attValue = this->getAttribute(i).value();
+    for (const auto &attName : attr) {
+      std::string attValue = this->getAttribute(attName).value();
       if (!attValue.empty()) {
         ostr << ',' << attName << '=' << attValue;
       }

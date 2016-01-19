@@ -234,13 +234,8 @@ const std::vector<std::string> Algorithm::workspaceMethodOn() const {
                                   WORKSPACE_TYPES_SEPARATOR,
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  std::vector<std::string> res;
-  res.reserve(tokenizer.count());
-  for (const auto &iter : tokenizer) {
-    res.push_back(iter);
-  }
 
-  return res;
+  return std::vector<std::string>(tokenizer.begin(), tokenizer.end());
 }
 
 /**
@@ -405,13 +400,13 @@ void Algorithm::unlockWorkspaces() {
   if (this->isChild())
     return;
   auto &debugLog = g_log.debug();
-  for (auto ws : m_writeLockedWorkspaces) {
+  for (auto &ws : m_writeLockedWorkspaces) {
     if (ws) {
       debugLog << "Unlocking " << ws->getName() << std::endl;
       ws->getLock()->unlock();
     }
   }
-  for (auto ws : m_readLockedWorkspaces) {
+  for (auto &ws : m_readLockedWorkspaces) {
     if (ws) {
       debugLog << "Unlocking " << ws->getName() << std::endl;
       ws->getLock()->unlock();
