@@ -521,18 +521,38 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 ms.DeleteWorkspace(out_name, EnableLogging=_LOGGING_)
                 ms.DeleteWorkspace(out_mon, EnableLogging=_LOGGING_)
 
+        ws_crop_max  = self._get_next_largest_bin_value(mtd[SUMMED_WS].getItem(0) , self._tof_max)
+        mon_crop_max = self._get_next_largest_bin_value(mtd[SUMMED_MON].getItem(0), self._mon_tof_max)
+
         ms.CropWorkspace(Inputworkspace= SUMMED_WS,
                          OutputWorkspace=SUMMED_WS,
-                         XMax=800,
+                         XMax=ws_crop_max,
                          EnableLogging=_LOGGING_)
         ms.CropWorkspace(Inputworkspace= SUMMED_MON,
                          OutputWorkspace=SUMMED_MON,
-                         XMax=800,
+                         XMax=mon_crop_max,
                          EnableLogging=_LOGGING_)
 
         summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_MON]
         self._load_diff_mode_parameters(summed_data)
         return summed_data, summed_mon
+
+#----------------------------------------------------------------------------------------
+
+    def _get_next_largest_bin_value(self, workspace, value):
+        """
+        Returns the next largest bin value to the bin contianing the given value
+        """
+        # Crop to value
+        temp_ws = ms.CropWorkspace(InputWorkspace=workspace,
+                                    XMax=value,
+                                    EnableLogging=False)
+        # Find last bin index of cropped
+        cropped_max_bin_index = len(temp_ws.dataX(0))
+        # Return one more than the cropped max (next bin)
+        value = workspace.dataX(0)[cropped_max_bin_index + 1]
+        ms.DeleteWorkspace(temp_ws)
+        return value
 
 #----------------------------------------------------------------------------------------
 
