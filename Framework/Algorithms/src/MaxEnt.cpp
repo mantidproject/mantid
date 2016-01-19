@@ -790,6 +790,18 @@ double MaxEnt::distance(const DblMatrix &s2, const std::vector<double> &beta) {
   return dist;
 }
 
+/** Populates the output workspaces
+* @param inWS :: [input] The input workspace
+* @param complex :: [input] Whether or not the input is complex
+* @param spec :: [input] The current spectrum being analyzed
+* @param nspec :: [input] The total number of histograms in the input workspace
+* @param data :: [input] The reconstructed data
+* @param image :: [input] The reconstructed image
+* @param outData :: [output] The output workspace containing the reconstructed
+* data
+* @param outImage :: [output] The output workspace containing the reconstructed
+* image
+*/
 void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, bool complex,
                               size_t spec, size_t nspec,
                               const std::vector<double> &data,
