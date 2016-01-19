@@ -1851,12 +1851,21 @@ EnggDiffractionPresenter::loadToPreproc(const std::string runNo) {
   const std::string instStr = m_view->currentInstrument();
   Workspace_sptr inWS;
 
+  // this is required when file is selected via browse button
+  const auto MultiRunNoDir = m_view->currentPreprocRunNo();
+  const auto runNoDir = MultiRunNoDir[0];
+
   try {
     auto load =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
-    load->setPropertyValue("Filename", instStr + runNo);
-    const std::string inWSName = "engggui_preproc_input_ws";
+	if (Poco::File(runNoDir).exists()) {
+		load->setPropertyValue("Filename", runNoDir);
+	}
+	else {
+		load->setPropertyValue("Filename", instStr + runNo);
+	}
+	const std::string inWSName = "engggui_preproc_input_ws";
     load->setPropertyValue("OutputWorkspace", inWSName);
 
     load->execute();
