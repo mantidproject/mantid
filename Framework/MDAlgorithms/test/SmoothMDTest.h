@@ -432,7 +432,6 @@ public:
     */
     for (size_t i = 0; i < out->getNPoints(); ++i) {
       TS_ASSERT_DELTA(1.0, out->getSignalAt(i), 0.001);
-      TS_ASSERT_DELTA(1.0, out->getErrorAt(i), 0.001);
     }
   }
 
@@ -471,9 +470,11 @@ public:
     */
     std::vector<double> expected_signal{0.018, 0.103, 0.018, 0.103, 0.579,
                                         0.103, 0.018, 0.103, 0.018};
+    std::vector<double> expected_error{0.766, 0.682, 0.766, 0.682, 0.608,
+                                       0.682, 0.766, 0.682, 0.766};
     for (size_t i = 0; i < out->getNPoints(); ++i) {
       TS_ASSERT_DELTA(expected_signal[i], out->getSignalAt(i), 0.001);
-      TS_ASSERT_DELTA(1.0, out->getErrorAt(i), 0.001);
+      TS_ASSERT_DELTA(expected_error[i], out->getErrorAt(i), 0.001);
     }
   }
 };

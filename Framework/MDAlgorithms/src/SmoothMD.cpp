@@ -359,9 +359,6 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
           }
         }
 
-        // TODO calculate error
-        outWS->setErrorSquaredAt(iteratorIndex, 1.0);
-
         std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity =
             iterator->findNeighbourIndexesByWidth1D(
                 static_cast<int>(gaussian_kernels[dimension_number].size()),
@@ -373,13 +370,19 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 
         // Convolve signal with kernel
         double sumSignal = 0;
+        double sumSquareError = 0;
+        double error = 0;
         for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
           if (indexValidity[i]) {
             sumSignal += read_ws->getSignalAt(neighbourIndexes[i]) *
                          normalised_kernel[i];
+            error = read_ws->getErrorAt(neighbourIndexes[i]) *
+                    normalised_kernel[i];
+            sumSquareError += error * error;
           }
 
           write_ws->setSignalAt(iteratorIndex, sumSignal);
+          write_ws->setErrorSquaredAt(iteratorIndex, sumSquareError);
         }
         progress.report();
 
