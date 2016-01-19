@@ -521,6 +521,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 ms.DeleteWorkspace(out_name, EnableLogging=_LOGGING_)
                 ms.DeleteWorkspace(out_mon, EnableLogging=_LOGGING_)
 
+        # Due to delay factor in the data, an extra bin is required to not over crop the data
         ws_crop_max  = self._get_next_largest_bin_value(mtd[SUMMED_WS].getItem(0) , self._tof_max)
         mon_crop_max = self._get_next_largest_bin_value(mtd[SUMMED_MON].getItem(0), self._mon_tof_max)
 
