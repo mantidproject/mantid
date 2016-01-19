@@ -1,11 +1,9 @@
 #pylint: disable=no-init,invalid-name
 """
-These system tests are to verify the behaviour of the 
+These system tests are to verify the behaviour of the
 ISIS reflectometry instruments signed theta value
 """
 import os
-import math
-import numpy as np
 from mantid.simpleapi import *
 import stresstesting
 
@@ -27,9 +25,9 @@ class ReflectometryInstrumentSignedThetaTest(stresstesting.MantidStressTest):
         theta_spectrum_axis=ConvertSpectrumAxis(InputWorkspace=I,OutputWorkspace='SignedTheta_vs_Wavelength',Target='signed_theta')
         # Retrieve point detector from IDF (after translation)
         detector = theta_spectrum_axis.getInstrument().getComponentByName(detector_name)
-        # Compare det-position * detector two theta with signed 2 theta (they should always be equal)  
+        # Compare det-position * detector two theta with signed 2 theta (they should always be equal)
         self.assertTrue(detector_vertical_position * theta_spectrum_axis.detectorTwoTheta(detector) == theta_spectrum_axis.detectorSignedTwoTheta(detector))
-        
+
         return True
 
     def runTest(self):
@@ -40,6 +38,7 @@ class ReflectometryInstrumentSignedThetaTest(stresstesting.MantidStressTest):
         self.signed_theta_test('CRISP_Definition.xml', 1)
         self.signed_theta_test('CRISP_Definition.xml', -1)
         # Run for POLREF
+
         self.signed_theta_test('POLREF_Definition.xml', 1)
         self.signed_theta_test('POLREF_Definition.xml', -1)
         # Run for SURF
