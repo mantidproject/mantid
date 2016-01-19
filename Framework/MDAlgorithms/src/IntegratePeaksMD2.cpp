@@ -641,7 +641,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       edgeMultiplier = volumeBkg/(volumeBkg-f1);
       }
       if(edge < PeakRadius) {
-      double sigma = PeakRadius/3.0;
+      double sigma = PeakRadius/2.5;
       // assume gaussian peak
       double e1=std::exp(-std::pow(edge,2)/(2*sigma*sigma))*PeakRadius;
       // volume of cap of sphere with h = edge
