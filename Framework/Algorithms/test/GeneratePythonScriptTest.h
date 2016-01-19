@@ -148,8 +148,7 @@ public:
     // set up history for the algorithn which is presumably removed from Mantid
     auto ws = API::FrameworkManager::Instance().getWorkspace(wsName);
     API::WorkspaceHistory &history = ws->history();
-    auto pAlg = std::unique_ptr<API::Algorithm>(
-        Mantid::Kernel::make_unique<NonExistingAlgorithm>());
+    auto pAlg = Mantid::Kernel::make_unique<NonExistingAlgorithm>();
     pAlg->initialize();
     history.addHistory(boost::make_shared<AlgorithmHistory>(
         API::AlgorithmHistory(pAlg.get())));
