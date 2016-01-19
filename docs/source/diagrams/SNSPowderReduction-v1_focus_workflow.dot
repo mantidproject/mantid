@@ -1,0 +1,34 @@
+digraph FocusAndSum {
+  labe="FocusAndSum Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    RunNumberList
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    alignAndFocusPowder	[label="AlignAndFocusPowder v1"]
+    getRunNumber [label="Get a run number"]
+  }
+
+  subgraph decisions{
+    $decision_style
+    haveMPI [label="Have MPI?"]
+    isSum [label="Is Sum True?"]
+    isLastRunNumber [label="Is Last Run Number?"]
+  }
+
+  RunNumberList	      -> getRunNumber
+  getRunNumber	      -> RunNumber
+  RunNumber	      -> alignAndFocusPowder
+  alignAndFocusPowder -> SumWorkspace
+  SumWorkspace	      -> isLastRunNumber
+
+  isLastRunNumber     -> OutputWorkspace [label="Yes"]
+
+  isLastRunNumber     -> getRunNumber [label="No"]
+
+}
