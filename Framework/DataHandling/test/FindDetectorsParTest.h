@@ -536,7 +536,7 @@ private:
     std::string polw_pattern("0.804071,0.804258,0.804442,");
     std::string azw_pattern("5.72472,5.72472,5.72472,");
 
-    std::array<std::stringstream, 5> bufs{};
+    std::array<std::stringstream, 5> bufs;
     for (int j = 0; j < 5; j++) {
       for (int i = 0; i < 3; i++) {
         bufs[j] << spResult->cell<double>(i, j) << ",";
