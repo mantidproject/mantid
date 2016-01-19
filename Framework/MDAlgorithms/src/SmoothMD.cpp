@@ -294,8 +294,10 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
   const bool useWeights = weightingWS.is_initialized();
   uint64_t nPoints = toSmooth->getNPoints();
   Progress progress(this, 0, 1, size_t(double(nPoints) * 1.1));
-  // Create the output workspace.
+  // Create the output workspace
   IMDHistoWorkspace_sptr outWS(toSmooth->clone().release());
+  // Create a temporary workspace
+  IMDHistoWorkspace_sptr tempWS(toSmooth->clone().release());
   progress.reportIncrement(
       size_t(double(nPoints) * 0.1)); // Report ~10% progress
 
@@ -310,45 +312,55 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
   const int nThreads = Mantid::API::FrameworkManager::Instance()
                            .getNumOMPThreads(); // NThreads to Request
 
-  auto iterators = toSmooth->createIterators(nThreads, NULL);
+  auto read_ws = outWS;
+  auto write_ws = tempWS;
+  for (size_t dimension_number = 0; dimension_number < widthVector.size();
+       ++dimension_number) {
 
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (int it = 0; it < int(iterators.size()); ++it) {
+    auto iterators = toSmooth->createIterators(nThreads, NULL);
 
-    PARALLEL_START_INTERUPT_REGION
-    boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
-
-    if (!iterator) {
-      throw std::logic_error(
-          "Failed to cast IMDIterator to MDHistoWorkspaceIterator");
+    // Alternately write to each workspace
+    if (dimension_number % 2 == 0) {
+      read_ws = outWS;
+      write_ws = tempWS;
+    } else {
+      read_ws = tempWS;
+      write_ws = outWS;
     }
 
-    do {
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int it = 0; it < int(iterators.size()); ++it) {
 
-      // Gets linear index at current position
-      size_t iteratorIndex = iterator->getLinearIndex();
+      PARALLEL_START_INTERUPT_REGION
+      boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
+          dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
 
-      if (useWeights) {
-
-        // Check that we could measure here.
-        if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
-
-          outWS->setSignalAt(iteratorIndex,
-                             std::numeric_limits<double>::quiet_NaN());
-
-          outWS->setErrorSquaredAt(iteratorIndex,
-                                   std::numeric_limits<double>::quiet_NaN());
-
-          continue; // Skip we couldn't measure here.
-        }
+      if (!iterator) {
+        throw std::logic_error(
+            "Failed to cast IMDIterator to MDHistoWorkspaceIterator");
       }
 
-      // TODO calculate error
-      outWS->setErrorSquaredAt(iteratorIndex, 1.0);
+      do {
 
-      for (size_t dimension_number = 0; dimension_number < widthVector.size();
-           ++dimension_number) {
+        // Gets linear index at current position
+        size_t iteratorIndex = iterator->getLinearIndex();
+
+        if (useWeights) {
+
+          // Check that we could measure here.
+          if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
+
+            write_ws->setSignalAt(iteratorIndex,
+                               std::numeric_limits<double>::quiet_NaN());
+            write_ws->setErrorSquaredAt(iteratorIndex,
+                                     std::numeric_limits<double>::quiet_NaN());
+
+            continue; // Skip we couldn't measure here.
+          }
+        }
+
+        // TODO calculate error
+        outWS->setErrorSquaredAt(iteratorIndex, 1.0);
 
         std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity =
             iterator->findNeighbourIndexesByWidth1D(
@@ -363,20 +375,21 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
         double sumSignal = 0;
         for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
           if (indexValidity[i]) {
-            sumSignal += outWS->getSignalAt(neighbourIndexes[i]) *
+            sumSignal += read_ws->getSignalAt(neighbourIndexes[i]) *
                          normalised_kernel[i];
           }
+
+          write_ws->setSignalAt(iteratorIndex, sumSignal);
         }
-        outWS->setSignalAt(iteratorIndex, sumSignal);
-      }
-      progress.report();
+        progress.report();
 
-    } while (iterator->next());
-    PARALLEL_END_INTERUPT_REGION
+      } while (iterator->next());
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
 
-  return outWS;
+  return write_ws;
 }
 
 //----------------------------------------------------------------------------------------------
