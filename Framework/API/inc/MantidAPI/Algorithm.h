@@ -32,6 +32,10 @@ template <class C, class N> class NObserver;
 class Void;
 }
 
+namespace Json {
+class Value;
+}
+
 namespace Mantid {
 namespace API {
 //----------------------------------------------------------------------
@@ -273,6 +277,8 @@ public:
   //@{
   /// Serialize an object to a string
   virtual std::string toString() const;
+  /// Serialize an object to a json object
+  ::Json::Value toJson() const;
   /// De-serialize an object from a string
   static IAlgorithm_sptr fromString(const std::string &input);
   /// Construct an object from a history entry
@@ -399,6 +405,8 @@ private:
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration,
                        const bool groupProcessing = false);
+
+  void registerFeatureUsage() const;
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.

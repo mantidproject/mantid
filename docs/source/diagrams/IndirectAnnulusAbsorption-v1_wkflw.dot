@@ -1,0 +1,111 @@
+digraph IndirectAnnulusAbsorption {
+  label="IndirectAnnulusAbsorption Flowchart"
+  $global_style
+
+  subgraph params  {
+    $param_style
+    SampleWorkspace1        [label="SampleWorkspace"]
+    SampleWorkspace2        [label="SampleWorkspace"]
+    SampleWorkspace_Wave
+    SampleWorkspace_Wave2   [label="SampleWorkspace_Wave"]
+    SampleChemicalFormula
+    SampleNumberDensity
+    SampleInnerRadius
+    SampleOuterRadius
+    SampleInnerRadius2      [label="SampleInnerRadius"]
+    SampleOuterRadius2      [label="SampleOuterRadius"]
+    AbsWorkspace1           [label="AbsorptionWorkspace"]
+    AbsWorkspace2           [label="AbsorptionWorkspace"]
+    CanWorkspace
+    CanWorkspace_Wave
+    CanScale
+    CanChemicalFormula
+    CanNumberDensity
+    CanInnerRadius
+    CanOuterRadius
+    CanScale
+    ElementSize1            [label="ElementSize"]
+    SampleLogs
+    EFixed1                 [label="eFixed"]
+    EFixed2                 [label="eFixed"]
+    OutputWorkspace
+  }
+
+  subgraph algorithms  {
+    $algorithm_style
+    GetEFixed
+    ConvertUnits1           [label="ConvertUnits"]
+    ConvertUnits2           [label="ConvertUnits"]
+    ConvertUnits3           [label="ConvertUnits"]
+    SetSampleMaterial1      [label="SetSampleMaterial"]
+    SetSampleMaterial2      [label="SetSampleMaterial"]
+    AnnulusAbsorption1      [label="AnnulusAbsorption"]
+    AnnulusAbsorption2      [label="AnnulusAbsorption"]
+    Scale
+    Divide1                 [label="Divide"]
+    Divide2                 [label="Divide"]
+    Divide3                 [label="Divide"]
+    Minus1                  [label="Minus"]
+    Minus2                  [label="Minus"]
+    AddSampleLogMultiple
+    GroupWorkspaces
+  }
+  
+  subgraph decisions {
+    $decision_style
+    canGiven          [label="Can Workspace?"]
+    canScale          [label="Can Scale?"]
+    useCorrections    [label="Can Corrections?"]
+  }
+
+  SampleWorkspace1                   	-> GetEFixed
+  GetEFixed                         	-> EFixed1
+  EFixed1                           	-> ConvertUnits1
+  SampleWorkspace1                   	-> ConvertUnits1
+  ConvertUnits1                     	-> SampleWorkspace_Wave             [label="Convert input workspace into Wavelength"]
+  SampleWorkspace_Wave                  -> SetSampleMaterial1
+  SampleChemicalFormula                 -> SetSampleMaterial1
+  SampleNumberDensity                   -> SetSampleMaterial1
+  SetSampleMaterial1               	    -> AnnulusAbsorption1
+  SampleInnerRadius                     -> AnnulusAbsorption1
+  SampleOuterRadius                     -> AnnulusAbsorption1
+  ElementSize1                       	-> AnnulusAbsorption1
+  EFixed1                           	-> AnnulusAbsorption1
+  AnnulusAbsorption1                  	-> AbsWorkspace1
+  AbsWorkspace1                     	-> canGiven
+  canGiven                    	        -> CanWorkspace                     [label="Yes"]
+    CanWorkspace                            -> ConvertUnits2
+    EFixed2                           	    -> ConvertUnits2
+    ConvertUnits2                     	    -> CanWorkspace_Wave            [label="Convert can workspace into Wavelength"]
+    CanWorkspace_Wave                       -> canScale
+    canScale                    	        -> Scale                        [label="Not equal to 1"]
+        CanScale                                -> Scale
+        Scale                             	    -> useCorrections           
+    canScale                    	        -> useCorrections               [label="Equal to 1"]
+    useCorrections                    	    -> SetSampleMaterial2           [label="Yes"]
+        CanChemicalFormula                      -> SetSampleMaterial2
+        CanNumberDensity                        -> SetSampleMaterial2
+        SetSampleMaterial2                      -> AnnulusAbsorption2
+        CanInnerRadius                          -> AnnulusAbsorption2
+        CanOuterRadius                          -> AnnulusAbsorption2
+        SampleInnerRadius2                      -> AnnulusAbsorption2
+        SampleOuterRadius2                      -> AnnulusAbsorption2
+        AnnulusAbsorption2                      -> AnnulusAbsorption2       [label="Repeated for Inner/Outer, Can/Sample"]
+        AnnulusAbsorption2                      -> Divide1
+        SetSampleMaterial2                      -> Divide1
+        Divide1                                 -> Minus1
+        SampleWorkspace2                        -> Minus1
+    useCorrections                    	    -> Minus2                       [label="No"]
+        SampleWorkspace2                        -> Minus2
+        Minus2                                  -> Divide2
+        AbsWorkspace2                           -> Divide2
+  canGiven                    	        -> Divide3                          [label="No"]
+  Minus1                                -> SampleWorkspace_Wave2
+  Divide2                               -> SampleWorkspace_Wave2
+  Divide3                               -> SampleWorkspace_Wave2
+  SampleWorkspace_Wave2                 -> ConvertUnits3                    [label="Convert back to DeltaE"]
+  ConvertUnits3                         -> AddSampleLogMultiple
+  SampleLogs                            -> AddSampleLogMultiple
+  AddSampleLogMultiple                  -> GroupWorkspaces
+  GroupWorkspaces                       -> OutputWorkspace
+}

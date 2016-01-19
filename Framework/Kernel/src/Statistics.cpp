@@ -97,8 +97,7 @@ std::vector<double> getZscore(const vector<TYPE> &data) {
     std::vector<double> Zscore(data.size(), 0.);
     return Zscore;
   }
-  typename vector<TYPE>::const_iterator it = data.begin();
-  for (; it != data.end(); ++it) {
+  for (auto it = data.cbegin(); it != data.cend(); ++it) {
     double tmp = static_cast<double>(*it);
     Zscore.push_back(fabs((tmp - stats.mean) / stats.standard_deviation));
   }
@@ -120,8 +119,7 @@ std::vector<double> getModifiedZscore(const vector<TYPE> &data,
   double tmp;
   size_t num_data = data.size(); // cache since it is frequently used
   double median = getMedian(data, num_data, sorted);
-  typename vector<TYPE>::const_iterator it = data.begin();
-  for (; it != data.end(); ++it) {
+  for (auto it = data.cbegin(); it != data.cend(); ++it) {
     tmp = static_cast<double>(*it);
     MADvec.push_back(fabs(tmp - median));
   }
@@ -132,8 +130,7 @@ std::vector<double> getModifiedZscore(const vector<TYPE> &data,
   }
   MADvec.clear();
   std::vector<double> Zscore;
-  it = data.begin();
-  for (; it != data.end(); ++it) {
+  for (auto it = data.begin(); it != data.end(); ++it) {
     tmp = static_cast<double>(*it);
     Zscore.push_back(0.6745 * fabs((tmp - median) / MAD));
   }
@@ -166,8 +163,7 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
       stats.minimum = stats.mean;
       stats.maximum = stats.mean;
       double stddev = 0.;
-      typename vector<TYPE>::const_iterator it = data.begin();
-      for (; it != data.end(); ++it) {
+      for (auto it = data.cbegin(); it != data.cend(); ++it) {
         double temp = static_cast<double>(*it);
         stddev += ((temp - stats.mean) * (temp - stats.mean));
         if (temp > stats.maximum)

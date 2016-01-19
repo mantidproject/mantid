@@ -688,8 +688,7 @@ void DgsReduction::exec() {
 
   // Put all properties except input files/workspaces into property manager.
   const std::vector<Property *> props = this->getProperties();
-  std::vector<Property *>::const_iterator iter = props.begin();
-  for (; iter != props.end(); ++iter) {
+  for (auto iter = props.cbegin(); iter != props.cend(); ++iter) {
     if (!boost::contains((*iter)->name(), "Input")) {
       this->reductionManager->declareProperty((*iter)->clone());
     }

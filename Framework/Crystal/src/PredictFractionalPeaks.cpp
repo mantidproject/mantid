@@ -191,7 +191,7 @@ void PredictFractionalPeaks::exec() {
               SavPk.push_back((int)floor(1000 * hkl1[2] + .5));
 
               // TODO keep list sorted so searching is faster?
-              vector<vector<int>>::iterator it =
+              auto it =
                   find(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
 
               if (it == AlreadyDonePeaks.end())

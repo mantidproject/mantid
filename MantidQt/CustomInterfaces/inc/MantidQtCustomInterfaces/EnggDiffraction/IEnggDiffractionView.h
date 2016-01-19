@@ -117,6 +117,22 @@ public:
   virtual std::string currentInstrument() const = 0;
 
   /**
+  * selected spec will be passed as a bank for the calibrartion
+  * process to be carried out
+  *
+  * @return which format should to applied for plotting data
+  */
+  virtual int currentCropCalibBankName() const = 0;
+
+  /**
+  * customised spec will be passed via specID text field for the
+  * calibrartion process to be carried out
+  *
+  * @return which format should to applied for plotting data
+  */
+  virtual std::string currentCalibSpecNos() const = 0;
+
+  /**
   * Selected plot data representation will be applied, which will
   * ran through python script
   *

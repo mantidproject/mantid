@@ -176,8 +176,7 @@ void ProcessDasNexusLog::addLog(API::MatrixWorkspace_sptr ws,
   }
 
   // 2. Add log
-  Kernel::TimeSeriesProperty<double> *newlog =
-      new Kernel::TimeSeriesProperty<double>(logname);
+  auto newlog = new Kernel::TimeSeriesProperty<double>(logname);
   for (size_t i = 0; i < timevec.size(); i++) {
     newlog->addValue(timevec[i], unifylogvalue);
   }

@@ -472,8 +472,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     bool norm_by_monitor = false;
     const Mantid::API::AlgorithmHistories &algohist =
         inputWS->getHistory().getAlgorithmHistories();
-    for (Mantid::API::AlgorithmHistories::const_iterator it = algohist.begin();
-         it != algohist.end(); ++it) {
+    for (auto it = algohist.cbegin(); it != algohist.cend(); ++it) {
       if ((*it)->name().compare("NormaliseByCurrent") == 0)
         norm_by_current = true;
       if ((*it)->name().compare("NormaliseToMonitor") == 0)

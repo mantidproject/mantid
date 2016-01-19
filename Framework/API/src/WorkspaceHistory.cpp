@@ -95,7 +95,7 @@ WorkspaceHistory::getAlgorithmHistory(const size_t index) const {
     throw std::out_of_range(
         "WorkspaceHistory::getAlgorithmHistory() - Index out of range");
   }
-  AlgorithmHistories::const_iterator start = m_algorithms.begin();
+  auto start = m_algorithms.cbegin();
   std::advance(start, index);
   return *start;
 }
@@ -180,8 +180,8 @@ void WorkspaceHistory::saveNexus(::NeXus::File *file) const {
 
   // Algorithm History
   int algCount = 0;
-  AlgorithmHistories::const_iterator histIter = m_algorithms.begin();
-  for (; histIter != m_algorithms.end(); ++histIter) {
+  for (auto histIter = m_algorithms.cbegin(); histIter != m_algorithms.cend();
+       ++histIter) {
     (*histIter)->saveNexus(file, algCount);
   }
 

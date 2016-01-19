@@ -1559,6 +1559,7 @@ FindPeaks::callFitPeak(const MatrixWorkspace_sptr &dataws, int wsindex,
   bool fitwithsteppedfwhm = (guessedFWHMStep > 0);
 
   FitOneSinglePeak fitpeak;
+  fitpeak.setChild(true);
   fitpeak.setWorskpace(dataws, wsindex);
   fitpeak.setFitWindow(vec_fitwindow[0], vec_fitwindow[1]);
   fitpeak.setFittingMethod(m_minimizer, m_costFunction);

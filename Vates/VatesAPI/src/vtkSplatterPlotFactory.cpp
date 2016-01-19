@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -25,6 +26,7 @@
 #include <vtkPolyVertex.h>
 #include <vtkSystemIncludes.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkNew.h>
 
 #include <algorithm>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -50,8 +52,7 @@ vtkSplatterPlotFactory::vtkSplatterPlotFactory(
     const size_t numPoints, const double percentToUse)
     : m_thresholdRange(thresholdRange), m_scalarName(scalarName),
       m_numPoints(numPoints), m_percentToUse(percentToUse),
-      m_buildSortedList(true), m_wsName(""), dataSet(NULL), slice(false),
-      sliceMask(NULL), sliceImplicitFunction(NULL), m_time(0.0),
+      m_buildSortedList(true), m_wsName(""), slice(false), m_time(0.0),
       m_minValue(0.1), m_maxValue(0.1),
       m_metaDataExtractor(new MetaDataExtractorUtils()),
       m_metadataJsonManager(new MetadataJsonManager()),
@@ -77,13 +78,7 @@ void vtkSplatterPlotFactory::doCreate(
   // from algos modifying ws)
   ReadLock lock(*ws);
 
-  // Avoid checking if each box is masked if there is no mask on the workspace
-  SigFuncIMDNodePtr getSignalFunction;
-  if (ws->hasMask()) {
-    getSignalFunction = &IMDNode::getSignalNormalizedWithMask;
-  } else {
-    getSignalFunction = &IMDNode::getSignalNormalized;
-  }
+  SigFuncIMDNodePtr getSignalFunction = &IMDNode::getSignalNormalized;
 
   // Find out how many events to plot, and the percentage of the largest
   // boxes to use.
@@ -108,7 +103,7 @@ void vtkSplatterPlotFactory::doCreate(
   // slice function
   std::vector<API::IMDNode *> boxes;
   if (this->slice) {
-    ws->getBox()->getBoxes(boxes, 1000, true, this->sliceImplicitFunction);
+      ws->getBox()->getBoxes(boxes, 1000, true, this->sliceImplicitFunction.get());
   } else {
     ws->getBox()->getBoxes(boxes, 1000, true);
   }
@@ -246,21 +241,21 @@ void vtkSplatterPlotFactory::doCreate(
   }
 
   // Create the point list, one position for each point actually used
-  vtkPoints *points = vtkPoints::New();
+  auto points = vtkSmartPointer<vtkPoints>::New();
   points->Allocate(numPoints);
   points->SetNumberOfPoints(numPoints);
 
   // The list of IDs of points used, one ID per point, since points
   // are not reused to form polygon facets, etc.
-  vtkIdType *ids = new vtkIdType[numPoints];
+  std::vector<vtkIdType> ids(numPoints, 0);
 
   // Only one scalar for each cell, NOT one per point
-  vtkFloatArray *signal = vtkFloatArray::New();
+  auto signal = vtkSmartPointer<vtkFloatArray>::New();
   signal->Allocate(numCells);
   signal->SetName(m_scalarName.c_str());
 
   // Create the data set.  Need space for each cell, not for each point
-  vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+  auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
   this->dataSet = visualDataSet;
   visualDataSet->Allocate(numCells);
   // Now copy the saved point, cell and signal info into vtk data structures
@@ -275,7 +270,7 @@ void vtkSplatterPlotFactory::doCreate(
     }
     signal->InsertNextTuple1(saved_signals[cell_i]);
     visualDataSet->InsertNextCell(
-        VTK_POLY_VERTEX, saved_n_points_in_cell[cell_i], ids + startPointIndex);
+        VTK_POLY_VERTEX, saved_n_points_in_cell[cell_i], &ids[startPointIndex]);
   }
 
   if (VERBOSE) {
@@ -290,8 +285,6 @@ void vtkSplatterPlotFactory::doCreate(
   // Add points and scalars
   visualDataSet->SetPoints(points);
   visualDataSet->GetCellData()->SetScalars(signal);
-
-  delete[] ids;
 }
 
 /**
@@ -351,22 +344,22 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
   const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
   // VTK structures
-  vtkFloatArray *signal = vtkFloatArray::New();
+  vtkNew<vtkFloatArray> signal;
   signal->Allocate(imageSize);
   signal->SetName(m_scalarName.c_str());
   signal->SetNumberOfComponents(1);
 
-  vtkPoints *points = vtkPoints::New();
+  vtkNew<vtkPoints> points;
   points->Allocate(static_cast<int>(imageSize));
 
   // Set up the actual vtkDataSet, here the vtkUnstructuredGrid, the cell type
   // we choose here is the vtk_poly_vertex
-  vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+  auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
   this->dataSet = visualDataSet;
   visualDataSet->Allocate(imageSize);
 
   // Create the vertex structure.
-  vtkVertex *vertex = vtkVertex::New();
+  vtkNew<vtkVertex> vertex;
 
   // Check if the workspace requires 4D handling.
   bool do4D = doMDHisto4D(workspace);
@@ -424,13 +417,8 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
     }
   }
 
-  vertex->Delete();
-
-  visualDataSet->SetPoints(points);
-  visualDataSet->GetCellData()->SetScalars(signal);
-
-  points->Delete();
-  signal->Delete();
+  visualDataSet->SetPoints(points.GetPointer());
+  visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
   visualDataSet->Squeeze();
 }
 
@@ -488,7 +476,7 @@ bool vtkSplatterPlotFactory::doMDHisto4D(
  * the stack.
  * @return fully constructed vtkDataSet.
  */
-vtkDataSet *
+vtkSmartPointer<vtkDataSet>
 vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
   UNUSED_ARG(progressUpdating);
 
@@ -504,8 +492,8 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
   if (nd > 3) {
     // Slice from >3D down to 3D
     this->slice = true;
-    this->sliceMask = new bool[nd];
-    this->sliceImplicitFunction = new MDImplicitFunction();
+      this->sliceMask = Mantid::Kernel::make_unique<bool[]>(nd);
+      this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
     // Make the mask of dimensions
     // TODO: Smarter mapping
     for (size_t d = 0; d < nd; d++)
@@ -536,7 +524,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
 
   // Set the instrument
   m_instrument = m_metaDataExtractor->extractInstrument(m_workspace);
-  double *range = NULL;
+  double *range = nullptr;
 
   if (dataSet) {
     range = dataSet->GetScalarRange();
@@ -558,12 +546,6 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
     CALL_MDEVENT_FUNCTION(this->doCreate, eventWorkspace);
   } else {
     this->doCreateMDHisto(histoWorkspace);
-  }
-
-  // Clean up
-  if (this->slice) {
-    delete[] this->sliceMask;
-    delete this->sliceImplicitFunction;
   }
 
   // Add metadata in json format
@@ -618,7 +600,7 @@ void vtkSplatterPlotFactory::addMetadata() const {
   const double defaultValue = 0.1;
 
   if (this->dataSet) {
-    double *range = NULL;
+    double *range = nullptr;
     range = dataSet->GetScalarRange();
 
     if (range) {
@@ -638,15 +620,13 @@ void vtkSplatterPlotFactory::addMetadata() const {
 
     // Append metadata
     std::string jsonString = m_metadataJsonManager->getSerializedJson();
-    vtkFieldData *outputFD = vtkFieldData::New();
+    vtkNew<vtkFieldData> outputFD;
 
     // Add metadata to dataset.
     MetadataToFieldData convert;
-    convert(outputFD, jsonString,
+    convert(outputFD.GetPointer(), jsonString,
             m_vatesConfigurations->getMetadataIdJson().c_str());
-    dataSet->SetFieldData(outputFD);
-
-    outputFD->Delete();
+    dataSet->SetFieldData(outputFD.GetPointer());
   }
 }
 
@@ -667,13 +647,13 @@ void vtkSplatterPlotFactory::setMetadata(vtkFieldData *fieldData,
 
   // Create a new field data array
   MetadataToFieldData convertMtoF;
-  vtkFieldData *outputFD = vtkFieldData::New();
+  vtkNew<vtkFieldData> outputFD;
   outputFD->ShallowCopy(fieldData);
-  convertMtoF(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
-  convertMtoF(outputFD, jsonString,
+  convertMtoF(outputFD.GetPointer(), xmlString,
+              XMLDefinitions::metaDataId().c_str());
+  convertMtoF(outputFD.GetPointer(), jsonString,
               m_vatesConfigurations->getMetadataIdJson().c_str());
-  dataSet->SetFieldData(outputFD);
-  outputFD->Delete();
+  dataSet->SetFieldData(outputFD.GetPointer());
 }
 
 /**

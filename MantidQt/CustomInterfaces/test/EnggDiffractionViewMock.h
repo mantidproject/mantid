@@ -50,6 +50,12 @@ public:
   // virtual std::string currentCalibFile() const;
   MOCK_CONST_METHOD0(currentCalibFile, std::string());
 
+  // int currentCropCalibBankName
+  MOCK_CONST_METHOD0(currentCropCalibBankName, int());
+
+  // std::string currentCalibSpecNos
+  MOCK_CONST_METHOD0(currentCalibSpecNos, std::string());
+
   // int currentPlotType
   MOCK_CONST_METHOD0(currentPlotType, int());
 
