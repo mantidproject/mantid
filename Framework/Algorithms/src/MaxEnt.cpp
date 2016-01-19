@@ -144,8 +144,8 @@ void MaxEnt::exec() {
 
   // Read input workspace
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-	// Complex data?
-	bool complex = getProperty("ComplexData");
+  // Complex data?
+  bool complex = getProperty("ComplexData");
 
   // Background (default level, sky background, etc)
   double background = getProperty("A");
@@ -199,21 +199,21 @@ void MaxEnt::exec() {
   npoints *= 2;
   for (size_t s = 0; s < nspec; s++) {
 
-		// Start distribution (flat background)
-		std::vector<double> image(npoints, background);
-		// Read data from the input workspace
+    // Start distribution (flat background)
+    std::vector<double> image(npoints, background);
+    // Read data from the input workspace
     // Only real part, complex part is zero
     std::vector<double> data(npoints, 0.);
     std::vector<double> error(npoints, 0.);
     for (size_t i = 0; i < npoints / 2; i++) {
       data[2 * i] = inWS->readY(s)[i];
       error[2 * i] = inWS->readE(s)[i];
-		}
+    }
     if (complex) {
       for (size_t i = 0; i < npoints / 2; i++) {
         data[2 * i + 1] = inWS->readY(2 * s + 1)[i];
         error[2 * i + 1] = inWS->readE(2 * s + 1)[i];
-			}
+      }
     }
 
     // To record the algorithm's progress
@@ -809,20 +809,20 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, bool complex,
 
   // Reconstructed data
 
-	for (int i = 0; i < npoints; i++) {
-		YR[i] = data[2 * i];
-		YI[i] = data[2 * i + 1];
-	}
+  for (int i = 0; i < npoints; i++) {
+    YR[i] = data[2 * i];
+    YI[i] = data[2 * i + 1];
+  }
   outData->dataX(spec) = inWS->readX(spec);
   outData->dataY(spec).assign(YR.begin(), YR.end());
-	outData->dataE(spec).assign(E.begin(), E.end());
-	if (complex) {
-		outData->dataX(nspec + spec) = inWS->readX(spec);
-		outData->dataY(nspec + spec).assign(YI.begin(), YI.end());
-		outData->dataE(nspec + spec).assign(E.begin(), E.end());
-	}
+  outData->dataE(spec).assign(E.begin(), E.end());
+  if (complex) {
+    outData->dataX(nspec + spec) = inWS->readX(spec);
+    outData->dataY(nspec + spec).assign(YI.begin(), YI.end());
+    outData->dataE(nspec + spec).assign(E.begin(), E.end());
+  }
 
-	// Reconstructed image
+  // Reconstructed image
 
   double dx = inWS->readX(spec)[1] - inWS->readX(spec)[0];
   double delta = 1. / dx / npoints;
@@ -837,14 +837,14 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, bool complex,
   if (npointsX == npoints + 1)
     X[npoints] = X[npoints - 1] + delta;
 
-	// Real part
+  // Real part
   outImage->dataX(spec).assign(X.begin(), X.end());
   outImage->dataY(spec).assign(YR.begin(), YR.end());
-	outImage->dataE(spec).assign(E.begin(), E.end());
-	// Imaginary part
-	outImage->dataX(nspec + spec).assign(X.begin(), X.end());
+  outImage->dataE(spec).assign(E.begin(), E.end());
+  // Imaginary part
+  outImage->dataX(nspec + spec).assign(X.begin(), X.end());
   outImage->dataY(nspec + spec).assign(YI.begin(), YI.end());
-	outImage->dataE(nspec + spec).assign(E.begin(), E.end());
+  outImage->dataE(nspec + spec).assign(E.begin(), E.end());
 }
 
 } // namespace Algorithms
