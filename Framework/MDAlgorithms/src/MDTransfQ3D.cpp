@@ -128,17 +128,15 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
   double qx = -m_ex * k0;
   double qy = -m_ey * k0;
   double qz = (1 - m_ez) * k0;
-<<<<<<< HEAD
-  Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
-=======
   if (convention == "Crystallography") {
     qx = -qx;
     qy = -qy;
     qz = -qz;
   }
 
-  Coord[0] = (coord_t)(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
->>>>>>> origin/master
+  Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy +
+                                  m_RotMat[2] * qz);
+
   if (Coord[0] < m_DimMin[0] || Coord[0] >= m_DimMax[0])
     return false;
 
