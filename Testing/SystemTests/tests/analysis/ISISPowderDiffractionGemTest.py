@@ -216,7 +216,7 @@ class ISISPowderDiffractionGem2(stresstesting.MantidStressTest):
         # Custom code to create and run this single test suite
         # and then mark as success or failure
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(LoadTests, "test"))
+        suite.addTest(unittest.makeSuite(LoadTests2, "test"))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)
@@ -243,7 +243,7 @@ class ISISPowderDiffractionGem2(stresstesting.MantidStressTest):
 # Deletion of invalid
 # ======================================================================
 # work horse
-class LoadTests(unittest.TestCase):
+class LoadTests2(unittest.TestCase):
     wsname = "__LoadTest"
     cleanup_names = []
 
