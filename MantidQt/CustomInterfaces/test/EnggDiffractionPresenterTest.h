@@ -778,10 +778,12 @@ public:
     EnggDiffPresenterNoThread pres(&mockView);
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
-        .Times(1)
+        .Times(2)
         .WillRepeatedly(Return(g_rebinRunNo));
 
-    EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(1.0));
+    EXPECT_CALL(mockView, rebinningTimeBin())
+        .Times(1)
+        .WillRepeatedly(Return(0.100000));
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -836,13 +838,13 @@ public:
         .WillOnce(Return(g_rebinRunNo));
     EXPECT_CALL(mockView, rebinningPulsesNumberPeriods())
         .Times(1)
-        .WillOnce(Return(1000));
+        .WillOnce(Return(0.100000));
     // 1s is big enough
     EXPECT_CALL(mockView, rebinningPulsesTime()).Times(1).WillOnce(Return(1));
 
     // No errors/warnings. There will be an error log from the algorithms
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
   }
