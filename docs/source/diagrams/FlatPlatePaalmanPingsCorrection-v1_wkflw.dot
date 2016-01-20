@@ -49,9 +49,9 @@ digraph FlatPlatePaalmanPingsCorrection {
   
   subgraph process  {
     $process_style
-    detAngles     [label="Determine detector angles based on sample workspace"]
-    flatAbs       [label="Mathematically calculates the flat absorption factors"]
-    flatAbsCan    [label="Re-calculate the assc, acsc and acc data taking into account the contribution of the can"]
+    detAngles     [label="get_angles: Determine detector angles based on sample workspace"]
+    flatAbs       [label="flat_abs: Mathematically calculates the flat absorption factors"]
+    flatAbsCan    [label="calculate_can: Re-calculate the assc, acsc and acc data taking into account the contribution of the can"]
   }
 
   SampleWorkspace           -> SetSampleMaterial
