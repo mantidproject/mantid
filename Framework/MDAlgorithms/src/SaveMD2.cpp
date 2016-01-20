@@ -16,13 +16,7 @@
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidKernel/ConfigService.h"
 
-// clang-format off
-#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
-typedef std::unique_ptr< ::NeXus::File> file_holder_type;
-#else
-typedef std::auto_ptr< ::NeXus::File> file_holder_type;
-#endif
-// clang-format on
+typedef std::unique_ptr<::NeXus::File> file_holder_type;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
