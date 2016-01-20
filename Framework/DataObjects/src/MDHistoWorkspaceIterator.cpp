@@ -695,7 +695,7 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth1D(
 
   std::vector<int> widths;
   for (size_t dimension = 0; dimension < m_nd; ++dimension) {
-    if (dimension == width_dimension) {
+    if (static_cast<int>(dimension) == width_dimension) {
       widths.push_back(width);
     } else {
       widths.push_back(1);
