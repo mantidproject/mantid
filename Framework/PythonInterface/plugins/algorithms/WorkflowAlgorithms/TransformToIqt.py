@@ -3,7 +3,6 @@ from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress
 from mantid.kernel import Direction, logger
 from mantid import config
-import math
 import os
 
 
