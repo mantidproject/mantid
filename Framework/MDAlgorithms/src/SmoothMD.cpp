@@ -14,6 +14,7 @@
 #include <boost/make_shared.hpp>
 #include <vector>
 #include <stack>
+#include <numeric>
 #include <map>
 #include <string>
 #include <sstream>
