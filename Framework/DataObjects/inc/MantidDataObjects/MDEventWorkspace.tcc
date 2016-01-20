@@ -16,6 +16,8 @@
 #include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidKernel/ConfigService.h"
+
 #include <iomanip>
 #include <functional>
 #include <algorithm>
@@ -327,8 +329,9 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
   }
   // Check if masked
   const API::IMDNode *box = data->getBoxAtCoord(coords);
+  if (!box) return MDMaskValue;
   if (box->getIsMasked()) {
-    return m_maskValue;
+    return MDMaskValue;
   }
   return getNormalizedSignal(box, normalization);
 }
@@ -376,6 +379,7 @@ TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
 TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
   std::vector<std::string> out;
   std::ostringstream mess;
+ 
   size_t mem;
   mem = (this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE, nd>)) /
         1024;
@@ -767,8 +771,8 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
 
       if (box != NULL) {
         if (box->getIsMasked()) {
-          y.push_back(m_maskValue);
-          e.push_back(m_maskValue);
+          y.push_back(MDMaskValue);
+          e.push_back(MDMaskValue);
         } else {
           // What is our normalization factor?
           signal_t normalizer = 1.0;

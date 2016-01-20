@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_GENERATEPYTHONSCRIPTTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include <fstream>
@@ -147,7 +148,7 @@ public:
     // set up history for the algorithn which is presumably removed from Mantid
     auto ws = API::FrameworkManager::Instance().getWorkspace(wsName);
     API::WorkspaceHistory &history = ws->history();
-    auto pAlg = std::auto_ptr<API::Algorithm>(new NonExistingAlgorithm());
+    auto pAlg = Mantid::Kernel::make_unique<NonExistingAlgorithm>();
     pAlg->initialize();
     history.addHistory(boost::make_shared<AlgorithmHistory>(
         API::AlgorithmHistory(pAlg.get())));

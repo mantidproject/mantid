@@ -50,7 +50,7 @@ CoordTransform::applyVMD(const Mantid::Kernel::VMD &inputVector) const {
   if (inputVector.getNumDims() != inD)
     throw std::runtime_error("CoordTransform::apply(): inputVector has the "
                              "wrong number of coordinates!");
-  coord_t *outArray = new coord_t[outD];
+  auto outArray = new coord_t[outD];
   this->apply(inputVector.getBareArray(), outArray);
   VMD out(outD, outArray);
   delete[] outArray;

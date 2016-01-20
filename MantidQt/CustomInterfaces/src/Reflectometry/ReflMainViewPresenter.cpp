@@ -147,9 +147,9 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   // TODO. Select strategy.
   /*
   std::unique_ptr<CatalogConfigService> catConfigService(
-      makeCatalogConfigServiceAdapter(ConfigService::Instance()));
+  makeCatalogConfigServiceAdapter(ConfigService::Instance()));
   UserCatalogInfo catalogInfo(
-      ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
+  ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
   */
 
   // Initialise options
@@ -228,8 +228,8 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 ReflMainViewPresenter::~ReflMainViewPresenter() {}
 
 /**
- * Finds the first unused group id
- */
+* Finds the first unused group id
+*/
 int ReflMainViewPresenter::getUnusedGroup(std::set<int> ignoredRows) const {
   std::set<int> usedGroups;
 
@@ -597,11 +597,11 @@ ReflMainViewPresenter::prepareRunWorkspace(const std::string &runStr) {
     return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
-   * but
-   * that doesn't preserve history nicely, so we'll just take care of tidying up
-   * in
-   * the event of failure.
-   */
+  * but
+  * that doesn't preserve history nicely, so we'll just take care of tidying up
+  * in
+  * the event of failure.
+  */
   IAlgorithm_sptr algPlus = AlgorithmManager::Instance().create("Plus");
   algPlus->initialize();
   algPlus->setProperty("LHSWorkspace", loadRun(runs[0], instrument)->name());
@@ -1113,9 +1113,6 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
   case IReflPresenter::GroupRowsFlag:
     groupRows();
     break;
-  case IReflPresenter::OpenTableFlag:
-    openTable();
-    break;
   case IReflPresenter::NewTableFlag:
     newTable();
     break;
@@ -1143,11 +1140,19 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
   case IReflPresenter::SearchFlag:
     search();
     break;
+  case IReflPresenter::ICATSearchCompleteFlag: {
+    auto algRunner = m_view->getAlgorithmRunner();
+    IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
+    populateSearch(searchAlg);
+  } break;
   case IReflPresenter::TransferFlag:
     transfer();
     break;
   case IReflPresenter::ImportTableFlag:
     importTable();
+    break;
+  case IReflPresenter::OpenTableFlag:
+    openTable();
     break;
   case IReflPresenter::ExportTableFlag:
     exportTable();
@@ -1250,9 +1255,7 @@ void ReflMainViewPresenter::openTable() {
 /**
 Import a table from TBL file
 */
-void ReflMainViewPresenter::importTable() {
-  m_view->showAlgorithmDialog("LoadReflTBL");
-}
+void ReflMainViewPresenter::importTable() { m_view->showImportDialog(); }
 
 /**
 Export a table to TBL file
@@ -1325,9 +1328,9 @@ void ReflMainViewPresenter::afterReplaceHandle(
 }
 
 /** Returns how many rows there are in a given group
-    @param groupId : The id of the group to count the rows of
-    @returns The number of rows in the group
- */
+@param groupId : The id of the group to count the rows of
+@returns The number of rows in the group
+*/
 size_t ReflMainViewPresenter::numRowsInGroup(int groupId) const {
   size_t count = 0;
   for (int i = 0; i < m_model->rowCount(); ++i)
@@ -1405,7 +1408,7 @@ void ReflMainViewPresenter::cutSelected() {
 }
 
 /** Paste the contents of the clipboard into the currently selected rows, or
- * append new rows */
+* append new rows */
 void ReflMainViewPresenter::pasteSelected() {
   const std::string text = m_view->getClipboard();
   std::vector<std::string> lines;
@@ -1444,8 +1447,6 @@ void ReflMainViewPresenter::pasteSelected() {
 /** Searches for runs that can be used */
 void ReflMainViewPresenter::search() {
   const std::string searchString = m_view->getSearchString();
-  const std::string searchInstr = m_view->getSearchInstrument();
-
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return;
@@ -1456,14 +1457,55 @@ void ReflMainViewPresenter::search() {
   if (CatalogManager::Instance().getActiveSessions().empty())
     m_view->showAlgorithmDialog("CatalogLogin");
 
-  try {
-    auto results = m_searcher->search(searchString);
-    m_searchModel = ReflSearchModel_sptr(
-        new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
-    m_view->showSearch(m_searchModel);
+  auto sessionId =
+      CatalogManager::Instance().getActiveSessions().front()->getSessionId();
+
+  // try {
+  auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
+  algSearch->initialize();
+  algSearch->setChild(true);
+  algSearch->setLogging(false);
+  algSearch->setProperty("Session", sessionId);
+  algSearch->setProperty("InvestigationId", searchString);
+  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
+  auto algRunner = m_view->getAlgorithmRunner();
+  algRunner->startAlgorithm(algSearch);
+  /*
+  while (!currentAlg->isExecuted())
+  {
+
+  THIS WORKS FUNCTIONALLY BUT YOU NEED TO
+  FIND A BETTER WAY TO SEE IF ALGORITHM
+  HAS BEEN EXECUTED AS THIS STILL INTRODUCES
+  A SERIAL-TYPE LAG
+
+
+
+  }
+  if (currentAlg->isExecuted())
+  {
+  ITableWorkspace_sptr results = currentAlg->getProperty("OutputWorkspace");
+  m_searchModel = ReflSearchModel_sptr(
+  new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
+  m_view->showSearch(m_searchModel);
+  }
+  //ITableWorkspace_sptr results = algSearch->getProperty("OutputWorkspace");
+  //auto results = m_searcher->search(searchString);
+  m_searchModel = ReflSearchModel_sptr(
+  new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
+  m_view->showSearch(m_searchModel);
   } catch (std::runtime_error &e) {
-    m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),
-                             "Search Failed");
+  m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),
+  "Search Failed");
+  }*/
+}
+
+void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
+  if (searchAlg->isExecuted()) {
+    ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
+    m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
+        *getTransferStrategy(), results, m_view->getSearchInstrument()));
+    m_view->showSearch(m_searchModel);
   }
 }
 
@@ -1472,6 +1514,7 @@ void ReflMainViewPresenter::transfer() {
   // Build the input for the transfer strategy
   SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
+
   for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
        ++rowIt) {
     const int row = *rowIt;
@@ -1487,7 +1530,6 @@ void ReflMainViewPresenter::transfer() {
     searchResult.location = m_searchModel->data(m_searchModel->index(row, 2))
                                 .toString()
                                 .toStdString();
-
     runs[run] = searchResult;
   }
 
@@ -1495,7 +1537,43 @@ void ReflMainViewPresenter::transfer() {
                         static_cast<int64_t>(selectedRows.size()),
                         this->m_progressView);
 
-  auto newRows = getTransferStrategy()->transferRuns(runs, progress);
+  TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
+
+  auto invalidRuns =
+      results.getErrorRuns(); // grab our invalid runs from the transfer
+
+  // iterate through invalidRuns to set the 'invalid transfers' in the search
+  // model
+  if (!invalidRuns.empty()) { // check if we have any invalid runs
+    for (auto invalidRowIt = invalidRuns.begin();
+         invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
+      auto &error = *invalidRowIt; // grab row from vector
+      // iterate over row containing run number and reason why it's invalid
+      for (auto errorRowIt = error.begin(); errorRowIt != error.end();
+           ++errorRowIt) {
+        const std::string runNumber = errorRowIt->first; // grab run number
+
+        // iterate over rows that are selected in the search table
+        for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
+             ++rowIt) {
+          const int row = *rowIt;
+          // get the run number from that selected row
+          const auto searchRun =
+              m_searchModel->data(m_searchModel->index(row, 0))
+                  .toString()
+                  .toStdString();
+          if (searchRun == runNumber) { // if search run number is the same as
+                                        // our invalid run number
+
+            // add this error to the member of m_searchModel that holds errors.
+            m_searchModel->m_errors.push_back(error);
+          }
+        }
+      }
+    }
+  }
+
+  auto newRows = results.getTransferRuns();
 
   std::map<std::string, int> groups;
   // Loop over the rows (vector elements)
@@ -1514,8 +1592,8 @@ void ReflMainViewPresenter::transfer() {
     }
 
     /* Set the scale to 1.0 for new rows. If there's a columnHeading specified
-       otherwise,
-       it will be overwritten below.
+    otherwise,
+    it will be overwritten below.
     */
     m_model->setData(m_model->index(rowIndex, ReflTableSchema::COL_SCALE), 1.0);
     auto colIndexLookup = ReflTableSchema::makeColumnNameMap();
@@ -1630,15 +1708,15 @@ void ReflMainViewPresenter::showOptionsDialog() {
 }
 
 /** Gets the options used by the presenter
-    @returns The options used by the presenter
- */
+@returns The options used by the presenter
+*/
 const std::map<std::string, QVariant> &ReflMainViewPresenter::options() const {
   return m_options;
 }
 
 /** Sets the options used by the presenter
-    @param options : The new options for the presenter to use
- */
+@param options : The new options for the presenter to use
+*/
 void ReflMainViewPresenter::setOptions(
     const std::map<std::string, QVariant> &options) {
   // Overwrite the given options
@@ -1671,12 +1749,12 @@ void ReflMainViewPresenter::initOptions() {
 }
 
 /**
- * Select and make a transfer strategy on demand based. Pick up the
- *user-provided
- * transfer strategy to do this.
- *
- * @return new TransferStrategy
- */
+* Select and make a transfer strategy on demand based. Pick up the
+*user-provided
+* transfer strategy to do this.
+*
+* @return new TransferStrategy
+*/
 std::unique_ptr<ReflTransferStrategy>
 ReflMainViewPresenter::getTransferStrategy() {
   const std::string currentMethod = m_view->getTransferMethod();
@@ -1693,8 +1771,8 @@ ReflMainViewPresenter::getTransferStrategy() {
 
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
-    auto source =
-        std::unique_ptr<ReflMeasurementItemSource>(new ReflNexusMeasurementItemSource);
+    auto source = std::unique_ptr<ReflMeasurementItemSource>(
+        new ReflNexusMeasurementItemSource);
 
     // Finally make and return the Measure based transfer strategy.
     return std::unique_ptr<ReflTransferStrategy>(

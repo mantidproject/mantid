@@ -321,7 +321,7 @@ coord_t *MDHistoWorkspace::getVertexesArray(size_t linearIndex,
       numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
 
   // The output vertexes coordinates
-  coord_t *out = new coord_t[numDimensions * numVertices];
+  auto out = new coord_t[numDimensions * numVertices];
   for (size_t i = 0; i < numVertices; ++i) {
     size_t outIndex = i * numDimensions;
     // Offset the 0th box by the position of this linear index, in each
@@ -389,7 +389,7 @@ signal_t MDHistoWorkspace::getSignalWithMaskAtCoord(
     const Mantid::API::MDNormalization &normalization) const {
   size_t linearIndex = this->getLinearIndexAtCoord(coords);
   if (this->getIsMaskedAt(linearIndex)) {
-    return m_maskValue;
+    return MDMaskValue;
   }
   return getSignalAtCoord(coords, normalization);
 }
@@ -586,8 +586,8 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
 
         // Is the signal here masked?
         if (this->getIsMaskedAt(linearIndex)) {
-          y.push_back(m_maskValue);
-          e.push_back(m_maskValue);
+          y.push_back(MDMaskValue);
+          e.push_back(MDMaskValue);
         } else {
           signal_t normalizer = getNormalizationFactor(normalize, linearIndex);
           // And add the normalized signal/error to the list too
@@ -1219,7 +1219,7 @@ void MDHistoWorkspace::setMDMasking(
       // If the function masks the point, then mask it, otherwise leave it as it
       // is.
       if (maskingRegion->isPointContained(this->getCenter(i))) {
-        m_masks[i] = true;
+        this->setMDMaskAt(i, true);
       }
     }
     delete maskingRegion;
@@ -1233,9 +1233,18 @@ void MDHistoWorkspace::setMDMasking(
  */
 void MDHistoWorkspace::setMDMaskAt(const size_t &index, bool mask) {
   m_masks[index] = mask;
+  if (mask) {
+    // Set signal and error of masked points to the value of MDMaskValue
+    this->setSignalAt(index, MDMaskValue);
+    this->setErrorSquaredAt(index, MDMaskValue);
+  }
 }
 
-/// Clear any existing masking.
+/**
+ * Clear any existing masking.
+ * Note that this clears the mask flag but does not restore the data
+ * which was set to NaN when it was masked.
+ */
 void MDHistoWorkspace::clearMDMasking() {
   for (size_t i = 0; i < this->getNPoints(); ++i) {
     m_masks[i] = false;

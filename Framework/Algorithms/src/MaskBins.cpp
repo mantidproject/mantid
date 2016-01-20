@@ -236,13 +236,14 @@ void MaskBins::execEvent() {
 void MaskBins::findIndices(const MantidVec &X,
                            MantidVec::difference_type &startBin,
                            MantidVec::difference_type &endBin) {
-  startBin = std::upper_bound(X.begin(), X.end(), m_startX) - X.begin();
+  startBin = std::distance(X.begin(),
+                           std::upper_bound(X.cbegin(), X.cend(), m_startX));
   if (startBin != 0)
     --startBin;
-  MantidVec::const_iterator last = std::lower_bound(X.begin(), X.end(), m_endX);
-  if (last == X.end())
+  auto last = std::lower_bound(X.cbegin(), X.cend(), m_endX);
+  if (last == X.cend())
     --last;
-  endBin = last - X.begin();
+  endBin = std::distance(X.cbegin(), last);
 }
 
 } // namespace Algorithms

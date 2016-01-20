@@ -14,14 +14,9 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidKernel/ConfigService.h"
 
-// clang-format off
-#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
-typedef std::unique_ptr< ::NeXus::File> file_holder_type;
-#else
-typedef std::auto_ptr< ::NeXus::File> file_holder_type;
-#endif
-// clang-format on
+typedef std::unique_ptr<::NeXus::File> file_holder_type;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -54,10 +49,8 @@ void SaveMD2::init() {
                                                       Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
+      new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd
@@ -106,6 +99,12 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   // Write out the coordinate system
   file->writeData("coordinate_system",
                   static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
+
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string m_QConvention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+  file->putAttr("QConvention", m_QConvention);
 
   // Write out the visual normalization
   file->writeData("visual_normalization",

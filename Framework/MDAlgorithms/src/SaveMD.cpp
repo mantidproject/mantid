@@ -15,13 +15,7 @@
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 
-// clang-format off
-#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
-typedef std::unique_ptr< ::NeXus::File> file_holder_type;
-#else
-typedef std::auto_ptr< ::NeXus::File> file_holder_type;
-#endif
-// clang-format on
+typedef std::unique_ptr<::NeXus::File> file_holder_type;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -53,10 +47,8 @@ void SaveMD::init() {
                                                       Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
+      new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd
@@ -111,7 +103,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       oldFile.remove();
   }
 
-  Progress *prog = new Progress(this, 0.0, 0.05, 1);
+  auto prog = new Progress(this, 0.0, 0.05, 1);
   if (update) // workspace has its own file and ignores any changes to the
               // algorithm parameters
   {

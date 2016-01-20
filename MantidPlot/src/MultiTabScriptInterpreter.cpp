@@ -44,12 +44,13 @@ MultiTabScriptInterpreter::MultiTabScriptInterpreter(ScriptingEnv *env,
       m_reportProgress(false), m_recentScriptList(),
       m_nullScript(new NullScriptFileInterpreter), m_current(m_nullScript),
       m_globalZoomLevel(0), m_showWhitespace(false), m_replaceTabs(true),
-      m_tabWhitespaceCount(4), m_fontFamily(), m_codeFolding(false) {
+      m_tabWhitespaceCount(4), m_fontFamily(), m_codeFolding(false),
+      m_LineWrapping(false) {
   connect(this, SIGNAL(currentChanged(int)), this,
           SLOT(tabSelectionChanged(int)));
   setTabsClosable(true);
-  connect(this, SIGNAL(tabCloseRequested(int)),
-          this, SLOT(closeTabAtIndex(int)));
+  connect(this, SIGNAL(tabCloseRequested(int)), this,
+          SLOT(closeTabAtIndex(int)));
 }
 
 /**
@@ -92,6 +93,7 @@ void MultiTabScriptInterpreter::newTab(int index, const QString &filename) {
   scriptRunner->setup(*scriptingEnv(), filename);
   scriptRunner->toggleProgressReporting(m_reportProgress);
   scriptRunner->toggleCodeFolding(m_codeFolding);
+  scriptRunner->toggleLineWrapping(m_LineWrapping);
   scriptRunner->toggleWhitespace(m_showWhitespace);
   scriptRunner->setTabWhitespaceCount(m_tabWhitespaceCount);
   scriptRunner->toggleReplaceTabs(m_replaceTabs);
@@ -106,12 +108,10 @@ void MultiTabScriptInterpreter::newTab(int index, const QString &filename) {
   scriptRunner->messages()->setZoom(globalZoomLevel());
   connect(scriptRunner, SIGNAL(textZoomedIn()), this,
           SLOT(zoomInAllButCurrent()));
-  connect(scriptRunner, SIGNAL(textZoomedIn()), this,
-          SLOT(trackZoomIn()));
+  connect(scriptRunner, SIGNAL(textZoomedIn()), this, SLOT(trackZoomIn()));
   connect(scriptRunner, SIGNAL(textZoomedOut()), this,
           SLOT(zoomOutAllButCurrent()));
-  connect(scriptRunner, SIGNAL(textZoomedOut()), this,
-          SLOT(trackZoomOut()));
+  connect(scriptRunner, SIGNAL(textZoomedOut()), this, SLOT(trackZoomOut()));
 
   emit newTabCreated(index);
   emit tabCountChanged(count());
@@ -305,15 +305,13 @@ void MultiTabScriptInterpreter::clearScriptVariables() {
 }
 
 /// Tracks the global zoom level
-void MultiTabScriptInterpreter::trackZoomIn()
-{
+void MultiTabScriptInterpreter::trackZoomIn() {
   if (m_globalZoomLevel < 20)
     ++m_globalZoomLevel;
 }
 
 /// Tracks the global zoom level
-void MultiTabScriptInterpreter::trackZoomOut()
-{
+void MultiTabScriptInterpreter::trackZoomOut() {
   if (m_globalZoomLevel > -10)
     --m_globalZoomLevel;
 }
@@ -394,6 +392,16 @@ void MultiTabScriptInterpreter::toggleCodeFolding(bool state) {
     interpreterAt(index)->toggleCodeFolding(state);
   }
 }
+
+/// Toggle line wrapping
+void MultiTabScriptInterpreter::toggleLineWrapping(bool state) {
+  m_LineWrapping = state;
+  int index_end = count() - 1;
+  for (int index = index_end; index >= 0; --index) {
+    interpreterAt(index)->toggleLineWrapping(state);
+  }
+}
+
 /**
  * Toggle the whitespace arrow on/off
  * @param state :: The state of the option
@@ -534,7 +542,8 @@ void MultiTabScriptInterpreter::showSelectFont() {
  */
 void MultiTabScriptInterpreter::closeTabAtIndex(int index) {
   ScriptFileInterpreter *interpreter = interpreterAt(index);
-  if(!interpreter->shouldClose()) return;
+  if (!interpreter->shouldClose())
+    return;
   emit tabClosing(index);
   removeTab(index);
   emit tabClosed(index);
@@ -564,7 +573,7 @@ void MultiTabScriptInterpreter::currentEditorModified(bool state) {
   if (state) {
     tabLabel = modifiedLabel + tabLabel;
   } else {
-    if(tabLabel.at(0) == modifiedLabel) {
+    if (tabLabel.at(0) == modifiedLabel) {
       tabLabel.remove(0, 1);
     }
   }

@@ -271,7 +271,7 @@ void CentroidPeaks::integrateEvent() {
         std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 
         std::vector<WeightedEventNoTime>::iterator itev;
-        std::vector<WeightedEventNoTime>::iterator itev_end = events.end();
+        auto itev_end = events.end();
 
         // Check for events in tof range
         for (itev = events.begin(); itev != itev_end; ++itev) {

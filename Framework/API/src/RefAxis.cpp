@@ -42,7 +42,7 @@ Axis *RefAxis::clone(const MatrixWorkspace *const parentWorkspace) {
 
 Axis *RefAxis::clone(const std::size_t length,
                      const MatrixWorkspace *const parentWorkspace) {
-  RefAxis *newAxis = new RefAxis(*this, parentWorkspace);
+  auto newAxis = new RefAxis(*this, parentWorkspace);
   newAxis->m_size = length;
   return newAxis;
 }

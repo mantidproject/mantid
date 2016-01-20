@@ -126,8 +126,8 @@ void EventWorkspace::copyDataFrom(const EventWorkspace &source,
   // Copy the vector of EventLists
   EventListVector source_data = source.data;
   EventListVector::iterator it;
-  EventListVector::iterator it_start = source_data.begin();
-  EventListVector::iterator it_end = source_data.end();
+  auto it_start = source_data.begin();
+  auto it_end = source_data.end();
   size_t source_data_size = source_data.size();
 
   // Do we copy only a range?
@@ -142,7 +142,7 @@ void EventWorkspace::copyDataFrom(const EventWorkspace &source,
 
   for (it = it_start; it != it_end; ++it) {
     // Create a new event list, copying over the events
-    EventList *newel = new EventList(**it);
+    auto newel = new EventList(**it);
     // Make sure to update the MRU to point to THIS event workspace.
     newel->setMRU(this->mru);
     this->data.push_back(newel);
@@ -165,7 +165,7 @@ size_t EventWorkspace::size() const {
 /// @returns the number of bins in the Y data
 size_t EventWorkspace::blocksize() const {
   // Pick the first pixel to find the blocksize.
-  EventListVector::const_iterator it = data.begin();
+  auto it = data.begin();
   if (it == data.end()) {
     throw std::range_error("EventWorkspace::blocksize, no pixels in workspace, "
                            "therefore cannot determine blocksize (# of bins).");
@@ -378,8 +378,7 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
 /// @returns The total number of events
 size_t EventWorkspace::getNumberEvents() const {
   size_t total = 0;
-  for (EventListVector::const_iterator it = this->data.begin();
-       it != this->data.end(); ++it) {
+  for (auto it = this->data.begin(); it != this->data.end(); ++it) {
     total += (*it)->getNumberEvents();
   }
   return total;
@@ -392,8 +391,7 @@ size_t EventWorkspace::getNumberEvents() const {
  */
 Mantid::API::EventType EventWorkspace::getEventType() const {
   Mantid::API::EventType out = Mantid::API::TOF;
-  for (EventListVector::const_iterator it = this->data.begin();
-       it != this->data.end(); ++it) {
+  for (auto it = this->data.begin(); it != this->data.end(); ++it) {
     Mantid::API::EventType thisType = (*it)->getEventType();
     if (static_cast<int>(out) < static_cast<int>(thisType)) {
       out = thisType;
@@ -455,8 +453,7 @@ size_t EventWorkspace::getMemorySize() const {
   // TODO: Add the MRU buffer
 
   // Add the memory from all the event lists
-  for (EventListVector::const_iterator it = this->data.begin();
-       it != this->data.end(); ++it) {
+  for (auto it = this->data.begin(); it != this->data.end(); ++it) {
     total += (*it)->getMemorySize();
   }
 
@@ -525,7 +522,7 @@ EventWorkspace::getOrAddEventList(const std::size_t workspace_index) {
     // Increase the size of the eventlist lists.
     for (size_t wi = old_size; wi <= workspace_index; wi++) {
       // Need to make a new one!
-      EventList *newel = new EventList(mru, specid_t(wi));
+      auto newel = new EventList(mru, specid_t(wi));
       // Add to list
       this->data.push_back(newel);
     }
@@ -790,7 +787,7 @@ void EventWorkspace::generateHistogramPulseTime(const std::size_t index,
  */
 void EventWorkspace::setAllX(Kernel::cow_ptr<MantidVec> &x) {
   // int counter=0;
-  EventListVector::iterator i = this->data.begin();
+  auto i = this->data.begin();
   for (; i != this->data.end(); ++i) {
     (*i)->setX(x);
   }

@@ -183,8 +183,7 @@ void SCDCalibratePanels::CalculateGroups(
   Groups.clear();
 
   if (Grouping == "OnePanelPerGroup") {
-    for (set<string>::iterator it = AllBankNames.begin();
-         it != AllBankNames.end(); ++it) {
+    for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
       string bankName = (*it);
       vector<string> vbankName;
       vbankName.push_back(bankName);
@@ -194,8 +193,7 @@ void SCDCalibratePanels::CalculateGroups(
   } else if (Grouping == "AllPanelsInOneGroup") {
     vector<string> vbankName;
 
-    for (set<string>::iterator it = AllBankNames.begin();
-         it != AllBankNames.end(); ++it) {
+    for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
       string bankName = (*it);
 
       vbankName.push_back(bankName);
@@ -319,8 +317,7 @@ boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
   boost::shared_ptr<const ParameterMap> pmap0 = instrument->getParameterMap();
   boost::shared_ptr<ParameterMap> pmap1(new ParameterMap());
 
-  for (vector<string>::iterator vit = AllBankNames.begin();
-       vit != AllBankNames.end(); ++vit) {
+  for (auto vit = AllBankNames.begin(); vit != AllBankNames.end(); ++vit) {
     string bankName = (*vit);
     updateBankParams(instrument->getComponentByName(bankName), pmap1, pmap0);
   }
@@ -706,12 +703,8 @@ void SCDCalibratePanels::exec() {
     iFunc->setParameter("t0", T0);
 
     double maxXYOffset = getProperty("MaxPositionChange_meters");
-    int i = -1; // position in ParamResults Array.
-    // for (auto group = Groups.begin(); group != Groups.end(); ++group) {
-    i++;
 
     boost::shared_ptr<const RectangularDetector> bank_rect;
-    string paramPrefix = "f" + boost::lexical_cast<string>(i) + "_";
 
     string name = group->front();
     boost::shared_ptr<const IComponent> bank_cmp =
@@ -732,14 +725,14 @@ void SCDCalibratePanels::exec() {
                    Zrot0);
 
     // --- set Function property ----------------------
-    iFunc->setParameter(paramPrefix + "detWidthScale", detWidthScale0);
-    iFunc->setParameter(paramPrefix + "detHeightScale", detHeightScale0);
-    iFunc->setParameter(paramPrefix + "Xoffset", Xoffset0);
-    iFunc->setParameter(paramPrefix + "Yoffset", Yoffset0);
-    iFunc->setParameter(paramPrefix + "Zoffset", Zoffset0);
-    iFunc->setParameter(paramPrefix + "Xrot", Xrot0);
-    iFunc->setParameter(paramPrefix + "Yrot", Yrot0);
-    iFunc->setParameter(paramPrefix + "Zrot", Zrot0);
+    iFunc->setParameter("f0_detWidthScale", detWidthScale0);
+    iFunc->setParameter("f0_detHeightScale", detHeightScale0);
+    iFunc->setParameter("f0_Xoffset", Xoffset0);
+    iFunc->setParameter("f0_Yoffset", Yoffset0);
+    iFunc->setParameter("f0_Zoffset", Zoffset0);
+    iFunc->setParameter("f0_Xrot", Xrot0);
+    iFunc->setParameter("f0_Yrot", Yrot0);
+    iFunc->setParameter("f0_Zrot", Zrot0);
 
     int startX = bounds[0];
     int endXp1 = bounds[group->size()];
@@ -750,39 +743,34 @@ void SCDCalibratePanels::exec() {
     }
 
     //---------- setup ties ----------------------------------
-    tie(iFunc, !use_PanelWidth, paramPrefix + "detWidthScale", detWidthScale0);
-    tie(iFunc, !use_PanelHeight, paramPrefix + "detHeightScale",
-        detHeightScale0);
-    tie(iFunc, !use_PanelPosition, paramPrefix + "Xoffset", Xoffset0);
-    tie(iFunc, !use_PanelPosition, paramPrefix + "Yoffset", Yoffset0);
-    tie(iFunc, !use_PanelPosition, paramPrefix + "Zoffset", Zoffset0);
-    tie(iFunc, !use_PanelOrientation, paramPrefix + "Xrot", Xrot0);
-    tie(iFunc, !use_PanelOrientation, paramPrefix + "Yrot", Yrot0);
-    tie(iFunc, !use_PanelOrientation, paramPrefix + "Zrot", Zrot0);
+    tie(iFunc, !use_PanelWidth, "f0_detWidthScale", detWidthScale0);
+    tie(iFunc, !use_PanelHeight, "f0_detHeightScale", detHeightScale0);
+    tie(iFunc, !use_PanelPosition, "f0_Xoffset", Xoffset0);
+    tie(iFunc, !use_PanelPosition, "f0_Yoffset", Yoffset0);
+    tie(iFunc, !use_PanelPosition, "f0_Zoffset", Zoffset0);
+    tie(iFunc, !use_PanelOrientation, "f0_Xrot", Xrot0);
+    tie(iFunc, !use_PanelOrientation, "f0_Yrot", Yrot0);
+    tie(iFunc, !use_PanelOrientation, "f0_Zrot", Zrot0);
 
     //--------------- setup constraints ------------------------------
-    if (i == 0) {
-      constrain(iFunc, "l0", (MIN_DET_HW_SCALE * L0), (MAX_DET_HW_SCALE * L0));
-      constrain(iFunc, "t0", -5., 5.);
-    }
+    constrain(iFunc, "l0", (MIN_DET_HW_SCALE * L0), (MAX_DET_HW_SCALE * L0));
+    constrain(iFunc, "t0", -5., 5.);
 
-    constrain(iFunc, paramPrefix + "detWidthScale",
-              MIN_DET_HW_SCALE * detWidthScale0,
+    constrain(iFunc, "f0_detWidthScale", MIN_DET_HW_SCALE * detWidthScale0,
               MAX_DET_HW_SCALE * detWidthScale0);
-    constrain(iFunc, paramPrefix + "detHeightScale",
-              MIN_DET_HW_SCALE * detHeightScale0,
+    constrain(iFunc, "f0_detHeightScale", MIN_DET_HW_SCALE * detHeightScale0,
               MAX_DET_HW_SCALE * detHeightScale0);
-    constrain(iFunc, paramPrefix + "Xoffset", -1. * maxXYOffset + Xoffset0,
+    constrain(iFunc, "f0_Xoffset", -1. * maxXYOffset + Xoffset0,
               maxXYOffset + Xoffset0);
-    constrain(iFunc, paramPrefix + "Yoffset", -1. * maxXYOffset + Yoffset0,
+    constrain(iFunc, "f0_Yoffset", -1. * maxXYOffset + Yoffset0,
               maxXYOffset + Yoffset0);
-    constrain(iFunc, paramPrefix + "Zoffset", -1. * maxXYOffset + Zoffset0,
+    constrain(iFunc, "f0_Zoffset", -1. * maxXYOffset + Zoffset0,
               maxXYOffset + Zoffset0);
 
     double MaxRotOffset = getProperty("MaxRotationChangeDegrees");
-    constrain(iFunc, paramPrefix + "Xrot", -1. * MaxRotOffset, MaxRotOffset);
-    constrain(iFunc, paramPrefix + "Yrot", -1. * MaxRotOffset, MaxRotOffset);
-    constrain(iFunc, paramPrefix + "Zrot", -1. * MaxRotOffset, MaxRotOffset);
+    constrain(iFunc, "f0_Xrot", -1. * MaxRotOffset, MaxRotOffset);
+    constrain(iFunc, "f0_Yrot", -1. * MaxRotOffset, MaxRotOffset);
+    constrain(iFunc, "f0_Zrot", -1. * MaxRotOffset, MaxRotOffset);
     //} // for vector< string > in Groups
 
     // Function supports setting the sample position even when it isn't be
@@ -924,31 +912,21 @@ void SCDCalibratePanels::exec() {
       boost::shared_ptr<const Instrument> NewInstrument(
           new Instrument(instrument->baseInstrument(), pmap));
 
-      i = -1;
-
-      /*for (vector<vector<string>>::iterator itv = Groups.begin();
-           itv != Groups.end(); ++itv) {*/
-      i++;
-
       boost::shared_ptr<const RectangularDetector> bank_rect;
       double rotx, roty, rotz;
 
-      string prefix = "f" + boost::lexical_cast<string>(i) + "_";
-
-      rotx = result[prefix + "Xrot"];
-      roty = result[prefix + "Yrot"];
-      rotz = result[prefix + "Zrot"];
+      rotx = result["f0_Xrot"];
+      roty = result["f0_Yrot"];
+      rotz = result["f0_Zrot"];
 
       Quat newRelRot = Quat(rotx, V3D(1, 0, 0)) * Quat(roty, V3D(0, 1, 0)) *
                        Quat(rotz, V3D(0, 0, 1)); //*RelRot;
 
-      FixUpBankParameterMap((banksVec), NewInstrument,
-                            V3D(result[prefix + "Xoffset"],
-                                result[prefix + "Yoffset"],
-                                result[prefix + "Zoffset"]),
-                            newRelRot, result[prefix + "detWidthScale"],
-                            result[prefix + "detHeightScale"], pmapOld,
-                            getProperty("RotateCenters"));
+      FixUpBankParameterMap(
+          (banksVec), NewInstrument,
+          V3D(result["f0_Xoffset"], result["f0_Yoffset"], result["f0_Zoffset"]),
+          newRelRot, result["f0_detWidthScale"], result["f0_detHeightScale"],
+          pmapOld, getProperty("RotateCenters"));
 
       //} // For @ group
 
@@ -1427,17 +1405,13 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("InitialTimeOffset", PREPROC);
 
   // ---------- outputs
-  vector<string> exts;
-  exts.push_back(".DetCal");
-  exts.push_back(".Det_Cal");
-  declareProperty(
-      new FileProperty("DetCalFilename", "", FileProperty::OptionalSave, exts),
-      "Path to an ISAW-style .detcal file to save.");
+  declareProperty(new FileProperty("DetCalFilename", "",
+                                   FileProperty::OptionalSave,
+                                   {".DetCal", ".Det_Cal"}),
+                  "Path to an ISAW-style .detcal file to save.");
 
-  vector<string> exts1;
-  exts1.push_back(".xml");
   declareProperty(
-      new FileProperty("XmlFilename", "", FileProperty::OptionalSave, exts1),
+      new FileProperty("XmlFilename", "", FileProperty::OptionalSave, {".xml"}),
       "Path to an Mantid .xml description(for LoadParameterFile) file to "
       "save.");
 
@@ -1669,8 +1643,7 @@ void SCDCalibratePanels::FixUpBankParameterMap(
     boost::shared_ptr<const ParameterMap> const pmapOld, bool RotCenters) {
   boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
 
-  for (vector<string>::const_iterator it1 = bankNames.begin();
-       it1 != bankNames.end(); ++it1) {
+  for (auto it1 = bankNames.cbegin(); it1 != bankNames.cend(); ++it1) {
 
     const string bankName = (*it1);
 
@@ -1756,10 +1729,8 @@ void SCDCalibratePanels::saveXmlFile(
   ParameterMap_sptr pmap = instrument->getParameterMap();
 
   // write out the detector banks
-  for (vector<vector<string>>::const_iterator it = Groups.begin();
-       it != Groups.end(); ++it) {
-    for (vector<string>::const_iterator it1 = (*it).begin(); it1 != (*it).end();
-         ++it1) {
+  for (auto it = Groups.begin(); it != Groups.end(); ++it) {
+    for (auto it1 = (*it).begin(); it1 != (*it).end(); ++it1) {
       string bankName = (*it1);
 
       oss3 << "<component-link name=\"" << bankName << "\">" << endl;

@@ -45,7 +45,8 @@ namespace Mantid
       virtual ~vtkMD0DFactory();
 
       /// Factory Method.
-      virtual vtkDataSet* create(ProgressAction& progressUpdating) const;
+      virtual vtkSmartPointer<vtkDataSet>
+      create(ProgressAction &progressUpdating) const;
 
       virtual void initialize(Mantid::API::Workspace_sptr);
 

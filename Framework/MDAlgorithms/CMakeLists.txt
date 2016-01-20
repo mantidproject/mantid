@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/CalculateCoverageDGS.cpp
 	src/CentroidPeaksMD.cpp
 	src/CentroidPeaksMD2.cpp
+	src/ChangeQConvention.cpp
 	src/CloneMDWorkspace.cpp
 	src/CompactMD.cpp
 	src/CompareMDWorkspaces.cpp
@@ -140,6 +141,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CalculateCoverageDGS.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
+	inc/MantidMDAlgorithms/ChangeQConvention.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompactMD.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
@@ -266,6 +268,7 @@ set ( TEST_FILES
 	CalculateCoverageDGSTest.h
 	CentroidPeaksMD2Test.h
 	CentroidPeaksMDTest.h
+	ChangeQConventionTest.h
 	CloneMDWorkspaceTest.h
 	CompactMDTest.h
 	CompareMDWorkspacesTest.h

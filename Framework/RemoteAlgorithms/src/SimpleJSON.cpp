@@ -685,8 +685,8 @@ void prettyPrint(const JSONObject &obj, std::ostream &ostr,
                  unsigned indentLevel) {
   // Prints keys/value pairs.  One pair per line  (Does not print opening or
   // closing braces...)
-  JSONObject::const_iterator it = obj.begin();
-  while (it != obj.end()) {
+  auto it = obj.cbegin();
+  while (it != obj.cend()) {
     for (unsigned i = 0; i < indentLevel; i++) {
       ostr << "\t";
     }

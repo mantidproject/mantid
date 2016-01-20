@@ -175,6 +175,12 @@ void ConvertToMDParent::init() {
                   // value is still not fully verified (see ticket #5982). "
                   "Defines the third projection vector of the target Q "
                   "coordinate system in **Q3D** mode. - Default (0,0,1)");
+  // if one needs no events near the origin of Q
+  declareProperty(
+      new PropertyWithValue<double>("AbsMinQ", 0.0, Direction::Input),
+      "Do not add events to MD workspace that are closer to the origin "
+      "in QSample radius than this value. Needed for 3D"
+      "views to remove noise. ");
 }
 /**The method responsible for analyzing input workspace parameters and
 *preprocessing detectors positions into reciprocal space

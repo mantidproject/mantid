@@ -239,7 +239,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
   // Prepare thread pool
   CPUTimer overallTime;
 
-  ThreadSchedulerFIFO *ts = new ThreadSchedulerFIFO();
+  auto ts = new ThreadSchedulerFIFO();
   ThreadPool tp(ts);
 
   Kernel::DiskBuffer *DiskBuf(NULL);

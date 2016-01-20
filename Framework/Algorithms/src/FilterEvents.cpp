@@ -43,7 +43,8 @@ FilterEvents::FilterEvents()
       m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
       m_vecSplitterTime(), m_vecSplitterGroup(), m_splitSampleLogs(false),
       m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(),
-      m_specSkipType(), m_vecSkip() {}
+      m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false),
+      m_filterStartTime(0) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -142,6 +143,16 @@ void FilterEvents::init() {
       new ArrayProperty<string>("OutputWorkspaceNames", Direction::Output),
       "List of output workspaces names");
 
+  declareProperty(
+      "RelativeTime", false,
+      "Flag to indicate that in the input Matrix splitting workspace,"
+      "the time indicated by X-vector is relative to either run start time or "
+      "some indicted time.");
+
+  declareProperty(
+      "FilterStartTime", "",
+      "Start time for splitters that can be parsed to DateAndTime.");
+
   return;
 }
 
@@ -150,7 +161,7 @@ void FilterEvents::init() {
  */
 void FilterEvents::exec() {
   // Process algorithm properties
-  processProperties();
+  processAlgorithmProperties();
 
   // Examine workspace for detectors
   examineEventWS();
@@ -221,7 +232,7 @@ void FilterEvents::exec() {
 //----------------------------------------------------------------------------------------------
 /** Process input properties
  */
-void FilterEvents::processProperties() {
+void FilterEvents::processAlgorithmProperties() {
   m_eventWS = this->getProperty("InputWorkspace");
   if (!m_eventWS) {
     stringstream errss;
@@ -305,6 +316,30 @@ void FilterEvents::processProperties() {
   else
     m_useDBSpectrum = true;
 
+  // Splitters are given relative time
+  m_isSplittersRelativeTime = getProperty("RelativeTime");
+  if (m_isSplittersRelativeTime) {
+    // Using relative time
+    std::string start_time_str = getProperty("FilterStartTime");
+    if (start_time_str.size() > 0) {
+      // User specifies the filter starting time
+      Kernel::DateAndTime temp_shift_time(start_time_str);
+      m_filterStartTime = temp_shift_time;
+    } else {
+      // Retrieve filter starting time from property run_start as default
+      if (m_eventWS->run().hasProperty("run_start")) {
+        Kernel::DateAndTime temp_shift_time(
+            m_eventWS->run().getProperty("run_start")->value());
+        m_filterStartTime = temp_shift_time;
+      } else {
+        throw std::runtime_error(
+            "Input event workspace does not have property run_start. "
+            "User does not specifiy filter start time."
+            "Splitters cannot be in reltive time.");
+      }
+    }
+  }
+
   return;
 }
 
@@ -372,8 +407,12 @@ void FilterEvents::examineEventWS() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
- *  and create a map for all workspace group number
+/** Purpose:
+ *    Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
+ *    and create a map for all workspace group number
+ *  Requirements:
+ *  Gaurantees
+ * @brief FilterEvents::processSplittersWorkspace
  */
 void FilterEvents::processSplittersWorkspace() {
   // 1. Init data structure
@@ -385,7 +424,6 @@ void FilterEvents::processSplittersWorkspace() {
   for (size_t i = 0; i < numsplitters; i++) {
     m_splitters.push_back(m_splittersWorkspace->getSplitter(i));
     m_workGroupIndexes.insert(m_splitters.back().index());
-
     if (inorder && i > 0 && m_splitters[i] < m_splitters[i - 1])
       inorder = false;
   }
@@ -416,15 +454,25 @@ void FilterEvents::processSplittersWorkspace() {
 
 //----------------------------------------------------------------------------------------------
 /**
-  */
+ * @brief FilterEvents::processMatrixSplitterWorkspace
+ * Purpose:
+ *   Convert the splitters in matrix workspace to a vector of splitters
+ * Requirements:
+ *   m_matrixSplitterWS has valid value
+ *   vecX's size must be one larger than and that of vecY of m_matrixSplitterWS
+ * Guarantees
+ *   Splitters stored in m_matrixSpliterWS are transformed to
+ *   m_vecSplitterTime and m_workGroupIndexes, which are of same size
+ */
 void FilterEvents::processMatrixSplitterWorkspace() {
   // Check input workspace validity
+  assert(m_matrixSplitterWS);
+
   const MantidVec &vecX = m_matrixSplitterWS->readX(0);
   const MantidVec &vecY = m_matrixSplitterWS->readY(0);
   size_t sizex = vecX.size();
   size_t sizey = vecY.size();
-  if (sizex - sizey != 1)
-    throw runtime_error("Size must be N and N-1.");
+  assert(sizex - sizey == 1);
 
   // Assign vectors for time comparison
   m_vecSplitterTime.assign(vecX.size(), 0);
@@ -434,6 +482,13 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   for (size_t i = 0; i < sizex; ++i) {
     m_vecSplitterTime[i] = static_cast<int64_t>(vecX[i]);
   }
+  // shift the splitters' time if applied
+  if (m_isSplittersRelativeTime) {
+    int64_t time_shift_ns = m_filterStartTime.totalNanoseconds();
+    for (size_t i = 0; i < sizex; ++i)
+      m_vecSplitterTime[i] += time_shift_ns;
+  }
+
   for (size_t i = 0; i < sizey; ++i) {
     m_vecSplitterGroup[i] = static_cast<int>(vecY[i]);
     m_workGroupIndexes.insert(m_vecSplitterGroup[i]);
@@ -460,13 +515,13 @@ void FilterEvents::createOutputWorkspaces() {
 
   // Determine the minimum group index number
   int minwsgroup = INT_MAX;
-  for (set<int>::iterator groupit = m_workGroupIndexes.begin();
+  for (auto groupit = m_workGroupIndexes.begin();
        groupit != m_workGroupIndexes.end(); ++groupit) {
     int wsgroup = *groupit;
     if (wsgroup < minwsgroup && wsgroup >= 0)
       minwsgroup = wsgroup;
   }
-  g_log.debug() << "[DB] Min WS Group = " << minwsgroup << "\n";
+  g_log.debug() << "Min WS Group = " << minwsgroup << "\n";
 
   bool from1 = getProperty("OutputWorkspaceIndexedFrom1");
   int delta_wsindex = 0;

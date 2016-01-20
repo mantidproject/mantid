@@ -131,13 +131,9 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
  * Initialise the algorithm
  */
 void LoadRKH::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".txt");
-  exts.push_back(".q");
-  exts.push_back(".dat");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
-      "Name of the RKH file to load");
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
+                                        {".txt", ".q", ".dat"}),
+                  "Name of the RKH file to load");
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
                                                Kernel::Direction::Output),
                   "The name to use for the output workspace");
@@ -346,8 +342,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
 
     // now read in the Y values
     MantidVec &YOut = outWrksp->dataY(i);
-    for (MantidVec::iterator it = YOut.begin(), end = YOut.end(); it != end;
-         ++it) {
+    for (auto it = YOut.begin(), end = YOut.end(); it != end; ++it) {
       m_fileIn >> *it;
     }
     prog.report("Loading Y data");
@@ -356,8 +351,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   // the error values form one big block after the Y-values
   for (size_t i = 0; i < nAxis1Values; ++i) {
     MantidVec &EOut = outWrksp->dataE(i);
-    for (MantidVec::iterator it = EOut.begin(), end = EOut.end(); it != end;
-         ++it) {
+    for (auto it = EOut.begin(), end = EOut.end(); it != end; ++it) {
       m_fileIn >> *it;
     }
     prog.report("Loading error estimates");
@@ -433,7 +427,7 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   outWrksp->getAxis(0)->unit() = UnitFactory::Instance().create(XUnit);
   outWrksp->setYUnitLabel(intensityUnit);
 
-  NumericAxis *const axis1 = new Mantid::API::NumericAxis(nAxis1Boundaries);
+  auto const axis1 = new Mantid::API::NumericAxis(nAxis1Boundaries);
   axis1->unit() = Mantid::Kernel::UnitFactory::Instance().create(YUnit);
   outWrksp->replaceAxis(1, axis1);
   for (int i = 0; i < nAxis1Boundaries; ++i) {
@@ -478,10 +472,8 @@ const std::string LoadRKH::readUnit(const std::string &line) {
 
   // theQuantity will contain the name of the unit, which can be many words long
   std::string theQuantity;
-  Poco::StringTokenizer::Iterator current = codes.begin() + 1,
-                                  end = codes.end();
-  for (; current != end; ++current) {
-    if (current != end - 1) {
+  for (auto current = codes.begin() + 1; current != codes.end(); ++current) {
+    if (current != codes.end() - 1) {
       theQuantity += *current;
     }
   }

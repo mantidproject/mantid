@@ -393,10 +393,10 @@ void LoadVulcanCalFile::processOffsets(
   std::set<int> set_bankID;
   map<detid_t, pair<bool, int>>
       map_verify; // key: detector ID, value: flag to have a match, bank ID
-  for (map<detid_t, double>::iterator miter = map_detoffset.begin();
-       miter != map_detoffset.end(); ++miter) {
+  for (auto miter = map_detoffset.begin(); miter != map_detoffset.end();
+       ++miter) {
     detid_t pid = miter->first;
-    map<detid_t, size_t>::iterator fiter = map_det2index.find(pid);
+    auto fiter = map_det2index.find(pid);
     if (fiter == map_det2index.end()) {
       map_verify.insert(make_pair(pid, make_pair(false, -1)));
     } else {
@@ -426,7 +426,7 @@ void LoadVulcanCalFile::processOffsets(
     for (size_t j = 0; j < NUMBERDETECTORPERMODULE; ++j) {
       detid_t detindex =
           static_cast<detid_t>(bankindex * NUMBERRESERVEDPERMODULE + j);
-      map<detid_t, pair<bool, int>>::iterator miter = map_verify.find(detindex);
+      auto miter = map_verify.find(detindex);
       if (miter == map_verify.end())
         throw runtime_error("It cannot happen!");
       bool exist = miter->second.first;

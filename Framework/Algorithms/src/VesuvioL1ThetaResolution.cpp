@@ -73,12 +73,9 @@ void VesuvioL1ThetaResolution::init() {
   auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLower(DBL_EPSILON);
 
-  std::vector<std::string> exts;
-  exts.push_back(".par");
-  exts.push_back(".dat");
   declareProperty(new FileProperty("PARFile", "",
-                                   FileProperty::FileAction::OptionalLoad, exts,
-                                   Direction::Input),
+                                   FileProperty::FileAction::OptionalLoad,
+                                   {".par", ".dat"}, Direction::Input),
                   "PAR file containing calibrated detector positions.");
 
   declareProperty("SampleWidth", 3.0, positiveDouble, "With of sample in cm.");
@@ -134,7 +131,7 @@ void VesuvioL1ThetaResolution::exec() {
       WorkspaceFactory::Instance().create("Workspace2D", 4, numHist, numHist);
 
   // Set vertical axis to statistic labels
-  TextAxis *specAxis = new TextAxis(4);
+  auto specAxis = new TextAxis(4);
   specAxis->setLabel(0, "l1_Mean");
   specAxis->setLabel(1, "l1_StdDev");
   specAxis->setLabel(2, "theta_Mean");

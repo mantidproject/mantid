@@ -24,6 +24,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -65,15 +66,15 @@ public:
 
   Mantid::API::Progress *getProgress() { return m_Progress.get(); }
   void resetProgress(size_t nSteps) {
-    m_Progress = std::auto_ptr<Mantid::API::Progress>(
-        new Mantid::API::Progress(this, 0, 1, nSteps));
+    m_Progress =
+        Mantid::Kernel::make_unique<Mantid::API::Progress>(this, 0, 1, nSteps);
   }
 
 private:
   void init(){};
   void exec(){};
 
-  std::auto_ptr<Mantid::API::Progress> m_Progress;
+  std::unique_ptr<Mantid::API::Progress> m_Progress;
   /// logger -> to provide logging,
   static Mantid::Kernel::Logger &g_log;
 };

@@ -1,4 +1,4 @@
-#pylint: disable=no-init, unused-variable
+#pylint: disable=no-init, unused-variable, too-many-lines
 # we need to disable unused_variable because ws.dataY(n) returns a reference  to the underlying c++ object
 # that can be modified inplace
 from mantid.kernel import *
@@ -38,6 +38,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
     _spectrum_no = None
     foil_map = None
     _inst_prefix = None
+    _back_scattering = None
+    _load_common_called = False
     _mon_spectra = None
     _mon_index = None
     _backward_spectra_list = None
@@ -60,7 +62,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
     _raw_grp = None
     _raw_monitors = None
     _nperiods = None
-    _goodframes = None
     pt_times = None
     delta_t = None
     mon_pt_times = None
@@ -129,7 +130,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 #----------------------------------------------------------------------------------------
 
     def PyExec(self):
-        self._load_inst_parameters()
+        self._load_common_inst_parameters()
         self._retrieve_input()
 
         if "Difference" in self._diff_opt:
@@ -140,14 +141,71 @@ class LoadVesuvio(LoadEmptyVesuvio):
 #----------------------------------------------------------------------------------------
 
     def validateInputs(self):
+        self._load_common_inst_parameters()
         issues = {}
 
-        # Validtae run number ranges
+        # Validate run number ranges
         run_str = self.getProperty(RUN_PROP).value
         if "-" in run_str:
             lower, upper = run_str.split("-")
-            if upper < lower:
-                issues[RUN_PROP] = "Range must be in format lower-upper"
+            issues = self._validate_range_formatting(lower, upper, RUN_PROP, issues)
+
+        # Validate SpectrumList
+        grp_spectra_list = self.getProperty(SPECTRA_PROP).value
+        if ";" in grp_spectra_list:
+            # Split on ';' if in form of 2-3;6-7
+            grp_spectra_list = grp_spectra_list.split(";")
+        else:
+            # Treat input as a list (for use in loop)
+            grp_spectra_list = [grp_spectra_list]
+
+        for spectra_grp in grp_spectra_list:
+            spectra_list = None
+            if "-" in spectra_grp:
+                # Split ranges
+                spectra_list = spectra_grp.split("-")
+                # Validate format
+                issues = self._validate_range_formatting(spectra_list[0], spectra_list[1], SPECTRA_PROP, issues)
+            elif "," in spectra_grp:
+                # Split comma separated lists
+                spectra_list = spectra_grp.split(",")
+            else:
+                # Single spectra (put into list for use in loop)
+                spectra_list = [spectra_grp]
+
+            # Validate boundaries
+            for spec in spectra_list:
+                spec = int(spec)
+                issues = self._validate_spec_min_max(spec, issues)
+
+        return issues
+
+#----------------------------------------------------------------------------------------
+
+    def _validate_range_formatting(self, lower, upper, property_name, issues):
+        """
+        Validates is a range style input is in the correct form of lower-upper
+        """
+        upper = int(upper)
+        lower = int(lower)
+        if upper < lower:
+            issues[property_name] = "Range must be in format lower-upper"
+        return issues
+
+#----------------------------------------------------------------------------------------
+
+    def _validate_spec_min_max(self, spectra, issues):
+        """
+        Validates if the spectra is with the minimum and maximum boundaries
+        """
+        # Only validate boundaries if in difference Mode
+        if "Difference" in self.getProperty(MODE_PROP).value:
+            specMin = self._backward_spectra_list[0]
+            specMax = self._forward_spectra_list[-1]
+            if spectra < specMin:
+                issues[SPECTRA_PROP] = ("Lower limit for spectra is %d in difference mode" % specMin)
+            if spectra > specMax:
+                issues[SPECTRA_PROP] = ("Upper limit for spectra is %d in difference mode" % specMax)
 
         return issues
 
@@ -159,12 +217,14 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         try:
             all_spectra = [item for sublist in self._spectra for item in sublist]
+            self._raise_error_if_mix_fwd_back(all_spectra)
+            self._raise_error_if_non_valid_mode(self._diff_opt, self._back_scattering)
+            self._set_spectra_type(all_spectra[0])
             self._setup_raw(all_spectra)
             self._create_foil_workspaces()
 
             for ws_index, spectrum_no in enumerate(all_spectra):
                 self._ws_index, self._spectrum_no = ws_index, spectrum_no
-                self._set_spectra_type(spectrum_no)
                 self.foil_map = SpectraToFoilPeriodMap(self._nperiods)
 
                 self._integrate_periods()
@@ -184,6 +244,37 @@ class LoadVesuvio(LoadEmptyVesuvio):
             self._store_results()
         finally: # Ensures it happens whether there was an error or not
             self._cleanup_raw()
+
+#----------------------------------------------------------------------------------------
+
+    def _raise_error_if_mix_fwd_back(self, spectra):
+        """
+        Checks that in input spectra are all in the forward or all in the backward
+        scattering range
+        Assumes that the spectra is sorted sorted
+        """
+        if len(spectra) == 1:
+            self._back_scattering = self._is_back_scattering(spectra[0])
+            return
+        all_back = self._is_back_scattering(spectra[0])
+        for spec_no in spectra[1:]:
+            if all_back and self._is_fwd_scattering(spec_no):
+                raise RuntimeError("Mixing backward and forward spectra is not permitted."
+                                   "Please correct the SpectrumList property.")
+        self._back_scattering = all_back
+
+#----------------------------------------------------------------------------------------
+
+    def _raise_error_if_non_valid_mode(self, mode, back_scattering):
+        """
+        Checks that the input are valid for the Mode of operation selected
+        SingleDifference - Forward Scattering
+        DoubleDifference - Back Scattering
+        """
+
+        if mode == "DoubleDifference":
+            if not back_scattering:
+                raise RuntimeError("Double Difference can only be used for Back scattering spectra")
 
 #----------------------------------------------------------------------------------------
 
@@ -250,11 +341,14 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _load_inst_parameters(self):
+    def _load_common_inst_parameters(self):
         """
             Loads an empty VESUVIO instrument and attaches the necessary
             parameters as attributes
         """
+        if self._load_common_called:
+            return
+
         isis = config.getFacility("ISIS")
         empty_vesuvio_ws = self._load_empty_evs()
         empty_vesuvio = empty_vesuvio_ws.getInstrument()
@@ -301,6 +395,37 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self._forw_period_sum1 = to_range_tuple(self.forward_period_sum1)
         self._forw_period_sum2 = to_range_tuple(self.forward_period_sum2)
         self._forw_foil_out_norm = to_range_tuple(self.forward_foil_out_norm)
+        self._load_common_called = True
+
+#----------------------------------------------------------------------------------------
+
+    def _load_diff_mode_parameters(self, workspace):
+        """
+        Loads the relevant parameter file for the current difference mode
+        into the given workspace
+        """
+        load_parameter_file = self.createChildAlgorithm("LoadParameterFile")
+        load_parameter_file.setLogging(_LOGGING_)
+        load_parameter_file.setPropertyValue("Workspace", workspace.name())
+        load_parameter_file.setProperty("Filename",
+                                        self._get_parameter_filename(self._diff_opt))
+        load_parameter_file.execute()
+
+#----------------------------------------------------------------------------------------
+
+    def _get_parameter_filename(self, diff_opt):
+        """
+        Returns the filename for the diff-mode specific parameters
+        """
+        if "Difference" not in diff_opt:
+            raise RuntimeError("Trying to load parameters for difference mode when not doing differencing! "
+                               "This is most likely a bug in the code. Please report this to the developers")
+
+        template = "VESUVIO_{0}_diff_Parameters.xml"
+        if diff_opt == "SingleDifference":
+            return template.format("single")
+        else:
+            return template.format("double")
 
 #----------------------------------------------------------------------------------------
 
@@ -317,8 +442,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
             numbers = prop.value.tolist()
             if self._mon_spectra in numbers:
                 numbers.remove(self._spectra)
+            numbers.sort()
             self._spectra.append(numbers)
         #endfor
+
         self._sumspectra = self.getProperty(SUM_PROP).value
 
 #----------------------------------------------------------------------------------------
@@ -329,7 +456,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         first_ws = self._raw_grp[0]
         self._nperiods = nperiods
-        self._goodframes = first_ws.getRun().getLogData("goodfrm").value
 
         # Cache delta_t values
         raw_t = first_ws.readX(0)
@@ -402,7 +528,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
                          XMax=self._mon_tof_max,
                          EnableLogging=_LOGGING_)
 
-        return mtd[SUMMED_WS], mtd[SUMMED_MON]
+        summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_MON]
+        self._load_diff_mode_parameters(summed_data)
+        return summed_data, summed_mon
 
 #----------------------------------------------------------------------------------------
 
@@ -432,21 +560,30 @@ class LoadVesuvio(LoadEmptyVesuvio):
         and set the normalization range appropriately
         @param spectrum_no The current spectrum no
         """
-        if spectrum_no >= self._backward_spectra_list[0] and spectrum_no <= self._backward_spectra_list[-1]:
+        if self._is_back_scattering(spectrum_no):
             self._spectra_type=BACKWARD
-        else:
-            self._spectra_type=FORWARD
-
-        if self._spectra_type == BACKWARD:
             self._mon_norm_start, self._mon_norm_end = self._back_mon_norm
             self._period_sum1_start, self._period_sum1_end = self._back_period_sum1
             self._period_sum2_start, self._period_sum2_end = self._back_period_sum2
             self._foil_out_norm_start, self._foil_out_norm_end = self._back_foil_out_norm
         else:
+            self._spectra_type=FORWARD
             self._mon_norm_start, self._mon_norm_end = self._forw_mon_norm
             self._period_sum1_start, self._period_sum1_end = self._forw_period_sum1
             self._period_sum2_start, self._period_sum2_end = self._forw_period_sum2
             self._foil_out_norm_start, self._foil_out_norm_end = self._forw_foil_out_norm
+
+#----------------------------------------------------------------------------------------
+
+    def _is_back_scattering(self, spectrum_no):
+        return spectrum_no >= self._backward_spectra_list[0] and \
+            spectrum_no <= self._backward_spectra_list[-1]
+
+#----------------------------------------------------------------------------------------
+
+    def _is_fwd_scattering(self, spectrum_no):
+        return spectrum_no >= self._forward_spectra_list[0] and \
+            spectrum_no <= self._forward_spectra_list[-1]
 
 #----------------------------------------------------------------------------------------
 
@@ -564,10 +701,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 foil_out_periods = (4,5,6)
                 foil_thin_periods = (1,2,3)
                 foil_thick_periods = (1,2)
-        elif self._nperiods == 9:
-            foil_out_periods = (7,8,9)
-            foil_thin_periods = (4,5,6)
-            foil_thick_periods = (1,2,3)
         else:
             pass
 
@@ -804,29 +937,31 @@ class LoadVesuvio(LoadEmptyVesuvio):
 class SpectraToFoilPeriodMap(object):
     """Defines the mapping between a spectrum number
     & the period index into a WorkspaceGroup for a foil state.
+    2 period :: forward scattering
+    3 period :: back scattering
+    6 period :: back & forward scattering
+
+    one_to_one          :: Only used in back scattering where there is a single
+                           static foil
+    odd_even/even_odd   :: Only used in forward scatter models when the foil
+                           is/isn't infront of each detector. First bank 135-142
+                           is odd_even, second (143-150) is even_odd and so on.
     """
 
     def __init__(self, nperiods=6):
         """Constructor. For nperiods seet up the mappings"""
         if nperiods == 2:
-            self._one_to_one = {1:1, 2:2}
             self._odd_even =  {1:1, 2:3}
             self._even_odd =  {1:2, 2:4}
         elif nperiods == 3:
             self._one_to_one = {1:1, 2:2, 3:3}
-            self._odd_even =   {1:1, 2:3, 3:5}
-            self._even_odd =   {1:2, 2:4, 3:6}
         elif nperiods == 6:
             self._one_to_one = {1:1, 2:2, 3:3, 4:4, 5:5, 6:6}
             self._odd_even =   {1:1, 2:3, 3:5, 4:2, 5:4, 6:6}
             self._even_odd =   {1:2, 2:4, 3:6, 4:1, 5:3, 6:5}
-        elif nperiods == 9:
-            self._one_to_one = {1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9}
-            self._odd_even =   {1:1, 2:3, 3:5, 4:2, 5:4, 6:6, 7:7, 8:8, 9:9}
-            self._even_odd =   {1:2, 2:4, 3:6, 4:1, 5:3, 6:5, 7:7, 8:8, 9:9}
         else:
             raise RuntimeError("Unsupported number of periods given: " + str(nperiods) +
-                               ". Supported number of periods=2,3,6,9")
+                               ". Supported number of periods=2,3,6")
 
 #----------------------------------------------------------------------------------------
 
@@ -896,7 +1031,7 @@ class SpectraToFoilPeriodMap(object):
         Returns a tuple of indices that can be used to access the Workspace within
         a WorkspaceGroup that corresponds to the foil state numbers given
         @param spectrum_no :: A spectrum number (1->nspectra)
-        @param foil_state_no :: A number between 1 & 9(inclusive) that defines which foil
+        @param foil_state_no :: A number between 1 & 6(inclusive) that defines which foil
                                 state is required
         @returns A tuple of indices in a WorkspaceGroup that gives the associated Workspace
         """
@@ -911,7 +1046,7 @@ class SpectraToFoilPeriodMap(object):
         """Returns an index that can be used to access the Workspace within
         a WorkspaceGroup that corresponds to the foil state given
             @param spectrum_no :: A spectrum number (1->nspectra)
-            @param foil_state_no :: A number between 1 & 9(inclusive) that defines which
+            @param foil_state_no :: A number between 1 & 6(inclusive) that defines which
                                         foil state is required
             @returns The index in a WorkspaceGroup that gives the associated Workspace
         """
@@ -937,9 +1072,9 @@ class SpectraToFoilPeriodMap(object):
 #----------------------------------------------------------------------------------------
 
     def _validate_foil_number(self, foil_number):
-        if foil_number < 1 or foil_number > 9:
+        if foil_number < 1 or foil_number > 6:
             raise ValueError("Invalid foil state given, expected a number between "
-                             "1 and 9. number=%d" % foil_number)
+                             "1 and 6. number=%d" % foil_number)
 
 #----------------------------------------------------------------------------------------
 

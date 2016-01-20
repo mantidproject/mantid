@@ -5,10 +5,12 @@ CSS_VALID = """QLineEdit {
                 background-color: white;
             }"""
 
+# Yellow
 CSS_INVALID = """QLineEdit {
                 background-color: #FFFF3C;
             }"""
 
+# light blue
 CSS_EDITED = """QLineEdit {
                 background-color: #DAF7F9;
             }"""

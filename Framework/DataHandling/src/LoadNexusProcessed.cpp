@@ -216,12 +216,9 @@ int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadNexusProcessed::init() {
   // Declare required input parameters for algorithm
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".nx5");
-  exts.push_back(".xml");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load,
+                       {".nxs", ".nx5", ".xml"}),
       "The name of the Nexus file to read, as a full or relative path.");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -1071,12 +1068,28 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       }
     }
   }
+
+  std::string m_QConvention = "Inelastic";
+  try {
+    m_cppFile->getAttr("QConvention", m_QConvention);
+  } catch (std::exception &) {
+  }
+
   // peaks_workspace
   m_cppFile->closeGroup();
 
+  // Change convention of loaded file to that in Preferen
+  double qSign = 1.0;
+  std::string convention = ConfigService::Instance().getString("Q.convention");
+  if (convention != m_QConvention)
+    qSign = -1.0;
+
   for (int r = 0; r < numberPeaks; r++) {
     Kernel::V3D v3d;
-    v3d[2] = 1.0;
+    if (convention == "Crystallography")
+      v3d[2] = -1.0;
+    else
+      v3d[2] = 1.0;
     Geometry::IPeak *p;
     p = peakWS->createPeak(v3d);
     peakWS->addPeak(*p);
@@ -1100,7 +1113,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
-        double val = nxDouble[r];
+        double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setH(val);
       }
     }
@@ -1110,7 +1123,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
-        double val = nxDouble[r];
+        double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setK(val);
       }
     }
@@ -1120,7 +1133,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
-        double val = nxDouble[r];
+        double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setL(val);
       }
     }
@@ -1343,7 +1356,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
       // if spectrum list property is set read each spectrum separately by
       // setting blocksize=1
       if (m_list) {
-        std::vector<int64_t>::iterator itr = m_spec_list.begin();
+        auto itr = m_spec_list.begin();
         for (; itr != m_spec_list.end(); ++itr) {
           int64_t specIndex = (*itr) - 1;
           progress(progressBegin +
@@ -1402,7 +1415,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
       }
       //
       if (m_list) {
-        std::vector<int64_t>::iterator itr = m_spec_list.begin();
+        auto itr = m_spec_list.begin();
         for (; itr != m_spec_list.end(); ++itr) {
           int64_t specIndex = (*itr) - 1;
           progress(progressBegin +
@@ -1540,7 +1553,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
 
   // Setting a unit onto a TextAxis makes no sense.
   if (unit2 == "TextAxis") {
-    Mantid::API::TextAxis *newAxis = new Mantid::API::TextAxis(nspectra);
+    auto newAxis = new Mantid::API::TextAxis(nspectra);
     local_workspace->replaceAxis(1, newAxis);
   } else if (unit2 != "spectraNumber") {
     try {
@@ -1632,11 +1645,20 @@ void LoadNexusProcessed::readInstrumentGroup(
 
   // Now build the spectra list
   int index = 0;
+  bool haveSpectraAxis = local_workspace->getAxis(1)->isSpectra();
 
   for (int i = 1; i <= spectraInfo.nSpectra; ++i) {
     int spectrum(-1);
+    // prefer the spectra number from the instrument section
+    // over anything else. If not there then use a spectra axis
+    // number if we have one, else make one up as nothing was
+    // written to the file. We should always set it so that
+    // CompareWorkspaces gives the expected answer on a Save/Load
+    // round trip.
     if (spectraInfo.hasSpectra) {
       spectrum = spectraInfo.spectraNumbers[i - 1];
+    } else if (haveSpectraAxis && !m_axis1vals.empty()) {
+      spectrum = static_cast<specid_t>(m_axis1vals[i - 1]);
     } else {
       spectrum = i + 1;
     }
@@ -1646,11 +1668,7 @@ void LoadNexusProcessed::readInstrumentGroup(
          find(m_spec_list.begin(), m_spec_list.end(), i) !=
              m_spec_list.end())) {
       ISpectrum *spec = local_workspace->getSpectrum(index);
-      if (m_axis1vals.empty()) {
-        spec->setSpectrumNo(spectrum);
-      } else {
-        spec->setSpectrumNo(static_cast<specid_t>(m_axis1vals[i - 1]));
-      }
+      spec->setSpectrumNo(spectrum);
       ++index;
 
       int start = spectraInfo.detectorIndex[i - 1];
@@ -2132,8 +2150,7 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
 
     if (m_list) {
       if (m_interval) {
-        for (std::vector<int64_t>::iterator it = m_spec_list.begin();
-             it != m_spec_list.end();)
+        for (auto it = m_spec_list.begin(); it != m_spec_list.end();)
           if (*it >= m_spec_min && *it < m_spec_max) {
             it = m_spec_list.erase(it);
           } else
