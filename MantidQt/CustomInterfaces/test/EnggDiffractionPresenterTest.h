@@ -335,6 +335,29 @@ public:
     pres.notify(IEnggDiffractionPresenter::CalcCalib);
   }
 
+  // This would test the cropped calibration with no cerial number
+  // which should produce a warning
+  void test_calcCroppedCalibWithoutRunNumbers() {
+	  testing::NiceMock<MockEnggDiffractionView> mockView;
+	  MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+	  // would need basic calibration settings from the user, but it should not
+	  // get to that point because of early detected errors:
+	  EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+
+	  EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+
+	  EXPECT_CALL(mockView, newCeriaNo())
+		  .Times(1)
+		  .WillOnce(Return(m_ex_empty_run_num));
+
+	  // No errors, 1 warning (no Vanadium, no Ceria run numbers given)
+	  EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+	  EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+	  pres.notify(IEnggDiffractionPresenter::CropCalib);
+  }
+
   void test_focusWithoutRunNumber() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
