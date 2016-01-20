@@ -16,8 +16,10 @@ digraph FuryFitMultiple {
     ParameterTable
     ParameterNames
     FitGroup
+    FitGroup2                [label="FitGroup"]
     SampleLogs
-    OutputWorkspaces
+    ResultWorkspace
+    ResultWorkspace2        [label="ResultWorkspace"]
   }
 
   subgraph algorithms {
@@ -26,7 +28,9 @@ digraph FuryFitMultiple {
     Fit
     ConvertToHistogram
     AddSampleLogMultiple
+    AddSampleLogMultiple2   [label="AddSampleLogMultiple"]
     CopyLogs
+    CopyLogs2           [label="Copy logs"]
   }
   
   subgraph decisions {
@@ -52,15 +56,19 @@ digraph FuryFitMultiple {
   Minimizer                     -> Fit
   MaxIterations                 -> Fit
   Fit                           -> ParameterTable
-  Fit                           -> FitGroup
+  Fit                           -> FitGroup                     [label="GroupWorkspace containing fitting results from each spectra"]
   ParameterTable                -> TransposeFitParametersTable  [label="Makes output consistent with PlotPeakByLogValue"]
   TransposeFitParametersTable   -> ConvertParametersToWorkspace
-  ParameterNames                -> ConvertParametersToWorkspace [label="Convert parameter table to a MatrixWorkspace containing paramNames"]
-  InputWorkspace2               -> CopyLogs
-  ConvertParametersToWorkspace  -> CopyLogs
-  FitGroup                      -> CopyLogs
-  CopyLogs                      -> AddSampleLogMultiple
-  SampleLogs                    -> AddSampleLogMultiple
-  FitGroup                      -> AddSampleLogMultiple
-  AddSampleLogMultiple          -> OutputWorkspaces
+  ParameterNames                -> ConvertParametersToWorkspace [label="Convert parameter of interest into MatrixWorkspace containing paramNames"]
+  ConvertParametersToWorkspace  -> ResultWorkspace              [label="Outputs Matrixworkspace containing Tau, Intensity, A0 and Beta"]
+  InputWorkspace2               -> CopyLogs                     [label="Copy SampleLogs from InputWorkspace to OutputWorkspaces"]
+  ResultWorkspace               -> CopyLogs
+  InputWorkspace2               -> CopyLogs2
+  FitGroup                      -> CopyLogs2
+  CopyLogs                      -> AddSampleLogMultiple         
+  CopyLogs2                     -> AddSampleLogMultiple2
+  SampleLogs                    -> AddSampleLogMultiple2
+  SampleLogs                    -> AddSampleLogMultiple         [label="Additional SampleLogs based on Fit data"]
+  AddSampleLogMultiple          -> ResultWorkspace2             [label="Outputworkspace"]
+  AddSampleLogMultiple2         -> FitGroup2                    [label="OutputWorkspace"]
 }
