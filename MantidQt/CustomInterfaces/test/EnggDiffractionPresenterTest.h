@@ -566,6 +566,37 @@ public:
 	  pres.notify(IEnggDiffractionPresenter::CropCalib);
   }
 
+  // TODO: disabled for now, as this one would need to load files
+  void test_disable_calcCropCalibOK() {
+	  testing::NiceMock<MockEnggDiffractionView> mockView;
+	  MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+	  // will need basic calibration settings from the user
+	  EXPECT_CALL(mockView, currentCalibSettings())
+		  .Times(1)
+		  .WillOnce(Return(m_basicCalibSettings));
+
+	  // As this is a positive test, personal directory/files should be
+	  // provided here instead
+	  EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+	  EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
+
+	  EXPECT_CALL(mockView, currentCropCalibBankName())
+		  .Times(1)
+		  .WillOnce(Return(0));
+
+	  std::string specid = "100-200";
+	  EXPECT_CALL(mockView, currentCalibSpecNos())
+		  .Times(2)
+		  .WillRepeatedly(Return(specid));
+
+	  // No errors/warnings
+	  EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+	  EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+	  pres.notify(IEnggDiffractionPresenter::CropCalib);
+  }
+
   void test_focusWithoutRunNumber() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
