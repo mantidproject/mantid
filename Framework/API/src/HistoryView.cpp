@@ -82,8 +82,8 @@ void HistoryView::unroll(std::vector<HistoryItem>::iterator &it) {
 void HistoryView::unrollAll() {
   auto it = m_historyItems.begin();
   while (it != m_historyItems.end()) {
-    // iterator passed as a reference to prevent iterator invalidation.
-    // iterator incremented within loop.
+    // iterator passed by reference to prevent iterator invalidation.
+    // iterator incremented within function.
     unroll(it);
   }
 }
@@ -99,7 +99,7 @@ void HistoryView::unrollAll() {
 void HistoryView::rollAll() {
   auto it = m_historyItems.begin();
   while (it != m_historyItems.end()) {
-    // iterator incremented within loop.
+    // iterator incremented within function.
     roll(it);
   }
 }
