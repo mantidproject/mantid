@@ -209,7 +209,7 @@ class ISISPowderDiffractionGem2(stresstesting.MantidStressTest):
         self._success = False
         expt = cry_ini.Files('GEM', RawDir=(DIRS[0] + "GEM"), Analysisdir='test',
                              forceRootDirFromScripts=False, inputInstDir=DIRS[0])
-        expt.initialize('Cycle_09_5_No_ExtV', user='Mantid_tester', prefFile='GEM_095_calibration_noExtV.pref')
+        expt.initialize('Cycle_09_5_No_ExtV', user='mantid_tester', prefFile='GEM_095_calibration_noExtV.pref')
         expt.tell()
         cry_focus.focus_all(expt, "48436", Write_ExtV=False)
 
