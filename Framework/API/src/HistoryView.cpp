@@ -10,9 +10,8 @@ HistoryView::HistoryView(const WorkspaceHistory &wsHist)
     : m_wsHist(wsHist), m_historyItems() {
   // add all of the top level algorithms to the view by default
   const auto algorithms = wsHist.getAlgorithmHistories();
-  for (auto iter = algorithms.cbegin(); iter != algorithms.cend(); ++iter) {
-    m_historyItems.emplace_back(*iter);
-  }
+  m_historyItems =
+      std::vector<HistoryItem>(algorithms.begin(), algorithms.end());
 }
 
 /**
@@ -35,7 +34,6 @@ void HistoryView::unroll(size_t index) {
   // advance to the item at the index
   auto it = m_historyItems.begin();
   std::advance(it, index);
-
   unroll(it);
 }
 
@@ -50,7 +48,7 @@ void HistoryView::unroll(size_t index) {
  * @param it :: iterator to the list of history item objects at the position to
  *unroll
  */
-void HistoryView::unroll(std::list<HistoryItem>::iterator it) {
+void HistoryView::unroll(std::vector<HistoryItem>::iterator &it) {
   const auto history = it->getAlgorithmHistory();
   const auto childHistories = history->getChildHistories();
 
@@ -60,12 +58,14 @@ void HistoryView::unroll(std::list<HistoryItem>::iterator it) {
 
     ++it; // move iterator forward to insertion position
     // insert each of the records, in order, at this position
-    for (auto childIter = childHistories.begin();
-         childIter != childHistories.end(); ++childIter) {
-      HistoryItem item(*childIter);
-      m_historyItems.insert(it, item);
+    std::vector<HistoryItem> tmpHistory;
+    tmpHistory.reserve(childHistories.size());
+    for (const auto &item : childHistories) {
+      tmpHistory.emplace_back(item);
     }
-  }
+    it = m_historyItems.insert(it, tmpHistory.begin(), tmpHistory.end());
+  } else
+    ++it;
 }
 
 /**
@@ -77,7 +77,8 @@ void HistoryView::unroll(std::list<HistoryItem>::iterator it) {
  *calling this method.
  */
 void HistoryView::unrollAll() {
-  for (auto it = m_historyItems.begin(); it != m_historyItems.end(); ++it) {
+  auto it = m_historyItems.begin();
+  while (it != m_historyItems.end()) {
     unroll(it);
   }
 }
@@ -91,7 +92,8 @@ void HistoryView::unrollAll() {
  *calling this method.
  */
 void HistoryView::rollAll() {
-  for (auto it = m_historyItems.begin(); it != m_historyItems.end(); ++it) {
+  auto it = m_historyItems.begin();
+  while (it != m_historyItems.end()) {
     roll(it);
   }
 }
@@ -118,7 +120,6 @@ void HistoryView::roll(size_t index) {
   // advance to the item at the index
   auto it = m_historyItems.begin();
   std::advance(it, index);
-
   roll(it);
 }
 
@@ -135,7 +136,7 @@ void HistoryView::roll(size_t index) {
  * @param it :: iterator to the list of history item objects at the positon to
  *roll
  */
-void HistoryView::roll(std::list<HistoryItem>::iterator it) {
+void HistoryView::roll(std::vector<HistoryItem>::iterator &it) {
 
   // the number of records after this position
   const size_t numChildren = it->numberOfChildren();
@@ -150,11 +151,13 @@ void HistoryView::roll(std::list<HistoryItem>::iterator it) {
       // roll them back up if so.
       if (it->isUnrolled()) {
         roll(it);
+        --it;
       }
       // Then just remove the item from the list
       it = m_historyItems.erase(it);
     }
-  }
+  } else
+    ++it;
 }
 
 /**
@@ -185,12 +188,8 @@ void HistoryView::filterBetweenExecDate(Mantid::Kernel::DateAndTime start,
  *
  * @returns vector of history items for this view.
  */
-const std::vector<HistoryItem> HistoryView::getAlgorithmsList() const {
-  std::vector<HistoryItem> histories;
-  histories.reserve(size());
-  std::copy(m_historyItems.begin(), m_historyItems.end(),
-            std::back_inserter(histories));
-  return histories;
+const std::vector<HistoryItem> &HistoryView::getAlgorithmsList() const {
+  return m_historyItems;
 }
 
 } // namespace API
