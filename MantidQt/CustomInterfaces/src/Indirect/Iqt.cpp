@@ -134,59 +134,62 @@ void Iqt::algorithmComplete(bool error) {
 
   // Tiled plot
   if (m_uiForm.ckTile->isChecked()) {
-    MatrixWorkspace_const_sptr outWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_pythonExportWsName);
-
-    // Find x value where y > 1 in 0th spectra
-    const auto tiledPlotWsName = outWs->getName() + "_tiled";
-    const auto y_data = outWs->dataY(0);
-    const auto y_data_length = y_data.size();
-    auto crop_index = y_data.size();
-    for (size_t i = 0; i < y_data_length; i++) {
-      if (y_data[i] > 1) {
-        crop_index = i - 1;
-        break;
-      }
-    }
-    const auto crop_value = outWs->dataX(0)[crop_index];
-
-    // Clone workspace before cropping to keep in ADS
-    IAlgorithm_sptr clone =
-        AlgorithmManager::Instance().create("CloneWorkspace");
-    clone->initialize();
-    clone->setProperty("InputWorkspace", outWs->getName());
-    clone->setProperty("OutputWorkspace", tiledPlotWsName);
-    clone->execute();
-
-    // Crop based on crop_value
-    IAlgorithm_sptr crop = AlgorithmManager::Instance().create("CropWorkspace");
-    crop->initialize();
-    crop->setProperty("InputWorkspace", tiledPlotWsName);
-    crop->setProperty("OutputWorkspace", tiledPlotWsName);
-    crop->setProperty("XMax", crop_value);
-    crop->execute();
-    MatrixWorkspace_const_sptr tiledPlotWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            tiledPlotWsName);
-
-    // Plot tiledwindow
-    const size_t nPlots = tiledPlotWs->getNumberHistograms();
-    if (nPlots == 0)
-      return;
-    QString pyInput = "from mantidplot import newTiledWindow\n";
-    pyInput += "newTiledWindow(sources=[";
-    for (size_t index = 0; index < nPlots; ++index) {
-      if (index > 0) {
-        pyInput += ",";
-      }
-      const std::string pyInStr =
-          "(['" + tiledPlotWsName + "'], " + std::to_string(index) + ")";
-      pyInput += QString::fromStdString(pyInStr);
-    }
-    pyInput += "])\n";
-    runPythonCode(pyInput);
+    PlotTiled();
   }
+}
+
+void Iqt::PlotTiled() {
+  MatrixWorkspace_const_sptr outWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          m_pythonExportWsName);
+
+  // Find x value where y > 1 in 0th spectra
+  const auto tiledPlotWsName = outWs->getName() + "_tiled";
+  const auto y_data = outWs->dataY(0);
+  const auto y_data_length = y_data.size();
+  auto crop_index = y_data.size();
+  for (size_t i = 0; i < y_data_length; i++) {
+    if (y_data[i] > 1) {
+      crop_index = i - 1;
+      break;
+    }
+  }
+  const auto crop_value = outWs->dataX(0)[crop_index];
+
+  // Clone workspace before cropping to keep in ADS
+  IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
+  clone->initialize();
+  clone->setProperty("InputWorkspace", outWs->getName());
+  clone->setProperty("OutputWorkspace", tiledPlotWsName);
+  clone->execute();
+
+  // Crop based on crop_value
+  IAlgorithm_sptr crop = AlgorithmManager::Instance().create("CropWorkspace");
+  crop->initialize();
+  crop->setProperty("InputWorkspace", tiledPlotWsName);
+  crop->setProperty("OutputWorkspace", tiledPlotWsName);
+  crop->setProperty("XMax", crop_value);
+  crop->execute();
+  MatrixWorkspace_const_sptr tiledPlotWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          tiledPlotWsName);
+
+  // Plot tiledwindow
+  const size_t nPlots = tiledPlotWs->getNumberHistograms();
+  if (nPlots == 0)
+    return;
+  QString pyInput = "from mantidplot import newTiledWindow\n";
+  pyInput += "newTiledWindow(sources=[";
+  for (size_t index = 0; index < nPlots; ++index) {
+    if (index > 0) {
+      pyInput += ",";
+    }
+    const std::string pyInStr =
+        "(['" + tiledPlotWsName + "'], " + std::to_string(index) + ")";
+    pyInput += QString::fromStdString(pyInStr);
+  }
+  pyInput += "])\n";
+  runPythonCode(pyInput);
 }
 
 /**
