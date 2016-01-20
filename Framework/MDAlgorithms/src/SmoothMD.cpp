@@ -418,11 +418,12 @@ void SmoothMD::init() {
   widthVectorValidator->add(
       boost::make_shared<MandatoryValidator<WidthVector>>());
 
-  declareProperty(new ArrayProperty<double>("WidthVector", widthVectorValidator,
-                                            Direction::Input),
-                  "Width vector. Either specify the width in n-pixels for each "
-                  "dimension, or provide a single entry (n-pixels) for all "
-                  "dimensions.");
+  declareProperty(
+      new ArrayProperty<double>("WidthVector", widthVectorValidator,
+                                Direction::Input),
+      "Width vector. Either specify the width in n-pixels for each "
+      "dimension, or provide a single entry (n-pixels) for all "
+      "dimensions. Must be odd integers if Hat function is chosen.");
 
   const auto allFunctionTypes = functions();
   const std::string first = allFunctionTypes.front();
