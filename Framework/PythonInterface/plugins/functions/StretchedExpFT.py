@@ -36,7 +36,7 @@ class StretchedExpFT(IFunction1D):
         """declare some constants"""
         super(StretchedExpFT, self).__init__()
         self._h = 4.135665616  # meV*Thz
-        self._parmset = set(['height', 'tau', 'beta', 'origin'])  # valid syntax for python >= 2.6
+        self._parmset = set(['height', 'tau', 'beta', 'Origin'])  # valid syntax for python >= 2.6
         self._parm2index = {'height': 0, 'tau': 1, 'beta': 2, 'origin': 3}  # order in which they were defined
 
     def category(self):
@@ -48,7 +48,7 @@ class StretchedExpFT(IFunction1D):
         self.declareParameter('height', 0.1, 'Intensity at the origin')
         self.declareParameter('tau', 100.0, 'Relaxation time of the standard exponential')
         self.declareParameter('beta', 1.0, 'Stretching exponent')
-        self.declareParameter('origin', 0.0, 'Origin of the peak')
+        self.declareParameter('Origin', 0.0, 'Origin of the peak')
         self.validateParams()
 
     def validateParams(self):
@@ -56,14 +56,14 @@ class StretchedExpFT(IFunction1D):
         height = self.getParameterValue('height')
         tau = self.getParameterValue('tau')
         beta = self.getParameterValue('beta')
-        origin = self.getParameterValue('origin')
+        origin = self.getParameterValue('Origin')
         for name, value in {'height': height, 'tau': tau, 'beta': beta}.items():
             if value <= 0:
                 message = 'Parameter {} in StretchedExpFT must be positive. Got {} instead'.format(name, str(value))
                 logger.error(message)
                 # raise ValueError(message)
                 return None
-        return {'height': height, 'tau': tau, 'beta': beta, 'origin': origin}
+        return {'height': height, 'tau': tau, 'beta': beta, 'Origin': origin}
 
     def function1D(self, xvals, **optparms):
         """ Computes the Fourier transform of the Symmetrized Stretched Exponential
@@ -110,11 +110,11 @@ class StretchedExpFT(IFunction1D):
         dt = (float(N) / (2 * N + 1)) * (self._h / emax)  # extent to negative times and t==0
         sampled_times = dt * np.arange(-N, N + 1)  # len( sampled_times ) < 64000
         exponent = -(np.abs(sampled_times) / p['tau']) ** p['beta']
-        freqs = de * np.arange(-N, N + 1)  # shift by origin
+        freqs = de * np.arange(-N, N + 1)
         fourier = p['height'] * np.abs(scipy.fftpack.fft(np.exp(exponent)).real)
         fourier = np.concatenate((fourier[N + 1:], fourier[0:N + 1]))
         interpolator = scipy.interpolate.interp1d(freqs, fourier)
-        fourier = interpolator(xvals - p['origin'])
+        fourier = interpolator(xvals - p['Origin'])
         return fourier
 
     def functionDeriv1D(self, xvals, jacobian):

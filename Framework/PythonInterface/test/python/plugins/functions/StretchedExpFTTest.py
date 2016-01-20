@@ -108,11 +108,11 @@ class StretchedExpFTTest( unittest.TestCase ):
         sx = -Nh*de+de/2
         ex = (Nh-1)*de+de/2
         # Our initial guess is not centered at the origin, but around de
-        initial_parameters = 'height=0.1, tau=100, beta=1, origin=%f' % variation(de)
+        initial_parameters = 'height=0.1, tau=100, beta=1, Origin=%f' % variation(de)
         func_string = 'name=StretchedExpFT,%s' % initial_parameters
         Fit(Function=func_string, InputWorkspace='_test_seft_data', StartX=sx, EndX=ex, CreateOutput=1, MaxIterations=20)
 
-        parms['origin'] = 0.0  # insert (origin,0.0) to parameter dictionary for assessment of fit results
+        parms['Origin'] = 0.0  # insert (Origin,0.0) to parameter dictionary for assessment of fit results
         ws = mtd['_test_seft_data_Parameters']
         #tr()
         fitted = ''
