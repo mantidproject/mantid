@@ -3,7 +3,6 @@ from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress
 from mantid.kernel import Direction, logger
 from mantid import config
-import math
 import os
 
 
@@ -287,12 +286,17 @@ class TransformToIqt(PythonAlgorithm):
         DeleteWorkspace('__sam')
 
         # Crop nonsense values off workspace
-        binning = int(math.ceil(mtd[self._output_workspace].blocksize() / 2.0))
-        bin_v = mtd[self._output_workspace].dataX(0)[binning]
-        trans_prog.report('Cropping output')
-        CropWorkspace(InputWorkspace=self._output_workspace,
+        y_data = mtd[self._output_workspace].dataY(0)
+        max_index = len(y_data) - 1 # Defaults to final value in spectra
+        for index in range(len(y_data)):
+            if y_data[index] > 1.0:
+                max_index = index - 1
+                break
+        x_data = mtd[self._output_workspace].dataX(0)
+        crop_value = x_data[max_index]
+        CropWorkspace(Inputworkspace =self._output_workspace,
                       OutputWorkspace=self._output_workspace,
-                      XMax=bin_v)
+                      XMax = crop_value)
 
         # Set Y axis unit and label
         mtd[self._output_workspace].setYUnit('')
@@ -304,7 +308,6 @@ class TransformToIqt(PythonAlgorithm):
         DeleteWorkspace('__res_int')
         DeleteWorkspace('__res_fft')
         DeleteWorkspace('__res')
-
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(TransformToIqt)
