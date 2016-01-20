@@ -91,7 +91,7 @@ std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
     result.push_back(Geometry::getWrappedVector((*op) * vector));
   }
 
-  std::sort(result.begin(), result.end(), FuzzyV3DLessThan());
+  std::sort(result.begin(), result.end(), AtomPositionsLessThan());
   result.erase(std::unique(result.begin(), result.end()), result.end());
 
   return result;
