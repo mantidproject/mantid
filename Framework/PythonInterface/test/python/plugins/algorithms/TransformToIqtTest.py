@@ -56,5 +56,21 @@ class TransformToIqtTest(unittest.TestCase):
         self.assertEqual(CheckWorkspacesMatch(params, self._param_table), "Success!")
 
 
+    def test_for_unwanted_data(self):
+        """
+        Test to see if data is more than 1 in y axis for the first spectra. Any data like this should be cropped
+        """
+
+        sample = Load('irs26176_graphite002_red')
+        resolution = Load('irs26173_graphite002_res')
+
+        params, iqt = TransformToIqt(SampleWorkspace=sample,
+                                     ResolutionWorkspace=resolution,
+                                     BinReductionFactor=10)
+
+        iqt_y_data = iqt.dataY(0)
+        for bin_index in range(len(iqt_y_data)):
+            self.assertLessEqual(iqt_y_data[bin_index], 1)
+
 if __name__ == '__main__':
     unittest.main()
