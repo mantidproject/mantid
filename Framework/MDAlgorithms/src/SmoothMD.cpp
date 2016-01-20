@@ -241,7 +241,7 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 
       // Explicitly cast the doubles to int
       // We've already checked in the validator that the doubles we have are odd
-      // integer values
+      // integer values and well below max int
       std::vector<int> widthVectorInt;
       widthVectorInt.reserve(widthVector.size());
       for (auto const widthEntry : widthVector) {

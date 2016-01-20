@@ -691,7 +691,7 @@ std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(
  */
 std::pair<std::vector<size_t>, std::vector<bool>>
 MDHistoWorkspaceIterator::findNeighbourIndexesByWidth1D(
-  const int &width, const int &width_dimension) const {
+    const int &width, const int &width_dimension) const {
 
   std::vector<int> widths;
   for (size_t dimension = 0; dimension < m_nd; ++dimension) {
