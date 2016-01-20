@@ -358,6 +358,81 @@ public:
 	  pres.notify(IEnggDiffractionPresenter::CropCalib);
   }
 
+  // this can start the cropped calibration thread, so watch out
+  // the test provide gui with missing calib settings
+  // which should return a single error
+  void test_calcCroppedCalibWithSettingsMissing() {
+	  testing::NiceMock<MockEnggDiffractionView> mockView;
+
+	  // this test can start a Qt thread that needs signals/slots
+	  // Don't do: MantidQt::CustomInterfaces::EnggDiffractionPresenter
+	  // pres(&mockView);
+	  MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+	  const std::string instr = "FAKEINSTR";
+	  const std::string vanNo = "9999999999"; // use a number that won't be found!
+	  const std::string ceriaNo =
+		  "9999999999"; // use a number that won't be found!
+
+	  EnggDiffCalibSettings calibSettings;
+
+	  EXPECT_CALL(mockView, currentCalibSettings())
+		  .Times(1)
+		  .WillOnce(Return(calibSettings));
+
+	  EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+
+	  EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
+
+	  // 1 warning because some required settings are missing/empty
+	  EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+	  EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+
+	  TS_ASSERT_THROWS_NOTHING(pres.notify(IEnggDiffractionPresenter::CropCalib));
+  }
+
+  // This should not start the process, tests with an empty spec number which
+  // should generate a user warning that spec number is missing
+  void test_calcCroppedCalibWithEmptySpec() {
+	  testing::NiceMock<MockEnggDiffractionView> mockView;
+
+	  // this test would start a Qt thread that needs signals/slots
+	  // Don't do: MantidQt::CustomInterfaces::EnggDiffractionPresenter
+	  // pres(&mockView);
+	  EnggDiffPresenterNoThread pres(&mockView);
+
+	  const std::string instr = "ENGINX";
+	  const std::string vanNo = "8899999988"; // use a number that won't be found!
+	  const std::string ceriaNo =
+		  "9999999999"; // use a number that won't be found!
+
+						// will need basic calibration settings from the user
+	  EnggDiffCalibSettings calibSettings;
+	  calibSettings.m_pixelCalibFilename =
+		  instr + "_" + vanNo + "_" + ceriaNo + ".prm";
+	  calibSettings.m_templateGSAS_PRM = "fake.prm";
+	  EXPECT_CALL(mockView, currentCalibSettings())
+		  .Times(1)
+		  .WillOnce(Return(calibSettings));
+
+	  EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+
+	  EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
+
+	  std::string specid = "";
+	  EXPECT_CALL(mockView, currentCalibSpecNos())
+		  .Times(1)
+		  .WillOnce(Return(specid));
+
+	  // No warnings/error pop-ups: some exception(s) are thrown (because there
+	  // are missing settings and/or files) but these must be caught
+	  // and error messages logged
+	  EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+	  EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+
+	  pres.notify(IEnggDiffractionPresenter::CropCalib);
+  }
+
   void test_focusWithoutRunNumber() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
