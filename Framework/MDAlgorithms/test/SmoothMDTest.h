@@ -146,7 +146,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<double> widthVector(1, 3);
+    WidthVector widthVector(1, 3);
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", toSmooth);
     alg.setPropertyValue("OutputWorkspace", "dummy");
@@ -185,7 +185,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<double> widthVector(1, 5); // Smooth with width == 5
+    WidthVector widthVector(1, 5); // Smooth with width == 5
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", toSmooth);
     alg.setPropertyValue("OutputWorkspace", "dummy");
@@ -248,7 +248,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<double> widthVector;
+    WidthVector widthVector;
     widthVector.push_back(3); // 3 = width in zeroth dimension
     widthVector.push_back(5); // 5 = width in first dimension
     alg.setProperty("WidthVector", widthVector);
@@ -289,7 +289,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<double> widthVector(1, 3); // Smooth with width == 3
+    WidthVector widthVector(1, 3); // Smooth with width == 3
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", a);
     alg.setProperty("InputNormalizationWorkspace", b);
@@ -313,7 +313,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<double> widthVector(1, 3); // Smooth with width == 3
+    WidthVector widthVector(1, 3); // Smooth with width == 3
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", a);
     alg.setProperty("InputNormalizationWorkspace", b);
@@ -520,6 +520,20 @@ public:
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", m_toSmooth);
     alg.setProperty("InputNormalizationWorkspace", m_toSmooth);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDHistoWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(out);
+  }
+
+  void test_execute_gaussian_function() {
+    SmoothMD alg;
+    alg.setChild(true);
+    alg.initialize();
+    WidthVector widthVector(1, 3); // Smooth with FWHM of 3
+    alg.setProperty("WidthVector", widthVector);
+    alg.setProperty("InputWorkspace", m_toSmooth);
+    alg.setProperty("Function", "Gaussian");
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr out = alg.getProperty("OutputWorkspace");
