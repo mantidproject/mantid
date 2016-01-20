@@ -495,7 +495,76 @@ public:
 	  pres.notify(IEnggDiffractionPresenter::CropCalib);
   }
 
+  // this test actually starts the cropped calibration process - which implies
+  // starting the thread unless you use the mock without thread
+  // this test case includes all valid settings, run numbers, spectrum id
+  // selected
+  // & valid spectrum id provided
+  void test_calcCroppedCalibWithRunNumbers() {
+	  testing::NiceMock<MockEnggDiffractionView> mockView;
 
+	  // this test would start a Qt thread that needs signals/slots
+	  // Don't do: MantidQt::CustomInterfaces::EnggDiffractionPresenter
+	  // pres(&mockView);
+	  EnggDiffPresenterNoThread pres(&mockView);
+
+	  const std::string instr = "ENGINX";
+	  const std::string vanNo = "8899999988"; // use a number that won't be found!
+	  const std::string ceriaNo =
+		  "9999999999"; // use a number that won't be found!
+
+						// will need basic calibration settings from the user
+	  EnggDiffCalibSettings calibSettings;
+	  calibSettings.m_pixelCalibFilename =
+		  instr + "_" + vanNo + "_" + ceriaNo + ".prm";
+	  calibSettings.m_templateGSAS_PRM = "fake.prm";
+	  EXPECT_CALL(mockView, currentCalibSettings())
+		  .Times(2)
+		  .WillRepeatedly(Return(calibSettings));
+
+	  EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+
+	  EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
+
+	  EXPECT_CALL(mockView, currentCropCalibBankName())
+		  .Times(1)
+		  .WillOnce(Return(0));
+
+	  std::string specid = "100-200";
+	  EXPECT_CALL(mockView, currentCalibSpecNos())
+		  .Times(2)
+		  .WillRepeatedly(Return(specid));
+
+	  const std::string filename =
+		  "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
+	  EXPECT_CALL(mockView,
+		  askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+			  ceriaNo + "_both_banks.prm"))
+		  .Times(0);
+	  //  .WillOnce(Return(filename)); // if enabled ask user output filename
+
+	  // Should not try to use options for focusing
+	  EXPECT_CALL(mockView, focusingRunNo()).Times(0);
+	  EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
+	  EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
+	  EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+	  EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+
+	  // should disable actions at the beginning of the calculations
+	  EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(1);
+
+	  // and should enable them again at the (unsuccessful) end - this happens
+	  // when a separate thread finished (here the thread is mocked)
+	  EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(1);
+
+	  // No warnings/error pop-ups: some exception(s) are thrown (because there
+	  // are missing settings and/or files) but these must be caught
+	  // and error messages logged
+	  EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+	  EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+
+	  pres.notify(IEnggDiffractionPresenter::CropCalib);
+  }
 
   void test_focusWithoutRunNumber() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
