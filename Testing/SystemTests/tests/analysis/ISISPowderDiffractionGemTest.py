@@ -192,8 +192,15 @@ class ISISPowderDiffractionGem2(stresstesting.MantidStressTest):
                     "GEM/VanaPeaks.dat", "GEM/test/GrpOff/offsets_2011_cycle111.cal",
                     "GEM/test/Cycle_09_5_No_ExtV/mantid_tester/GEM_095_calibration_noExtV.pref"])
 
-        # note: VanaPeaks.dat is used only if provided in the directory and is compulsory
-        # required here for GEM
+        # note:
+        # ISISPowderDiffractionGem2 system test required new .raw files and that are actually
+        # been previously been used in order to generate the vanadium files.
+        # The pref file is using two files for Vanadium `48038+48039`. This `pref file` was found
+        # on the network and being utilised by the scientists, hence used the exact .pref`, `.raw`
+        # and `.cal` files in order to run Powder Diffraction with GEM.
+        # For some reason `striping the vanadium peaks` for GEM is a must, unless it seems to crash
+        # and this is the reason the correct `GEM` version of `VanaPeaks.dat` is required within
+        # the directory.
 
     def _clean_up_files(self, filenames, directories):
         try:
@@ -240,7 +247,6 @@ class ISISPowderDiffractionGem2(stresstesting.MantidStressTest):
         self._clean_up_files(filenames, DIRS)
 
 
-# Deletion of invalid
 # ======================================================================
 # work horse
 class LoadTests2(unittest.TestCase):
