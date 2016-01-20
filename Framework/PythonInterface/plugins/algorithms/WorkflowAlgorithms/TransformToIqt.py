@@ -288,7 +288,7 @@ class TransformToIqt(PythonAlgorithm):
 
         # Crop nonsense values off workspace
         y_data = mtd[self._output_workspace].dataY(0)
-        max_index = 0
+        max_index = len(y_data) - 1 # Defaults to final value in spectra
         for index in range(len(y_data)):
             if y_data[index] > 1.0:
                 max_index = index - 1
