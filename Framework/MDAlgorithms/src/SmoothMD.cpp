@@ -29,7 +29,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 // Typedef for width vector
-typedef std::vector<int> WidthVector;
+typedef std::vector<double> WidthVector;
 
 // Typedef for kernel vector
 typedef std::vector<double> KernelVector;
@@ -232,7 +232,6 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 
           outWS->setSignalAt(iteratorIndex,
                              std::numeric_limits<double>::quiet_NaN());
-
           outWS->setErrorSquaredAt(iteratorIndex,
                                    std::numeric_limits<double>::quiet_NaN());
 
@@ -240,8 +239,17 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
         }
       }
 
+      // Explicitly cast the doubles to int
+      // We've already checked in the validator that the doubles we have are odd
+      // integer values
+      std::vector<int> widthVectorInt;
+      widthVectorInt.reserve(widthVector.size());
+      for (auto const widthEntry : widthVector) {
+        widthVectorInt.push_back(static_cast<int>(widthEntry));
+      }
+
       std::vector<size_t> neighbourIndexes =
-          iterator->findNeighbourIndexesByWidth(widthVector);
+          iterator->findNeighbourIndexesByWidth(widthVectorInt);
 
       size_t nNeighbours = neighbourIndexes.size();
       double sumSignal = iterator->getSignal();
@@ -351,9 +359,9 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
           if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
 
             write_ws->setSignalAt(iteratorIndex,
-                               std::numeric_limits<double>::quiet_NaN());
-            write_ws->setErrorSquaredAt(iteratorIndex,
-                                     std::numeric_limits<double>::quiet_NaN());
+                                  std::numeric_limits<double>::quiet_NaN());
+            write_ws->setErrorSquaredAt(
+                iteratorIndex, std::numeric_limits<double>::quiet_NaN());
 
             continue; // Skip we couldn't measure here.
           }
@@ -376,8 +384,8 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
           if (indexValidity[i]) {
             sumSignal += read_ws->getSignalAt(neighbourIndexes[i]) *
                          normalised_kernel[i];
-            error = read_ws->getErrorAt(neighbourIndexes[i]) *
-                    normalised_kernel[i];
+            error =
+                read_ws->getErrorAt(neighbourIndexes[i]) * normalised_kernel[i];
             sumSquareError += error * error;
           }
 
@@ -405,13 +413,13 @@ void SmoothMD::init() {
 
   auto widthVectorValidator = boost::make_shared<CompositeValidator>();
   auto boundedValidator =
-      boost::make_shared<ArrayBoundedValidator<int>>(1, 100);
+      boost::make_shared<ArrayBoundedValidator<double>>(1, 1000);
   widthVectorValidator->add(boundedValidator);
   widthVectorValidator->add(
-      boost::make_shared<MandatoryValidator<std::vector<int>>>());
+      boost::make_shared<MandatoryValidator<WidthVector>>());
 
-  declareProperty(new ArrayProperty<int>("WidthVector", widthVectorValidator,
-                                         Direction::Input),
+  declareProperty(new ArrayProperty<double>("WidthVector", widthVectorValidator,
+                                            Direction::Input),
                   "Width vector. Either specify the width in n-pixels for each "
                   "dimension, or provide a single entry (n-pixels) for all "
                   "dimensions.");
@@ -455,11 +463,12 @@ void SmoothMD::exec() {
   }
 
   // Get the width vector
-  std::vector<int> widthVector = this->getProperty("WidthVector");
+  std::vector<double> widthVector = this->getProperty("WidthVector");
   if (widthVector.size() == 1) {
     // Pad the width vector out to the right size if only one entry has been
     // provided.
-    widthVector = std::vector<int>(toSmooth->getNumDims(), widthVector.front());
+    widthVector =
+        std::vector<double>(toSmooth->getNumDims(), widthVector.front());
   }
 
   // Find the chosen smooth operation
@@ -482,9 +491,12 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
 
   IMDHistoWorkspace_sptr toSmoothWs = this->getProperty("InputWorkspace");
 
+  // Function type
+  std::string function_type = this->getProperty("Function");
+
   // Check the width vector
   const std::string widthVectorPropertyName = "WidthVector";
-  std::vector<int> widthVector = this->getProperty(widthVectorPropertyName);
+  std::vector<double> widthVector = this->getProperty(widthVectorPropertyName);
 
   if (widthVector.size() != 1 &&
       widthVector.size() != toSmoothWs->getNumDims()) {
@@ -493,13 +505,21 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
                                       " can either have one entry or needs to "
                                       "have entries for each dimension of the "
                                       "InputWorkspace."));
-  } else {
-    for (auto it = widthVector.begin(); it != widthVector.end(); ++it) {
-      const int widthEntry = *it;
-      if (widthEntry % 2 == 0) {
+  } else if (function_type == "Hat") {
+    // If Hat function is used then widthVector must contain odd integers only
+    for (auto const widthEntry : widthVector) {
+      double intpart;
+      if (modf(widthEntry, &intpart) != 0.0) {
         std::stringstream message;
-        message << widthVectorPropertyName
-                << " entries must be odd numbers. Bad entry is " << widthEntry;
+        message << widthVectorPropertyName << " entries must be (odd) integers "
+                                              "when Hat function is chosen. "
+                                              "Bad entry is " << widthEntry;
+        product.insert(std::make_pair(widthVectorPropertyName, message.str()));
+      } else if (static_cast<unsigned long>(widthEntry) % 2 == 0) {
+        std::stringstream message;
+        message << widthVectorPropertyName << " entries must be odd integers "
+                                              "when Hat function is chosen. "
+                                              "Bad entry is " << widthEntry;
         product.insert(std::make_pair(widthVectorPropertyName, message.str()));
       }
     }

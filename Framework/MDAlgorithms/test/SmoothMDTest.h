@@ -13,6 +13,9 @@ using Mantid::MDAlgorithms::SmoothMD;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
+// Typedef for width vector
+typedef std::vector<double> WidthVector;
+
 class SmoothMDTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -37,7 +40,7 @@ public:
     SmoothMD alg;
     alg.initialize();
     TSM_ASSERT_THROWS("N-pixels contains zero",
-                      alg.setProperty("WidthVector", std::vector<int>(1, 0)),
+                      alg.setProperty("WidthVector", WidthVector(1, 0)),
                       std::invalid_argument &);
   }
 
@@ -45,7 +48,7 @@ public:
     SmoothMD alg;
     alg.initialize();
     TSM_ASSERT_THROWS("Empty WidthVector",
-                      alg.setProperty("WidthVector", std::vector<int>()),
+                      alg.setProperty("WidthVector", std::vector<double>()),
                       std::invalid_argument &);
   }
 
@@ -60,11 +63,11 @@ public:
     alg.setProperty("InputWorkspace", toSmooth);
     alg.setProperty(
         "WidthVector",
-        std::vector<int>(1, 4)); // Width vector contains even number == 4
+        std::vector<double>(1, 4)); // Width vector contains even number == 4
     TSM_ASSERT_THROWS("One bad entry. Should throw.", alg.execute(),
                       std::runtime_error &);
 
-    std::vector<int> widthVector;
+    std::vector<double> widthVector;
     widthVector.push_back(3); // OK
     widthVector.push_back(5); // OK
     widthVector.push_back(2); // Not OK
@@ -79,7 +82,7 @@ public:
     auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(
         1 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
 
-    std::vector<int> badWidths(
+    std::vector<double> badWidths(
         11, 3); // odd number value = 3, but size of 11 has no meaning
 
     SmoothMD alg;
@@ -107,7 +110,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<int> widthVector(1, 3);
+    std::vector<double> widthVector(1, 3);
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", toSmooth);
     alg.setPropertyValue("OutputWorkspace", "dummy");
@@ -143,7 +146,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<int> widthVector(1, 3);
+    std::vector<double> widthVector(1, 3);
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", toSmooth);
     alg.setPropertyValue("OutputWorkspace", "dummy");
@@ -182,7 +185,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<int> widthVector(1, 5); // Smooth with width == 5
+    std::vector<double> widthVector(1, 5); // Smooth with width == 5
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", toSmooth);
     alg.setPropertyValue("OutputWorkspace", "dummy");
@@ -245,7 +248,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<int> widthVector;
+    std::vector<double> widthVector;
     widthVector.push_back(3); // 3 = width in zeroth dimension
     widthVector.push_back(5); // 5 = width in first dimension
     alg.setProperty("WidthVector", widthVector);
@@ -286,7 +289,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<int> widthVector(1, 3); // Smooth with width == 3
+    std::vector<double> widthVector(1, 3); // Smooth with width == 3
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", a);
     alg.setProperty("InputNormalizationWorkspace", b);
@@ -310,7 +313,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<int> widthVector(1, 3); // Smooth with width == 3
+    std::vector<double> widthVector(1, 3); // Smooth with width == 3
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", a);
     alg.setProperty("InputNormalizationWorkspace", b);
@@ -346,7 +349,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<int> widthVector(1, 3); // Smooth with width == 3
+    WidthVector widthVector(1, 3); // Smooth with width == 3
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", toSmooth);
     alg.setProperty("InputNormalizationWorkspace", normWs);
@@ -415,7 +418,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     // widthVector is the FWHM of the Gaussian in pixels in each dimension
-    std::vector<int> widthVector(1, 1);
+    WidthVector widthVector(1, 1);
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", toSmooth);
     alg.setProperty("Function", "Gaussian");
@@ -453,7 +456,7 @@ public:
     alg.initialize();
     // widthVector is the FWHM of the Gaussian in pixels in each dimension
     // This should result in a 3x3 kernel
-    std::vector<int> widthVector(1, 1);
+    WidthVector widthVector(1, 1);
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", toSmooth);
     alg.setProperty("Function", "Gaussian");
@@ -500,7 +503,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<int> widthVector(1, 5); // Smooth with width == 5
+    WidthVector widthVector(1, 5); // Smooth with width == 5
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", m_toSmooth);
     alg.setPropertyValue("OutputWorkspace", "dummy");
@@ -513,7 +516,7 @@ public:
     SmoothMD alg;
     alg.setChild(true);
     alg.initialize();
-    std::vector<int> widthVector(1, 3); // Smooth with width == 3
+    WidthVector widthVector(1, 3); // Smooth with width == 3
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", m_toSmooth);
     alg.setProperty("InputNormalizationWorkspace", m_toSmooth);
