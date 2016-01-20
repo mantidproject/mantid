@@ -70,7 +70,7 @@ class TransformToIqtTest(unittest.TestCase):
 
         iqt_y_data = iqt.dataY(0)
         for bin_index in range(len(iqt_y_data)):
-            self.assertLessEqual(iqt_y_data[bin_index], 1)
+            self.assertTrue(iqt_y_data[bin_index] < 1)
 
 
     def test_output_size(self):
