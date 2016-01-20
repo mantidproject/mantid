@@ -37,7 +37,7 @@ class StretchedExpFT(IFunction1D):
         super(StretchedExpFT, self).__init__()
         self._h = 4.135665616  # meV*Thz
         self._parmset = set(['height', 'tau', 'beta', 'Origin'])  # valid syntax for python >= 2.6
-        self._parm2index = {'height': 0, 'tau': 1, 'beta': 2, 'origin': 3}  # order in which they were defined
+        self._parm2index = {'height': 0, 'tau': 1, 'beta': 2, 'Origin': 3}  # order in which they were defined
 
     def category(self):
         return 'QuasiElastic'
