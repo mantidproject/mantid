@@ -124,7 +124,7 @@ void FlatPlateAbsorption::initialiseCachedDistances() {
         // Create track for distance in sample before scattering point
         Track incoming(m_elementPositions[counter], m_beamDirection * -1.0);
         m_sampleObject->interceptSurface(incoming);
-        m_L1s[counter] = incoming.begin()->distFromStart;
+        m_L1s[counter] = incoming.cbegin()->distFromStart;
 
         // Also calculate element volume here
         m_elementVolumes[counter] =

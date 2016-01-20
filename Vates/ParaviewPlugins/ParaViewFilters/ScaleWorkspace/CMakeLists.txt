@@ -8,7 +8,7 @@ set_property( TARGET MantidParaViewScaleWorkspaceSMPlugin PROPERTY FOLDER "Manti
 
 target_link_libraries( MantidParaViewScaleWorkspaceSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${MANTID_SUBPROJECT_LIBS} 
-${JSONCPP_LIBRARIES}
+${vtkjsoncpp_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

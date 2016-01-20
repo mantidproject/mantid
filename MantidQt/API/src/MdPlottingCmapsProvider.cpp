@@ -7,15 +7,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Node.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/SAX/InputSource.h>
-#include <Poco/Exception.h>
-
-
+#ifdef MAKE_VATES
+#include "vtkSMTransferFunctionPresets.h"
+#include "vtkNew.h"
+#include "vtk_jsoncpp.h"
+#endif
 
 namespace MantidQt{
   namespace API{
@@ -61,57 +57,32 @@ namespace MantidQt{
 
     void MdPlottingCmapsProvider::getColorMapsForVSI(QStringList& colorMapNames)
     {
-      // Get the installed color maps directory.
-      QString colorMapDirectory = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("colormaps.directory"));
-      if (colorMapDirectory.isEmpty())
-      {
-        return;
-      }
+#ifdef MAKE_VATES
+      vtkNew<vtkSMTransferFunctionPresets> presets;
 
-      QStringList colormapXMLFiles;
-      QStringList colorMapXMLNames;
-
-      // Extract all file names 
-      appendAllFileNamesForFileType(colorMapXMLNames, colormapXMLFiles, colorMapDirectory, "xml");
-
-      for (QStringList::iterator it = colormapXMLFiles.begin(); it != colormapXMLFiles.end(); ++it)
-      {
-        appendVSIColorMaps(colorMapNames, *it);
-      }
-    }
-
-    void MdPlottingCmapsProvider::appendVSIColorMaps(QStringList& colorMapNames,  QString fullFilePath)
-    {
-      std::string path = fullFilePath.toStdString();
-      std::ifstream input(path.c_str(), std::ifstream::in);
-
-      Poco::XML::InputSource source(input);
-
-      try
-      {
-        Poco::XML::DOMParser parser;
-
-        Poco::AutoPtr<Poco::XML::Document> doc = parser.parse(&source);
-
-        Poco::XML::Element* root = doc->documentElement();
-
-        // Get all color maps
-        Poco::AutoPtr<Poco::XML::NodeList> nodes = root->getElementsByTagName("ColorMap");
-
-        for (unsigned long i = 0; i < nodes->length(); ++i)
-        {
-          Poco::XML::Node* node = NULL;
-          Poco::XML::Element* element = NULL;
-          node = nodes->item(i);
-          element = dynamic_cast<Poco::XML::Element*>(node);
-          std::string nameOfMap = static_cast<std::string>(element->getAttribute("name"));
-          colorMapNames.append(QString(nameOfMap.c_str()));
+      // Check for colormap "hot". If preset, assume custom colormaps have
+      // already been loaded.
+      auto viridisColormap = presets->GetFirstPresetWithName("hot");
+      if (viridisColormap.empty()) {
+        const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
+                                          "All_idl_cmaps.json",
+                                          "All_mpl_cmaps.json"};
+        const std::string colorMapDirectory =
+            Mantid::Kernel::ConfigService::Instance().getString(
+                "colormaps.directory");
+        for (const auto &baseName : filenames) {
+          std::string colorMap = colorMapDirectory + baseName;
+          presets->ImportPresets(colorMap.c_str());
         }
       }
-      catch(Poco::Exception& exc)
-      {
-        g_log.warning() << "There was an issue with reading color maps:" << exc.displayText() <<"\n";
-      }
+
+      unsigned int numberOfPresets = presets->GetNumberOfPresets();
+      for (unsigned int i = 0; i < numberOfPresets; ++i) {
+        colorMapNames.append(QString::fromStdString(presets->GetPresetName(i)));
+        }
+#else
+      (void)colorMapNames;
+#endif
     }
 
     void MdPlottingCmapsProvider::appendAllFileNamesForFileType(QStringList& colorMapNames, QStringList& colorMapFiles, QString colorMapDirectory, QString fileType)
@@ -148,4 +119,4 @@ namespace MantidQt{
       return indexVector;
     }
   }
-}
+  }

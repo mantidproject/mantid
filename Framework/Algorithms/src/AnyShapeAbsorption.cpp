@@ -102,7 +102,7 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
           // This will also throw away points that are inside a gauge volume but
           // outside the sample
           if (m_sampleObject->interceptSurface(incoming) > 0) {
-            m_L1s.push_back(incoming.begin()->distFromStart);
+            m_L1s.push_back(incoming.cbegin()->distFromStart);
             m_elementPositions.push_back(currentPosition);
             // Also calculate element volume here
             m_elementVolumes.push_back(XSliceThickness * YSliceThickness *

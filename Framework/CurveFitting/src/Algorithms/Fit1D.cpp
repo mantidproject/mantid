@@ -705,7 +705,7 @@ void Fit1D::exec() {
     MantidVec &Y = ws->dataY(1);
     MantidVec &E = ws->dataY(2);
 
-    double *lOut =
+    auto lOut =
         new double[l_data.n]; // to capture output from call to function()
     modifyInitialFittedParameters(m_fittedParameter); // does nothing except if
                                                       // overwritten by derived

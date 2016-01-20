@@ -78,8 +78,8 @@ void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     if (box) {
       size_t ic(0);
       typename std::vector<MDE> &events = box->getEvents();
-      typename std::vector<MDE>::iterator it = events.begin();
-      typename std::vector<MDE>::iterator it_end = events.end();
+      auto it = events.begin();
+      auto it_end = events.end();
       for (; it != it_end; it++) {
         // Multiply weight by a scalar, propagating error
         float oldSignal = it->getSignal();

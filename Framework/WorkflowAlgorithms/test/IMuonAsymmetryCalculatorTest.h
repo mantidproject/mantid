@@ -321,7 +321,7 @@ public:
 
       TS_ASSERT_DELTA(ws->readY(0)[0], -0.2529, 0.0001);
       TS_ASSERT_DELTA(ws->readY(0)[1], 0.3918, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], 1.5316, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 1.5317, 0.0001);
 
       TS_ASSERT_DELTA(ws->readE(0)[0], 0.0547, 0.0001);
       TS_ASSERT_DELTA(ws->readE(0)[1], 0.1010, 0.0001);
@@ -360,7 +360,7 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
       TS_ASSERT_DELTA(ws->readY(0)[0], -0.2523, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], 0.3996, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.3997, 0.0001);
       TS_ASSERT_DELTA(ws->readY(0)[2], 1.5549, 0.0001);
 
       TS_ASSERT_DELTA(ws->readE(0)[0], 0.0443, 0.0001);

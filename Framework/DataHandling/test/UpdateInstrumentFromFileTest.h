@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
 #include "MantidDataHandling/LoadInstrumentFromNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -11,6 +12,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
@@ -139,6 +141,44 @@ public:
                      std::runtime_error);
   }
 
+  void test_GroupedDetector_Has_All_Components_Moved_To_Same_Coordinates() {
+    using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+    const std::string colNames = "spectrum,theta,t0,-,R";
+    const std::string contents = "plik det  t0 l0 l1\n"
+                                 "    0 130.4653  -0.4157  11.0050   0.6708\n";
+
+    const std::string filename = "__detpars_with_header.dat";
+    ScopedFileHelper::ScopedFile datfile(contents, filename);
+
+    const bool groupDetectors(true);
+    const bool ignorePhi(true);
+    loadTestInstrument(groupDetectors);
+    runUpdateInstrument(datfile.getFileName(), colNames, ignorePhi);
+
+    auto output =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+
+    auto group = boost::dynamic_pointer_cast<const DetectorGroup>(
+        output->getDetector(0));
+    TSM_ASSERT("Expected a DetectorGroup", group);
+    double expectedR(0.6708), expectedTheta(130.4653), expectedPhi(1.4320);
+    auto dets = group->getDetectors();
+    for (const auto &comp : dets) {
+      double r(-1.0), theta(-1.0), phi(-1.0);
+      comp->getPos().getSpherical(r, theta, phi);
+      TS_ASSERT_DELTA(expectedR, r, 1e-4);
+      TS_ASSERT_DELTA(expectedTheta, theta, 1e-4);
+      TS_ASSERT_DELTA(expectedPhi, phi, 1e-4);
+
+      std::vector<double> par = comp->getNumberParameter("t0");
+      TSM_ASSERT_EQUALS("Expected a single t0 parameter", 1, par.size());
+      TS_ASSERT_DELTA(par[0], -0.4157, 1e-4)
+    }
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
 private:
   void doTestWithAsciiFile(const std::string &filename,
                            const std::string &header) {
@@ -191,7 +231,7 @@ private:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  void loadTestInstrument() {
+  void loadTestInstrument(bool grouped = false) {
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
 
@@ -212,6 +252,15 @@ private:
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().addOrReplace(wsName, ws));
+    if (grouped) {
+      using Mantid::DataHandling::GroupDetectors2;
+      GroupDetectors2 alg;
+      alg.initialize();
+      alg.setProperty("InputWorkspace", wsName);
+      alg.setProperty("OutputWorkspace", wsName);
+      alg.setProperty("SpectraList", "1-9");
+      alg.execute();
+    }
   }
 
   void runUpdateInstrument(const std::string &filename,

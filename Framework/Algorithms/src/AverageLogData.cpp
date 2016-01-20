@@ -91,12 +91,10 @@ void AverageLogData::exec() {
   pctime.push_back(EMPTY_DBL() * 1.1); // larger than stime
   pcvalue.push_back(0.0);
 
-  std::vector<double>::iterator istime = stime.begin(),
-                                isvalue = svalue.begin(),
-                                ipctime = pctime.begin(),
-                                ipcvalue = pcvalue.begin();
+  auto isvalue = svalue.begin(), ipctime = pctime.begin(),
+       ipcvalue = pcvalue.begin();
 
-  for (; istime < (--stime.end()); ++istime) {
+  for (auto istime = stime.begin(); istime < (--stime.end()); ++istime) {
     // ignore all proton pulses before the lowest time for the log
     while ((*ipctime) < (*istime) + diffSeconds) {
       ++ipctime;

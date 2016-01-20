@@ -210,9 +210,8 @@ public:
 
   void test_clone() {
     ReflLegacyTransferStrategy strategy;
-    auto *clone = strategy.clone();
-    TS_ASSERT(dynamic_cast<ReflLegacyTransferStrategy *>(clone));
-    delete clone;
+    auto clone = strategy.clone();
+    TS_ASSERT(dynamic_cast<ReflLegacyTransferStrategy *>(clone.get()));
   }
 
   void test_filtering() {

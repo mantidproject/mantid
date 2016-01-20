@@ -1,5 +1,10 @@
-#pylint: disable=too-many-lines
-#pylint: disable=invalid-name
+# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
+
+try:
+    from mantidplot import *
+except ImportError:
+    canMantidPlot = False #
+
 import ui_refl_window
 import refl_save
 import refl_choose_col
@@ -25,11 +30,6 @@ except AttributeError:
 
 canMantidPlot = True
 
-try:
-    from mantidplot import *
-except ImportError:
-    canMantidPlot = False
-
 
 
 class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
@@ -50,8 +50,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.clip = QtGui.QApplication.clipboard()
         self.shown_cols = {}
         self.mod_flag = False
-        self.run_cols = [0,5,10]
-        self.angle_cols = [1,6,11]
+        self.run_cols = [0, 5, 10]
+        self.angle_cols = [1, 6, 11]
         self.scale_col = 16
         self.stitch_col = 17
         self.plot_col = 18
@@ -73,15 +73,16 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.__column_settings = "Mantid/ISISReflGui/Columns"
         self.__icat_download_key = "icat_download"
         self.__ads_use_key = "AlgUse"
-        self.__alg_migration_key="AlgUseReset"
+        self.__alg_migration_key = "AlgUseReset"
         self.__live_data_frequency_key = "frequency"
         self.__live_data_method_key = "method"
         self.__group_tof_workspaces_key = "group_tof_workspaces"
+        self.__stitch_right_key = "stitch_right"
 
-        #Setup instrument options with defaults assigned.
+        #Setup instrument with defaults assigned.
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF', 'OFFSPEC']
         self.polarisation_instruments = ['CRISP', 'POLREF']
-        self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
+        self.polarisation_options = {'None': PolarisationCorrection.NONE, '1-PNR': PolarisationCorrection.PNR, '2-PA': PolarisationCorrection.PA}
 
         #Set the live data settings, use default if none have been set before
         settings = QtCore.QSettings()
@@ -110,11 +111,13 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
         self.__icat_download = settings.value(self.__icat_download_key, False, type=bool)
         self.__group_tof_workspaces = settings.value(self.__group_tof_workspaces_key, True, type=bool)
+        self.__scale_right = settings.value(self.__stitch_right_key, True, type=bool)
 
         settings.setValue(self.__ads_use_key, self.__alg_use)
         settings.setValue(self.__icat_download_key, self.__icat_download)
         settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
         settings.setValue(self.__alg_migration_key, self.__alg_migrate)
+        settings.setValue(self.__stitch_right_key, self.__scale_right)
 
 
         settings.endGroup()
@@ -179,7 +182,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         Change the default instrument to the selected one
         """
         config['default.instrument'] = self.instrument_list[instrument]
-        logger.notice( "Instrument is now: " + str(config['default.instrument']))
+        logger.notice("Instrument is now: " + str(config['default.instrument']))
         self.textRB.clear()
         self._populate_runs_list()
         self.current_instrument = self.instrument_list[instrument]
@@ -278,7 +281,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         #first check if the table has been changed before clearing it
         if self.mod_flag:
-            ret, saved = self._save_check()
+            ret, _saved = self._save_check()
             if ret == QtGui.QMessageBox.Cancel:
                 return
         self.current_table = None
@@ -400,9 +403,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.listMain.clear()
 
         if self.__valid_rb():
-            """
-            Use ICAT for a journal search based on the RB number
-            """
+
+            # Use ICAT for a journal search based on the RB number
+
             active_session_id = None
             if CatalogManager.numberActiveSessions() == 0:
                 # Execute the CatalogLoginDialog
@@ -428,11 +431,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 file_name = row['Name']
                 file_id = row['Id']
                 description = row['Description']
-                run_number = re.search('[1-9]\d+', file_name).group()
+                run_number = re.search(r'[1-9]\d+', file_name).group()
 
-                if  bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
-                    title =  (run_number + ': ' + description).strip()
-                    self.__icat_file_map[title] = (file_id, run_number, file_name)
+                if bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
+                    title = (run_number + ': ' + description).strip()
+                    self.SampleText.__icat_file_map[title] = (file_id, run_number, file_name)
                     self.listMain.addItem(title)
             self.listMain.sortItems()
             del search_results
@@ -441,7 +444,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         copy the contents of the selected cells to the row below as long as the row below contains a run number in the first cell
         """
-        col = 0
+        _col = 0
         # make sure all selected cells are in the same row
         sum = 0
         howMany = len(self.tableMain.selectedItems())
@@ -462,11 +465,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                         row = row + 1
                         filled = filled + 1
                 if not filled:
-                    QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"No target cells to autofill. Rows to be filled should contain a run number in their first cell, and start from directly below the selected line.")
+                    QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill', "No target cells to autofill. Rows to be filled should contain a run number in their first cell, and start from directly below the selected line.")
             else:
-                QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"Selected cells must all be in the same row.")
+                QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill', "Selected cells must all be in the same row.")
         else:
-            QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"There are no source cells selected.")
+            QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill', "There are no source cells selected.")
 
     def _clear_cells(self):
         """
@@ -602,12 +605,12 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             else:
                 tup = tup + (split_title,) # Tuple of lists containing (run number, title, theta)
 
-        tupsort=sorted(tup,key=itemgetter(1,2)) # now sorted by title then theta
+        tupsort = sorted(tup, key=itemgetter(1, 2))  # now sorted by title then theta
         row = 0
-        for key, group in itertools.groupby(tupsort, lambda x: x[1]): # now group by title
+        for _key, group in itertools.groupby(tupsort, lambda x: x[1]): # now group by title
             col = 0
             run_angle_pairs_of_title = list() # for storing run_angle pairs all with the same title
-            for object in group: # loop over all with equal title
+            for object in group:  # loop over all with equal title
 
                 run_no = object[0]
                 angle = object[-1]
@@ -638,26 +641,26 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             row = row + 1
 
         if self.__icat_download:
-            """
-            If ICAT is being used for download, then files must be downloaded at the same time as they are transfered.
-            """
+
+            # If ICAT is being used for download, then files must be downloaded at the same time as they are transferred
+
 
             contents = str(idx.text()).strip()
-            file_id, runnumber, file_name = self.__icat_file_map[contents]
+            file_id, _runnumber, file_name = self.__icat_file_map[contents]
             active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
 
             save_location = config['defaultsave.directory']
 
             CatalogDownloadDataFiles(file_id, FileNames=file_name, DownloadPath=save_location, Session=active_session_id)
 
-            current_search_dirs= config.getDataSearchDirs()
+            current_search_dirs = config.getDataSearchDirs()
 
-            if not save_location in current_search_dirs:
+            if save_location not in current_search_dirs:
                 config.appendDataSearchDir(save_location)
 
 
 
-    def _set_all_stitch(self,state):
+    def _set_all_stitch(self, state):
         """
         Set the checkboxes in the Stitch? column to the same
         """
@@ -678,11 +681,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         try:
             willProcess = True
             rows = self.tableMain.selectionModel().selectedRows()
-            rowIndexes=[]
+            rowIndexes = []
             for idx in rows:
                 rowIndexes.append(idx.row())
             if not len(rowIndexes):
-                reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?',"This will process all rows in the table. Continue?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?', "This will process all rows in the table. Continue?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.No:
                     logger.notice("Cancelled!")
                     willProcess = False
@@ -691,11 +694,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if willProcess:
                 for row in rowIndexes:  # range(self.tableMain.rowCount()):
                     runno = []
-                    loadedRuns = []
+                    _loadedRuns = []
                     wksp = []
                     overlapLow = []
                     overlapHigh = []
-                    theta = [0, 0, 0]
+                    _theta = [0, 0, 0]
                     if self.tableMain.item(row, 0).text() != '':
                         self.statusMain.showMessage("Processing row: " + str(row + 1))
                         logger.debug("Processing row: " + str(row + 1))
@@ -714,7 +717,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                         if self.tableMain.item(row, 15).text() == '':
                             loadedRun = None
                             if load_live_runs.is_live_run(runno[0]):
-                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
+                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency=self.live_freq, accumulation=self.live_method)
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="_run")
                                 loadedRun = mtd["_run"]
@@ -729,7 +732,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                 thetaRun = loadedRun
                                 if isinstance(thetaRun, WorkspaceGroup):
                                     thetaRun = thetaRun[0]
-                                dqq, two_theta = CalculateResolution(Workspace = thetaRun, TwoTheta = two_theta)
+                                dqq, two_theta = CalculateResolution(Workspace=thetaRun, TwoTheta=two_theta)
 
                                 #Put the calculated resolution into the table
                                 resItem = QtGui.QTableWidgetItem()
@@ -750,12 +753,12 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                             dqq = float(self.tableMain.item(row, 15).text())
 
                         #Check secondary and tertiary two_theta columns, if they're blank and their corresponding run columns are set, fill them.
-                        for run_col in [5,10]:
+                        for run_col in [5, 10]:
                             tht_col = run_col + 1
                             run_val = str(self.tableMain.item(row, run_col).text())
                             tht_val = str(self.tableMain.item(row, tht_col).text())
                             if run_val and not tht_val:
-                                Load(Filename = run_val, OutputWorkspace = "_run")
+                                Load(Filename=run_val, OutputWorkspace="_run")
                                 loadedRun = mtd["_run"]
                                 tht_val = getLogValue(loadedRun, "Theta")
                                 if tht_val:
@@ -763,8 +766,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
                         # Populate runlist
                         first_wq = None
-                        for i in range(0,len(runno)):
-                            theta, qmin, qmax, wlam, wq = self._do_run(runno[i], row, i)
+                        for i in range(0, len(runno)):
+                            theta, qmin, qmax, _wlam, wq = self._do_run(runno[i], row, i)
                             if not first_wq:
                                 first_wq = wq # Cache the first Q workspace
                             theta = round(theta, 3)
@@ -804,7 +807,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                         outputwksp = runno[0] + '_' + runno[1][3:]
                                     else:
                                         outputwksp = runno[0] + '_' + runno[-1][3:]
-                                    begoverlap = w2.readX(0)[0]
+                                    _begoverlap = w2.readX(0)[0]
                                     # get Qmax
                                     if self.tableMain.item(row, i * 5 + 4).text() == '':
                                         overlapHigh = 0.3 * max(w1.readX(0))
@@ -817,15 +820,17 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                         Qmax = float(self.tableMain.item(row, i * 5 + 4).text())
                                     if Qmax > _overallQMax:
                                         _overallQMax = Qmax
-                                    if Qmin < _overallQMin :
+                                    if Qmin < _overallQMin:
                                         _overallQMin = Qmin
 
-                                    _wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, _overallQMin, _overallQMax, -dqq, 1, keep=True)
+                                    _wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh,
+                                                              _overallQMin, _overallQMax, -dqq, 1, keep=True,
+                                                              scale_right=self.__scale_right)
 
 
                         # Enable the plot button
                         plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
-                        plotbutton.setProperty('runno',runno)
+                        plotbutton.setProperty('runno', runno)
                         plotbutton.setProperty('overlapLow', overlapLow)
                         plotbutton.setProperty('overlapHigh', overlapHigh)
                         plotbutton.setProperty('wksp', wksp)
@@ -851,11 +856,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             runno_u = plotbutton.property('runno')
             runno = []
             for uni in runno_u:
-                runno.append(unicodedata.normalize('NFKD', uni).encode('ascii','ignore'))
+                runno.append(unicodedata.normalize('NFKD', uni).encode('ascii', 'ignore'))
             wksp_u = plotbutton.property('wksp')
             wksp = []
             for uni in wksp_u:
-                wksp.append(unicodedata.normalize('NFKD', uni).encode('ascii','ignore'))
+                wksp.append(unicodedata.normalize('NFKD', uni).encode('ascii', 'ignore'))
             overlapLow = plotbutton.property('overlapLow')
             overlapHigh = plotbutton.property('overlapHigh')
             row = plotbutton.property('row')
@@ -869,7 +874,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             return
         for i in range(len(runno)):
             ws_name_binned = wksp[i] + '_binned'
-            ws = getWorkspace(wksp[i])
+            _ws = getWorkspace(wksp[i])
             if len(overlapLow):
                 Qmin = overlapLow[0]
             else:
@@ -885,16 +890,16 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             Imax = max(wsb.readY(0))
 
             if canMantidPlot:
-                #Get the existing graph if it exists
+                # Get the existing graph if it exists
                 base_graph = self.__graphs.get(wksp[0], None)
 
-                #Clear the window if we're the first of a new set of curves
+                # Clear the window if we're the first of a new set of curves
                 clearWindow = (i == 0)
 
-                #Plot the new curve
-                base_graph = plotSpectrum(ws_name_binned, 0, True, window = base_graph, clearWindow = clearWindow)
+                # Plot the new curve
+                base_graph = plotSpectrum(ws_name_binned, 0, True, window=base_graph, clearWindow=clearWindow)
 
-                #Save the graph so we can re-use it
+                # Save the graph so we can re-use it
                 self.__graphs[wksp[i]] = base_graph
 
                 titl = groupGet(ws_name_binned, 'samp', 'run_title')
@@ -913,13 +918,14 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 outputwksp = runno[0] + '_' + runno[2][3:]
             if not getWorkspace(outputwksp, report_error=False):
                 # Stitching has not been done as part of processing, so we need to do it here.
-                wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
+                wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1,
+                                         keep=True, scale_right=self.__scale_right)
 
             Qmin = min(getWorkspace(outputwksp).readX(0))
             Qmax = max(getWorkspace(outputwksp).readX(0))
             if canMantidPlot:
                 stitched_graph = self.__graphs.get(outputwksp, None)
-                stitched_graph = plotSpectrum(outputwksp, 0, True, window = stitched_graph, clearWindow = True)
+                stitched_graph = plotSpectrum(outputwksp, 0, True, window=stitched_graph, clearWindow=True)
                 titl = groupGet(outputwksp, 'samp', 'run_title')
                 stitched_graph.activeLayer().setTitle(titl)
                 stitched_graph.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
@@ -976,32 +982,32 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
-            load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
+            load_live_runs.get_live_data(config['default.instrument'], frequency=self.live_freq, accumulation=self.live_method)
         wlam, wq, th = None, None, None
 
         # Only make a transmission workspace if we need one.
         if transrun and not transmission_ws:
             converter = ConvertToWavelength(transrun)
-            trans_run_names = converter.get_name_list()
+            _trans_run_names = converter.get_name_list()
             size = converter.get_ws_list_size()
             out_ws_name = transrun_named
             if size == 1:
                 trans1 = converter.get_workspace_from_list(0)
 
-                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name,Params=0.02, StartOverlap=10.0, EndOverlap=12.0 )
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, Params=0.02, StartOverlap=10.0, EndOverlap=12.0)
             elif size == 2:
                 trans1 = converter.get_workspace_from_list(0)
                 trans2 = converter.get_workspace_from_list(1)
-                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, SecondTransmissionRun=trans2,Params=0.02, StartOverlap=10.0, EndOverlap=12.0 )
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, SecondTransmissionRun=trans2, Params=0.02, StartOverlap=10.0, EndOverlap=12.0)
             else:
                 raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
 
-        #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
+        # Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
         ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
 
         if self.__alg_use:
-            #If we're dealing with a workspace group, we'll manually map execution over each group member
-            #We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
+            # If we're dealing with a workspace group, we'll manually map execution over each group member
+            # We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
             if isinstance(ws, WorkspaceGroup):
                 wqGroup = []
                 wlamGroup = []
@@ -1071,7 +1077,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.mod_flag = False
         return True
 
-    def _save(self, failsave = False):
+    def _save(self, failsave=False):
         """
         Save the table, showing no interface if not necessary. This also provides the failing save functionality.
         """
@@ -1089,17 +1095,17 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             import datetime
             failtime = datetime.datetime.today().strftime('%Y-%m-%d_%H-%M-%S')
             if self.current_table:
-                filename = self.current_table.rsplit('.',1)[0] + "_recovered_" + failtime + ".tbl"
+                filename = self.current_table.rsplit('.', 1)[0] + "_recovered_" + failtime + ".tbl"
             else:
                 mantidDefault = config['defaultsave.directory']
                 if os.path.exists(mantidDefault):
-                    filename = os.path.join(mantidDefault,"mantid_reflectometry_recovered_" + failtime + ".tbl")
+                    filename = os.path.join(mantidDefault, "mantid_reflectometry_recovered_" + failtime + ".tbl")
                 else:
                     import tempfile
                     tempDir = tempfile.gettempdir()
-                    filename = os.path.join(tempDir,"mantid_reflectometry_recovered_" + failtime + ".tbl")
+                    filename = os.path.join(tempDir, "mantid_reflectometry_recovered_" + failtime + ".tbl")
         else:
-            #this is a save-on-quit or file->save
+            # this is a save-on-quit or file->save
             if self.current_table:
                 filename = self.current_table
             else:
@@ -1139,7 +1145,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             try:
                 #before loading make sure you give them a chance to save
                 if self.mod_flag:
-                    ret, saved = self._save_check()
+                    ret, _saved = self._save_check()
                     if ret == QtGui.QMessageBox.Cancel:
                         #if they hit cancel abort the load
                         self.loading = False
@@ -1219,7 +1225,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
             dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq,
                                                          def_alg_use = self.__alg_use, def_icat_download=self.__icat_download,
-                                                         def_group_tof_workspaces = self.__group_tof_workspaces)
+                                                         def_group_tof_workspaces = self.__group_tof_workspaces,
+                                                         def_stitch_right=self.__scale_right)
             if dialog_controller.exec_():
 
                 # Fetch the settings back off the controller
@@ -1228,6 +1235,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 self.__alg_use = dialog_controller.useAlg()
                 self.__icat_download = dialog_controller.icatDownload()
                 self.__group_tof_workspaces = dialog_controller.groupTOFWorkspaces()
+                self.__scale_right = dialog_controller.stitchRight()
 
                 # Persist the settings
                 settings = QtCore.QSettings()
@@ -1239,6 +1247,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 settings.setValue(self.__ads_use_key, self.__alg_use)
                 settings.setValue(self.__icat_download_key, self.__icat_download)
                 settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
+                settings.setValue(self.__stitch_right_key, self.__scale_right)
                 settings.endGroup()
                 del settings
         except Exception as ex:
@@ -1297,10 +1306,10 @@ def getWorkspace(wksp, report_error=True):
         exists = mtd.doesExist(wksp)
         if not exists:
             if report_error:
-                logger.error( "Unable to get workspace: " + str(wksp))
-                return exists # Doesn't exist
+                logger.error("Unable to get workspace: " + str(wksp))
+                return exists  # Doesn't exist
             else:
-                return exists # Doesn't exist
+                return exists  # Doesn't exist
         elif isinstance(mtd[wksp], WorkspaceGroup):
             wout = mtd[wksp][0]
         else:

@@ -148,8 +148,8 @@ void AlgorithmProxy::addObserver(const Poco::AbstractObserver &observer) const {
 */
 void AlgorithmProxy::removeObserver(
     const Poco::AbstractObserver &observer) const {
-  std::vector<const Poco::AbstractObserver *>::iterator o = std::find(
-      m_externalObservers.begin(), m_externalObservers.end(), &observer);
+  auto o = std::find(m_externalObservers.begin(), m_externalObservers.end(),
+                     &observer);
   if (o != m_externalObservers.end())
     m_externalObservers.erase(o);
   if (m_alg)
@@ -282,9 +282,8 @@ void AlgorithmProxy::dropWorkspaceReferences() {
 void AlgorithmProxy::addObservers() {
   if (!m_alg)
     return;
-  std::vector<const Poco::AbstractObserver *>::reverse_iterator o =
-      m_externalObservers.rbegin();
-  for (; o != m_externalObservers.rend(); ++o)
+  for (auto o = m_externalObservers.rbegin(); o != m_externalObservers.rend();
+       ++o)
     m_alg->addObserver(**o);
   m_externalObservers.clear();
 }
@@ -310,15 +309,11 @@ std::string AlgorithmProxy::toString() const {
 
 /// Function to return all of the categories that contain this algorithm
 const std::vector<std::string> AlgorithmProxy::categories() const {
-  std::vector<std::string> res;
   Poco::StringTokenizer tokenizer(category(), categorySeparator(),
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
 
-  for (; h != tokenizer.end(); ++h) {
-    res.push_back(*h);
-  }
+  std::vector<std::string> res(tokenizer.begin(), tokenizer.end());
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);

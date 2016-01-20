@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>102</width>
-    <height>286</height>
+    <width>184</width>
+    <height>306</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -68,6 +68,13 @@
        </property>
        <property name="accelerated">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="autoScale">
+       <property name="text">
+        <string>Autoscale</string>
        </property>
       </widget>
      </item>

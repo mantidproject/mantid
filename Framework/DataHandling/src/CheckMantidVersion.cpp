@@ -178,7 +178,7 @@ CheckMantidVersion::splitVersionString(const std::string &versionString) const {
   Poco::StringTokenizer tokenizer(versionString, ".",
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
+  auto h = tokenizer.begin();
 
   for (; h != tokenizer.end(); ++h) {
     try {

@@ -91,9 +91,10 @@ void MDHWLoadingPresenter::transposeWs(Mantid::API::IMDHistoWorkspace_sptr &inHi
 }
 
 /// Constructor
-MDHWLoadingPresenter::MDHWLoadingPresenter(MDLoadingView *view)
-    : m_view(view), m_isSetup(false), m_time(-1), m_loadInMemory(false),
-      m_firstLoad(true), m_metadataJsonManager(new MetadataJsonManager()),
+MDHWLoadingPresenter::MDHWLoadingPresenter(std::unique_ptr<MDLoadingView> view)
+    : m_view(std::move(view)), m_isSetup(false), m_time(-1),
+      m_loadInMemory(false), m_firstLoad(true),
+      m_metadataJsonManager(new MetadataJsonManager()),
       m_metaDataExtractor(new MetaDataExtractorUtils()),
       m_vatesConfigurations(new VatesConfigurations()) {
   Mantid::API::FrameworkManager::Instance();
@@ -201,7 +202,7 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
                                           const std::string &wsName) {
   using namespace Mantid::API;
 
-  vtkFieldData *outputFD = vtkFieldData::New();
+  vtkNew<vtkFieldData> outputFD;
 
   // Serialize metadata
   VatesKnowledgeSerializer serializer;
@@ -216,11 +217,10 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
 
   // Add metadata to dataset.
   MetadataToFieldData convert;
-  convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
-  convert(outputFD, jsonString,
+  convert(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId().c_str());
+  convert(outputFD.GetPointer(), jsonString,
           m_vatesConfigurations->getMetadataIdJson().c_str());
-  visualDataSet->SetFieldData(outputFD);
-  outputFD->Delete();
+  visualDataSet->SetFieldData(outputFD.GetPointer());
 }
 
 

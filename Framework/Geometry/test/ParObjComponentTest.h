@@ -158,8 +158,8 @@ public:
     ObjComponent pocyl(&ocyl, pmap.get());
 
     TS_ASSERT_EQUALS(pocyl.interceptSurface(track), 1);
-    Track::LType::const_iterator it = track.begin();
-    if (it == track.end())
+    Track::LType::const_iterator it = track.cbegin();
+    if (it == track.cend())
       return;
     TS_ASSERT_EQUALS(it->distFromStart, 10.5);
     TS_ASSERT_DELTA(it->distInsideObject, 1, 0.0001);
@@ -173,8 +173,8 @@ public:
     // Create a new test track going from the origin down the line y = -x
     Track track2(V3D(0, 0, 0), V3D(0, 1, -1));
     TS_ASSERT_EQUALS(pocyl.interceptSurface(track2), 1);
-    Track::LType::const_iterator it2 = track2.begin();
-    if (it2 == track2.end())
+    Track::LType::const_iterator it2 = track2.cbegin();
+    if (it2 == track2.cend())
       return;
     TS_ASSERT_DELTA(it2->distFromStart, sqrt(2 * 10.5 * 10.5), 0.0001);
     TS_ASSERT_DELTA(it2->distInsideObject, sqrt(2.0), 0.0001);

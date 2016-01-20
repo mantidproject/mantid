@@ -19,6 +19,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/ConfigService.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -215,6 +216,12 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     //  = input beam direction (normalized to 1) - output beam direction
     //  (normalized to 1)
     V3D Q_dir_lab_frame = beamDir - detDir;
+    double qSign = -1.0;
+    std::string convention =
+        ConfigService::Instance().getString("Q.convention");
+    if (convention == "Crystallography")
+      qSign = 1.0;
+    Q_dir_lab_frame *= qSign;
 
     // Multiply by the rotation matrix to convert to Q in the sample frame (take
     // out goniometer rotation)
@@ -261,8 +268,8 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     typename std::vector<T> &events = *events_ptr;
 
     // Iterators to start/end
-    typename std::vector<T>::iterator it = events.begin();
-    typename std::vector<T>::iterator it_end = events.end();
+    auto it = events.begin();
+    auto it_end = events.end();
 
     for (; it != it_end; it++) {
       // Get the wavenumber in ang^-1 using the previously calculated constant.

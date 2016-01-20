@@ -64,7 +64,7 @@ public:
 
 //
 class ConvertToMDComponentsTest : public CxxTest::TestSuite {
-  std::auto_ptr<Convert2MDComponentsTestHelper> pAlg;
+  std::unique_ptr<Convert2MDComponentsTestHelper> pAlg;
   Mantid::API::MatrixWorkspace_sptr ws2D;
 
 public:
@@ -299,8 +299,7 @@ public:
   }
 
   ConvertToMDComponentsTest() {
-    pAlg = std::auto_ptr<Convert2MDComponentsTestHelper>(
-        new Convert2MDComponentsTestHelper());
+    pAlg = Mantid::Kernel::make_unique<Convert2MDComponentsTestHelper>();
     ws2D = WorkspaceCreationHelper::
         createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back;
