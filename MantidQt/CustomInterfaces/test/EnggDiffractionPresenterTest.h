@@ -566,7 +566,7 @@ public:
   }
 
   // TODO: disabled for now, as this one would need to load files
-  void test_disable_calcCropCalibOK() {
+  void disable_test_calcCropCalibOK() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
