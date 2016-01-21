@@ -55,7 +55,7 @@ public:
   template
   <typename T>
   Chainable &setSuccessor(T &&successor){
-      m_successor = std::forward<T>(successor);
+      m_successor = std::move(successor);
       return *m_successor;
   }
   bool hasSuccessor() const { return m_successor.get() != NULL; }
