@@ -55,7 +55,7 @@ PyObject *extractAxisValues(Axis &self) {
   if (self.isNumeric() || self.isSpectra()) {
     array = PyArray_SimpleNew(1, arrayDims, NPY_DOUBLE);
   } else if (self.isText()) {
-    array = PyList_New((Py_ssize_t)nvalues);
+    array = PyList_New(static_cast<Py_ssize_t>(nvalues));
     numeric = false;
   } else {
     throw std::invalid_argument("Unknown axis type. Cannot extract to Numpy");
@@ -67,7 +67,8 @@ PyObject *extractAxisValues(Axis &self) {
       PyObject *value =
           PyFloat_FromDouble(self.getValue(static_cast<size_t>(i)));
       void *pos = PyArray_GETPTR1((PyArrayObject *)array, i);
-      PyArray_SETITEM((PyArrayObject *)array, (char *)pos, value);
+      PyArray_SETITEM(reinterpret_cast<PyArrayObject *>(array),
+                      reinterpret_cast<char *>(pos), value);
     } else {
       const std::string s = self.label(static_cast<size_t>(i));
       PyObject *value = PyString_FromString(s.c_str());

@@ -205,7 +205,7 @@ void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
   // Attenuation factor is simply the average value
   attenFactor /= numDetected;
   // Error is 1/sqrt(nevents)
-  error = 1. / sqrt((double)numDetected);
+  error = 1. / sqrt(static_cast<double>(numDetected));
 }
 
 /**
