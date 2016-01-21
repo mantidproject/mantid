@@ -277,8 +277,9 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     outFile = save_path + outFile;
     out.open(outFile.c_str(), std::ofstream::out);
   }
-  // volume of Background sphere
-  double volumeBkg = 4.0 / 3.0 * M_PI * std::pow(BackgroundOuterRadius, 3);
+  // volume of Background sphere with inner volume subtracted
+  double volumeBkg = 4.0 / 3.0 * M_PI * (std::pow(BackgroundOuterRadius, 3) 
+      - std::pow(BackgroundOuterRadius, 3));
   // volume of PeakRadius sphere
   double volumeRadius = 4.0 / 3.0 * M_PI * std::pow(PeakRadius, 3);
   //

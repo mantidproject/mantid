@@ -128,35 +128,46 @@ CorrectIfOnEdge option
 ###################################
 
 This is an extension of what was calculated for the IntegrateIfOnEdge option.  It will only be calculated if this option  
-is true and for the background 
+is true and the minimum dv is less than PeakRadius or BackgroundOuterRadius.  
 
-:math:`\left|dv\right|<BackgroundOuterRadius` 
+For the background if
 
-:math:`h = BackgroundOuterRadius - \left|dv\right|`
+:math:`\left|dv\right|_{min}<BackgroundOuterRadius` 
 
-:math:`r = BackgroundOuterRadius`
+:math:`h = BackgroundOuterRadius - \left|dv\right|_{min}`
 
-or for the peak (assume that the shape is Gaussian)
+From the minimum of dv the volume of the cap of the sphere is found:
 
-:math:`\left|dv\right|<PeakRadius`
+:math:`V_{cap} = \pi h^2 / 3 (3 * BackgroundOuterRadius - h)`
 
-:math:`\sigma = PeakRadius / 3`
+The volume of the total sphere is calculated and for the background the volume of the inner radius must be subtracted:
 
-:math:`h = PeakRadius * exp(-\left|dv\right|^2 / (2 \sigma^2)`
-
-:math:`r = PeakRadius`
-
-The minimum of dv is calculated for each peak and from that value the volume of the cap of the sphere is found:
-
-:math:`V_{cap} = \pi h^2 / 3 (3r - h)`
-
-and the volume of the sphere is calculated
-
-:math:`V_{sphere} = 4/3 \pi r^3`
+:math:`V_{shell} = 4/3 \pi (BackgroundOuterRadius^3 - BackgroundInnerRadius^3)`
 
 The integrated intensity is multiplied by the ratio of the volume of the sphere divided by the volume where data was collected
 
-:math:`I_{multiplier} = V_{sphere} / (V_{sphere} - V_{cap})`
+:math:`I_{bkgMultiplier} = V_{shell} / (V_{shell} - V_{cap})`
+
+
+For the peak assume that the shape is Gaussian.  If
+
+:math:`\left|dv\right|_{min}<PeakRadius`
+
+:math:`\sigma = PeakRadius / 3`
+
+:math:`h = PeakRadius * exp(-\left|dv\right|_{min}^2 / (2 \sigma^2)`
+
+From the minimum of dv the volume of the cap of the sphere is found:
+
+:math:`V_{cap} = \pi h^2 / 3 (3 * PeakRadius - h)`
+
+and the volume of the sphere is calculated
+
+:math:`V_{sphere} = 4/3 \pi PeakRadius^3`
+
+The integrated intensity is multiplied by the ratio of the volume of the sphere divided by the volume where data was collected
+
+:math:`I_{peakMultiplier} = V_{sphere} / (V_{sphere} - V_{cap})`
 
 
    
