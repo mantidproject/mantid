@@ -10,7 +10,13 @@ digraph PowderDiffractionISIS {
   Focus_one_Start             [label="Start Focusing"]
   Focus_All_Start             [label="Focus All (Run)"]
 
+  subgraph params {
+    $param_style
 
+    VEmptyFile
+    VanadiumFile
+    FileName
+  }
 
   subgraph processes {
     $process_style
@@ -108,6 +114,7 @@ digraph PowderDiffractionISIS {
     Focus_one_SaveFocusedXYE1             [label="SaveFocusedXYE"]
     Focus_one_SaveFocusedXYE2             [label="SaveFocusedXYE"]
 
+    Focus_All_LoadNexusProcessed          [label="LoadNexusProcessed"]
   }
 
   subgraph decisions {
@@ -265,10 +272,10 @@ digraph PowderDiffractionISIS {
   Focus_All_Norm               -> Focus_All_LoadSac1                   [label="true"]
   Focus_All_Norm               -> Focus_All_LoadSac2                   [label="else"]
   Focus_All_LoadSac1           -> Focus_Al_ExistingV
-  Focus_Al_ExistingV           -> LoadNexusProcessed                   [label="load"]
+  Focus_Al_ExistingV           -> Focus_All_LoadNexusProcessed         [label="load"]
   Focus_Al_ExistingV           -> Focus_All_C_Vana                     [label="no"]
   Focus_All_LoadSac2           -> Focus_All_Focus_one
-  LoadNexusProcessed           -> Focus_All_Focus_one
+  Focus_All_LoadNexusProcessed -> Focus_All_Focus_one
   Focus_All_C_Vana             -> Focus_All_Focus_one
 
   }
