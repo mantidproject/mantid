@@ -39,6 +39,11 @@ void HistoryView::unroll(size_t index) {
   unroll(it);
 }
 
+#if defined(__GNUC__) && !defined(__clang__)
+#define GCC_VERSION                                                            \
+  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#endif
+
 /**
  * Unroll an algorithm history to export its child algorithms.
  *
@@ -58,7 +63,6 @@ void HistoryView::unroll(std::vector<HistoryItem>::iterator &it) {
     // mark this record as being ignored by the script builder
     it->unrolled(true);
 
-    ++it; // move iterator forward to insertion position
     // insert each of the records, in order, at this position
     std::vector<HistoryItem> tmpHistory;
     tmpHistory.reserve(childHistories.size());
@@ -66,7 +70,17 @@ void HistoryView::unroll(std::vector<HistoryItem>::iterator &it) {
       tmpHistory.emplace_back(item);
     }
     // since we are using a std::vector, do all insertions at the same time.
+#if !defined(GCC_VERSION) || GCC_VERSION >= 409000
+    ++it; // move iterator forward to insertion position
     it = m_historyItems.insert(it, tmpHistory.begin(), tmpHistory.end());
+#else
+    // workaround for GCC < 4.9
+    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55817
+    for (const auto &item : tmpHistory) {
+      ++it; // move iterator forward to insertion position
+      it = m_historyItems.insert(it, item);
+    }
+#endif
   } else
     ++it;
 }
