@@ -195,8 +195,6 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
                                      std::string logFileName, API::Run &run) {
   std::string str;
   std::string propname;
-  Mantid::Kernel::TimeSeriesProperty<double> *logd = 0;
-  Mantid::Kernel::TimeSeriesProperty<std::string> *logs = 0;
   std::map<std::string, Kernel::TimeSeriesProperty<double> *> dMap;
   std::map<std::string, Kernel::TimeSeriesProperty<std::string> *> sMap;
   typedef std::pair<std::string, Kernel::TimeSeriesProperty<double> *> dpair;
@@ -260,9 +258,9 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
         if (prop)
           prop->addValue(timecolumn, dvalue);
       } else {
-        logd = new Kernel::TimeSeriesProperty<double>(propname);
+        auto logd = Mantid::Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(propname);
         logd->addValue(timecolumn, dvalue);
-        dMap.insert(dpair(propname, logd));
+        dMap.insert(dpair(propname, logd.release()));
       }
     } else {
       auto sitr = sMap.find(propname);
@@ -271,9 +269,9 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
         if (prop)
           prop->addValue(timecolumn, valuecolumn);
       } else {
-        logs = new Kernel::TimeSeriesProperty<std::string>(propname);
+        auto logs = Mantid::Kernel::make_unique<Kernel::TimeSeriesProperty<std::string>>(propname);
         logs->addValue(timecolumn, valuecolumn);
-        sMap.insert(spair(propname, logs));
+        sMap.insert(spair(propname, logs.release()));
       }
     }
   }
