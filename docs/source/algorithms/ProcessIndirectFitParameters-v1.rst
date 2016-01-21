@@ -17,7 +17,7 @@ based on the desired parameters.
 Workflow
 --------
 
-.. diagram:: ProcessIndirectFirParameters-v1_wkflw.dot
+.. diagram:: ProcessIndirectFitParameters-v1_wkflw.dot
 
 
 Usage
