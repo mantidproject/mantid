@@ -76,9 +76,9 @@ void HistoryView::unroll(std::vector<HistoryItem>::iterator &it) {
 #else
     // workaround for GCC < 4.9
     // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55817
-    for (const auto &item : tmpHistory) {
-      ++it; // move iterator forward to insertion position
-      it = m_historyItems.insert(it, item);
+    ++it;
+    for(auto itItem = tmpHistory.rbegin();itItem!=tmpHistory.rend();++itItem){
+      it = m_historyItems.insert(it, *itItem);
     }
 #endif
   } else
