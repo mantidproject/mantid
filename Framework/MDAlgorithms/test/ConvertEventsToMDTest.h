@@ -22,7 +22,7 @@ public:
 
 //
 class ConvertEventsToMDTest : public CxxTest::TestSuite {
-  std::auto_ptr<ConvertEvents2MDEvTestHelper> pAlg;
+  std::unique_ptr<ConvertEvents2MDEvTestHelper> pAlg;
 
 public:
   static ConvertEventsToMDTest *createSuite() {
@@ -68,8 +68,7 @@ public:
   ConvertEventsToMDTest() {
     FrameworkManager::Instance();
 
-    pAlg = std::auto_ptr<ConvertEvents2MDEvTestHelper>(
-        new ConvertEvents2MDEvTestHelper());
+    pAlg = Mantid::Kernel::make_unique<ConvertEvents2MDEvTestHelper>();
     pAlg->initialize();
 
     int numHist = 10;

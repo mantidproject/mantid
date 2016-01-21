@@ -18,7 +18,8 @@ createLabel(const object &ascii, const object &utf8, const object &latex) {
     auto length = PyUnicode_GetSize(utf8Ptr);
     typedef UnitLabel::Utf8String::value_type Utf8Char;
     boost::scoped_array<Utf8Char> buffer(new Utf8Char[length]);
-    PyUnicode_AsWideChar((PyUnicodeObject *)utf8Ptr, buffer.get(), length);
+    PyUnicode_AsWideChar(reinterpret_cast<PyUnicodeObject *>(utf8Ptr),
+                         buffer.get(), length);
 
     auto *rawBuffer = buffer.get();
     return boost::make_shared<UnitLabel>(

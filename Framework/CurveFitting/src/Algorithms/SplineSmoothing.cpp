@@ -344,7 +344,7 @@ void SplineSmoothing::selectSmoothingPoints(
   while (resmooth) {
 
     if (incBreaks) {
-      if (smoothPts.size() > (unsigned)(maxBreaks + 2)) {
+      if (smoothPts.size() > static_cast<unsigned>(maxBreaks + 2)) {
         break;
       }
 

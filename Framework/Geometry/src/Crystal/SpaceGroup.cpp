@@ -105,9 +105,11 @@ Group_const_sptr SpaceGroup::getSiteSymmetryGroup(const V3D &position) const {
 
   std::vector<SymmetryOperation> siteSymmetryOps;
 
+  AtomPositionsEqual comparator;
+
   for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    if (Geometry::getWrappedVector((*op) * wrappedPosition) ==
-        wrappedPosition) {
+    if (comparator(Geometry::getWrappedVector((*op) * wrappedPosition),
+                   wrappedPosition)) {
       siteSymmetryOps.push_back(*op);
     }
   }
