@@ -54,12 +54,10 @@ protected:
 
 public:
   /// Set the successor
-  template
-  <typename T>
-  Chainable &setSuccessor(T &&successor){
-      m_successor = std::move(successor);
-      checkSuccessor();
-      return *m_successor;
+  template <typename T> Chainable &setSuccessor(T &&successor) {
+    m_successor = std::move(successor);
+    checkSuccessor();
+    return *m_successor;
   }
   bool hasSuccessor() const { return m_successor.get() != NULL; }
   virtual ~Chainable() = 0;
