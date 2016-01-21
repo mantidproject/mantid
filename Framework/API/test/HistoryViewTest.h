@@ -352,13 +352,15 @@ public:
 };
 
 class HistoryViewTestPerformance : public CxxTest::TestSuite {
-  
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HistoryViewTestPerformance *createSuite() { return new HistoryViewTestPerformance(); }
+  static HistoryViewTestPerformance *createSuite() {
+    return new HistoryViewTestPerformance();
+  }
   static void destroySuite(HistoryViewTestPerformance *suite) { delete suite; }
-  
+
 private:
   // 'Empty' algorithm class for tests
   class testalg : public Algorithm {
@@ -377,12 +379,12 @@ private:
     const std::string category() const {
       return "Cat";
     } ///< Algorithm's category for identification
-    
+
     void init() { declareProperty("name", "", Direction::Input); }
-    
+
     void exec() {}
   };
-  
+
 private:
   AlgorithmHistory_sptr
   createFromTestAlg(const std::string &name,
@@ -391,24 +393,27 @@ private:
     alg.initialize();
     alg.setPropertyValue("name", name);
     alg.execute();
-    
+
     AlgorithmHistory history(&alg, execTime, 14.0, m_execCount++);
     return boost::make_shared<AlgorithmHistory>(history);
   }
-  
+
 public:
   HistoryViewTestPerformance() : m_wsHist(), m_execCount(0) {
     // create dummy history structure
-    
-    for(std::size_t i = 0; i < 20; ++i)
-    {
-      auto alg = createFromTestAlg("alg"+boost::lexical_cast<std::string>(i), DateAndTime(100+i, 0));
-      for(std::size_t j = 0; j < 20; ++j)
-      {
-        auto childAlg = createFromTestAlg("child"+boost::lexical_cast<std::string>(j), DateAndTime(200+j, 0));
-        for (std::size_t k = 0; k < 20; ++k)
-        {
-          auto subChildAlg = createFromTestAlg("subChild"+boost::lexical_cast<std::string>(j)+boost::lexical_cast<std::string>(k), DateAndTime(300+k, 0));
+
+    for (int i = 0; i < 20; ++i) {
+      auto alg = createFromTestAlg("alg" + boost::lexical_cast<std::string>(i),
+                                   DateAndTime(100 + i, 0));
+      for (int j = 0; j < 20; ++j) {
+        auto childAlg =
+            createFromTestAlg("child" + boost::lexical_cast<std::string>(j),
+                              DateAndTime(200 + j, 0));
+        for (int k = 0; k < 20; ++k) {
+          auto subChildAlg = createFromTestAlg(
+              "subChild" + boost::lexical_cast<std::string>(j) +
+                  boost::lexical_cast<std::string>(k),
+              DateAndTime(300 + k, 0));
           childAlg->addChildHistory(subChildAlg);
         }
         alg->addChildHistory(childAlg);
@@ -416,20 +421,18 @@ public:
       m_wsHist.addHistory(alg);
     }
   }
-  
+
   void test_UnrollAll() {
     HistoryView view(m_wsHist);
     TS_ASSERT_THROWS_NOTHING(view.unrollAll());
   }
-  
+
   void test_UnrollAllRollAll() {
     HistoryView view(m_wsHist);
     TS_ASSERT_THROWS_NOTHING(view.unrollAll());
     TS_ASSERT_THROWS_NOTHING(view.rollAll());
   }
-  
-  
-  
+
   WorkspaceHistory m_wsHist;
   size_t m_execCount;
 };
