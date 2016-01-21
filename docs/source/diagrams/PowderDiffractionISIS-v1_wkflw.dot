@@ -10,6 +10,14 @@ digraph PowderDiffractionISIS {
   Focus_one_Start             [label="Start Focusing"]
   Focus_All_Start             [label="Focus All (Run)"]
 
+  subgraph params {
+    $param_style
+
+    VEmptyFile
+    VanadiumFile
+    FileName
+  }
+
   subgraph processes {
     $process_style
 
@@ -33,13 +41,26 @@ digraph PowderDiffractionISIS {
   subgraph algorithms {
     $algorithm_style
 
+    LoadVan_LoadRaw                       [label="LoadRaw"]
+    LoadVan_MaskBins                      [label="MaskBins"]
+    LoadVan_Plus                          [label="Plus"]
+    LoadVan_CreateSingleVal               [label="CreateSingleValuedWorkspace"]
+    LoadVan_LDivide                       [label="Divide"]
+
     LoadSac_CreateSingle_1                [label="CreateSingleValuedWorkspace"]
     LoadSac_CreateSingle_2                [label="CreateSingleValuedWorkspace"]
     LoadSac_CreateSingle_3                [label="CreateSingleValuedWorkspace"]
+    LoadSac_CreateSingle_4                [label="CreateSingleValuedWorkspace"]
     LoadSac_Divide_1                      [label="Divide"]
     LoadSac_Divide_2                      [label="Divide"]
     LoadSac_Integrate_1                   [label="Integrate"]
     LoadSac_Multiply_1                    [label="Multiply"]
+    LoadSac_MaskDetectorIf                [label="MaskDetectorIf"]
+    LoadSac_SolidAngle                    [label="SolidAngle"]
+    LoadSac_Multiply                      [label="Multiply"]
+    LoadSac_ConvertUnits                  [label="ConvertUnits"]
+    LoadSac_Integration                   [label="Integration"]
+
 
     CorrAbs_ConvertUnits                  [label="ConvertUnits"]
     CorrAbs_CylinderAbsorption            [label="CylinderAbsorption"]
@@ -93,6 +114,7 @@ digraph PowderDiffractionISIS {
     Focus_one_SaveFocusedXYE1             [label="SaveFocusedXYE"]
     Focus_one_SaveFocusedXYE2             [label="SaveFocusedXYE"]
 
+    Focus_All_LoadNexusProcessed          [label="LoadNexusProcessed"]
   }
 
   subgraph decisions {
@@ -119,36 +141,36 @@ digraph PowderDiffractionISIS {
 
   }
 
-  subgraph get_data_sum {
-  GetDataSum_Start              -> LoadRaw
-  FileName                      -> LoadRaw
-  LoadRaw                       -> IfHrpd
-  IfHrpd                        -> MaskBins                           [label="true"]
-  MaskBins                      -> FirstNonZeroNotFound
+  subgraph load_van_get_data_sum {
+  GetDataSum_Start              -> LoadVan_LoadRaw
+  FileName                      -> LoadVan_LoadRaw
+  LoadVan_LoadRaw               -> IfHrpd
+  IfHrpd                        -> LoadVan_MaskBins                   [label="true"]
+  LoadVan_MaskBins              -> FirstNonZeroNotFound
   IfHrpd                        -> FirstNonZeroNotFound               [label="else"]
-  FirstNonZeroNotFound          -> CreateSingleValuedWorkspace         [label="true"]
-  FirstNonZeroNotFound          -> Plus                               [label="else"]
-  Plus                          -> CreateSingleValuedWorkspace
-  CreateSingleValuedWorkspace   -> Divide
+  FirstNonZeroNotFound          -> LoadVan_CreateSingleVal            [label="true"]
+  FirstNonZeroNotFound          -> LoadVan_Plus                       [label="else"]
+  LoadVan_Plus                  -> LoadVan_CreateSingleVal
+  LoadVan_CreateSingleVal       -> LoadVan_LDivide
 
   }
 
   subgraph load_sac_eff {
   LoadSac_Start                 -> NoSac
-  NoSac                         -> CreateSingleValueWorkspace         [label="true"]
+  NoSac                         -> LoadSac_CreateSingle_4             [label="true"]
   NoSac                         -> SacEff_RunGetDataSum               [label="else"]
   SacEff_RunGetDataSum           -> UampsotalLess
   UampsotalLess                 -> LoadSac_CreateSingle_1             [label="true"]
   UampsotalLess                 -> LoadSac_Integrate_1                [label="else"]
-  LoadSac_Integrate_1           -> MaskDetectorIf
-  MaskDetectorIf                -> SolidAngle
-  SolidAngle                    -> LoadSac_CreateSingle_2
-  LoadSac_CreateSingle_2        -> Multiply
-  Multiply                      -> Eff
+  LoadSac_Integrate_1           -> LoadSac_MaskDetectorIf
+  LoadSac_MaskDetectorIf        -> LoadSac_SolidAngle
+  LoadSac_SolidAngle            -> LoadSac_CreateSingle_2
+  LoadSac_CreateSingle_2        -> LoadSac_Multiply
+  LoadSac_Multiply              -> Eff
   Eff                           -> LoadSac_Divide_1                   [label="true"]
-  LoadSac_Divide_1              -> ConvertUnits
-  ConvertUnits                  -> Integration
-  Integration                   -> LoadSac_Multiply_1
+  LoadSac_Divide_1              -> LoadSac_ConvertUnits
+  LoadSac_ConvertUnits          -> LoadSac_Integration
+  LoadSac_Integration           -> LoadSac_Multiply_1
   LoadSac_Multiply_1            -> LoadSac_CreateSingle_3
   LoadSac_CreateSingle_3        -> LoadSac_Divide_2
 
@@ -245,15 +267,15 @@ digraph PowderDiffractionISIS {
 
   }
 
-  subgraph focus_one {
+  subgraph focus_all {
   Focus_All_Start              -> Focus_All_Norm
   Focus_All_Norm               -> Focus_All_LoadSac1                   [label="true"]
   Focus_All_Norm               -> Focus_All_LoadSac2                   [label="else"]
   Focus_All_LoadSac1           -> Focus_Al_ExistingV
-  Focus_Al_ExistingV           -> LoadNexusProcessed                   [label="load"]
+  Focus_Al_ExistingV           -> Focus_All_LoadNexusProcessed         [label="load"]
   Focus_Al_ExistingV           -> Focus_All_C_Vana                     [label="no"]
   Focus_All_LoadSac2           -> Focus_All_Focus_one
-  LoadNexusProcessed           -> Focus_All_Focus_one
+  Focus_All_LoadNexusProcessed -> Focus_All_Focus_one
   Focus_All_C_Vana             -> Focus_All_Focus_one
 
   }
