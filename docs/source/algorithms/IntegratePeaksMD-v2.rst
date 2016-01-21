@@ -97,7 +97,7 @@ IntegrateIfOnEdge option
 ###################################
 
 Edges for each bank or pack of tubes of the instrument are defined by masking the edges in the PeaksWorkspace instrument. 
-e.g. For CORELLI, tubes 1 and 16, and pixels 0 and 255.
+e.g. For TOPAZ pixels 0 and 255 in both directions for the Rectangular Detector.
 Q in the lab frame for every peak is calculated, call it C
 For every point on the edge, the trajectory in reciprocal space is a straight line, going through:
 
@@ -122,6 +122,42 @@ If:
 
 for the integration, one of the detector trajectories on the edge is too close to the peak 
 This method is also applied to all masked pixels.  If there are masked pixels trajectories inside an integration volume, the peak must be rejected.
+
+   
+CorrectIfOnEdge option
+###################################
+
+This is an extension of what was calculated for the IntegrateIfOnEdge option.  It will only be calculated if this option  
+is true and for the background 
+
+:math:`\left|dv\right|<BackgroundOuterRadius` 
+
+:math:`h = BackgroundOuterRadius - \left|dv\right|`
+
+:math:`r = BackgroundOuterRadius`
+
+or for the peak (assume that the shape is Gaussian)
+
+:math:`\left|dv\right|<PeakRadius`
+
+:math:`\sigma = PeakRadius / 3`
+
+:math:`h = PeakRadius * exp(-\left|dv\right|^2 / (2 \sigma^2)`
+
+:math:`r = PeakRadius`
+
+The minimum of dv is calculated for each peak and from that value the volume of the cap of the sphere is found:
+
+:math:`V_{cap} = \pi h^2 / 3 (3r - h)`
+
+and the volume of the sphere is calculated
+
+:math:`V_{sphere} = 4/3 \pi r^3`
+
+The integrated intensity is multiplied by the ratio of the volume of the sphere divided by the volume where data was collected
+
+:math:`I_{multiplier} = V_{sphere} / (V_{sphere} - V_{cap})`
+
 
    
 Usage
