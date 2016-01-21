@@ -45,8 +45,7 @@ using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
-  m_Progress =
-      std::auto_ptr<API::Progress>(new API::Progress(this, 0, 1, nSteps));
+  m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
 }
 
 /**

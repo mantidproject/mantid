@@ -5,13 +5,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include <Poco/File.h>
 
-// clang-format off
-#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
-typedef std::unique_ptr< ::NeXus::File> file_holder_type;
-#else
-typedef std::auto_ptr< ::NeXus::File> file_holder_type;
-#endif
-// clang-format on
+typedef std::unique_ptr<::NeXus::File> file_holder_type;
 
 namespace Mantid {
 namespace DataObjects {
@@ -747,6 +741,11 @@ void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,
   file->writeData("coordinate_system",
                   static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
 
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string m_QConvention = ws->getConvention();
+  file->putAttr("QConvention", m_QConvention);
+
   // Write out the set display normalization
   file->writeData("visual_normalization",
                   static_cast<uint32_t>(ws->displayNormalization()));
@@ -806,6 +805,8 @@ void MDBoxFlatTree::saveAffineTransformMatricies(
 void MDBoxFlatTree::saveAffineTransformMatrix(
     ::NeXus::File *const file, API::CoordTransform const *transform,
     std::string entry_name) {
+  if (!transform)
+    return;
   Kernel::Matrix<coord_t> matrix = transform->makeAffineMatrix();
   g_log.debug() << "TRFM: " << matrix.str() << std::endl;
   saveMatrix<coord_t>(file, entry_name, matrix, ::NeXus::FLOAT32,

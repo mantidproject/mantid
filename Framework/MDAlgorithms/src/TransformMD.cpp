@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -93,6 +94,20 @@ void TransformMD::doTransform(
 }
 
 //----------------------------------------------------------------------------------------------
+/** Swap the array elements
+*
+* @param array :: signal array
+* @param arrayLength :: length of signal array
+*/
+void TransformMD::reverse(signal_t *array, size_t arrayLength) {
+  for (size_t i = 0; i < (arrayLength / 2); i++) {
+    signal_t temp = array[i];
+    array[i] = array[(arrayLength - 1) - i];
+    array[(arrayLength - 1) - i] = temp;
+  }
+}
+
+//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void TransformMD::exec() {
@@ -101,6 +116,7 @@ void TransformMD::exec() {
 
   inWS = getProperty("InputWorkspace");
   outWS = getProperty("OutputWorkspace");
+  std::string outName = getPropertyValue("OutputWorkspace");
 
   if (boost::dynamic_pointer_cast<MatrixWorkspace>(inWS))
     throw std::runtime_error("TransformMD can only transform a "
@@ -147,12 +163,72 @@ void TransformMD::exec() {
   if (histo) {
     // Recalculate all the values since the dimensions changed.
     histo->cacheValues();
+    if (m_scaling[0] < 0.0) {
+      signal_t *signals = histo->getSignalArray();
+      signal_t *errorsSq = histo->getErrorSquaredArray();
+
+      this->reverse(signals, histo->getNPoints());
+      this->reverse(errorsSq, histo->getNPoints());
+    }
+
+    this->setProperty("OutputWorkspace", histo);
   } else if (event) {
     // Call the method for this type of MDEventWorkspace.
     CALL_MDEVENT_FUNCTION(this->doTransform, outWS);
-  }
+    Progress *prog2 = NULL;
+    ThreadScheduler *ts = new ThreadSchedulerFIFO();
+    ThreadPool tp(ts, 0, prog2);
+    event->splitAllIfNeeded(ts);
+    // prog2->resetNumSteps( ts->size(), 0.4, 0.6);
+    tp.joinAll();
+    event->refreshCache();
+    // Set the special coordinate system.
+    IMDEventWorkspace_sptr inEvent =
+        boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+    event->setCoordinateSystem(inEvent->getSpecialCoordinateSystem());
 
-  this->setProperty("OutputWorkspace", outWS);
+    if (m_scaling[0] < 0) {
+      // Only need these 2 algorithms for transforming with negative number
+      std::vector<double> extents;
+      std::vector<std::string> names, units;
+      for (size_t d = 0; d < nd; d++) {
+        Geometry::IMDDimension_const_sptr dim = event->getDimension(d);
+        // Find the extents
+        extents.push_back(dim->getMinimum());
+        extents.push_back(dim->getMaximum());
+        names.push_back(std::string(dim->getName()));
+        units.push_back(dim->getUnits());
+      }
+      Algorithm_sptr create_alg = createChildAlgorithm("CreateMDWorkspace");
+      create_alg->setProperty("Dimensions", static_cast<int>(nd));
+      create_alg->setProperty("EventType", event->getEventTypeName());
+      create_alg->setProperty("Extents", extents);
+      create_alg->setProperty("Names", names);
+      create_alg->setProperty("Units", units);
+      create_alg->setPropertyValue("OutputWorkspace", "__none");
+      create_alg->executeAsChildAlg();
+      Workspace_sptr none = create_alg->getProperty("OutputWorkspace");
+
+      AnalysisDataService::Instance().addOrReplace(outName, event);
+      AnalysisDataService::Instance().addOrReplace("__none", none);
+      Mantid::API::BoxController_sptr boxController = event->getBoxController();
+      std::vector<int> splits;
+      for (size_t d = 0; d < nd; d++) {
+        splits.push_back(static_cast<int>(boxController->getSplitInto(d)));
+      }
+      Algorithm_sptr merge_alg = createChildAlgorithm("MergeMD");
+      merge_alg->setPropertyValue("InputWorkspaces", outName + ",__none");
+      merge_alg->setProperty("SplitInto", splits);
+      merge_alg->setProperty(
+          "SplitThreshold",
+          static_cast<int>(boxController->getSplitThreshold()));
+      merge_alg->setProperty("MaxRecursionDepth", 13);
+      merge_alg->executeAsChildAlg();
+      event = merge_alg->getProperty("OutputWorkspace");
+      AnalysisDataService::Instance().remove("__none");
+    }
+    this->setProperty("OutputWorkspace", event);
+  }
 }
 
 } // namespace Mantid

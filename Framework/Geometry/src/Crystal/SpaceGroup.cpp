@@ -1,5 +1,6 @@
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include <algorithm>
 
 namespace Mantid {
 namespace Geometry {
@@ -105,13 +106,11 @@ Group_const_sptr SpaceGroup::getSiteSymmetryGroup(const V3D &position) const {
   V3D wrappedPosition = Geometry::getWrappedVector(position);
 
   std::vector<SymmetryOperation> siteSymmetryOps;
-
-  for (const auto &m_allOperation : m_allOperations) {
-    if (Geometry::getWrappedVector(m_allOperation * wrappedPosition) ==
-        wrappedPosition) {
-      siteSymmetryOps.push_back(m_allOperation);
-    }
-  }
+  AtomPositionsEqual comparator;
+  std::copy_if(m_allOperations.begin(),m_allOperations.end(),std::inserter(siteSymmetryOps,siteSymmetryOps.begin()),[&](const SymmetryOperation & op)
+               {
+                 return Geometry::getWrappedVector(op * wrappedPosition) == wrappedPosition;
+               });
 
   return GroupFactory::create<Group>(siteSymmetryOps);
 }

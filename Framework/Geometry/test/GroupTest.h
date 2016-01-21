@@ -185,8 +185,8 @@ public:
     TS_ASSERT_EQUALS(two.getCoordinateSystem(), Group::Hexagonal);
   }
 
-  void testFuzzyV3DLessThan() {
-    FuzzyV3DLessThan lessThan;
+  void testAtomPositionLessThan() {
+    AtomPositionsLessThan lessThan(1.e-6);
 
     V3D v1(0.654321, 0.0, 0.0);
     V3D v2(0.654320, 0.0, 0.0);
@@ -218,6 +218,33 @@ public:
     TS_ASSERT(v1 == v7);
     TS_ASSERT(!lessThan(v1, v7));
     TS_ASSERT(!lessThan(v7, v1));
+  }
+
+  void testAtomPositionEqual() {
+    AtomPositionsEqual equal(1.e-6);
+
+    V3D v1(0.654321, 0.0, 0.0);
+    V3D v2(0.654320, 0.0, 0.0);
+    TS_ASSERT(!equal(v2, v1));
+
+    // 7th digit is not compared.
+    V3D v3(0.6543211, 0.0, 0.0);
+    TS_ASSERT(equal(v1, v3));
+    TS_ASSERT(equal(v3, v1));
+
+    // Same for y
+    V3D v4(0.654321, 0.0000010001, 0.0);
+    TS_ASSERT(!equal(v1, v4));
+
+    V3D v5(0.654321, 0.0000001, 0.0);
+    TS_ASSERT(equal(v5, v1));
+
+    // Same for z
+    V3D v6(0.654321, 0.0, 0.0000010001);
+    TS_ASSERT(!equal(v1, v6));
+
+    V3D v7(0.654321, 0.0, 0.0000001);
+    TS_ASSERT(equal(v1, v7));
   }
 
   void testContainsOperation() {
