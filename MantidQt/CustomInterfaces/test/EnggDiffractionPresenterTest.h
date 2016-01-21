@@ -93,6 +93,7 @@ public:
     m_ex_run_number.push_back(g_validRunNo);
     g_vanNo.push_back("8899999988");
     g_ceriaNo.push_back("9999999999");
+    g_rebinRunNo.push_back(g_eventModeRunNo);
 
     // provide personal directories in order to carry out the full disable tests
     m_basicCalibSettings.m_inputDirCalib = "GUI_calib_folder/";
@@ -333,6 +334,267 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::CalcCalib);
+  }
+
+  // This would test the cropped calibration with no cerial number
+  // which should produce a warning
+  void test_calcCroppedCalibWithoutRunNumbers() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // would need basic calibration settings from the user, but it should not
+    // get to that point because of early detected errors:
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+
+    EXPECT_CALL(mockView, newCeriaNo())
+        .Times(1)
+        .WillOnce(Return(m_ex_empty_run_num));
+
+    // No errors, 1 warning (no Vanadium, no Ceria run numbers given)
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::CropCalib);
+  }
+
+  // this can start the cropped calibration thread, so watch out
+  // the test provide gui with missing calib settings
+  // which should return a single error
+  void test_calcCroppedCalibWithSettingsMissing() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+
+    // this test can start a Qt thread that needs signals/slots
+    // Don't do: MantidQt::CustomInterfaces::EnggDiffractionPresenter
+    // pres(&mockView);
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    const std::string instr = "FAKEINSTR";
+    const std::string vanNo = "9999999999"; // use a number that won't be found!
+    const std::string ceriaNo =
+        "9999999999"; // use a number that won't be found!
+
+    EnggDiffCalibSettings calibSettings;
+
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(1)
+        .WillOnce(Return(calibSettings));
+
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
+
+    // 1 warning because some required settings are missing/empty
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+
+    TS_ASSERT_THROWS_NOTHING(pres.notify(IEnggDiffractionPresenter::CropCalib));
+  }
+
+  // This should not start the process, tests with an empty spec number which
+  // should generate a user warning that spec number is missing
+  void test_calcCroppedCalibWithEmptySpec() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+
+    // this test would start a Qt thread that needs signals/slots
+    // Don't do: MantidQt::CustomInterfaces::EnggDiffractionPresenter
+    // pres(&mockView);
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    const std::string instr = "ENGINX";
+    const std::string vanNo = "8899999988"; // use a number that won't be found!
+    const std::string ceriaNo =
+        "9999999999"; // use a number that won't be found!
+
+    // will need basic calibration settings from the user
+    EnggDiffCalibSettings calibSettings;
+    calibSettings.m_pixelCalibFilename =
+        instr + "_" + vanNo + "_" + ceriaNo + ".prm";
+    calibSettings.m_templateGSAS_PRM = "fake.prm";
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(1)
+        .WillOnce(Return(calibSettings));
+
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
+
+    std::string specid = "";
+    EXPECT_CALL(mockView, currentCalibSpecNos())
+        .Times(1)
+        .WillOnce(Return(specid));
+
+    // No warnings/error pop-ups: some exception(s) are thrown (because there
+    // are missing settings and/or files) but these must be caught
+    // and error messages logged
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::CropCalib);
+  }
+
+  // this test actually starts the cropped calibration process - which implies
+  // starting
+  // the thread unless you use the mock without thread
+  // this will utlise the bank name north and not still carry out the cropped
+  // calibration process normal
+  void test_calcCroppedCalibWithBankName() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+
+    // this test would start a Qt thread that needs signals/slots
+    // Don't do: MantidQt::CustomInterfaces::EnggDiffractionPresenter
+    // pres(&mockView);
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    const std::string instr = "ENGINX";
+    const std::string vanNo = "8899999988"; // use a number that won't be found!
+    const std::string ceriaNo =
+        "9999999999"; // use a number that won't be found!
+
+    // will need basic calibration settings from the user
+    EnggDiffCalibSettings calibSettings;
+    calibSettings.m_pixelCalibFilename =
+        instr + "_" + vanNo + "_" + ceriaNo + ".prm";
+    calibSettings.m_templateGSAS_PRM = "fake.prm";
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(2)
+        .WillRepeatedly(Return(calibSettings));
+
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
+
+    // North bank selected so the spectrum ID will not be called and
+    // process should carry on without spec id input
+    EXPECT_CALL(mockView, currentCropCalibBankName())
+        .Times(1)
+        .WillOnce(Return(1));
+
+    const std::string filename =
+        "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
+    //  .WillOnce(Return(filename)); // if enabled ask user output filename
+
+    // should disable actions at the beginning of the calculations
+    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(1);
+
+    // and should enable them again at the (unsuccessful) end - this happens
+    // when a separate thread finished (here the thread is mocked)
+    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(1);
+
+    // No warnings/error pop-ups: some exception(s) are thrown (because there
+    // are missing settings and/or files) but these must be caught
+    // and error messages logged
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::CropCalib);
+  }
+
+  // this test actually starts the cropped calibration process - which implies
+  // starting the thread unless you use the mock without thread
+  // this test case includes all valid settings, run numbers, spectrum id
+  // selected
+  // & valid spectrum id provided
+  void test_calcCroppedCalibWithRunNumbers() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+
+    // this test would start a Qt thread that needs signals/slots
+    // Don't do: MantidQt::CustomInterfaces::EnggDiffractionPresenter
+    // pres(&mockView);
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    const std::string instr = "ENGINX";
+    const std::string vanNo = "8899999988"; // use a number that won't be found!
+    const std::string ceriaNo =
+        "9999999999"; // use a number that won't be found!
+
+    // will need basic calibration settings from the user
+    EnggDiffCalibSettings calibSettings;
+    calibSettings.m_pixelCalibFilename =
+        instr + "_" + vanNo + "_" + ceriaNo + ".prm";
+    calibSettings.m_templateGSAS_PRM = "fake.prm";
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(2)
+        .WillRepeatedly(Return(calibSettings));
+
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
+
+    EXPECT_CALL(mockView, currentCropCalibBankName())
+        .Times(1)
+        .WillOnce(Return(0));
+
+    std::string specid = "100-200";
+    EXPECT_CALL(mockView, currentCalibSpecNos())
+        .Times(2)
+        .WillRepeatedly(Return(specid));
+
+    const std::string filename =
+        "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
+    //  .WillOnce(Return(filename)); // if enabled ask user output filename
+
+    // Should not try to use options for focusing
+    EXPECT_CALL(mockView, focusingRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+
+    // should disable actions at the beginning of the calculations
+    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(1);
+
+    // and should enable them again at the (unsuccessful) end - this happens
+    // when a separate thread finished (here the thread is mocked)
+    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(1);
+
+    // No warnings/error pop-ups: some exception(s) are thrown (because there
+    // are missing settings and/or files) but these must be caught
+    // and error messages logged
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::CropCalib);
+  }
+
+  // TODO: disabled for now, as this one would need to load files
+  void disable_test_calcCropCalibOK() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // will need basic calibration settings from the user
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(1)
+        .WillOnce(Return(m_basicCalibSettings));
+
+    // As this is a positive test, personal directory/files should be
+    // provided here instead
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
+
+    EXPECT_CALL(mockView, currentCropCalibBankName())
+        .Times(1)
+        .WillOnce(Return(0));
+
+    std::string specid = "100-200";
+    EXPECT_CALL(mockView, currentCalibSpecNos())
+        .Times(2)
+        .WillRepeatedly(Return(specid));
+
+    // No errors/warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::CropCalib);
   }
 
   void test_focusWithoutRunNumber() {
@@ -741,6 +1003,16 @@ public:
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
+    // inputs from user
+    EXPECT_CALL(mockView, currentPreprocRunNo())
+        .Times(1)
+        .WillOnce(Return(m_ex_empty_run_num));
+    EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(0));
+
+    // No errors/1 warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
     pres.notify(IEnggDiffractionPresenter::RebinTime);
   }
 
@@ -751,7 +1023,7 @@ public:
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
         .Times(1)
-        .WillOnce(Return(g_eventModeRunNo));
+        .WillOnce(Return(g_rebinRunNo));
     EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(0));
 
     // No errors/warnings
@@ -767,10 +1039,12 @@ public:
     EnggDiffPresenterNoThread pres(&mockView);
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
-        .Times(1)
-        .WillRepeatedly(Return(g_eventModeRunNo));
+        .Times(2)
+        .WillRepeatedly(Return(g_rebinRunNo));
 
-    EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(1.0));
+    EXPECT_CALL(mockView, rebinningTimeBin())
+        .Times(1)
+        .WillRepeatedly(Return(0.100000));
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -784,7 +1058,9 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // inputs from user
-    EXPECT_CALL(mockView, currentPreprocRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, currentPreprocRunNo())
+        .Times(1)
+        .WillOnce(Return(m_ex_empty_run_num));
     // should not even call this one when the run number is obviously wrong
     EXPECT_CALL(mockView, rebinningTimeBin()).Times(0);
 
@@ -798,7 +1074,7 @@ public:
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
         .Times(1)
-        .WillOnce(Return(g_eventModeRunNo));
+        .WillOnce(Return(g_rebinRunNo));
     EXPECT_CALL(mockView, rebinningPulsesNumberPeriods())
         .Times(1)
         .WillOnce(Return(1));
@@ -820,16 +1096,16 @@ public:
     // This file will be found but it is not a valid file for this re-binning
     EXPECT_CALL(mockView, currentPreprocRunNo())
         .Times(1)
-        .WillOnce(Return(g_eventModeRunNo));
+        .WillOnce(Return(g_rebinRunNo));
     EXPECT_CALL(mockView, rebinningPulsesNumberPeriods())
         .Times(1)
-        .WillOnce(Return(1000));
+        .WillOnce(Return(0.100000));
     // 1s is big enough
     EXPECT_CALL(mockView, rebinningPulsesTime()).Times(1).WillOnce(Return(1));
 
     // No errors/warnings. There will be an error log from the algorithms
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
   }
@@ -917,6 +1193,7 @@ private:
   std::vector<std::string> m_ex_run_number;
   std::vector<std::string> g_vanNo;
   std::vector<std::string> g_ceriaNo;
+  std::vector<std::string> g_rebinRunNo;
 };
 
 // Note this is not a correct event mode run number. Using it here just

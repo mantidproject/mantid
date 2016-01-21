@@ -120,10 +120,9 @@ void SaveScreenshotReaction::saveScreenshot()
                                       colorPalette->GetXMLName()));
     clone->Copy(colorPalette);
 
-    vtkSMProxy *chosenPalette = pxm->NewProxy("palettes",
-                                              palette.toLatin1().data());
+    auto chosenPalette = vtkSmartPointer<vtkSMProxy>::Take(
+        pxm->NewProxy("palettes", palette.toLatin1().data()));
     colorPalette->Copy(chosenPalette);
-    chosenPalette->Delete();
   }
 
   int stereo = ssDialog.getStereoMode();

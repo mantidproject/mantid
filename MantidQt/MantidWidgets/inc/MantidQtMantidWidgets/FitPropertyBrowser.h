@@ -145,6 +145,8 @@ public:
   bool convolveMembers()const;
   /// Set if the data must be normalised before fitting
   void normaliseData(bool on) {m_shouldBeNormalised = on;}
+  /// Get the max number of iterations
+  int maxIterations() const;
 
   /// Get the start X
   double startX()const;

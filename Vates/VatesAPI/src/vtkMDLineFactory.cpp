@@ -12,8 +12,10 @@
 #include <vtkFloatArray.h>
 #include <vtkLine.h>
 #include <vtkCellData.h>
+#include <vtkNew.h>
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::API;
 
@@ -43,10 +45,11 @@ Create the vtkStructuredGrid from the provided workspace
 stack.
 @return fully constructed vtkDataSet.
 */
-vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
-  vtkDataSet *product = tryDelegatingCreation<IMDEventWorkspace, 1>(
-      m_workspace, progressUpdating);
-  if (product != NULL) {
+vtkSmartPointer<vtkDataSet>
+vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
+  auto product = tryDelegatingCreation<IMDEventWorkspace, 1>(m_workspace,
+                                                             progressUpdating);
+  if (product != nullptr) {
     return product;
   } else {
     g_log.warning() << "Factory " << this->getFactoryTypeName()
@@ -65,7 +68,7 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     /*
     Write mask array with correct order for each internal dimension.
     */
-    bool *masks = new bool[nDims];
+        auto masks = Mantid::Kernel::make_unique<bool[]>(nDims);
     for (size_t i_dim = 0; i_dim < nDims; ++i_dim) {
       bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
       masks[i_dim] =
@@ -77,21 +80,21 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
         createIteratorWithNormalization(m_normalizationOption, imdws.get()));
 
     // Create 2 points per box.
-    vtkPoints *points = vtkPoints::New();
+    vtkNew<vtkPoints> points;
     points->SetNumberOfPoints(it->getDataSize() * 2);
 
     // One scalar per box
-    vtkFloatArray *signals = vtkFloatArray::New();
+    vtkNew<vtkFloatArray> signals;
     signals->Allocate(it->getDataSize());
     signals->SetName(vtkDataSetFactory::ScalarName.c_str());
     signals->SetNumberOfComponents(1);
 
     size_t nVertexes;
 
-    vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+    auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
     visualDataSet->Allocate(it->getDataSize());
 
-    vtkIdList *linePointList = vtkIdList::New();
+    vtkNew<vtkIdList> linePointList;
     linePointList->SetNumberOfIds(2);
 
     Mantid::API::CoordTransform const *transform = NULL;
@@ -100,7 +103,7 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     }
 
     Mantid::coord_t out[1];
-    bool *useBox = new bool[it->getDataSize()];
+    auto useBox = std::vector<bool>(it->getDataSize());
 
     double progressFactor = 0.5 / double(it->getDataSize());
     double progressOffset = 0.5;
@@ -109,20 +112,18 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     do {
       progressUpdating.eventRaised(double(iBox) * progressFactor);
 
-      Mantid::signal_t signal_normalized = it->getNormalizedSignalWithMask();
+      Mantid::signal_t signal_normalized = it->getNormalizedSignal();
       if (!isSpecial(signal_normalized) &&
           m_thresholdRange->inRange(signal_normalized)) {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal_normalized));
 
-        coord_t *coords =
-            it->getVertexesArray(nVertexes, nNonIntegrated, masks);
-        delete[] coords;
-        coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks);
+        auto coords = std::unique_ptr<coord_t>(
+            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get()));
 
         // Iterate through all coordinates. Candidate for speed improvement.
         for (size_t v = 0; v < nVertexes; ++v) {
-          coord_t *coord = coords + v * 1;
+          coord_t *coord = coords.get() + v * 1;
           size_t id = iBox * 2 + v;
           if (m_useTransform) {
             transform->apply(coord, out);
@@ -131,8 +132,6 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
             points->SetPoint(id, coord[0], 0, 0);
           }
         }
-        // Free memory
-        delete[] coords;
       } // valid number of vertexes returned
       else {
         useBox[iBox] = false;
@@ -140,7 +139,6 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
       ++iBox;
     } while (it->next());
 
-    delete[] masks;
     for (size_t ii = 0; ii < it->getDataSize(); ++ii) {
       progressUpdating.eventRaised((double(ii) * progressFactor) +
                                    progressOffset);
@@ -150,31 +148,25 @@ vtkDataSet *vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
 
         linePointList->SetId(0, pointIds + 0); // xyx
         linePointList->SetId(1, pointIds + 1); // dxyz
-        visualDataSet->InsertNextCell(VTK_LINE, linePointList);
+        visualDataSet->InsertNextCell(VTK_LINE, linePointList.GetPointer());
       } // valid number of vertexes returned
     }
-
-    delete[] useBox;
 
     signals->Squeeze();
     points->Squeeze();
 
-    visualDataSet->SetPoints(points);
-    visualDataSet->GetCellData()->SetScalars(signals);
+    visualDataSet->SetPoints(points.GetPointer());
+    visualDataSet->GetCellData()->SetScalars(signals.GetPointer());
     visualDataSet->Squeeze();
-
-    signals->Delete();
-    points->Delete();
-    linePointList->Delete();
 
     // Hedge against empty data sets
     if (visualDataSet->GetNumberOfPoints() <= 0) {
-      visualDataSet->Delete();
       vtkNullUnstructuredGrid nullGrid;
       visualDataSet = nullGrid.createNullData();
     }
 
-    return visualDataSet;
+    vtkSmartPointer<vtkDataSet> dataset = visualDataSet;
+    return dataset;
   }
 }
 

@@ -102,6 +102,7 @@ public:
   void sort(std::vector<std::pair<std::string, bool>> &criteria);
 
   int getNumberPeaks() const;
+  std::string getConvention() const;
   void removePeak(int peakNum);
   void addPeak(const Geometry::IPeak &ipeak);
   Peak &getPeak(int peakNum);

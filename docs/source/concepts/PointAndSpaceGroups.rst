@@ -228,7 +228,7 @@ Besides containing some very basic information, the most important functionality
     for i, pos in enumerate(equivalents):
         print str(i + 1) + ":", pos
         
-Please note that for hexagonal and trigonal space groups, where translations of :math:`1/3`, :math:`2/3`, :math:`1/6` and so on are common, these coordinates must be supplied either as ``1./3.`` or with a precision of 7 digits, e.g. ``0.6666667``.
+Please note that for hexagonal and trigonal space groups, where translations of :math:`1/3`, :math:`2/3`, :math:`1/6` and so on are common, these coordinates must be supplied either as ``1./3.`` or with a precision of 5 digits, e.g. ``0.66667``.
         
 .. testoutput:: ExEquivalentCoordinates
 

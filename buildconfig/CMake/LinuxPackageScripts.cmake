@@ -142,7 +142,7 @@ execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantid
                   OUTPUT_QUIET ERROR_QUIET )
 
 # Package version
-set ( EXTRA_LDPATH "\${INSTALLDIR}/../lib/paraview-4.3" )
+set ( EXTRA_LDPATH "\${INSTALLDIR}/../lib/paraview-5.0" )
 set ( MANTIDPLOT_EXEC MantidPlot_exe )
 configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
                  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )

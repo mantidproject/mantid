@@ -556,8 +556,9 @@ void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
   }
 }
 
-std::string EnggDiffractionViewQtGUI::currentPreprocRunNo() const {
-  return m_uiTabPreproc.MWRunFiles_preproc_run_num->getText().toStdString();
+std::vector<std::string> EnggDiffractionViewQtGUI::currentPreprocRunNo() const {
+	return qListToVector(m_uiTabPreproc.MWRunFiles_preproc_run_num->getFilenames(),
+		m_uiTabPreproc.MWRunFiles_preproc_run_num->isValid());
 }
 
 double EnggDiffractionViewQtGUI::rebinningTimeBin() const {
@@ -965,6 +966,9 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
   // calibration tab
   m_uiTabCalib.lineEdit_new_ceria_num->setInstrumentOverride(prefixInput);
   m_uiTabCalib.lineEdit_new_vanadium_num->setInstrumentOverride(prefixInput);
+
+  // rebin tab
+  m_uiTabPreproc.MWRunFiles_preproc_run_num->setInstrumentOverride(prefixInput);
   m_uiTabCalib.lineEdit_cropped_run_num->setInstrumentOverride(prefixInput);
 }
 
