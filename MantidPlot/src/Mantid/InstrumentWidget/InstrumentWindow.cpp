@@ -330,10 +330,12 @@ void InstrumentWindow::setSurfaceType(int type) {
     int peakLabelPrecision = 6;
     bool showPeakRow = true;
     bool showPeakLabels = true;
+    bool showPeakRelativeIntensity = true;
     if (surface) {
       peakLabelPrecision = surface->getPeakLabelPrecision();
       showPeakRow = surface->getShowPeakRowsFlag();
       showPeakLabels = surface->getShowPeakLabelsFlag();
+      showPeakRelativeIntensity = surface->getShowPeakRelativeIntensityFlag();
     } else {
       QSettings settings;
       peakLabelPrecision =
@@ -341,9 +343,13 @@ void InstrumentWindow::setSurfaceType(int type) {
               .toInt();
       showPeakRow =
           settings.value("Mantid/InstrumentWindow/ShowPeakRows", true).toBool();
-      showPeakLabels =
-          settings.value("Mantid/InstrumentWindow/ShowPeakLabels", true)
-              .toBool();
+      showPeakLabels = settings.value("Mantid/InstrumentWindow/ShowPeakLabels",
+                                      true).toBool();
+
+      // By default this is should be off for now.
+      showPeakRelativeIntensity =
+          settings.value("Mantid/InstrumentWindow/ShowPeakRelativeIntensities",
+                         false).toBool();
     }
 
     // Surface factory
@@ -409,6 +415,7 @@ void InstrumentWindow::setSurfaceType(int type) {
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowsFlag(showPeakRow);
     surface->setShowPeakLabelsFlag(showPeakLabels);
+    surface->setShowPeakRelativeIntensityFlag(showPeakRelativeIntensity);
     // set new surface
     setSurface(surface);
 
@@ -690,6 +697,8 @@ void InstrumentWindow::saveSettings() {
                       getSurface()->getPeakLabelPrecision());
     settings.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
     settings.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
+    settings.setValue("ShowPeakRelativeIntensities",
+                      getSurface()->getShowPeakRelativeIntensityFlag());
     foreach (InstrumentWindowTab *tab, m_tabs) { tab->saveSettings(settings); }
   }
   settings.endGroup();
@@ -1053,6 +1062,16 @@ void InstrumentWindow::setShowPeakRowFlag(bool on) {
  */
 void InstrumentWindow::setShowPeakLabelsFlag(bool on) {
   getSurface()->setShowPeakLabelsFlag(on);
+  updateInstrumentView();
+}
+
+/**
+ * Enable or disable indication of relative peak intensities
+ *
+ * @param on :: True to show, false to hide.
+ */
+void InstrumentWindow::setShowPeakRelativeIntensity(bool on) {
+  getSurface()->setShowPeakRelativeIntensityFlag(on);
   updateInstrumentView();
 }
 
