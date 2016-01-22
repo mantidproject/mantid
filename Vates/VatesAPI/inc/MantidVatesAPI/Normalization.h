@@ -42,10 +42,9 @@ typedef Mantid::signal_t (Mantid::API::IMDNode::*NormFuncIMDNodePtr)() const;
 /**
 Determine which normalization function will be called on an IMDNode
 */
-NormFuncIMDNodePtr
-makeMDEventNormalizationFunction(VisualNormalization normalizationOption,
-                                 Mantid::API::IMDEventWorkspace const *const ws,
-                                 const bool hasMask);
+NormFuncIMDNodePtr makeMDEventNormalizationFunction(
+    VisualNormalization normalizationOption,
+    Mantid::API::IMDEventWorkspace const *const ws);
 
 /**
 Determine which normalization function will be called on an IMDIterator of an

@@ -304,9 +304,8 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
  * the vector)
  */
 int RemoveBins::findIndex(const double &value, const MantidVec &vec) {
-  MantidVec::const_iterator pos =
-      std::lower_bound(vec.begin(), vec.end(), value);
-  return static_cast<int>(pos - vec.begin());
+  auto pos = std::lower_bound(vec.cbegin(), vec.cend(), value);
+  return static_cast<int>(std::distance(vec.cbegin(), pos));
 }
 
 /** Zeroes data (Y/E) at the end of a spectrum

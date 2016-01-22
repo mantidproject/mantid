@@ -150,7 +150,7 @@ void ConvertSpectrumAxis::exec() {
       inputWS, indexMap.size(), nxBins, nBins);
   // Now set up a new, numeric axis holding the theta values corresponding to
   // each spectrum
-  NumericAxis *const newAxis = new NumericAxis(indexMap.size());
+  auto const newAxis = new NumericAxis(indexMap.size());
   outputWS->replaceAxis(1, newAxis);
   // The unit of this axis is radians. Use the 'radians' unit defined above.
   if (unitTarget == "theta" || unitTarget == "signed_theta") {

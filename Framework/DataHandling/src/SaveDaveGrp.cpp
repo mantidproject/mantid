@@ -32,10 +32,8 @@ void SaveDaveGrp::init() {
   this->declareProperty(
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
-  std::vector<std::string> exts;
-  exts.push_back(".grp");
   this->declareProperty(
-      new FileProperty("Filename", "", FileProperty::Save, exts),
+      new FileProperty("Filename", "", FileProperty::Save, {".grp"}),
       "A DAVE grouped data format file that will be created");
   this->declareProperty(new Kernel::PropertyWithValue<bool>(
                             "ToMicroEV", false, Kernel::Direction::Input),

@@ -224,7 +224,7 @@ void LogManager::removeProperty(const std::string &name, bool delProperty) {
   // Remove any cached entries for this log. Need to make this more general
   for (unsigned int stat = 0; stat < 7; ++stat) {
     m_singleValueCache.removeCache(
-        std::make_pair(name, (Math::StatisticType)stat));
+        std::make_pair(name, static_cast<Math::StatisticType>(stat)));
   }
   m_manager.removeProperty(name, delProperty);
 }
@@ -395,9 +395,7 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
-  std::map<std::string, std::string>::iterator it = entries.begin();
-  std::map<std::string, std::string>::iterator it_end = entries.end();
-  for (; it != it_end; ++it) {
+  for (auto it = entries.begin(); it != entries.end(); ++it) {
     // Get the name/class pair
     const std::pair<std::string, std::string> &name_class = *it;
     // NXLog types are the main one.

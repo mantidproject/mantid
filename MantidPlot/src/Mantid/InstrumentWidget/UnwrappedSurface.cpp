@@ -500,6 +500,7 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
   po->setPrecision(m_peakLabelPrecision);
   po->setShowRowsFlag(m_showPeakRows);
   po->setShowLabelsFlag(m_showPeakLabels);
+  po->setShowRelativeIntensityFlag(m_showPeakRelativeIntensity);
   m_peakShapes.append(po);
   m_startPeakShapes = true;
   connect(po,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),this,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));

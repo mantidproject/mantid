@@ -122,7 +122,7 @@ template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &data)
     : nx(0), ny(0), V(0) {
   size_t numel = data.size();
-  size_t nxt = (size_t)sqrt(double(numel));
+  size_t nxt = static_cast<size_t>(sqrt(double(numel)));
   size_t test = nxt * nxt;
   if (test != numel) {
     throw(std::invalid_argument(
@@ -568,7 +568,7 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
   nx = a;
   ny = b;
   if (nx * ny) {
-    T *tmpX = new T[nx * ny];
+    auto tmpX = new T[nx * ny];
     V = new T *[nx];
     for (size_t i = 0; i < nx; i++) {
       V[i] = tmpX + (i * ny);
@@ -793,8 +793,8 @@ Matrix<T> &Matrix<T>::Transpose()
   }
   // irregular matrix
   // get some memory
-  T *tmpX = new T[ny * nx];
-  T **Vt = new T *[ny];
+  auto tmpX = new T[ny * nx];
+  auto Vt = new T *[ny];
   for (size_t i = 0; i < ny; i++) {
     Vt[i] = tmpX + (i * nx);
   }
@@ -974,9 +974,9 @@ T Matrix<T>::Invert()
       V[0][0] = static_cast<T>(1.) / V[0][0];
     return det;
   }
-  int *indx = new int[nx]; // Set in lubcmp
+  auto indx = new int[nx]; // Set in lubcmp
 
-  double *col = new double[nx];
+  auto col = new double[nx];
   int d;
   Matrix<T> Lcomp(*this);
   Lcomp.lubcmp(indx, d);
@@ -1114,7 +1114,7 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
     std::cerr << "Error with lubcmp" << std::endl;
     return;
   }
-  double *vv = new double[nx];
+  auto vv = new double[nx];
   interchange = 1;
   for (int i = 0; i < static_cast<int>(nx); i++) {
     big = 0.0;

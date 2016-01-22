@@ -1,0 +1,81 @@
+digraph ProcessVanadium {
+  label="Process Vanadium Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    VanadiumRunNumberList
+    ProcessedVanadiumWorkspace
+    TimeFilterWall
+    SampleRunIndex
+    CalibrationFile
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    convertUnitsToTOF [label="ConvertUnits v1 \n to T.O.F."]
+    formVanadiumWorkspaceName [label="Form vanadium workspace name"]
+    loadAndSum [label="Load and sum"]
+    loadAndSumBlgd [label="Load and sum\n vanadium background run"]
+    focusAndSum [label="FocusAndSum v1"]
+    minusBkgd [label="Minus v1\n van run - background run"]
+    compressEvents1 [label="CompressEvents v1"]
+    convertUnits1 [label="ConvertUnits v1"]
+    SetSampleMaterial [label="SetSampleMaterial"]
+    multipleScatteringCylinderAbsorption [label="MultipleScatteringCylinderAbsorption v1"]
+    convertUnits2 [label="ConvertUnits v1"]
+    alignAndFocusPowder [label="AlignAndFocusPowder v1"]
+    convertUnits3 [label="ConvertUnits v1"]
+    stripVanadiumPeaks [label="StripVanadiumPeaks"]
+    convertUnits4 [label="ConvertUnits v1"]
+    fftSmooth [label="FFTSmooth v1"]
+    setUncertainties [label="SetUncertainties"]
+
+}
+
+
+  subgraph decisions{
+    $decision_style
+    haveMPI [label="Have MPI?"]
+    isSum [label="Is Sum True?"]
+    doesVanadiumWorkspaceExist [label="Does vanadium workspace exist?"]
+    isBackgrounRunNumberSpecified [label="Is background run specified?"]
+    doStripVanadiumPeaks [label="Do strip vanadium peaks?"]
+  }
+
+
+  VanadiumRunNumberList	      -> formVanadiumWorkspaceName
+  formVanadiumWorkspaceName   -> doesVanadiumWorkspaceExit
+
+  formVanadiumWorkspaceName   -> convertUnitsToTOF	[label="Yes"]
+  convertUnitsToTOF	      -> ProcessedVanadiumWorkspace
+
+
+  formVanadiumWorkspaceName   -> loadAndSum	[label="No"]
+  loadAndSum		      -> isBackgrounRunNumberSpecified
+
+  isBackgrounRunNumberSpecified -> loadAndSumBkgd [label="Yes"]
+  loadAndSumBkgd	        -> minusBkgd [label="Yes"]
+  minusBkgd		        -> compressEvents1
+
+  isBackgrounRunNumberSpecified -> compressEvents1 [label="No"]
+
+  compressEvents1	      -> convertUnits1
+  convertUnits1		      -> setSampleMaterial
+  setSampleMaterial	      -> multipleScatteringCylinderAbsorption
+  multipleScatteringCylinderAbsorption	-> convertUnits2
+  convertUnits2		      -> alignAndFocusPowder
+
+  alignAndFocusPowder	      -> doStripVanadiumPeaks
+
+  doStripVanadiumPeaks	      -> convertUnits3	[label="Yes"]
+  convertUnits3		      -> stripVanadiumPeaks
+  stripVanadiumPeaks	      -> convertUnits4
+
+  doStripVanadiumPeaks	      -> convertUnits4	[label="No"]
+
+  convertUnits4		      -> fftSmooth
+  fftSmooth		      -> setUncertainties
+  setUncertainties	      -> ProcessedVanadiumWorkspace
+}
+

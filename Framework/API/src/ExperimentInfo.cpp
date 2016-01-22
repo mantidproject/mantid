@@ -83,7 +83,7 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
 /** Clone this ExperimentInfo class into a new one
  */
 ExperimentInfo *ExperimentInfo::cloneExperimentInfo() const {
-  ExperimentInfo *out = new ExperimentInfo();
+  auto out = new ExperimentInfo();
   out->copyExperimentInfoFrom(this);
   return out;
 }
@@ -1138,10 +1138,9 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   options += Poco::StringTokenizer::TOK_TRIM;
   Poco::StringTokenizer splitter(parameterStr, "|", options);
 
-  Poco::StringTokenizer::Iterator iend = splitter.end();
+  auto iend = splitter.end();
   // std::string prev_name;
-  for (Poco::StringTokenizer::Iterator itr = splitter.begin(); itr != iend;
-       ++itr) {
+  for (auto itr = splitter.begin(); itr != iend; ++itr) {
     Poco::StringTokenizer tokens(*itr, ";");
     if (tokens.count() < 4)
       continue;

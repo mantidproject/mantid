@@ -1108,10 +1108,9 @@ void InstrumentDefinitionParser::appendAssembly(
           InstrumentDefinitionParser::getParentComponent(pElem);
 
       // check if this location is in the exclude list
-      std::vector<std::string>::const_iterator it =
-          find(excludeList.begin(), excludeList.end(),
-               InstrumentDefinitionParser::getNameOfLocationElement(
-                   pElem, pParentElem));
+      auto it = find(excludeList.cbegin(), excludeList.cend(),
+                     InstrumentDefinitionParser::getNameOfLocationElement(
+                         pElem, pParentElem));
       if (it == excludeList.end()) {
 
         std::string typeName =
@@ -1231,8 +1230,7 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
         pLocElem, pCompElem);
 
     // Create the bank with the given parent.
-    Geometry::RectangularDetector *bank =
-        new Geometry::RectangularDetector(name, parent);
+    auto bank = new Geometry::RectangularDetector(name, parent);
 
     // set location for this newly added comp and set facing if specified in
     // instrument def. file. Also
@@ -1609,7 +1607,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
 */
 bool InstrumentDefinitionParser::isAssembly(std::string type) const {
   const std::string filename = m_xmlFile->getFileFullPathStr();
-  std::map<std::string, bool>::const_iterator it = isTypeAssembly.find(type);
+  auto it = isTypeAssembly.find(type);
 
   if (it == isTypeAssembly.end()) {
     throw Kernel::Exception::InstrumentDefinitionError(

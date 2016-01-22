@@ -118,8 +118,7 @@ void PeakHKLErrors::cLone(
   if (component->isParametrized()) {
 
     std::set<std::string> nms = pmapSv->names(component.get());
-    for (std::set<std::string>::iterator it = nms.begin(); it != nms.end();
-         ++it) {
+    for (auto it = nms.begin(); it != nms.end(); ++it) {
 
       if (pmapSv->contains(component.get(), *it, "double")) {
         std::vector<double> dparams =
@@ -247,7 +246,7 @@ void PeakHKLErrors::getRun2MatMap(
     std::map<int, Mantid::Kernel::Matrix<double>> &Res) const {
 
   for (int i = 0; i < Peaks->getNumberPeaks(); ++i) {
-    Geometry::IPeak &peak_old = Peaks->getPeak((int)i);
+    Geometry::IPeak &peak_old = Peaks->getPeak(i);
 
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = boost::lexical_cast<std::string>(runNum);
@@ -282,7 +281,7 @@ void PeakHKLErrors::getRun2MatMap(
 Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis(double theta,
                                                          char axis) {
   int cint = toupper(axis);
-  char c = (char)cint;
+  char c = static_cast<char>(cint);
   std::string S(std::string("") + c);
   size_t axisPos = std::string("XYZ").find(S);
 
@@ -316,7 +315,7 @@ Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis(double theta,
 Matrix<double> PeakHKLErrors::DerivRotationMatrixAboutRegAxis(double theta,
                                                               char axis) {
   int cint = toupper(axis);
-  char c = (char)cint;
+  char c = static_cast<char>(cint);
   std::string S(std::string("") + c);
   size_t axisPos = std::string("XYZ").find(S);
 
@@ -377,7 +376,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
 
   double ChiSqTot = 0.0;
   for (size_t i = 0; i < nData; i += 3) {
-    int peakNum = (int)(.5 + xValues[i]);
+    int peakNum = static_cast<int>(.5 + xValues[i]);
     IPeak &peak_old = Peaks->getPeak(peakNum);
 
     int runNum = peak_old.getRunNumber();
@@ -474,7 +473,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
                         parameterIndex(std::string("SampleZOffset"))};
 
   for (size_t i = 0; i < nData; i += 3) {
-    int peakNum = (int)(.5 + xValues[i]);
+    int peakNum = static_cast<int>(.5 + xValues[i]);
     IPeak &peak_old = Peaks->getPeak(peakNum);
     Peak peak =
         SCDPanelErrors::createNewPeak(peak_old, instNew, 0, peak_old.getL1());
@@ -482,7 +481,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = boost::lexical_cast<std::string>(runNum);
 
-    for (int kk = 0; kk < (int)nParams(); kk++) {
+    for (int kk = 0; kk < static_cast<int>(nParams()); kk++) {
       out->set(i, kk, 0.0);
       out->set(i + 1, kk, 0.0);
       out->set(i + 1, kk, 0.0);

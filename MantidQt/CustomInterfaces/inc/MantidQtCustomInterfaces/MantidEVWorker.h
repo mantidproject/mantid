@@ -68,6 +68,7 @@ public:
   bool loadAndConvertToMD(const std::string & file_name,
                           const std::string & ev_ws_name,
                           const std::string & md_ws_name,
+                          const double        modQ,
                           const double        minQ,
                           const double        maxQ,
                           const bool          do_lorentz_corr,
@@ -82,7 +83,9 @@ public:
                   const std::string & peaks_ws_name,
                         double        max_abc,
                         size_t        num_to_find,
-                        double        min_intensity );
+                        double        min_intensity,
+                        double minQPeaks,
+                        double maxQPeaks );
 
   /// Predict peaks and overwrite the peaks workspace
   bool predictPeaks( const std::string & peaks_ws_name,

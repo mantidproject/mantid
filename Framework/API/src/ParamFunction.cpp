@@ -21,13 +21,11 @@ Kernel::Logger g_log("ParamFunction");
 
 /// Destructor
 ParamFunction::~ParamFunction() {
-  for (std::vector<ParameterTie *>::iterator it = m_ties.begin();
-       it != m_ties.end(); ++it) {
+  for (auto it = m_ties.begin(); it != m_ties.end(); ++it) {
     delete *it;
   }
   m_ties.clear();
-  for (std::vector<IConstraint *>::iterator it = m_constraints.begin();
-       it != m_constraints.end(); ++it) {
+  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
     delete *it;
   }
   m_constraints.clear();
@@ -151,9 +149,9 @@ void ParamFunction::setParameterDescription(const std::string &name,
 double ParamFunction::getParameter(const std::string &name) const {
   std::string ucName(name);
   // std::transform(name.begin(), name.end(), ucName.begin(), toupper);
-  std::vector<std::string>::const_iterator it =
-      std::find(m_parameterNames.begin(), m_parameterNames.end(), ucName);
-  if (it == m_parameterNames.end()) {
+  auto it =
+      std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), ucName);
+  if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
     msg << "ParamFunction tries to get value of non-existing parameter ("
         << ucName << ") "
@@ -164,7 +162,7 @@ double ParamFunction::getParameter(const std::string &name) const {
     throw std::invalid_argument(msg.str());
   }
 
-  double parvalue = m_parameters[it - m_parameterNames.begin()];
+  double parvalue = m_parameters[it - m_parameterNames.cbegin()];
 
   if (parvalue != parvalue || !(parvalue > -DBL_MAX && parvalue < DBL_MAX)) {
     g_log.warning() << "Parameter " << name << " has a NaN or infinity value "
@@ -182,15 +180,15 @@ double ParamFunction::getParameter(const std::string &name) const {
 size_t ParamFunction::parameterIndex(const std::string &name) const {
   std::string ucName(name);
   // std::transform(name.begin(), name.end(), ucName.begin(), toupper);
-  std::vector<std::string>::const_iterator it =
-      std::find(m_parameterNames.begin(), m_parameterNames.end(), ucName);
-  if (it == m_parameterNames.end()) {
+  auto it =
+      std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), ucName);
+  if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
     msg << "ParamFunction " << this->name() << " does not have parameter ("
         << ucName << ").";
     throw std::invalid_argument(msg.str());
   }
-  return int(it - m_parameterNames.begin());
+  return std::distance(m_parameterNames.cbegin(), it);
 }
 
 /** Returns the name of parameter i
@@ -319,8 +317,7 @@ void ParamFunction::addTie(ParameterTie *tie) {
  * Apply the ties.
  */
 void ParamFunction::applyTies() {
-  for (std::vector<ParameterTie *>::iterator tie = m_ties.begin();
-       tie != m_ties.end(); ++tie) {
+  for (auto tie = m_ties.begin(); tie != m_ties.end(); ++tie) {
     (**tie).eval();
   }
 }
@@ -349,8 +346,7 @@ bool ParamFunction::removeTie(size_t i) {
   if (i >= nParams()) {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
-  std::vector<ParameterTie *>::iterator it =
-      std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(i));
+  auto it = std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(i));
   if (it != m_ties.end()) {
     delete *it;
     m_ties.erase(it);
@@ -368,9 +364,8 @@ ParameterTie *ParamFunction::getTie(size_t i) const {
   if (i >= nParams()) {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
-  std::vector<ParameterTie *>::const_iterator it =
-      std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(i));
-  if (it != m_ties.end()) {
+  auto it = std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(i));
+  if (it != m_ties.cend()) {
     return *it;
   }
   return NULL;
@@ -379,8 +374,7 @@ ParameterTie *ParamFunction::getTie(size_t i) const {
 /** Remove all ties
  */
 void ParamFunction::clearTies() {
-  for (std::vector<ParameterTie *>::iterator it = m_ties.begin();
-       it != m_ties.end(); ++it) {
+  for (auto it = m_ties.begin(); it != m_ties.end(); ++it) {
     size_t i = getParameterIndex(**it);
     unfix(i);
     delete *it;
@@ -416,9 +410,9 @@ IConstraint *ParamFunction::getConstraint(size_t i) const {
   if (i >= nParams()) {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
-  std::vector<IConstraint *>::const_iterator it = std::find_if(
-      m_constraints.begin(), m_constraints.end(), ReferenceEqual(i));
-  if (it != m_constraints.end()) {
+  auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
+                         ReferenceEqual(i));
+  if (it != m_constraints.cend()) {
     return *it;
   }
   return NULL;
@@ -429,8 +423,7 @@ IConstraint *ParamFunction::getConstraint(size_t i) const {
  */
 void ParamFunction::removeConstraint(const std::string &parName) {
   size_t iPar = parameterIndex(parName);
-  for (std::vector<IConstraint *>::iterator it = m_constraints.begin();
-       it != m_constraints.end(); ++it) {
+  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
     if (iPar == (**it).getIndex()) {
       delete *it;
       m_constraints.erase(it);
@@ -447,13 +440,11 @@ void ParamFunction::setUpForFit() {
 
 /// Nonvirtual member which removes all declared parameters
 void ParamFunction::clearAllParameters() {
-  for (std::vector<ParameterTie *>::iterator it = m_ties.begin();
-       it != m_ties.end(); ++it) {
+  for (auto it = m_ties.begin(); it != m_ties.end(); ++it) {
     delete *it;
   }
   m_ties.clear();
-  for (std::vector<IConstraint *>::iterator it = m_constraints.begin();
-       it != m_constraints.end(); ++it) {
+  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
     delete *it;
   }
   m_constraints.clear();

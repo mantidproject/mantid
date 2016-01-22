@@ -76,10 +76,10 @@ private:
   void parseStringToVector(std::string liststr, std::vector<detid_t> &detidvec);
 
   /// Extract mask from a workspace to a list of detectors
-  void extractMaskFromMatrixWorkspace(std::vector<detid_t> &maskeddetids);
+  std::vector<detid_t> extractMaskFromMatrixWorkspace();
 
   /// Extract masked detectors from a MaskWorkspace
-  void extractMaskFromMaskWorkspace(std::vector<detid_t> &maskeddetids);
+  std::vector<detid_t> extractMaskFromMaskWorkspace();
 
   /// Copy table workspace content from one workspace to another
   void copyTableWorkspaceContent(DataObjects::TableWorkspace_sptr sourceWS,

@@ -44,7 +44,7 @@ std::vector<std::string> dim_availible() {
 }
 //
 class ConvertToMDTest : public CxxTest::TestSuite {
-  std::auto_ptr<Convert2AnyTestHelper> pAlg;
+  std::unique_ptr<Convert2AnyTestHelper> pAlg;
 
 public:
   static ConvertToMDTest *createSuite() { return new ConvertToMDTest(); }
@@ -57,7 +57,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(pAlg->initialize())
     TS_ASSERT(pAlg->isInitialized())
 
-    TSM_ASSERT_EQUALS("algorithm should have 22 properties", 22,
+    TSM_ASSERT_EQUALS("algorithm should have 23 properties", 23,
                       (size_t)(pAlg->getProperties().size()));
   }
 
@@ -405,7 +405,7 @@ public:
   }
 
   ConvertToMDTest() {
-    pAlg = std::auto_ptr<Convert2AnyTestHelper>(new Convert2AnyTestHelper());
+    pAlg = Mantid::Kernel::make_unique<Convert2AnyTestHelper>();
     Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
         createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back;
@@ -461,7 +461,7 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite {
   DataObjects::TableWorkspace_sptr pDetLoc_events;
   DataObjects::TableWorkspace_sptr pDetLoc_histo;
   // pointer to mock algorithm to work with progress bar
-  std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
+  std::unique_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
 
   boost::shared_ptr<MDEventWSWrapper> pTargWS;
 
@@ -641,8 +641,7 @@ public:
     inWs2D->mutableRun().addProperty("Ei", 12., "meV", true);
     API::AnalysisDataService::Instance().addOrReplace("TestMatrixWS", inWs2D);
 
-    auto pAlg =
-        std::auto_ptr<PreprocessDetectorsToMD>(new PreprocessDetectorsToMD());
+    auto pAlg = Mantid::Kernel::make_unique<PreprocessDetectorsToMD>();
     pAlg->initialize();
 
     pAlg->setPropertyValue("InputWorkspace", "TestMatrixWS");
@@ -679,8 +678,8 @@ public:
     Rot.toRotation();
 
     // this will be used to display progress
-    pMockAlgorithm = std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm>(
-        new WorkspaceCreationHelper::MockAlgorithm());
+    pMockAlgorithm =
+        Mantid::Kernel::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
   }
 };
 

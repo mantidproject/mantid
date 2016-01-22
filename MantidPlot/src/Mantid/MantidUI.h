@@ -210,9 +210,11 @@ public:
 
   public slots:
     // Create a 1d graph form specified MatrixWorkspace and index
-  MultiLayer* plot1D(const QStringList& wsnames, const QList<int>& indexList, bool spectrumPlot,
-                     bool errs=true, Graph::CurveType style = Graph::Unspecified,
-                     MultiLayer* plotWindow = NULL, bool clearWindow = false, bool waterfallPlot = false);
+  MultiLayer *plot1D(const QStringList &wsnames, const QList<int> &indexList, bool spectrumPlot,
+					 MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+					 bool errs = true, Graph::CurveType style = Graph::Unspecified,
+					 MultiLayer *plotWindow = NULL, bool clearWindow = false,
+					 bool waterfallPlot = false);
 
   MultiLayer* plot1D(const QString& wsName, const std::set<int>& indexList, bool spectrumPlot,
                      MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
@@ -372,7 +374,12 @@ signals:
     MantidMatrix *importMatrixWorkspace(const QString& wsName, int lower = -1, int upper = -1,
       bool showDlg = true, bool makeVisible = true);
 
-    // Create a MantidMatrix from workspace wsName
+    // Create a MantidMatrix from workspace
+    MantidMatrix *
+    importMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr workspace,
+                          int lower = -1, int upper = -1, bool showDlg = true);
+
+    // Create a Table from workspace wsName
     Table *importTableWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true, bool transpose = false);
 
     void createLoadDAEMantidMatrix(const QString&);

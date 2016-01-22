@@ -50,6 +50,12 @@ public:
   // virtual std::string currentCalibFile() const;
   MOCK_CONST_METHOD0(currentCalibFile, std::string());
 
+  // int currentCropCalibBankName
+  MOCK_CONST_METHOD0(currentCropCalibBankName, int());
+
+  // std::string currentCalibSpecNos
+  MOCK_CONST_METHOD0(currentCalibSpecNos, std::string());
+
   // int currentPlotType
   MOCK_CONST_METHOD0(currentPlotType, int());
 
@@ -107,8 +113,8 @@ public:
   // virtual void resetFocus();
   MOCK_METHOD0(resetFocus, void());
 
-  // virtual std::string currentPreprocRunNo() const;
-  MOCK_CONST_METHOD0(currentPreprocRunNo, std::string());
+  // virtual std::vector<std::string> currentPreprocRunNo() const;
+  MOCK_CONST_METHOD0(currentPreprocRunNo, std::vector<std::string>());
 
   // virtual double rebinningTimeBin() const;
   MOCK_CONST_METHOD0(rebinningTimeBin, double());

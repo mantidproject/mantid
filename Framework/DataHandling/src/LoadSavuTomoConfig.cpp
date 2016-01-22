@@ -25,13 +25,9 @@ LoadSavuTomoConfig::~LoadSavuTomoConfig() {}
  */
 void LoadSavuTomoConfig::init() {
   // Required input properties
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".nx5");
-  exts.push_back(".xml");
-
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      new FileProperty("Filename", "", FileProperty::Load,
+                       {".nxs", ".nx5", ".xml"}),
       "The name of the Nexus parameterization file to read, as a full "
       "or relative path.");
 

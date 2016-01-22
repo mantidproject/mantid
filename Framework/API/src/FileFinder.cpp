@@ -126,8 +126,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
 
   const std::vector<std::string> &searchPaths =
       Kernel::ConfigService::Instance().getDataSearchDirs();
-  std::vector<std::string>::const_iterator it = searchPaths.begin();
-  for (; it != searchPaths.end(); ++it) {
+  for (auto it = searchPaths.cbegin(); it != searchPaths.cend(); ++it) {
 // On windows globbing is note working properly with network drives
 // for example a network drive containing a $
 // For this reason, and since windows is case insensitive anyway
@@ -479,9 +478,8 @@ FileFinderImpl::findRun(const std::string &hintstr,
                    tolower);
     if (!archiveOpt.empty() && archiveOpt != "off" &&
         !facility.archiveSearch().empty()) {
-      std::vector<std::string>::const_iterator it =
-          facility.archiveSearch().begin();
-      for (; it != facility.archiveSearch().end(); ++it) {
+      for (auto it = facility.archiveSearch().cbegin();
+           it != facility.archiveSearch().cend(); ++it) {
         g_log.debug() << "get archive search for the facility..." << *it
                       << "\n";
         archs.push_back(ArchiveSearchFactory::Instance().create(*it));
@@ -602,7 +600,7 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
   Poco::StringTokenizer hints(hint, ",",
                               Poco::StringTokenizer::TOK_TRIM |
                                   Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = hints.begin();
+  auto h = hints.begin();
 
   for (; h != hints.end(); ++h) {
     // Quick check for a filename
@@ -686,8 +684,7 @@ FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
                                const std::set<std::string> &filenames,
                                const std::vector<std::string> &exts) const {
   std::string path = "";
-  std::vector<IArchiveSearch_sptr>::const_iterator it = archs.begin();
-  for (; it != archs.end(); ++it) {
+  for (auto it = archs.cbegin(); it != archs.cend(); ++it) {
     try {
       path = (*it)->getArchivePath(filenames, exts);
       if (!path.empty()) {
@@ -750,9 +747,8 @@ FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
     }
   }
 
-  for (auto ext = extensions.begin(); ext != extensions.end(); ++ext) {
-    std::set<std::string>::const_iterator it = filenames.begin();
-    for (; it != filenames.end(); ++it) {
+  for (auto ext = extensions.cbegin(); ext != extensions.cend(); ++ext) {
+    for (auto it = filenames.cbegin(); it != filenames.cend(); ++it) {
       path = getFullPath(*it + *ext);
       try {
         if (!path.empty() && Poco::File(path).exists()) {
