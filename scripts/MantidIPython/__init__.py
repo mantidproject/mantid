@@ -25,3 +25,6 @@ from MantidIPython.plot_functions import *
 import warnings
 import mantid.kernel
 
+# Check if the version of Mantid being used matches the version which created the notebook.
+if "3.5.20160108.1509" != mantid.kernel.version_str():
+    warnings.warn("Version of Mantid being used does not match version which created the notebook.")
