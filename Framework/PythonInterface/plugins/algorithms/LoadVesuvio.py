@@ -468,7 +468,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self.delta_t = (raw_t[1:] - raw_t[:-1])
 
         mon_raw_t = self._raw_monitors[0].readX(0)
-        self._mon_raw_t = mon_raw_t
         delay = mon_raw_t[2] - mon_raw_t[1]
         # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
         mon_raw_t = mon_raw_t - delay
