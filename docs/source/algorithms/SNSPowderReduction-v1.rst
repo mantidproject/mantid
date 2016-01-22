@@ -30,6 +30,10 @@ Workflow
 
 .. diagram:: SNSPowderReduction-v1_focus_workflow.dot
 
+.. diagram:: SNSPowderReduction-v1_focuschunks_workflow.dot
+
+.. diagram:: SNSPowderReduction-v1_vanadium.dot
+
 Usage
 -----
 

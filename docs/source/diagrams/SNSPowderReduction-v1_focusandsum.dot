@@ -1,5 +1,5 @@
 digraph FocusAndSum {
-  labe="FocusAndSum Flowchart"
+  labe="SNSPowderReduction Focus And Sum Flowchart"
   $global_style
 
   subgraph params {
