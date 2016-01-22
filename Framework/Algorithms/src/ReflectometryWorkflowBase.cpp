@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ReflectometryWorkflowBase.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -38,17 +39,9 @@ ReflectometryWorkflowBase::~ReflectometryWorkflowBase() {}
  */
 void ReflectometryWorkflowBase::initIndexInputs() {
 
-  boost::shared_ptr<CompositeValidator> mandatoryWorkspaceIndex =
-      boost::make_shared<CompositeValidator>();
-  mandatoryWorkspaceIndex->add(boost::make_shared<MandatoryValidator<int>>());
-  auto boundedIndex = boost::make_shared<BoundedValidator<int>>();
-  boundedIndex->setLower(0);
-  mandatoryWorkspaceIndex->add(boundedIndex);
-
-  declareProperty(new PropertyWithValue<int>("I0MonitorIndex",
-                                             Mantid::EMPTY_INT(),
-                                             mandatoryWorkspaceIndex),
-                  "I0 monitor workspace index");
+  declareProperty(
+      new PropertyWithValue<int>("I0MonitorIndex", Mantid::EMPTY_INT()),
+      "I0 monitor workspace index");
 
   declareProperty(new PropertyWithValue<std::string>(
                       "ProcessingInstructions", "",
@@ -469,9 +462,20 @@ ReflectometryWorkflowBase::toLam(MatrixWorkspace_sptr toConvert,
   MatrixWorkspace_sptr detectorWS = toLamDetector(
       processingCommands, toConvert, wavelengthMinMax, wavelengthStep);
 
-  // Monitor Workspace Processing
-  MatrixWorkspace_sptr monitorWS =
-      toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
+  MatrixWorkspace_sptr monitorWS;
+  if (monitorIndex != Mantid::EMPTY_INT()) {
+    // Monitor Workspace Processing
+    monitorWS = toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
+  } else {
+    // We don't have a monitor index, so we divide through by unity.
+    monitorWS = detectorWS->clone();
+    // monitorWS->initialize(1, detectorWS->blocksize(),const std::size_t
+    // &YLength);
+    // Fill Counts with 1 for the monitor
+    monitorWS->dataY(0) = std::vector<double>(detectorWS->blocksize(), 1.0);
+    // Fill Errors with 0 for the monitor
+    monitorWS->dataE(0) = std::vector<double>(detectorWS->blocksize(), 0.0);
+  }
 
   // Rebin the Monitor Workspace to match the Detector Workspace.
   auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");

@@ -253,8 +253,8 @@ void ReflectometryReductionOneAuto::exec() {
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<MantidVec>("Params");
-  auto i0_monitor_index = static_cast<int>(
-      checkForDefault("I0MonitorIndex", instrument, "I0MonitorIndex"));
+  auto i0_monitor_index = static_cast<int>(checkForOptionalDefault(
+      "I0MonitorIndex", instrument, Mantid::EMPTY_INT(), "I0MonitorIndex"));
 
   std::string processing_commands;
   if (this->getPointerToProperty("ProcessingInstructions")->isDefault()) {
@@ -305,17 +305,17 @@ void ReflectometryReductionOneAuto::exec() {
   }
 
   double wavelength_min =
-      checkForDefault("WavelengthMin", instrument, "LambdaMin");
+      checkForMandatoryDefault("WavelengthMin", instrument, "LambdaMin");
   double wavelength_max =
-      checkForDefault("WavelengthMax", instrument, "LambdaMax");
+      checkForMandatoryDefault("WavelengthMax", instrument, "LambdaMax");
   auto wavelength_step = isSet<double>("WavelengthStep");
-  double wavelength_back_min = checkForDefault(
+  double wavelength_back_min = checkForMandatoryDefault(
       "MonitorBackgroundWavelengthMin", instrument, "MonitorBackgroundMin");
-  double wavelength_back_max = checkForDefault(
+  double wavelength_back_max = checkForMandatoryDefault(
       "MonitorBackgroundWavelengthMax", instrument, "MonitorBackgroundMax");
-  double wavelength_integration_min = checkForDefault(
+  double wavelength_integration_min = checkForMandatoryDefault(
       "MonitorIntegrationWavelengthMin", instrument, "MonitorIntegralMin");
-  double wavelength_integration_max = checkForDefault(
+  double wavelength_integration_max = checkForMandatoryDefault(
       "MonitorIntegrationWavelengthMax", instrument, "MonitorIntegralMax");
 
   auto detector_component_name = isSet<std::string>("DetectorComponentName");
@@ -489,7 +489,7 @@ ReflectometryReductionOneAuto::isSet(std::string propName) const {
   }
 }
 
-double ReflectometryReductionOneAuto::checkForDefault(
+double ReflectometryReductionOneAuto::checkForMandatoryDefault(
     std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
     std::string idf_name) const {
   auto algProperty = this->getPointerToProperty(propName);
@@ -501,6 +501,22 @@ double ReflectometryReductionOneAuto::checkForDefault(
                                propName);
     }
     return defaults[0];
+  } else {
+    return boost::lexical_cast<double, std::string>(algProperty->value());
+  }
+}
+
+double ReflectometryReductionOneAuto::checkForOptionalDefault(
+    std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
+    double fallbackValue, std::string idf_name) const {
+  auto algProperty = this->getPointerToProperty(propName);
+  if (algProperty->isDefault()) {
+    auto defaults = instrument->getNumberParameter(idf_name);
+    auto ret = fallbackValue;
+    if (defaults.size() != 0) {
+      ret = defaults[0];
+    }
+    return ret;
   } else {
     return boost::lexical_cast<double, std::string>(algProperty->value());
   }
