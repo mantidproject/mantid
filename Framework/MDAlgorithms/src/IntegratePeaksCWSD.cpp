@@ -123,9 +123,9 @@ void IntegratePeaksCWSD::simplePeakIntegration(const std::vector<detid_t> &vecMa
 
   // Define data structures
   // FIXME :: can this be moved to outer scope of this method?
-  std::vector<Kernel::V3D> vec_event_qsample;
-  std::vector<float> vec_event_signal;
-  std::vector<detid_t> vec_event_det;
+  // std::vector<Kernel::V3D> vec_event_qsample;
+  // std::vector<float> vec_event_signal;
+  // std::vector<detid_t> vec_event_det;
 
   // Go through to get value
   API::IMDIterator *mditer = m_inputWS->createIterator();
