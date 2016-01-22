@@ -1,5 +1,5 @@
-#ifndef DATAHANDING_LOADBBY_H_
-#define DATAHANDING_LOADBBY_H_
+#ifndef DATAHANDING_PATCHBBY_H_
+#define DATAHANDING_PATCHBBY_H_
 
 //---------------------------------------------------
 // Includes
@@ -14,11 +14,11 @@
 namespace Mantid {
 namespace DataHandling {
 /**
-Loads a Bilby data file. Implements API::IFileLoader and its file check methods
+Patches a Bilby data file. Implements API::Algorithm and its file check methods
 to recognise a file as the one containing Bilby data.
 
 @author David Mannicke (ANSTO), Anders Markvardsen (ISIS), Roman Tolchenov (Tessella plc)
-@date 11/07/2014
+@date 22/01/2016
 
 Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -42,80 +42,34 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
-
-  struct InstrumentInfo {
-    //
-    int32_t bm_counts;
-    int32_t att_pos;
-    //
-    double period_master;
-    double period_slave;
-    double phase_slave;
-    //
-    double L1_chopper_value;
-    double L2_det_value;
-    //
-    double L2_curtainl_value;
-    double L2_curtainr_value;
-    double L2_curtainu_value;
-    double L2_curtaind_value;
-    //
-    double D_det_value;
-    //
-    double D_curtainl_value;
-    double D_curtainr_value;
-    double D_curtainu_value;
-    double D_curtaind_value;
-  };
-
+class DLLExport PatchBBY : public API::Algorithm {
 public:
   // construction
-  LoadBBY() {}
-  virtual ~LoadBBY() {}
+  PatchBBY() {}
+  virtual ~PatchBBY() {}
 
   // description
   virtual int version() const override {
     return 1;
   }
   virtual const std::string name() const override {
-    return "LoadBBY";
+    return "PatchBBY";
   }
   virtual const std::string category() const override {
     return "DataHandling";
   }
   virtual const std::string summary() const override {
-    return "Loads a BilBy data file into a workspace.";
+    return "Patches a BilBy data file.";
   }
-
-  // returns a confidence value that this algorithm can load a specified file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 protected:
   // initialisation
   virtual void init() override;
   // execution
   virtual void exec() override;
-
-private:
-  // region of intreset
-  static std::vector<bool> createRoiVector(const std::string &maskfile);
-
-  // instrument creation
-  Geometry::Instrument_sptr createInstrument(ANSTO::Tar::File &tarFile, InstrumentInfo& instrumentInfo);
-  
-  // load nx dataset
-  template <class T>
-  static bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value);
-
-  // binary file access
-  template <class EventProcessor>
-  static void loadEvents(API::Progress &prog, const char *progMsg,
-                         ANSTO::Tar::File &tarFile,
-                         EventProcessor &eventProcessor);
 };
 
 } // DataHandling
 } // Mantid
 
-#endif // DATAHANDING_LOADBBY_H_
+#endif // DATAHANDING_PATCHBBY_H_
