@@ -20,7 +20,7 @@
 
   <!-- Maximum TOF for loaded raw data (monitors use mon_tof_max below) -->
   <parameter name="tof_max">
-    <value val="700"/>
+    <value val="600"/>
   </parameter>
 
   <!-- Maximum TOF for loaded monitor data -->
