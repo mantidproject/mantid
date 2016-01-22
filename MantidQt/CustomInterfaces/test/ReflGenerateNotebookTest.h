@@ -281,23 +281,6 @@ public:
 
   }
 
-  void testPlotsFunctionString()
-  {
-    std::string output = plotsFunctionString();
-
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, output, boost::is_any_of("\n"));
-
-    const std::string result[] = {
-      "#Import some useful tools for plotting",
-        "from MantidIPython import *"
-    };
-
-    // Check that the lines are output as expected
-    TS_ASSERT_EQUALS(notebookLines[0], result[0]);
-    TS_ASSERT_EQUALS(notebookLines[1], result[1]);
-  }
-
   void testPlotsString()
   {
     std::vector<std::string> unstitched_ws;
