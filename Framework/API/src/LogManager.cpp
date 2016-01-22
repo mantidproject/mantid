@@ -394,9 +394,7 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
-  for (auto &entrie : entries) {
-    // Get the name/class pair
-    const std::pair<std::string, std::string> &name_class = entrie;
+  for (const auto &name_class : entries) {
     // NXLog types are the main one.
     if (name_class.second == "NXlog") {
       Property *prop = PropertyNexus::loadProperty(file, name_class.first);

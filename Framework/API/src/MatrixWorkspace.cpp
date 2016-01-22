@@ -78,8 +78,8 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete
 // workspaces, so I moved this from protected to public.
 MatrixWorkspace::~MatrixWorkspace() {
-  for (auto &m_axe : m_axes) {
-    delete m_axe;
+  for (auto &m_axis : m_axes) {
+    delete m_axis;
   }
 }
 

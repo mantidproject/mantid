@@ -59,9 +59,9 @@ void Cluster::addIndex(const size_t &index) { m_indexes.push_back(index); }
  */
 void Cluster::writeTo(Mantid::API::IMDHistoWorkspace_sptr ws) const {
   const size_t label = this->getLabel();
-  for (auto m_indexe : m_indexes) {
-    ws->setSignalAt(m_indexe, static_cast<Mantid::signal_t>(label));
-    ws->setErrorSquaredAt(m_indexe, 0);
+  for (auto index : m_indexes) {
+    ws->setSignalAt(index, static_cast<Mantid::signal_t>(label));
+    ws->setErrorSquaredAt(index, 0);
   }
 }
 

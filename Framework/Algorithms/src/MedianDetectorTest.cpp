@@ -246,8 +246,8 @@ int MedianDetectorTest::maskOutliers(
   }
 
   for (size_t i = 0; i < indexmap.size(); ++i) {
-    std::vector<size_t> hists = indexmap[i];
-    double median = medianvec.at(i);
+    std::vector<size_t> &hists = indexmap[i];
+    double median = medianvec[i];
 
     PARALLEL_FOR1(countsWS)
     for (int j = 0; j < static_cast<int>(hists.size()); ++j) {

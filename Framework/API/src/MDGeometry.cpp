@@ -398,14 +398,13 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
  */
 void MDGeometry::deleteNotificationReceived(
     Mantid::API::WorkspacePreDeleteNotification_ptr notice) {
-  for (auto &m_originalWorkspace : m_originalWorkspaces) {
-    Workspace_sptr original = m_originalWorkspace;
+  for (auto &original : m_originalWorkspaces) {
     if (original) {
       // Compare the pointer being deleted to the one stored as the original.
       Workspace_sptr deleted = notice->object();
       if (original == deleted) {
         // Clear the reference
-        m_originalWorkspace.reset();
+        original.reset();
       }
     }
   }

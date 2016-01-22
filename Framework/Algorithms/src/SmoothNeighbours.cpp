@@ -542,8 +542,8 @@ Check whether the properties provided are all in their default state.
 */
 bool areAllDefault(ConstVecProperties &properties) {
   bool areAllDefault = false;
-  for (auto propertie : properties) {
-    if (!propertie->isDefault()) {
+  for (auto property : properties) {
+    if (!property->isDefault()) {
       return areAllDefault;
     }
   }

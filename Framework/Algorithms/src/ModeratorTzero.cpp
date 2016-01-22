@@ -345,54 +345,44 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           }
           if (t2 >= 0) // t2 < 0 when no detector info is available
           {
-            double tof;
             // fix the histogram bins
             MantidVec &x = evlist.dataX();
-            for (double &iter : x) {
-              tof = iter;
+            for (double &tof : x) {
               if (tof < m_t1min + t2)
                 tof -= min_t0_next;
               else
                 tof -= CalculateT0indirect(tof, L1, t2, E1, parser);
-              iter = tof;
             }
 
             MantidVec tofs = evlist.getTofs();
-            for (double &itof : tofs) {
-              tof = itof;
+            for (double &tof : tofs) {
               if (tof < m_t1min + t2)
                 tof -= min_t0_next;
               else
                 tof -= CalculateT0indirect(tof, L1, t2, E1, parser);
-              itof = tof;
             }
             evlist.setTofs(tofs);
             evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
           } // end of if( t2>= 0)
         }   // end of if(emode=="Indirect")
         else if (emode == "Elastic") {
-          double tof;
           // Apply t0 correction to histogram bins
           MantidVec &x = evlist.dataX();
-          for (double &iter : x) {
-            tof = iter;
+          for (double &tof : x) {
             if (tof < m_t1min * (L1 + L2) / L1)
               tof -= min_t0_next;
             else
               tof -= CalculateT0elastic(tof, L1 + L2, E1, parser);
-            iter = tof;
           }
 
           MantidVec tofs = evlist.getTofs();
-          for (double &itof : tofs) {
+          for (double &tof : tofs) {
             // add a [-0.1,0.1] microsecond noise to avoid artifacts
             // resulting from original tof data
-            tof = itof;
             if (tof < m_t1min * (L1 + L2) / L1)
               tof -= min_t0_next;
             else
               tof -= CalculateT0elastic(tof, L1 + L2, E1, parser);
-            itof = tof;
           }
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
@@ -403,8 +393,8 @@ void ModeratorTzero::execEvent(const std::string &emode) {
         else if (emode == "Direct") {
           // fix the histogram bins
           MantidVec &x = evlist.dataX();
-          for (double &iter : x) {
-            iter -= t0_direct;
+          for (double tof : x) {
+            tof -= t0_direct;
           }
 
           MantidVec tofs = evlist.getTofs();

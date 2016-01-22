@@ -399,17 +399,17 @@ void PolarizationCorrection::exec() {
     loadableProperties[cAlphaLabel()] = "calpha";
   }
 
-  for (auto &loadablePropertie : loadableProperties) {
-    Property *prop = getProperty(loadablePropertie.first);
+  for (auto &loadableProperty : loadableProperties) {
+    Property *prop = getProperty(loadableProperty.first);
 
     if (!prop)
       continue;
 
     if (prop->isDefault()) {
-      auto vals = instrument->getStringParameter(loadablePropertie.second);
+      auto vals = instrument->getStringParameter(loadableProperty.second);
       if (vals.empty())
         throw std::runtime_error(
-            "Cannot find value for " + loadablePropertie.first +
+            "Cannot find value for " + loadableProperty.first +
             " in parameter file. Please specify this property manually.");
       prop->setValue(vals[0]);
     }

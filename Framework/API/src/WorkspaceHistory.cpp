@@ -305,8 +305,8 @@ std::set<int> WorkspaceHistory::findHistoryEntries(::NeXus::File *file) {
 
   // Histories are numbered MantidAlgorithm_0, ..., MantidAlgorithm_10, etc.
   // Find all the unique numbers
-  for (auto &entrie : entries) {
-    std::string entryName = entrie.first;
+  for (auto &entry : entries) {
+    std::string entryName = entry.first;
     if (entryName.find("MantidAlgorithm_") != std::string::npos) {
       // Just get the number
       entryName = entryName.substr(16, entryName.size() - 16);
