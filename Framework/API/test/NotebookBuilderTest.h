@@ -232,10 +232,10 @@ public:
       notebookLines.push_back(line);
 
     // Check that the expected lines do appear in the output
-    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result_markdown) !=
-              notebookLines.cend())
-    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result_code) !=
-              notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_markdown) != notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_code) != notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -283,10 +283,10 @@ public:
       notebookLines.push_back(line);
 
     // Check that the expected lines do appear in the output
-    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result_markdown) !=
-              notebookLines.cend())
-    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result_code) !=
-              notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_markdown) != notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_code) != notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
