@@ -5,6 +5,7 @@ import unittest
 
 from mantid.api import (WorkspaceGroup, MatrixWorkspace)
 import mantid
+from mantid.simpleapi import *
 from VesuvioCommands import fit_tof
 
 class FitTofTest(unittest.TestCase):

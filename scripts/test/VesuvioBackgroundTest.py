@@ -1,5 +1,6 @@
 import unittest
 
+from mantid.simpleapi import *
 from VesuvioBackgrounds import (create_from_str, PolynomialBackground)
 
 # --------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 import unittest
 
+from mantid.simpleapi import *
 from VesuvioBackgrounds import PolynomialBackground
 from VesuvioFitting import FittingOptions, parse_fit_options
 from VesuvioProfiles import GaussianMassProfile, GramCharlierMassProfile
