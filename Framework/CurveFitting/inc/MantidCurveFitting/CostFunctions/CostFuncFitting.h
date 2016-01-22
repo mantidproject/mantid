@@ -41,8 +41,6 @@ public:
   void setParameter(size_t i, const double &value) override;
   /// Get name of i-th parameter
   std::string parameterName(size_t i) const;
-  /// Number of parameters
-  size_t nParams() const override;
   /// Set all parameters
   void setParameters(const GSLVector &params);
   /// Get all parameters into a GSLVector
@@ -86,10 +84,6 @@ public:
   void applyTies();
   /// Reset the fitting function (neccessary if parameters get fixed/unfixed)
   void reset() const;
-  /// Set all parameters
-  void setParameters(const GSLVector &params);
-  /// Get values of all parameters
-  void getParameters(GSLVector &params) const;
 
 protected:
   /// Calculates covariance matrix for fitting function's active parameters.
