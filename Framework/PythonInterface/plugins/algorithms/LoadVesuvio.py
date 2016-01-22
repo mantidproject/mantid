@@ -526,7 +526,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
         if self._foil_out_norm_end > self._tof_max:
             x_max = self._foil_out_norm_end
             self._crop_required = True
-            logger.warning("Crop = True")
 
         ms.CropWorkspace(Inputworkspace= SUMMED_WS,
                          OutputWorkspace=SUMMED_WS,
