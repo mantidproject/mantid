@@ -37,6 +37,10 @@ set ( TEST_PY_FILES
       test/SANSIsisInstrumentTest.py
       test/SANSReductionStepsUserFileTest.py
       test/SettingsTest.py
+      test/VesuvioBackgroundTest.py
+      test/VesuvioCommandsTest.py
+      test/VesuvioFittingTest.py
+      test/VesuvioProfileTest.py
       test/ReductionSettingsTest.py
       )
 
