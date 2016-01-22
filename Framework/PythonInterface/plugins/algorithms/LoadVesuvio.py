@@ -40,6 +40,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
     _inst_prefix = None
     _back_scattering = None
     _load_common_called = False
+    _crop_required = False
     _mon_spectra = None
     _mon_index = None
     _backward_spectra_list = None
@@ -86,7 +87,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
     foil_thick = None
     mon_thick = None
     foil_out = None
-    raw_t = None
+
 
 #----------------------------------------------------------------------------------------
 
@@ -460,18 +461,18 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         # Cache delta_t values
         raw_t = first_ws.readX(0)
-        self.raw_t = raw_t
-        delay = raw_t[1] - raw_t[0]
+        delay = raw_t[2] - raw_t[1]
         # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
         raw_t = raw_t - delay
-        self.pt_times = raw_t[0:]
+        self.pt_times = raw_t[1:]
         self.delta_t = (raw_t[1:] - raw_t[:-1])
 
         mon_raw_t = self._raw_monitors[0].readX(0)
+        self._mon_raw_t = mon_raw_t
         delay = mon_raw_t[2] - mon_raw_t[1]
         # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
         mon_raw_t = mon_raw_t - delay
-        self.mon_pt_times = mon_raw_t[0:]
+        self.mon_pt_times = mon_raw_t[1:]
         self.delta_tmon = (mon_raw_t[1:] - mon_raw_t[:-1])
 
 #----------------------------------------------------------------------------------------
@@ -521,39 +522,25 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 ms.DeleteWorkspace(out_name, EnableLogging=_LOGGING_)
                 ms.DeleteWorkspace(out_mon, EnableLogging=_LOGGING_)
 
-        # Due to delay factor in the data, an extra bin is required to not over crop the data
-        ws_crop_max  = self._get_next_largest_bin_value(mtd[SUMMED_WS].getItem(0) , self._tof_max)
-        mon_crop_max = self._get_next_largest_bin_value(mtd[SUMMED_MON].getItem(0), self._mon_tof_max)
+        # Check to see if extra data needs to be loaded to normalise in data
+        x_max = self._tof_max
+        if self._foil_out_norm_end > self._tof_max:
+            x_max = self._foil_out_norm_end
+            self._crop_required = True
+            logger.warning("Crop = True")
 
         ms.CropWorkspace(Inputworkspace= SUMMED_WS,
                          OutputWorkspace=SUMMED_WS,
-                         XMax=ws_crop_max,
+                         XMax=x_max,
                          EnableLogging=_LOGGING_)
         ms.CropWorkspace(Inputworkspace= SUMMED_MON,
                          OutputWorkspace=SUMMED_MON,
-                         XMax=mon_crop_max,
+                         XMax=self._mon_tof_max,
                          EnableLogging=_LOGGING_)
 
         summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_MON]
         self._load_diff_mode_parameters(summed_data)
         return summed_data, summed_mon
-
-#----------------------------------------------------------------------------------------
-
-    def _get_next_largest_bin_value(self, workspace, value):
-        """
-        Returns the next largest bin value to the bin contianing the given value
-        """
-        # Crop to value
-        temp_ws = ms.CropWorkspace(InputWorkspace=workspace,
-                                    XMax=value,
-                                    EnableLogging=False)
-        # Find last bin index of cropped
-        cropped_max_bin_index = len(temp_ws.dataX(0))
-        # Return one more than the cropped max (next bin)
-        value = workspace.dataX(0)[cropped_max_bin_index + 1]
-        ms.DeleteWorkspace(temp_ws)
-        return value
 
 #----------------------------------------------------------------------------------------
 
@@ -849,7 +836,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         else:
             raise RuntimeError("Unknown difference type requested: %d" % self._diff_opt)
 
-        self.foil_out.setX(wsindex, self.raw_t[:-1])
+        self.foil_out.setX(wsindex, self.pt_times)
 
 #----------------------------------------------------------------------------------------
 
@@ -950,6 +937,15 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
            Sets the values of the output workspace properties
         """
+        # Crop the data to _tof_max if not already done so
+        if self._crop_required:
+            crop = self.createChildAlgorithm("CropWorkspace")
+            crop.setProperty("InputWorkspace" ,self.foil_out)
+            crop.setProperty("OutputWorkspace",self.foil_out)
+            crop.setProperty("XMax", self._tof_max)
+            crop.execute()
+            self.foil_out = crop.getProperty("OutputWorkspace").value
+
         self.setProperty(WKSP_PROP, self.foil_out)
 
     def _cleanup_raw(self):
