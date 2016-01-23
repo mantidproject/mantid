@@ -619,7 +619,7 @@ void GroupDetectors2::processGroupingWorkspace(
           det_ids.push_back(det->getID());
         }
 
-        for (int det_id : det_ids) {
+        for (auto det_id : det_ids) {
           // translate detectors to target det ws indexes
           size_t targetWSIndex = detIdToWiMap[det_id];
           targetWSIndexSet.insert(targetWSIndex);
@@ -686,7 +686,7 @@ void GroupDetectors2::processMatrixWorkspace(
       if (detGroup) {
         det_ids = detGroup->getDetectorIDs();
 
-        for (int det_id : det_ids) {
+        for (auto det_id : det_ids) {
           // translate detectors to target det ws indexes
           size_t targetWSIndex = detIdToWiMap[det_id];
           targetWSIndexSet.insert(targetWSIndex);

@@ -211,27 +211,33 @@ then convert SXPeaks objects to PeakObjects and add them to the output workspace
 void FindSXPeaks::reducePeakList(const peakvector &pcv) {
   double resol = getProperty("Resolution");
   peakvector finalv;
-  bool found = false;
-  for (const auto &i : pcv) {
-    for (auto &j : finalv) {
-      if (i.compare(j, resol)) {
-        j += i;
+
+  for (const auto &currentPeak : pcv) {
+    /*for (auto & finalPeak : finalv) {
+      if (currentPeak.compare(finalPeak, resol)) {
+        finalPeak += currentPeak;
         found = true;
         break;
       }
-    }
-    if (!found)
-      finalv.push_back(i);
-    found = false;
+    }*/
+    auto pos = std::find_if(finalv.begin(), finalv.end(),
+                            [&currentPeak, resol](SXPeak &peak) {
+                              bool result = currentPeak.compare(peak, resol);
+                              if (result)
+                                peak += currentPeak;
+                              return result;
+                            });
+    if (pos == finalv.end())
+      finalv.push_back(currentPeak);
   }
 
-  for (auto &i : finalv) {
-    i.reduce();
+  for (auto &finalPeak : finalv) {
+    finalPeak.reduce();
     try {
-      Geometry::IPeak *peak = m_peaks->createPeak(i.getQ());
+      Geometry::IPeak *peak = m_peaks->createPeak(finalPeak.getQ());
       if (peak) {
-        peak->setIntensity(i.getIntensity());
-        peak->setDetectorID(i.getDetectorId());
+        peak->setIntensity(finalPeak.getIntensity());
+        peak->setDetectorID(finalPeak.getDetectorId());
         m_peaks->addPeak(*peak);
         delete peak;
       }

@@ -33,8 +33,7 @@ void Fit::initConcrete() {
                          "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
-  auto mustBePositive = boost::shared_ptr<Kernel::BoundedValidator<int>>(
-      new Kernel::BoundedValidator<int>());
+  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "MaxIterations", 500, mustBePositive->clone(),
@@ -109,11 +108,11 @@ void Fit::initConcrete() {
   */
 void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
   auto &properties = minimizer.getProperties();
-  for (auto propertie : properties) {
-    if ((*propertie).direction() == Kernel::Direction::Output &&
-        (*propertie).isValid() == "") {
-      Kernel::Property *property = (*propertie).clone();
-      declareProperty(property);
+  for (auto property : properties) {
+    if ((*property).direction() == Kernel::Direction::Output &&
+        (*property).isValid() == "") {
+      Kernel::Property *clonedProperty = (*property).clone();
+      declareProperty(clonedProperty);
     }
   }
 }

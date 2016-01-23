@@ -393,7 +393,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
         else if (emode == "Direct") {
           // fix the histogram bins
           MantidVec &x = evlist.dataX();
-          for (double tof : x) {
+          for (double &tof : x) {
             tof -= t0_direct;
           }
 

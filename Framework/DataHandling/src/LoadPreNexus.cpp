@@ -296,19 +296,19 @@ void LoadPreNexus::runLoadNexusLogs(const string &runinfo,
 
   // run the algorithm
   bool loadedLogs = false;
-  for (auto &possibilitie : possibilities) {
-    if (Poco::File(possibilitie).exists()) {
-      g_log.information() << "Loading logs from \"" << possibilitie << "\"\n";
+  for (auto &possibility : possibilities) {
+    if (Poco::File(possibility).exists()) {
+      g_log.information() << "Loading logs from \"" << possibility << "\"\n";
       IAlgorithm_sptr alg =
           this->createChildAlgorithm("LoadNexusLogs", prog_start, prog_stop);
       alg->setProperty("Workspace", m_outputWorkspace);
-      alg->setProperty("Filename", possibilitie);
+      alg->setProperty("Filename", possibility);
       alg->setProperty("OverwriteLogs", false);
       alg->executeAsChildAlg();
       loadedLogs = true;
       // Reload instrument so SNAP can use log values
-      std::string entry_name = LoadTOFRawNexus::getEntryName(possibilitie);
-      LoadEventNexus::runLoadInstrument(possibilitie, m_outputWorkspace,
+      std::string entry_name = LoadTOFRawNexus::getEntryName(possibility);
+      LoadEventNexus::runLoadInstrument(possibility, m_outputWorkspace,
                                         entry_name, this);
       break;
     }

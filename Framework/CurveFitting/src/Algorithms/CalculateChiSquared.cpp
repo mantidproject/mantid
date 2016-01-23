@@ -467,14 +467,14 @@ void CalculateChiSquared::estimateErrors() {
     // If there are more than 1, find the one with the smallest chi^2.
     double chiMin = std::numeric_limits<double>::max();
     double parMin = par0;
-    for (double i : minima) {
-      double value = base->eval(i, P);
+    for (double minimum : minima) {
+      double value = base->eval(minimum, P);
       if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-        g_log.debug() << i << " (" << value << ") ";
+        g_log.debug() << minimum << " (" << value << ") ";
       }
       if (value < chiMin) {
         chiMin = value;
-        parMin = i;
+        parMin = minimum;
       }
     }
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {

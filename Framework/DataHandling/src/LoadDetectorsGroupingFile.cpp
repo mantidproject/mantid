@@ -207,15 +207,15 @@ void LoadDetectorsGroupingFile::setByComponents() {
       m_groupWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Set
-  for (auto &it : m_groupComponentsMap) {
-    g_log.debug() << "Group ID = " << it.first << " With " << it.second.size()
-                  << " Components" << std::endl;
+  for (auto &componentMap : m_groupComponentsMap) {
+    g_log.debug() << "Group ID = " << componentMap.first << " With "
+                  << componentMap.second.size() << " Components" << std::endl;
 
-    for (size_t i = 0; i < it.second.size(); i++) {
+    for (auto &name : componentMap.second) {
 
       // a) get component
       Geometry::IComponent_const_sptr component =
-          m_instrument->getComponentByName(it.second[i]);
+          m_instrument->getComponentByName(name);
 
       // b) component -> component assembly --> children (more than detectors)
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -223,7 +223,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
       std::vector<Geometry::IComponent_const_sptr> children;
       asmb->getChildren(children, true);
 
-      g_log.debug() << "Component Name = " << it.second[i]
+      g_log.debug() << "Component Name = " << name
                     << "  Component ID = " << component->getComponentID()
                     << "Number of Children = " << children.size() << std::endl;
 
@@ -238,7 +238,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
           auto itx = indexmap.find(detid);
           if (itx != indexmap.end()) {
             size_t wsindex = itx->second;
-            m_groupWS->dataY(wsindex)[0] = it.first;
+            m_groupWS->dataY(wsindex)[0] = componentMap.first;
           } else {
             g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located"
                           << std::endl;
@@ -282,16 +282,15 @@ void LoadDetectorsGroupingFile::setByDetectors() {
       m_groupWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Set GroupingWorkspace
-  for (auto &it : m_groupDetectorsMap) {
-    g_log.debug() << "Group ID = " << it.first << std::endl;
+  for (auto &detectorMap : m_groupDetectorsMap) {
+    g_log.debug() << "Group ID = " << detectorMap.first << std::endl;
 
-    for (size_t i = 0; i < it.second.size(); i++) {
-      detid_t detid = it.second[i];
+    for (auto detid : detectorMap.second) {
       auto itx = indexmap.find(detid);
 
       if (itx != indexmap.end()) {
         size_t wsindex = itx->second;
-        m_groupWS->dataY(wsindex)[0] = it.first;
+        m_groupWS->dataY(wsindex)[0] = detectorMap.first;
       } else {
         g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located"
                       << std::endl;

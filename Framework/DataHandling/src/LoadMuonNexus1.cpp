@@ -27,6 +27,7 @@
 #include <Poco/Path.h>
 #include <limits>
 #include <cmath>
+#include <boost/iterator/counting_iterator.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
@@ -260,10 +261,10 @@ void LoadMuonNexus1::exec() {
     }
     // Read in the spectra in the optional list parameter, if set
     if (m_list) {
-      for (int i : m_spec_list) {
+      for (auto specid : m_spec_list) {
         specid_t histToRead =
-            static_cast<specid_t>(i - 1 + period * nxload.t_nsp1);
-        specid_t specNo = static_cast<specid_t>(i);
+            static_cast<specid_t>(specid - 1 + period * nxload.t_nsp1);
+        specid_t specNo = static_cast<specid_t>(specid);
         loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                  localWorkspace);
         counter++;
@@ -346,12 +347,12 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
     // Set the spectrum list that should be loaded
     if (m_interval || m_list) {
       // Load only selected spectra
-      for (int64_t i = m_spec_min; i < m_spec_max; i++) {
-        specToLoad.push_back(static_cast<int>(i));
-      }
-      for (int &it : m_spec_list) {
-        specToLoad.push_back(it);
-      }
+      specToLoad.insert(
+          specToLoad.end(),
+          boost::counting_iterator<int>(static_cast<int>(m_spec_min)),
+          boost::counting_iterator<int>(static_cast<int>(m_spec_max)));
+      specToLoad.insert(specToLoad.end(), m_spec_list.begin(),
+                        m_spec_list.end());
     } else {
       // Load all the spectra
       // Start from 1 to N+1 to be consistent with
@@ -379,8 +380,8 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
         // Simpliest case - one dead time for one detector
 
         // Populate deadTimes
-        for (int &it : specToLoad) {
-          deadTimes.push_back(deadTimesData[it - 1]);
+        for (auto &spectra : specToLoad) {
+          deadTimes.emplace_back(deadTimesData[spectra - 1]);
         }
         // Load into table
         TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
@@ -394,8 +395,8 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
         for (int64_t i = 0; i < m_numberOfPeriods; i++) {
 
           // Populate deadTimes
-          for (int &it : specToLoad) {
-            int index = static_cast<int>(it - 1 + i * m_numberOfSpectra);
+          for (auto spec : specToLoad) {
+            int index = static_cast<int>(spec - 1 + i * m_numberOfSpectra);
             deadTimes.push_back(deadTimesData[index]);
           }
 
@@ -435,12 +436,12 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
     // Set the spectrum list that should be loaded
     if (m_interval || m_list) {
       // Load only selected spectra
-      for (int64_t i = m_spec_min; i < m_spec_max; i++) {
-        specToLoad.push_back(static_cast<int>(i));
-      }
-      for (int &it : m_spec_list) {
-        specToLoad.push_back(it);
-      }
+      specToLoad.insert(
+          specToLoad.end(),
+          boost::counting_iterator<int>(static_cast<int>(m_spec_min)),
+          boost::counting_iterator<int>(static_cast<int>(m_spec_max)));
+      specToLoad.insert(specToLoad.end(), m_spec_list.begin(),
+                        m_spec_list.end());
     } else {
       // Load all the spectra
       // Start from 1 to N+1 to be consistent with
@@ -477,10 +478,10 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
           }
         } else {
           // User selected an entry number
-          for (int &it : specToLoad) {
-            int index = it - 1 + static_cast<int>((m_entrynumber - 1) *
-                                                  m_numberOfSpectra);
-            grouping.push_back(groupingData[index]);
+          for (auto &spec : specToLoad) {
+            int index = spec - 1 + static_cast<int>((m_entrynumber - 1) *
+                                                    m_numberOfSpectra);
+            grouping.emplace_back(groupingData[index]);
           }
         }
 
@@ -499,9 +500,9 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
 
           // Get the grouping
           grouping.clear();
-          for (int &it : specToLoad) {
-            int index = it - 1 + i * static_cast<int>(m_numberOfSpectra);
-            grouping.push_back(groupingData[index]);
+          for (auto &spec : specToLoad) {
+            int index = spec - 1 + i * static_cast<int>(m_numberOfSpectra);
+            grouping.emplace_back(groupingData[index]);
           }
 
           // Set table for period i

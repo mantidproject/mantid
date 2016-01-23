@@ -97,9 +97,9 @@ void LoadMcStas::exec() {
     std::map<std::string, std::string> histogramEntries;
 
     // populate eventEntries and histogramEntries
-    for (auto &dataEntrie : dataEntries) {
-      std::string dataName = dataEntrie.first;
-      std::string dataType = dataEntrie.second;
+    for (auto &dataEntry : dataEntries) {
+      std::string dataName = dataEntry.first;
+      std::string dataType = dataEntry.second;
       if (dataName == "content_nxs" || dataType != "NXdata")
         continue; // can be removed if sure no Nexus files contains
                   // "content_nxs"
@@ -116,18 +116,18 @@ void LoadMcStas::exec() {
 
       auto nxdataEntries = nxFile.getEntries();
 
-      for (auto &nxdataEntrie : nxdataEntries) {
-        if (nxdataEntrie.second == "NXparameters")
+      for (auto &nxdataEntry : nxdataEntries) {
+        if (nxdataEntry.second == "NXparameters")
           continue;
-        nxFile.openData(nxdataEntrie.first);
+        nxFile.openData(nxdataEntry.first);
         if (nxFile.hasAttr("long_name")) {
           std::string nameAttrValue;
           nxFile.getAttr("long_name", nameAttrValue);
 
           if (nameAttrValue.find("Neutron_ID") != std::string::npos) {
-            eventEntries[dataEntrie.first] = dataEntrie.second;
+            eventEntries[dataEntry.first] = dataEntry.second;
           } else {
-            histogramEntries[dataEntrie.first] = dataEntrie.second;
+            histogramEntries[dataEntry.first] = dataEntry.second;
           }
         }
         nxFile.closeData();
@@ -415,9 +415,9 @@ void LoadMcStas::readHistogramData(
 
   std::string nameAttrValueYLABEL;
 
-  for (const auto &histogramEntrie : histogramEntries) {
-    std::string dataName = histogramEntrie.first;
-    std::string dataType = histogramEntrie.second;
+  for (const auto &histogramEntry : histogramEntries) {
+    const std::string &dataName = histogramEntry.first;
+    const std::string &dataType = histogramEntry.second;
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
@@ -433,20 +433,20 @@ void LoadMcStas::readHistogramData(
     // Find the axis names
     auto nxdataEntries = nxFile.getEntries();
     std::string axis1Name, axis2Name;
-    for (auto &nxdataEntrie : nxdataEntries) {
-      if (nxdataEntrie.second == "NXparameters")
+    for (auto &nxdataEntry : nxdataEntries) {
+      if (nxdataEntry.second == "NXparameters")
         continue;
-      if (nxdataEntrie.first == "ncount")
+      if (nxdataEntry.first == "ncount")
         continue;
-      nxFile.openData(nxdataEntrie.first);
+      nxFile.openData(nxdataEntry.first);
 
       if (nxFile.hasAttr("axis")) {
         int axisNo(0);
         nxFile.getAttr("axis", axisNo);
         if (axisNo == 1)
-          axis1Name = nxdataEntrie.first;
+          axis1Name = nxdataEntry.first;
         else if (axisNo == 2)
-          axis2Name = nxdataEntrie.first;
+          axis2Name = nxdataEntry.first;
         else
           throw std::invalid_argument("Unknown axis number");
       }

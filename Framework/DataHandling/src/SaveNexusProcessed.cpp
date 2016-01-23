@@ -113,7 +113,7 @@ void SaveNexusProcessed::getSpectrumList(
     for (int i = spec_min; i <= spec_max; i++)
       spec.push_back(i);
     if (list) {
-      for (int s : spec_list) {
+      for (auto s : spec_list) {
         if (s < 0)
           continue;
         if (s < spec_min || s > spec_max)

@@ -150,11 +150,11 @@ void SaveAscii::exec() {
 
   // Add spectra list into the index list
   if (!spec_list.empty()) {
-    for (int &i : spec_list) {
-      if (i >= nSpectra)
+    for (auto &spec : spec_list) {
+      if (spec >= nSpectra)
         throw std::invalid_argument("Inconsistent spectra list");
       else
-        idx.insert(i);
+        idx.insert(spec);
     }
   }
   if (!idx.empty())

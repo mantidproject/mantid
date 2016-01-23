@@ -948,7 +948,7 @@ double Instrument::calcConversion(
     const std::map<detid_t, double> &offsets) {
   double factor = 0.;
   double offset;
-  for (int detector : detectors) {
+  for (auto detector : detectors) {
     auto off_iter = offsets.find(detector);
     if (off_iter != offsets.cend()) {
       offset = offsets.find(detector)->second;

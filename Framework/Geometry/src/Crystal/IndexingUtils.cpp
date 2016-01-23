@@ -1880,9 +1880,7 @@ int IndexingUtils::NumberOfValidIndexes(const std::vector<V3D> &hkls,
   double l_error;
   double total_error = 0;
   int count = 0;
-  V3D hkl;
-  for (const auto &i : hkls) {
-    hkl = i;
+  for (const auto &hkl : hkls) {
     if (ValidIndex(hkl, tolerance)) {
       count++;
       h_error = fabs(round(hkl[0]) - hkl[0]);

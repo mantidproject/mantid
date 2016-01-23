@@ -180,7 +180,7 @@ void LoadMask::processMaskOnDetectors(bool tomask,
                 << "  Final Single IDs Size = " << singledetids.size()
                 << std::endl;
 
-  for (int detid : singledetids) {
+  for (auto detid : singledetids) {
     detid2index_map::const_iterator it;
     it = indexmap.find(detid);
     if (it != indexmap.end()) {
@@ -196,7 +196,7 @@ void LoadMask::processMaskOnDetectors(bool tomask,
   }
 
   // 3. Mask pairs
-  for (size_t i = 0; i < pairdetids_low.size(); i++) {
+  for (size_t i = 0; i < pairdetids_low.size(); ++i) {
     g_log.error() << "To Be Implemented Soon For Pair (" << pairdetids_low[i]
                   << ", " << pairdetids_up[i] << "!" << std::endl;
   }
@@ -394,9 +394,7 @@ void LoadMask::detectorToDetectors(std::vector<int32_t> singles,
   << std::endl;
   }
   */
-  for (int single : singles) {
-    detectors.push_back(single);
-  }
+  detectors.insert(detectors.end(), singles.begin(), singles.end());
   for (size_t i = 0; i < pairslow.size(); i++) {
     for (int32_t j = 0; j < pairsup[i] - pairslow[i] + 1; j++) {
       int32_t detid = pairslow[i] + j;
@@ -582,15 +580,14 @@ void LoadMask::parseSpectrumIDs(std::string inputstr, bool tomask) {
 
   // 2. Set to data storage
   if (tomask) {
-    for (int single : singles) {
-      mask_specid_single.push_back(single);
-    }
+    mask_specid_single.insert(mask_specid_single.end(), singles.begin(),
+                              singles.end());
     for (size_t i = 0; i < pairs.size() / 2; i++) {
       mask_specid_pair_low.push_back(pairs[2 * i]);
       mask_specid_pair_up.push_back(pairs[2 * i + 1]);
     }
   } else {
-    for (int single : singles) {
+    for (auto single : singles) {
       unmask_specid_single.push_back(single);
     }
     for (size_t i = 0; i < pairs.size() / 2; i++) {
@@ -615,17 +612,15 @@ void LoadMask::parseDetectorIDs(std::string inputstr, bool tomask) {
 
   // 2. Set to data storage
   if (tomask) {
-    for (int single : singles) {
-      mask_detid_single.push_back(single);
-    }
+    mask_detid_single.insert(unmask_detid_single.end(), singles.begin(),
+                             singles.end());
     for (size_t i = 0; i < pairs.size() / 2; i++) {
       mask_detid_pair_low.push_back(pairs[2 * i]);
       mask_detid_pair_up.push_back(pairs[2 * i + 1]);
     }
   } else {
-    for (int single : singles) {
-      unmask_detid_single.push_back(single);
-    }
+    unmask_detid_single.insert(unmask_detid_single.end(), singles.begin(),
+                               singles.end());
     for (size_t i = 0; i < pairs.size() / 2; i++) {
       unmask_detid_pair_low.push_back(pairs[2 * i]);
       unmask_detid_pair_up.push_back(pairs[2 * i + 1]);

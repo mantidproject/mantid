@@ -450,9 +450,11 @@ void CreateChunkingFromInstrument::exec() {
     // fill in the table workspace
     for (auto &group : grouping) {
       stringstream banks;
-      for (auto bank = group.second.begin(); bank != group.second.end(); ++bank)
-        banks << (*bank) << ",";
-
+      // for (auto bank = group.second.begin(); bank != group.second.end();
+      // ++bank)
+      for (auto bank : group.second) {
+        banks << bank << ",";
+      }
       // remove the trailing comma
       string banksStr = banks.str();
       banksStr = banksStr.substr(0, banksStr.size() - 1);

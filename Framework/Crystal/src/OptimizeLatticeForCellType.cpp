@@ -100,20 +100,20 @@ void OptimizeLatticeForCellType::exec() {
     const std::vector<Peak> &peaks_all = ws->getPeaks();
     int run = 0;
     int count = 0;
-    for (const auto &i : peaks_all) {
-      if (i.getRunNumber() != run) {
+    for (const auto &peak : peaks_all) {
+      if (peak.getRunNumber() != run) {
         count++; // first entry in runWS is input workspace
-        DataObjects::PeaksWorkspace_sptr cloneWS(new PeaksWorkspace());
+        auto cloneWS = boost::make_shared<PeaksWorkspace>();
         cloneWS->setInstrument(ws->getInstrument());
         cloneWS->copyExperimentInfoFrom(ws.get());
         runWS.push_back(cloneWS);
-        runWS[count]->addPeak(i);
-        run = i.getRunNumber();
+        runWS[count]->addPeak(peak);
+        run = peak.getRunNumber();
         AnalysisDataService::Instance().addOrReplace(
             boost::lexical_cast<std::string>(run) + ws->getName(),
             runWS[count]);
       } else {
-        runWS[count]->addPeak(i);
+        runWS[count]->addPeak(peak);
       }
     }
   }
