@@ -2633,10 +2633,10 @@ InstrumentDefinitionParser::convertLocationsElement(
   std::map<std::string, double> attrValues;
 
   // Read all the set attribute values
-  for (const auto &allAttr : allAttrs) {
-    if (pElem->hasAttribute(allAttr)) {
-      attrValues[allAttr] = boost::lexical_cast<double>(
-          Strings::strip(pElem->getAttribute(allAttr)));
+  for (const auto &attr : allAttrs) {
+    if (pElem->hasAttribute(attr)) {
+      attrValues[attr] = boost::lexical_cast<double>(
+          Strings::strip(pElem->getAttribute(attr)));
     }
   }
 

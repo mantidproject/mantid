@@ -105,8 +105,8 @@ std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
   std::vector<V3D> equivalents;
   equivalents.reserve(m_allOperations.size());
 
-  for (const auto &allOperation : m_allOperations) {
-    equivalents.push_back(allOperation.transformHKL(hkl));
+  for (const auto &operation : m_allOperations) {
+    equivalents.push_back(operation.transformHKL(hkl));
   }
 
   std::sort(equivalents.begin(), equivalents.end(), std::greater<V3D>());
@@ -214,8 +214,10 @@ std::vector<PointGroup_sptr> getAllPointGroups() {
       PointGroupFactory::Instance().getAllPointGroupSymbols();
 
   std::vector<PointGroup_sptr> out;
-  for (auto &allSymbol : allSymbols) {
-    out.push_back(PointGroupFactory::Instance().createPointGroup(allSymbol));
+  out.reserve(allSymbols.size());
+
+  for (auto &symbol : allSymbols) {
+    out.push_back(PointGroupFactory::Instance().createPointGroup(symbol));
   }
 
   return out;
