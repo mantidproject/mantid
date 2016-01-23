@@ -751,7 +751,7 @@ double IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
   }
   return edge;
 }
-  
+
 void IntegratePeaksMD2::runMaskDetectors(
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
     std::string values) {
