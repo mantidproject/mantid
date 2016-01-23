@@ -44,9 +44,9 @@ void MultiDomainFunction::setDomainIndices(
  */
 void MultiDomainFunction::countNumberOfDomains() {
   std::set<size_t> dSet;
-  for (auto &m_domain : m_domains) {
-    if (m_domain.second.size()) {
-      dSet.insert(m_domain.second.begin(), m_domain.second.end());
+  for (auto &domain : m_domains) {
+    if (domain.second.size()) {
+      dSet.insert(domain.second.begin(), domain.second.end());
     }
   }
   m_nDomains = dSet.size();
@@ -319,12 +319,12 @@ MultiDomainFunction::createEquivalentFunctions() const {
     std::vector<size_t> domains;
     getDomainIndices(iFun, nDomains, domains);
 
-    for (auto j : domains) {
-      CompositeFunction_sptr cf = compositeFunctions[j];
+    for (auto domainIndex : domains) {
+      CompositeFunction_sptr cf = compositeFunctions[domainIndex];
       if (!cf) {
         // create a composite function for each domain
         cf = CompositeFunction_sptr(new CompositeFunction());
-        compositeFunctions[j] = cf;
+        compositeFunctions[domainIndex] = cf;
       }
       // add copies of all functions applied to j-th domain to a single
       // compositefunction

@@ -1778,8 +1778,8 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
 /// Empty the list of facilities, deleting the FacilityInfo objects in the
 /// process
 void ConfigServiceImpl::clearFacilities() {
-  for (auto &m_facilitie : m_facilities) {
-    delete m_facilitie;
+  for (auto &facility : m_facilities) {
+    delete facility;
   }
   m_facilities.clear();
 }
@@ -1808,11 +1808,11 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
   }
 
   // Now let's look through the other facilities
-  for (auto m_facilitie : m_facilities) {
+  for (auto facility : m_facilities) {
     try {
       g_log.debug() << "Looking for " << instrumentName << " at "
-                    << (*m_facilitie).name() << "." << std::endl;
-      return (*m_facilitie).instrument(instrumentName);
+                    << (*facility).name() << "." << std::endl;
+      return (*facility).instrument(instrumentName);
     } catch (Exception::NotFoundError &) {
       // Well the instName doesn't exist for this facility...
       // Move along, there's nothing to see here...
@@ -1868,9 +1868,9 @@ ConfigServiceImpl::getFacility(const std::string &facilityName) const {
   if (facilityName.empty())
     return this->getFacility();
 
-  for (auto m_facilitie : m_facilities) {
-    if ((*m_facilitie).name() == facilityName) {
-      return *m_facilitie;
+  for (auto facility : m_facilities) {
+    if ((*facility).name() == facilityName) {
+      return *facility;
     }
   }
 

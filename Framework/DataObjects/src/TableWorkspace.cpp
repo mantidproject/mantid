@@ -48,8 +48,8 @@ TableWorkspace::~TableWorkspace() {}
 
 size_t TableWorkspace::getMemorySize() const {
   size_t data_size = 0;
-  for (const auto &m_column : m_columns) {
-    data_size += m_column->sizeOfData();
+  for (const auto &column : m_columns) {
+    data_size += column->sizeOfData();
   }
   data_size += m_LogManager->getMemorySize();
   return data_size;
@@ -98,8 +98,8 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
 void TableWorkspace::setRowCount(size_t count) {
   if (count == rowCount())
     return;
-  for (auto &m_column : m_columns)
-    resizeColumn(m_column.get(), count);
+  for (auto &column : m_columns)
+    resizeColumn(column.get(), count);
   m_rowCount = count;
 }
 
@@ -116,9 +116,9 @@ API::Column_sptr TableWorkspace::getColumn(const std::string &name) {
 /// Gets the shared pointer to a column.
 API::Column_const_sptr
 TableWorkspace::getColumn(const std::string &name) const {
-  for (const auto &m_column : m_columns) {
-    if (m_column.get()->name() == name) {
-      return m_column;
+  for (const auto &column : m_columns) {
+    if (column.get()->name() == name) {
+      return column;
     }
   }
   std::string str = "Column " + name + " does not exist.\n";
@@ -162,8 +162,8 @@ void TableWorkspace::removeColumn(const std::string &name) {
 size_t TableWorkspace::insertRow(size_t index) {
   if (index >= rowCount())
     index = rowCount();
-  for (auto &m_column : m_columns)
-    insertInColumn(m_column.get(), index);
+  for (auto &column : m_columns)
+    insertInColumn(column.get(), index);
   ++m_rowCount;
   return index;
 }
@@ -175,16 +175,16 @@ void TableWorkspace::removeRow(size_t index) {
     g_log.error() << "Attempt to delete a non-existing row (" << index << ")\n";
     return;
   }
-  for (auto &m_column : m_columns)
-    removeFromColumn(m_column.get(), index);
+  for (auto &column : m_columns)
+    removeFromColumn(column.get(), index);
   --m_rowCount;
 }
 
 std::vector<std::string> TableWorkspace::getColumnNames() const {
   std::vector<std::string> nameList;
   nameList.reserve(m_columns.size());
-  for (const auto &m_column : m_columns)
-    nameList.push_back(m_column->name());
+  for (const auto &column : m_columns)
+    nameList.push_back(column->name());
   return nameList;
 }
 

@@ -10,8 +10,8 @@ namespace CurveFitting {
 /// Return the number of points in the domain
 size_t SeqDomain::size() const {
   size_t n = 0;
-  for (const auto &m_creator : m_creators) {
-    n += (*m_creator).getDomainSize();
+  for (const auto &creator : m_creators) {
+    n += creator->getDomainSize();
   }
   return n;
 }

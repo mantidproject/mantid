@@ -43,12 +43,12 @@ void MultiDomainCreator::createDomain(
   auto jointDomain = new API::JointDomain;
   API::FunctionValues_sptr values;
   i0 = 0;
-  for (auto &m_creator : m_creators) {
-    if (!m_creator) {
+  for (auto &creator : m_creators) {
+    if (!creator) {
       throw std::runtime_error("Missing domain creator");
     }
     API::FunctionDomain_sptr domain;
-    (*m_creator).createDomain(domain, values, i0);
+    (*creator).createDomain(domain, values, i0);
     jointDomain->addDomain(domain);
     i0 += domain->size();
   }

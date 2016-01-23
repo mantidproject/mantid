@@ -8,15 +8,17 @@ namespace NeXus {
 
 std::vector<std::string> NXAttributes::names() const {
   std::vector<std::string> out;
-  for (const auto &m_value : m_values)
-    out.push_back(m_value.first);
+  out.reserve(m_values.size());
+  for (const auto &value : m_values)
+    out.push_back(value.first);
   return out;
 }
 
 std::vector<std::string> NXAttributes::values() const {
   std::vector<std::string> out;
-  for (const auto &m_value : m_values)
-    out.push_back(m_value.second);
+  out.reserve(m_values.size());
+  for (const auto &value : m_values)
+    out.push_back(value.second);
   return out;
 }
 

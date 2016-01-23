@@ -112,8 +112,8 @@ StructureFactor CompositeBraggScatterer::calculateStructureFactor(
     const Kernel::V3D &hkl) const {
   StructureFactor sum(0.0, 0.0);
 
-  for (const auto &m_scatterer : m_scatterers) {
-    sum += m_scatterer->calculateStructureFactor(hkl);
+  for (const auto &scatterer : m_scatterers) {
+    sum += scatterer->calculateStructureFactor(hkl);
   }
 
   return sum;
@@ -132,8 +132,8 @@ void CompositeBraggScatterer::propagateProperty(
     const std::string &propertyName) {
   std::string propertyValue = getPropertyValue(propertyName);
 
-  for (auto &m_scatterer : m_scatterers) {
-    propagatePropertyToScatterer(m_scatterer, propertyName, propertyValue);
+  for (auto &scatterer : m_scatterers) {
+    propagatePropertyToScatterer(scatterer, propertyName, propertyValue);
   }
 }
 
@@ -169,14 +169,14 @@ void CompositeBraggScatterer::addScattererImplementation(
 void CompositeBraggScatterer::redeclareProperties() {
   std::map<std::string, size_t> propertyUseCount = getPropertyCountMap();
 
-  for (auto &m_scatterer : m_scatterers) {
+  for (auto &scatterer : m_scatterers) {
     // Check if any of the declared properties is in this scatterer (and set
     // value if that's the case)
     for (auto &prop : propertyUseCount) {
-      if (m_scatterer->existsProperty(prop.first)) {
+      if (scatterer->existsProperty(prop.first)) {
         prop.second += 1;
 
-        propagatePropertyToScatterer(m_scatterer, prop.first,
+        propagatePropertyToScatterer(scatterer, prop.first,
                                      getPropertyValue(prop.first));
       }
     }
@@ -184,11 +184,11 @@ void CompositeBraggScatterer::redeclareProperties() {
     // Use the properties of this scatterer which have been marked as exposed to
     // composite
     std::vector<Property *> properties =
-        m_scatterer->getPropertiesInGroup(getPropagatingGroupName());
-    for (auto &propertie : properties) {
-      std::string propertyName = propertie->name();
+        scatterer->getPropertiesInGroup(getPropagatingGroupName());
+    for (auto &property : properties) {
+      std::string propertyName = property->name();
       if (!existsProperty(propertyName)) {
-        declareProperty(propertie->clone());
+        declareProperty(property->clone());
       }
     }
   }

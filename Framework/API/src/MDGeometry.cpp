@@ -131,11 +131,17 @@ MDGeometry::getDimension(size_t index) const {
  */
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MDGeometry::getDimensionWithId(std::string id) const {
-  for (const auto &m_dimension : m_dimensions)
-    if (m_dimension->getDimensionId() == id)
-      return m_dimension;
-  throw std::invalid_argument("Dimension tagged " + id +
-                              " was not found in the Workspace");
+  auto dimension = std::find_if(
+      m_dimensions.begin(), m_dimensions.end(),
+      [&id](
+          const boost::shared_ptr<const Mantid::Geometry::IMDDimension> &dim) {
+        return dim->getDimensionId() == id;
+      });
+  if (dimension != m_dimensions.end())
+    return *dimension;
+  else
+    throw std::invalid_argument("Dimension tagged " + id +
+                                " was not found in the Workspace");
 }
 
 // --------------------------------------------------------------------------------------------
@@ -280,14 +286,11 @@ void MDGeometry::setBasisVector(size_t index, const Mantid::Kernel::VMD &vec) {
  * @return True ONLY if ALL the basis vectors have been normalized.
  */
 bool MDGeometry::allBasisNormalized() const {
-  bool allNormalized = true;
-  for (const auto &m_basisVector : m_basisVectors) {
-    if (m_basisVector.length() != 1.0) {
-      allNormalized = false;
-      break;
-    }
-  }
-  return allNormalized;
+  auto normalized = std::find_if(m_basisVectors.begin(), m_basisVectors.end(),
+                                 [](const Mantid::Kernel::VMD &basisVector) {
+                                   return basisVector.length() != 1.0;
+                                 });
+  return normalized == m_basisVectors.end();
 }
 
 //---------------------------------------------------------------------------------------------------

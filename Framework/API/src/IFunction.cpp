@@ -1000,8 +1000,8 @@ void IFunction::setAttributeValue(const std::string &attName,
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names(nAttributes(), "");
   size_t index(0);
-  for (const auto &m_attr : m_attrs) {
-    names[index] = m_attr.first;
+  for (const auto &attr : m_attrs) {
+    names[index] = attr.first;
     ++index;
   }
   return names;

@@ -44,8 +44,9 @@ void StatisticsOfPeaksWorkspace::init() {
                                                         Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> propOptions;
-  for (auto &m_pointGroup : m_pointGroups)
-    propOptions.push_back(m_pointGroup->getName());
+  propOptions.reserve(m_pointGroups.size());
+  for (auto &pointGroup : m_pointGroups)
+    propOptions.push_back(pointGroup->getName());
   declareProperty("PointGroup", propOptions[0],
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which point group applies to this crystal?");
@@ -53,6 +54,7 @@ void StatisticsOfPeaksWorkspace::init() {
   std::vector<std::string> centeringOptions;
   std::vector<ReflectionCondition_sptr> reflectionConditions =
       getAllReflectionConditions();
+  centeringOptions.reserve(reflectionConditions.size());
   for (auto &reflectionCondition : reflectionConditions)
     centeringOptions.push_back(reflectionCondition->getName());
   declareProperty("LatticeCentering", centeringOptions[0],

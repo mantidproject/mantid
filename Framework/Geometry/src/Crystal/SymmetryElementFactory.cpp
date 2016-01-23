@@ -378,9 +378,9 @@ SymmetryElement_sptr SymmetryElementFactoryImpl::createFromPrototype(
 /// invalid pointer if no appropriate generator is found.
 AbstractSymmetryElementGenerator_sptr SymmetryElementFactoryImpl::getGenerator(
     const SymmetryOperation &operation) const {
-  for (const auto &m_generator : m_generators) {
-    if (m_generator->canProcess(operation)) {
-      return m_generator;
+  for (const auto &generator : m_generators) {
+    if (generator->canProcess(operation)) {
+      return generator;
     }
   }
 

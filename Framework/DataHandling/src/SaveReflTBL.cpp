@@ -73,8 +73,8 @@ void SaveReflTBL::exec() {
     throw Exception::FileError("Unable to create file: ", filename);
   }
 
-  for (auto &m_stichgroup : m_stichgroups) {
-    std::vector<size_t> &rowNos = m_stichgroup.second;
+  for (auto &stichgroup : m_stichgroups) {
+    std::vector<size_t> &rowNos = stichgroup.second;
     size_t i = 0;
     for (; i < rowNos.size(); ++i) {
       // for each row in the group print the first 5 columns to file

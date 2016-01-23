@@ -37,8 +37,8 @@ CatalogSession_sptr CompositeCatalog::login(const std::string &username,
  * Log the user out of all catalogues in the container.
  */
 void CompositeCatalog::logout() {
-  for (auto &m_catalog : m_catalogs) {
-    m_catalog->logout();
+  for (auto &catalog : m_catalogs) {
+    catalog->logout();
   }
 }
 
@@ -54,8 +54,8 @@ void CompositeCatalog::logout() {
 void CompositeCatalog::search(const ICat::CatalogSearchParam &inputs,
                               ITableWorkspace_sptr &outputws, const int &offset,
                               const int &limit) {
-  for (auto &m_catalog : m_catalogs) {
-    m_catalog->search(inputs, outputws, offset, limit);
+  for (auto &catalog : m_catalogs) {
+    catalog->search(inputs, outputws, offset, limit);
   }
 }
 
@@ -66,8 +66,8 @@ void CompositeCatalog::search(const ICat::CatalogSearchParam &inputs,
 int64_t CompositeCatalog::getNumberOfSearchResults(
     const ICat::CatalogSearchParam &inputs) {
   int64_t numberOfSearchResults = 0;
-  for (auto &m_catalog : m_catalogs) {
-    numberOfSearchResults += m_catalog->getNumberOfSearchResults(inputs);
+  for (auto &catalog : m_catalogs) {
+    numberOfSearchResults += catalog->getNumberOfSearchResults(inputs);
   }
   return numberOfSearchResults;
 }
@@ -78,8 +78,8 @@ int64_t CompositeCatalog::getNumberOfSearchResults(
  * @param outputws :: The workspace to store the results.
  */
 void CompositeCatalog::myData(ITableWorkspace_sptr &outputws) {
-  for (auto &m_catalog : m_catalogs) {
-    m_catalog->myData(outputws);
+  for (auto &catalog : m_catalogs) {
+    catalog->myData(outputws);
   }
 }
 
@@ -91,8 +91,8 @@ void CompositeCatalog::myData(ITableWorkspace_sptr &outputws) {
  */
 void CompositeCatalog::getDataSets(const std::string &investigationId,
                                    ITableWorkspace_sptr &outputws) {
-  for (auto &m_catalog : m_catalogs) {
-    m_catalog->getDataSets(investigationId, outputws);
+  for (auto &catalog : m_catalogs) {
+    catalog->getDataSets(investigationId, outputws);
   }
 }
 
@@ -104,8 +104,8 @@ void CompositeCatalog::getDataSets(const std::string &investigationId,
  */
 void CompositeCatalog::getDataFiles(const std::string &investigationId,
                                     ITableWorkspace_sptr &outputws) {
-  for (auto &m_catalog : m_catalogs) {
-    m_catalog->getDataFiles(investigationId, outputws);
+  for (auto &catalog : m_catalogs) {
+    catalog->getDataFiles(investigationId, outputws);
   }
 }
 
@@ -114,8 +114,8 @@ void CompositeCatalog::getDataFiles(const std::string &investigationId,
  * @param instruments :: A reference to the vector to store the results.
  */
 void CompositeCatalog::listInstruments(std::vector<std::string> &instruments) {
-  for (auto &m_catalog : m_catalogs) {
-    m_catalog->listInstruments(instruments);
+  for (auto &catalog : m_catalogs) {
+    catalog->listInstruments(instruments);
   }
 }
 
@@ -125,8 +125,8 @@ void CompositeCatalog::listInstruments(std::vector<std::string> &instruments) {
  */
 void CompositeCatalog::listInvestigationTypes(
     std::vector<std::string> &invstTypes) {
-  for (auto &m_catalog : m_catalogs) {
-    m_catalog->listInvestigationTypes(invstTypes);
+  for (auto &catalog : m_catalogs) {
+    catalog->listInvestigationTypes(invstTypes);
   }
 }
 
@@ -134,8 +134,8 @@ void CompositeCatalog::listInvestigationTypes(
  * Keep each catalog session alive in the container.
  */
 void CompositeCatalog::keepAlive() {
-  for (auto &m_catalog : m_catalogs) {
-    m_catalog->keepAlive();
+  for (auto &catalog : m_catalogs) {
+    catalog->keepAlive();
   }
 }
 }

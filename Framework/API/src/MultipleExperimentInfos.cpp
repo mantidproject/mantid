@@ -97,9 +97,10 @@ uint16_t MultipleExperimentInfos::getNumExperimentInfo() const {
 void MultipleExperimentInfos::copyExperimentInfos(
     const MultipleExperimentInfos &other) {
   m_expInfos.clear();
+  m_expInfos.reserve(other.m_expInfos.size());
   // Do a deep copy of ExperimentInfo's
-  for (const auto &m_expInfo : other.m_expInfos) {
-    ExperimentInfo_sptr copy(new ExperimentInfo(*m_expInfo));
+  for (const auto &expInfo : other.m_expInfos) {
+    ExperimentInfo_sptr copy(new ExperimentInfo(*expInfo));
     m_expInfos.push_back(copy);
   }
 }

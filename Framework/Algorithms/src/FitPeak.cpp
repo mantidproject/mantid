@@ -1593,18 +1593,18 @@ void FitPeak::setupOutput(
 
   // Parameter vector
   vector<double> vec_fitpeak;
-  for (auto &m_peakParameterName : m_peakParameterNames) {
-    double value = m_peakFunc->getParameter(m_peakParameterName);
-    vec_fitpeak.push_back(value);
+  vec_fitpeak.reserve(m_peakParameterNames.size());
+  for (auto &peakParameterName : m_peakParameterNames) {
+    vec_fitpeak.push_back(m_peakFunc->getParameter(peakParameterName));
   }
 
   setProperty("FittedPeakParameterValues", vec_fitpeak);
 
   // Background
   vector<double> vec_fitbkgd;
-  for (auto &m_bkgdParameterName : m_bkgdParameterNames) {
-    double value = m_bkgdFunc->getParameter(m_bkgdParameterName);
-    vec_fitbkgd.push_back(value);
+  vec_fitpeak.reserve(m_bkgdParameterNames.size());
+  for (auto &bkgdParameterName : m_bkgdParameterNames) {
+    vec_fitbkgd.push_back(m_bkgdFunc->getParameter(bkgdParameterName));
   }
 
   setProperty("FittedBackgroundParameterValues", vec_fitbkgd);
@@ -1630,10 +1630,10 @@ void FitPeak::push(IFunction_const_sptr func,
   size_t nParam = funcparnames.size();
   for (size_t i = 0; i < nParam; ++i) {
     double parvalue = func->getParameter(i);
-    funcparammap.insert(make_pair(funcparnames[i], parvalue));
+    funcparammap.emplace(funcparnames[i], parvalue);
 
     double parerror = func->getError(i);
-    paramerrormap.insert(make_pair(funcparnames[i], parerror));
+    paramerrormap.emplace(funcparnames[i], parerror);
   }
 
   return;

@@ -362,12 +362,12 @@ void PlotPeakByLogValue::exec() {
     groupAlg->execute();
   }
 
-  for (auto &m_minimizerWorkspace : m_minimizerWorkspaces) {
-    const std::string paramName = m_minimizerWorkspace.first;
+  for (auto &minimizerWorkspace : m_minimizerWorkspaces) {
+    const std::string paramName = minimizerWorkspace.first;
     API::IAlgorithm_sptr groupAlg =
         AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupAlg->initialize();
-    groupAlg->setProperty("InputWorkspaces", m_minimizerWorkspace.second);
+    groupAlg->setProperty("InputWorkspaces", minimizerWorkspace.second);
     groupAlg->setProperty("OutputWorkspace", m_baseName + "_" + paramName);
     groupAlg->execute();
   }

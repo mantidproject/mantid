@@ -73,8 +73,8 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   if (other->m_moderatorModel)
     m_moderatorModel = other->m_moderatorModel->clone();
   m_choppers.clear();
-  for (const auto &m_chopper : other->m_choppers) {
-    m_choppers.push_back(m_chopper->clone());
+  for (const auto &chopper : other->m_choppers) {
+    m_choppers.push_back(chopper->clone());
   }
 }
 

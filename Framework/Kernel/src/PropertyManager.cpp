@@ -41,8 +41,8 @@ PropertyManager::PropertyManager(const PropertyManager &other)
 PropertyManager &PropertyManager::operator=(const PropertyManager &other) {
   // We need to do a deep copy here
   if (this != &other) {
-    for (auto &m_propertie : m_properties) {
-      delete m_propertie.second;
+    for (auto &property : m_properties) {
+      delete property.second;
     }
     this->m_properties.clear();
     this->m_orderedProperties.resize(other.m_orderedProperties.size());
@@ -162,14 +162,14 @@ void PropertyManager::filterByProperty(
     const Kernel::TimeSeriesProperty<bool> &filter) {
   const bool transferOwnership(
       true); // Make the new FilteredProperty own the original time series
-  for (auto &m_orderedPropertie : m_orderedProperties) {
-    Property *currentProp = m_orderedPropertie;
+  for (auto &orderedProperty : m_orderedProperties) {
+    Property *currentProp = orderedProperty;
     if (auto doubleSeries =
             dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
       auto filtered = new FilteredTimeSeriesProperty<double>(
           doubleSeries, filter, transferOwnership);
       // Replace the property in the ordered properties list
-      m_orderedPropertie = filtered;
+      orderedProperty = filtered;
       // Now replace in the map
       const std::string key = createKey(currentProp->name());
       this->m_properties[key] = filtered;
@@ -401,12 +401,12 @@ bool PropertyManager::existsProperty(const std::string &name) const {
  */
 bool PropertyManager::validateProperties() const {
   bool allValid = true;
-  for (const auto &m_propertie : m_properties) {
+  for (const auto &property : m_properties) {
     // check for errors in each property
-    std::string error = m_propertie.second->isValid();
+    std::string error = property.second->isValid();
     //"" means no error
     if (!error.empty()) {
-      g_log.error() << "Property \"" << m_propertie.first
+      g_log.error() << "Property \"" << property.first
                     << "\" is not set to a valid value: \"" << error << "\"."
                     << std::endl;
       allValid = false;
@@ -574,8 +574,8 @@ void PropertyManager::removeProperty(const std::string &name,
  */
 void PropertyManager::clear() {
   m_orderedProperties.clear();
-  for (auto &m_propertie : m_properties) {
-    delete m_propertie.second;
+  for (auto &property : m_properties) {
+    delete property.second;
   }
   m_properties.clear();
 }

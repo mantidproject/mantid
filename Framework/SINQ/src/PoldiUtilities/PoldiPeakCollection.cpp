@@ -60,8 +60,8 @@ PoldiPeakCollection_sptr PoldiPeakCollection::clone() {
   clone->setPointGroup(m_pointGroup);
   clone->setUnitCell(m_unitCell);
 
-  for (auto &m_peak : m_peaks) {
-    clone->addPeak(m_peak->clone());
+  for (auto &peak : m_peaks) {
+    clone->addPeak(peak->clone());
   }
 
   return clone;

@@ -249,8 +249,8 @@ void FunctionFactoryImpl::inputError(const std::string &str) const {
 void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
                                          const Expression &expr) const {
   if (expr.name() == ",") {
-    for (const auto &i : expr) {
-      addConstraint(fun, i);
+    for (const auto &constraint : expr) {
+      addConstraint(fun, constraint);
     }
   } else {
     addConstraint(fun, expr);
@@ -279,8 +279,8 @@ void FunctionFactoryImpl::addTies(IFunction_sptr fun,
   if (expr.name() == "=") {
     addTie(fun, expr);
   } else if (expr.name() == ",") {
-    for (const auto &i : expr) {
-      addTie(fun, i);
+    for (const auto &constraint : expr) {
+      addTie(fun, constraint);
     }
   }
 }

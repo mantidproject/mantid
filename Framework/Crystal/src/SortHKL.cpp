@@ -45,15 +45,17 @@ void SortHKL::init() {
   /* TODO: These two properties with string lists keep appearing -
    * Probably there should be a dedicated Property type or validator. */
   std::vector<std::string> pgOptions;
-  for (auto &m_pointGroup : m_pointGroups)
-    pgOptions.push_back(m_pointGroup->getName());
+  pgOptions.reserve(m_pointGroups.size());
+  for (auto &pointGroup : m_pointGroups)
+    pgOptions.push_back(pointGroup->getName());
   declareProperty("PointGroup", pgOptions[0],
                   boost::make_shared<StringListValidator>(pgOptions),
                   "Which point group applies to this crystal?");
 
   std::vector<std::string> centeringOptions;
-  for (auto &m_refCond : m_refConds)
-    centeringOptions.push_back(m_refCond->getName());
+  centeringOptions.reserve(m_refConds.size());
+  for (auto &refCond : m_refConds)
+    centeringOptions.push_back(refCond->getName());
   declareProperty("LatticeCentering", centeringOptions[0],
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
@@ -169,9 +171,9 @@ ReflectionCondition_sptr SortHKL::getCentering() const {
       boost::make_shared<ReflectionConditionPrimitive>();
 
   std::string refCondName = getPropertyValue("LatticeCentering");
-  for (const auto &m_refCond : m_refConds)
-    if (m_refCond->getName() == refCondName)
-      centering = m_refCond;
+  for (const auto &refCond : m_refConds)
+    if (refCond->getName() == refCondName)
+      centering = refCond;
 
   return centering;
 }

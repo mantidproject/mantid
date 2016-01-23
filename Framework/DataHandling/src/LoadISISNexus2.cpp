@@ -723,8 +723,8 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
   }
   // count the number of spectra
   size_t nSpec = 0;
-  for (auto &m_spectraBlock : m_spectraBlocks) {
-    nSpec += m_spectraBlock.last - m_spectraBlock.first + 1;
+  for (auto &spectraBlock : m_spectraBlocks) {
+    nSpec += spectraBlock.last - spectraBlock.first + 1;
   }
   return nSpec;
 }
@@ -746,9 +746,9 @@ void LoadISISNexus2::loadPeriodData(
   int64_t period_index(period - 1);
   // int64_t first_monitor_spectrum = 0;
 
-  for (auto &m_spectraBlock : m_spectraBlocks) {
-    if (m_spectraBlock.isMonitor) {
-      NXData monitor = entry.openNXData(m_spectraBlock.monName);
+  for (auto &spectraBlock : m_spectraBlocks) {
+    if (spectraBlock.isMonitor) {
+      NXData monitor = entry.openNXData(spectraBlock.monName);
       NXInt mondata = monitor.openIntData();
       m_progress->report("Loading monitor");
       mondata.load(1, static_cast<int>(period - 1)); // TODO this is just wrong
@@ -782,9 +782,9 @@ void LoadISISNexus2::loadPeriodData(
       // divisible by the block-size
       // and if not have an extra read of the left overs
       const int64_t blocksize = 8;
-      const int64_t rangesize = m_spectraBlock.last - m_spectraBlock.first + 1;
+      const int64_t rangesize = spectraBlock.last - spectraBlock.first + 1;
       const int64_t fullblocks = rangesize / blocksize;
-      int64_t spectra_no = m_spectraBlock.first;
+      int64_t spectra_no = spectraBlock.first;
 
       // For this to work correctly, we assume that the spectrum list increases
       // monotonically

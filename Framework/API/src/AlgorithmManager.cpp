@@ -149,9 +149,9 @@ void AlgorithmManagerImpl::setMaxAlgorithms(int n) {
  */
 IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
   Mutex::ScopedLock _lock(this->m_managedMutex);
-  for (const auto &m_managed_alg : m_managed_algs) {
-    if ((*m_managed_alg).getAlgorithmID() == id)
-      return m_managed_alg;
+  for (const auto &managed_alg : m_managed_algs) {
+    if ((*managed_alg).getAlgorithmID() == id)
+      return managed_alg;
   }
   return IAlgorithm_sptr();
 }
@@ -220,9 +220,9 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
 /// Requests cancellation of all running algorithms
 void AlgorithmManagerImpl::cancelAll() {
   Mutex::ScopedLock _lock(this->m_managedMutex);
-  for (auto &m_managed_alg : m_managed_algs) {
-    if (m_managed_alg->isRunning())
-      m_managed_alg->cancel();
+  for (auto &managed_alg : m_managed_algs) {
+    if (managed_alg->isRunning())
+      managed_alg->cancel();
   }
 }
 

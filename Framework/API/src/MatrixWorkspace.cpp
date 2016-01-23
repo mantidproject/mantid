@@ -78,8 +78,8 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete
 // workspaces, so I moved this from protected to public.
 MatrixWorkspace::~MatrixWorkspace() {
-  for (auto &m_axis : m_axes) {
-    delete m_axis;
+  for (auto &axis : m_axes) {
+    delete axis;
   }
 }
 
@@ -469,8 +469,8 @@ detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(
         map[*detList.begin()] = workspaceIndex;
     } else {
       // Allow multiple detectors per workspace index
-      for (auto it : detList)
-        map[it] = workspaceIndex;
+      for (auto det : detList)
+        map[det] = workspaceIndex;
     }
 
     // Ignore if the detector list is empty.
@@ -519,12 +519,12 @@ void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
 
     // Allow multiple detectors per workspace index, or,
     // If only one is allowed, then this has thrown already
-    for (auto it : detList) {
-      int index = it + offset;
+    for (auto det : detList) {
+      int index = det + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
-                         "): detector ID found (" << it
-                      << " at workspace index " << workspaceIndex
+                         "): detector ID found ("
+                      << det << " at workspace index " << workspaceIndex
                       << ") is invalid." << std::endl;
       } else
         // Save it at that point.
@@ -602,11 +602,11 @@ void MatrixWorkspace::getIndicesFromDetectorIDs(
 
   indexList.clear();
   indexList.reserve(detIdList.size());
-  for (int j : detIdList) {
-    auto wsIndices = detectorIDtoWSIndices.find(j);
+  for (const auto detId : detIdList) {
+    auto wsIndices = detectorIDtoWSIndices.find(detId);
     if (wsIndices != detectorIDtoWSIndices.end()) {
-      for (auto it : wsIndices->second) {
-        indexList.push_back(it);
+      for (auto index : wsIndices->second) {
+        indexList.push_back(index);
       }
     }
   }
@@ -627,13 +627,13 @@ void MatrixWorkspace::getSpectraFromDetectorIDs(
   spectraList.clear();
 
   // Try every detector in the list
-  for (int it : detIdList) {
+  for (int detId : detIdList) {
     bool foundDet = false;
     specid_t foundSpecNum = 0;
 
     // Go through every histogram
     for (size_t i = 0; i < this->getNumberHistograms(); i++) {
-      if (this->getSpectrum(i)->hasDetectorID(it)) {
+      if (this->getSpectrum(i)->hasDetectorID(detId)) {
         foundDet = true;
         foundSpecNum = this->getSpectrum(i)->getSpectrumNo();
         break;
@@ -1011,11 +1011,11 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
   spec->clearData();
 
   const std::set<detid_t> dets = spec->getDetectorIDs();
-  for (auto iter : dets) {
+  for (auto detId : dets) {
     try {
       if (const Geometry::Detector *det =
               dynamic_cast<const Geometry::Detector *>(
-                  sptr_instrument->getDetector(iter).get())) {
+                  sptr_instrument->getDetector(detId).get())) {
         m_parmap->addBool(det, "masked", true); // Thread-safe method
       }
     } catch (Kernel::Exception::NotFoundError &) {

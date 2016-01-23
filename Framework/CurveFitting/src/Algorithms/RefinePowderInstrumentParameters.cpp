@@ -1249,8 +1249,8 @@ RefinePowderInstrumentParameters::genMCResultTable() {
 
   tablews->addColumn("double", "Chi2");
   tablews->addColumn("double", "GSLChi2");
-  for (auto &m_PeakFunctionParameterName : m_PeakFunctionParameterNames) {
-    tablews->addColumn("double", m_PeakFunctionParameterName);
+  for (auto &peakFunctionParameterName : m_PeakFunctionParameterNames) {
+    tablews->addColumn("double", peakFunctionParameterName);
   }
 
   // 2. Put values in

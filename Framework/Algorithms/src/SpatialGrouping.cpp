@@ -82,13 +82,13 @@ void SpatialGrouping::exec() {
 
   Mantid::API::Progress prog(this, 0.0, 1.0, m_detectors.size());
 
-  for (auto &m_detector : m_detectors) {
+  for (auto &detector : m_detectors) {
     prog.report();
 
     // The detector
-    Mantid::Geometry::IDetector_const_sptr det = m_detector.second;
+    Mantid::Geometry::IDetector_const_sptr &det = detector.second;
     // The spectrum number of the detector
-    specid_t specNo = m_detector.first;
+    specid_t specNo = detector.first;
 
     // We are not interested in Monitors and we don't want them to be included
     // in

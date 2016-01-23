@@ -67,8 +67,8 @@ SymmetryOperationFactoryImpl::subscribedSymbols() const {
   std::vector<std::string> symbols;
   symbols.reserve(m_prototypes.size());
 
-  for (const auto &m_prototype : m_prototypes) {
-    symbols.push_back(m_prototype.first);
+  for (const auto &prototype : m_prototypes) {
+    symbols.push_back(prototype.first);
   }
 
   return symbols;

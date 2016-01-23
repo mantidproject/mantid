@@ -41,8 +41,8 @@ ICluster::ClusterIntegratedValues CompositeCluster::integrate(
   double errorIntSQ = 0;
   double sigInt = 0;
   // Integrate owned clusters and add those results too.
-  for (const auto &m_ownedCluster : m_ownedClusters) {
-    auto integratedValues = m_ownedCluster->integrate(ws);
+  for (const auto &ownedCluster : m_ownedClusters) {
+    auto integratedValues = ownedCluster->integrate(ws);
     sigInt += integratedValues.get<0>();
     errorIntSQ += integratedValues.get<1>();
   }
@@ -55,8 +55,8 @@ ICluster::ClusterIntegratedValues CompositeCluster::integrate(
  */
 void CompositeCluster::writeTo(
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const {
-  for (const auto &m_ownedCluster : m_ownedClusters) {
-    m_ownedCluster->writeTo(ws);
+  for (const auto &ownedCluster : m_ownedClusters) {
+    ownedCluster->writeTo(ws);
   }
 }
 
@@ -87,8 +87,8 @@ size_t CompositeCluster::getOriginalLabel() const { return getLabel(); }
  */
 size_t CompositeCluster::size() const {
   size_t size = 0;
-  for (const auto &m_ownedCluster : m_ownedClusters) {
-    size += m_ownedCluster->size();
+  for (const auto &ownedCluster : m_ownedClusters) {
+    size += ownedCluster->size();
   }
   return size;
 }
@@ -133,9 +133,9 @@ void CompositeCluster::toUniformMinimum(
     }
     m_label = minLabel;
 
-    for (auto &m_ownedCluster : m_ownedClusters) {
-      m_ownedCluster->setRootCluster(minCluster);
-      m_ownedCluster->toUniformMinimum(disjointSet);
+    for (auto &ownedCluster : m_ownedClusters) {
+      ownedCluster->setRootCluster(minCluster);
+      ownedCluster->toUniformMinimum(disjointSet);
     }
   }
 }
@@ -153,8 +153,8 @@ size_t CompositeCluster::getRepresentitiveIndex() const {
  * @param root : Root cluster to use
  */
 void CompositeCluster::setRootCluster(ICluster const *root) {
-  for (auto &m_ownedCluster : m_ownedClusters) {
-    m_ownedCluster->setRootCluster(root);
+  for (auto &ownedCluster : m_ownedClusters) {
+    ownedCluster->setRootCluster(root);
   }
 }
 

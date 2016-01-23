@@ -516,9 +516,9 @@ public:
 
     // Now, we look through existing ones to see if it is already loaded
     // thisBankPulseTimes = NULL;
-    for (auto &m_bankPulseTime : alg->m_bankPulseTimes) {
-      if (m_bankPulseTime->equals(thisNumPulses, thisStartTime)) {
-        thisBankPulseTimes = m_bankPulseTime;
+    for (auto &bankPulseTime : alg->m_bankPulseTimes) {
+      if (bankPulseTime->equals(thisNumPulses, thisStartTime)) {
+        thisBankPulseTimes = bankPulseTime;
         return;
       }
     }

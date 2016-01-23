@@ -71,9 +71,9 @@ Group Group::operator*(const Group &other) const {
   std::vector<SymmetryOperation> result;
   result.reserve(order() * other.order());
 
-  for (const auto &m_allOperation : m_allOperations) {
+  for (const auto &operation : m_allOperations) {
     for (const auto &otherOp : other.m_allOperations) {
-      result.push_back(m_allOperation * otherOp);
+      result.push_back(operation * otherOp);
     }
   }
 
@@ -84,9 +84,9 @@ Group Group::operator*(const Group &other) const {
 /// operations, vectors are wrapped to [0, 1).
 std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
   std::vector<Kernel::V3D> result;
-
-  for (const auto &m_allOperation : m_allOperations) {
-    result.push_back(Geometry::getWrappedVector(m_allOperation * vector));
+  result.reserve(m_allOperations.size());
+  for (const auto &operation : m_allOperations) {
+    result.push_back(Geometry::getWrappedVector(operation * vector));
   }
 
   std::sort(result.begin(), result.end(), AtomPositionsLessThan());
@@ -196,8 +196,8 @@ bool Group::hasIdentity() const {
 /// Returns true if the inverse of each element is in the group
 bool Group::eachElementHasInverse() const {
   // Iterate through all operations, check that the inverse is in the group.
-  for (const auto &m_allOperation : m_allOperations) {
-    if (!containsOperation(m_allOperation.inverse())) {
+  for (const auto &operation : m_allOperations) {
+    if (!containsOperation(operation.inverse())) {
       return false;
     }
   }

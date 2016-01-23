@@ -355,12 +355,12 @@ void Algorithm::lockWorkspaces() {
 
   // First, Write-lock the output workspaces
   auto &debugLog = g_log.debug();
-  for (auto &m_outputWorkspaceProp : m_outputWorkspaceProps) {
-    Workspace_sptr ws = m_outputWorkspaceProp->getWorkspace();
+  for (auto &outputWorkspaceProp : m_outputWorkspaceProps) {
+    Workspace_sptr ws = outputWorkspaceProp->getWorkspace();
     if (ws) {
       // The workspace property says to do locking,
       // AND it has NOT already been write-locked
-      if (m_outputWorkspaceProp->isLocking() &&
+      if (outputWorkspaceProp->isLocking() &&
           std::find(m_writeLockedWorkspaces.begin(),
                     m_writeLockedWorkspaces.end(),
                     ws) == m_writeLockedWorkspaces.end()) {
@@ -373,12 +373,12 @@ void Algorithm::lockWorkspaces() {
   }
 
   // Next read-lock the input workspaces
-  for (auto &m_inputWorkspaceProp : m_inputWorkspaceProps) {
-    Workspace_sptr ws = m_inputWorkspaceProp->getWorkspace();
+  for (auto &inputWorkspaceProp : m_inputWorkspaceProps) {
+    Workspace_sptr ws = inputWorkspaceProp->getWorkspace();
     if (ws) {
       // The workspace property says to do locking,
       // AND it has NOT already been write-locked
-      if (m_inputWorkspaceProp->isLocking() &&
+      if (inputWorkspaceProp->isLocking() &&
           std::find(m_writeLockedWorkspaces.begin(),
                     m_writeLockedWorkspaces.end(),
                     ws) == m_writeLockedWorkspaces.end()) {
@@ -458,7 +458,7 @@ bool Algorithm::execute() {
   if (!validateProperties()) {
     // Reset name on input workspaces to trigger attempt at collection from ADS
     const std::vector<Property *> &props = getProperties();
-    for (auto prop : props) {
+    for (auto &prop : props) {
       IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (wsProp && !(wsProp->getWorkspace())) {
         // Setting it's name to the same one it already had
@@ -1124,12 +1124,12 @@ bool Algorithm::checkGroups() {
   // Unroll the groups or single inputs into vectors of workspace
   m_groups.clear();
   m_groupWorkspaces.clear();
-  for (auto &m_inputWorkspaceProp : m_inputWorkspaceProps) {
-    auto *prop = dynamic_cast<Property *>(m_inputWorkspaceProp);
-    auto *wsGroupProp = dynamic_cast<WorkspaceProperty<WorkspaceGroup> *>(prop);
+  for (auto inputWorkspaceProp : m_inputWorkspaceProps) {
+    auto prop = dynamic_cast<Property *>(inputWorkspaceProp);
+    auto wsGroupProp = dynamic_cast<WorkspaceProperty<WorkspaceGroup> *>(prop);
     std::vector<Workspace_sptr> thisGroup;
 
-    Workspace_sptr ws = m_inputWorkspaceProp->getWorkspace();
+    Workspace_sptr ws = inputWorkspaceProp->getWorkspace();
     WorkspaceGroup_sptr wsGroup =
         boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
 
@@ -1231,8 +1231,8 @@ bool Algorithm::processGroups() {
   std::vector<WorkspaceGroup_sptr> outGroups;
 
   // ---------- Create all the output workspaces ----------------------------
-  for (auto &m_pureOutputWorkspaceProp : m_pureOutputWorkspaceProps) {
-    Property *prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProp);
+  for (auto &pureOutputWorkspaceProp : m_pureOutputWorkspaceProps) {
+    Property *prop = dynamic_cast<Property *>(pureOutputWorkspaceProp);
     if (prop) {
       WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup());
       outGroups.push_back(outWSGrp);

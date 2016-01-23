@@ -78,10 +78,10 @@ void ThreadPool::start(double waitSec) {
     throw std::runtime_error("Threads have already started.");
 
   // Delete any old threads (they should NOT be running!)
-  for (auto &m_thread : m_threads)
-    delete m_thread;
-  for (auto &m_runnable : m_runnables)
-    delete m_runnable;
+  for (auto &thread : m_threads)
+    delete thread;
+  for (auto &runnable : m_runnables)
+    delete runnable;
 
   // Now, launch that many threads and let them wait for new tasks.
   m_threads.clear();
@@ -143,8 +143,8 @@ void ThreadPool::joinAll() {
   if (m_started) {
     m_started = false;
     // If any of the threads are running, then YES, it is really started.
-    for (auto &m_thread : m_threads)
-      m_started = m_started || m_thread->isRunning();
+    for (auto &thread : m_threads)
+      m_started = m_started || thread->isRunning();
   }
 
   // Start all the threads if they were not already.
@@ -152,21 +152,21 @@ void ThreadPool::joinAll() {
     this->start();
 
   // Clear any wait times so that the threads stop waiting for new tasks.
-  for (auto &m_runnable : m_runnables)
-    m_runnable->clearWait();
+  for (auto &runnable : m_runnables)
+    runnable->clearWait();
 
   // Sequentially join all the threads.
-  for (auto &m_thread : m_threads) {
-    m_thread->join();
-    delete m_thread;
+  for (auto &thread : m_threads) {
+    thread->join();
+    delete thread;
   }
 
   // Clear the vectors (the threads are deleted now).
   m_threads.clear();
 
   // Get rid of the runnables too
-  for (auto &m_runnable : m_runnables)
-    delete m_runnable;
+  for (auto &runnable : m_runnables)
+    delete runnable;
   m_runnables.clear();
 
   // This will make threads restart

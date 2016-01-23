@@ -66,8 +66,8 @@ std::string FileValidator::checkValidity(const std::string &value) const {
       g_log.debug() << "Unrecognised extension in file \"" << value << "\"";
       if (!this->m_extensions.empty()) {
         g_log.debug() << " [ ";
-        for (const auto &m_extension : this->m_extensions)
-          g_log.debug() << m_extension << " ";
+        for (const auto &extension : this->m_extensions)
+          g_log.debug() << extension << " ";
         g_log.debug() << "]";
       }
       g_log.debug() << "\"." << std::endl;
@@ -165,10 +165,10 @@ bool FileValidator::endswith(const std::string &value) const {
                  tolower);
 
   // check for the ending
-  for (const auto &m_extension : m_extensions) {
-    if (has_ending(value, m_extension)) // original case
+  for (const auto &extension : m_extensions) {
+    if (has_ending(value, extension)) // original case
       return true;
-    if (has_ending(value_copy, m_extension)) // lower case
+    if (has_ending(value_copy, extension)) // lower case
       return true;
   }
   return false;

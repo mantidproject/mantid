@@ -368,7 +368,7 @@ void CompositeFunction::checkFunction() {
   std::vector<IFunction_sptr> functions(m_functions.begin(), m_functions.end());
   m_functions.clear();
 
-  for (auto f : functions) {
+  for (auto &f : functions) {
     CompositeFunction_sptr cf =
         boost::dynamic_pointer_cast<CompositeFunction>(f);
     if (cf)

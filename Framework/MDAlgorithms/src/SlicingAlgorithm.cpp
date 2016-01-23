@@ -373,8 +373,8 @@ void SlicingAlgorithm::createGeneralTransform() {
     ortho.resize(m_bases.size(), VMD(3));
     m_bases = ortho;
     g_log.information() << "Basis vectors forced to be orthogonal: ";
-    for (auto &m_base : m_bases)
-      g_log.information() << m_base.toString(",") << "; ";
+    for (auto &base : m_bases)
+      g_log.information() << base.toString(",") << "; ";
     g_log.information() << std::endl;
   }
 

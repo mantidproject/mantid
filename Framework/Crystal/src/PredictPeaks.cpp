@@ -67,8 +67,8 @@ void PredictPeaks::init() {
 
   // Build up a list of reflection conditions to use
   std::vector<std::string> propOptions;
-  for (auto &m_refCond : m_refConds)
-    propOptions.push_back(m_refCond->getName());
+  for (auto &refCond : m_refConds)
+    propOptions.push_back(refCond->getName());
   declareProperty("ReflectionCondition", "Primitive",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which reflection condition applies to this crystal, "
@@ -306,7 +306,8 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(
 
   // --- Reflection condition ----
   // Use the primitive by default
-  ReflectionCondition_sptr refCond(new ReflectionConditionPrimitive());
+  ReflectionCondition_sptr refCond =
+      boost::make_shared<ReflectionConditionPrimitive>();
   // Get it from the property
   std::string refCondName = getPropertyValue("ReflectionCondition");
   for (const auto &m_refCond : m_refConds)

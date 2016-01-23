@@ -198,8 +198,8 @@ Parser::Parser()
   ConfigServiceImpl &config = ConfigService::Instance();
 
   auto facilities = config.getFacilities();
-  for (auto &facilitie : facilities) {
-    const std::vector<InstrumentInfo> instruments = (*facilitie).instruments();
+  for (auto &facility : facilities) {
+    const std::vector<InstrumentInfo> instruments = (*facility).instruments();
 
     for (const auto &instrument : instruments) {
       m_validInstNames.insert(instrument.name());
@@ -297,10 +297,10 @@ void Parser::split() {
     throw std::runtime_error("There does not appear to be any runs present.");
 
   // See if the user has typed in one of the available instrument names.
-  for (const auto &m_validInstName : m_validInstNames) {
+  for (const auto &validInstName : m_validInstNames) {
     // USE CASELESS MATCHES HERE.
-    if (matchesFully(base, m_validInstName + ".*", true)) {
-      m_instString = getMatchingString("^" + m_validInstName, base, true);
+    if (matchesFully(base, validInstName + ".*", true)) {
+      m_instString = getMatchingString("^" + validInstName, base, true);
       break;
     }
   }

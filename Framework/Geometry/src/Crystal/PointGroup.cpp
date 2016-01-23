@@ -105,8 +105,8 @@ std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
   std::vector<V3D> equivalents;
   equivalents.reserve(m_allOperations.size());
 
-  for (const auto &m_allOperation : m_allOperations) {
-    equivalents.push_back(m_allOperation.transformHKL(hkl));
+  for (const auto &allOperation : m_allOperations) {
+    equivalents.push_back(allOperation.transformHKL(hkl));
   }
 
   std::sort(equivalents.begin(), equivalents.end(), std::greater<V3D>());
@@ -131,11 +131,10 @@ std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
 PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
   std::map<std::string, std::set<V3D>> symbolMap;
 
-  for (const auto &m_allOperation : m_allOperations) {
+  for (const auto &operation : m_allOperations) {
     SymmetryElementWithAxis_sptr element =
         boost::dynamic_pointer_cast<SymmetryElementWithAxis>(
-            SymmetryElementFactory::Instance().createSymElement(
-                m_allOperation));
+            SymmetryElementFactory::Instance().createSymElement(operation));
 
     if (element) {
       std::string symbol = element->hmSymbol();

@@ -152,10 +152,10 @@ std::string ParameterTie::asString(const IFunction *fun) const {
 
       int iTemp = boost::lexical_cast<int>(res[1]);
       int i = 0;
-      for (const auto &it : m_varMap) {
+      for (const auto &var : m_varMap) {
         if (i == iTemp) {
           res_expression +=
-              fun->parameterName(fun->getParameterIndex(it.second));
+              fun->parameterName(fun->getParameterIndex(var.second));
           break;
         }
         i++;

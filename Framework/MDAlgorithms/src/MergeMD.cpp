@@ -91,8 +91,7 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   std::vector<coord_t> dimMax(numDims, -1e30f);
 
   // Validate each workspace
-  for (auto &m_workspace : m_workspaces) {
-    IMDEventWorkspace_const_sptr ws = m_workspace;
+  for (auto &ws : m_workspaces) {
     if (ws->getNumDims() != numDims)
       throw std::invalid_argument(
           "Workspace " + ws->name() +

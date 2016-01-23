@@ -1622,15 +1622,15 @@ void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap,
   for (size_t icycle = 1; icycle <= maxcycles; ++icycle) {
     // Refine parameters (for all parameters in turn) to data with background
     // removed
-    for (auto &m_MCGroup : m_MCGroups) {
+    for (auto &MCGroup : m_MCGroups) {
       // Propose new value for ONE AND ONLY ONE Monte Carlo parameter group
       /*
       int igroup = giter->first; // group id
       g_log.debug() << "BigTrouble: Group " << igroup << "\n";
       */
       bool hasnewvalues =
-          proposeNewValues(m_MCGroup.second, currR, mapCurrParameter,
-                           newparammap, prevcyclebetterR);
+          proposeNewValues(MCGroup.second, currR, mapCurrParameter, newparammap,
+                           prevcyclebetterR);
 
       if (!hasnewvalues) {
         // No parameter to have value updated in this MC group.  Skip evaluation

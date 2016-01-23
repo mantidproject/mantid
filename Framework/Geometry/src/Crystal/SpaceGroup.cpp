@@ -60,17 +60,16 @@ std::string SpaceGroup::hmSymbol() const { return m_hmSymbol; }
  * @return :: true if the reflection is allowed, false otherwise.
  */
 bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
-  for (const auto &m_allOperation : m_allOperations) {
-    if (m_allOperation.hasTranslation()) {
+  for (const auto &operation : m_allOperations) {
+    if (operation.hasTranslation()) {
       /* Floating point precision problem:
        *    (H . v) % 1.0 is not always exactly 0, so instead:
        *    | [(H . v) + delta] % 1.0 | > 1e-14 is checked
        * The transformation is only performed if necessary.
        */
-      if ((fabs(fmod(fabs(hkl.scalar_prod(m_allOperation.reducedVector())) +
-                         1e-15,
+      if ((fabs(fmod(fabs(hkl.scalar_prod(operation.reducedVector())) + 1e-15,
                      1.0)) > 1e-14) &&
-          (m_allOperation.transformHKL(hkl) == hkl)) {
+          (operation.transformHKL(hkl) == hkl)) {
         return false;
       }
     }

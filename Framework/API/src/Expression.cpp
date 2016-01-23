@@ -360,8 +360,8 @@ void Expression::logPrint(const std::string &pads) const {
   std::string myPads = pads + "   ";
   if (m_terms.size()) {
     std::cerr << myPads << m_op << '[' << m_funct << ']' << "(" << '\n';
-    for (const auto &m_term : m_terms)
-      m_term.logPrint(myPads);
+    for (const auto &term : m_terms)
+      term.logPrint(myPads);
     std::cerr << myPads << ")" << '\n';
   } else
     std::cerr << myPads << m_op << m_funct << '\n';
@@ -452,11 +452,11 @@ std::string Expression::str() const {
   if (m_terms.size()) {
     if (brackets)
       res << '(';
-    for (const auto &m_term : m_terms) {
-      res << m_term.operator_name();
-      size_t prec1 = op_prec(m_term.m_funct);
+    for (const auto &term : m_terms) {
+      res << term.operator_name();
+      size_t prec1 = op_prec(term.m_funct);
       bool isItUnary = false;
-      if (m_term.size() == 1 && is_unary(m_term.m_funct)) {
+      if (term.size() == 1 && is_unary(term.m_funct)) {
         prec1 = 0; // unary operator
         isItUnary = true;
       }
@@ -465,7 +465,7 @@ std::string Expression::str() const {
         res << '(';
       if (isItUnary)
         res << ' ';
-      res << m_term.str();
+      res << term.str();
       if (bk)
         res << ')';
     }

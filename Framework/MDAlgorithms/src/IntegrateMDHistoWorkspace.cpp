@@ -407,8 +407,8 @@ void IntegrateMDHistoWorkspace::exec() {
         // calculated what the width vector would need to be.
         auto neighbourIndexes =
             inIterator->findNeighbourIndexesByWidth(widthVector);
-        for (auto neighbourIndexe : neighbourIndexes) {
-          inIterator->jumpTo(neighbourIndexe); // Go to that neighbour
+        for (auto neighbourIndex : neighbourIndexes) {
+          inIterator->jumpTo(neighbourIndex); // Go to that neighbour
           performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors,
                              sumNEvents);
         }

@@ -21,12 +21,12 @@ Kernel::Logger g_log("ParamFunction");
 
 /// Destructor
 ParamFunction::~ParamFunction() {
-  for (auto &m_tie : m_ties) {
-    delete m_tie;
+  for (auto &tie : m_ties) {
+    delete tie;
   }
   m_ties.clear();
-  for (auto &m_constraint : m_constraints) {
-    delete m_constraint;
+  for (auto &constraint : m_constraints) {
+    delete constraint;
   }
   m_constraints.clear();
 }
@@ -99,7 +99,6 @@ double ParamFunction::getParameter(size_t i) const {
 void ParamFunction::setParameter(const std::string &name, const double &value,
                                  bool explicitlySet) {
   std::string ucName(name);
-  // std::transform(name.begin(), name.end(), ucName.begin(), toupper);
   std::vector<std::string>::const_iterator it =
       std::find(m_parameterNames.begin(), m_parameterNames.end(), ucName);
   if (it == m_parameterNames.end()) {
@@ -108,8 +107,8 @@ void ParamFunction::setParameter(const std::string &name, const double &value,
         << ") "
         << "of function " << this->name();
     msg << "\nAllowed parameters: ";
-    for (auto &m_parameterName : m_parameterNames) {
-      msg << m_parameterName << ", ";
+    for (auto &parameterName : m_parameterNames) {
+      msg << parameterName << ", ";
     }
     throw std::invalid_argument(msg.str());
   }
@@ -133,8 +132,8 @@ void ParamFunction::setParameterDescription(const std::string &name,
     msg << "ParamFunction tries to set description to non-exist parameter ("
         << ucName << "). ";
     msg << "\nAllowed parameters: ";
-    for (auto &m_parameterName : m_parameterNames)
-      msg << m_parameterName << ", ";
+    for (auto &parameterName : m_parameterNames)
+      msg << parameterName << ", ";
     throw std::invalid_argument(msg.str());
   }
   setParameterDescription(static_cast<int>(it - m_parameterNames.begin()),
@@ -157,8 +156,8 @@ double ParamFunction::getParameter(const std::string &name) const {
         << ucName << ") "
         << "to function " << this->name();
     msg << "\nAllowed parameters: ";
-    for (const auto &m_parameterName : m_parameterNames)
-      msg << m_parameterName << ", ";
+    for (const auto &parameterName : m_parameterNames)
+      msg << parameterName << ", ";
     throw std::invalid_argument(msg.str());
   }
 
@@ -374,10 +373,10 @@ ParameterTie *ParamFunction::getTie(size_t i) const {
 /** Remove all ties
  */
 void ParamFunction::clearTies() {
-  for (auto &m_tie : m_ties) {
-    size_t i = getParameterIndex(*m_tie);
+  for (auto &tie : m_ties) {
+    size_t i = getParameterIndex(*tie);
     unfix(i);
-    delete m_tie;
+    delete tie;
   }
   m_ties.clear();
 }
@@ -388,11 +387,11 @@ void ParamFunction::clearTies() {
 void ParamFunction::addConstraint(IConstraint *ic) {
   size_t iPar = ic->getIndex();
   bool found = false;
-  for (auto &m_constraint : m_constraints) {
-    if (m_constraint->getIndex() == iPar) {
+  for (auto &constraint : m_constraints) {
+    if (constraint->getIndex() == iPar) {
       found = true;
-      delete m_constraint;
-      m_constraint = ic;
+      delete constraint;
+      constraint = ic;
       break;
     }
   }
@@ -432,19 +431,19 @@ void ParamFunction::removeConstraint(const std::string &parName) {
 }
 
 void ParamFunction::setUpForFit() {
-  for (auto &m_constraint : m_constraints) {
-    m_constraint->setParamToSatisfyConstraint();
+  for (auto &constraint : m_constraints) {
+    constraint->setParamToSatisfyConstraint();
   }
 }
 
 /// Nonvirtual member which removes all declared parameters
 void ParamFunction::clearAllParameters() {
-  for (auto &m_tie : m_ties) {
-    delete m_tie;
+  for (auto &tie : m_ties) {
+    delete tie;
   }
   m_ties.clear();
-  for (auto &m_constraint : m_constraints) {
-    delete m_constraint;
+  for (auto &constraint : m_constraints) {
+    delete constraint;
   }
   m_constraints.clear();
 

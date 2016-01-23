@@ -180,8 +180,8 @@ void WorkspaceHistory::saveNexus(::NeXus::File *file) const {
 
   // Algorithm History
   int algCount = 0;
-  for (const auto &m_algorithm : m_algorithms) {
-    m_algorithm->saveNexus(file, algCount);
+  for (const auto &algorithm : m_algorithms) {
+    algorithm->saveNexus(file, algCount);
   }
 
   // close process group

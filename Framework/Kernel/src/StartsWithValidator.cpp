@@ -12,8 +12,8 @@ namespace Kernel {
  * any of the allowed values"
   */
 std::string StartsWithValidator::checkValidity(const std::string &value) const {
-  for (const auto &m_allowedValue : m_allowedValues) {
-    if (value.substr(0, m_allowedValue.size()) == m_allowedValue) {
+  for (const auto &allowedValue : m_allowedValues) {
+    if (value.substr(0, allowedValue.size()) == allowedValue) {
       return "";
     }
   }

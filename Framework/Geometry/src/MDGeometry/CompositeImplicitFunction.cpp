@@ -46,8 +46,8 @@ std::string CompositeImplicitFunction::toXMLString() const {
   functionElement->appendChild(parameterListElement);
 
   std::string functionXML;
-  for (const auto &m_Function : m_Functions) {
-    functionXML += m_Function->toXMLString();
+  for (const auto &Function : m_Functions) {
+    functionXML += Function->toXMLString();
   }
   AutoPtr<Text> functionFormatText = pDoc->createTextNode("%s");
   functionElement->appendChild(functionFormatText);

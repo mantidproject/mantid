@@ -90,9 +90,9 @@ ImmutableCompositeFunction::parameterIndex(const std::string &name) const {
  * Returns the alias or name of parameter i
  */
 std::string ImmutableCompositeFunction::parameterName(size_t i) const {
-  for (const auto &m_alias : m_aliases) {
-    if (m_alias.second == i)
-      return m_alias.first;
+  for (const auto &alias : m_aliases) {
+    if (alias.second == i)
+      return alias.first;
   }
   return CompositeFunction::parameterName(i);
 }
