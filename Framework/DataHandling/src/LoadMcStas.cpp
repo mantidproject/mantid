@@ -246,9 +246,9 @@ void LoadMcStas::readEventData(
 
   const size_t numEventEntries = eventEntries.size();
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
-  for (const auto &eventEntrie : eventEntries) {
-    std::string dataName = eventEntrie.first;
-    std::string dataType = eventEntrie.second;
+  for (const auto &eventEntry : eventEntries) {
+    const std::string &dataName = eventEntrie.first;
+    const std::string &dataType = eventEntrie.second;
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
