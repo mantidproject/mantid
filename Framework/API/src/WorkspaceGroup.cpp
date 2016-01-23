@@ -71,7 +71,7 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
 }
 
 /**
- * @param workspace :: A workspace to check.
+ * @param workspaceToCheck :: A workspace to check.
  * @return :: True if the workspace is found.
  */
 bool WorkspaceGroup::isInChildGroup(const Workspace &workspaceToCheck) const {
@@ -357,7 +357,7 @@ bool WorkspaceGroup::isMultiperiod() const {
 }
 
 /**
- * @param workspace :: A workspace to check.
+ * @param workspaceToCheck :: A workspace to check.
  * @param level :: The current nesting level. Intended for internal use only by
  * WorkspaceGroup.
  * @return :: True if the worspace is found in any of the nested groups in this
