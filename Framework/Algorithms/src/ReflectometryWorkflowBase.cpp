@@ -468,7 +468,7 @@ ReflectometryWorkflowBase::toLam(MatrixWorkspace_sptr toConvert,
     monitorWS = toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
   } else {
     // We don't have a monitor index, so we divide through by unity.
-    monitorWS = detectorWS->clone();
+    monitorWS.reset(detectorWS->clone().release());
     // monitorWS->initialize(1, detectorWS->blocksize(),const std::size_t
     // &YLength);
     // Fill Counts with 1 for the monitor
