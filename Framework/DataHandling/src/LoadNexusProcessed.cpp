@@ -233,13 +233,13 @@ void LoadNexusProcessed::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
 
-  declareProperty("SpectrumMin", (int64_t)1, mustBePositive,
+  declareProperty("SpectrumMin", static_cast<int64_t>(1), mustBePositive,
                   "Number of first spectrum to read.");
-  declareProperty("SpectrumMax", (int64_t)Mantid::EMPTY_INT(), mustBePositive,
-                  "Number of last spectrum to read.");
+  declareProperty("SpectrumMax", static_cast<int64_t>(Mantid::EMPTY_INT()),
+                  mustBePositive, "Number of last spectrum to read.");
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"),
                   "List of spectrum numbers to read.");
-  declareProperty("EntryNumber", (int64_t)0, mustBePositive,
+  declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
                   "A positive number identifies one entry to be loaded, into "

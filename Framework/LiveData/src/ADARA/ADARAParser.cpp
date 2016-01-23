@@ -168,7 +168,7 @@ int Parser::bufferParse(std::string &log_info, unsigned int max_packets) {
       /* We know that the offset will fit into an unsigned
        * int, as that is the type we use for the buffer size.
        */
-      m_restart_offset = (unsigned int)(p - m_buffer);
+      m_restart_offset = static_cast<unsigned int>(p - m_buffer);
     }
   } else {
     /* We used up the buffer. */
@@ -184,14 +184,14 @@ int Parser::bufferParse(std::string &log_info, unsigned int max_packets) {
   int rc;
 
   if (stopped) {
-    rc = -(int)processed;
+    rc = -static_cast<int>(processed);
     // add to "stopped" log info...
     ss << processed;
     log_info.append("had parsed ");
     log_info.append(ss.str());
     log_info.append(" packets; ");
   } else {
-    rc = (int)processed;
+    rc = static_cast<int>(processed);
     // create log info...
     ss << rc;
     log_info.append("bufferParse(): Done. Parsed ");

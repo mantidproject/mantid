@@ -44,7 +44,7 @@ ParameterTie::~ParameterTie() {
  * @return pointer to added variable
  */
 double *ParameterTie::AddVariable(const char *varName, void *palg) {
-  ParameterTie &tie = *(ParameterTie *)palg;
+  ParameterTie &tie = *reinterpret_cast<ParameterTie *>(palg);
   ParameterReference ref(tie.m_function1,
                          tie.m_function1->parameterIndex(std::string(varName)));
 

@@ -297,7 +297,7 @@ void SaveIsawPeaks::exec() {
         size_t first_peak_index = ids[0];
         Peak &first_peak = peaks[first_peak_index];
         double monct = first_peak.getMonitorCount();
-        out << std::setw(12) << (int)(monct) << std::endl;
+        out << std::setw(12) << static_cast<int>(monct) << std::endl;
 
         out << header << std::endl;
 

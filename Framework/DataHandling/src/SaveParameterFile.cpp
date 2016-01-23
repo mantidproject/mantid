@@ -163,7 +163,7 @@ void SaveParameterFile::exec() {
   file << " valid-from=\"" << instrument->getValidFromDate().toISO8601String()
        << "\">\n";
 
-  prog.resetNumSteps((int64_t)toSave.size(), 0.6, 1.0);
+  prog.resetNumSteps(static_cast<int64_t>(toSave.size()), 0.6, 1.0);
   // Iterate through all the parameters we want to save and build an XML
   // document out of them.
   for (auto &compIt : toSave) {

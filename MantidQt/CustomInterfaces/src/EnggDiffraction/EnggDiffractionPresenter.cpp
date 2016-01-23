@@ -197,13 +197,12 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
   enum BankMode { SPECIDS = 0, NORTH = 1, SOUTH = 2 };
 
   try {
+    inputChecksBeforeCalibrate(vanNo, ceriaNo);
     if (m_view->currentCalibSpecNos().empty() &&
         specIdNum == BankMode::SPECIDS) {
       throw std::invalid_argument(
           "The Spectrum IDs cannot be empty, must be a"
           "valid range or a Bank Name can be selected instead");
-
-      inputChecksBeforeCalibrate(vanNo, ceriaNo);
     }
   } catch (std::invalid_argument &ia) {
     m_view->userWarning("Error in the inputs required for calibrate",

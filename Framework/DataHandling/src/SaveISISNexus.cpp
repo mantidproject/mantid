@@ -126,7 +126,7 @@ void SaveISISNexus::exec() {
   write_isis_vms_compat();
   saveString("beamline", " ");
 
-  flt = (float)m_isisRaw->rpb.r_dur; // could be wrong
+  flt = static_cast<float>(m_isisRaw->rpb.r_dur); // could be wrong
   saveFloatOpen("collection_time", &flt, 1);
   putAttr("units", "second");
   close();
@@ -143,7 +143,7 @@ void SaveISISNexus::exec() {
           "http://svn.isis.rl.ac.uk/instruments/ISISTOFRAW/?version=1.0");
   close();
 
-  flt = (float)m_isisRaw->rpb.r_dur;
+  flt = static_cast<float>(m_isisRaw->rpb.r_dur);
   saveFloatOpen("duration", &flt, 1);
   putAttr("units", "second");
   close();
@@ -443,8 +443,9 @@ void SaveISISNexus::write_isis_vms_compat() {
   saveInt("ULEN", &m_isisRaw->u_len);
   std::string user_info(160, ' ');
   if (m_isisRaw->u_len > 0) {
-    std::copy((char *)&m_isisRaw->user,
-              (char *)&m_isisRaw->user + m_isisRaw->u_len, user_info.begin());
+    std::copy(reinterpret_cast<char *>(&m_isisRaw->user),
+              reinterpret_cast<char *>(&m_isisRaw->user) + m_isisRaw->u_len,
+              user_info.begin());
   }
   saveString("USER", user_info);
   saveInt("VER1", &m_isisRaw->frmt_ver_no);

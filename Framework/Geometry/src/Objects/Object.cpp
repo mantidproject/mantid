@@ -1258,7 +1258,7 @@ double Object::CylinderSolidAngle(const V3D &observer,
 
   // Do the base cap which is a point at the centre and nslices points around it
   const int nslices(Mantid::Geometry::Cylinder::g_nslices);
-  const double angle_step = 2 * M_PI / (double)nslices;
+  const double angle_step = 2 * M_PI / static_cast<double>(nslices);
 
   const int nstacks(Mantid::Geometry::Cylinder::g_nstacks);
   const double z_step = height / nstacks;
@@ -1335,7 +1335,7 @@ double Object::ConeSolidAngle(const V3D &observer,
 
   // Do the base cap which is a point at the centre and nslices points around it
   const int nslices(Mantid::Geometry::Cone::g_nslices);
-  const double angle_step = 2 * M_PI / (double)nslices;
+  const double angle_step = 2 * M_PI / static_cast<double>(nslices);
   // Store the (x,y) points as they are used quite frequently
   auto cos_table = new double[nslices];
   auto sin_table = new double[nslices];

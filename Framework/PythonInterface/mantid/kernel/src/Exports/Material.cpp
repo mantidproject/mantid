@@ -23,18 +23,22 @@ void export_Material() {
       .add_property("pressure", make_function(&Material::pressure), "Pressure")
       .def("cohScatterXSection",
            (double (Material::*)(double) const)(&Material::cohScatterXSection),
-           (arg("self"), arg("lambda") = (double)NeutronAtom::ReferenceLambda),
+           (arg("self"),
+            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Coherent Scattering Cross-Section")
       .def("incohScatterXSection", (double (Material::*)(double)
                                         const)(&Material::incohScatterXSection),
-           (arg("self"), arg("lambda") = (double)NeutronAtom::ReferenceLambda),
+           (arg("self"),
+            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Incoherent Scattering Cross-Section")
       .def("totalScatterXSection", (double (Material::*)(double)
                                         const)(&Material::totalScatterXSection),
-           (arg("self"), arg("lambda") = (double)NeutronAtom::ReferenceLambda),
+           (arg("self"),
+            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Total Scattering Cross-Section")
       .def("absorbXSection",
            (double (Material::*)(double) const)(&Material::absorbXSection),
-           (arg("self"), arg("lambda") = (double)NeutronAtom::ReferenceLambda),
+           (arg("self"),
+            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Absorption Cross-Section");
 }

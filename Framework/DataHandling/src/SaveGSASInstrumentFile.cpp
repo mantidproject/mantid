@@ -883,7 +883,7 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
   double gam1 = getProfileParameterValue(profilemap, "Gam1");
   double gam2 = getProfileParameterValue(profilemap, "Gam2");
 
-  int randint = 10001 + (rand() % (int)(99999 - 10001 + 1));
+  int randint = 10001 + (rand() % (99999 - 10001 + 1));
 
   double mindsp = m_configuration->getParameter(bankid, "MinDsp");
   double maxtof = m_configuration->getParameter(bankid, "MaxTOF");
