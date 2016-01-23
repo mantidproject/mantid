@@ -199,7 +199,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
 
           if (!dims.empty()) {
             size_t newPixels = 1;
-            for (long long dim : dims)
+            for (auto dim : dims)
               newPixels *= dim;
             m_numPixels += newPixels;
           }

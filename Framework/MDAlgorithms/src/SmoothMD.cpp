@@ -165,16 +165,16 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
       size_t nNeighbours = neighbourIndexes.size();
       double sumSignal = iterator->getSignal();
       double sumSqError = iterator->getError();
-      for (auto neighbourIndexe : neighbourIndexes) {
+      for (auto neighbourIndex : neighbourIndexes) {
         if (useWeights) {
-          if ((*weightingWS)->getSignalAt(neighbourIndexe) == 0) {
+          if ((*weightingWS)->getSignalAt(neighbourIndex) == 0) {
             // Nothing measured here. We cannot use that neighbouring point.
             nNeighbours -= 1;
             continue;
           }
         }
-        sumSignal += toSmooth->getSignalAt(neighbourIndexe);
-        double error = toSmooth->getErrorAt(neighbourIndexe);
+        sumSignal += toSmooth->getSignalAt(neighbourIndex);
+        double error = toSmooth->getErrorAt(neighbourIndex);
         sumSqError += (error * error);
       }
 
