@@ -40,9 +40,9 @@ void LiveDataAlgorithm::initProps() {
   std::vector<std::string> instruments;
   auto &instrInfo =
       Kernel::ConfigService::Instance().getFacility().instruments();
-  for (const auto &it : instrInfo) {
-    if (!it.liveDataAddress().empty()) {
-      instruments.push_back(it.name());
+  for (const auto &instrument : instrInfo) {
+    if (!instrument.liveDataAddress().empty()) {
+      instruments.push_back(instrument.name());
     }
   }
 #ifndef NDEBUG

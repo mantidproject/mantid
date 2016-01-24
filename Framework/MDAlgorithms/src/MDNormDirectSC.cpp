@@ -214,9 +214,9 @@ std::string MDNormDirectSC::inputEnergyMode() const {
     // get dEAnalysisMode
     PropertyHistories histvec =
         hist.getAlgorithmHistory(nalgs - 2)->getProperties();
-    for (auto &it : histvec) {
-      if (it->name() == "dEAnalysisMode") {
-        emode = it->value();
+    for (auto &hist : histvec) {
+      if (hist->name() == "dEAnalysisMode") {
+        emode = hist->value();
         break;
       }
     }

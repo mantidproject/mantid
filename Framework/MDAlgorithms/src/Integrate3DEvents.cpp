@@ -272,8 +272,8 @@ void Integrate3DEvents::makeCovarianceMatrix(
   for (int row = 0; row < 3; row++) {
     for (int col = 0; col < 3; col++) {
       double sum = 0;
-      for (const auto &i : events) {
-        auto event = i.second;
+      for (const auto &value : events) {
+        const auto &event = value.second;
         if (event.norm() <= radius) {
           sum += event[row] * event[col];
         }
@@ -342,8 +342,8 @@ Integrate3DEvents::stdDev(std::vector<std::pair<double, V3D>> const &events,
   double stdev = 0;
   int count = 0;
 
-  for (const auto &i : events) {
-    auto event = i.second;
+  for (const auto &value : events) {
+    const auto &event = value.second;
     if (event.norm() <= radius) {
       double dot_prod = event.scalar_prod(direction);
       sum += dot_prod;

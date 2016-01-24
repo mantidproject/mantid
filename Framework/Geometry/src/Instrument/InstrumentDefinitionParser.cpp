@@ -2179,16 +2179,16 @@ void InstrumentDefinitionParser::setComponentLinks(
         }
       }
 
-      for (auto &i : sharedIComp) {
+      for (auto &ptr : sharedIComp) {
         boost::shared_ptr<const Geometry::Component> sharedComp =
-            boost::dynamic_pointer_cast<const Geometry::Component>(i);
+            boost::dynamic_pointer_cast<const Geometry::Component>(ptr);
         if (sharedComp) {
           // Not empty Component
           if (sharedComp->isParametrized()) {
             setLogfile(sharedComp->base(), curElem,
                        instrument->getLogfileCache());
           } else {
-            setLogfile(i.get(), curElem, instrument->getLogfileCache());
+            setLogfile(ptr.get(), curElem, instrument->getLogfileCache());
           }
         }
       }

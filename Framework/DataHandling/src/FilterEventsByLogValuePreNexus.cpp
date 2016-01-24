@@ -513,8 +513,8 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   m_loadOnlySomeSpectra = (this->m_spectraList.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (auto &it : m_spectraList)
-    spectraLoadMap[it] = true;
+  for (auto spectra : m_spectraList)
+    spectraLoadMap[spectra] = true;
 
   //---------------------------------------------------------------------------
   // Other features
@@ -2248,13 +2248,13 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
   eventws->getInstrument()->getDetectors(detector_map);
 
   // Set up
-  for (auto &it : detector_map) {
-    if (!it.second->isMonitor()) {
+  for (auto &det : detector_map) {
+    if (!det.second->isMonitor()) {
       // Add non-monitor detector ID
-      size_t workspaceIndex = m_pixelToWkspindex[it.first];
+      size_t workspaceIndex = m_pixelToWkspindex[det.first];
       // this->m_pixelToWkspindex[it->first] = workspaceIndex;
       EventList &spec = eventws->getOrAddEventList(workspaceIndex);
-      spec.addDetectorID(it.first);
+      spec.addDetectorID(det.first);
       // Start the spectrum number at 1
       spec.setSpectrumNo(specid_t(workspaceIndex + 1));
     }

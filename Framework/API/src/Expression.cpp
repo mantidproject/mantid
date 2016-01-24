@@ -71,9 +71,9 @@ void Expression::add_operators(const std::vector<std::string> &ops) {
     char j = 0;
     tokenizer tkz(m_operators->binary[i], " ",
                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-    for (const auto &it : tkz) {
-      m_operators->precedence[it] = i + 1;
-      m_operators->op_number[it] = j++;
+    for (const auto &index : tkz) {
+      m_operators->precedence[index] = i + 1;
+      m_operators->op_number[index] = j++;
     }
   }
 

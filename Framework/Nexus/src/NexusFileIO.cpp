@@ -1199,9 +1199,9 @@ bool NexusFileIO::writeNexusBinMasking(
       const API::MatrixWorkspace::MaskList &mList = ws->maskedBins(i);
       spectra.push_back(spectra_count);
       spectra.push_back(offset);
-      for (const auto &it : mList) {
-        bins.push_back(it.first);
-        weights.push_back(it.second);
+      for (const auto &mask : mList) {
+        bins.push_back(mask.first);
+        weights.push_back(mask.second);
       }
       ++spectra_count;
       offset += static_cast<int>(mList.size());
@@ -1304,9 +1304,9 @@ int getNexusEntryTypes(const std::string &fileName,
   }
   // for each entry found, look for "analysis" or "definition" text data fields
   // and return value plus entry name
-  for (auto &i : entryList) {
+  for (auto &entry : entryList) {
     //
-    stat = NXopengroup(fileH, i.c_str(), "NXentry");
+    stat = NXopengroup(fileH, entry.c_str(), "NXentry");
     // loop through field names in this entry
     while ((stat = NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) ==
            NX_OK) {
@@ -1326,7 +1326,7 @@ int getNexusEntryTypes(const std::string &fileName,
           value[dims[0]] = '\0';
           // return e.g entryName "analysis"/definition "muonTD"
           definition.push_back(value);
-          entryName.push_back(i);
+          entryName.push_back(entry);
           delete[] value;
           NXclosegroup(fileH); // close data group, then entry
           stat = NXclosegroup(fileH);

@@ -245,8 +245,8 @@ void DiffractionFocussing2::exec() {
             m_matrixInputW->maskedBins(i);
         // Now iterate over the list, adjusting the weights for the affected
         // bins
-        for (const auto &it : mask) {
-          const double currentX = Xin[it.first];
+        for (const auto &bin : mask) {
+          const double currentX = Xin[bin.first];
           // Add an intermediate bin with full weight if masked bins aren't
           // consecutive
           if (weight_bins.back() != currentX) {
@@ -255,8 +255,8 @@ void DiffractionFocussing2::exec() {
           }
           // The weight for this masked bin is 1 - the degree to which this bin
           // is masked
-          weights.push_back(1.0 - it.second);
-          weight_bins.push_back(Xin[it.first + 1]);
+          weights.push_back(1.0 - bin.second);
+          weight_bins.push_back(Xin[bin.first + 1]);
         }
         // Add on a final bin with full weight if masking doesn't go up to the
         // end

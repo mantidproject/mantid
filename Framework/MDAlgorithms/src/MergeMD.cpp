@@ -242,15 +242,15 @@ void MergeMD::exec() {
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
-  for (const auto &i : inputs_orig) {
+  for (const auto &input : inputs_orig) {
     WorkspaceGroup_sptr wsgroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(i);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(input);
     if (wsgroup) { // Workspace group
       std::vector<std::string> group = wsgroup->getNames();
       inputs.insert(inputs.end(), group.begin(), group.end());
     } else {
       // Single workspace
-      inputs.push_back(i);
+      inputs.push_back(input);
     }
   }
 

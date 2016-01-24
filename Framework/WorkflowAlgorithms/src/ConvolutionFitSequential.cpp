@@ -323,10 +323,10 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Add Numeric Logs
-  for (auto &it : sampleLogNumeric) {
+  for (auto &logItem : sampleLogNumeric) {
     logAdder->setProperty("Workspace", resultWs);
-    logAdder->setProperty("LogName", it.first);
-    logAdder->setProperty("LogText", it.second);
+    logAdder->setProperty("LogName", logItem.first);
+    logAdder->setProperty("LogText", logItem.second);
     logAdder->setProperty("LogType", "Number");
     logAdder->executeAsChildAlg();
     logAdderProg.report("Adding Numerical logs");

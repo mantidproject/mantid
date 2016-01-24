@@ -478,9 +478,10 @@ FileFinderImpl::findRun(const std::string &hintstr,
                    tolower);
     if (!archiveOpt.empty() && archiveOpt != "off" &&
         !facility.archiveSearch().empty()) {
-      for (const auto &it : facility.archiveSearch()) {
-        g_log.debug() << "get archive search for the facility..." << it << "\n";
-        archs.push_back(ArchiveSearchFactory::Instance().create(it));
+      for (const auto &facilityname : facility.archiveSearch()) {
+        g_log.debug() << "get archive search for the facility..."
+                      << facilityname << "\n";
+        archs.push_back(ArchiveSearchFactory::Instance().create(facilityname));
       }
     }
   }

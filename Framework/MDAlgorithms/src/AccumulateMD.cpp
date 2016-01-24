@@ -187,9 +187,7 @@ void insertDataSources(const std::string &data_sources,
       boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
 
   // Insert each data source into our complete set of historical data sources
-  for (auto &it : data_split) {
-    historical_data_sources.insert(it);
-  }
+  historical_data_sources.insert(data_split.begin(), data_split.end());
 }
 
 // Register the algorithm into the AlgorithmFactory

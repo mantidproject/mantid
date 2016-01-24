@@ -272,7 +272,7 @@ size_t DownloadInstrument::removeOrphanedFiles(
     const std::set<std::string> &filenamesToKeep) const {
   // hold files to delete in a set so we don't remove files while iterating over
   // the directory.
-  std::set<std::string> filesToDelete;
+  std::vector<std::string> filesToDelete;
 
   try {
     using Poco::DirectoryIterator;
@@ -285,7 +285,7 @@ size_t DownloadInstrument::removeOrphanedFiles(
           filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
                          "be deleted: " << entryPath.getFileName() << std::endl;
-        filesToDelete.insert(it->path());
+        filesToDelete.push_back(it->path());
       }
     }
   } catch (Poco::Exception &ex) {
@@ -302,8 +302,8 @@ size_t DownloadInstrument::removeOrphanedFiles(
 
   // delete any identified files
   try {
-    for (const auto &it : filesToDelete) {
-      Poco::File file(it);
+    for (const auto &filename : filesToDelete) {
+      Poco::File file(filename);
       file.remove();
     }
   } catch (Poco::Exception &ex) {

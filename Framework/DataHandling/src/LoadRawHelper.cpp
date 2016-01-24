@@ -424,15 +424,15 @@ LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
 
   if (!m_monitordetectorList.empty()) {
     const auto &map = mapping.getMapping();
-    for (const auto &it : map) {
-      auto detIDs = it.second;
+    for (const auto &SpectrumDetectorPair : map) {
+      auto detIDs = SpectrumDetectorPair.second;
       // Both m_monitordetectorList & detIDs should be (very) short so the
       // nested loop shouldn't be too evil
       for (auto detID : detIDs) {
         if (std::find(m_monitordetectorList.begin(),
                       m_monitordetectorList.end(),
                       detID) != m_monitordetectorList.end()) {
-          spectrumIndices.push_back(it.first);
+          spectrumIndices.push_back(SpectrumDetectorPair.first);
         }
       }
     }

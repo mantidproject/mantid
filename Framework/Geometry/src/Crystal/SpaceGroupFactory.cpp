@@ -146,8 +146,8 @@ SpaceGroupFactoryImpl::subscribedSpaceGroupSymbols() const {
   std::vector<std::string> symbols;
   symbols.reserve(m_generatorMap.size());
 
-  for (const auto &it : m_generatorMap) {
-    symbols.push_back(it.first);
+  for (const auto &generator : m_generatorMap) {
+    symbols.push_back(generator.first);
   }
 
   return symbols;
@@ -260,11 +260,11 @@ SpaceGroup_const_sptr SpaceGroupFactoryImpl::constructFromPrototype(
 void SpaceGroupFactoryImpl::fillPointGroupMap() {
   m_pointGroupMap.clear();
 
-  for (auto &it : m_generatorMap) {
-    SpaceGroup_const_sptr spaceGroup = getPrototype(it.first);
+  for (auto &generator : m_generatorMap) {
+    SpaceGroup_const_sptr spaceGroup = getPrototype(generator.first);
 
-    m_pointGroupMap.insert(
-        std::make_pair(spaceGroup->getPointGroup()->getSymbol(), it.first));
+    m_pointGroupMap.insert(std::make_pair(
+        spaceGroup->getPointGroup()->getSymbol(), generator.first));
   }
 }
 

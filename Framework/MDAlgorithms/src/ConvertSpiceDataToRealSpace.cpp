@@ -555,13 +555,14 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
     API::IMDEventWorkspace_sptr mdws,
     const std::vector<API::MatrixWorkspace_sptr> vec_ws2d) {
   // Add N experiment info as there are N measurment points
-  for (const auto &i : vec_ws2d) {
+  for (const auto &ws2d : vec_ws2d) {
     // Create an ExperimentInfo object
     ExperimentInfo_sptr tmp_expinfo = boost::make_shared<ExperimentInfo>();
-    Geometry::Instrument_const_sptr tmp_inst = i->getInstrument();
+    Geometry::Instrument_const_sptr tmp_inst = ws2d->getInstrument();
     tmp_expinfo->setInstrument(tmp_inst);
 
-    int runnumber = atoi(i->run().getProperty("run_number")->value().c_str());
+    int runnumber =
+        atoi(ws2d->run().getProperty("run_number")->value().c_str());
     tmp_expinfo->mutableRun().addProperty(
         new PropertyWithValue<int>("run_number", runnumber));
 

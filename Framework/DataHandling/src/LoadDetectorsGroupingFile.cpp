@@ -144,9 +144,10 @@ void LoadDetectorsGroupingFile::exec() {
     // 6. Add group names, if user has specified any
     std::map<int, std::string> groupNamesMap = loader.getGroupNamesMap();
 
-    for (auto &it : groupNamesMap) {
-      std::string groupIdStr = boost::lexical_cast<std::string>(it.first);
-      m_groupWS->mutableRun().addProperty("GroupName_" + groupIdStr, it.second);
+    for (auto &group : groupNamesMap) {
+      std::string groupIdStr = boost::lexical_cast<std::string>(group.first);
+      m_groupWS->mutableRun().addProperty("GroupName_" + groupIdStr,
+                                          group.second);
     }
   } else if (ext == "map") {
     // Deal with file as map
@@ -370,9 +371,9 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
   for (groupspeciter = m_groupSpectraMap.begin();
        groupspeciter != m_groupSpectraMap.end(); ++groupspeciter) {
     int groupid = groupspeciter->first;
-    for (int &i : groupspeciter->second) {
-      spectrumidgroupmap.insert(std::pair<int, int>(i, groupid));
-      specids.push_back(i);
+    for (int specid : groupspeciter->second) {
+      spectrumidgroupmap.emplace(specid, groupid);
+      specids.push_back(specid);
     }
   }
 

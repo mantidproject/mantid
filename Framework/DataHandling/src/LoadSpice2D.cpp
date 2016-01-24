@@ -206,10 +206,10 @@ void LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
 void LoadSpice2D::addMetadataAsRunProperties(
     const std::map<std::string, std::string> &metadata) {
 
-  for (const auto &it : metadata) {
-    std::string key = it.first;
+  for (const auto &keyValuePair : metadata) {
+    const std::string &key = keyValuePair.first;
     std::replace(key.begin(), key.end(), '/', '_');
-    m_workspace->mutableRun().addProperty(key, it.second, true);
+    m_workspace->mutableRun().addProperty(key, keyValuePair.second, true);
   }
 }
 

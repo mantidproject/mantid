@@ -3227,10 +3227,10 @@ Atom getAtom(const std::string &symbol, const uint16_t a_number) {
     return H3;
 
   // linear search
-  for (auto &i : ATOMS) {
-    if (symbol.compare(i.symbol) == 0) {
-      if (a_number == i.a_number) {
-        return i;
+  for (auto &atom : ATOMS) {
+    if (symbol.compare(atom.symbol) == 0) {
+      if (a_number == atom.a_number) {
+        return atom;
       }
     }
   }

@@ -2139,9 +2139,8 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
   }
   if (detList.size() == 0)
     return;
-  for (auto &i : detList) {
+  for (auto &det : detList) {
     bool keep = false;
-    boost::shared_ptr<RectangularDetector> det = i;
     std::string det_name = det->getName();
     for (auto &bankName : bankNames) {
       size_t pos = bankName.find("_events");
@@ -2170,7 +2169,7 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
             inst->removeDetector(d);
         }
       }
-      IComponent *comp = dynamic_cast<IComponent *>(i.get());
+      IComponent *comp = dynamic_cast<IComponent *>(det.get());
       inst->remove(comp);
     }
   }
@@ -2502,11 +2501,11 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
     if (!m_specList.empty()) {
       int i = 0;
       std::vector<int32_t> spec_temp, udet_temp;
-      for (int &it : spec) {
-        if (find(m_specList.begin(), m_specList.end(), it) !=
+      for (int &element : spec) {
+        if (find(m_specList.begin(), m_specList.end(), element) !=
             m_specList.end()) // spec element *it is not in spec_list
         {
-          spec_temp.push_back(it);
+          spec_temp.push_back(element);
           udet_temp.push_back(udet.at(i));
         }
         i++;

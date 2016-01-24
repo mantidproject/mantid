@@ -282,8 +282,8 @@ void GetAllEi::exec() {
                        boost::lexical_cast<std::string>(guess_ei.size()) +
                        " fell within both monitor's recording energy range\n";
   g_log.debug() << " Guess Energies are:\n";
-  for (double &i : guess_ei) {
-    g_log.debug() << boost::str(boost::format(" %8.2f; ") % i);
+  for (double ei : guess_ei) {
+    g_log.debug() << boost::str(boost::format(" %8.2f; ") % ei);
   }
   g_log.debug() << std::endl;
 

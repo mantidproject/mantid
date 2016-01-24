@@ -176,8 +176,8 @@ std::string ParameterTie::asString(const IFunction *fun) const {
  * @return True if any of the parameters is used as a variable in the mu::Parser
  */
 bool ParameterTie::findParametersOf(const IFunction *fun) const {
-  for (const auto &it : m_varMap) {
-    if (it.second.getFunction() == fun) {
+  for (const auto &varPair : m_varMap) {
+    if (varPair.second.getFunction() == fun) {
       return true;
     }
   }

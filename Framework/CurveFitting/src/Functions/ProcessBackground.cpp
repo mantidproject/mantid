@@ -1096,8 +1096,8 @@ size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX,
 
   // Count non-excluded region
   size_t count = 0;
-  for (auto &&i : v_useX)
-    if (i)
+  for (auto &&useX : v_useX)
+    if (useX)
       ++count;
 
   return count;

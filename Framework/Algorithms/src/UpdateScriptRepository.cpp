@@ -58,8 +58,8 @@ void UpdateScriptRepository::exec() {
     std::stringstream info;
     info << "Information about ScriptRepository:\n"
          << " A more recent version of the following files was installed:\n";
-    for (auto &i : f_list) {
-      info << "  * " << i << "\n";
+    for (auto &file : f_list) {
+      info << "  * " << file << "\n";
     }
     info << "Please check these files before using them. "
          << "Note: These files were configured for AutoUpdate.";

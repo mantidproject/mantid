@@ -939,10 +939,10 @@ std::set<std::string> ParameterMap::names(const IComponent *comp) const {
  */
 std::string ParameterMap::asString() const {
   std::stringstream out;
-  for (const auto &it : m_map) {
-    boost::shared_ptr<Parameter> p = it.second;
-    if (p && it.first) {
-      const IComponent *comp = (const IComponent *)(it.first);
+  for (const auto &mappair : m_map) {
+    const boost::shared_ptr<Parameter> &p = mappair.second;
+    if (p && mappair.first) {
+      const IComponent *comp = (const IComponent *)(mappair.first);
       const IDetector *det = dynamic_cast<const IDetector *>(comp);
       if (det) {
         out << "detID:" << det->getID();

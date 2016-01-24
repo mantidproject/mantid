@@ -1080,8 +1080,8 @@ SlicingAlgorithm::extractMDFrameForNonAxisAligned(
   const auto &referenceMDFrame =
       m_inWS->getDimension(indicesWithProjection[0])->getMDFrame();
 
-  for (auto &it : indicesWithProjection) {
-    const auto &toCheckMDFrame = m_inWS->getDimension(it)->getMDFrame();
+  for (auto &index : indicesWithProjection) {
+    const auto &toCheckMDFrame = m_inWS->getDimension(index)->getMDFrame();
     if (!referenceMDFrame.isSameType(toCheckMDFrame)) {
       g_log.warning() << "Slicing Algorithm: New basis vector tries to "
                          "mix un-mixable MDFrame types.";

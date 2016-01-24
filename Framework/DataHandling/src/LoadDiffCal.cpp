@@ -134,8 +134,8 @@ std::vector<NumT> readArrayCoerce(DataSet &dataset,
   } else if (PredType::NATIVE_FLOAT == dataType) {
     std::vector<float> temp(dataSpace.getSelectNpoints());
     dataset.read(&temp[0], dataType, dataSpace);
-    for (float &it : temp)
-      result.push_back(static_cast<NumT>(it));
+    for (float value : temp)
+      result.push_back(static_cast<NumT>(value));
   } else {
     throw DataTypeIException();
   }
@@ -197,11 +197,11 @@ std::vector<double> LoadDiffCal::readDoubleArray(Group &group,
                         << "\n";
   }
 
-  for (double &i : result) {
-    if (std::abs(i) < 1.e-10) {
-      i = 0.;
-    } else if (i != i) { // check for NaN
-      i = 0.;
+  for (double &value : result) {
+    if (std::abs(value) < 1.e-10) {
+      value = 0.;
+    } else if (value != value) { // check for NaN
+      value = 0.;
     }
   }
 

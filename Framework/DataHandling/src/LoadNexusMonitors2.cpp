@@ -233,8 +233,8 @@ void LoadNexusMonitors2::exec() {
     // number
     if (monitorNumber2Name.size() == monitorNames.size()) {
       monitorNames.clear();
-      for (auto &it : monitorNumber2Name) {
-        monitorNames.push_back(it.second);
+      for (auto &numberName : monitorNumber2Name) {
+        monitorNames.push_back(numberName.second);
       }
     }
   } else if (numEventMon == m_monitor_count) {

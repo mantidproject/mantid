@@ -51,8 +51,8 @@ void MullerAnsatz::init() {
   // setFormFactorIon("Cu2");
 
   // Declare parameters that participate in fitting
-  for (auto &i : AnsatzParameters::PAR_NAMES) {
-    declareParameter(i, 0.0);
+  for (auto &name : AnsatzParameters::PAR_NAMES) {
+    declareParameter(name, 0.0);
   }
 
   // Declare fixed attributes defaults

@@ -1075,9 +1075,9 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
   // Estimation of the resulting number of elements
   result.reserve(elements->count());
 
-  for (const auto &it : *elements) {
+  for (const auto &element : *elements) {
     // See above for the reason space is added
-    Tokenizer rangeElements(it + " ", rangeSep, Tokenizer::TOK_TRIM);
+    Tokenizer rangeElements(element + " ", rangeSep, Tokenizer::TOK_TRIM);
 
     size_t noOfRangeElements = rangeElements.count();
 
@@ -1085,7 +1085,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
     if (noOfRangeElements == 1) {
       int element;
       if (convert(rangeElements[0], element) != 1)
-        throw std::invalid_argument("Invalid element: " + it);
+        throw std::invalid_argument("Invalid element: " + element);
       result.push_back(element);
     }
     // A pair
@@ -1094,17 +1094,18 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
 
       if (convert(rangeElements[0], start) != 1 ||
           convert(rangeElements[1], end) != 1)
-        throw std::invalid_argument("Invalid range: " + it);
+        throw std::invalid_argument("Invalid range: " + element);
 
       if (start >= end)
-        throw std::invalid_argument("Range boundaries are reversed: " + it);
+        throw std::invalid_argument("Range boundaries are reversed: " +
+                                    element);
 
       for (int i = start; i <= end; i++)
         result.push_back(i);
     }
     // Error - e.g. "--""
     else {
-      throw std::invalid_argument("Multiple range separators: " + it);
+      throw std::invalid_argument("Multiple range separators: " + element);
     }
   }
 

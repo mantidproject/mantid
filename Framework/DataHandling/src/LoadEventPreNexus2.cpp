@@ -727,8 +727,8 @@ void LoadEventPreNexus2::procEvents(
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (auto &it : spectra_list)
-    spectraLoadMap[it] = true;
+  for (auto &spectrum : spectra_list)
+    spectraLoadMap[spectrum] = true;
 
   CPUTimer tim;
 

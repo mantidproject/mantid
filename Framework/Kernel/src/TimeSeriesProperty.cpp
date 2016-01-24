@@ -751,16 +751,16 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
 
   double numerator(0.0), totalTime(0.0);
   // Loop through the filter ranges
-  for (const auto &it : filter) {
+  for (const auto &time : filter) {
     // Calculate the total time duration (in seconds) within by the filter
-    totalTime += it.duration();
+    totalTime += time.duration();
 
     // Get the log value and index at the start time of the filter
     int index;
-    double value = getSingleValue(it.start(), index);
-    DateAndTime startTime = it.start();
+    double value = getSingleValue(time.start(), index);
+    DateAndTime startTime = time.start();
 
-    while (index < realSize() - 1 && m_values[index + 1].time() < it.stop()) {
+    while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
       ++index;
       numerator +=
           DateAndTime::secondsFromDuration(m_values[index].time() - startTime) *
@@ -771,7 +771,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
 
     // Now close off with the end of the current filter range
     numerator +=
-        DateAndTime::secondsFromDuration(it.stop() - startTime) * value;
+        DateAndTime::secondsFromDuration(time.stop() - startTime) * value;
   }
 
   // 'Normalise' by the total time

@@ -400,8 +400,8 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
     a = base.calcA(p2);
     if (calcMaxA) {
       maxA = 0.0;
-      for (double &it : a) {
-        double tmp = fabs(it);
+      for (double coeff : a) {
+        double tmp = fabs(coeff);
         if (tmp > maxA) {
           maxA = tmp;
         }

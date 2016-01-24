@@ -398,11 +398,9 @@ void MergeMDFiles::exec() {
 }
 /**Delete all event loaders */
 void MergeMDFiles::clearEventLoaders() {
-  for (auto &i : m_EventLoader) {
-    if (i) {
-      delete i;
-      i = NULL;
-    }
+  for (auto &loader : m_EventLoader) {
+    delete loader;
+    loader = NULL;
   }
 }
 

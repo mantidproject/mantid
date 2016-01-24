@@ -147,8 +147,8 @@ ScalarUtils::GetCells(const DblMatrix &UB, const std::string &cell_type,
     std::vector<ConventionalCell> temp =
         GetCellsUBOnly(k, cell_type, centering, allowPermutations);
 
-    for (auto &i : temp)
-      AddIfBest(result, i);
+    for (auto &cell : temp)
+      AddIfBest(result, cell);
   }
 
   return result;
@@ -234,8 +234,8 @@ ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB,
     // Get exact form requested and not permutations
     UB_list.push_back(UB);
   }
-  for (auto &i : UB_list) {
-    IndexingUtils::GetLatticeParameters(i, l_params);
+  for (auto &UB : UB_list) {
+    IndexingUtils::GetLatticeParameters(UB, l_params);
 
     form_0 = ReducedCell(0, l_params[0], l_params[1], l_params[2], l_params[3],
                          l_params[4], l_params[5]);
@@ -245,7 +245,7 @@ ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB,
 
     double error = form_0.WeightedDistance(form);
     if (error < min_error) {
-      info = ConventionalCell(i, form_num, allowPermutations);
+      info = ConventionalCell(UB, form_num, allowPermutations);
       min_error = error;
     }
   }
@@ -268,13 +268,13 @@ void ScalarUtils::RemoveHighErrorForms(std::vector<ConventionalCell> &list,
 
   std::vector<ConventionalCell> new_list;
 
-  for (auto &i : list)
-    if (i.GetError() <= level)
-      new_list.push_back(i);
+  for (auto &cell : list)
+    if (cell.GetError() <= level)
+      new_list.push_back(cell);
 
   list.clear();
-  for (const auto &i : new_list)
-    list.push_back(i);
+  for (const auto &cell : new_list)
+    list.push_back(cell);
 }
 
 /**
@@ -299,15 +299,14 @@ ScalarUtils::GetCellBestError(const std::vector<ConventionalCell> &list,
 
   ConventionalCell info = list[0];
   double min_error = 1.0e20;
-  std::string type;
 
   bool min_found = false;
-  for (const auto &i : list) {
-    type = i.GetCellType();
-    double error = i.GetError();
+  for (const auto &cell : list) {
+    std::string type = cell.GetCellType();
+    double error = cell.GetError();
     if ((use_triclinic || type != ReducedCell::TRICLINIC()) &&
         error < min_error) {
-      info = i;
+      info = cell;
       min_error = error;
       min_found = true;
     }

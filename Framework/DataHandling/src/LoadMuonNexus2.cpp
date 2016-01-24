@@ -116,10 +116,10 @@ void LoadMuonNexus2::doExec() {
 
   std::string detectorName;
   // Only the first NXdata found
-  for (auto &i : entry.groups()) {
-    std::string className = i.nxclass;
+  for (auto &group : entry.groups()) {
+    std::string className = group.nxclass;
     if (className == "NXdata") {
-      detectorName = i.nxname;
+      detectorName = group.nxname;
       break;
     }
   }

@@ -399,11 +399,11 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     std::vector<weightedNeighbour> neighbours;
 
     // Convert from spectrum numbers to workspace indices
-    for (auto &it : neighbSpectra) {
-      specid_t spec = it.first;
+    for (auto &specDistance : neighbSpectra) {
+      specid_t spec = specDistance.first;
 
       // Use the weighting strategy to calculate the weight.
-      double weight = WeightedSum->weightAt(it.second);
+      double weight = WeightedSum->weightAt(specDistance.second);
 
       if (weight > 0) {
         // Find the corresponding workspace index

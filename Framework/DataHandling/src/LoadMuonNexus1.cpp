@@ -573,11 +573,11 @@ LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
     groupingMap[grouping[i]].push_back(specToLoad[i]);
   }
 
-  for (auto &it : groupingMap) {
-    if (it.first != 0) // Skip 0 group
+  for (auto &group : groupingMap) {
+    if (group.first != 0) // Skip 0 group
     {
       TableRow newRow = detectorGroupingTable->appendRow();
-      newRow << it.second;
+      newRow << group.second;
     }
   }
 

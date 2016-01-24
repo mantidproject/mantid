@@ -229,8 +229,8 @@ void SumEventsByLogValue::createTableOutput(
 
     // Calculate the time covered by this log value and add it to the table
     double duration = 0.0;
-    for (auto &it : filter) {
-      duration += it.duration();
+    for (auto &time : filter) {
+      duration += time.duration();
     }
     timeCol->cell<double>(row) = duration;
 
