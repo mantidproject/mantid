@@ -110,9 +110,8 @@ void LoadMuonLog::exec() {
 * @returns The string but with all characters in lower case
 */
 std::string LoadMuonLog::stringToLower(std::string strToConvert) {
-  for (char &character : strToConvert) {
-    character = tolower(character);
-  }
+  std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(),
+                 ::tolower);
   return strToConvert; // return the converted string
 }
 
