@@ -145,8 +145,8 @@ Property *loadProperty(::NeXus::File *file, const std::string &group) {
     // Convert time in seconds to DateAndTime
     DateAndTime start(startStr);
     times.reserve(timeSec.size());
-    for (double i : timeSec) {
-      times.push_back(start + i);
+    for (double time : timeSec) {
+      times.push_back(start + time);
     }
   }
 

@@ -125,8 +125,8 @@ void LoadFullprofResolution::exec() {
   if (useBankIDsInFile)
     sort(vec_bankinirf.begin(), vec_bankinirf.end());
 
-  for (int i : vec_bankinirf)
-    g_log.debug() << "Irf containing bank " << i << ".\n";
+  for (int bank : vec_bankinirf)
+    g_log.debug() << "Irf containing bank " << bank << ".\n";
 
   // Bank-workspace correspondence
   map<int, size_t> workspaceOfBank;

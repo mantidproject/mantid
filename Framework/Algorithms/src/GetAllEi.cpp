@@ -272,8 +272,8 @@ void GetAllEi::exec() {
   destUnit->initialize(mon1Distance, 0., 0.,
                        static_cast<int>(Kernel::DeltaEMode::Elastic), 0.,
                        unused);
-  for (double i : guess_opening) {
-    double eGuess = destUnit->singleFromTOF(i);
+  for (double time : guess_opening) {
+    double eGuess = destUnit->singleFromTOF(time);
     if (eGuess > eMin && eGuess < eMax) {
       guess_ei.push_back(eGuess);
     }
@@ -399,13 +399,13 @@ void GetAllEi::printDebugModeInfo(const std::vector<double> &guess_opening,
                 << " chopper prospective opening within time frame: "
                 << TOF_range.first << " to: " << TOF_range.second << std::endl;
   g_log.debug() << " Timings are:\n";
-  for (double i : guess_opening) {
-    g_log.debug() << boost::str(boost::format(" %8.2f; ") % i);
+  for (double time : guess_opening) {
+    g_log.debug() << boost::str(boost::format(" %8.2f; ") % time);
   }
   g_log.debug() << std::endl;
   g_log.debug() << " Corresponding to energies:\n";
-  for (double i : guess_opening) {
-    double ei = destUnit->singleFromTOF(i);
+  for (double time : guess_opening) {
+    double ei = destUnit->singleFromTOF(time);
     g_log.debug() << boost::str(boost::format(" %8.2f; ") % ei);
   }
   g_log.debug() << std::endl;

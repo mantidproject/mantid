@@ -118,11 +118,7 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
                     << std::endl;
       throw;
     }
-    detid_t detid = 0;
-    for (auto it : detids) {
-      detid = it;
-    }
-    it->second.push_back(detid);
+    it->second.insert(it->second.end(), detids.begin(), detids.end());
   }
 
   return;

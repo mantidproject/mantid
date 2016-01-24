@@ -170,8 +170,8 @@ bool ChebfunBase::hasConverged(const std::vector<double> &a, double maxA,
   if (a.empty())
     return true;
   if (maxA == 0.0) {
-    for (double it : a) {
-      double tmp = fabs(it);
+    for (double coeff : a) {
+      double tmp = fabs(coeff);
       if (tmp > maxA) {
         maxA = tmp;
       }

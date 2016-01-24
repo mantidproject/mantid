@@ -551,8 +551,8 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
   stringstream db1ss;
   db1ss << "[DBx912] Number of banks in profile table = " << vecbankindex.size()
         << " containing bank ";
-  for (unsigned int i : vecbankindex)
-    db1ss << i << ", ";
+  for (unsigned int bankIndex : vecbankindex)
+    db1ss << bankIndex << ", ";
   g_log.information(db1ss.str());
 
   // Construct output
@@ -560,7 +560,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
 
   for (size_t i = 0; i < vecbankindex.size(); ++i) {
     unsigned int bankid = vecbankindex[i];
-    profilemap.insert(make_pair(bankid, vec_maptemp[i]));
+    profilemap.emplace(bankid, vec_maptemp[i]);
   }
 
   return;

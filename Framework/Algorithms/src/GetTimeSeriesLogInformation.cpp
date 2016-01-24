@@ -406,8 +406,7 @@ Workspace2D_sptr GetTimeSeriesLogInformation::calDistributions(
     vecCount[i] = 0;
 
   // 3. Count
-  for (double i : vecdt) {
-    double dt = i;
+  for (double dt : vecdt) {
     int index;
     if (dt < 0 && m_ignoreNegativeTime) {
       index = 0;
@@ -418,7 +417,7 @@ Workspace2D_sptr GetTimeSeriesLogInformation::calDistributions(
         // Out of upper boundary
         g_log.error() << "Find index = " << index
                       << " > vecX.size = " << vecDeltaT.size() << ".\n";
-      } else if (i < vecDeltaT[index]) {
+      } else if (dt < vecDeltaT[index]) {
         --index;
       }
 

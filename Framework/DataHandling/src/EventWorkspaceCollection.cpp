@@ -162,8 +162,8 @@ void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(
   // For each workspace, update all the spectrum numbers
   for (auto &ws : m_WsVec) {
     size_t counter = 0;
-    for (auto it : uniqueSpectra) {
-      ws->getSpectrum(counter)->setSpectrumNo(it);
+    for (auto spectrum : uniqueSpectra) {
+      ws->getSpectrum(counter)->setSpectrumNo(spectrum);
       ++counter;
     }
   }

@@ -317,12 +317,11 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
               m_dwavelength);
 
   // Store detector pixels
-  for (int it : data) {
-    double count = static_cast<double>(it);
+  for (int count : data) {
     // Data uncertainties, computed according to the HFIR/IGOR reduction code
     // The following is what I would suggest instead...
     // error = count > 0 ? sqrt((double)count) : 0.0;
-    double error = sqrt(0.5 + fabs(count - 0.5));
+    double error = sqrt(0.5 + fabs(static_cast<double>(count) - 0.5));
     store_value(m_workspace, specID++, count, error, m_wavelength,
                 m_dwavelength);
   }

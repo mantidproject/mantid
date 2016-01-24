@@ -773,8 +773,8 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
     return matrixws;
   } else {
     g_log.information() << "running Rebin( ";
-    for (double &m_param : m_params)
-      g_log.information() << m_param << " ";
+    for (double param : m_params)
+      g_log.information() << param << " ";
     g_log.information() << ")\n";
     API::IAlgorithm_sptr rebin3Alg = createChildAlgorithm("Rebin");
     rebin3Alg->setProperty("InputWorkspace", matrixws);

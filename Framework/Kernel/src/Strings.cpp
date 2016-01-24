@@ -266,10 +266,10 @@ int getPartLine(std::istream &fh, std::string &Out, std::string &Excess,
 std::string removeSpace(const std::string &CLine) {
   std::string Out;
   char prev = 'x';
-  for (char i : CLine) {
-    if (!isspace(i) || prev == '\\') {
-      Out += i;
-      prev = i;
+  for (char character : CLine) {
+    if (!isspace(character) || prev == '\\') {
+      Out += character;
+      prev = character;
     }
   }
   return Out;

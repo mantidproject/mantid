@@ -129,6 +129,7 @@ IntegratePeakTimeSlices::IntegratePeakTimeSlices()
 
   for (double &m_ParameterValue : m_ParameterValues)
     m_ParameterValue = 0;
+  std::fill(m_ParameterValues.begin(), m_ParameterValues.end(), 0.0);
 }
 
 double SQRT(double v) {
@@ -445,7 +446,8 @@ void IntegratePeakTimeSlices::exec() {
           std::vector<std::string> names;
 
           if (m_AttributeValues->StatBaseVals(ISSIxx) > 0 &&
-              m_AttributeValues->IsEnoughData(m_ParameterValues, g_log) &&
+              m_AttributeValues->IsEnoughData(m_ParameterValues.data(),
+                                              g_log) &&
               m_ParameterValues[ITINTENS] > 0) {
             double chisqOverDOF;
 
@@ -532,7 +534,8 @@ void IntegratePeakTimeSlices::exec() {
 
             g_log.debug("Try Merge 2 time slices");
             if (m_AttributeValues->StatBaseVals(ISSIxx) >= 0 &&
-                m_AttributeValues->IsEnoughData(m_ParameterValues, g_log))
+                m_AttributeValues->IsEnoughData(m_ParameterValues.data(),
+                                                g_log))
 
               Fit(Data, chisqOverDOF, done, names, params, errs, lastRow,
                   lastCol, neighborRadius);

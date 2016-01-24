@@ -165,9 +165,9 @@ SpecularReflectionAlgorithm::getDetectorComponent(
     auto specToWorkspaceIndex = workspace->getSpectrumToWorkspaceIndexMap();
     DetectorGroup_sptr allDetectors = boost::make_shared<DetectorGroup>();
     bool warnIfMasked = true;
-    for (int i : spectrumNumbers) {
-      const size_t &spectrumNumber = i;
-      auto it = specToWorkspaceIndex.find(i);
+    for (int index : spectrumNumbers) {
+      const size_t spectrumNumber{static_cast<size_t>(index)};
+      auto it = specToWorkspaceIndex.find(index);
       if (it == specToWorkspaceIndex.end()) {
         std::stringstream message;
         message << "Spectrum number " << spectrumNumber

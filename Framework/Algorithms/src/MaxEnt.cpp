@@ -239,8 +239,8 @@ void MaxEnt::exec() {
 
       // Apply distance penalty (SB eq. 33)
       double sum = 0.;
-      for (double i : image)
-        sum += fabs(i);
+      for (double point : image)
+        sum += fabs(point);
 
       double dist = distance(dirs.s2, beta);
       if (dist > distEps * sum / background) {

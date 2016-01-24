@@ -1619,9 +1619,9 @@ void MatrixWorkspace::saveSpectraMapNexus(
     const ::NeXus::NXcompression compression) const {
   // Count the total number of detectors
   std::size_t nDetectors = 0;
-  for (int i : spec) {
-    size_t wi = size_t(i); // Workspace index
-    nDetectors += this->getSpectrum(wi)->getDetectorIDs().size();
+  for (int index : spec) {
+    nDetectors +=
+        this->getSpectrum(static_cast<size_t>(index))->getDetectorIDs().size();
   }
 
   if (nDetectors < 1) {
