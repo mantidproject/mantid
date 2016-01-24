@@ -520,8 +520,8 @@ PlotPeakByLogValue::makeNames() const {
   typedef Poco::StringTokenizer tokenizer;
   tokenizer names(inputList, ";",
                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-  for (const auto &name : names) {
-    tokenizer params(name, ",", tokenizer::TOK_TRIM);
+  for (const auto &input : names) {
+    tokenizer params(input, ",", tokenizer::TOK_TRIM);
     std::string name = params[0];
     int wi = default_wi;
     int spec = default_spec;

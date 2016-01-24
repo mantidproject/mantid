@@ -207,7 +207,7 @@ void LoadSpice2D::addMetadataAsRunProperties(
     const std::map<std::string, std::string> &metadata) {
 
   for (const auto &keyValuePair : metadata) {
-    const std::string &key = keyValuePair.first;
+    std::string key = keyValuePair.first;
     std::replace(key.begin(), key.end(), '/', '_');
     m_workspace->mutableRun().addProperty(key, keyValuePair.second, true);
   }

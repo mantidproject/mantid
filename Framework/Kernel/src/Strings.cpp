@@ -1085,7 +1085,8 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
     if (noOfRangeElements == 1) {
       int element;
       if (convert(rangeElements[0], element) != 1)
-        throw std::invalid_argument("Invalid element: " + element);
+        throw std::invalid_argument("Invalid element: " +
+                                    boost::lexical_cast<std::string>(element));
       result.push_back(element);
     }
     // A pair
