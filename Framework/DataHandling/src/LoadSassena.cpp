@@ -429,7 +429,9 @@ void LoadSassena::exec() {
   for (std::vector<std::string>::const_iterator it = this->m_validSets.begin();
        it != this->m_validSets.end(); ++it) {
     setName = *it;
-    if (H5LTfind_dataset(h5file, setName.c_str()) == 1) {
+    //if (H5LTfind_dataset(h5file, setName.c_str()) == 1)
+    if (H5Lexists(h5file, setName.c_str(), H5P_DEFAULT))
+    {
       if (setName == "fq" || setName == "fq0" || setName == "fq2")
         this->loadFQ(h5file, gws, setName, qvmod, sorting_indexes);
       else if (setName == "fqt")
