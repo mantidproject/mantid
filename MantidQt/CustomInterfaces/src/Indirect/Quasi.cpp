@@ -102,7 +102,7 @@ bool Quasi::validate() {
   const auto eMin = m_dblManager->value(m_properties["EMin"]);
   const auto eMax = m_dblManager->value(m_properties["EMax"]);
   if (eMin > eMax)
-	  errors.append("EMin must be more than EMax.\n");
+	  errors.append("EMin must be less than EMax.\n");
   if (eMin == eMax)
 	  errors.append("EMin can not be equal to EMax.\n");
 
