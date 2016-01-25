@@ -83,7 +83,7 @@ protected:
                      hsize_t *dims) const;
   /// Read dataset data to a buffer ot type double
   herr_t dataSetDouble(const hid_t &h5file, const std::string setName,
-                     double *buf);
+                       double *buf);
   /// Load qvectors dataset, calculate modulus of vectors
   const MantidVec loadQvectors(const hid_t &h5file,
                                API::WorkspaceGroup_sptr gws,

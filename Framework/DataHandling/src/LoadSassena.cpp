@@ -74,12 +74,11 @@ herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string setName,
  * @param setName string name of dataset
  * @param buf storing dataset
  */
-herr_t LoadSassena::dataSetDouble(const hid_t &h5file, const std::string setName,
-                                double *buf) {
+herr_t LoadSassena::dataSetDouble(const hid_t &h5file,
+                                  const std::string setName, double *buf) {
   herr_t errorcode;
   errorcode = H5LTread_dataset_double(h5file, setName.c_str(), buf);
-  if (errorcode < 0)
-  {
+  if (errorcode < 0) {
     this->g_log.error("Cannot read " + setName + " dataset");
   }
   return errorcode;
@@ -108,7 +107,6 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
 
   MantidVec qvmod; // store the modulus of the vector
 
-
   const std::string gwsName = this->getPropertyValue("OutputWorkspace");
   const std::string setName("qvectors");
 
@@ -120,10 +118,8 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
   int nq = static_cast<int>(dims[0]); // number of q-vectors
   auto buf = new double[nq * 3];
 
-
   herr_t errorcode = this->dataSetDouble(h5file, "qvectors", buf);
-  if (errorcode < 0)
-  {
+  if (errorcode < 0) {
     this->g_log.error("LoadSassena::loadQvectors cannot proceed");
     qvmod.resize(0);
     return qvmod;
@@ -188,8 +184,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   int nq = static_cast<int>(qvmod.size()); // number of q-vectors
   auto buf = new double[nq * 2];
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
-  if (errorcode < 0)
-  {
+  if (errorcode < 0) {
     this->g_log.error("LoadSassena::loadFQ cannot proceed");
     return;
   }
@@ -243,8 +238,7 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
                           const std::vector<int> &sorting_indexes) {
 
   hsize_t dims[3];
-  if (dataSetInfo(h5file, setName, dims) < 0)
-  {
+  if (dataSetInfo(h5file, setName, dims) < 0) {
     this->g_log.error("Unable to read " + setName + " dataset info");
     this->g_log.error("LoadSassena::loadFQT cannot proceed");
     return;
@@ -255,8 +249,7 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   int nq = static_cast<int>(qvmod.size()); // number of q-vectors
   auto buf = new double[nq * nnt * 2];
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
-  if (errorcode < 0)
-  {
+  if (errorcode < 0) {
     this->g_log.error("LoadSassena::loadFQT cannot proceed");
     return;
   }
@@ -417,8 +410,7 @@ void LoadSassena::exec() {
   // Block to read the Q-vectors
   std::vector<int> sorting_indexes;
   const MantidVec qvmod = this->loadQvectors(h5file, gws, sorting_indexes);
-  if (qvmod.size() == 0)
-  {
+  if (qvmod.size() == 0) {
     this->g_log.error("No Q-vectors read. Unable to proceed");
     H5Fclose(h5file);
     return;
@@ -429,8 +421,7 @@ void LoadSassena::exec() {
   for (std::vector<std::string>::const_iterator it = this->m_validSets.begin();
        it != this->m_validSets.end(); ++it) {
     setName = *it;
-    if (H5Lexists(h5file, setName.c_str(), H5P_DEFAULT))
-    {
+    if (H5Lexists(h5file, setName.c_str(), H5P_DEFAULT)) {
       if (setName == "fq" || setName == "fq0" || setName == "fq2")
         this->loadFQ(h5file, gws, setName, qvmod, sorting_indexes);
       else if (setName == "fqt")
