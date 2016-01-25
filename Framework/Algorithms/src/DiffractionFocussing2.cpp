@@ -368,8 +368,8 @@ void DiffractionFocussing2::execEvent() {
     const vector<size_t> &indices = this->m_wsIndices[group];
 
     totalHistProcess += static_cast<int>(indices.size());
-    for (auto indice : indices) {
-      size_required[iGroup] += m_eventW->getEventList(indice).getNumberEvents();
+    for (auto index : indices) {
+      size_required[iGroup] += m_eventW->getEventList(index).getNumberEvents();
     }
     prog->report(1, "Pre-counting");
   }

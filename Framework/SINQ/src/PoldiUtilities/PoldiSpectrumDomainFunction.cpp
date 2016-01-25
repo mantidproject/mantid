@@ -164,14 +164,13 @@ void PoldiSpectrumDomainFunction::poldiFunction1D(
 
   double chopperSlitCount = static_cast<double>(m_chopperSlitOffsets.size());
 
-  for (int indice : indices) {
+  for (int index : indices) {
     std::vector<double> factors(domain.size());
 
     for (size_t i = 0; i < factors.size(); ++i) {
-      values.addToCalculated(i,
-                             chopperSlitCount * localValues[i] *
-                                 m_timeTransformer->detectorElementIntensity(
-                                     domain[i], static_cast<size_t>(indice)));
+      values.addToCalculated(i, chopperSlitCount * localValues[i] *
+                                    m_timeTransformer->detectorElementIntensity(
+                                        domain[i], static_cast<size_t>(index)));
     }
   }
 }
