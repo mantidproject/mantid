@@ -13,6 +13,7 @@ digraph FocusChunks {
 
   subgraph algorithms {
     $algorithm_style
+    setChunk0 [label="Get a chunk to process"]
     alignAndFocusPowder	[label="AlignAndFocusPowder v1"]
     getRunNumber [label="Get a run number"]
     plus [label="Plus v1\nsummed workspace"]
@@ -35,19 +36,30 @@ digraph FocusChunks {
     haveMPI [label="Have MPI?"]
     isSum [label="Is Sum True?"]
     isLastRunNumber [label="Is Last Run Number?"]
+    allChunksProcessed [label="Are All Chunks Reduced?"]
   }
 
-  setChunk0	      -> loadData
-  loadData	      -> doSplitWorkspace
+  subgraph values {
+    $value_style
+    RunNumber [label="Run Number"]
+  }
+
+  RunNumberList	      -> setChunk0
+  setChunk0	      -> load
+  load	  	      -> doSplitWorkspace
 
   doSplitWorkspace	-> splitWorkspace	    [label="Yes"]
   SplittersWorkspace	-> splitWorkspace
-  splitWorkspace	-> alignAndFocusWorkspaces
+  splitWorkspace	-> alignAndFocusPowder
 
-  doSplitWorkspace	-> alignAndFocusWorkspaces  [label="No"]
+  doSplitWorkspace	-> alignAndFocusPowder  [label="No"]
 
-  alignAndFocusWorkspaces -> plusAmongChunks
-  plusAmongChunks	  -> haveMPI
+  alignAndFocusPowder	-> plusAmongChunks
+  plusAmongChunks	-> allChunksProcessed
+
+  allChunksProcessed	-> setChunk0  [label="No"]
+ 
+  allChunksProcessed	-> haveMPI [label="Yes"]
 
   haveMPI	      -> gatherWorkspaces [label="Yes"]
   gatherWorkspaces    -> setGSASParamFile
@@ -55,7 +67,7 @@ digraph FocusChunks {
   haveMPI	      -> setGSASParamFile [label="No"]
 
 
-  setGSASParamFile    -> compresseEvents
+  setGSASParamFile    -> compressEvents
   compressEvents      -> normaliseByCurrent
   normaliseByCurrent  -> OutputWorkspacesList
 

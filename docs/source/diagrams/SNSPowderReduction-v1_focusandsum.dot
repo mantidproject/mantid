@@ -27,6 +27,12 @@ digraph FocusAndSum {
     isSum [label="Is Sum True?"]
     isLastRunNumber [label="Is Last Run Number?"]
   }
+  
+  subgraph values {
+    $value_style
+    RunNumber [label="Run Number"]
+  }
+
 
   RunNumberList	      -> getRunNumber
   getRunNumber	      -> RunNumber
