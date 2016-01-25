@@ -160,7 +160,7 @@ createDetectorGroupWith5CylindricalDetectors() {
     std::ostringstream os;
     os << "d" << i;
     auto det = boost::make_shared<Detector>(os.str(), i + 1, detShape, nullptr);
-    det->setPos((double)(i + 1), 2.0, 2.0);
+    det->setPos(static_cast<double>(i + 1), 2.0, 2.0);
     groupMembers[i] = det;
   }
 
@@ -247,7 +247,7 @@ boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors() {
     std::ostringstream os;
     os << "m" << i;
     auto det = boost::make_shared<Detector>(os.str(), i + 1, nullptr);
-    det->setPos((double)(i + 1), 2.0, 2.0);
+    det->setPos(static_cast<double>(i + 1), 2.0, 2.0);
     det->markAsMonitor();
     groupMembers[i] = det;
   }
@@ -331,8 +331,8 @@ Mantid::Geometry::Instrument_sptr
 createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
                                            const std::vector<double> &polar,
                                            const std::vector<double> &azim) {
-  boost::shared_ptr<Instrument> testInst(new Instrument("processed"));
 
+  auto testInst = boost::make_shared<Instrument>("processed");
   double cylRadius(0.004);
   double cylHeight(0.0002);
   // find characteristic sizes of the detectors;

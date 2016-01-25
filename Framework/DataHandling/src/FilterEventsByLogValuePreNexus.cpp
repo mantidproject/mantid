@@ -2464,7 +2464,8 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
     this->pulsetimes.reserve(m_numPulses);
     for (size_t i = 0; i < m_numPulses; i++) {
       Pulse &it = (*pulses)[i];
-      DateAndTime pulseDateTime((int64_t)it.seconds, (int64_t)it.nanoseconds);
+      DateAndTime pulseDateTime(static_cast<int64_t>(it.seconds),
+                                static_cast<int64_t>(it.nanoseconds));
       this->pulsetimes.push_back(pulseDateTime);
       this->m_vecEventIndex.push_back(it.event_index);
 

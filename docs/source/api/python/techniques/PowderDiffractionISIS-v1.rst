@@ -2,9 +2,6 @@
 ISIS Powder Diffraction Script
 ==============================
 
-.. automodule:: Powder_ISIS
-   :members:
-
 Description
 -----------
 A wide variety of algorithms are available within Mantid for processing of data,
@@ -27,9 +24,9 @@ ScriptingWindow.html>`_ on mantid in order to carry out the data normalisation:
 
 The preference file, a file with an extension name of .pref (e.g: UserPrefFile.pref)
 will contain the following at least:
- - vanadium, background and empty sample container (if used) run numbers
- - parameters  for carrying out a sample absorption correction (if required)
- - directories which can be assigned to RAW files, Vanadium Directory
+- vanadium, background and empty sample container (if used) run numbers
+- parameters  for carrying out a sample absorption correction (if required)
+- directories which can be assigned to RAW files, Vanadium Directory
 *These directories have been left blank but can be changed and set by each user*
 *on their preference. The directories are also modifiable via small script which*
 *is ran inside* `Scripting Window <http://docs.mantidproject.org/nightly/interfaces
@@ -37,9 +34,9 @@ will contain the following at least:
 
 The script which is required to be written inside `Scripting Window <http://docs.
 mantidproject.org/nightly/interfaces/ScriptingWindow.html>`_ on Mantid contains:
- - details of the location for all the files which will be utilised
- - name of the pref file and folders
- - the run number(s) you wish to process
+- details of the location for all the files which will be utilised
+- name of the pref file and folders
+- the run number(s) you wish to process
 
 Vanadium & Background Files
 ---------------------------
@@ -184,6 +181,11 @@ modifying the following line of the :ref:`usage-PowderISIS-ref` script to:
 
    expt = cry_ini.Files('Polaris', RawDir=(DIRS[0] + "Polaris"), Analysisdir='test', forceRootDirFromScripts=True)
 
+Workflow
+--------
+
+.. diagram:: PowderDiffractionISIS-v1_wkflw.dot
+
 Additional Information
 ----------------------
 
@@ -232,6 +234,3 @@ Usage
 
    cry_focus.focus_all(expt, "79514", Write_ExtV=False)
 
-
-.. autoclass:: Powder_ISIS
-   :members:

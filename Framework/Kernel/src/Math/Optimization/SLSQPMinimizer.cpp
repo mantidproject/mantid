@@ -2821,7 +2821,7 @@ L75:
 /*     FOR REAL OR D.P. SET HITEST = CUTHI/N */
 /*     FOR COMPLEX      SET HITEST = CUTHI/(2*N) */
 L85:
-  hitest = cuthi / (float)(*n);
+  hitest = cuthi / static_cast<float>(*n);
   /*                   PHASE 3.  SUM IS MID-RANGE.  NO SCALING. */
   i__1 = nn;
   i__2 = *incx;

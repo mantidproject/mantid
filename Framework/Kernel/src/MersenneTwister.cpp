@@ -45,7 +45,7 @@ MersenneTwister::~MersenneTwister() { delete m_savedStateGenerator; }
 void MersenneTwister::setSeed(const size_t seedValue) {
   // Bug in earlier versions of this implementation meant
   // that a unsigned int could not be past to the seed function
-  m_currentSeed = (boost::mt19937::result_type)seedValue;
+  m_currentSeed = static_cast<boost::mt19937::result_type>(seedValue);
   m_generator.seed(m_currentSeed);
   delete m_savedStateGenerator;
   m_savedStateGenerator = nullptr;

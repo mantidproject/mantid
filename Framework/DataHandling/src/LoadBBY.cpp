@@ -724,7 +724,8 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
 
   int state = 0;
   unsigned int c;
-  while ((c = (unsigned int)tarFile.read_byte()) != (unsigned int)-1) {
+  while ((c = static_cast<unsigned int>(tarFile.read_byte())) !=
+         static_cast<unsigned int>(-1)) {
 
     bool event_ended = false;
     switch (state) {
@@ -775,7 +776,7 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
       } else if ((x >= HISTO_BINS_X) || (y >= HISTO_BINS_Y)) {
       } else {
         // conversion from 100 nanoseconds to 1 microsecond
-        tof += ((int)dt) * 0.1;
+        tof += (static_cast<int>(dt)) * 0.1;
 
         eventProcessor.addEvent(x, y, tof);
         countsInFrame = true;
@@ -808,15 +809,17 @@ void BbyDetectorBankFactory::createAndAssign(size_t startIndex,
 
   bank->initialize(m_pixelShape,
                    // x
-                   (int)m_xPixelCount, 0, m_pixelWidth,
+                   static_cast<int>(m_xPixelCount), 0, m_pixelWidth,
                    // y
-                   (int)m_yPixelCount, 0, m_pixelHeight,
+                   static_cast<int>(m_yPixelCount), 0, m_pixelHeight,
                    // indices
-                   (int)startIndex, true, (int)m_yPixelCount);
+                   static_cast<int>(startIndex), true,
+                   static_cast<int>(m_yPixelCount));
 
   for (size_t x = 0; x < m_xPixelCount; ++x)
     for (size_t y = 0; y < m_yPixelCount; ++y)
-      m_instrument->markAsDetector(bank->getAtXY((int)x, (int)y).get());
+      m_instrument->markAsDetector(
+          bank->getAtXY(static_cast<int>(x), static_cast<int>(y)).get());
 
   Kernel::V3D center(m_center);
   rot.rotate(center);

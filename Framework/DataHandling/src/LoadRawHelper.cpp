@@ -1288,7 +1288,7 @@ bool LoadRawHelper::isAscii(const std::string &filename) {
   // Call it a binary file if we find a non-ascii character in the first 256
   // bytes of the file.
   for (char *p = data; p < pend; ++p) {
-    unsigned long ch = (unsigned long)*p;
+    unsigned long ch = static_cast<unsigned long>(*p);
     if (!(ch <= 0x7F)) {
       return false;
     }

@@ -85,11 +85,14 @@ void BinaryOperateMasks::exec() {
 
     unsigned int binop;
     if (op == "AND") {
-      binop = (unsigned int)Mantid::DataObjects::BinaryOperator::AND;
+      binop =
+          static_cast<unsigned int>(Mantid::DataObjects::BinaryOperator::AND);
     } else if (op == "OR") {
-      binop = (unsigned int)Mantid::DataObjects::BinaryOperator::OR;
+      binop =
+          static_cast<unsigned int>(Mantid::DataObjects::BinaryOperator::OR);
     } else if (op == "XOR") {
-      binop = (unsigned int)Mantid::DataObjects::BinaryOperator::XOR;
+      binop =
+          static_cast<unsigned int>(Mantid::DataObjects::BinaryOperator::XOR);
     } else {
       binop = 1000;
     }

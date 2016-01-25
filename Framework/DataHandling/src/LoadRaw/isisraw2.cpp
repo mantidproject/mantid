@@ -152,7 +152,7 @@ bool ISISRAW2::readData(FILE *file, int i) {
   int res = ISISRAW::ioRAW(file, outbuff, nwords, true);
   if (res != 0)
     return false;
-  byte_rel_expn(outbuff, nwords, 0, (int *)dat1, t_ntc1 + 1);
+  byte_rel_expn(outbuff, nwords, 0, reinterpret_cast<int *>(dat1), t_ntc1 + 1);
   return true;
 }
 

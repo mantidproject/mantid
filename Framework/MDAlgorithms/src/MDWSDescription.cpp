@@ -82,7 +82,7 @@ void MDWSDescription::buildFromMatrixWS(
 
   // number of MD ws dimensions is the sum of n-matrix dimensions and dimensions
   // coming from additional coordinates
-  m_NDims = nMatrixDim + (unsigned int)m_AddCoord.size();
+  m_NDims = nMatrixDim + static_cast<unsigned int>(m_AddCoord.size());
   this->resizeDimDescriptions(m_NDims);
   // check if all MD dimensions descriptors are set properly
   if (m_NDims != m_DimNames.size() || m_NDims != m_DimMin.size()) {
@@ -142,7 +142,7 @@ Kernel::Matrix<double> MDWSDescription::getGoniometerMatr() const {
 */
 void MDWSDescription::buildFromMDWS(
     const API::IMDEventWorkspace_const_sptr &pWS) {
-  m_NDims = (unsigned int)pWS->getNumDims();
+  m_NDims = static_cast<unsigned int>(pWS->getNumDims());
   // prepare all arrays:
   m_DimNames.resize(m_NDims);
   m_DimIDs.resize(m_NDims);

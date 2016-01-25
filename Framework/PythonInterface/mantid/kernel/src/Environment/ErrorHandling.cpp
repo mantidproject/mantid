@@ -53,7 +53,7 @@ void throwRuntimeError(const bool withTrace) {
     msg << "Unknown exception has occurred.";
   }
   if (withTrace) {
-    tracebackToMsg(msg, (PyTracebackObject *)(traceback));
+    tracebackToMsg(msg, reinterpret_cast<PyTracebackObject *>(traceback));
   }
 
   // Ensure we decrement the reference count on the traceback and exception
