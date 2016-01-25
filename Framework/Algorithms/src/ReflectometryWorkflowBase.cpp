@@ -439,17 +439,21 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
   return detectorWS;
 }
 
-MatrixWorkspace_sptr ReflectometryWorkflowBase::makeUnityWorkspace(const std::vector<double>& x) {
-    auto createWorkspaceAlg = this->createChildAlgorithm("CreateWorkspace");
-    createWorkspaceAlg->initialize();
-    createWorkspaceAlg->setProperty("DataX", x);
-    createWorkspaceAlg->setProperty("DataY", std::vector<double>(x.size()-1, 1.0));
-    createWorkspaceAlg->setProperty("NSpec", 1);
-    createWorkspaceAlg->setProperty("DataE", std::vector<double>(x.size()-1, 0.0));
-    createWorkspaceAlg->setProperty("UnitX", "Wavelength");
-    createWorkspaceAlg->execute();
-    MatrixWorkspace_sptr unityWorkspace = createWorkspaceAlg->getProperty("OutputWorkspace");
-    return unityWorkspace;
+MatrixWorkspace_sptr
+ReflectometryWorkflowBase::makeUnityWorkspace(const std::vector<double> &x) {
+  auto createWorkspaceAlg = this->createChildAlgorithm("CreateWorkspace");
+  createWorkspaceAlg->initialize();
+  createWorkspaceAlg->setProperty("DataX", x);
+  createWorkspaceAlg->setProperty("DataY",
+                                  std::vector<double>(x.size() - 1, 1.0));
+  createWorkspaceAlg->setProperty("NSpec", 1);
+  createWorkspaceAlg->setProperty("DataE",
+                                  std::vector<double>(x.size() - 1, 0.0));
+  createWorkspaceAlg->setProperty("UnitX", "Wavelength");
+  createWorkspaceAlg->execute();
+  MatrixWorkspace_sptr unityWorkspace =
+      createWorkspaceAlg->getProperty("OutputWorkspace");
+  return unityWorkspace;
 }
 
 /**

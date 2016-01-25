@@ -128,8 +128,8 @@ void CreateTransmissionWorkspaceAuto::exec() {
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<std::vector<double>>("Params");
-  auto i0_monitor_index = static_cast<int>(
-      checkForOptionalDefault("I0MonitorIndex", instrument, Mantid::EMPTY_INT(), "I0MonitorIndex"));
+  auto i0_monitor_index = static_cast<int>(checkForOptionalDefault(
+      "I0MonitorIndex", instrument, Mantid::EMPTY_INT(), "I0MonitorIndex"));
 
   std::string processing_commands;
   if (this->getPointerToProperty("ProcessingInstructions")->isDefault()) {

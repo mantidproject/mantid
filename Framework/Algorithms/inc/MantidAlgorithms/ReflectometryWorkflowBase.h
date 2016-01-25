@@ -111,7 +111,7 @@ private:
                const int monitorIndex, const MinMax &backgroundMinMax);
 
   /// Make a unity workspace
-  API::MatrixWorkspace_sptr makeUnityWorkspace(const std::vector<double>& x);
+  API::MatrixWorkspace_sptr makeUnityWorkspace(const std::vector<double> &x);
 };
 
 } // namespace Algorithms
