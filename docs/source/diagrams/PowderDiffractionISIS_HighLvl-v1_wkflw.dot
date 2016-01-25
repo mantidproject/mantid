@@ -1,0 +1,43 @@
+digraph PowderDiffractionISIS {
+  label="Powder Diffraction ISIS Higher Level"
+  $global_style
+
+  Focus_All_Start             [label="Focus All (Run)"]
+
+  subgraph processes {
+    $process_style
+
+    Focus_All_LoadSac1        [label="Load Sac Eff"]
+    Focus_All_LoadSac2        [label="Load Sac Eff"]
+    Focus_All_C_Vana          [label="Create Vana"]
+    Focus_All_Focus_one       [label="Start Focusing"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+
+    Focus_All_LoadNexusProcessed          [label="LoadNexusProcessed"]
+  }
+
+  subgraph decisions {
+    $decision_style
+
+    Focus_All_Norm                    [label="If Normalization required"]
+    Focus_Al_ExistingV                [label="ExistingV in .pref"]
+
+  }
+
+  subgraph focus_all {
+  Focus_All_Start              -> Focus_All_Norm
+  Focus_All_Norm               -> Focus_All_LoadSac1                   [label="true"]
+  Focus_All_Norm               -> Focus_All_LoadSac2                   [label="else"]
+  Focus_All_LoadSac1           -> Focus_Al_ExistingV
+  Focus_Al_ExistingV           -> Focus_All_LoadNexusProcessed         [label="load"]
+  Focus_Al_ExistingV           -> Focus_All_C_Vana                     [label="no"]
+  Focus_All_LoadSac2           -> Focus_All_Focus_one
+  Focus_All_LoadNexusProcessed -> Focus_All_Focus_one
+  Focus_All_C_Vana             -> Focus_All_Focus_one
+
+  }
+
+}
