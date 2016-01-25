@@ -8,6 +8,7 @@ if platform.system() == "Windows":
 
         _res_ws = None
         _sample_ws = None
+        _resnorm_ws = None
         _num_bins = None
         _num_hists = None
 
@@ -16,6 +17,8 @@ if platform.system() == "Windows":
                                 OutputWorkspace='__BayesQuasiTest_Resolution')
             self._sample_ws = Load(Filename='irs26176_graphite002_red.nxs',
                                 OutputWorkspace='__BayesQuasiTest_Sample')
+            self._resnorm_ws = Load(Filename='irs26173_graphite002_ResNorm.nxs',
+                                OutputWorkspace='__BayesQuasiTest_ResNorm')
             self._num_bins = self._sample_ws.blocksize()
             self._num_hists = self._sample_ws.getNumberHistograms()
 
@@ -180,6 +183,29 @@ if platform.system() == "Windows":
                                       Plot='None')
             self._validate_QSe_shape(result, fit_group)
             self._validate_QSe_value(result, fit_group)
+
+
+        def test_run_with_resNorm_file(self):
+            """
+            Test a simple lorentzian fit with a ResNorm file
+            """
+            fit_group, result = BayesQuasi(Program='QL',
+                                           SampleWorkspace=self._sample_ws,
+                                           ResolutionWorkspace=self._res_ws,
+                                           ResNormWorkspace=self._resnorm_ws,
+                                           MinRange=-0.547607,
+                                           MaxRange=0.543216,
+                                           SampleBins=1,
+                                           ResolutionBins=1,
+                                           Elastic=False,
+                                           Background='Sloping',
+                                           FixedWidth=False,
+                                           UseResNorm=True,
+                                           WidthFile='',
+                                           Loop=True,
+                                           Save=False,
+                                           Plot='None')
+
 
     if __name__=="__main__":
         unittest.main()
