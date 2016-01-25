@@ -78,7 +78,7 @@ void MaskBins::exec() {
   if (this->spectra_list.size() > 0) {
     const int numHist = static_cast<int>(inputWS->getNumberHistograms());
     //--- Validate spectra list ---
-    for (int wi : this->spectra_list) {
+    for (auto wi : this->spectra_list) {
       if ((wi < 0) || (wi >= numHist)) {
         std::ostringstream oss;
         oss << "One of the workspace indices specified, " << wi

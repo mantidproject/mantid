@@ -242,7 +242,7 @@ void OptimizeCrystalPlacement::exec() {
   //---------------
   std::vector<std::string> ChRunNumList;
   std::string predChar = "";
-  for (int runNum : RunNumList) {
+  for (auto runNum : RunNumList) {
     auto it1 = NOoptimizeRuns.begin();
     for (; it1 != NOoptimizeRuns.end() && *it1 != runNum; ++it1) {
     }

@@ -293,7 +293,7 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
                                       "have entries for each dimension of the "
                                       "InputWorkspace."));
   } else {
-    for (int widthEntry : widthVector) {
+    for (auto widthEntry : widthVector) {
       if (widthEntry % 2 == 0) {
         std::stringstream message;
         message << widthVectorPropertyName

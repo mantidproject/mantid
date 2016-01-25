@@ -172,7 +172,7 @@ void LoadGSASInstrumentFile::exec() {
     if (bankIds.size()) {
       // If user provided a list of banks, check that they exist in the .prm
       // file
-      for (int bankId : bankIds) {
+      for (auto bankId : bankIds) {
         if (!bankparammap.count(bankId)) {
           std::stringstream errorString;
           errorString << "Bank " << bankId << " not found in .prm file";

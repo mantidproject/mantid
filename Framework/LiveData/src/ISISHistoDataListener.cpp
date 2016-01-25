@@ -548,7 +548,7 @@ void ISISHistoDataListener::loadTimeRegimes() {
           m_monitorSpectra[i] = m_specIDs[monitorIndices[i] - 1];
         }
 
-        for (int &mon : m_monitorSpectra) {
+        for (auto &mon : m_monitorSpectra) {
           g_log.information() << "Monitor spectrum " << mon << std::endl;
         }
 
@@ -598,7 +598,7 @@ int ISISHistoDataListener::getTimeRegimeToLoad() const {
     if (m_monitorSpectra.empty())
       return 0;
     int regime = -1;
-    for (int specIt : m_specList) {
+    for (auto specIt : m_specList) {
       bool isMonitor =
           std::find(m_monitorSpectra.begin(), m_monitorSpectra.end(), specIt) !=
           m_monitorSpectra.end();

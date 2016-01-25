@@ -288,7 +288,7 @@ ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr &toCorrect,
   } else {
     auto specNumbers = getSpectrumNumbers(toCorrect);
     correctPosAlg->setProperty("SpectrumNumbersOfDetectors", specNumbers);
-    for (int specNumber : specNumbers) {
+    for (auto specNumber : specNumbers) {
       std::stringstream buffer;
       buffer << "Writing out: " << specNumber;
       g_log.notice(buffer.str());

@@ -108,7 +108,7 @@ void CreateLogTimeCorrection::getInstrumentSetup() {
 
   // 2. Get detector IDs
   std::vector<detid_t> detids = m_instrument->getDetectorIDs(true);
-  for (int &detid : detids) {
+  for (auto &detid : detids) {
     IDetector_const_sptr detector = m_instrument->getDetector(detid);
     V3D detpos = detector->getPos();
     double l2 = detpos.distance(samplepos);

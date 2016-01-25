@@ -554,7 +554,7 @@ MDNormDirectSC::removeGroupedIDs(const ExperimentInfo &exptInfo,
                                  // double to the correct size once
   std::set<detid_t> groupedIDs;
 
-  for (int curID : detIDs) {
+  for (auto curID : detIDs) {
     if (groupedIDs.count(curID) == 1)
       continue; // Already been processed
 

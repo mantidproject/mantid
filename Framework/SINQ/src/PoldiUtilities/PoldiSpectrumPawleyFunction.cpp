@@ -67,7 +67,7 @@ void PoldiSpectrumPawleyFunction::poldiFunction1D(
 
   double chopperSlitCount = static_cast<double>(m_chopperSlitOffsets.size());
 
-  for (int index : indices) {
+  for (auto index : indices) {
     std::vector<double> factors(domain.size());
 
     for (size_t i = 0; i < factors.size(); ++i) {

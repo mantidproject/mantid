@@ -316,7 +316,7 @@ void LoadDetectorsGroupingFile::setBySpectrumIDs() {
   for (gsiter = m_groupSpectraMap.begin(); gsiter != m_groupSpectraMap.end();
        ++gsiter) {
     int groupid = gsiter->first;
-    for (int specid : gsiter->second) {
+    for (auto specid : gsiter->second) {
       s2iter = s2imap.find(specid);
       if (s2iter == s2imap.end()) {
         g_log.error()
@@ -371,7 +371,7 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
   for (groupspeciter = m_groupSpectraMap.begin();
        groupspeciter != m_groupSpectraMap.end(); ++groupspeciter) {
     int groupid = groupspeciter->first;
-    for (int specid : groupspeciter->second) {
+    for (auto specid : groupspeciter->second) {
       spectrumidgroupmap.emplace(specid, groupid);
       specids.push_back(specid);
     }

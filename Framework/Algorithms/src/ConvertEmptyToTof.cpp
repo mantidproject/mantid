@@ -168,7 +168,7 @@ void ConvertEmptyToTof::validateSpectraIndices(std::vector<int> &v) {
     for (unsigned int i = 0; i < nHist; ++i)
       v[i] = i;
   } else {
-    for (int index : v) {
+    for (auto index : v) {
       if (index < 0 || static_cast<size_t>(index) >= nHist) {
         throw std::runtime_error("Spectra index out of limits: " +
                                  boost::lexical_cast<std::string>(index));
@@ -193,7 +193,7 @@ void ConvertEmptyToTof::validateChannelIndices(std::vector<int> &v) {
     for (unsigned int i = 0; i < blockSize; ++i)
       v[i] = i;
   } else {
-    for (int &index : v) {
+    for (auto &index : v) {
       if (index < 0 || static_cast<size_t>(index) >= blockSize) {
         throw std::runtime_error("Channel index out of limits: " +
                                  boost::lexical_cast<std::string>(index));
@@ -219,7 +219,7 @@ std::map<int, int> ConvertEmptyToTof::findElasticPeakPositions(
 
   g_log.information() << "Peak detection, search for peak " << std::endl;
 
-  for (int spectrumIndex : spectraIndices) {
+  for (auto spectrumIndex : spectraIndices) {
 
     const Mantid::MantidVec &thisSpecY = m_inputWS->dataY(spectrumIndex);
 

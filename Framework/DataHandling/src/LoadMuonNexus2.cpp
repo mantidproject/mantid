@@ -254,7 +254,7 @@ void LoadMuonNexus2::doExec() {
 
     // Read in the spectra in the optional list parameter, if set
     if (m_list) {
-      for (int spec : m_spec_list) {
+      for (auto spec : m_spec_list) {
         int k = index_spectrum[spec]; // if spec not found k is 0
         loadData(counts, timeBins, counter, period, k, localWorkspace);
         localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[k]);

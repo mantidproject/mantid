@@ -248,7 +248,7 @@ void LoadILLAscii::loadsDataIntoTheWS(API::MatrixWorkspace_sptr &thisWorkspace,
   thisWorkspace->dataX(0)[1] = m_wavelength + 0.001;
 
   size_t spec = 0;
-  for (int value : thisSpectrum) {
+  for (auto value : thisSpectrum) {
 
     if (spec > 0) {
       // just copy the time binning axis to every spectra

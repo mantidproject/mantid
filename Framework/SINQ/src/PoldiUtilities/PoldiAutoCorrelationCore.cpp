@@ -572,7 +572,7 @@ PoldiAutoCorrelationCore::getDistances(const std::vector<int> &elements) const {
   std::vector<double> distances;
   distances.reserve(elements.size());
 
-  for (int element : elements) {
+  for (auto element : elements) {
     distances.push_back(chopperDistance +
                         m_detector->distanceFromSample(element));
   }
@@ -681,7 +681,7 @@ double PoldiAutoCorrelationCore::getSumOfCounts(
   double sum = 0.0;
 
   for (int t = 0; t < timeBinCount; ++t) {
-    for (int detectorElement : detectorElements) {
+    for (auto detectorElement : detectorElements) {
       sum += getCounts(detectorElement, t);
     }
   }

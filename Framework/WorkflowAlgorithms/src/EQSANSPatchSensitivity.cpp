@@ -99,7 +99,7 @@ void EQSANSPatchSensitivity::exec() {
 
       // Apply patch
       progress(0.91, "Applying patch");
-      for (int patched_id : patched_ids) {
+      for (auto patched_id : patched_ids) {
         const Geometry::ComponentID det =
             inputWS->getDetector(patched_id)->getComponentID();
         try {

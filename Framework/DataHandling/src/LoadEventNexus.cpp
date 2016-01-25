@@ -2501,7 +2501,7 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
     if (!m_specList.empty()) {
       int i = 0;
       std::vector<int32_t> spec_temp, udet_temp;
-      for (int &element : spec) {
+      for (auto &element : spec) {
         if (find(m_specList.begin(), m_specList.end(), element) !=
             m_specList.end()) // spec element *it is not in spec_list
         {

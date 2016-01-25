@@ -531,7 +531,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
 
     std::vector<size_t> &wsindexes = sit->second;
 
-    for (int detid : detids) {
+    for (auto detid : detids) {
       auto ind = detIdToWiMap.find(detid);
       if (ind != detIdToWiMap.end()) {
         size_t wsid = ind->second;
@@ -559,7 +559,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
 
     std::vector<size_t> &wsindexes = sit->second;
 
-    for (int specid : spectra) {
+    for (auto specid : spectra) {
       auto ind = specs2index.find(specid);
       if (ind != specs2index.end()) {
         size_t wsid = ind->second;

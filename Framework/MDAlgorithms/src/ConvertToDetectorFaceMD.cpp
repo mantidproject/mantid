@@ -157,7 +157,7 @@ ConvertToDetectorFaceMD::getBanks() {
     }
   } else {
     // -- Find detectors using the numbers given ---
-    for (int &bankNum : bankNums) {
+    for (auto &bankNum : bankNums) {
       std::string bankName =
           "bank" + Mantid::Kernel::Strings::toString(bankNum);
       IComponent_const_sptr comp = inst->getComponentByName(bankName);

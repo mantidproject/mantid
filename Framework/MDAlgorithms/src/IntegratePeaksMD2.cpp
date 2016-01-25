@@ -714,7 +714,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 void IntegratePeaksMD2::calculateE1(Geometry::Instrument_const_sptr inst) {
   std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
 
-  for (int &detectorID : detectorIDs) {
+  for (auto &detectorID : detectorIDs) {
     Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(detectorID);
     if (det->isMonitor())
       continue; // skip monitor

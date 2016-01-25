@@ -125,7 +125,7 @@ void LoadFullprofResolution::exec() {
   if (useBankIDsInFile)
     sort(vec_bankinirf.begin(), vec_bankinirf.end());
 
-  for (int bank : vec_bankinirf)
+  for (auto bank : vec_bankinirf)
     g_log.debug() << "Irf containing bank " << bank << ".\n";
 
   // Bank-workspace correspondence
@@ -148,7 +148,7 @@ void LoadFullprofResolution::exec() {
 
     // Deal with banks
     sort(outputbankids.begin(), outputbankids.end());
-    for (int outputbankid : outputbankids) {
+    for (auto outputbankid : outputbankids) {
       if (outputbankid < 0) {
         g_log.warning() << "Input bank ID (" << outputbankid
                         << ") is negative.  It is not allowed and is  ignored. "
@@ -358,7 +358,7 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
 
   g_log.debug() << "[DB1112] Number of bank IDs = " << banks.size() << ", "
                 << "Number of ranges = " << bankstartindexmap.size() << endl;
-  for (int &bank : banks) {
+  for (auto &bank : banks) {
     g_log.debug() << "Bank " << bank << " From line " << bankstartindexmap[bank]
                   << " to " << bankendindexmap[bank] << endl;
   }

@@ -317,7 +317,7 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
               m_dwavelength);
 
   // Store detector pixels
-  for (int count : data) {
+  for (auto count : data) {
     // Data uncertainties, computed according to the HFIR/IGOR reduction code
     // The following is what I would suggest instead...
     // error = count > 0 ? sqrt((double)count) : 0.0;

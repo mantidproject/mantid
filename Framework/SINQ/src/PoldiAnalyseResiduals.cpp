@@ -52,13 +52,12 @@ const std::string PoldiAnalyseResiduals::summary() const {
 double PoldiAnalyseResiduals::sumCounts(
     const DataObjects::Workspace2D_sptr &workspace,
     const std::vector<int> &workspaceIndices) const {
-  double sum = 0.0;
-  for (int workspaceIndice : workspaceIndices) {
-    const MantidVec &counts = workspace->readY(workspaceIndice);
-    sum += std::accumulate(counts.begin(), counts.end(), 0.0);
-  }
-
-  return sum;
+  return std::accumulate(
+      workspaceIndices.begin(), workspaceIndices.end(), 0.0,
+      [&workspace](double sum, int workspaceIndex) {
+        const MantidVec &counts = workspace->readY(workspaceIndex);
+        return sum + std::accumulate(counts.begin(), counts.end(), 0.0);
+      });
 }
 
 /// Counts the number of values in each spectrum specified by the list of
@@ -66,13 +65,12 @@ double PoldiAnalyseResiduals::sumCounts(
 size_t PoldiAnalyseResiduals::numberOfPoints(
     const DataObjects::Workspace2D_sptr &workspace,
     const std::vector<int> &workspaceIndices) const {
-  size_t sum = 0;
-  for (int workspaceIndice : workspaceIndices) {
-    const MantidVec &counts = workspace->readY(workspaceIndice);
-    sum += counts.size();
-  }
-
-  return sum;
+  return std::accumulate(
+      workspaceIndices.begin(), workspaceIndices.end(), size_t{0},
+      [&workspace](size_t sum, int workspaceIndex) {
+        const MantidVec &counts = workspace->readY(workspaceIndex);
+        return sum + counts.size();
+      });
 }
 
 /// Adds the specified value to all spectra specified by the given workspace
@@ -80,8 +78,8 @@ size_t PoldiAnalyseResiduals::numberOfPoints(
 void PoldiAnalyseResiduals::addValue(
     DataObjects::Workspace2D_sptr &workspace, double value,
     const std::vector<int> &workspaceIndices) const {
-  for (int workspaceIndice : workspaceIndices) {
-    MantidVec &counts = workspace->dataY(workspaceIndice);
+  for (auto workspaceIndex : workspaceIndices) {
+    MantidVec &counts = workspace->dataY(workspaceIndex);
     for (double &count : counts) {
       count += value;
     }

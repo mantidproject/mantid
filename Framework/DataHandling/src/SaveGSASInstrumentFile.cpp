@@ -551,7 +551,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
   stringstream db1ss;
   db1ss << "[DBx912] Number of banks in profile table = " << vecbankindex.size()
         << " containing bank ";
-  for (unsigned int bankIndex : vecbankindex)
+  for (auto bankIndex : vecbankindex)
     db1ss << bankIndex << ", ";
   g_log.information(db1ss.str());
 
@@ -703,7 +703,7 @@ void SaveGSASInstrumentFile::convertToGSAS(
     throw runtime_error("Not set up yet!");
 
   // Set up min-dsp, max-tof
-  for (unsigned int bankid : outputbankids) {
+  for (auto bankid : outputbankids) {
     if (!m_configuration->hasBank(bankid))
       throw runtime_error(
           "Chopper configuration does not have some certain bank.");
@@ -722,7 +722,7 @@ void SaveGSASInstrumentFile::convertToGSAS(
   //  Convert and write
   vector<unsigned int> banks = outputbankids;
   sort(banks.begin(), banks.end());
-  for (unsigned int bankid : banks) {
+  for (auto bankid : banks) {
     if (m_configuration->hasBank(bankid)) {
       buildGSASTabulatedProfile(bankprofilemap, bankid);
       writePRMSingleBank(bankprofilemap, bankid, gsasinstrfilename);

@@ -123,7 +123,7 @@ void SaveNexusProcessed::getSpectrumList(
   } else if (list) {
     spec_max = 0;
     spec_min = numberOfHist - 1;
-    for (int s : spec_list) {
+    for (auto s : spec_list) {
       if (s < 0)
         continue;
       spec.push_back(s);

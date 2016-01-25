@@ -627,7 +627,7 @@ void MatrixWorkspace::getSpectraFromDetectorIDs(
   spectraList.clear();
 
   // Try every detector in the list
-  for (int detId : detIdList) {
+  for (auto detId : detIdList) {
     bool foundDet = false;
     specid_t foundSpecNum = 0;
 
@@ -1619,7 +1619,7 @@ void MatrixWorkspace::saveSpectraMapNexus(
     const ::NeXus::NXcompression compression) const {
   // Count the total number of detectors
   std::size_t nDetectors = 0;
-  for (int index : spec) {
+  for (auto index : spec) {
     nDetectors +=
         this->getSpectrum(static_cast<size_t>(index))->getDetectorIDs().size();
   }

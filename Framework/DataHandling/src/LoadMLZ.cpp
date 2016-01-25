@@ -138,7 +138,7 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
   g_log.debug() << "Number of masked detectors: " << masked_detectors.size()
                 << std::endl;
 
-  for (int masked_detector : masked_detectors) {
+  for (auto masked_detector : masked_detectors) {
     g_log.debug() << "List of masked detectors: ";
     g_log.debug() << masked_detector;
     g_log.debug() << ", ";

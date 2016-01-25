@@ -172,7 +172,7 @@ void CalculateCoverageDGS::exec() {
   auto instrument = inputWS->getInstrument();
   std::vector<detid_t> detIDS = instrument->getDetectorIDs(true);
   std::vector<double> tt, phi;
-  for (int &id : detIDS) {
+  for (auto &id : detIDS) {
     auto detector = instrument->getDetector(id);
     if (!detector->isMasked()) {
       tt.push_back(detector->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));

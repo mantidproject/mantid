@@ -308,7 +308,7 @@ bool SymmetryOperationSymbolParser::isValidMatrixRow(
     const std::vector<int> &matrixRow) {
   int nulls = 0;
 
-  for (int element : matrixRow) {
+  for (auto element : matrixRow) {
     if (abs(element) > 1) {
       return false;
     } else if (element == 0) {
