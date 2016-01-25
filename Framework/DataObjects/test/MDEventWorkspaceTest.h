@@ -587,7 +587,7 @@ public:
     ew->getLinePlot(start, end, NoNormalization, x, y, e);
     // Masked data is omitted
     TS_ASSERT_EQUALS(y.size(), 25);
-    TS_ASSERT_EQUALS(y[5], 3.0);        // Unmasked data
+    TS_ASSERT_EQUALS(y[5], 3.0); // Unmasked data
   }
 
   void test_that_sets_default_normalization_flags_to_volume_normalization() {
