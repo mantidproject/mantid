@@ -101,10 +101,8 @@ bool Quasi::validate() {
   // check eMin and eMax values
   const auto eMin = m_dblManager->value(m_properties["EMin"]);
   const auto eMax = m_dblManager->value(m_properties["EMax"]);
-  if (eMin > eMax)
-	  errors.append("EMin must be less than EMax.\n");
-  if (eMin == eMax)
-	  errors.append("EMin can not be equal to EMax.\n");
+  if (eMin >= eMax)
+	  errors.append("EMin must be strictly less than EMax.\n");
 
   // Create and show error messages
   errors.append(uiv.generateErrorMessage());
