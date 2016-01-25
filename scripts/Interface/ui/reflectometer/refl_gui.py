@@ -282,7 +282,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         #first check if the table has been changed before clearing it
         if self.mod_flag:
             ret, _saved = self._save_check()
-            if ret == QtGui.QMessageBox.Cancel:
+            if ret == QtGui.QMessageBox.RejectRole:
                 return
         self.current_table = None
 
