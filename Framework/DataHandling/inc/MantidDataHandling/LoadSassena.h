@@ -82,7 +82,7 @@ protected:
   herr_t dataSetInfo(const hid_t &h5file, const std::string setName,
                      hsize_t *dims) const;
   /// Read dataset data to a buffer ot type double
-  void dataSetDouble(const hid_t &h5file, const std::string setName,
+  herr_t dataSetDouble(const hid_t &h5file, const std::string setName,
                      double *buf);
   /// Load qvectors dataset, calculate modulus of vectors
   const MantidVec loadQvectors(const hid_t &h5file,
