@@ -122,10 +122,11 @@ SourceListPkt::SourceListPkt(const SourceListPkt &pkt) : Packet(pkt) {}
 
 BankedEventPkt::BankedEventPkt(const uint8_t *data, uint32_t len)
     : Packet(data, len),
-      m_fields(reinterpret_cast<const uint32_t *>(payload())), m_curEvent(nullptr),
-      m_lastFieldIndex(0), m_curFieldIndex(0), m_sourceStartIndex(0),
-      m_bankCount(0), m_TOFOffset(0), m_isCorrected(false), m_bankNum(0),
-      m_bankStartIndex(0), m_bankId(0), m_eventCount(0) {
+      m_fields(reinterpret_cast<const uint32_t *>(payload())),
+      m_curEvent(nullptr), m_lastFieldIndex(0), m_curFieldIndex(0),
+      m_sourceStartIndex(0), m_bankCount(0), m_TOFOffset(0),
+      m_isCorrected(false), m_bankNum(0), m_bankStartIndex(0), m_bankId(0),
+      m_eventCount(0) {
   if (m_payload_len < (4 * sizeof(uint32_t)))
     throw invalid_packet("BankedEvent packet is too short");
 
