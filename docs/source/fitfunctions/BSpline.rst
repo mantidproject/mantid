@@ -15,12 +15,6 @@ the input between them.
 First and second derivatives from the spline can be calculated by using
 the derivative1D function.
 
-BSpline function takes a set of attributes and a set of parameters. The
-first attrbiute is 'n' which has integer type and sets the number of
-interpolation points. The parameter names have the form 'yi' where 'y'
-is letter 'y' and 'i' is the parameter's index starting from 0 and have
-the type double. Likewise, the attribute names have the form 'xi'.
-
 A BSpline is a function :math:`f(x)` of order N, defined between an interval :math:`a \leqslant x \leqslant b`.
 When using BSplines for interpolation or for fitting, we essentially chain BSplines together so that each
 spline passes through the breakpoints in that interval.
@@ -41,26 +35,49 @@ Our BSpline will be defined as the following:
                                  f_2(x)& x_1 \leq x \leq x_2 \\
                                \end{cases}
                              
+We can write our :math:`B(x)` function as a series :math:`B(x) = \sum_{i=0}^{n+k-2} a_i f_i(x)`
+
+where :math:`a_i` is the coefficient of the BSpline. This coefficient maps to our fitting parameters found below.
+The coefficients :math:`a_0` to :math:`a_i` can be readily retrieved from a least-squares fit.
+
 To make our BSpline piecewise-smooth we must ensure that these conditions are satisfied:
 
 .. math::
-
+    
+    f_1(x_0) = y_0\\
+    f_2(x_2) = y_2\\
     \frac{df_1}{dx}(x_1) = \frac{df_2}{dx}(x_1)\\
     \frac{d^2 f_1}{dx^2}(x_1) = \frac{d^2 f_2}{dx^2}(x_1)\\
-    
+
 This point of smoothness is represented by the red circle in the graph below of our BSpline function :math:`B(x)`
       
 .. image:: ../images/BSplineQuadraticExample.jpg
-    :width: 600px
+    :width: 800px
     :align: center
-    :height: 400px
+    :height: 600px
     :alt: quadratic example of BSpline
 
 BSplines and Interpolation
 --------------------------
+BSplines are commonly used when interpolating between points. An interpolation is different to a fit as 
+it uses all of the data points to connect a straight line through them. It acts as if all of your data points
+are also breakpoints and a smooth spline of order N will connect the points together.
 
 BSplines and Fitting
 --------------------
+
+Fitting with a BSpline is different to interpolation as it requires your number of breakpoints to be less than your number
+of data points. The reason being, the BSplines will attempt to fit close to the data points but might only pass through
+some of the data points. It is not necessarily going to pass through all data points, only passing through breakpoints is gauranteed.
+
+An example of a fit using BSplines of order 3 can be seen in the image below, our breakpoints have been highlighted in green.
+The original dataset is in black, while the calculated fit using 4 breakpoints is in red.
+
+.. image:: ../images/BSplineFittingExample.png
+    :width: 800px
+    :align: center
+    :height: 600px
+    :alt: fitting example using BSplines
 
 .. attributes::
 

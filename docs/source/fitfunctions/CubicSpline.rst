@@ -27,6 +27,7 @@ the type double. Likewise, the attribute names have the form 'xi'.
    x0;Double;\-;Position of first exterior breakpoint
    x1;Double;\-;Position of the interior breakpoints
    x2;Double;\-;Position of the last exterior breakpoint
+
 .. properties::
 
 .. categories::
