@@ -560,13 +560,23 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
     e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
     return;
   } else {
-    // Get the first point
+    // Get the first unmasked point
     std::set<coord_t>::iterator it;
     it = boundaries.begin();
 
-    coord_t lastLinePos = *it;
-    VMD lastPos = start + (dir * lastLinePos);
+    coord_t lastLinePos;
+    size_t linearIndex;
+    VMD lastPos;
+    do {
+      lastLinePos = *it;
+      lastPos = start + (dir * lastLinePos);
+      linearIndex = this->getLinearIndexAtCoord(lastPos.getBareArray());
+      ++it;
+    } while (this->getIsMaskedAt(linearIndex));
+    --it; // Go back to before the unmasked region
+    lastLinePos = *it;
     x.push_back(lastLinePos);
+    lastPos = start + (dir * lastLinePos);
 
     ++it;
 
@@ -581,7 +591,7 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
       VMD middle = (pos + lastPos) * 0.5;
 
       // Find the signal in this bin
-      size_t linearIndex = this->getLinearIndexAtCoord(middle.getBareArray());
+      linearIndex = this->getLinearIndexAtCoord(middle.getBareArray());
       if (linearIndex < m_length) {
 
         // Is the signal here masked?

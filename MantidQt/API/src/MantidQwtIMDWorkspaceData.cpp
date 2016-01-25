@@ -70,7 +70,6 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
         if (dim->getDimensionId() == alongDim)
         {
           // All the way through in the single dimension
-          // TODO these need to exclude masked data
           m_start[d] = dim->getMinimum();
           m_end[d] = dim->getMaximum();
         }
