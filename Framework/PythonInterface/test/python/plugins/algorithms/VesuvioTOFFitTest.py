@@ -20,7 +20,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
         # Cache a TOF workspace
         self.__class__._test_ws = \
             vesuvio.load_and_crop_data(runs="15039-15045",
-                                                ip_file="Vesuvio_IP_file_test",
+                                                ip_file="Vesuvio_IP_file_test.par",
                                                 spectra="135-136")
 
     # -------------- Success cases ------------------
