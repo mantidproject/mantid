@@ -72,6 +72,8 @@ class VesuvioPreFit(VesuvioBase):
         # The output is a tuple of 2 arrays where the indices from each array are paired to
         # give the correct index in the original 2D array.
         for ws_index, pt_index in zip(indices[0], indices[1]):
+            ws_index = int(ws_index)
+            pt_index = int(pt_index)
             data.dataY(ws_index)[pt_index] = 0.0
             data.dataE(ws_index)[pt_index] = 0.0
 
