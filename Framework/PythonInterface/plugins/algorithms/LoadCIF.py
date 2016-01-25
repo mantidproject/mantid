@@ -253,10 +253,13 @@ class LoadCIF(PythonAlgorithm):
         crystalStructure = builder.getCrystalStructure()
 
         self.log().information('''Loaded the following crystal structure:
-                        Unit cell: {0}
-                        Space group: {1}
-                        Atoms: {2}
-                '''.format(builder.unitCell, builder.spaceGroup, builder.atoms))
+  Unit cell:
+    {0}
+  Space group:
+    {1}
+  Atoms:
+    {2}
+'''.format(builder.unitCell, builder.spaceGroup, '\n    '.join(builder.atoms.split(';'))))
 
         return crystalStructure
 
