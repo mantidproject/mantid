@@ -96,21 +96,28 @@ def GetResNorm(resnormWS,ngrp):
     return dtn,xsc
 
 def ReadNormFile(readRes,resnormWS,nsam):            # get norm & scale values
+    resnorm_root = resnormWS
+    # Obtain root of resnorm group name
+    if '_Intensity' in resnormWS:
+        resnorm_root = resnormWS[:-10]
+    if '_Stretch' in resnormWS:
+        resnorm_root = resnormWS[:-8]
+
     if readRes:                   # use ResNorm file option=o_res
-        Xin = mtd[resnormWS+'_Intensity'].readX(0)
+        Xin = mtd[resnorm_root+'_Intensity'].readX(0)
         nrm = len(Xin)                        # no. points from length of x array
         if nrm == 0:
             raise ValueError('ResNorm file has no Intensity points')
-        Xin = mtd[resnormWS+'_Stretch'].readX(0)  # no. points from length of x array
+        Xin = mtd[resnorm_root+'_Stretch'].readX(0)  # no. points from length of x array
         if len(Xin) == 0:
             raise ValueError('ResNorm file has no xscale points')
         if nrm != nsam:                # check that no. groups are the same
             raise ValueError('ResNorm groups (' +str(nrm) + ') not = Sample (' +str(nsam) +')')
         else:
-            dtn,xsc = GetResNorm(resnormWS,0)
+            dtn,xsc = GetResNorm(resnorm_root,0)
     else:
         # do not use ResNorm file
-        dtn,xsc = GetResNorm(resnormWS,nsam)
+        dtn,xsc = GetResNorm(resnorm_root,nsam)
     return dtn,xsc
 
 #Reads in a width ASCII file
