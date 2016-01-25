@@ -214,6 +214,23 @@ public:
     point.push_back(-5.0);
     TS_ASSERT(!p1.isPointBounded(point));
   }
+
+  void test_isPointInside_vectorversion() {
+    // Plane where x < 5
+    coord_t normal1[2] = {-1., 0};
+    coord_t point1[2] = {5., 0};
+    MDPlane p1(2, normal1, point1);
+    std::vector<coord_t> point;
+    point.clear();
+    point.push_back(4.0);
+    point.push_back(12.0);
+    TS_ASSERT(p1.isPointInside(point));
+
+    point.clear();
+    point.push_back(6.0);
+    point.push_back(-5.0);
+    TS_ASSERT(!p1.isPointInside(point));
+  }
 };
 
 //=========================================================================================

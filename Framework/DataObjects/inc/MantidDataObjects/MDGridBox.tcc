@@ -499,10 +499,13 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
                          coord_t(double(vertexIndex[d]) * m_SubBoxSize[d]);
 
       // Now check each plane to see if the vertex is bounded by it
+      // Don't include vertices on the plane to exclude case that box touches
+      // but does not intersect with the plane, as in this case no volume of the
+      // box is in the masked volume
       for (size_t p = 0; p < numPlanes; p++) {
         // Save whether this vertex is contained by this plane
         vertexContained[p * numVertices + linearVertexIndex] =
-            function->getPlane(p).isPointBounded(vertexCoord);
+            function->getPlane(p).isPointInside(vertexCoord);
       }
     }
 
