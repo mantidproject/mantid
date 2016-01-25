@@ -213,14 +213,12 @@ void IPowderDiffPeakFunction::setPeakRadius(const int &r) {
 /** Check whether a parameter is a profile parameter
   */
 bool IPowderDiffPeakFunction::hasProfileParameter(std::string paramname) {
-  std::vector<std::string>::iterator niter;
-  niter = lower_bound(m_sortedProfileParameterNames.begin(),
-                      m_sortedProfileParameterNames.end(), paramname);
-  if (niter == m_sortedProfileParameterNames.end())
+  auto candname = lower_bound(m_sortedProfileParameterNames.begin(),
+                              m_sortedProfileParameterNames.end(), paramname);
+  if (candname == m_sortedProfileParameterNames.end())
     return false;
 
-  std::string candname = *niter;
-  return !static_cast<bool>(candname.compare(paramname));
+  return candname->compare(paramname) != 0;
 }
 
 //-------------------------  External Functions
