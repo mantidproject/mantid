@@ -109,6 +109,9 @@ private:
   API::MatrixWorkspace_sptr
   toLamMonitor(const API::MatrixWorkspace_sptr &toConvert,
                const int monitorIndex, const MinMax &backgroundMinMax);
+
+  /// Make a unity workspace
+  API::MatrixWorkspace_sptr makeUnityWorkspace(const std::vector<double>& x);
 };
 
 } // namespace Algorithms

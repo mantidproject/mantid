@@ -439,6 +439,19 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
   return detectorWS;
 }
 
+MatrixWorkspace_sptr ReflectometryWorkflowBase::makeUnityWorkspace(const std::vector<double>& x) {
+    auto createWorkspaceAlg = this->createChildAlgorithm("CreateWorkspace");
+    createWorkspaceAlg->initialize();
+    createWorkspaceAlg->setProperty("DataX", x);
+    createWorkspaceAlg->setProperty("DataY", std::vector<double>(x.size()-1, 1.0));
+    createWorkspaceAlg->setProperty("NSpec", 1);
+    createWorkspaceAlg->setProperty("DataE", std::vector<double>(x.size()-1, 0.0));
+    createWorkspaceAlg->setProperty("UnitX", "Wavelength");
+    createWorkspaceAlg->execute();
+    MatrixWorkspace_sptr unityWorkspace = createWorkspaceAlg->getProperty("OutputWorkspace");
+    return unityWorkspace;
+}
+
 /**
  * Convert From a TOF workspace into a detector and monitor workspace both in
  * Lambda.
@@ -468,13 +481,7 @@ ReflectometryWorkflowBase::toLam(MatrixWorkspace_sptr toConvert,
     monitorWS = toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
   } else {
     // We don't have a monitor index, so we divide through by unity.
-    monitorWS.reset(detectorWS->clone().release());
-    // monitorWS->initialize(1, detectorWS->blocksize(),const std::size_t
-    // &YLength);
-    // Fill Counts with 1 for the monitor
-    monitorWS->dataY(0) = std::vector<double>(detectorWS->blocksize(), 1.0);
-    // Fill Errors with 0 for the monitor
-    monitorWS->dataE(0) = std::vector<double>(detectorWS->blocksize(), 0.0);
+    monitorWS = makeUnityWorkspace(detectorWS->readX(0));
   }
 
   // Rebin the Monitor Workspace to match the Detector Workspace.
