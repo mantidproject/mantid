@@ -1,4 +1,4 @@
-# pylint: disable=no-init,too-few-public-methods,wrong-import-position
+# pylint: disable=no-init,too-few-public-methods
 from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *
