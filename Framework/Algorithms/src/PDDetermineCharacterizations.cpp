@@ -156,10 +156,7 @@ bool closeEnough(const double left, const double right) {
 
   // same within 5%
   const double relativeDiff = diff * 2 / (left + right);
-  if (relativeDiff < .05)
-    return true;
-
-  return false;
+  return relativeDiff < .05;
 }
 
 /// Fill in the property manager from the correct line in the table

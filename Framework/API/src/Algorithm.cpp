@@ -1419,7 +1419,7 @@ bool Algorithm::isWorkspaceProperty(const Kernel::Property *const prop) const {
   }
   const IWorkspaceProperty *const wsProp =
       dynamic_cast<const IWorkspaceProperty *>(prop);
-  return (wsProp ? true : false);
+  return (wsProp != nullptr);
 }
 
 //=============================================================================================

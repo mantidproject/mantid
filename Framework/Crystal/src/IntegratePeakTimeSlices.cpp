@@ -1762,13 +1762,10 @@ bool DataModeHandler::isEdgePeak(const double *params, int nparams) {
   double Ry =
       lastRCRadius / CellHeight - EdgeY; // span from center  in y direction
 
-  if (Rx * Rx <
-          NStdDevPeakSpan * NStdDevPeakSpan * std::max<double>(Varx, VarxHW) ||
-      Ry * Ry <
-          NStdDevPeakSpan * NStdDevPeakSpan * std::max<double>(Vary, VaryHW))
-    return true;
-
-  return false;
+  return Rx * Rx < NStdDevPeakSpan * NStdDevPeakSpan *
+                       std::max<double>(Varx, VarxHW) ||
+         Ry * Ry <
+             NStdDevPeakSpan * NStdDevPeakSpan * std::max<double>(Vary, VaryHW);
 }
 
 /**

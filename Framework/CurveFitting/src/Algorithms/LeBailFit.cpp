@@ -1657,10 +1657,7 @@ void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap,
       } else {
         acceptchange = acceptOrDeny(currR, newR);
 
-        if (newR.Rwp < currR.Rwp)
-          prevcyclebetterR = true;
-        else
-          prevcyclebetterR = false;
+        prevcyclebetterR = newR.Rwp < currR.Rwp;
       }
 
       g_log.debug() << "[DBx317] Step " << icycle

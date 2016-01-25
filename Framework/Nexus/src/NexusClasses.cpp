@@ -593,7 +593,7 @@ Kernel::Property *NXLog::createSingleValueProperty() {
   } else if (nxType == NX_UINT8) {
     NXDataSetTyped<unsigned char> value(*this, valAttr);
     value.load();
-    bool state = (value[0] == 0) ? false : true;
+    bool state = value[0] != 0;
     prop = new Kernel::PropertyWithValue<bool>(name(), state);
   } else {
     prop = NULL;

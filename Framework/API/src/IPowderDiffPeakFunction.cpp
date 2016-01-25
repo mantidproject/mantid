@@ -220,10 +220,7 @@ bool IPowderDiffPeakFunction::hasProfileParameter(std::string paramname) {
     return false;
 
   std::string candname = *niter;
-  if (candname.compare(paramname))
-    return false;
-
-  return true;
+  return !static_cast<bool>(candname.compare(paramname));
 }
 
 //-------------------------  External Functions

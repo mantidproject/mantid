@@ -952,7 +952,7 @@ bool &MatrixWorkspace::isDistribution(bool newValue) {
 *  @return whether the workspace contains histogram data
 */
 bool MatrixWorkspace::isHistogramData() const {
-  return (readX(0).size() == blocksize() ? false : true);
+  return (readX(0).size() != blocksize());
 }
 
 /**
@@ -1097,7 +1097,7 @@ bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {
   // against throwing here).
   if (workspaceIndex >= this->getNumberHistograms())
     return false;
-  return (m_masks.find(workspaceIndex) == m_masks.end()) ? false : true;
+  return m_masks.find(workspaceIndex) != m_masks.end();
 }
 
 /** Returns the list of masked bins for a spectrum.

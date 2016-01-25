@@ -29,9 +29,7 @@ Mantid::Kernel::Logger g_log("MultipleFileProperty");
  * a "*" wild card in the file extension string passed to it.
  */
 bool doesNotContainWildCard(const std::string &ext) {
-  if (std::string::npos != ext.find("*"))
-    return false;
-  return true;
+  return std::string::npos == ext.find("*");
 }
 } // anonymous namespace
 
@@ -345,10 +343,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
         // Check for an extension.
         Poco::Path path(*unresolvedFileName);
 
-        if (path.getExtension().empty())
-          useDefaultExt = true;
-        else
-          useDefaultExt = false;
+        useDefaultExt = path.getExtension().empty();
       } catch (Poco::Exception &) {
         // Just shove the problematic filename straight into FileProperty and
         // see

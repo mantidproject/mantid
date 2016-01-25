@@ -530,11 +530,7 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws) {
     createNewWs = true;
   } else {
     bool shouldOverwrite = getProperty("OverwriteExisting");
-    if (shouldOverwrite) {
-      createNewWs = true;
-    } else {
-      createNewWs = false;
-    }
+    createNewWs = shouldOverwrite;
   }
   return createNewWs;
 }

@@ -107,11 +107,7 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
 
     // i. Determine which log to work on
     if (!nocomparison) {
-      if (times1[index1] < times2[index2]) {
-        launch1 = true;
-      } else {
-        launch1 = false;
-      }
+      launch1 = times1[index1] < times2[index2];
     }
 
     // ii. Retrieve data from source log

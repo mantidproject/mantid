@@ -356,7 +356,7 @@ bool ChangeTimeZero::checkForDateTime(const std::string &val) const {
  * @returns true if the offset has been set
  */
 bool ChangeTimeZero::isRelativeTimeShift(double offset) const {
-  return offset != m_defaultTimeShift ? true : false;
+  return offset != m_defaultTimeShift;
 }
 
 /**
@@ -365,9 +365,7 @@ bool ChangeTimeZero::isRelativeTimeShift(double offset) const {
  * @returns true if the offset has been set
  */
 bool ChangeTimeZero::isAbsoluteTimeShift(const std::string &offset) const {
-  return (offset != m_defaultAbsoluteTimeShift && checkForDateTime(offset))
-             ? true
-             : false;
+  return offset != m_defaultAbsoluteTimeShift && checkForDateTime(offset);
 }
 
 } // namespace Mantid
