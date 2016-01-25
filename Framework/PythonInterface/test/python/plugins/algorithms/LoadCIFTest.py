@@ -118,7 +118,7 @@ class CrystalStructureBuilderTestAtoms(unittest.TestCase):
                      (u'_atom_site_fract_y', [u'1/8', u'0.56(2)']),
                      (u'_atom_site_fract_z', [u'1/8', u'0.23(2)']),
                      (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
-                     (u'_atom_site_U_iso_or_equiv', [u'0.01', u'0.02'])])
+                     (u'_atom_site_u_iso_or_equiv', [u'0.01', u'0.02'])])
 
         self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
 

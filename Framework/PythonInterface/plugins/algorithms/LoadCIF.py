@@ -114,7 +114,7 @@ class CrystalStructureBuilder(object):
                                   (u'_atom_site_fract_y', True),
                                   (u'_atom_site_fract_z', True),
                                   (u'_atom_site_occupancy', False),
-                                  (u'_atom_site_U_iso_or_equiv', False)]
+                                  (u'_atom_site_u_iso_or_equiv', False)]
 
         atomFields = []
 
