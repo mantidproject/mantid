@@ -1,5 +1,5 @@
 digraph PowderDiffractionISIS {
-  label="Powder Diffraction ISIS Medium Level"
+  label="Mid-LevelPowderDiffractionISIS"
   $global_style
 
   LoadSac_Start               [label="Load Sac Eff"]
@@ -11,11 +11,23 @@ digraph PowderDiffractionISIS {
 
     VEmptyFile
     VanadiumFile
+
+    LoadSac_CorrWorkspace1        [label="Corr Workspace"]
+    LoadSac_CorrWorkspace2        [label="Corr Workspace"]
+    LoadSac_CorrWorkspace3        [label="Corr Workspace"]
+    LoadSac_CorrWorkspace4        [label="Corr Workspace"]
+    LoadSac_CorrWorkspace5        [label="Corr Workspace"]
+    LoadSac_CorrWorkspace6        [label="Corr Workspace"]
+
+    LoadSac_VanadiumWorkspace1    [label="Vanadium Workspace"]
+    LoadSac_VanadiumWorkspace2    [label="Vanadium Workspace"]
+    LoadSac_VanadiumWorkspace3    [label="Vanadium Workspace"]
+    LoadSac_VanadiumWorkspace4    [label="Vanadium Workspace"]
+
   }
 
   subgraph processes {
     $process_style
-
 
     SacEff_RunGetDataSum      [label="Load Vana (Get Data Sum)"]
 
@@ -86,11 +98,10 @@ digraph PowderDiffractionISIS {
     $decision_style
     NoSac                             [label="if NoSac"]
     Eff                               [label="if Eff"]
-    UampsotalLess                     [label="if UampsTotal < 1e-6"]
+    UampsotalLess                     [label="if Proton Charge < 1e-6"]
 
-    C_Vana_UampsotalGreater           [label="if UampsTotal > 1e-6"]
+    C_Vana_UampsotalGreater           [label="if Proton Charge > 1e-6"]
     C_Vana_NoAbs                      [label="if NoAbs"]
-
 
     Focus_one_VGrpFocus               [label="If VGrpFocus is sam"]
     Focus_one_SEmptyFile              [label="If SEmptyFile is not none"]
@@ -102,21 +113,34 @@ digraph PowderDiffractionISIS {
   subgraph load_sac_eff {
   LoadSac_Start                 -> NoSac
   NoSac                         -> LoadSac_CreateSingle_4             [label="true"]
+  LoadSac_CreateSingle_4        -> LoadSac_CorrWorkspace1
   NoSac                         -> SacEff_RunGetDataSum               [label="else"]
-  SacEff_RunGetDataSum           -> UampsotalLess
+  SacEff_RunGetDataSum          -> LoadSac_GetProtonCharge
+  LoadSac_GetProtonCharge       -> LoadSac_VanadiumWorkspace1
+  LoadSac_GetProtonCharge       -> UampsotalLess
   UampsotalLess                 -> LoadSac_CreateSingle_1             [label="true"]
+  LoadSac_CreateSingle_1        -> LoadSac_CorrWorkspace2
   UampsotalLess                 -> LoadSac_Integrate_1                [label="else"]
+  LoadSac_VanadiumWorkspace2     -> LoadSac_Integrate_1
   LoadSac_Integrate_1           -> LoadSac_MaskDetectorIf
+  LoadSac_MaskDetectorIf        -> LoadSac_NewCalFile
+  LoadSac_VanadiumWorkspace3     -> LoadSac_SolidAngle
   LoadSac_MaskDetectorIf        -> LoadSac_SolidAngle
   LoadSac_SolidAngle            -> LoadSac_CreateSingle_2
   LoadSac_CreateSingle_2        -> LoadSac_Multiply
+  LoadSac_Multiply              -> LoadSac_CorrWorkspace3
   LoadSac_Multiply              -> Eff
   Eff                           -> LoadSac_Divide_1                   [label="true"]
+  LoadSac_VanadiumWorkspace4     -> LoadSac_Divide_1
+  LoadSac_CorrWorkspace4        -> LoadSac_Divide_1
   LoadSac_Divide_1              -> LoadSac_ConvertUnits
   LoadSac_ConvertUnits          -> LoadSac_Integration
   LoadSac_Integration           -> LoadSac_Multiply_1
+  LoadSac_Multiply_1            -> LoadSac_CorrWorkspace5
+  LoadSac_CorrWorkspace5        -> LoadSac_CreateSingle_3
   LoadSac_Multiply_1            -> LoadSac_CreateSingle_3
   LoadSac_CreateSingle_3        -> LoadSac_Divide_2
+  LoadSac_Divide_2              -> LoadSac_CorrWorkspace6
 
   }
 
@@ -140,7 +164,6 @@ digraph PowderDiffractionISIS {
   C_Vana_SaveFocusedXYE         -> C_Vana_RunStripPeaks
 
   }
-
 
   subgraph focus_one {
   Focus_one_Start               -> Focus_one_RunGetDataSum
