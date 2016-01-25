@@ -2,9 +2,9 @@
 from mantid.kernel import *
 from mantid.api import *
 
-from vesuvio.algorithms.base import TableWorkspaceDictionaryFacade, VesuvioBase
-from vesuvio.fitting import parse_fit_options
-from vesuvio.instrument import VESUVIO
+from VesuvioBase import TableWorkspaceDictionaryFacade, VesuvioBase
+from VesuvioFitting import parse_fit_options
+from VesuvioInstrument import VESUVIO
 
 # Loading difference modes
 _DIFF_MODES = ("double", "single")

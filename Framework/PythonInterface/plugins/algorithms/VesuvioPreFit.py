@@ -2,7 +2,7 @@
 from mantid.kernel import *
 from mantid.api import *
 import numpy as np
-from vesuvio.algorithms.base import VesuvioBase
+from VesuvioBase import VesuvioBase
 
 
 class VesuvioPreFit(VesuvioBase):

@@ -2,8 +2,8 @@
 from string import Template
 from mantid.kernel import *
 from mantid.api import *
-from vesuvio.algorithms.base import VesuvioBase, TableWorkspaceDictionaryFacade
-from vesuvio.fitting import parse_fit_options
+from VesuvioBase import VesuvioBase, TableWorkspaceDictionaryFacade
+from VesuvioFitting import parse_fit_options
 
 #----------------------------------------------------------------------------------------
 
