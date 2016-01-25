@@ -16,6 +16,9 @@ class VesuvioTOFFit(VesuvioBase):
     def summary(self):
         return "Processes runs for Vesuvio at ISIS"
 
+    def category(self):
+        return "Inelastic\\Indirect"
+
     def PyInit(self):
         # Inputs
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),

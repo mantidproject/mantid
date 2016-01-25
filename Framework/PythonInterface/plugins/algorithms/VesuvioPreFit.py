@@ -10,6 +10,11 @@ class VesuvioPreFit(VesuvioBase):
     def summary(self):
         return "Apply preprocessing steps to loaded vesuvio data"
 
+    def category(self):
+        return "Inelastic\\Indirect"
+
+#------------------------------------------------------------------------------------------------
+
     def PyInit(self):
         # Inputs
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),

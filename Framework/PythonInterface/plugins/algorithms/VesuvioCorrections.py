@@ -39,6 +39,9 @@ class VesuvioCorrections(VesuvioBase):
     def summary(self):
         return "Apply post fitting steps to vesuvio data"
 
+    def category(self):
+        return "Inelastic\\Indirect"
+
 #------------------------------------------------------------------------------
 
     def PyInit(self):
