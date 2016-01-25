@@ -52,7 +52,7 @@ class CrystalStructureBuilder(object):
             # pylint: disable=unused-variable,invalid-name
             except RuntimeError as e:
                 raise RuntimeError(
-                    'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol' \
+                    'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol ' \
                     'to contain spaces between the components.\n' \
                     'Keys to look for: _space_group_name_H-M_alt, _symmetry_space_group_name_H-M')
 
