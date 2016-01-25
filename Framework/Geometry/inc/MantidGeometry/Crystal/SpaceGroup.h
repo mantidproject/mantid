@@ -81,8 +81,9 @@ public:
     }
 
     // Use fuzzy compare with the same condition as V3D::operator==().
-    std::sort(equivalents.begin(), equivalents.end(), FuzzyV3DLessThan());
-    equivalents.erase(std::unique(equivalents.begin(), equivalents.end()),
+    std::sort(equivalents.begin(), equivalents.end(), AtomPositionsLessThan());
+    equivalents.erase(std::unique(equivalents.begin(), equivalents.end(),
+                                  AtomPositionsEqual()),
                       equivalents.end());
 
     return equivalents;

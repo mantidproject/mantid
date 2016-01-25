@@ -126,7 +126,7 @@ public:
 
   virtual void resetFocus();
 
-  virtual std::string currentPreprocRunNo() const;
+  virtual std::vector<std::string> currentPreprocRunNo() const;
 
   virtual double rebinningTimeBin() const;
 

@@ -127,7 +127,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
 
   for (size_t k = 0; k < bankNames.size(); ++k) {
     for (int j = 0; j < pwks->getNumberPeaks(); ++j) {
-      const Geometry::IPeak &peak = pwks->getPeak((int)j);
+      const Geometry::IPeak &peak = pwks->getPeak(j);
       if (std::find(bankNames.begin(), bankNames.end(), peak.getBankName()) !=
           bankNames.end())
         if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance)) {
@@ -336,7 +336,8 @@ boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
   if (xml) {
     vector<int> detIDs = instrument->getDetectorIDs();
     MatrixWorkspace_sptr wsM = WorkspaceFactory::Instance().create(
-        "Workspace2D", detIDs.size(), (size_t)100, (size_t)100);
+        "Workspace2D", detIDs.size(), static_cast<size_t>(100),
+        static_cast<size_t>(100));
 
     Workspace2D_sptr ws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(wsM);
@@ -885,7 +886,7 @@ void SCDCalibratePanels::exec() {
         nVars--;
 
       // g_log.notice() << "      nVars=" <<nVars<< endl;
-      int NDof = ((int)ws->dataX(0).size() - nVars);
+      int NDof = (static_cast<int>(ws->dataX(0).size()) - nVars);
       NDofSum = +NDof;
 
       map<string, double> result;
@@ -901,7 +902,8 @@ void SCDCalibratePanels::exec() {
 
       //--------------------- Create Result Table Workspace-------------------
       this->progress(.92, "Creating Results table");
-      createResultWorkspace((int)Groups.size(), iGr + 1, names, params, errs);
+      createResultWorkspace(static_cast<int>(Groups.size()), iGr + 1, names,
+                            params, errs);
 
       //---------------- Create new instrument with ------------------------
       //--------------new parameters to SAVE to files---------------------
@@ -962,7 +964,7 @@ void SCDCalibratePanels::exec() {
       string prevBankName = "";
       int BankNumDef = 200;
       for (size_t q = 0; q < nData; q += 3) {
-        int pk = (int)xVals[q];
+        int pk = static_cast<int>(xVals[q]);
         const Geometry::IPeak &peak = peaksWs->getPeak(pk);
 
         string bankName = peak.getBankName();
@@ -1536,7 +1538,7 @@ void SCDCalibratePanels::CreateFxnGetValues(
     prefixStrm << "f" << g << "_";
     string prefix = prefixStrm.str();
 
-    for (int nm = 0; nm < (int)names.size(); ++nm) {
+    for (int nm = 0; nm < static_cast<int>(names.size()); ++nm) {
       if (names[nm].compare(0, prefix.length(), prefix) == 0) {
         string prm = names[nm].substr(prefix.length());
         if (FieldB.find(prm) != FieldB.end()) {

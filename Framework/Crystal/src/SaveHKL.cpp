@@ -502,7 +502,7 @@ double SaveHKL::absor_sphere(double &twoth, double &wl, double &tbar) {
   //  using the polymial coefficients, calulate astar (= 1/transmission) at
   //  theta values below and above the actual theta value.
 
-  i = (int)(theta / 5.);
+  i = static_cast<int>(theta / 5.);
   astar1 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
 
   i = i + 1;
@@ -522,7 +522,7 @@ double SaveHKL::absor_sphere(double &twoth, double &wl, double &tbar) {
   if (std::fabs(mu) < 1e-300)
     tbar = 0.0;
   else
-    tbar = -(double)std::log(trans) / mu;
+    tbar = -std::log(trans) / mu;
 
   return trans;
 }

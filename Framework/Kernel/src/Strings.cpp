@@ -475,9 +475,9 @@ float getVAXnum(const float A) {
   fmask = ((Bd.ival & 0x7f) << 16) | ((Bd.ival & 0xffff0000) >> 16);
   expt -= 128;
   fmask |= 0x800000;
-  frac = (float)fmask / 0x1000000;
+  frac = static_cast<float>(fmask) / 0x1000000;
   onum = frac * static_cast<float>(sign) * pow(2.0, expt);
-  return (float)onum;
+  return static_cast<float>(onum);
 }
 
 //------------------------------------------------------------------------------------------------

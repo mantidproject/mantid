@@ -918,7 +918,7 @@ Mantid::API::MatrixWorkspace_sptr
 createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
                                                  size_t numBins,
                                                  bool has_oriented_lattice) {
-  size_t rHist = (size_t)sqrt(double(numPixels));
+  size_t rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
   while (rHist * rHist < numPixels)
     rHist++;
 

@@ -279,7 +279,7 @@ void Integrate3DEvents::makeCovarianceMatrix(
         }
       }
       if (events.size() > 1)
-        matrix[row][col] = sum / (double)(events.size() - 1);
+        matrix[row][col] = sum / static_cast<double>(events.size() - 1);
       else
         matrix[row][col] = sum;
     }
@@ -354,7 +354,8 @@ Integrate3DEvents::stdDev(std::vector<std::pair<double, V3D>> const &events,
 
   if (count > 1) {
     double ave = sum / count;
-    stdev = sqrt((sum_sq / count - ave * ave) * (double)count / (count - 1.0));
+    stdev = sqrt((sum_sq / count - ave * ave) * static_cast<double>(count) /
+                 (count - 1.0));
   }
 
   return stdev;

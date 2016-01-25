@@ -576,290 +576,290 @@ const IonIndex &ionMap() {
  * @param ion_map A reference to the static lookup
  */
 void createIonLookup(IonIndex &ion_map) {
-  static const MagneticIon Sc0((std::string) "Sc", (uint16_t)0, j_Sc0[0],
-                               j_Sc0[1], j_Sc0[2], j_Sc0[3]);
+  static const MagneticIon Sc0((std::string) "Sc", static_cast<uint16_t>(0),
+                               j_Sc0[0], j_Sc0[1], j_Sc0[2], j_Sc0[3]);
   ion_map["Sc0"] = Sc0;
-  static const MagneticIon Sc1((std::string) "Sc", (uint16_t)1, j_Sc1[0],
-                               j_Sc1[1], j_Sc1[2], j_Sc1[3]);
+  static const MagneticIon Sc1((std::string) "Sc", static_cast<uint16_t>(1),
+                               j_Sc1[0], j_Sc1[1], j_Sc1[2], j_Sc1[3]);
   ion_map["Sc1"] = Sc1;
-  static const MagneticIon Sc2((std::string) "Sc", (uint16_t)2, j_Sc2[0],
-                               j_Sc2[1], j_Sc2[2], j_Sc2[3]);
+  static const MagneticIon Sc2((std::string) "Sc", static_cast<uint16_t>(2),
+                               j_Sc2[0], j_Sc2[1], j_Sc2[2], j_Sc2[3]);
   ion_map["Sc2"] = Sc2;
-  static const MagneticIon Ti0((std::string) "Ti", (uint16_t)0, j_Ti0[0],
-                               j_Ti0[1], j_Ti0[2], j_Ti0[3]);
+  static const MagneticIon Ti0((std::string) "Ti", static_cast<uint16_t>(0),
+                               j_Ti0[0], j_Ti0[1], j_Ti0[2], j_Ti0[3]);
   ion_map["Ti0"] = Ti0;
-  static const MagneticIon Ti1((std::string) "Ti", (uint16_t)1, j_Ti1[0],
-                               j_Ti1[1], j_Ti1[2], j_Ti1[3]);
+  static const MagneticIon Ti1((std::string) "Ti", static_cast<uint16_t>(1),
+                               j_Ti1[0], j_Ti1[1], j_Ti1[2], j_Ti1[3]);
   ion_map["Ti1"] = Ti1;
-  static const MagneticIon Ti2((std::string) "Ti", (uint16_t)2, j_Ti2[0],
-                               j_Ti2[1], j_Ti2[2], j_Ti2[3]);
+  static const MagneticIon Ti2((std::string) "Ti", static_cast<uint16_t>(2),
+                               j_Ti2[0], j_Ti2[1], j_Ti2[2], j_Ti2[3]);
   ion_map["Ti2"] = Ti2;
-  static const MagneticIon Ti3((std::string) "Ti", (uint16_t)3, j_Ti3[0],
-                               j_Ti3[1], j_Ti3[2], j_Ti3[3]);
+  static const MagneticIon Ti3((std::string) "Ti", static_cast<uint16_t>(3),
+                               j_Ti3[0], j_Ti3[1], j_Ti3[2], j_Ti3[3]);
   ion_map["Ti3"] = Ti3;
-  static const MagneticIon V0((std::string) "V", (uint16_t)0, j_V0[0], j_V0[1],
-                              j_V0[2], j_V0[3]);
+  static const MagneticIon V0((std::string) "V", static_cast<uint16_t>(0),
+                              j_V0[0], j_V0[1], j_V0[2], j_V0[3]);
   ion_map["V0"] = V0;
-  static const MagneticIon V1((std::string) "V", (uint16_t)1, j_V1[0], j_V1[1],
-                              j_V1[2], j_V1[3]);
+  static const MagneticIon V1((std::string) "V", static_cast<uint16_t>(1),
+                              j_V1[0], j_V1[1], j_V1[2], j_V1[3]);
   ion_map["V1"] = V1;
-  static const MagneticIon V2((std::string) "V", (uint16_t)2, j_V2[0], j_V2[1],
-                              j_V2[2], j_V2[3]);
+  static const MagneticIon V2((std::string) "V", static_cast<uint16_t>(2),
+                              j_V2[0], j_V2[1], j_V2[2], j_V2[3]);
   ion_map["V2"] = V2;
-  static const MagneticIon V3((std::string) "V", (uint16_t)3, j_V3[0], j_V3[1],
-                              j_V3[2], j_V3[3]);
+  static const MagneticIon V3((std::string) "V", static_cast<uint16_t>(3),
+                              j_V3[0], j_V3[1], j_V3[2], j_V3[3]);
   ion_map["V3"] = V3;
-  static const MagneticIon V4((std::string) "V", (uint16_t)4, j_V4[0], j_V4[1],
-                              j_V4[2], j_V4[3]);
+  static const MagneticIon V4((std::string) "V", static_cast<uint16_t>(4),
+                              j_V4[0], j_V4[1], j_V4[2], j_V4[3]);
   ion_map["V4"] = V4;
-  static const MagneticIon Cr0((std::string) "Cr", (uint16_t)0, j_Cr0[0],
-                               j_Cr0[1], j_Cr0[2], j_Cr0[3]);
+  static const MagneticIon Cr0((std::string) "Cr", static_cast<uint16_t>(0),
+                               j_Cr0[0], j_Cr0[1], j_Cr0[2], j_Cr0[3]);
   ion_map["Cr0"] = Cr0;
-  static const MagneticIon Cr1((std::string) "Cr", (uint16_t)1, j_Cr1[0],
-                               j_Cr1[1], j_Cr1[2], j_Cr1[3]);
+  static const MagneticIon Cr1((std::string) "Cr", static_cast<uint16_t>(1),
+                               j_Cr1[0], j_Cr1[1], j_Cr1[2], j_Cr1[3]);
   ion_map["Cr1"] = Cr1;
-  static const MagneticIon Cr2((std::string) "Cr", (uint16_t)2, j_Cr2[0],
-                               j_Cr2[1], j_Cr2[2], j_Cr2[3]);
+  static const MagneticIon Cr2((std::string) "Cr", static_cast<uint16_t>(2),
+                               j_Cr2[0], j_Cr2[1], j_Cr2[2], j_Cr2[3]);
   ion_map["Cr2"] = Cr2;
-  static const MagneticIon Cr3((std::string) "Cr", (uint16_t)3, j_Cr3[0],
-                               j_Cr3[1], j_Cr3[2], j_Cr3[3]);
+  static const MagneticIon Cr3((std::string) "Cr", static_cast<uint16_t>(3),
+                               j_Cr3[0], j_Cr3[1], j_Cr3[2], j_Cr3[3]);
   ion_map["Cr3"] = Cr3;
-  static const MagneticIon Cr4((std::string) "Cr", (uint16_t)4, j_Cr4[0],
-                               j_Cr4[1], j_Cr4[2], j_Cr4[3]);
+  static const MagneticIon Cr4((std::string) "Cr", static_cast<uint16_t>(4),
+                               j_Cr4[0], j_Cr4[1], j_Cr4[2], j_Cr4[3]);
   ion_map["Cr4"] = Cr4;
-  static const MagneticIon Mn0((std::string) "Mn", (uint16_t)0, j_Mn0[0],
-                               j_Mn0[1], j_Mn0[2], j_Mn0[3]);
+  static const MagneticIon Mn0((std::string) "Mn", static_cast<uint16_t>(0),
+                               j_Mn0[0], j_Mn0[1], j_Mn0[2], j_Mn0[3]);
   ion_map["Mn0"] = Mn0;
-  static const MagneticIon Mn1((std::string) "Mn", (uint16_t)1, j_Mn1[0],
-                               j_Mn1[1], j_Mn1[2], j_Mn1[3]);
+  static const MagneticIon Mn1((std::string) "Mn", static_cast<uint16_t>(1),
+                               j_Mn1[0], j_Mn1[1], j_Mn1[2], j_Mn1[3]);
   ion_map["Mn1"] = Mn1;
-  static const MagneticIon Mn2((std::string) "Mn", (uint16_t)2, j_Mn2[0],
-                               j_Mn2[1], j_Mn2[2], j_Mn2[3]);
+  static const MagneticIon Mn2((std::string) "Mn", static_cast<uint16_t>(2),
+                               j_Mn2[0], j_Mn2[1], j_Mn2[2], j_Mn2[3]);
   ion_map["Mn2"] = Mn2;
-  static const MagneticIon Mn3((std::string) "Mn", (uint16_t)3, j_Mn3[0],
-                               j_Mn3[1], j_Mn3[2], j_Mn3[3]);
+  static const MagneticIon Mn3((std::string) "Mn", static_cast<uint16_t>(3),
+                               j_Mn3[0], j_Mn3[1], j_Mn3[2], j_Mn3[3]);
   ion_map["Mn3"] = Mn3;
-  static const MagneticIon Mn4((std::string) "Mn", (uint16_t)4, j_Mn4[0],
-                               j_Mn4[1], j_Mn4[2], j_Mn4[3]);
+  static const MagneticIon Mn4((std::string) "Mn", static_cast<uint16_t>(4),
+                               j_Mn4[0], j_Mn4[1], j_Mn4[2], j_Mn4[3]);
   ion_map["Mn4"] = Mn4;
-  static const MagneticIon Fe0((std::string) "Fe", (uint16_t)0, j_Fe0[0],
-                               j_Fe0[1], j_Fe0[2], j_Fe0[3]);
+  static const MagneticIon Fe0((std::string) "Fe", static_cast<uint16_t>(0),
+                               j_Fe0[0], j_Fe0[1], j_Fe0[2], j_Fe0[3]);
   ion_map["Fe0"] = Fe0;
-  static const MagneticIon Fe1((std::string) "Fe", (uint16_t)1, j_Fe1[0],
-                               j_Fe1[1], j_Fe1[2], j_Fe1[3]);
+  static const MagneticIon Fe1((std::string) "Fe", static_cast<uint16_t>(1),
+                               j_Fe1[0], j_Fe1[1], j_Fe1[2], j_Fe1[3]);
   ion_map["Fe1"] = Fe1;
-  static const MagneticIon Fe2((std::string) "Fe", (uint16_t)2, j_Fe2[0],
-                               j_Fe2[1], j_Fe2[2], j_Fe2[3]);
+  static const MagneticIon Fe2((std::string) "Fe", static_cast<uint16_t>(2),
+                               j_Fe2[0], j_Fe2[1], j_Fe2[2], j_Fe2[3]);
   ion_map["Fe2"] = Fe2;
-  static const MagneticIon Fe3((std::string) "Fe", (uint16_t)3, j_Fe3[0],
-                               j_Fe3[1], j_Fe3[2], j_Fe3[3]);
+  static const MagneticIon Fe3((std::string) "Fe", static_cast<uint16_t>(3),
+                               j_Fe3[0], j_Fe3[1], j_Fe3[2], j_Fe3[3]);
   ion_map["Fe3"] = Fe3;
-  static const MagneticIon Fe4((std::string) "Fe", (uint16_t)4, j_Fe4[0],
-                               j_Fe4[1], j_Fe4[2], j_Fe4[3]);
+  static const MagneticIon Fe4((std::string) "Fe", static_cast<uint16_t>(4),
+                               j_Fe4[0], j_Fe4[1], j_Fe4[2], j_Fe4[3]);
   ion_map["Fe4"] = Fe4;
-  static const MagneticIon Co0((std::string) "Co", (uint16_t)0, j_Co0[0],
-                               j_Co0[1], j_Co0[2], j_Co0[3]);
+  static const MagneticIon Co0((std::string) "Co", static_cast<uint16_t>(0),
+                               j_Co0[0], j_Co0[1], j_Co0[2], j_Co0[3]);
   ion_map["Co0"] = Co0;
-  static const MagneticIon Co1((std::string) "Co", (uint16_t)1, j_Co1[0],
-                               j_Co1[1], j_Co1[2], j_Co1[3]);
+  static const MagneticIon Co1((std::string) "Co", static_cast<uint16_t>(1),
+                               j_Co1[0], j_Co1[1], j_Co1[2], j_Co1[3]);
   ion_map["Co1"] = Co1;
-  static const MagneticIon Co2((std::string) "Co", (uint16_t)2, j_Co2[0],
-                               j_Co2[1], j_Co2[2], j_Co2[3]);
+  static const MagneticIon Co2((std::string) "Co", static_cast<uint16_t>(2),
+                               j_Co2[0], j_Co2[1], j_Co2[2], j_Co2[3]);
   ion_map["Co2"] = Co2;
-  static const MagneticIon Co3((std::string) "Co", (uint16_t)3, j_Co3[0],
-                               j_Co3[1], j_Co3[2], j_Co3[3]);
+  static const MagneticIon Co3((std::string) "Co", static_cast<uint16_t>(3),
+                               j_Co3[0], j_Co3[1], j_Co3[2], j_Co3[3]);
   ion_map["Co3"] = Co3;
-  static const MagneticIon Co4((std::string) "Co", (uint16_t)4, j_Co4[0],
-                               j_Co4[1], j_Co4[2], j_Co4[3]);
+  static const MagneticIon Co4((std::string) "Co", static_cast<uint16_t>(4),
+                               j_Co4[0], j_Co4[1], j_Co4[2], j_Co4[3]);
   ion_map["Co4"] = Co4;
-  static const MagneticIon Ni0((std::string) "Ni", (uint16_t)0, j_Ni0[0],
-                               j_Ni0[1], j_Ni0[2], j_Ni0[3]);
+  static const MagneticIon Ni0((std::string) "Ni", static_cast<uint16_t>(0),
+                               j_Ni0[0], j_Ni0[1], j_Ni0[2], j_Ni0[3]);
   ion_map["Ni0"] = Ni0;
-  static const MagneticIon Ni1((std::string) "Ni", (uint16_t)1, j_Ni1[0],
-                               j_Ni1[1], j_Ni1[2], j_Ni1[3]);
+  static const MagneticIon Ni1((std::string) "Ni", static_cast<uint16_t>(1),
+                               j_Ni1[0], j_Ni1[1], j_Ni1[2], j_Ni1[3]);
   ion_map["Ni1"] = Ni1;
-  static const MagneticIon Ni2((std::string) "Ni", (uint16_t)2, j_Ni2[0],
-                               j_Ni2[1], j_Ni2[2], j_Ni2[3]);
+  static const MagneticIon Ni2((std::string) "Ni", static_cast<uint16_t>(2),
+                               j_Ni2[0], j_Ni2[1], j_Ni2[2], j_Ni2[3]);
   ion_map["Ni2"] = Ni2;
-  static const MagneticIon Ni3((std::string) "Ni", (uint16_t)3, j_Ni3[0],
-                               j_Ni3[1], j_Ni3[2], j_Ni3[3]);
+  static const MagneticIon Ni3((std::string) "Ni", static_cast<uint16_t>(3),
+                               j_Ni3[0], j_Ni3[1], j_Ni3[2], j_Ni3[3]);
   ion_map["Ni3"] = Ni3;
-  static const MagneticIon Ni4((std::string) "Ni", (uint16_t)4, j_Ni4[0],
-                               j_Ni4[1], j_Ni4[2], j_Ni4[3]);
+  static const MagneticIon Ni4((std::string) "Ni", static_cast<uint16_t>(4),
+                               j_Ni4[0], j_Ni4[1], j_Ni4[2], j_Ni4[3]);
   ion_map["Ni4"] = Ni4;
-  static const MagneticIon Cu0((std::string) "Cu", (uint16_t)0, j_Cu0[0],
-                               j_Cu0[1], j_Cu0[2], j_Cu0[3]);
+  static const MagneticIon Cu0((std::string) "Cu", static_cast<uint16_t>(0),
+                               j_Cu0[0], j_Cu0[1], j_Cu0[2], j_Cu0[3]);
   ion_map["Cu0"] = Cu0;
-  static const MagneticIon Cu1((std::string) "Cu", (uint16_t)1, j_Cu1[0],
-                               j_Cu1[1], j_Cu1[2], j_Cu1[3]);
+  static const MagneticIon Cu1((std::string) "Cu", static_cast<uint16_t>(1),
+                               j_Cu1[0], j_Cu1[1], j_Cu1[2], j_Cu1[3]);
   ion_map["Cu1"] = Cu1;
-  static const MagneticIon Cu2((std::string) "Cu", (uint16_t)2, j_Cu2[0],
-                               j_Cu2[1], j_Cu2[2], j_Cu2[3]);
+  static const MagneticIon Cu2((std::string) "Cu", static_cast<uint16_t>(2),
+                               j_Cu2[0], j_Cu2[1], j_Cu2[2], j_Cu2[3]);
   ion_map["Cu2"] = Cu2;
-  static const MagneticIon Cu3((std::string) "Cu", (uint16_t)3, j_Cu3[0],
-                               j_Cu3[1], j_Cu3[2], j_Cu3[3]);
+  static const MagneticIon Cu3((std::string) "Cu", static_cast<uint16_t>(3),
+                               j_Cu3[0], j_Cu3[1], j_Cu3[2], j_Cu3[3]);
   ion_map["Cu3"] = Cu3;
-  static const MagneticIon Cu4((std::string) "Cu", (uint16_t)4, j_Cu4[0],
-                               j_Cu4[1], j_Cu4[2], j_Cu4[3]);
+  static const MagneticIon Cu4((std::string) "Cu", static_cast<uint16_t>(4),
+                               j_Cu4[0], j_Cu4[1], j_Cu4[2], j_Cu4[3]);
   ion_map["Cu4"] = Cu4;
-  static const MagneticIon Y0((std::string) "Y", (uint16_t)0, j_Y0[0], j_Y0[1],
-                              j_Y0[2], j_Y0[3]);
+  static const MagneticIon Y0((std::string) "Y", static_cast<uint16_t>(0),
+                              j_Y0[0], j_Y0[1], j_Y0[2], j_Y0[3]);
   ion_map["Y0"] = Y0;
-  static const MagneticIon Zr0((std::string) "Zr", (uint16_t)0, j_Zr0[0],
-                               j_Zr0[1], j_Zr0[2], j_Zr0[3]);
+  static const MagneticIon Zr0((std::string) "Zr", static_cast<uint16_t>(0),
+                               j_Zr0[0], j_Zr0[1], j_Zr0[2], j_Zr0[3]);
   ion_map["Zr0"] = Zr0;
-  static const MagneticIon Zr1((std::string) "Zr", (uint16_t)1, j_Zr1[0],
-                               j_Zr1[1], j_Zr1[2], j_Zr1[3]);
+  static const MagneticIon Zr1((std::string) "Zr", static_cast<uint16_t>(1),
+                               j_Zr1[0], j_Zr1[1], j_Zr1[2], j_Zr1[3]);
   ion_map["Zr1"] = Zr1;
-  static const MagneticIon Nb0((std::string) "Nb", (uint16_t)0, j_Nb0[0],
-                               j_Nb0[1], j_Nb0[2], j_Nb0[3]);
+  static const MagneticIon Nb0((std::string) "Nb", static_cast<uint16_t>(0),
+                               j_Nb0[0], j_Nb0[1], j_Nb0[2], j_Nb0[3]);
   ion_map["Nb0"] = Nb0;
-  static const MagneticIon Nb1((std::string) "Nb", (uint16_t)1, j_Nb1[0],
-                               j_Nb1[1], j_Nb1[2], j_Nb1[3]);
+  static const MagneticIon Nb1((std::string) "Nb", static_cast<uint16_t>(1),
+                               j_Nb1[0], j_Nb1[1], j_Nb1[2], j_Nb1[3]);
   ion_map["Nb1"] = Nb1;
-  static const MagneticIon Mo0((std::string) "Mo", (uint16_t)0, j_Mo0[0],
-                               j_Mo0[1], j_Mo0[2], j_Mo0[3]);
+  static const MagneticIon Mo0((std::string) "Mo", static_cast<uint16_t>(0),
+                               j_Mo0[0], j_Mo0[1], j_Mo0[2], j_Mo0[3]);
   ion_map["Mo0"] = Mo0;
-  static const MagneticIon Mo1((std::string) "Mo", (uint16_t)1, j_Mo1[0],
-                               j_Mo1[1], j_Mo1[2], j_Mo1[3]);
+  static const MagneticIon Mo1((std::string) "Mo", static_cast<uint16_t>(1),
+                               j_Mo1[0], j_Mo1[1], j_Mo1[2], j_Mo1[3]);
   ion_map["Mo1"] = Mo1;
-  static const MagneticIon Tc0((std::string) "Tc", (uint16_t)0, j_Tc0[0],
-                               j_Tc0[1], j_Tc0[2], j_Tc0[3]);
+  static const MagneticIon Tc0((std::string) "Tc", static_cast<uint16_t>(0),
+                               j_Tc0[0], j_Tc0[1], j_Tc0[2], j_Tc0[3]);
   ion_map["Tc0"] = Tc0;
-  static const MagneticIon Tc1((std::string) "Tc", (uint16_t)1, j_Tc1[0],
-                               j_Tc1[1], j_Tc1[2], j_Tc1[3]);
+  static const MagneticIon Tc1((std::string) "Tc", static_cast<uint16_t>(1),
+                               j_Tc1[0], j_Tc1[1], j_Tc1[2], j_Tc1[3]);
   ion_map["Tc1"] = Tc1;
-  static const MagneticIon Ru0((std::string) "Ru", (uint16_t)0, j_Ru0[0],
-                               j_Ru0[1], j_Ru0[2], j_Ru0[3]);
+  static const MagneticIon Ru0((std::string) "Ru", static_cast<uint16_t>(0),
+                               j_Ru0[0], j_Ru0[1], j_Ru0[2], j_Ru0[3]);
   ion_map["Ru0"] = Ru0;
-  static const MagneticIon Ru1((std::string) "Ru", (uint16_t)1, j_Ru1[0],
-                               j_Ru1[1], j_Ru1[2], j_Ru1[3]);
+  static const MagneticIon Ru1((std::string) "Ru", static_cast<uint16_t>(1),
+                               j_Ru1[0], j_Ru1[1], j_Ru1[2], j_Ru1[3]);
   ion_map["Ru1"] = Ru1;
-  static const MagneticIon Rh0((std::string) "Rh", (uint16_t)0, j_Rh0[0],
-                               j_Rh0[1], j_Rh0[2], j_Rh0[3]);
+  static const MagneticIon Rh0((std::string) "Rh", static_cast<uint16_t>(0),
+                               j_Rh0[0], j_Rh0[1], j_Rh0[2], j_Rh0[3]);
   ion_map["Rh0"] = Rh0;
-  static const MagneticIon Rh1((std::string) "Rh", (uint16_t)1, j_Rh1[0],
-                               j_Rh1[1], j_Rh1[2], j_Rh1[3]);
+  static const MagneticIon Rh1((std::string) "Rh", static_cast<uint16_t>(1),
+                               j_Rh1[0], j_Rh1[1], j_Rh1[2], j_Rh1[3]);
   ion_map["Rh1"] = Rh1;
-  static const MagneticIon Pd0((std::string) "Pd", (uint16_t)0, j_Pd0[0],
-                               j_Pd0[1], j_Pd0[2], j_Pd0[3]);
+  static const MagneticIon Pd0((std::string) "Pd", static_cast<uint16_t>(0),
+                               j_Pd0[0], j_Pd0[1], j_Pd0[2], j_Pd0[3]);
   ion_map["Pd0"] = Pd0;
-  static const MagneticIon Pd1((std::string) "Pd", (uint16_t)1, j_Pd1[0],
-                               j_Pd1[1], j_Pd1[2], j_Pd1[3]);
+  static const MagneticIon Pd1((std::string) "Pd", static_cast<uint16_t>(1),
+                               j_Pd1[0], j_Pd1[1], j_Pd1[2], j_Pd1[3]);
   ion_map["Pd1"] = Pd1;
-  static const MagneticIon Ce2((std::string) "Ce", (uint16_t)2, j_Ce2[0],
-                               j_Ce2[1], j_Ce2[2], j_Ce2[3]);
+  static const MagneticIon Ce2((std::string) "Ce", static_cast<uint16_t>(2),
+                               j_Ce2[0], j_Ce2[1], j_Ce2[2], j_Ce2[3]);
   ion_map["Ce2"] = Ce2;
-  static const MagneticIon Nd2((std::string) "Nd", (uint16_t)2, j_Nd2[0],
-                               j_Nd2[1], j_Nd2[2], j_Nd2[3]);
+  static const MagneticIon Nd2((std::string) "Nd", static_cast<uint16_t>(2),
+                               j_Nd2[0], j_Nd2[1], j_Nd2[2], j_Nd2[3]);
   ion_map["Nd2"] = Nd2;
-  static const MagneticIon Nd3((std::string) "Nd", (uint16_t)3, j_Nd3[0],
-                               j_Nd3[1], j_Nd3[2], j_Nd3[3]);
+  static const MagneticIon Nd3((std::string) "Nd", static_cast<uint16_t>(3),
+                               j_Nd3[0], j_Nd3[1], j_Nd3[2], j_Nd3[3]);
   ion_map["Nd3"] = Nd3;
-  static const MagneticIon Sm2((std::string) "Sm", (uint16_t)2, j_Sm2[0],
-                               j_Sm2[1], j_Sm2[2], j_Sm2[3]);
+  static const MagneticIon Sm2((std::string) "Sm", static_cast<uint16_t>(2),
+                               j_Sm2[0], j_Sm2[1], j_Sm2[2], j_Sm2[3]);
   ion_map["Sm2"] = Sm2;
-  static const MagneticIon Sm3((std::string) "Sm", (uint16_t)3, j_Sm3[0],
-                               j_Sm3[1], j_Sm3[2], j_Sm3[3]);
+  static const MagneticIon Sm3((std::string) "Sm", static_cast<uint16_t>(3),
+                               j_Sm3[0], j_Sm3[1], j_Sm3[2], j_Sm3[3]);
   ion_map["Sm3"] = Sm3;
-  static const MagneticIon Eu2((std::string) "Eu", (uint16_t)2, j_Eu2[0],
-                               j_Eu2[1], j_Eu2[2], j_Eu2[3]);
+  static const MagneticIon Eu2((std::string) "Eu", static_cast<uint16_t>(2),
+                               j_Eu2[0], j_Eu2[1], j_Eu2[2], j_Eu2[3]);
   ion_map["Eu2"] = Eu2;
-  static const MagneticIon Eu3((std::string) "Eu", (uint16_t)3, j_Eu3[0],
-                               j_Eu3[1], j_Eu3[2], j_Eu3[3]);
+  static const MagneticIon Eu3((std::string) "Eu", static_cast<uint16_t>(3),
+                               j_Eu3[0], j_Eu3[1], j_Eu3[2], j_Eu3[3]);
   ion_map["Eu3"] = Eu3;
-  static const MagneticIon Gd2((std::string) "Gd", (uint16_t)2, j_Gd2[0],
-                               j_Gd2[1], j_Gd2[2], j_Gd2[3]);
+  static const MagneticIon Gd2((std::string) "Gd", static_cast<uint16_t>(2),
+                               j_Gd2[0], j_Gd2[1], j_Gd2[2], j_Gd2[3]);
   ion_map["Gd2"] = Gd2;
-  static const MagneticIon Gd3((std::string) "Gd", (uint16_t)3, j_Gd3[0],
-                               j_Gd3[1], j_Gd3[2], j_Gd3[3]);
+  static const MagneticIon Gd3((std::string) "Gd", static_cast<uint16_t>(3),
+                               j_Gd3[0], j_Gd3[1], j_Gd3[2], j_Gd3[3]);
   ion_map["Gd3"] = Gd3;
-  static const MagneticIon Tb2((std::string) "Tb", (uint16_t)2, j_Tb2[0],
-                               j_Tb2[1], j_Tb2[2], j_Tb2[3]);
+  static const MagneticIon Tb2((std::string) "Tb", static_cast<uint16_t>(2),
+                               j_Tb2[0], j_Tb2[1], j_Tb2[2], j_Tb2[3]);
   ion_map["Tb2"] = Tb2;
-  static const MagneticIon Tb3((std::string) "Tb", (uint16_t)3, j_Tb3[0],
-                               j_Tb3[1], j_Tb3[2], j_Tb3[3]);
+  static const MagneticIon Tb3((std::string) "Tb", static_cast<uint16_t>(3),
+                               j_Tb3[0], j_Tb3[1], j_Tb3[2], j_Tb3[3]);
   ion_map["Tb3"] = Tb3;
-  static const MagneticIon Dy2((std::string) "Dy", (uint16_t)2, j_Dy2[0],
-                               j_Dy2[1], j_Dy2[2], j_Dy2[3]);
+  static const MagneticIon Dy2((std::string) "Dy", static_cast<uint16_t>(2),
+                               j_Dy2[0], j_Dy2[1], j_Dy2[2], j_Dy2[3]);
   ion_map["Dy2"] = Dy2;
-  static const MagneticIon Dy3((std::string) "Dy", (uint16_t)3, j_Dy3[0],
-                               j_Dy3[1], j_Dy3[2], j_Dy3[3]);
+  static const MagneticIon Dy3((std::string) "Dy", static_cast<uint16_t>(3),
+                               j_Dy3[0], j_Dy3[1], j_Dy3[2], j_Dy3[3]);
   ion_map["Dy3"] = Dy3;
-  static const MagneticIon Ho2((std::string) "Ho", (uint16_t)2, j_Ho2[0],
-                               j_Ho2[1], j_Ho2[2], j_Ho2[3]);
+  static const MagneticIon Ho2((std::string) "Ho", static_cast<uint16_t>(2),
+                               j_Ho2[0], j_Ho2[1], j_Ho2[2], j_Ho2[3]);
   ion_map["Ho2"] = Ho2;
-  static const MagneticIon Ho3((std::string) "Ho", (uint16_t)3, j_Ho3[0],
-                               j_Ho3[1], j_Ho3[2], j_Ho3[3]);
+  static const MagneticIon Ho3((std::string) "Ho", static_cast<uint16_t>(3),
+                               j_Ho3[0], j_Ho3[1], j_Ho3[2], j_Ho3[3]);
   ion_map["Ho3"] = Ho3;
-  static const MagneticIon Er2((std::string) "Er", (uint16_t)2, j_Er2[0],
-                               j_Er2[1], j_Er2[2], j_Er2[3]);
+  static const MagneticIon Er2((std::string) "Er", static_cast<uint16_t>(2),
+                               j_Er2[0], j_Er2[1], j_Er2[2], j_Er2[3]);
   ion_map["Er2"] = Er2;
-  static const MagneticIon Er3((std::string) "Er", (uint16_t)3, j_Er3[0],
-                               j_Er3[1], j_Er3[2], j_Er3[3]);
+  static const MagneticIon Er3((std::string) "Er", static_cast<uint16_t>(3),
+                               j_Er3[0], j_Er3[1], j_Er3[2], j_Er3[3]);
   ion_map["Er3"] = Er3;
-  static const MagneticIon Tm2((std::string) "Tm", (uint16_t)2, j_Tm2[0],
-                               j_Tm2[1], j_Tm2[2], j_Tm2[3]);
+  static const MagneticIon Tm2((std::string) "Tm", static_cast<uint16_t>(2),
+                               j_Tm2[0], j_Tm2[1], j_Tm2[2], j_Tm2[3]);
   ion_map["Tm2"] = Tm2;
-  static const MagneticIon Tm3((std::string) "Tm", (uint16_t)3, j_Tm3[0],
-                               j_Tm3[1], j_Tm3[2], j_Tm3[3]);
+  static const MagneticIon Tm3((std::string) "Tm", static_cast<uint16_t>(3),
+                               j_Tm3[0], j_Tm3[1], j_Tm3[2], j_Tm3[3]);
   ion_map["Tm3"] = Tm3;
-  static const MagneticIon Yb2((std::string) "Yb", (uint16_t)2, j_Yb2[0],
-                               j_Yb2[1], j_Yb2[2], j_Yb2[3]);
+  static const MagneticIon Yb2((std::string) "Yb", static_cast<uint16_t>(2),
+                               j_Yb2[0], j_Yb2[1], j_Yb2[2], j_Yb2[3]);
   ion_map["Yb2"] = Yb2;
-  static const MagneticIon Yb3((std::string) "Yb", (uint16_t)3, j_Yb3[0],
-                               j_Yb3[1], j_Yb3[2], j_Yb3[3]);
+  static const MagneticIon Yb3((std::string) "Yb", static_cast<uint16_t>(3),
+                               j_Yb3[0], j_Yb3[1], j_Yb3[2], j_Yb3[3]);
   ion_map["Yb3"] = Yb3;
-  static const MagneticIon U3((std::string) "U", (uint16_t)3, j_U3[0], j_U3[1],
-                              j_U3[2], j_U3[3]);
+  static const MagneticIon U3((std::string) "U", static_cast<uint16_t>(3),
+                              j_U3[0], j_U3[1], j_U3[2], j_U3[3]);
   ion_map["U3"] = U3;
-  static const MagneticIon U4((std::string) "U", (uint16_t)4, j_U4[0], j_U4[1],
-                              j_U4[2], j_U4[3]);
+  static const MagneticIon U4((std::string) "U", static_cast<uint16_t>(4),
+                              j_U4[0], j_U4[1], j_U4[2], j_U4[3]);
   ion_map["U4"] = U4;
-  static const MagneticIon U5((std::string) "U", (uint16_t)5, j_U5[0], j_U5[1],
-                              j_U5[2], j_U5[3]);
+  static const MagneticIon U5((std::string) "U", static_cast<uint16_t>(5),
+                              j_U5[0], j_U5[1], j_U5[2], j_U5[3]);
   ion_map["U5"] = U5;
-  static const MagneticIon Np3((std::string) "Np", (uint16_t)3, j_Np3[0],
-                               j_Np3[1], j_Np3[2], j_Np3[3]);
+  static const MagneticIon Np3((std::string) "Np", static_cast<uint16_t>(3),
+                               j_Np3[0], j_Np3[1], j_Np3[2], j_Np3[3]);
   ion_map["Np3"] = Np3;
-  static const MagneticIon Np4((std::string) "Np", (uint16_t)4, j_Np4[0],
-                               j_Np4[1], j_Np4[2], j_Np4[3]);
+  static const MagneticIon Np4((std::string) "Np", static_cast<uint16_t>(4),
+                               j_Np4[0], j_Np4[1], j_Np4[2], j_Np4[3]);
   ion_map["Np4"] = Np4;
-  static const MagneticIon Np5((std::string) "Np", (uint16_t)5, j_Np5[0],
-                               j_Np5[1], j_Np5[2], j_Np5[3]);
+  static const MagneticIon Np5((std::string) "Np", static_cast<uint16_t>(5),
+                               j_Np5[0], j_Np5[1], j_Np5[2], j_Np5[3]);
   ion_map["Np5"] = Np5;
-  static const MagneticIon Np6((std::string) "Np", (uint16_t)6, j_Np6[0],
-                               j_Np6[1], j_Np6[2], j_Np6[3]);
+  static const MagneticIon Np6((std::string) "Np", static_cast<uint16_t>(6),
+                               j_Np6[0], j_Np6[1], j_Np6[2], j_Np6[3]);
   ion_map["Np6"] = Np6;
-  static const MagneticIon Pu3((std::string) "Pu", (uint16_t)3, j_Pu3[0],
-                               j_Pu3[1], j_Pu3[2], j_Pu3[3]);
+  static const MagneticIon Pu3((std::string) "Pu", static_cast<uint16_t>(3),
+                               j_Pu3[0], j_Pu3[1], j_Pu3[2], j_Pu3[3]);
   ion_map["Pu3"] = Pu3;
-  static const MagneticIon Pu4((std::string) "Pu", (uint16_t)4, j_Pu4[0],
-                               j_Pu4[1], j_Pu4[2], j_Pu4[3]);
+  static const MagneticIon Pu4((std::string) "Pu", static_cast<uint16_t>(4),
+                               j_Pu4[0], j_Pu4[1], j_Pu4[2], j_Pu4[3]);
   ion_map["Pu4"] = Pu4;
-  static const MagneticIon Pu5((std::string) "Pu", (uint16_t)5, j_Pu5[0],
-                               j_Pu5[1], j_Pu5[2], j_Pu5[3]);
+  static const MagneticIon Pu5((std::string) "Pu", static_cast<uint16_t>(5),
+                               j_Pu5[0], j_Pu5[1], j_Pu5[2], j_Pu5[3]);
   ion_map["Pu5"] = Pu5;
-  static const MagneticIon Pu6((std::string) "Pu", (uint16_t)6, j_Pu6[0],
-                               j_Pu6[1], j_Pu6[2], j_Pu6[3]);
+  static const MagneticIon Pu6((std::string) "Pu", static_cast<uint16_t>(6),
+                               j_Pu6[0], j_Pu6[1], j_Pu6[2], j_Pu6[3]);
   ion_map["Pu6"] = Pu6;
-  static const MagneticIon Am2((std::string) "Am", (uint16_t)2, j_Am2[0],
-                               j_Am2[1], j_Am2[2], j_Am2[3]);
+  static const MagneticIon Am2((std::string) "Am", static_cast<uint16_t>(2),
+                               j_Am2[0], j_Am2[1], j_Am2[2], j_Am2[3]);
   ion_map["Am2"] = Am2;
-  static const MagneticIon Am3((std::string) "Am", (uint16_t)3, j_Am3[0],
-                               j_Am3[1], j_Am3[2], j_Am3[3]);
+  static const MagneticIon Am3((std::string) "Am", static_cast<uint16_t>(3),
+                               j_Am3[0], j_Am3[1], j_Am3[2], j_Am3[3]);
   ion_map["Am3"] = Am3;
-  static const MagneticIon Am4((std::string) "Am", (uint16_t)4, j_Am4[0],
-                               j_Am4[1], j_Am4[2], j_Am4[3]);
+  static const MagneticIon Am4((std::string) "Am", static_cast<uint16_t>(4),
+                               j_Am4[0], j_Am4[1], j_Am4[2], j_Am4[3]);
   ion_map["Am4"] = Am4;
-  static const MagneticIon Am5((std::string) "Am", (uint16_t)5, j_Am5[0],
-                               j_Am5[1], j_Am5[2], j_Am5[3]);
+  static const MagneticIon Am5((std::string) "Am", static_cast<uint16_t>(5),
+                               j_Am5[0], j_Am5[1], j_Am5[2], j_Am5[3]);
   ion_map["Am5"] = Am5;
-  static const MagneticIon Am6((std::string) "Am", (uint16_t)6, j_Am6[0],
-                               j_Am6[1], j_Am6[2], j_Am6[3]);
+  static const MagneticIon Am6((std::string) "Am", static_cast<uint16_t>(6),
+                               j_Am6[0], j_Am6[1], j_Am6[2], j_Am6[3]);
   ion_map["Am6"] = Am6;
-  static const MagneticIon Am7((std::string) "Am", (uint16_t)7, j_Am7[0],
-                               j_Am7[1], j_Am7[2], j_Am7[3]);
+  static const MagneticIon Am7((std::string) "Am", static_cast<uint16_t>(7),
+                               j_Am7[0], j_Am7[1], j_Am7[2], j_Am7[3]);
   ion_map["Am7"] = Am7;
 }
 

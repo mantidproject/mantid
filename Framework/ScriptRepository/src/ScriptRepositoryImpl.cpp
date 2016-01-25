@@ -558,7 +558,7 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
     case LOCAL_ONLY:
     case LOCAL_CHANGED:
     case REMOTE_CHANGED:
-      acc_status = (SCRIPTSTATUS)(acc_status | entry.status);
+      acc_status = static_cast<SCRIPTSTATUS>(acc_status | entry.status);
       break;
     case LOCAL_ONLY | LOCAL_CHANGED:
       acc_status = LOCAL_CHANGED;
@@ -1333,7 +1333,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
     throw ScriptRepoException(ex.what());
   }
   // g_log.debug() << "SetAutoUpdate... end" << std::endl;
-  return (int)files_to_update.size();
+  return static_cast<int>(files_to_update.size());
 }
 
 /** Download a url and fetch it inside the local path given.
