@@ -189,7 +189,7 @@ class FitTofTest(unittest.TestCase):
             flags['background'] = {'function': 'Polynomial', 'order':3}
         else:
             flags['background'] = None
-        flags['ip_file'] = 'Vesuvio_IP_file_test.par'
+        flags['ip_file'] = 'Vesuvio_IP_file_test'
         flags['diff_mode'] = 'single'
         flags['gamma_correct'] = True
         flags['ms_flags'] = dict()
