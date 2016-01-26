@@ -22,6 +22,16 @@ if platform.system() == "Windows":
             self._num_bins = self._sample_ws.blocksize()
             self._num_hists = self._sample_ws.getNumberHistograms()
 
+
+        def tearDown(self):
+            """
+            Remove workspaces from ADS.
+            """
+            DeleteWorkspace(self._sample_ws)
+            DeleteWorkspace(self._res_ws)
+            DeleteWorkspace(self._resnorm_ws)
+
+
 #----------------------------------Algorithm tests----------------------------------------
 
         def test_QLr_Run(self):
