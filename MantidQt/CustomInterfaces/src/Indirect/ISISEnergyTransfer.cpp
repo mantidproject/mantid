@@ -525,6 +525,7 @@ void ISISEnergyTransfer::plotRaw() {
   loadAlg->initialize();
   loadAlg->setProperty("Filename", rawFile.toStdString());
   loadAlg->setProperty("OutputWorkspace", name);
+  loadAlg->setProperty("LoadLogFiles", false);
   if (extension.compare(".nxs") == 0) {
     int64_t detectorMin =
         static_cast<int64_t>(m_uiForm.spPlotTimeSpecMin->value());
