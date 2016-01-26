@@ -36,7 +36,7 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
         """
         out_ws_name = info_tuple[0]
         # target_frame = info_tuple[1]
-        exp_no = info_tuple[2]
+        # exp_no = info_tuple[2]
         scan_no = info_tuple[3]
 
         status, msg = self.append_row([scan_no, '', out_ws_name, 0., 0., 0., 0., 0., 0., 0, False])
@@ -75,8 +75,13 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
 
     def set_hkl(self, row_index, vec_hkl):
         """
-        Set up HKL value
+        Set up HKL value to table
+        :param row_index:
+        :param vec_hkl:
+        :return:
         """
+        # check requirement
+        assert isinstance(vec_hkl, list), 'Input HKL must be a list but not %s.' % str(type(vec_hkl))
         assert len(vec_hkl, 3)
 
         # locate
@@ -228,6 +233,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
     def get_exp_info(self, row_index):
         """
         Get experiment information from a row
+        :param row_index:
         :return: scan number, pt number
         """
         assert isinstance(row_index, int)
