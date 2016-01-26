@@ -1,17 +1,17 @@
 #ifndef MANTID_API_MDGEOMETRY_H_
 #define MANTID_API_MDGEOMETRY_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/VMD.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDLeanGeometry.h"
+#include "MantidKernel/VMD.h"
+
 #include <Poco/NObserver.h>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {
+
 class CoordTransform;
-class IMDWorkspace;
 
 /** Describes the geometry (i.e. dimensions) of an IMDWorkspace.
  * This defines the dimensions contained in the workspace.
@@ -43,7 +43,7 @@ class IMDWorkspace;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MDGeometry {
+class DLLExport MDGeometry : public IMDLeanGeometry {
 public:
   MDGeometry();
   MDGeometry(const MDGeometry &other);
