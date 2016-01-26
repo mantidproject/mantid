@@ -61,7 +61,7 @@ public:
 
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "Diffraction;DataHandling\\Text";
+    return "Diffraction\\DataHandling;DataHandling\\Text";
   }
 
   /// Returns a confidence value that this algorithm can load a file

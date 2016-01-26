@@ -49,17 +49,17 @@ namespace Converters = Mantid::PythonInterface::Converters;
  */
 PyObject *getValue(Mantid::API::Column_const_sptr column,
                    const std::type_info &typeID, const int row) {
-  if (typeID == typeid(Mantid::API::Boolean)) {
+  if (typeID.hash_code() == typeid(Mantid::API::Boolean).hash_code()) {
     bool res = column->cell<Mantid::API::Boolean>(row);
     return to_python_value<const bool &>()(res);
   }
 
 #define GET_BUILTIN(R, _, T)                                                   \
-  else if (typeID == typeid(T)) {                                              \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
     result = to_python_value<const T &>()(column->cell<T>(row));               \
   }
 #define GET_USER(R, _, T)                                                      \
-  else if (strcmp(typeID.name(), typeid(T).name()) == 0) {                     \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
     const converter::registration *entry =                                     \
         converter::registry::query(typeid(T));                                 \
     if (!entry)                                                                \
@@ -67,7 +67,7 @@ PyObject *getValue(Mantid::API::Column_const_sptr column,
     result = entry->to_python((const void *)&column->cell<T>(row));            \
   }
 #define GET_ARRAY(R, _, T)                                                     \
-  else if (typeID == typeid(T)) {                                              \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
     result = Converters::Clone::apply<T::value_type>::create1D(                \
         column->cell<T>(row));                                                 \
   }
@@ -97,17 +97,27 @@ PyObject *getValue(Mantid::API::Column_const_sptr column,
 void setValue(const Column_sptr column, const int row,
               const bpl::object &value) {
   const auto &typeID = column->get_type_info();
-  if (typeID == typeid(Mantid::API::Boolean)) {
+
+  // Special case: Treat Mantid Boolean as normal bool
+  if (typeID.hash_code() == typeid(Mantid::API::Boolean).hash_code()) {
     column->cell<Mantid::API::Boolean>(row) = bpl::extract<bool>(value)();
     return;
   }
 
+  // Special case: Boost has issues with NumPy ints, so use Python API instead
+  if (typeID.hash_code() == typeid(int).hash_code() &&
+      PyArray_IsIntegerScalar(value.ptr())) {
+    column->cell<int>(row) = static_cast<int>(PyInt_AsLong(value.ptr()));
+    return;
+  }
+
+// Macros for all other types
 #define SET_CELL(R, _, T)                                                      \
-  else if (strcmp(typeID.name(), typeid(T).name()) == 0) {                     \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
     column->cell<T>(row) = bpl::extract<T>(value)();                           \
   }
 #define SET_VECTOR_CELL(R, _, T)                                               \
-  else if (typeID == typeid(T)) {                                              \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
     if (!PyArray_Check(value.ptr())) {                                         \
       column->cell<T>(row) =                                                   \
           Converters::PySequenceToVector<T::value_type>(value)();              \
@@ -118,8 +128,7 @@ void setValue(const Column_sptr column, const int row,
   }
 
   // -- Use the boost preprocessor to generate a list of else if clause to cut
-  // out copy
-  // and pasted code.
+  // out copy and pasted code.
   if (false) {
   } // So that it always falls through to the list checking
   BOOST_PP_LIST_FOR_EACH(SET_CELL, _, BUILTIN_TYPES)
@@ -131,20 +140,73 @@ void setValue(const Column_sptr column, const int row,
   }
 }
 
-/** Access a cell and return a corresponding Python type
- *  @param self A reference to the TableWorkspace python object that we were
- * called on
- *  @param type The data type of the column to add
- *  @param name The name of the column to add
- *  @return A boolean indicating success or failure. Note that this is different
- * to the
- *          corresponding C++ method, which returns a pointer to the
- * newly-created column
- *          (as the Column class is not exposed to python).
+/**
+ * Add a column with a given plot type to the TableWorkspace
+ * @param self Reference to TableWorkspace this is called on
+ * @param type The data type of the column to add
+ * @param name The name of the column to add
+ * @param plottype The plot type to set on the column
+ * @return Boolean true if successful, false otherwise
  */
-bool addColumn(ITableWorkspace &self, const std::string &type,
-               const std::string &name) {
+bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
+                       const std::string &name, int plottype) {
+  auto column = self.addColumn(type, name);
+
+  if (column)
+    column->setPlotType(plottype);
+
+  return column != 0;
+}
+
+/**
+ * Add a column to the TableWorkspace (with default plot type)
+ * @param self A reference to the TableWorkspace python object that we were
+ * called on
+ * @param type The data type of the column to add
+ * @param name The name of the column to add
+ * @return A boolean indicating success or failure. Note that this is different
+ * to the corresponding C++ method, which returns a pointer to the
+ * newly-created column (as the Column class is not exposed to python).
+ */
+bool addColumnSimple(ITableWorkspace &self, const std::string &type,
+                     const std::string &name) {
   return self.addColumn(type, name) != 0;
+}
+
+/**
+ * Get the plot type of a column given by name or index
+ * @param self Reference to TableWorkspace this is called on
+ * @param column Name or index of column
+ * @return PlotType: 0=None, 1=X, 2=Y, 3=Z, 4=xErr, 5=yErr, 6=Label
+ */
+int getPlotType(ITableWorkspace &self, const bpl::object &column) {
+  // Find the column
+  Mantid::API::Column_const_sptr colptr;
+  if (PyString_Check(column.ptr())) {
+    colptr = self.getColumn(extract<std::string>(column)());
+  } else {
+    colptr = self.getColumn(extract<int>(column)());
+  }
+
+  return colptr->getPlotType();
+}
+
+/**
+ * Set the plot type of a column given by name or index
+ * @param self Reference to TableWorkspace this is called on
+ * @param column Name or index of column
+ * @param ptype PlotType: 0=None, 1=X, 2=Y, 3=Z, 4=xErr, 5=yErr, 6=Label
+ */
+void setPlotType(ITableWorkspace &self, const bpl::object &column, int ptype) {
+  // Find the column
+  Mantid::API::Column_sptr colptr;
+  if (PyString_Check(column.ptr())) {
+    colptr = self.getColumn(extract<std::string>(column)());
+  } else {
+    colptr = self.getColumn(extract<int>(column)());
+  }
+
+  colptr->setPlotType(ptype);
 }
 
 /**
@@ -203,13 +265,15 @@ PyObject *row(ITableWorkspace &self, int row) {
 }
 
 /**
- * Adds a new row in the table, where the items are given in a
- * dictionary object mapping {column name:value}
+ * Adds a new row in the table, where the items are given in a dictionary
+ * object mapping {column name:value}. It must contain a key-value entry for
+ * every column in the row, otherwise the insert will fail.
+ *
  * @param self :: A reference to the ITableWorkspace object
- * @param rowItems :: A dictionary defining the items in the row. It must
- * be the same length as the number of columns or the insert will fail
+ * @param rowItems :: A dictionary defining the items in the row
  */
 void addRowFromDict(ITableWorkspace &self, const bpl::dict &rowItems) {
+  // rowItems must contain an entry for every column
   bpl::ssize_t nitems = boost::python::len(rowItems);
   if (nitems != static_cast<bpl::ssize_t>(self.columnCount())) {
     throw std::invalid_argument(
@@ -217,38 +281,59 @@ void addRowFromDict(ITableWorkspace &self, const bpl::dict &rowItems) {
         "Expected: " +
         boost::lexical_cast<std::string>(self.columnCount()));
   }
+
+  // Add a new row to populate with values
   const int rowIndex = static_cast<int>(self.rowCount());
-  TableRow newRow = self.appendRow();
-  boost::python::object iter = rowItems.iteritems();
-  while (true) {
-    bpl::object keyValue;
-    try {
-      keyValue = iter.attr("next")();
-    } catch (bpl::error_already_set &) {
-      PyErr_Clear(); // Clear the raised StopIteration exception
-      break;
+  self.appendRow();
+
+  // Declared in this scope so we can access them in catch block
+  Column_sptr column; // Column in table
+  bpl::object value;  // Value from dictionary
+
+  try {
+    // Retrieve and set the value for each column
+    auto columns = self.getColumnNames();
+    for (auto iter = columns.begin(); iter != columns.end(); ++iter) {
+      column = self.getColumn(*iter);
+      value = rowItems[*iter];
+      setValue(column, rowIndex, value);
     }
-    const std::string columnName =
-        boost::python::extract<std::string>(keyValue[0]);
-    const Column_sptr column = self.getColumn(columnName);
-    try {
-      setValue(column, rowIndex, keyValue[1]);
-    } catch (bpl::error_already_set &) {
-      std::ostringstream os;
-      os << "Incorrect type passed for \"" << columnName << "\"";
-      throw std::invalid_argument(os.str());
+  } catch (bpl::error_already_set &) {
+    // One of the columns wasn't found in the dictionary
+    if (PyErr_ExceptionMatches(PyExc_KeyError)) {
+      std::ostringstream msg;
+      msg << "Missing key-value entry for column ";
+      msg << "<" << column->name() << ">";
+      PyErr_SetString(PyExc_KeyError, msg.str().c_str());
     }
+
+    // Wrong type of data for one of the columns
+    if (PyErr_ExceptionMatches(PyExc_TypeError)) {
+      std::ostringstream msg;
+      msg << "Wrong datatype <";
+      msg << std::string(
+          bpl::extract<std::string>(value.attr("__class__").attr("__name__")));
+      msg << "> for column <" << column->name() << "> ";
+      msg << "(expected <" << column->type() << ">)";
+      PyErr_SetString(PyExc_TypeError, msg.str().c_str());
+    }
+
+    // Remove the new row since populating it has failed
+    self.removeRow(rowIndex);
+    throw;
   }
 }
 
 /**
- * Adds a new row in the table, where the items are given in a
- * dictionary object mapping {column name:value}
+ * Adds a new row in the table, where the items are given in an ordered python
+ * sequence type (list, tuple, numpy array, etc). It must be the same length as
+ * the number of columns or the insert will fail.
+ *
  * @param self :: A reference to the ITableWorkspace object
- * @param rowItems :: A dictionary defining the items in the row. It must
- * be the same length as the number of columns or the insert will fail
+ * @param rowItems :: A sequence containing the column values in the row
  */
-void addRowFromList(ITableWorkspace &self, const bpl::list &rowItems) {
+void addRowFromSequence(ITableWorkspace &self, const bpl::object &rowItems) {
+  // rowItems must contain an entry for every column
   bpl::ssize_t nitems = boost::python::len(rowItems);
   if (nitems != static_cast<bpl::ssize_t>(self.columnCount())) {
     throw std::invalid_argument(
@@ -256,16 +341,33 @@ void addRowFromList(ITableWorkspace &self, const bpl::list &rowItems) {
         "Expected: " +
         boost::lexical_cast<std::string>(self.columnCount()));
   }
+
+  // Add a new row to populate with values
   const int rowIndex = static_cast<int>(self.rowCount());
-  TableRow newRow = self.appendRow();
+  self.appendRow();
+
+  // Loop over sequence and set each column value in same order
   for (bpl::ssize_t i = 0; i < nitems; ++i) {
-    const Column_sptr column = self.getColumn(i);
+    auto column = self.getColumn(i);
+    auto value = rowItems[i];
+
     try {
-      setValue(column, rowIndex, rowItems[i]);
+      setValue(column, rowIndex, value);
     } catch (bpl::error_already_set &) {
-      std::ostringstream os;
-      os << "Incorrect type passed for item \"" << i << "\" in list";
-      throw std::invalid_argument(os.str());
+      // Wrong type of data for one of the columns
+      if (PyErr_ExceptionMatches(PyExc_TypeError)) {
+        std::ostringstream msg;
+        msg << "Wrong datatype <";
+        msg << std::string(bpl::extract<std::string>(
+            value.attr("__class__").attr("__name__")));
+        msg << "> for column <" << column->name() << "> ";
+        msg << "(expected <" << column->type() << ">)";
+        PyErr_SetString(PyExc_TypeError, msg.str().c_str());
+      }
+
+      // Remove the new row since populating it has failed
+      self.removeRow(rowIndex);
+      throw;
     }
   }
 }
@@ -338,9 +440,28 @@ void export_ITableWorkspace() {
 
   class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>(
       "ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
-      .def("addColumn", &addColumn, (arg("self"), arg("type"), arg("name")),
+      .def("addColumn", &addColumnSimple,
+           (arg("self"), arg("type"), arg("name")),
            "Add a named column with the given type. Recognized types are: "
            "int,float,double,bool,str,V3D,long64")
+
+      .def("addColumn", &addColumnPlotType,
+           (arg("self"), arg("type"), arg("name"), arg("plottype")),
+           "Add a named column with the given datatype "
+           "(int,float,double,bool,str,V3D,long64) "
+           "\nand plottype "
+           "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
+
+      .def("getPlotType", &getPlotType, (arg("self"), arg("column")),
+           "Get the plot type of given column as an integer. "
+           "Accepts column name or index. \nPossible return values: "
+           "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
+
+      .def("setPlotType", &setPlotType,
+           (arg("self"), arg("column"), arg("ptype")),
+           "Set the plot type of given column. "
+           "Accepts column name or index. \nPossible type values: "
+           "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
 
       .def("removeColumn", &ITableWorkspace::removeColumn,
            (arg("self"), arg("name")), "Remove the named column")
@@ -372,13 +493,15 @@ void export_ITableWorkspace() {
       .def("row", &row, (arg("self"), arg("row")),
            "Return all values of a specific row as a dict")
 
-      .def("addRow", &addRowFromDict, (arg("self"), arg("row_items_dict")),
-           "Appends a row with the values from the dictionary")
-
-      .def("addRow", &addRowFromList, (arg("self"), arg("row_items_list")),
-           "Appends a row with the values from the given list. "
+      // FromSequence must come first since it takes an object parameter
+      // Otherwise, FromDict will never be called as object accepts anything
+      .def("addRow", &addRowFromSequence, (arg("self"), arg("row_items_seq")),
+           "Appends a row with the values from the given sequence. "
            "It it assumed that the items are in the correct order for the "
            "defined columns")
+
+      .def("addRow", &addRowFromDict, (arg("self"), arg("row_items_dict")),
+           "Appends a row with the values from the dictionary")
 
       .def("cell", &cell, (arg("self"), arg("value"), arg("row_or_column")),
            "Return the given cell. If the first argument is a "

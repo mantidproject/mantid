@@ -53,10 +53,9 @@ LoadFullprofResolution::~LoadFullprofResolution() {}
  */
 void LoadFullprofResolution::init() {
   // Input file name
-  vector<std::string> exts;
-  exts.push_back(".irf");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "Path to an Fullprof .irf file to load.");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".irf"}),
+      "Path to an Fullprof .irf file to load.");
 
   // Output table workspace
   auto wsprop = new WorkspaceProperty<API::ITableWorkspace>(
@@ -156,8 +155,8 @@ void LoadFullprofResolution::exec() {
                         << ") is negative.  It is not allowed and is  ignored. "
                         << ".\n";
       } else {
-        vector<int>::iterator fiter = lower_bound(
-            vec_bankinirf.begin(), vec_bankinirf.end(), outputbankid);
+        auto fiter = lower_bound(vec_bankinirf.begin(), vec_bankinirf.end(),
+                                 outputbankid);
         if (fiter == vec_bankinirf.end() || *fiter != outputbankid) {
           // Specified bank ID does not exist.
           stringstream errmsg;
@@ -694,7 +693,7 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
   if (numbanks == 0)
     throw runtime_error("Unable to generate a table from an empty map!");
 
-  map<int, map<string, double>>::iterator bankmapiter = bankparammap.begin();
+  auto bankmapiter = bankparammap.begin();
   size_t numparams = bankmapiter->second.size();
 
   // vector of all parameter name

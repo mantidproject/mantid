@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>895</width>
-    <height>621</height>
+    <width>900</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,6 +31,13 @@
             </property>
             <property name="text">
              <string>&amp;Fit</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="cbPlotGuess">
+            <property name="text">
+             <string>Plot Guess</string>
             </property>
            </widget>
           </item>

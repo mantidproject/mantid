@@ -5,9 +5,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidQtCustomInterfaces/ReflGenerateNotebook.h"
-#include "MantidQtCustomInterfaces/ReflVectorString.h"
-#include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/TableRow.h"
@@ -289,25 +289,13 @@ public:
     boost::split(notebookLines, output, boost::is_any_of("\n"));
 
     const std::string result[] = {
-      "def plotWithOptions(ax, ws, ops, n):",
-      "    \"\"\"",
-      "    Enable/disable legend, grid, limits according to",
-      "    options (ops) for the given axes (ax).",
-      "    Plot with or without errorbars.",
-      "    \"\"\"",
-      "    ws_plot = ConvertToPointData(ws)",
-      "    if ops['errorbars']:",
-      "        ax.errorbar(ws_plot.readX(0), ws_plot.readY(0), yerr=ws_plot.readE(0), label=ws.name())",
-      "    else:",
-      "        ax.plot(ws_plot.readX(0), ws_plot.readY(0), label=ws.name())",
+      "#Import some useful tools for plotting",
+        "from MantidIPython import *"
     };
 
-    // Check that the first 10 lines are output as expected
-    for (int i=0; i<11; ++i)
-    {
-      TS_ASSERT_EQUALS(notebookLines[i], result[i])
-    }
-
+    // Check that the lines are output as expected
+    TS_ASSERT_EQUALS(notebookLines[0], result[0]);
+    TS_ASSERT_EQUALS(notebookLines[1], result[1]);
   }
 
   void testPlotsString()

@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 import mantid
 import isis_instrument as instruments
 import ISISCommandInterface as command_iface
@@ -8,6 +8,7 @@ from mantid.simpleapi import *
 from mantid.kernel import DateAndTime
 import random
 import math
+
 class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
     def test_that_gets_transmission_monitor(self):
         # Arrange
@@ -228,34 +229,6 @@ class TestEventWorkspaceCheck(unittest.TestCase):
         self._clean_up(file_name)
         DeleteWorkspace(ws)
 
-class TestFitRescaleAndShift(unittest.TestCase):
-    def _create_workspace(self, ws_name):
-        CreateSampleWorkspace(OutputWorkspace = ws_name)
-    def test_that_2D_workspace_is_caught(self):
-        #Arrange
-        ws_name1 = "ws_fit_and_shift_test_1"
-        ws_name2 = "ws_fit_and_shift_test_2"
-        self._create_workspace(ws_name1)
-        self._create_workspace(ws_name2)
-        ws1 = mtd[ws_name1]
-        ws2 = mtd[ws_name2]
-
-        scale = 2.4
-        shift = 1.1
-        rAnds = instruments.DetectorBank._RescaleAndShift(scale, shift)
-
-        # Act
-        ret_scale, ret_shift = command_iface._fitRescaleAndShift(rAnds,ws1,ws2)
-
-        # Assert
-        self.assertTrue(ret_scale == scale)
-        self.assertTrue(ret_shift == shift)
-
-        # Clean up
-        DeleteWorkspace(ws1)
-        DeleteWorkspace(ws2)
-
-
 
 class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
     '''
@@ -386,6 +359,16 @@ class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
         delta_r_expected = delta_r/1000.
         self.assertEqual(delta_r_stored, delta_r_expected)
 
+
+class TestMaskFile(unittest.TestCase):
+    def test_throws_for_user_file_with_invalid_extension(self):
+        # Arrange
+        file_name = "/path1/path2/user_file.abc"
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act + Assert
+        args = [file_name]
+        self.assertRaises(RuntimeError, command_iface.MaskFile, *args)
 
 if __name__ == "__main__":
     unittest.main()

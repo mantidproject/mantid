@@ -158,7 +158,16 @@ void DiffractionFocussing2::exec() {
     }
   }
 
-  // No problem! It is a normal Workspace2D
+  // Check valida detectors are found in the .Cal file
+  if (nGroups <= 0) {
+    throw std::runtime_error("No selected Detectors found in .cal file for "
+                             "input range. Please ensure spectra range has "
+                             "atleast one selected detector.");
+  }
+  // Check the number of points
+  if (nPoints <= 0) {
+    throw std::runtime_error("No points found in the data range.");
+  }
   API::MatrixWorkspace_sptr out = API::WorkspaceFactory::Instance().create(
       m_matrixInputW, nGroups, nPoints + 1, nPoints);
   // Caching containers that are either only read from or unused. Initialize
@@ -180,7 +189,7 @@ void DiffractionFocussing2::exec() {
     int group = m_validGroups[outWorkspaceIndex];
 
     // Get the group
-    group2vectormap::iterator it = group2xvector.find(group);
+    auto it = group2xvector.find(group);
     group2vectormap::difference_type dif =
         std::distance(group2xvector.begin(), it);
     const MantidVec &Xout = *((*it).second);
@@ -236,8 +245,7 @@ void DiffractionFocussing2::exec() {
             m_matrixInputW->maskedBins(i);
         // Now iterate over the list, adjusting the weights for the affected
         // bins
-        for (API::MatrixWorkspace::MaskList::const_iterator it = mask.begin();
-             it != mask.end(); ++it) {
+        for (auto it = mask.cbegin(); it != mask.cend(); ++it) {
           const double currentX = Xin[(*it).first];
           // Add an intermediate bin with full weight if masked bins aren't
           // consecutive
@@ -360,8 +368,7 @@ void DiffractionFocussing2::execEvent() {
     const vector<size_t> &indices = this->m_wsIndices[group];
 
     totalHistProcess += static_cast<int>(indices.size());
-    for (vector<size_t>::const_iterator index = indices.begin();
-         index != indices.end(); ++index) {
+    for (auto index = indices.cbegin(); index != indices.cend(); ++index) {
       size_required[iGroup] += m_eventW->getEventList(*index).getNumberEvents();
     }
     prog->report(1, "Pre-counting");
@@ -487,7 +494,7 @@ void DiffractionFocussing2::execEvent() {
 
     // Now you set the X axis to the X you saved before.
     if (group2xvector.size() > 0) {
-      group2vectormap::iterator git = group2xvector.find(group);
+      auto git = group2xvector.find(group);
       if (git != group2xvector.end())
         out->setX(workspaceIndex, (git->second));
       else
@@ -519,7 +526,7 @@ int DiffractionFocussing2::validateSpectrumInGroup(size_t wi) {
     return -1;
   }
 
-  std::set<detid_t>::const_iterator it = dets.begin();
+  auto it = dets.cbegin();
   if (*it < 0) // bad pixel id
     return -1;
 

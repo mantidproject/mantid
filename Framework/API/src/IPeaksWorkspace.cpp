@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid {
 namespace API {
@@ -14,6 +15,11 @@ IPeaksWorkspace::~IPeaksWorkspace() {}
 const std::string IPeaksWorkspace::toString() const {
   std::ostringstream os;
   os << ITableWorkspace::toString() << "\n" << ExperimentInfo::toString();
+  if (convention == "Crystallography")
+    os << "Crystallography: kf-ki";
+  else
+    os << "Inelastic: ki-kf";
+  os << "\n";
 
   return os.str();
 }
@@ -37,8 +43,9 @@ IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected PeaksWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<PeaksWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -53,8 +60,9 @@ IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const PeaksWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<PeaksWorkspace>.";
     throw std::runtime_error(message);
   }
 }

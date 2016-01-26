@@ -60,12 +60,6 @@ Quadratic &Quadratic::operator=(const Quadratic &A)
   return *this;
 }
 
-Quadratic::~Quadratic()
-/**
-  Destructor
-*/
-{}
-
 double Quadratic::eqnValue(const Kernel::V3D &Pt) const
 /**
   Helper function to calcuate the value
@@ -388,6 +382,10 @@ void Quadratic::write(std::ostream &OX) const
     cx << " " << BaseEqn[i] << " ";
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
   return;
+}
+
+std::unique_ptr<Quadratic> Quadratic::clone() const {
+  return std::unique_ptr<Quadratic>(doClone());
 }
 
 } // NAMESPACE Geometry

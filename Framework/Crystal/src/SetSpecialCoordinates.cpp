@@ -3,7 +3,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Logger.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -64,7 +63,9 @@ const std::string SetSpecialCoordinates::name() const {
 int SetSpecialCoordinates::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SetSpecialCoordinates::category() const { return "Crystal"; }
+const std::string SetSpecialCoordinates::category() const {
+  return "Crystal\\Corrections";
+}
 
 //----------------------------------------------------------------------------------------------
 

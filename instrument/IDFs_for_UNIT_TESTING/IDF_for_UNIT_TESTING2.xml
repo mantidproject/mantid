@@ -263,16 +263,7 @@
     <height val="0.01" />
   </cylinder>  
   
-  <algebra val="outer-cylinder # inner-cylinder" />    
-  
-  <bounding-box>
-    <x-min val="-0.1368" />
-    <x-max val="0.036" />
-    <y-min val="-0.0756" />
-    <y-max val="0.0756" />
-    <z-min val="-0.011" />
-    <z-max val="0.021" />
-  </bounding-box>
+  <algebra val="outer-cylinder # inner-cylinder" />
 </type>
 
 

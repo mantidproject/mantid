@@ -16,6 +16,8 @@
 #include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidKernel/ConfigService.h"
+
 #include <iomanip>
 #include <functional>
 #include <algorithm>
@@ -24,11 +26,12 @@
 #include "MantidKernel/Exception.h"
 
 // Test for gcc 4.4
-#if __GNUC__ > 4 || \
-    (__GNUC__ == 4 && (__GNUC_MINOR__ > 4 || \
-		       (__GNUC_MINOR__ == 4 && \
-			__GNUC_PATCHLEVEL__ > 0)))
+#if __GNUC__ > 4 ||                                                            \
+    (__GNUC__ == 4 &&                                                          \
+     (__GNUC_MINOR__ > 4 || (__GNUC_MINOR__ == 4 && __GNUC_PATCHLEVEL__ > 0)))
+// clang-format off
 GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 #endif
 
 using namespace Mantid;
@@ -273,14 +276,17 @@ TMDE(std::vector<Mantid::API::IMDIterator *> MDEventWorkspace)::createIterators(
 TMDE(signal_t MDEventWorkspace)::getSignalAtCoord(
     const coord_t *coords,
     const Mantid::API::MDNormalization &normalization) const {
-  // Do an initial bounds check
-  for (size_t d = 0; d < nd; d++) {
-    coord_t x = coords[d];
-    if (data->getExtents(d).outside(x))
-      return std::numeric_limits<signal_t>::quiet_NaN();
+  if (!isInBounds(coords)) {
+    return std::numeric_limits<signal_t>::quiet_NaN();
   }
   // If you got here, then the point is in the workspace.
   const API::IMDNode *box = data->getBoxAtCoord(coords);
+  return getNormalizedSignal(box, normalization);
+}
+
+TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(
+    const API::IMDNode *box,
+    const Mantid::API::MDNormalization &normalization) const {
   if (box) {
     // What is our normalization factor?
     switch (normalization) {
@@ -295,6 +301,39 @@ TMDE(signal_t MDEventWorkspace)::getSignalAtCoord(
     return box->getSignal();
   } else
     return std::numeric_limits<signal_t>::quiet_NaN();
+}
+
+TMDE(bool MDEventWorkspace)::isInBounds(const coord_t *coords) const {
+  for (size_t d = 0; d < nd; d++) {
+    coord_t x = coords[d];
+    if (data->getExtents(d).outside(x))
+      return false;
+  }
+  return true;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get the signal at a particular coordinate in the workspace
+ * or return 0 if masked
+ *
+ * @param coords :: numDimensions-sized array of the coordinates to look at
+ * @param normalization : Normalisation to use.
+ * @return the (normalized) signal at a given coordinates.
+ *         NaN if outside the range of this workspace
+ */
+TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
+    const coord_t *coords,
+    const Mantid::API::MDNormalization &normalization) const {
+  if (!isInBounds(coords)) {
+    return std::numeric_limits<signal_t>::quiet_NaN();
+  }
+  // Check if masked
+  const API::IMDNode *box = data->getBoxAtCoord(coords);
+  if (!box) return MDMaskValue;
+  if (box->getIsMasked()) {
+    return MDMaskValue;
+  }
+  return getNormalizedSignal(box, normalization);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -340,6 +379,7 @@ TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
 TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
   std::vector<std::string> out;
   std::ostringstream mess;
+ 
   size_t mem;
   mem = (this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE, nd>)) /
         1024;
@@ -725,36 +765,32 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
     // const MDBoxBase<MDE,nd> * box = NULL;
     const IMDNode *box = NULL;
 
-    // Do an initial bounds check
-    bool outOfBounds = false;
-    for (size_t d = 0; d < nd; d++) {
-      if (data->getExtents(d).outside(coord[d])) {
-        outOfBounds = true;
-        break;
-      }
-    }
-
     // TODO: make the logic/reuse in the following nicer.
-    if (!outOfBounds) {
+    if (isInBounds(coord.getBareArray())) {
       box = this->data->getBoxAtCoord(coord.getBareArray());
 
       if (box != NULL) {
-        // What is our normalization factor?
-        signal_t normalizer = 1.0;
-        switch (normalize) {
-        case NoNormalization:
-          break;
-        case VolumeNormalization:
-          normalizer = box->getInverseVolume();
-          break;
-        case NumEventsNormalization:
-          normalizer = 1.0 / double(box->getNPoints());
-          break;
-        }
+        if (box->getIsMasked()) {
+          y.push_back(MDMaskValue);
+          e.push_back(MDMaskValue);
+        } else {
+          // What is our normalization factor?
+          signal_t normalizer = 1.0;
+          switch (normalize) {
+          case NoNormalization:
+            break;
+          case VolumeNormalization:
+            normalizer = box->getInverseVolume();
+            break;
+          case NumEventsNormalization:
+            normalizer = 1.0 / double(box->getNPoints());
+            break;
+          }
 
-        // And add the normalized signal/error to the list
-        y.push_back(box->getSignal() * normalizer);
-        e.push_back(box->getError() * normalizer);
+          // And add the normalized signal/error to the list
+          y.push_back(box->getSignal() * normalizer);
+          e.push_back(box->getError() * normalizer);
+        }
       } else {
         y.push_back(std::numeric_limits<double>::quiet_NaN());
         e.push_back(std::numeric_limits<double>::quiet_NaN());
@@ -825,13 +861,13 @@ TMDE(void MDEventWorkspace)::setCoordinateSystem(
   m_coordSystem = coordSystem;
 }
 
-
 /**
   Set the display normalization for any subsequently generated histoworkspaces.
-  @param preferredNormalization : Display normalization preference to pass on to generated histo workspaces.
+  @param preferredNormalization : Display normalization preference to pass on to
+  generated histo workspaces.
 */
 TMDE(void MDEventWorkspace)::setDisplayNormalizationHisto(
-     const Mantid::API::MDNormalization preferredNormalizationHisto) {
+    const Mantid::API::MDNormalization preferredNormalizationHisto) {
   m_displayNormalizationHisto = preferredNormalizationHisto;
 }
 
@@ -842,25 +878,21 @@ TMDE(MDNormalization MDEventWorkspace)::displayNormalizationHisto() const {
   return m_displayNormalizationHisto;
 }
 
-
 /**
   Set the display normalization
   @param preferredNormalization : Display normalization preference.
 */
 TMDE(void MDEventWorkspace)::setDisplayNormalization(
-     const Mantid::API::MDNormalization preferredNormalization) {
+    const Mantid::API::MDNormalization preferredNormalization) {
   m_displayNormalization = preferredNormalization;
 }
-
 
 /**
 Return the preferred normalization to use for visualization.
 */
 TMDE(MDNormalization MDEventWorkspace)::displayNormalization() const {
-  return m_displayNormalization ;
+  return m_displayNormalization;
 }
-
-
 
 } // namespace DataObjects
 

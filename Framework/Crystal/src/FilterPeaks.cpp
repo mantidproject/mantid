@@ -12,6 +12,10 @@ double HKL2(const Mantid::Geometry::IPeak &p) {
   return p.getH() * p.getH() + p.getK() * p.getK() + p.getL() * p.getL();
 }
 
+double QMOD(const Mantid::Geometry::IPeak &p) {
+  return p.getQSampleFrame().norm();
+}
+
 double intensity(const Mantid::Geometry::IPeak &p) { return p.getIntensity(); }
 
 double SN(const Mantid::Geometry::IPeak &p) {
@@ -44,7 +48,7 @@ const std::string FilterPeaks::name() const { return "FilterPeaks"; }
 /// Algorithm's version for identification. @see Algorithm::version
 int FilterPeaks::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string FilterPeaks::category() const { return "Crystal"; }
+const std::string FilterPeaks::category() const { return "Crystal\\Peaks"; }
 
 /** Initialize the algorithm's properties.
  */
@@ -61,6 +65,7 @@ void FilterPeaks::init() {
   filters.push_back("h^2+k^2+l^2");
   filters.push_back("Intensity");
   filters.push_back("Signal/Noise");
+  filters.push_back("QMod");
   declareProperty("FilterVariable", "",
                   boost::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
@@ -98,6 +103,8 @@ void FilterPeaks::exec() {
     filterFunction = &intensity;
   else if (FilterVariable == "Signal/Noise")
     filterFunction = &SN;
+  else if (FilterVariable == "QMod")
+    filterFunction = &QMOD;
   else
     throw std::invalid_argument("Unknown FilterVariable: " + FilterVariable);
 

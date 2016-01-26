@@ -219,9 +219,9 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         "Workspace2D", histogramNumber, numSteps, numSteps);
     wsDiff2D = boost::dynamic_pointer_cast<Workspace2D>(wsDiff);
     AnalysisDataService::Instance().addOrReplace("ProfilesFitDiff", wsDiff2D);
-    TextAxis *const newAxis1 = new TextAxis(peakWS->getNumberPeaks());
-    TextAxis *const newAxis2 = new TextAxis(peakWS->getNumberPeaks());
-    TextAxis *const newAxis3 = new TextAxis(peakWS->getNumberPeaks());
+    auto const newAxis1 = new TextAxis(peakWS->getNumberPeaks());
+    auto const newAxis2 = new TextAxis(peakWS->getNumberPeaks());
+    auto const newAxis3 = new TextAxis(peakWS->getNumberPeaks());
     wsProfile2D->replaceAxis(1, newAxis1);
     wsFit2D->replaceAxis(1, newAxis2);
     wsDiff2D->replaceAxis(1, newAxis3);
@@ -686,7 +686,8 @@ void IntegratePeaksMD::exec() {
 
 double f_eval(double x, void *params) {
   boost::shared_ptr<const API::CompositeFunction> fun =
-      *(boost::shared_ptr<const API::CompositeFunction> *)params;
+      *reinterpret_cast<boost::shared_ptr<const API::CompositeFunction> *>(
+          params);
   FunctionDomain1DVector domain(x);
   FunctionValues yval(domain);
   fun->function(domain, yval);

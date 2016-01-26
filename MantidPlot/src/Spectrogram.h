@@ -67,7 +67,7 @@ class Spectrogram: public QObject, public QwtPlotSpectrogram, public MantidQt::A
 
 public:
   Spectrogram();
-  Spectrogram(Matrix *m);
+  explicit Spectrogram(Matrix *m);
   Spectrogram(const QString &wsName, const Mantid::API::IMDWorkspace_const_sptr & workspace);
   Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
   Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
@@ -114,8 +114,14 @@ public:
   void setMantidColorMap(const MantidColorMap &map);
   void updateData(Matrix *m);
   void updateData(const Mantid::API::IMDWorkspace_const_sptr & workspace);
-  MantidQt::API::QwtRasterDataMD *dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr & workspace);
+  MantidQt::API::QwtRasterDataMD *
+  dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr &workspace,
+                    const QwtDoubleInterval *range = nullptr);
   void postDataUpdate();
+  /// Set autoscale on/off for color scale (default: on)
+  void setColorMapAutoScale(bool autoscale = true) {
+    d_color_map_autoscale = autoscale;
+  }
 
   ColorMapPolicy colorMapPolicy()const{return color_map_policy;};
 
@@ -220,12 +226,14 @@ protected:
   std::vector<unsigned char> mScaledValues;
   /// boolean flag to indicate intensity changed
   bool m_bIntensityChanged;
+  /// Flag for whether we autoscale color bar
+  bool d_color_map_autoscale;
 };
 
 class SpectrogramData: public QwtRasterData
 {
 public:
-  SpectrogramData(const QwtDoubleRect &rect):QwtRasterData(rect){}
+  explicit SpectrogramData(const QwtDoubleRect &rect) : QwtRasterData(rect) {}
   virtual double getMinPositiveValue()const = 0;
 };
 
@@ -233,10 +241,8 @@ public:
 class MatrixData: public SpectrogramData
 {
 public:
-  MatrixData(Matrix *m):
-    SpectrogramData(m->boundingRect()),
-    d_matrix(m)
-  {
+  explicit MatrixData(Matrix *m)
+      : SpectrogramData(m->boundingRect()), d_matrix(m) {
     n_rows = d_matrix->numRows();
     n_cols = d_matrix->numCols();
 

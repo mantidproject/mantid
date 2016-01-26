@@ -1,4 +1,4 @@
-"""
+﻿"""
     This module defines a simple function-style API for running Mantid
     algorithms. Each algorithm within Mantid is mapped to a Python
     function of the same name with the parameters of the algorithm becoming
@@ -32,7 +32,7 @@ from mantid.api._aliases import *
 
 #------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
-__SPECIALIZED_FUNCTIONS__ = ["Load", "CutMD"]
+__SPECIALIZED_FUNCTIONS__ = ["Load", "CutMD", "RenameWorkspace"]
 # List of specialized algorithms
 __MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD","IntegratePeaksMD"]
 # The "magic" keyword to enable/disable logging
@@ -408,6 +408,72 @@ _c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f
 # Replace the code object of the wrapper function
 CutMD.func_code = _c
 
+#--------------------- RenameWorkspace ------------- --------------------------
+def rename_wrapper(f):
+    """
+    Decorator generating code for RenameWorkspace algorithm.
+    """
+    
+    function_name = f.__name__
+
+    def wrapper(*args, **kwargs):
+        """Wrapper doing standard settings for RenameWorkspace C++ algorithm"""
+
+        arguments = {}
+        lhs = _kernel.funcreturns.lhs_info()
+        if lhs[0]>0:
+            if 'OutputWorkspace' not in kwargs:
+                arguments['OutputWorkspace'] = lhs[1][0]
+                pos_arg = {0:"InputWorkspace",1:"RenameMonitors"}
+            else:
+               pos_arg = {0:"InputWorkspace", 1:"OutputWorkspace", 2:"RenameMonitors"}
+        else:
+            pos_arg = {0:"InputWorkspace", 1:"OutputWorkspace", 2:"RenameMonitors"}
+
+
+
+        for ind, arg in enumerate(args):
+            arguments[pos_arg[ind]] = arg
+        for key, val in kwargs.items():
+            arguments[key] = val
+        if 'OutputWorkspace' not in arguments:
+            raise RuntimeError("Unable to set output workspace name."\
+                  " Please either assign the output of "\
+                  "RenameWorkspace to a variable or use the OutputWorkspace keyword.")
+
+        # Create and execute
+        algm = _create_algorithm_object(function_name)
+        _set_logging_option(algm, kwargs)
+        for key, val in arguments.items():
+            algm.setProperty(key, val)
+
+        algm.execute()
+
+        return _gather_returns(function_name, lhs, algm)
+
+    # Have a better load signature for autocomplete
+    _signature = "\bInputWorkspace,[OutputWorkspace],[True||False]"
+    # Getting the code object for Load
+    _f = wrapper.func_code
+    # Creating a new code object nearly identical, but with the two variable names replaced
+    # by the property list.
+    _c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags,\
+            _f.co_code, _f.co_consts, _f.co_names,\
+            (_signature, "kwargs"), _f.co_filename,\
+            _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
+
+    # Replace the code object of the wrapper function
+    wrapper.func_code = _c
+    wrapper.__doc__ = f.__doc__
+
+    return wrapper
+
+@rename_wrapper
+def RenameWorkspace(*args, **kwargs):
+    """ Rename workspace with option to renaming monitors
+        workspace attached to current workspace.
+    """
+    return None
 #--------------------------------------------------- --------------------------
 
 def _get_function_spec(func):
@@ -574,18 +640,28 @@ def _get_args_from_lhs(lhs, algm_obj):
         :param algm_obj: An initialised algorithm object
         :returns: A dictionary mapping property names to the values extracted from the lhs variables
     """
+
     ret_names = lhs[1]
     extra_args = {}
 
     output_props = [ algm_obj.getProperty(p) for p in algm_obj.outputProperties() ]
+
     nprops = len(output_props)
-    i = 0
-    while len(ret_names) > 0 and i < nprops:
-        p = output_props[i]
+    nnames = len(ret_names)
+
+    name = 0
+
+    for p in output_props:
         if _is_workspace_property(p):
-            extra_args[p.name] = ret_names[0]
-            ret_names = ret_names[1:]
-        i += 1
+            if nnames > 0 and nprops > nnames:
+                extra_args[p.name] = ret_names[0] # match argument to property name
+                ret_names = ret_names[1:]
+                nnames -= 1
+            elif nnames > 0:
+                extra_args[p.name] = ret_names[name]
+
+        name += 1
+
     return extra_args
 
 def _merge_keywords_with_lhs(keywords, lhs_args):
@@ -752,6 +828,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
 
         set_properties(algm, *args, **final_keywords)
+
         try:
             algm.execute()
         except RuntimeError, e:
@@ -759,7 +836,8 @@ def _create_algorithm_function(algorithm, version, _algm_object):
                 # Check for missing mandatory parameters
                 _check_mandatory_args(algorithm, _algm_object, e, *args, **kwargs)
             else:
-                raise RuntimeError(e.message)
+                raise
+
         return _gather_returns(algorithm, lhs, algm)
 
 

@@ -34,7 +34,6 @@ class InstrumentWindowRenderTab;
 class QPushButton;
 class QDialog;
 class QSlider;
-class QSpinBox;
 class QTabWidget;
 class QLineEdit;
 class QLabel;
@@ -167,6 +166,8 @@ public slots:
   void setPeakLabelPrecision(int n);
   void setShowPeakRowFlag(bool on);
   void setShowPeakLabelsFlag(bool on);
+  void setShowPeakRelativeIntensity(bool on);
+
   /// Enable OpenGL. Slot called from render tab only - doesn't update the checkbox.
   void enableGL( bool on );
   void updateInfoText();

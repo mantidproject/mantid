@@ -8,6 +8,7 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/UsageService.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
@@ -63,10 +64,10 @@ FrameworkManagerImpl::FrameworkManagerImpl()
   WSAStartup(MAKEWORD(2, 2), &wsaData);
 #endif
 
-#ifdef _MSC_VER
-  // This causes the exponent to consist of two digits (Windows Visual Studio
-  // normally 3, Linux default 2), where two digits are not sufficient I presume
-  // it uses more
+#if defined(_MSC_VER) && _MSC_VER < 1900
+  // This causes the exponent to consist of two digits.
+  // VC++ >=1900 use standards conforming behaviour and only
+  // uses the number of digits required
   _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 
@@ -110,9 +111,7 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
     g_log.information() << "Version check disabled." << std::endl;
   }
 
-  // the algorithm will see if it should run
-
-  SendStartupUsageInfo();
+  setupUsageReporting();
 }
 
 /// Update instrument definitions from github
@@ -137,27 +136,6 @@ void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
                      "check if a newer version is available." << std::endl;
-  }
-}
-
-/// Sends startup information about OS and Mantid version
-void FrameworkManagerImpl::SendStartupUsageInfo() {
-  // see whether or not to send
-  int sendStartupUsageInfo = 0;
-  int retVal = Kernel::ConfigService::Instance().getValue(
-      "usagereports.enabled", sendStartupUsageInfo);
-  if ((retVal == 0) || (sendStartupUsageInfo == 0)) {
-    return; // exit early
-  }
-
-  // do it
-  try {
-    IAlgorithm *algSendStartupUsage = this->createAlgorithm("SendUsage");
-    algSendStartupUsage->setAlgStartupLogging(false);
-    Poco::ActiveResult<bool> result = algSendStartupUsage->executeAsync();
-  } catch (Kernel::Exception::NotFoundError &) {
-    g_log.debug() << "SendUsage algorithm is not available - cannot update "
-                     "send usage information." << std::endl;
   }
 }
 
@@ -241,6 +219,11 @@ void FrameworkManagerImpl::clear() {
   clearPropertyManagers();
 }
 
+void FrameworkManagerImpl::shutdown() {
+  Kernel::UsageService::Instance().shutdown();
+  clear();
+}
+
 /**
  * Clear memory associated with the AlgorithmManager
  */
@@ -307,7 +290,8 @@ FrameworkManagerImpl::createAlgorithm(const std::string &algName,
   IAlgorithm *alg = AlgorithmManager::Instance()
                         .create(algName, version)
                         .get(); // createAlgorithm(algName);
-  alg->setProperties(propertiesArray);
+  alg->setPropertiesWithSimpleString(propertiesArray);
+
   return alg;
 }
 
@@ -428,6 +412,20 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
   }
   Mantid::API::MemoryManager::Instance().releaseFreeMemory();
   return retVal;
+}
+
+void FrameworkManagerImpl::setupUsageReporting() {
+  int enabled = 0;
+  int interval = 0;
+  int retVal = Kernel::ConfigService::Instance().getValue(
+      "Usage.BufferCheckInterval", interval);
+  if ((retVal == 1) && (interval > 0)) {
+    Kernel::UsageService::Instance().setInterval(interval);
+  }
+  retVal = Kernel::ConfigService::Instance().getValue("usagereports.enabled",
+                                                      enabled);
+  Kernel::UsageService::Instance().setEnabled((retVal == 1) && (enabled > 0));
+  Kernel::UsageService::Instance().registerStartup();
 }
 
 } // namespace API

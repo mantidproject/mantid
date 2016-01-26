@@ -56,6 +56,7 @@ public:
 
     loader.setProperty("InstrumentName", "HB2A");
     loader.setProperty("Workspace", dataws);
+    loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
 
     loader.execute();
     TS_ASSERT(loader.isExecuted());

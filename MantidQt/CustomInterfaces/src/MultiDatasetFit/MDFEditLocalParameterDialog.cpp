@@ -7,6 +7,8 @@
 
 namespace{
   QString makeNumber(double d) {return QString::number(d,'g',16);}
+  const int valueColumn = 0;
+  const int roleColumn  = 1;
 }
 
 namespace MantidQt
@@ -23,8 +25,8 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
   m_uiForm.setupUi(this);
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
   header->setResizeMode(0,QHeaderView::Stretch);
-  header->setResizeMode(1,QHeaderView::Stretch);
   connect(m_uiForm.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(valueChanged(int,int)));
+  m_uiForm.lblParameterName->setText("Parameter: " + parName);
 
   auto n = multifit->getNumberOfSpectra();
   for(int i = 0; i < n; ++i)
@@ -36,13 +38,23 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
     auto tie = multifit->getLocalParameterTie(parName,i);
     m_ties.push_back(tie);
     m_uiForm.tableWidget->insertRow(i);
-    auto cell = new QTableWidgetItem( QString("f%1.").arg(i) + parName );
-    m_uiForm.tableWidget->setItem( i, 0, cell );
-    cell = new QTableWidgetItem( makeNumber(value) );
-    m_uiForm.tableWidget->setItem( i, 1, cell );
+    auto cell = new QTableWidgetItem( makeNumber(value) );
+    m_uiForm.tableWidget->setItem(i, valueColumn, cell);
+    auto headerItem = new QTableWidgetItem(
+        multifit->getWorkspaceName(i) + " (" +
+        QString::number(multifit->getWorkspaceIndex(i)) + ")");
+    m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
+    cell = new QTableWidgetItem("");
+    auto flags = cell->flags();
+    flags ^= Qt::ItemIsEditable;
+    flags ^= Qt::ItemIsSelectable;
+    flags ^= Qt::ItemIsEnabled;
+    cell->setFlags(flags);
+    m_uiForm.tableWidget->setItem(i, roleColumn, cell);
+    updateRoleColumn(i);
   }
   auto deleg = new LocalParameterItemDelegate(this);
-  m_uiForm.tableWidget->setItemDelegateForColumn(1,deleg);
+  m_uiForm.tableWidget->setItemDelegateForColumn(valueColumn, deleg);
   connect(deleg,SIGNAL(setAllValues(double)),this,SLOT(setAllValues(double)));
   connect(deleg,SIGNAL(fixParameter(int,bool)),this,SLOT(fixParameter(int,bool)));
   connect(deleg,SIGNAL(setAllFixed(bool)),this,SLOT(setAllFixed(bool)));
@@ -57,12 +69,18 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
 /// @param col :: Column index of the changed cell.
 void EditLocalParameterDialog::valueChanged(int row, int col)
 {
-  if ( col == 1 )
+  if ( col == valueColumn )
   {
     QString text = m_uiForm.tableWidget->item(row,col)->text();
     try
     {
-      m_values[row] = text.toDouble();
+      bool ok = false;
+      double value = text.toDouble(&ok);
+      if (ok) {
+        m_values[row] = value;
+      } else {
+        m_ties[row] = text;
+      }
     }
     catch(std::exception&)
     {
@@ -80,7 +98,8 @@ void EditLocalParameterDialog::setAllValues(double value)
   for(int i = 0; i < n; ++i)
   {
     m_values[i] = value;
-    m_uiForm.tableWidget->item(i,1)->setText( makeNumber(value) );
+    m_uiForm.tableWidget->item(i, valueColumn)->setText( makeNumber(value) );
+    updateRoleColumn(i);
   }
 }
 
@@ -109,6 +128,7 @@ void EditLocalParameterDialog::fixParameter(int index, bool fix)
 {
   m_fixes[index] = fix;
   m_ties[index] = "";
+  updateRoleColumn(index);
 }
 
 /// Set a new tie for a parameter
@@ -118,6 +138,7 @@ void EditLocalParameterDialog::setTie(int index, QString tie)
 {
   m_ties[index] = tie;
   m_fixes[index] = false;
+  updateRoleColumn(index);
 }
 
 /// Set the same tie to all parameters.
@@ -128,6 +149,7 @@ void EditLocalParameterDialog::setTieAll(QString tie)
   {
     m_ties[i] = tie;
     m_fixes[i] = false;
+    updateRoleColumn(i);
   }
   redrawCells();
 }
@@ -141,6 +163,7 @@ void EditLocalParameterDialog::setAllFixed(bool fix)
   {
     m_fixes[i] = fix;
     m_ties[i] = "";
+    updateRoleColumn(i);
   }
   redrawCells();
 }
@@ -164,7 +187,7 @@ void EditLocalParameterDialog::showContextMenu()
 
   for(auto index = selection.begin(); index != selection.end(); ++index)
   {
-    if ( index->column() == 1 ) hasSelection = true;
+    if ( index->column() == valueColumn ) hasSelection = true;
   }
 
   if ( !hasSelection ) return;
@@ -224,9 +247,60 @@ void EditLocalParameterDialog::redrawCells()
   {
     // it's the only way I am able to make the table to repaint itself
     auto text = makeNumber(m_values[i]);
-    m_uiForm.tableWidget->item(i,1)->setText( text + " " );
-    m_uiForm.tableWidget->item(i,1)->setText( text );
+    m_uiForm.tableWidget->item(i, valueColumn)->setText( text + " " );
+    m_uiForm.tableWidget->item(i, valueColumn)->setText( text );
   }
+}
+
+/// Update the text in the role column
+void EditLocalParameterDialog::updateRoleColumn(int index)
+{
+  auto cell = m_uiForm.tableWidget->item(index, roleColumn);
+  if (m_fixes[index])
+  {
+    cell->setText("fixed");
+    cell->setForeground(QBrush(Qt::red));
+  }
+  else if (!m_ties[index].isEmpty())
+  {
+    cell->setText("tied");
+    cell->setForeground(QBrush(Qt::blue));
+  }
+  else
+  {
+    cell->setText("fitted");
+    cell->setForeground(QBrush(Qt::darkGreen));
+  }
+}
+
+/// Check if there are any other fixed parameters
+bool EditLocalParameterDialog::areOthersFixed(int i) const
+{
+  for (int j = 0; j < m_fixes.size(); ++j)
+  {
+    if (j != i && m_fixes[j]) return true;
+  }
+  return false;
+}
+
+/// Check if all other parameters are fixed
+bool EditLocalParameterDialog::areAllOthersFixed(int i) const
+{
+  for (int j = 0; j < m_fixes.size(); ++j)
+  {
+    if (j != i && !m_fixes[j]) return false;
+  }
+  return true;
+}
+
+/// Check if there are any other tied parameters
+bool EditLocalParameterDialog::areOthersTied(int i) const
+{
+  for (int j = 0; j < m_fixes.size(); ++j)
+  {
+    if (j != i && !m_ties[j].isEmpty()) return true;
+  }
+  return false;
 }
 
 } // MDF

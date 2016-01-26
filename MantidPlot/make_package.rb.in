@@ -58,6 +58,7 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libmxml.dylib",
                      "libhdf5.dylib",
                      "libhdf5_hl.dylib",
+                     "libhdf5_cpp.dylib",
                      "libmfhdf.dylib",
                      "libdf.dylib",
                      "libsz.dylib",
@@ -159,17 +160,16 @@ if( "@MAKE_VATES@" == "ON" )
 end
 `macdeployqt ../MantidPlot.app #{Qt_Executables}`
 
-#Fix remaining QT-related linking issues.
-`install_name_tool -id @rpath/libqsqlite.dylib Contents/Frameworks/plugins/sqldrivers/libqsqlite.dylib`
-
-#change id of all Qt4 imageformats libraries
-qt4_patterns = ["**/imageformats/*.dylib"]
-qt4_patterns.each do |pattern|
-  Dir[pattern].each do |library|
+if Dir.exist?("Contents/PlugIns")
+  #Fix remaining QT-related linking issues.
+  Dir["Contents/PlugIns/**/*.dylib"].each do |library|
     basename =  File.basename(library)
-    `chmod +w Contents/Frameworks/plugins/imageformats/#{basename}`
-    `install_name_tool -id @rpath/#{basename} Contents/Frameworks/plugins/imageformats/#{basename}`
+    `chmod +w #{library}`
+    `install_name_tool -id @rpath/#{basename} #{library}`
   end
+else
+  p "Contents/PlugIns not created by macdeployqt."
+  exit 1
 end
 
 #change id of all PyQt4 libraries

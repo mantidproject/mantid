@@ -11,25 +11,20 @@ execute_process(
 # Strip off any /CR or /LF
 string(STRIP ${OSX_VERSION} OSX_VERSION)
 
-if (OSX_VERSION VERSION_LESS 10.6)
-  message (FATAL_ERROR "The minimum supported version of Mac OS X is 10.6 (Snow Leopard).")
-endif()
-
-if (OSX_VERSION VERSION_GREATER 10.6 OR OSX_VERSION VERSION_EQUAL 10.6)
-  set ( OSX_CODENAME "Snow Leopard" )
-endif()
-
-if (OSX_VERSION VERSION_GREATER 10.7 OR OSX_VERSION VERSION_EQUAL 10.7)
-  set ( OSX_CODENAME "Lion")
-endif()
-
-if (OSX_VERSION VERSION_GREATER 10.8 OR OSX_VERSION VERSION_EQUAL 10.8)
-  set ( OSX_CODENAME "Mountain Lion")
+if (OSX_VERSION VERSION_LESS 10.9)
+  message (FATAL_ERROR "The minimum supported version of Mac OS X is 10.9 (Mavericks).")
 endif()
 
 if (OSX_VERSION VERSION_GREATER 10.9 OR OSX_VERSION VERSION_EQUAL 10.9)
   set ( OSX_CODENAME "Mavericks")
+endif()
 
+if (OSX_VERSION VERSION_GREATER 10.10 OR OSX_VERSION VERSION_EQUAL 10.10)
+  set ( OSX_CODENAME "Yosemite")
+endif()
+
+if (OSX_VERSION VERSION_GREATER 10.11 OR OSX_VERSION VERSION_EQUAL 10.11)
+  set ( OSX_CODENAME "El Capitan")
 endif()
 
 # Export variables globally
@@ -38,25 +33,13 @@ set(OSX_CODENAME ${OSX_CODENAME} CACHE INTERNAL "")
 
 message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 
-###########################################################################
-# Set include and library directories so that CMake finds Third_Party
-###########################################################################
-
-# Only use Third_Party for OS X older than Mavericks (10.9)
-if (OSX_VERSION VERSION_LESS 10.9)
-  message ( STATUS "Using Third_Party.")
-
-  set ( CMAKE_INCLUDE_PATH "${THIRD_PARTY}/include" )
-  set ( BOOST_INCLUDEDIR "${THIRD_PARTY}/include" )
-
-  set ( CMAKE_LIBRARY_PATH "${THIRD_PARTY}/lib/mac64" )
-  set ( BOOST_LIBRARYDIR  "${THIRD_PARTY}/lib/mac64" )
-else()
-  message ( STATUS "OS X Mavericks - Not using Mantid Third_Party libraries.")
-endif()
-
 # Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
+
+execute_process(COMMAND python-config --prefix OUTPUT_VARIABLE PYTHON_PREFIX)
+string(STRIP ${PYTHON_PREFIX} PYTHON_PREFIX)
+set( PYTHON_LIBRARY "${PYTHON_PREFIX}/lib/libpython2.7.dylib" CACHE FILEPATH "PYTHON_LIBRARY")
+set( PYTHON_INCLUDE_DIR "${PYTHON_PREFIX}/include/python2.7" CACHE PATH "PYTHON_INCLUDE_DIR")
 
 ###########################################################################
 # Use the system-installed version of Python.
@@ -83,13 +66,28 @@ endif ()
 set ( CLANG_WARNINGS "-Wall -Wextra -pedantic -Winit-self -Wpointer-arith -Wcast-qual -fno-common  -Wno-deprecated-register -Wno-deprecated-declarations")
 
 set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 ${CLANG_WARNINGS}" )
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -std=c++0x" )
-set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x" )
+if(${CMAKE_VERSION} VERSION_GREATER 3.1.0 OR ${CMAKE_VERSION} VERSION_EQUAL 3.1.0)
+  set(CMAKE_CXX_STANDARD 14)
+  set(CXX_STANDARD_REQUIRED 11)
+else()
+  include(CheckCXXCompilerFlag)
+  CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+  if(COMPILER_SUPPORTS_CXX14)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  elseif(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  endif()
+endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CLANG_WARNINGS} -stdlib=libc++" )
+  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -stdlib=libc++ ${CLANG_WARNINGS}" )
+endif()
+# XCode isn't picking up the standard set above.
+if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS "${CLANG_WARNINGS}")
   set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
+  set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")
 endif()
 
 if( ${CMAKE_C_COMPILER} MATCHES "icc.*$" )
@@ -195,13 +193,32 @@ if (OSX_VERSION VERSION_LESS 10.9)
   endforeach( PYPACKAGE )
 endif ()
 
-install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
-install ( DIRECTORY ${QT_PLUGINS_DIR}/sqldrivers DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
-
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
-                ${CMAKE_SOURCE_DIR}/installers/MacInstaller/qt.conf
           DESTINATION MantidPlot.app/Contents/Resources/
 )
+
+# Add launcher script for mantid python
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx
+          DESTINATION MantidPlot.app/Contents/MacOS/ 
+          RENAME mantidpython )
+# Add launcher application for a Mantid IPython console
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidPython_osx_launcher
+          DESTINATION MantidPython\ \(optional\).app/Contents/MacOS/ 
+          RENAME MantidPython )
+install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_Info.plist
+          DESTINATION MantidPython\ \(optional\).app/Contents/ 
+          RENAME Info.plist )
+install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPython.icns
+          DESTINATION MantidPython\ \(optional\).app/Contents/Resources/ )
+# Add launcher application for Mantid IPython notebooks
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidNotebook_osx_launcher
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/MacOS/ 
+          RENAME MantidNotebook )
+install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/ 
+          RENAME Info.plist )
+install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/ )
 
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
 set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/installers/MacInstaller/osx_DS_Store)

@@ -42,19 +42,15 @@ const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
 std::string
 ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
                                 const std::vector<std::string> &exts) const {
-  std::set<std::string>::const_iterator iter = filenames.begin();
-  for (; iter != filenames.end(); ++iter) {
+  for (auto iter = filenames.cbegin(); iter != filenames.cend(); ++iter) {
     g_log.debug() << *iter << ")\n";
   }
-  std::vector<std::string>::const_iterator iter2 = exts.begin();
-  for (; iter2 != exts.end(); ++iter2) {
-    g_log.debug() << *iter2 << ")\n";
+  for (auto iter = exts.cbegin(); iter != exts.cend(); ++iter) {
+    g_log.debug() << *iter << ")\n";
   }
 
-  std::vector<std::string>::const_iterator ext = exts.begin();
-  for (; ext != exts.end(); ++ext) {
-    std::set<std::string>::const_iterator it = filenames.begin();
-    for (; it != filenames.end(); ++it) {
+  for (auto ext = exts.cbegin(); ext != exts.cend(); ++ext) {
+    for (auto it = filenames.cbegin(); it != filenames.cend(); ++it) {
       const std::string fullPath = getPath(*it + *ext);
       if (!fullPath.empty())
         return fullPath;

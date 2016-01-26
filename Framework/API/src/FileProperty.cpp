@@ -2,6 +2,7 @@
 // Includes
 //-----------------------------------------------------------------
 #include "MantidAPI/FileProperty.h"
+
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DirectoryValidator.h"
@@ -9,52 +10,77 @@
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/Path.h>
 #include <Poco/File.h>
-#include <cctype>
+#include <Poco/Path.h>
+
 #include <algorithm>
+#include <cctype>
 
 namespace Mantid {
 
 namespace API {
 
-using namespace Mantid::Kernel;
+using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::DirectoryValidator;
+using Mantid::Kernel::FileValidator;
+using Mantid::Kernel::IValidator_sptr;
+
+namespace {
+/**
+  * Create the appropriate validator based on the parameters
+  * @param action The type of property that is being defined, @see FileAction
+  * @param exts A list of extensions, only use for File-type actions and are
+  *             passed to the validator
+  */
+IValidator_sptr createValidator(unsigned int action,
+                                const std::vector<std::string> &exts) {
+  if (action == FileProperty::Directory ||
+      action == FileProperty::OptionalDirectory) {
+    return boost::make_shared<DirectoryValidator>(action ==
+                                                  FileProperty::Directory);
+  } else {
+    return boost::make_shared<FileValidator>(
+        exts, (action == FileProperty::Load), (action == FileProperty::Save));
+  }
+}
+
+/**
+ * If the given extension doesn't exist in the list then add it
+ * @param extension A string listing the extension
+ * @param extensions The existing collection
+ */
+void addExtension(const std::string &extension,
+                  std::vector<std::string> &extensions) {
+  if (std::find(extensions.begin(), extensions.end(), extension) !=
+      extensions.end())
+    return;
+  else
+    extensions.push_back(extension);
+}
+}
 
 //-----------------------------------------------------------------
 // Public member functions
 //-----------------------------------------------------------------
 /**
  * Constructor
- * @param name ::          The name of the property
- * @param default_value :: A default value for the property
- * @param exts ::          The allowed extensions, the front entry in the vector
- * will be the default extension
- * @param action ::        An enum indicating whether this should be a load/save
+ * @param name The name of the property
+ * @param defaultValue A default value for the property
+ * @param action Inndicate whether this should be a load/save
  * property
- * @param direction ::     An optional direction (default=Input)
+ * @param exts The allowed extensions. The front entry in the vector
+ * will be the default extension
+ * @param direction An optional direction (default=Input)
  */
 FileProperty::FileProperty(const std::string &name,
-                           const std::string &default_value,
-                           unsigned int action,
+                           const std::string &defaultValue, unsigned int action,
                            const std::vector<std::string> &exts,
                            unsigned int direction)
-    : PropertyWithValue<std::string>(
-          name, default_value,
-          /* Create either a FileValidator or a
-             DirectoryValidator, depending on Action
-             */
-          (action == FileProperty::Directory ||
-           action == FileProperty::OptionalDirectory)
-              ? boost::make_shared<DirectoryValidator>(action ==
-                                                       FileProperty::Directory)
-              : boost::make_shared<FileValidator>(
-                    exts, (action == FileProperty::Load),
-                    (action == FileProperty::Save)),
-          direction),
-      m_action(action), m_defaultExt(""), m_runFileProp(false),
-      m_oldLoadPropValue(""), m_oldLoadFoundFile("") {
-  setUp((exts.size() > 0) ? exts.front() : "");
-}
+    : PropertyWithValue<std::string>(name, defaultValue,
+                                     createValidator(action, exts), direction),
+      m_action(action), m_defaultExt((exts.size() > 0) ? exts.front() : ""),
+      m_runFileProp(isLoadProperty() && extsMatchRunFiles()),
+      m_oldLoadPropValue(""), m_oldLoadFoundFile("") {}
 
 /**
  * Constructor
@@ -69,24 +95,25 @@ FileProperty::FileProperty(const std::string &name,
                            const std::string &default_value,
                            unsigned int action, const std::string &ext,
                            unsigned int direction)
-    : PropertyWithValue<std::string>(
-          name, default_value,
-          /* Create either a FileValidator or a
-             DirectoryValidator, depending on Action
-             */
-          (action == FileProperty::Directory ||
-           action == FileProperty::OptionalDirectory)
-              ? boost::make_shared<DirectoryValidator>(action ==
-                                                       FileProperty::Directory)
-              : boost::make_shared<FileValidator>(
-                    std::vector<std::string>(1, ext),
-                    (action == FileProperty::Load),
-                    (action == FileProperty::Save)),
-          direction),
-      m_action(action), m_defaultExt(ext), m_runFileProp(false),
-      m_oldLoadPropValue(""), m_oldLoadFoundFile("") {
-  setUp(ext);
-}
+    : FileProperty(name, default_value, action,
+                   std::vector<std::string>(1, ext), direction) {}
+
+/**
+ * Constructor
+ * @param name ::          The name of the property
+ * @param default_value :: A default value for the property
+ * @param exts ::          The braced-list of allowed extensions
+ * @param action ::        An enum indicating whether this should be a load/save
+ * property
+ * @param direction ::     An optional direction (default=Input)
+ */
+FileProperty::FileProperty(const std::string &name,
+                           const std::string &default_value,
+                           unsigned int action,
+                           std::initializer_list<std::string> exts,
+                           unsigned int direction)
+    : FileProperty(name, default_value, action,
+                   std::vector<std::string>(std::move(exts)), direction) {}
 
 /**
  * Check if this is a load property
@@ -189,19 +216,6 @@ std::string FileProperty::isEmptyValueValid() const {
 }
 
 /**
- * Set up the property
- * @param defExt :: The default extension
- */
-void FileProperty::setUp(const std::string &defExt) {
-  m_defaultExt = defExt;
-  if (isLoadProperty() && extsMatchRunFiles()) {
-    m_runFileProp = true;
-  } else {
-    m_runFileProp = false;
-  }
-}
-
-/**
  * Do the allowed values match the facility preference extensions for run files
  * @returns True if the extensions match those in the facility's preference list
  * for
@@ -213,10 +227,8 @@ bool FileProperty::extsMatchRunFiles() {
     Kernel::FacilityInfo facilityInfo =
         Kernel::ConfigService::Instance().getFacility();
     const std::vector<std::string> facilityExts = facilityInfo.extensions();
-    std::vector<std::string>::const_iterator facilityExtsBegin =
-        facilityExts.begin();
-    std::vector<std::string>::const_iterator facilityExtsEnd =
-        facilityExts.end();
+    auto facilityExtsBegin = facilityExts.cbegin();
+    auto facilityExtsEnd = facilityExts.cend();
     const std::vector<std::string> allowedExts = this->allowedValues();
 
     for (auto it = allowedExts.begin(); it != allowedExts.end(); ++it) {
@@ -231,17 +243,6 @@ bool FileProperty::extsMatchRunFiles() {
   // match of false
 
   return match;
-}
-
-namespace { // anonymous namespace keeps it here
-void addExtension(const std::string &extension,
-                  std::vector<std::string> &extensions) {
-  if (std::find(extensions.begin(), extensions.end(), extension) !=
-      extensions.end())
-    return;
-  else
-    extensions.push_back(extension);
-}
 }
 
 /**

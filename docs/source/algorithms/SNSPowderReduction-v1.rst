@@ -23,6 +23,13 @@ of time. Here is how the filter is used:
 | ``   3. There is NO upper boundary of the filter wall if wall[1] is ZERO;``
 
 
+Workflow
+--------
+
+.. diagram:: SNSPowderReduction-v1_workflow.dot
+
+.. diagram:: SNSPowderReduction-v1_focus_workflow.dot
+
 Usage
 -----
 

@@ -255,8 +255,7 @@ namespace {
   class DisableGUI_RAII
   {
   public:
-    DisableGUI_RAII(StepScan * gui) : the_gui(gui)
-    {
+    explicit DisableGUI_RAII(StepScan *gui) : the_gui(gui) {
       QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
       the_gui->setAttribute( Qt::WA_TransparentForMouseEvents );
     }

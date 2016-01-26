@@ -1,6 +1,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/VMD.h"
 
 #include <sstream>
@@ -11,12 +12,16 @@ namespace Mantid {
 namespace API {
 //-----------------------------------------------------------------------------------------------
 /** Default constructor */
-IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {}
+IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {
+  m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
+}
 
 //-----------------------------------------------------------------------------------------------
 /** Copy constructor */
 IMDWorkspace::IMDWorkspace(const IMDWorkspace &other)
-    : Workspace(other), Mantid::API::MDGeometry(other) {}
+    : Workspace(other), Mantid::API::MDGeometry(other) {
+  m_convention = other.getConvention();
+}
 
 /// Destructor
 IMDWorkspace::~IMDWorkspace() {}
@@ -40,6 +45,29 @@ IMDIterator *IMDWorkspace::createIterator(
   return iterators[0];
 }
 
+//---------------------------------------------------------------------------------------------
+/** @return the convention
+ */
+std::string IMDWorkspace::getConvention() const { return m_convention; }
+
+//---------------------------------------------------------------------------------------------
+/** @return the convention
+ */
+void IMDWorkspace::setConvention(std::string convention) {
+  m_convention = convention;
+}
+
+//---------------------------------------------------------------------------------------------
+/** @return the convention
+ */
+std::string IMDWorkspace::changeQConvention() {
+  if (this->getConvention() == "Crystallography")
+    m_convention = "Inelastic";
+  else
+    m_convention = "Crystallography";
+  return m_convention;
+}
+
 //-------------------------------------------------------------------------------------------
 /** Returns the signal (normalized by volume) at a given coordinates
  *
@@ -51,6 +79,20 @@ signal_t IMDWorkspace::getSignalAtVMD(
     const Mantid::Kernel::VMD &coords,
     const Mantid::API::MDNormalization &normalization) const {
   return this->getSignalAtCoord(coords.getBareArray(), normalization);
+}
+
+//-------------------------------------------------------------------------------------------
+/** Returns the signal (normalized by volume) at a given coordinates
+ * or 0 if masked
+ *
+ * @param coords :: coordinate as a VMD vector
+ * @param normalization :: how to normalize the signal returned
+ * @return normalized signal
+ */
+signal_t IMDWorkspace::getSignalWithMaskAtVMD(
+    const Mantid::Kernel::VMD &coords,
+    const Mantid::API::MDNormalization &normalization) const {
+  return this->getSignalWithMaskAtCoord(coords.getBareArray(), normalization);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -74,6 +116,12 @@ const std::string IMDWorkspace::toString() const {
     os << "Binned from '" << getOriginalWorkspace()->getName();
   }
   os << "\n";
+  if (this->getConvention() == "Crystallography")
+    os << "Crystallography: kf-ki";
+  else
+    os << "Inelastic: ki-kf";
+  os << "\n";
+
   return os.str();
 }
 
@@ -155,8 +203,9 @@ IPropertyManager::getValue<Mantid::API::IMDWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected IMDWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IMDWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -173,8 +222,9 @@ IPropertyManager::getValue<Mantid::API::IMDWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const IMDWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<IMDWorkspace>.";
     throw std::runtime_error(message);
   }
 }

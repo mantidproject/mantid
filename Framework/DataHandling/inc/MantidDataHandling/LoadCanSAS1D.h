@@ -68,7 +68,9 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\XML"; }
+  virtual const std::string category() const {
+    return "DataHandling\\XML;SANS\\DataHandling";
+  }
 
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(Kernel::FileDescriptor &descriptor) const;

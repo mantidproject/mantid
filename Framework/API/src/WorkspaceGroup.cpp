@@ -330,9 +330,9 @@ bool WorkspaceGroup::isMultiperiod() const {
     g_log.debug("Not a multiperiod-group with < 1 nested workspace.");
     return false;
   }
-  std::vector<Workspace_sptr>::const_iterator iterator = m_workspaces.begin();
   // Loop through all inner workspaces, checking each one in turn.
-  while (iterator != m_workspaces.end()) {
+  for (auto iterator = m_workspaces.cbegin(); iterator != m_workspaces.cend();
+       ++iterator) {
     if (MatrixWorkspace_sptr ws =
             boost::dynamic_pointer_cast<MatrixWorkspace>(*iterator)) {
       try {
@@ -353,7 +353,6 @@ bool WorkspaceGroup::isMultiperiod() const {
                   "Matrix Workspaces.");
       return false;
     }
-    ++iterator;
   }
   return true;
 }
@@ -401,8 +400,9 @@ IPropertyManager::getValue<Mantid::API::WorkspaceGroup_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected WorkspaceGroup.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<WorkspaceGroup>.";
     throw std::runtime_error(message);
   }
 }
@@ -417,8 +417,9 @@ IPropertyManager::getValue<Mantid::API::WorkspaceGroup_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const WorkspaceGroup.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<WorkspaceGroup>.";
     throw std::runtime_error(message);
   }
 }

@@ -215,7 +215,9 @@ const std::string IntegrateEllipsoids::name() const {
 int IntegrateEllipsoids::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string IntegrateEllipsoids::category() const { return "Crystal"; }
+const std::string IntegrateEllipsoids::category() const {
+  return "Crystal\\Integration";
+}
 
 //---------------------------------------------------------------------
 
@@ -357,9 +359,9 @@ void IntegrateEllipsoids::exec() {
     {
       peak_q_list.push_back(V3D(peaks[i].getQLabFrame()));
       qList.push_back(std::make_pair(1., V3D(peaks[i].getQLabFrame())));
-      V3D miller_ind((double)boost::math::iround<double>(hkl[0]),
-                     (double)boost::math::iround<double>(hkl[1]),
-                     (double)boost::math::iround<double>(hkl[2]));
+      V3D miller_ind(static_cast<double>(boost::math::iround<double>(hkl[0])),
+                     static_cast<double>(boost::math::iround<double>(hkl[1])),
+                     static_cast<double>(boost::math::iround<double>(hkl[2])));
       hkl_vectors.push_back(V3D(miller_ind));
       indexed_count++;
     }

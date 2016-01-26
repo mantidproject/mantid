@@ -47,11 +47,8 @@ LoadRawHelper::~LoadRawHelper() {}
 
 /// Initialisation method.
 void LoadRawHelper::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".raw");
-  exts.push_back(".s*");
-  exts.push_back(".add");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
+                                   {".raw", ".s*", ".add"}),
                   "The name of the RAW file to read, including its full or "
                   "relative path. The file extension must be .raw or .RAW "
                   "(N.B. case sensitive if running on Linux).");
@@ -475,7 +472,7 @@ bool LoadRawHelper::isAscii(FILE *file) const {
 std::vector<boost::shared_ptr<MantidVec>>
 LoadRawHelper::getTimeChannels(const int64_t &regimes,
                                const int64_t &lengthIn) {
-  float *const timeChannels = new float[lengthIn];
+  auto const timeChannels = new float[lengthIn];
   isisRaw->getTimeChannels(timeChannels, static_cast<int>(lengthIn));
 
   std::vector<boost::shared_ptr<MantidVec>> timeChannelsVec;
@@ -498,7 +495,7 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
     // In this case, also need to populate the map of spectrum-regime
     // correspondence
     const int64_t ndet = static_cast<int64_t>(isisRaw->i_det);
-    std::map<specid_t, specid_t>::iterator hint = m_specTimeRegimes.begin();
+    auto hint = m_specTimeRegimes.begin();
     for (int64_t j = 0; j < ndet; ++j) {
       // No checking for consistency here - that all detectors for given
       // spectrum
@@ -544,9 +541,8 @@ void LoadRawHelper::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", instrumentID);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty(
-        "RewriteSpectraMap",
-        false); // No point as we will load the one from the file
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");
@@ -960,8 +956,7 @@ specid_t LoadRawHelper::calculateWorkspaceSize() {
 
     if (m_list) {
       if (m_interval) {
-        for (std::vector<specid_t>::iterator it = m_spec_list.begin();
-             it != m_spec_list.end();)
+        for (auto it = m_spec_list.begin(); it != m_spec_list.end();)
           if (*it >= m_spec_min && *it < m_spec_max) {
             it = m_spec_list.erase(it);
           } else
@@ -1293,7 +1288,7 @@ bool LoadRawHelper::isAscii(const std::string &filename) {
   // Call it a binary file if we find a non-ascii character in the first 256
   // bytes of the file.
   for (char *p = data; p < pend; ++p) {
-    unsigned long ch = (unsigned long)*p;
+    unsigned long ch = static_cast<unsigned long>(*p);
     if (!(ch <= 0x7F)) {
       return false;
     }

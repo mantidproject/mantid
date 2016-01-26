@@ -1,4 +1,4 @@
-"""
+﻿"""
 MantidPlot module to gain access to plotting functions etc.
 Requires that the main script be run from within MantidPlot
 """
@@ -16,6 +16,7 @@ from PyQt4.QtCore import Qt
 import os
 import time
 import mantid.api
+import mantidqtpython
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
@@ -217,7 +218,7 @@ def newTiledWindow(name=None, sources = None, ncols = None):
 
 
 # ----------------------------------------------------------------------------------------------------
-def plotSpectrum(source, indices, error_bars=False, type=-1, window=None,
+def plotSpectrum(source, indices, distribution = mantidqtpython.MantidQt.DistributionDefault, error_bars=False, type=-1, window=None,
                  clearWindow=False, waterfall=False):
     """Open a 1D Plot of a spectrum in a workspace.
 
@@ -256,8 +257,39 @@ def plotSpectrum(source, indices, error_bars=False, type=-1, window=None,
         window = window._getHeldObject()
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
-                                          workspace_names, index_list, True, error_bars,
+                                          workspace_names, index_list, True, distribution, error_bars,
                                           type, window, clearWindow, waterfall))
+    if graph._getHeldObject() == None:
+        raise RuntimeError("Cannot create graph, see log for details.")
+    else:
+        return graph
+
+
+# ----------------------------------------------------------------------------------------------------
+def plotTableColumns(table, columns, type = -1):
+    """
+    This plots one or more columns from a table.
+
+    Args:
+        table: a qtiplot or mantid table (not a TableWorkspace)
+        columns: a list or a tuple of columns names to plot or a string for a single column.
+                To plot error bars add their column name(s).
+        type: curve style for plot (-1: unspecified; 0: line, default; 1: scatter/dots)
+    Returns:
+        A handle to the created window. None in case of error.
+    """
+    # This function uses qtiplot's methods for plotting tables.
+    # To be able to plot error bars all column names must be prefixed
+    # with the table name.
+    if isinstance(columns, tuple) or isinstance(columns, list):
+        columns = ['%s_%s' % (table.name(), column) for column in columns]
+        columns = tuple(columns)
+    else:
+        columns = '%s_%s' % (table.name(), columns)
+
+    graph = proxies.Graph(threadsafe_call(_qti.app.plot, table._getHeldObject(), columns, type))
+    threadsafe_call(graph.activeLayer().setTitle, table.windowLabel())
+
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
@@ -408,7 +440,7 @@ def plotBin(source, indices, error_bars=False, type=-1, window=None, clearWindow
         window = window._getHeldObject()
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
-                                          workspace_names, index_list, False, error_bars,
+                                          workspace_names, index_list, False, mantidqtpython.MantidQt.DistributionDefault, error_bars,
                                           type, window, clearWindow, waterfall))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
@@ -825,6 +857,10 @@ Layer.Right = _qti.GraphOptions.Right
 Layer.Bottom = _qti.GraphOptions.Bottom
 Layer.Top = _qti.GraphOptions.Top
 
+DistrFlag = mantidqtpython.MantidQt
+DistrFlag.DistrDefault = mantidqtpython.MantidQt.DistributionDefault
+DistrFlag.DistrTrue = mantidqtpython.MantidQt.DistributionTrue
+DistrFlag.DistrFalse = mantidqtpython.MantidQt.DistributionFalse
 
 # -----------------------------------------------------------------------------
 # --------------------------- "Private" functions -----------------------------

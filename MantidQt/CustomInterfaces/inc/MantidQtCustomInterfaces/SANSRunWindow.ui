@@ -3479,7 +3479,7 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item row="1" column="3">
-               <layout class="QHBoxLayout" name="horizontalLayout_24">
+               <layout class="QHBoxLayout" name="horizontalLayout_241">
                 <item>
                  <widget class="QCheckBox" name="left_right_checkbox">
                   <property name="text">
@@ -3503,7 +3503,7 @@ p, li { white-space: pre-wrap; }
                </layout>
               </item>
               <item row="0" column="3">
-               <widget class="QLabel" name="label_16">
+               <widget class="QLabel" name="label_161">
                 <property name="text">
                  <string>Find Beam Centre for:</string>
                 </property>
@@ -4353,7 +4353,7 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="12" column="2">
-         <layout class="QHBoxLayout" name="horizontalLayout_241">
+         <layout class="QHBoxLayout" name="horizontalLayout_2411">
           <item>
            <widget class="QLabel" name="binning_label">
             <property name="minimumSize">

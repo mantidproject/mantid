@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 import os,sys
 import stresstesting
 from mantid.simpleapi import *
@@ -55,7 +55,7 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
         saveFileName = self.rd.reducer.save_file_name
 #pylint: disable=unused-variable
         outWS = Load(Filename=saveFileName+'.nxs')
-        outWS *= 0.997979227566217
+        #outWS *= 0.997979227566217
         fullRezPath =FileFinder.getFullPath(saveFileName+'.nxs')
         os.remove(fullRezPath)
         return 'outWS'
@@ -104,7 +104,7 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
         # temporary workflow, until we fix workspace adjustment
         # disable pylint -- access to protected member
 #pylint: disable=W0212
-        rd._tolerr =3.e-3
+        rd._tolerr =1.e-6
         rd.reducer.prop_man.save_file_name = 'MARIReduction.nxs'
         rd.validate_run_number=11001
         try:
@@ -282,20 +282,27 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
         # Normalized by monitor-1. -- need monitor1 and ei needs ei_mon1_spec
         # This problem is hopefully fixed in reduction now, but here
         # we have to specify these values manually to guard against
-        # changes in a future
+        # changes in a future. This issue should be now fixed through varions means
         propman.normalise_method='monitor-1'
-        propman.mon1_norm_spec=40961
-        propman.ei_mon1_spec  =40966
+        # Adjust old IDF to new changes. This may change when loader is modified.
+        propman.ei_mon2_spec  = [5506,5505,5507]
+        propman.spectra_to_monitors_list=[5506,5505,5507]
+        #
+        ws = PropertyManager.sample_run.get_workspace()
+        # apply IDF property, correspondent to this particular time interval
+        propman.update_defaults_from_instrument(ws.getInstrument())
+        self.assertEqual(int(propman.mon1_norm_spec),40961)
+        self.assertEqual(propman.ei_mon1_spec,40966)
+
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
         self.assertTrue(not mon_ws is None)
-        ws = PropertyManager.sample_run.get_workspace()
 
         self.assertTrue(isinstance(ws,IEventWorkspace))
         self.assertEqual(ws.getNumberHistograms(),40960)
         self.assertTrue(isinstance(mon_ws,Workspace))
         #
-        self.assertEqual(mon_ws.getNumberHistograms(),27)
+        self.assertEqual(mon_ws.getNumberHistograms(),11)
 
         ei_ws = GetAllEi(mon_ws,40966,40967,IgnoreSecondMonitor=True)
         self.assertTrue(isinstance(ei_ws,Workspace))

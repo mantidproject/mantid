@@ -146,9 +146,8 @@ Mantid::Geometry::VecIMDDimension_const_sptr
 MDGeometry::getNonIntegratedDimensions() const {
   using namespace Mantid::Geometry;
   VecIMDDimension_const_sptr vecCollapsedDimensions;
-  std::vector<Mantid::Geometry::IMDDimension_sptr>::const_iterator it =
-      this->m_dimensions.begin();
-  for (; it != this->m_dimensions.end(); ++it) {
+  for (auto it = this->m_dimensions.cbegin(); it != this->m_dimensions.cend();
+       ++it) {
     IMDDimension_sptr current = (*it);
     if (!current->getIsIntegrated()) {
       vecCollapsedDimensions.push_back(current);
@@ -379,7 +378,10 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
                   static_cast<coord_t>(offset[d]);
     coord_t max = (dim->getMaximum() * static_cast<coord_t>(scaling[d])) +
                   static_cast<coord_t>(offset[d]);
-    dim->setRange(dim->getNBins(), min, max);
+    if (min < max)
+      dim->setRange(dim->getNBins(), min, max);
+    else
+      dim->setRange(dim->getNBins(), max, min);
   }
   // Clear the original workspace
   setOriginalWorkspace(boost::shared_ptr<Workspace>());

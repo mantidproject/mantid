@@ -37,7 +37,7 @@ const std::string MergeMD::name() const { return "MergeMD"; }
 int MergeMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MergeMD::category() const { return "MDAlgorithms"; }
+const std::string MergeMD::category() const { return "MDAlgorithms\\Creation"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ void MergeMD::init() {
  * @param inputs :: list of names of input MDWorkspaces
  */
 void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
-  std::vector<std::string>::iterator it = inputs.begin();
+  auto it = inputs.begin();
   for (; it != inputs.end(); it++) {
     IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve(*it));

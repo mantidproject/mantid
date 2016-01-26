@@ -202,7 +202,7 @@ void ConvertAxesToRealSpace::exec() {
   yRef.resize(axisVector[1].bins);
   fillAxisValues(yRef, axisVector[1], false);
 
-  NumericAxis *const yAxis = new NumericAxis(yRef);
+  auto const yAxis = new NumericAxis(yRef);
   boost::shared_ptr<Units::Label> ylabel =
       boost::dynamic_pointer_cast<Units::Label>(
           UnitFactory::Instance().create("Label"));

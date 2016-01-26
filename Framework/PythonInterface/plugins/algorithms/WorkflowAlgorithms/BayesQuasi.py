@@ -34,7 +34,7 @@ class BayesQuasi(PythonAlgorithm):
     _plot = None
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
     def summary(self):
         return "This algorithm runs the Fortran QLines programs which fits a Delta function of"+\
@@ -55,7 +55,7 @@ class BayesQuasi(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '', direction=Direction.Input),
                              doc='Name of the resolution input Workspace')
 
-        self.declareProperty(MatrixWorkspaceProperty('ResNormWorkspace', '',
+        self.declareProperty(WorkspaceGroupProperty('ResNormWorkspace', '',
                              optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='Name of the ResNorm input Workspace')
 
@@ -261,21 +261,21 @@ class BayesQuasi(PythonAlgorithm):
             reals = [efix, theta[m], rscl, bnorm]
 
             if prog == 'QLr':
-                workflow_prog.report('Running QLr for input %i' % nsam)
+                workflow_prog.report('Processing Sample number %i as Lorentzian' % nsam)
                 nd,xout,yout,eout,yfit,yprob=QLr.qlres(numb,Xv,Yv,Ev,reals,fitOp,
                                                        Xdat,Xb,Yb,Wy,We,dtn,xsc,
                                                        wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QLd':
-                workflow_prog.report('Running QLd for input %i' % nsam)
+                workflow_prog.report('Processing Sample number %i' % nsam)
                 nd,xout,yout,eout,yfit,yprob=QLd.qldata(numb,Xv,Yv,Ev,reals,fitOp,
                                                         Xdat,Xb,Yb,Eb,Wy,We,
                                                         wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QSe':
-                workflow_prog.report('Running QSe for input %i' % nsam)
+                workflow_prog.report('Processing Sample number %i as Stretched Exp' % nsam)
                 nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,\
                                                         Xdat,Xb,Yb,Wy,We,dtn,xsc,\
                                                         wrks,wrkr,lwrk)
@@ -301,7 +301,7 @@ class BayesQuasi(PythonAlgorithm):
             names = 'data,fit.1,diff.1'
             res_plot = [0, 1, 2]
             if self._program == 'QL':
-                workflow_prog.report('Processing QL data')
+                workflow_prog.report('Processing Lorentzian result data')
                 datX = np.append(datX,dataX)
                 datY = np.append(datY,dataF2[:nd])
                 datE = np.append(datE,dataG)
@@ -332,7 +332,7 @@ class BayesQuasi(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
 
         if self._program == 'QL':
-            comp_prog.report('Processing QLr probability data')
+            comp_prog.report('Processing Lorentzian probability data')
             yPr0 = np.array([prob0[0]])
             yPr1 = np.array([prob1[0]])
             yPr2 = np.array([prob2[0]])
@@ -358,12 +358,12 @@ class BayesQuasi(PythonAlgorithm):
         #Add some sample logs to the output workspaces
         log_prog.report('Copying Logs to outputWorkspace')
         CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=outWS)
-        log_prog.report('Adding Sample logs to QL output workspace')
+        log_prog.report('Adding Sample logs to Output workspace')
         QLAddSampleLogs(outWS, self._resWS, prog, self._background, self._elastic, erange,
                         (nbin, nrbin), self._resnormWS, self._wfile)
         log_prog.report('Copying logs to fit Workspace')
         CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=fitWS)
-        log_prog.report('Adding sample logs to QL fit workspace')
+        log_prog.report('Adding sample logs to Fit workspace')
         QLAddSampleLogs(fitWS, self._resWS, prog, self._background, self._elastic, erange,
                         (nbin, nrbin), self._resnormWS, self._wfile)
         log_prog.report('Finialising log copying')
@@ -376,7 +376,6 @@ class BayesQuasi(PythonAlgorithm):
             SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
             logger.information('Output fit file created : ' + fit_path)
             logger.information('Output paramter file created : ' + out_path)
-            log_prog.report('Files Saved')
 
         self.setProperty('OutputWorkspaceFit', fitWS)
         self.setProperty('OutputWorkspaceResult', outWS)

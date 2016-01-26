@@ -8,15 +8,9 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
-// Have to deal with ParaView warnings and Intel compiler the hard way.
-#if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
-#endif
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
-#include <pqChartValue.h>
-#include <pqColorMapModel.h>
 #include <pqDataRepresentation.h>
 #include <pqPipelineRepresentation.h>
 #include <pqScalarsToColors.h>
@@ -24,13 +18,11 @@
 #include <pqSMAdaptor.h>
 
 #include <vtkCallbackCommand.h>
+#include "vtk_jsoncpp.h"
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMIntVectorProperty.h>
 #include <vtkSMProxy.h>
 #include <vtkSMTransferFunctionProxy.h>
-#if defined(__INTEL_COMPILER)
-  #pragma warning enable 1170
-#endif
 
 #include <QColor>
 #include <QList>
@@ -81,46 +73,14 @@ VsiColorScale ColorUpdater::autoScale()
 }
 
 void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
-                                  const pqColorMapModel *model)
-{
+                                  const Json::Value &model) {
   pqScalarsToColors *lut = repr->getLookupTable();
-  if (NULL == lut)
-  {
+  if (NULL == lut) {
     // Got a bad proxy, so just return
     return;
   }
-
-  // Need the scalar bounds to calculate the color point settings
-  QPair<double, double> bounds = lut->getScalarRange();
-
   vtkSMProxy *lutProxy = lut->getProxy();
-
-  // Set the ColorSpace
-  pqSMAdaptor::setElementProperty(lutProxy->GetProperty("ColorSpace"),
-                                  model->getColorSpace());
-  // Set the NaN color
-  QList<QVariant> values;
-  QColor nanColor;
-  model->getNanColor(nanColor);
-  values << nanColor.redF() << nanColor.greenF() << nanColor.blueF();
-  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("NanColor"),
-                                          values);
-
-  // Set the RGB points
-  QList<QVariant> rgbPoints;
-  for(int i = 0; i < model->getNumberOfPoints(); i++)
-  {
-    QColor rgbPoint;
-    pqChartValue fraction;
-    model->getPointColor(i, rgbPoint);
-    model->getPointValue(i, fraction);
-    rgbPoints << fraction.getDoubleValue() * bounds.second << rgbPoint.redF()
-              << rgbPoint.greenF() << rgbPoint.blueF();
-  }
-  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("RGBPoints"),
-                                          rgbPoints);
-
-  lutProxy->UpdateVTKObjects();
+  vtkSMTransferFunctionProxy::ApplyPreset(lutProxy, model, true);
 }
 
 /**
@@ -178,10 +138,6 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
     // Set the scalar range values
     lookupTable->setScalarRange(this->m_minScale, this->m_maxScale);
 
-    // Set the logarithmic scale
-    pqSMAdaptor::setElementProperty(lookupTable->getProxy()->GetProperty("UseLogScale"),
-                                     this->m_logScaleState);
-
     vtkSMProxy* proxy = representation->getProxy();
     vtkSMProxy* lutProxy = pqSMAdaptor::getProxyProperty(proxy->GetProperty("LookupTable"));
     vtkSMProxy* scalarOpacityFunctionProxy = lutProxy?pqSMAdaptor::getProxyProperty(lutProxy->GetProperty("ScalarOpacityFunction")) : NULL;
@@ -211,6 +167,45 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
 void ColorUpdater::logScale(int state)
 {
   this->m_logScaleState = state;
+
+  // Update for all sources and all reps
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel =
+      pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
+  QList<pqPipelineSource *>::Iterator source;
+
+  // For all sources
+  for (QList<pqPipelineSource *>::iterator source = sources.begin();
+       source != sources.end(); ++source) {
+    QList<pqView *> views = (*source)->getViews();
+
+    // For all views
+    for (QList<pqView *>::iterator view = views.begin(); view != views.end();
+         ++view) {
+      QList<pqDataRepresentation *> reps =
+          (*source)->getRepresentations((*view));
+
+      // For all representations
+      for (QList<pqDataRepresentation *>::iterator rep = reps.begin();
+           rep != reps.end(); ++rep) {
+        // Set the logarithmic (linear) scale
+        auto lut = (*rep)->getLookupTable();
+        if (lut) {
+          pqSMAdaptor::setElementProperty(
+              (*rep)->getLookupTable()->getProxy()->GetProperty("UseLogScale"),
+              this->m_logScaleState);
+          if (m_logScaleState)
+            vtkSMTransferFunctionProxy::MapControlPointsToLogSpace(
+                (*rep)->getLookupTable()->getProxy());
+          else
+            vtkSMTransferFunctionProxy::MapControlPointsToLinearSpace(
+                (*rep)->getLookupTable()->getProxy());
+        }
+      }
+    }
+  }
 
   this->colorScaleChange(this->m_minScale, this->m_maxScale);
 }

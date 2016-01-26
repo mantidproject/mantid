@@ -48,7 +48,7 @@ public:
   }
 
   virtual int version() const { return 1; };
-  virtual const std::string category() const { return "Transforms"; };
+  virtual const std::string category() const { return "Transforms\\Grouping"; };
 
 protected:
   boost::shared_ptr<API::Progress> m_progress;

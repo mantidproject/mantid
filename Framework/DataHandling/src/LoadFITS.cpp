@@ -43,6 +43,10 @@ const std::string LoadFITS::g_IMAGE_KEY_NAME = "ImageKeyName";
 const std::string LoadFITS::g_HEADER_MAP_NAME = "HeaderMapFile";
 const std::string LoadFITS::g_defaultImgType = "SAMPLE";
 
+// Bits/bytes per pixel. Values fixed in the FITS standard
+const size_t LoadFITS::g_maxBitDepth = 64;
+const size_t LoadFITS::g_maxBytesPP = g_maxBitDepth / 8;
+
 /**
  * Constructor. Just initialize everything to prevent issues.
  */
@@ -175,9 +179,9 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
           e.what());
     }
 
-    // Get and convert specific standard header values which will are
-    // needed to know how to load the data: BITPIX, NAXIS, NAXISi (where i =
-    // 1..NAXIS, e.g. NAXIS2 for two axis).
+    // Get and convert specific MANDATORY standard header values which
+    // will are needed to know how to load the data: BITPIX, NAXIS,
+    // NAXISi (where i = 1..NAXIS, e.g. NAXIS2 for two axis).
     try {
       std::string tmpBitPix = headers[i].headerKeys[m_headerBitDepthKey];
       if (boost::contains(tmpBitPix, "-")) {
@@ -194,12 +198,16 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
             "Coult not interpret the entry number of bits per pixel (" +
             m_headerBitDepthKey + ") as an integer. Error: " + e.what());
       }
-      // Check that the files use bit depths of either 8, 16 or 32
+      // Check that the files use valid BITPIX values
+      // http://archive.stsci.edu/fits/fits_standard/node39.html#SECTION00941000000000000000
       if (headers[i].bitsPerPixel != 8 && headers[i].bitsPerPixel != 16 &&
           headers[i].bitsPerPixel != 32 && headers[i].bitsPerPixel != 64)
+        // this implicitly includes when 'headers[i].bitsPerPixel >
+        // g_maxBitDepth'
         throw std::runtime_error(
             "This algorithm only supports 8, 16, 32 or 64 "
-            "bits per pixel. The header of file '" +
+            "bits per pixel as allowed in the FITS standard. The header of "
+            "file '" +
             paths[i] + "' says that its bit depth is: " +
             boost::lexical_cast<std::string>(headers[i].bitsPerPixel));
     } catch (std::exception &e) {
@@ -816,22 +824,22 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
       uint8_t const *const buffer8Start = buffer8 + start;
       // Reverse byte order of current value. Make sure we allocate enough
       // enough space to hold the size
-      boost::scoped_array<uint8_t> byteValue(new uint8_t[bytespp]);
-      std::reverse_copy(buffer8Start, buffer8Start + bytespp, byteValue.get());
+      uint8_t byteValue[g_maxBytesPP];
+      std::reverse_copy(buffer8Start, buffer8Start + bytespp, byteValue);
 
       double val = 0;
       if (fileInfo.bitsPerPixel == 8) {
-        val = toDouble<uint8_t>(byteValue.get());
+        val = toDouble<uint8_t>(byteValue);
       } else if (fileInfo.bitsPerPixel == 16) {
-        val = toDouble<uint16_t>(byteValue.get());
+        val = toDouble<uint16_t>(byteValue);
       } else if (fileInfo.bitsPerPixel == 32 && !fileInfo.isFloat) {
-        val = toDouble<uint32_t>(byteValue.get());
+        val = toDouble<uint32_t>(byteValue);
       } else if (fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat) {
-        val = toDouble<uint32_t>(byteValue.get());
+        val = toDouble<uint32_t>(byteValue);
       } else if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
-        val = toDouble<float>(byteValue.get());
+        val = toDouble<float>(byteValue);
       } else if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat) {
-        val = toDouble<double>(byteValue.get());
+        val = toDouble<double>(byteValue);
       }
 
       val = fileInfo.scale * val - fileInfo.offset;

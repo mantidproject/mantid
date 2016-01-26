@@ -18,6 +18,11 @@ The correction goes as follows:
 where
 
         :math:`\Phi_{sample} = \frac{M_{sample}}{M_{ref}} \Phi_{ref}`
+        
+Workflow
+########
+
+.. diagram:: SANSBeamFluxCorrection-v1_wkflw.dot
 
 Usage
 -----
@@ -25,12 +30,12 @@ Usage
 **Example - Performing a Beam Flux Correction on Dummy Data**
 
 .. testcode:: ExTable
-
+   
    # Create some dummy data, as well as a dummy monitor ws for EQSANS.
    x = [1,2,3,4,5,6,7,8,9,10,11]
    y = 491520*[0.1]
    ws = CreateWorkspace(DataX=x,DataY=y,DataE=y,NSpec='49152',UnitX='Wavelength')
-   LoadInstrument(ws, InstrumentName="EQSANS")
+   LoadInstrument(ws, InstrumentName="EQSANS", RewriteSpectraMap=True)
    monitor = SumSpectra(ws)
 
    # Do the correction, dragging in the file which contains the reference flux spectrum.

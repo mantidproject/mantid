@@ -519,8 +519,7 @@ void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
 
     // Allow multiple detectors per workspace index, or,
     // If only one is allowed, then this has thrown already
-    for (std::set<detid_t>::const_iterator it = detList.begin();
-         it != detList.end(); ++it) {
+    for (auto it = detList.cbegin(); it != detList.cend(); ++it) {
       int index = *it + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
@@ -550,8 +549,8 @@ void MatrixWorkspace::getIndicesFromSpectra(
   indexList.clear();
   indexList.reserve(this->getNumberHistograms());
 
-  std::vector<specid_t>::const_iterator iter = spectraList.begin();
-  while (iter != spectraList.end()) {
+  auto iter = spectraList.cbegin();
+  while (iter != spectraList.cend()) {
     for (size_t i = 0; i < this->getNumberHistograms(); ++i) {
       if (this->getSpectrum(i)->getSpectrumNo() == *iter) {
         indexList.push_back(i);
@@ -625,14 +624,11 @@ void MatrixWorkspace::getIndicesFromDetectorIDs(
 void MatrixWorkspace::getSpectraFromDetectorIDs(
     const std::vector<detid_t> &detIdList,
     std::vector<specid_t> &spectraList) const {
-  std::vector<detid_t>::const_iterator it_start = detIdList.begin();
-  std::vector<detid_t>::const_iterator it_end = detIdList.end();
 
   spectraList.clear();
 
   // Try every detector in the list
-  std::vector<detid_t>::const_iterator it;
-  for (it = it_start; it != it_end; ++it) {
+  for (auto it = detIdList.cbegin(); it != detIdList.cend(); ++it) {
     bool foundDet = false;
     specid_t foundSpecNum = 0;
 
@@ -1016,8 +1012,7 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
   spec->clearData();
 
   const std::set<detid_t> dets = spec->getDetectorIDs();
-  for (std::set<detid_t>::const_iterator iter = dets.begin();
-       iter != dets.end(); ++iter) {
+  for (auto iter = dets.cbegin(); iter != dets.cend(); ++iter) {
     try {
       if (const Geometry::Detector *det =
               dynamic_cast<const Geometry::Detector *>(
@@ -1085,7 +1080,7 @@ void MatrixWorkspace::flagMasked(const size_t &spectrumIndex,
     // First get a reference to the list for this spectrum (or create a new
     // list)
     MaskList &binList = m_masks[spectrumIndex];
-    MaskList::iterator it = binList.find(binIndex);
+    auto it = binList.find(binIndex);
     if (it != binList.end()) {
       binList.erase(it);
     }
@@ -1113,7 +1108,7 @@ bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {
 */
 const MatrixWorkspace::MaskList &
 MatrixWorkspace::maskedBins(const size_t &workspaceIndex) const {
-  std::map<int64_t, MaskList>::const_iterator it = m_masks.find(workspaceIndex);
+  auto it = m_masks.find(workspaceIndex);
   // Throw if there are no masked bins for this spectrum. The caller should
   // check first using hasMaskedBins!
   if (it == m_masks.end()) {
@@ -1238,8 +1233,7 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
     throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower than "
                             "lowest in current range.");
   }
-  MantidVec::const_iterator lowit =
-      std::lower_bound(xValues.begin(), xValues.end(), xValue);
+  auto lowit = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
   if (lowit == xValues.end()) {
     throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater "
                             "than highest in current range.");
@@ -1256,7 +1250,7 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
 }
 
 uint64_t MatrixWorkspace::getNPoints() const {
-  return (uint64_t)(this->size());
+  return static_cast<uint64_t>(this->size());
 }
 
 //================================= FOR MDGEOMETRY
@@ -1438,11 +1432,11 @@ private:
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimension(size_t index) const {
   if (index == 0) {
-    MWXDimension *dimension = new MWXDimension(this, xDimensionId);
+    auto dimension = new MWXDimension(this, xDimensionId);
     return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
   } else if (index == 1) {
     Axis *yAxis = this->getAxis(1);
-    MWDimension *dimension = new MWDimension(yAxis, yDimensionId);
+    auto dimension = new MWDimension(yAxis, yDimensionId);
     return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
   } else
     throw std::invalid_argument("MatrixWorkspace only has 2 dimensions.");
@@ -1567,7 +1561,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
 
   if (wi < nhist) {
     const MantidVec &X = this->readX(wi);
-    MantidVec::const_iterator it = std::lower_bound(X.begin(), X.end(), x);
+    auto it = std::lower_bound(X.cbegin(), X.cend(), x);
     if (it == X.end()) {
       // Out of range
       return std::numeric_limits<double>::quiet_NaN();
@@ -1599,6 +1593,20 @@ signal_t MatrixWorkspace::getSignalAtCoord(
   } else
     // Out of range
     return std::numeric_limits<double>::quiet_NaN();
+}
+
+//------------------------------------------------------------------------------------
+/** Returns the (normalized) signal at a given coordinates
+ * Implementation differs from getSignalAtCoord for MD workspaces
+*
+* @param coords :: bare array, size 2, of coordinates. X, Y
+* @param normalization :: how to normalize the signal
+* @return normalized signal.
+*/
+signal_t MatrixWorkspace::getSignalWithMaskAtCoord(
+    const coord_t *coords,
+    const Mantid::API::MDNormalization &normalization) const {
+  return getSignalAtCoord(coords, normalization);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -2049,8 +2057,9 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected MatrixWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<MatrixWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -2065,8 +2074,9 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const MatrixWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<MatrixWorkspace>.";
     throw std::runtime_error(message);
   }
 }

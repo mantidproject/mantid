@@ -3,6 +3,7 @@
 
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/MDAxisValidator.h"
 namespace Mantid {
 namespace MDAlgorithms {
 

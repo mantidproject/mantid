@@ -94,8 +94,29 @@ IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>(
   if (prop) {
     return *prop;
   } else {
-    throw std::runtime_error("Attempt to assign property of incorrect type. "
-                             "Expected WorkspaceSingleValue.");
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<WorkspaceSingleValue>.";
+    throw std::runtime_error(message);
+  }
+}
+
+template <>
+DLLExport Mantid::DataObjects::WorkspaceSingleValue_const_sptr
+IPropertyManager::getValue<
+    Mantid::DataObjects::WorkspaceSingleValue_const_sptr>(
+    const std::string &name) const {
+  PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *prop =
+      dynamic_cast<
+          PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return prop->operator()();
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<WorkspaceSingleValue>.";
+    throw std::runtime_error(message);
   }
 }
 

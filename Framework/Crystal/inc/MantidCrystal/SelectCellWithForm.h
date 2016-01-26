@@ -49,7 +49,7 @@ public:
   virtual int version() const { return 1; };
 
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Crystal"; }
+  virtual const std::string category() const { return "Crystal\\Cell"; }
 
   /// Summary of algorithms purpose
   virtual const std::string summary() const {

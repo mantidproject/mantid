@@ -1,7 +1,5 @@
 """ Sample MARI reduction scrip used in testing ReductionWrapper """
 import os
-#os.environ["PATH"] =\
-#r"c:/Mantid/Code/builds/br_10881/bin/Release;"+os.environ["PATH"]
 
 from Direct.ReductionWrapper import *
 try:
@@ -40,7 +38,7 @@ class ReduceMARI(ReductionWrapper):
       prop['map_file'] = "mari_res.map"
       prop['monovan_mapfile'] = "mari_res.map"
       prop['hard_mask_file'] = "mar11015.msk"
-      prop['det_cal_file'] = "11060"
+      prop['det_cal_file'] = 11060
       prop['save_format'] = ''
       return prop
       #

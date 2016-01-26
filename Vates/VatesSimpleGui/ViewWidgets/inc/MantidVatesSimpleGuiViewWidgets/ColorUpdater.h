@@ -11,6 +11,10 @@ class pqPipelineRepresentation;
 
 class vtkObject;
 
+namespace Json {
+class Value;
+}
+
 namespace Mantid
 {
 namespace Vates
@@ -65,8 +69,7 @@ public:
    * @param repr the representation to change the color map on
    * @param model the color map to use
    */
-  void colorMapChange(pqPipelineRepresentation *repr,
-                      const pqColorMapModel *model);
+  void colorMapChange(pqPipelineRepresentation *repr, const Json::Value &model);
   /**
    * Set the data color scale range to the requested bounds.
    * @param min the minimum bound for the color scale

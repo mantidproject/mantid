@@ -356,7 +356,8 @@ void ISISHistoDataListener::calculateIndicesForReading(
   const int numberOfBins = m_numberOfBins[m_timeRegime];
   const int numberOfSpectra = m_numberOfSpectra[m_timeRegime];
   // max number of spectra that could be read in in one go
-  int maxNumberOfSpectra = 1024 * 1024 / (numberOfBins * (int)sizeof(int));
+  int maxNumberOfSpectra =
+      1024 * 1024 / (numberOfBins * static_cast<int>(sizeof(int)));
   if (maxNumberOfSpectra == 0) {
     maxNumberOfSpectra = 1;
   }
@@ -461,7 +462,8 @@ void ISISHistoDataListener::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", iName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap", false);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(false));
     loadInst->executeAsChildAlg();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");

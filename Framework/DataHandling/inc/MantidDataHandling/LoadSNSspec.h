@@ -57,7 +57,7 @@ public:
   }
 
   virtual int version() const { return 1; }
-  virtual const std::string category() const { return "DataHandling"; }
+  virtual const std::string category() const { return "DataHandling\\Text"; }
 
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(Kernel::FileDescriptor &descriptor) const;

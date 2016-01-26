@@ -4,12 +4,14 @@
 add_subdirectory( kernel )
 add_subdirectory( geometry )
 add_subdirectory( api )
+add_subdirectory( dataobjects )
 
 set ( TEST_PY_FILES
   ImportModuleTest.py
   SimpleAPITest.py
   SimpleAPILoadTest.py
   SimpleAPIFitTest.py
+  SimpleAPIRenameWorkspaceTest.py  
 )
 
 # Prefix for test=PythonInterface

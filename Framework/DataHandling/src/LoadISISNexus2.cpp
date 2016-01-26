@@ -62,27 +62,29 @@ LoadISISNexus2::LoadISISNexus2()
 * be used
 */
 int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
-  if (descriptor.pathOfTypeExists("/raw_data_1", "NXentry"))
-    return 80;
+  if (descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
+    // It also could be an Event Nexus file or a TOFRaw file,
+    // so confidence is set to less than 80.
+    return 75;
+  }
   return 0;
 }
 
 /// Initialization method.
 void LoadISISNexus2::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".n*");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the Nexus file to load");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".n*"}),
+      "The name of the Nexus file to load");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
-  declareProperty("SpectrumMin", (int64_t)0, mustBePositive);
-  declareProperty("SpectrumMax", (int64_t)EMPTY_INT(), mustBePositive);
+  declareProperty("SpectrumMin", static_cast<int64_t>(0), mustBePositive);
+  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
+                  mustBePositive);
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
-  declareProperty("EntryNumber", (int64_t)0, mustBePositive,
+  declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
                   "A positive number identifies one entry to be loaded, into "
@@ -457,11 +459,8 @@ void LoadISISNexus2::checkOptionalProperties(
     m_load_selected_spectra = true;
   }
 
-  int64_t spec_min(0);
-  int64_t spec_max(EMPTY_INT());
-  //
-  spec_min = getProperty("SpectrumMin");
-  spec_max = getProperty("SpectrumMax");
+  int64_t spec_min = getProperty("SpectrumMin");
+  int64_t spec_max = getProperty("SpectrumMax");
 
   // default spectra ID-s would not work if spectraID_min!=1
   if (m_loadBlockInfo.spectraID_min != 1) {
@@ -886,7 +885,8 @@ void LoadISISNexus2::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrument_name);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap", false);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");

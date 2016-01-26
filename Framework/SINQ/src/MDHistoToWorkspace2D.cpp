@@ -54,7 +54,7 @@ void MDHistoToWorkspace2D::exec() {
           "Workspace2D", nSpectra, lastDim->getNBins(), lastDim->getNBins()));
   outWS->setYUnit("Counts");
 
-  coord_t *pos = (coord_t *)malloc(m_rank * sizeof(coord_t));
+  coord_t *pos = reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
   memset(pos, 0, m_rank * sizeof(coord_t));
   m_currentSpectra = 0;
   recurseData(inWS, outWS, 0, pos);

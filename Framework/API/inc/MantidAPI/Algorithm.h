@@ -32,6 +32,10 @@ template <class C, class N> class NObserver;
 class Void;
 }
 
+namespace Json {
+class Value;
+}
+
 namespace Mantid {
 namespace API {
 //----------------------------------------------------------------------
@@ -117,7 +121,7 @@ public:
       return "FinishedNotification";
     }             ///< class name
     bool success; ///< true if the finished algorithm was successful or false if
-    /// it failed.
+                  /// it failed.
   };
 
   /// An algorithm can report its progress by sending ProgressNotification. Use
@@ -137,7 +141,7 @@ public:
     std::string message;   ///< Message sent with notification
     double estimatedTime;  ///<Estimated time to completion
     int progressPrecision; ///<Digits of precision to the progress (after the
-    /// decimal).
+                           /// decimal).
   };
 
   /// ErrorNotification is sent when an exception is caught during execution of
@@ -226,7 +230,7 @@ public:
   bool isChild() const;
   void setChild(const bool isChild);
   void enableHistoryRecordingForChild(const bool on);
-  bool isRecordingHistoryForChild() { return m_recordHistoryForChild; };
+  bool isRecordingHistoryForChild() { return m_recordHistoryForChild; }
   void setAlwaysStoreInADS(const bool doStore);
   void setRethrows(const bool rethrow);
 
@@ -273,6 +277,8 @@ public:
   //@{
   /// Serialize an object to a string
   virtual std::string toString() const;
+  /// Serialize an object to a json object
+  ::Json::Value toJson() const;
   /// De-serialize an object from a string
   static IAlgorithm_sptr fromString(const std::string &input);
   /// Construct an object from a history entry
@@ -317,6 +323,8 @@ protected:
 
   void setInitialized();
   void setExecuted(bool state);
+
+  void store();
 
   /** @name Progress Reporting functions */
   friend class Progress;
@@ -388,7 +396,6 @@ private:
   void lockWorkspaces();
   void unlockWorkspaces();
 
-  void store();
   void linkHistoryWithLastChild();
 
   void logAlgorithmInfo() const;
@@ -398,6 +405,8 @@ private:
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration,
                        const bool groupProcessing = false);
+
+  void registerFeatureUsage() const;
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.

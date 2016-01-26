@@ -36,6 +36,10 @@ void ContainerSubtraction::run() {
           sampleWsName.toStdString());
   m_originalSampleUnits = sampleWs->getAxis(0)->unit()->unitID();
 
+  // Check if using shift / scale
+  const bool shift = m_uiForm.ckShiftCan->isChecked();
+  const bool scale = m_uiForm.ckScaleCan->isChecked();
+
   // If not in wavelength then do conversion
   if (m_originalSampleUnits != "Wavelength") {
     g_log.information(
@@ -46,11 +50,17 @@ void ContainerSubtraction::run() {
     absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
   }
 
+  // Construct Can input name
   QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
+  QString canCloneName = canWsName;
+  if (shift) {
+	canCloneName += "_Shifted";
+  }
+
+  // Clone can for use in algorithm
   MatrixWorkspace_sptr canWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           canWsName.toStdString());
-  QString canCloneName = canWsName + "_Shifted";
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
   clone->initialize();
   clone->setProperty("InputWorkspace", canWs);
@@ -60,7 +70,7 @@ void ContainerSubtraction::run() {
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           canCloneName.toStdString());
 
-  if (m_uiForm.ckShiftCan->isChecked()) {
+  if (shift) {
     IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
     scaleX->initialize();
     scaleX->setProperty("InputWorkspace", canCloneWs);
@@ -77,6 +87,38 @@ void ContainerSubtraction::run() {
     rebin->execute();
   }
 
+  // Check for same binning across sample and container
+  if (shift) {
+	  addRebinStep(canCloneName, sampleWsName);
+  }
+  else {
+	  if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
+		  QString text =
+			  "Binning on sample and container does not match."
+			  "Would you like to rebin the container to match the sample?";
+
+		  int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+			  QMessageBox::Yes, QMessageBox::No,
+			  QMessageBox::NoButton);
+
+		  if (result == QMessageBox::Yes) {
+			  IAlgorithm_sptr rebin =
+				  AlgorithmManager::Instance().create("RebinToWorkspace");
+			  rebin->initialize();
+			  rebin->setProperty("WorkspaceToRebin", canCloneWs);
+			  rebin->setProperty("WorkspaceToMatch", sampleWs);
+			  rebin->setProperty("OutputWorkspace", canCloneName.toStdString());
+			  rebin->execute();
+		  }
+		  else {
+			  m_batchAlgoRunner->clearQueue();
+			  g_log.error("Cannot apply absorption corrections using a sample and "
+				  "container with different binning.");
+			  return;
+		  }
+	  }
+  }
+
   // If not in wavelength then do conversion
   std::string originalCanUnits = canCloneWs->getAxis(0)->unit()->unitID();
   if (originalCanUnits != "Wavelength") {
@@ -87,34 +129,9 @@ void ContainerSubtraction::run() {
     absCorProps["CanWorkspace"] = canCloneName.toStdString();
   }
 
-  bool useCanScale = m_uiForm.ckScaleCan->isChecked();
-  if (useCanScale) {
+  if (scale) {
     double canScaleFactor = m_uiForm.spCanScale->value();
     applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
-  }
-
-  // Check for same binning across sample and container
-  if (m_uiForm.ckShiftCan->isChecked()) {
-    addRebinStep(canCloneName, sampleWsName);
-  } else {
-    if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
-      QString text =
-          "Binning on sample and container does not match."
-          "Would you like to rebin the sample to match the container?";
-
-      int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
-                                         QMessageBox::Yes, QMessageBox::No,
-                                         QMessageBox::NoButton);
-
-      if (result == QMessageBox::Yes) {
-        addRebinStep(canCloneName, sampleWsName);
-      } else {
-        m_batchAlgoRunner->clearQueue();
-        g_log.error("Cannot apply absorption corrections using a sample and "
-                    "container with different binning.");
-        return;
-      }
-    }
   }
 
   // Generate output workspace name
@@ -189,39 +206,45 @@ bool ContainerSubtraction::validate() {
   UserInputValidator uiv;
 
   // Check valid inputs
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
-  uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
+  const bool samValid =
+      uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  const bool canValid =
+      uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
-  // Get Workspaces
-  MatrixWorkspace_sptr sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_uiForm.dsSample->getCurrentDataName().toStdString());
-  MatrixWorkspace_sptr containerWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_uiForm.dsContainer->getCurrentDataName().toStdString());
+  if (samValid && canValid) {
+    // Check Sample is of same type as container (e.g. _red/_sqw)
+    const QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+    const QString sampleType =
+        sampleName.right(sampleName.length() - sampleName.lastIndexOf("_"));
+    const QString containerName = m_uiForm.dsContainer->getCurrentDataName();
+    const QString containerType = containerName.right(
+        containerName.length() - containerName.lastIndexOf("_"));
 
-  // Check Sample is of same type as container
-  QString sample = m_uiForm.dsSample->getCurrentDataName();
-  QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
-  QString container = m_uiForm.dsContainer->getCurrentDataName();
-  QString containerType =
-      container.right(sample.length() - container.lastIndexOf("_"));
+    g_log.debug() << "Sample type is: " << sampleType.toStdString()
+                  << std::endl;
+    g_log.debug() << "Container type is: " << containerType.toStdString()
+                  << std::endl;
 
-  g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
-  g_log.debug() << "Container type is: " << containerType.toStdString()
-                << std::endl;
+    if (containerType != sampleType)
+      uiv.addErrorMessage(
+          "Sample and can workspaces must contain the same type of data.");
 
-  if (containerType != sampleType)
-    uiv.addErrorMessage(
-        "Sample and can workspaces must contain the same type of data.");
+    // Get Workspaces for histogram checking
+    MatrixWorkspace_sptr sampleWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            sampleName.toStdString());
+    MatrixWorkspace_sptr containerWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            containerName.toStdString());
 
-  // Check sample has the same number of Histograms as the contianer
-  const size_t sampleHist = sampleWs->getNumberHistograms();
-  const size_t containerHist = containerWs->getNumberHistograms();
+    // Check sample has the same number of Histograms as the contianer
+    const size_t sampleHist = sampleWs->getNumberHistograms();
+    const size_t containerHist = containerWs->getNumberHistograms();
 
-  if (sampleHist != containerHist) {
-    uiv.addErrorMessage(
-        " Sample and Container do not have a matching number of Histograms.");
+    if (sampleHist != containerHist) {
+      uiv.addErrorMessage(
+          " Sample and Container do not have a matching number of Histograms.");
+    }
   }
 
   // Show errors if there are any
@@ -270,15 +293,18 @@ void ContainerSubtraction::plotPreview(int specIndex) {
         "Subtracted", QString::fromStdString(m_pythonExportWsName), specIndex,
         Qt::green);
 
+  const bool shift = m_uiForm.ckShiftCan->isChecked();
+  const bool scale = m_uiForm.ckScaleCan->isChecked();
+
  //Scale can
-  if (m_uiForm.ckScaleCan->isChecked()) {
+  if (scale) {
     auto canName = m_uiForm.dsContainer->getCurrentDataName();
-    if (m_uiForm.ckShiftCan->isChecked()) {
+    if (shift) {
       canName += "_Shifted";
     }
     IAlgorithm_sptr scaleCan = AlgorithmManager::Instance().create("Scale");
     scaleCan->initialize();
-	scaleCan->setProperty("InputWorkspace", canName.toStdString());
+    scaleCan->setProperty("InputWorkspace", canName.toStdString());
     scaleCan->setProperty("OutputWorkspace", "__container_corrected");
     scaleCan->setProperty("Factor", m_uiForm.spCanScale->value());
     scaleCan->setProperty("Operation", "Multiply");
@@ -286,11 +312,11 @@ void ContainerSubtraction::plotPreview(int specIndex) {
   }
 
   // Plot container
-  if (m_uiForm.ckScaleCan->isChecked()) {
+  if (scale) {
     m_uiForm.ppPreview->addSpectrum("Container", "__container_corrected",
                                     specIndex, Qt::red);
   } else {
-    if (m_uiForm.ckShiftCan->isChecked()) {
+    if (shift) {
       m_uiForm.ppPreview->addSpectrum(
           "Container",
           (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"), specIndex,

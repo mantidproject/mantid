@@ -31,7 +31,9 @@ const std::string SignalOverError::name() const { return "SignalOverError"; }
 int SignalOverError::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SignalOverError::category() const { return "Arithmetic"; }
+const std::string SignalOverError::category() const {
+  return "Arithmetic\\Errors";
+}
 
 //----------------------------------------------------------------------------------------------
 

@@ -106,7 +106,7 @@ public:
 public:
   /// Return the list of illegal characters as one string
   const std::string &illegalCharacters() const;
-  /// Set the list of illegal characeters
+  /// Set the list of illegal characters
   void setIllegalCharacterList(const std::string &);
   /// Is the given name a valid name for an object in the ADS
   const std::string isValid(const std::string &name) const;
@@ -156,6 +156,7 @@ public:
 
   /// Return a lookup of the top level items
   std::map<std::string, Workspace_sptr> topLevelItems() const;
+  void shutdown();
 
 private:
   /// Checks the name is valid, throwing if not
@@ -179,7 +180,7 @@ private:
 /// AnalysisDataServiceImpl (needed for dllexport/dllimport) and a typedef for
 /// it.
 #ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
+// this breaks new namespace declaration rules; need to find a better fix
 template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
 #endif /* _WIN32 */

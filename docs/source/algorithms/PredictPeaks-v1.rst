@@ -62,7 +62,7 @@ which can currently be achieved as in the following example:
     maxIntensity = np.max(intensities)
     relativeIntensities = intensities / maxIntensity
 
-    print 'Maximum intensity: {:.2f}'.format(maxIntensity)
+    print 'Maximum intensity: {0:.2f}'.format(maxIntensity)
     print 'Peaks with relative intensity < 1%:', len([x for x in relativeIntensities if x < 0.01])
 
     absences = [i for i, x in enumerate(intensities) if x < 1e-9]

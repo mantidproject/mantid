@@ -133,7 +133,7 @@ bool SCARFLSFJobManager::ping() {
     }
   } else {
     throw std::runtime_error(
-        "Failed to ping the web service at:" + fullURL.toString() +
+        "Failed to ping the web service at: " + fullURL.toString() +
         ". Please check your parameters, software version, "
         "etc.");
   }
@@ -232,7 +232,7 @@ std::string SCARFLSFJobManager::urlComponentEncode(const std::string &in) {
       out << c;
     } else {
       // Any non unreserved is pct-escaped
-      out << '%' << std::setw(2) << int((unsigned char)c);
+      out << '%' << std::setw(2) << int(static_cast<unsigned char>(c));
     }
   }
   return out.str();

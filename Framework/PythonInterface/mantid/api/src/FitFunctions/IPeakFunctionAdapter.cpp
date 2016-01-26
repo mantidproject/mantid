@@ -23,7 +23,7 @@ using namespace boost::python;
  * @param self A reference to the calling Python object
  */
 IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject *self)
-    : API::IPeakFunction(), IFunctionAdapter(self), IFunction1DAdapter(self) {}
+    : API::IPeakFunction(), IFunction1DAdapter(self) {}
 
 /**
  */
@@ -100,7 +100,7 @@ void IPeakFunctionAdapter::functionLocal(double *out, const double *xValues,
     Environment::throwRuntimeError(true);
   }
 
-  PyArrayObject *nparray = (PyArrayObject *)(result);
+  PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(result);
   if (PyArray_TYPE(nparray) ==
       NPY_DOUBLE) // dtype matches so use memcpy for speed
   {

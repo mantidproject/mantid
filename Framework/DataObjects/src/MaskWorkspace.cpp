@@ -197,8 +197,7 @@ bool MaskWorkspace::isMasked(const std::set<detid_t> &detectorIDs) const {
   }
 
   bool masked(true);
-  for (std::set<detid_t>::const_iterator it = detectorIDs.begin();
-       it != detectorIDs.end(); ++it) {
+  for (auto it = detectorIDs.cbegin(); it != detectorIDs.cend(); ++it) {
     if (!this->isMasked(*it)) {
       masked = false;
       break; // allows space for a debug print statement
@@ -311,8 +310,9 @@ IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected MaskWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<MaskWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -328,8 +328,9 @@ IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const MaskWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<MaskWorkspace>.";
     throw std::runtime_error(message);
   }
 }

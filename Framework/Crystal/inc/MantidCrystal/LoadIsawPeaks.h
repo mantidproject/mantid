@@ -34,7 +34,7 @@ public:
 
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "Crystal;DataHandling\\Isaw";
+    return "Crystal\\DataHandling;DataHandling\\Isaw";
   }
 
   /// Returns a confidence value that this algorithm can load a file
@@ -59,7 +59,7 @@ private:
   /// Read a single peak from peaks file
   DataObjects::Peak readPeak(DataObjects::PeaksWorkspace_sptr outWS,
                              std::string &lastStr, std::ifstream &in,
-                             int &seqNum, std::string bankName);
+                             int &seqNum, std::string bankName, double qSign);
 
   int findPixelID(Geometry::Instrument_const_sptr inst, std::string bankName,
                   int col, int row);

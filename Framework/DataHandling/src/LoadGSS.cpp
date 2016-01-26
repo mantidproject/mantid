@@ -60,14 +60,9 @@ int LoadGSS::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialise the algorithm
   */
 void LoadGSS::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".gsa");
-  exts.push_back(".gss");
-  exts.push_back(".gda");
-  exts.push_back(".txt");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
-      "The input filename of the stored data");
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
+                                        {".gsa", ".gss", ".gda", ".txt"}),
+                  "The input filename of the stored data");
 
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
                                                Kernel::Direction::Output),
@@ -435,7 +430,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   */
 double LoadGSS::convertToDouble(std::string inputstring) {
   std::string temps = "";
-  int isize = (int)inputstring.size();
+  int isize = static_cast<int>(inputstring.size());
   for (int i = 0; i < isize; i++) {
     char thechar = inputstring[i];
     if ((thechar <= 'Z' && thechar >= 'A') ||
@@ -499,7 +494,8 @@ void LoadGSS::createInstrumentGeometry(
   // Add detectors
   // The L2 and 2-theta values from Raw file assumed to be relative to sample
   // position
-  const int numDetector = (int)detectorids.size(); // number of detectors
+  const int numDetector =
+      static_cast<int>(detectorids.size()); // number of detectors
   // std::vector<int> detID = detectorids;    // detector IDs
   // std::vector<double> angle = twothetas;  // angle between indicent beam and
   // direction from sample to detector (two-theta)

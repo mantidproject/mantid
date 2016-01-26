@@ -253,7 +253,8 @@ void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp,
     throw std::invalid_argument("Not enough peaks to fit ");
   }
 
-  if ((m_startX > (int)nData - 1) || (m_endX > (int)nData - 1)) {
+  if ((m_startX > static_cast<int>(nData) - 1) ||
+      (m_endX > static_cast<int>(nData) - 1)) {
     throw std::invalid_argument(X_START + " and " + X_END +
                                 " attributes are out of range");
   }
@@ -445,7 +446,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
                              "in the PeaksWorkspace");
     }
 
-    IPeak &peak_old = m_peaks->getPeak((int)pkIndex);
+    IPeak &peak_old = m_peaks->getPeak(static_cast<int>(pkIndex));
     Kernel::V3D hkl = peak_old.getHKL();
 
     // eliminate tolerance cause only those peaks that are OK should be here
@@ -480,6 +481,18 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   for (size_t i = 0; i < StartX; ++i)
     out[i] = 0.;
   for (size_t i = 0; i < q_vectors.size(); ++i) {
+    /*try {
+      Peak calculated(instChange, q_vectors[i]);
+      Peak theoretical(instChange, lattice.qFromHKL(hkl_vectors[i]));
+      std::cout << BankNames << "  " << calculated.getCol() << "  "
+                << theoretical.getCol() << "  " << calculated.getRow() << "  "
+                << theoretical.getRow() << "  " << calculated.getTOF() << "  "
+                << theoretical.getTOF() << "\n";
+    }
+    catch (...) {
+      g_log.debug() << "Problem only in printing peaks" << std::endl;
+    }*/
+
     Kernel::V3D err = q_vectors[i] - lattice.qFromHKL(hkl_vectors[i]);
 
     size_t outIndex = 3 * i + StartX;
@@ -533,7 +546,6 @@ Matrix<double> SCDPanelErrors::CalcDiffDerivFromdQ(
     Kernel::DblMatrix Deriv = Matrix<double>(DerivQ) - dQtheor * M_2_PI;
 
     return Deriv;
-
   } catch (...) {
 
     for (size_t i = 0; i < nParams(); ++i)
@@ -648,7 +660,17 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   this->getPeaks();
   Check(m_peaks, xValues, nData, StartX, EndX);
 
+  std::set<string> AllBankNames;
+  for (int i = 0; i < m_peaks->getNumberPeaks(); ++i)
+    AllBankNames.insert(m_peaks->getPeak(i).getBankName());
+
   Instrument_sptr instrNew = getNewInstrument(m_peaks->getPeak(0));
+  for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
+    std::string bankName = (*it);
+    boost::shared_ptr<const IComponent> panel =
+        instrNew->getComponentByName(bankName);
+    bankDetMap[bankName] = panel;
+  }
 
   boost::shared_ptr<ParameterMap> pmap = instrNew->getParameterMap();
 
@@ -661,18 +683,17 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   K = 2. * M_PI / ppeak.getWavelength() / velocity; // 2pi/lambda = K*velocity
 
   for (size_t xval = StartX; xval <= EndX; xval += 3) {
-
     double x = floor(xValues[xval]);
     Peak peak;
     V3D HKL;
     string thisBankName;
     Quat Rot;
-    IPeak &peak_old = m_peaks->getPeak((int)x);
+    IPeak &peak_old = m_peaks->getPeak(static_cast<int>(x));
 
     peak = createNewPeak(peak_old, instrNew, getParameter("t0"),
                          getParameter("l0"));
 
-    peakIndx.push_back((int)x);
+    peakIndx.push_back(static_cast<int>(x));
     qlab.push_back(peak.getQLabFrame());
     qXtal.push_back(peak.getQSampleFrame());
     row.push_back(peak.getRow());
@@ -697,8 +718,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     } else {
       V3D x_vec(1., 0., 0.);
       V3D y_vec(0., 1., 0.);
-      boost::shared_ptr<const IComponent> panel =
-          instrNew->getComponentByName(thisBankName);
+      boost::shared_ptr<const IComponent> panel = findBank(thisBankName);
+
       Rot = panel->getRotation();
       Rot.rotate(x_vec);
       Rot.rotate(y_vec);
@@ -740,7 +761,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
 
   try {
     Geometry::IndexingUtils::Optimize_UB(UB, hkl, qXtal);
-
   } catch (std::exception &s) {
 
     g_log.error("Not enough points to find Optimized UB1 =" +
@@ -759,8 +779,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   for (size_t gr = 0; gr < Groups.size(); ++gr) {
     vector<string> banknames;
     boost::split(banknames, Groups[gr], boost::is_any_of("/"));
-    for (vector<string>::iterator it = banknames.begin(); it != banknames.end();
-         ++it)
+    for (auto it = banknames.begin(); it != banknames.end(); ++it)
       bankName2Group[(*it)] = gr;
   }
   // derivative formulas documentation
@@ -797,7 +816,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   vector<V3D> Unrot_dQ[3];
   Matrix<double> Result(3, qlab.size());
 
-  for (size_t gr = 0; gr < (size_t)NGroups; ++gr) {
+  for (size_t gr = 0; gr < static_cast<size_t>(NGroups); ++gr) {
     Unrot_dQ[0].clear();
     Unrot_dQ[1].clear();
     Unrot_dQ[2].clear();
@@ -806,9 +825,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     size_t StartPos =
         parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xoffset");
 
-    for (size_t param = StartPos; param <= StartPos + (size_t)2; ++param)
-
-    {
+    for (size_t param = StartPos; param <= StartPos + static_cast<size_t>(2);
+         ++param) {
 
       V3D parxyz(0, 0, 0);
       parxyz[param - StartPos] = 1.;
@@ -887,7 +905,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
       Matrix<double> Result(3, qlab.size());
       Matrix<double> Rot2dRot(3, 3); // deriv of rot matrix at angle=0
       Rot2dRot.zeroMatrix();
-      int r1 = (int)param - (int)StartRot;
+      int r1 = static_cast<int>(param) - static_cast<int>(StartRot);
       int r = (r1 + 1) % 3;
 
       Rot2dRot[r][(r + 1) % 3] = -1;
@@ -1209,7 +1227,7 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
 
   for (size_t k = 0; k < bankNames.size(); ++k)
     for (size_t j = 0; j < pwks->rowCount(); ++j) {
-      Geometry::IPeak &peak = pwks->getPeak((int)j);
+      Geometry::IPeak &peak = pwks->getPeak(static_cast<int>(j));
       if (peak.getBankName().compare(bankNames[k]) == 0)
         if (peak.getH() != 0 || peak.getK() != 0 || peak.getL() != 0)
           if (peak.getH() - floor(peak.getH()) < tolerance ||
@@ -1219,9 +1237,9 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
               if (peak.getL() - floor(peak.getL()) < tolerance ||
                   floor(peak.getL() + 1) - peak.getL() < tolerance) {
                 N++;
-                xRef.push_back((double)j);
-                xRef.push_back((double)j);
-                xRef.push_back((double)j);
+                xRef.push_back(static_cast<double>(j));
+                xRef.push_back(static_cast<double>(j));
+                xRef.push_back(static_cast<double>(j));
                 yvalB.push_back(0.0);
                 yvalB.push_back(0.0);
                 yvalB.push_back(0.0);
@@ -1229,7 +1247,7 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
     }
 
   MatrixWorkspace_sptr mwkspc = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", (size_t)3, 3 * N, 3 * N);
+      "Workspace2D", static_cast<size_t>(3), 3 * N, 3 * N);
 
   mwkspc->setX(0, pX);
   mwkspc->setX(1, pX);
@@ -1340,6 +1358,11 @@ void SCDPanelErrors::setAttribute(const std::string &attName,
           new Geometry::UnitCell(a, b, c, alpha, beta, gamma));
     }
   }
+}
+
+boost::shared_ptr<const Geometry::IComponent>
+SCDPanelErrors::findBank(std::string bankName) {
+  return bankDetMap.find(bankName)->second;
 }
 
 } // namespace Crystal

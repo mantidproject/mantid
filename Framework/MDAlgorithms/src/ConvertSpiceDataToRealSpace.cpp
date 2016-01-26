@@ -339,6 +339,8 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
   IAlgorithm_sptr instloader = this->createChildAlgorithm("LoadInstrument");
   instloader->initialize();
   instloader->setProperty("InstrumentName", m_instrumentName);
+  instloader->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
   instloader->setProperty("Workspace", tempws);
   instloader->execute();
 
@@ -533,8 +535,7 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
     }
 
     // Create a new log
-    TimeSeriesProperty<double> *templog =
-        new TimeSeriesProperty<double>(logname);
+    auto templog = new TimeSeriesProperty<double>(logname);
     templog->addValues(vectimes, veclogval);
 
     // Add log to experiment info

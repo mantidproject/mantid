@@ -18,7 +18,16 @@ namespace DataObjects {
 class CalculateReflectometry;
 class TableWorkspace;
 
-/** ReflectometryMDTransform : Abstract type for reflectometry transforms to
+/**
+Simple container for porting detector angular information
+ */
+struct MANTID_DATAOBJECTS_DLL DetectorAngularCache {
+  std::vector<double> thetaWidths;
+  std::vector<double> thetas;
+  std::vector<double> detectorHeights;
+};
+
+/** ReflectometryMDTransform : Base type for reflectometry transforms to
  MDWorkspaces. This is a Strategy Design Pattern.
 
  @date 2012-05-29
@@ -44,7 +53,7 @@ class TableWorkspace;
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ReflectometryTransform {
+class MANTID_DATAOBJECTS_DLL ReflectometryTransform {
 
 protected:
   const size_t m_d0NumBins;
@@ -67,9 +76,6 @@ protected:
   boost::shared_ptr<DataObjects::MDEventWorkspace2Lean>
   createMDWorkspace(Geometry::IMDDimension_sptr, Geometry::IMDDimension_sptr,
                     API::BoxController_sptr boxController) const;
-
-  void
-  initAngularCaches(const API::MatrixWorkspace_const_sptr &workspace) const;
 
 public:
   // Execute the strategy to produce a transformed, output MDWorkspace
@@ -111,6 +117,10 @@ createVerticalAxis(Mantid::API::MatrixWorkspace *const ws,
                    const MantidVec &xAxisVec, const double gradQz,
                    const double cyToUnit, const size_t nBins,
                    const std::string &caption, const std::string &units);
+
+/// Create angular caches.
+MANTID_DATAOBJECTS_DLL DetectorAngularCache
+initAngularCaches(const Mantid::API::MatrixWorkspace *const workspace);
 
 // Helper typedef for scoped pointer of this type.
 typedef boost::shared_ptr<ReflectometryTransform> ReflectometryTransform_sptr;

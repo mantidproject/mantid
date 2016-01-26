@@ -10,16 +10,15 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MemoryManager.h"
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/UsageService.h"
 
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -29,6 +28,8 @@
 #include <Poco/RWLock.h>
 #include <Poco/StringTokenizer.h>
 #include <Poco/Void.h>
+
+#include <json/json.h>
 
 #include <map>
 
@@ -42,7 +43,8 @@ const std::string WORKSPACE_TYPES_SEPARATOR = ";";
 
 class WorkspacePropertyValueIs {
 public:
-  WorkspacePropertyValueIs(const std::string &value) : m_value(value){};
+  explicit WorkspacePropertyValueIs(const std::string &value)
+      : m_value(value){};
   bool operator()(IWorkspaceProperty *property) {
     Property *prop = dynamic_cast<Property *>(property);
     if (!prop)
@@ -202,15 +204,11 @@ void Algorithm::progress(double p, const std::string &msg, double estimatedTime,
 //---------------------------------------------------------------------------------------------
 /// Function to return all of the categories that contain this algorithm
 const std::vector<std::string> Algorithm::categories() const {
-  std::vector<std::string> res;
   Poco::StringTokenizer tokenizer(category(), categorySeparator(),
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
 
-  for (; h != tokenizer.end(); ++h) {
-    res.push_back(*h);
-  }
+  std::vector<std::string> res(tokenizer.begin(), tokenizer.end());
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);
@@ -584,11 +582,11 @@ bool Algorithm::execute() {
       Timer timer;
       // Call the concrete algorithm's exec method
       this->exec();
+      registerFeatureUsage();
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
       // Get how long this algorithm took to run
       const float duration = timer.elapsed();
-
       // need it to throw before trying to run fillhistory() on an algorithm
       // which has failed
       if (trackingHistory() && m_history) {
@@ -819,14 +817,27 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
 
 /**
  * Serialize this object to a string. The format is
- * AlgorithmName.version(prop1=value1,prop2=value2,...)
+ * a json formatted string.
  * @returns This object serialized as a string
  */
 std::string Algorithm::toString() const {
-  std::ostringstream writer;
-  writer << name() << "." << this->version() << "("
-         << Kernel::PropertyManagerOwner::asString(false) << ")";
-  return writer.str();
+  ::Json::FastWriter writer;
+
+  return writer.write(toJson());
+}
+
+/**
+* Serialize this object to a json object)
+* @returns This object serialized as a json object
+*/
+::Json::Value Algorithm::toJson() const {
+  ::Json::Value root;
+
+  root["name"] = name();
+  root["version"] = this->version();
+  root["properties"] = Kernel::PropertyManagerOwner::asJson(false);
+
+  return root;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -838,24 +849,28 @@ std::string Algorithm::toString() const {
  * @return a shared pointer to the created algorithm.
  */
 IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
-  // Hand off to the string creator
-  std::ostringstream stream;
-  stream << history.name() << "." << history.version() << "(";
+  ::Json::Value root;
+  ::Json::Value jsonMap;
+  ::Json::FastWriter writer;
+
   auto props = history.getProperties();
   const size_t numProps(props.size());
   for (size_t i = 0; i < numProps; ++i) {
     PropertyHistory_sptr prop = props[i];
     if (!prop->isDefault()) {
-      stream << prop->name() << "=" << prop->value();
+      jsonMap[prop->name()] = prop->value();
     }
-    if (i < numProps - 1)
-      stream << ",";
   }
-  stream << ")";
+
+  root["name"] = history.name();
+  root["version"] = history.version();
+  root["properties"] = jsonMap;
+
+  const std::string output = writer.write(root);
   IAlgorithm_sptr alg;
 
   try {
-    alg = Algorithm::fromString(stream.str());
+    alg = Algorithm::fromString(output);
   } catch (std::invalid_argument &) {
     throw std::runtime_error(
         "Could not create algorithm from history. "
@@ -874,78 +889,26 @@ IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
 * @return A pointer to a managed algorithm object
 */
 IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
-  static const boost::regex nameExp("(^[[:alnum:]]*)");
-  // Double back slash gets rid of the compiler warning about unrecognized
-  // escape sequence
-  static const boost::regex versExp("\\.([[:digit:]]+)\\(*");
-  // Property regex. Simply match the brackets and split
-  static const boost::regex propExp("\\((.*)\\)");
-  // Name=Value regex
-  static const boost::regex nameValExp("(.*)=(.*)");
-  // Property name regex
-  static const boost::regex propNameExp(".*,([[:word:]]*)");
-  // Empty dividers
-  static const boost::regex emptyExp(",[ ,]*,");
-  // Trailing commas
-  static const boost::regex trailingCommaExp(",$");
+  ::Json::Value root;
+  ::Json::Reader reader;
 
-  boost::match_results<std::string::const_iterator> what;
-  if (boost::regex_search(input, what, nameExp, boost::match_not_null)) {
-    const std::string algName = what[1];
-    int version = -1; // Highest version
-    if (boost::regex_search(input, what, versExp, boost::match_not_null)) {
-      try {
-        version = boost::lexical_cast<int, std::string>(what.str(1));
-      } catch (boost::bad_lexical_cast &) {
-      }
+  if (reader.parse(input, root)) {
+    const std::string algName = root["name"].asString();
+    int version = 0;
+    try {
+      version = root["version"].asInt();
+    } catch (std::runtime_error &) {
+      // do nothing - the next test will catch it
     }
+    if (version == 0)
+      version = -1;
+
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().createUnmanaged(algName, version);
     alg->initialize();
-    if (boost::regex_search(input, what, propExp, boost::match_not_null)) {
-      std::string _propStr = what[1];
 
-      // Cleanup: Remove empty dividers (multiple commas)
-      std::string __propStr = regex_replace(_propStr, emptyExp, ",");
-      // Cleanup: We might still be left with a trailing comma, remove it
-      std::string propStr = regex_replace(__propStr, trailingCommaExp, "");
-
-      boost::match_flag_type flags = boost::match_not_null;
-      std::string::const_iterator start, end;
-      start = propStr.begin();
-      end = propStr.end();
-      // Accumulate them first so that we can set some out of order
-      std::map<std::string, std::string> propNameValues;
-      while (boost::regex_search(start, end, what, nameValExp, flags)) {
-        std::string nameValue = what.str(1);
-        std::string value = what.str(2);
-
-        if (boost::regex_search(what[1].first, what[1].second, what,
-                                propNameExp, boost::match_not_null)) {
-          const std::string name = what.str(1);
-          propNameValues[name] = value;
-          end = what[1].first - 1;
-        } else {
-          // The last property-value pair
-          propNameValues[nameValue] = value;
-          break;
-        }
-        // update flags:
-        flags |= boost::match_prev_avail;
-        flags |= boost::match_not_bob;
-      }
-
-      // Some algorithms require Filename to be set first do that here
-      auto it = propNameValues.find("Filename");
-      if (it != propNameValues.end()) {
-        alg->setPropertyValue(it->first, it->second);
-        propNameValues.erase(it);
-      }
-      for (auto cit = propNameValues.begin(); cit != propNameValues.end();
-           ++cit) {
-        alg->setPropertyValue(cit->first, cit->second);
-      }
-    }
+    // get properties
+    alg->setProperties(root["properties"]);
     return alg;
   } else {
     throw std::runtime_error("Cannot create algorithm, invalid string format.");
@@ -1471,7 +1434,7 @@ struct AsyncFlagHolder {
   /** Constructor
   * @param A :: reference to the running flag
   */
-  AsyncFlagHolder(bool &running_flag) : m_running_flag(running_flag) {
+  explicit AsyncFlagHolder(bool &running_flag) : m_running_flag(running_flag) {
     m_running_flag = true;
   }
   /// Destructor
@@ -1609,6 +1572,17 @@ void Algorithm::reportCompleted(const double &duration,
   m_running = false;
 }
 
+/** Registers the usage of the algorithm with the UsageService
+*/
+void Algorithm::registerFeatureUsage() const {
+  if (UsageService::Instance().isEnabled()) {
+    std::ostringstream oss;
+    oss << this->name() << ".v" << this->version();
+    UsageService::Instance().registerFeatureUsage("Algorithm", oss.str(),
+                                                  isChild());
+  }
+}
+
 /** Enable or disable Logging of start and end messages
 @param enabled : true to enable logging, false to disable
 */
@@ -1644,8 +1618,8 @@ IPropertyManager::getValue<API::IAlgorithm_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message =
-        "Attempt to assign property " + name + " to incorrect type";
+    std::string message = "Attempt to assign property " + name +
+                          " to incorrect type. Expected shared_ptr<IAlgorithm>";
     throw std::runtime_error(message);
   }
 }
@@ -1667,7 +1641,8 @@ IPropertyManager::getValue<API::IAlgorithm_const_sptr>(
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name + " to incorrect type";
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<IAlgorithm>";
     throw std::runtime_error(message);
   }
 }

@@ -31,26 +31,9 @@
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
-#include "ParameterPropertyManager.h"
-
-// Suppress a warning coming out of code that isn't ours
-#if defined(__INTEL_COMPILER)
-  #pragma warning disable 1125
-#elif defined(__GNUC__)
-  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
-    #pragma GCC diagnostic push
-  #endif
-  #pragma GCC diagnostic ignored "-Woverloaded-virtual"
-#endif
 #include "qteditorfactory.h"
 #include "DoubleEditorFactory.h"
-#if defined(__INTEL_COMPILER)
-  #pragma warning enable 1125
-#elif defined(__GNUC__)
-  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
-    #pragma GCC diagnostic pop
-  #endif
-#endif
+#include "ParameterPropertyManager.h"
 
 #include <Poco/ActiveResult.h>
 
@@ -1200,6 +1183,12 @@ std::string FitPropertyBrowser::costFunction()const
 bool FitPropertyBrowser::convolveMembers() const
 {
     return m_boolManager->value(m_convolveMembers);
+}
+
+/// Get the max number of iterations
+int FitPropertyBrowser::maxIterations() const
+{
+  return m_intManager->value(m_maxIterations);
 }
 
 /// Get the registered function names

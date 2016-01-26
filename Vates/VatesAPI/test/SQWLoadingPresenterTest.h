@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkSmartPointer.h>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -12,6 +13,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidVatesAPI/SQWLoadingPresenter.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::VATES;
 
@@ -51,54 +53,70 @@ void setUp()
 
 void testConstructWithEmptyFileThrows()
 {
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", SQWLoadingPresenter(new MockMDLoadingView, ""), std::invalid_argument);
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.",
+                    SQWLoadingPresenter(std::move(view), ""),
+                    std::invalid_argument);
 }
 
 void testConstructWithNullViewThrows()
 {
-  MockMDLoadingView*  pView = NULL;
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", SQWLoadingPresenter(pView, "some_file"), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.",
+                    SQWLoadingPresenter(nullptr, "some_file"),
+                    std::invalid_argument);
 }
 
 void testConstruct()
 {
-  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", SQWLoadingPresenter(new MockMDLoadingView, getSuitableFileNamePath()));
+  std::unique_ptr<MDLoadingView> view =
+    Mantid::Kernel::make_unique<MockMDLoadingView>();
+  TSM_ASSERT_THROWS_NOTHING(
+      "Object should be created without exception.",
+      SQWLoadingPresenter(std::move(view), getSuitableFileNamePath()));
 }
 
 void testCanReadFile()
 {
-  MockMDLoadingView view;
-
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  SQWLoadingPresenter presenter(std::move(view), getSuitableFileNamePath());
   TSM_ASSERT("Should be readable, valid SQW file.", presenter.canReadFile());
 }
 
 void testCanReadFileWithDifferentCaseExtension()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, "other.Sqw");
-  TSM_ASSERT("Should be readable, only different in case.", presenter.canReadFile());
+  auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
+  SQWLoadingPresenter presenter(std::move(view), "other.Sqw");
+  TSM_ASSERT("Should be readable, only different in case.",
+             presenter.canReadFile());
 }
 
 void testCannotReadFileWithWrongExtension()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getUnhandledFileNamePath());
-  TSM_ASSERT("Should NOT be readable, completely wrong file type.", !presenter.canReadFile());
+  auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
+  SQWLoadingPresenter presenter(std::move(view), getUnhandledFileNamePath());
+  TSM_ASSERT("Should NOT be readable, completely wrong file type.",
+             !presenter.canReadFile());
 }
 
 void testExecutionInMemory()
 {
   using namespace testing;
   //Setup view
-  MockMDLoadingView* view = new MockMDLoadingView;
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1)); 
-  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(Return(true)); // View setup to request loading in memory.
+  auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
+  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(*view, getLoadInMemory())
+      .Times(AtLeast(1))
+      .WillRepeatedly(Return(true)); // View setup to request loading in memory.
   EXPECT_CALL(*view, getTime()).Times(AtLeast(1));
   EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
-  EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+  EXPECT_CALL(factory, create(_))
+      .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates objects
@@ -108,9 +126,10 @@ void testExecutionInMemory()
   EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
   //Create the presenter and runit!
-  SQWLoadingPresenter presenter(view, getSuitableFileNamePath());
+  SQWLoadingPresenter presenter(std::move(view), getSuitableFileNamePath());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+  auto product = presenter.execute(&factory, mockLoadingProgressAction,
+                                   mockDrawingProgressAction);
 
   std::string fileNameIfGenerated = getFileBackend(getSuitableFileNamePath());
   std::ifstream fileExists(fileNameIfGenerated.c_str(), ifstream::in);
@@ -124,35 +143,44 @@ void testExecutionInMemory()
   TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
   TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(view.get()));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 
   TSM_ASSERT("Bad usage of loading algorithm progress updates", Mock::VerifyAndClearExpectations(&mockLoadingProgressAction));
-
-  product->Delete();
 }
 
 void testCallHasTDimThrows()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
-  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable(), std::runtime_error);
+  SQWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(),
+      getSuitableFileNamePath());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                    presenter.hasTDimensionAvailable(), std::runtime_error);
 }
 
 void testCallGetTDimensionValuesThrows()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
-  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getTimeStepValues(), std::runtime_error);
+  SQWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(),
+      getSuitableFileNamePath());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                    presenter.getTimeStepValues(), std::runtime_error);
 }
 
 void testCallGetGeometryThrows()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
-  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getGeometryXML(), std::runtime_error);
+  SQWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(),
+      getSuitableFileNamePath());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                    presenter.getGeometryXML(), std::runtime_error);
 }
 
 void testExecuteLoadMetadata()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
+  SQWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(),
+      getSuitableFileNamePath());
   presenter.executeLoadMetadata();
   TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.", presenter.getTimeStepValues());
   TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable());
@@ -161,24 +189,30 @@ void testExecuteLoadMetadata()
 
 void testGetWorkspaceTypeName()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
-  TSM_ASSERT_EQUALS("Characterisation Test Failed", "", presenter.getWorkspaceTypeName());
+  SQWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(),
+      getSuitableFileNamePath());
+  TSM_ASSERT_EQUALS("Characterisation Test Failed", "",
+                    presenter.getWorkspaceTypeName());
 }
 
 void testTimeLabel()
 {
   using namespace testing;
   //Setup view
-  MockMDLoadingView* view = new MockMDLoadingView;
+  auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
   EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
-  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(Return(true)); // View setup to request loading in memory.
+  EXPECT_CALL(*view, getLoadInMemory())
+      .Times(AtLeast(1))
+      .WillRepeatedly(Return(true)); // View setup to request loading in memory.
   EXPECT_CALL(*view, getTime()).Times(AtLeast(1));
   EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
-  EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+  EXPECT_CALL(factory, create(_))
+      .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates objects
@@ -188,34 +222,36 @@ void testTimeLabel()
   EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
   //Create the presenter and runit!
-  SQWLoadingPresenter presenter(view, getSuitableFileNamePath());
+  SQWLoadingPresenter presenter(std::move(view), getSuitableFileNamePath());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+  auto product = presenter.execute(&factory, mockLoadingProgressAction,
+                                   mockDrawingProgressAction);
   TSM_ASSERT_EQUALS("Time label should be exact.",
                     presenter.getTimeStepLabel(), "en (meV)");
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(view.get()));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 
   TSM_ASSERT("Bad usage of loading algorithm progress updates", Mock::VerifyAndClearExpectations(&mockLoadingProgressAction));
-
-  product->Delete();
 }
 
 void testAxisLabels()
 {
   using namespace testing;
   //Setup view
-  MockMDLoadingView* view = new MockMDLoadingView;
+  auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
   EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
-  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(Return(true)); // View setup to request loading in memory.
+  EXPECT_CALL(*view, getLoadInMemory())
+      .Times(AtLeast(1))
+      .WillRepeatedly(Return(true)); // View setup to request loading in memory.
   EXPECT_CALL(*view, getTime()).Times(AtLeast(1));
   EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
-  EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+  EXPECT_CALL(factory, create(_))
+      .WillOnce(testing::Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates objects
@@ -225,9 +261,10 @@ void testAxisLabels()
   EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
   //Create the presenter and runit!
-  SQWLoadingPresenter presenter(view, getSuitableFileNamePath());
+  SQWLoadingPresenter presenter(std::move(view), getSuitableFileNamePath());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+  auto product = presenter.execute(&factory, mockLoadingProgressAction,
+                                   mockDrawingProgressAction);
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
   TSM_ASSERT_EQUALS("X Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForX"),
@@ -239,11 +276,9 @@ void testAxisLabels()
                     getStringFieldDataValue(product, "AxisTitleForZ"),
                     "qz ($\\AA^{-1}$)");
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(view.get()));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   TSM_ASSERT("Bad usage of loading algorithm progress updates", Mock::VerifyAndClearExpectations(&mockLoadingProgressAction));
-
-  product->Delete();
 }
 
 };

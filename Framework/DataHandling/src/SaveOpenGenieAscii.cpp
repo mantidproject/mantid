@@ -41,14 +41,10 @@ void SaveOpenGenieAscii::init() {
       "The name of the workspace containing the data you wish to save");
 
   // Declare required parameters, filename with ext {.his} and input
-  // workspac
-  std::vector<std::string> his_exts;
-  his_exts.push_back(".his");
-  his_exts.push_back(".txt");
-  his_exts.push_back("");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save, his_exts),
-      "The filename to use for the saved data");
+  // workspace
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save,
+                                        {".his", ".txt", ""}),
+                  "The filename to use for the saved data");
   declareProperty("IncludeHeader", true,
                   "Whether to include the header lines (default: true)");
   std::vector<std::string> header(2);

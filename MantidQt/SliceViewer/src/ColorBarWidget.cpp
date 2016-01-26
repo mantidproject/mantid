@@ -367,7 +367,20 @@ void ColorBarWidget::updateMinMaxGUI()
   ui.valMax->setValue( m_max );
 }
 
+/**
+ * Sets the state of the "Autoscale" checkbox
+ * @param autoscale :: [input] Autoscale on/off
+ */
+void ColorBarWidget::setAutoScale(bool autoscale) {
+  ui.autoScale->setChecked(autoscale);
+  updateColorMap();
+}
 
+/**
+ * Gets the state of the "Autoscale" checkbox
+ * @returns Whether the box is checked or not
+ */
+bool ColorBarWidget::getAutoScale() const { return ui.autoScale->isChecked(); }
 
 ColorBarWidget::~ColorBarWidget()
 {

@@ -3,6 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
@@ -63,13 +64,28 @@ public:
 
   /// the calibration hard work that a worker / thread will run
   void doNewCalibration(const std::string &outFilename,
-                        const std::string &vanNo, const std::string &ceriaNo);
+                        const std::string &vanNo, const std::string &ceriaNo,
+                        const std::string &specNos);
 
   /// the focusing hard work that a worker / thread will run
-  void doFocusRun(const std::string &dir,
-                  const std::vector<std::string> &outFilenames,
-                  const std::string &runNo, const std::vector<bool> &banks,
-                  const std::string &specNos, const std::string &dgFile);
+  void doFocusRun(const std::string &dir, const std::string &runNo,
+                  const std::vector<bool> &banks, const std::string &specNos,
+                  const std::string &dgFile);
+
+  /// checks if its a valid run number returns string
+  std::string isValidRunNumber(std::vector<std::string> dir);
+
+  /// checks if its a valid run number inside vector and returns a vector;
+  /// used for mutli-run focusing
+  std::vector<std::string> isValidMultiRunNumber(std::vector<std::string> dir);
+
+  /// pre-processing re-binning with Rebin, for a worker/thread
+  void doRebinningTime(const std::string &runNo, double bin,
+                       const std::string &outWSName);
+
+  /// pre-processing re-binning with RebinByPulseTimes, for a worker/thread
+  void doRebinningPulses(const std::string &runNo, size_t nperiods, double bin,
+                         const std::string &outWSName);
 
 protected:
   void initialize();
@@ -80,18 +96,23 @@ protected:
   void processStart();
   void processLoadExistingCalib();
   void processCalcCalib();
+  void ProcessCropCalib();
   void processFocusBasic();
   void processFocusCropped();
   void processFocusTexture();
   void processResetFocus();
+  void processRebinTime();
+  void processRebinMultiperiod();
   void processLogMsg();
   void processInstChange();
   void processRBNumberChange();
   void processShutDown();
+  void processStopFocus();
 
 protected slots:
   void calibrationFinished();
   void focusingFinished();
+  void rebinningFinished();
 
 private:
   bool validateRBNumber(const std::string &rbn) const;
@@ -110,10 +131,12 @@ private:
   // this may need to be mocked up in tests
   virtual void startAsyncCalibWorker(const std::string &outFilename,
                                      const std::string &vanNo,
-                                     const std::string &ceriaNo);
+                                     const std::string &ceriaNo,
+                                     const std::string &specNos);
 
   void doCalib(const EnggDiffCalibSettings &cs, const std::string &vanNo,
-               const std::string &ceriaNo, const std::string &outFilename);
+               const std::string &ceriaNo, const std::string &outFilename,
+               const std::string &specNos);
 
   std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
                                               const std::string &ceriaNo) const;
@@ -122,24 +145,26 @@ private:
   /// @name Focusing related private methods
   //@{
   /// this may also need to be mocked up in tests
-  void startFocusing(const std::string &runNo, const std::vector<bool> &banks,
+  void startFocusing(const std::vector<std::string> &multi_runNo,
+                     const std::vector<bool> &banks,
                      const std::string &specNos = "",
                      const std::string &dgFile = "");
 
-  void startAsyncFocusWorker(const std::string &dir,
-                             const std::vector<std::string> &outFilenames,
-                             const std::string &runNo,
-                             const std::vector<bool> &banks,
-                             const std::string &specNos,
-                             const std::string &dgFile);
+  virtual void
+  startAsyncFocusWorker(const std::string &dir,
+                        const std::vector<std::string> &multi_RunNo,
+                        const std::vector<bool> &banks,
+                        const std::string &specNos, const std::string &dgFile);
 
-  void inputChecksBeforeFocusBasic(const std::string &runNo,
+  void inputChecksBeforeFocusBasic(const std::vector<std::string> &multi_RunNo,
                                    const std::vector<bool> &banks);
-  void inputChecksBeforeFocusCropped(const std::string &runNo,
-                                     const std::vector<bool> &banks,
-                                     const std::string &specNos);
-  void inputChecksBeforeFocusTexture(const std::string &runNo,
-                                     const std::string &dgfile);
+  void
+  inputChecksBeforeFocusCropped(const std::vector<std::string> &multi_RunNo,
+                                const std::vector<bool> &banks,
+                                const std::string &specNos);
+  void
+  inputChecksBeforeFocusTexture(const std::vector<std::string> &multi_RunNo,
+                                const std::string &dgfile);
   void inputChecksBeforeFocus();
   void inputChecksBanks(const std::vector<bool> &banks);
 
@@ -147,6 +172,8 @@ private:
                                                 const std::vector<bool> &banks);
 
   std::string outputFocusCroppedFilename(const std::string &runNo);
+
+  std::vector<std::string> sumOfFilesLoadVec();
 
   std::vector<std::string>
   outputFocusTextureFilenames(const std::string &runNo,
@@ -171,18 +198,38 @@ private:
                                         std::string &preIntegFilename,
                                         std::string &preCurvesFilename,
                                         bool &found);
-  void
-  loadVanadiumPrecalcWorkspaces(const std::string &preIntegFilename,
-                                const std::string &preCurvesFilename,
-                                Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-                                Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
+
+  void loadVanadiumPrecalcWorkspaces(
+      const std::string &preIntegFilename, const std::string &preCurvesFilename,
+      Mantid::API::ITableWorkspace_sptr &vanIntegWS,
+      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, const std::string &vanNo);
 
   void calcVanadiumWorkspaces(const std::string &vanNo,
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
 
+  /// @name Methods related to pre-processing / re-binning
+  //@{
+  void inputChecksBeforeRebin(const std::string &runNo);
+
+  void inputChecksBeforeRebinTime(const std::string &runNo, double bin);
+
+  void inputChecksBeforeRebinPulses(const std::string &runNo, size_t nperiods,
+                                    double timeStep);
+
+  Mantid::API::Workspace_sptr loadToPreproc(const std::string runNo);
+
+  virtual void startAsyncRebinningTimeWorker(const std::string &runNo,
+                                             double bin,
+                                             const std::string &outWSName);
+
+  virtual void startAsyncRebinningPulsesWorker(const std::string &runNo,
+                                               size_t nperiods, double timeStep,
+                                               const std::string &outWSName);
+  //@}
+
   // plots workspace according to the user selection
-  void plotFocusedWorkspace(std::string outWSName, int bank);
+  void plotFocusedWorkspace(std::string outWSName);
 
   // algorithms to save the generated workspace
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
@@ -196,13 +243,28 @@ private:
                                  std::string bank, std::string format);
 
   // generates a directory if not found and handles the path
-  Poco::Path outFilesDir();
+  Poco::Path outFilesDir(std::string addToDir);
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
 
+  /// string to use for invalid run number error message
+  const static std::string g_runNumberErrorStr;
+
   /// whether to allow users to give the output calibration filename
   const static bool g_askUserCalibFilename;
+
+  /// whether to break the thread
+  static bool g_abortThread;
+
+  /// whether to run Sum Of Files & which focus run number to use
+  static std::string g_sumOfFilesFocus;
+
+  /// saves the last valid run number
+  static std::string g_lastValidRun;
+
+  /// bank name use or specIds for cropped calibration
+  static std::string g_calibCropIdentifier;
 
   // name of the workspace with the vanadium integration (of spectra)
   static const std::string g_vanIntegrationWSName;
@@ -213,6 +275,8 @@ private:
   bool m_calibFinishedOK;
   /// true if the last focusing completed successfully
   bool m_focusFinishedOK;
+  /// true if the last pre-processing/re-binning completed successfully
+  bool m_rebinningFinishedOK;
 
   /// Counter for the cropped output files
   static int g_croppedCounter;
@@ -229,5 +293,4 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_

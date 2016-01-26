@@ -2,18 +2,18 @@
 #define COLORSELECTIONWIDGET_H_
 
 #include "ui_ColorSelectionWidget.h"
-#include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
 #include "MantidQtAPI/MdConstants.h"
+#include "MantidQtAPI/MdSettings.h"
 #include "boost/scoped_ptr.hpp"
 #include <QWidget>
 
-class pqColorMapModel;
-class pqColorPresetManager;
-class pqColorPresetModel;
-class vtkPVXMLParser;
 class QDoubleValidator;
+
+namespace Json {
+class Value;
+}
 
 namespace Mantid
 {
@@ -103,7 +103,7 @@ signals:
    * Signal to pass on information about a change to the color map.
    * @param model the color map to send
    */
-  void colorMapChanged(const pqColorMapModel *model);
+  void colorMapChanged(const Json::Value &model);
   /**
    * Signal to pass on information that the color scale has changed.
    *
@@ -126,13 +126,10 @@ protected slots:
   void useLogScaling(int state);
   /// Set log color scaling, on user click
   void useLogScalingClicked(bool wasOn);
+  /// Get the Applied preset
+  void onApplyPreset(const Json::Value &);
 
 private:
-  /// Add color maps from XML files.
-  void addColorMapsFromFile(std::string fileName, vtkPVXMLParser *parser,
-                            pqColorPresetModel *model);
-  /// Add color maps from XML fragments.
-  void addColorMapsFromXML(vtkPVXMLParser *parser, pqColorPresetModel *model);
   /// Set up various color maps.
   void loadBuiltinColorPresets();
   /// Set status of the color selection editor widgets.
@@ -142,16 +139,14 @@ private:
   /// Set min smaller max, can be used to programmatically set the widgets
   void setMinSmallerMax(double& min, double& max);
 
-  boost::scoped_ptr<ColorMapManager> colorMapManager; ///< Keeps track of the available color maps.
-
   QDoubleValidator* m_minValidator;
   QDoubleValidator* m_maxValidator;
   double m_minHistoric;
   double m_maxHistoric;
 
   MantidQt::API::MdConstants m_mdConstants;
+  MantidQt::API::MdSettings m_mdSettings;
 
-  pqColorPresetManager *m_presets; ///< Dialog for choosing color presets
   Ui::ColorSelectionWidgetClass m_ui; ///< The mode control widget's UI form
   bool m_ignoreColorChangeCallbacks; ///< Effectively blocks/disables callbacks
 

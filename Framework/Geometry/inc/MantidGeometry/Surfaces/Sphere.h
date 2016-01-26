@@ -49,13 +49,15 @@ private:
   void displace(const Kernel::V3D &);
   /// Compute the distance from the centre of the sphere to the given point
   double centreToPoint(const Kernel::V3D &pt) const;
+  Sphere *doClone() const;
+
+protected:
+  Sphere(const Sphere &);
+  Sphere &operator=(const Sphere &);
 
 public:
   Sphere();
-  Sphere(const Sphere &);
-  Sphere *clone() const;
-  Sphere &operator=(const Sphere &);
-  ~Sphere();
+  std::unique_ptr<Sphere> clone() const;
   /// Effective typename
   virtual std::string className() const { return "Sphere"; }
   // Visit acceptor

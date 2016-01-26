@@ -17,8 +17,10 @@ class IMDEventWorkspace;
 namespace VATES {
 
 /** Enum describing different ways to normalize the signal
-* in a MDWorkspace. We define the VisualNormalization separate from the MDNormalization because from the
-visual perspective we want an AutoSelect option, which is too high level for the API MDNormalization and will cause
+* in a MDWorkspace. We define the VisualNormalization separate from the
+MDNormalization because from the
+visual perspective we want an AutoSelect option, which is too high level for the
+API MDNormalization and will cause
 confusion as to it's meaning if left in the core core.
 Do not change the enum integers. Adding new options to the enum is ok.
 */
@@ -29,7 +31,8 @@ enum VisualNormalization {
   VolumeNormalization = 1,
   /// Divide the signal by the number of events that contributed to it.
   NumEventsNormalization = 2,
-  /// Auto select Normalization. We ask the IMDWorkspace to tell us it's preference
+  /// Auto select Normalization. We ask the IMDWorkspace to tell us it's
+  /// preference
   AutoSelect = 3
 };
 
@@ -44,12 +47,12 @@ NormFuncIMDNodePtr makeMDEventNormalizationFunction(
     Mantid::API::IMDEventWorkspace const *const ws);
 
 /**
-Determine which normalization function will be called on an IMDIterator of an IMDWorkspace
+Determine which normalization function will be called on an IMDIterator of an
+IMDWorkspace
 */
-DLLExport Mantid::API::IMDIterator * createIteratorWithNormalization(
-    const VisualNormalization normalizationOption,
-    Mantid::API::IMDWorkspace const * const ws);
-
+DLLExport Mantid::API::IMDIterator *
+createIteratorWithNormalization(const VisualNormalization normalizationOption,
+                                Mantid::API::IMDWorkspace const *const ws);
 }
 }
 

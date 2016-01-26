@@ -20,7 +20,8 @@ namespace FractionalRebinning {
 
 /**
  * Find the possible region of intersection on the output workspace for the
- * given polygon. The given polygon must have a CLOCKWISE winding.
+ * given polygon. The given polygon must have a CLOCKWISE winding and the
+ * first vertex must be the "lowest left" point.
  * @param outputWS A pointer to the output workspace
  * @param verticalAxis A vector containing the output vertical axis edges
  * @param inputQ The input polygon (Polygon winding must be clockwise)
@@ -42,17 +43,15 @@ bool getIntersectionRegion(MatrixWorkspace_const_sptr outputWS,
       yn_hi < verticalAxis.front() || yn_lo > verticalAxis.back())
     return false;
 
-  MantidVec::const_iterator start_it =
-      std::upper_bound(xAxis.begin(), xAxis.end(), xn_lo);
-  MantidVec::const_iterator end_it =
-      std::upper_bound(xAxis.begin(), xAxis.end(), xn_hi);
+  auto start_it = std::upper_bound(xAxis.cbegin(), xAxis.cend(), xn_lo);
+  auto end_it = std::upper_bound(xAxis.cbegin(), xAxis.cend(), xn_hi);
   x_start = 0;
   x_end = xAxis.size() - 1;
-  if (start_it != xAxis.begin()) {
-    x_start = (start_it - xAxis.begin() - 1);
+  if (start_it != xAxis.cbegin()) {
+    x_start = (start_it - xAxis.cbegin() - 1);
   }
-  if (end_it != xAxis.end()) {
-    x_end = end_it - xAxis.begin();
+  if (end_it != xAxis.cend()) {
+    x_end = end_it - xAxis.cbegin();
   }
 
   // Q region

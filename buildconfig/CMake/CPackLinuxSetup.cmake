@@ -7,6 +7,8 @@ string ( TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME )
 
 # define the source generators
 set ( CPACK_SOURCE_GENERATOR TGZ )
+set ( CPACK_SOURCE_IGNORE_FILES
+  "${CMAKE_BINARY_DIR};/\\\\.git*;${CPACK_SOURCE_IGNORE_FILES}" )
 
 include (DetermineLinuxDistro)
 

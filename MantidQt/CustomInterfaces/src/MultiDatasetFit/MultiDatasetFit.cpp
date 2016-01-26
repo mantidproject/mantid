@@ -42,7 +42,8 @@ MultiDatasetFit::MultiDatasetFit(QWidget *parent)
 MultiDatasetFit::~MultiDatasetFit()
 {
   saveSettings();
-  m_plotController->clear();
+  bool clearGuess = true;
+  m_plotController->clear(clearGuess);
 }
 
 /// Initilize the layout. 
@@ -82,6 +83,7 @@ void MultiDatasetFit::initLayout()
   connect(m_uiForm.cbShowDataErrors,SIGNAL(toggled(bool)),m_plotController,SLOT(showDataErrors(bool)));
   connect(m_uiForm.btnToVisibleRange,SIGNAL(clicked()),m_plotController,SLOT(resetRange()));
   connect(m_uiForm.btnToFittingRange,SIGNAL(clicked()),m_plotController,SLOT(zoomToRange()));
+  connect(m_uiForm.cbPlotGuess,SIGNAL(toggled(bool)),m_plotController,SLOT(showGuessFunction(bool)));
 
   QSplitter* splitter = new QSplitter(Qt::Vertical,this);
 
@@ -91,6 +93,8 @@ void MultiDatasetFit::initLayout()
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
   connect(m_functionBrowser,SIGNAL(globalsChanged()),this,SLOT(checkFittingType()));
+  connect(m_functionBrowser,SIGNAL(globalsChanged()),this,SLOT(setParameterNamesForPlotting()));
+  connect(m_functionBrowser,SIGNAL(parameterChanged(const QString&, const QString&)),this,SLOT(updateGuessFunction(const QString&, const QString&)));
   connect(m_plotController,SIGNAL(currentIndexChanged(int)),m_functionBrowser,SLOT(setCurrentDataset(int)));
   connect(m_dataController,SIGNAL(spectraRemoved(QList<int>)),m_functionBrowser,SLOT(removeDatasets(QList<int>)));
   connect(m_dataController,SIGNAL(spectraAdded(int)),m_functionBrowser,SLOT(addDatasets(int)));
@@ -381,11 +385,13 @@ void MultiDatasetFit::finishFit(bool error)
     Mantid::API::IFunction_sptr fun;
     if (m_fitOptionsBrowser->getCurrentFittingType() == MantidWidgets::FitOptionsBrowser::Simultaneous)
     {
+      // After a simultaneous fit
       fun = m_fitRunner->getAlgorithm()->getProperty("Function");
       updateParameters( *fun );
     }
     else 
     {
+      // After a sequential fit
       auto paramsWSName = m_fitOptionsBrowser->getProperty("OutputWorkspace").toStdString();
       if (!Mantid::API::AnalysisDataService::Instance().doesExist(paramsWSName)) return;
       size_t nSpectra = getNumberOfSpectra();
@@ -408,6 +414,7 @@ void MultiDatasetFit::finishFit(bool error)
         }
       }
       updateParameters( *fun );
+      showParameterPlot();
     }
   }
 }
@@ -569,6 +576,8 @@ void MultiDatasetFit::reset()
 {
   m_functionBrowser->resetLocalParameters();
   m_functionBrowser->setNumberOfDatasets( getNumberOfSpectra() );
+  setParameterNamesForPlotting();
+  m_plotController->setGuessFunction(m_functionBrowser->getFunctionString());
 }
 
 /// Check if a local parameter is fixed
@@ -615,6 +624,8 @@ void MultiDatasetFit::loadSettings()
   m_uiForm.cbShowDataErrors->setChecked(option);
   option = settings.value("ApplyRangeToAll",false).asBool();
   m_uiForm.cbApplyRangeToAll->setChecked(option);
+  option = settings.value("PlotGuess",false).asBool();
+  m_uiForm.cbPlotGuess->setChecked(option);
 }
 
 /// Save settings
@@ -625,6 +636,7 @@ void MultiDatasetFit::saveSettings() const
   m_fitOptionsBrowser->saveSettings( settings );
   settings.setValue("ShowDataErrors",m_uiForm.cbShowDataErrors->isChecked());
   settings.setValue("ApplyRangeToAll",m_uiForm.cbApplyRangeToAll->isChecked());
+  settings.setValue("PlotGuess",m_uiForm.cbPlotGuess->isChecked());
 }
 
 /// Make sure that simultaneous fitting is on
@@ -671,6 +683,12 @@ void MultiDatasetFit::setLogNames()
   }
 }
 
+/// Collect names of local parameters and pass them to m_fitOptionsBrowser.
+void MultiDatasetFit::setParameterNamesForPlotting()
+{
+  m_fitOptionsBrowser->setParameterNamesForPlotting(m_functionBrowser->getLocalParameters());
+}
+
 /// Remove old output from Fit.
 void MultiDatasetFit::removeOldOutput()
 {
@@ -688,6 +706,26 @@ void MultiDatasetFit::invalidateOutput()
   m_outputWorkspaceName = "";
   m_plotController->clear();
   m_plotController->update();
+}
+
+/// Open a new graph window and plot a fitting parameter
+/// against a log value. The name of the parameter to plot
+/// and the log name must be selected in m_fitOptionsBrowser.
+void MultiDatasetFit::showParameterPlot()
+{
+  auto table = m_fitOptionsBrowser->getProperty("OutputWorkspace");
+  auto logValue = m_fitOptionsBrowser->getProperty("LogValue");
+  auto parName  = m_fitOptionsBrowser->getParameterToPlot();
+  if (table.isEmpty() || parName.isEmpty()) return;
+
+  auto pyInput = QString("table = importTableWorkspace('%1')\n"
+                         "plotTableColumns(table, ('%2','%3_Err'))\n").arg(table, parName, parName);
+  runPythonCode(pyInput);
+}
+
+void MultiDatasetFit::updateGuessFunction(const QString&, const QString&)
+{
+  m_plotController->updateGuessFunction(*m_functionBrowser->getFunction());
 }
 
 } // CustomInterfaces

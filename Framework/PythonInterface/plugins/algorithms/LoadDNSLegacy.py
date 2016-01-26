@@ -8,9 +8,6 @@ from mantid.kernel import Direction, StringListValidator, DateAndTime
 
 from dnsdata import DNSdata
 
-POLARISATIONS = ['0', 'x', 'y', 'z', '-x', '-y', '-z']
-NORMALIZATIONS = ['duration', 'monitor']
-
 
 class LoadDNSLegacy(PythonAlgorithm):
     """
@@ -23,12 +20,13 @@ class LoadDNSLegacy(PythonAlgorithm):
         Init
         """
         PythonAlgorithm.__init__(self)
+        self.tolerance = 1e-2
 
     def category(self):
         """
         Returns category
         """
-        return 'PythonAlgorithms\\MLZ\\DNS;DataHandling'
+        return 'Workflow\\MLZ\\DNS;DataHandling\\Text'
 
     def name(self):
         """
@@ -43,23 +41,54 @@ class LoadDNSLegacy(PythonAlgorithm):
         self.declareProperty(FileProperty("Filename", "",
                                           FileAction.Load, ['.d_dat']),
                              "Name of DNS experimental data file.")
+
+        self.declareProperty(FileProperty("CoilCurrentsTable", "",
+                                          FileAction.Load, ['.txt']),
+                             "Name of file containing table of coil currents and polarisations.")
+
         self.declareProperty(WorkspaceProperty("OutputWorkspace",
                                                "", direction=Direction.Output),
                              doc="Name of the workspace to store the experimental data.")
-        self.declareProperty("Polarisation", "0",
-                             StringListValidator(POLARISATIONS),
-                             doc="Type of polarisation.")
-        self.declareProperty("Normalization", "duration",
-                             StringListValidator(NORMALIZATIONS),
-                             doc="Type of data for normalization.")
+        normalizations = ['duration', 'monitor', 'no']
+        self.declareProperty("Normalization", "duration", StringListValidator(normalizations),
+                             doc="Kind of data normalization.")
         return
+
+    def get_polarisation_table(self):
+        # load polarisation table
+        poltable_name = self.getPropertyValue("CoilCurrentsTable")
+        try:
+            currents = np.genfromtxt(poltable_name, names=True, dtype=None)
+        except ValueError as err:
+            raise RuntimeError("Invalid coil currents table: " + str(err))
+        poltable = []
+        colnames = currents.dtype.names
+        poltable = [dict(zip(colnames, cur)) for cur in currents]
+        self.log().debug("Loaded polarisation table:\n" + str(poltable))
+        return poltable
+
+    def currents_match(self, dict1, dict2):
+        keys = ['C_a', 'C_b', 'C_c', 'C_z']
+        for key in keys:
+            if np.fabs(dict1[key] - dict2[key]) > self.tolerance:
+                return False
+        return True
+
+    def get_polarisation(self, metadata, poltable):
+        pol = []
+        coilcurrents = {'C_a': metadata.a_coil_current, 'C_b': metadata.b_coil_current,
+                        'C_c': metadata.c_coil_current, 'C_z': metadata.z_coil_current}
+        self.log().debug("Coil currents are " + str(coilcurrents))
+        for row in poltable:
+            if self.currents_match(row, coilcurrents):
+                return [row['polarisation'], row['comment']]
+
+        return pol
 
     def PyExec(self):
         # Input
         filename = self.getPropertyValue("Filename")
         outws_name = self.getPropertyValue("OutputWorkspace")
-        monws_name = outws_name + '_NORM'
-        pol = self.getPropertyValue("Polarisation")
         norm = self.getPropertyValue("Normalization")
 
         # load data array from the given file
@@ -78,18 +107,42 @@ class LoadDNSLegacy(PythonAlgorithm):
             self.log().error(message)
             raise RuntimeError(message)
 
+        # load polarisation table and determine polarisation
+        poltable = self.get_polarisation_table()
+        pol = self.get_polarisation(metadata, poltable)
+        if not pol:
+            pol = ['0', 'undefined']
+            self.log().warning("Failed to determine polarisation for " + filename +
+                               ". Values have been set to undefined.")
         ndet = 24
         # this needed to be able to use ConvertToMD
         dataX = np.zeros(2*ndet)
         dataX.fill(metadata.wavelength + 0.00001)
         dataX[::2] -= 0.000002
-        dataY = data_array[0:ndet, 1:]
-        dataE = np.sqrt(dataY)
+        # data normalization
+        factor = 1.0
+        yunit = "Counts"
+        ylabel = "Intensity"
+        if norm == 'duration':
+            factor = metadata.duration
+            yunit = "Counts/s"
+            ylabel = "Intensity normalized to duration"
+            if factor <= 0:
+                raise RuntimeError("Duration is invalid for file " + filename + ". Cannot normalize.")
+        if norm == 'monitor':
+            factor = metadata.monitor_counts
+            yunit = "Counts/monitor"
+            ylabel = "Intensity normalized to monitor"
+            if factor <= 0:
+                raise RuntimeError("Monitor counts are invalid for file " + filename + ". Cannot normalize.")
+        # set values for dataY and dataE
+        dataY = data_array[0:ndet, 1:]/factor
+        dataE = np.sqrt(data_array[0:ndet, 1:])/factor
         # create workspace
         api.CreateWorkspace(OutputWorkspace=outws_name, DataX=dataX, DataY=dataY,
                             DataE=dataE, NSpec=ndet, UnitX="Wavelength")
         outws = api.AnalysisDataService.retrieve(outws_name)
-        api.LoadInstrument(outws, InstrumentName='DNS')
+        api.LoadInstrument(outws, InstrumentName='DNS', RewriteSpectraMap=True)
 
         run = outws.mutableRun()
         if metadata.start_time and metadata.end_time:
@@ -145,8 +198,8 @@ class LoadDNSLegacy(PythonAlgorithm):
         api.AddSampleLog(outws, LogName='C_z', LogText=str(metadata.z_coil_current),
                          LogType='Number', LogUnit='A')
         # type of polarisation
-        api.AddSampleLog(outws, 'polarisation',
-                         LogText=pol, LogType='String')
+        api.AddSampleLog(outws, 'polarisation', LogText=pol[0], LogType='String')
+        api.AddSampleLog(outws, 'polarisation_comment', LogText=str(pol[1]), LogType='String')
         # slits
         api.AddSampleLog(outws, LogName='slit_i_upper_blade_position',
                          LogText=str(metadata.slit_i_upper_blade_position),
@@ -160,33 +213,13 @@ class LoadDNSLegacy(PythonAlgorithm):
         api.AddSampleLog(outws, 'slit_i_right_blade_position',
                          LogText=str(metadata.slit_i_right_blade_position),
                          LogType='Number', LogUnit='mm')
-        # add information whether the data are normalized (yes/no):
-        api.AddSampleLog(outws, LogName='normalized',
-                         LogText='no', LogType='String')
+        # data normalization
 
-        # create workspace with normalization data (monitor or duration)
-        if norm == 'duration':
-            dataY.fill(metadata.duration)
-            dataE.fill(0.001)
-            yunit = 'Seconds'
-            ylabel = 'Duration'
-        else:
-            dataY.fill(metadata.monitor_counts)
-            dataE = np.sqrt(dataY)
-            yunit = 'Counts'
-            ylabel = 'Monitor Counts'
-        api.CreateWorkspace(OutputWorkspace=monws_name, DataX=dataX, DataY=dataY,
-                            DataE=dataE, NSpec=ndet, UnitX="Wavelength")
-        monws = api.AnalysisDataService.retrieve(monws_name)
-        api.LoadInstrument(monws, InstrumentName='DNS')
-        api.RotateInstrumentComponent(monws, "bank0", X=0, Y=1, Z=0, Angle=metadata.deterota)
-        api.CopyLogs(InputWorkspace=outws_name, OutputWorkspace=monws_name, MergeStrategy='MergeReplaceExisting')
-        api.AddSampleLog(monws, 'normalization',
-                         LogText=norm, LogType='String')
-        monws.setYUnit(yunit)
-        monws.setYUnitLabel(ylabel)
-        outws.setYUnit("Counts")
-        outws.setYUnitLabel("Intensity")
+        # add information whether the data are normalized (duration/monitor/no):
+        api.AddSampleLog(outws, LogName='normalized', LogText=norm, LogType='String')
+
+        outws.setYUnit(yunit)
+        outws.setYUnitLabel(ylabel)
 
         self.setProperty("OutputWorkspace", outws)
         self.log().debug('LoadDNSLegacy: data are loaded to the workspace ' + outws_name)

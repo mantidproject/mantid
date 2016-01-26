@@ -58,6 +58,9 @@ public:
   /// Called by the framework when an attribute has been set
   void setAttribute(const std::string &attName,
                     const API::IFunction::Attribute &attr);
+  /// Store the attribute's value in the default IFunction's cache
+  void storeAttributePythonValue(const std::string &name,
+                                 const boost::python::object &value);
 
   // Each overload of declareParameter requires a different name as we
   // can't use a function pointer with a virtual base class
@@ -106,7 +109,6 @@ protected:
 
 private:
   /// The PyObject must be supplied to construct the object
-  DISABLE_DEFAULT_CONSTRUCT(IFunctionAdapter)
   DISABLE_COPY_AND_ASSIGN(IFunctionAdapter)
 
   /// The name of the function

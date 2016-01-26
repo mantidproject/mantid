@@ -8,6 +8,7 @@
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/ConfigService.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -48,20 +49,25 @@ class MANTID_API_DLL IPeaksWorkspace : public ITableWorkspace,
                                        public Mantid::API::ExperimentInfo {
 public:
   /// Ctor
-  IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {}
+  IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {
+    convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  }
 
   /// Destructor
   virtual ~IPeaksWorkspace();
 
   /// Returns a clone of the workspace
-  std::unique_ptr<IPeaksWorkspace> clone() const {
-    return std::unique_ptr<IPeaksWorkspace>(doClone());
-  }
+  IPeaksWorkspace_uptr clone() const { return IPeaksWorkspace_uptr(doClone()); }
 
   //---------------------------------------------------------------------------------------------
   /** @return the number of peaks
    */
   virtual int getNumberPeaks() const = 0;
+
+  //---------------------------------------------------------------------------------------------
+  /** @return the number of peaks
+   */
+  virtual std::string getConvention() const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Removes the indicated peak
@@ -153,6 +159,8 @@ public:
   virtual std::vector<std::pair<std::string, std::string>>
   peakInfo(Kernel::V3D QFrame, bool labCoords) const = 0;
   virtual int peakInfoNumber(Kernel::V3D qLabFrame, bool labCoords) const = 0;
+
+  std::string convention;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

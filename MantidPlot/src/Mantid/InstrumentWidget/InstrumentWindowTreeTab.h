@@ -14,7 +14,7 @@ class InstrumentWindowTreeTab: public InstrumentWindowTab
 {
   Q_OBJECT
 public:
-  InstrumentWindowTreeTab(InstrumentWindow* instrWindow);
+  explicit InstrumentWindowTreeTab(InstrumentWindow *instrWindow);
   void initSurface();
 public slots:
   void selectComponentByName(const QString& name);

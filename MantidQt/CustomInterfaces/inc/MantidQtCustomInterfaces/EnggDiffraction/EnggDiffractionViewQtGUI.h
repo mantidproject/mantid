@@ -9,6 +9,7 @@
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
 #include "ui_EnggDiffractionQtTabFocus.h"
+#include "ui_EnggDiffractionQtTabPreproc.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -86,11 +87,15 @@ public:
 
   std::string currentCalibFile() const;
 
-  std::string newVanadiumNo() const;
+  std::vector<std::string> newVanadiumNo() const;
 
-  std::string newCeriaNo() const;
+  std::vector<std::string> newCeriaNo() const;
 
   std::string outCalibFilename() const { return m_outCalibFilename; }
+
+  int currentCropCalibBankName() const { return m_currentCropCalibBankName; }
+
+  std::string currentCalibSpecNos() const;
 
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
                       const std::string &fname);
@@ -105,11 +110,11 @@ public:
 
   virtual std::string focusingDir() const;
 
-  virtual std::string focusingRunNo() const;
+  virtual std::vector<std::string> focusingRunNo() const;
 
-  virtual std::string focusingCroppedRunNo() const;
+  virtual std::vector<std::string> focusingCroppedRunNo() const;
 
-  virtual std::string focusingTextureRunNo() const;
+  virtual std::vector<std::string> focusingTextureRunNo() const;
 
   virtual std::vector<bool> focusingBanks() const;
 
@@ -121,6 +126,14 @@ public:
 
   virtual void resetFocus();
 
+  virtual std::vector<std::string> currentPreprocRunNo() const;
+
+  virtual double rebinningTimeBin() const;
+
+  virtual size_t rebinningPulsesNumberPeriods() const;
+
+  virtual double rebinningPulsesTime() const;
+
   virtual void plotFocusedSpectrum(const std::string &wsName);
 
   virtual void plotWaterfallSpectrum(const std::string &wsName);
@@ -131,13 +144,19 @@ public:
 
   int currentPlotType() const { return m_currentType; }
 
+  int currentMultiRunMode() const { return m_currentRunMode; }
+
 private slots:
-  /// for buttons, do calibrate, focus and similar
+  /// for buttons, do calibrate, focus, event->histo rebin, and similar
   void loadCalibrationClicked();
   void calibrateClicked();
+  void CroppedCalibrateClicked();
   void focusClicked();
   void focusCroppedClicked();
   void focusTextureClicked();
+  void rebinTimeClicked();
+  void rebinMultiperiodClicked();
+  void focusStopClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -157,11 +176,23 @@ private slots:
 
   void RBNumberChanged();
 
+  // slot of the cropped calibration part of the interface
+  void calibSpecIdChanged(int idx);
+
   // slots of the focus part of the interface
   void plotRepChanged(int idx);
 
+  // slot of the multi-run mode for focus
+  void multiRunModeChanged(int idx);
+
   // slots of plot spectrum check box status
   void plotFocusStatus();
+
+  // updates the cropped calib run number with new ceria
+  void updateCroppedCalibRun();
+
+  // enables the text field when appropriate bank name is selected
+  void enableSpecIds();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -171,10 +202,12 @@ private:
   virtual void initLayout();
   void doSetupGeneralWidgets();
   void doSetupTabCalib();
-  void doSetupTabSettings();
   void doSetupTabFocus();
+  void doSetupTabPreproc();
+  void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;
+  std::string guessDefaultFullCalibrationPath() const;
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();
@@ -197,7 +230,12 @@ private:
   // but they could be separate dialogs, widgets, etc.
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
+  Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
+
+  /// converts QList to a vector
+  std::vector<std::string> qListToVector(QStringList list,
+                                         bool validator) const;
 
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;
@@ -208,8 +246,14 @@ private:
   /// setting the instrument prefix ahead of the run number
   void setPrefix(std::string prefix);
 
+  // current bank number used for cropped calibration
+  int static m_currentCropCalibBankName;
+
   // plot data representation type selected
   int static m_currentType;
+
+  // multi-run focus mode type selected
+  int static m_currentRunMode;
 
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;

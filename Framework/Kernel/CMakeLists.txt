@@ -43,6 +43,7 @@ set ( SRC_FILES
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
+	src/MDAxisValidator.cpp
 	src/MDUnit.cpp
 	src/MDUnitFactory.cpp
 	src/MagneticFormFactorTable.cpp
@@ -66,6 +67,7 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
+	src/OptionalBool.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
 	src/ProgressText.cpp
@@ -100,6 +102,7 @@ set ( SRC_FILES
 	src/UnitFactory.cpp
 	src/UnitLabel.cpp
 	src/UnitLabelTypes.cpp
+	src/UsageService.cpp
 	src/UserCatalogInfo.cpp
 	src/UserStringParser.cpp
 	src/Utils.cpp
@@ -184,6 +187,7 @@ set ( INC_FILES
 	inc/MantidKernel/LogFilter.h
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
+	inc/MantidKernel/MDAxisValidator.h
 	inc/MantidKernel/MDUnit.h
 	inc/MantidKernel/MDUnitFactory.h
 	inc/MantidKernel/MRUList.h
@@ -212,6 +216,7 @@ set ( INC_FILES
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
 	inc/MantidKernel/NullValidator.h
+	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
 	inc/MantidKernel/PhysicalConstants.h
 	inc/MantidKernel/PocoVersion.h
@@ -257,6 +262,7 @@ set ( INC_FILES
 	inc/MantidKernel/UnitFactory.h
 	inc/MantidKernel/UnitLabel.h
 	inc/MantidKernel/UnitLabelTypes.h
+	inc/MantidKernel/UsageService.h
 	inc/MantidKernel/UserCatalogInfo.h
 	inc/MantidKernel/UserStringParser.h
 	inc/MantidKernel/Utils.h
@@ -269,6 +275,7 @@ set ( INC_FILES
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
+	inc/MantidKernel/make_unique.h
 )
 
 set ( TEST_FILES
@@ -321,11 +328,13 @@ set ( TEST_FILES
 	LogFilterTest.h
 	LogParserTest.h
 	LoggerTest.h
+	MDAxisValidatorTest.h
 	MDUnitFactoryTest.h
 	MDUnitTest.h
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
+	MakeUniqueTest.h
 	MandatoryValidatorTest.h
 	MaskedPropertyTest.h
 	MaterialTest.h
@@ -341,6 +350,7 @@ set ( TEST_FILES
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
 	NullValidatorTest.h
+	OptionalBoolTest.h
 	ProgressBaseTest.h
 	ProgressTextTest.h
 	PropertyHistoryTest.h
@@ -374,6 +384,7 @@ set ( TEST_FILES
 	UnitFactoryTest.h
 	UnitLabelTest.h
 	UnitTest.h
+	UsageServiceTest.h
 	UserCatalogInfoTest.h
 	UserStringParserTest.h
 	UtilsTest.h
@@ -406,8 +417,6 @@ if(UNITY_BUILD)
   enable_unity_build(Kernel SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-include_directories ( ${GSL_INCLUDE_DIR} )
-
 # Enable precompiled headers where supported (must be done before target is added)
 enable_precompiled_headers ( inc/MantidKernel/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
@@ -415,6 +424,8 @@ add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
+
+target_include_directories ( Kernel PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
@@ -428,7 +439,7 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
  target_link_libraries ( Kernel LINK_PRIVATE stdc++ )
 endif()
-target_link_libraries ( Kernel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${NEXUS_LIBRARIES} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} )
+target_link_libraries ( Kernel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${NEXUS_LIBRARIES} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 if (WITH_ASAN)
   target_link_libraries ( Kernel LINK_PRIVATE -lasan )
@@ -541,6 +552,7 @@ else ()
   set ( CONSOLEPATTERN "%s-[%p] %t" )
 endif ()
 
+set ( CONSOLECHANNELCLASS "ConsoleChannel" )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
 )
@@ -566,10 +578,19 @@ else ()
   set ( MANTID_ROOT .. )
 endif ()
 
+# Whether or not to check for updates is tied to a patch version being defined
+# nighly/unstable is basically ISO8601 so it will be longer than 8 char.
+# This affects Mantid.properties.install only.
+string( LENGTH "VERSION_PATCH ${VERSION_PATCH}" VERSION_PATCH_LENGTH)
+set (ENABLE_WEB_UPDATES 0)
+if (${VERSION_PATCH_LENGTH} LESS 8)
+  set (ENABLE_WEB_UPDATES 1)
+endif()
+
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
-set ( UPDATE_INSTRUMENT_DEFINTITIONS "1" )
-set ( CHECK_FOR_NEW_MANTID_VERSION "1" )
+set ( UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_WEB_UPDATES}" )
+set ( CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_WEB_UPDATES}" )
 set ( ENABLE_USAGE_REPORTS "1" )
 set ( DATADIRS "" )
 set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository" )
@@ -615,6 +636,7 @@ else ()
   set ( PV_PLUGINS ${MANTID_ROOT}/${PVPLUGINS_SUBDIR} )
 endif ()
 
+set ( CONSOLECHANNELCLASS "StdoutChannel" )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )

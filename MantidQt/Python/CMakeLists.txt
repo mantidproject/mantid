@@ -67,12 +67,21 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../RefDetectorViewer ) # to fi
 add_library ( mantidqtpython MODULE ${SIP_SRC} )
 
 if(WIN32)
-	# Windows: Python library name needs to end in .pyd for Windows
-	set_target_properties( mantidqtpython PROPERTIES PREFIX "" SUFFIX ".pyd" )
-	# Debug python library expects imported module names to end in _d
-	if ( PYTHON_DEBUG_LIBRARY )
-		set_target_properties ( mantidqtpython PROPERTIES DEBUG_OUTPUT_NAME mantidqtpython_d )
-	endif ()
+  # Windows: Python library name needs to end in .pyd for Windows
+  set_target_properties( mantidqtpython PROPERTIES PREFIX "" SUFFIX ".pyd" )
+  # Debug python library expects imported module names to end in _d
+  if ( PYTHON_DEBUG_LIBRARY )
+    set_target_properties ( mantidqtpython PROPERTIES DEBUG_OUTPUT_NAME mantidqtpython_d )
+  endif ()
+  # For a debug build copy the special PyQt4 debug build to the bin directory
+  add_custom_command (
+    TARGET mantidqtpython
+    POST_BUILD
+    COMMAND if 1==$<CONFIG:Debug> ${CMAKE_COMMAND} 
+      -E copy_directory ${PYTHON_DIR}/msvc-site-packages/debug/PyQt4 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/PyQt4
+    COMMENT "Copying debug PyQt4 to bin"
+  )
+    
 elseif ( APPLE )
 	# Mac: and in .so on the Mac, with no "lib" prefix either
   	set_target_properties ( mantidqtpython PROPERTIES PREFIX "" SUFFIX .so )
@@ -100,7 +109,6 @@ target_link_libraries ( mantidqtpython LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIM
             ${QWT_LIBRARIES}
             ${PYTHON_LIBRARIES}
             )
-
 
 
 ###########################################################################

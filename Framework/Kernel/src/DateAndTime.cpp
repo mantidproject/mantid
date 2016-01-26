@@ -88,10 +88,10 @@ time_t utc_mktime(struct tm *utctime) {
   tmp = *utctime;
   tmp.tm_isdst = -1;
   result = mktime(&tmp);
-  if (result == (time_t)-1)
-    return (time_t)-1;
+  if (result == static_cast<time_t>(-1))
+    return static_cast<time_t>(-1);
   if (gmtime_r_portable(&result, &check) == NULL)
-    return (time_t)-1;
+    return static_cast<time_t>(-1);
 
   // loop until match
   int counter = 0;
@@ -108,11 +108,11 @@ time_t utc_mktime(struct tm *utctime) {
     tmp.tm_isdst = -1;
 
     result = mktime(&tmp);
-    if (result == (time_t)-1)
-      return (time_t)-1;
+    if (result == static_cast<time_t>(-1))
+      return static_cast<time_t>(-1);
     gmtime_r_portable(&result, &check);
     if (gmtime_r_portable(&result, &check) == NULL)
-      return (time_t)-1;
+      return static_cast<time_t>(-1);
     // Seems like there can be endless loops at the end of a month? E.g. sep 30,
     // 2010 at 4:40 pm. This is to avoid it.
     counter++;
@@ -147,9 +147,12 @@ DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
  *    "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"; although the T can be replaced by a
  *space.
  *    The time must included, but the time-zone specification is optional.
+ *@param displayLogs :: if the logs should be dsiplayed during the execution of
+ *the constructor
  */
-DateAndTime::DateAndTime(const std::string ISO8601_string) : _nanoseconds(0) {
-  this->setFromISO8601(ISO8601_string);
+DateAndTime::DateAndTime(const std::string ISO8601_string, bool displayLogs)
+    : _nanoseconds(0) {
+  this->setFromISO8601(ISO8601_string, displayLogs);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -362,8 +365,9 @@ const DateAndTime DateAndTime::defaultTime() {
 /** Sets the date and time using an ISO8601-formatted string
  *
  * @param str :: ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
+ * @param displayLogs :: flag to indiciate if the logs should be displayed
  */
-void DateAndTime::setFromISO8601(const std::string str) {
+void DateAndTime::setFromISO8601(const std::string str, bool displayLogs) {
   // Make a copy
   std::string time = str;
 
@@ -374,7 +378,9 @@ void DateAndTime::setFromISO8601(const std::string str) {
       0, 10); // just take the date not the time or any date-time separator
   const size_t nSpace = date.find(' ');
   if (nSpace != std::string::npos) {
-    g_log.warning() << "Invalid ISO8601 date " << time;
+    if (displayLogs) {
+      g_log.warning() << "Invalid ISO8601 date " << time;
+    }
     time[nSpace] = '0'; // replace space with 0
 
     // Do again in case of second space
@@ -382,8 +388,9 @@ void DateAndTime::setFromISO8601(const std::string str) {
     const size_t nSecondSpace = date.find(' ');
     if (nSecondSpace != std::string::npos)
       time[nSecondSpace] = '0';
-
-    g_log.warning() << " corrected to " << time << std::endl;
+    if (displayLogs) {
+      g_log.warning() << " corrected to " << time << std::endl;
+    }
   }
 
   // Default of no timezone offset

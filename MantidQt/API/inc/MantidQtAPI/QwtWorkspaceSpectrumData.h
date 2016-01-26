@@ -2,6 +2,7 @@
 #define MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "DistributionOptions.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 #include "DllOption.h"
@@ -9,34 +10,23 @@
 #include <boost/shared_ptr.hpp>
 #include <QString>
 
-namespace MantidQt
-{
-
-  // Enumerate how to handle distributions
-  enum DistributionFlag
-  {
-    DistributionDefault = 0, // Use preferences value
-    DistributionTrue, // Force distribution plotting
-    DistributionFalse // Disable distribution plotting
-  };
-
-}
-
 //=================================================================================================
 //=================================================================================================
-/**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
+/**  This class implements QwtData with direct access to a spectrum in a
+ * MatrixWorkspace.
  */
-class EXPORT_OPT_MANTIDQT_API QwtWorkspaceSpectrumData : public MantidQwtMatrixWorkspaceData
-{
+class EXPORT_OPT_MANTIDQT_API QwtWorkspaceSpectrumData
+    : public MantidQwtMatrixWorkspaceData {
 public:
-
-  QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace & workspace, int specIndex,
-                           const bool logScale, const bool plotAsDistribution);
+  QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace &workspace,
+                           int specIndex, const bool logScale,
+                           const bool plotAsDistribution);
 
   //! @return Pointer to a copy (virtual copy constructor)
   virtual QwtWorkspaceSpectrumData *copy() const;
   /// Return a new data object of the same type but with a new workspace
-  virtual QwtWorkspaceSpectrumData* copyWithNewSource(const Mantid::API::MatrixWorkspace & workspace) const;
+  virtual QwtWorkspaceSpectrumData *
+  copyWithNewSource(const Mantid::API::MatrixWorkspace &workspace) const;
 
   //! @return Size of the data set
   virtual size_t size() const;
@@ -55,11 +45,11 @@ public:
   virtual double y(size_t i) const;
 
   /// Returns the error of the i-th data point
-  double e(size_t i)const;
+  double e(size_t i) const;
   /// Returns the x position of the error bar for the i-th data point (bin)
-  double ex(size_t i)const;
+  double ex(size_t i) const;
   /// Number of error bars to plot
-  size_t esize()const;
+  size_t esize() const;
 
   double getYMin() const;
   double getYMax() const;
@@ -73,16 +63,21 @@ public:
 
   /// Inform the data that it is to be plotted on a log y scale
   void setLogScale(bool on);
-  bool logScale()const{return m_logScale;}
+  bool logScale() const { return m_logScale; }
   void saveLowestPositiveValue(const double v);
   bool setAsDistribution(bool on = true);
 
+  // Sets offsets for and enables waterfall plots
+  void setXOffset(const double x);
+  void setYOffset(const double y);
+  void setWaterfallPlot(bool on);
+
 protected:
-  // Assignment operator (virtualized). MSVC not happy with compiler generated one
-  QwtWorkspaceSpectrumData& operator=(const QwtWorkspaceSpectrumData&);
+  // Assignment operator (virtualized). MSVC not happy with compiler generated
+  // one
+  QwtWorkspaceSpectrumData &operator=(const QwtWorkspaceSpectrumData &);
 
 private:
-
   friend class MantidMatrixCurve;
 
   /// Spectrum index in the workspace
@@ -103,7 +98,8 @@ private:
   bool m_isHistogram;
   /// If true the data already has the bin widths divided in
   bool m_dataIsNormalized;
-  /// This field can be set true for a histogram workspace. If it's true x(i) returns (X[i]+X[i+1])/2
+  /// This field can be set true for a histogram workspace. If it's true x(i)
+  /// returns (X[i]+X[i+1])/2
   bool m_binCentres;
   /// Indicates that the data is plotted on a log y scale
   bool m_logScale;
@@ -116,5 +112,13 @@ private:
   /// Is plotting as distribution
   bool m_isDistribution;
 
+  /// Indicates whether or not waterfall plots are enabled
+  bool m_isWaterfall;
+
+  /// x-axis offset for waterfall plots
+  double m_offsetX;
+
+  /// y-axis offset for waterfall plots
+  double m_offsetY;
 };
 #endif

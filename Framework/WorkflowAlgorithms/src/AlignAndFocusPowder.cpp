@@ -71,22 +71,18 @@ void AlignAndFocusPowder::init() {
   //   Direction::Output, PropertyMode::Optional),
   //   "The name of the workspace containing the filtered low resolution TOF
   //   data.");
-  std::vector<std::string> exts;
-  exts.push_back(".h5");
-  exts.push_back(".hd5");
-  exts.push_back(".hdf");
-  exts.push_back(".cal");
   declareProperty(
-      new FileProperty("CalFileName", "", FileProperty::OptionalLoad, exts),
+      new FileProperty("CalFileName", "", FileProperty::OptionalLoad,
+                       {".h5", ".hd5", ".hdf", ".cal"}),
       "The name of the CalFile with offset, masking, and grouping data");
   declareProperty(
       new WorkspaceProperty<GroupingWorkspace>(
-          "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
+          "GroupingWorkspace", "", Direction::InOut, PropertyMode::Optional),
       "Optional: A GroupingWorkspace giving the grouping info.");
 
   declareProperty(
       new WorkspaceProperty<ITableWorkspace>(
-          "CalibrationWorkspace", "", Direction::Input, PropertyMode::Optional),
+          "CalibrationWorkspace", "", Direction::InOut, PropertyMode::Optional),
       "Optional: A Workspace containing the calibration information. Either "
       "this or CalibrationFile needs to be specified.");
   declareProperty(
@@ -94,7 +90,7 @@ void AlignAndFocusPowder::init() {
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An OffsetsWorkspace giving the detector calibration values.");
   declareProperty(new WorkspaceProperty<MaskWorkspace>("MaskWorkspace", "",
-                                                       Direction::Input,
+                                                       Direction::InOut,
                                                        PropertyMode::Optional),
                   "Optional: A workspace giving which detectors are masked.");
   declareProperty(new WorkspaceProperty<TableWorkspace>("MaskBinTable", "",
@@ -944,18 +940,24 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
   // replace workspaces as appropriate
   if (loadGrouping) {
     m_groupWS = alg->getProperty("OutputGroupingWorkspace");
-    AnalysisDataService::Instance().addOrReplace(m_instName + "_group",
-                                                 m_groupWS);
+
+    const std::string name = m_instName + "_group";
+    AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
+    this->setPropertyValue("GroupingWorkspace", name);
   }
   if (loadCalibration) {
     m_calibrationWS = alg->getProperty("OutputCalWorkspace");
-    AnalysisDataService::Instance().addOrReplace(m_instName + "_cal",
-                                                 m_calibrationWS);
+
+    const std::string name = m_instName + "_cal";
+    AnalysisDataService::Instance().addOrReplace(name, m_calibrationWS);
+    this->setPropertyValue("CalibrationWorkspace", name);
   }
   if (loadMask) {
     m_maskWS = alg->getProperty("OutputMaskWorkspace");
-    AnalysisDataService::Instance().addOrReplace(m_instName + "_mask",
-                                                 m_maskWS);
+
+    const std::string name = m_instName + "_mask";
+    AnalysisDataService::Instance().addOrReplace(name, m_maskWS);
+    this->setPropertyValue("MaskWorkspace", name);
   }
 
   return;

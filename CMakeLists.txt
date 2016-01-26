@@ -1,17 +1,23 @@
 ###########################################################################
 # CMake version check.
-# Only versions after 2.8.12 will find the HL component for HDF5
+# Require >= 3.3 for Windows as previous versions contained a bug that
+# prevented external data from working correctly. Other systems require
+# 2.8.12 to avoid recompiling system packages
 ###########################################################################
-cmake_minimum_required ( VERSION 2.8.12 )
+if (CMAKE_HOST_WIN32)
+  cmake_minimum_required ( VERSION 3.3.0 )
+else()
+  cmake_minimum_required ( VERSION 2.8.12 )
+endif()
+
+# Define the project name.
+project ( Mantid )
 
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "")
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
-
-# Define the project name.
-project ( Mantid )
 
 SET (CPACK_INSTALL_CMAKE_PROJECTS
      "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
@@ -33,6 +39,28 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
+# Bootstrap any dependencies
+###########################################################################
+include ( Bootstrap )
+
+###########################################################################
+# Set expected variables for OS X
+###########################################################################
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
+  include ( DarwinSetup )
+endif ()
+
+###########################################################################
+# Set working Python versions
+###########################################################################
+set ( Python_ADDITIONAL_VERSIONS 2.7 2.6 )
+
+###########################################################################
+# Cross-platform setup
+###########################################################################
+include ( CommonSetup )
+
+###########################################################################
 # Check for Qt (DarwinSetup below needs a variable from this)
 ###########################################################################
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
@@ -51,36 +79,6 @@ endif ()
 ###########################################################################
 include ( ParaViewSetup )
 
-###########################################################################
-# Set paths to Third_Party for Windows builds
-###########################################################################
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-
-  if ( NOT THIRD_PARTY )
-      set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/Third_Party" )
-  endif ()
-  # Print out where we think we are looking for 3rd party stuff
-  message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
-
-  # Check that the 3rd party directory exists.
-  if (NOT IS_DIRECTORY "${THIRD_PARTY}")
-        message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
-  endif()
-
-  include ( WindowsSetup )
-
-  # Settings for generating the windows Nullsoft package via CPack
-  include ( WindowsNSIS )
-
-ENDIF()
-
-###########################################################################
-# Set paths to Third_Party for Mac builds
-###########################################################################
-IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  include ( DarwinSetup )
-ENDIF()
-
 # We probably don't want this to run on every build.
 option(COVERALLS "Generate coveralls data" OFF)
 
@@ -88,14 +86,6 @@ if (COVERALLS)
     include(Coveralls)
     coveralls_turn_on_coverage()
 endif()
-
-###########################################################################
-# Call our setup script
-###########################################################################
-if (NOT ENABLE_OPENCASCADE)
- set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation")
-endif()
-include ( CommonSetup )
 
 ###########################################################################
 # Find qwt. Needs to be version 5
@@ -152,8 +142,6 @@ add_dependencies ( check GUITests )
 add_custom_target ( AllTests )
 add_dependencies ( AllTests FrameworkTests GUITests )
 
-add_subdirectory ( MantidQt )
-
 if ( UNIX )
   #Experimental feature. Unix only at this point.
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
@@ -163,8 +151,11 @@ endif ( UNIX )
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
 
 if ( MAKE_VATES )
+  find_package( ParaView )
   add_subdirectory ( Vates )
-
+  if(ParaView_FOUND)
+    add_definitions ( -DMAKE_VATES )
+  endif()
   if (NOT APPLE)
     LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
           "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
@@ -181,6 +172,11 @@ if ( MAKE_VATES )
   endif()
 
 endif ( MAKE_VATES )
+
+if ( MSVC )
+  add_definitions ( -DQWT_DLL )
+endif ()
+add_subdirectory ( MantidQt )
 
 add_subdirectory ( MantidPlot )
 
@@ -240,7 +236,9 @@ if ( ENABLE_CPACK )
     # Mac package settings
     set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/installers/WinInstaller/License.txt )
 
-    IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+    if(CMAKE_HOST_WIN32)
+      include ( WindowsNSIS )
+    elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )
       # let people know what is coming out the other end
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
@@ -250,10 +248,10 @@ if ( ENABLE_CPACK )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-ipython >= 1.1.0" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-ipython >= 1.1.0,python-ipython-notebook" )
       # scipy & matplotlib
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp >= 0.7.0" )
 
       if( "${UNIX_CODENAME}" MATCHES "Santiago" )
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
@@ -261,7 +259,7 @@ if ( ENABLE_CPACK )
         # On RHEL6 we are using SCL packages for Qt
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4" )
       else()
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla, qwt5-qt4" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python-matplotlib-qt4" )
       endif()
 
       # Add software collections for RHEL
@@ -274,29 +272,34 @@ if ( ENABLE_CPACK )
         set ( DEPENDS_LIST "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-                           "libnexus0 (>= 4.3),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),"
-                           "libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),qt4-dev-tools,"
-                           "libqwt5-qt4,libqwtplot3d-qt4-0,python-numpy,python-sip,python-qt4,python-nxs (>= 4.3),libjsoncpp0" )
-        set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools0 (>= 1.7)" )
-        if( "${UNIX_CODENAME}" MATCHES "lucid" )
-          list ( APPEND DEPENDS_LIST ",libqscintilla2-5,"
-                                     "libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),"
-                                     "libmuparser0,libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9" )
-        elseif( "${UNIX_CODENAME}" MATCHES "precise" )
-          list ( APPEND DEPENDS_LIST ",libqscintilla2-8,"
-                                     "libopencascade-foundation-6.5.0 (>= 6.5.0),libopencascade-modeling-6.5.0 (>= 6.5.0),"
-                                     "libmuparser0debian1,"
-                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
-                                     "libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9")
-        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" OR "${UNIX_CODENAME}" STREQUAL "utopic" OR "${UNIX_CODENAME}" STREQUAL "vivid")
-          list ( APPEND DEPENDS_LIST ",libqscintilla2-11,"
-                                     "liboce-foundation8,liboce-modeling8,"
-                                     "libmuparser2,"
-                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
-                                     "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11")
-          set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
-        else()
-          message( WARNING "Mantid does not support packaging of this Ubuntu version: ${UNIX_CODENAME}")
+                           "libnexus0 (>= 4.3),"
+                           "libgsl0ldbl,"
+                           "libqtcore4 (>= 4.2),"
+                           "libqtgui4 (>= 4.2),"
+                           "libqt4-opengl (>= 4.2),"
+                           "libqt4-xml (>= 4.2),"
+                           "libqt4-svg (>= 4.2),"
+                           "libqt4-qt3support (>= 4.2),"
+                           "qt4-dev-tools,"
+                           "libqwt5-qt4,"
+                           "libqwtplot3d-qt4-0,"
+                           "python-numpy,"
+                           "python-sip,"
+                           "python-qt4,"
+                           "python-nxs (>= 4.3),"
+                           "libjsoncpp0 (>=0.7.0),"
+                           "libqscintilla2-11,"
+                           "liboce-foundation8,liboce-modeling8,"
+                           "libmuparser2,"
+                           "ipython-qtconsole (>= 1.1),"
+                           "ipython-notebook,"
+                           "python-matplotlib,"
+                           "python-scipy,"
+                           "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11" )
+        set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
+        if( "${UNIX_CODENAME}" STREQUAL "wily"  OR "${UNIX_CODENAME}" STREQUAL "xenial")
+            list ( APPEND DEPENDS_LIST ", libnexus0v5 (>= 4.3),libjsoncpp0v5 (>= 0.7.0),libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5")
+            list (REMOVE_ITEM DEPENDS_LIST "libjsoncpp0 (>=0.7.0)," "libqscintilla2-11," "libmuparser2," "libnexus0 (>= 4.3)," "libqwtplot3d-qt4-0,")
         endif()
         # parse list to string required for deb package
         string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )

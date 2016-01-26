@@ -694,6 +694,15 @@ namespace GraphOptions
   enum Axis{Left, Right, Bottom, Top};
 };
 
+namespace MantidQt 
+{
+%TypeHeaderCode 
+#include "MantidQtAPI/DistributionOptions.h"
+%End
+
+	enum DistributionFlag {DistributionDefault, DistributionTrue, DistributionFalse};  
+};
+
 class Graph : QWidget /PyName=Layer/
 {
 %TypeHeaderCode
@@ -1287,8 +1296,10 @@ class PythonScripting
 %End
 public:
   void write(const QString&);
-  // 'Fake' methods needed for IPython import
+  // Simulate file-like object (required for IPython)
   void flush();
+  // Simulate file-like object (required for colorama)
+  bool closed();
   void set_parent(SIP_PYOBJECT);
 private:
   PythonScripting(const PythonScripting&);
@@ -1300,8 +1311,10 @@ class PythonScript
 %End
 public:
   void write(const QString&);
-  // 'Fake' method needed for IPython import
+  // Simulate file-like object (required for IPython)
   void flush();
+  // Simulate file-like object (required for colorama)
+  bool closed();
   // Line number trace
   void lineNumberChanged(SIP_PYOBJECT,int);
 private:
@@ -1684,9 +1697,11 @@ sipClass=sipFindClass(sipCpp->className());
 
 public:
   // Plotting methods
-  MultiLayer* plot1D(const QList<QString>& wsnames, const QList<int>&, bool spectrumPlot, bool errs=false,
-    Graph::CurveType style = Graph::Unspecified, MultiLayer* window = NULL,
-                     bool clearWindow = false, bool waterfallPlot = false);
+  MultiLayer *plot1D(const QList<QString> &wsnames, const QList<int> &, bool spectrumPlot,
+					 MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+					 bool errs = true, Graph::CurveType style = Graph::Unspecified,
+					 MultiLayer *plotWindow = NULL, bool clearWindow = false,
+					 bool waterfallPlot = false);
 
   MultiLayer* drawSingleColorFillPlot(const QString & name, Graph::CurveType style = Graph::ColorMap,
                                       MultiLayer* window = NULL);

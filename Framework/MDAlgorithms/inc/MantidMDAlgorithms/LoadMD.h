@@ -1,6 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_LOADMD_H_
 #define MANTID_MDALGORITHMS_LOADMD_H_
 
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidKernel/System.h"
@@ -52,7 +53,9 @@ public:
   /// Algorithm's version for identification
   virtual int version() const { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "MDAlgorithms"; }
+  virtual const std::string category() const {
+    return "MDAlgorithms\\DataHandling";
+  }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const;
@@ -62,6 +65,9 @@ private:
   void init();
   /// Run the algorithm
   void exec();
+
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention;
 
   /// Helper method
   template <typename MDE, size_t nd>
@@ -81,6 +87,8 @@ private:
 
   void loadCoordinateSystem();
 
+  void loadQConvention();
+
   void loadVisualNormalization(
       const std::string &key,
       boost::optional<Mantid::API::MDNormalization> &normalization);
@@ -89,6 +97,12 @@ private:
   void loadAffineMatricies(API::IMDWorkspace_sptr ws);
   /// Load a given affine matrix
   API::CoordTransform *loadAffineMatrix(std::string entry_name);
+
+  /// Sets MDFrames for workspaces from legacy files
+  void setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws);
+
+  /// Checks if a worspace is a certain type of legacy file
+  void checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws);
 
   /// Open file handle
   // clang-format off
@@ -105,6 +119,8 @@ private:
   std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
   /// Coordinate system
   Kernel::SpecialCoordinateSystem m_coordSystem;
+  /// QConvention
+  std::string m_QConvention;
   /// load only the box structure with empty boxes but do not tload boxes events
   bool m_BoxStructureAndMethadata;
 
@@ -118,6 +134,9 @@ private:
   /// Named entry
   static const std::string VISUAL_NORMALIZATION_KEY;
   static const std::string VISUAL_NORMALIZATION_KEY_HISTO;
+
+  /// MDFrame correction flag
+  bool m_requiresMDFrameCorrection;
 };
 
 } // namespace DataObjects

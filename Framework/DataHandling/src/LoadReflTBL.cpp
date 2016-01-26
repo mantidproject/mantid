@@ -224,12 +224,10 @@ size_t LoadReflTBL::getCells(std::string line,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadReflTBL::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".tbl");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the table file to read, including its full or "
-                  "relative path. The file extension must be .tbl");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".tbl"}),
+      "The name of the table file to read, including its full or "
+      "relative path. The file extension must be .tbl");
   declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
                   "The name of the workspace that will be created.");

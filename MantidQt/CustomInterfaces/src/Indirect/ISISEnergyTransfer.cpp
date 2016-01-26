@@ -41,16 +41,6 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
 
-  // Re-validate when certain inputs are changed
-  connect(m_uiForm.spRebinLow, SIGNAL(valueChanged(double)), this,
-          SLOT(validate()));
-  connect(m_uiForm.spRebinWidth, SIGNAL(valueChanged(double)), this,
-          SLOT(validate()));
-  connect(m_uiForm.spRebinHigh, SIGNAL(valueChanged(double)), this,
-          SLOT(validate()));
-  connect(m_uiForm.leRebinString, SIGNAL(textChanged(const QString &)), this,
-          SLOT(validate()));
-
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
 
@@ -88,8 +78,21 @@ bool ISISEnergyTransfer::validate() {
   // Rebinning
   if (!m_uiForm.ckDoNotRebin->isChecked()) {
     if (m_uiForm.cbRebinType->currentText() == "Single") {
-      bool rebinValid = !uiv.checkBins(m_uiForm.spRebinLow->value(),
-                                       m_uiForm.spRebinWidth->value(),
+      double rebinWidth = m_uiForm.spRebinWidth->value();
+      if (rebinWidth < 0) {
+        // Ensure negative bin width is intentionally logarithmic
+        QString text = "The Binning width is currently negative, this suggests "
+                       "you wish to use logarithmic binning.\n"
+                       " Do you want to use Logarithmic Binning?";
+        int result = QMessageBox::question(
+            NULL, tr("Logarithmic Binning"), tr(text), QMessageBox::Yes,
+            QMessageBox::No, QMessageBox::NoButton);
+        if (result == QMessageBox::Yes) {
+          // Treat rebin width as a positive for validation
+          rebinWidth = std::abs(rebinWidth);
+        }
+      }
+      bool rebinValid = !uiv.checkBins(m_uiForm.spRebinLow->value(), rebinWidth,
                                        m_uiForm.spRebinHigh->value());
       m_uiForm.valRebinLow->setVisible(rebinValid);
       m_uiForm.valRebinWidth->setVisible(rebinValid);
@@ -325,9 +328,10 @@ void ISISEnergyTransfer::setInstrumentDefault() {
     return;
   }
 
-  int specMin = instDetails["spectra-min"].toInt();
-  int specMax = instDetails["spectra-max"].toInt();
-
+  // Set spectra min/max for spinners in UI
+  const int specMin = instDetails["spectra-min"].toInt();
+  const int specMax = instDetails["spectra-max"].toInt();
+  // Spectra spinners
   m_uiForm.spSpectraMin->setMinimum(specMin);
   m_uiForm.spSpectraMin->setMaximum(specMax);
   m_uiForm.spSpectraMin->setValue(specMin);
@@ -335,6 +339,15 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   m_uiForm.spSpectraMax->setMinimum(specMin);
   m_uiForm.spSpectraMax->setMaximum(specMax);
   m_uiForm.spSpectraMax->setValue(specMax);
+
+  // Plot time spectra spinners
+  m_uiForm.spPlotTimeSpecMin->setMinimum(1);		// 1 to allow for monitors
+  m_uiForm.spPlotTimeSpecMin->setMaximum(specMax);
+  m_uiForm.spPlotTimeSpecMin->setValue(1);
+
+  m_uiForm.spPlotTimeSpecMax->setMinimum(1);
+  m_uiForm.spPlotTimeSpecMax->setMaximum(specMax);
+  m_uiForm.spPlotTimeSpecMax->setValue(1);
 
   if (!instDetails["Efixed"].isEmpty())
     m_uiForm.spEfixed->setValue(instDetails["Efixed"].toDouble());
@@ -512,6 +525,7 @@ void ISISEnergyTransfer::plotRaw() {
   loadAlg->initialize();
   loadAlg->setProperty("Filename", rawFile.toStdString());
   loadAlg->setProperty("OutputWorkspace", name);
+  loadAlg->setProperty("LoadLogFiles", false);
   if (extension.compare(".nxs") == 0) {
     int64_t detectorMin =
         static_cast<int64_t>(m_uiForm.spPlotTimeSpecMin->value());

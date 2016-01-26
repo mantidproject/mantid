@@ -21,6 +21,7 @@ set ( TEST_PY_FILES
   MandatoryValidatorTest.py
   MemoryStatsTest.py
   NullValidatorTest.py
+  OptionalBoolTest.py
   ProgressBaseTest.py
   PropertyHistoryTest.py
   PropertyWithValueTest.py
@@ -33,6 +34,7 @@ set ( TEST_PY_FILES
   UnitFactoryTest.py
   UnitLabelTest.py
   UnitsTest.py
+  UsageServiceTest.py
   V3DTest.py
   VisibleWhenPropertyTest.py
   VMDTest.py

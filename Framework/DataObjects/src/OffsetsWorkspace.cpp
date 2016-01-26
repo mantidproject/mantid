@@ -48,8 +48,9 @@ IPropertyManager::getValue<Mantid::DataObjects::OffsetsWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected OffsetsWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<OffsetsWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -67,7 +68,7 @@ IPropertyManager::getValue<Mantid::DataObjects::OffsetsWorkspace_const_sptr>(
   } else {
     std::string message =
         "Attempt to assign property " + name +
-        " to incorrect type. Expected const OffsetsWorkspace.";
+        " to incorrect type. Expected const shared_ptr<OffsetsWorkspace>.";
     throw std::runtime_error(message);
   }
 }
