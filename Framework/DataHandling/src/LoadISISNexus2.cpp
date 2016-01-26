@@ -72,20 +72,19 @@ int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
 
 /// Initialization method.
 void LoadISISNexus2::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".n*");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the Nexus file to load");
+  declareProperty(
+      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".n*"}),
+      "The name of the Nexus file to load");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
-  declareProperty("SpectrumMin", (int64_t)0, mustBePositive);
-  declareProperty("SpectrumMax", (int64_t)EMPTY_INT(), mustBePositive);
+  declareProperty("SpectrumMin", static_cast<int64_t>(0), mustBePositive);
+  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
+                  mustBePositive);
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
-  declareProperty("EntryNumber", (int64_t)0, mustBePositive,
+  declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
                   "A positive number identifies one entry to be loaded, into "

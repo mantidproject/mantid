@@ -82,6 +82,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/DllOption.h
 	inc/MantidQtAPI/FileDialogHandler.h
 	inc/MantidQtAPI/GraphOptions.h
+    inc/MantidQtAPI/DistributionOptions.h
 	inc/MantidQtAPI/HelpWindow.h
 	inc/MantidQtAPI/InterfaceFactory.h
 	inc/MantidQtAPI/InterfaceManager.h
@@ -129,9 +130,15 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
-# Python includes
-include_directories ( ${PYTHON_INCLUDE_PATH} )
+if(MAKE_VATES AND ParaView_FOUND)
+  include( ${PARAVIEW_USE_FILE} )
+endif()
 
+# Python includes
+include_directories ( ${PYTHON_INCLUDE_PATH})
+if(MAKE_VATES AND ParaView_FOUND)
+  include_directories (SYSTEM ${PARAVIEW_INCLUDE_DIRS})
+endif()
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtAPI/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidQtAPI ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
@@ -146,6 +153,13 @@ target_link_libraries ( MantidQtAPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES}
   ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}
 )
+
+if(MAKE_VATES AND ParaView_FOUND)
+  target_link_libraries (MantidQtAPI LINK_PRIVATE
+  vtkPVServerManagerRendering
+  ${vtkjsoncpp_LIBRARIES}
+  )
+endif()
 
 ###########################################################################
 # Windows: Generate a qt.conf file so that the dev build finds the qt

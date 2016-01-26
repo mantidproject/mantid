@@ -32,7 +32,7 @@ OptimizeExtinctionParameters::OptimizeExtinctionParameters() {
 OptimizeExtinctionParameters::~OptimizeExtinctionParameters() {}
 
 static double gsl_costFunction(const gsl_vector *v, void *params) {
-  std::string *p = (std::string *)params;
+  std::string *p = reinterpret_cast<std::string *>(params);
   std::string inname = p[0];
   std::string corrOption = p[1];
   std::string pointOption = p[2];

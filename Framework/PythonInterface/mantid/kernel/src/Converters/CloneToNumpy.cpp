@@ -36,10 +36,10 @@ template <> PyObject *clone1D(const std::vector<bool> &cvector) {
 
   for (Py_intptr_t i = 0; i < dims[0]; ++i) {
     void *itemPtr = PyArray_GETPTR1(nparray, i);
-    PyArray_SETITEM(nparray, (char *)itemPtr,
+    PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr),
                     PyBool_FromLong(static_cast<long int>(cvector[i])));
   }
-  return (PyObject *)nparray;
+  return reinterpret_cast<PyObject *>(nparray);
 }
 
 /**
@@ -66,7 +66,7 @@ PyObject *cloneND(const ElementType *carray, const int ndims,
   void *arrayData = PyArray_DATA(nparray);
   const void *data = static_cast<void *>(const_cast<ElementType *>(carray));
   std::memcpy(arrayData, data, PyArray_ITEMSIZE(nparray) * length);
-  return (PyObject *)nparray;
+  return reinterpret_cast<PyObject *>(nparray);
 }
 
 /**

@@ -88,11 +88,9 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadIsawPeaks::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".peaks");
-  exts.push_back(".integrate");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
+                                   {".peaks", ".integrate"}),
                   "Path to an ISAW-style .peaks filename.");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -330,12 +328,13 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
  * @param in :: input stream
  * @param seqNum [out] :: the sequence number of the peak
  * @param bankName :: the bank number from the ISAW file.
+ * @param qSign :: For inelastic this is 1; for crystallography this is -1
  * @return the Peak the Peak object created
  */
 DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
                                           std::string &lastStr,
                                           std::ifstream &in, int &seqNum,
-                                          std::string bankName) {
+                                          std::string bankName, double qSign) {
   double h;
   double k;
   double l;
@@ -408,8 +407,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 
   // Create the peak object
   Peak peak(outWS->getInstrument(), pixelID, wl);
-  // HKL's are flipped by -1 because of the internal Q convention
-  peak.setHKL(-h, -k, -l);
+  peak.setHKL(qSign * h, qSign * k, qSign * l);
   peak.setIntensity(Inti);
   peak.setSigmaIntensity(SigI);
   peak.setBinCount(IPK);
@@ -506,7 +504,12 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
  */
 void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
                                std::string filename) {
-
+  // HKL's are flipped by -1 because of the internal Q convention
+  // unless Crystallography convention
+  double qSign = -1.0;
+  std::string convention = ConfigService::Instance().getString("Q.convention");
+  if (convention == "Crystallography")
+    qSign = 1.0;
   // Open the file
   std::ifstream in(filename.c_str());
 
@@ -566,7 +569,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
 
     try {
       // Read the peak
-      Peak peak = readPeak(outWS, s, in, seqNum, bankName);
+      Peak peak = readPeak(outWS, s, in, seqNum, bankName, qSign);
 
       // Get the calculated goniometer matrix
       Matrix<double> gonMat = uniGonio.getR();

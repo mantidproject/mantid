@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   Example1DFunctionTest.py
   ExamplePeakFunctionTest.py
   StretchedExpFTTest.py
+  AttributeTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

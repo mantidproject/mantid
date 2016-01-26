@@ -85,7 +85,7 @@ void SpecularReflectionCalculateTheta::exec() {
   const double beamoffset =
       refFrame->vecPointingAlongBeam().scalar_prod(detSample);
 
-  const double twoTheta = std::atan(upoffset / beamoffset) * 180 / M_PI;
+  const double twoTheta = 2 * std::atan(upoffset / beamoffset) * 180 / M_PI;
 
   std::stringstream strstream;
   strstream << "Recalculated two theta as: " << twoTheta;

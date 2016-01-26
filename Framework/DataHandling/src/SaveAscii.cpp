@@ -30,12 +30,8 @@ void SaveAscii::init() {
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
-
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
-  exts.push_back(".txt");
-  exts.push_back(".csv");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
+                                   {".dat", ".txt", ".csv"}),
                   "The filename of the output Ascii file.");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
@@ -117,8 +113,7 @@ void SaveAscii::exec() {
   }
   // Else if the separator drop down choice is not UserDefined then we use that.
   else if (choice != "UserDefined") {
-    std::map<std::string, std::string>::iterator it =
-        m_separatorIndex.find(choice);
+    auto it = m_separatorIndex.find(choice);
     sep = it->second;
   }
   // If we still have nothing, then we are forced to use a default.
@@ -186,8 +181,7 @@ void SaveAscii::exec() {
           file << " , DX" << spec;
       }
     else
-      for (std::set<int>::const_iterator spec = idx.begin(); spec != idx.end();
-           ++spec) {
+      for (auto spec = idx.cbegin(); spec != idx.cend(); ++spec) {
         file << comstr << "Y" << *spec << comstr << errstr << *spec << errstr2;
         if (write_dx)
           file << " , DX" << *spec;
@@ -220,8 +214,7 @@ void SaveAscii::exec() {
         file << ws->readE(spec)[bin];
       }
     else
-      for (std::set<int>::const_iterator spec = idx.begin(); spec != idx.end();
-           ++spec) {
+      for (auto spec = idx.cbegin(); spec != idx.cend(); ++spec) {
         file << sep;
         file << ws->readY(*spec)[bin];
         file << sep;

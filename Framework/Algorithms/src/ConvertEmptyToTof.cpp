@@ -269,20 +269,17 @@ void ConvertEmptyToTof::estimateFWHM(const Mantid::MantidVec &spec,
   size_t maxIndex =
       std::distance(spec.begin(), maxValueIt); // index of max value
 
-  // indices and values for the fwhm detection
-  size_t minFwhmIndex = maxIndex;
-  size_t maxFwhmIndex = maxIndex;
-  double minFwhmValue = maxValue;
-  double maxFwhmValue = maxValue;
-  // fwhm detection
-  for (; minFwhmValue > 0.5 * maxValue;
-       minFwhmIndex--, minFwhmValue = spec[minFwhmIndex]) {
-  }
-  for (; maxFwhmValue > 0.5 * maxValue;
-       maxFwhmIndex++, maxFwhmValue = spec[maxFwhmIndex]) {
-  }
+  auto minFwhmIt =
+      std::find_if(MantidVec::const_reverse_iterator(maxValueIt),
+                   MantidVec::const_reverse_iterator(spec.cbegin()),
+                   [maxValue](double value) { return value < 0.5 * maxValue; });
+  auto maxFwhmIt =
+      std::find_if(maxValueIt, spec.end(),
+                   [maxValue](double value) { return value < 0.5 * maxValue; });
+
   // double fwhm = thisSpecX[maxFwhmIndex] - thisSpecX[minFwhmIndex + 1];
-  double fwhm = static_cast<double>(maxFwhmIndex - minFwhmIndex + 1);
+  double fwhm =
+      static_cast<double>(std::distance(minFwhmIt.base(), maxFwhmIt) + 1);
 
   // parameters for the gaussian peak fit
   center = static_cast<double>(maxIndex);
@@ -294,13 +291,13 @@ void ConvertEmptyToTof::estimateFWHM(const Mantid::MantidVec &spec,
 
   // determination of the range used for the peak definition
   size_t ipeak_min = std::max(
-      static_cast<size_t>(0),
-      maxIndex - static_cast<size_t>(
-                     2.5 * static_cast<double>(maxIndex - maxFwhmIndex)));
+      std::size_t{0},
+      maxIndex - static_cast<size_t>(2.5 * static_cast<double>(std::distance(
+                                               maxValueIt, maxFwhmIt))));
   size_t ipeak_max = std::min(
       spec.size(),
-      maxIndex + static_cast<size_t>(
-                     2.5 * static_cast<double>(maxFwhmIndex - maxIndex)));
+      maxIndex + static_cast<size_t>(2.5 * static_cast<double>(std::distance(
+                                               maxFwhmIt, maxValueIt))));
   size_t i_delta_peak = ipeak_max - ipeak_min;
 
   g_log.debug() << "Peak estimate xmin/max: " << ipeak_min - 1 << "\t"

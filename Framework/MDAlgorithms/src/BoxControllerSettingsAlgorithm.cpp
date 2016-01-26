@@ -41,7 +41,7 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   value.clear();
   value.reserve(values.count());
-  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
+  for (auto it = values.begin(); it != values.end(); ++it)
     value.push_back(boost::lexical_cast<int>(*it));
 
   declareProperty(

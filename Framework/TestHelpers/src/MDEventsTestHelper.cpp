@@ -161,7 +161,7 @@ MDBox<MDLeanEvent<1>, 1> *makeMDBox1(size_t splitInto,
   // Splits into 10 boxes
   splitter->setSplitInto(splitInto);
   // Set the size
-  MDBox<MDLeanEvent<1>, 1> *out = new MDBox<MDLeanEvent<1>, 1>(splitter);
+  auto *out = new MDBox<MDLeanEvent<1>, 1>(splitter);
   out->setExtents(0, 0.0, 10.0);
   out->calcVolume();
   return out;
@@ -173,18 +173,17 @@ MDBox<MDLeanEvent<1>, 1> *makeMDBox1(size_t splitInto,
    tests !!!!**/
 MDBox<MDLeanEvent<3>, 3> *makeMDBox3() {
   // Split at 5 events
-
-  BoxController *splitter = new BoxController(3);
-
+  auto splitter = new BoxController(3);
   splitter->setSplitThreshold(5);
   // Splits into 10x5x2 boxes
   splitter->setSplitInto(10);
   splitter->setSplitInto(1, 5);
   splitter->setSplitInto(2, 2);
   // Set the size to 10.0 in all directions
-  MDBox<MDLeanEvent<3>, 3> *out = new MDBox<MDLeanEvent<3>, 3>(splitter);
-  for (size_t d = 0; d < 3; d++)
+  auto out = new MDBox<MDLeanEvent<3>, 3>(splitter);
+  for (size_t d = 0; d < 3; ++d) {
     out->setExtents(d, 0.0, 10.0);
+  }
   out->calcVolume();
   return out;
 }
@@ -194,8 +193,8 @@ MDBox<MDLeanEvent<3>, 3> *makeMDBox3() {
  */
 std::vector<MDLeanEvent<1>> makeMDEvents1(size_t num) {
   std::vector<MDLeanEvent<1>> out;
-  for (double i = 0; i < num; i++) {
-    double coords[1] = {i * 1.0 + 0.5};
+  for (std::size_t i = 0; i < num; i++) {
+    double coords[1] = {static_cast<double>(i) * 1.0 + 0.5};
     out.push_back(MDLeanEvent<1>(1.0, 1.0, coords));
   }
   return out;

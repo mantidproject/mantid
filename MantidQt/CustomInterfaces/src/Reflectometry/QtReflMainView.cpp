@@ -5,6 +5,7 @@
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -57,11 +58,12 @@ void QtReflMainView::initLayout() {
   connect(ui.tableSearchResults,
           SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showSearchContextMenu(const QPoint &)));
-
   // Finally, create a presenter to do the thinking for us
   m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(
       this /*main view*/,
       this /*currently this concrete view is also responsibile for prog reporting*/));
+  m_algoRunner = boost::shared_ptr<MantidQt::API::AlgorithmRunner>(
+      new MantidQt::API::AlgorithmRunner(this));
 }
 
 /**
@@ -75,9 +77,9 @@ void QtReflMainView::setModel(QString name) {
 }
 
 /**
- * Set all possible tranfer methods
- * @param methods : All possible transfer methods.
- */
+* Set all possible tranfer methods
+* @param methods : All possible transfer methods.
+*/
 void QtReflMainView::setTransferMethods(const std::set<std::string> &methods) {
   for (auto method = methods.begin(); method != methods.end(); ++method) {
     ui.comboTransferMethod->addItem((*method).c_str());
@@ -96,6 +98,10 @@ void QtReflMainView::showTable(QReflTableModel_sptr model) {
           SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
   ui.viewTable->setModel(m_model.get());
   ui.viewTable->resizeColumnsToContents();
+  std::string windowTitle = "ISIS Reflectometry (Polref) - " + m_toOpen;
+  auto mainWindowWidget = this->topLevelWidget();
+  mainWindowWidget->setWindowTitle(QString::fromStdString(windowTitle + "[*]"));
+  this->setWindowModified(false);
 }
 
 /**
@@ -114,7 +120,6 @@ Set the list of tables the user is offered to open
 */
 void QtReflMainView::setTableList(const std::set<std::string> &tables) {
   ui.menuOpenTable->clear();
-
   for (auto it = tables.begin(); it != tables.end(); ++it) {
     QAction *openTable =
         ui.menuOpenTable->addAction(QString::fromStdString(*it));
@@ -122,10 +127,20 @@ void QtReflMainView::setTableList(const std::set<std::string> &tables) {
 
     // Map this action to the table name
     m_openMap->setMapping(openTable, QString::fromStdString(*it));
-
-    connect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()));
-    connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)));
+    // When repeated corrections happen the QMessageBox from openTable()
+    // method in ReflMainViewPresenter will be called multiple times
+    // when 'no' is clicked.
+    // ConnectionType = UniqueConnection ensures that
+    // each object has only one of these signals.
+    connect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()),
+            Qt::UniqueConnection);
+    connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)),
+            Qt::UniqueConnection);
   }
+}
+
+void QtReflMainView::icatSearchComplete() {
+  m_presenter->notify(IReflPresenter::ICATSearchCompleteFlag);
 }
 
 /**
@@ -236,6 +251,8 @@ This slot notifies the presenter that the "search" button has been pressed
 */
 void QtReflMainView::on_actionSearch_triggered() {
   m_presenter->notify(IReflPresenter::SearchFlag);
+  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+          SLOT(icatSearchComplete()));
 }
 
 /**
@@ -438,27 +455,64 @@ Show the user the dialog for an algorithm
 void QtReflMainView::showAlgorithmDialog(const std::string &algorithm) {
   std::stringstream pythonSrc;
   pythonSrc << "try:\n";
-  pythonSrc << "  " << algorithm << "Dialog()\n";
+  pythonSrc << "  algm = " << algorithm << "Dialog()\n";
   pythonSrc << "except:\n";
   pythonSrc << "  pass\n";
-  runPythonCode(QString::fromStdString(pythonSrc.str()));
+  runPythonCode(QString::fromStdString(pythonSrc.str()), false);
+}
+
+void QtReflMainView::showImportDialog() {
+  std::stringstream pythonSrc;
+  pythonSrc << "try:\n";
+  pythonSrc << "  algm = "
+            << "LoadReflTBL"
+            << "Dialog()\n";
+  pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
+  pythonSrc << "except:\n";
+  pythonSrc << "  pass\n";
+  // outputWorkspaceName will hold the name of the workspace
+  // otherwise this should be an empty string.
+  QString outputWorkspaceName =
+      runPythonCode(QString::fromStdString(pythonSrc.str()), false);
+  m_toOpen = outputWorkspaceName.trimmed().toStdString();
+  // notifying the presenter that a new table should be opened
+  // The presenter will ask about any unsaved changes etc
+  // before opening the new table
+  m_presenter->notify(ReflMainViewPresenter::OpenTableFlag);
 }
 
 /**
 Show the user file dialog to choose save location of notebook
 */
 std::string QtReflMainView::requestNotebookPath() {
-  QString qfilename = QFileDialog::getSaveFileName(
-      0, "Save notebook file", QDir::currentPath(),
+
+  // We won't use QFileDialog directly here as using the NativeDialog option
+  // causes problems on MacOS.
+  QString qfilename = API::FileDialogHandler::getSaveFileName(
+      this, "Save notebook file", QDir::currentPath(),
       "IPython Notebook files (*.ipynb);;All files (*.*)",
       new QString("IPython Notebook files (*.ipynb)"));
-  return qfilename.toStdString();
+
+  // There is a Qt bug (QTBUG-27186) which means the filename returned
+  // from the dialog doesn't always the file extension appended.
+  // So we'll have to ensure this ourselves.
+  // Important, notebooks can't be loaded without this extension.
+  std::string filename = qfilename.toStdString();
+  if (filename.size() > 6) {
+    if (filename.substr(filename.size() - 6) != ".ipynb") {
+      filename.append(".ipynb");
+    }
+  } else {
+    filename.append(".ipynb");
+  }
+
+  return filename;
 }
 
 /**
- Save settings
- @param options : map of user options to save
- */
+Save settings
+@param options : map of user options to save
+*/
 void QtReflMainView::saveSettings(
     const std::map<std::string, QVariant> &options) {
   QSettings settings;
@@ -469,9 +523,9 @@ void QtReflMainView::saveSettings(
 }
 
 /**
- Load settings
- @param options : map of user options to load into
- */
+Load settings
+@param options : map of user options to load into
+*/
 void QtReflMainView::loadSettings(std::map<std::string, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(ReflSettingsGroup);
@@ -517,9 +571,9 @@ void QtReflMainView::setProgress(int progress) {
 }
 
 /**
- Get status of checkbox which determines whether an ipython notebook is produced
- @return true if a notebook should be output on process, false otherwise
- */
+Get status of checkbox which determines whether an ipython notebook is produced
+@return true if a notebook should be output on process, false otherwise
+*/
 bool QtReflMainView::getEnableNotebook() {
   return ui.checkEnableNotebook->isChecked();
 }
@@ -639,6 +693,11 @@ boost::shared_ptr<IReflPresenter> QtReflMainView::getPresenter() const {
   return m_presenter;
 }
 
+boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+QtReflMainView::getAlgorithmRunner() const {
+  return m_algoRunner;
+}
+
 /**
 Gets the contents of the system's clipboard
 @returns The contents of the clipboard
@@ -656,13 +715,13 @@ std::string QtReflMainView::getSearchString() const {
 }
 
 /**
- * Clear the progress
- */
+* Clear the progress
+*/
 void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
 
 /**
- * @return the transfer method selected.
- */
+* @return the transfer method selected.
+*/
 std::string QtReflMainView::getTransferMethod() const {
   return ui.comboTransferMethod->currentText().toStdString();
 }

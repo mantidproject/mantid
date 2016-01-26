@@ -118,7 +118,7 @@ int ObjComponent::interceptSurface(Track &track) const {
   int intercepts = shape()->interceptSurface(probeTrack);
 
   Track::LType::const_iterator it;
-  for (it = probeTrack.begin(); it != probeTrack.end(); ++it) {
+  for (it = probeTrack.cbegin(); it != probeTrack.cend(); ++it) {
     V3D in = it->entryPoint;
     this->getRotation().rotate(in);
     // use the scale factor

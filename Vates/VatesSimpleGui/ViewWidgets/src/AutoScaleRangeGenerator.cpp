@@ -244,14 +244,19 @@ namespace SimpleGui
     }
 
     // Otherwise get the data range of the representation for the active view
-    pqPipelineRepresentation* pipelineRepresentation = qobject_cast<pqPipelineRepresentation*>(source->getRepresentation(pqActiveObjects::instance().activeView()));
+    pqPipelineRepresentation *pipelineRepresentation =
+        qobject_cast<pqPipelineRepresentation *>(source->getRepresentation(
+            pqActiveObjects::instance().activeView()));
 
-    if (pipelineRepresentation)
-    {
-      QPair<double, double> range = pipelineRepresentation->getLookupTable()->getScalarRange();
-
-      minValue = range.first;
-      maxValue = range.second;
+    if (pipelineRepresentation) {
+      // The existence of the lookuptable needs to be checked at this point.
+      // ParaView seems to sometimes return NULL for the lookuptable, eg when
+      // a cut is performed along a box boundary
+      if (auto lookuptable = pipelineRepresentation->getLookupTable()) {
+        auto range = lookuptable->getScalarRange();
+        minValue = range.first;
+        maxValue = range.second;
+      }
     }
   }
 

@@ -1107,7 +1107,7 @@ TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
   */
 void RefinePowderInstrumentParameters3::addOrReplace(
     map<string, Parameter> &parameters, string parname, double parvalue) {
-  map<string, Parameter>::iterator pariter = parameters.find(parname);
+  auto pariter = parameters.find(parname);
   if (pariter != parameters.end()) {
     parameters[parname].curvalue = parvalue;
   } else {
@@ -1134,7 +1134,7 @@ Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(
 
   outws->getAxis(0)->setUnit("dSpacing");
 
-  TextAxis *taxis = new TextAxis(outws->getNumberHistograms());
+  auto taxis = new TextAxis(outws->getNumberHistograms());
   taxis->setLabel(0, "Data");
   taxis->setLabel(1, "Model");
   taxis->setLabel(2, "DiffDM");
@@ -1426,7 +1426,7 @@ void restoreFunctionParameterValue(
       function->setParameter(parname, parvalue);
 
       // 2. Parameter map
-      map<string, Parameter>::iterator pariter = parammap.find(parname);
+      auto pariter = parammap.find(parname);
       if (pariter != parammap.end()) {
         // Find the entry
         pariter->second.curvalue = parvalue;

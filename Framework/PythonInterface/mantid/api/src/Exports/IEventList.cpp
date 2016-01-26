@@ -27,7 +27,8 @@ void export_IEventList() {
       .value("WEIGHTED_NOTIME", WEIGHTED_NOTIME)
       .export_values();
 
-  class_<IEventList, boost::noncopyable>("IEventList", no_init)
+  class_<IEventList, bases<Mantid::API::ISpectrum>, boost::noncopyable>(
+      "IEventList", no_init)
       .def("getEventType", &IEventList::getEventType, args("self"),
            "Return the type of events stored.")
       .def("switchTo", &IEventList::switchTo, args("self", "newType"),

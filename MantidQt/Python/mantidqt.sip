@@ -66,12 +66,10 @@
 %End
 };
 
-
 namespace Mantid
 {
 namespace API
 {
-
 
 enum MDNormalization
 {
@@ -1139,6 +1137,16 @@ Mantid::API::MDNormalization SliceViewer::getNormalization()
         the current normalization
 %End
 
+  void setColorBarAutoScale(bool autoscale);
+%Docstring
+void SliceViewer::setColorBarAutoScale(bool autoscale)
+------------------------------------------------------
+    Set autoscaling for the color scale on or off
+	
+	Args:
+	    autoscale :: on/off status for autoscaling
+
+%End
 
   //*WIKI* ==== Dynamic Rebinning ====
   void setRebinThickness(int dim, double thickness)   throw (std::runtime_error);

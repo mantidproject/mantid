@@ -10,6 +10,36 @@ using Mantid::PythonInterface::Environment::CallMethod1;
 using Mantid::PythonInterface::Environment::CallMethod2;
 using namespace boost::python;
 
+namespace {
+
+/**
+ * Create an Attribute from a python value.
+ * @param value :: A value python object. Allowed python types:
+ * float,int,str,bool.
+ * @return :: The created attribute.
+ */
+Mantid::API::IFunction::Attribute
+createAttributeFromPythonValue(const object &value) {
+  PyObject *rawptr = value.ptr();
+  Mantid::API::IFunction::Attribute attr;
+
+  if (PyBool_Check(rawptr) == 1)
+    attr = Mantid::API::IFunction::Attribute(extract<bool>(rawptr)());
+  else if (PyInt_Check(rawptr) == 1)
+    attr = Mantid::API::IFunction::Attribute(extract<int>(rawptr)());
+  else if (PyFloat_Check(rawptr) == 1)
+    attr = Mantid::API::IFunction::Attribute(extract<double>(rawptr)());
+  else if (PyString_Check(rawptr) == 1)
+    attr = Mantid::API::IFunction::Attribute(extract<std::string>(rawptr)());
+  else
+    throw std::invalid_argument(
+        "Invalid attribute type. Allowed types=float,int,str,bool");
+
+  return attr;
+}
+
+} // namespace
+
 /**
  * Construct the wrapper and stores the reference to the PyObject
  * @param self A reference to the calling Python object
@@ -43,21 +73,12 @@ void IFunctionAdapter::init() {
  */
 void IFunctionAdapter::declareAttribute(const std::string &name,
                                         const object &defaultValue) {
-  PyObject *rawptr = defaultValue.ptr();
-  IFunction::Attribute attr;
-  if (PyInt_Check(rawptr) == 1)
-    attr = IFunction::Attribute(extract<int>(rawptr)());
-  else if (PyFloat_Check(rawptr) == 1)
-    attr = IFunction::Attribute(extract<double>(rawptr)());
-  else if (PyString_Check(rawptr) == 1)
-    attr = IFunction::Attribute(extract<std::string>(rawptr)());
-  else if (PyBool_Check(rawptr) == 1)
-    attr = IFunction::Attribute(extract<bool>(rawptr)());
-  else
-    throw std::invalid_argument(
-        "Invalid attribute type. Allowed types=float,int,str,bool");
-
+  auto attr = createAttributeFromPythonValue(defaultValue);
   IFunction::declareAttribute(name, attr);
+  if (PyObject_HasAttrString(getSelf(), "setAttributeValue")) {
+    CallMethod2<void, std::string, object>::dispatchWithException(
+        getSelf(), "setAttributeValue", name, defaultValue);
+  }
 }
 
 /**
@@ -101,13 +122,24 @@ IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
  */
 void IFunctionAdapter::setAttribute(const std::string &attName,
                                     const Attribute &attr) {
-  object value = object(handle<>(getAttributeValue(attr)));
-  try {
+  if (PyObject_HasAttrString(getSelf(), "setAttributeValue")) {
+    object value = object(handle<>(getAttributeValue(attr)));
     CallMethod2<void, std::string, object>::dispatchWithException(
         getSelf(), "setAttributeValue", attName, value);
-  } catch (std::runtime_error &) {
+  } else {
     IFunction::setAttribute(attName, attr);
   }
+}
+
+/**
+ * Store the attribute's value in the default IFunction's cache
+ * @param name :: The name of the attribute
+ * @param value :: The value to store
+ */
+void IFunctionAdapter::storeAttributePythonValue(const std::string &name,
+                                                 const object &value) {
+  auto attr = createAttributeFromPythonValue(value);
+  storeAttributeValue(name, attr);
 }
 
 /**

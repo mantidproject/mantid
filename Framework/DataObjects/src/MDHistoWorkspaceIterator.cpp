@@ -563,7 +563,7 @@ bool MDHistoWorkspaceIterator::isWithinBounds(size_t index) const {
 std::vector<int64_t> MDHistoWorkspaceIterator::createPermutations(
     const std::vector<int> &widths) const {
   // look-up
-  PermutationsMap::iterator it = m_permutationsVertexTouchingMap.find(widths);
+  auto it = m_permutationsVertexTouchingMap.find(widths);
   if (it == m_permutationsVertexTouchingMap.end()) {
 
     if (widths[0] % 2 == 0) {

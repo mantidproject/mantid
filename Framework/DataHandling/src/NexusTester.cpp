@@ -46,8 +46,8 @@ const std::string NexusTester::category() const {
 /** Initialize the algorithm's properties.
  */
 void NexusTester::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
+  std::initializer_list<std::string> exts = {".nxs"};
+
   declareProperty(
       new FileProperty("SaveFilename", "", FileProperty::OptionalSave, exts),
       "The name of the Nexus file to write.");
@@ -106,7 +106,7 @@ void NexusTester::exec() {
   // Size of the chunk in number of integers
   size_t chunkSize = ChunkSizeKb * 1024 / sizeof(uint32_t);
   // ----------- Generate the fake data -----------------------------
-  uint32_t *fakeData = new uint32_t[chunkSize];
+  auto fakeData = new uint32_t[chunkSize];
   if (FakeDataType == "Zeros") {
     for (size_t i = 0; i < chunkSize; i++)
       fakeData[i] = 0;

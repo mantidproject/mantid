@@ -15,6 +15,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -136,6 +137,50 @@ public:
     TSM_ASSERT_EQUALS("The next index hit should be 7 since that is the next "
                       "unmasked and inside function",
                       7, histoIt->getLinearIndex());
+
+    delete histoIt;
+  }
+
+  void test_getNormalizedSignal_with_mask() {
+    // std::vector<coord_t> normal_vector{1.};
+    // std::vector<coord_t> bound_vector{3.};
+
+    // MDImplicitFunction *function = new MDImplicitFunction();
+    // function->addPlane(MDPlane(normal_vector, bound_vector));
+
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+    WritableHistoWorkspace *ws =
+        new WritableHistoWorkspace(MDHistoDimension_sptr(
+            new MDHistoDimension("x", "x", frame, 0.0, 10.0, 10)));
+
+    ws->setSignalAt(0, 3.0);
+    ws->setSignalAt(1, 3.0);
+    ws->setSignalAt(2, 3.0);
+    ws->setSignalAt(3, 3.0);
+    ws->setSignalAt(4, 3.0);
+
+    ws->setMDMaskAt(0, false); // Unmasked
+    ws->setMDMaskAt(1, false); // Unmasked
+    ws->setMDMaskAt(2, true);  // Masked
+    ws->setMDMaskAt(3, false); // Unmasked
+    ws->setMDMaskAt(4, true);  // Masked
+
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
+
+    MDHistoWorkspaceIterator *histoIt =
+        dynamic_cast<MDHistoWorkspaceIterator *>(ws->createIterator());
+
+    TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
+                      " are unmasked",
+                      3.0, histoIt->getNormalizedSignal());
+    histoIt->jumpTo(2);
+    TSM_ASSERT("Should return NaN here as data at the iterator are masked",
+               boost::math::isnan(histoIt->getNormalizedSignal()));
+    histoIt->jumpTo(3);
+    TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
+                      " are unmasked",
+                      3.0, histoIt->getNormalizedSignal());
 
     delete histoIt;
   }

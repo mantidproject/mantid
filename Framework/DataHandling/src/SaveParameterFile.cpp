@@ -59,11 +59,8 @@ void SaveParameterFile::init() {
                               boost::make_shared<InstrumentValidator>()),
       "Workspace to save the instrument parameters from.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".xml");
-
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save, exts),
+      new API::FileProperty("Filename", "", API::FileProperty::Save, {".xml"}),
       "The name of the file into which the instrument parameters will be "
       "saved.");
 
@@ -166,7 +163,7 @@ void SaveParameterFile::exec() {
   file << " valid-from=\"" << instrument->getValidFromDate().toISO8601String()
        << "\">\n";
 
-  prog.resetNumSteps((int64_t)toSave.size(), 0.6, 1.0);
+  prog.resetNumSteps(static_cast<int64_t>(toSave.size()), 0.6, 1.0);
   // Iterate through all the parameters we want to save and build an XML
   // document out of them.
   for (auto compIt = toSave.begin(); compIt != toSave.end(); ++compIt) {

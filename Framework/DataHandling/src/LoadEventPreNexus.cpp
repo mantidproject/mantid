@@ -479,8 +479,7 @@ void LoadEventPreNexus::procEvents(
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (std::vector<int64_t>::iterator it = spectra_list.begin();
-       it != spectra_list.end(); it++)
+  for (auto it = spectra_list.begin(); it != spectra_list.end(); it++)
     spectraLoadMap[*it] = true;
 
   CPUTimer tim;
@@ -958,7 +957,8 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename,
     for (size_t i = 0; i < num_pulses; i++) {
       Pulse &it = (*pulses)[i];
       this->pulsetimes.push_back(
-          DateAndTime((int64_t)it.seconds, (int64_t)it.nanoseconds));
+          DateAndTime(static_cast<int64_t>(it.seconds),
+                      static_cast<int64_t>(it.nanoseconds)));
       this->event_indices.push_back(it.event_index);
 
       temp = it.pCurrent;

@@ -53,7 +53,7 @@ DiffractionEventCalibrateDetectors::~DiffractionEventCalibrateDetectors() {}
 static double gsl_costFunction(const gsl_vector *v, void *params) {
   double x, y, z, rotx, roty, rotz;
   std::string detname, inname, outname, peakOpt, rb_param, groupWSName;
-  std::string *p = (std::string *)params;
+  std::string *p = reinterpret_cast<std::string *>(params);
   detname = p[0];
   inname = p[1];
   outname = p[2];
@@ -193,8 +193,7 @@ double DiffractionEventCalibrateDetectors::intensity(
 
   // Find point of peak centre
   const MantidVec &yValues = outputW->readY(0);
-  MantidVec::const_iterator it =
-      std::max_element(yValues.begin(), yValues.end());
+  auto it = std::max_element(yValues.begin(), yValues.end());
   double peakHeight = *it;
   if (peakHeight == 0)
     return -0.000;

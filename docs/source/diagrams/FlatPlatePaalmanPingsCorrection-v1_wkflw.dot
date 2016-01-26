@@ -1,0 +1,107 @@
+digraph FlatPlatePaalmanPingsCorrection {
+  label="FlatPlatePaalmanPingsCorrection Flowchart"
+  $global_style
+
+  subgraph params  {
+    $param_style
+    SampleWorkspace
+    SampleChemicalFormula
+    SampleNumberDensity
+    SampleNumberDensity2    [label="SampleNumberDensity"]
+    SampleThickness
+    SampleAngle
+    CanWorkspace
+    CanChemicalFormula
+    CanNumberDensity
+    CanFrontThickness
+    CanBackThickness
+    OutputWorkspace
+    Angles
+    Waves
+    data                [label="absorption data"]
+    data1               [label="absorption data"]
+    data2               [label="absorption data"]
+    data_ass
+    data_ass1           [label="data_ass"]
+    data_assc
+    data_acsc
+    data_acc
+  }
+
+  subgraph algorithms  {
+    $algorithm_style
+    SetSampleMaterial
+    SetSampleMaterial2      [label="SetSampleMaterial"]
+    CreateWorkspace
+    AddSampleLog
+    GroupWorkspaces
+    SplineInterpolation
+  }
+  
+  subgraph decisions  {
+    $decision_style
+    useCan              [label="Using can"]
+    useCan2             [label="Using can"]
+    useCan3             [label="Using can"]
+    interpolate         [label="Interpolate"]
+    processedAngles     [label="Processed all angles"]
+  }
+  
+  subgraph process  {
+    $process_style
+    detAngles     [label="get_angles: Determine detector angles based on sample workspace"]
+    flatAbs       [label="flat_abs: Mathematically calculates the flat absorption factors"]
+    flatAbsCan    [label="calculate_can: Re-calculate the assc, acsc and acc data taking into account the contribution of the can"]
+  }
+
+  SampleWorkspace           -> SetSampleMaterial
+  SampleChemicalFormula     -> SetSampleMaterial
+  SampleNumberDensity       -> SetSampleMaterial
+  SetSampleMaterial         -> useCan
+  useCan                    -> CanWorkspace            [label="Yes"]
+    CanWorkspace                -> SetSampleMaterial2
+    CanChemicalFormula          -> SetSampleMaterial2
+    CanNumberDensity            -> SetSampleMaterial2
+    SetSampleMaterial2          -> detAngles
+  useCan                    -> detAngles                [label="No"]
+  detAngles                 -> Angles
+  // For each angle - start
+  Angles                    -> CurrentAngle
+  CurrentAngle              -> flatAbs
+  SampleThickness           -> flatAbs
+  SampleNumberDensity2      -> flatAbs
+  SampleAngle               -> flatAbs
+  flatAbs                   -> data
+  flatAbs                   -> useCan2
+  useCan2                   -> processedAngles          [label="No"]
+  useCan2                   -> data                     [label="Yes"]
+    data                        -> data_ass
+    data_ass                    -> flatAbsCan
+    CanFrontThickness           -> flatAbsCan
+    CanBackThickness            -> flatAbsCan
+    flatAbsCan                  -> data1
+    flatAbsCan                  -> processedAngles
+    data                        -> data1
+  processedAngles           -> Angles                   [label="No"]
+  // For each angle - end
+  processedAngles           -> data1                    [label="Yes"]
+  data1                     -> data_ass1
+  data1                     -> useCan3
+  Waves                     -> data_x
+  useCan3                   -> data2                    [label="Yes"]
+    data2                     -> data_assc
+    data2                     -> data_acsc
+    data2                     -> data_acc
+    data_assc                 -> CreateWorkspace
+    data_acsc                 -> CreateWorkspace
+    data_acc                  -> CreateWorkspace
+  data_ass1                 -> CreateWorkspace
+  data_x                    -> CreateWorkspace
+  CreateWorkspace           -> AddSampleLog
+  samplelogs                -> AddSampleLog
+  AddSampleLog              -> interpolate
+  interpolate               -> SplineInterpolation      [label="Yes"]
+  SplineInterpolation       -> GroupWorkspaces
+  interpolate               -> GroupWorkspaces          [label="No"]
+  GroupWorkspaces           -> OutputWorkspace  
+}

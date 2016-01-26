@@ -690,6 +690,14 @@ void ConfigDialog::initMantidPage()
   ckIgnoreParaView->setChecked(ignoreParaView);
   grid->addWidget(ckIgnoreParaView, 3, 0);
 
+  //Change to Crystallography Convention
+  ckQconvention = new QCheckBox("Crystallography Convention");
+  ckQconvention->setToolTip("Change from default ki-kf to kf-ki.");
+  const std::string QconventionProperty = "Q.convention";
+  bool Qconvention =  cfgSvc.hasProperty(QconventionProperty) && bool(cfgSvc.getString(QconventionProperty) == "Crystallography");
+  ckQconvention->setChecked(Qconvention);
+  grid->addWidget(ckQconvention, 4, 0);
+
   // Populate boxes
   auto faclist =  cfgSvc.getFacilityNames();
   for ( auto it = faclist.begin(); it != faclist.end(); ++it )
@@ -2464,6 +2472,10 @@ void ConfigDialog::apply()
    cfgSvc.setString("default.facility", facility->currentText().toStdString());
    cfgSvc.setString("default.instrument", defInstr->currentText().toStdString());
    cfgSvc.setString("paraview.ignore", QString::number(ckIgnoreParaView->isChecked()).toStdString());
+   if (ckQconvention->isChecked())
+     cfgSvc.setString("Q.convention", "Crystallography");
+   else
+     cfgSvc.setString("Q.convention", "Inelastic");
 
 
   updateDirSearchSettings();

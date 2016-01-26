@@ -131,8 +131,8 @@ void FindCenterOfMassPosition::exec() {
 
       // Get the current spectrum
       const MantidVec &YIn = inputWS->readY(i);
-      double y = (double)((i - n_monitors) % n_pixel_x);
-      double x = floor((double)(i - n_monitors) / n_pixel_y);
+      double y = static_cast<double>((i - n_monitors) % n_pixel_x);
+      double x = floor(static_cast<double>(i - n_monitors) / n_pixel_y);
 
       if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
         if (!direct_beam) {

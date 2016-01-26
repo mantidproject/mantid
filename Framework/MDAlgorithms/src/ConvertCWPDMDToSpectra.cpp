@@ -346,8 +346,7 @@ void ConvertCWPDMDToSpectra::findXBoundary(
     // Get run number
     int runnumber = dataws->getExperimentInfo(irun)->getRunNumber();
     g_log.debug() << "Run " << runnumber << ": ";
-    std::map<int, double>::const_iterator miter =
-        map_runwavelength.find(runnumber);
+    auto miter = map_runwavelength.find(runnumber);
     double wavelength = -1;
     if (miter != map_runwavelength.end()) {
       wavelength = miter->second;
@@ -504,8 +503,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
       else {
         if (temprun != currRunIndex) {
           // use map to find a new wavelength
-          std::map<int, double>::const_iterator miter =
-              map_runlambda.find(temprun);
+          auto miter = map_runlambda.find(temprun);
           if (miter == map_runlambda.end()) {
             std::stringstream errss;
             errss << "Event " << iev << " has run ID as " << temprun << ". "
@@ -538,9 +536,8 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
         xindex = static_cast<int>(vecy.size()) - 1;
       } else {
         // Other situation
-        std::vector<double>::const_iterator vfiter =
-            std::lower_bound(vecx.begin(), vecx.end(), outx);
-        xindex = static_cast<int>(vfiter - vecx.begin());
+        auto vfiter = std::lower_bound(vecx.cbegin(), vecx.cend(), outx);
+        xindex = static_cast<int>(vfiter - vecx.cbegin());
         if ((xindex < static_cast<int>(vecx.size())) &&
             (outx + 1.0E-5 < vecx[xindex])) {
           // assume the bin's boundaries are of [...) and consider numerical

@@ -553,7 +553,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   if (!isEmpty(nBins))
     tofStep = (tofMax - tofMin) / nBins;
   else
-    nBins = (int)floor((tofMax - tofMin) / tofStep);
+    nBins = static_cast<int>(floor((tofMax - tofMin) / tofStep));
 
   std::vector<double> params;
   params.push_back(tofMin);
