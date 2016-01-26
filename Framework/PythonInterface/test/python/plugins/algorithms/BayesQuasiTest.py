@@ -143,7 +143,7 @@ if platform.system() == "Windows":
             """
             Test Lorentzian fit for BayesQuasi
             """
-            fit_group, result, prob= BayesQuasi(Program='QL',
+            fit_group, result, prob = BayesQuasi(Program='QL',
                                               SampleWorkspace=self._sample_ws,
                                               ResolutionWorkspace=self._res_ws,
                                               MinRange=-0.547607,
@@ -189,7 +189,7 @@ if platform.system() == "Windows":
             """
             Test a simple lorentzian fit with a ResNorm file
             """
-            fit_group, result = BayesQuasi(Program='QL',
+            fit_group, result, prob = BayesQuasi(Program='QL',
                                            SampleWorkspace=self._sample_ws,
                                            ResolutionWorkspace=self._res_ws,
                                            ResNormWorkspace=self._resnorm_ws,
@@ -205,7 +205,7 @@ if platform.system() == "Windows":
                                            Loop=True,
                                            Save=False,
                                            Plot='None')
-
+            self._validate_QLr_shape(result, prob, fit_group)
 
     if __name__=="__main__":
         unittest.main()
