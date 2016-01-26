@@ -138,7 +138,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         msgBox = QtGui.QMessageBox()
         msgBox.setText("The table has been modified. Do you want to save your changes?")
 
-        accept_btn = QtGui.QPushButton('Accept')
+        accept_btn = QtGui.QPushButton('Save')
         cancel_btn = QtGui.QPushButton('Cancel')
         discard_btn = QtGui.QPushButton('Discard')
 
@@ -282,7 +282,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         #first check if the table has been changed before clearing it
         if self.mod_flag:
             ret, _saved = self._save_check()
-            if ret == QtGui.QMessageBox.Cancel:
+            if ret == QtGui.QMessageBox.RejectRole:
                 return
         self.current_table = None
 
@@ -1146,7 +1146,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 #before loading make sure you give them a chance to save
                 if self.mod_flag:
                     ret, _saved = self._save_check()
-                    if ret == QtGui.QMessageBox.Cancel:
+                    if ret == QtGui.QMessageBox.RejectRole:
                         #if they hit cancel abort the load
                         self.loading = False
                         return
