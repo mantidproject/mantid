@@ -48,6 +48,15 @@ void ConvFit::setup() {
                                << "EDS"
                                << "EDC"
                                << "SFT";
+  // All Parameters in tree that should be defaulting to 1
+  m_defaultParams = QStringList() << "Amplitude"
+                                  << "Beta"
+                                  << "Decay"
+                                  << "Diffusion"
+                                  << "Height"
+                                  << "Intensity"
+                                  << "Radius"
+                                  << "Tau";
 
   // Create TreeProperty Widget
   m_cfTree = new QtTreePropertyBrowser();
@@ -1576,37 +1585,42 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         if (count == 3) {
           propName = "Lorentzian 2";
         }
-        QString name = propName + "." + *it;
-        m_properties[name] = m_dblManager->addProperty(*it);
+		const QString paramName = QString(*it);
+        const QString fullPropName = propName + "." + *it;
+        m_properties[fullPropName] = m_dblManager->addProperty(*it);
 
-        if (QString(*it).compare("FWHM") == 0) {
+        if (paramName.compare("FWHM") == 0) {
           double resolution = getInstrumentResolution(m_cfInputWS->getName());
           if (previouslyOneL && count < 3) {
-            m_dblManager->setValue(m_properties[name], oneLValues[2]);
+            m_dblManager->setValue(m_properties[fullPropName], oneLValues[2]);
           } else {
-            m_dblManager->setValue(m_properties[name], resolution);
+            m_dblManager->setValue(m_properties[fullPropName], resolution);
           }
-        } else if (QString(*it).compare("Amplitude") == 0) {
+        } else if (paramName.compare("Amplitude") == 0) {
           if (previouslyOneL && count < 3) {
-            m_dblManager->setValue(m_properties[name], oneLValues[0]);
+            m_dblManager->setValue(m_properties[fullPropName], oneLValues[0]);
           } else {
-            m_dblManager->setValue(m_properties[name], 1.0);
+            m_dblManager->setValue(m_properties[fullPropName], 1.0);
           }
-        } else if (QString(*it).compare("PeakCentre") == 0) {
+        } else if (paramName.compare("PeakCentre") == 0) {
           if (previouslyOneL && count < 3) {
-            m_dblManager->setValue(m_properties[name], oneLValues[1]);
+            m_dblManager->setValue(m_properties[fullPropName], oneLValues[1]);
           } else {
-            m_dblManager->setValue(m_properties[name], 0.0);
+            m_dblManager->setValue(m_properties[fullPropName], 0.0);
           }
         } else {
-          m_dblManager->setValue(m_properties[name], 0.0);
+          if (m_defaultParams.contains(paramName, Qt::CaseInsensitive)) {
+            m_dblManager->setValue(m_properties[fullPropName], 1.0);
+          } else {
+            m_dblManager->setValue(m_properties[fullPropName], 0.0);
+          }
         }
 
-        m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
+        m_dblManager->setDecimals(m_properties[fullPropName], NUM_DECIMALS);
         if (count < 3) {
-          m_properties["FitFunction1"]->addSubProperty(m_properties[name]);
+          m_properties["FitFunction1"]->addSubProperty(m_properties[fullPropName]);
         } else {
-          m_properties["FitFunction2"]->addSubProperty(m_properties[name]);
+          m_properties["FitFunction2"]->addSubProperty(m_properties[fullPropName]);
         }
         count++;
       }
@@ -1617,21 +1631,26 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         propName = functionName;
       }
       for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-        QString name = propName + "." + *it;
-        m_properties[name] = m_dblManager->addProperty(*it);
+        const QString paramName = QString(*it);
+        const QString fullPropName = propName + "." + *it;
+        m_properties[fullPropName] = m_dblManager->addProperty(*it);
 
-        if (QString(*it).compare("FWHM") == 0) {
+        if (paramName.compare("FWHM") == 0) {
           double resolution = getInstrumentResolution(m_cfInputWS->getName());
-          m_dblManager->setValue(m_properties[name], resolution);
+          m_dblManager->setValue(m_properties[fullPropName], resolution);
         } else if (QString(*it).compare("Amplitude") == 0 ||
                    QString(*it).compare("Intensity") == 0) {
-          m_dblManager->setValue(m_properties[name], 1.0);
+          m_dblManager->setValue(m_properties[fullPropName], 1.0);
         } else {
-          m_dblManager->setValue(m_properties[name], 0.0);
+          if (m_defaultParams.contains(paramName, Qt::CaseInsensitive)) {
+            m_dblManager->setValue(m_properties[fullPropName], 1.0);
+          } else {
+            m_dblManager->setValue(m_properties[fullPropName], 0.0);
+          }
         }
 
-        m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
-        m_properties["FitFunction1"]->addSubProperty(m_properties[name]);
+        m_dblManager->setDecimals(m_properties[fullPropName], NUM_DECIMALS);
+        m_properties["FitFunction1"]->addSubProperty(m_properties[fullPropName]);
       }
     }
   }
