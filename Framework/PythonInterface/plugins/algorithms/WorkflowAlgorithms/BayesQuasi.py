@@ -55,7 +55,7 @@ class BayesQuasi(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '', direction=Direction.Input),
                              doc='Name of the resolution input Workspace')
 
-        self.declareProperty(MatrixWorkspaceProperty('ResNormWorkspace', '',
+        self.declareProperty(WorkspaceGroupProperty('ResNormWorkspace', '',
                              optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='Name of the ResNorm input Workspace')
 
@@ -275,7 +275,7 @@ class BayesQuasi(PythonAlgorithm):
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QSe':
-                workflow_prog.report('Processing Sample numebr %i as Stretched Exp' % nsam)
+                workflow_prog.report('Processing Sample number %i as Stretched Exp' % nsam)
                 nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,\
                                                         Xdat,Xb,Yb,Wy,We,dtn,xsc,\
                                                         wrks,wrkr,lwrk)
@@ -376,7 +376,6 @@ class BayesQuasi(PythonAlgorithm):
             SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
             logger.information('Output fit file created : ' + fit_path)
             logger.information('Output paramter file created : ' + out_path)
-            log_prog.report('Files Saved')
 
         self.setProperty('OutputWorkspaceFit', fitWS)
         self.setProperty('OutputWorkspaceResult', outWS)
