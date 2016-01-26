@@ -113,6 +113,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         for logname in self._sampleloglist:
             logtimeslist.append(logtimesdict[logname])
             logvaluelist.append(logvaluedict[logname])
+        self._writeAscynLogFile(logtimeslist, logvaluelist, localtimediff, self._timeTolerance)
 
         return
 
@@ -143,7 +144,11 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         if (self._timeTolerance) <= 0.:
             raise NotImplementedError("TimeTolerance must be larger than zero.")
 
-        self._writeHeaderToSeparateFile = self.getProperty('SeparateHeaderFile').value
+        # Set the flag to write header to separate file
+        if self._writeheader is True:
+            self._writeHeaderToSeparateFile = self.getProperty('SeparateHeaderFile').value
+        else:
+            self._writeHeaderToSeparateFile = False
 
         return
 
@@ -356,7 +361,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         logindex = nexttimelogindexes[0]
         logtimes = logtimeslist[logindex]
         thislogtime = logtimes[currtimeindexes[logindex]]
-        # FIXME : refactor the following to increase efficiency
         abstime = thislogtime.totalNanoseconds() * 1.E-9 - self._localtimediff
         reltime = thislogtime.totalNanoseconds() * 1.E-9 - self._starttime.totalNanoseconds() * 1.0E-9
         wbuf = "%.6f\t%.6f\t" % (abstime, reltime)
