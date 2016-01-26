@@ -694,7 +694,7 @@ void RefinePowderInstrumentParameters3::bookKeepMCResult(
   {
     map<string, Parameter> storemap;
     duplicateParameters(parammap, storemap);
-    bestresults.push_back(make_pair(chisq, storemap));
+    bestresults.emplace_back(chisq, storemap);
     sort(bestresults.begin(), bestresults.end());
   }
   */

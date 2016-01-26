@@ -1018,10 +1018,13 @@ namespace MantidQt
       {
         if (table->item(row, 0)->checkState())
         {
-          fileInfo.push_back(std::make_pair(
-              table->item(row, headerIndexByName(table, "Id"))->text().toLongLong(),
-              table->item(row, headerIndexByName(table, "Name"))->text().toStdString())
-          );
+          fileInfo.emplace_back(
+              table->item(row, headerIndexByName(table, "Id"))
+                  ->text()
+                  .toLongLong(),
+              table->item(row, headerIndexByName(table, "Name"))
+                  ->text()
+                  .toStdString());
         }
       }
       return (fileInfo);

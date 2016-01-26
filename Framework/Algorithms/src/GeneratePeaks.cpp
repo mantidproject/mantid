@@ -338,7 +338,7 @@ void GeneratePeaks::importPeaksFromTable(
     }
 
     // Generate peak function
-    mapiter->second.push_back(std::make_pair(centre, clonefunction));
+    mapiter->second.emplace_back(centre, clonefunction);
 
     g_log.information() << "Peak " << ipeak << ": Spec = " << wsindex
                         << " func: " << clonefunction->asString() << "\n";
@@ -420,8 +420,7 @@ void GeneratePeaks::importPeakFromVector(
   }
 
   // Set up function map
-  double centre = m_peakFunction->centre();
-  functionmap.push_back(std::make_pair(centre, compfunc));
+  functionmap.emplace_back(m_peakFunction->centre(), compfunc);
 
   return;
 }

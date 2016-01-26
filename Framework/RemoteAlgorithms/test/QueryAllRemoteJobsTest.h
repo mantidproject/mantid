@@ -76,8 +76,8 @@ public:
   }
 
   void test_propertiesOK() {
-    testFacilities.push_back(std::make_pair("SNS", "Fermi"));
-    testFacilities.push_back(std::make_pair("ISIS", "SCARF@STFC"));
+    testFacilities.emplace_back("SNS", "Fermi");
+    testFacilities.emplace_back("ISIS", "SCARF@STFC");
 
     const Mantid::Kernel::FacilityInfo &prevFac =
         Mantid::Kernel::ConfigService::Instance().getFacility();

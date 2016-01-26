@@ -403,7 +403,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
       std::vector<std::string> terms;
       boost::split(terms, colname, boost::is_any_of(anodelogprefix));
       size_t anodeid = static_cast<size_t>(atoi(terms.back().c_str()));
-      anodelist.push_back(std::make_pair(anodeid, icol));
+      anodelist.emplace_back(anodeid, icol);
     } else {
       samplenameindexmap.emplace(colname, icol);
     }

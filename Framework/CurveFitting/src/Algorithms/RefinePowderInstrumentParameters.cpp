@@ -696,12 +696,13 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
 
         // iv.  Archive
         vector<double> newparvalues;
+        newparvalues.reserve(numparameters);
         for (size_t i = 0; i < numparameters; ++i) {
           double parvalue = func4fit->getParameter(i);
           newparvalues.push_back(parvalue);
         }
-        m_BestFitParameters.push_back(make_pair(homchi2, newparvalues));
-        m_BestFitChi2s.push_back(make_pair(homchi2, gslchi2));
+        m_BestFitParameters.emplace_back(homchi2, newparvalues);
+        m_BestFitChi2s.emplace_back(homchi2, gslchi2);
 
         // v.  Sort and keep in size
         sort(m_BestFitParameters.begin(), m_BestFitParameters.end());
@@ -755,7 +756,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
 
       // ii.  Add the new values to vector
       vector<double> parametervalues = paramvalues;
-      m_BestMCParameters.push_back(make_pair(newchi2, parametervalues));
+      m_BestMCParameters.emplace_back(newchi2, parametervalues);
 
       // iii. Sort and delete the last if necessary
       sort(m_BestMCParameters.begin(), m_BestMCParameters.end());
@@ -1208,7 +1209,7 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
       throw runtime_error("Standard error option is not supported. ");
     }
 
-    peakcenters.push_back(make_pair(dh, make_pair(center, chi2)));
+    peakcenters.emplace_back(dh, make_pair(center, chi2));
   }
 
   // 2. Sort by d-spacing value

@@ -268,7 +268,7 @@ void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst,
 
     if (current.get()) {
       top_group = group_map[current->getName()]; // Return 0 if not in map
-      assemblies.push(std::make_pair(current, top_group));
+      assemblies.emplace(current, top_group);
     }
 
     prog.setNumSteps(int(assemblies.size()));
@@ -298,7 +298,7 @@ void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst,
               child_group = group_map[currentchild->getName()];
               if (child_group == 0)
                 child_group = top_group;
-              assemblies.push(std::make_pair(currentchild, child_group));
+              assemblies.emplace(currentchild, child_group);
             }
           }
         }

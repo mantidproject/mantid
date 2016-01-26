@@ -1158,7 +1158,7 @@ void LeBailFit::parseBraggPeaksParametersTable() {
       trow >> peakheight;
     }
 
-    m_inputPeakInfoVec.push_back(make_pair(hkl, peakheight));
+    m_inputPeakInfoVec.emplace_back(hkl, peakheight);
   } // ENDFOR row
 
   g_log.information() << "Imported HKL TableWorkspace.   Size of Rows = "

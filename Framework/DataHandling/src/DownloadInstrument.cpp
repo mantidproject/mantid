@@ -135,10 +135,9 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
 
   // get the file list from github
   StringToStringMap headers;
-  headers.insert(
-      std::make_pair("if-modified-since",
-                     Poco::DateTimeFormatter::format(
-                         gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT)));
+  headers.emplace("if-modified-since",
+                  Poco::DateTimeFormatter::format(
+                      gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT));
   std::string gitHubInstrumentRepoUrl =
       ConfigService::Instance().getString("UpdateInstrumentDefinitions.URL");
   if (gitHubInstrumentRepoUrl == "") {

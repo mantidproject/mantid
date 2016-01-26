@@ -516,7 +516,7 @@ boost::shared_ptr<Grouping> tableToGrouping(ITableWorkspace_sptr table)
   {
     grouping->pairNames.push_back("long");
     grouping->pairAlphas.push_back(1.0);
-    grouping->pairs.push_back(std::make_pair(0,1));
+    grouping->pairs.emplace_back(0, 1);
   }
 
   return grouping;

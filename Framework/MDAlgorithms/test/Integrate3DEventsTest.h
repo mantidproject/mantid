@@ -33,9 +33,9 @@ public:
     V3D peak_2(0, 5, 0);
     V3D peak_3(0, 0, 4);
 
-    peak_q_list.push_back(std::make_pair(1., peak_1));
-    peak_q_list.push_back(std::make_pair(1., peak_2));
-    peak_q_list.push_back(std::make_pair(1., peak_3));
+    peak_q_list.emplace_back(1., peak_1);
+    peak_q_list.emplace_back(1., peak_2);
+    peak_q_list.emplace_back(1., peak_3);
     // synthesize a UB-inverse to map
     DblMatrix UBinv(3, 3, false); // Q to h,k,l
     UBinv.setRow(0, V3D(.1, 0, 0));

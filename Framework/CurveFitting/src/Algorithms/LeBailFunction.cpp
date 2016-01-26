@@ -295,7 +295,7 @@ void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
       // Add new peak to all related data storage
       m_vecPeaks.push_back(newpeak);
       // FIXME - Refining lattice size is not considered here!
-      m_dspPeakVec.push_back(make_pair(dsp, newpeak));
+      m_dspPeakVec.emplace_back(dsp, newpeak);
       m_mapHKLPeak.emplace(hkl, newpeak);
     }
   }

@@ -47,7 +47,7 @@ namespace API
    */
   void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo, AlgorithmRuntimeProps props)
   {
-    m_algorithms.push_back(std::make_pair(algo, props));
+    m_algorithms.emplace_back(algo, props);
 
     g_log.debug() << "Added algorithm \"" << m_algorithms.back().first->name() << "\" to batch queue\n";
   }

@@ -1050,7 +1050,7 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
       for (size_t i = 0; i < peakparnames.size(); ++i)
         parammap.emplace(peakparnames[i],
   peak->getParameter(peakparnames[i]));
-      fitparammaps.push_back(make_pair(newchi2, parammap));
+      fitparammaps.emplace_back(newchi2, parammap);
 
       // ii. sort
       sort(fitparammaps.begin(), fitparammaps.end());
@@ -1340,7 +1340,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   fitparamvaluemaps.push_back(step1params);
   if (!goodfit1)
     chi2height = 1.0E20;
-  chi2indexvec.push_back(make_pair(chi2height, 0));
+  chi2indexvec.emplace_back(chi2height, 0);
 
   // Fix background
   vector<string> bkgdparnames = backgroundfunction->getParameterNames();
@@ -1360,7 +1360,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   if (!goodfitA)
     chi2planA = 1.0E20;
   fitparamvaluemaps.push_back(planAparams);
-  chi2indexvec.push_back(make_pair(chi2planA, 1));
+  chi2indexvec.emplace_back(chi2planA, 1);
 
   // c) Plan B: fit parameters in two groups in 2 steps
   // i.   Restore step 1's result
@@ -1395,7 +1395,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   if (!goodfitB)
     chi2planB = 1.0E20;
   fitparamvaluemaps.push_back(planBparams);
-  chi2indexvec.push_back(make_pair(chi2planB, 2));
+  chi2indexvec.emplace_back(chi2planB, 2);
 
   // d) Plan C: fit parameters in two groups in 2 steps in alternate order
   // i.   Restore step 1's result
@@ -1430,7 +1430,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   if (!goodfitC)
     chi2planC = 1.0E20;
   fitparamvaluemaps.push_back(planCparams);
-  chi2indexvec.push_back(make_pair(chi2planC, 3));
+  chi2indexvec.emplace_back(chi2planC, 3);
 
   // d) Summarize and compare result
   stringstream sumss;
@@ -2707,7 +2707,7 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
         peakhkls[ir], peakparametermaps[ir], bk2bk2braggmap, good, hkl, d_h);
 
     if (good) {
-      m_vecPeakFunctions.push_back(make_pair(d_h, make_pair(hkl, newpeak)));
+      m_vecPeakFunctions.emplace_back(d_h, make_pair(hkl, newpeak));
     } else {
       ++numbadrows;
     }
