@@ -215,8 +215,6 @@ class BayesQuasi(PythonAlgorithm):
 
         setup_prog.report('Reading files')
         Wy,We = ReadWidthFile(self._width,self._wfile,totalNoSam)
-        self._res_norm  = False
-        self._resnormWS = ''
         dtn,xsc = ReadNormFile(self._res_norm,self._resnormWS,totalNoSam)
 
         setup_prog.report('Establishing output workspace name')
