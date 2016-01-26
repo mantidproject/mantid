@@ -172,7 +172,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             ret, saved = self._save_check()
             if ret == QtGui.QMessageBox.AcceptRole:
                 if saved:
-                    event.accept()
+                    self.mod_flag = False
+                event.accept()
+            elif ret == QtGui.QMessageBox.RejectRole:
+                event.ignore()
             elif ret == QtGui.QMessageBox.NoRole:
                 self.mod_flag = False
                 event.accept()
