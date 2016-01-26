@@ -10,16 +10,19 @@ Description
 -----------
 
 This function creates spline using the set of points and interpolates
-the input between them.
+the input between them taking into account the least-squares fit.
 
 First and second derivatives from the spline can be calculated by using
 the derivative1D function.
 
-A BSpline is a function :math:`f(x)` of order N, defined between an interval :math:`a \leqslant x \leqslant b`.
+A BSpline is a polynomial function :math:`f(x)` of order N, defined between an interval :math:`a \leqslant x \leqslant b`.
 When using BSplines for interpolation or for fitting, we essentially chain BSplines together so that each
 spline passes through the breakpoints in that interval.
 
 There are conditions at each breakpoint that need to be fulfilled for the overall BSpline to be piecewise-smooth.
+
+Example
+-------
 
 To demonstrate these conditions we can set up a basic BSpline of order 2 with 3 breakpoints:
 
@@ -35,10 +38,13 @@ Our BSpline will be defined as the following:
                                  f_2(x)& x_1 \leq x \leq x_2 \\
                                \end{cases}
                              
-We can write our :math:`B(x)` function as a series :math:`B(x) = \sum_{i=0}^{n+k-2} a_i f_i(x)`
+We can write our :math:`B(x)` function as a series :math:`B(x) = \sum_{i=0}^{n+k-2} A_i f_i(x)`
 
-where :math:`a_i` is the coefficient of the BSpline. This coefficient maps to our fitting parameters found below.
-The coefficients :math:`a_0` to :math:`a_i` can be readily retrieved from a least-squares fit.
+where :math:`A_i` is the coefficient of the BSpline. This coefficient maps to our fitting parameters found below.
+The coefficients :math:`A_0` to :math:`A_i` can be readily retrieved from a least-squares fit.
+
+If :math:`N` is our number of breakpoints for a spline of order :math:`K` then we can expect :math:`N + K - 2` coefficients
+as the -2 accounts for our 2 exterior breakpoints at :math:`x_0` and :math:`x_n`.
 
 To make our BSpline piecewise-smooth we must ensure that these conditions are satisfied:
 
@@ -71,7 +77,7 @@ of data points. The reason being, the BSplines will attempt to fit close to the 
 some of the data points. It is not necessarily going to pass through all data points, only passing through breakpoints is gauranteed.
 
 An example of a fit using BSplines of order 3 can be seen in the image below, our breakpoints have been highlighted in green.
-The original dataset is in black, while the calculated fit using 4 breakpoints is in red.
+The original dataset is in black, while the calculated fit using a least-squares fit with 4 breakpoints is in red.
 
 .. image:: ../images/BSplineFittingExample.png
     :width: 800px
