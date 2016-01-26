@@ -188,9 +188,9 @@ void ConvFit::setup() {
           SLOT(newDataLoaded(const QString &)));
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-	  SLOT(extendResolutionWorkspace()));
+          SLOT(extendResolutionWorkspace()));
   connect(m_uiForm.dsResInput, SIGNAL(dataReady(const QString &)), this,
-	  SLOT(extendResolutionWorkspace()));
+          SLOT(extendResolutionWorkspace()));
 
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
@@ -223,80 +223,78 @@ void ConvFit::setup() {
 * algorithm
 */
 void ConvFit::run() {
-	if (m_cfInputWS == NULL) {
-		g_log.error("No workspace loaded");
-		return;
-	}
+  if (m_cfInputWS == NULL) {
+    g_log.error("No workspace loaded");
+    return;
+  }
 
-	QString fitType = fitTypeString();
-	QString bgType = backgroundString();
+  QString fitType = fitTypeString();
+  QString bgType = backgroundString();
 
-	if (fitType == "") {
-		g_log.error("No fit type defined");
-	}
+  if (fitType == "") {
+    g_log.error("No fit type defined");
+  }
 
-	bool useTies = m_uiForm.ckTieCentres->isChecked();
-	QString ties = (useTies ? "True" : "False");
+  bool useTies = m_uiForm.ckTieCentres->isChecked();
+  QString ties = (useTies ? "True" : "False");
 
-	CompositeFunction_sptr func = createFunction(useTies);
-	std::string function = std::string(func->asString());
-	std::string stX = m_properties["StartX"]->valueText().toStdString();
-	std::string enX = m_properties["EndX"]->valueText().toStdString();
-	m_runMin = m_uiForm.spSpectraMin->value();
-	m_runMax = m_uiForm.spSpectraMax->value();
-	std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
-	std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
-	int maxIterations =
-		static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
+  CompositeFunction_sptr func = createFunction(useTies);
+  std::string function = std::string(func->asString());
+  std::string stX = m_properties["StartX"]->valueText().toStdString();
+  std::string enX = m_properties["EndX"]->valueText().toStdString();
+  m_runMin = m_uiForm.spSpectraMin->value();
+  m_runMax = m_uiForm.spSpectraMax->value();
+  std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
+  std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
+  int maxIterations =
+      static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
-	// Construct expected name
-	m_baseName = QString::fromStdString(m_cfInputWS->getName());
-	int pos = m_baseName.lastIndexOf("_");
-	if (pos != -1) {
-		m_baseName = m_baseName.left(pos + 1);
-	}
-	m_baseName += "conv_";
-	if (m_blnManager->value(m_properties["UseDeltaFunc"])) {
-		m_baseName += "Delta";
-	}
-	int fitIndex = m_uiForm.cbFitType->currentIndex();
-	if (fitIndex < 3 && fitIndex != 0) {
-		m_baseName += QString::number(fitIndex);
-		m_baseName += "L";
-	}
-	else {
-		m_baseName += convertFuncToShort(m_uiForm.cbFitType->currentText());
-	}
-	m_baseName +=
-		convertBackToShort(m_uiForm.cbBackground->currentText().toStdString()) +
-		"_s";
-	m_baseName += QString::fromStdString(specMin);
-	m_baseName += "_to_";
-	m_baseName += QString::fromStdString(specMax);
+  // Construct expected name
+  m_baseName = QString::fromStdString(m_cfInputWS->getName());
+  int pos = m_baseName.lastIndexOf("_");
+  if (pos != -1) {
+    m_baseName = m_baseName.left(pos + 1);
+  }
+  m_baseName += "conv_";
+  if (m_blnManager->value(m_properties["UseDeltaFunc"])) {
+    m_baseName += "Delta";
+  }
+  int fitIndex = m_uiForm.cbFitType->currentIndex();
+  if (fitIndex < 3 && fitIndex != 0) {
+    m_baseName += QString::number(fitIndex);
+    m_baseName += "L";
+  } else {
+    m_baseName += convertFuncToShort(m_uiForm.cbFitType->currentText());
+  }
+  m_baseName +=
+      convertBackToShort(m_uiForm.cbBackground->currentText().toStdString()) +
+      "_s";
+  m_baseName += QString::fromStdString(specMin);
+  m_baseName += "_to_";
+  m_baseName += QString::fromStdString(specMax);
 
-	// Run ConvolutionFitSequential Algorithm
-	IAlgorithm_sptr cfs =
-		AlgorithmManager::Instance().create("ConvolutionFitSequential");
-	cfs->initialize();
+  // Run ConvolutionFitSequential Algorithm
+  IAlgorithm_sptr cfs =
+      AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  cfs->initialize();
 
-	cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
-	cfs->setProperty("Function", function);
-	cfs->setProperty("BackgroundType",
-		m_uiForm.cbBackground->currentText().toStdString());
-	cfs->setProperty("StartX", stX);
-	cfs->setProperty("EndX", enX);
-	cfs->setProperty("SpecMin", specMin);
-	cfs->setProperty("SpecMax", specMax);
-	cfs->setProperty("Convolve", true);
-	cfs->setProperty("Minimizer",
-		minimizerString("$outputname_$wsindex").toStdString());
-	cfs->setProperty("MaxIterations", maxIterations);
-	m_batchAlgoRunner->addAlgorithm(cfs);
-	connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-		SLOT(algorithmComplete(bool)));
-	m_batchAlgoRunner->executeBatchAsync();
+  cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
+  cfs->setProperty("Function", function);
+  cfs->setProperty("BackgroundType",
+                   m_uiForm.cbBackground->currentText().toStdString());
+  cfs->setProperty("StartX", stX);
+  cfs->setProperty("EndX", enX);
+  cfs->setProperty("SpecMin", specMin);
+  cfs->setProperty("SpecMax", specMax);
+  cfs->setProperty("Convolve", true);
+  cfs->setProperty("Minimizer",
+                   minimizerString("$outputname_$wsindex").toStdString());
+  cfs->setProperty("MaxIterations", maxIterations);
+  m_batchAlgoRunner->addAlgorithm(cfs);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
 }
-
 
 /**
 * Handles completion of the ConvolutionFitSequential algorithm.
@@ -485,7 +483,6 @@ void ConvFit::newDataLoaded(const QString wsName) {
   updatePlot();
 }
 
-
 /**
 * Create a resolution workspace with the same number of histograms as in the
 * sample.
@@ -495,32 +492,30 @@ void ConvFit::newDataLoaded(const QString wsName) {
 * to have the WorkspaceIndex attribute set.
 */
 void ConvFit::extendResolutionWorkspace() {
-	if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
-		const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
-		API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
-		appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
+  if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
+    const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
+    appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
 
-		size_t numHist = m_cfInputWS->getNumberHistograms();
-		for (size_t i = 0; i < numHist; i++) {
-			IAlgorithm_sptr appendAlg =
-				AlgorithmManager::Instance().create("AppendSpectra");
-			appendAlg->initialize();
-			appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
-			appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
+    size_t numHist = m_cfInputWS->getNumberHistograms();
+    for (size_t i = 0; i < numHist; i++) {
+      IAlgorithm_sptr appendAlg =
+          AlgorithmManager::Instance().create("AppendSpectra");
+      appendAlg->initialize();
+      appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
+      appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
 
-			if (i == 0) {
-				appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
-				m_batchAlgoRunner->addAlgorithm(appendAlg);
-			}
-			else {
-				m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
-			}
-		}
+      if (i == 0) {
+        appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
+        m_batchAlgoRunner->addAlgorithm(appendAlg);
+      } else {
+        m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
+      }
+    }
 
-		m_batchAlgoRunner->executeBatchAsync();
-	}
+    m_batchAlgoRunner->executeBatchAsync();
+  }
 }
-
 
 namespace {
 ////////////////////////////
@@ -1035,8 +1030,9 @@ void ConvFit::updatePlot() {
     m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], resolution);
   }
 
-  // If there is a result plot then plot it
-  std::string groupName = m_baseName.toStdString() + "_Workspaces";
+  // If there is a result workspace plot then plot it
+  const auto groupName = m_baseName.toStdString() + "_Workspaces";
+
   if (AnalysisDataService::Instance().doesExist(groupName)) {
     WorkspaceGroup_sptr outputGroup =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
@@ -1124,7 +1120,6 @@ void ConvFit::plotGuess() {
   m_uiForm.ppPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
 }
 
-
 /**
  * Runs the single fit algorithm
  */
@@ -1200,8 +1195,9 @@ void ConvFit::singleFitComplete(bool error) {
 
   // Plot the line on the mini plot
   m_uiForm.ppPlot->removeSpectrum("Guess");
-  m_uiForm.ppPlot->addSpectrum("Fit", m_singleFitOutputName + "_Workspace", 1,
-                               Qt::red);
+  const auto resultName = m_singleFitOutputName + "_Workspace";
+  m_uiForm.ppPlot->addSpectrum("Fit", resultName, 1, Qt::red);
+  m_uiForm.ppPlot->addSpectrum("Diff", resultName, 2, Qt::blue);
 
   IFunction_sptr outputFunc = m_singleFitAlg->getProperty("Function");
 
