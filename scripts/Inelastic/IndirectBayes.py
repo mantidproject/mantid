@@ -395,14 +395,14 @@ def QLAddSampleLogs(workspace, res_workspace, fit_program, background, elastic_p
                  LogType="String", LogText=str(resnorm_used))
     if resnorm_used:
         AddSampleLog(Workspace=workspace, LogName="resnorm_file",
-                     LogType="String", LogText=resnorm_workspace)
+                     LogType="String", LogText=str(resnorm_workspace))
 
     width_file_used = (width_file != '')
     AddSampleLog(Workspace=workspace, LogName="width",
                  LogType="String", LogText=str(width_file_used))
     if width_file_used:
         AddSampleLog(Workspace=workspace, LogName="width_file",
-                     LogType="String", LogText=width_file)
+                     LogType="String", LogText=str(width_file))
 
 
 def yield_floats(block):

@@ -230,7 +230,6 @@ void Quasi::run() {
  * Updates the data and fit curves on the mini plot.
  */
 void Quasi::algorithmComplete(bool error) {
-
   if (error)
     return;
   else
