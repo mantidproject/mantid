@@ -26,7 +26,8 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
     : m_iColPt(1), m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true),
-      m_isBaseName(false), m_normalizeByMon(false), m_scaleFactor(1.), m_removeBackground(false){}
+      m_isBaseName(false), m_normalizeByMon(false), m_scaleFactor(1.),
+      m_removeBackground(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -67,21 +68,23 @@ void ConvertCWSDExpToMomentum::init() {
                                       "file names listed in InputWorkspace are "
                                       "base name without directory.");
 
-  declareProperty("NormalizeByMonitor", true, "Flag to normalize the signal of each MDEvent by "
+  declareProperty("NormalizeByMonitor", true,
+                  "Flag to normalize the signal of each MDEvent by "
                   "monitor counts");
 
-  declareProperty("ScaleFactor", EMPTY_DBL(), "If it is given, then all the signals of MDEvent "
+  declareProperty("ScaleFactor", EMPTY_DBL(),
+                  "If it is given, then all the signals of MDEvent "
                   "shall be scaled up by this factor");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
-                    "BackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
-                  "Name of optional background workspace.");
+  declareProperty(
+      new WorkspaceProperty<MatrixWorkspace>(
+          "BackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Name of optional background workspace.");
 
   declareProperty(
       new FileProperty("Directory", "", FileProperty::OptionalDirectory),
       "Directory where data files are if InputWorkspace gives data file name "
       "as the base file name as indicated by 'IsBaseName'.");
-
 }
 
 //----------------------------------------------------------------------------------------------
@@ -98,24 +101,22 @@ void ConvertCWSDExpToMomentum::exec() {
     throw std::runtime_error(errmsg);
   }
   m_normalizeByMon = getProperty("NormalizeByMonitor");
-  if (m_normalizeByMon)
-  {
+  if (m_normalizeByMon) {
     m_scaleFactor = getProperty("ScaleFactor");
     if (isEmpty(m_scaleFactor))
-      throw std::runtime_error("As NormalizeByMonitor is true, ScaleFactor must be given!");
+      throw std::runtime_error(
+          "As NormalizeByMonitor is true, ScaleFactor must be given!");
   }
   // background
   std::string bkgdwsname = getPropertyValue("BackgroundWorkspace");
-  if (bkgdwsname.size() > 0)
-  {
+  if (bkgdwsname.size() > 0) {
     m_removeBackground = true;
     m_backgroundWS = getProperty("BackgroundWorkspace");
     // check background
-    if (m_backgroundWS->getNumberHistograms() != 256*256)
-      throw std::invalid_argument("Input background workspace does not have correct number of spectra.");
-  }
-  else
-  {
+    if (m_backgroundWS->getNumberHistograms() != 256 * 256)
+      throw std::invalid_argument("Input background workspace does not have "
+                                  "correct number of spectra.");
+  } else {
     m_removeBackground = false;
   }
 
@@ -285,8 +286,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
       ++numFileNotLoaded;
       continue;
     }
-    if (m_removeBackground)
-    {
+    if (m_removeBackground) {
       removeBackground(spicews);
     }
 
@@ -680,17 +680,15 @@ void ConvertCWSDExpToMomentum::updateQRange(
  * @brief ConvertCWSDExpToMomentum::removeBackground
  * @param dataws
  */
-void ConvertCWSDExpToMomentum::removeBackground(API::MatrixWorkspace_sptr dataws)
-{
+void ConvertCWSDExpToMomentum::removeBackground(
+    API::MatrixWorkspace_sptr dataws) {
   if (dataws->getNumberHistograms() != m_backgroundWS->getNumberHistograms())
     throw std::runtime_error("Impossible to have this situation");
 
   size_t numhist = dataws->getNumberHistograms();
-  for (size_t i = 0; i < numhist; ++i)
-  {
+  for (size_t i = 0; i < numhist; ++i) {
     double bkgd_y = m_backgroundWS->readY(i)[0];
-    if (fabs(bkgd_y) > 1.E-2)
-    {
+    if (fabs(bkgd_y) > 1.E-2) {
       dataws->dataY(i)[0] -= bkgd_y;
       dataws->dataE(i)[0] = std::sqrt(dataws->readY(i)[0]);
     }
