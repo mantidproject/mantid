@@ -1,5 +1,5 @@
 digraph PowderDiffractionISIS {
-  label="Mid-LevelPowderDiffractionISIS"
+  label="Mid-Level PowderDiffractionISIS"
   $global_style
 
   LoadSac_Start               [label="Load Sac Eff"]
@@ -16,13 +16,24 @@ digraph PowderDiffractionISIS {
     LoadSac_CorrWorkspace2        [label="Corr Workspace"]
     LoadSac_CorrWorkspace3        [label="Corr Workspace"]
     LoadSac_CorrWorkspace4        [label="Corr Workspace"]
-    LoadSac_CorrWorkspace5        [label="Corr Workspace"]
-    LoadSac_CorrWorkspace6        [label="Corr Workspace"]
+    LoadSac_VanadiumWorkspace     [label="Vanadium Workspace"]
+    LoadSac_VanadiumSumWs         [label="VanadiumSum Workspace"]
+    LoadSac_SAC_Workspace         [label="SAC Workspace"]
+    LoadSac_NewCalFile            [label="GrpOff Cal File"]
+    LoadSac_GetProtonCharge       [label="Get Proton Charge"]
+    LoadSac_GrpFile_Cal           [label="GrpOff Cal File"]
+    LoadSac_Pref_File_Properties  [label="Pref File Properties"]
 
-    LoadSac_VanadiumWorkspace1    [label="Vanadium Workspace"]
-    LoadSac_VanadiumWorkspace2    [label="Vanadium Workspace"]
-    LoadSac_VanadiumWorkspace3    [label="Vanadium Workspace"]
-    LoadSac_VanadiumWorkspace4    [label="Vanadium Workspace"]
+    C_Vana_VanadiumWorkspace1     [label="Vanadium Workspace"]
+    C_Vana_VanadiumWorkspace2     [label="Vanadium Workspace"]
+    C_Vana_Corr_Workspace         [label="Corr Workspace"]
+    C_Vana_Vanadium_corr_ws1      [label="Vanadium_corr Workspace"]
+    C_Vana_Vanadium_corr_ws2      [label="Vanadium_corr Workspace"]
+    C_Vana_GrpOff_Cal             [label="GrpOff Cal File"]
+    C_Vana_vEmptyWorkspace        [label="VEmpty Workspace"]
+
+    C_Vana_Unstripped_Nexus      [label="(Unstripped) Nexus File"]
+    C_Vana_Unstripped_Dat        [label="(Unstripped) Dat File"]
 
   }
 
@@ -113,54 +124,77 @@ digraph PowderDiffractionISIS {
   subgraph load_sac_eff {
   LoadSac_Start                 -> NoSac
   NoSac                         -> LoadSac_CreateSingle_4             [label="true"]
-  LoadSac_CreateSingle_4        -> LoadSac_CorrWorkspace1
+  LoadSac_CreateSingle_4        -> LoadSac_CorrWorkspace4
   NoSac                         -> SacEff_RunGetDataSum               [label="else"]
   SacEff_RunGetDataSum          -> LoadSac_GetProtonCharge
-  LoadSac_GetProtonCharge       -> LoadSac_VanadiumWorkspace1
+  LoadSac_VanadiumWorkspace     -> LoadSac_GetProtonCharge
   LoadSac_GetProtonCharge       -> UampsotalLess
   UampsotalLess                 -> LoadSac_CreateSingle_1             [label="true"]
-  LoadSac_CreateSingle_1        -> LoadSac_CorrWorkspace2
   UampsotalLess                 -> LoadSac_Integrate_1                [label="else"]
-  LoadSac_VanadiumWorkspace2     -> LoadSac_Integrate_1
+  LoadSac_CreateSingle_1        -> LoadSac_CorrWorkspace1
+  LoadSac_VanadiumWorkspace     -> LoadSac_Integrate_1
+  LoadSac_Integrate_1           -> LoadSac_VanadiumSumWs
   LoadSac_Integrate_1           -> LoadSac_MaskDetectorIf
+  LoadSac_VanadiumSumWs         -> LoadSac_MaskDetectorIf
+  LoadSac_GrpFile_Cal           -> LoadSac_MaskDetectorIf
   LoadSac_MaskDetectorIf        -> LoadSac_NewCalFile
-  LoadSac_VanadiumWorkspace3     -> LoadSac_SolidAngle
   LoadSac_MaskDetectorIf        -> LoadSac_SolidAngle
+  LoadSac_VanadiumWorkspace     -> LoadSac_SolidAngle
+  LoadSac_SolidAngle            -> LoadSac_SAC_Workspace
   LoadSac_SolidAngle            -> LoadSac_CreateSingle_2
   LoadSac_CreateSingle_2        -> LoadSac_Multiply
-  LoadSac_Multiply              -> LoadSac_CorrWorkspace3
+  LoadSac_SAC_Workspace         -> LoadSac_Multiply
+  LoadSac_Multiply              -> LoadSac_CorrWorkspace2
   LoadSac_Multiply              -> Eff
   Eff                           -> LoadSac_Divide_1                   [label="true"]
-  LoadSac_VanadiumWorkspace4     -> LoadSac_Divide_1
-  LoadSac_CorrWorkspace4        -> LoadSac_Divide_1
+  Eff                           -> LoadSac_CorrWorkspace4             [label="else"]
+  LoadSac_VanadiumWorkspace     -> LoadSac_Divide_1
+  LoadSac_CorrWorkspace2        -> LoadSac_Divide_1
   LoadSac_Divide_1              -> LoadSac_ConvertUnits
   LoadSac_ConvertUnits          -> LoadSac_Integration
+  LoadSac_Pref_File_Properties  -> LoadSac_Integration
+  LoadSac_CorrWorkspace2        -> LoadSac_Multiply_1
   LoadSac_Integration           -> LoadSac_Multiply_1
-  LoadSac_Multiply_1            -> LoadSac_CorrWorkspace5
-  LoadSac_CorrWorkspace5        -> LoadSac_CreateSingle_3
   LoadSac_Multiply_1            -> LoadSac_CreateSingle_3
+  LoadSac_Multiply_1            -> LoadSac_CorrWorkspace3
   LoadSac_CreateSingle_3        -> LoadSac_Divide_2
-  LoadSac_Divide_2              -> LoadSac_CorrWorkspace6
-
+  LoadSac_CorrWorkspace3        -> LoadSac_Divide_2
+  LoadSac_Divide_2              -> LoadSac_CorrWorkspace4
+// finished
   }
 
   subgraph create_vana {
+// working here
   C_Vana_Start                  -> C_Vana_RunLoadSacEff1
   VanadiumFile                  -> C_Vana_RunLoadSacEff1
   C_Vana_RunLoadSacEff1         -> C_Vana_RunLoadSacEff2
   VEmptyFile                    -> C_Vana_RunLoadSacEff2
   C_Vana_RunLoadSacEff2         -> C_Vana_UampsotalGreater
   C_Vana_UampsotalGreater       -> C_Vana_Minus                         [label="true"]
+  C_Vana_VanadiumWorkspace1      -> C_Vana_Minus
+  C_Vana_vEmptyWorkspace        -> C_Vana_Minus
   C_Vana_UampsotalGreater       -> C_Vana_AlignDetectors                [label="else"]
   C_Vana_Minus                  -> C_Vana_AlignDetectors
+  C_Vana_GrpOff_Cal             -> C_Vana_AlignDetectors
   C_Vana_AlignDetectors         -> C_Vana_Divide
+  C_Vana_Corr_Workspace         -> C_Vana_Divide
+  C_Vana_Divide                 -> C_Vana_Vanadium_corr_ws1
   C_Vana_Divide                 -> C_Vana_NoAbs
   C_Vana_NoAbs                  -> C_Vana_RunCorrectAbs                 [label="true"]
+  C_Vana_Vanadium_corr_ws1      -> C_Vana_RunCorrectAbs
   C_Vana_NoAbs                  -> C_Vana_DiffractionFocusing           [label="else"]
+  C_Vana_RunCorrectAbs          -> C_Vana_Vanadium_corr_ws2
+  C_Vana_Vanadium_corr_ws2      -> C_Vana_DiffractionFocusing
   C_Vana_RunCorrectAbs          -> C_Vana_DiffractionFocusing
+  C_Vana_GrpOff_Cal             -> C_Vana_DiffractionFocusing
   C_Vana_DiffractionFocusing    -> C_Vana_ReplaceSpecialValues
   C_Vana_ReplaceSpecialValues   -> C_Vana_SaveNexusProcessed
+  C_Vana_ReplaceSpecialValues   -> C_Vana_VanadiumWorkspace2
+  C_Vana_VanadiumWorkspace2     -> C_Vana_SaveNexusProcessed
+  C_Vana_SaveNexusProcessed     -> C_Vana_Unstripped_Nexus
   C_Vana_SaveNexusProcessed     -> C_Vana_SaveFocusedXYE
+  C_Vana_VanadiumWorkspace2     -> C_Vana_SaveFocusedXYE
+  C_Vana_SaveFocusedXYE         -> C_Vana_Unstripped_Dat
   C_Vana_SaveFocusedXYE         -> C_Vana_RunStripPeaks
 
   }
