@@ -80,7 +80,7 @@ public:
     std::vector<double> gs(1, 0.0);
     std::vector<double> efix(1, 0.0);
 
-    data_sources.push_back("ACCUMULATEMDTEST_NONEXISTENTWORKSPACE");
+    data_sources.emplace_back("ACCUMULATEMDTEST_NONEXISTENTWORKSPACE");
 
     Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
                                                   efix);

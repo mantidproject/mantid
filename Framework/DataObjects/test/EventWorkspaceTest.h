@@ -623,9 +623,9 @@ public:
     V3D sample(10, 0, 0);
     std::vector<V3D> detectorPositions;
 
-    detectorPositions.push_back(V3D(11, 1, 0)); // First detector pos
-    detectorPositions.push_back(
-        V3D(11, 1, 0)); // Second detector sits on the first.
+    detectorPositions.emplace_back(11, 1, 0); // First detector pos
+    detectorPositions.emplace_back(11, 1,
+                                   0); // Second detector sits on the first.
 
     WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(
         ws, source, sample, detectorPositions);

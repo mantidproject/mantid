@@ -184,7 +184,7 @@ void IndexSXPeaks::exec() {
     }
     IPeak &peak = ws->getPeak(row);
     V3D Qs = peak.getQSampleFrame() / (2.0 * M_PI);
-    peaks.push_back(PeakCandidate(Qs[0], Qs[1], Qs[2]));
+    peaks.emplace_back(Qs[0], Qs[1], Qs[2]);
   }
 
   // Sanity check the generated peaks.

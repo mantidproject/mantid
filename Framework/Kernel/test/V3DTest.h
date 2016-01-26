@@ -400,8 +400,8 @@ public:
     std::vector<V3D> in, out;
     // Simple case
     in.clear();
-    in.push_back(V3D(1, 0, 0));
-    in.push_back(V3D(0, 1, 0));
+    in.emplace_back(1, 0, 0);
+    in.emplace_back(0, 1, 0);
     out = V3D::makeVectorsOrthogonal(in);
     TS_ASSERT(out[0] == V3D(1, 0, 0));
     TS_ASSERT(out[1] == V3D(0, 1, 0));
@@ -409,8 +409,8 @@ public:
 
     // Non-unit vectors
     in.clear();
-    in.push_back(V3D(0.5, 0, 0));
-    in.push_back(V3D(0.5, 1.23, 0));
+    in.emplace_back(0.5, 0, 0);
+    in.emplace_back(0.5, 1.23, 0);
     out = V3D::makeVectorsOrthogonal(in);
     TS_ASSERT(out[0] == V3D(1, 0, 0));
     TS_ASSERT(out[1] == V3D(0, 1, 0));
@@ -418,8 +418,8 @@ public:
 
     // Flip it over
     in.clear();
-    in.push_back(V3D(0.5, 0, 0));
-    in.push_back(V3D(0.5, -1.23, 0));
+    in.emplace_back(0.5, 0, 0);
+    in.emplace_back(0.5, -1.23, 0);
     out = V3D::makeVectorsOrthogonal(in);
     TS_ASSERT(out[0] == V3D(1, 0, 0));
     TS_ASSERT(out[1] == V3D(0, -1, 0));

@@ -201,9 +201,9 @@ public:
     V3D source(0, 0, 0);
 
     std::vector<V3D> detectorPositions;
-    detectorPositions.push_back(V3D(L2_spec1, 0, 0));
-    detectorPositions.push_back(V3D(L2_spec2, 0, 0));
-    detectorPositions.push_back(V3D(L2_spec3, 0, 0));
+    detectorPositions.emplace_back(L2_spec1, 0, 0);
+    detectorPositions.emplace_back(L2_spec2, 0, 0);
+    detectorPositions.emplace_back(L2_spec3, 0, 0);
 
     auto inWS = createSinglePulseEventWorkspace(source, sample,
                                                 detectorPositions, tofValues);

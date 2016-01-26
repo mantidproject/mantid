@@ -32,7 +32,7 @@ public:
     A.Accept(B);
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     std::list<Kernel::V3D> Pnts;
-    Pnts.push_back(V3D(0.0, -1.0, -1.0));
+    Pnts.emplace_back(0.0, -1.0, -1.0);
     TS_ASSERT_EQUALS(A.getPoints(), Pnts);
     std::list<double> Dist;
     Dist.push_back(1.0);
@@ -47,8 +47,8 @@ public:
     A.Accept(B);
     std::list<V3D> pntOut;
     // changed for forward going only intercepts on quadratice surfaces
-    // pntOut.push_back(V3D(-2.0,0.0,0.0));
-    pntOut.push_back(V3D(2.0, 0.0, 0.0));
+    // pntOut.emplace_back(-2.0,0.0,0.0);
+    pntOut.emplace_back(2.0, 0.0, 0.0);
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
     std::list<double> Dist;
@@ -87,8 +87,8 @@ public:
     A.Accept(B);
     std::list<V3D> pntOut;
     // forward only
-    // pntOut.push_back(V3D(-1.0,0.0,0.0));
-    pntOut.push_back(V3D(1.0, 0.0, 0.0));
+    // pntOut.emplace_back(-1.0,0.0,0.0);
+    pntOut.emplace_back(1.0, 0.0, 0.0);
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
     std::list<double> Dist;
@@ -100,8 +100,8 @@ public:
     C.Accept(B);
     TS_ASSERT_EQUALS(C.getNPoints(), 2);
     std::list<V3D> pntOut2;
-    pntOut2.push_back(V3D(-1.0, 0.0, 0.0));
-    pntOut2.push_back(V3D(1.0, 0.0, 0.0));
+    pntOut2.emplace_back(-1.0, 0.0, 0.0);
+    pntOut2.emplace_back(1.0, 0.0, 0.0);
     TS_ASSERT_EQUALS(C.getPoints(), pntOut2);
   }
 

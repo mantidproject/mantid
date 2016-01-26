@@ -23,7 +23,7 @@ namespace Geometry {
     for(int h = -hmin; h <= hmax; ++h) {
       for(int k = -kmin; k <= kmax; ++k) {
         for(int l = -lmin; l <= lmax; ++l) {
-          hkls.push_back(V3D(h, k, l));
+          hkls.emplace_back(h, k, l);
         }
       }
     }

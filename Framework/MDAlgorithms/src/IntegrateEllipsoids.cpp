@@ -357,7 +357,7 @@ void IntegrateEllipsoids::exec() {
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) // use tolerance == 1 to
                                                        // just check for (0,0,0)
     {
-      peak_q_list.push_back(V3D(peaks[i].getQLabFrame()));
+      peak_q_list.emplace_back(peaks[i].getQLabFrame());
       qList.emplace_back(1., V3D(peaks[i].getQLabFrame()));
       V3D miller_ind(static_cast<double>(boost::math::iround<double>(hkl[0])),
                      static_cast<double>(boost::math::iround<double>(hkl[1])),

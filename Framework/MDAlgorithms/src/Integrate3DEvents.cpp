@@ -312,9 +312,9 @@ void Integrate3DEvents::getEigenVectors(DblMatrix const &cov_matrix,
 
   // copy the resulting eigen vectors to output vector
   for (size_t col = 0; col < size; col++) {
-    eigen_vectors.push_back(V3D(gsl_matrix_get(eigen_vec, 0, col),
-                                gsl_matrix_get(eigen_vec, 1, col),
-                                gsl_matrix_get(eigen_vec, 2, col)));
+    eigen_vectors.emplace_back(gsl_matrix_get(eigen_vec, 0, col),
+                               gsl_matrix_get(eigen_vec, 1, col),
+                               gsl_matrix_get(eigen_vec, 2, col));
   }
 
   gsl_matrix_free(matrix);

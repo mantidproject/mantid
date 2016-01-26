@@ -39,7 +39,7 @@ VMDBase<TYPE>::makeVectorsOrthogonal(std::vector<VMDBase> &vectors) {
         "VMDBase::makeVectorsOrthogonal(): Need 3D input vectors.");
   std::vector<V3D> in, out;
   for (size_t i = 0; i < vectors.size(); i++)
-    in.push_back(V3D(vectors[i][0], vectors[i][1], vectors[i][2]));
+    in.emplace_back(vectors[i][0], vectors[i][1], vectors[i][2]);
   out = V3D::makeVectorsOrthogonal(in);
 
   std::vector<VMDBase> retVal;
