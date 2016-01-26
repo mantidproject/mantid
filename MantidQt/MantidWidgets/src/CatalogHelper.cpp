@@ -220,7 +220,7 @@ namespace MantidQt
 
           // Add the input name + "_err" (to indicate the error marker in the GUI,
           // rather than the input field) as the key, and the related error as the value.
-          errors.insert(std::make_pair(iter->first + "_err", documentation));
+          errors.emplace(iter->first + "_err", documentation);
         }
       }
       return errors;

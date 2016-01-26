@@ -592,7 +592,7 @@ void ProcessBackground::selectFromGivenFunction() {
     double parvalue;
     row >> parname >> parvalue;
     if (parname[0] == 'A')
-      parmap.insert(make_pair(parname, parvalue));
+      parmap.emplace(parname, parvalue);
   }
 
   int bkgdorder =

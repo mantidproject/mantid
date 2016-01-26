@@ -787,11 +787,11 @@ void LoadFullprofResolution::createBankToWorkspaceMap(
     std::map<int, size_t> &workspaceOfBank) {
   if (workspaces.size() == 0) {
     for (size_t i = 0; i < banks.size(); i++) {
-      workspaceOfBank.insert(std::pair<int, size_t>(banks[i], i + 1));
+      workspaceOfBank.emplace(banks[i], i + 1);
     }
   } else {
     for (size_t i = 0; i < banks.size(); i++) {
-      workspaceOfBank.insert(std::pair<int, size_t>(banks[i], workspaces[i]));
+      workspaceOfBank.emplace(banks[i], workspaces[i]);
     }
   }
 }

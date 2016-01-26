@@ -481,7 +481,7 @@ public:
           mcpars.push_back(parmin);
           mcpars.push_back(parmax);
           mcpars.push_back(parstepsize);
-          parametermcs.insert(make_pair(parname, mcpars));
+          parametermcs.emplace(parname, mcpars);
         } catch (runtime_error err) {
           ;
         }

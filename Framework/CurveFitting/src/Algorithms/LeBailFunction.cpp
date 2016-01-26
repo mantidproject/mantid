@@ -69,7 +69,7 @@ LeBailFunction::LeBailFunction(std::string peaktype) {
   // Peak parameter values
   for (size_t i = 0; i < m_peakParameterNameVec.size(); ++i) {
     string parname = m_peakParameterNameVec[i];
-    m_functionParameters.insert(make_pair(parname, 0.0));
+    m_functionParameters.emplace(parname, 0.0);
   }
 
   // Importing peak position tolerance
@@ -296,7 +296,7 @@ void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
       m_vecPeaks.push_back(newpeak);
       // FIXME - Refining lattice size is not considered here!
       m_dspPeakVec.push_back(make_pair(dsp, newpeak));
-      m_mapHKLPeak.insert(make_pair(hkl, newpeak));
+      m_mapHKLPeak.emplace(hkl, newpeak);
     }
   }
 

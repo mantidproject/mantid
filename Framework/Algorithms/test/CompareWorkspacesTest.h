@@ -1008,7 +1008,7 @@ public:
         new PropertyWithValue<double>("ExtraLog", 10));
 
     std::map<std::string, std::string> otherProps;
-    otherProps.insert(std::make_pair("CheckSample", "1"));
+    otherProps.emplace("CheckSample", "1");
 
     doGroupTest(groupOneName, groupTwoName, "Different numbers of logs",
                 otherProps);

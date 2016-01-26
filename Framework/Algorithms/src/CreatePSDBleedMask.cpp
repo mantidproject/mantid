@@ -143,8 +143,7 @@ void CreatePSDBleedMask::exec() {
     }
     // New tube
     else {
-      tubeMap.insert(std::pair<TubeIndex::key_type, TubeIndex::mapped_type>(
-          parentID, TubeIndex::mapped_type(1, i)));
+      tubeMap.emplace(parentID, TubeIndex::mapped_type(1, i));
     }
 
     progress.report();

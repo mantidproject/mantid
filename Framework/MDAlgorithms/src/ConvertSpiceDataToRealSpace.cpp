@@ -279,7 +279,7 @@ void ConvertSpiceDataToRealSpace::parseSampleLogs(
       logvec[ir] = dbltemp;
     }
 
-    logvecmap.insert(std::make_pair(logname, logvec));
+    logvecmap.emplace(logname, logvec);
   }
 
   return;
@@ -405,7 +405,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
       size_t anodeid = static_cast<size_t>(atoi(terms.back().c_str()));
       anodelist.push_back(std::make_pair(anodeid, icol));
     } else {
-      samplenameindexmap.insert(std::make_pair(colname, icol));
+      samplenameindexmap.emplace(colname, icol);
     }
   } // ENDFOR (icol)
 
@@ -767,7 +767,7 @@ void ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
   for (size_t i = 0; i < numrows; ++i) {
     detid_t detid = detefftablews->cell<detid_t>(i, 0);
     double deteff = detefftablews->cell<double>(i, 1);
-    deteffmap.insert(std::make_pair(detid, deteff));
+    deteffmap.emplace(detid, deteff);
   }
 
   return;

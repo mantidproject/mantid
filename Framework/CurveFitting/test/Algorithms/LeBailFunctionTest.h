@@ -43,26 +43,24 @@ public:
     LeBailFunction lebailfunction("NeutronBk2BkExpConvPVoigt");
 
     // Add peak parameters
-    map<string, double> parammap;
+    map<string, double> parammap{{"Dtt1", 29671.7500},
+                                 {"Dtt2", 0.0},
+                                 {"Zero", 0.0},
 
-    parammap.insert(make_pair("Dtt1", 29671.7500));
-    parammap.insert(make_pair("Dtt2", 0.0));
-    parammap.insert(make_pair("Zero", 0.0));
+                                 {"Alph0", 4.026},
+                                 {"Alph1", 7.362},
+                                 {"Beta0", 3.489},
+                                 {"Beta1", 19.535},
 
-    parammap.insert(make_pair("Alph0", 4.026));
-    parammap.insert(make_pair("Alph1", 7.362));
-    parammap.insert(make_pair("Beta0", 3.489));
-    parammap.insert(make_pair("Beta1", 19.535));
+                                 {"Sig2", sqrt(11.380)},
+                                 {"Sig1", sqrt(9.901)},
+                                 {"Sig0", sqrt(17.370)},
 
-    parammap.insert(make_pair("Sig2", sqrt(11.380)));
-    parammap.insert(make_pair("Sig1", sqrt(9.901)));
-    parammap.insert(make_pair("Sig0", sqrt(17.370)));
+                                 {"Gam0", 0.0},
+                                 {"Gam1", 0.0},
+                                 {"Gam2", 0.0},
 
-    parammap.insert(make_pair("Gam0", 0.0));
-    parammap.insert(make_pair("Gam1", 0.0));
-    parammap.insert(make_pair("Gam2", 0.0));
-
-    parammap.insert(make_pair("LatticeConstant", 4.156890));
+                                 {"LatticeConstant", 4.156890}};
 
     lebailfunction.setProfileParameterValues(parammap);
 
@@ -115,38 +113,38 @@ public:
     LeBailFunction lebailfunction("ThermalNeutronBk2BkExpConvPVoigt");
 
     // Add peak parameters
-    map<string, double> parammap;
+    map<string, double> parammap
 
-    parammap.insert(make_pair("Dtt1", 29671.7500));
-    parammap.insert(make_pair("Dtt2", 0.0));
-    parammap.insert(make_pair("Dtt1t", 29671.750));
-    parammap.insert(make_pair("Dtt2t", 0.30));
+        {{"Dtt1", 29671.7500},
+         {"Dtt2", 0.0},
+         {"Dtt1t", 29671.750},
+         {"Dtt2t", 0.30},
 
-    parammap.insert(make_pair("Zero", 0.0));
-    parammap.insert(make_pair("Zerot", 33.70));
+         {"Zero", 0.0},
+         {"Zerot", 33.70},
 
-    parammap.insert(make_pair("Alph0", 4.026));
-    parammap.insert(make_pair("Alph1", 7.362));
-    parammap.insert(make_pair("Beta0", 3.489));
-    parammap.insert(make_pair("Beta1", 19.535));
+         {"Alph0", 4.026},
+         {"Alph1", 7.362},
+         {"Beta0", 3.489},
+         {"Beta1", 19.535},
 
-    parammap.insert(make_pair("Alph0t", 60.683));
-    parammap.insert(make_pair("Alph1t", 39.730));
-    parammap.insert(make_pair("Beta0t", 96.864));
-    parammap.insert(make_pair("Beta1t", 96.864));
+         {"Alph0t", 60.683},
+         {"Alph1t", 39.730},
+         {"Beta0t", 96.864},
+         {"Beta1t", 96.864},
 
-    parammap.insert(make_pair("Sig2", sqrt(11.380)));
-    parammap.insert(make_pair("Sig1", sqrt(9.901)));
-    parammap.insert(make_pair("Sig0", sqrt(17.370)));
+         {"Sig2", sqrt(11.380)},
+         {"Sig1", sqrt(9.901)},
+         {"Sig0", sqrt(17.370)},
 
-    parammap.insert(make_pair("Width", 1.0055));
-    parammap.insert(make_pair("Tcross", 0.4700));
+         {"Width", 1.0055},
+         {"Tcross", 0.4700},
 
-    parammap.insert(make_pair("Gam0", 0.0));
-    parammap.insert(make_pair("Gam1", 0.0));
-    parammap.insert(make_pair("Gam2", 0.0));
+         {"Gam0", 0.0},
+         {"Gam1", 0.0},
+         {"Gam2", 0.0},
 
-    parammap.insert(make_pair("LatticeConstant", 4.156890));
+         {"LatticeConstant", 4.156890}};
 
     lebailfunction.setProfileParameterValues(parammap);
 

@@ -488,7 +488,7 @@ public:
     std::map<int, std::string> prop_lines;
     int line_index(0);
     while (getline(reader, line)) {
-      prop_lines.insert(std::make_pair(line_index, line));
+      prop_lines.emplace(line_index, line);
       ++line_index;
     }
     reader.close();
@@ -540,7 +540,7 @@ public:
     std::map<int, std::string> prop_lines;
     int line_index(0);
     while (getline(reader, line)) {
-      prop_lines.insert(std::make_pair(line_index, line));
+      prop_lines.emplace(line_index, line);
       ++line_index;
     }
     reader.close();

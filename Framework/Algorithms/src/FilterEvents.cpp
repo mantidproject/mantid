@@ -742,7 +742,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     row >> detid >> offset_factor;
     if (offset_factor >= 0 && offset_factor <= 1) {
       // Valid offset (factor value)
-      toffactormap.insert(make_pair(detid, offset_factor));
+      toffactormap.emplace(detid, offset_factor);
     } else {
       // Error, throw!
       stringstream errss;
@@ -756,7 +756,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     if (hasshift) {
       double shift;
       row >> shift;
-      tofshiftmap.insert(make_pair(detid, shift));
+      tofshiftmap.emplace(detid, shift);
     }
   } // ENDFOR(row i)
 

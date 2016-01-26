@@ -151,7 +151,7 @@ void LoadGSASInstrumentFile::exec() {
                   << ".\n";
     map<string, double> parammap;
     parseBank(parammap, lines, bankid, bankStartIndex[bankid - 1]);
-    bankparammap.insert(make_pair(bankid, parammap));
+    bankparammap.emplace(bankid, parammap);
     g_log.debug() << "Bank starts at line" << bankStartIndex[i] + 1 << "\n";
   }
 

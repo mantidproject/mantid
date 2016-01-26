@@ -210,9 +210,8 @@ CompositeBraggScatterer::getPropertyCountMap() const {
   std::vector<Property *> compositeProperties = getProperties();
   for (auto it = compositeProperties.begin(); it != compositeProperties.end();
        ++it) {
-    propertyUseCount.insert(std::make_pair((*it)->name(), 0));
+    propertyUseCount.emplace((*it)->name(), 0);
   }
-
   return propertyUseCount;
 }
 

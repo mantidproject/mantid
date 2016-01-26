@@ -129,7 +129,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
     try {
       IDetector_const_sptr det = inputWS->getDetector(i);
       // Invoke relevant member function.
-      m_indexMap.insert(std::make_pair(thetaFunction(det) * 180.0 / M_PI, i));
+      m_indexMap.emplace(thetaFunction(det) * 180.0 / M_PI, i);
     } catch (Exception::NotFoundError &) {
       if (!warningGiven)
         g_log.warning("The instrument definition is incomplete - spectra "
@@ -176,13 +176,13 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
     double elasticQInAngstroms = Kernel::UnitConversion::run(twoTheta, efixed);
 
     if (targetUnit == "ElasticQ") {
-      m_indexMap.insert(std::make_pair(elasticQInAngstroms, i));
+      m_indexMap.emplace(elasticQInAngstroms, i);
     } else if (targetUnit == "ElasticQSquared") {
       // The QSquared value.
       double elasticQSquaredInAngstroms =
           elasticQInAngstroms * elasticQInAngstroms;
 
-      m_indexMap.insert(std::make_pair(elasticQSquaredInAngstroms, i));
+      m_indexMap.emplace(elasticQSquaredInAngstroms, i);
     }
 
     progress.report("Converting to Elastic Q...");

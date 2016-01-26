@@ -116,7 +116,7 @@ void ConvertSpectrumAxis::exec() {
       toUnit->fromTOF(xval, emptyVector, l1val, l2, twoTheta, emode, efixed,
                       delta);
       double value = (xval.front() + xval.back()) / 2;
-      indexMap.insert(std::make_pair(value, i));
+      indexMap.emplace(value, i);
     }
   } else {
     // Set up binding to memeber funtion. Avoids condition as part of loop over
@@ -135,7 +135,7 @@ void ConvertSpectrumAxis::exec() {
       try {
         IDetector_const_sptr det = inputWS->getDetector(i);
         // Invoke relevant member function.
-        indexMap.insert(std::make_pair(thetaFunction(det) * 180.0 / M_PI, i));
+        indexMap.emplace(thetaFunction(det) * 180.0 / M_PI, i);
       } catch (Exception::NotFoundError &) {
         if (!warningGiven)
           g_log.warning("The instrument definition is incomplete - spectra "

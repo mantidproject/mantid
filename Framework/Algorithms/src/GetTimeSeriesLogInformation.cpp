@@ -164,7 +164,7 @@ void GetTimeSeriesLogInformation::exec() {
  */
 void GetTimeSeriesLogInformation::processTimeRange() {
   // Orignal
-  m_intInfoMap.insert(make_pair("Items", m_log->size()));
+  m_intInfoMap.emplace("Items", m_log->size());
 
   // Input time
   double t0r = this->getProperty("FilterStartTime");
@@ -454,10 +454,9 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
   size_t f = m_timeVec.size()-1;
   */
 
-  m_intInfoMap.insert(make_pair("Number of Time Stamps", m_timeVec.size()));
-  m_intInfoMap.insert(make_pair("Number of Equal Time Stamps", countsame));
-  m_intInfoMap.insert(
-      make_pair("Number of Reversed Time Stamps", countinverse));
+  m_intInfoMap.emplace("Number of Time Stamps", m_timeVec.size());
+  m_intInfoMap.emplace("Number of Equal Time Stamps", countsame);
+  m_intInfoMap.emplace("Number of Reversed Time Stamps", countinverse);
 
   // 2. Average and standard deviation (delta t)
   double runduration_sec = static_cast<double>(m_endtime.totalNanoseconds() -
@@ -506,10 +505,10 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
   double std_dt =
       sqrt(sum_deltaT2 / static_cast<double>(numpts - 1) - avg_dt * avg_dt);
 
-  m_dblInfoMap.insert(make_pair("Average(dT)", avg_dt));
-  m_dblInfoMap.insert(make_pair("Sigma(dt)", std_dt));
-  m_dblInfoMap.insert(make_pair("Min(dT)", min_dt));
-  m_dblInfoMap.insert(make_pair("Max(dT)", max_dt));
+  m_dblInfoMap.emplace("Average(dT)", avg_dt);
+  m_dblInfoMap.emplace("Sigma(dt)", std_dt);
+  m_dblInfoMap.emplace("Min(dT)", min_dt);
+  m_dblInfoMap.emplace("Max(dT)", max_dt);
 
   // 3. Count number of time intervals beyond 10% of deviation
   /* Temporarily disabled

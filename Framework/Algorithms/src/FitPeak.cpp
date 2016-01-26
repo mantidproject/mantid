@@ -592,7 +592,7 @@ void FitOneSinglePeak::push(IFunction_const_sptr func,
   size_t nParam = funcparnames.size();
   for (size_t i = 0; i < nParam; ++i) {
     double parvalue = func->getParameter(i);
-    funcparammap.insert(make_pair(funcparnames[i], parvalue));
+    funcparammap.emplace(funcparnames[i], parvalue);
   }
 
   return;
@@ -615,7 +615,7 @@ void FitOneSinglePeak::storeFunctionError(
   size_t nParam = funcparnames.size();
   for (size_t i = 0; i < nParam; ++i) {
     double parerror = func->getError(i);
-    paramerrormap.insert(make_pair(funcparnames[i], parerror));
+    paramerrormap.emplace(funcparnames[i], parerror);
   }
 
   return;
@@ -1630,10 +1630,10 @@ void FitPeak::push(IFunction_const_sptr func,
   size_t nParam = funcparnames.size();
   for (size_t i = 0; i < nParam; ++i) {
     double parvalue = func->getParameter(i);
-    funcparammap.insert(make_pair(funcparnames[i], parvalue));
+    funcparammap.emplace(funcparnames[i], parvalue);
 
     double parerror = func->getError(i);
-    paramerrormap.insert(make_pair(funcparnames[i], parerror));
+    paramerrormap.emplace(funcparnames[i], parerror);
   }
 
   return;

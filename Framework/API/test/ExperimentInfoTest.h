@@ -494,8 +494,7 @@ public:
         else
           ft.to.setFromISO8601("2100-01-01T00:00:00");
 
-        idfFiles.insert(std::pair<std::string, fromToEntry>(
-            l_filenamePart.substr(0, found), ft));
+        idfFiles.emplace(l_filenamePart.substr(0, found), ft);
         idfIdentifiers.insert(l_filenamePart.substr(0, found));
       }
     }

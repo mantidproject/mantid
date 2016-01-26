@@ -11,13 +11,11 @@ namespace Kernel {
 namespace // unnamed
     {
 struct ModeIndex {
-  ModeIndex() {
-    index.insert(std::make_pair(DeltaEMode::Elastic, "Elastic"));
-    index.insert(std::make_pair(DeltaEMode::Direct, "Direct"));
-    index.insert(std::make_pair(DeltaEMode::Indirect, "Indirect"));
-    index.insert(std::make_pair(DeltaEMode::Undefined, "Undefined"));
-  }
-  std::map<DeltaEMode::Type, std::string> index;
+  std::map<DeltaEMode::Type, std::string> index{
+      {DeltaEMode::Elastic, "Elastic"},
+      {DeltaEMode::Direct, "Direct"},
+      {DeltaEMode::Indirect, "Indirect"},
+      {DeltaEMode::Undefined, "Undefined"}};
 };
 /// Returns the map storing the mode->string lookup
 ModeIndex &typeStringLookup() {

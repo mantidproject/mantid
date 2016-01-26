@@ -1815,9 +1815,7 @@ void LeBailFit::setupRandomWalkStrategyFromTable(
       giter->second.push_back(parname);
     } else {
       // First instance in the new group.
-      vector<string> newpars;
-      newpars.push_back(parname);
-      m_MCGroups.insert(make_pair(group, newpars));
+      m_MCGroups.emplace(group, vector<string>{parname});
     }
 
     // 3. Set up MC parameters, A0, A1, non-negative
@@ -1865,7 +1863,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   addParameterToMCMinimize(geomparams, "Zerot");
   addParameterToMCMinimize(geomparams, "Width");
   addParameterToMCMinimize(geomparams, "Tcross");
-  m_MCGroups.insert(make_pair(0, geomparams));
+  m_MCGroups.emplace(0, geomparams);
 
   dboutss << "Geometry parameters: ";
   for (size_t i = 0; i < geomparams.size(); ++i)
@@ -1878,7 +1876,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   addParameterToMCMinimize(alphs, "Alph1");
   addParameterToMCMinimize(alphs, "Alph0t");
   addParameterToMCMinimize(alphs, "Alph1t");
-  m_MCGroups.insert(make_pair(1, alphs));
+  m_MCGroups.emplace(1, alphs);
 
   dboutss << "Alpha parameters";
   for (size_t i = 0; i < alphs.size(); ++i)
@@ -1891,7 +1889,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   addParameterToMCMinimize(betas, "Beta1");
   addParameterToMCMinimize(betas, "Beta0t");
   addParameterToMCMinimize(betas, "Beta1t");
-  m_MCGroups.insert(make_pair(2, betas));
+  m_MCGroups.emplace(2, betas);
 
   dboutss << "Beta parameters";
   for (size_t i = 0; i < betas.size(); ++i)
@@ -1903,7 +1901,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   addParameterToMCMinimize(sigs, "Sig0");
   addParameterToMCMinimize(sigs, "Sig1");
   addParameterToMCMinimize(sigs, "Sig2");
-  m_MCGroups.insert(make_pair(3, sigs));
+  m_MCGroups.emplace(3, sigs);
 
   dboutss << "Sig parameters";
   for (size_t i = 0; i < sigs.size(); ++i)

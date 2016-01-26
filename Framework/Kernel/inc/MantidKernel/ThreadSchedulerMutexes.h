@@ -37,7 +37,7 @@ public:
     m_cost += newTask->cost();
 
     boost::shared_ptr<Mutex> mut = newTask->getMutex();
-    m_supermap[mut].insert(std::pair<double, Task *>(newTask->cost(), newTask));
+    m_supermap[mut].emplace(newTask->cost(), newTask);
     m_queueLock.unlock();
   }
 

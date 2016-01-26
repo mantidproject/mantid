@@ -191,25 +191,22 @@ ConfigServiceImpl::ConfigServiceImpl()
 
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
-  m_ConfigPaths.insert(
-      std::make_pair("mantidqt.python_interfaces_directory", true));
-  m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
-  m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
-  m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
-  m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
-  m_ConfigPaths.insert(
-      std::make_pair("instrumentDefinition.vtpDirectory", true));
-  m_ConfigPaths.insert(std::make_pair("groupingFiles.directory", true));
-  m_ConfigPaths.insert(std::make_pair("maskFiles.directory", true));
-  m_ConfigPaths.insert(std::make_pair("colormaps.directory", true));
-  m_ConfigPaths.insert(
-      std::make_pair("requiredpythonscript.directories", true));
-  m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
-  m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
-  m_ConfigPaths.insert(std::make_pair("python.plugins.directories", true));
-  m_ConfigPaths.insert(std::make_pair("user.python.plugins.directories", true));
-  m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
-  m_ConfigPaths.insert(std::make_pair("icatDownload.directory", true));
+  m_ConfigPaths.emplace("mantidqt.python_interfaces_directory", true);
+  m_ConfigPaths.emplace("plugins.directory", true);
+  m_ConfigPaths.emplace("pvplugins.directory", true);
+  m_ConfigPaths.emplace("mantidqt.plugins.directory", true);
+  m_ConfigPaths.emplace("instrumentDefinition.directory", true);
+  m_ConfigPaths.emplace("instrumentDefinition.vtpDirectory", true);
+  m_ConfigPaths.emplace("groupingFiles.directory", true);
+  m_ConfigPaths.emplace("maskFiles.directory", true);
+  m_ConfigPaths.emplace("colormaps.directory", true);
+  m_ConfigPaths.emplace("requiredpythonscript.directories", true);
+  m_ConfigPaths.emplace("pythonscripts.directory", true);
+  m_ConfigPaths.emplace("pythonscripts.directories", true);
+  m_ConfigPaths.emplace("python.plugins.directories", true);
+  m_ConfigPaths.emplace("user.python.plugins.directories", true);
+  m_ConfigPaths.emplace("datasearch.directories", true);
+  m_ConfigPaths.emplace("icatDownload.directory", true);
 
   // attempt to load the default properties file that resides in the directory
   // of the executable
@@ -489,7 +486,7 @@ void ConfigServiceImpl::convertRelativeToAbsolute() {
 
     std::string value(m_pConf->getString(key));
     value = makeAbsolute(value, key);
-    m_AbsolutePaths.insert(std::make_pair(key, value));
+    m_AbsolutePaths.emplace(key, value);
   }
 }
 

@@ -320,9 +320,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
     const auto &dets = m_InWS2D->getSpectrum(i)->getDetectorIDs();
     if (!dets.empty()) {
-      std::vector<detid_t> id_vector;
-      std::copy(dets.begin(), dets.end(), std::back_inserter(id_vector));
-      mapping->insert(std::make_pair(id_vector.front(), id_vector));
+      mapping->emplace(*dets.begin(),
+                       std::vector<detid_t>(dets.begin(), dets.end()));
     }
   }
 

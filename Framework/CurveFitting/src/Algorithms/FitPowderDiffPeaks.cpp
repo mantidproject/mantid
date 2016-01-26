@@ -1048,8 +1048,8 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
       // i. Store parameters;
       map<string,double> parammap;
       for (size_t i = 0; i < peakparnames.size(); ++i)
-        parammap.insert(make_pair(peakparnames[i],
-  peak->getParameter(peakparnames[i])));
+        parammap.emplace(peakparnames[i],
+  peak->getParameter(peakparnames[i]));
       fitparammaps.push_back(make_pair(newchi2, parammap));
 
       // ii. sort
@@ -2383,11 +2383,11 @@ void FitPowderDiffPeaks::parseBraggPeakTable(
       if (coltype.compare("int") == 0) {
         // Integer
         int temp = peakws->cell<int>(irow, icol);
-        intmap.insert(make_pair(colname, temp));
+        intmap.emplace(colname, temp);
       } else if (coltype.compare("double") == 0) {
         // Double
         double temp = peakws->cell<double>(irow, icol);
-        doublemap.insert(make_pair(colname, temp));
+        doublemap.emplace(colname, temp);
       }
 
     } // ENDFOR Column
@@ -2693,13 +2693,9 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
 
   // Create a map to convert the Bragg peak Table paramter name to Back to back
   // exponential+pseudo-voigt
-  map<string, string> bk2bk2braggmap;
-  bk2bk2braggmap.insert(make_pair("A", "Alpha"));
-  bk2bk2braggmap.insert(make_pair("B", "Beta"));
-  bk2bk2braggmap.insert(make_pair("X0", "TOF_h"));
-  bk2bk2braggmap.insert(make_pair("I", "Height"));
-  bk2bk2braggmap.insert(make_pair("S", "Sigma"));
-  bk2bk2braggmap.insert(make_pair("S2", "Sigma2"));
+  map<string, string> bk2bk2braggmap{{"A", "Alpha"},  {"B", "Beta"},
+                                     {"X0", "TOF_h"}, {"I", "Height"},
+                                     {"S", "Sigma"},  {"S2", "Sigma2"}};
 
   // Generate Peaks
   size_t numbadrows = 0;

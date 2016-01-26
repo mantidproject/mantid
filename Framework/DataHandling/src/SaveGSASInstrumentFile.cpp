@@ -70,7 +70,7 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
   */
 ChopperConfiguration::ChopperConfiguration(vector<int> bankids)
     : m_frequency(0) {
-  size_t numbanks = bankids.size();
+  const size_t numbanks = bankids.size();
 
   // Initialize vectors
   m_bankIDs.assign(numbanks, 0);
@@ -83,7 +83,7 @@ ChopperConfiguration::ChopperConfiguration(vector<int> bankids)
   m_bankIDs.assign(bankids.begin(), bankids.end());
   m_bankIDIndexMap.clear();
   for (size_t ib = 0; ib < numbanks; ++ib) {
-    m_bankIDIndexMap.insert(make_pair(m_bankIDs[ib], ib));
+    m_bankIDIndexMap.emplace(m_bankIDs[ib], ib);
   }
 }
 
@@ -120,7 +120,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq,
   // Set up bank ID / looking up index map
   m_bankIDIndexMap.clear();
   for (size_t ib = 0; ib < numbanks; ++ib) {
-    m_bankIDIndexMap.insert(make_pair(m_bankIDs[ib], ib));
+    m_bankIDIndexMap.emplace(m_bankIDs[ib], ib);
   }
 }
 
@@ -537,7 +537,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
       for (size_t icol = 0; icol < numbanks; ++icol) {
         double tmpdbl;
         tmprow >> tmpdbl;
-        vec_maptemp[icol].insert(make_pair(parname, tmpdbl));
+        vec_maptemp[icol].emplace(parname, tmpdbl);
       }
     } else {
       for (size_t icol = 0; icol < numbanks; ++icol) {
@@ -561,7 +561,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
 
   for (size_t i = 0; i < vecbankindex.size(); ++i) {
     unsigned int bankid = vecbankindex[i];
-    profilemap.insert(make_pair(bankid, vec_maptemp[i]));
+    profilemap.emplace(bankid, vec_maptemp[i]);
   }
 
   return;
@@ -711,9 +711,9 @@ void SaveGSASInstrumentFile::convertToGSAS(
           "Chopper configuration does not have some certain bank.");
 
     double mndsp = m_configuration->getParameter(bankid, "MinDsp");
-    m_bank_mndsp.insert(make_pair(bankid, mndsp));
+    m_bank_mndsp.emplace(bankid, mndsp);
     double mxtof = m_configuration->getParameter(bankid, "MaxTOF");
-    m_bank_mxtof.insert(make_pair(bankid, mxtof));
+    m_bank_mxtof.emplace(bankid, mxtof);
   }
 
   // Write bank header

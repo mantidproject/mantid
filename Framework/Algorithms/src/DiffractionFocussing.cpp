@@ -264,7 +264,7 @@ bool DiffractionFocussing::readGroupingFile(
     // if ( ! istr.good() ) return false;
     // only allow groups with +ve ids
     if ((sel) && (group > 0)) {
-      detectorGroups.insert(std::make_pair(group, udet));
+      detectorGroups.emplace(group, udet);
     }
   }
   return true;

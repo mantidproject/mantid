@@ -124,8 +124,7 @@ bool LibraryManagerImpl::loadLibrary(const std::string &filepath) {
     if (dlwrap->OpenLibrary(libName, directory.toString())) {
       // Successfully opened, so add to map
       g_log.debug("Opened library: " + libName + ".\n");
-      OpenLibs.insert(std::pair<std::string, boost::shared_ptr<LibraryWrapper>>(
-          libName, dlwrap));
+      OpenLibs.emplace(libName, dlwrap);
       return true;
     } else {
       return false;

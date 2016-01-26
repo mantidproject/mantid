@@ -144,7 +144,7 @@ void ConvertCWPDMDToSpectra::exec() {
               << " must exist for run " << runid << ".";
         throw std::runtime_error(errss.str());
       }
-      map_runWavelength.insert(std::make_pair(runid, thislambda));
+      map_runWavelength.emplace(runid, thislambda);
     }
   }
 

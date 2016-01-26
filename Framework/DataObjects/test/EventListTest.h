@@ -1672,8 +1672,8 @@ public:
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
     for (int i = 0; i < 10; i++)
-      outputs.insert(std::make_pair(i, new EventList()));
-    outputs.insert(std::make_pair(-1, new EventList()));
+      outputs.emplace(i, new EventList());
+    outputs.emplace(-1, new EventList());
 
     // Generate time splitters
     TimeSplitterType split;
@@ -1727,8 +1727,8 @@ public:
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
     for (int i = 0; i < 10; i++)
-      outputs.insert(std::make_pair(i, new EventList()));
-    outputs.insert(std::make_pair(-1, new EventList()));
+      outputs.emplace(i, new EventList());
+    outputs.emplace(-1, new EventList());
 
     // Generate time splitters
     std::vector<int64_t> vec_splitTimes;
@@ -2137,8 +2137,8 @@ public:
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
     for (int i = 0; i < 10; i++)
-      outputs.insert(std::make_pair(i, new EventList()));
-    outputs.insert(std::make_pair(-1, new EventList()));
+      outputs.emplace(i, new EventList());
+    outputs.emplace(-1, new EventList());
 
     // Generate time splitters
     std::vector<int64_t> vec_splitTimes(11);
@@ -2228,8 +2228,8 @@ public:
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
     for (int i = 0; i < 10; i++)
-      outputs.insert(std::make_pair(i, new EventList()));
-    outputs.insert(std::make_pair(-1, new EventList()));
+      outputs.emplace(i, new EventList());
+    outputs.emplace(-1, new EventList());
 
     // Generate time splitters
     std::vector<int64_t> vec_splitTimes(11);

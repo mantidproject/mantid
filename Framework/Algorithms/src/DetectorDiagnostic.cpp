@@ -572,8 +572,7 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
       m_parents = 0;
       return makeInstrumentMap(countsWS);
     }
-    mymap.insert(std::pair<Mantid::Geometry::ComponentID, size_t>(
-        anc[m_parents - 1]->getComponentID(), i));
+    mymap.emplace(anc[m_parents - 1]->getComponentID(), i);
   }
 
   std::vector<std::vector<size_t>> speclist;

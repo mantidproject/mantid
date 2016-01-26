@@ -131,8 +131,8 @@ ClusterRegister::~ClusterRegister() {}
  */
 void ClusterRegister::add(const size_t &label,
                           const boost::shared_ptr<ICluster> &cluster) {
-  m_Impl->m_register.insert(std::make_pair(label, cluster));
-  m_Impl->m_unique.insert(std::make_pair(label, cluster));
+  m_Impl->m_register.emplace(label, cluster);
+  m_Impl->m_unique.emplace(label, cluster);
 }
 
 /**
@@ -170,7 +170,7 @@ ClusterRegister::MapCluster ClusterRegister::clusters() const {
   auto mergedClusters = m_Impl->makeCompositeClusters();
   for (auto i = mergedClusters.begin(); i != mergedClusters.end(); ++i) {
     const auto &merged = *i;
-    temp.insert(std::make_pair(merged->getLabel(), merged));
+    temp.emplace(merged->getLabel(), merged);
   }
   return temp;
 }
@@ -189,7 +189,7 @@ ClusterRegister::clusters(std::vector<DisjointElement> &elements) const {
   for (auto i = mergedClusters.begin(); i != mergedClusters.end(); ++i) {
     const auto &merged = *i;
     merged->toUniformMinimum(elements);
-    temp.insert(std::make_pair(merged->getLabel(), merged));
+    temp.emplace(merged->getLabel(), merged);
   }
   return temp;
 }

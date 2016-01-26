@@ -404,10 +404,9 @@ void SCARFTomoReconstruction::doLogout(const std::string &username) {
 
   std::string httpsURL = baseURL + logoutPath;
   StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "text/plain"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.emplace("Content-Type", "text/plain");
+  headers.emplace("Cookie", token);
+  headers.emplace("Accept", m_acceptType);
   int code;
   std::stringstream ss;
   try {
@@ -510,10 +509,9 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
 
   std::string httpsURL = baseURL + submitPath;
   StringToStringMap headers;
-  headers.insert(std::pair<std::string, std::string>(
-      "Content-Type", "multipart/mixed; boundary=" + boundary));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  headers.emplace("Content-Type", "multipart/mixed; boundary=" + boundary);
+  headers.emplace("Accept", m_acceptType);
+  headers.emplace("Cookie", token);
   int code;
   std::stringstream ss;
   try {
@@ -573,8 +571,8 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
   StringToStringMap headers;
   headers.insert(
       std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  headers.emplace("Accept", m_acceptType);
+  headers.emplace("Cookie", token);
   int code;
   std::stringstream ss;
   try {
@@ -641,8 +639,8 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string &username,
   StringToStringMap headers;
   headers.insert(
       std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  headers.emplace("Accept", m_acceptType);
+  headers.emplace("Cookie", token);
   int code;
   std::stringstream ss;
   try {
@@ -698,9 +696,8 @@ bool SCARFTomoReconstruction::doPing() {
 
   std::string httpsURL = baseURL + pingPath;
   StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.emplace("Content-Type", "application/xml");
+  headers.emplace("Accept", m_acceptType);
   int code;
   std::stringstream ss;
   try {
@@ -765,8 +762,8 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
   StringToStringMap headers;
   headers.insert(
       std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.emplace("Cookie", token);
+  headers.emplace("Accept", m_acceptType);
   int code;
   std::stringstream ss;
   try {
@@ -837,10 +834,9 @@ void SCARFTomoReconstruction::doUploadFile(const std::string &username,
   InternetHelper session;
   std::string httpsURL = baseURL + uploadPath;
   StringToStringMap headers;
-  headers.insert(std::pair<std::string, std::string>(
-      "Content-Type", "multipart/mixed; boundary=" + boundary));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  headers.emplace("Content-Type", "multipart/mixed; boundary=" + boundary);
+  headers.emplace("Accept", m_acceptType);
+  headers.emplace("Cookie", token);
 
   const std::string &body = buildUploadBody(boundary, destDir, filename);
   int code;
@@ -1366,8 +1362,8 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
   StringToStringMap headers;
   headers.insert(
       std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.emplace("Cookie", token);
+  headers.emplace("Accept", m_acceptType);
   std::string body = remotePath;
   int code;
   std::stringstream ss;
@@ -1434,10 +1430,9 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
 
   std::string httpsURL = baseURL + downloadPath;
   StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.emplace("Content-Type", "application/xml");
+  headers.emplace("Cookie", token);
+  headers.emplace("Accept", m_acceptType);
   int code;
   std::stringstream ss;
   try {

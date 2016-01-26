@@ -943,9 +943,9 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
     hkl.push_back(k);
     hkl.push_back(l);
 
-    m_Peaks.insert(std::make_pair(hkl, newpeakptr));
+    m_Peaks.emplace(hkl, newpeakptr);
 
-    m_PeakErrors.insert(make_pair(hkl, chi2));
+    m_PeakErrors.emplace(hkl, chi2);
 
     g_log.information() << "[Generatem_Peaks] Peak " << ir << " HKL = ["
                         << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
@@ -1073,7 +1073,7 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
     tmpvec.push_back(tmin);
     tmpvec.push_back(tmax);
     tmpvec.push_back(tstepsize);
-    mcparameters.insert(make_pair(parname, tmpvec));
+    mcparameters.emplace(parname, tmpvec);
   }
 
   // 3. Retrieve the information for geometry parameters
