@@ -60,8 +60,8 @@ void CreateSampleWorkspace::init() {
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "An output workspace.");
   std::vector<std::string> typeOptions;
-  typeOptions.push_back("Histogram");
-  typeOptions.push_back("Event");
+  typeOptions.emplace_back("Histogram");
+  typeOptions.emplace_back("Event");
   declareProperty("WorkspaceType", "Histogram",
                   boost::make_shared<StringListValidator>(typeOptions),
                   "The type of workspace to create (default: Histogram)");

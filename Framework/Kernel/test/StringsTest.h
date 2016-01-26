@@ -255,13 +255,13 @@ public:
     out = join(v.begin(), v.end(), ",");
     TS_ASSERT_EQUALS(out, "");
 
-    v.push_back("Help");
-    v.push_back("Me");
-    v.push_back("I'm");
-    v.push_back("Stuck");
-    v.push_back("Inside");
-    v.push_back("A");
-    v.push_back("Test");
+    v.emplace_back("Help");
+    v.emplace_back("Me");
+    v.emplace_back("I'm");
+    v.emplace_back("Stuck");
+    v.emplace_back("Inside");
+    v.emplace_back("A");
+    v.emplace_back("Test");
 
     out = join(v.begin(), v.end(), ",");
     TS_ASSERT_EQUALS(out, "Help,Me,I'm,Stuck,Inside,A,Test");

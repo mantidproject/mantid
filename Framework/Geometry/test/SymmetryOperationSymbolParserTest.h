@@ -302,9 +302,9 @@ public:
 
   void testParseComponents() {
     std::vector<std::string> components;
-    components.push_back("x+z");
-    components.push_back("1/4-x");
-    components.push_back("y");
+    components.emplace_back("x+z");
+    components.emplace_back("1/4-x");
+    components.emplace_back("y");
 
     std::pair<Mantid::Kernel::IntMatrix, V3R> parsed;
     TS_ASSERT_THROWS_NOTHING(

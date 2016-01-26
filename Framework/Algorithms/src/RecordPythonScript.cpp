@@ -26,7 +26,7 @@ RecordPythonScript::RecordPythonScript()
 */
 void RecordPythonScript::init() {
   std::vector<std::string> exts;
-  exts.push_back(".py");
+  exts.emplace_back(".py");
 
   declareProperty(
       new API::FileProperty("Filename", "", API::FileProperty::Save, exts),

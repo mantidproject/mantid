@@ -261,20 +261,20 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails()
 
   // List of values to get from IPF
   std::vector<std::string> ipfElements;
-  ipfElements.push_back("analysis-type");
-  ipfElements.push_back("spectra-min");
-  ipfElements.push_back("spectra-max");
-  ipfElements.push_back("Efixed");
-  ipfElements.push_back("peak-start");
-  ipfElements.push_back("peak-end");
-  ipfElements.push_back("back-start");
-  ipfElements.push_back("back-end");
-  ipfElements.push_back("rebin-default");
-  ipfElements.push_back("cm-1-convert-choice");
-  ipfElements.push_back("save-nexus-choice");
-  ipfElements.push_back("save-ascii-choice");
-  ipfElements.push_back("fold-frames-choice");
-  ipfElements.push_back("resolution");
+  ipfElements.emplace_back("analysis-type");
+  ipfElements.emplace_back("spectra-min");
+  ipfElements.emplace_back("spectra-max");
+  ipfElements.emplace_back("Efixed");
+  ipfElements.emplace_back("peak-start");
+  ipfElements.emplace_back("peak-end");
+  ipfElements.emplace_back("back-start");
+  ipfElements.emplace_back("back-end");
+  ipfElements.emplace_back("rebin-default");
+  ipfElements.emplace_back("cm-1-convert-choice");
+  ipfElements.emplace_back("save-nexus-choice");
+  ipfElements.emplace_back("save-ascii-choice");
+  ipfElements.emplace_back("fold-frames-choice");
+  ipfElements.emplace_back("resolution");
 
   // In the IRIS IPF there is no fmica component
   if(instrumentName == "IRIS" && analyser == "fmica")

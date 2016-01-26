@@ -24,8 +24,8 @@ class MultiFileValidatorTest : public CxxTest::TestSuite {
 public:
   void testVectorConstructor() {
     std::vector<std::string> vec;
-    vec.push_back("raw");
-    vec.push_back("RAW");
+    vec.emplace_back("raw");
+    vec.emplace_back("RAW");
     FileValidator v(vec);
 
     // File extensions are converted to lowercase so should have one unique
@@ -35,8 +35,8 @@ public:
 
   void testCopyConstructor() {
     std::vector<std::string> vec;
-    vec.push_back("raw");
-    vec.push_back("RAW");
+    vec.emplace_back("raw");
+    vec.emplace_back("RAW");
     FileValidator v(vec);
     FileValidator copy(v);
 

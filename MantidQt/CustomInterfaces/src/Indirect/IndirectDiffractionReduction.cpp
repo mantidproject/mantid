@@ -259,11 +259,11 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   // Get save formats
   std::vector<std::string> saveFormats;
   if (m_uiForm.ckGSS->isChecked())
-    saveFormats.push_back("gss");
+    saveFormats.emplace_back("gss");
   if (m_uiForm.ckNexus->isChecked())
-    saveFormats.push_back("nxs");
+    saveFormats.emplace_back("nxs");
   if (m_uiForm.ckAscii->isChecked())
-    saveFormats.push_back("ascii");
+    saveFormats.emplace_back("ascii");
 
   // Set algorithm properties
   msgDiffReduction->setProperty("Instrument", instName.toStdString());

@@ -60,9 +60,9 @@ void LoadRawHelper::init() {
                   "periods will be stored in separate workspaces called "
                   "OutputWorkspace_PeriodNo.");
 
-  m_cache_options.push_back("If Slow");
-  m_cache_options.push_back("Always");
-  m_cache_options.push_back("Never");
+  m_cache_options.emplace_back("If Slow");
+  m_cache_options.emplace_back("Always");
+  m_cache_options.emplace_back("Never");
   declareProperty("Cache", "If Slow",
                   boost::make_shared<StringListValidator>(m_cache_options),
                   "An option allowing the algorithm to cache a remote file on "

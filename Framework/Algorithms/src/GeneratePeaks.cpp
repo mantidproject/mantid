@@ -70,13 +70,13 @@ void GeneratePeaks::init() {
 
   // Background properties
   std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Auto");
-  bkgdtypes.push_back("Flat (A0)");
-  bkgdtypes.push_back("Linear (A0, A1)");
-  bkgdtypes.push_back("Quadratic (A0, A1, A2)");
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  bkgdtypes.emplace_back("Auto");
+  bkgdtypes.emplace_back("Flat (A0)");
+  bkgdtypes.emplace_back("Linear (A0, A1)");
+  bkgdtypes.emplace_back("Quadratic (A0, A1, A2)");
+  bkgdtypes.emplace_back("Flat");
+  bkgdtypes.emplace_back("Linear");
+  bkgdtypes.emplace_back("Quadratic");
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");

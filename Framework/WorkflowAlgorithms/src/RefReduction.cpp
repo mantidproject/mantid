@@ -108,8 +108,8 @@ void RefReduction::init() {
                                          "Instrument", IS_EQUAL_TO, "REF_L"));
 
   std::vector<std::string> instrOptions;
-  instrOptions.push_back("REF_L");
-  instrOptions.push_back("REF_M");
+  instrOptions.emplace_back("REF_L");
+  instrOptions.emplace_back("REF_M");
   declareProperty("Instrument", "REF_M",
                   boost::make_shared<StringListValidator>(instrOptions),
                   "Instrument to reduce for");

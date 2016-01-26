@@ -26,8 +26,8 @@ void SumRowColumn::init() {
 
   // Need to select whether to sum rows or columns
   std::vector<std::string> orientation;
-  orientation.push_back("D_H");
-  orientation.push_back("D_V");
+  orientation.emplace_back("D_H");
+  orientation.emplace_back("D_V");
   declareProperty("Orientation", "",
                   boost::make_shared<StringListValidator>(orientation),
                   "Whether to sum rows (D_H) or columns (D_V).");

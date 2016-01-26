@@ -89,9 +89,9 @@ std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(
   }
 
   std::vector<std::string> symbols;
-  symbols.push_back("x");
-  symbols.push_back("y");
-  symbols.push_back("z");
+  symbols.emplace_back("x");
+  symbols.emplace_back("y");
+  symbols.emplace_back("z");
 
   std::vector<std::string> components;
 

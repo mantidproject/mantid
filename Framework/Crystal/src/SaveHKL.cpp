@@ -82,9 +82,9 @@ void SaveHKL::init() {
       "Path to an hkl file to save.");
 
   std::vector<std::string> histoTypes;
-  histoTypes.push_back("Bank");
-  histoTypes.push_back("RunNumber");
-  histoTypes.push_back("");
+  histoTypes.emplace_back("Bank");
+  histoTypes.emplace_back("RunNumber");
+  histoTypes.emplace_back("");
   declareProperty("SortBy", histoTypes[2],
                   boost::make_shared<StringListValidator>(histoTypes),
                   "Sort the histograms by bank, run number or both (default).");

@@ -170,7 +170,7 @@ public:
 
   void testString() {
     vector<string> data;
-    data.push_back("hi there");
+    data.emplace_back("hi there");
 
     Statistics stats = getStatistics(data);
 

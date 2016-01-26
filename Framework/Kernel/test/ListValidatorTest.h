@@ -16,9 +16,9 @@ public:
 
   void testVectorConstructor() {
     std::vector<std::string> vec;
-    vec.push_back("one");
-    vec.push_back("two");
-    vec.push_back("three");
+    vec.emplace_back("one");
+    vec.emplace_back("two");
+    vec.emplace_back("three");
     StringListValidator v(vec);
     TS_ASSERT_EQUALS(v.allowedValues().size(), 3)
   }
@@ -73,9 +73,9 @@ public:
 
   void testAliasString() {
     std::vector<std::string> values;
-    values.push_back("one");
-    values.push_back("three");
-    values.push_back("two");
+    values.emplace_back("one");
+    values.emplace_back("three");
+    values.emplace_back("two");
     std::map<std::string, std::string> aliases;
     aliases["1"] = "one";
     aliases["2"] = "two";
@@ -127,8 +127,8 @@ public:
 
   void test_wrong_alias() {
     std::vector<std::string> values;
-    values.push_back("one");
-    values.push_back("three");
+    values.emplace_back("one");
+    values.emplace_back("three");
     std::map<std::string, std::string> aliases;
     aliases["1"] = "one";
     aliases["2"] = "two";
@@ -138,8 +138,8 @@ public:
 
   void test_self_alias() {
     std::vector<std::string> values;
-    values.push_back("one");
-    values.push_back("three");
+    values.emplace_back("one");
+    values.emplace_back("three");
     std::map<std::string, std::string> aliases;
     aliases["1"] = "one";
     aliases["three"] = "three";

@@ -888,7 +888,7 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   std::string name;
   try {
     name = ws->run().getLogData("run_title")->value();
-    m_logMsgs.push_back(" Visualizing image: " + name);
+    m_logMsgs.emplace_back(" Visualizing image: " + name);
     m_presenter->notify(ITomographyIfacePresenter::LogMsg);
     m_logMsgs.clear();
   } catch (std::exception &e) {

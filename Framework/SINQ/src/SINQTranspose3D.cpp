@@ -18,10 +18,10 @@ void SINQTranspose3D::init() {
   declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
                                                            Direction::Input));
   std::vector<std::string> transposeOptions;
-  transposeOptions.push_back("Y,X,Z");
-  transposeOptions.push_back("X,Z,Y");
-  transposeOptions.push_back("TRICS");
-  transposeOptions.push_back("AMOR");
+  transposeOptions.emplace_back("Y,X,Z");
+  transposeOptions.emplace_back("X,Z,Y");
+  transposeOptions.emplace_back("TRICS");
+  transposeOptions.emplace_back("AMOR");
   this->declareProperty(
       "TransposeOption", "Y,X,Z",
       boost::make_shared<StringListValidator>(transposeOptions),

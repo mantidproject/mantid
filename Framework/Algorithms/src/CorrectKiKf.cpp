@@ -41,8 +41,8 @@ void CorrectKiKf::init() {
       "Name of the output workspace, can be the same as the input");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back("Direct");
-  propOptions.push_back("Indirect");
+  propOptions.emplace_back("Direct");
+  propOptions.emplace_back("Indirect");
   this->declareProperty("EMode", "Direct",
                         boost::make_shared<StringListValidator>(propOptions),
                         "The energy mode (default: Direct)");

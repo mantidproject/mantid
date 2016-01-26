@@ -389,14 +389,14 @@ public:
         DataObjects::TableWorkspace_sptr(tablews);
 
     std::vector<std::string> paramnames;
-    paramnames.push_back("Zero");
-    paramnames.push_back("Zerot");
-    paramnames.push_back("Dtt1");
-    paramnames.push_back("Dtt1t");
-    paramnames.push_back("Dtt2t");
-    paramnames.push_back("Tcross");
-    paramnames.push_back("Width");
-    paramnames.push_back("LatticeConstant");
+    paramnames.emplace_back("Zero");
+    paramnames.emplace_back("Zerot");
+    paramnames.emplace_back("Dtt1");
+    paramnames.emplace_back("Dtt1t");
+    paramnames.emplace_back("Dtt2t");
+    paramnames.emplace_back("Tcross");
+    paramnames.emplace_back("Width");
+    paramnames.emplace_back("LatticeConstant");
 
     tablews->addColumn("str", "Name");
     tablews->addColumn("double", "Value");

@@ -98,8 +98,8 @@ void RefinePowderInstrumentParameters::init() {
 
   // Refinement algorithm
   vector<string> algoptions;
-  algoptions.push_back("DirectFit");
-  algoptions.push_back("MonteCarlo");
+  algoptions.emplace_back("DirectFit");
+  algoptions.emplace_back("MonteCarlo");
   auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
   declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
                   "Algorithm to refine the instrument parameters.");
@@ -118,8 +118,8 @@ void RefinePowderInstrumentParameters::init() {
 
   // Method to calcualte the standard error of peaks
   vector<string> stdoptions;
-  stdoptions.push_back("ConstantValue");
-  stdoptions.push_back("InvertedPeakHeight");
+  stdoptions.emplace_back("ConstantValue");
+  stdoptions.emplace_back("InvertedPeakHeight");
   auto listvalidator =
       boost::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty(

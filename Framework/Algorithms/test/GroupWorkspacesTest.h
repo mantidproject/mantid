@@ -172,7 +172,8 @@ public:
 
     // Add another to the input list
     inputs.reserve(3);
-    inputs.push_back("test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_3");
+    inputs.emplace_back(
+        "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_3");
 
     const std::string groupName =
         "test_Exec_With_Input_That_Is_Not_In_ADS_Fails";

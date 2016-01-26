@@ -46,9 +46,9 @@ void CopyLogs::init() {
 
   // options for the type of strategy to take
   std::vector<std::string> strategies;
-  strategies.push_back("WipeExisting");
-  strategies.push_back("MergeKeepExisting");
-  strategies.push_back("MergeReplaceExisting");
+  strategies.emplace_back("WipeExisting");
+  strategies.emplace_back("MergeKeepExisting");
+  strategies.emplace_back("MergeReplaceExisting");
 
   auto strategiesValidator =
       boost::make_shared<StringListValidator>(strategies);

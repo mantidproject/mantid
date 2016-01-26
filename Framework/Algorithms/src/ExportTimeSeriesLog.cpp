@@ -52,8 +52,8 @@ void ExportTimeSeriesLog::init() {
   declareProperty("LogName", "", "Log's name to filter events.");
 
   std::vector<std::string> units;
-  units.push_back("Seconds");
-  units.push_back("Nano Seconds");
+  units.emplace_back("Seconds");
+  units.emplace_back("Nano Seconds");
   declareProperty(
       "UnitOfTime", "Seconds",
       boost::make_shared<Kernel::StringListValidator>(units),

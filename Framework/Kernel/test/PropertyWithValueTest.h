@@ -525,8 +525,8 @@ public:
     PropertyWithValue<std::string> empty(
         "test", "", boost::make_shared<StringListValidator>(empt));
     TS_ASSERT_EQUALS(empty.isValid(), "Select a value");
-    vec.push_back("one");
-    vec.push_back("two");
+    vec.emplace_back("one");
+    vec.emplace_back("two");
     PropertyWithValue<std::string> p(
         "test", "", boost::make_shared<StringListValidator>(vec));
     TS_ASSERT_EQUALS(p.isValid(), "Select a value");
@@ -644,8 +644,8 @@ public:
   void test_string_property_alias() {
     // system("pause");
     std::vector<std::string> allowedValues;
-    allowedValues.push_back("Hello");
-    allowedValues.push_back("World");
+    allowedValues.emplace_back("Hello");
+    allowedValues.emplace_back("World");
     std::map<std::string, std::string> alias;
     alias["1"] = "Hello";
     alias["0"] = "World";

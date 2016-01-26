@@ -98,11 +98,11 @@ void PlotAsymmetryByLogValue::init() {
                   "in the output workspace.");
 
   std::vector<std::string> optionsLog;
-  optionsLog.push_back("Mean");
-  optionsLog.push_back("Min");
-  optionsLog.push_back("Max");
-  optionsLog.push_back("First");
-  optionsLog.push_back("Last");
+  optionsLog.emplace_back("Mean");
+  optionsLog.emplace_back("Min");
+  optionsLog.emplace_back("Max");
+  optionsLog.emplace_back("First");
+  optionsLog.emplace_back("Last");
   declareProperty(
       "Function", "Last", boost::make_shared<StringListValidator>(optionsLog),
       "The function to apply: 'Mean', 'Min', 'Max', 'First' or 'Last'.");
@@ -112,8 +112,8 @@ void PlotAsymmetryByLogValue::init() {
                   "The period number for the 'green' data.");
 
   std::vector<std::string> options;
-  options.push_back("Integral");
-  options.push_back("Differential");
+  options.emplace_back("Integral");
+  options.emplace_back("Differential");
   declareProperty("Type", "Integral",
                   boost::make_shared<StringListValidator>(options),
                   "The calculation type: 'Integral' or 'Differential'.");
@@ -136,9 +136,9 @@ void PlotAsymmetryByLogValue::init() {
                   "groups.");
 
   std::vector<std::string> deadTimeCorrTypes;
-  deadTimeCorrTypes.push_back("None");
-  deadTimeCorrTypes.push_back("FromRunData");
-  deadTimeCorrTypes.push_back("FromSpecifiedFile");
+  deadTimeCorrTypes.emplace_back("None");
+  deadTimeCorrTypes.emplace_back("FromRunData");
+  deadTimeCorrTypes.emplace_back("FromSpecifiedFile");
 
   declareProperty("DeadTimeCorrType", deadTimeCorrTypes[0],
                   boost::make_shared<StringListValidator>(deadTimeCorrTypes),

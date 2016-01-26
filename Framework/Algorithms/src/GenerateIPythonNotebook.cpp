@@ -32,7 +32,7 @@ void GenerateIPythonNotebook::init() {
       "An input workspace.");
 
   std::vector<std::string> exts;
-  exts.push_back(".ipynb");
+  exts.emplace_back(".ipynb");
 
   declareProperty(new API::FileProperty("Filename", "",
                                         API::FileProperty::OptionalSave, exts),
@@ -54,9 +54,9 @@ void GenerateIPythonNotebook::init() {
                   Direction::Input);
 
   std::vector<std::string> saveVersions;
-  saveVersions.push_back("Specify Old");
-  saveVersions.push_back("Specify All");
-  saveVersions.push_back("Specify None");
+  saveVersions.emplace_back("Specify Old");
+  saveVersions.emplace_back("Specify All");
+  saveVersions.emplace_back("Specify None");
   declareProperty(
       "SpecifyAlgorithmVersions", "Specify Old",
       boost::make_shared<StringListValidator>(saveVersions),

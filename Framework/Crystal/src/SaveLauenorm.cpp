@@ -56,9 +56,9 @@ void SaveLauenorm::init() {
   declareProperty("MaxWavelength", EMPTY_DBL(),
                   "Maximum wavelength (Angstroms)");
   std::vector<std::string> histoTypes;
-  histoTypes.push_back("Bank");
-  histoTypes.push_back("RunNumber");
-  histoTypes.push_back("Both Bank and RunNumber");
+  histoTypes.emplace_back("Bank");
+  histoTypes.emplace_back("RunNumber");
+  histoTypes.emplace_back("Both Bank and RunNumber");
   declareProperty("SortFilesBy", histoTypes[0],
                   boost::make_shared<StringListValidator>(histoTypes),
                   "Sort into files by bank(default), run number or both.");

@@ -66,9 +66,9 @@ LoadILL::LoadILL() : API::IFileLoader<Kernel::NexusDescriptor>() {
   m_monitorElasticPeakPosition = 0;
   m_l1 = 0;
   m_l2 = 0;
-  m_supportedInstruments.push_back("IN4");
-  m_supportedInstruments.push_back("IN5");
-  m_supportedInstruments.push_back("IN6");
+  m_supportedInstruments.emplace_back("IN4");
+  m_supportedInstruments.emplace_back("IN5");
+  m_supportedInstruments.emplace_back("IN6");
 }
 
 /**

@@ -131,10 +131,10 @@ void CalculateCoverageDGS::init() {
       "Incident energy. If set, will override Ei in the input workspace");
 
   std::vector<std::string> options;
-  options.push_back("Q1");
-  options.push_back("Q2");
-  options.push_back("Q3");
-  options.push_back("DeltaE");
+  options.emplace_back("Q1");
+  options.emplace_back("Q2");
+  options.emplace_back("Q3");
+  options.emplace_back("DeltaE");
 
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");

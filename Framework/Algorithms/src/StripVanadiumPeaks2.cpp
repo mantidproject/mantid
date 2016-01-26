@@ -50,8 +50,8 @@ void StripVanadiumPeaks2::init() {
                                        "FindPeaks. Default 4.");
 
   std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  bkgdtypes.emplace_back("Linear");
+  bkgdtypes.emplace_back("Quadratic");
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "The type of background of the histogram. Present choices "

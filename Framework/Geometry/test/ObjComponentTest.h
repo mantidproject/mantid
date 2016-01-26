@@ -277,12 +277,12 @@ public:
     TS_ASSERT_DELTA(point.Z(), -10.0, 1e-6);
     // Cuboid not on principle axes
     std::vector<std::string> planes;
-    planes.push_back("px 0.5");
-    planes.push_back("px 1.5");
-    planes.push_back("py -22");
-    planes.push_back("py -21");
-    planes.push_back("pz -0.5");
-    planes.push_back("pz 0.5");
+    planes.emplace_back("px 0.5");
+    planes.emplace_back("px 1.5");
+    planes.emplace_back("py -22");
+    planes.emplace_back("py -21");
+    planes.emplace_back("pz -0.5");
+    planes.emplace_back("pz 0.5");
     ObjComponent D("ocube", createCuboid(planes));
     D.setPos(10, 0, 0);
     D.setRot(Quat(90.0, V3D(0, 0, 1)));

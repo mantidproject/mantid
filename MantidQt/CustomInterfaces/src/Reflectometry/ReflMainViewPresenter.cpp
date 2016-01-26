@@ -157,11 +157,11 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 
   // Set up the instrument selectors
   std::vector<std::string> instruments;
-  instruments.push_back("INTER");
-  instruments.push_back("SURF");
-  instruments.push_back("CRISP");
-  instruments.push_back("POLREF");
-  instruments.push_back("OFFSPEC");
+  instruments.emplace_back("INTER");
+  instruments.emplace_back("SURF");
+  instruments.emplace_back("CRISP");
+  instruments.emplace_back("POLREF");
+  instruments.emplace_back("OFFSPEC");
 
   // If the user's configured default instrument is in this list, set it as the
   // default, otherwise use INTER
@@ -890,7 +890,7 @@ void ReflMainViewPresenter::stitchRows(std::set<int> rows) {
       const std::string runNo = getRunNumber(runWS);
       if (AnalysisDataService::Instance().doesExist("IvsQ_" + runNo)) {
         runs.push_back(runNo);
-        workspaceNames.push_back("IvsQ_" + runNo);
+        workspaceNames.emplace_back("IvsQ_" + runNo);
       }
     }
 

@@ -51,8 +51,8 @@ void RemoveBins::init() {
                   "it will peak the unit from the Input workspace X unit.");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back("None");
-  propOptions.push_back("Linear");
+  propOptions.emplace_back("None");
+  propOptions.emplace_back("Linear");
   declareProperty("Interpolation", "None",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Whether mid-axis bins should be interpolated linearly "

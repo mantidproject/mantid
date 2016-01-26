@@ -58,9 +58,9 @@ void IntegratePeaksMD2::init() {
                   "An input MDEventWorkspace.");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back("Q (lab frame)");
-  propOptions.push_back("Q (sample frame)");
-  propOptions.push_back("HKL");
+  propOptions.emplace_back("Q (lab frame)");
+  propOptions.emplace_back("Q (sample frame)");
+  propOptions.emplace_back("HKL");
 
   declareProperty(
       new PropertyWithValue<double>("PeakRadius", 1.0, Direction::Input),
@@ -124,7 +124,7 @@ void IntegratePeaksMD2::init() {
 
   std::vector<std::string> peakNames =
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
-  peakNames.push_back("NoFit");
+  peakNames.emplace_back("NoFit");
   declareProperty("ProfileFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peakNames),
                   "Fitting function for profile that is used only with "

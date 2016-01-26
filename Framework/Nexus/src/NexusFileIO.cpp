@@ -175,18 +175,18 @@ int NexusFileIO::writeNexusProcessedHeader(const std::string &title,
       return (3);
   }
 
-  attributes.push_back("URL");
+  attributes.emplace_back("URL");
   avalues.push_back(
       "http://www.nexusformat.org/instruments/xml/NXprocessed.xml");
-  attributes.push_back("Version");
-  avalues.push_back("1.0");
+  attributes.emplace_back("Version");
+  avalues.emplace_back("1.0");
   // this may not be the "correct" long term path, but it is valid at present
   if (!writeNxValue<std::string>("definition", className, NX_CHAR, attributes,
                                  avalues))
     return (3);
   avalues.clear();
-  avalues.push_back("http://www.isis.rl.ac.uk/xml/IXmantid.xml");
-  avalues.push_back("1.0");
+  avalues.emplace_back("http://www.isis.rl.ac.uk/xml/IXmantid.xml");
+  avalues.emplace_back("1.0");
   if (!writeNxValue<std::string>("definition_local", className, NX_CHAR,
                                  attributes, avalues))
     return (3);
@@ -255,7 +255,7 @@ bool NexusFileIO::writeNxNote(const std::string &noteName,
 
   std::vector<std::string> attributes, avalues;
   if (date != "") {
-    attributes.push_back("date");
+    attributes.emplace_back("date");
     avalues.push_back(date);
   }
   if (!writeNxValue<std::string>("author", author, NX_CHAR, attributes,

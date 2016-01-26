@@ -58,9 +58,9 @@ void FindPeakBackground::init() {
                   "length must be exactly two.");
 
   std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  bkgdtypes.emplace_back("Flat");
+  bkgdtypes.emplace_back("Linear");
+  bkgdtypes.emplace_back("Quadratic");
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");

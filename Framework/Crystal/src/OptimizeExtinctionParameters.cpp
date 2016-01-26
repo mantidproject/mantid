@@ -61,16 +61,16 @@ void OptimizeExtinctionParameters::init() {
                                                         Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> corrOptions;
-  corrOptions.push_back("Type I Zachariasen");
-  corrOptions.push_back("Type I Gaussian");
-  corrOptions.push_back("Type I Lorentzian");
-  corrOptions.push_back("Type II Zachariasen");
-  corrOptions.push_back("Type II Gaussian");
-  corrOptions.push_back("Type II Lorentzian");
-  corrOptions.push_back("Type I&II Zachariasen");
-  corrOptions.push_back("Type I&II Gaussian");
-  corrOptions.push_back("Type I&II Lorentzian");
-  corrOptions.push_back("None, Scaling Only");
+  corrOptions.emplace_back("Type I Zachariasen");
+  corrOptions.emplace_back("Type I Gaussian");
+  corrOptions.emplace_back("Type I Lorentzian");
+  corrOptions.emplace_back("Type II Zachariasen");
+  corrOptions.emplace_back("Type II Gaussian");
+  corrOptions.emplace_back("Type II Lorentzian");
+  corrOptions.emplace_back("Type I&II Zachariasen");
+  corrOptions.emplace_back("Type I&II Gaussian");
+  corrOptions.emplace_back("Type I&II Lorentzian");
+  corrOptions.emplace_back("None, Scaling Only");
   declareProperty("ExtinctionCorrectionType", corrOptions[0],
                   boost::make_shared<StringListValidator>(corrOptions),
                   "Select the type of extinction correction.");

@@ -56,8 +56,8 @@ const std::string AppendGeometryToSNSNexus::category() const {
 void AppendGeometryToSNSNexus::init() {
   // Declare potential extensions for input NeXus file
   std::vector<std::string> extensions;
-  extensions.push_back(".nxs");
-  extensions.push_back(".h5");
+  extensions.emplace_back(".nxs");
+  extensions.emplace_back(".h5");
 
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
                                         extensions),

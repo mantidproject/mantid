@@ -93,8 +93,8 @@ void FullprofPolynomial::functionDeriv1D(API::Jacobian *out,
 */
 std::vector<std::string> FullprofPolynomial::getAttributeNames() const {
   std::vector<std::string> res;
-  res.push_back("n");
-  res.push_back("Bkpos");
+  res.emplace_back("n");
+  res.emplace_back("Bkpos");
 
   return res;
 }

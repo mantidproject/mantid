@@ -47,8 +47,8 @@ void CalculateFlatBackground::init() {
       "Indices of the spectra that will have their background removed\n"
       "default: modify all spectra");
   std::vector<std::string> modeOptions;
-  modeOptions.push_back("Linear Fit");
-  modeOptions.push_back("Mean");
+  modeOptions.emplace_back("Linear Fit");
+  modeOptions.emplace_back("Mean");
   declareProperty("Mode", "Linear Fit",
                   boost::make_shared<StringListValidator>(modeOptions),
                   "The background count rate is estimated either by taking a "
@@ -57,8 +57,8 @@ void CalculateFlatBackground::init() {
   // Property to determine whether we subtract the background or just return the
   // background.
   std::vector<std::string> outputOptions;
-  outputOptions.push_back("Subtract Background");
-  outputOptions.push_back("Return Background");
+  outputOptions.emplace_back("Subtract Background");
+  outputOptions.emplace_back("Return Background");
   declareProperty("OutputMode", "Subtract Background",
                   boost::make_shared<StringListValidator>(outputOptions),
                   "Once the background has been determined it can either be "

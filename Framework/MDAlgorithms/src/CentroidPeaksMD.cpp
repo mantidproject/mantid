@@ -42,9 +42,9 @@ void CentroidPeaksMD::init() {
                   "An input MDEventWorkspace.");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back("Q (lab frame)");
-  propOptions.push_back("Q (sample frame)");
-  propOptions.push_back("HKL");
+  propOptions.emplace_back("Q (lab frame)");
+  propOptions.emplace_back("Q (sample frame)");
+  propOptions.emplace_back("HKL");
   declareProperty("CoordinatesToUse", "HKL",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Ignored:  algorithm uses the InputWorkspace's coordinates.");

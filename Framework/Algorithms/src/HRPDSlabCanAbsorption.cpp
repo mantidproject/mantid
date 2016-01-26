@@ -51,8 +51,8 @@ void HRPDSlabCanAbsorption::init() {
       "calculated (default: all points)");
 
   std::vector<std::string> exp_options;
-  exp_options.push_back("Normal");
-  exp_options.push_back("FastApprox");
+  exp_options.emplace_back("Normal");
+  exp_options.emplace_back("FastApprox");
   declareProperty(
       "ExpMethod", "Normal",
       boost::make_shared<StringListValidator>(exp_options),

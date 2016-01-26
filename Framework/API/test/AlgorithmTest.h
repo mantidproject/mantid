@@ -191,10 +191,10 @@ public:
 
   void testCategories() {
     std::vector<std::string> result;
-    result.push_back("Cat");
+    result.emplace_back("Cat");
     TS_ASSERT_EQUALS(alg.categories(), result);
-    result.push_back("Leopard");
-    result.push_back("Mink");
+    result.emplace_back("Leopard");
+    result.emplace_back("Mink");
     TS_ASSERT_EQUALS(algv2.categories(), result);
     TS_ASSERT_EQUALS(algv3.categories(), result);
   }

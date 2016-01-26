@@ -1331,9 +1331,9 @@ void SCDCalibratePanels::init() {
                   "Workspace of Indexed Peaks");
 
   vector<string> choices;
-  choices.push_back("OnePanelPerGroup");
-  choices.push_back("AllPanelsInOneGroup");
-  choices.push_back("SpecifyGroups");
+  choices.emplace_back("OnePanelPerGroup");
+  choices.emplace_back("AllPanelsInOneGroup");
+  choices.emplace_back("SpecifyGroups");
   declareProperty(string("PanelGroups"), string("OnePanelPerGroup"),
                   boost::make_shared<Kernel::StringListValidator>(choices),
                   "Select grouping of Panels");
@@ -1383,8 +1383,8 @@ void SCDCalibratePanels::init() {
   // ---------- preprocessing
   vector<string> preProcessOptions;
   preProcessOptions.push_back(string("A)No PreProcessing"));
-  preProcessOptions.push_back("B)Apply a ISAW.DetCal File");
-  preProcessOptions.push_back("C)Apply a LoadParameter.xml type file");
+  preProcessOptions.emplace_back("B)Apply a ISAW.DetCal File");
+  preProcessOptions.emplace_back("C)Apply a LoadParameter.xml type file");
 
   declareProperty(
       string("PreProcessInstrument"), string("A)No PreProcessing"),
@@ -1392,8 +1392,8 @@ void SCDCalibratePanels::init() {
       "Select PreProcessing info");
 
   vector<string> exts2;
-  exts2.push_back(".DetCal");
-  exts2.push_back(".xml");
+  exts2.emplace_back(".DetCal");
+  exts2.emplace_back(".xml");
   declareProperty(new FileProperty("PreProcFilename", "",
                                    FileProperty::OptionalLoad, exts2),
                   "Path to file with preprocessing information");

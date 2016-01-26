@@ -97,8 +97,8 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
       ":ref:`algm-Rebin` algorithm).");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back("Direct");
-  propOptions.push_back("Indirect");
+  propOptions.emplace_back("Direct");
+  propOptions.emplace_back("Indirect");
   alg.declareProperty("EMode", "",
                       boost::make_shared<StringListValidator>(propOptions),
                       "The energy transfer analysis mode (Direct/Indirect)");

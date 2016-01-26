@@ -58,12 +58,12 @@ public:
   }
 
   void listInstruments(std::vector<std::string> &instruments) {
-    instruments.push_back("");
+    instruments.emplace_back("");
     m_counter++;
   }
 
   void listInvestigationTypes(std::vector<std::string> &investigations) {
-    investigations.push_back("");
+    investigations.emplace_back("");
     m_counter++;
   }
 

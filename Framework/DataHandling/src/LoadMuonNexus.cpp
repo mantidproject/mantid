@@ -75,8 +75,8 @@ void LoadMuonNexus::init() {
                   "one worskspace");
 
   std::vector<std::string> FieldOptions;
-  FieldOptions.push_back("Transverse");
-  FieldOptions.push_back("Longitudinal");
+  FieldOptions.emplace_back("Transverse");
+  FieldOptions.emplace_back("Longitudinal");
   declareProperty("MainFieldDirection", "Transverse",
                   boost::make_shared<StringListValidator>(FieldOptions),
                   "Output the main field direction if specified in Nexus file "

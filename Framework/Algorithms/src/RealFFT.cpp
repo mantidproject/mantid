@@ -50,8 +50,8 @@ void RealFFT::init() {
       "The index of the spectrum in the input workspace to transform.");
 
   std::vector<std::string> fft_dir;
-  fft_dir.push_back("Forward");
-  fft_dir.push_back("Backward");
+  fft_dir.emplace_back("Forward");
+  fft_dir.emplace_back("Backward");
   declareProperty(
       "Transform", "Forward", boost::make_shared<StringListValidator>(fft_dir),
       "The direction of the transform: \"Forward\" or \"Backward\".");

@@ -82,9 +82,9 @@ void ConvertToDiffractionMDWorkspace::init() {
       "Warning! This can use signficantly more memory!");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back("Q (lab frame)");
-  propOptions.push_back("Q (sample frame)");
-  propOptions.push_back("HKL");
+  propOptions.emplace_back("Q (lab frame)");
+  propOptions.emplace_back("Q (sample frame)");
+  propOptions.emplace_back("HKL");
   declareProperty(
       "OutputDimensions", "Q (lab frame)",
       boost::make_shared<StringListValidator>(propOptions),

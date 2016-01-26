@@ -141,8 +141,8 @@ public:
     TS_ASSERT_EQUALS(alg->version(), 1);
     TS_ASSERT_EQUALS(alg->category(), "ProxyCat;ProxyLeopard");
     std::vector<std::string> result;
-    result.push_back("ProxyCat");
-    result.push_back("ProxyLeopard");
+    result.emplace_back("ProxyCat");
+    result.emplace_back("ProxyLeopard");
     TS_ASSERT_EQUALS(alg->categories(), result);
     TS_ASSERT_EQUALS(alg->alias(), "Dog");
     TS_ASSERT(alg->isInitialized());

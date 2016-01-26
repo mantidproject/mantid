@@ -68,9 +68,9 @@ void NexusTester::init() {
       "Only works on linux AND you need to run MantidPlot in sudo mode (!).");
 
   std::vector<std::string> types;
-  types.push_back("Zeros");
-  types.push_back("Incrementing Numbers");
-  types.push_back("Random Numbers");
+  types.emplace_back("Zeros");
+  types.emplace_back("Incrementing Numbers");
+  types.emplace_back("Random Numbers");
   declareProperty("FakeData", "Incrementing Numbers",
                   boost::make_shared<StringListValidator>(types),
                   "For writing: type of fake data to generate.");

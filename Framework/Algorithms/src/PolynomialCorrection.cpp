@@ -30,8 +30,8 @@ void PolynomialCorrection::defineProperties() {
       "function in ascending powers of X. Can be given as a comma separated "
       "list in string form.");
   std::vector<std::string> propOptions;
-  propOptions.push_back("Multiply");
-  propOptions.push_back("Divide");
+  propOptions.emplace_back("Multiply");
+  propOptions.emplace_back("Divide");
   declareProperty("Operation", "Multiply",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The operation with which the correction is applied to the "

@@ -289,7 +289,7 @@ void MatrixWSDataSource::getInfoList( double x,
   std::set<detid_t> ids = spec->getDetectorIDs();
   if ( !ids.empty() )
   {
-    list.push_back("Det ID");
+    list.emplace_back("Det ID");
     const int64_t id = static_cast<int64_t>(*(ids.begin()));
     list.push_back(boost::lexical_cast<std::string>(id));
   }

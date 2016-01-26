@@ -1303,10 +1303,10 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
   cmd = "sw_vers"; // mac
 #elif _WIN32
   cmd = "wmic";              // windows
-  args.push_back("os");      // windows
-  args.push_back("get");     // windows
-  args.push_back("Caption"); // windows
-  args.push_back("/value");  // windows
+  args.emplace_back("os");      // windows
+  args.emplace_back("get");     // windows
+  args.emplace_back("Caption"); // windows
+  args.emplace_back("/value");  // windows
 #endif
 
   if (!cmd.empty()) {

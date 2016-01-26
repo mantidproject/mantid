@@ -129,8 +129,8 @@ public:
 
   void testOperators() {
     std::vector<std::string> ops;
-    ops.push_back(",");
-    ops.push_back("=");
+    ops.emplace_back(",");
+    ops.emplace_back("=");
 
     Expression expr(ops);
     TS_ASSERT_THROWS_NOTHING(expr.parse("x=-1\"(2)\",y=2a+b*(x+y) "));
@@ -175,7 +175,7 @@ public:
     TS_ASSERT_EQUALS(e4[1].name(), "+");
 
     std::vector<std::string> bin_ops;
-    bin_ops.push_back("=");
+    bin_ops.emplace_back("=");
     std::set<std::string> un_ops;
     un_ops.insert("!");
     un_ops.insert("%%");
@@ -213,7 +213,7 @@ public:
     TS_ASSERT_EQUALS(e8[1].name(), "%%");
 
     std::vector<std::string> bin_ops1;
-    bin_ops1.push_back("==");
+    bin_ops1.emplace_back("==");
     std::set<std::string> un_ops1;
     un_ops1.insert("!");
     un_ops1.insert("%%");
@@ -257,8 +257,8 @@ public:
     TS_ASSERT_THROWS(e14.parse("x==%% "), std::runtime_error);
 
     std::vector<std::string> bin_ops2;
-    bin_ops2.push_back("-");
-    bin_ops2.push_back("--");
+    bin_ops2.emplace_back("-");
+    bin_ops2.emplace_back("--");
     std::set<std::string> un_ops2;
     un_ops2.insert("-");
     un_ops2.insert("--");

@@ -56,8 +56,8 @@ void ConvertSpectrumAxis2::init() {
       "Note that 'theta' and 'signed_theta' are there for compatibility "
       "purposes; they are the same as 'Theta' and 'SignedTheta' respectively");
   std::vector<std::string> eModeOptions;
-  eModeOptions.push_back("Direct");
-  eModeOptions.push_back("Indirect");
+  eModeOptions.emplace_back("Direct");
+  eModeOptions.emplace_back("Indirect");
   declareProperty("EMode", "Direct",
                   boost::make_shared<StringListValidator>(eModeOptions),
                   "Some unit conversions require this value to be set "

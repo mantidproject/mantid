@@ -58,8 +58,8 @@ void ReflectometryReductionOneAuto::init() {
       "Input run in TOF or Lambda");
 
   std::vector<std::string> analysis_modes;
-  analysis_modes.push_back("PointDetectorAnalysis");
-  analysis_modes.push_back("MultiDetectorAnalysis");
+  analysis_modes.emplace_back("PointDetectorAnalysis");
+  analysis_modes.emplace_back("MultiDetectorAnalysis");
   auto analysis_mode_validator =
       boost::make_shared<StringListValidator>(analysis_modes);
 

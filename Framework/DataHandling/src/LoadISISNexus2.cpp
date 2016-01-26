@@ -91,9 +91,9 @@ void LoadISISNexus2::init() {
                   "one worskspace");
 
   std::vector<std::string> monitorOptions;
-  monitorOptions.push_back("Include");
-  monitorOptions.push_back("Exclude");
-  monitorOptions.push_back("Separate");
+  monitorOptions.emplace_back("Include");
+  monitorOptions.emplace_back("Exclude");
+  monitorOptions.emplace_back("Separate");
   std::map<std::string, std::string> monitorOptionsAliases;
   monitorOptionsAliases["1"] = "Separate";
   monitorOptionsAliases["0"] = "Exclude";

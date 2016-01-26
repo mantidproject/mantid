@@ -31,8 +31,8 @@ void FFTSmooth::init() {
                   "Spectrum index for smoothing");
 
   std::vector<std::string> type;
-  // type.push_back("Truncation");
-  type.push_back("Zeroing");
+  // type.emplace_back("Truncation");
+  type.emplace_back("Zeroing");
   declareProperty("Filter", "Zeroing",
                   boost::make_shared<StringListValidator>(type),
                   "The type of the applied filter");

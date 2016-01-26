@@ -32,9 +32,9 @@ void RRFMuon::init() {
       "Frequency of the oscillations");
 
   std::vector<std::string> unitOptions;
-  unitOptions.push_back("MHz");
-  unitOptions.push_back("Gauss");
-  unitOptions.push_back("Mrad/s");
+  unitOptions.emplace_back("MHz");
+  unitOptions.emplace_back("Gauss");
+  unitOptions.emplace_back("Mrad/s");
   declareProperty("FrequencyUnits", "MHz",
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The frequency units");

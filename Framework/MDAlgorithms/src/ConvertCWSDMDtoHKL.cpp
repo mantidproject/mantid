@@ -67,7 +67,7 @@ void ConvertCWSDMDtoHKL::init() {
                   "Name of the output MDEventWorkspace in HKL-space.");
 
   std::vector<std::string> exts;
-  exts.push_back(".dat");
+  exts.emplace_back(".dat");
   declareProperty(
       new FileProperty("QSampleFileName", "", API::FileProperty::OptionalSave),
       "Name of file for sample sample.");

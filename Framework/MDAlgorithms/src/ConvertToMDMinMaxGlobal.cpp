@@ -99,9 +99,9 @@ void ConvertToMDMinMaxGlobal::init() {
       new VisibleWhenProperty("QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
 
   std::vector<std::string> TargFrames;
-  TargFrames.push_back("AutoSelect");
-  TargFrames.push_back("Q");
-  TargFrames.push_back("HKL");
+  TargFrames.emplace_back("AutoSelect");
+  TargFrames.emplace_back("Q");
+  TargFrames.emplace_back("HKL");
   declareProperty(
       "Q3DFrames", "AutoSelect",
       boost::make_shared<StringListValidator>(TargFrames),

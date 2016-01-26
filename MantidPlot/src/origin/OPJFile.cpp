@@ -155,13 +155,13 @@ vector<string> OPJFile::findDataByIndex(int index) const {
     for (unsigned int i = 0; i < SPREADSHEET[spread].column.size(); i++)
       if (SPREADSHEET[spread].column[i].index == index) {
         str.push_back(SPREADSHEET[spread].column[i].name);
-        str.push_back("T_" + SPREADSHEET[spread].name);
+        str.emplace_back("T_" + SPREADSHEET[spread].name);
         return str;
       }
   for (unsigned int i = 0; i < MATRIX.size(); i++)
     if (MATRIX[i].index == index) {
       str.push_back(MATRIX[i].name);
-      str.push_back("M_" + MATRIX[i].name);
+      str.emplace_back("M_" + MATRIX[i].name);
       return str;
     }
   for (unsigned int i = 0; i < EXCEL.size(); i++)
@@ -169,13 +169,13 @@ vector<string> OPJFile::findDataByIndex(int index) const {
       for (unsigned int k = 0; k < EXCEL[i].sheet[j].column.size(); k++)
         if (EXCEL[i].sheet[j].column[k].index == index) {
           str.push_back(EXCEL[i].sheet[j].column[k].name);
-          str.push_back("E_" + EXCEL[i].name);
+          str.emplace_back("E_" + EXCEL[i].name);
           return str;
         }
   for (unsigned int i = 0; i < FUNCTION.size(); i++)
     if (FUNCTION[i].index == index) {
       str.push_back(FUNCTION[i].name);
-      str.push_back("F_" + FUNCTION[i].name);
+      str.emplace_back("F_" + FUNCTION[i].name);
       return str;
     }
   return str;

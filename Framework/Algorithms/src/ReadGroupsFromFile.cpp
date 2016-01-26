@@ -59,8 +59,8 @@ void ReadGroupsFromFile::init() {
       "[[CalFile]] (.cal extension).");
   // Flag to consider unselected detectors in the cal file
   std::vector<std::string> select;
-  select.push_back("True");
-  select.push_back("False");
+  select.emplace_back("True");
+  select.emplace_back("False");
   declareProperty("ShowUnselected", "True",
                   boost::make_shared<StringListValidator>(select),
                   "Whether to show detectors that are not in any group");

@@ -164,9 +164,9 @@ NotebookBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
 
   // Create a vector of all non workspace property type names
   std::vector<std::string> nonWorkspaceTypes;
-  nonWorkspaceTypes.push_back("number");
-  nonWorkspaceTypes.push_back("boolean");
-  nonWorkspaceTypes.push_back("string");
+  nonWorkspaceTypes.emplace_back("number");
+  nonWorkspaceTypes.emplace_back("boolean");
+  nonWorkspaceTypes.emplace_back("string");
 
   std::string prop = "";
   // No need to specify value for default properties

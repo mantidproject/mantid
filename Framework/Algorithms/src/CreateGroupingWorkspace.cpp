@@ -81,11 +81,11 @@ void CreateGroupingWorkspace::init() {
                   "If empty, then an empty GroupingWorkspace will be created.");
 
   std::vector<std::string> grouping;
-  grouping.push_back("");
-  grouping.push_back("All");
-  grouping.push_back("Group");
-  grouping.push_back("Column");
-  grouping.push_back("bank");
+  grouping.emplace_back("");
+  grouping.emplace_back("All");
+  grouping.emplace_back("Group");
+  grouping.emplace_back("Column");
+  grouping.emplace_back("bank");
   declareProperty(
       "GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "

@@ -297,7 +297,7 @@ void SaveGSASInstrumentFile::init() {
       "Name of the table workspace containing the parameters.");
 
   vector<string> infileexts;
-  infileexts.push_back(".irf");
+  infileexts.emplace_back(".irf");
   auto infileprop = new FileProperty("InputFileName", "",
                                      FileProperty::OptionalLoad, infileexts);
   declareProperty(infileprop,
@@ -312,17 +312,17 @@ void SaveGSASInstrumentFile::init() {
       "Bank IDs of the banks to be written to GSAS instrument file.");
 
   vector<string> instruments;
-  instruments.push_back("powgen");
-  instruments.push_back("nomad");
+  instruments.emplace_back("powgen");
+  instruments.emplace_back("nomad");
   declareProperty("Instrument", "powgen",
                   boost::make_shared<StringListValidator>(instruments),
                   "Name of the instrument that parameters are belonged to. "
                   "So far, only PG3 and NOM are supported.");
 
   vector<string> vecfreq;
-  vecfreq.push_back("10");
-  vecfreq.push_back("30");
-  vecfreq.push_back("60");
+  vecfreq.emplace_back("10");
+  vecfreq.emplace_back("30");
+  vecfreq.emplace_back("60");
   declareProperty("ChopperFrequency", "60",
                   boost::make_shared<StringListValidator>(vecfreq),
                   "Frequency of the chopper. ");

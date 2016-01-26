@@ -61,11 +61,11 @@ void FilterPeaks::init() {
                   "The filtered workspace");
 
   std::vector<std::string> filters;
-  filters.push_back("h+k+l");
-  filters.push_back("h^2+k^2+l^2");
-  filters.push_back("Intensity");
-  filters.push_back("Signal/Noise");
-  filters.push_back("QMod");
+  filters.emplace_back("h+k+l");
+  filters.emplace_back("h^2+k^2+l^2");
+  filters.emplace_back("Intensity");
+  filters.emplace_back("Signal/Noise");
+  filters.emplace_back("QMod");
   declareProperty("FilterVariable", "",
                   boost::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
@@ -75,11 +75,11 @@ void FilterPeaks::init() {
                   "The value of the FilterVariable to compare each peak to");
 
   std::vector<std::string> operation;
-  operation.push_back("<");
-  operation.push_back(">");
-  operation.push_back("=");
-  operation.push_back("<=");
-  operation.push_back(">=");
+  operation.emplace_back("<");
+  operation.emplace_back(">");
+  operation.emplace_back("=");
+  operation.emplace_back("<=");
+  operation.emplace_back(">=");
   declareProperty("Operator", "<",
                   boost::make_shared<StringListValidator>(operation), "");
 }

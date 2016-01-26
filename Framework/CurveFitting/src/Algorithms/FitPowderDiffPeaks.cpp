@@ -148,8 +148,8 @@ void FitPowderDiffPeaks::init() {
                   "Otherwise, calculate each peak's centre from d-spacing.");
 
   vector<string> genpeakoptions;
-  genpeakoptions.push_back("(HKL) & Calculation");
-  genpeakoptions.push_back("From Bragg Peak Table");
+  genpeakoptions.emplace_back("(HKL) & Calculation");
+  genpeakoptions.emplace_back("From Bragg Peak Table");
   auto propvalidator = boost::make_shared<StringListValidator>(genpeakoptions);
   declareProperty("PeakParametersStartingValueFrom", "(HKL) & Calculation",
                   propvalidator, "Choice of how to generate starting values of "
@@ -822,8 +822,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
     peak->setParameter("X0", tof_h);
 
     vector<string> paramsinmc;
-    paramsinmc.push_back("A");
-    paramsinmc.push_back("B");
+    paramsinmc.emplace_back("A");
+    paramsinmc.emplace_back("B");
 
     fitSinglePeakSimulatedAnnealing(peak, paramsinmc);
   }
@@ -2683,7 +2683,7 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
   BackToBackExponential tempeak;
   tempeak.initialize();
   mPeakParameterNames = tempeak.getParameterNames();
-  mPeakParameterNames.push_back("S2");
+  mPeakParameterNames.emplace_back("S2");
 
   // Parse TableWorkspace
   vector<map<std::string, double>> peakparametermaps;

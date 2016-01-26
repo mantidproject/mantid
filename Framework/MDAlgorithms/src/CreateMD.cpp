@@ -115,9 +115,9 @@ void CreateMD::init() {
                   "datasource energy values in meV");
 
   std::vector<std::string> e_mode_options;
-  e_mode_options.push_back("Elastic");
-  e_mode_options.push_back("Direct");
-  e_mode_options.push_back("Indirect");
+  e_mode_options.emplace_back("Elastic");
+  e_mode_options.emplace_back("Direct");
+  e_mode_options.emplace_back("Indirect");
 
   declareProperty("Emode", "Direct",
                   boost::make_shared<StringListValidator>(e_mode_options),

@@ -20,7 +20,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 /** Constructor
  */
 LoadILLSANS::LoadILLSANS() : m_defaultBinning(2) {
-  m_supportedInstruments.push_back("D33");
+  m_supportedInstruments.emplace_back("D33");
 }
 
 //----------------------------------------------------------------------------------------------

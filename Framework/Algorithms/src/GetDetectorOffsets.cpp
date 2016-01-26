@@ -75,8 +75,8 @@ void GetDetectorOffsets::init() {
                   "Maximum absolute value of offsets; default is 1");
 
   std::vector<std::string> modes;
-  modes.push_back("Relative");
-  modes.push_back("Absolute");
+  modes.emplace_back("Relative");
+  modes.emplace_back("Absolute");
 
   declareProperty("OffsetMode", "Relative",
                   boost::make_shared<StringListValidator>(modes),

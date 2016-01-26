@@ -20,10 +20,10 @@ void ProjectMD::init() {
   declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
                                                            Direction::Input));
   std::vector<std::string> projectOptions;
-  projectOptions.push_back("X");
-  projectOptions.push_back("Y");
-  projectOptions.push_back("Z");
-  projectOptions.push_back("K");
+  projectOptions.emplace_back("X");
+  projectOptions.emplace_back("Y");
+  projectOptions.emplace_back("Z");
+  projectOptions.emplace_back("K");
   this->declareProperty("ProjectDirection", "Z",
                         boost::make_shared<StringListValidator>(projectOptions),
                         "The project direction");

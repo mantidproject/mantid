@@ -203,12 +203,12 @@ MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
       // push back empty strings just so all the array properties have the
       // same
       // number of elements
-      submitDates.push_back("");
-      startDates.push_back("");
-      completionDates.push_back("");
+      submitDates.emplace_back("");
+      startDates.emplace_back("");
+      completionDates.emplace_back("");
     }
     // see comment in queryRemoteJob
-    cmdLines.push_back("Not available");
+    cmdLines.emplace_back("Not available");
 
     ++it;
   }

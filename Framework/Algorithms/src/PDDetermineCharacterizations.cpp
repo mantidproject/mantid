@@ -58,16 +58,16 @@ const std::string PDDetermineCharacterizations::summary() const {
  */
 std::vector<std::string> getColumnNames() {
   std::vector<std::string> names;
-  names.push_back("frequency");  // double
-  names.push_back("wavelength"); // double
-  names.push_back("bank");       // integer
-  names.push_back("container");  // string
-  names.push_back("vanadium");   // string
-  names.push_back("empty");      // string
-  names.push_back("d_min");      // string
-  names.push_back("d_max");      // string
-  names.push_back("tof_min");    // double
-  names.push_back("tof_max");    // double
+  names.emplace_back("frequency");  // double
+  names.emplace_back("wavelength"); // double
+  names.emplace_back("bank");       // integer
+  names.emplace_back("container");  // string
+  names.emplace_back("vanadium");   // string
+  names.emplace_back("empty");      // string
+  names.emplace_back("d_min");      // string
+  names.emplace_back("d_max");      // string
+  names.emplace_back("tof_min");    // double
+  names.emplace_back("tof_max");    // double
   return names;
 }
 
@@ -127,16 +127,16 @@ void PDDetermineCharacterizations::init() {
                   "Normalization background" + defaultMsg);
 
   std::vector<std::string> defaultFrequencyNames;
-  defaultFrequencyNames.push_back("SpeedRequest1");
-  defaultFrequencyNames.push_back("Speed1");
-  defaultFrequencyNames.push_back("frequency");
+  defaultFrequencyNames.emplace_back("SpeedRequest1");
+  defaultFrequencyNames.emplace_back("Speed1");
+  defaultFrequencyNames.emplace_back("frequency");
   declareProperty(new Kernel::ArrayProperty<std::string>(FREQ_PROP_NAME,
                                                          defaultFrequencyNames),
                   "Candidate log names for frequency");
 
   std::vector<std::string> defaultWavelengthNames;
-  defaultWavelengthNames.push_back("LambdaRequest");
-  defaultWavelengthNames.push_back("lambda");
+  defaultWavelengthNames.emplace_back("LambdaRequest");
+  defaultWavelengthNames.emplace_back("lambda");
   declareProperty(new Kernel::ArrayProperty<std::string>(
                       WL_PROP_NAME, defaultWavelengthNames),
                   "Candidate log names for wave length");

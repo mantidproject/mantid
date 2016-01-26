@@ -26,7 +26,7 @@ public:
   void test_one_word_required() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
-    required.push_back("test");
+    required.emplace_back("test");
     validator.setRequiredStrings(required);
     const std::string input = "This is a test string";
     TS_ASSERT_EQUALS("", validator.isValid(input));
@@ -35,8 +35,8 @@ public:
   void test_multiple_words_required() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
-    required.push_back("test");
-    required.push_back("This");
+    required.emplace_back("test");
+    required.emplace_back("This");
     validator.setRequiredStrings(required);
     const std::string input = "This is a test string";
     TS_ASSERT_EQUALS("", validator.isValid(input));
@@ -45,7 +45,7 @@ public:
   void test_capitalisation_is_enforced_correctly() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
-    required.push_back("this");
+    required.emplace_back("this");
     validator.setRequiredStrings(required);
     const std::string input = "This is a test string";
     const std::string error = "Error not all the required substrings were "
@@ -57,8 +57,8 @@ public:
   void test_error_produced_if_string_does_not_contain_all_the_substrings() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
-    required.push_back("not");
-    required.push_back("present");
+    required.emplace_back("not");
+    required.emplace_back("present");
     validator.setRequiredStrings(required);
     const std::string input = "This is a test string";
     const std::string error = "Error not all the required substrings were "
@@ -70,8 +70,8 @@ public:
   void test_error_produced_if_string_only_contains_some_of_the_substrings() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
-    required.push_back("not");
-    required.push_back("This");
+    required.emplace_back("not");
+    required.emplace_back("This");
     validator.setRequiredStrings(required);
     const std::string input = "This is a test string";
     const std::string error = "Error not all the required substrings were "
@@ -83,7 +83,7 @@ public:
   void test_substring_is_allowed_to_contain_punctuation() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
-    required.push_back(",");
+    required.emplace_back(",");
     validator.setRequiredStrings(required);
     const std::string input = "This, is a test string";
     TS_ASSERT_EQUALS("", validator.isValid(input));
@@ -92,7 +92,7 @@ public:
   void test_an_empty_string_produces_an_error() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
-    required.push_back(",");
+    required.emplace_back(",");
     validator.setRequiredStrings(required);
     const std::string input = "";
     const std::string error = "A value must be entered for this parameter.";

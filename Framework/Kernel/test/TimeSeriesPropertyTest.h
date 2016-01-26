@@ -1167,10 +1167,10 @@ public:
 
     // 2. What is correct
     std::vector<std::string> correctS;
-    correctS.push_back("2007-Nov-30 16:17:00 1");
-    correctS.push_back("2007-Nov-30 16:17:10 2");
-    correctS.push_back("2007-Nov-30 16:17:20 3");
-    correctS.push_back("2007-Nov-30 16:17:30 4");
+    correctS.emplace_back("2007-Nov-30 16:17:00 1");
+    correctS.emplace_back("2007-Nov-30 16:17:10 2");
+    correctS.emplace_back("2007-Nov-30 16:17:20 3");
+    correctS.emplace_back("2007-Nov-30 16:17:30 4");
 
     // 3. Check
     std::vector<std::string> tvalues = p->time_tValue();

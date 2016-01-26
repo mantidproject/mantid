@@ -21,8 +21,8 @@ void HFIRSANSNormalise::init() {
       "Workspace to be corrected");
 
   std::vector<std::string> normOptions;
-  normOptions.push_back("Monitor");
-  normOptions.push_back("Timer");
+  normOptions.emplace_back("Monitor");
+  normOptions.emplace_back("Timer");
   this->declareProperty("NormalisationType", "Monitor",
                         boost::make_shared<StringListValidator>(normOptions),
                         "Type of Normalisation to use");

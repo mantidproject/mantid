@@ -106,7 +106,7 @@ void Polynomial::functionDeriv1D(API::Jacobian *out, const double *xValues,
 */
 std::vector<std::string> Polynomial::getAttributeNames() const {
   std::vector<std::string> res;
-  res.push_back("n");
+  res.emplace_back("n");
   return res;
 }
 

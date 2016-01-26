@@ -26,9 +26,9 @@ void SANSBeamFluxCorrection::init() {
       "Workspace containing the monitor counts for the sample data");
 
   std::vector<std::string> exts;
-  exts.push_back("_event.nxs");
-  exts.push_back(".nxs");
-  exts.push_back(".nxs.h5");
+  exts.emplace_back("_event.nxs");
+  exts.emplace_back(".nxs");
+  exts.emplace_back(".nxs.h5");
   declareProperty(new API::FileProperty("ReferenceFluxFilename", "",
                                         API::FileProperty::Load, exts),
                   "File containing the reference flux spectrum.");

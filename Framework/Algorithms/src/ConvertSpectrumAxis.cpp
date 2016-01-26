@@ -40,16 +40,16 @@ void ConvertSpectrumAxis::init() {
       "The name to use for the output workspace.");
   std::vector<std::string> targetOptions =
       Mantid::Kernel::UnitFactory::Instance().getKeys();
-  targetOptions.push_back("theta");
-  targetOptions.push_back("signed_theta");
+  targetOptions.emplace_back("theta");
+  targetOptions.emplace_back("signed_theta");
   declareProperty("Target", "",
                   boost::make_shared<StringListValidator>(targetOptions),
                   "The unit to which the spectrum axis should be converted. "
                   "This can be either \"theta\" (for <math>\\theta</math> "
                   "degrees), or any of the IDs known to the [[Unit Factory]].");
   std::vector<std::string> eModeOptions;
-  eModeOptions.push_back("Direct");
-  eModeOptions.push_back("Indirect");
+  eModeOptions.emplace_back("Direct");
+  eModeOptions.emplace_back("Indirect");
   declareProperty("EMode", "Direct",
                   boost::make_shared<StringListValidator>(eModeOptions),
                   "Some unit conversions require this value to be set "

@@ -245,9 +245,9 @@ public:
 
   void testGetExtension() {
     std::vector<std::string> exts;
-    exts.push_back("_event.nxs");
-    exts.push_back(".nxs.h5");
-    exts.push_back(".n*");
+    exts.emplace_back("_event.nxs");
+    exts.emplace_back(".nxs.h5");
+    exts.emplace_back(".n*");
 
     TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("", exts), "");
     TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("PG31234", exts), "");

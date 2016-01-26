@@ -85,8 +85,8 @@ void PlotPeakByLogValue::init() {
                                        "(default the highest value of x)");
 
   std::vector<std::string> fitOptions;
-  fitOptions.push_back("Sequential");
-  fitOptions.push_back("Individual");
+  fitOptions.emplace_back("Sequential");
+  fitOptions.emplace_back("Individual");
   declareProperty("FitType", "Sequential",
                   boost::make_shared<StringListValidator>(fitOptions),
                   "Defines the way of setting initial values. \n"

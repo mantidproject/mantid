@@ -47,15 +47,15 @@ SCARFTomoReconstruction::SCARFTomoReconstruction()
 void SCARFTomoReconstruction::init() {
   // list of all actions
   std::vector<std::string> actions;
-  actions.push_back("LogIn");
-  actions.push_back("LogOut");
-  actions.push_back("Ping");
-  actions.push_back("Upload");
-  actions.push_back("SubmitJob");
-  actions.push_back("JobStatus");
-  actions.push_back("JobStatusByID");
-  actions.push_back("Download");
-  actions.push_back("CancelJob");
+  actions.emplace_back("LogIn");
+  actions.emplace_back("LogOut");
+  actions.emplace_back("Ping");
+  actions.emplace_back("Upload");
+  actions.emplace_back("SubmitJob");
+  actions.emplace_back("JobStatus");
+  actions.emplace_back("JobStatusByID");
+  actions.emplace_back("Download");
+  actions.emplace_back("CancelJob");
 
   auto listValue = boost::make_shared<StringListValidator>(actions);
   auto nullV = boost::make_shared<Kernel::NullValidator>();
@@ -1207,21 +1207,21 @@ void SCARFTomoReconstruction::genOutputStatusInfo(
     if (name) {
       jobNames.push_back(name->innerText().c_str());
     } else {
-      jobNames.push_back("Unknown!");
+      jobNames.emplace_back("Unknown!");
     }
 
     Poco::XML::Element *status = el->getChildElement("status");
     if (status) {
       jobStatus.push_back(status->innerText().c_str());
     } else {
-      jobStatus.push_back("Unknown!");
+      jobStatus.emplace_back("Unknown!");
     }
 
     Poco::XML::Element *cmd = el->getChildElement("cmd");
     if (cmd) {
       jobCommands.push_back(cmd->innerText().c_str());
     } else {
-      jobCommands.push_back("Unknown!");
+      jobCommands.emplace_back("Unknown!");
     }
   }
 

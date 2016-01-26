@@ -292,9 +292,9 @@ void FilterEventsByLogValuePreNexus::init() {
 
   // Loading option
   std::vector<std::string> propOptions;
-  propOptions.push_back("Auto");
-  propOptions.push_back("Serial");
-  propOptions.push_back("Parallel");
+  propOptions.emplace_back("Auto");
+  propOptions.emplace_back("Serial");
+  propOptions.emplace_back("Parallel");
   declareProperty("UseParallelProcessing", "Auto",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"
@@ -317,9 +317,9 @@ void FilterEventsByLogValuePreNexus::init() {
 
   //
   std::vector<std::string> vecfunmode;
-  vecfunmode.push_back("LoadData");
-  vecfunmode.push_back("Filter");
-  vecfunmode.push_back("ExamineEventLog");
+  vecfunmode.emplace_back("LoadData");
+  vecfunmode.emplace_back("Filter");
+  vecfunmode.emplace_back("ExamineEventLog");
   declareProperty("FunctionMode", "LoadData",
                   boost::make_shared<StringListValidator>(vecfunmode),
                   "Function mode for different purpose. ");

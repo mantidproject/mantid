@@ -67,13 +67,13 @@ public:
     // Add background functions
     std::vector<double> parvalues;
     std::vector<std::string> parnames;
-    parnames.push_back("A0");
+    parnames.emplace_back("A0");
     parvalues.push_back(1.0);
-    parnames.push_back("A1");
+    parnames.emplace_back("A1");
     parvalues.push_back(1.0);
-    parnames.push_back("A2");
+    parnames.emplace_back("A2");
     parvalues.push_back(1.0);
-    parnames.push_back("A3");
+    parnames.emplace_back("A3");
     parvalues.push_back(1.0);
 
     // Chebyshev
@@ -81,7 +81,7 @@ public:
         "Chebyshev", 3, parnames, parvalues, 5000., 10000.));
 
     // FullprofPolynomial
-    parnames.push_back("Bkpos");
+    parnames.emplace_back("Bkpos");
     parvalues.push_back(7000.);
 
     LeBailFunction lebailfunction2("NeutronBk2BkExpConvPVoigt");

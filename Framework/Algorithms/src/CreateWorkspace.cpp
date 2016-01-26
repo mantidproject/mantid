@@ -28,8 +28,8 @@ CreateWorkspace::~CreateWorkspace() {}
 void CreateWorkspace::init() {
 
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
-  unitOptions.push_back("SpectraNumber");
-  unitOptions.push_back("Text");
+  unitOptions.emplace_back("SpectraNumber");
+  unitOptions.emplace_back("Text");
 
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),

@@ -61,9 +61,9 @@ void ConvertUnits::init() {
                   "registered in\n"
                   "the Unit Factory)");
   std::vector<std::string> propOptions;
-  propOptions.push_back("Elastic");
-  propOptions.push_back("Direct");
-  propOptions.push_back("Indirect");
+  propOptions.emplace_back("Elastic");
+  propOptions.emplace_back("Direct");
+  propOptions.emplace_back("Indirect");
   declareProperty("EMode", "Elastic",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The energy mode (default: elastic)");

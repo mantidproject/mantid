@@ -130,17 +130,17 @@ void LeBailFit::init() {
 
   // Functionality: Fit/Calculation/Background
   std::vector<std::string> functions;
-  functions.push_back("LeBailFit");
-  functions.push_back("Calculation");
-  functions.push_back("MonteCarlo");
-  functions.push_back("RefineBackground");
+  functions.emplace_back("LeBailFit");
+  functions.emplace_back("Calculation");
+  functions.emplace_back("MonteCarlo");
+  functions.emplace_back("RefineBackground");
   auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
   this->declareProperty("Function", "LeBailFit", validator, "Functionality");
 
   // Peak type
   vector<string> peaktypes;
-  peaktypes.push_back("ThermalNeutronBk2BkExpConvPVoigt");
-  peaktypes.push_back("NeutronBk2BkExpConvPVoigt");
+  peaktypes.emplace_back("ThermalNeutronBk2BkExpConvPVoigt");
+  peaktypes.emplace_back("NeutronBk2BkExpConvPVoigt");
   auto peaktypevalidator = boost::make_shared<StringListValidator>(peaktypes);
   declareProperty("PeakType", "ThermalNeutronBk2BkExpConvPVoigt",
                   peaktypevalidator, "Peak profile type.");
@@ -149,9 +149,9 @@ void LeBailFit::init() {
    * ---------------------------------*/
   // About background:  Background type, input (table workspace or array)
   std::vector<std::string> bkgdtype;
-  bkgdtype.push_back("Polynomial");
-  bkgdtype.push_back("Chebyshev");
-  bkgdtype.push_back("FullprofPolynomial");
+  bkgdtype.emplace_back("Polynomial");
+  bkgdtype.emplace_back("Chebyshev");
+  bkgdtype.emplace_back("FullprofPolynomial");
   auto bkgdvalidator =
       boost::make_shared<Kernel::StringListValidator>(bkgdtype);
   declareProperty("BackgroundType", "Polynomial", bkgdvalidator,
@@ -405,7 +405,7 @@ void LeBailFit::processInputBackground() {
     size_t i0 = 0;
     if (m_backgroundType == "FullprofPolynomial") {
       // TODO - Add this special case to Wiki
-      m_backgroundParameterNames.push_back("Bkpos");
+      m_backgroundParameterNames.emplace_back("Bkpos");
       if (m_backgroundParameters[0] < m_startX ||
           m_backgroundParameters[0] > m_endX)
         g_log.warning(

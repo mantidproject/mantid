@@ -85,8 +85,8 @@ public:
 
   std::vector<std::string> getAttributeNames() const {
     std::vector<std::string> Res;
-    Res.push_back("OptRuns");
-    Res.push_back("PeakWorkspaceName");
+    Res.emplace_back("OptRuns");
+    Res.emplace_back("PeakWorkspaceName");
     return Res;
   }
 

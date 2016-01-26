@@ -93,9 +93,9 @@ void GenerateEventsFilter::init() {
                       new VisibleWhenProperty("LogName", IS_EQUAL_TO, ""));
 
   std::vector<std::string> timeoptions;
-  timeoptions.push_back("Seconds");
-  timeoptions.push_back("Nanoseconds");
-  timeoptions.push_back("Percent");
+  timeoptions.emplace_back("Seconds");
+  timeoptions.emplace_back("Nanoseconds");
+  timeoptions.emplace_back("Percent");
   declareProperty(
       "UnitOfTime", "Seconds",
       boost::make_shared<Kernel::StringListValidator>(timeoptions),
@@ -127,9 +127,9 @@ void GenerateEventsFilter::init() {
                       new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
   std::vector<std::string> filteroptions;
-  filteroptions.push_back("Both");
-  filteroptions.push_back("Increase");
-  filteroptions.push_back("Decrease");
+  filteroptions.emplace_back("Both");
+  filteroptions.emplace_back("Increase");
+  filteroptions.emplace_back("Decrease");
   declareProperty(
       "FilterLogValueByChangingDirection", "Both",
       boost::make_shared<Kernel::StringListValidator>(filteroptions),
@@ -148,9 +148,9 @@ void GenerateEventsFilter::init() {
                       new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
   vector<string> logboundoptions;
-  logboundoptions.push_back("Centre");
-  logboundoptions.push_back("Left");
-  logboundoptions.push_back("Other");
+  logboundoptions.emplace_back("Centre");
+  logboundoptions.emplace_back("Left");
+  logboundoptions.emplace_back("Other");
   auto logvalidator = boost::make_shared<StringListValidator>(logboundoptions);
   declareProperty(
       "LogBoundary", "Centre", logvalidator,
@@ -172,8 +172,8 @@ void GenerateEventsFilter::init() {
 
   // Linear or parallel
   vector<string> processoptions;
-  processoptions.push_back("Serial");
-  processoptions.push_back("Parallel");
+  processoptions.emplace_back("Serial");
+  processoptions.emplace_back("Parallel");
   auto procvalidator = boost::make_shared<StringListValidator>(processoptions);
   declareProperty(
       "UseParallelProcessing", "Serial", procvalidator,

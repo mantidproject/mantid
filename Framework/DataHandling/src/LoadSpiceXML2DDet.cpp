@@ -181,7 +181,7 @@ const std::string LoadSpiceXML2DDet::summary() const {
  */
 void LoadSpiceXML2DDet::init() {
   std::vector<std::string> xmlext;
-  xmlext.push_back(".xml");
+  xmlext.emplace_back(".xml");
   declareProperty(
       new FileProperty("Filename", "", FileProperty::FileAction::Load, xmlext),
       "XML file name for one scan including 2D detectors counts from SPICE");
