@@ -20,6 +20,7 @@
 #include "MantidQtAPI/AlgorithmPropertiesWidget.h"
 #include "MantidQtMantidWidgets/ProcessingAlgoWidget.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
+#include "MantidQtMantidWidgets/PreviewPlot.h"
 
 /** 
 The PluginCollectionInterface implements the interface for the plugin library and holds a 
@@ -152,4 +153,9 @@ DECLARE_WIDGET_PLUGIN(MessageDisplayPlugin,
 DECLARE_WIDGET_PLUGIN(DataSelectorPlugin,
     MantidQt::MantidWidgets::DataSelector,
     "Choose a file path or workspace to work with");
+
+DECLARE_WIDGET_PLUGIN(PreviewPlotPlugin,
+    MantidQt::MantidWidgets::PreviewPlot,
+    "Curve plots for workspace spectra");
+
 #endif
