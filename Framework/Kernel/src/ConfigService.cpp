@@ -1302,7 +1302,7 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
 #ifdef __APPLE__
   cmd = "sw_vers"; // mac
 #elif _WIN32
-  cmd = "wmic";              // windows
+  cmd = "wmic";                 // windows
   args.emplace_back("os");      // windows
   args.emplace_back("get");     // windows
   args.emplace_back("Caption"); // windows

@@ -20,7 +20,7 @@ public:
   static void destroySuite(LatticeDomainTest *suite) { delete suite; }
 
   void testConstruction() {
-      std::vector<V3D> hkls{{1, 1, 1}, {2, 1, 0}, {0, 0, 1}};
+    std::vector<V3D> hkls{{1, 1, 1}, {2, 1, 0}, {0, 0, 1}};
 
     TS_ASSERT_THROWS_NOTHING(LatticeDomain domain(hkls));
 
@@ -29,7 +29,7 @@ public:
   }
 
   void testSize() {
-      std::vector<V3D> hkls{{1, 1, 1}, {2, 1, 0}, {0, 0, 1}};
+    std::vector<V3D> hkls{{1, 1, 1}, {2, 1, 0}, {0, 0, 1}};
 
     LatticeDomain domain(hkls);
 
@@ -37,7 +37,7 @@ public:
   }
 
   void testAccess() {
-      std::vector<V3D> hkls{{1, 1, 1}, {2, 1, 0}, {0, 0, 1}};
+    std::vector<V3D> hkls{{1, 1, 1}, {2, 1, 0}, {0, 0, 1}};
 
     LatticeDomain domain(hkls);
 
