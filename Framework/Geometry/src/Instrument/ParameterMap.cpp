@@ -344,7 +344,7 @@ void ParameterMap::add(const IComponent *comp,
     if (existing_par != m_map.end()) {
       existing_par->second = par;
     } else {
-      m_map.insert(std::make_pair(comp->getComponentID(), par));
+      m_map.emplace(comp->getComponentID(), par);
     }
   }
 }
@@ -1049,9 +1049,11 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
 
   for (auto it = oldParameterNames.begin(); it != oldParameterNames.end();
        ++it) {
-    Parameter_sptr thisParameter = oldPMap->get(oldComp, *it);
-    // Insert the fetched parameter in the m_map
-    m_map.insert(std::make_pair(newComp->getComponentID(), thisParameter));
+    for (const auto &parameterName : oldParameterNames) {
+      // Insert the fetched parameter in the m_map
+      m_map.emplace(newComp->getComponentID(),
+                    oldPMap->get(oldComp, parameterName));
+    }
   }
 }
 

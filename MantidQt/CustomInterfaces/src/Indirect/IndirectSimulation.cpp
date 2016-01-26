@@ -37,9 +37,14 @@ void IndirectSimulation::initLayout()
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // Insert each tab into the interface on creation
-  m_simulationTabs.insert(std::make_pair(MOLDYN, new IndirectMolDyn(m_uiForm.IndirectSimulationTabs->widget(MOLDYN))));
-  m_simulationTabs.insert(std::make_pair(SASSENA, new IndirectSassena(m_uiForm.IndirectSimulationTabs->widget(SASSENA))));
-  m_simulationTabs.insert(std::make_pair(DOS, new DensityOfStates(m_uiForm.IndirectSimulationTabs->widget(DOS))));
+  m_simulationTabs.emplace(
+      MOLDYN,
+      new IndirectMolDyn(m_uiForm.IndirectSimulationTabs->widget(MOLDYN)));
+  m_simulationTabs.emplace(
+      SASSENA,
+      new IndirectSassena(m_uiForm.IndirectSimulationTabs->widget(SASSENA)));
+  m_simulationTabs.emplace(
+      DOS, new DensityOfStates(m_uiForm.IndirectSimulationTabs->widget(DOS)));
 
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, IndirectSimulationTab*>::iterator iter;

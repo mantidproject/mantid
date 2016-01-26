@@ -191,7 +191,7 @@ void IntegratePeaksUsingClusters::exec() {
                           << " overlaps with another Peak: " << it->second
                           << " and shares label id: " << it->first << std::endl;
         }
-        labelsTakenByPeaks.insert(std::make_pair(labelIdAtPeak, i));
+        labelsTakenByPeaks.emplace(labelIdAtPeak, i);
       }
       progress.report();
     }

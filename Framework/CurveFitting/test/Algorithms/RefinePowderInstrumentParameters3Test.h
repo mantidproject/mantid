@@ -399,7 +399,7 @@ public:
       double parvalue;
       row >> parname >> parvalue;
 
-      paramvalues.insert(std::make_pair(parname, parvalue));
+      paramvalues.emplace(parname, parvalue);
     }
 
     return;

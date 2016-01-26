@@ -1664,8 +1664,7 @@ void FitPowderDiffPeaks::storeFunctionParameters(
   vector<string> paramnames = function->getParameterNames();
   parammaps.clear();
   for (size_t i = 0; i < paramnames.size(); ++i)
-    parammaps.insert(
-        make_pair(paramnames[i], function->getParameter(paramnames[i])));
+    parammaps.emplace(paramnames[i], function->getParameter(paramnames[i]));
   return;
 }
 
@@ -2345,7 +2344,7 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
   for (size_t ir = 0; ir < numrows; ++ir) {
     API::TableRow trow = parameterWS->getRow(ir);
     trow >> parname >> value;
-    m_instrumentParmaeters.insert(std::make_pair(parname, value));
+    m_instrumentParmaeters.emplace(parname, value);
     g_log.notice() << "[DBx211] Import parameter " << parname << ": " << value
                    << endl;
   }

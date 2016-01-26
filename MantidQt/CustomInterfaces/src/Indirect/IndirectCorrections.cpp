@@ -36,17 +36,16 @@ IndirectCorrections::IndirectCorrections(QWidget *parent)
   // All tabs MUST appear here to be shown in interface.
   // We make the assumption that each map key corresponds to the order in which
   // the tabs appear.
-  m_tabs.insert(std::make_pair(CONTAINER_SUBTRACTION,
-                               new ContainerSubtraction(m_uiForm.twTabs->widget(
-                                   CONTAINER_SUBTRACTION))));
-  m_tabs.insert(std::make_pair(
-      CALC_CORR,
-      new CalculatePaalmanPings(m_uiForm.twTabs->widget(CALC_CORR))));
-  m_tabs.insert(std::make_pair(
-      APPLY_CORR, new ApplyPaalmanPings(m_uiForm.twTabs->widget(APPLY_CORR))));
-  m_tabs.insert(std::make_pair(
-      ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twTabs->widget(
-                                  ABSORPTION_CORRECTIONS))));
+  m_tabs.emplace(
+      CONTAINER_SUBTRACTION,
+      new ContainerSubtraction(m_uiForm.twTabs->widget(CONTAINER_SUBTRACTION)));
+  m_tabs.emplace(CALC_CORR,
+                 new CalculatePaalmanPings(m_uiForm.twTabs->widget(CALC_CORR)));
+  m_tabs.emplace(APPLY_CORR,
+                 new ApplyPaalmanPings(m_uiForm.twTabs->widget(APPLY_CORR)));
+  m_tabs.emplace(ABSORPTION_CORRECTIONS,
+                 new AbsorptionCorrections(
+                     m_uiForm.twTabs->widget(ABSORPTION_CORRECTIONS)));
 }
 
 /**

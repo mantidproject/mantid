@@ -148,8 +148,7 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName,
         "FileLoaderRegistryImpl::canLoad - Algorithm '" + algorithmName +
         "' is not registered as a loader.");
 
-  std::multimap<std::string, int> names;
-  names.insert(std::make_pair(algorithmName, -1));
+  std::multimap<std::string, int> names{{algorithmName, -1}};
   IAlgorithm_sptr loader;
   if (nexus) {
     if (NexusDescriptor::isHDF(filename)) {

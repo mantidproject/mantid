@@ -224,7 +224,7 @@ void SaveFullprofResolution::parseTableWorkspace() {
   for (size_t ir = 0; ir < numpars; ++ir) {
     double parvalue =
         m_profileTableWS->cell<double>(ir, static_cast<size_t>(colindex));
-    m_profileParamMap.insert(std::make_pair(vec_parnames[ir], parvalue));
+    m_profileParamMap.emplace(vec_parnames[ir], parvalue);
   }
 
   // Debug output

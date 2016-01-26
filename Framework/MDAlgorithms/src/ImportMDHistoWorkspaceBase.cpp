@@ -187,7 +187,7 @@ ImportMDHistoWorkspaceBase::validateInputs() {
     std::string message = "The selected frames can be 'HKL', 'QSample', 'QLab' "
                           "or 'General Frame'. You must specify as many frames "
                           "as there are dimensions.";
-    errors.insert(std::make_pair(framePropertyName, message));
+    errors.emplace(framePropertyName, message);
   }
   return errors;
 }

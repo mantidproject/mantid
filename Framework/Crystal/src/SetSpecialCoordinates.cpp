@@ -40,12 +40,12 @@ SetSpecialCoordinates::SetSpecialCoordinates() {
   m_specialCoordinatesNames.push_back(SetSpecialCoordinates::QSampleOption());
   m_specialCoordinatesNames.push_back(SetSpecialCoordinates::HKLOption());
 
-  m_specialCoordinatesMap.insert(std::make_pair(
-      SetSpecialCoordinates::QLabOption(), Mantid::Kernel::QLab));
-  m_specialCoordinatesMap.insert(std::make_pair(
-      SetSpecialCoordinates::QSampleOption(), Mantid::Kernel::QSample));
-  m_specialCoordinatesMap.insert(
-      std::make_pair(SetSpecialCoordinates::HKLOption(), Mantid::Kernel::HKL));
+  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::QLabOption(),
+                                  Mantid::Kernel::QLab);
+  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::QSampleOption(),
+                                  Mantid::Kernel::QSample);
+  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::HKLOption(),
+                                  Mantid::Kernel::HKL);
 }
 
 //----------------------------------------------------------------------------------------------

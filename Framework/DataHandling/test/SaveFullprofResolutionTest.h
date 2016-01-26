@@ -257,35 +257,17 @@ public:
    */
   void createProfile10TableWS(std::string wsname) {
     // Create a map of string/double for parameters of profile 10
-    std::map<std::string, double> parammap;
-    parammap.insert(make_pair("BANK", 1));
-    parammap.insert(make_pair("Alph0", 1.88187));
-    parammap.insert(make_pair("Alph0t", 64.4102));
-    parammap.insert(make_pair("Alph1", 0.));
-    parammap.insert(make_pair("Alph1t", 0.));
-    parammap.insert(make_pair("Beta0", 6.2511));
-    parammap.insert(make_pair("Beta0t", 85.9189));
-    parammap.insert(make_pair("Beta1", 0.));
-    parammap.insert(make_pair("Beta1t", 0.));
-    parammap.insert(make_pair("CWL", 0.533));
-    parammap.insert(make_pair("Dtt1", 22584.5));
-    parammap.insert(make_pair("Dtt1t", 22604.9));
-    parammap.insert(make_pair("Dtt2", 0));
-    parammap.insert(make_pair("Dtt2t", 0.3));
-    parammap.insert(make_pair("Gam0", 0));
-    parammap.insert(make_pair("Gam1", 5.744));
-    parammap.insert(make_pair("Gam2", 0));
-    parammap.insert(make_pair("Sig0", 0));
-    parammap.insert(make_pair("Sig1", 3.16228));
-    parammap.insert(make_pair("Sig2", 16.7331));
-    parammap.insert(make_pair("Tcross", 0.356));
-    parammap.insert(make_pair("Width", 1.0521));
-    parammap.insert(make_pair("Zero", 0));
-    parammap.insert(make_pair("Zerot", 11.3175));
-    parammap.insert(make_pair("step", 4.0002));
-    parammap.insert(make_pair("tof-max", 51000));
-    parammap.insert(make_pair("tof-min", 5000.23));
-    parammap.insert(make_pair("twotheta", 90.0));
+    std::map<std::string, double> parammap{
+        {"BANK", 1.},        {"Alph0", 1.88187},  {"Alph0t", 64.4102},
+        {"Alph1", 0.},       {"Alph1t", 0.},      {"Beta0", 6.2511},
+        {"Beta0t", 85.9189}, {"Beta1", 0.},       {"Beta1t", 0.},
+        {"CWL", 0.533},      {"Dtt1", 22584.5},   {"Dtt1t", 22604.9},
+        {"Dtt2", 0.},        {"Dtt2t", 0.3},      {"Gam0", 0.},
+        {"Gam1", 5.744},     {"Gam2", 0.},        {"Sig0", 0.},
+        {"Sig1", 3.16228},   {"Sig2", 16.7331},   {"Tcross", 0.356},
+        {"Width", 1.0521},   {"Zero", 0.},        {"Zerot", 11.3175},
+        {"step", 4.0002},    {"tof-max", 51000.}, {"tof-min", 5000.23},
+        {"twotheta", 90.0}};
 
     // Crate table workspace
     DataObjects::TableWorkspace_sptr geomws =

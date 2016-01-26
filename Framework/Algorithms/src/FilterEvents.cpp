@@ -507,9 +507,7 @@ void FilterEvents::createOutputWorkspaces() {
   if (m_hasInfoWS) {
     for (size_t ir = 0; ir < m_informationWS->rowCount(); ++ir) {
       API::TableRow row = m_informationWS->getRow(ir);
-      int &indexws = row.Int(0);
-      std::string &info = row.String(1);
-      infomap.insert(std::make_pair(indexws, info));
+      infomap.emplace(row.Int(0), row.String(1));
     }
   }
 
@@ -558,7 +556,7 @@ void FilterEvents::createOutputWorkspaces() {
                 "EventWorkspace", m_eventWS->getNumberHistograms(), 2, 1));
     API::WorkspaceFactory::Instance().initializeFromParent(m_eventWS, optws,
                                                            false);
-    m_outputWS.insert(std::make_pair(wsgroup, optws));
+    m_outputWS.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace
     if (m_hasInfoWS) {
@@ -882,7 +880,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
           int index = wsiter->first;
           DataObjects::EventList *output_el =
               wsiter->second->getEventListPtr(iws);
-          outputs.insert(std::make_pair(index, output_el));
+          outputs.emplace(index, output_el);
         }
       }
 
@@ -984,7 +982,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
           int index = wsiter->first;
           DataObjects::EventList *output_el =
               wsiter->second->getEventListPtr(iws);
-          outputs.insert(std::make_pair(index, output_el));
+          outputs.emplace(index, output_el);
         }
       }
 

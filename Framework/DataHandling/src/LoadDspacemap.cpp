@@ -343,7 +343,7 @@ void LoadDspacemap::readVulcanAsciiFile(const std::string &fileName,
     int32_t udet;
     double correction;
     istr >> udet >> correction;
-    vulcan.insert(std::make_pair(udet, correction));
+    vulcan.emplace(udet, correction);
     numentries++;
   }
 

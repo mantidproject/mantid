@@ -990,7 +990,7 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
     try {
       API::TableRow trow = parameterWS->getRow(ir);
       trow >> parname >> value;
-      parameters.insert(std::make_pair(parname, value));
+      parameters.emplace(parname, value);
     } catch (runtime_error &) {
       g_log.error() << "Import table workspace " << parameterWS->name()
                     << " error in line " << ir << ".  "

@@ -510,16 +510,13 @@ void GroupDetectors2::processXMLFile(std::string fname,
       loader.getGroupSpectraMap();
 
   // 3. Build m_GroupSpecInds
-  std::map<int, std::vector<detid_t>>::iterator dit;
-  for (dit = mGroupDetectorsMap.begin(); dit != mGroupDetectorsMap.end();
+  for (auto dit = mGroupDetectorsMap.begin(); dit != mGroupDetectorsMap.end();
        ++dit) {
-    int groupid = dit->first;
-    std::vector<size_t> tempv;
-    m_GroupSpecInds.insert(std::make_pair(groupid, tempv));
+    m_GroupSpecInds.emplace(dit->first, std::vector<size_t>());
   }
 
   // 4. Detector IDs
-  for (dit = mGroupDetectorsMap.begin(); dit != mGroupDetectorsMap.end();
+  for (auto dit = mGroupDetectorsMap.begin(); dit != mGroupDetectorsMap.end();
        ++dit) {
     int groupid = dit->first;
     std::vector<detid_t> detids = dit->second;
@@ -603,7 +600,7 @@ void GroupDetectors2::processGroupingWorkspace(
     if (groupid > 0) {
       if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
         // not found - create an empty set
-        group2WSIndexSetmap.insert(std::make_pair(groupid, std::set<size_t>()));
+        group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
       }
       // get a reference to the set
       std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
@@ -674,7 +671,7 @@ void GroupDetectors2::processMatrixWorkspace(
 
     if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
       // not found - create an empty set
-      group2WSIndexSetmap.insert(std::make_pair(groupid, std::set<size_t>()));
+      group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
     }
     // get a reference to the set
     std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];

@@ -729,7 +729,7 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
 
   double curvalue = minvalue;
   while (curvalue - valuetolerance < maxvalue) {
-    indexwsindexmap.insert(std::make_pair(index, wsindex));
+    indexwsindexmap.emplace(index, wsindex);
 
     // Log interval/value boundary
     double lowbound = curvalue - valuetolerance;

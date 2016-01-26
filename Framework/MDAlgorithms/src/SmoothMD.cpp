@@ -60,11 +60,8 @@ std::vector<std::string> functions() {
  * @return function map
  */
 SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
-  SmoothFunctionMap map;
-  map.insert(std::make_pair(
-      "Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
-                         _1, _2, _3)));
-  return map;
+  return {{"Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth,
+                              instance, _1, _2, _3)}};
 }
 }
 
@@ -287,11 +284,11 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
 
   if (widthVector.size() != 1 &&
       widthVector.size() != toSmoothWs->getNumDims()) {
-    product.insert(std::make_pair(widthVectorPropertyName,
-                                  widthVectorPropertyName +
-                                      " can either have one entry or needs to "
-                                      "have entries for each dimension of the "
-                                      "InputWorkspace."));
+    product.emplace(widthVectorPropertyName,
+                    widthVectorPropertyName +
+                        " can either have one entry or needs to "
+                        "have entries for each dimension of the "
+                        "InputWorkspace.");
   } else {
     for (auto it = widthVector.begin(); it != widthVector.end(); ++it) {
       const int widthEntry = *it;
@@ -299,7 +296,7 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
         std::stringstream message;
         message << widthVectorPropertyName
                 << " entries must be odd numbers. Bad entry is " << widthEntry;
-        product.insert(std::make_pair(widthVectorPropertyName, message.str()));
+        product.emplace(widthVectorPropertyName, message.str());
       }
     }
   }
@@ -333,8 +330,7 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
                   << " do not match. " << nBinsSmooth << " expected. Got "
                   << nBinsNorm << ". Shapes of inputs must be the same. Cannot "
                                   "continue smoothing.";
-          product.insert(std::make_pair(normalisationWorkspacePropertyName,
-                                        message.str()));
+          product.emplace(normalisationWorkspacePropertyName, message.str());
           break;
         }
       }

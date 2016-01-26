@@ -78,7 +78,7 @@ SymmetryOperationFactoryImpl::subscribedSymbols() const {
 void SymmetryOperationFactoryImpl::subscribe(
     const std::string &alias, const SymmetryOperation &prototype) {
   if (!isSubscribed(alias)) {
-    m_prototypes.insert(std::make_pair(alias, prototype));
+    m_prototypes.emplace(alias, prototype);
   }
 }
 

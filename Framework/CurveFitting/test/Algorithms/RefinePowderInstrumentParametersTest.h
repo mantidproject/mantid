@@ -42,8 +42,7 @@ public:
    */
   void Passed_test_FitZero() {
     // 1. Generate testing workspace
-    std::map<std::string, double> newparamvalues;
-    newparamvalues.insert(std::make_pair("Tcross", 0.5));
+    std::map<std::string, double> newparamvalues{{"Tcross", 0.5}};
 
     // This is the output from FitPowderDiffPeaks()
     std::string peakfilename("/home/wzz/Mantid/Code/debug/MyTestData/"
@@ -473,7 +472,7 @@ public:
         std::stringstream ss;
         ss.str(line);
         ss >> parname >> parvalue;
-        parameters.insert(std::make_pair(parname, parvalue));
+        parameters.emplace(parname, parvalue);
 
         try {
           ss >> parmin >> parmax >> parstepsize;
@@ -504,7 +503,7 @@ public:
       double parvalue;
       row >> parname >> parvalue;
 
-      paramvalues.insert(std::make_pair(parname, parvalue));
+      paramvalues.emplace(parname, parvalue);
     }
 
     return;

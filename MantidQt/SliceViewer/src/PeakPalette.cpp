@@ -10,28 +10,28 @@ namespace MantidQt
     PeakPalette::PeakPalette()
     {
       int index = 0;
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#bf7651")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#bd97cb")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#ceeeea")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#da4a52")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#9bc888")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#ffe181")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#e8b7c1")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#f38235")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#8390c6")));
-      m_foregroundMap.insert(std::make_pair(index, QColor("#4ca0ac")));
+      m_foregroundMap.emplace(index++, QColor("#bf7651"));
+      m_foregroundMap.emplace(index++, QColor("#bd97cb"));
+      m_foregroundMap.emplace(index++, QColor("#ceeeea"));
+      m_foregroundMap.emplace(index++, QColor("#da4a52"));
+      m_foregroundMap.emplace(index++, QColor("#9bc888"));
+      m_foregroundMap.emplace(index++, QColor("#ffe181"));
+      m_foregroundMap.emplace(index++, QColor("#e8b7c1"));
+      m_foregroundMap.emplace(index++, QColor("#f38235"));
+      m_foregroundMap.emplace(index++, QColor("#8390c6"));
+      m_foregroundMap.emplace(index, QColor("#4ca0ac"));
 
       index = 0;
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#bf7651")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#bd97cb")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#ceeeea")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#da4a52")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#9bc888")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#ffe181")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#e8b7c1")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#f38235")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#8390c6")));
-      m_backgroundMap.insert(std::make_pair(index, QColor("#4ca0ac")));
+      m_backgroundMap.emplace(index++, QColor("#bf7651"));
+      m_backgroundMap.emplace(index++, QColor("#bd97cb"));
+      m_backgroundMap.emplace(index++, QColor("#ceeeea"));
+      m_backgroundMap.emplace(index++, QColor("#da4a52"));
+      m_backgroundMap.emplace(index++, QColor("#9bc888"));
+      m_backgroundMap.emplace(index++, QColor("#ffe181"));
+      m_backgroundMap.emplace(index++, QColor("#e8b7c1"));
+      m_backgroundMap.emplace(index++, QColor("#f38235"));
+      m_backgroundMap.emplace(index++, QColor("#8390c6"));
+      m_backgroundMap.emplace(index, QColor("#4ca0ac"));
     }
 
     PeakPalette::PeakPalette(const PeakPalette& other) : m_backgroundMap(other.m_backgroundMap), m_foregroundMap(other.m_foregroundMap)

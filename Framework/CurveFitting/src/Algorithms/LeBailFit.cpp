@@ -976,7 +976,7 @@ void LeBailFit::parseInstrumentParametersTable() {
         trow >> dblvalue;
         g_log.debug() << "Value = " << dblvalue << ".\n";
         ;
-        tempdblmap.insert(std::make_pair(colname, dblvalue));
+        tempdblmap.emplace(colname, dblvalue);
       } else {
         // string data
         g_log.debug() << "Col-name = " << colname << ", ";
@@ -987,7 +987,7 @@ void LeBailFit::parseInstrumentParametersTable() {
                        strvalue.end());
 
         g_log.debug() << "Value = " << strvalue << ".\n";
-        tempstrmap.insert(std::make_pair(colname, strvalue));
+        tempstrmap.emplace(colname, strvalue);
       }
     }
 
@@ -1072,9 +1072,8 @@ void LeBailFit::parseInstrumentParametersTable() {
     newparameter.minrecordvalue = newparameter.maxvalue + 1.0;
     newparameter.maxrecordvalue = newparameter.minvalue - 1.0;
 
-    m_funcParameters.insert(std::make_pair(newparameter.name, newparameter));
-    m_origFuncParameters.insert(
-        std::make_pair(newparameter.name, newparameter.curvalue));
+    m_funcParameters.emplace(newparameter.name, newparameter);
+    m_origFuncParameters.emplace(newparameter.name, newparameter.curvalue);
 
     g_log.information() << "Inserting Parameter " << newparameter.name << " = "
                         << newparameter.curvalue << ".\n";
@@ -1219,7 +1218,7 @@ void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
     if (parname.size() > 0 && (parname[0] == 'A' || parname == "Bkpos")) {
       // Insert parameter name starting with A or Bkpos (special case for
       // FullprofPolynomial)
-      parmap.insert(std::make_pair(parname, parvalue));
+      parmap.emplace(parname, parvalue);
     }
   }
 
@@ -2663,7 +2662,7 @@ LeBailFit::convertToDoubleMap(std::map<std::string, Parameter> &inmap) {
   std::map<std::string, double> outmap;
   std::map<std::string, Parameter>::iterator miter;
   for (miter = inmap.begin(); miter != inmap.end(); ++miter) {
-    outmap.insert(std::make_pair(miter->first, miter->second.curvalue));
+    outmap.emplace(miter->first, miter->second.curvalue);
   }
 
   return outmap;

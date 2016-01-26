@@ -120,7 +120,7 @@ public:
     std::vector<Mantid::detid_t> group(2, 1);
     group[1] = 2;
     Mantid::det2group_map mapping;
-    mapping.insert(std::make_pair(1, group));
+    mapping.emplace(1, group);
     fileBacked->cacheDetectorGroupings(mapping);
   }
 
@@ -130,7 +130,7 @@ public:
     std::vector<Mantid::detid_t> group(2, 1);
     group[1] = 2;
     Mantid::det2group_map mapping;
-    mapping.insert(std::make_pair(1, group));
+    mapping.emplace(1, group);
     fileBacked->cacheDetectorGroupings(mapping);
 
     TS_ASSERT_EQUALS(group, fileBacked->getGroupMembers(1));

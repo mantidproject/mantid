@@ -295,7 +295,7 @@ void RefinePowderInstrumentParameters3::parseTableWorkspace(
     }
     newpar.fit = fit;
 
-    parammap.insert(make_pair(parname, newpar));
+    parammap.emplace(parname, newpar);
   }
 
   return;
@@ -1114,7 +1114,7 @@ void RefinePowderInstrumentParameters3::addOrReplace(
     Parameter newparameter;
     newparameter.name = parname;
     newparameter.curvalue = parvalue;
-    parameters.insert(make_pair(parname, newparameter));
+    parameters.emplace(parname, newparameter);
   }
 
   return;
@@ -1317,7 +1317,7 @@ void duplicateParameters(map<string, Parameter> source,
     Parameter param = miter->second;
     Parameter newparam;
     newparam = param;
-    target.insert(make_pair(parname, newparam));
+    target.emplace(parname, newparam);
   }
 
   return;
@@ -1360,7 +1360,7 @@ void convertToDict(vector<string> strvec, map<string, size_t> &lookupdict) {
   lookupdict.clear();
 
   for (size_t i = 0; i < strvec.size(); ++i)
-    lookupdict.insert(make_pair(strvec[i], i));
+    lookupdict.emplace(strvec[i], i);
 
   return;
 }
@@ -1397,7 +1397,7 @@ void storeFunctionParameterValue(
     string &parname = parnames[i];
     double parvalue = function->getParameter(i);
     double parerror = function->getError(i);
-    parvaluemap.insert(make_pair(parname, make_pair(parvalue, parerror)));
+    parvaluemap.emplace(parname, make_pair(parvalue, parerror));
   }
 
   return;

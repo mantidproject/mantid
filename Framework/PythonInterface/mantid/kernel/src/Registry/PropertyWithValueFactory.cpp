@@ -26,14 +26,13 @@ void initTypeLookup(PyTypeIndex &index) {
 
   // Map the Python types to the best match in C++
   typedef TypedPropertyValueHandler<double> FloatHandler;
-  index.insert(
-      std::make_pair(&PyFloat_Type, boost::make_shared<FloatHandler>()));
+  index.emplace(&PyFloat_Type, boost::make_shared<FloatHandler>());
 
   typedef TypedPropertyValueHandler<long> IntHandler;
-  index.insert(std::make_pair(&PyInt_Type, boost::make_shared<IntHandler>()));
+  index.emplace(&PyInt_Type, boost::make_shared<IntHandler>());
 
   typedef TypedPropertyValueHandler<bool> BoolHandler;
-  index.insert(std::make_pair(&PyBool_Type, boost::make_shared<BoolHandler>()));
+  index.emplace(&PyBool_Type, boost::make_shared<BoolHandler>());
 
   typedef TypedPropertyValueHandler<std::string> StrHandler;
   index.insert(
@@ -70,8 +69,7 @@ void initArrayLookup(PyArrayIndex &index) {
       std::make_pair("IntArray", boost::make_shared<IntArrayHandler>()));
 
   typedef SequenceTypeHandler<std::vector<long>> LongIntArrayHandler;
-  index.insert(std::make_pair("LongIntArray",
-                              boost::make_shared<LongIntArrayHandler>()));
+  index.emplace("LongIntArray", boost::make_shared<LongIntArrayHandler>());
 
   typedef SequenceTypeHandler<std::vector<std::string>> StringArrayHandler;
   index.insert(

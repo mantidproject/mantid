@@ -91,7 +91,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
     isNumeric = !istr.fail();
     old_data = sdata;
 
-    change_times.insert(std::make_pair(stime, sdata));
+    change_times.emplace(stime, sdata);
   }
 
   if (change_times.empty())

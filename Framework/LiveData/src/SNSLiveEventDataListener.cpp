@@ -854,8 +854,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableU32Pkt &pkt) {
   // Check to see if we should process this packet now.  If not, add it to the
   // variable map because we might need to process it later
   if (ignorePacket(pkt)) {
-    boost::shared_ptr<ADARA::Packet> ptr(new ADARA::VariableU32Pkt(pkt));
-    m_variableMap.insert(std::make_pair(std::make_pair(devId, pvId), ptr));
+    m_variableMap.emplace(std::make_pair(devId, pvId),
+                          boost::make_shared<ADARA::VariableU32Pkt>(pkt));
   } else {
     // Look up the name of this variable
     NameMapType::const_iterator it =
@@ -905,8 +905,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableDoublePkt &pkt) {
   // Check to see if we should process this packet now.  If not, add it to the
   // variable map because we might need to process it later
   if (ignorePacket(pkt)) {
-    boost::shared_ptr<ADARA::Packet> ptr(new ADARA::VariableDoublePkt(pkt));
-    m_variableMap.insert(std::make_pair(std::make_pair(devId, pvId), ptr));
+    m_variableMap.emplace(std::make_pair(devId, pvId),
+                          boost::make_shared<ADARA::VariableDoublePkt>(pkt));
   } else {
     // Look up the name of this variable
     NameMapType::const_iterator it =
@@ -959,8 +959,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableStringPkt &pkt) {
   // Check to see if we should process this packet now.  If not, add it to the
   // variable map because we might need to process it later
   if (ignorePacket(pkt)) {
-    boost::shared_ptr<ADARA::Packet> ptr(new ADARA::VariableStringPkt(pkt));
-    m_variableMap.insert(std::make_pair(std::make_pair(devId, pvId), ptr));
+    m_variableMap.emplace(std::make_pair(devId, pvId),
+                          boost::make_shared<ADARA::VariableStringPkt>(pkt));
   } else {
     // Look up the name of this variable
     NameMapType::const_iterator it =
