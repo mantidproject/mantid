@@ -54,7 +54,13 @@ The background signal within PeakRadius is calculated by scaling the
 background signal density in the shell to the volume of the peak:
 
 ...
-   
+
+
+Workflow
+--------
+
+.. diagram:: HB3A-v1_wokflw.dot
+
 Usage
 ------
 

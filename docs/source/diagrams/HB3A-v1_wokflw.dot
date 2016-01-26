@@ -1,0 +1,41 @@
+digraph HB3AReduction {
+  label = "HB3A Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    Sample
+    OutputWorkspace
+  }
+
+  subgraph decisions {
+    $decision_style
+    isAbsUnits [label="Absolute\nUnits?"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    DgsDiagnose
+    DgsProcessDetectorVanadium
+    DgsConvertToEnergyTransfer
+    DgsAbsoluteUnitsReduction
+    Divide
+    Blabla
+  }
+
+  subgraph values {
+    $value_style
+    detVanMask [label="DetVan\nDiag Mask"]
+    intDetVan [label="Integrated\nDetVan"]
+    procSamp [label="Processed\nSample"]
+    background [label="Time-independent\nbackground"]
+    procUnits [label="Processed\nAbsolute\nUnits"]
+    absUnits [label="Absolute\nUnits\nDiag Mask"]
+    SPhiE [label="S(&phi;, E)"]
+  }
+
+  HB3A	 -> Blalba
+  Sample -> Blabla
+  Blabla -> OutputWorkspace
+}
+
