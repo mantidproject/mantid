@@ -61,11 +61,23 @@ This point of smoothness is represented by the red circle in the graph below of 
     :height: 600px
     :alt: quadratic example of BSpline
 
-CubicSpline function takes a set of attributes and a set of parameters.
-The first attrbiute is 'n' which has integer type and sets the number of
-interpolation points. The parameter names have the form 'yi' where 'y'
-is letter 'y' and 'i' is the parameter's index starting from 0 and have
-the type double. Likewise, the attribute names have the form 'xi'.
+CubicSplines and Fitting
+------------------------
+
+Fitting using a CubicSpline fit function is different to interpolating with a CubicSpline as it requires the number of breakpoints 
+to be less than the number of data points. This allows the CubicSpline to fit as close as possible to the dataset using a least-squares fit
+instead of passing through all data points as with interpolation. The fitted curve will pass through the breakpoints however it may not pass through
+all of the data points in the set.
+
+A example of fitting with a CubicSpline has been provided below, with the breakpoints highlighted in green.
+The original data plot is in black and our fitted CubicSpline with four breakpoints is in red.
+
+.. image:: ../images/BSplineFittingExample.png
+    :width: 800px
+    :align: center
+    :height: 600px
+    :alt: fitting example using BSplines
+    
 
 .. attributes::
 
@@ -73,8 +85,13 @@ the type double. Likewise, the attribute names have the form 'xi'.
    x0;Double;\-;Position of first exterior breakpoint
    x1;Double;\-;Position of the interior breakpoints
    x2;Double;\-;Position of the last exterior breakpoint
-
+   
 .. properties::
+
+Even though the number of fitting parameters is set to 3 by default, this number is based off :math:`N + K - 2`.
+Where :math:`N` is the number of breakpoints in the fit, :math:`K` is the order of the spline (stays as 3 for the cubic spline case) and the :math:`-2`
+accounts for our two exterior breakpoints :math:`x_0, x_n`.
+Increasing the number of breakpoints in your fit will increase the number of fitting parameters by the same amount.
 
 .. categories::
 
