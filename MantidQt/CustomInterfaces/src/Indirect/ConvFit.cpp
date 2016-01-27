@@ -278,8 +278,8 @@ void ConvFit::run() {
 	IAlgorithm_sptr cfs =
 		AlgorithmManager::Instance().create("ConvolutionFitSequential");
 	cfs->initialize();
+
 	cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
-	cfs->setProperty("ResolutionWorkspace", resWs);
 	cfs->setProperty("Function", function);
 	cfs->setProperty("BackgroundType",
 		m_uiForm.cbBackground->currentText().toStdString());
