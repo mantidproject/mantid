@@ -217,9 +217,6 @@ be generated inside the calibration folder, if `ExistingV` is `no`.
 
 .. _usage-PowderISIS-ref:
 
-
-
-
 Usage
 -----
 
