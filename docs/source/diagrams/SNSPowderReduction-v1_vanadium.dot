@@ -1,5 +1,5 @@
 digraph ProcessVanadium {
-  label="Process Vanadium Flowchart"
+  label="Process Vanadium Run Flowchart"
   $global_style
 
   subgraph params {

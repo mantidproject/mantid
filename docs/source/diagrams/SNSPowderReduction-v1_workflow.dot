@@ -17,6 +17,8 @@ digraph SNSPowderReduction {
     getSampleRun [label="Get a sample run number"]
     getProcessedSam [label="Get a processed sample run workspace"]
     compressEvents [label="CompressEvents v1"]
+    processCanRun [label="Process Container Run\n(see workflow diagram 'Process Container Run'"]
+    processVanRun [label="Process Vanadium Run\n(see workflow diagram 'Process Vanadium Run'"]
   }
 
 

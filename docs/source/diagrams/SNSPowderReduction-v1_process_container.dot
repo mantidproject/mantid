@@ -1,5 +1,5 @@
 digraph SNSPowderReductionContainer {
-  label="SNSPowderReduction Processing Container Flowchart"
+  label="Process Container Run Flowchart"
   $global_style
 
   subgraph params {

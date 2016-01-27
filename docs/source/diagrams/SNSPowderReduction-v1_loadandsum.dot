@@ -1,5 +1,5 @@
 digraph LoadAndSum {
-  labe="SNSPowderReduction Load And Sum Flowchart"
+  label="SNSPowderReduction Load And Sum Flowchart"
   $global_style
 
   subgraph params {

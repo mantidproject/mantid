@@ -28,13 +28,13 @@ Workflow
 
 .. diagram:: SNSPowderReduction-v1_workflow.dot
  
-.. diagram:: SNSPowderReduction-v1_focusandsum.dot 
- 
-.. diagram:: SNSPowderReduction-v1_focuschunks_workflow.dot
- 
 .. diagram:: SNSPowderReduction-v1_vanadium.dot
 
 .. diagram:: SNSPowderReduction-v1_process_container.dot
+
+.. diagram:: SNSPowderReduction-v1_focusandsum.dot
+
+.. diagram:: SNSPowderReduction-v1_focuschunks_workflow.dot
 
 .. diagram:: SNSPowderReduction-v1_loadandsum.dot
 
