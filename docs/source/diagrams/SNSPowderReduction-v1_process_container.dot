@@ -12,8 +12,8 @@ digraph SNSPowderReductionContainer {
 
   subgraph algorithms {
     $algorithm_style
-    focusAndSum [label="FocusAndSum v1"]
-    focusChunks [label="FocusChunk v1"]
+    focusAndSum [label="FocusAndSum"]
+    focusChunks [label="FocusChunks"]
     convertUnits1 [label="ConvertUnits v1\nto T.O.F."]
     fftSmooth [label="FFTSmooth v1\nButterworth"]
   }
@@ -45,3 +45,4 @@ digraph SNSPowderReductionContainer {
   fftSmooth	    -> ProcessedCanRun
 
 }
+
