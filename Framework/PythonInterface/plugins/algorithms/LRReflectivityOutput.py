@@ -57,15 +57,18 @@ class LRReflectivityOutput(PythonAlgorithm):
                     try:
                         wl = mtd[ws].getRun().getProperty("LambdaRequest").value[0]
                         # Scaling factor above the wavelength cutoff are assumed to be 1
-                        normalization_available = wl > scaling_cutoff
-                        logger.notice("%s: no normalization for wl=%s" % (ws, str(wl)))
+                        if wl > scaling_cutoff:
+                            logger.notice("%s: no normalization needed for wl=%s" % (ws, str(wl)))
+                        else:
+                            logger.error("%s: normalization missing for wl=%s" % (ws, str(wl)))
+                            normalization_available = False
                     except:
-                        logger.notice("%s: could not find LambdaRequest" % ws)
+                        logger.error("%s: could not find LambdaRequest" % ws)
                         normalization_available = False
                 else:
                     logger.notice("%s: normalization found" % ws)
             else:
-                logger.notice("%s: no normalization info" % ws)
+                logger.error("%s: no normalization info" % ws)
                 normalization_available = False
         return normalization_available
 
