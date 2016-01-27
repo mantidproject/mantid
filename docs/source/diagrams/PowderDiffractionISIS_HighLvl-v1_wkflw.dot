@@ -1,8 +1,15 @@
 digraph PowderDiffractionISIS {
-  label="Powder Diffraction ISIS Higher Level"
+  label="High-LevelPowderDiffractionISIS"
   $global_style
 
   Focus_All_Start             [label="Focus All (Run)"]
+
+  subgraph params {
+    $param_style
+
+    Focus_All_Pref_File_Properties      [label="Pref File Properties - CorrVanFile"]
+    Focus_All_VanadiumBankNumberWs      [label="Vanadium (+ Bank Num) Workspace"]
+}
 
   subgraph processes {
     $process_style
@@ -28,15 +35,17 @@ digraph PowderDiffractionISIS {
   }
 
   subgraph focus_all {
-  Focus_All_Start              -> Focus_All_Norm
-  Focus_All_Norm               -> Focus_All_LoadSac1                   [label="true"]
-  Focus_All_Norm               -> Focus_All_LoadSac2                   [label="else"]
-  Focus_All_LoadSac1           -> Focus_Al_ExistingV
-  Focus_Al_ExistingV           -> Focus_All_LoadNexusProcessed         [label="load"]
-  Focus_Al_ExistingV           -> Focus_All_C_Vana                     [label="no"]
-  Focus_All_LoadSac2           -> Focus_All_Focus_one
-  Focus_All_LoadNexusProcessed -> Focus_All_Focus_one
-  Focus_All_C_Vana             -> Focus_All_Focus_one
+  Focus_All_Start                 -> Focus_All_Norm
+  Focus_All_Norm                  -> Focus_All_LoadSac1                   [label="true"]
+  Focus_All_Norm                  -> Focus_All_LoadSac2                   [label="else"]
+  Focus_All_LoadSac1              -> Focus_Al_ExistingV
+  Focus_All_Pref_File_Properties  -> Focus_All_LoadNexusProcessed
+  Focus_Al_ExistingV              -> Focus_All_LoadNexusProcessed         [label="load"]
+  Focus_All_LoadNexusProcessed    -> Focus_All_VanadiumBankNumberWs
+  Focus_Al_ExistingV              -> Focus_All_C_Vana                     [label="no"]
+  Focus_All_LoadSac2              -> Focus_All_Focus_one
+  Focus_All_LoadNexusProcessed    -> Focus_All_Focus_one
+  Focus_All_C_Vana                -> Focus_All_Focus_one
 
   }
 
