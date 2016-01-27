@@ -4,14 +4,16 @@ import NTableWidget as tableBase
 
 # UB peak information table
 Peak_Integration_Table_Setup = [('Scan', 'int'),
-                                ('Pt', 'int'),
+                                ('Pt', 'str'),
+                                ('Merged Workspace', 'str'),
                                 ('H', 'float'),
                                 ('K', 'float'),
                                 ('L', 'float'),
                                 ('Q_x', 'float'),
                                 ('Q_y', 'float'),
                                 ('Q_z', 'float'),
-                                ('Intensity', 'float')]
+                                ('Intensity', 'float'),
+                                ('Selected', 'checkbox')]
 
 
 class IntegratePeaksTableWidget(tableBase.NTableWidget):
@@ -26,12 +28,81 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
 
         return
 
+    def append_scan(self, info_tuple):
+        """
+        out_ws, target_frame, exp_no, scan_no, None
+        :param info_tuple:
+        :return: 2-tuple as boolean and error message
+        """
+        out_ws_name = info_tuple[0]
+        # target_frame = info_tuple[1]
+        # exp_no = info_tuple[2]
+        scan_no = info_tuple[3]
+
+        status, msg = self.append_row([scan_no, '', out_ws_name, 0., 0., 0., 0., 0., 0., 0, False])
+        if status is False:
+            msg = 'Unable to append row to peak integration table due to %s' % msg
+
+        return status, msg
+
+    def get_md_ws_name(self, row_index):
+        """ Get MD workspace name
+        :param row_index:
+        :return:
+        """
+        j_col = Peak_Integration_Table_Setup.index(('Merged Workspace', 'str'))
+
+        return self.get_cell_value(row_index, j_col)
+
+
+    def get_scan_number(self, row_index):
+        """ Get scan number of the row
+        :param row_index:
+        :return:
+        """
+        j_col = Peak_Integration_Table_Setup.index(('Scan', 'int'))
+
+        return self.get_cell_value(row_index, j_col)
+
     def setup(self):
         """
         Init setup
         :return:
         """
         self.init_setup(Peak_Integration_Table_Setup)
+
+        return
+
+    def set_hkl(self, row_index, vec_hkl):
+        """
+        Set up HKL value to table
+        :param row_index:
+        :param vec_hkl:
+        :return:
+        """
+        # check requirement
+        assert isinstance(vec_hkl, list), 'Input HKL must be a list but not %s.' % str(type(vec_hkl))
+        assert len(vec_hkl, 3)
+
+        # locate
+        index_h = Peak_Integration_Table_Setup.index(('H', 'float'))
+        for j in xrange(3):
+            col_index = j + index_h
+            self.update_cell_value(row_index, col_index, vec_hkl[j])
+
+        return
+
+    def set_q(self, row_index, vec_q):
+        """
+        Set up Q value
+        """
+        assert len(vec_q, 3)
+
+        # locate
+        index_q_x = Peak_Integration_Table_Setup.index(('Q_x', 'float'))
+        for j in xrange(3):
+            col_index = j + index_q_x
+            self.update_cell_value(row_index, col_index, vec_q[j])
 
         return
 
@@ -162,6 +233,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
     def get_exp_info(self, row_index):
         """
         Get experiment information from a row
+        :param row_index:
         :return: scan number, pt number
         """
         assert isinstance(row_index, int)
@@ -297,6 +369,32 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
+    def get_merged_ws_name(self, i_row):
+        """
+        Get ...
+        :param i_row:
+        :return:
+        """
+        j_col_merged = Process_Table_Setup.index(('Merged Workspace', 'str'))
+
+        return self.get_cell_value(i_row, j_col_merged)
+
+    def get_scan_list(self):
+        """ Get list of scans to merge from table
+        :return: list of 2-tuples (scan number, row number)
+        """
+        scan_list = list()
+        num_rows = self.rowCount()
+        j_select = Process_Table_Setup.index(('Select', 'checkbox'))
+        j_scan = Process_Table_Setup.index(('Scan', 'int'))
+
+        for i_row in xrange(num_rows):
+            if self.get_cell_value(i_row, j_select) is True:
+                scan_num = self.get_cell_value(i_row, j_scan)
+                scan_list.append((scan_num, i_row))
+
+        return scan_list
+
     def setup(self):
         """
         Init setup
@@ -330,6 +428,21 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return ''
 
+    def set_pt_by_row(self, row_number, pt_list):
+        """
+        :param scan_no:
+        :param pt_list:
+        :return:
+        """
+        # Check
+        assert isinstance(row_number, int)
+        assert isinstance(pt_list, list)
+
+        j_pt = Process_Table_Setup.index(('Number Pt', 'int'))
+        self.update_cell_value(row_number, j_pt, len(pt_list))
+
+        return ''
+
     def set_status(self, scan_no, status):
         """
         Set the status for merging scan to QTable
@@ -353,6 +466,23 @@ class ProcessTableWidget(tableBase.NTableWidget):
             return 'Unable to find scan %d in table.' % scan_no
 
         return ''
+
+    def set_status_by_row(self, row_number, status):
+        """
+        Set status to a specified row according to row number
+        :param row_number:
+        :param status:
+        :return:
+        """
+        # Check
+        assert isinstance(row_number, int)
+        assert isinstance(status, str)
+
+        # Set
+        i_status = Process_Table_Setup.index(('Status', 'str'))
+        self.update_cell_value(row_number, i_status, status)
+
+        return
 
     def set_ws_names(self, scan_num, merged_md_name, ws_group_name):
         """
@@ -381,5 +511,28 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         if set_done is False:
             return 'Unable to find scan %d in table.' % scan_num
+
+        return
+
+    def set_ws_names_by_row(self, row_number, merged_md_name, ws_group_name):
+        """
+        Set the workspaces' names to this table
+        :param row_number:
+        :param merged_md_name:
+        :param ws_group_name:
+        :return:
+        """
+        # Check
+        assert isinstance(row_number, int)
+        assert isinstance(merged_md_name, str) or merged_md_name is None
+        assert isinstance(ws_group_name, str) or ws_group_name is None
+
+        j_ws_name = Process_Table_Setup.index(('Merged Workspace', 'str'))
+        j_group_name = Process_Table_Setup.index(('Group Name', 'str'))
+
+        if merged_md_name is not None:
+            self.update_cell_value(row_number, j_ws_name, merged_md_name)
+        if ws_group_name is not None:
+            self.update_cell_value(row_number, j_group_name, ws_group_name)
 
         return

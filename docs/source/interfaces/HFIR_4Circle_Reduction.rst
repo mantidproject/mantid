@@ -46,6 +46,62 @@ Introduction of Tabs
   
     - Disabled because it is still in development.
 
+
+Algorithms
+----------
+
+Converting SPICE UB matrix to Mantid UB matrix
+++++++++++++++++++++++++++++++++++++++++++++++
+
+Assuming that SPICE UB matrix (3 x 3) is composed as 
+ * R11, R12, R13
+ * R21, R22, R23
+ * R31, R32, R33
+
+Then, converted to UB matrix in Mantid, it is like
+ *  R11,  R12,  R13
+ *  R31,  R32,  R33
+ * -R21, -R22, -R23
+
+
+Peak Integration: Normalization
++++++++++++++++++++++++++++++++
+
+Counts of neutron on any detector shall be normalized by its corresponding monitor
+count and then be multiplied by a constant specified by user.
+
+Peak Integration with automatic background subtraction by IntegrateEllipsoids
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+There is no existing algorithm in Mantid to integrate ellipsoid because
+algorithm *IntegrateEllipsoids* works only for event in unit as time-of-flight.
+
+
+Peak Integration with automatic background subtraction by approximation
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+This is an easy approximation to integrate a peak with background subtraction
+by specified region of interest.
+
+The pre-requisit is that all events are normalized by monitor counts
+and scaled up by same factor (e.g, 1500).
+
+1. Estimate background on detector
+   Read the first and last several measuring Pts of a scan.  It is assumed that these Pts. only containing background counts;
+   Then sum the counts on each individual detectors and average them.
+
+2. Mask detectors
+   Mask all the detectors out of the region of interest, which is defined by the pixel ID of its upper-left corner and lower-right corner. 
+
+3. Background subtraction
+   Subtract the background from detector's count.  If the result is negative, keep it as negative. 
+
+
+
+
+
+
+
 Use Cases
 ---------
 
