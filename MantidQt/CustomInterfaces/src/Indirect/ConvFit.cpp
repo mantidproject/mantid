@@ -278,7 +278,6 @@ void ConvFit::run() {
 	IAlgorithm_sptr cfs =
 		AlgorithmManager::Instance().create("ConvolutionFitSequential");
 	cfs->initialize();
-	MatrixWorkspace_sptr resWs = AnalysisDataService::Instance().retieveWorkspace<MatrixWorkspace>("__ConvFit_Resolution");
 	cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
 	cfs->setProperty("ResolutionWorkspace", resWs);
 	cfs->setProperty("Function", function);
