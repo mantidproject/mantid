@@ -4,7 +4,8 @@ digraph HB3AReduction {
 
   subgraph params {
     $param_style
-    Sample
+    ExperimentNumber
+    RunNumberList
     OutputWorkspace
   }
 
@@ -15,27 +16,20 @@ digraph HB3AReduction {
 
   subgraph algorithms {
     $algorithm_style
-    DgsDiagnose
-    DgsProcessDetectorVanadium
-    DgsConvertToEnergyTransfer
-    DgsAbsoluteUnitsReduction
-    Divide
-    Blabla
+    downloadData
+    viewRawData
   }
 
   subgraph values {
     $value_style
-    detVanMask [label="DetVan\nDiag Mask"]
-    intDetVan [label="Integrated\nDetVan"]
-    procSamp [label="Processed\nSample"]
     background [label="Time-independent\nbackground"]
-    procUnits [label="Processed\nAbsolute\nUnits"]
     absUnits [label="Absolute\nUnits\nDiag Mask"]
-    SPhiE [label="S(&phi;, E)"]
   }
 
-  HB3A	 -> Blalba
-  Sample -> Blabla
-  Blabla -> OutputWorkspace
+  ExperimentNumber	-> downloadData
+  RunNumberList		-> downloadData
+  downloadData		-> viewRawData
+  viewRawData		-> OutputWorkspace
+
 }
 
