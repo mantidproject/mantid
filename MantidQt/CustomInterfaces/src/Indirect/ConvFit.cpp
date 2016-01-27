@@ -877,7 +877,7 @@ void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp,
     } else {
       std::string propName = props[i]->propertyName().toStdString();
       double propValue = props[i]->valueText().toDouble();
-      if (propValue) {
+      if (propValue != 0.0) {
         if (func->hasAttribute(propName))
           func->setAttributeValue(propName, propValue);
         else
