@@ -31,9 +31,28 @@ digraph PowderDiffractionISIS {
     C_Vana_Vanadium_corr_ws2      [label="Vanadium_corr Workspace"]
     C_Vana_GrpOff_Cal             [label="GrpOff Cal File"]
     C_Vana_vEmptyWorkspace        [label="VEmpty Workspace"]
+    C_Vana_Unstripped_Nexus       [label="(Unstripped) Nexus File"]
+    C_Vana_Unstripped_Dat         [label="(Unstripped) Dat File"]
 
-    C_Vana_Unstripped_Nexus      [label="(Unstripped) Nexus File"]
-    C_Vana_Unstripped_Dat        [label="(Unstripped) Dat File"]
+    Focus_one_Sample_Workspace1   [label="Sample Workspace"]
+    Focus_one_Sample_Workspace2   [label="Sample Workspace"]
+    Focus_one_Sample_Workspace3   [label="Sample Workspace"]
+    Focus_one_Corr_Workspace      [label="Corr Workspace"]
+    Focus_one_SampleTrans_WS      [label="SampleTrans Workspace"]
+    Focus_one_SampleBankNumWS1    [label="Sample- (+ Bank Num) Workspace"]
+    Focus_one_VanadiumBankNumWS1  [label="Vanadium- (+ Bank Num) Workspace"]
+    Focus_one_ResultD_Bank_WS1    [label="ResultD- (+ Bank Num) Workspace"]
+    Focus_one_ResultD_Bank_WS2    [label="ResultD- (+ Bank Num) Workspace"]
+    Focus_one_ResultTOF_Bank_WS1  [label="ResultTOF- (+ Bank Num) Workspace"]
+    Focus_one_ResultTOF_Bank_WS2  [label="ResultTOF- (+ Bank Num) Workspace"]
+    Focus_one_ResultTOF_Grp_WS    [label="ResultTOF_Group Workspace"]
+    Focus_one_sEmpty_Workspace    [label="sEmpty Workspace"]
+    Focus_one_Pref_File_Prop      [label="Pref File Properties"]
+    Focus_one_GrpOff_Cal          [label="GrpOff Cal File"]
+    Focus_one_SaveGSS_OutFile     [label="GSS File"]
+    Focus_one_SaveNxs_OutFile     [label="Nexus File"]
+    Focus_one_SaveXYEtof_OutFile  [label="Dat File - _TOF.dat"]
+    Focus_one_SaveXYEd_OutFile    [label="Dat File - _D.dat"]
 
   }
 
@@ -115,7 +134,7 @@ digraph PowderDiffractionISIS {
     C_Vana_NoAbs                      [label="if NoAbs"]
 
     Focus_one_VGrpFocus               [label="If VGrpFocus is sam"]
-    Focus_one_SEmptyFile              [label="If SEmptyFile is not none"]
+    Focus_one_SEmptyDec              [label="If SEmptyFile is not none"]
     Focus_one_CorrectSampleAbs        [label="If CorrectSampleAbs is yes"]
     Focus_one_Norm                    [label="If Normalization required"]
 
@@ -160,11 +179,11 @@ digraph PowderDiffractionISIS {
   LoadSac_CreateSingle_3        -> LoadSac_Divide_2
   LoadSac_CorrWorkspace3        -> LoadSac_Divide_2
   LoadSac_Divide_2              -> LoadSac_CorrWorkspace4
-// finished
+
   }
 
   subgraph create_vana {
-// working here
+
   C_Vana_Start                  -> C_Vana_RunLoadSacEff1
   VanadiumFile                  -> C_Vana_RunLoadSacEff1
   C_Vana_RunLoadSacEff1         -> C_Vana_RunLoadSacEff2
@@ -201,40 +220,75 @@ digraph PowderDiffractionISIS {
 
   subgraph focus_one {
   Focus_one_Start               -> Focus_one_RunGetDataSum
+  Focus_one_Sample_Workspace1   -> Focus_one_RunGetDataSum
   Focus_one_RunGetDataSum       -> Focus_one_Integration
+  Focus_one_RunGetDataSum       -> Focus_one_Sample_Workspace2
+  Focus_one_Sample_Workspace2   -> Focus_one_Integration
   Focus_one_Integration         -> Focus_one_MaskDetectorIf
+  Focus_one_Pref_File_Prop      -> Focus_one_MaskDetectorIf
+  Focus_one_MaskDetectorIf      -> Focus_one_GrpOff_Cal
   Focus_one_MaskDetectorIf      -> Focus_one_VGrpFocus
   Focus_one_VGrpFocus           -> Focus_one_RunCreateVana              [label="true"]
-  Focus_one_RunCreateVana       -> Focus_one_SEmptyFile
-  Focus_one_VGrpFocus           -> Focus_one_SEmptyFile                 [label="else"]
-  Focus_one_SEmptyFile          -> Focus_one_Minus                      [label="true"]
-  Focus_one_SEmptyFile          -> Focus_one_AlignDetectors             [label="else"]
+  Focus_one_RunCreateVana       -> Focus_one_SEmptyDec
+  Focus_one_VGrpFocus           -> Focus_one_SEmptyDec                 [label="else"]
+  Focus_one_SEmptyDec           -> Focus_one_AlignDetectors             [label="else"]
+  Focus_one_SEmptyDec           -> Focus_one_Minus                      [label="true"]
+  Focus_one_Sample_Workspace2   -> Focus_one_Minus
+  Focus_one_sEmpty_Workspace    -> Focus_one_Minus
   Focus_one_Minus               -> Focus_one_AlignDetectors
+  Focus_one_Sample_Workspace2   -> Focus_one_AlignDetectors
+  Focus_one_GrpOff_Cal          -> Focus_one_AlignDetectors
   Focus_one_AlignDetectors      -> Focus_one_Divide1
+  Focus_one_Corr_Workspace      -> Focus_one_Divide1
   Focus_one_Divide1             -> Focus_one_CreSingleValWS
   Focus_one_CreSingleValWS      -> Focus_one_Multiply
+  Focus_one_Multiply            -> Focus_one_Sample_Workspace3
   Focus_one_Multiply            -> Focus_one_CorrectSampleAbs
-  Focus_one_CorrectSampleAbs    -> Focus_one_RunCorrectAbs              [label="true"]
-  Focus_one_RunCorrectAbs       -> Focus_one_ConvertUnits1
+  Focus_one_Sample_Workspace3   -> Focus_one_RunCorrectAbs
+  Focus_one_CorrectSampleAbs    -> Focus_one_RunCorrectAbs               [label="true"]
+  Focus_one_RunCorrectAbs       -> Focus_one_ConvertUnits1               [label="Target=Wavelength"]
+  Focus_one_RunCorrectAbs       -> Focus_one_SampleTrans_WS
+  Focus_one_Sample_Workspace3   -> Focus_one_ConvertUnits1
   Focus_one_ConvertUnits1       -> Focus_one_Divide2
-  Focus_one_Divide2             -> Focus_one_ConvertUnits2
+  Focus_one_SampleTrans_WS      -> Focus_one_Divide2
+  Focus_one_Divide2             -> Focus_one_ConvertUnits2               [label="Target=dSpacing"]
   Focus_one_ConvertUnits2       -> Focus_one_DiffractionFocus
-  Focus_one_CorrectSampleAbs    -> Focus_one_DiffractionFocus           [label="else"]
+  Focus_one_GrpOff_Cal          -> Focus_one_DiffractionFocus
+  Focus_one_CorrectSampleAbs    -> Focus_one_DiffractionFocus            [label="else"]
   Focus_one_DiffractionFocus    -> Focus_one_CropWorkspace
+  Focus_one_CropWorkspace       -> Focus_one_SampleBankNumWS1            [label="x's Bank Num"]
   Focus_one_CropWorkspace       -> Focus_one_Norm
   Focus_one_Norm                -> Focus_one_RebinToWorkspace            [label="true"]
-  Focus_one_RebinToWorkspace    -> Focus_one_Divide3
   Focus_one_Norm                -> Focus_one_RenameWorkspace             [label="else"]
+  Focus_one_VanadiumBankNumWS1  -> Focus_one_RebinToWorkspace            [label="WorkspaceToRebin"]
+  Focus_one_SampleBankNumWS1    -> Focus_one_RebinToWorkspace            [label="WorkspaceToMatch"]
+  Focus_one_RebinToWorkspace    -> Focus_one_Divide3
+  Focus_one_Divide3             -> Focus_one_ResultD_Bank_WS1
+  Focus_one_SampleBankNumWS1    -> Focus_one_RenameWorkspace
+  Focus_one_RenameWorkspace     -> Focus_one_ResultD_Bank_WS1
   Focus_one_Divide3             -> Focus_one_Rebin
   Focus_one_RenameWorkspace     -> Focus_one_Rebin
-  Focus_one_Rebin               -> Focus_one_ConvertUnits3
+  Focus_one_ResultD_Bank_WS1     -> Focus_one_Rebin
+  Focus_one_Rebin               -> Focus_one_ConvertUnits3               [label="Target=TOF"]
+  Focus_one_Rebin               -> Focus_one_ResultTOF_Bank_WS1
   Focus_one_ConvertUnits3       -> Focus_one_ReplaceSpecValues1
+  Focus_one_ReplaceSpecValues1  -> Focus_one_ResultD_Bank_WS2
   Focus_one_ReplaceSpecValues1  -> Focus_one_ReplaceSpecValues2
+  Focus_one_ResultTOF_Bank_WS1  -> Focus_one_ReplaceSpecValues2
+  Focus_one_ReplaceSpecValues2  -> Focus_one_ResultTOF_Bank_WS2
   Focus_one_ReplaceSpecValues2  -> Focus_one_GroupWorkspaces
+  Focus_one_ResultTOF_Bank_WS2  -> Focus_one_GroupWorkspaces
+  Focus_one_GroupWorkspaces     -> Focus_one_ResultTOF_Grp_WS
   Focus_one_GroupWorkspaces     -> Focus_one_SaveGSS
+  Focus_one_ResultTOF_Grp_WS    -> Focus_one_SaveGSS
+  Focus_one_SaveGSS             -> Focus_one_SaveGSS_OutFile
   Focus_one_SaveGSS             -> Focus_one_SaveNexusProcessed
-  Focus_one_SaveNexusProcessed  -> Focus_one_SaveFocusedXYE1
-  Focus_one_SaveFocusedXYE1     -> Focus_one_SaveFocusedXYE2
+  Focus_one_SaveNexusProcessed  -> Focus_one_SaveNxs_OutFile
+  Focus_one_SaveNexusProcessed  -> Focus_one_SaveFocusedXYE1             [label="units=TOF"]
+  Focus_one_SaveFocusedXYE1     -> Focus_one_SaveXYEtof_OutFile
+  Focus_one_SaveFocusedXYE1     -> Focus_one_SaveFocusedXYE2             [label="units=D"]
+  Focus_one_SaveFocusedXYE2     -> Focus_one_SaveXYEd_OutFile
+
 
   }
 
