@@ -1,3 +1,4 @@
+#include "ColorMapWidget.h"
 #include "InstrumentWindow.h"
 #include "InstrumentWindowRenderTab.h"
 #include "InstrumentWindowPickTab.h"
@@ -56,8 +57,11 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt::API;
 
-// Name of the QSettings group to store the InstrumentWindw settings
+// Name of the QSettings group to store the InstrumentWindw &
+// InstrumentWindowRender settings
 const char *InstrumentWindowSettingsGroup = "Mantid/InstrumentWindow";
+const std::string InstrumentWindow::m_windowRendSettingsGroup =
+    "Mantid/InstrumentWindowRender";
 
 namespace {
 /**
@@ -238,6 +242,9 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling,
     surface->resetInstrumentActor(m_instrumentActor);
     updateInfoText();
   }
+  readSettings();
+  updateInfoText();
+  update();
 }
 
 /**
@@ -702,6 +709,56 @@ void InstrumentWindow::saveSettings() {
     foreach (InstrumentWindowTab *tab, m_tabs) { tab->saveSettings(settings); }
   }
   settings.endGroup();
+
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_windowRendSettingsGroup));
+
+  // sets the combo to the particular value but does
+  // not update the setSurface? combo value
+  qs.setValue("user_params_Full3d", m_renderTab->m_full3D->isChecked());
+  qs.setValue("user_params_m_cylindricalX",
+	  m_renderTab->m_cylindricalX->isChecked());
+  qs.setValue("user_params_m_cylindricalY",
+	  m_renderTab->m_cylindricalY->isChecked());
+  qs.setValue("user_params_m_cylindricalZ",
+	  m_renderTab->m_cylindricalZ->isChecked());
+  qs.setValue("user_params_m_sphericalX",
+	  m_renderTab->m_sphericalX->isChecked());
+  qs.setValue("user_params_m_sphericalY",
+	  m_renderTab->m_sphericalY->isChecked());
+  qs.setValue("user_params_m_sphericalZ",
+	  m_renderTab->m_sphericalZ->isChecked());
+  qs.setValue("user_params_m_sideBySide",
+	  m_renderTab->m_sideBySide->isChecked());
+  qs.endGroup();
+}
+
+/**
+* Reads properties of the render window
+*/
+void InstrumentWindow::readSettings() {
+	QSettings qs;
+	qs.beginGroup(QString::fromStdString(m_windowRendSettingsGroup));
+
+	// sets the combo to the particular value but does
+	// not update the combo value
+	m_renderTab->m_full3D->setChecked(
+		qs.value("user_params_Full3d", false).toBool());
+	m_renderTab->m_cylindricalX->setChecked(
+		qs.value("user_params_m_cylindricalX", false).toBool());
+	m_renderTab->m_cylindricalY->setChecked(
+		qs.value("user_params_m_cylindricalY", true).toBool());
+	m_renderTab->m_cylindricalZ->setChecked(
+		qs.value("user_params_m_cylindricalZ", false).toBool());
+	m_renderTab->m_sphericalX->setChecked(
+		qs.value("user_params_m_sphericalX", false).toBool());
+	m_renderTab->m_sphericalY->setChecked(
+		qs.value("user_params_m_sphericalX", false).toBool());
+	m_renderTab->m_sphericalZ->setChecked(
+		qs.value("user_params_m_sphericalZ", false).toBool());
+	m_renderTab->m_sideBySide->setChecked(
+		qs.value("user_params_m_sideBySide", false).toBool());
+	qs.endGroup();
 }
 
 /**
