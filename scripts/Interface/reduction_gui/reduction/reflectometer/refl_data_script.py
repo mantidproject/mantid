@@ -67,6 +67,10 @@ class DataSets(BaseScriptElement):
     # how to treat overlap values
     overlap_lowest_error = True
     overlap_mean_value = False
+    
+    # Primary fraction range
+    clocking_from = None
+    clocking_to = None
 
     def __init__(self):
         super(DataSets, self).__init__()
@@ -198,7 +202,12 @@ class DataSets(BaseScriptElement):
         #fourth column precision
         xml += "<fourth_column_flag>%s</fourth_column_flag>\n" % str(self.fourth_column_flag)
         xml += "<fourth_column_dq0>%s</fourth_column_dq0>\n" % str(self.fourth_column_dq0)
-        xml += "<fourth_column_dq_over_q>%s</fourth_column_dq_over_q>\n " % str(self.fourth_column_dq_over_q)
+        xml += "<fourth_column_dq_over_q>%s</fourth_column_dq_over_q>\n" % str(self.fourth_column_dq_over_q)
+
+        # Primary fraction
+        if self.clocking_from is not None and self.clocking_to is not None:
+            xml += "<clocking_from>%s</clocking_from>\n" % str(self.clocking_from)
+            xml += "<clocking_to>%s</clocking_to>\n" % str(self.clocking_to)
 
         xml += "</RefLData>\n"
 
@@ -324,6 +333,11 @@ class DataSets(BaseScriptElement):
         self.fourth_column_dq0 = BaseScriptElement.getFloatElement(instrument_dom, "fourth_column_dq0")
         self.fourth_column_dq_over_q = BaseScriptElement.getFloatElement(instrument_dom, "fourth_column_dq_over_q")
 
+        # Primary fraction
+        self.clocking_from = BaseScriptElement.getIntElement(instrument_dom, "clocking_from", default=None)
+        self.clocking_to = BaseScriptElement.getIntElement(instrument_dom, "clocking_to", default=None)
+        
+
     def reset(self):
         """
             Reset state
@@ -379,3 +393,7 @@ class DataSets(BaseScriptElement):
         self.fourth_column_flag = DataSets.fourth_column_flag
         self.fourth_column_dq0 = DataSets.fourth_column_dq0
         self.fourth_column_dq_over_q = DataSets.fourth_column_dq_over_q
+        
+        # Primary fraction
+        self.clocking_from = DataSets.clocking_from
+        self.clocking_to = DataSets.clocking_to

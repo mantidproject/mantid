@@ -48,7 +48,7 @@ class LRReflectivityOutput(PythonAlgorithm):
             Check that all the workspaces are on an absolute scale.
             @param workspace_list: list of workspaces to put together
         """
-        scaling_cutoff = self.getProperty("ScalingWavelengthCutoff")
+        scaling_cutoff = self.getProperty("ScalingWavelengthCutoff").value
 
         normalization_available = True
         for ws in workspace_list:
