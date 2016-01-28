@@ -6,6 +6,7 @@ set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
+  BayesStretchTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
