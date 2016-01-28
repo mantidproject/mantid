@@ -1133,6 +1133,10 @@ void ConvFit::plotGuess() {
  * Runs the single fit algorithm
  */
 void ConvFit::singleFit() {
+  // Validate tab before running a single fit
+  if (!validate()) {
+	  return;
+  }
   // disconnect signal for single fit
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(singleFit(bool)));
