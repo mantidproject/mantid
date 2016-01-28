@@ -188,6 +188,16 @@ void ColorMapWidget::setMaxValue(double value)
 }
 
 /**
+* returns the min value as QString
+*/
+QString ColorMapWidget::getMinValue() { return m_minValueBox->text(); }
+
+/**
+* returns the min value as QString
+*/
+QString ColorMapWidget::getMaxValue() { return m_maxValueBox->text(); }
+
+/**
  * Update the min value text box.
  * @param value :: Value to be displayed in the text box.
  */

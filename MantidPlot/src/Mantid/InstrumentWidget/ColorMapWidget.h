@@ -25,6 +25,8 @@ public:
   void setupColorBarScaling(const MantidColorMap&);
   void setMinValue(double);
   void setMaxValue(double);
+  QString getMinValue();
+  QString getMaxValue();
   void setMinPositiveValue(double);
   int getScaleType()const;
   void setScaleType(int);
