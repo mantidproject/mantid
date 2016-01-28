@@ -28,8 +28,6 @@ private slots:
   void updateProperties(QtProperty *prop, double val);
   /// Slot to handle when a new sample file is available
   void handleSampleInputReady(const QString &filename);
-  /// Handles what happen after the algorithm is run
-  void algorithmComplete(bool error);
 
 private:
   // The ui form

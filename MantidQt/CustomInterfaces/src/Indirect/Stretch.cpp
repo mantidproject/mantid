@@ -83,41 +83,32 @@ bool Stretch::validate() {
 void Stretch::run() {
   using namespace Mantid::API;
 
-  auto save("False");
-  auto elasticPeak("False");
-  auto sequence("False");
-
+  // Workspace input
   const auto sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
   const auto resName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
   // Collect input from options section
   const auto background = m_uiForm.cbBackground->currentText().toStdString();
-
-  if (m_uiForm.chkElasticPeak->isChecked()) {
-    elasticPeak = "True";
-  }
-  if (m_uiForm.chkSequentialFit->isChecked()) {
-    sequence = "True";
-  }
+  const auto plot = m_uiForm.cbPlot->currentText().toStdString();
 
   // Collect input from the properties browser
-  const auto eMin = boost::lexical_cast<double>(m_properties["EMin"]->valueText());
-  const auto eMax = boost::lexical_cast<double>(m_properties["EMax"]->valueText());
-  const auto beta = boost::lexical_cast<double>(m_properties["Beta"]->valueText());
-  const auto sigma = boost::lexical_cast<double>(m_properties["Sigma"]->valueText());
-  const auto nBins = boost::lexical_cast<double>(m_properties["SampleBinning"]->valueText());
+  const auto eMin =  m_properties["EMin"]->valueText().toDouble();
+  const auto eMax =  m_properties["EMax"]->valueText().toDouble();
+  const auto beta =  m_properties["Beta"]->valueText().toLong();
+  const auto sigma = m_properties["Sigma"]->valueText().toLong();
+  const auto nBins = m_properties["SampleBinning"]->valueText().toLong();
 
-  // Output options
-  if (m_uiForm.chkSave->isChecked()) {
-    save = "True";
-  }
-  const auto plot = m_uiForm.cbPlot->currentText();
+  // Bool options
+  const auto save = m_uiForm.chkSave->isChecked();
+  const auto elasticPeak = m_uiForm.chkElasticPeak->isChecked();
+  const auto sequence = m_uiForm.chkSequentialFit->isChecked();
+
 
   // Construct OutputNames
-  const auto cutIndex = sampleName.find_last_of("_");
-  const auto baseName = sampleName.substr(0, cutIndex);
-  const auto fitWsName = baseName + "_Qst_Fit";
-  const auto contourWsName = baseName + "_Qst_Contour";
+  auto cutIndex = sampleName.find_last_of("_");
+  auto baseName = sampleName.substr(0, cutIndex);
+  auto fitWsName = baseName + "_Qst_Fit";
+  auto contourWsName = baseName + "_Qst_Contour";
 
   auto stretch = AlgorithmManager::Instance().create("BayesStretch");
   stretch->initialize();
@@ -138,8 +129,6 @@ void Stretch::run() {
 
   m_StretchAlg = stretch;
   m_batchAlgoRunner->addAlgorithm(stretch);
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-	  SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 
 }
