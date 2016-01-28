@@ -83,18 +83,15 @@ bool Stretch::validate() {
 void Stretch::run() {
   using namespace Mantid::API;
 
-  QString save("False");
+  auto save("False");
+  auto elasticPeak("False");
+  auto sequence("False");
 
-  QString elasticPeak("False");
-  QString sequence("False");
-
-  QString pyInput = "from IndirectBayes import QuestRun\n";
-
-  QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-  QString resName = m_uiForm.dsResolution->getCurrentDataName();
+  const auto sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
+  const auto resName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
   // Collect input from options section
-  QString background = m_uiForm.cbBackground->currentText();
+  const auto background = m_uiForm.cbBackground->currentText().toStdString();
 
   if (m_uiForm.chkElasticPeak->isChecked()) {
     elasticPeak = "True";
@@ -103,33 +100,48 @@ void Stretch::run() {
     sequence = "True";
   }
 
-  QString fitOps = "[" + elasticPeak + ", '" + background + "', False, False]";
-
   // Collect input from the properties browser
-  QString eMin = m_properties["EMin"]->valueText();
-  QString eMax = m_properties["EMax"]->valueText();
-  QString eRange = "[" + eMin + "," + eMax + "]";
-
-  QString beta = m_properties["Beta"]->valueText();
-  QString sigma = m_properties["Sigma"]->valueText();
-  QString betaSig = "[" + beta + ", " + sigma + "]";
-
-  QString nBins = m_properties["SampleBinning"]->valueText();
-  nBins = "[" + nBins + ", 1]";
+  const auto eMin = boost::lexical_cast<double>(m_properties["EMin"]->valueText());
+  const auto eMax = boost::lexical_cast<double>(m_properties["EMax"]->valueText());
+  const auto beta = boost::lexical_cast<double>(m_properties["Beta"]->valueText());
+  const auto sigma = boost::lexical_cast<double>(m_properties["Sigma"]->valueText());
+  const auto nBins = boost::lexical_cast<double>(m_properties["SampleBinning"]->valueText());
 
   // Output options
   if (m_uiForm.chkSave->isChecked()) {
     save = "True";
   }
-  QString plot = m_uiForm.cbPlot->currentText();
+  const auto plot = m_uiForm.cbPlot->currentText();
 
-  pyInput += "QuestRun('" + sampleName + "','" + resName + "'," + betaSig +
-             "," + eRange + "," + nBins + "," + fitOps + "," + sequence +
-             ","
-             " Save=" +
-             save + ", Plot='" + plot + "')\n";
+  // Construct OutputNames
+  const auto cutIndex = sampleName.find_last_of("_");
+  const auto baseName = sampleName.substr(0, cutIndex);
+  const auto fitWsName = baseName + "_Qst_Fit";
+  const auto contourWsName = baseName + "_Qst_Contour";
 
-  runPythonScript(pyInput);
+  auto stretch = AlgorithmManager::Instance().create("BayesStretch");
+  stretch->initialize();
+  stretch->setProperty("SampleWorkspace", sampleName);
+  stretch->setProperty("ResolutionWorkspace", resName);
+  stretch->setProperty("MinRange", eMin);
+  stretch->setProperty("MaxRange", eMax);
+  stretch->setProperty("SampleBins", nBins);
+  stretch->setProperty("Elastic", elasticPeak);
+  stretch->setProperty("Background", background);
+  stretch->setProperty("NumberSigma", sigma);
+  stretch->setProperty("NumberBeta", beta);
+  stretch->setProperty("Loop", sequence);
+  stretch->setProperty("Plot", plot);
+  stretch->setProperty("Save", save);
+  stretch->setProperty("OutputWorkspaceFit", fitWsName);
+  stretch->setProperty("OutputWorkspaceContour", contourWsName);
+
+  m_StretchAlg = stretch;
+  m_batchAlgoRunner->addAlgorithm(stretch);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+	  SLOT(algorithmComplete(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
+
 }
 
 /**
