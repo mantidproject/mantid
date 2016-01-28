@@ -137,7 +137,7 @@ void Stretch::run() {
  * Set the data selectors to use the default save directory
  * when browsing for input files.
  *
-* @param settings :: The current settings
+ * @param settings :: The current settings
  */
 void Stretch::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
