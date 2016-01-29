@@ -243,8 +243,7 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling,
     updateInfoText();
   }
   readSettings();
-  updateInfoText();
-  update();
+
 }
 
 /**
@@ -717,19 +716,30 @@ void InstrumentWindow::saveSettings() {
   // not update the setSurface? combo value
   qs.setValue("user_params_Full3d", m_renderTab->m_full3D->isChecked());
   qs.setValue("user_params_m_cylindricalX",
-	  m_renderTab->m_cylindricalX->isChecked());
+              m_renderTab->m_cylindricalX->isChecked());
   qs.setValue("user_params_m_cylindricalY",
-	  m_renderTab->m_cylindricalY->isChecked());
+              m_renderTab->m_cylindricalY->isChecked());
   qs.setValue("user_params_m_cylindricalZ",
-	  m_renderTab->m_cylindricalZ->isChecked());
+              m_renderTab->m_cylindricalZ->isChecked());
   qs.setValue("user_params_m_sphericalX",
-	  m_renderTab->m_sphericalX->isChecked());
+              m_renderTab->m_sphericalX->isChecked());
   qs.setValue("user_params_m_sphericalY",
-	  m_renderTab->m_sphericalY->isChecked());
+              m_renderTab->m_sphericalY->isChecked());
   qs.setValue("user_params_m_sphericalZ",
-	  m_renderTab->m_sphericalZ->isChecked());
+              m_renderTab->m_sphericalZ->isChecked());
   qs.setValue("user_params_m_sideBySide",
-	  m_renderTab->m_sideBySide->isChecked());
+              m_renderTab->m_sideBySide->isChecked());
+
+  qs.setValue("user_params_flipCheckBox",
+              m_renderTab->m_flipCheckBox->isChecked());
+
+  qs.setValue("user_params_autoscaling",
+              m_renderTab->m_autoscaling->isChecked());
+  qs.setValue("user_param_minVal",
+              m_renderTab->m_colorMapWidget->getMinValue());
+  qs.setValue("user_param_maxVal",
+              m_renderTab->m_colorMapWidget->getMaxValue());
+
   qs.endGroup();
 }
 
@@ -737,28 +747,43 @@ void InstrumentWindow::saveSettings() {
 * Reads properties of the render window
 */
 void InstrumentWindow::readSettings() {
-	QSettings qs;
-	qs.beginGroup(QString::fromStdString(m_windowRendSettingsGroup));
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_windowRendSettingsGroup));
 
-	// sets the combo to the particular value but does
-	// not update the combo value
-	m_renderTab->m_full3D->setChecked(
-		qs.value("user_params_Full3d", false).toBool());
-	m_renderTab->m_cylindricalX->setChecked(
-		qs.value("user_params_m_cylindricalX", false).toBool());
-	m_renderTab->m_cylindricalY->setChecked(
-		qs.value("user_params_m_cylindricalY", true).toBool());
-	m_renderTab->m_cylindricalZ->setChecked(
-		qs.value("user_params_m_cylindricalZ", false).toBool());
-	m_renderTab->m_sphericalX->setChecked(
-		qs.value("user_params_m_sphericalX", false).toBool());
-	m_renderTab->m_sphericalY->setChecked(
-		qs.value("user_params_m_sphericalX", false).toBool());
-	m_renderTab->m_sphericalZ->setChecked(
-		qs.value("user_params_m_sphericalZ", false).toBool());
-	m_renderTab->m_sideBySide->setChecked(
-		qs.value("user_params_m_sideBySide", false).toBool());
-	qs.endGroup();
+  // sets the combo to the particular value but does
+  // not update the combo value
+  m_renderTab->m_full3D->setChecked(
+      qs.value("user_params_Full3d", false).toBool());
+  m_renderTab->m_cylindricalX->setChecked(
+      qs.value("user_params_m_cylindricalX", false).toBool());
+  m_renderTab->m_cylindricalY->setChecked(
+      qs.value("user_params_m_cylindricalY", true).toBool());
+  m_renderTab->m_cylindricalZ->setChecked(
+      qs.value("user_params_m_cylindricalZ", false).toBool());
+  m_renderTab->m_sphericalX->setChecked(
+      qs.value("user_params_m_sphericalX", false).toBool());
+  m_renderTab->m_sphericalY->setChecked(
+      qs.value("user_params_m_sphericalY", false).toBool());
+  m_renderTab->m_sphericalZ->setChecked(
+      qs.value("user_params_m_sphericalZ", false).toBool());
+  m_renderTab->m_sideBySide->setChecked(
+      qs.value("user_params_m_sideBySide", false).toBool());
+
+  m_renderTab->m_flipCheckBox->setChecked(
+      qs.value("user_params_flipCheckBox", false).toBool());
+
+  colorMapRangeChanged(qs.value("user_param_minVal").toDouble(),
+                       qs.value("user_param_maxVal").toDouble());
+  // auto scale after max and min value required as it will
+  // read the above above and uncheck the box
+  m_renderTab->m_autoscaling->setChecked(
+      qs.value("user_params_autoscaling", true).toBool());
+
+  qs.endGroup();
+
+  // update according to read settings
+  updateInfoText();
+  update();
 }
 
 /**
