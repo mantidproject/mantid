@@ -730,15 +730,20 @@ void InstrumentWindow::saveSettings() {
   qs.setValue("user_params_m_sideBySide",
               m_renderTab->m_sideBySide->isChecked());
 
+  qs.setValue("user_param_mAxisCombo", m_renderTab->mAxisCombo->currentText());
   qs.setValue("user_params_flipCheckBox",
               m_renderTab->m_flipCheckBox->isChecked());
 
-  qs.setValue("user_params_autoscaling",
-              m_renderTab->m_autoscaling->isChecked());
   qs.setValue("user_param_minVal",
               m_renderTab->m_colorMapWidget->getMinValue());
   qs.setValue("user_param_maxVal",
               m_renderTab->m_colorMapWidget->getMaxValue());
+  qs.setValue("user_params_autoscaling",
+              m_renderTab->m_autoscaling->isChecked());
+
+  // saving the bin range entered
+  qs.setValue("user_params_minBinRange", m_instrumentActor->minBinValue());
+  qs.setValue("user_params_maxBinRange", m_instrumentActor->maxBinValue());
 
   qs.endGroup();
 }
@@ -769,8 +774,8 @@ void InstrumentWindow::readSettings() {
   m_renderTab->m_sideBySide->setChecked(
       qs.value("user_params_m_sideBySide", false).toBool());
 
-  // QString surfaceType;
-  int surfaceType;
+  // if true assign surfaceType int
+  int surfaceType = 2;
   if ((qs.value("user_params_Full3d").toBool())) {
     surfaceType = 0;
   } else if ((qs.value("user_params_m_cylindricalX").toBool())) {
@@ -785,11 +790,13 @@ void InstrumentWindow::readSettings() {
     surfaceType = 5;
   } else if ((qs.value("user_params_m_sphericalZ").toBool())) {
     surfaceType = 6;
-  } else {
+  } else if ((qs.value("user_params_m_sideBySide").toBool())) {
     surfaceType = 7;
   }
   setSurfaceType(surfaceType);
 
+  // setAxis can only be initailised after setSurfaceType has been called
+  m_renderTab->setAxis(qs.value("user_param_mAxisCombo").toString());
   m_renderTab->m_flipCheckBox->setChecked(
       qs.value("user_params_flipCheckBox", false).toBool());
 
@@ -800,9 +807,13 @@ void InstrumentWindow::readSettings() {
   m_renderTab->m_autoscaling->setChecked(
       qs.value("user_params_autoscaling", true).toBool());
 
+  // setting the bin range which is not from InstrumentWindowRenderTab
+  setBinRange(qs.value("user_params_minBinRange").toDouble(),
+              qs.value("user_params_maxBinRange").toDouble());
+
   qs.endGroup();
 
-  // update according to read settings
+  // update according to settings
   updateInfoText();
   update();
 }
