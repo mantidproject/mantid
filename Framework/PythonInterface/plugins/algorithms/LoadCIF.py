@@ -239,17 +239,27 @@ class LoadCIF(PythonAlgorithm):
                                ' (https://pypi.python.org/pypi/PyCifRW/4.1)')
 
     def _loadFromCif(self):
-        cifFileName = self.getProperty('InputFile').value
+        from CifFile import ReadCif
+
+        cifFileUrl = self._getFileUrl()
         workspace = self.getProperty('Workspace').value
 
         # Try to parse cif file using PyCifRW
-        from CifFile import ReadCif
+        parsedCifFile = ReadCif(cifFileUrl)
 
-        parsedCifFile = ReadCif(cifFileName)
         self._setCrystalStructureFromCifFile(workspace, parsedCifFile)
+
         ubOption = self.getProperty('LoadUBMatrix').value
         if ubOption:
             self._setUBMatrixFromCifFile(workspace, parsedCifFile)
+
+    def _getFileUrl(self):
+        # ReadCif requires a URL, windows path specs seem to confuse urllib,
+        # so the pathname is converted to a URL before passing it to ReadCif.
+        from urllib import pathname2url
+
+        cifFileName = self.getProperty('InputFile').value
+        return pathname2url(cifFileName)
 
     def _setCrystalStructureFromCifFile(self, workspace, cifFile):
         crystalStructure = self._getCrystalStructureFromCifFile(cifFile)
