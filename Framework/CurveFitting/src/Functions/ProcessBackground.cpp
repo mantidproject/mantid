@@ -257,7 +257,7 @@ void ProcessBackground::exec() {
   if (intemp < 0)
     throw std::invalid_argument(
         "WorkspaceIndex is not allowed to be less than 0. ");
-  m_wsIndex = size_t(intemp);
+  m_wsIndex = intemp;
   if (m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms()))
     throw runtime_error("Workspace index is out of boundary.");
 

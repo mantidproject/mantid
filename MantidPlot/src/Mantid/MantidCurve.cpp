@@ -193,19 +193,22 @@ void MantidCurve::doDraw(QPainter *p,
       {
         // This call can crash MantidPlot if the error is zero,
         //   so protect against this (line of zero length anyway)
-        if (E) p->drawLine(xi,ei1,xi,ylh);
+        if (E != 0.0)
+          p->drawLine(xi, ei1, xi, ylh);
         p->drawLine(xi-dx,ei1,xi+dx,ei1);
       }
       if ( m_errorSettings->plusSide() )
       {
         // This call can crash MantidPlot if the error is zero,
         //   so protect against this (line of zero length anyway)
-        if (E) p->drawLine(xi,yhl,xi,ei2);
+        if (E != 0.0)
+          p->drawLine(xi, yhl, xi, ei2);
         p->drawLine(xi-dx,ei2,xi+dx,ei2);
       }
       if ( m_errorSettings->throughSymbol() )
       {
-        if (E) p->drawLine(xi,yhl,xi,ylh);
+        if (E != 0.0)
+          p->drawLine(xi, yhl, xi, ylh);
       }
       
       xi0 = xi;

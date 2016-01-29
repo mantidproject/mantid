@@ -164,13 +164,12 @@ void MuonRemoveExpDecay::removeDecayError(const MantidVec &inX,
                                           MantidVec &outY) {
   // Do the removal
   for (size_t i = 0; i < inY.size(); ++i) {
-    if (inY[i])
+    if (inY[i] != 0.0)
       outY[i] =
           inY[i] *
           exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
     else
       outY[i] =
-          1.0 *
           exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
   }
 }
@@ -188,7 +187,7 @@ void MuonRemoveExpDecay::removeDecayData(const MantidVec &inX,
                                          MantidVec &outY) {
   // Do the removal
   for (size_t i = 0; i < inY.size(); ++i) {
-    if (inY[i])
+    if (inY[i] != 0.0)
       outY[i] =
           inY[i] *
           exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
