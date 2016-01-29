@@ -769,6 +769,27 @@ void InstrumentWindow::readSettings() {
   m_renderTab->m_sideBySide->setChecked(
       qs.value("user_params_m_sideBySide", false).toBool());
 
+  // QString surfaceType;
+  int surfaceType;
+  if ((qs.value("user_params_Full3d").toBool())) {
+    surfaceType = 0;
+  } else if ((qs.value("user_params_m_cylindricalX").toBool())) {
+    surfaceType = 1;
+  } else if ((qs.value("user_params_m_cylindricalY").toBool())) {
+    surfaceType = 2;
+  } else if ((qs.value("user_params_m_cylindricalZ").toBool())) {
+    surfaceType = 3;
+  } else if ((qs.value("user_params_m_sphericalX").toBool())) {
+    surfaceType = 4;
+  } else if ((qs.value("user_params_m_sphericalY").toBool())) {
+    surfaceType = 5;
+  } else if ((qs.value("user_params_m_sphericalZ").toBool())) {
+    surfaceType = 6;
+  } else {
+    surfaceType = 7;
+  }
+  setSurfaceType(surfaceType);
+
   m_renderTab->m_flipCheckBox->setChecked(
       qs.value("user_params_flipCheckBox", false).toBool());
 
