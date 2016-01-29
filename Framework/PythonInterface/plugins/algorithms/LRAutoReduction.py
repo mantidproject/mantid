@@ -43,6 +43,7 @@ class LRAutoReduction(PythonAlgorithm):
                              "Pixel range to use for calculating the primary fraction correction.")
         # ---------------------------------------------------------------------              
                                        
+        self.declareProperty("ScalingFactorTOFStep", 200.0, "Bin width in TOF for fitting scaling factors")
         self.declareProperty("ScalingWavelengthCutoff", 10.0, "Wavelength above which the scaling factors are assumed to be one")
         self.declareProperty("FindPeaks", False, "Find reflectivity peaks instead of using the template values")
         self.declareProperty("ForceSequenceNumber", 0, "Force the sequence number value if it's not available")
@@ -154,19 +155,15 @@ class LRAutoReduction(PythonAlgorithm):
         AnalysisDataService.remove(str(tof_summed))
         AnalysisDataService.remove(str(peak_data))
         
-        return peak, low_res
+        return [int(x) for x in peak], [int(x) for x in low_res]
 
        
-    def _read_template(self, run_number, first_run_of_set, sequence_number):
+    def _read_template(self, sequence_number):
         """
             Read template from file.
-            @param run_number: run number according to the data file name
-            @param first_run_of_set: first run in the sequence (sequence ID)
             @param sequence_number: the ID of the data set within the sequence of runs
         """
-        # Read in the configuration for this run in the set
-        # If there is a local template.xml, use it
-        template_file = filename = self.getProperty("TemplateFile").value
+        template_file = self.getProperty("TemplateFile").value
         fd = open(template_file, "r")
         xml_str = fd.read()
         s = DataSeries()
@@ -198,7 +195,7 @@ class LRAutoReduction(PythonAlgorithm):
         
         # If a template was supplied, use it.
         if len(filename.strip()) > 0:
-            data_set = self._read_template(run_number, first_run_of_set, sequence_number)
+            data_set = self._read_template(sequence_number)
         # ... if not, create a new one using the meta-data information
         else:
             create_template = True
@@ -209,8 +206,8 @@ class LRAutoReduction(PythonAlgorithm):
         #   Verify that the primary fraction is available
         if data_set.clocking_from is None and data_set.clocking_to is None:
             primary_range = self.getProperty("PrimaryFractionRange").value
-            data_set.clocking_from = primary_range[0]
-            data_set.clocking_to = primary_range[1]
+            data_set.clocking_from = int(primary_range[0])
+            data_set.clocking_to = int(primary_range[1])
             logger.notice("Template did not contain primary fraction range: using supplied default")
 
         # Get incident medium as a simple string
@@ -225,7 +222,7 @@ class LRAutoReduction(PythonAlgorithm):
             self.reflectivity_peak, self.low_res = self._find_peaks(self.event_data)            
             logger.notice("Using reflectivity peak %s (template was %s)" % (self.reflectivity_peak, data_set.DataPeakPixels))
             data_set.DataPeakPixels = self.reflectivity_peak
-            data_set.DataBackgroundRoi = [int(self.reflectivity_peak[0]-3), int(self.reflectivity_peak[1]+3), 0, 0]
+            data_set.DataBackgroundRoi = [self.reflectivity_peak[0]-3, self.reflectivity_peak[1]+3, 0, 0]
             logger.notice("Using low-res %s (template was %s)" % (self.low_res, data_set.data_x_range))
             data_set.data_x_range = self.low_res
                 
@@ -254,8 +251,18 @@ class LRAutoReduction(PythonAlgorithm):
             @param first_run_of_set: first run in the sequence (sequence ID)
             @param sequence_number: the ID of the data set within the sequence of runs
         """
-        #TODO: Before we create an empty template, see if a template for this set exists.
         # If so, load it and only overwrite the part we are dealing with here.
+        template_file = self._get_output_template_path(first_run_of_set)
+        if os.path.isfile(template_file):
+            fd = open(template_file, "r")
+            xml_str = fd.read()
+            s = DataSeries()
+            s.from_xml(xml_str)
+        else:
+            s = DataSeries()
+            
+        # Now we have an initial template
+        self.data_series_template = s
         
         # Get the TOF range
         tof_range = self._get_tof_range()     
@@ -263,21 +270,18 @@ class LRAutoReduction(PythonAlgorithm):
         #TODO: sync up names with new DAS
         # Get information from meta-data
         meta_data_run = self.event_data.getRun()
-        indicent_medium = self._read_property(meta_data_run, "incident_medium", "air")       
-        q_min = self._read_property(meta_data_run, "output_q_min", 0.005)
+        incident_medium = self._read_property(meta_data_run, "incident_medium", "air")       
+        q_min = self._read_property(meta_data_run, "output_q_min", 0.001)
         q_step = -abs(self._read_property(meta_data_run, "output_q_step", 0.02))
         dQ_constant = self._read_property(meta_data_run, "dq_constant", 0.004)
         dQ_slope = self._read_property(meta_data_run, "dq_slope", 0.02)
         angle_offset = self._read_property(meta_data_run, "angle_offset", 0.016)
         angle_offset_err = self._read_property(meta_data_run, "angle_offset_error", 0.001)
-        sf_file = self._read_property(meta_data_run, "scaling_factor_file", "")
+        sf_file = self._read_property(meta_data_run, "scaling_factor_file", "/SNS/REF_L/shared/sf.txt")
         if len(sf_file.strip())==0:
             logger.error("No scaling factor file supplied")
         
-        # If it doesn't exist, make sure that we pad the earlier items in the sequence.
-        new_data_sets = []
-        self.data_series_template = DataSeries()
-        for i in range(int(run_number)-int(first_run_of_set)+1):
+        def _new_data_set():
             d = DataSets()
             d.NormFlag = True
             d.DataBackgroundFlag = True
@@ -296,14 +300,35 @@ class LRAutoReduction(PythonAlgorithm):
             d.fourth_column_dq0 = dQ_constant
             d.fourth_column_dq_over_q = dQ_slope
             d.scaling_factor_file = sf_file
-            
+            return d
+         
+        # Copy over the existing series, up to the point we are at
+        new_data_sets = []
+        # First, copy over the entries in the existing template, up to the point previous to the current point
+        s_num = int(run_number)-int(first_run_of_set)
+        
+        for i in range(min(int(run_number)-int(first_run_of_set), len(s.data_sets))):
+            sequence_id = int(first_run_of_set)+i
+            logger.information("Copying %s" % sequence_id)
+            d = s.data_sets[i]
+            d.data_files=[sequence_id]
             new_data_sets.append(d)
+            
+        running_id = len(new_data_sets)
+        # Pad the items between what we have and the current point
+        for i in range(running_id, int(run_number)-int(first_run_of_set)+1):
+            sequence_id = int(first_run_of_set)+i
+            logger.information("Adding %s" % sequence_id)
+            d = _new_data_set()
+            d.data_files=[sequence_id]
+            new_data_sets.append(d)
+
         self.data_series_template.data_sets = new_data_sets
         
         data_set = self.data_series_template.data_sets[sequence_number-1]
         
         # Find direct beam peaks
-        self._get_direct_beam(data_set)
+        self._get_direct_beam(meta_data_run, data_set)
         
         return data_set
     
@@ -327,37 +352,44 @@ class LRAutoReduction(PythonAlgorithm):
         return [tof_min, tof_max]
 
 
-    def _get_direct_beam(self, data_set):
+    def _get_direct_beam(self, meta_data_run, data_set):
         """
             Get the direct beam run information for the loaded data
+            @param meta_data_run: Run object from the Mantid workspace
             @param data_set: DataSets object
         """
         # Wavelength of the data we are reducing
         data_wl = self.event_data.getRun().getProperty('LambdaRequest').value[0]
         
-        direct_beam_runs = self.getProperty("DirectBeamRuns").value
+        direct_beam_runs = self._read_property(meta_data_run, "direct_beam_runs", [])
         
         # For each run, load and compare the wavelength
-        is_direct_beam_found = False
+        direct_beam_found = None
         for r in direct_beam_runs:
             direct_beam_data = LoadEventNexus(Filename="REF_L_%s" % r)
             wl = direct_beam_data.getRun().getProperty('LambdaRequest').value[0]
             if data_wl == wl:
-                is_direct_beam_found = True
+                direct_beam_found = r
                 break
          
         # Raise an exception if we haven't found our direct beam run        
-        if not is_direct_beam_found:
+        if direct_beam_found is None:
             raise RuntimeError, "Could not find a valid direct beam run for wl=%s in %s" % (data_wl, str(direct_beam_runs))
             
         # Find the direct beam peak
-        peak, low_res = self._find_peaks(direct_beam_data) 
+        peak, low_res = self._find_peaks(direct_beam_data)
+        data_set.norm_file = direct_beam_found
         data_set.NormPeakPixels = peak
-        data_set.NormBackgroundRoi = [int(peak[0]-3), int(peak[1]+3), 0, 0]
+        data_set.NormBackgroundRoi = [peak[0]-3, peak[1]+3]
         data_set.NormBackgroundFlag = True
         data_set.norm_x_range = low_res
             
         
+    def _get_output_template_path(self, first_run_of_set):
+        output_dir = self.getProperty("OutputDirectory").value
+        return os.path.join(output_dir, "REF_L_%s_auto_template.xml" % first_run_of_set)
+        
+
     def _write_template(self, data_set, run_number, first_run_of_set, sequence_number):
         """
             Write out a template using the reduction parameters that we have used.
@@ -390,8 +422,7 @@ class LRAutoReduction(PythonAlgorithm):
 
         xml_str += self.data_series_template.to_xml()
         xml_str += "</Reduction>\n"
-        output_dir = self.getProperty("OutputDirectory").value
-        template_file = open(os.path.join(output_dir, "REF_L_%s_auto_template.xml" % first_run_of_set), 'w')
+        template_file = open(self._get_output_template_path(first_run_of_set), 'w')
         template_file.write(xml_str)
         template_file.close()
 
@@ -476,8 +507,9 @@ class LRAutoReduction(PythonAlgorithm):
                 return
             logger.notice("Using automated scaling factor calculator")
             output_dir = self.getProperty("OutputDirectory").value
+            sf_tof_step = self.getProperty("ScalingFactorTOFStep").value
             LRDirectBeamSort(RunList=range(first_run_of_set, first_run_of_set+sequence_number),
-                             UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=200,
+                             UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
                              ScalingFactorFile=os.path.join(output_dir, "sf_%s_auto.txt" % first_run_of_set))
             return
