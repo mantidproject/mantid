@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name, W0201, W1401, W0702, W0121, W0511
 import math
 import sys
 import re
@@ -140,7 +140,7 @@ class LRAutoReduction(PythonAlgorithm):
         """
             Find reflectivity peak and low-resolution peak for a workspace
             @param event_data: data workspace
-        """   
+        """
         # Find peaks as needed
         nx = int(event_data.getInstrument().getNumberParameter("number-of-x-pixels")[0])
         ny = int(event_data.getInstrument().getNumberParameter("number-of-y-pixels")[0])
