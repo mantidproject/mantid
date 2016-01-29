@@ -82,8 +82,8 @@ class LRAutoReduction(PythonAlgorithm):
             # Type 2 is zero-attenuator direct beams
             # Type 3 is data that we don't need to treat
         else:
-            do_reduction = not is_direct_beam
             first_run_of_set, sequence_number, is_direct_beam = self._parse_title(meta_data_run, run_number)
+            do_reduction = not is_direct_beam
 
         return first_run_of_set, sequence_number, do_reduction, is_direct_beam
 
