@@ -5,7 +5,6 @@ import re
 import platform
 import time
 import mantid
-import numpy
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -75,11 +74,18 @@ class LRAutoReduction(PythonAlgorithm):
         elif meta_data_run.hasProperty("sequencer_number") and meta_data_run.hasProperty("sequence_id"):
             sequence_number = meta_data_run.getProperty("sequence_number").value
             first_run_of_set = meta_data_run.getProperty("sequence_id").value
-            is_direct_beam = meta_data_run.getProperty("is_direct_beam").value
+            data_type = meta_data_run.getProperty("data_type").value
+            # Normal sample data is type 0
+            do_reduction = data_type==0
+            # Direct beams for scaling factors are type 1
+            is_direct_beam = data_type==1
+            # Type 2 is zero-attenuator direct beams
+            # Type 3 is data that we don't need to treat
         else:
+            do_reduction = not is_direct_beam
             first_run_of_set, sequence_number, is_direct_beam = self._parse_title(meta_data_run, run_number)
 
-        return first_run_of_set, sequence_number, is_direct_beam
+        return first_run_of_set, sequence_number, do_reduction, is_direct_beam
 
 
     def _parse_title(self, meta_data_run, run_number):
@@ -493,7 +499,7 @@ class LRAutoReduction(PythonAlgorithm):
         run_number = event_file.split('_')[2]
 
         # Determine where we are in the scan
-        first_run_of_set, sequence_number, is_direct_beam = self._get_series_info(filename, run_number)
+        first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info(filename, run_number)
 
         # Get the reduction parameters for this run
         data_set, incident_medium = self._get_template(run_number, first_run_of_set, sequence_number)
@@ -510,6 +516,9 @@ class LRAutoReduction(PythonAlgorithm):
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
                              ScalingFactorFile=os.path.join(output_dir, "sf_%s_auto.txt" % first_run_of_set))
+            return
+        elif not do_reduction:
+            logger.notice("The data is of a type that does not have to be reduced")
             return
 
         # Write template before we start the computation
