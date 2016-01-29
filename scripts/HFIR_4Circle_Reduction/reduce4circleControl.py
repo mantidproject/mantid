@@ -732,6 +732,8 @@ class CWSCDReductionControl(object):
         assert bkgd_inner_radius >= peak_radius
         assert bkgd_outer_radius >= bkgd_inner_radius
 
+        # TODO/FIXME/NOW/1st: Need to re-write this method according to documentation of IntegratePeaksCWSD()
+
         # Get MD WS
         if md_ws_name is None:
             raise RuntimeError('Implement how to locate merged MD workspace name from '

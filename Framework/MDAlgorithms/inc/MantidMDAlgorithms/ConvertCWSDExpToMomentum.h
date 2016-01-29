@@ -64,7 +64,7 @@ private:
   void convertSpiceMatrixToMomentumMDEvents(API::MatrixWorkspace_sptr dataws,
                                             bool usevirtual,
                                             const detid_t &startdetid,
-                                            const int runnumber);
+                                            const int runnumber, int monitor_counts);
 
   /// Convert |Q| with detector position to Q_sample
   Kernel::V3D convertToQSample(const Kernel::V3D &samplePos,
@@ -104,6 +104,7 @@ private:
   size_t m_iColPt;
   size_t m_iColFilename;
   size_t m_iColStartDetID;
+  size_t m_iMonitorCounts;
 
   std::vector<double> m_extentMins;
   std::vector<double> m_extentMaxs;
@@ -117,9 +118,6 @@ private:
   std::string m_dataDir;
   /// Flag to use m_dataDir
   bool m_isBaseName;
-  /// Flag to normalize and scale up
-  bool m_normalizeByMon;
-  double m_scaleFactor;
   /// Background workspace
   bool m_removeBackground;
   API::MatrixWorkspace_const_sptr m_backgroundWS;

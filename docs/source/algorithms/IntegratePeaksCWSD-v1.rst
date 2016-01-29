@@ -33,9 +33,18 @@ diffractometer (aka. 4-circle).
 Simple Peak Integration
 =======================
 
-Integration is performed by summing the signal strength from all MDEvents that 
+Integration is performed by summing the signal from all MDEvents that 
 are not masked.
 The integrated value will be normalized by the monitor counts.
+
+The **assumption** is to load an experiment point (*Pt*) and convert to MDEventWorkspace in Q-space.
+This *Pt*, i.e., workspace, contains at most one peak.
+Algorithm *FindPeaksMD* is able to find a peak in the MDEventWorkspace and output to a PeaksWorkspace.
+A UB matrix is set to this PeaksWorkspace as an option.
+
+The **pseduo-code** of this algorith is:
+ 1. Go over all the MDEvents;
+ 2. :math:`I = S \cdot sum_i^N\frac{Y_i}{m}`, where S is the scale fator, :math:`Y_i` is the signal of point i, and m is the monitor counts
 
 Masking
 #######

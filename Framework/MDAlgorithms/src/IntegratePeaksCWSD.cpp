@@ -4,9 +4,9 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidDataObjects/Peak.h"
 
 /*
-#include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -98,8 +98,9 @@ void IntegratePeaksCWSD::exec()
   }
 
   // Process peaks
+  std::map<uint16_t, signal_t> monitorCountMap = getMonitorCounts();
+  getPeakInformation();
   simplePeakIntegration(vecMaskedDetID);
-
 
 } //
 
@@ -153,15 +154,23 @@ void IntegratePeaksCWSD::simplePeakIntegration(const std::vector<detid_t> &vecMa
 
       // Get signal to add
       signal_t signal = mditer->getInnerSignal(iev);
+      uint16_t run_number = mditer->getInnerRunIndex(iev);
+      // signal_t monitor = 0;
 
+      float tempx = mditer->getInnerPosition(iev, 0);
+      float tempy = mditer->getInnerPosition(iev, 1);
+      float tempz = mditer->getInnerPosition(iev, 2);
+
+      double distance = -1;
+
+      g_log.notice() << "[DB] Event: run = " << run_number << ", signal = " << signal
+                     << ", distance = " << distance << "\n";
 
       // Check
       // if (currindex >= vec_event_qsample.size())
       //  throw std::runtime_error("Logic error in event size!");
       /*
-      float tempx = mditer->getInnerPosition(iev, 0);
-      float tempy = mditer->getInnerPosition(iev, 1);
-      float tempz = mditer->getInnerPosition(iev, 2);
+
 
 
 
@@ -200,7 +209,8 @@ void IntegratePeaksCWSD::simplePeakIntegration(const std::vector<detid_t> &vecMa
  * @brief IntegratePeaksCWSD::processMaskWorkspace
  * @param maskws
  */
-std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws)
+std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(
+    DataObjects::MaskWorkspace_const_sptr maskws)
 {
   std::vector<detid_t> vecMaskedDetID;
 
@@ -223,6 +233,41 @@ std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(DataObjects::MaskW
   return vecMaskedDetID;
 }
 
+/**
+ * @brief IntegratePeaksCWSD::getMonitorCounts
+ * @return
+ */
+std::map<uint16_t, signal_t> IntegratePeaksCWSD::getMonitorCounts()
+{
+  std::map<uint16_t, signal_t> run_monitor_map;
+
+  uint16_t num_expinfo = m_inputWS->getNumExperimentInfo();
+  for (size_t iexpinfo = 0; iexpinfo < num_expinfo; ++iexpinfo)
+  {
+    ExperimentInfo_const_sptr expinfo = m_inputWS->getExperimentInfo(iexpinfo);
+    std::string run_str = expinfo->run().getProperty("run_number")->value();
+    uint16_t run_number = static_cast<uint16_t>(atoi(run_str.c_str()));
+    std::string mon_str = expinfo->run().getProperty("monitor")->value();
+    signal_t monitor = static_cast<signal_t>(atoi(mon_str.c_str()));
+    run_monitor_map.insert(std::make_pair(run_number, monitor));
+    g_log.notice() << "[DB] Add run " << run_number << ", monitor = " << monitor << "\n";
+  }
+
+  return run_monitor_map;
+}
+
+
+void IntegratePeaksCWSD::getPeakInformation()
+{
+  std::vector<Peak> peaks = m_peaksWS->getPeaks();
+  size_t numpeaks = peaks.size();
+  for (size_t ipeak = 0; ipeak < numpeaks; ++ipeak)
+  {
+    Peak& peak = peaks[ipeak];
+    Mantid::Kernel::V3D qsample = peak.getQSampleFrame();
+    g_log.notice() <<"[DB] Q sample = " << qsample.toString() << "\n";
+  }
+}
 
 } // namespace Mantid
 } // namespace MDAlgorithms

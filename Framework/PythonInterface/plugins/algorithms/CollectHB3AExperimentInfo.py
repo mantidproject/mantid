@@ -29,7 +29,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._spiceTableDict = {}
         self._detStartID = {}
         self._2thetaScanPtDict = {}
-        self._scanPt2ThetaDict = {}
+        self._scanPt2ThetaDict = {} 
+        self._monitorCountsDict = dict()    # key = 2-tuple (int, int) as scan number and pt number. 
 
         self._currStartDetID = -999999999
 
@@ -113,7 +114,9 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 twotheta = self._scanPt2ThetaDict[(scannumber, ptnumber)]
                 startdetid = self._detStartID[twotheta]
                 datafilename = 'HB3A_exp%d_scan%04d_%04d.xml'%(self._expNumber, scannumber, ptnumber)
-                self._myScanPtFileTableWS.addRow([int(scannumber), int(ptnumber), str(datafilename), int(startdetid)])
+                monitor_counts = self._monitorCountsDict[(scannumber, ptnumber)]
+                self._myScanPtFileTableWS.addRow([int(scannumber), int(ptnumber), str(datafilename), int(startdetid), 
+                        int(monitor_counts)])
 
         # Output
         self.setProperty("OutputWorkspace", self._myScanPtFileTableWS)
@@ -136,8 +139,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._myScanPtFileTableWS.addColumn("int", "Pt")
         self._myScanPtFileTableWS.addColumn("str", "Filename")
         self._myScanPtFileTableWS.addColumn("int", "StartDetID")
-        # FIXME/TODO - Make this part work!
-        self._myScanPtFileTableWS.addColumkn('int', 'MonitorCounts')
+        self._myScanPtFileTableWS.addColumn('int', 'MonitorCounts')
 
         return
 
@@ -224,6 +226,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
             try:
                 iColPtNumber = colnames.index('Pt.')
                 iCol2Theta = colnames.index('2theta')
+                iColMonitor = colnames.index('monitor')
             except IndexError as e:
                 raise IndexError("Either Pt. or 2theta is not found in columns: %d"%(str(e)))
 
@@ -231,6 +234,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 ptnumber = spicetable.cell(irow, iColPtNumber)
                 if ptnumber in requiredptnumbers:
                     twotheta = spicetable.cell(irow, iCol2Theta)
+                    monitor = spicetable.cell(irow, iColMonitor)
+                    self._monitorCountsDict[(scannumber, ptnumber)] = monitor
                     if self._2thetaScanPtDict.has_key(twotheta) is False:
                         self._2thetaScanPtDict[twotheta] = []
                     self._2thetaScanPtDict[twotheta].append( (scannumber, ptnumber) ) # ENDFOR

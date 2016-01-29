@@ -46,8 +46,11 @@ private:
   template <typename MDE, size_t nd>
   void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
+  std::map<uint16_t, signal_t> getMonitorCounts();
 
   std::vector<detid_t> processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws);
+
+  void getPeakInformation();
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_inputWS;

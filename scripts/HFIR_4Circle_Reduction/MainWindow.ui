@@ -193,7 +193,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -2368,6 +2368,10 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionSave_Session"/>
     <addaction name="actionLoad_Session"/>
     <addaction name="separator"/>
+    <addaction name="action_setDefaultConfiguration"/>
+    <addaction name="separator"/>
+    <addaction name="action_SaveConfiguration"/>
+    <addaction name="action_LoadConfiguration"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -2424,6 +2428,27 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+L</string>
+   </property>
+  </action>
+  <action name="action_SaveConfiguration">
+   <property name="text">
+    <string>Save Configuration</string>
+   </property>
+  </action>
+  <action name="action_LoadConfiguration">
+   <property name="text">
+    <string>Load Configuration</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="action_setDefaultConfiguration">
+   <property name="text">
+    <string>Set Default Config</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>
