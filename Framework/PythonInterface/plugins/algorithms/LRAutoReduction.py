@@ -68,6 +68,8 @@ class LRAutoReduction(PythonAlgorithm):
         if force_value > 0:
             sequence_number = force_value
             first_run_of_set = int(run_number) - int(sequence_number) + 1
+            do_reduction = True
+            is_direct_beam = False
 
         # Look for meta data information, available with the new DAS
         # If it's not available, parse the title.
