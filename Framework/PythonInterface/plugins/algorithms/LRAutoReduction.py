@@ -34,15 +34,15 @@ class LRAutoReduction(PythonAlgorithm):
         self.declareProperty(FileProperty("TemplateFile", "",
                                           FileAction.OptionalLoad, ['.xml']),
                                           "Template reduction file")
-                            
-        # ------------ Properties that should be in the meta data -------------              
-        self.declareProperty("ScaleToUnity", True, 
+
+        # ------------ Properties that should be in the meta data -------------
+        self.declareProperty("ScaleToUnity", True,
                              "If true, the reflectivity under the Q given cutoff will be scaled to 1")
         self.declareProperty(IntArrayProperty("PrimaryFractionRange", [117, 197],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use for calculating the primary fraction correction.")
-        # ---------------------------------------------------------------------              
-                                       
+        # ---------------------------------------------------------------------
+
         self.declareProperty("ScalingFactorTOFStep", 200.0, "Bin width in TOF for fitting scaling factors")
         self.declareProperty("ScalingWavelengthCutoff", 10.0, "Wavelength above which the scaling factors are assumed to be one")
         self.declareProperty("FindPeaks", False, "Find reflectivity peaks instead of using the template values")
@@ -56,19 +56,19 @@ class LRAutoReduction(PythonAlgorithm):
         """
             Retrieve the information about the scan series so
             that we know how to put all the pieces together.
-            
+
             At some point this should all be in the data logs.
             We can also pull some of the information from the title.
         """
         # Load meta data to decide what to do
         self.event_data = LoadEventNexus(Filename=filename, MetaDataOnly=False)
         meta_data_run = self.event_data.getRun()
-        
+
         # Deal with a forced sequence number
         force_value = self.getProperty("ForceSequenceNumber").value
         if force_value > 0:
             sequence_number = force_value
-            first_run_of_set = int(run_number)-int(sequence_number)+1
+            first_run_of_set = int(run_number) - int(sequence_number) + 1
 
         # Look for meta data information, available with the new DAS
         # If it's not available, parse the title.
@@ -78,10 +78,10 @@ class LRAutoReduction(PythonAlgorithm):
             is_direct_beam = meta_data_run.getProperty("is_direct_beam").value
         else:
             first_run_of_set, sequence_number, is_direct_beam = self._parse_title(meta_data_run, run_number)
-            
+
         return first_run_of_set, sequence_number, is_direct_beam
- 
- 
+
+
     def _parse_title(self, meta_data_run, run_number):
         """
             Parse the title to get the first run number of the set and the sequence number
@@ -93,7 +93,7 @@ class LRAutoReduction(PythonAlgorithm):
         sequence_number = 1
         is_direct_beam = False
         title = meta_data_run.getProperty("run_title").value
-        
+
         # Determine whether this is a direct beam run
         if "direct beam" in title.lower():
             logger.notice("Direct beam found in the title")
@@ -101,35 +101,35 @@ class LRAutoReduction(PythonAlgorithm):
 
         thi = meta_data_run.getProperty('thi').value[0]
         tthd = meta_data_run.getProperty('tthd').value[0]
-        if math.fabs(thi-tthd)<0.001:
+        if math.fabs(thi - tthd) < 0.001:
             logger.notice("Angle appears to be zero: probably a direct beam run")
             is_direct_beam = True
-            
+
         # Determine the sequence ID and sequencer number
         try:
-            m=re.search("Run:(\d+)-(\d+)\.",title)
+            m = re.search("Run:(\d+)-(\d+)\.", title)
             if m is not None:
                 first_run_of_set = m.group(1)
                 sequence_number = int(m.group(2))
             else:
-                m=re.search("-(\d+)\.",title)
+                m = re.search("-(\d+)\.", title)
                 if m is not None:
                     sequence_number = int(m.group(1))
-                    first_run_of_set = int(run_number)-int(sequence_number)+1
+                    first_run_of_set = int(run_number) - int(sequence_number) + 1
                 else:
                     sequence_number = -1
-                    first_run_of_set = int(run_number)-int(sequence_number)+1
+                    first_run_of_set = int(run_number) - int(sequence_number) + 1
         except:
             sequence_number = -1
-            first_run_of_set = int(run_number)-int(sequence_number)+1
+            first_run_of_set = int(run_number) - int(sequence_number) + 1
 
         if sequence_number == -1:
             logger.notice("Title: %s" % title)
             raise RuntimeError, "Could not identify sequence number. Make sure the run title ends with -n where 1 < n < 7"
-                       
+
         return first_run_of_set, sequence_number, is_direct_beam
 
- 
+
     def _find_peaks(self, event_data):
         """
             Find reflectivity peak and low-resolution peak for a workspace
@@ -139,25 +139,25 @@ class LRAutoReduction(PythonAlgorithm):
         nx = int(event_data.getInstrument().getNumberParameter("number-of-x-pixels")[0])
         ny = int(event_data.getInstrument().getNumberParameter("number-of-y-pixels")[0])
         tof_summed = Integration(InputWorkspace=event_data)
-        
+
         # Reflectivity peak
         peak_data = RefRoi(InputWorkspace=tof_summed, IntegrateY=False,
                            NXPixel=nx, NYPixel=ny, ConvertToQ=False)
         peak_data = Transpose(InputWorkspace=peak_data)
         peak, _, _ = LRPeakSelection(InputWorkspace=peak_data, ComputePrimaryRange=False)
-        
+
         # Low-resolution range
         peak_data = RefRoi(InputWorkspace=tof_summed, IntegrateY=True,
                            NXPixel=nx, NYPixel=ny, ConvertToQ=False)
         peak_data = Transpose(InputWorkspace=peak_data)
         _, low_res, _ = LRPeakSelection(InputWorkspace=peak_data, ComputePrimaryRange=False)
-       
+
         AnalysisDataService.remove(str(tof_summed))
         AnalysisDataService.remove(str(peak_data))
-        
+
         return [int(x) for x in peak], [int(x) for x in low_res]
 
-       
+
     def _read_template(self, sequence_number):
         """
             Read template from file.
@@ -169,15 +169,15 @@ class LRAutoReduction(PythonAlgorithm):
         s = DataSeries()
         s.from_xml(xml_str)
 
-        if len(s.data_sets)>=sequence_number:
-            data_set = s.data_sets[sequence_number-1]
-        elif len(s.data_sets)>0:
+        if len(s.data_sets) >= sequence_number:
+            data_set = s.data_sets[sequence_number - 1]
+        elif len(s.data_sets) > 0:
             data_set = s.data_sets[0]
         else:
             raise RuntimeError, "Invalid reduction template"
-            
+
         self.data_series_template = s
-        
+
         return data_set
 
 
@@ -192,7 +192,7 @@ class LRAutoReduction(PythonAlgorithm):
         filename = self.getProperty("TemplateFile").value
         # Keep track of the origin of the template so we know whether to force peak finding
         create_template = False
-        
+
         # If a template was supplied, use it.
         if len(filename.strip()) > 0:
             data_set = self._read_template(sequence_number)
@@ -214,18 +214,18 @@ class LRAutoReduction(PythonAlgorithm):
         _incident_medium_str = str(data_set.incident_medium_list[0])
         _list = _incident_medium_str.split(',')
         incident_medium = _list[data_set.incident_medium_index_selected]
-                 
+
         # If we have to find peaks, do it here
         find_peaks = self.getProperty("FindPeaks").value
         if find_peaks or create_template:
             # Find reflectivity peak
-            self.reflectivity_peak, self.low_res = self._find_peaks(self.event_data)            
+            self.reflectivity_peak, self.low_res = self._find_peaks(self.event_data)
             logger.notice("Using reflectivity peak %s (template was %s)" % (self.reflectivity_peak, data_set.DataPeakPixels))
             data_set.DataPeakPixels = self.reflectivity_peak
-            data_set.DataBackgroundRoi = [self.reflectivity_peak[0]-3, self.reflectivity_peak[1]+3, 0, 0]
+            data_set.DataBackgroundRoi = [self.reflectivity_peak[0] - 3, self.reflectivity_peak[1] + 3, 0, 0]
             logger.notice("Using low-res %s (template was %s)" % (self.low_res, data_set.data_x_range))
             data_set.data_x_range = self.low_res
-                
+
         return data_set, incident_medium
 
 
@@ -260,17 +260,17 @@ class LRAutoReduction(PythonAlgorithm):
             s.from_xml(xml_str)
         else:
             s = DataSeries()
-            
+
         # Now we have an initial template
         self.data_series_template = s
-        
+
         # Get the TOF range
-        tof_range = self._get_tof_range()     
-        
-        #TODO: sync up names with new DAS
+        tof_range = self._get_tof_range()
+
+        # TODO: sync up names with new DAS
         # Get information from meta-data
         meta_data_run = self.event_data.getRun()
-        incident_medium = self._read_property(meta_data_run, "incident_medium", "air")       
+        incident_medium = self._read_property(meta_data_run, "incident_medium", "air")
         q_min = self._read_property(meta_data_run, "output_q_min", 0.001)
         q_step = -abs(self._read_property(meta_data_run, "output_q_step", 0.02))
         dQ_constant = self._read_property(meta_data_run, "dq_constant", 0.004)
@@ -278,9 +278,9 @@ class LRAutoReduction(PythonAlgorithm):
         angle_offset = self._read_property(meta_data_run, "angle_offset", 0.016)
         angle_offset_err = self._read_property(meta_data_run, "angle_offset_error", 0.001)
         sf_file = self._read_property(meta_data_run, "scaling_factor_file", "/SNS/REF_L/shared/sf.txt")
-        if len(sf_file.strip())==0:
+        if len(sf_file.strip()) == 0:
             logger.error("No scaling factor file supplied")
-        
+
         def _new_data_set():
             d = DataSets()
             d.NormFlag = True
@@ -294,45 +294,43 @@ class LRAutoReduction(PythonAlgorithm):
             d.incident_medium_index_selected = 0
             d.angle_offset = angle_offset
             d.angle_offset_error = angle_offset_err
-            
+
             d.q_min = q_min
             d.q_step = q_step
             d.fourth_column_dq0 = dQ_constant
             d.fourth_column_dq_over_q = dQ_slope
             d.scaling_factor_file = sf_file
             return d
-         
+
         # Copy over the existing series, up to the point we are at
         new_data_sets = []
         # First, copy over the entries in the existing template, up to the point previous to the current point
-        s_num = int(run_number)-int(first_run_of_set)
-        
-        for i in range(min(int(run_number)-int(first_run_of_set), len(s.data_sets))):
-            sequence_id = int(first_run_of_set)+i
+        for i in range(min(int(run_number) - int(first_run_of_set), len(s.data_sets))):
+            sequence_id = int(first_run_of_set) + i
             logger.information("Copying %s" % sequence_id)
             d = s.data_sets[i]
-            d.data_files=[sequence_id]
+            d.data_files = [sequence_id]
             new_data_sets.append(d)
-            
+
         running_id = len(new_data_sets)
         # Pad the items between what we have and the current point
-        for i in range(running_id, int(run_number)-int(first_run_of_set)+1):
-            sequence_id = int(first_run_of_set)+i
+        for i in range(running_id, int(run_number) - int(first_run_of_set) + 1):
+            sequence_id = int(first_run_of_set) + i
             logger.information("Adding %s" % sequence_id)
             d = _new_data_set()
-            d.data_files=[sequence_id]
+            d.data_files = [sequence_id]
             new_data_sets.append(d)
 
         self.data_series_template.data_sets = new_data_sets
-        
-        data_set = self.data_series_template.data_sets[sequence_number-1]
-        
+
+        data_set = self.data_series_template.data_sets[sequence_number - 1]
+
         # Find direct beam peaks
         self._get_direct_beam(meta_data_run, data_set)
-        
+
         return data_set
-    
-    
+
+
     def _get_tof_range(self):
         """
             Determine TOF range from the data
@@ -347,8 +345,8 @@ class LRAutoReduction(PythonAlgorithm):
         m = 1.675e-27  # kg
         wl = self.event_data.getRun().getProperty('LambdaRequest').value[0]
         chopper_speed = self.event_data.getRun().getProperty('SpeedRequest1').value[0]
-        tof_min = source_detector_distance / h * m * (wl + 0.5*60.0/chopper_speed - 1.7*60.0/chopper_speed) * 1e-4
-        tof_max = source_detector_distance / h * m * (wl + 0.5*60.0/chopper_speed + 1.7*60.0/chopper_speed) * 1e-4
+        tof_min = source_detector_distance / h * m * (wl + 0.5 * 60.0 / chopper_speed - 1.7 * 60.0 / chopper_speed) * 1e-4
+        tof_max = source_detector_distance / h * m * (wl + 0.5 * 60.0 / chopper_speed + 1.7 * 60.0 / chopper_speed) * 1e-4
         return [tof_min, tof_max]
 
 
@@ -360,9 +358,9 @@ class LRAutoReduction(PythonAlgorithm):
         """
         # Wavelength of the data we are reducing
         data_wl = self.event_data.getRun().getProperty('LambdaRequest').value[0]
-        
+
         direct_beam_runs = self._read_property(meta_data_run, "direct_beam_runs", [])
-        
+
         # For each run, load and compare the wavelength
         direct_beam_found = None
         for r in direct_beam_runs:
@@ -371,24 +369,24 @@ class LRAutoReduction(PythonAlgorithm):
             if data_wl == wl:
                 direct_beam_found = r
                 break
-         
-        # Raise an exception if we haven't found our direct beam run        
+
+        # Raise an exception if we haven't found our direct beam run
         if direct_beam_found is None:
             raise RuntimeError, "Could not find a valid direct beam run for wl=%s in %s" % (data_wl, str(direct_beam_runs))
-            
+
         # Find the direct beam peak
         peak, low_res = self._find_peaks(direct_beam_data)
         data_set.norm_file = direct_beam_found
         data_set.NormPeakPixels = peak
-        data_set.NormBackgroundRoi = [peak[0]-3, peak[1]+3]
+        data_set.NormBackgroundRoi = [peak[0] - 3, peak[1] + 3]
         data_set.NormBackgroundFlag = True
         data_set.norm_x_range = low_res
-            
-        
+
+
     def _get_output_template_path(self, first_run_of_set):
         output_dir = self.getProperty("OutputDirectory").value
         return os.path.join(output_dir, "REF_L_%s_auto_template.xml" % first_run_of_set)
-        
+
 
     def _write_template(self, data_set, run_number, first_run_of_set, sequence_number):
         """
@@ -409,15 +407,15 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Copy over the existing series, up to the point we are at
         new_data_sets = []
-        for i in range(int(run_number)-int(first_run_of_set)+1):
-            if i>len(self.data_series_template.data_sets):
+        for i in range(int(run_number) - int(first_run_of_set) + 1):
+            if i > len(self.data_series_template.data_sets):
                 break
             d = self.data_series_template.data_sets[i]
-            d.data_files=[int(first_run_of_set)+i]
+            d.data_files = [int(first_run_of_set) + i]
             new_data_sets.append(d)
         # Make copy over the parameters we actually used
-        new_data_sets[sequence_number-1] = data_set
-         
+        new_data_sets[sequence_number - 1] = data_set
+
         self.data_series_template.data_sets = new_data_sets
 
         xml_str += self.data_series_template.to_xml()
@@ -426,7 +424,7 @@ class LRAutoReduction(PythonAlgorithm):
         template_file.write(xml_str)
         template_file.close()
 
-        
+
     def _save_partial_output(self, data_set, first_run_of_set, sequence_number, run_number):
         """
             Stitch and save the full reflectivity curve, or as much as we have at the moment.
@@ -447,7 +445,7 @@ class LRAutoReduction(PythonAlgorithm):
             if ws.endswith("ts") and ws.startswith(prefix):
                 output_ws = ws
                 n_ts += 1
-        if n_ts>1:
+        if n_ts > 1:
             logger.error("More than one reduced output for %s" % prefix)
 
         file_path = os.path.join(output_dir, output_file)
@@ -465,38 +463,38 @@ class LRAutoReduction(PythonAlgorithm):
         for ws in ws_list:
             if ws.endswith("auto_ts"):
                 input_ws_list.append(ws)
-                
+
         if len(input_ws_list) == 0:
             logger.notice("No data sets to stitch.")
             return
         input_ws_list = sorted(input_ws_list)
-        
+
         default_file_name = 'REFL_%s_combined_data_auto.txt' % first_run_of_set
         file_path = os.path.join(output_dir, default_file_name)
         scale_to_unity = self.getProperty("ScaleToUnity").value
         wl_cutoff = self.getProperty("ScalingWavelengthCutoff").value
-        
+
         # The following were the values used in the auto-reduction before 2016
         # output_binning = [0.005, -0.01, 2.0]
         output_binning = [data_set.q_min, -abs(data_set.q_step), 2.0]
         dQ_constant = data_set.fourth_column_dq0
         dQ_slope = data_set.fourth_column_dq_over_q
-        
+
         LRReflectivityOutput(ReducedWorkspaces=input_ws_list, ScaleToUnity=scale_to_unity, ScalingWavelengthCutoff=wl_cutoff,
                              OutputBinning=output_binning, DQConstant=dQ_constant, DQSlope=dQ_slope, OutputFilename=file_path)
         for ws in input_ws_list:
             AnalysisDataService.remove(str(ws))
-        
+
         return file_path
-    
+
     def PyExec(self):
         filename = self.getProperty("Filename").value
         event_file = os.path.split(filename)[-1]
         run_number = event_file.split('_')[2]
-        
+
         # Determine where we are in the scan
         first_run_of_set, sequence_number, is_direct_beam = self._get_series_info(filename, run_number)
-        
+
         # Get the reduction parameters for this run
         data_set, incident_medium = self._get_template(run_number, first_run_of_set, sequence_number)
 
@@ -508,7 +506,7 @@ class LRAutoReduction(PythonAlgorithm):
             logger.notice("Using automated scaling factor calculator")
             output_dir = self.getProperty("OutputDirectory").value
             sf_tof_step = self.getProperty("ScalingFactorTOFStep").value
-            LRDirectBeamSort(RunList=range(first_run_of_set, first_run_of_set+sequence_number),
+            LRDirectBeamSort(RunList=range(first_run_of_set, first_run_of_set + sequence_number),
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
                              ScalingFactorFile=os.path.join(output_dir, "sf_%s_auto.txt" % first_run_of_set))
@@ -516,7 +514,7 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Write template before we start the computation
         self._write_template(data_set, run_number, first_run_of_set, sequence_number)
-        
+
         # Execute the reduction
         LiquidsReflectometryReduction(RunNumbers=[int(run_number)],
               NormalizationRunNumber=str(data_set.norm_file),
@@ -545,7 +543,7 @@ class LRAutoReduction(PythonAlgorithm):
               OutputWorkspace='reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number))
 
         # Put the reflectivity curve together
-        file_path = self._save_partial_output(data_set, first_run_of_set, sequence_number, run_number)
-    
+        self._save_partial_output(data_set, first_run_of_set, sequence_number, run_number)
+
 
 AlgorithmFactory.subscribe(LRAutoReduction)
