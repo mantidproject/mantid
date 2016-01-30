@@ -23,8 +23,8 @@ class SpaceGroupFactoryTest(stresstesting.MantidStressTest):
 
         # There are some space groups which have new names in the latest tables, they will be included in the
         # test when aliases are available.
-        self.assertLess(len(self.notChecked), 25,
-                        'Some space groups were not checked: ' + str(self.notChecked))
+        self.assertLessThan(len(self.notChecked), 25,
+                            'Some space groups were not checked: ' + str(self.notChecked))
 
     def checkSpaceGroup(self, symbol):
         group = SpaceGroupFactory.createSpaceGroup(symbol)
