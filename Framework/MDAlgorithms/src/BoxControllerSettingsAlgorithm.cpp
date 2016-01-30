@@ -36,7 +36,7 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(
 
   // Split up comma-separated properties
   std::vector<int> value;
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer values(SplitInto, ",",
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   value.clear();

@@ -144,8 +144,10 @@ private:
     RangeHelper(){};
     /// give an enum from poco a better name here
     enum {
-      IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM ///< equal to
-      /// Poco::StringTokenizer::TOK_TRIM but
+      IGNORE_SPACES =
+          Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY ///< equal to
+      /// Mantid::Kernel::StringTokenizer::TOK_TRIM but
       /// saves some typing
     };
   };
@@ -239,8 +241,8 @@ private:
     /// spectrum number to the this
     EMPTY_LINE = 1001 - INT_MAX, ///< when reading from the input file this
     /// value means that we found any empty line
-    IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM ///< equal to
-    /// Poco::StringTokenizer::TOK_TRIM but
+    IGNORE_SPACES = Mantid::Kernel::StringTokenizer::TOK_TRIM ///< equal to
+    /// Mantid::Kernel::StringTokenizer::TOK_TRIM but
     /// saves some typing
   };
 

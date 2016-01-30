@@ -26,7 +26,7 @@
 #include <Poco/ActiveResult.h>
 #include <Poco/NotificationCenter.h>
 #include <Poco/RWLock.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/Void.h>
 
 #include <json/json.h>
@@ -204,9 +204,10 @@ void Algorithm::progress(double p, const std::string &msg, double estimatedTime,
 //---------------------------------------------------------------------------------------------
 /// Function to return all of the categories that contain this algorithm
 const std::vector<std::string> Algorithm::categories() const {
-  Poco::StringTokenizer tokenizer(category(), categorySeparator(),
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tokenizer(
+      category(), categorySeparator(),
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
   std::vector<std::string> res(tokenizer.begin(), tokenizer.end());
 
@@ -230,10 +231,10 @@ const std::string Algorithm::workspaceMethodName() const { return ""; }
  *workspaceMethodName attached
  */
 const std::vector<std::string> Algorithm::workspaceMethodOn() const {
-  Poco::StringTokenizer tokenizer(this->workspaceMethodOnTypes(),
-                                  WORKSPACE_TYPES_SEPARATOR,
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tokenizer(
+      this->workspaceMethodOnTypes(), WORKSPACE_TYPES_SEPARATOR,
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   std::vector<std::string> res;
   res.reserve(tokenizer.count());
   for (auto iter = tokenizer.begin(); iter != tokenizer.end(); ++iter) {

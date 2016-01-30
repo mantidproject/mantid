@@ -2,7 +2,7 @@
 #include "MantidKernel/FilterChannel.h"
 
 #include <Poco/LoggingRegistry.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/Message.h>
 
 namespace Poco {

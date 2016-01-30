@@ -222,7 +222,8 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
 
     std::string ids = group->getAttribute("val");
 
-    Poco::StringTokenizer data(ids, ",", Poco::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer data(
+        ids, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
 
     if (data.begin() != data.end()) {
       for (auto it = data.begin(); it != data.end(); ++it) {

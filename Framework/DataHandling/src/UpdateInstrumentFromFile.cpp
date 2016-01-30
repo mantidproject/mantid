@@ -17,7 +17,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <nexus/NeXusException.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <fstream>
 
@@ -311,7 +311,8 @@ bool UpdateInstrumentFromFile::parseAsciiHeader(
                                 "property is empty, cannot interpret columns");
   }
 
-  Poco::StringTokenizer splitter(header, ",", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer splitter(
+      header, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   headerInfo.colCount = splitter.count();
   auto it =
       splitter.begin(); // First column must be spectrum number or detector ID

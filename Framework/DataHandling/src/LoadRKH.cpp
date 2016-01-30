@@ -15,7 +15,7 @@
 #include <boost/date_time/date_parsing.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <istream>
 
@@ -411,8 +411,9 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   if (fileLine.size() < 5) {
     std::getline(m_fileIn, fileLine);
   }
-  Poco::StringTokenizer wsDimensions(fileLine, " ",
-                                     Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer wsDimensions(
+      fileLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (wsDimensions.count() < 2) {
     throw Exception::NotFoundError("Input file", "dimensions");
   }
@@ -460,7 +461,9 @@ void LoadRKH::readNumEntrys(const int nEntries, MantidVec &output) {
 */
 const std::string LoadRKH::readUnit(const std::string &line) {
   // split the line into words
-  const Poco::StringTokenizer codes(line, " ", Poco::StringTokenizer::TOK_TRIM);
+  const Mantid::Kernel::StringTokenizer codes(
+      line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (codes.count() < 1) {
     return "C++ no unit found";
   }

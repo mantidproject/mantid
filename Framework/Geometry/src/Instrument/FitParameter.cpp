@@ -4,7 +4,7 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include "MantidGeometry/muParser_Silent.h"
 
 namespace Mantid {
@@ -162,7 +162,7 @@ std::ostream &operator<<(std::ostream &os, const FitParameter &f) {
 */
 std::istream &operator>>(std::istream &in, FitParameter &f) {
 
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   std::string str;
   getline(in, str);
   tokenizer values(str, ",", tokenizer::TOK_TRIM);
