@@ -4,12 +4,12 @@
 
 #include "MantidAPI/Expression.h"
 
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 namespace Mantid {
 namespace API {
 
-typedef Poco::StringTokenizer tokenizer;
+typedef Mantid::Kernel::StringTokenizer tokenizer;
 
 const std::string DEFAULT_OPS_STR[] = {";", ",", "=", "== != > < <= >=",
                                        "&& || ^^", "+ -", "* /", "^"};

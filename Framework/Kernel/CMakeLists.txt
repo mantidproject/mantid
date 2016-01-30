@@ -244,6 +244,7 @@ set ( INC_FILES
 	inc/MantidKernel/StdoutChannel.h
 	inc/MantidKernel/StringContainsValidator.h
 	inc/MantidKernel/Strings.h
+	inc/MantidKernel/StringTokenizer.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
 	inc/MantidKernel/TestChannel.h

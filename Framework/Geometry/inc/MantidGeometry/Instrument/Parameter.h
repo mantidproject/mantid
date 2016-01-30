@@ -212,7 +212,8 @@ template <class Type> std::string ParameterType<Type>::asString() const {
  */
 template <class Type>
 void ParameterType<Type>::fromString(const std::string &value) {
-  std::istringstream istr(value);
+  std::string newvalue(value.begin(), value.end() - 1);
+  std::istringstream istr(newvalue);
   istr >> m_value;
 }
 

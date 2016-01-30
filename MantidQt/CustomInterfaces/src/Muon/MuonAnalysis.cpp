@@ -33,7 +33,7 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/assign.hpp>
