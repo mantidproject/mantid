@@ -462,8 +462,7 @@ void LoadRKH::readNumEntrys(const int nEntries, MantidVec &output) {
 const std::string LoadRKH::readUnit(const std::string &line) {
   // split the line into words
   const Mantid::Kernel::StringTokenizer codes(
-      line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (codes.count() < 1) {
     return "C++ no unit found";
   }

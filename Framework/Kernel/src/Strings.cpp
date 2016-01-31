@@ -1048,26 +1048,30 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
                             const std::string &rangeSep) {
   typedef Mantid::Kernel::StringTokenizer Tokenizer;
 
-  boost::shared_ptr<Tokenizer> elements;
+  Tokenizer elements;
 
   if (elemSep.find(' ') != std::string::npos) {
-    Tokenizer ranges(str, rangeSep, Tokenizer::TOK_TRIM);
+    // If element separator contains space character it's a special case,
+    // because in that case
+    // it is allowed to have element separator inside a range, e.g. "4 - 5", but
+    // not "4,-5"
+    Tokenizer ranges(str + " ", rangeSep, Tokenizer::TOK_TRIM);
     std::string new_str =
         join(ranges.begin(), ranges.end(), rangeSep.substr(0, 1));
-    elements = boost::make_shared<Tokenizer>(
-        new_str, elemSep, Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
+    elements = Tokenizer(new_str, elemSep,
+                         Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   } else {
-    elements = boost::make_shared<Tokenizer>(
-        str, elemSep, Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
+    elements = Tokenizer(str, elemSep,
+                         Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   }
 
   std::vector<int> result;
 
   // Estimation of the resulting number of elements
-  result.reserve(elements->count());
+  result.reserve(elements.count());
 
-  for (auto it = elements->begin(); it != elements->end(); it++) {
-    Tokenizer rangeElements(*it, rangeSep, Tokenizer::TOK_TRIM);
+  for (auto it = elements.begin(); it != elements.end(); it++) {
+    Tokenizer rangeElements(*it + " ", rangeSep, Tokenizer::TOK_TRIM);
 
     size_t noOfRangeElements = rangeElements.count();
 

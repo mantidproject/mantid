@@ -90,6 +90,7 @@ set ( SRC_FILES
 	src/StdoutChannel.cpp
 	src/StringContainsValidator.cpp
 	src/Strings.cpp
+        src/StringTokenizer.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
 	src/ThreadPoolRunnable.cpp
