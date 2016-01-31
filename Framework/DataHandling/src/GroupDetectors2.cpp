@@ -736,9 +736,7 @@ int GroupDetectors2::readInt(std::string line) {
       line, "#", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (dataComment.begin() != dataComment.end()) {
     Mantid::Kernel::StringTokenizer data(
-        *(dataComment.begin()), " ",
-        Mantid::Kernel::StringTokenizer::TOK_TRIM |
-            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        *(dataComment.begin()), " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
     if (data.count() == 1) {
       if (!data[0].empty()) {
         try {
