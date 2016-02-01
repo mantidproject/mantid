@@ -803,8 +803,9 @@ void InstrumentWindow::readSettings() {
 
   colorMapRangeChanged(qs.value("user_param_minVal").toDouble(),
                        qs.value("user_param_maxVal").toDouble());
-  m_renderTab->m_colorMapWidget->setNthPower(
-      qs.value("user_param_nthTerm").toDouble());
+  m_renderTab->nthPowerChanged(qs.value("user_param_nthTerm").toDouble());
+  changeNthPower(qs.value("user_param_nthTerm").toDouble());
+
   // auto scale after max and min value required as it will
   // read the above above and uncheck the box
   m_renderTab->m_autoscaling->setChecked(
