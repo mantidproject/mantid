@@ -209,7 +209,7 @@ struct MANTID_API_DLL Boolean {
   /// equal to operator
   bool operator==(const Boolean &b) const { return (this->value == b.value); }
   //
-  operator double(void) const { return double(this->value); }
+  operator bool() const { return this->value; }
   bool value; ///< boolean value
 };
 
