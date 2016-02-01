@@ -1,20 +1,23 @@
 """These are more integration tests as they will require that the test data is available
 and that mantid can be imported
 """
-import unittest
+import stresstesting
+from abc import ABCMeta, abstractmethod
 
 from mantid.api import (WorkspaceGroup, MatrixWorkspace)
 import mantid
 from mantid.simpleapi import *
 from VesuvioCommands import fit_tof
 
-class FitTofTest(unittest.TestCase):
 
-    def test_fit_single_spectrum_tof_and_no_background(self):
+class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
+
+    def runTest(self):
         flags = self._create_test_flags(background=False)
         runs = "15039-15045"
-
         fit_results = fit_tof(runs, flags)
+
+    def validate(self):
         self.assertTrue(isinstance(fit_results, tuple))
         self.assertEqual(4, len(fit_results))
 
@@ -45,11 +48,14 @@ class FitTofTest(unittest.TestCase):
         self.assertTrue(isinstance(exit_iteration, int))
 
 
-    def test_fit_single_spectrum_tof_including_background(self):
+class SingleSpectrumBackground(stresstesting.MantidStressTest):
+
+    def runTest(self):
         flags = self._create_test_flags(background=True)
         runs = "15039-15045"
-
         fit_results = fit_tof(runs, flags)
+
+    def validate(self):
         self.assertTrue(isinstance(fit_results, tuple))
         self.assertEqual(4, len(fit_results))
 
@@ -80,13 +86,16 @@ class FitTofTest(unittest.TestCase):
         self.assertTrue(isinstance(exit_iteration, int))
 
 
-    def test_fit_bank_by_bank_for_forward_spectra_tof_and_no_background(self):
+class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
+
+    def runTest(self):
         flags = self._create_test_flags(background=False)
         flags['fit_mode'] = 'bank'
         flags['spectra'] = 'forward'
         runs = "15039-15045"
-
         fit_results = fit_tof(runs, flags)
+
+    def validate(self):
         self.assertTrue(isinstance(fit_results, tuple))
         self.assertEquals(4, len(fit_results))
 
@@ -126,13 +135,16 @@ class FitTofTest(unittest.TestCase):
         self.assertTrue(isinstance(exit_iteration, int))
 
 
-    def test_fit_spectra_by_spectra_for_forward_spectra_tof_and_no_background(self):
+class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest):
+
+    def runTest(self):
         flags = self._create_test_flags(background=False)
         flags['fit_mode'] = 'spectra'
         flags['spectra'] = '143-144'
         runs = "15039-15045"
-
         fit_results = fit_tof(runs, flags)
+
+    def validate(self):
         self.assertTrue(isinstance(fit_results, tuple))
         self.assertEquals(4, len(fit_results))
 
@@ -172,35 +184,33 @@ class FitTofTest(unittest.TestCase):
         self.assertTrue(isinstance(exit_iteration, int))
 
 
-    def _create_test_flags(self, background):
-        runs = "15039-15045"
-        flags = dict()
-        flags['fit_mode'] = 'spectrum'
-        flags['spectra'] = '135'
+#=====================================Helper Function=================================
+        
+def _create_test_flags(background):
+    runs = "15039-15045"
+    flags = dict()
+    flags['fit_mode'] = 'spectrum'
+    flags['spectra'] = '135'
 
-        mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
-                  'hermite_coeffs': [1,0,0], 'k_free': 0, 'sears_flag': 1}
-        mass2 = {'value': 16.0, 'function': 'Gaussian', 'width': 10}
-        mass3 = {'value': 27.0, 'function': 'Gaussian', 'width': 13}
-        mass4 = {'value': 133.0, 'function': 'Gaussian', 'width': 30}
-        flags['masses'] = [mass1, mass2, mass3, mass4]
-        flags['intensity_constraints'] = [0, 1, 0, -4]
-        if background:
-            flags['background'] = {'function': 'Polynomial', 'order':3}
-        else:
-            flags['background'] = None
-        flags['ip_file'] = 'Vesuvio_IP_file_test.par'
-        flags['diff_mode'] = 'single'
-        flags['gamma_correct'] = True
-        flags['ms_flags'] = dict()
-        flags['ms_flags']['SampleWidth'] = 10.0
-        flags['ms_flags']['SampleHeight'] = 10.0
-        flags['ms_flags']['SampleDepth'] = 0.5
-        flags['ms_flags']['SampleDensity'] = 241
-        flags['fit_minimizer'] = 'Levenberg-Marquardt,AbsError=1e-08,RelError=1e-08'
+    mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
+              'hermite_coeffs': [1,0,0], 'k_free': 0, 'sears_flag': 1}
+    mass2 = {'value': 16.0, 'function': 'Gaussian', 'width': 10}
+    mass3 = {'value': 27.0, 'function': 'Gaussian', 'width': 13}
+    mass4 = {'value': 133.0, 'function': 'Gaussian', 'width': 30}
+    flags['masses'] = [mass1, mass2, mass3, mass4]
+    flags['intensity_constraints'] = [0, 1, 0, -4]
+    if background:
+        flags['background'] = {'function': 'Polynomial', 'order':3}
+    else:
+        flags['background'] = None
+    flags['ip_file'] = 'Vesuvio_IP_file_test.par'
+    flags['diff_mode'] = 'single'
+    flags['gamma_correct'] = True
+    flags['ms_flags'] = dict()
+    flags['ms_flags']['SampleWidth'] = 10.0
+    flags['ms_flags']['SampleHeight'] = 10.0
+    flags['ms_flags']['SampleDepth'] = 0.5
+    flags['ms_flags']['SampleDensity'] = 241
+    flags['fit_minimizer'] = 'Levenberg-Marquardt,AbsError=1e-08,RelError=1e-08'
 
-        return flags
-
-
-if __name__ == '__main__':
-    unittest.main()
+    return flags
