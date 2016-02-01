@@ -1,6 +1,8 @@
 set ( SRC_FILES
 	src/DataComparison.cpp
 	src/DirectConvertToEnergy.cpp
+        src/DynamicPDF/SliceSelector.cpp
+        src/DynamicPDF/BackgroundRemover.cpp
 	src/EnggDiffraction/EnggDiffractionPresenter.cpp
 	src/EnggDiffraction/EnggDiffractionViewQtGUI.cpp
 	src/Homer.cpp
@@ -120,6 +122,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/DataComparison.h
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
+        inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
+        inc/MantidQtCustomInterfaces/DynamicPDF/BackgroundRemover.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
@@ -349,6 +353,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
+               inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.ui
+               inc/MantidQtCustomInterfaces/DynamicPDF/BackgroundRemover.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtGUI.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabCalib.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabFocus.ui
