@@ -20,7 +20,7 @@ const double TOLERANCE = 1.e-10;
 }
 
 /// (Empty) Constructor
-SetUncertainties::SetUncertainties() : API::Algorithm() {}
+SetUncertainties::SetUncertainties() : API::TriviallyParallelAlgorithm() {}
 
 /// Virtual destructor
 SetUncertainties::~SetUncertainties() {}
@@ -87,6 +87,14 @@ void SetUncertainties::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  setProperty("OutputWorkspace", outputWorkspace);
+}
+
+void SetUncertainties::execNonMaster() {
+  // All non-master ranks simple create a dummy output workspace.
+  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr outputWorkspace =
+      WorkspaceFactory::Instance().create(inputWorkspace);
   setProperty("OutputWorkspace", outputWorkspace);
 }
 

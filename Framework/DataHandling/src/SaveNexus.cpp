@@ -169,6 +169,13 @@ void SaveNexus::runSaveNexusProcessed() {
   progress(1);
 }
 
+MPI::ExecutionMode SaveNexus::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  if(storageModes.at("InputWorkspace") == MPI::StorageMode::MasterOnly)
+    return MPI::ExecutionMode::MasterOnly;
+  return MPI::ExecutionMode::Invalid;
+}
+
 /**
 Overriden process groups.
 */

@@ -4,7 +4,7 @@
 //--------------------------------
 // Includes
 //--------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidKernel/NeutronAtom.h"
 
 namespace Mantid {
@@ -39,7 +39,7 @@ namespace DataHandling {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SetSampleMaterial : public Mantid::API::Algorithm {
+class DLLExport SetSampleMaterial : public Mantid::API::TriviallyParallelAlgorithm {
 public:
   /// (Empty) Constructor
   SetSampleMaterial();

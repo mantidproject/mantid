@@ -108,6 +108,12 @@ void LoadEventAndCompress::init() {
   auto range = boost::make_shared<BoundedValidator<double>>();
   range->setBounds(0., 100.);
   declareProperty("FilterBadPulses", 95., range);
+
+  declareProperty(
+      new PropertyWithValue<bool>("LoadCompleteWorkspaceOnMasterRank", false,
+                                  Direction::Input),
+      "In a run with MPI, loads all data on master rank and none on other "
+      "ranks.");
 }
 
 /// @see DataProcessorAlgorithm::determineChunk(const std::string &)
@@ -157,6 +163,8 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
                            getProperty("FilterMonByTimeStart"));
   alg->setProperty<double>("FilterMonByTimeStop",
                            getProperty("FilterMonByTimeStop"));
+  alg->setProperty<bool>("LoadCompleteWorkspaceOnMasterRank",
+                         getProperty("LoadCompleteWorkspaceOnMasterRank"));
 
   // set chunking information
   if (rowCount > 0.) {
@@ -238,12 +246,34 @@ void LoadEventAndCompress::exec() {
 
     progress.report();
   }
-  Workspace_sptr total = assemble(resultWS);
+  // TODO distinguish different MPI builds...
+  //Workspace_sptr total = assemble(resultWS);
 
   // Don't bother compressing combined workspace. DetermineChunking is designed
   // to prefer loading full banks so no further savings should be available.
 
-  setProperty("OutputWorkspace", total);
+  //setProperty("OutputWorkspace", total);
+  setProperty("OutputWorkspace", resultWS);
+}
+
+MPI::ExecutionMode LoadEventAndCompress::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  // We have no input workspace, so we do not use the map.
+  UNUSED_ARG(storageModes)
+  if (getProperty("LoadCompleteWorkspaceOnMasterRank"))
+    return MPI::ExecutionMode::MasterOnly;
+  else
+    return MPI::ExecutionMode::Distributed;
+}
+
+MPI::StorageMode LoadEventAndCompress::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  // We have only one output workspace, so we ignore propertyName.
+  UNUSED_ARG(propertyName)
+  if (getProperty("LoadCompleteWorkspaceOnMasterRank"))
+    return MPI::StorageMode::MasterOnly;
+  else
+    return MPI::StorageMode::Distributed;
 }
 
 } // namespace WorkflowAlgorithms

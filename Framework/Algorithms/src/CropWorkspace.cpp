@@ -16,7 +16,7 @@ using namespace Kernel;
 using namespace API;
 
 /// Default constructor
-CropWorkspace::CropWorkspace() : Algorithm() {}
+CropWorkspace::CropWorkspace(): TriviallyParallelAlgorithm() {}
 
 /// Destructor
 CropWorkspace::~CropWorkspace() {}

@@ -73,6 +73,10 @@ private:
   /// Overwrites Algorithm method
   void exec();
 
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+
   /// The name and path of the input file
   std::string m_filename;
   /// The name and path of the input file

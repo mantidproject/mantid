@@ -463,7 +463,8 @@ bool Algorithm::execute() {
   cacheWorkspaceProperties();
 
   // no logging of input if a child algorithm (except for python child algos)
-  if (!m_isChildAlgorithm || m_alwaysStoreInADS)
+  //if (m_alwaysStoreInADS)
+  //if (!m_isChildAlgorithm || m_alwaysStoreInADS)
     logAlgorithmInfo();
 
   // Check all properties for validity
@@ -1571,7 +1572,8 @@ void Algorithm::reportCompleted(const double &duration,
     optionalMessage = ". Processed as a workspace group";
   }
 
-  if (!m_isChildAlgorithm || m_alwaysStoreInADS) {
+  //if (!m_isChildAlgorithm || m_alwaysStoreInADS)
+  {
     if (m_isAlgStartupLoggingEnabled) {
 
       std::stringstream msg;
@@ -1588,10 +1590,10 @@ void Algorithm::reportCompleted(const double &duration,
     }
   }
 
-  else {
-    getLogger().debug() << name() << " finished with isChild = " << isChild()
-                        << std::endl;
-  }
+  //else {
+  //  getLogger().debug() << name() << " finished with isChild = " << isChild()
+  //                      << std::endl;
+  //}
   m_running = false;
 }
 
@@ -1654,7 +1656,7 @@ void Algorithm::propagateWorkspaceStorageMode() const {
       MPI::StorageMode mode = getStorageModeForOutputWorkspace(prop.name());
       wsProp->getWorkspace()->setStorageMode(mode);
       getLogger().notice() << "Set storage mode of output \"" + prop.name() +
-                                  "\" to " + MPI::toString(mode) + ".\n";
+                                  "\" to " + MPI::toString(mode) + ". Workspace name is " + wsProp->getWorkspace()->name() + "\n";
     }
   }
 }

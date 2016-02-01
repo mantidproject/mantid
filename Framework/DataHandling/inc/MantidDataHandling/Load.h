@@ -59,6 +59,13 @@ public:
   virtual void setPropertyValue(const std::string &name,
                                 const std::string &value);
 
+protected:
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;  
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
 private:
   /// This method returns shared pointer to a load algorithm which got
   /// the highest preference after file check.

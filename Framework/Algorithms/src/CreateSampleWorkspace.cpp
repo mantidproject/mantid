@@ -11,6 +11,8 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidMPI/Helpers.h"
+
 #include <cmath>
 #include <ctime>
 #include <numeric>
@@ -283,6 +285,34 @@ void CreateSampleWorkspace::addChopperParameters(
                             "is_running");
   paramMap.add<bool>("bool", chopper.get(), "filter_with_derivative", false);
 }
+
+//// TODO NOTE: this Algorithm does actually no make sense in parallel like this,
+//// so this is just for testing (need modifications for actual 'Distributed' support).
+
+MPI::ExecutionMode CreateSampleWorkspace::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  return MPI::ExecutionMode::Identical;
+}
+
+MPI::StorageMode CreateSampleWorkspace::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  return MPI::StorageMode::Cloned;
+}
+
+//bool CreateSampleWorkspace::canExecWithParallelism(
+//    Parallelism parallelism) const {
+//  if ((parallelism == Parallelism::None) ||
+//      (parallelism == Parallelism::Distributed))
+//    return true;
+//  return false;
+//}
+//
+//Parallelism CreateSampleWorkspace::determineRequiredParallelism() const {
+//  if(MPI::numberOfRanks() == 1)
+//    return Parallelism::None;
+//  else
+//    return Parallelism::Distributed;
+//}
 
 /** Create histogram workspace
  */

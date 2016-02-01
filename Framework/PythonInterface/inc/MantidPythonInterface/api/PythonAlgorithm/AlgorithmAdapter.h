@@ -121,6 +121,19 @@ protected:
    */
   inline PyObject *getSelf() const { return m_self; }
 
+  /** Get correct execution mode based on input storage modes for an MPI run. */
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override {
+    return MPI::ExecutionMode::Distributed;
+  }
+
+  /** Get storage mode for an output workspace. */
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override {
+    return MPI::StorageMode::Distributed;
+  }
+
 private:
   /// The PyObject must be supplied to construct the object
   DISABLE_DEFAULT_CONSTRUCT(AlgorithmAdapter)

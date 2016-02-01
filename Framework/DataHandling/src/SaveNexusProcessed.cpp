@@ -528,5 +528,12 @@ bool SaveNexusProcessed::processGroups() {
   return true;
 }
 
+MPI::ExecutionMode SaveNexusProcessed::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  if(storageModes.at("InputWorkspace") == MPI::StorageMode::MasterOnly)
+    return MPI::ExecutionMode::MasterOnly;
+  return MPI::ExecutionMode::Invalid;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

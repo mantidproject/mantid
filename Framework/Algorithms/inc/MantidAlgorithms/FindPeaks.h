@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 // #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
@@ -58,7 +58,7 @@ namespace Algorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport FindPeaks : public API::Algorithm {
+class DLLExport FindPeaks : public API::TriviallyParallelAlgorithm {
 public:
   /// Constructor
   FindPeaks();

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -58,7 +58,7 @@ namespace Algorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport CorrectKiKf : public API::Algorithm {
+class DLLExport CorrectKiKf : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
   CorrectKiKf();

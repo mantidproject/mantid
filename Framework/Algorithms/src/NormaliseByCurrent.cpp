@@ -17,7 +17,7 @@ using namespace API;
 using namespace DataObjects;
 
 /// Default constructor
-NormaliseByCurrent::NormaliseByCurrent() : Algorithm() {}
+NormaliseByCurrent::NormaliseByCurrent() : TriviallyParallelAlgorithm() {}
 
 // Destructor
 NormaliseByCurrent::~NormaliseByCurrent() {}

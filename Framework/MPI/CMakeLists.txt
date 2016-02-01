@@ -1,13 +1,16 @@
 set ( SRC_FILES
+  src/SplittingFunctions.cpp
   src/Types.cpp
 )
 
 set ( INC_FILES
+  inc/MantidMPI/SplittingFunctions.h
   inc/MantidMPI/Types.h
   inc/MantidMPI/Helpers.h
 )
 
 set ( TEST_FILES
+  SplittingFunctionsTest.h
   HelpersTest.h
 )
 

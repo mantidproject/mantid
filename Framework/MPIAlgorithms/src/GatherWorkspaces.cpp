@@ -172,9 +172,9 @@ void GatherWorkspaces::exec() {
       const ISpectrum *inSpec = inputWorkspace->getSpectrum(wi);
       if (accum == "Add") {
         outputWorkspace->dataX(wi) = inputWorkspace->readX(wi);
-        reduce(included, inputWorkspace->readY(wi), outputWorkspace->dataY(wi),
+        boost::mpi::reduce<MantidVec>(included, inputWorkspace->readY(wi), outputWorkspace->dataY(wi),
                vplus(), 0);
-        reduce(included, inputWorkspace->readE(wi), outputWorkspace->dataE(wi),
+        boost::mpi::reduce<MantidVec>(included, inputWorkspace->readE(wi), outputWorkspace->dataE(wi),
                eplus(), 0);
       } else if (accum == "Append") {
         // Copy over data from own input workspace
@@ -209,8 +209,8 @@ void GatherWorkspaces::exec() {
       outSpec->addDetectorIDs(inSpec->getDetectorIDs());
     } else {
       if (accum == "Add") {
-        reduce(included, inputWorkspace->readY(wi), vplus(), 0);
-        reduce(included, inputWorkspace->readE(wi), eplus(), 0);
+        boost::mpi::reduce<MantidVec>(included, inputWorkspace->readY(wi), vplus(), 0);
+        boost::mpi::reduce<MantidVec>(included, inputWorkspace->readE(wi), eplus(), 0);
       } else if (accum == "Append") {
         std::vector<boost::mpi::request> reqs(3);
 

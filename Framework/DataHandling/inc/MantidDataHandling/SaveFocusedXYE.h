@@ -4,7 +4,7 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MasterOnlyAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -58,7 +58,7 @@ namespace DataHandling {
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport SaveFocusedXYE : public API::Algorithm {
+class DLLExport SaveFocusedXYE : public API::MasterOnlyAlgorithm {
 public:
   enum HeaderType { XYE, MAUD, TOPAS };
   /// Constructor

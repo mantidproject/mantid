@@ -1363,7 +1363,23 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
     Geometry::Detector *detector = new Geometry::Detector(
         name, idList.vec[idList.counted], mapTypeNameToShape[typeName], parent);
     idList.counted++;
-    parent->add(detector);
+
+    // Check if detector is monitor
+    bool is_monitor = false;
+    if (category.compare("Monitor") == 0 || category.compare("monitor") == 0)
+      is_monitor = true;
+    else {
+      // for backwards compatebility look for mark-as="monitor"
+      if ((pCompElem->hasAttribute("mark-as") &&
+           pCompElem->getAttribute("mark-as").compare("monitor") == 0) ||
+          (pLocElem->hasAttribute("mark-as") &&
+           pLocElem->getAttribute("mark-as").compare("monitor") == 0)) {
+        is_monitor = true;
+      }
+    }
+    //if(detector->getID()%4 == 0 || is_monitor) {
+    //  printf("adding detector %d %d\n", detector->getID(), (int)is_monitor);
+      parent->add(detector);
 
     // set location for this newly added comp and set facing if specified in
     // instrument def. file. Also
@@ -1421,6 +1437,10 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
     // only used if the
     // "facing" elements are defined in the instrument definition file
     m_facingComponent.push_back(detector);
+    //} else {
+    //  delete detector;
+    //}
+
   } else {
     //-------------- Not a Detector nor a RectangularDetector
     //------------------------------

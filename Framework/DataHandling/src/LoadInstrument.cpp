@@ -44,7 +44,7 @@ using namespace Geometry;
 Poco::Mutex LoadInstrument::m_mutex;
 
 /// Empty default constructor
-LoadInstrument::LoadInstrument() : Algorithm() {}
+LoadInstrument::LoadInstrument() : TriviallyParallelAlgorithm() {}
 
 //------------------------------------------------------------------------------------------------------------------------------
 /// Initialisation method.

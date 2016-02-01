@@ -78,6 +78,13 @@ public:
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
 
+protected:
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;  
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
 private:
   /// Overwrites Algorithm method.
   void init();

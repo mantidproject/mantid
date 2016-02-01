@@ -543,5 +543,11 @@ void LoadDiffCal::exec() {
   makeCalWorkspace(detids, difc, difa, tzero, dasids, offset);
 }
 
+MPI::ExecutionMode LoadDiffCal::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  UNUSED_ARG(storageModes)
+  return MPI::ExecutionMode::Identical;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

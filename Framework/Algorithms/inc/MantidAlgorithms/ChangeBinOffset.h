@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
 
 namespace Mantid {
@@ -43,7 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ChangeBinOffset : public API::Algorithm {
+class DLLExport ChangeBinOffset : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
   ChangeBinOffset();

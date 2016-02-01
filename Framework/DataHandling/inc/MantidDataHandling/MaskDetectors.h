@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -52,7 +52,7 @@ namespace DataHandling {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MaskDetectors : public API::Algorithm {
+class DLLExport MaskDetectors : public API::TriviallyParallelAlgorithm {
 public:
   MaskDetectors();
   virtual ~MaskDetectors();
@@ -87,6 +87,9 @@ private:
   void appendToIndexListFromMaskWS(
       std::vector<size_t> &indexList,
       const DataObjects::MaskWorkspace_const_sptr maskedWorkspace);
+
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;  
 };
 
 } // namespace DataHandling

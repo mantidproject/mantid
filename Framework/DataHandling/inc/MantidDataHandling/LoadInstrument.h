@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
 
 //----------------------------------------------------------------------
@@ -73,7 +73,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class DLLExport LoadInstrument : public API::Algorithm {
+class DLLExport LoadInstrument : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
   LoadInstrument();

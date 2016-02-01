@@ -15,7 +15,7 @@ DECLARE_ALGORITHM(StripPeaks)
 using namespace Kernel;
 using namespace API;
 
-StripPeaks::StripPeaks() : API::Algorithm(), m_maxChiSq(0.) {}
+StripPeaks::StripPeaks() : API::TriviallyParallelAlgorithm(), m_maxChiSq(0.) {}
 
 void StripPeaks::init() {
   declareProperty(

@@ -111,6 +111,9 @@ public:
   void setTitle(std::string title);
   void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> filter);
   virtual bool threadSafe() const;
+
+  /// Set the storage mode (used for MPI runs)
+  void setStorageMode(MPI::StorageMode mode);
 };
 
 typedef boost::shared_ptr<EventWorkspaceCollection>

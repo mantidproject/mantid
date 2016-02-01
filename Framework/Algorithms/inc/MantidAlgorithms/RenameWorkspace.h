@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -41,10 +41,10 @@ namespace Algorithms {
 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport RenameWorkspace : public API::Algorithm {
+class DLLExport RenameWorkspace : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
-  RenameWorkspace() : API::Algorithm(){};
+  RenameWorkspace() : API::TriviallyParallelAlgorithm(){};
   /// Destructor
   virtual ~RenameWorkspace(){};
   /// Algorithm's name for identification overriding a virtual method
@@ -56,6 +56,10 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Utility\\Workspaces"; }
+
+protected:
+  /// Override because renames should be done on all ranks, no matter what.
+  virtual void execMasterOnly() override { printf("RenameWorkspace!!!\n"); exec(); }
 
 private:
   const std::string workspaceMethodName() const { return "rename"; }

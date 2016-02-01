@@ -45,6 +45,12 @@ public:
   virtual const std::string category() const;
   virtual const std::string summary() const;
 
+protected:
+  /** Parallel mode is ExecutionMode::Identical. */
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+
 private:
   void init();
   void exec();

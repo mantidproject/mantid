@@ -66,6 +66,12 @@ protected:
   // Overridden Algorithm methods
   void init();
   virtual void exec();
+
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;  
+
+  //bool canExecWithParallelism(API::Parallelism parallelism) const override;  
 };
 
 } // namespace Algorithms

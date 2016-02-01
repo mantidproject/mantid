@@ -2,7 +2,7 @@
 #define MANTID_CURVEFITTING_IFITTINGALGORITHM_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidAPI/IDomainCreator.h"
 
 namespace Mantid {
@@ -47,7 +47,7 @@ namespace CurveFitting {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IFittingAlgorithm : public API::Algorithm {
+class DLLExport IFittingAlgorithm : public API::TriviallyParallelAlgorithm {
 public:
   IFittingAlgorithm();
   virtual ~IFittingAlgorithm();

@@ -219,6 +219,8 @@ std::string Divide::checkSizeCompatibility(
   }
 
   if (m_matchXSize) {
+    //for(size_t i=0; i<lhs->readX(0).size(); i++)
+    //  printf("%lu %lf %lf\n", i, lhs->readX(0)[i], rhs->readX(0)[i]);
     // Past this point, for a 2D WS operation, we require the X arrays to match.
     // Note this only checks the first spectrum
     if (!WorkspaceHelpers::matchingBins(lhs, rhs, true)) {

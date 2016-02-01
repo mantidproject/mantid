@@ -20,6 +20,8 @@ inline void serialize(Archive & ar,
 template <class Archive>
 void save(Archive &ar, const Mantid::DataObjects::EventList &elist,
           const unsigned int /*version*/) {
+  printf("wrong saving EventList\n");
+
   int etype;
   switch (elist.getEventType()) {
   case Mantid::API::TOF: {

@@ -1,6 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include <boost/mpi/collectives.hpp>
+
+#include "MantidMPI/Helpers.h"
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidDataObjects/RebinnedOutput.h"
@@ -18,7 +18,7 @@ using namespace API;
 using namespace DataObjects;
 
 SumSpectra::SumSpectra()
-    : API::Algorithm(), m_outSpecId(0), m_minSpec(0), m_maxSpec(0),
+    : API::TriviallyParallelAlgorithm(), m_outSpecId(0), m_minSpec(0), m_maxSpec(0),
       m_keepMonitors(false), m_numberOfSpectra(0), m_yLength(0), m_indices(),
       m_calculateWeightedSum(false) {}
 
@@ -291,6 +291,52 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
     progress.report();
   }
 
+#ifdef MPI_BUILD
+  // gather(MPI::communicator(), YSum.data(), m_yLength, std::vector< T > &
+  // out_values, MPI::rootRank());
+  // TODO avoid this memory allocation on non-root ranks
+  printf("starting gather, length %d\n", m_yLength);
+  std::vector<double> reducedYSum(m_yLength);
+  std::vector<double> reducedYError(m_yLength);
+  reduce(MPI::communicator(), YSum.data(), m_yLength, reducedYSum.data(),
+         std::plus<double>(), MPI::rootRank());
+  reduce(MPI::communicator(), YError.data(), m_yLength, reducedYError.data(),
+         std::plus<double>(), MPI::rootRank());
+  if (MPI::isRoot()) {
+    YSum = reducedYSum;
+    YError = reducedYError;
+  }
+  if (m_calculateWeightedSum) {
+    std::vector<double> reducedWeight(m_yLength);
+    std::vector<size_t> reducednZeros(m_yLength);
+    reduce(MPI::communicator(), Weight.data(), m_yLength, reducedWeight.data(),
+           std::plus<double>(), MPI::rootRank());
+    reduce(MPI::communicator(), nZeros.data(), m_yLength, reducednZeros.data(),
+           std::plus<size_t>(), MPI::rootRank());
+    if (MPI::isRoot()) {
+      Weight = reducedWeight;
+      nZeros = reducednZeros;
+    }
+  }
+  printf("local: %ld spectra\n", numSpectra);
+  size_t reduced_numSpectra;
+  size_t reduced_numMasked;
+  size_t reduced_numZeros;
+  reduce(MPI::communicator(), numSpectra, reduced_numSpectra, std::plus<size_t>(),
+         MPI::rootRank());
+  reduce(MPI::communicator(), numMasked, reduced_numMasked, std::plus<size_t>(),
+         MPI::rootRank());
+  reduce(MPI::communicator(), numZeros, reduced_numZeros, std::plus<size_t>(),
+         MPI::rootRank());
+  if (MPI::isRoot()) {
+    numSpectra = reduced_numSpectra;
+    printf("gathered: %ld spectra\n", numSpectra);
+    numMasked = reduced_numMasked;
+    numZeros = reduced_numZeros;
+  }
+  // TODO detector IDs!
+#endif
+
   if (m_calculateWeightedSum) {
     numZeros = 0;
     for (size_t i = 0; i < Weight.size(); i++) {
@@ -502,6 +548,14 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   // Assign it to the output workspace property
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));
+}
+
+MPI::StorageMode SumSpectra::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  // Ignored, since we have only one output workspace.
+  UNUSED_ARG(propertyName)
+  // TODO This implementation goes wrong for StorageMode::Cloned.
+  return MPI::StorageMode::MasterOnly;
 }
 
 } // namespace Algorithms

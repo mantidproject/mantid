@@ -14,6 +14,8 @@
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
+#include <set>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -175,6 +177,24 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
              "'getSampleDetails' is deprecated, use 'getRun' instead.");
   return self.mutableRun();
 }
+
+std::vector<size_t>
+getIndicesFromDetectorIDs(MatrixWorkspace &self,
+                          const std::vector<Mantid::detid_t> &detIdList) {
+  std::vector<size_t> indices;
+  self.getIndicesFromDetectorIDs(detIdList, indices);
+  return indices;
+}
+
+std::vector<size_t>
+getIndicesFromDetectorIDSet(MatrixWorkspace &self,
+                          const std::set<Mantid::detid_t> &detIdSet) {
+  std::vector<size_t> indices;
+  std::vector<Mantid::detid_t> detIdList;
+  detIdList.insert(detIdList.begin(), detIdSet.begin(), detIdSet.end());
+  self.getIndicesFromDetectorIDs(detIdList, indices);
+  return indices;
+}
 }
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -238,6 +258,20 @@ void export_MatrixWorkspace() {
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
            "Returns the caption for the Y axis")
+
+      .def("getIndicesFromDetectorIDs",
+           (std::vector<size_t>(
+               *)(const MatrixWorkspace &,
+                  const std::vector<Mantid::detid_t> &detIdList)) &
+               getIndicesFromDetectorIDs,
+           "")
+
+      .def("getIndicesFromDetectorIDSet",
+           (std::vector<size_t>(
+               *)(const MatrixWorkspace &,
+                  const std::set<Mantid::detid_t> &detIdList)) &
+               getIndicesFromDetectorIDSet,
+           "")
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),

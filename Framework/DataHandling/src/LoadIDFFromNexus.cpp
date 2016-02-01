@@ -28,7 +28,7 @@ using namespace API;
 using Geometry::Instrument;
 
 /// Empty default constructor
-LoadIDFFromNexus::LoadIDFFromNexus() {}
+LoadIDFFromNexus::LoadIDFFromNexus() : TriviallyParallelAlgorithm() {}
 
 /// Initialisation method.
 void LoadIDFFromNexus::init() {

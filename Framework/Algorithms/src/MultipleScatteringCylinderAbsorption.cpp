@@ -62,7 +62,7 @@ static const double COEFF5 = -0.8667;
 } // end of anonymous
 
 MultipleScatteringCylinderAbsorption::MultipleScatteringCylinderAbsorption()
-    : API::Algorithm() {}
+    : API::TriviallyParallelAlgorithm() {}
 
 MultipleScatteringCylinderAbsorption::~MultipleScatteringCylinderAbsorption() {}
 

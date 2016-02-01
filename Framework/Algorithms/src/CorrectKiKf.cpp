@@ -22,7 +22,7 @@ using namespace Geometry;
 using std::size_t;
 
 /// Default constructor
-CorrectKiKf::CorrectKiKf() : Algorithm() {}
+CorrectKiKf::CorrectKiKf() : TriviallyParallelAlgorithm() {}
 
 /// Destructor
 CorrectKiKf::~CorrectKiKf() {}

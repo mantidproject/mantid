@@ -124,6 +124,8 @@ void LoadISISNexus2::init() {
 *values
 */
 void LoadISISNexus2::exec() {
+  printf("LoadISISNexus2::exec()\n");
+
 
   //**********************************************************************
   // process load monitor options request

@@ -78,6 +78,10 @@ private:
   /// Overwrites Algorithm method
   void exec();
 
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+
   void getSpectrumList(std::vector<int> &spec,
                        Mantid::API::MatrixWorkspace_const_sptr matrixWorkspace);
 

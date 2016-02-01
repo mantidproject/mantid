@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -39,7 +39,7 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SetUncertainties : public API::Algorithm {
+class DLLExport SetUncertainties : public API::TriviallyParallelAlgorithm {
 public:
   /// (Empty) Constructor
   SetUncertainties();
@@ -61,6 +61,11 @@ public:
 
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Arithmetic\\Errors"; }
+
+protected:
+  /// Override because renames should be done on all ranks, no matter what.
+  //virtual void execMasterOnly() override { printf("RenameWorkspace!!!\n"); exec(); }
+  virtual void execNonMaster() override;
 
 private:
   /// Initialisation code

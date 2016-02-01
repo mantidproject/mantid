@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 namespace Mantid {
 namespace Algorithms {
 /** Takes a workspace as input and rebins the data according to the input rebin
@@ -52,10 +52,8 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Rebin : public API::Algorithm {
+class DLLExport Rebin : public API::TriviallyParallelAlgorithm {
 public:
-  /// Default constructor
-  Rebin() : API::Algorithm(){};
   /// Destructor
   virtual ~Rebin(){};
   /// Algorithm's name for identification overriding a virtual method

@@ -23,6 +23,9 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
+#ifdef MPI_BUILD
+#include "MantidMPI/SplittingFunctions.h"
+#endif
 
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
@@ -251,6 +254,12 @@ void LoadNexusProcessed::init() {
       "For multiperiod workspaces. Copy instrument, parameter and x-data "
       "rather than loading it directly for each workspace. Y, E and log "
       "information is always loaded.");
+
+  declareProperty(
+      new PropertyWithValue<bool>("LoadCompleteWorkspaceOnMasterRank", false,
+                                  Direction::Input),
+      "In a run with MPI, loads all data on master rank and none on other "
+      "ranks.");
 }
 
 /**
@@ -2060,6 +2069,14 @@ void LoadNexusProcessed::checkOptionalProperties(
     const std::size_t numberofspectra) {
   // read in the settings passed to the algorithm
   m_spec_list = getProperty("SpectrumList");
+
+  if (!getProperty("LoadCompleteWorkspaceOnMasterRank")) {
+    for (size_t spec=1; spec<=numberofspectra; ++spec) {
+      if (Mantid::MPI::indexIsOnThisRank(spec))
+        m_spec_list.emplace_back(spec);
+    }
+  }
+
   m_spec_max = getProperty("SpectrumMax");
   m_spec_min = getProperty("SpectrumMin");
   // Are we using a list of spectra or all the spectra in a range?
@@ -2165,6 +2182,26 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
     }
   }
   return total_specs;
+}
+
+MPI::ExecutionMode LoadNexusProcessed::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  // We have no input workspace, so we do not use the map.
+  UNUSED_ARG(storageModes)
+  if (getProperty("LoadCompleteWorkspaceOnMasterRank"))
+    return MPI::ExecutionMode::MasterOnly;
+  else
+    return MPI::ExecutionMode::Distributed;
+}
+
+MPI::StorageMode LoadNexusProcessed::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  // We have only one output workspace, so we ignore propertyName.
+  UNUSED_ARG(propertyName)
+  if (getProperty("LoadCompleteWorkspaceOnMasterRank"))
+    return MPI::StorageMode::MasterOnly;
+  else
+    return MPI::StorageMode::Distributed;
 }
 
 } // namespace DataHandling

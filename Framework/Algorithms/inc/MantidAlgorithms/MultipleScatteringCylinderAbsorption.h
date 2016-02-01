@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include <vector>
 
 namespace Mantid {
@@ -39,7 +39,7 @@ namespace Algorithms {
                   <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MultipleScatteringCylinderAbsorption : public API::Algorithm {
+class DLLExport MultipleScatteringCylinderAbsorption : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
   MultipleScatteringCylinderAbsorption();

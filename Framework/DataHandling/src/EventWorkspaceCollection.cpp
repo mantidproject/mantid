@@ -106,6 +106,7 @@ void EventWorkspaceCollection::setNPeriods(
         temp,
         m_WsVec[i]); // Copy all logs from dummy workspace to period workspaces.
     m_WsVec[i]->setInstrument(temp->getInstrument());
+    m_WsVec[i]->setStorageMode(temp->getStorageMode());
   }
 }
 
@@ -318,6 +319,11 @@ bool EventWorkspaceCollection::threadSafe() const {
   // Since there is a mutex lock around sorting, EventWorkspaces are always
   // safe.
   return true;
+}
+
+void EventWorkspaceCollection::setStorageMode(MPI::StorageMode storageMode) {
+  for (size_t i = 0; i < m_WsVec.size(); ++i)
+    m_WsVec[i]->setStorageMode(storageMode);
 }
 
 } // namespace DataHandling

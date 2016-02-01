@@ -61,7 +61,8 @@ IDomainCreator *createDomainCreator(const IFunction *fun, const Workspace *ws,
 /** Constructor
  */
 IFittingAlgorithm::IFittingAlgorithm()
-    : API::Algorithm(), m_domainType(API::IDomainCreator::Simple) {}
+    : API::TriviallyParallelAlgorithm(),
+      m_domainType(API::IDomainCreator::Simple) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

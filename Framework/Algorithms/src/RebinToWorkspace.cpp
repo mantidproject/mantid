@@ -85,3 +85,25 @@ void RebinToWorkspace::createRebinParameters(
       rb_params.push_back(matchXdata[i + 1] - matchXdata[i]);
   }
 }
+
+Mantid::MPI::ExecutionMode RebinToWorkspace::getParallelExecutionMode(
+    const std::map<std::string, Mantid::MPI::StorageMode> &storageModes) const {
+  // "WorkspaceToRebin" determines the execution mode. "WorkspaceToMatch" must
+  // be available on all ranks that rebin.
+  // Valid combinations are:
+  // - Distributed + Cloned
+  // - Distributed + Distributed
+  // - Cloned + Cloned
+  // - MasterOnly + MasterOnly
+  // TODO implemented these checks
+  return getCorrespondingExecutionMode(storageModes.at("WorkspaceToRebin"));
+}
+
+Mantid::MPI::StorageMode RebinToWorkspace::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  // Ignored, since we have only one output workspace.
+  UNUSED_ARG(propertyName)
+  API::MatrixWorkspace_const_sptr ws = getProperty("WorkspaceToRebin");
+  return ws->getStorageMode();
+}
+

@@ -31,9 +31,9 @@ DECLARE_ALGORITHM(GetEi2)
 * Default contructor
 */
 GetEi2::GetEi2()
-    : Algorithm(), m_input_ws(), m_peak1_pos(0, 0.0), m_fixedei(false),
-      m_tof_window(0.1), m_peak_signif(2.0), m_peak_deriv(1.0),
-      m_binwidth_frac(1.0 / 12.0), m_bkgd_frac(0.5) {
+    : TriviallyParallelAlgorithm(), m_input_ws(), m_peak1_pos(0, 0.0),
+      m_fixedei(false), m_tof_window(0.1), m_peak_signif(2.0),
+      m_peak_deriv(1.0), m_binwidth_frac(1.0 / 12.0), m_bkgd_frac(0.5) {
   // Conversion factor common for converting between micro seconds and energy in
   // meV
   m_t_to_mev = 5e11 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;

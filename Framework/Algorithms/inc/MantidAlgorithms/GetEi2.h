@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 
@@ -49,7 +49,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport GetEi2 : public API::Algorithm {
+class DLLExport GetEi2 : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
   GetEi2();

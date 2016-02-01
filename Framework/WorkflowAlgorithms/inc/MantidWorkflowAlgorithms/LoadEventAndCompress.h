@@ -48,6 +48,13 @@ protected:
   API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr &wksp,
                                          double filterBadPulses);
 
+protected:
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;  
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
 private:
   virtual void init() override;
   virtual void exec() override;

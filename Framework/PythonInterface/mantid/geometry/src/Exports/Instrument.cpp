@@ -10,6 +10,12 @@ using Mantid::detid_t;
 using namespace boost::python;
 using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 
+namespace {
+std::vector<detid_t> test(const Instrument &instrument, bool skipMonitors) {
+  return instrument.getDetectorIDs(skipMonitors);
+}
+}
+
 void export_Instrument() {
   register_ptr_to_python<boost::shared_ptr<Instrument>>();
 
@@ -33,6 +39,11 @@ void export_Instrument() {
                               Instrument::getDetector,
            (arg("self"), arg("detector_id")),
            "Returns the detector with the given ID")
+
+      //.def("getDetectorIDs", &test,
+      .def("getDetectorIDs", (std::vector<int32_t>(Instrument::*)(bool) const) &
+                                 Instrument::getDetectorIDs,
+           "Returns a vector with all detector IDs")
 
       .def("getReferenceFrame",
            (boost::shared_ptr<const ReferenceFrame>(Instrument::*)()) &

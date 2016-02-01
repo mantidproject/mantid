@@ -82,6 +82,12 @@ protected:
   virtual void exec();
   virtual void init();
 
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
   bool handleSpecialDivideMinus();
 
   /// Execution method for event workspaces, to be overridden as needed.

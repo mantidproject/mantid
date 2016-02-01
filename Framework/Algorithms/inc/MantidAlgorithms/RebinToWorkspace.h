@@ -64,6 +64,13 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Transforms\\Rebin"; }
 
+protected:
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
 private:
   /// Initialisation code
   void init();

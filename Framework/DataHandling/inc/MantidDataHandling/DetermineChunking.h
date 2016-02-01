@@ -73,6 +73,15 @@ public:
   virtual int version() const;
   virtual const std::string category() const;
 
+protected:
+  /** Parallel mode is ExecutionMode::Identical. */
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+  /** Same data on all ranks, returns StorageMode::Cloned. */
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
 private:
   void init();
   void exec();

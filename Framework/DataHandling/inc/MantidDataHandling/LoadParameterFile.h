@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -68,7 +68,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class DLLExport LoadParameterFile : public API::Algorithm {
+class DLLExport LoadParameterFile : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
   LoadParameterFile();

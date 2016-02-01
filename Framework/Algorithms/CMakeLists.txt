@@ -126,6 +126,7 @@ set ( SRC_FILES
 	src/FitPeak.cpp
 	src/FixGSASInstrumentFile.cpp
 	src/FlatPlateAbsorption.cpp
+        src/GatherWorkspaceOnMaster.cpp
 	src/GeneralisedSecondDifference.cpp
 	src/GenerateEventsFilter.cpp
 	src/GenerateIPythonNotebook.cpp
@@ -226,6 +227,7 @@ set ( SRC_FILES
 	src/SassenaFFT.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
+        src/ScatterWorkspaceFromMaster.cpp
 	src/Segfault.cpp
 	src/SetInstrumentParameter.cpp
 	src/SetUncertainties.cpp
@@ -403,6 +405,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FitPeak.h
 	inc/MantidAlgorithms/FixGSASInstrumentFile.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
+        inc/MantidAlgorithms/GatherWorkspaceOnMaster.h
 	inc/MantidAlgorithms/GSLFunctions.h
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
 	inc/MantidAlgorithms/GenerateEventsFilter.h
@@ -504,6 +507,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
+        inc/MantidAlgorithms/ScatterWorkspaceFromMaster.h
 	inc/MantidAlgorithms/Segfault.h
 	inc/MantidAlgorithms/SetInstrumentParameter.h
 	inc/MantidAlgorithms/SetUncertainties.h
@@ -687,6 +691,7 @@ set ( TEST_FILES
 	FitPeakTest.h
 	FixGSASInstrumentFileTest.h
 	FlatPlateAbsorptionTest.h
+        GatherWorkspaceOnMasterTest.h
 	GeneralisedSecondDifferenceTest.h
 	GenerateEventsFilterTest.h
 	GenerateIPythonNotebookTest.h
@@ -816,6 +821,7 @@ set ( TEST_FILES
 	WorkspaceCreationHelperTest.h
 	WorkspaceGroupTest.h
 )
+        #ScatterWorkspaceFromMasterTest.h
 
 set ( TEST_PY_FILES NormaliseToUnityTest.py )
 

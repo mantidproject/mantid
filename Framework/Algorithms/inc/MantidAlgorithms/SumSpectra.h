@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 #include <set>
@@ -55,7 +55,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SumSpectra : public API::Algorithm {
+class DLLExport SumSpectra : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
   SumSpectra();
@@ -75,6 +75,10 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Transforms\\Grouping"; }
+
+protected:
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
 
 private:
   /// Handle logic for RebinnedOutput workspaces

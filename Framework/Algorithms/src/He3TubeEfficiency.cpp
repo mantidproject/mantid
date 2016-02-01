@@ -28,8 +28,8 @@ DECLARE_ALGORITHM(He3TubeEfficiency)
 
 /// Default constructor
 He3TubeEfficiency::He3TubeEfficiency()
-    : Algorithm(), inputWS(), outputWS(), paraMap(NULL), shapeCache(),
-      samplePos(), spectraSkipped(), progress(NULL) {
+    : TriviallyParallelAlgorithm(), inputWS(), outputWS(), paraMap(NULL),
+      shapeCache(), samplePos(), spectraSkipped(), progress(NULL) {
   this->shapeCache.clear();
 }
 

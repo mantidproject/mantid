@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -49,7 +49,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class DLLExport LoadIDFFromNexus : public API::Algorithm {
+class DLLExport LoadIDFFromNexus : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
   LoadIDFFromNexus();

@@ -1101,5 +1101,34 @@ BinaryOperation::buildBinaryOperationTable(
   return table;
 }
 
+MPI::ExecutionMode BinaryOperation::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  MPI::StorageMode lhs = storageModes.find("LHSWorkspace")->second;
+  MPI::StorageMode rhs = storageModes.find("RHSWorkspace")->second;
+  // Two identical modes is ok
+  if (lhs == rhs)
+    return getCorrespondingExecutionMode(std::begin(storageModes)->second);
+  // Mode <X> times Cloned is also ok
+  if ((lhs == MPI::StorageMode::Cloned))
+    return getCorrespondingExecutionMode(rhs);
+  if ((rhs == MPI::StorageMode::Cloned))
+    return getCorrespondingExecutionMode(lhs);
+  // Other options are not ok (e.g., MasterOnly times Distributed)
+  return MPI::ExecutionMode::Invalid;
+}
+
+MPI::StorageMode BinaryOperation::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  API::MatrixWorkspace_const_sptr ws_lhs = getProperty("LHSWorkspace");
+  MPI::StorageMode lhs = ws_lhs->getStorageMode();
+  API::MatrixWorkspace_const_sptr ws_rhs = getProperty("RHSWorkspace");
+  MPI::StorageMode rhs = ws_rhs->getStorageMode();
+  // If LHS is cloned, RHS may dictate another type
+  if ((lhs == MPI::StorageMode::Cloned))
+    return rhs;
+  // Otherwise the lhs type is fine
+  return lhs;
+}
+
 } // namespace Algorithms
 } // namespace Mantid

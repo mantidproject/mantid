@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include <boost/shared_ptr.hpp>
 namespace Mantid {
 namespace API {
@@ -50,7 +50,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport NormaliseByCurrent : public API::Algorithm {
+class DLLExport NormaliseByCurrent : public API::TriviallyParallelAlgorithm {
 public:
   NormaliseByCurrent();
   virtual ~NormaliseByCurrent();

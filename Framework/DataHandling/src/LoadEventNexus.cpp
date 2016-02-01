@@ -1492,6 +1492,7 @@ void LoadEventNexus::createWorkspaceIndexMaps(
   // Create the required spectra mapping so that the workspace knows what to pad
   // to
   createSpectraMapping(m_filename, monitors, bankNames);
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   // This map will be used to find the workspace index
   if (this->event_id_is_spec)
@@ -1668,6 +1669,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   }
   m_ws->setNPeriods(
       nPeriods, periodLog); // This is how many workspaces we are going to make.
+  // m_ws->setStorageMode(getStorageModeForOutputWorkspace("OutputWorkspace"));
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
   if (m_allBanksPulseTimes == NULL) {
@@ -1676,6 +1678,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
   }
 
+  //printf("LoadEventNexus %d %d\n", !m_ws->getInstrument(), !m_instrument_loaded_correctly);
   if (!m_ws->getInstrument() || !m_instrument_loaded_correctly) {
     // Load the instrument (if not loaded before)
     prog->report("Loading instrument");
@@ -1686,6 +1689,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       throw std::runtime_error(
           "Instrument was not initialized correctly! Loading cannot continue.");
   }
+  //printf("LoadEventNexus instrument has %lu detectors\n", m_ws->getInstrument()->getNumberDetectors());
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   // top level file information
   m_file->openPath("/");
@@ -1728,8 +1733,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       m_file->closeGroup();
     }
   }
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   loadSampleDataISIScompatibility(*m_file, *m_ws);
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   // Close the 'top entry' group (raw_data_1 for NexusProcessed, etc.)
   m_file->closeGroup();
@@ -1749,6 +1756,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     // Missing metadata is not a fatal error. Log and go on with your life
     g_log.error() << "Error loading metadata: " << e.what() << std::endl;
   }
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   // --------------------------- Time filtering
   // ------------------------------------
@@ -1785,6 +1793,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       throw std::invalid_argument(msg);
     }
   }
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   if (is_time_filtered) {
     // Now filter out the run, using the DateAndTime type.
@@ -1806,6 +1815,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
     return;
   }
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   // --------- Loading only one bank ? ----------------------------------
   std::vector<std::string> someBanks = getProperty("BankName");
@@ -1844,6 +1854,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   } else {
     someBanks.clear();
   }
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   prog->report("Initializing all pixels");
 
@@ -1858,7 +1869,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   //----------------- Pad Empty Pixels -------------------------------
+  //printf("LoadEventNexus ws has %lu histograms xxx\n", m_ws->getNumberHistograms());
   createWorkspaceIndexMaps(monitors, someBanks);
+  //printf("LoadEventNexus ws has %lu histograms xxx\n", m_ws->getNumberHistograms());
 
   // Cache a map for speed.
   if (!m_haveWeights) {
@@ -1870,6 +1883,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
     this->makeMapToEventLists<WeightedEventVector_pt>(weightedEventVectors);
   }
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   // Set all (empty) event lists as sorted by pulse time. That way, calling
   // SortEvents will not try to sort these empty lists.
@@ -1887,6 +1901,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   auto diskIOMutex = boost::make_shared<Mutex>();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   if (chunk !=
       EMPTY_INT()) // We are loading part - work out the bank number range
@@ -1947,6 +1962,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       bankNumEvents[i] = stop_event - start_event;
     }
   }
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   // split banks up if the number of cores is more than twice the number of
   // banks
@@ -1968,6 +1984,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
           this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
           prog2, diskIOMutex, scheduler, periodLogVec));
   }
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
   // Start and end all threads
   pool.joinAll();
   diskIOMutex.reset();
@@ -2021,9 +2038,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   }
   // Set the binning axis using this.
   m_ws->setAllX(axis);
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 
   // if there is time_of_flight load it
   loadTimeOfFlight(m_ws, m_top_entry_name, classType);
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
 }
 
 //-----------------------------------------------------------------------------
@@ -2213,6 +2232,7 @@ void LoadEventNexus::createSpectraMapping(
   if (!monitorsOnly && !bankNames.empty()) {
     std::vector<IDetector_const_sptr> allDets;
 
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
     for (auto name = bankNames.begin(); name != bankNames.end(); ++name) {
       // Only build the map for the single bank
       std::vector<IDetector_const_sptr> dets;
@@ -2222,8 +2242,13 @@ void LoadEventNexus::createSpectraMapping(
                                  "' as a component assembly in the instrument "
                                  "tree; or it did not contain any detectors."
                                  " Try unchecking SingleBankPixelsOnly.");
-      allDets.insert(allDets.end(), dets.begin(), dets.end());
+      //allDets.insert(allDets.end(), dets.begin(), dets.end());
+      for (const auto &det : dets) {
+        if (Mantid::MPI::indexIsOnThisRank(det->getID()))
+          allDets.emplace_back(det);
+      }
     }
+  //printf("LoadEventNexus ws has %lu histograms\n", m_ws->getNumberHistograms());
     if (!allDets.empty()) {
       m_ws->resizeTo(allDets.size());
       // Make an event list for each.
@@ -2236,12 +2261,14 @@ void LoadEventNexus::createSpectraMapping(
     }
 
   } else {
+  //printf("LoadEventNexus ws has %lu histograms???\n", m_ws->getNumberHistograms());
     spectramap = loadSpectraMapping(nxsfile, monitorsOnly, m_top_entry_name);
     // Did we load one? If so then the event ID is the spectrum number and not
     // det ID
     if (spectramap)
       this->event_id_is_spec = true;
   }
+  //printf("LoadEventNexus ws has %lu histograms yyy\n", m_ws->getNumberHistograms());
 
   if (!spectramap) {
     g_log.debug() << "No custom spectra mapping found, continuing with default "
@@ -2437,6 +2464,7 @@ void LoadEventNexus::runLoadMonitors() {
 bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
                                         const bool monitorsOnly,
                                         const std::string &entry_name) {
+  //printf("LoadEventNexus ws has %lu histograms blaaa\n", m_ws->getNumberHistograms());
   const std::string vms_str = "/isis_vms_compat";
   try {
     g_log.debug() << "Attempting to load custom spectra mapping from '"
@@ -2476,6 +2504,7 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
   // for /isis_vms_compat, typically: /raw_data_1/isis_vms_compat
   m_file->closeGroup();
   m_file->closeGroup();
+  //printf("LoadEventNexus ws has %lu histograms blaaa\n", m_ws->getNumberHistograms());
 
   // The spec array will contain a spectrum number for each udet but the
   // spectrum number
@@ -2487,6 +2516,7 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
        << ", SPEC=" << spec.size() << "\n";
     throw std::runtime_error(os.str());
   }
+  //printf("LoadEventNexus ws has %lu histograms blaaa\n", m_ws->getNumberHistograms());
   // Monitor filtering/selection
   const std::vector<detid_t> monitors = m_ws->getInstrument()->getMonitors();
   const size_t nmons(monitors.size());
@@ -2508,10 +2538,12 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
   } else {
     g_log.debug() << "Loading only detector spectra from " << filename << "\n";
 
+  //printf("LoadEventNexus ws has %lu histograms blaaa\n", m_ws->getNumberHistograms());
     // If optional spectra are provided, if so, m_specList is initialized. spec
     // is used if necessary
     createSpectraList(*std::min_element(spec.begin(), spec.end()),
                       *std::max_element(spec.begin(), spec.end()));
+  //printf("LoadEventNexus ws has %lu histograms blaaa\n", m_ws->getNumberHistograms());
 
     if (!m_specList.empty()) {
       int i = 0;
@@ -2528,6 +2560,21 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
       spec = spec_temp;
       udet = udet_temp;
     }
+    if (false) {
+      int i = 0;
+      std::vector<int32_t> spec_temp, udet_temp;
+      for (auto it = spec.begin(); it != spec.end(); it++) {
+          ////printf("det id %d\n", udet.at(i));
+          if(udet.at(i) % 1024 == 0) {
+          spec_temp.push_back(*it);
+          udet_temp.push_back(udet.at(i));
+          }
+        i++;
+      }
+      spec = spec_temp;
+      udet = udet_temp;
+    }
+  //printf("LoadEventNexus ws has %lu histograms blaaa\n", m_ws->getNumberHistograms());
 
     SpectrumDetectorMapping mapping(spec, udet, monitors);
     m_ws->resizeTo(mapping.getMapping().size());
@@ -2536,6 +2583,7 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
     m_ws->setSpectrumNumbersFromUniqueSpectra(uniqueSpectra);
     // Fill detectors based on this mapping
     m_ws->updateSpectraUsing(mapping);
+  //printf("LoadEventNexus ws has %lu histograms blaaa\n", m_ws->getNumberHistograms());
   }
   return true;
 }

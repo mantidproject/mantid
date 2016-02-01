@@ -306,6 +306,20 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
 }
 
 //---------------------------------------------------------------------------------------------
+// Protected members
+//---------------------------------------------------------------------------------------------
+
+/**
+ * Protected getParallelExecutionMode. Can be overridden in the subclass by a
+ * function name PyGetParallelExecutionModeExpected to enable support for
+ * parallel (MPI) execution. */
+//template <typename BaseAlgorithm>
+//MPI::ExecutionMode AlgorithmAdapter<BaseAlgorithm>::getParallelExecutionMode(
+//    const std::map<std::string, MPI::StorageMode> &storageModes) {
+//  return CallMethod0<MPI::ExecutionMode>::dispatchWithException(getSelf(), "PyGetParallelExecutionModeExpected");
+//}
+
+//---------------------------------------------------------------------------------------------
 // Private members
 //---------------------------------------------------------------------------------------------
 

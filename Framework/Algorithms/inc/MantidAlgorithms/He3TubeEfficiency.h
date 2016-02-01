@@ -1,7 +1,7 @@
 #ifndef MANTID_ALGORITHM_HE3TUBEEFFICIENCY_H_
 #define MANTID_ALGORITHM_HE3TUBEEFFICIENCY_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidKernel/V3D.h"
 #include <map>
 #include <vector>
@@ -50,7 +50,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport He3TubeEfficiency : public API::Algorithm {
+class DLLExport He3TubeEfficiency : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
   He3TubeEfficiency();

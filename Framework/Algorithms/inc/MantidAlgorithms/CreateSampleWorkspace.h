@@ -52,6 +52,12 @@ private:
   void init();
   void exec();
 
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
   DataObjects::EventWorkspace_sptr
   createEventWorkspace(int numPixels, int numBins, int numEvents, double x0,
                        double binDelta, int start_at_pixelID,

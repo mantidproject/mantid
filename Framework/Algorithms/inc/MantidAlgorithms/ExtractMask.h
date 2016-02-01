@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -47,10 +47,10 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ExtractMask : public Mantid::API::Algorithm {
+class DLLExport ExtractMask : public Mantid::API::TriviallyParallelAlgorithm {
 public:
   /// Constructor
-  ExtractMask() : Mantid::API::Algorithm() {}
+  ExtractMask() : Mantid::API::TriviallyParallelAlgorithm() {}
   /// Virtual destructor
   virtual ~ExtractMask() {}
   /// Algorithm's name

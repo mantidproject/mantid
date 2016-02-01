@@ -35,6 +35,12 @@ void LoadNexusMonitors::init() {
                   "an EventWorkspace), as long as there is event data. If "
                   "disabled, load monitors as spectra (into a Workspace2D, "
                   "regardless of whether event data is found.");
+
+  declareProperty(
+      new Kernel::PropertyWithValue<bool>("LoadCompleteWorkspaceOnMasterRank",
+                                          false, Kernel::Direction::Input),
+      "In a run with MPI, loads all data on master rank and none on other "
+      "ranks.");
 }
 
 /**
@@ -83,6 +89,26 @@ void LoadNexusMonitors::exec() {
   }
 
   setProperty("OutputWorkspace", ws);
+}
+
+MPI::ExecutionMode LoadNexusMonitors::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  // We have no input workspace, so we do not use the map.
+  UNUSED_ARG(storageModes)
+  if (getProperty("LoadCompleteWorkspaceOnMasterRank"))
+    return MPI::ExecutionMode::MasterOnly;
+  else
+    return MPI::ExecutionMode::Distributed;
+}
+
+MPI::StorageMode LoadNexusMonitors::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  // We have only one output workspace, so we ignore propertyName.
+  UNUSED_ARG(propertyName)
+  if (getProperty("LoadCompleteWorkspaceOnMasterRank"))
+    return MPI::StorageMode::MasterOnly;
+  else
+    return MPI::StorageMode::Distributed;
 }
 
 } // end DataHandling

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -66,7 +66,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CropWorkspace : public API::Algorithm {
+class DLLExport CropWorkspace : public API::TriviallyParallelAlgorithm {
 public:
   CropWorkspace();
   virtual ~CropWorkspace();

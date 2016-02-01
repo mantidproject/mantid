@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAlgorithms/FFT.h"
 
@@ -36,10 +36,10 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport RealFFT : public API::Algorithm {
+class DLLExport RealFFT : public API::TriviallyParallelAlgorithm {
 public:
   /// Default constructor
-  RealFFT() : API::Algorithm(){};
+  RealFFT() : API::TriviallyParallelAlgorithm(){};
   /// Destructor
   virtual ~RealFFT(){};
   /// Algorithm's name for identification overriding a virtual method

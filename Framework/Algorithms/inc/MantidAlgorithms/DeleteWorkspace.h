@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -37,7 +37,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport DeleteWorkspace : public API::Algorithm {
+class DLLExport DeleteWorkspace : public API::TriviallyParallelAlgorithm {
 public:
   /// Algorithm's name
   virtual const std::string name() const { return "DeleteWorkspace"; }
@@ -50,6 +50,10 @@ public:
   virtual const std::string category() const { return "Utility\\Workspaces"; }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
+
+protected:
+  /// Override because deletes should be done on all ranks, no matter what.
+  virtual void execMasterOnly() override { exec(); }
 
 private:
   /// Overridden init

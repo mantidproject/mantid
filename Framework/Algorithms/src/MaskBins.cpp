@@ -23,7 +23,8 @@ using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::DataObjects::EventWorkspace_const_sptr;
 
-MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0) {}
+MaskBins::MaskBins()
+    : API::TriviallyParallelAlgorithm(), m_startX(0.0), m_endX(0.0) {}
 
 void MaskBins::init() {
   declareProperty(

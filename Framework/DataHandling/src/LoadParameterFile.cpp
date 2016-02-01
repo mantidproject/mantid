@@ -38,7 +38,7 @@ using Geometry::Instrument;
 using Geometry::Instrument_sptr;
 
 /// Empty default constructor
-LoadParameterFile::LoadParameterFile() : Algorithm() {}
+LoadParameterFile::LoadParameterFile() : TriviallyParallelAlgorithm() {}
 
 /// Initialisation method.
 void LoadParameterFile::init() {

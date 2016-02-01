@@ -361,5 +361,11 @@ void MaskDetectors::appendToIndexListFromMaskWS(
   return;
 } // appendToIndexListFromWS
 
+MPI::StorageMode MaskDetectors::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  Workspace_sptr ws = getProperty("Workspace");
+  return ws->getStorageMode();
+}
+
 } // namespace DataHandling
 } // namespace Mantid

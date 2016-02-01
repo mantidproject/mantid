@@ -108,6 +108,7 @@ void DiffractionFocussing2::exec() {
   m_matrixInputW = getProperty("InputWorkspace");
   nPoints = static_cast<int>(m_matrixInputW->blocksize());
   nHist = static_cast<int>(m_matrixInputW->getNumberHistograms());
+    printf("histograms: %lu\n", nHist);
 
   // Validate UnitID (spacing)
   Axis *axis = m_matrixInputW->getAxis(0);
@@ -231,6 +232,7 @@ void DiffractionFocussing2::exec() {
 
       outSpec->addDetectorIDs(inSpec->getDetectorIDs());
       try {
+        //printf("in %lu %lf %lf %lf\n", inWorkspaceIndex, Xin[1000], Yin[1000], Ein[1000]);
         VectorHelper::rebinHistogram(Xin, Yin, Ein, Xout, Yout, Eout, true);
       } catch (...) {
         // Should never happen because Xout is constructed to envelop all of the
@@ -309,6 +311,9 @@ void DiffractionFocussing2::exec() {
 
     // TODO sqrt error before rebin!
     g_log.notice() << "Gathering data..." << std::endl;
+    printf("%lu\n", Xout.size());
+    printf("%lf %lf %lf\n", Xout[0], Yout[0], Eout[0]);
+    printf("%lf %lf %lf\n", Xout[1000], Yout[1000], Eout[1000]);
     std::vector<std::set<detid_t>> allDetectorIDs;
     std::vector<MantidVec> allGroupWgts;
     std::vector<MantidVec> allXouts;
@@ -335,6 +340,8 @@ void DiffractionFocussing2::exec() {
                                      Xout, Yout, Eout, addition);
       }
       g_log.notice() << "Merging data done." << std::endl;
+      printf("%lf %lf %lf\n", Xout[0], Yout[0], Eout[0]);
+      printf("%lf %lf %lf\n", Xout[1000], Yout[1000], Eout[1000]);
     }
 #endif
     // End gather data from all ranks
@@ -459,18 +466,6 @@ void DiffractionFocussing2::execEvent() {
       int max = (wiChunk + 1) * chunkSize;
       if (max > totalHistProcess)
         max = totalHistProcess;
-
-      // precalculate output size
-      /* size_t numEventsInChunk(0);
-      for (int wi=wiChunk*chunkSize; wi < max; wi++)
-      {
-        const int group = groupAtWorkspaceIndex[wi];
-        if (group == 1)
-        {
-          // Accumulate the chunk
-          numEventsInChunk += eventW->getEventList(wi).getNumberEvents();
-        }
-      } */
 
       // Make a blank EventList that will accumulate the chunk.
       EventList chunkEL;

@@ -134,12 +134,12 @@ void DetermineChunking::exec() {
   }
   this->setProperty("OutputWorkspace", strategy);
 
-#ifndef MPI_BUILD
+//#ifndef MPI_BUILD
   // mpi needs work for every core, so don't do this
   if (maxChunk == 0 || isEmpty(maxChunk)) {
     return;
   }
-#endif
+//#endif
 
   // --------------------- DETERMINE NUMBER OF CHUNKS
   // PreNexus
@@ -363,5 +363,18 @@ FileType DetermineChunking::getFileType(const string &filename) {
 
   throw std::invalid_argument("Unsupported file type");
 }
+
+MPI::ExecutionMode DetermineChunking::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  UNUSED_ARG(storageModes)
+  return MPI::ExecutionMode::Identical;
+}
+
+MPI::StorageMode DetermineChunking::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  UNUSED_ARG(propertyName)
+  return MPI::StorageMode::Cloned;
+}
+
 } // namespace Mantid
 } // namespace DataHandling

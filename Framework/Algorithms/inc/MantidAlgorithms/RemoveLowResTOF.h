@@ -2,12 +2,12 @@
 #define REMOVELOWRESTOF_H_
 
 // includes
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
-class DLLExport RemoveLowResTOF : public API::Algorithm {
+class DLLExport RemoveLowResTOF : public API::TriviallyParallelAlgorithm {
 public:
   RemoveLowResTOF();
   virtual ~RemoveLowResTOF();

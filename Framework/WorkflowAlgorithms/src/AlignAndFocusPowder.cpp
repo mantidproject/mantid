@@ -979,5 +979,23 @@ void AlignAndFocusPowder::doSortEvents(Mantid::API::Workspace_sptr ws) {
   alg->executeAsChildAlg();
 }
 
+MPI::ExecutionMode AlignAndFocusPowder::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  // The (non-optional) "InputWorkspace" determines the execution mode. Other
+  // workspaces are helpers and some may differ.
+  return getCorrespondingExecutionMode(storageModes.at("InputWorkspace"));
+}
+
+MPI::StorageMode AlignAndFocusPowder::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  // TODO: apparently this algorithm can either keep distributed workspace, or transition to MasterOnly. This somehow depends on input parameters
+  printf("Warning: disabled transition to MasterOnly in DiffractionFocussing2\n");
+  //return MPI::StorageMode::MasterOnly;
+  // Ignored, since we have only one output workspace.
+  UNUSED_ARG(propertyName)
+  API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+  return ws->getStorageMode();
+}
+
 } // namespace WorkflowAlgorithm
 } // namespace Mantid

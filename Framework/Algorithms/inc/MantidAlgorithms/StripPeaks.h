@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
@@ -53,7 +53,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport StripPeaks : public API::Algorithm {
+class DLLExport StripPeaks : public API::TriviallyParallelAlgorithm {
 public:
   /// (Empty) Constructor
   StripPeaks();

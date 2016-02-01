@@ -63,6 +63,12 @@ public:
   virtual const std::string category() const { return "DataHandling\\Nexus"; }
 
 protected:
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
   /// Intialisation code
   void init();
 

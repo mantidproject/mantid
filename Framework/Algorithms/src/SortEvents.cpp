@@ -69,5 +69,20 @@ void SortEvents::exec() {
   return;
 }
 
+MPI::ExecutionMode SortEvents::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  // We have only one input workspace => consider only first map entry.
+  return getCorrespondingExecutionMode(std::begin(storageModes)->second);
+}
+
+//bool SortEvents::canExecWithParallelism(
+//    Parallelism parallelism) const {
+//  std::cout << parallelismToString(parallelism) << std::endl;
+//  if ((parallelism == Parallelism::None) ||
+//      (parallelism == Parallelism::Distributed))
+//    return true;
+//  return false;
+//}
+
 } // namespace Algorithm
 } // namespace Mantid

@@ -487,6 +487,7 @@ std::string LoadTOFRawNexus::getEntryName(const std::string &filename) {
  *values
  */
 void LoadTOFRawNexus::exec() {
+  printf("LoadTOFRawNexus::exec()\n");
   // The input properties
   std::string filename = getPropertyValue("Filename");
   m_signalNo = getProperty("Signal");

@@ -66,6 +66,12 @@ void LoadNexus::init() {
                   "workspace within a group. "
                   "A positive number identifies one entry to be loaded, into "
                   "one worskspace");
+
+  declareProperty(
+      new PropertyWithValue<bool>("LoadCompleteWorkspaceOnMasterRank", false,
+                                  Direction::Input),
+      "In a run with MPI, loads all data on master rank and none on other "
+      "ranks.");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -175,6 +181,9 @@ void LoadNexus::runLoadNexusProcessed() {
                                  getPropertyValue("SpectrumMax"));
   loadNexusPro->setPropertyValue("SpectrumList",
                                  getPropertyValue("SpectrumList"));
+  loadNexusPro->setPropertyValue(
+      "LoadCompleteWorkspaceOnMasterRank",
+      getPropertyValue("LoadCompleteWorkspaceOnMasterRank"));
 
   /* !!! The spectrum min/max/list properties are currently missing from
      LoadNexus
@@ -300,6 +309,26 @@ void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
       setProperty(name, wkspace);
     }
   }
+}
+
+MPI::ExecutionMode LoadNexus::getParallelExecutionMode(
+    const std::map<std::string, MPI::StorageMode> &storageModes) const {
+  // We have no input workspace, so we do not use the map.
+  UNUSED_ARG(storageModes)
+  if (getProperty("LoadCompleteWorkspaceOnMasterRank"))
+    return MPI::ExecutionMode::MasterOnly;
+  else
+    return MPI::ExecutionMode::Distributed;
+}
+
+MPI::StorageMode LoadNexus::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  // We have only one output workspace, so we ignore propertyName.
+  UNUSED_ARG(propertyName)
+  if (getProperty("LoadCompleteWorkspaceOnMasterRank"))
+    return MPI::StorageMode::MasterOnly;
+  else
+    return MPI::StorageMode::Distributed;
 }
 
 } // namespace DataHandling

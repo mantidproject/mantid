@@ -35,7 +35,7 @@ const double GetEi::GET_COUNT_RATE = 0.15;
 const double GetEi::FIT_PEAK = 0.2;
 
 /// Empty default constructor algorith() calls the constructor in the base class
-GetEi::GetEi() : Algorithm(), m_tempWS(), m_fracCompl(0.0) {}
+GetEi::GetEi() : TriviallyParallelAlgorithm(), m_tempWS(), m_fracCompl(0.0) {}
 
 void GetEi::init() {
   // Declare required input parameters for algorithm and do some validation here

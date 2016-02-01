@@ -76,6 +76,13 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "DataHandling\\Nexus"; }
 
+protected:
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes)
+      const override;  
+  virtual MPI::StorageMode getStorageModeForOutputWorkspace(
+      const std::string &propertyName) const override;
+
 private:
   /// Overwrites Algorithm method.
   void init();

@@ -80,6 +80,13 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
 
+protected:
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes) const {
+    API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+    return getCorrespondingExecutionMode(ws->getStorageMode());
+  }
+
 private:
   // Overridden Algorithm methods
   void init();
