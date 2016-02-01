@@ -372,6 +372,8 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   } else if (bCorrectPosition) {
     toConvert = correctPosition(toConvert, thetaInDeg.get(), isPointDetector);
   }
+
+  // Rotate the source (needed before ConvertUnits)
   double rotationTheta = getAngleForSourceRotation(toConvert, thetaInDeg.get());
   if (rotationTheta != 0.0) {
     auto rotateSource = this->createChildAlgorithm("RotateSource");
@@ -389,6 +391,17 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   convertUnits->setProperty("Target", "MomentumTransfer");
   convertUnits->execute();
   MatrixWorkspace_sptr inQ = convertUnits->getProperty("OutputWorkspace");
+
+  // Rotate the source back to its original position
+  if (rotationTheta != 0.0) {
+    auto rotateSource = this->createChildAlgorithm("RotateSource");
+    rotateSource->setChild(true);
+    rotateSource->initialize();
+    rotateSource->setProperty("Workspace", toConvert);
+    rotateSource->setProperty("Angle", -rotationTheta);
+    rotateSource->execute();
+  }
+
   return inQ;
 }
 
@@ -673,7 +686,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
           stitchingDelta.is_initialized()) {
         const std::vector<double> params =
             boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-                stitchingEnd.get()).convert_to_container<std::vector<double>>();
+                stitchingEnd.get())
+                .convert_to_container<std::vector<double>>();
         alg->setProperty("Params", params);
       } else if (stitchingDelta.is_initialized()) {
         alg->setProperty("Params",

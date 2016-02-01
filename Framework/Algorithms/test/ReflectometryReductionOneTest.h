@@ -205,9 +205,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
 
-    TS_ASSERT_DIFFERS(m_tinyReflWS->getInstrument()->getSource()->getPos(),
+    TS_ASSERT_EQUALS(m_tinyReflWS->getInstrument()->getSource()->getPos(),
                       outLam->getInstrument()->getSource()->getPos());
-    TS_ASSERT_EQUALS(outLam->getInstrument()->getSource()->getPos(),
+    TS_ASSERT_DIFFERS(outLam->getInstrument()->getSource()->getPos(),
                      outQ->getInstrument()->getSource()->getPos());
   }
 
