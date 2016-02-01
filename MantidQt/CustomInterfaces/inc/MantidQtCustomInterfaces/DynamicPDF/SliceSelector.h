@@ -9,10 +9,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace DynamicPDF {
 
-using workspacePtr = boost::shared_ptr<Mantid::API::MatrixWorkspace>;
-
 // Forward Declarations
-class BackgroundRemover;
+//class BackgroundRemover;
 
 /// Helper class containing pointer and some metadata for the loaded workspace
 class WorkspaceRecord{
@@ -22,10 +20,10 @@ public:
   WorkspaceRecord(const std::string &workspaceName);
   void updateMetadata(const size_t &newIndex);
 
-  workspacePtr ws;
-  const std::string name;
-  double energy;
-  std::string label;
+  boost::shared_ptr<Mantid::API::MatrixWorkspace> m_ws;
+  const std::string m_name;
+  double m_energy;
+  std::string m_label;
 };
 
 
@@ -41,13 +39,13 @@ public:
 
 public:
   /// Default Constructor
-  SliceSelector(QWidget *parent = NULL);
+  SliceSelector(QWidget *parent = nullptr);
 
 private slots:
   /// Opens the Qt help page for the interface
   void showHelp();
   /// Load file or workspace containing energy slices
-  void loadedSlices(const QString &workspaceName);
+  void loadSlices(const QString &workspaceName);
   /// Update all child widgets
   void updateSelectedSlice(const int &newSelectedIndex);
   void updatePlotSelectedSlice();
@@ -62,10 +60,10 @@ private:
   boost::shared_ptr<WorkspaceRecord> m_loadedWorkspace;
   size_t m_selectedWorkspaceIndex;
   /// The child dialog to remove the multiphonon background
-  boost::shared_ptr<BackgroundRemover> m_BackgroundRemover;
+  //boost::shared_ptr<BackgroundRemover> m_BackgroundRemover;
 };
 
 }
 }
 }
-#endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
+#endif //MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
