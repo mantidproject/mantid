@@ -34,6 +34,14 @@ std::vector<std::string> split(const std::string &str,
                      output.emplace_back(first, second);
                    }
                  });
+
+  if (!str.empty()) {
+    const auto pos = std::find_first_of(str.end() - 1, str.end(),
+                                        delims.begin(), delims.end());
+    if (pos != str.end()) {
+      output.emplace_back();
+    }
+  }
   return output;
 }
 }
@@ -57,5 +65,4 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
                                   }),
                    m_tokens.end());
   }
-  
 };

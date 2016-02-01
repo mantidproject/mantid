@@ -412,7 +412,8 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
     std::getline(m_fileIn, fileLine);
   }
   Mantid::Kernel::StringTokenizer wsDimensions(
-      fileLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+      fileLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (wsDimensions.count() < 2) {
     throw Exception::NotFoundError("Input file", "dimensions");
   }
@@ -461,7 +462,8 @@ void LoadRKH::readNumEntrys(const int nEntries, MantidVec &output) {
 const std::string LoadRKH::readUnit(const std::string &line) {
   // split the line into words
   const Mantid::Kernel::StringTokenizer codes(
-      line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+      line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (codes.count() < 1) {
     return "C++ no unit found";
   }
@@ -469,14 +471,13 @@ const std::string LoadRKH::readUnit(const std::string &line) {
   // the symbol for the quantity q = MomentumTransfer, etc.
   const std::string symbol(codes[0]);
   // this is units used to measure the quantity e.g. angstroms, counts, ...
-  const std::string unit(*(codes.end() - 1));
+  auto itUnitsToken = codes.end() - 1;
+  const std::string unit(*itUnitsToken);
 
   // theQuantity will contain the name of the unit, which can be many words long
   std::string theQuantity;
-  for (auto current = codes.begin() + 1; current != codes.end(); ++current) {
-    if (current != codes.end() - 1) {
-      theQuantity += *current;
-    }
+  for (auto current = codes.begin() + 1; current != itUnitsToken; ++current) {
+    theQuantity += *current;
   }
 
   // this is a syntax check the line before returning its data

@@ -165,6 +165,13 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
   typedef Mantid::Kernel::StringTokenizer tokenizer;
   std::string str;
   getline(in, str);
+
+  // avoid empty token in the final position.
+  char delimiter = ',';
+  char lastCharacter = str.back();
+  if (delimiter == lastCharacter)
+    str.pop_back();
+
   tokenizer values(str, ",", tokenizer::TOK_TRIM);
 
   if (values.count() <= 2) {
@@ -244,6 +251,5 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
 
   return in;
 }
-
 } // namespace Geometry
 } // namespace Mantid
