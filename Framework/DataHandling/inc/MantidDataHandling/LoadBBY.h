@@ -17,7 +17,8 @@ namespace DataHandling {
 Loads a Bilby data file. Implements API::IFileLoader and its file check methods
 to recognise a file as the one containing Bilby data.
 
-@author David Mannicke (ANSTO), Anders Markvardsen (ISIS), Roman Tolchenov (Tessella plc)
+@author David Mannicke (ANSTO), Anders Markvardsen (ISIS), Roman Tolchenov
+(Tessella plc)
 @date 11/07/2014
 
 Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -75,15 +76,9 @@ public:
   virtual ~LoadBBY() {}
 
   // description
-  virtual int version() const {
-    return 1;
-  }
-  virtual const std::string name() const {
-    return "LoadBBY";
-  }
-  virtual const std::string category() const {
-    return "DataHandling";
-  }
+  virtual int version() const { return 1; }
+  virtual const std::string name() const { return "LoadBBY"; }
+  virtual const std::string category() const { return "DataHandling"; }
   virtual const std::string summary() const {
     return "Loads a BilBy data file into a workspace.";
   }
@@ -102,11 +97,13 @@ private:
   static std::vector<bool> createRoiVector(const std::string &maskfile);
 
   // instrument creation
-  Geometry::Instrument_sptr createInstrument(ANSTO::Tar::File &tarFile, InstrumentInfo& instrumentInfo);
-  
+  Geometry::Instrument_sptr createInstrument(ANSTO::Tar::File &tarFile,
+                                             InstrumentInfo &instrumentInfo);
+
   // load nx dataset
   template <class T>
-  static bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value);
+  static bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path,
+                            T &value);
 
   // binary file access
   template <class EventProcessor>
