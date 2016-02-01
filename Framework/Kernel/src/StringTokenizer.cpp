@@ -26,18 +26,22 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
     }
   }
 
-  // 1.47 doesn't 
+  // 1.47 doesn't tokenize whitespace.
   // limit whitespace to a single space
+
+  if (options == 2 || options == 3) {
   if (separators.find(" ") != std::string::npos) {
     boost::trim_left(newstring);
-    Poco::StringTokenizer preTokenizer(newstring, " ", TOK_TRIM);
+    Poco::StringTokenizer preTokenizer(newstring, " ",
+                                       TOK_TRIM | TOK_IGNORE_EMPTY);
     newstring = std::string();
-    if (preTokenizer.count() > 0) {
-      for (auto it = preTokenizer.begin(); it != preTokenizer.end() - 1; ++it) {
-        newstring += *it + " ";
-      }
-      newstring += *(preTokenizer.end() - 1);
+    for (const auto &elem : preTokenizer) {
+      newstring += elem + " ";
     }
+    // remove extra space.
+    if (!newstring.empty())
+      newstring.pop_back();
+  }
   }
 
   //1.61 fails to find two tokens in str="2- " and sep="-".
