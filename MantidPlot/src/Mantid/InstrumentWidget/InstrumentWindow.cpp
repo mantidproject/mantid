@@ -243,7 +243,6 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling,
     updateInfoText();
   }
   readSettings();
-
 }
 
 /**
@@ -729,15 +728,17 @@ void InstrumentWindow::saveSettings() {
               m_renderTab->m_sphericalZ->isChecked());
   qs.setValue("user_params_m_sideBySide",
               m_renderTab->m_sideBySide->isChecked());
-
   qs.setValue("user_param_mAxisCombo", m_renderTab->mAxisCombo->currentText());
   qs.setValue("user_params_flipCheckBox",
               m_renderTab->m_flipCheckBox->isChecked());
 
+  // saving the settings for the graph and color map
   qs.setValue("user_param_minVal",
               m_renderTab->m_colorMapWidget->getMinValue());
   qs.setValue("user_param_maxVal",
               m_renderTab->m_colorMapWidget->getMaxValue());
+  qs.setValue("user_param_nthTerm",
+              m_renderTab->m_colorMapWidget->getNth_power());
   qs.setValue("user_params_autoscaling",
               m_renderTab->m_autoscaling->isChecked());
 
@@ -749,7 +750,7 @@ void InstrumentWindow::saveSettings() {
 }
 
 /**
-* Reads properties of the render window
+* Reads properties of the instrument render window and the bin range
 */
 void InstrumentWindow::readSettings() {
   QSettings qs;
@@ -802,12 +803,15 @@ void InstrumentWindow::readSettings() {
 
   colorMapRangeChanged(qs.value("user_param_minVal").toDouble(),
                        qs.value("user_param_maxVal").toDouble());
+  m_renderTab->m_colorMapWidget->setNthPower(
+      qs.value("user_param_nthTerm").toDouble());
   // auto scale after max and min value required as it will
   // read the above above and uncheck the box
   m_renderTab->m_autoscaling->setChecked(
       qs.value("user_params_autoscaling", true).toBool());
 
-  // setting the bin range which is not from InstrumentWindowRenderTab
+  // setting the bin range which is not accessed from InstrumentWindowRenderTab
+  // trouble setting the slider according to bin range?
   setBinRange(qs.value("user_params_minBinRange").toDouble(),
               qs.value("user_params_maxBinRange").toDouble());
 
