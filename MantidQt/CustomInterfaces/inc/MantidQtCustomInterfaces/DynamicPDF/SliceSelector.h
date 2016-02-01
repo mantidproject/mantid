@@ -1,6 +1,6 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
 #define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
-
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "ui_SliceSelector.h"
