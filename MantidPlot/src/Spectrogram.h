@@ -114,8 +114,14 @@ public:
   void setMantidColorMap(const MantidColorMap &map);
   void updateData(Matrix *m);
   void updateData(const Mantid::API::IMDWorkspace_const_sptr & workspace);
-  MantidQt::API::QwtRasterDataMD *dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr & workspace);
+  MantidQt::API::QwtRasterDataMD *
+  dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr &workspace,
+                    const QwtDoubleInterval *range = nullptr);
   void postDataUpdate();
+  /// Set autoscale on/off for color scale (default: on)
+  void setColorMapAutoScale(bool autoscale = true) {
+    d_color_map_autoscale = autoscale;
+  }
 
   ColorMapPolicy colorMapPolicy()const{return color_map_policy;};
 
@@ -220,6 +226,8 @@ protected:
   std::vector<unsigned char> mScaledValues;
   /// boolean flag to indicate intensity changed
   bool m_bIntensityChanged;
+  /// Flag for whether we autoscale color bar
+  bool d_color_map_autoscale;
 };
 
 class SpectrogramData: public QwtRasterData

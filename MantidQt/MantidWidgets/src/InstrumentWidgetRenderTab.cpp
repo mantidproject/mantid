@@ -567,6 +567,12 @@ QMenu* InstrumentWidgetRenderTab::createPeaksMenu()
   connect(signalMapper, SIGNAL(mapped(int)), m_instrWidget, SLOT(setPeakLabelPrecision(int)));
   menu->addMenu(setPrecision);
 
+  QAction *showRelativeIntensity = new QAction("Indicate relative intensity", this);
+  showRelativeIntensity->setCheckable(true);
+  showRelativeIntensity->setChecked(settings.value("ShowPeakRelativeIntensities", false).toBool());
+  connect(showRelativeIntensity, SIGNAL(toggled(bool)), m_instrWidget, SLOT(setShowPeakRelativeIntensity(bool)));
+  menu->addAction(showRelativeIntensity);
+
   // Clear peaks action
   QAction* clearPeaks = new QAction("Clear peaks",this);
   connect(clearPeaks,SIGNAL(triggered()),m_instrWidget, SLOT(clearPeakOverlays()));

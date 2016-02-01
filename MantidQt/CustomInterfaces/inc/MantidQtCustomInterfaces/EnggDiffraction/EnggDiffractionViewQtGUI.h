@@ -93,6 +93,10 @@ public:
 
   std::string outCalibFilename() const { return m_outCalibFilename; }
 
+  int currentCropCalibBankName() const { return m_currentCropCalibBankName; }
+
+  std::string currentCalibSpecNos() const;
+
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
                       const std::string &fname);
 
@@ -122,7 +126,7 @@ public:
 
   virtual void resetFocus();
 
-  virtual std::string currentPreprocRunNo() const;
+  virtual std::vector<std::string> currentPreprocRunNo() const;
 
   virtual double rebinningTimeBin() const;
 
@@ -146,6 +150,7 @@ private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
   void loadCalibrationClicked();
   void calibrateClicked();
+  void CroppedCalibrateClicked();
   void focusClicked();
   void focusCroppedClicked();
   void focusTextureClicked();
@@ -171,6 +176,9 @@ private slots:
 
   void RBNumberChanged();
 
+  // slot of the cropped calibration part of the interface
+  void calibSpecIdChanged(int idx);
+
   // slots of the focus part of the interface
   void plotRepChanged(int idx);
 
@@ -179,6 +187,12 @@ private slots:
 
   // slots of plot spectrum check box status
   void plotFocusStatus();
+
+  // updates the cropped calib run number with new ceria
+  void updateCroppedCalibRun();
+
+  // enables the text field when appropriate bank name is selected
+  void enableSpecIds();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -231,6 +245,9 @@ private:
 
   /// setting the instrument prefix ahead of the run number
   void setPrefix(std::string prefix);
+
+  // current bank number used for cropped calibration
+  int static m_currentCropCalibBankName;
 
   // plot data representation type selected
   int static m_currentType;

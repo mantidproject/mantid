@@ -9,8 +9,9 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-
+#include <vtkNew.h>
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 using Mantid::DataObjects::MDEventWorkspace;
 
@@ -58,8 +59,9 @@ public:
   virtual ~vtkMDHexFactory();
 
   /// Factory Method. Should also handle delegation to successors.
-  virtual vtkDataSet* create(ProgressAction& progressUpdate) const;
-  
+  virtual vtkSmartPointer<vtkDataSet>
+  create(ProgressAction &progressUpdate) const;
+
   /// Initalize with a target workspace.
   virtual void initialize(Mantid::API::Workspace_sptr);
 
@@ -95,16 +97,17 @@ private:
   size_t m_maxDepth;
 
   /// Data set that will be generated
-  mutable vtkDataSet * dataSet;
+  mutable vtkSmartPointer<vtkDataSet> dataSet;
 
   /// We are slicing down from > 3 dimensions
   mutable bool slice;
 
   /// Mask for choosing along which dimensions to slice
-  mutable bool * sliceMask;
+  mutable std::unique_ptr<bool[]> sliceMask;
 
   /// Implicit function to define which boxes to render.
-  mutable Mantid::Geometry::MDImplicitFunction * sliceImplicitFunction;
+  mutable boost::shared_ptr<Mantid::Geometry::MDImplicitFunction>
+      sliceImplicitFunction;
 
   /// Time value.
   double m_time;

@@ -233,8 +233,8 @@ void CompareWorkspaces::processGroups(
     // We should use an algorithm for each so that the output properties are
     // reset properly
     Algorithm_sptr checker = this->createChildAlgorithm(
-        this->name(), progressFraction * (double)i,
-        progressFraction * (double)(i + 1), false, this->version());
+        this->name(), progressFraction * static_cast<double>(i),
+        progressFraction * static_cast<double>(i + 1), false, this->version());
     checker->setPropertyValue("Workspace1", namesOne[i]);
     checker->setPropertyValue("Workspace2", namesTwo[i]);
     for (size_t j = 0; j < numNonDefault; ++j) {
@@ -741,9 +741,9 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
       recordMismatch(out.str());
       return false;
     }
-    std::set<detid_t>::const_iterator it1 = spec1->getDetectorIDs().begin();
-    std::set<detid_t>::const_iterator it2 = spec2->getDetectorIDs().begin();
-    for (; it1 != spec1->getDetectorIDs().end(); ++it1, ++it2) {
+    auto it2 = spec2->getDetectorIDs().cbegin();
+    for (auto it1 = spec1->getDetectorIDs().cbegin();
+         it1 != spec1->getDetectorIDs().cend(); ++it1, ++it2) {
       if (*it1 != *it2) {
         recordMismatch("Detector IDs mismatch");
         return false;

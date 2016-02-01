@@ -322,6 +322,7 @@ void InstrumentWidget::setSurfaceType(int type) {
     int peakLabelPrecision = 6;
     bool showPeakRow = true;
     bool showPeakLabels = true;
+	bool showPeakRelativeIntensity = true;
     if (surface) {
       peakLabelPrecision = surface->getPeakLabelPrecision();
       showPeakRow = surface->getShowPeakRowsFlag();
@@ -333,9 +334,13 @@ void InstrumentWidget::setSurfaceType(int type) {
               .toInt();
       showPeakRow =
           settings.value("Mantid/InstrumentWidget/ShowPeakRows", true).toBool();
-      showPeakLabels =
-          settings.value("Mantid/InstrumentWidget/ShowPeakLabels", true)
-              .toBool();
+	  showPeakLabels = settings.value("Mantid/InstrumentWindow/ShowPeakLabels",
+		  true).toBool();
+	  
+		        // By default this is should be off for now.
+	  showPeakRelativeIntensity =
+		  settings.value("Mantid/InstrumentWindow/ShowPeakRelativeIntensities",
+			             false).toBool();
     }
 
     // Surface factory
@@ -401,6 +406,7 @@ void InstrumentWidget::setSurfaceType(int type) {
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowsFlag(showPeakRow);
     surface->setShowPeakLabelsFlag(showPeakLabels);
+	surface->setShowPeakRelativeIntensityFlag(showPeakRelativeIntensity);
     // set new surface
     setSurface(surface);
 
@@ -681,6 +687,8 @@ void InstrumentWidget::saveSettings() {
                       getSurface()->getPeakLabelPrecision());
     settings.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
     settings.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
+	settings.setValue("ShowPeakRelativeInsensities", 
+					  getSurface()->getShowPeakRelativeIntensityFlag());
     foreach (InstrumentWidgetTab *tab, m_tabs) { tab->saveSettings(settings); }
   }
   settings.endGroup();
@@ -972,6 +980,16 @@ void InstrumentWidget::setShowPeakRowFlag(bool on) {
  */
 void InstrumentWidget::setShowPeakLabelsFlag(bool on) {
   getSurface()->setShowPeakLabelsFlag(on);
+  updateInstrumentView();
+}
+
+/**
+ * Enable or disable indication of relative peak intensities
+ *
+ * @param on :: True to show, false to hide.
+ */
+void InstrumentWidget::setShowPeakRelativeIntensity(bool on) {
+  getSurface()->setShowPeakRelativeIntensityFlag(on);
   updateInstrumentView();
 }
 

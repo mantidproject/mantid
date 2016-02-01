@@ -347,7 +347,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   int sum = getProperty("SumNumberOfNeighbours");
   boost::shared_ptr<const Geometry::IComponent> parent, neighbParent,
       grandparent, neighbGParent;
-  bool *used = new bool[inWS->getNumberHistograms()];
+  auto used = new bool[inWS->getNumberHistograms()];
   if (sum > 1) {
     for (size_t wi = 0; wi < inWS->getNumberHistograms(); wi++)
       used[wi] = false;
@@ -399,8 +399,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     std::vector<weightedNeighbour> neighbours;
 
     // Convert from spectrum numbers to workspace indices
-    for (SpectraDistanceMap::iterator it = neighbSpectra.begin();
-         it != neighbSpectra.end(); ++it) {
+    for (auto it = neighbSpectra.begin(); it != neighbSpectra.end(); ++it) {
       specid_t spec = it->first;
 
       // Use the weighting strategy to calculate the weight.
@@ -408,7 +407,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
 
       if (weight > 0) {
         // Find the corresponding workspace index
-        spec2index_map::const_iterator mapIt = spec2index.find(spec);
+        auto mapIt = spec2index.find(spec);
         if (mapIt != spec2index.end()) {
           size_t neighWI = mapIt->second;
           if (sum > 1) {
@@ -543,8 +542,7 @@ Check whether the properties provided are all in their default state.
 */
 bool areAllDefault(ConstVecProperties &properties) {
   bool areAllDefault = false;
-  for (ConstVecProperties::const_iterator it = properties.begin();
-       it != properties.end(); ++it) {
+  for (auto it = properties.cbegin(); it != properties.cend(); ++it) {
     if (!(*it)->isDefault()) {
       return areAllDefault;
     }

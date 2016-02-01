@@ -20,7 +20,7 @@ namespace {
 template <typename T>
 BoundedValidator<T> *createBoundedValidator(object lower = object(),
                                             object upper = object()) {
-  BoundedValidator<T> *validator = new BoundedValidator<T>();
+  auto validator = new BoundedValidator<T>();
   if (!Mantid::PythonInterface::isNone(lower)) {
     validator->setLower(extract<T>(lower));
   }
@@ -42,7 +42,7 @@ BoundedValidator<T> *
 createExclusiveBoundedValidator(object lower = object(),
                                 object upper = object(),
                                 const bool exclusive = false) {
-  BoundedValidator<T> *validator = new BoundedValidator<T>();
+  auto validator = new BoundedValidator<T>();
   if (lower.ptr() != Py_None) {
     validator->setLower(extract<T>(lower));
     validator->setLowerExclusive(exclusive);

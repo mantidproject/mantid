@@ -105,7 +105,8 @@ void EQSANSTofStructure::exec() {
       frame_skipping ? tof_frame_width * 2.0 : tof_frame_width;
   double frame_offset = 0.0;
   if (frame_tof0 >= tmp_frame_width)
-    frame_offset = tmp_frame_width * ((int)(frame_tof0 / tmp_frame_width));
+    frame_offset =
+        tmp_frame_width * (static_cast<int>(frame_tof0 / tmp_frame_width));
 
   this->execEvent(inputWS, frame_tof0, frame_offset, tof_frame_width,
                   tmp_frame_width, frame_skipping);

@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 
@@ -45,6 +46,7 @@ namespace Geometry {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+
 typedef boost::rational<int> RationalNumber;
 
 class MANTID_GEOMETRY_DLL V3R {
@@ -129,8 +131,28 @@ protected:
   RationalNumber m_z;
 };
 
-MANTID_GEOMETRY_DLL V3R operator*(const Kernel::IntMatrix &lhs, const V3R &rhs);
+/// Performs a matrix multiplication v' = M * v, throws
+/// Kernel::Exception::MisMatch<size_t> if M does not have exactly 3 columns.
+template <typename T>
+V3R operator*(const Kernel::Matrix<T> &lhs, const V3R &rhs) {
+  size_t rows = lhs.numRows();
+  size_t cols = lhs.numCols();
 
+  if (cols != 3) {
+    throw Kernel::Exception::MisMatch<size_t>(cols, 3,
+                                              "operator*(IntMatrix, V3R)");
+  }
+
+  V3R result;
+  for (size_t r = 0; r < rows; ++r) {
+    for (size_t c = 0; c < cols; ++c) {
+      result[r] +=
+          static_cast<typename RationalNumber::int_type>(lhs[r][c]) * rhs[c];
+    }
+  }
+
+  return result;
+}
 } // namespace Geometry
 } // namespace Mantid
 

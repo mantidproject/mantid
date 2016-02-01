@@ -119,6 +119,10 @@ void export_IFunction() {
            (arg("self"), arg("name")),
            "Return the value of the named attribute")
 
+      .def("storeAttributeValue", &IFunctionAdapter::storeAttributePythonValue,
+           (arg("self"), arg("name"), arg("value")),
+           "Store an attribute value in the default cache")
+
       .def("declareParameter", &IFunctionAdapter::declareFitParameter,
            (arg("self"), arg("name"), arg("init_value"), arg("description")),
            "Declare a fitting parameter settings its default value & "

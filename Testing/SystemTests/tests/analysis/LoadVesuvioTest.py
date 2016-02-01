@@ -114,16 +114,6 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(37594.0, evs_raw.readY(0)[1], places=DIFF_PLACES)
         self.assertAlmostEqual(193.89172236070317, evs_raw.readE(0)[1], places=DIFF_PLACES)
 
-    def test_using_ip_file_adjusts_instrument_and_attaches_parameters_difference_mode(self):
-        self._run_load("14188", "3", "SingleDifference", "IP0005.dat")
-
-        # Check some data
-        evs_raw = mtd[self.ws_name]
-        det0 = evs_raw.getDetector(0)
-        param = det0.getNumberParameter("t0")
-        self.assertEqual(1, len(param))
-        self.assertAlmostEqual(-0.4157, param[0], places=4)
-
     def test_using_ip_file_adjusts_instrument_and_attaches_parameters_foil_mode(self):
         self._run_load("14188", "3", "FoilOut", "IP0005.dat")
 
@@ -323,6 +313,11 @@ class VesuvioTests(unittest.TestCase):
     def test_load_with_difference_option_not_applicable_to_current_spectra_raises_error(self):
         self.assertRaises(ValueError, ms.LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name, Mode="",SpectrumList="3-134")
+
+    def test_forward_scattering_spectra_with_double_difference_mode_raises_error(self):
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          Mode="DoubleDifference",
+                          OutputWorkspace=self.ws_name, SpectrumList="140-150")
 
     def test_raising_error_removes_temporary_raw_workspaces(self):
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188,14199", # Second run is invalid

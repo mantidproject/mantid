@@ -25,10 +25,10 @@ private slots:
   void typeSelection(int index);
   void bgTypeSelection(int index);
   void newDataLoaded(const QString wsName);
+  void extendResolutionWorkspace();
   void updatePlot();
   void plotGuess();
-  void singleFitExtension();
-  void singleFit(const bool &error);
+  void singleFit();
   void specMinChanged(int value);
   void specMaxChanged(int value);
   void minChanged(double);
@@ -44,7 +44,6 @@ private slots:
   void showTieCheckbox(QString);
   void singleFitComplete(bool error);
   void fitFunctionSelected(const QString &);
-  void extensionComplete(bool error);
   void algorithmComplete(bool error);
 
 
@@ -65,7 +64,6 @@ private:
   void updatePlotOptions();
   QString convertFuncToShort(const QString &);
   QString convertBackToShort(const std::string &original);
-  void extendResolutionWorkspace(const bool &run);
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
   QtTreePropertyBrowser *m_cfTree;
@@ -75,11 +73,16 @@ private:
   bool m_confitResFileType;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;
-  QStringList m_fitStrings;
   QString m_previousFit;
   QString m_baseName;
   int m_runMin;
   int m_runMax;
+
+  // ShortHand Naming for fit functions
+  QStringList m_fitStrings;
+
+  // Used in auto generating defaults for parameters
+  QStringList m_defaultParams;
 
 };
 } // namespace IDA

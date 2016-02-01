@@ -8,6 +8,7 @@
 
 #include "vtkFieldData.h"
 #include "vtkCharArray.h"
+#include "vtkNew.h"
 #include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
 
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
@@ -81,7 +82,7 @@ private:
 static vtkFieldData* createFieldDataWithCharArray(std::string testData, std::string id)
 {
   vtkFieldData* fieldData = vtkFieldData::New();
-  vtkCharArray* charArray = vtkCharArray::New();
+  vtkNew<vtkCharArray> charArray;
   charArray->SetName(id.c_str());
   charArray->Allocate(100);
   for(unsigned int i = 0; i < testData.size(); i++)
@@ -93,8 +94,7 @@ static vtkFieldData* createFieldDataWithCharArray(std::string testData, std::str
 
     }
   }
-  fieldData->AddArray(charArray);
-  charArray->Delete();
+  fieldData->AddArray(charArray.GetPointer());
   return fieldData;
 }
 
@@ -103,10 +103,10 @@ public:
   void testNoDimensionMappings()
   {
     using namespace Mantid::VATES;
-    vtkRectilinearGrid* data = vtkRectilinearGrid::New();
+    vtkNew<vtkRectilinearGrid> data;
     data->SetFieldData(createFieldDataWithCharArray(constructXML("", "", "", ""), Mantid::VATES::XMLDefinitions::metaDataId())); // No mappings
    
-    vtkDataSetToGeometry xmlParser(data);
+    vtkDataSetToGeometry xmlParser(data.GetPointer());
     xmlParser.execute();
     
     TSM_ASSERT("X dimension mappings are absent. No dimension should have been set.", !xmlParser.hasXDimension());
@@ -114,16 +114,15 @@ public:
     TSM_ASSERT("Z dimension mappings are absent. No dimension should have been set.", !xmlParser.hasZDimension());
     TSM_ASSERT("T dimension mappings are absent. No dimension should have been set.", !xmlParser.hasTDimension());
     TSM_ASSERT_EQUALS("Wrong number of non-mapped dimensions", 5, xmlParser.getNonMappedDimensions().size());
-    data->Delete();
   }
 
   void testGetXDimension()
   {
     using namespace Mantid::VATES;
-    vtkRectilinearGrid* data = vtkRectilinearGrid::New();
+    vtkNew<vtkRectilinearGrid> data;
     data->SetFieldData(createFieldDataWithCharArray(constructXML("en", "", "", ""), Mantid::VATES::XMLDefinitions::metaDataId())); // Only x
    
-    vtkDataSetToGeometry xmlParser(data);
+    vtkDataSetToGeometry xmlParser(data.GetPointer());
     xmlParser.execute();
     
     TSM_ASSERT("X dimension should have been extracted via its mappings", xmlParser.hasXDimension());
@@ -131,16 +130,15 @@ public:
     TSM_ASSERT("Z dimension mappings are absent. No dimension should have been set.", !xmlParser.hasZDimension());
     TSM_ASSERT("T dimension mappings are absent. No dimension should have been set.", !xmlParser.hasTDimension());
     TSM_ASSERT_EQUALS("Wrong number of non-mapped dimensions", 4, xmlParser.getNonMappedDimensions().size());
-    data->Delete();
   }
 
   void testGetYDimension()
   {
     using namespace Mantid::VATES;
-    vtkRectilinearGrid* data = vtkRectilinearGrid::New();
+    vtkNew<vtkRectilinearGrid> data;
     data->SetFieldData(createFieldDataWithCharArray(constructXML("", "en", "", ""), Mantid::VATES::XMLDefinitions::metaDataId())); // Only y
    
-    vtkDataSetToGeometry xmlParser(data);
+    vtkDataSetToGeometry xmlParser(data.GetPointer());
     xmlParser.execute();
    
     TSM_ASSERT("X dimension mappings are absent. No dimension should have been set.", !xmlParser.hasXDimension());
@@ -148,16 +146,15 @@ public:
     TSM_ASSERT("Z dimension mappings are absent. No dimension should have been set.", !xmlParser.hasZDimension());
     TSM_ASSERT("T dimension mappings are absent. No dimension should have been set.", !xmlParser.hasTDimension());
     TSM_ASSERT_EQUALS("Wrong number of non-mapped dimensions", 4, xmlParser.getNonMappedDimensions().size());
-    data->Delete();
   }
 
   void testGetZDimension()
   {
     using namespace Mantid::VATES;
-    vtkRectilinearGrid* data = vtkRectilinearGrid::New();
+    vtkNew<vtkRectilinearGrid> data;
     data->SetFieldData(createFieldDataWithCharArray(constructXML("", "", "en", ""), Mantid::VATES::XMLDefinitions::metaDataId())); // Only z
    
-    vtkDataSetToGeometry xmlParser(data);
+    vtkDataSetToGeometry xmlParser(data.GetPointer());
     xmlParser.execute();
    
     TSM_ASSERT("X dimension mappings are absent. No dimension should have been set.", !xmlParser.hasXDimension());
@@ -165,16 +162,15 @@ public:
     TSM_ASSERT("Z dimension should have been extracted via its mappings", xmlParser.hasZDimension());
     TSM_ASSERT("T dimension mappings are absent. No dimension should have been set.", !xmlParser.hasTDimension());
     TSM_ASSERT_EQUALS("Wrong number of non-mapped dimensions", 4, xmlParser.getNonMappedDimensions().size());
-    data->Delete();
   }
 
   void testGetTDimension()
   {
     using namespace Mantid::VATES;
-    vtkRectilinearGrid* data = vtkRectilinearGrid::New();
+    vtkNew<vtkRectilinearGrid> data;
     data->SetFieldData(createFieldDataWithCharArray(constructXML("", "", "", "en"), Mantid::VATES::XMLDefinitions::metaDataId())); // Only t
    
-    vtkDataSetToGeometry xmlParser(data);
+    vtkDataSetToGeometry xmlParser(data.GetPointer());
     xmlParser.execute();
    
     TSM_ASSERT("X dimension mappings are absent. No dimension should have been set.", !xmlParser.hasXDimension());
@@ -182,16 +178,15 @@ public:
     TSM_ASSERT("Z dimension mappings are absent. No dimension should have been set.", !xmlParser.hasZDimension());
     TSM_ASSERT("T dimension should have been extracted via its mappings", xmlParser.hasTDimension());
     TSM_ASSERT_EQUALS("Wrong number of non-mapped dimensions", 4, xmlParser.getNonMappedDimensions().size());
-    data->Delete();
   }
 
   void testAllDimensions()
   {
     using namespace Mantid::VATES;
-    vtkRectilinearGrid* data = vtkRectilinearGrid::New();
+    vtkNew<vtkRectilinearGrid> data;
     data->SetFieldData(createFieldDataWithCharArray(constructXML("qy", "qx", "en", "qz"), Mantid::VATES::XMLDefinitions::metaDataId())); // All configured.
    
-    vtkDataSetToGeometry xmlParser(data);
+    vtkDataSetToGeometry xmlParser(data.GetPointer());
     xmlParser.execute();
    
     TSM_ASSERT("X dimension should have been extracted via its mappings", xmlParser.hasXDimension());
@@ -206,8 +201,6 @@ public:
 
     TSM_ASSERT_EQUALS("Wrong number of non-mapped dimensions", 1, xmlParser.getNonMappedDimensions().size());
     TSM_ASSERT_EQUALS("Wrong non-mapped dimension found", "other" ,xmlParser.getNonMappedDimensions()[0]->getDimensionId());
-
-    data->Delete();
   }
 
   void testAssignment()
@@ -215,14 +208,14 @@ public:
     using namespace Mantid::VATES;
 
     using namespace Mantid::VATES;
-    vtkRectilinearGrid* dataA = vtkRectilinearGrid::New();
+    vtkNew<vtkRectilinearGrid> dataA;
     dataA->SetFieldData(createFieldDataWithCharArray(constructXML("qy", "qx", "en", "qz"), Mantid::VATES::XMLDefinitions::metaDataId()));
 
-    vtkRectilinearGrid* dataB = vtkRectilinearGrid::New();
+    vtkNew<vtkRectilinearGrid> dataB;
     dataB->SetFieldData(createFieldDataWithCharArray(constructXML("", "", "", ""), Mantid::VATES::XMLDefinitions::metaDataId()));
 
-    vtkDataSetToGeometry A(dataA);
-    vtkDataSetToGeometry B(dataB);
+    vtkDataSetToGeometry A(dataA.GetPointer());
+    vtkDataSetToGeometry B(dataB.GetPointer());
     B = A;
     A.execute();
     B.execute();
@@ -243,10 +236,10 @@ public:
     using namespace Mantid::VATES;
 
     using namespace Mantid::VATES;
-    vtkRectilinearGrid* dataA = vtkRectilinearGrid::New();
+    vtkNew<vtkRectilinearGrid> dataA;
     dataA->SetFieldData(createFieldDataWithCharArray(constructXML("qy", "qx", "en", "qz"), Mantid::VATES::XMLDefinitions::metaDataId()));
 
-    vtkDataSetToGeometry A(dataA);
+    vtkDataSetToGeometry A(dataA.GetPointer());
     vtkDataSetToGeometry B = A;
     A.execute();
     B.execute();

@@ -22,46 +22,43 @@ namespace Mantid
     @throw invalid_argument if the repository is null
     @throw invalid_arument if view is null
     */
-  MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDEWLoadingPresenter(view), 
-    m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1)
-    {
-      if(m_wsName.empty())
-      {
-        throw std::invalid_argument("The workspace name is empty.");
-      }
-      if(NULL == repository)
-      {
-        throw std::invalid_argument("The repository is NULL");
-      }
-      if(NULL == m_view)
-      {
-        throw std::invalid_argument("View is NULL.");
-      }
+  MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(
+      std::unique_ptr<MDLoadingView> view, WorkspaceProvider *repository,
+      std::string wsName)
+      : MDEWLoadingPresenter(std::move(view)), m_repository(repository),
+        m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1) {
+    if (m_wsName.empty()) {
+      throw std::invalid_argument("The workspace name is empty.");
     }
+    if (nullptr == repository) {
+      throw std::invalid_argument("The repository is NULL");
+    }
+    if (nullptr == m_view) {
+      throw std::invalid_argument("View is NULL.");
+    }
+  }
 
-     /*
-    Indicates whether this presenter is capable of handling the type of file that is attempted to be loaded.
-    @return false if the file cannot be read.
-    */
-    bool MDEWInMemoryLoadingPresenter::canReadFile() const
-    {
-      bool bCanReadIt = true;
-      if(!m_repository->canProvideWorkspace(m_wsName))
-      {
-        //The workspace does not exist.
-        bCanReadIt = false;
-      }
-      else if(NULL == boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(m_repository->fetchWorkspace(m_wsName)).get())
-      {
-        //The workspace can be found, but is not an IMDEventWorkspace.
-        bCanReadIt = false;
-      }
-      else
-      {
-        //The workspace is present, and is of the correct type.
-        bCanReadIt = true;
-      }
-      return bCanReadIt;
+  /*
+ Indicates whether this presenter is capable of handling the type of file that
+ is attempted to be loaded.
+ @return false if the file cannot be read.
+ */
+  bool MDEWInMemoryLoadingPresenter::canReadFile() const {
+    bool bCanReadIt = true;
+    if (!m_repository->canProvideWorkspace(m_wsName)) {
+      // The workspace does not exist.
+      bCanReadIt = false;
+    } else if (nullptr ==
+               boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+                   m_repository->fetchWorkspace(m_wsName))
+                   .get()) {
+      // The workspace can be found, but is not an IMDEventWorkspace.
+      bCanReadIt = false;
+    } else {
+      // The workspace is present, and is of the correct type.
+      bCanReadIt = true;
+    }
+    return bCanReadIt;
     }
 
     /*
@@ -70,8 +67,9 @@ namespace Mantid
     @param  : Handler for GUI updates while algorithm progresses.
     @param drawingProgressUpdate : Handler for GUI updates while vtkDataSetFactory::create occurs.
     */
-    vtkDataSet* MDEWInMemoryLoadingPresenter::execute(vtkDataSetFactory* factory, ProgressAction&, ProgressAction& drawingProgressUpdate)
-    {
+    vtkSmartPointer<vtkDataSet> MDEWInMemoryLoadingPresenter::execute(
+        vtkDataSetFactory *factory, ProgressAction &,
+        ProgressAction &drawingProgressUpdate) {
       using namespace Mantid::API;
       using namespace Mantid::Geometry;
 
@@ -79,7 +77,7 @@ namespace Mantid
       IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
 
       factory->setRecursionDepth(this->m_view->getRecursionDepth());
-      vtkDataSet* visualDataSet = factory->oneStepCreate(eventWs, drawingProgressUpdate);
+      auto visualDataSet = factory->oneStepCreate(eventWs, drawingProgressUpdate);
       
       /*extractMetaData needs to be re-run here because the first execution of this from ::executeLoadMetadata will not have ensured that all dimensions
         have proper range extents set.
@@ -127,16 +125,13 @@ namespace Mantid
       this->extractMetadata(eventWs);
     }
 
-    ///Destructor
-    MDEWInMemoryLoadingPresenter::~MDEWInMemoryLoadingPresenter()
-    {
-      delete m_view;
-    }
+    /// Destructor
+    MDEWInMemoryLoadingPresenter::~MDEWInMemoryLoadingPresenter() {}
 
-     /*
-      Getter for the workspace type name.
-      @return Workspace Type Name
-    */
+    /*
+     Getter for the workspace type name.
+     @return Workspace Type Name
+   */
     std::string MDEWInMemoryLoadingPresenter::getWorkspaceTypeName()
     {
       return m_wsTypeName;

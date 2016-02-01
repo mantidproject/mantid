@@ -684,16 +684,15 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     }
     // Get an X spectrum to search (they're all the same, monitors excepted)
     const MantidVec &X0 = workspace->readX(i);
-    MantidVec::const_iterator start =
-        std::lower_bound(X0.begin(), X0.end(), -1.0e-10 * DBL_MAX);
+    auto start = std::lower_bound(X0.cbegin(), X0.cend(), -1.0e-10 * DBL_MAX);
     if (start == X0.end()) {
       const std::string e("Check the input EFixed: the one given leads to all "
                           "bins being in the physically inaccessible region.");
       g_log.error(e);
       throw std::invalid_argument(e);
     }
-    MantidVec::difference_type bins = X0.end() - start;
-    MantidVec::difference_type first = start - X0.begin();
+    MantidVec::difference_type bins = X0.cend() - start;
+    MantidVec::difference_type first = start - X0.cbegin();
 
     result =
         WorkspaceFactory::Instance().create(workspace, numSpec, bins, bins - 1);
@@ -717,9 +716,8 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     int maxBins = 0;
     for (size_t i = 0; i < numSpec; ++i) {
       const MantidVec &X = workspace->readX(i);
-      MantidVec::const_iterator end =
-          std::lower_bound(X.begin(), X.end(), 1.0e-10 * DBL_MAX);
-      MantidVec::difference_type bins = end - X.begin();
+      auto end = std::lower_bound(X.cbegin(), X.cend(), 1.0e-10 * DBL_MAX);
+      MantidVec::difference_type bins = end - X.cbegin();
       lastBins[i] = bins;
       if (bins > maxBins)
         maxBins = static_cast<int>(bins);

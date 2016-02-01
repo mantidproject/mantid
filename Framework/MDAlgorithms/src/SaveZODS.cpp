@@ -73,7 +73,7 @@ void SaveZODS::exec() {
         << std::endl;
 
   // Create a HDF5 file
-  ::NeXus::File *file = new ::NeXus::File(Filename, NXACC_CREATE5);
+  auto file = new ::NeXus::File(Filename, NXACC_CREATE5);
 
   // ----------- Coordinate system -----------
   uint32_t isLocal = 1;

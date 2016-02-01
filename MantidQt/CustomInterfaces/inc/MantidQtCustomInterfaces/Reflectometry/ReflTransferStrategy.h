@@ -72,11 +72,9 @@ public:
   transferRuns(SearchResultMap &searchResults,
                Mantid::Kernel::ProgressBase &progress) = 0;
 
-  /**
-  * Virtual constructor
-  * @return : A new instance of this.
-  */
-  virtual ReflTransferStrategy *clone() const = 0;
+  std::unique_ptr<ReflTransferStrategy> clone() const {
+    return std::unique_ptr<ReflTransferStrategy>(doClone());
+  }
 
   /**
   * Filter. Individual transfer strategies may veto file types they
@@ -85,6 +83,13 @@ public:
   * @return True only if the file type is known.
   */
   virtual bool knownFileType(const std::string &filename) const = 0;
+
+private:
+  /**
+   * Virtual constructor
+   * @return : A new instance of this.
+   */
+  virtual ReflTransferStrategy *doClone() const = 0;
 };
 }
 }

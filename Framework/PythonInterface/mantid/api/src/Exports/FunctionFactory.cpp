@@ -62,9 +62,10 @@ void subscribe(FunctionFactoryImpl &self, const boost::python::object &obj) {
 
   // obj could be or instance/class, check instance first
   PyObject *classObject(NULL);
-  if (PyObject_IsInstance(obj.ptr(), (PyObject *)baseClass)) {
+  if (PyObject_IsInstance(obj.ptr(), reinterpret_cast<PyObject *>(baseClass))) {
     classObject = PyObject_GetAttrString(obj.ptr(), "__class__");
-  } else if (PyObject_IsSubclass(obj.ptr(), (PyObject *)baseClass)) {
+  } else if (PyObject_IsSubclass(obj.ptr(),
+                                 reinterpret_cast<PyObject *>(baseClass))) {
     classObject = obj.ptr(); // We need to ensure the type of lifetime
                              // management so grab the raw pointer
   } else {
@@ -93,6 +94,9 @@ void export_FunctionFactory() {
            "Returns a list of the currently available functions")
       .def("createFunction", &FunctionFactoryImpl::createFunction,
            (arg("self"), arg("type")),
+           "Return a pointer to the requested function")
+      .def("createInitialized", &FunctionFactoryImpl::createInitialized,
+           (arg("self"), arg("init_expr")),
            "Return a pointer to the requested function")
       .def("subscribe", &subscribe, (arg("self"), arg("object")),
            "Register a Python class derived from IFunction into the factory")

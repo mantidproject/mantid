@@ -17,6 +17,12 @@ const char* MantidVersion::version()
   return "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@";
 }
 
+const char* MantidVersion::versionShort()
+{
+  // The major and minor version numbers are specified in Build/CMake/VersionNumber.cmake
+  return "@VERSION_MAJOR@.@VERSION_MINOR@";
+}
+
 std::string MantidVersion::releaseNotes()
 {
   const std::string STEM = "http://www.mantidproject.org/Release_Notes_";

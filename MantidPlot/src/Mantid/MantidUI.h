@@ -374,7 +374,12 @@ signals:
     MantidMatrix *importMatrixWorkspace(const QString& wsName, int lower = -1, int upper = -1,
       bool showDlg = true, bool makeVisible = true);
 
-    // Create a MantidMatrix from workspace wsName
+    // Create a MantidMatrix from workspace
+    MantidMatrix *
+    importMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr workspace,
+                          int lower = -1, int upper = -1, bool showDlg = true);
+
+    // Create a Table from workspace wsName
     Table *importTableWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true, bool transpose = false);
 
     void createLoadDAEMantidMatrix(const QString&);

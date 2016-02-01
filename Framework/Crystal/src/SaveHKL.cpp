@@ -128,6 +128,12 @@ void SaveHKL::exec() {
   int runSequence = 0;
   int bankold = -1;
   int runold = -1;
+  // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
+  // Default for kf-ki has -q
+  double qSign = -1.0;
+  std::string convention = ConfigService::Instance().getString("Q.convention");
+  if (convention == "Crystallography")
+    qSign = 1.0;
 
   std::fstream out;
   bool append = getProperty("AppendFile");
@@ -310,14 +316,14 @@ void SaveHKL::exec() {
     // hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n'
     //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM,
     //    TRANSMISSION, DN, TWOTH, DSP))
-    // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
     if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0) {
       banned.push_back(wi);
       continue;
     }
     if (decimalHKL == EMPTY_INT())
-      out << std::setw(4) << Utils::round(-p.getH()) << std::setw(4)
-          << Utils::round(-p.getK()) << std::setw(4) << Utils::round(-p.getL());
+      out << std::setw(4) << Utils::round(qSign * p.getH()) << std::setw(4)
+          << Utils::round(qSign * p.getK()) << std::setw(4)
+          << Utils::round(qSign * p.getL());
     else
       out << std::setw(5 + decimalHKL) << std::fixed
           << std::setprecision(decimalHKL) << -p.getH()
@@ -496,7 +502,7 @@ double SaveHKL::absor_sphere(double &twoth, double &wl, double &tbar) {
   //  using the polymial coefficients, calulate astar (= 1/transmission) at
   //  theta values below and above the actual theta value.
 
-  i = (int)(theta / 5.);
+  i = static_cast<int>(theta / 5.);
   astar1 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
 
   i = i + 1;
@@ -516,7 +522,7 @@ double SaveHKL::absor_sphere(double &twoth, double &wl, double &tbar) {
   if (std::fabs(mu) < 1e-300)
     tbar = 0.0;
   else
-    tbar = -(double)std::log(trans) / mu;
+    tbar = -std::log(trans) / mu;
 
   return trans;
 }

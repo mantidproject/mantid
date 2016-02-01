@@ -759,8 +759,8 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
   // Debug print
   stringstream dbsplitss;
   dbsplitss << "Index map size = " << indexwsindexmap.size() << "\n";
-  for (map<size_t, int>::iterator mit = indexwsindexmap.begin();
-       mit != indexwsindexmap.end(); ++mit) {
+  for (auto mit = indexwsindexmap.begin(); mit != indexwsindexmap.end();
+       ++mit) {
     dbsplitss << "Index " << mit->first << ":  WS-group = " << mit->second
               << ". Log value range: [" << logvalueranges[mit->first * 2]
               << ", " << logvalueranges[mit->first * 2 + 1] << ").\n";

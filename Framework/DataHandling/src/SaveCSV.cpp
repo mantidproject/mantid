@@ -129,7 +129,7 @@ void SaveCSV::exec() {
 
       outCSV_File << "A";
 
-      for (int j = 0; j < (int)xValue.size(); j++) {
+      for (int j = 0; j < static_cast<int>(xValue.size()); j++) {
         outCSV_File << std::setw(15) << xValue[j] << m_separator;
       }
 
@@ -147,7 +147,7 @@ void SaveCSV::exec() {
         if (xValue != xValuePrevious) {
           outCSV_File << "A";
 
-          for (int j = 0; j < (int)xValue.size(); j++) {
+          for (int j = 0; j < static_cast<int>(xValue.size()); j++) {
             outCSV_File << std::setw(15) << xValue[j] << m_separator;
           }
 
@@ -161,7 +161,7 @@ void SaveCSV::exec() {
 
       outCSV_File << i;
 
-      for (int j = 0; j < (int)yValue.size(); j++) {
+      for (int j = 0; j < static_cast<int>(yValue.size()); j++) {
         outCSV_File << std::setw(15) << yValue[j] << m_separator;
       }
 
@@ -177,7 +177,7 @@ void SaveCSV::exec() {
 
       outCSV_File << i;
 
-      for (int j = 0; j < (int)eValue.size(); j++) {
+      for (int j = 0; j < static_cast<int>(eValue.size()); j++) {
         outCSV_File << std::setw(15) << eValue[j] << m_separator;
       }
       outCSV_File << m_lineSeparator;
@@ -213,7 +213,7 @@ void SaveCSV::saveXerrors(std::ofstream &stream,
 
     stream << i;
 
-    for (int j = 0; j < (int)dXvalue.size(); j++) {
+    for (int j = 0; j < static_cast<int>(dXvalue.size()); j++) {
       stream << std::setw(15) << dXvalue[j] << m_separator;
     }
     stream << m_lineSeparator;
