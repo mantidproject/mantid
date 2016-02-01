@@ -1055,7 +1055,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
     // because in that case
     // it is allowed to have element separator inside a range, e.g. "4 - 5", but
     // not "4,-5"
-    Tokenizer ranges(str + " ", rangeSep, Tokenizer::TOK_TRIM);
+    Tokenizer ranges(str, rangeSep, Tokenizer::TOK_TRIM);
     std::string new_str =
         join(ranges.begin(), ranges.end(), rangeSep.substr(0, 1));
     elements = Tokenizer(new_str, elemSep,
@@ -1071,7 +1071,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
   result.reserve(elements.count());
 
   for (auto it = elements.begin(); it != elements.end(); it++) {
-    Tokenizer rangeElements(*it + " ", rangeSep, Tokenizer::TOK_TRIM);
+    Tokenizer rangeElements(*it, rangeSep, Tokenizer::TOK_TRIM);
 
     size_t noOfRangeElements = rangeElements.count();
 
