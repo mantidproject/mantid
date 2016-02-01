@@ -29,6 +29,8 @@ src/MDLoadingPresenter.cpp
 src/Normalization.cpp
 src/NoThresholdRange.cpp
 src/ProgressAction.cpp
+src/SaveMDWorkspaceToVTK.cpp
+src/SaveMDWorkspaceToVTKImpl.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
 src/UserDefinedThresholdRange.cpp
@@ -93,7 +95,10 @@ inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/NoThresholdRange.h
 inc/MantidVatesAPI/NullPeaksPresenterVsi.h
 inc/MantidVatesAPI/PeaksPresenterVsi.h
+inc/MantidVatesAPI/PresenterUtilities.h
 inc/MantidVatesAPI/ProgressAction.h
+inc/MantidVatesAPI/SaveMDWorkspaceToVTK.h
+inc/MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h
 inc/MantidVatesAPI/SQWLoadingPresenter.h
 inc/MantidVatesAPI/ThresholdRange.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
@@ -163,6 +168,8 @@ test/MetaDataExtractorUtilsTest.h
 test/MetadataJsonManagerTest.h
 test/MetadataToFieldDataTest.h
 test/NormalizationTest.h
+test/SaveMDWorkspaceToVTKTest.h
+test/SaveMDWorkspaceToVTKImplTest.h
 test/SQWLoadingPresenterTest.h
 test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h
