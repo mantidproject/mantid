@@ -412,8 +412,7 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
     std::getline(m_fileIn, fileLine);
   }
   Mantid::Kernel::StringTokenizer wsDimensions(
-      fileLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      fileLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (wsDimensions.count() < 2) {
     throw Exception::NotFoundError("Input file", "dimensions");
   }
