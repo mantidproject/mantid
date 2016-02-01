@@ -7,8 +7,10 @@
 
 using namespace Mantid::Geometry;
 
+namespace {
 // The logger object
-Mantid::Kernel::Logger g_log("RotationSurface");
+  Mantid::Kernel::Logger g_log("RotationSurface");
+}
 
 RotationSurface::RotationSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis):
     UnwrappedSurface(rootActor),
