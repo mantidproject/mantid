@@ -40,6 +40,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
     m_peakLabelPrecision(2),
     m_showPeakRows(false),
     m_showPeakLabels(false),
+    m_showPeakRelativeIntensity(false),
     m_peakShapesStyle(0),
     m_viewChanged(true),
     m_redrawPicking(true)
@@ -685,6 +686,18 @@ void ProjectionSurface::setShowPeakLabelsFlag(bool on)
     for(int i=0;i < m_peakShapes.size(); ++i)
     {
       m_peakShapes[i]->setShowLabelsFlag(on);
+    }
+}
+
+/**
+ * Enable or disable the show peak label flag
+ */
+void ProjectionSurface::setShowPeakRelativeIntensityFlag(bool on)
+{
+    m_showPeakRelativeIntensity = on;
+    for(int i=0;i < m_peakShapes.size(); ++i)
+    {
+      m_peakShapes[i]->setShowRelativeIntensityFlag(on);
     }
 }
 

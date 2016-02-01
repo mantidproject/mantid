@@ -98,6 +98,8 @@ protected:
   // current value of Sin(Theta)^2 corresponding to the current detector value
   // and used to calculate Lorentz corrections
   double m_SinThetaSq;
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention;
   // all other variables are the same as in ModQ
   // hole near origin of Q
   double m_AbsMin;

@@ -16,6 +16,8 @@
 #include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidKernel/ConfigService.h"
+
 #include <iomanip>
 #include <functional>
 #include <algorithm>
@@ -327,6 +329,7 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
   }
   // Check if masked
   const API::IMDNode *box = data->getBoxAtCoord(coords);
+  if (!box) return MDMaskValue;
   if (box->getIsMasked()) {
     return MDMaskValue;
   }
@@ -376,6 +379,7 @@ TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
 TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
   std::vector<std::string> out;
   std::ostringstream mess;
+ 
   size_t mem;
   mem = (this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE, nd>)) /
         1024;
@@ -830,22 +834,6 @@ TMDE(void MDEventWorkspace)::clearMDMasking() {
   for (size_t i = 0; i < allBoxes.size(); ++i) {
     allBoxes[i]->unmask();
   }
-}
-
-/**
-Return true if there is any mask on the workspace
-*/
-TMDE(bool MDEventWorkspace)::hasMask() {
-  auto *it = this->createIterator();
-  size_t counter = 0;
-  for (; counter < it->getDataSize(); ++counter) {
-    if (it->getIsMasked()) {
-      delete it;
-      return true;
-    }
-  }
-  delete it;
-  return false;
 }
 
 /**

@@ -5,6 +5,7 @@
 #include <vtkCharArray.h>
 #include <vtkFieldData.h>
 #include "MantidVatesAPI/FieldDataToMetadata.h"
+#include <vtkSmartPointer.h>
 
 using Mantid::VATES::FieldDataToMetadata;
 
@@ -17,7 +18,7 @@ private:
   static vtkFieldData* createFieldDataWithCharArray(std::string testData, std::string id)
   {
     vtkFieldData* fieldData = vtkFieldData::New();
-    vtkCharArray* charArray = vtkCharArray::New();
+    auto charArray = vtkSmartPointer<vtkCharArray>::New();
     charArray->SetName(id.c_str());
     charArray->Allocate(100);
     for(unsigned int i = 0; i < testData.size(); i++)
@@ -29,8 +30,7 @@ private:
 
       }
     }
-    fieldData->AddArray(charArray);
-    charArray->Delete();
+    fieldData->AddArray(charArray.GetPointer());
     return fieldData;
   }
 
@@ -40,35 +40,35 @@ public:
   {
     const std::string id = "1";
     const std::string testData = "abc";
-    vtkFieldData* fieldData = createFieldDataWithCharArray(testData, id);
+    vtkSmartPointer<vtkFieldData> fieldData =
+        createFieldDataWithCharArray(testData, id);
 
     FieldDataToMetadata function;
     std::string metadata = function.execute(fieldData, id);
 
     TSM_ASSERT_EQUALS("The Function failed to properly convert field data to metadata", testData, metadata);
-    fieldData->Delete();
   }
 
   void testOperatorOverload()
   {
     const std::string id = "1";
     const std::string testData = "abc";
-    vtkFieldData* fieldData = createFieldDataWithCharArray(testData, id);
+    vtkSmartPointer<vtkFieldData> fieldData =
+        createFieldDataWithCharArray(testData, id);
 
     FieldDataToMetadata function;
     TSM_ASSERT_EQUALS("Results from two equivalent methods differ.", function(fieldData, id), function.execute(fieldData, id));
-    fieldData->Delete();
   }
 
   void testThrowsIfNotFound()
   {
     const std::string id = "1";
     const std::string testData = "abc";
-    vtkFieldData* fieldData = createFieldDataWithCharArray(testData, id);
+    vtkSmartPointer<vtkFieldData> fieldData =
+        createFieldDataWithCharArray(testData, id);
 
     FieldDataToMetadata function;
     TSM_ASSERT_THROWS("Unknown id requested. Should have thrown.", function.execute(fieldData, "x"), std::runtime_error );
-    fieldData->Delete();
   }
 
   void testThrowsIfNullFieldData()

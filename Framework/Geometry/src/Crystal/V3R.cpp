@@ -1,6 +1,4 @@
 #include "MantidGeometry/Crystal/V3R.h"
-#include "MantidKernel/Exception.h"
-
 namespace Mantid {
 namespace Geometry {
 
@@ -330,27 +328,6 @@ V3R::operator std::vector<double>() const {
   vector.push_back(boost::rational_cast<double>(m_z));
 
   return vector;
-}
-
-/// Performs a matrix multiplication v' = M * v, throws
-/// Kernel::Exception::MisMatch<size_t> if M does not have exactly 3 columns.
-V3R operator*(const Kernel::IntMatrix &lhs, const V3R &rhs) {
-  size_t rows = lhs.numRows();
-  size_t cols = lhs.numCols();
-
-  if (cols != 3) {
-    throw Kernel::Exception::MisMatch<size_t>(cols, 3,
-                                              "operator*(IntMatrix, V3R)");
-  }
-
-  V3R result;
-  for (size_t r = 0; r < rows; ++r) {
-    for (size_t c = 0; c < cols; ++c) {
-      result[r] += lhs[r][c] * rhs[c];
-    }
-  }
-
-  return result;
 }
 
 } // namespace Geometry

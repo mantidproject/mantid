@@ -1,0 +1,56 @@
+digraph SNSPowderReduction {
+  label="SNSPowderReduction Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    RunNumber
+    Sum
+    TimeFilterWall
+    CalibrationFile
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    focusAndSum [label="FocusAndSum v1"]
+  }
+
+
+  subgraph decisions{
+    $decision_style
+    haveMPI [label="Have MPI?"]
+    isSum [label="Is Sum True?"]
+    isLastRunNumber [label="Is Last Run Number?"]
+  }
+  
+
+  Sum		    -> isSum
+
+  isSum		    -> focusAndSum  [label="Yes"]
+  RunNumber	    -> focusAndSum
+  TimeFilterWall    -> focusAndSum
+  CalibrationFile   -> focusAndSum
+
+  isSum		    -> isLastRunNumber [label="No"]
+
+
+}
+
+digraph FocusAndSum123 {
+  labe="FocusAndSum Flowchart"
+
+  subgraph params {
+    $param_style
+    RunNumber
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    alignAndFocusPowder	[label="AlignAndFocusPowder v1"]
+  }
+
+  RunNumber	      -> alignAndFocusPowder
+  alignAndFocusPowder -> OutputWorkspace
+}
+

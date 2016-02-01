@@ -146,7 +146,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
       // Use a different user properties file for an mpi-enabled build to avoid
-      // confusion if both are used on the same filesystem
+      // confusion if both are used on the same file system
       m_user_properties_file_name("Mantid-mpi.user.properties"),
 #else
       m_user_properties_file_name("Mantid.user.properties"),
@@ -672,10 +672,15 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "## e.g.: ISIS, SNS, ILL" << std::endl;
     filestr << "default.facility=" << std::endl;
     filestr << std::endl;
-    filestr << "## Stes the default instrument" << std::endl;
+    filestr << "## Sets the default instrument" << std::endl;
     filestr << "## e.g. IRIS, HET, NIMROD" << std::endl;
     filestr << "default.instrument=" << std::endl;
     filestr << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets the Q.convention" << std::endl;
+    filestr << "## Set to Crystallography for kf-ki instead of default "
+               "Inelastic which is ki-kf" << std::endl;
+    filestr << "#Q.convention=Crystallography" << std::endl;
     filestr << "##" << std::endl;
     filestr << "## DIRECTORIES" << std::endl;
     filestr << "##" << std::endl;

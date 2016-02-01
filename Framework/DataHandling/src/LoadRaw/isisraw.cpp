@@ -39,14 +39,14 @@ ISISRAW::ISISRAW() : m_crpt(0), dat1(0) {
                  i_det]; // nuse UT* user tables (total size NUSE*NDET) ut01=phi
   for (i = 0; i < i_det; i++) {
     spec[i] = i + 1; // we have t_nsp1 = i_det
-    delt[i] = (float)i;
-    len2[i] = (float)i;
+    delt[i] = static_cast<float>(i);
+    len2[i] = static_cast<float>(i);
     code[i] = i + 1;
-    tthe[i] = (float)i;
+    tthe[i] = static_cast<float>(i);
   }
   for (i = 0; i < i_use; i++) {
     for (j = 0; j < i_det; j++) {
-      ut[i * i_det + j] = (float)j;
+      ut[i * i_det + j] = static_cast<float>(j);
     }
   }
   // section 4
@@ -92,7 +92,7 @@ ISISRAW::ISISRAW() : m_crpt(0), dat1(0) {
   u_len = 1;
   u_dat = new float[u_len]; // user defined data (ULEN, max size 400 words)
   for (i = 0; i < u_len; i++) {
-    u_dat[i] = (float)i;
+    u_dat[i] = static_cast<float>(i);
   }
   // section 8
   ver8 = 2; // data version number (=2)
@@ -113,7 +113,7 @@ ISISRAW::ISISRAW() : m_crpt(0), dat1(0) {
   logsect.lines = new LOG_LINE[logsect.nlines];
   for (i = 0; i < logsect.nlines; i++) {
     // logsect.lines[i].data = "test log line"; //Deprecated
-    logsect.lines[i].data = (char *)malloc(16);
+    logsect.lines[i].data = reinterpret_cast<char *>(malloc(16));
     strcpy(logsect.lines[i].data, "test log line");
     logsect.lines[i].len = static_cast<int>(strlen(logsect.lines[i].data));
   }
@@ -125,9 +125,11 @@ int ISISRAW::addItems() {
   static const int hdr_size = sizeof(hdr) / sizeof(char);
   static const int rrpb_size = sizeof(rpb) / sizeof(float);
   static const int irpb_size = sizeof(rpb) / sizeof(int);
-  m_char_items.addItem("HDR", (const char *)&hdr, false, &hdr_size);
-  m_real_items.addItem("RRPB", (float *)&rpb, false, &rrpb_size);
-  m_int_items.addItem("IRPB", (int *)&rpb, false, &irpb_size);
+  m_char_items.addItem("HDR", reinterpret_cast<const char *>(&hdr), false,
+                       &hdr_size);
+  m_real_items.addItem("RRPB", reinterpret_cast<float *>(&rpb), false,
+                       &rrpb_size);
+  m_int_items.addItem("IRPB", reinterpret_cast<int *>(&rpb), false, &irpb_size);
   return 0;
 }
 
@@ -509,11 +511,12 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
       if (from_file) {
         nwords = ddes[i].nwords;
         ioRAW(file, outbuff, 4 * nwords, from_file);
-        byte_rel_expn(outbuff, 4 * nwords, 0, (int *)&dat1[i * (t_ntc1 + 1)],
+        byte_rel_expn(outbuff, 4 * nwords, 0,
+                      reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]),
                       t_ntc1 + 1);
       } else {
-        byte_rel_comp((int *)&dat1[i * (t_ntc1 + 1)], t_ntc1 + 1, outbuff,
-                      outbuff_size, nout);
+        byte_rel_comp(reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]),
+                      t_ntc1 + 1, outbuff, outbuff_size, nout);
         nwords = (3 + nout) / 4; // round up to words
         ddes[i].nwords = nwords;
         ddes[i].offset = offset + ndata;
@@ -536,8 +539,10 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     int uncomp_data_size = 33 + t_nper * (t_nsp1 + 1) * (t_ntc1 + 1);
     int curr_filesize = add.ad_end - 1;
     int uncomp_filesize = add.ad_data - 1 + uncomp_data_size + len_log;
-    dhdr.d_crdata = (float)uncomp_data_size / (float)curr_data_size;
-    dhdr.d_crfile = (float)uncomp_filesize / (float)curr_filesize;
+    dhdr.d_crdata = static_cast<float>(uncomp_data_size) /
+                    static_cast<float>(curr_data_size);
+    dhdr.d_crfile =
+        static_cast<float>(uncomp_filesize) / static_cast<float>(curr_filesize);
     dhdr.d_exp_filesize =
         uncomp_filesize /
         128; // in 512 byte blocks (vms default allocation unit)
@@ -579,19 +584,21 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, HDR_STRUCT *s, int len, bool from_file) {
-  ioRAW(file, (char *)s, sizeof(HDR_STRUCT) * len, from_file);
+  ioRAW(file, reinterpret_cast<char *>(s), sizeof(HDR_STRUCT) * len, from_file);
   return 0;
 }
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, ADD_STRUCT *s, int len, bool from_file) {
-  ioRAW(file, (int *)s, (sizeof(ADD_STRUCT) * len / sizeof(int)), from_file);
+  ioRAW(file, reinterpret_cast<int *>(s),
+        (sizeof(ADD_STRUCT) * len / sizeof(int)), from_file);
   return 0;
 }
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, USER_STRUCT *s, int len, bool from_file) {
-  ioRAW(file, (char *)s, sizeof(USER_STRUCT) * len, from_file);
+  ioRAW(file, reinterpret_cast<char *>(s), sizeof(USER_STRUCT) * len,
+        from_file);
   return 0;
 }
 
@@ -656,7 +663,8 @@ int ISISRAW::ioRAW(FILE *file, SE_STRUCT *s, int len, bool from_file) {
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, DAEP_STRUCT *s, int len, bool from_file) {
-  ioRAW(file, (int *)s, sizeof(DAEP_STRUCT) * len / sizeof(int), from_file);
+  ioRAW(file, reinterpret_cast<int *>(s),
+        sizeof(DAEP_STRUCT) * len / sizeof(int), from_file);
   return 0;
 }
 
@@ -921,7 +929,7 @@ int ISISRAW::vmstime(char *timbuf, int len, time_t time_value) {
     return FAILURE;
   }
 #else  //_WIN32
-  tmstruct = localtime((time_t *)&time_value);
+  tmstruct = localtime(&time_value);
 #endif //_WIN32
   n = strftime(timbuf, len, "%d-%b-%Y %H:%M:%S", tmstruct);
   for (i = 0; i < n; i++) {

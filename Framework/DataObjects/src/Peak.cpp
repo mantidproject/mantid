@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include <algorithm>
@@ -24,7 +25,9 @@ Peak::Peak()
       m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakShape(new NoShape) {}
+      m_peakShape(new NoShape) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the lab frame).
@@ -43,6 +46,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setQLabFrame(QLabFrame, detectorDistance);
 }
@@ -68,6 +72,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst,
       m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -89,6 +94,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
   this->setWavelength(m_Wavelength);
@@ -109,6 +115,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
   this->setWavelength(m_Wavelength);
@@ -131,6 +138,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -153,6 +161,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, double scattering,
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
       m_peakShape(new NoShape) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
   m_detectorID = -1;
@@ -180,7 +189,9 @@ Peak::Peak(const Peak &other)
       m_orig_L(other.m_orig_L), m_detIDs(other.m_detIDs),
       m_peakShape(other.m_peakShape->clone())
 
-{}
+{
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
@@ -201,6 +212,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
       m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
       m_peakShape(new NoShape) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -452,7 +464,11 @@ Mantid::Kernel::V3D Peak::getQLabFrame() const {
   // Now calculate the wavevector of the scattered neutron
   double wvf = (2.0 * M_PI) / this->getWavelength();
   // And Q in the lab frame
-  return beamDir * wvi - detDir * wvf;
+  // Default for ki-kf is positive
+  double qSign = 1.0;
+  if (convention == "Crystallography")
+    qSign = -1.0;
+  return (beamDir * wvi - detDir * wvf) * qSign;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -528,7 +544,11 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
   boost::shared_ptr<const ReferenceFrame> refFrame =
       this->m_inst->getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
-  const double qBeam = q.scalar_prod(refBeamDir);
+  // Default for ki-kf has -q
+  double qSign = 1.0;
+  if (convention == "Crystallography")
+    qSign = -1.0;
+  const double qBeam = q.scalar_prod(refBeamDir) * qSign;
 
   if (norm_q == 0.0)
     throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
@@ -548,7 +568,12 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
   // Save the wavelength
   this->setWavelength(wl);
 
-  V3D detectorDir = q * -1.0;
+  // Default for ki-kf has -q
+  qSign = -1.0;
+  if (convention == "Crystallography")
+    qSign = 1.0;
+
+  V3D detectorDir = q * qSign;
   detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
   detectorDir.normalize();
 

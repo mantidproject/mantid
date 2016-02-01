@@ -56,7 +56,7 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
                                             int numBins);
 
   def("create2DWorkspaceWithFullInstrument",
-      (Signature1_2D)&create2DWorkspaceWithFullInstrument,
+      reinterpret_cast<Signature1_2D>(&create2DWorkspaceWithFullInstrument),
       create2DWorkspaceWithFullInstrument_overloads()
           [return_value_policy<AsType<Workspace_sptr>>()]);
   def("create2DWorkspaceWithRectangularInstrument",
@@ -75,7 +75,8 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   //===================================
 
   def("createPeaksWorkspace",
-      (PeaksWorkspace_sptr (*)(const int))createPeaksWorkspace,
+      reinterpret_cast<PeaksWorkspace_sptr (*)(const int)>(
+          createPeaksWorkspace),
       return_value_policy<AsType<Workspace_sptr>>());
   def("createPeaksWorkspace",
       (PeaksWorkspace_sptr (*)(const int, const bool))createPeaksWorkspace,

@@ -58,7 +58,7 @@ public:
 
     Column_const_sptr col = table->getColumn(1);
     const Column *tableC = col.get();
-    TS_ASSERT_DELTA(tableC->operator[](0), -0.0246, 0.0001);
+    TS_ASSERT_DELTA(tableC->operator[](0), -0.0238, 0.0001);
 
     Mantid::API::AnalysisDataService::Instance().remove("deadtimetable");
     Mantid::API::AnalysisDataService::Instance().remove("fittedData");

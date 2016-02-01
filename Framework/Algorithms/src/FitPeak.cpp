@@ -331,8 +331,8 @@ bool FitOneSinglePeak::simpleFit() {
     m_peakFunc->setFwhm(m_vecFWHM[i]);
 
     // fit and process result
-    double goodndess = fitFunctionSD(compfunc, m_dataWS, m_wsIndex, m_minFitX,
-                                     m_maxFitX, false);
+    double goodndess =
+        fitFunctionSD(compfunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
     processNStoreFitResult(goodndess, true);
 
     // restore the function parameters
@@ -468,8 +468,7 @@ double FitOneSinglePeak::fitPeakFunction(API::IPeakFunction_sptr peakfunc,
   m_sstream << "Function (to fit): " << peakfunc->asString() << "  From "
             << startx << "  to " << endx << ".\n";
 
-  double goodness =
-      fitFunctionSD(peakfunc, dataws, wsindex, startx, endx, false);
+  double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx);
 
   return goodness;
 }
@@ -638,6 +637,62 @@ void FitOneSinglePeak::pop(const std::map<std::string, double> &funcparammap,
 }
 
 //----------------------------------------------------------------------------------------------
+/** Calcualte chi-square for single domain data
+ * @brief FitOneSinglePeak::calChiSquareSD
+ * @param fitfunc
+ * @param dataws
+ * @param wsindex
+ * @param xmin
+ * @param xmax
+ * @return
+ */
+double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
+                                        MatrixWorkspace_sptr dataws,
+                                        size_t wsindex, double xmin,
+                                        double xmax) {
+  // Set up sub algorithm fit
+  IAlgorithm_sptr fit;
+  try {
+    fit = createChildAlgorithm("CalculateChiSquared", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    std::stringstream errss;
+    errss << "The FitPeak algorithm requires the CurveFitting library";
+    g_log.error(errss.str());
+    throw std::runtime_error(errss.str());
+  }
+
+  // Set the properties
+  fit->setProperty("Function", fitfunc);
+  fit->setProperty("InputWorkspace", dataws);
+  fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+  fit->setProperty("StartX", xmin);
+  fit->setProperty("EndX", xmax);
+
+  fit->executeAsChildAlg();
+  if (!fit->isExecuted()) {
+    g_log.error("Fit for background is not executed. ");
+    throw std::runtime_error("Fit for background is not executed. ");
+  }
+
+  // Retrieve result
+  const double chi2 = fit->getProperty("ChiSquaredWeightedDividedByNData");
+  // g_log.notice() << "[DELETE DB]"
+  //               << " Chi2/NParam = " <<
+  //               fit->getPropertyValue("ChiSquaredDividedByNData")
+  //               << " Chi2/DOF = " <<
+  //               fit->getPropertyValue("ChiSquaredDividedByDOF")
+  //               << " Chi2 = " << fit->getPropertyValue("ChiSquared")
+  //               << " Chi2W/NParam = " <<
+  //               fit->getPropertyValue("ChiSquaredWeightedDividedByNData")
+  //               << " Chi2W/DOF = " <<
+  //               fit->getPropertyValue("ChiSquaredWeightedDividedByDOF")
+  //               << " Chi2W = " << fit->getPropertyValue("ChiSquaredWeighted")
+  //               << "\n";
+
+  return chi2;
+}
+
+//----------------------------------------------------------------------------------------------
 /** Fit function in single domain
   * @exception :: (1) Fit cannot be called. (2) Fit.isExecuted is false (cannot
  * be executed)
@@ -646,24 +701,8 @@ void FitOneSinglePeak::pop(const std::map<std::string, double> &funcparammap,
   */
 double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
                                        MatrixWorkspace_sptr dataws,
-                                       size_t wsindex, double xmin, double xmax,
-                                       bool calmode) {
-  // Set up calculation mode: for pure chi-square/Rwp
-  int maxiteration = 50;
-  vector<string> parnames;
-  if (calmode) {
-    // Fix all parameters
-    parnames = fitfunc->getParameterNames();
-    for (size_t i = 0; i < parnames.size(); ++i)
-      fitfunc->fix(i);
-
-    maxiteration = 1;
-  } else {
-    // Unfix all parameters
-    for (size_t i = 0; i < fitfunc->nParams(); ++i)
-      fitfunc->unfix(i);
-  }
-
+                                       size_t wsindex, double xmin,
+                                       double xmax) {
   // Set up sub algorithm fit
   IAlgorithm_sptr fit;
   try {
@@ -679,7 +718,7 @@ double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
   fit->setProperty("Function", fitfunc);
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
-  fit->setProperty("MaxIterations", maxiteration);
+  fit->setProperty("MaxIterations", 50); // magic number
   fit->setProperty("StartX", xmin);
   fit->setProperty("EndX", xmax);
   fit->setProperty("Minimizer", m_minimizer);
@@ -699,15 +738,9 @@ double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
   // Retrieve result
   std::string fitStatus = fit->getProperty("OutputStatus");
   double chi2 = EMPTY_DBL();
-  if (fitStatus == "success" || calmode) {
+  if (fitStatus == "success") {
     chi2 = fit->getProperty("OutputChi2overDoF");
     fitfunc = fit->getProperty("Function");
-  }
-
-  // Release the ties
-  if (calmode) {
-    for (size_t i = 0; i < parnames.size(); ++i)
-      fitfunc->unfix(i);
   }
 
   // Debug information
@@ -820,12 +853,10 @@ double FitOneSinglePeak::fitCompositeFunction(
 
   // Do calculation for starting chi^2/Rwp: as the assumption that the input the
   // so far the best Rwp
-  bool modecal = true;
   // FIXME - This is not a good practise...
-  double backRwp =
-      fitFunctionSD(bkgdfunc, dataws, wsindex, startx, endx, modecal);
+  double backRwp = calChiSquareSD(bkgdfunc, dataws, wsindex, startx, endx);
   m_sstream << "Background: Pre-fit Goodness = " << backRwp << "\n";
-  m_bestRwp = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
+  m_bestRwp = calChiSquareSD(compfunc, dataws, wsindex, startx, endx);
   m_sstream << "Peak+Background: Pre-fit Goodness = " << m_bestRwp << "\n";
 
   map<string, double> bkuppeakmap, bkupbkgdmap;
@@ -835,9 +866,7 @@ double FitOneSinglePeak::fitCompositeFunction(
   storeFunctionError(bkgdfunc, m_fitErrorBkgdFunc);
 
   // Fit
-  modecal = false;
-  double goodness =
-      fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
+  double goodness = fitFunctionSD(compfunc, dataws, wsindex, startx, endx);
   string errorreason;
 
   // Check fit result

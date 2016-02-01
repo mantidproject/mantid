@@ -700,29 +700,33 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
 
   double zMin =  1e300;
   double zMax = -1e300;
-  for(int i=0;i<numRows();i++)
-    for(int j=0;j<numCols();j++)
-    {
-      if (cell(i,j) < zMin) zMin = cell(i,j);
-      if (cell(i,j) > zMax) zMax = cell(i,j);
+  for (int i = 0; i < numRows(); i++) {
+    for (int j = 0; j < numCols(); j++) {
+      double val = cell(i, j);
+      if (val < zMin)
+        zMin = val;
+      if (val > zMax)
+        zMax = val;
     }
+  }
 
-    // Calculate xStart(), xEnd(), yStart(), yEnd()
-    boundingRect();
+  // Calculate xStart(), xEnd(), yStart(), yEnd()
+  boundingRect();
 
-    MantidMatrixFunction *fun = new MantidMatrixFunction(*this);
-    plot->addFunction(fun, xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows() );
+  MantidMatrixFunction *fun = new MantidMatrixFunction(*this);
+  plot->addFunction(fun, xStart(), xEnd(), yStart(), yEnd(), zMin, zMax,
+                    numCols(), numRows());
 
-    using MantidQt::API::PlotAxis;
-    plot->setXAxisLabel(PlotAxis(*m_workspace, 0).title());
-    plot->setYAxisLabel(PlotAxis(*m_workspace, 1).title());
-    plot->setZAxisLabel(PlotAxis(false, *m_workspace).title());
+  using MantidQt::API::PlotAxis;
+  plot->setXAxisLabel(PlotAxis(*m_workspace, 0).title());
+  plot->setYAxisLabel(PlotAxis(*m_workspace, 1).title());
+  plot->setZAxisLabel(PlotAxis(false, *m_workspace).title());
 
-    a->initPlot3D(plot);
-    //plot->confirmClose(false);
-    QApplication::restoreOverrideCursor();
+  a->initPlot3D(plot);
+  // plot->confirmClose(false);
+  QApplication::restoreOverrideCursor();
 
-    return plot;
+  return plot;
 }
 
 void MantidMatrix::attachMultilayer(MultiLayer* ml)

@@ -4,6 +4,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -27,7 +28,7 @@ public:
 // Test is transformed from ConvetToQ3DdE but actually tests some aspects of
 // ConvertToMD algorithm.
 class ConvertToQ3DdETest : public CxxTest::TestSuite {
-  std::auto_ptr<ConvertTo3DdETestHelper> pAlg;
+  std::unique_ptr<ConvertTo3DdETestHelper> pAlg;
 
 public:
   static ConvertToQ3DdETest *createSuite() { return new ConvertToQ3DdETest(); }
@@ -489,8 +490,7 @@ public:
   }
 
   ConvertToQ3DdETest() {
-    pAlg =
-        std::auto_ptr<ConvertTo3DdETestHelper>(new ConvertTo3DdETestHelper());
+    pAlg = Mantid::Kernel::make_unique<ConvertTo3DdETestHelper>();
     pAlg->initialize();
     // initialize (load)Matid algorithm framework -- needed to run this test
     // separately
