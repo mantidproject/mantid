@@ -26,7 +26,7 @@ public:
   };
 
   typedef std::vector<std::string> TokenVec;
-  typedef Poco::StringTokenizer::Iterator Iterator;
+  typedef std::vector<std::string>::const_iterator Iterator;
   StringTokenizer() = default;
   StringTokenizer(const std::string &str, const std::string &separators,
                   int options = 0);
