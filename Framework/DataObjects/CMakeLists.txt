@@ -68,12 +68,10 @@ set ( INC_FILES
 	inc/MantidDataObjects/CoordTransformDistanceParser.h
 	inc/MantidDataObjects/DllConfig.h
 	inc/MantidDataObjects/EventList.h
-        inc/MantidDataObjects/EventListSerialization.h
 	inc/MantidDataObjects/EventWorkspace.h
 	inc/MantidDataObjects/EventWorkspaceHelpers.h
 	inc/MantidDataObjects/EventWorkspaceMRU.h
 	inc/MantidDataObjects/Events.h
-        inc/MantidDataObjects/EventsSerialization.h
 	inc/MantidDataObjects/FakeMD.h
 	inc/MantidDataObjects/FractionalRebinning.h
 	inc/MantidDataObjects/GroupingWorkspace.h
