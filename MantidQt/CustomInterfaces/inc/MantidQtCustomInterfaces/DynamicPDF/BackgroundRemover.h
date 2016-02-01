@@ -21,12 +21,11 @@ public:
 
   BackgroundRemover(SliceSelector *parent);
 
-
-public:
-
   void refreshSlice(const boost::shared_ptr<WorkspaceRecord> loadedWorkspace,
                 const size_t &workspaceIndex);
 
+private:
+  Ui::BackgroundRemover m_uiForm;
 };
 
 }
