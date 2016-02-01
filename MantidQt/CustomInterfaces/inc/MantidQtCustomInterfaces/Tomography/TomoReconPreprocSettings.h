@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMORECONPREPROCSETTINGS_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMORECONPREPROCSETTINGS_H_
 
-#include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 
 #include <cstddef>
 
@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct DLLExport TomoReconPreprocSettings {
+struct MANTIDQT_CUSTOMINTERFACES_DLL TomoReconPreprocSettings {
   bool normalizeByProtonCharge;
   bool normalizeByFlatDark;
 
