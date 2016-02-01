@@ -373,6 +373,7 @@ set ( TEST_FILES
 	StdoutChannelTest.h
 	StringContainsValidatorTest.h
 	StringsTest.h
+        StringTokenizerTest.h
 	TaskTest.h
 	ThreadPoolRunnableTest.h
 	ThreadPoolTest.h
