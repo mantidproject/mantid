@@ -1,9 +1,10 @@
 #include <iostream>
 #include <iomanip>
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h"
 //#include "MantidQtCustomInterfaces/DynamicPDF/BackgroundRemover.h"
-
-#include "MantidQtAPI/HelpWindow.h"
 
 namespace
 {
