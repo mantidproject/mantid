@@ -14,6 +14,10 @@ namespace VATES{
 
   DECLARE_ALGORITHM(SaveMDWorkspaceToVTK)
 
+  SaveMDWorkspaceToVTK::SaveMDWorkspaceToVTK() : pimpl(new SaveMDWorkspaceToVTKImpl) {}
+
+  SaveMDWorkspaceToVTK::~SaveMDWorkspaceToVTK() {}
+
   const std::string SaveMDWorkspaceToVTK::name() const {
   return "SaveMDWorkspaceToVTK";
   }
@@ -27,7 +31,7 @@ namespace VATES{
   }
 
   const std::string SaveMDWorkspaceToVTK::summary() const {
-    std::string summary = "Saves MD workspaces to VTK file types which can be loaded by ParaView./n MDHisto workspaces are saved as .vts files and MDEvent workspaces as .vtu files.";
+    std::string summary = "Saves MD workspaces to VTK file types which can be loaded by ParaView. MDHisto workspaces are saved as .vts files and MDEvent workspaces as .vtu files.";
     return summary;
   }
 
@@ -41,23 +45,25 @@ namespace VATES{
       extensions, Mantid::Kernel::Direction::Input),
       "Save location.");
     auto normalizations = pimpl->getAllowedNormalizationsInStringRepresentation();
-#if 1
+
     declareProperty(
-      "Visual Normalization", "AutoSelect",
+      "Normalization", "AutoSelect",
       boost::make_shared<Mantid::Kernel::StringListValidator>(normalizations),
-      "TThe visual normalization option. The automatic default will choose a normalization based on your data type and instrument.");
-#endif
+      "The visual normalization option. The automatic default will choose a normalization based on your data type and instrument.");
+
+
     // TODO: Add threshold property
-    // TODO: Add range selection
   }
 
   void SaveMDWorkspaceToVTK::exec() {
+    // Get the input properties
     Mantid::API::IMDWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
     std::string filename = this->getProperty("Filename");
 
-    auto normalization = Mantid::VATES::VisualNormalization::AutoSelect;
+    std::string normalizationInStringRepresentation = this->getProperty("Normalization");
+    auto normalization = pimpl->translateStringToVisualNormalization(normalizationInStringRepresentation);
 
-
+    // Save workspace into file
     if (auto histoWS = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(inputWS)) {
       pimpl->saveMDHistoWorkspace(histoWS, filename, normalization);
     }
@@ -72,7 +78,7 @@ namespace VATES{
 
     // Check for input workspace type
     Mantid::API::IMDWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-    if (!boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(inputWS) ||
+    if (!boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(inputWS) &&
         !boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(inputWS)) {
       errorMessage.emplace("InputWorkspace", "You can only save MDHisto or MDEvent workspaces.");
     }

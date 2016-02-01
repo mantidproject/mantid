@@ -58,8 +58,8 @@ void applyCOBMatrixSettingsToVtkDataSet(Mantid::VATES::MDLoadingPresenter* prese
   catch (std::invalid_argument &e)
   {
     std::string error = e.what();
-    vtkDebugMacro(<< "Workspace does not have correct information to "
-      << "plot non-orthogonal axes. " << error);
+    //vtkDebugMacro(<< "Workspace does not have correct information to "
+    //  << "plot non-orthogonal axes. " << error);
     // Add the standard change of basis matrix and set the boundaries
     presenter->setDefaultCOBandBoundaries(dataSet);
   }

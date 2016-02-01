@@ -1,8 +1,11 @@
 #include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/Normalization.h"
+
 #include "MantidVatesAPI/NoThresholdRange.h"
-#include "MantidVatesAPI/MDLoadingView.h"
+#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
+
+#include "MantidVatesAPI/MDLoadingViewSimple.h"
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/PresenterUtilities.h"
@@ -13,14 +16,18 @@
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+
+#include <vtkSmartPointer.h>
 #include <vtkXMLStructuredGridWriter.h>
 #include <vtkXMLUnstructuredGridWriter.h>
+#include <vtkStructuredGridWriter.h>
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 
 #include "MantidKernel/make_unique.h"
-
+#include <memory>
 
 namespace {
 class NullProgressAction : public Mantid::VATES::ProgressAction
@@ -64,13 +71,15 @@ void SaveMDWorkspaceToVTKImpl::saveMDHistoWorkspace(Mantid::API::IMDHistoWorkspa
   auto fullFilename = getFullFilePathWithExtension(filename, structuredGridExtension);
 
   // TODO:Optionally ignore zeros
-  auto thresholdRange = boost::make_shared<NoThresholdRange>();
+  auto thresholdRange = boost::make_shared<IgnoreZerosThresholdRange>();
 
-  // Define a time slice
-  double time = 0.0;
+  // Define a time slice.
+  double time = selectTimeSliceValue(histoWS);
 
   // Set up a presenter
-  auto presenter = createInMemoryPresenter<MDHWInMemoryLoadingPresenter, Mantid::API::IMDHistoWorkspace>(nullptr, histoWS->name());
+  std::unique_ptr<MDLoadingView> view = Kernel::make_unique<Mantid::VATES::MDLoadingViewSimple>();
+
+  auto presenter = createInMemoryPresenter<MDHWInMemoryLoadingPresenter, Mantid::API::IMDHistoWorkspace>(std::move(view), histoWS->name());
 
   // Set up vtk data factory chain
   auto factoryChain = createFactoryChain<vtkMDHistoHex4DFactory, vtkMDHistoHexFactory,
@@ -116,13 +125,10 @@ void SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(vtkXMLWriter* writer, vtkDa
  */
 std::vector<std::string> SaveMDWorkspaceToVTKImpl::getAllowedNormalizationsInStringRepresentation() const {
   std::vector<std::string> normalizations;
-  m_normalizations.size();
-  const auto norm = m_normalizations.begin()->first;
-  //std::cout << "==============" << std::endl;
-  //std::cout << norm << std::endl;
-  //for (auto it = m_normalizations.begin(); it != m_normalizations.end(); ++it) {
-  //  normalizations.push_back(it->first);
-  //}
+  for (auto it = m_normalizations.begin(); it != m_normalizations.end(); ++it) {
+    normalizations.push_back(it->first);
+  }
+
   return normalizations;
 }
 
@@ -131,13 +137,29 @@ VisualNormalization SaveMDWorkspaceToVTKImpl::translateStringToVisualNormalizati
 }
 
 void SaveMDWorkspaceToVTKImpl::setupNormalization() {
-  std::cout << "WAS HERE ==========================" << std::endl;
   m_normalizations.insert(std::make_pair("AutoSelect", VisualNormalization::AutoSelect));
   m_normalizations.insert(std::make_pair("NoNormalization", VisualNormalization::NoNormalization));
   m_normalizations.insert(std::make_pair("NumEventsNormalization", VisualNormalization::NumEventsNormalization));
   m_normalizations.insert(std::make_pair("VolumeNormalization", VisualNormalization::VolumeNormalization));
 }
 
+/**
+ * Returns a time for a time slice
+ * @param workspace: the workspace
+ * @return either the first time entry in case of a 4D workspace or else 0.0
+ */
+double SaveMDWorkspaceToVTKImpl::selectTimeSliceValue(Mantid::API::IMDWorkspace_sptr workspace) const {
+  auto actualNonIntegratedDimensionality = workspace->getNonIntegratedDimensions().size();
+  const size_t dimensionsWithTime = 4;
+  double time = 0.0;
+
+  if (actualNonIntegratedDimensionality ==  dimensionsWithTime) {
+      auto timeLikeDimension = workspace->getDimension(3);
+      time = static_cast<double>(timeLikeDimension->getMinimum());
+  }
+
+  return time;
+}
 
 }
 }

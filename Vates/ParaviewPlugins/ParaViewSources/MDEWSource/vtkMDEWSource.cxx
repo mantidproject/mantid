@@ -240,7 +240,7 @@ int vtkMDEWSource::RequestInformation(
       vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
     } else {
       // If the MDEvent workspace has had top level splitting applied to it,
-      // then use the a depth of 1
+      // then use the a deptgit stah of 1
       if (auto split =
               Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName)) {
         SetDepth(split.get());

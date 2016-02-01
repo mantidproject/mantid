@@ -3,9 +3,11 @@
 
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/Normalization.h"
 
 #include <vtkXMLWriter.h>
+#include <vtkDataSet.h>
 #include <map>
 
 namespace Mantid {
@@ -31,6 +33,7 @@ private:
   std::map<std::string, VisualNormalization> m_normalizations;
   void setupNormalization();
   void writeDataSetToVTKFile(vtkXMLWriter* writer, vtkDataSet* dataSet, std::string filename) const;
+  double selectTimeSliceValue(Mantid::API::IMDWorkspace_sptr workspace) const;
 };
 
 }
