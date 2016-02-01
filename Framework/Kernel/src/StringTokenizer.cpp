@@ -11,43 +11,37 @@
 #include <algorithm>
 #include <iostream>
 
+namespace {
+template <class InputIt, class ForwardIt, class BinOp>
+void for_each_token(InputIt first, InputIt last, ForwardIt s_first,
+                    ForwardIt s_last, BinOp binary_op) {
+  while (first != last) {
+    const auto pos = std::find_first_of(first, last, s_first, s_last);
+    binary_op(first, pos);
+    if (pos == last)
+      break;
+    first = std::next(pos);
+  }
+}
+
+std::vector<std::string> split(const std::string &str,
+                               const std::string &delims = " ",
+                               bool skip_empty = false) {
+  std::vector<std::string> output;
+  for_each_token(cbegin(str), cend(str), cbegin(delims), cend(delims),
+                 [&output, skip_empty](auto first, auto second) {
+                   if (first != second || !skip_empty) {
+                     output.emplace_back(first, second);
+                   }
+                 });
+  return output;
+}
+}
 Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
                                                  const std::string &separators,
                                                  int options) {
-  std::string newstring = str;
 
-  //restore 1.47 behavior of removing the last token if it is empty.
-  //remove last character iff it is a separator.
-  if (!str.empty()) {
-    std::string meow(str.end() - 1, str.end());
-    if (std::find_first_of(separators.begin(), separators.end(), meow.begin(),
-                           meow.end()) != separators.end()) {
-      newstring.pop_back();
-    }
-  }
-
-  // 1.47 doesn't tokenize whitespace.
-  // limit whitespace to a single space
-
-  if (options == 2 || options == 3) {
-  if (separators.find(" ") != std::string::npos) {
-    boost::trim_left(newstring);
-    Poco::StringTokenizer preTokenizer(newstring, " ",
-                                       TOK_TRIM | TOK_IGNORE_EMPTY);
-    newstring = std::string();
-    for (const auto &elem : preTokenizer) {
-      newstring += elem + " ";
-    }
-    // remove extra space.
-    if (!newstring.empty())
-      newstring.pop_back();
-  }
-  }
-
-  //1.61 fails to find two tokens in str="2- " and sep="-".
-  //To work around this, we do the trimming and removing empty tokens ourselves.
-  Poco::StringTokenizer tokenizer(newstring, separators,0);
-  m_tokens.insert(m_tokens.begin(), tokenizer.begin(), tokenizer.end());
+  m_tokens = split(str, separators);
 
   if (options == 2 || options == 3) {
 
