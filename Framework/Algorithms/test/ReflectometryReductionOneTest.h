@@ -206,9 +206,9 @@ public:
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(m_tinyReflWS->getInstrument()->getSource()->getPos(),
-                      outLam->getInstrument()->getSource()->getPos());
+                     outLam->getInstrument()->getSource()->getPos());
     TS_ASSERT_DIFFERS(outLam->getInstrument()->getSource()->getPos(),
-                     outQ->getInstrument()->getSource()->getPos());
+                      outQ->getInstrument()->getSource()->getPos());
   }
 
   void test_Qrange() {
