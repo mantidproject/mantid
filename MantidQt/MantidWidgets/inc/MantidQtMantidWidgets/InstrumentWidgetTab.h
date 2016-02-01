@@ -21,7 +21,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetTab : public QFrame, pub
     Q_OBJECT
 public:
     explicit InstrumentWidgetTab(InstrumentWidget *parent);
-    /// Called by InstrumentWindow after the projection surface crated
+    /// Called by InstrumentWidget after the projection surface crated
     /// Use it for surface-specific initialization
     virtual void initSurface() {}
     /// Save tab's persistent settings to the provided QSettings instance
@@ -34,7 +34,7 @@ public:
     /// Get the projection surface
     boost::shared_ptr<ProjectionSurface> getSurface() const;
 protected:
-    /// The parent InstrumentWindow
+    /// The parent InstrumentWidget
     InstrumentWidget* m_instrWidget;
 
 };

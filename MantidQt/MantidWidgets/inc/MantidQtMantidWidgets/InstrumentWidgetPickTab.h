@@ -27,7 +27,7 @@ class QSignalMapper;
 class QMenu;
 
 /**
-  * Implements the Pick tab in InstrumentWindow.
+  * Implements the Pick tab in InstrumentWidget.
   * Contains a set of tools which allow one to:
   *
   *  - pick a detector or a tube and display the data in it and some info

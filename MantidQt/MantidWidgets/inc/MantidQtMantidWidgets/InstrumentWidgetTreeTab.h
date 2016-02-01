@@ -9,7 +9,7 @@
 class InstrumentTreeWidget;
 
 /**
-  * Implements the instrument tree tab in InstrumentWindow
+  * Implements the instrument tree tab in InstrumentWidget
   */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetTreeTab: public InstrumentWidgetTab
 {

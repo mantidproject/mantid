@@ -45,7 +45,7 @@ namespace Mantid
 }
 
 /**
-  * Implements the Mask/Group tab in InstrumentWindow.
+  * Implements the Mask/Group tab in InstrumentWidget.
   *
   * Contains controls to create, manipulate and apply masking and grouping to underlying workspace.
   *

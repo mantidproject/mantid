@@ -12,10 +12,8 @@
 #include "SimpleWidget.h"
 #include "DetXMLFile.h"
 
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 
-#include <Poco/Path.h>
 #include <Poco/ActiveResult.h>
 
 #include <QVBoxLayout>

@@ -3,21 +3,11 @@
 
 #include "WidgetDllOption.h"
 #include "MantidGLWidget.h"
-#include "BinDialog.h"
 #include "InstrumentWidgetTypes.h"
 
 #include "MantidQtAPI/GraphOptions.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-#include "MantidQtAPI/MantidAlgorithmMetatype.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmObserver.h"
-
-#include <string>
-#include <vector>
-
-#include "qwt_scale_widget.h"
-#include <Poco/NObserver.h>
-#include <boost/shared_ptr.hpp>
 
 class InstrumentActor;
 class OneCurvePlot;
@@ -45,7 +35,7 @@ class QStackedLayout;
 class QSettings;
 
 /**
-  \class  InstrumentWindow
+  \class  InstrumentWidget
   \brief  This is the main window for the control of display on geometry
   \author Srikanth Nagella
   \date   September 2008

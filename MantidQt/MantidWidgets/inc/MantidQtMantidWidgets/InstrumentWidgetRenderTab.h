@@ -20,7 +20,7 @@ class QMenu;
 class QLineEdit;
 
 /**
-  * Implements the Render tab in InstrumentWindow.
+  * Implements the Render tab in InstrumentWidget.
   */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetRenderTab: public InstrumentWidgetTab
 {
