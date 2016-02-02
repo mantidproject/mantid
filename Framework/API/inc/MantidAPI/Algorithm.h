@@ -426,7 +426,7 @@ private:
   /// recorded. Applicable to child algs only
   bool m_alwaysStoreInADS; ///< Always store in the ADS, even for child algos
   bool m_runningAsync;     ///< Algorithm is running asynchronously
-  bool m_running;          ///< Algorithm is running
+  std::atomic<bool> m_running; ///< Algorithm is running
   bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
   bool m_isAlgStartupLoggingEnabled; /// Whether to log alg startup and
                                      /// closedown messages from the base class
@@ -458,8 +458,6 @@ private:
   int m_singleGroup;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
-  /// A non-recursive mutex for thread-safety
-  mutable Kernel::Mutex m_mutex;
 };
 
 /// Typedef for a shared pointer to an Algorithm

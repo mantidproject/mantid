@@ -167,7 +167,6 @@ void Algorithm::setRethrows(const bool rethrow) { this->m_rethrow = rethrow; }
 
 /// True if the algorithm is running.
 bool Algorithm::isRunning() const {
-  Poco::FastMutex::ScopedLock _lock(m_mutex);
   return m_running;
 }
 
@@ -565,7 +564,6 @@ bool Algorithm::execute() {
   try {
     try {
       if (!isChild()) {
-        Poco::FastMutex::ScopedLock _lock(m_mutex);
         m_running = true;
       }
 
