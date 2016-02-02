@@ -38,7 +38,7 @@ By default the interface shows the *Run* tab, where you can visualize
 images, submit reconstruction jobs, see and control the status of the
 jobs submitted recently.
 
-.. image:: /images/tomo_tab1_submission_reconstruction_jobs.png
+.. figure:: /images/tomo_tab1_submission_reconstruction_jobs.png
    :align: right
    :scale: 50%
 
@@ -64,10 +64,9 @@ Open beam directory
 Dark field directory
   Where to find the dark image(s)
 
-.. interface:: Tomographic Reconstruction
-  :widget: setupTab
-  :align: right
-  :width: 300
+.. figure:: /images/tomo_tab2_setup_authentication.png
+   :align: center
+   :scale: 60%
 
 **NB**: as this interface is under heavy development, several
 practical details lack polishin or are missing. This implies that
@@ -158,9 +157,13 @@ Data locations
 
 This is dependent on the facility and instrument.
 
-TODO: this is work in progress. In principle data will be replicated
-in the ISIS archive, the SCARF imat disk space, and possibly an
-analysis machine located in R3.
+TODO: this is work in progress. At ISIS In principle data will be
+replicated in the ISIS archive, the SCARF imat disk space, and
+possibly an analysis machine located in R3.
+
+The tab *Visualization* has simple push buttons to browse the files
+available from the local and remote locations, as well as any other
+directory or folder selected by the user.
 
 Running jobs remotely
 ---------------------
@@ -193,6 +196,10 @@ the tool and/or reconstruction method used.
 * Region of interest (ROI) for the analysis
 * Area for normalization (open beam, not blocked by sample)
 * Center of rotation, for tomographic reconstruction
+
+.. figure:: /images/tomo_tab3_ROI_etc.png
+   :align: center
+   :scale: 60%
 
 At any stage during the process of selecting the regions it is also
 possible to see how the selections fit different images by sliding
@@ -230,10 +237,14 @@ jobs. Pre-processing filters are applied on the raw input images
 before the reconstruction algorithm is run. Post-processing steps are
 applied on the reconstructed volume produced by the algorithm.
 
+.. figure:: /images/tomo_tab4_pre_post_proc_filters.png
+   :align: center
+   :scale: 60%
+
 The tab also shows options to define what outputs should be produced
 in addition to the reconstructed volume.
 
-The settings are rememberd between session, and it is possible to
+The settings are remembered between session, and it is possible to
 reset all the settings to their factory default by clicking on the
 reset button.
 
@@ -258,7 +269,9 @@ same location:
 Running jobs locally
 --------------------
 
-This functionality is being added at the moment.
+This capability is being developed at the moment, and it requires
+additional setup steps on the local analysis machine. Basic
+functionality is supported only on the IMAT data analysis machine.
 
 Visualization
 -------------
@@ -267,6 +280,15 @@ Visualization
              third party tools for 3D visualization and segmentation.
              This is work in progress.
 
+The **Visualization** tab can be used to browse the local and remote
+locations where results are stored. It is also possible to open these
+results in third party visualization applications. **NB**: ParaView is
+currently supported and additional tools are being integrated.
+
+.. figure:: /images/tomo_tab5_send_to_viz.png
+   :align: center
+   :scale: 60%
+
 Energy bands
 ------------
 
@@ -274,10 +296,27 @@ Energy bands
              of combining energy bands from energy selective experiments.
              This is work in progress.
 
+.. figure:: /images/tomo_tab7_energy_bands.png
+   :align: center
+   :scale: 60%
+
+Conversion between formats
+--------------------------
+
+.. warning:: The interface is being extended to provide a simple interface
+             to convert between different image formats for convenience and
+             interoperability with third party tools.
+             This is work in progress as support for new formats is being
+             integrated.
+
+.. figure:: /images/tomo_tab6_formats_convert.png
+   :align: center
+   :scale: 60%
+
 Example
 -------
 
-TODO: ideally, come up with a good and small example data set.
+TODO: there should be an example using a small data set.
 
 TomoPy
 ------
