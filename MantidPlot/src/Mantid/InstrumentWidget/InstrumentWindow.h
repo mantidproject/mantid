@@ -1,31 +1,32 @@
 #ifndef INSTRUMENTWINDOW_H
 #define INSTRUMENTWINDOW_H
 
-#include <Mantid/IProjectSerialisable.h>
-#include <InstrumentWidget.h>
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include <Mantid/IProjectSerialisable.h>
 
+#include <MdiSubWindow.h>
 #include <boost/shared_ptr.hpp>
 
 class ApplicationWindow;
-class MdiSubWindow;
+class InstrumentWidget;
 
 using namespace Mantid;
 
-class InstrumentWindow : public InstrumentWidget,
-                               public IProjectSerialisable {
+class InstrumentWindow : public MdiSubWindow, public IProjectSerialisable {
   Q_OBJECT
 public:
-  explicit InstrumentWindow(MdiSubWindow *parent, const QString &wsName);
+  explicit InstrumentWindow(const QString &wsName,
+                            const QString &label = QString(),
+                            ApplicationWindow *parent = nullptr,
+                            const QString &name = QString());
   ~InstrumentWindow();
 
   void loadFromProject(const std::string &lines, ApplicationWindow *app,
                        const int fileVersion);
   std::string saveToProject(ApplicationWindow *app);
+  InstrumentWidget *getInstrumentWidget() { return m_instrumentWidget; }
 
-protected:
-	virtual void closeEvent(QCloseEvent *e);
 private:
   /// ADS notification handlers
   virtual void preDeleteHandle(
@@ -39,7 +40,7 @@ private:
   virtual void clearADSHandle();
 
 private:
-  MdiSubWindow *m_mdiSubWindowParent;
+  InstrumentWidget *m_instrumentWidget;
 };
 
 #endif // INSTRUMENTWINDOW_H

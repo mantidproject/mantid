@@ -58,6 +58,7 @@ public:
   ~InstrumentWidget();
   void init(bool resetGeometry = true, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0, bool setDefaultView = true);
   QString getWorkspaceName() const { return m_workspaceName; }
+  void renameWorkspace(const QString & workspace) { m_workspaceName = workspace; }
 
   SurfaceType getSurfaceType()const{return m_surfaceType;}
   /// Get pointer to the projection surface
@@ -80,6 +81,7 @@ public:
   void setExponent(double nth_power);
   void setViewType(const QString& type);
   InstrumentActor* getInstrumentActor() const {return m_instrumentActor;}
+  void resetInstrument(bool resetGeometry);
   void selectTab(int tab);
   void selectTab(Tab tab){selectTab(int(tab));}
   InstrumentWidgetTab *getTab(const QString & title="") const;

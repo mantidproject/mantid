@@ -1,50 +1,50 @@
-#include "InstrumentWidget.h"
-#include "InstrumentWidgetRenderTab.h"
-#include "InstrumentWidgetPickTab.h"
-#include "InstrumentWidgetMaskTab.h"
-#include "InstrumentWidgetTreeTab.h"
-#include "XIntegrationControl.h"
+#include "DetXMLFile.h"
 #include "InstrumentActor.h"
+#include "InstrumentWidget.h"
+#include "InstrumentWidgetMaskTab.h"
+#include "InstrumentWidgetPickTab.h"
+#include "InstrumentWidgetRenderTab.h"
+#include "InstrumentWidgetTreeTab.h"
+#include "PanelsSurface.h"
+#include "Projection3D.h"
+#include "SimpleWidget.h"
 #include "UnwrappedCylinder.h"
 #include "UnwrappedSphere.h"
-#include "Projection3D.h"
-#include "PanelsSurface.h"
-#include "SimpleWidget.h"
-#include "DetXMLFile.h"
+#include "XIntegrationControl.h"
 
 #include "MantidAPI/IPeaksWorkspace.h"
 
 #include <Poco/ActiveResult.h>
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QWidget>
-#include <QMenu>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QString>
-#include <QSplitter>
-#include <QDoubleValidator>
-#include <QDesktopServices>
-#include <QRadioButton>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QGridLayout>
-#include <QLabel>
-#include <QComboBox>
-#include <QSettings>
-#include <QFileInfo>
-#include <QColorDialog>
-#include <QLineEdit>
-#include <QCheckBox>
-#include <QImageWriter>
 #include <QApplication>
+#include <QCheckBox>
+#include <QColorDialog>
+#include <QComboBox>
+#include <QDesktopServices>
+#include <QDoubleValidator>
 #include <QDragEnterEvent>
 #include <QDropEvent>
-#include <QStackedLayout>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QImageWriter>
 #include <QKeyEvent>
-#include <QUrl>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMenu>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSettings>
+#include <QSplitter>
+#include <QStackedLayout>
+#include <QString>
 #include <QTemporaryFile>
+#include <QUrl>
+#include <QVBoxLayout>
+#include <QWidget>
 
 #include "MantidQtAPI/FileDialogHandler.h"
 
@@ -75,9 +75,9 @@ public:
  * Constructor.
  */
 InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent)
-    : QWidget(parent), WorkspaceObserver(),
-      m_InstrumentDisplay(NULL), m_simpleDisplay(NULL), m_workspaceName(wsName),
-      m_instrumentActor(NULL), m_surfaceType(FULL3D),
+    : QWidget(parent), WorkspaceObserver(), m_InstrumentDisplay(nullptr),
+      m_simpleDisplay(nullptr), m_workspaceName(wsName),
+      m_instrumentActor(nullptr), m_surfaceType(FULL3D),
       m_savedialog_dir(QString::fromStdString(
           Mantid::Kernel::ConfigService::Instance().getString(
               "defaultsave.directory"))),
@@ -146,7 +146,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent)
   connect(m_clearPeakOverlays, SIGNAL(activated()), this,
           SLOT(clearPeakOverlays()));
 
-  //confirmClose(app->confirmCloseInstrWindow);
+  // confirmClose(app->confirmCloseInstrWindow);
 
   setAttribute(Qt::WA_DeleteOnClose);
 
@@ -233,6 +233,17 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
 }
 
 /**
+* Deletes instrument actor before re-initializing.
+* @param resetGeometry
+*/
+void InstrumentWidget::resetInstrument(bool resetGeometry) {
+  delete m_instrumentActor;
+  m_instrumentActor = nullptr;
+  init(resetGeometry, true, 0.0, 0.0, false);
+  updateInstrumentDetectors();
+}
+
+/**
  * Select the tab to be displayed
  */
 void InstrumentWidget::selectTab(int tab) {
@@ -244,7 +255,7 @@ void InstrumentWidget::selectTab(int tab) {
  * @param title Optional title of a tab (default="")
  */
 InstrumentWidgetTab *InstrumentWidget::getTab(const QString &title) const {
-  QWidget *tab(NULL);
+  QWidget *tab(nullptr);
   if (title.isEmpty())
     tab = mControlsTab->currentWidget();
   else {
@@ -259,7 +270,7 @@ InstrumentWidgetTab *InstrumentWidget::getTab(const QString &title) const {
   if (tab)
     return qobject_cast<InstrumentWidgetTab *>(tab);
   else
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -271,7 +282,7 @@ InstrumentWidgetTab *InstrumentWidget::getTab(const Tab tab) const {
   if (widget)
     return qobject_cast<InstrumentWidgetTab *>(widget);
   else
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -322,28 +333,23 @@ void InstrumentWidget::setSurfaceType(int type) {
     int peakLabelPrecision = 6;
     bool showPeakRow = true;
     bool showPeakLabels = true;
-	bool showPeakRelativeIntensity = true;
+    bool showPeakRelativeIntensity = true;
     if (surface) {
       peakLabelPrecision = surface->getPeakLabelPrecision();
       showPeakRow = surface->getShowPeakRowsFlag();
       showPeakLabels = surface->getShowPeakLabelsFlag();
     } else {
       QSettings settings;
-	  settings.beginGroup(InstrumentWidgetSettingsGroup);
-	  bool contains = false;
-      peakLabelPrecision =
-          settings.value("PeakLabelPrecision", 2)
-              .toInt();
-      showPeakRow =
-          settings.value("ShowPeakRows", true).toBool();
-	  showPeakLabels = settings.value("ShowPeakLabels",
-		  true).toBool();
-	  
-		        // By default this is should be off for now.
-	  showPeakRelativeIntensity =
-		  settings.value("ShowPeakRelativeIntensities",
-			             false).toBool();
-	  settings.endGroup();
+      settings.beginGroup(InstrumentWidgetSettingsGroup);
+      bool contains = false;
+      peakLabelPrecision = settings.value("PeakLabelPrecision", 2).toInt();
+      showPeakRow = settings.value("ShowPeakRows", true).toBool();
+      showPeakLabels = settings.value("ShowPeakLabels", true).toBool();
+
+      // By default this is should be off for now.
+      showPeakRelativeIntensity =
+          settings.value("ShowPeakRelativeIntensities", false).toBool();
+      settings.endGroup();
     }
 
     // Surface factory
@@ -409,7 +415,7 @@ void InstrumentWidget::setSurfaceType(int type) {
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowsFlag(showPeakRow);
     surface->setShowPeakLabelsFlag(showPeakLabels);
-	surface->setShowPeakRelativeIntensityFlag(showPeakRelativeIntensity);
+    surface->setShowPeakRelativeIntensityFlag(showPeakRelativeIntensity);
     // set new surface
     setSurface(surface);
 
@@ -690,8 +696,8 @@ void InstrumentWidget::saveSettings() {
                       getSurface()->getPeakLabelPrecision());
     settings.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
     settings.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
-	settings.setValue("ShowPeakRelativeIntensities", 
-					  getSurface()->getShowPeakRelativeIntensityFlag());
+    settings.setValue("ShowPeakRelativeIntensities",
+                      getSurface()->getShowPeakRelativeIntensityFlag());
     foreach (InstrumentWidgetTab *tab, m_tabs) { tab->saveSettings(settings); }
   }
   settings.endGroup();
@@ -792,22 +798,18 @@ void InstrumentWidget::componentSelected(ComponentID id) {
   }
 }
 
-void InstrumentWidget::executeAlgorithm(const QString &,
-                                        const QString &) {
-  //emit execMantidAlgorithm(alg_name, param_list, this);
+void InstrumentWidget::executeAlgorithm(const QString &, const QString &) {
+  // emit execMantidAlgorithm(alg_name, param_list, this);
 }
 
 void InstrumentWidget::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
-	try
-	{
-		alg->executeAsync();
-	}
-	catch (Poco::NoThreadAvailableException &)
-	{
-		return;
-	}
+  try {
+    alg->executeAsync();
+  } catch (Poco::NoThreadAvailableException &) {
+    return;
+  }
 
-	return;
+  return;
 }
 
 /**
