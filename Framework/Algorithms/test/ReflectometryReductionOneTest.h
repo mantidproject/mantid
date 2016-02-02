@@ -208,7 +208,7 @@ public:
     TS_ASSERT_EQUALS(m_tinyReflWS->getInstrument()->getSource()->getPos(),
                      outLam->getInstrument()->getSource()->getPos());
     TS_ASSERT_EQUALS(outLam->getInstrument()->getSource()->getPos(),
-                      outQ->getInstrument()->getSource()->getPos());
+                     outQ->getInstrument()->getSource()->getPos());
   }
 
   void test_Qrange() {
@@ -271,7 +271,7 @@ public:
 
     TS_ASSERT_DELTA(45.0, outTheta, 0.00001);
     TS_ASSERT_EQUALS(source->getPos(),
-        inQ->getInstrument()->getSource()->getPos());
+                     inQ->getInstrument()->getSource()->getPos());
     // convert from degrees to radians for sin() function
     double outThetaInRadians = outTheta * M_PI / 180;
 
