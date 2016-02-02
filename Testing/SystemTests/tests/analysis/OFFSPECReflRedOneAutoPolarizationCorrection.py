@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name,line-too-long
+# pylint: disable=no-init, invalid-name, line-too-long, attribute-defined-outside-init
 
 """
 This system test verifies that OFFSPEC data is processed correctly
