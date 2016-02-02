@@ -257,7 +257,7 @@ const std::vector<std::string> IFunction::categories() const {
       category(), categorySeparator(),
       Mantid::Kernel::StringTokenizer::TOK_TRIM |
           Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-  return std::vector<std::string>(tokenizer.begin(), tokenizer.end());
+  return tokenizer.asVector();
 }
 
 /**

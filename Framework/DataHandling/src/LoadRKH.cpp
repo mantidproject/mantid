@@ -471,12 +471,12 @@ const std::string LoadRKH::readUnit(const std::string &line) {
   // the symbol for the quantity q = MomentumTransfer, etc.
   const std::string symbol(codes[0]);
   // this is units used to measure the quantity e.g. angstroms, counts, ...
-  auto itUnitsToken = codes.end() - 1;
+  auto itUnitsToken = codes.cend() - 1;
   const std::string unit(*itUnitsToken);
 
   // theQuantity will contain the name of the unit, which can be many words long
   std::string theQuantity;
-  for (auto current = codes.begin() + 1; current != itUnitsToken; ++current) {
+  for (auto current = codes.cbegin() + 1; current != itUnitsToken; ++current) {
     theQuantity += *current;
   }
 

@@ -52,7 +52,8 @@ public:
   };
 
   typedef std::vector<std::string> TokenVec;
-  typedef std::vector<std::string>::const_iterator Iterator;
+  typedef std::vector<std::string>::iterator Iterator;
+  typedef std::vector<std::string>::const_iterator ConstIterator;
   /// Constructs an object from an empty string.
   StringTokenizer() = default;
   /// Constructor requiring a string to tokenize and a string of separators.
@@ -75,12 +76,12 @@ public:
   /** Const iterator referring to first element in the container.
   * @return a const iterator referring to the first element in the container.
   */
-  Iterator cbegin() const { return m_tokens.begin(); };
+  ConstIterator cbegin() const { return m_tokens.cbegin(); };
   /** Const iterator referring to the past-the-end element in the container.
    * @return a const iterator referring to the past-the-end element in the
    * container.
    */
-  Iterator cend() const { return m_tokens.end(); };
+  ConstIterator cend() const { return m_tokens.cend(); };
 
   /** Get a const reference to the index'th token. Indexing an out-of-range
    * element won't throw, but is otherwise undefined behavior.
