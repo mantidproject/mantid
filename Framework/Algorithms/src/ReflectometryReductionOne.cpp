@@ -394,10 +394,15 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
 
   // Rotate the source back to its original position
   if (rotationTheta != 0.0) {
+    // for IvsLam Workspace
     auto rotateSource = this->createChildAlgorithm("RotateSource");
     rotateSource->setChild(true);
     rotateSource->initialize();
     rotateSource->setProperty("Workspace", toConvert);
+    rotateSource->setProperty("Angle", -rotationTheta);
+    rotateSource->execute();
+    // for IvsQ Workspace
+    rotateSource->setProperty("Workspace", inQ);
     rotateSource->setProperty("Angle", -rotationTheta);
     rotateSource->execute();
   }

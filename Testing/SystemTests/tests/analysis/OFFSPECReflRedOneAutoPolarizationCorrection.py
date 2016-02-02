@@ -35,6 +35,11 @@ class OFFSPECReflRedOneAutoPolarizationCorrection(stresstesting.MantidStressTest
         return True
 
     def validate(self):
+        '''
+        we only wish to check the data from PolarizationCorrection in this system test.
+        It is not necessary to check the Instrument definition or Instrument Parameters
+        '''
+        self.disableChecking = ["Instrument"]
         return ("_IvsLam_polCorr", "OFFSPECReflRedOneAutoPolarizationCorrection_good_v2.nxs")
 
     def requiredFiles(self):
