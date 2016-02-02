@@ -2,6 +2,8 @@
 #define MANTID_SUPPORTTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <random>
+#include <array>
 #include "MantidKernel/StringTokenizer.h"
 
 /**
@@ -11,161 +13,212 @@
 
 class StringTokenizerTest : public CxxTest::TestSuite {
 public:
-  void test_tokenize_key_value() {
-
+  void test_StringTokenizer_key_value() {
     auto tokenizer1 = Mantid::Kernel::StringTokenizer(
         "key1=value1: key2=value2", ":",
         Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    std::vector<std::string> result1(tokenizer1.begin(), tokenizer1.end());
-    std::vector<std::string> expected1{"key1=value1", "key2=value2"};
-    TS_ASSERT_EQUALS(result1, expected1);
+    std::vector<std::string> expected{"key1=value1", "key2=value2"};
+    TS_ASSERT_EQUALS(tokenizer1.asVector(), expected);
     auto tokenizer2 = Mantid::Kernel::StringTokenizer(
-        result1[0], "=", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    std::vector<std::string> result2(tokenizer2.begin(), tokenizer2.end());
-    std::vector<std::string> expected2{"key1", "value1"};
-    TS_ASSERT_EQUALS(result2, expected2);
-    auto tokenizer3 = Mantid::Kernel::StringTokenizer(
-        result1[1], "=", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    std::vector<std::string> result3(tokenizer3.begin(), tokenizer3.end());
-    std::vector<std::string> expected3{"key2", "value2"};
-    TS_ASSERT_EQUALS(result3, expected3);
+        tokenizer1[0], "=", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    expected = {"key1", "value1"};
+    TS_ASSERT_EQUALS(tokenizer1.count(), 2);
+    TS_ASSERT_EQUALS(tokenizer2.asVector(), expected);
+    tokenizer2 = Mantid::Kernel::StringTokenizer(
+        tokenizer1[1], "=", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    expected = {"key2", "value2"};
+    TS_ASSERT_EQUALS(tokenizer2.asVector(), expected);
   }
 
-  void test_tokenize_key_value_with_spaces() {
+  void test_StringTokenizer_key_value_with_spaces() {
     auto tokenizer1 =
         Mantid::Kernel::StringTokenizer("key 1@value1: key2@value 2", ":");
-    std::vector<std::string> result1(tokenizer1.begin(), tokenizer1.end());
     std::vector<std::string> expected1{"key 1@value1", " key2@value 2"};
-    TS_ASSERT_EQUALS(result1, expected1);
+    TS_ASSERT_EQUALS(tokenizer1.asVector(), expected1);
+    TS_ASSERT_EQUALS(tokenizer1.count(), 2);
 
-    auto tokenizer2 = Mantid::Kernel::StringTokenizer(result1[0], "@");
-    std::vector<std::string> result2(tokenizer2.begin(), tokenizer2.end());
+    auto tokenizer2 = Mantid::Kernel::StringTokenizer(tokenizer1[0], "@");
     std::vector<std::string> expected2{"key 1", "value1"};
-    TS_ASSERT_EQUALS(result2, expected2);
+    TS_ASSERT_EQUALS(tokenizer2.asVector(), expected2);
 
-    auto tokenizer3 = Mantid::Kernel::StringTokenizer(result1[1], "@");
-    std::vector<std::string> result3(tokenizer3.begin(), tokenizer3.end());
-    std::vector<std::string> expected3{" key2", "value 2"};
-    TS_ASSERT_EQUALS(result3, expected3);
+    tokenizer2 = Mantid::Kernel::StringTokenizer(tokenizer1.at(0), "@");
+    expected2 = {"key 1", "value1"};
+    TS_ASSERT_EQUALS(tokenizer2.asVector(), expected2);
+
+    tokenizer2 = Mantid::Kernel::StringTokenizer(tokenizer1[1], "@");
+    expected2 = {" key2", "value 2"};
+    TS_ASSERT_EQUALS(tokenizer2.asVector(), expected2);
+
+    tokenizer2 = Mantid::Kernel::StringTokenizer(tokenizer1.at(1), "@");
+    expected2 = {" key2", "value 2"};
+    TS_ASSERT_EQUALS(tokenizer2.asVector(), expected2);
+
+    TS_ASSERT_THROWS_ANYTHING(tokenizer1.at(3));
   }
 
-  void test_parseRange_simple() {
+  void test_StringTokenizer_parseRange_simple() {
     auto tokenizer = Mantid::Kernel::StringTokenizer("3,1,4,0,2,5", ",");
-    std::vector<std::string> result(tokenizer.begin(), tokenizer.end());
     std::vector<std::string> expected{"3", "1", "4", "0", "2", "5"};
-    TS_ASSERT_EQUALS(result, expected);
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
+    tokenizer = Mantid::Kernel::StringTokenizer("3,1,4,0,2,5,", ",");
+    expected = {"3", "1", "4", "0", "2", "5", ""};
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
+    tokenizer = Mantid::Kernel::StringTokenizer(
+        "3,1,4,0,2,5,", ",",
+        Mantid::Kernel::StringTokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
+    expected = {"3", "1", "4", "0", "2", "5"};
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
   }
 
-  void test_parseRange_ranges() {
+  void test_StringTokenizer_parseRange_ranges() {
     auto tokenizer = Mantid::Kernel::StringTokenizer(
         "  1, 2 - 5,   6   ,7,8,    9,10-12", ",",
         Mantid::Kernel::StringTokenizer::TOK_TRIM |
             Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-    std::vector<std::string> result(tokenizer.begin(), tokenizer.end());
     std::vector<std::string> expected{"1", "2 - 5", "6",    "7",
                                       "8", "9",     "10-12"};
-    TS_ASSERT_EQUALS(result, expected);
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
   }
 
-  void test_parseRange_emptyElements() {
-    auto tokenizer1 = Mantid::Kernel::StringTokenizer(
+  void test_StringTokenizer_parseRange_emptyElements() {
+    auto tokenizer = Mantid::Kernel::StringTokenizer(
         ",1,2,3", ",", Mantid::Kernel::StringTokenizer::TOK_TRIM |
                            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-    std::vector<std::string> result1(tokenizer1.begin(), tokenizer1.end());
-    std::vector<std::string> expected1{"1", "2", "3"};
-    TS_ASSERT_EQUALS(result1, expected1);
+    std::vector<std::string> expected{"1", "2", "3"};
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
 
-    auto tokenizer2 = Mantid::Kernel::StringTokenizer(
+    tokenizer = Mantid::Kernel::StringTokenizer(
         "1,2,3,", ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    std::vector<std::string> result2(tokenizer2.begin(), tokenizer2.end());
-    std::vector<std::string> expected2{"1", "2", "3", ""};
-    TS_ASSERT_EQUALS(result2, expected2);
+    expected = {"1", "2", "3", ""};
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
 
-    auto tokenizer3 = Mantid::Kernel::StringTokenizer(
+    tokenizer = Mantid::Kernel::StringTokenizer(
         "1,2,,,,3", ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    std::vector<std::string> result3(tokenizer3.begin(), tokenizer3.end());
-    std::vector<std::string> expected3{"1", "2", "", "", "", "3"};
-    TS_ASSERT_EQUALS(result3, expected3);
+    expected = {"1", "2", "", "", "", "3"};
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
   }
 
-  void test_parseRange_mapStyleSimple() {
-    auto tokenizer1 = Mantid::Kernel::StringTokenizer(
+  void test_StringTokenizer_parseRange_mapStyleSimple() {
+    auto tokenizer = Mantid::Kernel::StringTokenizer(
         "   52   53   54   55   56   57   58   192", " ",
         Mantid::Kernel::StringTokenizer::TOK_TRIM |
             Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-    std::vector<std::string> result1(tokenizer1.begin(), tokenizer1.end());
-    std::vector<std::string> expected1{"52", "53", "54", "55",
-                                       "56", "57", "58", "192"};
-    TS_ASSERT_EQUALS(result1, expected1);
+    std::vector<std::string> expected{"52", "53", "54", "55",
+                                      "56", "57", "58", "192"};
+    TS_ASSERT_EQUALS(tokenizer.count(), 8);
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
   }
 
-  void test_parseRange_customRangeSep() {
+  void test_StringTokenizer_parseRange_customRangeSep() {
     auto tokenizer = Mantid::Kernel::StringTokenizer("1-2,3:5,6-7,8:10", ",");
-    std::vector<std::string> result(tokenizer.begin(), tokenizer.end());
     std::vector<std::string> expected{"1-2", "3:5", "6-7", "8:10"};
-    TS_ASSERT_EQUALS(result, expected);
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
   }
 
-  void test_parseRange_emptyString() {
+  void test_StringTokenizer_parseRange_emptyString() {
     auto tokenizer = Mantid::Kernel::StringTokenizer("", "-:");
     TS_ASSERT_EQUALS(tokenizer.count(), 0);
+    TS_ASSERT_EQUALS(tokenizer.asVector(), std::vector<std::string>());
   }
 
-  void test_parseRange_invalidRange() {
+  void test_StringTokenizer_parseRange_invalidRange() {
     auto tokenizer = Mantid::Kernel::StringTokenizer("1,2,3,-5,6", ",");
-    std::vector<std::string> result(tokenizer.begin(), tokenizer.end());
     std::vector<std::string> expected{"1", "2", "3", "-5", "6"};
-    TS_ASSERT_EQUALS(result, expected);
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
   }
 
-  void test_parseRange_invalidRange2() {
+  void test_StringTokenizer_parseRange_invalidRange2() {
     auto tokenizer = Mantid::Kernel::StringTokenizer("-5", "-");
-    std::vector<std::string> result(tokenizer.begin(), tokenizer.end());
     std::vector<std::string> expected{"", "5"};
-    TS_ASSERT_EQUALS(result, expected);
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
   }
 
-  void test_parseRange_invalidRange3() {
+  void test_StringTokenizer_parseRange_invalidRange3() {
     auto tokenizer = Mantid::Kernel::StringTokenizer("2-", "-");
-    std::vector<std::string> result(tokenizer.begin(), tokenizer.end());
     std::vector<std::string> expected{"2", ""};
-    TS_ASSERT_EQUALS(result, expected);
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
+    tokenizer = Mantid::Kernel::StringTokenizer(
+        "2-", "-",
+        Mantid::Kernel::StringTokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
+    expected = {"2"};
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
   }
 
 };
 
-std::string random_string(size_t length) {
-  auto randchar = []() -> char {
-    const char charset[] = "0123456789"
-                           "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                           "abcdefghijklmnopqrstuvwxyz";
-    const size_t max_index = (sizeof(charset) - 1);
-    return charset[rand() % max_index];
+class RandomCharacter {
+public:
+  RandomCharacter() {
+    const size_t maxIndex = (sizeof(m_characterSet) - 1);
+    m_distribution = std::uniform_int_distribution<unsigned>(0, maxIndex);
   };
+  char operator()() { return m_characterSet[m_distribution(m_generator)]; };
+
+private:
+  std::array<char, 62> m_characterSet{
+      {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+       'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+       'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+       'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+       'u', 'v', 'w', 'x', 'y', 'z'}};
+  std::mt19937 m_generator;
+  std::uniform_int_distribution<unsigned> m_distribution;
+};
+
+std::string randomString(size_t length) {
+  RandomCharacter randChar;
   std::string str(length, 0);
-  std::generate_n(str.begin(), length, randchar);
+  for (auto &character : str) {
+    character = randChar();
+  }
   return str;
 }
 
 class StringTokenizerTestPerformance : public CxxTest::TestSuite {
 private:
-public:
-  void test_oneLargeString() {
+  std::string m_bigString;
+  std::size_t m_length = 50000000;
 
-    std::size_t length(200000000);
-    std::string oneBigString = random_string(length);
-    for (size_t i = 0; i < length; i += 10)
-      oneBigString[i] = ';';
-    // oneBigString.replace(i,1,1,';');
+public:
+  StringTokenizerTestPerformance() {
+    m_bigString = randomString(m_length);
+    for (size_t i = 2; i < m_length; i += 10) {
+      m_bigString[i - 2] = ';';
+      m_bigString[i - 1] = ' ';
+      m_bigString[i] = ';';
+    }
+  };
+
+  void test_oneLargeString() {
+    auto start = std::chrono::system_clock::now();
+    auto tokenizer1 = Mantid::Kernel::StringTokenizer(m_bigString, ";", 0);
+    auto end = std::chrono::system_clock::now();
+    TS_ASSERT_EQUALS(tokenizer1.count(), m_length / 5 + 1);
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+    std::cout << "<" << tokenizer1[1] << " " << std::endl;
+  }
+
+  void test_oneLargeString_trim() {
     auto start = std::chrono::system_clock::now();
     auto tokenizer1 = Mantid::Kernel::StringTokenizer(
-        oneBigString, ";",
+        m_bigString, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    auto end = std::chrono::system_clock::now();
+    TS_ASSERT_EQUALS(tokenizer1.count(), m_length / 5 + 1);
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+    std::cout << "<" << tokenizer1[1] << " " << std::endl;
+  }
+
+  void test_oneLargeString_trim_ignoreEmpty() {
+    auto start = std::chrono::system_clock::now();
+    auto tokenizer1 = Mantid::Kernel::StringTokenizer(
+        m_bigString, ";",
         Mantid::Kernel::StringTokenizer::TOK_TRIM |
             Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     auto end = std::chrono::system_clock::now();
-    TS_ASSERT_EQUALS(tokenizer1.count(), length / 10 + 1);
+    TS_ASSERT_EQUALS(tokenizer1.count(), m_length / 10);
     std::chrono::duration<double> elapsed_seconds = end - start;
-
     std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
     std::cout << "<" << tokenizer1[1] << " " << std::endl;
   }

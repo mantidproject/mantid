@@ -166,13 +166,9 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
   std::string str;
   getline(in, str);
 
-  // avoid empty token in the final position.
-  char delimiter = ',';
-  char lastCharacter = str.back();
-  if (delimiter == lastCharacter)
-    str.pop_back();
-
-  tokenizer values(str, ",", tokenizer::TOK_TRIM);
+  // allow a comma in the final position.
+  tokenizer values(str, ",", tokenizer::TOK_TRIM |
+                                 tokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
 
   if (values.count() <= 2) {
     g_log.warning()

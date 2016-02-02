@@ -235,13 +235,7 @@ const std::vector<std::string> Algorithm::workspaceMethodOn() const {
       this->workspaceMethodOnTypes(), WORKSPACE_TYPES_SEPARATOR,
       Mantid::Kernel::StringTokenizer::TOK_TRIM |
           Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-  std::vector<std::string> res;
-  res.reserve(tokenizer.count());
-  for (auto iter = tokenizer.begin(); iter != tokenizer.end(); ++iter) {
-    res.push_back(*iter);
-  }
-
-  return res;
+  return std::vector<std::string>(tokenizer.begin(), tokenizer.end());
 }
 
 /**

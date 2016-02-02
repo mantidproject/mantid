@@ -22,14 +22,16 @@ class StringTokenizer
 public:
   enum Options {
     TOK_IGNORE_EMPTY = 1, /// ignore empty tokens
-    TOK_TRIM = 2          /// remove leading and trailing whitespace from tokens
+    TOK_TRIM = 2,         /// remove leading and trailing whitespace from tokens
+    TOK_IGNORE_FINAL_EMPTY_TOKEN =
+        4 // don't check if there is an empty token at the end.
   };
 
   typedef std::vector<std::string> TokenVec;
   typedef std::vector<std::string>::const_iterator Iterator;
   StringTokenizer() = default;
   StringTokenizer(const std::string &str, const std::string &separators,
-                  int options = 0);
+                  unsigned options = 0);
   ~StringTokenizer() = default;
   /// Destroys the tokenizer.
 
@@ -40,33 +42,24 @@ const std::string &operator[](std::size_t index) const {
   return m_tokens[index];
 };
 /// Returns const reference the index'th token.
-/// Throws a RangeException if the index is out of range.
 
 std::string &operator[](std::size_t index) { return m_tokens[index]; };
 /// Returns reference to the index'th token.
+
+const TokenVec &asVector() { return m_tokens; };
+// Returns a vector of tokenized strings.
+
+const std::string &at(std::size_t index) const { return m_tokens.at(index); };
+/// Returns const reference the index'th token.
 /// Throws a RangeException if the index is out of range.
 
-bool has(const std::string &token) const {
-  return std::find(m_tokens.begin(), m_tokens.end(), token) != m_tokens.end();
-};
-/// Returns true if token exists, false otherwise.
-
-/*std::size_t find(const std::string &token, std::size_t pos = 0) const {
-  return
-std::distance(m_tokens.begin(),std::find(m_tokens.begin()+pos,m_tokens.end(),token));
-};*/
-/// Returns the index of the first occurrence of the token
-/// starting at position pos.
-/// Throws a NotFoundException if the token is not found.
+std::string &at(std::size_t index) { return m_tokens.at(index); };
+/// Returns reference to the index'th token.
+/// Throws a RangeException if the index is out of range.
 
 std::size_t count() const { return m_tokens.size(); };
 /// Returns the total number of tokens.
 
-/*std::size_t count(const std::string &token) const {
-  return std::count(m_tokens.begin(),m_tokens.end(),token);
-};
-/// Returns the number of tokens equal to the specified token.
-*/
 private:
   std::vector<std::string> m_tokens;
 };
