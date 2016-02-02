@@ -58,7 +58,7 @@ class AlignComponents(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty("InputWorkspace", "",
                                                validator=InstrumentValidator(),
                                                optional=PropertyMode.Optional,
-                                               direction=Direction.InOut),
+                                               direction=Direction.Input),
                              doc="Workspace containing the instrument to be calibrated.")
 
         # Source
@@ -217,11 +217,12 @@ class AlignComponents(PythonAlgorithm):
 
         detID = calWS.column('detid')
 
-        wks = self.getProperty("InputWorkspace").value
-        if wks is None:
+        if self.getProperty("InputWorkspace").value is not None:
+            wks_name = self.getProperty("InputWorkspace").value.getName()
+        else:
+            wks_name = "alignedWorkspace"
             wks = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,
-                                          OutputWorkspace="alignedWorkspace")
-        wks_name=wks.getName()
+                                          OutputWorkspace=wks_name)
 
         # First fit L1 if selected for Source and/or Sample
         for component in "Source", "Sample":
