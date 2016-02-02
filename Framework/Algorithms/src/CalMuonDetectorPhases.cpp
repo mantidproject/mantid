@@ -5,6 +5,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -69,52 +70,18 @@ std::map<std::string, std::string> CalMuonDetectorPhases::validateInputs() {
 void CalMuonDetectorPhases::exec() {
 
   // Get the input ws
-  API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  m_inputWS = getProperty("InputWorkspace");
 
   // Get start and end time
-  double startTime = getProperty("FirstGoodData");
-  double endTime = getProperty("LastGoodData");
-
-  // If startTime is EMPTY_DBL():
-  if (startTime == EMPTY_DBL()) {
-    try {
-      // Read FirstGoodData from workspace logs if possible
-      double firstGoodData =
-          inputWS->run().getLogAsSingleValue("FirstGoodData");
-      startTime = firstGoodData;
-    } catch (...) {
-      g_log.warning("Couldn't read FirstGoodData, setting to 0");
-      // Set startTime to 0
-      startTime = 0.;
-    }
-  }
-  // If endTime is EMPTY_DBL():
-  if (endTime == EMPTY_DBL()) {
-    // Last available time
-    endTime = inputWS->readX(0).back();
-  }
+  double startTime = getStartTime();
+  double endTime = getEndTime();
 
   // Get the frequency
-  double freq = getProperty("Frequency");
-
-  // If frequency is EMPTY_DBL():
-  if (freq == EMPTY_DBL()) {
-    try {
-      // Read sample_magn_field from workspace logs
-      freq = inputWS->run().getLogAsSingleValue("sample_magn_field");
-      // Multiply by muon gyromagnetic ratio: 0.01355 MHz/G
-      freq *= 2 * M_PI * 0.01355;
-    } catch (...) {
-      throw std::runtime_error(
-          "Couldn't read sample_magn_field. Please provide a value for "
-          "the frequency");
-    }
-  }
+  double freq = getFrequency();
 
   // Prepares the workspaces: extracts data from [startTime, endTime] and
   // removes exponential decay
-  API::MatrixWorkspace_sptr tempWS =
-      prepareWorkspace(inputWS, startTime, endTime);
+  API::MatrixWorkspace_sptr tempWS = prepareWorkspace(startTime, endTime);
 
   // Create the output workspaces
   auto tab = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -276,18 +243,16 @@ std::string CalMuonDetectorPhases::createFittingFunction(int nspec,
 }
 
 /** Extracts relevant data from a workspace and removes exponential decay
-* @param ws :: [input] The input workspace
 * @param startTime :: [input] First X value to consider
 * @param endTime :: [input] Last X value to consider
 * @return :: Pre-processed workspace to fit
 */
 API::MatrixWorkspace_sptr
-CalMuonDetectorPhases::prepareWorkspace(const API::MatrixWorkspace_sptr &ws,
-                                        double startTime, double endTime) {
+CalMuonDetectorPhases::prepareWorkspace(double startTime, double endTime) {
 
   // Extract counts from startTime to endTime
   API::IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
-  crop->setProperty("InputWorkspace", ws);
+  crop->setProperty("InputWorkspace", m_inputWS);
   crop->setProperty("XMin", startTime);
   crop->setProperty("XMax", endTime);
   crop->executeAsChildAlg();
@@ -302,6 +267,72 @@ CalMuonDetectorPhases::prepareWorkspace(const API::MatrixWorkspace_sptr &ws,
       remove->getProperty("OutputWorkspace");
 
   return wsRem;
+}
+
+/**
+ * Returns the frequency to use in the sequential fit.
+ *
+ * If user has provided a frequency as input, use that.
+ * Otherwise, use 2*pi*g_mu*(sample_magn_field)
+ *
+ * @return :: Frequency to use in fit
+ */
+double CalMuonDetectorPhases::getFrequency() const {
+  double freq = getProperty("Frequency");
+
+  // If frequency is EMPTY_DBL():
+  if (freq == EMPTY_DBL()) {
+    try {
+      // Read sample_magn_field from workspace logs
+      freq = m_inputWS->run().getLogAsSingleValue("sample_magn_field");
+      // Multiply by muon gyromagnetic ratio: 0.01355 MHz/G
+      freq *= 2 * M_PI * PhysicalConstants::MuonGyromagneticRatio;
+    } catch (...) {
+      throw std::runtime_error(
+          "Couldn't read sample_magn_field. Please provide a value for "
+          "the frequency");
+    }
+  }
+  return freq;
+}
+
+/**
+ * Get start time for fit
+ * If not provided as input, try to read from workspace logs.
+ * If it's not there either, set to 0 and warn user.
+ * @return :: Start time for fit
+ */
+double CalMuonDetectorPhases::getStartTime() const {
+  double startTime = getProperty("FirstGoodData");
+  // If startTime is EMPTY_DBL():
+  if (startTime == EMPTY_DBL()) {
+    try {
+      // Read FirstGoodData from workspace logs if possible
+      double firstGoodData =
+          m_inputWS->run().getLogAsSingleValue("FirstGoodData");
+      startTime = firstGoodData;
+    } catch (...) {
+      g_log.warning("Couldn't read FirstGoodData, setting to 0");
+      // Set startTime to 0
+      startTime = 0.;
+    }
+  }
+  return startTime;
+}
+
+/**
+ * Get end time for fit
+ * If it's not there, use the last available time in the workspace.
+ * @return :: End time for fit
+ */
+double CalMuonDetectorPhases::getEndTime() const {
+  double endTime = getProperty("LastGoodData");
+  // If endTime is EMPTY_DBL():
+  if (endTime == EMPTY_DBL()) {
+    // Last available time
+    endTime = m_inputWS->readX(0).back();
+  }
+  return endTime;
 }
 
 } // namespace Algorithms

@@ -57,9 +57,7 @@ private:
   /// Validate the inputs
   std::map<std::string, std::string> validateInputs();
   /// Prepare workspace for fit
-  API::MatrixWorkspace_sptr
-  prepareWorkspace(const API::MatrixWorkspace_sptr &ws, double startTime,
-                   double endTime);
+  API::MatrixWorkspace_sptr prepareWorkspace(double startTime, double endTime);
   /// Fit the workspace
   void fitWorkspace(const API::MatrixWorkspace_sptr &ws, double freq,
                     std::string groupName, API::ITableWorkspace_sptr &resTab,
@@ -69,6 +67,14 @@ private:
   /// Extract asymmetry and phase from fitting results
   API::ITableWorkspace_sptr
   extractDetectorInfo(const API::ITableWorkspace_sptr &paramTab, size_t nspec);
+  /// Find frequency to use in sequential fit
+  double getFrequency() const;
+  /// Get start time for fit
+  double getStartTime() const;
+  /// Get end time for fit
+  double getEndTime() const;
+  /// Pointer to input workspace
+  API::MatrixWorkspace_sptr m_inputWS;
 };
 } // namespace Algorithms
 } // namespace Mantid
