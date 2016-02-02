@@ -38,10 +38,9 @@ By default the interface shows the *Run* tab, where you can visualize
 images, submit reconstruction jobs, see and control the status of the
 jobs submitted recently.
 
-.. interface:: Tomographic Reconstruction
-  :widget: runTab
-  :align: right
-  :width: 300
+.. image:: /images/tomo_tab1_submission_reconstruction_jobs.png
+   :align: right
+   :scale: 50%
 
 In the setup tab you can set the details of the remote and/or local
 compute resources. Importantly, here is where you can set you username
@@ -70,8 +69,8 @@ Dark field directory
   :align: right
   :width: 300
 
-**NB**: as this interface is in an early stage and under heavy
-development, several practical details are missing. This implies that
+**NB**: as this interface is under heavy development, several
+practical details lack polishin or are missing. This implies that
 there may be usability issues at times and some steps may not be as
 intuitive or simple as they could. Please, do not hesitate to provide
 suggestions and feedback.
