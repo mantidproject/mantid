@@ -1052,10 +1052,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             inst = wq[0].getInstrument()
         else:
             inst = wq.getInstrument()
-        #NOTE: In the new Refl UI, these adjustments to lmin/lmax are NOT made. This has been
-        #noted in the parameter files for INTER/CRIST/POLREF/SURF.
-        lmin = inst.getNumberParameter('LambdaMin')[0] + 1
-        lmax = inst.getNumberParameter('LambdaMax')[0] - 2
+
+        lmin = inst.getNumberParameter('LambdaMin')[0]
+        lmax = inst.getNumberParameter('LambdaMax')[0]
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
         return th, qmin, qmax, wlam, wq
