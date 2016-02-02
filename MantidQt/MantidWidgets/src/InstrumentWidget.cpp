@@ -341,7 +341,6 @@ void InstrumentWidget::setSurfaceType(int type) {
     } else {
       QSettings settings;
       settings.beginGroup(InstrumentWidgetSettingsGroup);
-      bool contains = false;
       peakLabelPrecision = settings.value("PeakLabelPrecision", 2).toInt();
       showPeakRow = settings.value("ShowPeakRows", true).toBool();
       showPeakLabels = settings.value("ShowPeakLabels", true).toBool();
