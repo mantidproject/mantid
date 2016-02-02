@@ -46,6 +46,15 @@ The **pseduo-code** of this algorith is:
  1. Go over all the MDEvents;
  2. :math:`I = S \cdot sum_i^N\frac{Y_i}{m}`, where S is the scale fator, :math:`Y_i` is the signal of point i, and m is the monitor counts
 
+Here is how this peak integration algorithm is applied to GUI
+
+ 1. Find out all the run numbers by experiment number and scan number;
+ 2. Execute FindPeaksMD() on all runs (i.e., Pts);
+ 3. Calculate peak center by :math:`\vec{p} = \frac{1}{\sum_i B_i}\sum_i B_i * \vec{p}_i`, where
+    :math:`\vec{p}` is the center of the peak, :math:`B_i` is the bin count of run i;
+ 4. Execute IntegratePeaksCWSD() to integrate peak for each run/pt if a peak is found;
+ 5. Loop all the peaks workspaces and sum the intensity as :math:`I = \sum_i I_i`.
+
 Masking
 #######
 

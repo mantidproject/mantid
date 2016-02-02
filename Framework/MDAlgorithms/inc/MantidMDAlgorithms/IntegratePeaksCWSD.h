@@ -35,7 +35,7 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MDAlgorithms\\Peaks"; }
 
-  void simplePeakIntegration(const std::vector<detid_t> &vecMaskedDetID);
+
 
 private:
   /// Initialise the properties
@@ -43,20 +43,30 @@ private:
   /// Run the algorithm
   void exec();
 
+  void simplePeakIntegration(const std::vector<detid_t> &vecMaskedDetID,
+                             const std::map<int, signal_t> &run_monitor_map);
   template <typename MDE, size_t nd>
-  void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws,
+                 const std::map<uint16_t, signal_t> &run_monitor_map);
 
-  std::map<uint16_t, signal_t> getMonitorCounts();
+  std::map<int, signal_t> getMonitorCounts();
 
   std::vector<detid_t> processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws);
 
   void getPeakInformation();
+
+  DataObjects::PeaksWorkspace_sptr createOutputs();
+
+  void mergePeaks();
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_inputWS;
 
   /// Input PeaksWorkspace
   Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
+
+  /// Peak centers
+  std::map<int, Kernel::V3D> m_runPeakCenterMap;
 
   /// Mask
   bool m_maskDets;

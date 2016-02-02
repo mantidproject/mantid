@@ -432,6 +432,38 @@ class CWSCDReductionControl(object):
 
         return True, error_message
 
+    def estimate_detector_background(self, bkgd_scan_list):
+        """ Integrate peak with background and etc...
+        Purpose:
+
+        Requirements:
+
+        Guarantees:
+
+        :param bkgd_scan_list:
+        :return:
+        """
+        raise RuntimeError('Incorrect note and documentation: Add me into workflow!')
+        # Check
+        assert isinstance(bkgd_scan_list, list)
+        assert len(bkgd_scan_list) > 2
+
+        # Load and sum
+        bkgd_ws = None
+        for pt_num in bkgd_scan_list:
+            self.load_spice_xml_file(exp_no=exp_number, scan_no=scan_number, pt_no=pt_num)
+            this_matrix_ws = AnalysisDataService.retrieve(get_raw_data_workspace_name(exp_number, scan_number, pt_num))
+            if bkgd_ws is None:
+                bkgd_ws = api.CloneWorkspace(InputWorkspace=this_matrix_ws, OutputWorkspace=special_name)
+            else:
+                bkgd_ws = bkgd_ws + this_matrix_ws
+        # END-FOR
+
+        # Average
+        bkgd_ws *= 1./len(bkgd_scan_list)
+
+        return bkgd_ws.name()
+
     def existDataFile(self, scanno, ptno):
         """
         Check whether data file for a scan or pt number exists
@@ -710,6 +742,77 @@ class CWSCDReductionControl(object):
             hkl = [hkl_v3d.X(), hkl_v3d.Y(), hkl_v3d.Z()]
 
         return True, (hkl, error)
+
+    def integrate_peaks_q(self, exp_no, scan_no):
+        """
+        Integrate peaks in Q-space
+        :param exp_no:
+        :param scan_no:
+        :return:
+        """
+        # Check inputs
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
+
+        # Get the SPICE file
+        spice_table_name = get_spice_table_name(exp_no, scan_no)
+        if AnalysisDataService.doesExist(spice_table_name) is False:
+            self.download_spice_file(exp_no, scan_no, False)
+            self.load_spice_scan_file(exp_no, scan_no)
+
+        # Find peaks & get the peak centers
+        spice_table = AnalysisDataService.retrieve(spice_table_name)
+        num_rows = spice_table.rowCount()
+
+        sum_peak_center = [0., 0., 0.]
+        sum_bin_counts = 0.
+
+        for i_row in xrange(num_rows):
+            pt_no = spice_table.cell(i_row, 0)
+            self.download_spice_xml_file(scan_no, pt_no, exp_no)
+            # self.load_spice_xml_file(exp_no, scan_no, pt_no)
+            self.find_peak(exp_no, scan_no, pt_no)
+            peak_ws_name = get_single_pt_peak_ws_name(exp_no, scan_no, pt_no)
+            peak_ws = AnalysisDataService.retrieve(peak_ws_name)
+            if peak_ws.getNumberPeaks() == 1:
+                peak = peak_ws.getPeak(0)
+                peak_center = peak.getQSampleFrame()
+                bin_count = peak.getBinCount()
+
+                sum_peak_center[0] += bin_count * peak_center.X()
+                sum_peak_center[1] += bin_count * peak_center.Y()
+                sum_peak_center[2] += bin_count * peak_center.Z()
+
+                sum_bin_counts += bin_count
+
+            elif peak_ws.getNumberPeaks() > 1:
+                raise NotImplementedError('More than 1 peak???')
+        # END-FOR
+
+        final_peak_center = [0., 0., 0.]
+        for i in xrange(3):
+            final_peak_center[i] = sum_peak_center[i] * (1./sum_bin_counts)
+        #final_peak_center = sum_peak_center * (1./sum_bin_counts)
+
+        print 'Avg peak center = ', final_peak_center, 'Total counts = ', sum_bin_counts
+
+        # Integrate peaks
+        total_intensity = 0.
+        for i_row in xrange(num_rows):
+            pt_no = spice_table.cell(i_row, 0)
+            md_ws_name = get_single_pt_md_name(exp_no, scan_no, pt_no)
+            peak_ws_name = get_single_pt_peak_ws_name(exp_no, scan_no, pt_no)
+            out_ws_name = peak_ws_name + '_integrated'
+            api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
+                                   PeaksWorkspace=peak_ws_name,
+                                   OutputWorkspace=out_ws_name)
+            out_peak_ws = AnalysisDataService.retrieve(out_ws_name)
+            peak = out_peak_ws.getPeak(0)
+            intensity = peak.getIntensity()
+            total_intensity += intensity
+        # END-FOR
+
+        return total_intensity
 
     def integrate_peaks(self, exp_no, scan_no, pt_list, md_ws_name,
                         peak_radius, bkgd_inner_radius, bkgd_outer_radius,
@@ -1196,6 +1299,26 @@ class CWSCDReductionControl(object):
 
         return True, ''
 
+    def refine_ub(self, exp_number, scan_run_list):
+        """
+        :param scan_run_list: list of 2-tuple as scan number and run number
+        :return:
+        """
+        # TODO/NOW/1st
+        FindUBUsingIndexedPeaks(PeaksWorkspace='Temp_UB_Peak', Tolerance=0.5)
+
+        peak_ws = AnalysisDataService.retrieve('Temp_UB_Peak')
+
+        ol = peak_ws.sample().getOrientedLattice()
+
+        """
+        a(), b(), c(), alpha()
+         'errora', 'erroralpha','errorb','errorbeta','errorc','errorgamma',
+          'getUB',
+        """
+
+        return
+
     def set_exp_number(self, exp_number):
         """ Add experiment number
         :param exp_number:
@@ -1348,37 +1471,39 @@ class CWSCDReductionControl(object):
 
         return ptlist
 
-    def estimate_detector_background(self, bkgd_scan_list):
-        """ Integrate peak with background and etc...
-        Purpose:
-        
-        Requirements:
-
-        Guarantees:
-
-        :param bkgd_scan_list: 
-        :return:
+    def survey(self, exp_number):
         """
-        raise RuntimeError('Incorrect note and documentation: Add me into workflow!')
-        # Check
-        assert isinstance(bkgd_scan_list, list)
-        assert len(bkgd_scan_list) > 2
+        """
+        # TODO/NOW/1st
+        counts_dict = dict()
+        for scan_number in xrange(1, 100000):
 
-        # Load and sum
-        bkgd_ws = None
-        for pt_num in bkgd_scan_list:
-            self.load_spice_xml_file(exp_no=exp_number, scan_no=scan_number, pt_no=pt_num)
-            this_matrix_ws = AnalysisDataService.retrieve(get_raw_data_workspace_name(exp_number, scan_number, pt_num))
-            if bkgd_ws is None:
-                bkgd_ws = api.CloneWorkspace(InputWorkspace=this_matrix_ws, OutputWorkspace=special_name)
-            else:
-                bkgd_ws = bkgd_ws + this_matrix_ws
-        # END-FOR
+          file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (root_url, exp_number, exp_number, scan_number)
+          file_name = '%s_exp%04d_scan%04d.dat' % ('HB3A', exp_number, scan_number)
+          file_name = os.path.join('/tmp/', file_name)
+          try:
+              DownloadFile(Address=file_url, Filename=file_name)
+              spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=file_name, OutputWorkspace='TempTable',
+                                                              RunInfoWorkspace='TempInfo')
+              num_rows = spice_table_ws.rowCount()
+              max_count = 0
+              max_row = 0
+              for i_row in xrange(num_rows):
+                  det_count = spice_table_ws.cell(i_row, 5)
+                  h = spice_table_ws.cell(i_row, 13)
+                  k = spice_table_ws.cell(i_row, 14)
+                  l = spice_table_ws.cell(i_row, 15)
+                  if det_count > max_count:
+                      max_count = det_count
+                      max_row = i_row
+              # print max_row, max_count
+              counts_dict[max_count] = (scan_number, max_row, h, k, l)
+          except RuntimeError as e:
+              print e
+              break
+        # END-FOR (scan_number)
 
-        # Average
-        bkgd_ws *= 1./len(bkgd_scan_list)
-
-        return bkgd_ws.name()
+        return
 
 
 def get_spice_file_name(exp_number, scan_number):
