@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/CalMuonDetectorPhases.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IFunction.h"
@@ -15,6 +16,9 @@ using API::Progress;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalMuonDetectorPhases)
+
+// Define name for temporary workspace
+const std::string CalMuonDetectorPhases::m_workspaceName = "CMDPInput";
 
 //----------------------------------------------------------------------------------------------
 /** Initializes the algorithm's properties.
@@ -114,45 +118,42 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   int nspec = static_cast<int>(ws->getNumberHistograms());
 
   // Create the fitting function f(x) = A * sin ( w * x + p )
-  std::string funcStr = createFittingFunction(nspec, freq);
-  // Create the function from string
-  API::IFunction_sptr func =
-      API::FunctionFactory::Instance().createInitialized(funcStr);
-  // Create the multi domain function
-  boost::shared_ptr<API::MultiDomainFunction> multi =
-      boost::dynamic_pointer_cast<API::MultiDomainFunction>(func);
-  // Set the domain indices
-  for (int i = 0; i < nspec; ++i) {
-    multi->setDomainIndex(i, i);
+  std::string funcStr = createFittingFunction(freq);
+
+  // Create the input string. Workspace must be in the ADS (temporarily)
+  API::AnalysisDataService::Instance().addOrReplace(m_workspaceName, ws);
+  std::ostringstream input;
+  for (int i = 0; i < nspec; i++) {
+    input << m_workspaceName << ",i" << i << ";";
   }
 
-  API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
+  auto fit = createChildAlgorithm("PlotPeakByLogValue");
   fit->initialize();
   fit->addObserver(this->progressObserver());
   setChildStartProgress(0.);
   setChildEndProgress(1.);
-  fit->setProperty("Function",
-                   boost::dynamic_pointer_cast<API::IFunction>(multi));
-  fit->setProperty("InputWorkspace", ws);
-  fit->setProperty("WorkspaceIndex", 0);
-  for (int s = 1; s < nspec; s++) {
-    std::string suffix = boost::lexical_cast<std::string>(s);
-    fit->setProperty("InputWorkspace_" + suffix, ws);
-    fit->setProperty("WorkspaceIndex_" + suffix, s);
-  }
+  fit->setPropertyValue("Function", funcStr);
+  fit->setPropertyValue("Input", input.str());
+  fit->setPropertyValue("OutputWorkspace", groupName);
+  fit->setPropertyValue("FitType", "Individual"); // each fit starts with same initial parameters
   fit->setProperty("CreateOutput", true);
-  fit->setProperty("Output", groupName);
   fit->execute();
 
+  // Get the fitting results - stored in ADS
+  std::string resultsName(groupName);
+  resGroup = boost::dynamic_pointer_cast<API::WorkspaceGroup>(
+      API::AnalysisDataService::Instance().retrieve(
+          resultsName.append("_Workspaces")));
+
   // Get the parameter table
-  API::ITableWorkspace_sptr tab = fit->getProperty("OutputParameters");
+  API::ITableWorkspace_sptr tab = fit->getProperty("OutputWorkspace");
   // Now we have our fitting results stored in tab
   // but we need to extract the relevant information, i.e.
   // the detector phases (parameter 'p') and asymmetries ('A')
   resTab = extractDetectorInfo(tab, static_cast<size_t>(nspec));
 
-  // Get the fitting results
-  resGroup = fit->getProperty("OutputWorkspace");
+  // Clear temporary workspaces out of ADS
+  clearUpADS(groupName);
 }
 
 /** Extracts detector asymmetries and phases from fitting results
@@ -164,9 +165,8 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
     const API::ITableWorkspace_sptr &paramTab, size_t nspec) {
 
   // Make sure paramTable is the right size
-  // It should contain three parameters per detector/spectrum plus 'const
-  // function value'
-  if (paramTab->rowCount() != nspec * 3 + 1) {
+  // It should contain as many rows as spectra
+  if (paramTab->rowCount() != nspec) {
     throw std::invalid_argument(
         "Can't extract detector parameters from fit results");
   }
@@ -178,14 +178,13 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
   tab->addColumn("double", "Phase");
 
   // Reference frequency, all w values should be the same
-  double omegaRef = paramTab->Double(1, 1);
+  double omegaRef = paramTab->Double(0, 3);
 
   for (size_t s = 0; s < nspec; s++) {
     // The following '3' factor corresponds to the number of function params
-    size_t specRow = s * 3;
-    double asym = paramTab->Double(specRow, 1);
-    double omega = paramTab->Double(specRow + 1, 1);
-    double phase = paramTab->Double(specRow + 2, 1);
+    double asym = paramTab->Double(s, 1);
+    double omega = paramTab->Double(s, 3);
+    double phase = paramTab->Double(s, 5);
     // If omega != omegaRef something went wrong with the fit
     if (omega != omegaRef) {
       throw std::runtime_error("Fit failed");
@@ -210,34 +209,21 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
 }
 
 /** Creates the fitting function f(x) = A * sin( w*x + p) as string
-* @param nspec :: [input] The number of domains (spectra)
-* @param freq :: [input] Hint for the frequency (w)
+* @param freq :: [input] Fixed value for the frequency (w)
 * @returns :: The fitting function as a string
 */
-std::string CalMuonDetectorPhases::createFittingFunction(int nspec,
-                                                         double freq) {
+std::string CalMuonDetectorPhases::createFittingFunction(double freq) {
 
   // The fitting function is:
   // f(x) = A * sin ( w * x + p )
   // where w is shared across workspaces
   std::ostringstream ss;
-  ss << "composite=MultiDomainFunction,NumDeriv=true;";
-  for (int s = 0; s < nspec; s++) {
-    ss << "name=UserFunction,";
-    ss << "Formula=A*sin(w*x+p),";
-    ss << "A=0.5,";
-    ss << "w=" << freq << ",";
-    ss << "p=0.;";
-  }
-  ss << "ties=(";
-  for (int s = 1; s < nspec - 1; s++) {
-    ss << "f";
-    ss << boost::lexical_cast<std::string>(s);
-    ss << ".w=f0.w,";
-  }
-  ss << "f";
-  ss << boost::lexical_cast<std::string>(nspec - 1);
-  ss << ".w=f0.w)";
+  ss << "name=UserFunction,";
+  ss << "Formula=A*sin(w*x+p),";
+  ss << "A=0.5,";
+  ss << "w=" << freq << ",";
+  ss << "p=0.5;";
+  ss << "ties=(f0.w=" << freq << ")";
 
   return ss.str();
 }
@@ -333,6 +319,20 @@ double CalMuonDetectorPhases::getEndTime() const {
     endTime = m_inputWS->readX(0).back();
   }
   return endTime;
+}
+
+/**
+ * Removes temporary workspaces from the ADS
+ */
+void CalMuonDetectorPhases::clearUpADS(const std::string &groupName) const {
+  std::ostringstream workspaces, covariance, parameters;
+  API::AnalysisDataService::Instance().remove(m_workspaceName);
+  workspaces << groupName << "_Workspaces";
+  API::AnalysisDataService::Instance().deepRemoveGroup(workspaces.str());
+  covariance << groupName << "_NormalisedCovarianceMatrices";
+  API::AnalysisDataService::Instance().deepRemoveGroup(covariance.str());
+  parameters << groupName << "_Parameters";
+  API::AnalysisDataService::Instance().deepRemoveGroup(parameters.str());
 }
 
 } // namespace Algorithms

@@ -63,7 +63,7 @@ private:
                     std::string groupName, API::ITableWorkspace_sptr &resTab,
                     API::WorkspaceGroup_sptr &resGroup);
   /// Create the fitting function as string
-  std::string createFittingFunction(int nspec, double freq);
+  std::string createFittingFunction(double freq);
   /// Extract asymmetry and phase from fitting results
   API::ITableWorkspace_sptr
   extractDetectorInfo(const API::ITableWorkspace_sptr &paramTab, size_t nspec);
@@ -73,8 +73,12 @@ private:
   double getStartTime() const;
   /// Get end time for fit
   double getEndTime() const;
+  /// Remove temporary workspaces from ADS
+  void clearUpADS(const std::string &groupName) const;
   /// Pointer to input workspace
   API::MatrixWorkspace_sptr m_inputWS;
+  /// Name of workspace to put in ADS temporarily
+  const static std::string m_workspaceName;
 };
 } // namespace Algorithms
 } // namespace Mantid
