@@ -134,4 +134,41 @@ public:
 
 };
 
+std::string random_string(size_t length) {
+  auto randchar = []() -> char {
+    const char charset[] = "0123456789"
+                           "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                           "abcdefghijklmnopqrstuvwxyz";
+    const size_t max_index = (sizeof(charset) - 1);
+    return charset[rand() % max_index];
+  };
+  std::string str(length, 0);
+  std::generate_n(str.begin(), length, randchar);
+  return str;
+}
+
+class StringTokenizerTestPerformance : public CxxTest::TestSuite {
+private:
+public:
+  void test_oneLargeString() {
+
+    std::size_t length(200000000);
+    std::string oneBigString = random_string(length);
+    for (size_t i = 0; i < length; i += 10)
+      oneBigString[i] = ';';
+    // oneBigString.replace(i,1,1,';');
+    auto start = std::chrono::system_clock::now();
+    auto tokenizer1 = Mantid::Kernel::StringTokenizer(
+        oneBigString, ";",
+        Mantid::Kernel::StringTokenizer::TOK_TRIM |
+            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    auto end = std::chrono::system_clock::now();
+    TS_ASSERT_EQUALS(tokenizer1.count(), length / 10 + 1);
+    std::chrono::duration<double> elapsed_seconds = end - start;
+
+    std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+    std::cout << "<" << tokenizer1[1] << " " << std::endl;
+  }
+};
+
 #endif // MANTID_SUPPORTTEST_H_
