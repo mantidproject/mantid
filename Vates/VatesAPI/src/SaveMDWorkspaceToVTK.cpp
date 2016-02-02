@@ -5,7 +5,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "boost/pointer_cast.hpp"
+
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
 
@@ -44,15 +44,21 @@ namespace VATES{
     declareProperty(new Mantid::API::FileProperty("Filename", "", Mantid::API::FileProperty::Save,
       extensions, Mantid::Kernel::Direction::Input),
       "Save location.");
-    auto normalizations = pimpl->getAllowedNormalizationsInStringRepresentation();
 
+    auto normalizations = pimpl->getAllowedNormalizationsInStringRepresentation();
     declareProperty(
       "Normalization", "AutoSelect",
       boost::make_shared<Mantid::Kernel::StringListValidator>(normalizations),
       "The visual normalization option. The automatic default will choose a normalization based on your data type and instrument.");
 
+    auto thresholds = pimpl->getAllowedThresholdsInStringRepresentation();
+    declareProperty(
+          "ThresholdRange", "IgnoreZerosThresholdRange",
+          boost::make_shared<Mantid::Kernel::StringListValidator>(normalizations),
+          "The threshold range. Currently either no threshold or a ignore-zeros policy can be applied.");
 
-    // TODO: Add threshold property
+
+    // TODO: if 4D add time slice selection
   }
 
   void SaveMDWorkspaceToVTK::exec() {
@@ -63,13 +69,16 @@ namespace VATES{
     std::string normalizationInStringRepresentation = this->getProperty("Normalization");
     auto normalization = pimpl->translateStringToVisualNormalization(normalizationInStringRepresentation);
 
+    std::string thresholdRangeInStringRepresentation = this->getProperty("ThresholdRange");
+    auto thresholdRange = pimpl->translateStringToThresholdRange(thresholdRangeInStringRepresentation);
+
     // Save workspace into file
     if (auto histoWS = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(inputWS)) {
-      pimpl->saveMDHistoWorkspace(histoWS, filename, normalization);
+      pimpl->saveMDHistoWorkspace(histoWS, filename, normalization, thresholdRange);
     }
     else {
       auto eventWS = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(inputWS);
-      pimpl->saveMDEventWorkspace(eventWS, filename, normalization);
+      pimpl->saveMDEventWorkspace(eventWS, filename, normalization, thresholdRange);
     }
   }
 
@@ -81,6 +90,11 @@ namespace VATES{
     if (!boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(inputWS) &&
         !boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(inputWS)) {
       errorMessage.emplace("InputWorkspace", "You can only save MDHisto or MDEvent workspaces.");
+    }
+
+    // Check for the dimensionality
+    if (pimpl->is4DWorkspace(inputWS)) {
+      errorMessage.emplace("InputWorkspace", "The workspace must be 3D or less. You can use a slicing operaiton to remove a dimension.");
     }
 
     // Check for file location

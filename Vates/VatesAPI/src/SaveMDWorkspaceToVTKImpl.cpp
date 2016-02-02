@@ -28,6 +28,7 @@
 
 #include "MantidKernel/make_unique.h"
 #include <memory>
+#include <boost/make_shared.hpp>
 
 namespace {
 class NullProgressAction : public Mantid::VATES::ProgressAction
@@ -46,8 +47,6 @@ std::string getFullFilePathWithExtension(std::string filename, const std::string
   auto fullFilename = filename + extension;
   return fullFilename;
 }
-
-
 }
 
 
@@ -58,20 +57,20 @@ const std::string SaveMDWorkspaceToVTKImpl::structuredGridExtension = ".vts";
 const std::string SaveMDWorkspaceToVTKImpl::unstructuredGridExtension = ".vtu";
 
 SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl() {
-  setupNormalization();
+  setupMembers();
 }
 
 /**
  * Save an MDHisto workspace to a vts file.
  * @param histoWS: the histo workspace which is to be saved.
  * @param filename: the name of the file to which the workspace is to be saved.
+ * @param normalization: the visual normalization option
+ * @param thresholdRange: a plolicy for the threshold range
  */
 void SaveMDWorkspaceToVTKImpl::saveMDHistoWorkspace(Mantid::API::IMDHistoWorkspace_sptr histoWS,
-  std::string filename, VisualNormalization normalization) const {
-  auto fullFilename = getFullFilePathWithExtension(filename, structuredGridExtension);
+  std::string filename, VisualNormalization normalization, ThresholdRange_scptr thresholdRange) const {
 
-  // TODO:Optionally ignore zeros
-  auto thresholdRange = boost::make_shared<IgnoreZerosThresholdRange>();
+  auto fullFilename = getFullFilePathWithExtension(filename, structuredGridExtension);
 
   // Define a time slice.
   double time = selectTimeSliceValue(histoWS);
@@ -104,9 +103,11 @@ void SaveMDWorkspaceToVTKImpl::saveMDHistoWorkspace(Mantid::API::IMDHistoWorkspa
  * Save an MDEvent workspace to a vtu file.
  * @param eventWS: the event workspace which is to be saved.
  * @param filename: the name of the file to which the workspace is to be saved.
+ * @param normalization: the visual normalization option
+ * @param thresholdRange: a plolicy for the threshold range
  */
 void SaveMDWorkspaceToVTKImpl::saveMDEventWorkspace(Mantid::API::IMDEventWorkspace_sptr eventWS,
-  std::string filename, VisualNormalization normalization) const {
+  std::string filename, VisualNormalization normalization, ThresholdRange_scptr thresholdRange) const {
 
 }
 
@@ -136,12 +137,31 @@ VisualNormalization SaveMDWorkspaceToVTKImpl::translateStringToVisualNormalizati
   return m_normalizations.at(normalization);
 }
 
-void SaveMDWorkspaceToVTKImpl::setupNormalization() {
+void SaveMDWorkspaceToVTKImpl::setupMembers() {
   m_normalizations.insert(std::make_pair("AutoSelect", VisualNormalization::AutoSelect));
   m_normalizations.insert(std::make_pair("NoNormalization", VisualNormalization::NoNormalization));
   m_normalizations.insert(std::make_pair("NumEventsNormalization", VisualNormalization::NumEventsNormalization));
   m_normalizations.insert(std::make_pair("VolumeNormalization", VisualNormalization::VolumeNormalization));
+
+  m_thresholds.push_back("IgnoreZerosThresholdRange");
+  m_thresholds.push_back("NoThresholdRange");
 }
+
+std::vector<std::string> SaveMDWorkspaceToVTKImpl::getAllowedThresholdsInStringRepresentation() const {
+  return m_thresholds;
+}
+
+
+ThresholdRange_scptr SaveMDWorkspaceToVTKImpl::translateStringToThresholdRange(const std::string thresholdRange) const {
+  if (thresholdRange == m_thresholds[0]) {
+      return boost::make_shared<IgnoreZerosThresholdRange>();
+  } else if (thresholdRange == m_thresholds[1]) {
+      return boost::make_shared<NoThresholdRange>();
+  } else {
+    throw std::runtime_error("SaveMDWorkspaceToVTK: The selected threshold range seems to be incorrect.");
+  }
+}
+
 
 /**
  * Returns a time for a time slice
@@ -149,16 +169,18 @@ void SaveMDWorkspaceToVTKImpl::setupNormalization() {
  * @return either the first time entry in case of a 4D workspace or else 0.0
  */
 double SaveMDWorkspaceToVTKImpl::selectTimeSliceValue(Mantid::API::IMDWorkspace_sptr workspace) const {
-  auto actualNonIntegratedDimensionality = workspace->getNonIntegratedDimensions().size();
-  const size_t dimensionsWithTime = 4;
   double time = 0.0;
-
-  if (actualNonIntegratedDimensionality ==  dimensionsWithTime) {
+  if (is4DWorkspace(workspace)) {
       auto timeLikeDimension = workspace->getDimension(3);
       time = static_cast<double>(timeLikeDimension->getMinimum());
   }
-
   return time;
+}
+
+bool SaveMDWorkspaceToVTKImpl::is4DWorkspace(Mantid::API::IMDWorkspace_sptr workspace) const {
+  auto actualNonIntegratedDimensionality = workspace->getNonIntegratedDimensions().size();
+  const size_t dimensionsWithTime = 4;
+  return actualNonIntegratedDimensionality == dimensionsWithTime;
 }
 
 }
