@@ -19,12 +19,11 @@ class AlignComponentsTest(unittest.TestCase):
         AlignComponents(CalibrationTable="PG3_cal",
                         InputWorkspace="testWS",
                         ComponentList="bank26",
-                        Yposition=False, Zposition=False,
-                        Xrotation=False, Yrotation=False, Zrotation=False)
+                        Xposition=True)
         ws = mtd["testWS"]
         endPos = ws.getInstrument().getComponentByName("bank26").getPos()
         endRot = ws.getInstrument().getComponentByName("bank26").getRotation()
-        self.assertAlmostEqual(endPos.getX(), 1.51596)
+        self.assertAlmostEqual(endPos.getX(), 1.51596056)
         self.assertEqual(startPos.getY(), endPos.getY())
         self.assertEqual(startPos.getZ(), endPos.getZ())
         self.assertEqual(startRot, endRot)
@@ -35,12 +34,11 @@ class AlignComponentsTest(unittest.TestCase):
         AlignComponents(CalibrationTable="PG3_cal",
                         InputWorkspace=ws,
                         ComponentList="bank46",
-                        Xposition=False, Yposition=False, Zposition=False,
-                        Yrotation=False, Zrotation=False)
+                        Xrotation=True)
         endPos = ws.getInstrument().getComponentByName("bank46").getPos()
         endRot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
         self.assertEqual(startPos, endPos)
-        self.assertAlmostEqual(startRot[0], -37.5517)
+        self.assertAlmostEqual(endRot[0], -37.5516956)
         self.assertAlmostEqual(startRot[1], endRot[1])
         self.assertAlmostEqual(startRot[2], endRot[2])
 
