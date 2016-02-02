@@ -63,21 +63,22 @@ size_t TomographyIfaceViewQtGUI::g_nameSeqNo = 0;
 
 std::string TomographyIfaceViewQtGUI::g_defLocalExternalPythonPath =
 #ifdef _WIN32
-    // assume we're using Aanconda python and it is installed in c:/local
+    // assume we're using Aanconda Python and it is installed in c:/local
     // could also be c:/local/anaconda/scripts/ipython
     "c:/local/anaconda/python.exe";
 #else
-    // just use the system python, assuming is in the system path
+    // just use the system Python, assuming is in the system path
     "python";
 #endif
 
-// For paths where python third party tools are installed, if they're not
-// included in the system's python path. For example you could have put
-// the AstraToolbox package in
-// c:/local/tomo-tools/astra/astra-1.6-python27-win-x64/astra-1.6
-// Leaving this empty implies that the tools must have been installed in the
-// system python path. As an example, in the Anaconda python distribution for
-// windows it could be in: c:/local/Anaconda/Lib/site-packages/
+// For paths where Python third party tools are installed, if they're
+// not included in the system python path. For example you could have
+// put the AstraToolbox package in
+// C:/local/tomo-tools/astra/astra-1.6-python27-win-x64/astra-1.6
+// Leaving this empty implies that the tools must have been installed
+// in the system Python path. As an example, in the Anaconda python
+// distribution for windows it could be in:
+// c:/local/Anaconda/Lib/site-packages/
 std::vector<std::string> TomographyIfaceViewQtGUI::g_defAddPathPython;
 
 const std::string TomographyIfaceViewQtGUI::g_defRemotePathScripts =
@@ -93,9 +94,9 @@ const std::string TomographyIfaceViewQtGUI::g_defOutPathLocal =
 
 const std::string TomographyIfaceViewQtGUI::g_defOutPathRemote =
 #ifdef _WIN32
-    "I:/imat/";
+    "I:/imat-data/";
 #else
-    "~/imat/";
+    "~/imat-data/";
 #endif
 
 const std::string TomographyIfaceViewQtGUI::g_defParaviewPath =
@@ -112,18 +113,20 @@ const std::string TomographyIfaceViewQtGUI::g_defParaviewAppendPath =
     "paraview";
 #endif
 
+const std::string notAvailTool = "This tool is not available on this platform";
+
 const std::string TomographyIfaceViewQtGUI::g_defOctopusVisPath =
 #ifdef _WIN32
     "C:/Program Files/Octopus Imaging/Octopus Visualisation";
 #else
-    "This tool is not available on this platform";
+    notAvailTool;
 #endif
 
 const std::string TomographyIfaceViewQtGUI::g_defOctopusAppendPath =
 #ifdef _WIN32
     "octoviewer3d.exe";
 #else
-    "This tool is not available";
+    notAvailTool;
 #endif
 
 const std::string TomographyIfaceViewQtGUI::g_defProcessedSubpath = "processed";
@@ -155,6 +158,7 @@ const std::string TomographyIfaceViewQtGUI::g_defPathReconOut =
     "~/imat/";
 #endif
 
+// TODO: these should become part of the model
 const std::vector<std::pair<
     std::string, std::string>> TomographyIfaceViewQtGUI::g_astra_methods = {
     std::make_pair("FBP3D_CUDA", "FBP 3D: Filtered Back-Propagation"),
@@ -1093,7 +1097,8 @@ void TomographyIfaceViewQtGUI::reconstructClicked() {
   }
 }
 
-// TODO: move to the presenter / merge in processRunRecon
+// TODO: This should not be here in the view. Hopefully this settles soon.
+// Move this logic to the presenter / merge in processRunRecon
 void TomographyIfaceViewQtGUI::processLocalRunRecon() {
   const std::string toolName = currentReconTool();
   try {
@@ -1353,6 +1358,7 @@ void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
   // Local processes
   for (size_t i = 0; i < m_localJobsStatus.size(); ++i) {
 
+    // This won't work well, at least on windows.
     // bool runs = Poco::isRunning(
     //    boost::lexical_cast<Poco::Process::PID>(m_localJobsStatus[i].id));
     // if (!runs)
@@ -1368,9 +1374,8 @@ void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     t->setItem(ii, 3, new QTableWidgetItem(
                           QString::fromStdString(m_localJobsStatus[i].status)));
 
-    // beware "Exit" is called "Exited" on the web portal, but the REST
-    // responses
-    // call it "Exit"
+    // beware "Exit" is called "Exited" on the web portal, but the
+    // REST responses call it "Exit"
     if (std::string::npos != m_localJobsStatus[i].status.find("Exit") ||
         std::string::npos != m_localJobsStatus[i].status.find("Suspend"))
       t->item(ii, 3)->setBackground(QColor(255, 120, 120)); // Qt::red
@@ -1821,12 +1826,11 @@ void TomographyIfaceViewQtGUI::browseEnergyOutputClicked() {
 std::string
 TomographyIfaceViewQtGUI::checkUserBrowsePath(QLineEdit *le,
                                               const std::string &userMsg) {
-  QString algPrev =
-      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
 
   QString prev;
   if (le->text().isEmpty()) {
-    prev = algPrev;
+    prev =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   } else {
     prev = le->text();
   }

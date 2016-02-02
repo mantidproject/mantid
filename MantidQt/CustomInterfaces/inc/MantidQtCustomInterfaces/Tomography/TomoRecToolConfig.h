@@ -75,8 +75,8 @@ public:
    */
   virtual bool valid() const { return true; }
 
-  /// A vector tomographic reconstruction algorithms described by a name-in-tool
-  /// and a human-readable-name
+  /// A vector of tomographic reconstruction algorithms described by a
+  /// name-in-tool and a human-readable-name
   typedef std::vector<std::pair<std::string, std::string>> TomoReconAlgs;
 
   virtual TomoReconAlgs algorithmsAvailable() const { return m_algs; };

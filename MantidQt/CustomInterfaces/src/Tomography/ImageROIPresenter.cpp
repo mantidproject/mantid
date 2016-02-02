@@ -160,11 +160,14 @@ void ImageROIPresenter::processNewStack() {
   for (size_t i = 0; i < imgs.size(); i++) {
     const std::string extShort = imgs[i].substr(imgs[i].size() - 3);
     const std::string extLong = imgs[i].substr(imgs[i].size() - 4);
-    if (extShort != "fit" && extLong != "fits") {
+    const std::string expectedShort = "fit";
+    const std::string expectedLong = "fit";
+    if (extShort != expectedShort && extLong != expectedLong) {
       m_view->userWarning("Invalid files found in the stack of images",
                           "Found files with unrecognized extension. Expected "
-                          "files with extension 'fit' or 'fits' but found: " +
-                              imgs[i]);
+                          "files with extension '" +
+                              expectedShort + "' or '" + expectedLong +
+                              "' but found: " + imgs[i]);
       return;
     }
   }
@@ -259,8 +262,7 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   allPaths = imgs[i];
   i++;
   while (i < imgs.size()) {
-    allPaths.append(", ");
-    allPaths.append(imgs[i++]);
+    allPaths.append(", " + imgs[i++]);
   }
   loadFITSImage(allPaths, wsName);
 

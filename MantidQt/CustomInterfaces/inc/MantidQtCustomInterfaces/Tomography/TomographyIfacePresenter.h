@@ -97,6 +97,7 @@ private:
   /// Associated model for this presenter (MVP pattern)
   const boost::scoped_ptr<TomographyIfaceModel> m_model;
 
+  // TODO: replace this with an std::mutex. Also below for threads.
   // mutex for the job status info update operations on the view
   QMutex *m_statusMutex;
 

@@ -162,9 +162,10 @@ void TomographyIfaceModel::setupComputeResource() {
   }
   m_computeResStatus.push_back(true);
 
-  // put local as second compute resource, and enable it by default
-  // TODO: some basic sanity checks could be done before enabling it,
-  // including availability of the necessaryy external tools
+  // finally, put local as last compute resource, and enable it by default
+  // TODO: as in validateCompResource() some basic sanity checks could
+  // be done before enabling it, including availability of the
+  // necessaryy external tools
   m_computeResStatus.push_back(true);
 }
 
