@@ -51,14 +51,14 @@ public:
     TS_ASSERT_EQUALS(tab->columnCount(), 3);
     // Test asymmetries
     TS_ASSERT_DELTA(tab->Double(0, 1), 0.099, 0.001);
-    TS_ASSERT_DELTA(tab->Double(1, 1), 0.099, 0.001);
-    TS_ASSERT_DELTA(tab->Double(2, 1), 0.099, 0.001);
+    TS_ASSERT_DELTA(tab->Double(1, 1), 0.100, 0.001);
+    TS_ASSERT_DELTA(tab->Double(2, 1), 0.100, 0.001);
     TS_ASSERT_DELTA(tab->Double(3, 1), 0.100, 0.001);
     // Test phases
-    TS_ASSERT_DELTA(tab->Double(0, 2), 6.281, 0.001);
-    TS_ASSERT_DELTA(tab->Double(1, 2), 0.785, 0.001);
-    TS_ASSERT_DELTA(tab->Double(2, 2), 1.570, 0.001);
-    TS_ASSERT_DELTA(tab->Double(3, 2), 2.354, 0.001);
+    TS_ASSERT_DELTA(tab->Double(0, 2), 6.283, 0.001);
+    TS_ASSERT_DELTA(tab->Double(1, 2), 0.786, 0.001);
+    TS_ASSERT_DELTA(tab->Double(2, 2), 1.571, 0.001);
+    TS_ASSERT_DELTA(tab->Double(3, 2), 2.355, 0.001);
   }
 
   void testBadWorkspaceUnits() {
