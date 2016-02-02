@@ -60,6 +60,15 @@ $SCL_ON_RHEL6 "cmake -DMANTID_DATA_STORE=${MANTID_DATA_STORE} .."
 ###############################################################################
 $SCL_ON_RHEL6 "cmake --build . -- StandardTestData"
 
+###############################################################################
+# Add tests from the examples available on the mantidproject wiki pages
+# The script produces additional RST pages derived from examples.
+# These will be run togethe with the standard docs-test RST pages.
+###############################################################################
+if [[ "${ON_UBUNTU}" == true ]] && [[ ${JOB_NAME} == *wikitests* ]]; then
+  $SCL_ON_RHEL6 "python ${WORKSPACE}/tools/scripts/TestWikiPython.py -o ${WORKSPACE}/docs/source/mwTests"
+fi
+
 #####################################################################################
 # Run tests
 #####################################################################################
