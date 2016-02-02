@@ -13,7 +13,7 @@ ANALYSIS_DIR = ''
 
 
 class Files:
-    def __init__(self, instr, RawDir="", Analysisdir="", UnitTest=False, debugMode=False, forceRootDirFromScripts=True, inputInstDir=''):
+    def __init__(self, instr, RawDir="", Analysisdir="", UnitTest=False, debugMode=False, forceRootDirFromScripts=False, inputInstDir=''):
         global ANALYSIS_DIR
         self.debugMode = False
         if debugMode:
