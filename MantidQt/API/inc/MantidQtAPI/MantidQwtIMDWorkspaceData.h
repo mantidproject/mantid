@@ -13,34 +13,36 @@
  * It implements the QwtData interface.
  *
  */
-class EXPORT_OPT_MANTIDQT_API MantidQwtIMDWorkspaceData : public MantidQwtWorkspaceData
-{
+class EXPORT_OPT_MANTIDQT_API MantidQwtIMDWorkspaceData
+    : public MantidQwtWorkspaceData {
 public:
-
   /// For PlotAxisChoice, auto-determine it
   static const int PlotAuto = -2;
   /// For PlotAxisChoice, distance from start of line
   static const int PlotDistance = -1;
 
-  MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_const_sptr workspace, const bool logScale,
-      Mantid::Kernel::VMD start = Mantid::Kernel::VMD(), Mantid::Kernel::VMD end = Mantid::Kernel::VMD(),
+  MantidQwtIMDWorkspaceData(
+      Mantid::API::IMDWorkspace_const_sptr workspace, const bool logScale,
+      Mantid::Kernel::VMD start = Mantid::Kernel::VMD(),
+      Mantid::Kernel::VMD end = Mantid::Kernel::VMD(),
       Mantid::API::MDNormalization normalize = Mantid::API::NoNormalization,
       bool isDistribution = false);
 
-  MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data);
+  MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData &data);
   MantidQwtIMDWorkspaceData &operator=(const MantidQwtIMDWorkspaceData &);
   virtual ~MantidQwtIMDWorkspaceData();
 
   virtual QwtData *copy() const;
-  virtual MantidQwtIMDWorkspaceData* copy(Mantid::API::IMDWorkspace_sptr workspace) const;
+  virtual MantidQwtIMDWorkspaceData *
+  copy(Mantid::API::IMDWorkspace_sptr workspace) const;
 
   virtual size_t size() const;
   virtual double x(size_t i) const;
   virtual double y(size_t i) const;
 
-  double e(size_t i)const;
-  double ex(size_t i)const;
-  size_t esize()const;
+  double e(size_t i) const;
+  double ex(size_t i) const;
+  size_t esize() const;
   double getYMin() const;
   double getYMax() const;
 
@@ -52,10 +54,9 @@ public:
   QString getYAxisLabel() const;
   int currentPlotXAxis() const;
 
-
   /// Inform the data that it is to be plotted on a log y scale
   void setLogScale(bool on);
-  bool logScale()const{return m_logScale;}
+  bool logScale() const { return m_logScale; }
   void saveLowestPositiveValue(const double v);
   bool setAsDistribution(bool on = true);
 
@@ -64,7 +65,6 @@ public:
   void setWaterfallPlot(bool on);
 
 private:
-
   void cacheLinePlot();
   void calculateMinMax();
   void choosePlotAxis();
@@ -116,8 +116,9 @@ private:
   /// Original workspace (for purposes of showing alternative coordinates)
   boost::weak_ptr<const Mantid::API::IMDWorkspace> m_originalWorkspace;
 
-  /// Optional coordinate transformation to go from distance on line to another coordinate
-  Mantid::API::CoordTransform * m_transform;
+  /// Optional coordinate transformation to go from distance on line to another
+  /// coordinate
+  Mantid::API::CoordTransform *m_transform;
 
   /// Choice of which X axis to plot.
   int m_plotAxis;
@@ -135,6 +136,5 @@ private:
 
   /// y-axis offset for waterfall plots
   double m_offsetY;
-
 };
 #endif

@@ -596,11 +596,20 @@ public:
     std::vector<signal_t> e;
     ws->getLinePlot(start, end, NoNormalization, x, y, e);
 
-    TS_ASSERT_EQUALS(y.size(), 10);
-    // Masked value should be zero
-    TS_ASSERT(boost::math::isnan(y[2]));
-    // Unmasked value
-    TS_ASSERT_DELTA(y[9], 9.0, 1e-5);
+    // Masked values should be omitted
+    TS_ASSERT_EQUALS(y.size(), 5);
+
+    // Unmasked values
+    TS_ASSERT_DELTA(y[0], 5.0, 1e-5);
+    TS_ASSERT_DELTA(y[1], 6.0, 1e-5);
+    TS_ASSERT_DELTA(y[2], 7.0, 1e-5);
+    TS_ASSERT_DELTA(y[3], 8.0, 1e-5);
+    TS_ASSERT_DELTA(y[4], 9.0, 1e-5);
+
+    TS_ASSERT_EQUALS(x.size(), 6);
+    TS_ASSERT_DELTA(x[0], 4.5, 1e-5);
+    TS_ASSERT_DELTA(x[1], 5.5, 1e-5);
+    TS_ASSERT_DELTA(x[2], 6.5, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------

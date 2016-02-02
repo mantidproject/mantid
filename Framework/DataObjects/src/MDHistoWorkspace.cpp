@@ -560,20 +560,29 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
     e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
     return;
   } else {
-    // Get the first point
+    // Get the first unmasked point
     std::set<coord_t>::iterator it;
     it = boundaries.begin();
 
-    coord_t lastLinePos = *it;
-    VMD lastPos = start + (dir * lastLinePos);
+    coord_t lastLinePos;
+    size_t linearIndex;
+    VMD lastPos;
+    do {
+      lastLinePos = *it;
+      lastPos = start + (dir * lastLinePos);
+      linearIndex = this->getLinearIndexAtCoord(lastPos.getBareArray());
+      ++it;
+    } while (this->getIsMaskedAt(linearIndex));
+    --it; // Go back to before the unmasked region
+    lastLinePos = *it;
     x.push_back(lastLinePos);
+    lastPos = start + (dir * lastLinePos);
 
     ++it;
 
     for (; it != boundaries.end(); ++it) {
       // This is our current position along the line
       coord_t linePos = *it;
-      x.push_back(linePos);
 
       // This is the full position at this boundary
       VMD pos = start + (dir * linePos);
@@ -582,14 +591,12 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
       VMD middle = (pos + lastPos) * 0.5;
 
       // Find the signal in this bin
-      size_t linearIndex = this->getLinearIndexAtCoord(middle.getBareArray());
+      linearIndex = this->getLinearIndexAtCoord(middle.getBareArray());
       if (linearIndex < m_length) {
 
         // Is the signal here masked?
-        if (this->getIsMaskedAt(linearIndex)) {
-          y.push_back(MDMaskValue);
-          e.push_back(MDMaskValue);
-        } else {
+        if (!this->getIsMaskedAt(linearIndex)) {
+          x.push_back(linePos);
           signal_t normalizer = getNormalizationFactor(normalize, linearIndex);
           // And add the normalized signal/error to the list too
           auto signal = this->getSignalAt(linearIndex) * normalizer;
@@ -604,6 +611,7 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
         lastPos = pos;
       } else {
         // Invalid index. This shouldn't happen
+        x.push_back(linePos);
         y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
         e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
       }
