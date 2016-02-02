@@ -25,7 +25,7 @@ void for_each_token(InputIt first, InputIt last, ForwardIt s_first,
 }
 
 std::vector<std::string> split(const std::string &str,
-                               const std::string &delims = " ",
+                               const std::string &delims,
                                bool skip_empty = false) {
   std::vector<std::string> output;
   for_each_token(cbegin(str), cend(str), cbegin(delims), cend(delims),
