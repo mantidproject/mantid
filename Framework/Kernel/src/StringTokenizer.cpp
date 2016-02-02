@@ -115,13 +115,17 @@ std::vector<std::string> split3(const std::string &str,
  * @param separators List of characters used to separate the input string.
  * @param options  tokenizer settings. The number can be found using the
  * StringTokenizer::Options enum
+ * @throw Throws std::runtime_error if options > 7.
  * @return a const reference to the index'th token.
  */
 Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
                                                  const std::string &separators,
                                                  unsigned options) {
-  // check options variable is in the range 0-3.
-  assert(options < 8);
+  // check options variable is in the range 0-7.
+  if (options > 7)
+    throw std::runtime_error(
+        "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
+        std::to_string(options));
   // if str is empty, then there is no workt to do. exit early.
   if (str.empty())
     return;
@@ -157,11 +161,6 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
     break;
   case 7:
     m_tokens = split3(str, separators);
-    break;
-  default:
-    throw std::runtime_error(
-        "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
-        std::to_string(options));
     break;
   }
 };
