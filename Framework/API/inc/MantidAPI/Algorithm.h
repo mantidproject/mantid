@@ -1,9 +1,8 @@
 #ifndef MANTID_API_ALGORITHM_H_
 #define MANTID_API_ALGORITHM_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include <atomic>
+
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyManagerOwner.h"
@@ -356,9 +355,9 @@ protected:
   virtual void fillHistory();
 
   /// Set to true to stop execution
-  bool m_cancel;
+  std::atomic<bool> m_cancel;
   /// Set if an exception is thrown, and not caught, within a parallel region
-  bool m_parallelException;
+  std::atomic<bool> m_parallelException;
 
   friend class WorkspaceHistory; // Allow workspace history loading to adjust
                                  // g_execCount
