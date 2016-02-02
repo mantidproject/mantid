@@ -248,4 +248,4 @@ Usage
 .. toctree::
    :maxdepth: 1
 
-   /../../api/python/index
+   api/python/index
