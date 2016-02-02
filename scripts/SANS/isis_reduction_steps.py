@@ -1067,13 +1067,13 @@ class Mask_ISIS(ReductionStep):
         instrum.load_empty(wksp_name)
 
         # apply masking to the current detector
-        self.execute(None, wksp_name, instrum)
+        self.execute(None, wksp_name)
 
         # now the other detector
         other = instrum.other_detector().name()
         original = instrum.cur_detector().name()
         instrum.setDetector(other)
-        self.execute(None, wksp_name, instrum)
+        self.execute(None, wksp_name)
         # reset the instrument to mask the currecnt detector
         instrum.setDetector(original)
 
