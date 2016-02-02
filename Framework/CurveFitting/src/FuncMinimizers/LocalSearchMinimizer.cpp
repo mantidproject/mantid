@@ -28,6 +28,21 @@ using Functions::Chebfun;
 namespace {
 
 static size_t iiter = 0;
+std::string suffix(size_t i) {
+  return "_" + boost::lexical_cast<std::string>(iiter) + "_" +
+         boost::lexical_cast<std::string>(i);
+}
+std::string suffix() {
+  return "_" + boost::lexical_cast<std::string>(iiter);
+}
+
+void check_cheb(const Chebfun& cheb) {
+  auto x = cheb.linspace();
+  auto y = cheb(x);
+  auto si = suffix();
+  CHECK_OUT_2("x" + si, x);
+  CHECK_OUT_2("y" + si, y);
+}
 
 typedef boost::optional<GSLVector> OptionalParameters;
 
@@ -255,66 +270,6 @@ std::tuple<double, double> findMinimum(const Chebfun& cheb) {
 
 //-----------------------------------------------------------------------------
 /// Perform an iteration of the Newton algorithm.
-OptionalParameters iterationNewton(API::ICostFunction &function) {
-  auto fittingFunction =
-      dynamic_cast<CostFunctions::CostFuncFitting *>(&function);
-  auto n = function.nParams();
-  if (fittingFunction) {
-    auto hessian = fittingFunction->getHessian();
-    auto derivatives = fittingFunction->getDeriv();
-
-    // Scaling factors
-    std::vector<double> scalingFactors(n);
-
-    for (size_t i = 0; i < n; ++i) {
-      double tmp = hessian.get(i, i);
-      scalingFactors[i] = sqrt(tmp);
-      if (tmp == 0.0) {
-        return OptionalParameters();
-      }
-    }
-
-    // Apply scaling
-    for (size_t i = 0; i < n; ++i) {
-      double d = derivatives.get(i);
-      derivatives.set(i, d / scalingFactors[i]);
-      for (size_t j = i; j < n; ++j) {
-        const double f = scalingFactors[i] * scalingFactors[j];
-        double tmp = hessian.get(i, j);
-        hessian.set(i, j, tmp / f);
-        if (i != j) {
-          tmp = hessian.get(j, i);
-          hessian.set(j, i, tmp / f);
-        }
-      }
-    }
-
-    // Parameter corrections
-    GSLVector corrections(n);
-    // To find dx solve the system of linear equations   hessian * corrections == -derivatives
-    derivatives *= -1.0;
-    hessian.solve(derivatives, corrections);
-
-    // Apply the corrections
-    auto parameters = getParameters(function);
-    auto oldParameters = parameters;
-    auto oldCostFunction = function.val();
-    for (size_t i = 0; i < n; ++i) {
-      parameters[i] += corrections.get(i) / scalingFactors[i];
-    }
-    
-    if (!checkParameters(parameters)) {
-      return OptionalParameters();
-    }
-
-    std::cerr << "Newton " << std::endl;
-    return parameters;
-  }
-  return OptionalParameters();
-}
-
-//-----------------------------------------------------------------------------
-/// Perform an iteration of the Newton algorithm.
 OptionalParameters iterationLMStep(API::ICostFunction &function, const GSLVector& newtonParameters) {
   auto oldParameters = getParameters(function);
   GSLVector direction = newtonParameters;
@@ -334,14 +289,13 @@ OptionalParameters iterationLMStep(API::ICostFunction &function, const GSLVector
     if (!checkParameters(parameters.get())) {
       parameters = OptionalParameters();
     } else {
-      std::cerr << "LM step " << valueMin << ' ' << bool(parameters) << std::endl;
+      std::cerr << "LM step " << valueMin << ' ' << cheb.size() << ' ' << cheb.startX() << ' ' << cheb.endX() << std::endl;
     }
   } catch (std::runtime_error&) {
     parameters = OptionalParameters();
   }
   return parameters;
 }
-
 //-----------------------------------------------------------------------------
 /// Perform an iteration of the gradient descent algorithm.
 OptionalParameters iterationGradientDescent(API::ICostFunction &function) {
@@ -379,6 +333,68 @@ OptionalParameters iterationGradientDescent(API::ICostFunction &function) {
   std::cerr << "gradient " << valueMin << std::endl;
   return params;
 }
+
+
+//-----------------------------------------------------------------------------
+/// Perform an iteration of the Newton algorithm.
+OptionalParameters iterationNewton(API::ICostFunction &function, bool smallChange) {
+  auto fittingFunction =
+      dynamic_cast<CostFunctions::CostFuncFitting *>(&function);
+  if (fittingFunction) {
+    auto n = function.nParams();
+    auto parameters = getParameters(function);
+
+    auto hessian = fittingFunction->getHessian();
+    auto negativeDerivatives = fittingFunction->getDeriv();
+    negativeDerivatives *= -1.0;
+
+    // Calculate corrections to the parameters
+    GSLVector corrections(n);
+    // Scaling factors
+    std::vector<double> scalingFactors(n);
+
+    for (size_t i = 0; i < n; ++i) {
+      double tmp = hessian.get(i, i);
+      scalingFactors[i] = sqrt(tmp);
+      if (tmp == 0.0) {
+        return OptionalParameters();
+      }
+    }
+
+    // Apply scaling
+    for (size_t i = 0; i < n; ++i) {
+      double d = negativeDerivatives.get(i);
+      negativeDerivatives.set(i, d / scalingFactors[i]);
+      for (size_t j = i; j < n; ++j) {
+        const double f = scalingFactors[i] * scalingFactors[j];
+        double tmp = hessian.get(i, j);
+        hessian.set(i, j, tmp / f);
+        if (i != j) {
+          tmp = hessian.get(j, i);
+          hessian.set(j, i, tmp / f);
+        }
+      }
+    }
+
+    // To find dx solve the system of linear equations   hessian * corrections
+    // == -derivatives
+    hessian.solve(negativeDerivatives, corrections);
+
+    // Apply the corrections
+    for (size_t i = 0; i < n; ++i) {
+      parameters[i] += corrections.get(i) / scalingFactors[i];
+    }
+
+    if (!checkParameters(parameters)) {
+      return OptionalParameters();
+    }
+
+    std::cerr << "Newton " << std::endl;
+    return parameters;
+  }
+  return OptionalParameters();
+}
+
 
 //-----------------------------------------------------------------------------
 /// 
@@ -453,11 +469,85 @@ void initializeDirections(API::ICostFunction &function,
   }
 }
 
+//-----------------------------------------------------------------------------
+/// Calculate eigenvalues and eigenvectors of the hessian.
+void eigenSystem(const API::ICostFunction &function, GSLVector &e, GSLMatrix &V) {
+  auto fittingFunction =
+      dynamic_cast<const CostFunctions::CostFuncFitting *>(&function);
+  if (fittingFunction) {
+    auto n = function.nParams();
+
+    auto hessian = fittingFunction->getHessian();
+
+    {
+      auto det = hessian.det();
+      double detRatio = det;
+      for(size_t i = 0; i < n; ++i) {
+        detRatio /= hessian.get(i,i);
+      }
+      std::cerr << "det= " << det << ' ' << detRatio << std::endl;
+      //std::cerr << "hessian=\n" << hessian << std::endl;
+    }
+    hessian.eigenSystem(e, V);
+  }
+}
+
+//-----------------------------------------------------------------------------
+OptionalParameters iterationSingularHessian(API::ICostFunction &function,
+                                            GSLVector &e, GSLMatrix &V,
+                                            bool smallChange) {
+  auto parameters = getParameters(function);
+  auto oldParameters = parameters;
+  auto oldValue = function.val();
+  bool isHessianSingular = false;
+  std::vector<size_t> badIndices;
+  std::vector<GSLVector> badSpace;
+  for (size_t i = 0; i < e.size(); ++i) {
+    if (fabs(e[i] / e[0]) <= 1e-5) {
+      badIndices.push_back(i);
+      badSpace.push_back(V.copyColumn(i));
+      isHessianSingular = true;
+    }
+  }
+
+  if (!isHessianSingular) {
+    return OptionalParameters();
+  }
+
+  std::cerr << "Eigenvalues:" << e << std::endl;
+  if (badIndices.size() > 0 && smallChange) {
+    std::cerr << "Steps in bad direction" << std::endl;
+    double minValue = oldValue;
+    GSLVector minParameters;
+    for (auto &badVector : badSpace) {
+      parameters = oldParameters;
+      parameters += badVector;
+      auto newParameters = iterationLMStep(function, parameters);
+      if (newParameters) {
+        setParameters(function, newParameters.get());
+        auto value = function.val();
+        if (value < minValue) {
+          minValue = value;
+          minParameters = newParameters.get();
+        }
+      }
+    }
+    if (minValue != oldValue) {
+      std::cerr << "Min bad value " << minValue << std::endl;
+      return OptionalParameters(minParameters);
+    } else {
+      std::cerr << "Min bad value is bad" << std::endl;
+      return OptionalParameters();
+    }
+  }
+  return iterationGradientDescent(function);
+}
+
 } // anonymous namespace
 
 //-----------------------------------------------------------------------------
 /// Constructor
-LocalSearchMinimizer::LocalSearchMinimizer() {}
+LocalSearchMinimizer::LocalSearchMinimizer():m_smallChange(false), m_badIteration(false) {}
 
 //-----------------------------------------------------------------------------
 /// Return current value of the cost function
@@ -475,6 +565,10 @@ void LocalSearchMinimizer::initialize(API::ICostFunction_sptr function,
 }
 
 //-----------------------------------------------------------------------------
+void LocalSearchMinimizer::checkStatus() {
+}
+
+//-----------------------------------------------------------------------------
 /// Do one iteration.
 bool LocalSearchMinimizer::iterate(size_t iter) {
 
@@ -483,28 +577,36 @@ bool LocalSearchMinimizer::iterate(size_t iter) {
   auto oldParameters = getParameters(*m_costFunction);
   auto oldValue = m_costFunction->val();
   std::cerr << "\nIteration " << iter << ' ' << oldValue << std::endl;
-  size_t n = m_costFunction->nParams();
 
+  GSLVector e;
+  GSLMatrix V;
 
-  OptionalParameters parameters = iterationNewton(*m_costFunction);
+  eigenSystem(*m_costFunction, e, V);
+  OptionalParameters parameters = iterationSingularHessian(*m_costFunction, e, V, m_smallChange);
 
-  if (parameters) {
-    setParameters(*m_costFunction, parameters.get());
-    auto value = m_costFunction->val();
-    std::cerr << "   " << value << std::endl;
-    if (!boost::math::isfinite(value) || value > oldValue) {
-      setParameters(*m_costFunction, oldParameters);
-      parameters = iterationLMStep(*m_costFunction, parameters.get());
+  if (!parameters) {
+    parameters = iterationNewton(*m_costFunction, m_smallChange);
+
+    if (parameters) {
       setParameters(*m_costFunction, parameters.get());
-      value = m_costFunction->val();
-    }
+      auto value = m_costFunction->val();
+      std::cerr << "   " << value << std::endl;
+      if (!boost::math::isfinite(value) || value > oldValue) {
+        std::cerr << "Going for LM step" << std::endl;
+        setParameters(*m_costFunction, oldParameters);
+        parameters = iterationLMStep(*m_costFunction, parameters.get());
+        setParameters(*m_costFunction, parameters.get());
+        value = m_costFunction->val();
+      }
 
-    if (!boost::math::isfinite(value) || value >= oldValue) {
-      setParameters(*m_costFunction, oldParameters);
-      parameters = OptionalParameters();
+      if (!boost::math::isfinite(value) || value >= oldValue) {
+        std::cerr << "Too large value" << std::endl;
+        setParameters(*m_costFunction, oldParameters);
+        parameters = OptionalParameters();
+      }
     }
   }
-  
+
   if (!parameters) {
     parameters = iterationGradientDescent(*m_costFunction);
   }
@@ -522,7 +624,9 @@ bool LocalSearchMinimizer::iterate(size_t iter) {
     return false;
   }
 
-  if (!parameters || fabs(oldValue / newValue) < 1.0001) {
+  if (!parameters || fabs(oldValue / newValue) < 1.001) { // < replace literal
+    std::cerr << "Small change" << std::endl;
+    m_smallChange = true;
     auto altParameters = iterationSingleParameters(*m_costFunction, oldValue);
     if (!altParameters) {
       return false;
@@ -531,7 +635,7 @@ bool LocalSearchMinimizer::iterate(size_t iter) {
     auto altValue = m_costFunction->val();
     if (altValue >= newValue) {
       if (parameters) {
-        if (fabs(oldValue / newValue) < 1.0 + 1e-8) {
+        if (fabs(oldValue / newValue) < 1.0 + 1e-8) { // < replace literal
           return false;
         }
         setParameters(*m_costFunction, parameters.get());
@@ -541,8 +645,15 @@ bool LocalSearchMinimizer::iterate(size_t iter) {
     } else {
       std::cerr << "Single parameter " << altValue << std::endl;
     }
+  } else {
+    m_smallChange = false;
   }
 
+  std::cerr << "Delta " << newValue - oldValue << std::endl;
+
+  if (!m_badIteration) {
+    m_oldParameters = oldParameters.toStdVector();
+  }
   return true;
 }
 

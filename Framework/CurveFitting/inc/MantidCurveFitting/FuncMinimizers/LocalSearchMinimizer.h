@@ -6,9 +6,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
-namespace Functions {
-  class Chebfun;
-}
+
+class GSLVector;
+
 namespace FuncMinimisers {
 
 /** LocalSearchMinimizer : TODO: DESCRIPTION
@@ -48,9 +48,15 @@ public:
   virtual void initialize(API::ICostFunction_sptr function,
                           size_t maxIterations = 0);
 private:
+  void checkStatus();
   /// Function to minimize.
   API::ICostFunction_sptr m_costFunction;
   std::vector<std::vector<double>> m_directions;
+  bool m_smallChange;
+  bool m_parametersInitialized;
+  std::vector<double> m_oldParameters;
+  bool m_badIteration;
+  std::vector<size_t> m_badParameters;
 };
 
 } // namespace FuncMinimisers

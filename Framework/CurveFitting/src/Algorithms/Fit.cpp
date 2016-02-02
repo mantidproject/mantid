@@ -118,6 +118,8 @@ void Fit::initConcrete() {
                   "Output is an empty string).");
   declareProperty("Surface", "", "Type of surface to output. No output if empty.");
   declareProperty("SurfaceScaling", 0.0, "Scaling factor.");
+  declareProperty("SurfaceStart", 0, "Starting index.");
+  declareProperty("SurfaceEnd", 0, "Ending index.");
 }
 
 /// Read in the properties specific to Fit.
@@ -438,9 +440,21 @@ void Fit::outputSurface() {
   }
 
   try {
-    const GSLVector& p0 = m_points.front();
-    const GSLVector& p1 = m_points.back();
+    int ii0 = getProperty("SurfaceStart");
+    int ii1 = getProperty("SurfaceEnd");
+    size_t i0 = static_cast<size_t>(ii0);
+    if (i0 >= m_points.size() - 1) {
+      i0 = 0;
+    }
+    size_t i1 = static_cast<size_t>(ii1);
+    if (i1 == 0 || i1 >= m_points.size() - 1) {
+      i1 = m_points.size() - 1;
+    }
+    const GSLVector& p0 = m_points[i0];
+    const GSLVector& p1 = m_points[i1];
     auto funCopy = m_function->clone();
+
+    std::cerr << m_points.size() << " iterations" << std::endl;
 
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
@@ -495,6 +509,29 @@ void Fit::outputSurface() {
       dx = dp.norm();
     }
 
+    declareProperty(
+        make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+            "SurfacePath", "", Kernel::Direction::Output),
+        "The name of the TableWorkspace ");
+    setPropertyValue("SurfacePath", outputBaseName + "_Path");
+    Mantid::API::ITableWorkspace_sptr path =
+        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    path->addColumn("double", "X")->setPlotType(1);
+    path->addColumn("double", "Y")->setPlotType(2);
+
+    for (size_t i = i0; i <= i1; i++) {
+      auto p = m_points[i];
+      p -= p0;
+      auto px = p.dot(x);
+      if (fabs(px) > dx) {
+        dx = fabs(px);
+      }
+      Mantid::API::TableRow row = path->appendRow();
+      row << px << p.dot(y) - yWidth / 2;
+    }
+    dx *= 2;
+    setProperty("SurfacePath", path);
+
     double scaling = getProperty("SurfaceScaling");
     if (scaling != 0.0) {
       dx *= scaling;
@@ -507,6 +544,9 @@ void Fit::outputSurface() {
         costFunc->setParameters(px);
         auto val = costFunc->val();
         auto ratio = fabs(val / val0);
+        if (j == 0 && ratio >= 1.0) {
+          break;
+        }
         if (j > 0 && ratio < 1.1 && ratio > 0.9) {
           if (val != oldVal) {
             std::cerr << "Search stopped after " << j << " iterations " << val0
@@ -546,24 +586,6 @@ void Fit::outputSurface() {
         matrix->dataY(i)[j] = val;
       }
     }
-
-    declareProperty(
-      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-            "SurfacePath", "", Kernel::Direction::Output),
-        "The name of the TableWorkspace ");
-    setPropertyValue("SurfacePath", outputBaseName + "_Path");
-    Mantid::API::ITableWorkspace_sptr path =
-        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-    path->addColumn("double", "X")->setPlotType(1);
-    path->addColumn("double", "Y")->setPlotType(2);
-
-    for (size_t i = 0; i < m_points.size(); i++) {
-      auto p = m_points[i];
-      p -= p0;
-      Mantid::API::TableRow row = path->appendRow();
-      row << p.dot(x) << p.dot(y) - yWidth / 2;
-    }
-    setProperty("SurfacePath", path);
 
   } catch (std::runtime_error &e) {
     g_log.warning() << "Cannot create the surface, error happened:" << std::endl
