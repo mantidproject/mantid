@@ -77,7 +77,7 @@ class AlignComponents(PythonAlgorithm):
                              doc="Comma separated list on instrument components to refine.")
 
         # X position
-        self.declareProperty(name="Xposition", defaultValue=True,
+        self.declareProperty(name="Xposition", defaultValue=False,
                              doc="Refine Xposition")
         condition = EnabledWhenProperty("Xposition", PropertyCriterion.IsDefault)
         self.declareProperty(name="MinXposition", defaultValue=-0.1,
@@ -90,7 +90,7 @@ class AlignComponents(PythonAlgorithm):
         self.setPropertySettings("MaxXposition", condition)
 
         # Y position
-        self.declareProperty(name="Yposition", defaultValue=True,
+        self.declareProperty(name="Yposition", defaultValue=False,
                              doc="Refine Yposition")
         condition = EnabledWhenProperty("Yposition", PropertyCriterion.IsDefault)
         self.declareProperty(name="MinYposition", defaultValue=-0.1,
@@ -103,7 +103,7 @@ class AlignComponents(PythonAlgorithm):
         self.setPropertySettings("MaxYposition", condition)
 
         # Z position
-        self.declareProperty(name="Zposition", defaultValue=True,
+        self.declareProperty(name="Zposition", defaultValue=False,
                              doc="Refine Zposition")
         condition = EnabledWhenProperty("Zposition", PropertyCriterion.IsDefault)
         self.declareProperty(name="MinZposition", defaultValue=-0.1,
@@ -116,7 +116,7 @@ class AlignComponents(PythonAlgorithm):
         self.setPropertySettings("MaxZposition", condition)
 
         # X rotation
-        self.declareProperty(name="Xrotation", defaultValue=True,
+        self.declareProperty(name="Xrotation", defaultValue=False,
                              doc="Refinerotation around X")
         condition = EnabledWhenProperty("Xrotation", PropertyCriterion.IsDefault)
         self.declareProperty(name="MinXrotation", defaultValue=-10.0,
@@ -129,7 +129,7 @@ class AlignComponents(PythonAlgorithm):
         self.setPropertySettings("MaxXrotation", condition)
 
         # Y rotation
-        self.declareProperty(name="Yrotation", defaultValue=True,
+        self.declareProperty(name="Yrotation", defaultValue=False,
                              doc="Refinerotation around Y")
         condition = EnabledWhenProperty("Yrotation", PropertyCriterion.IsDefault)
         self.declareProperty(name="MinYrotation", defaultValue=-10.0,
@@ -142,7 +142,7 @@ class AlignComponents(PythonAlgorithm):
         self.setPropertySettings("MaxYrotation", condition)
 
         # Z rotation
-        self.declareProperty(name="Zrotation", defaultValue=True,
+        self.declareProperty(name="Zrotation", defaultValue=False,
                              doc="Refinerotation around Z")
         condition = EnabledWhenProperty("Zrotation", PropertyCriterion.IsDefault)
         self.declareProperty(name="MinZrotation", defaultValue=-10.0,
