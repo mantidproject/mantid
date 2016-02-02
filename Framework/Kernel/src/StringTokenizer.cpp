@@ -42,6 +42,9 @@ void emptyFinalToken(const std::string &str, const std::string &delims,
   }
 }
 
+// generic tokenizer using std::find_first_of modelled after
+// http://tcbrindle.github.io/posts/a-quicker-study-on-tokenising/
+// MIT licensed.
 template <class InputIt, class ForwardIt, class BinOp>
 void for_each_token(InputIt first, InputIt last, ForwardIt s_first,
                     ForwardIt s_last, BinOp binary_op) {
@@ -54,6 +57,7 @@ void for_each_token(InputIt first, InputIt last, ForwardIt s_first,
   }
 }
 
+// split keeping whitespace and empty tokens.
 std::vector<std::string> split0(const std::string &str,
                                 const std::string &delims) {
   std::vector<std::string> output;
@@ -64,6 +68,7 @@ std::vector<std::string> split0(const std::string &str,
   return output;
 }
 
+// split keeping whitespace and ignoring empty tokens.
 std::vector<std::string> split1(const std::string &str,
                                 const std::string &delims) {
   std::vector<std::string> output;
@@ -75,6 +80,7 @@ std::vector<std::string> split1(const std::string &str,
   return output;
 }
 
+// split trimming whitespace and keeping empty tokens.
 std::vector<std::string> split2(const std::string &str,
                                 const std::string &delims) {
   std::vector<std::string> output;
@@ -84,32 +90,47 @@ std::vector<std::string> split2(const std::string &str,
                    trim(output.back());
                  });
   return output;
-    }
+}
 
-    std::vector<std::string> split3(const std::string &str,
-                                    const std::string &delims) {
-      std::vector<std::string> output;
-      for_each_token(cbegin(str), cend(str), cbegin(delims), cend(delims),
-                     [&output](auto first, auto second) {
-                       if (first != second) {
-                         output.emplace_back(first, second);
-                         trim(output.back());
-                         if (output.back().empty())
-                           output.pop_back();
-                       }
-                     });
+// split trimming whitespace and ignoring empty tokens.
+std::vector<std::string> split3(const std::string &str,
+                                const std::string &delims) {
+  std::vector<std::string> output;
+  for_each_token(cbegin(str), cend(str), cbegin(delims), cend(delims),
+                 [&output](auto first, auto second) {
+                   if (first != second) {
+                     output.emplace_back(first, second);
+                     trim(output.back());
+                     if (output.back().empty())
+                       output.pop_back();
+                   }
+                 });
   return output;
 }
 }
+
+/**
+ * Constructor requiring a string to tokenize and a string of separators.
+ * @param str Input string to be separated into tokens.
+ * @param separators List of characters used to separate the input string.
+ * @param options  tokenizer settings. The number can be found using the
+ * StringTokenizer::Options enum
+ * @return a const reference to the index'th token.
+ */
 Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
                                                  const std::string &separators,
                                                  unsigned options) {
   // check options variable is in the range 0-3.
   assert(options < 8);
-  // if str is empty, then there is no worktto do. exit early.
+  // if str is empty, then there is no workt to do. exit early.
   if (str.empty())
     return;
 
+  // see comments above for the different options split0,split1,split2 and
+  // split3 implement.
+  // cases 0-3 will check for a separator in the last place and insert an empty
+  // token at the end.
+  // cases 4-7 will not check and ignore a potential empty token at the end.
   switch (options) {
   case 0:
     m_tokens = split0(str, separators);
@@ -142,5 +163,5 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
         "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
         std::to_string(options));
     break;
-    }
+  }
 };
