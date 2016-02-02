@@ -170,15 +170,17 @@ class AlignComponents(PythonAlgorithm):
             issues['MaskWorkspace'] = "MaskWorkspace must be empty or of type \"MaskWorkspace\""
 
         # Need to get instrument in order to check components are valid
-        wks = self.getProperty("InputWorkspace").value
-        if wks is None:
+        if self.getProperty("InputWorkspace").value is not None:
+            wks_name = self.getProperty("InputWorkspace").value.getName()
+        else:
             inputFilename = self.getProperty("InstrumentFilename").value
             if inputFilename == "":
                 issues["InputWorkspace"] = "A InputWorkspace or InstrumentFilename must be defined"
                 return issues
             else:
-                wks = api.LoadEmptyInstrument(Filename=inputFilename,
-                                              OutputWorkspace="alignedWorkspace")
+                api.LoadEmptyInstrument(Filename=inputFilename,
+                                        OutputWorkspace="alignedWorkspace")
+                wks_name = "alignedWorkspace"
 
         # Check if each component listed is defined in the instrument
         components = self.getProperty("ComponentList").value
@@ -186,7 +188,7 @@ class AlignComponents(PythonAlgorithm):
             issues['ComponentList'] = "Must supply components"
         else:
             components = [component for component in components
-                          if wks.getInstrument().getComponentByName(component) is None]
+                          if api.mtd[wks_name].getInstrument().getComponentByName(component) is None]
             if len(components) > 0:
                 issues['ComponentList'] = "Instrument has no component \"" \
                                        + ','.join(components) + "\""
@@ -224,13 +226,12 @@ class AlignComponents(PythonAlgorithm):
         # First fit L1 if selected for Source and/or Sample
         for component in "Source", "Sample":
             if self.getProperty("Fit"+component+"Position").value:
-                wks=api.mtd[wks_name]
                 if component == "Sample":
-                    componentName = wks.getInstrument().getSample().getFullName()
-                    componentZ = wks.getInstrument().getSample().getPos().getZ()
+                    componentName = api.mtd[wks_name].getInstrument().getSample().getFullName()
+                    componentZ = api.mtd[wks_name].getInstrument().getSample().getPos().getZ()
                 else:
-                    componentName = wks.getInstrument().getSource().getFullName()
-                    componentZ = wks.getInstrument().getSource().getPos().getZ()
+                    componentName = api.mtd[wks_name].getInstrument().getSource().getFullName()
+                    componentZ = api.mtd[wks_name].getInstrument().getSource().getPos().getZ()
                 logger.notice("Working on " + componentName +
                               " Starting position is " + str(componentZ))
                 firstIndex = 0
@@ -253,7 +254,6 @@ class AlignComponents(PythonAlgorithm):
                               " Final position is " + str(newZ.x[0]))
 
         # Now fit all the components if any
-        wks=api.mtd[wks_name]
         components = self.getProperty("ComponentList").value
 
         for opt in self._optionsList:
@@ -267,7 +267,7 @@ class AlignComponents(PythonAlgorithm):
 
         prog = Progress(self, start=0, end=1, nreports=len(components))
         for component in components:
-            comp = wks.getInstrument().getComponentByName(component)
+            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)
             firstDetID = self._getFirstDetID(comp)
             firstIndex = detID.index(firstDetID)
             lastDetID = self._getLastDetID(comp)
@@ -331,24 +331,24 @@ class AlignComponents(PythonAlgorithm):
 
             # Apply the results to the output workspace
             xmap = self._mapOptions(results.x)
-            wks=api.mtd[wks_name]
 
             if self._move:
-                api.MoveInstrumentComponent(wks, component, X=xmap[0], Y=xmap[1], Z=xmap[2],
+                api.MoveInstrumentComponent(wks_name, component, X=xmap[0], Y=xmap[1], Z=xmap[2],
                                             RelativePosition=False)
 
             if self._rotate:
                 (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5])
-                api.RotateInstrumentComponent(wks, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
+                api.RotateInstrumentComponent(wks_name, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
                                               RelativeRotation=False)
 
             # Need to grab the component again, as things have changed
-            comp = wks.getInstrument().getComponentByName(component)
+            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)
             logger.notice("Finshed " + comp.getFullName() +
                           " Final position is " + str(comp.getPos()) +
                           " Final rotation is " + str(comp.getRotation().getEulerAngles()))
 
             prog.report()
+        logger.notice("Results applied to workspace "+wks_name)
 
     #pylint: disable=too-many-arguments
     def _minimisation_func(self, x_0, wks_name, component, firstIndex, lastIndex, difc, mask):
@@ -366,9 +366,9 @@ class AlignComponents(PythonAlgorithm):
             api.RotateInstrumentComponent(wks_name, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
                                           RelativeRotation=False)
 
-        wks_new = api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name)
+        api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name)
 
-        difc_new = wks_new.extractY().flatten()[firstIndex:lastIndex + 1]
+        difc_new = api.mtd[wks_name].extractY().flatten()[firstIndex:lastIndex + 1]
 
         if self._masking:
             difc_new = np.ma.masked_array(difc_new, mask)
