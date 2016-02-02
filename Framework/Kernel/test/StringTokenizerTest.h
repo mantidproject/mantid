@@ -143,7 +143,6 @@ public:
     expected = {"2"};
     TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
   }
-
 };
 
 class RandomCharacter {
@@ -190,37 +189,22 @@ public:
   };
 
   void test_oneLargeString() {
-    auto start = std::chrono::system_clock::now();
     auto tokenizer1 = Mantid::Kernel::StringTokenizer(m_bigString, ";", 0);
-    auto end = std::chrono::system_clock::now();
     TS_ASSERT_EQUALS(tokenizer1.count(), m_length / 5 + 1);
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
-    std::cout << "<" << tokenizer1[1] << " " << std::endl;
   }
 
   void test_oneLargeString_trim() {
-    auto start = std::chrono::system_clock::now();
     auto tokenizer1 = Mantid::Kernel::StringTokenizer(
         m_bigString, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    auto end = std::chrono::system_clock::now();
     TS_ASSERT_EQUALS(tokenizer1.count(), m_length / 5 + 1);
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
-    std::cout << "<" << tokenizer1[1] << " " << std::endl;
   }
 
   void test_oneLargeString_trim_ignoreEmpty() {
-    auto start = std::chrono::system_clock::now();
     auto tokenizer1 = Mantid::Kernel::StringTokenizer(
         m_bigString, ";",
         Mantid::Kernel::StringTokenizer::TOK_TRIM |
             Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-    auto end = std::chrono::system_clock::now();
     TS_ASSERT_EQUALS(tokenizer1.count(), m_length / 10);
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
-    std::cout << "<" << tokenizer1[1] << " " << std::endl;
   }
 };
 

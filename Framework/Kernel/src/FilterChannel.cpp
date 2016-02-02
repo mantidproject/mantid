@@ -23,8 +23,9 @@ void FilterChannel::addChannel(Channel *pChannel) {
 void FilterChannel::setProperty(const std::string &name,
                                 const std::string &value) {
   if (name.compare(0, 7, "channel") == 0) {
-    StringTokenizer tokenizer(value, ",;", StringTokenizer::TOK_IGNORE_EMPTY |
-                                               StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer tokenizer(
+        value, ",;", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
+                         Mantid::Kernel::StringTokenizer::TOK_TRIM);
     for (auto it = tokenizer.begin(); it != tokenizer.end(); ++it) {
       addChannel(LoggingRegistry::defaultRegistry().channelForName(*it));
     }
