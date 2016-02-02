@@ -30,8 +30,10 @@ src/MDLoadingPresenter.cpp
 src/Normalization.cpp
 src/NoThresholdRange.cpp
 src/ProgressAction.cpp
+src/PresenterUtilities.cpp
 src/SaveMDWorkspaceToVTK.cpp
 src/SaveMDWorkspaceToVTKImpl.cpp
+src/SingleWorkspaceProvider.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
 src/UserDefinedThresholdRange.cpp
@@ -101,6 +103,7 @@ inc/MantidVatesAPI/PresenterUtilities.h
 inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/SaveMDWorkspaceToVTK.h
 inc/MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h
+inc/MantidVatesAPI/SingleWorkspaceProvider.h
 inc/MantidVatesAPI/SQWLoadingPresenter.h
 inc/MantidVatesAPI/ThresholdRange.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
@@ -173,6 +176,7 @@ test/MetadataToFieldDataTest.h
 test/NormalizationTest.h
 test/SaveMDWorkspaceToVTKTest.h
 test/SaveMDWorkspaceToVTKImplTest.h
+test/SingleWorkspaceProviderTest.h
 test/SQWLoadingPresenterTest.h
 test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h

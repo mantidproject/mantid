@@ -6,22 +6,27 @@
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
 #include "MantidVatesAPI/MDLoadingViewSimple.h"
+#include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/PresenterUtilities.h"
+#include "MantidVatesAPI/SingleWorkspaceProvider.h"
 
-#include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
+
+#include "MantidVatesAPI/vtkMD0DFactory.h"
+#include "MantidVatesAPI/vtkMDHexFactory.h"
+#include "MantidVatesAPI/vtkMDQuadFactory.h"
+#include "MantidVatesAPI/vtkMDLineFactory.h"
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 #include <vtkSmartPointer.h>
 #include <vtkXMLStructuredGridWriter.h>
 #include <vtkXMLUnstructuredGridWriter.h>
-#include <vtkStructuredGridWriter.h>
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -38,23 +43,20 @@ class NullProgressAction : public Mantid::VATES::ProgressAction
   }
 };
 
-/**
-* Get full file path with the correct extension
-* @param filename: the name of the file but without the extension
-* @param extension: the extension type
-*/
-std::string getFullFilePathWithExtension(std::string filename, const std::string extension) {
-  auto fullFilename = filename + extension;
-  return fullFilename;
+bool has_suffix(const std::string &str, const std::string &suffix)
+{
+    return str.size() >= suffix.size() &&
+           str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
+
 }
 
 
 namespace Mantid {
 namespace VATES {
 
-const std::string SaveMDWorkspaceToVTKImpl::structuredGridExtension = ".vts";
-const std::string SaveMDWorkspaceToVTKImpl::unstructuredGridExtension = ".vtu";
+const std::string SaveMDWorkspaceToVTKImpl::structuredGridExtension = "vts";
+const std::string SaveMDWorkspaceToVTKImpl::unstructuredGridExtension = "vtu";
 
 SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl() {
   setupMembers();
@@ -66,24 +68,34 @@ SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl() {
  * @param filename: the name of the file to which the workspace is to be saved.
  * @param normalization: the visual normalization option
  * @param thresholdRange: a plolicy for the threshold range
+ * @param recursionDepth: the recursion depth for MDEvent Workspaces determines from which level data should be displayed
  */
-void SaveMDWorkspaceToVTKImpl::saveMDHistoWorkspace(Mantid::API::IMDHistoWorkspace_sptr histoWS,
-  std::string filename, VisualNormalization normalization, ThresholdRange_scptr thresholdRange) const {
-
-  auto fullFilename = getFullFilePathWithExtension(filename, structuredGridExtension);
+void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(Mantid::API::IMDWorkspace_sptr workspace,
+  std::string filename, VisualNormalization normalization, ThresholdRange_scptr thresholdRange, int recursionDepth) const {
+  auto isHistoWorkspace = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace) != nullptr;
+  auto fullFilename = getFullFilename(filename, isHistoWorkspace);
 
   // Define a time slice.
-  double time = selectTimeSliceValue(histoWS);
+  auto time = selectTimeSliceValue(workspace);
 
-  // Set up a presenter
-  std::unique_ptr<MDLoadingView> view = Kernel::make_unique<Mantid::VATES::MDLoadingViewSimple>();
+  // Choose settings based on workspace type
 
-  auto presenter = createInMemoryPresenter<MDHWInMemoryLoadingPresenter, Mantid::API::IMDHistoWorkspace>(std::move(view), histoWS->name());
+  std::unique_ptr<MDLoadingPresenter> presenter = nullptr;
+  auto view = Kernel::make_unique<Mantid::VATES::MDLoadingViewSimple>();
+  std::unique_ptr<vtkDataSetFactory> factoryChain = nullptr;
+  auto workspaceProvider  =  Mantid::Kernel::make_unique<SingleWorkspaceProvider>(workspace);
 
-  // Set up vtk data factory chain
-  auto factoryChain = createFactoryChain<vtkMDHistoHex4DFactory, vtkMDHistoHexFactory,
-                                         vtkMDHistoQuadFactory, vtkMDHistoLineFactory,
-                                         vtkMD0DFactory>(thresholdRange, normalization, time);
+  if (isHistoWorkspace) {
+      presenter = createInMemoryPresenter<MDHWInMemoryLoadingPresenter>(std::move(view), workspace, std::move(workspaceProvider));
+      factoryChain = createFactoryChain5Factories<vtkMDHistoHex4DFactory, vtkMDHistoHexFactory,
+                                               vtkMDHistoQuadFactory, vtkMDHistoLineFactory,
+                                               vtkMD0DFactory>(thresholdRange, normalization, time);
+  } else {
+      view->setRecursionDepth(recursionDepth);
+      presenter = createInMemoryPresenter<MDEWInMemoryLoadingPresenter>(std::move(view), workspace, std::move(workspaceProvider));
+      factoryChain = createFactoryChain4Factories<vtkMDHexFactory, vtkMDQuadFactory, vtkMDLineFactory,
+                                               vtkMD0DFactory>(thresholdRange, normalization, time);
+  }
 
   // Create the vtk data
   NullProgressAction nullProgressA;
@@ -91,33 +103,28 @@ void SaveMDWorkspaceToVTKImpl::saveMDHistoWorkspace(Mantid::API::IMDHistoWorkspa
   auto dataSet = presenter->execute(factoryChain.get(), nullProgressA, nullProgressB);
 
   // Do an orthogonal correction
-  applyCOBMatrixSettingsToVtkDataSet(presenter.get(), dataSet);
-  presenter->setAxisLabels(dataSet);
+  dataSet = getDataSetWithOrthogonalCorrection(dataSet, presenter.get(), isHistoWorkspace);
 
   // Write the data to the file
-  auto writer = vtkSmartPointer<vtkXMLStructuredGridWriter>::New();
-  writeDataSetToVTKFile(writer, dataSet, fullFilename);
+  vtkSmartPointer<vtkXMLWriter> writer  = getXMLWriter(isHistoWorkspace);
+  auto writeSuccessFlag = writeDataSetToVTKFile(writer, dataSet, fullFilename);
+  if (!writeSuccessFlag) {
+    throw std::runtime_error("SaveMDWorkspaceToVTK: VTK could not write your data set to a file.");
+  }
 }
 
-/**
- * Save an MDEvent workspace to a vtu file.
- * @param eventWS: the event workspace which is to be saved.
- * @param filename: the name of the file to which the workspace is to be saved.
- * @param normalization: the visual normalization option
- * @param thresholdRange: a plolicy for the threshold range
- */
-void SaveMDWorkspaceToVTKImpl::saveMDEventWorkspace(Mantid::API::IMDEventWorkspace_sptr eventWS,
-  std::string filename, VisualNormalization normalization, ThresholdRange_scptr thresholdRange) const {
-
-}
 
 /**
  * Write an unstructured grid or structured grid to a vtk file.
+ * @param writer: a vtk xml writer
+ * @param dataSet: the data set which is to be saved out
+ * @param filename: the file name
+ * @returns a vtk error flag
  */
-void SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(vtkXMLWriter* writer, vtkDataSet* dataSet, std::string filename) const {
+int SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(vtkXMLWriter* writer, vtkDataSet* dataSet, std::string filename) const {
   writer->SetFileName(filename.c_str());
   writer->SetInputData(dataSet);
-  writer->Write();
+  return writer->Write();
 }
 
 /**
@@ -181,6 +188,36 @@ bool SaveMDWorkspaceToVTKImpl::is4DWorkspace(Mantid::API::IMDWorkspace_sptr work
   auto actualNonIntegratedDimensionality = workspace->getNonIntegratedDimensions().size();
   const size_t dimensionsWithTime = 4;
   return actualNonIntegratedDimensionality == dimensionsWithTime;
+}
+
+std::string SaveMDWorkspaceToVTKImpl::getFullFilename(std::string filename, bool isHistoWorkspace) const{
+  auto extension = isHistoWorkspace ? structuredGridExtension : unstructuredGridExtension;
+  if (!has_suffix(filename, extension)) {
+      filename += ".";
+      filename += extension;
+  }
+  return filename;
+}
+
+vtkSmartPointer<vtkXMLWriter> SaveMDWorkspaceToVTKImpl::getXMLWriter(bool isHistoWorkspace) const {
+  vtkSmartPointer<vtkXMLWriter> writer;
+  if (isHistoWorkspace) {
+      writer = vtkSmartPointer<vtkXMLStructuredGridWriter>::New();
+  } else {
+      writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+  }
+  return writer;
+}
+
+vtkSmartPointer<vtkDataSet> SaveMDWorkspaceToVTKImpl::getDataSetWithOrthogonalCorrection(vtkSmartPointer<vtkDataSet> dataSet, MDLoadingPresenter* presenter, bool isHistoWorkspace)  const{
+  if (!isHistoWorkspace) {
+    vtkSmartPointer<vtkPVClipDataSet> clipped = getClippedDataSet(dataSet);
+    dataSet = clipped->GetOutput();
+  }
+  applyCOBMatrixSettingsToVtkDataSet(presenter, dataSet);
+  presenter->setAxisLabels(dataSet);
+
+  return dataSet;
 }
 
 }

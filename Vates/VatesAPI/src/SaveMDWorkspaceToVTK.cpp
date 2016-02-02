@@ -9,6 +9,8 @@
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
 
+#include "MantidKernel/BoundedValidator.h"
+
 namespace Mantid {
 namespace VATES{
 
@@ -40,7 +42,8 @@ namespace VATES{
       new Mantid::API::WorkspaceProperty<Mantid::API::IMDWorkspace>("InputWorkspace", "", Mantid::Kernel::Direction::Input),
       "MDWorkspace to save/export");
 
-    std::vector<std::string> extensions;
+    std::vector<std::string> extensions= {SaveMDWorkspaceToVTKImpl::structuredGridExtension,
+                                          SaveMDWorkspaceToVTKImpl::unstructuredGridExtension};
     declareProperty(new Mantid::API::FileProperty("Filename", "", Mantid::API::FileProperty::Save,
       extensions, Mantid::Kernel::Direction::Input),
       "Save location.");
@@ -54,11 +57,14 @@ namespace VATES{
     auto thresholds = pimpl->getAllowedThresholdsInStringRepresentation();
     declareProperty(
           "ThresholdRange", "IgnoreZerosThresholdRange",
-          boost::make_shared<Mantid::Kernel::StringListValidator>(normalizations),
+          boost::make_shared<Mantid::Kernel::StringListValidator>(thresholds),
           "The threshold range. Currently either no threshold or a ignore-zeros policy can be applied.");
 
-
-    // TODO: if 4D add time slice selection
+    boost::shared_ptr<Mantid::Kernel::BoundedValidator<int>> mustBePositive(new Mantid::Kernel::BoundedValidator<int>());
+    mustBePositive->setLower(1);
+    declareProperty(
+          "RecursionDepth", 5, mustBePositive,
+          "The recursion depth is only required for MDEvent workspaces and determines to which level data should be displayed.");
   }
 
   void SaveMDWorkspaceToVTK::exec() {
@@ -72,14 +78,10 @@ namespace VATES{
     std::string thresholdRangeInStringRepresentation = this->getProperty("ThresholdRange");
     auto thresholdRange = pimpl->translateStringToThresholdRange(thresholdRangeInStringRepresentation);
 
+    int recursionDepth = this->getProperty("RecursionDepth");
+
     // Save workspace into file
-    if (auto histoWS = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(inputWS)) {
-      pimpl->saveMDHistoWorkspace(histoWS, filename, normalization, thresholdRange);
-    }
-    else {
-      auto eventWS = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(inputWS);
-      pimpl->saveMDEventWorkspace(eventWS, filename, normalization, thresholdRange);
-    }
+    pimpl->saveMDWorkspace(inputWS, filename, normalization, thresholdRange, recursionDepth);
   }
 
   std::map < std::string, std::string> SaveMDWorkspaceToVTK::validateInputs() {
@@ -94,7 +96,7 @@ namespace VATES{
 
     // Check for the dimensionality
     if (pimpl->is4DWorkspace(inputWS)) {
-      errorMessage.emplace("InputWorkspace", "The workspace must be 3D or less. You can use a slicing operaiton to remove a dimension.");
+      //errorMessage.emplace("InputWorkspace", "The workspace must be 3D or less. You can use a slicing operaiton to remove a dimension.");
     }
 
     // Check for file location
