@@ -130,7 +130,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent)
   mainLayout->addLayout(infoLayout);
 
   QSettings settings;
-  settings.beginGroup("Mantid/InstrumentWidget");
+  settings.beginGroup(InstrumentWidgetSettingsGroup);
 
   // Background colour
   setBackgroundColor(
@@ -329,18 +329,21 @@ void InstrumentWidget::setSurfaceType(int type) {
       showPeakLabels = surface->getShowPeakLabelsFlag();
     } else {
       QSettings settings;
+	  settings.beginGroup(InstrumentWidgetSettingsGroup);
+	  bool contains = false;
       peakLabelPrecision =
-          settings.value("Mantid/InstrumentWidget/PeakLabelPrecision", 2)
+          settings.value("PeakLabelPrecision", 2)
               .toInt();
       showPeakRow =
-          settings.value("Mantid/InstrumentWidget/ShowPeakRows", true).toBool();
-	  showPeakLabels = settings.value("Mantid/InstrumentWindow/ShowPeakLabels",
+          settings.value("ShowPeakRows", true).toBool();
+	  showPeakLabels = settings.value("ShowPeakLabels",
 		  true).toBool();
 	  
 		        // By default this is should be off for now.
 	  showPeakRelativeIntensity =
-		  settings.value("Mantid/InstrumentWindow/ShowPeakRelativeIntensities",
+		  settings.value("ShowPeakRelativeIntensities",
 			             false).toBool();
+	  settings.endGroup();
     }
 
     // Surface factory
@@ -675,7 +678,7 @@ void InstrumentWidget::setInfoText(const QString &text) {
  */
 void InstrumentWidget::saveSettings() {
   QSettings settings;
-  settings.beginGroup("Mantid/InstrumentWidget");
+  settings.beginGroup(InstrumentWidgetSettingsGroup);
   if (m_InstrumentDisplay)
     settings.setValue("BackgroundColor",
                       m_InstrumentDisplay->currentBackgroundColor());
@@ -687,7 +690,7 @@ void InstrumentWidget::saveSettings() {
                       getSurface()->getPeakLabelPrecision());
     settings.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
     settings.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
-	settings.setValue("ShowPeakRelativeInsensities", 
+	settings.setValue("ShowPeakRelativeIntensities", 
 					  getSurface()->getShowPeakRelativeIntensityFlag());
     foreach (InstrumentWidgetTab *tab, m_tabs) { tab->saveSettings(settings); }
   }

@@ -850,7 +850,7 @@ void InstrumentActor::changeNthPower(double nth_power)
 void InstrumentActor::loadSettings()
 {
   QSettings settings;
-  settings.beginGroup("Mantid/InstrumentWindow");
+  settings.beginGroup("Mantid/InstrumentWidget");
   m_scaleType = static_cast<GraphOptions::ScaleType>( settings.value("ScaleType", 0 ).toInt() );
   //Load Colormap. If the file is invalid the default stored colour map is used
   m_currentColorMapFilename = settings.value("ColormapFile", "").toString();
@@ -862,7 +862,7 @@ void InstrumentActor::loadSettings()
 void InstrumentActor::saveSettings()
 {
   QSettings settings;
-  settings.beginGroup("Mantid/InstrumentWindow");
+  settings.beginGroup("Mantid/InstrumentWidget");
   settings.setValue("ColormapFile", m_currentColorMapFilename);
   settings.setValue("ScaleType", (int)m_colorMap.getScaleType() );
   settings.setValue("ShowGuides", m_showGuides);
