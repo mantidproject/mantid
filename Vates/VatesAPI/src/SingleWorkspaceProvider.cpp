@@ -3,7 +3,7 @@
 namespace Mantid {
 namespace VATES {
 
-SingleWorkspaceProvider::SingleWorkspaceProvider(Mantid::API::IMDWorkspace_sptr workspace) : m_workspace(workspace) { }
+SingleWorkspaceProvider::SingleWorkspaceProvider(Mantid::API::Workspace_sptr workspace) : m_workspace(workspace) { }
 
 /**
  * @brief SingleWorkspaceProvider::canProvideWorkspace

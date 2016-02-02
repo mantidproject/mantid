@@ -2,7 +2,8 @@
 #define VATES_API_SINGLE_WORKSPACE_PROVIDER_H_
 
 #include "WorkspaceProvider.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Workspace.h"
+
 
 namespace Mantid {
 namespace VATES {
@@ -13,12 +14,12 @@ namespace VATES {
  */
 class DLLExport SingleWorkspaceProvider : public WorkspaceProvider{
 public:
-  SingleWorkspaceProvider(Mantid::API::IMDWorkspace_sptr workspace);
+  SingleWorkspaceProvider(Mantid::API::Workspace_sptr workspace);
   bool canProvideWorkspace(std::string wsName) const;
   Mantid::API::Workspace_sptr fetchWorkspace(std::string wsName) const;
   void disposeWorkspace(std::string wsName) const;
 private:
-  Mantid::API::IMDWorkspace_sptr m_workspace = nullptr;
+  Mantid::API::Workspace_sptr m_workspace = nullptr;
 };
 
 }

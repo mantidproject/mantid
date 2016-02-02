@@ -1,5 +1,4 @@
 #include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
-#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/Normalization.h"
 
 #include "MantidVatesAPI/NoThresholdRange.h"
@@ -11,27 +10,17 @@
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/PresenterUtilities.h"
 #include "MantidVatesAPI/SingleWorkspaceProvider.h"
-
-#include "MantidVatesAPI/vtkMDHistoLineFactory.h"
-#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
-#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
-#include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
-
-#include "MantidVatesAPI/vtkMD0DFactory.h"
-#include "MantidVatesAPI/vtkMDHexFactory.h"
-#include "MantidVatesAPI/vtkMDQuadFactory.h"
-#include "MantidVatesAPI/vtkMDLineFactory.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidKernel/make_unique.h"
 
 #include <vtkSmartPointer.h>
 #include <vtkXMLStructuredGridWriter.h>
 #include <vtkXMLUnstructuredGridWriter.h>
 
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
 
-#include "MantidKernel/make_unique.h"
 #include <memory>
 #include <boost/make_shared.hpp>
 
@@ -78,24 +67,9 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(Mantid::API::IMDWorkspace_sptr wo
   // Define a time slice.
   auto time = selectTimeSliceValue(workspace);
 
-  // Choose settings based on workspace type
-
-  std::unique_ptr<MDLoadingPresenter> presenter = nullptr;
-  auto view = Kernel::make_unique<Mantid::VATES::MDLoadingViewSimple>();
-  std::unique_ptr<vtkDataSetFactory> factoryChain = nullptr;
-  auto workspaceProvider  =  Mantid::Kernel::make_unique<SingleWorkspaceProvider>(workspace);
-
-  if (isHistoWorkspace) {
-      presenter = createInMemoryPresenter<MDHWInMemoryLoadingPresenter>(std::move(view), workspace, std::move(workspaceProvider));
-      factoryChain = createFactoryChain5Factories<vtkMDHistoHex4DFactory, vtkMDHistoHexFactory,
-                                               vtkMDHistoQuadFactory, vtkMDHistoLineFactory,
-                                               vtkMD0DFactory>(thresholdRange, normalization, time);
-  } else {
-      view->setRecursionDepth(recursionDepth);
-      presenter = createInMemoryPresenter<MDEWInMemoryLoadingPresenter>(std::move(view), workspace, std::move(workspaceProvider));
-      factoryChain = createFactoryChain4Factories<vtkMDHexFactory, vtkMDQuadFactory, vtkMDLineFactory,
-                                               vtkMD0DFactory>(thresholdRange, normalization, time);
-  }
+  // Get presenter and data set factory set up
+  auto factoryChain = getDataSetFactoryChain(isHistoWorkspace, thresholdRange, normalization, time);
+  auto presenter = getPresenter(isHistoWorkspace, workspace, recursionDepth);
 
   // Create the vtk data
   NullProgressAction nullProgressA;
@@ -111,6 +85,46 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(Mantid::API::IMDWorkspace_sptr wo
   if (!writeSuccessFlag) {
     throw std::runtime_error("SaveMDWorkspaceToVTK: VTK could not write your data set to a file.");
   }
+}
+
+/**
+ * Creates the correct factory chain based
+ * @param isHistWorkspace: flag if workspace is MDHisto
+ * @param thresholdRange: the threshold range
+ * @param normalization: the normalization option
+ * @param time: the time slice info
+ * @returns a data set factory
+ */
+std::unique_ptr<vtkDataSetFactory> SaveMDWorkspaceToVTKImpl::getDataSetFactoryChain(bool isHistWorkspace, ThresholdRange_scptr thresholdRange, VisualNormalization normalization, double time) const {
+  std::unique_ptr<vtkDataSetFactory> factory;
+  if (isHistWorkspace) {
+    factory = createFactoryChainForHistoWorkspace(thresholdRange, normalization, time);
+  }
+  else {
+    factory = createFactoryChainForEventWorkspace(thresholdRange, normalization, time);
+  }
+  return factory;
+}
+
+/**
+* Creates the correct factory chain based
+* @param isHistWorkspace: flag if workspace is MDHisto
+* @param workspace: the workspace
+* @param recursionDepth: the recursion depth
+* @returns a presenter for either MDHisto or MDEvent
+*/
+std::unique_ptr<MDLoadingPresenter> SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace, Mantid::API::IMDWorkspace_sptr workspace, int recursionDepth) const {
+  std::unique_ptr<MDLoadingPresenter> presenter = nullptr;
+  auto view = Kernel::make_unique<Mantid::VATES::MDLoadingViewSimple>();
+  auto workspaceProvider = Mantid::Kernel::make_unique<SingleWorkspaceProvider>(workspace);
+  if (isHistoWorkspace) {
+    presenter = createInMemoryPresenter<MDHWInMemoryLoadingPresenter>(std::move(view), workspace, std::move(workspaceProvider));
+  }
+  else {
+    view->setRecursionDepth(recursionDepth);
+    presenter = createInMemoryPresenter<MDEWInMemoryLoadingPresenter>(std::move(view), workspace, std::move(workspaceProvider));
+  }
+  return presenter;
 }
 
 

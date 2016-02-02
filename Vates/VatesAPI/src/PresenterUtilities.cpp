@@ -44,5 +44,45 @@ void applyCOBMatrixSettingsToVtkDataSet(Mantid::VATES::MDLoadingPresenter* prese
   }
 }
 
+/**
+ * Creates a factory chain for MDEvent workspaces
+ * @param threshold: the threshold range
+ * @param normalization: the normalization option
+ * @param time: the time slice time
+ * @returns a factory chain
+ */
+std::unique_ptr<vtkMDHexFactory> createFactoryChainForEventWorkspace(ThresholdRange_scptr threshold, VisualNormalization normalization, double time) {
+  auto factory = Mantid::Kernel::make_unique<vtkMDHexFactory>(threshold, normalization);
+  factory->setSuccessor(
+    Mantid::Kernel::make_unique<vtkMDQuadFactory>(
+      threshold, normalization))
+    .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
+      threshold, normalization))
+    .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
+  factory->setTime(time);
+  return factory;
+}
+
+/**
+* Creates a factory chain for MDHisto workspaces
+* @param threshold: the threshold range
+* @param normalization: the normalization option
+* @param time: the time slice time
+* @returns a factory chain
+*/
+std::unique_ptr<vtkMDHistoHex4DFactory<TimeToTimeStep>> createFactoryChainForHistoWorkspace(ThresholdRange_scptr threshold, VisualNormalization normalization, double time) {
+  auto factory =
+    Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+      threshold, normalization, time);
+  factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+    threshold, normalization))
+    .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
+      threshold, normalization))
+    .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
+      threshold, normalization))
+    .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
+  return factory;
+}
+
 }
 }

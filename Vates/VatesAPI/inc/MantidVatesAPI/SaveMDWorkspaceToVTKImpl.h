@@ -1,10 +1,11 @@
 #ifndef VATES_API_SAVE_MD_WORKSPACE_TO_VTK_IMPL_H_
 #define VATES_API_SAVE_MD_WORKSPACE_TO_VTK_IMPL_H_
 
+#include "MantidKernel/System.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ThresholdRange.h"
-
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include <vtkDataSet.h>
 #include <vtkXMLWriter.h>
@@ -16,7 +17,7 @@ namespace VATES {
 
 class MDLoadingPresenter;
 
-class SaveMDWorkspaceToVTKImpl {
+class DLLExport SaveMDWorkspaceToVTKImpl {
 public:
   SaveMDWorkspaceToVTKImpl();
   ~SaveMDWorkspaceToVTKImpl() {}
@@ -46,6 +47,8 @@ private:
   std::string getFullFilename(std::string filename, bool isHistoWorkspace) const;
   vtkSmartPointer<vtkXMLWriter> getXMLWriter(bool isHistoWorkspace) const;
   vtkSmartPointer<vtkDataSet> getDataSetWithOrthogonalCorrection(vtkSmartPointer<vtkDataSet> dataSet, MDLoadingPresenter* presenter, bool isHistoWorkspace) const;
+  std::unique_ptr<vtkDataSetFactory> getDataSetFactoryChain(bool isHistWorkspace, ThresholdRange_scptr thresholdRange, VisualNormalization normalization, double time) const;
+  std::unique_ptr<MDLoadingPresenter> getPresenter(bool isHistoWorkspace, Mantid::API::IMDWorkspace_sptr workspace, int recursionDepth) const;
 };
 
 }

@@ -4,7 +4,10 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
 #include "MantidVatesAPI/Normalization.h"
+#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+
+using namespace Mantid::DataObjects;
 
 class SaveMDWorkspaceToVTKImplTest : public CxxTest::TestSuite
 {
@@ -19,9 +22,9 @@ public:
     // Assert
     TSM_ASSERT_EQUALS("There should be 4 normalization options.", normalizations.size(), 4);
     TSM_ASSERT_EQUALS("First normalization should be AutoSelect.", normalizations[0], "AutoSelect");
-    TSM_ASSERT_EQUALS("First normalization should be NoNormalization.", normalizations[0], "NoNormalization");
-    TSM_ASSERT_EQUALS("First normalization should be NumEventsNormalization.", normalizations[0], "NumEventsNormalization");
-    TSM_ASSERT_EQUALS("First normalization should be VolumeNormalization.", normalizations[0], "VolumeNormalization");
+    TSM_ASSERT_EQUALS("First normalization should be NoNormalization.", normalizations[1], "NoNormalization");
+    TSM_ASSERT_EQUALS("First normalization should be NumEventsNormalization.", normalizations[2], "NumEventsNormalization");
+    TSM_ASSERT_EQUALS("First normalization should be VolumeNormalization.", normalizations[3], "VolumeNormalization");
   }
 
   void test_string_representation_converts_to_visual_normalization() {
@@ -33,13 +36,13 @@ public:
     auto autoSelect = saveMDToVTK.translateStringToVisualNormalization(normalizations[0]);
     auto noNormalization = saveMDToVTK.translateStringToVisualNormalization(normalizations[1]);
     auto numEventsNormalization = saveMDToVTK.translateStringToVisualNormalization(normalizations[2]);
-    auto noNormalization = saveMDToVTK.translateStringToVisualNormalization(normalizations[3]);
+    auto volumeNormalization = saveMDToVTK.translateStringToVisualNormalization(normalizations[3]);
 
     // Assert
     TSM_ASSERT_EQUALS("The visual normalization should be AutoSelect.", autoSelect, Mantid::VATES::AutoSelect);
-    TSM_ASSERT_EQUALS("The visual normalization should be NoNormalization.", autoSelect, Mantid::VATES::NoNormalization);
-    TSM_ASSERT_EQUALS("The visual normalization should be NumEventsNormalization.", autoSelect, Mantid::VATES::NumEventsNormalization);
-    TSM_ASSERT_EQUALS("The visual normalization should be VolumeNormalization.", autoSelect, Mantid::VATES::VolumeNormalization);
+    TSM_ASSERT_EQUALS("The visual normalization should be NoNormalization.", noNormalization, Mantid::VATES::NoNormalization);
+    TSM_ASSERT_EQUALS("The visual normalization should be NumEventsNormalization.", numEventsNormalization, Mantid::VATES::NumEventsNormalization);
+    TSM_ASSERT_EQUALS("The visual normalization should be VolumeNormalization.", volumeNormalization, Mantid::VATES::VolumeNormalization);
   }
 
   void test_that_vector_of_threshold_strings_has_all_values() {
@@ -51,19 +54,17 @@ public:
 
     // Assert
     TSM_ASSERT_EQUALS("There should be 2 normalization options", thresholds.size(), 2);
-    TSM_ASSERT_EQUALS("First normalization should be IgnoreZeroThresholdRange.", thresholds[0], "IgnoreZeroTresholdRange");
-    TSM_ASSERT_EQUALS("First normalization should be NoThresholdRange.", thresholds[1], "NoThresholdRange");
+    TSM_ASSERT_EQUALS("First normalization should be IgnoreZerosThresholdRange.", thresholds[0], "IgnoreZerosThresholdRange");
+    TSM_ASSERT_EQUALS("Second normalization should be NoThresholdRange.", thresholds[1], "NoThresholdRange");
   }
 
   void test_string_representation_converts_to_TresholdRange() {
     // Arrange
     Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
     auto thresholds = saveMDToVTK.getAllowedThresholdsInStringRepresentation();
-
     // Act
-    auto ignoreZerosThresholdRange = saveMDToVTk.translateStringToThresholdRange(thresholds[0]);
-    auto noThresholdsRange = saveMDToVTk.translateStringToThresholdRange(thresholds[1]);
-
+    auto ignoreZerosThresholdRange = saveMDToVTK.translateStringToThresholdRange(thresholds[0]);
+    auto noThresholdRange = saveMDToVTK.translateStringToThresholdRange(thresholds[1]);
     // Assert
     TSM_ASSERT("Should be a IgnoreZerosTresholdRange", boost::dynamic_pointer_cast<Mantid::VATES::IgnoreZerosThresholdRange>(ignoreZerosThresholdRange));
     TSM_ASSERT("Should be a NoTresholdRange", boost::dynamic_pointer_cast<Mantid::VATES::ThresholdRange>(noThresholdRange));
@@ -97,7 +98,7 @@ public:
 
   void test_that_saves_MD_Histo_workspace_to_vts_file() {
     // Arrange
-    Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
+    //Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
 
     // TODO: FINISH with fake data here, also write a system test with real data
 

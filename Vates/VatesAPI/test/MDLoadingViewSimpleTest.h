@@ -6,7 +6,6 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::VATES;
-using namespace testing;
 
 class MDLoadingViewSimpleTest : public CxxTest::TestSuite
 {
