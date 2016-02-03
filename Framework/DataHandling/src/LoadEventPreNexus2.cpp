@@ -280,10 +280,7 @@ void LoadEventPreNexus2::init() {
   setPropertySettings("TotalChunks",
                       new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
 
-  std::vector<std::string> propOptions;
-  propOptions.emplace_back("Auto");
-  propOptions.emplace_back("Serial");
-  propOptions.emplace_back("Parallel");
+  std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"

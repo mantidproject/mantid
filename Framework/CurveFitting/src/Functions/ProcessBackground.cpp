@@ -68,11 +68,8 @@ void ProcessBackground::init() {
                   "Output workspace containing processed background");
 
   // Function Options
-  std::vector<std::string> options;
-  options.emplace_back("SelectBackgroundPoints");
-  options.emplace_back("RemovePeaks");
-  options.emplace_back("DeleteRegion");
-  options.emplace_back("AddRegion");
+  std::vector<std::string> options{"SelectBackgroundPoints", "RemovePeaks",
+                                   "DeleteRegion", "AddRegion"};
 
   auto validator = boost::make_shared<Kernel::StringListValidator>(options);
   declareProperty("Options", "RemovePeaks", validator,
@@ -93,9 +90,7 @@ void ProcessBackground::init() {
       new VisibleWhenProperty("Options", IS_EQUAL_TO, "AddRegion"));
 
   // Optional Function Type
-  std::vector<std::string> bkgdtype;
-  bkgdtype.emplace_back("Polynomial");
-  bkgdtype.emplace_back("Chebyshev");
+  std::vector<std::string> bkgdtype{"Polynomial", "Chebyshev"};
   // bkgdtype.emplace_back("FullprofPolynomial");
   auto bkgdvalidator =
       boost::make_shared<Kernel::StringListValidator>(bkgdtype);
@@ -106,10 +101,7 @@ void ProcessBackground::init() {
                       new VisibleWhenProperty("Options", IS_EQUAL_TO,
                                               "SelectBackgroundPoints"));
 
-  vector<string> funcoptions;
-  funcoptions.emplace_back("N/A");
-  funcoptions.emplace_back("FitGivenDataPoints");
-  funcoptions.emplace_back("UserFunction");
+  vector<string> funcoptions{"N/A", "FitGivenDataPoints", "UserFunction"};
   auto fovalidator = boost::make_shared<StringListValidator>(funcoptions);
   declareProperty("SelectionMode", "N/A", fovalidator,
                   "If choise is UserFunction, background will be selected by "
@@ -154,9 +146,8 @@ void ProcessBackground::init() {
       new VisibleWhenProperty("SelectionMode", IS_EQUAL_TO, "UserFunction"));
 
   // Mode to select background
-  vector<string> pointsselectmode;
-  pointsselectmode.emplace_back("All Background Points");
-  pointsselectmode.emplace_back("Input Background Points Only");
+  vector<string> pointsselectmode{"All Background Points",
+                                  "Input Background Points Only"};
   auto modevalidator =
       boost::make_shared<StringListValidator>(pointsselectmode);
   declareProperty("BackgroundPointSelectMode", "All Background Points",
@@ -201,9 +192,7 @@ void ProcessBackground::init() {
                                               "SelectBackgroundPoints"));
 
   // Output background type.
-  std::vector<std::string> outbkgdtype;
-  outbkgdtype.emplace_back("Polynomial");
-  outbkgdtype.emplace_back("Chebyshev");
+  std::vector<std::string> outbkgdtype{"Polynomial", "Chebyshev"};
   auto outbkgdvalidator =
       boost::make_shared<Kernel::StringListValidator>(bkgdtype);
   declareProperty("OutputBackgroundType", "Polynomial", outbkgdvalidator,

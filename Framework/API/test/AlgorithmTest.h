@@ -190,8 +190,7 @@ public:
   }
 
   void testCategories() {
-    std::vector<std::string> result;
-    result.emplace_back("Cat");
+    std::vector<std::string> result{"Cat"};
     TS_ASSERT_EQUALS(alg.categories(), result);
     result.emplace_back("Leopard");
     result.emplace_back("Mink");

@@ -456,10 +456,7 @@ public:
     std::size_t numBins[dims] = {10, 10, 10};
     Mantid::coord_t min[dims] = {0.0, 0.0, 0.0};
     Mantid::coord_t max[dims] = {10.0, 10.0, 10.0};
-    std::vector<std::string> names;
-    names.emplace_back("h");
-    names.emplace_back("k");
-    names.emplace_back("l");
+    std::vector<std::string> names{"h", "k", "l"};
     MDHistoWorkspace_sptr mdhws2 =
         MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
             3, 5.0, 1.0, numBins, min, max, names);

@@ -25,8 +25,7 @@ public:
       dataEYX.push_back(i * 1.234);
     }
 
-    std::vector<std::string> qvals;
-    qvals.emplace_back("9.876");
+    std::vector<std::string> qvals{"9.876"};
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty<int>("NSpec", 1));
     TS_ASSERT_THROWS_NOTHING(
@@ -89,11 +88,8 @@ public:
     alg.setPropertyValue("UnitX", "Wavelength");
     alg.setPropertyValue("VerticalAxisUnit", "Text");
 
-    std::vector<std::string> textAxis;
-    textAxis.emplace_back("I've Got");
-    textAxis.emplace_back("A Lovely");
-    textAxis.emplace_back("Bunch Of");
-    textAxis.emplace_back("Coconuts");
+    std::vector<std::string> textAxis{"I've Got", "A Lovely", "Bunch Of",
+                                      "Coconuts"};
 
     alg.setProperty<std::vector<std::string>>("VerticalAxisValues", textAxis);
     alg.setProperty<int>("NSpec", 4);

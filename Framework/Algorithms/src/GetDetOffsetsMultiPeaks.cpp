@@ -159,18 +159,13 @@ void GetDetOffsetsMultiPeaks::init() {
                   "Name of the input Tableworkspace containing peak fit window "
                   "information for each spectrum. ");
 
-  std::vector<std::string> peaktypes;
-  peaktypes.emplace_back("BackToBackExponential");
-  peaktypes.emplace_back("Gaussian");
-  peaktypes.emplace_back("Lorentzian");
+  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian",
+                                     "Lorentzian"};
   declareProperty("PeakFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peaktypes),
                   "Type of peak to fit");
 
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.emplace_back("Flat");
-  bkgdtypes.emplace_back("Linear");
-  bkgdtypes.emplace_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty(
       "BackgroundType", "Linear",
       boost::make_shared<StringListValidator>(bkgdtypes),

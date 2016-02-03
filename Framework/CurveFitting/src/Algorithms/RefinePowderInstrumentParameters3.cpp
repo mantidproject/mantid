@@ -68,9 +68,7 @@ void RefinePowderInstrumentParameters3::init() {
       "Output tableworkspace containing instrument's fitted parameters. ");
 
   // Refinement algorithm
-  vector<string> algoptions;
-  algoptions.emplace_back("OneStepFit");
-  algoptions.emplace_back("MonteCarlo");
+  vector<string> algoptions{"OneStepFit", "MonteCarlo"};
   auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
   declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
                   "Algorithm to refine the instrument parameters.");
@@ -84,9 +82,7 @@ void RefinePowderInstrumentParameters3::init() {
                   "Random seed for Monte Carlo simulation. ");
 
   // Method to calcualte the standard error of peaks
-  vector<string> stdoptions;
-  stdoptions.emplace_back("ConstantValue");
-  stdoptions.emplace_back("UseInputValue");
+  vector<string> stdoptions{"ConstantValue", "UseInputValue"};
   auto listvalidator =
       boost::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty(

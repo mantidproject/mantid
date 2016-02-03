@@ -58,9 +58,8 @@ void GetTimeSeriesLogInformation::init() {
 
   declareProperty("LogName", "", "Log's name to filter events.");
 
-  std::vector<std::string> timeoptions;
-  timeoptions.emplace_back("Absolute Time (nano second)");
-  timeoptions.emplace_back("Relative Time (second)");
+  std::vector<std::string> timeoptions{"Absolute Time (nano second)",
+                                       "Relative Time (second)"};
   declareProperty(
       "TimeRangeOption", "Relative Time (second)",
       boost::make_shared<StringListValidator>(timeoptions),

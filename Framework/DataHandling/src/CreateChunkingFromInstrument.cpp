@@ -116,12 +116,7 @@ void CreateChunkingFromInstrument::init() {
                   "as separate groups. "
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
-  vector<string> grouping;
-  grouping.emplace_back("");
-  grouping.emplace_back("All");
-  grouping.emplace_back("Group");
-  grouping.emplace_back("Column");
-  grouping.emplace_back("bank");
+  vector<string> grouping{"", "All", "Group", "Column", "bank"};
   declareProperty(
       PARAM_CHUNK_BY, "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "

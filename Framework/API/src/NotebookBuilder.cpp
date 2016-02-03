@@ -163,10 +163,7 @@ NotebookBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
   using Mantid::Kernel::Direction;
 
   // Create a vector of all non workspace property type names
-  std::vector<std::string> nonWorkspaceTypes;
-  nonWorkspaceTypes.emplace_back("number");
-  nonWorkspaceTypes.emplace_back("boolean");
-  nonWorkspaceTypes.emplace_back("string");
+  std::vector<std::string> nonWorkspaceTypes{"number", "boolean", "string"};
 
   std::string prop = "";
   // No need to specify value for default properties

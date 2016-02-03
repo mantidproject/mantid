@@ -85,10 +85,7 @@ void IFittingAlgorithm::init() {
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
 
-  std::vector<std::string> domainTypes;
-  domainTypes.emplace_back("Simple");
-  domainTypes.emplace_back("Sequential");
-  domainTypes.emplace_back("Parallel");
+  std::vector<std::string> domainTypes{"Simple", "Sequential", "Parallel"};
   declareProperty(
       "DomainType", "Simple",
       Kernel::IValidator_sptr(

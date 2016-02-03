@@ -31,8 +31,7 @@ void CorrectToFile::init() {
                   "The units of the first column of the correction file "
                   "(default wavelength)");
 
-  std::vector<std::string> operations(1, std::string("Divide"));
-  operations.emplace_back("Multiply");
+  std::vector<std::string> operations{"Divide", "Multiply"};
   declareProperty("WorkspaceOperation", "Divide",
                   boost::make_shared<Kernel::StringListValidator>(operations),
                   "Allowed values: Divide, Multiply (default is divide)");

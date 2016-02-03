@@ -143,10 +143,7 @@ public:
   }
 
   void test_filter_to_new_none_new() {
-    std::vector<std::string> input_data;
-    input_data.emplace_back("test1");
-    input_data.emplace_back("test2");
-    input_data.emplace_back("test3");
+    std::vector<std::string> input_data{"test1", "test2", "test3"};
     std::vector<std::string> current_data = input_data;
 
     // Create vector for other parameters
@@ -169,17 +166,9 @@ public:
   }
 
   void test_filter_to_new() {
-    std::vector<std::string> input_data;
-    input_data.emplace_back("test1");
-    input_data.emplace_back("test2");
-    input_data.emplace_back("test3");
-    input_data.emplace_back("test4");
-    input_data.emplace_back("test5");
-
-    std::vector<std::string> current_data;
-    current_data.emplace_back("test1");
-    current_data.emplace_back("test3");
-    current_data.emplace_back("test4");
+    std::vector<std::string> input_data{"test1", "test2", "test3", "test4",
+                                        "test5"};
+    std::vector<std::string> current_data{"test1", "test3", "test4"};
 
     // Create vector for other parameters
     std::vector<double> psi(5, 0.0);

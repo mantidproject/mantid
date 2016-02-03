@@ -90,11 +90,7 @@ std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(
     throw std::runtime_error("Matrix is not a 3x3 matrix.");
   }
 
-  std::vector<std::string> symbols;
-  symbols.emplace_back("x");
-  symbols.emplace_back("y");
-  symbols.emplace_back("z");
-
+  std::vector<std::string> symbols{"x", "y", "z"};
   std::vector<std::string> components;
 
   for (size_t r = 0; r < 3; ++r) {

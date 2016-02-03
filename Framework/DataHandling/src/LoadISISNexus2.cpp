@@ -90,10 +90,7 @@ void LoadISISNexus2::init() {
                   "A positive number identifies one entry to be loaded, into "
                   "one worskspace");
 
-  std::vector<std::string> monitorOptions;
-  monitorOptions.emplace_back("Include");
-  monitorOptions.emplace_back("Exclude");
-  monitorOptions.emplace_back("Separate");
+  std::vector<std::string> monitorOptions{"Include", "Exclude", "Separate"};
   std::map<std::string, std::string> monitorOptionsAliases;
   monitorOptionsAliases["1"] = "Separate";
   monitorOptionsAliases["0"] = "Exclude";

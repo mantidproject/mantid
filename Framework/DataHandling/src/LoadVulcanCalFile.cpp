@@ -58,10 +58,7 @@ void LoadVulcanCalFile::init() {
       new FileProperty("OffsetFilename", "", FileProperty::Load, ".dat"),
       "Path to the VULCAN offset file. ");
 
-  vector<string> groupoptions;
-  groupoptions.emplace_back("6Modules");
-  groupoptions.emplace_back("2Banks");
-  groupoptions.emplace_back("1Bank");
+  vector<string> groupoptions{"6Modules", "2Banks", "1Bank"};
 
   declareProperty(
       "Grouping", "6Modules",

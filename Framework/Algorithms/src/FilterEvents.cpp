@@ -91,12 +91,8 @@ void FilterEvents::init() {
                   "and continuous. ");
 
   // TOF correction
-  vector<string> corrtypes;
-  corrtypes.emplace_back("None");
-  corrtypes.emplace_back("Customized");
-  corrtypes.emplace_back("Direct");
-  corrtypes.emplace_back("Elastic");
-  corrtypes.emplace_back("Indirect");
+  vector<string> corrtypes{"None", "Customized", "Direct", "Elastic",
+                           "Indirect"};
   declareProperty("CorrectionToSample", "None",
                   boost::make_shared<StringListValidator>(corrtypes),
                   "Type of correction on neutron events to sample time from "
@@ -120,9 +116,7 @@ void FilterEvents::init() {
       new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Direct"));
 
   // Algorithm to spectra without detectors
-  vector<string> spec_no_det;
-  spec_no_det.emplace_back("Skip");
-  spec_no_det.emplace_back("Skip only if TOF correction");
+  vector<string> spec_no_det{"Skip", "Skip only if TOF correction"};
   declareProperty("SpectrumWithoutDetector", "Skip",
                   boost::make_shared<StringListValidator>(spec_no_det),
                   "Approach to deal with spectrum without detectors. ");

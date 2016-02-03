@@ -311,18 +311,13 @@ void SaveGSASInstrumentFile::init() {
       new ArrayProperty<unsigned int>("BankIDs"),
       "Bank IDs of the banks to be written to GSAS instrument file.");
 
-  vector<string> instruments;
-  instruments.emplace_back("powgen");
-  instruments.emplace_back("nomad");
+  vector<string> instruments{"powgen", "nomad"};
   declareProperty("Instrument", "powgen",
                   boost::make_shared<StringListValidator>(instruments),
                   "Name of the instrument that parameters are belonged to. "
                   "So far, only PG3 and NOM are supported.");
 
-  vector<string> vecfreq;
-  vecfreq.emplace_back("10");
-  vecfreq.emplace_back("30");
-  vecfreq.emplace_back("60");
+  vector<string> vecfreq{"10", "30", "60"};
   declareProperty("ChopperFrequency", "60",
                   boost::make_shared<StringListValidator>(vecfreq),
                   "Frequency of the chopper. ");

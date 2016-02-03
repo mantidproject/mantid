@@ -147,9 +147,7 @@ void FitPowderDiffPeaks::init() {
                   "BraggPeakParameterWorkspace."
                   "Otherwise, calculate each peak's centre from d-spacing.");
 
-  vector<string> genpeakoptions;
-  genpeakoptions.emplace_back("(HKL) & Calculation");
-  genpeakoptions.emplace_back("From Bragg Peak Table");
+  vector<string> genpeakoptions{"(HKL) & Calculation", "From Bragg Peak Table"};
   auto propvalidator = boost::make_shared<StringListValidator>(genpeakoptions);
   declareProperty("PeakParametersStartingValueFrom", "(HKL) & Calculation",
                   propvalidator, "Choice of how to generate starting values of "
@@ -821,9 +819,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
     peak->setParameter("I", height * fwhm);
     peak->setParameter("X0", tof_h);
 
-    vector<string> paramsinmc;
-    paramsinmc.emplace_back("A");
-    paramsinmc.emplace_back("B");
+    vector<string> paramsinmc{"A", "B"};
 
     fitSinglePeakSimulatedAnnealing(peak, paramsinmc);
   }

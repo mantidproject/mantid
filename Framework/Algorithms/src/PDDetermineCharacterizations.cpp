@@ -57,18 +57,8 @@ const std::string PDDetermineCharacterizations::summary() const {
  * @return The list of expected column names
  */
 std::vector<std::string> getColumnNames() {
-  std::vector<std::string> names;
-  names.emplace_back("frequency");  // double
-  names.emplace_back("wavelength"); // double
-  names.emplace_back("bank");       // integer
-  names.emplace_back("container");  // string
-  names.emplace_back("vanadium");   // string
-  names.emplace_back("empty");      // string
-  names.emplace_back("d_min");      // string
-  names.emplace_back("d_max");      // string
-  names.emplace_back("tof_min");    // double
-  names.emplace_back("tof_max");    // double
-  return names;
+  return {"frequency", "wavelength", "bank",  "container", "vanadium",
+          "empty",     "d_min",      "d_max", "tof_min",   "tof_max"};
 }
 
 /// More intesive input checking. @see Algorithm::validateInputs
@@ -126,17 +116,13 @@ void PDDetermineCharacterizations::init() {
   declareProperty(new Kernel::ArrayProperty<int32_t>("NormBackRun", "0"),
                   "Normalization background" + defaultMsg);
 
-  std::vector<std::string> defaultFrequencyNames;
-  defaultFrequencyNames.emplace_back("SpeedRequest1");
-  defaultFrequencyNames.emplace_back("Speed1");
-  defaultFrequencyNames.emplace_back("frequency");
+  std::vector<std::string> defaultFrequencyNames{"SpeedRequest1", "Speed1",
+                                                 "frequency"};
   declareProperty(new Kernel::ArrayProperty<std::string>(FREQ_PROP_NAME,
                                                          defaultFrequencyNames),
                   "Candidate log names for frequency");
 
-  std::vector<std::string> defaultWavelengthNames;
-  defaultWavelengthNames.emplace_back("LambdaRequest");
-  defaultWavelengthNames.emplace_back("lambda");
+  std::vector<std::string> defaultWavelengthNames{"LambdaRequest", "lambda"};
   declareProperty(new Kernel::ArrayProperty<std::string>(
                       WL_PROP_NAME, defaultWavelengthNames),
                   "Candidate log names for wave length");

@@ -397,12 +397,9 @@ public:
   }
 
   void test_makeVectorsOrthogonal() {
-    std::vector<V3D> in, out;
     // Simple case
-    in.clear();
-    in.emplace_back(1, 0, 0);
-    in.emplace_back(0, 1, 0);
-    out = V3D::makeVectorsOrthogonal(in);
+    std::vector<V3D> in{{1, 0, 0}, {0, 1, 0}};
+    auto out = V3D::makeVectorsOrthogonal(in);
     TS_ASSERT(out[0] == V3D(1, 0, 0));
     TS_ASSERT(out[1] == V3D(0, 1, 0));
     TS_ASSERT(out[2] == V3D(0, 0, 1));

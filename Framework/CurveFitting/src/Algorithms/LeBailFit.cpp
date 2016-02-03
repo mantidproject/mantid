@@ -129,18 +129,14 @@ void LeBailFit::init() {
       "Region of data (TOF) for LeBail fit.  Default is whole range. ");
 
   // Functionality: Fit/Calculation/Background
-  std::vector<std::string> functions;
-  functions.emplace_back("LeBailFit");
-  functions.emplace_back("Calculation");
-  functions.emplace_back("MonteCarlo");
-  functions.emplace_back("RefineBackground");
+  std::vector<std::string> functions{"LeBailFit", "Calculation", "MonteCarlo",
+                                     "RefineBackground"};
   auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
   this->declareProperty("Function", "LeBailFit", validator, "Functionality");
 
   // Peak type
-  vector<string> peaktypes;
-  peaktypes.emplace_back("ThermalNeutronBk2BkExpConvPVoigt");
-  peaktypes.emplace_back("NeutronBk2BkExpConvPVoigt");
+  vector<string> peaktypes{"ThermalNeutronBk2BkExpConvPVoigt",
+                           "NeutronBk2BkExpConvPVoigt"};
   auto peaktypevalidator = boost::make_shared<StringListValidator>(peaktypes);
   declareProperty("PeakType", "ThermalNeutronBk2BkExpConvPVoigt",
                   peaktypevalidator, "Peak profile type.");
@@ -148,10 +144,8 @@ void LeBailFit::init() {
   /*------------------------  Background Related Properties
    * ---------------------------------*/
   // About background:  Background type, input (table workspace or array)
-  std::vector<std::string> bkgdtype;
-  bkgdtype.emplace_back("Polynomial");
-  bkgdtype.emplace_back("Chebyshev");
-  bkgdtype.emplace_back("FullprofPolynomial");
+  std::vector<std::string> bkgdtype{"Polynomial", "Chebyshev",
+                                    "FullprofPolynomial"};
   auto bkgdvalidator =
       boost::make_shared<Kernel::StringListValidator>(bkgdtype);
   declareProperty("BackgroundType", "Polynomial", bkgdvalidator,

@@ -279,11 +279,7 @@ public:
   }
 
   void test_isMember() {
-    std::vector<std::string> group(5, "");
-    group[0] = "A";
-    group[1] = "A1";
-    group[2] = "B0";
-    group[3] = "C";
+    std::vector<std::string> group{"A", "A1", "B0", "C"};
 
     TS_ASSERT_EQUALS(1, isMember(group, "A1"));
     TS_ASSERT_EQUALS(-1, isMember(group, " "));
@@ -295,13 +291,7 @@ public:
   void test_parseRange_defaultSimple() {
     std::vector<int> result;
     TS_ASSERT_THROWS_NOTHING(result = parseRange("3,1,4,0,2,5"));
-    std::vector<int> expected(6);
-    expected[0] = 3;
-    expected[1] = 1;
-    expected[2] = 4;
-    expected[3] = 0;
-    expected[4] = 2;
-    expected[5] = 5;
+    std::vector<int> expected{3, 1, 4, 0, 2, 5};
     TS_ASSERT_EQUALS(result, expected);
   }
 
@@ -319,10 +309,7 @@ public:
   }
 
   void test_parseRange_emptyElements() {
-    std::vector<int> expected(3);
-    expected[0] = 1;
-    expected[1] = 2;
-    expected[2] = 3;
+    std::vector<int> expected{1, 2, 3};
 
     std::vector<int> result1;
     TS_ASSERT_THROWS_NOTHING(result1 = parseRange(",1,2,3"));

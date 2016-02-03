@@ -130,11 +130,7 @@ void CalculateCoverageDGS::init() {
                                     Mantid::Kernel::Direction::Input),
       "Incident energy. If set, will override Ei in the input workspace");
 
-  std::vector<std::string> options;
-  options.emplace_back("Q1");
-  options.emplace_back("Q2");
-  options.emplace_back("Q3");
-  options.emplace_back("DeltaE");
+  std::vector<std::string> options{"Q1", "Q2", "Q3", "DeltaE"};
 
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");

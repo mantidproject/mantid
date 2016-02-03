@@ -45,10 +45,8 @@ void CopyLogs::init() {
       "Workspace to copy logs too.");
 
   // options for the type of strategy to take
-  std::vector<std::string> strategies;
-  strategies.emplace_back("WipeExisting");
-  strategies.emplace_back("MergeKeepExisting");
-  strategies.emplace_back("MergeReplaceExisting");
+  std::vector<std::string> strategies{"WipeExisting", "MergeKeepExisting",
+                                      "MergeReplaceExisting"};
 
   auto strategiesValidator =
       boost::make_shared<StringListValidator>(strategies);

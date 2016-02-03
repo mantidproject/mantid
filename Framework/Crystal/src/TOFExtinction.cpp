@@ -41,17 +41,11 @@ void TOFExtinction::init() {
                   "An input PeaksWorkspace with an instrument.");
   declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
                                                         Direction::Output));
-  std::vector<std::string> corrOptions;
-  corrOptions.emplace_back("Type I Zachariasen");
-  corrOptions.emplace_back("Type I Gaussian");
-  corrOptions.emplace_back("Type I Lorentzian");
-  corrOptions.emplace_back("Type II Zachariasen");
-  corrOptions.emplace_back("Type II Gaussian");
-  corrOptions.emplace_back("Type II Lorentzian");
-  corrOptions.emplace_back("Type I&II Zachariasen");
-  corrOptions.emplace_back("Type I&II Gaussian");
-  corrOptions.emplace_back("Type I&II Lorentzian");
-  corrOptions.emplace_back("None, Scaling Only");
+  std::vector<std::string> corrOptions{
+      "Type I Zachariasen",    "Type I Gaussian",    "Type I Lorentzian",
+      "Type II Zachariasen",   "Type II Gaussian",   "Type II Lorentzian",
+      "Type I&II Zachariasen", "Type I&II Gaussian", "Type I&II Lorentzian",
+      "None, Scaling Only"};
   declareProperty("ExtinctionCorrectionType", corrOptions[0],
                   boost::make_shared<StringListValidator>(corrOptions),
                   "Select the type of extinction correction.");

@@ -52,8 +52,7 @@ public:
   }
 
   void testCreateSymOpsVector() {
-    std::vector<std::string> opStrings;
-    opStrings.emplace_back("x,y,z");
+    std::vector<std::string> opStrings{"x,y,z"};
 
     std::vector<SymmetryOperation> symOps =
         SymmetryOperationFactory::Instance().createSymOps(opStrings);

@@ -15,10 +15,7 @@ public:
   }
 
   void testVectorConstructor() {
-    std::vector<std::string> vec;
-    vec.emplace_back("one");
-    vec.emplace_back("two");
-    vec.emplace_back("three");
+    std::vector<std::string> vec{"one", "two", "three"};
     StartsWithValidator v(vec);
     TS_ASSERT_EQUALS(v.allowedValues().size(), 3)
   }

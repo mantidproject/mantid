@@ -44,9 +44,7 @@ void SaveIsawPeaks::init() {
   declareProperty("AppendFile", false, "Append to file if true.\n"
                                        "If false, new file (default).");
 
-  std::vector<std::string> exts;
-  exts.emplace_back(".peaks");
-  exts.emplace_back(".integrate");
+  std::vector<std::string> exts{".peaks", ".integrate"};
 
   declareProperty(new FileProperty("Filename", "", FileProperty::Save,
                                    {".peaks", ".integrate"}),

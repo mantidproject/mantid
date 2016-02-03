@@ -70,11 +70,7 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 }
 
 void LoadDaveGrp::init() {
-  std::vector<std::string> exts;
-  exts.emplace_back(".grp");
-  exts.emplace_back(".sqe");
-  exts.emplace_back(".txt");
-  exts.emplace_back(".dat");
+  std::vector<std::string> exts{".grp", ".sqe", ".txt", ".dat"};
 
   this->declareProperty(
       new API::FileProperty("Filename", "", API::FileProperty::Load, exts),

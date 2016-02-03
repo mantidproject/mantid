@@ -92,10 +92,7 @@ void GenerateEventsFilter::init() {
   setPropertySettings("TimeInterval",
                       new VisibleWhenProperty("LogName", IS_EQUAL_TO, ""));
 
-  std::vector<std::string> timeoptions;
-  timeoptions.emplace_back("Seconds");
-  timeoptions.emplace_back("Nanoseconds");
-  timeoptions.emplace_back("Percent");
+  std::vector<std::string> timeoptions{"Seconds", "Nanoseconds", "Percent"};
   declareProperty(
       "UnitOfTime", "Seconds",
       boost::make_shared<Kernel::StringListValidator>(timeoptions),
@@ -126,10 +123,7 @@ void GenerateEventsFilter::init() {
   setPropertySettings("LogValueInterval",
                       new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
-  std::vector<std::string> filteroptions;
-  filteroptions.emplace_back("Both");
-  filteroptions.emplace_back("Increase");
-  filteroptions.emplace_back("Decrease");
+  std::vector<std::string> filteroptions{"Both", "Increase", "Decrease"};
   declareProperty(
       "FilterLogValueByChangingDirection", "Both",
       boost::make_shared<Kernel::StringListValidator>(filteroptions),
@@ -147,10 +141,7 @@ void GenerateEventsFilter::init() {
   setPropertySettings("TimeTolerance",
                       new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
-  vector<string> logboundoptions;
-  logboundoptions.emplace_back("Centre");
-  logboundoptions.emplace_back("Left");
-  logboundoptions.emplace_back("Other");
+  vector<string> logboundoptions{"Centre", "Left", "Other"};
   auto logvalidator = boost::make_shared<StringListValidator>(logboundoptions);
   declareProperty(
       "LogBoundary", "Centre", logvalidator,
@@ -171,9 +162,7 @@ void GenerateEventsFilter::init() {
       "Title of output splitters workspace and information workspace.");
 
   // Linear or parallel
-  vector<string> processoptions;
-  processoptions.emplace_back("Serial");
-  processoptions.emplace_back("Parallel");
+  vector<string> processoptions{"Serial", "Parallel"};
   auto procvalidator = boost::make_shared<StringListValidator>(processoptions);
   declareProperty(
       "UseParallelProcessing", "Serial", procvalidator,

@@ -1130,13 +1130,9 @@ void FitPeak::init() {
       new ArrayProperty<double>("FittedPeakParameterValues", Direction::Output),
       "Fitted peak parameter values. ");
 
-  vector<string> bkgdtypes;
-  bkgdtypes.emplace_back("Flat");
-  bkgdtypes.emplace_back("Flat (A0)");
-  bkgdtypes.emplace_back("Linear");
-  bkgdtypes.emplace_back("Linear (A0, A1)");
-  bkgdtypes.emplace_back("Quadratic");
-  bkgdtypes.emplace_back("Quadratic (A0, A1, A2)");
+  vector<string> bkgdtypes{"Flat",      "Flat (A0)",
+                           "Linear",    "Linear (A0, A1)",
+                           "Quadratic", "Quadratic (A0, A1, A2)"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
@@ -1193,9 +1189,7 @@ void FitPeak::init() {
                   "from proposed value more than "
                   "the given value, fit is treated as failure. ");
 
-  vector<string> costFuncOptions;
-  costFuncOptions.emplace_back("Chi-Square");
-  costFuncOptions.emplace_back("Rwp");
+  vector<string> costFuncOptions{"Chi-Square", "Rwp"};
   declareProperty("CostFunction", "Chi-Square",
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(costFuncOptions)),

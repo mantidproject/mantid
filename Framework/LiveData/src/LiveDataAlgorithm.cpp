@@ -81,10 +81,7 @@ void LiveDataAlgorithm::initProps() {
                   "data. Only for command line usage, does not appear on the "
                   "user interface.");
 
-  std::vector<std::string> propOptions;
-  propOptions.emplace_back("Add");
-  propOptions.emplace_back("Replace");
-  propOptions.emplace_back("Append");
+  std::vector<std::string> propOptions{"Add", "Replace", "Append"};
   declareProperty(
       "AccumulationMethod", "Add",
       boost::make_shared<StringListValidator>(propOptions),
@@ -121,10 +118,7 @@ void LiveDataAlgorithm::initProps() {
                                          Direction::Input),
       "A Python script that will be run to process the accumulated data.");
 
-  std::vector<std::string> runOptions;
-  runOptions.emplace_back("Restart");
-  runOptions.emplace_back("Stop");
-  runOptions.emplace_back("Rename");
+  std::vector<std::string> runOptions{"Restart", "Stop", "Rename"};
   declareProperty("RunTransitionBehavior", "Restart",
                   boost::make_shared<StringListValidator>(runOptions),
                   "What to do at run start/end boundaries?\n"

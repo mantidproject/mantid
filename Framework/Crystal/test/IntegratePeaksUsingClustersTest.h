@@ -107,7 +107,7 @@ public:
 
   void test_threshold_too_high_gives_no_peaks() {
     // ------- Make the fake input
-    std::vector<V3D> hklValues{V3D(2, 2, 2)};
+    std::vector<V3D> hklValues{{2, 2, 2}};
     const double peakRadius = 1;
     const double threshold = 10000; // Threshold will filter out everything
                                     // given the nEventsInPeak restriction.
@@ -138,7 +138,7 @@ public:
 
   void test_integrate_single_peak() {
     // ------- Make the fake input
-    std::vector<V3D> hklValues{V3D(2, 2, 2)};
+    std::vector<V3D> hklValues{{2, 2, 2}};
     const double peakRadius = 1;
     const double threshold = 100;
     const size_t nEventsInPeak = 10000;
@@ -179,7 +179,7 @@ public:
   void test_integrate_two_separate_but_identical_peaks() {
     // ------- Make the fake input
     // Add several peaks. These are NOT overlapping.
-    std::vector<V3D> hklValues{V3D(1, 1, 1), V3D(6, 6, 6)};
+    std::vector<V3D> hklValues{{1, 1, 1}, {6, 6, 6}};
     const double peakRadius = 1;
     const double threshold = 100;
     const size_t nEventsInPeak = 10000;
@@ -229,7 +229,7 @@ public:
   void test_integrate_two_peaks_of_different_magnitude() {
     // ------- Make the fake input
     // Add several peaks. These are NOT overlapping.
-    std::vector<V3D> hklValues{V3D(1, 1, 1), V3D(6, 6, 6)};
+    std::vector<V3D> hklValues{{1, 1, 1}, {6, 6, 6}};
     const double peakRadius = 1;
     const double threshold = 100;
     std::vector<size_t> nEventsInPeakVec;

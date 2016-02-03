@@ -28,11 +28,7 @@ BinaryOperateMasks::~BinaryOperateMasks() {
 
 void BinaryOperateMasks::init() {
 
-  std::vector<std::string> operators;
-  operators.emplace_back("AND");
-  operators.emplace_back("OR");
-  operators.emplace_back("XOR");
-  operators.emplace_back("NOT");
+  std::vector<std::string> operators{"AND", "OR", "XOR", "NOT"};
 
   declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>(
                       "InputWorkspace1", "", Direction::Input),

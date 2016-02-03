@@ -402,15 +402,9 @@ public:
     DataObjects::TableWorkspace_sptr geomws =
         DataObjects::TableWorkspace_sptr(tablews);
 
-    std::vector<std::string> paramnames;
-    paramnames.emplace_back("Zero");
-    paramnames.emplace_back("Zerot");
-    paramnames.emplace_back("Dtt1");
-    paramnames.emplace_back("Dtt1t");
-    paramnames.emplace_back("Dtt2t");
-    paramnames.emplace_back("Tcross");
-    paramnames.emplace_back("Width");
-    paramnames.emplace_back("LatticeConstant");
+    std::vector<std::string> paramnames{"Zero",  "Zerot",          "Dtt1",
+                                        "Dtt1t", "Dtt2t",          "Tcross",
+                                        "Width", "LatticeConstant"};
 
     tablews->addColumn("str", "Name");
     tablews->addColumn("double", "Value");

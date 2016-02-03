@@ -45,10 +45,8 @@ void LoadDspacemap::init() {
       new FileProperty("Filename", "", FileProperty::Load, {".dat", ".bin"}),
       "The DspacemapFile containing the d-space mapping.");
 
-  std::vector<std::string> propOptions;
-  propOptions.emplace_back("POWGEN");
-  propOptions.emplace_back("VULCAN-ASCII");
-  propOptions.emplace_back("VULCAN-Binary");
+  std::vector<std::string> propOptions{"POWGEN", "VULCAN-ASCII",
+                                       "VULCAN-Binary"};
   declareProperty("FileType", "POWGEN",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type of file being read.");

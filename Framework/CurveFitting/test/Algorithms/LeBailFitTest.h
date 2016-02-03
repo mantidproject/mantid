@@ -506,9 +506,7 @@ public:
 
     // c) Generate TableWorkspaces
     std::vector<double> pkheights(numpeaks, 1.0);
-    map<string, double> modmap;
-    modmap.emplace("Alph0", 5.0);
-    modmap.emplace("Beta0", 5.0);
+    map<string, double> modmap{{"Alph0", 5.0}, {"Beta0", 5.0}};
     parameterws = createPeakParameterWorkspace(modmap, 2);
     hklws = createInputHKLWorkspace(hkls, pkheights);
     bkgdws = createBackgroundParameterWorksapce(1);

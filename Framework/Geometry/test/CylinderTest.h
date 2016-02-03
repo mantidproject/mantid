@@ -158,9 +158,8 @@ public:
   Test the distance of a point from the cylinder
   */
   {
-    std::vector<std::string> CylStr;
-    CylStr.emplace_back("cx 1");            // Cylinder origin
-    CylStr.emplace_back("c/x 1.0 1.0 1.0"); // also cylinder at ?origin?
+    std::vector<std::string> CylStr{"cx 1", "c/x 1.0 1.0 1.0"};
+    // Cylinder origin // also cylinder at ?origin?
     Kernel::V3D P(0, -1.2, 0);
     double results[] = {1.2 - 1, 1.41661};
 

@@ -32,10 +32,7 @@ void FFTSmooth2::init() {
   declareProperty("WorkspaceIndex", 0, mustBePositive,
                   "Spectrum index for smoothing");
 
-  std::vector<std::string> type;
-  // type.emplace_back("Truncation");
-  type.emplace_back("Zeroing");
-  type.emplace_back("Butterworth");
+  std::vector<std::string> type{"Zeroing", "Butterworth"};
   declareProperty("Filter", "Zeroing",
                   boost::make_shared<StringListValidator>(type),
                   "The type of the applied filter");

@@ -84,10 +84,7 @@ public:
   getNewInstrument(DataObjects::PeaksWorkspace_sptr Peaks) const;
 
   std::vector<std::string> getAttributeNames() const {
-    std::vector<std::string> Res;
-    Res.emplace_back("OptRuns");
-    Res.emplace_back("PeakWorkspaceName");
-    return Res;
+    return {"OptRuns", "PeakWorkspaceName"};
   }
 
   IFunction::Attribute getAttribute(const std::string &attName) const {

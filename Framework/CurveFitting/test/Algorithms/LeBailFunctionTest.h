@@ -65,16 +65,8 @@ public:
     lebailfunction.setProfileParameterValues(parammap);
 
     // Add background functions
-    std::vector<double> parvalues;
-    std::vector<std::string> parnames;
-    parnames.emplace_back("A0");
-    parvalues.push_back(1.0);
-    parnames.emplace_back("A1");
-    parvalues.push_back(1.0);
-    parnames.emplace_back("A2");
-    parvalues.push_back(1.0);
-    parnames.emplace_back("A3");
-    parvalues.push_back(1.0);
+    std::vector<double> parvalues{1.0, 1.0, 1.0, 1.0};
+    std::vector<std::string> parnames{"A0", "A1", "A2", "A3"};
 
     // Chebyshev
     TS_ASSERT_THROWS_NOTHING(lebailfunction.addBackgroundFunction(

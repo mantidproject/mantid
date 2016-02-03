@@ -291,10 +291,7 @@ void FilterEventsByLogValuePreNexus::init() {
                       new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
 
   // Loading option
-  std::vector<std::string> propOptions;
-  propOptions.emplace_back("Auto");
-  propOptions.emplace_back("Serial");
-  propOptions.emplace_back("Parallel");
+  std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"
@@ -316,10 +313,7 @@ void FilterEventsByLogValuePreNexus::init() {
                   "(pixel) information. ");
 
   //
-  std::vector<std::string> vecfunmode;
-  vecfunmode.emplace_back("LoadData");
-  vecfunmode.emplace_back("Filter");
-  vecfunmode.emplace_back("ExamineEventLog");
+  std::vector<std::string> vecfunmode{"LoadData", "Filter", "ExamineEventLog"};
   declareProperty("FunctionMode", "LoadData",
                   boost::make_shared<StringListValidator>(vecfunmode),
                   "Function mode for different purpose. ");

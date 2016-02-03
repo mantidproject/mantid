@@ -43,10 +43,7 @@ void GetSpiceDataRawCountsFromMD::init() {
                                              Direction::Output),
       "Name of the output MatrixWorkspace containing the raw data required.");
 
-  std::vector<std::string> vecmode;
-  vecmode.emplace_back("Pt.");
-  vecmode.emplace_back("Detector");
-  vecmode.emplace_back("Sample Log");
+  std::vector<std::string> vecmode{"Pt.", "Detector", "Sample Log"};
   auto modevalidator = boost::make_shared<ListValidator<std::string>>(vecmode);
   declareProperty(
       "Mode", "Detector", modevalidator,

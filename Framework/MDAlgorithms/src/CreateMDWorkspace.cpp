@@ -43,9 +43,7 @@ void CreateMDWorkspace::init() {
   declareProperty(new PropertyWithValue<int>("Dimensions", 1, Direction::Input),
                   "Number of dimensions that the workspace will have.");
 
-  std::vector<std::string> propOptions;
-  propOptions.emplace_back("MDEvent");
-  propOptions.emplace_back("MDLeanEvent");
+  std::vector<std::string> propOptions{"MDEvent", "MDLeanEvent"};
   declareProperty("EventType", "MDLeanEvent",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which underlying data type will event take.");

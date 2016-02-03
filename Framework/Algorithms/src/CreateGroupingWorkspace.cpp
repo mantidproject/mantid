@@ -80,12 +80,7 @@ void CreateGroupingWorkspace::init() {
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
 
-  std::vector<std::string> grouping;
-  grouping.emplace_back("");
-  grouping.emplace_back("All");
-  grouping.emplace_back("Group");
-  grouping.emplace_back("Column");
-  grouping.emplace_back("bank");
+  std::vector<std::string> grouping{"", "All", "Group", "Column", "bank"};
   declareProperty(
       "GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "

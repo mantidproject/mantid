@@ -97,9 +97,7 @@ void RefinePowderInstrumentParameters::init() {
       "Minimum number of fitted peaks for refining instrument parameters.");
 
   // Refinement algorithm
-  vector<string> algoptions;
-  algoptions.emplace_back("DirectFit");
-  algoptions.emplace_back("MonteCarlo");
+  vector<string> algoptions{"DirectFit", "MonteCarlo"};
   auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
   declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
                   "Algorithm to refine the instrument parameters.");
@@ -117,9 +115,7 @@ void RefinePowderInstrumentParameters::init() {
                   "Minimum allowed value for Sigma of a peak.");
 
   // Method to calcualte the standard error of peaks
-  vector<string> stdoptions;
-  stdoptions.emplace_back("ConstantValue");
-  stdoptions.emplace_back("InvertedPeakHeight");
+  vector<string> stdoptions{"ConstantValue", "InvertedPeakHeight"};
   auto listvalidator =
       boost::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty(
@@ -755,8 +751,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
       paramvalues[paramindex] = newvalue;
 
       // ii.  Add the new values to vector
-      vector<double> parametervalues = paramvalues;
-      m_BestMCParameters.emplace_back(newchi2, parametervalues);
+      m_BestMCParameters.emplace_back(newchi2, paramvalues);
 
       // iii. Sort and delete the last if necessary
       sort(m_BestMCParameters.begin(), m_BestMCParameters.end());

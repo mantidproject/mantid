@@ -48,12 +48,7 @@ namespace {
  * @brief functions
  * @return Allowed smoothing functions
  */
-std::vector<std::string> functions() {
-  std::vector<std::string> propOptions;
-  propOptions.emplace_back("Hat");
-  // propOptions.emplace_back("Gaussian");
-  return propOptions;
-}
+std::vector<std::string> functions() { return {"Hat"}; }
 
 /**
  * Maps a function name to a smoothing function

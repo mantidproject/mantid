@@ -15,10 +15,7 @@ public:
   }
 
   void testVectorConstructor() {
-    std::vector<std::string> vec;
-    vec.emplace_back("one");
-    vec.emplace_back("two");
-    vec.emplace_back("three");
+    std::vector<std::string> vec{"one", "two", "three"};
     StringListValidator v(vec);
     TS_ASSERT_EQUALS(v.allowedValues().size(), 3)
   }
@@ -72,14 +69,9 @@ public:
   }
 
   void testAliasString() {
-    std::vector<std::string> values;
-    values.emplace_back("one");
-    values.emplace_back("three");
-    values.emplace_back("two");
-    std::map<std::string, std::string> aliases;
-    aliases["1"] = "one";
-    aliases["2"] = "two";
-    aliases["3"] = "three";
+    std::vector<std::string> values{"one", "three", "two"};
+    std::map<std::string, std::string> aliases{
+        {"1", "one"}, {"2", "two"}, {"3", "three"}};
     StringListValidator validator(values, aliases);
     TS_ASSERT_EQUALS(validator.isValid("one"), "")
     TS_ASSERT_EQUALS(validator.isValid("two"), "")
@@ -99,14 +91,9 @@ public:
   }
 
   void testAliasInt() {
-    std::vector<int> values;
-    values.push_back(1);
-    values.push_back(5);
-    values.push_back(3);
-    std::map<std::string, std::string> aliases;
-    aliases["11"] = "1";
-    aliases["33"] = "3";
-    aliases["55"] = "5";
+    std::vector<int> values{1, 5, 3};
+    std::map<std::string, std::string> aliases{
+        {"11", "1"}, {"33", "3"}, {"55", "5"}};
     ListValidator<int> validator(values, aliases);
     TS_ASSERT_EQUALS(validator.isValid(1), "")
     TS_ASSERT_EQUALS(validator.isValid(3), "")
@@ -126,24 +113,16 @@ public:
   }
 
   void test_wrong_alias() {
-    std::vector<std::string> values;
-    values.emplace_back("one");
-    values.emplace_back("three");
-    std::map<std::string, std::string> aliases;
-    aliases["1"] = "one";
-    aliases["2"] = "two";
+    std::vector<std::string> values{"one", "three"};
+    std::map<std::string, std::string> aliases{{"1", "one"}, {"2", "two"}};
     TS_ASSERT_THROWS(StringListValidator validator(values, aliases),
                      std::invalid_argument);
   }
 
   void test_self_alias() {
-    std::vector<std::string> values;
-    values.emplace_back("one");
-    values.emplace_back("three");
-    std::map<std::string, std::string> aliases;
-    aliases["1"] = "one";
-    aliases["three"] = "three";
-    aliases["one"] = "three";
+    std::vector<std::string> values{"one", "three"};
+    std::map<std::string, std::string> aliases{
+        {"1", "one"}, {"three", "three"}, {"one", "three"}};
     StringListValidator validator(values, aliases);
 
     TS_ASSERT_EQUALS(validator.isValid("one"), "")

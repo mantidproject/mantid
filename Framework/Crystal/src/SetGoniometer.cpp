@@ -37,9 +37,8 @@ void SetGoniometer::init() {
       new WorkspaceProperty<>("Workspace", "", Direction::InOut),
       "An workspace that will be modified with the new goniometer created.");
 
-  std::vector<std::string> gonOptions;
-  gonOptions.emplace_back("None, Specify Individually");
-  gonOptions.emplace_back("Universal");
+  std::vector<std::string> gonOptions{"None, Specify Individually",
+                                      "Universal"};
   declareProperty("Goniometers", gonOptions[0],
                   boost::make_shared<StringListValidator>(gonOptions),
                   "Set the axes and motor names according to goniometers that "

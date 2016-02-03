@@ -57,10 +57,7 @@ void FindPeakBackground::init() {
                   "The window is the same for all indices in workspace. The "
                   "length must be exactly two.");
 
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.emplace_back("Flat");
-  bkgdtypes.emplace_back("Linear");
-  bkgdtypes.emplace_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
