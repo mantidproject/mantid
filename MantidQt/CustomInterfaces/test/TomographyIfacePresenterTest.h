@@ -317,7 +317,8 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     EXPECT_CALL(mockView, currentComputeResource()).Times(0);
-    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_)).Times(1);
+    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_, testing::_))
+        .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -331,7 +332,8 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     EXPECT_CALL(mockView, currentComputeResource()).Times(0);
-    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_)).Times(1);
+    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_, testing::_))
+        .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -396,12 +398,14 @@ public:
         .Times(1)
         .WillOnce(Return(TomoPathsConfig()));
 
+    // user changes some paths
     pres.notify(ITomographyIfacePresenter::TomoPathsChanged);
 
     EXPECT_CALL(mockView, currentComputeResource())
-        .Times(1)
-        .WillOnce(Return(g_scarfName));
+        .Times(2)
+        .WillRepeatedly(Return(g_scarfName));
 
+    // user changes the compute resource
     pres.notify(ITomographyIfacePresenter::CompResourceChanged);
 
     EXPECT_CALL(mockView, currentReconTool())
@@ -413,15 +417,41 @@ public:
         .Times(1)
         .WillOnce(Return(toolsSettings));
 
+    // user opens dialog and sets up a reconstruction tool
     pres.notify(ITomographyIfacePresenter::SetupReconTool);
 
-    // should not use this for now:
-    EXPECT_CALL(mockView, prePostProcSettings()).Times(0);
+    TomoPathsConfig pathsCfg;
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(pathsCfg));
+
+    ImageStackPreParams roiEtc;
+    EXPECT_CALL(mockView, currentROIEtcParams())
+        .Times(1)
+        .WillOnce(Return(roiEtc));
+
+    EXPECT_CALL(mockView, tomopyMethod()).Times(1).WillOnce(Return(""));
+
+    EXPECT_CALL(mockView, astraMethod()).Times(1).WillOnce(Return(""));
+
+    TomoReconFiltersSettings filters;
+    EXPECT_CALL(mockView, prePostProcSettings())
+        .Times(1)
+        .WillOnce(Return(filters));
+
+    EXPECT_CALL(mockView, externalInterpreterPath())
+        .Times(1)
+        .WillOnce(Return(""));
+
+    EXPECT_CALL(mockView, pathLocalReconScripts())
+        .Times(1)
+        .WillOnce(Return(""));
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
+    // finally, user tries to run a reconstruction job
     pres.notify(ITomographyIfacePresenter::RunReconstruct);
   }
 
