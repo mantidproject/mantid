@@ -346,7 +346,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
         yProb = np.append(yProb,yPr2)
         CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
             Nspec=3, UnitX='MomentumTransfer', EnableLogging=_LOGGING_)
-        outWS = C2Fw(samWS[:-4],fname)
+        outWS = C2Fw(fname)
         if Plot != 'None':
             QuasiPlot(fname,Plot,res_plot,Loop)
     if program == 'QSe':
@@ -490,7 +490,7 @@ def read_ql_file(file_name, nl):
     return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
 
 
-def C2Fw(prog,sname):
+def C2Fw(sname):
     output_workspace = sname+'_Result'
     num_spectra = 0
 
@@ -640,8 +640,7 @@ def C2Se(sname):
 
     logger.information('Vaxis=' + str(Vaxis))
     CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,\
-        UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='',\
-        EnableLogging=_LOGGING_)
+        UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='', EnableLogging=_LOGGING_)
     return outWS
 
 
@@ -787,9 +786,8 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
             dataEz = np.append(dataEz,eBet0)
 
         CreateWorkspace(OutputWorkspace=zpWS, DataX=dataXz, DataY=dataYz, DataE=dataEz,
-                        Nspec=Nsig, UnitX='MomentumTransfer',
-                        VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=dataXs,
-                        EnableLogging=_LOGGING_)
+                        Nspec=Nsig, UnitX='MomentumTransfer',VerticalAxisUnit='MomentumTransfer',
+                        VerticalAxisValues=dataXs, EnableLogging=_LOGGING_)
 
         unitx = mtd[zpWS].getAxis(0).setUnit("Label")
         unitx.setLabel('beta' , '')
@@ -815,14 +813,12 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
 
     #create workspaces for sigma and beta
     CreateWorkspace(OutputWorkspace=fname+'_Sigma', DataX=xSig, DataY=ySig, DataE=eSig,\
-        Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis,
-        EnableLogging=_LOGGING_)
+        Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis, EnableLogging=_LOGGING_)
     unitx = mtd[fname+'_Sigma'].getAxis(0).setUnit("Label")
     unitx.setLabel('sigma' , '')
 
     CreateWorkspace(OutputWorkspace=fname+'_Beta', DataX=xBet, DataY=yBet, DataE=eBet,\
-        Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis,
-        EnableLogging=_LOGGING_)
+        Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis, EnableLogging=_LOGGING_)
     unitx = mtd[fname+'_Beta'].getAxis(0).setUnit("Label")
     unitx.setLabel('beta' , '')
 
