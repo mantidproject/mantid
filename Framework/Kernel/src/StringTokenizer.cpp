@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <functional>
 #include <cassert>
+#include <iterator> //cbegin,cend
 
 namespace {
 
@@ -61,8 +62,10 @@ void for_each_token(InputIt first, InputIt last, ForwardIt s_first,
 std::vector<std::string> split0(const std::string &str,
                                 const std::string &delims) {
   std::vector<std::string> output;
-  for_each_token(cbegin(str), cend(str), cbegin(delims), cend(delims),
-                 [&output](auto first, auto second) {
+  for_each_token(std::cbegin(str), std::cend(str), std::cbegin(delims),
+                 std::cend(delims),
+                 [&output](std::string::const_iterator first,
+                           std::string::const_iterator second) {
                    output.emplace_back(first, second);
                  });
   return output;
@@ -72,8 +75,10 @@ std::vector<std::string> split0(const std::string &str,
 std::vector<std::string> split1(const std::string &str,
                                 const std::string &delims) {
   std::vector<std::string> output;
-  for_each_token(cbegin(str), cend(str), cbegin(delims), cend(delims),
-                 [&output](auto first, auto second) {
+  for_each_token(std::cbegin(str), std::cend(str), std::cbegin(delims),
+                 std::cend(delims),
+                 [&output](std::string::const_iterator first,
+                           std::string::const_iterator second) {
                    if (first != second)
                      output.emplace_back(first, second);
                  });
@@ -84,8 +89,10 @@ std::vector<std::string> split1(const std::string &str,
 std::vector<std::string> split2(const std::string &str,
                                 const std::string &delims) {
   std::vector<std::string> output;
-  for_each_token(cbegin(str), cend(str), cbegin(delims), cend(delims),
-                 [&output](auto first, auto second) {
+  for_each_token(std::cbegin(str), std::cend(str), std::cbegin(delims),
+                 std::cend(delims),
+                 [&output](std::string::const_iterator first,
+                           std::string::const_iterator second) {
                    output.emplace_back(first, second);
                    trim(output.back());
                  });
@@ -96,8 +103,10 @@ std::vector<std::string> split2(const std::string &str,
 std::vector<std::string> split3(const std::string &str,
                                 const std::string &delims) {
   std::vector<std::string> output;
-  for_each_token(cbegin(str), cend(str), cbegin(delims), cend(delims),
-                 [&output](auto first, auto second) {
+  for_each_token(std::cbegin(str), std::cend(str), std::cbegin(delims),
+                 std::cend(delims),
+                 [&output](std::string::const_iterator first,
+                           std::string::const_iterator second) {
                    if (first != second) {
                      output.emplace_back(first, second);
                      trim(output.back());
