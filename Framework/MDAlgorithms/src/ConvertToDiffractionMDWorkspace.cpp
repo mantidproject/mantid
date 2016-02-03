@@ -19,6 +19,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/ConfigService.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -215,6 +216,12 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     //  = input beam direction (normalized to 1) - output beam direction
     //  (normalized to 1)
     V3D Q_dir_lab_frame = beamDir - detDir;
+    double qSign = -1.0;
+    std::string convention =
+        ConfigService::Instance().getString("Q.convention");
+    if (convention == "Crystallography")
+      qSign = 1.0;
+    Q_dir_lab_frame *= qSign;
 
     // Multiply by the rotation matrix to convert to Q in the sample frame (take
     // out goniometer rotation)
@@ -306,8 +313,8 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
       el.clear();
       // For Linux with tcmalloc, make sure memory goes back, if you've cleared
       // 200 Megs
-      MemoryManager::Instance().releaseFreeMemoryIfAccumulated(memoryCleared,
-                                                               (size_t)2e8);
+      MemoryManager::Instance().releaseFreeMemoryIfAccumulated(
+          memoryCleared, static_cast<size_t>(2e8));
     }
   }
   prog->reportIncrement(numEvents, "Adding Events");

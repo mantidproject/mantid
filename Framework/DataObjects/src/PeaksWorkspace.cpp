@@ -128,6 +128,11 @@ void PeaksWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
 int PeaksWorkspace::getNumberPeaks() const { return int(peaks.size()); }
 
 //---------------------------------------------------------------------------------------------
+/** @return the convention
+ */
+std::string PeaksWorkspace::getConvention() const { return convention; }
+
+//---------------------------------------------------------------------------------------------
 /** Removes the indicated peak
  * @param peakNum  the peak to remove. peakNum starts at 0
  */
@@ -651,6 +656,11 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
 
   // Coordinate system
   file->writeData("coordinate_system", static_cast<uint32_t>(m_coordSystem));
+
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string m_QConvention = this->getConvention();
+  file->putAttr("QConvention", m_QConvention);
 
   // Detectors column
   file->writeData("column_1", detectorID);

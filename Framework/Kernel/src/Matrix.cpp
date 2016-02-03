@@ -122,7 +122,7 @@ template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &data)
     : nx(0), ny(0), V(0) {
   size_t numel = data.size();
-  size_t nxt = (size_t)sqrt(double(numel));
+  size_t nxt = static_cast<size_t>(sqrt(double(numel)));
   size_t test = nxt * nxt;
   if (test != numel) {
     throw(std::invalid_argument(

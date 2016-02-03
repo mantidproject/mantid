@@ -86,7 +86,7 @@ bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
   // first nbytes bytes of the file.
   bool result = true;
   for (char *p = data; p < pend; ++p) {
-    unsigned long ch = (unsigned long)*p;
+    unsigned long ch = static_cast<unsigned long>(*p);
     if (!(ch <= 0x7F)) {
       result = false;
       break;

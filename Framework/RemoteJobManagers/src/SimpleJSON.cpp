@@ -369,7 +369,7 @@ void initFromStream(JSONObject &obj, istream &istr) {
   skipWhiteSpace(istr);
 
   // Check for empty object (and make sure we consume the })
-  nextChar = (char)istr.peek();
+  nextChar = static_cast<char>(istr.peek());
   if (nextChar == '}') {
     istr.ignore();
   }
@@ -383,7 +383,7 @@ void initFromStream(JSONObject &obj, istream &istr) {
 
     // We expect to start the loop with the stream pointing to the opening quote
     // of the key
-    nextChar = (char)istr.peek();
+    nextChar = static_cast<char>(istr.peek());
     checkChar(nextChar, '"');
 
     string key = readString(istr);
@@ -435,7 +435,7 @@ void initArrayFromStream(JSONArray &arr, istream &istr) {
   skipWhiteSpace(istr);
 
   // Check for empty array (and make sure we consume the ])
-  nextChar = (char)istr.peek();
+  nextChar = static_cast<char>(istr.peek());
   if (nextChar == ']') {
     istr.ignore();
   }
@@ -489,7 +489,7 @@ JSONValue initValueFromStream(istream &istr) {
   // We expect the stream to be at the start of the value.
 
   // Need to determine what kind of value it is.
-  char nextChar = (char)istr.peek();
+  char nextChar = static_cast<char>(istr.peek());
   if (nextChar == '"') // value is a string
   {
     // Read until we get the closing '"'
@@ -539,7 +539,7 @@ JSONValue initValueFromStream(istream &istr) {
   // Done processing the value. Verify that it ends properly (ie, we
   // get a comma or a closing brace)
   skipWhiteSpace(istr);
-  nextChar = (char)istr.peek();
+  nextChar = static_cast<char>(istr.peek());
   if ((nextChar != ',') && (nextChar != '}') && (nextChar != ']')) {
     string message = "Improperly terminated key/value pair.  Expected comma or "
                      "closing brace.  Received: ";
@@ -656,7 +656,7 @@ string readString(istream &istr) {
 // Note: This function is not used for strings.  See readString() for that.
 string readUntilCloseChar(istream &istr) {
   string value;
-  char next = (char)istr.peek();
+  char next = static_cast<char>(istr.peek());
   while ((next != ',') && (next != '}') && (next != ']')) {
     if (istr.eof()) {
       throw JSONParseException(
@@ -670,7 +670,7 @@ string readUntilCloseChar(istream &istr) {
       value += next;
     }
     istr.get(); // consume the char from the stream
-    next = (char)istr.peek();
+    next = static_cast<char>(istr.peek());
   }
 
   // Strip any whitespace off the end of the value string

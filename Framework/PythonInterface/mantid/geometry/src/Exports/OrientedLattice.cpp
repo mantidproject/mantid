@@ -53,7 +53,7 @@ void export_OrientedLattice() {
       .def(init<double, double, double>((arg("_a"), arg("_b"), arg("_c"))))
       .def(init<double, double, double, double, double, double, optional<int>>(
           (arg("_a"), arg("_b"), arg("_c"), arg("_alpha"), arg("_beta"),
-           arg("_gamma"), arg("Unit") = (int)(angDegrees))))
+           arg("_gamma"), arg("Unit") = static_cast<int>(angDegrees))))
       .def(init<UnitCell>(arg("uc")))
       .def("getuVector", (&OrientedLattice::getuVector), arg("self"))
       .def("getvVector", (&OrientedLattice::getvVector), arg("self"))

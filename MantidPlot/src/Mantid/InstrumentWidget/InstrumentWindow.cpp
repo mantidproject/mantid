@@ -1,3 +1,4 @@
+#include "ColorMapWidget.h"
 #include "InstrumentWindow.h"
 #include "InstrumentWindowRenderTab.h"
 #include "InstrumentWindowPickTab.h"
@@ -56,8 +57,11 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt::API;
 
-// Name of the QSettings group to store the InstrumentWindw settings
+// Name of the QSettings group to store the InstrumentWindw &
+// InstrumentWindowRender settings
 const char *InstrumentWindowSettingsGroup = "Mantid/InstrumentWindow";
+const std::string InstrumentWindow::m_windowRendSettingsGroup =
+    "Mantid/InstrumentWindowRender";
 
 namespace {
 /**
@@ -238,6 +242,7 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling,
     surface->resetInstrumentActor(m_instrumentActor);
     updateInfoText();
   }
+  readSettings();
 }
 
 /**
@@ -330,10 +335,12 @@ void InstrumentWindow::setSurfaceType(int type) {
     int peakLabelPrecision = 6;
     bool showPeakRow = true;
     bool showPeakLabels = true;
+    bool showPeakRelativeIntensity = true;
     if (surface) {
       peakLabelPrecision = surface->getPeakLabelPrecision();
       showPeakRow = surface->getShowPeakRowsFlag();
       showPeakLabels = surface->getShowPeakLabelsFlag();
+      showPeakRelativeIntensity = surface->getShowPeakRelativeIntensityFlag();
     } else {
       QSettings settings;
       peakLabelPrecision =
@@ -341,9 +348,13 @@ void InstrumentWindow::setSurfaceType(int type) {
               .toInt();
       showPeakRow =
           settings.value("Mantid/InstrumentWindow/ShowPeakRows", true).toBool();
-      showPeakLabels =
-          settings.value("Mantid/InstrumentWindow/ShowPeakLabels", true)
-              .toBool();
+      showPeakLabels = settings.value("Mantid/InstrumentWindow/ShowPeakLabels",
+                                      true).toBool();
+
+      // By default this is should be off for now.
+      showPeakRelativeIntensity =
+          settings.value("Mantid/InstrumentWindow/ShowPeakRelativeIntensities",
+                         false).toBool();
     }
 
     // Surface factory
@@ -409,6 +420,7 @@ void InstrumentWindow::setSurfaceType(int type) {
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowsFlag(showPeakRow);
     surface->setShowPeakLabelsFlag(showPeakLabels);
+    surface->setShowPeakRelativeIntensityFlag(showPeakRelativeIntensity);
     // set new surface
     setSurface(surface);
 
@@ -690,9 +702,125 @@ void InstrumentWindow::saveSettings() {
                       getSurface()->getPeakLabelPrecision());
     settings.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
     settings.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
+    settings.setValue("ShowPeakRelativeIntensities",
+                      getSurface()->getShowPeakRelativeIntensityFlag());
     foreach (InstrumentWindowTab *tab, m_tabs) { tab->saveSettings(settings); }
   }
   settings.endGroup();
+
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_windowRendSettingsGroup));
+
+  // sets the combo to the particular value but does
+  // not update the setSurface? combo value
+  qs.setValue("user_params_Full3d", m_renderTab->m_full3D->isChecked());
+  qs.setValue("user_params_m_cylindricalX",
+              m_renderTab->m_cylindricalX->isChecked());
+  qs.setValue("user_params_m_cylindricalY",
+              m_renderTab->m_cylindricalY->isChecked());
+  qs.setValue("user_params_m_cylindricalZ",
+              m_renderTab->m_cylindricalZ->isChecked());
+  qs.setValue("user_params_m_sphericalX",
+              m_renderTab->m_sphericalX->isChecked());
+  qs.setValue("user_params_m_sphericalY",
+              m_renderTab->m_sphericalY->isChecked());
+  qs.setValue("user_params_m_sphericalZ",
+              m_renderTab->m_sphericalZ->isChecked());
+  qs.setValue("user_params_m_sideBySide",
+              m_renderTab->m_sideBySide->isChecked());
+  qs.setValue("user_param_mAxisCombo", m_renderTab->mAxisCombo->currentText());
+  qs.setValue("user_params_flipCheckBox",
+              m_renderTab->m_flipCheckBox->isChecked());
+
+  // saving the settings for the graph and color map
+  qs.setValue("user_param_minVal",
+              m_renderTab->m_colorMapWidget->getMinValue());
+  qs.setValue("user_param_maxVal",
+              m_renderTab->m_colorMapWidget->getMaxValue());
+  qs.setValue("user_param_nthTerm",
+              m_renderTab->m_colorMapWidget->getNth_power());
+  qs.setValue("user_params_autoscaling",
+              m_renderTab->m_autoscaling->isChecked());
+
+  // saving the bin range entered
+  qs.setValue("user_params_minBinRange", m_instrumentActor->minBinValue());
+  qs.setValue("user_params_maxBinRange", m_instrumentActor->maxBinValue());
+
+  qs.endGroup();
+}
+
+/**
+* Reads properties of the instrument render window and the bin range
+*/
+void InstrumentWindow::readSettings() {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_windowRendSettingsGroup));
+
+  // sets the combo to the particular value but does
+  // not update the combo value
+  m_renderTab->m_full3D->setChecked(
+      qs.value("user_params_Full3d", false).toBool());
+  m_renderTab->m_cylindricalX->setChecked(
+      qs.value("user_params_m_cylindricalX", false).toBool());
+  m_renderTab->m_cylindricalY->setChecked(
+      qs.value("user_params_m_cylindricalY", true).toBool());
+  m_renderTab->m_cylindricalZ->setChecked(
+      qs.value("user_params_m_cylindricalZ", false).toBool());
+  m_renderTab->m_sphericalX->setChecked(
+      qs.value("user_params_m_sphericalX", false).toBool());
+  m_renderTab->m_sphericalY->setChecked(
+      qs.value("user_params_m_sphericalY", false).toBool());
+  m_renderTab->m_sphericalZ->setChecked(
+      qs.value("user_params_m_sphericalZ", false).toBool());
+  m_renderTab->m_sideBySide->setChecked(
+      qs.value("user_params_m_sideBySide", false).toBool());
+
+  // if true assign surfaceType int
+  int surfaceType = 2;
+  if ((qs.value("user_params_Full3d").toBool())) {
+    surfaceType = 0;
+  } else if ((qs.value("user_params_m_cylindricalX").toBool())) {
+    surfaceType = 1;
+  } else if ((qs.value("user_params_m_cylindricalY").toBool())) {
+    surfaceType = 2;
+  } else if ((qs.value("user_params_m_cylindricalZ").toBool())) {
+    surfaceType = 3;
+  } else if ((qs.value("user_params_m_sphericalX").toBool())) {
+    surfaceType = 4;
+  } else if ((qs.value("user_params_m_sphericalY").toBool())) {
+    surfaceType = 5;
+  } else if ((qs.value("user_params_m_sphericalZ").toBool())) {
+    surfaceType = 6;
+  } else if ((qs.value("user_params_m_sideBySide").toBool())) {
+    surfaceType = 7;
+  }
+  setSurfaceType(surfaceType);
+
+  // setAxis can only be initailised after setSurfaceType has been called
+  m_renderTab->setAxis(qs.value("user_param_mAxisCombo").toString());
+  m_renderTab->m_flipCheckBox->setChecked(
+      qs.value("user_params_flipCheckBox", false).toBool());
+
+  colorMapRangeChanged(qs.value("user_param_minVal").toDouble(),
+                       qs.value("user_param_maxVal").toDouble());
+  m_renderTab->nthPowerChanged(qs.value("user_param_nthTerm").toDouble());
+  changeNthPower(qs.value("user_param_nthTerm").toDouble());
+
+  // auto scale after max and min value required as it will
+  // read the above above and uncheck the box
+  m_renderTab->m_autoscaling->setChecked(
+      qs.value("user_params_autoscaling", true).toBool());
+
+  // setting the bin range which is not accessed from InstrumentWindowRenderTab
+  // trouble setting the slider according to bin range?
+  setBinRange(qs.value("user_params_minBinRange").toDouble(),
+              qs.value("user_params_maxBinRange").toDouble());
+
+  qs.endGroup();
+
+  // update according to settings
+  updateInfoText();
+  update();
 }
 
 /**
@@ -1053,6 +1181,16 @@ void InstrumentWindow::setShowPeakRowFlag(bool on) {
  */
 void InstrumentWindow::setShowPeakLabelsFlag(bool on) {
   getSurface()->setShowPeakLabelsFlag(on);
+  updateInstrumentView();
+}
+
+/**
+ * Enable or disable indication of relative peak intensities
+ *
+ * @param on :: True to show, false to hide.
+ */
+void InstrumentWindow::setShowPeakRelativeIntensity(bool on) {
+  getSurface()->setShowPeakRelativeIntensityFlag(on);
   updateInstrumentView();
 }
 

@@ -178,7 +178,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
       maxAsym = phase->Double(h, 1);
     }
   }
-  if (!maxAsym) {
+  if (maxAsym == 0.0) {
     throw std::invalid_argument("Invalid detector asymmetries");
   }
 

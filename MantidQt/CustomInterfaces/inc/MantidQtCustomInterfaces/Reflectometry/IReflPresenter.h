@@ -58,6 +58,7 @@ public:
     CutSelectedFlag,
     PasteSelectedFlag,
     SearchFlag,
+    ICATSearchCompleteFlag,
     TransferFlag,
     ImportTableFlag,
     ExportTableFlag,

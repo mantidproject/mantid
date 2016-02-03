@@ -45,8 +45,7 @@ using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
-  m_Progress =
-      std::auto_ptr<API::Progress>(new API::Progress(this, 0, 1, nSteps));
+  m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
 }
 
 /**
@@ -919,7 +918,7 @@ Mantid::API::MatrixWorkspace_sptr
 createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
                                                  size_t numBins,
                                                  bool has_oriented_lattice) {
-  size_t rHist = (size_t)sqrt(double(numPixels));
+  size_t rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
   while (rHist * rHist < numPixels)
     rHist++;
 
