@@ -35,13 +35,14 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MDAlgorithms\\Peaks"; }
 
-
-
 private:
   /// Initialise the properties
   void init();
   /// Run the algorithm
   void exec();
+
+  /// Process and check input properties
+  void processInputs();
 
   void simplePeakIntegration(const std::vector<detid_t> &vecMaskedDetID,
                              const std::map<int, signal_t> &run_monitor_map);
@@ -66,11 +67,24 @@ private:
   Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
 
   /// Peak centers
+  bool m_haveMultipleRun;
+  std::map<int, signal_t> monitorCountMap;
+
   std::map<int, Kernel::V3D> m_runPeakCenterMap;
+  bool m_haveSinglePeakCenter;
+  Kernel::V3D m_peakCenter;
+  double m_peakRadius;
+  bool m_doMergePeak;
+
+  /// Peaks
+  std::vector<DataObjects::Peak> m_vecPeaks;
+  /// Integrated peaks' intensity per run number
+  std::map<int, float> m_runPeakCountsMap;
 
   /// Mask
   bool m_maskDets;
   DataObjects::MaskWorkspace_sptr m_maskWS;
+  std::vector<detid_t> vecMaskedDetID;
 };
 
 } // namespace Mantid

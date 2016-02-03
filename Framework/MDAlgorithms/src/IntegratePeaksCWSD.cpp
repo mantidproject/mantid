@@ -45,7 +45,7 @@ const signal_t THRESHOLD_SIGNAL = 0;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IntegratePeaksCWSD::IntegratePeaksCWSD() {}
+IntegratePeaksCWSD::IntegratePeaksCWSD() : m_haveSinglePeakCenter(false), m_doMergePeak(false){}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -95,12 +95,65 @@ void IntegratePeaksCWSD::init() {
 void IntegratePeaksCWSD::exec()
 {
   // Process input & check
+  processInputs();
+
+  // Integrate peak with simple algorithm
+  simplePeakIntegration(vecMaskedDetID, monitorCountMap);
+
+  // Merge peak if necessary
+  if (m_doMergePeak)
+    mergePeaks();
+
+  // Output
+  DataObjects::PeaksWorkspace_sptr outws = createOutputs();
+  setProperty("OutputWorkspace", outws);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Process and check input properties
+ */
+void IntegratePeaksCWSD::processInputs()
+{
+  // Required input workspaces
   m_inputWS = getProperty("InputWorkspace");
   m_peaksWS = getProperty("PeaksWorkspace");
-  bool merge_peaks = getProperty("MergePeaks");
 
+  // monitor counts
+  monitorCountMap = getMonitorCounts();
+
+  // go through peak
+  getPeakInformation();
+  if (m_runPeakCenterMap.size() > 1)
+    m_haveMultipleRun = true;
+  else
+    m_haveMultipleRun = false;
+
+  // peak related
+  m_peakRadius = getProperty("PeakRadius");
+  assert(m_peakRadius != EMPTY_DBL());
+
+  // merge peak only makes sense when there is more than 1 peak
+  if (m_haveMultipleRun)
+    m_doMergePeak = getProperty("MergePeaks");
+  else
+    m_doMergePeak = false;
+
+  std::vector<double> peak_center = getProperty("PeakCenter");
+  if (peak_center.size() == 0)
+  {
+    // no single peak center
+    assert(!m_doMergePeak && "In order to merge peak, peak center must be given!");
+  }
+  else{
+    // assigned peak center
+    assert(peak_center.size() == 3 && "PeakCenter must have 3 elements.");
+    m_peakCenter.setX(peak_center[0]);
+    m_peakCenter.setY(peak_center[1]);
+    m_peakCenter.setZ(peak_center[2]);
+  }
+
+  // optional mask workspace
   std::string maskwsname = getPropertyValue("MaskWorkspace");
-  std::vector<detid_t> vecMaskedDetID;
   if (maskwsname.size() > 0)
   {
     // process mask workspace
@@ -113,18 +166,7 @@ void IntegratePeaksCWSD::exec()
     m_maskDets = false;
   }
 
-  // Process peaks
-  std::map<int, signal_t> monitorCountMap = getMonitorCounts();
-  getPeakInformation();
-  simplePeakIntegration(vecMaskedDetID, monitorCountMap);
-  if (merge_peaks)
-    mergePeaks();
-
-
-  DataObjects::PeaksWorkspace_sptr outws = createOutputs();
-  setProperty("OutputWorkspace", outws);
-
-} //
+}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -145,12 +187,6 @@ void IntegratePeaksCWSD::simplePeakIntegration(const std::vector<detid_t> &vecMa
   assert(m_inputWS && "MDEventWorkspace is not defined.");
   assert(m_peaksWS && "PeaksWorkspace is not defined.");
 
-  // Define data structures
-  // FIXME :: can this be moved to outer scope of this method?
-  // std::vector<Kernel::V3D> vec_event_qsample;
-  // std::vector<float> vec_event_signal;
-  // std::vector<detid_t> vec_event_det;
-
   // Go through to get value
   API::IMDIterator *mditer = m_inputWS->createIterator();
   size_t nextindex = 1;
@@ -161,9 +197,9 @@ void IntegratePeaksCWSD::simplePeakIntegration(const std::vector<detid_t> &vecMa
   // loop up the map for peak center and monitor counts each time
   int current_run_number = -1;
   signal_t current_monitor_counts = 0;
-  Kernel::V3D current_peak_center;
+  Kernel::V3D current_peak_center = m_peakCenter;
 
-  signal_t total_signal = 0;
+  // signal_t total_signal = 0;
   double min_distance = 10000000;
   double max_distance = -1;
   while (scancell) {
@@ -196,49 +232,37 @@ void IntegratePeaksCWSD::simplePeakIntegration(const std::vector<detid_t> &vecMa
       int run_number_i = static_cast<int>(run_number);
       if (current_run_number != run_number_i)
       {
+        // update run number
         current_run_number = run_number_i;
+        // update monitor counts
         std::map<int, signal_t>::const_iterator m_finder = run_monitor_map.find(current_run_number);
         if (m_finder != run_monitor_map.end())
           current_monitor_counts = m_finder->second;
         else
           throw std::runtime_error("Unable to find run number.");
-        // current_monitor_counts = run_monitor_map[current_run_number];
-        current_peak_center = m_runPeakCenterMap[current_run_number];
+
+        // update peak center
+        if (!m_haveSinglePeakCenter)
+          current_peak_center = m_runPeakCenterMap[current_run_number];
       }
 
-
+      // calculate distance
       float tempx = mditer->getInnerPosition(iev, 0);
       float tempy = mditer->getInnerPosition(iev, 1);
       float tempz = mditer->getInnerPosition(iev, 2);
-
       Kernel::V3D pixel_pos(tempx, tempy, tempz);
       double distance = current_peak_center.distance(pixel_pos);
-
-      total_signal += signal/current_monitor_counts;
+      if (distance < m_peakRadius)
+      {
+        // FIXME - Is it very costly to use map each time???
+        // total_signal += signal/current_monitor_counts;
+        m_runPeakCountsMap[run_number] += signal/current_monitor_counts;
+      }
 
       if (distance < min_distance)
         min_distance = distance;
       if (distance > max_distance)
         max_distance = distance;
-
-      // g_log.notice() << "[DB] Event: run = " << run_number << ", signal = " << signal
-      //  << ", distance = " << distance << "\n";
-
-      // Check
-      // if (currindex >= vec_event_qsample.size())
-      //  throw std::runtime_error("Logic error in event size!");
-      /*
-
-      // FIXME/TODO/NOW - Continue from here!
-      throw std::runtime_error("Need to find out how to deal with detid and signal here!");
-
-      Kernel::V3D qsample(tempx, tempy, tempz);
-      vec_event_qsample[currindex] = qsample;
-      vec_event_signal[currindex] = signal;
-      vec_event_det[currindex] = detid;
-      */
-
-      // ++currindex;
     }
 
     // Advance to next cell
@@ -253,12 +277,14 @@ void IntegratePeaksCWSD::simplePeakIntegration(const std::vector<detid_t> &vecMa
   } // END-WHILE (scan-cell)
 
   // Summarize
-  g_log.notice() << "Total normalized signal = " << total_signal << " Distance range is "
+  g_log.notice() << "Distance range is "
                  << min_distance << ", " << max_distance << "\n";
 
   return;
 }
 
+
+//----------------------------------------------------------------------------------------------
 /** Purpose: Process mask workspace
  *  Requirement: m_maskWS is not None
  *  Guarantees: an array will be set up for masked detectors
@@ -289,20 +315,59 @@ std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(
   return vecMaskedDetID;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Merge the peaks' counts
+ * @brief IntegratePeaksCWSD::mergePeaks
+ */
 void IntegratePeaksCWSD::mergePeaks()
 {
+  float total_intensity = 0;
+  float total_monitor_counts = 0.;
+
+  // sum over all runs
+  std::map<int, signal_t>::iterator mon_iter;
+  for (mon_iter = monitorCountMap.begin(); mon_iter != monitorCountMap.end(); ++ mon_iter)
+  {
+    int run_number_i = mon_iter->first;
+    signal_t monitor_i = mon_iter->second;
+    float intensity_i = m_runPeakCountsMap[run_number_i];
+    total_intensity += monitor_i * intensity_i;
+    total_monitor_counts += monitor_i;
+  }
+
+  // final merged intensity
+  float merged_intensity = total_intensity / total_monitor_counts;
+
+  // set the merged intensity to each peak
+  std::map<int, float>::iterator count_iter;
+  for (count_iter = m_runPeakCountsMap.begin(); count_iter != m_runPeakCountsMap.end(); ++ count_iter)
+    count_iter->second = merged_intensity;
 
 }
 
+//----------------------------------------------------------------------------------------------
+/** Create otuput workspace
+ * @brief IntegratePeaksCWSD::createOutputs
+ * @return
+ */
 DataObjects::PeaksWorkspace_sptr IntegratePeaksCWSD::createOutputs()
 {
+  // clone the original peaks workspace
   DataObjects::PeaksWorkspace_sptr outws = m_peaksWS->clone();
-  DataObjects::Peak &peak0 = outws->getPeak(0);
-  peak0.setIntensity(100);
+
+  size_t num_peaks = outws->getNumberPeaks();
+  for (size_t i_peak = 0; i_peak < num_peaks; ++i_peak)
+  {
+    DataObjects::Peak &peak_i = outws->getPeak(i_peak);
+    int run_number_i = peak_i.getRunNumber();
+    float intensity_i = m_runPeakCountsMap[run_number_i];
+    peak_i.setIntensity(intensity_i);
+  }
 
   return outws;
 }
 
+//----------------------------------------------------------------------------------------------
 /**
  * @brief IntegratePeaksCWSD::getMonitorCounts
  * @return
@@ -326,18 +391,24 @@ std::map<int, signal_t> IntegratePeaksCWSD::getMonitorCounts()
   return run_monitor_map;
 }
 
-
+//----------------------------------------------------------------------------------------------
+/** Get peak information from peaks workspace
+ * @return
+ */
 void IntegratePeaksCWSD::getPeakInformation()
 {
-  // TODO/NOW: If the number of peaks are more than 1!
-  std::vector<Peak> peaks = m_peaksWS->getPeaks();
-  size_t numpeaks = peaks.size();
+  m_vecPeaks = m_peaksWS->getPeaks();
+  size_t numpeaks = m_vecPeaks.size();
   for (size_t ipeak = 0; ipeak < numpeaks; ++ipeak)
   {
-    DataObjects::Peak &peak = peaks[ipeak];
+    DataObjects::Peak &peak = m_vecPeaks[ipeak];
     int run_number = peak.getRunNumber();
     Mantid::Kernel::V3D qsample = peak.getQSampleFrame();
     m_runPeakCenterMap.insert(std::make_pair(run_number, qsample));
+
+    // set up the data structure to store integrated peaks' counts
+    m_runPeakCountsMap.insert(std::make_pair(run_number, 0.));
+
     g_log.notice() <<"[DB] Q sample = " << qsample.toString() << "\n";
   }
 }
