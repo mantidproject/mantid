@@ -68,11 +68,11 @@ Dark field directory
    :align: center
    :scale: 60%
 
-**NB**: as this interface is under heavy development, several
-practical details lack polishin or are missing. This implies that
-there may be usability issues at times and some steps may not be as
-intuitive or simple as they could. Please, do not hesitate to provide
-suggestions and feedback.
+**NB**: This interface is under heavy development. Several practical
+details lack polishing and/or are missing. This implies that there may
+be usability issues at times and some steps may not be as intuitive or
+simple as they could. Please, do not hesitate to provide suggestions
+and feedback.
 
 The next sections provide further details that might be needed to
 fully understand the process of generating tomographic reconstructions
@@ -244,9 +244,9 @@ applied on the reconstructed volume produced by the algorithm.
 The tab also shows options to define what outputs should be produced
 in addition to the reconstructed volume.
 
-The settings are remembered between session, and it is possible to
-reset all the settings to their factory default by clicking on the
-reset button.
+The settings are remembered between sessions. It is possible to reset
+all the settings to their original defaults by clicking on the reset
+button.
 
 Results from reconstruction jobs
 --------------------------------
@@ -303,9 +303,9 @@ Energy bands
 Conversion between formats
 --------------------------
 
-.. warning:: The interface is being extended to provide a simple interface
-             to convert between different image formats for convenience and
-             interoperability with third party tools.
+.. warning:: The interface is being extended to provide a simple graphical
+             interface to convert between different image formats for
+             convenience and interoperability with third party tools.
              This is work in progress as support for new formats is being
              integrated.
 

@@ -100,10 +100,10 @@ def setup_cmd_options():
 
     grp_pre = parser.add_argument_group('Pre-processing of input raw images/projections')
 
-    grp_pre.add_argument("--input-path-flat", required=False, default=None, type=str,
-                         help="Input directory for flat images")
-
     grp_pre.add_argument("--input-path-flat", required=False, default=None,
+                         type=str, help="Input directory for flat images")
+
+    grp_pre.add_argument("--input-path-dark", required=False, default=None,
                          type=str, help="Input directory for flat images")
 
     img_formats = ['tiff', 'fits', 'tif', 'fit', 'png']
