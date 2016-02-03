@@ -1472,38 +1472,56 @@ class CWSCDReductionControl(object):
         return ptlist
 
     def survey(self, exp_number):
+        """ Load all the SPICE ascii file to get the big picture such that
+        * the strongest peaks and their HKL in order to make data reduction and analysis more convenient
+        :param exp_number: experiment number
+        :return: a dictionary. key = max_count
         """
-        """
-        # TODO/NOW/1st
-        counts_dict = dict()
-        for scan_number in xrange(1, 100000):
+        # Check
+        assert isinstance(exp_number, int)
 
-          file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (root_url, exp_number, exp_number, scan_number)
-          file_name = '%s_exp%04d_scan%04d.dat' % ('HB3A', exp_number, scan_number)
-          file_name = os.path.join('/tmp/', file_name)
-          try:
-              DownloadFile(Address=file_url, Filename=file_name)
-              spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=file_name, OutputWorkspace='TempTable',
-                                                              RunInfoWorkspace='TempInfo')
-              num_rows = spice_table_ws.rowCount()
-              max_count = 0
-              max_row = 0
-              for i_row in xrange(num_rows):
-                  det_count = spice_table_ws.cell(i_row, 5)
-                  h = spice_table_ws.cell(i_row, 13)
-                  k = spice_table_ws.cell(i_row, 14)
-                  l = spice_table_ws.cell(i_row, 15)
-                  if det_count > max_count:
-                      max_count = det_count
-                      max_row = i_row
-              # print max_row, max_count
-              counts_dict[max_count] = (scan_number, max_row, h, k, l)
-          except RuntimeError as e:
-              print e
-              break
+        # Output workspace
+        counts_dict = dict()
+
+        # Download and
+        MAX_SCAN_NUMBER = 100000
+        for scan_number in xrange(1, MAX_SCAN_NUMBER):
+            # form file URL
+            file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, exp_number,
+                                                                        exp_number, scan_number)
+            file_name = '%s_exp%04d_scan%04d.dat' % ('HB3A', exp_number, scan_number)
+            file_name = os.path.join(self._dataDir, file_name)
+
+            # download file and load
+            try:
+                api.DownloadFile(Address=file_url, Filename=file_name)
+
+                spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=file_name,
+                                                                    OutputWorkspace='TempTable',
+                                                                    RunInfoWorkspace='TempInfo')
+                num_rows = spice_table_ws.rowCount()
+                max_count = 0
+                max_row = 0
+                for i_row in xrange(num_rows):
+                    det_count = spice_table_ws.cell(i_row, 5)
+                    h = spice_table_ws.cell(i_row, 13)
+                    k = spice_table_ws.cell(i_row, 14)
+                    l = spice_table_ws.cell(i_row, 15)
+                    if det_count > max_count:
+                        max_count = det_count
+                        max_row = i_row
+                    if max_count in counts_dict:
+                        # in case that there are some scans that have same maximum counts
+                        counts_dict[max_count] = [counts_dict[max_count]]
+                        counts_dict[max_count].append((scan_number, max_row, h, k, l))
+                    else:
+                        counts_dict[max_count] = (scan_number, max_row, h, k, l)
+            except RuntimeError as e:
+                print e
+                break
         # END-FOR (scan_number)
 
-        return
+        return counts_dict
 
 
 def get_spice_file_name(exp_number, scan_number):

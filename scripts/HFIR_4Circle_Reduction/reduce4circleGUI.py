@@ -135,6 +135,10 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_findPeaks, QtCore.SIGNAL('clicked()'),
                      self.do_find_peaks_integrate)
 
+        # Tab survey
+        self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
+                     self.do_survey_scan)
+
         # Menu
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
                      self.menu_quit)
@@ -986,6 +990,37 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.set_local_data_dir(local_data_dir)
         self._myControl.set_working_directory(working_dir)
         self._myControl.set_server_url(data_server)
+
+        return
+
+    def do_survey(self):
+        """
+        Purpose: survey for the strongest reflections
+        :return:
+        """
+        # Get experiment number
+        exp_number = int(self.ui.lineEdit_exp.text())
+
+        # Get value
+        counts_dict = self._myControl.survey(exp_number)
+
+        # Sort and add to table
+        count_list = counts_dict.keys()
+        count_list = count_list.sort(reverse=True)
+
+        max_number = int(self.ui.lineEdit_numSurveyOutput.text())
+        for i_ref in xrange(max_number):
+            counts = count_list[i_ref]
+            dict_value = counts_dict[counts]
+            if isinstance(dict_value, tuple):
+                self.ui.tableWidget_surveyTable.addReflection(dict_value)
+            elif isinstance(dict_value, list):
+                for reflection in dict_value:
+                    self.ui.tableWidget_surveyTable.addReflection(reflection)
+            else:
+                raise RuntimeError(
+                        'Type %s is not a supported value type of counts dictionary.' % str(type(dict_value)))
+        # END-FOR
 
         return
 
