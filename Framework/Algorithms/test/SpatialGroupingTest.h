@@ -78,18 +78,17 @@ public:
     TS_ASSERT(input.is_open());
 
     // Testing file
-    std::
-        vector<std::string> expected{"<?xml version=\"1.0\" encoding=\"UTF-8\" "
-                                     "?>",
-                                     "<!-- XML Grouping File created by "
-                                     "SpatialGrouping Algorithm -->",
-                                     "<detector-grouping>",
-                                     "<group name=\"group1\"><detids "
-                                     "val=\"1,2,3,4,5,6,7,8,9\"/></group>",
-                                     "<group name=\"group2\"><detids "
-                                     "val=\"10,11,12,13,14,15,16,17,18\"/></"
-                                     "group>",
-                                     "</detector-grouping>"};
+    std::vector<std::string> expected{
+        "<?xml version=\"1.0\" encoding=\"UTF-8\" "
+        "?>",
+        "<!-- XML Grouping File created by "
+        "SpatialGrouping Algorithm -->",
+        "<detector-grouping>", "<group name=\"group1\"><detids "
+                               "val=\"1,2,3,4,5,6,7,8,9\"/></group>",
+        "<group name=\"group2\"><detids "
+        "val=\"10,11,12,13,14,15,16,17,18\"/></"
+        "group>",
+        "</detector-grouping>"};
 
     std::vector<std::string>::iterator iter = expected.begin();
 

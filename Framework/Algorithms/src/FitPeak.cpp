@@ -1130,8 +1130,7 @@ void FitPeak::init() {
       new ArrayProperty<double>("FittedPeakParameterValues", Direction::Output),
       "Fitted peak parameter values. ");
 
-  vector<string> bkgdtypes{"Flat",      "Flat (A0)",
-                           "Linear",    "Linear (A0, A1)",
+  vector<string> bkgdtypes{"Flat", "Flat (A0)", "Linear", "Linear (A0, A1)",
                            "Quadratic", "Quadratic (A0, A1, A2)"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
