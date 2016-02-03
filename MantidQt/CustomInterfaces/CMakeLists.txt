@@ -2,7 +2,6 @@ set ( SRC_FILES
 	src/DataComparison.cpp
 	src/DirectConvertToEnergy.cpp
         src/DynamicPDF/SliceSelector.cpp
-#        src/DynamicPDF/BackgroundRemover.cpp
 	src/EnggDiffraction/EnggDiffractionPresenter.cpp
 	src/EnggDiffraction/EnggDiffractionViewQtGUI.cpp
 	src/Homer.cpp
@@ -87,14 +86,14 @@ set ( SRC_FILES
 	src/Reflectometry/ReflNexusMeasurementItemSource.cpp
 	src/Reflectometry/ReflSearchModel.cpp
 	src/Reflectometry/ReflTableSchema.cpp
-    src/Reflectometry/TransferResults.cpp
+        src/Reflectometry/TransferResults.cpp
 	src/SANSAddFiles.cpp
 	src/SANSConstants.cpp
 	src/SANSDiagnostics.cpp
 	src/SANSEventSlicing.cpp
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
-	src/SampleTransmission.cpp
+        src/SampleTransmission.cpp
 	src/StepScan.cpp
 	src/Tomography/ImageROIPresenter.cpp
 	src/Tomography/ImageROIViewQtWidget.cpp
@@ -115,13 +114,13 @@ set ( SRC_FILES
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
+# IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
 	inc/MantidQtCustomInterfaces/DataComparison.h
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
-	inc/MantidQtCustomInterfaces/DllConfig.h
         inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
-#        inc/MantidQtCustomInterfaces/DynamicPDF/BackgroundRemover.h
+	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
@@ -144,7 +143,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
-	inc/MantidQtCustomInterfaces/Indirect/IndirectCorrections.h
+        inc/MantidQtCustomInterfaces/Indirect/IndirectCorrections.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysisTab.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h
@@ -222,7 +221,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h
-    inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
+        inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSConstants.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
@@ -261,6 +260,7 @@ set ( SRC_UNITY_IGNORE_FILES )
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/DataComparison.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
+                inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h
@@ -349,7 +349,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.ui
-#               inc/MantidQtCustomInterfaces/DynamicPDF/BackgroundRemover.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtGUI.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabCalib.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabFocus.ui
@@ -452,6 +451,7 @@ else ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
 endif ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} OPTIONS ${extra_options} )
+
 qt4_add_resources ( RES_FILES icons/CustomInterfacesIcons.qrc )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )#${RES_FILES})

@@ -16,7 +16,6 @@ namespace DynamicPDF {
 class WorkspaceRecord{
 
 public:
-  /// Default Constructor
   WorkspaceRecord(const std::string &workspaceName);
   void updateMetadata(const size_t &newIndex);
 
@@ -38,8 +37,8 @@ public:
   static QString categoryInfo() { return "DynamicPDF"; }
 
 public:
-  /// Default Constructor
   SliceSelector(QWidget *parent = nullptr);
+  ~SliceSelector();
 
 private slots:
   /// Opens the Qt help page for the interface
