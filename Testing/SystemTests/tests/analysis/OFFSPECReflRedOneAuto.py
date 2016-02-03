@@ -1,4 +1,4 @@
-﻿#pylint: disable=no-init,invalid-name
+﻿# pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 """
 This system test verifies that OFFSPEC data is processed correctly by
 ReflectometryReductionOneAuto
@@ -33,6 +33,11 @@ class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
         return True
 
     def validate(self):
+        '''
+        we only wish to check the Q-range in this system test. It is not necessary
+        to check the Instrument definition or Instrument Parameters
+        '''
+        self.disableChecking = ["Instrument"]
         return ("ivq_75_76_78","OFFSPECReflRedOneAuto_good_v2.nxs")
 
     def requiredFiles(self):

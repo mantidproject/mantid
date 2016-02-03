@@ -103,6 +103,9 @@ QString PeakHKL::formatNumber(double h, int prec) {
 /// Extract minimum and maximum intensity from peaks workspace for scaling.
 void AbstractIntensityScale::setPeaksWorkspace(
     const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
+  m_maxIntensity = 0.0;
+  m_minIntensity = 0.0;
+
   if (pws) {
     int peakCount = pws->getNumberPeaks();
 
@@ -116,11 +119,10 @@ void AbstractIntensityScale::setPeaksWorkspace(
     auto minMaxIntensity =
         std::minmax_element(intensities.begin(), intensities.end());
 
-    m_maxIntensity = *minMaxIntensity.second;
-    m_minIntensity = *minMaxIntensity.first;
-  } else {
-    m_maxIntensity = 0.0;
-    m_minIntensity = 0.0;
+    if (peakCount > 0) {
+      m_maxIntensity = *minMaxIntensity.second;
+      m_minIntensity = *minMaxIntensity.first;
+    }
   }
 }
 
