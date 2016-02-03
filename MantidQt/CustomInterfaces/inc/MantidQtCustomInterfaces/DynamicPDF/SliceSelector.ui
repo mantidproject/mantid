@@ -86,6 +86,17 @@
      </layout>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="layout2Dview">
+      <item>
+       <widget class="QSlider" name="sliderSelectSlice">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QGroupBox" name="groupPlotSelectedSlice">
       <property name="title">
        <string>Plots Selected Slice</string>
