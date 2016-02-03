@@ -29,6 +29,79 @@ using std::vector;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PDCalibration)
 
+namespace { // anonymous
+const auto isNonZero = [] (const double value) { return value != 0.; };
+}
+
+//----------------------------------------------------------------------------------------------
+/// private inner class
+class PDCalibration::FittedPeaks {
+public:
+  FittedPeaks(API::MatrixWorkspace_const_sptr wksp, const std::size_t wkspIndex) {
+    this->wkspIndex = wkspIndex;
+
+    // convert workspace index into detector id
+    const auto spectrum = wksp->getSpectrum(wkspIndex);
+    const auto detIds = spectrum->getDetectorIDs();
+    if (detIds.size() != 1) {
+      throw std::runtime_error("Summed pixels is not currently supported");
+    }
+    this->detid = *(detIds.begin());
+
+    const MantidVec &X = spectrum->readX();
+    const MantidVec &Y = spectrum->readY();
+    tofMin = X.front();
+    tofMax = X.back();
+
+    // determine tof min supported by the workspace
+    size_t minIndex = 0; // want to store value
+    for (; minIndex < Y.size(); ++minIndex) {
+      if (isNonZero(Y[minIndex])) {
+        tofMin = X[minIndex];
+        break;
+      }
+    }
+
+    // determin tof max supported by the workspace
+    size_t maxIndex = Y.size() - 1;
+    for (; maxIndex > minIndex; --maxIndex) {
+      if (isNonZero(Y[maxIndex])) {
+        tofMax = X[maxIndex];
+        break;
+      }
+    }
+
+  }
+
+  void setPositions(const std::vector<double> &peaksInD,
+                    const std::vector<double> &peaksInDWindows,
+                    std::function<double(double)> toTof) {
+
+    const std::size_t numOrig = peaksInD.size();
+    for (std::size_t i = 0; i < numOrig; ++i) {
+        const double centre = toTof(peaksInD[i]);
+        if (centre < tofMax && centre > tofMin) {
+          inDPos.push_back(peaksInD[i]);
+          inTofPos.push_back(peaksInD[i]);
+          inTofWindows.push_back(peaksInDWindows[2*i]);
+          inTofWindows.push_back(peaksInDWindows[2*i+1]);
+        }
+    }
+    std::transform(inTofPos.begin(), inTofPos.end(),
+                   inTofPos.begin(), toTof);
+    std::transform(inTofWindows.begin(), inTofWindows.end(),
+                   inTofWindows.begin(), toTof);
+  }
+
+  std::size_t wkspIndex;
+  detid_t detid;
+  double tofMin;
+  double tofMax;
+  std::vector<double> inTofPos;
+  std::vector<double> inTofWindows;
+  std::vector<double> inDPos;
+};
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -123,7 +196,7 @@ void PDCalibration::exec() {
 
   m_peaksInDspacing = getProperty("PeakPositions");
   const double peakWindowMaxInDSpacing = 0.1; // TODO configurable
-  auto windowsInDSpacing = dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
+  const auto windowsInDSpacing = dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
 
   for (std::size_t i = 0; i < m_peaksInDspacing.size(); ++i) {
     std::cout << "[" << i << "] "
@@ -147,30 +220,28 @@ void PDCalibration::exec() {
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (std::size_t wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
       PARALLEL_START_INTERUPT_REGION
-       const auto spectrum = m_uncalibratedWS->getSpectrum(wkspIndex);
-       const auto detIds = spectrum->getDetectorIDs();
-       if (detIds.size() != 1) {
-         throw std::runtime_error("Summed pixels is not currently supported");
-       }
-       const detid_t detid = *(detIds.begin());
+      if (isEvent && uncalibratedEWS->getEventList(wkspIndex).empty()) {
+        //std::cout << "Empty event list at wkspIndex = " << wkspIndex << std::endl;
+        continue;
+      }
 
-       if (isEvent && uncalibratedEWS->getEventList(wkspIndex).empty()) {
-         //std::cout << "Empty event list at wkspIndex = " << wkspIndex << std::endl;
-         continue;
-       }
+      PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
+      auto toTof = getDSpacingToTof(peaks.detid);
+      peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
 
-       auto toTof = getDSpacingToTof(detid);
-       auto tofs = dSpacingToTof(m_peaksInDspacing, toTof);
-       auto tofWindows = dSpacingToTof(windowsInDSpacing, toTof);
+      if (peaks.inTofPos.empty())
+        continue;
 
-       std::cout << "****************************** detid = " << detid
-                 << " wkspIndex = " << wkspIndex << std::endl;
+//       std::cout << "****************************** detid = " << peaks.detid
+//                 << " wkspIndex = " << wkspIndex
+//                 << " numPeaks = " << peaks.inTofPos.size() << std::endl;
+//       std::cout << "--> TOFRANGE " << peaks.tofMin << " -> " << peaks.tofMax << std::endl;
 
        auto alg = createChildAlgorithm("FindPeaks");
        alg->setProperty("InputWorkspace", m_uncalibratedWS);
        alg->setProperty("WorkspaceIndex", static_cast<int>(wkspIndex));
-       alg->setProperty("PeakPositions", tofs);
-       alg->setProperty("FitWindows", tofWindows);
+       alg->setProperty("PeakPositions", peaks.inTofPos);
+       alg->setProperty("FitWindows", peaks.inTofWindows);
        alg->setProperty("FWHM", 7); // TODO default
        alg->setProperty("Tolerance", 4); // TODO default
        alg->setProperty("PeakFunction", "Gaussian"); // TODO configurable?
@@ -182,15 +253,15 @@ void PDCalibration::exec() {
        alg->setProperty("StartFromObservedPeakCentre", true); // TODO configurable?
        alg->executeAsChildAlg();
        API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
-       std::cout << "fitted rowcount " << fittedTable->rowCount() << std::endl;
+//       std::cout << "fitted rowcount " << fittedTable->rowCount() << std::endl;
 
-       std::cout << "old: ";
-       for (auto tof: tofs) {
-         std::cout << tof << " ";
-       }
-       std::cout << std::endl;
+//       std::cout << "old: ";
+//       for (auto tof: peaks.inTofPos) {
+//         std::cout << tof << " ";
+//       }
+//       std::cout << std::endl;
 
-       std::cout << "------------------------------" << std::endl;
+//       std::cout << "------------------------------" << std::endl;
        double difc_cumm = 0.;
        size_t difc_count = 0;
        for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
@@ -200,27 +271,27 @@ void PDCalibration::exec() {
          double height = fittedTable->getRef<double>("height", i);
          double chi2 = fittedTable->getRef<double>("chi2", i);
 
-         std::cout << "d=" << m_peaksInDspacing[i]<< " centre old=" << tofs[i];
+//         std::cout << "d=" << m_peaksInDspacing[i]<< " centre old=" << peaks.inTofPos[i];
          if (chi2 > 1.e10) {
-           std::cout << " failed to fit - chisq" << chi2 << std::endl;
-         } else if (tofWindows[2*i] >= centre || tofWindows[2*i+1] <= centre) {
-           std::cout << " failed to fit - centre " << tofWindows[2*i] << " < " << centre
-                     << " < " << tofWindows[2*i+1] << std::endl;
+//           std::cout << " failed to fit - chisq" << chi2 << std::endl;
+         } else if (peaks.inTofWindows[2*i] >= centre || peaks.inTofWindows[2*i+1] <= centre) {
+//           std::cout << " failed to fit - centre " << peaks.inTofWindows[2*i] << " < " << centre
+//                     << " < " << peaks.inTofWindows[2*i+1] << std::endl;
          } else {
            double difc = centre / m_peaksInDspacing[i];
            difc_cumm += difc;
            difc_count += 1;
 
-           std::cout << " new=" << centre << " width=" << width << " height=" << height
-                     << " chi2=" << chi2 << " difc=" << difc << std::endl;
+//           std::cout << " new=" << centre << " width=" << width << " height=" << height
+//                     << " chi2=" << chi2 << " difc=" << difc << std::endl;
          }
        }
        if (difc_count > 0) {
-           setCalibrationValues(detid, (difc_cumm/static_cast<double>(difc_count)), 0., 0.);
+           setCalibrationValues(peaks.detid, (difc_cumm/static_cast<double>(difc_count)), 0., 0.);
 
-           std::cout << "avg difc = " << (difc_cumm/static_cast<double>(difc_count)) << std::endl;
+//           std::cout << "avg difc = " << (difc_cumm/static_cast<double>(difc_count)) << std::endl;
        } else {
-           std::cout << "failed to fit - zero peaks found in " << detid << std::endl;
+//           std::cout << "failed to fit - zero peaks found in " << peaks.detid << std::endl;
        }
 
        //break;
@@ -292,18 +363,6 @@ std::function<double(double)> PDCalibration::getDSpacingToTof(const detid_t deti
     const double tzero = m_calibrationTable->getRef<double>("tzero", rowNum);
 
     return d_to_tof(difc, difa, tzero);
-}
-
-vector<double> PDCalibration::dSpacingToTof(const vector<double> &dSpacing,
-                                  std::function<double(double)> toTof) {
-  if (dSpacing.empty()) { // quickly return an empty vector
-    return vector<double>();
-  }
-
-  vector<double> tof(dSpacing.size());
-  std::transform(dSpacing.begin(), dSpacing.end(), tof.begin(), toTof);
-
-  return tof;
 }
 
 void PDCalibration::setCalibrationValues(const detid_t detid, const double difc, const double difa, const double tzero) {

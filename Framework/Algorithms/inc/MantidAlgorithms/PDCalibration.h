@@ -44,6 +44,8 @@ public:
   virtual const std::string summary() const;
 
 private:
+  class FittedPeaks; // forward declare of private inner class
+
   void init();
   void exec();
   API::MatrixWorkspace_sptr loadAndBin();
@@ -51,8 +53,6 @@ private:
   API::MatrixWorkspace_sptr load(const std::string filename);
   void loadOldCalibration();
   std::function<double(double)> getDSpacingToTof(const detid_t detid);
-  std::vector<double> dSpacingToTof(const std::vector<double> &dSpacing,
-                                    std::function<double(double)> toTof);
   std::vector<double> dSpacingWindows(const std::vector<double> &centres,
                                       const double widthMax);
   void setCalibrationValues(const detid_t detid, const double difc, const double difa, const double tzero);
@@ -64,6 +64,7 @@ private:
   double m_tofMin;
   double m_tofMax;
   bool m_hasDasIds;
+
 };
 
 } // namespace Algorithms
