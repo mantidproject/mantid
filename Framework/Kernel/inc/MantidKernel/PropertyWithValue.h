@@ -213,22 +213,9 @@ PROPERTYWITHVALUE_TOVALUE(int)
 PROPERTYWITHVALUE_TOVALUE(long)
 PROPERTYWITHVALUE_TOVALUE(uint32_t)
 PROPERTYWITHVALUE_TOVALUE(uint64_t)
-//#if defined(__APPLE__)
-// PROPERTYWITHVALUE_TOVALUE(unsigned long);
-//#endif
-
-template <>
-inline void toValue<unsigned long>(const std::string &strvalue,
-                                   std::vector<unsigned long> &value) {
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
-  tokenizer values(strvalue, ",",
-                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-  value.clear();
-  value.reserve(values.count());
-  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it) {
-    appendValue(*it, value);
-  }
-}
+#if defined(__APPLE__)
+PROPERTYWITHVALUE_TOVALUE(unsigned long);
+#endif
 
 // Clear up the namespace
 #undef PROPERTYWITHVALUE_TOVALUE
