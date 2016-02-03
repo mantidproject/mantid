@@ -92,8 +92,7 @@ def setup_cmd_options():
                            help="Number of iterations (only valid for iterative methods "
                            "(example: SIRT, ART, etc.).")
 
-
-    grp_recon.add_argument("--max-angle", required=False, type=int,
+    grp_recon.add_argument("--max-angle", required=False, type=float,
                            help="Maximum angle (of the last projection), assuming first angle=0, and "
                            "uniform angle increment for every projection (note: this "
                            "is overriden by the angles found in the input FITS headers)")
@@ -204,7 +203,7 @@ def grab_preproc_options(args):
         pre_config.crop_coords = ast.literal_eval(args.air_region)
 
     if args.median_filter_size:
-        if not args.median_filter.isdigit():
+        if isinstance(args.median_filter_size, str) and not args.median_filter_size.isdigit():
             raise RuntimeError("The median filter size/width must be an integer")
         pre_config.median_filter_size = args.median_filter_size
 
@@ -226,7 +225,7 @@ def grab_tool_alg_options(args):
     config.algorithm = args.algorithm
 
     if args.num_iter:
-        if not args.num_iter.isdigit():
+        if isinstance(args.num_iter, str) and not args.num_iter.isdigit():
             raise RuntimeError("The number of iterations must be an integer")
         config.num_iter = int(args.num_iter)
 

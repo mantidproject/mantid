@@ -376,7 +376,6 @@ private:
 
   /// Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;
-  static const std::vector<std::pair<std::string, std::string>> g_astra_methods;
   static const std::vector<std::pair<std::string, std::string>>
       g_tomopy_methods;
   std::string m_astraMethod;

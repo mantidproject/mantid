@@ -84,7 +84,8 @@ void TomographyIfaceModel::cleanup() {
  * @throws std::runtime_error on inconsistent selection of compute
  * resource
  */
-std::string TomographyIfaceModel::validateCompResource(const std::string &res) {
+std::string
+TomographyIfaceModel::validateCompResource(const std::string &res) const {
   if (res == m_localCompName) {
     // Nothing yet
     // throw std::runtime_error("There is no support for the local compute "
@@ -324,7 +325,7 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
     const std::string &compRes) {
   std::string run, opt;
   try {
-    makeRunnableWithOptionsLocal(compRes, run, opt);
+    makeRunnableWithOptions(compRes, run, opt);
   } catch (std::exception &e) {
     g_log.error() << "Could not prepare the requested reconstruction job "
                      "submission. There was an error: " +
@@ -449,7 +450,7 @@ void TomographyIfaceModel::getJobStatusInfo(const std::string &compRes) {
  * @throw std::runtime_error if the required fields are not set
  * properly
  */
-void TomographyIfaceModel::checkDataPathsSet() {
+void TomographyIfaceModel::checkDataPathsSet() const {
   if (!m_pathsConfig.validate()) {
     const std::string detail =
         "Please define the paths to your dataset images. "
@@ -468,28 +469,10 @@ void TomographyIfaceModel::doRunReconstructionJobLocal() {
   const std::string toolName = usingTool();
   try {
     std::string run, args;
-    makeRunnableWithOptionsLocal("local", run, args);
+    makeRunnableWithOptions("local", run, args);
 
-    // options with all the info from filters and regions
-    const std::string cmdOpts =
-        filtersCfgToCmdOpts(m_prePostProcSettings, m_imageStackPreParams);
-
-    const std::string mainScript = "/Imaging/IMAT/tomo_reconstruct.py";
-    std::string toolMethodStr = m_pathLocalReconScripts + mainScript;
-    if (g_TomoPyTool == toolName)
-      toolMethodStr += " --tool=tomopy --algorithm=" + m_tomopyMethod;
-    else if (g_AstraTool == toolName)
-      toolMethodStr += " --tool=astra --algorithm=" + m_astraMethod;
-
-    if (g_TomoPyTool != toolName || m_tomopyMethod != "gridred" ||
-        m_tomopyMethod != "fbp")
-      toolMethodStr += " --num_iter=5";
-
-    args = toolMethodStr + " " + args;
-    args += " " + cmdOpts;
-
-    logMsg("Running " + toolName + ", with binary: " +
-           m_externalInterpreterPath + ", with parameters: " + args);
+    logMsg("Running " + toolName + ", with binary: " + run +
+           ", with parameters: " + args);
 
     std::vector<std::string> runArgs = {args};
     // Mantid::Kernel::ConfigService::Instance().launchProcess(run, runArgs);
@@ -522,18 +505,32 @@ void TomographyIfaceModel::doRunReconstructionJobLocal() {
   }
 }
 
-void TomographyIfaceModel::makeRunnableWithOptionsLocal(const std::string &comp,
-                                                        std::string &run,
-                                                        std::string &opt) {
-  opt = "--help";
-
+/**
+ * Build the components of the command line to run on the remote or local
+ * compute resource. Produces a (normally full) path to a runnable, and
+ * the options (quite like $0 and $* in scripts).
+ *
+ * @param comp Compute resource for which the command line is being prepared
+ * @param run Path to a runnable application (script, python module, etc.)
+ * @param opt Command line parameters to the application
+ */
+void TomographyIfaceModel::makeRunnableWithOptions(const std::string &comp,
+                                                   std::string &run,
+                                                   std::string &opt) const {
   const std::string tool = usingTool();
+  // Special case. Just pass on user inputs.
+  if (tool == g_customCmdTool) {
+    const std::string cmd = m_toolsSettings.custom.toCommand();
+    splitCmdLine(cmd, run, opt);
+    return;
+  }
+
   std::string cmd;
-
-  // TODO: use here prePostProcSettings()
-
   // TODO this is still incomplete, not all tools ready
-  if (tool == g_TomoPyTool) {
+  if ("local" == comp) {
+    const std::string mainScript = "/Imaging/IMAT/tomo_reconstruct.py";
+    cmd = m_pathLocalReconScripts + mainScript;
+  } else if (tool == g_TomoPyTool) {
     cmd = m_toolsSettings.tomoPy.toCommand();
     // this will make something like:
     // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
@@ -545,8 +542,6 @@ void TomographyIfaceModel::makeRunnableWithOptionsLocal(const std::string &comp,
     // this will produce something like this:
     // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
     // opt = base + currentPathFITS();
-  } else if (tool == g_customCmdTool) {
-    cmd = m_toolsSettings.custom.toCommand();
   } else {
     throw std::runtime_error(
         "Unable to use this tool. "
@@ -561,67 +556,36 @@ void TomographyIfaceModel::makeRunnableWithOptionsLocal(const std::string &comp,
   // checkWarningToolNotSetup(tool, cmd, run, opt);
   if (comp == m_localCompName)
     run = m_externalInterpreterPath;
+
+  opt = makeTomoRecScriptOptions();
 }
 
 /**
- * Build the components of the command line to run on the remote
- * compute resource.Produces a (normally full) path to a runnable, and
- * the options (quite like $0 and $* in scripts).
+ * Build the command line options string in the way the tomorec
+ * scripts (remote and local) expect it.
  *
- * @param comp Compute resource for which the command line is being prepared
- * @param run Path to a runnable application (script, python module, etc.)
- * @param opt Command line parameters to the application
+ * @return command options ready for the tomorec script
  */
-void TomographyIfaceModel::makeRunnableWithOptions(const std::string &comp,
-                                                   std::string &run,
-                                                   std::string &opt) {
-  checkDataPathsSet();
+std::string TomographyIfaceModel::makeTomoRecScriptOptions() const {
 
-  // For now we only know how to 'aproximately' run commands on SCARF
-  if (g_SCARFName == comp) {
-    const std::string tool = usingTool();
-    std::string cmd;
+  std::string toolMethodStr = "";
 
-    // TODO this is still incomplete, not all tools ready
-    if (tool == g_TomoPyTool) {
-      cmd = m_toolsSettings.tomoPy.toCommand();
-      // this will make something like:
-      // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
-      // opt = "--input_dir " + base + currentPathFITS() + " " + "--dark " +
-      // base +
-      //      currentPathDark() + " " + "--white " + base + currentPathFlat();
-    } else if (tool == g_AstraTool) {
-      cmd = m_toolsSettings.astra.toCommand();
-      // this will produce something like this:
-      // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
-      // opt = base + currentPathFITS();
-    } else if (tool == g_customCmdTool) {
-      cmd = m_toolsSettings.custom.toCommand();
-    } else {
-      throw std::runtime_error(
-          "Unable to use this tool. "
-          "I do not know how to submit jobs to use this tool: " +
-          tool + ". It seems that this interface is "
-                 "misconfigured or there has been an unexpected "
-                 "failure.");
-    }
+  const std::string toolName = usingTool();
+  if (g_TomoPyTool == toolName)
+    toolMethodStr += " --tool=tomopy --algorithm=" + m_tomopyMethod;
+  else if (g_AstraTool == toolName)
+    toolMethodStr += " --tool=astra --algorithm=" + m_astraMethod;
 
-    splitCmdLine(cmd, run, opt);
-    checkWarningToolNotSetup(tool, cmd, run, opt);
-  } else {
-    run = "error_do_not_know_what_to_do";
-    opt = "no_options_known";
+  if (g_TomoPyTool != toolName || m_tomopyMethod != "gridred" ||
+      m_tomopyMethod != "fbp")
+    toolMethodStr += " --num-iter=5";
 
-    const std::string details =
-        "Unrecognized remote compute resource. "
-        "The remote compute resource that you are trying not used is "
-        "not known: " +
-        comp + ". This seems to indicate that this interface is "
-               "misconfigured or there has been an unexpected failure.";
-    throw std::runtime_error(
-        "Could not recognize the remote compute resource: '" + comp + "'. " +
-        details);
-  }
+  // options with all the info from filters and regions
+  const std::string cmdOpts =
+      filtersCfgToCmdOpts(m_prePostProcSettings, m_imageStackPreParams);
+
+  std::string tomorecOpts = toolMethodStr + " " + cmdOpts;
+  return tomorecOpts;
 }
 
 /**
@@ -635,10 +599,9 @@ void TomographyIfaceModel::makeRunnableWithOptions(const std::string &comp,
  * @param opt options for that command/script/executable derived from the
  * settings
  */
-void TomographyIfaceModel::checkWarningToolNotSetup(const std::string &tool,
-                                                    const std::string &settings,
-                                                    const std::string &cmd,
-                                                    const std::string &opt) {
+void TomographyIfaceModel::checkWarningToolNotSetup(
+    const std::string &tool, const std::string &settings,
+    const std::string &cmd, const std::string &opt) const {
   if (tool.empty() || settings.empty() || cmd.empty() || opt.empty()) {
     const std::string detail =
         "Please define the settings of this tool. "
@@ -657,7 +620,8 @@ void TomographyIfaceModel::checkWarningToolNotSetup(const std::string &tool,
  * the code is reorganized to use the tool settings objetcs better.
  */
 void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
-                                        std::string &run, std::string &opts) {
+                                        std::string &run,
+                                        std::string &opts) const {
   if (cmd.empty())
     return;
 
@@ -741,7 +705,7 @@ void TomographyIfaceModel::logMsg(const std::string &msg) {
  *
  * @returns A string like "x1, y1, x2, y2"
  */
-std::string boxCoordinatesToCSV(ImageStackPreParams::Box2D &coords) {
+std::string boxCoordinatesToCSV(const ImageStackPreParams::Box2D &coords) {
   std::string x1 = std::to_string(coords.first.X());
   std::string y1 = std::to_string(coords.first.Y());
   std::string x2 = std::to_string(coords.second.X());
@@ -762,9 +726,9 @@ std::string boxCoordinatesToCSV(ImageStackPreParams::Box2D &coords) {
  * This doesn't belong here and should be move to more appropriate
  * place.
  */
-std::string
-TomographyIfaceModel::filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
-                                          ImageStackPreParams &corRegions) {
+std::string TomographyIfaceModel::filtersCfgToCmdOpts(
+    const TomoReconFiltersSettings &filters,
+    const ImageStackPreParams &corRegions) const {
   std::string opts;
 
   opts +=
@@ -773,9 +737,16 @@ TomographyIfaceModel::filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
   opts += " --air-region='[" +
           boxCoordinatesToCSV(corRegions.normalizationRegion) + "]'";
 
-  // TODO: (requires IMAT specific headers to become available soon)
+  // TODO: (we require here IMAT specific headers to become available soon)
   // filters.prep.normalizeByProtonCharge
 
+  opts += " --input-path=" + m_pathsConfig.pathSamples();
+  std::string alg = "alg";
+  if (g_TomoPyTool == usingTool())
+    alg = m_tomopyMethod;
+  else if (g_AstraTool == usingTool())
+    alg = m_astraMethod;
+  opts += " --output=out_recon_" + m_currentTool + "_" + alg;
   if (filters.prep.normalizeByFlatDark) {
     const std::string flat = m_pathsConfig.pathOpenBeam();
     if (!flat.empty())
@@ -796,10 +767,10 @@ TomographyIfaceModel::filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
   } else {
     cor = corRegions.cor.X();
   }
-  opts += " --cor='[" + std::to_string(cor) + "']";
+  opts += " --cor=" + std::to_string(cor);
 
   // filters.prep.rotation
-  opts += "--rotation=" + std::to_string(rotationIdx);
+  opts += " --rotation=" + std::to_string(rotationIdx);
 
   // filters.prep.maxAngle
   opts += " --max-angle=" + std::to_string(filters.prep.maxAngle);
@@ -813,7 +784,7 @@ TomographyIfaceModel::filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
 
   // postp.cutOffLevel
   if (filters.postp.cutOffLevel > 0.0)
-    opts += " --cut-off" + std::to_string(filters.postp.cutOffLevel);
+    opts += " --cut-off=" + std::to_string(filters.postp.cutOffLevel);
 
   return opts;
 }

@@ -160,26 +160,26 @@ private:
   /// retrieve info from compute resource into status table
   void getJobStatusInfo(const std::string &compRes);
 
-  std::string validateCompResource(const std::string &res);
+  std::string validateCompResource(const std::string &res) const;
 
   /// makes the command line string to run on the remote/local
   void makeRunnableWithOptions(const std::string &comp, std::string &run,
-                               std::string &opt);
+                               std::string &opt) const;
 
   void checkWarningToolNotSetup(const std::string &tool,
                                 const std::string &settings,
-                                const std::string &cmd, const std::string &opt);
+                                const std::string &cmd,
+                                const std::string &opt) const;
 
-  void makeRunnableWithOptionsLocal(const std::string &comp, std::string &run,
-                                    std::string &opt);
+  std::string makeTomoRecScriptOptions() const;
 
-  std::string filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
-                                  ImageStackPreParams &corRegions);
+  std::string filtersCfgToCmdOpts(const TomoReconFiltersSettings &filters,
+                                  const ImageStackPreParams &corRegions) const;
 
   void splitCmdLine(const std::string &cmd, std::string &run,
-                    std::string &opts);
+                    std::string &opts) const;
 
-  void checkDataPathsSet();
+  void checkDataPathsSet() const;
 
   /// username last logged in (empty if not in login status), from local
   /// perspective

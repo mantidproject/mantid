@@ -49,12 +49,19 @@ public:
 
   ~ToolConfigAstraToolbox() {}
 
+  // gives the list of methods (reconstruction algorithms) available
+  static const std::vector<std::pair<std::string, std::string>> methods() {
+    return g_astraMethods;
+  }
+
 protected:
   virtual std::string makeCmdLineOptions() const;
 
   virtual std::string makeExecutable() const { return m_runnable; };
 
 private:
+  static const std::vector<std::pair<std::string, std::string>> g_astraMethods;
+
   std::string m_pathOut;
   std::string m_pathDark;
   std::string m_pathOpen;

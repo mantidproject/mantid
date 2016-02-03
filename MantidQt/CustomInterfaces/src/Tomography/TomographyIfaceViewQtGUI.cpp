@@ -157,52 +157,6 @@ const std::string TomographyIfaceViewQtGUI::g_defPathReconOut =
     "~/imat/";
 #endif
 
-// TODO: these should become part of the model
-const std::vector<std::pair<
-    std::string, std::string>> TomographyIfaceViewQtGUI::g_astra_methods = {
-    std::make_pair("FBP3D_CUDA", "FBP 3D: Filtered Back-Propagation"),
-    std::make_pair(
-        "SIRT3D_CUDA",
-        "SIRT 3D: Simultaneous Iterative Reconstruction Technique algorithm"),
-    std::make_pair("CGLS3D_CUDA",
-                   "CGLS 3D: Conjugate gradient least square algorithm"),
-    std::make_pair("FDK_CUDA", "FDK 3D: Feldkamp-Davis-Kress algorithm for "
-                               "3D circular cone beam data sets")};
-
-// pairs of name-in-the-tool, human-readable-name
-const std::vector<std::pair<std::string, std::string>>
-    TomographyIfaceViewQtGUI::g_tomopy_methods = {
-        std::make_pair("gridrec", "gridrec: Fourier grid reconstruction "
-                                  "algorithm (Dowd, 19999; Rivers, 2006)"),
-        std::make_pair("sirt",
-                       "sirt: Simultaneous algebraic reconstruction technique"),
-
-        std::make_pair("art",
-                       "art: Algebraic reconstruction technique (Kak, 1998)"),
-        std::make_pair("bart",
-                       "bart: Block algebraic reconstruction technique."),
-        std::make_pair("fbp", "fbp: Filtered back-projection algorithm"),
-        std::make_pair("mlem",
-                       "mlem: Maximum-likelihood expectation maximization "
-                       "algorithm (Dempster, 1977)"),
-        std::make_pair("osem", "osem: Ordered-subset expectation maximization "
-                               "algorithm (Hudson, 1994)"),
-        std::make_pair("ospml_hybrid",
-                       "ospml_hybrid: Ordered-subset penalized maximum "
-                       "likelihood algorithm with weighted "
-                       "linear and quadratic penalties"),
-        std::make_pair("ospml_quad",
-                       "ospml_quad: Ordered-subset penalized maximum "
-                       "likelihood algorithm with quadratic "
-                       "penalties"),
-        std::make_pair("pml_hybrid",
-                       "pml_hybrid: Penalized maximum likelihood algorithm "
-                       "with weighted linear and quadratic "
-                       "penalties (Chang, 2004)"),
-        std::make_pair("pml_quad", "pml_quad: Penalized maximum likelihood "
-                                   "algorithm with quadratic penalty"),
-};
-
 // Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
 
@@ -220,7 +174,12 @@ TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
       m_settingsGroup("CustomInterfaces/Tomography"), m_availPlugins(),
       m_currPlugins(), m_currentParamPath(), m_presenter(NULL) {
 
-  // TODO: find a better place for this Savu stuff - see other TODOs
+  // defaults from the tools
+  m_tomopyMethod = ToolConfigTomoPy::methods().front().first;
+  m_astraMethod = ToolConfigAstraToolbox::methods().front().first;
+
+  // TODO: find a better place for this Savu stuff when the tool is
+  // ready - see other TODOs
   m_availPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
   m_availPlugins->addColumns("str", "name", 4);
   m_currPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
@@ -908,7 +867,7 @@ void TomographyIfaceViewQtGUI::toolSetupClicked() {
  * @param name Name of the (tomographic reconstruction) tool
  */
 void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
-  QString run = "/work/imat/commissioning_phase/scripts/Imaging/IMAT/"
+  QString run = "/work/imat/phase_commissioning/scripts/Imaging/IMAT/"
                 "tomo_reconstruct.py"; // m_uiAstra.lineEdit_runnable->text();
   static size_t reconIdx = 1;
 
@@ -919,9 +878,10 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
     TomoToolConfigTomoPy tomopy;
     m_uiTomoPy.setupUi(&tomopy);
     m_uiTomoPy.comboBox_method->clear();
-    for (size_t i = 0; i < g_tomopy_methods.size(); i++) {
+    auto methods = ToolConfigTomoPy::methods();
+    for (size_t i = 0; i < methods.size(); i++) {
       m_uiTomoPy.comboBox_method->addItem(
-          QString::fromStdString(g_tomopy_methods[i].second));
+          QString::fromStdString(methods[i].second));
     }
     int res = tomopy.exec();
 
@@ -939,15 +899,16 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
               m_uiTabRun.lineEdit_rb_number->text().toStdString() +
               localOutNameAppendix,
           paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples());
-      m_tomopyMethod = g_tomopy_methods[mi].first;
+      m_tomopyMethod = methods[mi].first;
     }
   } else if (g_AstraTool == name) {
     TomoToolConfigAstra astra;
     m_uiAstra.setupUi(&astra);
     m_uiAstra.comboBox_method->clear();
-    for (size_t i = 0; i < g_astra_methods.size(); i++) {
+    auto methods = ToolConfigAstraToolbox::methods();
+    for (size_t i = 0; i < methods.size(); i++) {
       m_uiAstra.comboBox_method->addItem(
-          QString::fromStdString(g_astra_methods[i].second));
+          QString::fromStdString(methods[i].second));
     }
     int res = astra.exec();
 
@@ -966,7 +927,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
               m_uiTabRun.lineEdit_rb_number->text().toStdString() +
               localOutNameAppendix),
           paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples());
-      m_astraMethod = g_astra_methods[mi].first;
+      m_astraMethod = methods[mi].first;
     }
   } else if (g_SavuTool == name) {
     // TODO: savu not ready. This is a temporary kludge, it just shows
@@ -1149,8 +1110,8 @@ void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     t->setItem(ii, 0, new QTableWidgetItem(QString::fromStdString("local")));
     t->setItem(ii, 1, new QTableWidgetItem(
                           QString::fromStdString(localStatus[i].name)));
-    t->setItem(ii, 2, new QTableWidgetItem(
-                          QString::fromStdString(localStatus[i].id)));
+    t->setItem(ii, 2,
+               new QTableWidgetItem(QString::fromStdString(localStatus[i].id)));
 
     t->setItem(ii, 3, new QTableWidgetItem(
                           QString::fromStdString(localStatus[i].status)));
@@ -1165,13 +1126,12 @@ void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     else if (std::string::npos != localStatus[i].status.find("Running") ||
              std::string::npos != localStatus[i].status.find("Active"))
       t->item(ii, 3)->setBackground(QColor(120, 120, 255)); // Qt::blue
-    else if (std::string::npos !=
-                 localStatus[i].status.find("Finished") ||
+    else if (std::string::npos != localStatus[i].status.find("Finished") ||
              std::string::npos != localStatus[i].status.find("Done"))
       t->item(ii, 3)->setBackground(QColor(120, 255, 120)); // Qt::green
 
-    t->setItem(ii, 4, new QTableWidgetItem(QString::fromStdString(
-                          localStatus[i].cmdLine)));
+    t->setItem(ii, 4, new QTableWidgetItem(
+                          QString::fromStdString(localStatus[i].cmdLine)));
   }
 
   t->setSortingEnabled(sort);
