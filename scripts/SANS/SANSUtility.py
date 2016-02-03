@@ -17,8 +17,10 @@ import numpy as np
 
 sanslog = Logger("SANS")
 ADDED_EVENT_DATA_TAG = '_added_event_data'
-REG_DATA_NAME = '-add' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
-REG_DATA_MONITORS_NAME = '-add_monitors' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
+ADD_TAG = '-add'
+ADD_MONITORS_TAG = '-add_monitors'
+REG_DATA_NAME = ADD_TAG  + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
+REG_DATA_MONITORS_NAME = ADD_MONITORS_TAG + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 ZERO_ERROR_DEFAULT = 1e6
 INCIDENT_MONITOR_TAG = '_incident_monitor'
 
@@ -699,6 +701,7 @@ def get_masked_det_ids(ws):
             break
         if det.isMasked():
             yield det.getID()
+
 def create_zero_error_free_workspace(input_workspace_name, output_workspace_name):
     '''
     Creates a cloned workspace where all zero-error values have been replaced with a large value
@@ -1312,6 +1315,15 @@ def convert_to_string_list(to_convert):
     output_string = "[" + ','.join("'"+element+"'" for element in string_list) + "]"
     return output_string
 
+def convert_to_list_of_strings(to_convert):
+    '''
+    Converts a string of comma-separted values to a list of strings
+    @param to_convert: the string to convert
+    @returns a list of strings
+    '''
+    values = to_convert.split(",")
+    return [element.strip() for element in values]
+
 def can_load_as_event_workspace(filename):
     '''
     Check if an file can be loaded into an event workspace
@@ -1584,7 +1596,6 @@ def extract_fit_parameters(rAnds):
     else:
         fit_mode = "None"
     return scale_factor, shift_factor, fit_mode
-
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

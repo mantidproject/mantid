@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>950</width>
-    <height>605</height>
+    <height>632</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -1866,19 +1866,6 @@ intermediate ranges are there for comparison</string>
           </layout>
          </widget>
         </item>
-        <item row="7" column="1">
-         <spacer name="verticalSpacer_8">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
         <item row="2" column="1" rowspan="3">
          <layout class="QVBoxLayout" name="verticalLayout_11">
           <item>
@@ -2525,6 +2512,9 @@ intermediate ranges are there for comparison</string>
           </item>
          </layout>
         </item>
+        <item row="7" column="1">
+         <widget class="MantidQt::CustomInterfaces::SANSBackgroundCorrectionWidget" name="sansBackgroundCorrectionWidget" native="true"/>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_4">
@@ -2704,7 +2694,7 @@ intermediate ranges are there for comparison</string>
            </sizepolicy>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="page_3">
            <layout class="QGridLayout" name="gridLayout_6">
@@ -3510,13 +3500,13 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
              </layout>
+             <zorder>label_161</zorder>
              <zorder>rear_beam_y</zorder>
              <zorder>rear_radio</zorder>
              <zorder>front_beam_y</zorder>
              <zorder>front_beam_x</zorder>
              <zorder>front_radio</zorder>
              <zorder>rear_beam_x</zorder>
-             <zorder>label_16</zorder>
             </widget>
            </item>
            <item>
@@ -4658,6 +4648,12 @@ p, li { white-space: pre-wrap; }
    <class>MantidQt::MantidWidgets::MessageDisplay</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/MessageDisplay.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::SANSBackgroundCorrectionWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>
