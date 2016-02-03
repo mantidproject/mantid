@@ -49,6 +49,8 @@ void SliceSelector::initLayout() {
   connect(m_uiForm.pushHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
   connect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this,
           SLOT(updateSelectedSlice(int)));
+  connect(m_uiForm.sliderSelectSlice, SIGNAL(valueChanged(int)), this,
+          SLOT(updateSelectedSlice(int)));
   connect(m_uiForm.pushLaunchBackgroundRemover, SIGNAL(clicked()), this,
           SLOT(launchBackgroundRemover()));
 }
@@ -72,7 +74,15 @@ void SliceSelector::loadSlices(const QString &workspaceName) {
   m_uiForm.spinboxSliceSelector->setMaximum(
       static_cast<int>(maximumWorkspaceIndex));
   m_uiForm.spinboxSliceSelector->setValue(
-      static_cast<int>(m_selectedWorkspaceIndex));
+      static_cast<int>(0));
+  m_uiForm.spinboxSliceSelector->setSingleStep(1);
+
+  /// initialize the slider in the 2D view
+  m_uiForm.sliderSelectSlice->setMinimum(0);
+  m_uiForm.sliderSelectSlice->setMaximum(
+        static_cast<int>(maximumWorkspaceIndex));
+  m_uiForm.spinboxSliceSelector->setValue(
+      static_cast<int>(0));
 
   /// initialize the preview plot
   updatePlotSelectedSlice();
@@ -92,6 +102,8 @@ void SliceSelector::updateSelectedSlice(const int &newSelectedIndex) {
   m_loadedWorkspace->updateMetadata(m_selectedWorkspaceIndex);
   m_uiForm.labelSliceEnergy->setText(
       QString::fromStdString(m_loadedWorkspace->m_label));
+  m_uiForm.spinboxSliceSelector->setValue(m_selectedWorkspaceIndex);
+  m_uiForm.sliderSelectSlice->setValue(m_selectedWorkspaceIndex);
   updatePlotSelectedSlice();
 }
 
