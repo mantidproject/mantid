@@ -122,7 +122,7 @@ void ApplyTransmissionCorrection::exec() {
 
     const double exp_term =
         (1.0 / cos(inputWS->detectorTwoTheta(det)) + 1.0) / 2.0;
-    for (int j = 0; j < (int)inputWS->readY(0).size(); j++) {
+    for (int j = 0; j < static_cast<int>(inputWS->readY(0).size()); j++) {
       if (!thetaDependent) {
         YOut[j] = 1.0 / TrIn[j];
         EOut[j] = std::fabs(ETrIn[j] * TrIn[j] * TrIn[j]);

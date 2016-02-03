@@ -161,21 +161,17 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     /*
     Will attempt to handle drawing in 4D case and then in 3D case if that fails, and so on down to 1D
     */
-    auto zeroDFactory = Mantid::Kernel::make_unique<vtkMD0DFactory>();
-    auto lineFactory = Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
-        thresholdRange, m_normalizationOption);
-    auto quadFactory = Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
-        thresholdRange, m_normalizationOption);
-    auto hexFactory = Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-        thresholdRange, m_normalizationOption);
     auto factory =
         Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
             thresholdRange, m_normalizationOption, m_time);
 
-    factory->SetSuccessor(std::move(hexFactory));
-    hexFactory->SetSuccessor(std::move(quadFactory));
-    quadFactory->SetSuccessor(std::move(lineFactory));
-    lineFactory->SetSuccessor(std::move(zeroDFactory));
+    factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+                              thresholdRange, m_normalizationOption))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
+            thresholdRange, m_normalizationOption))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
+            thresholdRange, m_normalizationOption))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
 
     auto product = m_presenter->execute(factory.get(), loadingProgressUpdate,
                                         drawingProgressUpdate);

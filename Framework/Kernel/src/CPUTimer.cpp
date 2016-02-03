@@ -38,7 +38,7 @@ float CPUTimer::elapsedCPU(bool doReset) {
   UNUSED_ARG(doReset);
 #else /* linux & mac */
   clock_t end = clock();
-  retval = ((float)(end - m_start)) / CLOCKS_PER_SEC;
+  retval = (static_cast<float>(end - m_start)) / CLOCKS_PER_SEC;
   if (doReset)
     this->reset();
 #endif

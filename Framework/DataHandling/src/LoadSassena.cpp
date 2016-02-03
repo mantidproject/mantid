@@ -74,13 +74,14 @@ herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string setName,
  * @param setName string name of dataset
  * @param buf storing dataset
  */
-void LoadSassena::dataSetDouble(const hid_t &h5file, const std::string setName,
-                                double *buf) {
-  if (H5LTread_dataset_double(h5file, setName.c_str(), buf) < 0) {
+herr_t LoadSassena::dataSetDouble(const hid_t &h5file,
+                                  const std::string setName, double *buf) {
+  herr_t errorcode;
+  errorcode = H5LTread_dataset_double(h5file, setName.c_str(), buf);
+  if (errorcode < 0) {
     this->g_log.error("Cannot read " + setName + " dataset");
-    throw Kernel::Exception::FileError(
-        "Unable to read " + setName + " dataset:", m_filename);
   }
+  return errorcode;
 }
 
 /* Helper object and function to sort modulus of Q-vectors
@@ -104,6 +105,8 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
                                           API::WorkspaceGroup_sptr gws,
                                           std::vector<int> &sorting_indexes) {
 
+  MantidVec qvmod; // store the modulus of the vector
+
   const std::string gwsName = this->getPropertyValue("OutputWorkspace");
   const std::string setName("qvectors");
 
@@ -114,9 +117,14 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
   }
   int nq = static_cast<int>(dims[0]); // number of q-vectors
   auto buf = new double[nq * 3];
-  this->dataSetDouble(h5file, "qvectors", buf);
 
-  MantidVec qvmod; // store the modulus of the vector
+  herr_t errorcode = this->dataSetDouble(h5file, "qvectors", buf);
+  if (errorcode < 0) {
+    this->g_log.error("LoadSassena::loadQvectors cannot proceed");
+    qvmod.resize(0);
+    return qvmod;
+  }
+
   double *curr = buf;
   for (int iq = 0; iq < nq; iq++) {
     qvmod.push_back(
@@ -172,8 +180,16 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
 void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
                          const std::string setName, const MantidVec &qvmod,
                          const std::vector<int> &sorting_indexes) {
-  const std::string gwsName = this->getPropertyValue("OutputWorkspace");
+
   int nq = static_cast<int>(qvmod.size()); // number of q-vectors
+  auto buf = new double[nq * 2];
+  herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
+  if (errorcode < 0) {
+    this->g_log.error("LoadSassena::loadFQ cannot proceed");
+    return;
+  }
+
+  const std::string gwsName = this->getPropertyValue("OutputWorkspace");
 
   DataObjects::Workspace2D_sptr ws =
       boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -181,8 +197,6 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   const std::string wsName = gwsName + std::string("_") + setName;
   ws->setTitle(wsName);
 
-  auto buf = new double[nq * 2];
-  this->dataSetDouble(h5file, setName, buf);
   MantidVec &re = ws->dataY(0); // store the real part
   ws->dataX(0) = qvmod;         // X-axis values are the modulus of the q vector
   MantidVec &im = ws->dataY(1); // store the imaginary part
@@ -222,21 +236,27 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
 void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
                           const std::string setName, const MantidVec &qvmod,
                           const std::vector<int> &sorting_indexes) {
-  const std::string gwsName = this->getPropertyValue("OutputWorkspace");
-  int nq = static_cast<int>(qvmod.size()); // number of q-vectors
-  const double dt =
-      getProperty("TimeUnit"); // time unit increment, in picoseconds;
+
   hsize_t dims[3];
   if (dataSetInfo(h5file, setName, dims) < 0) {
-    throw Kernel::Exception::FileError(
-        "Unable to read " + setName + " dataset info:", m_filename);
+    this->g_log.error("Unable to read " + setName + " dataset info");
+    this->g_log.error("LoadSassena::loadFQT cannot proceed");
+    return;
   }
   int nnt = static_cast<int>(dims[1]); // number of non-negative time points
   int nt = 2 * nnt - 1;                // number of time points
-  int origin = nnt - 1;
-  auto buf = new double[nq * nnt * 2];
-  this->dataSetDouble(h5file, setName, buf);
 
+  int nq = static_cast<int>(qvmod.size()); // number of q-vectors
+  auto buf = new double[nq * nnt * 2];
+  herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
+  if (errorcode < 0) {
+    this->g_log.error("LoadSassena::loadFQT cannot proceed");
+    return;
+  }
+
+  const std::string gwsName = this->getPropertyValue("OutputWorkspace");
+  const double dt =
+      getProperty("TimeUnit"); // time unit increment, in picoseconds;
   DataObjects::Workspace2D_sptr wsRe =
       boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
           API::WorkspaceFactory::Instance().create("Workspace2D", nq, nt, nt));
@@ -251,6 +271,7 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
       gwsName + std::string("_") + setName + std::string(".Im");
   wsIm->setTitle(wsImName);
 
+  int origin = nnt - 1;
   for (int iq = 0; iq < nq; iq++) {
     MantidVec &reX = wsRe->dataX(iq);
     MantidVec &imX = wsIm->dataX(iq);
@@ -385,14 +406,22 @@ void LoadSassena::exec() {
   // const std::string version(cversion);
   // determine which loader protocol to use based on the version
   // to be done at a later time, maybe implement a Version class
+
+  // Block to read the Q-vectors
   std::vector<int> sorting_indexes;
   const MantidVec qvmod = this->loadQvectors(h5file, gws, sorting_indexes);
+  if (qvmod.size() == 0) {
+    this->g_log.error("No Q-vectors read. Unable to proceed");
+    H5Fclose(h5file);
+    return;
+  }
+
   // iterate over the valid sets
   std::string setName;
   for (std::vector<std::string>::const_iterator it = this->m_validSets.begin();
        it != this->m_validSets.end(); ++it) {
     setName = *it;
-    if (H5LTfind_dataset(h5file, setName.c_str()) == 1) {
+    if (H5Lexists(h5file, setName.c_str(), H5P_DEFAULT)) {
       if (setName == "fq" || setName == "fq0" || setName == "fq2")
         this->loadFQ(h5file, gws, setName, qvmod, sorting_indexes);
       else if (setName == "fqt")

@@ -18,7 +18,7 @@ using API::Jacobian;
 */
 int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
 
-  struct GSL_FitData *p = (struct GSL_FitData *)params;
+  struct GSL_FitData *p = reinterpret_cast<struct GSL_FitData *>(params);
 
   // update function parameters
   if (x->data) {
@@ -80,7 +80,7 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
 */
 int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
-  struct GSL_FitData *p = (struct GSL_FitData *)params;
+  struct GSL_FitData *p = reinterpret_cast<struct GSL_FitData *>(params);
 
   p->J.setJ(J);
 

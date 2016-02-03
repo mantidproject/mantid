@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/HistoryView.h"
+#include <iterator>
+#include <algorithm>
 
 namespace Mantid {
 namespace API {
@@ -10,9 +12,8 @@ HistoryView::HistoryView(const WorkspaceHistory &wsHist)
     : m_wsHist(wsHist), m_historyItems() {
   // add all of the top level algorithms to the view by default
   const auto algorithms = wsHist.getAlgorithmHistories();
-  for (auto iter = algorithms.cbegin(); iter != algorithms.cend(); ++iter) {
-    m_historyItems.emplace_back(*iter);
-  }
+  m_historyItems =
+      std::vector<HistoryItem>(algorithms.begin(), algorithms.end());
 }
 
 /**
@@ -35,9 +36,13 @@ void HistoryView::unroll(size_t index) {
   // advance to the item at the index
   auto it = m_historyItems.begin();
   std::advance(it, index);
-
   unroll(it);
 }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#define GCC_VERSION                                                            \
+  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#endif
 
 /**
  * Unroll an algorithm history to export its child algorithms.
@@ -50,7 +55,7 @@ void HistoryView::unroll(size_t index) {
  * @param it :: iterator to the list of history item objects at the position to
  *unroll
  */
-void HistoryView::unroll(std::list<HistoryItem>::iterator it) {
+void HistoryView::unroll(std::vector<HistoryItem>::iterator &it) {
   const auto history = it->getAlgorithmHistory();
   const auto childHistories = history->getChildHistories();
 
@@ -58,14 +63,27 @@ void HistoryView::unroll(std::list<HistoryItem>::iterator it) {
     // mark this record as being ignored by the script builder
     it->unrolled(true);
 
-    ++it; // move iterator forward to insertion position
     // insert each of the records, in order, at this position
-    for (auto childIter = childHistories.begin();
-         childIter != childHistories.end(); ++childIter) {
-      HistoryItem item(*childIter);
-      m_historyItems.insert(it, item);
+    std::vector<HistoryItem> tmpHistory;
+    tmpHistory.reserve(childHistories.size());
+    for (const auto &item : childHistories) {
+      tmpHistory.emplace_back(item);
     }
-  }
+// since we are using a std::vector, do all insertions at the same time.
+#if !defined(GCC_VERSION) || GCC_VERSION >= 409000
+    ++it; // move iterator forward to insertion position
+    it = m_historyItems.insert(it, tmpHistory.begin(), tmpHistory.end());
+#else
+    // workaround for GCC < 4.9
+    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55817
+    ++it;
+    for (auto itItem = tmpHistory.rbegin(); itItem != tmpHistory.rend();
+         ++itItem) {
+      it = m_historyItems.insert(it, *itItem);
+    }
+#endif
+  } else
+    ++it;
 }
 
 /**
@@ -77,7 +95,10 @@ void HistoryView::unroll(std::list<HistoryItem>::iterator it) {
  *calling this method.
  */
 void HistoryView::unrollAll() {
-  for (auto it = m_historyItems.begin(); it != m_historyItems.end(); ++it) {
+  auto it = m_historyItems.begin();
+  while (it != m_historyItems.end()) {
+    // iterator passed by reference to prevent iterator invalidation.
+    // iterator incremented within function.
     unroll(it);
   }
 }
@@ -91,7 +112,9 @@ void HistoryView::unrollAll() {
  *calling this method.
  */
 void HistoryView::rollAll() {
-  for (auto it = m_historyItems.begin(); it != m_historyItems.end(); ++it) {
+  auto it = m_historyItems.begin();
+  while (it != m_historyItems.end()) {
+    // iterator incremented within function.
     roll(it);
   }
 }
@@ -118,8 +141,21 @@ void HistoryView::roll(size_t index) {
   // advance to the item at the index
   auto it = m_historyItems.begin();
   std::advance(it, index);
-
   roll(it);
+}
+
+/**
+ * Check if our children are unrolled and if so roll them back up.
+ *
+ * @param it :: iterator pointing to the item whose children will be rolled up.
+ */
+void HistoryView::rollChildren(std::vector<HistoryItem>::iterator it) {
+  const size_t numChildren = it->numberOfChildren();
+  ++it;
+  for (size_t i = 0; i < numChildren; ++i) {
+    if (it->isUnrolled())
+      roll(it);
+  }
 }
 
 /**
@@ -135,26 +171,19 @@ void HistoryView::roll(size_t index) {
  * @param it :: iterator to the list of history item objects at the positon to
  *roll
  */
-void HistoryView::roll(std::list<HistoryItem>::iterator it) {
+void HistoryView::roll(std::vector<HistoryItem>::iterator &it) {
 
   // the number of records after this position
   const size_t numChildren = it->numberOfChildren();
   if (it->isUnrolled() && numChildren > 0) {
     // mark this record as not being ignored by the script builder
     it->unrolled(false);
-    ++it; // move to first child
-
-    // remove each of the children from the list
-    for (size_t i = 0; i < numChildren; ++i) {
-      // check if our children are unrolled and
-      // roll them back up if so.
-      if (it->isUnrolled()) {
-        roll(it);
-      }
-      // Then just remove the item from the list
-      it = m_historyItems.erase(it);
-    }
-  }
+    this->rollChildren(it);
+    // Then just remove the children from the list
+    ++it;
+    it = m_historyItems.erase(it, it + numChildren);
+  } else
+    ++it;
 }
 
 /**
@@ -166,31 +195,14 @@ void HistoryView::roll(std::list<HistoryItem>::iterator it) {
  */
 void HistoryView::filterBetweenExecDate(Mantid::Kernel::DateAndTime start,
                                         Mantid::Kernel::DateAndTime end) {
-  for (auto it = m_historyItems.begin(); it != m_historyItems.end();) {
-    Mantid::Kernel::DateAndTime algExecutionDate =
-        it->getAlgorithmHistory()->executionDate();
-
-    // If the algorithm is outside of the time range, remove it and keep
-    // iterating
-    if (algExecutionDate < start || algExecutionDate > end) {
-      it = m_historyItems.erase(it);
-    } else {
-      ++it;
-    }
-  }
-}
-
-/**
- * Get the list of History Items for this view.
- *
- * @returns vector of history items for this view.
- */
-const std::vector<HistoryItem> HistoryView::getAlgorithmsList() const {
-  std::vector<HistoryItem> histories;
-  histories.reserve(size());
-  std::copy(m_historyItems.begin(), m_historyItems.end(),
-            std::back_inserter(histories));
-  return histories;
+  auto lastItem = std::remove_if(
+      m_historyItems.begin(), m_historyItems.end(),
+      [&start, &end](const HistoryItem &item) {
+        Mantid::Kernel::DateAndTime algExecutionDate =
+            item.getAlgorithmHistory()->executionDate();
+        return algExecutionDate < start || algExecutionDate > end;
+      });
+  m_historyItems.erase(lastItem, m_historyItems.end());
 }
 
 } // namespace API

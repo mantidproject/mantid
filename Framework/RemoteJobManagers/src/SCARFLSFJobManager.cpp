@@ -232,7 +232,7 @@ std::string SCARFLSFJobManager::urlComponentEncode(const std::string &in) {
       out << c;
     } else {
       // Any non unreserved is pct-escaped
-      out << '%' << std::setw(2) << int((unsigned char)c);
+      out << '%' << std::setw(2) << int(static_cast<unsigned char>(c));
     }
   }
   return out.str();

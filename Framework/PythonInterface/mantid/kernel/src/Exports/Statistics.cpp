@@ -52,8 +52,10 @@ bool isFloatArray(PyObject *obj) {
  */
 bool typesEqual(PyObject *first, PyObject *second) {
 #if NPY_API_VERSION >= 0x00000007 // 1.7
-  const PyArrayObject *firstArray = (const PyArrayObject *)first;
-  const PyArrayObject *secondArray = (const PyArrayObject *)second;
+  const PyArrayObject *firstArray =
+      reinterpret_cast<const PyArrayObject *>(first);
+  const PyArrayObject *secondArray =
+      reinterpret_cast<const PyArrayObject *>(second);
 #else
   PyArrayObject *firstArray = (PyArrayObject *)first;
   PyArrayObject *secondArray = (PyArrayObject *)second;

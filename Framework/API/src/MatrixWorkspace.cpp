@@ -1250,7 +1250,7 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
 }
 
 uint64_t MatrixWorkspace::getNPoints() const {
-  return (uint64_t)(this->size());
+  return static_cast<uint64_t>(this->size());
 }
 
 //================================= FOR MDGEOMETRY

@@ -1,0 +1,74 @@
+digraph FuryFitMultiple {
+  label="FuryFitMultiple Flowchart"
+  $global_style
+  
+  subgraph params {
+    $param_style
+    InputWorkspace
+    InputWorkspace2     [label="InputWorkspace"]
+    Function
+    StartX
+    EndX
+    SpecMin
+    SpecMax
+    Minimizer
+    MaxIterations
+    ParameterTable
+    ParameterNames
+    FitGroup
+    FitGroup2                [label="FitGroup"]
+    SampleLogs
+    ResultWorkspace
+    ResultWorkspace2        [label="ResultWorkspace"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    CropWorkspace
+    Fit
+    ConvertToHistogram
+    AddSampleLogMultiple
+    AddSampleLogMultiple2   [label="AddSampleLogMultiple"]
+    CopyLogs
+    CopyLogs2           [label="Copy logs"]
+  }
+  
+  subgraph decisions {
+    $decision_style
+  }
+  
+  subgraph process  {
+    $process_style
+    ConvertToElasticQ
+    TransposeFitParametersTable
+    ConvertParametersToWorkspace
+  }
+  
+  InputWorkspace                -> CropWorkspace
+  StartX                        -> CropWorkspace
+  EndX                          -> CropWorkspace
+  SpecMin                       -> CropWorkspace
+  SpecMax                       -> CropWorkspace
+  CropWorkspace                 -> ConvertToHistogram
+  ConvertToHistogram            -> ConvertToElasticQ        [label="Convert spectrum axis to ElaticQ"]
+  ConvertToElasticQ             -> Fit
+  Function                      -> Fit
+  Minimizer                     -> Fit
+  MaxIterations                 -> Fit
+  Fit                           -> ParameterTable
+  Fit                           -> FitGroup                     [label="GroupWorkspace containing fitting results from each spectra"]
+  ParameterTable                -> TransposeFitParametersTable  [label="Makes output consistent with PlotPeakByLogValue"]
+  TransposeFitParametersTable   -> ConvertParametersToWorkspace
+  ParameterNames                -> ConvertParametersToWorkspace [label="Convert parameter of interest into MatrixWorkspace containing paramNames"]
+  ConvertParametersToWorkspace  -> ResultWorkspace              [label="Outputs Matrixworkspace containing Tau, Intensity, A0 and Beta"]
+  InputWorkspace2               -> CopyLogs                     [label="Copy SampleLogs from InputWorkspace to OutputWorkspaces"]
+  ResultWorkspace               -> CopyLogs
+  InputWorkspace2               -> CopyLogs2
+  FitGroup                      -> CopyLogs2
+  CopyLogs                      -> AddSampleLogMultiple         
+  CopyLogs2                     -> AddSampleLogMultiple2
+  SampleLogs                    -> AddSampleLogMultiple2
+  SampleLogs                    -> AddSampleLogMultiple         [label="Additional SampleLogs based on Fit data"]
+  AddSampleLogMultiple          -> ResultWorkspace2             [label="Outputworkspace"]
+  AddSampleLogMultiple2         -> FitGroup2                    [label="OutputWorkspace"]
+}
