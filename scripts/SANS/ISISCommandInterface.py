@@ -19,6 +19,7 @@ import copy
 from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
+import SANSUserFileParser as UserFileParser
 
 # disable plotting if running outside Mantidplot
 try:
@@ -1667,6 +1668,87 @@ def has_user_file_valid_extension(file_name):
     is_valid = su.is_valid_user_file_extension(file_name)
     print str(is_valid)
     return is_valid
+
+##################### Accesor functions for BackgroundCorrection
+def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_numbers=None):
+    '''
+    Set a background correction setting.
+    @param run_number: the run number
+    @param is_time_based: if it is time-based or uamp-based
+    @param is_mon: if it is a monitor or a detector
+    @param is_mean: if it is mean or tof
+    @param mon_numbers: the monitor numbers of interest or an empty string
+    '''
+    def convert_from_comma_separated_string_to_int_list(input_string):
+        '''
+        Convert from string with comma-separated values to a python int list
+        @param input_string: the input string
+        @returns an integer list
+        @raises RuntimeError: conversion form string to int is not possible
+        '''
+        if input_string is None or len(input_string) == 0:
+            return None
+        string_list = su.convert_to_list_of_strings(input_string)
+        can_convert_to_int = all(su.is_convertible_to_int(element) for element in string_list)
+        int_list = None
+        if can_convert_to_int:
+            int_list = [int(element) for element in string_list]
+        else:
+            raise RuntimeError("Cannot convert string list to integer list")
+        return int_list
+    mon_numbers_int = convert_from_comma_separated_string_to_int_list(mon_numbers)
+
+    setting = UserFileParser.DarkRunSettings(run_number = run_number,
+                                             time = is_time_based,
+                                             mean = is_mean,
+                                             mon = is_mon,
+                                             mon_number = mon_numbers_int)
+    ReductionSingleton().add_dark_run_setting(setting)
+
+def get_background_correction(is_time, is_mon, component):
+    '''
+        Gets the background corrections settings for a specific configuration
+        This can be: time-based + detector, time_based + monitor,
+                     uamp-based + detector, uamp_based + monitor
+        @param is_time: is it time or uamp based
+        @param is_mon: is it a monitor or a detector
+        @param component: string with a component name (need to do this because of the python-C++ interface)
+    '''
+    def convert_from_int_list_to_string(int_list):
+        '''
+        Convert from a python list of integers to a string with comma-separated values
+        @param int_list: the integer list
+        @returns the string
+        '''
+        if int_list is None or len(int_list) == 0:
+            return None
+        else:
+            string_list = [str(element) for element in int_list]
+            return su.convert_from_string_list(string_list)
+
+    setting = ReductionSingleton().get_dark_run_setting(is_time, is_mon)
+
+    value = None
+    if setting is not None:
+        if component == "run_number":
+            value = setting.run_number
+        elif component == "is_mean":
+            value = str(setting.mean)
+        elif component == "is_mon":
+            value = str(setting.mon)
+        elif component == "mon_number":
+            value = convert_from_int_list_to_string(setting.mon_numbers)
+        else:
+            pass
+    print str(value)
+    return value
+
+def clear_background_correction():
+    '''
+    Clears the background correction settings
+    '''
+    ReductionSingleton().clear_dark_run_settings()
+
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
