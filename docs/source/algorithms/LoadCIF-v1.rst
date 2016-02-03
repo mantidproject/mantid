@@ -32,10 +32,11 @@ which one to use.
 
 **Atoms**
 
-There needs to be a *loop_* with at least the following fields: *_atom_site_label*, *_atom_site_fract_x*,
-*_atom_site_fract_y* and *_atom_site_fract_z*. Additionally, *_atom_site_occupancy* and *_atom_site_U_iso_or_equiv* are
-recognized. The labels are expected to contain the element symbol, any non-letter characters (numbers, special
-characters) are removed.
+There needs to be a *loop_* with at least the following fields: *_atom_site_type_symbol* or *_atom_site_label*,
+*_atom_site_fract_x*, *_atom_site_fract_y* and *_atom_site_fract_z*. Additionally, *_atom_site_occupancy* and
+*_atom_site_U_iso_or_equiv* and *_atom_site_B_iso_or_equiv* (internally converted to U by dividing by :math:`8\pi^2`
+are recognized. The labels are expected to contain the element symbol, any non-letter characters (numbers, special
+characters) are removed. The *_atom_site_label* is only used when *_atom_site_type_symbol* is not present.
 
 Optionally, a UB-matrix can be loaded from the CIF-file and applied to the workspace via the SetUB-algorithm. For this,
 the *_diffrn_orient_matrix_UB_xy* fields have to be set.

@@ -199,13 +199,14 @@ void ScaleX::execEvent() {
     PARALLEL_START_INTERUPT_REGION
     // Do the offsetting
     if ((i >= m_wi_min) && (i <= m_wi_max)) {
+      auto factor = getScaleFactor(inputWS, i);
       if (op == "Multiply") {
-        outputWS->getEventList(i).scaleTof(getScaleFactor(inputWS, i));
-        if (m_algFactor < 0) {
+        outputWS->getEventList(i).scaleTof(factor);
+        if (factor < 0) {
           outputWS->getEventList(i).reverse();
         }
       } else if (op == "Add") {
-        outputWS->getEventList(i).addTof(getScaleFactor(inputWS, i));
+        outputWS->getEventList(i).addTof(factor);
       }
     }
     m_progress->report("Scaling X");

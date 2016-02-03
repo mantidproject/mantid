@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 import mantid
 import isis_instrument as instruments
 import ISISCommandInterface as command_iface
@@ -39,8 +39,6 @@ class SANSReductionStepsUserFileTest(unittest.TestCase):
         # Assert
         self.assertEqual(None, start_TOF_ROI, 'The start time should not have been set')
         self.assertEqual(None, end_TOF_ROI, 'The end time should not have been set')
-
-
 
 class MockConvertTOQISISQResolution(object):
     def __init__(self):

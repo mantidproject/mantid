@@ -3,6 +3,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Cache.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/TimeSplitter.h"
@@ -82,7 +83,13 @@ public:
   virtual size_t getMemorySize() const;
 
   /// Add data to the object in the form of a property
-  void addProperty(Kernel::Property *prop, bool overwrite = false);
+  /// @deprecated new code should use smart pointers
+  void addProperty(Kernel::Property *prop, bool overwrite = false) {
+    addProperty(std::unique_ptr<Kernel::Property>(prop), overwrite);
+  };
+  /// Add data to the object in the form of a property
+  void addProperty(std::unique_ptr<Kernel::Property> prop,
+                   bool overwrite = false);
   /// Add a property of given type
   template <class TYPE>
   void addProperty(const std::string &name, const TYPE &value,
@@ -122,8 +129,18 @@ public:
   /**
    * Add a log entry
    * @param p :: A pointer to the property containing the log entry
+   * @deprecated new code should use smart pointers
    */
-  void addLogData(Kernel::Property *p) { addProperty(p); }
+  void addLogData(Kernel::Property *p) {
+    addLogData(std::unique_ptr<Kernel::Property>(p));
+  }
+  /**
+   * Add a log entry
+   * @param p :: A pointer to the property containing the log entry
+   */
+  void addLogData(std::unique_ptr<Kernel::Property> p) {
+    addProperty(std::move(p));
+  }
   /**
    * Access a single log entry
    * @param name :: The name of the log entry to retrieve
@@ -202,7 +219,9 @@ typedef boost::shared_ptr<const LogManager> LogManager_const_sptr;
 template <class TYPE>
 void LogManager::addProperty(const std::string &name, const TYPE &value,
                              bool overwrite) {
-  addProperty(new Kernel::PropertyWithValue<TYPE>(name, value), overwrite);
+  addProperty(
+      Mantid::Kernel::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value),
+      overwrite);
 }
 
 /**
@@ -217,9 +236,10 @@ void LogManager::addProperty(const std::string &name, const TYPE &value,
 template <class TYPE>
 void LogManager::addProperty(const std::string &name, const TYPE &value,
                              const std::string &units, bool overwrite) {
-  Kernel::Property *newProp = new Kernel::PropertyWithValue<TYPE>(name, value);
+  auto newProp =
+      Mantid::Kernel::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value);
   newProp->setUnits(units);
-  addProperty(newProp, overwrite);
+  addProperty(std::move(newProp), overwrite);
 }
 }
 }
