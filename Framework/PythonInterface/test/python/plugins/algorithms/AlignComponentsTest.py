@@ -9,7 +9,7 @@ class AlignComponentsTest(unittest.TestCase):
         MoveInstrumentComponent(Workspace='testWS',ComponentName=component,X=0.06,Y=0.04,Z=4.98,RelativePosition=False)
 
         ### Detector should move to [0.05,0.03,4.98]
-        # Calibration table generated with:
+        ### Calibration table generated with:
         # CreateSampleWorkspace(OutputWorkspace='sample', NumBanks=1,BankPixelWidth=4)
         # MoveInstrumentComponent(Workspace='sample',ComponentName='bank1',X=0.05,Y=0.03,Z=4.98,RelativePosition=False)
         # CalculateDIFC(InputWorkspace='sample', OutputWorkspace='sample')
@@ -59,31 +59,39 @@ class AlignComponentsTest(unittest.TestCase):
     def testAlignComponentsRotationY(self):
         CreateSampleWorkspace(OutputWorkspace='testWS', NumBanks=1,BankPixelWidth=4)
         component='bank1'
-        MoveInstrumentComponent(Workspace='testWS',ComponentName=component,X=0.05,Y=0.03,Z=4.98,RelativePosition=False)
-        RotateInstrumentComponent(Workspace='testWS',ComponentName='bank1',X=0,Y=1,Z=0,Angle=1,RelativeRotation=False)
+        MoveInstrumentComponent(Workspace='testWS',ComponentName=component,X=2.00,Y=0,Z=2.00,RelativePosition=False)
+        RotateInstrumentComponent(Workspace='testWS',ComponentName='bank1',X=0,Y=1,Z=0,Angle=50,RelativeRotation=False)
 
-        # Detector should rotate to +3deg around Y
+        ### Detector should rotate to +45deg around Y
+        ### Calibration table generated with:
+        # CreateSampleWorkspace(OutputWorkspace='sample2', NumBanks=1,BankPixelWidth=4)
+        # MoveInstrumentComponent(Workspace='sample2',ComponentName='bank1',X=2.0,Y=0.0,Z=2.0,RelativePosition=False)
+        # RotateInstrumentComponent(Workspace='sample2',ComponentName='bank1',X=0,Y=1,Z=0,Angle=45,RelativeRotation=False)
+        # CalculateDIFC(InputWorkspace='sample2', OutputWorkspace='sample2')
+        # d=mtd['sample2'].extractY()
+        # for i in range(len(d)):
+        #        print "calTable.addRow(["+str(i+16)+", "+str(d[i][0])+"])"
+
         calTable = CreateEmptyTableWorkspace()
         calTable.addColumn("int", "detid")
         calTable.addColumn("double", "difc")
 
-        calTable.addRow([16, 44.3352831346])
-        calTable.addRow([17, 47.7503426493])
-        calTable.addRow([18, 51.6581064544])
-        calTable.addRow([19, 55.9553976608])
-        calTable.addRow([20, 49.6449496013])
-        calTable.addRow([21, 52.7174076764])
-        calTable.addRow([22, 56.2816322009])
-        calTable.addRow([23, 60.2503705523])
-        calTable.addRow([24, 55.1137655776])
-        calTable.addRow([25, 57.8969430684])
-        calTable.addRow([26, 61.160311581])
-        calTable.addRow([27, 64.8313598544])
-        calTable.addRow([28, 60.6988733631])
-        calTable.addRow([29, 63.236900201])
-        calTable.addRow([30, 66.237921314])
-        calTable.addRow([31, 69.6420722102])
-        
+        calTable.addRow([16, 2481.89300158])
+        calTable.addRow([17, 2481.90717397])
+        calTable.addRow([18, 2481.94969])
+        calTable.addRow([19, 2482.02054626])
+        calTable.addRow([20, 2490.36640334])
+        calTable.addRow([21, 2490.38050851])
+        calTable.addRow([22, 2490.42282292])
+        calTable.addRow([23, 2490.49334316])
+        calTable.addRow([24, 2498.83911141])
+        calTable.addRow([25, 2498.85314962])
+        calTable.addRow([26, 2498.89526313])
+        calTable.addRow([27, 2498.96544859])
+        calTable.addRow([28, 2507.31101837])
+        calTable.addRow([29, 2507.32498986])
+        calTable.addRow([30, 2507.36690322])
+        calTable.addRow([31, 2507.43675513])
 
         ws = mtd["testWS"]
         startPos = ws.getInstrument().getComponentByName(component).getPos()
@@ -96,7 +104,7 @@ class AlignComponentsTest(unittest.TestCase):
         endPos = ws.getInstrument().getComponentByName(component).getPos()
         endRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles() #YZX
         self.assertEqual(startPos, endPos)
-        self.assertAlmostEqual(endRot[0],3.0)
+        self.assertAlmostEqual(endRot[0],45.0,places=1)
         self.assertEqual(startRot[1], endRot[1])
         self.assertEqual(startRot[2], endRot[2])
 

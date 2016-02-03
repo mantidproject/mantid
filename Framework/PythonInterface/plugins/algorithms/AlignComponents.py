@@ -276,7 +276,7 @@ class AlignComponents(PythonAlgorithm):
             if lastDetID - firstDetID != lastIndex - firstIndex:
                 raise RuntimeError("Calibration detid doesn't match instrument")
 
-            eulerAngles = comp.getRotation().getEulerAngles()
+            eulerAngles = comp.getRotation().getEulerAngles() # [Y,Z,X]
 
             logger.notice("Working on " + comp.getFullName() +
                           " Starting position is " + str(comp.getPos()) +
@@ -284,7 +284,7 @@ class AlignComponents(PythonAlgorithm):
 
             x0List = []
             self._initialPos = [comp.getPos().getX(), comp.getPos().getY(), comp.getPos().getZ(),
-                                eulerAngles[0], eulerAngles[1], eulerAngles[2]]
+                                eulerAngles[2], eulerAngles[0], eulerAngles[1]]
 
             boundsList = []
 
