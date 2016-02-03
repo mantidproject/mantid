@@ -692,11 +692,15 @@ bool LocalSearchMinimizer::iterate(size_t iter) {
     m_smallChange = false;
   }
 
-  std::cerr << "Delta " << newValue - oldValue << std::endl;
-
-  if (!m_badIteration) {
+  double delta = newValue - oldValue;
+  std::cerr << "Delta " << delta << std::endl;
+  if (delta < 0) {
     m_oldParameters = oldParameters.toStdVector();
+  } else {
+    setParameters(*m_costFunction, oldParameters);
+    m_smallChange = true;
   }
+
   return true;
 }
 
