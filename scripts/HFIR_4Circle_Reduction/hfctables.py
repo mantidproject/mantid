@@ -556,6 +556,48 @@ class ScanSurveyTable(tableBase.NTableWidget):
         """
         tableBase.NTableWidget.__init__(self, parent)
 
+        self._myScanInfoDict = dict()
+        self._myScanList = list()
+
+        return
+
+    def show_reflections(self, num_rows):
+        """
+        :param num_rows:
+        :return:
+        """
+        for i_ref in xrange(min(num_rows, len(self._myScanList))):
+            # get counts
+            counts = self._myScanList[i_ref]
+            dict_value = self._myScanInfoDict[counts]
+            if isinstance(dict_value, tuple):
+                self.append_row(list(dict_value))
+            elif isinstance(dict_value, list):
+                for reflection in dict_value:
+                    self.append_row(list(reflection))
+            else:
+                raise RuntimeError(
+                        'Type %s is not a supported value type of counts dictionary.' % str(type(dict_value)))
+        # END-FOR
+
+        return
+
+    def set_survey_result(self, survey_scan_dict):
+        """
+
+        :param survey_scan_dict:
+        :return:
+        """
+        # check
+        assert isinstance(survey_scan_dict, dict)
+
+        # Sort and add to table
+        scan_list = survey_scan_dict.keys()
+        scan_list.sort(reverse=True)
+
+        self._myScanInfoDict = survey_scan_dict
+        self._myScanList = scan_list
+
         return
 
     def setup(self):

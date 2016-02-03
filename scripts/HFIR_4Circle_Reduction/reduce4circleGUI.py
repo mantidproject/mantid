@@ -685,6 +685,30 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_load_survey(self):
+        """ Load csv file containing experiment-scan survey's result.
+        :return:
+        """
+        # check validity
+        num_rows = int(self.ui.lineEdit_numSurveyOutput.text())
+
+        # get the csv file
+        file_filter = 'CSV Files (*.csv);;All Files (*.*)'
+        csv_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Open Exp-Scan Survey File', self._homeDir,
+                                                              file_filter))
+
+        # call controller to load
+        counts_dict = self._myControl.load_scan_survey_file(csv_file_name)
+        assert isinstance(counts_dict, dict), 'Returned value from load scan survey file must be a dictionary.'
+
+        # set the table
+        self.ui.tableWidget_surveyTable.set_survey_result(counts_dict)
+        self.ui.tableWidget_surveyTable.remove_all_rows()
+        self.ui.tableWidget_surveyTable.show_survey(num_rows)
+
+        return
+
+
     def do_plot_pt_raw(self):
         """ Plot the Pt.
         """
@@ -863,6 +887,21 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_save_survey(self):
+        """
+        Save the survey to a file
+        :return:
+        """
+        # Get file name
+        file_filter = 'CSV Files (*.csv);;All Files (*.*)'
+        out_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Save scan survey result', self._homeDir,
+                                                              file_filter))
+
+        # Save file
+        self._myControl.save_scan_survey(out_file_name)
+
+        return
+
     def do_set_experiment(self):
         """ Set experiment
         :return:
@@ -994,27 +1033,21 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get experiment number
         exp_number = int(self.ui.lineEdit_exp.text())
-
-        # Get value
-        counts_dict = self._myControl.survey(exp_number)
-
-        # Sort and add to table
-        count_list = counts_dict.keys()
-        count_list = count_list.sort(reverse=True)
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_surveyStartPt,
+                                                        self.ui.lineEdit_surveyEndPt])
+        if status is False:
+            err_msg = ret_obj
+            self.pop_one_button_dialog(err_msg)
+        start_scan = ret_obj[0]
+        end_scan = ret_obj[1]
 
         max_number = int(self.ui.lineEdit_numSurveyOutput.text())
-        for i_ref in xrange(max_number):
-            counts = count_list[i_ref]
-            dict_value = counts_dict[counts]
-            if isinstance(dict_value, tuple):
-                self.ui.tableWidget_surveyTable.addReflection(dict_value)
-            elif isinstance(dict_value, list):
-                for reflection in dict_value:
-                    self.ui.tableWidget_surveyTable.addReflection(reflection)
-            else:
-                raise RuntimeError(
-                        'Type %s is not a supported value type of counts dictionary.' % str(type(dict_value)))
-        # END-FOR
+
+        # Get value
+        counts_dict = self._myControl.survey(exp_number, start_scan, end_scan)
+        self.ui.tableWidget_surveyTable.set_survey_result(counts_dict)
+
+        self.ui.tableWidget_surveyTable.show_reflections(max_number)
 
         return
 
