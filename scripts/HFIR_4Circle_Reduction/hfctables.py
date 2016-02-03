@@ -536,3 +536,33 @@ class ProcessTableWidget(tableBase.NTableWidget):
             self.update_cell_value(row_number, j_group_name, ws_group_name)
 
         return
+
+
+class ScanSurveyTable(tableBase.NTableWidget):
+    """
+    Extended table widget for peak integration
+    """
+    Table_Setup = [('Scan', 'int'),
+                   ('Max Counts Pt', 'int'),
+                   ('Max Counts', 'int'),
+                   ('H', 'float'),
+                   ('K', 'float'),
+                   ('L', 'float'),
+                   ('Selected', 'checkbox')]
+
+    def __init__(self, parent):
+        """
+        :param parent:
+        """
+        tableBase.NTableWidget.__init__(self, parent)
+
+        return
+
+    def setup(self):
+        """
+        Init setup
+        :return:
+        """
+        self.init_setup(ScanSurveyTable.Table_Setup)
+
+        return

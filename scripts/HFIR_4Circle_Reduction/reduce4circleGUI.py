@@ -99,6 +99,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_resetPeakHKLs, QtCore.SIGNAL('clicked()'),
                      self.do_reset_ub_peaks_hkl)
 
+        self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
+                     self.do_refine_ub)
+
         # Tab 'Merge'
         self.connect(self.ui.pushButton_setUBSliceView, QtCore.SIGNAL('clicked()'),
                      self.do_set_ub_sv)
@@ -119,16 +122,6 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.comboBox_instrument, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.change_instrument_name)
 
-        # Refine UB matrix
-        self.connect(self.ui.pushButton_addToRefine, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub)
-        self.connect(self.ui.pushButton_addAllRefineUB, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub)
-        self.connect(self.ui.pushButton_acceptRefinedUB, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub)
-        self.connect(self.ui.pushButton_resetRefinedUB, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub)
-
         # Tab 'Integrate Peaks'
         self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_peaks)
@@ -136,8 +129,13 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_find_peaks_integrate)
 
         # Tab survey
+        # TODO/NOW/1st!
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
-                     self.do_survey_scan)
+                     self.do_survey)
+        self.connect(self.ui.pushButton_saveSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_save_survey)
+        self.connect(self.ui.pushButton_loadSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_load_survey)
 
         # Menu
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
@@ -149,8 +147,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.load_session)
 
         # Event handling for tab 'refine ub matrix'
-        self.connect(self.ui.pushButton_addToRefine, QtCore.SIGNAL('clicked()'),
-                     self.doAddScanPtToRefineUB)
 
         # Validator ... (NEXT)
 
@@ -166,8 +162,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Initial setup
         self.ui.tabWidget.setCurrentIndex(0)
-        self.ui.tabWidget.setTabEnabled(4, False)
-        self.ui.tabWidget.setTabEnabled(5, True)
         self._init_table_widgets()
         self.ui.radioButton_ubFromTab1.setChecked(True)
 
@@ -190,7 +184,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.tableWidget_ubMatrix.setup()
         self.ui.tableWidget_ubMergeScan.setup()
-        self.ui.tableWidget_refinedUB.setup()
+        self.ui.tableWidget_surveyTable.setup()
         self.ui.tableWidget_peakIntegration.setup()
 
         self.ui.tableWidget_mergeScans.setup()
