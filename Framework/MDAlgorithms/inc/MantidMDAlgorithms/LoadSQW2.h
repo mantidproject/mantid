@@ -57,18 +57,13 @@ private:
   typedef DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>
       SQWWorkspace;
 
-  /// Define the sections of the file
-  struct SQWHeader {
-    int32_t nfiles;
-  };
-
   void init();
   void exec();
   void cacheInputs();
   void initFileReader();
-  SQWHeader readMainHeader();
+  void readMainHeader();
   void createOutputWorkspace();
-  void readAllSPEHeadersToWorkspace(const int32_t nfiles);
+  void readAllSPEHeadersToWorkspace();
   boost::shared_ptr<API::ExperimentInfo> readSingleSPEHeader();
   Kernel::DblMatrix
   calculateOutputTransform(const Kernel::DblMatrix &gonR,
@@ -88,13 +83,14 @@ private:
   void readPixelData();
   void splitAllBoxes();
   void warnIfMemoryInsufficient(int64_t npixtot);
-  void addEventFromBuffer(const float *pixel);
+  size_t addEventFromBuffer(const float *pixel);
   void toOutputFrame(const uint16_t runIndex, float &u1, float &u2, float &u3);
   void finalize();
 
   std::unique_ptr<std::ifstream> m_file;
   std::unique_ptr<Kernel::BinaryStreamReader> m_reader;
   boost::shared_ptr<SQWWorkspace> m_outputWS;
+  uint16_t m_nspe;
   std::vector<Kernel::DblMatrix> m_outputTransforms;
   std::unique_ptr<API::Progress> m_progress;
   std::string m_outputFrame;

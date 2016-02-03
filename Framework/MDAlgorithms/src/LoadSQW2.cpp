@@ -60,7 +60,8 @@ DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
 /// Default constructor
 LoadSQW2::LoadSQW2()
     : API::IFileLoader<Kernel::FileDescriptor>(), m_file(), m_reader(),
-      m_outputWS(), m_outputTransforms(), m_progress(), m_outputFrame() {}
+      m_outputWS(), m_nspe(0), m_outputTransforms(), m_progress(),
+      m_outputFrame() {}
 
 /// Default destructor
 LoadSQW2::~LoadSQW2() {}
@@ -138,9 +139,9 @@ void LoadSQW2::init() {
 void LoadSQW2::exec() {
   cacheInputs();
   initFileReader();
-  auto mainHeader = readMainHeader();
+  readMainHeader();
   createOutputWorkspace();
-  readAllSPEHeadersToWorkspace(mainHeader.nfiles);
+  readAllSPEHeadersToWorkspace();
   skipDetectorSection();
   readDataSection();
   finalize();
@@ -167,15 +168,13 @@ void LoadSQW2::initFileReader() {
  * Stores the number of files.
  * @return A SQWHeader object describing the section
  */
-LoadSQW2::SQWHeader LoadSQW2::readMainHeader() {
+void LoadSQW2::readMainHeader() {
   std::string appName, filename, filepath, title;
   double appVersion(0.0);
-  int32_t sqwType(-1);
-  int32_t numDims(-1);
-  SQWHeader header;
+  int32_t sqwType(-1), numDims(-1), nspe(-1);
   *m_reader >> appName >> appVersion >> sqwType >> numDims >> filename >>
-      filepath >> title >> header.nfiles;
-
+      filepath >> title >> nspe;
+  m_nspe = static_cast<uint16_t>(nspe);
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     std::ostringstream os;
     os << "Main header:\n"
@@ -186,10 +185,9 @@ LoadSQW2::SQWHeader LoadSQW2::readMainHeader() {
        << "    filename: " << filename << "\n"
        << "    filepath: " << filepath << "\n"
        << "    title: " << title << "\n"
-       << "    nfiles: " << header.nfiles << "\n";
+       << "    nfiles: " << m_nspe << "\n";
     g_log.debug(os.str());
   }
-  return header;
 }
 
 /// Create the output workspace object
@@ -202,9 +200,9 @@ void LoadSQW2::createOutputWorkspace() {
  * output workspace
  * @param nfiles The number of expected spe header sections
  */
-void LoadSQW2::readAllSPEHeadersToWorkspace(const int32_t nfiles) {
-  m_outputTransforms.reserve(nfiles);
-  for (int32_t i = 0; i < nfiles; ++i) {
+void LoadSQW2::readAllSPEHeadersToWorkspace() {
+  m_outputTransforms.reserve(m_nspe);
+  for (uint16_t i = 0; i < m_nspe; ++i) {
     auto expt = readSingleSPEHeader();
     m_outputWS->addExperimentInfo(expt);
     m_outputTransforms.emplace_back(
@@ -625,6 +623,7 @@ void LoadSQW2::readPixelData() {
   constexpr int64_t bufferSize(FIELDS_PER_PIXEL * NPIX_CHUNK);
   std::vector<float> pixBuffer(bufferSize);
   int64_t pixelsLeftToRead(npixtot), chunksRead(0);
+  size_t pixelsAdded(0);
   while (pixelsLeftToRead > 0) {
     int64_t chunkSize(pixelsLeftToRead);
     if (chunkSize > NPIX_CHUNK) {
@@ -632,7 +631,7 @@ void LoadSQW2::readPixelData() {
     }
     m_reader->read(pixBuffer, FIELDS_PER_PIXEL * chunkSize);
     for (int64_t i = 0; i < chunkSize; ++i) {
-      addEventFromBuffer(pixBuffer.data() + i * 9);
+      pixelsAdded += addEventFromBuffer(pixBuffer.data() + i * 9);
       m_progress->report();
     }
     pixelsLeftToRead -= chunkSize;
@@ -642,6 +641,15 @@ void LoadSQW2::readPixelData() {
     }
   }
   assert(pixelsLeftToRead == 0);
+  if (pixelsAdded == 0) {
+    throw std::runtime_error(
+        "No pixels could be added from the source file. "
+        "Please check the irun fields of all pixels are valid.");
+  } else if (pixelsAdded != static_cast<size_t>(npixtot)) {
+    g_log.warning("Some pixels within the source file had an invalid irun "
+                  "field. They have been ignored.");
+  }
+
   g_log.debug() << "Time to read all pixels: " << timer.elapsed() << "s\n";
 }
 
@@ -683,21 +691,30 @@ void LoadSQW2::warnIfMemoryInsufficient(int64_t npixtot) {
 
 /**
  * Assume the given pointer points to the start of a full pixel and create
- * an MDEvent based on it
+ * an MDEvent based on it iff it has a valid run id.
  * @param pixel A pointer assumed to point to at the start of a single pixel
  * from the data file
+ * @return 1 if the event was added, 0 otherwise
  */
-void LoadSQW2::addEventFromBuffer(const float *pixel) {
+size_t LoadSQW2::addEventFromBuffer(const float *pixel) {
   using DataObjects::MDEvent;
+  // Is the pixel field valid? Older versions of Horace produced files with
+  // an invalid field and we can't use this. It should be between 1 && nfiles
+  uint16_t irun = static_cast<uint16_t>(pixel[4]);
+  if (irun < 1 || irun > m_nspe) {
+    return 0;
+  }
   auto u1(pixel[0]), u2(pixel[1]), u3(pixel[2]), en(pixel[3]);
-  auto irun = static_cast<uint16_t>(pixel[4] - 1);
-  toOutputFrame(irun, u1, u2, u3);
+  uint16_t runIndex = static_cast<uint16_t>(irun - 1);
+  toOutputFrame(runIndex, u1, u2, u3);
   const auto idet = static_cast<detid_t>(pixel[5]);
   // skip energy bin
   auto signal = pixel[7];
   auto error = pixel[8];
   coord_t centres[4] = {u1, u2, u3, en};
-  m_outputWS->addEvent(MDEvent<4>(signal, error * error, irun, idet, centres));
+  m_outputWS->addEvent(
+      MDEvent<4>(signal, error * error, runIndex, idet, centres));
+  return 1;
 }
 
 /**
