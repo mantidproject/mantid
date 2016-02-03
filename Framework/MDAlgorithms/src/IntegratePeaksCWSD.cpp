@@ -138,7 +138,7 @@ void IntegratePeaksCWSD::processInputs()
   else
     m_doMergePeak = false;
 
-  std::vector<double> peak_center = getProperty("PeakCenter");
+  std::vector<double> peak_center = getProperty("PeakCentre");
   if (peak_center.size() == 0)
   {
     // no single peak center
@@ -146,7 +146,7 @@ void IntegratePeaksCWSD::processInputs()
   }
   else{
     // assigned peak center
-    assert(peak_center.size() == 3 && "PeakCenter must have 3 elements.");
+    assert(peak_center.size() == 3 && "PeakCentre must have 3 elements.");
     m_peakCenter.setX(peak_center[0]);
     m_peakCenter.setY(peak_center[1]);
     m_peakCenter.setZ(peak_center[2]);
@@ -239,7 +239,11 @@ void IntegratePeaksCWSD::simplePeakIntegration(const std::vector<detid_t> &vecMa
         if (m_finder != run_monitor_map.end())
           current_monitor_counts = m_finder->second;
         else
-          throw std::runtime_error("Unable to find run number.");
+	{
+	  std::stringstream errss;
+	  errss << "Unable to find run number " << current_run_number << " in monitor counts map";
+          throw std::runtime_error(errss.str());
+	}
 
         // update peak center
         if (!m_haveSinglePeakCenter)
