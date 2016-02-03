@@ -166,9 +166,7 @@ void Algorithm::setAlwaysStoreInADS(const bool doStore) {
 void Algorithm::setRethrows(const bool rethrow) { this->m_rethrow = rethrow; }
 
 /// True if the algorithm is running.
-bool Algorithm::isRunning() const {
-  return m_running;
-}
+bool Algorithm::isRunning() const { return m_running; }
 
 //---------------------------------------------------------------------------------------------
 /**  Add an observer to a notification
