@@ -181,7 +181,7 @@ void HistoryView::roll(std::vector<HistoryItem>::iterator &it) {
     this->rollChildren(it);
     // Then just remove the children from the list
     ++it;
-    m_historyItems.erase(it, it + numChildren);
+    it = m_historyItems.erase(it, it + numChildren);
   } else
     ++it;
 }

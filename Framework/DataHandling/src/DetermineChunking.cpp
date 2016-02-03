@@ -242,7 +242,7 @@ void DetermineChunking::exec() {
   }
 
   int numChunks = 0;
-  if (maxChunk) // protect from divide by zero
+  if (maxChunk != 0.0) // protect from divide by zero
   {
     numChunks = static_cast<int>(filesize / maxChunk);
   }

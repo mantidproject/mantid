@@ -5,6 +5,8 @@ from mantid.api import *
 from mantid.geometry import SpaceGroupFactory, CrystalStructure
 
 import re
+import math
+
 
 # pylint: disable=invalid-name
 def removeErrorEstimateFromNumber(numberString):
@@ -14,6 +16,10 @@ def removeErrorEstimateFromNumber(numberString):
         return numberString
 
     return numberString[:errorBegin]
+
+
+def convertBisoToUiso(bIso):
+    return bIso / (8.0 * math.pi * math.pi)
 
 
 class CrystalStructureBuilder(object):
@@ -46,8 +52,8 @@ class CrystalStructureBuilder(object):
             # pylint: disable=unused-variable,invalid-name
             except RuntimeError as e:
                 raise RuntimeError(
-                    'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol'\
-                    'to contain spaces between the components.\n'\
+                    'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol ' \
+                    'to contain spaces between the components.\n' \
                     'Keys to look for: _space_group_name_H-M_alt, _symmetry_space_group_name_H-M')
 
     def _getSpaceGroupFromString(self, cifData):
@@ -109,12 +115,12 @@ class CrystalStructureBuilder(object):
         return ' '.join(unitCellValues)
 
     def _getAtoms(self, cifData):
-        atomFieldsRequirements = [(u'_atom_site_label', True),
-                                  (u'_atom_site_fract_x', True),
+        atomSymbols = self._getAtomSymbols(cifData)
+
+        atomFieldsRequirements = [(u'_atom_site_fract_x', True),
                                   (u'_atom_site_fract_y', True),
                                   (u'_atom_site_fract_z', True),
-                                  (u'_atom_site_occupancy', False),
-                                  (u'_atom_site_U_iso_or_equiv', False)]
+                                  (u'_atom_site_occupancy', False)]
 
         atomFields = []
 
@@ -127,7 +133,14 @@ class CrystalStructureBuilder(object):
                         'Mandatory field {0} not found in CIF-file.' \
                         'Please check the atomic position definitions.'.format(field))
 
-        atomLists = [cifData[x] for x in atomFields]
+        atomLists = [atomSymbols] + [cifData[x] for x in atomFields]
+
+        try:
+            isotropicUs = self._getIsotropicUs(cifData)
+            atomLists += [isotropicUs]
+        # pylint: disable=unused-variable,invalid-name
+        except RuntimeError as e:
+            pass
 
         atomLines = []
         for atomLine in zip(*atomLists):
@@ -138,6 +151,29 @@ class CrystalStructureBuilder(object):
             atomLines.append(' '.join(cleanLine))
 
         return ';'.join(atomLines)
+
+    def _getAtomSymbols(self, cifData):
+        rawAtomSymbols = [cifData[x] for x in [u'_atom_site_type_symbol', u'_atom_site_label'] if x in
+                          cifData.keys()]
+
+        if len(rawAtomSymbols) == 0:
+            raise RuntimeError('Cannot determine atom types, both _atom_site_type_symbol and _atom_site_label are '
+                               'missing.')
+
+        return [self._getCleanAtomSymbol(x) for x in rawAtomSymbols[0]]
+
+    def _getIsotropicUs(self, cifData):
+        keyUIso = u'_atom_site_u_iso_or_equiv'
+
+        if keyUIso in cifData.keys():
+            return cifData[keyUIso]
+
+        keyBIso = u'_atom_site_b_iso_or_equiv'
+
+        if keyBIso in cifData.keys():
+            return [convertBisoToUiso(float(x)) for x in cifData[keyBIso]]
+
+        raise RuntimeError('Neither U_iso nor B_iso are defined in the CIF-file.')
 
     def _getCleanAtomSymbol(self, atomSymbol):
         nonCharacterRe = re.compile('[^a-z]', re.IGNORECASE)
@@ -196,17 +232,34 @@ class LoadCIF(PythonAlgorithm):
                              doc='Load UB-matrix from CIF file if available.')
 
     def PyExec(self):
-        cifFileName = self.getProperty('InputFile').value
+        try:
+            self._loadFromCif()
+        except ImportError:
+            raise RuntimeError('This algorithm requires an additional Python package: PyCifRW' \
+                               ' (https://pypi.python.org/pypi/PyCifRW/4.1)')
+
+    def _loadFromCif(self):
+        from CifFile import ReadCif
+
+        cifFileUrl = self._getFileUrl()
         workspace = self.getProperty('Workspace').value
 
         # Try to parse cif file using PyCifRW
-        parsedCifFile = ReadCif(cifFileName)
+        parsedCifFile = ReadCif(cifFileUrl)
 
         self._setCrystalStructureFromCifFile(workspace, parsedCifFile)
 
         ubOption = self.getProperty('LoadUBMatrix').value
         if ubOption:
             self._setUBMatrixFromCifFile(workspace, parsedCifFile)
+
+    def _getFileUrl(self):
+        # ReadCif requires a URL, windows path specs seem to confuse urllib,
+        # so the pathname is converted to a URL before passing it to ReadCif.
+        from urllib import pathname2url
+
+        cifFileName = self.getProperty('InputFile').value
+        return pathname2url(cifFileName)
 
     def _setCrystalStructureFromCifFile(self, workspace, cifFile):
         crystalStructure = self._getCrystalStructureFromCifFile(cifFile)
@@ -217,10 +270,13 @@ class LoadCIF(PythonAlgorithm):
         crystalStructure = builder.getCrystalStructure()
 
         self.log().information('''Loaded the following crystal structure:
-                        Unit cell: {0}
-                        Space group: {1}
-                        Atoms: {2}
-                '''.format(builder.unitCell, builder.spaceGroup, builder.atoms))
+  Unit cell:
+    {0}
+  Space group:
+    {1}
+  Atoms:
+    {2}
+'''.format(builder.unitCell, builder.spaceGroup, '\n    '.join(builder.atoms.split(';'))))
 
         return crystalStructure
 
@@ -238,10 +294,4 @@ class LoadCIF(PythonAlgorithm):
         return builder.getUBMatrix()
 
 
-try:
-    from CifFile import ReadCif
-
-    AlgorithmFactory.subscribe(LoadCIF)
-except ImportError:
-    logger.debug('Failed to subscribe algorithm LoadCIF; Python package PyCifRW' \
-                 'may be missing (https://pypi.python.org/pypi/PyCifRW/4.1)')
+AlgorithmFactory.subscribe(LoadCIF)

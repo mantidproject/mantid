@@ -252,7 +252,7 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,
 
   Kernel::V3D er(0, 1, 0), e_th,
       ez(0, 0, 1); // ez along beamline, which is always oz;
-  if (dist2Det)
+  if (dist2Det != 0.0)
     er = toDet / dist2Det; // direction to the detector
   Kernel::V3D e_tg =
       er.cross_prod(ez); // tangential to the ring and anticloakwise;
