@@ -189,7 +189,6 @@ Order (low first)
       return (*ux < *ax);
   }
   return uc != Units.end();
-  // false = everything idential or A.comp bigger:
 }
 
 Acomp &Acomp::operator+=(const Acomp &A)
