@@ -404,6 +404,7 @@ void LoadBBY::exec() {
   AddSinglePointTimeSeriesProperty(logManager, time_str, "curtain_rotation", 10.0);
 
   API::IAlgorithm_sptr loadInstrumentAlg = createChildAlgorithm("LoadInstrument");
+  loadInstrumentAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
   loadInstrumentAlg->setProperty("Workspace", eventWS);
   loadInstrumentAlg->setPropertyValue("InstrumentName", "BILBY");
   loadInstrumentAlg->executeAsChildAlg();
