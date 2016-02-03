@@ -62,8 +62,7 @@ void for_each_token(InputIt first, InputIt last, ForwardIt s_first,
 std::vector<std::string> split0(const std::string &str,
                                 const std::string &delims) {
   std::vector<std::string> output;
-  for_each_token(std::cbegin(str), std::cend(str), std::cbegin(delims),
-                 std::cend(delims),
+  for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first,
                            std::string::const_iterator second) {
                    output.emplace_back(first, second);
@@ -75,8 +74,7 @@ std::vector<std::string> split0(const std::string &str,
 std::vector<std::string> split1(const std::string &str,
                                 const std::string &delims) {
   std::vector<std::string> output;
-  for_each_token(std::cbegin(str), std::cend(str), std::cbegin(delims),
-                 std::cend(delims),
+  for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first,
                            std::string::const_iterator second) {
                    if (first != second)
@@ -89,8 +87,7 @@ std::vector<std::string> split1(const std::string &str,
 std::vector<std::string> split2(const std::string &str,
                                 const std::string &delims) {
   std::vector<std::string> output;
-  for_each_token(std::cbegin(str), std::cend(str), std::cbegin(delims),
-                 std::cend(delims),
+  for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first,
                            std::string::const_iterator second) {
                    output.emplace_back(first, second);
@@ -103,8 +100,7 @@ std::vector<std::string> split2(const std::string &str,
 std::vector<std::string> split3(const std::string &str,
                                 const std::string &delims) {
   std::vector<std::string> output;
-  for_each_token(std::cbegin(str), std::cend(str), std::cbegin(delims),
-                 std::cend(delims),
+  for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first,
                            std::string::const_iterator second) {
                    if (first != second) {
