@@ -6,6 +6,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
@@ -48,6 +49,14 @@ void CalMuonDetectorPhases::init() {
   declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>(
                       "DataFitted", "", Direction::Output),
                   "Name of the output workspace holding fitting results");
+
+  declareProperty(new ArrayProperty<int>("ForwardSpectra", Direction::Input),
+                  "The spectra numbers of the forward group. If not specified "
+                  "will read from file.");
+
+  declareProperty(new ArrayProperty<int>("BackwardSpectra", Direction::Input),
+                  "The spectra numbers of the backward group. If not specified "
+                  "will read from file.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -64,6 +73,21 @@ std::map<std::string, std::string> CalMuonDetectorPhases::validateInputs() {
   if ((unit->label().ascii() != "Microseconds") &&
       (unit->label().ascii() != "microsecond")) {
     result["InputWorkspace"] = "InputWorkspace units must be microseconds";
+  }
+
+  // Check spectra numbers are valid, if specified
+  int nspec = static_cast<int>(inputWS->getNumberHistograms());
+  std::vector<int> forward = getProperty("ForwardSpectra");
+  std::vector<int> backward = getProperty("BackwardSpectra");
+  for (int spec : forward) {
+    if (spec < 1 || spec > nspec) {
+      result["ForwardSpectra"] = "Invalid spectrum numbers in ForwardSpectra";
+    }
+  }
+  for (int spec : backward) {
+    if (spec < 1 || spec > nspec) {
+      result["BackwardSpectra"] = "Invalid spectrum numbers in BackwardSpectra";
+    }
   }
 
   return result;
