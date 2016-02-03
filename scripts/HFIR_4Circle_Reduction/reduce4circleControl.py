@@ -22,6 +22,8 @@ DebugMode = True
 DET_X_SIZE = 256
 DET_Y_SIZE = 256
 
+MAX_SCAN_NUMBER = 100000
+
 
 class PeakInfo(object):
     """ Class containing a peak's information for GUI
@@ -875,6 +877,15 @@ class CWSCDReductionControl(object):
 
         return
 
+    def load_scan_survey_file(self, csv_file_name):
+        """ Load scan survey from a csv file
+        :param csv_file_name:
+        :return:
+        """
+        # TODO/NOW/1st - Implement!
+
+        return
+
     def load_spice_scan_file(self, exp_no, scan_no, spice_file_name=None):
         """
         Load a SPICE scan file to table workspace and run information matrix workspace.
@@ -1319,6 +1330,16 @@ class CWSCDReductionControl(object):
 
         return
 
+    def save_scan_survey(self, file_name):
+        """
+        Save scan-survey's result to a csv file
+        :param file_name:
+        :return:
+        """
+        # TODO/NOW/1st - Implement!
+
+        return
+
     def set_exp_number(self, exp_number):
         """ Add experiment number
         :param exp_number:
@@ -1471,7 +1492,7 @@ class CWSCDReductionControl(object):
 
         return ptlist
 
-    def survey(self, exp_number):
+    def survey(self, exp_number, start_scan, end_scan):
         """ Load all the SPICE ascii file to get the big picture such that
         * the strongest peaks and their HKL in order to make data reduction and analysis more convenient
         :param exp_number: experiment number
@@ -1479,13 +1500,16 @@ class CWSCDReductionControl(object):
         """
         # Check
         assert isinstance(exp_number, int)
+        if isinstance(start_scan, int) is False:
+            start_scan = 1
+        if isinstance(end_scan , int) is False:
+            end_scan = MAX_SCAN_NUMBER
 
         # Output workspace
         counts_dict = dict()
 
         # Download and
-        MAX_SCAN_NUMBER = 100000
-        for scan_number in xrange(1, MAX_SCAN_NUMBER):
+        for scan_number in xrange(start_scan, end_scan):
             # form file URL
             file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, exp_number,
                                                                         exp_number, scan_number)
