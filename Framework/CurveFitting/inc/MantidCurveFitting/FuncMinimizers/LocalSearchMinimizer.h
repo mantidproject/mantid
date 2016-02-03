@@ -8,6 +8,7 @@ namespace Mantid {
 namespace CurveFitting {
 
 class GSLVector;
+class GSLMatrix;
 
 namespace FuncMinimisers {
 
@@ -37,6 +38,7 @@ namespace FuncMinimisers {
 class MANTID_CURVEFITTING_DLL LocalSearchMinimizer
     : public API::IFuncMinimizer {
 public:
+  enum ParameterStatus {GOOD, BAD};
   LocalSearchMinimizer();
   /// Name of the minimizer.
   std::string name() const { return "LocalSearchMinimizer"; }
@@ -48,7 +50,7 @@ public:
   virtual void initialize(API::ICostFunction_sptr function,
                           size_t maxIterations = 0);
 private:
-  void checkStatus();
+  void checkStatus(const GSLVector &e, const GSLMatrix &V);
   /// Function to minimize.
   API::ICostFunction_sptr m_costFunction;
   std::vector<std::vector<double>> m_directions;
@@ -56,7 +58,7 @@ private:
   bool m_parametersInitialized;
   std::vector<double> m_oldParameters;
   bool m_badIteration;
-  std::vector<size_t> m_badParameters;
+  std::vector<ParameterStatus> m_badParameters;
 };
 
 } // namespace FuncMinimisers

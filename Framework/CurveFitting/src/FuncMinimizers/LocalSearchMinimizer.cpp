@@ -503,7 +503,8 @@ OptionalParameters iterationSingularHessian(API::ICostFunction &function,
   std::vector<size_t> badIndices;
   std::vector<GSLVector> badSpace;
   for (size_t i = 0; i < e.size(); ++i) {
-    if (fabs(e[i] / e[0]) <= 1e-5) {
+    auto ratio = fabs(e[i] / e[0]);
+    if (ratio <= 1e-5 && ratio > 1e-14) {
       badIndices.push_back(i);
       badSpace.push_back(V.copyColumn(i));
       isHessianSingular = true;
@@ -543,11 +544,20 @@ OptionalParameters iterationSingularHessian(API::ICostFunction &function,
   return iterationGradientDescent(function);
 }
 
+//-----------------------------------------------------------------------------
+OptionalParameters iterationRecoverFromBadIteration(API::ICostFunction &function, const GSLVector &oldParameters) {
+  auto dir = getParameters(function);
+  dir -= oldParameters;
+  dir *= 0.5;
+  dir += oldParameters;
+  return OptionalParameters(dir);
+}
+
 } // anonymous namespace
 
 //-----------------------------------------------------------------------------
 /// Constructor
-LocalSearchMinimizer::LocalSearchMinimizer():m_smallChange(false), m_badIteration(false) {}
+LocalSearchMinimizer::LocalSearchMinimizer():m_smallChange(false), m_parametersInitialized(false), m_badIteration(false) {}
 
 //-----------------------------------------------------------------------------
 /// Return current value of the cost function
@@ -565,7 +575,28 @@ void LocalSearchMinimizer::initialize(API::ICostFunction_sptr function,
 }
 
 //-----------------------------------------------------------------------------
-void LocalSearchMinimizer::checkStatus() {
+void LocalSearchMinimizer::checkStatus(const GSLVector &e, const GSLMatrix &V) {
+  if (!m_parametersInitialized) {
+    m_badParameters.resize(e.size(), GOOD);
+  }
+  m_badIteration = false;
+  size_t nBads = 0;
+  size_t nVeryBads = 0;
+  for(size_t i = 0; i < e.size(); ++i) {
+    auto ratio = fabs(e[i] / e[0]);
+    if (ratio < 1e-5) { // < replace literal
+      ++nBads;
+    }
+    if (ratio < 1e-14) { // < replace literal
+      if (!m_parametersInitialized) {
+        m_badParameters[i] = BAD;
+      } else if (m_badParameters[i] == GOOD) {
+        ++nVeryBads;
+      }
+    }
+  }
+  m_badIteration = (nBads > 0 && nBads == nVeryBads);
+  m_parametersInitialized = true;
 }
 
 //-----------------------------------------------------------------------------
@@ -582,7 +613,19 @@ bool LocalSearchMinimizer::iterate(size_t iter) {
   GSLMatrix V;
 
   eigenSystem(*m_costFunction, e, V);
-  OptionalParameters parameters = iterationSingularHessian(*m_costFunction, e, V, m_smallChange);
+
+  checkStatus(e, V);
+  std::cerr << "Bad? " << m_badIteration << std::endl;
+
+  OptionalParameters parameters;
+
+  if (m_badIteration) {
+    parameters = iterationRecoverFromBadIteration(*m_costFunction, GSLVector(m_oldParameters));
+    setParameters(*m_costFunction, parameters.get());
+    return true;
+  }
+
+  parameters = iterationSingularHessian(*m_costFunction, e, V, m_smallChange);
 
   if (!parameters) {
     parameters = iterationNewton(*m_costFunction, m_smallChange);
