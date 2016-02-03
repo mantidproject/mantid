@@ -321,8 +321,8 @@ std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(
  */
 void IntegratePeaksCWSD::mergePeaks()
 {
-  float total_intensity = 0;
-  float total_monitor_counts = 0.;
+  double total_intensity = 0;
+  double total_monitor_counts = 0.;
 
   // sum over all runs
   std::map<int, signal_t>::iterator mon_iter;
@@ -330,16 +330,16 @@ void IntegratePeaksCWSD::mergePeaks()
   {
     int run_number_i = mon_iter->first;
     signal_t monitor_i = mon_iter->second;
-    float intensity_i = m_runPeakCountsMap[run_number_i];
+    double intensity_i = m_runPeakCountsMap[run_number_i];
     total_intensity += monitor_i * intensity_i;
     total_monitor_counts += monitor_i;
   }
 
   // final merged intensity
-  float merged_intensity = total_intensity / total_monitor_counts;
+  double merged_intensity = total_intensity / total_monitor_counts;
 
   // set the merged intensity to each peak
-  std::map<int, float>::iterator count_iter;
+  std::map<int, double>::iterator count_iter;
   for (count_iter = m_runPeakCountsMap.begin(); count_iter != m_runPeakCountsMap.end(); ++ count_iter)
     count_iter->second = merged_intensity;
 
@@ -358,9 +358,9 @@ DataObjects::PeaksWorkspace_sptr IntegratePeaksCWSD::createOutputs()
   size_t num_peaks = outws->getNumberPeaks();
   for (size_t i_peak = 0; i_peak < num_peaks; ++i_peak)
   {
-    DataObjects::Peak &peak_i = outws->getPeak(i_peak);
+    DataObjects::Peak &peak_i = outws->getPeak(static_cast<int>(i_peak));
     int run_number_i = peak_i.getRunNumber();
-    float intensity_i = m_runPeakCountsMap[run_number_i];
+    double intensity_i = m_runPeakCountsMap[run_number_i];
     peak_i.setIntensity(intensity_i);
   }
 

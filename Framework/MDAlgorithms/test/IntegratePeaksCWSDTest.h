@@ -53,7 +53,7 @@ public:
   {
     // Create workspaces to test
     std::vector<Mantid::Kernel::V3D> vec_qsample;
-    std::vector<float> vec_signal;
+    std::vector<double> vec_signal;
     std::vector<int> vec_detid;
     std::vector<int> vec_runnumbers;
     createMDEvents1Run(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
@@ -90,7 +90,7 @@ public:
   {
     // Create workspaces to test
     std::vector<Mantid::Kernel::V3D> vec_qsample;
-    std::vector<float> vec_signal;
+    std::vector<double> vec_signal;
     std::vector<int> vec_detid;
     std::vector<int> vec_runnumbers;
     createMDEvents2Run(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
@@ -131,7 +131,7 @@ public:
    * @brief createMDWorkspace
    */
   IMDEventWorkspace_sptr createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
-                                           const std::vector<float> &vec_event_signal,
+                                           const std::vector<double> &vec_event_signal,
                                            const std::vector<int> &vec_event_det,
                                            const std::vector<int> &vec_event_run)
   {
@@ -193,12 +193,12 @@ public:
     for (size_t iq = 0; iq < vec_event_qsample.size(); ++iq) {
       Mantid::Kernel::V3D qsample = vec_event_qsample[iq];
       std::vector<Mantid::coord_t> millerindex(3);
-      millerindex[0] = static_cast<float>(qsample.X());
-      millerindex[1] = static_cast<float>(qsample.Y());
-      millerindex[2] = static_cast<float>(qsample.Z());
+      millerindex[0] = static_cast<Mantid::coord_t>(qsample.X());
+      millerindex[1] = static_cast<Mantid::coord_t>(qsample.Y());
+      millerindex[2] = static_cast<Mantid::coord_t>(qsample.Z());
 
-      float signal = vec_event_signal[iq];
-      float error = std::sqrt(signal);
+      double signal = vec_event_signal[iq];
+      double error = std::sqrt(signal);
       uint16_t runnumber = static_cast<uint16_t>(vec_event_run[iq]);
       Mantid::detid_t detid = vec_event_det[iq];
 
@@ -247,28 +247,28 @@ public:
 
   //-------------------------------------------------------------------------------
   void createMDEvents1Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
-                          std::vector<float> &vec_signal,
+                          std::vector<double> &vec_signal,
                           std::vector<Mantid::detid_t> &vec_detid,
                           std::vector<int> &vec_runnumber){
 
-    float q_x0 = -0.4;
-    float q_y0 = -0.4;
-    float q_z0 = -0.4;
-    float d_q = 0.1;
+    double q_x0 = -0.4;
+    double q_y0 = -0.4;
+    double q_z0 = -0.4;
+    double d_q = 0.1;
     Mantid::Kernel::V3D origin(0, 0, 0);
 
     Mantid::detid_t detid = 1000;
     for (size_t i = 0; i < 8; ++i)
     {
-      float q_x = static_cast<float>(i) * d_q + q_x0;
+      double q_x = static_cast<double>(i) * d_q + q_x0;
       for (size_t j = 0; j < 8; ++j)
       {
-        float q_y = static_cast<float>(j) * d_q + q_y0;
+        double q_y = static_cast<double>(j) * d_q + q_y0;
         for (size_t k = 0; k < 8; ++k)
         {
-          float q_z = static_cast<float>(k) * d_q + q_z0;
+          double q_z = static_cast<double>(k) * d_q + q_z0;
           Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
-          float signal = qsample.distance(origin) * 1000;
+          double signal = qsample.distance(origin) * 1000;
 
           vec_qsample.push_back(qsample);
           vec_signal.push_back(signal);
@@ -285,28 +285,28 @@ public:
 
   //-------------------------------------------------------------------------------
   void createMDEvents2Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
-                          std::vector<float> &vec_signal,
+                          std::vector<double> &vec_signal,
                           std::vector<Mantid::detid_t> &vec_detid,
                           std::vector<int> &vec_runnumber){
 
-    float q_x0 = -0.4;
-    float q_y0 = -0.4;
-    float q_z0 = -0.4;
-    float d_q = 0.1;
+    double q_x0 = -0.4;
+    double q_y0 = -0.4;
+    double q_z0 = -0.4;
+    double d_q = 0.1;
     Mantid::Kernel::V3D origin(0, 0, 0);
 
     Mantid::detid_t detid = 1000;
     for (size_t i = 0; i < 8; ++i)
     {
-      float q_x = static_cast<float>(i) * d_q + q_x0;
+      double q_x = static_cast<double>(i) * d_q + q_x0;
       for (size_t j = 0; j < 8; ++j)
       {
-        float q_y = static_cast<float>(j) * d_q + q_y0;
+        double q_y = static_cast<double>(j) * d_q + q_y0;
         for (size_t k = 0; k < 8; ++k)
         {
-          float q_z = static_cast<float>(k) * d_q + q_z0;
+          double q_z = static_cast<double>(k) * d_q + q_z0;
           Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
-          float signal = qsample.distance(origin) * 1000;
+          double signal = qsample.distance(origin) * 1000;
 
           vec_qsample.push_back(qsample);
           vec_signal.push_back(signal);
@@ -327,15 +327,15 @@ public:
     detid = 1000;
     for (size_t i = 0; i < 8; ++i)
     {
-      float q_x = static_cast<float>(i) * d_q + q_x0;
+      double q_x = static_cast<double>(i) * d_q + q_x0;
       for (size_t j = 0; j < 8; ++j)
       {
-        float q_y = static_cast<float>(j) * d_q + q_y0;
+        double q_y = static_cast<double>(j) * d_q + q_y0;
         for (size_t k = 0; k < 8; ++k)
         {
-          float q_z = static_cast<float>(k) * d_q + q_z0;
+          double q_z = static_cast<double>(k) * d_q + q_z0;
           Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
-          float signal = qsample.distance(origin) * 100;
+          double signal = qsample.distance(origin) * 100;
 
           vec_qsample.push_back(qsample);
           vec_signal.push_back(signal);

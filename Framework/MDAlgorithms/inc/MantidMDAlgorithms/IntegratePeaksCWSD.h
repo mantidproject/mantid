@@ -79,7 +79,7 @@ private:
   /// Peaks
   std::vector<DataObjects::Peak> m_vecPeaks;
   /// Integrated peaks' intensity per run number
-  std::map<int, float> m_runPeakCountsMap;
+  std::map<int, double> m_runPeakCountsMap;
 
   /// Mask
   bool m_maskDets;
