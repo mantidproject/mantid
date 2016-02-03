@@ -33,6 +33,44 @@ ConvFit::ConvFit(QWidget *parent)
   m_uiForm.setupUi(parent);
 }
 
+/**
+ * Populates the default parameter map with the initial default values
+ * @param map :: The default value map to populate
+ * @return The QMap populated with default values
+ */
+QMap<QString, double> ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
+	// If the parameters from a One lorentzian fit are present
+	if (map.contains("PeakCentre")) {
+		map.remove("PeakCentre");
+		map.remove("FWHM");
+	}
+	// Reset all parameters to default of 1
+	map.insert("Amplitude", 1.0);
+	map.insert("Beta", 1.0);
+	map.insert("Decay", 1.0);
+	map.insert("Diffusion", 1.0);
+	map.insert("Height", 1.0);
+	map.insert("Intensity", 1.0);
+	map.insert("Radius", 1.0);
+	map.insert("Tau", 1.0);
+	return map;
+}
+
+/**
+ * Adds the One Lorentzian fit informtion to the list of default parameters
+ * @param map			:: The default value map to populate
+ * @param amplitude		:: One lorentzian amplitude
+ * @param peakCentre	:: One lorentzian peakCentre
+ * @param fwhm			:: One lorentzian fwhm
+ * @return The QMap populated with default values
+ */
+QMap<QString, double> ConvFit::addLorentzianFitToDeafultQMap(QMap<QString, double> map, const double &amplitude, const double &peakCentre, const double &fwhm) {
+	map.insert("PeakCentre", peakCentre);
+	map.insert("FWHM", fwhm);
+	map.replace("Amplitude", amplitude);
+	return map;
+}
+
 void ConvFit::setup() {
   // Create Property Managers
   m_stringManager = new QtStringPropertyManager();
@@ -49,14 +87,9 @@ void ConvFit::setup() {
                                << "EDC"
                                << "SFT";
   // All Parameters in tree that should be defaulting to 1
-  m_defaultParams = QStringList() << "Amplitude"
-                                  << "Beta"
-                                  << "Decay"
-                                  << "Diffusion"
-                                  << "Height"
-                                  << "Intensity"
-                                  << "Radius"
-                                  << "Tau";
+  QMap<QString, double> m_defaultParams;
+
+
 
   // Create TreeProperty Widget
   m_cfTree = new QtTreePropertyBrowser();
