@@ -16,7 +16,6 @@ using namespace MantidQt::CustomInterfaces;
 #include <boost/lexical_cast.hpp>
 
 #include <Poco/Path.h>
-#include <Poco/Process.h>
 
 #include <QFileDialog>
 #include <QFileSystemModel>
@@ -998,230 +997,10 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
 }
 
 /**
- * Produces a comma separated list of coordinates as a string of real values
- *
- * @param coords Coordinates given as point 1 (x,y), point 2 (x,y)
- *
- * @returns A string like "x1, y1, x2, y2"
- */
-std::string boxCoordinatesToCSV(ImageStackPreParams::Box2D &coords) {
-  std::string x1 = std::to_string(coords.first.X());
-  std::string y1 = std::to_string(coords.first.Y());
-  std::string x2 = std::to_string(coords.second.X());
-  std::string y2 = std::to_string(coords.second.Y());
-
-  return x1 + ", " + y1 + ", " + x2 + ", " + y2;
-}
-
-/**
- * Build options string to send them to the tomographic reconstruction
- * scripts command line.
- *
- * @param filters Settings for the pre-post processing steps/filters
- *
- * @param corRegions center and regions selected by the user (region
- * of intererst/analysis area and normalization or air region).
- *
- * This doesn't belong here and should be move to more appropriate
- * place.
- */
-std::string
-TomographyIfaceViewQtGUI::filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
-                                              ImageStackPreParams &corRegions) {
-  std::string opts;
-
-  opts +=
-      " --region-of-interest='[" + boxCoordinatesToCSV(corRegions.roi) + "]'";
-
-  opts += " --air-region='[" +
-          boxCoordinatesToCSV(corRegions.normalizationRegion) + "]'";
-
-  // TODO: (requires IMAT specific headers to become available soon)
-  // filters.prep.normalizeByProtonCharge
-
-  if (filters.prep.normalizeByFlatDark) {
-    const std::string flat = m_pathsConfig.pathOpenBeam();
-    if (!flat.empty())
-      opts += " --input-path-flat=" + flat;
-
-    const std::string dark = m_pathsConfig.pathDark();
-    if (!dark.empty())
-      opts += " --input-path-dark=" + dark;
-  }
-
-  opts +=
-      " --median-filter-size=" + std::to_string(filters.prep.medianFilterWidth);
-
-  int rotationIdx = filters.prep.rotation / 90;
-  double cor = 0;
-  if (1 == rotationIdx % 2) {
-    cor = corRegions.cor.Y();
-  } else {
-    cor = corRegions.cor.X();
-  }
-  opts += " --cor='[" + std::to_string(cor) + "']";
-
-  // filters.prep.rotation
-  opts += "--rotation=" + std::to_string(rotationIdx);
-
-  // filters.prep.maxAngle
-  opts += " --max-angle=" + std::to_string(filters.prep.maxAngle);
-
-  // prep.scaleDownFactor
-  if (filters.prep.scaleDownFactor > 1)
-    opts += " --scale-down=" + std::to_string(filters.prep.scaleDownFactor);
-
-  // postp.circMaskRadius
-  opts += " --circular-mask=" + std::to_string(filters.postp.circMaskRadius);
-
-  // postp.cutOffLevel
-  if (filters.postp.cutOffLevel > 0.0)
-    opts += " --cut-off" + std::to_string(filters.postp.cutOffLevel);
-
-  return opts;
-}
-
-/**
  * Slot - when the user clicks the 'reconstruct data' or similar button.
  */
 void TomographyIfaceViewQtGUI::reconstructClicked() {
-  // TODO: this should be refactored and moved from here to the presenter/model,
-  // and use proper methods like m_model->localComputeResource()
-  // and m_view->currentComputeResource();
-  const std::string compRes = "Local";
-  if (compRes == currentComputeResource()) {
-    processLocalRunRecon();
-    m_presenter->notify(ITomographyIfacePresenter::RunReconstruct);
-  } else {
-    m_presenter->notify(ITomographyIfacePresenter::RunReconstruct);
-  }
-}
-
-// TODO: This should not be here in the view. Hopefully this settles soon.
-// Move this logic to the presenter / merge in processRunRecon
-void TomographyIfaceViewQtGUI::processLocalRunRecon() {
-  const std::string toolName = currentReconTool();
-  try {
-    std::string run, args;
-    makeRunnableWithOptions("local", run, args);
-
-    // pre-/post processing steps and filters
-    TomoReconFiltersSettings filters = prePostProcSettings();
-    // center of rotation and regions
-    ImageStackPreParams corRegions = m_tabROIW->userSelection();
-    // options with all the info from filters and regions
-    const std::string cmdOpts = filtersCfgToCmdOpts(filters, corRegions);
-
-    const std::string mainScript = "/Imaging/IMAT/tomo_reconstruct.py";
-    std::string toolMethodStr = m_setupPathReconScripts + mainScript;
-    if (g_TomoPyTool == toolName)
-      toolMethodStr += " --tool=tomopy --algorithm=" + m_tomopyMethod;
-    else if (g_AstraTool == toolName)
-      toolMethodStr += " --tool=astra --algorithm=" + m_astraMethod;
-
-    if (g_TomoPyTool != toolName || m_tomopyMethod != "gridred" ||
-        m_tomopyMethod != "fbp")
-      toolMethodStr += " --num_iter=5";
-
-    args = toolMethodStr + " " + args;
-    args += " " + cmdOpts;
-
-    sendLog("Running " + toolName + ", with binary: " +
-            m_localExternalPythonPath + ", with parameters: " + args);
-
-    std::vector<std::string> runArgs = {args};
-    // Mantid::Kernel::ConfigService::Instance().launchProcess(run, runArgs);
-    try {
-      Poco::ProcessHandle handle = Poco::Process::launch(run, runArgs);
-      Poco::Process::PID pid = handle.id();
-      Mantid::API::IRemoteJobManager::RemoteJobInfo info;
-      info.id = boost::lexical_cast<std::string>(pid);
-      info.name = "Mantid_Local";
-      info.status = "Running";
-      info.cmdLine = run + " " + args;
-      m_localJobsStatus.push_back(info);
-    } catch (Poco::SystemException &sexc) {
-      userWarning("Execution failed",
-                  "Could not run the tool. Error details: " +
-                      std::string(sexc.what()));
-      Mantid::API::IRemoteJobManager::RemoteJobInfo info;
-      info.id = boost::lexical_cast<std::string>(std::rand());
-      info.name = "Mantid_Local";
-      info.status = "Exit";
-      info.cmdLine = run + " " + args;
-      m_localJobsStatus.push_back(info);
-    }
-  } catch (std::runtime_error &rexc) {
-    sendLog("The execution of " + toolName + "failed. details: " +
-            std::string(rexc.what()));
-    userWarning("Execution failed ",
-                "Coult not execute the tool. Error details: " +
-                    std::string(rexc.what()));
-  }
-}
-
-void TomographyIfaceViewQtGUI::makeRunnableWithOptions(const std::string &comp,
-                                                       std::string &run,
-                                                       std::string &opt) {
-  UNUSED_ARG(comp);
-  run = "bin";
-  opt = "--help";
-
-  // m_model->checkDataPathsSet();
-  // TODO: validate data path:
-  if (m_uiTabSetup.lineEdit_path_FITS->text().isEmpty()) {
-    userWarning("Sample images path not set!", "The path to the sample images "
-                                               "is strictly required to start "
-                                               "a reconstruction");
-  }
-
-  const std::string tool = currentReconTool();
-  std::string cmd;
-
-  // TODO: use here prePostProcSettings()
-
-  // TODO this is still incomplete, not all tools ready
-  if (tool == g_TomoPyTool) {
-    cmd = m_toolsSettings.tomoPy.toCommand();
-    // this will make something like:
-    // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
-    // opt = "--input_dir " + base + currentPathFITS() + " " + "--dark " +
-    // base +
-    //      currentPathDark() + " " + "--white " + base + currentPathFlat();
-  } else if (tool == g_AstraTool) {
-    cmd = m_toolsSettings.astra.toCommand();
-    // this will produce something like this:
-    // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
-    // opt = base + currentPathFITS();
-  } else if (tool == g_customCmdTool) {
-    cmd = m_toolsSettings.custom.toCommand();
-  } else {
-    throw std::runtime_error(
-        "Unable to use this tool. "
-        "I do not know how to submit jobs to use this tool: " +
-        tool + ". It seems that this interface is "
-               "misconfigured or there has been an unexpected "
-               "failure.");
-  }
-
-  splitCmdLine(cmd, run, opt);
-  // TODO: this may not make sense any longer:
-  // checkWarningToolNotSetup(tool, cmd, run, opt);
-  run = m_localExternalPythonPath;
-}
-
-void TomographyIfaceViewQtGUI::splitCmdLine(const std::string &cmd,
-                                            std::string &run,
-                                            std::string &opts) {
-  if (cmd.empty())
-    return;
-
-  auto pos = cmd.find(' ');
-  if (std::string::npos == pos)
-    return;
-
-  run = cmd.substr(0, pos);
-  opts = cmd.substr(pos + 1);
+  m_presenter->notify(ITomographyIfacePresenter::RunReconstruct);
 }
 
 /**
@@ -1318,11 +1097,13 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  * information from a recent query to the server.
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+        localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
-  t->setRowCount(static_cast<int>(status.size() + m_localJobsStatus.size()));
+  t->setRowCount(static_cast<int>(status.size() + localStatus.size()));
 
   for (size_t i = 0; i < status.size(); ++i) {
     int ii = static_cast<int>(i);
@@ -1356,41 +1137,41 @@ void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
   }
 
   // Local processes
-  for (size_t i = 0; i < m_localJobsStatus.size(); ++i) {
+  for (size_t i = 0; i < localStatus.size(); ++i) {
 
     // This won't work well, at least on windows.
     // bool runs = Poco::isRunning(
-    //    boost::lexical_cast<Poco::Process::PID>(m_localJobsStatus[i].id));
+    //    boost::lexical_cast<Poco::Process::PID>(localStatus[i].id));
     // if (!runs)
-    //  m_localJobsStatus[i].status = "Done";
+    //  m_localStatus[i].status = "Done";
 
     int ii = static_cast<int>(status.size() + i);
     t->setItem(ii, 0, new QTableWidgetItem(QString::fromStdString("local")));
     t->setItem(ii, 1, new QTableWidgetItem(
-                          QString::fromStdString(m_localJobsStatus[i].name)));
+                          QString::fromStdString(localStatus[i].name)));
     t->setItem(ii, 2, new QTableWidgetItem(
-                          QString::fromStdString(m_localJobsStatus[i].id)));
+                          QString::fromStdString(localStatus[i].id)));
 
     t->setItem(ii, 3, new QTableWidgetItem(
-                          QString::fromStdString(m_localJobsStatus[i].status)));
+                          QString::fromStdString(localStatus[i].status)));
 
     // beware "Exit" is called "Exited" on the web portal, but the
     // REST responses call it "Exit"
-    if (std::string::npos != m_localJobsStatus[i].status.find("Exit") ||
-        std::string::npos != m_localJobsStatus[i].status.find("Suspend"))
+    if (std::string::npos != localStatus[i].status.find("Exit") ||
+        std::string::npos != localStatus[i].status.find("Suspend"))
       t->item(ii, 3)->setBackground(QColor(255, 120, 120)); // Qt::red
-    else if (std::string::npos != m_localJobsStatus[i].status.find("Pending"))
+    else if (std::string::npos != localStatus[i].status.find("Pending"))
       t->item(ii, 3)->setBackground(QColor(150, 150, 150)); // Qt::gray
-    else if (std::string::npos != m_localJobsStatus[i].status.find("Running") ||
-             std::string::npos != m_localJobsStatus[i].status.find("Active"))
+    else if (std::string::npos != localStatus[i].status.find("Running") ||
+             std::string::npos != localStatus[i].status.find("Active"))
       t->item(ii, 3)->setBackground(QColor(120, 120, 255)); // Qt::blue
     else if (std::string::npos !=
-                 m_localJobsStatus[i].status.find("Finished") ||
-             std::string::npos != m_localJobsStatus[i].status.find("Done"))
+                 localStatus[i].status.find("Finished") ||
+             std::string::npos != localStatus[i].status.find("Done"))
       t->item(ii, 3)->setBackground(QColor(120, 255, 120)); // Qt::green
 
     t->setItem(ii, 4, new QTableWidgetItem(QString::fromStdString(
-                          m_localJobsStatus[i].cmdLine)));
+                          localStatus[i].cmdLine)));
   }
 
   t->setSortingEnabled(sort);
@@ -1695,7 +1476,8 @@ void TomographyIfaceViewQtGUI::sendToParaviewClicked() {
 }
 
 /**
- * Start a third party tool as a process
+ * Start a third party tool as a process. TODO: This is a very early
+ * experimental implementation that should be moved out of this view.
  *
  * @param toolName Human understandable name of the tool/program
  * @param pathString Path where the tool is installed

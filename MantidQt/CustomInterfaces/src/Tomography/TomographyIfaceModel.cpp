@@ -3,6 +3,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
+#include <Poco/Process.h>
+
 #include <QMutex>
 
 using namespace Mantid::API;
@@ -34,7 +36,9 @@ TomographyIfaceModel::TomographyIfaceModel()
     : m_loggedInUser(""), m_loggedInComp(""), m_facility("ISIS"),
       m_localCompName("Local"), m_computeRes(), m_computeResStatus(),
       m_reconTools(), m_reconToolsStatus(), m_jobsStatus(), m_SCARFtools(),
-      m_toolsSettings(), m_statusMutex(NULL) {
+      m_toolsSettings(), m_tomopyMethod("gridrec"), m_astraMethod("FBP3D_CUDA"),
+      m_externalInterpreterPath(""), m_prePostProcSettings(),
+      m_imageStackPreParams(), m_statusMutex(NULL) {
 
   m_computeRes.push_back(g_SCARFName);
   m_computeRes.push_back(m_localCompName);
@@ -320,7 +324,7 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
     const std::string &compRes) {
   std::string run, opt;
   try {
-    makeRunnableWithOptions(compRes, run, opt);
+    makeRunnableWithOptionsLocal(compRes, run, opt);
   } catch (std::exception &e) {
     g_log.error() << "Could not prepare the requested reconstruction job "
                      "submission. There was an error: " +
@@ -458,6 +462,105 @@ void TomographyIfaceModel::checkDataPathsSet() {
         "paths to the sample, dark and open beam images. " +
         detail);
   }
+}
+
+void TomographyIfaceModel::doRunReconstructionJobLocal() {
+  const std::string toolName = usingTool();
+  try {
+    std::string run, args;
+    makeRunnableWithOptionsLocal("local", run, args);
+
+    // options with all the info from filters and regions
+    const std::string cmdOpts =
+        filtersCfgToCmdOpts(m_prePostProcSettings, m_imageStackPreParams);
+
+    const std::string mainScript = "/Imaging/IMAT/tomo_reconstruct.py";
+    std::string toolMethodStr = m_pathLocalReconScripts + mainScript;
+    if (g_TomoPyTool == toolName)
+      toolMethodStr += " --tool=tomopy --algorithm=" + m_tomopyMethod;
+    else if (g_AstraTool == toolName)
+      toolMethodStr += " --tool=astra --algorithm=" + m_astraMethod;
+
+    if (g_TomoPyTool != toolName || m_tomopyMethod != "gridred" ||
+        m_tomopyMethod != "fbp")
+      toolMethodStr += " --num_iter=5";
+
+    args = toolMethodStr + " " + args;
+    args += " " + cmdOpts;
+
+    logMsg("Running " + toolName + ", with binary: " +
+           m_externalInterpreterPath + ", with parameters: " + args);
+
+    std::vector<std::string> runArgs = {args};
+    // Mantid::Kernel::ConfigService::Instance().launchProcess(run, runArgs);
+    try {
+      Poco::ProcessHandle handle = Poco::Process::launch(run, runArgs);
+      Poco::Process::PID pid = handle.id();
+      Mantid::API::IRemoteJobManager::RemoteJobInfo info;
+      info.id = boost::lexical_cast<std::string>(pid);
+      info.name = "Mantid_Local";
+      info.status = "Running";
+      info.cmdLine = run + " " + args;
+      m_jobsStatusLocal.push_back(info);
+    } catch (Poco::SystemException &sexc) {
+      g_log.error()
+          << "Execution failed. Could not run the tool. Error details: "
+          << std::string(sexc.what());
+      Mantid::API::IRemoteJobManager::RemoteJobInfo info;
+      info.id = boost::lexical_cast<std::string>(std::rand());
+      info.name = "Mantid_Local";
+      info.status = "Exit";
+      info.cmdLine = run + " " + args;
+      m_jobsStatusLocal.push_back(info);
+    }
+  } catch (std::runtime_error &rexc) {
+    logMsg("The execution of " + toolName + "failed. details: " +
+           std::string(rexc.what()));
+    g_log.error()
+        << "Execution failed. Coult not execute the tool. Error details: "
+        << std::string(rexc.what());
+  }
+}
+
+void TomographyIfaceModel::makeRunnableWithOptionsLocal(const std::string &comp,
+                                                        std::string &run,
+                                                        std::string &opt) {
+  opt = "--help";
+
+  const std::string tool = usingTool();
+  std::string cmd;
+
+  // TODO: use here prePostProcSettings()
+
+  // TODO this is still incomplete, not all tools ready
+  if (tool == g_TomoPyTool) {
+    cmd = m_toolsSettings.tomoPy.toCommand();
+    // this will make something like:
+    // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
+    // opt = "--input_dir " + base + currentPathFITS() + " " + "--dark " +
+    // base +
+    //      currentPathDark() + " " + "--white " + base + currentPathFlat();
+  } else if (tool == g_AstraTool) {
+    cmd = m_toolsSettings.astra.toCommand();
+    // this will produce something like this:
+    // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
+    // opt = base + currentPathFITS();
+  } else if (tool == g_customCmdTool) {
+    cmd = m_toolsSettings.custom.toCommand();
+  } else {
+    throw std::runtime_error(
+        "Unable to use this tool. "
+        "I do not know how to submit jobs to use this tool: " +
+        tool + ". It seems that this interface is "
+               "misconfigured or there has been an unexpected "
+               "failure.");
+  }
+
+  splitCmdLine(cmd, run, opt);
+  // TODO: this may not make sense any longer:
+  // checkWarningToolNotSetup(tool, cmd, run, opt);
+  if (comp == m_localCompName)
+    run = m_externalInterpreterPath;
 }
 
 /**
@@ -629,6 +732,90 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
 
 void TomographyIfaceModel::logMsg(const std::string &msg) {
   g_log.notice() << msg << std::endl;
+}
+
+/**
+ * Produces a comma separated list of coordinates as a string of real values
+ *
+ * @param coords Coordinates given as point 1 (x,y), point 2 (x,y)
+ *
+ * @returns A string like "x1, y1, x2, y2"
+ */
+std::string boxCoordinatesToCSV(ImageStackPreParams::Box2D &coords) {
+  std::string x1 = std::to_string(coords.first.X());
+  std::string y1 = std::to_string(coords.first.Y());
+  std::string x2 = std::to_string(coords.second.X());
+  std::string y2 = std::to_string(coords.second.Y());
+
+  return x1 + ", " + y1 + ", " + x2 + ", " + y2;
+}
+
+/**
+ * Build options string to send them to the tomographic reconstruction
+ * scripts command line.
+ *
+ * @param filters Settings for the pre-post processing steps/filters
+ *
+ * @param corRegions center and regions selected by the user (region
+ * of intererst/analysis area and normalization or air region).
+ *
+ * This doesn't belong here and should be move to more appropriate
+ * place.
+ */
+std::string
+TomographyIfaceModel::filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
+                                          ImageStackPreParams &corRegions) {
+  std::string opts;
+
+  opts +=
+      " --region-of-interest='[" + boxCoordinatesToCSV(corRegions.roi) + "]'";
+
+  opts += " --air-region='[" +
+          boxCoordinatesToCSV(corRegions.normalizationRegion) + "]'";
+
+  // TODO: (requires IMAT specific headers to become available soon)
+  // filters.prep.normalizeByProtonCharge
+
+  if (filters.prep.normalizeByFlatDark) {
+    const std::string flat = m_pathsConfig.pathOpenBeam();
+    if (!flat.empty())
+      opts += " --input-path-flat=" + flat;
+
+    const std::string dark = m_pathsConfig.pathDark();
+    if (!dark.empty())
+      opts += " --input-path-dark=" + dark;
+  }
+
+  opts +=
+      " --median-filter-size=" + std::to_string(filters.prep.medianFilterWidth);
+
+  int rotationIdx = filters.prep.rotation / 90;
+  double cor = 0;
+  if (1 == rotationIdx % 2) {
+    cor = corRegions.cor.Y();
+  } else {
+    cor = corRegions.cor.X();
+  }
+  opts += " --cor='[" + std::to_string(cor) + "']";
+
+  // filters.prep.rotation
+  opts += "--rotation=" + std::to_string(rotationIdx);
+
+  // filters.prep.maxAngle
+  opts += " --max-angle=" + std::to_string(filters.prep.maxAngle);
+
+  // prep.scaleDownFactor
+  if (filters.prep.scaleDownFactor > 1)
+    opts += " --scale-down=" + std::to_string(filters.prep.scaleDownFactor);
+
+  // postp.circMaskRadius
+  opts += " --circular-mask=" + std::to_string(filters.postp.circMaskRadius);
+
+  // postp.cutOffLevel
+  if (filters.postp.cutOffLevel > 0.0)
+    opts += " --cut-off" + std::to_string(filters.postp.cutOffLevel);
+
+  return opts;
 }
 
 } // namespace CustomInterfaces

@@ -3,9 +3,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -278,28 +278,61 @@ void TomographyIfacePresenter::processSetupReconTool() {
 }
 
 void TomographyIfacePresenter::processRunRecon() {
-  if (m_model->loggedIn().empty()) {
-    m_view->updateJobsInfoDisplay(m_model->jobsStatus());
+  // m_model->checkDataPathsSet();
+  // TODO: validate data path:
+  TomoPathsConfig paths = m_view->currentPathsConfig();
+  if (paths.pathSamples().empty()) {
+    m_view->userWarning("Sample images path not set!",
+                        "The path to the sample images "
+                        "is strictly required to start "
+                        "a reconstruction");
     return;
   }
 
+  // pre-/post processing steps and filters
+  m_model->updatePrePostProcSettings(m_view->prePostProcSettings());
+  // center of rotation and regions
+  m_model->updateImageStackPreParams(m_view->currentROIEtcParams());
+  m_model->updateTomopyMethod(m_view->tomopyMethod());
+  m_model->updateAstraMethod(m_view->astraMethod());
+  m_model->updateExternalInterpreterPath(m_view->externalInterpreterPath());
+  m_model->updatePathLocalReconScripts(m_view->pathLocalReconScripts());
   const std::string &resource = m_view->currentComputeResource();
-
-  if (m_model->localComputeResource() != resource) {
-    try {
-      m_model->doSubmitReconstructionJob(resource);
-    } catch (std::exception &e) {
-      m_view->userWarning("Issue when trying to start a job", e.what());
-    }
-
-    processRefreshJobs();
+  if (m_model->localComputeResource() == resource) {
+    subprocessRunReconLocal();
+  } else {
+    subprocessRunReconRemote();
   }
+
+  processRefreshJobs();
+}
+
+void TomographyIfacePresenter::subprocessRunReconRemote() {
+  if (m_model->loggedIn().empty()) {
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
+                                  m_model->jobsStatusLocal());
+    return;
+  }
+
+  try {
+
+    m_model->doSubmitReconstructionJob(m_view->currentComputeResource());
+  } catch (std::exception &e) {
+    m_view->userWarning("Issue when trying to start a job", e.what());
+  }
+
+  processRefreshJobs();
+}
+
+void TomographyIfacePresenter::subprocessRunReconLocal() {
+  m_model->doRunReconstructionJobLocal();
 }
 
 void TomographyIfacePresenter::processRefreshJobs() {
   // No need to be logged in, there can be local processes
   if (m_model->loggedIn().empty()) {
-    m_view->updateJobsInfoDisplay(m_model->jobsStatus());
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
+                                  m_model->jobsStatusLocal());
     return;
   }
 
@@ -313,7 +346,8 @@ void TomographyIfacePresenter::processRefreshJobs() {
     // update widgets from that info
     QMutexLocker lockit(m_statusMutex);
 
-    m_view->updateJobsInfoDisplay(m_model->jobsStatus());
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
+                                  m_model->jobsStatusLocal());
   }
 }
 

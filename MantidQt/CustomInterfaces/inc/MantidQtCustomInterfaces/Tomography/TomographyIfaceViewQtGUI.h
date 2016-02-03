@@ -94,6 +94,16 @@ public:
 
   std::string getPassword() const;
 
+  std::string externalInterpreterPath() const {
+    return m_localExternalPythonPath;
+  }
+
+  std::string pathLocalReconScripts() const { return m_setupPathReconScripts; };
+
+  std::string astraMethod() const { return m_astraMethod; }
+
+  std::string tomopyMethod() const { return m_tomopyMethod; }
+
   void updateLoginControls(bool loggedIn);
 
   void enableLoggedActions(bool enable);
@@ -107,13 +117,15 @@ public:
   void updateCompResourceStatus(bool online);
 
   void updateJobsInfoDisplay(
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status);
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+          localStatus);
 
   std::vector<std::string> processingJobsIDs() const {
     return m_processingJobsIDs;
   }
 
-  /// Get the current reconstruction tooll settings set by the user
+  /// Get the current reconstruction tools settings set by the user
   TomoReconToolsUserSettings reconToolsSettings() const {
     return m_toolsSettings;
   }
@@ -133,6 +145,10 @@ public:
   int keepAlivePeriod() { return m_settings.useKeepAlive; }
 
   TomoPathsConfig currentPathsConfig() const { return m_pathsConfig; }
+
+  ImageStackPreParams currentROIEtcParams() const {
+    return m_tabROIW->userSelection();
+  }
 
 private slots:
   /// for buttons, run tab, and similar
@@ -204,9 +220,6 @@ private:
 
   void splitCmdLine(const std::string &cmd, std::string &run,
                     std::string &opts);
-
-  std::string filtersCfgToCmdOpts(TomoReconFiltersSettings &filters,
-                                  ImageStackPreParams &corRegions);
 
 private:
   /// Setup the interface (tab UI)

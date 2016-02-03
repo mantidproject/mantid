@@ -161,7 +161,7 @@ void ImageROIPresenter::processNewStack() {
     const std::string extShort = imgs[i].substr(imgs[i].size() - 3);
     const std::string extLong = imgs[i].substr(imgs[i].size() - 4);
     const std::string expectedShort = "fit";
-    const std::string expectedLong = "fit";
+    const std::string expectedLong = "fits";
     if (extShort != expectedShort && extLong != expectedLong) {
       m_view->userWarning("Invalid files found in the stack of images",
                           "Found files with unrecognized extension. Expected "
