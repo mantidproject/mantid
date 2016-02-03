@@ -338,7 +338,7 @@ class AlignComponents(PythonAlgorithm):
                                             RelativePosition=False)
 
             if self._rotate:
-                (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5])
+                (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[4], xmap[5], xmap[3]) # YZX
                 api.RotateInstrumentComponent(wks_name, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
                                               RelativeRotation=False)
 
@@ -363,7 +363,7 @@ class AlignComponents(PythonAlgorithm):
             api.MoveInstrumentComponent(wks_name, component, X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
 
         if self._rotate:
-            (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5])
+            (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[4], xmap[5], xmap[3]) # YZX
             api.RotateInstrumentComponent(wks_name, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
                                           RelativeRotation=False)
 
