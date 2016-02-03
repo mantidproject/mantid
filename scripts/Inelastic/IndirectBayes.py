@@ -23,9 +23,6 @@ from IndirectCommon import *
 import sys, platform, math, os.path, numpy as np
 MTD_PLOT = import_mantidplot()
 
-# Create Workspace Logging
-_LOGGING_ = False
-
 def readASCIIFile(file_name):
     workdir = config['defaultsave.directory']
 
@@ -325,8 +322,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
         fout = fname+'_Workspace_'+ str(m)
 
         CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,\
-            Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names,\
-            EnableLogging=_LOGGING_)
+            Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
 
         # append workspace to list of results
         group += fout + ','
@@ -345,8 +341,8 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
         yProb = np.append(yProb,yPr1)
         yProb = np.append(yProb,yPr2)
         CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
-            Nspec=3, UnitX='MomentumTransfer', EnableLogging=_LOGGING_)
-        outWS = C2Fw(fname)
+            Nspec=3, UnitX='MomentumTransfer')
+        outWS = C2Fw(samWS[:-4],fname)
         if Plot != 'None':
             QuasiPlot(fname,Plot,res_plot,Loop)
     if program == 'QSe':
@@ -490,7 +486,7 @@ def read_ql_file(file_name, nl):
     return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
 
 
-def C2Fw(sname):
+def C2Fw(prog,sname):
     output_workspace = sname+'_Result'
     num_spectra = 0
 
@@ -552,8 +548,7 @@ def C2Fw(sname):
     e = np.asarray(e).flatten()
 
     CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,\
-        UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names,\
-        EnableLogging=_LOGGING_)
+        UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
 
     return output_workspace
 
@@ -640,7 +635,7 @@ def C2Se(sname):
 
     logger.information('Vaxis=' + str(Vaxis))
     CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,\
-        UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='', EnableLogging=_LOGGING_)
+        UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
     return outWS
 
 
@@ -786,8 +781,8 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
             dataEz = np.append(dataEz,eBet0)
 
         CreateWorkspace(OutputWorkspace=zpWS, DataX=dataXz, DataY=dataYz, DataE=dataEz,
-                        Nspec=Nsig, UnitX='MomentumTransfer',VerticalAxisUnit='MomentumTransfer',
-                        VerticalAxisValues=dataXs, EnableLogging=_LOGGING_)
+                        Nspec=Nsig, UnitX='MomentumTransfer',
+                        VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=dataXs)
 
         unitx = mtd[zpWS].getAxis(0).setUnit("Label")
         unitx.setLabel('beta' , '')
@@ -813,12 +808,12 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
 
     #create workspaces for sigma and beta
     CreateWorkspace(OutputWorkspace=fname+'_Sigma', DataX=xSig, DataY=ySig, DataE=eSig,\
-        Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis, EnableLogging=_LOGGING_)
+        Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
     unitx = mtd[fname+'_Sigma'].getAxis(0).setUnit("Label")
     unitx.setLabel('sigma' , '')
 
     CreateWorkspace(OutputWorkspace=fname+'_Beta', DataX=xBet, DataY=yBet, DataE=eBet,\
-        Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis, EnableLogging=_LOGGING_)
+        Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
     unitx = mtd[fname+'_Beta'].getAxis(0).setUnit("Label")
     unitx.setLabel('beta' , '')
 
@@ -923,19 +918,19 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
             yPar1 = np.array([pfit[0]])
             yPar2 = np.array([pfit[1]])
             CreateWorkspace(OutputWorkspace='Data', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],\
-                NSpec=1, UnitX='DeltaE', EnableLogging=_LOGGING_)
+                NSpec=1, UnitX='DeltaE')
             CreateWorkspace(OutputWorkspace='Fit', DataX=dataX, DataY=yfit[:nd], DataE=np.zeros(nd),\
-                NSpec=1, UnitX='DeltaE', EnableLogging=_LOGGING_)
+                NSpec=1, UnitX='DeltaE')
         else:
             yPar1 = np.append(yPar1,pfit[0])
             yPar2 = np.append(yPar2,pfit[1])
 
             CreateWorkspace(OutputWorkspace='__datmp', DataX=dataX, DataY=yout[:nd],
-                            DataE=eout[:nd], NSpec=1, UnitX='DeltaE', EnableLogging=_LOGGING_)
+                            DataE=eout[:nd], NSpec=1, UnitX='DeltaE')
             ConjoinWorkspaces(InputWorkspace1='Data', InputWorkspace2='__datmp',
                               CheckOverlapping=False)
             CreateWorkspace(OutputWorkspace='__f1tmp', DataX=dataX, DataY=yfit[:nd],
-                            DataE=np.zeros(nd), NSpec=1, UnitX='DeltaE', EnableLogging=_LOGGING_)
+                            DataE=np.zeros(nd), NSpec=1, UnitX='DeltaE')
             ConjoinWorkspaces(InputWorkspace1='Fit', InputWorkspace2='__f1tmp',
                               CheckOverlapping=False)
 
@@ -943,9 +938,9 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
     resnorm_stretch = fname+'_ResNorm_Stretch'
 
     CreateWorkspace(OutputWorkspace=resnorm_intesity, DataX=xPar, DataY=yPar1, DataE=xPar,\
-        NSpec=1, UnitX='MomentumTransfer', EnableLogging=_LOGGING_)
+        NSpec=1, UnitX='MomentumTransfer')
     CreateWorkspace(OutputWorkspace=resnorm_stretch, DataX=xPar, DataY=yPar2, DataE=xPar,\
-        NSpec=1, UnitX='MomentumTransfer', EnableLogging=_LOGGING_)
+        NSpec=1, UnitX='MomentumTransfer')
 
     group = resnorm_intesity + ','+ resnorm_stretch
 
