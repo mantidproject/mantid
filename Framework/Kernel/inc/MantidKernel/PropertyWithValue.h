@@ -198,8 +198,8 @@ template <typename T> T extractToValueVector(const std::string &strvalue) {
 template <typename T>
 inline void
 toValue(const std::string &strvalue,
-        std::vector<typename std::enable_if<std::is_integral<T>::value>::type>
-            &value) {
+        std::vector<typename std::enable_if<std::is_integral<T>::value>::type> &
+            value) {
   typedef Poco::StringTokenizer tokenizer;
   tokenizer values(strvalue, ",",
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
