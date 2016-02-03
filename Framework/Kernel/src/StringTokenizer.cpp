@@ -168,4 +168,4 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
     m_tokens = split3(str, separators);
     break;
   }
-};
+}
