@@ -4,7 +4,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoReconPreprocSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconPostprocSettings.h"
 
-#include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct  DLLExport TomoReconFiltersSettings {
+struct MANTIDQT_CUSTOMINTERFACES_DLL TomoReconFiltersSettings {
   MantidQt::CustomInterfaces::TomoReconPreprocSettings prep;
   MantidQt::CustomInterfaces::TomoReconPostprocSettings postp;
 

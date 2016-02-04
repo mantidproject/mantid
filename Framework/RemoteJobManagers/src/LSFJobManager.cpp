@@ -573,10 +573,12 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
     addJobInTransaction(jobID);
     g_log.debug() << "Submitted job, got ID: " << iid << std::endl;
   } catch (std::exception &e) {
-    g_log.warning() << "The job has been submitted but the code returned does "
-                       "not seem well formed: '" +
-                           jobID + "'. Detailed error: " +
-                           e.what() << std::endl;
+    g_log.warning()
+        << "The job has been submitted but the job ID  returned does "
+           "not seem well formed. Job ID string from server: '" +
+               jobID + "'. Detailed error when tryint to interpret the code "
+                       "returned as an integer: " +
+               e.what() << std::endl;
   }
 
   return jobID;
