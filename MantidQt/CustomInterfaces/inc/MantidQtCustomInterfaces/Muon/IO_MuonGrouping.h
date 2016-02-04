@@ -45,38 +45,21 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 using namespace Mantid;
 using namespace Mantid::API;
 
-/// Structure to represent grouping information for Muon Analysis
-struct Grouping {
-  std::vector<std::string> groupNames;
-  std::vector<std::string> groups; // Range strings, e.g. "1-32"
-
-  std::vector<std::string> pairNames;
-  std::vector<std::pair<size_t, size_t> > pairs; // Pairs of group ids
-  std::vector<double> pairAlphas;
-
-  std::string description;
-  std::string defaultName; // Not storing id because can be either group or pair
-};
-
 /// Saves grouping to the XML file specified
-void MANTIDQT_CUSTOMINTERFACES_DLL saveGroupingToXML(const Grouping& grouping, 
-  const std::string& filename);
-
-/// Loads grouping from the XML file specified
-void MANTIDQT_CUSTOMINTERFACES_DLL loadGroupingFromXML(const std::string& filename, 
-  Grouping& grouping);
+void MANTIDQT_CUSTOMINTERFACES_DLL saveGroupingToXML(
+    const Mantid::API::Grouping &grouping, const std::string &filename);
 
 /// Parses information from the grouping table and saves to Grouping struct
-void MANTIDQT_CUSTOMINTERFACES_DLL parseGroupingTable(const Ui::MuonAnalysis& form, 
-  Grouping& grouping);
+void MANTIDQT_CUSTOMINTERFACES_DLL parseGroupingTable(
+    const Ui::MuonAnalysis &form, Mantid::API::Grouping &grouping);
 
 /// Fills in the grouping table using information from provided Grouping struct
-void MANTIDQT_CUSTOMINTERFACES_DLL fillGroupingTable(const Grouping& grouping, 
-  Ui::MuonAnalysis& form);
+void MANTIDQT_CUSTOMINTERFACES_DLL fillGroupingTable(
+    const Mantid::API::Grouping &grouping, Ui::MuonAnalysis &form);
 
 /// Groups the workspace according to grouping provided
-MatrixWorkspace_sptr MANTIDQT_CUSTOMINTERFACES_DLL groupWorkspace(MatrixWorkspace_const_sptr ws, 
-  const Grouping& g);
+MatrixWorkspace_sptr MANTIDQT_CUSTOMINTERFACES_DLL
+groupWorkspace(MatrixWorkspace_const_sptr ws, const Mantid::API::Grouping &g);
 
 /// create 'map' relating group number to row number in group table
 void MANTIDQT_CUSTOMINTERFACES_DLL whichGroupToWhichRow(const Ui::MuonAnalysis& m_uiForm, 
@@ -91,19 +74,16 @@ void MANTIDQT_CUSTOMINTERFACES_DLL setGroupGroupPair(Ui::MuonAnalysis& m_uiForm,
   const std::string& name);
 
 /// Convert a grouping table to a grouping struct
-boost::shared_ptr<Grouping> MANTIDQT_CUSTOMINTERFACES_DLL tableToGrouping(ITableWorkspace_sptr table);
+boost::shared_ptr<Mantid::API::Grouping>
+    MANTIDQT_CUSTOMINTERFACES_DLL tableToGrouping(ITableWorkspace_sptr table);
 
 /// Converts a grouping information to a grouping table
-ITableWorkspace_sptr MANTIDQT_CUSTOMINTERFACES_DLL groupingToTable(boost::shared_ptr<Grouping> grouping);
+ITableWorkspace_sptr MANTIDQT_CUSTOMINTERFACES_DLL
+groupingToTable(boost::shared_ptr<Mantid::API::Grouping> grouping);
 
 /// Returns a "dummy" grouping which a single group with all the detectors in it
-boost::shared_ptr<Grouping> getDummyGrouping(Instrument_const_sptr instrument);
-
-/// Attempts to load a grouping information referenced by IDF
-boost::shared_ptr<Grouping> getGroupingFromIDF(Instrument_const_sptr instrument,
-                                               const std::string& mainFieldDirection);
-
-
+boost::shared_ptr<Mantid::API::Grouping>
+getDummyGrouping(Instrument_const_sptr instrument);
 }
 }
 }
