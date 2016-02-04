@@ -1707,7 +1707,7 @@ ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
 * Adds the One Lorentzian fit informtion to the list of default parameters
 * @param map			:: The default value QMap to populate
 * @param amplitude		:: One lorentzian amplitude
-* @param peakCentre	:: One lorentzian peakCentre
+* @param peakCentre		:: One lorentzian peakCentre
 * @param fwhm			:: One lorentzian fwhm
 * @return The QMap populated with default values
 */
@@ -1725,7 +1725,7 @@ QMap<QString, double> ConvFit::addLorentzianFitToDeafultQMap(
 * function
 * @param map			:: A QMap of any parameters that have non zero
 * default values
-* @param parameters	:: A QStringList of all the parameters for the current
+* @param parameters		:: A QStringList of all the parameters for the current
 * fit function
 * @param fitFunction	:: The name of the current fit function
 * @return a QMap populated with name, value pairs for parameters where name =
@@ -1738,19 +1738,19 @@ ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
   QMap<QString, double> fullMap;
   QString fitFuncName = fitFunction;
   // Special case for Two lorentzian - as it is comprised of 2 lorentzians
-  if (fitFunction.compare("Two Lorentzian") == 0) {
+  if (fitFunction.compare("Two Lorentzians") == 0) {
     fitFuncName = "Lorentzian 1";
     for (auto param = parameters.begin(); param != parameters.end(); ++param) {
       QString fullPropName = fitFuncName + "." + QString(*param);
-      if (defaultMap.contains(QString(*param))) {
-        if (fullMap.contains(fullPropName)) {
-          fullPropName = "Lorentzian 2." + QString(*param);
-          fullMap.insert(fullPropName, 0);
-        } else {
-          fullMap.insert(fullPropName, defaultMap[*param]);
-        }
-      } else {
+      if (fullMap.contains(fullPropName)) {
+        fullPropName = "Lorentzian 2." + QString(*param);
         fullMap.insert(fullPropName, 0);
+      } else {
+        if (defaultMap.contains(QString(*param))) {
+          fullMap.insert(fullPropName, defaultMap[*param]);
+        } else {
+          fullMap.insert(fullPropName, 0);
+        }
       }
     }
     // All Other Fitfunctions
