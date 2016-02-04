@@ -30,7 +30,7 @@ MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(
     : MDHWLoadingPresenter(std::move(view)), m_repository(repository),
       m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1) {
   if (m_wsName.empty()) {
-    //throw std::invalid_argument("The workspace name is empty.");
+    throw std::invalid_argument("The workspace name is empty.");
   }
   if (NULL == repository) {
     throw std::invalid_argument("The repository is NULL");

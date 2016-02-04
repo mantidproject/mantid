@@ -74,9 +74,9 @@ namespace VATES {
 /**
  * This function constructs and executes the helper class.
  * @param dataset : The VTK data to modify
- * @param name : The MDWorkspace containing the information to construct
- * @param workspaceProvider: The provider of one or multiple workspaces
- * modification
+ * @param name : The MDWorkspace containing the information to construct.
+ * @param workspaceProvider: The provider of one or multiple workspaces.
+
  */
 void vtkDataSetToNonOrthogonalDataSet::exec(
     vtkDataSet *dataset, std::string name,
@@ -90,8 +90,8 @@ void vtkDataSetToNonOrthogonalDataSet::exec(
 /**
  * This is the private class constructor.
  * @param dataset : The VTK data to modify
- * @param name : The MDWorkspace containing the information to construct
- * modification
+ * @param name : The MDWorkspace containing the information to construct.
+ * @param workspaceProvider:The provider of one or multiple workspaces.
  */
 vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
     vtkDataSet *dataset, std::string name,

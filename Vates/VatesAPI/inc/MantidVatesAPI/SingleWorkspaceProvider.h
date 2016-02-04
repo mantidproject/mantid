@@ -23,7 +23,7 @@ public:
     void disposeWorkspace(std::string wsName) const;
 
 private:
-    Mantid::API::Workspace_sptr m_workspace = nullptr;
+    Mantid::API::Workspace_sptr m_workspace;
 };
 }
 }

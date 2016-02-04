@@ -127,7 +127,7 @@ SaveMDWorkspaceToVTKImpl::getDataSetFactoryChain(
 
 /**
  * Creates the correct factory chain based
- * @param isHistWorkspace: flag if workspace is MDHisto
+ * @param isHistoWorkspace: flag if workspace is MDHisto
  * @param workspace: the workspace
  * @param recursionDepth: the recursion depth
  * @returns a presenter for either MDHisto or MDEvent

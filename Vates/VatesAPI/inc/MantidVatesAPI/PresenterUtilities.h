@@ -1,6 +1,8 @@
 #ifndef MANTID_VATES_PRESENTER_UTILITIES_H
 #define MANTID_VATES_PRESENTER_UTILITIES_H
 
+#include "MantidKernel/System.h"
+
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MDLoadingPresenter.h"
 #include "MantidVatesAPI/ThresholdRange.h"
@@ -89,7 +91,7 @@ vtkSmartPointer<vtkPVClipDataSet>
 getClippedDataSet(vtkSmartPointer<vtkDataSet> dataSet);
 
 /// Create name with timestamp attached.
-std::string createTimeStampedName(std::string name);
+std::string DLLExport createTimeStampedName(std::string name);
 }
 }
 
