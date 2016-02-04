@@ -440,7 +440,8 @@ splitToKeyValues(const std::string &input, const std::string &keyValSep,
                            Mantid::Kernel::StringTokenizer::TOK_TRIM;
   Mantid::Kernel::StringTokenizer listSplitter(input, listSep);
   for (const auto &iter : listSplitter) {
-    Mantid::Kernel::StringTokenizer keyValSplitter(iter, keyValSep, splitOptions);
+    Mantid::Kernel::StringTokenizer keyValSplitter(iter, keyValSep,
+                                                   splitOptions);
     if (keyValSplitter.count() == 2) {
       keyValues[keyValSplitter[0]] = keyValSplitter[1];
     }
