@@ -89,8 +89,8 @@ bool LibraryManagerImpl::skip(const std::string &filename) {
     initialized = true;
   }
   bool skipme(false);
-  for (auto itr = excludes.begin(); itr != excludes.end(); ++itr) {
-    if (filename.find(*itr) != std::string::npos) {
+  for (const auto &exclude : excludes) {
+    if (filename.find(exclude) != std::string::npos) {
       skipme = true;
       break;
     }

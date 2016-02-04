@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IRemoteJobManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
@@ -151,6 +152,20 @@ public:
   virtual std::string currentReconTool() const = 0;
 
   /**
+   * Method/algorithm selected from the TomoPy list.
+   *
+   * @return name of the method as used in TomoPy
+   */
+  virtual std::string astraMethod() const = 0;
+
+  /**
+   * Method/algorithm selected from the Astra list.
+   *
+   * @return name of the method as used in Astra Toolbox
+   */
+  virtual std::string tomopyMethod() const = 0;
+
+  /**
    * Updates buttons and banners related to the current login
    * status. For example, when we are logged in, the 'log in' button
    * should be disabled, but some other widget may be enabled or some
@@ -230,6 +245,14 @@ public:
   virtual TomoPathsConfig currentPathsConfig() const = 0;
 
   /**
+   * Regions and center of rotation, normally defined by the user with
+   * a graphical rectangle selection tool.
+   *
+   * @return current user selection of regions
+   */
+  virtual ImageStackPreParams currentROIEtcParams() const = 0;
+
+  /**
    * Show a tool specific configuration dialog for the user to set it up
    *
    * @param name human readable name of the tool, as a string
@@ -237,14 +260,34 @@ public:
   virtual void showToolConfig(const std::string &name) = 0;
 
   /**
+   * Path to local scripts (reconstruction). Normally set to the
+   * installation path, but user modifyable
+   *
+   * @return path to the scrtips as a string
+   */
+  virtual std::string pathLocalReconScripts() const = 0;
+
+  /**
+   * User choice of external (Python) interpreter for third party
+   * tools
+   *
+   * @return path to the interpreter as a string
+   */
+  virtual std::string externalInterpreterPath() const = 0;
+
+  /**
    * Refresh the table, tree etc. that displays info on the running/finished
    *jobs.
    *
    * @param status Job information, as produced for example by the
    * Mantid remote algorithms.
+   *
+   * @param localStatus similar information but for local runs
    */
-  virtual void updateJobsInfoDisplay(const std::vector<
-      Mantid::API::IRemoteJobManager::RemoteJobInfo> &status) = 0;
+  virtual void updateJobsInfoDisplay(
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+          localStatus) = 0;
 
   /**
    * Save settings (normally when closing the interface). This refers

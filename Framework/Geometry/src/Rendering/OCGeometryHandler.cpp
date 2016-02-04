@@ -64,7 +64,7 @@ void OCGeometryHandler::Triangulate() {
 
 void OCGeometryHandler::Render() {
   if (Obj != NULL) {
-    if (boolTriangulated == false)
+    if (!boolTriangulated)
       Triangulate();
     Renderer->Render(Triangulator->getObjectSurface());
   } else if (ObjComp != NULL) {
@@ -74,7 +74,7 @@ void OCGeometryHandler::Render() {
 
 void OCGeometryHandler::Initialize() {
   if (Obj != NULL) {
-    if (boolTriangulated == false)
+    if (!boolTriangulated)
       Triangulate();
     Renderer->Initialize(Triangulator->getObjectSurface());
   } else if (ObjComp != NULL) {
@@ -84,7 +84,7 @@ void OCGeometryHandler::Initialize() {
 
 int OCGeometryHandler::NumberOfTriangles() {
   if (Obj != NULL) {
-    if (boolTriangulated == false)
+    if (!boolTriangulated)
       Triangulate();
     return Triangulator->getNumberOfTriangles();
   } else {
@@ -94,7 +94,7 @@ int OCGeometryHandler::NumberOfTriangles() {
 
 int OCGeometryHandler::NumberOfPoints() {
   if (Obj != NULL) {
-    if (boolTriangulated == false)
+    if (!boolTriangulated)
       Triangulate();
     return Triangulator->getNumberOfPoints();
   } else {
@@ -104,7 +104,7 @@ int OCGeometryHandler::NumberOfPoints() {
 
 double *OCGeometryHandler::getTriangleVertices() {
   if (Obj != NULL) {
-    if (boolTriangulated == false)
+    if (!boolTriangulated)
       Triangulate();
     return Triangulator->getTriangleVertices();
   } else {
@@ -114,7 +114,7 @@ double *OCGeometryHandler::getTriangleVertices() {
 
 int *OCGeometryHandler::getTriangleFaces() {
   if (Obj != NULL) {
-    if (boolTriangulated == false)
+    if (!boolTriangulated)
       Triangulate();
     return Triangulator->getTriangleFaces();
   } else {

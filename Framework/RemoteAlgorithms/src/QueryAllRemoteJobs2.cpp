@@ -84,16 +84,16 @@ void QueryAllRemoteJobs2::exec() {
   std::vector<std::string> startDates;
   std::vector<std::string> completionDates;
   std::vector<std::string> cmdLine;
-  for (size_t j = 0; j < infos.size(); ++j) {
-    jobIds.push_back(infos[j].id);
-    jobNames.push_back(infos[j].name);
-    jobStatusStrs.push_back(infos[j].status);
-    transIds.push_back(infos[j].transactionID);
-    runNames.push_back(infos[j].runnableName);
-    submitDates.push_back(infos[j].submitDate.toISO8601String());
-    startDates.push_back(infos[j].startDate.toISO8601String());
-    completionDates.push_back(infos[j].completionTime.toISO8601String());
-    cmdLine.push_back(infos[j].cmdLine);
+  for (auto &info : infos) {
+    jobIds.push_back(info.id);
+    jobNames.push_back(info.name);
+    jobStatusStrs.push_back(info.status);
+    transIds.push_back(info.transactionID);
+    runNames.push_back(info.runnableName);
+    submitDates.push_back(info.submitDate.toISO8601String());
+    startDates.push_back(info.startDate.toISO8601String());
+    completionDates.push_back(info.completionTime.toISO8601String());
+    cmdLine.push_back(info.cmdLine);
   }
   setProperty("JobID", jobIds);
   setProperty("JobStatusString", jobStatusStrs);

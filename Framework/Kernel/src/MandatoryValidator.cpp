@@ -23,10 +23,7 @@ template <> DLLExport bool checkIsEmpty(const std::string &value) {
  * @return True if the value is considered empty, see EmptyValues.h
  */
 template <> DLLExport bool checkIsEmpty(const double &value) {
-  if (std::fabs(value - Mantid::EMPTY_DBL()) < 1e-08)
-    return true;
-  else
-    return false;
+  return std::fabs(value - Mantid::EMPTY_DBL()) < 1e-08;
 }
 /**
  * Specialization of checkIsEmpty for int

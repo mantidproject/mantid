@@ -103,8 +103,8 @@ void SaveOpenGenieAscii::exec() {
 
   // writes out x, y, e to vector
   std::string alpha;
-  for (int Num = 0; Num < 3; Num++) {
-    alpha = Alpha[Num];
+  for (const auto &Num : Alpha) {
+    alpha = Num;
     axisToFile(alpha, singleSpc, fourspc, nBins, isHistogram);
   }
 
@@ -236,10 +236,10 @@ std::string SaveOpenGenieAscii::getAxisValues(std::string alpha, int bin,
 void SaveOpenGenieAscii::getSampleLogs(std::string fourspc) {
   const std::vector<Property *> &logData = ws->run().getLogData();
 
-  for (auto log = logData.begin(); log != logData.end(); ++log) {
-    std::string name = (*log)->name();
-    std::string type = (*log)->type();
-    std::string value = (*log)->value();
+  for (auto log : logData) {
+    std::string name = log->name();
+    std::string type = log->type();
+    std::string value = log->value();
 
     if (type.std::string::find("vector") &&
         type.std::string::find("double") != std::string::npos) {

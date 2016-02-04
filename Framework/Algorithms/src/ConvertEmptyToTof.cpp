@@ -131,8 +131,8 @@ void ConvertEmptyToTof::exec() {
     std::map<int, int> eppMap =
         findElasticPeakPositions(spectraIndices, channelIndices);
 
-    for (auto it = eppMap.begin(); it != eppMap.end(); ++it) {
-      g_log.debug() << "Spectra idx =" << it->first << ", epp=" << it->second
+    for (auto &epp : eppMap) {
+      g_log.debug() << "Spectra idx =" << epp.first << ", epp=" << epp.second
                     << std::endl;
     }
 
@@ -168,10 +168,10 @@ void ConvertEmptyToTof::validateSpectraIndices(std::vector<int> &v) {
     for (unsigned int i = 0; i < nHist; ++i)
       v[i] = i;
   } else {
-    for (auto it = v.begin(); it != v.end(); ++it) {
-      if (*it < 0 || static_cast<size_t>(*it) >= nHist) {
+    for (auto index : v) {
+      if (index < 0 || static_cast<size_t>(index) >= nHist) {
         throw std::runtime_error("Spectra index out of limits: " +
-                                 boost::lexical_cast<std::string>(*it));
+                                 boost::lexical_cast<std::string>(index));
       }
     }
   }
@@ -193,10 +193,10 @@ void ConvertEmptyToTof::validateChannelIndices(std::vector<int> &v) {
     for (unsigned int i = 0; i < blockSize; ++i)
       v[i] = i;
   } else {
-    for (auto it = v.begin(); it != v.end(); ++it) {
-      if (*it < 0 || static_cast<size_t>(*it) >= blockSize) {
+    for (auto &index : v) {
+      if (index < 0 || static_cast<size_t>(index) >= blockSize) {
         throw std::runtime_error("Channel index out of limits: " +
-                                 boost::lexical_cast<std::string>(*it));
+                                 boost::lexical_cast<std::string>(index));
       }
     }
   }
@@ -219,9 +219,8 @@ std::map<int, int> ConvertEmptyToTof::findElasticPeakPositions(
 
   g_log.information() << "Peak detection, search for peak " << std::endl;
 
-  for (auto it = spectraIndices.begin(); it != spectraIndices.end(); ++it) {
+  for (auto spectrumIndex : spectraIndices) {
 
-    int spectrumIndex = *it;
     const Mantid::MantidVec &thisSpecY = m_inputWS->dataY(spectrumIndex);
 
     int minChannelIndex = *(channelIndices.begin());
@@ -399,9 +398,9 @@ ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
   std::vector<int> eppList;
 
   double firstL2 = getL2(m_inputWS, eppMap.begin()->first);
-  for (auto it = eppMap.begin(); it != eppMap.end(); ++it) {
+  for (const auto &epp : eppMap) {
 
-    double l2 = getL2(m_inputWS, it->first);
+    double l2 = getL2(m_inputWS, epp.first);
     if (!areEqual(l2, firstL2, 0.0001)) {
       g_log.error() << "firstL2=" << firstL2 << " , "
                     << "l2=" << l2 << std::endl;
@@ -414,9 +413,9 @@ ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
     epTofList.push_back(
         (calculateTOF(l1, wavelength) + calculateTOF(l2, wavelength)) *
         1e6); // microsecs
-    eppList.push_back(it->first);
+    eppList.push_back(epp.first);
 
-    g_log.debug() << "WS index = " << it->first << ", l1 = " << l1
+    g_log.debug() << "WS index = " << epp.first << ", l1 = " << l1
                   << ", l2 = " << l2
                   << ", TOF(l1+l2) = " << *(epTofList.end() - 1) << std::endl;
   }

@@ -109,9 +109,9 @@ void SetMDFrame::exec() {
     return;
   }
 
-  for (auto index = axes.begin(); index != axes.end(); ++index) {
+  for (auto &axe : axes) {
     // Get associated dimension
-    auto dimension = inputWorkspace->getDimension(*index);
+    auto dimension = inputWorkspace->getDimension(axe);
 
     // Provide a new MDFrame
     std::string frameSelection = getProperty(mdFrameSpecifier);
@@ -150,8 +150,8 @@ std::map<std::string, std::string> SetMDFrame::validateInputs() {
   std::vector<int> axesInts = this->getProperty("Axes");
   Kernel::MDAxisValidator axisChecker(axesInts, ws->getNumDims(), true);
   auto axisErrors = axisChecker.validate();
-  for (auto iter = axisErrors.begin(); iter != axisErrors.end(); iter++) {
-    invalidProperties.insert(*iter);
+  for (auto &axisError : axisErrors) {
+    invalidProperties.insert(axisError);
   }
 
   return invalidProperties;

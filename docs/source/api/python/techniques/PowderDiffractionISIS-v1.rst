@@ -112,11 +112,12 @@ as shown below, the script shall look for the raw files (with the format of
 .. code-block:: python
 
    #----------------------------------------------------
-   # Calibration Runs Numbers
+   # Runs Numbers
    #----------------------------------------------------
    #
    Vanadium     78338
    V-Empty      78339
+   S-Empty      0
    #
 
 Output
@@ -248,4 +249,4 @@ Usage
 .. toctree::
    :maxdepth: 1
 
-   /../../api/python/index
+   api/python/index

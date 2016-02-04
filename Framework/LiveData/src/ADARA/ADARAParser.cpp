@@ -297,14 +297,13 @@ void Parser::getDiscardedPacketsLogString(std::string &log_info) {
   uint64_t total_discarded = 0;
 
   // Append Each Discarded Packet Type Count...
-  for (auto it = m_discarded_packets.begin(); it != m_discarded_packets.end();
-       ++it) {
+  for (auto &discarded_packet : m_discarded_packets) {
     std::stringstream ss;
-    ss << std::hex << "0x" << it->first << std::dec << "=" << it->second
-       << "; ";
+    ss << std::hex << "0x" << discarded_packet.first << std::dec << "="
+       << discarded_packet.second << "; ";
     log_info.append(ss.str());
 
-    total_discarded += it->second;
+    total_discarded += discarded_packet.second;
   }
 
   // Append Total Discarded Packet Count

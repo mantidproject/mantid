@@ -229,11 +229,8 @@ class TestEventWorkspaceCheck(unittest.TestCase):
         self._clean_up(file_name)
         DeleteWorkspace(ws)
 
-
 class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
-    '''
-    Test the input and output mechanims for the QResolution settings
-    '''
+    #Test the input and output mechanims for the QResolution settings
     def test_full_setup_for_circular_apertures(self):
         # Arrange
         command_iface.Clean()
@@ -359,7 +356,6 @@ class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
         delta_r_expected = delta_r/1000.
         self.assertEqual(delta_r_stored, delta_r_expected)
 
-
 class TestMaskFile(unittest.TestCase):
     def test_throws_for_user_file_with_invalid_extension(self):
         # Arrange
@@ -369,6 +365,40 @@ class TestMaskFile(unittest.TestCase):
         # Act + Assert
         args = [file_name]
         self.assertRaises(RuntimeError, command_iface.MaskFile, *args)
+
+class SANSCommandInterfaceGetAndSetBackgroundCorrectionSettings(unittest.TestCase):
+    def _do_test_correct_setting(self, run_number, is_time, is_mon, is_mean, mon_numbers):
+        # Assert that settings were set
+        setting = ReductionSingleton().get_dark_run_setting(is_time, is_mon)
+        self.assertEquals(setting.run_number, run_number)
+        self.assertEquals(setting.time, is_time)
+        self.assertEquals(setting.mean, is_mean)
+        self.assertEquals(setting.mon, is_mon)
+        self.assertEquals(setting.mon_numbers, mon_numbers)
+
+        # Assert that other settings are None. Hence set up all combinations and remove the one which
+        # has been set up earlier
+        combinations = [[True, True], [True, False], [False, True], [False, False]]
+        selected_combination = [is_time, is_mon]
+        combinations.remove(selected_combination)
+
+        for combination in combinations:
+            self.assertTrue(ReductionSingleton().get_dark_run_setting(combination[0], combination[1]) is None)
+
+    def test_that_correct_setting_can_be_passed_in(self):
+        # Arrange
+        run_number = "test12345"
+        is_time = True
+        is_mon = True
+        is_mean = False
+        mon_numbers= None
+        command_iface.Clean()
+        command_iface.LOQ()
+        # Act
+        command_iface.set_background_correction(run_number, is_time,
+                                                is_mon, is_mean, mon_numbers)
+        # Assert
+        self._do_test_correct_setting(run_number, is_time, is_mon, is_mean, mon_numbers)
 
 if __name__ == "__main__":
     unittest.main()

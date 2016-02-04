@@ -236,8 +236,8 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
   targetFrames.push_back(Mantid::Geometry::QSample::QSampleName);
 
   auto isValidFrame = true;
-  for (auto it = frames.begin(); it != frames.end(); ++it) {
-    auto result = checkIfFrameValid(*it, targetFrames);
+  for (auto &frame : frames) {
+    auto result = checkIfFrameValid(frame, targetFrames);
     if (!result) {
       isValidFrame = result;
     }
@@ -264,9 +264,8 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
  */
 bool CreateMDWorkspace::checkIfFrameValid(
     const std::string &frame, const std::vector<std::string> &targetFrames) {
-  for (auto targetFrame = targetFrames.begin();
-       targetFrame != targetFrames.end(); ++targetFrame) {
-    if (*targetFrame == frame) {
+  for (const auto &targetFrame : targetFrames) {
+    if (targetFrame == frame) {
       return true;
     }
   }

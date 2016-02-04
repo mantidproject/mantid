@@ -48,8 +48,8 @@ TableWorkspace::~TableWorkspace() {}
 
 size_t TableWorkspace::getMemorySize() const {
   size_t data_size = 0;
-  for (auto c = m_columns.cbegin(); c != m_columns.cend(); ++c) {
-    data_size += (*c)->sizeOfData();
+  for (const auto &column : m_columns) {
+    data_size += column->sizeOfData();
   }
   data_size += m_LogManager->getMemorySize();
   return data_size;
@@ -98,8 +98,8 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
 void TableWorkspace::setRowCount(size_t count) {
   if (count == rowCount())
     return;
-  for (auto ci = m_columns.begin(); ci != m_columns.end(); ci++)
-    resizeColumn(ci->get(), count);
+  for (auto &column : m_columns)
+    resizeColumn(column.get(), count);
   m_rowCount = count;
 }
 
@@ -116,9 +116,9 @@ API::Column_sptr TableWorkspace::getColumn(const std::string &name) {
 /// Gets the shared pointer to a column.
 API::Column_const_sptr
 TableWorkspace::getColumn(const std::string &name) const {
-  for (auto c_it = m_columns.cbegin(); c_it != m_columns.cend(); ++c_it) {
-    if (c_it->get()->name() == name) {
-      return *c_it;
+  for (const auto &column : m_columns) {
+    if (column.get()->name() == name) {
+      return column;
     }
   }
   std::string str = "Column " + name + " does not exist.\n";
@@ -162,8 +162,8 @@ void TableWorkspace::removeColumn(const std::string &name) {
 size_t TableWorkspace::insertRow(size_t index) {
   if (index >= rowCount())
     index = rowCount();
-  for (auto ci = m_columns.begin(); ci != m_columns.end(); ci++)
-    insertInColumn(ci->get(), index);
+  for (auto &column : m_columns)
+    insertInColumn(column.get(), index);
   ++m_rowCount;
   return index;
 }
@@ -175,16 +175,16 @@ void TableWorkspace::removeRow(size_t index) {
     g_log.error() << "Attempt to delete a non-existing row (" << index << ")\n";
     return;
   }
-  for (auto ci = m_columns.begin(); ci != m_columns.end(); ci++)
-    removeFromColumn(ci->get(), index);
+  for (auto &column : m_columns)
+    removeFromColumn(column.get(), index);
   --m_rowCount;
 }
 
 std::vector<std::string> TableWorkspace::getColumnNames() const {
   std::vector<std::string> nameList;
   nameList.reserve(m_columns.size());
-  for (auto ci = m_columns.begin(); ci != m_columns.end(); ci++)
-    nameList.push_back((*ci)->name());
+  for (const auto &column : m_columns)
+    nameList.push_back(column->name());
   return nameList;
 }
 
@@ -256,10 +256,9 @@ void TableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
     // add more records to the back of the queue
     if (record.keyIndex < criteria.size() - 1) {
       size_t keyIndex = record.keyIndex + 1;
-      for (auto range = equalRanges.begin(); range != equalRanges.end();
-           ++range) {
+      for (auto &equalRange : equalRanges) {
         sortRecords.push(
-            SortIterationRecord(keyIndex, range->first, range->second));
+            SortIterationRecord(keyIndex, equalRange.first, equalRange.second));
       }
     }
 

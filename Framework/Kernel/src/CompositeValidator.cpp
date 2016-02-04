@@ -20,8 +20,8 @@ std::vector<std::string> CompositeValidator::allowedValues() const {
   std::multiset<std::string> elem_all;
   // how many validators return non-empty list of allowed values
   int n_combinations(0);
-  for (auto itr = m_children.cbegin(); itr != m_children.cend(); ++itr) {
-    std::vector<std::string> subs = (*itr)->allowedValues();
+  for (const auto &itr : m_children) {
+    std::vector<std::string> subs = itr->allowedValues();
     if (subs.empty())
       continue;
     elem_unique.insert(subs.begin(), subs.end());
@@ -32,13 +32,13 @@ std::vector<std::string> CompositeValidator::allowedValues() const {
   if (n_combinations < 2)
     return std::vector<std::string>(elem_unique.begin(), elem_unique.end());
   // there is more then one combination and we have to identify its union;
-  for (auto its = elem_unique.cbegin(); its != elem_unique.cend(); ++its) {
-    auto im = elem_all.find(*its);
+  for (const auto &its : elem_unique) {
+    auto im = elem_all.find(its);
     elem_all.erase(im);
   }
   std::set<std::string> rez;
-  for (auto im = elem_all.cbegin(); im != elem_all.cend(); ++im) {
-    rez.insert(*im);
+  for (const auto &im : elem_all) {
+    rez.insert(im);
   }
   return std::vector<std::string>(rez.begin(), rez.end());
 }
@@ -50,8 +50,8 @@ std::vector<std::string> CompositeValidator::allowedValues() const {
 Kernel::IValidator_sptr CompositeValidator::clone() const {
   boost::shared_ptr<CompositeValidator> copy =
       boost::make_shared<CompositeValidator>();
-  for (auto itr = m_children.cbegin(); itr != m_children.end(); ++itr) {
-    copy->add((*itr)->clone());
+  for (const auto &itr : m_children) {
+    copy->add(itr->clone());
   }
   return copy;
 }

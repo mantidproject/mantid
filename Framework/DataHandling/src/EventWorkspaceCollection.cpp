@@ -29,9 +29,9 @@ void copyLogs(const EventWorkspace_sptr &from, EventWorkspace_sptr &to) {
   // from the logs, get all the properties that don't overwrite any
   // prop. already set in the sink workspace (like 'filename').
   auto props = from->mutableRun().getLogData();
-  for (size_t j = 0; j < props.size(); j++) {
-    if (!to->mutableRun().hasProperty(props[j]->name())) {
-      to->mutableRun().addLogData(props[j]->clone());
+  for (auto &prop : props) {
+    if (!to->mutableRun().hasProperty(prop->name())) {
+      to->mutableRun().addLogData(prop->clone());
     }
   }
 }
@@ -110,8 +110,8 @@ void EventWorkspaceCollection::setNPeriods(
 }
 
 void EventWorkspaceCollection::reserveEventListAt(size_t wi, size_t size) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->getEventList(wi).reserve(size);
+  for (auto &ws : m_WsVec) {
+    ws->getEventList(wi).reserve(size);
   }
 }
 
@@ -128,8 +128,8 @@ API::Workspace_sptr EventWorkspaceCollection::combinedWorkspace() {
     final = getSingleHeldWorkspace();
   } else {
     auto wsg = boost::make_shared<API::WorkspaceGroup>();
-    for (size_t i = 0; i < m_WsVec.size(); ++i) {
-      wsg->addWorkspace(m_WsVec[i]);
+    for (auto &ws : m_WsVec) {
+      wsg->addWorkspace(ws);
     }
     final = wsg;
   }
@@ -160,10 +160,10 @@ EventWorkspaceCollection::getSpectrum(const size_t index) const {
 void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(
     const std::set<int> uniqueSpectra) {
   // For each workspace, update all the spectrum numbers
-  for (auto ws = m_WsVec.begin(); ws != m_WsVec.end(); ++ws) {
+  for (auto &ws : m_WsVec) {
     size_t counter = 0;
-    for (auto it = uniqueSpectra.begin(); it != uniqueSpectra.end(); ++it) {
-      (*ws)->getSpectrum(counter)->setSpectrumNo(*it);
+    for (auto spectrum : uniqueSpectra) {
+      ws->getSpectrum(counter)->setSpectrumNo(spectrum);
       ++counter;
     }
   }
@@ -171,16 +171,16 @@ void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(
 
 void EventWorkspaceCollection::setSpectrumNumberForAllPeriods(
     const size_t spectrumNumber, const specid_t specid) {
-  for (auto ws = m_WsVec.begin(); ws != m_WsVec.end(); ++ws) {
-    auto spec = (*ws)->getSpectrum(spectrumNumber);
+  for (auto &ws : m_WsVec) {
+    auto spec = ws->getSpectrum(spectrumNumber);
     spec->setSpectrumNo(specid);
   }
 }
 
 void EventWorkspaceCollection::setDetectorIdsForAllPeriods(
     const size_t spectrumNumber, const detid_t id) {
-  for (auto ws = m_WsVec.begin(); ws != m_WsVec.end(); ++ws) {
-    auto spec = (*ws)->getSpectrum(spectrumNumber);
+  for (auto &ws : m_WsVec) {
+    auto spec = ws->getSpectrum(spectrumNumber);
     spec->setDetectorID(id);
   }
 }
@@ -228,40 +228,40 @@ Kernel::DateAndTime EventWorkspaceCollection::getFirstPulseTime() const {
   return m_WsVec[0]->getFirstPulseTime();
 }
 void EventWorkspaceCollection::setAllX(Kernel::cow_ptr<MantidVec> &x) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->setAllX(x);
+  for (auto &ws : m_WsVec) {
+    ws->setAllX(x);
   }
 }
 size_t EventWorkspaceCollection::getNumberEvents() const {
   return m_WsVec[0]->getNumberEvents(); // Should be the sum across all periods?
 }
 void EventWorkspaceCollection::resizeTo(const size_t size) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->resizeTo(size); // Creates the EventLists
+  for (auto &ws : m_WsVec) {
+    ws->resizeTo(size); // Creates the EventLists
   }
 }
 void EventWorkspaceCollection::padSpectra(const std::vector<int32_t> &padding) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->padSpectra(padding); // Set detector ids and spectrum numbers
+  for (auto &ws : m_WsVec) {
+    ws->padSpectra(padding); // Set detector ids and spectrum numbers
   }
 }
 void EventWorkspaceCollection::setInstrument(
     const Geometry::Instrument_const_sptr &inst) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->setInstrument(inst);
+  for (auto &ws : m_WsVec) {
+    ws->setInstrument(inst);
   }
 }
 void EventWorkspaceCollection::setMonitorWorkspace(
     const boost::shared_ptr<API::MatrixWorkspace> &monitorWS) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->setMonitorWorkspace(
+  for (auto &ws : m_WsVec) {
+    ws->setMonitorWorkspace(
         monitorWS); // TODO, do we really set the same monitor on all periods???
   }
 }
 void EventWorkspaceCollection::updateSpectraUsing(
     const API::SpectrumDetectorMapping &map) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->updateSpectraUsing(map);
+  for (auto &ws : m_WsVec) {
+    ws->updateSpectraUsing(map);
   }
 }
 
@@ -271,43 +271,43 @@ DataObjects::EventList *EventWorkspaceCollection::getEventListPtr(size_t i) {
 }
 
 void EventWorkspaceCollection::populateInstrumentParameters() {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->populateInstrumentParameters();
+  for (auto &ws : m_WsVec) {
+    ws->populateInstrumentParameters();
   }
 }
 
 void EventWorkspaceCollection::setGeometryFlag(const int flag) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->mutableSample().setGeometryFlag(flag);
+  for (auto &ws : m_WsVec) {
+    ws->mutableSample().setGeometryFlag(flag);
   }
 }
 
 void EventWorkspaceCollection::setThickness(const float flag) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->mutableSample().setThickness(flag);
+  for (auto &ws : m_WsVec) {
+    ws->mutableSample().setThickness(flag);
   }
 }
 void EventWorkspaceCollection::setHeight(const float flag) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->mutableSample().setHeight(flag);
+  for (auto &ws : m_WsVec) {
+    ws->mutableSample().setHeight(flag);
   }
 }
 void EventWorkspaceCollection::setWidth(const float flag) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->mutableSample().setWidth(flag);
+  for (auto &ws : m_WsVec) {
+    ws->mutableSample().setWidth(flag);
   }
 }
 
 void EventWorkspaceCollection::setTitle(std::string title) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    m_WsVec[i]->setTitle(title);
+  for (auto &ws : m_WsVec) {
+    ws->setTitle(title);
   }
 }
 
 void EventWorkspaceCollection::applyFilter(
     boost::function<void(MatrixWorkspace_sptr)> func) {
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    func(m_WsVec[i]);
+  for (auto &ws : m_WsVec) {
+    func(ws);
   }
 }
 

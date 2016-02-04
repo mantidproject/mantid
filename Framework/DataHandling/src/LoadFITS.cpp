@@ -754,11 +754,10 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
   ws->setYUnitLabel("brightness");
 
   // Add all header info to log.
-  for (auto it = fileInfo.headerKeys.begin(); it != fileInfo.headerKeys.end();
-       ++it) {
-    ws->mutableRun().removeLogData(it->first, true);
+  for (const auto &headerKey : fileInfo.headerKeys) {
+    ws->mutableRun().removeLogData(headerKey.first, true);
     ws->mutableRun().addLogData(
-        new PropertyWithValue<std::string>(it->first, it->second));
+        new PropertyWithValue<std::string>(headerKey.first, headerKey.second));
   }
 
   // Add rotational data to log. Clear first from copied WS

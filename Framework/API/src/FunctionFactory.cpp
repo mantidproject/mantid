@@ -217,8 +217,8 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     }
     cfun->addFunction(fun);
     size_t i = cfun->nFunctions() - 1;
-    for (auto att = pAttributes.begin(); att != pAttributes.end(); ++att) {
-      cfun->setLocalAttributeValue(i, att->first, att->second);
+    for (auto &pAttribute : pAttributes) {
+      cfun->setLocalAttributeValue(i, pAttribute.first, pAttribute.second);
     }
   }
 
@@ -249,8 +249,8 @@ void FunctionFactoryImpl::inputError(const std::string &str) const {
 void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
                                          const Expression &expr) const {
   if (expr.name() == ",") {
-    for (size_t i = 0; i < expr.size(); i++) {
-      addConstraint(fun, expr[i]);
+    for (const auto &constraint : expr) {
+      addConstraint(fun, constraint);
     }
   } else {
     addConstraint(fun, expr);
@@ -279,8 +279,8 @@ void FunctionFactoryImpl::addTies(IFunction_sptr fun,
   if (expr.name() == "=") {
     addTie(fun, expr);
   } else if (expr.name() == ",") {
-    for (size_t i = 0; i < expr.size(); i++) {
-      addTie(fun, expr[i]);
+    for (const auto &constraint : expr) {
+      addTie(fun, constraint);
     }
   }
 }

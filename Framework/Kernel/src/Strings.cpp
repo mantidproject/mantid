@@ -266,10 +266,10 @@ int getPartLine(std::istream &fh, std::string &Out, std::string &Excess,
 std::string removeSpace(const std::string &CLine) {
   std::string Out;
   char prev = 'x';
-  for (unsigned int i = 0; i < CLine.length(); i++) {
-    if (!isspace(CLine[i]) || prev == '\\') {
-      Out += CLine[i];
-      prev = CLine[i];
+  for (char character : CLine) {
+    if (!isspace(character) || prev == '\\') {
+      Out += character;
+      prev = character;
     }
   }
   return Out;
@@ -439,9 +439,8 @@ splitToKeyValues(const std::string &input, const std::string &keyValSep,
   const int splitOptions = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY +
                            Mantid::Kernel::StringTokenizer::TOK_TRIM;
   Mantid::Kernel::StringTokenizer listSplitter(input, listSep);
-  for (auto iter = listSplitter.begin(); iter != listSplitter.end(); ++iter) {
-    Mantid::Kernel::StringTokenizer keyValSplitter(*iter, keyValSep,
-                                                   splitOptions);
+  for (const auto &iter : listSplitter) {
+    Poco::StringTokenizer keyValSplitter(iter, keyValSep, splitOptions);
     if (keyValSplitter.count() == 2) {
       keyValues[keyValSplitter[0]] = keyValSplitter[1];
     }
@@ -1070,8 +1069,9 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
   // Estimation of the resulting number of elements
   result.reserve(elements.count());
 
-  for (auto it = elements.begin(); it != elements.end(); it++) {
-    Tokenizer rangeElements(*it, rangeSep, Tokenizer::TOK_TRIM);
+  for (const auto &elementString : *elements) {
+    // See above for the reason space is added
+    Tokenizer rangeElements(elementString, rangeSep, Tokenizer::TOK_TRIM);
 
     size_t noOfRangeElements = rangeElements.count();
 
@@ -1079,7 +1079,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
     if (noOfRangeElements == 1) {
       int element;
       if (convert(rangeElements[0], element) != 1)
-        throw std::invalid_argument("Invalid element: " + *it);
+        throw std::invalid_argument("Invalid element: " + elementString);
       result.push_back(element);
     }
     // A pair
@@ -1088,17 +1088,19 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
 
       if (convert(rangeElements[0], start) != 1 ||
           convert(rangeElements[1], end) != 1)
-        throw std::invalid_argument("Invalid range: " + *it);
+        throw std::invalid_argument("Invalid range: " + elementString);
 
       if (start >= end)
-        throw std::invalid_argument("Range boundaries are reversed: " + *it);
+        throw std::invalid_argument("Range boundaries are reversed: " +
+                                    elementString);
 
       for (int i = start; i <= end; i++)
         result.push_back(i);
     }
     // Error - e.g. "--""
     else {
-      throw std::invalid_argument("Multiple range separators: " + *it);
+      throw std::invalid_argument("Multiple range separators: " +
+                                  elementString);
     }
   }
 

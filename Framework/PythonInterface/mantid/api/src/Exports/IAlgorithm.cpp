@@ -144,8 +144,7 @@ PyObject *getOutputProperties(IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
   // Build the list
   PyObject *names = PyList_New(0);
-  for (auto itr = properties.cbegin(); itr != properties.cend(); ++itr) {
-    Property *p = *itr;
+  for (auto p : properties) {
     if (p->direction() == Direction::Output) {
       PyList_Append(names, PyString_FromString(p->name().c_str()));
     }

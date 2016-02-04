@@ -163,8 +163,8 @@ void SpecularReflectionPositionCorrect::moveDetectors(
       /*
        * We have to move individual components.
        */
-      for (size_t i = 0; i < detectors.size(); ++i) {
-        moveDetectors(toCorrect, detectors[i], sample, upOffset, acrossOffset,
+      for (const auto &detector : detectors) {
+        moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset,
                       detectorPosition); // Recursive call
       }
     }

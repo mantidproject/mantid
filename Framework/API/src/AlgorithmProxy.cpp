@@ -269,8 +269,8 @@ void AlgorithmProxy::stopped() {
  */
 void AlgorithmProxy::dropWorkspaceReferences() {
   const std::vector<Property *> &props = getProperties();
-  for (unsigned int i = 0; i < props.size(); ++i) {
-    if (auto *wsProp = dynamic_cast<IWorkspaceProperty *>(props[i])) {
+  for (auto prop : props) {
+    if (auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop)) {
       wsProp->clear();
     }
   }
