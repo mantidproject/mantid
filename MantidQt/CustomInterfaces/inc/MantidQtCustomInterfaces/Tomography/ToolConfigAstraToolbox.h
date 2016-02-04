@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h"
 
 namespace MantidQt {
@@ -36,12 +36,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ToolConfigAstraToolbox : public TomoRecToolConfig {
+class MANTIDQT_CUSTOMINTERFACES_DLL ToolConfigAstraToolbox
+    : public TomoRecToolConfig {
 public:
   ToolConfigAstraToolbox();
 
-  ToolConfigAstraToolbox(const std::string &runnable, double centerRot,
-                         double angleMin, double angleMax,
+  ToolConfigAstraToolbox(const std::string &runnable,
                          const std::string &pathOut,
                          const std::string &pathDark,
                          const std::string &pathOpen,
@@ -49,15 +49,19 @@ public:
 
   ~ToolConfigAstraToolbox() {}
 
+  // gives the list of methods (reconstruction algorithms) available
+  static const std::vector<std::pair<std::string, std::string>> methods() {
+    return g_astraMethods;
+  }
+
 protected:
   virtual std::string makeCmdLineOptions() const;
 
   virtual std::string makeExecutable() const { return m_runnable; };
 
 private:
-  double m_centerRot;
-  double m_angleMin;
-  double m_angleMax;
+  static const std::vector<std::pair<std::string, std::string>> g_astraMethods;
+
   std::string m_pathOut;
   std::string m_pathDark;
   std::string m_pathOpen;
