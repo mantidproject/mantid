@@ -125,8 +125,7 @@ void MergeMDFiles::loadBoxData() {
   const std::vector<int> &boxType = m_BoxStruct.getBoxType();
   // calculate event positions in the target file.
   uint64_t eventsStart = 0;
-  for (size_t i = 0; i < Boxes.size(); i++) {
-    API::IMDNode *mdBox = Boxes[i];
+  for (auto mdBox : Boxes) {
     mdBox->clear();
     size_t ID = mdBox->getID();
 
@@ -399,11 +398,9 @@ void MergeMDFiles::exec() {
 }
 /**Delete all event loaders */
 void MergeMDFiles::clearEventLoaders() {
-  for (size_t i = 0; i < m_EventLoader.size(); i++) {
-    if (m_EventLoader[i]) {
-      delete m_EventLoader[i];
-      m_EventLoader[i] = nullptr;
-    }
+  for (auto &loader : m_EventLoader) {
+    delete loader;
+    loader = nullptr;
   }
 }
 

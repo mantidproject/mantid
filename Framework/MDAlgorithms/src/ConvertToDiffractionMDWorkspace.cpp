@@ -623,8 +623,8 @@ void ConvertToDiffractionMDWorkspace::exec() {
                         << " events. This took " << cputimtotal
                         << " in total.\n";
     std::vector<std::string> stats = ws->getBoxControllerStats();
-    for (size_t i = 0; i < stats.size(); ++i)
-      g_log.information() << stats[i] << "\n";
+    for (auto &stat : stats)
+      g_log.information() << stat << "\n";
     g_log.information() << std::endl;
   }
 

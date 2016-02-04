@@ -218,9 +218,8 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   API::FrameworkManager::Instance();
 
-  for (size_t d = 0; d < directionList.size(); d++)
+  for (auto dir : directionList)
     for (int sgn = 1; sgn > -2; sgn -= 2) {
-      V3D dir = directionList[d];
       dir.normalize();
       Quat Q(sgn * dphi, dir);
       Q.normalize();

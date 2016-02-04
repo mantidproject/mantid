@@ -236,10 +236,10 @@ AnalysisDataServiceImpl::topLevelItems() const {
   auto topLevelNames = this->getObjectNames();
   std::set<Workspace_sptr> groupMembers;
 
-  for (auto it = topLevelNames.begin(); it != topLevelNames.end(); ++it) {
+  for (const auto &topLevelName : topLevelNames) {
     try {
-      const std::string &name = *it;
-      auto ws = this->retrieve(*it);
+      const std::string &name = topLevelName;
+      auto ws = this->retrieve(topLevelName);
       topLevel.insert(std::make_pair(name, ws));
       if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
         group->reportMembers(groupMembers);

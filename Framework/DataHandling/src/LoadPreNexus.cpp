@@ -259,8 +259,8 @@ void LoadPreNexus::parseRuninfo(const string &runinfo, string &dataDir,
     g_log.debug() << "Found 1 event file: \"" << eventFilenames[0] << "\"\n";
   } else {
     g_log.debug() << "Found " << eventFilenames.size() << " event files:";
-    for (size_t i = 0; i < eventFilenames.size(); i++) {
-      g_log.debug() << "\"" << eventFilenames[i] << "\" ";
+    for (auto &eventFilename : eventFilenames) {
+      g_log.debug() << "\"" << eventFilename << "\" ";
     }
     g_log.debug() << "\n";
   }
@@ -296,20 +296,19 @@ void LoadPreNexus::runLoadNexusLogs(const string &runinfo,
 
   // run the algorithm
   bool loadedLogs = false;
-  for (size_t i = 0; i < possibilities.size(); i++) {
-    if (Poco::File(possibilities[i]).exists()) {
-      g_log.information() << "Loading logs from \"" << possibilities[i]
-                          << "\"\n";
+  for (auto &possibility : possibilities) {
+    if (Poco::File(possibility).exists()) {
+      g_log.information() << "Loading logs from \"" << possibility << "\"\n";
       IAlgorithm_sptr alg =
           this->createChildAlgorithm("LoadNexusLogs", prog_start, prog_stop);
       alg->setProperty("Workspace", m_outputWorkspace);
-      alg->setProperty("Filename", possibilities[i]);
+      alg->setProperty("Filename", possibility);
       alg->setProperty("OverwriteLogs", false);
       alg->executeAsChildAlg();
       loadedLogs = true;
       // Reload instrument so SNAP can use log values
-      std::string entry_name = LoadTOFRawNexus::getEntryName(possibilities[i]);
-      LoadEventNexus::runLoadInstrument(possibilities[i], m_outputWorkspace,
+      std::string entry_name = LoadTOFRawNexus::getEntryName(possibility);
+      LoadEventNexus::runLoadInstrument(possibility, m_outputWorkspace,
                                         entry_name, this);
       break;
     }

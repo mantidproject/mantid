@@ -168,11 +168,9 @@ BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
 
 /** The method deletes all units converter allocated*/
 void BackgroundHelper::deleteUnitsConverters() {
-  for (size_t i = 0; i < m_WSUnit.size(); i++) {
-    if (m_WSUnit[i]) {
-      delete m_WSUnit[i];
-      m_WSUnit[i] = nullptr;
-    }
+  for (auto &unit : m_WSUnit) {
+    delete unit;
+    unit = nullptr;
   }
 }
 

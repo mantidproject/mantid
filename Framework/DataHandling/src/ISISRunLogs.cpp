@@ -25,9 +25,9 @@ ISISRunLogs::ISISRunLogs(const API::Run &icpRun, const int totalNumPeriods)
     : m_logParser(), m_numOfPeriods(totalNumPeriods) {
   // ICP event either in form icp_event or icpevent
   static const char *icpLogNames[2] = {"icp_event", "icpevent"};
-  for (int i = 0; i < 2; ++i) {
+  for (auto &icpLogName : icpLogNames) {
     try {
-      Kernel::Property *icpLog = icpRun.getLogData(icpLogNames[i]);
+      Kernel::Property *icpLog = icpRun.getLogData(icpLogName);
       m_logParser.reset(new LogParser(icpLog));
       return;
     } catch (std::runtime_error &) {

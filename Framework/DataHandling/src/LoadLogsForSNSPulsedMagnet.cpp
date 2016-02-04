@@ -210,9 +210,9 @@ void LoadLogsForSNSPulsedMagnet::ParsePulseIDLogFile() {
   BinaryFile<Pulse> pulseFile(m_pulseidfilename);
   this->m_numpulses = pulseFile.getNumElements();
   pulses = pulseFile.loadAll();
-  for (auto it = pulses->begin(); it != pulses->end(); ++it) {
-    this->m_pulseidseconds.push_back(it->seconds);
-    this->m_pulseidnanoseconds.push_back(it->nanoseconds);
+  for (auto &pulse : *pulses) {
+    this->m_pulseidseconds.push_back(pulse.seconds);
+    this->m_pulseidnanoseconds.push_back(pulse.nanoseconds);
   }
   delete pulses;
 }

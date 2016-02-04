@@ -297,8 +297,8 @@ void Qxy::exec() {
   // left to be executed here for computational efficiency
   size_t numHist = weights->getNumberHistograms();
   for (size_t i = 0; i < numHist; i++) {
-    for (size_t j = 0; j < weights->dataE(i).size(); j++) {
-      weights->dataE(i)[j] = sqrt(weights->dataE(i)[j]);
+    for (double &j : weights->dataE(i)) {
+      j = sqrt(j);
     }
   }
 

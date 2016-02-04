@@ -55,8 +55,7 @@ public:
     GroupType containingAny;
     GroupType containingNone;
     // ------------- Find equivalent sets
-    for (auto i = m_groups.begin(); i != m_groups.end(); ++i) {
-      GroupType::value_type &cluster = *i;
+    for (auto &cluster : m_groups) {
       if (cluster.find(aLabel) != cluster.end()) {
         containingAny.push_back(cluster);
       } else if (cluster.find(bLabel) != cluster.end()) {
@@ -83,8 +82,7 @@ public:
       GroupType::value_type masterSet;
       masterSet.insert(aLabel); // Incase it doesn't already contain a
       masterSet.insert(bLabel); // Incase it doesn't already contain b
-      for (auto i = containingAny.begin(); i != containingAny.end(); ++i) {
-        GroupType::value_type &childSet = *i;
+      for (auto &childSet : containingAny) {
         masterSet.insert(childSet.begin(),
                          childSet.end()); // Build the master set.
       }
@@ -101,11 +99,10 @@ public:
    */
   std::list<boost::shared_ptr<CompositeCluster>> makeCompositeClusters() {
     std::list<boost::shared_ptr<CompositeCluster>> composites;
-    for (auto i = m_groups.begin(); i != m_groups.end(); ++i) {
-      GroupType::value_type &labelSet = *i;
+    for (auto &labelSet : m_groups) {
       auto composite = boost::make_shared<CompositeCluster>();
-      for (auto j = labelSet.begin(); j != labelSet.end(); ++j) {
-        boost::shared_ptr<ICluster> &cluster = m_register[(*j)];
+      for (auto j : labelSet) {
+        boost::shared_ptr<ICluster> &cluster = m_register[j];
         composite->add(cluster);
       }
       composites.push_back(composite);
@@ -168,8 +165,7 @@ ClusterRegister::MapCluster ClusterRegister::clusters() const {
   MapCluster temp;
   temp.insert(m_Impl->m_unique.begin(), m_Impl->m_unique.end());
   auto mergedClusters = m_Impl->makeCompositeClusters();
-  for (auto i = mergedClusters.begin(); i != mergedClusters.end(); ++i) {
-    const auto &merged = *i;
+  for (auto &merged : mergedClusters) {
     temp.insert(std::make_pair(merged->getLabel(), merged));
   }
   return temp;
@@ -186,8 +182,7 @@ ClusterRegister::clusters(std::vector<DisjointElement> &elements) const {
   MapCluster temp;
   temp.insert(m_Impl->m_unique.begin(), m_Impl->m_unique.end());
   auto mergedClusters = m_Impl->makeCompositeClusters();
-  for (auto i = mergedClusters.begin(); i != mergedClusters.end(); ++i) {
-    const auto &merged = *i;
+  for (auto &merged : mergedClusters) {
     merged->toUniformMinimum(elements);
     temp.insert(std::make_pair(merged->getLabel(), merged));
   }

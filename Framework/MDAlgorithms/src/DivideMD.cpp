@@ -73,8 +73,8 @@ void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     dbuff = ws->getBoxController()->getFileIO();
   }
 
-  for (size_t i = 0; i < boxes.size(); i++) {
-    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+  for (auto &boxe : boxes) {
+    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
     if (box) {
       size_t ic(0);
       typename std::vector<MDE> &events = box->getEvents();

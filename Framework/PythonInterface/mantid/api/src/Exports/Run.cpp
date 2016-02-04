@@ -103,8 +103,8 @@ bpl::object get(bpl::object self, bpl::object key) {
 bpl::list keys(Run &self) {
   const std::vector<Mantid::Kernel::Property *> &logs = self.getProperties();
   bpl::list names;
-  for (auto iter = logs.begin(); iter != logs.end(); ++iter) {
-    names.append((*iter)->name());
+  for (auto log : logs) {
+    names.append(log->name());
   }
   return names;
 }

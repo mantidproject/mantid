@@ -91,8 +91,7 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   std::vector<coord_t> dimMax(numDims, -1e30f);
 
   // Validate each workspace
-  for (size_t i = 0; i < m_workspaces.size(); i++) {
-    IMDEventWorkspace_const_sptr ws = m_workspaces[i];
+  for (auto &ws : m_workspaces) {
     if (ws->getNumDims() != numDims)
       throw std::invalid_argument(
           "Workspace " + ws->name() +
@@ -243,16 +242,15 @@ void MergeMD::exec() {
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
-  for (size_t i = 0; i < inputs_orig.size(); i++) {
+  for (const auto &input : inputs_orig) {
     WorkspaceGroup_sptr wsgroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            inputs_orig[i]);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(input);
     if (wsgroup) { // Workspace group
       std::vector<std::string> group = wsgroup->getNames();
       inputs.insert(inputs.end(), group.begin(), group.end());
     } else {
       // Single workspace
-      inputs.push_back(inputs_orig[i]);
+      inputs.push_back(input);
     }
   }
 

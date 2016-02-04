@@ -1399,8 +1399,8 @@ boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
   temp->mutableRun().clearOutdatedTimeSeriesLogValues();
 
   // Clear out old monitor logs
-  for (unsigned i = 0; i < m_monitorLogs.size(); i++) {
-    temp->mutableRun().removeProperty(m_monitorLogs[i]);
+  for (auto &monitorLog : m_monitorLogs) {
+    temp->mutableRun().removeProperty(monitorLog);
   }
   m_monitorLogs.clear();
 

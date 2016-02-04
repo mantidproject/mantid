@@ -318,13 +318,9 @@ VecCommands interpret(const std::string &processingInstructions) {
   commandParsers.push_back(boost::make_shared<AdditionParser>());
 
   VecCommands commands;
-  for (auto it = processingInstructionsSplit.begin();
-       it != processingInstructionsSplit.end(); ++it) {
-    const std::string candidate = *it;
+  for (auto candidate : processingInstructionsSplit) {
     bool parserFound = false;
-    for (auto parserIt = commandParsers.begin();
-         parserIt != commandParsers.end(); ++parserIt) {
-      auto commandParser = *parserIt;
+    for (auto commandParser : commandParsers) {
       Command *command = commandParser->interpret(candidate);
       boost::shared_ptr<Command> commandSptr(command);
       if (commandSptr->isValid()) // Do not record invalid commands.

@@ -260,8 +260,7 @@ void Convolution::function(const FunctionDomain &domain,
     std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
   } else if (!dltFuns.empty()) {
     std::vector<double> x(nData);
-    for (auto it = dltFuns.begin(); it != dltFuns.end(); ++it) {
-      auto df = *it;
+    for (auto df : dltFuns) {
       double shift = -df->getParameter("Centre");
       dltF = df->getParameter("Height") * df->HeightPrefactor();
       std::transform(xValues, xValues + nData, x.data(),

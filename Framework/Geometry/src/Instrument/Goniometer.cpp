@@ -90,7 +90,7 @@ bool Goniometer::isDefined() const { return initFromR || (!motors.empty()); }
 /// name, direction, sense, angle)
 /// The angle units shown is degrees
 std::string Goniometer::axesInfo() {
-  if (initFromR == true) {
+  if (initFromR) {
     return std::string("Goniometer was initialized from a rotation matrix. No "
                        "information about axis is available.\n");
   } else {
@@ -126,7 +126,7 @@ std::string Goniometer::axesInfo() {
 */
 void Goniometer::pushAxis(std::string name, double axisx, double axisy,
                           double axisz, double angle, int sense, int angUnit) {
-  if (initFromR == true) {
+  if (initFromR) {
     throw std::runtime_error(
         "Initialized from a rotation matrix, so no axes can be pushed.");
   } else {
@@ -155,7 +155,7 @@ void Goniometer::setRotationAngle(std::string name, double value) {
       changed = true;
     }
   }
-  if (changed == false) {
+  if (!changed) {
     throw std::invalid_argument("Motor name " + name + " not found");
   }
   recalculateR();

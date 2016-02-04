@@ -42,7 +42,7 @@ void ExponentialCorrection::retrieveProperties() {
   m_c0 = getProperty("C0");
   m_c1 = getProperty("C1");
   std::string op = getProperty("Operation");
-  m_divide = (op == "Divide") ? true : false;
+  m_divide = op == "Divide";
 }
 
 void ExponentialCorrection::performUnaryOperation(const double XIn,

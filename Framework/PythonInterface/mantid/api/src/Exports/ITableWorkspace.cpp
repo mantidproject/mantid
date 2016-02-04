@@ -293,9 +293,9 @@ void addRowFromDict(ITableWorkspace &self, const bpl::dict &rowItems) {
   try {
     // Retrieve and set the value for each column
     auto columns = self.getColumnNames();
-    for (auto iter = columns.begin(); iter != columns.end(); ++iter) {
-      column = self.getColumn(*iter);
-      value = rowItems[*iter];
+    for (auto &iter : columns) {
+      column = self.getColumn(iter);
+      value = rowItems[iter];
       setValue(column, rowIndex, value);
     }
   } catch (bpl::error_already_set &) {

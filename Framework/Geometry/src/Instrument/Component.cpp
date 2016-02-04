@@ -446,9 +446,9 @@ Component::getParameterNamesByComponent() const {
     return retVal;
 
   std::set<std::string> names = m_map->names(this);
-  for (auto itNames = names.begin(); itNames != names.end(); ++itNames) {
+  for (const auto &name : names) {
     retVal.insert(
-        std::pair<std::string, ComponentID>(*itNames, this->getComponentID()));
+        std::pair<std::string, ComponentID>(name, this->getComponentID()));
   }
 
   // Walk up the tree and find the parameters attached to the parent components

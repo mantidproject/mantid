@@ -718,10 +718,10 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
   for (size_t g = 0; g < groups.size(); g++) {
     retVal->getOrAddEventList(g).clearDetectorIDs();
     std::vector<int> dets = groups[g];
-    for (auto it = dets.begin(); it != dets.end(); ++it) {
+    for (auto det : dets) {
       for (int i = 0; i < numBins; i++)
         retVal->getOrAddEventList(g) += TofEvent((i + 0.5) * binDelta, 1);
-      retVal->getOrAddEventList(g).addDetectorID(*it);
+      retVal->getOrAddEventList(g).addDetectorID(det);
     }
   }
   // Create the x-axis for histogramming.

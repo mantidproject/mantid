@@ -619,10 +619,8 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
   std::vector<double> medianvec;
   g_log.debug("Calculating the median count rate of the spectra");
 
-  for (size_t j = 0; j < indexmap.size(); ++j) {
+  for (auto hists : indexmap) {
     std::vector<double> medianInput;
-    std::vector<size_t> hists = indexmap.at(j);
-
     const int nhists = static_cast<int>(hists.size());
     // The maximum possible length is that of workspace length
     medianInput.reserve(nhists);

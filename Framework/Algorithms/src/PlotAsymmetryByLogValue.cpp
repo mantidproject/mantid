@@ -387,29 +387,29 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(
   auto tAxis = new TextAxis(nplots);
   if (nplots == 1) {
     size_t i = 0;
-    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
-      outWS->dataX(0)[i] = it->second;
-      outWS->dataY(0)[i] = m_redY[it->first];
-      outWS->dataE(0)[i] = m_redE[it->first];
+    for (auto &value : m_logValue) {
+      outWS->dataX(0)[i] = value.second;
+      outWS->dataY(0)[i] = m_redY[value.first];
+      outWS->dataE(0)[i] = m_redE[value.first];
       i++;
     }
     tAxis->setLabel(0, "Asymmetry");
 
   } else {
     size_t i = 0;
-    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
-      outWS->dataX(0)[i] = it->second;
-      outWS->dataY(0)[i] = m_diffY[it->first];
-      outWS->dataE(0)[i] = m_diffE[it->first];
-      outWS->dataX(1)[i] = it->second;
-      outWS->dataY(1)[i] = m_redY[it->first];
-      outWS->dataE(1)[i] = m_redE[it->first];
-      outWS->dataX(2)[i] = it->second;
-      outWS->dataY(2)[i] = m_greenY[it->first];
-      outWS->dataE(2)[i] = m_greenE[it->first];
-      outWS->dataX(3)[i] = it->second;
-      outWS->dataY(3)[i] = m_sumY[it->first];
-      outWS->dataE(3)[i] = m_sumE[it->first];
+    for (auto &value : m_logValue) {
+      outWS->dataX(0)[i] = value.second;
+      outWS->dataY(0)[i] = m_diffY[value.first];
+      outWS->dataE(0)[i] = m_diffE[value.first];
+      outWS->dataX(1)[i] = value.second;
+      outWS->dataY(1)[i] = m_redY[value.first];
+      outWS->dataE(1)[i] = m_redE[value.first];
+      outWS->dataX(2)[i] = value.second;
+      outWS->dataY(2)[i] = m_greenY[value.first];
+      outWS->dataE(2)[i] = m_greenE[value.first];
+      outWS->dataX(3)[i] = value.second;
+      outWS->dataY(3)[i] = m_sumY[value.first];
+      outWS->dataE(3)[i] = m_sumE[value.first];
       i++;
     }
     tAxis->setLabel(0, "Red-Green");
@@ -431,20 +431,20 @@ void PlotAsymmetryByLogValue::saveResultsToADS(MatrixWorkspace_sptr &outWS,
 
   if (nplots == 2) {
     size_t i = 0;
-    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
-      size_t run = it->first;
+    for (auto &value : m_logValue) {
+      size_t run = value.first;
       outWS->dataX(0)[i] = static_cast<double>(run); // run number
-      outWS->dataY(0)[i] = it->second;               // log value
+      outWS->dataY(0)[i] = value.second;             // log value
       outWS->dataY(1)[i] = m_redY[run];              // redY
       outWS->dataE(1)[i] = m_redE[run];              // redE
       i++;
     }
   } else {
     size_t i = 0;
-    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
-      size_t run = it->first;
+    for (auto &value : m_logValue) {
+      size_t run = value.first;
       outWS->dataX(0)[i] = static_cast<double>(run); // run number
-      outWS->dataY(0)[i] = it->second;               // log value
+      outWS->dataY(0)[i] = value.second;             // log value
       outWS->dataY(1)[i] = m_diffY[run];             // diffY
       outWS->dataE(1)[i] = m_diffE[run];             // diffE
       outWS->dataY(2)[i] = m_redY[run];              // redY

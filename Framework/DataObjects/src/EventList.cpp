@@ -353,8 +353,8 @@ EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
     // and append to the list
     this->weightedEventsNoTime.reserve(this->weightedEventsNoTime.size() +
                                        more_events.size());
-    for (auto it = more_events.begin(); it != more_events.end(); ++it)
-      this->weightedEventsNoTime.emplace_back(*it);
+    for (const auto &more_event : more_events)
+      this->weightedEventsNoTime.emplace_back(more_event);
     break;
   }
 
@@ -2560,8 +2560,8 @@ void EventList::convertTofHelper(std::vector<T> &events,
 void EventList::convertTof(const double factor, const double offset) {
   // fix the histogram parameter
   MantidVec &x = this->refX.access();
-  for (auto iter = x.begin(); iter != x.end(); ++iter)
-    *iter = (*iter) * factor + offset;
+  for (double &iter : x)
+    iter = iter * factor + offset;
   // this->refX.access() = x;
 
   if ((factor < 0.) && (this->getSortType() == TOF_SORT))

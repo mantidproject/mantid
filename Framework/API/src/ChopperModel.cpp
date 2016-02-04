@@ -50,8 +50,8 @@ void ChopperModel::initialize(const std::string &params) {
 
   setBaseParameters(keyValues);
 
-  for (auto iter = keyValues.begin(); iter != keyValues.end(); ++iter) {
-    setParameterValue(iter->first, iter->second);
+  for (auto &keyValue : keyValues) {
+    setParameterValue(keyValue.first, keyValue.second);
   }
 }
 

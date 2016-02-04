@@ -1091,8 +1091,8 @@ double Object::triangleSolidAngle(const V3D &observer,
     std::vector<Kernel::V3D> vectors;
     this->GetObjectGeom(type, vectors, radius, height);
     if (type == 1) {
-      for (size_t i = 0; i < vectors.size(); i++)
-        vectors[i] *= scaleFactor;
+      for (auto &vector : vectors)
+        vector *= scaleFactor;
       return CuboidSolidAngle(observer, vectors);
     } else if (type == 2) // this is wrong for scaled objects
       return SphereSolidAngle(observer, vectors, radius);
@@ -1626,13 +1626,13 @@ void Object::calcBoundingBoxByGeometry() {
     maxX = maxY = maxZ = -huge;
 
     // Loop over all corner points to find minima and maxima on each axis
-    for (auto iter = vectors.cbegin(); iter != vectors.cend(); ++iter) {
-      minX = std::min(minX, iter->X());
-      maxX = std::max(maxX, iter->X());
-      minY = std::min(minY, iter->Y());
-      maxY = std::max(maxY, iter->Y());
-      minZ = std::min(minZ, iter->Z());
-      maxZ = std::max(maxZ, iter->Z());
+    for (const auto &vector : vectors) {
+      minX = std::min(minX, vector.X());
+      maxX = std::max(maxX, vector.X());
+      minY = std::min(minY, vector.Y());
+      maxY = std::max(maxY, vector.Y());
+      minZ = std::min(minZ, vector.Z());
+      maxZ = std::max(maxZ, vector.Z());
     }
   } break;
 

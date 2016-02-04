@@ -71,16 +71,14 @@ void Expression::add_operators(const std::vector<std::string> &ops) {
     char j = 0;
     tokenizer tkz(m_operators->binary[i], " ",
                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-    for (auto it = tkz.begin(); it != tkz.end(); it++) {
-      m_operators->precedence[*it] = i + 1;
-      m_operators->op_number[*it] = j++;
+    for (const auto &index : tkz) {
+      m_operators->precedence[index] = i + 1;
+      m_operators->op_number[index] = j++;
     }
   }
 
-  for (size_t i = 0; i < ops.size(); i++) {
-    std::string str = ops[i];
-    for (size_t j = 0; j < str.size(); j++) {
-      char c = str[j];
+  for (auto str : ops) {
+    for (char c : str) {
       if (c == ' ')
         continue;
       m_operators->symbols.insert(c);
@@ -90,10 +88,8 @@ void Expression::add_operators(const std::vector<std::string> &ops) {
 
 void Expression::add_unary(const std::set<std::string> &ops) {
   m_operators->unary = ops;
-  for (auto it = ops.cbegin(); it != ops.cend(); ++it) {
-    for (auto c = it->cbegin(); c != it->cend(); ++c) {
-      m_operators->symbols.insert(*c);
-    }
+  for (const auto &op : ops) {
+    m_operators->symbols.insert(op.cbegin(), op.cend());
   }
 }
 
@@ -309,11 +305,7 @@ void Expression::tokenize() {
     }
 
     if (c == '"') {
-      if (!inString) {
-        inString = true;
-      } else {
-        inString = false;
-      }
+      inString = !inString;
     }
 
   } // for i
@@ -364,8 +356,8 @@ void Expression::logPrint(const std::string &pads) const {
   std::string myPads = pads + "   ";
   if (m_terms.size()) {
     std::cerr << myPads << m_op << '[' << m_funct << ']' << "(" << '\n';
-    for (size_t i = 0; i < m_terms.size(); i++)
-      m_terms[i].logPrint(myPads);
+    for (const auto &term : m_terms)
+      term.logPrint(myPads);
     std::cerr << myPads << ")" << '\n';
   } else
     std::cerr << myPads << m_op << m_funct << '\n';
@@ -401,10 +393,7 @@ void Expression::setFunct(const std::string &name) {
   bool inQuotes = false;
   for (std::string::const_iterator c = name.begin(); c != name.end(); ++c) {
     if (*c == '"') {
-      if (inQuotes)
-        inQuotes = false;
-      else
-        inQuotes = true;
+      inQuotes = !inQuotes;
       continue;
     }
 
@@ -456,11 +445,11 @@ std::string Expression::str() const {
   if (m_terms.size()) {
     if (brackets)
       res << '(';
-    for (size_t i = 0; i < m_terms.size(); i++) {
-      res << m_terms[i].operator_name();
-      size_t prec1 = op_prec(m_terms[i].m_funct);
+    for (const auto &term : m_terms) {
+      res << term.operator_name();
+      size_t prec1 = op_prec(term.m_funct);
       bool isItUnary = false;
-      if (m_terms[i].size() == 1 && is_unary(m_terms[i].m_funct)) {
+      if (term.size() == 1 && is_unary(term.m_funct)) {
         prec1 = 0; // unary operator
         isItUnary = true;
       }
@@ -469,7 +458,7 @@ std::string Expression::str() const {
         res << '(';
       if (isItUnary)
         res << ' ';
-      res << m_terms[i].str();
+      res << term.str();
       if (bk)
         res << ')';
     }
@@ -498,12 +487,12 @@ std::set<std::string> Expression::getVariables() const {
       out.insert(s);
     }
   } else {
-    for (auto e = begin(); e != end(); ++e) {
-      if (e->isFunct()) {
-        std::set<std::string> tout = e->getVariables();
+    for (const auto &e : *this) {
+      if (e.isFunct()) {
+        std::set<std::string> tout = e.getVariables();
         out.insert(tout.begin(), tout.end());
       } else {
-        std::string s = e->name();
+        std::string s = e.name();
         if (!s.empty() && !isdigit(s[0])) {
           out.insert(s);
         }

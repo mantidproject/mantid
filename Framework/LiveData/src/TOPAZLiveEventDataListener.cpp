@@ -588,8 +588,8 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
   // TODO: At present, there's no way for monitor logs to be added
   // to m_monitorLogs.  Either implement this feature, or remove
   // m_monitorLogs!
-  for (unsigned i = 0; i < m_monitorLogs.size(); i++) {
-    temp->mutableRun().removeProperty(m_monitorLogs[i]);
+  for (auto &monitorLog : m_monitorLogs) {
+    temp->mutableRun().removeProperty(monitorLog);
   }
   m_monitorLogs.clear();
 

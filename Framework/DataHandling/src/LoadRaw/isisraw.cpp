@@ -145,8 +145,8 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt)
       ver7(0), u_dat(nullptr), ver8(0), ddes(nullptr), dat1(nullptr) {
   memset(r_title, ' ', sizeof(r_title));
   memset(i_inst, ' ', sizeof(i_inst));
-  for (int i = 0; i < 256; i++) {
-    t_pmap[i] = 1; // period number for each basic period
+  for (auto &value : t_pmap) {
+    value = 1; // period number for each basic period
   }
   memset(t_tcm1, 0, sizeof(t_tcm1)); // time channel mode
   memset(t_tcp1, 0, sizeof(t_tcp1)); // time channel parameters
@@ -171,8 +171,8 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt, bool doUpdateFromCRPT)
       ver7(0), u_dat(nullptr), ver8(0), ddes(nullptr), dat1(nullptr) {
   memset(r_title, ' ', sizeof(r_title));
   memset(i_inst, ' ', sizeof(i_inst));
-  for (int i = 0; i < 256; i++) {
-    t_pmap[i] = 1; // period number for each basic period
+  for (auto &value : t_pmap) {
+    value = 1; // period number for each basic period
   }
   memset(t_tcm1, 0, sizeof(t_tcm1)); // time channel mode
   memset(t_tcp1, 0, sizeof(t_tcp1)); // time channel parameters

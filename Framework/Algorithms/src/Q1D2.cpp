@@ -120,7 +120,7 @@ void Q1D2::exec() {
   // iterations of the loop below
 
   // Flag to decide if Q Resolution is to be used
-  auto useQResolution = qResolution ? true : false;
+  auto useQResolution = static_cast<bool>(qResolution);
 
   // this will become the output workspace from this algorithm
   MatrixWorkspace_sptr outputWS =

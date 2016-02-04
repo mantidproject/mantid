@@ -357,11 +357,10 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   if (prog)
     prog->resetNumSteps(compElems.size(), 0.0, 1.0);
 
-  for (size_t i = 0; i < compElems.size(); ++i) {
+  for (auto pElem : compElems) {
     if (prog)
       prog->report("Loading instrument Definition");
 
-    const Element *pElem = compElems[i];
     {
       IdList idList; // structure to possibly be populated with detector IDs
 
@@ -2180,18 +2179,16 @@ void InstrumentDefinitionParser::setComponentLinks(
         }
       }
 
-      for (size_t i = 0; i < sharedIComp.size(); i++) {
+      for (auto &ptr : sharedIComp) {
         boost::shared_ptr<const Geometry::Component> sharedComp =
-            boost::dynamic_pointer_cast<const Geometry::Component>(
-                sharedIComp[i]);
+            boost::dynamic_pointer_cast<const Geometry::Component>(ptr);
         if (sharedComp) {
           // Not empty Component
           if (sharedComp->isParametrized()) {
             setLogfile(sharedComp->base(), curElem,
                        instrument->getLogfileCache());
           } else {
-            setLogfile(sharedIComp[i].get(), curElem,
-                       instrument->getLogfileCache());
+            setLogfile(ptr.get(), curElem, instrument->getLogfileCache());
           }
         }
       }
@@ -2636,10 +2633,10 @@ InstrumentDefinitionParser::convertLocationsElement(
   std::map<std::string, double> attrValues;
 
   // Read all the set attribute values
-  for (auto it = allAttrs.begin(); it != allAttrs.end(); ++it) {
-    if (pElem->hasAttribute(*it)) {
-      attrValues[*it] =
-          boost::lexical_cast<double>(Strings::strip(pElem->getAttribute(*it)));
+  for (const auto &attr : allAttrs) {
+    if (pElem->hasAttribute(attr)) {
+      attrValues[attr] = boost::lexical_cast<double>(
+          Strings::strip(pElem->getAttribute(attr)));
     }
   }
 
@@ -2647,19 +2644,20 @@ InstrumentDefinitionParser::convertLocationsElement(
   std::map<std::string, double> rangeAttrSteps;
 
   // Find *-end for range attributes and calculate steps
-  for (auto it = rangeAttrs.begin(); it != rangeAttrs.end(); ++it) {
-    std::string endAttr = *it + "-end";
+  for (const auto &rangeAttr : rangeAttrs) {
+    std::string endAttr = rangeAttr + "-end";
     if (pElem->hasAttribute(endAttr)) {
-      if (attrValues.find(*it) == attrValues.end()) {
+      if (attrValues.find(rangeAttr) == attrValues.end()) {
         throw Exception::InstrumentDefinitionError(
             "*-end attribute without corresponding * attribute.");
       }
 
-      double from = attrValues[*it];
+      double from = attrValues[rangeAttr];
       double to = boost::lexical_cast<double>(
           Strings::strip(pElem->getAttribute(endAttr)));
 
-      rangeAttrSteps[*it] = (to - from) / (static_cast<double>(nElements) - 1);
+      rangeAttrSteps[rangeAttr] =
+          (to - from) / (static_cast<double>(nElements) - 1);
     }
   }
 
@@ -2678,13 +2676,13 @@ InstrumentDefinitionParser::convertLocationsElement(
     }
 
     // Copy values of all the attributes set
-    for (auto it = attrValues.begin(); it != attrValues.end(); ++it) {
-      pLoc->setAttribute(it->first,
-                         boost::lexical_cast<std::string>(it->second));
+    for (auto &attrValue : attrValues) {
+      pLoc->setAttribute(attrValue.first,
+                         boost::lexical_cast<std::string>(attrValue.second));
 
       // If attribute has a step, increase the value by the step
-      if (rangeAttrSteps.find(it->first) != rangeAttrSteps.end()) {
-        it->second += rangeAttrSteps[it->first];
+      if (rangeAttrSteps.find(attrValue.first) != rangeAttrSteps.end()) {
+        attrValue.second += rangeAttrSteps[attrValue.first];
       }
     }
 

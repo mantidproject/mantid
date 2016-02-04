@@ -378,16 +378,16 @@ void FindDetectorsPar::extractAndLinearize(
   this->detID.resize(nDetectors);
 
   nDetectors = 0;
-  for (size_t i = 0; i < detPar.size(); i++) {
-    if (detPar[i].detID < 0)
+  for (const auto &parameter : detPar) {
+    if (parameter.detID < 0)
       continue;
 
-    azimuthal[nDetectors] = detPar[i].azimutAngle;
-    polar[nDetectors] = detPar[i].polarAngle;
-    azimuthalWidth[nDetectors] = detPar[i].azimWidth;
-    polarWidth[nDetectors] = detPar[i].polarWidth;
-    secondaryFlightpath[nDetectors] = detPar[i].secondaryFlightPath;
-    detID[nDetectors] = static_cast<size_t>(detPar[i].detID);
+    azimuthal[nDetectors] = parameter.azimutAngle;
+    polar[nDetectors] = parameter.polarAngle;
+    azimuthalWidth[nDetectors] = parameter.azimWidth;
+    polarWidth[nDetectors] = parameter.polarWidth;
+    secondaryFlightpath[nDetectors] = parameter.secondaryFlightPath;
+    detID[nDetectors] = static_cast<size_t>(parameter.detID);
     nDetectors++;
   }
   // store caluclated value

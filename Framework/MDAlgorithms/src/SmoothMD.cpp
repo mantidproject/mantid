@@ -165,16 +165,16 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
       size_t nNeighbours = neighbourIndexes.size();
       double sumSignal = iterator->getSignal();
       double sumSqError = iterator->getError();
-      for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
+      for (auto neighbourIndex : neighbourIndexes) {
         if (useWeights) {
-          if ((*weightingWS)->getSignalAt(neighbourIndexes[i]) == 0) {
+          if ((*weightingWS)->getSignalAt(neighbourIndex) == 0) {
             // Nothing measured here. We cannot use that neighbouring point.
             nNeighbours -= 1;
             continue;
           }
         }
-        sumSignal += toSmooth->getSignalAt(neighbourIndexes[i]);
-        double error = toSmooth->getErrorAt(neighbourIndexes[i]);
+        sumSignal += toSmooth->getSignalAt(neighbourIndex);
+        double error = toSmooth->getErrorAt(neighbourIndex);
         sumSqError += (error * error);
       }
 
@@ -293,8 +293,7 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
                                       "have entries for each dimension of the "
                                       "InputWorkspace."));
   } else {
-    for (auto it = widthVector.begin(); it != widthVector.end(); ++it) {
-      const int widthEntry = *it;
+    for (auto widthEntry : widthVector) {
       if (widthEntry % 2 == 0) {
         std::stringstream message;
         message << widthVectorPropertyName
