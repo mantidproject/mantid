@@ -32,10 +32,14 @@ class NullProgressAction : public Mantid::VATES::ProgressAction
   }
 };
 
-bool has_suffix(const std::string &str, const std::string &suffix)
+bool has_suffix(const std::string &stringToCheck, const std::string &suffix)
 {
-    return str.size() >= suffix.size() &&
-           str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+  auto isStringLargerThanSuffix = stringToCheck.size() >= suffix.size();
+  auto isSuffixInString = false;
+  if (isStringLargerThanSuffix) {
+      isSuffInString = stringToCheck.compare(stringToCheck.size() - suffix.size(), suffix.size(), suffix) == 0;
+  }
+  return isSuffixInString;
 }
 
 }
