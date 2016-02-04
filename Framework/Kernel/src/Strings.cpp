@@ -440,7 +440,7 @@ splitToKeyValues(const std::string &input, const std::string &keyValSep,
                            Mantid::Kernel::StringTokenizer::TOK_TRIM;
   Mantid::Kernel::StringTokenizer listSplitter(input, listSep);
   for (const auto &iter : listSplitter) {
-    Poco::StringTokenizer keyValSplitter(iter, keyValSep, splitOptions);
+    Mantid::Kernel::StringTokenizer keyValSplitter(iter, keyValSep, splitOptions);
     if (keyValSplitter.count() == 2) {
       keyValues[keyValSplitter[0]] = keyValSplitter[1];
     }
@@ -1069,7 +1069,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
   // Estimation of the resulting number of elements
   result.reserve(elements.count());
 
-  for (const auto &elementString : *elements) {
+  for (const auto &elementString : elements) {
     // See above for the reason space is added
     Tokenizer rangeElements(elementString, rangeSep, Tokenizer::TOK_TRIM);
 
