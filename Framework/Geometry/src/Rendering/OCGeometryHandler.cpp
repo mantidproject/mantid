@@ -113,7 +113,7 @@ double *OCGeometryHandler::getTriangleVertices() {
 }
 
 int *OCGeometryHandler::getTriangleFaces() {
-  if (Obj != Nullptr) {
+  if (Obj != nullptr) {
     if (!boolTriangulated)
       Triangulate();
     return Triangulator->getTriangleFaces();
