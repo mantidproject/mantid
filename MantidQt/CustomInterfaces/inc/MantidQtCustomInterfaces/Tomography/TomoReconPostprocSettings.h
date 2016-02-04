@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMORECONPOSTPROCSETTINGS_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMORECONPOSTPROCSETTINGS_H_
 
-#include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct DLLExport TomoReconPostprocSettings {
+struct MANTIDQT_CUSTOMINTERFACES_DLL TomoReconPostprocSettings {
   double circMaskRadius;
   double cutOffLevel;
 

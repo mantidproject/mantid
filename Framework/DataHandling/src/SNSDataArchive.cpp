@@ -45,8 +45,8 @@ SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
   // ICAT4 web service take upper case filename such as HYSA_2662
   std::transform(filename.begin(), filename.end(), filename.begin(), toupper);
 
-  for (auto iter2 = exts.cbegin(); iter2 != exts.cend(); ++iter2) {
-    g_log.debug() << *iter2 << ";";
+  for (const auto &ext : exts) {
+    g_log.debug() << ext << ";";
   }
   g_log.debug() << "\n";
 
@@ -79,8 +79,8 @@ SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
     }
   }
 
-  for (auto ext = exts.begin(); ext != exts.cend(); ++ext) {
-    std::string datafile = filename + *ext;
+  for (const auto &ext : exts) {
+    std::string datafile = filename + ext;
     std::vector<std::string>::const_iterator iter = locations.begin();
     for (; iter != locations.end(); ++iter) {
       if (boost::algorithm::ends_with((*iter), datafile)) {

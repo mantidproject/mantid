@@ -74,7 +74,7 @@ static bool CompareDiffFrom90(const DblMatrix &UB_1, const DblMatrix &UB_2) {
 @param Umatrix :: orientation matrix U. By default this will be identity matrix
 */
 NiggliCell::NiggliCell(const DblMatrix &Umatrix) : UnitCell() {
-  if (Umatrix.isRotation() == true) {
+  if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
   } else
@@ -99,7 +99,7 @@ NiggliCell::NiggliCell(const NiggliCell &other)
 NiggliCell::NiggliCell(const double _a, const double _b, const double _c,
                        const DblMatrix &Umatrix)
     : UnitCell(_a, _b, _c) {
-  if (Umatrix.isRotation() == true) {
+  if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
   } else
@@ -121,7 +121,7 @@ NiggliCell::NiggliCell(const double _a, const double _b, const double _c,
                        const double _gamma, const DblMatrix &Umatrix,
                        const int angleunit)
     : UnitCell(_a, _b, _c, _alpha, _beta, _gamma, angleunit) {
-  if (Umatrix.isRotation() == true) {
+  if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
   } else
@@ -134,7 +134,7 @@ NiggliCell::NiggliCell(const double _a, const double _b, const double _c,
 */
 NiggliCell::NiggliCell(const UnitCell &uc, const DblMatrix &Umatrix)
     : UnitCell(uc), U(Umatrix) {
-  if (Umatrix.isRotation() == true) {
+  if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
   } else
@@ -143,7 +143,7 @@ NiggliCell::NiggliCell(const UnitCell &uc, const DblMatrix &Umatrix)
 
 NiggliCell::NiggliCell(const UnitCell *uc, const DblMatrix &Umatrix)
     : UnitCell(uc), U(Umatrix) {
-  if (Umatrix.isRotation() == true) {
+  if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
   } else

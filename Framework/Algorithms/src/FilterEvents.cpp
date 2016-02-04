@@ -507,9 +507,7 @@ void FilterEvents::createOutputWorkspaces() {
 
   // Determine the minimum group index number
   int minwsgroup = INT_MAX;
-  for (auto groupit = m_workGroupIndexes.begin();
-       groupit != m_workGroupIndexes.end(); ++groupit) {
-    int wsgroup = *groupit;
+  for (auto wsgroup : m_workGroupIndexes) {
     if (wsgroup < minwsgroup && wsgroup >= 0)
       minwsgroup = wsgroup;
   }
@@ -1027,8 +1025,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 void FilterEvents::generateSplitters(int wsindex,
                                      Kernel::TimeSplitterType &splitters) {
   splitters.clear();
-  for (size_t isp = 0; isp < m_splitters.size(); ++isp) {
-    Kernel::SplittingInterval splitter = m_splitters[isp];
+  for (auto splitter : m_splitters) {
     int index = splitter.index();
     if (index == wsindex) {
       splitters.push_back(splitter);
@@ -1052,8 +1049,7 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
                     << std::endl;
     return;
   } else {
-    for (size_t i = 0; i < splitters.size(); ++i) {
-      SplittingInterval split = splitters[i];
+    for (auto split : splitters) {
       g_log.debug() << "[FilterEvents DB1226] Going to filter workspace "
                     << eventws->name() << ": "
                     << "log name = " << logname
@@ -1075,9 +1071,9 @@ void FilterEvents::getTimeSeriesLogNames(std::vector<std::string> &lognames) {
 
   const std::vector<Kernel::Property *> allprop =
       m_eventWS->mutableRun().getProperties();
-  for (size_t ip = 0; ip < allprop.size(); ++ip) {
+  for (auto ip : allprop) {
     Kernel::TimeSeriesProperty<double> *timeprop =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(allprop[ip]);
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(ip);
     if (timeprop) {
       std::string pname = timeprop->name();
       lognames.push_back(pname);

@@ -416,9 +416,7 @@ bool PreprocessDetectorsToMD::isDetInfoLost(
     Mantid::API::MatrixWorkspace_const_sptr inWS2D) const {
   auto pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
   // if this is numeric axis, then the detector's information has been lost:
-  if (pYAxis)
-    return true;
-  return false;
+  return pYAxis != nullptr;
 }
 
 /** Method returns the efixed or Ei value stored in properties of the input

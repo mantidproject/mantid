@@ -93,27 +93,24 @@ void CreateLogPropertyTable::exec() {
       this->getProperty("LogPropertyNames");
 
   // Make sure all workspaces contain the properties.
-  for (auto matrixWs = matrixWsList.begin(); matrixWs != matrixWsList.end();
-       ++matrixWs) {
-    const Run &run = matrixWs->get()->run();
-    const std::string wsName = matrixWs->get()->getName();
+  for (const auto &matrixWs : matrixWsList) {
+    const Run &run = matrixWs.get()->run();
+    const std::string wsName = matrixWs.get()->getName();
 
     // Throw if a run does not have a property.
-    for (auto propName = propNames.begin(); propName != propNames.end();
-         ++propName)
-      if (!run.hasProperty(*propName))
+    for (const auto &propName : propNames)
+      if (!run.hasProperty(propName))
         throw std::runtime_error("\"" + wsName +
                                  "\" does not have a run property of \"" +
-                                 *propName + "\".");
+                                 propName + "\".");
   }
 
   // Set up output table.
   boost::shared_ptr<ITableWorkspace> outputTable =
       WorkspaceFactory::Instance().createTable();
   // One column for each property.
-  for (auto propName = propNames.begin(); propName != propNames.end();
-       ++propName)
-    outputTable->addColumn("str", *propName);
+  for (const auto &propName : propNames)
+    outputTable->addColumn("str", propName);
   // One row for each workspace.
   for (size_t i = 0; i < matrixWsList.size(); ++i)
     outputTable->appendRow();
@@ -132,13 +129,12 @@ void CreateLogPropertyTable::exec() {
     TableRow row = outputTable->getRow(i);
     MatrixWorkspace_sptr matrixWs = matrixWsList[i];
 
-    for (auto propName = propNames.begin(); propName != propNames.end();
-         ++propName) {
-      Property *prop = matrixWs->run().getProperty(*propName);
+    for (const auto &propName : propNames) {
+      Property *prop = matrixWs->run().getProperty(propName);
       std::stringstream propValue;
 
       if (prop->type().find("TimeValue") != std::string::npos) {
-        propValue << matrixWs->run().getLogAsSingleValue(*propName,
+        propValue << matrixWs->run().getLogAsSingleValue(propName,
                                                          timeSeriesStat);
       } else {
         propValue << prop->value();
@@ -174,12 +170,12 @@ retrieveMatrixWsList(const std::vector<std::string> &wsNames,
   std::vector<MatrixWorkspace_sptr> matrixWsList;
 
   // Get all the workspaces which are to be inspected for log proeprties.
-  for (auto wsName = wsNames.begin(); wsName != wsNames.end(); ++wsName) {
+  for (const auto &wsName : wsNames) {
     WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve(*wsName));
+        AnalysisDataService::Instance().retrieve(wsName));
     MatrixWorkspace_sptr matrixWs =
         boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(*wsName));
+            AnalysisDataService::Instance().retrieve(wsName));
 
     if (wsGroup) {
       const std::vector<std::string> childNames = wsGroup->getNames();
@@ -191,20 +187,18 @@ retrieveMatrixWsList(const std::vector<std::string> &wsNames,
 
       // Retrieve pointers to all the child workspaces.
       std::vector<MatrixWorkspace_sptr> childWsList;
-      for (auto childName = childNames.begin(); childName != childNames.end();
-           ++childName) {
+      for (const auto &childName : childNames) {
         childWsList.push_back(
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                *childName));
+                childName));
       }
 
       // Deal with child workspaces according to policy.
       switch (groupPolicy) {
       case ALL: {
         // Append all the children to the list.
-        for (auto childWs = childWsList.begin(); childWs != childWsList.end();
-             ++childWs)
-          matrixWsList.push_back(*childWs);
+        for (auto &childWs : childWsList)
+          matrixWsList.push_back(childWs);
         break;
       }
       case FIRST:
@@ -275,8 +269,8 @@ std::set<std::string> getAllGroupPolicyNames() {
   const std::map<std::string, GroupPolicy> &map = getGroupPolicyMap();
   std::set<std::string> groupPolicyNames;
 
-  for (auto policy = map.begin(); policy != map.end(); ++policy)
-    groupPolicyNames.insert(policy->first);
+  for (const auto &policy : map)
+    groupPolicyNames.insert(policy.first);
 
   return groupPolicyNames;
 }
@@ -330,8 +324,8 @@ std::set<std::string> getAllStatisticTypeNames() {
   const std::map<std::string, Math::StatisticType> &map = getStatisticTypeMap();
   std::set<std::string> statisticTypeNames;
 
-  for (auto policy = map.begin(); policy != map.end(); ++policy)
-    statisticTypeNames.insert(policy->first);
+  for (const auto &policy : map)
+    statisticTypeNames.insert(policy.first);
 
   return statisticTypeNames;
 }

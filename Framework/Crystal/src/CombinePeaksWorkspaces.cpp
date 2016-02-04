@@ -91,8 +91,8 @@ void CombinePeaksWorkspaces::exec() {
   if (!CombineMatchingPeaks) {
     // Loop over the peaks in the second workspace, appending each one to the
     // output
-    for (size_t i = 0; i < rhsPeaks.size(); ++i) {
-      output->addPeak(rhsPeaks[i]);
+    for (const auto &rhsPeak : rhsPeaks) {
+      output->addPeak(rhsPeak);
       progress.report();
     }
   } else // Check for matching peaks
@@ -105,15 +105,14 @@ void CombinePeaksWorkspaces::exec() {
 
     // Loop over the peaks in the second workspace, appending ones that don't
     // match any in first workspace
-    for (size_t i = 0; i < rhsPeaks.size(); ++i) {
-      const Peak &currentPeak = rhsPeaks[i];
+    for (const auto &currentPeak : rhsPeaks) {
       // Now have to go through the first workspace checking for matches
       // Not doing anything clever as peaks workspace are typically not large -
       // just a linear search
       bool match = false;
-      for (size_t j = 0; j < lhsPeaks.size(); ++j) {
+      for (const auto &lhsPeak : lhsPeaks) {
         const V3D deltaQ =
-            currentPeak.getQSampleFrame() - lhsPeaks[j].getQSampleFrame();
+            currentPeak.getQSampleFrame() - lhsPeak.getQSampleFrame();
         if (deltaQ.nullVector(
                 Tolerance)) // Using a V3D method that does the job
         {

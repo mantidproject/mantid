@@ -173,14 +173,12 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   const string CAL("_CAL");
   const size_t CAL_LEN = CAL.length(); // cache to make life easier
   vector<string> files;
-  for (size_t i = 0; i < dirs.size(); ++i) {
-    if ((dirs[i].length() > CAL_LEN) &&
-        (dirs[i].compare(dirs[i].length() - CAL.length(), CAL.length(), CAL) ==
-         0)) {
-      if (Poco::File(base.path() + "/" + dirs[i] + "/calibrations/" + mapping)
+  for (auto &dir : dirs) {
+    if ((dir.length() > CAL_LEN) &&
+        (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
+      if (Poco::File(base.path() + "/" + dir + "/calibrations/" + mapping)
               .exists())
-        files.push_back(base.path() + "/" + dirs[i] + "/calibrations/" +
-                        mapping);
+        files.push_back(base.path() + "/" + dir + "/calibrations/" + mapping);
     }
   }
 
@@ -509,8 +507,8 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   m_loadOnlySomeSpectra = (this->m_spectraList.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (auto it = m_spectraList.begin(); it != m_spectraList.end(); it++)
-    spectraLoadMap[*it] = true;
+  for (auto spectra : m_spectraList)
+    spectraLoadMap[spectra] = true;
 
   //---------------------------------------------------------------------------
   // Other features
@@ -777,8 +775,8 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   std::reverse(eventExts.begin(), eventExts.end());
 
-  for (size_t i = 0; i < eventExts.size(); ++i) {
-    size_t pos = instrument.find(eventExts[i]);
+  for (auto &eventExt : eventExts) {
+    size_t pos = instrument.find(eventExt);
     if (pos != string::npos) {
       instrument = instrument.substr(0, pos);
       break;
@@ -2244,13 +2242,13 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
   eventws->getInstrument()->getDetectors(detector_map);
 
   // Set up
-  for (auto it = detector_map.begin(); it != detector_map.end(); it++) {
-    if (!it->second->isMonitor()) {
+  for (auto &det : detector_map) {
+    if (!det.second->isMonitor()) {
       // Add non-monitor detector ID
-      size_t workspaceIndex = m_pixelToWkspindex[it->first];
+      size_t workspaceIndex = m_pixelToWkspindex[det.first];
       // this->m_pixelToWkspindex[it->first] = workspaceIndex;
       EventList &spec = eventws->getOrAddEventList(workspaceIndex);
-      spec.addDetectorID(it->first);
+      spec.addDetectorID(det.first);
       // Start the spectrum number at 1
       spec.setSpectrumNo(specid_t(workspaceIndex + 1));
     }

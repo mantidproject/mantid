@@ -35,16 +35,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ToolConfigTomoPy : public TomoRecToolConfig {
+class MANTIDQT_CUSTOMINTERFACES_DLL ToolConfigTomoPy
+    : public TomoRecToolConfig {
 public:
   ToolConfigTomoPy();
 
   ToolConfigTomoPy(const std::string &runnable, const std::string &pathOut,
                    const std::string &pathDark, const std::string &pathOpen,
-                   const std::string &pathSample, double centerRot,
-                   double angleMin, double angleMax);
+                   const std::string &pathSample);
 
   ~ToolConfigTomoPy() {}
+
+  // gives the list of methods (reconstruction algorithms) available
+  static const std::vector<std::pair<std::string, std::string>> methods() {
+    return g_tomopyMethods;
+  }
 
 protected:
   virtual std::string makeCmdLineOptions() const;
@@ -52,13 +57,12 @@ protected:
   virtual std::string makeExecutable() const { return m_runnable; };
 
 private:
+  static const std::vector<std::pair<std::string, std::string>> g_tomopyMethods;
+
   std::string m_pathOut;
   std::string m_pathDark;
   std::string m_pathOpen;
   std::string m_pathSample;
-  double m_centerRot;
-  double m_angleMin;
-  double m_angleMax;
 };
 
 } // namespace CustomInterfaces

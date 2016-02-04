@@ -94,7 +94,7 @@ Matrix<T>::Matrix(const size_t nrow, const size_t ncol, const bool makeIdentity)
   // Note:: nx,ny zeroed so setMem always works
   setMem(nrow, ncol);
   zeroMatrix();
-  if (makeIdentity == true)
+  if (makeIdentity)
     identityMatrix();
 }
 

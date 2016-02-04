@@ -128,7 +128,6 @@ std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(
 bool SymmetryOperationSymbolParser::isValidMatrixRow(const int *element,
                                                      size_t columnNumber) {
   int nulls = 0;
-
   for (size_t i = 0; i < columnNumber; ++i) {
     if (abs(element[i]) > 1) {
       return false;

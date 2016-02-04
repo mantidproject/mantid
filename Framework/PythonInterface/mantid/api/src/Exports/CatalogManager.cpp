@@ -13,8 +13,8 @@ using namespace boost::python;
 boost::python::object getActiveSessionsAsList(CatalogManagerImpl &self) {
   boost::python::list sessions;
   const auto vecSessions = self.getActiveSessions();
-  for (auto itr = vecSessions.begin(); itr != vecSessions.end(); ++itr) {
-    sessions.append(*itr);
+  for (const auto &vecSession : vecSessions) {
+    sessions.append(vecSession);
   }
   return sessions;
 }

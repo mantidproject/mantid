@@ -21,6 +21,8 @@
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/IAlgorithm.h"
 
+#include <array>
+
 namespace Mantid {
 namespace Crystal {
 /**
@@ -255,7 +257,7 @@ private:
   std::string m_ParameterNames[7];
 
   boost::shared_ptr<DataModeHandler> m_AttributeValues;
-  double m_ParameterValues[7];
+  std::array<double, 7> m_ParameterValues;
 
   Mantid::detid2index_map m_wi_to_detid_map;
 

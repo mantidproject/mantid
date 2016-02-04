@@ -59,8 +59,8 @@ std::map<std::string, OptionalBool::Value> OptionalBool::strToEmumMap() {
 std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {
   std::map<Value, std::string> map;
   auto opposite = strToEmumMap();
-  for (auto it = opposite.begin(); it != opposite.end(); ++it) {
-    map.emplace(it->second, it->first);
+  for (auto &oppositePair : opposite) {
+    map.emplace(oppositePair.second, oppositePair.first);
   }
   return map;
 }

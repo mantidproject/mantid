@@ -37,9 +37,7 @@ Mantid::Kernel::Logger g_log("FileFinder");
  * @returns true if extension contains a "*", else false.
  */
 bool containsWildCard(const std::string &ext) {
-  if (std::string::npos != ext.find("*"))
-    return true;
-  return false;
+  return std::string::npos != ext.find("*");
 }
 }
 
@@ -126,7 +124,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
 
   const std::vector<std::string> &searchPaths =
       Kernel::ConfigService::Instance().getDataSearchDirs();
-  for (auto it = searchPaths.cbegin(); it != searchPaths.cend(); ++it) {
+  for (const auto &searchPath : searchPaths) {
 // On windows globbing is note working properly with network drives
 // for example a network drive containing a $
 // For this reason, and since windows is case insensitive anyway
@@ -134,7 +132,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
 #ifdef _WIN32
     if (fName.find("*") != std::string::npos) {
 #endif
-      Poco::Path path(*it, fName);
+      Poco::Path path(searchPath, fName);
       Poco::Path pathPattern(path);
       std::set<std::string> files;
       Kernel::Glob::glob(pathPattern, files, m_globOption);
@@ -147,7 +145,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
       }
 #ifdef _WIN32
     } else {
-      Poco::Path path(*it, fName);
+      Poco::Path path(searchPath, fName);
       Poco::File file(path);
       if (file.exists() && !(ignoreDirs && file.isDirectory())) {
         return path.toString();
@@ -398,8 +396,8 @@ FileFinderImpl::getExtension(const std::string &filename,
                 << "])\n";
 
   // go through the list of supplied extensions
-  for (auto it = exts.begin(); it != exts.end(); ++it) {
-    std::string extension = toUpper(*it);
+  for (const auto &ext : exts) {
+    std::string extension = toUpper(ext);
     if (extension.rfind('*') ==
         extension.size() - 1) // there is a wildcard at play
     {
@@ -409,7 +407,7 @@ FileFinderImpl::getExtension(const std::string &filename,
     std::size_t found = toUpper(filename).rfind(extension);
     if (found != std::string::npos) {
       g_log.debug() << "matched extension \"" << extension << "\" based on \""
-                    << (*it) << "\"\n";
+                    << ext << "\"\n";
       return filename.substr(found); // grab the actual extensions found
     }
   }
@@ -478,11 +476,10 @@ FileFinderImpl::findRun(const std::string &hintstr,
                    tolower);
     if (!archiveOpt.empty() && archiveOpt != "off" &&
         !facility.archiveSearch().empty()) {
-      for (auto it = facility.archiveSearch().cbegin();
-           it != facility.archiveSearch().cend(); ++it) {
-        g_log.debug() << "get archive search for the facility..." << *it
-                      << "\n";
-        archs.push_back(ArchiveSearchFactory::Instance().create(*it));
+      for (const auto &facilityname : facility.archiveSearch()) {
+        g_log.debug() << "get archive search for the facility..."
+                      << facilityname << "\n";
+        archs.push_back(ArchiveSearchFactory::Instance().create(facilityname));
       }
     }
   }
@@ -684,9 +681,9 @@ FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
                                const std::set<std::string> &filenames,
                                const std::vector<std::string> &exts) const {
   std::string path = "";
-  for (auto it = archs.cbegin(); it != archs.cend(); ++it) {
+  for (const auto &arch : archs) {
     try {
-      path = (*it)->getArchivePath(filenames, exts);
+      path = arch->getArchivePath(filenames, exts);
       if (!path.empty()) {
         return path;
       }
@@ -730,13 +727,11 @@ FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
   // performance when calling findRuns()
   // with a large range of files, especially when searchPaths consists of
   // folders containing a large number of runs.
-  for (auto ext = extensions.begin(); ext != extensions.end(); ++ext) {
-    for (auto filename = filenames.begin(); filename != filenames.end();
-         ++filename) {
-      for (auto searchPath = searchPaths.begin();
-           searchPath != searchPaths.end(); ++searchPath) {
+  for (auto &extension : extensions) {
+    for (const auto &filename : filenames) {
+      for (const auto &searchPath : searchPaths) {
         try {
-          Poco::Path path(*searchPath, *filename + *ext);
+          Poco::Path path(searchPath, filename + extension);
           Poco::File file(path);
           if (file.exists())
             return path.toString();
@@ -747,9 +742,9 @@ FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
     }
   }
 
-  for (auto ext = extensions.cbegin(); ext != extensions.cend(); ++ext) {
-    for (auto it = filenames.cbegin(); it != filenames.cend(); ++it) {
-      path = getFullPath(*it + *ext);
+  for (const auto &extension : extensions) {
+    for (const auto &filename : filenames) {
+      path = getFullPath(filename + extension);
       try {
         if (!path.empty() && Poco::File(path).exists()) {
           g_log.debug() << "path returned from getFullPath() = " << path

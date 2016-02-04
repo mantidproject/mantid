@@ -96,8 +96,8 @@ Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(
   }
 
   if (!latErrorsValid) {
-    for (size_t i = 0; i < sigabc.size(); i++)
-      sigabc[i] = 0;
+    for (double &sig : sigabc)
+      sig = 0;
     return UB;
 
   } else

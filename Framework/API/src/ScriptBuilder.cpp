@@ -112,9 +112,9 @@ ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
   const std::string name = algHistory->name();
   if (name == COMMENT_ALG) {
     auto props = algHistory->getProperties();
-    for (auto propIter = props.begin(); propIter != props.end(); ++propIter) {
-      if ((*propIter)->name() == "Note") {
-        comment << "# " << (*propIter)->value();
+    for (auto &prop : props) {
+      if (prop->name() == "Note") {
+        comment << "# " << prop->value();
       }
     }
   }
@@ -137,8 +137,8 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     return buildCommentString(algHistory);
 
   auto props = algHistory->getProperties();
-  for (auto propIter = props.begin(); propIter != props.end(); ++propIter) {
-    prop = buildPropertyString(*propIter);
+  for (auto &propIter : props) {
+    prop = buildPropertyString(propIter);
     if (prop.length() > 0) {
       properties << prop << ", ";
     }
@@ -153,11 +153,11 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
 
     std::vector<Algorithm_descriptor> descriptors =
         AlgorithmFactory::Instance().getDescriptors();
-    for (auto dit = descriptors.begin(); dit != descriptors.end(); ++dit) {
+    for (auto &descriptor : descriptors) {
       // If a newer version of this algorithm exists, then this must be an old
       // version.
-      if ((*dit).name == algHistory->name() &&
-          (*dit).version > algHistory->version()) {
+      if (descriptor.name == algHistory->name() &&
+          descriptor.version > algHistory->version()) {
         oldVersion = true;
         break;
       }

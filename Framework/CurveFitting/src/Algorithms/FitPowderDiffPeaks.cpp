@@ -433,8 +433,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
             "Failed to fit the right most peak.  Unable to process. ");
 
       stringstream robmsgss;
-      for (size_t i = 0; i < peakparnames.size(); ++i) {
-        string &parname = peakparnames[i];
+      for (auto &parname : peakparnames) {
         robmsgss << parname << " = " << thispeak->getParameter(parname) << endl;
       }
       g_log.information() << "[DB1151] Robust Fit Result:   Chi^2 = " << chi2
@@ -1212,8 +1211,7 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
     } else {
       // Fit overlapped peaks
       vector<BackToBackExponential_sptr> peaksgroup;
-      for (size_t index = 0; index < indexpeakgroup.size(); ++index) {
-        size_t ipk = indexpeakgroup[index];
+      for (auto ipk : indexpeakgroup) {
         BackToBackExponential_sptr temppeak =
             m_vecPeakFunctions[ipk].second.second;
         peaksgroup.push_back(temppeak);
@@ -1469,8 +1467,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   stringstream debugss;
   debugss << "DB1251 Single Peak Confident Fit Result:  Chi^2 = " << chi2
           << endl;
-  for (size_t i = 0; i < parnames.size(); ++i) {
-    string &parname = parnames[i];
+  for (auto &parname : parnames) {
     debugss << parname << "  =  " << peak->getParameter(parname) << endl;
   }
   g_log.notice(debugss.str());
@@ -1659,8 +1656,8 @@ void FitPowderDiffPeaks::storeFunctionParameters(
     IFunction_sptr function, std::map<string, double> &parammaps) {
   vector<string> paramnames = function->getParameterNames();
   parammaps.clear();
-  for (size_t i = 0; i < paramnames.size(); ++i)
-    parammaps.emplace(paramnames[i], function->getParameter(paramnames[i]));
+  for (auto &paramname : paramnames)
+    parammaps.emplace(paramname, function->getParameter(paramname));
   return;
 }
 
@@ -1670,8 +1667,7 @@ void FitPowderDiffPeaks::storeFunctionParameters(
 void FitPowderDiffPeaks::restoreFunctionParameters(
     IFunction_sptr function, map<string, double> parammap) {
   vector<string> paramnames = function->getParameterNames();
-  for (size_t i = 0; i < paramnames.size(); ++i) {
-    string &parname = paramnames[i];
+  for (auto &parname : paramnames) {
     auto miter = parammap.find(parname);
     if (miter != parammap.end())
       function->setParameter(parname, miter->second);
@@ -1701,8 +1697,8 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
   dbss << peakfunction->asString() << endl;
   dbss << "Starting Value: ";
   vector<string> names = peakfunction->getParameterNames();
-  for (size_t i = 0; i < names.size(); ++i)
-    dbss << names[i] << "= " << peakfunction->getParameter(names[i]) << ", \t";
+  for (auto &name : names)
+    dbss << name << "= " << peakfunction->getParameter(name) << ", \t";
   for (size_t i = 0; i < dataws->readX(workspaceindex).size(); ++i)
     dbss << dataws->readX(workspaceindex)[i] << "\t\t"
          << dataws->readY(workspaceindex)[i] << "\t\t"
@@ -1983,8 +1979,8 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(
 
   // 7. Set up the composite function
   CompositeFunction_sptr peaksfunction(new CompositeFunction());
-  for (size_t i = 0; i < peaks.size(); ++i)
-    peaksfunction->addFunction(peaks[i]);
+  for (auto &peak : peaks)
+    peaksfunction->addFunction(peak);
 
   // 8. Fit multiple peaks
   vector<double> chi2s;
@@ -2171,9 +2167,7 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
   */
 void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
     vector<BackToBackExponential_sptr> peaks) {
-  for (size_t ipk = 0; ipk < peaks.size(); ++ipk) {
-    BackToBackExponential_sptr thispeak = peaks[ipk];
-
+  for (auto thispeak : peaks) {
     // 1. Set constraint on X.
     double fwhm = thispeak->fwhm();
     double centre = thispeak->centre();
@@ -2199,8 +2193,8 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(
   stringstream dbss0;
   dbss0 << "Starting Value: ";
   vector<string> names = peaksfunc->getParameterNames();
-  for (size_t i = 0; i < names.size(); ++i)
-    dbss0 << names[i] << "= " << peaksfunc->getParameter(names[i]) << ", \t";
+  for (auto &name : names)
+    dbss0 << name << "= " << peaksfunc->getParameter(name) << ", \t";
   g_log.information() << "DBx430 " << dbss0.str() << endl;
 
   // 2. Create fit
@@ -2225,8 +2219,8 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(
   // 4. Output
   stringstream dbss;
   dbss << "Fit N-Peaks @ ";
-  for (size_t i = 0; i < peakfuncs.size(); ++i)
-    dbss << peakfuncs[i]->centre() << ", ";
+  for (auto &peakfunc : peakfuncs)
+    dbss << peakfunc->centre() << ", ";
 
   if (isexecute) {
     // Figure out result
@@ -2911,8 +2905,7 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
 
       // Set peak parameters
       std::map<std::string, double>::iterator miter;
-      for (size_t ipn = 0; ipn < tnb2bfuncparnames.size(); ++ipn) {
-        string parname = tnb2bfuncparnames[ipn];
+      for (auto parname : tnb2bfuncparnames) {
         if (parname.compare("Height") != 0) {
           miter = m_instrumentParmaeters.find(parname);
           if (miter == m_instrumentParmaeters.end()) {

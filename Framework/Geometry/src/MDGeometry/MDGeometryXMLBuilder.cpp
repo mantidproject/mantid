@@ -64,8 +64,8 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(
 template <typename CheckDimensionPolicy>
 void MDGeometryBuilderXML<CheckDimensionPolicy>::addManyOrdinaryDimensions(
     VecIMDDimension_sptr manyDims) const {
-  for (auto it = manyDims.begin(); it != manyDims.end(); ++it) {
-    addOrdinaryDimension(*it);
+  for (auto &manyDim : manyDims) {
+    addOrdinaryDimension(manyDim);
   }
 }
 

@@ -235,8 +235,8 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
   }
   if (level == 0) {
     auto attrInfos = file.getAttrInfos();
-    for (size_t i = 0; i < attrInfos.size(); ++i) {
-      m_rootAttrs.insert(attrInfos[i].name);
+    for (auto &attrInfo : attrInfos) {
+      m_rootAttrs.insert(attrInfo.name);
     }
   }
 

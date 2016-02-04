@@ -107,9 +107,8 @@ void CreateSampleWorkspace::init() {
   m_preDefinedFunctionmap.emplace("User Defined", "");
   std::vector<std::string> functionOptions;
   functionOptions.reserve(m_preDefinedFunctionmap.size());
-  for (auto iterator = m_preDefinedFunctionmap.begin();
-       iterator != m_preDefinedFunctionmap.end(); iterator++) {
-    functionOptions.push_back(iterator->first);
+  for (const auto &preDefinedFunction : m_preDefinedFunctionmap) {
+    functionOptions.push_back(preDefinedFunction.first);
   }
   declareProperty("Function", "One Peak",
                   boost::make_shared<StringListValidator>(functionOptions),
