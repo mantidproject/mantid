@@ -13,6 +13,7 @@
 
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
@@ -208,7 +209,8 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
 
     try
     {
-      m_presenter->makeNonOrthogonal(output);
+      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider));
     }
     catch (std::invalid_argument &e)
     {
@@ -241,8 +243,9 @@ int vtkMDEWSource::RequestInformation(
     } else {
       // If the MDEvent workspace has had top level splitting applied to it,
       // then use the a deptgit stah of 1
+      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
       if (auto split =
-              Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName)) {
+              Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName, std::move(workspaceProvider))) {
         SetDepth(split.get());
       }
 

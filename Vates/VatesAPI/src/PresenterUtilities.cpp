@@ -1,6 +1,9 @@
 #include "MantidVatesAPI/PresenterUtilities.h"
 #include <vtkPVClipDataSet.h>
 #include <vtkBox.h>
+#include <chrono>
+#include <ctime>
+#include <algorithm>
 
 namespace Mantid
 {
@@ -28,11 +31,14 @@ vtkSmartPointer<vtkPVClipDataSet> getClippedDataSet(vtkSmartPointer<vtkDataSet> 
  * non-orthogonal data sets.
  * @param presenter: a pointer to a presenter instance
  * @param dataSet: the data set which holds the COB information
+ * @param workspaceProvider: provides one or multiple workspaces
  */
-void applyCOBMatrixSettingsToVtkDataSet(Mantid::VATES::MDLoadingPresenter* presenter, vtkDataSet* dataSet) {
+void applyCOBMatrixSettingsToVtkDataSet(Mantid::VATES::MDLoadingPresenter* presenter,
+                                        vtkDataSet* dataSet,
+                                        std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider) {
   try
   {
-    presenter->makeNonOrthogonal(dataSet);
+    presenter->makeNonOrthogonal(dataSet, std::move(workspaceProvider));
   }
   catch (std::invalid_argument &e)
   {
@@ -84,5 +90,23 @@ std::unique_ptr<vtkMDHistoHex4DFactory<TimeToTimeStep>> createFactoryChainForHis
   return factory;
 }
 
+
+/**
+* Creates a time stamped name
+* @param name: the input name
+* @return a name with a time stamp
+*/
+std::string createTimeStampedName(std::string name) {
+  auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  std::string timeInReadableFormat = std::string(std::ctime(&currentTime));
+  // Replace all white space with double underscore
+  std::replace(timeInReadableFormat.begin(), timeInReadableFormat.end(),' ', '_');
+  //Replace all colons with single underscore
+  std::replace(timeInReadableFormat.begin(), timeInReadableFormat.end(),':', '_');
+  timeInReadableFormat.erase(std::remove(timeInReadableFormat.begin(), timeInReadableFormat.end(), '\n'), timeInReadableFormat.end());
+  std::string stampedName = name + "_";
+  stampedName = stampedName + timeInReadableFormat;
+  return stampedName;
+}
 }
 }

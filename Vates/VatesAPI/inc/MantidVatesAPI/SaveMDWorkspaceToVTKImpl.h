@@ -46,7 +46,10 @@ private:
   double selectTimeSliceValue(Mantid::API::IMDWorkspace_sptr workspace) const;
   std::string getFullFilename(std::string filename, bool isHistoWorkspace) const;
   vtkSmartPointer<vtkXMLWriter> getXMLWriter(bool isHistoWorkspace) const;
-  vtkSmartPointer<vtkDataSet> getDataSetWithOrthogonalCorrection(vtkSmartPointer<vtkDataSet> dataSet, MDLoadingPresenter* presenter, bool isHistoWorkspace) const;
+  vtkSmartPointer<vtkDataSet> getDataSetWithOrthogonalCorrection(vtkSmartPointer<vtkDataSet> dataSet,
+                                                                 MDLoadingPresenter* presenter,
+                                                                 Mantid::API::IMDWorkspace_sptr workspace,
+                                                                 bool isHistoWorkspace) const;
   std::unique_ptr<vtkDataSetFactory> getDataSetFactoryChain(bool isHistWorkspace, ThresholdRange_scptr thresholdRange, VisualNormalization normalization, double time) const;
   std::unique_ptr<MDLoadingPresenter> getPresenter(bool isHistoWorkspace, Mantid::API::IMDWorkspace_sptr workspace, int recursionDepth) const;
 };

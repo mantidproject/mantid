@@ -181,7 +181,8 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
       
     try
     {
-      m_presenter->makeNonOrthogonal(output);
+      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider));
     }
     catch (std::invalid_argument &e)
     {

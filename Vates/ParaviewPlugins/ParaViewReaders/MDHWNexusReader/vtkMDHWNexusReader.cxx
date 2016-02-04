@@ -13,6 +13,7 @@
 #include "vtkBox.h"
 #include "vtkUnstructuredGrid.h"
 
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
@@ -134,7 +135,8 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
 
   try
   {
-    m_presenter->makeNonOrthogonal(output);
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider));
   }
   catch (std::invalid_argument &e)
   {

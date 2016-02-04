@@ -7,6 +7,7 @@
 #include <vtkMatrix4x4.h>
 #include <vtkPVChangeOfBasisHelper.h>
 #include <vtkDataArray.h>
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
@@ -178,7 +179,8 @@ public:
 
     // Set the COB
     try {
-      presenter.makeNonOrthogonal(product);
+      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      presenter.makeNonOrthogonal(product, std::move(workspaceProvider));
     } catch (...) {
       // Add the standard change of basis matrix and set the boundaries
       presenter.setDefaultCOBandBoundaries(product);

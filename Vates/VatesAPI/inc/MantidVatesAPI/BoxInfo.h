@@ -2,6 +2,10 @@
 #define MANTID_VATESAPI_BOXINFO_H
 
 #include "MantidKernel/System.h"
+#include "MantidVatesAPI/WorkspaceProvider.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/make_unique.h"
 #include <boost/optional.hpp>
 
 namespace Mantid
@@ -37,9 +41,10 @@ namespace Mantid
     /**
      * Function for finding an appropriate initial recursion depth.
      * @param workspaceName :: name of the workspace
+     * @param workspaceProvider :: an instance of the a workspace provider
      * @returns the appropriate recursion depth or nothing
      */
-    boost::optional<int> DLLExport findRecursionDepthForTopLevelSplitting(const std::string &workspaceName);
+    boost::optional<int> DLLExport findRecursionDepthForTopLevelSplitting(const std::string &workspaceName, std::unique_ptr<WorkspaceProvider> workspaceProvider);
   }
 }
 

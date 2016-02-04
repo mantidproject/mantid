@@ -69,6 +69,7 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(Mantid::API::IMDWorkspace_sptr wo
 
   // Get presenter and data set factory set up
   auto factoryChain = getDataSetFactoryChain(isHistoWorkspace, thresholdRange, normalization, time);
+
   auto presenter = getPresenter(isHistoWorkspace, workspace, recursionDepth);
 
   // Create the vtk data
@@ -77,7 +78,7 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(Mantid::API::IMDWorkspace_sptr wo
   auto dataSet = presenter->execute(factoryChain.get(), nullProgressA, nullProgressB);
 
   // Do an orthogonal correction
-  dataSet = getDataSetWithOrthogonalCorrection(dataSet, presenter.get(), isHistoWorkspace);
+  dataSet = getDataSetWithOrthogonalCorrection(dataSet, presenter.get(), workspace, isHistoWorkspace);
 
   // Write the data to the file
   vtkSmartPointer<vtkXMLWriter> writer  = getXMLWriter(isHistoWorkspace);
@@ -118,11 +119,13 @@ std::unique_ptr<MDLoadingPresenter> SaveMDWorkspaceToVTKImpl::getPresenter(bool 
   auto view = Kernel::make_unique<Mantid::VATES::MDLoadingViewSimple>();
   auto workspaceProvider = Mantid::Kernel::make_unique<SingleWorkspaceProvider>(workspace);
   if (isHistoWorkspace) {
-    presenter = createInMemoryPresenter<MDHWInMemoryLoadingPresenter>(std::move(view), workspace, std::move(workspaceProvider));
+    InMemoryPresenterFactory<MDHWInMemoryLoadingPresenter, EmptyWorkspaceNamePolicy> presenterFactory;
+    presenter = presenterFactory.create(std::move(view), workspace, std::move(workspaceProvider));
   }
   else {
     view->setRecursionDepth(recursionDepth);
-    presenter = createInMemoryPresenter<MDEWInMemoryLoadingPresenter>(std::move(view), workspace, std::move(workspaceProvider));
+    InMemoryPresenterFactory<MDEWInMemoryLoadingPresenter, EmptyWorkspaceNamePolicy> presenterFactory;
+    presenter = presenterFactory.create(std::move(view), workspace, std::move(workspaceProvider));
   }
   return presenter;
 }
@@ -223,12 +226,18 @@ vtkSmartPointer<vtkXMLWriter> SaveMDWorkspaceToVTKImpl::getXMLWriter(bool isHist
   return writer;
 }
 
-vtkSmartPointer<vtkDataSet> SaveMDWorkspaceToVTKImpl::getDataSetWithOrthogonalCorrection(vtkSmartPointer<vtkDataSet> dataSet, MDLoadingPresenter* presenter, bool isHistoWorkspace)  const{
+vtkSmartPointer<vtkDataSet> SaveMDWorkspaceToVTKImpl::getDataSetWithOrthogonalCorrection(vtkSmartPointer<vtkDataSet> dataSet,
+                                                                                         MDLoadingPresenter* presenter,
+                                                                                         Mantid::API::IMDWorkspace_sptr workspace,
+                                                                                         bool isHistoWorkspace)  const{
   if (!isHistoWorkspace) {
     vtkSmartPointer<vtkPVClipDataSet> clipped = getClippedDataSet(dataSet);
     dataSet = clipped->GetOutput();
   }
-  applyCOBMatrixSettingsToVtkDataSet(presenter, dataSet);
+
+
+  auto workspaceProvider = Mantid::Kernel::make_unique<SingleWorkspaceProvider>(workspace);
+  applyCOBMatrixSettingsToVtkDataSet(presenter, dataSet, std::move(workspaceProvider));
   presenter->setAxisLabels(dataSet);
 
   return dataSet;

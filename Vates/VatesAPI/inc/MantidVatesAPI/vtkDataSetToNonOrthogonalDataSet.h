@@ -1,6 +1,7 @@
 #ifndef MANTID_VATES_VTKDATASETTONONORTHOGONALDATASET_H_
 #define MANTID_VATES_VTKDATASETTONONORTHOGONALDATASET_H_
 
+#include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
@@ -53,9 +54,9 @@ namespace VATES
   {
   public:
     /// Static execution method
-    static void exec(vtkDataSet *dataset, std::string name);
+    static void exec(vtkDataSet *dataset, std::string name, std::unique_ptr<WorkspaceProvider> workspaceProvider);
     /// Constructor
-    vtkDataSetToNonOrthogonalDataSet(vtkDataSet *dataset, std::string name);
+    vtkDataSetToNonOrthogonalDataSet(vtkDataSet *dataset, std::string name, std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider);
     /// Class execution method
     void execute();
     /// Destructor
@@ -83,6 +84,7 @@ namespace VATES
     Kernel::V3D m_basisZ; ///< The Z direction basis vector
     Kernel::SpecialCoordinateSystem m_coordType; ///< The coordinate system for the workspace
     std::array<double, 6> m_boundingBox;
+    std::unique_ptr<Mantid::VATES::WorkspaceProvider> m_workspaceProvider;
   };
 
 

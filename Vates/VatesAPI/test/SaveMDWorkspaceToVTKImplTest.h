@@ -128,7 +128,6 @@ public:
     // Assert -- at this point we can only check that a vtk (xml) structured grid file (vts) has been created
     auto fileExists = doesFileExist(filenameExpected);
     TSM_ASSERT("The .vts file should have been saved to the default save directory", fileExists);
-
     // Cleanup
     removeTemporaryFile(filenameExpected);
   }

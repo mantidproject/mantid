@@ -1,4 +1,4 @@
-# This is mainly here so you don't get a complaint when running cmake
+#This is mainly here so you don't get a complaint when running cmake
 cmake_minimum_required( VERSION 2.8.12 )
 
 project( VatesAPI )
@@ -174,6 +174,7 @@ test/MetaDataExtractorUtilsTest.h
 test/MetadataJsonManagerTest.h
 test/MetadataToFieldDataTest.h
 test/NormalizationTest.h
+test/PresenterUtilitiesTest.h
 test/SaveMDWorkspaceToVTKTest.h
 test/SaveMDWorkspaceToVTKImplTest.h
 test/SingleWorkspaceProviderTest.h
