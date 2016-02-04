@@ -24,7 +24,8 @@ public:
 
   void test_that_incorrectly_initiated_provider_cannot_provide() {
     // Arrange
-    Mantid::VATES::SingleWorkspaceProvider provider(nullptr);
+    Mantid::API::IMDWorkspace_sptr emptyWorkspace;
+    Mantid::VATES::SingleWorkspaceProvider provider(emptyWorkspace);
     // Act
     auto canProvide = provider.canProvideWorkspace("");
     // Assert

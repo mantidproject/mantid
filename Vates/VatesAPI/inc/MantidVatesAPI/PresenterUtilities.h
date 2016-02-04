@@ -27,7 +27,7 @@ namespace Mantid
 namespace VATES
 {
 
-class EmptyWorkspaceNamePolicy
+class DLLExport EmptyWorkspaceNamePolicy
 {
 protected:
     std::string getWorkspaceName(Mantid::API::IMDWorkspace_sptr)
@@ -36,7 +36,7 @@ protected:
     }
 };
 
-class NonEmptyWorkspaceNamePolicy
+class DLLExport NonEmptyWorkspaceNamePolicy
 {
 protected:
     std::string getWorkspaceName(Mantid::API::IMDWorkspace_sptr workspace)
@@ -53,7 +53,7 @@ protected:
  * @returns a new in memory loading presenter.
  */
 template <class Presenter, class WorkspaceNamePolicy>
-class InMemoryPresenterFactory : private WorkspaceNamePolicy
+class DLLExport InMemoryPresenterFactory : private WorkspaceNamePolicy
 {
     using WorkspaceNamePolicy::getWorkspaceName;
 
@@ -70,25 +70,22 @@ public:
 };
 
 /// Creates a facotry chain for MDHisto workspaces
-std::unique_ptr<vtkMDHistoHex4DFactory<TimeToTimeStep>>
-createFactoryChainForHistoWorkspace(ThresholdRange_scptr threshold,
+std::unique_ptr<vtkMDHistoHex4DFactory<TimeToTimeStep>> DLLExport createFactoryChainForHistoWorkspace(ThresholdRange_scptr threshold,
                                     VisualNormalization normalization,
                                     double time);
 
 /// Creates a factory chain for MDEvent workspaces
-std::unique_ptr<vtkMDHexFactory>
-createFactoryChainForEventWorkspace(ThresholdRange_scptr threshold,
+std::unique_ptr<vtkMDHexFactory> DLLExport createFactoryChainForEventWorkspace(ThresholdRange_scptr threshold,
                                     VisualNormalization normalization,
                                     double time);
 
 /// Function to apply the Change-of-Basis-Matrix
-void applyCOBMatrixSettingsToVtkDataSet(
+void DLLExport applyCOBMatrixSettingsToVtkDataSet(
     Mantid::VATES::MDLoadingPresenter *presenter, vtkDataSet *dataSet,
     std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider);
 
 /// Function to get clipped data sets.
-vtkSmartPointer<vtkPVClipDataSet>
-getClippedDataSet(vtkSmartPointer<vtkDataSet> dataSet);
+vtkSmartPointer<vtkPVClipDataSet> DLLExport getClippedDataSet(vtkSmartPointer<vtkDataSet> dataSet);
 
 /// Create name with timestamp attached.
 std::string DLLExport createTimeStampedName(std::string name);

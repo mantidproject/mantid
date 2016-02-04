@@ -91,7 +91,7 @@ void vtkDataSetToNonOrthogonalDataSet::exec(
  * This is the private class constructor.
  * @param dataset : The VTK data to modify
  * @param name : The MDWorkspace containing the information to construct.
- * @param workspaceProvider:The provider of one or multiple workspaces.
+ * @param workspaceProvider: The provider of one or multiple workspaces.
  */
 vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
     vtkDataSet *dataset, std::string name,
