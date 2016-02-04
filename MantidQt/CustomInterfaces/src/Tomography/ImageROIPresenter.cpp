@@ -157,6 +157,21 @@ void ImageROIPresenter::processNewStack() {
     return;
   }
 
+  for (size_t i = 0; i < imgs.size(); i++) {
+    const std::string extShort = imgs[i].substr(imgs[i].size() - 3);
+    const std::string extLong = imgs[i].substr(imgs[i].size() - 4);
+    const std::string expectedShort = "fit";
+    const std::string expectedLong = "fits";
+    if (extShort != expectedShort && extLong != expectedLong) {
+      m_view->userWarning("Invalid files found in the stack of images",
+                          "Found files with unrecognized extension. Expected "
+                          "files with extension '" +
+                              expectedShort + "' or '" + expectedLong +
+                              "' but found: " + imgs[i]);
+      return;
+    }
+  }
+
   Mantid::API::WorkspaceGroup_sptr wsg = loadFITSStack(imgs);
   if (!wsg)
     return;
@@ -226,14 +241,30 @@ void ImageROIPresenter::processShutDown() { m_view->saveSettings(); }
 
 Mantid::API::WorkspaceGroup_sptr
 ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
+  if (imgs.empty())
+    return Mantid::API::WorkspaceGroup_sptr();
+
   const std::string wsName = "__stack_fits_viewer_tomography_gui";
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   if (ads.doesExist(wsName)) {
     ads.remove(wsName);
   }
-  for (size_t i = 0; i < imgs.size(); ++i) {
-    loadFITSImage(imgs[i], wsName);
+
+  // This would be the alternative that loads images one by one (one
+  // algorithm run per image file)
+  // for (size_t i = 0; i < imgs.size(); ++i) {
+  //  loadFITSImage(imgs[i], wsName);
+  // }
+
+  // Load all image files using a list with their names
+  std::string allPaths;
+  size_t i = 0;
+  allPaths = imgs[i];
+  i++;
+  while (i < imgs.size()) {
+    allPaths.append(", " + imgs[i++]);
   }
+  loadFITSImage(allPaths, wsName);
 
   Mantid::API::WorkspaceGroup_sptr wsg;
   try {

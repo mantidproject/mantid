@@ -72,6 +72,9 @@ protected:
   void processSetupReconTool();
   void processRunRecon();
 
+  void subprocessRunReconRemote();
+  void subprocessRunReconLocal();
+
 protected slots:
   /// It may be run on user request, or periodically from a timer/thread
   void processRefreshJobs();
@@ -97,6 +100,11 @@ private:
   /// Associated model for this presenter (MVP pattern)
   const boost::scoped_ptr<TomographyIfaceModel> m_model;
 
+  /// To prepare a local run
+  void makeRunnableWithOptionsLocal(const std::string &comp, std::string &run,
+                                    std::string &opt);
+
+  // TODO: replace this with an std::mutex. Also below for threads.
   // mutex for the job status info update operations on the view
   QMutex *m_statusMutex;
 

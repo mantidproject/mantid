@@ -484,13 +484,14 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
   // %J.error"
 
   // Two applications are for now registered on SCARF:
-  //  TOMOPY_0_0_3, PYASTRATOOLBOX_1_1
-  std::string appName = "TOMOPY_0_0_3";
+  //  TOMOPY_0_0_3, PYASTRATOOLBOX_1_1 - old versions
+  //  TOMOPY_0_1_9, PYASTRATOOLBOX_1_6 - newer versions (Dec 2015)
+  std::string appName = "TOMOPY_0_1_9";
   // Basic attempt at guessing the app that we might really need. This
   // is not fixed/unstable at the moment
-  if (runnablePath.find("astra-2d-FBP") != std::string::npos ||
-      runnablePath.find("astra-3d-SIRT3D") != std::string::npos) {
-    appName = "PYASTRATOOLBOX_1_1";
+  if (runnablePath.find("--tool astra") != std::string::npos ||
+      runnablePath.find("--tool=astra") != std::string::npos) {
+    appName = "PYASTRATOOLBOX_1_6";
   }
 
   // this gets executed (for example via 'exec' or 'python', depending on the
