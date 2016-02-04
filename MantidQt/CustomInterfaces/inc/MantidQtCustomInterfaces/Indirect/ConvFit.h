@@ -64,6 +64,8 @@ private:
   void updatePlotOptions();
   QString convertFuncToShort(const QString &);
   QString convertBackToShort(const std::string &original);
+  void addParametersToTree(const QStringList &parameters, const QString &currentFitFunction);
+
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
   QtTreePropertyBrowser *m_cfTree;
@@ -83,9 +85,9 @@ private:
 
   // Used in auto generating defaults for parameters
   QMap<QString, double> m_defaultParams;
-  QMap<QString, double> ConvFit::createDefaultParamsMap(QMap<QString, double> map);
-  QMap<QString, double> ConvFit::addLorentzianFitToDeafultQMap(QMap<QString, double> map, const double &amplitude, const double &peakCentre, const double &fwhm);
-  QMap<QString, double> ConvFit::constructFullPropertyMap(QMap<QString, double> defaultMap, const QStringList parameters, const QString &fitFunction);
+  QMap<QString, double> createDefaultParamsMap(QMap<QString, double> map);
+  QMap<QString, double> addLorentzianFitToDeafultQMap(QMap<QString, double> map, const double &amplitude, const double &peakCentre, const double &fwhm);
+  QMap<QString, double> constructFullPropertyMap(QMap<QString, double> defaultMap, const QStringList parameters, const QString &fitFunction);
 };
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -1558,13 +1558,10 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   m_uiForm.ckPlotGuess->setChecked(false);
   m_uiForm.ckTieCentres->setChecked(false);
 
-  // Add new parameter elements
-  int fitFunctionIndex = m_uiForm.cbFitType->currentIndex();
-  QStringList parameters = getFunctionParameters(functionName);
   updatePlotOptions();
 
   // Two Lorentzians Fit
-  if (fitFunctionIndex == 2) {
+  if (currentFitFunction.compare("Two Lorentzians") == 0) {
     m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
     m_cfTree->addProperty(m_properties["FitFunction1"]);
     m_properties["FitFunction2"] = m_grpManager->addProperty("Lorentzian 2");
@@ -1574,31 +1571,43 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
 
-  // No fit function parameters required for None
+  // If there are parameters in the list, add them
+  const QStringList parameters = getFunctionParameters(functionName);
   if (parameters.isEmpty() != true) {
-    const QMap<QString, double> fullPropertyMap = constructFullPropertyMap(
-        m_defaultParams, parameters, currentFitFunction);
-    const QStringList keys = fullPropertyMap.keys();
-    for (auto i = keys.begin(); i != keys.end(); ++i) {
-      const auto fullPropertyName = QString(*i);
-      const auto paramName = fullPropertyName.right(
-          fullPropertyName.size() - fullPropertyName.lastIndexOf(".") - 1);
-      const auto propName =
-          fullPropertyName.left(fullPropertyName.lastIndexOf("."));
-      m_properties[fullPropertyName] = m_dblManager->addProperty(paramName);
-      m_dblManager->setValue(m_properties[fullPropertyName],
-                             fullPropertyMap[fullPropertyName]);
-      m_dblManager->setDecimals(m_properties[fullPropertyName], NUM_DECIMALS);
-      if (propName.compare("Lorentzian 2") == 0) {
-        m_properties["FitFunction2"]->addSubProperty(
-            m_properties[fullPropertyName]);
-      } else {
-        m_properties["FitFunction1"]->addSubProperty(
-            m_properties[fullPropertyName]);
-      }
+	  addParametersToTree(parameters, currentFitFunction);
+  }
+
+  m_previousFit = m_uiForm.cbFitType->currentText();
+}
+
+/**
+ * Adds all the parameters that are required for the currentFitFunction to the parameter tree
+ * @param parameters			:: A QStringList of all the parameters for the current fit function
+ * @param currentFitFunction	:: The name of the current fit function
+ */
+void ConvFit::addParametersToTree(const QStringList &parameters,
+                                  const QString &currentFitFunction) {
+  const QMap<QString, double> fullPropertyMap =
+      constructFullPropertyMap(m_defaultParams, parameters, currentFitFunction);
+  const QStringList keys = fullPropertyMap.keys();
+  for (auto i = keys.begin(); i != keys.end(); ++i) {
+    const auto fullPropertyName = QString(*i);
+    const auto paramName = fullPropertyName.right(
+        fullPropertyName.size() - fullPropertyName.lastIndexOf(".") - 1);
+    const auto propName =
+        fullPropertyName.left(fullPropertyName.lastIndexOf("."));
+    m_properties[fullPropertyName] = m_dblManager->addProperty(paramName);
+    m_dblManager->setValue(m_properties[fullPropertyName],
+                           fullPropertyMap[fullPropertyName]);
+    m_dblManager->setDecimals(m_properties[fullPropertyName], NUM_DECIMALS);
+    if (propName.compare("Lorentzian 2") == 0) {
+      m_properties["FitFunction2"]->addSubProperty(
+          m_properties[fullPropertyName]);
+    } else {
+      m_properties["FitFunction1"]->addSubProperty(
+          m_properties[fullPropertyName]);
     }
   }
-  m_previousFit = m_uiForm.cbFitType->currentText();
 }
 
 /**
@@ -1753,8 +1762,7 @@ ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
         }
       }
     }
-    // All Other Fitfunctions
-  } else {
+  } else {     // All Other fit functions
     for (auto param = parameters.begin(); param != parameters.end(); ++param) {
       QString fullPropName = fitFuncName + "." + QString(*param);
       if (defaultMap.contains(QString(*param))) {
