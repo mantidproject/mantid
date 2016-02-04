@@ -16,6 +16,7 @@
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/LineViewer.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
+#include "MantidQtMantidWidgets/MWSpectrogram.h"
 #include "MantidQtAPI/AlgorithmPropertiesWidget.h"
 #include "MantidQtMantidWidgets/ProcessingAlgoWidget.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
@@ -132,6 +133,10 @@ DECLARE_WIDGET_PLUGIN(SafeQwtPlotPlugin,
     MantidQt::MantidWidgets::SafeQwtPlot,
     "Version of QwtPlot with workspace-level thread safety");
 
+DECLARE_WIDGET_PLUGIN(MWSpectrogramPlugin,
+    MantidQt::MantidWidgets::MWSpectrogram,
+    "2D view of a MatrixWorkspace");
+
 DECLARE_WIDGET_PLUGIN(AlgorithmPropertiesWidgetPlugin,
     MantidQt::API::AlgorithmPropertiesWidget,
     "List of algorithm properties");
@@ -147,5 +152,4 @@ DECLARE_WIDGET_PLUGIN(MessageDisplayPlugin,
 DECLARE_WIDGET_PLUGIN(DataSelectorPlugin,
     MantidQt::MantidWidgets::DataSelector,
     "Choose a file path or workspace to work with");
-
 #endif

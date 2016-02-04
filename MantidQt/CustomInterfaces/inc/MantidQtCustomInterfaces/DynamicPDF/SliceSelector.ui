@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>432</width>
+    <width>535</width>
     <height>654</height>
    </rect>
   </property>
@@ -40,7 +40,7 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="MantidQt::MantidWidgets::DataSelector" name="dataSelector" native="true"/>
+        <widget class="MantidQt::MantidWidgets::DataSelector" name="dataSelector"/>
        </item>
       </layout>
      </widget>
@@ -93,6 +93,9 @@
          <enum>Qt::Vertical</enum>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="MantidQt::MantidWidgets::MWSpectrogram" name="slices2DPlot"/>
       </item>
      </layout>
     </item>
@@ -184,6 +187,17 @@
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWSpectrogram</class>
+   <extends>QwtPlot</extends>
+   <header>MantidQtMantidWidgets/MWSpectrogram.h</header>
+  </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
