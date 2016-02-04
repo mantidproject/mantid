@@ -161,6 +161,29 @@ class AlignComponents(PythonAlgorithm):
                              doc="Maximum relative gamma rotation (deg)")
         self.setPropertySettings("MaxGammaRotation", condition)
 
+        # Translation
+        self.setPropertyGroup("Xposition","Translation")
+        self.setPropertyGroup("MinXposition","Translation")
+        self.setPropertyGroup("MaxXposition","Translation")
+        self.setPropertyGroup("Yposition","Translation")
+        self.setPropertyGroup("MinYposition","Translation")
+        self.setPropertyGroup("MaxYposition","Translation")
+        self.setPropertyGroup("Zposition","Translation")
+        self.setPropertyGroup("MinZposition","Translation")
+        self.setPropertyGroup("MaxZposition","Translation")
+
+        # Rotation
+        self.setPropertyGroup("EulerConvention","Rotation")
+        self.setPropertyGroup("alphaRotation","Rotation")
+        self.setPropertyGroup("MinAlphaRotation","Rotation")
+        self.setPropertyGroup("MaxAlphaRotation","Rotation")
+        self.setPropertyGroup("betaRotation","Rotation")
+        self.setPropertyGroup("MinBetaRotation","Rotation")
+        self.setPropertyGroup("MaxBetaRotation","Rotation")
+        self.setPropertyGroup("gammaRotation","Rotation")
+        self.setPropertyGroup("MinGammaRotation","Rotation")
+        self.setPropertyGroup("MaxGammaRotation","Rotation")
+
     def validateInputs(self):
         """
         Does basic validation for inputs
