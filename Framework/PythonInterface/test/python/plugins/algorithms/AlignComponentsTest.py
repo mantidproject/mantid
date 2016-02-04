@@ -95,14 +95,14 @@ class AlignComponentsTest(unittest.TestCase):
 
         ws = mtd["testWS"]
         startPos = ws.getInstrument().getComponentByName(component).getPos()
-        startRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles() #YZX
+        startRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles("YZX") #YZX
         AlignComponents(CalibrationTable="calTable",
                         InputWorkspace="testWS",
                         ComponentList=component,
-                        Yrotation=True)
+                        alphaRotation=True)
         ws = mtd["testWS"]
         endPos = ws.getInstrument().getComponentByName(component).getPos()
-        endRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles() #YZX
+        endRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles("YZX") #YZX
         self.assertEqual(startPos, endPos)
         self.assertAlmostEqual(endRot[0],45.0,places=1)
         self.assertEqual(startRot[1], endRot[1])

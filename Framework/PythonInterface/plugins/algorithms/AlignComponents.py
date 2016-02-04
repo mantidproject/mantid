@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import chisquare
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, \
     ITableWorkspaceProperty, FileAction, FileProperty, WorkspaceProperty, InstrumentValidator, Progress
-from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, logger, Quat, V3D, StringArrayProperty
+from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, logger, Quat, V3D, StringArrayProperty, StringListValidator
 import mantid.simpleapi as api
 
 class AlignComponents(PythonAlgorithm):
@@ -12,12 +12,13 @@ class AlignComponents(PythonAlgorithm):
     Class to align components
     """
 
-    _optionsList = ["Xposition", "Yposition", "Zposition", "Xrotation", "Yrotation", "Zrotation"]
+    _optionsList = ["Xposition", "Yposition", "Zposition", "alphaRotation", "betaRotation", "gammaRotation"]
     _optionsDict = {}
     _initialPos = None
     _move = False
     _rotate = False
     _masking = False
+    _eulerConvention = None
 
     def category(self):
         """
@@ -115,44 +116,50 @@ class AlignComponents(PythonAlgorithm):
                              doc="Maximum relative Z bound (m)")
         self.setPropertySettings("MaxZposition", condition)
 
+        # euler angles convention
+        eulerConventions = ["ZXZ", "XYX", "YZY", "ZYZ", "XZX", "YXY", "XYZ", "YZX", "ZXY", "XZY", "ZYX", "YXZ"]
+        self.declareProperty(name="EulerConvention", defaultValue="YZX",
+                             validator=StringListValidator(eulerConventions),
+                             doc="Euler angles convention used when calculating and displaying angles, eg XYZ corresponding to alpha beta gamma.")
+
         # X rotation
-        self.declareProperty(name="Xrotation", defaultValue=False,
-                             doc="Refinerotation around X")
-        condition = EnabledWhenProperty("Xrotation", PropertyCriterion.IsDefault)
-        self.declareProperty(name="MinXrotation", defaultValue=-10.0,
+        self.declareProperty(name="alphaRotation", defaultValue=False,
+                             doc="Refine rotation around X")
+        condition = EnabledWhenProperty("alphaRotation", PropertyCriterion.IsDefault)
+        self.declareProperty(name="MinAlphaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Minimum relative Xrotation (deg)")
-        self.setPropertySettings("MinXrotation", condition)
-        self.declareProperty(name="MaxXrotation", defaultValue=10.0,
+                             doc="Minimum relative alpha rotation (deg)")
+        self.setPropertySettings("MinAlphaRotation", condition)
+        self.declareProperty(name="MaxAlphaRotation", defaultValue=10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Maximum relative Xrotation (deg)")
-        self.setPropertySettings("MaxXrotation", condition)
+                             doc="Maximum relative alpha rotation (deg)")
+        self.setPropertySettings("MaxAlphaRotation", condition)
 
         # Y rotation
-        self.declareProperty(name="Yrotation", defaultValue=False,
-                             doc="Refinerotation around Y")
-        condition = EnabledWhenProperty("Yrotation", PropertyCriterion.IsDefault)
-        self.declareProperty(name="MinYrotation", defaultValue=-10.0,
+        self.declareProperty(name="betaRotation", defaultValue=False,
+                             doc="Refine rotation around Y")
+        condition = EnabledWhenProperty("betaRotation", PropertyCriterion.IsDefault)
+        self.declareProperty(name="MinBetaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Minimum relative Yrotation (deg)")
-        self.setPropertySettings("MinYrotation", condition)
-        self.declareProperty(name="MaxYrotation", defaultValue=10.0,
+                             doc="Minimum relative beta rotation (deg)")
+        self.setPropertySettings("MinBetaRotation", condition)
+        self.declareProperty(name="MaxBetaRotation", defaultValue=10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Maximum relative Yrotation (deg)")
-        self.setPropertySettings("MaxYrotation", condition)
+                             doc="Maximum relative beta rotation (deg)")
+        self.setPropertySettings("MaxBetaRotation", condition)
 
         # Z rotation
-        self.declareProperty(name="Zrotation", defaultValue=False,
-                             doc="Refinerotation around Z")
-        condition = EnabledWhenProperty("Zrotation", PropertyCriterion.IsDefault)
-        self.declareProperty(name="MinZrotation", defaultValue=-10.0,
+        self.declareProperty(name="gammaRotation", defaultValue=False,
+                             doc="Refine rotation around Z")
+        condition = EnabledWhenProperty("gammaRotation", PropertyCriterion.IsDefault)
+        self.declareProperty(name="MinGammaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Minimum relative Zrotation (deg)")
-        self.setPropertySettings("MinZrotation", condition)
-        self.declareProperty(name="MaxZrotation", defaultValue=10.0,
+                             doc="Minimum relative gamma rotation (deg)")
+        self.setPropertySettings("MinGammaRotation", condition)
+        self.declareProperty(name="MaxGammaRotation", defaultValue=10.0,
                              validator=FloatBoundedValidator(-90, 90),
-                             doc="Maximum relative Zrotation (deg)")
-        self.setPropertySettings("MaxZrotation", condition)
+                             doc="Maximum relative gamma rotation (deg)")
+        self.setPropertySettings("MaxGammaRotation", condition)
 
     def validateInputs(self):
         """
@@ -195,7 +202,7 @@ class AlignComponents(PythonAlgorithm):
 
         # This checks that something will actually be refined,
         if not (self.getProperty("Xposition").value or self.getProperty("Yposition").value or self.getProperty("Zposition").value or
-                self.getProperty("Xrotation").value or self.getProperty("Yrotation").value or self.getProperty("Zrotation").value or
+                self.getProperty("alphaRotation").value or self.getProperty("betaRotation").value or self.getProperty("gammaRotation").value or
                 self.getProperty("FitSourcePosition").value or self.getProperty("FitSamplePosition").value):
             issues["Xposition"] = "You must calibrate at least one property"
 
@@ -203,6 +210,7 @@ class AlignComponents(PythonAlgorithm):
 
     #pylint: disable=too-many-branches
     def PyExec(self):
+        self._eulerConvention=self.getProperty('EulerConvention').value
         calWS = self.getProperty('CalibrationTable').value
         calWS = api.SortTableWorkspace(calWS, Columns='detid')
         maskWS = self.getProperty("MaskWorkspace").value
@@ -263,7 +271,7 @@ class AlignComponents(PythonAlgorithm):
         if self._optionsDict["Xposition"] or self._optionsDict["Yposition"] or self._optionsDict["Zposition"]:
             self._move = True
 
-        if self._optionsDict["Xrotation"] or self._optionsDict["Yrotation"] or self._optionsDict["Zrotation"]:
+        if self._optionsDict["alphaRotation"] or self._optionsDict["betaRotation"] or self._optionsDict["gammaRotation"]:
             self._rotate = True
 
         prog = Progress(self, start=0, end=1, nreports=len(components))
@@ -276,7 +284,7 @@ class AlignComponents(PythonAlgorithm):
             if lastDetID - firstDetID != lastIndex - firstIndex:
                 raise RuntimeError("Calibration detid doesn't match instrument")
 
-            eulerAngles = comp.getRotation().getEulerAngles() # [Y,Z,X]
+            eulerAngles = comp.getRotation().getEulerAngles(self._eulerConvention)
 
             logger.notice("Working on " + comp.getFullName() +
                           " Starting position is " + str(comp.getPos()) +
@@ -284,7 +292,7 @@ class AlignComponents(PythonAlgorithm):
 
             x0List = []
             self._initialPos = [comp.getPos().getX(), comp.getPos().getY(), comp.getPos().getZ(),
-                                eulerAngles[2], eulerAngles[0], eulerAngles[1]]
+                                eulerAngles[0], eulerAngles[1], eulerAngles[2]]
 
             boundsList = []
 
@@ -308,18 +316,18 @@ class AlignComponents(PythonAlgorithm):
                 x0List.append(self._initialPos[2])
                 boundsList.append((self._initialPos[2] + self.getProperty("MinZposition").value,
                                    self._initialPos[2] + self.getProperty("MaxZposition").value))
-            if self._optionsDict["Xrotation"]:
+            if self._optionsDict["alphaRotation"]:
                 x0List.append(self._initialPos[3])
-                boundsList.append((self._initialPos[3] + self.getProperty("MinXrotation").value,
-                                   self._initialPos[3] + self.getProperty("MaxXrotation").value))
-            if self._optionsDict["Yrotation"]:
+                boundsList.append((self._initialPos[3] + self.getProperty("MinAlphaRotation").value,
+                                   self._initialPos[3] + self.getProperty("MaxAlphaRotation").value))
+            if self._optionsDict["betaRotation"]:
                 x0List.append(self._initialPos[4])
-                boundsList.append((self._initialPos[4] + self.getProperty("MinYrotation").value,
-                                   self._initialPos[4] + self.getProperty("MaxYrotation").value))
-            if self._optionsDict["Zrotation"]:
+                boundsList.append((self._initialPos[4] + self.getProperty("MinBetaRotation").value,
+                                   self._initialPos[4] + self.getProperty("MaxBetaRotation").value))
+            if self._optionsDict["gammaRotation"]:
                 x0List.append(self._initialPos[5])
-                boundsList.append((self._initialPos[5] + self.getProperty("MinZrotation").value,
-                                   self._initialPos[5] + self.getProperty("MaxZrotation").value))
+                boundsList.append((self._initialPos[5] + self.getProperty("MinGammaRotation").value,
+                                   self._initialPos[5] + self.getProperty("MaxGammaRotation").value))
 
             results = minimize(self._minimisation_func, x0=x0List,
                                args=(wks_name,
@@ -338,7 +346,7 @@ class AlignComponents(PythonAlgorithm):
                                             RelativePosition=False)
 
             if self._rotate:
-                (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[4], xmap[5], xmap[3]) # YZX
+                (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5], self._eulerConvention)
                 api.RotateInstrumentComponent(wks_name, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
                                               RelativeRotation=False)
 
@@ -346,7 +354,7 @@ class AlignComponents(PythonAlgorithm):
             comp = api.mtd[wks_name].getInstrument().getComponentByName(component)
             logger.notice("Finshed " + comp.getFullName() +
                           " Final position is " + str(comp.getPos()) +
-                          " Final rotation is " + str(comp.getRotation().getEulerAngles()))
+                          " Final rotation is " + str(comp.getRotation().getEulerAngles(self._eulerConvention)))
 
             prog.report()
         logger.notice("Results applied to workspace "+wks_name)
@@ -363,7 +371,7 @@ class AlignComponents(PythonAlgorithm):
             api.MoveInstrumentComponent(wks_name, component, X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
 
         if self._rotate:
-            (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[4], xmap[5], xmap[3]) # YZX
+            (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5], self._eulerConvention) # YZX
             api.RotateInstrumentComponent(wks_name, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
                                           RelativeRotation=False)
 
@@ -426,7 +434,7 @@ class AlignComponents(PythonAlgorithm):
                 out.append(self._initialPos[self._optionsList.index(opt)])
         return out
 
-    def _eulerToQuat(self, alpha, beta, gamma, convention="YZX"):
+    def _eulerToQuat(self, alpha, beta, gamma, convention):
         """
         Convert Euler angles to a quaternion
         """
@@ -434,7 +442,7 @@ class AlignComponents(PythonAlgorithm):
         return (Quat(alpha, getV3D[convention[0]]) * Quat(beta, getV3D[convention[1]]) *
                 Quat(gamma, getV3D[convention[2]]))
 
-    def _eulerToAngleAxis(self, alpha, beta, gamma, convention="YZX"):
+    def _eulerToAngleAxis(self, alpha, beta, gamma, convention):
         """
         Convert Euler angles to a angle rotation around an axis
         """
