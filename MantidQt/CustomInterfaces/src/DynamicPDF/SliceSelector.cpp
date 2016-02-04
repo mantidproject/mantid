@@ -4,6 +4,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h"
+// includes for the 2D view
+#include "MantidQtMantidWidgets/SafeQwtPlot.h"
+#include <qwt_plot_spectrogram.h>
+
 //#include "MantidQtCustomInterfaces/DynamicPDF/BackgroundRemover.h"
 
 namespace {
@@ -37,7 +41,8 @@ DECLARE_SUBWINDOW(SliceSelector)
 // SliceSelector::SliceSelector(QWidget *parent) : UserSubWindow{parent},
 // m_loadedWorkspace{nullptr}, m_BackgroundRemover{nullptr} {
 SliceSelector::SliceSelector(QWidget *parent)
-    : UserSubWindow{parent}, m_loadedWorkspace{nullptr} {}
+    : UserSubWindow{parent}, m_view2D{nullptr,nullptr},
+      m_loadedWorkspace{nullptr} {}
 
 SliceSelector::~SliceSelector() { m_selectedWorkspaceIndex = 0; }
 
@@ -57,13 +62,12 @@ void SliceSelector::initLayout() {
 
 ///
 void SliceSelector::loadSlices(const QString &workspaceName) {
-
   m_loadedWorkspace =
       boost::make_shared<WorkspaceRecord>(workspaceName.toStdString());
   m_selectedWorkspaceIndex = 0;
   m_loadedWorkspace->updateMetadata(m_selectedWorkspaceIndex);
-  size_t maximumWorkspaceIndex =
-      m_loadedWorkspace->m_ws->getNumberHistograms() - 1;
+  int maximumWorkspaceIndex =
+      static_cast<int>(m_loadedWorkspace->m_ws->getNumberHistograms()) - 1;
 
   /// initialize the label displaying the energy
   m_uiForm.labelSliceEnergy->setText(
@@ -71,18 +75,21 @@ void SliceSelector::loadSlices(const QString &workspaceName) {
 
   /// initialize the spin box that selects the energy slice
   m_uiForm.spinboxSliceSelector->setMinimum(0);
-  m_uiForm.spinboxSliceSelector->setMaximum(
-      static_cast<int>(maximumWorkspaceIndex));
-  m_uiForm.spinboxSliceSelector->setValue(
-      static_cast<int>(0));
+  m_uiForm.spinboxSliceSelector->setMaximum(maximumWorkspaceIndex);
+  m_uiForm.spinboxSliceSelector->setValue(0);
   m_uiForm.spinboxSliceSelector->setSingleStep(1);
 
-  /// initialize the slider in the 2D view
+  /// initialize the slider next to the 2D view
   m_uiForm.sliderSelectSlice->setMinimum(0);
-  m_uiForm.sliderSelectSlice->setMaximum(
-        static_cast<int>(maximumWorkspaceIndex));
-  m_uiForm.spinboxSliceSelector->setValue(
-      static_cast<int>(0));
+  m_uiForm.sliderSelectSlice->setMaximum(maximumWorkspaceIndex);
+  m_uiForm.spinboxSliceSelector->setValue(0);
+
+  /// initialize the 2D view of the histogram;
+  m_view2D.plot2D = m_uiForm.slices2DPlot;
+  m_view2D.spectrogram = new QwtPlotSpectrogram();
+  m_view2D.spectrogram->attach(m_view2D.plot2D);
+  m_view2D.plot2D->setWorkspace(m_loadedWorkspace->m_ws);
+  m_view2D.plot2D->replot();
 
   /// initialize the preview plot
   updatePlotSelectedSlice();
@@ -98,13 +105,17 @@ void SliceSelector::updatePlotSelectedSlice() {
 
 /// Update all widgets in the form with the new selected index
 void SliceSelector::updateSelectedSlice(const int &newSelectedIndex) {
-  m_selectedWorkspaceIndex = newSelectedIndex;
-  m_loadedWorkspace->updateMetadata(m_selectedWorkspaceIndex);
-  m_uiForm.labelSliceEnergy->setText(
-      QString::fromStdString(m_loadedWorkspace->m_label));
-  m_uiForm.spinboxSliceSelector->setValue(m_selectedWorkspaceIndex);
-  m_uiForm.sliderSelectSlice->setValue(m_selectedWorkspaceIndex);
-  updatePlotSelectedSlice();
+  m_selectedWorkspaceIndex = static_cast<size_t>(newSelectedIndex);
+  /// Check  pointer m_loadedWorkspace because the user may attemp to manipulate
+  /// the widgets before (s)he loads any data
+  if (m_loadedWorkspace) {
+    m_loadedWorkspace->updateMetadata(m_selectedWorkspaceIndex);
+    m_uiForm.labelSliceEnergy->setText(
+        QString::fromStdString(m_loadedWorkspace->m_label));
+    m_uiForm.spinboxSliceSelector->setValue(newSelectedIndex);
+    m_uiForm.sliderSelectSlice->setValue(newSelectedIndex);
+    updatePlotSelectedSlice();
+  }
 }
 
 /// Initialize and/or update the dialog to remove the multiphonon background
