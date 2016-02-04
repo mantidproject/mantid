@@ -164,6 +164,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tabWidget.setCurrentIndex(0)
         self._init_table_widgets()
         self.ui.radioButton_ubFromTab1.setChecked(True)
+        self.ui.lineEdit_numSurveyOutput.setText('50')
 
         # Tab 'Access'
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
@@ -1045,6 +1046,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Get value
         counts_dict = self._myControl.survey(exp_number, start_scan, end_scan)
+        print '[DB-BAT] Counts dictionary: ', counts_dict
         self.ui.tableWidget_surveyTable.set_survey_result(counts_dict)
 
         self.ui.tableWidget_surveyTable.show_reflections(max_number)

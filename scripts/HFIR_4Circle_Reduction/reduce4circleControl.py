@@ -10,6 +10,7 @@
 ################################################################################
 import os
 import urllib2
+import csv
 
 import numpy
 
@@ -219,6 +220,9 @@ class CWSCDReductionControl(object):
         self._myLastPeakUB = None
         # Flag for data storage
         self._cacheDataOnly = False
+
+        # Dictionary to store survey information
+        self._surveyDict = dict()
 
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
@@ -1215,7 +1219,7 @@ class CWSCDReductionControl(object):
 
         return is_url_good, error_message
 
-    def setWebAccessMode(self, mode):
+    def set_web_access_mode(self, mode):
         """
         Set data access mode form server
         :param mode:
@@ -1336,7 +1340,26 @@ class CWSCDReductionControl(object):
         :param file_name:
         :return:
         """
-        # TODO/NOW/1st - Implement!
+        # Check requirements
+        assert isinstance(file_name, str)
+        assert len(self._surveyDict) > 0
+
+        # File name
+        if file_name.endswith('.csv') is False:
+            file_name = '%s.csv' % file_name
+
+        # Write file
+        titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L']
+        with open(file_name, 'w') as csvfile:
+            spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            spamwriter.writerow(titles)
+            for counts in self._surveyDict.keys():
+                # FIXME - Need to think of the case that there are 2 scans with same maximum det counts
+                items = list(self._surveyDict[counts])
+                items.insert(0, counts)
+                spamwriter.writerow(items)
+            # END-FOR
+        # END-WITH
 
         return
 
@@ -1534,16 +1557,20 @@ class CWSCDReductionControl(object):
                     if det_count > max_count:
                         max_count = det_count
                         max_row = i_row
-                    if max_count in counts_dict:
-                        # in case that there are some scans that have same maximum counts
+                # END-FOR
+                if max_count in counts_dict:
+                    # in case that there are some scans that have same maximum counts
+                    if isinstance(counts_dict[max_count], tuple):
                         counts_dict[max_count] = [counts_dict[max_count]]
-                        counts_dict[max_count].append((scan_number, max_row, h, k, l))
-                    else:
-                        counts_dict[max_count] = (scan_number, max_row, h, k, l)
+                    counts_dict[max_count].append((scan_number, max_row, h, k, l))
+                else:
+                    counts_dict[max_count] = (scan_number, max_row, h, k, l)
             except RuntimeError as e:
                 print e
                 break
         # END-FOR (scan_number)
+
+        self._surveyDict = counts_dict
 
         return counts_dict
 
