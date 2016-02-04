@@ -61,7 +61,8 @@ private:
   void exec();
   void cacheInputs();
   void initFileReader();
-  void readMainHeader();
+  int32_t readMainHeader();
+  void throwIfUnsupportedFileType(int32_t sqwType);
   void createOutputWorkspace();
   void readAllSPEHeadersToWorkspace();
   boost::shared_ptr<API::ExperimentInfo> readSingleSPEHeader();

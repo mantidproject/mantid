@@ -126,6 +126,13 @@ public:
                      std::invalid_argument);
   }
 
+  void test_Unsupported_SQW_Type_Throws_Error() {
+    auto algm = createAlgorithm();
+    algm->setProperty("Filename", "horace_dnd_test_file.sqw");
+    algm->setRethrows(true);
+    TS_ASSERT_THROWS(algm->execute(), std::runtime_error);
+  }
+
 private:
   struct Arguments {
     Arguments() : metadataOnly(false), outputFilename(), outputFrame() {}
@@ -146,7 +153,6 @@ private:
   IMDEventWorkspace_sptr runAlgorithm(Arguments args) {
     auto algm = createAlgorithm();
     algm->setProperty("Filename", m_filename);
-    algm->setProperty("OutputWorkspace", "__unused_value_for_child_algorithm");
     algm->setProperty("MetadataOnly", args.metadataOnly);
     algm->setProperty("OutputFilename", args.outputFilename);
     if (!args.outputFrame.empty()) {
@@ -160,6 +166,7 @@ private:
     IAlgorithm_uptr alg(Mantid::Kernel::make_unique<LoadSQW2>());
     alg->initialize();
     alg->setChild(true);
+    alg->setProperty("OutputWorkspace", "__unused_value_for_child_algorithm");
     return alg;
   }
 

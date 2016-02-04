@@ -139,7 +139,8 @@ void LoadSQW2::init() {
 void LoadSQW2::exec() {
   cacheInputs();
   initFileReader();
-  readMainHeader();
+  auto sqwType = readMainHeader();
+  throwIfUnsupportedFileType(sqwType);
   createOutputWorkspace();
   readAllSPEHeadersToWorkspace();
   skipDetectorSection();
@@ -164,11 +165,10 @@ void LoadSQW2::initFileReader() {
 /**
  * Reads the initial header section. Skips specifically the
  * following: app_name, app_version, sqw_type, ndims, filename, filepath,
- * title.
- * Stores the number of files.
- * @return A SQWHeader object describing the section
+ * title. Caches the number of contributing files.
+ * @return An integer describing the SQW type stored: 0 = DND, 1 = SQW
  */
-void LoadSQW2::readMainHeader() {
+int32_t LoadSQW2::readMainHeader() {
   std::string appName, filename, filepath, title;
   double appVersion(0.0);
   int32_t sqwType(-1), numDims(-1), nspe(-1);
@@ -188,6 +188,20 @@ void LoadSQW2::readMainHeader() {
        << "    nfiles: " << m_nspe << "\n";
     g_log.debug(os.str());
   }
+  return sqwType;
+}
+
+/**
+ * Throw std::runtime_error if the sqw type of the file is unsupported
+ * @param sqwType 0 = DND, 1 = SQW
+ */
+void LoadSQW2::throwIfUnsupportedFileType(int32_t sqwType) {
+  if (sqwType != 1) {
+    throw std::runtime_error("Unsupported SQW type: " +
+                             std::to_string(sqwType) +
+                             "\nOnly files containing the full pixel "
+                             "information are currently supported");
+  }
 }
 
 /// Create the output workspace object
@@ -198,7 +212,6 @@ void LoadSQW2::createOutputWorkspace() {
 /**
  * Read all of the SPE headers and fill in the experiment details on the
  * output workspace
- * @param nfiles The number of expected spe header sections
  */
 void LoadSQW2::readAllSPEHeadersToWorkspace() {
   m_outputTransforms.reserve(m_nspe);
