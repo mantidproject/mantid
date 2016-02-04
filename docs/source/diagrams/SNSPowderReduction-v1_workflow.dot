@@ -4,10 +4,10 @@ digraph SNSPowderReduction {
 
   subgraph params {
     $param_style
-    RunNumber
-    Sum
+    SampleRunList
     TimeFilterWall
     CalibrationFile
+    OutputWorkspaces
   }
 
   subgraph algorithms {
@@ -19,12 +19,14 @@ digraph SNSPowderReduction {
     compressEvents [label="CompressEvents v1"]
     processCanRun [label="Process Container Run\n(see workflow diagram 'Process Container Run'"]
     processVanRun [label="Process Vanadium Run\n(see workflow diagram 'Process Vanadium Run'"]
+    resetNegatives [label="ResetNegatives v1"]
+    scale [label="Scale v1"]
+    convertUnits [label="ConvertUnits v1"]
   }
 
 
   subgraph decisions{
     $decision_style
-    haveMPI [label="Have MPI?"]
     isSum [label="Is Sum True?"]
     isLastSampleRun [label="Is Last Sample Run Number?"]
     isCanRunDefined [label="Is container run specified?"]
@@ -46,7 +48,7 @@ digraph SNSPowderReduction {
   CalibrationFile   -> focusAndSum
   focusAndSum	    -> SamRunList
 
-  isSum		    -> isLastRunNumber [label="No"]
+  isSum		    -> getSampleRun [label="No"]
   getSampleRun	    -> focusChunks
   TimeFilterWall    -> focusChunks
   CalibrationFile   -> focusChunks
@@ -68,6 +70,12 @@ digraph SNSPowderReduction {
   processVanRun	    -> compressEvents
 
   compressEvents    -> mustDataPositive
+  mustDataPositive  -> resetNegatives [label="Yes"]
+  resetNegatives    -> scale
+  mustDataPositive  -> scale	      [label="No"]
+  scale		    -> convertUnits
+  convertUnits	    -> OutputWorkspaces
+
 
 
 }
