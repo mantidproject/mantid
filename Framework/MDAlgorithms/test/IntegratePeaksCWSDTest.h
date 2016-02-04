@@ -49,7 +49,7 @@ public:
   //-------------------------------------------------------------------------------
   /** Test integrate MDEventWorkspace with 1 run
    */
-  void test_singleRun()
+  void Ptest_singleRun()
   {
     // Initialize algorithm and set up
     IntegratePeaksCWSD alg;
@@ -89,7 +89,7 @@ public:
   //-------------------------------------------------------------------------------
   /** Test integrate MDEventWorkspace with 1 run
    */
-  void Xtest_multipleRun()
+  void test_multipleRun()
   {
     // Create workspaces to test
     std::vector<Mantid::Kernel::V3D> vec_qsample;
@@ -100,7 +100,8 @@ public:
 
     IMDEventWorkspace_sptr inputws = createMDWorkspace(vec_qsample, vec_signal,
                                                        vec_detid, vec_runnumbers);
-    AnalysisDataService::Instance().addOrReplace("TestMDWS", inputws);
+    AnalysisDataService::Instance().addOrReplace("TestMDWS2", inputws);
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TestMDWS2"));
 
     std::vector<int> runnumberlist;
     runnumberlist.push_back(vec_runnumbers.front());
@@ -109,18 +110,19 @@ public:
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
     peakcenterlist.push_back(peakcenter);
     peakcenterlist.push_back(peakcenter);
-    PeaksWorkspace_sptr peakws = buildPeakWorkspace(vec_runnumbers, peakcenterlist);
+    PeaksWorkspace_sptr peakws = buildPeakWorkspace(runnumberlist, peakcenterlist);
     AnalysisDataService::Instance().addOrReplace("TestPeaksWS", peakws);
 
     // Initialize algorithm and set up
     IntegratePeaksCWSD alg;
+    alg.initialize();
     TS_ASSERT(alg.isInitialized())
 
     alg.setProperty("InputWorkspace", inputws);
     alg.setProperty("PeaksWorkspace", peakws);
     alg.setProperty("OutputWorkspace", "IntegratedPeakWS");
     alg.setProperty("PeakRadius", 0.2);
-    alg.setPropertyValue("PeakCentre", "0, 0, 0");
+    alg.setPropertyValue("PeakCentre", "3, 3, 3");
     alg.setProperty("MergePeaks", true);
 
     alg.execute();
@@ -210,6 +212,18 @@ public:
           static_cast<float>(signal), static_cast<float>(error * error),
           static_cast<uint16_t>(runnumber), detid, millerindex.data());
     }
+
+    // Set up run information
+    ExperimentInfo_sptr exp_info = boost::make_shared<ExperimentInfo>();
+    exp_info->mutableRun().addProperty("run_number", 121);
+    exp_info->mutableRun().addProperty("monitor", 3021);
+    mdws->addExperimentInfo(exp_info);
+
+    ExperimentInfo_sptr exp_info2 = boost::make_shared<ExperimentInfo>();
+    exp_info2->mutableRun().addProperty("run_number", 144);
+    exp_info2->mutableRun().addProperty("monitor", 1022);
+    mdws->addExperimentInfo(exp_info2);
+
 
     return mdws;
   }

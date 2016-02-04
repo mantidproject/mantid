@@ -63,7 +63,7 @@ private:
 
   void convertSpiceMatrixToMomentumMDEvents(API::MatrixWorkspace_sptr dataws,
                                             bool usevirtual,
-                                            const detid_t &startdetid,
+                                            const detid_t &startdetid, const int scannnumber,
                                             const int runnumber, int monitor_counts);
 
   /// Convert |Q| with detector position to Q_sample
@@ -101,6 +101,7 @@ private:
   Kernel::V3D m_samplePos;
   Kernel::V3D m_sourcePos;
 
+  size_t m_iColScan;
   size_t m_iColPt;
   size_t m_iColFilename;
   size_t m_iColStartDetID;
