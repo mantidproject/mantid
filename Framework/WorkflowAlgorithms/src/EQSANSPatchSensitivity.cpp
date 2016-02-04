@@ -99,13 +99,13 @@ void EQSANSPatchSensitivity::exec() {
 
       // Apply patch
       progress(0.91, "Applying patch");
-      for (size_t k = 0; k < patched_ids.size(); k++) {
+      for (auto patched_id : patched_ids) {
         const Geometry::ComponentID det =
-            inputWS->getDetector(patched_ids[k])->getComponentID();
+            inputWS->getDetector(patched_id)->getComponentID();
         try {
           if (det) {
-            MantidVec &YValues = inputWS->dataY(patched_ids[k]);
-            MantidVec &YErrors = inputWS->dataE(patched_ids[k]);
+            MantidVec &YValues = inputWS->dataY(patched_id);
+            MantidVec &YErrors = inputWS->dataE(patched_id);
             if (useRegression) {
               YValues[0] = alpha + beta * det->getPos().Y();
               YErrors[0] = error;

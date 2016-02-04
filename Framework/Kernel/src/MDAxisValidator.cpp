@@ -12,11 +12,7 @@ namespace Kernel {
 MDAxisValidator::MDAxisValidator(const std::vector<int> &axes,
                                  const size_t nDimensions,
                                  const bool checkIfEmpty)
-    : m_wsDimensions(nDimensions), m_emptyCheck(checkIfEmpty) {
-  for (auto iter = axes.begin(); iter != axes.end(); iter++) {
-    m_axes.push_back(*iter);
-  }
-}
+    : m_axes(axes), m_wsDimensions(nDimensions), m_emptyCheck(checkIfEmpty) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

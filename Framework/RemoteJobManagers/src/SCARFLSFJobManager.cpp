@@ -224,8 +224,7 @@ std::string SCARFLSFJobManager::urlComponentEncode(const std::string &in) {
   out.fill('0');
   out << std::hex;
 
-  for (std::string::const_iterator i = in.begin(), n = in.end(); i != n; ++i) {
-    std::string::value_type c = (*i);
+  for (char c : in) {
     // unreserved characters go through, where:
     // unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
     if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
@@ -241,17 +240,21 @@ std::string SCARFLSFJobManager::urlComponentEncode(const std::string &in) {
 std::string
 SCARFLSFJobManager::guessJobSubmissionAppName(const std::string &runnablePath,
                                               const std::string &jobOptions) {
-  UNUSED_ARG(jobOptions);
+  UNUSED_ARG(runnablePath);
 
   // Two applications are for now registered and being used on SCARF:
-  //  TOMOPY_0_0_3, PYASTRATOOLBOX_1_1
-  std::string appName = "TOMOPY_0_0_3";
+  // tomopy and astra toolbox
+  // The first versions installed were: TOMOPY_0_0_3, PYASTRATOOLBOX_1_1
+  // The last versions installed as of this writing are:
+  // TOMOPY_0_1_9, PYASTRATOOLBOX_1_6
+  // Default: tomopy, as it loads the python module/environment
+  std::string appName = "TOMOPY_0_1_9";
 
   // Basic guess of the app that we might really need. Not
   // fixed/unstable at the moment
-  if (runnablePath.find("astra-2d-FBP") != std::string::npos ||
-      runnablePath.find("astra-3d-SIRT3D") != std::string::npos) {
-    appName = "PYASTRATOOLBOX_1_1";
+  if (jobOptions.find("--tool astra") != std::string::npos ||
+      jobOptions.find("--tool=astra") != std::string::npos) {
+    appName = "PYASTRATOOLBOX_1_6";
   }
 
   return appName;

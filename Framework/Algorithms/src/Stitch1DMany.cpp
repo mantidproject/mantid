@@ -71,13 +71,12 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
   if (inputWorkspacesStr.size() < 2)
     errors["InputWorkspaces"] = "At least 2 input workspaces required.";
 
-  for (auto ws = inputWorkspacesStr.begin(); ws != inputWorkspacesStr.end();
-       ++ws) {
-    if (AnalysisDataService::Instance().doesExist(*ws)) {
+  for (const auto &ws : inputWorkspacesStr) {
+    if (AnalysisDataService::Instance().doesExist(ws)) {
       m_inputWorkspaces.push_back(
-          AnalysisDataService::Instance().retrieveWS<Workspace>(*ws));
+          AnalysisDataService::Instance().retrieveWS<Workspace>(ws));
     } else {
-      errors["InputWorkspaces"] = *ws + " is not a valid workspace.";
+      errors["InputWorkspaces"] = ws + " is not a valid workspace.";
       break;
     }
   }
@@ -85,9 +84,8 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
   // Check that all the workspaces are of the same type
   if (m_inputWorkspaces.size() > 0) {
     const std::string id = m_inputWorkspaces[0]->id();
-    for (auto it = m_inputWorkspaces.begin(); it != m_inputWorkspaces.end();
-         ++it) {
-      if ((*it)->id() != id) {
+    for (auto &inputWorkspace : m_inputWorkspaces) {
+      if (inputWorkspace->id() != id) {
         errors["InputWorkspaces"] = "All workspaces must be the same type.";
         break;
       }
@@ -98,10 +96,9 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
         boost::dynamic_pointer_cast<WorkspaceGroup>(m_inputWorkspaces[0]);
     if (firstGroup) {
       size_t groupSize = firstGroup->size();
-      for (auto it = m_inputWorkspaces.begin(); it != m_inputWorkspaces.end();
-           ++it) {
+      for (auto &inputWorkspace : m_inputWorkspaces) {
         WorkspaceGroup_sptr group =
-            boost::dynamic_pointer_cast<WorkspaceGroup>(*it);
+            boost::dynamic_pointer_cast<WorkspaceGroup>(inputWorkspace);
         if (group->size() != groupSize) {
           errors["InputWorkspaces"] =
               "All group workspaces must be the same size.";
@@ -183,9 +180,8 @@ void Stitch1DMany::exec() {
 
     if (!isChild()) {
       // Copy each input workspace's history into our output workspace's history
-      for (auto inWS = m_inputWorkspaces.begin();
-           inWS != m_inputWorkspaces.end(); ++inWS)
-        lhsWS->history().addHistory((*inWS)->getHistory());
+      for (auto &inputWorkspace : m_inputWorkspaces)
+        lhsWS->history().addHistory(inputWorkspace->getHistory());
     }
     // We're a child algorithm, but we're recording history anyway
     else if (isRecordingHistoryForChild() && m_parentHistory) {
@@ -197,10 +193,10 @@ void Stitch1DMany::exec() {
   // We're dealing with group workspaces
   else {
     std::vector<WorkspaceGroup_sptr> groupWorkspaces;
-    for (auto it = m_inputWorkspaces.begin(); it != m_inputWorkspaces.end();
-         ++it)
+    groupWorkspaces.reserve(m_inputWorkspaces.size());
+    for (auto &inputWorkspace : m_inputWorkspaces)
       groupWorkspaces.push_back(
-          boost::dynamic_pointer_cast<WorkspaceGroup>(*it));
+          boost::dynamic_pointer_cast<WorkspaceGroup>(inputWorkspace));
 
     // List of workspaces to be grouped
     std::vector<std::string> toGroup;
@@ -215,8 +211,8 @@ void Stitch1DMany::exec() {
       // The name of the resulting workspace
       std::string outName = groupName;
 
-      for (size_t j = 0; j < groupWorkspaces.size(); ++j) {
-        const std::string wsName = groupWorkspaces[j]->getItem(i)->name();
+      for (auto &groupWorkspace : groupWorkspaces) {
+        const std::string wsName = groupWorkspace->getItem(i)->name();
         toProcess.push_back(wsName);
         outName += "_" + wsName;
       }

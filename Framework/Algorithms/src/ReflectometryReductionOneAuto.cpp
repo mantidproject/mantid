@@ -583,11 +583,11 @@ bool ReflectometryReductionOneAuto::processGroups() {
 
   // Copy all the non-workspace properties over
   std::vector<Property *> props = this->getProperties();
-  for (auto prop = props.begin(); prop != props.end(); ++prop) {
-    if (*prop) {
-      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(*prop);
+  for (auto &prop : props) {
+    if (prop) {
+      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (!wsProp)
-        alg->setPropertyValue((*prop)->name(), (*prop)->value());
+        alg->setPropertyValue(prop->name(), prop->value());
     }
   }
 

@@ -63,7 +63,7 @@ endif ()
 # Force 64-bit compiler as that's all we support
 ###########################################################################
 
-set ( CLANG_WARNINGS "-Wall -Wextra -pedantic -Winit-self -Wpointer-arith -Wcast-qual -fno-common  -Wno-deprecated-register -Wno-deprecated-declarations")
+set ( CLANG_WARNINGS "-Wall -Wextra -pedantic -Wconversion -Wno-sign-conversion -Winit-self -Wpointer-arith -Wcast-qual -fno-common -Wno-deprecated-declarations")
 
 set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 ${CLANG_WARNINGS}" )
 if(${CMAKE_VERSION} VERSION_GREATER 3.1.0 OR ${CMAKE_VERSION} VERSION_EQUAL 3.1.0)

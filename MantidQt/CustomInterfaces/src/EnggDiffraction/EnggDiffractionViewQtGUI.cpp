@@ -335,7 +335,7 @@ void EnggDiffractionViewQtGUI::readSettings() {
           .toString()
           .toStdString();
   m_calibSettings.m_forceRecalcOverwrite =
-      qs.value("rebin-calib", g_defaultRebinWidth).toFloat();
+      qs.value("rebin-calib", g_defaultRebinWidth).toBool();
 
   // 'focusing' block
   m_focusDir = qs.value("focus-dir").toString().toStdString();

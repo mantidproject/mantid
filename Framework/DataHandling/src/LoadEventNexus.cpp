@@ -57,9 +57,9 @@ void copyLogs(const Mantid::DataHandling::EventWorkspaceCollection_sptr &from,
   // from the logs, get all the properties that don't overwrite any
   // prop. already set in the sink workspace (like 'filename').
   auto props = from->mutableRun().getLogData();
-  for (size_t j = 0; j < props.size(); j++) {
-    if (!to->mutableRun().hasProperty(props[j]->name())) {
-      to->mutableRun().addLogData(props[j]->clone());
+  for (auto &prop : props) {
+    if (!to->mutableRun().hasProperty(prop->name())) {
+      to->mutableRun().addLogData(prop->clone());
     }
   }
 }
@@ -516,9 +516,9 @@ public:
 
     // Now, we look through existing ones to see if it is already loaded
     // thisBankPulseTimes = NULL;
-    for (size_t i = 0; i < alg->m_bankPulseTimes.size(); i++) {
-      if (alg->m_bankPulseTimes[i]->equals(thisNumPulses, thisStartTime)) {
-        thisBankPulseTimes = alg->m_bankPulseTimes[i];
+    for (auto &bankPulseTime : alg->m_bankPulseTimes) {
+      if (bankPulseTime->equals(thisNumPulses, thisStartTime)) {
+        thisBankPulseTimes = bankPulseTime;
         return;
       }
     }
@@ -1802,27 +1802,24 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
   if ((!someBanks.empty()) && (!monitors)) {
     // check that all of the requested banks are in the file
-    for (auto someBank = someBanks.begin(); someBank != someBanks.end();
-         ++someBank) {
+    for (auto &someBank : someBanks) {
       bool foundIt = false;
-      for (auto bankName = bankNames.begin(); bankName != bankNames.end();
-           ++bankName) {
-        if ((*bankName) == (*someBank) + "_events") {
+      for (auto &bankName : bankNames) {
+        if (bankName == someBank + "_events") {
           foundIt = true;
           break;
         }
       }
       if (!foundIt) {
-        throw std::invalid_argument("No entry named '" + (*someBank) +
+        throw std::invalid_argument("No entry named '" + someBank +
                                     "' was found in the .NXS file.\n");
       }
     }
 
     // change the number of banks to load
     bankNames.clear();
-    for (auto someBank = someBanks.begin(); someBank != someBanks.end();
-         ++someBank)
-      bankNames.push_back((*someBank) + "_events");
+    for (auto &someBank : someBanks)
+      bankNames.push_back(someBank + "_events");
 
     // how many events are in a bank
     bankNumEvents.clear();
@@ -2142,13 +2139,12 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
   }
   if (detList.size() == 0)
     return;
-  for (int i = 0; i < static_cast<int>(detList.size()); i++) {
+  for (auto &det : detList) {
     bool keep = false;
-    boost::shared_ptr<RectangularDetector> det = detList[i];
     std::string det_name = det->getName();
-    for (int j = 0; j < static_cast<int>(bankNames.size()); j++) {
-      size_t pos = bankNames[j].find("_events");
-      if (det_name.compare(bankNames[j].substr(0, pos)) == 0)
+    for (auto &bankName : bankNames) {
+      size_t pos = bankName.find("_events");
+      if (det_name.compare(bankName.substr(0, pos)) == 0)
         keep = true;
       if (keep)
         break;
@@ -2160,21 +2156,20 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
           boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
       asmb->getChildren(children, false);
-      for (int col = 0; col < static_cast<int>(children.size()); col++) {
+      for (auto &col : children) {
         boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-            boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-                children[col]);
+            boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
         std::vector<Geometry::IComponent_const_sptr> grandchildren;
         asmb2->getChildren(grandchildren, false);
 
-        for (int row = 0; row < static_cast<int>(grandchildren.size()); row++) {
-          Detector *d = dynamic_cast<Detector *>(
-              const_cast<IComponent *>(grandchildren[row].get()));
+        for (auto &row : grandchildren) {
+          Detector *d =
+              dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
           if (d)
             inst->removeDetector(d);
         }
       }
-      IComponent *comp = dynamic_cast<IComponent *>(detList[i].get());
+      IComponent *comp = dynamic_cast<IComponent *>(det.get());
       inst->remove(comp);
     }
   }
@@ -2203,12 +2198,12 @@ void LoadEventNexus::createSpectraMapping(
   if (!monitorsOnly && !bankNames.empty()) {
     std::vector<IDetector_const_sptr> allDets;
 
-    for (auto name = bankNames.begin(); name != bankNames.end(); ++name) {
+    for (const auto &bankName : bankNames) {
       // Only build the map for the single bank
       std::vector<IDetector_const_sptr> dets;
-      m_ws->getInstrument()->getDetectorsInBank(dets, (*name));
+      m_ws->getInstrument()->getDetectorsInBank(dets, bankName);
       if (dets.empty())
-        throw std::runtime_error("Could not find the bank named '" + (*name) +
+        throw std::runtime_error("Could not find the bank named '" + bankName +
                                  "' as a component assembly in the instrument "
                                  "tree; or it did not contain any detectors."
                                  " Try unchecking SingleBankPixelsOnly.");
@@ -2506,11 +2501,11 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
     if (!m_specList.empty()) {
       int i = 0;
       std::vector<int32_t> spec_temp, udet_temp;
-      for (auto it = spec.begin(); it != spec.end(); it++) {
-        if (find(m_specList.begin(), m_specList.end(), *it) !=
+      for (auto &element : spec) {
+        if (find(m_specList.begin(), m_specList.end(), element) !=
             m_specList.end()) // spec element *it is not in spec_list
         {
-          spec_temp.push_back(*it);
+          spec_temp.push_back(element);
           udet_temp.push_back(udet.at(i));
         }
         i++;
@@ -2741,9 +2736,8 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
         // spread the events uniformly inside the bin
         boost::uniform_real<> distribution(left, right);
         std::vector<double> random_numbers(m);
-        for (auto it = random_numbers.begin(); it != random_numbers.end();
-             ++it) {
-          *it = distribution(rand_gen);
+        for (double &random_number : random_numbers) {
+          random_number = distribution(rand_gen);
         }
         std::sort(random_numbers.begin(), random_numbers.end());
         auto it = random_numbers.begin();

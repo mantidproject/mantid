@@ -8,15 +8,17 @@ namespace NeXus {
 
 std::vector<std::string> NXAttributes::names() const {
   std::vector<std::string> out;
-  for (auto it = m_values.cbegin(); it != m_values.cend(); ++it)
-    out.push_back(it->first);
+  out.reserve(m_values.size());
+  for (const auto &value : m_values)
+    out.push_back(value.first);
   return out;
 }
 
 std::vector<std::string> NXAttributes::values() const {
   std::vector<std::string> out;
-  for (auto it = m_values.begin(); it != m_values.end(); ++it)
-    out.push_back(it->second);
+  out.reserve(m_values.size());
+  for (const auto &value : m_values)
+    out.push_back(value.second);
   return out;
 }
 
@@ -593,7 +595,7 @@ Kernel::Property *NXLog::createSingleValueProperty() {
   } else if (nxType == NX_UINT8) {
     NXDataSetTyped<unsigned char> value(*this, valAttr);
     value.load();
-    bool state = (value[0] == 0) ? false : true;
+    bool state = value[0] != 0;
     prop = new Kernel::PropertyWithValue<bool>(name(), state);
   } else {
     prop = NULL;

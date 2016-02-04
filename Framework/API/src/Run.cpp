@@ -102,14 +102,14 @@ Run &Run::operator+=(const Run &rhs) {
   mergeMergables(m_manager, rhs.m_manager);
 
   // Other properties are added together if they are on the approved list
-  for (int i = 0; i < ADDABLES; ++i) {
-    if (rhs.m_manager.existsProperty(ADDABLE[i])) {
+  for (const auto &name : ADDABLE) {
+    if (rhs.m_manager.existsProperty(name)) {
       // get a pointer to the property on the right-hand side workspace
-      Property *right = rhs.m_manager.getProperty(ADDABLE[i]);
+      Property *right = rhs.m_manager.getProperty(name);
 
       // now deal with the left-hand side
-      if (m_manager.existsProperty(ADDABLE[i])) {
-        Property *left = m_manager.getProperty(ADDABLE[i]);
+      if (m_manager.existsProperty(name)) {
+        Property *left = m_manager.getProperty(name);
         left->operator+=(right);
       } else
         // no property on the left-hand side, create one and copy the
@@ -135,11 +135,10 @@ void Run::splitByTime(TimeSplitterType &splitter,
   // std::vector<LogManager *> outputsBase(outputs.begin(),outputs.end());
   LogManager::splitByTime(splitter, outputs);
 
-  size_t n = outputs.size();
   // Re-integrate proton charge of all outputs
-  for (size_t i = 0; i < n; i++) {
-    if (outputs[i]) {
-      auto run = dynamic_cast<Run *>(outputs[i]);
+  for (auto output : outputs) {
+    if (output) {
+      auto run = dynamic_cast<Run *>(output);
       if (run)
         run->integrateProtonCharge();
     }
@@ -398,9 +397,7 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    // Get the name/class pair
-    const std::pair<std::string, std::string> &name_class = *it;
+  for (const auto &name_class : entries) {
     if (name_class.second == "NXpositioner") {
       // Goniometer class
       m_goniometer.loadNexus(file, name_class.first);
@@ -506,15 +503,15 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
   // get pointers to all the properties on the right-handside and prepare to
   // loop through them
   const std::vector<Property *> inc = toAdd.getProperties();
-  for (auto it = inc.cbegin(); it != inc.cend(); ++it) {
-    const std::string rhs_name = (*it)->name();
+  for (auto ptr : inc) {
+    const std::string &rhs_name = ptr->name();
     try {
       // now get pointers to the same properties on the left-handside
       Property *lhs_prop(sum.getProperty(rhs_name));
-      lhs_prop->merge(*it);
+      lhs_prop->merge(ptr);
     } catch (Exception::NotFoundError &) {
       // copy any properties that aren't already on the left hand side
-      Property *copy = (*it)->clone();
+      Property *copy = ptr->clone();
       // And we add a copy of that property to *this
       sum.declareProperty(copy, "");
     }

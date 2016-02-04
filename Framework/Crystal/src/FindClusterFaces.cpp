@@ -120,8 +120,7 @@ void findFacesAtIndex(const size_t linearIndex, IMDIterator *mdIterator,
                                                    indexes);
 
   const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
-  for (size_t i = 0; i < neighbours.size(); ++i) {
-    size_t neighbourLinearIndex = neighbours[i];
+  for (auto neighbourLinearIndex : neighbours) {
     const int neighbourId =
         static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
 
@@ -372,11 +371,9 @@ void FindClusterFaces::exec() {
   for (int i = 0; i < nIterators; ++i) {
     const ClusterFaces &localClusterFaces = clusterFaces[i];
 
-    for (auto it = localClusterFaces.begin(); it != localClusterFaces.end();
-         ++it) {
+    for (const auto &clusterFace : localClusterFaces) {
       if (!limitRows || (out->rowCount() < size_t(maxRows))) {
         TableRow row = out->appendRow();
-        const ClusterFace &clusterFace = *it;
         row << clusterFace.clusterId << double(clusterFace.workspaceIndex)
             << clusterFace.faceNormalDimension << clusterFace.maxEdge
             << clusterFace.radius;

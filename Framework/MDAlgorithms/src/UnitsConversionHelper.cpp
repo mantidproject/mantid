@@ -59,9 +59,7 @@ UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,
 /** Test and check if units conversion really occurs. Return true if unit
  * conversion happens or false if noConversion mode is selected*/
 bool UnitsConversionHelper::isUnitConverted() const {
-  if (m_UnitCnvrsn == CnvrtToMD::ConvertNo)
-    return false;
-  return true;
+  return m_UnitCnvrsn != CnvrtToMD::ConvertNo;
 }
 /** Initialize unit conversion helper
  * This method is interface to internal initialize method, which actually takes
@@ -109,18 +107,12 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr,
 // the helper function which used in the code below to simplify check if the
 // variable is in range
 inline bool inRange(const std::pair<double, double> &range, const double &val) {
-  if (val >= range.first && val <= range.second)
-    return true;
-  else
-    return false;
+  return val >= range.first && val <= range.second;
 }
 // the helper function which used in the code below to simplify check if the
 // variable is in range
 inline bool inRange(const double &xMin, const double &xMax, const double &val) {
-  if (val >= xMin && val <= xMax)
-    return true;
-  else
-    return false;
+  return val >= xMin && val <= xMax;
 }
 
 /** Method verify if the Units transformation is well defined in the range

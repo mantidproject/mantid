@@ -358,7 +358,6 @@ void IntegrateMDHistoWorkspace::exec() {
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < int(outIterators.size()); ++i) {
-
       PARALLEL_START_INTERUPT_REGION
       boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
           dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i]));
@@ -410,8 +409,8 @@ void IntegrateMDHistoWorkspace::exec() {
         // calculated what the width vector would need to be.
         auto neighbourIndexes =
             inIterator->findNeighbourIndexesByWidth(widthVector);
-        for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
-          inIterator->jumpTo(neighbourIndexes[i]); // Go to that neighbour
+        for (auto neighbourIndex : neighbourIndexes) {
+          inIterator->jumpTo(neighbourIndex); // Go to that neighbour
           performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors,
                              sumNEvents);
         }

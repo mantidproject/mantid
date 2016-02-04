@@ -33,6 +33,8 @@ set ( TEST_PY_FILES
       test/SANSBatchModeTest.py
       test/SANSCentreFinderTest.py
       test/SANSCommandInterfaceTest.py
+      test/SANSDarkRunCorrectionTest.py
+      test/SANSUserFileParserTest.py
       test/SANSUtilityTest.py
       test/SANSIsisInstrumentTest.py
       test/SANSReductionStepsUserFileTest.py

@@ -35,17 +35,16 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(
   mustBeMoreThen1->setLower(1);
 
   // Split up comma-separated properties
-  std::vector<int> value;
   typedef Poco::StringTokenizer tokenizer;
   tokenizer values(SplitInto, ",",
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-  value.clear();
-  value.reserve(values.count());
-  for (auto it = values.begin(); it != values.end(); ++it)
-    value.push_back(boost::lexical_cast<int>(*it));
+  std::vector<int> valueVec;
+  valueVec.reserve(values.count());
+  for (const auto &value : values)
+    valueVec.push_back(boost::lexical_cast<int>(value));
 
   declareProperty(
-      new ArrayProperty<int>("SplitInto", value),
+      new ArrayProperty<int>("SplitInto", valueVec),
       "A comma separated list of into how many sub-grid elements each "
       "dimension should split; "
       "or just one to split into the same number for all dimensions. Default " +
