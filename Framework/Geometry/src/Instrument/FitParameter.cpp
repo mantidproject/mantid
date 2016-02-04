@@ -196,7 +196,7 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
 
   // read optional entries
   values.reserve(10);
-  while (values.size() <= 10)
+  while (values.size() < 10)
     values.emplace_back("");
 
   f.setConstraintMin(values[3]);
