@@ -3,26 +3,28 @@
 
 #include "MantidVatesAPI/MDLoadingView.h"
 
-namespace Mantid {
-namespace VATES {
+namespace Mantid
+{
+namespace VATES
+{
 
-class DLLExport MDLoadingViewSimple : public MDLoadingView {
+class DLLExport MDLoadingViewSimple : public MDLoadingView
+{
 public:
-  double getTime() const override;
-  void setTime(double time);
+    double getTime() const override;
+    void setTime(double time);
 
-  size_t getRecursionDepth() const override;
-  void setRecursionDepth(size_t recursionDepth);
+    size_t getRecursionDepth() const override;
+    void setRecursionDepth(size_t recursionDepth);
 
-  bool getLoadInMemory() const override;
-  void setLoadInMemory(bool loadInMemory);
+    bool getLoadInMemory() const override;
+    void setLoadInMemory(bool loadInMemory);
 
 private:
-  double m_time = 0.0;
-  size_t m_recursionDepth = 5;
-  bool m_loadInMemory = true;
+    double m_time = 0.0;
+    size_t m_recursionDepth = 5;
+    bool m_loadInMemory = true;
 };
-
 }
 }
 

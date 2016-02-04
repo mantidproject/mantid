@@ -4,24 +4,27 @@
 #include "WorkspaceProvider.h"
 #include "MantidAPI/Workspace.h"
 
-
-namespace Mantid {
-namespace VATES {
+namespace Mantid
+{
+namespace VATES
+{
 
 /**
- * @brief The SingleWorkspaceProvider class holds a reference to a single IMDWorkspace. Note that this
+ * @brief The SingleWorkspaceProvider class holds a reference to a single
+ * IMDWorkspace. Note that this
  *        means that the workspace does not have to live in the ADS.
  */
-class DLLExport SingleWorkspaceProvider : public WorkspaceProvider{
+class DLLExport SingleWorkspaceProvider : public WorkspaceProvider
+{
 public:
-  SingleWorkspaceProvider(Mantid::API::Workspace_sptr workspace);
-  bool canProvideWorkspace(std::string wsName) const;
-  Mantid::API::Workspace_sptr fetchWorkspace(std::string wsName) const;
-  void disposeWorkspace(std::string wsName) const;
-private:
-  Mantid::API::Workspace_sptr m_workspace = nullptr;
-};
+    SingleWorkspaceProvider(Mantid::API::Workspace_sptr workspace);
+    bool canProvideWorkspace(std::string wsName) const;
+    Mantid::API::Workspace_sptr fetchWorkspace(std::string wsName) const;
+    void disposeWorkspace(std::string wsName) const;
 
+private:
+    Mantid::API::Workspace_sptr m_workspace = nullptr;
+};
 }
 }
 
