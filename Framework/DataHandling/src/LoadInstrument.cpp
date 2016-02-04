@@ -222,11 +222,9 @@ void LoadInstrument::runLoadParameterFile() {
     std::vector<std::string> directoryNames =
         configService.getInstrumentDirectories();
 
-    for (auto instDirs_itr = directoryNames.begin();
-         instDirs_itr != directoryNames.end(); ++instDirs_itr) {
+    for (auto directoryName : directoryNames) {
       // This will iterate around the directories from user ->etc ->install, and
       // find the first beat file
-      std::string directoryName = *instDirs_itr;
       fullPathParamIDF = getFullPathParamIDF(directoryName);
       // stop when you find the first one
       if (!fullPathParamIDF.empty())

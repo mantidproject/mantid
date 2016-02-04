@@ -224,8 +224,7 @@ std::string SCARFLSFJobManager::urlComponentEncode(const std::string &in) {
   out.fill('0');
   out << std::hex;
 
-  for (std::string::const_iterator i = in.begin(), n = in.end(); i != n; ++i) {
-    std::string::value_type c = (*i);
+  for (char c : in) {
     // unreserved characters go through, where:
     // unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
     if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {

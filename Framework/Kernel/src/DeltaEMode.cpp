@@ -35,10 +35,10 @@ const std::vector<std::string> DeltaEMode::availableTypes() {
   std::vector<std::string> modes;
   modes.reserve(lookup.index.size());
   size_t index(0);
-  for (auto iter = lookup.index.begin(); iter != lookup.index.end(); ++iter) {
-    if (iter->first == DeltaEMode::Undefined)
+  for (const auto &iter : lookup.index) {
+    if (iter.first == DeltaEMode::Undefined)
       continue;
-    modes.push_back(iter->second);
+    modes.push_back(iter.second);
     ++index;
   }
   return modes;
@@ -68,10 +68,10 @@ std::string DeltaEMode::asString(const Type mode) {
  */
 DeltaEMode::Type DeltaEMode::fromString(const std::string &modeStr) {
   const ModeIndex &lookup = typeStringLookup();
-  for (auto iter = lookup.index.begin(); iter != lookup.index.end(); ++iter) {
-    if (boost::iequals(modeStr, iter->second)) // case-insensitive
+  for (const auto &iter : lookup.index) {
+    if (boost::iequals(modeStr, iter.second)) // case-insensitive
     {
-      return iter->first;
+      return iter.first;
     }
   }
   // Unknown mode

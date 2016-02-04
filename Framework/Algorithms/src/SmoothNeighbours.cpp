@@ -299,8 +299,8 @@ void SmoothNeighbours::findNeighboursRectangular() {
 
           // Adjust the weights of each neighbour to normalize to unity
           if (!sum || expandSumAllPixels)
-            for (size_t q = 0; q < neighbours.size(); q++)
-              neighbours[q].second /= totalWeight;
+            for (auto &neighbour : neighbours)
+              neighbour.second /= totalWeight;
 
           // Save the list of neighbours for this output workspace index.
           m_neighbours[outWI] = neighbours;
@@ -399,11 +399,11 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     std::vector<weightedNeighbour> neighbours;
 
     // Convert from spectrum numbers to workspace indices
-    for (auto it = neighbSpectra.begin(); it != neighbSpectra.end(); ++it) {
-      specid_t spec = it->first;
+    for (auto &specDistance : neighbSpectra) {
+      specid_t spec = specDistance.first;
 
       // Use the weighting strategy to calculate the weight.
-      double weight = WeightedSum->weightAt(it->second);
+      double weight = WeightedSum->weightAt(specDistance.second);
 
       if (weight > 0) {
         // Find the corresponding workspace index
@@ -433,8 +433,8 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
 
     // Adjust the weights of each neighbour to normalize to unity
     if (sum == 1)
-      for (size_t q = 0; q < neighbours.size(); q++)
-        neighbours[q].second /= totalWeight;
+      for (auto &neighbour : neighbours)
+        neighbour.second /= totalWeight;
 
     // Save the list of neighbours for this output workspace index.
     m_neighbours[outWI] = neighbours;
@@ -542,8 +542,8 @@ Check whether the properties provided are all in their default state.
 */
 bool areAllDefault(ConstVecProperties &properties) {
   bool areAllDefault = false;
-  for (auto it = properties.cbegin(); it != properties.cend(); ++it) {
-    if (!(*it)->isDefault()) {
+  for (auto property : properties) {
+    if (!property->isDefault()) {
       return areAllDefault;
     }
   }

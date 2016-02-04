@@ -302,8 +302,8 @@ void ILLParser::parseFieldNumeric(std::map<std::string, std::string> &header,
   for (int i = 0; i < nTextLines; i++) {
     std::getline(fin, line);
     std::vector<std::string> s = splitLineInFixedWithFields(line, fieldWith);
-    for (auto it = s.begin(); it != s.end(); ++it) {
-      keys[index] = *it;
+    for (auto &type : s) {
+      keys[index] = type;
       index += 1;
     }
   }
@@ -314,8 +314,8 @@ void ILLParser::parseFieldNumeric(std::map<std::string, std::string> &header,
     std::getline(fin, line);
     std::vector<std::string> s = splitLineInFixedWithFields(line, fieldWith);
     pos += s.size();
-    for (auto it = s.begin(); it != s.end(); ++it) {
-      values[index] = *it;
+    for (auto &value : s) {
+      values[index] = value;
       index += 1;
     }
   }
@@ -346,9 +346,9 @@ std::vector<int> ILLParser::parseFieldISpec(int fieldWith) {
     std::getline(fin, line);
     std::vector<std::string> s = splitLineInFixedWithFields(line, fieldWith);
     nSpectraRead += static_cast<int>(s.size());
-    for (auto it = s.begin(); it != s.end(); ++it) {
+    for (auto &value : s) {
       // sscanf is much faster than lexical_cast / erase_spaces
-      sscanf(it->c_str(), "%8d", &spectrumValues[index]);
+      sscanf(value.c_str(), "%8d", &spectrumValues[index]);
       index += 1;
     }
   }
@@ -361,8 +361,8 @@ std::vector<int> ILLParser::parseFieldISpec(int fieldWith) {
  */
 void ILLParser::showHeader() {
   std::cout << "* Global header" << '\n';
-  for (auto it = header.begin(); it != header.end(); ++it)
-    std::cout << it->first << " => " << it->second << '\n';
+  for (auto &value : header)
+    std::cout << value.first << " => " << value.second << '\n';
 
   std::cout << "* Spectrum header" << '\n';
   int i = 0;
@@ -458,12 +458,12 @@ T ILLParser::getValue(const std::string &field,
 
   T ret = std::numeric_limits<T>::infinity();
 
-  for (auto it = thisHeader.begin(); it != thisHeader.end(); ++it) {
+  for (const auto &value : thisHeader) {
     // std::cout << it->first << "=>" << it->second << '\n';
-    std::size_t pos = it->first.find(field);
+    std::size_t pos = value.first.find(field);
     if (pos != std::string::npos) {
       // std::cout << "Found field: " << field << "=>" << it->second << '\n';
-      ret = evaluate<T>(it->second);
+      ret = evaluate<T>(value.second);
     }
   }
 

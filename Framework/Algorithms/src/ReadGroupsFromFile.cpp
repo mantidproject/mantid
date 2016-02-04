@@ -225,11 +225,11 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
     Poco::StringTokenizer data(ids, ",", Poco::StringTokenizer::TOK_TRIM);
 
     if (data.begin() != data.end()) {
-      for (auto it = data.begin(); it != data.end(); ++it) {
+      for (const auto &value : data) {
         // cast the string to an int
         int detID;
         try {
-          detID = boost::lexical_cast<int>(*it);
+          detID = boost::lexical_cast<int>(value);
         } catch (boost::bad_lexical_cast &) {
           throw Mantid::Kernel::Exception::FileError(
               "Could cast string to integer in input XML file", filename);

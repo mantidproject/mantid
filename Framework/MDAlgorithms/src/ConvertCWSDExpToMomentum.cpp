@@ -421,8 +421,8 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
   // Add all the other propertys from original data workspace
   const std::vector<Kernel::Property *> vec_property =
       dataws->run().getProperties();
-  for (size_t i = 0; i < vec_property.size(); ++i) {
-    expinfo->mutableRun().addProperty(vec_property[i]->clone());
+  for (auto property : vec_property) {
+    expinfo->mutableRun().addProperty(property->clone());
   }
 
   m_outputWS->addExperimentInfo(expinfo);

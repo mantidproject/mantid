@@ -33,8 +33,7 @@ void Fit::initConcrete() {
                          "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
-  auto mustBePositive = boost::shared_ptr<Kernel::BoundedValidator<int>>(
-      new Kernel::BoundedValidator<int>());
+  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "MaxIterations", 500, mustBePositive->clone(),
@@ -63,11 +62,11 @@ void Fit::initConcrete() {
   std::vector<std::string> costFuncOptions =
       API::CostFunctionFactory::Instance().getKeys();
   // select only CostFuncFitting variety
-  for (auto it = costFuncOptions.begin(); it != costFuncOptions.end(); ++it) {
+  for (auto &costFuncOption : costFuncOptions) {
     auto costFunc = boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-        API::CostFunctionFactory::Instance().create(*it));
+        API::CostFunctionFactory::Instance().create(costFuncOption));
     if (!costFunc) {
-      *it = "";
+      costFuncOption = "";
     }
   }
   declareProperty(
@@ -109,11 +108,11 @@ void Fit::initConcrete() {
   */
 void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
   auto &properties = minimizer.getProperties();
-  for (auto prop = properties.begin(); prop != properties.end(); ++prop) {
-    if ((**prop).direction() == Kernel::Direction::Output &&
-        (**prop).isValid() == "") {
-      Kernel::Property *property = (**prop).clone();
-      declareProperty(property);
+  for (auto property : properties) {
+    if ((*property).direction() == Kernel::Direction::Output &&
+        (*property).isValid() == "") {
+      Kernel::Property *clonedProperty = (*property).clone();
+      declareProperty(clonedProperty);
     }
   }
 }

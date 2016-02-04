@@ -171,12 +171,12 @@ void ChangeTimeZero::shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws,
   // 2. string properties: here we change the values if they are ISO8601 times
   auto logs = ws->mutableRun().getLogData();
   Progress prog(this, startProgress, stopProgress, logs.size());
-  for (auto iter = logs.begin(); iter != logs.end(); ++iter) {
-    if (isTimeSeries(*iter)) {
-      shiftTimeInLogForTimeSeries(ws, *iter, timeShift);
+  for (auto &log : logs) {
+    if (isTimeSeries(log)) {
+      shiftTimeInLogForTimeSeries(ws, log, timeShift);
 
     } else if (auto stringProperty =
-                   dynamic_cast<PropertyWithValue<std::string> *>(*iter)) {
+                   dynamic_cast<PropertyWithValue<std::string> *>(log)) {
       shiftTimeOfLogForStringProperty(stringProperty, timeShift);
     }
 

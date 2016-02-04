@@ -78,8 +78,8 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete
 // workspaces, so I moved this from protected to public.
 MatrixWorkspace::~MatrixWorkspace() {
-  for (unsigned int i = 0; i < m_axes.size(); ++i) {
-    delete m_axes[i];
+  for (auto &axis : m_axes) {
+    delete axis;
   }
 }
 
@@ -469,8 +469,8 @@ detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(
         map[*detList.begin()] = workspaceIndex;
     } else {
       // Allow multiple detectors per workspace index
-      for (auto it = detList.begin(); it != detList.end(); ++it)
-        map[*it] = workspaceIndex;
+      for (auto det : detList)
+        map[det] = workspaceIndex;
     }
 
     // Ignore if the detector list is empty.
@@ -519,11 +519,11 @@ void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
 
     // Allow multiple detectors per workspace index, or,
     // If only one is allowed, then this has thrown already
-    for (auto it = detList.cbegin(); it != detList.cend(); ++it) {
-      int index = *it + offset;
+    for (auto det : detList) {
+      int index = det + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
-                         "): detector ID found (" << *it
+                         "): detector ID found (" << det
                       << " at workspace index " << workspaceIndex
                       << ") is invalid." << std::endl;
       } else
@@ -595,19 +595,18 @@ void MatrixWorkspace::getIndicesFromDetectorIDs(
   std::map<detid_t, std::set<size_t>> detectorIDtoWSIndices;
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     auto detIDs = getSpectrum(i)->getDetectorIDs();
-    for (auto it = detIDs.begin(); it != detIDs.end(); ++it) {
-      detectorIDtoWSIndices[*it].insert(i);
+    for (auto detID : detIDs) {
+      detectorIDtoWSIndices[detID].insert(i);
     }
   }
 
   indexList.clear();
   indexList.reserve(detIdList.size());
-  for (size_t j = 0; j < detIdList.size(); ++j) {
-    auto wsIndices = detectorIDtoWSIndices.find(detIdList[j]);
+  for (const auto detId : detIdList) {
+    auto wsIndices = detectorIDtoWSIndices.find(detId);
     if (wsIndices != detectorIDtoWSIndices.end()) {
-      for (auto it = wsIndices->second.begin(); it != wsIndices->second.end();
-           ++it) {
-        indexList.push_back(*it);
+      for (auto index : wsIndices->second) {
+        indexList.push_back(index);
       }
     }
   }
@@ -628,13 +627,13 @@ void MatrixWorkspace::getSpectraFromDetectorIDs(
   spectraList.clear();
 
   // Try every detector in the list
-  for (auto it = detIdList.cbegin(); it != detIdList.cend(); ++it) {
+  for (auto detId : detIdList) {
     bool foundDet = false;
     specid_t foundSpecNum = 0;
 
     // Go through every histogram
     for (size_t i = 0; i < this->getNumberHistograms(); i++) {
-      if (this->getSpectrum(i)->hasDetectorID(*it)) {
+      if (this->getSpectrum(i)->hasDetectorID(detId)) {
         foundDet = true;
         foundSpecNum = this->getSpectrum(i)->getSpectrumNo();
         break;
@@ -1012,11 +1011,11 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
   spec->clearData();
 
   const std::set<detid_t> dets = spec->getDetectorIDs();
-  for (auto iter = dets.cbegin(); iter != dets.cend(); ++iter) {
+  for (auto detId : dets) {
     try {
       if (const Geometry::Detector *det =
               dynamic_cast<const Geometry::Detector *>(
-                  sptr_instrument->getDetector(*iter).get())) {
+                  sptr_instrument->getDetector(detId).get())) {
         m_parmap->addBool(det, "masked", true); // Thread-safe method
       }
     } catch (Kernel::Exception::NotFoundError &) {
@@ -1620,9 +1619,9 @@ void MatrixWorkspace::saveSpectraMapNexus(
     const ::NeXus::NXcompression compression) const {
   // Count the total number of detectors
   std::size_t nDetectors = 0;
-  for (size_t i = 0; i < spec.size(); i++) {
-    size_t wi = size_t(spec[i]); // Workspace index
-    nDetectors += this->getSpectrum(wi)->getDetectorIDs().size();
+  for (auto index : spec) {
+    nDetectors +=
+        this->getSpectrum(static_cast<size_t>(index))->getDetectorIDs().size();
   }
 
   if (nDetectors < 1) {

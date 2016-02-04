@@ -135,9 +135,8 @@ void AbsorptionCorrection::exec() {
   // If sample not at origin, shift cached positions.
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
   if (samplePos != V3D(0, 0, 0)) {
-    for (auto it = m_elementPositions.begin(); it != m_elementPositions.end();
-         ++it) {
-      (*it) += samplePos;
+    for (auto &elementPosition : m_elementPositions) {
+      elementPosition += samplePos;
     }
   }
 

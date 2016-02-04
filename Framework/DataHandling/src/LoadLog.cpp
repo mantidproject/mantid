@@ -466,8 +466,8 @@ bool LoadLog::SNSTextFormatColumns(const std::string &str,
   boost::split(strs, str, boost::is_any_of("\t "));
   double val;
   // Every column must evaluate to a double
-  for (size_t i = 0; i < strs.size(); i++) {
-    if (!Strings::convert<double>(strs[i], val))
+  for (auto &str : strs) {
+    if (!Strings::convert<double>(str, val))
       return false;
     else
       out.push_back(val);
