@@ -80,7 +80,7 @@ class AlignComponents(PythonAlgorithm):
         # X position
         self.declareProperty(name="Xposition", defaultValue=False,
                              doc="Refine Xposition")
-        condition = EnabledWhenProperty("Xposition", PropertyCriterion.IsDefault)
+        condition = EnabledWhenProperty("Xposition", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinXposition", defaultValue=-0.1,
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Minimum relative X bound (m)")
@@ -93,7 +93,7 @@ class AlignComponents(PythonAlgorithm):
         # Y position
         self.declareProperty(name="Yposition", defaultValue=False,
                              doc="Refine Yposition")
-        condition = EnabledWhenProperty("Yposition", PropertyCriterion.IsDefault)
+        condition = EnabledWhenProperty("Yposition", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinYposition", defaultValue=-0.1,
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Minimum relative Y bound (m)")
@@ -106,7 +106,7 @@ class AlignComponents(PythonAlgorithm):
         # Z position
         self.declareProperty(name="Zposition", defaultValue=False,
                              doc="Refine Zposition")
-        condition = EnabledWhenProperty("Zposition", PropertyCriterion.IsDefault)
+        condition = EnabledWhenProperty("Zposition", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinZposition", defaultValue=-0.1,
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Minimum relative Z bound (m)")
@@ -125,7 +125,7 @@ class AlignComponents(PythonAlgorithm):
         # X rotation
         self.declareProperty(name="alphaRotation", defaultValue=False,
                              doc="Refine rotation around X")
-        condition = EnabledWhenProperty("alphaRotation", PropertyCriterion.IsDefault)
+        condition = EnabledWhenProperty("alphaRotation", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinAlphaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
                              doc="Minimum relative alpha rotation (deg)")
@@ -138,7 +138,7 @@ class AlignComponents(PythonAlgorithm):
         # Y rotation
         self.declareProperty(name="betaRotation", defaultValue=False,
                              doc="Refine rotation around Y")
-        condition = EnabledWhenProperty("betaRotation", PropertyCriterion.IsDefault)
+        condition = EnabledWhenProperty("betaRotation", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinBetaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
                              doc="Minimum relative beta rotation (deg)")
@@ -151,7 +151,7 @@ class AlignComponents(PythonAlgorithm):
         # Z rotation
         self.declareProperty(name="gammaRotation", defaultValue=False,
                              doc="Refine rotation around Z")
-        condition = EnabledWhenProperty("gammaRotation", PropertyCriterion.IsDefault)
+        condition = EnabledWhenProperty("gammaRotation", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinGammaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
                              doc="Minimum relative gamma rotation (deg)")
