@@ -1,5 +1,5 @@
 ﻿# pylint: disable=too-many-lines, too-many-branches, invalid-name, super-on-old-class, protected-access,
-# too-few-public-methods,too-few-public-methods, too-many-arguments
+# pylint: disable=too-few-public-methods,too-few-public-methods, too-many-arguments, too-many-instance-attributes
 """
     This file defines what happens in each step in the data reduction, it's
     the guts of the reduction. See ISISReducer for order the steps are run
@@ -1763,13 +1763,14 @@ class DarkRunSubtraction(object):
 
         # Check that for each of these settings we only have one run number specified, else raise an error
         has_max_one_run_number = lambda indices : len(set([run_number[index] for index in indices])) < 2
-        if (not has_max_one_run_number(indices_time_detector) or \
-            not has_max_one_run_number(indices_time_monitor) or \
-            not has_max_one_run_number(indices_uamp_detector) or \
-            not has_max_one_run_number(indices_uamp_monitor)):
-                raise RuntimeError("DarkRunSubtraction: More background correction runs have been specified than are allowed. "
-                                   "There can be maximally one run number for each time-based detector, "
-                                   "uamp-based detector, time-based monitor and uamp-based monitor settings.\n")
+        if not has_max_one_run_number(indices_time_detector) or \
+           not has_max_one_run_number(indices_time_monitor) or \
+           not has_max_one_run_number(indices_uamp_detector) or \
+           not has_max_one_run_number(indices_uamp_monitor):
+            raise RuntimeError("DarkRunSubtraction: More background correction runs have been "
+                               "specified than are allowed. "
+                               "There can be maximally one run number for each time-based detector, "
+                               "uamp-based detector, time-based monitor and uamp-based monitor settings.\n")
 
         # Handle detectors
         self._dark_run_time_detector_setting = self._get_final_setting_detectors(run_number, use_mean,
@@ -1802,7 +1803,7 @@ class DarkRunSubtraction(object):
         detector_mean = [use_mean[index] for index in indices]
         detector_time = [use_time[index] for index in indices]
 
-        if len(detector_runs) == 0 or detector_runs[0] == None:
+        if len(detector_runs) == 0 or detector_runs[0] is None:
             return None
         else:
             return DarkRunSubtraction.DarkRunSubtractionSettings(run_number = detector_runs[0],
@@ -1850,7 +1851,7 @@ class DarkRunSubtraction(object):
 
         # If the runs are empty or None then we don't have any settings here
         unique_runs = list(set(monitor_runs))
-        if len(unique_runs) == 0 or monitor_runs[0] == None:
+        if len(unique_runs) == 0 or monitor_runs[0] is None:
             return None
         else:
             return DarkRunSubtraction.DarkRunSubtractionSettings(run_number = monitor_runs[0],
@@ -2124,37 +2125,40 @@ class TransmissionCalc(ReductionStep):
         # and perform the correction on these indicies.
         # Second we perform the correction on all indices which are not
         # monitors
-        for ws_index in range(tmp.getNumberHistograms()):
-            if tmp.getDetector(ws_index).isMonitor():
-                spectrum_number = tmp.getSpectrum(ws_index).getSpectrumNo()
-                back_start_mon, back_end_mon = inst.get_TOFs(spectrum_number)
-                if back_start_mon and back_end_mon:
-                    CalculateFlatBackground(
-                        InputWorkspace=tmpWS,
-                        OutputWorkspace=tmpWS,
-                        StartX=back_start_mon,
-                        EndX=back_end_mon,
-                        WorkspaceIndexList=ws_index,
-                        Mode='Mean')
+        if tmp.getNumberHistograms() > 0:
+            for ws_index in range(tmp.getNumberHistograms()):
+                if tmp.getDetector(ws_index).isMonitor():
+                    spectrum_number = tmp.getSpectrum(ws_index).getSpectrumNo()
+                    back_start_mon, back_end_mon = inst.get_TOFs(spectrum_number)
+                    if back_start_mon and back_end_mon:
+                        CalculateFlatBackground(
+                            InputWorkspace=tmpWS,
+                            OutputWorkspace=tmpWS,
+                            StartX=back_start_mon,
+                            EndX=back_end_mon,
+                            WorkspaceIndexList=ws_index,
+                            Mode='Mean')
 
-        back_start_roi, back_end_roi = inst.get_TOFs_for_ROI()
-        if back_start_roi and back_end_roi:
-            CalculateFlatBackground(
-                InputWorkspace=tmpWS,
-                OutputWorkspace=tmpWS,
-                StartX=back_start_roi,
-                EndX=back_end_roi,
-                WorkspaceIndexList=ws_index,
-                Mode='Mean',
-                SkipMonitors=True)
+            back_start_roi, back_end_roi = inst.get_TOFs_for_ROI()
+            if back_start_roi and back_end_roi:
+                CalculateFlatBackground(
+                    InputWorkspace=tmpWS,
+                    OutputWorkspace=tmpWS,
+                    StartX=back_start_roi,
+                    EndX=back_end_roi,
+                    WorkspaceIndexList=ws_index,
+                    Mode='Mean',
+                    SkipMonitors=True)
 
-        ConvertUnits(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, Target="Wavelength")
+            ConvertUnits(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, Target="Wavelength")
 
-        if self.interpolate:
-            InterpolatingRebin(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, Params=wavbining)
+            if self.interpolate:
+                InterpolatingRebin(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, Params=wavbining)
+            else:
+                Rebin(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, Params=wavbining)
+            return tmpWS
         else:
-            Rebin(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, Params=wavbining)
-        return tmpWS
+            raise RuntimeError('The number of histograms in the workspace must be greater than 0')
 
     def _get_index(self, number):
         """
