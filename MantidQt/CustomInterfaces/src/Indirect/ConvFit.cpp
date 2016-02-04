@@ -1541,6 +1541,20 @@ void ConvFit::showTieCheckbox(QString fitType) {
 */
 QStringList ConvFit::getFunctionParameters(QString functionName) {
   QStringList parameters;
+  // Add function parameters to QStringList
+  if (functionName.compare("Zero Lorentzians") != 0) {
+    if (functionName.compare("One Lorentzian") == 0) {
+      functionName = "Lorentzian";
+    }
+    IFunction_sptr func =
+        FunctionFactory::Instance().createFunction(functionName.toStdString());
+
+    for (size_t i = 0; i < func->nParams(); i++) {
+      parameters << QString::fromStdString(func->parameterName(i));
+    }
+  }
+
+  // Add another lorentzian function parameters for 2 lorentzian fit
   if (functionName.compare("Two Lorentzians") == 0) {
     functionName = "Lorentzian";
     IFunction_sptr func =
@@ -1550,20 +1564,6 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
       parameters << QString::fromStdString(func->parameterName(i));
     }
   }
-
-  if (functionName.compare("One Lorentzian") == 0) {
-    functionName = "Lorentzian";
-  }
-
-  if (functionName.compare("Zero Lorentzians") != 0) {
-    IFunction_sptr func =
-        FunctionFactory::Instance().createFunction(functionName.toStdString());
-
-    for (size_t i = 0; i < func->nParams(); i++) {
-      parameters << QString::fromStdString(func->parameterName(i));
-    }
-  }
-
   return parameters;
 }
 
