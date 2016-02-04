@@ -269,6 +269,17 @@ std::tuple<double, double> findMinimum(const Chebfun& cheb) {
 }
 
 //-----------------------------------------------------------------------------
+const GSLMatrix& getHessian(const API::ICostFunction &function) {
+  auto fittingFunction =
+      dynamic_cast<const CostFunctions::CostFuncFitting *>(&function);
+  if (fittingFunction) {
+    return fittingFunction->getHessian();
+  } else {
+    throw std::runtime_error("Cannot return the Hessian: the cost function doesn't support it.");
+  }
+}
+
+//-----------------------------------------------------------------------------
 /// Perform an iteration of the Newton algorithm.
 OptionalParameters iterationLMStep(API::ICostFunction &function, const GSLVector& newtonParameters) {
   auto oldParameters = getParameters(function);
@@ -398,7 +409,7 @@ OptionalParameters iterationNewton(API::ICostFunction &function, bool smallChang
 
 //-----------------------------------------------------------------------------
 /// 
-OptionalParameters iterationSingleParameters(API::ICostFunction &function, double oldValue) {
+OptionalParameters iterationSingleParameters(API::ICostFunction &function, double oldValue, bool lastIteration = false) {
   auto n = function.nParams();
   std::vector<Chebfun> slices;
   slices.reserve(n);
@@ -438,7 +449,7 @@ OptionalParameters iterationSingleParameters(API::ICostFunction &function, doubl
     }
   }
 
-  if (allConverged) {
+  if (allConverged || lastIteration) {
 
     for(size_t i = 0; i < n; ++i) {
       std::cerr << "   slice " << i << ' ' << slices[i].size() << ' ' << slices[i].accuracy() << std::endl;
@@ -475,20 +486,13 @@ void eigenSystem(const API::ICostFunction &function, GSLVector &e, GSLMatrix &V)
   auto fittingFunction =
       dynamic_cast<const CostFunctions::CostFuncFitting *>(&function);
   if (fittingFunction) {
-    auto n = function.nParams();
-
     auto hessian = fittingFunction->getHessian();
-
-    {
-      auto det = hessian.det();
-      double detRatio = det;
-      for(size_t i = 0; i < n; ++i) {
-        detRatio /= hessian.get(i,i);
-      }
-      std::cerr << "det= " << det << ' ' << detRatio << std::endl;
-      //std::cerr << "hessian=\n" << hessian << std::endl;
-    }
+    //std::cerr << "Hessian:" << std::endl;
+    //std::cerr << hessian << std::endl;
     hessian.eigenSystem(e, V);
+    std::cerr << "Eigenvalues:\n" << e << std::endl;
+    //std::cerr << "Eigenvectors:" << std::endl;
+    //std::cerr << V << std::endl;
   }
 }
 
@@ -502,12 +506,30 @@ OptionalParameters iterationSingularHessian(API::ICostFunction &function,
   bool isHessianSingular = false;
   std::vector<size_t> badIndices;
   std::vector<GSLVector> badSpace;
+  auto hessian = getHessian(function);
   for (size_t i = 0; i < e.size(); ++i) {
     auto ratio = fabs(e[i] / e[0]);
-    if (ratio <= 1e-5 && ratio > 1e-14) {
+    if (ratio <= 1e-5 && ratio > 1e-14) { // < literals
       badIndices.push_back(i);
       badSpace.push_back(V.copyColumn(i));
-      isHessianSingular = true;
+
+      double maxCorr = 0.0;
+      for(size_t j = 0; j < e.size(); ++j) {
+        if (i == j) continue;
+        double corr = 1e100;
+        double denominator = hessian.get(i,i) - hessian.get(j,j);
+        if (denominator != 0) {
+          corr = fabs(hessian.get(i,j) / denominator);
+        }
+        if (corr > maxCorr) {
+          maxCorr = corr;
+        }
+      }
+      maxCorr /= hessian.get(i,i);
+      std::cerr << "Correlation " << i << ' ' << maxCorr << std::endl;
+      if (maxCorr > 0.1) {
+        isHessianSingular = true;
+      }
     }
   }
 
@@ -515,7 +537,6 @@ OptionalParameters iterationSingularHessian(API::ICostFunction &function,
     return OptionalParameters();
   }
 
-  std::cerr << "Eigenvalues:" << e << std::endl;
   if (badIndices.size() > 0 && smallChange) {
     std::cerr << "Steps in bad direction" << std::endl;
     double minValue = oldValue;
@@ -586,11 +607,19 @@ void LocalSearchMinimizer::checkStatus(const GSLVector &e, const GSLMatrix &V) {
     auto ratio = fabs(e[i] / e[0]);
     if (ratio < 1e-5) { // < replace literal
       ++nBads;
+    } else {
+      if (m_badParameters[i] == BAD) {
+        std::cerr << "Recovered parameter " << i << std::endl;
+      }
+      m_badParameters[i] = GOOD;
     }
     if (ratio < 1e-14) { // < replace literal
       if (!m_parametersInitialized) {
         m_badParameters[i] = BAD;
+        std::cerr << "Bad parameter " << i << std::endl;
+        //throw std::runtime_error("Bad parameters found.");
       } else if (m_badParameters[i] == GOOD) {
+        std::cerr << "Bad parameter " << i << std::endl;
         ++nVeryBads;
       }
     }
@@ -679,6 +708,7 @@ bool LocalSearchMinimizer::iterate(size_t iter) {
     if (altValue >= newValue) {
       if (parameters) {
         if (fabs(oldValue / newValue) < 1.0 + 1e-8) { // < replace literal
+          iterationSingleParameters(*m_costFunction, oldValue, true);
           return false;
         }
         setParameters(*m_costFunction, parameters.get());
