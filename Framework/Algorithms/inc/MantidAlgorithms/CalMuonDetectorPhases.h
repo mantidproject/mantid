@@ -56,25 +56,42 @@ private:
   void exec();
   /// Validate the inputs
   std::map<std::string, std::string> validateInputs();
-  /// Prepare workspace for fit
-  API::MatrixWorkspace_sptr prepareWorkspace(double startTime, double endTime);
+  /// Prepare workspace for fit by extracting data
+  API::MatrixWorkspace_sptr extractDataFromWorkspace(double startTime,
+                                                     double endTime);
+  /// Remove exponential data from workspace
+  API::MatrixWorkspace_sptr
+  removeExpDecay(const API::MatrixWorkspace_sptr &wsInput);
   /// Fit the workspace
   void fitWorkspace(const API::MatrixWorkspace_sptr &ws, double freq,
                     std::string groupName, API::ITableWorkspace_sptr &resTab,
                     API::WorkspaceGroup_sptr &resGroup);
   /// Create the fitting function as string
-  std::string createFittingFunction(double freq);
+  std::string createFittingFunction(double freq, bool fixFreq);
   /// Extract asymmetry and phase from fitting results
   API::ITableWorkspace_sptr
   extractDetectorInfo(const API::ITableWorkspace_sptr &paramTab, size_t nspec);
   /// Find frequency to use in sequential fit
-  double getFrequency() const;
+  double getFrequency(const API::MatrixWorkspace_sptr &ws);
+  /// Get frequency hint to use when finding frequency
+  double getFrequencyHint() const;
   /// Get start time for fit
   double getStartTime() const;
   /// Get end time for fit
   double getEndTime() const;
   /// Remove temporary workspaces from ADS
   void clearUpADS(const std::string &groupName) const;
+  /// Calculate detector efficiency (alpha)
+  double getAlpha(const API::MatrixWorkspace_sptr &ws,
+                  const std::vector<int> &forward,
+                  const std::vector<int> &backward);
+  /// Calculate asymmetry
+  API::MatrixWorkspace_sptr getAsymmetry(const API::MatrixWorkspace_sptr &ws,
+                                         const std::vector<int> &forward,
+                                         const std::vector<int> &backward,
+                                         const double alpha);
+  /// Fit asymmetry to get frequency
+  double fitFrequencyFromAsymmetry(const API::MatrixWorkspace_sptr &wsAsym);
   /// Pointer to input workspace
   API::MatrixWorkspace_sptr m_inputWS;
   /// Name of workspace to put in ADS temporarily

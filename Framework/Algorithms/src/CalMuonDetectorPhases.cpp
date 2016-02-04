@@ -104,12 +104,12 @@ void CalMuonDetectorPhases::exec() {
   double startTime = getStartTime();
   double endTime = getEndTime();
 
-  // Get the frequency
-  double freq = getFrequency();
+  // Prepares the workspaces: extracts data from [startTime, endTime]
+  API::MatrixWorkspace_sptr tempWS =
+      extractDataFromWorkspace(startTime, endTime);
 
-  // Prepares the workspaces: extracts data from [startTime, endTime] and
-  // removes exponential decay
-  API::MatrixWorkspace_sptr tempWS = prepareWorkspace(startTime, endTime);
+  // Get the frequency
+  double freq = getFrequency(tempWS);
 
   // Create the output workspaces
   auto tab = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -118,8 +118,9 @@ void CalMuonDetectorPhases::exec() {
   // Get the name of 'DataFitted'
   std::string groupName = getPropertyValue("DataFitted");
 
-  // Fit the workspace
-  fitWorkspace(tempWS, freq, groupName, tab, group);
+  // Remove exponential decay and fit the workspace
+  auto wsToFit = removeExpDecay(tempWS);
+  fitWorkspace(wsToFit, freq, groupName, tab, group);
 
   // Set the table
   setProperty("DetectorTable", tab);
@@ -142,7 +143,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   int nspec = static_cast<int>(ws->getNumberHistograms());
 
   // Create the fitting function f(x) = A * sin ( w * x + p )
-  std::string funcStr = createFittingFunction(freq);
+  std::string funcStr = createFittingFunction(freq, true);
 
   // Create the input string. Workspace must be in the ADS (temporarily)
   API::AnalysisDataService::Instance().addOrReplace(m_workspaceName, ws);
@@ -232,34 +233,48 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
   return tab;
 }
 
-/** Creates the fitting function f(x) = A * sin( w*x + p) as string
-* @param freq :: [input] Fixed value for the frequency (w)
+/** Creates the fitting function f(x) = A * sin( w*x + p) + B as string
+* Two modes:
+* 1) Fixed frequency, no background - for main sequential fit
+* 2) Varying frequency, flat background - for finding frequency from asymmetry
+* @param freq :: [input] Value for the frequency (w)
+* @param fixFreq :: [input] True: fixed frequency, no background. False: varying
+* frequency with flat background.
 * @returns :: The fitting function as a string
 */
-std::string CalMuonDetectorPhases::createFittingFunction(double freq) {
-
+std::string CalMuonDetectorPhases::createFittingFunction(double freq,
+                                                         bool fixFreq) {
   // The fitting function is:
-  // f(x) = A * sin ( w * x + p )
-  // where w is shared across workspaces
+  // f(x) = A * sin ( w * x + p ) [+ B]
   std::ostringstream ss;
   ss << "name=UserFunction,";
-  ss << "Formula=A*sin(w*x+p),";
+  if (fixFreq) {
+    // no background
+    ss << "Formula=A*sin(w*x+p),";
+  } else {
+    // flat background
+    ss << "Formula=A*sin(w*x+p)+B,";
+    ss << "B=0.5,";
+  }
   ss << "A=0.5,";
   ss << "w=" << freq << ",";
   ss << "p=0.5;";
-  ss << "ties=(f0.w=" << freq << ")";
+  if (fixFreq) {
+    // w is shared across workspaces
+    ss << "ties=(f0.w=" << freq << ")";
+  }
 
   return ss.str();
 }
 
-/** Extracts relevant data from a workspace and removes exponential decay
+/** Extracts relevant data from a workspace
 * @param startTime :: [input] First X value to consider
 * @param endTime :: [input] Last X value to consider
 * @return :: Pre-processed workspace to fit
 */
 API::MatrixWorkspace_sptr
-CalMuonDetectorPhases::prepareWorkspace(double startTime, double endTime) {
-
+CalMuonDetectorPhases::extractDataFromWorkspace(double startTime,
+                                                double endTime) {
   // Extract counts from startTime to endTime
   API::IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
   crop->setProperty("InputWorkspace", m_inputWS);
@@ -268,26 +283,33 @@ CalMuonDetectorPhases::prepareWorkspace(double startTime, double endTime) {
   crop->executeAsChildAlg();
   boost::shared_ptr<API::MatrixWorkspace> wsCrop =
       crop->getProperty("OutputWorkspace");
+  return wsCrop;
+}
 
-  // Remove exponential decay
+/**
+ * Removes exponential decay from a workspace
+ * @param wsInput :: [input] Workspace to work on
+ * @return :: Workspace with decay removed
+ */
+API::MatrixWorkspace_sptr CalMuonDetectorPhases::removeExpDecay(
+    const API::MatrixWorkspace_sptr &wsInput) {
   API::IAlgorithm_sptr remove = createChildAlgorithm("RemoveExpDecay");
-  remove->setProperty("InputWorkspace", wsCrop);
+  remove->setProperty("InputWorkspace", wsInput);
   remove->executeAsChildAlg();
-  boost::shared_ptr<API::MatrixWorkspace> wsRem =
-      remove->getProperty("OutputWorkspace");
-
+  API::MatrixWorkspace_sptr wsRem = remove->getProperty("OutputWorkspace");
   return wsRem;
 }
 
 /**
- * Returns the frequency to use in the sequential fit.
+ * Returns the frequency hint to use as a starting point for finding the
+ * frequency.
  *
  * If user has provided a frequency as input, use that.
  * Otherwise, use 2*pi*g_mu*(sample_magn_field)
  *
- * @return :: Frequency to use in fit
+ * @return :: Frequency hint to use
  */
-double CalMuonDetectorPhases::getFrequency() const {
+double CalMuonDetectorPhases::getFrequencyHint() const {
   double freq = getProperty("Frequency");
 
   // If frequency is EMPTY_DBL():
@@ -307,6 +329,39 @@ double CalMuonDetectorPhases::getFrequency() const {
 }
 
 /**
+ * Returns the frequency to use in the sequential fit.
+ *
+ * Finds this by grouping the spectra and calculating the asymmetry, then
+ * fitting this to get the frequency.
+ * The starting value for this fit is taken from the frequency hint or logs.
+ * @param ws :: [input] Pointer to cropped workspace with exp decay removed
+ * @return :: Fixed frequency value to use in the sequential fit
+ */
+double
+CalMuonDetectorPhases::getFrequency(const API::MatrixWorkspace_sptr &ws) {
+  std::vector<int> forward = getProperty("ForwardSpectra");
+  std::vector<int> backward = getProperty("BackwardSpectra");
+
+  // If grouping not provided, read it from the file
+  // TODO: must implement this
+  if (forward.empty() || backward.empty()) {
+    throw std::runtime_error(
+        "TODO: implement getting grouping from instrument if not provided");
+  }
+
+  // Calculate asymmetry
+  const double alpha = getAlpha(ws, forward, backward);
+  const API::MatrixWorkspace_sptr wsAsym =
+      getAsymmetry(ws, forward, backward, alpha);
+
+  // Fit an oscillating function, allowing frequency to vary
+  // Starting value for frequency is hint
+  double frequency = fitFrequencyFromAsymmetry(wsAsym);
+
+  return frequency;
+}
+
+/**
  * Get start time for fit
  * If not provided as input, try to read from workspace logs.
  * If it's not there either, set to 0 and warn user.
@@ -314,7 +369,6 @@ double CalMuonDetectorPhases::getFrequency() const {
  */
 double CalMuonDetectorPhases::getStartTime() const {
   double startTime = getProperty("FirstGoodData");
-  // If startTime is EMPTY_DBL():
   if (startTime == EMPTY_DBL()) {
     try {
       // Read FirstGoodData from workspace logs if possible
@@ -323,7 +377,6 @@ double CalMuonDetectorPhases::getStartTime() const {
       startTime = firstGoodData;
     } catch (...) {
       g_log.warning("Couldn't read FirstGoodData, setting to 0");
-      // Set startTime to 0
       startTime = 0.;
     }
   }
@@ -337,12 +390,111 @@ double CalMuonDetectorPhases::getStartTime() const {
  */
 double CalMuonDetectorPhases::getEndTime() const {
   double endTime = getProperty("LastGoodData");
-  // If endTime is EMPTY_DBL():
   if (endTime == EMPTY_DBL()) {
     // Last available time
     endTime = m_inputWS->readX(0).back();
   }
   return endTime;
+}
+
+/**
+ * Calculate alpha (detector efficiency) from the given workspace
+ * If calculation fails, returns default 1.0
+ * @param ws :: [input] Workspace to calculate alpha from
+ * @param forward :: [input] Forward group spectra numbers
+ * @param backward :: [input] Backward group spectra numbers
+ * @return :: Alpha, or 1.0 if calculation failed
+ */
+double CalMuonDetectorPhases::getAlpha(const API::MatrixWorkspace_sptr &ws,
+                                       const std::vector<int> &forward,
+                                       const std::vector<int> &backward) {
+  double alpha = 1.0;
+  try {
+    auto alphaAlg = createChildAlgorithm("AlphaCalc");
+    alphaAlg->setProperty("InputWorkspace", ws);
+    alphaAlg->setProperty("ForwardSpectra", forward);
+    alphaAlg->setProperty("BackwardSpectra", backward);
+    alphaAlg->executeAsChildAlg();
+    alpha = alphaAlg->getProperty("Alpha");
+  } catch (const std::exception &e) {
+    // Eat the error and return default 1.0 so algorithm can continue.
+    // Warn the user that calculating alpha failed
+    std::ostringstream message;
+    message << "Calculating alpha failed, default to 1.0: " << e.what();
+    g_log.error(message.str());
+  }
+  return alpha;
+}
+
+/**
+ * Calculate asymmetry for the given workspace
+ * @param ws :: [input] Workspace to calculate asymmetry from
+ * @param forward :: [input] Forward group spectra numbers
+ * @param backward :: [input] Backward group spectra numbers
+ * @param alpha :: [input] Detector efficiency
+ * @return :: Asymmetry for workspace
+ */
+API::MatrixWorkspace_sptr CalMuonDetectorPhases::getAsymmetry(
+    const API::MatrixWorkspace_sptr &ws, const std::vector<int> &forward,
+    const std::vector<int> &backward, const double alpha) {
+  auto alg = createChildAlgorithm("AsymmetryCalc");
+  alg->setProperty("InputWorkspace", ws);
+  alg->setProperty("OutputWorkspace", "__NotUsed");
+  alg->setProperty("ForwardSpectra", forward);
+  alg->setProperty("BackwardSpectra", backward);
+  alg->setProperty("Alpha", alpha);
+  alg->executeAsChildAlg();
+  API::MatrixWorkspace_sptr wsAsym = alg->getProperty("OutputWorkspace");
+  return wsAsym;
+}
+
+/**
+ * Fit the asymmetry and return the frequency found.
+ * Starting value for the frequency is taken from the hint.
+ * If the fit fails, return the initial hint.
+ * @param wsAsym :: [input] Workspace with asymmetry to fit
+ * @return :: Frequency found from fit
+ */
+double CalMuonDetectorPhases::fitFrequencyFromAsymmetry(
+    const API::MatrixWorkspace_sptr &wsAsym) {
+  // Starting value for frequency is hint
+  double hint = getFrequencyHint();
+  std::string funcStr = createFittingFunction(hint, false);
+  double frequency = hint;
+
+  std::string fitStatus = "success";
+  try {
+    auto func = API::FunctionFactory::Instance().createInitialized(funcStr);
+    auto fit = createChildAlgorithm("Fit");
+    fit->setProperty("Function", func);
+    fit->setProperty("InputWorkspace", wsAsym);
+    fit->setProperty("WorkspaceIndex", 0);
+    fit->setProperty("CreateOutput", true);
+    fit->setProperty("OutputParametersOnly", true);
+    fit->setProperty("Output", "__Invisible");
+    fit->executeAsChildAlg();
+    fitStatus = fit->getProperty("OutputStatus");
+    if (fitStatus == "success") {
+      API::ITableWorkspace_sptr params = fit->getProperty("OutputParameters");
+      const size_t rows = params->rowCount();
+      static size_t colName(0), colValue(1);
+      for (size_t iRow = 0; iRow < rows; iRow++) {
+        if (params->cell<std::string>(iRow, colName) == "w") {
+          frequency = params->cell<double>(iRow, colValue);
+          break;
+        }
+      }
+    }
+  } catch (const std::exception &e) {
+    // Report fit failure to user
+    fitStatus = e.what();
+  }
+  if (fitStatus != "success") { // Either failed, or threw an exception
+    std::ostringstream message;
+    message << "Fit failed (" << fitStatus << "), using omega hint = " << hint;
+    g_log.error(message.str());
+  }
+  return frequency;
 }
 
 /**
