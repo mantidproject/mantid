@@ -40,6 +40,8 @@ public:
     calc->setPropertyValue("Frequency", "25");
     calc->setPropertyValue("DataFitted", "fit");
     calc->setPropertyValue("DetectorTable", "tab");
+    calc->setProperty("ForwardSpectra", std::vector<int>{1, 2});
+    calc->setProperty("BackwardSpectra", std::vector<int>{3, 4});
 
     TS_ASSERT_THROWS_NOTHING(calc->execute());
 
@@ -55,15 +57,15 @@ public:
     TS_ASSERT_DELTA(tab->Double(2, 1), 0.100, 0.001);
     TS_ASSERT_DELTA(tab->Double(3, 1), 0.100, 0.001);
     // Test phases
-    TS_ASSERT_DELTA(tab->Double(0, 2), 6.283, 0.001);
-    TS_ASSERT_DELTA(tab->Double(1, 2), 0.786, 0.001);
-    TS_ASSERT_DELTA(tab->Double(2, 2), 1.571, 0.001);
-    TS_ASSERT_DELTA(tab->Double(3, 2), 2.355, 0.001);
+    TS_ASSERT_DELTA(tab->Double(0, 2), 6.278, 0.001);
+    TS_ASSERT_DELTA(tab->Double(1, 2), 0.781, 0.001);
+    TS_ASSERT_DELTA(tab->Double(2, 2), 1.566, 0.001);
+    TS_ASSERT_DELTA(tab->Double(3, 2), 2.350, 0.001);
   }
 
   void testBadWorkspaceUnits() {
 
-    auto ws = createWorkspace(1, 4, "Wavelength");
+    auto ws = createWorkspace(2, 4, "Wavelength");
     auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
     calc->initialize();
     calc->setChild(true);
@@ -71,6 +73,8 @@ public:
     calc->setPropertyValue("Frequency", "25");
     calc->setPropertyValue("DataFitted", "fit");
     calc->setPropertyValue("DetectorTable", "tab");
+    calc->setProperty("ForwardSpectra", std::vector<int>{1});
+    calc->setProperty("BackwardSpectra", std::vector<int>{2});
 
     TS_ASSERT_THROWS(calc->execute(), std::runtime_error);
     TS_ASSERT(!calc->isExecuted());
@@ -78,13 +82,15 @@ public:
 
   void testNoFrequencySupplied() {
 
-    auto ws = createWorkspace(1, 4, "Microseconds");
+    auto ws = createWorkspace(2, 4, "Microseconds");
     auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
     calc->initialize();
     calc->setChild(true);
     calc->setProperty("InputWorkspace", ws);
     calc->setPropertyValue("DataFitted", "fit");
     calc->setPropertyValue("DetectorTable", "tab");
+    calc->setProperty("ForwardSpectra", std::vector<int>{1});
+    calc->setProperty("BackwardSpectra", std::vector<int>{2});
 
     TS_ASSERT_THROWS(calc->execute(), std::runtime_error);
     TS_ASSERT(!calc->isExecuted());
