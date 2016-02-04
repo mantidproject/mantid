@@ -23,7 +23,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
                          can_load_as_event_workspace, is_convertible_to_float, correct_q_resolution_for_can,
-                          is_valid_user_file_extension, ADD_TAG, ADD_MONITORS_TAG)
+                         is_valid_user_file_extension, ADD_TAG, ADD_MONITORS_TAG)
 import DarkRunCorrection as DarkCorr
 
 import SANSUserFileParser as UserFileParser
@@ -1607,7 +1607,7 @@ class DarkRunSubtraction(object):
         if dark_run_ws.getNumberHistograms() != (end_spec_index - start_spec_index + 1):
             start_ws_index, end_ws_index = self._get_start_and_end_ws_index(start_spec_index,
                                                                             end_spec_index,
-                                                                             workspace_index_offset)
+                                                                            workspace_index_offset)
             # Now crop the workspace to the correct size
             cropped_name = dark_run_ws_name + "_cropped"
             alg_crop = AlgorithmManager.createUnmanaged("CropWorkspace")
@@ -1763,13 +1763,13 @@ class DarkRunSubtraction(object):
 
         # Check that for each of these settings we only have one run number specified, else raise an error
         has_max_one_run_number = lambda indices : len(set([run_number[index] for index in indices])) < 2
-        if (not has_max_one_run_number(indices_time_detector) or
-            not has_max_one_run_number(indices_time_monitor) or
-            not has_max_one_run_number(indices_uamp_detector) or
-            not has_max_one_run_number(indices_uamp_monitor) ) :
-            raise RuntimeError("DarkRunSubtraction: More background correction runs have been specified than are allowed. "
-                               "There can be maximally one run number for each time-based detector, "
-                               "uamp-based detector, time-based monitor and uamp-based monitor settings.\n")
+        if (not has_max_one_run_number(indices_time_detector) or \
+            not has_max_one_run_number(indices_time_monitor) or \
+            not has_max_one_run_number(indices_uamp_detector) or \
+            not has_max_one_run_number(indices_uamp_monitor)):
+                raise RuntimeError("DarkRunSubtraction: More background correction runs have been specified than are allowed. "
+                                   "There can be maximally one run number for each time-based detector, "
+                                   "uamp-based detector, time-based monitor and uamp-based monitor settings.\n")
 
         # Handle detectors
         self._dark_run_time_detector_setting = self._get_final_setting_detectors(run_number, use_mean,
@@ -1779,9 +1779,9 @@ class DarkRunSubtraction(object):
 
         # handle monitors
         self._dark_run_time_monitor_setting = self._get_final_setting_monitors(run_number, use_mean,
-                                                                                 use_time, mon_number, indices_time_monitor)
+                                                                               use_time, mon_number, indices_time_monitor)
         self._dark_run_uamp_monitor_setting = self._get_final_setting_monitors(run_number, use_mean,
-                                                                                 use_time, mon_number, indices_uamp_monitor)
+                                                                               use_time, mon_number, indices_uamp_monitor)
 
     def _get_final_setting_detectors(self, run_number, use_mean, use_time, indices):
         '''
