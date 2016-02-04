@@ -35,7 +35,7 @@ ConvFit::ConvFit(QWidget *parent)
 
 /**
  * Populates the default parameter map with the initial default values
- * @param map :: The default value map to populate
+ * @param map :: The default value QMap to populate
  * @return The QMap populated with default values
  */
 QMap<QString, double> ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
@@ -58,7 +58,7 @@ QMap<QString, double> ConvFit::createDefaultParamsMap(QMap<QString, double> map)
 
 /**
  * Adds the One Lorentzian fit informtion to the list of default parameters
- * @param map			:: The default value map to populate
+ * @param map			:: The default value QMap to populate
  * @param amplitude		:: One lorentzian amplitude
  * @param peakCentre	:: One lorentzian peakCentre
  * @param fwhm			:: One lorentzian fwhm
@@ -69,6 +69,53 @@ QMap<QString, double> ConvFit::addLorentzianFitToDeafultQMap(QMap<QString, doubl
 	map.insert("FWHM", fwhm);
 	map.replace("Amplitude", amplitude);
 	return map;
+}
+
+/**
+ * Populates a map with ALL parameters names and values for the current fit
+ * function
+ * @param map			:: A QMap of any parameters that have non zero
+ * default values
+ * @param parameters	:: A QStringList of all the parameters for the current
+ * fit function
+ * @param fitFunction	:: The name of the current fit function
+ * @return a QMap populated with name, value pairs for parameters where name =
+ * fitFunction.parametername and value is either from the default map or 0
+ */
+QMap<QString, double>
+ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
+                                  const QStringList parameters,
+                                  const QString &fitFunction) {
+  QMap<QString, double> fullMap;
+  QString fitFuncName = fitFunction;
+  // Special case for Two lorentzian - as it is comprised of 2 lorentzians
+  if (fitFunction.compare("Two Lorentzian") == 0) {
+    fitFuncName = "Lorentzian 1";
+    for (auto param = parameters.begin(); param != parameters.end(); ++param) {
+      QString fullPropName = fitFuncName + "." + QString(*param);
+      if (defaultMap.contains(QString(*param))) {
+        if (fullMap.contains(fullPropName)) {
+          fullPropName = "Lorentzian 2." + QString(*param);
+          fullMap.insert(fullPropName, 0);
+        } else {
+          fullMap.insert(fullPropName, defaultMap[*param]);
+        }
+      } else {
+        fullMap.insert(fullPropName, 0);
+      }
+    }
+    // All Other Fitfunctions
+  } else {
+    for (auto param = parameters.begin(); param != parameters.end(); ++param) {
+      QString fullPropName = fitFuncName + "." + QString(*param);
+      if (defaultMap.contains(QString(*param))) {
+        fullMap.insert(fullPropName, defaultMap[*param]);
+      } else {
+        fullMap.insert(fullPropName, 0);
+      }
+    }
+  }
+  return fullMap;
 }
 
 void ConvFit::setup() {
@@ -88,8 +135,7 @@ void ConvFit::setup() {
                                << "SFT";
   // All Parameters in tree that should be defaulting to 1
   QMap<QString, double> m_defaultParams;
-
-
+  m_defaultParams = createDefaultParamsMap(m_defaultParams);
 
   // Create TreeProperty Widget
   m_cfTree = new QtTreePropertyBrowser();
@@ -1541,13 +1587,14 @@ void ConvFit::showTieCheckbox(QString fitType) {
 */
 QStringList ConvFit::getFunctionParameters(QString functionName) {
   QStringList parameters;
+  auto currentFitFunction = functionName;
   // Add function parameters to QStringList
   if (functionName.compare("Zero Lorentzians") != 0) {
-    if (functionName.compare("One Lorentzian") == 0) {
-      functionName = "Lorentzian";
+    if (functionName.compare("One Lorentzian") == 0 || functionName.compare("Two Lorentzians") == 0) {
+      currentFitFunction = "Lorentzian";
     }
     IFunction_sptr func =
-        FunctionFactory::Instance().createFunction(functionName.toStdString());
+        FunctionFactory::Instance().createFunction(currentFitFunction.toStdString());
 
     for (size_t i = 0; i < func->nParams(); i++) {
       parameters << QString::fromStdString(func->parameterName(i));
@@ -1572,20 +1619,21 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
 * @param functionName Name of new fit function
 */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
-  bool previouslyOneL = false;
   // If resolution file has been entered update default FWHM to resolution
   if (m_uiForm.dsResInput->getCurrentDataName().compare("") != 0) {
-	  m_defaultParams["FWHM"] = getInstrumentResolution(m_cfInputWS->getName());
+    m_defaultParams["FWHM"] = getInstrumentResolution(m_cfInputWS->getName());
   }
   // If the previous fit was One Lorentzian and the new fit is Two Lorentzian
   // preserve the values of One Lorentzian Fit
+  const QString currentFitFunction = m_uiForm.cbFitType->currentText();
   if (m_previousFit.compare("One Lorentzian") == 0 &&
-      m_uiForm.cbFitType->currentText().compare("Two Lorentzians") == 0) {
-    previouslyOneL = true;
-    const double amplitude = m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
-    const double peakCentre = m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
+      currentFitFunction.compare("Two Lorentzians") == 0) {
+    const double amplitude =
+        m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
+    const double peakCentre =
+        m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
     const double fwhm = m_dblManager->value(m_properties["Lorentzian 1.FWHM"]);
-	addLorentzianFitToDeafultQMap(m_defaultParams, amplitude, peakCentre, fwhm);
+    addLorentzianFitToDeafultQMap(m_defaultParams, amplitude, peakCentre, fwhm);
   }
 
   // Remove previous parameters from tree
@@ -1611,9 +1659,12 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
 
+  const QMap<QString, double> fullPropertyMap =
+      constructFullPropertyMap(m_defaultParams, parameters, currentFitFunction);
+
   QString propName;
   // No fit function parameters required for None
-  if (parameters[0].isEmpty() != true) {
+  if (parameters.isEmpty() != true) {
     // Two Lorentzians Fit
     if (fitFunctionIndex == 2) {
       int count = 0;
