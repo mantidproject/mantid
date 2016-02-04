@@ -167,10 +167,11 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
   getline(in, str);
 
   // allow a comma in the final position.
-  tokenizer values(str, ",", tokenizer::TOK_TRIM |
+  tokenizer tokens(str, ",", tokenizer::TOK_TRIM |
                                  tokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
+  auto values = tokens.asVector();
 
-  if (values.count() <= 2) {
+  if (values.size() < 3) {
     g_log.warning()
         << "Expecting a comma separated list of at each three entries"
         << " (any of which may be empty strings) to set information about a "
@@ -180,9 +181,9 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
   }
 
   try {
-    f.setValue() = boost::lexical_cast<double>(values.at(0));
+    f.setValue(boost::lexical_cast<double>(values[0]));
   } catch (boost::bad_lexical_cast &) {
-    f.setValue() = 0.0;
+    f.setValue(0.0);
 
     if (!values.at(0).empty()) {
       g_log.warning() << "Could not read " << values[0] << " as double for "
@@ -193,56 +194,27 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
 
   // read remaining required entries
 
-  f.setFunction() = values.at(1);
-  f.setName() = values.at(2);
+  f.setFunction(values[1]);
+  f.setName(values[2]);
 
   // read optional entries
+  values.reserve(10);
+  while (values.size() < 10)
+    values.emplace_back("");
 
-  try {
-    f.setConstraintMin() = values.at(3);
-  } catch (...) {
-    f.setConstraintMin() = "";
-  }
+  f.setConstraintMin(values[3]);
+  f.setConstraintMax(values[4]);
+  f.setConstraintPenaltyFactor(values[5]);
+  f.setTie(values[6]);
+  f.setFormula(values[7]);
+  f.setFormulaUnit(values[8]);
+  f.setResultUnit(values[9]);
 
-  try {
-    f.setConstraintMax() = values.at(4);
-  } catch (...) {
-    f.setConstraintMax() = "";
-  }
-
-  try {
-    f.setConstraintPenaltyFactor() = values.at(5);
-  } catch (...) {
-    f.setConstraintPenaltyFactor() = "";
-  }
-
-  try {
-    f.setTie() = values.at(6);
-  } catch (...) {
-    f.setTie() = "";
-  }
-
-  try {
-    f.setFormula() = values.at(7);
-  } catch (...) {
-    f.setFormula() = "";
-  }
-
-  try {
-    f.setFormulaUnit() = values.at(8);
-  } catch (...) {
-    f.setFormulaUnit() = "";
-  }
-
-  try {
-    f.setResultUnit() = values.at(9);
-  } catch (...) {
-    f.setResultUnit() = "";
-  }
-
-  if (values.count() > 10) {
-    std::stringstream str(values.at(10));
-    str >> f.setLookUpTable();
+  if (values.size() > 10) {
+    std::stringstream str(values[10]);
+    Kernel::Interpolation lookupTable;
+    str >> lookupTable;
+    f.setLookUpTable(lookupTable);
   }
 
   return in;
