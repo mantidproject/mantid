@@ -14,6 +14,11 @@ namespace MDAlgorithms {
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
+// Box manager parameters for child algorithms
+static const std::string SPLITINTO("2");
+static const std::string SPLITTHRESHOLD("500");
+static const std::string MAXRECURSIONDEPTH("20");
+
 /*
  * Pad the vector of parameter values to the same size as data sources
  *
@@ -381,9 +386,9 @@ CreateMD::convertToMD(Mantid::API::Workspace_sptr workspace,
   convert_alg->setPropertyValue("MaxValues", max_values);
   // Use same box split settings in ConvertToMD and MergeMD
   // Otherwise InPlace=True or False will give different results
-  convert_alg->setProperty("SplitInto", "2");
-  convert_alg->setProperty("SplitThreshold", "500");
-  convert_alg->setProperty("MaxRecursionDepth", "20");
+  convert_alg->setProperty("SplitInto", SPLITINTO);
+  convert_alg->setProperty("SplitThreshold", SPLITTHRESHOLD);
+  convert_alg->setProperty("MaxRecursionDepth", MAXRECURSIONDEPTH);
   // OverwriteExisting=false means events are added to the existing workspace,
   // effectively doing the merge in place  (without using MergeMD)
   convert_alg->setProperty("OverwriteExisting", !in_place);
@@ -411,9 +416,9 @@ CreateMD::merge_runs(const std::vector<std::string> &to_merge) {
   merge_alg->setPropertyValue("OutputWorkspace", "dummy");
   // Use same box split settings in ConvertToMD and MergeMD
   // Otherwise InPlace=True or False will give different results
-  merge_alg->setProperty("SplitInto", "2");
-  merge_alg->setProperty("SplitThreshold", "500");
-  merge_alg->setProperty("MaxRecursionDepth", "20");
+  merge_alg->setProperty("SplitInto", SPLITINTO);
+  merge_alg->setProperty("SplitThreshold", SPLITTHRESHOLD);
+  merge_alg->setProperty("MaxRecursionDepth", MAXRECURSIONDEPTH);
   merge_alg->executeAsChildAlg();
 
   return merge_alg->getProperty("OutputWorkspace");
