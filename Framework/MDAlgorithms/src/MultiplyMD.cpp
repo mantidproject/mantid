@@ -74,13 +74,13 @@ void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     dbuff = ws->getBoxController()->getFileIO();
   }
 
-  for (size_t i = 0; i < boxes.size(); i++) {
-    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+  for (auto &boxe : boxes) {
+    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
     if (box) {
       typename std::vector<MDE> &events = box->getEvents();
       size_t ic(events.size());
-      typename std::vector<MDE>::iterator it = events.begin();
-      typename std::vector<MDE>::iterator it_end = events.end();
+      auto it = events.begin();
+      auto it_end = events.end();
       for (; it != it_end; it++) {
         // Multiply weight by a scalar, propagating error
         float oldSignal = it->getSignal();

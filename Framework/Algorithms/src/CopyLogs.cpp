@@ -91,8 +91,7 @@ void CopyLogs::exec() {
  */
 void CopyLogs::mergeReplaceExisting(
     const std::vector<Kernel::Property *> &inputLogs, Run &outputRun) {
-  for (auto iter = inputLogs.begin(); iter != inputLogs.end(); ++iter) {
-    Kernel::Property *prop = *iter;
+  for (auto prop : inputLogs) {
     // if the log exists, remove and replace it
     if (outputRun.hasProperty(prop->name())) {
       outputRun.removeLogData(prop->name());
@@ -107,8 +106,7 @@ void CopyLogs::mergeReplaceExisting(
  */
 void CopyLogs::mergeKeepExisting(
     const std::vector<Kernel::Property *> &inputLogs, Run &outputRun) {
-  for (auto iter = inputLogs.begin(); iter != inputLogs.end(); ++iter) {
-    Kernel::Property *prop = *iter;
+  for (auto prop : inputLogs) {
     // add the log only if it doesn't already exist
     if (!outputRun.hasProperty(prop->name())) {
       outputRun.addLogData(prop->clone());
@@ -125,13 +123,13 @@ void CopyLogs::wipeExisting(const std::vector<Kernel::Property *> &inputLogs,
   auto outputLogs = outputRun.getLogData();
 
   // remove each of the logs from the second workspace
-  for (auto iter = outputLogs.begin(); iter != outputLogs.end(); ++iter) {
-    outputRun.removeLogData((*iter)->name());
+  for (auto &outputLog : outputLogs) {
+    outputRun.removeLogData(outputLog->name());
   }
 
   // add all the logs from the new workspace
-  for (auto iter = inputLogs.begin(); iter != inputLogs.end(); ++iter) {
-    outputRun.addLogData((*iter)->clone());
+  for (auto inputLog : inputLogs) {
+    outputRun.addLogData(inputLog->clone());
   }
 }
 

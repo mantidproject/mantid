@@ -29,10 +29,10 @@ void EQSANSPatchSensitivity::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("Workspace");
   MatrixWorkspace_sptr patchWS = getProperty("PatchWorkspace");
   bool useRegression = getProperty("UseLinearRegression");
-  const int nx_pixels = (int)(inputWS->getInstrument()->getNumberParameter(
-      "number-of-x-pixels")[0]);
-  const int ny_pixels = (int)(inputWS->getInstrument()->getNumberParameter(
-      "number-of-y-pixels")[0]);
+  const int nx_pixels = static_cast<int>(
+      inputWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
+  const int ny_pixels = static_cast<int>(
+      inputWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
 
   const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
   // Need to get hold of the parameter map
@@ -99,13 +99,13 @@ void EQSANSPatchSensitivity::exec() {
 
       // Apply patch
       progress(0.91, "Applying patch");
-      for (size_t k = 0; k < patched_ids.size(); k++) {
+      for (auto patched_id : patched_ids) {
         const Geometry::ComponentID det =
-            inputWS->getDetector(patched_ids[k])->getComponentID();
+            inputWS->getDetector(patched_id)->getComponentID();
         try {
           if (det) {
-            MantidVec &YValues = inputWS->dataY(patched_ids[k]);
-            MantidVec &YErrors = inputWS->dataE(patched_ids[k]);
+            MantidVec &YValues = inputWS->dataY(patched_id);
+            MantidVec &YErrors = inputWS->dataE(patched_id);
             if (useRegression) {
               YValues[0] = alpha + beta * det->getPos().Y();
               YErrors[0] = error;

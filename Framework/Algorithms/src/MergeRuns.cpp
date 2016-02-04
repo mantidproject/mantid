@@ -64,16 +64,15 @@ void MergeRuns::exec() {
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
-  for (size_t i = 0; i < inputs_orig.size(); i++) {
+  for (const auto &input : inputs_orig) {
     WorkspaceGroup_sptr wsgroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            inputs_orig[i]);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(input);
     if (wsgroup) { // Workspace group
       std::vector<std::string> group = wsgroup->getNames();
       inputs.insert(inputs.end(), group.begin(), group.end());
     } else {
       // Single workspace
-      inputs.push_back(inputs_orig[i]);
+      inputs.push_back(input);
     }
   }
 
@@ -189,14 +188,14 @@ void MergeRuns::buildAdditionTables() {
         // Didn't find it. Try to use the LHS map.
 
         // First, we have to get the (single) detector ID of the RHS
-        std::set<detid_t>::iterator inDets_it = inDets.begin();
+        auto inDets_it = inDets.begin();
         detid_t rhs_detector_ID = *inDets_it;
 
         // Now we use the LHS map to find it. This only works if both the lhs
         // and rhs have 1 detector per pixel
         detid2index_map::const_iterator map_it =
             lhs_det_to_wi.find(rhs_detector_ID);
-        if (map_it != lhs_det_to_wi.end()) {
+        if (map_it != lhs_det_to_wi.cend()) {
           outWI = static_cast<int>(map_it->second); // This is the workspace
                                                     // index in the LHS that
                                                     // matched rhs_detector_ID
@@ -283,9 +282,9 @@ void MergeRuns::execEvent() {
     boost::shared_ptr<AdditionTable> table = m_tables[workspaceNum - 1];
 
     // Add all the event lists together as the table says to do
-    for (auto it = table->begin(); it != table->end(); ++it) {
-      int64_t inWI = it->first;
-      int64_t outWI = it->second;
+    for (auto &WI : *table) {
+      int64_t inWI = WI.first;
+      int64_t outWI = WI.second;
       if (outWI >= 0) {
         outWS->getEventList(outWI) += addee->getEventList(inWI);
       } else {

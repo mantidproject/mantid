@@ -183,7 +183,7 @@ std::string Object::cellStr(const std::map<int, Object> &MList) const {
         Mantid::Kernel::Strings::convPartNum(TopStr.substr(pos), cN);
     if (nLen > 0) {
       cx << "(";
-      std::map<int, Object>::const_iterator vc = MList.find(cN);
+      auto vc = MList.find(cN);
       if (vc == MList.end())
         throw Kernel::Exception::NotFoundError(
             "Not found in the list of indexable hulls (Object::cellStr)", cN);
@@ -279,8 +279,7 @@ int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
       SurfPoint *KV = dynamic_cast<SurfPoint *>(T1);
       if (KV) {
         // Ensure that we have a it in the surface list:
-        std::map<int, boost::shared_ptr<Surface>>::const_iterator mf =
-            Smap.find(KV->getKeyN());
+        auto mf = Smap.find(KV->getKeyN());
         if (mf != Smap.end()) {
           KV->setKey(mf->second);
           Rcount++;
@@ -1092,8 +1091,8 @@ double Object::triangleSolidAngle(const V3D &observer,
     std::vector<Kernel::V3D> vectors;
     this->GetObjectGeom(type, vectors, radius, height);
     if (type == 1) {
-      for (size_t i = 0; i < vectors.size(); i++)
-        vectors[i] *= scaleFactor;
+      for (auto &vector : vectors)
+        vector *= scaleFactor;
       return CuboidSolidAngle(observer, vectors);
     } else if (type == 2) // this is wrong for scaled objects
       return SphereSolidAngle(observer, vectors, radius);
@@ -1259,7 +1258,7 @@ double Object::CylinderSolidAngle(const V3D &observer,
 
   // Do the base cap which is a point at the centre and nslices points around it
   const int nslices(Mantid::Geometry::Cylinder::g_nslices);
-  const double angle_step = 2 * M_PI / (double)nslices;
+  const double angle_step = 2 * M_PI / static_cast<double>(nslices);
 
   const int nstacks(Mantid::Geometry::Cylinder::g_nstacks);
   const double z_step = height / nstacks;
@@ -1336,10 +1335,10 @@ double Object::ConeSolidAngle(const V3D &observer,
 
   // Do the base cap which is a point at the centre and nslices points around it
   const int nslices(Mantid::Geometry::Cone::g_nslices);
-  const double angle_step = 2 * M_PI / (double)nslices;
+  const double angle_step = 2 * M_PI / static_cast<double>(nslices);
   // Store the (x,y) points as they are used quite frequently
-  double *cos_table = new double[nslices];
-  double *sin_table = new double[nslices];
+  auto cos_table = new double[nslices];
+  auto sin_table = new double[nslices];
 
   double solid_angle(0.0);
   for (int sl = 0; sl < nslices; ++sl) {
@@ -1627,13 +1626,13 @@ void Object::calcBoundingBoxByGeometry() {
     maxX = maxY = maxZ = -huge;
 
     // Loop over all corner points to find minima and maxima on each axis
-    for (auto iter = vectors.cbegin(); iter != vectors.cend(); ++iter) {
-      minX = std::min(minX, iter->X());
-      maxX = std::max(maxX, iter->X());
-      minY = std::min(minY, iter->Y());
-      maxY = std::max(maxY, iter->Y());
-      minZ = std::min(minZ, iter->Z());
-      maxZ = std::max(maxZ, iter->Z());
+    for (const auto &vector : vectors) {
+      minX = std::min(minX, vector.X());
+      maxX = std::max(maxX, vector.X());
+      minY = std::min(minY, vector.Y());
+      maxY = std::max(maxY, vector.Y());
+      minZ = std::min(minZ, vector.Z());
+      maxZ = std::max(maxZ, vector.Z());
     }
   } break;
 
@@ -1823,7 +1822,7 @@ int Object::searchForObject(Kernel::V3D &point) const {
   for (dir = axes.begin(); dir != axes.end(); ++dir) {
     Geometry::Track tr(point, (*dir));
     if (this->interceptSurface(tr) > 0) {
-      point = tr.begin()->entryPoint;
+      point = tr.cbegin()->entryPoint;
       return 1;
     }
   }

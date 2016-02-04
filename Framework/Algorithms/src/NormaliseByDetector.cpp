@@ -116,10 +116,8 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
   ParamNames allParamNames = function->getParameterNames();
 
   // Lookup each parameter name.
-  for (ParamNames::iterator it = allParamNames.begin();
-       it != allParamNames.end(); ++it) {
-    Geometry::Parameter_sptr param =
-        paramMap.getRecursive(&(*det), (*it), type);
+  for (auto &name : allParamNames) {
+    Geometry::Parameter_sptr param = paramMap.getRecursive(&(*det), name, type);
 
     const Geometry::FitParameter &fitParam =
         tryParseFunctionParameter(param, det);

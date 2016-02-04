@@ -242,7 +242,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
   int EndY = AdjY;
   int SumX = getProperty("SumPixelsX");
   int SumY = getProperty("SumPixelsY");
-  bool sum = (SumX * SumY > 1) ? true : false;
+  bool sum = SumX * SumY > 1;
   if (sum) {
     StartX = 0;
     StartY = 0;
@@ -299,8 +299,8 @@ void SmoothNeighbours::findNeighboursRectangular() {
 
           // Adjust the weights of each neighbour to normalize to unity
           if (!sum || expandSumAllPixels)
-            for (size_t q = 0; q < neighbours.size(); q++)
-              neighbours[q].second /= totalWeight;
+            for (auto &neighbour : neighbours)
+              neighbour.second /= totalWeight;
 
           // Save the list of neighbours for this output workspace index.
           m_neighbours[outWI] = neighbours;
@@ -347,7 +347,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   int sum = getProperty("SumNumberOfNeighbours");
   boost::shared_ptr<const Geometry::IComponent> parent, neighbParent,
       grandparent, neighbGParent;
-  bool *used = new bool[inWS->getNumberHistograms()];
+  auto used = new bool[inWS->getNumberHistograms()];
   if (sum > 1) {
     for (size_t wi = 0; wi < inWS->getNumberHistograms(); wi++)
       used[wi] = false;
@@ -399,16 +399,15 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     std::vector<weightedNeighbour> neighbours;
 
     // Convert from spectrum numbers to workspace indices
-    for (SpectraDistanceMap::iterator it = neighbSpectra.begin();
-         it != neighbSpectra.end(); ++it) {
-      specid_t spec = it->first;
+    for (auto &specDistance : neighbSpectra) {
+      specid_t spec = specDistance.first;
 
       // Use the weighting strategy to calculate the weight.
-      double weight = WeightedSum->weightAt(it->second);
+      double weight = WeightedSum->weightAt(specDistance.second);
 
       if (weight > 0) {
         // Find the corresponding workspace index
-        spec2index_map::const_iterator mapIt = spec2index.find(spec);
+        auto mapIt = spec2index.find(spec);
         if (mapIt != spec2index.end()) {
           size_t neighWI = mapIt->second;
           if (sum > 1) {
@@ -434,8 +433,8 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
 
     // Adjust the weights of each neighbour to normalize to unity
     if (sum == 1)
-      for (size_t q = 0; q < neighbours.size(); q++)
-        neighbours[q].second /= totalWeight;
+      for (auto &neighbour : neighbours)
+        neighbour.second /= totalWeight;
 
     // Save the list of neighbours for this output workspace index.
     m_neighbours[outWI] = neighbours;
@@ -543,9 +542,8 @@ Check whether the properties provided are all in their default state.
 */
 bool areAllDefault(ConstVecProperties &properties) {
   bool areAllDefault = false;
-  for (ConstVecProperties::const_iterator it = properties.begin();
-       it != properties.end(); ++it) {
-    if (!(*it)->isDefault()) {
+  for (auto property : properties) {
+    if (!property->isDefault()) {
       return areAllDefault;
     }
   }

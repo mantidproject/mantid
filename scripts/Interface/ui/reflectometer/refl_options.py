@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 import ui_refl_options_window
 from PyQt4 import QtCore, QtGui
 
@@ -7,18 +7,17 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
+
 class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
-
-
     """
     Member variables
     """
     __frequency = 0
     __method = 0
-    __method_list = ["Add","Replace","Append"]
+    __method_list = ["Add", "Replace", "Append"]
     __icat_download = False
 
-    def __init__(self, def_method, def_freq, def_alg_use, def_icat_download, def_group_tof_workspaces):
+    def __init__(self, def_method, def_freq, def_alg_use, def_icat_download, def_group_tof_workspaces, def_stitch_right):
         """
         Initialise the interface
         """
@@ -30,7 +29,7 @@ class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
         self.__frequency = def_freq
         self.__icat_download = def_icat_download
         self.__group_tof_workspaces = def_group_tof_workspaces
-
+        self.__stitch_right = def_stitch_right
 
         self.setupUi(self)
 
@@ -45,14 +44,16 @@ class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
         self.checkAlg.setChecked(def_alg_use)
         self.checkICATDownload.setChecked(def_icat_download)
         self.checkGroupTOFWorkspaces.setChecked(def_group_tof_workspaces)
+        self.checkScaleRight.setChecked(def_stitch_right)
 
 
-        #connect update signals to functions
+        # connect update signals to functions
         self.dspinFrequency.valueChanged.connect(self.__update_frequency)
         self.comboAccMethod.activated.connect(self.__update_method)
         self.checkAlg.clicked.connect(self.__update_Alg_use)
         self.checkICATDownload.clicked.connect(self.__update_download_method)
         self.checkGroupTOFWorkspaces.clicked.connect(self.__update_groupTOF_method)
+        self.checkScaleRight.clicked.connect(self.__update_stitch_right)
 
     def __update_Alg_use(self, checked):
         self.__alg_use = checked
@@ -69,6 +70,9 @@ class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
     def __update_groupTOF_method(self, checked):
         self.__group_tof_workspaces = checked
 
+    def __update_stitch_right(self, checked):
+        self.__stitch_right = checked
+
     def icatDownload(self):
         return self.__icat_download
 
@@ -84,5 +88,5 @@ class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
     def method(self):
         return self.__method
 
-
-
+    def stitchRight(self):
+        return self.__stitch_right

@@ -70,7 +70,7 @@ void CoordTransformAffine::copyRawMatrix() {
 /** Virtual cloner
  * @return a copy of this object  */
 CoordTransform *CoordTransformAffine::clone() const {
-  CoordTransformAffine *out = new CoordTransformAffine(inD, outD);
+  auto out = new CoordTransformAffine(inD, outD);
   out->setMatrix(this->getMatrix());
   return out;
 }
@@ -376,8 +376,7 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
     ownSecondAff = true;
   }
   // Initialize the affine matrix
-  CoordTransformAffine *out =
-      new CoordTransformAffine(firstAff->getInD(), secondAff->getOutD());
+  auto out = new CoordTransformAffine(firstAff->getInD(), secondAff->getOutD());
   // Multiply the two matrices together
   Matrix<coord_t> outMat = secondAff->getMatrix() * firstAff->getMatrix();
   // Set in the output

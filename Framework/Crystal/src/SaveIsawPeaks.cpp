@@ -247,7 +247,11 @@ void SaveIsawPeaks::exec() {
       }
     }
   }
-
+  // HKL's are flipped by -1 because of the internal Q convention
+  // unless Crystallography convention
+  double qSign = -1.0;
+  if (ws->getConvention() == "Crystallography")
+    qSign = 1.0;
   // ============================== Save all Peaks
   // =========================================
   // Sequence number
@@ -293,23 +297,22 @@ void SaveIsawPeaks::exec() {
         size_t first_peak_index = ids[0];
         Peak &first_peak = peaks[first_peak_index];
         double monct = first_peak.getMonitorCount();
-        out << std::setw(12) << (int)(monct) << std::endl;
+        out << std::setw(12) << static_cast<int>(monct) << std::endl;
 
         out << header << std::endl;
 
         // Go through each peak at this run / bank
-        for (size_t i = 0; i < ids.size(); i++) {
-          size_t wi = ids[i];
+        for (auto wi : ids) {
           Peak &p = peaks[wi];
 
           // Sequence (run) number
           out << "3" << std::setw(7) << seqNum;
 
-          // HKL is flipped by -1 due to different q convention in ISAW vs
-          // mantid.
-          out << std::setw(5) << Utils::round(-p.getH()) << std::setw(5)
-              << Utils::round(-p.getK()) << std::setw(5)
-              << Utils::round(-p.getL());
+          // HKL's are flipped by -1 because of the internal Q convention
+          // unless Crystallography convention
+          out << std::setw(5) << Utils::round(qSign * p.getH()) << std::setw(5)
+              << Utils::round(qSign * p.getK()) << std::setw(5)
+              << Utils::round(qSign * p.getL());
 
           // Row/column
           out << std::setw(8) << std::fixed << std::setprecision(2)

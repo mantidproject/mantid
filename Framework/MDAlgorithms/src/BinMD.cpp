@@ -98,7 +98,7 @@ template <typename MDE, size_t nd>
 inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
                             const size_t *const chunkMax) {
   // An array to hold the rotated/transformed coordinates
-  coord_t *outCenter = new coord_t[m_outD];
+  auto outCenter = new coord_t[m_outD];
 
   // Evaluate whether the entire box is in the same bin
   if (box->getNPoints() > (1 << nd) * 2) {
@@ -181,9 +181,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
   // So you need to iterate through events.
 
   const std::vector<MDE> &events = box->getConstEvents();
-  typename std::vector<MDE>::const_iterator it = events.begin();
-  typename std::vector<MDE>::const_iterator it_end = events.end();
-  for (; it != it_end; it++) {
+  for (auto it = events.begin(); it != events.end(); ++it) {
     // Cache the center of the event (again for speed)
     const coord_t *inCenter = it->getCenter();
 
@@ -334,8 +332,8 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
 
       // Go through every box for this chunk.
-      for (size_t i = 0; i < boxes.size(); i++) {
-        MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+      for (auto &boxe : boxes) {
+        MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
         // Perform the binning in this separate method.
         if (box)
           this->binMDBox(box, chunkMin.data(), chunkMax.data());

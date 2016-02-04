@@ -49,12 +49,10 @@ void GroupWorkspaces::exec() {
  * @param names The list of names to add from the ADS
  */
 void GroupWorkspaces::addToGroup(const std::vector<std::string> &names) {
-  typedef std::vector<std::string>::const_iterator const_vector_iterator;
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-  const_vector_iterator cend = names.end();
-  for (const_vector_iterator citr = names.begin(); citr != cend; ++citr) {
-    auto workspace = ads.retrieve(*citr);
+  for (const auto &name : names) {
+    auto workspace = ads.retrieve(name);
     addToGroup(workspace);
   }
 }

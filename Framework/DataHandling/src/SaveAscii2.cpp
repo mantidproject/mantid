@@ -71,10 +71,10 @@ void SaveAscii2::init() {
                                {"SemiColon", ";"},
                                {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
-  for (size_t i = 0; i < 6; ++i) {
-    std::string option = spacers[i][0];
+  for (auto &spacer : spacers) {
+    std::string option = spacer[0];
     m_separatorIndex.insert(
-        std::pair<std::string, std::string>(option, spacers[i][1]));
+        std::pair<std::string, std::string>(option, spacer[1]));
     sepOptions.push_back(option);
   }
 
@@ -135,8 +135,7 @@ void SaveAscii2::exec() {
   }
   // Else if the separator drop down choice is not UserDefined then we use that.
   else if (choice != "UserDefined") {
-    std::map<std::string, std::string>::iterator it =
-        m_separatorIndex.find(choice);
+    auto it = m_separatorIndex.find(choice);
     m_sep = it->second;
   }
   // If we still have nothing, then we are forced to use a default.
@@ -182,11 +181,11 @@ void SaveAscii2::exec() {
 
   // Add spectra list into the index list
   if (!spec_list.empty()) {
-    for (size_t i = 0; i < spec_list.size(); i++) {
-      if (spec_list[i] >= nSpectra) {
+    for (auto &spec : spec_list) {
+      if (spec >= nSpectra) {
         throw std::invalid_argument("Inconsistent spectra list");
       } else {
-        idx.insert(spec_list[i]);
+        idx.insert(spec);
       }
     }
   }
@@ -230,7 +229,7 @@ void SaveAscii2::exec() {
     }
   } else {
     Progress progress(this, 0, 1, idx.size());
-    for (std::set<int>::const_iterator i = idx.begin(); i != idx.end(); ++i) {
+    for (auto i = idx.begin(); i != idx.end(); ++i) {
       writeSpectra(i, file);
       progress.report();
     }

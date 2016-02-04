@@ -268,8 +268,8 @@ void TobyFitResolutionModel::setAttribute(
   } else if (name == FOREGROUNDONLY_NAME) {
     m_foregroundOnly = (value.asInt() != 0);
   } else {
-    for (auto iter = m_yvector.begin(); iter != m_yvector.end(); ++iter) {
-      iter->setAttribute(name, value);
+    for (auto &iter : m_yvector) {
+      iter.setAttribute(name, value);
     }
   }
 }

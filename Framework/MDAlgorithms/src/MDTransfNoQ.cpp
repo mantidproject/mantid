@@ -68,11 +68,8 @@ void MDTransfNoQ::initialize(const MDWSDescription &ConvParams) {
 */
 bool MDTransfNoQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
   if (m_YAxis) {
-    Coord[1] = (coord_t)(m_YAxis->operator()(i));
-    if (Coord[1] < m_DimMin[1] || Coord[1] >= m_DimMax[1])
-      return false;
-    else
-      return true;
+    Coord[1] = static_cast<coord_t>(m_YAxis->operator()(i));
+    return !(Coord[1] < m_DimMin[1] || Coord[1] >= m_DimMax[1]);
   }
   return false;
 }
@@ -81,7 +78,7 @@ bool MDTransfNoQ::calcMatrixCoord(const double &X, std::vector<coord_t> &Coord,
   if (X < m_DimMin[0] || X >= m_DimMax[0])
     return false;
 
-  Coord[0] = (coord_t)X;
+  Coord[0] = static_cast<coord_t>(X);
   return true;
 }
 

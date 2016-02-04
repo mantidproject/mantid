@@ -32,7 +32,7 @@ OptimizeExtinctionParameters::OptimizeExtinctionParameters() {
 OptimizeExtinctionParameters::~OptimizeExtinctionParameters() {}
 
 static double gsl_costFunction(const gsl_vector *v, void *params) {
-  std::string *p = (std::string *)params;
+  std::string *p = reinterpret_cast<std::string *>(params);
   std::string inname = p[0];
   std::string corrOption = p[1];
   std::string pointOption = p[2];
@@ -84,8 +84,8 @@ void OptimizeExtinctionParameters::init() {
                   "Becker-Coppens Crystallite Radius (micron)",
                   Direction::InOut);
   std::vector<std::string> propOptions;
-  for (size_t i = 0; i < m_pointGroups.size(); ++i)
-    propOptions.push_back(m_pointGroups[i]->getName());
+  for (auto &pointGroup : m_pointGroups)
+    propOptions.push_back(pointGroup->getName());
   declareProperty("PointGroup", propOptions[0],
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which point group applies to this crystal?");

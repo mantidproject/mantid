@@ -64,10 +64,7 @@ bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo) const {
   //       std::cout << "MonIDPropChanger::isConditionChanged() called  ";
   //       std::cout << monitors_changed << std::endl;
 
-  if (!monitors_changed)
-    return false;
-
-  return true;
+  return monitors_changed;
 }
 // function which modifies the allowed values for the list of monitors.
 void MonIDPropChanger::applyChanges(const IPropertyManager *algo,
@@ -396,7 +393,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
       throw std::runtime_error("More then one spectra corresponds to the "
                                "requested monitor ID, which is unheard of");
     }
-    spectra_num = (int)indexList[0];
+    spectra_num = static_cast<int>(indexList[0]);
   } else { // monitor spectrum is specified.
     spec2index_map specs;
     const SpectraAxis *axis =
@@ -410,7 +407,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
       throw std::runtime_error("Input workspace does not contain spectrum "
                                "number given for MonitorSpectrum");
     }
-    spectra_num = (int)specs[monitorSpec];
+    spectra_num = static_cast<int>(specs[monitorSpec]);
   }
   return this->extractMonitorSpectrum(inputWorkspace, spectra_num);
 }

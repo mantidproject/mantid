@@ -132,8 +132,8 @@ MDHistoWorkspace::~MDHistoWorkspace() {
 void MDHistoWorkspace::init(
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions) {
   std::vector<IMDDimension_sptr> dim2;
-  for (size_t i = 0; i < dimensions.size(); i++)
-    dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimensions[i]));
+  for (auto &dimension : dimensions)
+    dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimension));
   this->init(dim2);
   m_nEventsContributed = 0;
 }
@@ -310,10 +310,11 @@ coord_t *MDHistoWorkspace::getVertexesArray(size_t linearIndex,
                                             size_t &numVertices) const {
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
   // bits
-  numVertices = (size_t)(1) << numDimensions; // Cast avoids warning about
-                                              // result of 32-bit shift
-                                              // implicitly converted to 64 bits
-                                              // on MSVC
+  numVertices = static_cast<size_t>(1)
+                << numDimensions; // Cast avoids warning about
+                                  // result of 32-bit shift
+                                  // implicitly converted to 64 bits
+                                  // on MSVC
 
   // Index into each dimension. Built from the linearIndex.
   size_t dimIndexes[10];
@@ -321,7 +322,7 @@ coord_t *MDHistoWorkspace::getVertexesArray(size_t linearIndex,
       numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
 
   // The output vertexes coordinates
-  coord_t *out = new coord_t[numDimensions * numVertices];
+  auto out = new coord_t[numDimensions * numVertices];
   for (size_t i = 0; i < numVertices; ++i) {
     size_t outIndex = i * numDimensions;
     // Offset the 0th box by the position of this linear index, in each
@@ -1219,7 +1220,7 @@ void MDHistoWorkspace::setMDMasking(
       // If the function masks the point, then mask it, otherwise leave it as it
       // is.
       if (maskingRegion->isPointContained(this->getCenter(i))) {
-        m_masks[i] = true;
+        this->setMDMaskAt(i, true);
       }
     }
     delete maskingRegion;
@@ -1233,9 +1234,18 @@ void MDHistoWorkspace::setMDMasking(
  */
 void MDHistoWorkspace::setMDMaskAt(const size_t &index, bool mask) {
   m_masks[index] = mask;
+  if (mask) {
+    // Set signal and error of masked points to the value of MDMaskValue
+    this->setSignalAt(index, MDMaskValue);
+    this->setErrorSquaredAt(index, MDMaskValue);
+  }
 }
 
-/// Clear any existing masking.
+/**
+ * Clear any existing masking.
+ * Note that this clears the mask flag but does not restore the data
+ * which was set to NaN when it was masked.
+ */
 void MDHistoWorkspace::clearMDMasking() {
   for (size_t i = 0; i < this->getNPoints(); ++i) {
     m_masks[i] = false;

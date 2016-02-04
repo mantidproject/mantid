@@ -8,17 +8,17 @@ namespace NeXus {
 
 std::vector<std::string> NXAttributes::names() const {
   std::vector<std::string> out;
-  std::map<std::string, std::string>::const_iterator it = m_values.begin();
-  for (; it != m_values.end(); ++it)
-    out.push_back(it->first);
+  out.reserve(m_values.size());
+  for (const auto &value : m_values)
+    out.push_back(value.first);
   return out;
 }
 
 std::vector<std::string> NXAttributes::values() const {
   std::vector<std::string> out;
-  std::map<std::string, std::string>::const_iterator it = m_values.begin();
-  for (; it != m_values.end(); ++it)
-    out.push_back(it->second);
+  out.reserve(m_values.size());
+  for (const auto &value : m_values)
+    out.push_back(value.second);
   return out;
 }
 
@@ -28,7 +28,7 @@ std::vector<std::string> NXAttributes::values() const {
  * otherwise
  */
 std::string NXAttributes::operator()(const std::string &name) const {
-  std::map<std::string, std::string>::const_iterator it = m_values.find(name);
+  auto it = m_values.find(name);
   if (it == m_values.end())
     return "";
   return it->second;
@@ -319,7 +319,7 @@ std::vector<std::string> &NXNote::data() {
     NXopendata(m_fileID, "data");
     NXgetinfo(m_fileID, &rank, dims, &type);
     int n = dims[0];
-    char *buffer = new char[n];
+    auto buffer = new char[n];
     NXstatus stat = NXgetdata(m_fileID, buffer);
     NXclosedata(m_fileID);
     m_data.clear();
@@ -595,7 +595,7 @@ Kernel::Property *NXLog::createSingleValueProperty() {
   } else if (nxType == NX_UINT8) {
     NXDataSetTyped<unsigned char> value(*this, valAttr);
     value.load();
-    bool state = (value[0] == 0) ? false : true;
+    bool state = value[0] != 0;
     prop = new Kernel::PropertyWithValue<bool>(name(), state);
   } else {
     prop = NULL;

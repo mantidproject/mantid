@@ -57,15 +57,23 @@ public:
   void filterBetweenExecDate(Mantid::Kernel::DateAndTime start,
                              Mantid::Kernel::DateAndTime end =
                                  Mantid::Kernel::DateAndTime::getCurrentTime());
-  const std::vector<HistoryItem> getAlgorithmsList() const;
+  /**
+  * Get the list of History Items for this view.
+  *
+  * @returns vector of history items for this view.
+  */
+  const std::vector<HistoryItem> &getAlgorithmsList() const {
+    return m_historyItems;
+  };
   size_t size() const { return m_historyItems.size(); }
 
 private:
-  void unroll(std::list<HistoryItem>::iterator it);
-  void roll(std::list<HistoryItem>::iterator it);
+  void unroll(std::vector<HistoryItem>::iterator &it);
+  void roll(std::vector<HistoryItem>::iterator &it);
+  void rollChildren(std::vector<HistoryItem>::iterator it);
 
   const WorkspaceHistory m_wsHist;
-  std::list<HistoryItem> m_historyItems;
+  std::vector<HistoryItem> m_historyItems;
 };
 
 } // namespace API

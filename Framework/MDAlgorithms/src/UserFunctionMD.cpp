@@ -106,8 +106,7 @@ double UserFunctionMD::functionMD(const API::IMDIterator &r) const {
 double *UserFunctionMD::AddVariable(const char *varName, void *pufun) {
   UserFunctionMD &fun = *reinterpret_cast<UserFunctionMD *>(pufun);
 
-  std::vector<std::string>::iterator x =
-      std::find(fun.m_varNames.begin(), fun.m_varNames.end(), varName);
+  auto x = std::find(fun.m_varNames.begin(), fun.m_varNames.end(), varName);
   if (x != fun.m_varNames.end()) {
     // std::vector<std::string>::difference_type i =
     // std::distance(fun.m_varNames.begin(),x);

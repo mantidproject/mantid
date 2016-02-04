@@ -152,8 +152,8 @@ void MuonRemoveExpDecay::exec() {
 }
 
 /** This method corrects the errors for one spectra.
- *	 The muon lifetime is in microseconds not seconds, i.e. 2.2 rather than
- *0.0000022.
+ *	 The muon lifetime is in microseconds not seconds, i.e. 2.1969811 rather
+ *   than 0.0000021969811.
  *   This is because the data is in microseconds.
  *   @param inX ::  The X vector
  *   @param inY ::  The input error vector
@@ -164,20 +164,19 @@ void MuonRemoveExpDecay::removeDecayError(const MantidVec &inX,
                                           MantidVec &outY) {
   // Do the removal
   for (size_t i = 0; i < inY.size(); ++i) {
-    if (inY[i])
+    if (inY[i] != 0.0)
       outY[i] =
           inY[i] *
           exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
     else
       outY[i] =
-          1.0 *
           exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
   }
 }
 
 /** This method corrects the data for one spectra.
- *	 The muon lifetime is in microseconds not seconds, i.e. 2.2 rather than
- *0.0000022.
+ *	 The muon lifetime is in microseconds not seconds, i.e. 2.1969811 rather
+ *   than 0.0000021969811.
  *   This is because the data is in microseconds.
  *   @param inX ::  The X vector
  *   @param inY ::  The input data vector
@@ -188,7 +187,7 @@ void MuonRemoveExpDecay::removeDecayData(const MantidVec &inX,
                                          MantidVec &outY) {
   // Do the removal
   for (size_t i = 0; i < inY.size(); ++i) {
-    if (inY[i])
+    if (inY[i] != 0.0)
       outY[i] =
           inY[i] *
           exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));

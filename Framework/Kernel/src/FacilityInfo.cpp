@@ -74,8 +74,8 @@ void FacilityInfo::fillExtensions(const Poco::XML::Element *elem) {
   typedef Poco::StringTokenizer tokenizer;
   tokenizer exts(extsStr, ",",
                  tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-  for (tokenizer::Iterator it = exts.begin(); it != exts.end(); ++it) {
-    addExtension(*it);
+  for (const auto &ext : exts) {
+    addExtension(ext);
   }
 }
 
@@ -190,23 +190,25 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
     }
   }
 
-  std::vector<InstrumentInfo>::const_iterator it = m_instruments.begin();
-  for (; it != m_instruments.end(); ++it) {
-    if (boost::iequals(it->name(), iName)) // Case-insensitive search
+  for (const auto &instrument : m_instruments) {
+    if (boost::iequals(instrument.name(), iName)) // Case-insensitive search
     {
-      g_log.debug() << "Instrument '" << iName << "' found as " << it->name()
-                    << " at " << name() << "." << std::endl;
-      return *it;
+      g_log.debug() << "Instrument '" << iName << "' found as "
+                    << instrument.name() << " at " << name() << "."
+                    << std::endl;
+      return instrument;
     }
   }
 
   // if unsuccessful try shortname
-  for (it = m_instruments.begin(); it != m_instruments.end(); ++it) {
-    if (boost::iequals(it->shortName(), iName)) // Case-insensitive search
+  for (const auto &instrument : m_instruments) {
+    if (boost::iequals(instrument.shortName(),
+                       iName)) // Case-insensitive search
     {
-      g_log.debug() << "Instrument '" << iName << "' found as " << it->name()
-                    << " at " << name() << "." << std::endl;
-      return *it;
+      g_log.debug() << "Instrument '" << iName << "' found as "
+                    << instrument.name() << " at " << name() << "."
+                    << std::endl;
+      return instrument;
     }
   }
 
@@ -245,7 +247,7 @@ FacilityInfo::instruments(const std::string &tech) const {
   */
 std::vector<std::string> FacilityInfo::computeResources() const {
   std::vector<std::string> names;
-  ComputeResourcesMap::const_iterator it = m_computeResources.begin();
+  auto it = m_computeResources.begin();
   while (it != m_computeResources.end()) {
     names.push_back((*it).first);
     ++it;

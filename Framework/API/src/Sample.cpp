@@ -193,11 +193,7 @@ void Sample::setCrystalStructure(
 bool Sample::hasCrystalStructure() const {
   // Conversion to bool seems to be a problem in VS2012, so this is a bit more
   // verbose than it should be.
-  if (m_crystalStructure) {
-    return true;
-  }
-
-  return false;
+  return static_cast<bool>(m_crystalStructure);
 }
 
 /// Destroys the internally stored CrystalStructure-object.

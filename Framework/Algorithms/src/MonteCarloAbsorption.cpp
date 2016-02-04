@@ -205,7 +205,7 @@ void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
   // Attenuation factor is simply the average value
   attenFactor /= numDetected;
   // Error is 1/sqrt(nevents)
-  error = 1. / sqrt((double)numDetected);
+  error = 1. / sqrt(static_cast<double>(numDetected));
 }
 
 /**
@@ -288,7 +288,7 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
     return false;
   }
 
-  double length = beforeScatter.begin()->distInsideObject;
+  double length = beforeScatter.cbegin()->distInsideObject;
   factor *= attenuation(length, *m_sampleMaterial, lambda);
 
   beforeScatter.clearIntersectionResults();
@@ -296,14 +296,12 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
     m_container->interceptSurfaces(beforeScatter);
   }
   // Attenuation factor is product of factor for each material
-  Track::LType::const_iterator cend = beforeScatter.end();
-  for (Track::LType::const_iterator citr = beforeScatter.begin(); citr != cend;
-       ++citr) {
-    length = citr->distInsideObject;
-    factor *= attenuation(length, citr->object->material(), lambda);
+  for (const auto &citr : beforeScatter) {
+    length = citr.distInsideObject;
+    factor *= attenuation(length, citr.object->material(), lambda);
   }
 
-  length = afterScatter.begin()->distInsideObject;
+  length = afterScatter.cbegin()->distInsideObject;
   factor *= attenuation(length, *m_sampleMaterial, lambda);
 
   afterScatter.clearIntersectionResults();
@@ -311,11 +309,9 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
     m_container->interceptSurfaces(afterScatter);
   }
   // Attenuation factor is product of factor for each material
-  cend = afterScatter.end();
-  for (Track::LType::const_iterator citr = afterScatter.begin(); citr != cend;
-       ++citr) {
-    length = citr->distInsideObject;
-    factor *= attenuation(length, citr->object->material(), lambda);
+  for (const auto &citr : afterScatter) {
+    length = citr.distInsideObject;
+    factor *= attenuation(length, citr.object->material(), lambda);
   }
 
   return true;

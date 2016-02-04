@@ -160,15 +160,11 @@ Order (low first)
   const int TS = isSingle(); // is this one component
   const int AS = A.isSingle();
   if (TS != AS)
-    return (TS > AS) ? true : false;
+    return TS > AS;
   // PROCESS Intersection/Union
   if (!TS && Intersect != A.Intersect) {
     // Union==0 therefore this > A
-    if (Intersect > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return Intersect > 0;
   }
 
   // PROCESS Units. (order : then size)
@@ -192,10 +188,7 @@ Order (low first)
     if (*ax != *ux)
       return (*ux < *ax);
   }
-  if (uc != Units.end())
-    return true;
-  // everything idential or A.comp bigger:
-  return false;
+  return uc != Units.end();
 }
 
 Acomp &Acomp::operator+=(const Acomp &A)
@@ -475,17 +468,17 @@ Units are sorted after this function is returned.
   int bextra = 0;
   // find first Component to add
   //  std::cerr<<"Process Union:"<<Ln<<std::endl;
-  for (unsigned int iu = 0; iu < Ln.length(); iu++) {
+  for (char iu : Ln) {
     if (blevel) // we are in a bracket then...
     {
-      if (Ln[iu] == ')') // maybe closing outward..
+      if (iu == ')') // maybe closing outward..
         blevel--;
-      else if (Ln[iu] == '(')
+      else if (iu == '(')
         blevel++;
       if (blevel || bextra)
-        Express += Ln[iu];
+        Express += iu;
     } else {
-      if (Ln[iu] == '+') {
+      if (iu == '+') {
         Acomp AX;
         try {
           AX.setString(Express);
@@ -495,7 +488,7 @@ Units are sorted after this function is returned.
         }
         Express.erase(); // reset string
         addComp(AX);     // add components
-      } else if (Ln[iu] == '(') {
+      } else if (iu == '(') {
         blevel++;
         if (Express.length()) {
           Express += '(';
@@ -503,7 +496,7 @@ Units are sorted after this function is returned.
         } else
           bextra = 0;
       } else
-        Express += Ln[iu];
+        Express += iu;
     }
   }
   if (Express.size() > 0) {
@@ -533,7 +526,7 @@ It requires that the Intersect is the same for both
     return -1;
 
   if (!A.Units.empty()) {
-    std::vector<int>::iterator Ept = Units.end();
+    auto Ept = Units.end();
     Units.resize(Units.size() + A.Units.size());
     copy(A.Units.begin(), A.Units.end(), Ept);
     std::sort(Units.begin(), Units.end());
@@ -841,7 +834,7 @@ Remove identical items.
   // Units are sorted
 
   sort(Units.begin(), Units.end());
-  std::vector<int>::iterator ux = unique(Units.begin(), Units.end());
+  auto ux = unique(Units.begin(), Units.end());
   cnt += static_cast<int>(std::distance(ux, Units.end()));
   Units.erase(ux, Units.end());
   return cnt;
@@ -888,7 +881,7 @@ i.e. one pass.
     std::vector<BnId>::iterator vc;
     for (vc = Work.begin(); vc != Work.end(); ++vc) {
       const int GrpIndex(vc->TrueCount() + 1);
-      std::vector<BnId>::iterator oc = vc + 1;
+      auto oc = vc + 1;
       for (oc = vc + 1; oc != Work.end(); ++oc) {
         const int OCnt = oc->TrueCount();
         if (OCnt > GrpIndex)

@@ -121,8 +121,8 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Create the ouput workspace
   typename MDEventWorkspace<OMDE, ond>::sptr outWS(
       new MDEventWorkspace<OMDE, ond>());
-  for (size_t od = 0; od < m_binDimensions.size(); od++) {
-    outWS->addDimension(m_binDimensions[od]);
+  for (auto &binDimension : m_binDimensions) {
+    outWS->addDimension(binDimension);
   }
   outWS->setCoordinateSystem(ws->getSpecialCoordinateSystem());
   outWS->initialize();
@@ -196,7 +196,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (fileBackedWS)
     API::IMDNode::sortObjByID(boxes);
 
-  Progress *prog = new Progress(this, 0.0, 1.0, boxes.size());
+  auto prog = new Progress(this, 0.0, 1.0, boxes.size());
 
   // The root of the output workspace
   MDBoxBase<OMDE, ond> *outRootBox = outWS->getBox();
@@ -216,9 +216,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       const std::vector<MDE> &events = box->getConstEvents();
 
-      typename std::vector<MDE>::const_iterator it = events.begin();
-      typename std::vector<MDE>::const_iterator it_end = events.end();
-      for (; it != it_end; it++) {
+      for (auto it = events.cbegin(); it != events.cend(); ++it) {
         // Cache the center of the event (again for speed)
         const coord_t *inCenter = it->getCenter();
 

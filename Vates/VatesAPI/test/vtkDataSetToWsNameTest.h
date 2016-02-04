@@ -5,6 +5,7 @@
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MockObjects.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include <vtkNew.h>
 
 using namespace Mantid::VATES;
 
@@ -37,22 +38,20 @@ public:
 
   void testExecution()
   {
-    vtkStructuredGrid* ds = vtkStructuredGrid::New();
+    vtkNew<vtkStructuredGrid> ds;
     ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
 
-    vtkDataSetToWsName extractor(ds);
+    vtkDataSetToWsName extractor(ds.GetPointer());
     TS_ASSERT_EQUALS("WS_NAME", extractor.execute());
-    ds->Delete();
   }
 
   void testStaticUsage()
   {
-    vtkStructuredGrid* ds = vtkStructuredGrid::New();
+    vtkNew<vtkStructuredGrid> ds;
     ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
 
-    TS_ASSERT_EQUALS("WS_NAME", vtkDataSetToWsName::exec(ds));
+    TS_ASSERT_EQUALS("WS_NAME", vtkDataSetToWsName::exec(ds.GetPointer()));
   }
-
 };
 
 #endif

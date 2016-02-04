@@ -520,13 +520,12 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
 void RefinePowderInstrumentParameters3::proposeNewValues(
     vector<string> mcgroup, map<string, Parameter> &curparammap,
     map<string, Parameter> &newparammap, double currchisq) {
-  for (size_t i = 0; i < mcgroup.size(); ++i) {
+  for (auto paramname : mcgroup) {
     // random number between -1 and 1
     double randomnumber =
         2 * static_cast<double>(rand()) / static_cast<double>(RAND_MAX) - 1.0;
 
     // parameter information
-    string paramname = mcgroup[i];
     Parameter param = curparammap[paramname];
     double stepsize = m_dampingFactor * currchisq *
                       (param.curvalue * param.mcA1 + param.mcA0) *
@@ -723,8 +722,8 @@ void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(
   mcgroups.push_back(geomparams);
 
   dboutss << "Geometry parameters: ";
-  for (size_t i = 0; i < geomparams.size(); ++i)
-    dboutss << geomparams[i] << "\t\t";
+  for (auto &geomparam : geomparams)
+    dboutss << geomparam << "\t\t";
   dboutss << endl;
 
   g_log.notice(dboutss.str());
@@ -1107,7 +1106,7 @@ TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
   */
 void RefinePowderInstrumentParameters3::addOrReplace(
     map<string, Parameter> &parameters, string parname, double parvalue) {
-  map<string, Parameter>::iterator pariter = parameters.find(parname);
+  auto pariter = parameters.find(parname);
   if (pariter != parameters.end()) {
     parameters[parname].curvalue = parvalue;
   } else {
@@ -1134,7 +1133,7 @@ Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(
 
   outws->getAxis(0)->setUnit("dSpacing");
 
-  TextAxis *taxis = new TextAxis(outws->getNumberHistograms());
+  auto taxis = new TextAxis(outws->getNumberHistograms());
   taxis->setLabel(0, "Data");
   taxis->setLabel(1, "Model");
   taxis->setLabel(2, "DiffDM");
@@ -1187,8 +1186,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterValues(
   msgss << "Set Instrument Function Parameter : " << endl;
 
   std::map<std::string, Parameter>::iterator paramiter;
-  for (size_t i = 0; i < funparamnames.size(); ++i) {
-    string parname = funparamnames[i];
+  for (auto parname : funparamnames) {
     paramiter = params.find(parname);
 
     if (paramiter != params.end()) {
@@ -1413,8 +1411,7 @@ void restoreFunctionParameterValue(
     map<string, Parameter> &parammap) {
   vector<string> parnames = function->getParameterNames();
 
-  for (size_t i = 0; i < parnames.size(); ++i) {
-    string &parname = parnames[i];
+  for (auto &parname : parnames) {
     map<string, pair<double, double>>::iterator miter;
     miter = parvaluemap.find(parname);
 
@@ -1426,7 +1423,7 @@ void restoreFunctionParameterValue(
       function->setParameter(parname, parvalue);
 
       // 2. Parameter map
-      map<string, Parameter>::iterator pariter = parammap.find(parname);
+      auto pariter = parammap.find(parname);
       if (pariter != parammap.end()) {
         // Find the entry
         pariter->second.curvalue = parvalue;

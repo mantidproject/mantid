@@ -154,7 +154,6 @@ void ReflectometryReductionOneAuto::init() {
   declareProperty("StrictSpectrumChecking", true,
                   "Strict checking between spectrum numbers in input "
                   "workspaces and transmission workspaces.");
-
   std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
       "None")("AutoDetect")("PolynomialCorrection")("ExponentialCorrection");
   declareProperty("CorrectionAlgorithm", "AutoDetect",
@@ -354,7 +353,6 @@ void ReflectometryReductionOneAuto::exec() {
                            wavelength_integration_max);
     refRedOne->setProperty("CorrectDetectorPositions", correct_positions);
     refRedOne->setProperty("StrictSpectrumChecking", strict_spectrum_checking);
-
     if (correction_algorithm == "PolynomialCorrection") {
       // Copy across the polynomial
       refRedOne->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
@@ -585,11 +583,11 @@ bool ReflectometryReductionOneAuto::processGroups() {
 
   // Copy all the non-workspace properties over
   std::vector<Property *> props = this->getProperties();
-  for (auto prop = props.begin(); prop != props.end(); ++prop) {
-    if (*prop) {
-      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(*prop);
+  for (auto &prop : props) {
+    if (prop) {
+      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (!wsProp)
-        alg->setPropertyValue((*prop)->name(), (*prop)->value());
+        alg->setPropertyValue(prop->name(), prop->value());
     }
   }
 

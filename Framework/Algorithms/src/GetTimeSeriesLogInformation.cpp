@@ -277,10 +277,9 @@ TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
   tablews->addColumn("double", "Value");
 
   // 1. Integer part
-  for (auto intmapiter = m_intInfoMap.begin(); intmapiter != m_intInfoMap.end();
-       ++intmapiter) {
-    string name = intmapiter->first;
-    size_t value = intmapiter->second;
+  for (auto &intmapiter : m_intInfoMap) {
+    string name = intmapiter.first;
+    size_t value = intmapiter.second;
 
     TableRow newrow = tablews->appendRow();
     newrow << name << static_cast<double>(value);
@@ -407,20 +406,18 @@ Workspace2D_sptr GetTimeSeriesLogInformation::calDistributions(
     vecCount[i] = 0;
 
   // 3. Count
-  for (size_t i = 0; i < vecdt.size(); ++i) {
-    double dt = vecdt[i];
+  for (double dt : vecdt) {
     int index;
     if (dt < 0 && m_ignoreNegativeTime) {
       index = 0;
     } else {
-      vector<double>::iterator viter =
-          lower_bound(vecDeltaT.begin(), vecDeltaT.end(), dt);
+      auto viter = lower_bound(vecDeltaT.begin(), vecDeltaT.end(), dt);
       index = static_cast<int>(viter - vecDeltaT.begin());
       if (index >= static_cast<int>(vecDeltaT.size())) {
         // Out of upper boundary
         g_log.error() << "Find index = " << index
                       << " > vecX.size = " << vecDeltaT.size() << ".\n";
-      } else if (vecdt[i] < vecDeltaT[index]) {
+      } else if (dt < vecDeltaT[index]) {
         --index;
       }
 

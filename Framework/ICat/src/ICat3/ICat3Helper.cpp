@@ -313,8 +313,8 @@ void CICatHelper::listInstruments(std::vector<std::string> &instruments) {
   int result = icat.listInstruments(&request, &response);
 
   if (result == 0) {
-    for (unsigned i = 0; i < response.return_.size(); ++i) {
-      instruments.push_back(response.return_[i]);
+    for (const auto &instrument : response.return_) {
+      instruments.push_back(instrument);
     }
   } else {
     CErrorHandling::throwErrorMessages(icat);
@@ -339,8 +339,8 @@ void CICatHelper::listInvestigationTypes(
   int result = icat.listInvestigationTypes(&request, &response);
 
   if (result == 0) {
-    for (unsigned i = 0; i < response.return_.size(); ++i) {
-      investTypes.push_back(response.return_[i]);
+    for (const auto &type : response.return_) {
+      investTypes.push_back(type);
     }
   } else {
     CErrorHandling::throwErrorMessages(icat);
@@ -484,8 +484,7 @@ ICat3::ns1__advancedSearchDetails *
 CICatHelper::buildSearchQuery(const CatalogSearchParam &inputs) {
   // As this is a member variable we need to reset the search terms once
   // a new search is performed.
-  ICat3::ns1__advancedSearchDetails *advancedSearchDetails =
-      new ICat3::ns1__advancedSearchDetails;
+  auto advancedSearchDetails = new ICat3::ns1__advancedSearchDetails;
 
   ns1__investigationInclude invesInclude =
       ns1__investigationInclude__INVESTIGATORS_USCOREAND_USCOREKEYWORDS;

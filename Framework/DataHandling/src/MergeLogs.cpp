@@ -85,8 +85,7 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
   std::vector<Kernel::DateAndTime> times1 = p1->timesAsVector();
   std::vector<Kernel::DateAndTime> times2 = p2->timesAsVector();
 
-  Kernel::TimeSeriesProperty<double> *rp =
-      new Kernel::TimeSeriesProperty<double>(ologname);
+  auto rp = new Kernel::TimeSeriesProperty<double>(ologname);
 
   // 2. Merge
   size_t index1 = 0;
@@ -108,11 +107,7 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
 
     // i. Determine which log to work on
     if (!nocomparison) {
-      if (times1[index1] < times2[index2]) {
-        launch1 = true;
-      } else {
-        launch1 = false;
-      }
+      launch1 = times1[index1] < times2[index2];
     }
 
     // ii. Retrieve data from source log

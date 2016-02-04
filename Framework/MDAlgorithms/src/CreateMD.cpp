@@ -40,8 +40,8 @@ void padParameterVector(std::vector<double> &param_vector,
  */
 bool any_given(const std::vector<std::vector<double>> &params) {
   std::vector<double> param;
-  for (auto iter = params.begin(); iter != params.end(); ++iter) {
-    param = *iter;
+  for (const auto &iter : params) {
+    param = iter;
     if (!param.empty()) {
       return true;
     }
@@ -57,8 +57,8 @@ bool any_given(const std::vector<std::vector<double>> &params) {
  */
 bool all_given(const std::vector<std::vector<double>> &params) {
   std::vector<double> param;
-  for (auto iter = params.begin(); iter != params.end(); ++iter) {
-    param = *iter;
+  for (const auto &iter : params) {
+    param = iter;
     if (param.empty()) {
       return false;
     }
@@ -253,8 +253,8 @@ void CreateMD::exec() {
   progress.report();
 
   // Clean up temporary workspaces
-  for (const auto &workspace_name : to_merge_names) {
-    AnalysisDataService::Instance().remove(workspace_name);
+  for (auto &to_merge_name : to_merge_names) {
+    AnalysisDataService::Instance().remove(to_merge_name);
   }
 
   this->setProperty("OutputWorkspace", output_workspace);

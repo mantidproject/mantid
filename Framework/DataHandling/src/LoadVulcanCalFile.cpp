@@ -393,10 +393,9 @@ void LoadVulcanCalFile::processOffsets(
   std::set<int> set_bankID;
   map<detid_t, pair<bool, int>>
       map_verify; // key: detector ID, value: flag to have a match, bank ID
-  for (map<detid_t, double>::iterator miter = map_detoffset.begin();
-       miter != map_detoffset.end(); ++miter) {
-    detid_t pid = miter->first;
-    map<detid_t, size_t>::iterator fiter = map_det2index.find(pid);
+  for (auto &miter : map_detoffset) {
+    detid_t pid = miter.first;
+    auto fiter = map_det2index.find(pid);
     if (fiter == map_det2index.end()) {
       map_verify.insert(make_pair(pid, make_pair(false, -1)));
     } else {
@@ -421,12 +420,11 @@ void LoadVulcanCalFile::processOffsets(
   static const size_t arr[] = {21, 22, 23, 26, 27, 28};
   vector<size_t> vec_banks(arr, arr + sizeof(arr) / sizeof(arr[0]));
 
-  for (size_t i = 0; i < vec_banks.size(); ++i) {
-    size_t bankindex = vec_banks[i];
+  for (auto bankindex : vec_banks) {
     for (size_t j = 0; j < NUMBERDETECTORPERMODULE; ++j) {
       detid_t detindex =
           static_cast<detid_t>(bankindex * NUMBERRESERVEDPERMODULE + j);
-      map<detid_t, pair<bool, int>>::iterator miter = map_verify.find(detindex);
+      auto miter = map_verify.find(detindex);
       if (miter == map_verify.end())
         throw runtime_error("It cannot happen!");
       bool exist = miter->second.first;

@@ -145,7 +145,7 @@ void AsymmetryCalc::exec() {
         (tmpWS->dataY(forward)[j] + alpha * tmpWS->dataY(backward)[j]);
 
     // cal F-aB / F+aB
-    if (denominator) {
+    if (denominator != 0.0) {
       outputWS->dataY(0)[j] = numerator / denominator;
     } else {
       outputWS->dataY(0)[j] = 0.;
@@ -153,7 +153,7 @@ void AsymmetryCalc::exec() {
 
     // Work out the error (as in 1st attachment of ticket #4188)
     double error = 1.0;
-    if (denominator) {
+    if (denominator != 0.0) {
       // cal F + a2B
       double q1 =
           tmpWS->dataY(forward)[j] + alpha * alpha * tmpWS->dataY(backward)[j];

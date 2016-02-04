@@ -167,12 +167,13 @@ void CalculateCoverageDGS::exec() {
   // get the limits
   Mantid::API::MatrixWorkspace_const_sptr inputWS =
       getProperty("InputWorkspace");
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // cache two theta and phi
   auto instrument = inputWS->getInstrument();
   std::vector<detid_t> detIDS = instrument->getDetectorIDs(true);
   std::vector<double> tt, phi;
-  for (int i = 0; i < static_cast<int>(detIDS.size()); i++) {
-    auto detector = instrument->getDetector(detIDS[i]);
+  for (auto &id : detIDS) {
+    auto detector = instrument->getDetector(id);
     if (!detector->isMasked()) {
       tt.push_back(detector->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
       phi.push_back(detector->getPhi());
@@ -458,6 +459,10 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
       qin(0., 0., m_ki);
   qout = m_rubw * qout;
   qin = m_rubw * qin;
+  if (convention == "Crystallography") {
+    qout *= -1;
+    qin *= -1;
+  }
   double hStart = qin.X() - qout.X() * m_kfmin,
          hEnd = qin.X() - qout.X() * m_kfmax;
   double kStart = qin.Y() - qout.Y() * m_kfmin,

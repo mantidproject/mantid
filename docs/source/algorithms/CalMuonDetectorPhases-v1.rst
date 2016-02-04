@@ -54,10 +54,10 @@ Output:
 
 .. testoutput:: CalMuonDetectorPhasesExample
 
-  Detector 1 has phase 0.673839 and amplitude 0.133418
-  Detector 2 has phase 0.451991 and amplitude 0.134742
-  Detector 3 has phase 0.269082 and amplitude 0.149763
-  Detector 4 has phase 0.140398 and amplitude 0.153004
+  Detector 1 has phase 0.673861 and amplitude 0.133419
+  Detector 2 has phase 0.452013 and amplitude 0.134742
+  Detector 3 has phase 0.269103 and amplitude 0.149764
+  Detector 4 has phase 0.140418 and amplitude 0.153004
 
 .. categories::
 

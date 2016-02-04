@@ -228,7 +228,7 @@ int getPartLine(std::istream &fh, std::string &Out, std::string &Excess,
                 const int spc) {
   // std::string Line;
   if (fh.good()) {
-    char *ss = new char[spc + 1];
+    auto ss = new char[spc + 1];
     const int clen = static_cast<int>(spc - Out.length());
     fh.getline(ss, clen, '\n');
     ss[clen + 1] = 0; // incase line failed to read completely
@@ -266,10 +266,10 @@ int getPartLine(std::istream &fh, std::string &Out, std::string &Excess,
 std::string removeSpace(const std::string &CLine) {
   std::string Out;
   char prev = 'x';
-  for (unsigned int i = 0; i < CLine.length(); i++) {
-    if (!isspace(CLine[i]) || prev == '\\') {
-      Out += CLine[i];
-      prev = CLine[i];
+  for (char character : CLine) {
+    if (!isspace(character) || prev == '\\') {
+      Out += character;
+      prev = character;
     }
   }
   return Out;
@@ -284,7 +284,7 @@ std::string removeSpace(const std::string &CLine) {
  *  @return String read.
  */
 std::string getLine(std::istream &fh, const int spc) {
-  char *ss = new char[spc + 1];
+  auto ss = new char[spc + 1];
   std::string Line;
   if (fh.good()) {
     fh.getline(ss, spc, '\n');
@@ -439,8 +439,8 @@ splitToKeyValues(const std::string &input, const std::string &keyValSep,
   const int splitOptions =
       Poco::StringTokenizer::TOK_IGNORE_EMPTY + Poco::StringTokenizer::TOK_TRIM;
   Poco::StringTokenizer listSplitter(input, listSep);
-  for (auto iter = listSplitter.begin(); iter != listSplitter.end(); ++iter) {
-    Poco::StringTokenizer keyValSplitter(*iter, keyValSep, splitOptions);
+  for (const auto &iter : listSplitter) {
+    Poco::StringTokenizer keyValSplitter(iter, keyValSep, splitOptions);
     if (keyValSplitter.count() == 2) {
       keyValues[keyValSplitter[0]] = keyValSplitter[1];
     }
@@ -475,9 +475,9 @@ float getVAXnum(const float A) {
   fmask = ((Bd.ival & 0x7f) << 16) | ((Bd.ival & 0xffff0000) >> 16);
   expt -= 128;
   fmask |= 0x800000;
-  frac = (float)fmask / 0x1000000;
+  frac = static_cast<float>(fmask) / 0x1000000;
   onum = frac * static_cast<float>(sign) * pow(2.0, expt);
-  return (float)onum;
+  return static_cast<float>(onum);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -772,9 +772,9 @@ int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y,
   FX << "# " << Npts << " " << Epts << std::endl;
   FX.precision(10);
   FX.setf(std::ios::scientific, std::ios::floatfield);
-  typename V<T, A>::const_iterator xPt = X.begin();
-  typename V<T, A>::const_iterator yPt = Y.begin();
-  typename V<T, A>::const_iterator ePt = (Epts ? Err.begin() : Y.begin());
+  auto xPt = X.cbegin();
+  auto yPt = Y.cbegin();
+  auto ePt = (Epts ? Err.cbegin() : Y.cbegin());
 
   // Double loop to include/exclude a short error stack
   size_t eCount = 0;
@@ -977,8 +977,8 @@ size_t split_path(const std::string &path,
   // allocate target vector to keep folder structure and fill it in
   size_t n_folders = split_pos.size() - 1;
   path_components.resize(n_folders);
-  std::list<int64_t>::iterator it1 = split_pos.begin();
-  std::list<int64_t>::iterator it2 = it1;
+  auto it1 = split_pos.begin();
+  auto it2 = it1;
   ++it2;
 
   int64_t ic(0);
@@ -1075,10 +1075,9 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
   // Estimation of the resulting number of elements
   result.reserve(elements->count());
 
-  for (Tokenizer::Iterator it = elements->begin(); it != elements->end();
-       it++) {
+  for (const auto &elementString : *elements) {
     // See above for the reason space is added
-    Tokenizer rangeElements(*it + " ", rangeSep, Tokenizer::TOK_TRIM);
+    Tokenizer rangeElements(elementString + " ", rangeSep, Tokenizer::TOK_TRIM);
 
     size_t noOfRangeElements = rangeElements.count();
 
@@ -1086,7 +1085,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
     if (noOfRangeElements == 1) {
       int element;
       if (convert(rangeElements[0], element) != 1)
-        throw std::invalid_argument("Invalid element: " + *it);
+        throw std::invalid_argument("Invalid element: " + elementString);
       result.push_back(element);
     }
     // A pair
@@ -1095,17 +1094,19 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
 
       if (convert(rangeElements[0], start) != 1 ||
           convert(rangeElements[1], end) != 1)
-        throw std::invalid_argument("Invalid range: " + *it);
+        throw std::invalid_argument("Invalid range: " + elementString);
 
       if (start >= end)
-        throw std::invalid_argument("Range boundaries are reversed: " + *it);
+        throw std::invalid_argument("Range boundaries are reversed: " +
+                                    elementString);
 
       for (int i = start; i <= end; i++)
         result.push_back(i);
     }
     // Error - e.g. "--""
     else {
-      throw std::invalid_argument("Multiple range separators: " + *it);
+      throw std::invalid_argument("Multiple range separators: " +
+                                  elementString);
     }
   }
 

@@ -83,7 +83,7 @@ IFunction_sptr FunctionFactoryImpl::createSimple(
   }
 
   const std::vector<Expression> &terms = expr.terms();
-  std::vector<Expression>::const_iterator term = terms.begin();
+  auto term = terms.cbegin();
 
   if (term->name() != "=")
     inputError(expr.str());
@@ -146,7 +146,7 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
   }
 
   const std::vector<Expression> &terms = expr.terms();
-  std::vector<Expression>::const_iterator it = terms.begin();
+  auto it = terms.cbegin();
   const Expression &term = it->bracketsRemoved();
 
   CompositeFunction_sptr cfun;
@@ -166,7 +166,7 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
       inputError(expr.str());
     }
   } else if (term.name() == ",") {
-    std::vector<Expression>::const_iterator firstTerm = term.terms().begin();
+    auto firstTerm = term.terms().cbegin();
     if (firstTerm->name() == "=") {
       if (firstTerm->terms()[0].name() == "composite") {
         cfun = boost::dynamic_pointer_cast<CompositeFunction>(
@@ -217,8 +217,8 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     }
     cfun->addFunction(fun);
     size_t i = cfun->nFunctions() - 1;
-    for (auto att = pAttributes.begin(); att != pAttributes.end(); ++att) {
-      cfun->setLocalAttributeValue(i, att->first, att->second);
+    for (auto &pAttribute : pAttributes) {
+      cfun->setLocalAttributeValue(i, pAttribute.first, pAttribute.second);
     }
   }
 
@@ -249,8 +249,8 @@ void FunctionFactoryImpl::inputError(const std::string &str) const {
 void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
                                          const Expression &expr) const {
   if (expr.name() == ",") {
-    for (size_t i = 0; i < expr.size(); i++) {
-      addConstraint(fun, expr[i]);
+    for (const auto &constraint : expr) {
+      addConstraint(fun, constraint);
     }
   } else {
     addConstraint(fun, expr);
@@ -279,8 +279,8 @@ void FunctionFactoryImpl::addTies(IFunction_sptr fun,
   if (expr.name() == "=") {
     addTie(fun, expr);
   } else if (expr.name() == ",") {
-    for (size_t i = 0; i < expr.size(); i++) {
-      addTie(fun, expr[i]);
+    for (const auto &constraint : expr) {
+      addTie(fun, constraint);
     }
   }
 }

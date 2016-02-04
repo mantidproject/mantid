@@ -8,6 +8,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/LogParser.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -195,13 +196,10 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
                                      std::string logFileName, API::Run &run) {
   std::string str;
   std::string propname;
-  Mantid::Kernel::TimeSeriesProperty<double> *logd = 0;
-  Mantid::Kernel::TimeSeriesProperty<std::string> *logs = 0;
-  std::map<std::string, Kernel::TimeSeriesProperty<double> *> dMap;
-  std::map<std::string, Kernel::TimeSeriesProperty<std::string> *> sMap;
-  typedef std::pair<std::string, Kernel::TimeSeriesProperty<double> *> dpair;
-  typedef std::pair<std::string, Kernel::TimeSeriesProperty<std::string> *>
-      spair;
+  std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<double>>>
+      dMap;
+  std::map<std::string,
+           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>> sMap;
   kind l_kind(LoadLog::empty);
   bool isNumeric(false);
 
@@ -254,42 +252,38 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
     isNumeric = !istr.fail();
 
     if (isNumeric) {
-      std::map<std::string, Kernel::TimeSeriesProperty<double> *>::iterator
-          ditr = dMap.find(propname);
+      auto ditr = dMap.find(propname);
       if (ditr != dMap.end()) {
-        Kernel::TimeSeriesProperty<double> *prop = ditr->second;
+        auto prop = ditr->second.get();
         if (prop)
           prop->addValue(timecolumn, dvalue);
       } else {
-        logd = new Kernel::TimeSeriesProperty<double>(propname);
+        auto logd =
+            Mantid::Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+                propname);
         logd->addValue(timecolumn, dvalue);
-        dMap.insert(dpair(propname, logd));
+        dMap.emplace(std::make_pair(propname, std::move(logd)));
       }
     } else {
-      std::map<std::string, Kernel::TimeSeriesProperty<std::string> *>::iterator
-          sitr = sMap.find(propname);
+      auto sitr = sMap.find(propname);
       if (sitr != sMap.end()) {
-        Kernel::TimeSeriesProperty<std::string> *prop = sitr->second;
+        auto prop = sitr->second.get();
         if (prop)
           prop->addValue(timecolumn, valuecolumn);
       } else {
-        logs = new Kernel::TimeSeriesProperty<std::string>(propname);
+        auto logs = Mantid::Kernel::make_unique<
+            Kernel::TimeSeriesProperty<std::string>>(propname);
         logs->addValue(timecolumn, valuecolumn);
-        sMap.insert(spair(propname, logs));
+        sMap.emplace(std::make_pair(propname, std::move(logs)));
       }
     }
   }
   try {
-    std::map<std::string, Kernel::TimeSeriesProperty<double> *>::const_iterator
-        itr = dMap.begin();
-    for (; itr != dMap.end(); ++itr) {
-      run.addLogData(itr->second);
+    for (auto itr = dMap.begin(); itr != dMap.end(); ++itr) {
+      run.addLogData(itr->second.release());
     }
-    std::map<std::string,
-             Kernel::TimeSeriesProperty<std::string> *>::const_iterator sitr =
-        sMap.begin();
-    for (; sitr != sMap.end(); ++sitr) {
-      run.addLogData(sitr->second);
+    for (auto sitr = sMap.begin(); sitr != sMap.end(); ++sitr) {
+      run.addLogData(sitr->second.release());
     }
   } catch (std::invalid_argument &e) {
     g_log.warning() << e.what();
@@ -354,7 +348,7 @@ bool LoadLog::LoadSNSText() {
   // Ok, create all the logs
   std::vector<TimeSeriesProperty<double> *> props;
   for (size_t i = 0; i < numCols; i++) {
-    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>(names[i]);
+    auto p = new TimeSeriesProperty<double>(names[i]);
     if (units.size() == numCols)
       p->setUnits(units[i]);
     props.push_back(p);
@@ -441,7 +435,7 @@ bool LoadLog::isAscii(const std::string &filename) {
    * first 256 bytes of the file.
    */
   for (char *p = data; p < pend; ++p) {
-    unsigned long ch = (unsigned long)*p;
+    unsigned long ch = static_cast<unsigned long>(*p);
     if (!(ch <= 0x7F)) {
       return false;
     }
@@ -472,8 +466,8 @@ bool LoadLog::SNSTextFormatColumns(const std::string &str,
   boost::split(strs, str, boost::is_any_of("\t "));
   double val;
   // Every column must evaluate to a double
-  for (size_t i = 0; i < strs.size(); i++) {
-    if (!Strings::convert<double>(strs[i], val))
+  for (auto &str : strs) {
+    if (!Strings::convert<double>(str, val))
       return false;
     else
       out.push_back(val);

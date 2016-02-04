@@ -356,7 +356,8 @@ void ISISHistoDataListener::calculateIndicesForReading(
   const int numberOfBins = m_numberOfBins[m_timeRegime];
   const int numberOfSpectra = m_numberOfSpectra[m_timeRegime];
   // max number of spectra that could be read in in one go
-  int maxNumberOfSpectra = 1024 * 1024 / (numberOfBins * (int)sizeof(int));
+  int maxNumberOfSpectra =
+      1024 * 1024 / (numberOfBins * static_cast<int>(sizeof(int)));
   if (maxNumberOfSpectra == 0) {
     maxNumberOfSpectra = 1;
   }
@@ -547,9 +548,8 @@ void ISISHistoDataListener::loadTimeRegimes() {
           m_monitorSpectra[i] = m_specIDs[monitorIndices[i] - 1];
         }
 
-        for (auto mon = m_monitorSpectra.begin(); mon != m_monitorSpectra.end();
-             ++mon) {
-          g_log.information() << "Monitor spectrum " << *mon << std::endl;
+        for (auto &mon : m_monitorSpectra) {
+          g_log.information() << "Monitor spectrum " << mon << std::endl;
         }
 
         const std::string detRTCB =
@@ -598,14 +598,13 @@ int ISISHistoDataListener::getTimeRegimeToLoad() const {
     if (m_monitorSpectra.empty())
       return 0;
     int regime = -1;
-    for (auto specIt = m_specList.begin(); specIt != m_specList.end();
-         ++specIt) {
+    for (auto specIt : m_specList) {
       bool isMonitor =
-          std::find(m_monitorSpectra.begin(), m_monitorSpectra.end(),
-                    *specIt) != m_monitorSpectra.end();
-      if (!isMonitor && *specIt > m_totalNumberOfSpectra)
+          std::find(m_monitorSpectra.begin(), m_monitorSpectra.end(), specIt) !=
+          m_monitorSpectra.end();
+      if (!isMonitor && specIt > m_totalNumberOfSpectra)
         throw std::invalid_argument("Invalid spectra index is found: " +
-                                    boost::lexical_cast<std::string>(*specIt));
+                                    boost::lexical_cast<std::string>(specIt));
       int specRegime = isMonitor ? 1 : 0;
       if (regime < 0) {
         regime = specRegime;

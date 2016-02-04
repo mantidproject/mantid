@@ -100,7 +100,7 @@ bool Unit::quickConversion(std::string destUnitName, double &factor,
   // See if there's a conversion listed for the requested destination unit
   std::transform(destUnitName.begin(), destUnitName.end(), destUnitName.begin(),
                  toupper);
-  UnitConversions::const_iterator iter = it->second.find(destUnitName);
+  auto iter = it->second.find(destUnitName);
   // If not, return false
   if (iter == it->second.end())
     return false;

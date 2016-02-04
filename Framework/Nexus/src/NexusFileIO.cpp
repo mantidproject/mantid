@@ -105,7 +105,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
       g_log.error("Unable to open file " + fileName);
       throw Exception::FileError("Unable to open File:", fileName);
     }
-    ::NeXus::File *file = new ::NeXus::File(fileID, true);
+    auto file = new ::NeXus::File(fileID, true);
     // clang-format off
     m_filehandle = boost::shared_ptr< ::NeXus::File>(file);
     // clang-format on
@@ -219,9 +219,9 @@ bool NexusFileIO::writeNxStringArray(
   int dimensions[2];
   size_t maxlen = 0;
   dimensions[0] = static_cast<int>(values.size());
-  for (size_t i = 0; i < values.size(); i++)
-    if (values[i].size() > maxlen)
-      maxlen = values[i].size();
+  for (const auto &value : values)
+    if (value.size() > maxlen)
+      maxlen = value.size();
   dimensions[1] = static_cast<int>(maxlen);
   NXstatus status = NXmakedata(fileID, name.c_str(), NX_CHAR, 2, dimensions);
   if (status == NX_ERROR)
@@ -231,7 +231,7 @@ bool NexusFileIO::writeNxStringArray(
     NXputattr(fileID, attributes[it].c_str(),
               reinterpret_cast<void *>(const_cast<char *>(avalues[it].c_str())),
               static_cast<int>(avalues[it].size() + 1), NX_CHAR);
-  char *strs = new char[values.size() * maxlen];
+  auto strs = new char[values.size() * maxlen];
   for (size_t i = 0; i < values.size(); i++) {
     strncpy(&strs[i * maxlen], values[i].c_str(), maxlen);
   }
@@ -541,7 +541,7 @@ void NexusFileIO::writeTableColumn(int type, const std::string &interpret_as,
   const int nRows = static_cast<int>(col.size());
   int dims_array[1] = {nRows};
 
-  NexusT *toNexus = new NexusT[nRows];
+  auto toNexus = new NexusT[nRows];
   for (int ii = 0; ii < nRows; ii++)
     toNexus[ii] = static_cast<NexusT>(col.cell<ColumnT>(ii));
   NXwritedata(columnName.c_str(), type, 1, dims_array, (void *)(toNexus),
@@ -698,7 +698,7 @@ int NexusFileIO::writeNexusTableWorkspace(
 
       NXcompmakedata(fileID, str.c_str(), NX_CHAR, 2, dims_array, false, asize);
       NXopendata(fileID, str.c_str());
-      char *toNexus = new char[maxStr * nRows];
+      auto toNexus = new char[maxStr * nRows];
       for (int ii = 0; ii < nRows; ii++) {
         std::string rowStr = col->cell<std::string>(ii);
         for (size_t ic = 0; ic < rowStr.size(); ic++)
@@ -859,10 +859,10 @@ void NexusFileIO::writeEventListData(std::vector<T> events, bool writeTOF,
     return;
 
   size_t num = events.size();
-  double *tofs = new double[num];
-  double *weights = new double[num];
-  double *errorSquareds = new double[num];
-  int64_t *pulsetimes = new int64_t[num];
+  auto tofs = new double[num];
+  auto weights = new double[num];
+  auto errorSquareds = new double[num];
+  auto pulsetimes = new int64_t[num];
 
   typename std::vector<T>::const_iterator it;
   typename std::vector<T>::const_iterator it_end = events.end();
@@ -1057,8 +1057,8 @@ bool NexusFileIO::checkAttributeName(const std::string &target) const {
   // clang-format off
   const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
   // clang-format on
-  for (auto it = infos.begin(); it != infos.end(); ++it) {
-    if (target.compare(it->name) == 0)
+  for (const auto &info : infos) {
+    if (target.compare(info.name) == 0)
       return true;
   }
 
@@ -1141,9 +1141,9 @@ int NexusFileIO::findMantidWSEntries() const {
   // count
   int count = 0;
   std::map<std::string, std::string> entries = m_filehandle->getEntries();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->second == "NXentry") {
-      if (it->first.find("mantid_workspace_") == 0)
+  for (auto &entrie : entries) {
+    if (entrie.second == "NXentry") {
+      if (entrie.first.find("mantid_workspace_") == 0)
         count++;
     }
   }
@@ -1154,8 +1154,8 @@ int NexusFileIO::findMantidWSEntries() const {
 bool NexusFileIO::checkEntryAtLevel(const std::string &item) const {
   // Search the currently open level for name "item"
   std::map<std::string, std::string> entries = m_filehandle->getEntries();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->first == item)
+  for (auto &entrie : entries) {
+    if (entrie.first == item)
       return true;
   }
 
@@ -1167,13 +1167,13 @@ bool NexusFileIO::checkEntryAtLevelByAttribute(const std::string &attribute,
   // Search the currently open level for a section with "attribute" and return
   // entry name
   std::map<std::string, std::string> entries = m_filehandle->getEntries();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->second == "SDS") {
-      m_filehandle->openData(it->first);
+  for (auto &entrie : entries) {
+    if (entrie.second == "SDS") {
+      m_filehandle->openData(entrie.first);
       bool result = checkAttributeName(attribute);
       m_filehandle->closeData();
       if (result) {
-        entry = it->first;
+        entry = entrie.first;
         return true;
       }
     }
@@ -1199,10 +1199,9 @@ bool NexusFileIO::writeNexusBinMasking(
       const API::MatrixWorkspace::MaskList &mList = ws->maskedBins(i);
       spectra.push_back(spectra_count);
       spectra.push_back(offset);
-      API::MatrixWorkspace::MaskList::const_iterator it = mList.begin();
-      for (; it != mList.end(); ++it) {
-        bins.push_back(it->first);
-        weights.push_back(it->second);
+      for (const auto &mask : mList) {
+        bins.push_back(mask.first);
+        weights.push_back(mask.second);
       }
       ++spectra_count;
       offset += static_cast<int>(mList.size());
@@ -1305,9 +1304,9 @@ int getNexusEntryTypes(const std::string &fileName,
   }
   // for each entry found, look for "analysis" or "definition" text data fields
   // and return value plus entry name
-  for (size_t i = 0; i < entryList.size(); i++) {
+  for (auto &entry : entryList) {
     //
-    stat = NXopengroup(fileH, entryList[i].c_str(), "NXentry");
+    stat = NXopengroup(fileH, entry.c_str(), "NXentry");
     // loop through field names in this entry
     while ((stat = NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) ==
            NX_OK) {
@@ -1320,14 +1319,14 @@ int getNexusEntryTypes(const std::string &fileName,
           stat = NXgetinfo(fileH, &rank, dims, &type);
           if (stat == NX_ERROR)
             continue;
-          char *value = new char[dims[0] + 1];
+          auto value = new char[dims[0] + 1];
           stat = NXgetdata(fileH, value);
           if (stat == NX_ERROR)
             continue;
           value[dims[0]] = '\0';
           // return e.g entryName "analysis"/definition "muonTD"
           definition.push_back(value);
-          entryName.push_back(entryList[i]);
+          entryName.push_back(entry);
           delete[] value;
           NXclosegroup(fileH); // close data group, then entry
           stat = NXclosegroup(fileH);

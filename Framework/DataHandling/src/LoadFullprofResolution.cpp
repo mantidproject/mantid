@@ -125,8 +125,8 @@ void LoadFullprofResolution::exec() {
   if (useBankIDsInFile)
     sort(vec_bankinirf.begin(), vec_bankinirf.end());
 
-  for (size_t i = 0; i < vec_bankinirf.size(); ++i)
-    g_log.debug() << "Irf containing bank " << vec_bankinirf[i] << ".\n";
+  for (auto bank : vec_bankinirf)
+    g_log.debug() << "Irf containing bank " << bank << ".\n";
 
   // Bank-workspace correspondence
   map<int, size_t> workspaceOfBank;
@@ -148,15 +148,14 @@ void LoadFullprofResolution::exec() {
 
     // Deal with banks
     sort(outputbankids.begin(), outputbankids.end());
-    for (size_t i = 0; i < outputbankids.size(); ++i) {
-      int outputbankid = outputbankids[i];
+    for (auto outputbankid : outputbankids) {
       if (outputbankid < 0) {
         g_log.warning() << "Input bank ID (" << outputbankid
                         << ") is negative.  It is not allowed and is  ignored. "
                         << ".\n";
       } else {
-        vector<int>::iterator fiter = lower_bound(
-            vec_bankinirf.begin(), vec_bankinirf.end(), outputbankid);
+        auto fiter = lower_bound(vec_bankinirf.begin(), vec_bankinirf.end(),
+                                 outputbankid);
         if (fiter == vec_bankinirf.end() || *fiter != outputbankid) {
           // Specified bank ID does not exist.
           stringstream errmsg;
@@ -359,10 +358,9 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
 
   g_log.debug() << "[DB1112] Number of bank IDs = " << banks.size() << ", "
                 << "Number of ranges = " << bankstartindexmap.size() << endl;
-  for (size_t i = 0; i < banks.size(); ++i) {
-    g_log.debug() << "Bank " << banks[i] << " From line "
-                  << bankstartindexmap[banks[i]] << " to "
-                  << bankendindexmap[banks[i]] << endl;
+  for (auto &bank : banks) {
+    g_log.debug() << "Bank " << bank << " From line " << bankstartindexmap[bank]
+                  << " to " << bankendindexmap[bank] << endl;
   }
 
   return;
@@ -693,7 +691,7 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
   if (numbanks == 0)
     throw runtime_error("Unable to generate a table from an empty map!");
 
-  map<int, map<string, double>>::iterator bankmapiter = bankparammap.begin();
+  auto bankmapiter = bankparammap.begin();
   size_t numparams = bankmapiter->second.size();
 
   // vector of all parameter name

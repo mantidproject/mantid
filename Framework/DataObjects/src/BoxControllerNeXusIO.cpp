@@ -30,8 +30,8 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
       m_ReadConversion(noConversion) {
   m_BlockSize[1] = 4 + m_bc->getNDims();
 
-  for (size_t i = 0; i < 2; i++) {
-    m_EventsTypeHeaders.push_back(EventHeaders[i]);
+  for (auto &EventHeader : EventHeaders) {
+    m_EventsTypeHeaders.push_back(EventHeader);
   }
 
   m_EventsTypesSupported.resize(2);

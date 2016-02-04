@@ -96,7 +96,7 @@ void MaskPeaksWorkspace::exec() {
   PARALLEL_FOR3(m_inputW, peaksW, tablews)
   for (int i = 0; i < static_cast<int>(peaks.size()); i++) {
     PARALLEL_START_INTERUPT_REGION
-    Peak peak = peaks[i];
+    const Peak &peak = peaks[i];
     // get the peak location on the detector
     double col = peak.getCol();
     double row = peak.getRow();
@@ -106,7 +106,7 @@ void MaskPeaksWorkspace::exec() {
                   << " y=" << yPeak << "\n";
 
     // the detector component for the peak will have all pixels that we mask
-    const string bankName = peak.getBankName();
+    const string &bankName = peak.getBankName();
     if (bankName.compare("None") == 0)
       continue;
     Geometry::IComponent_const_sptr comp = inst->getComponentByName(bankName);
@@ -244,8 +244,7 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
     if (x - 1 >= NCOLS || x - 1 < 0 || y - 1 >= NROWS || y - 1 < 0)
       return EMPTY_INT();
     std::string bankName = comp->getName();
-    detid2index_map::const_iterator it =
-        pixel_to_wi.find(findPixelID(bankName, x, y));
+    auto it = pixel_to_wi.find(findPixelID(bankName, x, y));
     if (it == pixel_to_wi.end())
       return EMPTY_INT();
     return (it->second);

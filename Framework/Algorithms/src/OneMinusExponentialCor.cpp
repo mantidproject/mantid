@@ -39,7 +39,7 @@ void OneMinusExponentialCor::retrieveProperties() {
   m_c = getProperty("C");
   m_c1 = getProperty("C1");
   std::string op = getProperty("Operation");
-  m_divide = (op == "Divide") ? true : false;
+  m_divide = op == "Divide";
 }
 
 void OneMinusExponentialCor::performUnaryOperation(const double XIn,

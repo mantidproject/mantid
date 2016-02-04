@@ -145,8 +145,7 @@ bool ChopperConfiguration::hasBank(unsigned int bankid) const {
 double ChopperConfiguration::getParameter(unsigned int bankid,
                                           const string &paramname) const {
   // Obtain index for the bank
-  map<unsigned int, size_t>::const_iterator biter =
-      m_bankIDIndexMap.find(bankid);
+  auto biter = m_bankIDIndexMap.find(bankid);
   if (biter == m_bankIDIndexMap.end()) {
     stringstream errss;
     errss << "Bank ID and index map does not have entry for bank " << bankid;
@@ -187,7 +186,7 @@ double ChopperConfiguration::getParameter(unsigned int bankid,
   */
 void ChopperConfiguration::setParameter(unsigned int bankid,
                                         const string &paramname, double value) {
-  map<unsigned, size_t>::iterator biter = m_bankIDIndexMap.find(bankid);
+  auto biter = m_bankIDIndexMap.find(bankid);
 
   if (biter == m_bankIDIndexMap.end()) {
     stringstream errss;
@@ -232,9 +231,9 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
   boost::split(strs, instring, boost::is_any_of(", "));
 
   vector<double> vecdouble;
-  for (size_t i = 0; i < strs.size(); i++) {
-    if (strs[i].size() > 0) {
-      double item = atof(strs[i].c_str());
+  for (auto &str : strs) {
+    if (str.size() > 0) {
+      double item = atof(str.c_str());
       vecdouble.push_back(item);
       // cout << "[C] |" << strs[i] << "|" << item << "\n";
     }
@@ -255,9 +254,9 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
   boost::split(strs, instring, boost::is_any_of(", "));
 
   vector<unsigned int> vecinteger;
-  for (size_t i = 0; i < strs.size(); i++) {
-    if (strs[i].size() > 0) {
-      int item = atoi(strs[i].c_str());
+  for (auto &str : strs) {
+    if (str.size() > 0) {
+      int item = atoi(str.c_str());
       if (item < 0) {
         throw runtime_error(
             "Found negative number in a string for unsigned integers.");
@@ -366,10 +365,8 @@ void SaveGSASInstrumentFile::exec() {
   // Deal with a default
   if (m_vecBankID2File.empty()) {
     // Default is to export all banks
-    for (map<unsigned int, map<string, double>>::iterator miter =
-             bankprofileparammap.begin();
-         miter != bankprofileparammap.end(); ++miter) {
-      unsigned int bankid = miter->first;
+    for (auto &miter : bankprofileparammap) {
+      unsigned int bankid = miter.first;
       m_vecBankID2File.push_back(bankid);
     }
     sort(m_vecBankID2File.begin(), m_vecBankID2File.end());
@@ -554,8 +551,8 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
   stringstream db1ss;
   db1ss << "[DBx912] Number of banks in profile table = " << vecbankindex.size()
         << " containing bank ";
-  for (size_t i = 0; i < vecbankindex.size(); ++i)
-    db1ss << vecbankindex[i] << ", ";
+  for (auto bankIndex : vecbankindex)
+    db1ss << bankIndex << ", ";
   g_log.information(db1ss.str());
 
   // Construct output
@@ -563,7 +560,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
 
   for (size_t i = 0; i < vecbankindex.size(); ++i) {
     unsigned int bankid = vecbankindex[i];
-    profilemap.insert(make_pair(bankid, vec_maptemp[i]));
+    profilemap.emplace(bankid, vec_maptemp[i]);
   }
 
   return;
@@ -706,8 +703,7 @@ void SaveGSASInstrumentFile::convertToGSAS(
     throw runtime_error("Not set up yet!");
 
   // Set up min-dsp, max-tof
-  for (size_t i = 0; i < outputbankids.size(); ++i) {
-    unsigned int bankid = outputbankids[i];
+  for (auto bankid : outputbankids) {
     if (!m_configuration->hasBank(bankid))
       throw runtime_error(
           "Chopper configuration does not have some certain bank.");
@@ -726,8 +722,7 @@ void SaveGSASInstrumentFile::convertToGSAS(
   //  Convert and write
   vector<unsigned int> banks = outputbankids;
   sort(banks.begin(), banks.end());
-  for (size_t ib = 0; ib < banks.size(); ++ib) {
-    unsigned int bankid = banks[ib];
+  for (auto bankid : banks) {
     if (m_configuration->hasBank(bankid)) {
       buildGSASTabulatedProfile(bankprofilemap, bankid);
       writePRMSingleBank(bankprofilemap, bankid, gsasinstrfilename);
@@ -762,8 +757,7 @@ void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
     const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
     unsigned int bankid) {
   // Locate the profile map
-  map<unsigned int, map<string, double>>::const_iterator biter =
-      bankprofilemap.find(bankid);
+  auto biter = bankprofilemap.find(bankid);
   if (biter == bankprofilemap.end())
     throw runtime_error("Bank ID cannot be found in bank-profile-map-map. 001");
   const map<string, double> &profilemap = biter->second;
@@ -866,8 +860,7 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
     const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
     unsigned int bankid, const std::string &prmfilename) {
   // Get access to the profile map
-  map<unsigned int, map<string, double>>::const_iterator biter =
-      bankprofilemap.find(bankid);
+  auto biter = bankprofilemap.find(bankid);
   if (biter == bankprofilemap.end())
     throw runtime_error("Bank does not exist in bank-profile-map. 002");
 
@@ -890,7 +883,7 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
   double gam1 = getProfileParameterValue(profilemap, "Gam1");
   double gam2 = getProfileParameterValue(profilemap, "Gam2");
 
-  int randint = 10001 + (rand() % (int)(99999 - 10001 + 1));
+  int randint = 10001 + (rand() % (99999 - 10001 + 1));
 
   double mindsp = m_configuration->getParameter(bankid, "MinDsp");
   double maxtof = m_configuration->getParameter(bankid, "MaxTOF");
@@ -1076,14 +1069,13 @@ SaveGSASInstrumentFile::getValueFromMap(const map<string, double> &profilemap,
   */
 double SaveGSASInstrumentFile::getProfileParameterValue(
     const map<string, double> &profilemap, const string &paramname) {
-  map<string, double>::const_iterator piter = profilemap.find(paramname);
+  auto piter = profilemap.find(paramname);
   if (piter == profilemap.end()) {
     stringstream errss;
     errss << "Profile map does not contain parameter " << paramname
           << ". Available parameters are ";
-    for (map<string, double>::const_iterator piter = profilemap.begin();
-         piter != profilemap.end(); ++piter) {
-      errss << piter->first << ", ";
+    for (const auto &piter : profilemap) {
+      errss << piter.first << ", ";
     }
     g_log.error(errss.str());
     throw runtime_error(errss.str());

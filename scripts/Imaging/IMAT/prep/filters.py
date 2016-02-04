@@ -82,7 +82,7 @@ def crop_vol(data_vol, coords):
 
     return cropped_data
 
-def remove_stripes_ring_artifacts(data_vol, method='fourier-wavelet'):
+def remove_stripes_ring_artifacts(data_vol, method='wavelet-fourier'):
     """
     Removal of stripes in sinograms / ring artifacts in reconstructed
     volume.
@@ -94,13 +94,13 @@ def remove_stripes_ring_artifacts(data_vol, method='fourier-wavelet'):
     @param data_vol :: stack of projection images as 3d data (dimensions z, y, x), with
     z different projections angles, and y and x the rows and columns of individual images.
 
-    @param method :: 'fw': Fourier-Wavelet based method
+    @param method :: 'wf': Wavelet-Fourier based method
 
     Returns :: filtered data hopefully without stripes which should dramatically decrease
     ring artifacts after reconstruction and the effect of these on post-processing tasks
     such as segmentation of the reconstructed 3d data volume.
     """
-    supported_methods = ['fourier-wavelet']
+    supported_methods = ['wavelet-fourier']
 
     if not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
         raise ValueError("Wrong data volume when trying to filter stripes/ring artifacts: {0}".
@@ -110,7 +110,21 @@ def remove_stripes_ring_artifacts(data_vol, method='fourier-wavelet'):
         raise ValueError("The method to remove stripes and ring artifacts must be one of {0}. "
                          "Got unknown value: {1}".format(supported_methods, method))
 
-    raise RuntimeError("Not implemented. Data type: {0}".format(data_vol.dtype))
+    try:
+        import tomopy
+        stripped_vol = tomopy.prep.stripe.remove_stripe_fw(data_vol)
+    except ImportError:
+        stripped_vol = remove_sino_stripes_rings_wf(data_vol)
+
+    return stripped_vol
+
+def remove_sino_stripes_rings_wf(data_vol, wv_levels=None):
+    if not wv_levels:
+        max_len = np.max(data_vol.shape)
+        wv_levels = int(np.ceil(np.log2(max_len)))
+
+    from . import filters_adv
+    return filters_adv.remove_sino_stripes_rings_wf(data_vol, wv_levels)
 
 def circular_mask(data_vol, ratio=1.0, mask_out_val=0.0):
     """

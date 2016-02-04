@@ -343,8 +343,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
                 << "  Original MP Size = " << m_values.size() << "\n";
 
   // 4. Create new
-  for (size_t isp = 0; isp < splittervec.size(); ++isp) {
-    Kernel::SplittingInterval splitter = splittervec[isp];
+  for (auto splitter : splittervec) {
     Kernel::DateAndTime t_start = splitter.start();
     Kernel::DateAndTime t_stop = splitter.stop();
 
@@ -456,7 +455,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
   size_t i_property = 0;
 
   //    And at the same time, iterate through the splitter
-  Kernel::TimeSplitterType::iterator itspl = splitter.begin();
+  auto itspl = splitter.begin();
 
   size_t counter = 0;
   g_log.debug() << "[DB] Number of time series entries = " << m_values.size()
@@ -752,17 +751,16 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
 
   double numerator(0.0), totalTime(0.0);
   // Loop through the filter ranges
-  for (TimeSplitterType::const_iterator it = filter.begin(); it != filter.end();
-       ++it) {
+  for (const auto &time : filter) {
     // Calculate the total time duration (in seconds) within by the filter
-    totalTime += it->duration();
+    totalTime += time.duration();
 
     // Get the log value and index at the start time of the filter
     int index;
-    double value = getSingleValue(it->start(), index);
-    DateAndTime startTime = it->start();
+    double value = getSingleValue(time.start(), index);
+    DateAndTime startTime = time.start();
 
-    while (index < realSize() - 1 && m_values[index + 1].time() < it->stop()) {
+    while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
       ++index;
       numerator +=
           DateAndTime::secondsFromDuration(m_values[index].time() - startTime) *
@@ -773,7 +771,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
 
     // Now close off with the end of the current filter range
     numerator +=
-        DateAndTime::secondsFromDuration(it->stop() - startTime) * value;
+        DateAndTime::secondsFromDuration(time.stop() - startTime) * value;
   }
 
   // 'Normalise' by the total time

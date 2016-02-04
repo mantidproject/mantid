@@ -229,9 +229,9 @@ void LoadNexusLogs::exec() {
       ptime.reserve(event_frame_number.size());
       std::vector<Mantid::Kernel::DateAndTime> plogt = plog->timesAsVector();
       std::vector<double> plogv = plog->valuesAsVector();
-      for (size_t i = 0; i < event_frame_number.size(); ++i) {
-        ptime.push_back(plogt[event_frame_number[i]]);
-        pval.push_back(plogv[event_frame_number[i]]);
+      for (auto number : event_frame_number) {
+        ptime.push_back(plogt[number]);
+        pval.push_back(plogv[number]);
       }
       pcharge->create(ptime, pval);
       pcharge->setUnits("uAh");
@@ -573,7 +573,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
       throw;
     }
     // Make an int TSP
-    TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>(prop_name);
+    auto tsp = new TimeSeriesProperty<int>(prop_name);
     tsp->create(start_time, time_double, values);
     tsp->setUnits(value_units);
     g_log.debug() << "   done reading \"value\" array\n";
@@ -595,8 +595,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     // The string may contain non-printable (i.e. control) characters, replace
     // these
     std::replace_if(values.begin(), values.end(), iscntrl, ' ');
-    TimeSeriesProperty<std::string> *tsp =
-        new TimeSeriesProperty<std::string>(prop_name);
+    auto tsp = new TimeSeriesProperty<std::string>(prop_name);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);
     const size_t ntimes = times.size();
@@ -617,7 +616,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
       file.closeData();
       throw;
     }
-    TimeSeriesProperty<double> *tsp = new TimeSeriesProperty<double>(prop_name);
+    auto tsp = new TimeSeriesProperty<double>(prop_name);
     tsp->create(start_time, time_double, values);
     tsp->setUnits(value_units);
     g_log.debug() << "   done reading \"value\" array\n";

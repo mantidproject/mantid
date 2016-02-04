@@ -1,5 +1,4 @@
 #include "MantidCrystal/CompositeCluster.h"
-#include <stdexcept>
 
 namespace {
 /**
@@ -42,8 +41,8 @@ ICluster::ClusterIntegratedValues CompositeCluster::integrate(
   double errorIntSQ = 0;
   double sigInt = 0;
   // Integrate owned clusters and add those results too.
-  for (size_t i = 0; i < m_ownedClusters.size(); ++i) {
-    auto integratedValues = m_ownedClusters[i]->integrate(ws);
+  for (const auto &ownedCluster : m_ownedClusters) {
+    auto integratedValues = ownedCluster->integrate(ws);
     sigInt += integratedValues.get<0>();
     errorIntSQ += integratedValues.get<1>();
   }
@@ -56,8 +55,8 @@ ICluster::ClusterIntegratedValues CompositeCluster::integrate(
  */
 void CompositeCluster::writeTo(
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const {
-  for (size_t i = 0; i < m_ownedClusters.size(); ++i) {
-    m_ownedClusters[i]->writeTo(ws);
+  for (const auto &ownedCluster : m_ownedClusters) {
+    ownedCluster->writeTo(ws);
   }
 }
 
@@ -88,8 +87,8 @@ size_t CompositeCluster::getOriginalLabel() const { return getLabel(); }
  */
 size_t CompositeCluster::size() const {
   size_t size = 0;
-  for (size_t i = 0; i < m_ownedClusters.size(); ++i) {
-    size += m_ownedClusters[i]->size();
+  for (const auto &ownedCluster : m_ownedClusters) {
+    size += ownedCluster->size();
   }
   return size;
 }
@@ -134,9 +133,9 @@ void CompositeCluster::toUniformMinimum(
     }
     m_label = minLabel;
 
-    for (size_t i = 0; i < m_ownedClusters.size(); ++i) {
-      m_ownedClusters[i]->setRootCluster(minCluster);
-      m_ownedClusters[i]->toUniformMinimum(disjointSet);
+    for (auto &ownedCluster : m_ownedClusters) {
+      ownedCluster->setRootCluster(minCluster);
+      ownedCluster->toUniformMinimum(disjointSet);
     }
   }
 }
@@ -154,8 +153,8 @@ size_t CompositeCluster::getRepresentitiveIndex() const {
  * @param root : Root cluster to use
  */
 void CompositeCluster::setRootCluster(ICluster const *root) {
-  for (size_t i = 0; i < m_ownedClusters.size(); ++i) {
-    m_ownedClusters[i]->setRootCluster(root);
+  for (auto &ownedCluster : m_ownedClusters) {
+    ownedCluster->setRootCluster(root);
   }
 }
 

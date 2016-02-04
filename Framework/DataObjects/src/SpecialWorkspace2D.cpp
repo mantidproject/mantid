@@ -46,8 +46,8 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
   detID_to_WI.clear();
   for (size_t wi = 0; wi < m_noVectors; wi++) {
     set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
-    for (auto det = dets.begin(); det != dets.end(); ++det) {
-      detID_to_WI[*det] = wi;
+    for (auto det : dets) {
+      detID_to_WI[det] = wi;
     }
   }
 }
@@ -66,8 +66,8 @@ SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
   detID_to_WI.clear();
   for (size_t wi = 0; wi < m_noVectors; wi++) {
     set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
-    for (auto det = dets.begin(); det != dets.end(); ++det) {
-      detID_to_WI[*det] = wi;
+    for (auto det : dets) {
+      detID_to_WI[det] = wi;
     }
   }
 }
@@ -114,7 +114,7 @@ const std::string SpecialWorkspace2D::toString() const {
  * @throw std::invalid_argument if the detector ID was not found
  */
 double SpecialWorkspace2D::getValue(const detid_t detectorID) const {
-  std::map<detid_t, size_t>::const_iterator it = detID_to_WI.find(detectorID);
+  auto it = detID_to_WI.find(detectorID);
 
   if (it == detID_to_WI.end()) {
     std::ostringstream os;
@@ -137,7 +137,7 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID) const {
  */
 double SpecialWorkspace2D::getValue(const detid_t detectorID,
                                     const double defaultValue) const {
-  std::map<detid_t, size_t>::const_iterator it = detID_to_WI.find(detectorID);
+  auto it = detID_to_WI.find(detectorID);
   if (it == detID_to_WI.end())
     return defaultValue;
   else {
@@ -162,7 +162,7 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID,
  */
 void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value,
                                   const double error) {
-  std::map<detid_t, size_t>::iterator it = detID_to_WI.find(detectorID);
+  auto it = detID_to_WI.find(detectorID);
   if (it == detID_to_WI.end()) {
     std::stringstream msg;
     msg << "SpecialWorkspace2D::setValue(): Input Detector ID = " << detectorID
@@ -186,8 +186,8 @@ void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value,
  */
 void SpecialWorkspace2D::setValue(const set<detid_t> &detectorIDs,
                                   const double value, const double error) {
-  for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID) {
-    this->setValue(*detID, value, error);
+  for (auto detectorID : detectorIDs) {
+    this->setValue(detectorID, value, error);
   }
 }
 

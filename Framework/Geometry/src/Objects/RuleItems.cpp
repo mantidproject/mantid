@@ -307,7 +307,7 @@ bool Intersection::isValid(const std::map<int, int> &MX) const
 {
   if (!A || !B)
     return false;
-  return (A->isValid(MX) && B->isValid(MX)) ? true : false;
+  return A->isValid(MX) && B->isValid(MX);
 }
 
 int Intersection::simplify()
@@ -580,7 +580,7 @@ bool Union::isValid(const Kernel::V3D &Vec) const
   @retval 0 :: Vec is outside object.
 */
 {
-  return ((A && A->isValid(Vec)) || (B && B->isValid(Vec))) ? true : false;
+  return (A && A->isValid(Vec)) || (B && B->isValid(Vec));
 }
 
 bool Union::isValid(const std::map<int, int> &MX) const
@@ -592,7 +592,7 @@ bool Union::isValid(const std::map<int, int> &MX) const
   @retval 0 :: Neither side is valid
 */
 {
-  return ((A && A->isValid(MX)) || (B && B->isValid(MX))) ? true : false;
+  return (A && A->isValid(MX)) || (B && B->isValid(MX));
 }
 
 std::string Union::display() const
@@ -815,11 +815,11 @@ bool SurfPoint::isValid(const std::map<int, int> &MX) const
   @return MX.second if key found or 0
 */
 {
-  std::map<int, int>::const_iterator lx = MX.find(keyN);
+  auto lx = MX.find(keyN);
   if (lx == MX.end())
     return false;
   const int rtype = (lx->second) ? 1 : -1;
-  return (rtype * sign) >= 0 ? true : false;
+  return (rtype * sign) >= 0;
 }
 
 std::string SurfPoint::display() const
@@ -1354,7 +1354,7 @@ bool BoolValue::isValid(const Kernel::V3D &pt) const
 */
 {
   (void)pt; // Avoid compiler warning
-  return (status > 0) ? true : false;
+  return status > 0;
 }
 
 bool BoolValue::isValid(const std::map<int, int> &map) const
@@ -1365,7 +1365,7 @@ bool BoolValue::isValid(const std::map<int, int> &map) const
 */
 {
   (void)map; // Avoid compiler warning
-  return (status > 0) ? true : false;
+  return status > 0;
 }
 
 int BoolValue::simplify()
@@ -1575,7 +1575,7 @@ bool CompGrp::isValid(const std::map<int, int> &SMap) const
 {
   // Note:: if isValid is true then return 0:
   if (A)
-    return (A->isValid(SMap)) ? false : true;
+    return !A->isValid(SMap);
   return true;
 }
 
