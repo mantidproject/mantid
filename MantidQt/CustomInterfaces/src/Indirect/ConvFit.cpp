@@ -1555,9 +1555,7 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
     functionName = "Lorentzian";
   }
 
-  if (functionName.compare("Zero Lorentzians") == 0) {
-    parameters.append("Zero");
-  } else {
+  if (functionName.compare("Zero Lorentzians") != 0) {
     IFunction_sptr func =
         FunctionFactory::Instance().createFunction(functionName.toStdString());
 
@@ -1614,8 +1612,8 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   }
 
   QString propName;
-  // No fit function parameters required for Zero
-  if (parameters[0].compare("Zero") != 0) {
+  // No fit function parameters required for None
+  if (parameters[0].isEmpty() != true) {
     // Two Lorentzians Fit
     if (fitFunctionIndex == 2) {
       int count = 0;
