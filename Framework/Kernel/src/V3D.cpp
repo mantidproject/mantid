@@ -506,7 +506,7 @@ void V3D::rotate(const Kernel::Matrix<double> &A)
 bool V3D::coLinear(const V3D &Bv, const V3D &Cv) const {
   const V3D &Av = *this;
   const V3D Tmp((Bv - Av).cross_prod(Cv - Av));
-  return (Tmp.norm() > Tolerance) ? false : true;
+  return Tmp.norm() <= Tolerance;
 }
 
 bool V3D::nullVector(const double Tol) const

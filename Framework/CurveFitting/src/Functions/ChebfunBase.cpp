@@ -186,10 +186,7 @@ bool ChebfunBase::hasConverged(const std::vector<double> &a, double maxA,
   for (auto i = a.rbegin() + shift; i != a.rend() - 1; ++i) {
     if (*i == 0.0)
       continue;
-    if ((fabs(*i) + fabs(*(i + 1))) / maxA / 2 < tolerance)
-      return true;
-    else
-      return false;
+    return (fabs(*i) + fabs(*(i + 1))) / maxA / 2 < tolerance;
   }
   return false;
 }

@@ -305,11 +305,7 @@ void Expression::tokenize() {
     }
 
     if (c == '"') {
-      if (!inString) {
-        inString = true;
-      } else {
-        inString = false;
-      }
+      inString = !inString;
     }
 
   } // for i
@@ -397,10 +393,7 @@ void Expression::setFunct(const std::string &name) {
   bool inQuotes = false;
   for (std::string::const_iterator c = name.begin(); c != name.end(); ++c) {
     if (*c == '"') {
-      if (inQuotes)
-        inQuotes = false;
-      else
-        inQuotes = true;
+      inQuotes = !inQuotes;
       continue;
     }
 

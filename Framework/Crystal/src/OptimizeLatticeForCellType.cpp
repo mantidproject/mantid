@@ -260,11 +260,8 @@ bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
-    if (col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
-        row >= (RDet->ypixels() - Edge))
-      return true;
-    else
-      return false;
+    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
+           row >= (RDet->ypixels() - Edge);
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -286,11 +283,8 @@ bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
     int NROWS = static_cast<int>(grandchildren.size());
     int NCOLS = static_cast<int>(children.size());
     // Wish pixels and tubes start at 1 not 0
-    if (col - startI < Edge || col - startI >= (NCOLS - Edge) ||
-        row - startI < Edge || row - startI >= (NROWS - Edge))
-      return true;
-    else
-      return false;
+    return col - startI < Edge || col - startI >= (NCOLS - Edge) ||
+           row - startI < Edge || row - startI >= (NROWS - Edge);
   }
   return false;
 }

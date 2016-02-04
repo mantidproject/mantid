@@ -697,10 +697,7 @@ bool GeneratePeaks::hasParameter(API::IFunction_sptr function,
   std::vector<std::string> parnames = function->getParameterNames();
   std::vector<std::string>::iterator piter;
   piter = std::find(parnames.begin(), parnames.end(), paramname);
-  if (piter != parnames.end())
-    return true;
-
-  return false;
+  return piter != parnames.end();
 }
 
 //----------------------------------------------------------------------------------------------

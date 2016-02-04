@@ -1742,10 +1742,7 @@ bool UDlesserExecCount(NXClassInfo elem1, NXClassInfo elem2) {
   is1 >> execNum1;
   is2 >> execNum2;
 
-  if (execNum1 < execNum2)
-    return true;
-  else
-    return false;
+  return execNum1 < execNum2;
 }
 
 //-------------------------------------------------------------------------------------------------

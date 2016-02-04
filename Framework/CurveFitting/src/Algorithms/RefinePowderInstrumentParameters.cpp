@@ -724,11 +724,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     //      << ".  Acceptance Prob. = " << prob << "; Random = " << randnumber
     //      << endl;
 
-    if (randnumber < prob) {
-      accept = true;
-    } else {
-      accept = false;
-    }
+    accept = randnumber < prob;
 
     // d. Adjust step size
     if (false) {

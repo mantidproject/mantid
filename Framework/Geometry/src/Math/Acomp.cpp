@@ -160,15 +160,11 @@ Order (low first)
   const int TS = isSingle(); // is this one component
   const int AS = A.isSingle();
   if (TS != AS)
-    return (TS > AS) ? true : false;
+    return TS > AS;
   // PROCESS Intersection/Union
   if (!TS && Intersect != A.Intersect) {
     // Union==0 therefore this > A
-    if (Intersect > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return Intersect > 0;
   }
 
   // PROCESS Units. (order : then size)
@@ -192,10 +188,7 @@ Order (low first)
     if (*ax != *ux)
       return (*ux < *ax);
   }
-  if (uc != Units.end())
-    return true;
-  // everything idential or A.comp bigger:
-  return false;
+  return uc != Units.end();
 }
 
 Acomp &Acomp::operator+=(const Acomp &A)

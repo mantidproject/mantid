@@ -570,10 +570,7 @@ ConvertCWSDExpToMomentum::loadSpiceData(const std::string &filename,
     loader->execute();
 
     dataws = loader->getProperty("OutputWorkspace");
-    if (dataws)
-      loaded = true;
-    else
-      loaded = false;
+    loaded = static_cast<bool>(dataws);
   } catch (std::runtime_error &runerror) {
     loaded = false;
     errmsg = runerror.what();

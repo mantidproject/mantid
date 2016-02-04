@@ -281,10 +281,7 @@ bool MaskWorkspace::hasInstrument() const {
   bool hasinst;
   Geometry::Instrument_const_sptr inst = this->getInstrument();
   if (inst) {
-    if (inst->getNumberDetectors() > 0)
-      hasinst = true;
-    else
-      hasinst = false;
+    hasinst = inst->getNumberDetectors() > 0;
   } else
     hasinst = false;
 

@@ -118,10 +118,7 @@ Test if a file with this filename already exists
 */
 bool fileExists(const std::string &filename) {
   Poco::File test_file(filename);
-  if (test_file.exists()) {
-    return true;
-  }
-  return false;
+  return test_file.exists();
 }
 
 DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)

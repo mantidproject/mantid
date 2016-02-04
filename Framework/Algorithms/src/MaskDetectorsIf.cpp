@@ -167,7 +167,7 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
     bool selection;
 
     if (it == umap.end())
-      selection = (sel == 0) ? false : true;
+      selection = sel != 0;
     else
       selection = (*it).second;
 

@@ -1066,10 +1066,7 @@ bool ConfigServiceImpl::isExecutable(const std::string &target) const {
     Poco::File tempFile = Poco::File(expTarget);
 
     if (tempFile.exists()) {
-      if (tempFile.canExecute())
-        return true;
-      else
-        return false;
+      return tempFile.canExecute();
     } else
       return false;
   } catch (Poco::Exception &) {
