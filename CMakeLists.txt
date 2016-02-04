@@ -10,6 +10,13 @@ else()
   cmake_minimum_required ( VERSION 2.8.12 )
 endif()
 
+if(POLICY CMP0053)
+  #Simplify variable reference and escape sequence evaluation.
+  #Claims to dramatically improve CMake configure and generate time
+  #requires CMake 3.1 or later
+  cmake_policy(SET CMP0053 NEW)
+endif()
+
 # Define the project name.
 project ( Mantid )
 
