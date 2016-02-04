@@ -17,7 +17,7 @@ workspace<DiffractionCalibrationWorkspace>` and minimize the
 difference between the DIFC of the instrument and calibration
 workspace by moving and rotating instrument components.
 
-The resulting caliibrated geometry can be exported by
+The resulting calibrated geometry can be exported by
 :ref:`algm-ExportGeometry`.
 
 Usage
@@ -37,10 +37,10 @@ Usage
       component="bank26"
       print "Start position is",ws.getInstrument().getComponentByName(component).getPos()
       AlignComponents(CalibrationTable="PG3_cal",
-	      InputWorkspace=ws,
-	      Zposition=False,
-	      Xrotation=False, Yrotation=False, Zrotation=False,
+              Workspace=ws,
+	      Xposition=True, YPosition=True,
               ComponentList=component)
+      ws=mtd['ws']
       print "Final position is",ws.getInstrument().getComponentByName(component).getPos()
 
 Output:
@@ -50,7 +50,7 @@ Output:
     Start position is [1.54436,0.863271,-1.9297]
     Final position is [1.53747,0.824442,-1.9297]
 
-**Example - Align the Y rotaion of bank26 and bank46 in POWGEN:**
+**Example - Align the Y rotation of bank26 and bank46 in POWGEN:**
 
 .. testcode:: rotation
 
@@ -65,10 +65,11 @@ Output:
       print "Start bank26 rotation is",ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
       print "Start bank46 rotation is",ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
       AlignComponents(CalibrationTable="PG3_cal",
-	      InputWorkspace=ws,
-	      Xposition=False, Yposition=False, Zposition=False,
-              Xrotation=False, Zrotation=False,
+	      Workspace=ws,
+	      EulerConvention="YZX",
+              alphaRotation=True,
 	      ComponentList=components)
+      ws=mtd['ws']
       print "Final bank26 rotation is",ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
       print "Final bank46 rotation is",ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
 
@@ -76,12 +77,15 @@ Output:
 
       Start bank26 rotation is [-24.0613,0.120403,18.0162]
       Start bank46 rotation is [-41.0917,0.060773,17.7948]
-      Final bank26 rotation is [-24.0613,1.19777,18.0162]
-      Final bank46 rotation is [-41.0917,2.40476,17.7948]
+      Final bank26 rotation is [-24.6626,0.120403,18.0162]
+      Final bank46 rotation is [-37.5517,0.060773,17.7948]
+
+**Example - Align the detector group3 in POWGEN:**
+
 
 **Example - Align sample position in POWGEN:**
 
-.. testcode:: sample
+.. code-block:: python
 
       LoadCalFile(InstrumentName="PG3",
 	    CalFilename="PG3_golden.cal",
@@ -92,15 +96,14 @@ Output:
       ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2014-03-10.xml")
       print "Start sample position is",ws.getInstrument().getSample().getPos().getZ()
       AlignComponents(CalibrationTable="PG3_cal",
-	      InputWorkspace=ws,
-	      Xposition=False, Yposition=False, Zposition=False,
-              Xrotation=False, Yrotation=False, Zrotation=False)
-      print "Final sample position is",ws.getInstrument().getSample().getPos().getZ()
+            Workspace=ws,
+            FitSamplePosition=True)
+      print "Final sample position is",mtd['ws'].getInstrument().getSample().getPos().getZ()
 
-.. testoutput::	sample
+Output:
 
       Start sample position is 0.0
-      Final sample position is 0.3
+      Final sample position is 0.002
 
 .. categories::
 
