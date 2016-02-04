@@ -551,7 +551,7 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive */
-  void test_getLinePlot_horizontal() {
+  void test_getLineData_horizontal() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
@@ -561,7 +561,7 @@ public:
     std::vector<coord_t> x;
     std::vector<signal_t> y;
     std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+    ws->getLineData(start, end, NoNormalization, x, y, e);
     TS_ASSERT_EQUALS(x.size(), 11);
     TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
     TS_ASSERT_DELTA(x[1], 0.5, 1e-5);
@@ -576,7 +576,7 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive */
-  void test_getLinePlot_horizontal_withMask() {
+  void test_getLineData_horizontal_withMask() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
@@ -594,7 +594,7 @@ public:
     std::vector<coord_t> x;
     std::vector<signal_t> y;
     std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+    ws->getLineData(start, end, NoNormalization, x, y, e);
 
     TS_ASSERT_EQUALS(y.size(), 10);
     // Masked value should be zero
@@ -605,7 +605,7 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive */
-  void test_getLinePlot_3D() {
+  void test_getLineData_3D() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 10);
     for (size_t i = 0; i < 1000; i++)
@@ -615,7 +615,7 @@ public:
     std::vector<coord_t> x;
     std::vector<signal_t> y;
     std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+    ws->getLineData(start, end, NoNormalization, x, y, e);
     TS_ASSERT_EQUALS(x.size(), 11);
     TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
     TS_ASSERT_DELTA(x[1], 0.5, 1e-5);
@@ -630,7 +630,7 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going negative */
-  void test_getLinePlot_horizontal_backwards() {
+  void test_getLineData_horizontal_backwards() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
@@ -640,7 +640,7 @@ public:
     std::vector<coord_t> x;
     std::vector<signal_t> y;
     std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+    ws->getLineData(start, end, NoNormalization, x, y, e);
     TS_ASSERT_EQUALS(x.size(), 11);
     TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
     TS_ASSERT_DELTA(x[1], 0.5, 1e-5);
@@ -655,7 +655,7 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Diagonal line at 45 degrees crosses through 3 bins */
-  void test_getLinePlot_diagonal() {
+  void test_getLineData_diagonal() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
@@ -665,7 +665,7 @@ public:
     std::vector<coord_t> x;
     std::vector<signal_t> y;
     std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+    ws->getLineData(start, end, NoNormalization, x, y, e);
     std::cout << "X\n" << Strings::join(x.begin(), x.end(), ",") << std::endl;
     std::cout << "Y\n" << Strings::join(y.begin(), y.end(), ",") << std::endl;
 
@@ -683,7 +683,7 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive, starting before and ending after limits */
-  void test_getLinePlot_horizontal_pastEdges() {
+  void test_getLineData_horizontal_pastEdges() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
@@ -693,7 +693,7 @@ public:
     std::vector<coord_t> x;
     std::vector<signal_t> y;
     std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+    ws->getLineData(start, end, NoNormalization, x, y, e);
     TS_ASSERT_EQUALS(x.size(), 11);
     TS_ASSERT_DELTA(x[0], 0.5, 1e-5);
     TS_ASSERT_DELTA(x[1], 1.5, 1e-5);
@@ -708,7 +708,7 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Line that completely misses the workspace */
-  void test_getLinePlot_totallyOutOfBounds() {
+  void test_getLineData_totallyOutOfBounds() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
@@ -718,7 +718,7 @@ public:
     std::vector<coord_t> x;
     std::vector<signal_t> y;
     std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+    ws->getLineData(start, end, NoNormalization, x, y, e);
     TS_ASSERT_EQUALS(x.size(), 2);
     TS_ASSERT_DELTA(x[0], 0, 1e-5);
     // NAN for Y

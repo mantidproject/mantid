@@ -498,6 +498,70 @@ bool pointInWorkspace(const MDHistoWorkspace *ws, const VMD &point) {
 /** Obtain coordinates for a line plot through a MDWorkspace.
  * Cross the workspace from start to end points, recording the signal along the
  *line.
+ *
+ * @param start :: coordinates of the start point of the line
+ * @param end :: coordinates of the end point of the line
+ * @param normalize :: how to normalize the signal
+ * @param x :: linearly spaced points along the line between start and end.
+ * @param y :: is set to the normalized signal for each bin. Length = length(x)
+ *- 1
+ * @param e :: error vector for each bin.
+ */
+void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
+                                   const Mantid::Kernel::VMD &end,
+                                   Mantid::API::MDNormalization normalize,
+                                   std::vector<coord_t> &x,
+                                   std::vector<signal_t> &y,
+                                   std::vector<signal_t> &e) const {
+  // TODO: Don't use a fixed number of points later
+  size_t numPoints = 500;
+
+  VMD step = (end - start) / double(numPoints);
+  double stepLength = step.norm();
+
+  // These will be the curve as plotted
+  x.clear();
+  y.clear();
+  e.clear();
+  for (size_t i = 0; i < numPoints; i++) {
+    // Coordinate along the line
+    VMD coord = start + step * double(i);
+    // Record the position along the line
+    x.push_back(static_cast<coord_t>(stepLength * double(i)));
+
+    // Get index of bin at this coordinate
+    size_t linearIndex = this->getLinearIndexAtCoord(coord.getBareArray());
+    if (linearIndex < m_length) {
+
+      if (this->getIsMaskedAt(linearIndex)) {
+        y.push_back(MDMaskValue);
+        e.push_back(MDMaskValue);
+      } else {
+        signal_t normalizer = getNormalizationFactor(normalize, linearIndex);
+        // And add the normalized signal/error to the list too
+        auto signal = this->getSignalAt(linearIndex) * normalizer;
+        if (boost::math::isinf(signal)) {
+          // The plotting library (qwt) doesn't like infs.
+          signal = std::numeric_limits<signal_t>::quiet_NaN();
+        }
+        y.push_back(signal);
+        e.push_back(this->getErrorAt(linearIndex) * normalizer);
+      }
+
+    } else {
+      // Point is outside the workspace. Add NANs
+      y.push_back(std::numeric_limits<double>::quiet_NaN());
+      e.push_back(std::numeric_limits<double>::quiet_NaN());
+    }
+  }
+  // And the last point
+  x.push_back((end - start).norm());
+}
+
+//----------------------------------------------------------------------------------------------
+/** Obtain coordinates for a line plot through a MDWorkspace.
+ * Cross the workspace from start to end points, recording the signal along the
+ *line.
  * Sets the x,y vectors to the histogram bin boundaries and counts
  *
  * @param start :: coordinates of the start point of the line
@@ -509,7 +573,7 @@ bool pointInWorkspace(const MDHistoWorkspace *ws, const VMD &point) {
  *- 1
  * @param e :: error vector for each bin.
  */
-void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
+void MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
                                    const Mantid::Kernel::VMD &end,
                                    Mantid::API::MDNormalization normalize,
                                    std::vector<coord_t> &x,

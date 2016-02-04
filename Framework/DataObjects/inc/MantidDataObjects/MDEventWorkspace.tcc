@@ -746,7 +746,7 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
                                          std::vector<signal_t> &y,
                                          std::vector<signal_t> &e) const {
   // TODO: Don't use a fixed number of points later
-  size_t numPoints = 200;
+  size_t numPoints = 500;
 
   VMD step = (end - start) / double(numPoints);
   double stepLength = step.norm();
