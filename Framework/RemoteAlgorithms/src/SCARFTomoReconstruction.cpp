@@ -396,9 +396,9 @@ void SCARFTomoReconstruction::doLogout(const std::string &username) {
   const std::string token = it->second.m_token_str;
 
   std::string httpsURL = baseURL + logoutPath;
-  StringToStringMap headers{{"Content-Type", "text/plain"},
-                            {"Cookie", token},
-                            {"Accept", m_acceptType}};
+  std::map<std::string, std::string> headers{{"Content-Type", "text/plain"},
+                                             {"Cookie", token},
+                                             {"Accept", m_acceptType}};
   int code;
   std::stringstream ss;
   try {
@@ -500,7 +500,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
   const std::string token = it->second.m_token_str;
 
   std::string httpsURL = baseURL + submitPath;
-  StringToStringMap headers{
+  std::map<std::string, std::string> headers{
       {"Content-Type", "multipart/mixed; boundary=" + boundary},
       {"Accept", m_acceptType},
       {"Cookie", token}};
@@ -560,9 +560,10 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
   const std::string token = it->second.m_token_str;
 
   std::string httpsURL = baseURL + jobStatusPath;
-  StringToStringMap headers{{"Content-Type", "application/xml"},
-                            {"Accept", m_acceptType},
-                            {"Cookie", token}};
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"},
+      {"Accept", m_acceptType},
+      {"Cookie", token}};
   int code;
   std::stringstream ss;
   try {
@@ -626,9 +627,10 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string &username,
   const std::string token = it->second.m_token_str;
 
   std::string httpsURL = baseURL + jobIdStatusPath;
-  StringToStringMap headers{{"Content-Type", "application/xml"},
-                            {"Accept", m_acceptType},
-                            {"Cookie", token}};
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"},
+      {"Accept", m_acceptType},
+      {"Cookie", token}};
   int code;
   std::stringstream ss;
   try {
@@ -683,8 +685,8 @@ bool SCARFTomoReconstruction::doPing() {
   const std::string baseURL = "https://portal.scarf.rl.ac.uk:8443/";
 
   std::string httpsURL = baseURL + pingPath;
-  StringToStringMap headers{{"Content-Type", "application/xml"},
-                            {"Accept", m_acceptType}};
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"}, {"Accept", m_acceptType}};
   int code;
   std::stringstream ss;
   try {
@@ -746,9 +748,10 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
   const std::string token = it->second.m_token_str;
 
   std::string httpsURL = baseURL + killPath;
-  StringToStringMap headers{{"Content-Type", "application/xml"},
-                            {"Cookie", token},
-                            {"Accept", m_acceptType}};
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"},
+      {"Cookie", token},
+      {"Accept", m_acceptType}};
   int code;
   std::stringstream ss;
   try {
@@ -818,7 +821,7 @@ void SCARFTomoReconstruction::doUploadFile(const std::string &username,
 
   InternetHelper session;
   std::string httpsURL = baseURL + uploadPath;
-  StringToStringMap headers{
+  std::map<std::string, std::string> headers{
       {"Content-Type", "multipart/mixed; boundary=" + boundary},
       {"Accept", m_acceptType},
       {"Cookie", token}};
@@ -1344,9 +1347,10 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
 
   std::string httpsURL = baseURL + downloadOnePath;
 
-  StringToStringMap headers{{"Content-Type", "application/xml"},
-                            {"Cookie", token},
-                            {"Accept", m_acceptType}};
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"},
+      {"Cookie", token},
+      {"Accept", m_acceptType}};
   std::string body = remotePath;
   int code;
   std::stringstream ss;
@@ -1412,9 +1416,10 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
   const std::string token = t.m_token_str;
 
   std::string httpsURL = baseURL + downloadPath;
-  StringToStringMap headers{{"Content-Type", "application/xml"},
-                            {"Cookie", token},
-                            {"Accept", m_acceptType}};
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"},
+      {"Cookie", token},
+      {"Accept", m_acceptType}};
   int code;
   std::stringstream ss;
   try {
