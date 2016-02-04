@@ -578,8 +578,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
            "not seem well formed. Job ID string from server: '" +
                jobID + "'. Detailed error when tryint to interpret the code "
                        "returned as an integer: " +
-               e.what()
-        << std::endl;
+               e.what() << std::endl;
   }
 
   return jobID;
