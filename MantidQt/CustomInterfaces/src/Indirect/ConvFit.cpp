@@ -33,92 +33,6 @@ ConvFit::ConvFit(QWidget *parent)
   m_uiForm.setupUi(parent);
 }
 
-/**
- * Populates the default parameter map with the initial default values
- * @param map :: The default value QMap to populate
- * @return The QMap populated with default values
- */
-QMap<QString, double> ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
-	// If the parameters from a One lorentzian fit are present
-	if (map.contains("PeakCentre")) {
-		map.remove("PeakCentre");
-		map.remove("FWHM");
-	}
-	// Reset all parameters to default of 1
-	map.insert("Amplitude", 1.0);
-	map.insert("beta", 1.0);
-	map.insert("Decay", 1.0);
-	map.insert("Diffusion", 1.0);
-	map.insert("height", 1.0); // Lower case in StretchedExp - this can be improved with a case insensitive check
-	map.insert("Height", 1.0);
-	map.insert("Intensity", 1.0);
-	map.insert("Radius", 1.0);
-	map.insert("tau", 1.0);
-	return map;
-}
-
-/**
- * Adds the One Lorentzian fit informtion to the list of default parameters
- * @param map			:: The default value QMap to populate
- * @param amplitude		:: One lorentzian amplitude
- * @param peakCentre	:: One lorentzian peakCentre
- * @param fwhm			:: One lorentzian fwhm
- * @return The QMap populated with default values
- */
-QMap<QString, double> ConvFit::addLorentzianFitToDeafultQMap(QMap<QString, double> map, const double &amplitude, const double &peakCentre, const double &fwhm) {
-	map.insert("PeakCentre", peakCentre);
-	map.insert("FWHM", fwhm);
-	map.replace("Amplitude", amplitude);
-	return map;
-}
-
-/**
- * Populates a map with ALL parameters names and values for the current fit
- * function
- * @param map			:: A QMap of any parameters that have non zero
- * default values
- * @param parameters	:: A QStringList of all the parameters for the current
- * fit function
- * @param fitFunction	:: The name of the current fit function
- * @return a QMap populated with name, value pairs for parameters where name =
- * fitFunction.parametername and value is either from the default map or 0
- */
-QMap<QString, double>
-ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
-                                  const QStringList parameters,
-                                  const QString &fitFunction) {
-  QMap<QString, double> fullMap;
-  QString fitFuncName = fitFunction;
-  // Special case for Two lorentzian - as it is comprised of 2 lorentzians
-  if (fitFunction.compare("Two Lorentzian") == 0) {
-    fitFuncName = "Lorentzian 1";
-    for (auto param = parameters.begin(); param != parameters.end(); ++param) {
-      QString fullPropName = fitFuncName + "." + QString(*param);
-      if (defaultMap.contains(QString(*param))) {
-        if (fullMap.contains(fullPropName)) {
-          fullPropName = "Lorentzian 2." + QString(*param);
-          fullMap.insert(fullPropName, 0);
-        } else {
-          fullMap.insert(fullPropName, defaultMap[*param]);
-        }
-      } else {
-        fullMap.insert(fullPropName, 0);
-      }
-    }
-    // All Other Fitfunctions
-  } else {
-    for (auto param = parameters.begin(); param != parameters.end(); ++param) {
-      QString fullPropName = fitFuncName + "." + QString(*param);
-      if (defaultMap.contains(QString(*param))) {
-        fullMap.insert(fullPropName, defaultMap[*param]);
-      } else {
-        fullMap.insert(fullPropName, 0);
-      }
-    }
-  }
-  return fullMap;
-}
-
 void ConvFit::setup() {
   // Create Property Managers
   m_stringManager = new QtStringPropertyManager();
@@ -1761,6 +1675,96 @@ QString ConvFit::convertBackToShort(const std::string &original) {
     result += original.at(pos + 1);
   }
   return result;
+}
+
+/**
+* Populates the default parameter map with the initial default values
+* @param map :: The default value QMap to populate
+* @return The QMap populated with default values
+*/
+QMap<QString, double>
+ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
+  // If the parameters from a One lorentzian fit are present
+  if (map.contains("PeakCentre")) {
+    map.remove("PeakCentre");
+    map.remove("FWHM");
+  }
+  // Reset all parameters to default of 1
+  map.insert("Amplitude", 1.0);
+  map.insert("beta", 1.0);
+  map.insert("Decay", 1.0);
+  map.insert("Diffusion", 1.0);
+  map.insert("height", 1.0); // Lower case in StretchedExp - this can be
+                             // improved with a case insensitive check
+  map.insert("Height", 1.0);
+  map.insert("Intensity", 1.0);
+  map.insert("Radius", 1.0);
+  map.insert("tau", 1.0);
+  return map;
+}
+
+/**
+* Adds the One Lorentzian fit informtion to the list of default parameters
+* @param map			:: The default value QMap to populate
+* @param amplitude		:: One lorentzian amplitude
+* @param peakCentre	:: One lorentzian peakCentre
+* @param fwhm			:: One lorentzian fwhm
+* @return The QMap populated with default values
+*/
+QMap<QString, double> ConvFit::addLorentzianFitToDeafultQMap(
+    QMap<QString, double> map, const double &amplitude,
+    const double &peakCentre, const double &fwhm) {
+  map.insert("PeakCentre", peakCentre);
+  map.insert("FWHM", fwhm);
+  map.replace("Amplitude", amplitude);
+  return map;
+}
+
+/**
+* Populates a map with ALL parameters names and values for the current fit
+* function
+* @param map			:: A QMap of any parameters that have non zero
+* default values
+* @param parameters	:: A QStringList of all the parameters for the current
+* fit function
+* @param fitFunction	:: The name of the current fit function
+* @return a QMap populated with name, value pairs for parameters where name =
+* fitFunction.parametername and value is either from the default map or 0
+*/
+QMap<QString, double>
+ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
+                                  const QStringList parameters,
+                                  const QString &fitFunction) {
+  QMap<QString, double> fullMap;
+  QString fitFuncName = fitFunction;
+  // Special case for Two lorentzian - as it is comprised of 2 lorentzians
+  if (fitFunction.compare("Two Lorentzian") == 0) {
+    fitFuncName = "Lorentzian 1";
+    for (auto param = parameters.begin(); param != parameters.end(); ++param) {
+      QString fullPropName = fitFuncName + "." + QString(*param);
+      if (defaultMap.contains(QString(*param))) {
+        if (fullMap.contains(fullPropName)) {
+          fullPropName = "Lorentzian 2." + QString(*param);
+          fullMap.insert(fullPropName, 0);
+        } else {
+          fullMap.insert(fullPropName, defaultMap[*param]);
+        }
+      } else {
+        fullMap.insert(fullPropName, 0);
+      }
+    }
+    // All Other Fitfunctions
+  } else {
+    for (auto param = parameters.begin(); param != parameters.end(); ++param) {
+      QString fullPropName = fitFuncName + "." + QString(*param);
+      if (defaultMap.contains(QString(*param))) {
+        fullMap.insert(fullPropName, defaultMap[*param]);
+      } else {
+        fullMap.insert(fullPropName, 0);
+      }
+    }
+  }
+  return fullMap;
 }
 
 } // namespace IDA
