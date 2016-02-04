@@ -500,8 +500,17 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
   // determine the lattice constants
   Kernel::Matrix<double> UB(3, 3);
   IndexingUtils::Optimize_UB(UB, hkl, qVecs);
-  std::vector<double> lat(70);
+  std::vector<double> lat(7);
   IndexingUtils::GetLatticeParameters(UB, lat);
+  char buffer[100];
+
+  sprintf(buffer,
+          std::string(" %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),
+          lat[0], lat[1], lat[2], lat[3], lat[4],
+          lat[5], lat[6]);
+  std::string result(buffer);
+  std::cout << "Lattice before optimization: "<<
+      result << "\n";
 
   // see if the lattice constants are no worse than 25% out
   if (fabs(lat[0] - a) / a > .25)
@@ -518,6 +527,32 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
     return false;
 
   return true;
+}
+
+/**
+ * Tests inputs. Does the indexing correspond to the entered lattice parameters
+ * @param peaksWs  The peaks workspace with indexed peaks
+ * @param  tolerance   The indexing tolerance
+ */
+std::string GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance) {
+  // put together a list of indexed peaks
+  std::vector<V3D> hkl;
+  hkl.reserve(peaksWs->getNumberPeaks());
+  std::vector<V3D> qVecs;
+  qVecs.reserve(peaksWs->getNumberPeaks());
+  for (int i = 0; i < peaksWs->getNumberPeaks(); i++) {
+    const Peak &peak = peaksWs->getPeak(i);
+    if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance)) {
+      hkl.push_back(peak.getHKL());
+      qVecs.push_back(peak.getQSampleFrame());
+    }
+  }
+
+  // determine the lattice constants
+  Kernel::Matrix<double> UB(3, 3);
+  IndexingUtils::Optimize_UB(UB, hkl, qVecs);
+ return IndexingUtils::GetLatticeParameterString(UB);
+
 }
 
 namespace { // anonymous namespace
@@ -612,6 +647,17 @@ void SCDCalibratePanels::exec() {
   QErrTable->addColumn("double", "Theoretical TOF");
   double chisqSum = 0;
   int NDofSum = 0;
+  if (!GoodStart(peaksWs, a, b, c, alpha, beta, gamma, tolerance)) {
+    g_log.warning() << "**** Indexing is NOT compatible with given lattice "
+                       "parameters******" << std::endl;
+    g_log.warning() << "        Index with conventional orientation matrix???"
+                    << std::endl;
+  }
+
+  //----------- Initialize peaksWorkspace, initial parameter values
+  // etc.---------
+  boost::shared_ptr<const Instrument> instrument =
+      peaksWs->getPeak(0).getInstrument();
 
   PARALLEL_FOR1(peaksWs)
   for (int iGr = 0; iGr < static_cast<int>(Groups.size()); iGr++) {
@@ -621,20 +667,9 @@ void SCDCalibratePanels::exec() {
     for (auto bankName = group->begin(); bankName != group->end(); ++bankName) {
       banksVec.push_back(*bankName);
     }
-    if (!GoodStart(peaksWs, a, b, c, alpha, beta, gamma, tolerance)) {
-      g_log.warning() << "**** Indexing is NOT compatible with given lattice "
-                         "parameters******" << std::endl;
-      g_log.warning() << "        Index with conventional orientation matrix???"
-                      << std::endl;
-    }
     //------------------ Set Up Workspace for IFitFunction Fit---------------
     vector<int> bounds;
     Workspace2D_sptr ws = calcWorkspace(peaksWs, banksVec, tolerance, bounds);
-
-    //----------- Initialize peaksWorkspace, initial parameter values
-    // etc.---------
-    boost::shared_ptr<const Instrument> instrument =
-        peaksWs->getPeak(0).getInstrument();
     double T0 = 0;
     if ((string)getProperty("PreProcessInstrument") ==
         "C)Apply a LoadParameter.xml type file")
@@ -735,11 +770,16 @@ void SCDCalibratePanels::exec() {
     iFunc->setParameter("f0_Yrot", Yrot0);
     iFunc->setParameter("f0_Zrot", Zrot0);
 
+    set<string> MyBankNames;
+    for (int i = 0; i < peaksWs->getNumberPeaks(); ++i)
+      MyBankNames.insert(banksVec[0]);
     int startX = bounds[0];
     int endXp1 = bounds[group->size()];
     if (endXp1 - startX < 13) {
       g_log.error() << "Bank Group " << BankNameString
                     << " does not have enough peaks for fitting" << endl;
+      saveIsawDetCal(instrument, MyBankNames, T0,
+                     DetCalFileName + boost::lexical_cast<std::string>(iGr));
       continue;
     }
 
@@ -789,6 +829,11 @@ void SCDCalibratePanels::exec() {
                 samplePos.Y() + SampleYoffset + maxXYOffset);
       constrain(iFunc, "SampleZ", samplePos.Z() + SampleZoffset - maxXYOffset,
                 samplePos.Z() + SampleZoffset + maxXYOffset);
+    }
+    else {
+      tie(iFunc,true, "SampleX", samplePos.X() + SampleXoffset);
+      tie(iFunc, true, "SampleY", samplePos.Y() + SampleYoffset);
+      tie(iFunc, true, "SampleZ", samplePos.Z() + SampleZoffset);
     }
 
     tie(iFunc, !useL0, "l0", L0);
@@ -940,9 +985,6 @@ void SCDCalibratePanels::exec() {
 
       //---------------------- Save new instrument to DetCal-------------
       //-----------------------or xml(for LoadParameterFile) files-----------
-      set<string> MyBankNames;
-      for (int i = 0; i < peaksWs->getNumberPeaks(); ++i)
-        MyBankNames.insert(banksVec[0]);
       this->progress(.94, "Saving detcal file");
       saveIsawDetCal(NewInstrument, MyBankNames, result["t0"],
                      DetCalFileName + boost::lexical_cast<std::string>(iGr));
@@ -1037,8 +1079,8 @@ void SCDCalibratePanels::exec() {
     l0vec.erase(l0vec.begin() + (*it));
   }
 
-  Statistics stats = getStatistics(l0vec);
-  outfile << "7  " << std::setprecision(4) << std::fixed << (stats.mean);
+  Statistics statsl = getStatistics(l0vec);
+  outfile << "7  " << std::setprecision(4) << std::fixed << (statsl.mean);
   Zscore = getZscore(t0vec);
   banned.clear();
   for (size_t i = 0; i < t0vec.size(); ++i) {
@@ -1051,8 +1093,8 @@ void SCDCalibratePanels::exec() {
        it != banned.rend(); ++it) {
     t0vec.erase(t0vec.begin() + (*it));
   }
-  stats = getStatistics(t0vec);
-  outfile << std::setw(13) << std::setprecision(3) << stats.mean << std::endl;
+  Statistics statst = getStatistics(t0vec);
+  outfile << std::setw(13) << std::setprecision(3) << statst.mean << std::endl;
   outfile << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
              "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
              "     UpZ" << std::endl;
@@ -1065,6 +1107,19 @@ void SCDCalibratePanels::exec() {
   setProperty("QErrorWorkspace", QErrTable);
   setProperty("ChiSqOverDOF", chisqSum);
   setProperty("DOF", NDofSum);
+
+  set<string> bankNames;
+  for (int i = 0; i < peaksWs->getNumberPeaks(); ++i) {
+    IPeak &peak = peaksWs->getPeak(i);
+    instrument =
+          peak.getInstrument();
+    LoadISawDetCal(instrument, bankNames, statst.mean, statsl.mean, DetCalFileName,
+                   "bank");
+    peak.setInstrument(instrument);
+    peak.findDetector();
+  }
+  g_log.notice() << "Lattice after optimization: "<<
+  GoodEnd(peaksWs, tolerance)<< "\n";
 }
 
 /**
