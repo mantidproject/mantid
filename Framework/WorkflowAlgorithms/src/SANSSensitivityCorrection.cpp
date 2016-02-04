@@ -93,9 +93,7 @@ bool SANSSensitivityCorrection::fileCheck(const std::string &filePath) {
     return false;
   }
 
-  if (entryName[0] == "mantid_workspace_1")
-    return true;
-  return false;
+  return entryName[0] == "mantid_workspace_1";
 }
 
 void SANSSensitivityCorrection::exec() {

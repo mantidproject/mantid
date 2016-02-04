@@ -36,8 +36,8 @@ void ModeratorModel::initialize(const std::string &params) {
         "could be parsed. Check it has the key=value format.");
   }
 
-  for (auto iter = keyValues.begin(); iter != keyValues.end(); ++iter) {
-    setParameterValue(iter->first, iter->second);
+  for (auto &keyValue : keyValues) {
+    setParameterValue(keyValue.first, keyValue.second);
   }
 
   /// Any custom setup

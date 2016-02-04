@@ -665,8 +665,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     AllBankNames.insert(m_peaks->getPeak(i).getBankName());
 
   Instrument_sptr instrNew = getNewInstrument(m_peaks->getPeak(0));
-  for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
-    std::string bankName = (*it);
+  for (auto bankName : AllBankNames) {
     boost::shared_ptr<const IComponent> panel =
         instrNew->getComponentByName(bankName);
     bankDetMap[bankName] = panel;
@@ -779,8 +778,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   for (size_t gr = 0; gr < Groups.size(); ++gr) {
     vector<string> banknames;
     boost::split(banknames, Groups[gr], boost::is_any_of("/"));
-    for (auto it = banknames.begin(); it != banknames.end(); ++it)
-      bankName2Group[(*it)] = gr;
+    for (auto &bankname : banknames)
+      bankName2Group[bankname] = gr;
   }
   // derivative formulas documentation
   // Qvec=-K*Vvec +K*v_mag*beamDir
@@ -1225,10 +1224,10 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   Mantid::MantidVecPtr yvals;
   Mantid::MantidVec &yvalB = yvals.access();
 
-  for (size_t k = 0; k < bankNames.size(); ++k)
+  for (auto &bankName : bankNames)
     for (size_t j = 0; j < pwks->rowCount(); ++j) {
       Geometry::IPeak &peak = pwks->getPeak(static_cast<int>(j));
-      if (peak.getBankName().compare(bankNames[k]) == 0)
+      if (peak.getBankName().compare(bankName) == 0)
         if (peak.getH() != 0 || peak.getK() != 0 || peak.getL() != 0)
           if (peak.getH() - floor(peak.getH()) < tolerance ||
               floor(peak.getH() + 1) - peak.getH() < tolerance)

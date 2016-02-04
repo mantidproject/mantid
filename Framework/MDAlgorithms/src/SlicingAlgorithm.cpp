@@ -275,9 +275,9 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
   // Count the number of output dimensions
   m_outD = 0;
   std::string dimChars = this->getDimensionChars();
-  for (size_t i = 0; i < dimChars.size(); i++) {
+  for (char dimChar : dimChars) {
     std::string propName = "BasisVector0";
-    propName[11] = dimChars[i];
+    propName[11] = dimChar;
     if (!Strings::strip(this->getPropertyValue(propName)).empty())
       m_outD++;
   }
@@ -306,9 +306,9 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
   m_transformScaling.clear();
 
   // Create the dimensions based on the strings from the user
-  for (size_t i = 0; i < dimChars.size(); i++) {
+  for (char dimChar : dimChars) {
     std::string propName = "BasisVector0";
-    propName[11] = dimChars[i];
+    propName[11] = dimChar;
     try {
       makeBasisVectorFromString(getPropertyValue(propName));
     } catch (std::exception &e) {
@@ -373,8 +373,8 @@ void SlicingAlgorithm::createGeneralTransform() {
     ortho.resize(m_bases.size(), VMD(3));
     m_bases = ortho;
     g_log.information() << "Basis vectors forced to be orthogonal: ";
-    for (size_t i = 0; i < m_bases.size(); i++)
-      g_log.information() << m_bases[i].toString(",") << "; ";
+    for (auto &base : m_bases)
+      g_log.information() << base.toString(",") << "; ";
     g_log.information() << std::endl;
   }
 
@@ -529,9 +529,9 @@ void SlicingAlgorithm::createAlignedTransform() {
   // Validate inputs
   bool previousWasEmpty = false;
   size_t numDims = 0;
-  for (size_t i = 0; i < dimChars.size(); i++) {
+  for (char dimChar : dimChars) {
     std::string propName = "AlignedDim0";
-    propName[10] = dimChars[i];
+    propName[10] = dimChar;
     std::string prop = Strings::strip(getPropertyValue(propName));
     if (!prop.empty())
       numDims++;
@@ -947,11 +947,11 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
     // Last-resort, totally general case
     // 2*N planes defined by N basis vectors, in any dimensionality workspace.
     // Assumes orthogonality!
-    for (size_t i = 0; i < bases.size(); i++) {
+    for (auto &base : bases) {
       // For each basis vector, make two planes, perpendicular to it and facing
       // inwards
-      func->addPlane(MDPlane(bases[i], o1));
-      func->addPlane(MDPlane(bases[i] * -1.0, o2));
+      func->addPlane(MDPlane(base, o1));
+      func->addPlane(MDPlane(base * -1.0, o2));
     }
   }
 
@@ -1080,9 +1080,8 @@ SlicingAlgorithm::extractMDFrameForNonAxisAligned(
   const auto &referenceMDFrame =
       m_inWS->getDimension(indicesWithProjection[0])->getMDFrame();
 
-  for (auto it = indicesWithProjection.begin();
-       it != indicesWithProjection.end(); ++it) {
-    const auto &toCheckMDFrame = m_inWS->getDimension(*it)->getMDFrame();
+  for (auto &index : indicesWithProjection) {
+    const auto &toCheckMDFrame = m_inWS->getDimension(index)->getMDFrame();
     if (!referenceMDFrame.isSameType(toCheckMDFrame)) {
       g_log.warning() << "Slicing Algorithm: New basis vector tries to "
                          "mix un-mixable MDFrame types.";

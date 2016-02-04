@@ -90,12 +90,12 @@ void LoadIsawUB::exec() {
 
   readToEndOfLine(in, true);
   double latVals[6];
-  for (size_t col = 0; col < 6; col++) {
+  for (double &latVal : latVals) {
     s = getWord(in, true);
     if (!convert(s, val))
       throw std::runtime_error("The string '" + s +
                                "' in the file was not understood as a number.");
-    latVals[col] = val;
+    latVal = val;
   }
 
   // Adjust the UB by transposing

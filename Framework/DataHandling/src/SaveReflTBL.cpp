@@ -73,9 +73,8 @@ void SaveReflTBL::exec() {
     throw Exception::FileError("Unable to create file: ", filename);
   }
 
-  for (auto iterator = m_stichgroups.begin(); iterator != m_stichgroups.end();
-       ++iterator) {
-    std::vector<size_t> &rowNos = iterator->second;
+  for (auto &stichgroup : m_stichgroups) {
+    std::vector<size_t> &rowNos = stichgroup.second;
     size_t i = 0;
     for (; i < rowNos.size(); ++i) {
       // for each row in the group print the first 5 columns to file
@@ -101,9 +100,8 @@ void SaveReflTBL::exec() {
 
   // now do the same for the ungrouped
 
-  for (auto iterator = m_nogroup.begin(); iterator != m_nogroup.end();
-       ++iterator) {
-    TableRow row = ws->getRow(*iterator);
+  for (auto &iterator : m_nogroup) {
+    TableRow row = ws->getRow(iterator);
     for (int j = 0; j < 5; ++j) {
       writeVal(row.cell<std::string>(j), file);
     }

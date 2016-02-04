@@ -55,8 +55,8 @@ const std::string IMDEventWorkspace::toString() const {
 
   // Now box controller details
   std::vector<std::string> stats = getBoxControllerStats();
-  for (size_t i = 0; i < stats.size(); i++) {
-    os << stats[i] << "\n";
+  for (auto &stat : stats) {
+    os << stat << "\n";
   }
 
   os << MultipleExperimentInfos::toString() << "\n";

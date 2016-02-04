@@ -138,8 +138,7 @@ void MDBoxFlatTree::setBoxesFilePositions(bool setFileBacked) {
   // Kernel::ISaveable::sortObjByFilePos(m_Boxes);
   // calculate the box positions in the resulting file and save it on place
   uint64_t eventsStart = 0;
-  for (size_t i = 0; i < m_Boxes.size(); i++) {
-    API::IMDNode *mdBox = m_Boxes[i];
+  for (auto mdBox : m_Boxes) {
     size_t ID = mdBox->getID();
 
     // avoid grid boxes;
@@ -403,8 +402,8 @@ void MDBoxFlatTree::loadExperimentInfos(
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
   std::list<uint16_t> ExperimentBlockNum;
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    std::string name = it->first;
+  for (auto &entry : entries) {
+    const std::string &name = entry.first;
     if (boost::starts_with(name, "experiment")) {
       try {
         uint16_t num =

@@ -78,10 +78,10 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
         sourceAlg->getProperty(this->m_workspacePropertyName);
 
     // Inspect all the input workspaces in the ArrayProperty input.
-    for (auto it = workspaces.begin(); it != workspaces.end(); ++it) {
-      Workspace_sptr ws = AnalysisDataService::Instance().retrieve(*it);
+    for (auto &workspace : workspaces) {
+      Workspace_sptr ws = AnalysisDataService::Instance().retrieve(workspace);
       if (!ws) {
-        throw Kernel::Exception::NotFoundError("Workspace", *it);
+        throw Kernel::Exception::NotFoundError("Workspace", workspace);
       }
       tryAddInputWorkspaceToInputGroups(ws, vecWorkspaceGroups);
     }
@@ -91,8 +91,8 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
     WorkspaceVector outWorkspaces;
     sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
     UNUSED_ARG(outWorkspaces);
-    for (auto it = inWorkspaces.begin(); it != inWorkspaces.end(); ++it) {
-      tryAddInputWorkspaceToInputGroups(*it, vecWorkspaceGroups);
+    for (auto &inWorkspace : inWorkspaces) {
+      tryAddInputWorkspaceToInputGroups(inWorkspace, vecWorkspaceGroups);
     }
   }
 
@@ -130,9 +130,8 @@ std::string MultiPeriodGroupWorker::createFormattedInputWorkspaceNames(
     const size_t &periodIndex, const VecWSGroupType &vecWorkspaceGroups) const {
   std::string prefix = "";
   std::string inputWorkspaces = "";
-  for (size_t j = 0; j < vecWorkspaceGroups.size(); ++j) {
-    inputWorkspaces +=
-        prefix + vecWorkspaceGroups[j]->getItem(periodIndex)->name();
+  for (const auto &vecWorkspaceGroup : vecWorkspaceGroups) {
+    inputWorkspaces += prefix + vecWorkspaceGroup->getItem(periodIndex)->name();
     prefix = ",";
   }
   return inputWorkspaces;
@@ -155,8 +154,7 @@ void MultiPeriodGroupWorker::copyInputWorkspaceProperties(
     IAlgorithm *targetAlg, IAlgorithm *sourceAlg,
     const int &periodNumber) const {
   std::vector<Property *> props = sourceAlg->getProperties();
-  for (size_t j = 0; j < props.size(); j++) {
-    Property *prop = props[j];
+  for (auto prop : props) {
     if (prop) {
       if (prop->direction() == Direction::Input) {
         if (const IWorkspaceProperty *wsProp =

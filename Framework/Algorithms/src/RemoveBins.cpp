@@ -199,7 +199,7 @@ void RemoveBins::checkProperties() {
   }
 
   const std::string interpolation = getProperty("Interpolation");
-  m_interpolate = (interpolation == "Linear" ? true : false);
+  m_interpolate = (interpolation == "Linear");
 
   return;
 }

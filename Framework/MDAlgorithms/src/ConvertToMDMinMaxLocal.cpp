@@ -176,9 +176,9 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
 
     std::vector<double> range = pQtransf->getExtremumPoints(x1, x2, iSpctr);
     // transform coordinates
-    for (size_t k = 0; k < range.size(); k++) {
+    for (double &k : range) {
 
-      pQtransf->calcMatrixCoord(range[k], locCoord, signal, errorSq);
+      pQtransf->calcMatrixCoord(k, locCoord, signal, errorSq);
       // identify min-max ranges for current spectrum
       for (size_t j = 0; j < nDims; j++) {
         if (locCoord[j] < MinValues[j])

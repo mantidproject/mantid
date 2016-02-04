@@ -67,8 +67,8 @@ void PredictPeaks::init() {
 
   // Build up a list of reflection conditions to use
   std::vector<std::string> propOptions;
-  for (size_t i = 0; i < m_refConds.size(); ++i)
-    propOptions.push_back(m_refConds[i]->getName());
+  for (auto &refCond : m_refConds)
+    propOptions.push_back(refCond->getName());
   declareProperty("ReflectionCondition", "Primitive",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which reflection condition applies to this crystal, "
@@ -234,10 +234,9 @@ void PredictPeaks::exec() {
   Progress prog(this, 0.0, 1.0, possibleHKLs.size() * gonioVec.size());
   prog.setNotifyStep(0.01);
 
-  for (auto goniometerMatrix = gonioVec.begin();
-       goniometerMatrix != gonioVec.end(); ++goniometerMatrix) {
+  for (auto &goniometerMatrix : gonioVec) {
     // Final transformation matrix (HKL to Q in lab frame)
-    DblMatrix orientedUB = (*goniometerMatrix) * ub;
+    DblMatrix orientedUB = goniometerMatrix * ub;
 
     /* Because of the additional filtering step it's better to keep track of the
      * allowed peaks with a counter. */
@@ -245,10 +244,10 @@ void PredictPeaks::exec() {
 
     size_t allowedPeakCount = 0;
 
-    for (auto hkl = possibleHKLs.begin(); hkl != possibleHKLs.end(); ++hkl) {
-      if (lambdaFilter.isAllowed(*hkl)) {
+    for (auto &possibleHKL : possibleHKLs) {
+      if (lambdaFilter.isAllowed(possibleHKL)) {
         ++allowedPeakCount;
-        calculateQAndAddToOutput(*hkl, orientedUB, *goniometerMatrix);
+        calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix);
       }
       prog.report();
     }
@@ -307,12 +306,13 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(
 
   // --- Reflection condition ----
   // Use the primitive by default
-  ReflectionCondition_sptr refCond(new ReflectionConditionPrimitive());
+  ReflectionCondition_sptr refCond =
+      boost::make_shared<ReflectionConditionPrimitive>();
   // Get it from the property
   std::string refCondName = getPropertyValue("ReflectionCondition");
-  for (size_t i = 0; i < m_refConds.size(); ++i)
-    if (m_refConds[i]->getName() == refCondName)
-      refCond = m_refConds[i];
+  for (const auto &m_refCond : m_refConds)
+    if (m_refCond->getName() == refCondName)
+      refCond = m_refCond;
 
   HKLGenerator gen(orientedLattice, dMin);
   auto filter =

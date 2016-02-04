@@ -212,10 +212,7 @@ std::string BoxController::getFilename() const {
 /** the function left for compartibility with the previous bc python interface.
 @return true if the workspace is file based and false otherwise */
 bool BoxController::useWriteBuffer() const {
-  if (m_fileIO)
-    return true;
-  else
-    return false;
+  return static_cast<bool>(m_fileIO);
 }
 
 //------------------------------------------------------------------------------------------------------
