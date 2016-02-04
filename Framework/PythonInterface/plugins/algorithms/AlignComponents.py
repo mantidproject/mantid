@@ -4,7 +4,8 @@ import numpy as np
 from scipy.stats import chisquare
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, \
     ITableWorkspaceProperty, FileAction, FileProperty, WorkspaceProperty, InstrumentValidator, Progress
-from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, logger, Quat, V3D, StringArrayProperty, StringListValidator
+from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, \
+    logger, Quat, V3D, StringArrayProperty, StringListValidator
 import mantid.simpleapi as api
 
 class AlignComponents(PythonAlgorithm):
@@ -56,7 +57,7 @@ class AlignComponents(PythonAlgorithm):
                                           extensions=[".xml"]),
                              doc="Instrument filename")
 
-        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
+        self.declareProperty(WorkspaceProperty("Workspace", "",
                                                validator=InstrumentValidator(),
                                                optional=PropertyMode.Optional,
                                                direction=Direction.Input),
@@ -200,12 +201,12 @@ class AlignComponents(PythonAlgorithm):
             issues['MaskWorkspace'] = "MaskWorkspace must be empty or of type \"MaskWorkspace\""
 
         # Need to get instrument in order to check components are valid
-        if self.getProperty("InputWorkspace").value is not None:
-            wks_name = self.getProperty("InputWorkspace").value.getName()
+        if self.getProperty("Workspace").value is not None:
+            wks_name = self.getProperty("Workspace").value.getName()
         else:
             inputFilename = self.getProperty("InstrumentFilename").value
             if inputFilename == "":
-                issues["InputWorkspace"] = "A InputWorkspace or InstrumentFilename must be defined"
+                issues["Workspace"] = "A Workspace or InstrumentFilename must be defined"
                 return issues
             else:
                 api.LoadEmptyInstrument(Filename=inputFilename,
@@ -248,8 +249,8 @@ class AlignComponents(PythonAlgorithm):
 
         detID = calWS.column('detid')
 
-        if self.getProperty("InputWorkspace").value is not None:
-            wks_name = self.getProperty("InputWorkspace").value.getName()
+        if self.getProperty("Workspace").value is not None:
+            wks_name = self.getProperty("Workspace").value.getName()
         else:
             wks_name = "alignedWorkspace"
             wks = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,

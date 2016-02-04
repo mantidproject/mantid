@@ -42,7 +42,7 @@ class AlignComponentsTest(unittest.TestCase):
         startPos = ws.getInstrument().getComponentByName(component).getPos()
         startRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles()
         AlignComponents(CalibrationTable="calTable",
-                        InputWorkspace="testWS",
+                        Workspace="testWS",
                         ComponentList=component,
                         Xposition=True,
                         Yposition=True)
@@ -97,7 +97,7 @@ class AlignComponentsTest(unittest.TestCase):
         startPos = ws.getInstrument().getComponentByName(component).getPos()
         startRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles("YZX") #YZX
         AlignComponents(CalibrationTable="calTable",
-                        InputWorkspace="testWS",
+                        Workspace="testWS",
                         ComponentList=component,
                         alphaRotation=True)
         ws = mtd["testWS"]
