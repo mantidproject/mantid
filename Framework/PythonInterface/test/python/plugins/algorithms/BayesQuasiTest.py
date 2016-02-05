@@ -192,7 +192,7 @@ if platform.system() == "Windows":
             # Test values of probability
             prob_y = probability.dataY(0)
             self.assertEquals(round(probability.dataY(0)[0], 1), -66251.4)
-            self.assertEquals(round(probability.dataY(1)[0], 3), -378.749)
+            self.assertEquals(round(probability.dataY(1)[0], 3), -378.751)
             self.assertEquals(round(probability.dataY(2)[0], 6), 0.000000)
 
             # Test values of group
