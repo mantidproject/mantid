@@ -292,9 +292,9 @@ void CalculateCoverageDGS::exec() {
   std::vector<double> Q1Basis = getProperty("Q1Basis");
   std::vector<double> Q2Basis = getProperty("Q2Basis");
   std::vector<double> Q3Basis = getProperty("Q3Basis");
-  W.setRow(0, Q1Basis);
-  W.setRow(1, Q2Basis);
-  W.setRow(2, Q3Basis);
+  W.setColumn(0, Q1Basis);
+  W.setColumn(1, Q2Basis);
+  W.setColumn(2, Q3Basis);
 
   m_rubw = gon * UB * W * (2.0 * M_PI);
 
