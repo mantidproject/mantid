@@ -1,5 +1,5 @@
 digraph FocusAndSum {
-  labe="FocusAndSum Flowchart"
+  label="SNSPowderReduction Focus And Sum Flowchart"
   $global_style
 
   subgraph params {
@@ -17,16 +17,19 @@ digraph FocusAndSum {
     split [label="SplitEvents v1"]
     mergeWorkspace [label="Merge chunked workspaces"]
     gatherWorkspace [label="Gather workspaces MPI"]
-    compressEvents [label="CompressEvents v1"]
     normaliseByCurrent [label="NormaliseByCurrent v1"]
   }
 
   subgraph decisions{
     $decision_style
-    haveMPI [label="Have MPI?"]
-    isSum [label="Is Sum True?"]
     isLastRunNumber [label="Is Last Run Number?"]
   }
+  
+  subgraph values {
+    $value_style
+    RunNumber [label="Run Number"]
+  }
+
 
   RunNumberList	      -> getRunNumber
   getRunNumber	      -> RunNumber
@@ -36,10 +39,12 @@ digraph FocusAndSum {
   alignAndFocusPowder -> mergeWorkspace
   mergeWorkspace      -> gatherWorkspace
   gatherWorkspace     -> normaliseByCurrent
-  normaliseByCurrent  -> isLastRunNumber
+  normaliseByCurrent  -> plus
+  plus                -> isLastRunNumber
+
 
   isLastRunNumber     -> OutputWorkspace [label="Yes"]
-
   isLastRunNumber     -> getRunNumber [label="No"]
 
 }
+
