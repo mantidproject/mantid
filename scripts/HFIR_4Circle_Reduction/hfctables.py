@@ -544,7 +544,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
     """
     Table_Setup = [('Scan', 'int'),
                    ('Max Counts Pt', 'int'),
-                   ('Max Counts', 'int'),
+                   ('Max Counts', 'double'),
                    ('H', 'float'),
                    ('K', 'float'),
                    ('L', 'float'),
@@ -555,11 +555,31 @@ class ScanSurveyTable(tableBase.NTableWidget):
         :param parent:
         """
         tableBase.NTableWidget.__init__(self, parent)
+        self.set_status_column_name('Selected')
 
         self._myScanInfoDict = dict()
         self._myScanList = list()
 
         return
+
+    def get_selected_run_surveyed(self):
+        """
+
+        :return:
+        """
+        # TODO/NOW/1st: documents + check
+
+        row_index_list = self.get_selected_rows(True)
+        assert len(row_index_list) > 0
+
+        row_index = row_index_list[0]
+        scan_number = self.get_cell_value(row_index, 0)
+        pt_number = self.get_cell_value(row_index, 1)
+
+        # clear selection
+        # TODO/NOW/1st - Implement!
+
+        return scan_number, pt_number
 
     def show_reflections(self, num_rows):
         """

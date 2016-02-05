@@ -28,6 +28,8 @@ class NTableWidget(QtGui.QTableWidget):
         self._myHeaderList = None
         self._myColumnTypeList = None
 
+        self._statusColName = 'Status'
+
         return
 
     def append_row(self, row_value_list, type_list=None):
@@ -86,6 +88,8 @@ class NTableWidget(QtGui.QTableWidget):
 
         :return: list of row numbers that are selected
         """
+        # TODO/NOW/1st: documentation + check requirements!
+
         rows_list = list()
         index_status = self._myColumnTypeList.index('checkbox')
 
@@ -97,7 +101,7 @@ class NTableWidget(QtGui.QTableWidget):
                 continue
             # exclude non-matched
             if status is not None:
-                j_status = self._myHeaderList.index('Status')
+                j_status = self._myHeaderList.index(self._statusColName)
                 this_status = self.get_cell_value(i_row, j_status)
                 if this_status != status:
                     continue
@@ -226,6 +230,18 @@ class NTableWidget(QtGui.QTableWidget):
             # centers it within the table column :-)
             self.setCellWidget(row, col, checkbox)
         # END-IF-ELSE
+
+        return
+
+    def set_status_column_name(self, name):
+        """
+
+        :param name:
+        :return:
+        """
+        # TODO/NOW/1st: doc + check
+
+        self._statusColName = name
 
         return
 

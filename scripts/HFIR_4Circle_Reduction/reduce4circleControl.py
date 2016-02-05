@@ -886,7 +886,20 @@ class CWSCDReductionControl(object):
         :param csv_file_name:
         :return:
         """
-        # TODO/NOW/1st - Implement!
+        # TODO/NOW/1st - documentation + requirements test
+
+        # open file
+        with open(csv_file_name, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter=',', quotechar='|')
+            header = reader.next()
+            for row in reader:
+                # ignore the first line as title
+                print row, type(row)
+
+                # ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L'] <type 'list'>
+                # ['32.0', '305', '35', '-0.1318', '-0.0102', '12.9921'] <type 'list'>
+                # ...
+                # ['24.0', '(306, 20, -0.142, -0.0109, 13.9916)', '(308, 33, -0.1623, -0.0125, 15.9903)'] <type 'list'>
 
         return
 

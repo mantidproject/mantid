@@ -80,6 +80,9 @@ class MainWindow(QtGui.QMainWindow):
                      self.show_scan_pt_list)
         self.connect(self.ui.pushButton_usePt4UB, QtCore.SIGNAL('clicked()'),
                      self.do_add_peak_to_find)
+        # TODO/NOW/1st: enable
+        #self.connect(self.ui.pushButton_addPeakNoIndex, QtCore.SIGNAL('clicked()'),
+        #             self.do_add_peak_no_index)
 
         # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
@@ -98,6 +101,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_clear_ub_peaks)
         self.connect(self.ui.pushButton_resetPeakHKLs, QtCore.SIGNAL('clicked()'),
                      self.do_reset_ub_peaks_hkl)
+        self.connect(self.ui.pushButton_selectAllPeaks, QtCore.SIGNAL('clicked()'),
+                     self.do_select_all_peaks)
 
         self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub)
@@ -129,13 +134,14 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_find_peaks_integrate)
 
         # Tab survey
-        # TODO/NOW/1st!
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
                      self.do_survey)
         self.connect(self.ui.pushButton_saveSurvey, QtCore.SIGNAL('clicked()'),
                      self.do_save_survey)
         self.connect(self.ui.pushButton_loadSurvey, QtCore.SIGNAL('clicked()'),
                      self.do_load_survey)
+        self.connect(self.ui.pushButton_viewSurveyPeak, QtCore.SIGNAL('clicked()'),
+                     self.do_view_survey_peak)
 
         # Menu
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
@@ -145,8 +151,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.save_current_session)
         self.connect(self.ui.actionLoad_Session, QtCore.SIGNAL('triggered()'),
                      self.load_session)
-
-        # Event handling for tab 'refine ub matrix'
 
         # Validator ... (NEXT)
 
@@ -165,6 +169,7 @@ class MainWindow(QtGui.QMainWindow):
         self._init_table_widgets()
         self.ui.radioButton_ubFromTab1.setChecked(True)
         self.ui.lineEdit_numSurveyOutput.setText('50')
+        self.ui.checkBox_loadHKLfromFile.setChecked(True)
 
         # Tab 'Access'
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
@@ -172,7 +177,23 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_localSpiceDir.setEnabled(True)
         self.ui.pushButton_browseLocalDataDir.setEnabled(True)
 
+        # QSettings
+        # TODO/NOW/1st: call load_settings()
+        settings = QtCore.QSettings()
+        spice_dir = settings.value('local_spice_dir', '')
+        self.ui.lineEdit_localSpiceDir.setText(spice_dir)
+        # self._save_directory = settings.value("saved_text", '')
+
         return
+
+    def closeEvent(self, QCloseEvent):
+        """
+
+        :param QCloseEvent:
+        :return:
+        """
+        print 'I am called!'
+        self.menu_quit()
 
     def _init_table_widgets(self):
         """ Initialize the table widgets
@@ -289,6 +310,10 @@ class MainWindow(QtGui.QMainWindow):
 
         :return:
         """
+        # TODO/NOW/1st
+        # call mantid.FindUBUsingIndexedPeaks()
+        # refer to Calculate UB matrix to build PeakWorkspace
+
         raise RuntimeError('Next Release')
 
     def change_data_access_mode(self):
@@ -709,7 +734,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def do_plot_pt_raw(self):
         """ Plot the Pt.
         """
@@ -727,6 +751,12 @@ class MainWindow(QtGui.QMainWindow):
 
         # Call to plot 2D
         self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
+
+        # Information
+        info = '%-10s: %d\n%-10s: %d\n%-10s: %d\n' % ('Exp', exp_no,
+                                                      'Scan', scan_no,
+                                                      'Pt', pt_no)
+        self.ui.plainTextEdit_rawDataInformation.setPlainText(info)
 
         return
 
@@ -903,6 +933,15 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_select_all_peaks(self):
+        """
+        Purpose: select all peaks in table tableWidget_peaksCalUB
+        :return:
+        """
+        # TODO/NOW/1st:
+
+        return
+
     def do_set_experiment(self):
         """ Set experiment
         :return:
@@ -1066,6 +1105,27 @@ class MainWindow(QtGui.QMainWindow):
 
         return url_is_good
 
+    def do_view_survey_peak(self):
+        """ View survey peak
+
+        :return:
+        """
+        # TODO/NOW/1st: documents + requirements check
+
+        # get values
+        try:
+            scan_num, pt_num = self.ui.tableWidget_surveyTable.get_selected_run_surveyed()
+        except RuntimeError, err:
+            self.pop_one_button_dialog(str(err))
+            return
+
+        # switch tab
+        self.ui.tabWidget.setCurrentIndex(1)
+        self.ui.lineEdit_run.setText(str(scan_num))
+        self.ui.lineEdit_rawDataPtNo.setText(str(pt_num))
+
+        return
+
     def pop_one_button_dialog(self, message):
         """ Pop up a one-button dialog
         :param message:
@@ -1152,6 +1212,7 @@ class MainWindow(QtGui.QMainWindow):
 
         :return:
         """
+        self.save_settings()
         self.close()
 
     def show_scan_pt_list(self):
@@ -1209,6 +1270,36 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(err_msg)
 
         return
+
+    def save_settings(self):
+        """
+
+        :return:
+        """
+        # TODO/NOW/1st - Documents + Finish
+
+        local_spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
+
+        settings = QtCore.QSettings()
+
+        settings.setValue("local_spice_dir", local_spice_dir)
+
+        """ Candidates
+        lineEdit_workDir, lineEdit_a, lineEdit_alpha, ..., lineEdit_exp,
+
+
+        """
+
+        return
+
+    def load_settings(self):
+        """
+
+        :return:
+        """
+        print 'I am called!'
+        # settings = QtCore.QSettings()
+        # self.ui.textEdit.setText(settings.value("saved_text"))
 
     def _get_lattice_parameters(self):
         """
