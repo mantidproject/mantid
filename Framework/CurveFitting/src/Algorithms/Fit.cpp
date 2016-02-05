@@ -29,6 +29,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -120,6 +121,7 @@ void Fit::initConcrete() {
   declareProperty("SurfaceScaling", 0.0, "Scaling factor.");
   declareProperty("SurfaceStart", 0, "Starting index.");
   declareProperty("SurfaceEnd", 0, "Ending index.");
+  declareProperty(new Kernel::ArrayProperty<double>("SurfaceParams"));
 }
 
 /// Read in the properties specific to Fit.
@@ -451,7 +453,18 @@ void Fit::outputSurface() {
       i1 = m_points.size() - 1;
     }
     const GSLVector& p0 = m_points[i0];
-    const GSLVector& p1 = m_points[i1];
+    GSLVector p1 = m_points[i1];
+
+    std::vector<double> finalParams = getProperty("SurfaceParams");
+    if (!finalParams.empty()) {
+      if (p1.size() != finalParams.size()) {
+        std::cerr << "Wrong vector size of SurfaceParams" << std::endl;
+      }
+      for(size_t i = 0; i < p1.size(); ++i) {
+        p1[i] = finalParams[i];
+      }
+    }
+
     auto funCopy = m_function->clone();
 
     std::cerr << m_points.size() << " iterations" << std::endl;

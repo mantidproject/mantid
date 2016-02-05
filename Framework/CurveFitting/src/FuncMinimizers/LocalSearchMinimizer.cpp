@@ -514,6 +514,7 @@ OptionalParameters iterationSingularHessian(API::ICostFunction &function,
       badSpace.push_back(V.copyColumn(i));
 
       double maxCorr = 0.0;
+      size_t jMaxCorr = i;
       for(size_t j = 0; j < e.size(); ++j) {
         if (i == j) continue;
         double corr = 1e100;
@@ -522,11 +523,15 @@ OptionalParameters iterationSingularHessian(API::ICostFunction &function,
           corr = fabs(hessian.get(i,j) / denominator);
         }
         if (corr > maxCorr) {
-          maxCorr = corr;
+          double r = fabs(hessian.get(i,i) / hessian.get(j,j));
+          if (r <= 1e-5) {
+            maxCorr = corr;
+            jMaxCorr = j;
+          }
         }
       }
       maxCorr /= hessian.get(i,i);
-      std::cerr << "Correlation " << i << ' ' << maxCorr << std::endl;
+      std::cerr << "Correlation " << i << ' ' << maxCorr << ' ' << jMaxCorr<< std::endl;
       if (maxCorr > 0.1) {
         isHessianSingular = true;
       }
