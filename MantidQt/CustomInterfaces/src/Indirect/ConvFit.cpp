@@ -1532,11 +1532,13 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   if (m_previousFit.compare("One Lorentzian") == 0 &&
       currentFitFunction.compare("Two Lorentzians") == 0) {
     const double amplitude =
-        m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
+        m_dblManager->value(m_properties["One Lorentzian.Amplitude"]);
     const double peakCentre =
-        m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
-    const double fwhm = m_dblManager->value(m_properties["Lorentzian 1.FWHM"]);
-    addLorentzianFitToDeafultQMap(m_defaultParams, amplitude, peakCentre, fwhm);
+        m_dblManager->value(m_properties["One Lorentzian.PeakCentre"]);
+    const double fwhm =
+        m_dblManager->value(m_properties["One Lorentzian.FWHM"]);
+    m_defaultParams = addLorentzianFitToDeafultQMap(m_defaultParams, amplitude,
+                                                    peakCentre, fwhm);
   }
 
   // Remove previous parameters from tree
@@ -1698,13 +1700,14 @@ ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
   if (fitFunction.compare("Two Lorentzians") == 0) {
     fitFuncName = "Lorentzian 1";
     for (auto param = parameters.begin(); param != parameters.end(); ++param) {
-      QString fullPropName = fitFuncName + "." + QString(*param);
+	  const QString qStrParam = QString(*param);
+      QString fullPropName = fitFuncName + "." + qStrParam;
       if (fullMap.contains(fullPropName)) {
-        fullPropName = "Lorentzian 2." + QString(*param);
+        fullPropName = "Lorentzian 2." + qStrParam;
         fullMap.insert(fullPropName, 0);
       } else {
-        if (defaultMap.contains(QString(*param))) {
-          fullMap.insert(fullPropName, defaultMap[*param]);
+        if (defaultMap.contains(qStrParam)) {
+          fullMap.insert(fullPropName, defaultMap[qStrParam]);
         } else {
           fullMap.insert(fullPropName, 0);
         }
@@ -1712,7 +1715,7 @@ ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
     }
   } else {     // All Other fit functions
     for (auto param = parameters.begin(); param != parameters.end(); ++param) {
-      QString fullPropName = fitFuncName + "." + QString(*param);
+      const QString fullPropName = fitFuncName + "." + QString(*param);
       if (defaultMap.contains(QString(*param))) {
         fullMap.insert(fullPropName, defaultMap[*param]);
       } else {
