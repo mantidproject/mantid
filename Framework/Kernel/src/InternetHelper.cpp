@@ -54,8 +54,8 @@ Logger g_log("InternetHelper");
 InternetHelper::InternetHelper()
     : m_proxyInfo(), m_isProxySet(false), m_timeout(30), m_isTimeoutSet(false),
       m_contentLength(0), m_method(HTTPRequest::HTTP_GET),
-      m_contentType("application/json"), m_body(), m_headers(), m_request(NULL),
-      m_response(NULL) {}
+      m_contentType("application/json"), m_body(), m_headers(),
+      m_request(nullptr), m_response(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -64,16 +64,16 @@ InternetHelper::InternetHelper(const Kernel::ProxyInfo &proxy)
     : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30),
       m_isTimeoutSet(false), m_contentLength(0),
       m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
-      m_body(), m_headers(), m_request(NULL), m_response(NULL) {}
+      m_body(), m_headers(), m_request(nullptr), m_response(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
 InternetHelper::~InternetHelper() {
-  if (m_request != NULL) {
+  if (m_request != nullptr) {
     delete m_request;
   }
-  if (m_response != NULL) {
+  if (m_response != nullptr) {
     delete m_response;
   }
 }
@@ -88,10 +88,10 @@ void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
 }
 
 void InternetHelper::createRequest(Poco::URI &uri) {
-  if (m_request != NULL) {
+  if (m_request != nullptr) {
     delete m_request;
   }
-  if (m_response != NULL) {
+  if (m_response != nullptr) {
     delete m_response;
   }
 
@@ -108,9 +108,8 @@ void InternetHelper::createRequest(Poco::URI &uri) {
     m_request->setContentLength(m_contentLength);
   }
 
-  for (auto itHeaders = m_headers.begin(); itHeaders != m_headers.end();
-       ++itHeaders) {
-    m_request->set(itHeaders->first, itHeaders->second);
+  for (auto &header : m_headers) {
+    m_request->set(header.first, header.second);
   }
 
   if (m_method == "POST") {
@@ -248,7 +247,8 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
     // Create a singleton for holding the default context.
     // e.g. any future requests to publish are made to this certificate and
     // context.
-    SSLManager::instance().initializeClient(NULL, certificateHandler, context);
+    SSLManager::instance().initializeClient(nullptr, certificateHandler,
+                                            context);
     // Create the session
     HTTPSClientSession session(uri.getHost(),
                                static_cast<Poco::UInt16>(uri.getPort()));
@@ -529,7 +529,7 @@ void InternetHelper::setBody(const std::ostringstream &body) {
 void InternetHelper::setBody(Poco::Net::HTMLForm &form) {
 
   setMethod("POST");
-  if (m_request == NULL) {
+  if (m_request == nullptr) {
     Poco::URI uri("http://www.mantidproject.org");
     createRequest(uri);
   }
@@ -602,7 +602,7 @@ void InternetHelper::reset() {
   m_body = "";
   m_method = HTTPRequest::HTTP_GET;
   m_contentType = "application/json";
-  m_request = NULL;
+  m_request = nullptr;
 }
 
 } // namespace Kernel

@@ -179,7 +179,7 @@ void SLSQPMinimizer::initializeConstraints(const DblMatrix &equality,
 
   size_t constrCounter(0);
   while (constrCounter < totalNumConstr) {
-    const DblMatrix *constrMatrix(NULL);
+    const DblMatrix *constrMatrix(nullptr);
     if (constrCounter < numEqualityConstraints())
       constrMatrix = &equality;
     else

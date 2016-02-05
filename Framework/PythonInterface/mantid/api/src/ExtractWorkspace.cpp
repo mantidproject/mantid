@@ -37,7 +37,7 @@ ExtractWorkspace::ExtractWorkspace(const boost::python::api::object &pyvalue)
  * Check whether the extract can pull out the workspace type
  * @return True if it can be converted, false otherwise
  */
-bool ExtractWorkspace::check() const { return m_value.get() != NULL; }
+bool ExtractWorkspace::check() const { return m_value.get() != nullptr; }
 
 /**
  * @return The extracted shared_ptr or throws std::invalid_argument

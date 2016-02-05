@@ -100,26 +100,26 @@ void OptimizeLatticeForCellType::exec() {
     const std::vector<Peak> &peaks_all = ws->getPeaks();
     int run = 0;
     int count = 0;
-    for (size_t i = 0; i < peaks_all.size(); i++) {
-      if (peaks_all[i].getRunNumber() != run) {
+    for (const auto &peak : peaks_all) {
+      if (peak.getRunNumber() != run) {
         count++; // first entry in runWS is input workspace
-        DataObjects::PeaksWorkspace_sptr cloneWS(new PeaksWorkspace());
+        auto cloneWS = boost::make_shared<PeaksWorkspace>();
         cloneWS->setInstrument(ws->getInstrument());
         cloneWS->copyExperimentInfoFrom(ws.get());
         runWS.push_back(cloneWS);
-        runWS[count]->addPeak(peaks_all[i]);
-        run = peaks_all[i].getRunNumber();
+        runWS[count]->addPeak(peak);
+        run = peak.getRunNumber();
         AnalysisDataService::Instance().addOrReplace(
             boost::lexical_cast<std::string>(run) + ws->getName(),
             runWS[count]);
       } else {
-        runWS[count]->addPeak(peaks_all[i]);
+        runWS[count]->addPeak(peak);
       }
     }
   }
   // finally do the optimization
-  for (size_t i_run = 0; i_run < runWS.size(); i_run++) {
-    DataObjects::PeaksWorkspace_sptr peakWS(runWS[i_run]->clone().release());
+  for (auto &i_run : runWS) {
+    DataObjects::PeaksWorkspace_sptr peakWS(i_run->clone().release());
     AnalysisDataService::Instance().addOrReplace("_peaks", peakWS);
     const DblMatrix UB = peakWS->sample().getOrientedLattice().getUB();
     std::vector<double> lat(6);
@@ -174,16 +174,16 @@ void OptimizeLatticeForCellType::exec() {
                        refinedCell.errorbeta(), refinedCell.errorgamma());
 
     // Show the modified lattice parameters
-    g_log.notice() << runWS[i_run]->getName() << "  " << o_lattice << "\n";
+    g_log.notice() << i_run->getName() << "  " << o_lattice << "\n";
 
-    runWS[i_run]->mutableSample().setOrientedLattice(&o_lattice);
+    i_run->mutableSample().setOrientedLattice(&o_lattice);
 
     setProperty("OutputChi2", chisq);
 
     if (apply) {
       // Reindex peaks with new UB
       Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
-      alg->setPropertyValue("PeaksWorkspace", runWS[i_run]->getName());
+      alg->setPropertyValue("PeaksWorkspace", i_run->getName());
       alg->setProperty("Tolerance", tolerance);
       alg->executeAsChildAlg();
     }
@@ -195,25 +195,23 @@ void OptimizeLatticeForCellType::exec() {
       // Save Peaks
       Mantid::API::IAlgorithm_sptr savePks_alg =
           createChildAlgorithm("SaveIsawPeaks");
-      savePks_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-      savePks_alg->setProperty("Filename", outputdir + "ls" +
-                                               runWS[i_run]->getName() +
+      savePks_alg->setPropertyValue("InputWorkspace", i_run->getName());
+      savePks_alg->setProperty("Filename", outputdir + "ls" + i_run->getName() +
                                                ".integrate");
       savePks_alg->executeAsChildAlg();
       g_log.notice() << "See output file: "
-                     << outputdir + "ls" + runWS[i_run]->getName() +
-                            ".integrate"
+                     << outputdir + "ls" + i_run->getName() + ".integrate"
                      << "\n";
       // Save UB
       Mantid::API::IAlgorithm_sptr saveUB_alg =
           createChildAlgorithm("SaveIsawUB");
-      saveUB_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-      saveUB_alg->setProperty("Filename", outputdir + "ls" +
-                                              runWS[i_run]->getName() + ".mat");
+      saveUB_alg->setPropertyValue("InputWorkspace", i_run->getName());
+      saveUB_alg->setProperty("Filename",
+                              outputdir + "ls" + i_run->getName() + ".mat");
       saveUB_alg->executeAsChildAlg();
       // Show the names of files written
       g_log.notice() << "See output file: "
-                     << outputdir + "ls" + runWS[i_run]->getName() + ".mat"
+                     << outputdir + "ls" + i_run->getName() + ".mat"
                      << "\n";
     }
   }
@@ -262,11 +260,8 @@ bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
-    if (col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
-        row >= (RDet->ypixels() - Edge))
-      return true;
-    else
-      return false;
+    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
+           row >= (RDet->ypixels() - Edge);
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -288,11 +283,8 @@ bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
     int NROWS = static_cast<int>(grandchildren.size());
     int NCOLS = static_cast<int>(children.size());
     // Wish pixels and tubes start at 1 not 0
-    if (col - startI < Edge || col - startI >= (NCOLS - Edge) ||
-        row - startI < Edge || row - startI >= (NROWS - Edge))
-      return true;
-    else
-      return false;
+    return col - startI < Edge || col - startI >= (NCOLS - Edge) ||
+           row - startI < Edge || row - startI >= (NROWS - Edge);
   }
   return false;
 }

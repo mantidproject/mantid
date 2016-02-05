@@ -63,7 +63,7 @@ void ProcessDasNexusLog::exec() {
 
   // 2. Check Input
   // 1. Get log
-  Kernel::Property *log(NULL);
+  Kernel::Property *log(nullptr);
   try {
     log = inWS->run().getProperty(inlogname);
   } catch (Exception::NotFoundError &) {
@@ -177,8 +177,8 @@ void ProcessDasNexusLog::addLog(API::MatrixWorkspace_sptr ws,
 
   // 2. Add log
   auto newlog = new Kernel::TimeSeriesProperty<double>(logname);
-  for (size_t i = 0; i < timevec.size(); i++) {
-    newlog->addValue(timevec[i], unifylogvalue);
+  for (auto &time : timevec) {
+    newlog->addValue(time, unifylogvalue);
   }
   ws->mutableRun().addProperty(newlog, true);
 
@@ -402,11 +402,11 @@ void ProcessDasNexusLog::convertToAbsoluteTime(
     if (tnow > prevtime) {
       // (a) Process previous logs
       std::sort(tofs.begin(), tofs.end());
-      for (size_t j = 0; j < tofs.size(); j++) {
+      for (double tof : tofs) {
         Kernel::DateAndTime temptime =
-            prevtime + static_cast<int64_t>(tofs[j] * 100);
+            prevtime + static_cast<int64_t>(tof * 100);
         abstimevec.push_back(temptime);
-        orderedtofs.push_back(tofs[j]);
+        orderedtofs.push_back(tof);
       }
       // (b) Clear
       tofs.clear();
@@ -422,11 +422,10 @@ void ProcessDasNexusLog::convertToAbsoluteTime(
   if (!tofs.empty()) {
     // (a) Process previous logs: note value is in unit of 100 nano-second
     std::sort(tofs.begin(), tofs.end());
-    for (size_t j = 0; j < tofs.size(); j++) {
-      Kernel::DateAndTime temptime =
-          prevtime + static_cast<int64_t>(tofs[j] * 100);
+    for (double tof : tofs) {
+      Kernel::DateAndTime temptime = prevtime + static_cast<int64_t>(tof * 100);
       abstimevec.push_back(temptime);
-      orderedtofs.push_back(tofs[j]);
+      orderedtofs.push_back(tof);
     }
   } else {
     throw std::runtime_error("Impossible for this to happen!");
@@ -467,11 +466,11 @@ void ProcessDasNexusLog::writeLogtoFile(API::MatrixWorkspace_sptr ws,
     if (tnow > prevtime) {
       // (a) Process previous logs
       std::sort(tofs.begin(), tofs.end());
-      for (size_t j = 0; j < tofs.size(); j++) {
+      for (double tof : tofs) {
         Kernel::DateAndTime temptime =
-            prevtime + static_cast<int64_t>(tofs[j] * 100);
+            prevtime + static_cast<int64_t>(tof * 100);
         ofs << temptime.totalNanoseconds() << "\t" << tnow.totalNanoseconds()
-            << "\t" << tofs[j] * 0.1 << std::endl;
+            << "\t" << tof * 0.1 << std::endl;
       }
       // (b) Clear
       tofs.clear();
@@ -486,11 +485,10 @@ void ProcessDasNexusLog::writeLogtoFile(API::MatrixWorkspace_sptr ws,
   if (!tofs.empty()) {
     // (a) Process previous logs: note value is in unit of 100 nano-second
     std::sort(tofs.begin(), tofs.end());
-    for (size_t j = 0; j < tofs.size(); j++) {
-      Kernel::DateAndTime temptime =
-          prevtime + static_cast<int64_t>(tofs[j] * 100);
+    for (double tof : tofs) {
+      Kernel::DateAndTime temptime = prevtime + static_cast<int64_t>(tof * 100);
       ofs << temptime.totalNanoseconds() << "\t" << prevtime.totalNanoseconds()
-          << "\t" << tofs[j] * 0.1 << std::endl;
+          << "\t" << tof * 0.1 << std::endl;
     }
   } else {
     throw std::runtime_error("Impossible for this to happen!");

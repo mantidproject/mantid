@@ -123,7 +123,7 @@ bool compareEventPulseTimeTOF(const TofEvent &e1, const TofEvent &e2) {
 
 /// Constructor (empty)
 EventList::EventList()
-    : eventType(TOF), order(UNSORTED), mru(NULL), m_lockedMRU(false) {}
+    : eventType(TOF), order(UNSORTED), mru(nullptr), m_lockedMRU(false) {}
 
 /** Constructor with a MRU list
  * @param mru :: pointer to the MRU of the parent EventWorkspace
@@ -144,7 +144,7 @@ EventList::EventList(const EventList &rhs)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of TofEvent's */
 EventList::EventList(const std::vector<TofEvent> &events)
-    : mru(NULL), m_lockedMRU(false) {
+    : mru(nullptr), m_lockedMRU(false) {
   this->events.assign(events.begin(), events.end());
   this->eventType = TOF;
   this->order = UNSORTED;
@@ -153,7 +153,7 @@ EventList::EventList(const std::vector<TofEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEvent's */
 EventList::EventList(const std::vector<WeightedEvent> &events)
-    : mru(NULL), m_lockedMRU(false) {
+    : mru(nullptr), m_lockedMRU(false) {
   this->weightedEvents.assign(events.begin(), events.end());
   this->eventType = WEIGHTED;
   this->order = UNSORTED;
@@ -162,7 +162,7 @@ EventList::EventList(const std::vector<WeightedEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEventNoTime's */
 EventList::EventList(const std::vector<WeightedEventNoTime> &events)
-    : mru(NULL), m_lockedMRU(false) {
+    : mru(nullptr), m_lockedMRU(false) {
   this->weightedEventsNoTime.assign(events.begin(), events.end());
   this->eventType = WEIGHTED_NOTIME;
   this->order = UNSORTED;
@@ -353,8 +353,8 @@ EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
     // and append to the list
     this->weightedEventsNoTime.reserve(this->weightedEventsNoTime.size() +
                                        more_events.size());
-    for (auto it = more_events.begin(); it != more_events.end(); ++it)
-      this->weightedEventsNoTime.emplace_back(*it);
+    for (const auto &more_event : more_events)
+      this->weightedEventsNoTime.emplace_back(more_event);
     break;
   }
 
@@ -1542,7 +1542,7 @@ const MantidVec &EventList::constDataY() const {
   MantidVecWithMarker *yData;
   yData = mru->findY(thread, this->m_specNo);
 
-  if (yData == NULL) {
+  if (yData == nullptr) {
     // Create the MRU object
     yData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
 
@@ -1584,7 +1584,7 @@ const MantidVec &EventList::constDataE() const {
   MantidVecWithMarker *eData;
   eData = mru->findE(thread, this->m_specNo);
 
-  if (eData == NULL) {
+  if (eData == nullptr) {
     // Create the MRU object
     eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
 
@@ -2560,8 +2560,8 @@ void EventList::convertTofHelper(std::vector<T> &events,
 void EventList::convertTof(const double factor, const double offset) {
   // fix the histogram parameter
   MantidVec &x = this->refX.access();
-  for (auto iter = x.begin(); iter != x.end(); ++iter)
-    *iter = (*iter) * factor + offset;
+  for (double &iter : x)
+    iter = iter * factor + offset;
   // this->refX.access() = x;
 
   if ((factor < 0.) && (this->getSortType() == TOF_SORT))

@@ -42,7 +42,7 @@ void UnaryOperation::exec() {
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(in_work);
-  if ((eventW != NULL) && !(this->useHistogram)) {
+  if ((eventW != nullptr) && !(this->useHistogram)) {
     this->execEvent();
     return;
   }

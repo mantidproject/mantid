@@ -439,8 +439,8 @@ void ICat4Catalog::saveDataSets(std::vector<xsd__anyType *> response,
   }
 
   std::string emptyCell = "";
-  for (auto iter = response.begin(); iter != response.end(); ++iter) {
-    ns1__dataset *dataset = dynamic_cast<ns1__dataset *>(*iter);
+  for (auto &iter : response) {
+    ns1__dataset *dataset = dynamic_cast<ns1__dataset *>(iter);
     if (dataset) {
       API::TableRow table = outputws->appendRow();
 
@@ -545,8 +545,8 @@ void ICat4Catalog::listInstruments(std::vector<std::string> &instruments) {
   auto searchResults =
       performSearch(icat, "Instrument.fullName ORDER BY fullName");
 
-  for (unsigned i = 0; i < searchResults.size(); ++i) {
-    auto instrument = dynamic_cast<xsd__string *>(searchResults.at(i));
+  for (auto &searchResult : searchResults) {
+    auto instrument = dynamic_cast<xsd__string *>(searchResult);
     if (instrument)
       instruments.push_back(instrument->__item);
   }
@@ -564,8 +564,8 @@ void ICat4Catalog::listInvestigationTypes(
   auto searchResults =
       performSearch(icat, "InvestigationType.name ORDER BY name");
 
-  for (size_t i = 0; i < searchResults.size(); ++i) {
-    auto investigationType = dynamic_cast<xsd__string *>(searchResults.at(i));
+  for (auto &searchResult : searchResults) {
+    auto investigationType = dynamic_cast<xsd__string *>(searchResult);
     if (investigationType)
       invstTypes.push_back(investigationType->__item);
   }
@@ -713,12 +713,12 @@ void ICat4Catalog::keepAlive() {
 void ICat4Catalog::setSSLContext(ICATPortBindingProxy &icat) {
   if (soap_ssl_client_context(
           &icat, SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
-          NULL, /* keyfile: required only when client must authenticate to
+          nullptr, /* keyfile: required only when client must authenticate to
         server (see SSL docs on how to obtain this file) */
-          NULL, /* password to read the keyfile */
-          NULL, /* optional cacert file to store trusted certificates */
-          NULL, /* optional capath to directory with trusted certificates */
-          NULL  /* if randfile!=NULL: use a file with random data to seed
+          nullptr, /* password to read the keyfile */
+          nullptr, /* optional cacert file to store trusted certificates */
+          nullptr, /* optional capath to directory with trusted certificates */
+          nullptr  /* if randfile!=NULL: use a file with random data to seed
                    randomness */
           )) {
     throwErrorMessage(icat);
@@ -798,8 +798,8 @@ int64_t ICat4Catalog::getMantidDatasetId(const std::string &investigationID) {
       icat, "Dataset <-> Investigation[name = '" + investigationID + "']");
 
   int64_t datasetID = -1;
-  for (size_t i = 0; i < searchResults.size(); ++i) {
-    auto dataset = dynamic_cast<ns1__dataset *>(searchResults.at(i));
+  for (auto &searchResult : searchResults) {
+    auto dataset = dynamic_cast<ns1__dataset *>(searchResult);
     if (dataset && *(dataset->name) == "mantid")
       datasetID = *(dataset->id);
   }

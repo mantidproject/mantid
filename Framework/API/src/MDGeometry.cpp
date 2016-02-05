@@ -131,11 +131,17 @@ MDGeometry::getDimension(size_t index) const {
  */
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MDGeometry::getDimensionWithId(std::string id) const {
-  for (size_t i = 0; i < m_dimensions.size(); ++i)
-    if (m_dimensions[i]->getDimensionId() == id)
-      return m_dimensions[i];
-  throw std::invalid_argument("Dimension tagged " + id +
-                              " was not found in the Workspace");
+  auto dimension = std::find_if(
+      m_dimensions.begin(), m_dimensions.end(),
+      [&id](
+          const boost::shared_ptr<const Mantid::Geometry::IMDDimension> &dim) {
+        return dim->getDimensionId() == id;
+      });
+  if (dimension != m_dimensions.end())
+    return *dimension;
+  else
+    throw std::invalid_argument("Dimension tagged " + id +
+                                " was not found in the Workspace");
 }
 
 // --------------------------------------------------------------------------------------------
@@ -146,9 +152,7 @@ Mantid::Geometry::VecIMDDimension_const_sptr
 MDGeometry::getNonIntegratedDimensions() const {
   using namespace Mantid::Geometry;
   VecIMDDimension_const_sptr vecCollapsedDimensions;
-  for (auto it = this->m_dimensions.cbegin(); it != this->m_dimensions.cend();
-       ++it) {
-    IMDDimension_sptr current = (*it);
+  for (auto current : this->m_dimensions) {
     if (!current->getIsIntegrated()) {
       vecCollapsedDimensions.push_back(current);
     }
@@ -282,14 +286,11 @@ void MDGeometry::setBasisVector(size_t index, const Mantid::Kernel::VMD &vec) {
  * @return True ONLY if ALL the basis vectors have been normalized.
  */
 bool MDGeometry::allBasisNormalized() const {
-  bool allNormalized = true;
-  for (auto it = m_basisVectors.begin(); it != m_basisVectors.end(); ++it) {
-    if (it->length() != 1.0) {
-      allNormalized = false;
-      break;
-    }
-  }
-  return allNormalized;
+  auto normalized = std::find_if(m_basisVectors.begin(), m_basisVectors.end(),
+                                 [](const Mantid::Kernel::VMD &basisVector) {
+                                   return basisVector.length() != 1.0;
+                                 });
+  return normalized == m_basisVectors.end();
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -385,8 +386,8 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
   }
   // Clear the original workspace
   setOriginalWorkspace(boost::shared_ptr<Workspace>());
-  setTransformFromOriginal(NULL);
-  setTransformToOriginal(NULL);
+  setTransformFromOriginal(nullptr);
+  setTransformToOriginal(nullptr);
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -400,14 +401,13 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
  */
 void MDGeometry::deleteNotificationReceived(
     Mantid::API::WorkspacePreDeleteNotification_ptr notice) {
-  for (size_t i = 0; i < m_originalWorkspaces.size(); i++) {
-    Workspace_sptr original = m_originalWorkspaces[i];
+  for (auto &original : m_originalWorkspaces) {
     if (original) {
       // Compare the pointer being deleted to the one stored as the original.
       Workspace_sptr deleted = notice->object();
       if (original == deleted) {
         // Clear the reference
-        m_originalWorkspaces[i].reset();
+        original.reset();
       }
     }
   }

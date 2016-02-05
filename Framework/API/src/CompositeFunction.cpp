@@ -62,9 +62,8 @@ std::string CompositeFunction::asString() const {
       getAttribute("NumDeriv").asBool() == true) {
     ostr << "composite=" << name();
     std::vector<std::string> attr = this->getAttributeNames();
-    for (size_t i = 0; i < attr.size(); i++) {
-      std::string attName = attr[i];
-      std::string attValue = this->getAttribute(attr[i]).value();
+    for (const auto &attName : attr) {
+      std::string attValue = this->getAttribute(attName).value();
       if (!attValue.empty()) {
         ostr << ',' << attName << '=' << attValue;
       }
@@ -73,7 +72,8 @@ std::string CompositeFunction::asString() const {
   }
   for (size_t i = 0; i < nFunctions(); i++) {
     IFunction_sptr fun = getFunction(i);
-    bool isComp = boost::dynamic_pointer_cast<CompositeFunction>(fun) != 0;
+    bool isComp =
+        boost::dynamic_pointer_cast<CompositeFunction>(fun) != nullptr;
     if (isComp)
       ostr << '(';
     ostr << fun->asString();
@@ -369,9 +369,7 @@ void CompositeFunction::checkFunction() {
   std::vector<IFunction_sptr> functions(m_functions.begin(), m_functions.end());
   m_functions.clear();
 
-  for (std::vector<IFunction_sptr>::size_type i = 0; i < functions.size();
-       i++) {
-    IFunction_sptr f = functions[i];
+  for (auto &f : functions) {
     CompositeFunction_sptr cf =
         boost::dynamic_pointer_cast<CompositeFunction>(f);
     if (cf)

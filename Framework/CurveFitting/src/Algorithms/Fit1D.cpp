@@ -35,7 +35,7 @@ using API::Jacobian;
 class JacobianImpl : public Jacobian {
 public:
   /// Default constructor
-  JacobianImpl() : Jacobian(), m_J(NULL){};
+  JacobianImpl() : Jacobian(), m_J(nullptr){};
 
   /// The index map
   std::map<int, int> m_map;
@@ -329,7 +329,7 @@ void Fit1D::exec() {
 
   // check if derivative defined in derived class
   bool isDerivDefined = true;
-  gsl_matrix *M = NULL;
+  gsl_matrix *M = nullptr;
   try {
     const std::vector<double> inTest(m_parameterNames.size(), 1.0);
     std::vector<double> outTest(m_parameterNames.size());
@@ -505,7 +505,7 @@ void Fit1D::exec() {
   // set-up remaining GSL machinery for least squared
 
   const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
-  gsl_multifit_fdfsolver *s = NULL;
+  gsl_multifit_fdfsolver *s = nullptr;
   if (isDerivDefined) {
     s = gsl_multifit_fdfsolver_alloc(T, l_data.n, l_data.p);
     gsl_multifit_fdfsolver_set(s, &f, initFuncArg);
@@ -515,8 +515,8 @@ void Fit1D::exec() {
 
   const gsl_multimin_fminimizer_type *simplexType =
       gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *simplexMinimizer = NULL;
-  gsl_vector *simplexStepSize = NULL;
+  gsl_multimin_fminimizer *simplexMinimizer = nullptr;
+  gsl_vector *simplexStepSize = nullptr;
   if (!isDerivDefined) {
     simplexMinimizer = gsl_multimin_fminimizer_alloc(simplexType, l_data.p);
     simplexStepSize = gsl_vector_alloc(l_data.p);
@@ -603,7 +603,7 @@ void Fit1D::exec() {
   if (!output.empty()) {
     // calculate covariance matrix if derivatives available
 
-    gsl_matrix *covar(NULL);
+    gsl_matrix *covar(nullptr);
     std::vector<double> standardDeviations;
     std::vector<double> sdExtended;
     if (isDerivDefined) {
@@ -765,8 +765,8 @@ void Fit1D::exec() {
  *   @param fixed :: A list of comma separated names of the fixed parameters.
  */
 FitData::FitData(Fit1D *fit, const std::string &fixed)
-    : n(0), X(NULL), Y(NULL), sigmaData(NULL), fit1D(fit),
-      forSimplexLSwrap(NULL), parameters(NULL) {
+    : n(0), X(nullptr), Y(nullptr), sigmaData(nullptr), fit1D(fit),
+      forSimplexLSwrap(nullptr), parameters(nullptr) {
   typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
   boost::char_separator<char> sep(",");
   boost::tokenizer<boost::char_separator<char>> names(fixed, sep);

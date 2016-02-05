@@ -90,7 +90,7 @@ void CopySample::exec() {
   // get input sample
   IMDEventWorkspace_const_sptr inMDWS =
       boost::dynamic_pointer_cast<const IMDEventWorkspace>(inWS);
-  if (inMDWS != NULL) // it is an MD workspace
+  if (inMDWS != nullptr) // it is an MD workspace
   {
     int inputSampleNumber = getProperty("MDInputSampleNumber");
     if (inputSampleNumber < 0) {
@@ -127,7 +127,7 @@ void CopySample::exec() {
 
   IMDEventWorkspace_sptr outMDWS =
       boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
-  if (outMDWS != NULL) {
+  if (outMDWS != nullptr) {
     int outputSampleNumber = getProperty("MDOutputSampleNumber");
     if ((outputSampleNumber == EMPTY_INT()) ||
         (outputSampleNumber < 0)) // copy to all samples

@@ -145,13 +145,13 @@ Property *loadProperty(::NeXus::File *file, const std::string &group) {
     // Convert time in seconds to DateAndTime
     DateAndTime start(startStr);
     times.reserve(timeSec.size());
-    for (size_t i = 0; i < timeSec.size(); i++) {
-      times.push_back(start + timeSec[i]);
+    for (double time : timeSec) {
+      times.push_back(start + time);
     }
   }
 
   file->openData("value");
-  Property *retVal = NULL;
+  Property *retVal = nullptr;
   switch (file->getInfo().type) {
   case ::NeXus::FLOAT32:
     retVal = makeProperty<float>(file, group, times);
@@ -181,7 +181,7 @@ Property *loadProperty(::NeXus::File *file, const std::string &group) {
   case ::NeXus::INT8:
   case ::NeXus::INT16:
   case ::NeXus::UINT16:
-    retVal = NULL;
+    retVal = nullptr;
     break;
   }
 
@@ -286,9 +286,9 @@ void saveTimeSeriesPropertyString(::NeXus::File *file,
 
   // Find the max length of any string
   size_t maxlen = 0;
-  for (size_t i = 0; i < values.size(); i++)
-    if (values[i].size() > maxlen)
-      maxlen = values[i].size();
+  for (auto &value : values)
+    if (value.size() > maxlen)
+      maxlen = value.size();
   // Increment by 1 to have the 0 terminator
   maxlen++;
   // Copy into one array

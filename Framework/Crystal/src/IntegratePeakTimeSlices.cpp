@@ -127,8 +127,9 @@ IntegratePeakTimeSlices::IntegratePeakTimeSlices()
   // for (int i = 0; i < NAttributes; i++)
   //   m_AttributeValues[i] = 0;
 
-  for (int i = 0; i < NParameters; i++)
-    m_ParameterValues[i] = 0;
+  for (double &m_ParameterValue : m_ParameterValues)
+    m_ParameterValue = 0;
+  std::fill(m_ParameterValues.begin(), m_ParameterValues.end(), 0.0);
 }
 
 double SQRT(double v) {
@@ -188,7 +189,7 @@ void IntegratePeakTimeSlices::init() {
 void IntegratePeakTimeSlices::exec() {
   time_t seconds1;
 
-  seconds1 = time(NULL);
+  seconds1 = time(nullptr);
 
   double dQ = getProperty("PeakQspan");
 
@@ -445,7 +446,8 @@ void IntegratePeakTimeSlices::exec() {
           std::vector<std::string> names;
 
           if (m_AttributeValues->StatBaseVals(ISSIxx) > 0 &&
-              m_AttributeValues->IsEnoughData(m_ParameterValues, g_log) &&
+              m_AttributeValues->IsEnoughData(m_ParameterValues.data(),
+                                              g_log) &&
               m_ParameterValues[ITINTENS] > 0) {
             double chisqOverDOF;
 
@@ -532,7 +534,8 @@ void IntegratePeakTimeSlices::exec() {
 
             g_log.debug("Try Merge 2 time slices");
             if (m_AttributeValues->StatBaseVals(ISSIxx) >= 0 &&
-                m_AttributeValues->IsEnoughData(m_ParameterValues, g_log))
+                m_AttributeValues->IsEnoughData(m_ParameterValues.data(),
+                                                g_log))
 
               Fit(Data, chisqOverDOF, done, names, params, errs, lastRow,
                   lastCol, neighborRadius);
@@ -633,7 +636,7 @@ void IntegratePeakTimeSlices::exec() {
     setProperty("SigmaIntensity", SQRT(TotVariance));
     time_t seconds2;
 
-    seconds2 = time(NULL);
+    seconds2 = time(nullptr);
     double dif = difftime(seconds2, seconds1);
     g_log.debug() << "Finished Integr peak number " << indx << " in " << dif
                   << " seconds" << std::endl;
@@ -1762,13 +1765,10 @@ bool DataModeHandler::isEdgePeak(const double *params, int nparams) {
   double Ry =
       lastRCRadius / CellHeight - EdgeY; // span from center  in y direction
 
-  if (Rx * Rx <
-          NStdDevPeakSpan * NStdDevPeakSpan * std::max<double>(Varx, VarxHW) ||
-      Ry * Ry <
-          NStdDevPeakSpan * NStdDevPeakSpan * std::max<double>(Vary, VaryHW))
-    return true;
-
-  return false;
+  return Rx * Rx < NStdDevPeakSpan * NStdDevPeakSpan *
+                       std::max<double>(Varx, VarxHW) ||
+         Ry * Ry <
+             NStdDevPeakSpan * NStdDevPeakSpan * std::max<double>(Vary, VaryHW);
 }
 
 /**

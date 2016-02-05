@@ -74,7 +74,7 @@ std::map<std::string, std::string> SumEventsByLogValue::validateInputs() {
   try {
     ITimeSeriesProperty *log = dynamic_cast<ITimeSeriesProperty *>(
         m_inputWorkspace->run().getLogData(m_logName));
-    if (log == NULL) {
+    if (log == nullptr) {
       errors["LogName"] = "'" + m_logName + "' is not a time-series log.";
       return errors;
     }
@@ -105,7 +105,7 @@ void SumEventsByLogValue::exec() {
   m_binningParams = getProperty("OutputBinning");
   // Binning parameters must be provided for floating point logs
   if (m_binningParams.empty()) {
-    if (intLog != NULL) {
+    if (intLog != nullptr) {
       createTableOutput(intLog);
     } else {
       throw std::invalid_argument(
@@ -113,9 +113,9 @@ void SumEventsByLogValue::exec() {
     }
   } else // Binning parameters have been given
   {
-    if (intLog != NULL) {
+    if (intLog != nullptr) {
       createBinnedOutput(intLog);
-    } else if (dblLog != NULL) {
+    } else if (dblLog != nullptr) {
       createBinnedOutput(dblLog);
     }
     // else if ( dynamic_cast<const TimeSeriesProperty<std::string>*>(log) !=
@@ -189,13 +189,13 @@ void SumEventsByLogValue::createTableOutput(
   // value
   auto protonChgCol = outputWorkspace->addColumn("double", "proton_charge");
   // Get hold of the proton charge log for later
-  const TimeSeriesProperty<double> *protonChargeLog = NULL;
+  const TimeSeriesProperty<double> *protonChargeLog = nullptr;
   try {
     protonChargeLog =
         m_inputWorkspace->run().getTimeSeriesProperty<double>("proton_charge");
     // Set back to NULL if the log is empty or bad things will happen later
     if (protonChargeLog->realSize() == 0)
-      protonChargeLog = NULL;
+      protonChargeLog = nullptr;
   } catch (std::exception &) {
     // Log and carry on if not found. Column will be left empty.
     g_log.warning("proton_charge log not found in workspace.");
@@ -204,8 +204,8 @@ void SumEventsByLogValue::createTableOutput(
   // Get a list of the other time-series logs in the input workspace
   auto otherLogs = getNumberSeriesLogs();
   // Add a column for each of these 'other' logs
-  for (auto it = otherLogs.begin(); it != otherLogs.end(); ++it) {
-    auto newColumn = outputWorkspace->addColumn("double", it->first);
+  for (auto &otherLog : otherLogs) {
+    auto newColumn = outputWorkspace->addColumn("double", otherLog.first);
     // For the benefit of MantidPlot, set these columns to be containing X
     // values
     newColumn->setPlotType(1);
@@ -229,8 +229,8 @@ void SumEventsByLogValue::createTableOutput(
 
     // Calculate the time covered by this log value and add it to the table
     double duration = 0.0;
-    for (auto it = filter.begin(); it != filter.end(); ++it) {
-      duration += it->duration();
+    for (auto &time : filter) {
+      duration += time.duration();
     }
     timeCol->cell<double>(row) = duration;
 
@@ -241,13 +241,13 @@ void SumEventsByLogValue::createTableOutput(
           sumProtonCharge(protonChargeLog, filter);
     interruption_point();
 
-    for (auto log = otherLogs.begin(); log != otherLogs.end(); ++log) {
+    for (auto &otherLog : otherLogs) {
       // Calculate the average value of each 'other' log for the current value
       // of the main log
       // Have to (maybe inefficiently) fetch back column by name - move outside
       // loop if too slow
-      outputWorkspace->getColumn(log->first)->cell<double>(row) =
-          log->second->averageValueInFilter(filter);
+      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) =
+          otherLog.second->averageValueInFilter(filter);
     }
     prog.report();
   }
@@ -273,15 +273,14 @@ void SumEventsByLogValue::filterEventList(
     return;
 
   const auto pulseTimes = eventList.getPulseTimes();
-  for (std::size_t eventIndex = 0; eventIndex < pulseTimes.size();
-       ++eventIndex) {
+  for (auto pulseTime : pulseTimes) {
     // Find the value of the log at the time of this event
     // This algorithm is really concerned with 'slow' logs so we don't care
     // about
     // the time of the event within the pulse.
     // NB: If the pulse time is before the first log entry, we get the first
     // value.
-    const int logValue = log->getSingleValue(pulseTimes[eventIndex]);
+    const int logValue = log->getSingleValue(pulseTime);
 
     if (logValue >= minVal && logValue <= maxVal) {
       // In this scenario it's easy to know what bin to increment
@@ -345,8 +344,8 @@ SumEventsByLogValue::getNumberSeriesLogs() {
   std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>>
       numberSeriesProps;
   const auto &logs = m_inputWorkspace->run().getLogData();
-  for (auto log = logs.begin(); log != logs.end(); ++log) {
-    const std::string logName = (*log)->name();
+  for (auto log : logs) {
+    const std::string logName = log->name();
     // Don't add the log that's the one being summed against
     if (logName == m_logName)
       continue;
@@ -355,16 +354,16 @@ SumEventsByLogValue::getNumberSeriesLogs() {
     if (logName == "proton_charge")
       continue;
     // Try to cast to an ITimeSeriesProperty
-    auto tsp = dynamic_cast<const ITimeSeriesProperty *>(*log);
+    auto tsp = dynamic_cast<const ITimeSeriesProperty *>(log);
     // Move on to the next one if this is not a TSP
-    if (tsp == NULL)
+    if (tsp == nullptr)
       continue;
     // Don't keep ones with only one entry
     // if ( tsp->realSize() < 2 ) continue;
     // Now make sure it's either an int or double tsp, and if so add log to the
     // list
-    if (dynamic_cast<TimeSeriesProperty<double> *>(*log) ||
-        dynamic_cast<TimeSeriesProperty<int> *>(*log)) {
+    if (dynamic_cast<TimeSeriesProperty<double> *>(log) ||
+        dynamic_cast<TimeSeriesProperty<int> *>(log)) {
       numberSeriesProps.push_back(std::make_pair(logName, tsp));
     }
   }
@@ -425,10 +424,9 @@ void SumEventsByLogValue::createBinnedOutput(
     PARALLEL_START_INTERUPT_REGION
     const IEventList &eventList = m_inputWorkspace->getEventList(spec);
     const auto pulseTimes = eventList.getPulseTimes();
-    for (std::size_t eventIndex = 0; eventIndex < pulseTimes.size();
-         ++eventIndex) {
+    for (auto pulseTime : pulseTimes) {
       // Find the value of the log at the time of this event
-      const double logValue = log->getSingleValue(pulseTimes[eventIndex]);
+      const double logValue = log->getSingleValue(pulseTime);
       if (logValue >= XValues.front() && logValue < XValues.back()) {
         PARALLEL_ATOMIC
         ++Y[VectorHelper::getBinIndex(XValues, logValue)];

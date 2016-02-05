@@ -57,9 +57,9 @@ void copyLogs(const Mantid::DataHandling::EventWorkspaceCollection_sptr &from,
   // from the logs, get all the properties that don't overwrite any
   // prop. already set in the sink workspace (like 'filename').
   auto props = from->mutableRun().getLogData();
-  for (size_t j = 0; j < props.size(); j++) {
-    if (!to->mutableRun().hasProperty(props[j]->name())) {
-      to->mutableRun().addLogData(props[j]->clone());
+  for (auto &prop : props) {
+    if (!to->mutableRun().hasProperty(prop->name())) {
+      to->mutableRun().addLogData(prop->clone());
     }
   }
 }
@@ -111,7 +111,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
 *  Handles a zero-sized vector */
 BankPulseTimes::BankPulseTimes(const std::vector<Kernel::DateAndTime> &times) {
   numPulses = times.size();
-  pulseTimes = NULL;
+  pulseTimes = nullptr;
   if (numPulses == 0)
     return;
   pulseTimes = new DateAndTime[numPulses];
@@ -485,8 +485,9 @@ public:
         // m_loadError(false),
         prog(prog), scheduler(scheduler), m_loadError(false),
         m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(),
-        m_event_id(NULL), m_event_time_of_flight(NULL), m_have_weight(false),
-        m_event_weight(NULL), m_framePeriodNumbers(framePeriodNumbers) {
+        m_event_id(nullptr), m_event_time_of_flight(nullptr),
+        m_have_weight(false), m_event_weight(nullptr),
+        m_framePeriodNumbers(framePeriodNumbers) {
     setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
     m_min_id = std::numeric_limits<uint32_t>::max();
@@ -516,9 +517,9 @@ public:
 
     // Now, we look through existing ones to see if it is already loaded
     // thisBankPulseTimes = NULL;
-    for (size_t i = 0; i < alg->m_bankPulseTimes.size(); i++) {
-      if (alg->m_bankPulseTimes[i]->equals(thisNumPulses, thisStartTime)) {
-        thisBankPulseTimes = alg->m_bankPulseTimes[i];
+    for (auto &bankPulseTime : alg->m_bankPulseTimes) {
+      if (bankPulseTime->equals(thisNumPulses, thisStartTime)) {
+        thisBankPulseTimes = bankPulseTime;
         return;
       }
     }
@@ -802,9 +803,9 @@ public:
     m_loadSize.resize(1, 0);
 
     // Data arrays
-    m_event_id = NULL;
-    m_event_time_of_flight = NULL;
-    m_event_weight = NULL;
+    m_event_id = nullptr;
+    m_event_time_of_flight = nullptr;
+    m_event_weight = nullptr;
 
     m_loadError = false;
     m_have_weight = alg->m_haveWeights;
@@ -1020,7 +1021,7 @@ LoadEventNexus::LoadEventNexus()
       compressTolerance(0), eventVectors(), m_eventVectorMutex(),
       eventid_max(0), pixelID_to_wi_vector(), pixelID_to_wi_offset(),
       m_bankPulseTimes(), m_allBanksPulseTimes(), m_top_entry_name(),
-      m_file(NULL), splitProcessing(false), m_haveWeights(false),
+      m_file(nullptr), splitProcessing(false), m_haveWeights(false),
       weightedEventVectors(), m_instrument_loaded_correctly(false),
       loadlogs(false), m_logs_loaded_correctly(false), event_id_is_spec(false) {
 }
@@ -1394,7 +1395,7 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
     // possible spectrum number
     eventid_max = maxSpecNo;
     for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(maxSpecNo + 1, NULL);
+      vectors[i].resize(maxSpecNo + 1, nullptr);
     }
     for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
       for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
@@ -1414,7 +1415,7 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
     // Make an array where index = pixel ID
     // Set the value to NULL by default
     for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(eventid_max + 1, NULL);
+      vectors[i].resize(eventid_max + 1, nullptr);
     }
 
     for (size_t j = size_t(pixelID_to_wi_offset);
@@ -1660,7 +1661,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       nPeriods, periodLog); // This is how many workspaces we are going to make.
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
-  if (m_allBanksPulseTimes == NULL) {
+  if (m_allBanksPulseTimes == nullptr) {
     std::vector<DateAndTime> temp;
     // m_allBanksPulseTimes = new BankPulseTimes(temp);
     m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
@@ -1802,27 +1803,24 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
   if ((!someBanks.empty()) && (!monitors)) {
     // check that all of the requested banks are in the file
-    for (auto someBank = someBanks.begin(); someBank != someBanks.end();
-         ++someBank) {
+    for (auto &someBank : someBanks) {
       bool foundIt = false;
-      for (auto bankName = bankNames.begin(); bankName != bankNames.end();
-           ++bankName) {
-        if ((*bankName) == (*someBank) + "_events") {
+      for (auto &bankName : bankNames) {
+        if (bankName == someBank + "_events") {
           foundIt = true;
           break;
         }
       }
       if (!foundIt) {
-        throw std::invalid_argument("No entry named '" + (*someBank) +
+        throw std::invalid_argument("No entry named '" + someBank +
                                     "' was found in the .NXS file.\n");
       }
     }
 
     // change the number of banks to load
     bankNames.clear();
-    for (auto someBank = someBanks.begin(); someBank != someBanks.end();
-         ++someBank)
-      bankNames.push_back((*someBank) + "_events");
+    for (auto &someBank : someBanks)
+      bankNames.push_back(someBank + "_events");
 
     // how many events are in a bank
     bankNumEvents.clear();
@@ -2142,13 +2140,12 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
   }
   if (detList.size() == 0)
     return;
-  for (int i = 0; i < static_cast<int>(detList.size()); i++) {
+  for (auto &det : detList) {
     bool keep = false;
-    boost::shared_ptr<RectangularDetector> det = detList[i];
     std::string det_name = det->getName();
-    for (int j = 0; j < static_cast<int>(bankNames.size()); j++) {
-      size_t pos = bankNames[j].find("_events");
-      if (det_name.compare(bankNames[j].substr(0, pos)) == 0)
+    for (auto &bankName : bankNames) {
+      size_t pos = bankName.find("_events");
+      if (det_name.compare(bankName.substr(0, pos)) == 0)
         keep = true;
       if (keep)
         break;
@@ -2160,21 +2157,20 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
           boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
       asmb->getChildren(children, false);
-      for (int col = 0; col < static_cast<int>(children.size()); col++) {
+      for (auto &col : children) {
         boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-            boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-                children[col]);
+            boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
         std::vector<Geometry::IComponent_const_sptr> grandchildren;
         asmb2->getChildren(grandchildren, false);
 
-        for (int row = 0; row < static_cast<int>(grandchildren.size()); row++) {
-          Detector *d = dynamic_cast<Detector *>(
-              const_cast<IComponent *>(grandchildren[row].get()));
+        for (auto &row : grandchildren) {
+          Detector *d =
+              dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
           if (d)
             inst->removeDetector(d);
         }
       }
-      IComponent *comp = dynamic_cast<IComponent *>(detList[i].get());
+      IComponent *comp = dynamic_cast<IComponent *>(det.get());
       inst->remove(comp);
     }
   }
@@ -2203,12 +2199,12 @@ void LoadEventNexus::createSpectraMapping(
   if (!monitorsOnly && !bankNames.empty()) {
     std::vector<IDetector_const_sptr> allDets;
 
-    for (auto name = bankNames.begin(); name != bankNames.end(); ++name) {
+    for (const auto &bankName : bankNames) {
       // Only build the map for the single bank
       std::vector<IDetector_const_sptr> dets;
-      m_ws->getInstrument()->getDetectorsInBank(dets, (*name));
+      m_ws->getInstrument()->getDetectorsInBank(dets, bankName);
       if (dets.empty())
-        throw std::runtime_error("Could not find the bank named '" + (*name) +
+        throw std::runtime_error("Could not find the bank named '" + bankName +
                                  "' as a component assembly in the instrument "
                                  "tree; or it did not contain any detectors."
                                  " Try unchecking SingleBankPixelsOnly.");
@@ -2506,11 +2502,11 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
     if (!m_specList.empty()) {
       int i = 0;
       std::vector<int32_t> spec_temp, udet_temp;
-      for (auto it = spec.begin(); it != spec.end(); it++) {
-        if (find(m_specList.begin(), m_specList.end(), *it) !=
+      for (auto &element : spec) {
+        if (find(m_specList.begin(), m_specList.end(), element) !=
             m_specList.end()) // spec element *it is not in spec_list
         {
-          spec_temp.push_back(*it);
+          spec_temp.push_back(element);
           udet_temp.push_back(udet.at(i));
         }
         i++;
@@ -2741,9 +2737,8 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
         // spread the events uniformly inside the bin
         boost::uniform_real<> distribution(left, right);
         std::vector<double> random_numbers(m);
-        for (auto it = random_numbers.begin(); it != random_numbers.end();
-             ++it) {
-          *it = distribution(rand_gen);
+        for (double &random_number : random_numbers) {
+          random_number = distribution(rand_gen);
         }
         std::sort(random_numbers.begin(), random_numbers.end());
         auto it = random_numbers.begin();

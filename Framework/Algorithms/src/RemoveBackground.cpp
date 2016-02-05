@@ -159,7 +159,7 @@ void RemoveBackground::exec() {
 //-------------------------------------------------------------------------------------------------------------------------------
 /// Constructor
 BackgroundHelper::BackgroundHelper()
-    : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(NULL), m_inPlace(true),
+    : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(nullptr), m_inPlace(true),
       m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0),
       m_Emode(0), m_L1(0), m_Efix(0), m_Sample(), m_nullifyNegative(false),
       m_previouslyRemovedBkgMode(false) {}
@@ -168,11 +168,9 @@ BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
 
 /** The method deletes all units converter allocated*/
 void BackgroundHelper::deleteUnitsConverters() {
-  for (size_t i = 0; i < m_WSUnit.size(); i++) {
-    if (m_WSUnit[i]) {
-      delete m_WSUnit[i];
-      m_WSUnit[i] = NULL;
-    }
+  for (auto &unit : m_WSUnit) {
+    delete unit;
+    unit = nullptr;
   }
 }
 
@@ -229,7 +227,7 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
   this->deleteUnitsConverters();
   // allocate the array of units converters to avoid units reallocation within a
   // loop
-  m_WSUnit.assign(nThreads, NULL);
+  m_WSUnit.assign(nThreads, nullptr);
   for (int i = 0; i < nThreads; i++) {
     m_WSUnit[i] = WSUnit->clone();
   }

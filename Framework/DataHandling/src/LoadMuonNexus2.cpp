@@ -116,10 +116,10 @@ void LoadMuonNexus2::doExec() {
 
   std::string detectorName;
   // Only the first NXdata found
-  for (unsigned int i = 0; i < entry.groups().size(); i++) {
-    std::string className = entry.groups()[i].nxclass;
+  for (auto &group : entry.groups()) {
+    std::string className = group.nxclass;
     if (className == "NXdata") {
-      detectorName = entry.groups()[i].nxname;
+      detectorName = group.nxname;
       break;
     }
   }
@@ -254,8 +254,7 @@ void LoadMuonNexus2::doExec() {
 
     // Read in the spectra in the optional list parameter, if set
     if (m_list) {
-      for (unsigned int i = 0; i < m_spec_list.size(); ++i) {
-        int spec = m_spec_list[i];
+      for (auto spec : m_spec_list) {
         int k = index_spectrum[spec]; // if spec not found k is 0
         loadData(counts, timeBins, counter, period, k, localWorkspace);
         localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[k]);
@@ -297,7 +296,7 @@ void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt &counts,
   X.assign(timeBins.begin(), timeBins.end());
 
   int nBins = 0;
-  int *data = NULL;
+  int *data = nullptr;
 
   if (counts.rank() == 3) {
     nBins = counts.dim2();

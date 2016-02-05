@@ -148,7 +148,7 @@ public:
 };
 
 /// (Empty) Constructor
-FakeISISEventDAE::FakeISISEventDAE() : m_server(NULL) {}
+FakeISISEventDAE::FakeISISEventDAE() : m_server(nullptr) {}
 
 /// Destructor
 FakeISISEventDAE::~FakeISISEventDAE() {
@@ -222,7 +222,7 @@ void FakeISISEventDAE::exec() {
   histoDAEHandle.wait();
   if (m_server) {
     m_server->stop();
-    m_server = NULL;
+    m_server = nullptr;
   }
   socket.close();
 

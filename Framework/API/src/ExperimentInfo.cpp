@@ -73,9 +73,8 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   if (other->m_moderatorModel)
     m_moderatorModel = other->m_moderatorModel->clone();
   m_choppers.clear();
-  for (auto iter = other->m_choppers.begin(); iter != other->m_choppers.end();
-       ++iter) {
-    m_choppers.push_back((*iter)->clone());
+  for (const auto &chopper : other->m_choppers) {
+    m_choppers.push_back(chopper->clone());
   }
 }
 
@@ -106,9 +105,8 @@ const std::string ExperimentInfo::toString() const {
 
   // parameter files loaded
   auto paramFileVector = this->instrumentParameters().getParameterFilenames();
-  for (auto itFilename = paramFileVector.begin();
-       itFilename != paramFileVector.end(); ++itFilename) {
-    out << "Parameters from: " << *itFilename;
+  for (auto &itFilename : paramFileVector) {
+    out << "Parameters from: " << itFilename;
     out << "\n";
   }
 
@@ -851,11 +849,9 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
                                                       // the most recently
                                                       // starting matching IDF
-  for (auto instDirs_itr = directoryNames.begin();
-       instDirs_itr != directoryNames.end(); ++instDirs_itr) {
+  for (auto directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first beat file
-    std::string directoryName = *instDirs_itr;
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
          ++dir_itr) {
       if (!Poco::File(dir_itr->path()).isFile())
@@ -1076,7 +1072,7 @@ void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename,
       instr = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      instr = parser.parseXML(NULL);
+      instr = parser.parseXML(nullptr);
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instr);
     }
@@ -1148,7 +1144,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     // if( comp_name == prev_name ) continue; this blocks reading in different
     // parameters of the same component. RNT
     // prev_name = comp_name;
-    const Geometry::IComponent *comp = NULL;
+    const Geometry::IComponent *comp = nullptr;
     if (comp_name.find("detID:") != std::string::npos) {
       int detID = atoi(comp_name.substr(6).c_str());
       comp = instr->getDetector(detID).get();
@@ -1194,7 +1190,7 @@ void ExperimentInfo::populateWithParameter(
   ParameterValue paramValue(paramInfo,
                             runData); // Defines implicit conversion operator
 
-  const std::string *pDescription = NULL;
+  const std::string *pDescription = nullptr;
   if (!paramInfo.m_description.empty())
     pDescription = &paramInfo.m_description;
 

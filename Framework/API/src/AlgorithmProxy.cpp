@@ -269,8 +269,8 @@ void AlgorithmProxy::stopped() {
  */
 void AlgorithmProxy::dropWorkspaceReferences() {
   const std::vector<Property *> &props = getProperties();
-  for (unsigned int i = 0; i < props.size(); ++i) {
-    if (auto *wsProp = dynamic_cast<IWorkspaceProperty *>(props[i])) {
+  for (auto prop : props) {
+    if (auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop)) {
       wsProp->clear();
     }
   }
@@ -317,7 +317,7 @@ const std::vector<std::string> AlgorithmProxy::categories() const {
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);
-  if (depo != NULL) {
+  if (depo != nullptr) {
     res.push_back("Deprecated");
   }
   return res;

@@ -335,7 +335,7 @@ void ExportTimeSeriesLog::setupEventWorkspace(
                                               values[i + start_index]));
   }
   // Ensure thread-safety
-  outEventWS->sortAll(TOF_SORT, NULL);
+  outEventWS->sortAll(TOF_SORT, nullptr);
 
   // Now, create a default X-vector for histogramming, with just 2 bins.
   Kernel::cow_ptr<MantidVec> axis;

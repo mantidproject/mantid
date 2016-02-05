@@ -59,9 +59,7 @@ UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,
 /** Test and check if units conversion really occurs. Return true if unit
  * conversion happens or false if noConversion mode is selected*/
 bool UnitsConversionHelper::isUnitConverted() const {
-  if (m_UnitCnvrsn == CnvrtToMD::ConvertNo)
-    return false;
-  return true;
+  return m_UnitCnvrsn != CnvrtToMD::ConvertNo;
 }
 /** Initialize unit conversion helper
  * This method is interface to internal initialize method, which actually takes
@@ -109,18 +107,12 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr,
 // the helper function which used in the code below to simplify check if the
 // variable is in range
 inline bool inRange(const std::pair<double, double> &range, const double &val) {
-  if (val >= range.first && val <= range.second)
-    return true;
-  else
-    return false;
+  return val >= range.first && val <= range.second;
 }
 // the helper function which used in the code below to simplify check if the
 // variable is in range
 inline bool inRange(const double &xMin, const double &xMax, const double &val) {
-  if (val >= xMin && val <= xMax)
-    return true;
-  else
-    return false;
+  return val >= xMin && val <= xMax;
 }
 
 /** Method verify if the Units transformation is well defined in the range
@@ -263,7 +255,7 @@ void UnitsConversionHelper::initialize(
 
   // get efix
   m_Efix = DetWS->getLogs()->getPropertyValueAsType<double>("Ei");
-  m_pEfixedArray = NULL;
+  m_pEfixedArray = nullptr;
   if (m_Emode == static_cast<int>(Kernel::DeltaEMode::Indirect))
     m_pEfixedArray = DetWS->getColDataArray<float>("eFixed");
 
@@ -365,8 +357,8 @@ UnitsConversionHelper::UnitsConversionHelper(
 UnitsConversionHelper::UnitsConversionHelper()
     : m_UnitCnvrsn(CnvrtToMD::ConvertNo), m_Factor(1), m_Power(1),
       m_Emode(-1), // undefined
-      m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_pTwoThetas(NULL),
-      m_pL2s(NULL), m_pEfixedArray(NULL) {}
+      m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_pTwoThetas(nullptr),
+      m_pL2s(nullptr), m_pEfixedArray(nullptr) {}
 
 } // endNamespace DataObjects
 } // endNamespace Mantid

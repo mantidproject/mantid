@@ -23,7 +23,7 @@ using Geometry::IDetector_sptr;
 using Geometry::IComponent_const_sptr;
 
 /// Empty default constructor
-ApplyCalibration::ApplyCalibration() : Algorithm(), m_pmap(NULL) {}
+ApplyCalibration::ApplyCalibration() : Algorithm(), m_pmap(nullptr) {}
 
 /// Initialisation method.
 void ApplyCalibration::init() {
@@ -68,7 +68,7 @@ void ApplyCalibration::exec() {
     setDetectorPosition(instrument, detID[i], detPos[i], false);
   }
   // Ensure pointer is only valid for execution
-  m_pmap = NULL;
+  m_pmap = nullptr;
 }
 
 /**

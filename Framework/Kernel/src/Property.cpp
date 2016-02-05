@@ -18,7 +18,7 @@ namespace Kernel {
 Property::Property(const std::string &name, const std::type_info &type,
                    const unsigned int direction)
     : m_name(name), m_documentation(""), m_typeinfo(&type),
-      m_direction(direction), m_units(""), m_settings(NULL), m_group(""),
+      m_direction(direction), m_units(""), m_settings(nullptr), m_group(""),
       m_remember(true) {
   // Make sure a random int hasn't been passed in for the direction
   // Property & PropertyWithValue destructors will be called in this case
@@ -31,7 +31,7 @@ Property::Property(const std::string &name, const std::type_info &type,
 Property::Property(const Property &right)
     : m_name(right.m_name), m_documentation(right.m_documentation),
       m_typeinfo(right.m_typeinfo), m_direction(right.m_direction),
-      m_units(right.m_units), m_settings(NULL), m_group(right.m_group),
+      m_units(right.m_units), m_settings(nullptr), m_group(right.m_group),
       m_remember(right.m_remember) {
   if (right.m_settings)
     m_settings = right.m_settings->clone();
@@ -102,7 +102,7 @@ IPropertySettings *Property::getSettings() { return m_settings; }
  */
 void Property::deleteSettings() {
   delete m_settings;
-  m_settings = NULL;
+  m_settings = nullptr;
 }
 
 /**

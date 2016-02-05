@@ -25,8 +25,8 @@ boost::python::list getEquivalentPositions(SpaceGroup &self,
       self.getEquivalentPositions(Converters::PyObjectToV3D(point)());
 
   boost::python::list pythonEquivalents;
-  for (auto it = equivalents.begin(); it != equivalents.end(); ++it) {
-    pythonEquivalents.append(*it);
+  for (const auto &equivalent : equivalents) {
+    pythonEquivalents.append(equivalent);
   }
 
   return pythonEquivalents;

@@ -99,7 +99,7 @@ void SaveGSS::init() {
 void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
                    double &l1, double &l2, double &tth, double &difc) {
   Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
-  if (instrument == NULL) {
+  if (instrument == nullptr) {
     l1 = 0.;
     l2 = 0.;
     tth = 0.;
@@ -107,7 +107,7 @@ void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
   }
   Geometry::IComponent_const_sptr source = instrument->getSource();
   Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     l1 = 0.;
     l2 = 0.;
     tth = 0.;
@@ -206,7 +206,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
   Geometry::IComponent_const_sptr source;
   Geometry::IComponent_const_sptr sample;
   bool has_instrument = false;
-  if (instrument != NULL) {
+  if (instrument != nullptr) {
     source = instrument->getSource();
     sample = instrument->getSample();
     if (source && sample)
@@ -379,7 +379,7 @@ void writeLogValue(std::ostream &os, const Run &runinfo,
   Kernel::Property *prop = runinfo.getProperty(name);
 
   // Return without a valid pointer to property
-  if (prop == NULL) {
+  if (prop == nullptr) {
     os << defValue;
     return;
   }
@@ -430,7 +430,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     // the instrument parameter file
     if (runinfo.hasProperty("iparm_file")) {
       Kernel::Property *prop = runinfo.getProperty("iparm_file");
-      if (prop != NULL && (!prop->value().empty())) {
+      if (prop != nullptr && (!prop->value().empty())) {
         std::stringstream line;
         line << "#Instrument parameter file: " << prop->value();
         os << std::setw(80) << std::left << line.str() << "\n";
@@ -472,10 +472,10 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     bool norm_by_monitor = false;
     const Mantid::API::AlgorithmHistories &algohist =
         inputWS->getHistory().getAlgorithmHistories();
-    for (auto it = algohist.cbegin(); it != algohist.cend(); ++it) {
-      if ((*it)->name().compare("NormaliseByCurrent") == 0)
+    for (const auto &algo : algohist) {
+      if (algo->name().compare("NormaliseByCurrent") == 0)
         norm_by_current = true;
-      if ((*it)->name().compare("NormaliseToMonitor") == 0)
+      if (algo->name().compare("NormaliseToMonitor") == 0)
         norm_by_monitor = true;
     }
     os << "#";

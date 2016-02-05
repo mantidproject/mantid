@@ -27,7 +27,7 @@ DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer, Levenberg-Marquardt)
 // clang-format on
 
 LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
-    : m_data(NULL), gslContainer(), m_gslSolver(NULL), m_function(),
+    : m_data(nullptr), gslContainer(), m_gslSolver(nullptr), m_function(),
       m_absError(1e-4), m_relError(1e-4) {
   declareProperty("AbsError", m_absError, "Absolute error allowed for "
                                           "parameters - a stopping parameter "

@@ -149,15 +149,14 @@ void LoadNexusMonitors2::exec() {
       int numEventThings =
           0; // number of things that are eventish - should be 3
       string_map_t inner_entries = file.getEntries(); // get list of entries
-      for (auto inner = inner_entries.begin(); inner != inner_entries.end();
-           ++inner) {
-        if (inner->first == "event_index") {
+      for (auto &entry : inner_entries) {
+        if (entry.first == "event_index") {
           numEventThings += 1;
           continue;
-        } else if (inner->first == "event_time_offset") {
+        } else if (entry.first == "event_time_offset") {
           numEventThings += 1;
           continue;
-        } else if (inner->first == "event_time_zero") {
+        } else if (entry.first == "event_time_zero") {
           numEventThings += 1;
           continue;
         }
@@ -234,9 +233,8 @@ void LoadNexusMonitors2::exec() {
     // number
     if (monitorNumber2Name.size() == monitorNames.size()) {
       monitorNames.clear();
-      for (auto it = monitorNumber2Name.begin(); it != monitorNumber2Name.end();
-           ++it) {
-        monitorNames.push_back(it->second);
+      for (auto &numberName : monitorNumber2Name) {
+        monitorNames.push_back(numberName.second);
       }
     }
   } else if (numEventMon == m_monitor_count) {
@@ -581,7 +579,7 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
  **/
 bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   bool res = true;
-  ::NeXus::File *f = NULL;
+  ::NeXus::File *f = nullptr;
   try {
     f = new ::NeXus::File(fname);
     if (f)

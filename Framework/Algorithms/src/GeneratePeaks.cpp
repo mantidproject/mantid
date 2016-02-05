@@ -577,8 +577,8 @@ void GeneratePeaks::processTableColumnNames() {
               << " does not have paramter " << m_funcParameterNames[i] << "\n"
               << "Allowed function parameters are ";
         std::vector<std::string> parnames = m_peakFunction->getParameterNames();
-        for (size_t k = 0; k < parnames.size(); ++k)
-          errss << parnames[k] << ", ";
+        for (auto &parname : parnames)
+          errss << parname << ", ";
         throw std::runtime_error(errss.str());
       }
     }
@@ -697,10 +697,7 @@ bool GeneratePeaks::hasParameter(API::IFunction_sptr function,
   std::vector<std::string> parnames = function->getParameterNames();
   std::vector<std::string>::iterator piter;
   piter = std::find(parnames.begin(), parnames.end(), paramname);
-  if (piter != parnames.end())
-    return true;
-
-  return false;
+  return piter != parnames.end();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -820,16 +817,16 @@ std::vector<std::string>
 GeneratePeaks::addFunctionParameterNames(std::vector<std::string> funcnames) {
   std::vector<std::string> vec_funcparnames;
 
-  for (size_t i = 0; i < funcnames.size(); ++i) {
+  for (auto &funcname : funcnames) {
     // Add original name in
-    vec_funcparnames.push_back(funcnames[i]);
+    vec_funcparnames.push_back(funcname);
 
     // Add a full function name and parameter names in
     IFunction_sptr tempfunc =
-        FunctionFactory::Instance().createFunction(funcnames[i]);
+        FunctionFactory::Instance().createFunction(funcname);
 
     std::stringstream parnamess;
-    parnamess << funcnames[i] << " (";
+    parnamess << funcname << " (";
     std::vector<std::string> funcpars = tempfunc->getParameterNames();
     for (size_t j = 0; j < funcpars.size(); ++j) {
       parnamess << funcpars[j];

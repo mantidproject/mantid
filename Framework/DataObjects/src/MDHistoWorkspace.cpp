@@ -62,7 +62,7 @@ MDHistoWorkspace::MDHistoWorkspace(
 MDHistoWorkspace::MDHistoWorkspace(
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions,
     Mantid::API::MDNormalization displayNormalization)
-    : IMDHistoWorkspace(), numDimensions(0), m_numEvents(NULL),
+    : IMDHistoWorkspace(), numDimensions(0), m_numEvents(nullptr),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
   this->init(dimensions);
@@ -77,7 +77,7 @@ MDHistoWorkspace::MDHistoWorkspace(
 MDHistoWorkspace::MDHistoWorkspace(
     std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions,
     Mantid::API::MDNormalization displayNormalization)
-    : IMDHistoWorkspace(), numDimensions(0), m_numEvents(NULL),
+    : IMDHistoWorkspace(), numDimensions(0), m_numEvents(nullptr),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
   this->init(dimensions);
@@ -132,8 +132,8 @@ MDHistoWorkspace::~MDHistoWorkspace() {
 void MDHistoWorkspace::init(
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions) {
   std::vector<IMDDimension_sptr> dim2;
-  for (size_t i = 0; i < dimensions.size(); i++)
-    dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimensions[i]));
+  for (auto &dimension : dimensions)
+    dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimension));
   this->init(dim2);
   m_nEventsContributed = 0;
 }
@@ -1215,7 +1215,7 @@ Does not perform any clearing. Multiple calls are compounded.
 */
 void MDHistoWorkspace::setMDMasking(
     Mantid::Geometry::MDImplicitFunction *maskingRegion) {
-  if (maskingRegion != NULL) {
+  if (maskingRegion != nullptr) {
     for (size_t i = 0; i < this->getNPoints(); ++i) {
       // If the function masks the point, then mask it, otherwise leave it as it
       // is.

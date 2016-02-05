@@ -117,9 +117,9 @@ void FindDetectorsOutsideLimits::exec() {
 
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-  if (instrument != NULL) {
-    checkForMask = ((instrument->getSource() != NULL) &&
-                    (instrument->getSample() != NULL));
+  if (instrument != nullptr) {
+    checkForMask = ((instrument->getSource() != nullptr) &&
+                    (instrument->getSample() != nullptr));
   }
 
   int numFailed(0);

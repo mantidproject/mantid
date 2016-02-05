@@ -41,8 +41,8 @@ PropertyManager::PropertyManager(const PropertyManager &other)
 PropertyManager &PropertyManager::operator=(const PropertyManager &other) {
   // We need to do a deep copy here
   if (this != &other) {
-    for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
-      delete it->second;
+    for (auto &property : m_properties) {
+      delete property.second;
     }
     this->m_properties.clear();
     this->m_orderedProperties.resize(other.m_orderedProperties.size());
@@ -141,7 +141,7 @@ void PropertyManager::splitByTime(
         output_properties.push_back(
             outputs[i]->getPointerToPropertyOrNull(prop->name()));
       else
-        output_properties.push_back(NULL);
+        output_properties.push_back(nullptr);
     }
 
     // Now the property does the splitting.
@@ -162,15 +162,14 @@ void PropertyManager::filterByProperty(
     const Kernel::TimeSeriesProperty<bool> &filter) {
   const bool transferOwnership(
       true); // Make the new FilteredProperty own the original time series
-  for (auto iter = m_orderedProperties.begin();
-       iter != m_orderedProperties.end(); ++iter) {
-    Property *currentProp = *iter;
+  for (auto &orderedProperty : m_orderedProperties) {
+    Property *currentProp = orderedProperty;
     if (auto doubleSeries =
             dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
       auto filtered = new FilteredTimeSeriesProperty<double>(
           doubleSeries, filter, transferOwnership);
       // Replace the property in the ordered properties list
-      (*iter) = filtered;
+      orderedProperty = filtered;
       // Now replace in the map
       const std::string key = createKey(currentProp->name());
       this->m_properties[key] = filtered;
@@ -402,12 +401,12 @@ bool PropertyManager::existsProperty(const std::string &name) const {
  */
 bool PropertyManager::validateProperties() const {
   bool allValid = true;
-  for (auto it = m_properties.cbegin(); it != m_properties.cend(); ++it) {
+  for (const auto &property : m_properties) {
     // check for errors in each property
-    std::string error = it->second->isValid();
+    std::string error = property.second->isValid();
     //"" means no error
     if (!error.empty()) {
-      g_log.error() << "Property \"" << it->first
+      g_log.error() << "Property \"" << property.first
                     << "\" is not set to a valid value: \"" << error << "\"."
                     << std::endl;
       allValid = false;
@@ -500,7 +499,7 @@ PropertyManager::getPointerToPropertyOrNull(const std::string &name) const {
   if (it != m_properties.end()) {
     return it->second;
   }
-  return NULL;
+  return nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -575,8 +574,8 @@ void PropertyManager::removeProperty(const std::string &name,
  */
 void PropertyManager::clear() {
   m_orderedProperties.clear();
-  for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
-    delete it->second;
+  for (auto &property : m_properties) {
+    delete property.second;
   }
   m_properties.clear();
 }

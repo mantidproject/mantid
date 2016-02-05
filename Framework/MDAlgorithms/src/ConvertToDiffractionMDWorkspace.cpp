@@ -44,8 +44,8 @@ ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
       Append(true), // append data to existing target MD workspace if one exist
       LorentzCorrection(false), // not doing Lorents
       l1(1.), beamline_norm(1.), failedDetectorLookupCount(0),
-      m_extentsMin(NULL),
-      m_extentsMax(NULL) // will be allocated in exec using nDims
+      m_extentsMin(nullptr),
+      m_extentsMax(nullptr) // will be allocated in exec using nDims
 {}
 
 //----------------------------------------------------------------------------------------------
@@ -623,8 +623,8 @@ void ConvertToDiffractionMDWorkspace::exec() {
                         << " events. This took " << cputimtotal
                         << " in total.\n";
     std::vector<std::string> stats = ws->getBoxControllerStats();
-    for (size_t i = 0; i < stats.size(); ++i)
-      g_log.information() << stats[i] << "\n";
+    for (auto &stat : stats)
+      g_log.information() << stat << "\n";
     g_log.information() << std::endl;
   }
 

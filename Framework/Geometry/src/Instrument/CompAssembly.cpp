@@ -16,14 +16,14 @@ using Kernel::Quat;
 /** Empty constructor
  */
 CompAssembly::CompAssembly()
-    : Component(), m_children(), m_cachedBoundingBox(NULL) {}
+    : Component(), m_children(), m_cachedBoundingBox(nullptr) {}
 
 /** Constructor for a parametrized CompAssembly
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  * */
 CompAssembly::CompAssembly(const IComponent *base, const ParameterMap *map)
-    : Component(base, map), m_children(), m_cachedBoundingBox(NULL) {}
+    : Component(base, map), m_children(), m_cachedBoundingBox(nullptr) {}
 
 /** Valued constructor
  *  @param n :: name of the assembly
@@ -35,7 +35,7 @@ CompAssembly::CompAssembly(const IComponent *base, const ParameterMap *map)
  *  this is registered as a children of reference.
  */
 CompAssembly::CompAssembly(const std::string &n, IComponent *reference)
-    : Component(n, reference), m_children(), m_cachedBoundingBox(NULL) {
+    : Component(n, reference), m_children(), m_cachedBoundingBox(nullptr) {
   if (reference) {
     ICompAssembly *test = dynamic_cast<ICompAssembly *>(reference);
     if (test) {
@@ -65,8 +65,8 @@ CompAssembly::~CompAssembly() {
   if (m_cachedBoundingBox)
     delete m_cachedBoundingBox;
   // Iterate over pointers in m_children, deleting them
-  for (auto it = m_children.begin(); it != m_children.end(); ++it) {
-    delete *it;
+  for (auto &child : m_children) {
+    delete child;
   }
   m_children.clear();
 }
@@ -371,10 +371,10 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
     if (!m_cachedBoundingBox) {
       m_cachedBoundingBox = new BoundingBox();
       // Loop over the children and define a box large enough for all of them
-      for (auto it = m_children.cbegin(); it != m_children.cend(); ++it) {
+      for (auto child : m_children) {
         BoundingBox compBox;
-        if (*it) {
-          (*it)->getBoundingBox(compBox);
+        if (child) {
+          child->getBoundingBox(compBox);
           m_cachedBoundingBox->grow(compBox);
         }
       }

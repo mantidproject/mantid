@@ -56,18 +56,17 @@ std::string MultiFileValidator::checkValidity(
 
   std::string accumulatedErrors("");
 
-  for (auto rowIt = values.cbegin(); rowIt != values.cend(); ++rowIt) {
-    std::vector<std::string> row = (*rowIt);
-    for (auto valueIt = row.cbegin(); valueIt != row.cend(); ++valueIt) {
+  for (auto row : values) {
+    for (const auto &valueIt : row) {
       // For each filename value, check its validity, and and accumulate any
       // errors.
-      std::string error = m_fileValidator.isValid(*valueIt);
+      std::string error = m_fileValidator.isValid(valueIt);
       if (!error.empty()) {
         if (accumulatedErrors.empty())
           accumulatedErrors =
-              "Could not validate the following file(s): " + (*valueIt);
+              "Could not validate the following file(s): " + valueIt;
         else
-          accumulatedErrors = accumulatedErrors + ", " + (*valueIt);
+          accumulatedErrors = accumulatedErrors + ", " + valueIt;
       }
     }
   }

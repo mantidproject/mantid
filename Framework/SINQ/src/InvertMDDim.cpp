@@ -44,7 +44,7 @@ void InvertMDDim::exec() {
 
   int rank = static_cast<int>(inWS->getNumDims());
   auto idx = new int[rank];
-  if (idx == NULL || outWS == NULL) {
+  if (idx == nullptr || outWS == nullptr) {
     throw std::runtime_error("Out of memory in InvertMDDim");
   }
   recurseDim(inWS, outWS, 0, idx, rank);

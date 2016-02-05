@@ -134,8 +134,7 @@ size_t doConnectedComponentLabeling(IMDIterator *iterator,
       nonEmptyNeighbourIndexes.reserve(maxNeighbours);
       SetIds neighbourIds;
       // Discover non-empty neighbours
-      for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
-        size_t neighIndex = neighbourIndexes[i];
+      for (auto neighIndex : neighbourIndexes) {
         if (!iterator->isWithinBounds(neighIndex)) {
           /* Record labels which appear to belong to the same cluster, but
            cannot be combined in this
@@ -181,8 +180,7 @@ size_t doConnectedComponentLabeling(IMDIterator *iterator,
         DisjointElement &parentElement =
             neighbourElements[candidateSourceParentIndex];
         // Union remainder parents with the chosen parent
-        for (size_t i = 0; i < nonEmptyNeighbourIndexes.size(); ++i) {
-          size_t neighIndex = nonEmptyNeighbourIndexes[i];
+        for (auto neighIndex : nonEmptyNeighbourIndexes) {
           if (neighIndex != candidateSourceParentIndex) {
             neighbourElements[neighIndex].unionWith(&parentElement);
           }
@@ -346,10 +344,10 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
     // equivalent clusters. Must be done in sequence.
     // Combine cluster maps processed by each thread.
     ClusterRegister clusterRegister;
-    for (auto it = parallelClusterMapVec.begin();
-         it != parallelClusterMapVec.end(); ++it) {
-      for (auto itt = it->begin(); itt != it->end(); ++itt) {
-        clusterRegister.add(itt->first, itt->second);
+    for (auto &parallelClusterMap : parallelClusterMapVec) {
+      for (auto it = parallelClusterMap.begin(); it != parallelClusterMap.end();
+           ++it) {
+        clusterRegister.add(it->first, it->second);
       }
     }
 
@@ -357,18 +355,17 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
     // ambiguity.
     g_log.debug("Percolate minimum label across boundaries");
 
-    for (auto it = parallelEdgeVec.begin(); it != parallelEdgeVec.end(); ++it) {
-      VecEdgeIndexPair &indexPairVec = *it;
-      for (auto iit = indexPairVec.begin(); iit != indexPairVec.end(); ++iit) {
-        DisjointElement &a = neighbourElements[iit->get<0>()];
-        DisjointElement &b = neighbourElements[iit->get<1>()];
+    for (auto &indexPairVec : parallelEdgeVec) {
+      for (auto &iit : indexPairVec) {
+        DisjointElement &a = neighbourElements[iit.get<0>()];
+        DisjointElement &b = neighbourElements[iit.get<1>()];
         clusterRegister.merge(a, b);
       }
     }
     clusterMap = clusterRegister.clusters(neighbourElements);
 
   } else {
-    API::IMDIterator *iterator = ws->createIterator(NULL);
+    API::IMDIterator *iterator = ws->createIterator(nullptr);
     VecEdgeIndexPair edgeIndexPair; // This should never get filled in a single
                                     // threaded situation.
     size_t endLabelId = doConnectedComponentLabeling(
@@ -439,8 +436,8 @@ ClusterTuple ConnectedComponentLabeling::executeAndFetchClusters(
   // Get the keys (label ids) first in order to do the next stage in parallel.
   VecIndexes keys;
   keys.reserve(clusters.size());
-  for (auto it = clusters.begin(); it != clusters.end(); ++it) {
-    keys.push_back(it->first);
+  for (auto &cluster : clusters) {
+    keys.push_back(cluster.first);
   }
   // Write each cluster out to the output workspace
   PARALLEL_FOR_NO_WSP_CHECK()

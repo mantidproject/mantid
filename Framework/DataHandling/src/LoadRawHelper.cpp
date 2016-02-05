@@ -87,7 +87,7 @@ void LoadRawHelper::init() {
  */
 FILE *LoadRawHelper::openRawFile(const std::string &fileName) {
   FILE *file = fopen(fileName.c_str(), "rb");
-  if (file == NULL) {
+  if (file == nullptr) {
     g_log.error("Unable to open file " + fileName);
     throw Exception::FileError("Unable to open File:", fileName);
   }
@@ -424,15 +424,15 @@ LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
 
   if (!m_monitordetectorList.empty()) {
     const auto &map = mapping.getMapping();
-    for (auto it = map.begin(); it != map.end(); ++it) {
-      auto detIDs = it->second;
+    for (const auto &SpectrumDetectorPair : map) {
+      auto detIDs = SpectrumDetectorPair.second;
       // Both m_monitordetectorList & detIDs should be (very) short so the
       // nested loop shouldn't be too evil
-      for (auto detIt = detIDs.begin(); detIt != detIDs.end(); ++detIt) {
+      for (auto detID : detIDs) {
         if (std::find(m_monitordetectorList.begin(),
                       m_monitordetectorList.end(),
-                      *detIt) != m_monitordetectorList.end()) {
-          spectrumIndices.push_back(it->first);
+                      detID) != m_monitordetectorList.end()) {
+          spectrumIndices.push_back(SpectrumDetectorPair.first);
         }
       }
     }
@@ -762,7 +762,7 @@ void LoadRawHelper::createPeriodLogs(
  */
 void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
                                       ISISRAW *const rawFile) const {
-  ISISRAW *localISISRaw(NULL);
+  ISISRAW *localISISRaw(nullptr);
   if (!rawFile) {
     localISISRaw = isisRaw.get();
   } else {

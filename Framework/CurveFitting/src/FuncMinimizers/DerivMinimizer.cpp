@@ -79,7 +79,7 @@ void DerivMinimizer::fundfun(const gsl_vector *x, void *params, double *f,
 
 /// Constructor
 DerivMinimizer::DerivMinimizer()
-    : m_gslSolver(NULL), m_x(NULL), m_stopGradient(1e-3), m_stepSize(0.1),
+    : m_gslSolver(nullptr), m_x(nullptr), m_stopGradient(1e-3), m_stepSize(0.1),
       m_tolerance(0.0001) {
   initGSLMMin();
 }
@@ -90,24 +90,24 @@ DerivMinimizer::DerivMinimizer()
  * @param tolerance :: Tolerance.
  */
 DerivMinimizer::DerivMinimizer(const double stepSize, const double tolerance)
-    : m_gslSolver(NULL), m_x(NULL), m_stopGradient(1e-3), m_stepSize(stepSize),
-      m_tolerance(tolerance) {
+    : m_gslSolver(nullptr), m_x(nullptr), m_stopGradient(1e-3),
+      m_stepSize(stepSize), m_tolerance(tolerance) {
   initGSLMMin();
 }
 
 void DerivMinimizer::initGSLMMin() {
-  m_gslMultiminContainer.f = NULL;
-  m_gslMultiminContainer.df = NULL;
-  m_gslMultiminContainer.fdf = NULL;
+  m_gslMultiminContainer.f = nullptr;
+  m_gslMultiminContainer.df = nullptr;
+  m_gslMultiminContainer.fdf = nullptr;
   m_gslMultiminContainer.n = 0;
-  m_gslMultiminContainer.params = NULL;
+  m_gslMultiminContainer.params = nullptr;
 }
 
 /**
  * Destructor.
  */
 DerivMinimizer::~DerivMinimizer() {
-  if (m_gslSolver != NULL) {
+  if (m_gslSolver != nullptr) {
     gsl_multimin_fdfminimizer_free(m_gslSolver);
     gsl_vector_free(m_x);
   }
@@ -147,7 +147,7 @@ void DerivMinimizer::initialize(API::ICostFunction_sptr function,
  * @return :: true to continue, false to stop.
  */
 bool DerivMinimizer::iterate(size_t) {
-  if (m_gslSolver == NULL) {
+  if (m_gslSolver == nullptr) {
     throw std::runtime_error("Minimizer " + this->name() +
                              " was not initialized.");
   }

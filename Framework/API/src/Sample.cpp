@@ -23,7 +23,7 @@ using Geometry::ShapeFactory;
  * Default constructor. Required for cow_ptr.
  */
 Sample::Sample()
-    : m_name(), m_shape(), m_environment(), m_lattice(NULL),
+    : m_name(), m_shape(), m_environment(), m_lattice(nullptr),
       m_crystalStructure(), m_samples(), m_geom_id(0), m_thick(0.0),
       m_height(0.0), m_width(0.0) {}
 
@@ -33,9 +33,10 @@ Sample::Sample()
  */
 Sample::Sample(const Sample &copy)
     : m_name(copy.m_name), m_shape(copy.m_shape),
-      m_environment(copy.m_environment), m_lattice(NULL), m_crystalStructure(),
-      m_samples(copy.m_samples), m_geom_id(copy.m_geom_id),
-      m_thick(copy.m_thick), m_height(copy.m_height), m_width(copy.m_width) {
+      m_environment(copy.m_environment), m_lattice(nullptr),
+      m_crystalStructure(), m_samples(copy.m_samples),
+      m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), m_height(copy.m_height),
+      m_width(copy.m_width) {
   if (copy.m_lattice)
     m_lattice = new OrientedLattice(copy.getOrientedLattice());
 
@@ -64,12 +65,12 @@ Sample &Sample::operator=(const Sample &rhs) {
   m_thick = rhs.m_thick;
   m_height = rhs.m_height;
   m_width = rhs.m_width;
-  if (m_lattice != NULL)
+  if (m_lattice != nullptr)
     delete m_lattice;
   if (rhs.m_lattice)
     m_lattice = new OrientedLattice(rhs.getOrientedLattice());
   else
-    m_lattice = NULL;
+    m_lattice = nullptr;
 
   m_crystalStructure.reset();
   if (rhs.hasCrystalStructure()) {
@@ -162,17 +163,17 @@ OrientedLattice &Sample::getOrientedLattice() {
  * @param latt :: A pointer to a OrientedLattice.
  */
 void Sample::setOrientedLattice(OrientedLattice *latt) {
-  if (m_lattice != NULL) {
+  if (m_lattice != nullptr) {
     delete m_lattice;
   }
-  if (latt != NULL)
+  if (latt != nullptr)
     m_lattice = new OrientedLattice(*latt);
   else
-    m_lattice = NULL;
+    m_lattice = nullptr;
 }
 
 /** @return true if the sample has an OrientedLattice  */
-bool Sample::hasOrientedLattice() const { return (m_lattice != NULL); }
+bool Sample::hasOrientedLattice() const { return (m_lattice != nullptr); }
 
 const Geometry::CrystalStructure &Sample::getCrystalStructure() const {
   if (!hasCrystalStructure()) {
@@ -193,11 +194,7 @@ void Sample::setCrystalStructure(
 bool Sample::hasCrystalStructure() const {
   // Conversion to bool seems to be a problem in VS2012, so this is a bit more
   // verbose than it should be.
-  if (m_crystalStructure) {
-    return true;
-  }
-
-  return false;
+  return static_cast<bool>(m_crystalStructure);
 }
 
 /// Destroys the internally stored CrystalStructure-object.
@@ -397,7 +394,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
 void Sample::clearOrientedLattice() {
   if (m_lattice) {
     delete m_lattice;
-    m_lattice = NULL;
+    m_lattice = nullptr;
   }
 }
 }

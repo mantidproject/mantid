@@ -266,13 +266,13 @@ void ConvertToMDMinMaxGlobal::exec() {
     }
   }
 
-  for (size_t i = 0; i < OtherDimensions.size(); ++i) {
-    if (!ws->run().hasProperty(OtherDimensions[i])) {
+  for (auto &OtherDimension : OtherDimensions) {
+    if (!ws->run().hasProperty(OtherDimension)) {
       g_log.error() << "The workspace does not have a property "
-                    << OtherDimensions[i] << std::endl;
+                    << OtherDimension << std::endl;
       throw std::invalid_argument("Property not found. Please see error log.");
     }
-    Kernel::Property *pProperty = (ws->run().getProperty(OtherDimensions[i]));
+    Kernel::Property *pProperty = (ws->run().getProperty(OtherDimension));
     TimeSeriesProperty<double> *p =
         dynamic_cast<TimeSeriesProperty<double> *>(pProperty);
     if (p) {
@@ -285,8 +285,8 @@ void ConvertToMDMinMaxGlobal::exec() {
       if (!p) {
         std::string ERR =
             " Can not interpret property, used as dimension.\n Property: " +
-            OtherDimensions[i] + " is neither a time series (run) property nor "
-                                 "a property with value<double>";
+            OtherDimension + " is neither a time series (run) property nor "
+                             "a property with value<double>";
         throw(std::invalid_argument(ERR));
       }
       double val = *p;

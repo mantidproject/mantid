@@ -51,13 +51,13 @@ DECLARE_ALGORITHM(CalculateMSVesuvio)
 
 /// Constructor
 CalculateMSVesuvio::CalculateMSVesuvio()
-    : Algorithm(), m_randgen(NULL), m_acrossIdx(0), m_upIdx(1), m_beamIdx(3),
+    : Algorithm(), m_randgen(nullptr), m_acrossIdx(0), m_upIdx(1), m_beamIdx(3),
       m_beamDir(), m_srcR2(0.0), m_halfSampleHeight(0.0),
-      m_halfSampleWidth(0.0), m_halfSampleThick(0.0), m_sampleShape(NULL),
-      m_sampleProps(NULL), m_detHeight(-1.0), m_detWidth(-1.0),
+      m_halfSampleWidth(0.0), m_halfSampleThick(0.0), m_sampleShape(nullptr),
+      m_sampleProps(nullptr), m_detHeight(-1.0), m_detWidth(-1.0),
       m_detThick(-1.0), m_tmin(-1.0), m_tmax(-1.0), m_delt(-1.0),
       m_foilRes(-1.0), m_nscatters(0), m_nruns(0), m_nevents(0),
-      m_progress(NULL), m_inputWS() {}
+      m_progress(nullptr), m_inputWS() {}
 
 /// Destructor
 CalculateMSVesuvio::~CalculateMSVesuvio() {
@@ -651,8 +651,8 @@ CalculateMSVesuvio::calculateE1Range(const double theta,
 
   double e1min(1e10), e1max(-1e10); // large so that anything else is smaller
   const auto &atoms = m_sampleProps->atoms;
-  for (size_t i = 0; i < atoms.size(); ++i) {
-    const double mass = atoms[i].mass;
+  for (const auto &atom : atoms) {
+    const double mass = atom.mass;
 
     const double fraction =
         (cth + sqrt(mass * mass - sth * sth)) / (1.0 + mass);
@@ -661,7 +661,7 @@ CalculateMSVesuvio::calculateE1Range(const double theta,
     const double qr = sqrt(k0 * k0 + k1 * k1 - 2.0 * k0 * k1 * cth);
     const double wr = en0 - en1;
     const double width = PhysicalConstants::E_mev_toNeutronWavenumberSq *
-                         atoms[i].profile * qr / mass;
+                         atom.profile * qr / mass;
     const double e1a = en0 - wr - 10.0 * width;
     const double e1b = en0 - wr + 10.0 * width;
     if (e1a < e1min)
@@ -694,20 +694,20 @@ double CalculateMSVesuvio::partialDiffXSec(const double en0, const double en1,
   const auto &atoms = m_sampleProps->atoms;
   if (q > 0.0) // avoid continuous checking in loop
   {
-    for (size_t i = 0; i < atoms.size(); ++i) {
-      const double jstddev = atoms[i].profile;
-      const double mass = atoms[i].mass;
+    for (const auto &atom : atoms) {
+      const double jstddev = atom.profile;
+      const double mass = atom.mass;
       const double y = mass * w / (4.18036 * q) - 0.5 * q;
       const double jy =
           exp(-0.5 * y * y / (jstddev * jstddev)) / (jstddev * rt2pi);
       const double sqw = mass * jy / (4.18036 * q);
 
-      const double sclength = atoms[i].sclength;
+      const double sclength = atom.sclength;
       pdcs += sclength * sclength * (k1 / k0) * sqw;
     }
   } else {
-    for (size_t i = 0; i < atoms.size(); ++i) {
-      const double sclength = atoms[i].sclength;
+    for (const auto &atom : atoms) {
+      const double sclength = atom.sclength;
       pdcs += sclength * sclength;
     }
   }

@@ -90,10 +90,10 @@ PDDetermineCharacterizations::validateInputs() {
         << expectedNames.size();
     result[CHAR_PROP_NAME] = msg.str();
   } else {
-    for (auto it = expectedNames.begin(); it != expectedNames.end(); ++it) {
-      if (std::find(names.begin(), names.end(), *it) == names.end()) {
+    for (auto &expectedName : expectedNames) {
+      if (std::find(names.begin(), names.end(), expectedName) == names.end()) {
         std::stringstream msg;
-        msg << "Failed to find column named " << (*it);
+        msg << "Failed to find column named " << expectedName;
         result[CHAR_PROP_NAME] = msg.str();
       }
     }
@@ -156,10 +156,7 @@ bool closeEnough(const double left, const double right) {
 
   // same within 5%
   const double relativeDiff = diff * 2 / (left + right);
-  if (relativeDiff < .05)
-    return true;
-
-  return false;
+  return relativeDiff < .05;
 }
 
 /// Fill in the property manager from the correct line in the table
@@ -230,26 +227,26 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
     validUnits.insert("Hz");
   }
 
-  for (auto name = names.begin(); name != names.end(); ++name) {
-    if (run.hasProperty(*name)) {
-      const std::string units = run.getProperty(*name)->units();
+  for (auto &name : names) {
+    if (run.hasProperty(name)) {
+      const std::string units = run.getProperty(name)->units();
 
       if (validUnits.find(units) != validUnits.end()) {
-        double value = run.getLogAsSingleValue(*name);
+        double value = run.getLogAsSingleValue(name);
         if (value == 0.) {
           std::stringstream msg;
-          msg << "'" << *name << "' has a mean value of zero " << units;
+          msg << "'" << name << "' has a mean value of zero " << units;
           g_log.information(msg.str());
         } else {
           std::stringstream msg;
-          msg << "Found " << label << " in log '" << *name
+          msg << "Found " << label << " in log '" << name
               << "' with mean value " << value << " " << units;
           g_log.information(msg.str());
           return value;
         }
       } else {
         std::stringstream msg;
-        msg << "When looking at " << *name
+        msg << "When looking at " << name
             << " log encountered unknown units for " << label << ":" << units;
         g_log.warning(msg.str());
       }
@@ -352,12 +349,13 @@ void PDDetermineCharacterizations::exec() {
   overrideRunNumProperty("NormBackRun", "empty");
 
   std::vector<std::string> expectedNames = getColumnNames();
-  for (auto it = expectedNames.begin(); it != expectedNames.end(); ++it) {
-    if (m_propertyManager->existsProperty(*it)) {
-      g_log.debug() << (*it) << ":" << m_propertyManager->getPropertyValue(*it)
+  for (auto &expectedName : expectedNames) {
+    if (m_propertyManager->existsProperty(expectedName)) {
+      g_log.debug() << expectedName << ":"
+                    << m_propertyManager->getPropertyValue(expectedName)
                     << "\n";
     } else {
-      g_log.warning() << (*it) << " DOES NOT EXIST\n";
+      g_log.warning() << expectedName << " DOES NOT EXIST\n";
     }
   }
 }

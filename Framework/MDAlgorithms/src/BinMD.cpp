@@ -35,8 +35,9 @@ using namespace Mantid::DataObjects;
 /** Constructor
  */
 BinMD::BinMD()
-    : outWS(), prog(NULL), implicitFunction(NULL), indexMultiplier(NULL),
-      signals(NULL), errors(NULL), numEvents(NULL) {}
+    : outWS(), prog(nullptr), implicitFunction(nullptr),
+      indexMultiplier(nullptr), signals(nullptr), errors(nullptr),
+      numEvents(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -332,8 +333,8 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
 
       // Go through every box for this chunk.
-      for (size_t i = 0; i < boxes.size(); i++) {
-        MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+      for (auto &boxe : boxes) {
+        MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
         // Perform the binning in this separate method.
         if (box)
           this->binMDBox(box, chunkMin.data(), chunkMax.data());
@@ -373,7 +374,7 @@ void BinMD::exec() {
 
   // De serialize the implicit function
   std::string ImplicitFunctionXML = getPropertyValue("ImplicitFunctionXML");
-  implicitFunction = NULL;
+  implicitFunction = nullptr;
   if (!ImplicitFunctionXML.empty())
     implicitFunction =
         Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(

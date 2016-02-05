@@ -37,8 +37,8 @@ void ImmutableCompositeFunction::addFunction(IFunction *fun) {
 void ImmutableCompositeFunction::setParameter(const std::string &name,
                                               const double &value,
                                               bool explicitlySet) {
-  auto alias = m_alias.find(name);
-  if (alias != m_alias.end()) {
+  auto alias = m_aliases.find(name);
+  if (alias != m_aliases.end()) {
     CompositeFunction::setParameter(alias->second, value, explicitlySet);
   } else {
     CompositeFunction::setParameter(name, value, explicitlySet);
@@ -52,8 +52,8 @@ void ImmutableCompositeFunction::setParameter(const std::string &name,
  */
 void ImmutableCompositeFunction::setParameterDescription(
     const std::string &name, const std::string &description) {
-  auto alias = m_alias.find(name);
-  if (alias != m_alias.end()) {
+  auto alias = m_aliases.find(name);
+  if (alias != m_aliases.end()) {
     CompositeFunction::setParameterDescription(alias->second, description);
   } else {
     CompositeFunction::setParameterDescription(name, description);
@@ -66,8 +66,8 @@ void ImmutableCompositeFunction::setParameterDescription(
  * @return :: The parameter value.
  */
 double ImmutableCompositeFunction::getParameter(const std::string &name) const {
-  auto alias = m_alias.find(name);
-  if (alias != m_alias.end()) {
+  auto alias = m_aliases.find(name);
+  if (alias != m_aliases.end()) {
     return CompositeFunction::getParameter(alias->second);
   }
   return CompositeFunction::getParameter(name);
@@ -79,8 +79,8 @@ double ImmutableCompositeFunction::getParameter(const std::string &name) const {
  */
 size_t
 ImmutableCompositeFunction::parameterIndex(const std::string &name) const {
-  auto alias = m_alias.find(name);
-  if (alias != m_alias.end()) {
+  auto alias = m_aliases.find(name);
+  if (alias != m_aliases.end()) {
     return alias->second;
   }
   return CompositeFunction::parameterIndex(name);
@@ -90,9 +90,9 @@ ImmutableCompositeFunction::parameterIndex(const std::string &name) const {
  * Returns the alias or name of parameter i
  */
 std::string ImmutableCompositeFunction::parameterName(size_t i) const {
-  for (auto alias = m_alias.begin(); alias != m_alias.end(); ++alias) {
-    if (alias->second == i)
-      return alias->first;
+  for (const auto &alias : m_aliases) {
+    if (alias.second == i)
+      return alias.first;
   }
   return CompositeFunction::parameterName(i);
 }
@@ -107,10 +107,10 @@ std::string ImmutableCompositeFunction::parameterName(size_t i) const {
 void ImmutableCompositeFunction::setAlias(const std::string &parName,
                                           const std::string &alias) {
   // make sure the alias is unique
-  if (m_alias.count(alias) > 0) {
+  if (m_aliases.count(alias) > 0) {
     throw Kernel::Exception::ExistsError("ImmutableCompositeFunction", alias);
   }
-  m_alias[alias] = CompositeFunction::parameterIndex(parName);
+  m_aliases[alias] = CompositeFunction::parameterIndex(parName);
 }
 
 /**

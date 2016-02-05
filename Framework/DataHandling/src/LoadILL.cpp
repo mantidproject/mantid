@@ -171,7 +171,7 @@ int LoadILL::getEPPFromVanadium(const std::string &filenameVanadium,
                                 MatrixWorkspace_sptr vanaWS) {
   int calculatedDetectorElasticPeakPosition = -1;
 
-  if (vanaWS != NULL) {
+  if (vanaWS != nullptr) {
 
     // Check if it has been store on the run object for this workspace
     if (vanaWS->run().hasProperty("EPP")) {
@@ -516,15 +516,16 @@ void LoadILL::loadDataIntoTheWorkSpace(
   // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
 
-  for (auto it = monitors.begin(); it != monitors.end(); ++it) {
+  for (const auto &monitor : monitors) {
 
     m_localWorkspace->dataX(spec)
         .assign(detectorTofBins.begin(), detectorTofBins.end());
     // Assign Y
-    m_localWorkspace->dataY(spec).assign(it->begin(), it->end());
+    m_localWorkspace->dataY(spec).assign(monitor.begin(), monitor.end());
     // Assign Error
     MantidVec &E = m_localWorkspace->dataE(spec);
-    std::transform(it->begin(), it->end(), E.begin(), LoadILL::calculateError);
+    std::transform(monitor.begin(), monitor.end(), E.begin(),
+                   LoadILL::calculateError);
     ++spec;
   }
 

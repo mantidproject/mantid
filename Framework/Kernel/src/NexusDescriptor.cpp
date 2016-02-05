@@ -113,7 +113,7 @@ bool NexusDescriptor::isHDF(const std::string &filename,
  */
 NexusDescriptor::NexusDescriptor(const std::string &filename)
     : m_filename(), m_extension(), m_firstEntryNameType(), m_rootAttrs(),
-      m_pathsToTypes(), m_file(NULL) {
+      m_pathsToTypes(), m_file(nullptr) {
   if (filename.empty()) {
     throw std::invalid_argument("NexusDescriptor() - Empty filename '" +
                                 filename + "'");
@@ -235,8 +235,8 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
   }
   if (level == 0) {
     auto attrInfos = file.getAttrInfos();
-    for (size_t i = 0; i < attrInfos.size(); ++i) {
-      m_rootAttrs.insert(attrInfos[i].name);
+    for (auto &attrInfo : attrInfos) {
+      m_rootAttrs.insert(attrInfo.name);
     }
   }
 

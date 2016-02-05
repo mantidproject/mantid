@@ -122,15 +122,15 @@ void RemovePromptPulse::exec() {
     return;
   }
   g_log.information() << "Calculated prompt pulses at ";
-  for (size_t i = 0; i < pulseTimes.size(); ++i)
-    g_log.information() << pulseTimes[i] << " ";
+  for (double pulseTime : pulseTimes)
+    g_log.information() << pulseTime << " ";
   g_log.information() << " microseconds\n";
 
   MatrixWorkspace_sptr outputWS;
-  for (auto left = pulseTimes.begin(); left != pulseTimes.end(); ++left) {
-    double right = (*left) + width;
+  for (double &pulseTime : pulseTimes) {
+    double right = pulseTime + width;
 
-    g_log.notice() << "Filtering tmin=" << *left << ", tmax=" << right
+    g_log.notice() << "Filtering tmin=" << pulseTime << ", tmax=" << right
                    << " microseconds\n";
 
     // run maskbins to do the work on the first prompt pulse
@@ -147,7 +147,7 @@ void RemovePromptPulse::exec() {
     }
     // always write to correct output workspace
     algo->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
-    algo->setProperty<double>("XMin", *left);
+    algo->setProperty<double>("XMin", pulseTime);
     algo->setProperty<double>("XMax", right);
     algo->executeAsChildAlg();
 

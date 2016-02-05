@@ -19,7 +19,7 @@ using namespace DataObjects;
 
 /// Default constructor
 MergeRuns::MergeRuns()
-    : MultiPeriodGroupAlgorithm(), m_progress(NULL), m_inEventWS(),
+    : MultiPeriodGroupAlgorithm(), m_progress(nullptr), m_inEventWS(),
       m_inMatrixWS(), m_tables() {}
 
 /// Destructor
@@ -64,16 +64,15 @@ void MergeRuns::exec() {
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
-  for (size_t i = 0; i < inputs_orig.size(); i++) {
+  for (const auto &input : inputs_orig) {
     WorkspaceGroup_sptr wsgroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            inputs_orig[i]);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(input);
     if (wsgroup) { // Workspace group
       std::vector<std::string> group = wsgroup->getNames();
       inputs.insert(inputs.end(), group.begin(), group.end());
     } else {
       // Single workspace
-      inputs.push_back(inputs_orig[i]);
+      inputs.push_back(input);
     }
   }
 
@@ -283,9 +282,9 @@ void MergeRuns::execEvent() {
     boost::shared_ptr<AdditionTable> table = m_tables[workspaceNum - 1];
 
     // Add all the event lists together as the table says to do
-    for (auto it = table->begin(); it != table->end(); ++it) {
-      int64_t inWI = it->first;
-      int64_t outWI = it->second;
+    for (auto &WI : *table) {
+      int64_t inWI = WI.first;
+      int64_t outWI = WI.second;
       if (outWI >= 0) {
         outWS->getEventList(outWI) += addee->getEventList(inWI);
       } else {

@@ -28,7 +28,7 @@ DECLARE_ALGORITHM(GenerateEventsFilter)
 GenerateEventsFilter::GenerateEventsFilter()
     : API::Algorithm(), m_dataWS(), m_splitWS(), m_filterWS(), m_filterInfoWS(),
       m_startTime(), m_stopTime(), m_runEndTime(),
-      m_timeUnitConvertFactorToNS(0.), m_dblLog(NULL), m_intLog(NULL),
+      m_timeUnitConvertFactorToNS(0.), m_dblLog(nullptr), m_intLog(nullptr),
       m_logAtCentre(false), m_logTimeTolerance(0.), m_forFastLog(false),
       m_splitters(), m_vecSplitterTime(), m_vecSplitterGroup(),
       m_useParallel(false), m_vecSplitterTimeSet(), m_vecGroupIndexSet() {}
@@ -759,11 +759,10 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
   // Debug print
   stringstream dbsplitss;
   dbsplitss << "Index map size = " << indexwsindexmap.size() << "\n";
-  for (auto mit = indexwsindexmap.begin(); mit != indexwsindexmap.end();
-       ++mit) {
-    dbsplitss << "Index " << mit->first << ":  WS-group = " << mit->second
-              << ". Log value range: [" << logvalueranges[mit->first * 2]
-              << ", " << logvalueranges[mit->first * 2 + 1] << ").\n";
+  for (auto &mit : indexwsindexmap) {
+    dbsplitss << "Index " << mit.first << ":  WS-group = " << mit.second
+              << ". Log value range: [" << logvalueranges[mit.first * 2] << ", "
+              << logvalueranges[mit.first * 2 + 1] << ").\n";
   }
   g_log.information(dbsplitss.str());
 

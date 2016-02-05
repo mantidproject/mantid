@@ -36,8 +36,8 @@ Logger g_log("NexusFileIO");
 
 /// Empty default constructor
 NexusFileIO::NexusFileIO()
-    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW), m_progress(0),
-      m_filename() {}
+    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW),
+      m_progress(nullptr), m_filename() {}
 
 /// Constructor that supplies a progress object
 NexusFileIO::NexusFileIO(Progress *prog)
@@ -219,9 +219,9 @@ bool NexusFileIO::writeNxStringArray(
   int dimensions[2];
   size_t maxlen = 0;
   dimensions[0] = static_cast<int>(values.size());
-  for (size_t i = 0; i < values.size(); i++)
-    if (values[i].size() > maxlen)
-      maxlen = values[i].size();
+  for (const auto &value : values)
+    if (value.size() > maxlen)
+      maxlen = value.size();
   dimensions[1] = static_cast<int>(maxlen);
   NXstatus status = NXmakedata(fileID, name.c_str(), NX_CHAR, 2, dimensions);
   if (status == NX_ERROR)
@@ -343,7 +343,7 @@ int NexusFileIO::writeNexusProcessedData2D(
                 start, asize);
       start[0]++;
     }
-    if (m_progress != 0)
+    if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
     int signal = 1;
     NXputattr(fileID, "signal", &signal, 1, NX_INT32);
@@ -376,7 +376,7 @@ int NexusFileIO::writeNexusProcessedData2D(
       start[0]++;
     }
 
-    if (m_progress != 0)
+    if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
 
     // Fractional area for RebinnedOutput
@@ -395,7 +395,7 @@ int NexusFileIO::writeNexusProcessedData2D(
                   start, asize);
         start[0]++;
       }
-      if (m_progress != 0)
+      if (m_progress != nullptr)
         m_progress->reportIncrement(1, "Writing data");
     }
 
@@ -1057,8 +1057,8 @@ bool NexusFileIO::checkAttributeName(const std::string &target) const {
   // clang-format off
   const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
   // clang-format on
-  for (auto it = infos.begin(); it != infos.end(); ++it) {
-    if (target.compare(it->name) == 0)
+  for (const auto &info : infos) {
+    if (target.compare(info.name) == 0)
       return true;
   }
 
@@ -1141,9 +1141,9 @@ int NexusFileIO::findMantidWSEntries() const {
   // count
   int count = 0;
   std::map<std::string, std::string> entries = m_filehandle->getEntries();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->second == "NXentry") {
-      if (it->first.find("mantid_workspace_") == 0)
+  for (auto &entrie : entries) {
+    if (entrie.second == "NXentry") {
+      if (entrie.first.find("mantid_workspace_") == 0)
         count++;
     }
   }
@@ -1154,8 +1154,8 @@ int NexusFileIO::findMantidWSEntries() const {
 bool NexusFileIO::checkEntryAtLevel(const std::string &item) const {
   // Search the currently open level for name "item"
   std::map<std::string, std::string> entries = m_filehandle->getEntries();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->first == item)
+  for (auto &entrie : entries) {
+    if (entrie.first == item)
       return true;
   }
 
@@ -1167,13 +1167,13 @@ bool NexusFileIO::checkEntryAtLevelByAttribute(const std::string &attribute,
   // Search the currently open level for a section with "attribute" and return
   // entry name
   std::map<std::string, std::string> entries = m_filehandle->getEntries();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->second == "SDS") {
-      m_filehandle->openData(it->first);
+  for (auto &entrie : entries) {
+    if (entrie.second == "SDS") {
+      m_filehandle->openData(entrie.first);
       bool result = checkAttributeName(attribute);
       m_filehandle->closeData();
       if (result) {
-        entry = it->first;
+        entry = entrie.first;
         return true;
       }
     }
@@ -1199,9 +1199,9 @@ bool NexusFileIO::writeNexusBinMasking(
       const API::MatrixWorkspace::MaskList &mList = ws->maskedBins(i);
       spectra.push_back(spectra_count);
       spectra.push_back(offset);
-      for (auto it = mList.cbegin(); it != mList.cend(); ++it) {
-        bins.push_back(it->first);
-        weights.push_back(it->second);
+      for (const auto &mask : mList) {
+        bins.push_back(mask.first);
+        weights.push_back(mask.second);
       }
       ++spectra_count;
       offset += static_cast<int>(mList.size());
@@ -1304,9 +1304,9 @@ int getNexusEntryTypes(const std::string &fileName,
   }
   // for each entry found, look for "analysis" or "definition" text data fields
   // and return value plus entry name
-  for (size_t i = 0; i < entryList.size(); i++) {
+  for (auto &entry : entryList) {
     //
-    stat = NXopengroup(fileH, entryList[i].c_str(), "NXentry");
+    stat = NXopengroup(fileH, entry.c_str(), "NXentry");
     // loop through field names in this entry
     while ((stat = NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) ==
            NX_OK) {
@@ -1326,7 +1326,7 @@ int getNexusEntryTypes(const std::string &fileName,
           value[dims[0]] = '\0';
           // return e.g entryName "analysis"/definition "muonTD"
           definition.push_back(value);
-          entryName.push_back(entryList[i]);
+          entryName.push_back(entry);
           delete[] value;
           NXclosegroup(fileH); // close data group, then entry
           stat = NXclosegroup(fileH);

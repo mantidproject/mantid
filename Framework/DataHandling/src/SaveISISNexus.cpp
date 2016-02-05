@@ -100,7 +100,7 @@ void SaveISISNexus::exec() {
 
   m_isisRaw = new ISISRAW2;
   rawFile = fopen(inputFilename.c_str(), "rb");
-  if (rawFile == NULL) {
+  if (rawFile == nullptr) {
     throw Exception::FileError("Cannot open file ", inputFilename);
   }
   m_isisRaw->ioRAW(rawFile, true);
@@ -322,8 +322,8 @@ int SaveISISNexus::saveStringVectorOpen(const char *name,
   }
   int buff_size = max_str_size;
   if (buff_size <= 0)
-    for (std::size_t i = 0; i < str_vec.size(); ++i) {
-      buff_size = std::max(buff_size, int(str_vec[i].size()));
+    for (const auto &str : str_vec) {
+      buff_size = std::max(buff_size, int(str.size()));
     }
   if (buff_size <= 0)
     buff_size = 1;
@@ -969,8 +969,8 @@ void SaveISISNexus::selog() {
 
   // create a log for each of the found log files
   std::size_t nBase = base_name.size() + 1;
-  for (std::size_t i = 0; i < potentialLogFiles.size(); ++i) {
-    std::string logName = Poco::Path(potentialLogFiles[i]).getFileName();
+  for (auto &potentialLogFile : potentialLogFiles) {
+    std::string logName = Poco::Path(potentialLogFile).getFileName();
     logName.erase(0, nBase);
     logName.erase(logName.size() - 4);
     if (logName.size() > 3) {
@@ -980,9 +980,9 @@ void SaveISISNexus::selog() {
         continue;
     }
 
-    std::ifstream fil(potentialLogFiles[i].c_str());
+    std::ifstream fil(potentialLogFile.c_str());
     if (!fil) {
-      g_log.warning("Cannot open log file " + potentialLogFiles[i]);
+      g_log.warning("Cannot open log file " + potentialLogFile);
       continue;
     }
 

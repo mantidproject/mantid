@@ -28,7 +28,7 @@ DECLARE_ALGORITHM(MergeMDFiles)
 MergeMDFiles::MergeMDFiles()
     : m_nDims(0), m_MDEventType(), m_fileBasedTargetWS(false), m_Filenames(),
       m_EventLoader(), m_OutIWS(), totalEvents(0), totalLoaded(0), fileMutex(),
-      statsMutex(), prog(NULL) {}
+      statsMutex(), prog(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -77,7 +77,7 @@ void MergeMDFiles::loadBoxData() {
   totalEvents = 0;
 
   m_fileComponentsStructure.resize(m_Filenames.size());
-  m_EventLoader.assign(m_Filenames.size(), NULL);
+  m_EventLoader.assign(m_Filenames.size(), nullptr);
 
   try {
     for (size_t i = 0; i < m_Filenames.size(); i++) {
@@ -125,8 +125,7 @@ void MergeMDFiles::loadBoxData() {
   const std::vector<int> &boxType = m_BoxStruct.getBoxType();
   // calculate event positions in the target file.
   uint64_t eventsStart = 0;
-  for (size_t i = 0; i < Boxes.size(); i++) {
-    API::IMDNode *mdBox = Boxes[i];
+  for (auto mdBox : Boxes) {
     mdBox->clear();
     size_t ID = mdBox->getID();
 
@@ -242,7 +241,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
   auto ts = new ThreadSchedulerFIFO();
   ThreadPool tp(ts);
 
-  Kernel::DiskBuffer *DiskBuf(NULL);
+  Kernel::DiskBuffer *DiskBuf(nullptr);
   if (m_fileBasedTargetWS) {
     DiskBuf = bc->getFileIO();
   }
@@ -399,11 +398,9 @@ void MergeMDFiles::exec() {
 }
 /**Delete all event loaders */
 void MergeMDFiles::clearEventLoaders() {
-  for (size_t i = 0; i < m_EventLoader.size(); i++) {
-    if (m_EventLoader[i]) {
-      delete m_EventLoader[i];
-      m_EventLoader[i] = NULL;
-    }
+  for (auto &loader : m_EventLoader) {
+    delete loader;
+    loader = nullptr;
   }
 }
 

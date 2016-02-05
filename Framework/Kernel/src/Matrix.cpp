@@ -83,7 +83,7 @@ template <typename T> std::vector<T> Matrix<T>::getVector() const {
 //
 template <typename T>
 Matrix<T>::Matrix(const size_t nrow, const size_t ncol, const bool makeIdentity)
-    : nx(0), ny(0), V(0)
+    : nx(0), ny(0), V(nullptr)
 /**
   Constructor with pre-set sizes. Matrix is zeroed
   @param nrow :: number of rows
@@ -94,13 +94,13 @@ Matrix<T>::Matrix(const size_t nrow, const size_t ncol, const bool makeIdentity)
   // Note:: nx,ny zeroed so setMem always works
   setMem(nrow, ncol);
   zeroMatrix();
-  if (makeIdentity == true)
+  if (makeIdentity)
     identityMatrix();
 }
 
 template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &A, const std::vector<T> &B)
-    : nx(0), ny(0), V(0)
+    : nx(0), ny(0), V(nullptr)
 /**
   Constructor to take two vectors and multiply them to
   construct a matrix. (assuming that we have columns x row
@@ -120,7 +120,7 @@ Matrix<T>::Matrix(const std::vector<T> &A, const std::vector<T> &B)
 //
 template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &data)
-    : nx(0), ny(0), V(0) {
+    : nx(0), ny(0), V(nullptr) {
   size_t numel = data.size();
   size_t nxt = static_cast<size_t>(sqrt(double(numel)));
   size_t test = nxt * nxt;
@@ -142,7 +142,7 @@ Matrix<T>::Matrix(const std::vector<T> &data)
 
 template <typename T>
 Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
-    : nx(A.nx - 1), ny(A.ny - 1), V(0)
+    : nx(A.nx - 1), ny(A.ny - 1), V(nullptr)
 /**
   Constructor with for a missing row/column.
   @param A :: The input matrix
@@ -178,7 +178,7 @@ Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
 
 template <typename T>
 Matrix<T>::Matrix(const Matrix<T> &A)
-    : nx(0), ny(0), V(0)
+    : nx(0), ny(0), V(nullptr)
 /**
   Simple copy constructor
   @param A :: Object to copy
@@ -545,7 +545,7 @@ void Matrix<T>::deleteMem()
   if (V) {
     delete[] * V;
     delete[] V;
-    V = 0;
+    V = nullptr;
   }
   nx = 0;
   ny = 0;

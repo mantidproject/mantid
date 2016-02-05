@@ -3,9 +3,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -155,6 +155,13 @@ void TomographyIfacePresenter::processCompResourceChange() {
   const std::string comp = m_view->currentComputeResource();
 
   m_model->setupRunTool(comp);
+
+  if ("Local" == comp) {
+    m_view->enableLoggedActions(true);
+  } else {
+    const bool status = !m_model->loggedIn().empty();
+    m_view->enableLoggedActions(status);
+  }
 }
 
 void TomographyIfacePresenter::processToolChange() {
@@ -169,7 +176,10 @@ void TomographyIfacePresenter::processToolChange() {
     m_view->enableRunReconstruct(false);
     m_view->enableConfigTool(true);
   } else {
-    m_view->enableRunReconstruct(!(m_model->loggedIn().empty()));
+    // No need to be logged in anymore when local is selected
+    const bool runningLocally = "Local" == m_view->currentComputeResource();
+    m_view->enableRunReconstruct(runningLocally ||
+                                 !(m_model->loggedIn().empty()));
     m_view->enableConfigTool(true);
   }
 
@@ -197,7 +207,11 @@ void TomographyIfacePresenter::processLogin() {
         "again if that's what you meant.");
   }
 
-  const std::string compRes = m_view->currentComputeResource();
+  std::string compRes = m_view->currentComputeResource();
+  // if local is selected, just take the first remote resource
+  if ("Local" == compRes) {
+    compRes = "SCARF@STFC";
+  }
   try {
     const std::string user = m_view->getUsername();
     if (user.empty()) {
@@ -238,7 +252,12 @@ void TomographyIfacePresenter::processLogout() {
   }
 
   try {
-    m_model->doLogout(m_view->currentComputeResource(), m_view->getUsername());
+    std::string compRes = m_view->currentComputeResource();
+    // if local is selected, just take the first remote resource
+    if ("Local" == compRes) {
+      compRes = "SCARF@STFC";
+    }
+    m_model->doLogout(compRes, m_view->getUsername());
   } catch (std::exception &e) {
     throw(std::string("Problem when logging out. Error description: ") +
           e.what());
@@ -251,38 +270,84 @@ void TomographyIfacePresenter::processSetupReconTool() {
   if (TomographyIfaceModel::g_CCPiTool != m_view->currentReconTool()) {
     m_view->showToolConfig(m_view->currentReconTool());
     m_model->updateReconToolsSettings(m_view->reconToolsSettings());
+
+    // TODO: this would make sense if the reconstruct action/button
+    // was only enabled after setting up at least one tool
+    // m_view->enableToolsSetupsActions(true);
   }
 }
 
 void TomographyIfacePresenter::processRunRecon() {
-  if (m_model->loggedIn().empty())
+  // m_model->checkDataPathsSet();
+  // TODO: validate data path:
+  TomoPathsConfig paths = m_view->currentPathsConfig();
+  if (paths.pathSamples().empty()) {
+    m_view->userWarning("Sample images path not set!",
+                        "The path to the sample images "
+                        "is strictly required to start "
+                        "a reconstruction");
     return;
-
-  const std::string &resource = m_view->currentComputeResource();
-
-  if (m_model->localComputeResource() != resource) {
-    try {
-      m_model->doSubmitReconstructionJob(resource);
-    } catch (std::exception &e) {
-      m_view->userWarning("Issue when trying to start a job", e.what());
-    }
-
-    processRefreshJobs();
   }
+
+  // pre-/post processing steps and filters
+  m_model->updatePrePostProcSettings(m_view->prePostProcSettings());
+  // center of rotation and regions
+  m_model->updateImageStackPreParams(m_view->currentROIEtcParams());
+  m_model->updateTomopyMethod(m_view->tomopyMethod());
+  m_model->updateAstraMethod(m_view->astraMethod());
+  m_model->updateExternalInterpreterPath(m_view->externalInterpreterPath());
+  m_model->updatePathLocalReconScripts(m_view->pathLocalReconScripts());
+  const std::string &resource = m_view->currentComputeResource();
+  if (m_model->localComputeResource() == resource) {
+    subprocessRunReconLocal();
+  } else {
+    subprocessRunReconRemote();
+  }
+
+  processRefreshJobs();
+}
+
+void TomographyIfacePresenter::subprocessRunReconRemote() {
+  if (m_model->loggedIn().empty()) {
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
+                                  m_model->jobsStatusLocal());
+    return;
+  }
+
+  try {
+
+    m_model->doSubmitReconstructionJob(m_view->currentComputeResource());
+  } catch (std::exception &e) {
+    m_view->userWarning("Issue when trying to start a job", e.what());
+  }
+
+  processRefreshJobs();
+}
+
+void TomographyIfacePresenter::subprocessRunReconLocal() {
+  m_model->doRunReconstructionJobLocal();
 }
 
 void TomographyIfacePresenter::processRefreshJobs() {
-  if (m_model->loggedIn().empty())
+  // No need to be logged in, there can be local processes
+  if (m_model->loggedIn().empty()) {
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
+                                  m_model->jobsStatusLocal());
     return;
+  }
 
-  const std::string &comp = m_view->currentComputeResource();
+  std::string comp = m_view->currentComputeResource();
+  if ("Local" == comp) {
+    comp = "SCARF@STFC";
+  }
   m_model->doRefreshJobsInfo(comp);
 
   {
     // update widgets from that info
     QMutexLocker lockit(m_statusMutex);
 
-    m_view->updateJobsInfoDisplay(m_model->jobsStatus());
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
+                                  m_model->jobsStatusLocal());
   }
 }
 
@@ -300,8 +365,8 @@ void TomographyIfacePresenter::processVisualizeJobs() {
   doVisualize(m_view->processingJobsIDs());
 }
 
-void
-TomographyIfacePresenter::doVisualize(const std::vector<std::string> &ids) {
+void TomographyIfacePresenter::doVisualize(
+    const std::vector<std::string> &ids) {
   m_model->logMsg(" Visualizing results from job: " + ids.front());
   // TODO: open dialog, send to Paraview, etc.
 }
