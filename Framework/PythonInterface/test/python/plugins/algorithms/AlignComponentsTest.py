@@ -1,5 +1,6 @@
 import unittest
 from mantid.simpleapi import AlignComponents, CreateSampleWorkspace, MoveInstrumentComponent, CreateEmptyTableWorkspace, mtd, RotateInstrumentComponent
+from mantid.api import AlgorithmFactory
 
 class AlignComponentsTest(unittest.TestCase):
 
@@ -109,4 +110,6 @@ class AlignComponentsTest(unittest.TestCase):
         self.assertEqual(startRot[2], endRot[2])
 
 if __name__ == "__main__":
-    unittest.main()
+    # Only test is Algorithm is loaded
+    if AlgorithmFactory.exists("AlignComponents"):
+        unittest.main()
