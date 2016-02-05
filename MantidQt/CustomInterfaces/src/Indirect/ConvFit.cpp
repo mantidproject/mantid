@@ -1257,7 +1257,7 @@ void ConvFit::singleFitComplete(bool error) {
     pref += "f" + QString::number(subIndex) + ".";
   }
 
-  if (fitTypeIndex == 1 || fitTypeIndex == 2) {
+  if (fitTypeIndex == 2) {
     functionName = "Lorentzian 1";
   }
 
@@ -1332,7 +1332,11 @@ void ConvFit::hwhmChanged(double val) {
   // Update the property
   auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
   hwhmRangeSelector->blockSignals(true);
-  m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], hwhm * 2);
+  QString propName = "Lorentzian 1.FWHM";
+  if (m_uiForm.cbFitType->currentIndex() == 1) {
+	  propName = "One Lorentzian";
+  }
+  m_dblManager->setValue(m_properties[propName], hwhm * 2);
   hwhmRangeSelector->blockSignals(false);
 }
 
