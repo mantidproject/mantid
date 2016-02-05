@@ -79,7 +79,7 @@ private:
   int m_runMax;
 
   // ShortHand Naming for fit functions
-  QStringList m_fitStrings;
+  QStringList m_fitAbbreviation;
 
   // Used in auto generating defaults for parameters
   QMap<QString, double> m_defaultParams;

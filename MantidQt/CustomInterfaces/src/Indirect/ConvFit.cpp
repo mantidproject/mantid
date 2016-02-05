@@ -40,14 +40,14 @@ void ConvFit::setup() {
   m_runMax = 0;
 
   // Initialise fitTypeStrings
-  m_fitStrings = QStringList() << ""
-                               << "1L"
-                               << "2L"
-                               << "IDS"
-                               << "IDC"
-                               << "EDS"
-                               << "EDC"
-                               << "SFT";
+  m_fitAbbreviation = QStringList() << ""
+                                    << "1L"
+                                    << "2L"
+                                    << "IDS"
+                                    << "IDC"
+                                    << "EDS"
+                                    << "EDC"
+                                    << "SFT";
   // All Parameters in tree that should be defaulting to 1
   m_defaultParams = createDefaultParamsMap(m_defaultParams);
 
@@ -884,7 +884,7 @@ QString ConvFit::fitTypeString() const {
   if (m_blnManager->value(m_properties["UseDeltaFunc"]))
     fitType += "Delta";
 
-  fitType += m_fitStrings.at(m_uiForm.cbFitType->currentIndex());
+  fitType += m_fitAbbreviation.at(m_uiForm.cbFitType->currentIndex());
 
   return fitType;
 }
@@ -1194,16 +1194,16 @@ void ConvFit::singleFitComplete(bool error) {
   m_uiForm.ppPlot->addSpectrum("Fit", resultName, 1, Qt::red);
   m_uiForm.ppPlot->addSpectrum("Diff", resultName, 2, Qt::blue);
 
-  IFunction_sptr outputFunc = m_singleFitAlg->getProperty("Function");
+  IFunction_const_sptr outputFunc = m_singleFitAlg->getProperty("Function");
 
   QString functionName = m_uiForm.cbFitType->currentText();
 
   // Get params.
   QMap<QString, double> parameters;
-  std::vector<std::string> parNames = outputFunc->getParameterNames();
+  const std::vector<std::string> parNames = outputFunc->getParameterNames();
   std::vector<double> parVals;
 
-  QStringList params = getFunctionParameters(functionName);
+  const QStringList params = getFunctionParameters(functionName);
 
   for (size_t i = 0; i < parNames.size(); ++i)
     parVals.push_back(outputFunc->getParameter(parNames[i]));
@@ -1216,7 +1216,7 @@ void ConvFit::singleFitComplete(bool error) {
   m_dblManager->setValue(m_properties["BGA0"], parameters["f0.A0"]);
   m_dblManager->setValue(m_properties["BGA1"], parameters["f0.A1"]);
 
-  int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
+  const int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
 
   int funcIndex = 0;
   int subIndex = 0;
@@ -1227,13 +1227,13 @@ void ConvFit::singleFitComplete(bool error) {
     subIndex++;
   }
 
-  bool usingDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
+  const bool usingDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
 
   // If using a delta function with any fit type or using two Lorentzians
-  bool usingCompositeFunc =
+  const bool usingCompositeFunc =
       ((usingDeltaFunc && fitTypeIndex > 0) || fitTypeIndex == 2);
 
-  QString prefBase = "f1.f1.";
+  const QString prefBase = "f1.f1.";
 
   if (usingDeltaFunc) {
     QString key = prefBase;
@@ -1263,8 +1263,8 @@ void ConvFit::singleFitComplete(bool error) {
 
   if (fitTypeIndex == 2) {
     for (auto it = params.begin(); it != params.end() - 3; ++it) {
-      QString functionParam = functionName + "." + *it;
-      QString paramValue = pref + *it;
+      const QString functionParam = functionName + "." + *it;
+      const QString paramValue = pref + *it;
       m_dblManager->setValue(m_properties[functionParam],
                              parameters[paramValue]);
     }
@@ -1276,16 +1276,16 @@ void ConvFit::singleFitComplete(bool error) {
     functionName = "Lorentzian 2";
 
     for (auto it = params.begin() + 3; it != params.end(); ++it) {
-      QString functionParam = functionName + "." + *it;
-      QString paramValue = pref + *it;
+      const QString functionParam = functionName + "." + *it;
+      const QString paramValue = pref + *it;
       m_dblManager->setValue(m_properties[functionParam],
                              parameters[paramValue]);
     }
 
   } else {
     for (auto it = params.begin(); it != params.end(); ++it) {
-      QString functionParam = functionName + "." + *it;
-      QString paramValue = pref + *it;
+      const QString functionParam = functionName + "." + *it;
+      const QString paramValue = pref + *it;
       m_dblManager->setValue(m_properties[functionParam],
                              parameters[paramValue]);
     }
