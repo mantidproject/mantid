@@ -207,8 +207,8 @@ public:
         // Arrange
         auto workspace = getTestWorkspace("MDHisto");
 
-        const std::string filename = "SaveMDWorkspaceToVTKImplTestFile.vts";
-        filename = getTemporaryFilename(filenameWithExtension);
+        std::string filename = "SaveMDWorkspaceToVTKImplTestFile.vts";
+        filename = getTemporaryFilename(filename);
         removeTemporaryFile(filename);
 
         // Act
