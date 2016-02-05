@@ -230,48 +230,39 @@ void ConvFit::run() {
     g_log.error("No workspace loaded");
     return;
   }
-
-  QString fitType = fitTypeString();
-  QString bgType = backgroundString();
-
+  // Check for valid fitType
+  const QString fitType = fitTypeString();
   if (fitType == "") {
     g_log.error("No fit type defined");
   }
 
+  // Get input from interface
   bool useTies = m_uiForm.ckTieCentres->isChecked();
   QString ties = (useTies ? "True" : "False");
 
   CompositeFunction_sptr func = createFunction(useTies);
-  std::string function = std::string(func->asString());
-  std::string stX = m_properties["StartX"]->valueText().toStdString();
-  std::string enX = m_properties["EndX"]->valueText().toStdString();
+  const auto function = std::string(func->asString());
+  const auto stX = m_properties["StartX"]->valueText().toStdString();
+  const auto enX = m_properties["EndX"]->valueText().toStdString();
   m_runMin = m_uiForm.spSpectraMin->value();
   m_runMax = m_uiForm.spSpectraMax->value();
-  std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
-  std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
-  int maxIterations =
+  const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
+  const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
+  const int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
   // Construct expected name
   m_baseName = QString::fromStdString(m_cfInputWS->getName());
-  int pos = m_baseName.lastIndexOf("_");
-  if (pos != -1) {
-    m_baseName = m_baseName.left(pos + 1);
+  // Remove _red
+  const auto cutIndex = m_baseName.lastIndexOf("_");
+  if (cutIndex != -1) {
+    m_baseName = m_baseName.left(cutIndex + 1);
   }
+  // Add fit specific suffix
+  const QString bgType = backgroundString();
   m_baseName += "conv_";
-  if (m_blnManager->value(m_properties["UseDeltaFunc"])) {
-    m_baseName += "Delta";
-  }
-  int fitIndex = m_uiForm.cbFitType->currentIndex();
-  if (fitIndex < 3 && fitIndex != 0) {
-    m_baseName += QString::number(fitIndex);
-    m_baseName += "L";
-  } else {
-    m_baseName += convertFuncToShort(m_uiForm.cbFitType->currentText());
-  }
-  m_baseName +=
-      convertBackToShort(m_uiForm.cbBackground->currentText().toStdString()) +
-      "_s";
+  m_baseName += fitType;
+  m_baseName += bgType;
   m_baseName += QString::fromStdString(specMin);
   m_baseName += "_to_";
   m_baseName += QString::fromStdString(specMax);
@@ -280,7 +271,6 @@ void ConvFit::run() {
   IAlgorithm_sptr cfs =
       AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->initialize();
-
   cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
   cfs->setProperty("Function", function);
   cfs->setProperty("BackgroundType",
@@ -293,6 +283,8 @@ void ConvFit::run() {
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", maxIterations);
+
+  // Add to batch alg runner and execute
   m_batchAlgoRunner->addAlgorithm(cfs);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
@@ -1645,46 +1637,6 @@ void ConvFit::updatePlotOptions() {
   m_uiForm.cbPlotType->addItems(plotOptions);
 }
 
-/**
-* Converts the user input for function into short hand for use in the workspace
-* naming
-* @param original - The original user input to the function
-* @return The short hand of the users input
-*/
-QString ConvFit::convertFuncToShort(const QString &original) {
-  QString result = "";
-  if (m_uiForm.cbFitType->currentIndex() != 0) {
-    if (original.at(0) == 'E') {
-      result += "E";
-    } else if (original.at(0) == 'I') {
-      result += "I";
-    } else {
-      return "SFT";
-    }
-    auto pos = original.find("Circle");
-    if (pos != -1) {
-      result += "DC";
-    } else {
-      result += "DS";
-    }
-  }
-  return result;
-}
-
-/**
-* Converts the user input for background into short hand for use in the
-* workspace naming
-* @param original - The original user input to the function
-* @return The short hand of the users input
-*/
-QString ConvFit::convertBackToShort(const std::string &original) {
-  QString result = QString::fromStdString(original.substr(0, 3));
-  auto pos = original.find(" ");
-  if (pos != std::string::npos) {
-    result += original.at(pos + 1);
-  }
-  return result;
-}
 
 /**
 * Populates the default parameter map with the initial default values
