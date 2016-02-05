@@ -41,11 +41,6 @@ void CentroidPeaksMD2::init() {
                                                            Direction::Input),
                   "An input MDEventWorkspace.");
 
-  std::vector<std::string> propOptions;
-  propOptions.emplace_back("Q (lab frame)");
-  propOptions.emplace_back("Q (sample frame)");
-  propOptions.emplace_back("HKL");
-
   declareProperty(
       new PropertyWithValue<double>("PeakRadius", 1.0, Direction::Input),
       "Fixed radius around each peak position in which to calculate the "

@@ -510,19 +510,16 @@ void GroupDetectors2::processXMLFile(std::string fname,
       loader.getGroupSpectraMap();
 
   // 3. Build m_GroupSpecInds
-  for (auto dit = mGroupDetectorsMap.begin(); dit != mGroupDetectorsMap.end();
-       ++dit) {
-    m_GroupSpecInds.emplace(dit->first, std::vector<size_t>());
+  for (const auto &det : mGroupDetectorsMap) {
+    m_GroupSpecInds.emplace(det.first, std::vector<size_t>());
   }
 
   // 4. Detector IDs
-  for (auto dit = mGroupDetectorsMap.begin(); dit != mGroupDetectorsMap.end();
-       ++dit) {
-    int groupid = dit->first;
-    std::vector<detid_t> detids = dit->second;
+  for (const auto &det : mGroupDetectorsMap) {
+    int groupid = det.first;
+    const std::vector<detid_t> &detids = det.second;
 
-    storage_map::iterator sit;
-    sit = m_GroupSpecInds.find(groupid);
+    auto sit = m_GroupSpecInds.find(groupid);
     if (sit == m_GroupSpecInds.end())
       continue;
 

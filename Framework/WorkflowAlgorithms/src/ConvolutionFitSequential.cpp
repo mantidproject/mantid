@@ -68,19 +68,14 @@ void ConvolutionFitSequential::init() {
       "The input workspace for the fit.");
 
   auto scv = boost::make_shared<StringContainsValidator>();
-  auto requires = std::vector<std::string>();
-  requires.emplace_back("Convolution");
-  requires.emplace_back("Resolution");
+  auto requires = std::vector<std::string>{"Convolution", "Resolution"};
   scv->setRequiredStrings(requires);
 
   declareProperty("Function", "", scv,
                   "The function that describes the parameters of the fit.",
                   Direction::Input);
 
-  std::vector<std::string> backType;
-  backType.emplace_back("Fixed Flat");
-  backType.emplace_back("Fit Flat");
-  backType.emplace_back("Fit Linear");
+  std::vector<std::string> backType{"Fixed Flat", "Fit Flat", "Fit Linear"};
 
   declareProperty("BackgroundType", "Fixed Flat",
                   boost::make_shared<StringListValidator>(backType),

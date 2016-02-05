@@ -214,8 +214,6 @@ public:
     lebailfunction.function(out, vecX, true, false);
     TS_ASSERT_THROWS_ANYTHING(lebailfunction.function(out, vecX, true, true));
 
-    // map<string, double> bkgdparmap {{"A0", 0.001},{"A1", 0.}};
-
     vector<string> vecbkgdparnames(2);
     vecbkgdparnames[0] = "A0";
     vecbkgdparnames[1] = "A1";

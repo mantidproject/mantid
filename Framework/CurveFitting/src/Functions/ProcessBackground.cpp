@@ -91,7 +91,6 @@ void ProcessBackground::init() {
 
   // Optional Function Type
   std::vector<std::string> bkgdtype{"Polynomial", "Chebyshev"};
-  // bkgdtype.emplace_back("FullprofPolynomial");
   auto bkgdvalidator =
       boost::make_shared<Kernel::StringListValidator>(bkgdtype);
   declareProperty(

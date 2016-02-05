@@ -201,14 +201,13 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   // should'nt touch.
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-  std::set<std::string> blacklist;
-  blacklist.insert("ThetaIn");
-  blacklist.insert("ThetaOut");
-  blacklist.insert("InputWorkspace");
-  blacklist.insert("OutputWorkspace");
-  blacklist.insert("OutputWorkspaceWavelength");
-  blacklist.insert("FirstTransmissionRun");
-  blacklist.insert("SecondTransmissionRun");
+  std::set<std::string> blacklist{"ThetaIn",
+                                  "ThetaOut",
+                                  "InputWorkspace",
+                                  "OutputWorkspace",
+                                  "OutputWorkspaceWavelength",
+                                  "FirstTransmissionRun",
+                                  "SecondTransmissionRun"};
   m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
 
   // If we don't have a searcher yet, use ReflCatalogSearcher

@@ -158,48 +158,47 @@ namespace MantidQt
         m_dataCachePeakIndex(-1),
         m_peaksWS(peaksWS)
     {
-      int index = 0;
-      m_columnNameMap.emplace(index++, RUNNUMBER);
-      m_columnNameMap.emplace(index++, DETID);
-      m_columnNameMap.emplace(index++, H);
-      m_columnNameMap.emplace(index++, K);
-      m_columnNameMap.emplace(index++, L);
-      m_columnNameMap.emplace(index++, WAVELENGTH);
-      m_columnNameMap.emplace(index++, INITIAL_ENERGY);
-      m_columnNameMap.emplace(index++, FINAL_ENERGY);
-      m_columnNameMap.emplace(index++, ENERGY);
-      m_columnNameMap.emplace(index++, TOF);
-      m_columnNameMap.emplace(index++, DSPACING);
-      m_columnNameMap.emplace(index++, INT);
-      m_columnNameMap.emplace(index++, SIGMINT);
-      m_columnNameMap.emplace(index++, INT_SIGINT);
-      m_columnNameMap.emplace(index++, BINCOUNT);
-      m_columnNameMap.emplace(index++, BANKNAME);
-      m_columnNameMap.emplace(index++, ROW);
-      m_columnNameMap.emplace(index++, COL);
-      m_columnNameMap.emplace(index++, QLAB);
-      m_columnNameMap.emplace(index++, QSAMPLE);
+      m_columnNameMap = {{0, RUNNUMBER},
+                         {1, DETID},
+                         {2, H},
+                         {3, K},
+                         {4, L},
+                         {5, WAVELENGTH},
+                         {6, INITIAL_ENERGY},
+                         {7, FINAL_ENERGY},
+                         {8, ENERGY},
+                         {9, TOF},
+                         {10, DSPACING},
+                         {11, INT},
+                         {12, SIGMINT},
+                         {13, INT_SIGINT},
+                         {14, BINCOUNT},
+                         {15, BANKNAME},
+                         {16, ROW},
+                         {17, COL},
+                         {18, QLAB},
+                         {19, QSAMPLE}};
 
-      m_sortableColumns.emplace(RUNNUMBER, true);
-      m_sortableColumns.emplace(DETID, true);
-      m_sortableColumns.emplace(H, true);
-      m_sortableColumns.emplace(K, true);
-      m_sortableColumns.emplace(L, true);
-      m_sortableColumns.emplace(WAVELENGTH, true);
-      m_sortableColumns.emplace(ENERGY, false);
-      m_sortableColumns.emplace(INITIAL_ENERGY, true);
-      m_sortableColumns.emplace(FINAL_ENERGY, true);
-      m_sortableColumns.emplace(TOF, true);
-      m_sortableColumns.emplace(DSPACING, true);
-      m_sortableColumns.emplace(INT, true);
-      m_sortableColumns.emplace(SIGMINT, true);
-      m_sortableColumns.emplace(INT_SIGINT, false);
-      m_sortableColumns.emplace(BINCOUNT, true);
-      m_sortableColumns.emplace(BANKNAME, true);
-      m_sortableColumns.emplace(ROW, true);
-      m_sortableColumns.emplace(COL, true);
-      m_sortableColumns.emplace(QLAB, false);
-      m_sortableColumns.emplace(QSAMPLE, false);
+      m_sortableColumns = {{RUNNUMBER, true},
+                           {DETID, true},
+                           {H, true},
+                           {K, true},
+                           {L, true},
+                           {WAVELENGTH, true},
+                           {ENERGY, false},
+                           {INITIAL_ENERGY, true},
+                           {FINAL_ENERGY, true},
+                           {TOF, true},
+                           {DSPACING, true},
+                           {INT, true},
+                           {SIGMINT, true},
+                           {INT_SIGINT, false},
+                           {BINCOUNT, true},
+                           {BANKNAME, true},
+                           {ROW, true},
+                           {COL, true},
+                           {QLAB, false},
+                           {QSAMPLE, false}};
 
       if (!Mantid::Kernel::ConfigService::Instance().getValue("PeakColumn.hklPrec", m_hklPrec))
         m_hklPrec = 2;

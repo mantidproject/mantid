@@ -107,9 +107,7 @@ void RefReduction::init() {
   setPropertySettings("AngleOffset", new VisibleWhenProperty(
                                          "Instrument", IS_EQUAL_TO, "REF_L"));
 
-  std::vector<std::string> instrOptions;
-  instrOptions.emplace_back("REF_L");
-  instrOptions.emplace_back("REF_M");
+  std::vector<std::string> instrOptions{"REF_L", "REF_M"};
   declareProperty("Instrument", "REF_M",
                   boost::make_shared<StringListValidator>(instrOptions),
                   "Instrument to reduce for");

@@ -61,11 +61,8 @@ void SetupHFIRReduction::init() {
 
   // Beam center
   std::string center_grp = "Beam Center";
-  std::vector<std::string> centerOptions;
-  centerOptions.emplace_back("None");
-  centerOptions.emplace_back("Value");
-  centerOptions.emplace_back("DirectBeam");
-  centerOptions.emplace_back("Scattering");
+  std::vector<std::string> centerOptions{"None", "Value", "DirectBeam",
+                                         "Scattering"};
 
   declareProperty("BeamCenterMethod", "None",
                   boost::make_shared<StringListValidator>(centerOptions),

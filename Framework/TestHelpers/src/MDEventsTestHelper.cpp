@@ -241,12 +241,7 @@ MDHistoWorkspace_sptr
 makeFakeMDHistoWorkspaceGeneral(size_t numDims, double signal,
                                 double errorSquared, size_t *numBins,
                                 coord_t *min, coord_t *max, std::string name) {
-  std::vector<std::string> names;
-  names.emplace_back("x");
-  names.emplace_back("y");
-  names.emplace_back("z");
-  names.emplace_back("t");
-
+  std::vector<std::string> names{"x", "y", "z", "t"};
   // Create MDFrame of General Frame type
   Mantid::Geometry::GeneralFrame frame(
       Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");

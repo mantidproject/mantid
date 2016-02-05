@@ -20,9 +20,7 @@ void HFIRSANSNormalise::init() {
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
       "Workspace to be corrected");
 
-  std::vector<std::string> normOptions;
-  normOptions.emplace_back("Monitor");
-  normOptions.emplace_back("Timer");
+  std::vector<std::string> normOptions{"Monitor", "Timer"};
   this->declareProperty("NormalisationType", "Monitor",
                         boost::make_shared<StringListValidator>(normOptions),
                         "Type of Normalisation to use");

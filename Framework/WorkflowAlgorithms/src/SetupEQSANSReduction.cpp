@@ -86,11 +86,8 @@ void SetupEQSANSReduction::init() {
 
   // Beam center
   std::string center_grp = "Beam Center";
-  std::vector<std::string> centerOptions;
-  centerOptions.emplace_back("None");
-  centerOptions.emplace_back("Value");
-  centerOptions.emplace_back("DirectBeam");
-  centerOptions.emplace_back("Scattering");
+  std::vector<std::string> centerOptions{"None", "Value", "DirectBeam",
+                                         "Scattering"};
 
   declareProperty("BeamCenterMethod", "None",
                   boost::make_shared<StringListValidator>(centerOptions),
@@ -256,9 +253,7 @@ void SetupEQSANSReduction::init() {
 
   // Transmission
   std::string trans_grp = "Transmission";
-  std::vector<std::string> transOptions;
-  transOptions.emplace_back("Value");
-  transOptions.emplace_back("DirectBeam");
+  std::vector<std::string> transOptions{"Value", "DirectBeam"};
   declareProperty("TransmissionMethod", "Value",
                   boost::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
@@ -479,10 +474,7 @@ void SetupEQSANSReduction::init() {
   declareProperty(
       new ArrayProperty<int>("MaskedEdges"),
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
-  std::vector<std::string> maskOptions;
-  maskOptions.emplace_back("None");
-  maskOptions.emplace_back("Front");
-  maskOptions.emplace_back("Back");
+  std::vector<std::string> maskOptions{"None", "Front", "Back"};
   declareProperty("MaskedSide", "None",
                   boost::make_shared<StringListValidator>(maskOptions),
                   "Mask one side of the detector");

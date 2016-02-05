@@ -54,6 +54,16 @@ const std::string PDDetermineCharacterizations::summary() const {
 
 /**
  * These should match those in LoadPDCharacterizations
+ * - "frequency" double
+ * -  "wavelength" (double)
+ * -  "bank" (integer)
+ * -  "container" (string)
+ * -  "vanadium" (string)
+ * -  "empty" (string)
+ * -  "d_min" (string)
+ * -  "d_max" (string)
+ * -  "tof_min" (double)
+ * -  "tof_max" (double)
  * @return The list of expected column names
  */
 std::vector<std::string> getColumnNames() {
