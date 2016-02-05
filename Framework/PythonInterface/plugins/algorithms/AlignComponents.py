@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init, no-name-in-module
 import math
 import numpy as np
 from scipy.stats import chisquare
@@ -121,7 +121,8 @@ class AlignComponents(PythonAlgorithm):
         eulerConventions = ["ZXZ", "XYX", "YZY", "ZYZ", "XZX", "YXY", "XYZ", "YZX", "ZXY", "XZY", "ZYX", "YXZ"]
         self.declareProperty(name="EulerConvention", defaultValue="YZX",
                              validator=StringListValidator(eulerConventions),
-                             doc="Euler angles convention used when calculating and displaying angles, eg XYZ corresponding to alpha beta gamma.")
+                             doc="Euler angles convention used when calculating and displaying angles,"
+                             "eg XYZ corresponding to alpha beta gamma.")
 
         # alpha rotation
         self.declareProperty(name="alphaRotation", defaultValue=False,
@@ -225,10 +226,15 @@ class AlignComponents(PythonAlgorithm):
                                        + ','.join(components) + "\""
 
         # This checks that something will actually be refined,
-        if not (self.getProperty("Xposition").value or self.getProperty("Yposition").value or self.getProperty("Zposition").value or
-                self.getProperty("alphaRotation").value or self.getProperty("betaRotation").value or self.getProperty("gammaRotation").value or
-                self.getProperty("FitSourcePosition").value or self.getProperty("FitSamplePosition").value):
-            issues["Xposition"] = "You must calibrate at least one property"
+        if not (self.getProperty("Xposition").value or
+                self.getProperty("Yposition").value or
+                self.getProperty("Zposition").value or
+                self.getProperty("alphaRotation").value or
+                self.getProperty("betaRotation").value or
+                self.getProperty("gammaRotation").value or
+                self.getProperty("FitSourcePosition").value or
+                self.getProperty("FitSamplePosition").value):
+            issues["Xposition"] = "You must calibrate at least one parameter."
 
         return issues
 
@@ -253,8 +259,8 @@ class AlignComponents(PythonAlgorithm):
             wks_name = self.getProperty("Workspace").value.getName()
         else:
             wks_name = "alignedWorkspace"
-            wks = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,
-                                          OutputWorkspace=wks_name)
+            api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,
+                                    OutputWorkspace=wks_name)
 
         # First fit L1 if selected for Source and/or Sample
         for component in "Source", "Sample":
@@ -482,7 +488,6 @@ class AlignComponents(PythonAlgorithm):
         return deg, ax0, ax1, ax2
 
 
-#pylint: disable=wrong-import-position, wrong-import-order
 try:
     from scipy.optimize import minimize
     AlgorithmFactory.subscribe(AlignComponents)
