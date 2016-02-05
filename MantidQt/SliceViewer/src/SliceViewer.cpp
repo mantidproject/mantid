@@ -65,6 +65,18 @@ using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
 using MantidQt::API::AlgorithmRunner;
 
+namespace {
+/*
+Checks if the rebinning is in a consistent state, ie if rebin mode is selected and there
+is a rebin workspace or there is no rebin workspace and no rebin mode selected.
+The state is inconsistent if rebin mode is selected and there is no workspace.
+*/
+  bool isRebinInConsistentState(Mantid::API::IMDWorkspace_sptr rebinnedWS, bool useRebinMode) {
+    return rebinnedWS && useRebinMode;
+  }
+}
+
+
 namespace MantidQt {
 namespace SliceViewer {
 
@@ -1378,7 +1390,13 @@ part of the workspace */
 void SliceViewer::findRangeSlice() {
   IMDWorkspace_sptr workspace_used = m_ws;
   if (m_rebinMode) {
-    workspace_used = this->m_overlayWS;
+    // If the rebinned state is inconsistent, then we turn off
+    // the rebin selection and continue to use the original WS
+    if (!isRebinInConsistentState(m_overlayWS, m_rebinMode)) {
+      setRebinMode(false);
+    } else {
+      workspace_used = this->m_overlayWS;
+    }
   }
 
   if (!workspace_used)
