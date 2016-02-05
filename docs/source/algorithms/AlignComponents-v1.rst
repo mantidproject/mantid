@@ -33,7 +33,7 @@ Usage
             MakeOffsetsWorkspace=True,
             MakeMaskWorkspace=False,
             WorkspaceName="PG3")
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2014-03-10.xml")
+      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
       component="bank26"
       print "Start position is",ws.getInstrument().getComponentByName(component).getPos()
       AlignComponents(CalibrationTable="PG3_cal",
@@ -60,7 +60,7 @@ Output:
 	    MakeOffsetsWorkspace=True,
 	    MakeMaskWorkspace=False,
 	    WorkspaceName="PG3")
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2014-03-10.xml")
+      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
       components="bank26,bank46"
       print "Start bank26 rotation is",ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
       print "Start bank46 rotation is",ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
@@ -85,7 +85,7 @@ Output:
 
 **Example - Align sample position in POWGEN:**
 
-.. code-block:: python
+.. testcode:: sample
 
       LoadCalFile(InstrumentName="PG3",
 	    CalFilename="PG3_golden.cal",
@@ -93,17 +93,17 @@ Output:
 	    MakeOffsetsWorkspace=True,
 	    MakeMaskWorkspace=False,
 	    WorkspaceName="PG3")
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2014-03-10.xml")
+      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
       print "Start sample position is",ws.getInstrument().getSample().getPos().getZ()
       AlignComponents(CalibrationTable="PG3_cal",
             Workspace=ws,
             FitSamplePosition=True)
       print "Final sample position is",mtd['ws'].getInstrument().getSample().getPos().getZ()
 
-Output:
+.. testoutput:: sample
 
       Start sample position is 0.0
-      Final sample position is 0.002
+      Final sample position is 0.000876544781748
 
 .. categories::
 
