@@ -143,17 +143,88 @@ public:
         TSM_ASSERT("Detects that not a 4D MD workspace", !is4D);
     }
 
-    void test_that_saves_MD_Histo_workspace_to_vts_file()
+    void
+    test_that_saves_MD_Event_workspace_to_vts_file_without_extension_in_path_name()
     {
         // Arrange
-        Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
-        const size_t numDims = 3;
-        const size_t numBins = 5;
-        auto workspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-            1.0, numDims, numBins);
+        auto workspace = getTestWorkspace("MDEvent");
 
-        const int recursionDepth
-            = 5; // Note that this does not matter since we are testing MDHisto
+        const std::string filenameBare = "SaveMDWorkspaceToVTKImplTestFile";
+        const std::string filenameWithExtension = filenameBare + ".vtu";
+
+        auto filenameExpected = getTemporaryFilename(filenameWithExtension);
+        removeTemporaryFile(filenameExpected);
+
+        auto filename = getTemporaryFilename(filenameBare);
+
+        // Act
+        do_test_saving_to_vtk_file(workspace, filename);
+
+        // Assert
+        verify_file_creation(filenameExpected);
+    }
+
+    void
+    test_that_saves_MD_Event_workspace_to_vts_file_with_extension_in_path_name()
+    {
+        // Arrange
+        auto workspace = getTestWorkspace("MDEvent");
+
+        const std::string filename = "SaveMDWorkspaceToVTKImplTestFile.vtu";
+        removeTemporaryFile(filename);
+
+        // Act
+        do_test_saving_to_vtk_file(workspace, filename);
+
+        // Assert
+        verify_file_creation(filename);
+    }
+
+    void
+    test_that_saves_MD_Histo_workspace_to_vts_file_without_extension_in_path_name()
+    {
+        // Arrange
+        auto workspace = getTestWorkspace("MDHisto");
+
+        const std::string filenameBare = "SaveMDWorkspaceToVTKImplTestFile";
+        const std::string filenameWithExtension = filenameBare + ".vts";
+
+        auto filenameExpected = getTemporaryFilename(filenameWithExtension);
+        removeTemporaryFile(filenameExpected);
+
+        auto filename = getTemporaryFilename(filenameBare);
+
+        // Act
+        do_test_saving_to_vtk_file(workspace, filename);
+
+        // Assert
+        verify_file_creation(filenameExpected);
+    }
+
+    void
+    test_that_saves_MD_Histo_workspace_to_vts_file_with_extension_in_path_name()
+    {
+        // Arrange
+        auto workspace = getTestWorkspace("MDHisto");
+
+        const std::string filename = "SaveMDWorkspaceToVTKImplTestFile.vts";
+        filename = getTemporaryFilename(filenameWithExtension);
+        removeTemporaryFile(filename);
+
+        // Act
+        do_test_saving_to_vtk_file(workspace, filename);
+
+        // Assert
+        verify_file_creation(filename);
+    }
+
+private:
+    void do_test_saving_to_vtk_file(Mantid::API::IMDWorkspace_sptr workspace,
+                                    std::string filename)
+    {
+        const int recursionDepth = 5;
+
+        Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
 
         const auto normalizations
             = saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
@@ -166,29 +237,34 @@ public:
         const auto threshold
             = saveMDToVTK.translateStringToThresholdRange(thresholds[0]);
 
-        const std::string filenameBare = "SaveMDWorkspaceToVTKImplTestFile";
-        const std::string filenameWithExtension = filenameBare + ".vts";
-
-        auto filenameExpected = getTemporaryFilename(filenameWithExtension);
-        removeTemporaryFile(filenameExpected);
-
-        auto filename = getTemporaryFilename(filenameBare);
-
-        // Act
         saveMDToVTK.saveMDWorkspace(workspace, filename, normalization,
                                     threshold, recursionDepth);
-
-        // Assert -- at this point we can only check that a vtk (xml) structured
-        // grid file (vts) has been created
-        auto fileExists = doesFileExist(filenameExpected);
-        TSM_ASSERT("The .vts file should have been saved to the default save "
-                   "directory",
-                   fileExists);
-        // Cleanup
-        removeTemporaryFile(filenameExpected);
     }
 
-private:
+    Mantid::API::IMDWorkspace_sptr getTestWorkspace(std::string workspaceType)
+    {
+        Mantid::API::IMDWorkspace_sptr workspace;
+        if (workspaceType == "MDEvent") {
+            const std::string name = "SaveMDEventToVTKTestWorkspace";
+            workspace = MDEventsTestHelper::makeFakeMDEventWorkspace(name);
+        } else {
+            const size_t numDims = 3;
+            const size_t numBins = 5;
+            workspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+                1.0, numDims, numBins);
+        }
+        return workspace;
+    }
+
+    void verify_file_creation(std::string filename)
+    {
+        // Assert
+        auto fileExists = doesFileExist(filename);
+        TSM_ASSERT("The according file should have been saved out", fileExists);
+        // Cleanup
+        removeTemporaryFile(filename);
+    }
+
     std::string getTemporaryFilename(std::string filenameWithoutPath) const
     {
         auto default_save_directory
