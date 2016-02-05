@@ -93,8 +93,10 @@ Output:
 	    WorkspaceName="PG3")
       ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
       components="bank26,bank46"
-      print "Start bank26 rotation is",ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
-      print "Start bank46 rotation is",ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
+      bank26Rot = ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
+      bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
+      print "Start bank26 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank26Rot[0], bank26Rot[1], bank26Rot[2])
+      print "Start bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
       AlignComponents(CalibrationTable="PG3_cal",
 	      Workspace=ws,
 	      MaskWorkspace="PG3_mask",
@@ -102,15 +104,17 @@ Output:
               alphaRotation=True,
 	      ComponentList=components)
       ws=mtd['ws']
-      print "Final bank26 rotation is",ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
-      print "Final bank46 rotation is",ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
+      bank26Rot = ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
+      bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
+      print "Final bank26 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank26Rot[0], bank26Rot[1], bank26Rot[2])
+      print "Final bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
 
 .. testoutput:: rotation
 
-      Start bank26 rotation is [-24.0613,0.120403,18.0162]
-      Start bank46 rotation is [-41.0917,0.060773,17.7948]
-      Final bank26 rotation is [-25.2256,0.120403,18.0162]
-      Final bank46 rotation is [-37.3972,0.060773,17.7948]
+      Start bank26 rotation is [-24.061.0.120,18.016]
+      Start bank46 rotation is [-41.092.0.061,17.795]
+      Final bank26 rotation is [-25.226.0.120,18.016]
+      Final bank46 rotation is [-37.397.0.061,17.795]
 
 **Example - Align sample position in POWGEN:**
 
@@ -131,12 +135,12 @@ Output:
             Workspace=ws,
             MaskWorkspace="PG3_mask",
             FitSamplePosition=True)
-      print "Final sample position is",mtd['ws'].getInstrument().getSample().getPos().getZ()
+      print "Final sample position is {:.5f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ())
 
 .. testoutput:: sample
 
       Start sample position is 0.0
-      Final sample position is 0.028259327914
+      Final sample position is 0.02826
 
 .. categories::
 
