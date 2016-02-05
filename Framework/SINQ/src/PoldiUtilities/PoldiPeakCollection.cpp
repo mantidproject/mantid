@@ -199,15 +199,9 @@ bool PoldiPeakCollection::checkColumns(
     return false;
   }
 
-  std::vector<std::string> shouldNames{"HKL",
-                                       "d",
-                                       "delta d",
-                                       "Q",
-                                       "delta Q",
-                                       "Intensity",
-                                       "delta Intensity",
-                                       "FWHM (rel.)",
-                                       "delta FWHM (rel.)"};
+  std::vector<std::string> shouldNames{"HKL", "d", "delta d", "Q", "delta Q",
+                                       "Intensity", "delta Intensity",
+                                       "FWHM (rel.)", "delta FWHM (rel.)"};
 
   std::vector<std::string> columnNames = tableWorkspace->getColumnNames();
 
