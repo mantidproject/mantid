@@ -56,7 +56,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         self.rbdir = os.path.join(targetDir,self.userID,self.rbnumber)
         self.UserScriptRepoDir = os.path.join(targetDir,'UserScripts')
-        self.MapMaskDir        = os.path.join(targetDir,'MapMaskDir')
+        self.MapMaskDir = os.path.join(targetDir,'MapMaskDir')
         self.userRootDir = os.path.join(targetDir,self.userID)
         if not os.path.exists(self.rbdir):
             os.makedirs(self.rbdir)
