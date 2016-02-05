@@ -30,7 +30,7 @@ namespace Mantid {
 
 namespace Geometry {
 
-SurfaceFactory *SurfaceFactory::FOBJ(0);
+SurfaceFactory *SurfaceFactory::FOBJ(nullptr);
 
 SurfaceFactory *SurfaceFactory::Instance()
 /**

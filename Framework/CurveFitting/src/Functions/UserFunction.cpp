@@ -31,7 +31,7 @@ UserFunction::~UserFunction() { delete m_parser; }
 @param pufun :: Pointer to the function
 */
 double *UserFunction::AddVariable(const char *varName, void *pufun) {
-  UserFunction &fun = *(UserFunction *)pufun;
+  UserFunction &fun = *reinterpret_cast<UserFunction *>(pufun);
 
   if (std::string(varName) != "x") {
     try {

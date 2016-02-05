@@ -199,7 +199,7 @@ void RemoveBins::checkProperties() {
   }
 
   const std::string interpolation = getProperty("Interpolation");
-  m_interpolate = (interpolation == "Linear" ? true : false);
+  m_interpolate = (interpolation == "Linear");
 
   return;
 }
@@ -273,7 +273,7 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
   // Get the distance between the source and the sample (assume in metres)
   Geometry::IComponent_const_sptr sample = instrument->getSample();
   // Check for valid instrument
-  if (sample == NULL) {
+  if (sample == nullptr) {
     throw Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get sample");
   }

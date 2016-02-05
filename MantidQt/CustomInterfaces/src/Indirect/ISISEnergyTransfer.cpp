@@ -328,9 +328,10 @@ void ISISEnergyTransfer::setInstrumentDefault() {
     return;
   }
 
-  int specMin = instDetails["spectra-min"].toInt();
-  int specMax = instDetails["spectra-max"].toInt();
-
+  // Set spectra min/max for spinners in UI
+  const int specMin = instDetails["spectra-min"].toInt();
+  const int specMax = instDetails["spectra-max"].toInt();
+  // Spectra spinners
   m_uiForm.spSpectraMin->setMinimum(specMin);
   m_uiForm.spSpectraMin->setMaximum(specMax);
   m_uiForm.spSpectraMin->setValue(specMin);
@@ -338,6 +339,15 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   m_uiForm.spSpectraMax->setMinimum(specMin);
   m_uiForm.spSpectraMax->setMaximum(specMax);
   m_uiForm.spSpectraMax->setValue(specMax);
+
+  // Plot time spectra spinners
+  m_uiForm.spPlotTimeSpecMin->setMinimum(1);		// 1 to allow for monitors
+  m_uiForm.spPlotTimeSpecMin->setMaximum(specMax);
+  m_uiForm.spPlotTimeSpecMin->setValue(1);
+
+  m_uiForm.spPlotTimeSpecMax->setMinimum(1);
+  m_uiForm.spPlotTimeSpecMax->setMaximum(specMax);
+  m_uiForm.spPlotTimeSpecMax->setValue(1);
 
   if (!instDetails["Efixed"].isEmpty())
     m_uiForm.spEfixed->setValue(instDetails["Efixed"].toDouble());
@@ -515,6 +525,7 @@ void ISISEnergyTransfer::plotRaw() {
   loadAlg->initialize();
   loadAlg->setProperty("Filename", rawFile.toStdString());
   loadAlg->setProperty("OutputWorkspace", name);
+  loadAlg->setProperty("LoadLogFiles", false);
   if (extension.compare(".nxs") == 0) {
     int64_t detectorMin =
         static_cast<int64_t>(m_uiForm.spPlotTimeSpecMin->value());

@@ -135,7 +135,8 @@ void PredictFractionalPeaks::exec() {
 
   int N = NPeaks;
   if (includePeaksInRange) {
-    N = (int)((Hmax - Hmin + 1) * (Kmax - Kmin + 1) * (Lmax - Lmin + 1) + .5);
+    N = static_cast<int>(
+        (Hmax - Hmin + 1) * (Kmax - Kmin + 1) * (Lmax - Lmin + 1) + .5);
     N = max<int>(100, N);
   }
   IPeak &peak0 = Peaks->getPeak(0);
@@ -158,16 +159,16 @@ void PredictFractionalPeaks::exec() {
   bool done = false;
   int ErrPos = 1; // Used to determine position in code of a throw
   while (!done) {
-    for (size_t hoffset = 0; hoffset < hOffsets.size(); hoffset++)
-      for (size_t koffset = 0; koffset < kOffsets.size(); koffset++)
-        for (size_t loffset = 0; loffset < lOffsets.size(); loffset++)
+    for (double hOffset : hOffsets) {
+      for (double kOffset : kOffsets) {
+        for (double lOffset : lOffsets) {
           try {
             V3D hkl1(hkl);
             ErrPos = 0;
 
-            hkl1[0] += hOffsets[hoffset];
-            hkl1[1] += kOffsets[koffset];
-            hkl1[2] += lOffsets[loffset];
+            hkl1[0] += hOffset;
+            hkl1[1] += kOffset;
+            hkl1[2] += lOffset;
 
             Kernel::V3D Qs = UB * hkl1;
             Qs *= 2.0;
@@ -186,9 +187,9 @@ void PredictFractionalPeaks::exec() {
               ErrPos = 2;
               vector<int> SavPk;
               SavPk.push_back(RunNumber);
-              SavPk.push_back((int)floor(1000 * hkl1[0] + .5));
-              SavPk.push_back((int)floor(1000 * hkl1[1] + .5));
-              SavPk.push_back((int)floor(1000 * hkl1[2] + .5));
+              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[0] + .5)));
+              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[1] + .5)));
+              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[2] + .5)));
 
               // TODO keep list sorted so searching is faster?
               auto it =
@@ -207,6 +208,9 @@ void PredictFractionalPeaks::exec() {
             if (ErrPos != 1) // setQLabFrame in createPeak throws exception
               throw new std::invalid_argument("Invalid data at this point");
           }
+        }
+      }
+    }
     if (includePeaksInRange) {
       hkl[0]++;
       if (hkl[0] > Hmax) {

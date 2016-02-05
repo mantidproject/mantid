@@ -57,9 +57,9 @@ bool PointGroupFactoryImpl::isSubscribed(const std::string &hmSymbol) const {
 std::vector<std::string>
 PointGroupFactoryImpl::getAllPointGroupSymbols() const {
   std::vector<std::string> pointGroups;
-
-  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
-    pointGroups.push_back(it->first);
+  pointGroups.reserve(m_generatorMap.size());
+  for (const auto &generator : m_generatorMap) {
+    pointGroups.push_back(generator.first);
   }
 
   return pointGroups;
@@ -71,11 +71,11 @@ std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(
     const PointGroup::CrystalSystem &crystalSystem) {
   std::vector<std::string> pointGroups;
 
-  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
-    PointGroup_sptr pointGroup = getPrototype(it->first);
+  for (auto &generator : m_generatorMap) {
+    PointGroup_sptr pointGroup = getPrototype(generator.first);
 
     if (pointGroup->crystalSystem() == crystalSystem) {
-      pointGroups.push_back(it->first);
+      pointGroups.push_back(generator.first);
     }
   }
 
@@ -163,7 +163,7 @@ PointGroupFactoryImpl::PointGroupFactoryImpl()
     : m_generatorMap(), m_crystalSystemMap(),
       m_screwAxisRegex("(2|3|4|6)[1|2|3|4|5]"),
       m_glidePlaneRegex("a|b|c|d|e|g|n"), m_centeringRegex("[A-Z]"),
-      m_originChoiceRegex(":(1|2)") {
+      m_originChoiceRegex(":(1|2|r)") {
   Kernel::LibraryManager::Instance();
 }
 
@@ -197,11 +197,15 @@ PointGroup_sptr PointGroupGenerator::generatePrototype() {
 DECLARE_POINTGROUP("1", "x,y,z", "Triclinic")
 DECLARE_POINTGROUP("-1", "-x,-y,-z", "Triclinic")
 DECLARE_POINTGROUP("2", "-x,y,-z", "Monoclinic, unique axis b")
+DECLARE_POINTGROUP("112", "-x,-y,z", "Monoclinic, unique axis c")
 DECLARE_POINTGROUP("m", "x,-y,z", "Monoclinic, unique axis b")
+DECLARE_POINTGROUP("11m", "x,y,-z", "Monoclinic, unique axis c")
 DECLARE_POINTGROUP("2/m", "-x,y,-z; -x,-y,-z", "Monoclinic, unique axis b")
 DECLARE_POINTGROUP("112/m", "-x,-y,z; x,y,-z", "Monoclinic, unique axis c")
 DECLARE_POINTGROUP("222", "-x,-y,z; x,-y,-z", "Orthorombic")
 DECLARE_POINTGROUP("mm2", "-x,-y,z; -x,y,z", "Orthorombic")
+DECLARE_POINTGROUP("2mm", "x,-y,-z; x,-y,z", "Orthorombic")
+DECLARE_POINTGROUP("m2m", "-x,y,-z; x,y,-z", "Orthorombic")
 DECLARE_POINTGROUP("mmm", "-x,-y,-z; -x,-y,z; x,-y,-z", "Orthorombic")
 DECLARE_POINTGROUP("4", "-y,x,z", "Tetragonal")
 DECLARE_POINTGROUP("-4", "y,-x,-z", "Tetragonal")

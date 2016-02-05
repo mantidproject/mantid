@@ -148,8 +148,8 @@ void DetermineChunking::exec() {
     string dataDir;
     LoadPreNexus lp;
     lp.parseRuninfo(filename, dataDir, eventFilenames);
-    for (size_t i = 0; i < eventFilenames.size(); i++) {
-      BinaryFile<DasEvent> eventfile(dataDir + eventFilenames[i]);
+    for (auto &eventFilename : eventFilenames) {
+      BinaryFile<DasEvent> eventfile(dataDir + eventFilename);
       // Factor of 2 for compression
       filesize += static_cast<double>(eventfile.getNumElements()) * 48.0 /
                   (1024.0 * 1024.0 * 1024.0);
@@ -242,7 +242,7 @@ void DetermineChunking::exec() {
   }
 
   int numChunks = 0;
-  if (maxChunk) // protect from divide by zero
+  if (maxChunk != 0.0) // protect from divide by zero
   {
     numChunks = static_cast<int>(filesize / maxChunk);
   }
@@ -326,8 +326,8 @@ std::string DetermineChunking::setTopEntryName(std::string filename) {
  */
 FileType DetermineChunking::getFileType(const string &filename) {
   // check for prenexus
-  for (int i = 0; i < NUM_EXT_PRENEXUS; ++i) {
-    if (filename.find(PRENEXUS_EXT[i]) != std::string::npos) {
+  for (const auto &extension : PRENEXUS_EXT) {
+    if (filename.find(extension) != std::string::npos) {
       g_log.information() << "Determined \'" << filename
                           << "\' is a prenexus file\n";
       return PRENEXUS_FILE;
@@ -335,8 +335,8 @@ FileType DetermineChunking::getFileType(const string &filename) {
   }
 
   // check for histogram nexus
-  for (int i = 0; i < NUM_EXT_HISTO_NEXUS; ++i) {
-    if (filename.find(HISTO_NEXUS_EXT[i]) != std::string::npos) {
+  for (const auto &extension : HISTO_NEXUS_EXT) {
+    if (filename.find(extension) != std::string::npos) {
       g_log.information() << "Determined \'" << filename
                           << "\' is a  histogram nexus file\n";
       return HISTO_NEXUS_FILE;
@@ -344,8 +344,8 @@ FileType DetermineChunking::getFileType(const string &filename) {
   }
 
   // check for event nexus - must be last because a valid extension is ".nxs"
-  for (int i = 0; i < NUM_EXT_EVENT_NEXUS; ++i) {
-    if (filename.find(EVENT_NEXUS_EXT[i]) != std::string::npos) {
+  for (const auto &extension : EVENT_NEXUS_EXT) {
+    if (filename.find(extension) != std::string::npos) {
       g_log.information() << "Determined \'" << filename
                           << "\' is an event nexus file\n";
       return EVENT_NEXUS_FILE;
@@ -353,8 +353,8 @@ FileType DetermineChunking::getFileType(const string &filename) {
   }
 
   // check for isis raw files
-  for (int i = 0; i < NUM_EXT_RAW; ++i) {
-    if (filename.find(RAW_EXT[i]) != std::string::npos) {
+  for (const auto &extension : RAW_EXT) {
+    if (filename.find(extension) != std::string::npos) {
       g_log.information() << "Determined \'" << filename
                           << "\' is an ISIS raw file\n";
       return RAW_FILE;

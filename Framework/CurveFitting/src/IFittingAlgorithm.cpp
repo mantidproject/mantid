@@ -27,7 +27,7 @@ IDomainCreator *createDomainCreator(const IFunction *fun, const Workspace *ws,
                                     IPropertyManager *manager,
                                     IDomainCreator::DomainType domainType) {
 
-  IDomainCreator *creator = NULL;
+  IDomainCreator *creator = nullptr;
 
   // ILatticeFunction requires API::LatticeDomain.
   if (dynamic_cast<const ILatticeFunction *>(fun)) {
@@ -241,10 +241,10 @@ void IFittingAlgorithm::addWorkspaces() {
         new MultiDomainCreator(this, m_workspacePropertyNames));
   }
   auto props = getProperties();
-  for (auto prop = props.begin(); prop != props.end(); ++prop) {
-    if ((**prop).direction() == Kernel::Direction::Input &&
-        dynamic_cast<API::IWorkspaceProperty *>(*prop)) {
-      const std::string workspacePropertyName = (**prop).name();
+  for (auto &prop : props) {
+    if ((*prop).direction() == Kernel::Direction::Input &&
+        dynamic_cast<API::IWorkspaceProperty *>(prop)) {
+      const std::string workspacePropertyName = (*prop).name();
       API::Workspace_const_sptr ws = getProperty(workspacePropertyName);
       IDomainCreator *creator =
           createDomainCreator(m_function.get(), ws.get(), workspacePropertyName,

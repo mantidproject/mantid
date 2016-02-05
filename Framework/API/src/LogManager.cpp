@@ -158,7 +158,7 @@ void LogManager::splitByTime(TimeSplitterType &splitter,
                              std::vector<LogManager *> outputs) const {
   // Make a vector of managers for the splitter. Fun!
   const size_t n = outputs.size();
-  std::vector<PropertyManager *> output_managers(outputs.size(), NULL);
+  std::vector<PropertyManager *> output_managers(outputs.size(), nullptr);
   for (size_t i = 0; i < n; i++) {
     if (outputs[i]) {
       output_managers[i] = &(outputs[i]->m_manager);
@@ -183,12 +183,15 @@ void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter) {
 
 //-----------------------------------------------------------------------------------------------
 /**
- * Add data to the object in the form of a property
- * @param prop :: A pointer to a property whose ownership is transferred to this
- * object
- * @param overwrite :: If true, a current value is overwritten. (Default: False)
- */
-void LogManager::addProperty(Kernel::Property *prop, bool overwrite) {
+  * Add data to the object in the form of a property
+  * @param prop :: A pointer to a property whose ownership is transferred to
+ * this
+  * object
+  * @param overwrite :: If true, a current value is overwritten. (Default:
+ * False)
+  */
+void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop,
+                             bool overwrite) {
   // Make an exception for the proton charge
   // and overwrite it's value as we don't want to store the proton charge in two
   // separate locations
@@ -199,7 +202,7 @@ void LogManager::addProperty(Kernel::Property *prop, bool overwrite) {
        prop->name() == "run_title")) {
     removeProperty(name);
   }
-  m_manager.declareProperty(prop, "");
+  m_manager.declareProperty(prop.release(), "");
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -224,7 +227,7 @@ void LogManager::removeProperty(const std::string &name, bool delProperty) {
   // Remove any cached entries for this log. Need to make this more general
   for (unsigned int stat = 0; stat < 7; ++stat) {
     m_singleValueCache.removeCache(
-        std::make_pair(name, (Math::StatisticType)stat));
+        std::make_pair(name, static_cast<Math::StatisticType>(stat)));
   }
   m_manager.removeProperty(name, delProperty);
 }
@@ -235,8 +238,7 @@ void LogManager::removeProperty(const std::string &name, bool delProperty) {
 size_t LogManager::getMemorySize() const {
   size_t total = 0;
   std::vector<Property *> props = m_manager.getProperties();
-  for (size_t i = 0; i < props.size(); i++) {
-    Property *p = props[i];
+  for (auto p : props) {
     if (p)
       total += p->getMemorySize() + sizeof(Property *);
   }
@@ -334,8 +336,8 @@ void LogManager::clearTimeSeriesLogs() {
   // Loop over the set of properties, identifying those that are time-series
   // properties
   // and then clearing them out.
-  for (auto it = props.begin(); it != props.end(); ++it) {
-    if (auto tsp = dynamic_cast<ITimeSeriesProperty *>(*it)) {
+  for (auto prop : props) {
+    if (auto tsp = dynamic_cast<ITimeSeriesProperty *>(prop)) {
       tsp->clear();
     }
   }
@@ -347,8 +349,8 @@ void LogManager::clearTimeSeriesLogs() {
  */
 void LogManager::clearOutdatedTimeSeriesLogValues() {
   auto &props = getProperties();
-  for (auto it = props.begin(); it != props.end(); ++it) {
-    if (auto tsp = dynamic_cast<ITimeSeriesProperty *>(*it)) {
+  for (auto prop : props) {
+    if (auto tsp = dynamic_cast<ITimeSeriesProperty *>(prop)) {
       tsp->clearOutdated();
     }
   }
@@ -368,9 +370,9 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
 
   // Save all the properties as NXlog
   std::vector<Property *> props = m_manager.getProperties();
-  for (size_t i = 0; i < props.size(); i++) {
+  for (auto &prop : props) {
     try {
-      PropertyNexus::saveProperty(file, props[i]);
+      PropertyNexus::saveProperty(file, prop);
     } catch (std::invalid_argument &exc) {
       g_log.warning(exc.what());
     }
@@ -395,9 +397,7 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    // Get the name/class pair
-    const std::pair<std::string, std::string> &name_class = *it;
+  for (const auto &name_class : entries) {
     // NXLog types are the main one.
     if (name_class.second == "NXlog") {
       Property *prop = PropertyNexus::loadProperty(file, name_class.first);

@@ -59,8 +59,8 @@ void CompositeBraggScatterer::setScatterers(
     const std::vector<BraggScatterer_sptr> &scatterers) {
   removeAllScatterers();
 
-  for (auto it = scatterers.begin(); it != scatterers.end(); ++it) {
-    addScattererImplementation(*it);
+  for (const auto &scatterer : scatterers) {
+    addScattererImplementation(scatterer);
   }
 
   redeclareProperties();
@@ -112,8 +112,8 @@ StructureFactor CompositeBraggScatterer::calculateStructureFactor(
     const Kernel::V3D &hkl) const {
   StructureFactor sum(0.0, 0.0);
 
-  for (auto it = m_scatterers.begin(); it != m_scatterers.end(); ++it) {
-    sum += (*it)->calculateStructureFactor(hkl);
+  for (const auto &scatterer : m_scatterers) {
+    sum += scatterer->calculateStructureFactor(hkl);
   }
 
   return sum;
@@ -132,8 +132,8 @@ void CompositeBraggScatterer::propagateProperty(
     const std::string &propertyName) {
   std::string propertyValue = getPropertyValue(propertyName);
 
-  for (auto it = m_scatterers.begin(); it != m_scatterers.end(); ++it) {
-    propagatePropertyToScatterer(*it, propertyName, propertyValue);
+  for (auto &scatterer : m_scatterers) {
+    propagatePropertyToScatterer(scatterer, propertyName, propertyValue);
   }
 }
 
@@ -169,35 +169,34 @@ void CompositeBraggScatterer::addScattererImplementation(
 void CompositeBraggScatterer::redeclareProperties() {
   std::map<std::string, size_t> propertyUseCount = getPropertyCountMap();
 
-  for (auto it = m_scatterers.begin(); it != m_scatterers.end(); ++it) {
+  for (auto &scatterer : m_scatterers) {
     // Check if any of the declared properties is in this scatterer (and set
     // value if that's the case)
-    for (auto prop = propertyUseCount.begin(); prop != propertyUseCount.end();
-         ++prop) {
-      if ((*it)->existsProperty(prop->first)) {
-        prop->second += 1;
+    for (auto &prop : propertyUseCount) {
+      if (scatterer->existsProperty(prop.first)) {
+        prop.second += 1;
 
-        propagatePropertyToScatterer(*it, prop->first,
-                                     getPropertyValue(prop->first));
+        propagatePropertyToScatterer(scatterer, prop.first,
+                                     getPropertyValue(prop.first));
       }
     }
 
     // Use the properties of this scatterer which have been marked as exposed to
     // composite
     std::vector<Property *> properties =
-        (*it)->getPropertiesInGroup(getPropagatingGroupName());
-    for (auto prop = properties.begin(); prop != properties.end(); ++prop) {
-      std::string propertyName = (*prop)->name();
+        scatterer->getPropertiesInGroup(getPropagatingGroupName());
+    for (auto &property : properties) {
+      std::string propertyName = property->name();
       if (!existsProperty(propertyName)) {
-        declareProperty((*prop)->clone());
+        declareProperty(property->clone());
       }
     }
   }
 
   // Remove unused properties
-  for (auto it = propertyUseCount.begin(); it != propertyUseCount.end(); ++it) {
-    if (it->second == 0) {
-      removeProperty(it->first);
+  for (auto &property : propertyUseCount) {
+    if (property.second == 0) {
+      removeProperty(property.first);
     }
   }
 }
@@ -208,9 +207,8 @@ CompositeBraggScatterer::getPropertyCountMap() const {
   std::map<std::string, size_t> propertyUseCount;
 
   std::vector<Property *> compositeProperties = getProperties();
-  for (auto it = compositeProperties.begin(); it != compositeProperties.end();
-       ++it) {
-    propertyUseCount.insert(std::make_pair((*it)->name(), 0));
+  for (auto &compositeProperty : compositeProperties) {
+    propertyUseCount.insert(std::make_pair(compositeProperty->name(), 0));
   }
 
   return propertyUseCount;

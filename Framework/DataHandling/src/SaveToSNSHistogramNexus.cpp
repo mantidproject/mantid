@@ -93,7 +93,7 @@ int SaveToSNSHistogramNexus::add_path(const char *path) {
 int SaveToSNSHistogramNexus::remove_path(const char *path) {
   char *tstr;
   tstr = strrchr(current_path, '/');
-  if (tstr != NULL && !strcmp(path, tstr + 1)) {
+  if (tstr != nullptr && !strcmp(path, tstr + 1)) {
     *tstr = '\0';
   } else {
     printf("path error\n");
@@ -277,7 +277,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
       new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];
 
   // Only allocate an array for errors if it is needed
-  float *errors = NULL;
+  float *errors = nullptr;
   if (doBoth)
     errors =
         new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];
@@ -441,7 +441,7 @@ int SaveToSNSHistogramNexus::WriteDataGroup(std::string bank,
       return NX_ERROR;
     if (NXputdata(outId, dataBuffer) != NX_OK)
       return NX_ERROR;
-    if (NXfree((void **)&dataBuffer) != NX_OK)
+    if (NXfree(&dataBuffer) != NX_OK)
       return NX_ERROR;
     if (NXclosedata(outId) != NX_OK)
       return NX_ERROR;
@@ -465,8 +465,8 @@ int SaveToSNSHistogramNexus::WriteDataGroup(std::string bank,
 
     // Give a 50% margin of error in allocating the memory
     memory_available = memory_available / 2;
-    if (memory_available > (size_t)5e9)
-      memory_available = (size_t)5e9;
+    if (memory_available > static_cast<size_t>(5e9))
+      memory_available = static_cast<size_t>(5e9);
 
     if (memory_available < memory_required) {
       // Compute how large of a slab you can still use.
@@ -622,7 +622,7 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
               return NX_ERROR;
             if (NXputdata(outId, dataBuffer) != NX_OK)
               return NX_ERROR;
-            if (NXfree((void **)&dataBuffer) != NX_OK)
+            if (NXfree(&dataBuffer) != NX_OK)
               return NX_ERROR;
             if (NXclosedata(outId) != NX_OK)
               return NX_ERROR;
@@ -671,13 +671,13 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
           strcmp(attrName, "HDF5_Version") && strcmp(attrName, "file_name") &&
           strcmp(attrName, "file_time")) {
         attrLen++; /* Add space for string termination */
-        if (NXmalloc((void **)&attrBuffer, 1, &attrLen, attrType) != NX_OK)
+        if (NXmalloc(&attrBuffer, 1, &attrLen, attrType) != NX_OK)
           return NX_ERROR;
         if (NXgetattr(inId, attrName, attrBuffer, &attrLen, &attrType) != NX_OK)
           return NX_ERROR;
         if (NXputattr(outId, attrName, attrBuffer, attrLen, attrType) != NX_OK)
           return NX_ERROR;
-        if (NXfree((void **)&attrBuffer) != NX_OK)
+        if (NXfree(&attrBuffer) != NX_OK)
           return NX_ERROR;
       }
       i++;

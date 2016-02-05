@@ -61,7 +61,7 @@ Object::Object(const std::string &shapeXML)
 * @param A :: The object to initialise this copy from
 */
 Object::Object(const Object &A)
-    : ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : NULL),
+    : ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : nullptr),
       m_boundingBox(A.m_boundingBox), AABBxMax(A.AABBxMax),
       AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin),
       AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded),
@@ -80,7 +80,7 @@ Object::Object(const Object &A)
 Object &Object::operator=(const Object &A) {
   if (this != &A) {
     ObjName = A.ObjName;
-    TopRule = (A.TopRule) ? A.TopRule->clone() : 0;
+    TopRule = (A.TopRule) ? A.TopRule->clone() : nullptr;
     AABBxMax = A.AABBxMax;
     AABByMax = A.AABByMax;
     AABBzMax = A.AABBzMax;
@@ -126,7 +126,7 @@ const Kernel::Material &Object::material() const { return m_material; }
 */
 bool Object::hasValidShape() const {
   // Assume invalid shape if object has no 'TopRule' or surfaces
-  return (TopRule != NULL && !SurList.empty());
+  return (TopRule != nullptr && !SurList.empty());
 }
 
 /**
@@ -668,7 +668,7 @@ void Object::write(std::ostream &OX) const {
 * @returns 1 on success
 */
 int Object::procString(const std::string &Line) {
-  TopRule = 0;
+  TopRule = nullptr;
   std::map<int, std::unique_ptr<Rule>> RuleList; // List for the rules
   int Ridx = 0; // Current index (not necessary size of RuleList
   // SURFACE REPLACEMENT
@@ -1091,8 +1091,8 @@ double Object::triangleSolidAngle(const V3D &observer,
     std::vector<Kernel::V3D> vectors;
     this->GetObjectGeom(type, vectors, radius, height);
     if (type == 1) {
-      for (size_t i = 0; i < vectors.size(); i++)
-        vectors[i] *= scaleFactor;
+      for (auto &vector : vectors)
+        vector *= scaleFactor;
       return CuboidSolidAngle(observer, vectors);
     } else if (type == 2) // this is wrong for scaled objects
       return SphereSolidAngle(observer, vectors, radius);
@@ -1258,7 +1258,7 @@ double Object::CylinderSolidAngle(const V3D &observer,
 
   // Do the base cap which is a point at the centre and nslices points around it
   const int nslices(Mantid::Geometry::Cylinder::g_nslices);
-  const double angle_step = 2 * M_PI / (double)nslices;
+  const double angle_step = 2 * M_PI / static_cast<double>(nslices);
 
   const int nstacks(Mantid::Geometry::Cylinder::g_nstacks);
   const double z_step = height / nstacks;
@@ -1335,7 +1335,7 @@ double Object::ConeSolidAngle(const V3D &observer,
 
   // Do the base cap which is a point at the centre and nslices points around it
   const int nslices(Mantid::Geometry::Cone::g_nslices);
-  const double angle_step = 2 * M_PI / (double)nslices;
+  const double angle_step = 2 * M_PI / static_cast<double>(nslices);
   // Store the (x,y) points as they are used quite frequently
   auto cos_table = new double[nslices];
   auto sin_table = new double[nslices];
@@ -1626,13 +1626,13 @@ void Object::calcBoundingBoxByGeometry() {
     maxX = maxY = maxZ = -huge;
 
     // Loop over all corner points to find minima and maxima on each axis
-    for (auto iter = vectors.cbegin(); iter != vectors.cend(); ++iter) {
-      minX = std::min(minX, iter->X());
-      maxX = std::max(maxX, iter->X());
-      minY = std::min(minY, iter->Y());
-      maxY = std::max(maxY, iter->Y());
-      minZ = std::min(minZ, iter->Z());
-      maxZ = std::max(maxZ, iter->Z());
+    for (const auto &vector : vectors) {
+      minX = std::min(minX, vector.X());
+      maxX = std::max(maxX, vector.X());
+      minY = std::min(minY, vector.Y());
+      maxY = std::max(maxY, vector.Y());
+      minZ = std::min(minZ, vector.Z());
+      maxZ = std::max(maxZ, vector.Z());
     }
   } break;
 
@@ -1835,7 +1835,7 @@ int Object::searchForObject(Kernel::V3D &point) const {
 * the calling function.
 */
 void Object::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
-  if (h == NULL)
+  if (h == nullptr)
     return;
   handle = h;
 }
@@ -1845,7 +1845,7 @@ void Object::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
 * function does nothing.
 */
 void Object::draw() const {
-  if (handle == NULL)
+  if (handle == nullptr)
     return;
   // Render the Object
   handle->Render();
@@ -1857,7 +1857,7 @@ void Object::draw() const {
 * If the handler is not set then this function does nothing.
 */
 void Object::initDraw() const {
-  if (handle == NULL)
+  if (handle == nullptr)
     return;
   // Render the Object
   handle->Initialize();
@@ -1897,16 +1897,16 @@ void Object::updateGeometryHandler() {
     return;
   bGeometryCaching = true;
   // Check if the Geometry handler can be handled for cache
-  if (handle == NULL)
+  if (handle == nullptr)
     return;
   if (!handle->canTriangulate())
     return;
   // Check if the reader exist then read the cache
-  if (vtkCacheReader.get() != NULL) {
+  if (vtkCacheReader.get() != nullptr) {
     vtkCacheReader->readCacheForObject(this);
   }
   // Check if the writer exist then write the cache
-  if (vtkCacheWriter.get() != NULL) {
+  if (vtkCacheWriter.get() != nullptr) {
     vtkCacheWriter->addObject(this);
   }
 }
@@ -1918,7 +1918,7 @@ void Object::updateGeometryHandler() {
 * @return the number of triangles
 */
 int Object::NumberOfTriangles() const {
-  if (handle == NULL)
+  if (handle == nullptr)
     return 0;
   return handle->NumberOfTriangles();
 }
@@ -1927,7 +1927,7 @@ int Object::NumberOfTriangles() const {
 * get number of points
 */
 int Object::NumberOfPoints() const {
-  if (handle == NULL)
+  if (handle == nullptr)
     return 0;
   return handle->NumberOfPoints();
 }
@@ -1936,8 +1936,8 @@ int Object::NumberOfPoints() const {
 * get vertices
 */
 double *Object::getTriangleVertices() const {
-  if (handle == NULL)
-    return NULL;
+  if (handle == nullptr)
+    return nullptr;
   return handle->getTriangleVertices();
 }
 
@@ -1945,8 +1945,8 @@ double *Object::getTriangleVertices() const {
 * get faces
 */
 int *Object::getTriangleFaces() const {
-  if (handle == NULL)
-    return NULL;
+  if (handle == nullptr)
+    return nullptr;
   return handle->getTriangleFaces();
 }
 
@@ -1956,7 +1956,7 @@ int *Object::getTriangleFaces() const {
 void Object::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                            double &myradius, double &myheight) const {
   type = 0;
-  if (handle == NULL)
+  if (handle == nullptr)
     return;
   handle->GetObjectGeom(type, vectors, myradius, myheight);
 }

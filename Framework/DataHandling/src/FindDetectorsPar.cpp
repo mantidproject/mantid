@@ -67,12 +67,12 @@ void FindDetectorsPar::exec() {
 
   // Get the input workspace
   const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-  if (inputWS.get() == NULL) {
+  if (inputWS.get() == nullptr) {
     throw(Kernel::Exception::NotFoundError(
         "can not obtain InoputWorkspace for the algorithm to work", ""));
   }
   // Number of spectra
-  const int64_t nHist = (int64_t)inputWS->getNumberHistograms();
+  const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
 
   // try to load par file if one is availible
   std::string fileName = this->getProperty("ParFile");
@@ -83,7 +83,7 @@ void FindDetectorsPar::exec() {
       throw(Kernel::Exception::FileError(" file not exist", fileName));
     }
     size_t nPars = loadParFile(fileName);
-    if (nPars == (size_t)nHist) {
+    if (nPars == static_cast<size_t>(nHist)) {
       this->populate_values_from_file(inputWS);
       this->setOutputTable();
       return;
@@ -102,7 +102,7 @@ void FindDetectorsPar::exec() {
   this->m_nDetectors = 0;
 
   Progress progress(this, 0, 1, 100);
-  const int progStep = (int)(ceil(double(nHist) / 100.0));
+  const int progStep = static_cast<int>(ceil(double(nHist) / 100.0));
 
   // define the centre of coordinates:
   Kernel::V3D Observer = inputWS->getInstrument()->getSample()->getPos();
@@ -252,7 +252,7 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,
 
   Kernel::V3D er(0, 1, 0), e_th,
       ez(0, 0, 1); // ez along beamline, which is always oz;
-  if (dist2Det)
+  if (dist2Det != 0.0)
     er = toDet / dist2Det; // direction to the detector
   Kernel::V3D e_tg =
       er.cross_prod(ez); // tangential to the ring and anticloakwise;
@@ -378,16 +378,16 @@ void FindDetectorsPar::extractAndLinearize(
   this->detID.resize(nDetectors);
 
   nDetectors = 0;
-  for (size_t i = 0; i < detPar.size(); i++) {
-    if (detPar[i].detID < 0)
+  for (const auto &parameter : detPar) {
+    if (parameter.detID < 0)
       continue;
 
-    azimuthal[nDetectors] = detPar[i].azimutAngle;
-    polar[nDetectors] = detPar[i].polarAngle;
-    azimuthalWidth[nDetectors] = detPar[i].azimWidth;
-    polarWidth[nDetectors] = detPar[i].polarWidth;
-    secondaryFlightpath[nDetectors] = detPar[i].secondaryFlightPath;
-    detID[nDetectors] = static_cast<size_t>(detPar[i].detID);
+    azimuthal[nDetectors] = parameter.azimutAngle;
+    polar[nDetectors] = parameter.polarAngle;
+    azimuthalWidth[nDetectors] = parameter.azimWidth;
+    polarWidth[nDetectors] = parameter.polarWidth;
+    secondaryFlightpath[nDetectors] = parameter.secondaryFlightPath;
+    detID[nDetectors] = static_cast<size_t>(parameter.detID);
     nDetectors++;
   }
   // store caluclated value
@@ -627,8 +627,8 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
     int nData_records(0), nData_blocks(0);
     // cppcheck-suppress invalidscanf
     int nDatas = sscanf(&BUF[0], " %d %d ", &nData_records, &nData_blocks);
-    file_descriptor.nData_records = (size_t)nData_records;
-    file_descriptor.nData_blocks = (size_t)nData_blocks;
+    file_descriptor.nData_records = static_cast<size_t>(nData_records);
+    file_descriptor.nData_blocks = static_cast<size_t>(nData_blocks);
     if (nDatas != 2) {
       g_log.error() << " File " << fileName << " iterpreted as SPE but does "
                                                "not have two numbers in the "
@@ -757,7 +757,7 @@ void FindDetectorsPar::load_plain(std::ifstream &stream,
       throw(std::invalid_argument("error while interpreting data "));
     }
     for (int j = 0; j < nRead_Data; j++) {
-      Data[i * BlockSize + j] = (double)data_buf[j];
+      Data[i * BlockSize + j] = static_cast<double>(data_buf[j]);
     }
   }
 }

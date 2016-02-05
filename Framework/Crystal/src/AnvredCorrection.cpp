@@ -146,8 +146,8 @@ void AnvredCorrection::exec() {
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWS);
   if (eventW)
-    eventW->sortAll(TOF_SORT, NULL);
-  if ((getProperty("PreserveEvents")) && (eventW != NULL) &&
+    eventW->sortAll(TOF_SORT, nullptr);
+  if ((getProperty("PreserveEvents")) && (eventW != nullptr) &&
       !m_returnTransmissionOnly) {
     // Input workspace is an event workspace. Use the other exec method
     this->execEvent();
@@ -272,7 +272,7 @@ void AnvredCorrection::execEvent() {
   correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2,
                                                1));
-  correctionFactors->sortAll(TOF_SORT, NULL);
+  correctionFactors->sortAll(TOF_SORT, nullptr);
   // Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(
       m_inputWS, correctionFactors, true);
@@ -499,7 +499,7 @@ double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
   //  using the polymial coefficients, calulate astar (= 1/transmission) at
   //  theta values below and above the actual theta value.
 
-  i = (int)(theta / 5.);
+  i = static_cast<int>(theta / 5.);
   astar1 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
 
   i = i + 1;
@@ -556,7 +556,7 @@ void AnvredCorrection::BuildLamdaWeights() {
 
   for (size_t i = 0; i < m_lamda_weight.size(); i++) {
     double lamda = static_cast<double>(i) / STEPS_PER_ANGSTROM;
-    m_lamda_weight[i] *= (double)(1 / std::pow(lamda, power));
+    m_lamda_weight[i] *= (1 / std::pow(lamda, power));
   }
 }
 void AnvredCorrection::scale_init(IDetector_const_sptr det,

@@ -555,14 +555,14 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
     API::IMDEventWorkspace_sptr mdws,
     const std::vector<API::MatrixWorkspace_sptr> vec_ws2d) {
   // Add N experiment info as there are N measurment points
-  for (size_t i = 0; i < vec_ws2d.size(); ++i) {
+  for (const auto &ws2d : vec_ws2d) {
     // Create an ExperimentInfo object
     ExperimentInfo_sptr tmp_expinfo = boost::make_shared<ExperimentInfo>();
-    Geometry::Instrument_const_sptr tmp_inst = vec_ws2d[i]->getInstrument();
+    Geometry::Instrument_const_sptr tmp_inst = ws2d->getInstrument();
     tmp_expinfo->setInstrument(tmp_inst);
 
     int runnumber =
-        atoi(vec_ws2d[i]->run().getProperty("run_number")->value().c_str());
+        atoi(ws2d->run().getProperty("run_number")->value().c_str());
     tmp_expinfo->mutableRun().addProperty(
         new PropertyWithValue<int>("run_number", runnumber));
 
@@ -631,8 +631,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(
       MDEW_MDEVENT_3);
 
-  for (size_t iws = 0; iws < vec_ws2d.size(); ++iws) {
-    API::MatrixWorkspace_sptr thisWorkspace = vec_ws2d[iws];
+  for (auto thisWorkspace : vec_ws2d) {
     short unsigned int runnumber = static_cast<short unsigned int>(
         atoi(thisWorkspace->run().getProperty("run_number")->value().c_str()));
 

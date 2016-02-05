@@ -93,12 +93,14 @@ int LoadBBY::confidence(Kernel::FileDescriptor &descriptor) const {
   size_t hdfFiles = 0;
   size_t binFiles = 0;
   const std::vector<std::string> &subFiles = file.files();
-  for (auto itr = subFiles.begin(); itr != subFiles.end(); ++itr) {
-    auto len = itr->length();
-    if ((len > 4) && (itr->find_first_of("\\/", 0, 2) == std::string::npos)) {
-      if ((itr->rfind(".hdf") == len - 4) && (itr->compare(0, 3, "BBY") == 0))
+  for (const auto &subFile : subFiles) {
+    auto len = subFile.length();
+    if ((len > 4) &&
+        (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
+      if ((subFile.rfind(".hdf") == len - 4) &&
+          (subFile.compare(0, 3, "BBY") == 0))
         hdfFiles++;
-      else if (itr->rfind(".bin") == len - 4)
+      else if (subFile.rfind(".bin") == len - 4)
         binFiles++;
     }
   }
@@ -223,9 +225,9 @@ void LoadBBY::exec() {
 
   // set title
   const std::vector<std::string> &subFiles = tarFile.files();
-  for (auto itr = subFiles.begin(); itr != subFiles.end(); ++itr)
-    if (itr->compare(0, 3, "BBY") == 0) {
-      std::string title = *itr;
+  for (const auto &subFile : subFiles)
+    if (subFile.compare(0, 3, "BBY") == 0) {
+      std::string title = subFile;
 
       if (title.rfind(".hdf") == title.length() - 4)
         title.resize(title.length() - 4);
@@ -247,7 +249,7 @@ void LoadBBY::exec() {
   // load events
   size_t numberHistograms = eventWS->getNumberHistograms();
 
-  std::vector<EventVector_pt> eventVectors(numberHistograms, NULL);
+  std::vector<EventVector_pt> eventVectors(numberHistograms, nullptr);
   std::vector<size_t> eventCounts(numberHistograms, 0);
 
   // phase correction
@@ -490,9 +492,9 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
   // extract hdf file
   int64_t fileSize = 0;
   const std::vector<std::string> &files = tarFile.files();
-  for (auto itr = files.begin(); itr != files.end(); ++itr)
-    if (itr->rfind(".hdf") == itr->length() - 4) {
-      tarFile.select(itr->c_str());
+  for (const auto &file : files)
+    if (file.rfind(".hdf") == file.length() - 4) {
+      tarFile.select(file.c_str());
       fileSize = tarFile.selected_size();
       break;
     }
@@ -700,9 +702,9 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
   // select bin file
   int64_t fileSize = 0;
   const std::vector<std::string> &files = tarFile.files();
-  for (auto itr = files.begin(); itr != files.end(); ++itr)
-    if (itr->rfind(".bin") == itr->length() - 4) {
-      tarFile.select(itr->c_str());
+  for (const auto &file : files)
+    if (file.rfind(".bin") == file.length() - 4) {
+      tarFile.select(file.c_str());
       fileSize = tarFile.selected_size();
       break;
     }
@@ -724,7 +726,8 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
 
   int state = 0;
   unsigned int c;
-  while ((c = (unsigned int)tarFile.read_byte()) != (unsigned int)-1) {
+  while ((c = static_cast<unsigned int>(tarFile.read_byte())) !=
+         static_cast<unsigned int>(-1)) {
 
     bool event_ended = false;
     switch (state) {
@@ -775,7 +778,7 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
       } else if ((x >= HISTO_BINS_X) || (y >= HISTO_BINS_Y)) {
       } else {
         // conversion from 100 nanoseconds to 1 microsecond
-        tof += ((int)dt) * 0.1;
+        tof += (static_cast<int>(dt)) * 0.1;
 
         eventProcessor.addEvent(x, y, tof);
         countsInFrame = true;
@@ -808,15 +811,17 @@ void BbyDetectorBankFactory::createAndAssign(size_t startIndex,
 
   bank->initialize(m_pixelShape,
                    // x
-                   (int)m_xPixelCount, 0, m_pixelWidth,
+                   static_cast<int>(m_xPixelCount), 0, m_pixelWidth,
                    // y
-                   (int)m_yPixelCount, 0, m_pixelHeight,
+                   static_cast<int>(m_yPixelCount), 0, m_pixelHeight,
                    // indices
-                   (int)startIndex, true, (int)m_yPixelCount);
+                   static_cast<int>(startIndex), true,
+                   static_cast<int>(m_yPixelCount));
 
   for (size_t x = 0; x < m_xPixelCount; ++x)
     for (size_t y = 0; y < m_yPixelCount; ++y)
-      m_instrument->markAsDetector(bank->getAtXY((int)x, (int)y).get());
+      m_instrument->markAsDetector(
+          bank->getAtXY(static_cast<int>(x), static_cast<int>(y)).get());
 
   Kernel::V3D center(m_center);
   rot.rotate(center);

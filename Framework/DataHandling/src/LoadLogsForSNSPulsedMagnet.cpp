@@ -26,7 +26,7 @@ using namespace Mantid::API;
 LoadLogsForSNSPulsedMagnet::LoadLogsForSNSPulsedMagnet()
     : m_delaytimefilename(""), m_pulseidfilename(""),
       m_delayfileinoldformat(false), m_numpulses(0), m_numchoppers(0),
-      m_delaytimes(NULL), m_pulseidseconds(), m_pulseidnanoseconds(), WS() {}
+      m_delaytimes(nullptr), m_pulseidseconds(), m_pulseidnanoseconds(), WS() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -152,15 +152,17 @@ void LoadLogsForSNSPulsedMagnet::ParseDelayTimeLogFile() {
       double dtime;
       if (m_delayfileinoldformat) {
         // Old format
-        logFile.read((char *)&dtime, sizeof(double));
+        logFile.read(reinterpret_cast<char *>(&dtime), sizeof(double));
 
-        chopperindex = (unsigned int)(i + 1);
-        delaytime = (unsigned int)(dtime * 1000);
+        chopperindex = static_cast<unsigned int>(i + 1);
+        delaytime = static_cast<unsigned int>(dtime * 1000);
 
       } else {
         // New format
-        logFile.read((char *)&chopperindex, sizeof(unsigned int));
-        logFile.read((char *)&delaytime, sizeof(unsigned int));
+        logFile.read(reinterpret_cast<char *>(&chopperindex),
+                     sizeof(unsigned int));
+        logFile.read(reinterpret_cast<char *>(&delaytime),
+                     sizeof(unsigned int));
       }
       if (delaytime != 0) {
         g_log.debug() << "Pulse Index =  " << index
@@ -208,9 +210,9 @@ void LoadLogsForSNSPulsedMagnet::ParsePulseIDLogFile() {
   BinaryFile<Pulse> pulseFile(m_pulseidfilename);
   this->m_numpulses = pulseFile.getNumElements();
   pulses = pulseFile.loadAll();
-  for (auto it = pulses->begin(); it != pulses->end(); ++it) {
-    this->m_pulseidseconds.push_back(it->seconds);
-    this->m_pulseidnanoseconds.push_back(it->nanoseconds);
+  for (auto &pulse : *pulses) {
+    this->m_pulseidseconds.push_back(pulse.seconds);
+    this->m_pulseidnanoseconds.push_back(pulse.nanoseconds);
   }
   delete pulses;
 }

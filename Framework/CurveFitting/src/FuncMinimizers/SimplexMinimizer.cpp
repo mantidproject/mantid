@@ -42,11 +42,11 @@ double SimplexMinimizer::fun(const gsl_vector *x, void *params) {
 }
 
 SimplexMinimizer::SimplexMinimizer(const double epsabs)
-    : m_epsabs(epsabs), m_costFunction(), m_size(1.0), m_simplexStepSize(NULL),
-      m_startGuess(NULL), m_gslSolver(NULL) {
-  gslContainer.f = NULL;
+    : m_epsabs(epsabs), m_costFunction(), m_size(1.0),
+      m_simplexStepSize(nullptr), m_startGuess(nullptr), m_gslSolver(nullptr) {
+  gslContainer.f = nullptr;
   gslContainer.n = -1;
-  gslContainer.params = NULL;
+  gslContainer.params = nullptr;
 }
 
 void SimplexMinimizer::initialize(API::ICostFunction_sptr function, size_t) {

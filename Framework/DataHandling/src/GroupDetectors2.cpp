@@ -106,7 +106,7 @@ void GroupDetectors2::exec() {
   const bool preserveEvents = getProperty("PreserveEvents");
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL && preserveEvents) {
+  if (eventW != nullptr && preserveEvents) {
     this->execEvent();
     return;
   }
@@ -531,8 +531,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
 
     std::vector<size_t> &wsindexes = sit->second;
 
-    for (size_t i = 0; i < detids.size(); i++) {
-      detid_t detid = detids[i];
+    for (auto detid : detids) {
       auto ind = detIdToWiMap.find(detid);
       if (ind != detIdToWiMap.end()) {
         size_t wsid = ind->second;
@@ -560,8 +559,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
 
     std::vector<size_t> &wsindexes = sit->second;
 
-    for (size_t i = 0; i < spectra.size(); i++) {
-      int specid = spectra[i];
+    for (auto specid : spectra) {
       auto ind = specs2index.find(specid);
       if (ind != specs2index.end()) {
         size_t wsid = ind->second;
@@ -621,9 +619,8 @@ void GroupDetectors2::processGroupingWorkspace(
           det_ids.push_back(det->getID());
         }
 
-        for (auto dit = det_ids.begin(); dit != det_ids.end(); ++dit) {
+        for (auto det_id : det_ids) {
           // translate detectors to target det ws indexes
-          detid_t det_id = *dit;
           size_t targetWSIndex = detIdToWiMap[det_id];
           targetWSIndexSet.insert(targetWSIndex);
           // mark as used
@@ -638,10 +635,9 @@ void GroupDetectors2::processGroupingWorkspace(
   }
 
   // Build m_GroupSpecInds (group -> list of ws indices)
-  for (auto dit = group2WSIndexSetmap.begin(); dit != group2WSIndexSetmap.end();
-       ++dit) {
-    size_t groupid = dit->first;
-    std::set<size_t> &targetWSIndexSet = dit->second;
+  for (auto &dit : group2WSIndexSetmap) {
+    size_t groupid = dit.first;
+    std::set<size_t> &targetWSIndexSet = dit.second;
     std::vector<size_t> tempv;
     tempv.assign(targetWSIndexSet.begin(), targetWSIndexSet.end());
     m_GroupSpecInds.insert(
@@ -690,9 +686,8 @@ void GroupDetectors2::processMatrixWorkspace(
       if (detGroup) {
         det_ids = detGroup->getDetectorIDs();
 
-        for (auto dit = det_ids.begin(); dit != det_ids.end(); ++dit) {
+        for (auto det_id : det_ids) {
           // translate detectors to target det ws indexes
-          detid_t det_id = *dit;
           size_t targetWSIndex = detIdToWiMap[det_id];
           targetWSIndexSet.insert(targetWSIndex);
           // mark as used
@@ -707,10 +702,9 @@ void GroupDetectors2::processMatrixWorkspace(
   }
 
   // Build m_GroupSpecInds (group -> list of ws indices)
-  for (auto dit = group2WSIndexSetmap.begin(); dit != group2WSIndexSetmap.end();
-       ++dit) {
-    size_t groupid = dit->first;
-    std::set<size_t> &targetWSIndexSet = dit->second;
+  for (auto &dit : group2WSIndexSetmap) {
+    size_t groupid = dit.first;
+    std::set<size_t> &targetWSIndexSet = dit.second;
     if (!targetWSIndexSet.empty()) {
       std::vector<size_t> tempv;
       tempv.assign(targetWSIndexSet.begin(), targetWSIndexSet.end());
@@ -856,11 +850,11 @@ void GroupDetectors2::readSpectraIndexes(std::string line,
                                          std::string seperator) {
   // remove comments and white space
   Poco::StringTokenizer dataComment(line, seperator, IGNORE_SPACES);
-  for (auto itr = dataComment.begin(); itr != dataComment.end(); ++itr) {
+  for (const auto &itr : dataComment) {
     std::vector<size_t> specNums;
     specNums.reserve(output.capacity());
 
-    RangeHelper::getList(*itr, specNums);
+    RangeHelper::getList(itr, specNums);
 
     std::vector<size_t>::const_iterator specN = specNums.begin();
     for (; specN != specNums.end(); ++specN) {
@@ -963,10 +957,7 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
     size_t nonMaskedSpectra(0);
     beh->dataX(outIndex)[0] = 0.0;
     beh->dataE(outIndex)[0] = 0.0;
-    for (auto wsIter = it->second.cbegin(); wsIter != it->second.cend();
-         ++wsIter) {
-      const size_t originalWI = *wsIter;
-
+    for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
       const ISpectrum *fromSpectrum = inputWS->getSpectrum(originalWI);
 
@@ -1071,10 +1062,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
     size_t nonMaskedSpectra(0);
     beh->dataX(outIndex)[0] = 0.0;
     beh->dataE(outIndex)[0] = 0.0;
-    for (auto wsIter = it->second.cbegin(); wsIter != it->second.cend();
-         ++wsIter) {
-      const size_t originalWI = *wsIter;
-
+    for (auto originalWI : it->second) {
       const EventList &fromEL = inputWS->getEventList(originalWI);
       // Add the event lists with the operator
       outEL += fromEL;
@@ -1141,11 +1129,10 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
                      static_cast<double>(unGroupedSet.size());
 
   // go thorugh all the spectra in the input workspace
-  for (auto copyFrIt = unGroupedSet.cbegin(); copyFrIt != unGroupedSet.cend();
-       ++copyFrIt) {
-    if (*copyFrIt == USED)
+  for (auto copyFrIt : unGroupedSet) {
+    if (copyFrIt == USED)
       continue; // Marked as not to be used
-    size_t sourceIndex = static_cast<size_t>(*copyFrIt);
+    size_t sourceIndex = static_cast<size_t>(copyFrIt);
 
     // The input spectrum we'll copy
     const ISpectrum *inputSpec = inputWS->getSpectrum(sourceIndex);
@@ -1199,11 +1186,10 @@ void GroupDetectors2::moveOthersEvent(
                      static_cast<double>(unGroupedSet.size());
 
   // go thorugh all the spectra in the input workspace
-  for (auto copyFrIt = unGroupedSet.cbegin(); copyFrIt != unGroupedSet.cend();
-       ++copyFrIt) {
-    if (*copyFrIt == USED)
+  for (auto copyFrIt : unGroupedSet) {
+    if (copyFrIt == USED)
       continue; // Marked as not to be used
-    size_t sourceIndex = static_cast<size_t>(*copyFrIt);
+    size_t sourceIndex = static_cast<size_t>(copyFrIt);
 
     // The input spectrum we'll copy
     const EventList &inputSpec = inputWS->getEventList(sourceIndex);
@@ -1324,8 +1310,7 @@ void translateAdd(const std::string &instructions,
   boost::split(spectra, instructions, boost::is_any_of("+"));
 
   std::vector<int> outSpectra;
-  for (auto sIt = spectra.begin(); sIt != spectra.end(); ++sIt) {
-    std::string spectrum = *sIt;
+  for (auto spectrum : spectra) {
     // remove leading/trailing whitespace
     boost::trim(spectrum);
     // add this spectrum to the group we're about to add
@@ -1419,8 +1404,7 @@ void GroupDetectors2::translateInstructions(const std::string &instructions,
   std::vector<std::string> groups;
   boost::split(groups, instructions, boost::is_any_of(","));
 
-  for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt) {
-    std::string groupStr = *gIt;
+  for (auto groupStr : groups) {
     // remove leading/trailing whitespace
     boost::trim(groupStr);
 
@@ -1445,9 +1429,9 @@ void GroupDetectors2::translateInstructions(const std::string &instructions,
   // We now have the groups as a vector of a vector of ints. Turn this into a
   // string, just like the contents of a map file.
   commands << outGroups.size() << "\n";
-  for (size_t i = 0; i < outGroups.size(); ++i) {
-    const int groupId = outGroups[i][0] + 1;
-    const int groupSize = static_cast<int>(outGroups[i].size());
+  for (auto &outGroup : outGroups) {
+    const int groupId = outGroup[0] + 1;
+    const int groupSize = static_cast<int>(outGroup.size());
 
     // Comment the output for readability
     commands << "# Group " << groupId;
@@ -1459,8 +1443,8 @@ void GroupDetectors2::translateInstructions(const std::string &instructions,
     // Group members
     // So far we've been using 0-indexed ids, but the mapfile syntax expects
     // 1-indexed ids, so we add 1 to the spectra ids here.
-    for (size_t j = 0; j < outGroups[i].size(); ++j)
-      commands << (j > 0 ? " " : "") << outGroups[i][j] + 1;
+    for (size_t j = 0; j < outGroup.size(); ++j)
+      commands << (j > 0 ? " " : "") << outGroup[j] + 1;
     commands << "\n";
   }
 }

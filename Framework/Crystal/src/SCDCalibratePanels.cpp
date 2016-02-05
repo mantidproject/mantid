@@ -127,7 +127,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
 
   for (size_t k = 0; k < bankNames.size(); ++k) {
     for (int j = 0; j < pwks->getNumberPeaks(); ++j) {
-      const Geometry::IPeak &peak = pwks->getPeak((int)j);
+      const Geometry::IPeak &peak = pwks->getPeak(j);
       if (std::find(bankNames.begin(), bankNames.end(), peak.getBankName()) !=
           bankNames.end())
         if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance)) {
@@ -183,8 +183,7 @@ void SCDCalibratePanels::CalculateGroups(
   Groups.clear();
 
   if (Grouping == "OnePanelPerGroup") {
-    for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
-      string bankName = (*it);
+    for (auto bankName : AllBankNames) {
       vector<string> vbankName;
       vbankName.push_back(bankName);
       Groups.push_back(vbankName);
@@ -193,9 +192,7 @@ void SCDCalibratePanels::CalculateGroups(
   } else if (Grouping == "AllPanelsInOneGroup") {
     vector<string> vbankName;
 
-    for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
-      string bankName = (*it);
-
+    for (auto bankName : AllBankNames) {
       vbankName.push_back(bankName);
     }
 
@@ -208,9 +205,7 @@ void SCDCalibratePanels::CalculateGroups(
     boost::split(GroupA, bankingCode, boost::is_any_of("]"));
     set<string> usedInts;
 
-    for (size_t Gr = 0; Gr < GroupA.size(); ++Gr) {
-      string S = GroupA[Gr];
-
+    for (auto S : GroupA) {
       boost::trim(S);
 
       if (S.empty())
@@ -226,9 +221,7 @@ void SCDCalibratePanels::CalculateGroups(
       boost::split(GroupB, S, boost::is_any_of(","));
 
       vector<string> Group0;
-      for (size_t panelRange = 0; panelRange < GroupB.size(); ++panelRange) {
-        string rangeOfBanks = GroupB[panelRange];
-
+      for (auto rangeOfBanks : GroupB) {
         boost::trim(rangeOfBanks);
 
         vector<string> StrtStopStep;
@@ -317,8 +310,7 @@ boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
   boost::shared_ptr<const ParameterMap> pmap0 = instrument->getParameterMap();
   boost::shared_ptr<ParameterMap> pmap1(new ParameterMap());
 
-  for (auto vit = AllBankNames.begin(); vit != AllBankNames.end(); ++vit) {
-    string bankName = (*vit);
+  for (auto bankName : AllBankNames) {
     updateBankParams(instrument->getComponentByName(bankName), pmap1, pmap0);
   }
 
@@ -336,7 +328,8 @@ boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
   if (xml) {
     vector<int> detIDs = instrument->getDetectorIDs();
     MatrixWorkspace_sptr wsM = WorkspaceFactory::Instance().create(
-        "Workspace2D", detIDs.size(), (size_t)100, (size_t)100);
+        "Workspace2D", detIDs.size(), static_cast<size_t>(100),
+        static_cast<size_t>(100));
 
     Workspace2D_sptr ws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(wsM);
@@ -617,8 +610,8 @@ void SCDCalibratePanels::exec() {
     PARALLEL_START_INTERUPT_REGION
     auto group = Groups.begin() + iGr;
     vector<string> banksVec;
-    for (auto bankName = group->begin(); bankName != group->end(); ++bankName) {
-      banksVec.push_back(*bankName);
+    for (auto &bankName : *group) {
+      banksVec.push_back(bankName);
     }
     if (!GoodStart(peaksWs, a, b, c, alpha, beta, gamma, tolerance)) {
       g_log.warning() << "**** Indexing is NOT compatible with given lattice "
@@ -885,7 +878,7 @@ void SCDCalibratePanels::exec() {
         nVars--;
 
       // g_log.notice() << "      nVars=" <<nVars<< endl;
-      int NDof = ((int)ws->dataX(0).size() - nVars);
+      int NDof = (static_cast<int>(ws->dataX(0).size()) - nVars);
       NDofSum = +NDof;
 
       map<string, double> result;
@@ -901,7 +894,8 @@ void SCDCalibratePanels::exec() {
 
       //--------------------- Create Result Table Workspace-------------------
       this->progress(.92, "Creating Results table");
-      createResultWorkspace((int)Groups.size(), iGr + 1, names, params, errs);
+      createResultWorkspace(static_cast<int>(Groups.size()), iGr + 1, names,
+                            params, errs);
 
       //---------------- Create new instrument with ------------------------
       //--------------new parameters to SAVE to files---------------------
@@ -962,7 +956,7 @@ void SCDCalibratePanels::exec() {
       string prevBankName = "";
       int BankNumDef = 200;
       for (size_t q = 0; q < nData; q += 3) {
-        int pk = (int)xVals[q];
+        int pk = static_cast<int>(xVals[q]);
         const Geometry::IPeak &peak = peaksWs->getPeak(pk);
 
         string bankName = peak.getBankName();
@@ -1234,9 +1228,7 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
 
   // determine the field names, the leading '_' is the break point
   vector<string> TableFieldNames;
-  for (size_t p = 0; p < names.size(); ++p) {
-    string fieldName = names[p];
-
+  for (auto fieldName : names) {
     size_t dotPos = fieldName.find('_');
     if (dotPos < fieldName.size())
       fieldName = fieldName.substr(dotPos + 1);
@@ -1536,7 +1528,7 @@ void SCDCalibratePanels::CreateFxnGetValues(
     prefixStrm << "f" << g << "_";
     string prefix = prefixStrm.str();
 
-    for (int nm = 0; nm < (int)names.size(); ++nm) {
+    for (int nm = 0; nm < static_cast<int>(names.size()); ++nm) {
       if (names[nm].compare(0, prefix.length(), prefix) == 0) {
         string prm = names[nm].substr(prefix.length());
         if (FieldB.find(prm) != FieldB.end()) {
@@ -1643,9 +1635,7 @@ void SCDCalibratePanels::FixUpBankParameterMap(
     boost::shared_ptr<const ParameterMap> const pmapOld, bool RotCenters) {
   boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
 
-  for (auto it1 = bankNames.cbegin(); it1 != bankNames.cend(); ++it1) {
-
-    const string bankName = (*it1);
+  for (auto bankName : bankNames) {
 
     boost::shared_ptr<const IComponent> bank1 =
         NewInstrument->getComponentByName(bankName);
@@ -1729,8 +1719,8 @@ void SCDCalibratePanels::saveXmlFile(
   ParameterMap_sptr pmap = instrument->getParameterMap();
 
   // write out the detector banks
-  for (auto it = Groups.begin(); it != Groups.end(); ++it) {
-    for (auto it1 = (*it).begin(); it1 != (*it).end(); ++it1) {
+  for (const auto &Group : Groups) {
+    for (auto it1 = Group.begin(); it1 != Group.end(); ++it1) {
       string bankName = (*it1);
 
       oss3 << "<component-link name=\"" << bankName << "\">" << endl;

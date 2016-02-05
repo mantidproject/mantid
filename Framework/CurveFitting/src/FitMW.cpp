@@ -86,7 +86,7 @@ FitMW::FitMW(Kernel::IPropertyManager *fit,
  * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
  */
 FitMW::FitMW(FitMW::DomainType domainType)
-    : API::IDomainCreator(NULL, std::vector<std::string>(), domainType),
+    : API::IDomainCreator(nullptr, std::vector<std::string>(), domainType),
       m_workspaceIndex(-1), m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()),
       m_maxSize(10), m_normalise(false), m_startIndex(0) {}
 

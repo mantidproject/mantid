@@ -231,9 +231,9 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
   boost::split(strs, instring, boost::is_any_of(", "));
 
   vector<double> vecdouble;
-  for (size_t i = 0; i < strs.size(); i++) {
-    if (strs[i].size() > 0) {
-      double item = atof(strs[i].c_str());
+  for (auto &str : strs) {
+    if (str.size() > 0) {
+      double item = atof(str.c_str());
       vecdouble.push_back(item);
       // cout << "[C] |" << strs[i] << "|" << item << "\n";
     }
@@ -254,9 +254,9 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
   boost::split(strs, instring, boost::is_any_of(", "));
 
   vector<unsigned int> vecinteger;
-  for (size_t i = 0; i < strs.size(); i++) {
-    if (strs[i].size() > 0) {
-      int item = atoi(strs[i].c_str());
+  for (auto &str : strs) {
+    if (str.size() > 0) {
+      int item = atoi(str.c_str());
       if (item < 0) {
         throw runtime_error(
             "Found negative number in a string for unsigned integers.");
@@ -365,9 +365,8 @@ void SaveGSASInstrumentFile::exec() {
   // Deal with a default
   if (m_vecBankID2File.empty()) {
     // Default is to export all banks
-    for (auto miter = bankprofileparammap.begin();
-         miter != bankprofileparammap.end(); ++miter) {
-      unsigned int bankid = miter->first;
+    for (auto &miter : bankprofileparammap) {
+      unsigned int bankid = miter.first;
       m_vecBankID2File.push_back(bankid);
     }
     sort(m_vecBankID2File.begin(), m_vecBankID2File.end());
@@ -552,8 +551,8 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
   stringstream db1ss;
   db1ss << "[DBx912] Number of banks in profile table = " << vecbankindex.size()
         << " containing bank ";
-  for (size_t i = 0; i < vecbankindex.size(); ++i)
-    db1ss << vecbankindex[i] << ", ";
+  for (auto bankIndex : vecbankindex)
+    db1ss << bankIndex << ", ";
   g_log.information(db1ss.str());
 
   // Construct output
@@ -561,7 +560,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
 
   for (size_t i = 0; i < vecbankindex.size(); ++i) {
     unsigned int bankid = vecbankindex[i];
-    profilemap.insert(make_pair(bankid, vec_maptemp[i]));
+    profilemap.emplace(bankid, vec_maptemp[i]);
   }
 
   return;
@@ -704,8 +703,7 @@ void SaveGSASInstrumentFile::convertToGSAS(
     throw runtime_error("Not set up yet!");
 
   // Set up min-dsp, max-tof
-  for (size_t i = 0; i < outputbankids.size(); ++i) {
-    unsigned int bankid = outputbankids[i];
+  for (auto bankid : outputbankids) {
     if (!m_configuration->hasBank(bankid))
       throw runtime_error(
           "Chopper configuration does not have some certain bank.");
@@ -724,8 +722,7 @@ void SaveGSASInstrumentFile::convertToGSAS(
   //  Convert and write
   vector<unsigned int> banks = outputbankids;
   sort(banks.begin(), banks.end());
-  for (size_t ib = 0; ib < banks.size(); ++ib) {
-    unsigned int bankid = banks[ib];
+  for (auto bankid : banks) {
     if (m_configuration->hasBank(bankid)) {
       buildGSASTabulatedProfile(bankprofilemap, bankid);
       writePRMSingleBank(bankprofilemap, bankid, gsasinstrfilename);
@@ -886,7 +883,7 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
   double gam1 = getProfileParameterValue(profilemap, "Gam1");
   double gam2 = getProfileParameterValue(profilemap, "Gam2");
 
-  int randint = 10001 + (rand() % (int)(99999 - 10001 + 1));
+  int randint = 10001 + (rand() % (99999 - 10001 + 1));
 
   double mindsp = m_configuration->getParameter(bankid, "MinDsp");
   double maxtof = m_configuration->getParameter(bankid, "MaxTOF");
@@ -1077,9 +1074,8 @@ double SaveGSASInstrumentFile::getProfileParameterValue(
     stringstream errss;
     errss << "Profile map does not contain parameter " << paramname
           << ". Available parameters are ";
-    for (auto piter = profilemap.cbegin(); piter != profilemap.cend();
-         ++piter) {
-      errss << piter->first << ", ";
+    for (const auto &piter : profilemap) {
+      errss << piter.first << ", ";
     }
     g_log.error(errss.str());
     throw runtime_error(errss.str());

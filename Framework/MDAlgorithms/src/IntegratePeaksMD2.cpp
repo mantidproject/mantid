@@ -150,6 +150,12 @@ void IntegratePeaksMD2::init() {
                   "PeakRadius plus this value multiplied"
                   "by the magnitude of Q at the peak center so each peak has a "
                   "different integration radius.  Q includes the 2*pi factor.");
+
+  declareProperty(
+      "CorrectIfOnEdge", false,
+      "Only warning if all of peak outer radius is not on detector (default).\n"
+      "If false, correct for volume off edge for both background and "
+      "intensity.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -257,6 +263,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   /// Replace intensity with 0
   bool replaceIntensity = getProperty("ReplaceIntensity");
   bool integrateEdge = getProperty("IntegrateIfOnEdge");
+  bool correctEdge = getProperty("CorrectIfOnEdge");
 
   std::string profileFunction = getProperty("ProfileFunction");
   std::string integrationOption = getProperty("IntegrationOption");
@@ -270,6 +277,11 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     outFile = save_path + outFile;
     out.open(outFile.c_str(), std::ofstream::out);
   }
+  // volume of Background sphere with inner volume subtracted
+  double volumeBkg = 4.0 / 3.0 * M_PI * (std::pow(BackgroundOuterRadius, 3) -
+                                         std::pow(BackgroundOuterRadius, 3));
+  // volume of PeakRadius sphere
+  double volumeRadius = 4.0 / 3.0 * M_PI * std::pow(PeakRadius, 3);
   //
   // If the following OMP pragma is included, this algorithm seg faults
   // sporadically when processing multiple TOPAZ runs in a script, on
@@ -302,10 +314,12 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     // Do not integrate if sphere is off edge of detector
 
-    if (!detectorQ(p.getQLabFrame(),
-                   std::max(BackgroundOuterRadius, PeakRadius))) {
+    double edge = detectorQ(p.getQLabFrame(),
+                            std::max(BackgroundOuterRadius, PeakRadius));
+    if (edge < std::max(BackgroundOuterRadius, PeakRadius)) {
       g_log.warning() << "Warning: sphere/cylinder for integration is off edge "
-                         "of detector for peak " << i << std::endl;
+                         "of detector for peak " << i
+                      << "; radius of edge =  " << edge << std::endl;
       if (!integrateEdge) {
         if (replaceIntensity) {
           p.setIntensity(0.0);
@@ -620,10 +634,32 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         2.0 * std::max(PeakRadiusVector[i], BackgroundOuterRadiusVector[i]));
     // Save it back in the peak object.
     if (signal != 0. || replaceIntensity) {
-      p.setIntensity(signal - ratio * background_total - bgSignal);
-      p.setSigmaIntensity(sqrt(errorSquared +
-                               ratio * ratio * std::fabs(background_total) +
-                               bgErrorSquared));
+      double edgeMultiplier = 1.0;
+      double peakMultiplier = 1.0;
+      if (correctEdge) {
+        if (edge < BackgroundOuterRadius) {
+          double e1 = BackgroundOuterRadius - edge;
+          // volume of cap of sphere with h = edge
+          double f1 =
+              M_PI * std::pow(e1, 2) / 3 * (3 * BackgroundOuterRadius - e1);
+          edgeMultiplier = volumeBkg / (volumeBkg - f1);
+        }
+        if (edge < PeakRadius) {
+          double sigma = PeakRadius / 3.0;
+          // assume gaussian peak
+          double e1 =
+              std::exp(-std::pow(edge, 2) / (2 * sigma * sigma)) * PeakRadius;
+          // volume of cap of sphere with h = edge
+          double f1 = M_PI * std::pow(e1, 2) / 3 * (3 * PeakRadius - e1);
+          peakMultiplier = volumeRadius / (volumeRadius - f1);
+        }
+      }
+      p.setIntensity(peakMultiplier * signal -
+                     edgeMultiplier * (ratio * background_total + bgSignal));
+      p.setSigmaIntensity(
+          sqrt(peakMultiplier * errorSquared +
+               edgeMultiplier * (ratio * ratio * std::fabs(background_total) +
+                                 bgErrorSquared)));
     }
 
     g_log.information() << "Peak " << i << " at " << pos << ": signal "
@@ -678,8 +714,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 void IntegratePeaksMD2::calculateE1(Geometry::Instrument_const_sptr inst) {
   std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
 
-  for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID) {
-    Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(*detID);
+  for (auto &detectorID : detectorIDs) {
+    Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(detectorID);
     if (det->isMonitor())
       continue; // skip monitor
     if (!det->isMasked())
@@ -703,27 +739,46 @@ void IntegratePeaksMD2::calculateE1(Geometry::Instrument_const_sptr inst) {
  * @param QLabFrame: The Peak center.
  * @param r: Peak radius.
  */
-bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
-
-  for (auto E1 = E1Vec.begin(); E1 != E1Vec.end(); ++E1) {
+double IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
+  double edge = r;
+  for (auto &E1 : E1Vec) {
     V3D distv = QLabFrame -
-                *E1 * (QLabFrame.scalar_prod(
-                          *E1)); // distance to the trajectory as a vector
+                E1 * (QLabFrame.scalar_prod(
+                         E1)); // distance to the trajectory as a vector
     if (distv.norm() < r) {
-      return false;
+      edge = distv.norm();
     }
   }
-  return true;
+  return edge;
 }
+
 void IntegratePeaksMD2::runMaskDetectors(
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
     std::string values) {
-  IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
-  alg->setProperty<Workspace_sptr>("Workspace", peakWS);
-  alg->setProperty(property, values);
-  if (!alg->execute())
-    throw std::runtime_error(
-        "MaskDetectors Child Algorithm has not executed successfully");
+  // For CORELLI do not count as edge if next to another detector bank
+  if (property == "Tube" && peakWS->getInstrument()->getName() == "CORELLI") {
+    IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
+    alg->setProperty<Workspace_sptr>("Workspace", peakWS);
+    alg->setProperty("Bank", "1,7,12,17,22,27,30,59,63,69,74,79,84,89");
+    alg->setProperty(property, "1");
+    if (!alg->execute())
+      throw std::runtime_error(
+          "MaskDetectors Child Algorithm has not executed successfully");
+    IAlgorithm_sptr alg2 = createChildAlgorithm("MaskBTP");
+    alg2->setProperty<Workspace_sptr>("Workspace", peakWS);
+    alg2->setProperty("Bank", "6,11,16,21,26,29,58,62,68,73,78,83,88,91");
+    alg2->setProperty(property, "16");
+    if (!alg2->execute())
+      throw std::runtime_error(
+          "MaskDetectors Child Algorithm has not executed successfully");
+  } else {
+    IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
+    alg->setProperty<Workspace_sptr>("Workspace", peakWS);
+    alg->setProperty(property, values);
+    if (!alg->execute())
+      throw std::runtime_error(
+          "MaskDetectors Child Algorithm has not executed successfully");
+  }
 }
 
 void IntegratePeaksMD2::checkOverlap(
@@ -766,7 +821,8 @@ void IntegratePeaksMD2::exec() {
 
 double f_eval2(double x, void *params) {
   boost::shared_ptr<const API::CompositeFunction> fun =
-      *(boost::shared_ptr<const API::CompositeFunction> *)params;
+      *reinterpret_cast<boost::shared_ptr<const API::CompositeFunction> *>(
+          params);
   FunctionDomain1DVector domain(x);
   FunctionValues yval(domain);
   fun->function(domain, yval);

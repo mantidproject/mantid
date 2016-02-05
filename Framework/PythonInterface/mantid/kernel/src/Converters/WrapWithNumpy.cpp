@@ -52,7 +52,7 @@ PyObject *wrapWithNDArray(const ElementType *carray, const int ndims,
 
   if (mode == ReadOnly)
     markReadOnly(nparray);
-  return (PyObject *)nparray;
+  return reinterpret_cast<PyObject *>(nparray);
 }
 
 //-----------------------------------------------------------------------

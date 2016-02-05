@@ -754,11 +754,10 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
   ws->setYUnitLabel("brightness");
 
   // Add all header info to log.
-  for (auto it = fileInfo.headerKeys.begin(); it != fileInfo.headerKeys.end();
-       ++it) {
-    ws->mutableRun().removeLogData(it->first, true);
+  for (const auto &headerKey : fileInfo.headerKeys) {
+    ws->mutableRun().removeLogData(headerKey.first, true);
     ws->mutableRun().addLogData(
-        new PropertyWithValue<std::string>(it->first, it->second));
+        new PropertyWithValue<std::string>(headerKey.first, headerKey.second));
   }
 
   // Add rotational data to log. Clear first from copied WS
@@ -981,9 +980,9 @@ void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
 
   for (size_t j = 1; j < (imageY.size() - 1); ++j) {
     for (size_t i = 1; i < (imageY[0].size() - 1); ++i) {
-      if (!goodY[j][i]) {
-        if (goodY[j - 1][i] || goodY[j + 1][i] || goodY[j][i - 1] ||
-            goodY[j][i + 1]) {
+      if (goodY[j][i] == 0.0) {
+        if (goodY[j - 1][i] != 0.0 || goodY[j + 1][i] != 0.0 ||
+            goodY[j][i - 1] != 0.0 || goodY[j][i + 1] != 0.0) {
           imageY[j][i] = goodY[j - 1][i] * imageY[j - 1][i] +
                          goodY[j + 1][i] * imageY[j + 1][i] +
                          goodY[j][i - 1] * imageY[j][i - 1] +
@@ -991,9 +990,9 @@ void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
         }
       }
 
-      if (!goodE[j][i]) {
-        if (goodE[j - 1][i] || goodE[j + 1][i] || goodE[j][i - 1] ||
-            goodE[j][i + 1]) {
+      if (goodE[j][i] == 0.0) {
+        if (goodE[j - 1][i] != 0.0 || goodE[j + 1][i] != 0.0 ||
+            goodE[j][i - 1] != 0.0 || goodE[j][i + 1] != 0.0) {
           imageE[j][i] = goodE[j - 1][i] * imageE[j - 1][i] +
                          goodE[j + 1][i] * imageE[j + 1][i] +
                          goodE[j][i - 1] * imageE[j][i - 1] +

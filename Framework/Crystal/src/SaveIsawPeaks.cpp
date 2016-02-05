@@ -297,13 +297,12 @@ void SaveIsawPeaks::exec() {
         size_t first_peak_index = ids[0];
         Peak &first_peak = peaks[first_peak_index];
         double monct = first_peak.getMonitorCount();
-        out << std::setw(12) << (int)(monct) << std::endl;
+        out << std::setw(12) << static_cast<int>(monct) << std::endl;
 
         out << header << std::endl;
 
         // Go through each peak at this run / bank
-        for (size_t i = 0; i < ids.size(); i++) {
-          size_t wi = ids[i];
+        for (auto wi : ids) {
           Peak &p = peaks[wi];
 
           // Sequence (run) number

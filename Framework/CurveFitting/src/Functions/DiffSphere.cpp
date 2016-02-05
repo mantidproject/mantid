@@ -122,7 +122,7 @@ void InelasticDiffSphere::initAlphaCoeff() {
   for (std::vector<xnlc>::const_iterator it = m_xnl.begin(); it != m_xnl.end();
        ++it) {
     double x = it->x; // eigenvalue for a (n, l) pair
-    double l = (double)(it->l);
+    double l = static_cast<double>(it->l);
     m_alpha.push_back((2.0 * l + 1) * 6.0 * x * x / (x * x - l * (l + 1)));
   }
 }
@@ -133,10 +133,10 @@ void InelasticDiffSphere::initAlphaCoeff() {
  * numerical indeterminacies. To avoid them, we will interpolate linearly.
  */
 void InelasticDiffSphere::initLinJlist() {
-  for (size_t i = 0; i < m_xnl.size(); i++) {
+  for (auto &coeff : m_xnl) {
     linearJ abJ;
-    double x = m_xnl[i].x; // eigenvalue for a (n, l) pair
-    unsigned int l = (unsigned int)(m_xnl[i].l);
+    double x = coeff.x; // eigenvalue for a (n, l) pair
+    unsigned int l = static_cast<unsigned int>(coeff.l);
     double Qa = x - m_divZone; // left of the numerical divergence point
     double J0 = (Qa * boost::math::sph_bessel(l + 1, Qa) -
                  l * boost::math::sph_bessel(l, Qa)) /
@@ -182,7 +182,7 @@ InelasticDiffSphere::LorentzianCoefficients(double a) const {
   // precompute the 2+m_lmax spherical bessel functions (26 in total)
   std::vector<double> jl(2 + m_lmax);
   for (size_t l = 0; l < 2 + m_lmax; l++) {
-    jl[l] = boost::math::sph_bessel((unsigned int)(l), a);
+    jl[l] = boost::math::sph_bessel(static_cast<unsigned int>(l), a);
   }
 
   // store the coefficient of each Lorentzian in vector YJ(a,w)
@@ -191,7 +191,7 @@ InelasticDiffSphere::LorentzianCoefficients(double a) const {
 
   for (size_t i = 0; i < ncoeff; i++) {
     double x = m_xnl[i].x;
-    unsigned int l = (unsigned int)(m_xnl[i].l);
+    unsigned int l = static_cast<unsigned int>(m_xnl[i].l);
 
     double J;
     if (fabs(a - x) > m_divZone) {

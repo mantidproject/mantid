@@ -20,7 +20,7 @@ IDomainCreator *DomainCreatorFactoryImpl::createDomainCreator(
     const unsigned int domainType) const {
   auto creator = this->createUnwrapped(id);
   creator->initialize(pm, workspacePropertyName,
-                      (IDomainCreator::DomainType)domainType);
+                      static_cast<IDomainCreator::DomainType>(domainType));
   return creator;
 }
 

@@ -223,13 +223,13 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
 
   // Efixed; do we need one and does one exist?
   double Efi = targWS->getLogs()->getPropertyValueAsType<double>("Ei");
-  float *pEfixedArray(NULL);
+  float *pEfixedArray(nullptr);
   const Geometry::ParameterMap &pmap = inputWS->constInstrumentParameters();
   if (m_getEFixed)
     pEfixedArray = targWS->getColDataArray<float>("eFixed");
 
   // check if one needs to generate masked detectors column.
-  int *pMasksArray(NULL);
+  int *pMasksArray(nullptr);
   if (m_getIsMasked)
     pMasksArray = targWS->getColDataArray<int>("detMask");
 
@@ -301,7 +301,7 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
       } catch (std::runtime_error &) {
       }
       // set efixed for each existing detector
-      *(pEfixedArray + liveDetectorsCount) = (float)(Efi);
+      *(pEfixedArray + liveDetectorsCount) = static_cast<float>(Efi);
     }
 
     liveDetectorsCount++;
@@ -391,7 +391,7 @@ void PreprocessDetectorsToMD::buildFakeDetectorsPositions(
   // Loop over the spectra
   for (size_t i = 0; i < nHist; i++) {
     sp2detMap[i] = i;
-    detId[i] = (detid_t)i;
+    detId[i] = static_cast<detid_t>(i);
     detIDMap[i] = i;
     L2[i] = 1;
 
@@ -416,9 +416,7 @@ bool PreprocessDetectorsToMD::isDetInfoLost(
     Mantid::API::MatrixWorkspace_const_sptr inWS2D) const {
   auto pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
   // if this is numeric axis, then the detector's information has been lost:
-  if (pYAxis)
-    return true;
-  return false;
+  return pYAxis != nullptr;
 }
 
 /** Method returns the efixed or Ei value stored in properties of the input

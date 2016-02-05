@@ -54,7 +54,7 @@ CalculateGammaBackground::CalculateGammaBackground()
     : Algorithm(), m_inputWS(), m_indices(), m_profileFunction(), m_npeaks(0),
       m_reversed(), m_samplePos(), m_l1(0.0), m_foilRadius(0.0),
       m_foilUpMin(0.0), m_foilUpMax(0.0), m_foils0(), m_foils1(),
-      m_backgroundWS(), m_correctedWS(), m_progress(NULL) {}
+      m_backgroundWS(), m_correctedWS(), m_progress(nullptr) {}
 
 /// Destructor
 CalculateGammaBackground::~CalculateGammaBackground() {

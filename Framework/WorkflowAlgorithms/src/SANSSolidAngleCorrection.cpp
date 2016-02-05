@@ -32,7 +32,7 @@ static double getYTubeAngle(IDetector_const_sptr det,
       workspace->getInstrument()->getSource();
   Geometry::IComponent_const_sptr sample =
       workspace->getInstrument()->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw std::invalid_argument("Instrument not sufficiently defined: failed "
                                 "to get source and/or sample");
   }

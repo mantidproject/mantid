@@ -88,10 +88,10 @@ std::vector<MinMax> calculateExtents(const DblMatrix &inMatrix,
   const double maxDbl = std::numeric_limits<double>::max();
   std::vector<MinMax> extents(3, std::make_pair(maxDbl, maxDbl));
 
-  for (auto hIt = hRange.begin(); hIt != hRange.end(); ++hIt) {
-    for (auto kIt = kRange.begin(); kIt != kRange.end(); ++kIt) {
-      for (auto lIt = lRange.begin(); lIt != lRange.end(); ++lIt) {
-        V3D origPos(*hIt, *kIt, *lIt);
+  for (double &hIt : hRange) {
+    for (double &kIt : kRange) {
+      for (double &lIt : lRange) {
+        V3D origPos(hIt, kIt, lIt);
         for (size_t i = 0; i < 3; ++i) {
           const V3D other(invMat[i][0], invMat[i][1], invMat[i][2]);
           double val = origPos.scalar_prod(other);

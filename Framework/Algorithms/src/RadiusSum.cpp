@@ -527,8 +527,8 @@ void RadiusSum::numBinsIsReasonable() {
                     << "It corresponds to a separation smaller than the image "
                        "resolution (detector size). "
                     << "A resonable number is smaller than "
-                    << (int)((max_radius - min_radius) / min_bin_size)
-                    << std::endl;
+                    << static_cast<int>((max_radius - min_radius) /
+                                        min_bin_size) << std::endl;
 }
 
 double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {
@@ -570,8 +570,8 @@ double RadiusSum::getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr inWS) {
 
   std::vector<double> boundaries = getBoundariesOfNumericImage(inWS);
   const MantidVec &refX = inWS->readX(inputWS->getNumberHistograms() / 2);
-  int nX = (int)(refX.size());
-  int nY = (int)(inWS->getAxis(1)->length());
+  int nX = static_cast<int>(refX.size());
+  int nY = static_cast<int>(inWS->getAxis(1)->length());
 
   // remembering boundaries is defined as { xMin, xMax, yMin, yMax}
   return std::min(((boundaries[1] - boundaries[0]) / nX),
@@ -592,11 +592,11 @@ void RadiusSum::normalizeOutputByRadius(std::vector<double> &values,
   g_log.debug() << "Calculate Output[i] = Counts[i] / (Radius[i] ^ "
                 << exp_power << ") << " << std::endl;
   if (exp_power > 1.00001 || exp_power < 0.99999) {
-    for (int i = 0; i < (int)values.size(); i++) {
+    for (int i = 0; i < static_cast<int>(values.size()); i++) {
       values[i] = values[i] / pow(first_radius + i * bin_size, exp_power);
     }
   } else { // avoid calling pow because exp_power == 1 (for performance)
-    for (int i = 0; i < (int)values.size(); i++) {
+    for (int i = 0; i < static_cast<int>(values.size()); i++) {
       values[i] = values[i] / (first_radius + i * bin_size);
     }
   }
@@ -649,7 +649,7 @@ void RadiusSum::setUpOutputWorkspace(std::vector<double> &values) {
   MantidVec &refX = outputWS->dataX(0);
   double bin_size = (max_radius - min_radius) / num_bins;
 
-  for (int i = 0; i < ((int)refX.size()) - 1; i++)
+  for (int i = 0; i < (static_cast<int>(refX.size())) - 1; i++)
     refX[i] = min_radius + i * bin_size;
   refX[refX.size() - 1] = max_radius;
 

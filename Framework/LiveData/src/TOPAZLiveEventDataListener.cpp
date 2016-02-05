@@ -158,7 +158,7 @@ TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()
     : ILiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
       m_monitorLogs(), m_wsName(), m_indexMap(), m_monitorIndexMap(),
       m_tcpSocket(), m_dataSocket(), m_dataAddr(), m_isConnected(false),
-      m_udpBuf(NULL), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
+      m_udpBuf(nullptr), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
       m_thread(), m_stopThread(false), m_backgroundException() {
 
   m_udpBuf = new unsigned char[m_udpBufSize];
@@ -340,7 +340,7 @@ void TOPAZLiveEventDataListener::run() {
       // pulse_id_structs, followed by zero or more neutron_event_structs.
       //
       // Lets start with some basic decoding and logging...
-      COMMAND_HEADER_PTR hdr = (COMMAND_HEADER_PTR)m_udpBuf;
+      COMMAND_HEADER_PTR hdr = reinterpret_cast<COMMAND_HEADER_PTR>(m_udpBuf);
       unsigned long num_pulse_ids = hdr->Spare1 / sizeof(PULSE_ID);
       unsigned long num_events =
           (hdr->iTotalBytes - hdr->Spare1) / sizeof(NEUTRON_EVENT);
@@ -349,10 +349,11 @@ void TOPAZLiveEventDataListener::run() {
                     << num_pulse_ids << " pulses  " << num_events << " events"
                     << std::endl;
 
-      PULSE_ID_PTR pid = (PULSE_ID_PTR)(m_udpBuf + sizeof(COMMAND_HEADER));
-      NEUTRON_EVENT_PTR events =
-          (NEUTRON_EVENT_PTR)(m_udpBuf + sizeof(COMMAND_HEADER) +
-                              (num_pulse_ids * sizeof(PULSE_ID)));
+      PULSE_ID_PTR pid =
+          reinterpret_cast<PULSE_ID_PTR>(m_udpBuf + sizeof(COMMAND_HEADER));
+      NEUTRON_EVENT_PTR events = reinterpret_cast<NEUTRON_EVENT_PTR>(
+          m_udpBuf + sizeof(COMMAND_HEADER) +
+          (num_pulse_ids * sizeof(PULSE_ID)));
 
       for (unsigned i = 0; i < num_pulse_ids; i++) {
         g_log.debug() << "Pulse ID: " << pid[i].pulseIDhigh << ", "
@@ -587,8 +588,8 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
   // TODO: At present, there's no way for monitor logs to be added
   // to m_monitorLogs.  Either implement this feature, or remove
   // m_monitorLogs!
-  for (unsigned i = 0; i < m_monitorLogs.size(); i++) {
-    temp->mutableRun().removeProperty(m_monitorLogs[i]);
+  for (auto &monitorLog : m_monitorLogs) {
+    temp->mutableRun().removeProperty(monitorLog);
   }
   m_monitorLogs.clear();
 

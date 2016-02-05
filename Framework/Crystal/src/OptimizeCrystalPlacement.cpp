@@ -205,13 +205,13 @@ void OptimizeCrystalPlacement::exec() {
     if (use) // add to lists for workspace
     {
       nPeaksUsed++;
-      xRef.push_back((double)i);
+      xRef.push_back(static_cast<double>(i));
       yvalB.push_back(0.0);
       errB.push_back(1.0);
-      xRef.push_back((double)i);
+      xRef.push_back(static_cast<double>(i));
       yvalB.push_back(0.0);
       errB.push_back(1.0);
-      xRef.push_back((double)i);
+      xRef.push_back(static_cast<double>(i));
       yvalB.push_back(0.0);
       errB.push_back(1.0);
     }
@@ -228,7 +228,8 @@ void OptimizeCrystalPlacement::exec() {
   }
 
   int N = 3 * nPeaksUsed; // Peaks->getNumberPeaks();
-  mwkspc = WorkspaceFactory::Instance().create("Workspace2D", (size_t)1, N, N);
+  mwkspc = WorkspaceFactory::Instance().create("Workspace2D",
+                                               static_cast<size_t>(1), N, N);
   mwkspc->setX(0, pX);
   mwkspc->setData(0, yvals, errs);
 
@@ -241,9 +242,7 @@ void OptimizeCrystalPlacement::exec() {
   //---------------
   std::vector<std::string> ChRunNumList;
   std::string predChar = "";
-  for (auto it = RunNumList.begin(); it != RunNumList.end(); ++it) {
-    int runNum = *it;
-
+  for (auto runNum : RunNumList) {
     auto it1 = NOoptimizeRuns.begin();
     for (; it1 != NOoptimizeRuns.end() && *it1 != runNum; ++it1) {
     }
@@ -410,7 +409,7 @@ void OptimizeCrystalPlacement::exec() {
 
   //------------- Fix up Result workspace values ----------------------------
   std::map<std::string, double> Results;
-  for (int prm = 0; prm < (int)RRes->rowCount(); ++prm) {
+  for (int prm = 0; prm < static_cast<int>(RRes->rowCount()); ++prm) {
     std::string namee = RRes->getRef<std::string>("Name", prm);
 
     std::string start = namee.substr(0, 3);

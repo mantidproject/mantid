@@ -71,12 +71,10 @@ void PeakHKLErrors::setUpOptRuns() {
 
   boost::split(OptRunNums, OptRunstemp, boost::is_any_of("/"));
 
-  for (size_t i = 0; i < OptRunNums.size(); i++) {
-    declareParameter("phi" + OptRunNums[i], 0.0,
-                     "Phi sample orientation value");
-    declareParameter("chi" + OptRunNums[i], 0.0,
-                     "Chi sample orientation value");
-    declareParameter("omega" + OptRunNums[i], 0.0,
+  for (auto &OptRunNum : OptRunNums) {
+    declareParameter("phi" + OptRunNum, 0.0, "Phi sample orientation value");
+    declareParameter("chi" + OptRunNum, 0.0, "Chi sample orientation value");
+    declareParameter("omega" + OptRunNum, 0.0,
                      "Omega sample orientation value");
   }
 }
@@ -118,39 +116,39 @@ void PeakHKLErrors::cLone(
   if (component->isParametrized()) {
 
     std::set<std::string> nms = pmapSv->names(component.get());
-    for (auto it = nms.begin(); it != nms.end(); ++it) {
+    for (const auto &nm : nms) {
 
-      if (pmapSv->contains(component.get(), *it, "double")) {
+      if (pmapSv->contains(component.get(), nm, "double")) {
         std::vector<double> dparams =
-            pmapSv->getDouble(component->getName(), *it);
-        pmap->addDouble(component.get(), *it, dparams[0]);
+            pmapSv->getDouble(component->getName(), nm);
+        pmap->addDouble(component.get(), nm, dparams[0]);
         continue;
       }
 
-      if (pmapSv->contains(component.get(), *it, "V3D")) {
-        std::vector<V3D> V3Dparams = pmapSv->getV3D(component->getName(), *it);
-        pmap->addV3D(component.get(), *it, V3Dparams[0]);
+      if (pmapSv->contains(component.get(), nm, "V3D")) {
+        std::vector<V3D> V3Dparams = pmapSv->getV3D(component->getName(), nm);
+        pmap->addV3D(component.get(), nm, V3Dparams[0]);
         continue;
       }
 
-      if (pmapSv->contains(component.get(), *it, "int")) {
+      if (pmapSv->contains(component.get(), nm, "int")) {
         std::vector<int> iparams =
-            pmapSv->getType<int>(component->getName(), *it);
-        pmap->addInt(component.get(), *it, iparams[0]);
+            pmapSv->getType<int>(component->getName(), nm);
+        pmap->addInt(component.get(), nm, iparams[0]);
         continue;
       }
 
-      if (pmapSv->contains(component.get(), *it, "string")) {
+      if (pmapSv->contains(component.get(), nm, "string")) {
         std::vector<std::string> sparams =
-            pmapSv->getString(component->getName(), *it);
-        pmap->addString(component.get(), *it, sparams[0]);
+            pmapSv->getString(component->getName(), nm);
+        pmap->addString(component.get(), nm, sparams[0]);
         continue;
       }
 
-      if (pmapSv->contains(component.get(), *it, "Quat")) {
+      if (pmapSv->contains(component.get(), nm, "Quat")) {
         std::vector<Kernel::Quat> sparams =
-            pmapSv->getType<Kernel::Quat>(component->getName(), *it);
-        pmap->addQuat(component.get(), *it, sparams[0]);
+            pmapSv->getType<Kernel::Quat>(component->getName(), nm);
+        pmap->addQuat(component.get(), nm, sparams[0]);
         continue;
       }
     }
@@ -246,7 +244,7 @@ void PeakHKLErrors::getRun2MatMap(
     std::map<int, Mantid::Kernel::Matrix<double>> &Res) const {
 
   for (int i = 0; i < Peaks->getNumberPeaks(); ++i) {
-    Geometry::IPeak &peak_old = Peaks->getPeak((int)i);
+    Geometry::IPeak &peak_old = Peaks->getPeak(i);
 
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = boost::lexical_cast<std::string>(runNum);
@@ -281,7 +279,7 @@ void PeakHKLErrors::getRun2MatMap(
 Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis(double theta,
                                                          char axis) {
   int cint = toupper(axis);
-  char c = (char)cint;
+  char c = static_cast<char>(cint);
   std::string S(std::string("") + c);
   size_t axisPos = std::string("XYZ").find(S);
 
@@ -315,7 +313,7 @@ Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis(double theta,
 Matrix<double> PeakHKLErrors::DerivRotationMatrixAboutRegAxis(double theta,
                                                               char axis) {
   int cint = toupper(axis);
-  char c = (char)cint;
+  char c = static_cast<char>(cint);
   std::string S(std::string("") + c);
   size_t axisPos = std::string("XYZ").find(S);
 
@@ -376,7 +374,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
 
   double ChiSqTot = 0.0;
   for (size_t i = 0; i < nData; i += 3) {
-    int peakNum = (int)(.5 + xValues[i]);
+    int peakNum = static_cast<int>(.5 + xValues[i]);
     IPeak &peak_old = Peaks->getPeak(peakNum);
 
     int runNum = peak_old.getRunNumber();
@@ -473,7 +471,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
                         parameterIndex(std::string("SampleZOffset"))};
 
   for (size_t i = 0; i < nData; i += 3) {
-    int peakNum = (int)(.5 + xValues[i]);
+    int peakNum = static_cast<int>(.5 + xValues[i]);
     IPeak &peak_old = Peaks->getPeak(peakNum);
     Peak peak =
         SCDPanelErrors::createNewPeak(peak_old, instNew, 0, peak_old.getL1());
@@ -481,7 +479,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = boost::lexical_cast<std::string>(runNum);
 
-    for (int kk = 0; kk < (int)nParams(); kk++) {
+    for (int kk = 0; kk < static_cast<int>(nParams()); kk++) {
       out->set(i, kk, 0.0);
       out->set(i + 1, kk, 0.0);
       out->set(i + 1, kk, 0.0);

@@ -54,7 +54,7 @@ int Parser::bufferParse(std::string &log_info, unsigned int max_packets) {
     chunk_len = m_oversize_len;
     if (valid_len < chunk_len)
       chunk_len = valid_len;
-    stopped = rxOversizePkt(NULL, p, m_oversize_offset, chunk_len);
+    stopped = rxOversizePkt(nullptr, p, m_oversize_offset, chunk_len);
     m_oversize_offset += chunk_len;
     m_oversize_len -= chunk_len;
     valid_len -= chunk_len;
@@ -168,7 +168,7 @@ int Parser::bufferParse(std::string &log_info, unsigned int max_packets) {
       /* We know that the offset will fit into an unsigned
        * int, as that is the type we use for the buffer size.
        */
-      m_restart_offset = (unsigned int)(p - m_buffer);
+      m_restart_offset = static_cast<unsigned int>(p - m_buffer);
     }
   } else {
     /* We used up the buffer. */
@@ -184,14 +184,14 @@ int Parser::bufferParse(std::string &log_info, unsigned int max_packets) {
   int rc;
 
   if (stopped) {
-    rc = -(int)processed;
+    rc = -static_cast<int>(processed);
     // add to "stopped" log info...
     ss << processed;
     log_info.append("had parsed ");
     log_info.append(ss.str());
     log_info.append(" packets; ");
   } else {
-    rc = (int)processed;
+    rc = static_cast<int>(processed);
     // create log info...
     ss << rc;
     log_info.append("bufferParse(): Done. Parsed ");
@@ -256,7 +256,7 @@ bool Parser::rxOversizePkt(const PacketHeader *hdr, const uint8_t *,
                            unsigned int, unsigned int) {
   // NOTE: ADARA::PacketHeader *hdr can be NULL...! ;-o
   /* Default is to discard the data */
-  if (hdr != NULL)
+  if (hdr != nullptr)
     (m_discarded_packets[hdr->type()])++;
   return false;
 }
@@ -297,14 +297,13 @@ void Parser::getDiscardedPacketsLogString(std::string &log_info) {
   uint64_t total_discarded = 0;
 
   // Append Each Discarded Packet Type Count...
-  for (auto it = m_discarded_packets.begin(); it != m_discarded_packets.end();
-       ++it) {
+  for (auto &discarded_packet : m_discarded_packets) {
     std::stringstream ss;
-    ss << std::hex << "0x" << it->first << std::dec << "=" << it->second
-       << "; ";
+    ss << std::hex << "0x" << discarded_packet.first << std::dec << "="
+       << discarded_packet.second << "; ";
     log_info.append(ss.str());
 
-    total_discarded += it->second;
+    total_discarded += discarded_packet.second;
   }
 
   // Append Total Discarded Packet Count

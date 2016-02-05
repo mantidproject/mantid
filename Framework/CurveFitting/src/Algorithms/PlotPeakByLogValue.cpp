@@ -362,13 +362,12 @@ void PlotPeakByLogValue::exec() {
     groupAlg->execute();
   }
 
-  for (auto it = m_minimizerWorkspaces.begin();
-       it != m_minimizerWorkspaces.end(); ++it) {
-    const std::string paramName = (*it).first;
+  for (auto &minimizerWorkspace : m_minimizerWorkspaces) {
+    const std::string paramName = minimizerWorkspace.first;
     API::IAlgorithm_sptr groupAlg =
         AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupAlg->initialize();
-    groupAlg->setProperty("InputWorkspaces", (*it).second);
+    groupAlg->setProperty("InputWorkspaces", minimizerWorkspace.second);
     groupAlg->setProperty("OutputWorkspace", m_baseName + "_" + paramName);
     groupAlg->execute();
   }
@@ -521,8 +520,8 @@ PlotPeakByLogValue::makeNames() const {
   typedef Poco::StringTokenizer tokenizer;
   tokenizer names(inputList, ";",
                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-  for (auto it = names.begin(); it != names.end(); ++it) {
-    tokenizer params(*it, ",", tokenizer::TOK_TRIM);
+  for (const auto &input : names) {
+    tokenizer params(input, ",", tokenizer::TOK_TRIM);
     std::string name = params[0];
     int wi = default_wi;
     int spec = default_spec;
@@ -574,8 +573,8 @@ PlotPeakByLogValue::makeNames() const {
           boost::dynamic_pointer_cast<API::WorkspaceGroup>(ws);
       if (wsg) {
         std::vector<std::string> wsNames = wsg->getNames();
-        for (auto i = wsNames.begin(); i != wsNames.end(); ++i) {
-          nameList.push_back(InputData(*i, wi, -1, period, start, end));
+        for (auto &wsName : wsNames) {
+          nameList.push_back(InputData(wsName, wi, -1, period, start, end));
         }
         continue;
       }
@@ -604,13 +603,13 @@ PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
 
   auto minimizer = FuncMinimizerFactory::Instance().createMinimizer(format);
   auto minimizerProps = minimizer->getProperties();
-  for (auto it = minimizerProps.begin(); it != minimizerProps.end(); ++it) {
+  for (auto &minimizerProp : minimizerProps) {
     Mantid::API::WorkspaceProperty<> *wsProp =
-        dynamic_cast<Mantid::API::WorkspaceProperty<> *>(*it);
+        dynamic_cast<Mantid::API::WorkspaceProperty<> *>(minimizerProp);
     if (wsProp) {
-      std::string wsPropValue = (*it)->value();
+      std::string wsPropValue = minimizerProp->value();
       if (wsPropValue != "") {
-        std::string wsPropName = (*it)->name();
+        std::string wsPropName = minimizerProp->name();
         m_minimizerWorkspaces[wsPropName].push_back(wsPropValue);
       }
     }

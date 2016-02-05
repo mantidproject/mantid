@@ -170,14 +170,12 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   const string CAL("_CAL");
   const size_t CAL_LEN = CAL.length(); // cache to make life easier
   vector<string> files;
-  for (size_t i = 0; i < dirs.size(); ++i) {
-    if ((dirs[i].length() > CAL_LEN) &&
-        (dirs[i].compare(dirs[i].length() - CAL.length(), CAL.length(), CAL) ==
-         0)) {
-      if (Poco::File(base.path() + "/" + dirs[i] + "/calibrations/" + mapping)
+  for (auto &dir : dirs) {
+    if ((dir.length() > CAL_LEN) &&
+        (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
+      if (Poco::File(base.path() + "/" + dir + "/calibrations/" + mapping)
               .exists())
-        files.push_back(base.path() + "/" + dirs[i] + "/calibrations/" +
-                        mapping);
+        files.push_back(base.path() + "/" + dir + "/calibrations/" + mapping);
     }
   }
 
@@ -223,10 +221,10 @@ int LoadEventPreNexus2::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Constructor
  */
 LoadEventPreNexus2::LoadEventPreNexus2()
-    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), prog(NULL),
+    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), prog(nullptr),
       spectra_list(), pulsetimes(), event_indices(), proton_charge(),
       proton_charge_tot(0), pixel_to_wkspindex(), pixelmap(), detid_max(),
-      eventfile(NULL), num_events(0), num_pulses(0), numpixel(0),
+      eventfile(nullptr), num_events(0), num_pulses(0), numpixel(0),
       num_good_events(0), num_error_events(0), num_bad_events(0),
       num_wrongdetid_events(0), num_ignored_events(0), first_event(0),
       max_events(0), using_mapping_file(false), loadOnlySomeSpectra(false),
@@ -612,8 +610,8 @@ void LoadEventPreNexus2::runLoadInstrument(
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   std::reverse(eventExts.begin(), eventExts.end());
 
-  for (size_t i = 0; i < eventExts.size(); ++i) {
-    size_t pos = instrument.find(eventExts[i]);
+  for (auto &eventExt : eventExts) {
+    size_t pos = instrument.find(eventExt);
     if (pos != string::npos) {
       instrument = instrument.substr(0, pos);
       break;
@@ -729,8 +727,8 @@ void LoadEventPreNexus2::procEvents(
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (auto it = spectra_list.begin(); it != spectra_list.end(); it++)
-    spectraLoadMap[*it] = true;
+  for (auto &spectrum : spectra_list)
+    spectraLoadMap[spectrum] = true;
 
   CPUTimer tim;
 
@@ -1366,7 +1364,8 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
     this->pulsetimes.reserve(num_pulses);
     for (size_t i = 0; i < num_pulses; i++) {
       Pulse &it = (*pulses)[i];
-      DateAndTime pulseDateTime((int64_t)it.seconds, (int64_t)it.nanoseconds);
+      DateAndTime pulseDateTime(static_cast<int64_t>(it.seconds),
+                                static_cast<int64_t>(it.nanoseconds));
       this->pulsetimes.push_back(pulseDateTime);
       this->event_indices.push_back(it.event_index);
 

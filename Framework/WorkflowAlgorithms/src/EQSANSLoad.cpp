@@ -128,8 +128,8 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
   std::string config_file = "";
   static boost::regex re1("eqsans_configuration\\.([0-9]+)$");
   boost::smatch matches;
-  for (auto it = searchPaths.cbegin(); it != searchPaths.cend(); ++it) {
-    Poco::DirectoryIterator file_it(*it);
+  for (const auto &searchPath : searchPaths) {
+    Poco::DirectoryIterator file_it(searchPath);
     Poco::DirectoryIterator end;
     for (; file_it != end; ++file_it) {
       if (boost::regex_search(file_it.name(), matches, re1)) {
@@ -274,7 +274,7 @@ void EQSANSLoad::getSourceSlitSize() {
                              slit1Name + " as a time series property with "
                                          "floating point values.");
   }
-  int slit1 = (int)dp->getStatistics().mean;
+  int slit1 = static_cast<int>(dp->getStatistics().mean);
 
   const std::string slit2Name = "vBeamSlit2";
   prop = dataWS->run().getProperty(slit2Name);
@@ -284,7 +284,7 @@ void EQSANSLoad::getSourceSlitSize() {
                              slit2Name + " as a time series property with "
                                          "floating point values.");
   }
-  int slit2 = (int)dp->getStatistics().mean;
+  int slit2 = static_cast<int>(dp->getStatistics().mean);
 
   const std::string slit3Name = "vBeamSlit3";
   prop = dataWS->run().getProperty(slit3Name);
@@ -294,7 +294,7 @@ void EQSANSLoad::getSourceSlitSize() {
                              slit3Name + " as a time series property with "
                                          "floating point values.");
   }
-  int slit3 = (int)dp->getStatistics().mean;
+  int slit3 = static_cast<int>(dp->getStatistics().mean);
 
   if (slit1 < 0 && slit2 < 0 && slit3 < 0) {
     m_output_message += "   Could not determine source aperture diameter\n";
@@ -338,10 +338,10 @@ void EQSANSLoad::moveToBeamCenter() {
   }
 
   // Check that the center of the detector really is at (0,0)
-  int nx_pixels = (int)(dataWS->getInstrument()->getNumberParameter(
-      "number-of-x-pixels")[0]);
-  int ny_pixels = (int)(dataWS->getInstrument()->getNumberParameter(
-      "number-of-y-pixels")[0]);
+  int nx_pixels = static_cast<int>(
+      dataWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
+  int ny_pixels = static_cast<int>(
+      dataWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
   V3D pixel_first = dataWS->getInstrument()->getDetector(0)->getPos();
   int detIDx = EQSANSInstrument::getDetectorFromPixel(nx_pixels - 1, 0, dataWS);
   int detIDy = EQSANSInstrument::getDetectorFromPixel(0, ny_pixels - 1, dataWS);

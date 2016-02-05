@@ -127,7 +127,7 @@ bool ISISLiveEventDataListener::connect(
     retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle);
   }
   if (retVal != 0) {
-    m_daeHandle = NULL;
+    m_daeHandle = nullptr;
     return false;
   }
 
@@ -387,9 +387,11 @@ void ISISLiveEventDataListener::saveEvents(
     period = 0;
   }
 
-  for (auto it = data.begin(); it != data.end(); ++it) {
-    Mantid::DataObjects::TofEvent event(it->time_of_flight, pulseTime);
-    m_eventBuffer[period]->getEventList(it->spectrum).addEventQuickly(event);
+  for (const auto &streamEvent : data) {
+    Mantid::DataObjects::TofEvent event(streamEvent.time_of_flight, pulseTime);
+    m_eventBuffer[period]
+        ->getEventList(streamEvent.spectrum)
+        .addEventQuickly(event);
   }
 }
 

@@ -38,7 +38,7 @@ DECLARE_ALGORITHM(FindPeaks)
   */
 FindPeaks::FindPeaks()
     : API::Algorithm(), m_peakParameterNames(), m_bkgdParameterNames(),
-      m_bkgdOrder(0), m_outPeakTableWS(), m_progress(NULL), m_dataWS(),
+      m_bkgdOrder(0), m_outPeakTableWS(), m_progress(nullptr), m_dataWS(),
       m_inputPeakFWHM(0), m_wsIndex(0), singleSpectrum(false),
       m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
       m_centreIndex(1) /* for Gaussian */, m_peakFuncType(""),

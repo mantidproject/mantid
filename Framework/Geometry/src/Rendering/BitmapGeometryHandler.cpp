@@ -25,7 +25,7 @@ BitmapGeometryHandler::BitmapGeometryHandler(RectangularDetector *comp)
 }
 
 BitmapGeometryHandler::BitmapGeometryHandler()
-    : GeometryHandler((Object *)NULL), m_rectDet(NULL) {}
+    : GeometryHandler((Object *)nullptr), m_rectDet(nullptr) {}
 
 /// Destructor
 BitmapGeometryHandler::~BitmapGeometryHandler() {}
@@ -96,26 +96,31 @@ void BitmapGeometryHandler::Render() {
   pos = m_rectDet->getRelativePosAtXY(0, 0);
   pos += V3D(m_rectDet->xstep() * (-0.5), m_rectDet->ystep() * (-0.5),
              0.0); // Adjust to account for the size of a pixel
-  glVertex3f((GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
+  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
+             static_cast<GLfloat>(pos.Z()));
 
-  glTexCoord2f((GLfloat)tex_frac_x, 0.0);
+  glTexCoord2f(static_cast<GLfloat>(tex_frac_x), 0.0);
   pos = m_rectDet->getRelativePosAtXY(m_rectDet->xpixels() - 1, 0);
   pos += V3D(m_rectDet->xstep() * (+0.5), m_rectDet->ystep() * (-0.5),
              0.0); // Adjust to account for the size of a pixel
-  glVertex3f((GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
+  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
+             static_cast<GLfloat>(pos.Z()));
 
-  glTexCoord2f((GLfloat)tex_frac_x, (GLfloat)tex_frac_y);
+  glTexCoord2f(static_cast<GLfloat>(tex_frac_x),
+               static_cast<GLfloat>(tex_frac_y));
   pos = m_rectDet->getRelativePosAtXY(m_rectDet->xpixels() - 1,
                                       m_rectDet->ypixels() - 1);
   pos += V3D(m_rectDet->xstep() * (+0.5), m_rectDet->ystep() * (+0.5),
              0.0); // Adjust to account for the size of a pixel
-  glVertex3f((GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
+  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
+             static_cast<GLfloat>(pos.Z()));
 
-  glTexCoord2f(0.0, (GLfloat)tex_frac_y);
+  glTexCoord2f(0.0, static_cast<GLfloat>(tex_frac_y));
   pos = m_rectDet->getRelativePosAtXY(0, m_rectDet->ypixels() - 1);
   pos += V3D(m_rectDet->xstep() * (-0.5), m_rectDet->ystep() * (+0.5),
              0.0); // Adjust to account for the size of a pixel
-  glVertex3f((GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
+  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
+             static_cast<GLfloat>(pos.Z()));
 
   glEnd();
   if (glGetError() > 0)

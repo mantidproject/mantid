@@ -232,10 +232,10 @@ Rule *Intersection::findKey(const int KeyN)
   @retval Rule* if an appropiate leaf is found
 */
 {
-  Rule *PtrOut = (A) ? A->findKey(KeyN) : 0;
+  Rule *PtrOut = (A) ? A->findKey(KeyN) : nullptr;
   if (PtrOut)
     return PtrOut;
-  return (B) ? B->findKey(KeyN) : 0;
+  return (B) ? B->findKey(KeyN) : nullptr;
 }
 
 std::string Intersection::display() const
@@ -307,7 +307,7 @@ bool Intersection::isValid(const std::map<int, int> &MX) const
 {
   if (!A || !B)
     return false;
-  return (A->isValid(MX) && B->isValid(MX)) ? true : false;
+  return A->isValid(MX) && B->isValid(MX);
 }
 
 int Intersection::simplify()
@@ -534,10 +534,10 @@ Rule *Union::findKey(const int KeyN)
 */
 {
 
-  Rule *PtrOut = (A) ? A->findKey(KeyN) : 0;
+  Rule *PtrOut = (A) ? A->findKey(KeyN) : nullptr;
   if (PtrOut)
     return PtrOut;
-  return (B) ? B->findKey(KeyN) : 0;
+  return (B) ? B->findKey(KeyN) : nullptr;
 }
 
 int Union::isComplementary() const
@@ -580,7 +580,7 @@ bool Union::isValid(const Kernel::V3D &Vec) const
   @retval 0 :: Vec is outside object.
 */
 {
-  return ((A && A->isValid(Vec)) || (B && B->isValid(Vec))) ? true : false;
+  return (A && A->isValid(Vec)) || (B && B->isValid(Vec));
 }
 
 bool Union::isValid(const std::map<int, int> &MX) const
@@ -592,7 +592,7 @@ bool Union::isValid(const std::map<int, int> &MX) const
   @retval 0 :: Neither side is valid
 */
 {
-  return ((A && A->isValid(MX)) || (B && B->isValid(MX))) ? true : false;
+  return (A && A->isValid(MX)) || (B && B->isValid(MX));
 }
 
 std::string Union::display() const
@@ -758,7 +758,7 @@ Rule *SurfPoint::findKey(const int KeyNum)
   @retval Rule* if an appropiate leaf is found
 */
 {
-  return (KeyNum == keyN) ? this : 0;
+  return (KeyNum == keyN) ? this : nullptr;
 }
 
 void SurfPoint::setKeyN(const int Ky)
@@ -819,7 +819,7 @@ bool SurfPoint::isValid(const std::map<int, int> &MX) const
   if (lx == MX.end())
     return false;
   const int rtype = (lx->second) ? 1 : -1;
-  return (rtype * sign) >= 0 ? true : false;
+  return (rtype * sign) >= 0;
 }
 
 std::string SurfPoint::display() const
@@ -971,7 +971,7 @@ TopoDS_Shape SurfPoint::analyze() {
 //----------------------------------------
 
 CompObj::CompObj()
-    : Rule(), objN(0), key(0)
+    : Rule(), objN(0), key(nullptr)
 /**
   Constructor
 */
@@ -1079,7 +1079,7 @@ Rule *CompObj::findKey(const int i)
 */
 {
   (void)i; // Avoid compiler warning
-  return 0;
+  return nullptr;
 }
 
 int CompObj::findLeaf(const Rule *A) const
@@ -1354,7 +1354,7 @@ bool BoolValue::isValid(const Kernel::V3D &pt) const
 */
 {
   (void)pt; // Avoid compiler warning
-  return (status > 0) ? true : false;
+  return status > 0;
 }
 
 bool BoolValue::isValid(const std::map<int, int> &map) const
@@ -1365,7 +1365,7 @@ bool BoolValue::isValid(const std::map<int, int> &map) const
 */
 {
   (void)map; // Avoid compiler warning
-  return (status > 0) ? true : false;
+  return status > 0;
 }
 
 int BoolValue::simplify()
@@ -1536,7 +1536,7 @@ Rule *CompGrp::findKey(const int i)
 */
 {
   (void)i; // Avoid compiler warning
-  return 0;
+  return nullptr;
 }
 
 int CompGrp::findLeaf(const Rule *R) const
@@ -1575,7 +1575,7 @@ bool CompGrp::isValid(const std::map<int, int> &SMap) const
 {
   // Note:: if isValid is true then return 0:
   if (A)
-    return (A->isValid(SMap)) ? false : true;
+    return !A->isValid(SMap);
   return true;
 }
 

@@ -223,9 +223,9 @@ void CreateDummyCalFile::saveGroupingFile(const std::string &filename,
     }
   } else //
   {
-    for (auto it = instrcalib.cbegin(); it != instrcalib.cend(); ++it)
-      writeCalEntry(outfile, (*it).first, ((*it).second).first, 0.0, 1,
-                    ((*it).second).second);
+    for (const auto &value : instrcalib)
+      writeCalEntry(outfile, value.first, (value.second).first, 0.0, 1,
+                    (value.second).second);
   }
 
   // Closing

@@ -48,7 +48,7 @@ private:
 /// Helper class for scaling peak markers to intensities.
 class AbstractIntensityScale {
 public:
-  AbstractIntensityScale(
+  explicit AbstractIntensityScale(
       const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
     setPeaksWorkspace(pws);
   }
@@ -70,7 +70,7 @@ protected:
 /// Default intensity scale leaves all markers unchanged.
 class DefaultIntensityScale : public AbstractIntensityScale {
 public:
-  DefaultIntensityScale(
+  explicit DefaultIntensityScale(
       const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
       : AbstractIntensityScale(pws) {}
 
@@ -89,7 +89,7 @@ protected:
 /// strong, very strong).
 class QualitativeIntensityScale : public AbstractIntensityScale {
 public:
-  QualitativeIntensityScale(
+  explicit QualitativeIntensityScale(
       const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
       : AbstractIntensityScale(pws) {}
 
@@ -99,6 +99,7 @@ protected:
                   const PeakMarker2D::Style &baseStyle) const override;
 
 private:
+  // cppcheck-suppress unusedPrivateFunction
   int getIntensityLevel(double intensity) const;
 
   // Scaling to weak < 0.1 <= medium <= 0.6 <= strong <= 0.9 <= very strong

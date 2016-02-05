@@ -34,8 +34,8 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
       self.getFunctionNames<Mantid::API::IFunction>();
 
   PyObject *registered = PyList_New(0);
-  for (auto name = names.begin(); name != names.end(); ++name) {
-    PyObject *value = PyString_FromString(name->c_str());
+  for (const auto &name : names) {
+    PyObject *value = PyString_FromString(name.c_str());
     if (PyList_Append(registered, value))
       throw std::runtime_error("Failed to insert value into PyList");
   }
@@ -61,10 +61,11 @@ void subscribe(FunctionFactoryImpl &self, const boost::python::object &obj) {
       converter::registered<IFunction>::converters.to_python_target_type());
 
   // obj could be or instance/class, check instance first
-  PyObject *classObject(NULL);
-  if (PyObject_IsInstance(obj.ptr(), (PyObject *)baseClass)) {
+  PyObject *classObject(nullptr);
+  if (PyObject_IsInstance(obj.ptr(), reinterpret_cast<PyObject *>(baseClass))) {
     classObject = PyObject_GetAttrString(obj.ptr(), "__class__");
-  } else if (PyObject_IsSubclass(obj.ptr(), (PyObject *)baseClass)) {
+  } else if (PyObject_IsSubclass(obj.ptr(),
+                                 reinterpret_cast<PyObject *>(baseClass))) {
     classObject = obj.ptr(); // We need to ensure the type of lifetime
                              // management so grab the raw pointer
   } else {
