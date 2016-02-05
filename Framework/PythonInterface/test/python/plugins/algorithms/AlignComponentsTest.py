@@ -104,7 +104,7 @@ class AlignComponentsTest(unittest.TestCase):
         endPos = ws.getInstrument().getComponentByName(component).getPos()
         endRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles("YZX") #YZX
         self.assertEqual(startPos, endPos)
-        self.assertAlmostEqual(endRot[0],45.0,places=1)
+        self.assertAlmostEqual(endRot[0],45.0,places=0)
         self.assertEqual(startRot[1], endRot[1])
         self.assertEqual(startRot[2], endRot[2])
 
