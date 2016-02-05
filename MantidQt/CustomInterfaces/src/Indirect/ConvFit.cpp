@@ -359,41 +359,57 @@ void ConvFit::algorithmComplete(bool error) {
     }
 
     if (temp != 0.0) {
-      // Log for temp value in result Ws
-      auto valMtx = AlgorithmManager::Instance().create("AddSampleLog");
-      valMtx->setProperty("Workspace", resultWs->getName());
-      valMtx->setProperty("LogName", "temperature_value");
-      valMtx->setProperty("LogText", temperature.toStdString());
-      valMtx->setProperty("LogType", "Number");
-      m_batchAlgoRunner->addAlgorithm(valMtx);
-
-      // Log for temp bool in result Ws
-      auto corrMtx = AlgorithmManager::Instance().create("AddSampleLog");
-      corrMtx->setProperty("Workspace", resultWs->getName());
-      corrMtx->setProperty("LogName", "temperature_correction");
-      corrMtx->setProperty("LogText", "true");
-      corrMtx->setProperty("LogType", "String");
-      m_batchAlgoRunner->addAlgorithm(corrMtx);
-
-      // Log for temp value in group Ws
-      auto valGrp = AlgorithmManager::Instance().create("AddSampleLog");
-      valGrp->setProperty("Workspace", groupWs->getName());
-      valGrp->setProperty("LogName", "temperature_value");
-      valGrp->setProperty("LogText", temperature.toStdString());
-      valGrp->setProperty("LogType", "Number");
-      m_batchAlgoRunner->addAlgorithm(valGrp);
-
-      // Log for temp bool in group Ws
-      auto corrGrp = AlgorithmManager::Instance().create("AddSampleLog");
-      corrGrp->setProperty("Workspace", groupWs->getName());
-      corrGrp->setProperty("LogName", "temperature_correction");
-      corrGrp->setProperty("LogText", "true");
-      corrGrp->setProperty("LogType", "String");
-      m_batchAlgoRunner->addAlgorithm(corrGrp);
+		addTemperatureLogs(resultWs, groupWs, temperature.toStdString());
     }
   }
   m_batchAlgoRunner->executeBatchAsync();
   updatePlot();
+}
+
+/**
+ * Adds the temperature log algorithms to the batch algorithm runner
+ * @param resultWs		:: A Matrix Workspace that contains result data from
+ * a sequential fit
+ * @param groupWs		:: A GroupWorkspace that contains the fitted
+ * data
+ * @param temperature	:: The value of temperature as a string
+ */
+void ConvFit::addTemperatureLogs(MatrixWorkspace_sptr resultWs,
+                                 WorkspaceGroup_sptr groupWs,
+                                 const std::string temperature) {
+  /*==========THIS COULD BE DONE AS A TEMPLATE (REDUCES CODE
+   * DUPLICATION)==============*/
+  // Log for temp value in result Ws
+  auto valMtx = AlgorithmManager::Instance().create("AddSampleLog");
+  valMtx->setProperty("Workspace", resultWs->getName());
+  valMtx->setProperty("LogName", "temperature_value");
+  valMtx->setProperty("LogText", temperature);
+  valMtx->setProperty("LogType", "Number");
+  m_batchAlgoRunner->addAlgorithm(valMtx);
+
+  // Log for temp bool in result Ws
+  auto corrMtx = AlgorithmManager::Instance().create("AddSampleLog");
+  corrMtx->setProperty("Workspace", resultWs->getName());
+  corrMtx->setProperty("LogName", "temperature_correction");
+  corrMtx->setProperty("LogText", "true");
+  corrMtx->setProperty("LogType", "String");
+  m_batchAlgoRunner->addAlgorithm(corrMtx);
+
+  // Log for temp value in group Ws
+  auto valGrp = AlgorithmManager::Instance().create("AddSampleLog");
+  valGrp->setProperty("Workspace", groupWs->getName());
+  valGrp->setProperty("LogName", "temperature_value");
+  valGrp->setProperty("LogText", temperature);
+  valGrp->setProperty("LogType", "Number");
+  m_batchAlgoRunner->addAlgorithm(valGrp);
+
+  // Log for temp bool in group Ws
+  auto corrGrp = AlgorithmManager::Instance().create("AddSampleLog");
+  corrGrp->setProperty("Workspace", groupWs->getName());
+  corrGrp->setProperty("LogName", "temperature_correction");
+  corrGrp->setProperty("LogText", "true");
+  corrGrp->setProperty("LogType", "String");
+  m_batchAlgoRunner->addAlgorithm(corrGrp);
 }
 
 /**
