@@ -161,7 +161,8 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   fit->setPropertyValue("Function", funcStr);
   fit->setPropertyValue("Input", input.str());
   fit->setPropertyValue("OutputWorkspace", groupName);
-  fit->setPropertyValue("FitType", "Individual"); // each fit starts with same initial parameters
+  fit->setPropertyValue(
+      "FitType", "Individual"); // each fit starts with same initial parameters
   fit->setProperty("CreateOutput", true);
   fit->execute();
 

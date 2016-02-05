@@ -17,7 +17,7 @@ GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument)
 */
 GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument,
                                const std::string &mainFieldDirection)
-    : m_mainFieldDirection(mainFieldDirection), m_instrument(instrument) {}
+    : m_instrument(instrument), m_mainFieldDirection(mainFieldDirection) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -30,6 +30,7 @@ GroupingLoader::~GroupingLoader() {}
  */
 boost::shared_ptr<Grouping> GroupingLoader::getGroupingFromIDF() const {
   std::string parameterName = "Default grouping file";
+  auto loadedGrouping = boost::make_shared<Grouping>();
 
   // Special case for MUSR, because it has two possible groupings
   if (m_instrument->getName() == "MUSR") {
@@ -46,23 +47,21 @@ boost::shared_ptr<Grouping> GroupingLoader::getGroupingFromIDF() const {
     std::string directoryName =
         Kernel::ConfigService::Instance().getInstrumentDirectory();
 
-    auto loadedGrouping = boost::make_shared<Grouping>();
     loadGroupingFromXML(directoryName + groupingFile, *loadedGrouping);
-
-    return loadedGrouping;
   } else {
     throw std::runtime_error("Multiple groupings specified for the instrument");
   }
+  return loadedGrouping;
 }
 
 /**
  * Loads grouping from the XML file specified.
  *
  * @param filename :: XML filename to load grouping information from
- * @param        g :: Struct to store grouping information to
+ * @param grouping :: Struct to store grouping information to
  */
 void GroupingLoader::loadGroupingFromXML(const std::string &filename,
-                                         Grouping &grouping) const {
+                                         Grouping &grouping) {
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
   Poco::AutoPtr<Document> pDoc;

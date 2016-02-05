@@ -10,11 +10,12 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
+#include <boost/make_shared.hpp>
 #include <vector>
 
 namespace Mantid {
 namespace API {
- 
+
 /// Structure to represent grouping information
 struct Grouping {
   std::vector<std::string> groupNames;
