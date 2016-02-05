@@ -71,8 +71,8 @@ Checks if the rebinning is in a consistent state, ie if rebin mode is selected a
 is a rebin workspace or there is no rebin workspace and no rebin mode selected.
 The state is inconsistent if rebin mode is selected and there is no workspace.
 */
-  bool isRebinInConsistentState(Mantid::API::IMDWorkspace_sptr rebinnedWS, bool useRebinMode) {
-    return rebinnedWS && useRebinMode;
+  bool isRebinInConsistentState(Mantid::API::IMDWorkspace* rebinnedWS, bool useRebinMode) {
+    return (rebinnedWS != nullptr) && useRebinMode;
   }
 }
 
@@ -755,7 +755,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   this->updateDimensionSliceWidgets();
 
   // Only autoscale color bar if box is checked
-  if (m_colorBar->getAutoScale()) {
+  if (!m_firstWorkspaceOpen || m_colorBar->getAutoScale()) {
     // Find the full range. And use it
     findRangeFull();
     m_colorBar->setViewRange(m_colorRangeFull);
@@ -1392,7 +1392,7 @@ void SliceViewer::findRangeSlice() {
   if (m_rebinMode) {
     // If the rebinned state is inconsistent, then we turn off
     // the rebin selection and continue to use the original WS
-    if (!isRebinInConsistentState(m_overlayWS, m_rebinMode)) {
+    if (!isRebinInConsistentState(m_overlayWS.get(), m_rebinMode)) {
       setRebinMode(false);
     } else {
       workspace_used = this->m_overlayWS;
