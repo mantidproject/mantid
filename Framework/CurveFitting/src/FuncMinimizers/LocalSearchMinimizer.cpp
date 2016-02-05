@@ -515,23 +515,22 @@ OptionalParameters iterationSingularHessian(API::ICostFunction &function,
 
       double maxCorr = 0.0;
       size_t jMaxCorr = i;
-      for(size_t j = 0; j < e.size(); ++j) {
-        if (i == j) continue;
-        double corr = 1e100;
-        double denominator = hessian.get(i,i) - hessian.get(j,j);
-        if (denominator != 0) {
-          corr = fabs(hessian.get(i,j) / denominator);
-        }
-        if (corr > maxCorr) {
-          double r = fabs(hessian.get(i,i) / hessian.get(j,j));
-          if (r <= 1e-5) {
+      for (size_t j = 0; j < e.size(); ++j) {
+        if (i == j)
+          continue;
+        double r = fabs(e[i] / e[j]);
+        if (r <= 1e-5) {
+          double corr =
+              e[i] - (e[i] * pow(V.get(i, i), 2) + e[j] * pow(V.get(i, j), 2));
+          corr = fabs(corr / e[i]);
+          if (corr > maxCorr) {
             maxCorr = corr;
             jMaxCorr = j;
           }
         }
       }
-      maxCorr /= hessian.get(i,i);
-      std::cerr << "Correlation " << i << ' ' << maxCorr << ' ' << jMaxCorr<< std::endl;
+      std::cerr << "Correlation " << i << ' ' << maxCorr << ' ' << jMaxCorr
+                << std::endl;
       if (maxCorr > 0.1) {
         isHessianSingular = true;
       }
