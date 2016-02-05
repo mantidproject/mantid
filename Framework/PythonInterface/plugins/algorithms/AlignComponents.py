@@ -123,9 +123,9 @@ class AlignComponents(PythonAlgorithm):
                              validator=StringListValidator(eulerConventions),
                              doc="Euler angles convention used when calculating and displaying angles, eg XYZ corresponding to alpha beta gamma.")
 
-        # X rotation
+        # alpha rotation
         self.declareProperty(name="alphaRotation", defaultValue=False,
-                             doc="Refine rotation around X")
+                             doc="Refine rotation around first axis, alpha")
         condition = EnabledWhenProperty("alphaRotation", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinAlphaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
@@ -136,9 +136,9 @@ class AlignComponents(PythonAlgorithm):
                              doc="Maximum relative alpha rotation (deg)")
         self.setPropertySettings("MaxAlphaRotation", condition)
 
-        # Y rotation
+        # beta rotation
         self.declareProperty(name="betaRotation", defaultValue=False,
-                             doc="Refine rotation around Y")
+                             doc="Refine rotation around seconds axis, beta")
         condition = EnabledWhenProperty("betaRotation", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinBetaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
@@ -149,9 +149,9 @@ class AlignComponents(PythonAlgorithm):
                              doc="Maximum relative beta rotation (deg)")
         self.setPropertySettings("MaxBetaRotation", condition)
 
-        # Z rotation
+        # gamma rotation
         self.declareProperty(name="gammaRotation", defaultValue=False,
-                             doc="Refine rotation around Z")
+                             doc="Refine rotation around third axis, gamma")
         condition = EnabledWhenProperty("gammaRotation", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinGammaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
