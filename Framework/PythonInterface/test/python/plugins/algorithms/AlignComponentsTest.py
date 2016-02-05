@@ -100,7 +100,7 @@ class AlignComponentsTest(unittest.TestCase):
         AlignComponents(CalibrationTable="calTable",
                         Workspace="testWS",
                         ComponentList=component,
-                        alphaRotation=True)
+                        AlphaRotation=True)
         ws = mtd["testWS"]
         endPos = ws.getInstrument().getComponentByName(component).getPos()
         endRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles("YZX") #YZX

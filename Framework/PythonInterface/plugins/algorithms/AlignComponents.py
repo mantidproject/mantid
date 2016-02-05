@@ -13,7 +13,7 @@ class AlignComponents(PythonAlgorithm):
     Class to align components
     """
 
-    _optionsList = ["Xposition", "Yposition", "Zposition", "alphaRotation", "betaRotation", "gammaRotation"]
+    _optionsList = ["Xposition", "Yposition", "Zposition", "AlphaRotation", "BetaRotation", "GammaRotation"]
     _optionsDict = {}
     _initialPos = None
     _move = False
@@ -125,9 +125,9 @@ class AlignComponents(PythonAlgorithm):
                              "eg XYZ corresponding to alpha beta gamma.")
 
         # alpha rotation
-        self.declareProperty(name="alphaRotation", defaultValue=False,
+        self.declareProperty(name="AlphaRotation", defaultValue=False,
                              doc="Refine rotation around first axis, alpha")
-        condition = EnabledWhenProperty("alphaRotation", PropertyCriterion.IsNotDefault)
+        condition = EnabledWhenProperty("AlphaRotation", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinAlphaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
                              doc="Minimum relative alpha rotation (deg)")
@@ -138,9 +138,9 @@ class AlignComponents(PythonAlgorithm):
         self.setPropertySettings("MaxAlphaRotation", condition)
 
         # beta rotation
-        self.declareProperty(name="betaRotation", defaultValue=False,
+        self.declareProperty(name="BetaRotation", defaultValue=False,
                              doc="Refine rotation around seconds axis, beta")
-        condition = EnabledWhenProperty("betaRotation", PropertyCriterion.IsNotDefault)
+        condition = EnabledWhenProperty("BetaRotation", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinBetaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
                              doc="Minimum relative beta rotation (deg)")
@@ -151,9 +151,9 @@ class AlignComponents(PythonAlgorithm):
         self.setPropertySettings("MaxBetaRotation", condition)
 
         # gamma rotation
-        self.declareProperty(name="gammaRotation", defaultValue=False,
+        self.declareProperty(name="GammaRotation", defaultValue=False,
                              doc="Refine rotation around third axis, gamma")
-        condition = EnabledWhenProperty("gammaRotation", PropertyCriterion.IsNotDefault)
+        condition = EnabledWhenProperty("GammaRotation", PropertyCriterion.IsNotDefault)
         self.declareProperty(name="MinGammaRotation", defaultValue=-10.0,
                              validator=FloatBoundedValidator(-90, 90),
                              doc="Minimum relative gamma rotation (deg)")
@@ -176,13 +176,13 @@ class AlignComponents(PythonAlgorithm):
 
         # Rotation
         self.setPropertyGroup("EulerConvention","Rotation")
-        self.setPropertyGroup("alphaRotation","Rotation")
+        self.setPropertyGroup("AlphaRotation","Rotation")
         self.setPropertyGroup("MinAlphaRotation","Rotation")
         self.setPropertyGroup("MaxAlphaRotation","Rotation")
-        self.setPropertyGroup("betaRotation","Rotation")
+        self.setPropertyGroup("BetaRotation","Rotation")
         self.setPropertyGroup("MinBetaRotation","Rotation")
         self.setPropertyGroup("MaxBetaRotation","Rotation")
-        self.setPropertyGroup("gammaRotation","Rotation")
+        self.setPropertyGroup("GammaRotation","Rotation")
         self.setPropertyGroup("MinGammaRotation","Rotation")
         self.setPropertyGroup("MaxGammaRotation","Rotation")
 
@@ -229,9 +229,9 @@ class AlignComponents(PythonAlgorithm):
         if not (self.getProperty("Xposition").value or
                 self.getProperty("Yposition").value or
                 self.getProperty("Zposition").value or
-                self.getProperty("alphaRotation").value or
-                self.getProperty("betaRotation").value or
-                self.getProperty("gammaRotation").value or
+                self.getProperty("AlphaRotation").value or
+                self.getProperty("BetaRotation").value or
+                self.getProperty("GammaRotation").value or
                 self.getProperty("FitSourcePosition").value or
                 self.getProperty("FitSamplePosition").value):
             issues["Xposition"] = "You must calibrate at least one parameter."
@@ -301,7 +301,7 @@ class AlignComponents(PythonAlgorithm):
         if self._optionsDict["Xposition"] or self._optionsDict["Yposition"] or self._optionsDict["Zposition"]:
             self._move = True
 
-        if self._optionsDict["alphaRotation"] or self._optionsDict["betaRotation"] or self._optionsDict["gammaRotation"]:
+        if self._optionsDict["AlphaRotation"] or self._optionsDict["BetaRotation"] or self._optionsDict["GammaRotation"]:
             self._rotate = True
 
         prog = Progress(self, start=0, end=1, nreports=len(components))
@@ -346,15 +346,15 @@ class AlignComponents(PythonAlgorithm):
                 x0List.append(self._initialPos[2])
                 boundsList.append((self._initialPos[2] + self.getProperty("MinZposition").value,
                                    self._initialPos[2] + self.getProperty("MaxZposition").value))
-            if self._optionsDict["alphaRotation"]:
+            if self._optionsDict["AlphaRotation"]:
                 x0List.append(self._initialPos[3])
                 boundsList.append((self._initialPos[3] + self.getProperty("MinAlphaRotation").value,
                                    self._initialPos[3] + self.getProperty("MaxAlphaRotation").value))
-            if self._optionsDict["betaRotation"]:
+            if self._optionsDict["BetaRotation"]:
                 x0List.append(self._initialPos[4])
                 boundsList.append((self._initialPos[4] + self.getProperty("MinBetaRotation").value,
                                    self._initialPos[4] + self.getProperty("MaxBetaRotation").value))
-            if self._optionsDict["gammaRotation"]:
+            if self._optionsDict["GammaRotation"]:
                 x0List.append(self._initialPos[5])
                 boundsList.append((self._initialPos[5] + self.getProperty("MinGammaRotation").value,
                                    self._initialPos[5] + self.getProperty("MaxGammaRotation").value))

@@ -101,7 +101,7 @@ Output:
 	      Workspace=ws,
 	      MaskWorkspace="PG3_mask",
 	      EulerConvention="YZX",
-              alphaRotation=True,
+              AlphaRotation=True,
 	      ComponentList=components)
       ws=mtd['ws']
       bank26Rot = ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
