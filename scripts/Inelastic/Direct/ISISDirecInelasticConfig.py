@@ -1,5 +1,5 @@
-﻿#!/usr/bin/python
-
+﻿
+#!/usr/bin/python
 import os
 import sys
 import platform
@@ -31,14 +31,14 @@ class UserProperties(object):
         self._cycle_IDs = {}
         self._start_dates = {}
         self._rb_exist = {}
-        #
+
         self._user_id = None
         self._recent_dateID = None
         if args[0] is None:
             return
         if len(args) == 1:
-            _input = str(args[0])
-            param = _input.split()
+            input_ = str(args[0])
+            param = input_.split()
             self._user_id = param[0]
             if len(param) == 5:
                 self.set_user_properties(param[1], param[2], param[3], param[4])
@@ -694,8 +694,8 @@ class MantidConfigDirectInelastic(object):
             raise RuntimeError("SERVER ERROR: no correct home path defined at {0}".format(self._home_path))
         if not os.path.exists(self._script_repo):
             raise RuntimeError(("SERVER ERROR: no correct user script repository defined at {0}\n"
-                                "Check out Mantid script repository from account, "
-                                "which have admin rights").format(self._script_repo))
+                                "Check out Mantid script repository from account,"
+                                " which have admin rights").format(self._script_repo))
         if not os.path.exists(self._map_mask_folder):
             raise RuntimeError(("SERVER ERROR: no correct map/mask folder defined at {0}\n"
                                 "Check out Mantid map/mask files from svn at "
@@ -847,56 +847,55 @@ class MantidConfigDirectInelastic(object):
         file_time = time.mktime(start_date.timetuple())
         os.utime(config_file_name, (file_time, file_time))
 
-
+# pylint: disable = invalid-name
 if __name__ == "__main__":
 
     if len(sys.argv) != 6:
         print "usage: Config.py userID instrument RBNumber cycleID start_date"
         exit()
 
-    ARGI = sys.argv[1:]
-    USER = UserProperties(*ARGI)
+    argi = sys.argv[1:]
+    user = UserProperties(*argi)
 
     if platform.system() == 'Windows':
         sys.path.insert(0, 'c:/Mantid/scripts/Inelastic/Direct')
 
-        BASE = 'd:/Data/Mantid_Testing/config_script_test_folder'
-        ANALYSIS_DIR = BASE
+        base = 'd:/Data/Mantid_Testing/config_script_test_folder'
+        analysisDir = base
 
-        MANTID_DIR = r"c:\Mantid\_builds\br_master\bin\Release"
-        USER_SCRIPT_REPO_DIR = os.path.join(ANALYSIS_DIR, "UserScripts")
-        MAP_MASK_DIR = os.path.join(ANALYSIS_DIR, "InstrumentFiles")
+        MantidDir = r"c:\Mantid\_builds\br_master\bin\Release"
+        UserScriptRepoDir = os.path.join(analysisDir, "UserScripts")
+        MapMaskDir = os.path.join(analysisDir, "InstrumentFiles")
 
-        ROOT_DIR = os.path.join(BASE, 'users')
+        rootDir = os.path.join(base, 'users')
     else:
         sys.path.insert(0, '/opt/Mantid/scripts/Inelastic/Direct/')
         # sys.path.insert(0,'/opt/mantidnightly/scripts/Inelastic/Direct/')
 
 
-        MANTID_DIR = '/opt/Mantid'
-        MAP_MASK_DIR = '/usr/local/mprogs/InstrumentFiles/'
-        USER_SCRIPT_REPO_DIR = '/opt/UserScripts'
+        MantidDir = '/opt/Mantid'
+        MapMaskDir = '/usr/local/mprogs/InstrumentFiles/'
+        UserScriptRepoDir = '/opt/UserScripts'
         home = '/home'
         #
-        ROOT_DIR = "/home/"
-        ANALYSIS_DIR = "/instrument/"
+        rootDir = "/home/"
+        analysisDir = "/instrument/"
 
     # initialize Mantid configuration
 
     from ISISDirecInelasticConfig import MantidConfigDirectInelastic, UserProperties
 
-    MCF = MantidConfigDirectInelastic(MANTID_DIR, ROOT_DIR, USER_SCRIPT_REPO_DIR, MAP_MASK_DIR)
+    mcf = MantidConfigDirectInelastic(MantidDir, rootDir, UserScriptRepoDir, MapMaskDir)
     print "Successfully initialized ISIS Inelastic Configuration script generator"
 
-    RB_USER_FOLDER = os.path.join(MCF._home_path, USER.userID)
-    USER.rb_dir = RB_USER_FOLDER
-    if not USER.rb_dir_exist:
-
-        print "RB folder {0} for user {1} should exist and be accessible to configure this user".format(USER.rb_dir,
-                                                                                                        USER.userID)
+    rb_user_folder = os.path.join(mcf._home_path, user.userID)
+    user.rb_dir = rb_user_folder
+    if not user.rb_dir_exist:
+        print "RB folder {0} for user {1} should exist and be accessible to configure this user".format(user.rb_dir,
+                                                                                                        user.userID)
         exit()
     # Configure user
-    MCF.init_user(USER.userID, USER)
-    MCF.generate_config()
+    mcf.init_user(user.userID, user)
+    mcf.generate_config()
     print "Successfully Configured user: {0} for instrument {1} and RBNum: {2}" \
-        .format(USER.userID, USER.instrument, USER.rb_folder)
+        .format(user.userID, user.instrument, user.rb_folder)
