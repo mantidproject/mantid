@@ -78,9 +78,10 @@ class EnggCalibrate(PythonAlgorithm):
         self.setPropertyGroup('Bank', banks_grp)
         self.setPropertyGroup(self.INDICES_PROP_NAME, banks_grp)
 
-        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",\
-                Direction.Input, PropertyMode.Optional),\
-    		"Calibrated detector positions. If not specified, default ones are used.")
+        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",
+                                                     Direction.Input, PropertyMode.Optional),
+                             "Calibrated detector positions. If not specified, default ones (from the "
+                             "current instrument definition) are used.")
 
         self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the calibration parameters calculated '
@@ -94,11 +95,16 @@ class EnggCalibrate(PythonAlgorithm):
         self.declareProperty("Zero", 0.0, direction = Direction.Output,
                              doc = "Calibrated Zero value for the bank or range of pixels/detectors given")
 
+        self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
+                             doc = "Information on fitted peaks as produced by the (child) algorithm "
+                             "EnggFitPeaks.")
+
         out_grp = 'Outputs'
         self.setPropertyGroup('DetectorPositions', out_grp)
         self.setPropertyGroup('OutputParametersTableName', out_grp)
         self.setPropertyGroup('Difc', out_grp)
         self.setPropertyGroup('Zero', out_grp)
+        self.setPropertyGroup('FittedPeaks', out_grp)
 
     def PyExec(self):
 
@@ -111,7 +117,7 @@ class EnggCalibrate(PythonAlgorithm):
         prog = Progress(self, start=0, end=1, nreports=2)
 
         prog.report('Focusing the input workspace')
-        focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
+        focussed_ws = self._focus_run(self.getProperty('InputWorkspace').value,
                                      self.getProperty("VanadiumWorkspace").value,
                                      self.getProperty('Bank').value,
                                      self.getProperty(self.INDICES_PROP_NAME).value)
@@ -120,34 +126,38 @@ class EnggCalibrate(PythonAlgorithm):
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         prog.report('Fitting parameters for the focused run')
-        difc, zero = self._fitParams(focussed_ws, expectedPeaksD)
+        difc, zero, fitted_peaks = self._fit_params(focussed_ws, expectedPeaksD)
 
-        self._produceOutputs(difc, zero)
+        self._produce_outputs(difc, zero)
 
-    def _fitParams(self, focusedWS, expectedPeaksD):
+    def _fit_params(self, focused_ws, expected_peaks_d):
         """
-        Fit the GSAS parameters that this algorithm produces: difc and zero
+        Fit the GSAS parameters that this algorithm produces: difc and zero. Fits a
+        number of peaks starting from the expected peak positions. Then it fits a line
+        on the peak positions to produce the DIFC and TZERO as used in GSAS.
 
-        @param focusedWS :: focused workspace to do the fitting on
-        @param expectedPeaksD :: expected peaks for the fitting, in d-spacing units
+        @param focused_ws :: focused workspace to do the fitting on
+        @param expected_peaks_d :: expected peaks, used as intial peak positions for the
+        fitting, in d-spacing units
 
-        @returns a pair of parameters: difc and zero
+        @returns a tuple of parameters: difc, zero, and a list of peak centers as fitted
         """
 
-        fitPeaksAlg = self.createChildAlgorithm('EnggFitPeaks')
-        fitPeaksAlg.setProperty('InputWorkspace', focusedWS)
-        fitPeaksAlg.setProperty('WorkspaceIndex', 0) # There should be only one index anyway
-        fitPeaksAlg.setProperty('ExpectedPeaks', expectedPeaksD)
+        fit_alg = self.createChildAlgorithm('EnggFitPeaks')
+        fit_alg.setProperty('InputWorkspace', focused_ws)
+        fit_alg.setProperty('WorkspaceIndex', 0) # There should be only one index anyway
+        fit_alg.setProperty('ExpectedPeaks', expected_peaks_d)
         # we could also pass raw 'ExpectedPeaks' and 'ExpectedPeaksFromFile' to
         # EnggFitPaks, but better to check inputs early, before this
-        fitPeaksAlg.execute()
+        fit_alg.execute()
 
-        difc = fitPeaksAlg.getProperty('Difc').value
-        zero = fitPeaksAlg.getProperty('Zero').value
+        difc = fit_alg.getProperty('Difc').value
+        zero = fit_alg.getProperty('Zero').value
+        fitted_peaks = fit_alg.getProperty('FittedPeaks').value
 
-        return difc, zero
+        return difc, zero, fitted_peaks
 
-    def _focusRun(self, ws, vanWS, bank, indices):
+    def _focus_run(self, ws, vanWS, bank, indices):
         """
         Focuses the input workspace by running EnggFocus as a child algorithm, which will produce a
         single spectrum workspace.
@@ -185,7 +195,7 @@ class EnggCalibrate(PythonAlgorithm):
 
         return alg.getProperty('OutputWorkspace').value
 
-    def _produceOutputs(self, difc, zero):
+    def _produce_outputs(self, difc, zero):
         """
         Just fills in the output properties as requested
 

@@ -20,13 +20,13 @@ class EnggFitPeaks(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
-    		"Workspace to fit peaks in. ToF is expected X unit.")
+                             "Workspace to fit peaks in. ToF is expected X unit.")
 
         self.declareProperty("WorkspaceIndex", 0,\
-    		"Index of the spectra to fit peaks in")
+                             "Index of the spectra to fit peaks in")
 
-        self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._getDefaultPeaks())),\
-    		"A list of dSpacing values to be translated into TOF to find expected peaks.")
+        self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._get_default_peaks())),\
+                             "A list of dSpacing values to be translated into TOF to find expected peaks.")
 
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
                                           action=FileAction.OptionalLoad,extensions = [".csv"]),
@@ -53,6 +53,12 @@ class EnggFitPeaks(PythonAlgorithm):
 
         self.declareProperty("Zero", 0.0, direction = Direction.Output,\
     		doc = "Fitted Zero value")
+
+        self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
+                             doc = "Information on fitted peaks. The table contains, for every peak fitted "
+                             "the expected peak value (in d-spacing), and the parameters fitted. The expected "
+                             "values are given in the column labelled 'dSpacing'. When fitting "
+                             "back-to-back exponential functions, the 'X0' column has the fitted peak center.")
 
     def PyExec(self):
 
@@ -86,22 +92,26 @@ class EnggFitPeaks(PythonAlgorithm):
                                "expected peaks. " + txt)
 
         peaksTableName = self.getPropertyValue("OutFittedPeaksTable")
-        difc, zero = self._fitAllPeaks(inWS, wsIndex, (foundPeaks, expectedPeaksD), peaksTableName)
-        self._produceOutputs(difc, zero)
+        difc, zero, fitted_peaks = self._fit_all_peaks(inWS, wsIndex, (foundPeaks, expectedPeaksD), peaksTableName)
+        self._produce_outputs(difc, zero, fitted_peaks)
 
-    def _getDefaultPeaks(self):
-        """ Gets default peaks for Engg algorithm. Values from CeO2 """
-
+    def _get_default_peaks(self):
+        """
+        Gets default peaks for Engg algorithms. Values from CeO2
+        """
         import EnggUtils
 
         return EnggUtils.default_ceria_expected_peaks()
 
-    def _produceOutputs(self, difc, zero):
+    def _produce_outputs(self, difc, zero, fitted_peaks):
         """
-        Fills in the output properties as requested via the input properties.
+        Fills in the output properties as requested via the input properties. Sets the output difc, and zero
+        values, and a table workspace with peaks information. It can also produces a table with the difc and
+        zero parameters if this is required in the inputs.
 
         @param difc :: the difc GSAS parameter as fitted here
         @param zero :: the zero GSAS parameter as fitted here
+        @param fitted_peaks :: table workspace with peak parameters (one peak per row)
         """
 
         import EnggUtils
@@ -109,12 +119,14 @@ class EnggFitPeaks(PythonAlgorithm):
         # mandatory outputs
         self.setProperty('Difc', difc)
         self.setProperty('Zero', zero)
+        self.setProperty('FittedPeaks', fitted_peaks)
 
         # optional outputs
         tblName = self.getPropertyValue("OutParametersTable")
         if '' != tblName:
             EnggUtils.generateOutputParTable(tblName, difc, zero)
             self.log().information("Output parameters added into a table workspace: %s" % tblName)
+
 
     def _estimate_start_end_fitting_range(self, centre, width):
         """
@@ -141,10 +153,11 @@ class EnggFitPeaks(PythonAlgorithm):
 
         return (startx, endx)
 
-    def _fitAllPeaks(self, inWS, wsIndex, peaks, peaksTableName):
+    def _fit_all_peaks(self, inWS, wsIndex, peaks, peaksTableName):
         """
         This method is the core of EnggFitPeaks. It tries to fit as many peaks as there are in the list of
-        expected peaks passed to the algorithm.
+        expected peaks passed to the algorithm. This is a single peak fitting, in the sense that peaks
+        are fitted separately, one at a time.
 
         The parameters from the (Gaussian) peaks fitted by FindPeaks elsewhere (before calling this method)
         are used as initial guesses.
@@ -156,8 +169,8 @@ class EnggFitPeaks(PythonAlgorithm):
                         (in dSpacing units)
         @param peaksTableName :: name of an (output) table with peaks parameters. If empty, the table is anonymous
 
-        @returns difc and zero parameters obtained from fitting a
-        linear background (in _fitDSpacingToTOF) to the peaks fitted
+        @returns difc and zero parameters and a table with parameters for every fitted peak. The difc and zero
+        parameters are obtained from fitting a linear background (in _fit_dSpacing_to_ToF) to the peaks fitted
         here individually
 
         """
@@ -240,9 +253,9 @@ class EnggFitPeaks(PythonAlgorithm):
                                'difc and zero. Please check the list of expected peaks given and if it is '
                                'appropriate for the workspace')
 
-        difc, zero = self._fitDSpacingToTOF(fittedPeaks)
+        difc, zero = self._fit_dSpacing_to_ToF(fittedPeaks)
 
-        return (difc, zero)
+        return (difc, zero, fittedPeaks)
 
     def _peaksFromFindPeaks(self, inWS, expectedPeaksToF, wsIndex):
         """
@@ -265,7 +278,7 @@ class EnggFitPeaks(PythonAlgorithm):
         foundPeaks = findPeaksAlg.getProperty('PeaksList').value
         return foundPeaks
 
-    def _fitDSpacingToTOF(self, fittedPeaksTable):
+    def _fit_dSpacing_to_ToF(self, fittedPeaksTable):
         """
         Fits a linear background to the dSpacing <-> TOF relationship and returns fitted difc
         and zero values. If the table passed has less than 2 peaks this raises an exception, as it
@@ -436,7 +449,12 @@ class EnggFitPeaks(PythonAlgorithm):
         return table
 
     def _addParametersToMap(self, paramMap, paramTable):
-        """ Reads parameters from the Fit Parameter table, and add their values and errors to the map
+        """
+        Takes parameters from a table that contains output parameters from a Fit run, and adds
+        them as name:value and name_Err:error_value pairs to the map.
+
+        @param paramMap :: map where to add the fitting parameters
+        @param paramTable :: table with parameters from a Fit algorithm run
         """
         for i in range(paramTable.rowCount() - 1): # Skip the last (fit goodness) row
             row = paramTable.row(i)
