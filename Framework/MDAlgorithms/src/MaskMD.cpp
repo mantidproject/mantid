@@ -23,6 +23,11 @@ namespace MDAlgorithms {
  */
 std::vector<std::string> parseDimensionNames(const std::string &names_string) {
 
+  // This regex has two parts which are separated by the "|" (or)
+  // The first part matches anything which is bounded by square brackets
+  // unless they contain square brackets (so that it only matches inner pairs)
+  // The second part matches anything that doesn't contain a comma
+  // NB, the order of the two parts matters
   regex expression("\\[([^\\[]*)\\]|[^,]+");
 
   boost::sregex_token_iterator iter(names_string.begin(), names_string.end(),
