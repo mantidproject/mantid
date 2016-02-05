@@ -227,10 +227,9 @@ void ConvFit::setup() {
 */
 void ConvFit::run() {
   // Get input from interface
-  bool useTies = m_uiForm.ckTieCentres->isChecked();
-  QString ties = (useTies ? "True" : "False");
+  const auto useTies = m_uiForm.ckTieCentres->isChecked();
 
-  CompositeFunction_sptr func = createFunction(useTies);
+  const auto func = createFunction(useTies);
   const auto function = std::string(func->asString());
   const auto stX = m_properties["StartX"]->valueText().toStdString();
   const auto enX = m_properties["EndX"]->valueText().toStdString();
@@ -238,7 +237,7 @@ void ConvFit::run() {
   m_runMax = m_uiForm.spSpectraMax->value();
   const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
   const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
-  const int maxIterations =
+  const auto maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
   // Construct expected name
@@ -249,8 +248,8 @@ void ConvFit::run() {
     m_baseName = m_baseName.left(cutIndex + 1);
   }
   // Add fit specific suffix
-  const QString bgType = backgroundString();
-  const QString fitType = fitTypeString();
+  const auto bgType = backgroundString();
+  const auto fitType = fitTypeString();
   m_baseName += "conv_";
   m_baseName += fitType;
   m_baseName += bgType;
@@ -259,8 +258,7 @@ void ConvFit::run() {
   m_baseName += QString::fromStdString(specMax);
 
   // Run ConvolutionFitSequential Algorithm
-  IAlgorithm_sptr cfs =
-      AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->initialize();
   cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
   cfs->setProperty("Function", function);
@@ -294,7 +292,7 @@ void ConvFit::algorithmComplete(bool error) {
   if (error)
     return;
 
-  std::string resultName = m_baseName.toStdString() + "_Result";
+  const auto resultName = m_baseName.toStdString() + "_Result";
   MatrixWorkspace_sptr resultWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
 
@@ -311,26 +309,26 @@ void ConvFit::algorithmComplete(bool error) {
     addSaveWorkspaceToQueue(QresultWsName, fullPath);
   }
 
-  std::string plot = m_uiForm.cbPlotType->currentText().toStdString();
+  const auto plot = m_uiForm.cbPlotType->currentText().toStdString();
 
   // Handle plot result
   if (!(plot.compare("None") == 0)) {
     if (plot.compare("All") == 0) {
-      int specEnd = (int)resultWs->getNumberHistograms();
+      const int specEnd = (int)resultWs->getNumberHistograms(); // Cast to int for use in plotSpectrum
       for (int i = 0; i < specEnd; i++) {
         IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
                                   i, i);
       }
     } else {
       // -1 to account for None in dropDown
-      int specNumber = m_uiForm.cbPlotType->currentIndex() - 1;
+      const auto specNumber = m_uiForm.cbPlotType->currentIndex() - 1;
       IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
                                 specNumber, specNumber);
     }
   }
 
   // Obtain WorkspaceGroup from ADS
-  std::string groupName = m_baseName.toStdString() + "_Workspaces";
+  const auto groupName = m_baseName.toStdString() + "_Workspaces";
   WorkspaceGroup_sptr groupWs =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
 
