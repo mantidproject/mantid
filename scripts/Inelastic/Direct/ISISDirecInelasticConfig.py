@@ -1,5 +1,4 @@
-﻿
-#!/usr/bin/python
+﻿#!/usr/bin/python
 import os
 import sys
 import platform
@@ -37,8 +36,8 @@ class UserProperties(object):
         if args[0] is None:
             return
         if len(args) == 1:
-            input_ = str(args[0])
-            param = input_.split()
+            input = str(args[0])
+            param = input.split()
             self._user_id = param[0]
             if len(param) == 5:
                 self.set_user_properties(param[1], param[2], param[3], param[4])
@@ -106,7 +105,6 @@ class UserProperties(object):
                 ind = str_parts.index(prop)
             except Exception:
                 ind = None
-                raise
             if not ind is None:
                 str_parts[ind] = str(getattr(self, prop))
         data_string = "".join(str_parts)
@@ -590,7 +588,7 @@ class MantidConfigDirectInelastic(object):
         # user files description is not there
         try:
             domObj = minidom.parse(job_description_file)
-        except (StandardError, Warning):
+        except Exception:
             input_file, output_file = self._fullpath_to_copy()
             filenames_to_copy.append((input_file, output_file, None))
             return filenames_to_copy
@@ -694,12 +692,12 @@ class MantidConfigDirectInelastic(object):
             raise RuntimeError("SERVER ERROR: no correct home path defined at {0}".format(self._home_path))
         if not os.path.exists(self._script_repo):
             raise RuntimeError(("SERVER ERROR: no correct user script repository defined at {0}\n"
-                                "Check out Mantid script repository from account,"
-                                " which have admin rights").format(self._script_repo))
+                                "Check out Mantid script repository from account, "
+                                "which have admin rights").format(self._script_repo))
         if not os.path.exists(self._map_mask_folder):
             raise RuntimeError(("SERVER ERROR: no correct map/mask folder defined at {0}\n"
-                                "Check out Mantid map/mask files from svn at "
-                                "https://svn.isis.rl.ac.uk/InstrumentFiles/trunk").format(self._map_mask_folder))
+                                "Check out Mantid map/mask files from svn at"
+                                " https://svn.isis.rl.ac.uk/InstrumentFiles/trunk").format(self._map_mask_folder))
 
     def _init_config(self):
         """Execute Mantid properties setup methods"""
@@ -848,6 +846,7 @@ class MantidConfigDirectInelastic(object):
         os.utime(config_file_name, (file_time, file_time))
 
 # pylint: disable = invalid-name
+
 if __name__ == "__main__":
 
     if len(sys.argv) != 6:
