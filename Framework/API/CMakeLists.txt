@@ -358,6 +358,7 @@ set ( TEST_FILES
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
+	GroupingLoaderTest.h
 	HistogramValidatorTest.h
 	HistoryItemTest.h
 	HistoryViewTest.h
