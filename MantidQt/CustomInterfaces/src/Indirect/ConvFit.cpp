@@ -226,16 +226,6 @@ void ConvFit::setup() {
 * algorithm
 */
 void ConvFit::run() {
-  if (m_cfInputWS == NULL) {
-    g_log.error("No workspace loaded");
-    return;
-  }
-  // Check for valid fitType
-  const QString fitType = fitTypeString();
-  if (fitType == "") {
-    g_log.error("No fit type defined");
-  }
-
   // Get input from interface
   bool useTies = m_uiForm.ckTieCentres->isChecked();
   QString ties = (useTies ? "True" : "False");
@@ -260,6 +250,7 @@ void ConvFit::run() {
   }
   // Add fit specific suffix
   const QString bgType = backgroundString();
+  const QString fitType = fitTypeString();
   m_baseName += "conv_";
   m_baseName += fitType;
   m_baseName += bgType;
@@ -413,6 +404,11 @@ void ConvFit::algorithmComplete(bool error) {
 */
 bool ConvFit::validate() {
   UserInputValidator uiv;
+
+  const QString fitType = fitTypeString();
+  if (fitType == "") {
+	  uiv.addErrorMessage("No fit type defined");
+  }
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResInput);
