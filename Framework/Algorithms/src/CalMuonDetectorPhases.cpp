@@ -515,7 +515,7 @@ double CalMuonDetectorPhases::fitFrequencyFromAsymmetry(
     fit->setProperty("OutputParametersOnly", true);
     fit->setProperty("Output", "__Invisible");
     fit->executeAsChildAlg();
-    fitStatus = fit->getProperty("OutputStatus");
+    fitStatus = fit->getPropertyValue("OutputStatus");
     if (fitStatus == "success") {
       API::ITableWorkspace_sptr params = fit->getProperty("OutputParameters");
       const size_t rows = params->rowCount();
