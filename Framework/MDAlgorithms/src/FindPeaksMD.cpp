@@ -107,7 +107,7 @@ DECLARE_ALGORITHM(FindPeaksMD)
  */
 FindPeaksMD::FindPeaksMD()
     : peakWS(), peakRadiusSquared(), DensityThresholdFactor(0.0), m_maxPeaks(0),
-      m_addDetectors(true), m_densityScaleFactor(1e-6), prog(NULL), inst(),
+      m_addDetectors(true), m_densityScaleFactor(1e-6), prog(nullptr), inst(),
       m_runNumber(-1), dimType(), m_goniometer() {}
 
 //----------------------------------------------------------------------------------------------

@@ -19,7 +19,7 @@ using namespace DataObjects;
 
 /// Default constructor
 MergeRuns::MergeRuns()
-    : MultiPeriodGroupAlgorithm(), m_progress(NULL), m_inEventWS(),
+    : MultiPeriodGroupAlgorithm(), m_progress(nullptr), m_inEventWS(),
       m_inMatrixWS(), m_tables() {}
 
 /// Destructor

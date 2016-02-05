@@ -1547,7 +1547,7 @@ Assessor function to get a Comp points
 */
 {
   if (Index < 0 || Index >= static_cast<int>(Comp.size()))
-    return 0;
+    return nullptr;
   return &Comp[Index];
 }
 

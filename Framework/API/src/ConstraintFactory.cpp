@@ -43,7 +43,7 @@ IConstraint *ConstraintFactoryImpl::createInitialized(IFunction *fun,
 IConstraint *ConstraintFactoryImpl::createInitialized(IFunction *fun,
                                                       const Expression &expr,
                                                       bool isDefault) const {
-  IConstraint *c = 0;
+  IConstraint *c = nullptr;
   if (expr.name() == "==") {
     c = createUnwrapped("BoundaryConstraint");
   } else {

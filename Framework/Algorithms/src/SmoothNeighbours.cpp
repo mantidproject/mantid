@@ -40,7 +40,7 @@ SmoothNeighbours::SmoothNeighbours()
     : API::Algorithm(), AdjX(0), AdjY(0), Edge(0), Radius(0.), nNeighbours(0),
       WeightedSum(new NullWeighting), PreserveEvents(false),
       expandSumAllPixels(false), outWI(0), inWS(), m_neighbours(),
-      m_prog(NULL) {}
+      m_prog(nullptr) {}
 
 /** Initialisation method.
  *
@@ -805,7 +805,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
   // Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(ws, outWS, false);
   // Ensure thread-safety
-  outWS->sortAll(TOF_SORT, NULL);
+  outWS->sortAll(TOF_SORT, nullptr);
 
   this->setProperty("OutputWorkspace",
                     boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));

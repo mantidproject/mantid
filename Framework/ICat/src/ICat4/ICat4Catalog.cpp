@@ -717,12 +717,12 @@ void ICat4Catalog::keepAlive() {
 void ICat4Catalog::setSSLContext(ICATPortBindingProxy &icat) {
   if (soap_ssl_client_context(
           &icat, SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
-          NULL, /* keyfile: required only when client must authenticate to
+          nullptr, /* keyfile: required only when client must authenticate to
         server (see SSL docs on how to obtain this file) */
-          NULL, /* password to read the keyfile */
-          NULL, /* optional cacert file to store trusted certificates */
-          NULL, /* optional capath to directory with trusted certificates */
-          NULL  /* if randfile!=NULL: use a file with random data to seed
+          nullptr, /* password to read the keyfile */
+          nullptr, /* optional cacert file to store trusted certificates */
+          nullptr, /* optional capath to directory with trusted certificates */
+          nullptr  /* if randfile!=NULL: use a file with random data to seed
                    randomness */
           )) {
     throwErrorMessage(icat);

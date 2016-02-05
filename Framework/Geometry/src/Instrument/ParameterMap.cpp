@@ -837,7 +837,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
 Parameter_sptr ParameterMap::getRecursiveByType(const IComponent *comp,
                                                 const std::string &type) const {
   boost::shared_ptr<const IComponent> compInFocus(comp, NoDeleting());
-  while (compInFocus != NULL) {
+  while (compInFocus != nullptr) {
     Parameter_sptr param = getByType(compInFocus.get(), type);
     if (param) {
       return param;

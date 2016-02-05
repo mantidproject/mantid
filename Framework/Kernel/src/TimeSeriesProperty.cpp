@@ -443,7 +443,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
         myOutput->m_size = 0;
       }
     } else {
-      outputs_tsp.push_back(NULL);
+      outputs_tsp.push_back(nullptr);
     }
   }
 

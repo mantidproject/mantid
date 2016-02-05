@@ -94,7 +94,7 @@ void PeakIntegration::exec() {
   EventWorkspace_const_sptr inWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
   if (inWS) {
-    inWS->sortAll(TOF_SORT, NULL);
+    inWS->sortAll(TOF_SORT, nullptr);
   }
 
   // Get some stuff from the input workspace

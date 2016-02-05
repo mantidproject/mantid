@@ -162,8 +162,8 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
                                Poco::Net::Context::VERIFY_NONE);
     // Create a singleton for holding the default context. E.g. any future
     // requests to publish are made to this certificate and context.
-    Poco::Net::SSLManager::instance().initializeClient(NULL, certificateHandler,
-                                                       context);
+    Poco::Net::SSLManager::instance().initializeClient(
+        nullptr, certificateHandler, context);
 
     // Session takes ownership of socket
     Poco::Net::SecureStreamSocket *socket =

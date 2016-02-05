@@ -365,7 +365,7 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
     clusterMap = clusterRegister.clusters(neighbourElements);
 
   } else {
-    API::IMDIterator *iterator = ws->createIterator(NULL);
+    API::IMDIterator *iterator = ws->createIterator(nullptr);
     VecEdgeIndexPair edgeIndexPair; // This should never get filled in a single
                                     // threaded situation.
     size_t endLabelId = doConnectedComponentLabeling(

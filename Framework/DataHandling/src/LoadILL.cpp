@@ -171,7 +171,7 @@ int LoadILL::getEPPFromVanadium(const std::string &filenameVanadium,
                                 MatrixWorkspace_sptr vanaWS) {
   int calculatedDetectorElasticPeakPosition = -1;
 
-  if (vanaWS != NULL) {
+  if (vanaWS != nullptr) {
 
     // Check if it has been store on the run object for this workspace
     if (vanaWS->run().hasProperty("EPP")) {

@@ -21,7 +21,7 @@ std::vector<double> FunctionDomain1D::toVector() const {
   */
 FunctionDomain1DVector::FunctionDomain1DVector(
     const std::vector<double> &xvalues)
-    : FunctionDomain1D(NULL, 0) {
+    : FunctionDomain1D(nullptr, 0) {
   if (xvalues.empty()) {
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
   }
@@ -37,7 +37,7 @@ FunctionDomain1DVector::FunctionDomain1DVector(
 FunctionDomain1DVector::FunctionDomain1DVector(
     std::vector<double>::const_iterator from,
     std::vector<double>::const_iterator to)
-    : FunctionDomain1D(NULL, 0) {
+    : FunctionDomain1D(nullptr, 0) {
   if (from == to) {
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
   }
@@ -56,7 +56,7 @@ FunctionDomain1DVector::FunctionDomain1DVector(
 FunctionDomain1DVector::FunctionDomain1DVector(const double startX,
                                                const double endX,
                                                const size_t n)
-    : FunctionDomain1D(NULL, 0) {
+    : FunctionDomain1D(nullptr, 0) {
   if (n == 0) {
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
   }
@@ -77,7 +77,7 @@ FunctionDomain1DVector::FunctionDomain1DVector(const double startX,
  * @param x :: The argument value.
  */
 FunctionDomain1DVector::FunctionDomain1DVector(const double x)
-    : FunctionDomain1D(NULL, 0) {
+    : FunctionDomain1D(nullptr, 0) {
   m_X.resize(1);
   m_X[0] = x;
   resetData(&m_X[0], m_X.size());
@@ -89,7 +89,7 @@ FunctionDomain1DVector::FunctionDomain1DVector(const double x)
  */
 FunctionDomain1DVector::FunctionDomain1DVector(
     const FunctionDomain1DVector &right)
-    : FunctionDomain1D(NULL, 0) {
+    : FunctionDomain1D(nullptr, 0) {
   *this = right;
 }
 

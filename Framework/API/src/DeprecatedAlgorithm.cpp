@@ -52,7 +52,7 @@ void DeprecatedAlgorithm::deprecatedDate(const std::string &date) {
 /// This merely prints the deprecation error for people to see.
 const std::string DeprecatedAlgorithm::deprecationMsg(const IAlgorithm *algo) {
   std::stringstream msg;
-  if (algo != NULL)
+  if (algo != nullptr)
     msg << algo->name() << " is ";
 
   msg << "deprecated";

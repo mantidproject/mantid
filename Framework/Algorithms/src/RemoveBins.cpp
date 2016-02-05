@@ -271,7 +271,7 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
   // Get the distance between the source and the sample (assume in metres)
   Geometry::IComponent_const_sptr sample = instrument->getSample();
   // Check for valid instrument
-  if (sample == NULL) {
+  if (sample == nullptr) {
     throw Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get sample");
   }

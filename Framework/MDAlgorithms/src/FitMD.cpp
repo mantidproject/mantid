@@ -33,7 +33,7 @@ using namespace Kernel;
  * Default Constructor
  */
 FitMD::FitMD()
-    : API::IDomainCreator(NULL, std::vector<std::string>(),
+    : API::IDomainCreator(nullptr, std::vector<std::string>(),
                           IDomainCreator::Simple),
       m_maxSize(0), m_startIndex(0), m_count(0) {}
 

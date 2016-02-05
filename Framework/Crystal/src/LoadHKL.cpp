@@ -64,7 +64,7 @@ void LoadHKL::exec() {
   if (convention == "Crystallography")
     qSign = 1.0;
   Instrument_sptr inst(new Geometry::Instrument);
-  Detector *detector = new Detector("det1", -1, 0);
+  Detector *detector = new Detector("det1", -1, nullptr);
   detector->setPos(0.0, 0.0, 0.0);
   inst->add(detector); // This takes care of deletion
   inst->markAsDetector(detector);

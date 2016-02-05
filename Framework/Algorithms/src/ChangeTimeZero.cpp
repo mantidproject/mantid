@@ -248,7 +248,7 @@ DateAndTime
 ChangeTimeZero::getStartTimeFromWorkspace(API::MatrixWorkspace_sptr ws) const {
   auto run = ws->run();
   // Check for the first good frame in the log
-  Mantid::Kernel::TimeSeriesProperty<double> *goodFrame = NULL;
+  Mantid::Kernel::TimeSeriesProperty<double> *goodFrame = nullptr;
   try {
     goodFrame = run.getTimeSeriesProperty<double>("proton_charge");
   } catch (std::invalid_argument) {

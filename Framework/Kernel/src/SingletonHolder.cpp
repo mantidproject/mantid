@@ -5,14 +5,14 @@ namespace Mantid {
 namespace Kernel {
 
 /// List of functions to call on program exit
-static std::list<atexit_func_t> *cleanup_list = NULL;
+static std::list<atexit_func_t> *cleanup_list = nullptr;
 
 /// Function registed to atexit() that will clean up
 /// all our singletons
 /// This function may be registed with atexit() more than once, so it needs to
 /// clear the list once it has called all the functions
 MANTID_KERNEL_DLL void CleanupSingletons() {
-  if (cleanup_list == NULL) {
+  if (cleanup_list == nullptr) {
     return;
   }
   std::list<atexit_func_t>::const_iterator it;
@@ -20,7 +20,7 @@ MANTID_KERNEL_DLL void CleanupSingletons() {
     (*(*it))();
   }
   delete cleanup_list;
-  cleanup_list = NULL;
+  cleanup_list = nullptr;
 }
 
 /// Adds singleton cleanup function to our atexit list
@@ -28,7 +28,7 @@ MANTID_KERNEL_DLL void CleanupSingletons() {
 /// first out
 /// @param func :: Exit function to call - the singleton destructor function
 MANTID_KERNEL_DLL void AddSingleton(atexit_func_t func) {
-  if (cleanup_list == NULL) {
+  if (cleanup_list == nullptr) {
     cleanup_list = new std::list<atexit_func_t>;
     atexit(&CleanupSingletons);
   }

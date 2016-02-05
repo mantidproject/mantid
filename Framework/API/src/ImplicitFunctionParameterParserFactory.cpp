@@ -27,8 +27,8 @@ ImplicitFunctionParameterParser *ImplicitFunctionParameterParserFactoryImpl::
   }
   Poco::AutoPtr<Poco::XML::NodeList> parameters =
       parametersElement->getElementsByTagName("Parameter");
-  ImplicitFunctionParameterParser *paramParser = NULL;
-  ImplicitFunctionParameterParser *nextParser = NULL;
+  ImplicitFunctionParameterParser *paramParser = nullptr;
+  ImplicitFunctionParameterParser *nextParser = nullptr;
   for (unsigned long i = 0; i < parameters->length(); i++) {
     Poco::XML::Element *parameter =
         dynamic_cast<Poco::XML::Element *>(parameters->item(i));
@@ -37,7 +37,7 @@ ImplicitFunctionParameterParser *ImplicitFunctionParameterParserFactoryImpl::
         "Parser"; // Append parser to the name. Fixed convention
     ImplicitFunctionParameterParser *childParamParser =
         this->createUnwrapped(paramParserName);
-    if (paramParser != NULL) {
+    if (paramParser != nullptr) {
       nextParser->setSuccessorParser(childParamParser);
     } else {
       paramParser = childParamParser;

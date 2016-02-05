@@ -26,7 +26,7 @@ using namespace Mantid::API;
 LoadLogsForSNSPulsedMagnet::LoadLogsForSNSPulsedMagnet()
     : m_delaytimefilename(""), m_pulseidfilename(""),
       m_delayfileinoldformat(false), m_numpulses(0), m_numchoppers(0),
-      m_delaytimes(NULL), m_pulseidseconds(), m_pulseidnanoseconds(), WS() {}
+      m_delaytimes(nullptr), m_pulseidseconds(), m_pulseidnanoseconds(), WS() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

@@ -300,7 +300,7 @@ size_t Convolution::addFunction(IFunction_sptr f) {
     }
     CompositeFunction_sptr cf =
         boost::dynamic_pointer_cast<CompositeFunction>(f1);
-    if (cf == 0) {
+    if (cf == nullptr) {
       cf = boost::dynamic_pointer_cast<CompositeFunction>(
           API::FunctionFactory::Instance().createFunction("CompositeFunction"));
       removeFunction(1);

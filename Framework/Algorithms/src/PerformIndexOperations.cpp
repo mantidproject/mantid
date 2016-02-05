@@ -152,7 +152,7 @@ typedef std::vector<boost::shared_ptr<CommandParser>> VecCommandParsers;
 template <typename ProductType> class CommandParserBase : public CommandParser {
 public:
   virtual Command *interpret(const std::string &instruction) const {
-    Command *command = NULL;
+    Command *command = nullptr;
     boost::regex ex = getRegex();
     if (boost::regex_match(instruction, ex)) {
       auto indexes =
@@ -192,7 +192,7 @@ public:
   virtual ~AdditionParser() {}
 
   virtual Command *interpret(const std::string &instruction) const {
-    Command *command = NULL;
+    Command *command = nullptr;
     boost::regex ex("^\\s*[0-9]+\\s*\\+\\s*[0-9]+\\s*$");
     if (boost::regex_match(instruction, ex)) {
       std::vector<std::string> arguments;
@@ -234,7 +234,7 @@ public:
   virtual ~CropParserIndex() {}
 
   virtual Command *interpret(const std::string &instruction) const {
-    Command *command = NULL;
+    Command *command = nullptr;
     boost::regex ex("^\\s*[0-9]+\\s*$");
     if (boost::regex_match(instruction, ex)) {
       int index = -1;

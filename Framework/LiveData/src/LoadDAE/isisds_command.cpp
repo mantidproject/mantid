@@ -108,7 +108,7 @@ static void clear_replies(SOCKET s) {
   while (!done) {
     FD_ZERO(&fds);
     FD_SET(s, &fds);
-    if ((select(FD_SETSIZE, &fds, NULL, NULL, &timeout) > 0) &&
+    if ((select(FD_SETSIZE, &fds, nullptr, nullptr, &timeout) > 0) &&
         FD_ISSET(s, &fds)) {
       recv(s, buffer, sizeof(buffer), 0);
     } else {
@@ -133,7 +133,7 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
   ISISDSDataType data_type;
   int dims_array[10], ndims;
 
-  if ((hostp = gethostbyname(host)) == NULL) {
+  if ((hostp = gethostbyname(host)) == nullptr) {
     return INVALID_SOCKET;
   }
   memset(&address, 0, sizeof(address));
@@ -173,14 +173,14 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     closesocket(s);
     return INVALID_SOCKET;
   }
-  comm = NULL;
+  comm = nullptr;
   if (isisds_recv_command_alloc(s, &comm, reinterpret_cast<void **>(&comm_data),
                                 &data_type, dims_array, &ndims) <= 0) {
     closesocket(s);
     free(comm);
     return INVALID_SOCKET;
   }
-  if (comm_data != NULL) {
+  if (comm_data != nullptr) {
     free(comm_data);
   }
   if (!strcmp(comm, "OK")) {
@@ -210,7 +210,7 @@ int isisds_recv_open(SOCKET s, ISISDSAccessMode *access_type) {
     return -1;
   }
   *access_type = static_cast<ISISDSAccessMode>(op.access_type);
-  return isisds_send_command(s, "OK", NULL, ISISDSUnknown, NULL, 0);
+  return isisds_send_command(s, "OK", nullptr, ISISDSUnknown, nullptr, 0);
 }
 /*
  * return > 0 on success
@@ -229,7 +229,7 @@ int isisds_send_command(SOCKET s, const char *command, const void *data,
   int n, len_data;
   isisds_command_header_t comm;
   memset(&comm, 0, sizeof(comm));
-  if (dims_array == NULL) {
+  if (dims_array == nullptr) {
     comm.ndims = 1;
     comm.dims_array[0] = ndims;
     len_data = ndims * isisds_type_size[type];
@@ -252,7 +252,7 @@ int isisds_send_command(SOCKET s, const char *command, const void *data,
   strncpy(comm.command, command, sizeof(comm.command) - 1);
   clear_replies(s);
   n = send(s, reinterpret_cast<char *>(&comm), sizeof(comm), 0);
-  if ((n == sizeof(comm)) && (data != NULL) && (len_data > 0)) {
+  if ((n == sizeof(comm)) && (data != nullptr) && (len_data > 0)) {
     n = send(s, reinterpret_cast<const char *>(data), len_data, 0);
   }
   return n;
@@ -303,7 +303,7 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
   n = recv_all(s, *data, len_data, 0);
   if (n != len_data) {
     free(*data);
-    *data = NULL;
+    *data = nullptr;
     len_data = 0;
     return -1;
   }
@@ -326,11 +326,11 @@ int isisds_recv_command(SOCKET s, char *command, int *len_command, void *data,
                         ISISDSDataType *type, int dims_array[], int *ndims) {
   int t_ndims = 1;
   int istat;
-  char *command_temp = NULL;
-  if (type == NULL) {
+  char *command_temp = nullptr;
+  if (type == nullptr) {
     return -1;
   }
-  if (dims_array == NULL || ndims == NULL ||
+  if (dims_array == nullptr || ndims == nullptr ||
       (*ndims <= 1 && dims_array[0] <= 1)) {
     int t_dims[8] = {1, 0, 0, 0, 0, 0, 0, 0};
     /* assume single simple value */
@@ -353,14 +353,14 @@ int isisds_recv_command(SOCKET s, char *command, int *len_command, void *data,
 int isisds_recv_command_alloc(SOCKET s, char **command, void **data,
                               ISISDSDataType *type, int dims_array[],
                               int *ndims) {
-  if (ndims == NULL || dims_array == NULL || type == NULL) {
+  if (ndims == nullptr || dims_array == nullptr || type == nullptr) {
     return -1;
   }
-  if (data == NULL || command == NULL) {
+  if (data == nullptr || command == nullptr) {
     return -1;
   }
-  *data = NULL;
-  *command = NULL;
+  *data = nullptr;
+  *command = nullptr;
   /* *ndims = 0; */
   dims_array[0] = 0;
   *type = ISISDSUnknown;

@@ -101,7 +101,7 @@ void ModeratorTzero::exec() {
   // Run execEvent if eventWorkSpace
   EventWorkspace_const_sptr eventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventWS != NULL) {
+  if (eventWS != nullptr) {
     execEvent(emode);
     return;
   }

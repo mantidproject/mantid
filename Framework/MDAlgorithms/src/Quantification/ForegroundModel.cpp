@@ -18,8 +18,8 @@ const char *FORM_FACTOR_ION = "FormFactorIon";
  * Default constructor only callable by the factory
  */
 ForegroundModel::ForegroundModel()
-    : API::ParamFunction(), m_fittingFunction(NULL), m_parOffset(0),
-      m_MagIonName(""), m_formFactorTable(NULL) {
+    : API::ParamFunction(), m_fittingFunction(nullptr), m_parOffset(0),
+      m_MagIonName(""), m_formFactorTable(nullptr) {
   addAttributes();
   setFormFactorIon("0"); // Off
 }
@@ -29,8 +29,8 @@ ForegroundModel::ForegroundModel()
  * @param fittingFunction :: A reference to the fitting function
  */
 ForegroundModel::ForegroundModel(const API::IFunction &fittingFunction)
-    : API::ParamFunction(), m_fittingFunction(NULL), m_parOffset(0),
-      m_formFactorTable(NULL) {
+    : API::ParamFunction(), m_fittingFunction(nullptr), m_parOffset(0),
+      m_formFactorTable(nullptr) {
   addAttributes();
   setFormFactorIon("0"); // Off
   setFunctionUnderMinimization(fittingFunction);
@@ -130,7 +130,7 @@ void ForegroundModel::setFormFactorIon(const std::string &ionType) {
   // "0" indicates off
   if (ionType == "0") {
     delete m_formFactorTable;
-    m_formFactorTable = NULL;
+    m_formFactorTable = nullptr;
   } else {
     using namespace PhysicalConstants;
     if (m_MagIonName != ionType) {

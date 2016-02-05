@@ -10,7 +10,7 @@ namespace API {
 /**
  * Default constructor
  */
-Progress::Progress() : ProgressBase(0.0, 0.0, 0), m_alg(NULL) {}
+Progress::Progress() : ProgressBase(0.0, 0.0, 0), m_alg(nullptr) {}
 
 /** Creates a Progress instance
     @param alg :: Algorithm reporting its progress

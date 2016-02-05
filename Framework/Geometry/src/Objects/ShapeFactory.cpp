@@ -148,9 +148,9 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
   int l_id = 1; // used to build up unique id's for each shape added. Must start
                 // from int > zero.
 
-  Element *lastElement = NULL; // This is to store element for the fixed
-                               // complete objects such as sphere,cone,cylinder
-                               // and cuboid
+  Element *lastElement = nullptr; // This is to store element for the fixed
+  // complete objects such as sphere,cone,cylinder
+  // and cuboid
   for (unsigned int i = 0; i < pNL_length; i++) {
     if ((pNL->item(i))->nodeType() == Node::ELEMENT_NODE) {
       Element *pE = static_cast<Element *>(pNL->item(i));
@@ -279,7 +279,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
     retVal->setObject(21, algebraFromUser);
     retVal->populate(primitives);
     // check whether there is only one surface/closed surface
-    if (numPrimitives == 1 && lastElement != NULL) // special case
+    if (numPrimitives == 1 && lastElement != nullptr) // special case
     {
       // parse the primitive and create a Geometry handler for the object
       createGeometryHandler(lastElement, retVal);
@@ -1199,7 +1199,7 @@ ShapeFactory::getOptionalShapeElement(Poco::XML::Element *pElem,
   // Allow zero or one occurances of subelements with the given name.
   Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName(name);
   if (pNL->length() == 0)
-    return NULL;
+    return nullptr;
   else if (pNL->length() > 1)
     throw std::invalid_argument(
         "XML element: <" + pElem->tagName() +

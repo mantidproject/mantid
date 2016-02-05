@@ -27,7 +27,7 @@ IDomainCreator *createDomainCreator(const IFunction *fun, const Workspace *ws,
                                     IPropertyManager *manager,
                                     IDomainCreator::DomainType domainType) {
 
-  IDomainCreator *creator = NULL;
+  IDomainCreator *creator = nullptr;
 
   // ILatticeFunction requires API::LatticeDomain.
   if (dynamic_cast<const ILatticeFunction *>(fun)) {

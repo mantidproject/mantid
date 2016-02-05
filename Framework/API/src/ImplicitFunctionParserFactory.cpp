@@ -44,7 +44,7 @@ ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(
 
   Poco::AutoPtr<Poco::XML::NodeList> childFunctions =
       functionElement->getElementsByTagName("Function");
-  ImplicitFunctionParser *childParser = NULL;
+  ImplicitFunctionParser *childParser = nullptr;
   for (unsigned long i = 0; i < childFunctions->length(); i++) {
     Poco::XML::Node *childFunctionNode = childFunctions->item(i);
 

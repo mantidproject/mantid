@@ -107,7 +107,7 @@ void ConvertAxisByFormula::exec() {
 
   bool isRefAxis = false;
   RefAxis *refAxisPtr = dynamic_cast<RefAxis *>(axisPtr);
-  if (refAxisPtr != NULL) {
+  if (refAxisPtr != nullptr) {
     CommonBinsValidator sameBins;
     if (sameBins.isValid(outputWs) != "") {
       throw std::invalid_argument("Axes must have common bins for this "
