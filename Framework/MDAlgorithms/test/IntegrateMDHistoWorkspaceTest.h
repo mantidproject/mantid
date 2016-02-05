@@ -306,6 +306,60 @@ public:
     TSM_ASSERT_DELTA("Wrong value", 1.0, outWS->getSignalAt(4), 1e-4);
   }
 
+  void test_1D_integration_exact_binning_with_mask() {
+
+    /*
+     * Test that masked values do not contribute to integral
+
+                         input
+    (x = 0) *|--|--|--|--|--|--|--|--|--|--|* (x = 10)
+              1  1  1  1  1  1  1  1  1  1
+
+                output requested
+
+    (x = 0) *|--------------|* (x = 5)
+              1 + 1 + masked + masked + 1 = 3 counts
+
+    */
+
+    using namespace Mantid::DataObjects;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        1.0 /*signal*/, 1 /*nd*/, 10 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+    auto histNorm = Mantid::API::MDNormalization::NumEventsNormalization;
+    ws->setDisplayNormalization(histNorm);
+
+    ws->setMDMaskAt(2, true);
+    ws->setMDMaskAt(3, true);
+
+    IntegrateMDHistoWorkspace alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    const double min = 0;
+    const double max = 5;
+    alg.setProperty("P1Bin", boost::assign::list_of(min)(max)
+                                 .convert_to_container<std::vector<double>>());
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    // Quick check that output seems to have the right shape.
+    TSM_ASSERT_EQUALS("All integrated", 1, outWS->getNPoints());
+    auto dim = outWS->getDimension(0);
+    TS_ASSERT_EQUALS(min, dim->getMinimum());
+    TS_ASSERT_EQUALS(max, dim->getMaximum());
+
+    // Check the data.
+    TSM_ASSERT_DELTA("Wrong integrated value", 3.0, outWS->getSignalAt(0),
+                     1e-4);
+    TSM_ASSERT_DELTA("Wrong error value",
+                     std::sqrt(3 * (ws->getErrorAt(0) * ws->getErrorAt(0))),
+                     outWS->getErrorAt(0), 1e-4);
+    TSM_ASSERT_EQUALS("Should have a num events normalization",
+                      outWS->displayNormalization(), histNorm);
+  }
+
   void test_2d_partial_binning() {
 
     /*
