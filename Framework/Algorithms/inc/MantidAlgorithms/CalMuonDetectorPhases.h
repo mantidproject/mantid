@@ -92,6 +92,10 @@ private:
                                          const double alpha);
   /// Fit asymmetry to get frequency
   double fitFrequencyFromAsymmetry(const API::MatrixWorkspace_sptr &wsAsym);
+  /// Find the grouping from the instrument
+  void getGroupingFromInstrument(const API::MatrixWorkspace_sptr &ws,
+                                 std::vector<int> &forward,
+                                 std::vector<int> &backward);
   /// Pointer to input workspace
   API::MatrixWorkspace_sptr m_inputWS;
   /// Name of workspace to put in ADS temporarily

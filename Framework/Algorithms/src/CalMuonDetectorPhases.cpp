@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
@@ -312,7 +313,6 @@ API::MatrixWorkspace_sptr CalMuonDetectorPhases::removeExpDecay(
 double CalMuonDetectorPhases::getFrequencyHint() const {
   double freq = getProperty("Frequency");
 
-  // If frequency is EMPTY_DBL():
   if (freq == EMPTY_DBL()) {
     try {
       // Read sample_magn_field from workspace logs
@@ -342,11 +342,9 @@ CalMuonDetectorPhases::getFrequency(const API::MatrixWorkspace_sptr &ws) {
   std::vector<int> forward = getProperty("ForwardSpectra");
   std::vector<int> backward = getProperty("BackwardSpectra");
 
-  // If grouping not provided, read it from the file
-  // TODO: must implement this
+  // If grouping not provided, read it from the instrument
   if (forward.empty() || backward.empty()) {
-    throw std::runtime_error(
-        "TODO: implement getting grouping from instrument if not provided");
+    getGroupingFromInstrument(ws, forward, backward);
   }
 
   // Calculate asymmetry
@@ -355,10 +353,53 @@ CalMuonDetectorPhases::getFrequency(const API::MatrixWorkspace_sptr &ws) {
       getAsymmetry(ws, forward, backward, alpha);
 
   // Fit an oscillating function, allowing frequency to vary
-  // Starting value for frequency is hint
   double frequency = fitFrequencyFromAsymmetry(wsAsym);
 
   return frequency;
+}
+
+/**
+ * If grouping was not provided, find the instrument from the input workspace
+ * and read the default grouping from its IDF. Returns the forward and backward
+ * groupings as arrays of integers.
+ * @param ws :: [input] Workspace to find grouping for
+ * @param forward :: [output] Forward spectrum indices for given instrument
+ * @param backward :: [output] Backward spectrum indices for given instrument
+ */
+void CalMuonDetectorPhases::getGroupingFromInstrument(
+    const API::MatrixWorkspace_sptr &ws, std::vector<int> &forward,
+    std::vector<int> &backward) {
+  // make sure both arrays are empty
+  forward.clear();
+  backward.clear();
+
+  const auto instrument = ws->getInstrument();
+  if (instrument->getName() == "MUSR") {
+    // Two possibilities for grouping, but we have no way of knowing which
+    throw new std::invalid_argument(
+        "Cannot use default instrument grouping for MUSR "
+        "as main field direction is unknown");
+  }
+
+  // Load grouping and find forward, backward groups
+  std::string fwdRange, bwdRange;
+  API::GroupingLoader loader(instrument);
+  const auto grouping = loader.getGroupingFromIDF();
+  size_t nGroups = grouping->groups.size();
+  for (size_t iGroup = 0; iGroup < nGroups; iGroup++) {
+    const std::string name = grouping->groupNames[iGroup];
+    if (name == "fwd") {
+      fwdRange = grouping->groups[iGroup];
+    } else if (name == "bwd" || name == "bkwd") {
+      bwdRange = grouping->groups[iGroup];
+    }
+  }
+
+  // Use ArrayProperty's functionality to convert string ranges to groups
+  this->setProperty("ForwardSpectra", fwdRange);
+  this->setProperty("BackwardSpectra", bwdRange);
+  forward = getProperty("ForwardSpectra");
+  backward = getProperty("BackwardSpectra");
 }
 
 /**
