@@ -86,8 +86,8 @@ size_t Algorithm::g_execCount = 0;
 /// Constructor
 Algorithm::Algorithm()
     : PropertyManagerOwner(), m_cancel(false), m_parallelException(false),
-      m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(NULL),
-      m_notificationCenter(NULL), m_progressObserver(NULL),
+      m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(nullptr),
+      m_notificationCenter(nullptr), m_progressObserver(nullptr),
       m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
       m_recordHistoryForChild(false), m_alwaysStoreInADS(false),
       m_runningAsync(false), m_running(false), m_rethrow(false),
@@ -212,7 +212,7 @@ const std::vector<std::string> Algorithm::categories() const {
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);
-  if (depo != NULL) {
+  if (depo != nullptr) {
     res.push_back("Deprecated");
   }
   return res;
@@ -433,7 +433,7 @@ bool Algorithm::execute() {
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
   {
     DeprecatedAlgorithm *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
-    if (depo != NULL)
+    if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
   }
   // Start by freeing up any memory available.

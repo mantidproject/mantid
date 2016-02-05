@@ -27,7 +27,7 @@ namespace DataObjects {
  */
 CoordTransformAffine::CoordTransformAffine(const size_t inD, const size_t outD)
     : CoordTransform(inD, outD), m_affineMatrix(outD + 1, inD + 1),
-      m_rawMatrix(NULL), m_rawMemory(NULL) {
+      m_rawMatrix(nullptr), m_rawMemory(nullptr) {
   m_affineMatrix.identityMatrix();
 
   // Allocate the raw matrix
@@ -49,11 +49,11 @@ CoordTransformAffine::CoordTransformAffine(const size_t inD, const size_t outD)
 CoordTransformAffine::~CoordTransformAffine() {
   // delete array of pointers to rows
   delete[] m_rawMatrix;
-  m_rawMatrix = NULL;
+  m_rawMatrix = nullptr;
 
   // delete large mem block holding the matrix
   delete[] m_rawMemory;
-  m_rawMemory = NULL;
+  m_rawMemory = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------

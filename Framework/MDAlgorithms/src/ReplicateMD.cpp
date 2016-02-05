@@ -326,7 +326,7 @@ void ReplicateMD::exec() {
                            .getNumOMPThreads(); // NThreads to Request
 
   // collection of iterators
-  auto iterators = outputWS->createIterators(nThreads, NULL);
+  auto iterators = outputWS->createIterators(nThreads, nullptr);
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int it = 0; it < int(iterators.size()); ++it) {

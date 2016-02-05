@@ -65,7 +65,7 @@ const std::string THICKNESS_PARAM = "TubeThickness";
 // this default constructor calls default constructors and sets other member
 // data to impossible (flag) values
 DetectorEfficiencyCor::DetectorEfficiencyCor()
-    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(NULL), m_Ei(-1.0),
+    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr), m_Ei(-1.0),
       m_ki(-1.0), m_shapeCache(), m_samplePos(), m_spectraSkipped() {
   m_shapeCache.clear();
 }

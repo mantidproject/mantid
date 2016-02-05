@@ -352,7 +352,7 @@ void IntegrateMDHistoWorkspace::exec() {
     const int nThreads = Mantid::API::FrameworkManager::Instance()
                              .getNumOMPThreads(); // NThreads to Request
 
-    auto outIterators = outWS->createIterators(nThreads, NULL);
+    auto outIterators = outWS->createIterators(nThreads, nullptr);
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < int(outIterators.size()); ++i) {

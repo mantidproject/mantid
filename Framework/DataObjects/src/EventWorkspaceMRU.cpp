@@ -43,7 +43,7 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
 void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
   Mutex::ScopedLock _lock(m_changeMruListsMutexE);
   if (m_bufferedDataE.size() <= thread_num) {
-    m_bufferedDataE.resize(thread_num + 1, NULL);
+    m_bufferedDataE.resize(thread_num + 1, nullptr);
     for (auto &data : m_bufferedDataE) {
       if (!data)
         data = new mru_list(50); // Create a MRU list with this many entries.
@@ -58,7 +58,7 @@ void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
 void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
   Mutex::ScopedLock _lock(m_changeMruListsMutexY);
   if (m_bufferedDataY.size() <= thread_num) {
-    m_bufferedDataY.resize(thread_num + 1, NULL);
+    m_bufferedDataY.resize(thread_num + 1, nullptr);
     for (auto &data : m_bufferedDataY) {
       if (!data)
         data = new mru_list(50); // Create a MRU list with this many entries.

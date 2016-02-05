@@ -35,8 +35,9 @@ using namespace Mantid::DataObjects;
 /** Constructor
  */
 BinMD::BinMD()
-    : outWS(), prog(NULL), implicitFunction(NULL), indexMultiplier(NULL),
-      signals(NULL), errors(NULL), numEvents(NULL) {}
+    : outWS(), prog(nullptr), implicitFunction(nullptr),
+      indexMultiplier(nullptr), signals(nullptr), errors(nullptr),
+      numEvents(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -373,7 +374,7 @@ void BinMD::exec() {
 
   // De serialize the implicit function
   std::string ImplicitFunctionXML = getPropertyValue("ImplicitFunctionXML");
-  implicitFunction = NULL;
+  implicitFunction = nullptr;
   if (!ImplicitFunctionXML.empty())
     implicitFunction =
         Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(

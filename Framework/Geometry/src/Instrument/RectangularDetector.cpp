@@ -21,8 +21,8 @@ using Kernel::Matrix;
 /** Empty constructor
  */
 RectangularDetector::RectangularDetector()
-    : CompAssembly(), IObjComponent(NULL), m_rectBase(NULL), m_minDetId(0),
-      m_maxDetId(0) {
+    : CompAssembly(), IObjComponent(nullptr), m_rectBase(nullptr),
+      m_minDetId(0), m_maxDetId(0) {
 
   init();
   setGeometryHandler(new BitmapGeometryHandler(this));
@@ -34,7 +34,7 @@ RectangularDetector::RectangularDetector()
  * */
 RectangularDetector::RectangularDetector(const RectangularDetector *base,
                                          const ParameterMap *map)
-    : CompAssembly(base, map), IObjComponent(NULL), m_rectBase(base),
+    : CompAssembly(base, map), IObjComponent(nullptr), m_rectBase(base),
       m_minDetId(0), m_maxDetId(0) {
   init();
   setGeometryHandler(new BitmapGeometryHandler(this));
@@ -51,7 +51,7 @@ RectangularDetector::RectangularDetector(const RectangularDetector *base,
  */
 RectangularDetector::RectangularDetector(const std::string &n,
                                          IComponent *reference)
-    : CompAssembly(n, reference), IObjComponent(NULL), m_rectBase(NULL),
+    : CompAssembly(n, reference), IObjComponent(nullptr), m_rectBase(nullptr),
       m_minDetId(0), m_maxDetId(0) {
   init();
   this->setName(n);
@@ -669,7 +669,7 @@ unsigned int RectangularDetector::getTextureID() const { return m_textureID; }
 void RectangularDetector::draw() const {
   // std::cout << "RectangularDetector::draw() called for " << this->getName()
   // << "\n";
-  if (Handle() == NULL)
+  if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
   Handle()->Render();
@@ -691,7 +691,7 @@ void RectangularDetector::drawObject() const {
 void RectangularDetector::initDraw() const {
   // std::cout << "RectangularDetector::initDraw() called for " <<
   // this->getName() << "\n";
-  if (Handle() == NULL)
+  if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
   // if(shape!=NULL)    shape->initDraw();

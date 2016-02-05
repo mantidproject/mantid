@@ -34,7 +34,7 @@ DECLARE_ALGORITHM(LoadDetectorsGroupingFile)
 /** Constructor
  */
 LoadDetectorsGroupingFile::LoadDetectorsGroupingFile()
-    : m_groupWS(), m_instrument(), m_pDoc(NULL), m_pRootElem(NULL),
+    : m_groupWS(), m_instrument(), m_pDoc(nullptr), m_pRootElem(nullptr),
       m_groupComponentsMap(), m_groupDetectorsMap(), m_groupSpectraMap() {}
 
 //----------------------------------------------------------------------------------------------
@@ -402,7 +402,7 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
 LoadGroupXMLFile::LoadGroupXMLFile()
     : m_instrumentName(""), m_userGiveInstrument(false), m_date(""),
       m_userGiveDate(false), m_description(""), m_userGiveDescription(false),
-      m_pDoc(NULL), m_pRootElem(NULL), m_groupComponentsMap(),
+      m_pDoc(nullptr), m_pRootElem(nullptr), m_groupComponentsMap(),
       m_groupDetectorsMap(), m_groupSpectraMap(), m_startGroupID(1),
       m_groupNamesMap() {}
 

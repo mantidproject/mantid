@@ -232,10 +232,10 @@ Rule *Intersection::findKey(const int KeyN)
   @retval Rule* if an appropiate leaf is found
 */
 {
-  Rule *PtrOut = (A) ? A->findKey(KeyN) : 0;
+  Rule *PtrOut = (A) ? A->findKey(KeyN) : nullptr;
   if (PtrOut)
     return PtrOut;
-  return (B) ? B->findKey(KeyN) : 0;
+  return (B) ? B->findKey(KeyN) : nullptr;
 }
 
 std::string Intersection::display() const
@@ -534,10 +534,10 @@ Rule *Union::findKey(const int KeyN)
 */
 {
 
-  Rule *PtrOut = (A) ? A->findKey(KeyN) : 0;
+  Rule *PtrOut = (A) ? A->findKey(KeyN) : nullptr;
   if (PtrOut)
     return PtrOut;
-  return (B) ? B->findKey(KeyN) : 0;
+  return (B) ? B->findKey(KeyN) : nullptr;
 }
 
 int Union::isComplementary() const
@@ -758,7 +758,7 @@ Rule *SurfPoint::findKey(const int KeyNum)
   @retval Rule* if an appropiate leaf is found
 */
 {
-  return (KeyNum == keyN) ? this : 0;
+  return (KeyNum == keyN) ? this : nullptr;
 }
 
 void SurfPoint::setKeyN(const int Ky)
@@ -971,7 +971,7 @@ TopoDS_Shape SurfPoint::analyze() {
 //----------------------------------------
 
 CompObj::CompObj()
-    : Rule(), objN(0), key(0)
+    : Rule(), objN(0), key(nullptr)
 /**
   Constructor
 */
@@ -1079,7 +1079,7 @@ Rule *CompObj::findKey(const int i)
 */
 {
   (void)i; // Avoid compiler warning
-  return 0;
+  return nullptr;
 }
 
 int CompObj::findLeaf(const Rule *A) const
@@ -1536,7 +1536,7 @@ Rule *CompGrp::findKey(const int i)
 */
 {
   (void)i; // Avoid compiler warning
-  return 0;
+  return nullptr;
 }
 
 int CompGrp::findLeaf(const Rule *R) const

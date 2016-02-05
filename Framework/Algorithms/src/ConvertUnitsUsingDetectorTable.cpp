@@ -204,7 +204,7 @@ void ConvertUnitsUsingDetectorTable::setupMemberVariables(
   m_distribution = inputWS->isDistribution() && !inputWS->YUnit().empty();
   // Check if its an event workspace
   m_inputEvents =
-      (boost::dynamic_pointer_cast<const EventWorkspace>(inputWS) != NULL);
+      (boost::dynamic_pointer_cast<const EventWorkspace>(inputWS) != nullptr);
 
   m_inputUnit = inputWS->getAxis(0)->unit();
   const std::string targetUnit = getPropertyValue("Target");

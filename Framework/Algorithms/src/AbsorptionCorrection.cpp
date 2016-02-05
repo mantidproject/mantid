@@ -21,7 +21,7 @@ using namespace API;
 using namespace Mantid::PhysicalConstants;
 
 AbsorptionCorrection::AbsorptionCorrection()
-    : API::Algorithm(), m_inputWS(), m_sampleObject(NULL), m_L1s(),
+    : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
       m_sampleVolume(0.0), m_refAtten(0.0), m_scattering(0), n_lambda(0),
       m_xStep(0), m_emode(0), m_lambdaFixed(0.), EXPONENTIAL() {}

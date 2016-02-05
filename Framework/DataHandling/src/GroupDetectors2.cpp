@@ -106,7 +106,7 @@ void GroupDetectors2::exec() {
   const bool preserveEvents = getProperty("PreserveEvents");
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL && preserveEvents) {
+  if (eventW != nullptr && preserveEvents) {
     this->execEvent();
     return;
   }

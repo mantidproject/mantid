@@ -76,7 +76,7 @@ int Rule::removeComplementary(std::unique_ptr<Rule> &TopRule)
   while (active) {
     active = 0;
     std::stack<DTriple<Rule *, int, Rule *>> TreeLine; // Tree stack of rules
-    TreeLine.push(DTriple<Rule *, int, Rule *>(0, 0, TopRule.get()));
+    TreeLine.push(DTriple<Rule *, int, Rule *>(nullptr, 0, TopRule.get()));
 
     while (!active && !TreeLine.empty()) // need to exit on active
     {
@@ -111,11 +111,11 @@ int Rule::removeComplementary(std::unique_ptr<Rule> &TopRule)
           if (TreeComp.first) {
             TreeComp.first = tmpA->leaf(0);
             // delete tmpA
-            tmpA->setLeaf(0, 0);
+            tmpA->setLeaf(nullptr, 0);
             Rule *parentOfA = tmpA->getParent();
             if (parentOfA) {
               int leafNumber = parentOfA->findLeaf(tmpA);
-              parentOfA->setLeaf(NULL, leafNumber);
+              parentOfA->setLeaf(nullptr, leafNumber);
             }
           }
         }
@@ -174,7 +174,7 @@ int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
 
     // Start by putting the top item on the Tree Stack.
     // Note that it doesn't have a parent.
-    TreeLine.push(DTriple<Rule *, int, Rule *>(0, 0, TopRule.get()));
+    TreeLine.push(DTriple<Rule *, int, Rule *>(nullptr, 0, TopRule.get()));
 
     // Exit condition is that nothing changed last time
     // or the tree is Empty.
@@ -218,8 +218,8 @@ int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
               -1) // ok the LHS is a union. (a ^ b) v g ==> (a v g) ^ (b v g )
           {
             // Make copies of the Unions leaves (allowing for null union)
-            alpha = (tmpB->leaf(0)) ? tmpB->leaf(0)->clone() : 0;
-            beta = (tmpB->leaf(1)) ? tmpB->leaf(1)->clone() : 0;
+            alpha = (tmpB->leaf(0)) ? tmpB->leaf(0)->clone() : nullptr;
+            beta = (tmpB->leaf(1)) ? tmpB->leaf(1)->clone() : nullptr;
             gamma = tmpC->clone();
           } else // RHS a v (b ^ g) ==> (a v b) ^ (a v g )
           {
@@ -227,8 +227,8 @@ int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
             // Note :: alpha designated as beta , gamma plays the role of alpha
             // in the RHS part of the above equation (allows common replace
             // block below.
-            alpha = (tmpC->leaf(0)) ? tmpC->leaf(0)->clone() : 0;
-            beta = (tmpC->leaf(1)) ? tmpC->leaf(1)->clone() : 0;
+            alpha = (tmpC->leaf(0)) ? tmpC->leaf(0)->clone() : nullptr;
+            beta = (tmpC->leaf(1)) ? tmpC->leaf(1)->clone() : nullptr;
             gamma = tmpB->clone();
           }
           // Have bit to replace
@@ -398,7 +398,7 @@ int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
   Rule *Ptr = TRule->findKey(SurfN);
   while (Ptr) {
     Rule *LevelOne = Ptr->getParent(); // Must work
-    Rule *LevelTwo = (LevelOne) ? LevelOne->getParent() : 0;
+    Rule *LevelTwo = (LevelOne) ? LevelOne->getParent() : nullptr;
 
     if (LevelTwo) /// Not the top level
     {
@@ -414,7 +414,7 @@ int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
       Rule *PObj =
           (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
 
-      PObj->setParent(0); /// New Top rule
+      PObj->setParent(nullptr); /// New Top rule
       TRule = PObj->clone();
     } else // Basic surf object
     {
@@ -433,14 +433,14 @@ int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
 }
 
 Rule::Rule()
-    : Parent(0)
+    : Parent(nullptr)
 /**
   Standard Constructor
 */
 {}
 
 Rule::Rule(const Rule &)
-    : Parent(0)
+    : Parent(nullptr)
 /**
   Constructor copies.
   Parent set to 0

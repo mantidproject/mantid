@@ -177,7 +177,8 @@ MDTransfNoQ::inputUnitID(Kernel::DeltaEMode::Type mode,
   return pXAxis->unit()->unitID();
 }
 
-MDTransfNoQ::MDTransfNoQ() : m_NMatrixDim(0), m_YAxis(NULL), m_Det(NULL) {}
+MDTransfNoQ::MDTransfNoQ()
+    : m_NMatrixDim(0), m_YAxis(nullptr), m_Det(nullptr) {}
 
 /**
  * Set the display normalization for no Q

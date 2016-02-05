@@ -148,7 +148,7 @@ FastReadOnlyFile::FastReadOnlyFile(const char *filename) {
 }
 FastReadOnlyFile::~FastReadOnlyFile() {
   fclose(m_handle);
-  m_handle = NULL;
+  m_handle = nullptr;
 }
 void *FastReadOnlyFile::handle() const { return m_handle; }
 bool FastReadOnlyFile::read(void *buffer, uint32_t size) {
@@ -156,7 +156,7 @@ bool FastReadOnlyFile::read(void *buffer, uint32_t size) {
 }
 bool FastReadOnlyFile::seek(int64_t offset, int whence, int64_t *newPosition) {
   return (0 == fseek(m_handle, offset, whence)) &&
-         ((newPosition == NULL) ||
+         ((newPosition == nullptr) ||
           (0 <= (*newPosition = static_cast<int64_t>(ftell(m_handle)))));
 }
 #endif
@@ -179,7 +179,7 @@ File::File(const std::string &path)
     : m_good(true), m_file(path.c_str()), m_selected(static_cast<size_t>(-1)),
       m_position(0), m_size(0), m_bufferPosition(0), m_bufferAvailable(0) {
 
-  m_good = m_file.handle() != NULL;
+  m_good = m_file.handle() != nullptr;
   while (m_good) {
     EntryHeader header;
     int64_t position;

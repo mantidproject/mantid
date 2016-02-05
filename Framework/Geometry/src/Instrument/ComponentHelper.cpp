@@ -133,7 +133,7 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
   instrument->markAsSamplePos(sample);
 
   // A detector
-  Detector *det = new Detector("point-detector", 1 /*detector id*/, NULL);
+  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
   det->setPos(detectorPos);
   det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(det);
@@ -169,7 +169,7 @@ createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
   size_t numdets = vecdetpos.size();
   for (size_t i = 0; i < numdets; ++i) {
     Detector *det =
-        new Detector("point-detector", vecdetid[i] /*detector id*/, NULL);
+        new Detector("point-detector", vecdetid[i] /*detector id*/, nullptr);
     det->setPos(vecdetpos[i]);
     // FIXME - should be cubi... pixel
     det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));

@@ -21,7 +21,7 @@ CompositeImplicitFunction::~CompositeImplicitFunction() {}
 bool CompositeImplicitFunction::addFunction(
     Mantid::Geometry::MDImplicitFunction_sptr constituentFunction) {
   bool bSuccess = false;
-  if (constituentFunction.get() != NULL) {
+  if (constituentFunction.get() != nullptr) {
     this->m_Functions.push_back(constituentFunction);
     bSuccess = true;
   }

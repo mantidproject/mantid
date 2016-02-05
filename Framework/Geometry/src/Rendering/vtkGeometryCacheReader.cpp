@@ -35,7 +35,7 @@ Kernel::Logger g_log("vtkGeometryCacheReader");
  */
 vtkGeometryCacheReader::vtkGeometryCacheReader(std::string filename) {
   mFileName = filename;
-  mDoc = NULL;
+  mDoc = nullptr;
   Init();
 }
 
@@ -68,7 +68,7 @@ void vtkGeometryCacheReader::readCacheForObject(Object *obj) {
   std::stringstream objName;
   objName << obj->getName();
   Poco::XML::Element *pEle = getElementByObjectName(objName.str());
-  if (pEle == NULL) // Element not found
+  if (pEle == nullptr) // Element not found
   {
     g_log.debug("Cache not found for Object with name " + objName.str());
     return;
@@ -106,11 +106,11 @@ void vtkGeometryCacheReader::readCacheForObject(Object *obj) {
 Poco::XML::Element *
 vtkGeometryCacheReader::getElementByObjectName(std::string name) {
   Element *pRoot = mDoc->documentElement();
-  if (pRoot == NULL || pRoot->nodeName().compare("VTKFile") != 0)
-    return NULL;
+  if (pRoot == nullptr || pRoot->nodeName().compare("VTKFile") != 0)
+    return nullptr;
   Element *pPolyData = pRoot->getChildElement("PolyData");
-  if (pPolyData == NULL)
-    return NULL;
+  if (pPolyData == nullptr)
+    return nullptr;
   return pPolyData->getElementById(name, "name");
 }
 
@@ -119,13 +119,13 @@ vtkGeometryCacheReader::getElementByObjectName(std::string name) {
  */
 void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle,
                                         int *noOfPoints, double **points) {
-  if (pEle == NULL) {
+  if (pEle == nullptr) {
     *noOfPoints = 0;
     return;
   }
   // Allocate memory
   *points = new double[(*noOfPoints) * 3];
-  if (*points == NULL) // Out of memory
+  if (*points == nullptr) // Out of memory
   {
     g_log.error("Cannot allocate memory for triangle cache of Object ");
     return;
@@ -145,13 +145,13 @@ void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle,
  */
 void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle,
                                            int *noOfTriangles, int **faces) {
-  if (pEle == NULL) {
+  if (pEle == nullptr) {
     *noOfTriangles = 0;
     return;
   }
   // Allocate memory
   *faces = new int[(*noOfTriangles) * 3];
-  if (*faces == NULL) // Out of memory
+  if (*faces == nullptr) // Out of memory
   {
     g_log.error("Cannot allocate memory for triangle cache of Object ");
     return;

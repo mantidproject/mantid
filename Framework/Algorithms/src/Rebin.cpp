@@ -140,7 +140,7 @@ void Rebin::exec() {
   EventWorkspace_const_sptr eventInputWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
-  if (eventInputWS != NULL) {
+  if (eventInputWS != nullptr) {
     //------- EventWorkspace as input -------------------------------------
     EventWorkspace_sptr eventOutputWS =
         boost::dynamic_pointer_cast<EventWorkspace>(outputWS);

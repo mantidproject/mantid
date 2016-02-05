@@ -151,7 +151,7 @@ Property *loadProperty(::NeXus::File *file, const std::string &group) {
   }
 
   file->openData("value");
-  Property *retVal = NULL;
+  Property *retVal = nullptr;
   switch (file->getInfo().type) {
   case ::NeXus::FLOAT32:
     retVal = makeProperty<float>(file, group, times);
@@ -181,7 +181,7 @@ Property *loadProperty(::NeXus::File *file, const std::string &group) {
   case ::NeXus::INT8:
   case ::NeXus::INT16:
   case ::NeXus::UINT16:
-    retVal = NULL;
+    retVal = nullptr;
     break;
   }
 

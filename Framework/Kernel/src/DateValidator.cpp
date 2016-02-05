@@ -30,7 +30,7 @@ struct tm getTimeValue(const std::string &sDate, std::string &error) {
   timeinfo.tm_isdst = -1;
 #ifndef _WIN32
   timeinfo.tm_gmtoff = 0;
-  timeinfo.tm_zone = 0;
+  timeinfo.tm_zone = nullptr;
 #endif
 
   std::basic_string<char>::size_type index, off = 0;

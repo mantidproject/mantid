@@ -47,7 +47,7 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
   }
 
   Poco::XML::Element *nameElement = dimensionXML.getChildElement("Name");
-  if (NULL == nameElement) {
+  if (nullptr == nameElement) {
     throw std::invalid_argument(
         "Invalid string passed to createDimension: No Name element");
   }
@@ -55,27 +55,27 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
 
   Poco::XML::Element *unitsElement = dimensionXML.getChildElement("Units");
   std::string units = "None";
-  if (NULL != unitsElement) {
+  if (nullptr != unitsElement) {
     // Set units if they exist.
     units = unitsElement->innerText();
   }
 
   Poco::XML::Element *frameElement = dimensionXML.getChildElement("Frame");
   std::string frame = "Unknown frame";
-  if (NULL != frameElement) {
+  if (nullptr != frameElement) {
     // Set the frame if it exists
     frame = frameElement->innerText();
   }
 
   Poco::XML::Element *upperBoundsElement =
       dimensionXML.getChildElement("UpperBounds");
-  if (NULL == upperBoundsElement) {
+  if (nullptr == upperBoundsElement) {
     throw std::invalid_argument(
         "Invalid string passed to createDimension: No UpperBounds element");
   }
   Poco::XML::Element *lowerBoundsElement =
       dimensionXML.getChildElement("LowerBounds");
-  if (NULL == lowerBoundsElement) {
+  if (nullptr == lowerBoundsElement) {
     throw std::invalid_argument(
         "Invalid string passed to createDimension: No LowerBounds element");
   }
@@ -93,7 +93,7 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
 
   Poco::XML::Element *numBinsElement =
       dimensionXML.getChildElement("NumberOfBins");
-  if (NULL == numBinsElement) {
+  if (nullptr == numBinsElement) {
     throw std::invalid_argument(
         "Invalid string passed to createDimension: No NumberOfBins element");
   }
@@ -107,7 +107,7 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
 
   Poco::XML::Element *integrationXML =
       dimensionXML.getChildElement("Integrated");
-  if (NULL != integrationXML) {
+  if (nullptr != integrationXML) {
     double upperLimit = atof(
         integrationXML->getChildElement("UpperLimit")->innerText().c_str());
     double lowerLimit = atof(

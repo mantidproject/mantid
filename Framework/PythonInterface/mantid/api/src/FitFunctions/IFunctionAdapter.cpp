@@ -99,7 +99,7 @@ PyObject *IFunctionAdapter::getAttributeValue(const std::string &name) {
 PyObject *
 IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
   std::string type = attr.type();
-  PyObject *result(NULL);
+  PyObject *result(nullptr);
   if (type == "int")
     result = to_python_value<const int &>()(attr.asInt());
   else if (type == "double")

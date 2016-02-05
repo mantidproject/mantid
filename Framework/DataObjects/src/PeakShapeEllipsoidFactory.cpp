@@ -29,7 +29,7 @@ Mantid::Geometry::PeakShape *
 PeakShapeEllipsoidFactory::create(const std::string &source) const {
   Json::Reader reader;
   Json::Value root;
-  Mantid::Geometry::PeakShape *product = NULL;
+  Mantid::Geometry::PeakShape *product = nullptr;
   if (reader.parse(source, root)) {
     const std::string shape = root["shape"].asString();
     if (shape == PeakShapeEllipsoid::ellipsoidShapeName()) {

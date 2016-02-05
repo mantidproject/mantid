@@ -202,7 +202,7 @@ void LoadMcStas::readEventData(
           InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      instrument = parser.parseXML(NULL);
+      instrument = parser.parseXML(nullptr);
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
