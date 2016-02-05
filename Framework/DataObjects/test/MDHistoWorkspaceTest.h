@@ -549,6 +549,55 @@ public:
         iws->getSignalWithMaskAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
   }
 
+  void test_getLinePlot() {
+    MDHistoWorkspace_sptr ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i = 0; i < 100; i++)
+      ws->setSignalAt(i, double(i));
+    VMD start(0.5, 0.5);
+    VMD end(9.5, 0.5);
+    std::vector<coord_t> x;
+    std::vector<signal_t> y;
+    std::vector<signal_t> e;
+    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+    TS_ASSERT_EQUALS(x.size(), 500);
+    TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(x[50], 0.9018, 1e-5);
+    TS_ASSERT_DELTA(x[100], 1.8036, 1e-5);
+    TS_ASSERT_DELTA(x[499], 9.0, 1e-5);
+
+    TS_ASSERT_EQUALS(y.size(), 500);
+    TS_ASSERT_DELTA(y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(y[50], 1.0, 1e-5);
+    TS_ASSERT_DELTA(y[100], 2.0, 1e-5);
+  }
+
+  void test_getLinePlotWithMaskedData() {
+    MDHistoWorkspace_sptr ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i = 0; i < 100; i++)
+      ws->setSignalAt(i, double(i));
+
+    std::vector<coord_t> min{0, 0};
+    std::vector<coord_t> max{5, 5};
+
+    // Mask part of the workspace
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ws->setMDMasking(function);
+
+    VMD start(0.5, 0.5);
+    VMD end(9.5, 0.5);
+    std::vector<coord_t> x;
+    std::vector<signal_t> y;
+    std::vector<signal_t> e;
+    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+
+    // Masked points omitted
+    TS_ASSERT_EQUALS(y.size(), 250);
+    // Unmasked value
+    TS_ASSERT_DELTA(y[200], 8.0, 1e-5);
+  }
+
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive */
   void test_getLineData_horizontal() {

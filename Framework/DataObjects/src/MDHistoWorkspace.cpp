@@ -516,7 +516,7 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
   // TODO: Don't use a fixed number of points later
   size_t numPoints = 500;
 
-  VMD step = (end - start) / double(numPoints);
+  VMD step = (end - start) / double(numPoints - 1);
   double stepLength = step.norm();
 
   // These will be the curve as plotted
@@ -526,17 +526,15 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
   for (size_t i = 0; i < numPoints; i++) {
     // Coordinate along the line
     VMD coord = start + step * double(i);
-    // Record the position along the line
-    x.push_back(static_cast<coord_t>(stepLength * double(i)));
 
     // Get index of bin at this coordinate
     size_t linearIndex = this->getLinearIndexAtCoord(coord.getBareArray());
     if (linearIndex < m_length) {
 
-      if (this->getIsMaskedAt(linearIndex)) {
-        y.push_back(MDMaskValue);
-        e.push_back(MDMaskValue);
-      } else {
+      if (!this->getIsMaskedAt(linearIndex)) {
+        // Record the position along the line
+        x.push_back(static_cast<coord_t>(stepLength * double(i)));
+
         signal_t normalizer = getNormalizationFactor(normalize, linearIndex);
         // And add the normalized signal/error to the list too
         auto signal = this->getSignalAt(linearIndex) * normalizer;
@@ -549,13 +547,13 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
       }
 
     } else {
+      // Record the position along the line
+      x.push_back(static_cast<coord_t>(stepLength * double(i)));
       // Point is outside the workspace. Add NANs
       y.push_back(std::numeric_limits<double>::quiet_NaN());
       e.push_back(std::numeric_limits<double>::quiet_NaN());
     }
   }
-  // And the last point
-  x.push_back((end - start).norm());
 }
 
 //----------------------------------------------------------------------------------------------
