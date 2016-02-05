@@ -62,10 +62,17 @@ $SCL_ON_RHEL6 "cmake --build . -- StandardTestData"
 
 ###############################################################################
 # Add tests from the examples available on the mantidproject wiki pages
-# The script produces additional RST pages derived from examples.
-# These will be run togethe with the standard docs-test RST pages.
+# The script produces additional RST pages derived from the examples.
+# These will be run together with the standard docs-test RST pages.
+#
+# Only for:
+#   jobs that have the suffix wikitests in their name,
+#   on platforms: Ubuntu
 ###############################################################################
-if [[ "${ON_UBUNTU}" == true ]] && [[ ${JOB_NAME} == *wikitests* ]]; then
+if [[ ${NODE_LABELS} == *ubuntu* ]]; then
+    ON_WT_PLATFORMS=true
+fi
+if [[ "${ON_WT_PLATFORMS}" == true ]] && [[ ${JOB_NAME} == *wikitests* ]]; then
   $SCL_ON_RHEL6 "python ${WORKSPACE}/tools/scripts/TestWikiPython.py -o ${WORKSPACE}/docs/source/mwTests"
 fi
 
