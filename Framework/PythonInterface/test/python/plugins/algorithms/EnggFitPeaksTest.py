@@ -32,6 +32,12 @@ class EnggFitPeaksTest(unittest.TestCase):
                           InputWorkspace=ws_name, BankPixelFoo=33,
                           WorkspaceIndex=0, ExpectedPeaks='0.51, 0.72')
 
+        # missing FittedPeaks output property
+        self.assertRaises(RuntimeError,
+                          EnggFitPeaks,
+                          InputWorkspace=ws_name,
+                          WorkspaceIndex=0, ExpectedPeaks='0.51, 0.72')
+
         # Wrong ExpectedPeaks value
         self.assertRaises(ValueError,
                           EnggFitPeaks,
@@ -164,9 +170,12 @@ class EnggFitPeaksTest(unittest.TestCase):
         ep1 = 0.4
         ep2 = 1.09
         paramsTblName = 'test_difc_zero_table'
-        difc, zero = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
-                                    OutFittedPeaksTable=peaksTblName,
-                                    OutParametersTable=paramsTblName)
+        difc, zero, test_fit_peaks_table = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
+                                                        OutFittedPeaksTable=peaksTblName,
+                                                        OutParametersTable=paramsTblName)
+
+        self.assertEquals(test_fit_peaks_table.rowCount(), 2)
+
         pTable = mtd[paramsTblName]
         self.assertEquals(pTable.rowCount(), 1)
         self.assertEquals(pTable.columnCount(), 2)
@@ -205,8 +214,10 @@ class EnggFitPeaksTest(unittest.TestCase):
         ep1 = 0.4
         ep2 = 0.83
         ep3 = 1.09
-        difc, zero = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2, ep3],
-                                    OutFittedPeaksTable=peaksTblName)
+        difc, zero, test_fit_peaks_table = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2, ep3],
+                                                        OutFittedPeaksTable=peaksTblName)
+
+        self.assertEquals(test_fit_peaks_table.rowCount(), 3)
 
         expected_difc = 17335.67250113934
         # assertLess would be nices, but only available in unittest >= 2.7
