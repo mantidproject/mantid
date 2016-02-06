@@ -128,7 +128,7 @@ class EnggCalibrate(PythonAlgorithm):
         prog.report('Fitting parameters for the focused run')
         difc, zero, fitted_peaks = self._fit_params(focussed_ws, expectedPeaksD)
 
-        self._produce_outputs(difc, zero)
+        self._produce_outputs(difc, zero, fitted_peaks)
 
     def _fit_params(self, focused_ws, expected_peaks_d):
         """
@@ -195,18 +195,20 @@ class EnggCalibrate(PythonAlgorithm):
 
         return alg.getProperty('OutputWorkspace').value
 
-    def _produce_outputs(self, difc, zero):
+    def _produce_outputs(self, difc, zero, fitted_peaks):
         """
         Just fills in the output properties as requested
 
         @param difc :: the difc GSAS parameter as fitted here
         @param zero :: the zero GSAS parameter as fitted here
+        @param fitted_peaks :: table workspace with peak parameters (one peak per row)
         """
 
         import EnggUtils
 
         self.setProperty('Difc', difc)
         self.setProperty('Zero', zero)
+        self.setProperty('FittedPeaks', fitted_peaks)
 
         # make output table if requested
         tblName = self.getPropertyValue("OutputParametersTableName")
