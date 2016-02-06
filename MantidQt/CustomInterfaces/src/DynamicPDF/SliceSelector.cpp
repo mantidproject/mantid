@@ -41,7 +41,7 @@ DECLARE_SUBWINDOW(SliceSelector)
 // SliceSelector::SliceSelector(QWidget *parent) : UserSubWindow{parent},
 // m_loadedWorkspace{nullptr}, m_BackgroundRemover{nullptr} {
 SliceSelector::SliceSelector(QWidget *parent)
-    : UserSubWindow{parent}, m_view2D{nullptr,nullptr},
+    : UserSubWindow{parent}, m_plot2D{nullptr},
       m_loadedWorkspace{nullptr} {}
 
 SliceSelector::~SliceSelector() { m_selectedWorkspaceIndex = 0; }
@@ -85,11 +85,9 @@ void SliceSelector::loadSlices(const QString &workspaceName) {
   m_uiForm.spinboxSliceSelector->setValue(0);
 
   /// initialize the 2D view of the histogram;
-  m_view2D.plot2D = m_uiForm.slices2DPlot;
-  m_view2D.spectrogram = new QwtPlotSpectrogram();
-  m_view2D.spectrogram->attach(m_view2D.plot2D);
-  m_view2D.plot2D->setWorkspace(m_loadedWorkspace->m_ws);
-  m_view2D.plot2D->replot();
+  m_plot2D = m_uiForm.slices2DPlot;
+  m_plot2D->setWorkspace(m_loadedWorkspace->m_ws);
+  m_plot2D->updateDisplay();
 
   /// initialize the preview plot
   updatePlotSelectedSlice();
