@@ -367,10 +367,11 @@ void AlignAndFocusPowder::exec() {
       g_log.information() << "running CompressEvents(Tolerance=" << tolerance
                           << ")\n";
       API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
-      compressAlg->setProperty("InputWorkspace", m_outputEW);
-      compressAlg->setProperty("OutputWorkspace", m_outputEW);
-      compressAlg->setProperty("OutputWorkspace", m_outputEW);
-      compressAlg->setProperty("Tolerance", tolerance);
+      compressAlg->setProperties(
+          std::make_pair(std::string("InputWorkspace"), m_outputEW),
+          std::make_pair(std::string("OutputWorkspace"), m_outputEW),
+          std::make_pair(std::string("OutputWorkspace"), m_outputEW),
+          std::make_pair(std::string("Tolerance"), tolerance));
       compressAlg->executeAsChildAlg();
       m_outputEW = compressAlg->getProperty("OutputWorkspace");
       m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);

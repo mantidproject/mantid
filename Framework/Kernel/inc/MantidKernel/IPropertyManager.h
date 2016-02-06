@@ -143,6 +143,29 @@ public:
     return this;
   }
 
+  /** Templated method to set the value of a PropertyWithValue
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T, typename... Args>
+  IPropertyManager *setProperties(std::pair<std::string, T> prop,
+                                  Args &&... others) {
+    setTypedProperty(prop.first, prop.second,
+                     boost::is_convertible<T, boost::shared_ptr<DataItem>>());
+    this->afterPropertySet(prop.first);
+    setProperties(std::forward<Args>(others)...);
+    return this;
+  }
+
+  template <typename T>
+  IPropertyManager *setProperties(const std::pair<std::string, T> &prop) {
+    setProperty(prop.first, prop.second);
+    return this;
+  }
+
   /** Specialised version of setProperty template method to handle const char *
   *  @param name :: The name of the property (case insensitive)
   *  @param value :: The value to assign to the property
