@@ -66,7 +66,7 @@ class EnggFitPeaks(PythonAlgorithm):
 
         # Get peaks in dSpacing from file
         expected_peaks_dsp = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                          self.getProperty('ExpectedPeaks').value)
+                                                              self.getProperty('ExpectedPeaks').value)
 
         if len(expected_peaks_dsp) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")

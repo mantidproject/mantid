@@ -118,9 +118,9 @@ class EnggCalibrate(PythonAlgorithm):
 
         prog.report('Focusing the input workspace')
         focussed_ws = self._focus_run(self.getProperty('InputWorkspace').value,
-                                     self.getProperty("VanadiumWorkspace").value,
-                                     self.getProperty('Bank').value,
-                                     self.getProperty(self.INDICES_PROP_NAME).value)
+                                      self.getProperty("VanadiumWorkspace").value,
+                                      self.getProperty('Bank').value,
+                                      self.getProperty(self.INDICES_PROP_NAME).value)
 
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
