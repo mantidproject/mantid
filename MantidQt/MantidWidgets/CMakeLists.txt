@@ -21,8 +21,8 @@ set ( SRC_FILES
     src/InputController.cpp
     src/MantidHelpWindow.cpp
     src/MWDiag.cpp
-    src/MWSpectrogram.cpp
     src/MWRunFiles.cpp
+    src/MWView.cpp
     src/MessageDisplay.cpp
     src/MultifitSetupDialog.cpp
     src/MuonFitPropertyBrowser.cpp
@@ -78,8 +78,8 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
     inc/MantidQtMantidWidgets/MuonSequentialFitDialog.h
     inc/MantidQtMantidWidgets/MWDiag.h
-    inc/MantidQtMantidWidgets/MWSpectrogram.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
+    inc/MantidQtMantidWidgets/MWView.h
     inc/MantidQtMantidWidgets/PeakPicker.h
     inc/MantidQtMantidWidgets/PeriodicTableWidget.h
     inc/MantidQtMantidWidgets/pqHelpWindow.h
@@ -123,6 +123,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
+    inc/MantidQtMantidWidgets/MWView.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
     inc/MantidQtMantidWidgets/MuonSequentialFitDialog.ui
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.ui
