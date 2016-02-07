@@ -12,6 +12,7 @@
 #include <functional>
 
 #include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
@@ -151,46 +152,46 @@ std::vector<double> getModifiedZscore(const vector<TYPE> &data,
  */
 template <typename TYPE>
 Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
-  Statistics stats = getNanStatistics();
+  Statistics statistics = getNanStatistics();
   size_t num_data = data.size(); // cache since it is frequently used
   if (num_data == 0) {           // don't do anything
-    return stats;
+    return statistics;
   }
   // calculate the mean if this or the stddev is requested
   const bool stddev = ((flags & StatOptions::UncorrectedStdDev) ||
                        (flags & StatOptions::CorrectedStdDev));
   if (stddev) {
     using namespace boost::accumulators;
-    accumulator_set<TYPE, features<tag::min, tag::max, tag::variance>> acc;
+    accumulator_set<double, stats<tag::min, tag::max, tag::variance>> acc;
     for (auto &value : data) {
-      acc(value);
+      acc(static_cast<double>(value));
     }
-    stats.minimum = min(acc);
-    stats.maximum = max(acc);
-    stats.mean = mean(acc);
+    statistics.minimum = min(acc);
+    statistics.maximum = max(acc);
+    statistics.mean = mean(acc);
     double var = variance(acc);
 
     if (flags & StatOptions::CorrectedStdDev) {
       double ndofs = static_cast<double>(data.size());
       var *= ndofs / (ndofs - 1.0);
     }
-    stats.standard_deviation = std::sqrt(var);
+    statistics.standard_deviation = std::sqrt(var);
 
   } else if (flags & StatOptions::Mean) {
     using namespace boost::accumulators;
-    accumulator_set<TYPE, features<tag::mean>> acc;
+    accumulator_set<double, stats<tag::mean>> acc;
     for (auto &value : data) {
-      acc(value);
+      acc(static_cast<double>(value));
     }
-    stats.mean = mean(acc);
+    statistics.mean = mean(acc);
   }
 
   // calculate the median if requested
   if (flags & StatOptions::Median) {
-    stats.median = getMedian(data, num_data, flags & StatOptions::SortedData);
+    statistics.median = getMedian(data, num_data, flags & StatOptions::SortedData);
   }
 
-  return stats;
+  return statistics;
 }
 
 /// Getting statistics of a string array should just give a bunch of NaNs
