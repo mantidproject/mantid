@@ -613,6 +613,8 @@ void SCDCalibratePanels::exec() {
 
   bool useL0 = getProperty("useL0");
   bool useTimeOffset = getProperty("useTimeOffset");
+  int Niter=1;
+  if (useL0 || useTimeOffset) Niter = 2;
   bool use_PanelWidth = getProperty("usePanelWidth");
   bool use_PanelHeight = getProperty("usePanelHeight");
   bool use_PanelPosition = getProperty("usePanelPosition");
@@ -659,6 +661,18 @@ void SCDCalibratePanels::exec() {
   boost::shared_ptr<const Instrument> instrument =
       peaksWs->getPeak(0).getInstrument();
 
+  double T0 = 0;
+  if ((string)getProperty("PreProcessInstrument") ==
+      "C)Apply a LoadParameter.xml type file")
+    T0 = getProperty("InitialTimeOffset"); //!*****
+
+  double L0 = peaksWs->getPeak(0).getL1();
+  std::ofstream outfile(DetCalFileName);
+  g_log.debug() << "Initial L0,T0=" << L0 << "," << T0 << endl;
+  std::vector<std::string> detcal;
+
+  for (auto it0l0 = 0; it0l0 != Niter; ++it0l0) {
+    detcal.clear();
   PARALLEL_FOR1(peaksWs)
   for (int iGr = 0; iGr < static_cast<int>(Groups.size()); iGr++) {
     PARALLEL_START_INTERUPT_REGION
@@ -670,18 +684,12 @@ void SCDCalibratePanels::exec() {
     //------------------ Set Up Workspace for IFitFunction Fit---------------
     vector<int> bounds;
     Workspace2D_sptr ws = calcWorkspace(peaksWs, banksVec, tolerance, bounds);
-    double T0 = 0;
-    if ((string)getProperty("PreProcessInstrument") ==
-        "C)Apply a LoadParameter.xml type file")
-      T0 = getProperty("InitialTimeOffset"); //!*****
-
-    double L0 = peaksWs->getPeak(0).getL1();
+    double T0_bank = T0;
+    double L0_bank = L0;
     boost::shared_ptr<const Instrument> PreCalibinstrument =
         GetNewCalibInstrument(
             instrument, (string)getProperty("PreProcessInstrument"),
-            (string)getProperty("PreProcFilename"), T0, L0, banksVec);
-    g_log.debug() << "Initial L0,T0=" << L0 << "," << T0 << endl;
-
+            (string)getProperty("PreProcFilename"), T0_bank, L0_bank, banksVec);
     V3D samplePos = peaksWs->getPeak(0).getInstrument()->getSample()->getPos();
 
     string PeakWSName = getPropertyValue("PeakWorkspace");
@@ -735,8 +743,8 @@ void SCDCalibratePanels::exec() {
     iFunc->setAttributeValue("endX", -1);
     iFunc->setAttributeValue("RotateCenters", RotGroups);
     iFunc->setAttributeValue("SampleOffsets", SampOffsets);
-    iFunc->setParameter("l0", L0);
-    iFunc->setParameter("t0", T0);
+    iFunc->setParameter("l0", L0_bank);
+    iFunc->setParameter("t0", T0_bank);
 
     double maxXYOffset = getProperty("MaxPositionChange_meters");
 
@@ -778,7 +786,7 @@ void SCDCalibratePanels::exec() {
     if (endXp1 - startX < 13) {
       g_log.error() << "Bank Group " << BankNameString
                     << " does not have enough peaks for fitting" << endl;
-      saveIsawDetCal(instrument, MyBankNames, T0,
+      saveIsawDetCal(instrument, MyBankNames, T0_bank,
                      DetCalFileName + boost::lexical_cast<std::string>(iGr));
       continue;
     }
@@ -794,7 +802,7 @@ void SCDCalibratePanels::exec() {
     tie(iFunc, !use_PanelOrientation, "f0_Zrot", Zrot0);
 
     //--------------- setup constraints ------------------------------
-    constrain(iFunc, "l0", (MIN_DET_HW_SCALE * L0), (MAX_DET_HW_SCALE * L0));
+    constrain(iFunc, "l0", (MIN_DET_HW_SCALE * L0_bank), (MAX_DET_HW_SCALE * L0_bank));
     constrain(iFunc, "t0", -5., 5.);
 
     constrain(iFunc, "f0_detWidthScale", MIN_DET_HW_SCALE * detWidthScale0,
@@ -836,8 +844,8 @@ void SCDCalibratePanels::exec() {
       tie(iFunc, true, "SampleZ", samplePos.Z() + SampleZoffset);
     }
 
-    tie(iFunc, !useL0, "l0", L0);
-    tie(iFunc, !useTimeOffset, "t0", T0);
+    tie(iFunc, !useL0, "l0", L0_bank);
+    tie(iFunc, !useTimeOffset, "t0", T0_bank);
 
     //--------------------- Set up Fit Algorithm and Execute-------------------
     boost::shared_ptr<Algorithm> fit_alg =
@@ -1040,9 +1048,7 @@ void SCDCalibratePanels::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  std::vector<std::string> detcal;
   std::vector<double> l0vec, t0vec;
-  std::ofstream outfile(DetCalFileName);
   std::string line, seven;
   for (int iGr = 0; iGr < static_cast<int>(Groups.size()); iGr++) {
     std::ifstream infile(DetCalFileName +
@@ -1066,35 +1072,44 @@ void SCDCalibratePanels::exec() {
       Poco::File(DetCalFileName + boost::lexical_cast<std::string>(iGr))
           .remove();
   }
-  std::vector<double> Zscore = getZscore(l0vec);
-  std::vector<size_t> banned;
-  for (size_t i = 0; i < l0vec.size(); ++i) {
-    if (Zscore[i] > 0.5) {
-      banned.push_back(i);
+    if (useL0) {
+    std::vector<double> Zscore = getZscore(l0vec);
+    std::vector<size_t> banned;
+    for (size_t i = 0; i < l0vec.size(); ++i) {
+      if (Zscore[i] > 0.5) {
+        banned.push_back(i);
+      }
+    }
+    // delete outliers
+    for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin();
+         it != banned.rend(); ++it) {
+      l0vec.erase(l0vec.begin() + (*it));
     }
   }
-  // delete outliers
-  for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin();
-       it != banned.rend(); ++it) {
-    l0vec.erase(l0vec.begin() + (*it));
-  }
-
-  Statistics statsl = getStatistics(l0vec);
-  outfile << "7  " << std::setprecision(4) << std::fixed << (statsl.mean);
-  Zscore = getZscore(t0vec);
-  banned.clear();
-  for (size_t i = 0; i < t0vec.size(); ++i) {
-    if (Zscore[i] > 0.5) {
-      banned.push_back(i);
+  if (useTimeOffset) {
+    Statistics stats = getStatistics(l0vec);
+    L0 = stats.mean * 0.01;
+    std::vector<double> Zscore = getZscore(t0vec);
+    std::vector<size_t> banned;
+    for (size_t i = 0; i < t0vec.size(); ++i) {
+      if (Zscore[i] > 0.5) {
+        banned.push_back(i);
+      }
+    }
+    // delete outliers
+    for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin();
+         it != banned.rend(); ++it) {
+      t0vec.erase(t0vec.begin() + (*it));
     }
   }
-  // delete outliers
-  for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin();
-       it != banned.rend(); ++it) {
-    t0vec.erase(t0vec.begin() + (*it));
-  }
-  Statistics statst = getStatistics(t0vec);
-  outfile << std::setw(13) << std::setprecision(3) << statst.mean << std::endl;
+  Statistics stats = getStatistics(t0vec);
+  T0 = stats.mean;
+  useL0 = false;
+  useTimeOffset = false;
+}
+  L0 *= 100.;
+  outfile << "7  " << std::setprecision(4) << std::fixed << L0;
+  outfile << std::setw(13) << std::setprecision(3) << T0 << std::endl;
   outfile << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
              "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
              "     UpZ" << std::endl;
@@ -1113,7 +1128,7 @@ void SCDCalibratePanels::exec() {
     IPeak &peak = peaksWs->getPeak(i);
     instrument =
           peak.getInstrument();
-    LoadISawDetCal(instrument, bankNames, statst.mean, statsl.mean, DetCalFileName,
+    LoadISawDetCal(instrument, bankNames, T0, L0, DetCalFileName,
                    "bank");
     peak.setInstrument(instrument);
     peak.findDetector();
