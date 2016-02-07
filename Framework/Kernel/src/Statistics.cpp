@@ -11,6 +11,15 @@
 #include <stdexcept>
 #include <functional>
 
+#include <functional>
+
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/median.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+
 namespace Mantid {
 namespace Kernel {
 
@@ -44,7 +53,7 @@ double getMedian(const vector<TYPE> &data, const size_t num_data,
   if (num_data == 1)
     return static_cast<double>(*(data.begin()));
 
-  bool is_even = ((num_data % 2) == 0);
+  bool is_even = ((num_data & 1) == 0);
   if (is_even) {
     double left = 0.0;
     double right = 0.0;
@@ -80,7 +89,8 @@ double getMedian(const vector<TYPE> &data, const size_t num_data,
       return static_cast<double>(*(temp.begin() + num_data / 2));
     }
   }
-}
+  }
+
 /**
  * There are enough special cases in determining the Z score where it useful to
  * put it in a single function.
@@ -150,36 +160,41 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
   if (num_data == 0) {           // don't do anything
     return stats;
   }
-
   // calculate the mean if this or the stddev is requested
   const bool stddev = ((flags & StatOptions::UncorrectedStdDev) ||
                        (flags & StatOptions::CorrectedStdDev));
-  if ((flags & StatOptions::Mean) || stddev) {
-    const TYPE sum = std::accumulate(data.begin(), data.end(),
-                                     static_cast<TYPE>(0), std::plus<TYPE>());
-    stats.mean = static_cast<double>(sum) / (static_cast<double>(num_data));
-    if (stddev) {
-      // calculate the standard deviation, min, max
-      stats.minimum = stats.mean;
-      stats.maximum = stats.mean;
-      double stddev = 0.;
-      for (auto it = data.cbegin(); it != data.cend(); ++it) {
-        double temp = static_cast<double>(*it);
-        stddev += ((temp - stats.mean) * (temp - stats.mean));
-        if (temp > stats.maximum)
-          stats.maximum = temp;
-        if (temp < stats.minimum)
-          stats.minimum = temp;
-      }
-      size_t ndofs =
-          (flags & StatOptions::CorrectedStdDev) ? num_data - 1 : num_data;
-      stats.standard_deviation = sqrt(stddev / (static_cast<double>(ndofs)));
+  if (stddev) {
+    using namespace boost::accumulators;
+    accumulator_set<TYPE,
+                    features<tag::min, tag::max, tag::mean, tag::variance>> acc;
+    for (auto &value : data) {
+      acc(value);
     }
+    stats.minimum = min(acc);
+    stats.maximum = max(acc);
+    stats.mean = mean(acc);
+    double var = variance(acc);
+
+    if (flags & StatOptions::CorrectedStdDev) {
+      double ndofs = static_cast<double>(data.size());
+      var *= ndofs / (ndofs - 1.0);
+    }
+    stats.standard_deviation = std::sqrt(var);
+
+  } else if (flags & StatOptions::Mean) {
+    using namespace boost::accumulators;
+    accumulator_set<TYPE, features<tag::mean>> acc;
+    for (auto &value : data) {
+      acc(value);
+    }
+    stats.mean = mean(acc);
   }
+
   // calculate the median if requested
   if (flags & StatOptions::Median) {
     stats.median = getMedian(data, num_data, flags & StatOptions::SortedData);
   }
+
   return stats;
 }
 
