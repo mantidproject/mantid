@@ -128,6 +128,12 @@ class EnggCalibrate(PythonAlgorithm):
         prog.report('Fitting parameters for the focused run')
         difc, zero, fitted_peaks = self._fit_params(focussed_ws, expectedPeaksD)
 
+        self.log().information("Fitted {0} peaks. Resulting difc: {1}, tzero: {2}".
+                               format(fitted_peaks.rowCount(), difc, zero))
+        self.log().information("Peaks fitted: {0}, centers in ToF: {1}".
+                               format(fitted_peaks.column("dSpacing"),
+                                      fitted_peaks.column("X0")))
+
         self._produce_outputs(difc, zero, fitted_peaks)
 
     def _fit_params(self, focused_ws, expected_peaks_d):
