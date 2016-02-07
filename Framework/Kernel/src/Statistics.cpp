@@ -12,7 +12,6 @@
 #include <functional>
 
 #include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
@@ -162,8 +161,7 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
                        (flags & StatOptions::CorrectedStdDev));
   if (stddev) {
     using namespace boost::accumulators;
-    accumulator_set<TYPE,
-                    features<tag::min, tag::max, tag::mean, tag::variance>> acc;
+    accumulator_set<TYPE, features<tag::min, tag::max, tag::variance>> acc;
     for (auto &value : data) {
       acc(value);
     }
