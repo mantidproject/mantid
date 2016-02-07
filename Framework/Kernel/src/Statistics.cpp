@@ -86,7 +86,7 @@ double getMedian(const vector<TYPE> &data, const size_t num_data,
       return static_cast<double>(*(temp.begin() + num_data / 2));
     }
   }
-  }
+}
 
 /**
  * There are enough special cases in determining the Z score where it useful to
