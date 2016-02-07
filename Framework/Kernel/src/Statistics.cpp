@@ -188,7 +188,8 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
 
   // calculate the median if requested
   if (flags & StatOptions::Median) {
-    statistics.median = getMedian(data, num_data, flags & StatOptions::SortedData);
+    statistics.median =
+        getMedian(data, num_data, flags & StatOptions::SortedData);
   }
 
   return statistics;
