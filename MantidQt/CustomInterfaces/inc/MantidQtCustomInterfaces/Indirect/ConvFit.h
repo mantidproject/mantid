@@ -62,8 +62,12 @@ private:
   QString minimizerString(QString outputName) const;
   QStringList getFunctionParameters(QString);
   void updatePlotOptions();
-  void addParametersToTree(const QStringList &parameters, const QString &currentFitFunction);
-  void addTemperatureLogs(MatrixWorkspace_sptr resultWs, WorkspaceGroup_sptr groupWs, const std::string temperature);
+  void addParametersToTree(const QStringList &parameters,
+                           const QString &currentFitFunction);
+  void addSampleLogsToWorkspace(const std::string workspaceName,
+                                const std::string logName,
+                                const std::string logText,
+                                const std::string logType);
 
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;

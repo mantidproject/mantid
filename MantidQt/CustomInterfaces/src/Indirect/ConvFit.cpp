@@ -228,17 +228,12 @@ void ConvFit::setup() {
 void ConvFit::run() {
   // Get input from interface
   const auto useTies = m_uiForm.ckTieCentres->isChecked();
-
   const auto func = createFunction(useTies);
   const auto function = std::string(func->asString());
-  const auto stX = m_properties["StartX"]->valueText().toStdString();
-  const auto enX = m_properties["EndX"]->valueText().toStdString();
   m_runMin = m_uiForm.spSpectraMin->value();
   m_runMax = m_uiForm.spSpectraMax->value();
   const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
   const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
-  const auto maxIterations =
-      static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
   // Construct expected name
   m_baseName = QString::fromStdString(m_cfInputWS->getName());
@@ -264,14 +259,14 @@ void ConvFit::run() {
   cfs->setProperty("Function", function);
   cfs->setProperty("BackgroundType",
                    m_uiForm.cbBackground->currentText().toStdString());
-  cfs->setProperty("StartX", stX);
-  cfs->setProperty("EndX", enX);
+  cfs->setProperty("StartX", m_properties["StartX"]->valueText().toStdString());
+  cfs->setProperty("EndX", m_properties["EndX"]->valueText().toStdString());
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("Convolve", true);
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
-  cfs->setProperty("MaxIterations", maxIterations);
+  cfs->setProperty("MaxIterations", static_cast<int>(m_dblManager->value(m_properties["MaxIterations"])));
 
   // Add to batch alg runner and execute
   m_batchAlgoRunner->addAlgorithm(cfs);
@@ -327,39 +322,34 @@ void ConvFit::algorithmComplete(bool error) {
     }
   }
 
-  // Obtain WorkspaceGroup from ADS
+  // Name for GroupWorkspace
   const auto groupName = m_baseName.toStdString() + "_Workspaces";
-  WorkspaceGroup_sptr groupWs =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
 
-  // Log for Resolution to result Ws
-  auto resLog = AlgorithmManager::Instance().create("AddSampleLog");
-  resLog->setProperty("Workspace", resultWs->getName());
-  resLog->setProperty("LogName", "resolution_filename");
-  resLog->setProperty("LogText",
-                      m_uiForm.dsResInput->getCurrentDataName().toStdString());
-  resLog->setProperty("LogType", "String");
-  m_batchAlgoRunner->addAlgorithm(resLog);
+  // Add Sample logs for ResolutionFiles
+  const auto resFile = m_uiForm.dsResInput->getCurrentDataName().toStdString();
+  addSampleLogsToWorkspace(resultName, "resolution_filename", resFile,
+                           "String");
+  addSampleLogsToWorkspace(groupName, "resolution_filename", resFile, "String");
 
-  // Log for resolution to group Ws
-  auto resLogGrp = AlgorithmManager::Instance().create("AddSampleLog");
-  resLogGrp->setProperty("Workspace", groupWs->getName());
-  resLogGrp->setProperty("LogName", "resolution_filename");
-  resLogGrp->setProperty(
-      "LogText", m_uiForm.dsResInput->getCurrentDataName().toStdString());
-  resLogGrp->setProperty("LogType", "String");
-  m_batchAlgoRunner->addAlgorithm(resLogGrp);
-
-  // Handle Temperature logs
+  // Check if temperature is used and is valid
   if (m_uiForm.ckTempCorrection->isChecked()) {
-    QString temperature = m_uiForm.leTempCorrection->text();
-    double temp = 0.0;
+    const QString temperature = m_uiForm.leTempCorrection->text();
+    double temperature_dbl = 0.0;
     if (temperature.toStdString().compare("") != 0) {
-      temp = temperature.toDouble();
+		temperature_dbl = temperature.toDouble();
     }
 
-    if (temp != 0.0) {
-		addTemperatureLogs(resultWs, groupWs, temperature.toStdString());
+    if (temperature_dbl != 0.0) {
+      // Add Sample logs for temperature
+      const auto temperatureStr = temperature.toStdString();
+      addSampleLogsToWorkspace(resultName, "temperature_correction", "true",
+                               "String");
+      addSampleLogsToWorkspace(groupName, "temperature_correction", "true",
+                               "String");
+      addSampleLogsToWorkspace(resultName, "temperature_value", temperatureStr,
+                               "Number");
+      addSampleLogsToWorkspace(groupName, "temperature_value", temperatureStr,
+                               "Number");
     }
   }
   m_batchAlgoRunner->executeBatchAsync();
@@ -367,49 +357,24 @@ void ConvFit::algorithmComplete(bool error) {
 }
 
 /**
- * Adds the temperature log algorithms to the batch algorithm runner
- * @param resultWs		:: A Matrix Workspace that contains result data from
- * a sequential fit
- * @param groupWs		:: A GroupWorkspace that contains the fitted
- * data
- * @param temperature	:: The value of temperature as a string
+ * Sets up and add an instance of the AddSampleLog algorithm to the batch
+ * algorithm runner
+ * @param workspaceName	:: The name of the workspace to add the log to
+ * @param logName		:: The title of the log input
+ * @param logText		:: The information to match the title
+ * @param logType		:: The type of information (String, Number)
  */
-void ConvFit::addTemperatureLogs(MatrixWorkspace_sptr resultWs,
-                                 WorkspaceGroup_sptr groupWs,
-                                 const std::string temperature) {
-  /*==========THIS COULD BE DONE AS A TEMPLATE (REDUCES CODE
-   * DUPLICATION)==============*/
-  // Log for temp value in result Ws
-  auto valMtx = AlgorithmManager::Instance().create("AddSampleLog");
-  valMtx->setProperty("Workspace", resultWs->getName());
-  valMtx->setProperty("LogName", "temperature_value");
-  valMtx->setProperty("LogText", temperature);
-  valMtx->setProperty("LogType", "Number");
-  m_batchAlgoRunner->addAlgorithm(valMtx);
+void ConvFit::addSampleLogsToWorkspace(const std::string workspaceName,
+                                       const std::string logName,
+                                       const std::string logText,
+                                       const std::string logType) {
 
-  // Log for temp bool in result Ws
-  auto corrMtx = AlgorithmManager::Instance().create("AddSampleLog");
-  corrMtx->setProperty("Workspace", resultWs->getName());
-  corrMtx->setProperty("LogName", "temperature_correction");
-  corrMtx->setProperty("LogText", "true");
-  corrMtx->setProperty("LogType", "String");
-  m_batchAlgoRunner->addAlgorithm(corrMtx);
-
-  // Log for temp value in group Ws
-  auto valGrp = AlgorithmManager::Instance().create("AddSampleLog");
-  valGrp->setProperty("Workspace", groupWs->getName());
-  valGrp->setProperty("LogName", "temperature_value");
-  valGrp->setProperty("LogText", temperature);
-  valGrp->setProperty("LogType", "Number");
-  m_batchAlgoRunner->addAlgorithm(valGrp);
-
-  // Log for temp bool in group Ws
-  auto corrGrp = AlgorithmManager::Instance().create("AddSampleLog");
-  corrGrp->setProperty("Workspace", groupWs->getName());
-  corrGrp->setProperty("LogName", "temperature_correction");
-  corrGrp->setProperty("LogText", "true");
-  corrGrp->setProperty("LogType", "String");
-  m_batchAlgoRunner->addAlgorithm(corrGrp);
+  auto addSampleLog = AlgorithmManager::Instance().create("AddSampleLog");
+  addSampleLog->setProperty("Workspace", workspaceName);
+  addSampleLog->setProperty("LogName", logName);
+  addSampleLog->setProperty("LogText", logText);
+  addSampleLog->setProperty("LogType", logType);
+  m_batchAlgoRunner->addAlgorithm(addSampleLog);
 }
 
 /**
