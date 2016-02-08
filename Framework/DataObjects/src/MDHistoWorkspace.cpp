@@ -514,10 +514,10 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
                                    std::vector<signal_t> &y,
                                    std::vector<signal_t> &e) const {
   // TODO: Don't use a fixed number of points later
-  size_t numPoints = 500;
+  const size_t numPoints = 500;
 
-  VMD step = (end - start) / double(numPoints - 1);
-  double stepLength = step.norm();
+  const VMD step = (end - start) / double(numPoints - 1);
+  const auto stepLength = step.norm();
 
   // These will be the curve as plotted
   x.clear();
@@ -528,7 +528,7 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
     VMD coord = start + step * double(i);
 
     // Get index of bin at this coordinate
-    size_t linearIndex = this->getLinearIndexAtCoord(coord.getBareArray());
+    const auto linearIndex = this->getLinearIndexAtCoord(coord.getBareArray());
     if (linearIndex < m_length) {
 
       if (!this->getIsMaskedAt(linearIndex)) {
@@ -550,8 +550,8 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
       // Record the position along the line
       x.push_back(static_cast<coord_t>(stepLength * double(i)));
       // Point is outside the workspace. Add NANs
-      y.push_back(std::numeric_limits<double>::quiet_NaN());
-      e.push_back(std::numeric_limits<double>::quiet_NaN());
+      y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+      e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
     }
   }
 }
@@ -591,7 +591,7 @@ void MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
 
   // Unit-vector of the direction
   VMD dir = end - start;
-  coord_t length = dir.normalize();
+  const auto length = dir.normalize();
 
 // Vector with +1 where direction is positive, -1 where negative
 #define sgn(x) ((x < 0) ? -1.0f : ((x > 0.) ? 1.0f : 0.0f))
@@ -599,7 +599,7 @@ void MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
   for (size_t d = 0; d < nd; d++) {
     dirSign[d] = sgn(dir[d]);
   }
-  size_t BADINDEX = size_t(-1);
+  const size_t BADINDEX = size_t(-1);
 
   // Dimensions of the workspace
   boost::scoped_array<size_t> index(new size_t[nd]);
@@ -610,7 +610,7 @@ void MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
     numBins[d] = dim->getNBins();
   }
 
-  std::set<coord_t> boundaries =
+  const std::set<coord_t> boundaries =
       getBinBoundariesOnLine(start, end, nd, dir, length);
 
   if (boundaries.empty()) {
@@ -624,7 +624,7 @@ void MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
   } else {
     // Get the first point
     std::set<coord_t>::iterator it;
-    it = boundaries.begin();
+    it = boundaries.cbegin();
 
     coord_t lastLinePos = *it;
     VMD lastPos = start + (dir * lastLinePos);
@@ -632,7 +632,7 @@ void MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
 
     ++it;
 
-    for (; it != boundaries.end(); ++it) {
+    for (; it != boundaries.cend(); ++it) {
       // This is our current position along the line
       coord_t linePos = *it;
       x.push_back(linePos);
@@ -644,7 +644,7 @@ void MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
       VMD middle = (pos + lastPos) * 0.5;
 
       // Find the signal in this bin
-      size_t linearIndex = this->getLinearIndexAtCoord(middle.getBareArray());
+      const auto linearIndex = this->getLinearIndexAtCoord(middle.getBareArray());
       if (linearIndex < m_length) {
 
         // Is the signal here masked?
@@ -652,7 +652,7 @@ void MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
           y.push_back(MDMaskValue);
           e.push_back(MDMaskValue);
         } else {
-          signal_t normalizer = getNormalizationFactor(normalize, linearIndex);
+          auto normalizer = getNormalizationFactor(normalize, linearIndex);
           // And add the normalized signal/error to the list too
           auto signal = this->getSignalAt(linearIndex) * normalizer;
           if (boost::math::isinf(signal)) {
