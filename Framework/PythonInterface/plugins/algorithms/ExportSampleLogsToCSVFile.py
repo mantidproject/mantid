@@ -20,6 +20,8 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
     _maxtime = None
     _starttime = None
     _localtimediff = None
+    _writeHeaderToSeparateFile = True
+    _append = False
 
     def __init__(self):
         """ Initialization
@@ -27,8 +29,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         """
         PythonAlgorithm.__init__(self)
 
-        self._writeHeaderToSeparateFile = True
-        self._append = False
 
         return
 
