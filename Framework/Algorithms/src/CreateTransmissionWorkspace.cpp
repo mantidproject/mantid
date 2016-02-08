@@ -252,8 +252,7 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
         stitchingDelta.is_initialized()) {
       const std::vector<double> params =
           boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-              stitchingEnd.get())
-              .convert_to_container<std::vector<double>>();
+              stitchingEnd.get()).convert_to_container<std::vector<double>>();
       stitch1DAlg->setProperty("Params", params);
     } else if (stitchingDelta.is_initialized()) {
       const double delta = stitchingDelta.get();
