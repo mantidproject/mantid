@@ -1507,7 +1507,9 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
 void ConvFit::fitFunctionSelected(const QString &functionName) {
   // If resolution file has been entered update default FWHM to resolution
   if (m_uiForm.dsResInput->getCurrentDataName().compare("") != 0) {
-    m_defaultParams["FWHM"] = getInstrumentResolution(m_cfInputWS->getName());
+    const auto res = getInstrumentResolution(m_cfInputWS->getName());
+    m_defaultParams["FWHM"] = res;
+    m_defaultParams["default_FWHM"] = res;
   }
   // If the previous fit was One Lorentzian and the new fit is Two Lorentzian
   // preserve the values of One Lorentzian Fit
@@ -1642,6 +1644,7 @@ ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
   map.insert("Intensity", 1.0);
   map.insert("Radius", 1.0);
   map.insert("tau", 1.0);
+  map.insert("default_Amplitude", 1.0);	// Used in the case of 2L fit
   return map;
 }
 
@@ -1665,11 +1668,10 @@ QMap<QString, double> ConvFit::addLorentzianFitToDeafultQMap(
 /**
 * Populates a map with ALL parameters names and values for the current fit
 * function
-* @param map			:: A QMap of any parameters that have non zero
-* default values
-* @param parameters		:: A QStringList of all the parameters for the current
+* @param map :: A QMap of any parameters that have non zero default values
+* @param parameters	:: A QStringList of all the parameters for the current
 * fit function
-* @param fitFunction	:: The name of the current fit function
+* @param fitFunction :: The name of the current fit function
 * @return a QMap populated with name, value pairs for parameters where name =
 * fitFunction.parametername and value is either from the default map or 0
 */
@@ -1687,7 +1689,12 @@ ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
       QString fullPropName = fitFuncName + "." + qStrParam;
       if (fullMap.contains(fullPropName)) {
         fullPropName = "Lorentzian 2." + qStrParam;
-        fullMap.insert(fullPropName, 0);
+        double value = 0;
+        const auto defaultParam = "default_" + qStrParam;
+        if (defaultMap.contains(defaultParam)) {
+          value = defaultMap[defaultParam];
+        }
+        fullMap.insert(fullPropName, value);
       } else {
         if (defaultMap.contains(qStrParam)) {
           fullMap.insert(fullPropName, defaultMap[qStrParam]);
