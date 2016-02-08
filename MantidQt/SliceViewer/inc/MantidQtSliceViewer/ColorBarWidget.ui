@@ -92,8 +92,11 @@
      </item>
      <item>
       <widget class="QCheckBox" name="autoScale">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This flag signals that the color scale range should be set automatically to the current slice range when a workspace is loaded. Note that auto scaling will be applied when a workspace is loaded for the very first time. This option is mainly relevant for live data workspaces, which are continuously being updated and reloaded.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
-        <string>Autoscale</string>
+        <string>Autoscale on load</string>
        </property>
       </widget>
      </item>

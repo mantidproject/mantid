@@ -7,6 +7,8 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include <boost/make_shared.hpp>
 
+using namespace MantidQt::SliceViewer;
+
 namespace {
 
 struct SliceDefinition {
