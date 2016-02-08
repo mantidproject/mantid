@@ -4,6 +4,7 @@ set ( SRC_FILES
     src/CatalogSearch.cpp
     src/CatalogSelector.cpp
     src/CheckboxHeader.cpp
+    src/ColorBarWidget.cpp
     src/DataSelector.cpp
     src/DiagResults.cpp
     src/DoubleDialogEditor.cpp
@@ -56,6 +57,7 @@ set ( SRC_FILES
 set ( MOC_FILES 
     inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
     inc/MantidQtMantidWidgets/CheckboxHeader.h
+    inc/MantidQtMantidWidgets/ColorBarWidget.h
     inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
     inc/MantidQtMantidWidgets/DoubleDialogEditor.h
@@ -120,6 +122,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/DataSelector.ui
     inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/CatalogSelector.ui
+    inc/MantidQtMantidWidgets/ColorBarWidget.ui
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
