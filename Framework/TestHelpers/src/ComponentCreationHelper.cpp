@@ -108,7 +108,7 @@ Object_sptr createCuboid(double x_side_length, double y_side_length,
 */
 boost::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders() {
   boost::shared_ptr<CompAssembly> bank =
-      boost::shared_ptr<CompAssembly>(new CompAssembly("BankName"));
+      boost::make_shared<CompAssembly>("BankName");
   // One object
   Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
       0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");

@@ -105,7 +105,7 @@ public:
 
     Mantid::API::IMDWorkspace_sptr testWS = createTestMDWorkspace();
     auto mdDomain =
-        boost::shared_ptr<FunctionDomainMD>(new FunctionDomainMD(testWS));
+        boost::make_shared<FunctionDomainMD>(testWS);
     FunctionValues output(*mdDomain);
     crossSection->setWorkspace(testWS);
     crossSection->setAttributeValue("ConvAtt0", 100.3);

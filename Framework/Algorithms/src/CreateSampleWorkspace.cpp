@@ -474,7 +474,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
   testInst->setReferenceFrame(
-      boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+      boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);

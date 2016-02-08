@@ -10,6 +10,7 @@
 #include "MantidKernel/Strings.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
@@ -169,7 +170,7 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
       // removed), see header for details.
       m_computeResources.insert(std::make_pair(
           name,
-          boost::shared_ptr<RemoteJobManager>(new RemoteJobManager(elem))));
+          boost::make_shared<RemoteJobManager>(elem)));
     }
   }
 }

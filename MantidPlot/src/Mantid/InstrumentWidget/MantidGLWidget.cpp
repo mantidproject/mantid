@@ -267,7 +267,7 @@ void MantidGLWidget::saveToFile(const QString & filename)
  */
 void MantidGLWidget::resetWidget()
 {
-  //setActorCollection(boost::shared_ptr<GLActorCollection>(new GLActorCollection()));
+  //setActorCollection(boost::make_shared<GLActorCollection>());
 }
 
 /**

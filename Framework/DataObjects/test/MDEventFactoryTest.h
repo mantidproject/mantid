@@ -41,7 +41,7 @@ public:
 
   void test_box_factory() {
     BoxController_sptr bc =
-        boost::shared_ptr<BoxController>(new BoxController(4));
+        boost::make_shared<BoxController>(4);
 
     IMDNode *Box = MDEventFactory::createBox(
         4, MDEventFactory::BoxType::MDBoxWithLean, bc);
