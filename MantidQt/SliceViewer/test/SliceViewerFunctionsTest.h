@@ -101,7 +101,7 @@ public:
   void test_that_slice_point_which_is_partially_in_the_workspace_is_detected_as_not_being_in_the_workspace() {
     std::string sliceLiesWithinWorkspaceBoundary = "partially";
     auto liesInside = do_test_slice_lies_in_workspace_boundaries(sliceLiesWithinWorkspaceBoundary);
-    TSM_ASSERT("Slice definition should not lie within the workspace boundary", !liesInside);
+    TSM_ASSERT("Slice definition should lie within the workspace boundary", liesInside);
   }
 
 };
