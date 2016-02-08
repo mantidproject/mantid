@@ -685,7 +685,7 @@ public:
     makeMatrix(mat);
     mat.normVert();
     const std::string expected("0.137361 0.549442 0.824163 0.408248 0.408248 "
-                         "0.816497 0.57735 0.11547 -0.80829 ");
+                               "0.816497 0.57735 0.11547 -0.80829 ");
     TS_ASSERT_EQUALS(mat.str(), expected);
     TS_ASSERT_DELTA(std::sqrt(mat[0][0] * mat[0][0] + mat[0][1] * mat[0][1] +
                               mat[0][2] * mat[0][2]),

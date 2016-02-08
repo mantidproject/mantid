@@ -145,8 +145,8 @@ public:
   void swapRows(const size_t, const size_t); ///< Swap rows (first V index)
   void swapCols(const size_t, const size_t); ///< Swap cols (second V index)
 
-  T Invert(); ///< LU inversion routine
-  void averSymmetric(); ///< make Matrix symmetric
+  T Invert();                                      ///< LU inversion routine
+  void averSymmetric();                            ///< make Matrix symmetric
   int Diagonalise(Matrix<T> &, Matrix<T> &) const; ///< (only Symmetric matrix)
   void sortEigen(Matrix<T> &);                     ///< Sort eigenvectors
   Matrix<T> Tprime() const;                        ///< Transpose the matrix
