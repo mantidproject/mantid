@@ -1,9 +1,16 @@
 #include "MantidVatesAPI/PresenterUtilities.h"
+#include "MantidKernel/Logger.h"
 #include <vtkPVClipDataSet.h>
 #include <vtkBox.h>
 #include <chrono>
 #include <ctime>
 #include <algorithm>
+
+namespace
+{
+/// Static logger
+Mantid::Kernel::Logger g_log_presenter_utilities("PresenterUtilities");
+}
 
 namespace Mantid
 {
@@ -43,8 +50,19 @@ void applyCOBMatrixSettingsToVtkDataSet(
     try {
         presenter->makeNonOrthogonal(dataSet, std::move(workspaceProvider));
     } catch (std::invalid_argument &e) {
+        std::string error = e.what();
+        g_log_presenter_utilities.warning()
+            << "PresenterUtilities: Workspace does not have correct "
+               "information to "
+            << "plot non-orthogonal axes: " << error;
         // Add the standard change of basis matrix and set the boundaries
         presenter->setDefaultCOBandBoundaries(dataSet);
+    } catch (...) {
+        g_log_presenter_utilities.warning()
+            << "PresenterUtilities: Workspace does not have correct "
+               "information to "
+            << "plot non-orthogonal axes. Non-orthogonal axes features require "
+               "three dimensions.";
     }
 }
 

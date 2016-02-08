@@ -22,22 +22,31 @@ Note that it is currently not possible to save out workspaces with more than thr
 Usage
 -----
 
-.. testcode::
+.. testcode:: SaveMDWorkspaceToVTK
+  
+    import os
+    signalInput = [i for i in range(1,28)]
+    errorInput = [1 for i in range(1,28)]
+    
+    ws = CreateMDHistoWorkspace(SignalInput=signalInput, ErrorInput=errorInput, Dimensionality='3',
+                                Extents='-1,1,-1,1,-1,1', NumberOfBins='3,3,3', Names='A,B,C', Units='U,T,W')
+                                
+    ws2 = CreateMDHistoWorkspace(SignalInput='1,2,3,4,5,6,7,8,9', ErrorInput='1,1,1,1,1,1,1,1,1', Dimensionality='2',
+                                Extents='-1,1,-1,1', NumberOfBins='3,3', Names='A,B', Units='U,T')                            
+  
+    savefile = os.path.join(config["default.savedirectory"], "mdhws")
+    SaveMDWorkspaceToVTK(InputWorkspace = ws, Filename = savefile)
+    
+    print "File created:", os.path.exists(savefile)
 
-  import os
-  signalInput = [i for i in range(1,28)]
-  errorInput = [1 for i in range(1,28)]
+.. testoutput:: SaveMDWorkspaceToVTK
 
-  # Create a sample workspace
-  ws = CreateMDHistoWorkspace(SignalInput=signalInput, ErrorInput=errorInput, Dimensionality='3',
-                            Extents='-1,1,-1,1,-1,1', NumberOfBins='3,3,3', Names='A,B,C', Units='U,T,W')
-  # Save the file out 
-  savefile = os.path.join(config["default.savedirectory"], "mdhws")
-  SaveMDWorkspaceToVTK(InputWorkspace = ws, Filename = savefile)
+    File created: True
 
-.. testcleanup::
 
-  os.remove(filePath)
+.. testcleanup:: SaveMDWorkspaceToVTK
+
+    os.remove(savefile)
   
 .. categories::
 
