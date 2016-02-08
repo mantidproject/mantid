@@ -273,8 +273,8 @@ boost::optional<T> CreateTransmissionWorkspaceAuto::checkForOptionalDefault(
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
     if (defaults.size() != 0) {
-      auto default = static_cast<T>(defaults[0]);
-      return boost::make_optional<T>(default);
+      auto defaultValue = static_cast<T>(defaults[0]);
+      return boost::make_optional<T>(defaultValue);
     } else {
       return boost::optional<T>();
     }
