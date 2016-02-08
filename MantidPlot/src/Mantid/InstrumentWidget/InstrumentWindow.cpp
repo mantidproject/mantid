@@ -38,10 +38,14 @@ std::string InstrumentWindow::saveToProject(ApplicationWindow *app) {
   TSVSerialiser tsv;
   tsv.writeRaw("<instrumentwindow>");
   tsv.writeLine("WorkspaceName")
-      << m_instrumentWidget->getWorkspaceName().toStdString();
+      << m_instrumentWidget->getWorkspaceNameStdString();
   tsv.writeRaw(app->windowGeometryInfo(this));
   tsv.writeRaw("</instrumentwindow>");
   return tsv.outputLines();
+}
+
+void InstrumentWindow::selectTab(int tab) {
+  return m_instrumentWidget->selectTab(tab);
 }
 
 /**
@@ -52,7 +56,7 @@ std::string InstrumentWindow::saveToProject(ApplicationWindow *app) {
 void InstrumentWindow::preDeleteHandle(
     const std::string &ws_name,
     const boost::shared_ptr<Workspace> workspace_ptr) {
-  if (ws_name == m_instrumentWidget->getWorkspaceName().toStdString()) {
+  if (m_instrumentWidget->hasWorkspace(ws_name)) {
     confirmClose(false);
     close();
     return;
@@ -60,49 +64,20 @@ void InstrumentWindow::preDeleteHandle(
   Mantid::API::IPeaksWorkspace_sptr pws =
       boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
   if (pws) {
-    m_instrumentWidget->getSurface()->deletePeaksWorkspace(pws);
-    m_instrumentWidget->updateInstrumentView();
+    m_instrumentWidget->deletePeaksWorkspace(pws);
     return;
   }
 }
 
 void InstrumentWindow::afterReplaceHandle(
     const std::string &wsName, const boost::shared_ptr<Workspace> workspace) {
-  // Replace current workspace
-  if (wsName == m_instrumentWidget->getWorkspaceName().toStdString()) {
-    if (m_instrumentWidget->getInstrumentActor()) {
-      // Check if it's still the same workspace underneath (as well as having
-      // the same name)
-      auto matrixWS =
-          boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
-      bool sameWS = false;
-      try {
-        sameWS = (matrixWS ==
-                  m_instrumentWidget->getInstrumentActor()->getWorkspace());
-      } catch (std::runtime_error &) {
-        // Carry on, sameWS should stay false
-      }
-
-      // try to detect if the instrument changes (unlikely if the workspace
-      // hasn't, but theoretically possible)
-      bool resetGeometry =
-          matrixWS->getInstrument()->getNumberDetectors() !=
-          m_instrumentWidget->getInstrumentActor()->ndetectors();
-
-      // if workspace and instrument don't change keep the scaling
-      if (sameWS && !resetGeometry) {
-        m_instrumentWidget->getInstrumentActor()->updateColors();
-      } else {
-        m_instrumentWidget->resetInstrument(resetGeometry);
-      }
-    }
-  }
+  m_instrumentWidget->handleWorkspaceReplacement(wsName, workspace);
 }
 
 void InstrumentWindow::renameHandle(const std::string &oldName,
                                     const std::string &newName) {
-  if (oldName == m_instrumentWidget->getWorkspaceName().toStdString()) {
-    m_instrumentWidget->renameWorkspace(QString::fromStdString(newName));
+  if (m_instrumentWidget->hasWorkspace(oldName)) {
+    m_instrumentWidget->renameWorkspace(newName);
     setWindowTitle(QString("Instrument - ") +
                    m_instrumentWidget->getWorkspaceName());
   }

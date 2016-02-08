@@ -2043,31 +2043,27 @@ InstrumentWidget* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   //Need a new window
   const QString windowName(QString("InstrumentWindow:") + wsName);
-  InstrumentWindow *insWin = new InstrumentWindow(wsName, QString("Instrument"), appWindow(), windowName);
-
+  
   try
   {
-    insWin->getInstrumentWidget()->init();
+    InstrumentWindow *insWin = new InstrumentWindow(
+        wsName, QString("Instrument"), appWindow(), windowName);
+
+    insWin->getInstrumentWidget()->selectTab(tab);
+
+    appWindow()->addMdiSubWindow(insWin);
+
+    QApplication::restoreOverrideCursor();
+    return insWin->getInstrumentWidget();
   }
   catch(const std::exception& e)
   {
     QApplication::restoreOverrideCursor();
     QString errorMessage = "Instrument view cannot be created:\n\n" + QString(e.what());
     QMessageBox::critical(appWindow(),"MantidPlot - Error",errorMessage);
-    if (insWin)
-    {
-      appWindow()->closeWindow(insWin);
-	  insWin->close();
-    }
+
     return NULL;
   }
-
-  insWin->getInstrumentWidget()->selectTab(tab);
-
-  appWindow()->addMdiSubWindow(insWin);
-
-  QApplication::restoreOverrideCursor();
-  return insWin->getInstrumentWidget();
 }
 
 MdiSubWindow *MantidUI::getInstrumentWindow(const QString & wsName, int tab)

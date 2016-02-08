@@ -26,6 +26,7 @@ public:
                        const int fileVersion);
   std::string saveToProject(ApplicationWindow *app);
   InstrumentWidget *getInstrumentWidget() { return m_instrumentWidget; }
+  void selectTab(int tab);
 
 private:
   /// ADS notification handlers

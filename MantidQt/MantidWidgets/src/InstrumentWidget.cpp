@@ -5,14 +5,14 @@
 #include "InstrumentWidgetPickTab.h"
 #include "InstrumentWidgetRenderTab.h"
 #include "InstrumentWidgetTreeTab.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Workspace.h"
 #include "PanelsSurface.h"
 #include "Projection3D.h"
 #include "SimpleWidget.h"
 #include "UnwrappedCylinder.h"
 #include "UnwrappedSphere.h"
 #include "XIntegrationControl.h"
-
-#include "MantidAPI/IPeaksWorkspace.h"
 
 #include <Poco/ActiveResult.h>
 
@@ -74,7 +74,10 @@ public:
 /**
  * Constructor.
  */
-InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent)
+InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
+                                   bool resetGeometry, bool autoscaling,
+                                   double scaleMin, double scaleMax,
+                                   bool setDefaultView)
     : QWidget(parent), WorkspaceObserver(), m_InstrumentDisplay(nullptr),
       m_simpleDisplay(nullptr), m_workspaceName(wsName),
       m_instrumentActor(nullptr), m_surfaceType(FULL3D),
@@ -173,6 +176,8 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent)
   setAcceptDrops(true);
 
   setWindowTitle(QString("Instrument - ") + m_workspaceName);
+
+  init(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView);
 }
 
 /**
@@ -1094,6 +1099,12 @@ void InstrumentWidget::updateInstrumentDetectors() {
   QApplication::restoreOverrideCursor();
 }
 
+void InstrumentWidget::deletePeaksWorkspace(
+    Mantid::API::IPeaksWorkspace_sptr pws) {
+  this->getSurface()->deletePeaksWorkspace(pws);
+  updateInstrumentView();
+}
+
 /**
  * Choose which widget to use.
  * @param yes :: True to use the OpenGL one or false to use the Simple
@@ -1178,4 +1189,35 @@ QString InstrumentWidget::getInstrumentSettingsGroupName() const {
   return QString::fromAscii(InstrumentWidgetSettingsGroup) + "/" +
          QString::fromStdString(
              getInstrumentActor()->getInstrument()->getName());
+}
+
+void InstrumentWidget::handleWorkspaceReplacement(
+    const std::string &wsName, const boost::shared_ptr<Workspace> workspace) {
+  // Replace current workspace
+  if (hasWorkspace(wsName)) {
+    if (m_instrumentActor) {
+      // Check if it's still the same workspace underneath (as well as having
+      // the same name)
+      auto matrixWS =
+          boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
+      bool sameWS = false;
+      try {
+        sameWS = (matrixWS == m_instrumentActor->getWorkspace());
+      } catch (std::runtime_error &) {
+        // Carry on, sameWS should stay false
+      }
+
+      // try to detect if the instrument changes (unlikely if the workspace
+      // hasn't, but theoretically possible)
+      bool resetGeometry = matrixWS->getInstrument()->getNumberDetectors() !=
+                           m_instrumentActor->ndetectors();
+
+      // if workspace and instrument don't change keep the scaling
+      if (sameWS && !resetGeometry) {
+        m_instrumentActor->updateColors();
+      } else {
+        resetInstrument(resetGeometry);
+      }
+    }
+  }
 }
