@@ -168,11 +168,9 @@ private:
   }
 
   CompositeBraggScatterer_sptr getCompositeScatterer() {
-    std::vector<BraggScatterer_sptr> scatterers;
-    scatterers.push_back(getInitializedScatterer("Si", "[0.35, 0, 0]"));
-    scatterers.push_back(getInitializedScatterer("Si", "1/4, 1/4, 1/4"));
-
-    return CompositeBraggScatterer::create(scatterers);
+    return CompositeBraggScatterer::create(
+        {getInitializedScatterer("Si", "[0.35, 0, 0]"),
+         getInitializedScatterer("Si", "1/4, 1/4, 1/4")});
   }
 
   std::map<V3D, double> getCalculatedStructureFactors() {

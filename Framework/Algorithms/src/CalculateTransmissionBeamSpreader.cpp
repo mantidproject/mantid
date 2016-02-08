@@ -109,9 +109,8 @@ void CalculateTransmissionBeamSpreader::exec() {
   }
 
   // Extract the required spectra into separate workspaces
-  std::vector<detid_t> udets;
+  std::vector<detid_t> udets{getProperty("IncidentBeamMonitor")};
   std::vector<size_t> indices;
-  udets.push_back(getProperty("IncidentBeamMonitor"));
 
   // Convert UDETs to workspace indices
   // Get monitors (assume that the detector mapping is the same for all data
@@ -140,11 +139,9 @@ void CalculateTransmissionBeamSpreader::exec() {
 
   // Note: Replaced PARALLEL_SECTION with this OMP for loop, due to occasional
   // unexplained segfault.
-  std::vector<MatrixWorkspace_sptr> in_ws, out_ws(4);
-  in_ws.push_back(sample_scatterWS);
-  in_ws.push_back(direct_scatterWS);
-  in_ws.push_back(sample_spreaderWS);
-  in_ws.push_back(direct_spreaderWS);
+  std::vector<MatrixWorkspace_sptr> in_ws{sample_scatterWS, direct_scatterWS,
+                                          sample_spreaderWS, direct_spreaderWS},
+      out_ws(4);
 
   PARALLEL_FOR_IF(true)
   for (int i = 0; i < 4; i++) {

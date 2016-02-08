@@ -60,13 +60,7 @@ public:
     string lessThan(" is < the lower bound (");
 
     ArrayBoundedValidator<int> vi(0, 10);
-    vector<int> ai;
-    ai.push_back(10);
-    ai.push_back(3);
-    ai.push_back(-1);
-    ai.push_back(2);
-    ai.push_back(11);
-    ai.push_back(0);
+    vector<int> ai{10, 3, -1, 2, 11, 0};
 
     TS_ASSERT_EQUALS(vi.isValid(ai), index_start + "2" + index_end + start +
                                          "-1" + lessThan + "0" + end +

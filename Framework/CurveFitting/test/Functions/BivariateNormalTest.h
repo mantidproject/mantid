@@ -121,7 +121,7 @@ public:
     double xx[nCells];
     for (int i = 0; i < nCells; i++) {
       xx[i] = i;
-      x_vec_ptr.access().push_back((double)i);
+      x_vec_ptr.access().push_back(static_cast<double>(i));
     }
     NormalFit.setAttributeValue("CalcVariances", CalcVariances);
 

@@ -68,9 +68,9 @@ public:
 
     // Test vector of vector.
     std::vector<std::vector<int>> input;
-    input.push_back(std::vector<int>(10)); // Make it 10 elements long, but
-                                           // should only be the size of the
-                                           // parent vector that is counted.
+    input.emplace_back(10); // Make it 10 elements long, but
+                            // should only be the size of the
+                            // parent vector that is counted.
     Property *b = new ArrayProperty<std::vector<int>>("vec_property", input);
     TS_ASSERT_EQUALS(1, b->size());
     delete b;

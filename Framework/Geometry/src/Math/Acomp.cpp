@@ -59,41 +59,6 @@ Standard Constructor
 */
 {}
 
-Acomp::Acomp(const Acomp &A)
-    : Intersect(A.Intersect), Units(A.Units)
-/**
-Copy constructor
-@param A :: Acomp object to copy
-*/
-{
-  std::vector<Acomp>::const_iterator vc;
-  for (vc = A.Comp.begin(); vc != A.Comp.end(); ++vc)
-    Comp.push_back(*vc);
-}
-
-Acomp &Acomp::operator=(const Acomp &A)
-/**
-The assignment operator carries out a
-down level deletion of the Comp vector
-@param A :: Object to copy
-@return *this
-*/
-{
-  if (this != &A) {
-    Intersect = A.Intersect;
-    Units = A.Units;
-    Comp = A.Comp;
-  }
-  return *this;
-}
-
-Acomp::~Acomp()
-/**
-Destructor deletes each Comp Unit and
-down the chain.
-*/
-{}
-
 bool Acomp::operator!=(const Acomp &A) const
 /**
 Inequality operator
@@ -1164,16 +1129,13 @@ component)
   to calculate the DNF but just use it
   */
   if (isDNF()) {
-    std::vector<int>::const_iterator vc;
-    std::vector<Acomp>::const_iterator xc;
-
     Parts.clear();
-    for (vc = Units.begin(); vc != Units.end(); ++vc) {
+    for (auto vc = Units.begin(); vc != Units.end(); ++vc) {
       Acomp Aitem(1); // Intersection (doesn't matter since 1 object)
       Aitem.addUnitItem(*vc);
       Parts.push_back(Aitem);
     }
-    for (xc = Comp.begin(); xc != Comp.end(); ++xc)
+    for (auto xc = Comp.begin(); xc != Comp.end(); ++xc)
       Parts.push_back(*xc);
     return static_cast<int>(Parts.size());
   }
