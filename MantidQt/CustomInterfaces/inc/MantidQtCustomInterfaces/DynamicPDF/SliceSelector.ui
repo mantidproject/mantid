@@ -95,7 +95,7 @@
        </widget>
       </item>
       <item>
-       <widget class="MantidQt::MantidWidgets::MWSpectrogram" name="slices2DPlot"/>
+       <widget class="MantidQt::MantidWidgets::MWView" name="slices2DPlot"/>
       </item>
      </layout>
     </item>
@@ -194,9 +194,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWSpectrogram</class>
-   <extends>QwtPlot</extends>
-   <header>MantidQtMantidWidgets/MWSpectrogram.h</header>
+   <class>MantidQt::MantidWidgets::MWView</class>
+   <extends>Qwidget</extends>
+   <header>MantidQtMantidWidgets/MWView.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>

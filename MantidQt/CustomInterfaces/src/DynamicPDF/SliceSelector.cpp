@@ -1,11 +1,11 @@
 #include <iostream>
 #include <iomanip>
+// includes for workspace handling
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+// includes for interface
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h"
-// includes for the 2D view
-#include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include <qwt_plot_spectrogram.h>
 
 //#include "MantidQtCustomInterfaces/DynamicPDF/BackgroundRemover.h"
@@ -41,8 +41,7 @@ DECLARE_SUBWINDOW(SliceSelector)
 // SliceSelector::SliceSelector(QWidget *parent) : UserSubWindow{parent},
 // m_loadedWorkspace{nullptr}, m_BackgroundRemover{nullptr} {
 SliceSelector::SliceSelector(QWidget *parent)
-    : UserSubWindow{parent}, m_plot2D{nullptr},
-      m_loadedWorkspace{nullptr} {}
+    : UserSubWindow{parent}, m_loadedWorkspace{nullptr} {}
 
 SliceSelector::~SliceSelector() { m_selectedWorkspaceIndex = 0; }
 
@@ -60,7 +59,7 @@ void SliceSelector::initLayout() {
           SLOT(launchBackgroundRemover()));
 }
 
-///
+/// Load file or workspace containing energy slices
 void SliceSelector::loadSlices(const QString &workspaceName) {
   m_loadedWorkspace =
       boost::make_shared<WorkspaceRecord>(workspaceName.toStdString());
@@ -84,10 +83,8 @@ void SliceSelector::loadSlices(const QString &workspaceName) {
   m_uiForm.sliderSelectSlice->setMaximum(maximumWorkspaceIndex);
   m_uiForm.spinboxSliceSelector->setValue(0);
 
-  /// initialize the 2D view of the histogram;
-  m_plot2D = m_uiForm.slices2DPlot;
-  m_plot2D->setWorkspace(m_loadedWorkspace->m_ws);
-  m_plot2D->updateDisplay();
+  /// initialize the 2D view of the slices;
+
 
   /// initialize the preview plot
   updatePlotSelectedSlice();
@@ -124,10 +121,10 @@ void SliceSelector::launchBackgroundRemover() {
   //}
   // m_BackgroundRemover->refreshSlice(m_loadedWorkspace,
   // m_selectedWorkspaceIndex);
-  std::cout << "Hello world";
+  g_log.error("Not implemented...yet");
 }
 
-/// Qt-help page
+/// Opens the Qt help page for the interface
 void SliceSelector::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(
       NULL, QString("Dynamic PDF Calculator"));
