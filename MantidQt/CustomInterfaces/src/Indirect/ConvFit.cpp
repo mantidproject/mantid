@@ -1685,15 +1685,18 @@ ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
                                   const QString &fitFunction) {
   QMap<QString, double> fullMap;
   QString fitFuncName = fitFunction;
-  // Special case for Two lorentzian - as it is comprised of 2 lorentzians
+  // Special case for Two lorentzian - as it is comprised of 2 single
+  // lorentzians
   if (fitFunction.compare("Two Lorentzians") == 0) {
     fitFuncName = "Lorentzian 1";
     for (auto param = parameters.begin(); param != parameters.end(); ++param) {
       const QString qStrParam = QString(*param);
       QString fullPropName = fitFuncName + "." + qStrParam;
       if (fullMap.contains(fullPropName)) {
+        // If current property is already in the Map then it's a 2L property
         fullPropName = "Lorentzian 2." + qStrParam;
         double value = 0;
+        // Check for default parameter (used for 2L case)
         const auto defaultParam = "default_" + qStrParam;
         if (defaultMap.contains(defaultParam)) {
           value = defaultMap[defaultParam];
@@ -1703,6 +1706,7 @@ ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
         if (defaultMap.contains(qStrParam)) {
           fullMap.insert(fullPropName, defaultMap[qStrParam]);
         } else {
+          // If property not in Map, assumed to default to value of 0
           fullMap.insert(fullPropName, 0);
         }
       }
@@ -1713,6 +1717,7 @@ ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
       if (defaultMap.contains(QString(*param))) {
         fullMap.insert(fullPropName, defaultMap[*param]);
       } else {
+        // If property not in Map, assumed to default to value of 0
         fullMap.insert(fullPropName, 0);
       }
     }
