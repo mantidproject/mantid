@@ -141,7 +141,6 @@ void ConvFit::setup() {
       createFitType("InelasticDiffRotDiscreteCircle");
   m_properties["StretchedExpFT"] = createFitType("StretchedExpFT");
 
-
   // Update fit parameters in browser when function is selected
   connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(QString)), this,
           SLOT(fitFunctionSelected(const QString &)));
@@ -266,7 +265,8 @@ void ConvFit::run() {
   cfs->setProperty("Convolve", true);
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
-  cfs->setProperty("MaxIterations", static_cast<int>(m_dblManager->value(m_properties["MaxIterations"])));
+  cfs->setProperty("MaxIterations", static_cast<int>(m_dblManager->value(
+                                        m_properties["MaxIterations"])));
 
   // Add to batch alg runner and execute
   m_batchAlgoRunner->addAlgorithm(cfs);
@@ -309,7 +309,9 @@ void ConvFit::algorithmComplete(bool error) {
   // Handle plot result
   if (!(plot.compare("None") == 0)) {
     if (plot.compare("All") == 0) {
-      const int specEnd = (int)resultWs->getNumberHistograms(); // Cast to int for use in plotSpectrum
+      const int specEnd =
+          (int)resultWs
+              ->getNumberHistograms(); // Cast to int for use in plotSpectrum
       for (int i = 0; i < specEnd; i++) {
         IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
                                   i, i);
@@ -336,7 +338,7 @@ void ConvFit::algorithmComplete(bool error) {
     const QString temperature = m_uiForm.leTempCorrection->text();
     double temperature_dbl = 0.0;
     if (temperature.toStdString().compare("") != 0) {
-		temperature_dbl = temperature.toDouble();
+      temperature_dbl = temperature.toDouble();
     }
 
     if (temperature_dbl != 0.0) {
@@ -386,7 +388,7 @@ bool ConvFit::validate() {
 
   const QString fitType = fitTypeString();
   if (fitType == "") {
-	  uiv.addErrorMessage("No fit type defined");
+    uiv.addErrorMessage("No fit type defined");
   }
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
@@ -1096,7 +1098,7 @@ void ConvFit::plotGuess() {
 void ConvFit::singleFit() {
   // Validate tab before running a single fit
   if (!validate()) {
-	  return;
+    return;
   }
   // disconnect signal for single fit
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -1313,7 +1315,7 @@ void ConvFit::hwhmChanged(double val) {
   hwhmRangeSelector->blockSignals(true);
   QString propName = "Lorentzian 1.FWHM";
   if (m_uiForm.cbFitType->currentIndex() == 1) {
-	  propName = "One Lorentzian";
+    propName = "One Lorentzian";
   }
   m_dblManager->setValue(m_properties[propName], hwhm * 2);
   hwhmRangeSelector->blockSignals(false);
@@ -1476,11 +1478,12 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
   auto currentFitFunction = functionName;
   // Add function parameters to QStringList
   if (functionName.compare("Zero Lorentzians") != 0) {
-    if (functionName.compare("One Lorentzian") == 0 || functionName.compare("Two Lorentzians") == 0) {
+    if (functionName.compare("One Lorentzian") == 0 ||
+        functionName.compare("Two Lorentzians") == 0) {
       currentFitFunction = "Lorentzian";
     }
-    IFunction_sptr func =
-        FunctionFactory::Instance().createFunction(currentFitFunction.toStdString());
+    IFunction_sptr func = FunctionFactory::Instance().createFunction(
+        currentFitFunction.toStdString());
 
     for (size_t i = 0; i < func->nParams(); i++) {
       parameters << QString::fromStdString(func->parameterName(i));
@@ -1549,15 +1552,17 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   // If there are parameters in the list, add them
   const QStringList parameters = getFunctionParameters(functionName);
   if (parameters.isEmpty() != true) {
-	  addParametersToTree(parameters, currentFitFunction);
+    addParametersToTree(parameters, currentFitFunction);
   }
 
   m_previousFit = m_uiForm.cbFitType->currentText();
 }
 
 /**
- * Adds all the parameters that are required for the currentFitFunction to the parameter tree
- * @param parameters			:: A QStringList of all the parameters for the current fit function
+ * Adds all the parameters that are required for the currentFitFunction to the
+ * parameter tree
+ * @param parameters			:: A QStringList of all the parameters for
+ * the current fit function
  * @param currentFitFunction	:: The name of the current fit function
  */
 void ConvFit::addParametersToTree(const QStringList &parameters,
@@ -1620,7 +1625,6 @@ void ConvFit::updatePlotOptions() {
   m_uiForm.cbPlotType->addItems(plotOptions);
 }
 
-
 /**
 * Populates the default parameter map with the initial default values
 * @param map :: The default value QMap to populate
@@ -1644,7 +1648,7 @@ ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
   map.insert("Intensity", 1.0);
   map.insert("Radius", 1.0);
   map.insert("tau", 1.0);
-  map.insert("default_Amplitude", 1.0);	// Used in the case of 2L fit
+  map.insert("default_Amplitude", 1.0); // Used in the case of 2L fit
   return map;
 }
 
@@ -1685,7 +1689,7 @@ ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
   if (fitFunction.compare("Two Lorentzians") == 0) {
     fitFuncName = "Lorentzian 1";
     for (auto param = parameters.begin(); param != parameters.end(); ++param) {
-	  const QString qStrParam = QString(*param);
+      const QString qStrParam = QString(*param);
       QString fullPropName = fitFuncName + "." + qStrParam;
       if (fullMap.contains(fullPropName)) {
         fullPropName = "Lorentzian 2." + qStrParam;
@@ -1703,7 +1707,7 @@ ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
         }
       }
     }
-  } else {     // All Other fit functions
+  } else { // All Other fit functions
     for (auto param = parameters.begin(); param != parameters.end(); ++param) {
       const QString fullPropName = fitFuncName + "." + QString(*param);
       if (defaultMap.contains(QString(*param))) {
