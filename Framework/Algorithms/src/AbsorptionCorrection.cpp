@@ -63,19 +63,14 @@ void AbsorptionCorrection::init() {
       "The number of wavelength points for which the numerical integral is\n"
       "calculated (default: all points)");
 
-  std::vector<std::string> exp_options;
-  exp_options.push_back("Normal");
-  exp_options.push_back("FastApprox");
+  std::vector<std::string> exp_options{"Normal", "FastApprox"};
   declareProperty(
       "ExpMethod", "Normal",
       boost::make_shared<StringListValidator>(exp_options),
       "Select the method to use to calculate exponentials, normal or a\n"
       "fast approximation (default: Normal)");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Elastic");
-  propOptions.push_back("Direct");
-  propOptions.push_back("Indirect");
+  std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
   declareProperty("EMode", "Elastic",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The energy mode (default: elastic)");

@@ -41,8 +41,8 @@ std::map<std::string, std::string> MDAxisValidator::validate() const {
 
   // Make sure that there are fewer axes specified than exist on the workspace
   if (m_axes.size() > m_wsDimensions) {
-    invalidProperties.insert(std::make_pair(
-        "Axes", "More axes specified than dimensions available in the input"));
+    invalidProperties.emplace(
+        "Axes", "More axes specified than dimensions available in the input");
   }
 
   // Ensure that the axes selection is within the number of dimensions of the

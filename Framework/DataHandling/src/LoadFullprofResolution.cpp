@@ -190,7 +190,7 @@ void LoadFullprofResolution::exec() {
     parseResolutionStrings(parammap, lines, useBankIDsInFile, bankid,
                            bankstartindexmap[bankid], bankendindexmap[bankid],
                            nProf);
-    bankparammap.insert(make_pair(bankid, parammap));
+    bankparammap.emplace(bankid, parammap);
   }
 
   // Generate output table workspace
@@ -327,8 +327,8 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
         // Previous line is in a bank range.  Then finish the previous bank
         // range
         endindex = static_cast<int>(i) - 1;
-        bankstartindexmap.insert(make_pair(banks.back(), startindex));
-        bankendindexmap.insert(make_pair(banks.back(), endindex));
+        bankstartindexmap.emplace(banks.back(), startindex);
+        bankendindexmap.emplace(banks.back(), endindex);
       }
 
       // Start the new pair
@@ -352,8 +352,8 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
   }
   if (startindex >= 0) {
     endindex = static_cast<int>(lines.size()) - 1;
-    bankstartindexmap.insert(make_pair(banks.back(), startindex));
-    bankendindexmap.insert(make_pair(banks.back(), endindex));
+    bankstartindexmap.emplace(banks.back(), startindex);
+    bankendindexmap.emplace(banks.back(), endindex);
   }
 
   g_log.debug() << "[DB1112] Number of bank IDs = " << banks.size() << ", "
@@ -785,11 +785,11 @@ void LoadFullprofResolution::createBankToWorkspaceMap(
     std::map<int, size_t> &workspaceOfBank) {
   if (workspaces.size() == 0) {
     for (size_t i = 0; i < banks.size(); i++) {
-      workspaceOfBank.insert(std::pair<int, size_t>(banks[i], i + 1));
+      workspaceOfBank.emplace(banks[i], i + 1);
     }
   } else {
     for (size_t i = 0; i < banks.size(); i++) {
-      workspaceOfBank.insert(std::pair<int, size_t>(banks[i], workspaces[i]));
+      workspaceOfBank.emplace(banks[i], workspaces[i]);
     }
   }
 }
@@ -1058,7 +1058,7 @@ void LoadFullprofResolution::getTableRowNumbers(
     TableRow row = tablews->getRow(i);
     std::string name;
     row >> name;
-    parammap.insert(std::make_pair(name, i));
+    parammap.emplace(name, i);
   }
 
   return;

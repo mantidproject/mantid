@@ -142,11 +142,6 @@ public:
     tw.setRowCount(2);
     TS_ASSERT_EQUALS(tw.rowCount(), 2);
     TS_ASSERT_EQUALS(cNumb[1], 2);
-
-    // str[0] = "First"; str[1] = "Second";
-    // vector<string> names;
-    // names.push_back("Number");
-    // names.push_back("Name");
   }
 
   void testRow() {

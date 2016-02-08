@@ -183,9 +183,8 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
         static_cast<const Instrument *>(m_base)->m_detectorCache;
     // And turn them into parametrized versions
     for (const auto &in_det : in_dets) {
-      out_map.insert(std::pair<detid_t, IDetector_sptr>(
-          in_det.first,
-          ParComponentFactory::createDetector(in_det.second.get(), m_map)));
+      out_map.emplace(in_det.first, ParComponentFactory::createDetector(
+                                        in_det.second.get(), m_map));
     }
   } else {
     // You can just return the detector cache directly.

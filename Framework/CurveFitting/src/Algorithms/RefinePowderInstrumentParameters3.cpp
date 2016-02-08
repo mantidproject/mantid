@@ -68,9 +68,7 @@ void RefinePowderInstrumentParameters3::init() {
       "Output tableworkspace containing instrument's fitted parameters. ");
 
   // Refinement algorithm
-  vector<string> algoptions;
-  algoptions.push_back("OneStepFit");
-  algoptions.push_back("MonteCarlo");
+  vector<string> algoptions{"OneStepFit", "MonteCarlo"};
   auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
   declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
                   "Algorithm to refine the instrument parameters.");
@@ -84,9 +82,7 @@ void RefinePowderInstrumentParameters3::init() {
                   "Random seed for Monte Carlo simulation. ");
 
   // Method to calcualte the standard error of peaks
-  vector<string> stdoptions;
-  stdoptions.push_back("ConstantValue");
-  stdoptions.push_back("UseInputValue");
+  vector<string> stdoptions{"ConstantValue", "UseInputValue"};
   auto listvalidator =
       boost::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty(
@@ -295,7 +291,7 @@ void RefinePowderInstrumentParameters3::parseTableWorkspace(
     }
     newpar.fit = fit;
 
-    parammap.insert(make_pair(parname, newpar));
+    parammap.emplace(parname, newpar);
   }
 
   return;
@@ -693,7 +689,7 @@ void RefinePowderInstrumentParameters3::bookKeepMCResult(
   {
     map<string, Parameter> storemap;
     duplicateParameters(parammap, storemap);
-    bestresults.push_back(make_pair(chisq, storemap));
+    bestresults.emplace_back(chisq, storemap);
     sort(bestresults.begin(), bestresults.end());
   }
   */
@@ -1113,7 +1109,7 @@ void RefinePowderInstrumentParameters3::addOrReplace(
     Parameter newparameter;
     newparameter.name = parname;
     newparameter.curvalue = parvalue;
-    parameters.insert(make_pair(parname, newparameter));
+    parameters.emplace(parname, newparameter);
   }
 
   return;
@@ -1315,7 +1311,7 @@ void duplicateParameters(map<string, Parameter> source,
     Parameter param = miter->second;
     Parameter newparam;
     newparam = param;
-    target.insert(make_pair(parname, newparam));
+    target.emplace(parname, newparam);
   }
 
   return;
@@ -1358,7 +1354,7 @@ void convertToDict(vector<string> strvec, map<string, size_t> &lookupdict) {
   lookupdict.clear();
 
   for (size_t i = 0; i < strvec.size(); ++i)
-    lookupdict.insert(make_pair(strvec[i], i));
+    lookupdict.emplace(strvec[i], i);
 
   return;
 }
@@ -1395,7 +1391,7 @@ void storeFunctionParameterValue(
     string &parname = parnames[i];
     double parvalue = function->getParameter(i);
     double parerror = function->getError(i);
-    parvaluemap.insert(make_pair(parname, make_pair(parvalue, parerror)));
+    parvaluemap.emplace(parname, make_pair(parvalue, parerror));
   }
 
   return;

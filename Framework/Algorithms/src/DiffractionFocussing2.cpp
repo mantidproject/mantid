@@ -603,9 +603,8 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     // Create the group range in the map if it isn't already there
     if (gpit == group2minmax.end()) {
-      gpit = group2minmax.insert(std::make_pair(
-                                     group, std::make_pair(
-                                                BIGGEST, -1. * BIGGEST))).first;
+      gpit = group2minmax.emplace(group, std::make_pair(BIGGEST, -1. * BIGGEST))
+                 .first;
     }
     const double min = (gpit->second).first;
     const double max = (gpit->second).second;

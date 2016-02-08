@@ -213,7 +213,7 @@ const std::vector<std::string> Algorithm::categories() const {
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);
   if (depo != nullptr) {
-    res.push_back("Deprecated");
+    res.emplace_back("Deprecated");
   }
   return res;
 }

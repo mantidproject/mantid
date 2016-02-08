@@ -168,9 +168,8 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
       // TODO: this is a bit of duplicate effort at the moment, until
       // RemoteJobManager goes away from here (then this would be
       // removed), see header for details.
-      m_computeResources.insert(std::make_pair(
-          name,
-          boost::make_shared<RemoteJobManager>(elem)));
+      m_computeResources.emplace(name,
+                                 boost::make_shared<RemoteJobManager>(elem));
     }
   }
 }

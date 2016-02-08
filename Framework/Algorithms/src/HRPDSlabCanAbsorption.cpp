@@ -50,9 +50,7 @@ void HRPDSlabCanAbsorption::init() {
       "The number of wavelength points for which the numerical integral is\n"
       "calculated (default: all points)");
 
-  std::vector<std::string> exp_options;
-  exp_options.push_back("Normal");
-  exp_options.push_back("FastApprox");
+  std::vector<std::string> exp_options{"Normal", "FastApprox"};
   declareProperty(
       "ExpMethod", "Normal",
       boost::make_shared<StringListValidator>(exp_options),

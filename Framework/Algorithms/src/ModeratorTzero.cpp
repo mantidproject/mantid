@@ -47,10 +47,7 @@ void ModeratorTzero::init() {
                   "The name of the output workspace");
 
   // declare the instrument scattering mode
-  std::vector<std::string> EModeOptions;
-  EModeOptions.push_back("Indirect");
-  EModeOptions.push_back("Direct");
-  EModeOptions.push_back("Elastic");
+  std::vector<std::string> EModeOptions{"Indirect", "Direct", "Elastic"};
   this->declareProperty("EMode", "Indirect",
                         boost::make_shared<StringListValidator>(EModeOptions),
                         "The energy mode (default: Indirect)");

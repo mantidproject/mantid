@@ -231,7 +231,7 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
                                std::map<std::string, std::string> &pmap,
                                int level) {
   if (!rootPath.empty()) {
-    pmap.insert(std::make_pair(rootPath, className));
+    pmap.emplace(rootPath, className);
   }
   if (level == 0) {
     auto attrInfos = file.getAttrInfos();
@@ -247,8 +247,7 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
     const std::string &entryClass = it->second;
     const std::string entryPath = rootPath + "/" + entryName;
     if (entryClass == "SDS") {
-      // tmap.insert(std::make_pair(entryClass, entryPath));
-      pmap.insert(std::make_pair(entryPath, entryClass));
+      pmap.emplace(entryPath, entryClass);
     } else if (entryClass == "CDF0.0") {
       // Do nothing with this
     } else {

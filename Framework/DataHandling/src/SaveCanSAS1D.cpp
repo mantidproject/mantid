@@ -43,18 +43,11 @@ void SaveCanSAS1D::init() {
       new API::FileProperty("Filename", "", API::FileProperty::Save, ".xml"),
       "The name of the xml file to save");
 
-  std::vector<std::string> radiation_source;
-  radiation_source.push_back("Spallation Neutron Source");
-  radiation_source.push_back("Pulsed Reactor Neutron Source");
-  radiation_source.push_back("Reactor Neutron Source");
-  radiation_source.push_back("Synchrotron X-ray Source");
-  radiation_source.push_back("Pulsed Muon Source");
-  radiation_source.push_back("Rotating Anode X-ray");
-  radiation_source.push_back("Fixed Tube X-ray");
-  radiation_source.push_back("neutron");
-  radiation_source.push_back("x-ray");
-  radiation_source.push_back("muon");
-  radiation_source.push_back("electron");
+  std::vector<std::string> radiation_source{
+      "Spallation Neutron Source", "Pulsed Reactor Neutron Source",
+      "Reactor Neutron Source", "Synchrotron X-ray Source",
+      "Pulsed Muon Source", "Rotating Anode X-ray", "Fixed Tube X-ray",
+      "neutron", "x-ray", "muon", "electron"};
   declareProperty(
       "RadiationSource", "Spallation Neutron Source",
       boost::make_shared<Kernel::StringListValidator>(radiation_source),

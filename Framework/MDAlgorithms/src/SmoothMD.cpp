@@ -48,23 +48,15 @@ namespace {
  * @brief functions
  * @return Allowed smoothing functions
  */
-std::vector<std::string> functions() {
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Hat");
-  // propOptions.push_back("Gaussian");
-  return propOptions;
-}
+std::vector<std::string> functions() { return {"Hat"}; }
 
 /**
  * Maps a function name to a smoothing function
  * @return function map
  */
 SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
-  SmoothFunctionMap map;
-  map.insert(std::make_pair(
-      "Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
-                         _1, _2, _3)));
-  return map;
+  return {{"Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth,
+                              instance, _1, _2, _3)}};
 }
 }
 
@@ -287,18 +279,18 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
 
   if (widthVector.size() != 1 &&
       widthVector.size() != toSmoothWs->getNumDims()) {
-    product.insert(std::make_pair(widthVectorPropertyName,
-                                  widthVectorPropertyName +
-                                      " can either have one entry or needs to "
-                                      "have entries for each dimension of the "
-                                      "InputWorkspace."));
+    product.emplace(widthVectorPropertyName,
+                    widthVectorPropertyName +
+                        " can either have one entry or needs to "
+                        "have entries for each dimension of the "
+                        "InputWorkspace.");
   } else {
     for (auto widthEntry : widthVector) {
       if (widthEntry % 2 == 0) {
         std::stringstream message;
         message << widthVectorPropertyName
                 << " entries must be odd numbers. Bad entry is " << widthEntry;
-        product.insert(std::make_pair(widthVectorPropertyName, message.str()));
+        product.emplace(widthVectorPropertyName, message.str());
       }
     }
   }
@@ -332,8 +324,7 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
                   << " do not match. " << nBinsSmooth << " expected. Got "
                   << nBinsNorm << ". Shapes of inputs must be the same. Cannot "
                                   "continue smoothing.";
-          product.insert(std::make_pair(normalisationWorkspacePropertyName,
-                                        message.str()));
+          product.emplace(normalisationWorkspacePropertyName, message.str());
           break;
         }
       }

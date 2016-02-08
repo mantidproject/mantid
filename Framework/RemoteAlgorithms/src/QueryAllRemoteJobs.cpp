@@ -143,9 +143,9 @@ void QueryAllRemoteJobs::exec() {
         // push back empty strings just so all the array properties have the
         // same
         // number of elements
-        submitDates.push_back("");
-        startDates.push_back("");
-        completionDates.push_back("");
+        submitDates.emplace_back("");
+        startDates.emplace_back("");
+        completionDates.emplace_back("");
       }
 
       ++it;

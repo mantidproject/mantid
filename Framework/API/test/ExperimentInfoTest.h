@@ -418,10 +418,8 @@ public:
     TS_ASSERT(det);
 
     // Set a mapping
-    std::vector<Mantid::detid_t> group(2, 1);
-    group[1] = 2;
-    Mantid::det2group_map mapping;
-    mapping.insert(std::make_pair(1, group));
+    std::vector<Mantid::detid_t> group{1, 2};
+    Mantid::det2group_map mapping{{1, group}};
     exptInfo->cacheDetectorGroupings(mapping);
 
     TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
@@ -446,7 +444,7 @@ public:
   test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_IDs() {
     ExperimentInfo expt;
     std::map<Mantid::detid_t, std::vector<Mantid::detid_t>> mappings;
-    mappings.insert(std::make_pair(1, std::vector<Mantid::detid_t>(1, 2)));
+    mappings.emplace(1, std::vector<Mantid::detid_t>(1, 2));
     expt.cacheDetectorGroupings(mappings);
 
     std::vector<Mantid::detid_t> ids;
@@ -494,8 +492,7 @@ public:
         else
           ft.to.setFromISO8601("2100-01-01T00:00:00");
 
-        idfFiles.insert(std::pair<std::string, fromToEntry>(
-            l_filenamePart.substr(0, found), ft));
+        idfFiles.emplace(l_filenamePart.substr(0, found), ft);
         idfIdentifiers.insert(l_filenamePart.substr(0, found));
       }
     }
