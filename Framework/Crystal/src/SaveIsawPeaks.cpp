@@ -44,8 +44,6 @@ void SaveIsawPeaks::init() {
   declareProperty("AppendFile", false, "Append to file if true.\n"
                                        "If false, new file (default).");
 
-  std::vector<std::string> exts{".peaks", ".integrate"};
-
   declareProperty(new FileProperty("Filename", "", FileProperty::Save,
                                    {".peaks", ".integrate"}),
                   "Path to an ISAW-style peaks or integrate file to save.");
