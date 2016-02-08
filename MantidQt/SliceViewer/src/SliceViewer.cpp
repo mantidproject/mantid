@@ -1395,8 +1395,6 @@ void SliceViewer::findRangeSlice() {
 
   if (!workspace_used)
     return;
-  // Acquire a scoped read-only lock on the workspace, preventing it from being
-  // written while we iterate through.
 
   // Set the full color range if it has not been set yet
   // We need to do this before aquiring the dead lock
@@ -1404,6 +1402,8 @@ void SliceViewer::findRangeSlice() {
     findRangeFull();
   }
 
+  // Acquire a scoped read-only lock on the workspace, preventing it from being
+  // written while we iterate through.
   ReadLock lock(*workspace_used);
 
   m_colorRangeSlice = QwtDoubleInterval(0., 1.0);
@@ -1431,21 +1431,6 @@ void SliceViewer::findRangeSlice() {
     }
   }
 
-
-  // This builds the implicit function for just this slice
-  MDBoxImplicitFunction *function = new MDBoxImplicitFunction(min, max);
-
-  // Iterate through the slice
-  m_colorRangeSlice = API::SignalRange(*workspace_used, *function,
-    this->getNormalization()).interval();
-  delete function;
-
-  // In case of failure, use the full range instead
-  if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0)) {
-    m_colorRangeSlice = m_colorRangeFull;
-  }
-
-#if 0
   if (doesSliceCutThroughWorkspace(min, max, m_dimensions)) {
     // This builds the implicit function for just this slice
     MDBoxImplicitFunction *function = new MDBoxImplicitFunction(min, max);
@@ -1454,15 +1439,16 @@ void SliceViewer::findRangeSlice() {
     m_colorRangeSlice = API::SignalRange(*workspace_used, *function,
       this->getNormalization()).interval();
     delete function;
+
     // In case of failure, use the full range instead
-    if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0))
+    if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0)) {
       m_colorRangeSlice = m_colorRangeFull;
+    }
   }
   else {
     // If the slice does not cut through the workspace we make use fo the full workspace
     m_colorRangeSlice = m_colorRangeFull;
   }
-#endif
 }
 
 //------------------------------------------------------------------------------

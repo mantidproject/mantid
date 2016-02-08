@@ -1,5 +1,6 @@
 #include "MantidQtSliceViewer/SliceViewerFunctions.h"
 
+
 namespace MantidQt {
   namespace SliceViewer {
 
@@ -11,7 +12,7 @@ namespace MantidQt {
  * @returns true if the slice goes fully or partially through the workspace
 */
 bool doesSliceCutThroughWorkspace(const Mantid::Kernel::VMD& min, const  Mantid::Kernel::VMD& max,
-  const std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions) {
+  const std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions) {
   auto valueBetweenMinMax = [](const Mantid::Kernel::VMD_t value, const Mantid::Kernel::VMD_t min, const Mantid::Kernel::VMD_t max) {
     return value >= min && value <= max;
   };
@@ -24,11 +25,14 @@ bool doesSliceCutThroughWorkspace(const Mantid::Kernel::VMD& min, const  Mantid:
     const auto minDimension = static_cast<Mantid::Kernel::VMD_t>(dimension->getMinimum());
     const auto maxDimension = static_cast<Mantid::Kernel::VMD_t>(dimension->getMaximum());
 
-    if (!valueBetweenMinMax(min[dimCounter], minDimension, maxDimension) ||
+    // If the the value for min and max is not in the min-max range of the dimension of the workspace
+    // then the cut is neither full nor partial
+    if (!valueBetweenMinMax(min[dimCounter], minDimension, maxDimension) &&
       !valueBetweenMinMax(max[dimCounter], minDimension, maxDimension)) {
       cutsThroughWorkspace = false;
       break;
     }
+    ++dimCounter;
   }
   return cutsThroughWorkspace;
 };

@@ -31,12 +31,12 @@ SliceDefinition get_slice_definition(const size_t numberOfDimensions, const Mant
 }
 
 
-std::vector<Mantid::Geometry::IMDDimension_sptr> get_dimensions_collection(const size_t numberOfDimensions,
+std::vector<Mantid::Geometry::MDHistoDimension_sptr> get_dimensions_collection(const size_t numberOfDimensions,
   const Mantid::Kernel::VMD_t minValue,
   const Mantid::Kernel::VMD_t maxValue,
   const std::string sliceLies) {
 
-  std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions(numberOfDimensions);
+  std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions(numberOfDimensions);
 
   const size_t numberOfBins = 5;
   auto minConverted = static_cast<Mantid::coord_t>(minValue);
