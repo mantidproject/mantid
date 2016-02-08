@@ -1,0 +1,137 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidCurveFitting/ComplexVector.h"
+
+#include <gsl/gsl_blas.h>
+#include <stdexcept>
+#include <iomanip>
+#include <sstream>
+#include <cmath>
+
+namespace Mantid {
+namespace CurveFitting {
+
+/// Constructor
+ComplexVector::ComplexVector(){
+  m_vector = gsl_vector_complex_alloc(1);
+}
+
+/// Destructor
+ComplexVector::~ComplexVector(){
+  gsl_vector_complex_free(m_vector);
+}
+
+/// Constructor
+/// @param n :: The length of the vector.
+ComplexVector::ComplexVector(const size_t n) {
+  m_vector = gsl_vector_complex_alloc(n);
+}
+
+/// Copy constructor.
+/// @param v :: The other vector
+ComplexVector::ComplexVector(const ComplexVector &v) {
+  gsl_vector_complex_memcpy(m_vector, v.gsl());
+}
+
+/// Copy from a gsl vector
+/// @param v :: A vector to copy from.
+ComplexVector::ComplexVector(const gsl_vector_complex *v) {
+  gsl_vector_complex_memcpy(m_vector, v);
+}
+
+/// Copy assignment operator
+/// @param v :: The other vector
+ComplexVector &ComplexVector::operator=(const ComplexVector &v) {
+  gsl_vector_complex_memcpy(m_vector, v.gsl());
+  return *this;
+}
+
+/// Get the pointer to the GSL vector
+gsl_vector_complex *ComplexVector::gsl() { return m_vector; }
+
+/// Get the pointer to the GSL vector
+const gsl_vector_complex *ComplexVector::gsl() const { return m_vector; }
+
+/// Resize the vector
+/// @param n :: The new length
+void ComplexVector::resize(const size_t n) {
+  gsl_vector_complex_free(m_vector);
+  m_vector = gsl_vector_complex_alloc(n);
+}
+
+/// Size of the vector
+size_t ComplexVector::size() const { return m_vector->size; }
+
+/// set an element
+/// @param i :: The element index
+/// @param value :: The new value
+void ComplexVector::set(size_t i, const ComplexType &value) {
+  if (i < m_vector->size) {
+    gsl_vector_complex_set(m_vector, i, value);
+
+  } else {
+    std::stringstream errmsg;
+    errmsg << "ComplexVector index = " << i
+           << " is out of range = " << m_vector->size << " in ComplexVector.set()";
+    throw std::out_of_range(errmsg.str());
+  }
+}
+/// get an element
+/// @param i :: The element index
+ComplexType ComplexVector::get(size_t i) const {
+  if (i < m_vector->size) {
+    return gsl_vector_complex_get(m_vector, i);
+  }
+
+  std::stringstream errmsg;
+  errmsg << "ComplexVector index = " << i << " is out of range = " << m_vector->size
+         << " in ComplexVector.get()";
+  throw std::out_of_range(errmsg.str());
+}
+
+// Set all elements to zero
+void ComplexVector::zero() { gsl_vector_complex_set_zero(m_vector); }
+
+/// Add a vector
+/// @param v :: The other vector
+ComplexVector &ComplexVector::operator+=(const ComplexVector &v) {
+  if (size() != v.size()) {
+    throw std::runtime_error("ComplexVectors have different sizes.");
+  }
+  gsl_vector_complex_add(gsl(), v.gsl());
+  return *this;
+}
+
+/// Subtract a vector
+/// @param v :: The other vector
+ComplexVector &ComplexVector::operator-=(const ComplexVector &v) {
+  if (size() != v.size()) {
+    throw std::runtime_error("ComplexVectors have different sizes.");
+  }
+  gsl_vector_complex_sub(gsl(), v.gsl());
+  return *this;
+}
+
+/// Multiply by a number
+/// @param d :: The number
+ComplexVector &ComplexVector::operator*=(const ComplexType d) {
+  gsl_vector_complex_scale(gsl(), d);
+  return *this;
+}
+
+
+/// The << operator.
+std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {
+  std::ios::fmtflags fflags(ostr.flags());
+  ostr << std::scientific << std::setprecision(6);
+  for (size_t j = 0; j < v.size(); ++j) {
+    auto value = v.get(j);
+    ostr << std::setw(28) << value.dat[0] << "+" << value.dat[1] << "j";
+  }
+  ostr.flags(fflags);
+  return ostr;
+}
+
+} // namespace CurveFitting
+} // namespace Mantid

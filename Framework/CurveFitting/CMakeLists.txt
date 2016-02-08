@@ -104,6 +104,8 @@ set ( SRC_FILES
 	src/Functions/UserFunction1D.cpp
 	src/Functions/VesuvioResolution.cpp
 	src/Functions/Voigt.cpp
+	src/ComplexMatrix.cpp
+	src/ComplexVector.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
 	src/GSLVector.cpp
@@ -228,6 +230,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/UserFunction1D.h
 	inc/MantidCurveFitting/Functions/VesuvioResolution.h
 	inc/MantidCurveFitting/Functions/Voigt.h
+	inc/MantidCurveFitting/ComplexMatrix.h
+	inc/MantidCurveFitting/ComplexVector.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
