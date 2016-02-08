@@ -502,7 +502,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
       for (size_t p = 0; p < numPlanes; p++) {
         // Save whether this vertex is contained by this plane
         vertexContained[p * numVertices + linearVertexIndex] =
-            function->getPlane(p).isPointBounded(vertexCoord);
+            function->getPlane(p).isPointInside(vertexCoord);
       }
     }
 
