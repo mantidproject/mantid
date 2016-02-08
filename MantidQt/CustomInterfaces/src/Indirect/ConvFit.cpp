@@ -295,12 +295,12 @@ void ConvFit::algorithmComplete(bool error) {
 
   // Handle Save file
   if (save) {
-    QString saveDir = QString::fromStdString(
+    auto saveDir = QString::fromStdString(
         Mantid::Kernel::ConfigService::Instance().getString(
             "defaultsave.directory"));
     // Check validity of save path
-    QString QresultWsName = QString::fromStdString(resultWs->getName());
-    QString fullPath = saveDir.append(QresultWsName).append(".nxs");
+    const auto QresultWsName = QString::fromStdString(resultWs->getName());
+    const auto fullPath = saveDir.append(QresultWsName).append(".nxs");
     addSaveWorkspaceToQueue(QresultWsName, fullPath);
   }
 
@@ -394,8 +394,8 @@ bool ConvFit::validate() {
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResInput);
 
-  auto range = std::make_pair(m_dblManager->value(m_properties["StartX"]),
-                              m_dblManager->value(m_properties["EndX"]));
+  const auto range = std::make_pair(m_dblManager->value(m_properties["StartX"]),
+                                    m_dblManager->value(m_properties["EndX"]));
   uiv.checkValidRange("Fitting Range", range);
 
   // Enforce the rule that at least one fit is needed; either a delta function,
@@ -412,7 +412,7 @@ bool ConvFit::validate() {
     }
   }
 
-  QString error = uiv.generateErrorMessage();
+  const auto error = uiv.generateErrorMessage();
   showMessageBox(error);
 
   return error.isEmpty();
@@ -439,7 +439,7 @@ void ConvFit::newDataLoaded(const QString wsName) {
   m_cfInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       m_cfInputWSName.toStdString());
 
-  int maxSpecIndex = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
+  const int maxSpecIndex = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
 
   m_uiForm.spPlotSpectrum->setMaximum(maxSpecIndex);
   m_uiForm.spPlotSpectrum->setMinimum(0);
