@@ -644,7 +644,8 @@ void MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
       VMD middle = (pos + lastPos) * 0.5;
 
       // Find the signal in this bin
-      const auto linearIndex = this->getLinearIndexAtCoord(middle.getBareArray());
+      const auto linearIndex =
+          this->getLinearIndexAtCoord(middle.getBareArray());
       if (linearIndex < m_length) {
 
         // Is the signal here masked?
