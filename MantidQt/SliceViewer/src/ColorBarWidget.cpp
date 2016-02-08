@@ -53,8 +53,8 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   QObject::connect(ui.valMax, SIGNAL(editingFinished()), this, SLOT(changedMaximum()));
   QObject::connect(ui.valMin, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMinimum()));
   QObject::connect(ui.valMax, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMaximum()));
-  QObject::connect(ui.valMin, SIGNAL(valueChanged()), this, SLOT(changedMinimum()));
-  QObject::connect(ui.valMax, SIGNAL(valueChanged()), this, SLOT(changedMaximum()));
+  QObject::connect(ui.valMin, SIGNAL(valueChanged(double)), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(valueChanged(double)), this, SLOT(changedMaximum()));
   QObject::connect(m_colorBar, SIGNAL(mouseMoved(QPoint, double)), this, SLOT(colorBarMouseMoved(QPoint, double)));
 
   // Initial view
