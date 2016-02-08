@@ -871,62 +871,62 @@ void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
     m_key->getBoundingBox(gXmax, gYmax, gZmax, gXmin, gYmin, gZmin);
     if (!((xmax <= gXmax && xmax >= gXmin) &&
           (ymax <= gYmax && ymax >= gYmin) && (zmax <= gZmax && zmax >= gZmin)))
-      listOfPoints.push_back(V3D(xmax, ymax, zmax));
+      listOfPoints.emplace_back(xmax, ymax, zmax);
     if (!((xmin <= gXmax && xmin >= gXmin) &&
           (ymax <= gYmax && ymax >= gYmin) && (zmax <= gZmax && zmax >= gZmin)))
-      listOfPoints.push_back(V3D(xmin, ymax, zmax));
+      listOfPoints.emplace_back(xmin, ymax, zmax);
     if (!((xmin <= gXmax && xmin >= gXmin) &&
           (ymax <= gYmax && ymax >= gYmin) && (zmin <= gZmax && zmin >= gZmin)))
-      listOfPoints.push_back(V3D(xmin, ymax, zmin));
+      listOfPoints.emplace_back(xmin, ymax, zmin);
     if (!((xmax <= gXmax && xmax >= gXmin) &&
           (ymax <= gYmax && ymax >= gYmin) && (zmin <= gZmax && zmin >= gZmin)))
-      listOfPoints.push_back(V3D(xmax, ymax, zmin));
+      listOfPoints.emplace_back(xmax, ymax, zmin);
     if (!((xmin <= gXmax && xmin >= gXmin) &&
           (ymin <= gYmax && ymin >= gYmin) && (zmin <= gZmax && zmin >= gZmin)))
-      listOfPoints.push_back(V3D(xmin, ymin, zmin));
+      listOfPoints.emplace_back(xmin, ymin, zmin);
     if (!((xmax <= gXmax && xmax >= gXmin) &&
           (ymin <= gYmax && ymin >= gYmin) && (zmin <= gZmax && zmin >= gZmin)))
-      listOfPoints.push_back(V3D(xmax, ymin, zmin));
+      listOfPoints.emplace_back(xmax, ymin, zmin);
     if (!((xmax <= gXmax && xmax >= gXmin) &&
           (ymin <= gYmax && ymin >= gYmin) && (zmax <= gZmax && zmax >= gZmin)))
-      listOfPoints.push_back(V3D(xmax, ymin, zmax));
+      listOfPoints.emplace_back(xmax, ymin, zmax);
     if (!((xmin <= gXmax && xmin >= gXmin) &&
           (ymin <= gYmax && ymin >= gYmin) && (zmax <= gZmax && zmax >= gZmin)))
-      listOfPoints.push_back(V3D(xmin, ymin, zmax));
+      listOfPoints.emplace_back(xmin, ymin, zmax);
 
     // group box inside input box
     if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
          (gZmax <= zmax && gZmax >= zmin)) &&
         (gXmax != xmax || gYmax != ymax || gZmax != zmax))
-      listOfPoints.push_back(V3D(gXmax, gYmax, gZmax));
+      listOfPoints.emplace_back(gXmax, gYmax, gZmax);
     if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
          (gZmax <= zmax && gZmax >= zmin)) &&
         (gXmin != xmin || gYmax != ymax || gZmax != zmax))
-      listOfPoints.push_back(V3D(gXmin, gYmax, gZmax));
+      listOfPoints.emplace_back(gXmin, gYmax, gZmax);
     if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
          (gZmin <= zmax && gZmin >= zmin)) &&
         (gXmin != xmin || gYmax != ymax || gZmin != zmin))
-      listOfPoints.push_back(V3D(gXmin, gYmax, gZmin));
+      listOfPoints.emplace_back(gXmin, gYmax, gZmin);
     if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
          (gZmin <= zmax && gZmin >= zmin)) &&
         (gXmax != xmax || gYmax != ymax || gZmin != zmin))
-      listOfPoints.push_back(V3D(gXmax, gYmax, gZmin));
+      listOfPoints.emplace_back(gXmax, gYmax, gZmin);
     if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
          (gZmin <= zmax && gZmin >= zmin)) &&
         (gXmin != xmin || gYmin != ymin || gZmin != zmin))
-      listOfPoints.push_back(V3D(gXmin, gYmin, gZmin));
+      listOfPoints.emplace_back(gXmin, gYmin, gZmin);
     if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
          (gZmin <= zmax && gZmin >= zmin)) &&
         (gXmax != xmax || gYmin != ymin || gZmin != zmin))
-      listOfPoints.push_back(V3D(gXmax, gYmin, gZmin));
+      listOfPoints.emplace_back(gXmax, gYmin, gZmin);
     if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
          (gZmax <= zmax && gZmax >= zmin)) &&
         (gXmax != xmax || gYmin != ymin || gZmax != zmax))
-      listOfPoints.push_back(V3D(gXmax, gYmin, gZmax));
+      listOfPoints.emplace_back(gXmax, gYmin, gZmax);
     if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
          (gZmax <= zmax && gZmax >= zmin)) &&
         (gXmin != xmin || gYmin != ymin || gZmax != zmax))
-      listOfPoints.push_back(V3D(gXmin, gYmin, gZmax));
+      listOfPoints.emplace_back(gXmin, gYmin, gZmax);
 
     if (!listOfPoints.empty()) {
       xmin = ymin = zmin = DBL_MAX;
@@ -1175,62 +1175,62 @@ void CompObj::getBoundingBox(double &xmax, double &ymax, double &zmax,
   key->getBoundingBox(gXmax, gYmax, gZmax, gXmin, gYmin, gZmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymax, zmax));
+    listOfPoints.emplace_back(xmax, ymax, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymax, zmax));
+    listOfPoints.emplace_back(xmin, ymax, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymax, zmin));
+    listOfPoints.emplace_back(xmin, ymax, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymax, zmin));
+    listOfPoints.emplace_back(xmax, ymax, zmin);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymin, zmin));
+    listOfPoints.emplace_back(xmin, ymin, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymin, zmin));
+    listOfPoints.emplace_back(xmax, ymin, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymin, zmax));
+    listOfPoints.emplace_back(xmax, ymin, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymin, zmax));
+    listOfPoints.emplace_back(xmin, ymin, zmax);
 
   // object box inside input box
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmax != xmax || gYmax != ymax || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmax, gYmax, gZmax));
+    listOfPoints.emplace_back(gXmax, gYmax, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmin != xmin || gYmax != ymax || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmin, gYmax, gZmax));
+    listOfPoints.emplace_back(gXmin, gYmax, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmin != xmin || gYmax != ymax || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmin, gYmax, gZmin));
+    listOfPoints.emplace_back(gXmin, gYmax, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmax != xmax || gYmax != ymax || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmax, gYmax, gZmin));
+    listOfPoints.emplace_back(gXmax, gYmax, gZmin);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmin != xmin || gYmin != ymin || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmin, gYmin, gZmin));
+    listOfPoints.emplace_back(gXmin, gYmin, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmax != xmax || gYmin != ymin || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmax, gYmin, gZmin));
+    listOfPoints.emplace_back(gXmax, gYmin, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmax != xmax || gYmin != ymin || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmax, gYmin, gZmax));
+    listOfPoints.emplace_back(gXmax, gYmin, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmin != xmin || gYmin != ymin || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmin, gYmin, gZmax));
+    listOfPoints.emplace_back(gXmin, gYmin, gZmax);
 
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = DBL_MAX;
@@ -1643,62 +1643,62 @@ void CompGrp::getBoundingBox(double &xmax, double &ymax, double &zmax,
   A->getBoundingBox(gXmax, gYmax, gZmax, gXmin, gYmin, gZmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymax, zmax));
+    listOfPoints.emplace_back(xmax, ymax, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymax, zmax));
+    listOfPoints.emplace_back(xmin, ymax, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymax, zmin));
+    listOfPoints.emplace_back(xmin, ymax, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymax, zmin));
+    listOfPoints.emplace_back(xmax, ymax, zmin);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymin, zmin));
+    listOfPoints.emplace_back(xmin, ymin, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymin, zmin));
+    listOfPoints.emplace_back(xmax, ymin, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymin, zmax));
+    listOfPoints.emplace_back(xmax, ymin, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymin, zmax));
+    listOfPoints.emplace_back(xmin, ymin, zmax);
 
   // group box inside input box
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmax != xmax || gYmax != ymax || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmax, gYmax, gZmax));
+    listOfPoints.emplace_back(gXmax, gYmax, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmin != xmin || gYmax != ymax || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmin, gYmax, gZmax));
+    listOfPoints.emplace_back(gXmin, gYmax, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmin != xmin || gYmax != ymax || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmin, gYmax, gZmin));
+    listOfPoints.emplace_back(gXmin, gYmax, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmax != xmax || gYmax != ymax || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmax, gYmax, gZmin));
+    listOfPoints.emplace_back(gXmax, gYmax, gZmin);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmin != xmin || gYmin != ymin || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmin, gYmin, gZmin));
+    listOfPoints.emplace_back(gXmin, gYmin, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmax != xmax || gYmin != ymin || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmax, gYmin, gZmin));
+    listOfPoints.emplace_back(gXmax, gYmin, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmax != xmax || gYmin != ymin || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmax, gYmin, gZmax));
+    listOfPoints.emplace_back(gXmax, gYmin, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmin != xmin || gYmin != ymin || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmin, gYmin, gZmax));
+    listOfPoints.emplace_back(gXmin, gYmin, gZmax);
 
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = DBL_MAX;

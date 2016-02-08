@@ -104,10 +104,7 @@ public:
     manager.declareProperty(
         new WorkspaceProperty<Workspace>("WS3", "", Direction::Input));
 
-    std::vector<std::string> propNames;
-    propNames.push_back("WS1");
-    propNames.push_back("WS2");
-    propNames.push_back("WS3");
+    std::vector<std::string> propNames{"WS1", "WS2", "WS3"};
     MultiDomainCreator multi(&manager, propNames);
 
     TS_ASSERT_EQUALS(multi.getNCreators(), 3);
@@ -176,10 +173,7 @@ public:
     manager.declareProperty(
         new WorkspaceProperty<Workspace>("WS3", "", Direction::Input));
 
-    std::vector<std::string> propNames;
-    propNames.push_back("WS1");
-    propNames.push_back("WS2");
-    propNames.push_back("WS3");
+    std::vector<std::string> propNames{"WS1", "WS2", "WS3"};
     MultiDomainCreator multi(&manager, propNames);
 
     manager.setProperty("WS1", ws1);
@@ -255,10 +249,8 @@ public:
     manager.declareProperty(
         new WorkspaceProperty<Workspace>("WS3", "", Direction::Input));
 
-    std::vector<std::string> propNames;
-    propNames.push_back("WS1");
-    propNames.push_back("WS2");
-    propNames.push_back("WS3");
+    std::vector<std::string> propNames{"WS1", "WS2", "WS3"};
+
     MultiDomainCreator multi(&manager, propNames);
 
     manager.setProperty("WS1", ws1);

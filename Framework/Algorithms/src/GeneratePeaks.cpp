@@ -69,14 +69,10 @@ void GeneratePeaks::init() {
                   "mapping to PeakParameterNames list. ");
 
   // Background properties
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Auto");
-  bkgdtypes.push_back("Flat (A0)");
-  bkgdtypes.push_back("Linear (A0, A1)");
-  bkgdtypes.push_back("Quadratic (A0, A1, A2)");
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Auto", "Flat (A0)", "Linear (A0, A1)",
+                                     "Quadratic (A0, A1, A2)", "Flat"
+                                                               "Linear",
+                                     "Quadratic"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
@@ -164,7 +160,7 @@ void GeneratePeaks::exec() {
   else {
     std::vector<std::pair<double, API::IFunction_sptr>> vecpeakfunc;
     importPeakFromVector(vecpeakfunc);
-    functionmap.insert(std::make_pair(m_wsIndex, vecpeakfunc));
+    functionmap.emplace(m_wsIndex, vecpeakfunc);
   }
 
   generatePeaks(functionmap, outputWS);
@@ -233,7 +229,7 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
   if (!m_useFuncParamWS) {
     m_wsIndex = getProperty("WorkspaceIndex");
     m_spectraSet.insert(static_cast<specid_t>(m_wsIndex));
-    m_SpectrumMap.insert(std::make_pair(static_cast<specid_t>(m_wsIndex), 0));
+    m_SpectrumMap.emplace(static_cast<specid_t>(m_wsIndex), 0);
   }
 
   return;
@@ -333,12 +329,12 @@ void GeneratePeaks::importPeaksFromTable(
       std::pair<std::map<specid_t, std::vector<std::pair<
                                        double, API::IFunction_sptr>>>::iterator,
                 bool> ret;
-      ret = functionmap.insert(std::make_pair(wsindex, tempvector));
+      ret = functionmap.emplace(wsindex, tempvector);
       mapiter = ret.first;
     }
 
     // Generate peak function
-    mapiter->second.push_back(std::make_pair(centre, clonefunction));
+    mapiter->second.emplace_back(centre, clonefunction);
 
     g_log.information() << "Peak " << ipeak << ": Spec = " << wsindex
                         << " func: " << clonefunction->asString() << "\n";
@@ -420,8 +416,7 @@ void GeneratePeaks::importPeakFromVector(
   }
 
   // Set up function map
-  double centre = m_peakFunction->centre();
-  functionmap.push_back(std::make_pair(centre, compfunc));
+  functionmap.emplace_back(m_peakFunction->centre(), compfunc);
 
   return;
 }
@@ -655,7 +650,7 @@ void GeneratePeaks::getSpectraSet(
   std::set<specid_t>::iterator pit;
   specid_t icount = 0;
   for (pit = m_spectraSet.begin(); pit != m_spectraSet.end(); ++pit) {
-    m_SpectrumMap.insert(std::make_pair(*pit, icount));
+    m_SpectrumMap.emplace(*pit, icount);
     ++icount;
   }
 

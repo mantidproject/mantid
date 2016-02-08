@@ -277,17 +277,17 @@ void Load::init() {
       Mantid::Kernel::ConfigService::Instance().getFacility();
   std::vector<std::string> exts = defaultFacility.extensions();
   // Add in some other known extensions
-  exts.push_back(".xml");
-  exts.push_back(".dat");
-  exts.push_back(".txt");
-  exts.push_back(".csv");
-  exts.push_back(".spe");
-  exts.push_back(".grp");
-  exts.push_back(".nxspe");
-  exts.push_back(".h5");
-  exts.push_back(".hd5");
-  exts.push_back(".sqw");
-  exts.push_back(".fits");
+  exts.emplace_back(".xml");
+  exts.emplace_back(".dat");
+  exts.emplace_back(".txt");
+  exts.emplace_back(".csv");
+  exts.emplace_back(".spe");
+  exts.emplace_back(".grp");
+  exts.emplace_back(".nxspe");
+  exts.emplace_back(".h5");
+  exts.emplace_back(".hd5");
+  exts.emplace_back(".sqw");
+  exts.emplace_back(".fits");
 
   declareProperty(
       new MultipleFileProperty("Filename", exts),

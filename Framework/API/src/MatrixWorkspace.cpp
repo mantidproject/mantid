@@ -1083,7 +1083,7 @@ void MatrixWorkspace::flagMasked(const size_t &spectrumIndex,
     if (it != binList.end()) {
       binList.erase(it);
     }
-    binList.insert(std::make_pair(binIndex, weight));
+    binList.emplace(binIndex, weight);
   }
 }
 

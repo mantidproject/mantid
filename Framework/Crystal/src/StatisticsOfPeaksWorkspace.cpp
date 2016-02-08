@@ -67,11 +67,8 @@ void StatisticsOfPeaksWorkspace::init() {
   declareProperty(new WorkspaceProperty<ITableWorkspace>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  std::vector<std::string> sortTypes;
-  sortTypes.push_back("ResolutionShell");
-  sortTypes.push_back("Bank");
-  sortTypes.push_back("RunNumber");
-  sortTypes.push_back("Overall");
+  std::vector<std::string> sortTypes{"ResolutionShell", "Bank", "RunNumber",
+                                     "Overall"};
   declareProperty("SortBy", sortTypes[0],
                   boost::make_shared<StringListValidator>(sortTypes),
                   "Sort the peaks by bank, run number(default) or only overall "

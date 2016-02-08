@@ -119,14 +119,14 @@ void LoadBBY::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
   exts.clear();
-  exts.push_back(".tar");
+  exts.emplace_back(".tar");
   declareProperty(
       new API::FileProperty(FilenameStr, "", API::FileProperty::Load, exts),
       "The input filename of the stored data");
 
   // mask
   exts.clear();
-  exts.push_back(".xml");
+  exts.emplace_back(".xml");
   declareProperty(
       new API::FileProperty(MaskStr, "", API::FileProperty::OptionalLoad, exts),
       "The input filename of the mask data");

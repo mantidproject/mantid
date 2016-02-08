@@ -349,18 +349,18 @@ public:
     // Profile parameter
     std::map<std::string, double> parammodifymap;
     if (testplan.compare("zero") == 0) {
-      parammodifymap.insert(std::make_pair("Zero", 2.0));
+      parammodifymap.emplace("Zero", 2.0);
     } else if (testplan.compare("alpha") == 0) {
       double alph0 = 4.026;
       double newalph0 = alph0 * 0.05;
-      parammodifymap.insert(std::make_pair("Alph0", newalph0));
+      parammodifymap.emplace("Alph0", newalph0);
     } else if (testplan.compare("sigma") == 0) {
       double sig1 = 9.901;
       double newsig1 = sig1 * 0.1;
       double sig0 = 127.37;
       double newsig0 = sig0 * 0.1;
-      parammodifymap.insert(std::make_pair("Sig0", newsig0));
-      parammodifymap.insert(std::make_pair("Sig1", newsig1));
+      parammodifymap.emplace("Sig0", newsig0);
+      parammodifymap.emplace("Sig1", newsig1);
     }
     parameterws = createPeakParameterWorkspace(parammodifymap, 1);
     // c) Reflection (111) and (110)
@@ -506,9 +506,7 @@ public:
 
     // c) Generate TableWorkspaces
     std::vector<double> pkheights(numpeaks, 1.0);
-    map<string, double> modmap;
-    modmap.insert(make_pair("Alph0", 5.0));
-    modmap.insert(make_pair("Beta0", 5.0));
+    map<string, double> modmap{{"Alph0", 5.0}, {"Beta0", 5.0}};
     parameterws = createPeakParameterWorkspace(modmap, 2);
     hklws = createInputHKLWorkspace(hkls, pkheights);
     bkgdws = createBackgroundParameterWorksapce(1);
@@ -759,7 +757,7 @@ public:
     std::map<std::string, double>::iterator mit;
     for (mit = paramvaluemap.begin(); mit != paramvaluemap.end(); ++mit) {
       std::string parname = mit->first;
-      paramfitmap.insert(std::make_pair(parname, "t"));
+      paramfitmap.emplace(parname, "t");
     }
 
     std::cout << "Parameter Fit Map Size = " << paramfitmap.size() << std::endl;
@@ -816,30 +814,29 @@ public:
   void genPeakParametersBackgroundLessData(
       std::map<std::string, double> &paramvaluemap) {
     // a) Value
-    paramvaluemap.insert(std::make_pair("Dtt1", 29671.7500));
-    paramvaluemap.insert(std::make_pair("Dtt2", 0.0));
-    paramvaluemap.insert(std::make_pair("Dtt1t", 29671.750));
-    paramvaluemap.insert(std::make_pair("Dtt2t", 0.30));
-    paramvaluemap.insert(std::make_pair("Zero", 0.0));
-    paramvaluemap.insert(std::make_pair("Zerot", 33.70));
-    paramvaluemap.insert(std::make_pair("Alph0", 4.026));
-    paramvaluemap.insert(std::make_pair("Alph1", 7.362));
-    paramvaluemap.insert(std::make_pair("Beta0", 3.489));
-    paramvaluemap.insert(std::make_pair("Beta1", 19.535));
-    paramvaluemap.insert(std::make_pair("Alph0t", 60.683));
-    paramvaluemap.insert(std::make_pair("Alph1t", 39.730));
-    paramvaluemap.insert(std::make_pair("Beta0t", 96.864));
-    paramvaluemap.insert(std::make_pair("Beta1t", 96.864));
-    paramvaluemap.insert(std::make_pair("Sig2", sqrt(11.380)));
-    paramvaluemap.insert(std::make_pair("Sig1", sqrt(9.901)));
-    paramvaluemap.insert(std::make_pair("Sig0", sqrt(17.370)));
-    paramvaluemap.insert(std::make_pair("Width", 1.0055));
-    paramvaluemap.insert(std::make_pair("Tcross", 0.4700));
-    paramvaluemap.insert(std::make_pair("Gam0", 0.0));
-    paramvaluemap.insert(std::make_pair("Gam1", 0.0));
-    paramvaluemap.insert(std::make_pair("Gam2", 0.0));
-    paramvaluemap.insert(std::make_pair("LatticeConstant", 4.156890));
-
+    paramvaluemap.emplace("Dtt1", 29671.7500);
+    paramvaluemap.emplace("Dtt2", 0.0);
+    paramvaluemap.emplace("Dtt1t", 29671.750);
+    paramvaluemap.emplace("Dtt2t", 0.30);
+    paramvaluemap.emplace("Zero", 0.0);
+    paramvaluemap.emplace("Zerot", 33.70);
+    paramvaluemap.emplace("Alph0", 4.026);
+    paramvaluemap.emplace("Alph1", 7.362);
+    paramvaluemap.emplace("Beta0", 3.489);
+    paramvaluemap.emplace("Beta1", 19.535);
+    paramvaluemap.emplace("Alph0t", 60.683);
+    paramvaluemap.emplace("Alph1t", 39.730);
+    paramvaluemap.emplace("Beta0t", 96.864);
+    paramvaluemap.emplace("Beta1t", 96.864);
+    paramvaluemap.emplace("Sig2", sqrt(11.380));
+    paramvaluemap.emplace("Sig1", sqrt(9.901));
+    paramvaluemap.emplace("Sig0", sqrt(17.370));
+    paramvaluemap.emplace("Width", 1.0055);
+    paramvaluemap.emplace("Tcross", 0.4700);
+    paramvaluemap.emplace("Gam0", 0.0);
+    paramvaluemap.emplace("Gam1", 0.0);
+    paramvaluemap.emplace("Gam2", 0.0);
+    paramvaluemap.emplace("LatticeConstant", 4.156890);
     return;
   }
 
@@ -849,35 +846,35 @@ public:
   void genPeakParameterBank7(std::map<std::string, double> &paramvaluemap) {
     paramvaluemap.clear();
 
-    paramvaluemap.insert(std::make_pair("Alph0", 0.5));
-    paramvaluemap.insert(std::make_pair("Alph0t", 128.96));
-    paramvaluemap.insert(std::make_pair("Alph1", 0.));
-    paramvaluemap.insert(std::make_pair("Alph1t", 15.702));
-    paramvaluemap.insert(std::make_pair("Beta0", 2.0));
-    paramvaluemap.insert(std::make_pair("Beta0t", 202.28));
-    paramvaluemap.insert(std::make_pair("Beta1", 0.));
-    paramvaluemap.insert(std::make_pair("Beta1t", 0.));
-    paramvaluemap.insert(std::make_pair("CWL", 4.797));
-    paramvaluemap.insert(std::make_pair("Dtt1", 22777.1));
-    paramvaluemap.insert(std::make_pair("Dtt1t", 22785.4));
-    paramvaluemap.insert(std::make_pair("Dtt2", 0.0));
-    paramvaluemap.insert(std::make_pair("Dtt2t", 0.3));
-    paramvaluemap.insert(std::make_pair("Gam0", 0));
-    paramvaluemap.insert(std::make_pair("Gam1", 0));
-    paramvaluemap.insert(std::make_pair("Gam2", 0));
-    paramvaluemap.insert(std::make_pair("Profile", 10));
-    paramvaluemap.insert(std::make_pair("Sig0", 0));
-    paramvaluemap.insert(std::make_pair("Sig1", sqrt(10.0)));
-    paramvaluemap.insert(std::make_pair("Sig2", sqrt(15.48)));
-    paramvaluemap.insert(std::make_pair("Tcross", 0.25));
-    paramvaluemap.insert(std::make_pair("Width", 5.8675));
-    paramvaluemap.insert(std::make_pair("Zero", 0));
-    paramvaluemap.insert(std::make_pair("Zerot", 62.5));
-    paramvaluemap.insert(std::make_pair("step", 0.005));
-    paramvaluemap.insert(std::make_pair("tof-max", 233.8));
-    paramvaluemap.insert(std::make_pair("tof-min", 50.2919));
-    paramvaluemap.insert(std::make_pair("twotheta", 90.807));
-    paramvaluemap.insert(std::make_pair("LatticeConstant", 9.438));
+    paramvaluemap.emplace("Alph0", 0.5);
+    paramvaluemap.emplace("Alph0t", 128.96);
+    paramvaluemap.emplace("Alph1", 0.);
+    paramvaluemap.emplace("Alph1t", 15.702);
+    paramvaluemap.emplace("Beta0", 2.0);
+    paramvaluemap.emplace("Beta0t", 202.28);
+    paramvaluemap.emplace("Beta1", 0.);
+    paramvaluemap.emplace("Beta1t", 0.);
+    paramvaluemap.emplace("CWL", 4.797);
+    paramvaluemap.emplace("Dtt1", 22777.1);
+    paramvaluemap.emplace("Dtt1t", 22785.4);
+    paramvaluemap.emplace("Dtt2", 0.0);
+    paramvaluemap.emplace("Dtt2t", 0.3);
+    paramvaluemap.emplace("Gam0", 0);
+    paramvaluemap.emplace("Gam1", 0);
+    paramvaluemap.emplace("Gam2", 0);
+    paramvaluemap.emplace("Profile", 10);
+    paramvaluemap.emplace("Sig0", 0);
+    paramvaluemap.emplace("Sig1", sqrt(10.0));
+    paramvaluemap.emplace("Sig2", sqrt(15.48));
+    paramvaluemap.emplace("Tcross", 0.25);
+    paramvaluemap.emplace("Width", 5.8675);
+    paramvaluemap.emplace("Zero", 0);
+    paramvaluemap.emplace("Zerot", 62.5);
+    paramvaluemap.emplace("step", 0.005);
+    paramvaluemap.emplace("tof-max", 233.8);
+    paramvaluemap.emplace("tof-min", 50.2919);
+    paramvaluemap.emplace("twotheta", 90.807);
+    paramvaluemap.emplace("LatticeConstant", 9.438);
 
     return;
   }
@@ -888,29 +885,29 @@ public:
   void genPeakParameterNomBank4(map<std::string, double> &paramvaluemap) {
     paramvaluemap.clear();
 
-    paramvaluemap.insert(make_pair("Alph0", 0.886733));
-    paramvaluemap.insert(make_pair("Alph0t", 114.12));
-    paramvaluemap.insert(make_pair("Alph1", 8.38073));
-    paramvaluemap.insert(make_pair("Alph1t", 75.8038));
-    paramvaluemap.insert(make_pair("Beta0", 3.34888));
-    paramvaluemap.insert(make_pair("Beta0t", 88.292));
-    paramvaluemap.insert(make_pair("Beta1", 10.5768));
-    paramvaluemap.insert(make_pair("Beta1t", -0.0346847));
-    paramvaluemap.insert(make_pair("Dtt1", 9491.56));
-    paramvaluemap.insert(make_pair("Dtt1t", 9423.85));
-    paramvaluemap.insert(make_pair("Dtt2", 0));
-    paramvaluemap.insert(make_pair("Dtt2t", 0.3));
-    paramvaluemap.insert(make_pair("Gam0", 0));
-    paramvaluemap.insert(make_pair("Gam1", 0));
-    paramvaluemap.insert(make_pair("Gam2", 0));
-    paramvaluemap.insert(make_pair("LatticeConstant", 4.15689));
-    paramvaluemap.insert(make_pair("Sig0", 0));
-    paramvaluemap.insert(make_pair("Sig1", 18.3863));
-    paramvaluemap.insert(make_pair("Sig2", 0.671019));
-    paramvaluemap.insert(make_pair("Tcross", 0.4373));
-    paramvaluemap.insert(make_pair("Width", 2.9654));
-    paramvaluemap.insert(make_pair("Zero", 0));
-    paramvaluemap.insert(make_pair("Zerot", 101.618));
+    paramvaluemap.emplace("Alph0", 0.886733);
+    paramvaluemap.emplace("Alph0t", 114.12);
+    paramvaluemap.emplace("Alph1", 8.38073);
+    paramvaluemap.emplace("Alph1t", 75.8038);
+    paramvaluemap.emplace("Beta0", 3.34888);
+    paramvaluemap.emplace("Beta0t", 88.292);
+    paramvaluemap.emplace("Beta1", 10.5768);
+    paramvaluemap.emplace("Beta1t", -0.0346847);
+    paramvaluemap.emplace("Dtt1", 9491.56);
+    paramvaluemap.emplace("Dtt1t", 9423.85);
+    paramvaluemap.emplace("Dtt2", 0);
+    paramvaluemap.emplace("Dtt2t", 0.3);
+    paramvaluemap.emplace("Gam0", 0);
+    paramvaluemap.emplace("Gam1", 0);
+    paramvaluemap.emplace("Gam2", 0);
+    paramvaluemap.emplace("LatticeConstant", 4.15689);
+    paramvaluemap.emplace("Sig0", 0);
+    paramvaluemap.emplace("Sig1", 18.3863);
+    paramvaluemap.emplace("Sig2", 0.671019);
+    paramvaluemap.emplace("Tcross", 0.4373);
+    paramvaluemap.emplace("Width", 2.9654);
+    paramvaluemap.emplace("Zero", 0);
+    paramvaluemap.emplace("Zerot", 101.618);
 
     return;
   }
@@ -920,24 +917,24 @@ public:
    * example)
     */
   void generateGPPDBank1(map<std::string, double> &parammap) {
-    parammap.insert(make_pair("Dtt1", 16370.650));
-    parammap.insert(make_pair("Dtt2", 0.10));
-    parammap.insert(make_pair("Zero", 0.0));
+    parammap.emplace("Dtt1", 16370.650);
+    parammap.emplace("Dtt2", 0.10);
+    parammap.emplace("Zero", 0.0);
 
-    parammap.insert(make_pair("Alph0", 1.0));
-    parammap.insert(make_pair("Alph1", 0.0));
-    parammap.insert(make_pair("Beta0", 0.109036));
-    parammap.insert(make_pair("Beta1", 0.009834));
+    parammap.emplace("Alph0", 1.0);
+    parammap.emplace("Alph1", 0.0);
+    parammap.emplace("Beta0", 0.109036);
+    parammap.emplace("Beta1", 0.009834);
 
-    parammap.insert(make_pair("Sig2", sqrt(91.127)));
-    parammap.insert(make_pair("Sig1", sqrt(1119.230)));
-    parammap.insert(make_pair("Sig0", sqrt(0.0)));
+    parammap.emplace("Sig2", sqrt(91.127));
+    parammap.emplace("Sig1", sqrt(1119.230));
+    parammap.emplace("Sig0", sqrt(0.0));
 
-    parammap.insert(make_pair("Gam0", 0.0));
-    parammap.insert(make_pair("Gam1", 7.688));
-    parammap.insert(make_pair("Gam2", 0.0));
+    parammap.emplace("Gam0", 0.0);
+    parammap.emplace("Gam1", 7.688);
+    parammap.emplace("Gam2", 0.0);
 
-    parammap.insert(make_pair("LatticeConstant", 5.431363));
+    parammap.emplace("LatticeConstant", 5.431363);
 
     return;
   }
@@ -1826,8 +1823,8 @@ public:
                   << " has am empty field for fit/tie. " << std::endl;
       }
 
-      paramvalues.insert(std::make_pair(parname, parvalue));
-      paramfitstatus.insert(std::make_pair(parname, fitortie));
+      paramvalues.emplace(parname, parvalue);
+      paramfitstatus.emplace(parname, fitortie);
     }
 
     return;
@@ -1843,29 +1840,29 @@ public:
     map<string, double> bkgdparmap;
     switch (option) {
     case 1:
-      bkgdparmap.insert(make_pair("A0", -197456));
-      bkgdparmap.insert(make_pair("A1", 15.5819));
-      bkgdparmap.insert(make_pair("A2", -0.000467362));
-      bkgdparmap.insert(make_pair("A3", 5.59069e-09));
-      bkgdparmap.insert(make_pair("A4", 2.81875e-14));
-      bkgdparmap.insert(make_pair("A5", -1.88986e-18));
-      bkgdparmap.insert(make_pair("A6", 2.9137e-23));
-      bkgdparmap.insert(make_pair("A7", -2.50121e-28));
-      bkgdparmap.insert(make_pair("A8", 1.3279e-33));
-      bkgdparmap.insert(make_pair("A9", -4.33776e-39));
-      bkgdparmap.insert(make_pair("A10", 8.01018e-45));
-      bkgdparmap.insert(make_pair("A11", -6.40846e-51));
+      bkgdparmap.emplace("A0", -197456);
+      bkgdparmap.emplace("A1", 15.5819);
+      bkgdparmap.emplace("A2", -0.000467362);
+      bkgdparmap.emplace("A3", 5.59069e-09);
+      bkgdparmap.emplace("A4", 2.81875e-14);
+      bkgdparmap.emplace("A5", -1.88986e-18);
+      bkgdparmap.emplace("A6", 2.9137e-23);
+      bkgdparmap.emplace("A7", -2.50121e-28);
+      bkgdparmap.emplace("A8", 1.3279e-33);
+      bkgdparmap.emplace("A9", -4.33776e-39);
+      bkgdparmap.emplace("A10", 8.01018e-45);
+      bkgdparmap.emplace("A11", -6.40846e-51);
 
       break;
 
     case 2:
       // NOMAD Bank4
-      bkgdparmap.insert(make_pair("A0", 0.73));
-      bkgdparmap.insert(make_pair("A1", -8.0E-5));
-      bkgdparmap.insert(make_pair("A2", 0.0));
-      bkgdparmap.insert(make_pair("A3", 0.0));
-      bkgdparmap.insert(make_pair("A4", 0.0));
-      bkgdparmap.insert(make_pair("A5", 0.0));
+      bkgdparmap.emplace("A0", 0.73);
+      bkgdparmap.emplace("A1", -8.0E-5);
+      bkgdparmap.emplace("A2", 0.0);
+      bkgdparmap.emplace("A3", 0.0);
+      bkgdparmap.emplace("A4", 0.0);
+      bkgdparmap.emplace("A5", 0.0);
 
       break;
 

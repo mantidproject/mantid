@@ -81,10 +81,8 @@ void ConvertToDiffractionMDWorkspace::init() {
       "One MDEvent will be created for each histogram bin (even empty ones).\n"
       "Warning! This can use signficantly more memory!");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Q (lab frame)");
-  propOptions.push_back("Q (sample frame)");
-  propOptions.push_back("HKL");
+  std::vector<std::string> propOptions{"Q (lab frame)", "Q (sample frame)",
+                                       "HKL"};
   declareProperty(
       "OutputDimensions", "Q (lab frame)",
       boost::make_shared<StringListValidator>(propOptions),

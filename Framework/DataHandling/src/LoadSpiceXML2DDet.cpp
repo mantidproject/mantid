@@ -180,10 +180,9 @@ const std::string LoadSpiceXML2DDet::summary() const {
  * @brief LoadSpiceXML2DDet::init
  */
 void LoadSpiceXML2DDet::init() {
-  std::vector<std::string> xmlext;
-  xmlext.push_back(".xml");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::FileAction::Load, xmlext),
+      new FileProperty("Filename", "", FileProperty::FileAction::Load,
+                       {".xml"}),
       "XML file name for one scan including 2D detectors counts from SPICE");
 
   declareProperty(

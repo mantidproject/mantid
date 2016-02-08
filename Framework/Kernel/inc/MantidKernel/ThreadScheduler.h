@@ -264,7 +264,7 @@ public:
     // Cache the total cost
     m_queueLock.lock();
     m_cost += newTask->cost();
-    m_map.insert(std::pair<double, Task *>(newTask->cost(), newTask));
+    m_map.emplace(newTask->cost(), newTask);
     m_queueLock.unlock();
   }
 

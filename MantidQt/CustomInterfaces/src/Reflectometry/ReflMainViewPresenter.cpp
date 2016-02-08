@@ -157,11 +157,11 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 
   // Set up the instrument selectors
   std::vector<std::string> instruments;
-  instruments.push_back("INTER");
-  instruments.push_back("SURF");
-  instruments.push_back("CRISP");
-  instruments.push_back("POLREF");
-  instruments.push_back("OFFSPEC");
+  instruments.emplace_back("INTER");
+  instruments.emplace_back("SURF");
+  instruments.emplace_back("CRISP");
+  instruments.emplace_back("POLREF");
+  instruments.emplace_back("OFFSPEC");
 
   // If the user's configured default instrument is in this list, set it as the
   // default, otherwise use INTER
@@ -201,14 +201,13 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   // should'nt touch.
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-  std::set<std::string> blacklist;
-  blacklist.insert("ThetaIn");
-  blacklist.insert("ThetaOut");
-  blacklist.insert("InputWorkspace");
-  blacklist.insert("OutputWorkspace");
-  blacklist.insert("OutputWorkspaceWavelength");
-  blacklist.insert("FirstTransmissionRun");
-  blacklist.insert("SecondTransmissionRun");
+  std::set<std::string> blacklist{"ThetaIn",
+                                  "ThetaOut",
+                                  "InputWorkspace",
+                                  "OutputWorkspace",
+                                  "OutputWorkspaceWavelength",
+                                  "FirstTransmissionRun",
+                                  "SecondTransmissionRun"};
   m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
@@ -890,7 +889,7 @@ void ReflMainViewPresenter::stitchRows(std::set<int> rows) {
       const std::string runNo = getRunNumber(runWS);
       if (AnalysisDataService::Instance().doesExist("IvsQ_" + runNo)) {
         runs.push_back(runNo);
-        workspaceNames.push_back("IvsQ_" + runNo);
+        workspaceNames.emplace_back("IvsQ_" + runNo);
       }
     }
 

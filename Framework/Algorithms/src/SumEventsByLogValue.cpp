@@ -364,7 +364,7 @@ SumEventsByLogValue::getNumberSeriesLogs() {
     // list
     if (dynamic_cast<TimeSeriesProperty<double> *>(log) ||
         dynamic_cast<TimeSeriesProperty<int> *>(log)) {
-      numberSeriesProps.push_back(std::make_pair(logName, tsp));
+      numberSeriesProps.emplace_back(logName, tsp);
     }
   }
 

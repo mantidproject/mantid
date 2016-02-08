@@ -47,9 +47,7 @@ void StripPeaks::init() {
                   "peak positions. Non-positive value indicates that this "
                   "option is turned off.");
 
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Linear", "Quadratic"};
   declareProperty(
       "BackgroundType", "Linear",
       boost::make_shared<StringListValidator>(bkgdtypes),

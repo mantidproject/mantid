@@ -273,13 +273,8 @@ public:
     TS_ASSERT_DELTA(point.Y(), 10.0, 1e-6);
     TS_ASSERT_DELTA(point.Z(), -10.0, 1e-6);
     // Cuboid not on principle axes
-    std::vector<std::string> planes;
-    planes.push_back("px 0.5");
-    planes.push_back("px 1.5");
-    planes.push_back("py -22");
-    planes.push_back("py -21");
-    planes.push_back("pz -0.5");
-    planes.push_back("pz 0.5");
+    std::vector<std::string> planes{"px 0.5", "px 1.5",  "py -22",
+                                    "py -21", "pz -0.5", "pz 0.5"};
     ObjComponent D("ocube", createCuboid(planes));
     D.setPos(10, 0, 0);
     D.setRot(Quat(90.0, V3D(0, 0, 1)));

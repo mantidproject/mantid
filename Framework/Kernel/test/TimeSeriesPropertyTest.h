@@ -1166,11 +1166,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. What is correct
-    std::vector<std::string> correctS;
-    correctS.push_back("2007-Nov-30 16:17:00 1");
-    correctS.push_back("2007-Nov-30 16:17:10 2");
-    correctS.push_back("2007-Nov-30 16:17:20 3");
-    correctS.push_back("2007-Nov-30 16:17:30 4");
+    std::vector<std::string> correctS{
+        "2007-Nov-30 16:17:00 1", "2007-Nov-30 16:17:10 2",
+        "2007-Nov-30 16:17:20 3", "2007-Nov-30 16:17:30 4"};
 
     // 3. Check
     std::vector<std::string> tvalues = p->time_tValue();

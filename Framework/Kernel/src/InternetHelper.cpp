@@ -565,7 +565,7 @@ const std::string &InternetHelper::getResponseReason() {
 **/
 void InternetHelper::addHeader(const std::string &key,
                                const std::string &value) {
-  m_headers.insert(std::pair<std::string, std::string>(key, value));
+  m_headers.emplace(key, value);
 }
 
 /** Removes a header
