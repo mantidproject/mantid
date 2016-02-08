@@ -128,7 +128,7 @@ class EnggFitPeaks(PythonAlgorithm):
             self.log().information("Output parameters added into a table workspace: %s" % tbl_name)
 
 
-    def _estimate_start_end_fitting_range(self, centre, width):
+    def _estimate_start_end_fitting_range(self, center, width):
         """
         Try to predict a fit window for the peak (using magic numbers). The heuristic
         +-COEF_LEFT/RIGHT sometimes produces ranges that are too narrow and contain too few
@@ -141,8 +141,8 @@ class EnggFitPeaks(PythonAlgorithm):
         COEF_RIGHT = 3
         MIN_RANGE_WIDTH = 175
 
-        startx = centre - (width * COEF_LEFT)
-        endx = centre + (width * COEF_RIGHT)
+        startx = center - (width * COEF_LEFT)
+        endx = center + (width * COEF_RIGHT)
         # force startx-endx > 175, etc
         x_diff = endx-startx
         min_width = MIN_RANGE_WIDTH
@@ -193,7 +193,7 @@ class EnggFitPeaks(PythonAlgorithm):
             width = initial_params[2]
             if width <= 0.:
                 detailTxt = ("Cannot fit a peak with these initial parameters from FindPeaks, center: %s "
-                             ", width: %s, height: %s"%(centre, width, height))
+                             ", width: %s, height: %s"%(initial_params[0], width, initial_params[1]))
                 self.log().notice('For workspace index ' + str(wks_index) + ', a peak that is in the list of '
                                   'expected peaks and was found by FindPeaks has not been fitted correctly. '
                                   'It will be ignored. Details: ' + detailTxt)
