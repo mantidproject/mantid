@@ -132,7 +132,7 @@ private:
   Mantid::API::IAlgorithm_sptr
   createTestAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
     Mantid::API::IAlgorithm_sptr alg =
-        boost::shared_ptr<Mantid::API::IAlgorithm>(new CalculateMSVesuvio);
+        boost::make_shared<CalculateMSVesuvio>();
     alg->initialize();
     alg->setRethrows(true);
     alg->setChild(true);

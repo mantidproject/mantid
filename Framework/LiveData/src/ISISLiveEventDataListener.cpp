@@ -289,7 +289,7 @@ void ISISLiveEventDataListener::run() {
     m_isConnected = false;
 
     m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(e));
+        boost::make_shared<std::runtime_error>(e);
 
   } catch (std::invalid_argument &
                e) { // TimeSeriesProperty (and possibly some other things) can
@@ -301,7 +301,7 @@ void ISISLiveEventDataListener::run() {
         "Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
     m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(newMsg));
+        boost::make_shared<std::runtime_error>(newMsg);
 
   } catch (...) { // Default exception handler
     g_log.error() << "Uncaught exception in ISISLiveEventDataListener network "

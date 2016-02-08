@@ -158,7 +158,7 @@ public:
     // add experiment infos
     for (int i = 0; i < 80; i++) {
       ExperimentInfo_sptr ei =
-          boost::shared_ptr<ExperimentInfo>(new ExperimentInfo());
+          boost::make_shared<ExperimentInfo>();
       ei->mutableRun().addProperty("Psi", double(i));
       ei->mutableRun().addProperty("Ei", 400.);
       ei->mutableRun().setGoniometer(gon, true);

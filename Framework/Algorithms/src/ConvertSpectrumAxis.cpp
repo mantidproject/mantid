@@ -154,7 +154,7 @@ void ConvertSpectrumAxis::exec() {
   outputWS->replaceAxis(1, newAxis);
   // The unit of this axis is radians. Use the 'radians' unit defined above.
   if (unitTarget == "theta" || unitTarget == "signed_theta") {
-    newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
+    newAxis->unit() = boost::make_shared<Units::Degrees>();
   } else {
     newAxis->unit() = UnitFactory::Instance().create(unitTarget);
   }

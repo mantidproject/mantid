@@ -495,7 +495,7 @@ void LoadMcStas::readHistogramData(
     Axis *axis2 = new NumericAxis(axis2Length);
     axis2->title() = axis2Name;
     // Set caption
-    lblUnit = boost::shared_ptr<Units::Label>(new Units::Label);
+    lblUnit = boost::make_shared<Units::Label>();
     lblUnit->setLabel(axis2Name, "");
     axis2->unit() = lblUnit;
 

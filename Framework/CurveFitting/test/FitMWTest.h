@@ -459,7 +459,7 @@ public:
     // AnalysisDataService::Instance().add(inputWSName, ws2);
 
     auto composite =
-        boost::shared_ptr<API::CompositeFunction>(new API::CompositeFunction);
+        boost::make_shared<API::CompositeFunction>();
     API::IFunction_sptr expDecay(new ExpDecay);
     expDecay->setParameter("Height", 1.5);
     expDecay->setError(0, 0.01);
@@ -653,7 +653,7 @@ public:
   }
 
   void do_test_convolve_members_option(bool withBackground) {
-    auto conv = boost::shared_ptr<Convolution>(new Convolution);
+    auto conv = boost::make_shared<Convolution>();
     auto resolution = IFunction_sptr(new Gaussian);
     resolution->initialize();
     resolution->setParameter("Height", 1.0);
@@ -697,7 +697,7 @@ public:
       bckgd->setParameter("Height", 1.);
       bckgd->setParameter("Lifetime", 1.);
       auto composite =
-          boost::shared_ptr<API::CompositeFunction>(new API::CompositeFunction);
+          boost::make_shared<API::CompositeFunction>();
       composite->addFunction(bckgd);
       composite->addFunction(conv);
       fitfun = composite;

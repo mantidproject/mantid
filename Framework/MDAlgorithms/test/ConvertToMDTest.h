@@ -672,7 +672,7 @@ public:
       throw(
           std::runtime_error("Can not obtain preprocessed events detectors "));
 
-    pTargWS = boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
+    pTargWS = boost::make_shared<MDEventWSWrapper>();
 
     Rot.setRandom(100);
     Rot.toRotation();

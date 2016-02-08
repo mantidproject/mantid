@@ -131,7 +131,7 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
 
   if (addProp && !m_manager->existsProperty(m_workspaceIndexPropertyName)) {
     auto mustBePositive =
-        boost::shared_ptr<BoundedValidator<int>>(new BoundedValidator<int>());
+        boost::make_shared<BoundedValidator<int>>();
     mustBePositive->setLower(0);
     declareProperty(new PropertyWithValue<int>(m_workspaceIndexPropertyName, 0,
                                                mustBePositive),

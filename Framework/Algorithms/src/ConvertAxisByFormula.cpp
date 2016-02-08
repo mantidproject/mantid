@@ -190,7 +190,7 @@ void ConvertAxisByFormula::exec() {
       axisUnits = axisPtr->unit()->label();
     }
     axisPtr->unit() =
-        boost::shared_ptr<Unit>(new Units::Label(axisTitle, axisUnits));
+        boost::make_shared<Units::Label>(axisTitle, axisUnits);
   }
 }
 

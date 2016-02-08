@@ -139,7 +139,7 @@ void ConvertToMD::exec() {
   // algorithm parameters
   if (!m_OutWSWrapper)
     m_OutWSWrapper =
-        boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
+        boost::make_shared<MDEventWSWrapper>();
 
   // -------- get Input workspace
   m_InWS2D = getProperty("InputWorkspace");

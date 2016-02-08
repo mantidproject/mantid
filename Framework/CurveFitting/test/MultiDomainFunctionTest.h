@@ -233,7 +233,7 @@ public:
     // constant value A1
 
     MatrixWorkspace_sptr ws =
-        boost::shared_ptr<MatrixWorkspace>(new WorkspaceTester);
+        boost::make_shared<WorkspaceTester>();
     ws->initialize(1, 30, 30);
     {
       const double dx = 1.0;
