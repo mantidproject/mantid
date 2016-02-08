@@ -220,9 +220,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
         try:
             all_spectra = [item for sublist in self._spectra for item in sublist]
             self._raise_error_if_mix_fwd_back(all_spectra)
-            self._raise_error_if_non_valid_mode(self._diff_opt, self._back_scattering)
+            self._raise_error_if_non_valid_mode_scattering(self._diff_opt, self._back_scattering)
             self._set_spectra_type(all_spectra[0])
             self._setup_raw(all_spectra)
+            self._raise_error_if_non_valid_mode_periods(self._diff_opt, self._nperiods)
             self._create_foil_workspaces()
 
             for ws_index, spectrum_no in enumerate(all_spectra):
@@ -264,12 +265,25 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 raise RuntimeError("Mixing backward and forward spectra is not permitted."
                                    "Please correct the SpectrumList property.")
         self._back_scattering = all_back
+#----------------------------------------------------------------------------------------
+
+    def _raise_error_if_non_valid_mode_periods(self, mode, nperiods):
+        """
+        Checks that the input is valid for the Mode of operation selected with the number of periods
+        2 periods - No ThickDifference, NoDoubleDifference, Single Valid
+        3 periods - All valid
+        6 periods - All valid
+        """
+
+        if nperiods == 2:
+            if mode == "ThickDifference" or mode == "DoubleDifference":
+                raise RuntimeError("%s mode is not valid for 2 period data" % mode)
 
 #----------------------------------------------------------------------------------------
 
-    def _raise_error_if_non_valid_mode(self, mode, back_scattering):
+    def _raise_error_if_non_valid_mode_scattering(self, mode, back_scattering):
         """
-        Checks that the input are valid for the Mode of operation selected
+        Checks that the input is valid for the Mode of operation selected with the current scattering
         SingleDifference - Forward Scattering
         DoubleDifference - Back Scattering
         """
