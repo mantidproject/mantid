@@ -191,8 +191,9 @@ void ProcessBackground::init() {
                                               "SelectBackgroundPoints"));
 
   // Output background type.
+  std::vector<std::string> outbkgdtype{"Polynomial", "Chebyshev"};
   auto outbkgdvalidator =
-      boost::make_shared<Kernel::StringListValidator>(bkgdtype);
+      boost::make_shared<Kernel::StringListValidator>(outbkgdtype);
   declareProperty("OutputBackgroundType", "Polynomial", outbkgdvalidator,
                   "Type of background to fit with selected background points.");
   setPropertySettings("OutputBackgroundType",
