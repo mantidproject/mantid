@@ -611,16 +611,14 @@ boost::optional<T> ReflectometryReductionOne::checkForOptionalDefault(
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
     if (defaults.size() != 0) {
-      auto defaultValue = static_cast<T>(defaults[0]);
-      return boost::make_optional<T>(defaultValue);
+      return boost::optional<T>(static_cast<T>(defaults[0]));
     } else {
       return boost::optional<T>();
     }
   } else {
-    auto propertyValue =
+    double value =
         boost::lexical_cast<double, std::string>(algProperty->value());
-    auto value = static_cast<T>(propertyValue);
-    return boost::make_optional<T>(value);
+    return boost::optional<T>(static_cast<T>(value));
   }
 }
 

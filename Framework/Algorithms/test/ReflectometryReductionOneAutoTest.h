@@ -129,7 +129,7 @@ public:
     params->addDouble(tinyInst.get(), "PointDetectorStart", 0.0);
     params->addDouble(tinyInst.get(), "PointDetectorStop", 0.0);
     if (monitorNormalization) {
-      params->addDouble(tinyInst.get(), "I0MonitorIndex", 1);
+      params->addDouble(tinyInst.get(), "I0MonitorIndex", 1.0);
     }
     params->addDouble(tinyInst.get(), "LambdaMin", 0.0);
     params->addDouble(tinyInst.get(), "LambdaMax", 10.0);
@@ -338,7 +338,7 @@ public:
 
   void test_monitor_index_positive() {
     auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1),
+    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1.0),
                      std::invalid_argument);
   }
 

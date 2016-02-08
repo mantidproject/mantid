@@ -253,7 +253,7 @@ void ReflectometryReductionOneAuto::exec() {
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<MantidVec>("Params");
-  auto i0_monitor_index = checkForOptionalDefault<double>(
+  auto i0_monitor_index = checkForOptionalDefault<int>(
       "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   std::string processing_commands;
@@ -517,13 +517,14 @@ boost::optional<T> ReflectometryReductionOneAuto::checkForOptionalDefault(
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
     if (defaults.size() != 0) {
-      return boost::optional<T>(defaults[0]);
+      return boost::optional<T>(static_cast<T>(defaults[0]));
     } else {
       return boost::optional<T>();
     }
   } else {
-    auto value = boost::lexical_cast<double, std::string>(algProperty->value());
-    return boost::optional<T>(value);
+    double value =
+        boost::lexical_cast<double, std::string>(algProperty->value());
+    return boost::optional<T>(static_cast<T>(value));
   }
 }
 

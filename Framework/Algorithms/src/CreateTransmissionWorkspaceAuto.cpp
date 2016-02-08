@@ -199,9 +199,8 @@ void CreateTransmissionWorkspaceAuto::exec() {
     }
     if (i0_monitor_index.is_initialized()) {
       algCreateTransWS->setProperty("I0MonitorIndex", i0_monitor_index.get());
-    }
-    else {
-        algCreateTransWS->setProperty("I0MonitorIndex", Mantid::EMPTY_INT());
+    } else {
+      algCreateTransWS->setProperty("I0MonitorIndex", Mantid::EMPTY_INT());
     }
     algCreateTransWS->setProperty("ProcessingInstructions",
                                   processing_commands);
@@ -273,15 +272,14 @@ boost::optional<T> CreateTransmissionWorkspaceAuto::checkForOptionalDefault(
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
     if (defaults.size() != 0) {
-      auto defaultValue = static_cast<T>(defaults[0]);
-      return boost::make_optional<T>(defaultValue);
+      return boost::optional<T>(static_cast<T>(defaults[0]));
     } else {
       return boost::optional<T>();
     }
   } else {
-    auto propertyValue = boost::lexical_cast<double, std::string>(algProperty->value());
-    auto value = static_cast<T>(propertyValue);
-    return boost::make_optional<T>(value);
+    double value =
+        boost::lexical_cast<double, std::string>(algProperty->value());
+    return boost::optional<T>(static_cast<T>(value));
   }
 }
 
