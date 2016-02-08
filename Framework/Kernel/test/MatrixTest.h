@@ -476,8 +476,9 @@ public:
   void testConstructorTwoVectors() {
     const std::vector<int> vecA{1, 2, 3}, vecB{4, 5, 6};
     IntMatrix mat(vecA, vecB);
-    for (int iRow = 0; iRow < vecA.size(); iRow++) {
-      for (int iCol = 0; iCol < vecA.size(); iCol++) {
+    const int nRowsCols = static_cast<int>(vecA.size());
+    for (int iRow = 0; iRow < nRowsCols; iRow++) {
+      for (int iCol = 0; iCol < nRowsCols; iCol++) {
         const int expected = vecA[iRow] * vecB[iCol];
         TS_ASSERT_EQUALS(mat.item(iRow, iCol), expected);
       }
@@ -748,7 +749,8 @@ public:
   void testSetMem() {
     DblMatrix mat(3, 3);
     mat.setMem(5, 5);
-    TS_ASSERT_THROWS_NOTHING(double x = mat[4][4]);
+    double x = 0;
+    TS_ASSERT_THROWS_NOTHING(x = mat[4][4]);
   }
 
   void testSize() {
