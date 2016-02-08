@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/QPeaksTableModel.cpp
 	src/QScienceSpinBox.cpp
 	src/SliceViewer.cpp
+	src/SliceViewerFunctions.cpp
 	src/SliceViewerWindow.cpp
 	src/SnapToGridDialog.cpp
 	src/XYLimitsDialog.cpp
@@ -66,6 +67,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/QPeaksTableModel.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/SliceViewer.h
+	inc/MantidQtSliceViewer/SliceViewerFunctions.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
 	inc/MantidQtSliceViewer/UpdateableOnDemand.h
@@ -117,6 +119,7 @@ set ( TEST_FILES
     test/PhysicalCrossPeakTest.h
     test/PhysicalSphericalPeakTest.h
     test/NullPeaksPresenterTest.h
+    test/SliceViewerFunctionsTest.h
 )
 
 # Python unit tests

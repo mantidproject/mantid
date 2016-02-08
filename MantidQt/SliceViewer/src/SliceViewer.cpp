@@ -2214,6 +2214,9 @@ Event handler for plot panning.
 void SliceViewer::panned(int, int) {
   autoRebinIfRequired();
 
+  applyColorScalingForCurrentSliceIfRequired();
+
+
   this->updatePeaksOverlay();
 }
 
@@ -2470,6 +2473,9 @@ void SliceViewer::zoomToRectangle(const PeakBoundingBox &boundingBox) {
       QString::fromStdString(m_peaksSliderWidget->getDimName());
   this->setSlicePoint(dimensionName, boundingBox.slicePoint());
 
+  // Set the color scale range for the current slice if required
+  applyColorScalingForCurrentSliceIfRequired();
+
   // Make sure the view updates
   m_plot->replot();
 }
@@ -2538,6 +2544,18 @@ void SliceViewer::dropEvent(QDropEvent *e) {
 void SliceViewer::setColorBarAutoScale(bool autoscale) {
   m_colorBar->setAutoScale(autoscale);
 }
+
+/**
+* Apply the color scaling for the current slice. This will
+* be applied only if it is explicitly requested
+*/
+void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
+  auto useAutoColorScaleforCurrentSlice = m_colorBar->getAutoColorScaleforCurrentSlice();
+  if (useAutoColorScaleforCurrentSlice) {
+    setColorScaleAutoSlice();
+  }
+}
+
 
 } // namespace
 }
