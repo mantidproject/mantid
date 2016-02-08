@@ -603,6 +603,27 @@ void ReflectometryReductionOne::exec() {
   setProperty("OutputWorkspace", IvsQ);
 }
 
+template <typename T>
+boost::optional<T> ReflectometryReductionOne::checkForOptionalDefault(
+    std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
+    std::string idf_name) const {
+  auto algProperty = this->getPointerToProperty(propName);
+  if (algProperty->isDefault()) {
+    auto defaults = instrument->getNumberParameter(idf_name);
+    if (defaults.size() != 0) {
+      auto defaultValue = static_cast<T>(defaults[0]);
+      return boost::make_optional<T>(defaultValue);
+    } else {
+      return boost::optional<T>();
+    }
+  } else {
+    auto propertyValue =
+        boost::lexical_cast<double, std::string>(algProperty->value());
+    auto value = static_cast<T>(propertyValue);
+    return boost::make_optional<T>(value);
+  }
+}
+
 /**
 * Perform Transmission Corrections.
 * @param IvsLam : Run workspace which is to be normalized by the results of the
@@ -637,7 +658,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
     MatrixWorkspace_sptr IvsLam, const MinMax &wavelengthInterval,
     const MinMax &wavelengthMonitorBackgroundInterval,
     const MinMax &wavelengthMonitorIntegrationInterval,
-    const OptionalInteger &i0MonitorIndex, MatrixWorkspace_sptr firstTransmissionRun,
+    const OptionalInteger &i0MonitorIndex,
+    MatrixWorkspace_sptr firstTransmissionRun,
     OptionalMatrixWorkspace_sptr secondTransmissionRun,
     const OptionalDouble &stitchingStart, const OptionalDouble &stitchingDelta,
     const OptionalDouble &stitchingEnd,
@@ -676,7 +698,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
           stitchingDelta.is_initialized()) {
         const std::vector<double> params =
             boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-                stitchingEnd.get()).convert_to_container<std::vector<double>>();
+                stitchingEnd.get())
+                .convert_to_container<std::vector<double>>();
         alg->setProperty("Params", params);
       } else if (stitchingDelta.is_initialized()) {
         alg->setProperty("Params",
@@ -690,8 +713,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
       }
     }
     alg->setProperty("ProcessingInstructions", spectrumProcessingCommands);
-    if (i0MonitorIndex.is_initialized()){
-        alg->setProperty("I0MonitorIndex", i0MonitorIndex.get());
+    if (i0MonitorIndex.is_initialized()) {
+      alg->setProperty("I0MonitorIndex", i0MonitorIndex.get());
     }
     alg->setProperty("WavelengthMin", wavelengthInterval.get<0>());
     alg->setProperty("WavelengthMax", wavelengthInterval.get<1>());

@@ -129,7 +129,7 @@ public:
     params->addDouble(tinyInst.get(), "PointDetectorStart", 0.0);
     params->addDouble(tinyInst.get(), "PointDetectorStop", 0.0);
     if (monitorNormalization) {
-      params->addDouble(tinyInst.get(), "I0MonitorIndex", 1.0);
+      params->addDouble(tinyInst.get(), "I0MonitorIndex", 1);
     }
     params->addDouble(tinyInst.get(), "LambdaMin", 0.0);
     params->addDouble(tinyInst.get(), "LambdaMax", 10.0);

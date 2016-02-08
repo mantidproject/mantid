@@ -67,12 +67,6 @@ public:
                 const API::MatrixWorkspace_sptr &toConvert,
                 const MinMax &wavelengthMinMax, const double &wavelengthStep);
 
-  template <typename T>
-  boost::optional<T>
-  checkForOptionalDefault(std::string propName,
-                          Mantid::Geometry::Instrument_const_sptr instrument,
-                          std::string idf_name = "") const;
-
 protected:
   /// Determine if the property has it's default value.
   bool isPropertyDefault(const std::string &propertyName) const;
@@ -121,7 +115,6 @@ private:
   /// Make a unity workspace
   API::MatrixWorkspace_sptr makeUnityWorkspace(const std::vector<double> &x);
 };
-
 } // namespace Algorithms
 } // namespace Mantid
 

@@ -357,32 +357,32 @@ ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
   convertUnitsAlg->execute();
 
   // Crop the to the monitor index.
-    MatrixWorkspace_sptr monitorWS =
-        convertUnitsAlg->getProperty("OutputWorkspace");
-    auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
-    cropWorkspaceAlg->initialize();
-    cropWorkspaceAlg->setProperty("InputWorkspace", monitorWS);
-    cropWorkspaceAlg->setProperty("StartWorkspaceIndex", monitorIndex.get());
-    cropWorkspaceAlg->setProperty("EndWorkspaceIndex", monitorIndex.get());
-    cropWorkspaceAlg->execute();
-    monitorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr monitorWS =
+      convertUnitsAlg->getProperty("OutputWorkspace");
+  auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
+  cropWorkspaceAlg->initialize();
+  cropWorkspaceAlg->setProperty("InputWorkspace", monitorWS);
+  cropWorkspaceAlg->setProperty("StartWorkspaceIndex", monitorIndex.get());
+  cropWorkspaceAlg->setProperty("EndWorkspaceIndex", monitorIndex.get());
+  cropWorkspaceAlg->execute();
+  monitorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
-    // If min&max are both 0, we won't do the flat background normalization.
-    if (backgroundMinMax.get<0>() == 0 && backgroundMinMax.get<1>() == 0)
+  // If min&max are both 0, we won't do the flat background normalization.
+  if (backgroundMinMax.get<0>() == 0 && backgroundMinMax.get<1>() == 0)
     return monitorWS;
 
-    // Flat background correction
-    auto correctMonitorsAlg =
-        this->createChildAlgorithm("CalculateFlatBackground");
-    correctMonitorsAlg->initialize();
-    correctMonitorsAlg->setProperty("InputWorkspace", monitorWS);
-    correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
-    correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
-    correctMonitorsAlg->setProperty("SkipMonitors", false);
-    correctMonitorsAlg->execute();
-    monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
+  // Flat background correction
+  auto correctMonitorsAlg =
+      this->createChildAlgorithm("CalculateFlatBackground");
+  correctMonitorsAlg->initialize();
+  correctMonitorsAlg->setProperty("InputWorkspace", monitorWS);
+  correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
+  correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
+  correctMonitorsAlg->setProperty("SkipMonitors", false);
+  correctMonitorsAlg->execute();
+  monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
 
-    return monitorWS;
+  return monitorWS;
 }
 
 /**
@@ -394,7 +394,8 @@ ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
  * @param wavelengthStep : Wavelength step for rebinning
  * @return Detector workspace in wavelength
  */
-MatrixWorkspace_sptr ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
+MatrixWorkspace_sptr
+ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
                                          const MatrixWorkspace_sptr &toConvert,
                                          const MinMax &wavelengthMinMax,
                                          const double &wavelengthStep) {
@@ -496,26 +497,6 @@ ReflectometryWorkflowBase::toLam(MatrixWorkspace_sptr toConvert,
   monitorWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
 
   return DetectorMonitorWorkspacePair(detectorWS, monitorWS);
-}
-
-template <typename T>
-boost::optional<T> ReflectometryWorkflowBase::checkForOptionalDefault(
-    std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
-    std::string idf_name) const {
-    auto algProperty = this->getPointerToProperty(propName);
-    if (algProperty->isDefault()) {
-        auto defaults = instrument->getNumberParameter(idf_name);
-        if (defaults.size() != 0) {
-            auto default = static_cast<T>(defaults[0]);
-            return boost::make_optional<T>(default);
-        } else {
-            return boost::optional<T>();
-        }
-    } else {
-        auto propertyValue = boost::lexical_cast<double, std::string>(algProperty->value());
-        auto value = static_cast<T>(propertyValue);
-        return boost::make_optional<T>(value);
-    }
 }
 
 } // namespace Algorithms

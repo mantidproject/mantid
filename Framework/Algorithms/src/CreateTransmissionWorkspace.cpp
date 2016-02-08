@@ -111,8 +111,8 @@ void CreateTransmissionWorkspace::exec() {
   // Get the monitor i0 index
   auto transWS = firstTransmissionRun.get();
   auto instrument = transWS->getInstrument();
-  const auto i0MonitorIndex = checkForOptionalDefault<int>("I0MonitorIndex", instrument,
-                                   "I0MonitorIndex");
+  const OptionalInteger i0MonitorIndex = checkForOptionalDefault<int>(
+      "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   // Create the transmission workspace.
   MatrixWorkspace_sptr outWS = this->makeTransmissionCorrection(
@@ -123,6 +123,27 @@ void CreateTransmissionWorkspace::exec() {
       stitchingEndOverlap, wavelengthStep);
 
   setProperty("OutputWorkspace", outWS);
+}
+
+template <typename T>
+boost::optional<T> CreateTransmissionWorkspace::checkForOptionalDefault(
+    std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
+    std::string idf_name) const {
+  auto algProperty = this->getPointerToProperty(propName);
+  if (algProperty->isDefault()) {
+    auto defaults = instrument->getNumberParameter(idf_name);
+    if (defaults.size() != 0) {
+      auto defaultValue = static_cast<T>(defaults[0]);
+      return boost::make_optional<T>(defaultValue);
+    } else {
+      return boost::optional<T>();
+    }
+  } else {
+    auto propertyValue =
+        boost::lexical_cast<double, std::string>(algProperty->value());
+    auto value = static_cast<T>(propertyValue);
+    return boost::make_optional<T>(value);
+  }
 }
 
 /**
@@ -248,27 +269,5 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
 
   return transmissionWS;
 }
-
-template <typename T>
-boost::optional<T> CreateTransmissionWorkspace::checkForOptionalDefault(
-    std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
-    std::string idf_name) const {
-  auto algProperty = this->getPointerToProperty(propName);
-  if (algProperty->isDefault()) {
-    auto defaults = instrument->getNumberParameter(idf_name);
-    if (defaults.size() != 0) {
-      auto default = static_cast<T>(defaults[0]);
-      return boost::make_optional<T>(default);
-    } else {
-      return boost::optional<T>();
-    }
-  } else {
-    auto propertyValue =
-        boost::lexical_cast<double, std::string>(algProperty->value());
-    auto value = static_cast<T>(propertyValue);
-    return boost::make_optional<T>(value);
-  }
-}
-
 } // namespace Algorithms
 } // namespace Mantid
