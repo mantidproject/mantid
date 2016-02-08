@@ -284,7 +284,7 @@ void AccumulateMD::init() {
                   "gs rotation in degrees. Optional or one entry per run.");
 
   declareProperty(
-      new PropertyWithValue<bool>("InPlace", false, Direction::Input),
+      new PropertyWithValue<bool>("InPlace", true, Direction::Input),
       "Execute conversions to MD and Merge in one-step. Less "
       "memory overhead.");
 
@@ -336,7 +336,7 @@ void AccumulateMD::exec() {
     IMDEventWorkspace_sptr out_ws =
         createMDWorkspace(input_data, psi, gl, gs, efix);
     this->setProperty("OutputWorkspace", out_ws);
-    g_log.notice() << this->name() << " succesfully created a clean workspace"
+    g_log.notice() << this->name() << " successfully created a clean workspace"
                    << std::endl;
     this->progress(1.0);
     return; // POSSIBLE EXIT POINT
