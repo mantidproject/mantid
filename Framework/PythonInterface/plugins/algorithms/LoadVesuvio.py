@@ -223,7 +223,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             self._raise_error_if_non_valid_mode_scattering(self._diff_opt, self._back_scattering)
             self._set_spectra_type(all_spectra[0])
             self._setup_raw(all_spectra)
-            self._raise_error_if_non_valid_mode_periods(self._diff_opt, self._nperiods)
+            self._raise_error_if_non_valid_period_scattering(self._nperiods, self._back_scattering)
             self._create_foil_workspaces()
 
             for ws_index, spectrum_no in enumerate(all_spectra):
@@ -265,19 +265,28 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 raise RuntimeError("Mixing backward and forward spectra is not permitted."
                                    "Please correct the SpectrumList property.")
         self._back_scattering = all_back
+
 #----------------------------------------------------------------------------------------
 
-    def _raise_error_if_non_valid_mode_periods(self, mode, nperiods):
+    def _raise_error_if_non_valid_period_scattering(self, nperiods, back_scattering):
         """
-        Checks that the input is valid for the Mode of operation selected with the number of periods
-        2 periods - No ThickDifference, NoDoubleDifference, Single Valid
-        3 periods - All valid
-        6 periods - All valid
+        Checks that the input is valid for the number of periods in the data with the current scattering
+        2 Period - Only Forward Scattering
+        3 Period - Only Back Scattering
+        6 Period - Both Forward and Back
         """
-
+        logger.warning("PERIOD/SCATTERING")
+        logger.warning(str(nperiods))
         if nperiods == 2:
-            if mode == "ThickDifference" or mode == "DoubleDifference":
-                raise RuntimeError("%s mode is not valid for 2 period data" % mode)
+            logger.warning("2 PERIODS")
+            if back_scattering:
+                raise RuntimeError("2 period data can only be used for forward scattering spectra")
+
+        if nperiods == 3:
+            logger.warning("3 PERIODS")
+            if not back_scattering:
+                raise RuntimeError("3 period data can only be used for back scattering spectra")
+
 
 #----------------------------------------------------------------------------------------
 
@@ -288,9 +297,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
         DoubleDifference - Back Scattering
         """
 
-        if mode == "DoubleDifference":
+        if mode == "DoubleDifference" or mode == "ThickDifference":
             if not back_scattering:
-                raise RuntimeError("Double Difference can only be used for Back scattering spectra")
+                raise RuntimeError("%s can only be used for back scattering spectra" % mode)
 
 #----------------------------------------------------------------------------------------
 
@@ -316,6 +325,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                    EnableLogging=_LOGGING_)
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
+        self._raise_error_if_non_valid_period_scattering(self._nperiods, self._back_scattering)
         first_ws = raw_group[0]
         foil_out = WorkspaceFactory.create(first_ws)
         x_values = first_ws.readX(0)
@@ -988,7 +998,7 @@ class SpectraToFoilPeriodMap(object):
     def __init__(self, nperiods=6):
         """Constructor. For nperiods set up the mappings"""
         if nperiods == 2:
-            self._one_to_one = {1:1, 2:2}   # Kept to use in reorder method
+            self._one_to_one = {1:1, 2:2}   # Kept for use in reorder method
             self._odd_even =   {1:1, 2:2}
             self._even_odd =   {1:2, 2:1}
         elif nperiods == 3:
