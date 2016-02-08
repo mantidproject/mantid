@@ -837,7 +837,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
 Parameter_sptr ParameterMap::getRecursiveByType(const IComponent *comp,
                                                 const std::string &type) const {
   boost::shared_ptr<const IComponent> compInFocus(comp, NoDeleting());
-  while (compInFocus != NULL) {
+  while (compInFocus != nullptr) {
     Parameter_sptr param = getByType(compInFocus.get(), type);
     if (param) {
       return param;
@@ -939,10 +939,10 @@ std::set<std::string> ParameterMap::names(const IComponent *comp) const {
  */
 std::string ParameterMap::asString() const {
   std::stringstream out;
-  for (auto it = m_map.cbegin(); it != m_map.cend(); ++it) {
-    boost::shared_ptr<Parameter> p = it->second;
-    if (p && it->first) {
-      const IComponent *comp = (const IComponent *)(it->first);
+  for (const auto &mappair : m_map) {
+    const boost::shared_ptr<Parameter> &p = mappair.second;
+    if (p && mappair.first) {
+      const IComponent *comp = (const IComponent *)(mappair.first);
       const IDetector *det = dynamic_cast<const IDetector *>(comp);
       if (det) {
         out << "detID:" << det->getID();
@@ -1047,9 +1047,8 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
 
   std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
 
-  for (auto it = oldParameterNames.begin(); it != oldParameterNames.end();
-       ++it) {
-    Parameter_sptr thisParameter = oldPMap->get(oldComp, *it);
+  for (const auto &oldParameterName : oldParameterNames) {
+    Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
     // Insert the fetched parameter in the m_map
     m_map.insert(std::make_pair(newComp->getComponentID(), thisParameter));
   }

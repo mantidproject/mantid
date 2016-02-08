@@ -279,8 +279,7 @@ void LoadAscii::fillInputValues(std::vector<double> &values,
                                 const std::list<std::string> &columns) const {
   values.resize(columns.size());
   int i = 0;
-  for (auto itr = columns.cbegin(); itr != columns.cend(); ++itr) {
-    std::string value = *itr;
+  for (auto value : columns) {
     boost::trim(value);
     boost::to_lower(value);
     if (value == "nan" || value == "1.#qnan") // ignores nans (not a number) and

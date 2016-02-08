@@ -163,11 +163,11 @@ void PoldiIndexKnownCompounds::initializeIndexedPeaks(
 
   m_indexedPeaks.clear();
 
-  for (size_t i = 0; i < expectedPhases.size(); ++i) {
+  for (const auto &expectedPhase : expectedPhases) {
     PoldiPeakCollection_sptr newCollection =
         boost::make_shared<PoldiPeakCollection>(
             m_measuredPeaks->intensityType());
-    newCollection->setPointGroup(expectedPhases[i]->pointGroup());
+    newCollection->setPointGroup(expectedPhase->pointGroup());
     newCollection->setProfileFunctionName(
         m_measuredPeaks->getProfileFunctionName());
 
@@ -200,10 +200,10 @@ std::vector<Workspace_sptr> PoldiIndexKnownCompounds::getWorkspaces(
     const std::vector<std::string> &workspaceNames) const {
   std::vector<Workspace_sptr> workspaces;
 
-  for (auto it = workspaceNames.begin(); it != workspaceNames.end(); ++it) {
+  for (const auto &workspaceName : workspaceNames) {
     try {
       Workspace_sptr currentWorkspace =
-          AnalysisDataService::Instance().retrieveWS<Workspace>(*it);
+          AnalysisDataService::Instance().retrieveWS<Workspace>(workspaceName);
 
       WorkspaceGroup_sptr groupTest =
           boost::dynamic_pointer_cast<WorkspaceGroup>(currentWorkspace);
@@ -231,9 +231,9 @@ std::vector<PoldiPeakCollection_sptr>
 PoldiIndexKnownCompounds::getPeakCollections(
     const std::vector<Workspace_sptr> &workspaces) const {
   std::vector<PoldiPeakCollection_sptr> peakCollections;
-  for (auto it = workspaces.begin(); it != workspaces.end(); ++it) {
+  for (const auto &workspace : workspaces) {
     TableWorkspace_sptr tableWs =
-        boost::dynamic_pointer_cast<TableWorkspace>(*it);
+        boost::dynamic_pointer_cast<TableWorkspace>(workspace);
 
     if (!tableWs) {
       throw std::invalid_argument(
@@ -251,8 +251,8 @@ std::vector<std::string> PoldiIndexKnownCompounds::getWorkspaceNames(
     const std::vector<Workspace_sptr> &workspaces) const {
   std::vector<std::string> names;
 
-  for (auto it = workspaces.begin(); it != workspaces.end(); ++it) {
-    names.push_back((*it)->getName());
+  for (const auto &workspace : workspaces) {
+    names.push_back(workspace->getName());
   }
 
   return names;
@@ -333,12 +333,12 @@ std::vector<double> PoldiIndexKnownCompounds::getNormalizedContributions(
   }
 
   std::vector<double> normalizedContributions;
-  for (auto it = contributions.begin(); it != contributions.end(); ++it) {
-    if (*it < 0.0) {
+  for (double contribution : contributions) {
+    if (contribution < 0.0) {
       throw std::invalid_argument("Contributions less than 0 are not allowed.");
     }
 
-    normalizedContributions.push_back(*it / sum);
+    normalizedContributions.push_back(contribution / sum);
   }
 
   return normalizedContributions;
@@ -394,9 +394,9 @@ void PoldiIndexKnownCompounds::scaleToExperimentalValues(
   double maximumExperimentalIntensity = getMaximumIntensity(measuredPeaks);
 
   double maximumCalculatedIntensity = 0.0;
-  for (auto it = peakCollections.begin(); it != peakCollections.end(); ++it) {
-    maximumCalculatedIntensity =
-        std::max(getMaximumIntensity(*it), maximumCalculatedIntensity);
+  for (const auto &peakCollection : peakCollections) {
+    maximumCalculatedIntensity = std::max(getMaximumIntensity(peakCollection),
+                                          maximumCalculatedIntensity);
   }
 
   scaleIntensityEstimates(peakCollections,
@@ -705,9 +705,8 @@ void PoldiIndexKnownCompounds::assignCandidates(
    * inserted into the
    * peak collection that holds unindexed peaks.
    */
-  for (auto it = unassignedMeasuredPeaks.begin();
-       it != unassignedMeasuredPeaks.end(); ++it) {
-    collectUnindexedPeak(*it);
+  for (const auto &unassignedMeasuredPeak : unassignedMeasuredPeaks) {
+    collectUnindexedPeak(unassignedMeasuredPeak);
   }
 }
 
@@ -738,8 +737,8 @@ PoldiIndexKnownCompounds::getIntensitySortedPeakCollection(
 
   PoldiPeakCollection_sptr sortedPeaks =
       boost::make_shared<PoldiPeakCollection>(peaks->intensityType());
-  for (size_t i = 0; i < peakVector.size(); ++i) {
-    sortedPeaks->addPeak(peakVector[i]->clone());
+  for (auto &peak : peakVector) {
+    sortedPeaks->addPeak(peak->clone());
   }
 
   return sortedPeaks;

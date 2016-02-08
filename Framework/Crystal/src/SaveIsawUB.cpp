@@ -93,7 +93,7 @@ void SaveIsawUB::exec() {
     ExperimentInfo_sptr ws;
     IMDEventWorkspace_sptr MDWS =
         boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1);
-    if (MDWS != NULL) {
+    if (MDWS != nullptr) {
       ws = MDWS->getExperimentInfo(0);
     } else {
       ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);

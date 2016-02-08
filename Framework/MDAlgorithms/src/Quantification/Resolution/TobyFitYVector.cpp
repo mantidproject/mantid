@@ -28,10 +28,11 @@ unsigned int TobyFitYVector::length() { return 11; }
  *  Construct a Y vector for the current set up.
  */
 TobyFitYVector::TobyFitYVector()
-    : m_yvector(length(), 0.0), m_curRandNums(NULL), m_randIndex(0),
-      m_curObs(NULL), m_curQOmega(NULL), m_moderator(true), m_aperture(true),
-      m_chopper(true), m_chopperJitter(true), m_sampleVolume(true),
-      m_detectorDepth(true), m_detectorArea(true), m_detectionTime(true) {}
+    : m_yvector(length(), 0.0), m_curRandNums(nullptr), m_randIndex(0),
+      m_curObs(nullptr), m_curQOmega(nullptr), m_moderator(true),
+      m_aperture(true), m_chopper(true), m_chopperJitter(true),
+      m_sampleVolume(true), m_detectorDepth(true), m_detectorArea(true),
+      m_detectionTime(true) {}
 
 /**
  * Adds the attributes from the vector to the given model
@@ -148,10 +149,10 @@ size_t TobyFitYVector::recalculate(const std::vector<double> &randomNums,
   calculateTimeBinContribution();
   size_t randUsed = m_randIndex;
 
-  m_curRandNums = NULL;
+  m_curRandNums = nullptr;
   m_randIndex = 0;
-  m_curObs = NULL;
-  m_curQOmega = NULL;
+  m_curObs = nullptr;
+  m_curQOmega = nullptr;
 
   return randUsed;
 }

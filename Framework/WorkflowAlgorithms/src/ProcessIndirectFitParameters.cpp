@@ -173,8 +173,7 @@ void ProcessIndirectFitParameters::exec() {
   workflowProg.report("Converting text axis");
   auto axis = new TextAxis(outputWs->getNumberHistograms());
   size_t offset = 0;
-  for (size_t j = 0; j < workspaceNames.size(); j++) {
-    auto peakWs = workspaceNames.at(j);
+  for (auto peakWs : workspaceNames) {
     for (size_t k = 0; k < peakWs.size(); k++) {
       axis->setLabel((k + offset), peakWs.at(k));
     }
@@ -258,9 +257,9 @@ ProcessIndirectFitParameters::reorder2DVector(
   auto reorderedVector = std::vector<std::vector<std::string>>();
   for (size_t i = 0; i < maximumLength; i++) {
     std::vector<std::string> temp;
-    for (size_t j = 0; j < original.size(); j++) {
-      if (original.at(j).size() > i) {
-        temp.push_back(original.at(j).at(i));
+    for (const auto &j : original) {
+      if (j.size() > i) {
+        temp.push_back(j.at(i));
       }
     }
     reorderedVector.push_back(temp);

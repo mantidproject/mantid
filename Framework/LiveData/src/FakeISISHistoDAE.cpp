@@ -311,7 +311,7 @@ using namespace Kernel;
 using namespace API;
 
 /// (Empty) Constructor
-FakeISISHistoDAE::FakeISISHistoDAE() : m_server(NULL) {}
+FakeISISHistoDAE::FakeISISHistoDAE() : m_server(nullptr) {}
 
 /// Destructor
 FakeISISHistoDAE::~FakeISISHistoDAE() {
@@ -368,7 +368,7 @@ void FakeISISHistoDAE::exec() {
   }
   if (m_server) {
     m_server->stop();
-    m_server = NULL;
+    m_server = nullptr;
   }
   socket.close();
 }

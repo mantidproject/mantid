@@ -15,7 +15,7 @@ using Kernel::Quat;
 * @param map :: a ParameterMap to parameterize the component
 */
 Component::Component(const IComponent *base, const ParameterMap *map)
-    : m_parent(NULL), m_base(dynamic_cast<const Component *>(base)),
+    : m_parent(nullptr), m_base(dynamic_cast<const Component *>(base)),
       m_map(map) {
   if (!m_base) {
     throw std::invalid_argument(
@@ -28,14 +28,15 @@ Component::Component(const IComponent *base, const ParameterMap *map)
 *  Create a component with null parent
 */
 Component::Component()
-    : m_parent(NULL), m_base(NULL), m_map(NULL), m_name(), m_pos(), m_rot() {}
+    : m_parent(nullptr), m_base(nullptr), m_map(nullptr), m_name(), m_pos(),
+      m_rot() {}
 
 /** Constructor by value
 *  @param name :: Component name
 *  @param parent :: parent Component (optional)
 */
 Component::Component(const std::string &name, IComponent *parent)
-    : m_parent(parent), m_base(NULL), m_map(NULL), m_name(name), m_pos(),
+    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name), m_pos(),
       m_rot() {}
 
 /** Constructor by value
@@ -46,7 +47,7 @@ Component::Component(const std::string &name, IComponent *parent)
 */
 Component::Component(const std::string &name, const V3D &position,
                      IComponent *parent)
-    : m_parent(parent), m_base(NULL), m_map(NULL), m_name(name),
+    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name),
       m_pos(position), m_rot() {}
 
 /** Constructor
@@ -57,7 +58,7 @@ Component::Component(const std::string &name, const V3D &position,
 */
 Component::Component(const std::string &name, const V3D &position,
                      const Quat &rotation, IComponent *parent)
-    : m_parent(parent), m_base(NULL), m_map(NULL), m_name(name),
+    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name),
       m_pos(position), m_rot(rotation) {}
 
 /// Destructor
@@ -67,7 +68,7 @@ Component::~Component() {}
 /** Return true if the Component is, in fact, parametrized
 *  (that is - it has a valid parameter map)
 */
-bool Component::isParametrized() const { return (m_map != NULL); }
+bool Component::isParametrized() const { return (m_map != nullptr); }
 
 /** Clone method
 *  Make a copy of the Component
@@ -445,9 +446,9 @@ Component::getParameterNamesByComponent() const {
     return retVal;
 
   std::set<std::string> names = m_map->names(this);
-  for (auto itNames = names.begin(); itNames != names.end(); ++itNames) {
+  for (const auto &name : names) {
     retVal.insert(
-        std::pair<std::string, ComponentID>(*itNames, this->getComponentID()));
+        std::pair<std::string, ComponentID>(name, this->getComponentID()));
   }
 
   // Walk up the tree and find the parameters attached to the parent components

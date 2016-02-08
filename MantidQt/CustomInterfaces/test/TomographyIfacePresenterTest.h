@@ -212,11 +212,19 @@ public:
     tools.push_back(g_ccpi);
     tools.push_back("Savu");
 
-    for (size_t i = 0; i < tools.size(); i++) {
+    TSM_ASSERT_EQUALS("There should be 4 tools in this test", tools.size(), 4);
+    // up to this index the tools are supported
+    const size_t indexToolsWork = 1;
+    for (size_t i = 0; i < 3; i++) {
       EXPECT_CALL(mockView, currentReconTool())
           .Times(1)
           .WillOnce(Return(tools[i]));
-      EXPECT_CALL(mockView, currentComputeResource()).Times(0);
+      if (i <= indexToolsWork) {
+        EXPECT_CALL(mockView, currentComputeResource()).Times(1);
+      } else {
+        EXPECT_CALL(mockView, currentComputeResource()).Times(0);
+      }
+
       EXPECT_CALL(mockView, enableRunReconstruct(testing::_)).Times(1);
       EXPECT_CALL(mockView, enableConfigTool(testing::_)).Times(1);
 
@@ -309,7 +317,8 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     EXPECT_CALL(mockView, currentComputeResource()).Times(0);
-    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_)).Times(0);
+    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_, testing::_))
+        .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -323,7 +332,8 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     EXPECT_CALL(mockView, currentComputeResource()).Times(0);
-    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_)).Times(0);
+    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_, testing::_))
+        .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -360,12 +370,13 @@ public:
                       "expected (maximum angle)",
                       def.prep.maxAngle, 360.0);
 
-    TSM_ASSERT_LESS_THAN_EQUALS("Pre-processing settings default values should be as "
-                      "expected (scale down)",
-                      def.prep.scaleDownFactor, 1);
+    TSM_ASSERT_LESS_THAN_EQUALS(
+        "Pre-processing settings default values should be as "
+        "expected (scale down)",
+        def.prep.scaleDownFactor, 1);
 
     TSM_ASSERT_DELTA("Post-processing settings default values should be as "
-                      "expected (circular mask)",
+                     "expected (circular mask)",
                      def.postp.circMaskRadius, 0.94, 1e-5);
 
     TSM_ASSERT_EQUALS("Post-processing settings default values should be as "
@@ -387,12 +398,14 @@ public:
         .Times(1)
         .WillOnce(Return(TomoPathsConfig()));
 
+    // user changes some paths
     pres.notify(ITomographyIfacePresenter::TomoPathsChanged);
 
     EXPECT_CALL(mockView, currentComputeResource())
-        .Times(1)
-        .WillOnce(Return(g_scarfName));
+        .Times(2)
+        .WillRepeatedly(Return(g_scarfName));
 
+    // user changes the compute resource
     pres.notify(ITomographyIfacePresenter::CompResourceChanged);
 
     EXPECT_CALL(mockView, currentReconTool())
@@ -404,15 +417,41 @@ public:
         .Times(1)
         .WillOnce(Return(toolsSettings));
 
+    // user opens dialog and sets up a reconstruction tool
     pres.notify(ITomographyIfacePresenter::SetupReconTool);
 
-    // should not use this for now:
-    EXPECT_CALL(mockView, prePostProcSettings()).Times(0);
+    TomoPathsConfig pathsCfg;
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(pathsCfg));
+
+    ImageStackPreParams roiEtc;
+    EXPECT_CALL(mockView, currentROIEtcParams())
+        .Times(1)
+        .WillOnce(Return(roiEtc));
+
+    EXPECT_CALL(mockView, tomopyMethod()).Times(1).WillOnce(Return(""));
+
+    EXPECT_CALL(mockView, astraMethod()).Times(1).WillOnce(Return(""));
+
+    TomoReconFiltersSettings filters;
+    EXPECT_CALL(mockView, prePostProcSettings())
+        .Times(1)
+        .WillOnce(Return(filters));
+
+    EXPECT_CALL(mockView, externalInterpreterPath())
+        .Times(1)
+        .WillOnce(Return(""));
+
+    EXPECT_CALL(mockView, pathLocalReconScripts())
+        .Times(1)
+        .WillOnce(Return(""));
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
+    // finally, user tries to run a reconstruction job
     pres.notify(ITomographyIfacePresenter::RunReconstruct);
   }
 

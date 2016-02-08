@@ -352,10 +352,8 @@ Quat &Quat::operator*=(const Quat &_q) {
  */
 bool Quat::operator==(const Quat &q) const {
   using namespace std;
-  return (fabs(w - q.w) > Tolerance || fabs(a - q.a) > Tolerance ||
-          fabs(b - q.b) > Tolerance || fabs(c - q.c) > Tolerance)
-             ? false
-             : true;
+  return !(fabs(w - q.w) > Tolerance || fabs(a - q.a) > Tolerance ||
+           fabs(b - q.b) > Tolerance || fabs(c - q.c) > Tolerance);
 
   // return (quat_tol(w,q.w) && quat_tol(a,q.a) && quat_tol(b,q.b) &&
   // quat_tol(c,q.c));

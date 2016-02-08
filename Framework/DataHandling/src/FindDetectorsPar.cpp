@@ -67,7 +67,7 @@ void FindDetectorsPar::exec() {
 
   // Get the input workspace
   const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-  if (inputWS.get() == NULL) {
+  if (inputWS.get() == nullptr) {
     throw(Kernel::Exception::NotFoundError(
         "can not obtain InoputWorkspace for the algorithm to work", ""));
   }
@@ -252,7 +252,7 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,
 
   Kernel::V3D er(0, 1, 0), e_th,
       ez(0, 0, 1); // ez along beamline, which is always oz;
-  if (dist2Det)
+  if (dist2Det != 0.0)
     er = toDet / dist2Det; // direction to the detector
   Kernel::V3D e_tg =
       er.cross_prod(ez); // tangential to the ring and anticloakwise;
@@ -378,16 +378,16 @@ void FindDetectorsPar::extractAndLinearize(
   this->detID.resize(nDetectors);
 
   nDetectors = 0;
-  for (size_t i = 0; i < detPar.size(); i++) {
-    if (detPar[i].detID < 0)
+  for (const auto &parameter : detPar) {
+    if (parameter.detID < 0)
       continue;
 
-    azimuthal[nDetectors] = detPar[i].azimutAngle;
-    polar[nDetectors] = detPar[i].polarAngle;
-    azimuthalWidth[nDetectors] = detPar[i].azimWidth;
-    polarWidth[nDetectors] = detPar[i].polarWidth;
-    secondaryFlightpath[nDetectors] = detPar[i].secondaryFlightPath;
-    detID[nDetectors] = static_cast<size_t>(detPar[i].detID);
+    azimuthal[nDetectors] = parameter.azimutAngle;
+    polar[nDetectors] = parameter.polarAngle;
+    azimuthalWidth[nDetectors] = parameter.azimWidth;
+    polarWidth[nDetectors] = parameter.polarWidth;
+    secondaryFlightpath[nDetectors] = parameter.secondaryFlightPath;
+    detID[nDetectors] = static_cast<size_t>(parameter.detID);
     nDetectors++;
   }
   // store caluclated value

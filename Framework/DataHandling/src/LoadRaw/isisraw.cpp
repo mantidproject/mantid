@@ -8,7 +8,7 @@
 #define FAILURE 1
 
 /// stuff
-ISISRAW::ISISRAW() : m_crpt(0), dat1(0) {
+ISISRAW::ISISRAW() : m_crpt(nullptr), dat1(nullptr) {
   int i, j;
   // section 1
   frmt_ver_no = 2; // format version number VER1 (=2)
@@ -137,23 +137,24 @@ int ISISRAW::addItems() {
 /// stuff
 ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt)
     : m_crpt(crpt), frmt_ver_no(0), data_format(0), ver2(0), r_number(0),
-      ver3(0), i_det(0), i_mon(0), i_use(0), mdet(0), monp(0), spec(0), delt(0),
-      len2(0), code(0), tthe(0), ut(0), ver4(0), ver5(0), crat(0), modn(0),
-      mpos(0), timr(0), udet(0), ver6(0), t_ntrg(0), t_nfpp(0), t_nper(0),
-      t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(0), ver7(0), u_dat(0), ver8(0),
-      ddes(0), dat1(0) {
+      ver3(0), i_det(0), i_mon(0), i_use(0), mdet(nullptr), monp(nullptr),
+      spec(nullptr), delt(nullptr), len2(nullptr), code(nullptr), tthe(nullptr),
+      ut(nullptr), ver4(0), ver5(0), crat(nullptr), modn(nullptr),
+      mpos(nullptr), timr(nullptr), udet(nullptr), ver6(0), t_ntrg(0),
+      t_nfpp(0), t_nper(0), t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(nullptr),
+      ver7(0), u_dat(nullptr), ver8(0), ddes(nullptr), dat1(nullptr) {
   memset(r_title, ' ', sizeof(r_title));
   memset(i_inst, ' ', sizeof(i_inst));
-  for (int i = 0; i < 256; i++) {
-    t_pmap[i] = 1; // period number for each basic period
+  for (auto &value : t_pmap) {
+    value = 1; // period number for each basic period
   }
   memset(t_tcm1, 0, sizeof(t_tcm1)); // time channel mode
   memset(t_tcp1, 0, sizeof(t_tcp1)); // time channel parameters
   e_nse = 0;
-  e_seblock = 0;
+  e_seblock = nullptr;
   u_len = 0;
   logsect.nlines = 0;
-  logsect.lines = 0;
+  logsect.lines = nullptr;
   addItems();
   updateFromCRPT();
 }
@@ -162,23 +163,24 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt)
 /// stuff
 ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt, bool doUpdateFromCRPT)
     : m_crpt(crpt), frmt_ver_no(0), data_format(0), ver2(0), r_number(0),
-      ver3(0), i_det(0), i_mon(0), i_use(0), mdet(0), monp(0), spec(0), delt(0),
-      len2(0), code(0), tthe(0), ut(0), ver4(0), ver5(0), crat(0), modn(0),
-      mpos(0), timr(0), udet(0), ver6(0), t_ntrg(0), t_nfpp(0), t_nper(0),
-      t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(0), ver7(0), u_dat(0), ver8(0),
-      ddes(0), dat1(0) {
+      ver3(0), i_det(0), i_mon(0), i_use(0), mdet(nullptr), monp(nullptr),
+      spec(nullptr), delt(nullptr), len2(nullptr), code(nullptr), tthe(nullptr),
+      ut(nullptr), ver4(0), ver5(0), crat(nullptr), modn(nullptr),
+      mpos(nullptr), timr(nullptr), udet(nullptr), ver6(0), t_ntrg(0),
+      t_nfpp(0), t_nper(0), t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(nullptr),
+      ver7(0), u_dat(nullptr), ver8(0), ddes(nullptr), dat1(nullptr) {
   memset(r_title, ' ', sizeof(r_title));
   memset(i_inst, ' ', sizeof(i_inst));
-  for (int i = 0; i < 256; i++) {
-    t_pmap[i] = 1; // period number for each basic period
+  for (auto &value : t_pmap) {
+    value = 1; // period number for each basic period
   }
   memset(t_tcm1, 0, sizeof(t_tcm1)); // time channel mode
   memset(t_tcp1, 0, sizeof(t_tcp1)); // time channel parameters
   e_nse = 0;
-  e_seblock = 0;
+  e_seblock = nullptr;
   u_len = 0;
   logsect.nlines = 0;
-  logsect.lines = 0;
+  logsect.lines = nullptr;
   addItems();
   if (doUpdateFromCRPT) {
     updateFromCRPT();
@@ -188,7 +190,7 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt, bool doUpdateFromCRPT)
 // update from bound CRPT
 /// stuff
 int ISISRAW::updateFromCRPT() {
-  if (m_crpt == NULL) {
+  if (m_crpt == nullptr) {
     return 0;
   }
 #ifndef REAL_CRPT
@@ -481,7 +483,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
   auto outbuff = new char[outbuff_size];
   if (!read_data) {
     ndes = ndata = 0;
-    dat1 = NULL;
+    dat1 = nullptr;
     // seek to position right after the data if we want to read the log
     if (from_file) {
       ndes = t_nper * (t_nsp1 + 1);
@@ -714,7 +716,7 @@ int ISISRAW::ioRAW(FILE *file, LOG_LINE *s, int len, bool from_file) {
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, char *s, int len, bool from_file) {
-  if ((len <= 0) || (s == 0)) {
+  if ((len <= 0) || (s == nullptr)) {
     return 0;
   }
 
@@ -731,7 +733,7 @@ int ISISRAW::ioRAW(FILE *file, char *s, int len, bool from_file) {
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, int *s, int len, bool from_file) {
-  if ((len <= 0) || (s == 0)) {
+  if ((len <= 0) || (s == nullptr)) {
     return 0;
   }
 
@@ -748,7 +750,7 @@ int ISISRAW::ioRAW(FILE *file, int *s, int len, bool from_file) {
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, uint32_t *s, int len, bool from_file) {
-  if ((len <= 0) || (s == 0)) {
+  if ((len <= 0) || (s == nullptr)) {
     return 0;
   }
 
@@ -765,7 +767,7 @@ int ISISRAW::ioRAW(FILE *file, uint32_t *s, int len, bool from_file) {
 /// stuff
 int ISISRAW::ioRAW(FILE *file, float *s, int len, bool from_file) {
   int errcode = 0;
-  if ((len <= 0) || (s == 0)) {
+  if ((len <= 0) || (s == nullptr)) {
     return 0;
   }
 
@@ -789,10 +791,10 @@ int ISISRAW::ioRAW(FILE *file, char **s, int len, bool from_file) {
       *s = new char[len];
       ioRAW(file, *s, len, from_file);
     } else {
-      *s = 0;
+      *s = nullptr;
     }
   } else {
-    if (*s != 0) {
+    if (*s != nullptr) {
       ioRAW(file, *s, len, from_file);
     }
   }
@@ -806,10 +808,10 @@ int ISISRAW::ioRAW(FILE *file, int **s, int len, bool from_file) {
       *s = new int[len];
       ioRAW(file, *s, len, from_file);
     } else {
-      *s = 0;
+      *s = nullptr;
     }
   } else {
-    if (*s != 0) {
+    if (*s != nullptr) {
       ioRAW(file, *s, len, from_file);
     }
   }
@@ -823,10 +825,10 @@ int ISISRAW::ioRAW(FILE *file, uint32_t **s, int len, bool from_file) {
       *s = new uint32_t[len];
       ioRAW(file, *s, len, from_file);
     } else {
-      *s = 0;
+      *s = nullptr;
     }
   } else {
-    if (*s != 0) {
+    if (*s != nullptr) {
       ioRAW(file, *s, len, from_file);
     }
   }
@@ -840,10 +842,10 @@ int ISISRAW::ioRAW(FILE *file, float **s, int len, bool from_file) {
       *s = new float[len];
       ioRAW(file, *s, len, from_file);
     } else {
-      *s = 0;
+      *s = nullptr;
     }
   } else {
-    if (*s != 0) {
+    if (*s != nullptr) {
       ioRAW(file, *s, len, from_file);
     }
   }
@@ -857,10 +859,10 @@ int ISISRAW::ioRAW(FILE *file, SE_STRUCT **s, int len, bool from_file) {
       *s = new SE_STRUCT[len];
       ioRAW(file, *s, len, from_file);
     } else {
-      *s = 0;
+      *s = nullptr;
     }
   } else {
-    if (*s != 0) {
+    if (*s != nullptr) {
       ioRAW(file, *s, len, from_file);
     }
   }
@@ -874,10 +876,10 @@ int ISISRAW::ioRAW(FILE *file, DDES_STRUCT **s, int len, bool from_file) {
       *s = new DDES_STRUCT[len];
       ioRAW(file, *s, len, from_file);
     } else {
-      *s = 0;
+      *s = nullptr;
     }
   } else {
-    if (*s != 0) {
+    if (*s != nullptr) {
       ioRAW(file, *s, len, from_file);
     }
   }
@@ -891,10 +893,10 @@ int ISISRAW::ioRAW(FILE *file, LOG_LINE **s, int len, bool from_file) {
       *s = new LOG_LINE[len];
       ioRAW(file, *s, len, from_file);
     } else {
-      *s = 0;
+      *s = nullptr;
     }
   } else {
-    if (*s != 0) {
+    if (*s != nullptr) {
       ioRAW(file, *s, len, from_file);
     }
   }
@@ -922,7 +924,7 @@ int ISISRAW::vmstime(char *timbuf, int len, time_t time_value) {
    * get time in VMS format 01-JAN-1970 00:00:00
    */
   size_t i, n;
-  struct tm *tmstruct = NULL;
+  struct tm *tmstruct = nullptr;
 #ifdef MS_VISUAL_STUDIO
   errno_t err = localtime_s(tmstruct, &time_value);
   if (err) {
@@ -948,7 +950,7 @@ int ISISRAW::readFromFile(const char *filename, bool read_data) {
 #else  //_WIN32
   FILE *input_file = fopen(filename, "rb");
 #endif //_WIN32
-  if (input_file != NULL) {
+  if (input_file != nullptr) {
     ioRAW(input_file, true, read_data);
     fclose(input_file);
     return 0;

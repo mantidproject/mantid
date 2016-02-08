@@ -315,7 +315,7 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
                                   centers));
     }
   }
-  ws->splitAllIfNeeded(NULL);
+  ws->splitAllIfNeeded(nullptr);
   ws->refreshCache();
   return ws;
 }

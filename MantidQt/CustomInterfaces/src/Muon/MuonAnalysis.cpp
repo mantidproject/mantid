@@ -2620,8 +2620,7 @@ void MuonAnalysis::changeTab(int newTabIndex)
 
     // setFitPropertyBrowser() above changes the fitting range, so we have to
     // either initialise it to the correct values:
-    if ( !xmin && !xmax )
-    {
+    if (xmin == 0.0 && xmax == 0.0) {
       // A previous fitting range of [0,0] means this is the first time the users goes to "Data Analysis" tab
       // We have to initialise the fitting range
       m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());

@@ -257,7 +257,7 @@ void ProcessBackground::exec() {
   if (intemp < 0)
     throw std::invalid_argument(
         "WorkspaceIndex is not allowed to be less than 0. ");
-  m_wsIndex = size_t(intemp);
+  m_wsIndex = intemp;
   if (m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms()))
     throw runtime_error("Workspace index is out of boundary.");
 
@@ -598,9 +598,9 @@ void ProcessBackground::selectFromGivenFunction() {
   int bkgdorder =
       static_cast<int>(parmap.size() - 1); // A0 - A(n) total n+1 parameters
   bkgdfunc->setAttributeValue("n", bkgdorder);
-  for (auto mit = parmap.begin(); mit != parmap.end(); ++mit) {
-    string parname = mit->first;
-    double parvalue = mit->second;
+  for (auto &mit : parmap) {
+    string parname = mit.first;
+    double parvalue = mit.second;
     bkgdfunc->setParameter(parname, parvalue);
   }
 
@@ -1096,8 +1096,8 @@ size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX,
 
   // Count non-excluded region
   size_t count = 0;
-  for (size_t i = 0; i < v_useX.size(); ++i)
-    if (v_useX[i])
+  for (auto &&useX : v_useX)
+    if (useX)
       ++count;
 
   return count;

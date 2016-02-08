@@ -7,7 +7,8 @@ TomoToolConfigTomoPy::TomoToolConfigTomoPy(QWidget *parent) : QDialog(parent) {}
 
 TomoToolConfigSavu::TomoToolConfigSavu(QWidget *parent) : QMainWindow(parent) {}
 
-TomoToolConfigAstra::TomoToolConfigAstra(QWidget *parent) : QDialog(parent) {}
+TomoToolConfigAstra::TomoToolConfigAstra(QWidget *parent) : QDialog(parent) {
+}
 
 TomoToolConfigCustom::TomoToolConfigCustom(QWidget *parent) : QDialog(parent) {}
 
@@ -22,12 +23,13 @@ TomoToolConfigDialog::TomoToolConfigDialog(QWidget *parent) : QDialog(parent) {
   editOpt = new QLineEdit("/work/imat");
   hOpt = new QHBoxLayout();
   hOpt->addWidget(labelOpt);
+
   hOpt->addWidget(editOpt);
 
   okButton = new QPushButton("Ok");
   cancelButton = new QPushButton("Cancel");
   hBut = new QHBoxLayout();
-  hBut->insertStretch(0,1);
+  hBut->insertStretch(0, 1);
   hBut->addWidget(okButton);
   hBut->addWidget(cancelButton);
 

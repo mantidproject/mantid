@@ -112,15 +112,15 @@ void Q1D2::exec() {
   // FIXME: how to examine the wavePixelAdj?
   g_log.debug() << "All input workspaces were found to be valid\n";
   // normalization as a function of wavelength (i.e. centers of x-value bins)
-  double const *const binNorms = waveAdj ? &(waveAdj->readY(0)[0]) : NULL;
+  double const *const binNorms = waveAdj ? &(waveAdj->readY(0)[0]) : nullptr;
   // error on the wavelength normalization
-  double const *const binNormEs = waveAdj ? &(waveAdj->readE(0)[0]) : NULL;
+  double const *const binNormEs = waveAdj ? &(waveAdj->readE(0)[0]) : nullptr;
 
   // define the (large number of) data objects that are going to be used in all
   // iterations of the loop below
 
   // Flag to decide if Q Resolution is to be used
-  auto useQResolution = qResolution ? true : false;
+  auto useQResolution = static_cast<bool>(qResolution);
 
   // this will become the output workspace from this algorithm
   MatrixWorkspace_sptr outputWS =

@@ -64,10 +64,7 @@ bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo) const {
   //       std::cout << "MonIDPropChanger::isConditionChanged() called  ";
   //       std::cout << monitors_changed << std::endl;
 
-  if (!monitors_changed)
-    return false;
-
-  return true;
+  return monitors_changed;
 }
 // function which modifies the allowed values for the list of monitors.
 void MonIDPropChanger::applyChanges(const IPropertyManager *algo,

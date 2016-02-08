@@ -714,7 +714,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
 
   // Set up GSL minimzer
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *s = NULL;
+  gsl_multimin_fminimizer *s = nullptr;
   gsl_vector *ss, *x;
   gsl_multimin_function minex_func;
 
@@ -1153,9 +1153,9 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
 
   // set up columns
   m_peakOffsetTableWS->addColumn("int", "WorkspaceIndex");
-  for (size_t i = 0; i < m_peakPositions.size(); ++i) {
+  for (double m_peakPosition : m_peakPositions) {
     std::stringstream namess;
-    namess << "@" << std::setprecision(5) << m_peakPositions[i];
+    namess << "@" << std::setprecision(5) << m_peakPosition;
     m_peakOffsetTableWS->addColumn("str", namess.str());
   }
   m_peakOffsetTableWS->addColumn("double", "OffsetDeviation");

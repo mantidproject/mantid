@@ -74,15 +74,15 @@ void ClearInstrumentParameters::exec() {
   ParameterMap::pmap paramsToKeep;
 
   // Go through all the parameters, keep a hold of any we don't want to clear.
-  for (auto paramIt = params->begin(); paramIt != params->end(); ++paramIt) {
+  for (auto &paramIt : *params) {
     // Are we keeping the location parameters?
-    const std::string pName = (*paramIt).second->name();
+    const std::string pName = paramIt.second->name();
     if (!clearLocationParams &&
         (pName == "x" || pName == "y" || pName == "z" ||
          pName == "r-position" || pName == "t-position" ||
          pName == "p-position" || pName == "rotx" || pName == "roty" ||
          pName == "rotz")) {
-      paramsToKeep.insert(*paramIt);
+      paramsToKeep.insert(paramIt);
     }
   }
 
@@ -90,9 +90,8 @@ void ClearInstrumentParameters::exec() {
   params->clear();
 
   // Add any parameters we're keeping back into the parameter map.
-  for (auto paramIt = paramsToKeep.begin(); paramIt != paramsToKeep.end();
-       ++paramIt) {
-    params->add((*paramIt).first, (*paramIt).second);
+  for (auto &paramIt : paramsToKeep) {
+    params->add(paramIt.first, paramIt.second);
   }
 }
 

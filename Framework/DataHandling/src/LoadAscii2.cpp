@@ -28,7 +28,7 @@ using namespace API;
 LoadAscii2::LoadAscii2()
     : m_columnSep(), m_separatorIndex(), m_comment(), m_baseCols(0),
       m_specNo(0), m_lastBins(0), m_curBins(0), m_spectraStart(),
-      m_spectrumIDcount(0), m_lineNo(0), m_spectra(), m_curSpectra(NULL) {}
+      m_spectrumIDcount(0), m_lineNo(0), m_spectra(), m_curSpectra(nullptr) {}
 
 /**
 * Return the confidence with with this algorithm can load the file
@@ -556,8 +556,7 @@ void LoadAscii2::fillInputValues(std::vector<double> &values,
                                  const std::list<std::string> &columns) const {
   values.resize(columns.size());
   int i = 0;
-  for (auto itr = columns.cbegin(); itr != columns.cend(); ++itr) {
-    std::string value = *itr;
+  for (auto value : columns) {
     boost::trim(value);
     boost::to_lower(value);
     if (value == "nan" || value == "1.#qnan") // ignores nans (not a number) and
@@ -597,10 +596,10 @@ void LoadAscii2::init() {
                                {"UserDefined", "UserDefined"}};
   // For the ListValidator
   std::vector<std::string> sepOptions;
-  for (size_t i = 0; i < 7; ++i) {
-    std::string option = spacers[i][0];
+  for (auto &spacer : spacers) {
+    std::string option = spacer[0];
     m_separatorIndex.insert(
-        std::pair<std::string, std::string>(option, spacers[i][1]));
+        std::pair<std::string, std::string>(option, spacer[1]));
     sepOptions.push_back(option);
   }
   declareProperty("Separator", "Automatic",

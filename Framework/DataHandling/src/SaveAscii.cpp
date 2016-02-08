@@ -59,10 +59,10 @@ void SaveAscii::init() {
                                {"SemiColon", ";"},
                                {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
-  for (size_t i = 0; i < 6; ++i) {
-    std::string option = spacers[i][0];
+  for (auto &spacer : spacers) {
+    std::string option = spacer[0];
     m_separatorIndex.insert(
-        std::pair<std::string, std::string>(option, spacers[i][1]));
+        std::pair<std::string, std::string>(option, spacer[1]));
     sepOptions.push_back(option);
   }
 
@@ -150,11 +150,11 @@ void SaveAscii::exec() {
 
   // Add spectra list into the index list
   if (!spec_list.empty()) {
-    for (size_t i = 0; i < spec_list.size(); i++) {
-      if (spec_list[i] >= nSpectra)
+    for (auto &spec : spec_list) {
+      if (spec >= nSpectra)
         throw std::invalid_argument("Inconsistent spectra list");
       else
-        idx.insert(spec_list[i]);
+        idx.insert(spec);
     }
   }
   if (!idx.empty())
@@ -181,10 +181,10 @@ void SaveAscii::exec() {
           file << " , DX" << spec;
       }
     else
-      for (auto spec = idx.cbegin(); spec != idx.cend(); ++spec) {
-        file << comstr << "Y" << *spec << comstr << errstr << *spec << errstr2;
+      for (auto spec : idx) {
+        file << comstr << "Y" << spec << comstr << errstr << spec << errstr2;
         if (write_dx)
-          file << " , DX" << *spec;
+          file << " , DX" << spec;
       }
     file << std::endl;
   }
@@ -214,11 +214,11 @@ void SaveAscii::exec() {
         file << ws->readE(spec)[bin];
       }
     else
-      for (auto spec = idx.cbegin(); spec != idx.cend(); ++spec) {
+      for (auto spec : idx) {
         file << sep;
-        file << ws->readY(*spec)[bin];
+        file << ws->readY(spec)[bin];
         file << sep;
-        file << ws->readE(*spec)[bin];
+        file << ws->readE(spec)[bin];
       }
 
     if (write_dx) {

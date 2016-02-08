@@ -239,13 +239,13 @@ void MaxEnt::exec() {
 
       // Apply distance penalty (SB eq. 33)
       double sum = 0.;
-      for (size_t i = 0; i < image.size(); i++)
-        sum += fabs(image[i]);
+      for (double point : image)
+        sum += fabs(point);
 
       double dist = distance(dirs.s2, beta);
       if (dist > distEps * sum / background) {
-        for (size_t k = 0; k < beta.size(); k++) {
-          beta[k] *= sqrt(sum / dist / background);
+        for (double &k : beta) {
+          k *= sqrt(sum / dist / background);
         }
       }
 
@@ -481,7 +481,7 @@ SearchDirections MaxEnt::calculateSearchDirections(
       dirs.s2[k][l] = 0.;
       dirs.c2[k][l] = 0.;
       for (size_t i = 0; i < npoints; i++) {
-        if (error[i])
+        if (error[i] != 0.0)
           dirs.c2[k][l] +=
               dirs.xDat[k][i] * dirs.xDat[l][i] / error[i] / error[i];
         dirs.s2[k][l] -= dirs.xIm[k][i] * dirs.xIm[l][i] / fabs(image[i]);
@@ -522,7 +522,7 @@ double MaxEnt::getChiSq(const std::vector<double> &data,
   // ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
   double chiSq = 0;
   for (size_t i = 0; i < npoints; i++) {
-    if (errors[i]) {
+    if (errors[i] != 0.0) {
       double term = (data[i] - dataCalc[i]) / errors[i];
       chiSq += term * term;
     }
@@ -550,7 +550,7 @@ std::vector<double> MaxEnt::getCGrad(const std::vector<double> &data,
   // CGrad_i = -2 * [ data_i - dataCalc_i ] / [ error_i ]^2
   std::vector<double> cgrad(npoints, 0.);
   for (size_t i = 0; i < npoints; i++) {
-    if (errors[i])
+    if (errors[i] != 0.0)
       cgrad[i] = -2. * (data[i] - dataCalc[i]) / errors[i] / errors[i];
   }
 

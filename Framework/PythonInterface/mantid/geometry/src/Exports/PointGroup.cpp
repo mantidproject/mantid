@@ -27,8 +27,8 @@ boost::python::list getEquivalents(PointGroup &self, const object &hkl) {
       self.getEquivalents(Converters::PyObjectToV3D(hkl)());
 
   boost::python::list pythonEquivalents;
-  for (auto it = equivalents.begin(); it != equivalents.end(); ++it) {
-    pythonEquivalents.append(*it);
+  for (const auto &equivalent : equivalents) {
+    pythonEquivalents.append(equivalent);
   }
 
   return pythonEquivalents;

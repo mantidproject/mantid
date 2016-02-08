@@ -183,6 +183,7 @@ private:
   QWidget * createInstrumentTreeTab(QTabWidget* ControlsTab);
   void createTabs(QSettings& settings);
   void saveSettings();
+  void readSettings();
 
   QString asString(const std::vector<int>& numbers) const;
   QString confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets);
@@ -244,6 +245,7 @@ private:
   bool m_blocked;     
   QList<int> m_selectedDetectors;
   bool m_instrumentDisplayContextMenuOn;
+  const static std::string m_windowRendSettingsGroup;
 
 private:
   /// ADS notification handlers

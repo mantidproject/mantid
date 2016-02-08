@@ -302,12 +302,12 @@ MantidVecPtr CreateSimulationWorkspace::createBinBoundaries() const {
  */
 void CreateSimulationWorkspace::applyDetectorMapping() {
   size_t wsIndex(0);
-  for (auto iter = m_detGroups.begin(); iter != m_detGroups.end(); ++iter) {
+  for (auto &detGroup : m_detGroups) {
     ISpectrum *spectrum = m_outputWS->getSpectrum(wsIndex);
     spectrum->setSpectrumNo(
         static_cast<specid_t>(wsIndex + 1)); // Ensure a contiguous mapping
     spectrum->clearDetectorIDs();
-    spectrum->addDetectorIDs(iter->second);
+    spectrum->addDetectorIDs(detGroup.second);
     ++wsIndex;
   }
 }

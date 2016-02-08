@@ -130,7 +130,7 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   double xmax_wksp = inputWS->getXMax();
   EventWorkspace_const_sptr inputEventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (inputEventWS != NULL) {
+  if (inputEventWS != nullptr) {
     xmin_wksp = inputEventWS->getTofMin();
     xmax_wksp = inputEventWS->getTofMax();
   }
@@ -318,7 +318,7 @@ void ResampleX::exec() {
   // start doing actual work
   EventWorkspace_const_sptr inputEventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (inputEventWS != NULL) {
+  if (inputEventWS != nullptr) {
     if (m_preserveEvents) {
       EventWorkspace_sptr outputEventWS =
           boost::dynamic_pointer_cast<EventWorkspace>(outputWS);

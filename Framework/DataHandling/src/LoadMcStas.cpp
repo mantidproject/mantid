@@ -97,9 +97,9 @@ void LoadMcStas::exec() {
     std::map<std::string, std::string> histogramEntries;
 
     // populate eventEntries and histogramEntries
-    for (auto eit = dataEntries.begin(); eit != dataEntries.end(); ++eit) {
-      std::string dataName = eit->first;
-      std::string dataType = eit->second;
+    for (auto &dataEntry : dataEntries) {
+      std::string dataName = dataEntry.first;
+      std::string dataType = dataEntry.second;
       if (dataName == "content_nxs" || dataType != "NXdata")
         continue; // can be removed if sure no Nexus files contains
                   // "content_nxs"
@@ -116,19 +116,18 @@ void LoadMcStas::exec() {
 
       auto nxdataEntries = nxFile.getEntries();
 
-      for (auto nit = nxdataEntries.begin(); nit != nxdataEntries.end();
-           ++nit) {
-        if (nit->second == "NXparameters")
+      for (auto &nxdataEntry : nxdataEntries) {
+        if (nxdataEntry.second == "NXparameters")
           continue;
-        nxFile.openData(nit->first);
+        nxFile.openData(nxdataEntry.first);
         if (nxFile.hasAttr("long_name")) {
           std::string nameAttrValue;
           nxFile.getAttr("long_name", nameAttrValue);
 
           if (nameAttrValue.find("Neutron_ID") != std::string::npos) {
-            eventEntries[eit->first] = eit->second;
+            eventEntries[dataEntry.first] = dataEntry.second;
           } else {
-            histogramEntries[eit->first] = eit->second;
+            histogramEntries[dataEntry.first] = dataEntry.second;
           }
         }
         nxFile.closeData();
@@ -203,7 +202,7 @@ void LoadMcStas::readEventData(
           InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      instrument = parser.parseXML(NULL);
+      instrument = parser.parseXML(nullptr);
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
@@ -247,9 +246,9 @@ void LoadMcStas::readEventData(
 
   const size_t numEventEntries = eventEntries.size();
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
-  for (auto eit = eventEntries.begin(); eit != eventEntries.end(); ++eit) {
-    std::string dataName = eit->first;
-    std::string dataType = eit->second;
+  for (const auto &eventEntry : eventEntries) {
+    const std::string &dataName = eventEntry.first;
+    const std::string &dataType = eventEntry.second;
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
@@ -416,10 +415,9 @@ void LoadMcStas::readHistogramData(
 
   std::string nameAttrValueYLABEL;
 
-  for (auto eit = histogramEntries.begin(); eit != histogramEntries.end();
-       ++eit) {
-    std::string dataName = eit->first;
-    std::string dataType = eit->second;
+  for (const auto &histogramEntry : histogramEntries) {
+    const std::string &dataName = histogramEntry.first;
+    const std::string &dataType = histogramEntry.second;
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
@@ -435,20 +433,20 @@ void LoadMcStas::readHistogramData(
     // Find the axis names
     auto nxdataEntries = nxFile.getEntries();
     std::string axis1Name, axis2Name;
-    for (auto nit = nxdataEntries.begin(); nit != nxdataEntries.end(); ++nit) {
-      if (nit->second == "NXparameters")
+    for (auto &nxdataEntry : nxdataEntries) {
+      if (nxdataEntry.second == "NXparameters")
         continue;
-      if (nit->first == "ncount")
+      if (nxdataEntry.first == "ncount")
         continue;
-      nxFile.openData(nit->first);
+      nxFile.openData(nxdataEntry.first);
 
       if (nxFile.hasAttr("axis")) {
         int axisNo(0);
         nxFile.getAttr("axis", axisNo);
         if (axisNo == 1)
-          axis1Name = nit->first;
+          axis1Name = nxdataEntry.first;
         else if (axisNo == 2)
-          axis2Name = nit->first;
+          axis2Name = nxdataEntry.first;
         else
           throw std::invalid_argument("Unknown axis number");
       }

@@ -44,7 +44,7 @@ Kernel::Logger g_log("ISISHistoDataListener");
 
 /// Constructor
 ISISHistoDataListener::ISISHistoDataListener()
-    : ILiveListener(), isInitilized(false), m_daeHandle(NULL),
+    : ILiveListener(), isInitilized(false), m_daeHandle(nullptr),
       m_numberOfPeriods(0), m_totalNumberOfSpectra(0), m_timeRegime(-1) {
   declareProperty(new Kernel::ArrayProperty<specid_t>("SpectraList"),
                   "An optional list of spectra to load. If blank, all "
@@ -94,7 +94,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   IDCsetreportfunc(&ISISHistoDataListener::IDCReporter);
 
   if (IDCopen(m_daeName.c_str(), 0, 0, &m_daeHandle, address.port()) != 0) {
-    m_daeHandle = NULL;
+    m_daeHandle = nullptr;
     return false;
   }
 
@@ -121,7 +121,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
 }
 
 bool ISISHistoDataListener::isConnected() {
-  if (m_daeHandle == NULL)
+  if (m_daeHandle == nullptr)
     return false;
   // try to read a parameter, success means connected
   int sv_dims_array[1] = {1}, sv_ndims = 1, buffer;
@@ -548,9 +548,8 @@ void ISISHistoDataListener::loadTimeRegimes() {
           m_monitorSpectra[i] = m_specIDs[monitorIndices[i] - 1];
         }
 
-        for (auto mon = m_monitorSpectra.begin(); mon != m_monitorSpectra.end();
-             ++mon) {
-          g_log.information() << "Monitor spectrum " << *mon << std::endl;
+        for (auto &mon : m_monitorSpectra) {
+          g_log.information() << "Monitor spectrum " << mon << std::endl;
         }
 
         const std::string detRTCB =
@@ -599,14 +598,13 @@ int ISISHistoDataListener::getTimeRegimeToLoad() const {
     if (m_monitorSpectra.empty())
       return 0;
     int regime = -1;
-    for (auto specIt = m_specList.begin(); specIt != m_specList.end();
-         ++specIt) {
+    for (auto specIt : m_specList) {
       bool isMonitor =
-          std::find(m_monitorSpectra.begin(), m_monitorSpectra.end(),
-                    *specIt) != m_monitorSpectra.end();
-      if (!isMonitor && *specIt > m_totalNumberOfSpectra)
+          std::find(m_monitorSpectra.begin(), m_monitorSpectra.end(), specIt) !=
+          m_monitorSpectra.end();
+      if (!isMonitor && specIt > m_totalNumberOfSpectra)
         throw std::invalid_argument("Invalid spectra index is found: " +
-                                    boost::lexical_cast<std::string>(*specIt));
+                                    boost::lexical_cast<std::string>(specIt));
       int specRegime = isMonitor ? 1 : 0;
       if (regime < 0) {
         regime = specRegime;

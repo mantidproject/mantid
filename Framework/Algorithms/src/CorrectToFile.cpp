@@ -75,7 +75,7 @@ void CorrectToFile::exec() {
     const MantidVec &Ecor = rkhInput->readE(0);
 
     const bool histogramData = outputWS->isHistogramData();
-    const bool divide = (operation == "Divide") ? true : false;
+    const bool divide = operation == "Divide";
     double Yfactor, correctError;
 
     const int64_t nOutSpec =

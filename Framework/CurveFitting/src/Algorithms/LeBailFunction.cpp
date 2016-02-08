@@ -67,8 +67,7 @@ LeBailFunction::LeBailFunction(std::string peaktype) {
        m_orderedProfileParameterNames.end());
 
   // Peak parameter values
-  for (size_t i = 0; i < m_peakParameterNameVec.size(); ++i) {
-    string parname = m_peakParameterNameVec[i];
+  for (auto parname : m_peakParameterNameVec) {
     m_functionParameters.insert(make_pair(parname, 0.0));
   }
 
@@ -320,8 +319,7 @@ IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l) {
       boost::dynamic_pointer_cast<IPowderDiffPeakFunction>(f);
 
   peak->setMillerIndex(h, k, l);
-  for (size_t i = 0; i < m_peakParameterNameVec.size(); ++i) {
-    string parname = m_peakParameterNameVec[i];
+  for (auto parname : m_peakParameterNameVec) {
     double parvalue = m_functionParameters[parname];
     peak->setParameter(parname, parvalue);
   }
@@ -371,8 +369,7 @@ bool LeBailFunction::calculatePeaksIntensities(
   }
 
   // Set zero to all peaks out of boundary
-  for (size_t i = 0; i < outboundpeakvec.size(); ++i) {
-    IPowderDiffPeakFunction_sptr peak = outboundpeakvec[i];
+  for (auto peak : outboundpeakvec) {
     peak->setHeight(0.);
   }
 
@@ -477,9 +474,9 @@ bool LeBailFunction::calculateGroupPeakIntensities(
             << ", TOF_h = " << thispeak->centre()
             << ", FWHM = " << thispeak->fwhm() << "\n";
       vector<string> peakparamnames = thispeak->getParameterNames();
-      for (size_t ipar = 0; ipar < peakparamnames.size(); ++ipar) {
-        errss << "\t" << peakparamnames[ipar] << " = "
-              << thispeak->getParameter(peakparamnames[ipar]) << "\n";
+      for (auto &peakparamname : peakparamnames) {
+        errss << "\t" << peakparamname << " = "
+              << thispeak->getParameter(peakparamname) << "\n";
       }
     }
 

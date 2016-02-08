@@ -265,8 +265,8 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
   // double prog=0.5;
   Progress prog(this, 0.5, 1.0, static_cast<int>(m_vectDet.size()));
   // loop over detector (IComps)
-  for (size_t id = 0; id < m_vectDet.size(); id++) {
-    comp = m_vectDet[id];
+  for (auto &id : m_vectDet) {
+    comp = id;
     boost::shared_ptr<const IDetector> det =
         boost::dynamic_pointer_cast<const IDetector>(comp);
     int idet = 0;
@@ -340,7 +340,7 @@ void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,
   (void)rawfile; // Avoid compiler warning
 
   // open raw file
-  ISISRAW iraw(NULL);
+  ISISRAW iraw(nullptr);
   if (iraw.readFromFile(m_filename.c_str(), false) != 0) {
     g_log.error("Unable to open file " + m_filename);
     throw Exception::FileError("Unable to open File:", m_filename);

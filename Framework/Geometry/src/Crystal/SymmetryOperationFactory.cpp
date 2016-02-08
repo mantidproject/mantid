@@ -32,8 +32,8 @@ SymmetryOperationFactoryImpl::createSymOps(const std::string &identifiers) {
 std::vector<SymmetryOperation> SymmetryOperationFactoryImpl::createSymOps(
     const std::vector<std::string> &identifiers) {
   std::vector<SymmetryOperation> symOps;
-  for (auto it = identifiers.begin(); it != identifiers.end(); ++it) {
-    symOps.push_back(createSymOp(boost::trim_copy(*it)));
+  for (const auto &identifier : identifiers) {
+    symOps.push_back(createSymOp(boost::trim_copy(identifier)));
   }
 
   return symOps;
@@ -67,8 +67,8 @@ SymmetryOperationFactoryImpl::subscribedSymbols() const {
   std::vector<std::string> symbols;
   symbols.reserve(m_prototypes.size());
 
-  for (auto it = m_prototypes.begin(); it != m_prototypes.end(); ++it) {
-    symbols.push_back(it->first);
+  for (const auto &prototype : m_prototypes) {
+    symbols.push_back(prototype.first);
   }
 
   return symbols;

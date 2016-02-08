@@ -180,9 +180,8 @@ void WorkspaceHistory::saveNexus(::NeXus::File *file) const {
 
   // Algorithm History
   int algCount = 0;
-  for (auto histIter = m_algorithms.cbegin(); histIter != m_algorithms.cend();
-       ++histIter) {
-    (*histIter)->saveNexus(file, algCount);
+  for (const auto &algorithm : m_algorithms) {
+    algorithm->saveNexus(file, algCount);
   }
 
   // close process group
@@ -269,8 +268,9 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File *file,
                                          AlgorithmHistory_sptr parent) {
   // historyNumbers should be sorted by number
   std::set<int> historyNumbers = findHistoryEntries(file);
-  for (auto it = historyNumbers.begin(); it != historyNumbers.end(); ++it) {
-    std::string entryName = "MantidAlgorithm_" + Kernel::Strings::toString(*it);
+  for (auto historyNumber : historyNumbers) {
+    std::string entryName =
+        "MantidAlgorithm_" + Kernel::Strings::toString(historyNumber);
     std::string rawData;
     file->openGroup(entryName, "NXnote");
     file->readData("data", rawData);
@@ -305,8 +305,8 @@ std::set<int> WorkspaceHistory::findHistoryEntries(::NeXus::File *file) {
 
   // Histories are numbered MantidAlgorithm_0, ..., MantidAlgorithm_10, etc.
   // Find all the unique numbers
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    std::string entryName = it->first;
+  for (auto &entry : entries) {
+    std::string entryName = entry.first;
     if (entryName.find("MantidAlgorithm_") != std::string::npos) {
       // Just get the number
       entryName = entryName.substr(16, entryName.size() - 16);

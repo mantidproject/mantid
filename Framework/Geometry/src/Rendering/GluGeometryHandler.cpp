@@ -32,7 +32,7 @@ boost::shared_ptr<GeometryHandler> GluGeometryHandler::clone() const {
 }
 
 GluGeometryHandler::~GluGeometryHandler() {
-  if (Renderer != NULL)
+  if (Renderer != nullptr)
     delete Renderer;
 }
 
@@ -56,7 +56,7 @@ void GluGeometryHandler::Triangulate() {
 }
 
 void GluGeometryHandler::Render() {
-  if (Obj != NULL) {
+  if (Obj != nullptr) {
     switch (type) {
     case CUBOID:
       (dynamic_cast<GluGeometryRenderer *>(Renderer))
@@ -79,7 +79,7 @@ void GluGeometryHandler::Render() {
           ->RenderSegmentedCylinder(center, axis, radius, height);
       break;
     }
-  } else if (ObjComp != NULL) {
+  } else if (ObjComp != nullptr) {
     Renderer->Render(ObjComp);
   }
 }
@@ -88,7 +88,7 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
                                        std::vector<Kernel::V3D> &vectors,
                                        double &myradius, double &myheight) {
   mytype = 0;
-  if (Obj != NULL) {
+  if (Obj != nullptr) {
     switch (type) {
     case CUBOID:
       mytype = 1;
@@ -128,7 +128,7 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
 }
 
 void GluGeometryHandler::Initialize() {
-  if (Obj != NULL) {
+  if (Obj != nullptr) {
     // There is no initialization or probably call render
     Render();
   }

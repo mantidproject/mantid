@@ -46,10 +46,7 @@ void SaveRKH::exec() {
   // Retrieve the input workspace
   m_workspace = getProperty("InputWorkspace");
 
-  m_2d =
-      (m_workspace->getNumberHistograms() > 1 && m_workspace->blocksize() > 1)
-          ? true
-          : false;
+  m_2d = m_workspace->getNumberHistograms() > 1 && m_workspace->blocksize() > 1;
 
   // If a 2D workspace, check that it has two numeric axes - bail out if not
   if (m_2d && !(m_workspace->getAxis(1)->isNumeric())) {
@@ -134,7 +131,7 @@ void SaveRKH::writeHeader() {
 void SaveRKH::write1D() {
   const size_t noDataPoints = m_workspace->size();
   const size_t nhist = m_workspace->getNumberHistograms();
-  const bool horizontal = (nhist == 1) ? true : false;
+  const bool horizontal = nhist == 1;
   if (horizontal) {
     g_log.notice() << "Values in first column are the X values\n";
     if (m_workspace->getAxis(0)->unit())

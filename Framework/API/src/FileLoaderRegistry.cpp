@@ -160,10 +160,7 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName,
     loader = searchForLoader<FileDescriptor, IFileLoader<FileDescriptor>>(
         filename, names, m_log);
   }
-  if (loader)
-    return true;
-  else
-    return false;
+  return static_cast<bool>(loader);
 }
 
 //----------------------------------------------------------------------------------------------

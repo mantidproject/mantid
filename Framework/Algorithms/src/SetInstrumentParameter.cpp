@@ -103,13 +103,13 @@ void SetInstrumentParameter::exec() {
 
   auto &paramMap = ws->instrumentParameters();
   if (!dets.empty()) {
-    for (auto it = dets.begin(); it != dets.end(); ++it) {
-      addParameter(paramMap, (*it).get(), paramName, paramType, paramValue);
+    for (auto &det : dets) {
+      addParameter(paramMap, det.get(), paramName, paramType, paramValue);
     }
   } else {
     if (cmptList.size() > 0) {
-      for (auto it = cmptList.begin(); it != cmptList.end(); ++it) {
-        addParameter(paramMap, it->get(), paramName, paramType, paramValue);
+      for (auto &cmpt : cmptList) {
+        addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
       }
     } else {
       g_log.warning("Could not find the component requested.");

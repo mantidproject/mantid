@@ -34,9 +34,9 @@ void SaveReflThreeColumnAscii::extraHeaders(std::ofstream &file) {
 
   const std::vector<std::string> logList = getProperty("LogList");
   /// logs
-  for (auto log = logList.begin(); log != logList.end(); ++log) {
-    file << boost::lexical_cast<std::string>(*log) << ": "
-         << boost::lexical_cast<std::string>(samp.getLogData(*log)->value())
+  for (const auto &log : logList) {
+    file << boost::lexical_cast<std::string>(log) << ": "
+         << boost::lexical_cast<std::string>(samp.getLogData(log)->value())
          << std::endl;
   }
 }
