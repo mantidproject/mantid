@@ -333,8 +333,8 @@ void Q1DWeighted::exec() {
   // Create workspace group that holds output workspaces
   WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
 
-  for (auto it = wedgeWorkspaces.begin(); it != wedgeWorkspaces.end(); ++it) {
-    wsgroup->addWorkspace(*it);
+  for (auto &wedgeWorkspace : wedgeWorkspaces) {
+    wsgroup->addWorkspace(wedgeWorkspace);
   }
   // set the output property
   std::string outputWSGroupName = getPropertyValue("WedgeWorkspace");

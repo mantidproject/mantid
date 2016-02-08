@@ -113,8 +113,7 @@ void SaveNexusProcessed::getSpectrumList(
     for (int i = spec_min; i <= spec_max; i++)
       spec.push_back(i);
     if (list) {
-      for (size_t i = 0; i < spec_list.size(); i++) {
-        int s = spec_list[i];
+      for (auto s : spec_list) {
         if (s < 0)
           continue;
         if (s < spec_min || s > spec_max)
@@ -124,8 +123,7 @@ void SaveNexusProcessed::getSpectrumList(
   } else if (list) {
     spec_max = 0;
     spec_min = numberOfHist - 1;
-    for (size_t i = 0; i < spec_list.size(); i++) {
-      int s = spec_list[i];
+    for (auto s : spec_list) {
       if (s < 0)
         continue;
       spec.push_back(s);
@@ -384,10 +382,10 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
 
   // Initialize all the arrays
   int64_t num = index;
-  double *tofs = NULL;
-  float *weights = NULL;
-  float *errorSquareds = NULL;
-  int64_t *pulsetimes = NULL;
+  double *tofs = nullptr;
+  float *weights = nullptr;
+  float *errorSquareds = nullptr;
+  int64_t *pulsetimes = nullptr;
 
   // overall event type.
   EventType type = m_eventWorkspace->getEventType();

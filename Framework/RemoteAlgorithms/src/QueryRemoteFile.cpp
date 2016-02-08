@@ -69,8 +69,8 @@ void QueryRemoteFile::exec() {
     std::vector<std::string> filenames;
     std::string oneFile;
     resp["Files"].getValue(files);
-    for (unsigned int i = 0; i < files.size(); i++) {
-      files[i].getValue(oneFile);
+    for (auto &file : files) {
+      file.getValue(oneFile);
       filenames.push_back(oneFile);
     }
 

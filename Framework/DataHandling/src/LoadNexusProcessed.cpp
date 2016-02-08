@@ -193,7 +193,7 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
 LoadNexusProcessed::LoadNexusProcessed()
     : m_shared_bins(false), m_xbins(), m_axis1vals(), m_list(false),
       m_interval(false), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),
-      m_spec_list(), m_filtered_spec_idxs(), m_cppFile(NULL) {}
+      m_spec_list(), m_filtered_spec_idxs(), m_cppFile(nullptr) {}
 
 /// Delete NexusFileIO in destructor
 LoadNexusProcessed::~LoadNexusProcessed() { delete m_cppFile; }
@@ -1095,8 +1095,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     peakWS->addPeak(*p);
   }
 
-  for (size_t i = 0; i < columnNames.size(); i++) {
-    const std::string str = columnNames[i];
+  for (auto str : columnNames) {
     if (!str.compare("column_1")) {
       NXInt nxInt = nx_tw.openNXInt(str.c_str());
       nxInt.load();
@@ -1743,10 +1742,7 @@ bool UDlesserExecCount(NXClassInfo elem1, NXClassInfo elem2) {
   is1 >> execNum1;
   is2 >> execNum2;
 
-  if (execNum1 < execNum2)
-    return true;
-  else
-    return false;
+  return execNum1 < execNum2;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1860,11 +1856,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *data_end = data_start + nchannels;
   double *err_start = errors();
   double *err_end = err_start + nchannels;
-  double *farea_start = NULL;
-  double *farea_end = NULL;
+  double *farea_start = nullptr;
+  double *farea_end = nullptr;
   const int64_t nxbins(m_xbins->size());
-  double *xErrors_start = NULL;
-  double *xErrors_end = NULL;
+  double *xErrors_start = nullptr;
+  double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(static_cast<int>(blocksize), static_cast<int>(hist));
@@ -1937,11 +1933,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *data_end = data_start + nchannels;
   double *err_start = errors();
   double *err_end = err_start + nchannels;
-  double *farea_start = NULL;
-  double *farea_end = NULL;
+  double *farea_start = nullptr;
+  double *farea_end = nullptr;
   const int64_t nxbins(m_xbins->size());
-  double *xErrors_start = NULL;
-  double *xErrors_end = NULL;
+  double *xErrors_start = nullptr;
+  double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(static_cast<int>(blocksize), static_cast<int>(hist));
@@ -2015,10 +2011,10 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   errors.load(static_cast<int>(blocksize), static_cast<int>(hist));
   double *err_start = errors();
   double *err_end = err_start + nchannels;
-  double *farea_start = NULL;
-  double *farea_end = NULL;
-  double *xErrors_start = NULL;
-  double *xErrors_end = NULL;
+  double *farea_start = nullptr;
+  double *farea_end = nullptr;
+  double *xErrors_start = nullptr;
+  double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(static_cast<int>(blocksize), static_cast<int>(hist));

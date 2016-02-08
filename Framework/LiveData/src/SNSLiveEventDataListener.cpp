@@ -413,7 +413,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
     unsigned lastBankID = pkt.curBankId();
     // A counter that we use for logging purposes
     unsigned eventsPerBank = 0;
-    while (event != NULL) {
+    while (event != nullptr) {
       eventsPerBank++;
       totalEvents++;
       if (lastBankID < 0xFFFFFFFE) // Bank ID -1 & -2 are special cases and are
@@ -1094,7 +1094,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
           // actual keyword
           // to the template declaration.  Hense all the if...else if...else
           // stuff...
-          Property *prop = NULL;
+          Property *prop = nullptr;
           if (pvType == "double") {
             prop = new TimeSeriesProperty<double>(pvName);
           } else if ((pvType == "integer") || (pvType == "unsigned") ||
@@ -1399,8 +1399,8 @@ boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
   temp->mutableRun().clearOutdatedTimeSeriesLogValues();
 
   // Clear out old monitor logs
-  for (unsigned i = 0; i < m_monitorLogs.size(); i++) {
-    temp->mutableRun().removeProperty(m_monitorLogs[i]);
+  for (auto &monitorLog : m_monitorLogs) {
+    temp->mutableRun().removeProperty(monitorLog);
   }
   m_monitorLogs.clear();
 

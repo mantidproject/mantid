@@ -21,7 +21,7 @@ using namespace API;
 using namespace Mantid::PhysicalConstants;
 
 AbsorptionCorrection::AbsorptionCorrection()
-    : API::Algorithm(), m_inputWS(), m_sampleObject(NULL), m_L1s(),
+    : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
       m_sampleVolume(0.0), m_refAtten(0.0), m_scattering(0), n_lambda(0),
       m_xStep(0), m_emode(0), m_lambdaFixed(0.), EXPONENTIAL() {}
@@ -135,9 +135,8 @@ void AbsorptionCorrection::exec() {
   // If sample not at origin, shift cached positions.
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
   if (samplePos != V3D(0, 0, 0)) {
-    for (auto it = m_elementPositions.begin(); it != m_elementPositions.end();
-         ++it) {
-      (*it) += samplePos;
+    for (auto &elementPosition : m_elementPositions) {
+      elementPosition += samplePos;
     }
   }
 

@@ -43,8 +43,9 @@ VMDBase<TYPE>::makeVectorsOrthogonal(std::vector<VMDBase> &vectors) {
   out = V3D::makeVectorsOrthogonal(in);
 
   std::vector<VMDBase> retVal;
-  for (size_t i = 0; i < out.size(); i++)
-    retVal.push_back(VMDBase(out[i]));
+  retVal.reserve(out.size());
+  for (auto &vector : out)
+    retVal.emplace_back(vector);
   return retVal;
 }
 

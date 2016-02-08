@@ -77,10 +77,10 @@ static const double TOF_CONVERSION = .1;
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
 LoadEventPreNexus::LoadEventPreNexus()
-    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), prog(NULL),
+    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), prog(nullptr),
       spectra_list(), pulsetimes(), event_indices(), proton_charge(),
       proton_charge_tot(0), pixel_to_wkspindex(), pixelmap(), detid_max(),
-      eventfile(NULL), num_events(0), num_pulses(0), numpixel(0),
+      eventfile(nullptr), num_events(0), num_pulses(0), numpixel(0),
       num_good_events(0), num_error_events(0), num_ignored_events(0),
       first_event(0), max_events(0), using_mapping_file(false),
       loadOnlySomeSpectra(false), spectraLoadMap(), longest_tof(0),
@@ -237,14 +237,12 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) { //
   const string CAL("_CAL");
   const size_t CAL_LEN = CAL.length(); // cache to make life easier
   vector<string> files;
-  for (size_t i = 0; i < dirs.size(); ++i) {
-    if ((dirs[i].length() > CAL_LEN) &&
-        (dirs[i].compare(dirs[i].length() - CAL.length(), CAL.length(), CAL) ==
-         0)) {
-      if (Poco::File(base.path() + "/" + dirs[i] + "/calibrations/" + mapping)
+  for (auto &dir : dirs) {
+    if ((dir.length() > CAL_LEN) &&
+        (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
+      if (Poco::File(base.path() + "/" + dir + "/calibrations/" + mapping)
               .exists())
-        files.push_back(base.path() + "/" + dirs[i] + "/calibrations/" +
-                        mapping);
+        files.push_back(base.path() + "/" + dir + "/calibrations/" + mapping);
     }
   }
 
@@ -479,8 +477,8 @@ void LoadEventPreNexus::procEvents(
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (auto it = spectra_list.begin(); it != spectra_list.end(); it++)
-    spectraLoadMap[*it] = true;
+  for (auto &spectrum : spectra_list)
+    spectraLoadMap[spectrum] = true;
 
   CPUTimer tim;
 

@@ -94,7 +94,7 @@ void FilterPeaks::exec() {
   filteredWS->copyExperimentInfoFrom(inputWS.get());
 
   const std::string FilterVariable = getProperty("FilterVariable");
-  double (*filterFunction)(const Mantid::Geometry::IPeak &) = 0;
+  double (*filterFunction)(const Mantid::Geometry::IPeak &) = nullptr;
   if (FilterVariable == "h+k+l")
     filterFunction = &HKLSum;
   else if (FilterVariable == "h^2+k^2+l^2")

@@ -90,14 +90,14 @@ void SaveParameterFile::exec() {
   Progress prog(this, 0.0, 0.3, params->size());
 
   // Build a list of parameters to save;
-  for (auto paramsIt = params->begin(); paramsIt != params->end(); ++paramsIt) {
+  for (auto &paramsIt : *params) {
     if (prog.hasCancellationBeenRequested())
       break;
     prog.report("Generating parameters");
-    const ComponentID cID = (*paramsIt).first;
-    const std::string pName = (*paramsIt).second->name();
-    const std::string pType = (*paramsIt).second->type();
-    const std::string pValue = (*paramsIt).second->asString();
+    const ComponentID cID = paramsIt.first;
+    const std::string pName = paramsIt.second->name();
+    const std::string pType = paramsIt.second->type();
+    const std::string pValue = paramsIt.second->asString();
 
     if (pName == "x" || pName == "y" || pName == "z" || pName == "r-position" ||
         pName == "t-position" || pName == "p-position" || pName == "rotx" ||
@@ -140,7 +140,7 @@ void SaveParameterFile::exec() {
         // With fitting parameters we do something special (i.e. silly)
         // We create an entire XML element to be inserted into the output,
         // instead of just giving a single fixed value
-        const FitParameter &fitParam = paramsIt->second->value<FitParameter>();
+        const FitParameter &fitParam = paramsIt.second->value<FitParameter>();
         const std::string fpName =
             fitParam.getFunction() + ":" + fitParam.getName();
         std::stringstream fpValue;
@@ -166,12 +166,12 @@ void SaveParameterFile::exec() {
   prog.resetNumSteps(static_cast<int64_t>(toSave.size()), 0.6, 1.0);
   // Iterate through all the parameters we want to save and build an XML
   // document out of them.
-  for (auto compIt = toSave.begin(); compIt != toSave.end(); ++compIt) {
+  for (auto &compIt : toSave) {
     if (prog.hasCancellationBeenRequested())
       break;
     prog.report("Saving parameters");
     // Component data
-    const ComponentID cID = compIt->first;
+    const ComponentID cID = compIt.first;
     const std::string cFullName = cID->getFullName();
     const IDetector *cDet = dynamic_cast<IDetector *>(cID);
     const detid_t cDetID = (cDet) ? cDet->getID() : 0;
@@ -180,7 +180,7 @@ void SaveParameterFile::exec() {
     if (cDetID != 0)
       file << " id=\"" << cDetID << "\"";
     file << " name=\"" << cFullName << "\">\n";
-    for (auto paramIt = compIt->second.begin(); paramIt != compIt->second.end();
+    for (auto paramIt = compIt.second.begin(); paramIt != compIt.second.end();
          ++paramIt) {
       const std::string pName = paramIt->get<0>();
       const std::string pType = paramIt->get<1>();

@@ -288,9 +288,9 @@ ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr &toCorrect,
   } else {
     auto specNumbers = getSpectrumNumbers(toCorrect);
     correctPosAlg->setProperty("SpectrumNumbersOfDetectors", specNumbers);
-    for (size_t t = 0; t < specNumbers.size(); ++t) {
+    for (auto specNumber : specNumbers) {
       std::stringstream buffer;
-      buffer << "Writing out: " << specNumbers[t];
+      buffer << "Writing out: " << specNumber;
       g_log.notice(buffer.str());
     }
   }
@@ -372,6 +372,8 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   } else if (bCorrectPosition) {
     toConvert = correctPosition(toConvert, thetaInDeg.get(), isPointDetector);
   }
+
+  // Rotate the source (needed before ConvertUnits)
   double rotationTheta = getAngleForSourceRotation(toConvert, thetaInDeg.get());
   if (rotationTheta != 0.0) {
     auto rotateSource = this->createChildAlgorithm("RotateSource");
@@ -389,6 +391,22 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   convertUnits->setProperty("Target", "MomentumTransfer");
   convertUnits->execute();
   MatrixWorkspace_sptr inQ = convertUnits->getProperty("OutputWorkspace");
+
+  // Rotate the source back to its original position
+  if (rotationTheta != 0.0) {
+    // for IvsLam Workspace
+    auto rotateSource = this->createChildAlgorithm("RotateSource");
+    rotateSource->setChild(true);
+    rotateSource->initialize();
+    rotateSource->setProperty("Workspace", toConvert);
+    rotateSource->setProperty("Angle", -rotationTheta);
+    rotateSource->execute();
+    // for IvsQ Workspace
+    rotateSource->setProperty("Workspace", inQ);
+    rotateSource->setProperty("Angle", -rotationTheta);
+    rotateSource->execute();
+  }
+
   return inQ;
 }
 
@@ -408,7 +426,7 @@ ReflectometryReductionOne::getSurfaceSampleComponent(
     sampleComponent = this->getPropertyValue("SampleComponentName");
   }
   auto searchResult = inst->getComponentByName(sampleComponent);
-  if (searchResult == NULL) {
+  if (searchResult == nullptr) {
     throw std::invalid_argument(sampleComponent +
                                 " does not exist. Check input properties.");
   }
@@ -435,7 +453,7 @@ ReflectometryReductionOne::getDetectorComponent(
   }
   boost::shared_ptr<const IComponent> searchResult =
       inst->getComponentByName(componentToCorrect);
-  if (searchResult == NULL) {
+  if (searchResult == nullptr) {
     throw std::invalid_argument(componentToCorrect +
                                 " does not exist. Check input properties.");
   }

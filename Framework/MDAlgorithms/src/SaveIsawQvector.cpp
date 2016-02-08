@@ -126,8 +126,8 @@ void SaveIsawQvector::exec() {
     coord_map[2] = 1;
   }
   if (this->getProperty("RightHanded")) {
-    for (size_t dim = 0; dim < DIMS; ++dim)
-      coord_signs[dim] *= -1.; // everything changes sign
+    for (double &coord_sign : coord_signs)
+      coord_sign *= -1.; // everything changes sign
   }
 
   // units conersion helper
@@ -165,8 +165,8 @@ void SaveIsawQvector::exec() {
     double signal(1.);  // ignorable garbage
     double errorSq(1.); // ignorable garbage
     const std::vector<TofEvent> &raw_events = events.getEvents();
-    for (auto event = raw_events.begin(); event != raw_events.end(); ++event) {
-      double val = unitConv.convertUnits(event->tof());
+    for (const auto &raw_event : raw_events) {
+      double val = unitConv.convertUnits(raw_event.tof());
       q_converter->calcMatrixCoord(val, locCoord, signal, errorSq);
       for (size_t dim = 0; dim < DIMS; ++dim) {
         buffer[dim] =

@@ -87,7 +87,7 @@ void CreateWorkspace::exec() {
   const Property *const dataYprop = getProperty("DataY");
   const Property *const dataEprop = getProperty("DataE");
 
-  const ArrayProperty<double> *pCheck = NULL;
+  const ArrayProperty<double> *pCheck = nullptr;
 
   pCheck = dynamic_cast<const ArrayProperty<double> *>(dataXprop);
   if (!pCheck)
@@ -210,7 +210,7 @@ void CreateWorkspace::exec() {
       }
     } else {
       const size_t vAxisLength = vAxis.size();
-      NumericAxis *newAxis(NULL);
+      NumericAxis *newAxis(nullptr);
       if (vAxisLength == static_cast<size_t>(nSpec))
         newAxis = new NumericAxis(vAxisLength); // treat as points
       else if (vAxisLength == static_cast<size_t>(nSpec + 1))

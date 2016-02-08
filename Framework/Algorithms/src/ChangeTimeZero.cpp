@@ -171,12 +171,12 @@ void ChangeTimeZero::shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws,
   // 2. string properties: here we change the values if they are ISO8601 times
   auto logs = ws->mutableRun().getLogData();
   Progress prog(this, startProgress, stopProgress, logs.size());
-  for (auto iter = logs.begin(); iter != logs.end(); ++iter) {
-    if (isTimeSeries(*iter)) {
-      shiftTimeInLogForTimeSeries(ws, *iter, timeShift);
+  for (auto &log : logs) {
+    if (isTimeSeries(log)) {
+      shiftTimeInLogForTimeSeries(ws, log, timeShift);
 
     } else if (auto stringProperty =
-                   dynamic_cast<PropertyWithValue<std::string> *>(*iter)) {
+                   dynamic_cast<PropertyWithValue<std::string> *>(log)) {
       shiftTimeOfLogForStringProperty(stringProperty, timeShift);
     }
 
@@ -248,7 +248,7 @@ DateAndTime
 ChangeTimeZero::getStartTimeFromWorkspace(API::MatrixWorkspace_sptr ws) const {
   auto run = ws->run();
   // Check for the first good frame in the log
-  Mantid::Kernel::TimeSeriesProperty<double> *goodFrame = NULL;
+  Mantid::Kernel::TimeSeriesProperty<double> *goodFrame = nullptr;
   try {
     goodFrame = run.getTimeSeriesProperty<double>("proton_charge");
   } catch (std::invalid_argument) {
@@ -356,7 +356,7 @@ bool ChangeTimeZero::checkForDateTime(const std::string &val) const {
  * @returns true if the offset has been set
  */
 bool ChangeTimeZero::isRelativeTimeShift(double offset) const {
-  return offset != m_defaultTimeShift ? true : false;
+  return offset != m_defaultTimeShift;
 }
 
 /**
@@ -365,9 +365,7 @@ bool ChangeTimeZero::isRelativeTimeShift(double offset) const {
  * @returns true if the offset has been set
  */
 bool ChangeTimeZero::isAbsoluteTimeShift(const std::string &offset) const {
-  return (offset != m_defaultAbsoluteTimeShift && checkForDateTime(offset))
-             ? true
-             : false;
+  return offset != m_defaultAbsoluteTimeShift && checkForDateTime(offset);
 }
 
 } // namespace Mantid

@@ -43,7 +43,7 @@ void PolynomialCorrection::retrieveProperties() {
   m_coeffs = getProperty("Coefficients");
   m_polySize = m_coeffs.size();
   std::string operation = getProperty("Operation");
-  m_isOperationMultiply = operation == "Multiply" ? true : false;
+  m_isOperationMultiply = operation == "Multiply";
 }
 
 void PolynomialCorrection::performUnaryOperation(const double XIn,

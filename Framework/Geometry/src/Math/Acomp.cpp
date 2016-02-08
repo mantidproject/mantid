@@ -160,15 +160,11 @@ Order (low first)
   const int TS = isSingle(); // is this one component
   const int AS = A.isSingle();
   if (TS != AS)
-    return (TS > AS) ? true : false;
+    return TS > AS;
   // PROCESS Intersection/Union
   if (!TS && Intersect != A.Intersect) {
     // Union==0 therefore this > A
-    if (Intersect > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return Intersect > 0;
   }
 
   // PROCESS Units. (order : then size)
@@ -192,10 +188,7 @@ Order (low first)
     if (*ax != *ux)
       return (*ux < *ax);
   }
-  if (uc != Units.end())
-    return true;
-  // everything idential or A.comp bigger:
-  return false;
+  return uc != Units.end();
 }
 
 Acomp &Acomp::operator+=(const Acomp &A)
@@ -475,17 +468,17 @@ Units are sorted after this function is returned.
   int bextra = 0;
   // find first Component to add
   //  std::cerr<<"Process Union:"<<Ln<<std::endl;
-  for (unsigned int iu = 0; iu < Ln.length(); iu++) {
+  for (char iu : Ln) {
     if (blevel) // we are in a bracket then...
     {
-      if (Ln[iu] == ')') // maybe closing outward..
+      if (iu == ')') // maybe closing outward..
         blevel--;
-      else if (Ln[iu] == '(')
+      else if (iu == '(')
         blevel++;
       if (blevel || bextra)
-        Express += Ln[iu];
+        Express += iu;
     } else {
-      if (Ln[iu] == '+') {
+      if (iu == '+') {
         Acomp AX;
         try {
           AX.setString(Express);
@@ -495,7 +488,7 @@ Units are sorted after this function is returned.
         }
         Express.erase(); // reset string
         addComp(AX);     // add components
-      } else if (Ln[iu] == '(') {
+      } else if (iu == '(') {
         blevel++;
         if (Express.length()) {
           Express += '(';
@@ -503,7 +496,7 @@ Units are sorted after this function is returned.
         } else
           bextra = 0;
       } else
-        Express += Ln[iu];
+        Express += iu;
     }
   }
   if (Express.size() > 0) {
@@ -1554,7 +1547,7 @@ Assessor function to get a Comp points
 */
 {
   if (Index < 0 || Index >= static_cast<int>(Comp.size()))
-    return 0;
+    return nullptr;
   return &Comp[Index];
 }
 

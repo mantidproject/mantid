@@ -46,7 +46,7 @@ using namespace Kernel;
 MonteCarloAbsorption::MonteCarloAbsorption()
     : m_samplePos(), m_sourcePos(), m_numVolumeElements(0), m_blocks(),
       m_blkHalfX(0.0), m_blkHalfY(0.0), m_blkHalfZ(0.0), m_rngs(0), m_inputWS(),
-      m_sampleShape(NULL), m_sampleMaterial(NULL), m_container(NULL),
+      m_sampleShape(nullptr), m_sampleMaterial(nullptr), m_container(nullptr),
       m_numberOfPoints(0), m_xStepSize(0), m_numberOfEvents(300) {}
 
 /**
@@ -296,10 +296,9 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
     m_container->interceptSurfaces(beforeScatter);
   }
   // Attenuation factor is product of factor for each material
-  for (auto citr = beforeScatter.cbegin(); citr != beforeScatter.cend();
-       ++citr) {
-    length = citr->distInsideObject;
-    factor *= attenuation(length, citr->object->material(), lambda);
+  for (const auto &citr : beforeScatter) {
+    length = citr.distInsideObject;
+    factor *= attenuation(length, citr.object->material(), lambda);
   }
 
   length = afterScatter.cbegin()->distInsideObject;
@@ -310,9 +309,9 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
     m_container->interceptSurfaces(afterScatter);
   }
   // Attenuation factor is product of factor for each material
-  for (auto citr = afterScatter.cbegin(); citr != afterScatter.cend(); ++citr) {
-    length = citr->distInsideObject;
-    factor *= attenuation(length, citr->object->material(), lambda);
+  for (const auto &citr : afterScatter) {
+    length = citr.distInsideObject;
+    factor *= attenuation(length, citr.object->material(), lambda);
   }
 
   return true;
@@ -360,7 +359,7 @@ void MonteCarloAbsorption::retrieveInput() {
   try {
     m_container = &(m_inputWS->sample().getEnvironment());
   } catch (std::runtime_error &) {
-    m_container = NULL;
+    m_container = nullptr;
     g_log.information()
         << "No environment has been defined, continuing with only sample.\n";
   }

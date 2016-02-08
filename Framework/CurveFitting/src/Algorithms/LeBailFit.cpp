@@ -677,8 +677,7 @@ void LeBailFit::execRefineBackground() {
   outtablews->addColumn("double", "Value");
   outtablews->addColumn("double", "Error");
 
-  for (size_t i = 0; i < m_bkgdParameterNames.size(); ++i) {
-    string parname = m_bkgdParameterNames[i];
+  for (auto parname : m_bkgdParameterNames) {
     double parvalue = m_backgroundFunction->getParameter(parname);
 
     TableRow newrow = outtablews->appendRow();
@@ -1449,7 +1448,7 @@ void LeBailFit::createOutputDataWorkspace() {
   // 4. Set axis
   m_outputWS->getAxis(0)->setUnit("TOF");
 
-  API::TextAxis *tAxis = 0;
+  API::TextAxis *tAxis = nullptr;
   tAxis = new API::TextAxis(nspec);
   tAxis->setLabel(0, "Data");
   tAxis->setLabel(1, "Calc");
@@ -1623,14 +1622,14 @@ void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap,
   for (size_t icycle = 1; icycle <= maxcycles; ++icycle) {
     // Refine parameters (for all parameters in turn) to data with background
     // removed
-    for (auto giter = m_MCGroups.begin(); giter != m_MCGroups.end(); ++giter) {
+    for (auto &MCGroup : m_MCGroups) {
       // Propose new value for ONE AND ONLY ONE Monte Carlo parameter group
       /*
       int igroup = giter->first; // group id
       g_log.debug() << "BigTrouble: Group " << igroup << "\n";
       */
       bool hasnewvalues =
-          proposeNewValues(giter->second, currR, mapCurrParameter, newparammap,
+          proposeNewValues(MCGroup.second, currR, mapCurrParameter, newparammap,
                            prevcyclebetterR);
 
       if (!hasnewvalues) {
@@ -1657,10 +1656,7 @@ void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap,
       } else {
         acceptchange = acceptOrDeny(currR, newR);
 
-        if (newR.Rwp < currR.Rwp)
-          prevcyclebetterR = true;
-        else
-          prevcyclebetterR = false;
+        prevcyclebetterR = newR.Rwp < currR.Rwp;
       }
 
       g_log.debug() << "[DBx317] Step " << icycle
@@ -1868,8 +1864,8 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   m_MCGroups.insert(make_pair(0, geomparams));
 
   dboutss << "Geometry parameters: ";
-  for (size_t i = 0; i < geomparams.size(); ++i)
-    dboutss << geomparams[i] << "\t\t";
+  for (auto &geomparam : geomparams)
+    dboutss << geomparam << "\t\t";
   dboutss << "\n";
 
   // b. Alphas
@@ -1881,8 +1877,8 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   m_MCGroups.insert(make_pair(1, alphs));
 
   dboutss << "Alpha parameters";
-  for (size_t i = 0; i < alphs.size(); ++i)
-    dboutss << alphs[i] << "\t\t";
+  for (auto &alph : alphs)
+    dboutss << alph << "\t\t";
   dboutss << "\n";
 
   // c. Beta
@@ -1894,8 +1890,8 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   m_MCGroups.insert(make_pair(2, betas));
 
   dboutss << "Beta parameters";
-  for (size_t i = 0; i < betas.size(); ++i)
-    dboutss << betas[i] << "\t\t";
+  for (auto &beta : betas)
+    dboutss << beta << "\t\t";
   dboutss << "\n";
 
   // d. Sig
@@ -1906,8 +1902,8 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   m_MCGroups.insert(make_pair(3, sigs));
 
   dboutss << "Sig parameters";
-  for (size_t i = 0; i < sigs.size(); ++i)
-    dboutss << sigs[i] << "\t\t";
+  for (auto &sig : sigs)
+    dboutss << sig << "\t\t";
   dboutss << "\n";
 
   g_log.notice(dboutss.str());
@@ -1916,16 +1912,14 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
 
   // 2. Dictionary for each parameter for non-negative, mcX0, mcX1
   // a) Sig0, Sig1, Sig2
-  for (size_t i = 0; i < sigs.size(); ++i) {
-    string parname = sigs[i];
+  for (auto parname : sigs) {
     m_funcParameters[parname].mcA0 = 2.0;
     m_funcParameters[parname].mcA1 = 1.0;
     m_funcParameters[parname].nonnegative = true;
   }
 
   // b) Alpha
-  for (size_t i = 0; i < alphs.size(); ++i) {
-    string parname = alphs[i];
+  for (auto parname : alphs) {
     m_funcParameters[parname].mcA1 = 1.0;
     m_funcParameters[parname].nonnegative = false;
   }
@@ -1935,8 +1929,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   m_funcParameters["Alph1t"].mcA0 = 0.05;
 
   // c) Beta
-  for (size_t i = 0; i < betas.size(); ++i) {
-    string parname = betas[i];
+  for (auto parname : betas) {
     m_funcParameters[parname].mcA1 = 1.0;
     m_funcParameters[parname].nonnegative = false;
   }
@@ -2167,9 +2160,8 @@ bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r,
 
   // Find out parameters to refine in this step/MC group
   g_log.debug() << "Parameter Number In Group = " << mcgroup.size() << "\n";
-  for (size_t i = 0; i < mcgroup.size(); ++i) {
+  for (auto paramname : mcgroup) {
     // Find out the i-th parameter to be refined or not
-    string paramname = mcgroup[i];
     auto mapiter = curparammap.find(paramname);
     if (mapiter == curparammap.end()) {
       stringstream errmsg;

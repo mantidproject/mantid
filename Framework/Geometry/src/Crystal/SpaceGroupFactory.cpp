@@ -21,9 +21,9 @@ bool isValidGeneratorString(const std::string &generatorString) {
   std::vector<std::string> generatorStrings;
   boost::split(generatorStrings, generatorString, boost::is_any_of(";"));
 
-  for (auto it = generatorStrings.begin(); it != generatorStrings.end(); ++it) {
+  for (auto &generatorString : generatorStrings) {
     try {
-      SymmetryOperationSymbolParser::parseIdentifier(*it);
+      SymmetryOperationSymbolParser::parseIdentifier(generatorString);
     } catch (Kernel::Exception::ParseError) {
       return false;
     }
@@ -250,8 +250,8 @@ SpaceGroupFactoryImpl::subscribedSpaceGroupSymbols() const {
   std::vector<std::string> symbols;
   symbols.reserve(m_generatorMap.size());
 
-  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
-    symbols.push_back(it->first);
+  for (const auto &generator : m_generatorMap) {
+    symbols.push_back(generator.first);
   }
 
   return symbols;
@@ -410,11 +410,11 @@ SpaceGroup_const_sptr SpaceGroupFactoryImpl::constructFromPrototype(
 void SpaceGroupFactoryImpl::fillPointGroupMap() {
   m_pointGroupMap.clear();
 
-  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
-    SpaceGroup_const_sptr spaceGroup = getPrototype(it->first);
+  for (auto &generator : m_generatorMap) {
+    SpaceGroup_const_sptr spaceGroup = getPrototype(generator.first);
 
-    m_pointGroupMap.insert(
-        std::make_pair(spaceGroup->getPointGroup()->getSymbol(), it->first));
+    m_pointGroupMap.insert(std::make_pair(
+        spaceGroup->getPointGroup()->getSymbol(), generator.first));
   }
 }
 

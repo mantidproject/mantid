@@ -230,7 +230,7 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
   uint64_t totalmem;
   size_t len = sizeof(totalmem);
   // Gives system memory in bytes
-  int err = sysctlbyname("hw.memsize", &totalmem, &len, NULL, 0);
+  int err = sysctlbyname("hw.memsize", &totalmem, &len, nullptr, 0);
   if (err)
     g_log.warning("Unable to obtain memory of system");
   sys_total = totalmem / 1024;

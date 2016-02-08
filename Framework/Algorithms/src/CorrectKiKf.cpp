@@ -67,7 +67,7 @@ void CorrectKiKf::exec() {
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL) {
+  if (eventW != nullptr) {
     this->execEvent();
     return;
   }

@@ -88,7 +88,7 @@ public:
     pmap.addDouble(det1->getComponentID(), parname, det1Factor);
 
     auto det2 = inputWS->getDetector(1);
-    const double det2Factor(10);
+    const double det2Factor(-10);
     pmap.addDouble(det2->getComponentID(), parname, det2Factor);
 
     const double instFactor(100);
@@ -108,10 +108,22 @@ public:
         factor = instFactor;
 
       for (size_t j = 0; j < xsize; ++j) {
-        TS_ASSERT_DELTA(result->readX(i)[j], factor * inputWS->readX(i)[j],
-                        1e-12);
-        TS_ASSERT_EQUALS(result->readY(i)[j], inputWS->readY(i)[j]);
-        TS_ASSERT_EQUALS(result->readE(i)[j], inputWS->readE(i)[j]);
+        if (factor > 0) {
+          TS_ASSERT_DELTA(result->readX(i)[j], factor * inputWS->readX(i)[j],
+                          1e-12);
+          TS_ASSERT_EQUALS(result->readY(i)[j], inputWS->readY(i)[j]);
+          TS_ASSERT_EQUALS(result->readE(i)[j], inputWS->readE(i)[j]);
+        } else {
+          // ScaleX reverses the histogram if the factor is negative
+          // X vector has length xsize+1
+          TS_ASSERT_DELTA(result->readX(i)[j],
+                          factor * inputWS->readX(i)[xsize - j], 1e-12);
+          // Y and E have length xsize
+          TS_ASSERT_EQUALS(result->readY(i)[j],
+                           inputWS->readY(i)[xsize - 1 - j]);
+          TS_ASSERT_EQUALS(result->readE(i)[j],
+                           inputWS->readE(i)[xsize - 1 - j]);
+        }
       }
     }
   }
@@ -131,7 +143,7 @@ public:
     pmap.addDouble(det1->getComponentID(), parname, det1Factor);
 
     auto det2 = inputWS->getDetector(1);
-    const double det2Factor(10);
+    const double det2Factor(-10);
     pmap.addDouble(det2->getComponentID(), parname, det2Factor);
 
     const double instFactor(100);
@@ -143,6 +155,7 @@ public:
         boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(result);
     TS_ASSERT(resultEventWS);
 
+    const size_t xsize = result->blocksize();
     for (size_t i = 0; i < resultEventWS->getNumberHistograms(); ++i) {
       double factor(1.0);
       if (i == 0)
@@ -162,6 +175,25 @@ public:
       TS_ASSERT_EQUALS(inTOFs.size(), outTOFs.size());
       for (size_t j = 0; i < inTOFs.size(); ++j) {
         TS_ASSERT_DELTA(outTOFs[j], factor * inTOFs[j], 1e-12);
+      }
+
+      for (size_t j = 0; j < xsize; ++j) {
+        if (factor > 0) {
+          TS_ASSERT_DELTA(result->readX(i)[j], factor * inputWS->readX(i)[j],
+                          1e-12);
+          TS_ASSERT_EQUALS(result->readY(i)[j], inputWS->readY(i)[j]);
+          TS_ASSERT_EQUALS(result->readE(i)[j], inputWS->readE(i)[j]);
+        } else {
+          // ScaleX reverses the histogram if the factor is negative
+          // X vector has length xsize+1
+          TS_ASSERT_DELTA(result->readX(i)[j],
+                          factor * inputWS->readX(i)[xsize - j], 1e-12);
+          // Y and E have length xsize
+          TS_ASSERT_EQUALS(result->readY(i)[j],
+                           inputWS->readY(i)[xsize - 1 - j]);
+          TS_ASSERT_EQUALS(result->readE(i)[j],
+                           inputWS->readE(i)[xsize - 1 - j]);
+        }
       }
     }
   }

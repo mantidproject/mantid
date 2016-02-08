@@ -129,14 +129,13 @@ void GluGeometryRenderer::CreateCube(const V3D &Point1, const V3D &Point2,
   V3D normal;
   // first face
   glBegin(GL_QUADS);
-  for (int i = 0; i < 6; i++) {
-    normal =
-        (vertex[faceindex[i][0]] - vertex[faceindex[i][1]])
-            .cross_prod((vertex[faceindex[i][0]] - vertex[faceindex[i][2]]));
+  for (auto &row : faceindex) {
+    normal = (vertex[row[0]] - vertex[row[1]])
+                 .cross_prod((vertex[row[0]] - vertex[row[2]]));
     normal.normalize();
     glNormal3d(normal[0], normal[1], normal[2]);
     for (int j = 0; j < 4; j++) {
-      int ij = faceindex[i][j];
+      int ij = row[j];
       if (ij == 0)
         glTexCoord2i(0, 0);
       if (ij == 1)

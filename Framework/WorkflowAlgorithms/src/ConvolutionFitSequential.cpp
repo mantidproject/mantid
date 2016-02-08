@@ -313,20 +313,20 @@ void ConvolutionFitSequential::exec() {
   Progress logAdderProg(this, 0.96, 0.97, 6);
   // Add String Logs
   auto logAdder = createChildAlgorithm("AddSampleLog");
-  for (auto it = sampleLogStrings.begin(); it != sampleLogStrings.end(); ++it) {
+  for (auto &sampleLogString : sampleLogStrings) {
     logAdder->setProperty("Workspace", resultWs);
-    logAdder->setProperty("LogName", it->first);
-    logAdder->setProperty("LogText", it->second);
+    logAdder->setProperty("LogName", sampleLogString.first);
+    logAdder->setProperty("LogText", sampleLogString.second);
     logAdder->setProperty("LogType", "String");
     logAdder->executeAsChildAlg();
     logAdderProg.report("Add text logs");
   }
 
   // Add Numeric Logs
-  for (auto it = sampleLogNumeric.begin(); it != sampleLogNumeric.end(); it++) {
+  for (auto &logItem : sampleLogNumeric) {
     logAdder->setProperty("Workspace", resultWs);
-    logAdder->setProperty("LogName", it->first);
-    logAdder->setProperty("LogText", it->second);
+    logAdder->setProperty("LogName", logItem.first);
+    logAdder->setProperty("LogText", logItem.second);
     logAdder->setProperty("LogType", "Number");
     logAdder->executeAsChildAlg();
     logAdderProg.report("Adding Numerical logs");
@@ -367,10 +367,7 @@ void ConvolutionFitSequential::exec() {
 bool ConvolutionFitSequential::checkForTwoLorentz(
     const std::string &subFunction) {
   auto pos = subFunction.rfind("Lorentzian");
-  if (pos != std::string::npos) {
-    return true;
-  }
-  return false;
+  return pos != std::string::npos;
 }
 
 /**

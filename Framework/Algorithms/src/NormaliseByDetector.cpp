@@ -72,7 +72,7 @@ void NormaliseByDetector::init() {
 
 const Geometry::FitParameter NormaliseByDetector::tryParseFunctionParameter(
     Geometry::Parameter_sptr parameter, Geometry::IDetector_const_sptr det) {
-  if (parameter == NULL) {
+  if (parameter == nullptr) {
     std::stringstream stream;
     stream << det->getName() << " and all of it's parent components, have no "
                                 "fitting type parameters. This algorithm "
@@ -116,9 +116,8 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
   ParamNames allParamNames = function->getParameterNames();
 
   // Lookup each parameter name.
-  for (auto it = allParamNames.begin(); it != allParamNames.end(); ++it) {
-    Geometry::Parameter_sptr param =
-        paramMap.getRecursive(&(*det), (*it), type);
+  for (auto &name : allParamNames) {
+    Geometry::Parameter_sptr param = paramMap.getRecursive(&(*det), name, type);
 
     const Geometry::FitParameter &fitParam =
         tryParseFunctionParameter(param, det);

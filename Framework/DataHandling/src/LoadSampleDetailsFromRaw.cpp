@@ -40,7 +40,7 @@ void LoadSampleDetailsFromRaw::exec() {
 
   std::string filename = getPropertyValue("Filename");
   FILE *file = fopen(filename.c_str(), "rb");
-  if (file == NULL) {
+  if (file == nullptr) {
     g_log.error("Unable to open file " + filename);
     throw Exception::FileError("Unable to open File:", filename);
   }

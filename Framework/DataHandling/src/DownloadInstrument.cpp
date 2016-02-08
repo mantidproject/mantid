@@ -107,9 +107,9 @@ void DownloadInstrument::exec() {
                    << " from the instrument repository" << std::endl;
   }
 
-  for (auto itMap = fileMap.begin(); itMap != fileMap.end(); ++itMap) {
+  for (auto &itMap : fileMap) {
     // download a file
-    doDownloadFile(itMap->first, itMap->second);
+    doDownloadFile(itMap.first, itMap.second);
   }
 
   setProperty("FileDownloadCount", static_cast<int>(fileMap.size()));
@@ -180,8 +180,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
 
   std::set<std::string> repoFilenames;
 
-  for (Json::ArrayIndex i = 0; i < serverContents.size(); ++i) {
-    const auto &serverElement = serverContents[i];
+  for (auto &serverElement : serverContents) {
     std::string name = serverElement.get("name", "").asString();
     repoFilenames.insert(name);
     Poco::Path filePath(localPath, name);
@@ -273,7 +272,7 @@ size_t DownloadInstrument::removeOrphanedFiles(
     const std::set<std::string> &filenamesToKeep) const {
   // hold files to delete in a set so we don't remove files while iterating over
   // the directory.
-  std::set<std::string> filesToDelete;
+  std::vector<std::string> filesToDelete;
 
   try {
     using Poco::DirectoryIterator;
@@ -286,7 +285,7 @@ size_t DownloadInstrument::removeOrphanedFiles(
           filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
                          "be deleted: " << entryPath.getFileName() << std::endl;
-        filesToDelete.insert(it->path());
+        filesToDelete.push_back(it->path());
       }
     }
   } catch (Poco::Exception &ex) {
@@ -303,8 +302,8 @@ size_t DownloadInstrument::removeOrphanedFiles(
 
   // delete any identified files
   try {
-    for (auto it = filesToDelete.begin(); it != filesToDelete.end(); ++it) {
-      Poco::File file(*it);
+    for (const auto &filename : filesToDelete) {
+      Poco::File file(filename);
       file.remove();
     }
   } catch (Poco::Exception &ex) {

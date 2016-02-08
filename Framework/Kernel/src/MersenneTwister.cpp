@@ -16,7 +16,7 @@ namespace Kernel {
  */
 MersenneTwister::MersenneTwister(const size_t seedValue)
     : m_generator(), m_uniform_dist(), m_currentSeed(0),
-      m_savedStateGenerator(NULL) {
+      m_savedStateGenerator(nullptr) {
   setSeed(seedValue);
   setRange(0.0, 1.0);
 }
@@ -30,7 +30,7 @@ MersenneTwister::MersenneTwister(const size_t seedValue)
 MersenneTwister::MersenneTwister(const size_t seedValue, const double start,
                                  const double end)
     : m_generator(), m_uniform_dist(), m_currentSeed(),
-      m_savedStateGenerator(NULL) {
+      m_savedStateGenerator(nullptr) {
   setSeed(seedValue);
   setRange(start, end);
 }
@@ -48,7 +48,7 @@ void MersenneTwister::setSeed(const size_t seedValue) {
   m_currentSeed = static_cast<boost::mt19937::result_type>(seedValue);
   m_generator.seed(m_currentSeed);
   delete m_savedStateGenerator;
-  m_savedStateGenerator = NULL;
+  m_savedStateGenerator = nullptr;
 }
 
 /**

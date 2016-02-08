@@ -21,7 +21,7 @@ namespace {
  */
 void createOrUpdateValue(API::Run &run, const std::string &name,
                          const std::string &time, const std::string &value) {
-  TimeSeriesProperty<std::string> *timeSeries(NULL);
+  TimeSeriesProperty<std::string> *timeSeries(nullptr);
   if (run.hasProperty(name)) {
     timeSeries =
         dynamic_cast<TimeSeriesProperty<std::string> *>(run.getLogData(name));

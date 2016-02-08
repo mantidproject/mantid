@@ -107,7 +107,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   std::vector<double> vecX, vecY, vecE;
 
   // progress
-  Progress *prog = NULL;
+  Progress *prog = nullptr;
 
   // Parameters for reading file
   char currentLine[256];
@@ -145,7 +145,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   while (!input.eof() && input.getline(currentLine, 256)) {
     // Initialize progress after NSpec is imported
-    if (nSpec != 0 && prog == NULL) {
+    if (nSpec != 0 && prog == nullptr) {
       prog = new Progress(this, 0.0, 1.0, nSpec);
     }
 
@@ -232,7 +232,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         vecY.clear();
         vecE.clear();
 
-        if (prog != NULL)
+        if (prog != nullptr)
           prog->report();
       }
 

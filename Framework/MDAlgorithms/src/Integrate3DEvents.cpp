@@ -69,8 +69,8 @@ Integrate3DEvents::~Integrate3DEvents() {}
  */
 void Integrate3DEvents::addEvents(
     std::vector<std::pair<double, V3D>> const &event_qs, bool hkl_integ) {
-  for (size_t i = 0; i < event_qs.size(); i++) {
-    addEvent(event_qs[i], hkl_integ);
+  for (const auto &event_q : event_qs) {
+    addEvent(event_q, hkl_integ);
   }
 }
 
@@ -183,14 +183,14 @@ double Integrate3DEvents::numInEllipsoid(
     std::vector<std::pair<double, V3D>> const &events,
     std::vector<V3D> const &directions, std::vector<double> const &sizes) {
   double count = 0;
-  for (size_t i = 0; i < events.size(); i++) {
+  for (const auto &event : events) {
     double sum = 0;
     for (size_t k = 0; k < 3; k++) {
-      double comp = events[i].second.scalar_prod(directions[k]) / sizes[k];
+      double comp = event.second.scalar_prod(directions[k]) / sizes[k];
       sum += comp * comp;
     }
     if (sum <= 1)
-      count += events[i].first;
+      count += event.first;
   }
 
   return count;
@@ -216,17 +216,17 @@ double Integrate3DEvents::numInEllipsoidBkg(
     std::vector<double> const &sizesIn) {
   double count = 0;
   std::vector<double> eventVec;
-  for (size_t i = 0; i < events.size(); i++) {
+  for (const auto &event : events) {
     double sum = 0;
     double sumIn = 0;
     for (size_t k = 0; k < 3; k++) {
-      double comp = events[i].second.scalar_prod(directions[k]) / sizes[k];
+      double comp = event.second.scalar_prod(directions[k]) / sizes[k];
       sum += comp * comp;
-      comp = events[i].second.scalar_prod(directions[k]) / sizesIn[k];
+      comp = event.second.scalar_prod(directions[k]) / sizesIn[k];
       sumIn += comp * comp;
     }
     if (sum <= 1 && sumIn >= 1)
-      eventVec.push_back(events[i].first);
+      eventVec.push_back(event.first);
   }
   std::sort(eventVec.begin(), eventVec.end());
   // Remove top 1% of background
@@ -272,8 +272,8 @@ void Integrate3DEvents::makeCovarianceMatrix(
   for (int row = 0; row < 3; row++) {
     for (int col = 0; col < 3; col++) {
       double sum = 0;
-      for (size_t i = 0; i < events.size(); i++) {
-        auto event = events[i].second;
+      for (const auto &value : events) {
+        const auto &event = value.second;
         if (event.norm() <= radius) {
           sum += event[row] * event[col];
         }
@@ -342,8 +342,8 @@ Integrate3DEvents::stdDev(std::vector<std::pair<double, V3D>> const &events,
   double stdev = 0;
   int count = 0;
 
-  for (size_t i = 0; i < events.size(); i++) {
-    auto event = events[i].second;
+  for (const auto &value : events) {
+    const auto &event = value.second;
     if (event.norm() <= radius) {
       double dot_prod = event.scalar_prod(direction);
       sum += dot_prod;
@@ -589,10 +589,10 @@ double Integrate3DEvents::detectorQ(std::vector<Kernel::V3D> E1Vec,
                                     const Mantid::Kernel::V3D QLabFrame,
                                     std::vector<double> &r) {
   double quot = 1.0;
-  for (auto E1 = E1Vec.begin(); E1 != E1Vec.end(); ++E1) {
+  for (auto &E1 : E1Vec) {
     V3D distv = QLabFrame -
-                *E1 * (QLabFrame.scalar_prod(
-                          *E1)); // distance to the trajectory as a vector
+                E1 * (QLabFrame.scalar_prod(
+                         E1)); // distance to the trajectory as a vector
     double quot0 = distv.norm() / *(std::min_element(r.begin(), r.end()));
     if (quot0 < quot) {
       quot = quot0;

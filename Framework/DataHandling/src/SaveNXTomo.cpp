@@ -110,8 +110,8 @@ void SaveNXTomo::processAll() {
   m_includeError = getProperty("IncludeError");
   m_overwriteFile = getProperty("OverwriteFile");
 
-  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
-    const std::string workspaceID = (*it)->id();
+  for (auto &workspace : m_workspaces) {
+    const std::string workspaceID = workspace->id();
 
     if ((workspaceID.find("Workspace2D") == std::string::npos) &&
         (workspaceID.find("RebinnedOutput") == std::string::npos))
@@ -119,7 +119,7 @@ void SaveNXTomo::processAll() {
           "SaveNXTomo passed invalid workspaces. Must be Workspace2D");
 
     // Do the full check for common binning
-    if (!WorkspaceHelpers::commonBoundaries(*it)) {
+    if (!WorkspaceHelpers::commonBoundaries(workspace)) {
       g_log.error("The input workspace must have common bins");
       throw std::invalid_argument("The input workspace must have common bins");
     }
@@ -156,8 +156,8 @@ void SaveNXTomo::processAll() {
   // Create a progress reporting object
   Progress progress(this, 0, 1, m_workspaces.size());
 
-  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
-    writeSingleWorkspace(*it, nxFile);
+  for (auto &workspace : m_workspaces) {
+    writeSingleWorkspace(workspace, nxFile);
     progress.report();
   }
 
@@ -405,8 +405,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
   // value
   std::vector<Property *> logVals = workspace->run().getLogData();
 
-  for (auto it = logVals.begin(); it != logVals.end(); ++it) {
-    auto prop = *it;
+  for (auto prop : logVals) {
     if (prop->name() != "ImageKey" && prop->name() != "Rotation" &&
         prop->name() != "Intensity" && prop->name() != "Axis1" &&
         prop->name() != "Axis2") {

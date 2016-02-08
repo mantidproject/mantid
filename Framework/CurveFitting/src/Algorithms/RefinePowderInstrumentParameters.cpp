@@ -247,8 +247,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   stringstream msgss;
   msgss << "Set Instrument Function Parameter : " << endl;
   std::map<std::string, double>::iterator paramiter;
-  for (size_t i = 0; i < funparamnames.size(); ++i) {
-    string parname = funparamnames[i];
+  for (auto parname : funparamnames) {
     paramiter = m_FuncParameters.find(parname);
     if (paramiter == m_FuncParameters.end()) {
       // Not found and thus skip
@@ -340,8 +339,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   cout << "Homemade Chi^2 = " << selfchi2 << endl;
 
   // 5. Update fitted parameters
-  for (size_t i = 0; i < funparamnames.size(); ++i) {
-    std::string parname = funparamnames[i];
+  for (auto parname : funparamnames) {
     double parvalue = fitfunc->getParameter(parname);
     m_FuncParameters[parname] = parvalue;
   }
@@ -726,11 +724,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     //      << ".  Acceptance Prob. = " << prob << "; Random = " << randnumber
     //      << endl;
 
-    if (randnumber < prob) {
-      accept = true;
-    } else {
-      accept = false;
-    }
+    accept = randnumber < prob;
 
     // d. Adjust step size
     if (false) {
@@ -894,26 +888,26 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
     sigma2 = -1;
 
     API::TableRow row = peakparamws->getRow(ir);
-    for (size_t ic = 0; ic < colnames.size(); ++ic) {
-      if (colnames[ic].compare("H") == 0)
+    for (auto &colname : colnames) {
+      if (colname.compare("H") == 0)
         row >> h;
-      else if (colnames[ic].compare("K") == 0)
+      else if (colname.compare("K") == 0)
         row >> k;
-      else if (colnames[ic].compare("L") == 0)
+      else if (colname.compare("L") == 0)
         row >> l;
-      else if (colnames[ic].compare("Alpha") == 0)
+      else if (colname.compare("Alpha") == 0)
         row >> alpha;
-      else if (colnames[ic].compare("Beta") == 0)
+      else if (colname.compare("Beta") == 0)
         row >> beta;
-      else if (colnames[ic].compare("Sigma2") == 0)
+      else if (colname.compare("Sigma2") == 0)
         row >> sigma2;
-      else if (colnames[ic].compare("Sigma") == 0)
+      else if (colname.compare("Sigma") == 0)
         row >> sigma;
-      else if (colnames[ic].compare("Chi2") == 0)
+      else if (colname.compare("Chi2") == 0)
         row >> chi2;
-      else if (colnames[ic].compare("Height") == 0)
+      else if (colname.compare("Height") == 0)
         row >> height;
-      else if (colnames[ic].compare("TOF_h") == 0)
+      else if (colname.compare("TOF_h") == 0)
         row >> tof_h;
       else {
         try {
@@ -1078,9 +1072,8 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
 
   // 3. Retrieve the information for geometry parameters
   map<string, vector<double>>::iterator mit;
-  for (size_t i = 0; i < parameternames.size(); ++i) {
+  for (auto parname : parameternames) {
     // a) Get on hold of the MC parameter vector
-    string parname = parameternames[i];
     mit = mcparameters.find(parname);
     if (mit == mcparameters.end()) {
       // Not found the parameter.  raise error!
@@ -1133,8 +1126,7 @@ void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
   double width = m_Function->getParameter("Width");
   double tcross = m_Function->getParameter("Tcross");
 
-  for (size_t i = 0; i < vec_d.size(); ++i) {
-    double dh = vec_d[i];
+  for (double dh : vec_d) {
     double n = 0.5 * gsl_sf_erfc(width * (tcross - 1 / dh));
     vec_n.push_back(n);
   }
@@ -1253,8 +1245,8 @@ RefinePowderInstrumentParameters::genMCResultTable() {
 
   tablews->addColumn("double", "Chi2");
   tablews->addColumn("double", "GSLChi2");
-  for (size_t i = 0; i < m_PeakFunctionParameterNames.size(); ++i) {
-    tablews->addColumn("double", m_PeakFunctionParameterNames[i]);
+  for (auto &peakFunctionParameterName : m_PeakFunctionParameterNames) {
+    tablews->addColumn("double", peakFunctionParameterName);
   }
 
   // 2. Put values in

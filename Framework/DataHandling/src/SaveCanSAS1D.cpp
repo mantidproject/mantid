@@ -308,9 +308,9 @@ void SaveCanSAS1D::searchandreplaceSpecialChars(std::string &input) {
   std::string specialchars = "&<>'\"";
   std::string::size_type searchIndex = 0;
   std::string::size_type findIndex;
-  for (std::string::size_type i = 0; i < specialchars.size(); ++i) {
+  for (char specialchar : specialchars) {
     while (searchIndex < input.length()) {
-      findIndex = input.find(specialchars[i], searchIndex);
+      findIndex = input.find(specialchar, searchIndex);
       if (findIndex != std::string::npos) {
         searchIndex = findIndex + 1;
         // replace with xml entity refrence

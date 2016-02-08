@@ -338,8 +338,8 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
     specid_t deltaPlusT = inSpec + this->m_detNeighbourOffset;
     specid_t deltaMinusT = inSpec - this->m_detNeighbourOffset;
 
-    for (auto it = neighbours.begin(); it != neighbours.end(); ++it) {
-      specid_t spec = it->first;
+    for (auto &neighbour : neighbours) {
+      specid_t spec = neighbour.first;
       g_log.debug() << "Neighbor ID: " << spec << std::endl;
       if (spec == deltaPlus1 || spec == deltaMinus1 || spec == deltaPlusT ||
           spec == deltaMinusT) {

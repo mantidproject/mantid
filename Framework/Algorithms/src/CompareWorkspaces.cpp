@@ -28,7 +28,7 @@ DECLARE_ALGORITHM(CompareWorkspaces)
 /** Constructor
  */
 CompareWorkspaces::CompareWorkspaces()
-    : API::Algorithm(), m_Result(false), m_Prog(NULL),
+    : API::Algorithm(), m_Result(false), m_Prog(nullptr),
       m_ParallelComparison(true) {}
 
 //----------------------------------------------------------------------------------------------
@@ -216,8 +216,7 @@ void CompareWorkspaces::processGroups(
   const std::vector<Property *> &allProps = this->getProperties();
   std::vector<Property *> nonDefaultProps;
   nonDefaultProps.reserve(allProps.size());
-  for (size_t i = 0; i < allProps.size(); ++i) {
-    Property *p = allProps[i];
+  for (auto p : allProps) {
     const std::string &propName = p->name();
     // Skip those not set and the input workspaces
     if (p->isDefault() || propName == "Workspace1" || propName == "Workspace2")
@@ -671,8 +670,8 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
     Unit_const_sptr ax1_unit = ax1->unit();
     Unit_const_sptr ax2_unit = ax2->unit();
 
-    if ((ax1_unit == NULL && ax2_unit != NULL) ||
-        (ax1_unit != NULL && ax2_unit == NULL) ||
+    if ((ax1_unit == nullptr && ax2_unit != nullptr) ||
+        (ax1_unit != nullptr && ax2_unit == nullptr) ||
         (ax1_unit && ax1_unit->unitID() != ax2_unit->unitID())) {
       recordMismatch(axis_name + " unit mismatch");
       return false;
