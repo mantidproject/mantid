@@ -210,6 +210,13 @@ public:
     TS_ASSERT(p1.isPointBounded(point));
 
     point.clear();
+    point.push_back(5.0);
+    point.push_back(-5.0);
+    TSM_ASSERT("Point should be found to be bounded by "
+               "plane, it lies exactly on the plane",
+               p1.isPointBounded(point));
+
+    point.clear();
     point.push_back(6.0);
     point.push_back(-5.0);
     TS_ASSERT(!p1.isPointBounded(point));
@@ -224,12 +231,16 @@ public:
     point.clear();
     point.push_back(4.0);
     point.push_back(12.0);
-    TS_ASSERT(p1.isPointInside(point));
+    TSM_ASSERT("Point should be found to be inside region bounded by plane",
+               p1.isPointInside(point));
 
+    // Point lies on the plane, not inside it
     point.clear();
-    point.push_back(6.0);
+    point.push_back(5.0);
     point.push_back(-5.0);
-    TS_ASSERT(!p1.isPointInside(point));
+    TSM_ASSERT("Point should not be found to be inside region bounded by "
+               "plane, it lies exactly on the plane",
+               !p1.isPointInside(point));
   }
 };
 
