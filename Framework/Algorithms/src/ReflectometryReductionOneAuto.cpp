@@ -253,8 +253,8 @@ void ReflectometryReductionOneAuto::exec() {
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<MantidVec>("Params");
-  auto i0_monitor_index = static_cast<int>(checkForOptionalDefault(
-      "I0MonitorIndex", instrument, Mantid::EMPTY_INT(), "I0MonitorIndex"));
+  auto i0_monitor_index = checkForOptionalDefault<double>(
+      "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   std::string processing_commands;
   if (this->getPointerToProperty("ProcessingInstructions")->isDefault()) {
@@ -339,7 +339,10 @@ void ReflectometryReductionOneAuto::exec() {
     refRedOne->setProperty("OutputWorkspaceWavelength",
                            output_workspace_lam_name);
     refRedOne->setProperty("NormalizeByIntegratedMonitors", norm_by_int_mons);
-    refRedOne->setProperty("I0MonitorIndex", i0_monitor_index);
+
+    if (i0_monitor_index.is_initialized()) {
+      refRedOne->setProperty("I0MonitorIndex", i0_monitor_index.get());
+    }
     refRedOne->setProperty("ProcessingInstructions", processing_commands);
     refRedOne->setProperty("WavelengthMin", wavelength_min);
     refRedOne->setProperty("WavelengthMax", wavelength_max);
@@ -506,19 +509,21 @@ double ReflectometryReductionOneAuto::checkForMandatoryDefault(
   }
 }
 
-double ReflectometryReductionOneAuto::checkForOptionalDefault(
+template <typename T>
+boost::optional<T> ReflectometryReductionOneAuto::checkForOptionalDefault(
     std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
-    double fallbackValue, std::string idf_name) const {
+    std::string idf_name) const {
   auto algProperty = this->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
-    auto ret = fallbackValue;
     if (defaults.size() != 0) {
-      ret = defaults[0];
+      return boost::optional<T>(defaults[0]);
+    } else {
+      return boost::optional<T>();
     }
-    return ret;
   } else {
-    return boost::lexical_cast<double, std::string>(algProperty->value());
+    auto value = boost::lexical_cast<double, std::string>(algProperty->value());
+    return boost::optional<T>(value);
   }
 }
 

@@ -39,15 +39,16 @@ namespace Algorithms {
 class DLLExport ReflectometryWorkflowBase : public API::DataProcessorAlgorithm {
 public:
   // Class typedefs
-  typedef boost::tuple<double, double> MinMax;
-  typedef boost::optional<double> OptionalDouble;
-  typedef boost::optional<Mantid::API::MatrixWorkspace_sptr>
-      OptionalMatrixWorkspace_sptr;
-  typedef std::vector<int> WorkspaceIndexList;
-  typedef boost::optional<std::vector<int>> OptionalWorkspaceIndexes;
-  typedef boost::tuple<Mantid::API::MatrixWorkspace_sptr,
-                       Mantid::API::MatrixWorkspace_sptr>
-      DetectorMonitorWorkspacePair;
+  using MinMax = boost::tuple<double, double>;
+  using OptionalDouble = boost::optional<double>;
+  using OptionalMatrixWorkspace_sptr =
+      boost::optional<Mantid::API::MatrixWorkspace_sptr>;
+  using WorkspaceIndexList = std::vector<int>;
+  using OptionalWorkspaceIndexes = boost::optional<std::vector<int>>;
+  using DetectorMonitorWorkspacePair =
+      boost::tuple<Mantid::API::MatrixWorkspace_sptr,
+                   Mantid::API::MatrixWorkspace_sptr>;
+  using OptionalInteger = boost::optional<int>;
 
   ReflectometryWorkflowBase();
   virtual ~ReflectometryWorkflowBase();
@@ -56,15 +57,21 @@ public:
   /// properties provided.
   DetectorMonitorWorkspacePair
   toLam(Mantid::API::MatrixWorkspace_sptr toConvert,
-        const std::string &processingCommands, const int monitorIndex,
-        const MinMax &wavelengthMinMax, const MinMax &backgroundMinMax,
-        const double &wavelengthStep);
+        const std::string &processingCommands,
+        const OptionalInteger monitorIndex, const MinMax &wavelengthMinMax,
+        const MinMax &backgroundMinMax, const double &wavelengthStep);
 
   /// Convert the detector spectrum of the input workspace to wavelength
   API::MatrixWorkspace_sptr
   toLamDetector(const std::string &processingCommands,
                 const API::MatrixWorkspace_sptr &toConvert,
                 const MinMax &wavelengthMinMax, const double &wavelengthStep);
+
+  template <typename T>
+  boost::optional<T>
+  checkForOptionalDefault(std::string propName,
+                          Mantid::Geometry::Instrument_const_sptr instrument,
+                          std::string idf_name = "") const;
 
 protected:
   /// Determine if the property has it's default value.
@@ -108,7 +115,8 @@ private:
   /// Convert the monitor parts of the input workspace to wavelength
   API::MatrixWorkspace_sptr
   toLamMonitor(const API::MatrixWorkspace_sptr &toConvert,
-               const int monitorIndex, const MinMax &backgroundMinMax);
+               const OptionalInteger monitorIndex,
+               const MinMax &backgroundMinMax);
 
   /// Make a unity workspace
   API::MatrixWorkspace_sptr makeUnityWorkspace(const std::vector<double> &x);

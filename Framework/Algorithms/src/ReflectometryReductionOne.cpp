@@ -505,7 +505,10 @@ void ReflectometryReductionOne::exec() {
   fetchOptionalLowerUpperPropertyValue("RegionOfDirectBeam", isPointDetector,
                                        directBeam);
 
-  const int i0MonitorIndex = getProperty("I0MonitorIndex");
+  auto instrument = runWS->getInstrument();
+
+  const OptionalInteger i0MonitorIndex = checkForOptionalDefault<int>(
+      "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   const bool correctDetectorPositions = getProperty("CorrectDetectorPositions");
 
@@ -634,7 +637,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
     MatrixWorkspace_sptr IvsLam, const MinMax &wavelengthInterval,
     const MinMax &wavelengthMonitorBackgroundInterval,
     const MinMax &wavelengthMonitorIntegrationInterval,
-    const int &i0MonitorIndex, MatrixWorkspace_sptr firstTransmissionRun,
+    const OptionalInteger &i0MonitorIndex, MatrixWorkspace_sptr firstTransmissionRun,
     OptionalMatrixWorkspace_sptr secondTransmissionRun,
     const OptionalDouble &stitchingStart, const OptionalDouble &stitchingDelta,
     const OptionalDouble &stitchingEnd,
@@ -687,7 +690,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
       }
     }
     alg->setProperty("ProcessingInstructions", spectrumProcessingCommands);
-    alg->setProperty("I0MonitorIndex", i0MonitorIndex);
+    if (i0MonitorIndex.is_initialized()){
+        alg->setProperty("I0MonitorIndex", i0MonitorIndex.get());
+    }
     alg->setProperty("WavelengthMin", wavelengthInterval.get<0>());
     alg->setProperty("WavelengthMax", wavelengthInterval.get<1>());
     alg->setProperty("WavelengthStep", wavelengthStep);

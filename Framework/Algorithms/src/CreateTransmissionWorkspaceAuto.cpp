@@ -128,16 +128,16 @@ void CreateTransmissionWorkspaceAuto::exec() {
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<std::vector<double>>("Params");
-  auto i0_monitor_index = static_cast<int>(checkForOptionalDefault(
-      "I0MonitorIndex", instrument, Mantid::EMPTY_INT(), "I0MonitorIndex"));
+  auto i0_monitor_index = checkForOptionalDefault<int>(
+      "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   std::string processing_commands;
   if (this->getPointerToProperty("ProcessingInstructions")->isDefault()) {
-    const int start = static_cast<int>(
-        instrument->getNumberParameter("PointDetectorStart")[0]);
-    const int stop = static_cast<int>(
-        instrument->getNumberParameter("PointDetectorStop")[0]);
     if (analysis_mode == "PointDetectorAnalysis") {
+      const int start = static_cast<int>(
+          instrument->getNumberParameter("PointDetectorStart")[0]);
+      const int stop = static_cast<int>(
+          instrument->getNumberParameter("PointDetectorStop")[0]);
       if (start == stop) {
         processing_commands = boost::lexical_cast<std::string>(start);
       } else {
@@ -197,8 +197,12 @@ void CreateTransmissionWorkspaceAuto::exec() {
     if (params.is_initialized()) {
       algCreateTransWS->setProperty("Params", params.get());
     }
-
-    algCreateTransWS->setProperty("I0MonitorIndex", i0_monitor_index);
+    if (i0_monitor_index.is_initialized()) {
+      algCreateTransWS->setProperty("I0MonitorIndex", i0_monitor_index.get());
+    }
+    else {
+        algCreateTransWS->setProperty("I0MonitorIndex", Mantid::EMPTY_INT());
+    }
     algCreateTransWS->setProperty("ProcessingInstructions",
                                   processing_commands);
     algCreateTransWS->setProperty("WavelengthMin", wavelength_min);
@@ -261,19 +265,23 @@ double CreateTransmissionWorkspaceAuto::checkForMandatoryDefault(
   }
 }
 
-double CreateTransmissionWorkspaceAuto::checkForOptionalDefault(
+template <typename T>
+boost::optional<T> CreateTransmissionWorkspaceAuto::checkForOptionalDefault(
     std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
-    double fallbackValue, std::string idf_name) const {
+    std::string idf_name) const {
   auto algProperty = this->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
-    auto ret = fallbackValue;
     if (defaults.size() != 0) {
-      ret = defaults[0];
+      auto default = static_cast<T>(defaults[0]);
+      return boost::make_optional<T>(default);
+    } else {
+      return boost::optional<T>();
     }
-    return ret;
   } else {
-    return boost::lexical_cast<double, std::string>(algProperty->value());
+    auto propertyValue = boost::lexical_cast<double, std::string>(algProperty->value());
+    auto value = static_cast<T>(propertyValue);
+    return boost::make_optional<T>(value);
   }
 }
 

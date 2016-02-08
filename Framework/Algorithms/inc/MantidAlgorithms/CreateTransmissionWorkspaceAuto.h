@@ -62,9 +62,11 @@ private:
                            Mantid::Geometry::Instrument_const_sptr instrument,
                            std::string idf_name = "") const;
 
-  double checkForOptionalDefault(
-      std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
-      double fallbackValue, std::string idf_name = "") const;
+  template <typename T>
+  boost::optional<T>
+  checkForOptionalDefault(std::string propName,
+                          Mantid::Geometry::Instrument_const_sptr instrument,
+                          std::string idf_name = "") const;
 };
 
 } // namespace Algorithms

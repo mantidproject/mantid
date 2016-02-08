@@ -109,7 +109,10 @@ void CreateTransmissionWorkspace::exec() {
   const std::string processingCommands = getWorkspaceIndexList();
 
   // Get the monitor i0 index
-  const int i0MonitorIndex = getProperty("I0MonitorIndex");
+  auto transWS = firstTransmissionRun.get();
+  auto instrument = transWS->getInstrument();
+  const auto i0MonitorIndex = checkForOptionalDefault<int>("I0MonitorIndex", instrument,
+                                   "I0MonitorIndex");
 
   // Create the transmission workspace.
   MatrixWorkspace_sptr outWS = this->makeTransmissionCorrection(
@@ -156,12 +159,15 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     const std::string &processingCommands, const MinMax &wavelengthInterval,
     const MinMax &wavelengthMonitorBackgroundInterval,
     const MinMax &wavelengthMonitorIntegrationInterval,
-    const int &i0MonitorIndex, MatrixWorkspace_sptr firstTransmissionRun,
+    const OptionalInteger &i0MonitorIndex,
+    MatrixWorkspace_sptr firstTransmissionRun,
     OptionalMatrixWorkspace_sptr secondTransmissionRun,
     const OptionalDouble &stitchingStart, const OptionalDouble &stitchingDelta,
     const OptionalDouble &stitchingEnd,
     const OptionalDouble &stitchingStartOverlap,
     const OptionalDouble &stitchingEndOverlap, const double &wavelengthStep) {
+  /*make struct of optional inputs to refactor method arguments*/
+  /*make a using statements defining OptionalInteger for MonitorIndex*/
   auto trans1InLam = toLam(firstTransmissionRun, processingCommands,
                            i0MonitorIndex, wavelengthInterval,
                            wavelengthMonitorBackgroundInterval, wavelengthStep);
@@ -227,7 +233,8 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
         stitchingDelta.is_initialized()) {
       const std::vector<double> params =
           boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-              stitchingEnd.get()).convert_to_container<std::vector<double>>();
+              stitchingEnd.get())
+              .convert_to_container<std::vector<double>>();
       stitch1DAlg->setProperty("Params", params);
     } else if (stitchingDelta.is_initialized()) {
       const double delta = stitchingDelta.get();
@@ -240,6 +247,27 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
   }
 
   return transmissionWS;
+}
+
+template <typename T>
+boost::optional<T> CreateTransmissionWorkspace::checkForOptionalDefault(
+    std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
+    std::string idf_name) const {
+  auto algProperty = this->getPointerToProperty(propName);
+  if (algProperty->isDefault()) {
+    auto defaults = instrument->getNumberParameter(idf_name);
+    if (defaults.size() != 0) {
+      auto default = static_cast<T>(defaults[0]);
+      return boost::make_optional<T>(default);
+    } else {
+      return boost::optional<T>();
+    }
+  } else {
+    auto propertyValue =
+        boost::lexical_cast<double, std::string>(algProperty->value());
+    auto value = static_cast<T>(propertyValue);
+    return boost::make_optional<T>(value);
+  }
 }
 
 } // namespace Algorithms

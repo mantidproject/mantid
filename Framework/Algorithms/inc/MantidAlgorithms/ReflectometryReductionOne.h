@@ -91,7 +91,7 @@ private:
       API::MatrixWorkspace_sptr IvsLam, const MinMax &wavelengthInterval,
       const MinMax &wavelengthMonitorBackgroundInterval,
       const MinMax &wavelengthMonitorIntegrationInterval,
-      const int &i0MonitorIndex, API::MatrixWorkspace_sptr firstTransmissionRun,
+      const OptionalInteger &i0MonitorIndex, API::MatrixWorkspace_sptr firstTransmissionRun,
       OptionalMatrixWorkspace_sptr secondTransmissionRun,
       const OptionalDouble &stitchingStartQ,
       const OptionalDouble &stitchingDeltaQ,
