@@ -95,8 +95,8 @@ namespace VATES{
     }
 
     // Check for the dimensionality
-    if (pimpl->is4DWorkspace(inputWS)) {
-      errorMessage.emplace("InputWorkspace", "The workspace must be 3D or less. You can use a slicing operation to remove a dimension.");
+    if (!pimpl->is3DWorkspace(inputWS)) {
+      errorMessage.emplace("InputWorkspace", "The MD workspace must be 3D.");
     }
 
     // Check for file location

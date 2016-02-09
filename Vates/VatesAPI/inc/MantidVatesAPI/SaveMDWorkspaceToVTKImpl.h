@@ -35,13 +35,14 @@ public:
   VisualNormalization translateStringToVisualNormalization(const std::string normalization) const;
   ThresholdRange_scptr translateStringToThresholdRange(const std::string thresholdRange) const;
 
-  bool is4DWorkspace(Mantid::API::IMDWorkspace_sptr workspace) const;
+  bool is3DWorkspace(Mantid::API::IMDWorkspace_sptr workspace) const;
 
 private:
   std::map<std::string, VisualNormalization> m_normalizations;
   std::vector<std::string> m_thresholds;
 
   void setupMembers();
+  bool is4DWorkspace(Mantid::API::IMDWorkspace_sptr workspace) const;
   int writeDataSetToVTKFile(vtkXMLWriter* writer, vtkDataSet* dataSet, std::string filename) const;
   double selectTimeSliceValue(Mantid::API::IMDWorkspace_sptr workspace) const;
   std::string getFullFilename(std::string filename, bool isHistoWorkspace) const;

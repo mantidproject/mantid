@@ -43,6 +43,13 @@ bool has_suffix(const std::string &stringToCheck, const std::string &suffix)
     }
     return isSuffixInString;
 }
+
+bool isNDWorkspace(Mantid::API::IMDWorkspace_sptr workspace, const size_t dimensionality)
+{
+    auto actualNonIntegratedDimensionality
+        = workspace->getNonIntegratedDimensions().size();
+    return actualNonIntegratedDimensionality == dimensionality;
+}
 }
 
 namespace Mantid
@@ -255,10 +262,21 @@ double SaveMDWorkspaceToVTKImpl::selectTimeSliceValue(
 bool SaveMDWorkspaceToVTKImpl::is4DWorkspace(
     Mantid::API::IMDWorkspace_sptr workspace) const
 {
-    auto actualNonIntegratedDimensionality
-        = workspace->getNonIntegratedDimensions().size();
-    const size_t dimensionsWithTime = 4;
-    return actualNonIntegratedDimensionality == dimensionsWithTime;
+   const size_t dimensionality = 4;
+   return isNDWorkspace(workspace, dimensionality);
+}
+
+
+/**
+ * Checks if a workspace is non 3D
+ * @param workspace: the workspace to check
+ * @return true if the workspace is 3D else false
+ */
+bool SaveMDWorkspaceToVTKImpl::is3DWorkspace(
+    Mantid::API::IMDWorkspace_sptr workspace) const
+{
+  const size_t dimensionality = 3;
+  return isNDWorkspace(workspace, dimensionality);
 }
 
 /**

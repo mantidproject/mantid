@@ -31,7 +31,7 @@ public:
             alg.execute());
     }
 
-    void test_that_4D_workspace_throws()
+    void test_that_non_3D_workspace_throws()
     {
         // Arrange
         const size_t numDims = 4;

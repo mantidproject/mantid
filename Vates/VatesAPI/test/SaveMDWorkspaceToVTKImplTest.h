@@ -113,7 +113,7 @@ public:
                        noThresholdRange));
     }
 
-    void test_detects_when_4D_workspace()
+    void test_detects_when_not_3D_workspace()
     {
         // Arrange
         Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
@@ -122,25 +122,25 @@ public:
             = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims);
 
         // Act
-        const auto is4D = saveMDToVTK.is4DWorkspace(workspace);
+        const auto is3D = saveMDToVTK.is3DWorkspace(workspace);
 
         // Assert
-        TSM_ASSERT("Detects a 4D MD workspace", is4D);
+        TSM_ASSERT("Detects a non-3D MD workspace", !is3D);
     }
 
-    void test_detects_when_not_4D_workspace()
+    void test_detects_when_3D_workspace()
     {
         // Arrange
         Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
-        const size_t numDims = 2;
+        const size_t numDims = 3;
         auto workspace
             = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims);
 
         // Act
-        const auto is4D = saveMDToVTK.is4DWorkspace(workspace);
+        const auto is3D = saveMDToVTK.is3DWorkspace(workspace);
 
         // Assert
-        TSM_ASSERT("Detects that not a 4D MD workspace", !is4D);
+        TSM_ASSERT("Detects that a 3D MD workspace", is3D);
     }
 
     void
