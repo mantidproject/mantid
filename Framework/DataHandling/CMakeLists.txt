@@ -107,6 +107,7 @@ set ( SRC_FILES
 	src/ModifyDetectorDotDatFile.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
+	src/PatchBBY.cpp
 	src/PDLoadCharacterizations.cpp
 	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
@@ -263,6 +264,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/NexusTester.h
+	inc/MantidDatahandling/PatchBBY.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
 	inc/MantidDataHandling/ProcessDasNexusLog.h
 	inc/MantidDataHandling/RawFileInfo.h

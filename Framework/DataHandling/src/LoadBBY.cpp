@@ -404,9 +404,9 @@ void LoadBBY::exec() {
   AddSinglePointTimeSeriesProperty(logManager, time_str, "curtain_rotation", 10.0);
 
   API::IAlgorithm_sptr loadInstrumentAlg = createChildAlgorithm("LoadInstrument");
-  loadInstrumentAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
   loadInstrumentAlg->setProperty("Workspace", eventWS);
   loadInstrumentAlg->setPropertyValue("InstrumentName", "BILBY");
+  loadInstrumentAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
   loadInstrumentAlg->executeAsChildAlg();
 
   setProperty("OutputWorkspace", eventWS);
@@ -570,7 +570,7 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
     }
 
   if (logContent.size() > 0) {
-    auto data = std::istringstream(logContent);
+    std::istringstream data(logContent);
     Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> conf(new Poco::Util::PropertyFileConfiguration(data));
     
     if (conf->hasProperty("bm1_counts"))

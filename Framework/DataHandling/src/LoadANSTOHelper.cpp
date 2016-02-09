@@ -437,7 +437,7 @@ bool File::append(const std::string &path, const std::string &name, const void *
     if (fileName.compare(name) == 0)
       targetPosition = lastHeaderPosition;
     else if (targetPosition != -1)
-      throw std::exception("format exception"); // it has to be the last file in the archive
+      throw std::runtime_error("format exception"); // it has to be the last file in the archive
 
     FileInfo fileInfo;
     fileInfo.Offset = position;

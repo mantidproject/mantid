@@ -14,35 +14,35 @@ enum TYPE {
 };
 
 struct PropertyInfo {
-  const char *const Group;
-  const char *const Name;
-  TYPE const Type;
+  const char* const Group;
+  const char* const Name;
+  TYPE        const Type;
 };
 
 // consts
-static char const *const HistoryStr = "History.log";
-static char const *const FilenameStr = "Filename";
+static char const* const HistoryStr = "History.log";
+static char const* const FilenameStr = "Filename";
 static PropertyInfo PatchableProperties[] = {
-    {"Group1", "bm1_counts", TYPE_INT},
-    {"Group1", "att_pos", TYPE_DBL},
+  { "Group1", "bm1_counts"         , TYPE_INT },
+  { "Group1", "att_pos"            , TYPE_DBL },
 
-    {"Group2", "master_chopper_freq", TYPE_DBL},
-    {"Group2", "t0_chopper_freq", TYPE_DBL},
-    {"Group2", "t0_chopper_phase", TYPE_DBL},
-
-    //{ "Group3", "L1"                 , TYPE_DBL },
-    {"Group3", "L2_det", TYPE_DBL},
-    {"Group3", "Ltof_det", TYPE_DBL},
-
-    {"Group4", "L2_curtainl", TYPE_DBL},
-    {"Group4", "L2_curtainr", TYPE_DBL},
-    {"Group4", "L2_curtainu", TYPE_DBL},
-    {"Group4", "L2_curtaind", TYPE_DBL},
-
-    {"Group5", "curtainl", TYPE_DBL},
-    {"Group5", "curtainr", TYPE_DBL},
-    {"Group5", "curtainu", TYPE_DBL},
-    {"Group5", "curtaind", TYPE_DBL},
+  { "Group2", "master_chopper_freq", TYPE_DBL },
+  { "Group2", "t0_chopper_freq"    , TYPE_DBL },
+  { "Group2", "t0_chopper_phase"   , TYPE_DBL },
+  
+  //{ "Group3", "L1"                 , TYPE_DBL },
+  { "Group3", "L2_det"             , TYPE_DBL },
+  { "Group3", "Ltof_det"           , TYPE_DBL },
+  
+  { "Group4", "L2_curtainl"        , TYPE_DBL },
+  { "Group4", "L2_curtainr"        , TYPE_DBL },
+  { "Group4", "L2_curtainu"        , TYPE_DBL },
+  { "Group4", "L2_curtaind"        , TYPE_DBL },
+  
+  { "Group5", "curtainl"           , TYPE_DBL },
+  { "Group5", "curtainr"           , TYPE_DBL },
+  { "Group5", "curtainu"           , TYPE_DBL },
+  { "Group5", "curtaind"           , TYPE_DBL },
 };
 
 /**
@@ -61,21 +61,20 @@ void PatchBBY::init() {
   declareProperty(
       new API::FileProperty(FilenameStr, "", API::FileProperty::Load, exts),
       "The filename of the stored data to be patched");
-
+  
   // patchable properties
-  for (auto itr = std::begin(PatchableProperties);
-       itr != std::end(PatchableProperties); ++itr) {
+  for (auto itr = std::begin(PatchableProperties); itr != std::end(PatchableProperties); ++itr) {
     switch (itr->Type) {
     case TYPE_INT:
-      declareProperty(new Kernel::PropertyWithValue<int>(
-                          itr->Name, EMPTY_INT(), Kernel::Direction::Input),
-                      "Optional");
+      declareProperty(
+          new Kernel::PropertyWithValue<int>(itr->Name, EMPTY_INT(), Kernel::Direction::Input),
+          "Optional");
       break;
 
     case TYPE_DBL:
-      declareProperty(new Kernel::PropertyWithValue<double>(
-                          itr->Name, EMPTY_DBL(), Kernel::Direction::Input),
-                      "Optional");
+      declareProperty(
+          new Kernel::PropertyWithValue<double>(itr->Name, EMPTY_DBL(), Kernel::Direction::Input),
+          "Optional");
       break;
     }
 
@@ -90,8 +89,8 @@ void PatchBBY::exec() {
   std::string filename = getPropertyValue(FilenameStr);
   ANSTO::Tar::File tarFile(filename);
   if (!tarFile.good())
-    throw std::invalid_argument("invalid BBY file");
-
+    throw std::invalid_argument("invalid BBY file"); 
+  
   size_t hdfFiles = 0;
   size_t binFiles = 0;
   size_t logFiles = 0;
@@ -109,8 +108,7 @@ void PatchBBY::exec() {
         binFiles++;
       else if (itr->compare(HistoryStr) == 0) {
         if (std::distance(itr, subFiles.end()) != 1)
-          throw std::invalid_argument(
-              "invalid BBY file (history has to be at the end)");
+          throw std::invalid_argument("invalid BBY file (history has to be at the end)"); 
 
         logFiles++;
         tarFile.select(itr->c_str());
@@ -127,43 +125,46 @@ void PatchBBY::exec() {
   std::ostringstream logContentNewBuffer;
   int tmp_int;
   double tmp_dbl;
-  for (auto itr = std::begin(PatchableProperties);
-       itr != std::end(PatchableProperties); ++itr) {
+  for (auto itr = std::begin(PatchableProperties); itr != std::end(PatchableProperties); ++itr) {
     auto property_value = getProperty(itr->Name);
-    // if (!isEmpty(property_value))
-    switch (itr->Type) {
-    case TYPE_INT:
-      tmp_int = property_value;
-      if (tmp_int != EMPTY_INT()) // !!!
-        logContentNewBuffer << itr->Name << " = " << tmp_int << std::endl;
-      break;
+    //if (!isEmpty(property_value))
+      switch (itr->Type) {
+      case TYPE_INT:
+        tmp_int = property_value;
+        if (tmp_int != EMPTY_INT()) // !!!
+          logContentNewBuffer << itr->Name << " = " << tmp_int << std::endl;
+        break;
 
-    case TYPE_DBL:
-      tmp_dbl = property_value;
-      if (tmp_dbl != EMPTY_DBL()) // !!!
-        logContentNewBuffer << itr->Name << " = " << tmp_dbl << std::endl;
-      break;
-    }
+      case TYPE_DBL:
+        tmp_dbl = property_value;
+        if (tmp_dbl != EMPTY_DBL()) // !!!
+          logContentNewBuffer << itr->Name << " = " << tmp_dbl << std::endl;
+        break;
+      }
   }
-
+    
   std::string logContentNew = logContentNewBuffer.str();
   if (logContentNew.size() == 0)
     throw std::invalid_argument("nothing to patch");
-
+  
   // read existing history
   std::string logContent;
   if (logFiles == 0) {
     logContent = std::move(logContentNew);
-  } else {
+  }
+  else {
     logContent.resize(logSize);
     tarFile.read(&logContent[0], logSize);
     logContent.append(logContentNew);
   }
   // append patches to file
   tarFile.close();
-  if (!ANSTO::Tar::File::append(filename, HistoryStr, logContent.c_str(),
-                                logContent.size()))
-    throw std::invalid_argument("unable to patch");
+  if (!ANSTO::Tar::File::append(
+    filename,
+    HistoryStr,
+    logContent.c_str(),
+    logContent.size()))
+    throw std::runtime_error("unable to patch");
 }
 
 } // DataHandling
