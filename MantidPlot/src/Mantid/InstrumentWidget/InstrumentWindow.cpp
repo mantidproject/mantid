@@ -8,6 +8,7 @@
 #include <ProjectionSurface.h>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
                                    ApplicationWindow *parent,

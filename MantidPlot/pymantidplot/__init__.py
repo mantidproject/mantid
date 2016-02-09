@@ -17,15 +17,17 @@ import os
 import time
 import mantid.api
 import mantidqtpython
+from mantidqtpython import GraphOptions
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
-from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker,
-                  GraphOptions, InstrumentWidget, InstrumentWidgetRenderTab, InstrumentWidgetPickTab,
-                  InstrumentWidgetMaskTab)
+from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker)
+				  
+print dir(mantidqtpython)
 
 # Make the ApplicationWindow instance accessible from the mantidplot namespace
 from _qti import app
+
 
 # Alias threadsafe_call so users have a more understandable name
 gui_cmd = threadsafe_call
@@ -677,6 +679,8 @@ def getMantidMatrix(name):
     """Get a handle to the named Mantid matrix"""
     return new_proxy(proxies.MantidMatrix, _qti.app.mantidUI.getMantidMatrix, name)
 
+	
+InstrumentWidget = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidget
 
 def getInstrumentView(name, tab=InstrumentWidget.RENDER):
     """Create an instrument view window based on the given workspace.
@@ -866,14 +870,14 @@ for name in MantidUIImports:
 
 # Set some aliases for Layer enumerations so that old code will still work
 Layer = _qti.Layer
-Layer.Log10 = _qti.GraphOptions.Log10
-Layer.Linear = _qti.GraphOptions.Linear
-Layer.Left = _qti.GraphOptions.Left
-Layer.Right = _qti.GraphOptions.Right
-Layer.Bottom = _qti.GraphOptions.Bottom
-Layer.Top = _qti.GraphOptions.Top
+Layer.Log10 = mantidqtpython.GraphOptions.Log10
+Layer.Linear = mantidqtpython.GraphOptions.Linear
+Layer.Left = mantidqtpython.GraphOptions.Left
+Layer.Right = mantidqtpython.GraphOptions.Right
+Layer.Bottom = mantidqtpython.GraphOptions.Bottom
+Layer.Top = mantidqtpython.GraphOptions.Top
 
-DistrFlag = mantidqtpython.MantidQt
+DistrFlag = mantidqtpython.MantidQt.DistributionFlag
 DistrFlag.DistrDefault = mantidqtpython.MantidQt.DistributionDefault
 DistrFlag.DistrTrue = mantidqtpython.MantidQt.DistributionTrue
 DistrFlag.DistrFalse = mantidqtpython.MantidQt.DistributionFalse

@@ -9,7 +9,13 @@
 #include <boost/shared_ptr.hpp>
 
 class ApplicationWindow;
-class InstrumentWidget;
+namespace MantidQt
+{
+	namespace MantidWidgets
+	{
+		class InstrumentWidget;
+	}
+}
 
 using namespace Mantid;
 
@@ -25,7 +31,7 @@ public:
   void loadFromProject(const std::string &lines, ApplicationWindow *app,
                        const int fileVersion);
   std::string saveToProject(ApplicationWindow *app);
-  InstrumentWidget *getInstrumentWidget() { return m_instrumentWidget; }
+  MantidQt::MantidWidgets::InstrumentWidget *getInstrumentWidget() { return m_instrumentWidget; }
   void selectTab(int tab);
 
 private:
@@ -41,7 +47,7 @@ private:
   virtual void clearADSHandle();
 
 private:
-  InstrumentWidget *m_instrumentWidget;
+	MantidQt::MantidWidgets::InstrumentWidget *m_instrumentWidget;
 };
 
 #endif // INSTRUMENTWINDOW_H

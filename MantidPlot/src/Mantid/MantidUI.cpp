@@ -85,6 +85,7 @@
 using namespace std;
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
 
@@ -2049,7 +2050,7 @@ InstrumentWidget* MantidUI::getInstrumentView(const QString & wsName, int tab)
     InstrumentWindow *insWin = new InstrumentWindow(
         wsName, QString("Instrument"), appWindow(), windowName);
 
-    insWin->getInstrumentWidget()->selectTab(tab);
+    insWin->selectTab(tab);
 
     appWindow()->addMdiSubWindow(insWin);
 
@@ -2075,6 +2076,7 @@ MdiSubWindow *MantidUI::getInstrumentWindow(const QString & wsName, int tab)
 void MantidUI::showMantidInstrument(const QString& wsName)
 {
   InstrumentWidget *insWin = getInstrumentView(wsName);
+
   if (!insWin)
   {
     m_lastShownInstrumentWin = NULL;

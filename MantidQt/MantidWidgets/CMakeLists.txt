@@ -50,51 +50,51 @@ set ( SRC_FILES
     src/pqHelpWindow.cxx
     src/pythonCalc.cpp
     src/LineEditWithClear.cpp
-    src/BinDialog.cpp
-    src/CollapsiblePanel.cpp
-    src/ColorMapWidget.cpp
-    src/CompAssemblyActor.cpp
-    src/ComponentActor.cpp
-    src/DetXMLFile.cpp
-    src/GLActor.cpp
-    src/GLActorCollection.cpp
-    src/GLActorVisitor.cpp
-    src/GLColor.cpp
-    src/GLObject.cpp
-    src/ICompAssemblyActor.cpp
-    src/InstrumentActor.cpp
-    src/InstrumentTreeModel.cpp
-    src/InstrumentTreeWidget.cpp
-    src/InstrumentWidget.cpp
-    src/InstrumentWidgetMaskTab.cpp
-    src/InstrumentWidgetPickTab.cpp
-    src/InstrumentWidgetRenderTab.cpp
-    src/InstrumentWidgetTab.cpp
-    src/InstrumentWidgetTreeTab.cpp
-    src/MantidGLWidget.cpp
-    src/MaskBinsData.cpp
-    src/ObjCompAssemblyActor.cpp
-    src/ObjComponentActor.cpp
-    src/OneCurvePlot.cpp
-    src/OpenGLError.cpp
-    src/PanelsSurface.cpp
-    src/PeakMarker2D.cpp
-    src/PeakOverlay.cpp
-    src/Projection3D.cpp
-    src/ProjectionSurface.cpp
-    src/RectangularDetectorActor.cpp
-    src/RectF.cpp
-    src/RotationSurface.cpp
-    src/SampleActor.cpp
-    src/Shape2D.cpp
-    src/Shape2DCollection.cpp
-    src/SimpleWidget.cpp
-    src/UCorrectionDialog.cpp
-    src/UnwrappedCylinder.cpp
-    src/UnwrappedSphere.cpp
-    src/UnwrappedSurface.cpp
-    src/Viewport.cpp
-    src/XIntegrationControl.cpp
+    src/InstrumentView/BinDialog.cpp
+    src/InstrumentView/CollapsiblePanel.cpp
+    src/InstrumentView/ColorMapWidget.cpp
+    src/InstrumentView/CompAssemblyActor.cpp
+    src/InstrumentView/ComponentActor.cpp
+    src/InstrumentView/DetXMLFile.cpp
+    src/InstrumentView/GLActor.cpp
+    src/InstrumentView/GLActorCollection.cpp
+    src/InstrumentView/GLActorVisitor.cpp
+    src/InstrumentView/GLColor.cpp
+    src/InstrumentView/GLObject.cpp
+    src/InstrumentView/ICompAssemblyActor.cpp
+    src/InstrumentView/InstrumentActor.cpp
+    src/InstrumentView/InstrumentTreeModel.cpp
+    src/InstrumentView/InstrumentTreeWidget.cpp
+    src/InstrumentView/InstrumentWidget.cpp
+    src/InstrumentView/InstrumentWidgetMaskTab.cpp
+    src/InstrumentView/InstrumentWidgetPickTab.cpp
+    src/InstrumentView/InstrumentWidgetRenderTab.cpp
+    src/InstrumentView/InstrumentWidgetTab.cpp
+    src/InstrumentView/InstrumentWidgetTreeTab.cpp
+    src/InstrumentView/MantidGLWidget.cpp
+    src/InstrumentView/MaskBinsData.cpp
+    src/InstrumentView/ObjCompAssemblyActor.cpp
+    src/InstrumentView/ObjComponentActor.cpp
+    src/InstrumentView/OneCurvePlot.cpp
+    src/InstrumentView/OpenGLError.cpp
+    src/InstrumentView/PanelsSurface.cpp
+    src/InstrumentView/PeakMarker2D.cpp
+    src/InstrumentView/PeakOverlay.cpp
+    src/InstrumentView/Projection3D.cpp
+    src/InstrumentView/ProjectionSurface.cpp
+    src/InstrumentView/RectangularDetectorActor.cpp
+    src/InstrumentView/RectF.cpp
+    src/InstrumentView/RotationSurface.cpp
+    src/InstrumentView/SampleActor.cpp
+    src/InstrumentView/Shape2D.cpp
+    src/InstrumentView/Shape2DCollection.cpp
+    src/InstrumentView/SimpleWidget.cpp
+    src/InstrumentView/UCorrectionDialog.cpp
+    src/InstrumentView/UnwrappedCylinder.cpp
+    src/InstrumentView/UnwrappedSphere.cpp
+    src/InstrumentView/UnwrappedSurface.cpp
+    src/InstrumentView/Viewport.cpp
+    src/InstrumentView/XIntegrationControl.cpp
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
@@ -148,27 +148,27 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/WorkspaceEditorFactory.h
     inc/MantidQtMantidWidgets/WorkspaceSelector.h
     inc/MantidQtMantidWidgets/LineEditWithClear.h
-    inc/MantidQtMantidWidgets/XIntegrationControl.h
-    inc/MantidQtMantidWidgets/BinDialog.h
-    inc/MantidQtMantidWidgets/InstrumentTreeModel.h
-    inc/MantidQtMantidWidgets/InstrumentTreeWidget.h
-    inc/MantidQtMantidWidgets/InstrumentWidget.h
-    inc/MantidQtMantidWidgets/InstrumentWidgetTab.h
-    inc/MantidQtMantidWidgets/InstrumentWidgetRenderTab.h
-    inc/MantidQtMantidWidgets/InstrumentWidgetPickTab.h
-    inc/MantidQtMantidWidgets/InstrumentWidgetMaskTab.h
-    inc/MantidQtMantidWidgets/InstrumentWidgetTreeTab.h
-    inc/MantidQtMantidWidgets/ColorMapWidget.h
-    inc/MantidQtMantidWidgets/MantidGLWidget.h
-    inc/MantidQtMantidWidgets/OneCurvePlot.h
-    inc/MantidQtMantidWidgets/CollapsiblePanel.h
-    inc/MantidQtMantidWidgets/InstrumentActor.h
-    inc/MantidQtMantidWidgets/PeakOverlay.h
-    inc/MantidQtMantidWidgets/ProjectionSurface.h
-    inc/MantidQtMantidWidgets/Projection3D.h
-    inc/MantidQtMantidWidgets/Shape2DCollection.h
-    inc/MantidQtMantidWidgets/UnwrappedSurface.h
-    inc/MantidQtMantidWidgets/UCorrectionDialog.h
+    inc/MantidQtMantidWidgets/InstrumentView/BinDialog.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentTreeModel.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentTreeWidget.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetRenderTab.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetPickTab.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h
+    inc/MantidQtMantidWidgets/InstrumentView/ColorMapWidget.h
+    inc/MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h
+    inc/MantidQtMantidWidgets/InstrumentView/OneCurvePlot.h
+    inc/MantidQtMantidWidgets/InstrumentView/CollapsiblePanel.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/PeakOverlay.h
+    inc/MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h
+    inc/MantidQtMantidWidgets/InstrumentView/Projection3D.h
+    inc/MantidQtMantidWidgets/InstrumentView/Shape2DCollection.h
+    inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
+    inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h
+	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 )
 
 # Add the include files are NOT already in MOC_FILES
@@ -179,52 +179,52 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/ErrorCurve.h
     inc/MantidQtMantidWidgets/WidgetDllOption.h
     inc/MantidQtMantidWidgets/HintStrategy.h
-    inc/MantidQtMantidWidgets/BinDialog.h
-    inc/MantidQtMantidWidgets/CollapsiblePanel.h
-    inc/MantidQtMantidWidgets/ColorMapWidget.h
-    inc/MantidQtMantidWidgets/CompAssemblyActor.h
-    inc/MantidQtMantidWidgets/ComponentActor.h
-    inc/MantidQtMantidWidgets/DetXMLFile.h
-    inc/MantidQtMantidWidgets/GLActor.h
-    inc/MantidQtMantidWidgets/GLActorCollection.h
-    inc/MantidQtMantidWidgets/GLActorVisitor.h
-    inc/MantidQtMantidWidgets/GLColor.h
-    inc/MantidQtMantidWidgets/GLObject.h
-    inc/MantidQtMantidWidgets/ICompAssemblyActor.h
-    inc/MantidQtMantidWidgets/InstrumentActor.h
-    inc/MantidQtMantidWidgets/InstrumentTreeModel.h
-    inc/MantidQtMantidWidgets/InstrumentTreeWidget.h
-    inc/MantidQtMantidWidgets/InstrumentWidget.h
-    inc/MantidQtMantidWidgets/InstrumentWidgetMaskTab.h
-    inc/MantidQtMantidWidgets/InstrumentWidgetPickTab.h
-    inc/MantidQtMantidWidgets/InstrumentWidgetRenderTab.h
-    inc/MantidQtMantidWidgets/InstrumentWidgetTab.h
-    inc/MantidQtMantidWidgets/InstrumentWidgetTreeTab.h
-    inc/MantidQtMantidWidgets/InstrumentWidgetTypes.h
-    inc/MantidQtMantidWidgets/MantidGLWidget.h
-    inc/MantidQtMantidWidgets/MaskBinsData.h
-    inc/MantidQtMantidWidgets/ObjCompAssemblyActor.h
-    inc/MantidQtMantidWidgets/ObjComponentActor.h
-    inc/MantidQtMantidWidgets/OneCurvePlot.h
-    inc/MantidQtMantidWidgets/OpenGLError.h
-    inc/MantidQtMantidWidgets/PanelsSurface.h
-    inc/MantidQtMantidWidgets/PeakMarker2D.h
-    inc/MantidQtMantidWidgets/PeakOverlay.h
-    inc/MantidQtMantidWidgets/Projection3D.h
-    inc/MantidQtMantidWidgets/ProjectionSurface.h
-    inc/MantidQtMantidWidgets/RectangularDetectorActor.h
-    inc/MantidQtMantidWidgets/RectF.h
-    inc/MantidQtMantidWidgets/RotationSurface.h
-    inc/MantidQtMantidWidgets/SampleActor.h
-    inc/MantidQtMantidWidgets/Shape2D.h
-    inc/MantidQtMantidWidgets/Shape2DCollection.h
-    inc/MantidQtMantidWidgets/SimpleWidget.h
-    inc/MantidQtMantidWidgets/UCorrectionDialog.h
-    inc/MantidQtMantidWidgets/UnwrappedCylinder.h
-    inc/MantidQtMantidWidgets/UnwrappedSphere.h
-    inc/MantidQtMantidWidgets/UnwrappedSurface.h
-    inc/MantidQtMantidWidgets/Viewport.h
-    inc/MantidQtMantidWidgets/XIntegrationControl.h
+    inc/MantidQtMantidWidgets/InstrumentView/BinDialog.h
+    inc/MantidQtMantidWidgets/InstrumentView/CollapsiblePanel.h
+    inc/MantidQtMantidWidgets/InstrumentView/ColorMapWidget.h
+    inc/MantidQtMantidWidgets/InstrumentView/CompAssemblyActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/ComponentActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/DetXMLFile.h
+    inc/MantidQtMantidWidgets/InstrumentView/GLActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/GLActorCollection.h
+    inc/MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h
+    inc/MantidQtMantidWidgets/InstrumentView/GLColor.h
+    inc/MantidQtMantidWidgets/InstrumentView/GLObject.h
+    inc/MantidQtMantidWidgets/InstrumentView/ICompAssemblyActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentTreeModel.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentTreeWidget.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetPickTab.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetRenderTab.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h
+    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTypes.h
+    inc/MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h
+    inc/MantidQtMantidWidgets/InstrumentView/MaskBinsData.h
+    inc/MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/OneCurvePlot.h
+    inc/MantidQtMantidWidgets/InstrumentView/OpenGLError.h
+    inc/MantidQtMantidWidgets/InstrumentView/PanelsSurface.h
+    inc/MantidQtMantidWidgets/InstrumentView/PeakMarker2D.h
+    inc/MantidQtMantidWidgets/InstrumentView/PeakOverlay.h
+    inc/MantidQtMantidWidgets/InstrumentView/Projection3D.h
+    inc/MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h
+    inc/MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/RectF.h
+    inc/MantidQtMantidWidgets/InstrumentView/RotationSurface.h
+    inc/MantidQtMantidWidgets/InstrumentView/SampleActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/Shape2D.h
+    inc/MantidQtMantidWidgets/InstrumentView/Shape2DCollection.h
+    inc/MantidQtMantidWidgets/InstrumentView/SimpleWidget.h
+    inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h
+    inc/MantidQtMantidWidgets/InstrumentView/UnwrappedCylinder.h
+    inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSphere.h
+    inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
+    inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
+    inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 )
 
 # QtDesigner UI files to process
@@ -247,7 +247,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/PeriodicTableWidget.ui
     inc/MantidQtMantidWidgets/PreviewPlot.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
-    inc/MantidQtMantidWidgets/UCorrectionDialog.ui
+    inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.ui
 )
 
 # Python unit tests
@@ -266,6 +266,7 @@ include_directories ( ../../QtPropertyBrowser/src )
 include_directories ( ../../MantidQt/API/inc )
 include_directories ( ../../MantidQt/MantidWidgets/inc )
 include_directories ( ../../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets )
+include_directories ( ../../MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView )
 include_directories ( ../../MantidQt/SliceViewer/inc )
 include_directories ( ../../MantidQt/SpectrumViewer/inc )
 include_directories ( ../../MantidQt/Factory/inc )
