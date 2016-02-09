@@ -2,6 +2,7 @@
 #define MANTID_SINQ_POLDI2DFUNCTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <boost/make_shared.hpp>
 
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
