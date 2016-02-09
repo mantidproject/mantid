@@ -95,6 +95,12 @@ public:
 
     // Single point at (2,2)
     TS_ASSERT(!quad.contains(V2D(1, 1)));
+    // Single point at (5, -1)
+    TS_ASSERT(!quad.contains(V2D(5, -1)));
+    // Single point at (11, 5)
+    TS_ASSERT(!quad.contains(V2D(11, 5)));
+    // Single point at (5, 11)
+    TS_ASSERT(!quad.contains(V2D(5, 11)));
   }
 
   void test_polygon_outside_quadrilateral() {
@@ -115,7 +121,6 @@ public:
     // Create a polygon from smallQuad so we
     // can test Quadrilateral::contains
     ConvexPolygon poly = smallQuad.toPoly();
-
     // poly should not be inside quad
     TS_ASSERT(!quad.contains(poly));
   }
