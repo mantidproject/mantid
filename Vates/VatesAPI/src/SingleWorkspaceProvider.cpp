@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/SingleWorkspaceProvider.h"
+#include "MantidAPI/Workspace.h"
 
 namespace Mantid {
 namespace VATES {
@@ -6,7 +7,7 @@ namespace VATES {
 SingleWorkspaceProvider::SingleWorkspaceProvider(Mantid::API::Workspace_sptr workspace) : m_workspace(workspace) { }
 
 /**
- * @brief SingleWorkspaceProvider::canProvideWorkspace
+ * SingleWorkspaceProvider::canProvideWorkspace
  * @return true if the pointer the workspace is not nullptr else false
  */
 bool SingleWorkspaceProvider::canProvideWorkspace(std::string) const {
@@ -14,7 +15,7 @@ bool SingleWorkspaceProvider::canProvideWorkspace(std::string) const {
 }
 
 /**
- * @brief SingleWorkspaceProvider::fetchWorkspace
+ * SingleWorkspaceProvider::fetchWorkspace
  * @returns the underlying workspace
  */
 Mantid::API::Workspace_sptr SingleWorkspaceProvider::fetchWorkspace(std::string) const {
@@ -22,7 +23,7 @@ Mantid::API::Workspace_sptr SingleWorkspaceProvider::fetchWorkspace(std::string)
 }
 
 /**
- * @brief SingleWorkspaceProvider::disposeWorkspace: this is left blank, as we don't want
+ * SingleWorkspaceProvider::disposeWorkspace: this is left blank, as we don't want
  *        to be able to dispose of the workspace
  */
 void SingleWorkspaceProvider::disposeWorkspace(std::string) const {}

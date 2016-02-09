@@ -3,9 +3,6 @@
 
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
-#include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/make_unique.h"
 #include <boost/optional.hpp>
 
 namespace Mantid

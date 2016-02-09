@@ -5,9 +5,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ThresholdRange.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
 
-#include <vtkDataSet.h>
 #include <vtkXMLWriter.h>
 #include <vtkSmartPointer.h>
 #include <map>
@@ -15,7 +13,9 @@
 namespace Mantid {
 namespace VATES {
 
+// Forward declaration
 class MDLoadingPresenter;
+class vtkDataSetFactory;
 
 class DLLExport SaveMDWorkspaceToVTKImpl {
 public:

@@ -125,19 +125,12 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
       dynamic_cast<MDHistoWorkspaceIterator *>(createIteratorWithNormalization(
           m_normalizationOption, m_workspace.get())));
 
-#if 1
   vtkNew<vtkMDHWSignalArray<double>> signal;
 
   signal->SetName(vtkDataSetFactory::ScalarName.c_str());
   signal->InitializeArray(std::move(iterator), offset, imageSize);
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
-#else
-  vtkNew<vtkFloatArray> signal;
 
-  signal->SetName(vtkDataSetFactory::ScalarName.c_str());
-  signal->InitializeArray(std::move(iterator), offset, imageSize);
-  visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
-#endif
 
   for (vtkIdType index = 0; index < imageSize; ++index) {
     progressUpdate.eventRaised(double(index) * progressFactor);

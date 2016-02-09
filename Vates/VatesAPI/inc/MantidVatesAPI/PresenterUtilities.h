@@ -4,28 +4,20 @@
 #include "MantidKernel/System.h"
 
 #include "MantidVatesAPI/MDLoadingView.h"
-#include "MantidVatesAPI/MDLoadingPresenter.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
-#include "MantidVatesAPI/Normalization.h"
+#include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
+#include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 
-#include "MantidVatesAPI/vtkMDHistoLineFactory.h"
-#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
-#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
-#include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
-#include "MantidVatesAPI/vtkMD0DFactory.h"
-#include "MantidVatesAPI/vtkMDHexFactory.h"
-#include "MantidVatesAPI/vtkMDQuadFactory.h"
-#include "MantidVatesAPI/vtkMDLineFactory.h"
-
-#include "MantidKernel/make_unique.h"
 #include <vtkPVClipDataSet.h>
 
 namespace Mantid
 {
 namespace VATES
 {
+
+// Forward Decalaration
+class MDLoadingPresenter;
 
 class DLLExport EmptyWorkspaceNamePolicy
 {
@@ -80,8 +72,7 @@ std::unique_ptr<vtkMDHexFactory> DLLExport createFactoryChainForEventWorkspace(T
                                     double time);
 
 /// Function to apply the Change-of-Basis-Matrix
-void DLLExport applyCOBMatrixSettingsToVtkDataSet(
-    Mantid::VATES::MDLoadingPresenter *presenter, vtkDataSet *dataSet,
+void DLLExport applyCOBMatrixSettingsToVtkDataSet(MDLoadingPresenter *presenter, vtkDataSet *dataSet,
     std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider);
 
 /// Function to get clipped data sets.

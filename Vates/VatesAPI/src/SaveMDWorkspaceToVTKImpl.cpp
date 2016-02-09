@@ -25,6 +25,8 @@
 
 namespace
 {
+// This progress object gets called by PV (and is used by the plugins),
+// it does not have much use here.
 class NullProgressAction : public Mantid::VATES::ProgressAction
 {
     virtual void eventRaised(double) {}
@@ -269,7 +271,7 @@ std::string
 SaveMDWorkspaceToVTKImpl::getFullFilename(std::string filename,
                                           bool isHistoWorkspace) const
 {
-    auto extension = isHistoWorkspace ? structuredGridExtension
+    const auto extension = isHistoWorkspace ? structuredGridExtension
                                       : unstructuredGridExtension;
     if (!has_suffix(filename, extension)) {
         filename += ".";

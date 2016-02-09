@@ -1,7 +1,20 @@
 #include "MantidVatesAPI/PresenterUtilities.h"
+
+#include "MantidVatesAPI/MDLoadingPresenter.h"
+#include "MantidVatesAPI/ThresholdRange.h"
+#include "MantidVatesAPI/vtkMDHistoLineFactory.h"
+#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
+#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
+#include "MantidVatesAPI/vtkMD0DFactory.h"
+#include "MantidVatesAPI/vtkMDQuadFactory.h"
+#include "MantidVatesAPI/vtkMDLineFactory.h"
+
+
 #include "MantidKernel/Logger.h"
-#include <vtkPVClipDataSet.h>
+#include "MantidKernel/make_unique.h"
+
 #include <vtkBox.h>
+
 #include <chrono>
 #include <ctime>
 #include <algorithm>

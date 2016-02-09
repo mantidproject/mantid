@@ -58,7 +58,7 @@ namespace VATES{
     declareProperty(
           "ThresholdRange", "IgnoreZerosThresholdRange",
           boost::make_shared<Mantid::Kernel::StringListValidator>(thresholds),
-          "The threshold range. Currently either no threshold or a ignore-zeros policy can be applied.");
+          "The threshold range. Currently either no threshold or an ignore-zeros policy can be applied.");
 
     boost::shared_ptr<Mantid::Kernel::BoundedValidator<int>> mustBePositive(new Mantid::Kernel::BoundedValidator<int>());
     mustBePositive->setLower(1);
@@ -91,12 +91,12 @@ namespace VATES{
     Mantid::API::IMDWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
     if (!boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(inputWS) &&
         !boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(inputWS)) {
-      errorMessage.emplace("InputWorkspace", "You can only save MDHisto or MDEvent workspaces.");
+      errorMessage.emplace("InputWorkspace", "Only MDHisto or MDEvent workspaces can be saved.");
     }
 
     // Check for the dimensionality
     if (pimpl->is4DWorkspace(inputWS)) {
-      //errorMessage.emplace("InputWorkspace", "The workspace must be 3D or less. You can use a slicing operaiton to remove a dimension.");
+      errorMessage.emplace("InputWorkspace", "The workspace must be 3D or less. You can use a slicing operation to remove a dimension.");
     }
 
     // Check for file location
