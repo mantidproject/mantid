@@ -1130,13 +1130,14 @@ component)
   */
   if (isDNF()) {
     Parts.clear();
-    for (auto vc = Units.begin(); vc != Units.end(); ++vc) {
+    for (const auto &item : Units) {
       Acomp Aitem(1); // Intersection (doesn't matter since 1 object)
-      Aitem.addUnitItem(*vc);
+      Aitem.addUnitItem(item);
       Parts.push_back(Aitem);
     }
-    for (auto xc = Comp.begin(); xc != Comp.end(); ++xc)
-      Parts.push_back(*xc);
+    for (const auto &item : Comp) {
+      Parts.push_back(item);
+    }
     return static_cast<int>(Parts.size());
   }
 
@@ -1144,10 +1145,9 @@ component)
   std::vector<BnId> DNFobj;
   if (!getDNFobject(keyNumbers, DNFobj)) {
     if (makePI(DNFobj)) {
-      std::vector<BnId>::const_iterator vc;
-      for (vc = DNFobj.begin(); vc != DNFobj.end(); ++vc) {
+      for (auto &obj : DNFobj) {
         Acomp Aitem(1); // make an intersection and add components
-        Aitem.addUnit(keyNumbers, *vc);
+        Aitem.addUnit(keyNumbers, obj);
         Parts.push_back(Aitem);
       }
     }
