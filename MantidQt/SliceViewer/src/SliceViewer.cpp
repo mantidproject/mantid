@@ -1199,6 +1199,9 @@ void SliceViewer::updateDisplaySlot(int index, double value) {
   // Trigger a rebin on each movement of the slice point
   if (m_rebinMode && ui.btnAutoRebin->isOn())
     this->rebinParamsChanged();
+
+  // Update the colors scale if required
+  applyColorScalingForCurrentSliceIfRequired();
 }
 
 //------------------------------------------------------------------------------

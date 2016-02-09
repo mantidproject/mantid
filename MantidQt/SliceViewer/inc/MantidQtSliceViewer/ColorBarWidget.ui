@@ -83,7 +83,7 @@
      <item>
       <widget class="QCheckBox" name="autoScaleForCurrentSlice">
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When this is checked the color scale range will be automatically set to the current slice whenever the user zooms to a new peak.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When this is checked the color scale range will be automatically set to the current slice whenever the user zooms to a new peak, pans through the view or changes the slice with the slider control&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
         <string>Autoscale to current slice</string>
