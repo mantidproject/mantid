@@ -12,7 +12,7 @@ namespace MantidQt {
  * @returns true if the slice goes fully or partially through the workspace
 */
 bool doesSliceCutThroughWorkspace(const Mantid::Kernel::VMD& min, const  Mantid::Kernel::VMD& max,
-  const std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions) {
+  const std::vector<Mantid::Geometry::MDHistoDimension_sptr>& dimensions) {
   auto valueBetweenMinMax = [](const Mantid::Kernel::VMD_t value, const Mantid::Kernel::VMD_t min, const Mantid::Kernel::VMD_t max) {
     return value >= min && value <= max;
   };
@@ -35,7 +35,7 @@ bool doesSliceCutThroughWorkspace(const Mantid::Kernel::VMD& min, const  Mantid:
     ++dimCounter;
   }
   return cutsThroughWorkspace;
-};
+}
 
 /**
  * Checks if the colors scale range should be automatically set. We should provide auto scaling
