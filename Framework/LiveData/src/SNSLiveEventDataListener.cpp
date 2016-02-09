@@ -299,8 +299,7 @@ void SNSLiveEventDataListener::run() {
 
     m_isConnected = false;
 
-    m_backgroundException =
-        boost::make_shared<ADARA::invalid_packet>(e);
+    m_backgroundException = boost::make_shared<ADARA::invalid_packet>(e);
 
   } catch (std::runtime_error &
                e) { // exception handler for generic runtime exceptions
@@ -309,8 +308,7 @@ void SNSLiveEventDataListener::run() {
                   << "Thread will exit.\n";
     m_isConnected = false;
 
-    m_backgroundException =
-        boost::make_shared<std::runtime_error>(e);
+    m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
   } catch (std::invalid_argument &
                e) { // TimeSeriesProperty (and possibly some other things) can
@@ -324,8 +322,7 @@ void SNSLiveEventDataListener::run() {
     std::string newMsg(
         "Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
-    m_backgroundException =
-        boost::make_shared<std::runtime_error>(newMsg);
+    m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
 
   } catch (...) { // Default exception handler
     g_log.fatal(

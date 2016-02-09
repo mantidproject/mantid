@@ -138,8 +138,7 @@ void ConvertToMD::exec() {
   // initiate class which would deal with any dimension workspaces requested by
   // algorithm parameters
   if (!m_OutWSWrapper)
-    m_OutWSWrapper =
-        boost::make_shared<MDEventWSWrapper>();
+    m_OutWSWrapper = boost::make_shared<MDEventWSWrapper>();
 
   // -------- get Input workspace
   m_InWS2D = getProperty("InputWorkspace");

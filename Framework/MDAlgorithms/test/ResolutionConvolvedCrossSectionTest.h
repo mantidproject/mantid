@@ -104,8 +104,7 @@ public:
     IFunction *crossSection = createInitializedTestConvolution();
 
     Mantid::API::IMDWorkspace_sptr testWS = createTestMDWorkspace();
-    auto mdDomain =
-        boost::make_shared<FunctionDomainMD>(testWS);
+    auto mdDomain = boost::make_shared<FunctionDomainMD>(testWS);
     FunctionValues output(*mdDomain);
     crossSection->setWorkspace(testWS);
     crossSection->setAttributeValue("ConvAtt0", 100.3);

@@ -72,7 +72,8 @@ boost::shared_ptr<Object> ShapeFactory::createShape(std::string shapeXML,
     g_log.warning("Unable to parse XML string " + shapeXML +
                   " . Empty geometry Object is returned.");
 
-    return boost::make_shared<Object>();;
+    return boost::make_shared<Object>();
+    ;
   }
   // Get pointer to root element
   Element *pRootElem = pDoc->documentElement();

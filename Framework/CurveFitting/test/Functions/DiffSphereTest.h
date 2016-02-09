@@ -478,8 +478,7 @@ private:
 
     // Create the instrument
     boost::shared_ptr<Instrument> inst(new Instrument("BASIS"));
-    inst->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
+    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // Add the source position
     ObjComponent *source = new ObjComponent(

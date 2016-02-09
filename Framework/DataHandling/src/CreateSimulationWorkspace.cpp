@@ -128,8 +128,7 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
   m_outputWS->getAxis(0)->setUnit(getProperty("UnitX"));
   m_outputWS->setYUnit("SpectraNumber");
 
-  m_progress =
-      boost::make_shared<Progress>(this, 0.5, 0.75, nhistograms);
+  m_progress = boost::make_shared<Progress>(this, 0.5, 0.75, nhistograms);
 
   PARALLEL_FOR1(m_outputWS)
   for (int64_t i = 0; i < static_cast<int64_t>(nhistograms); ++i) {

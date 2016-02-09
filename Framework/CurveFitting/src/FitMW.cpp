@@ -130,8 +130,7 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
   m_normalisePropertyName = "Normalise" + suffix;
 
   if (addProp && !m_manager->existsProperty(m_workspaceIndexPropertyName)) {
-    auto mustBePositive =
-        boost::make_shared<BoundedValidator<int>>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
     mustBePositive->setLower(0);
     declareProperty(new PropertyWithValue<int>(m_workspaceIndexPropertyName, 0,
                                                mustBePositive),

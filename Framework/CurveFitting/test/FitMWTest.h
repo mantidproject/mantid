@@ -458,8 +458,7 @@ public:
     const std::string inputWSName = "FitMWTest_CompositeTest";
     // AnalysisDataService::Instance().add(inputWSName, ws2);
 
-    auto composite =
-        boost::make_shared<API::CompositeFunction>();
+    auto composite = boost::make_shared<API::CompositeFunction>();
     API::IFunction_sptr expDecay(new ExpDecay);
     expDecay->setParameter("Height", 1.5);
     expDecay->setError(0, 0.01);
@@ -696,8 +695,7 @@ public:
       API::IFunction_sptr bckgd(new ExpDecay);
       bckgd->setParameter("Height", 1.);
       bckgd->setParameter("Lifetime", 1.);
-      auto composite =
-          boost::make_shared<API::CompositeFunction>();
+      auto composite = boost::make_shared<API::CompositeFunction>();
       composite->addFunction(bckgd);
       composite->addFunction(conv);
       fitfun = composite;

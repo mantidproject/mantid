@@ -258,8 +258,7 @@ void IntegratePeakTimeSlices::exec() {
   // For quickly looking up workspace index from det id
   m_wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap();
 
-  TableWorkspace_sptr TabWS =
-      boost::make_shared<TableWorkspace>(0);
+  TableWorkspace_sptr TabWS = boost::make_shared<TableWorkspace>(0);
 
   //----------------------------- get Peak extents
   //------------------------------

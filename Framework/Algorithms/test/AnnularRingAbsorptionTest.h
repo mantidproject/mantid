@@ -121,8 +121,7 @@ private:
   }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    auto alg =
-        boost::make_shared<AnnularRingAbsorption>();
+    auto alg = boost::make_shared<AnnularRingAbsorption>();
     alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);
