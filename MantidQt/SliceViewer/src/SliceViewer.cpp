@@ -65,6 +65,27 @@ using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
 using MantidQt::API::AlgorithmRunner;
 
+namespace {
+/*
+Checks if the rebinning is in a consistent state, ie if rebin mode is selected and there
+is a rebin workspace or there is no rebin workspace and no rebin mode selected.
+The state is inconsistent if rebin mode is selected and there is no workspace.
+*/
+  bool isRebinInConsistentState(Mantid::API::IMDWorkspace* rebinnedWS, bool useRebinMode) {
+    return (rebinnedWS != nullptr) && useRebinMode;
+  }
+
+/**
+ * Checks if the colors scale range should be automatically set. We should provide auto scaling
+ * on load if the workspaces is either loaded the first time or if it is explictly selected.
+ */
+  bool shouldAutoScaleForNewlySetWorkspace(bool isFirstWorkspaceOpen, bool isAutoScalingOnLoad) {
+    return !isFirstWorkspaceOpen || isAutoScalingOnLoad;
+  }
+
+}
+
+
 namespace MantidQt {
 namespace SliceViewer {
 
@@ -742,9 +763,11 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // Build up the widgets
   this->updateDimensionSliceWidgets();
 
-  // Only autoscale color bar if box is checked
-  if (m_colorBar->getAutoScale()) {
-    // Find the full range. And use it
+  // This will auto scale the color bar to the current slice when the workspace is
+  // loaded. This always happens when a workspace is loaded for the first time.
+  // For live event data workspaces subsequent updates might not lead to an auto
+  // scaling of the color scale range (if this is explicitly turned off).
+  if (shouldAutoScaleForNewlySetWorkspace(m_firstWorkspaceOpen, m_colorBar->getAutoScale())) {
     findRangeFull();
     m_colorBar->setViewRange(m_colorRangeFull);
     m_colorBar->updateColorMap();
@@ -1378,7 +1401,13 @@ part of the workspace */
 void SliceViewer::findRangeSlice() {
   IMDWorkspace_sptr workspace_used = m_ws;
   if (m_rebinMode) {
-    workspace_used = this->m_overlayWS;
+    // If the rebinned state is inconsistent, then we turn off
+    // the rebin selection and continue to use the original WS
+    if (!isRebinInConsistentState(m_overlayWS.get(), m_rebinMode)) {
+      setRebinMode(false);
+    } else {
+      workspace_used = this->m_overlayWS;
+    }
   }
 
   if (!workspace_used)
