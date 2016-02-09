@@ -526,7 +526,7 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
  * @param peaksWs  The peaks workspace with indexed peaks
  * @param  tolerance   The indexing tolerance
  */
-std::string GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance) {
+std::string GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance, Kernel::Matrix<double> &U) {
   // put together a list of indexed peaks
   std::vector<V3D> hkl;
   hkl.reserve(peaksWs->getNumberPeaks());
@@ -543,6 +543,13 @@ std::string GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance) {
   // determine the lattice constants
   Kernel::Matrix<double> UB(3, 3);
   IndexingUtils::Optimize_UB(UB, hkl, qVecs);
+  vector<double> lat;
+  IndexingUtils::GetLatticeParameters(UB, lat);
+  OrientedLattice lattice(lat[0], lat[1], lat[2], lat[3], lat[4], lat[5]);
+  lattice.setUB(UB);
+  U = lattice.getU();
+
+  std::cout << UB <<"\n";
  return IndexingUtils::GetLatticeParameterString(UB);
 
 }
@@ -1002,40 +1009,6 @@ void SCDCalibratePanels::exec() {
 
       CreateFxnGetValues(ws, NGroups, names, params, BankNameString, out.data(),
                          xVals.data(), nData);
-
-      string prevBankName = "";
-      int BankNumDef = 200;
-      for (size_t q = 0; q < nData; q += 3) {
-        int pk = static_cast<int>(xVals[q]);
-        const Geometry::IPeak &peak = peaksWs->getPeak(pk);
-
-        string bankName = peak.getBankName();
-        size_t pos = bankName.find_last_not_of("0123456789");
-        int bankNum;
-        if (pos < bankName.size())
-          bankNum = boost::lexical_cast<int>(bankName.substr(pos + 1));
-        else if (bankName == prevBankName)
-          bankNum = BankNumDef;
-        else {
-          prevBankName = bankName;
-          BankNumDef++;
-          bankNum = BankNumDef;
-        }
-        try {
-          Geometry::OrientedLattice lattice(a, b, c, alpha, beta, gamma);
-          lattice.setUB(peaksWs->sample().getOrientedLattice().getUB());
-          Peak theoretical(NewInstrument, lattice.qFromHKL(peak.getHKL()),
-                           peak.getGoniometerMatrix());
-          Peak calculated(NewInstrument, peak.getQSampleFrame(),
-                          peak.getGoniometerMatrix());
-          Mantid::API::TableRow row = QErrTable->appendRow();
-          row << bankNum << pk << calculated.getCol() << theoretical.getCol()
-              << calculated.getRow() << theoretical.getRow()
-              << calculated.getTOF() << theoretical.getTOF();
-        } catch (...) {
-          g_log.debug() << "Problem only in printing peaks" << std::endl;
-        }
-      }
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -1123,10 +1096,45 @@ void SCDCalibratePanels::exec() {
     LoadISawDetCal(instrument, bankNames, T0, L0, DetCalFileName,
                    "bank");
     peak.setInstrument(instrument);
-    peak.findDetector();
+    peak.setDetectorID(peak.getDetectorID());
   }
+  Kernel::Matrix<double> U(3, 3);
   g_log.notice() << "Lattice after optimization: "<<
-  GoodEnd(peaksWs, tolerance)<< "\n";
+  GoodEnd(peaksWs, tolerance, U)<< "\n";
+
+  // We must sort the peaks
+  std::vector<std::pair<std::string, bool>> criteria;
+  criteria.push_back(std::pair<std::string, bool>("BankName", true));
+  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.push_back(std::pair<std::string, bool>("h", true));
+  criteria.push_back(std::pair<std::string, bool>("k", true));
+  criteria.push_back(std::pair<std::string, bool>("l", true));
+  peaksWs->sort(criteria);
+
+  // create table of theoretical vs calculated
+  Geometry::OrientedLattice lattice(a, b, c, alpha, beta, gamma, U);
+  Kernel::Matrix<double> UB(3, 3);
+  UB = lattice.getUB();
+  std::cout << UB <<"\n";
+  for (int j = 0; j < peaksWs->getNumberPeaks(); ++j) {
+    const Geometry::IPeak &peak = peaksWs->getPeak(j);
+    string bankName = peak.getBankName();
+    size_t k = bankName.find_last_not_of("0123456789");
+    int bank = 0;
+    if (k < bankName.length())
+      bank = boost::lexical_cast<int>(bankName.substr(k + 1));
+
+    try {
+      V3D q_lab =  (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
+      Peak theoretical(peak.getInstrument(), q_lab);
+      Mantid::API::TableRow row = QErrTable->appendRow();
+      row << bank << j << peak.getCol() << theoretical.getCol()
+          << peak.getRow() << theoretical.getRow()
+          << peak.getTOF() << theoretical.getTOF();
+    } catch (...) {
+      g_log.debug() << "Problem only in printing peaks" << std::endl;
+    }
+  }
 }
 
 /**
