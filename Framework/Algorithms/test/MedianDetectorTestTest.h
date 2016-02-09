@@ -175,7 +175,7 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, 11, 10);
     m_2DWS = boost::dynamic_pointer_cast<Workspace2D>(space);
     const short specLength = 22;
-    boost::shared_ptr<MantidVec> x(new MantidVec(specLength));
+    boost::shared_ptr<MantidVec> x = boost::make_shared<MantidVec>(specLength);
     for (int i = 0; i < specLength; ++i) {
       (*x)[i] = i * 1000;
     }
@@ -196,7 +196,8 @@ public:
     boost::shared_ptr<MantidVec> almostBigEnough(
         new MantidVec(specLength - 1, 0));
     (*almostBigEnough)[0] = 0.9 * m_YSum * (0.5 * Nhist - 1);
-    boost::shared_ptr<MantidVec> bigEnough(new MantidVec(specLength - 1, 0));
+    boost::shared_ptr<MantidVec> bigEnough =
+        boost::make_shared<MantidVec>(specLength - 1, 0);
     (*bigEnough)[0] = 1.2 * m_YSum * (0.5 * Nhist);
 
     for (int j = 0; j < Nhist; ++j) {

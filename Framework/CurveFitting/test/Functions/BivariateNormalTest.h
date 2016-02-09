@@ -145,7 +145,7 @@ public:
 
     std::vector<double> out(nCells);
 
-    boost::shared_ptr<Jacob> Jac(new Jacob(7, nCells));
+    boost::shared_ptr<Jacob> Jac = boost::make_shared<Jacob>(7, nCells);
 
     NormalFit.functionDeriv1D(Jac.get(), xx, nCells);
 

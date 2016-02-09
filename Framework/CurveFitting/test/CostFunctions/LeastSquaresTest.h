@@ -288,7 +288,8 @@ public:
 
     API::CompositeFunction_sptr fnWithBk(new API::CompositeFunction());
 
-    boost::shared_ptr<LinearBackground> bk(new LinearBackground());
+    boost::shared_ptr<LinearBackground> bk =
+        boost::make_shared<LinearBackground>();
     bk->initialize();
 
     bk->setParameter("A0", 0.0);
@@ -296,7 +297,7 @@ public:
     bk->tie("A1", "0");
 
     // set up Gaussian fitting function
-    boost::shared_ptr<Gaussian> fn(new Gaussian());
+    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
     fn->initialize();
     fn->setParameter("PeakCentre", 79450.0);
     fn->setParameter("Height", 200.0);

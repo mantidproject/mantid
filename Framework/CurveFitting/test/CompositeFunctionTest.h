@@ -148,10 +148,14 @@ public:
   }
 
   void testFit() {
-    boost::shared_ptr<CompositeFunction> mfun(new CompositeFunction());
-    boost::shared_ptr<CurveFittingGauss> g1(new CurveFittingGauss());
-    boost::shared_ptr<CurveFittingGauss> g2(new CurveFittingGauss());
-    boost::shared_ptr<CurveFittingLinear> bk(new CurveFittingLinear());
+    boost::shared_ptr<CompositeFunction> mfun =
+        boost::make_shared<CompositeFunction>();
+    boost::shared_ptr<CurveFittingGauss> g1 =
+        boost::make_shared<CurveFittingGauss>();
+    boost::shared_ptr<CurveFittingGauss> g2 =
+        boost::make_shared<CurveFittingGauss>();
+    boost::shared_ptr<CurveFittingLinear> bk =
+        boost::make_shared<CurveFittingLinear>();
 
     mfun->addFunction(bk);
     mfun->addFunction(g1);

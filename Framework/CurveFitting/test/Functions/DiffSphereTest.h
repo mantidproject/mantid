@@ -135,7 +135,8 @@ public:
                              // of the 99 coefficients to break down
 
     // initialize the elastic part
-    boost::shared_ptr<ElasticDiffSphere> elastic_part(new ElasticDiffSphere());
+    boost::shared_ptr<ElasticDiffSphere> elastic_part =
+        boost::make_shared<ElasticDiffSphere>();
     elastic_part->setParameter("Height", I);
     elastic_part->setParameter("Radius", R);
     elastic_part->setAttributeValue("Q", Q);
@@ -477,7 +478,8 @@ private:
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
 
     // Create the instrument
-    boost::shared_ptr<Instrument> inst(new Instrument("BASIS"));
+    boost::shared_ptr<Instrument> inst =
+        boost::make_shared<Instrument>("BASIS");
     inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // Add the source position

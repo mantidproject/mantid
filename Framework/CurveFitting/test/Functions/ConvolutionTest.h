@@ -370,7 +370,8 @@ public:
 
   void testConvolution_fit_resolution() {
 
-    boost::shared_ptr<WorkspaceTester> data(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> data =
+        boost::make_shared<WorkspaceTester>();
     data->init(1, 100, 100);
     for (size_t i = 0; i < data->blocksize(); i++) {
       data->dataX(0)[i] = -10.0 + 0.2 * double(i);
