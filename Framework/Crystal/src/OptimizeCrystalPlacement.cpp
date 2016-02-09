@@ -435,7 +435,7 @@ void OptimizeCrystalPlacement::exec() {
   boost::shared_ptr<const Instrument> OldInstrument = peak.getInstrument();
   boost::shared_ptr<const ParameterMap> pmap_old =
       OldInstrument->getParameterMap();
-  boost::shared_ptr<ParameterMap> pmap_new(new ParameterMap());
+  auto pmap_new = boost::make_shared<ParameterMap>();
 
   PeakHKLErrors::cLone(pmap_new, OldInstrument, pmap_old);
 
@@ -449,8 +449,7 @@ void OptimizeCrystalPlacement::exec() {
   if (OldInstrument->isParametrized())
     Inst = OldInstrument->baseInstrument();
 
-  boost::shared_ptr<const Instrument> NewInstrument(
-      new Geometry::Instrument(Inst, pmap_new));
+  auto NewInstrument = boost::make_shared<Geometry::Instrument>(Inst, pmap_new);
 
   SCDCalibratePanels::FixUpSourceParameterMap(NewInstrument, L0, newSampPos,
                                               pmap_old);

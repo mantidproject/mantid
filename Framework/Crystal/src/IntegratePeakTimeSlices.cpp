@@ -332,10 +332,10 @@ void IntegratePeakTimeSlices::exec() {
                                 m_yvec * (Centy - m_ROW) * m_cellHeight +
                                 m_xvec * (Centx - m_COL) * m_cellWidth;
 
-          boost::shared_ptr<DataModeHandler> XXX(new DataModeHandler(
+          auto XXX = boost::make_shared<DataModeHandler>(
               R, R, Centy, Centx, m_cellWidth, m_cellHeight,
               getProperty("CalculateVariances"), NBadEdgeCells,
-              m_NCOLS - NBadEdgeCells, NBadEdgeCells, m_NROWS - NBadEdgeCells));
+              m_NCOLS - NBadEdgeCells, NBadEdgeCells, m_NROWS - NBadEdgeCells);
           m_AttributeValues = XXX;
           XXX->setCurrentRadius(R);
 
@@ -388,8 +388,8 @@ void IntegratePeakTimeSlices::exec() {
     // Set from attributes replace by m_R0
     m_R0 = -1;
     int LastTableRow = -1;
-    boost::shared_ptr<DataModeHandler> origAttributeList(new DataModeHandler());
-    boost::shared_ptr<DataModeHandler> lastAttributeList(new DataModeHandler());
+    auto origAttributeList = boost::make_shared<DataModeHandler>();
+    auto lastAttributeList = boost::make_shared<DataModeHandler>();
 
     for (int dir = 1; dir >= -1; dir -= 2) {
       bool done = false;
@@ -494,8 +494,8 @@ void IntegratePeakTimeSlices::exec() {
               chanMax = xchan + 1;
               if (dir < 0)
                 chanMax++;
-              boost::shared_ptr<DataModeHandler> XXX(
-                  new DataModeHandler(*m_AttributeValues));
+              auto XXX =
+                  boost::make_shared<DataModeHandler>(*m_AttributeValues);
               m_AttributeValues = XXX;
               if (X.size() > 0)
                 m_AttributeValues->setTime((X[chanMax] + X[chanMin]) / 2.0);
@@ -508,8 +508,8 @@ void IntegratePeakTimeSlices::exec() {
               if (lastAttributeList->case4)
                 chanMax++;
 
-              boost::shared_ptr<DataModeHandler> XXX(
-                  new DataModeHandler(*lastAttributeList));
+              auto XXX =
+                  boost::make_shared<DataModeHandler>(*lastAttributeList);
               m_AttributeValues = XXX;
 
               m_AttributeValues->setTime((time + m_AttributeValues->time) /
@@ -579,7 +579,7 @@ void IntegratePeakTimeSlices::exec() {
                 LastTableRow = -1;
 
             } else {
-              boost::shared_ptr<DataModeHandler> XXX(new DataModeHandler());
+              auto XXX = boost::make_shared<DataModeHandler>();
               lastAttributeList = XXX;
             }
             done = true;
@@ -1480,10 +1480,10 @@ void IntegratePeakTimeSlices::SetUpData(
 
   int NBadEdgeCells = getProperty("NBadEdgePixels");
 
-  boost::shared_ptr<DataModeHandler> X(new DataModeHandler(
+  auto X = boost::make_shared<DataModeHandler>(
       Radius, Radius, CentY, CentX, m_cellWidth, m_cellHeight,
       getProperty("CalculateVariances"), NBadEdgeCells, m_NCOLS - NBadEdgeCells,
-      NBadEdgeCells, m_NROWS - NBadEdgeCells));
+      NBadEdgeCells, m_NROWS - NBadEdgeCells);
 
   m_AttributeValues = X;
   m_AttributeValues->setCurrentRadius(Radius);
@@ -1527,10 +1527,10 @@ void IntegratePeakTimeSlices::SetUpData(
     neighborRadius -= DD;
 
   // if( changed) CentNghbr = CentPos.
-  boost::shared_ptr<DataModeHandler> X1(new DataModeHandler(
+  auto X1 = boost::make_shared<DataModeHandler>(
       Radius, NewRadius, CentY, CentX, m_cellWidth, m_cellHeight,
       getProperty("CalculateVariances"), NBadEdgeCells, m_NCOLS - NBadEdgeCells,
-      NBadEdgeCells, m_NROWS - NBadEdgeCells));
+      NBadEdgeCells, m_NROWS - NBadEdgeCells);
 
   m_AttributeValues = X1;
   m_AttributeValues->setCurrentRadius(NewRadius);
