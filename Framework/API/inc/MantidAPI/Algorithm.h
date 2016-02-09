@@ -297,7 +297,7 @@ public:
     alg->setProperties(std::forward<Args>(properties)...);
     alg->executeAsChildAlg();
     return alg;
-  };
+  }
 
   template <typename... Args>
   API::IAlgorithm_sptr
@@ -308,7 +308,7 @@ public:
     alg->setProperties(std::forward<Args>(properties)...);
     alg->executeAsChildAlg();
     return alg;
-  };
+  }
 
   template <typename... Args>
   API::IAlgorithm_sptr
@@ -320,7 +320,7 @@ public:
     alg->setProperties(std::forward<Args>(properties)...);
     alg->executeAsChildAlg();
     return alg;
-  };
+  }
 
   template <typename... Args>
   API::IAlgorithm_sptr
@@ -332,7 +332,7 @@ public:
     alg->setProperties(std::forward<Args>(properties)...);
     alg->executeAsChildAlg();
     return alg;
-  };
+  }
 
   /// set whether we wish to track the child algorithm's history and pass it the
   /// parent object to fill.
