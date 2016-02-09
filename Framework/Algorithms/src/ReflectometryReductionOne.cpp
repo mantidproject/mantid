@@ -508,9 +508,8 @@ void ReflectometryReductionOne::exec() {
 
   auto instrument = runWS->getInstrument();
 
-  const OptionalInteger i0MonitorIndex =
-      BoostOptionalToAlgorithmProperty::checkForOptionalDefault<int>(
-          this, "I0MonitorIndex", instrument, "I0MonitorIndex");
+  const OptionalInteger i0MonitorIndex = checkForOptionalDefault<int>(
+      this, "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   const bool correctDetectorPositions = getProperty("CorrectDetectorPositions");
 

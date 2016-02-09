@@ -3,13 +3,13 @@
 
 #include <boost/optional.hpp>
 
-namespace BoostOptionalToAlgorithmProperty{
-
+namespace {
 
 template <typename T>
-T checkForMandatoryDefault(Mantid::API::Algorithm* const alg, std::string propName,
+T checkForMandatoryDefault(Mantid::API::Algorithm *const alg,
+                           std::string propName,
                            Mantid::Geometry::Instrument_const_sptr instrument,
-                           std::string idf_name){
+                           std::string idf_name) {
   auto algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
@@ -20,15 +20,16 @@ T checkForMandatoryDefault(Mantid::API::Algorithm* const alg, std::string propNa
     }
     return static_cast<T>(defaults[0]);
   } else {
-    return static_cast<T>(boost::lexical_cast<double, std::string>(algProperty->value()));
+    return static_cast<T>(
+        boost::lexical_cast<double, std::string>(algProperty->value()));
   }
 }
 
 template <typename T>
 boost::optional<T>
-checkForOptionalDefault(Mantid::API::Algorithm* const alg, std::string propName,
+checkForOptionalDefault(Mantid::API::Algorithm *const alg, std::string propName,
                         Mantid::Geometry::Instrument_const_sptr instrument,
-                        std::string idf_name){
+                        std::string idf_name) {
   auto algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
@@ -44,6 +45,6 @@ checkForOptionalDefault(Mantid::API::Algorithm* const alg, std::string propName,
   }
 }
 
-} //namespace
+} // namespace
 
 #endif // MANTID_ALGORITHMS_BOOSTOPTIONALTOALGORITHMPROPERTY_H_

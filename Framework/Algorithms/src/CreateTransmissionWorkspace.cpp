@@ -112,9 +112,8 @@ void CreateTransmissionWorkspace::exec() {
   // Get the monitor i0 index
   auto transWS = firstTransmissionRun.get();
   auto instrument = transWS->getInstrument();
-  const OptionalInteger i0MonitorIndex =
-      BoostOptionalToAlgorithmProperty::checkForOptionalDefault<int>(
-          this, "I0MonitorIndex", instrument, "I0MonitorIndex");
+  const OptionalInteger i0MonitorIndex = checkForOptionalDefault<int>(
+      this, "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   // Create the transmission workspace.
   MatrixWorkspace_sptr outWS = this->makeTransmissionCorrection(
