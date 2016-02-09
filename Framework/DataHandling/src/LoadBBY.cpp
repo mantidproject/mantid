@@ -380,8 +380,9 @@ void LoadBBY::exec() {
                        1.0e6); // static_cast<double>(instrumentInfo.bm_counts)
 
   // currently
-  Kernel::time_duration duration = boost::posix_time::microseconds(
-      static_cast<boost::int64_t>(static_cast<double>(eventCounter.numFrames()) * period));
+  Kernel::time_duration duration =
+      boost::posix_time::microseconds(static_cast<boost::int64_t>(
+          static_cast<double>(eventCounter.numFrames()) * period));
 
   Kernel::DateAndTime start_time("2000-01-01T00:00:00");
   Kernel::DateAndTime end_time(start_time + duration);
