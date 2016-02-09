@@ -141,7 +141,7 @@ void LoadMcStasNexus::exec() {
       Axis *axis1 = ws->getAxis(0);
       axis1->title() = axis1Name;
       // Set caption
-      boost::shared_ptr<Units::Label> lblUnit(new Units::Label);
+      auto lblUnit = boost::make_shared<Units::Label>();
       lblUnit->setLabel(axis1Name, "");
       axis1->unit() = lblUnit;
 

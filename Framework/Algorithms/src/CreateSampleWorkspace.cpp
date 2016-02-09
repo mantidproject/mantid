@@ -468,7 +468,7 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     API::Progress &progress, int num_banks, int pixels, double pixelSpacing,
     const double bankDistanceFromSample, const double sourceSampleDistance) {
-  boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
+  auto testInst = boost::make_shared<Instrument>("basic_rect");
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
   testInst->setReferenceFrame(
