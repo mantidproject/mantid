@@ -39,8 +39,8 @@ private:
 
 public:
   // construction
-  ProgressTracker(API::Progress &progBar, const char *msg,
-                  int64_t target, size_t count);
+  ProgressTracker(API::Progress &progBar, const char *msg, int64_t target,
+                  size_t count);
   ~ProgressTracker();
 
   // methods
@@ -86,7 +86,7 @@ protected:
   // tof
   double m_tofMin;
   double m_tofMax;
-  
+
   // methods
   virtual void addEventImpl(size_t id, double tof); // override
 
@@ -108,7 +108,7 @@ class EventAssigner : public EventProcessor {
 protected:
   // fields
   std::vector<EventVector_pt> &m_eventVectors;
-  
+
   // methods
   virtual void addEventImpl(size_t id, double tof); // override
 
@@ -230,11 +230,8 @@ public:
   int read_byte();
 
   // helpers
-  static bool append(
-    const std::string &path,
-    const std::string &name,
-    const void *buffer,
-    size_t size);
+  static bool append(const std::string &path, const std::string &name,
+                     const void *buffer, size_t size);
 };
 
 } // Tar

@@ -17,7 +17,8 @@ namespace DataHandling {
 Patches a Bilby data file. Implements API::Algorithm and its file check methods
 to recognise a file as the one containing Bilby data.
 
-@author David Mannicke (ANSTO), Anders Markvardsen (ISIS), Roman Tolchenov (Tessella plc)
+@author David Mannicke (ANSTO), Anders Markvardsen (ISIS), Roman Tolchenov
+(Tessella plc)
 @date 22/01/2016
 
 Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -49,15 +50,9 @@ public:
   virtual ~PatchBBY() {}
 
   // description
-  virtual int version() const override {
-    return 1;
-  }
-  virtual const std::string name() const override {
-    return "PatchBBY";
-  }
-  virtual const std::string category() const override {
-    return "DataHandling";
-  }
+  virtual int version() const override { return 1; }
+  virtual const std::string name() const override { return "PatchBBY"; }
+  virtual const std::string category() const override { return "DataHandling"; }
   virtual const std::string summary() const override {
     return "Patches a BilBy data file.";
   }

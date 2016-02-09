@@ -27,20 +27,21 @@ static const size_t HISTO_BINS_Y = 256;
 // 100 = 40 + 20 + 40
 static const size_t Progress_LoadBinFile = 48;
 static const size_t Progress_ReserveMemory = 4;
-static const size_t Progress_Total = 2 * Progress_LoadBinFile + Progress_ReserveMemory;
+static const size_t Progress_Total =
+    2 * Progress_LoadBinFile + Progress_ReserveMemory;
 
-static char const* const FilenameStr = "Filename";
-static char const* const MaskStr = "Mask";
+static char const *const FilenameStr = "Filename";
+static char const *const MaskStr = "Mask";
 
-static char const* const PeriodMasterStr = "PeriodMaster";
-static char const* const PeriodSlaveStr = "PeriodSlave";
-static char const* const PhaseSlaveStr = "PhaseSlave";
+static char const *const PeriodMasterStr = "PeriodMaster";
+static char const *const PeriodSlaveStr = "PeriodSlave";
+static char const *const PhaseSlaveStr = "PhaseSlave";
 
-static char const* const FilterByTofMinStr = "FilterByTofMin";
-static char const* const FilterByTofMaxStr = "FilterByTofMax";
+static char const *const FilterByTofMinStr = "FilterByTofMin";
+static char const *const FilterByTofMaxStr = "FilterByTofMax";
 
-static char const* const FilterByTimeStartStr = "FilterByTimeStart";
-static char const* const FilterByTimeStopStr  = "FilterByTimeStop";
+static char const *const FilterByTimeStartStr = "FilterByTimeStart";
+static char const *const FilterByTimeStopStr = "FilterByTimeStop";
 
 using ANSTO::EventVector_pt;
 
@@ -50,7 +51,8 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager,
                                       const std::string &name,
                                       const TYPE value) {
   // create time series property and add single value
-  Kernel::TimeSeriesProperty<TYPE> *p = new Kernel::TimeSeriesProperty<TYPE>(name);
+  Kernel::TimeSeriesProperty<TYPE> *p =
+      new Kernel::TimeSeriesProperty<TYPE>(name);
   p->addValue(time, value);
 
   // add to log manager
@@ -136,24 +138,22 @@ void LoadBBY::init() {
   // OutputWorkspace
   declareProperty(new API::WorkspaceProperty<API::IEventWorkspace>(
       "OutputWorkspace", "", Kernel::Direction::Output));
-  
+
   // FilterByTofMin
-  declareProperty(
-      new Kernel::PropertyWithValue<double>(FilterByTofMinStr, 0,
-                                            Kernel::Direction::Input),
-      "Optional: To exclude events that do not fall within a range "
-      "of times-of-flight. "
-      "This is the minimum accepted value in microseconds. Keep "
-      "blank to load all events.");
+  declareProperty(new Kernel::PropertyWithValue<double>(
+                      FilterByTofMinStr, 0, Kernel::Direction::Input),
+                  "Optional: To exclude events that do not fall within a range "
+                  "of times-of-flight. "
+                  "This is the minimum accepted value in microseconds. Keep "
+                  "blank to load all events.");
 
   // FilterByTofMax
-  declareProperty(
-      new Kernel::PropertyWithValue<double>(FilterByTofMaxStr, EMPTY_DBL(),
-                                            Kernel::Direction::Input),
-      "Optional: To exclude events that do not fall within a range "
-      "of times-of-flight. "
-      "This is the maximum accepted value in microseconds. Keep "
-      "blank to load all events.");
+  declareProperty(new Kernel::PropertyWithValue<double>(
+                      FilterByTofMaxStr, EMPTY_DBL(), Kernel::Direction::Input),
+                  "Optional: To exclude events that do not fall within a range "
+                  "of times-of-flight. "
+                  "This is the maximum accepted value in microseconds. Keep "
+                  "blank to load all events.");
 
   // FilterByTimeStart
   declareProperty(
@@ -171,13 +171,13 @@ void LoadBBY::init() {
 
   // period and phase
   declareProperty(new Kernel::PropertyWithValue<double>(
-                  PeriodMasterStr, EMPTY_DBL(), Kernel::Direction::Input),
+                      PeriodMasterStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional");
   declareProperty(new Kernel::PropertyWithValue<double>(
-                  PeriodSlaveStr, EMPTY_DBL(), Kernel::Direction::Input),
+                      PeriodSlaveStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional");
   declareProperty(new Kernel::PropertyWithValue<double>(
-                  PhaseSlaveStr, EMPTY_DBL(), Kernel::Direction::Input),
+                      PhaseSlaveStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional");
 
   std::string grpOptional = "Filters";
@@ -204,17 +204,17 @@ void LoadBBY::exec() {
   std::string filename = getPropertyValue(FilenameStr);
   ANSTO::Tar::File tarFile(filename);
   if (!tarFile.good())
-    throw std::invalid_argument("invalid BBY file"); 
+    throw std::invalid_argument("invalid BBY file");
 
   // region of intreset
   std::vector<bool> roi = createRoiVector(getPropertyValue(MaskStr));
-  
+
   double tofMinBoundary = getProperty(FilterByTofMinStr);
   double tofMaxBoundary = getProperty(FilterByTofMaxStr);
-  
+
   double timeMinBoundary = getProperty(FilterByTimeStartStr);
   double timeMaxBoundary = getProperty(FilterByTimeStopStr);
-  
+
   if (isEmpty(tofMaxBoundary))
     tofMaxBoundary = std::numeric_limits<double>::infinity();
   if (isEmpty(timeMaxBoundary))
@@ -253,61 +253,57 @@ void LoadBBY::exec() {
 
   // create instrument
   InstrumentInfo instrumentInfo;
-  
-  //Geometry::Instrument_sptr instrument =
-    createInstrument(tarFile, /* ref */ instrumentInfo);
-  //eventWS->setInstrument(instrument);
+
+  // Geometry::Instrument_sptr instrument =
+  createInstrument(tarFile, /* ref */ instrumentInfo);
+  // eventWS->setInstrument(instrument);
 
   // load events
   size_t numberHistograms = eventWS->getNumberHistograms();
 
   std::vector<EventVector_pt> eventVectors(numberHistograms, NULL);
   std::vector<size_t> eventCounts(numberHistograms, 0);
-  
+
   // phase correction
-  Kernel::Property* periodMasterProperty = getPointerToProperty(PeriodMasterStr); 
-  Kernel::Property* periodSlaveProperty = getPointerToProperty(PeriodSlaveStr); 
-  Kernel::Property* phaseSlaveProperty = getPointerToProperty(PhaseSlaveStr); 
-  
+  Kernel::Property *periodMasterProperty =
+      getPointerToProperty(PeriodMasterStr);
+  Kernel::Property *periodSlaveProperty = getPointerToProperty(PeriodSlaveStr);
+  Kernel::Property *phaseSlaveProperty = getPointerToProperty(PhaseSlaveStr);
+
   double periodMaster;
   double periodSlave;
   double phaseSlave;
 
-  if (periodMasterProperty->isDefault() ||
-      periodSlaveProperty->isDefault() || 
+  if (periodMasterProperty->isDefault() || periodSlaveProperty->isDefault() ||
       phaseSlaveProperty->isDefault()) {
-        
+
     if (!periodMasterProperty->isDefault() ||
-        !periodSlaveProperty->isDefault() || 
-        !phaseSlaveProperty->isDefault()) {
-      throw std::invalid_argument("Please specify PeriodMaster, PeriodSlave and PhaseSlave or none of them.");
+        !periodSlaveProperty->isDefault() || !phaseSlaveProperty->isDefault()) {
+      throw std::invalid_argument("Please specify PeriodMaster, PeriodSlave "
+                                  "and PhaseSlave or none of them.");
     }
-    
+
     // if values have not been specified in loader then use values from hdf file
     periodMaster = instrumentInfo.period_master;
     periodSlave = instrumentInfo.period_slave;
     phaseSlave = instrumentInfo.phase_slave;
-  }
-  else {
+  } else {
     periodMaster = getProperty(PeriodMasterStr);
     periodSlave = getProperty(PeriodSlaveStr);
     phaseSlave = getProperty(PhaseSlaveStr);
 
     if ((periodMaster < 0.0) || (periodSlave < 0.0))
-      throw std::invalid_argument("Please specify a positive value for PeriodMaster and PeriodSlave.");
+      throw std::invalid_argument(
+          "Please specify a positive value for PeriodMaster and PeriodSlave.");
   }
-  
+
   double period = periodSlave;
-  double shift = -1.0/6.0*periodMaster - periodSlave * phaseSlave / 360.0;
+  double shift = -1.0 / 6.0 * periodMaster - periodSlave * phaseSlave / 360.0;
 
   // count total events per pixel to reserve necessary memory
-  ANSTO::EventCounter eventCounter(roi, HISTO_BINS_Y,
-                                   period, shift,
-                                   tofMinBoundary,
-                                   tofMaxBoundary,
-                                   timeMinBoundary,
-                                   timeMaxBoundary,
-                                   eventCounts);
+  ANSTO::EventCounter eventCounter(
+      roi, HISTO_BINS_Y, period, shift, tofMinBoundary, tofMaxBoundary,
+      timeMinBoundary, timeMaxBoundary, eventCounts);
 
   loadEvents(prog, "loading neutron counts", tarFile, eventCounter);
 
@@ -318,8 +314,7 @@ void LoadBBY::exec() {
   for (size_t i = 0; i != numberHistograms; ++i) {
     DataObjects::EventList &eventList = eventWS->getEventList(i);
 
-    eventList.setSortOrder(
-        DataObjects::PULSETIME_SORT);
+    eventList.setSortOrder(DataObjects::PULSETIME_SORT);
     eventList.reserve(eventCounts[i]);
 
     eventList.setDetectorID(static_cast<detid_t>(i));
@@ -330,21 +325,19 @@ void LoadBBY::exec() {
     progTracker.update(i);
   }
   progTracker.complete();
-  
-  ANSTO::EventAssigner eventAssigner(roi, HISTO_BINS_Y,
-                                     period, shift,
-                                     tofMinBoundary,
-                                     tofMaxBoundary,
-                                     timeMinBoundary,
-                                     timeMaxBoundary,
-                                     eventVectors);
+
+  ANSTO::EventAssigner eventAssigner(
+      roi, HISTO_BINS_Y, period, shift, tofMinBoundary, tofMaxBoundary,
+      timeMinBoundary, timeMaxBoundary, eventVectors);
 
   loadEvents(prog, "loading neutron events", tarFile, eventAssigner);
 
   Kernel::cow_ptr<MantidVec> axis;
   MantidVec &xRef = axis.access();
   xRef.resize(2, 0.0);
-  xRef[0] = std::max(0.0, floor(eventCounter.tofMin())); // just to make sure the bins hold it all
+  xRef[0] = std::max(
+      0.0,
+      floor(eventCounter.tofMin())); // just to make sure the bins hold it all
   xRef[1] = eventCounter.tofMax() + 1;
   eventWS->setAllX(axis);
 
@@ -368,21 +361,26 @@ void LoadBBY::exec() {
     maskingAlg->setProperty("WorkspaceIndexList", maskIndexList);
     maskingAlg->executeAsChildAlg();
   }
-  
+
   // set log values
   API::LogManager &logManager = eventWS->mutableRun();
-  
+
   logManager.addProperty("filename", filename);
   logManager.addProperty("att_pos", static_cast<int>(instrumentInfo.att_pos));
-  logManager.addProperty("frame_count", static_cast<int>(eventCounter.numFrames()));
+  logManager.addProperty("frame_count",
+                         static_cast<int>(eventCounter.numFrames()));
   logManager.addProperty("period", period);
-  
-  // currently beam monitor counts are not available, instead number of frames times period is used
-  logManager.addProperty("bm_counts", eventCounter.numFrames() * period / 1.0e6); // static_cast<double>(instrumentInfo.bm_counts)
-  
+
+  // currently beam monitor counts are not available, instead number of frames
+  // times period is used
+  logManager.addProperty(
+      "bm_counts", eventCounter.numFrames() * period /
+                       1.0e6); // static_cast<double>(instrumentInfo.bm_counts)
+
   // currently
-  Kernel::time_duration duration = boost::posix_time::microseconds(static_cast<boost::int64_t>(eventCounter.numFrames() * period));
-  
+  Kernel::time_duration duration = boost::posix_time::microseconds(
+      static_cast<boost::int64_t>(eventCounter.numFrames() * period));
+
   Kernel::DateAndTime start_time("2000-01-01T00:00:00");
   Kernel::DateAndTime end_time(start_time + duration);
 
@@ -390,23 +388,37 @@ void LoadBBY::exec() {
   logManager.addProperty("end_time", end_time.toISO8601String());
 
   std::string time_str = start_time.toISO8601String();
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L1_chopper_value", instrumentInfo.L1_chopper_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_det_value", instrumentInfo.L2_det_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtainl_value", instrumentInfo.L2_curtainl_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtainr_value", instrumentInfo.L2_curtainr_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtainu_value", instrumentInfo.L2_curtainu_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtaind_value", instrumentInfo.L2_curtaind_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_det_value", instrumentInfo.D_det_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainl_value", instrumentInfo.D_curtainl_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainr_value", instrumentInfo.D_curtainr_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainu_value", instrumentInfo.D_curtainu_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtaind_value", instrumentInfo.D_curtaind_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "curtain_rotation", 10.0);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "L1_chopper_value",
+                                   instrumentInfo.L1_chopper_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_det_value",
+                                   instrumentInfo.L2_det_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtainl_value",
+                                   instrumentInfo.L2_curtainl_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtainr_value",
+                                   instrumentInfo.L2_curtainr_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtainu_value",
+                                   instrumentInfo.L2_curtainu_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtaind_value",
+                                   instrumentInfo.L2_curtaind_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_det_value",
+                                   instrumentInfo.D_det_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainl_value",
+                                   instrumentInfo.D_curtainl_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainr_value",
+                                   instrumentInfo.D_curtainr_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainu_value",
+                                   instrumentInfo.D_curtainu_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtaind_value",
+                                   instrumentInfo.D_curtaind_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "curtain_rotation",
+                                   10.0);
 
-  API::IAlgorithm_sptr loadInstrumentAlg = createChildAlgorithm("LoadInstrument");
+  API::IAlgorithm_sptr loadInstrumentAlg =
+      createChildAlgorithm("LoadInstrument");
   loadInstrumentAlg->setProperty("Workspace", eventWS);
   loadInstrumentAlg->setPropertyValue("InstrumentName", "BILBY");
-  loadInstrumentAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
+  loadInstrumentAlg->setProperty("RewriteSpectraMap",
+                                 Mantid::Kernel::OptionalBool(false));
   loadInstrumentAlg->executeAsChildAlg();
 
   setProperty("OutputWorkspace", eventWS);
@@ -421,8 +433,8 @@ std::vector<bool> LoadBBY::createRoiVector(const std::string &maskfile) {
 
   std::ifstream input(maskfile.c_str());
   if (!input.good())
-    throw std::invalid_argument("invalid mask file"); 
-  
+    throw std::invalid_argument("invalid mask file");
+
   std::string line;
   while (std::getline(input, line)) {
     auto i0 = line.find("<detids>");
@@ -464,8 +476,9 @@ std::vector<bool> LoadBBY::createRoiVector(const std::string &maskfile) {
 }
 
 // instrument creation
-Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
-                                                    InstrumentInfo& instrumentInfo) {
+Geometry::Instrument_sptr
+LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
+                          InstrumentInfo &instrumentInfo) {
 
   const double toMeters = 1.0 / 1000;
 
@@ -519,12 +532,13 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
 
       float tmp_float;
       int32_t tmp_int32 = 0;
-      
+
       if (loadNXDataSet(entry, "monitor/bm1_counts", tmp_int32))
         instrumentInfo.bm_counts = tmp_int32;
       if (loadNXDataSet(entry, "instrument/att_pos", tmp_float))
-        instrumentInfo.att_pos = static_cast<int32_t>(tmp_float + 0.5f); // [1.0, 2.0, ..., 5.0]
-      
+        instrumentInfo.att_pos =
+            static_cast<int32_t>(tmp_float + 0.5f); // [1.0, 2.0, ..., 5.0]
+
       if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float))
         instrumentInfo.period_master = 1.0 / tmp_float * 1.0e6;
       if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float))
@@ -535,7 +549,8 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
       if (loadNXDataSet(entry, "instrument/L2_det", tmp_float))
         instrumentInfo.L2_det_value = tmp_float * toMeters;
       if (loadNXDataSet(entry, "instrument/Ltof_det", tmp_float))
-        instrumentInfo.L1_chopper_value = tmp_float * toMeters - instrumentInfo.L2_det_value;
+        instrumentInfo.L1_chopper_value =
+            tmp_float * toMeters - instrumentInfo.L2_det_value;
       // if (loadNXDataSet(entry, "instrument/L1", tmp_float))
       //  instrumentInfo.L1_source_value = tmp_float * toMeters;
 
@@ -571,36 +586,45 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
 
   if (logContent.size() > 0) {
     std::istringstream data(logContent);
-    Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> conf(new Poco::Util::PropertyFileConfiguration(data));
-    
+    Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> conf(
+        new Poco::Util::PropertyFileConfiguration(data));
+
     if (conf->hasProperty("bm1_counts"))
       instrumentInfo.bm_counts = conf->getInt("bm1_counts");
     if (conf->hasProperty("att_pos"))
-      instrumentInfo.att_pos = static_cast<int32_t>(conf->getDouble("att_pos") + 0.5f);
-    
+      instrumentInfo.att_pos =
+          static_cast<int32_t>(conf->getDouble("att_pos") + 0.5f);
+
     if (conf->hasProperty("master_chopper_freq"))
-      instrumentInfo.period_master = 1.0 / conf->getDouble("master_chopper_freq") * 1.0e6;
+      instrumentInfo.period_master =
+          1.0 / conf->getDouble("master_chopper_freq") * 1.0e6;
     if (conf->hasProperty("t0_chopper_freq"))
-      instrumentInfo.period_slave = 1.0 / conf->getDouble("t0_chopper_freq") * 1.0e6;
+      instrumentInfo.period_slave =
+          1.0 / conf->getDouble("t0_chopper_freq") * 1.0e6;
     if (conf->hasProperty("t0_chopper_phase"))
       instrumentInfo.phase_slave = conf->getDouble("t0_chopper_phase");
-    
+
     if (conf->hasProperty("L2_det"))
       instrumentInfo.L2_det_value = conf->getDouble("L2_det") * toMeters;
     if (conf->hasProperty("Ltof_det"))
-      instrumentInfo.L1_chopper_value = conf->getDouble("Ltof_det") * toMeters - instrumentInfo.L2_det_value;
-    //if (conf->hasProperty("L1"))
+      instrumentInfo.L1_chopper_value =
+          conf->getDouble("Ltof_det") * toMeters - instrumentInfo.L2_det_value;
+    // if (conf->hasProperty("L1"))
     //  instrumentInfo.L1_source_value = conf->getDouble("L1") * toMeters;
-    
+
     if (conf->hasProperty("L2_curtainl"))
-      instrumentInfo.L2_curtainl_value = conf->getDouble("L2_curtainl") * toMeters;
+      instrumentInfo.L2_curtainl_value =
+          conf->getDouble("L2_curtainl") * toMeters;
     if (conf->hasProperty("L2_curtainr"))
-      instrumentInfo.L2_curtainr_value = conf->getDouble("L2_curtainr") * toMeters;
+      instrumentInfo.L2_curtainr_value =
+          conf->getDouble("L2_curtainr") * toMeters;
     if (conf->hasProperty("L2_curtainu"))
-      instrumentInfo.L2_curtainu_value = conf->getDouble("L2_curtainu") * toMeters;
+      instrumentInfo.L2_curtainu_value =
+          conf->getDouble("L2_curtainu") * toMeters;
     if (conf->hasProperty("L2_curtaind"))
-      instrumentInfo.L2_curtaind_value = conf->getDouble("L2_curtaind") * toMeters;
-    
+      instrumentInfo.L2_curtaind_value =
+          conf->getDouble("L2_curtaind") * toMeters;
+
     if (conf->hasProperty("curtainl"))
       instrumentInfo.D_curtainl_value = conf->getDouble("curtainl") * toMeters;
     if (conf->hasProperty("curtainr"))
@@ -615,16 +639,19 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
 
   /*
   // instrument
-  Geometry::Instrument_sptr instrument = boost::make_shared<Geometry::Instrument>("BILBY");
+  Geometry::Instrument_sptr instrument =
+  boost::make_shared<Geometry::Instrument>("BILBY");
   instrument->setDefaultViewAxis("Z-");
 
   // source
-  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
+  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source",
+  instrument.get());
   instrument->add(source);
   instrument->markAsSource(source);
-  
+
   // sample
-  Geometry::ObjComponent *samplePos = new Geometry::ObjComponent("Sample", instrument.get());
+  Geometry::ObjComponent *samplePos = new Geometry::ObjComponent("Sample",
+  instrument.get());
   instrument->add(samplePos);
   instrument->markAsSamplePos(samplePos);
 
@@ -637,14 +664,14 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
   double height = 640.0 / 1000; // meters
   double angle = 10.0;          // degree
 
-  // raw data format 
+  // raw data format
   size_t xPixelCount = HISTO_BINS_X / 6;
   size_t yPixelCount = HISTO_BINS_Y;
-  
+
   // we assumed that individual pixels have the same size and shape of a cuboid:
   double pixel_width = width / static_cast<double>(xPixelCount);
   double pixel_height = height / static_cast<double>(yPixelCount);
-  
+
   // final number of pixels
   size_t pixelCount = xPixelCount * yPixelCount;
 
@@ -661,10 +688,14 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
   // shapes in Mantid.
   std::string detXML =
     "<cuboid id=\"pixel\">"
-      "<left-front-bottom-point   x=\"+"+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\"0\"  />"
-      "<left-front-top-point      x=\"+"+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\""+pixel_depth_str+"\"  />"
-      "<left-back-bottom-point    x=\"-"+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\"0\"  />"
-      "<right-front-bottom-point  x=\"+"+pixel_width_str+"\" y=\"+"+pixel_height_str+"\" z=\"0\"  />"
+      "<left-front-bottom-point   x=\"+"+pixel_width_str+"\"
+  y=\"-"+pixel_height_str+"\" z=\"0\"  />"
+      "<left-front-top-point      x=\"+"+pixel_width_str+"\"
+  y=\"-"+pixel_height_str+"\" z=\""+pixel_depth_str+"\"  />"
+      "<left-back-bottom-point    x=\"-"+pixel_width_str+"\"
+  y=\"-"+pixel_height_str+"\" z=\"0\"  />"
+      "<right-front-bottom-point  x=\"+"+pixel_width_str+"\"
+  y=\"+"+pixel_height_str+"\" z=\"0\"  />"
     "</cuboid>";
 
   // Create a shape object which will be shared by all pixels.
@@ -678,36 +709,42 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
 
   // curtain l
   factory.createAndAssign(0 * pixelCount,
-                          Kernel::V3D(+instrumentInfo.D_curtainl_value, 0, instrumentInfo.L2_curtainl_value),
+                          Kernel::V3D(+instrumentInfo.D_curtainl_value, 0,
+  instrumentInfo.L2_curtainl_value),
                           Kernel::Quat(0, Kernel::V3D(0, 0, 1)) *
                               Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
 
   // curtain r
   factory.createAndAssign(1 * pixelCount,
-                          Kernel::V3D(-instrumentInfo.D_curtainr_value, 0, instrumentInfo.L2_curtainr_value),
+                          Kernel::V3D(-instrumentInfo.D_curtainr_value, 0,
+  instrumentInfo.L2_curtainr_value),
                           Kernel::Quat(180, Kernel::V3D(0, 0, 1)) *
                               Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
 
   // curtain u
   factory.createAndAssign(2 * pixelCount,
-                          Kernel::V3D(0, +instrumentInfo.D_curtainu_value, instrumentInfo.L2_curtainu_value),
+                          Kernel::V3D(0, +instrumentInfo.D_curtainu_value,
+  instrumentInfo.L2_curtainu_value),
                           Kernel::Quat(90, Kernel::V3D(0, 0, 1)) *
                               Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
 
   // curtain d
   factory.createAndAssign(3 * pixelCount,
-                          Kernel::V3D(0, -instrumentInfo.D_curtaind_value, instrumentInfo.L2_curtaind_value),
+                          Kernel::V3D(0, -instrumentInfo.D_curtaind_value,
+  instrumentInfo.L2_curtaind_value),
                           Kernel::Quat(-90, Kernel::V3D(0, 0, 1)) *
                               Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
 
   // back 1 (left)
   factory.createAndAssign(4 * pixelCount,
-                          Kernel::V3D(+instrumentInfo.D_det_value, 0, instrumentInfo.L2_det_value),
+                          Kernel::V3D(+instrumentInfo.D_det_value, 0,
+  instrumentInfo.L2_det_value),
                           Kernel::Quat(0, Kernel::V3D(0, 0, 1)));
 
   // back 2 (right)
   factory.createAndAssign(5 * pixelCount,
-                          Kernel::V3D(-instrumentInfo.D_det_value, 0, instrumentInfo.L2_det_value),
+                          Kernel::V3D(-instrumentInfo.D_det_value, 0,
+  instrumentInfo.L2_det_value),
                           Kernel::Quat(180, Kernel::V3D(0, 0, 1)));
 
   return instrument;
@@ -716,8 +753,7 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
 
 // load nx dataset
 template <class T>
-bool LoadBBY::loadNXDataSet(NeXus::NXEntry &entry,
-                            const std::string &path,
+bool LoadBBY::loadNXDataSet(NeXus::NXEntry &entry, const std::string &path,
                             T &value) {
   try {
     NeXus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(path);
@@ -725,8 +761,7 @@ bool LoadBBY::loadNXDataSet(NeXus::NXEntry &entry,
 
     value = *dataSet();
     return true;
-  }
-  catch (std::runtime_error&) {
+  } catch (std::runtime_error &) {
     return false;
   }
 }
@@ -734,7 +769,8 @@ bool LoadBBY::loadNXDataSet(NeXus::NXEntry &entry,
 // read counts/events from binary file
 template <class EventProcessor>
 void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
-                         ANSTO::Tar::File &tarFile, EventProcessor &eventProcessor) {
+                         ANSTO::Tar::File &tarFile,
+                         EventProcessor &eventProcessor) {
   prog.doReport(progMsg);
 
   // select bin file
@@ -824,13 +860,12 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
 
 // DetectorBankFactory
 BbyDetectorBankFactory::BbyDetectorBankFactory(
-  Geometry::Instrument_sptr instrument, Geometry::Object_sptr pixelShape,
-  size_t xPixelCount, size_t yPixelCount, double pixelWidth,
-  double pixelHeight, const Kernel::V3D &center)
-  : m_instrument(instrument), m_pixelShape(pixelShape),
-    m_xPixelCount(xPixelCount), m_yPixelCount(yPixelCount),
-    m_pixelWidth(pixelWidth), m_pixelHeight(pixelHeight), m_center(center) {
-}
+    Geometry::Instrument_sptr instrument, Geometry::Object_sptr pixelShape,
+    size_t xPixelCount, size_t yPixelCount, double pixelWidth,
+    double pixelHeight, const Kernel::V3D &center)
+    : m_instrument(instrument), m_pixelShape(pixelShape),
+      m_xPixelCount(xPixelCount), m_yPixelCount(yPixelCount),
+      m_pixelWidth(pixelWidth), m_pixelHeight(pixelHeight), m_center(center) {}
 void BbyDetectorBankFactory::createAndAssign(size_t startIndex,
                                              const Kernel::V3D &pos,
                                              const Kernel::Quat &rot) const {
