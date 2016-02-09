@@ -61,11 +61,7 @@ public:
     // get some value to check
     double l1 = 43.754;
 
-    vector<size_t> checkrows;
-    checkrows.push_back(0);
-    checkrows.push_back(100);
-    checkrows.push_back(1000);
-    checkrows.push_back(5000);
+    vector<size_t> checkrows{0, 100, 1000, 5000};
 
     for (size_t i = 0; i < checkrows.size(); ++i) {
       TableRow row = outws->getRow(i);
@@ -107,11 +103,7 @@ public:
     // get some value to check
     double l1 = 43.754;
 
-    vector<size_t> checkrows;
-    checkrows.push_back(0);
-    checkrows.push_back(100);
-    checkrows.push_back(1000);
-    checkrows.push_back(5000);
+    vector<size_t> checkrows{0, 100, 1000, 5000};
 
     for (size_t i = 0; i < checkrows.size(); ++i) {
       TableRow row = outws->getRow(i);

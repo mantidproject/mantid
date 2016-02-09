@@ -106,12 +106,12 @@ void ConvertToDetectorFaceMD::convertEventList(
     coord_t tof = static_cast<coord_t>(it->tof());
     if (nd == 3) {
       coord_t center[3] = {x, y, tof};
-      out_events.push_back(MDE(float(it->weight()), float(it->errorSquared()),
-                               runIndex, detectorID, center));
+      out_events.emplace_back(float(it->weight()), float(it->errorSquared()),
+                              runIndex, detectorID, center);
     } else if (nd == 4) {
       coord_t center[4] = {x, y, tof, bankNum};
-      out_events.push_back(MDE(float(it->weight()), float(it->errorSquared()),
-                               runIndex, detectorID, center));
+      out_events.emplace_back(float(it->weight()), float(it->errorSquared()),
+                              runIndex, detectorID, center);
     }
   }
 
@@ -231,10 +231,7 @@ void ConvertToDetectorFaceMD::exec() {
       TOFname, TOFname, frameTOF, static_cast<coord_t>(tof_min),
       static_cast<coord_t>(tof_max), ax0->length()));
 
-  std::vector<IMDDimension_sptr> dims;
-  dims.push_back(dimX);
-  dims.push_back(dimY);
-  dims.push_back(dimTOF);
+  std::vector<IMDDimension_sptr> dims{dimX, dimY, dimTOF};
 
   if (banks.size() > 1) {
     Mantid::Geometry::GeneralFrame frameNumber(

@@ -227,11 +227,10 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
   int ndims_prop = getProperty("Dimensions");
   auto ndims = static_cast<size_t>(ndims_prop);
 
-  std::vector<std::string> targetFrames;
-  targetFrames.push_back(Mantid::Geometry::GeneralFrame::GeneralFrameName);
-  targetFrames.push_back(Mantid::Geometry::HKL::HKLName);
-  targetFrames.push_back(Mantid::Geometry::QLab::QLabName);
-  targetFrames.push_back(Mantid::Geometry::QSample::QSampleName);
+  std::vector<std::string> targetFrames{
+      Mantid::Geometry::GeneralFrame::GeneralFrameName,
+      Mantid::Geometry::HKL::HKLName, Mantid::Geometry::QLab::QLabName,
+      Mantid::Geometry::QSample::QSampleName};
 
   auto isValidFrame = true;
   for (auto &frame : frames) {

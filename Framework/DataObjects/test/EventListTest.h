@@ -66,10 +66,7 @@ public:
   void test_AssignmentOperator() {
     // Modify EventList such that is does not contain default values.
     el.setSpectrumNo(42);
-    MantidVec x;
-    x.push_back(0.1);
-    x.push_back(0.2);
-    x.push_back(0.3);
+    MantidVec x{0.1, 0.2, 0.3};
     el.setX(x);
     el.setDx(x);
 
@@ -89,10 +86,7 @@ public:
   //==================================================================================
 
   void test_PlusOperator() {
-    vector<TofEvent> mylist;
-    mylist.push_back(TofEvent(45, 67));
-    mylist.push_back(TofEvent(89, 12));
-    mylist.push_back(TofEvent(34, 56));
+    vector<TofEvent> mylist{{45, 67}, {89, 12}, {34, 56}};
     el += mylist;
     vector<TofEvent> rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 6);
@@ -120,12 +114,8 @@ public:
   }
 
   template <class T>
-  void do_test_memory_handling(EventList &el2,
-                               typename std::vector<T> &events) {
-    typename std::vector<T> mylist;
-    mylist.push_back(T(45));
-    mylist.push_back(T(89));
-    mylist.push_back(T(34));
+  void do_test_memory_handling(EventList &el2, std::vector<T> &events) {
+    std::vector<T> mylist{{45}, {89}, {34}};
     el2 += mylist;
     TS_ASSERT_EQUALS(events.size(), 3);
     TS_ASSERT_EQUALS(events.capacity(), 3);
@@ -1733,7 +1723,7 @@ public:
     // Generate time splitters
     std::vector<int64_t> vec_splitTimes;
     std::vector<int> vec_splitGroup;
-
+    vec_splitTimes.reserve(10);
     // Start only at 100
     for (int i = 1; i <= 10; i++) {
       vec_splitTimes.push_back(i * 1000000);

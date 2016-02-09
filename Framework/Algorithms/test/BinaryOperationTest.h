@@ -260,13 +260,16 @@ public:
 
   void
   test_buildBinaryOperationTable_groupedLHS_by_groupedRHS_bad_overlap_throws() {
-    std::vector<std::vector<int>> lhs(6), rhs(4);
-    for (int i = 0; i < 24; i++) {
-      // 4 detectors per pixel in lhs
-      lhs[i / 4].push_back(i);
-      // 6 detectors in each on the rhs
-      rhs[i / 6].push_back(i);
-    }
+    // 4 detectors per pixel in lhs
+    std::vector<std::vector<int>> lhs{{0, 1, 2, 3},     {4, 5, 6, 7},
+                                      {8, 9, 10, 11},   {12, 13, 14, 15},
+                                      {16, 17, 18, 19}, {20, 21, 22, 23}};
+    // 6 detectors in each on the rhs
+    std::vector<std::vector<int>> rhs{{0, 1, 2, 3, 4, 5},
+                                      {6, 7, 8, 9, 10, 11},
+                                      {12, 13, 14, 15, 16, 17},
+                                      {18, 19, 20, 21, 22, 23}};
+
     auto table = do_test_buildBinaryOperationTable(lhs, rhs, false);
     TS_ASSERT_EQUALS((*table)[0], 0);  // 0-3 go into 0-5
     TS_ASSERT_EQUALS((*table)[1], -1); // 4-7 fails to go anywhere

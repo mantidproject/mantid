@@ -319,10 +319,7 @@ void DgsConvertToEnergyTransfer::exec() {
                                          "bkgd-range-max", inputWS);
     tibTofEnd += binOffset;
     const double tibTofWidth = tibTofEnd - tibTofStart;
-    std::vector<double> params;
-    params.push_back(tibTofStart);
-    params.push_back(tibTofWidth);
-    params.push_back(tibTofEnd);
+    std::vector<double> params{tibTofStart, tibTofWidth, tibTofEnd};
 
     bool treatTibAsEvents = false;
 

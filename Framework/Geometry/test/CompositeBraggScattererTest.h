@@ -32,9 +32,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(CompositeBraggScatterer_sptr scatterer =
                                  CompositeBraggScatterer::create());
 
-    std::vector<BraggScatterer_sptr> scatterers;
-    scatterers.push_back(getInitializedScatterer("Si", "0.35, 0, 0"));
-    scatterers.push_back(getInitializedScatterer("Si", "1/4, 1/4, 1/4"));
+    std::vector<BraggScatterer_sptr> scatterers{
+        getInitializedScatterer("Si", "0.35, 0, 0"),
+        getInitializedScatterer("Si", "1/4, 1/4, 1/4")};
 
     CompositeBraggScatterer_sptr scatterer =
         CompositeBraggScatterer::create(scatterers);
