@@ -78,8 +78,9 @@ void MaskDetectorsIf::exec() {
     else {
       double val = inputW->readY(i)[0];
       if (compar_f(val, value)) {
-        for (auto it = dets.cbegin(); it != dets.cend(); ++it)
-          umap.insert(std::make_pair(*it, select_on));
+        for (auto det : dets) {
+          umap.emplace(det, select_on);
+        }
       }
     }
     double p = static_cast<double>(i) / static_cast<double>(nspec);
@@ -167,7 +168,7 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
     bool selection;
 
     if (it == umap.end())
-      selection = (sel == 0) ? false : true;
+      selection = sel != 0;
     else
       selection = (*it).second;
 

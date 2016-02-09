@@ -43,9 +43,7 @@ void CreateMDWorkspace::init() {
   declareProperty(new PropertyWithValue<int>("Dimensions", 1, Direction::Input),
                   "Number of dimensions that the workspace will have.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("MDEvent");
-  propOptions.push_back("MDLeanEvent");
+  std::vector<std::string> propOptions{"MDEvent", "MDLeanEvent"};
   declareProperty("EventType", "MDLeanEvent",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which underlying data type will event take.");
@@ -236,8 +234,8 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
   targetFrames.push_back(Mantid::Geometry::QSample::QSampleName);
 
   auto isValidFrame = true;
-  for (auto it = frames.begin(); it != frames.end(); ++it) {
-    auto result = checkIfFrameValid(*it, targetFrames);
+  for (auto &frame : frames) {
+    auto result = checkIfFrameValid(frame, targetFrames);
     if (!result) {
       isValidFrame = result;
     }
@@ -251,7 +249,7 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
     std::string message = "The selected frames can be 'HKL', 'QSample', 'QLab' "
                           "or 'General Frame'. You must specify as many frames "
                           "as there are dimensions.";
-    errors.insert(std::make_pair(framePropertyName, message));
+    errors.emplace(framePropertyName, message);
   }
   return errors;
 }
@@ -264,9 +262,8 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
  */
 bool CreateMDWorkspace::checkIfFrameValid(
     const std::string &frame, const std::vector<std::string> &targetFrames) {
-  for (auto targetFrame = targetFrames.begin();
-       targetFrame != targetFrames.end(); ++targetFrame) {
-    if (*targetFrame == frame) {
+  for (const auto &targetFrame : targetFrames) {
+    if (targetFrame == frame) {
       return true;
     }
   }

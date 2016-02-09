@@ -68,19 +68,14 @@ void ConvolutionFitSequential::init() {
       "The input workspace for the fit.");
 
   auto scv = boost::make_shared<StringContainsValidator>();
-  auto requires = std::vector<std::string>();
-  requires.push_back("Convolution");
-  requires.push_back("Resolution");
+  auto requires = std::vector<std::string>{"Convolution", "Resolution"};
   scv->setRequiredStrings(requires);
 
   declareProperty("Function", "", scv,
                   "The function that describes the parameters of the fit.",
                   Direction::Input);
 
-  std::vector<std::string> backType;
-  backType.push_back("Fixed Flat");
-  backType.push_back("Fit Flat");
-  backType.push_back("Fit Linear");
+  std::vector<std::string> backType{"Fixed Flat", "Fit Flat", "Fit Linear"};
 
   declareProperty("BackgroundType", "Fixed Flat",
                   boost::make_shared<StringListValidator>(backType),
@@ -243,11 +238,11 @@ void ConvolutionFitSequential::exec() {
   Progress workflowProg(this, 0.91, 0.94, 4);
   auto paramNames = std::vector<std::string>();
   if (funcName.compare("DeltaFunction") == 0) {
-    paramNames.push_back("Height");
+    paramNames.emplace_back("Height");
   } else {
     auto func = FunctionFactory::Instance().createFunction(funcName);
     if (delta) {
-      paramNames.push_back("Height");
+      paramNames.emplace_back("Height");
     }
     for (size_t i = 0; i < func->nParams(); i++) {
       paramNames.push_back(func->parameterName(i));
@@ -258,7 +253,7 @@ void ConvolutionFitSequential::exec() {
       size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
                    paramNames.begin();
       paramNames.erase(paramNames.begin() + pos);
-      paramNames.push_back("EISF");
+      paramNames.emplace_back("EISF");
     }
   }
 
@@ -313,20 +308,20 @@ void ConvolutionFitSequential::exec() {
   Progress logAdderProg(this, 0.96, 0.97, 6);
   // Add String Logs
   auto logAdder = createChildAlgorithm("AddSampleLog");
-  for (auto it = sampleLogStrings.begin(); it != sampleLogStrings.end(); ++it) {
+  for (auto &sampleLogString : sampleLogStrings) {
     logAdder->setProperty("Workspace", resultWs);
-    logAdder->setProperty("LogName", it->first);
-    logAdder->setProperty("LogText", it->second);
+    logAdder->setProperty("LogName", sampleLogString.first);
+    logAdder->setProperty("LogText", sampleLogString.second);
     logAdder->setProperty("LogType", "String");
     logAdder->executeAsChildAlg();
     logAdderProg.report("Add text logs");
   }
 
   // Add Numeric Logs
-  for (auto it = sampleLogNumeric.begin(); it != sampleLogNumeric.end(); it++) {
+  for (auto &logItem : sampleLogNumeric) {
     logAdder->setProperty("Workspace", resultWs);
-    logAdder->setProperty("LogName", it->first);
-    logAdder->setProperty("LogText", it->second);
+    logAdder->setProperty("LogName", logItem.first);
+    logAdder->setProperty("LogText", logItem.second);
     logAdder->setProperty("LogType", "Number");
     logAdder->executeAsChildAlg();
     logAdderProg.report("Adding Numerical logs");
@@ -367,10 +362,7 @@ void ConvolutionFitSequential::exec() {
 bool ConvolutionFitSequential::checkForTwoLorentz(
     const std::string &subFunction) {
   auto pos = subFunction.rfind("Lorentzian");
-  if (pos != std::string::npos) {
-    return true;
-  }
-  return false;
+  return pos != std::string::npos;
 }
 
 /**

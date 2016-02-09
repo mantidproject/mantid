@@ -205,8 +205,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
 
-    TS_ASSERT_DIFFERS(m_tinyReflWS->getInstrument()->getSource()->getPos(),
-                      outLam->getInstrument()->getSource()->getPos());
+    TS_ASSERT_EQUALS(m_tinyReflWS->getInstrument()->getSource()->getPos(),
+                     outLam->getInstrument()->getSource()->getPos());
     TS_ASSERT_EQUALS(outLam->getInstrument()->getSource()->getPos(),
                      outQ->getInstrument()->getSource()->getPos());
   }
@@ -270,8 +270,8 @@ public:
     double outTheta = alg->getProperty("ThetaOut");
 
     TS_ASSERT_DELTA(45.0, outTheta, 0.00001);
-    TS_ASSERT_DIFFERS(source->getPos(),
-                      inQ->getInstrument()->getSource()->getPos())
+    TS_ASSERT_EQUALS(source->getPos(),
+                     inQ->getInstrument()->getSource()->getPos());
     // convert from degrees to radians for sin() function
     double outThetaInRadians = outTheta * M_PI / 180;
 

@@ -116,12 +116,7 @@ void CreateChunkingFromInstrument::init() {
                   "as separate groups. "
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
-  vector<string> grouping;
-  grouping.push_back("");
-  grouping.push_back("All");
-  grouping.push_back("Group");
-  grouping.push_back("Column");
-  grouping.push_back("bank");
+  vector<string> grouping{"", "All", "Group", "Column", "bank"};
   declareProperty(
       PARAM_CHUNK_BY, "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "
@@ -246,17 +241,17 @@ string parentName(IComponent_const_sptr comp, const string &prefix) {
  */
 string parentName(IComponent_const_sptr comp, const vector<string> &names) {
   // handle the special case of the component has the name
-  for (auto name = names.begin(); name != names.end(); ++name)
-    if (name->compare(comp->getName()) == 0)
-      return (*name);
+  for (const auto &name : names)
+    if (name.compare(comp->getName()) == 0)
+      return name;
 
   // find the parent with the correct name
   IComponent_const_sptr parent = comp->getParent();
   if (parent) {
     // see if this is the parent
-    for (auto name = names.begin(); name != names.end(); ++name)
-      if (name->compare(parent->getName()) == 0)
-        return (*name);
+    for (const auto &name : names)
+      if (name.compare(parent->getName()) == 0)
+        return name;
 
     // or recurse
     return parentName(parent, names);
@@ -401,8 +396,8 @@ void CreateChunkingFromInstrument::exec() {
   } else if (inst->getName().compare("SNAP") == 0 &&
              groupLevel.compare("Group") == 0) {
     groupNames.clear();
-    groupNames.push_back("East");
-    groupNames.push_back("West");
+    groupNames.emplace_back("East");
+    groupNames.emplace_back("West");
   }
 
   // set up a progress bar with the "correct" number of steps
@@ -448,12 +443,13 @@ void CreateChunkingFromInstrument::exec() {
       throw std::runtime_error("Failed to find any banks in the instrument");
 
     // fill in the table workspace
-    for (auto group = grouping.begin(); group != grouping.end(); ++group) {
+    for (auto &group : grouping) {
       stringstream banks;
-      for (auto bank = group->second.begin(); bank != group->second.end();
-           ++bank)
-        banks << (*bank) << ",";
-
+      // for (auto bank = group.second.begin(); bank != group.second.end();
+      // ++bank)
+      for (auto bank : group.second) {
+        banks << bank << ",";
+      }
       // remove the trailing comma
       string banksStr = banks.str();
       banksStr = banksStr.substr(0, banksStr.size() - 1);

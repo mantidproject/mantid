@@ -104,11 +104,7 @@ public:
     fn.setParameter("a", 4.7605);
     fn.setParameter("c", 12.9956);
 
-    std::vector<V3D> hkls;
-    hkls.push_back(V3D(1, 0, -2));
-    hkls.push_back(V3D(1, 0, 4));
-    hkls.push_back(V3D(0, 0, 6));
-    hkls.push_back(V3D(5, -2, -5));
+    std::vector<V3D> hkls{{1, 0, -2}, {1, 0, 4}, {0, 0, 6}, {5, -2, -5}};
 
     LatticeDomain domain(hkls);
     FunctionValues values(domain);

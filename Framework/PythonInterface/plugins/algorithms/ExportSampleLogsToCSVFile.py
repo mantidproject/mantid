@@ -20,6 +20,17 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
     _maxtime = None
     _starttime = None
     _localtimediff = None
+    _writeHeaderToSeparateFile = True
+    _append = False
+
+    def __init__(self):
+        """ Initialization
+        @return:
+        """
+        PythonAlgorithm.__init__(self)
+
+
+        return
 
     def category(self):
         """ Category
@@ -54,6 +65,10 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         self.declareProperty("Header", "", "String in the header file.")
 
+        self.declareProperty('SeparateHeaderFile', True,
+                             'If true, then the header is written to another file.'
+                             'Otherwise, header will be in the same outputfile.')
+
         # Time zone
         timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",\
                 "Europe/Paris", "Europe/Copenhagen"]
@@ -69,12 +84,21 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         return
 
-
     def PyExec(self):
         """ Main executor
         """
         # Read inputs
         self._getProperties()
+
+        # Write header file as an option
+        if self._writeheader is True:
+            # check
+            assert self._wksp is not None
+
+            # get date and description to write
+            testdatetime = self._wksp.getRun().getProperty("run_start").value
+            description = "Type your description here"
+            self._writeHeaderFile(testdatetime, description)
 
         # Read in logs
         logtimesdict, logvaluedict, loglength = self._readSampleLogs()
@@ -90,12 +114,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             logtimeslist.append(logtimesdict[logname])
             logvaluelist.append(logvaluedict[logname])
         self._writeAscynLogFile(logtimeslist, logvaluelist, localtimediff, self._timeTolerance)
-
-        # Write header file
-        if self._writeheader is True:
-            testdatetime = self._wksp.getRun().getProperty("run_start").value
-            description = "Type your description here"
-            self._writeHeaderFile(testdatetime, description)
 
         return
 
@@ -126,6 +144,12 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         if (self._timeTolerance) <= 0.:
             raise NotImplementedError("TimeTolerance must be larger than zero.")
 
+        # Set the flag to write header to separate file
+        if self._writeheader is True:
+            self._writeHeaderToSeparateFile = self.getProperty('SeparateHeaderFile').value
+        else:
+            self._writeHeaderToSeparateFile = False
+
         return
 
 
@@ -146,7 +170,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             localtimediff = 0
 
         return localtimediff
-
 
     def _writeLogFile(self, logtimesdict, logvaluedict, loglength, localtimediff):
         """ Write the logs to file
@@ -217,12 +240,15 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         return maxnumlines, starttime, maxtime
 
-
     def _writeAscynLogFile(self, logtimeslist, logvaluelist, localtimediff, timetol):
-        """ Logs are recorded upon the change of the data
+        """
+        Logs are recorded upon the change of the data
         time tolerance : two log entries within time tolerance will be recorded as one
-        Arguments
-        - timetol  : tolerance of time (in second)
+        @param logtimeslist:
+        @param logvaluelist:
+        @param localtimediff:
+        @param timetol:  tolerance of time (in second)
+        @return:
         """
         # Check input
         if logtimeslist.__class__.__name__ != "list":
@@ -268,9 +294,12 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             wbuf = wbuf[:-1]
 
         try:
-            ofile = open(self._outputfilename, "w")
-            ofile.write(wbuf)
-            ofile.close()
+            if self._append is True:
+                log_file = open(self._outputfilename, 'a')
+            else:
+                log_file = open(self._outputfilename, "w")
+            log_file.write(wbuf)
+            log_file.close()
         except IOError:
             raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
 
@@ -278,8 +307,12 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
     def _findNextTimeStamps(self, logtimeslist, currtimeindexes, timetol, nexttimelogindexes):
         """
-        Arguments:
-        - nexttimelogindexes : (output) indexes of logs for next time stamp
+        Find next time stamp among all logs
+        @param logtimeslist:
+        @param currtimeindexes:
+        @param timetol:
+        @param nexttimelogindexes: (output) indexes of logs for next time stamp
+        @return:
         """
         # clear output
         nexttimelogindexes[:] = []
@@ -328,7 +361,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         logindex = nexttimelogindexes[0]
         logtimes = logtimeslist[logindex]
         thislogtime = logtimes[currtimeindexes[logindex]]
-        # FIXME : refactor the following to increase efficiency
         abstime = thislogtime.totalNanoseconds() * 1.E-9 - self._localtimediff
         reltime = thislogtime.totalNanoseconds() * 1.E-9 - self._starttime.totalNanoseconds() * 1.0E-9
         wbuf = "%.6f\t%.6f\t" % (abstime, reltime)
@@ -414,15 +446,19 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         else:
             self.log().information("Final Log length = %d" % (loglength))
 
-        return (logtimesdict, logvaluedict, loglength)
+        return logtimesdict, logvaluedict, loglength
 
-
-    def _writeHeaderFile(self, testdatetime, description):
-        """ Write the header file for a LoadFrame
+    def _writeHeaderFile(self, test_datetime, description):
+        """
+        Write the header file for a LoadFrame
+        @param test_datetime:
+        @param description:
+        @return:
         """
         # Construct 3 lines of the header file
-        testdatetime_mk = DateAndTime(testdatetime)
-        line0 = "Test date: %s (%.6f) Time Zone: %s" % (str(testdatetime), float(testdatetime_mk.totalNanoseconds())/1.0E9, self._timezone)
+        testdatetime_mk = DateAndTime(test_datetime)
+        line0 = "Test date: %s (%.6f) Time Zone: %s" % (
+            str(test_datetime), float(testdatetime_mk.totalNanoseconds()) / 1.0E9, self._timezone)
         line1 = "Test description: %s" % (description)
         line2 = self._headercontent
 
@@ -431,8 +467,12 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         # headerfilename = self._outputfilename.split(".")[0] + "_header.txt"
         filepath = os.path.dirname(self._outputfilename)
         basename = os.path.basename(self._outputfilename)
-        baseheadername = basename.split(".txt")[0] + "_header.txt"
-        headerfilename = os.path.join(filepath, baseheadername)
+        if self._writeHeaderToSeparateFile is True:
+            baseheadername = basename.split(".txt")[0] + "_header.txt"
+            headerfilename = os.path.join(filepath, baseheadername)
+        else:
+            headerfilename = self._outputfilename
+            self._append = True
 
         self.log().information("Writing header file %s ... " % (headerfilename))
 

@@ -12,7 +12,7 @@ using namespace DataObjects;
 
 /** Constructor
  */
-WorkspaceJoiners::WorkspaceJoiners() : Algorithm(), m_progress(NULL) {}
+WorkspaceJoiners::WorkspaceJoiners() : Algorithm(), m_progress(nullptr) {}
 
 /** Destructor
  */

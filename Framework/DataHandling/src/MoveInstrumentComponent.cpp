@@ -68,7 +68,7 @@ void MoveInstrumentComponent::exec() {
   // Find the component to move
   if (DetID != -1) {
     comp = inst->getDetector(DetID);
-    if (comp == 0) {
+    if (comp == nullptr) {
       std::ostringstream mess;
       mess << "Detector with ID " << DetID << " was not found.";
       g_log.error(mess.str());
@@ -76,7 +76,7 @@ void MoveInstrumentComponent::exec() {
     }
   } else if (!ComponentName.empty()) {
     comp = inst->getComponentByName(ComponentName);
-    if (comp == 0) {
+    if (comp == nullptr) {
       std::ostringstream mess;
       mess << "Component with name " << ComponentName << " was not found.";
       g_log.error(mess.str());

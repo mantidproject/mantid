@@ -149,9 +149,9 @@ void AlgorithmManagerImpl::setMaxAlgorithms(int n) {
  */
 IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
   Mutex::ScopedLock _lock(this->m_managedMutex);
-  for (auto a = m_managed_algs.cbegin(); a != m_managed_algs.cend(); ++a) {
-    if ((**a).getAlgorithmID() == id)
-      return *a;
+  for (const auto &managed_alg : m_managed_algs) {
+    if ((*managed_alg).getAlgorithmID() == id)
+      return managed_alg;
   }
   return IAlgorithm_sptr();
 }
@@ -207,8 +207,7 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
     const std::string &algorithmName) const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;
   Mutex::ScopedLock _lock(this->m_managedMutex);
-  for (auto alg = m_managed_algs.begin(); alg != m_managed_algs.end(); ++alg) {
-    auto currentAlgorithm = *alg;
+  for (auto currentAlgorithm : m_managed_algs) {
     if (currentAlgorithm->name() == algorithmName &&
         currentAlgorithm->isRunning()) {
       theRunningInstances.push_back(currentAlgorithm);
@@ -221,9 +220,9 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
 /// Requests cancellation of all running algorithms
 void AlgorithmManagerImpl::cancelAll() {
   Mutex::ScopedLock _lock(this->m_managedMutex);
-  for (auto it = m_managed_algs.begin(); it != m_managed_algs.end(); ++it) {
-    if ((*it)->isRunning())
-      (*it)->cancel();
+  for (auto &managed_alg : m_managed_algs) {
+    if (managed_alg->isRunning())
+      managed_alg->cancel();
   }
 }
 

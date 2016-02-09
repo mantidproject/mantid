@@ -23,7 +23,7 @@ namespace {
 template <typename T>
 void createOrUpdateValue(API::Run &run, const std::string &name,
                          const std::string &time, const T value) {
-  TimeSeriesProperty<T> *timeSeries(NULL);
+  TimeSeriesProperty<T> *timeSeries(nullptr);
   if (run.hasProperty(name)) {
     timeSeries = dynamic_cast<TimeSeriesProperty<T> *>(run.getLogData(name));
     if (!timeSeries)

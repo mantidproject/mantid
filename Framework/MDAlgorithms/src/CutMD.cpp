@@ -88,10 +88,10 @@ std::vector<MinMax> calculateExtents(const DblMatrix &inMatrix,
   const double maxDbl = std::numeric_limits<double>::max();
   std::vector<MinMax> extents(3, std::make_pair(maxDbl, maxDbl));
 
-  for (auto hIt = hRange.begin(); hIt != hRange.end(); ++hIt) {
-    for (auto kIt = kRange.begin(); kIt != kRange.end(); ++kIt) {
-      for (auto lIt = lRange.begin(); lIt != lRange.end(); ++lIt) {
-        V3D origPos(*hIt, *kIt, *lIt);
+  for (double &hIt : hRange) {
+    for (double &kIt : kRange) {
+      for (double &lIt : lRange) {
+        V3D origPos(hIt, kIt, lIt);
         for (size_t i = 0; i < 3; ++i) {
           const V3D other(invMat[i][0], invMat[i][1], invMat[i][2]);
           double val = origPos.scalar_prod(other);
@@ -385,12 +385,12 @@ void CutMD::exec() {
         steppedExtents.push_back(extentLimit);
         steppedBins.push_back(static_cast<int>(dimRange / pbins[i][0]));
       } else if (nArgs == 2) {
-        steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][1]));
+        steppedExtents.emplace_back(pbins[i][0], pbins[i][1]);
         steppedBins.push_back(1);
       } else if (nArgs == 3) {
         const double dimRange = pbins[i][2] - pbins[i][0];
         const double stepSize = pbins[i][1] < dimRange ? pbins[i][1] : dimRange;
-        steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][2]));
+        steppedExtents.emplace_back(pbins[i][0], pbins[i][2]);
         steppedBins.push_back(static_cast<int>(dimRange / stepSize));
       }
 

@@ -130,11 +130,7 @@ void CalculateCoverageDGS::init() {
                                     Mantid::Kernel::Direction::Input),
       "Incident energy. If set, will override Ei in the input workspace");
 
-  std::vector<std::string> options;
-  options.push_back("Q1");
-  options.push_back("Q2");
-  options.push_back("Q3");
-  options.push_back("DeltaE");
+  std::vector<std::string> options{"Q1", "Q2", "Q3", "DeltaE"};
 
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");
@@ -172,8 +168,8 @@ void CalculateCoverageDGS::exec() {
   auto instrument = inputWS->getInstrument();
   std::vector<detid_t> detIDS = instrument->getDetectorIDs(true);
   std::vector<double> tt, phi;
-  for (int i = 0; i < static_cast<int>(detIDS.size()); i++) {
-    auto detector = instrument->getDetector(detIDS[i]);
+  for (auto &id : detIDS) {
+    auto detector = instrument->getDetector(id);
     if (!detector->isMasked()) {
       tt.push_back(detector->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
       phi.push_back(detector->getPhi());
@@ -292,9 +288,9 @@ void CalculateCoverageDGS::exec() {
   std::vector<double> Q1Basis = getProperty("Q1Basis");
   std::vector<double> Q2Basis = getProperty("Q2Basis");
   std::vector<double> Q3Basis = getProperty("Q3Basis");
-  W.setRow(0, Q1Basis);
-  W.setRow(1, Q2Basis);
-  W.setRow(2, Q3Basis);
+  W.setColumn(0, Q1Basis);
+  W.setColumn(1, Q2Basis);
+  W.setColumn(2, Q3Basis);
 
   m_rubw = gon * UB * W * (2.0 * M_PI);
 

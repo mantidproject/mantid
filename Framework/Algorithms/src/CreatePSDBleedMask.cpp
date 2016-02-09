@@ -143,8 +143,7 @@ void CreatePSDBleedMask::exec() {
     }
     // New tube
     else {
-      tubeMap.insert(std::pair<TubeIndex::key_type, TubeIndex::mapped_type>(
-          parentID, TubeIndex::mapped_type(1, i)));
+      tubeMap.emplace(parentID, TubeIndex::mapped_type(1, i));
     }
 
     progress.report();
@@ -269,8 +268,8 @@ bool CreatePSDBleedMask::performBleedTest(
 void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices,
                                   API::MatrixWorkspace_sptr workspace) {
   const double deadValue(1.0); // delete the data
-  for (auto citr = tubeIndices.cbegin(); citr != tubeIndices.cend(); ++citr) {
-    workspace->dataY(*citr)[0] = deadValue;
+  for (auto tubeIndice : tubeIndices) {
+    workspace->dataY(tubeIndice)[0] = deadValue;
   }
 }
 }

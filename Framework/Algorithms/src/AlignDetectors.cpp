@@ -91,10 +91,10 @@ public:
     double difc = 0.;
     double difa = 0.;
     double tzero = 0.;
-    for (auto row = rows.begin(); row != rows.end(); ++row) {
-      difc += m_difcCol->toDouble(*row);
-      difa += m_difaCol->toDouble(*row);
-      tzero += m_tzeroCol->toDouble(*row);
+    for (auto row : rows) {
+      difc += m_difcCol->toDouble(row);
+      difa += m_difaCol->toDouble(row);
+      tzero += m_tzeroCol->toDouble(row);
     }
     if (rows.size() > 1) {
       double norm = 1. / static_cast<double>(rows.size());
@@ -125,8 +125,8 @@ private:
 
   std::set<size_t> getRow(const std::set<detid_t> &detIds) {
     std::set<size_t> rows;
-    for (auto detId = detIds.begin(); detId != detIds.end(); ++detId) {
-      auto rowIter = m_detidToRow.find(*detId);
+    for (auto detId : detIds) {
+      auto rowIter = m_detidToRow.find(detId);
       if (rowIter != m_detidToRow.end()) { // skip if not found
         rows.insert(rowIter->second);
       }
@@ -156,7 +156,7 @@ const std::string AlignDetectors::summary() const {
 
 /// (Empty) Constructor
 AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
-  this->tofToDmap = NULL;
+  this->tofToDmap = nullptr;
 }
 
 /// Destructor
@@ -300,7 +300,7 @@ void AlignDetectors::exec() {
   // Check if its an event workspace
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL) {
+  if (eventW != nullptr) {
     this->execEvent();
     return;
   }

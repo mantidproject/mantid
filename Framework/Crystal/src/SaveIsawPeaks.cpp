@@ -44,9 +44,7 @@ void SaveIsawPeaks::init() {
   declareProperty("AppendFile", false, "Append to file if true.\n"
                                        "If false, new file (default).");
 
-  std::vector<std::string> exts;
-  exts.push_back(".peaks");
-  exts.push_back(".integrate");
+  std::vector<std::string> exts{".peaks", ".integrate"};
 
   declareProperty(new FileProperty("Filename", "", FileProperty::Save,
                                    {".peaks", ".integrate"}),
@@ -302,8 +300,7 @@ void SaveIsawPeaks::exec() {
         out << header << std::endl;
 
         // Go through each peak at this run / bank
-        for (size_t i = 0; i < ids.size(); i++) {
-          size_t wi = ids[i];
+        for (auto wi : ids) {
           Peak &p = peaks[wi];
 
           // Sequence (run) number

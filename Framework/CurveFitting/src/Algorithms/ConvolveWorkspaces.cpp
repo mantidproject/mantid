@@ -17,7 +17,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(ConvolveWorkspaces)
 
 /// Constructor
-ConvolveWorkspaces::ConvolveWorkspaces() : API::Algorithm(), prog(NULL) {}
+ConvolveWorkspaces::ConvolveWorkspaces() : API::Algorithm(), prog(nullptr) {}
 
 /// Virtual destructor
 ConvolveWorkspaces::~ConvolveWorkspaces() { delete prog; }

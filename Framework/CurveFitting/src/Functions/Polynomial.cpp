@@ -104,11 +104,7 @@ void Polynomial::functionDeriv1D(API::Jacobian *out, const double *xValues,
 /** Get Attribute names
  * @return A list of attribute names (identical to Polynomial)
 */
-std::vector<std::string> Polynomial::getAttributeNames() const {
-  std::vector<std::string> res;
-  res.push_back("n");
-  return res;
-}
+std::vector<std::string> Polynomial::getAttributeNames() const { return {"n"}; }
 
 //----------------------------------------------------------------------------------------------
 /** Get Attribute

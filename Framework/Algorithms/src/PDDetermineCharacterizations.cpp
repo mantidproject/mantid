@@ -54,21 +54,21 @@ const std::string PDDetermineCharacterizations::summary() const {
 
 /**
  * These should match those in LoadPDCharacterizations
+ * - "frequency" double
+ * -  "wavelength" (double)
+ * -  "bank" (integer)
+ * -  "container" (string)
+ * -  "vanadium" (string)
+ * -  "empty" (string)
+ * -  "d_min" (string)
+ * -  "d_max" (string)
+ * -  "tof_min" (double)
+ * -  "tof_max" (double)
  * @return The list of expected column names
  */
 std::vector<std::string> getColumnNames() {
-  std::vector<std::string> names;
-  names.push_back("frequency");  // double
-  names.push_back("wavelength"); // double
-  names.push_back("bank");       // integer
-  names.push_back("container");  // string
-  names.push_back("vanadium");   // string
-  names.push_back("empty");      // string
-  names.push_back("d_min");      // string
-  names.push_back("d_max");      // string
-  names.push_back("tof_min");    // double
-  names.push_back("tof_max");    // double
-  return names;
+  return {"frequency", "wavelength", "bank",  "container", "vanadium",
+          "empty",     "d_min",      "d_max", "tof_min",   "tof_max"};
 }
 
 /// More intesive input checking. @see Algorithm::validateInputs
@@ -90,10 +90,10 @@ PDDetermineCharacterizations::validateInputs() {
         << expectedNames.size();
     result[CHAR_PROP_NAME] = msg.str();
   } else {
-    for (auto it = expectedNames.begin(); it != expectedNames.end(); ++it) {
-      if (std::find(names.begin(), names.end(), *it) == names.end()) {
+    for (auto &expectedName : expectedNames) {
+      if (std::find(names.begin(), names.end(), expectedName) == names.end()) {
         std::stringstream msg;
-        msg << "Failed to find column named " << (*it);
+        msg << "Failed to find column named " << expectedName;
         result[CHAR_PROP_NAME] = msg.str();
       }
     }
@@ -126,17 +126,13 @@ void PDDetermineCharacterizations::init() {
   declareProperty(new Kernel::ArrayProperty<int32_t>("NormBackRun", "0"),
                   "Normalization background" + defaultMsg);
 
-  std::vector<std::string> defaultFrequencyNames;
-  defaultFrequencyNames.push_back("SpeedRequest1");
-  defaultFrequencyNames.push_back("Speed1");
-  defaultFrequencyNames.push_back("frequency");
+  std::vector<std::string> defaultFrequencyNames{"SpeedRequest1", "Speed1",
+                                                 "frequency"};
   declareProperty(new Kernel::ArrayProperty<std::string>(FREQ_PROP_NAME,
                                                          defaultFrequencyNames),
                   "Candidate log names for frequency");
 
-  std::vector<std::string> defaultWavelengthNames;
-  defaultWavelengthNames.push_back("LambdaRequest");
-  defaultWavelengthNames.push_back("lambda");
+  std::vector<std::string> defaultWavelengthNames{"LambdaRequest", "lambda"};
   declareProperty(new Kernel::ArrayProperty<std::string>(
                       WL_PROP_NAME, defaultWavelengthNames),
                   "Candidate log names for wave length");
@@ -156,10 +152,7 @@ bool closeEnough(const double left, const double right) {
 
   // same within 5%
   const double relativeDiff = diff * 2 / (left + right);
-  if (relativeDiff < .05)
-    return true;
-
-  return false;
+  return relativeDiff < .05;
 }
 
 /// Fill in the property manager from the correct line in the table
@@ -230,26 +223,26 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
     validUnits.insert("Hz");
   }
 
-  for (auto name = names.begin(); name != names.end(); ++name) {
-    if (run.hasProperty(*name)) {
-      const std::string units = run.getProperty(*name)->units();
+  for (auto &name : names) {
+    if (run.hasProperty(name)) {
+      const std::string units = run.getProperty(name)->units();
 
       if (validUnits.find(units) != validUnits.end()) {
-        double value = run.getLogAsSingleValue(*name);
+        double value = run.getLogAsSingleValue(name);
         if (value == 0.) {
           std::stringstream msg;
-          msg << "'" << *name << "' has a mean value of zero " << units;
+          msg << "'" << name << "' has a mean value of zero " << units;
           g_log.information(msg.str());
         } else {
           std::stringstream msg;
-          msg << "Found " << label << " in log '" << *name
+          msg << "Found " << label << " in log '" << name
               << "' with mean value " << value << " " << units;
           g_log.information(msg.str());
           return value;
         }
       } else {
         std::stringstream msg;
-        msg << "When looking at " << *name
+        msg << "When looking at " << name
             << " log encountered unknown units for " << label << ":" << units;
         g_log.warning(msg.str());
       }
@@ -352,12 +345,13 @@ void PDDetermineCharacterizations::exec() {
   overrideRunNumProperty("NormBackRun", "empty");
 
   std::vector<std::string> expectedNames = getColumnNames();
-  for (auto it = expectedNames.begin(); it != expectedNames.end(); ++it) {
-    if (m_propertyManager->existsProperty(*it)) {
-      g_log.debug() << (*it) << ":" << m_propertyManager->getPropertyValue(*it)
+  for (auto &expectedName : expectedNames) {
+    if (m_propertyManager->existsProperty(expectedName)) {
+      g_log.debug() << expectedName << ":"
+                    << m_propertyManager->getPropertyValue(expectedName)
                     << "\n";
     } else {
-      g_log.warning() << (*it) << " DOES NOT EXIST\n";
+      g_log.warning() << expectedName << " DOES NOT EXIST\n";
     }
   }
 }

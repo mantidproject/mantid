@@ -22,12 +22,13 @@ TomoToolConfigDialog::TomoToolConfigDialog(QWidget *parent) : QDialog(parent) {
   editOpt = new QLineEdit("/work/imat");
   hOpt = new QHBoxLayout();
   hOpt->addWidget(labelOpt);
+
   hOpt->addWidget(editOpt);
 
   okButton = new QPushButton("Ok");
   cancelButton = new QPushButton("Cancel");
   hBut = new QHBoxLayout();
-  hBut->insertStretch(0,1);
+  hBut->insertStretch(0, 1);
   hBut->addWidget(okButton);
   hBut->addWidget(cancelButton);
 

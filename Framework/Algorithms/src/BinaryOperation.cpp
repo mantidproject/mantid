@@ -28,7 +28,7 @@ BinaryOperation::BinaryOperation()
       m_matchXSize(false), m_flipSides(false), m_keepEventWorkspace(false),
       m_useHistogramForRhsEventWorkspace(false),
       m_do2D_even_for_SingleColumn_on_rhs(false), m_indicesToMask(),
-      m_progress(NULL) {}
+      m_progress(nullptr) {}
 
 BinaryOperation::~BinaryOperation() {
   if (m_progress)

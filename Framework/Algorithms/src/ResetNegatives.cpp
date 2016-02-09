@@ -94,7 +94,7 @@ void ResetNegatives::exec() {
   DataObjects::EventWorkspace_const_sptr eventWS =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
   if (eventWS)
-    eventWS->sortAll(DataObjects::TOF_SORT, NULL);
+    eventWS->sortAll(DataObjects::TOF_SORT, nullptr);
 
   Progress prog(this, .1, 1., 2 * nHist);
 
@@ -153,8 +153,8 @@ void ResetNegatives::pushMinimum(MatrixWorkspace_const_sptr minWS,
     if (minValue <= 0) {
       minValue *= -1.;
       MantidVec &y = wksp->dataY(i);
-      for (auto it = y.begin(); it != y.end(); ++it) {
-        *it = fixZero(*it + minValue);
+      for (double &value : y) {
+        value = fixZero(value + minValue);
       }
     }
     prog.report();
@@ -168,12 +168,13 @@ void ResetNegatives::pushMinimum(MatrixWorkspace_const_sptr minWS,
  * them to the supplied value.
  *
  * @param minWS A workspace of minimum values for each spectra.
- * @param value Reset negative values in the spectra to this number.
+ * @param spectrumNegativeValues Reset negative values in the spectra to this
+ * number.
  * @param wksp The workspace to modify.
  * @param prog The progress.
  */
 void ResetNegatives::changeNegatives(MatrixWorkspace_const_sptr minWS,
-                                     const double value,
+                                     const double spectrumNegativeValues,
                                      MatrixWorkspace_sptr wksp,
                                      Progress &prog) {
   int64_t nHist = wksp->getNumberHistograms();
@@ -184,11 +185,11 @@ void ResetNegatives::changeNegatives(MatrixWorkspace_const_sptr minWS,
         0.) // quick check to see if there is a reason to bother
     {
       MantidVec &y = wksp->dataY(i);
-      for (auto it = y.begin(); it != y.end(); ++it) {
-        if (*it < 0.) {
-          *it = value;
+      for (double &value : y) {
+        if (value < 0.) {
+          value = spectrumNegativeValues;
         } else
-          *it = fixZero(*it);
+          value = fixZero(value);
       }
     }
     prog.report();
