@@ -223,7 +223,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
             self._raise_error_if_non_valid_mode_scattering(self._diff_opt, self._back_scattering)
             self._set_spectra_type(all_spectra[0])
             self._setup_raw(all_spectra)
-            self._raise_error_if_non_valid_period_scattering(self._nperiods, self._back_scattering)
             self._create_foil_workspaces()
 
             for ws_index, spectrum_no in enumerate(all_spectra):
@@ -262,28 +261,29 @@ class LoadVesuvio(LoadEmptyVesuvio):
         all_back = self._is_back_scattering(spectra[0])
         for spec_no in spectra[1:]:
             if all_back and self._is_fwd_scattering(spec_no):
-                raise RuntimeError("Mixing backward and forward spectra is not permitted."
+                raise RuntimeError("Mixing backward and forward spectra is not permitted. "
                                    "Please correct the SpectrumList property.")
         self._back_scattering = all_back
 
 #----------------------------------------------------------------------------------------
 
-    def _raise_error_if_non_valid_period_scattering(self, nperiods, back_scattering):
+    def _raise_error_if_non_valid_period_scattering(self, run_str,  back_scattering):
         """
         Checks that the input is valid for the number of periods in the data with the current scattering
         2 Period - Only Forward Scattering
         3 Period - Only Back Scattering
         6 Period - Both Forward and Back
         """
-        logger.warning("PERIOD/SCATTERING")
-        logger.warning(str(nperiods))
+        rfi_alg = self.createChildAlgorithm(name='RawFileInfo', enableLogging=False)
+        rfi_alg.setProperty('Filename', run_str)
+        rfi_alg.execute()
+        nperiods = rfi_alg.getProperty('PeriodCount').value
+
         if nperiods == 2:
-            logger.warning("2 PERIODS")
             if back_scattering:
                 raise RuntimeError("2 period data can only be used for forward scattering spectra")
 
         if nperiods == 3:
-            logger.warning("3 PERIODS")
             if not back_scattering:
                 raise RuntimeError("3 period data can only be used for back scattering spectra")
 
@@ -320,12 +320,12 @@ class LoadVesuvio(LoadEmptyVesuvio):
         except ValueError:
             run_str = runs[0]
 
+        self._raise_error_if_non_valid_period_scattering(run_str, self._back_scattering)
         all_spectra = [item for sublist in self._spectra for item in sublist]
         ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
                    EnableLogging=_LOGGING_)
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
-        self._raise_error_if_non_valid_period_scattering(self._nperiods, self._back_scattering)
         first_ws = raw_group[0]
         foil_out = WorkspaceFactory.create(first_ws)
         x_values = first_ws.readX(0)
@@ -514,6 +514,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self.summed_ws, self.summed_mon = "__loadraw_evs", "__loadraw_evs_monitors"
         for index, run in enumerate(runs):
             run = inst_prefix + str(run)
+            self._raise_error_if_non_valid_period_scattering(run, self._back_scattering)
             if index == 0:
                 out_name, out_mon = SUMMED_WS, SUMMED_MON
             else:
