@@ -74,7 +74,7 @@ void EventProcessor::addEvent(size_t x, size_t y, double tof) {
   // check if event is in valid range
 
   // frame boundary
-  double frameTime = (m_frames * m_period) * 1e-6; // in seconds
+  double frameTime = (static_cast<double>(m_frames) * m_period) * 1e-6; // in seconds
   if ((frameTime < m_timeMinBoundary) || (frameTime > m_timeMaxBoundary))
     return;
 
@@ -187,7 +187,7 @@ void EntryHeader::writeChecksum() {
 
   std::ostringstream buffer;
 
-  buffer << std::oct << std::setfill('0') << std::setw(sizeof(Checksum) - 1)
+  buffer << std::oct << std::setfill('0') << std::setw(static_cast<int>(sizeof(Checksum)) - 1)
          << value;
   std::string string = buffer.str();
 
@@ -197,7 +197,7 @@ void EntryHeader::writeChecksum() {
 void EntryHeader::writeFileSize(int64_t value) {
   std::ostringstream buffer;
 
-  buffer << std::oct << std::setfill('0') << std::setw(sizeof(FileSize) - 1)
+  buffer << std::oct << std::setfill('0') << std::setw(static_cast<int>(sizeof(FileSize)) - 1)
          << value;
   std::string string = buffer.str();
 
