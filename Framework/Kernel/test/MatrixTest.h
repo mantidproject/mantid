@@ -751,6 +751,7 @@ public:
     mat.setMem(5, 5);
     double x = 0;
     TS_ASSERT_THROWS_NOTHING(x = mat[4][4]);
+    (void)x; // fixes compiler warning
   }
 
   void testSize() {
