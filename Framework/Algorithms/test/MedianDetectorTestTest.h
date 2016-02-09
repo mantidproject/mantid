@@ -202,7 +202,7 @@ public:
 
     for (int j = 0; j < Nhist; ++j) {
       m_2DWS->setX(j, x);
-      boost::shared_ptr<MantidVec> spectrum(new MantidVec);
+      boost::shared_ptr<MantidVec> spectrum = boost::make_shared<MantidVec>();
       // the spectravalues will be multiples of the random numbers above
       for (int l = 0; l < specLength - 1; ++l) {
         spectrum->push_back(j * yArray[l]);

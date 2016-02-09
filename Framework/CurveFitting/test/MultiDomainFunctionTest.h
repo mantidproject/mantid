@@ -159,7 +159,8 @@ public:
     ii[1] = 2;
     multi->setDomainIndices(2, ii);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(multi, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 6);
 

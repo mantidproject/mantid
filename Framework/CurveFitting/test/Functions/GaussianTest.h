@@ -202,7 +202,8 @@ public:
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fnWithBk, domain, values);
     // TS_ASSERT_EQUALS(costFun->nParams(),3);
 

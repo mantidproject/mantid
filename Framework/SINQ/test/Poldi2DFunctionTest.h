@@ -20,14 +20,16 @@ public:
   static void destroySuite(Poldi2DFunctionTest *suite) { delete suite; }
 
   void testTypes() {
-    boost::shared_ptr<Poldi2DFunction> function2D(new Poldi2DFunction);
+    boost::shared_ptr<Poldi2DFunction> function2D =
+        boost::make_shared<Poldi2DFunction>();
 
     TS_ASSERT(boost::dynamic_pointer_cast<CompositeFunction>(function2D));
     TS_ASSERT(boost::dynamic_pointer_cast<IFunction1DSpectrum>(function2D));
   }
 
   void testSummation() {
-    boost::shared_ptr<Poldi2DFunction> function2D(new Poldi2DFunction);
+    boost::shared_ptr<Poldi2DFunction> function2D =
+        boost::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new SummingFunction);
@@ -55,7 +57,8 @@ public:
   }
 
   void testIterationBehavior() {
-    boost::shared_ptr<Poldi2DFunction> function2D(new Poldi2DFunction);
+    boost::shared_ptr<Poldi2DFunction> function2D =
+        boost::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new SummingFunction);
@@ -87,7 +90,8 @@ public:
   }
 
   void testPoldiFunction1D() {
-    boost::shared_ptr<Poldi2DFunction> function2D(new Poldi2DFunction);
+    boost::shared_ptr<Poldi2DFunction> function2D =
+        boost::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new TestPoldiFunction1D);

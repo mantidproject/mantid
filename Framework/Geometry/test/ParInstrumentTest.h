@@ -42,9 +42,10 @@ public:
     TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(),
                                 boost::shared_ptr<ParameterMap>()),
                      std::invalid_argument);
-    // boost::shared_ptr<Instrument> instr(new Instrument);
+    // boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
     // TS_ASSERT_THROWS(Instrument(instr,boost::shared_ptr<ParameterMap>()),std::invalid_argument);
-    boost::shared_ptr<ParameterMap> paramMap(new ParameterMap);
+    boost::shared_ptr<ParameterMap> paramMap =
+        boost::make_shared<ParameterMap>();
     TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(), paramMap),
                      std::invalid_argument);
   }
