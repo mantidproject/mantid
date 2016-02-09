@@ -153,23 +153,35 @@ Here is a typical use case to calculate UB matrix after initial setup.
  
  4. User views all the measurements
 
- 5. User finds out the measurement with the strongest reflection and push button use
+  1. User finds out the measurement with the strongest reflection and push button use
 
- 6. GUI shifts to tab *Calculate UB* automatically
+  2. Alternatively, user can use the survey result to find out the Pt. with the maximum counts of the scan
 
- 7. User pushes button *Find Peak* with checking *Load HKL from file*
+ 5. GUI shifts to tab *Calculate UB* automatically
 
- 8. GUI finds the peak center and load HKL
+ 6. User pushes button *Find Peak* with checking *Load HKL from file*
 
- 9. User pushes button *Add peak* to add the peak to table
+ 7. GUI finds the peak center and load HKL
 
- 10. User repeats step 2 to 9 to add other peaks
+ 8. User pushes button *Add peak* to add the peak to table
 
- 11. User select the peaks that are linearly independent and pushes *Calcualte UB*
+ 9. User repeats step 2 to 9 to add other peaks
 
- 12. GUI calculates UB matrix and show the result
+ 10. User select the peaks that are linearly independent and pushes *Calcualte UB*
 
- 13. User may push *Index peak* to use the calculated UB matrix to index peaks in the table to check UB matrix.
+ 11. GUI calculates UB matrix and show the result
+
+ 12. User may push *Index peak* to use the calculated UB matrix to index peaks in the table to check UB matrix;
+
+ 13. User may refine the UB matrix and thus lattice parameters
+      
+   1. user adds more peaks to the UB peak table; 
+         
+   2. user selects at least 3 non-degenerate peaks;
+
+   3. user clicks button *Refine*;
+
+   4. application refines UB matrix and outputs the refined UB matrix, refined lattice parameters and their error.
  
 
 Workflow to merge measurements in scan

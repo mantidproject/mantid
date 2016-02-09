@@ -80,9 +80,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.show_scan_pt_list)
         self.connect(self.ui.pushButton_usePt4UB, QtCore.SIGNAL('clicked()'),
                      self.do_add_peak_to_find)
-        # TODO/NOW/1st: enable
-        #self.connect(self.ui.pushButton_addPeakNoIndex, QtCore.SIGNAL('clicked()'),
-        #             self.do_add_peak_no_index)
+        self.connect(self.ui.pushButton_addPeakNoIndex, QtCore.SIGNAL('clicked()'),
+                     self.do_add_peak_no_index)
 
         # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
@@ -178,11 +177,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.pushButton_browseLocalDataDir.setEnabled(True)
 
         # QSettings
-        # TODO/NOW/1st: call load_settings()
-        settings = QtCore.QSettings()
-        spice_dir = settings.value('local_spice_dir', '')
-        self.ui.lineEdit_localSpiceDir.setText(spice_dir)
-        # self._save_directory = settings.value("saved_text", '')
+        self.load_settings()
 
         return
 
@@ -219,7 +214,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # Check whether there is any scan merged and selected
-        ret_list = self.ui.tableWidget_mergeScans.get_selected_rows(status='Done')
+        ret_list = self.ui.tableWidget_mergeScans.get_rows_by_state('Done')
         if len(ret_list) == 0:
             self.pop_one_button_dialog('No scan is selected for integration!')
             return
@@ -307,9 +302,61 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_refine_ub(self):
         """
-
+        Refine UB matrix
         :return:
         """
+        # Collecting all peaks that will be used to refine UB matrix
+        row_index_list = self.ui.tableWidget_peaksCalUB.get_selected_rows(True)
+        if len(row_index_list) < 3:
+            err_msg = 'At least 3 peaks must be selected to refine UB matrix.' \
+                      'Now it is only %d selected.' % len(row_index_list)
+            self.pop_one_button_dialog(err_msg)
+            return
+
+        # loop over all peaks for peak information
+        peak_info_list = list()
+        status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
+        for i_row in row_index_list:
+            scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
+            status, peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
+            if status is False:
+                self.pop_one_button_dialog(peak_info)
+                return
+            assert isinstance(peak_info, r4c.PeakInfo)
+            peak_info_list.append(peak_info)
+        # END-FOR
+
+        # Refine UB matrix
+        try:
+            self._myControl.refine_ub_matrix(peak_info_list)
+        except AssertionError as error:
+            self.pop_one_button_dialog(str(error))
+            return
+
+        # Deal with result
+        ub_matrix, lattice, lattice_error = self._myControl.get_refined_ub_matrix()
+        # ub matrix
+        self.ui.tableWidget_ubMatrix.set_from_matrix(ub_matrix)
+
+        # lattice parameter
+        assert isinstance(lattice, list)
+        assert len(lattice) == 6
+        self.ui.lineEdit_aUnitCell.setText('%.5f' % lattice[0])
+        self.ui.lineEdit_bUnitCell.setText('%.5f' % lattice[1])
+        self.ui.lineEdit_cUnitCell.setText('%.5f' % lattice[2])
+        self.ui.lineEdit_alphaUnitCell.setText('%.5f' % lattice[3])
+        self.ui.lineEdit_betaUnitCell.setText('%.5f' % lattice[4])
+        self.ui.lineEdit_gammaUnitCell.setText('%.5f' % lattice[5])
+
+        assert isinstance(lattice_error, list)
+        assert len(lattice_error) == 6
+        self.ui.lineEdit_aError.setText('%.5f' % lattice_error[0])
+        self.ui.lineEdit_bError.setText('%.5f' % lattice_error[1])
+        self.ui.lineEdit_cError.setText('%.5f' % lattice_error[2])
+        self.ui.lineEdit_alphaError.setText('%.5f' % lattice_error[3])
+        self.ui.lineEdit_betaError.setText('%.5f' % lattice_error[4])
+        self.ui.lineEdit_gammaError.setText('%.5f' % lattice_error[5])
+
         # TODO/NOW/1st
         # call mantid.FindUBUsingIndexedPeaks()
         # refer to Calculate UB matrix to build PeakWorkspace
@@ -353,6 +400,34 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_add_peak_no_index(self):
+        """
+        Purpose: add a peak from 'View Raw Data' tab to the UB peak table
+        without indexing it
+        :return:
+        """
+        # Get exp, scan and Pt information
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_run,
+                                                        self.ui.lineEdit_rawDataPtNo])
+        if not status:
+            err_msg = ret_obj
+            self.pop_one_button_dialog(err_msg)
+            return
+        else:
+            int_list = ret_obj
+            exp_no, scan_no, pt_no = ret_obj
+
+        # Switch tab
+        self.ui.tabWidget.setCurrentIndex(2)
+
+        # Find and index peak
+        self._myControl.find_peak(exp_no, scan_no, pt_no)
+        peak_info = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
+        self.set_ub_peak_table(peak_info)
+
+        return
+
     def do_add_ub_peak(self):
         """ Add current to ub peaks
         :return:
@@ -363,6 +438,7 @@ class MainWindow(QtGui.QMainWindow):
                                                          self.ui.lineEdit_ptNumber])
         if status is False:
             self.pop_one_button_dialog(int_list)
+            return
         exp_no, scan_no, pt_no = int_list
 
         # Get HKL from GUI
@@ -518,7 +594,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # Deal with result
         if status is True:
-            self._show_ub_matrix(ub_matrix)
+            self.ui.tableWidget_ubMatrix.set_from_matrix(ub_matrix)
+
         else:
             err_msg = ub_matrix
             self.pop_one_button_dialog(err_msg)
@@ -878,8 +955,8 @@ class MainWindow(QtGui.QMainWindow):
             group_name = '???'
 
             status, ret_tup = self._myControl.merge_pts_in_scan_v2(exp_no=None, scan_no=scan_no,
-                                                            target_ws_name=out_ws_name,
-                                                            target_frame=frame)
+                                                                   target_ws_name=out_ws_name,
+                                                                   target_frame=frame)
             merge_status = 'Done'
             merged_name = ret_tup[0]
             group_name = ret_tup[1]
@@ -925,8 +1002,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get file name
         file_filter = 'CSV Files (*.csv);;All Files (*.*)'
-        out_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Save scan survey result', self._homeDir,
-                                                              file_filter))
+        out_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Save scan survey result',
+                                                              self._homeDir, file_filter))
 
         # Save file
         self._myControl.save_scan_survey(out_file_name)
@@ -1119,6 +1196,9 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(str(err))
             return
 
+        # clear selection
+        self.ui.tableWidget_surveyTable.select_all_rows(False)
+
         # switch tab
         self.ui.tabWidget.setCurrentIndex(1)
         self.ui.lineEdit_run.setText(str(scan_num))
@@ -1273,33 +1353,69 @@ class MainWindow(QtGui.QMainWindow):
 
     def save_settings(self):
         """
-
+        Save settings (parameter set) upon quiting
         :return:
         """
-        # TODO/NOW/1st - Documents + Finish
-
-        local_spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
-
         settings = QtCore.QSettings()
 
+        # directories
+        local_spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
         settings.setValue("local_spice_dir", local_spice_dir)
+        work_dir = str(self.ui.lineEdit_workDir.text())
+        settings.setValue('work_dir', work_dir)
 
-        """ Candidates
-        lineEdit_workDir, lineEdit_a, lineEdit_alpha, ..., lineEdit_exp,
+        # experiment number
+        exp_num = str(self.ui.lineEdit_exp.text())
+        settings.setValue('exp_number', exp_num)
 
-
-        """
+        # lattice parameters
+        lattice_a = str(self.ui.lineEdit_a.text())
+        settings.setValue('a', lattice_a)
+        lattice_b = str(self.ui.lineEdit_b.text())
+        settings.setValue('b', lattice_b)
+        lattice_c = str(self.ui.lineEdit_c.text())
+        settings.setValue('c', lattice_c)
+        lattice_alpha = str(self.ui.lineEdit_alpha.text())
+        settings.setValue('alpha', lattice_alpha)
+        lattice_beta = str(self.ui.lineEdit_beta.text())
+        settings.setValue('beta', lattice_beta)
+        lattice_gamma = str(self.ui.lineEdit_gamma.text())
+        settings.setValue('gamma', lattice_gamma)
 
         return
 
     def load_settings(self):
         """
-
+        Load QSettings from previous saved file
         :return:
         """
-        print 'I am called!'
-        # settings = QtCore.QSettings()
-        # self.ui.textEdit.setText(settings.value("saved_text"))
+        settings = QtCore.QSettings()
+
+        # directories
+        spice_dir = settings.value('local_spice_dir', '')
+        self.ui.lineEdit_localSpiceDir.setText(spice_dir)
+        work_dir = settings.value('work_dir')
+        self.ui.lineEdit_workDir.setText(work_dir)
+
+        # experiment number
+        exp_num = settings.value('exp_number')
+        self.ui.lineEdit_exp.setText(exp_num)
+
+        # lattice parameters
+        lattice_a = settings.value('a')
+        self.ui.lineEdit_a.setText(lattice_a)
+        lattice_b = settings.value('b')
+        self.ui.lineEdit_a.setText(lattice_b)
+        lattice_c = settings.value('c')
+        self.ui.lineEdit_a.setText(lattice_c)
+        lattice_alpha = settings.value('alpha')
+        self.ui.lineEdit_a.setText(lattice_alpha)
+        lattice_beta = settings.value('beta')
+        self.ui.lineEdit_a.setText(lattice_beta)
+        lattice_gamma = settings.value('gamma')
+        self.ui.lineEdit_a.setText(lattice_gamma)
+
+        return
 
     def _get_lattice_parameters(self):
         """
@@ -1361,16 +1477,5 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.graphicsView.clear_canvas()
         self.ui.graphicsView.add_plot_2d(raw_det_data, x_min=0, x_max=256, y_min=0, y_max=256,
                                          hold_prev_image=False)
-
-        return
-
-    def _show_ub_matrix(self, ubmatrix):
-        """ Show UB matrix
-        :param ubmatrix:
-        :return:
-        """
-        assert ubmatrix.shape == (3, 3)
-
-        self.ui.tableWidget_ubMatrix.set_from_matrix(ubmatrix)
 
         return

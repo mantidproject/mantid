@@ -1327,25 +1327,59 @@ class CWSCDReductionControl(object):
 
         return True, ''
 
-    def refine_ub(self, exp_number, scan_run_list):
+    def refine_ub_matrix(self, peak_info_list):
+        """ Refine UB matrix
+        Requirements: input is a list of PeakInfo objects and there are at least 3
+                        non-degenerate peaks
+        Guarantees: UB matrix is refined.  Refined UB matrix and lattice parameters
+                    with errors are returned
+        :param peak_info_list: list of PeakInfo
+        :return: 2-tuple: (True, (ub matrix, lattice parameters, lattice parameters errors))
+                          (False, error message)
         """
-        :param scan_run_list: list of 2-tuple as scan number and run number
-        :return:
-        """
-        # TODO/NOW/1st
-        FindUBUsingIndexedPeaks(PeaksWorkspace='Temp_UB_Peak', Tolerance=0.5)
+        # Check inputs
+        assert isinstance(peak_info_list, list)
+        assert len(peak_info_list) >= 3
 
-        peak_ws = AnalysisDataService.retrieve('Temp_UB_Peak')
+        # Construct a new peak workspace by combining all single peak
+        ub_peak_ws_name = 'Temp_Refine_UB_Peak'
+        api.CloneWorkspace(InputWorkspace=peak_info_list[0].get_peak_workspace(),
+                           OutputWorkspace=ub_peak_ws_name)
 
-        ol = peak_ws.sample().getOrientedLattice()
+        for i_peak_info in xrange(1, len(peak_info_list)):
+            # Get peak workspace
+            peak_ws = peak_info_list[i_peak_info].get_peak_workspace()
+            assert peak_ws is not None
+            assert peak_ws is not tuple
 
-        """
-        a(), b(), c(), alpha()
-         'errora', 'erroralpha','errorb','errorbeta','errorc','errorgamma',
-          'getUB',
-        """
+            # Combine peak workspace
+            ub_peak_ws = api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws_name,
+                                                    RHSWorkspace=peak_ws,
+                                                    CombineMatchingPeaks=False,
+                                                    OutputWorkspace=ub_peak_ws_name)
+        # END-FOR(i_peak_info)
 
-        return
+        # Calculate UB matrix
+        try:
+            api.FindUBUsingIndexedPeaks(PeaksWorkspace=ub_peak_ws_name, Tolerance=0.5)
+        except RuntimeError as e:
+            return False, 'Unable to refine UB matrix due to %s.' % str(e)
+
+        # Get peak workspace
+        refined_ub_ws = AnalysisDataService.retrieve(ub_peak_ws_name)
+        assert refined_ub_ws is not None
+
+        oriented_lattice = refined_ub_ws.sample().getOrientedLattice()
+
+        refined_ub_matrix = oriented_lattice.getUB()
+        lattice = [oriented_lattice.a(), oriented_lattice.b(),
+                   oriented_lattice.c(), oriented_lattice.alpha(),
+                   oriented_lattice.beta(), oriented_lattice.gamma()]
+        lattice_error = [oriented_lattice.errora(), oriented_lattice.errorb(),
+                         oriented_lattice.errorc(), oriented_lattice.erroralpha(),
+                         oriented_lattice.errorbeta(), oriented_lattice.errorgamma()]
+
+        return True, (refined_ub_matrix, lattice, lattice_error)
 
     def save_scan_survey(self, file_name):
         """

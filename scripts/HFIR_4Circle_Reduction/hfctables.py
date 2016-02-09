@@ -369,6 +369,31 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
+    def get_rows_by_state(self, target_state):
+        """ Get the rows' indexes by status' value (state)
+        Requirements: target_state is a string
+        Guarantees: a list of integers as row indexes are returned for all rows with state as target_state
+        :param target_state:
+        :return:
+        """
+        # Get column index
+        status_col_index = self._myHeaderList.index('Status')
+
+        # Check
+        assert isinstance(target_state, str)
+
+        # Loop around to check
+        return_list = list()
+        num_rows = self.rowCount()
+        for i_row in xrange(num_rows):
+            status_i = self.get_cell_value(i_row, status_col_index)
+            if status_i == target_state:
+                return_list.append(i_row)
+        # END-FOR (i_row)
+
+        return return_list
+
+
     def get_merged_ws_name(self, i_row):
         """
         Get ...
@@ -564,20 +589,20 @@ class ScanSurveyTable(tableBase.NTableWidget):
 
     def get_selected_run_surveyed(self):
         """
-
-        :return:
+        Purpose: Get selected pt number and run number that is set as selected
+        Requirements: there must be one and only one run that is selected
+        Guarantees: a 2-tuple for integer for return as scan number and Pt. number
+        :return: a 2-tuple of integer
         """
-        # TODO/NOW/1st: documents + check
-
+        # get the selected row indexes and check
         row_index_list = self.get_selected_rows(True)
-        assert len(row_index_list) > 0
+        assert len(row_index_list) == 1, 'There must be exactly one run that is selected. Now' \
+                                         'there are %d runs that are selected' % len(row_index_list)
 
+        # get scan and pt
         row_index = row_index_list[0]
         scan_number = self.get_cell_value(row_index, 0)
         pt_number = self.get_cell_value(row_index, 1)
-
-        # clear selection
-        # TODO/NOW/1st - Implement!
 
         return scan_number, pt_number
 

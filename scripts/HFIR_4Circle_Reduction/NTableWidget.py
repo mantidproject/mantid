@@ -83,43 +83,46 @@ class NTableWidget(QtGui.QTableWidget):
 
         return
 
-    def get_selected_rows(self, status=None):
+    def get_selected_rows(self, status=True):
+        """ Get the rows whose status is same as given status
+        Requirements: given status must be a boolean
+        Guarantees: a list of row indexes are constructed for those rows that meet the requirement.
+        :param status:
+        :return: list of row indexes that are selected
         """
+        # check
+        assert isinstance(status, bool)
+        index_status = self._myColumnTypeList.index(self._statusColName)
 
-        :return: list of row numbers that are selected
-        """
-        # TODO/NOW/1st: documentation + check requirements!
-
-        rows_list = list()
-        index_status = self._myColumnTypeList.index('checkbox')
-
+        # loop over all the rows
+        row_index_list = list()
         for i_row in xrange(self.rowCount()):
-            # check selected
-            is_checked = self.get_row_value(i_row)[index_status]
-            # exclude non-selected
-            if is_checked is False:
-                continue
-            # exclude non-matched
-            if status is not None:
-                j_status = self._myHeaderList.index(self._statusColName)
-                this_status = self.get_cell_value(i_row, j_status)
-                if this_status != status:
-                    continue
+            # check status
+            is_checked = self.get_cell_value(i_row, index_status)
+            if is_checked == status:
+                row_index_list.append(i_row)
 
-            rows_list.append(i_row)
-
-        return rows_list
+        return row_index_list
 
     def get_cell_value(self, row_index, col_index):
         """
-
+        Purpose: Get cell value
+        Requirements: row index and column index are integer and within range.
+        Guarantees: the cell value with correct type is returned
         :param row_index:
         :param col_index:
         :return:
         """
-        c_type = self._myColumnTypeList[col_index]
+        # check
+        assert isinstance(row_index, int)
+        assert isinstance(col_index, int)
+        assert 0 <= row_index < self.rowCount()
+        assert 0 <= col_index < self.columnCount()
 
-        if c_type == 'checkbox':
+        # get cell type
+        cell_data_type = self._myColumnTypeList[col_index]
+
+        if cell_data_type == 'checkbox':
             # Check box
             cell_i_j = self.cellWidget(row_index, col_index)
             assert isinstance(cell_i_j, QtGui.QCheckBox)
@@ -131,9 +134,9 @@ class NTableWidget(QtGui.QTableWidget):
             assert isinstance(item_i_j, QtGui.QTableWidgetItem)
 
             return_value = str(item_i_j.text())
-            if c_type == 'int':
+            if cell_data_type == 'int':
                 return_value = int(return_value)
-            elif c_type == 'float':
+            elif cell_data_type == 'float':
                 return_value = float(return_value)
 
         return return_value
@@ -208,6 +211,32 @@ class NTableWidget(QtGui.QTableWidget):
 
         return
 
+    def select_all_rows(self, status):
+        """
+        Purpose: select or deselect all rows in the table if applied
+        Requirements:
+          (1) status/selection column name must be set right;
+          (2) status (input arguments) must be a boolean
+        Guarantees: all rows will be either selected (status is True) or deselected (status is false)
+        :param status:
+        :return: 2-tuple as (True, None) or (False, error message)
+        """
+        # get column  index
+        try:
+            status_col_index = self._myHeaderList.index(self._statusColName)
+        except ValueError as e:
+            # status column name is not properly set up
+            return False, str(e)
+
+        # Loop over all rows. If any row's status is not same as target status, then set it
+        num_rows = self.rowCount()
+        for row_index in xrange(num_rows):
+            if self.get_cell_value(row_index, status_col_index) != status:
+                self.set_value_cell(row_index, status_col_index, status)
+        # END-FOR
+
+        return
+
     def set_check_box(self, row, col, state):
         """ function to add a new select checkbox to a cell in a table row
         won't add a new checkbox if one already exists
@@ -235,12 +264,18 @@ class NTableWidget(QtGui.QTableWidget):
 
     def set_status_column_name(self, name):
         """
-
+        Purpose: if the status column's name is not 'Status' of this table,
+                 then re-set the colun name for the status row
+        Requirements: given name must be a string and in _header
         :param name:
         :return:
         """
-        # TODO/NOW/1st: doc + check
+        # check
+        assert isinstance(name, str), 'Given status column name must be an integer,' \
+                                      'but not %s.' % str(type(name))
+        assert name in self._myHeaderList
 
+        # set value
         self._statusColName = name
 
         return
