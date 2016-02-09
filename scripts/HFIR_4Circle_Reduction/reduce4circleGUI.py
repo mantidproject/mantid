@@ -198,12 +198,10 @@ class MainWindow(QtGui.QMainWindow):
         # NOTE: have to call this because pyqt set column and row to 0 after __init__
         #       thus a 2-step initialization has to been adopted
         self.ui.tableWidget_peaksCalUB.setup()
-
         self.ui.tableWidget_ubMatrix.setup()
         self.ui.tableWidget_ubMergeScan.setup()
         self.ui.tableWidget_surveyTable.setup()
         self.ui.tableWidget_peakIntegration.setup()
-
         self.ui.tableWidget_mergeScans.setup()
 
         return
@@ -283,7 +281,6 @@ class MainWindow(QtGui.QMainWindow):
         adapt_q_bkgd = self.ui.checkBox_adaptQBkgd.isChecked()
         integrate_on_edge = self.ui.checkBox_integrateOnEdge.isChecked()
         is_cylinder = self.ui.checkBox_cylinder.isChecked()
-
 
         # Choose the peaks to be integrated
         row_index_list = self.ui.tableWidget_peakIntegration.get_selected_rows()
@@ -416,15 +413,21 @@ class MainWindow(QtGui.QMainWindow):
             return
         else:
             int_list = ret_obj
-            exp_no, scan_no, pt_no = ret_obj
+            exp_no, scan_no, pt_no = int_list
 
         # Switch tab
         self.ui.tabWidget.setCurrentIndex(2)
 
         # Find and index peak
         self._myControl.find_peak(exp_no, scan_no, pt_no)
-        peak_info = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
-        self.set_ub_peak_table(peak_info)
+        status, ret_obj = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
+        if status is False:
+            err_msg = ret_obj
+            self.pop_one_button_dialog(err_msg)
+            return
+        else:
+            peak_info = ret_obj
+            self.set_ub_peak_table(peak_info)
 
         return
 
@@ -1405,15 +1408,15 @@ class MainWindow(QtGui.QMainWindow):
         lattice_a = settings.value('a')
         self.ui.lineEdit_a.setText(lattice_a)
         lattice_b = settings.value('b')
-        self.ui.lineEdit_a.setText(lattice_b)
+        self.ui.lineEdit_b.setText(lattice_b)
         lattice_c = settings.value('c')
-        self.ui.lineEdit_a.setText(lattice_c)
+        self.ui.lineEdit_c.setText(lattice_c)
         lattice_alpha = settings.value('alpha')
-        self.ui.lineEdit_a.setText(lattice_alpha)
+        self.ui.lineEdit_alpha.setText(lattice_alpha)
         lattice_beta = settings.value('beta')
-        self.ui.lineEdit_a.setText(lattice_beta)
+        self.ui.lineEdit_beta.setText(lattice_beta)
         lattice_gamma = settings.value('gamma')
-        self.ui.lineEdit_a.setText(lattice_gamma)
+        self.ui.lineEdit_gamma.setText(lattice_gamma)
 
         return
 

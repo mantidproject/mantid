@@ -25,7 +25,7 @@ class NTableWidget(QtGui.QTableWidget):
 
         self._myParent = parent
 
-        self._myHeaderList = None
+        self._myColumnNameList = None
         self._myColumnTypeList = None
 
         self._statusColName = 'Status'
@@ -92,7 +92,7 @@ class NTableWidget(QtGui.QTableWidget):
         """
         # check
         assert isinstance(status, bool)
-        index_status = self._myColumnTypeList.index(self._statusColName)
+        index_status = self._myColumnNameList.index(self._statusColName)
 
         # loop over all the rows
         row_index_list = list()
@@ -187,17 +187,17 @@ class NTableWidget(QtGui.QTableWidget):
         num_cols = len(column_tup_list)
 
         # Class variables
-        self._myHeaderList = list()
+        self._myColumnNameList = list()
         self._myColumnTypeList = list()
 
         for c_tup in column_tup_list:
             c_name = c_tup[0]
             c_type = c_tup[1]
-            self._myHeaderList.append(c_name)
+            self._myColumnNameList.append(c_name)
             self._myColumnTypeList.append(c_type)
 
         self.setColumnCount(num_cols)
-        self.setHorizontalHeaderLabels(self._myHeaderList)
+        self.setHorizontalHeaderLabels(self._myColumnNameList)
 
         return
 
@@ -223,7 +223,7 @@ class NTableWidget(QtGui.QTableWidget):
         """
         # get column  index
         try:
-            status_col_index = self._myHeaderList.index(self._statusColName)
+            status_col_index = self._myColumnNameList.index(self._statusColName)
         except ValueError as e:
             # status column name is not properly set up
             return False, str(e)
@@ -245,7 +245,7 @@ class NTableWidget(QtGui.QTableWidget):
         assert isinstance(state, bool)
 
         # Check if cellWidget exists
-        if self.cellWidget(row,col):
+        if self.cellWidget(row, col):
             # existing: just set the value
             self.cellWidget(row, col).setChecked(state)
         else:
@@ -273,7 +273,7 @@ class NTableWidget(QtGui.QTableWidget):
         # check
         assert isinstance(name, str), 'Given status column name must be an integer,' \
                                       'but not %s.' % str(type(name))
-        assert name in self._myHeaderList
+        assert name in self._myColumnNameList
 
         # set value
         self._statusColName = name

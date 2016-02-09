@@ -153,9 +153,8 @@ Here is a typical use case to calculate UB matrix after initial setup.
  
  4. User views all the measurements
 
-  1. User finds out the measurement with the strongest reflection and push button use
-
-  2. Alternatively, user can use the survey result to find out the Pt. with the maximum counts of the scan
+  * User finds out the measurement with the strongest reflection and push button use
+  * Alternatively, user can use the survey result to find out the Pt. with the maximum counts of the scan
 
  5. GUI shifts to tab *Calculate UB* automatically
 

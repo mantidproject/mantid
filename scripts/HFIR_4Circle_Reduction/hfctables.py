@@ -54,7 +54,6 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
 
         return self.get_cell_value(row_index, j_col)
 
-
     def get_scan_number(self, row_index):
         """ Get scan number of the row
         :param row_index:
@@ -70,6 +69,8 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
         :return:
         """
         self.init_setup(Peak_Integration_Table_Setup)
+
+        self._statusColName = 'Selected'
 
         return
 
@@ -292,6 +293,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :return:
         """
         self.init_setup(UB_Peak_Table_Setup)
+        self._statusColName = 'Selected'
 
         return
 
@@ -377,7 +379,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return:
         """
         # Get column index
-        status_col_index = self._myHeaderList.index('Status')
+        status_col_index = self._myColumnNameList.index('Status')
 
         # Check
         assert isinstance(target_state, str)
@@ -580,7 +582,6 @@ class ScanSurveyTable(tableBase.NTableWidget):
         :param parent:
         """
         tableBase.NTableWidget.__init__(self, parent)
-        self.set_status_column_name('Selected')
 
         self._myScanInfoDict = dict()
         self._myScanList = list()
@@ -663,5 +664,6 @@ class ScanSurveyTable(tableBase.NTableWidget):
         :return:
         """
         self.init_setup(ScanSurveyTable.Table_Setup)
+        self.set_status_column_name('Selected')
 
         return

@@ -224,6 +224,9 @@ class CWSCDReductionControl(object):
         # Dictionary to store survey information
         self._surveyDict = dict()
 
+        # Tuple to hold the result of refining UB
+        self._refinedUBTup = None
+
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
 
@@ -516,16 +519,15 @@ class CWSCDReductionControl(object):
         # Collect reduction information: example
         exp_info_ws_name = get_pt_info_ws_name(exp_number, scan_number)
         virtual_instrument_info_table_name = get_virtual_instrument_table_name(exp_number, scan_number, pt_number)
-        api.CollectHB3AExperimentInfo(
-            ExperimentNumber=exp_number,
-            GenerateVirtualInstrument=False,
-            ScanList=[scan_number],
-            PtLists=[-1, pt_number],
-            DataDirectory=self._dataDir,
-            GetFileFromServer=False,
-            Detector2ThetaTolerance=0.01,
-            OutputWorkspace=exp_info_ws_name,
-            DetectorTableWorkspace=virtual_instrument_info_table_name)
+        api.CollectHB3AExperimentInfo(ExperimentNumber=exp_number,
+                                      GenerateVirtualInstrument=False,
+                                      ScanList=[scan_number],
+                                      PtLists=[-1, pt_number],
+                                      DataDirectory=self._dataDir,
+                                      GetFileFromServer=False,
+                                      Detector2ThetaTolerance=0.01,
+                                      OutputWorkspace=exp_info_ws_name,
+                                      DetectorTableWorkspace=virtual_instrument_info_table_name)
 
         # Load XML file to MD
         pt_md_ws_name = get_single_pt_md_name(exp_number, scan_number, pt_number)
@@ -536,6 +538,7 @@ class CWSCDReductionControl(object):
 
         # Find peak in Q-space
         pt_peak_ws_name = get_single_pt_peak_ws_name(exp_number, scan_number, pt_number)
+        print '[DB] Found peaks are output workspace %s.' % pt_peak_ws_name
         api.FindPeaksMD(InputWorkspace=pt_md_ws_name, MaxPeaks=10,
                         DensityThresholdFactor=0.01, OutputWorkspace=pt_peak_ws_name)
         peak_ws = AnalysisDataService.retrieve(pt_peak_ws_name)
@@ -665,7 +668,7 @@ class CWSCDReductionControl(object):
         :param exp_number: experiment number.  if it is None, then use the current exp number
         :param scan_number:
         :param pt_number:
-        :return:
+        :return: 2-tuple as (True, PeakInfo) or (False, string)
         """
         # Check for type
         if exp_number is None:
@@ -1379,6 +1382,10 @@ class CWSCDReductionControl(object):
                          oriented_lattice.errorc(), oriented_lattice.erroralpha(),
                          oriented_lattice.errorbeta(), oriented_lattice.errorgamma()]
 
+        print '[DB-BAT] Refined UB = ', refined_ub_matrix, 'of type', type(refined_ub_matrix)
+
+        self._refinedUBTup = (refined_ub_ws, refined_ub_matrix, lattice, lattice_error)
+
         return True, (refined_ub_matrix, lattice, lattice_error)
 
     def save_scan_survey(self, file_name):
@@ -1398,13 +1405,23 @@ class CWSCDReductionControl(object):
         # Write file
         titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L']
         with open(file_name, 'w') as csvfile:
-            spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            spamwriter.writerow(titles)
+            csv_writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            csv_writer.writerow(titles)
             for counts in self._surveyDict.keys():
-                # FIXME - Need to think of the case that there are 2 scans with same maximum det counts
-                items = list(self._surveyDict[counts])
-                items.insert(0, counts)
-                spamwriter.writerow(items)
+                survey_value = self._surveyDict[counts]
+
+                if isinstance(survey_value, tuple):
+                    # single value mode: create a single element list
+                    survey_value = [survey_value]
+
+                # output
+                for items in survey_value:
+                    # convert tuple to list
+                    items = list(items)
+                    # insert counts as the first element
+                    items.insert(0, counts)
+                    # write to csv
+                    csv_writer.writerow(items)
             # END-FOR
         # END-WITH
 
@@ -1594,13 +1611,18 @@ class CWSCDReductionControl(object):
                                                                     OutputWorkspace='TempTable',
                                                                     RunInfoWorkspace='TempInfo')
                 num_rows = spice_table_ws.rowCount()
+                col_name_list = spice_table_ws.getColumnNames()
+                h_col_index = col_name_list.index('h')
+                k_col_index = col_name_list.index('k')
+                l_col_index = col_name_list.index('l')
+
                 max_count = 0
                 max_row = 0
                 for i_row in xrange(num_rows):
                     det_count = spice_table_ws.cell(i_row, 5)
-                    h = spice_table_ws.cell(i_row, 13)
-                    k = spice_table_ws.cell(i_row, 14)
-                    l = spice_table_ws.cell(i_row, 15)
+                    h = spice_table_ws.cell(i_row, h_col_index)
+                    k = spice_table_ws.cell(i_row, k_col_index)
+                    l = spice_table_ws.cell(i_row, l_col_index)
                     if det_count > max_count:
                         max_count = det_count
                         max_row = i_row
@@ -1614,7 +1636,10 @@ class CWSCDReductionControl(object):
                     counts_dict[max_count] = (scan_number, max_row, h, k, l)
             except RuntimeError as e:
                 print e
-                break
+                return False, str(e)
+            except ValueError as e:
+                return False, 'Unable to locate column h, k, or l. See %s.' % str(e)
+
         # END-FOR (scan_number)
 
         self._surveyDict = counts_dict

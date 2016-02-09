@@ -193,7 +193,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>5</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -2537,6 +2537,13 @@ p, li { white-space: pre-wrap; }
                      </size>
                     </property>
                    </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_clearSurveyTable">
+                    <property name="text">
+                     <string>Clear Table</string>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </item>
