@@ -113,11 +113,6 @@ private:
   /// returns angle for source rotation
   double getAngleForSourceRotation(API::MatrixWorkspace_sptr toConvert,
                                    double thetaOut);
-  template <typename T>
-  boost::optional<T>
-  checkForOptionalDefault(std::string propName,
-                          Mantid::Geometry::Instrument_const_sptr instrument,
-                          std::string idf_name = "") const;
 };
 
 } // namespace Algorithms

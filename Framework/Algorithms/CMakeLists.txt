@@ -300,6 +300,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AverageLogData.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
+    inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
 	inc/MantidAlgorithms/CalculateDIFC.h

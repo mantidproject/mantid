@@ -56,17 +56,17 @@ private:
   void exec();
 
   template <typename T> boost::optional<T> isSet(std::string propName) const;
-
+  /*
   double
   checkForMandatoryDefault(std::string propName,
                            Mantid::Geometry::Instrument_const_sptr instrument,
                            std::string idf_name = "") const;
-
+  
   template <typename T>
   boost::optional<T>
   checkForOptionalDefault(std::string propName,
                           Mantid::Geometry::Instrument_const_sptr instrument,
-                          std::string idf_name = "") const;
+                          std::string idf_name = "") const;*/
 };
 
 } // namespace Algorithms

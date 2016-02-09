@@ -61,12 +61,6 @@ private:
       const OptionalDouble &stitchingStartOverlapQ,
       const OptionalDouble &stitchingEndOverlapQ, const double &wavelengthStep);
 
-  template <typename T>
-  boost::optional<T>
-  checkForOptionalDefault(std::string propName,
-                          Mantid::Geometry::Instrument_const_sptr instrument,
-                          std::string idf_name = "") const;
-
   void init();
   void exec();
 };

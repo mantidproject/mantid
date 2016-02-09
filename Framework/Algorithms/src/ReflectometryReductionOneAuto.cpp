@@ -1,3 +1,4 @@
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/ReflectometryReductionOneAuto.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -253,8 +254,9 @@ void ReflectometryReductionOneAuto::exec() {
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<MantidVec>("Params");
-  auto i0_monitor_index = checkForOptionalDefault<int>(
-      "I0MonitorIndex", instrument, "I0MonitorIndex");
+  auto i0_monitor_index =
+      BoostOptionalToAlgorithmProperty::checkForOptionalDefault<int>(
+          this, "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   std::string processing_commands;
   if (this->getPointerToProperty("ProcessingInstructions")->isDefault()) {
@@ -305,18 +307,28 @@ void ReflectometryReductionOneAuto::exec() {
   }
 
   double wavelength_min =
-      checkForMandatoryDefault("WavelengthMin", instrument, "LambdaMin");
+      BoostOptionalToAlgorithmProperty::checkForMandatoryDefault<double>(
+          this, "WavelengthMin", instrument, "LambdaMin");
   double wavelength_max =
-      checkForMandatoryDefault("WavelengthMax", instrument, "LambdaMax");
+      BoostOptionalToAlgorithmProperty::checkForMandatoryDefault<double>(
+          this, "WavelengthMax", instrument, "LambdaMax");
   auto wavelength_step = isSet<double>("WavelengthStep");
-  double wavelength_back_min = checkForMandatoryDefault(
-      "MonitorBackgroundWavelengthMin", instrument, "MonitorBackgroundMin");
-  double wavelength_back_max = checkForMandatoryDefault(
-      "MonitorBackgroundWavelengthMax", instrument, "MonitorBackgroundMax");
-  double wavelength_integration_min = checkForMandatoryDefault(
-      "MonitorIntegrationWavelengthMin", instrument, "MonitorIntegralMin");
-  double wavelength_integration_max = checkForMandatoryDefault(
-      "MonitorIntegrationWavelengthMax", instrument, "MonitorIntegralMax");
+  double wavelength_back_min =
+      BoostOptionalToAlgorithmProperty::checkForMandatoryDefault<double>(
+          this, "MonitorBackgroundWavelengthMin", instrument,
+          "MonitorBackgroundMin");
+  double wavelength_back_max =
+      BoostOptionalToAlgorithmProperty::checkForMandatoryDefault<double>(
+          this, "MonitorBackgroundWavelengthMax", instrument,
+          "MonitorBackgroundMax");
+  double wavelength_integration_min =
+      BoostOptionalToAlgorithmProperty::checkForMandatoryDefault<double>(
+          this, "MonitorIntegrationWavelengthMin", instrument,
+          "MonitorIntegralMin");
+  double wavelength_integration_max =
+      BoostOptionalToAlgorithmProperty::checkForMandatoryDefault<double>(
+          this, "MonitorIntegrationWavelengthMax", instrument,
+          "MonitorIntegralMax");
 
   auto detector_component_name = isSet<std::string>("DetectorComponentName");
   auto sample_component_name = isSet<std::string>("SampleComponentName");
@@ -489,42 +501,6 @@ ReflectometryReductionOneAuto::isSet(std::string propName) const {
   } else {
     T value = this->getProperty(propName);
     return boost::optional<T>(value);
-  }
-}
-
-double ReflectometryReductionOneAuto::checkForMandatoryDefault(
-    std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
-    std::string idf_name) const {
-  auto algProperty = this->getPointerToProperty(propName);
-  if (algProperty->isDefault()) {
-    auto defaults = instrument->getNumberParameter(idf_name);
-    if (defaults.size() == 0) {
-      throw std::runtime_error("No data could be retrieved from the parameters "
-                               "and argument wasn't provided: " +
-                               propName);
-    }
-    return defaults[0];
-  } else {
-    return boost::lexical_cast<double, std::string>(algProperty->value());
-  }
-}
-
-template <typename T>
-boost::optional<T> ReflectometryReductionOneAuto::checkForOptionalDefault(
-    std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
-    std::string idf_name) const {
-  auto algProperty = this->getPointerToProperty(propName);
-  if (algProperty->isDefault()) {
-    auto defaults = instrument->getNumberParameter(idf_name);
-    if (defaults.size() != 0) {
-      return boost::optional<T>(static_cast<T>(defaults[0]));
-    } else {
-      return boost::optional<T>();
-    }
-  } else {
-    double value =
-        boost::lexical_cast<double, std::string>(algProperty->value());
-    return boost::optional<T>(static_cast<T>(value));
   }
 }
 
