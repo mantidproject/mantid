@@ -166,10 +166,7 @@ void Algorithm::setAlwaysStoreInADS(const bool doStore) {
 void Algorithm::setRethrows(const bool rethrow) { this->m_rethrow = rethrow; }
 
 /// True if the algorithm is running.
-bool Algorithm::isRunning() const {
-  Poco::FastMutex::ScopedLock _lock(m_mutex);
-  return m_running;
-}
+bool Algorithm::isRunning() const { return m_running; }
 
 //---------------------------------------------------------------------------------------------
 /**  Add an observer to a notification
@@ -565,7 +562,6 @@ bool Algorithm::execute() {
   try {
     try {
       if (!isChild()) {
-        Poco::FastMutex::ScopedLock _lock(m_mutex);
         m_running = true;
       }
 
@@ -1496,7 +1492,6 @@ const Poco::AbstractObserver &Algorithm::progressObserver() const {
  * Cancel an algorithm
  */
 void Algorithm::cancel() {
-  Poco::FastMutex::ScopedLock _lock(m_mutex);
   // set myself to be cancelled
   m_cancel = true;
 
@@ -1513,7 +1508,6 @@ void Algorithm::cancel() {
  * and check if the algorithm has requested that it be cancelled.
  */
 void Algorithm::interruption_point() {
-  Poco::FastMutex::ScopedLock _lock(m_mutex);
   // only throw exceptions if the code is not multi threaded otherwise you
   // contravene the OpenMP standard
   // that defines that all loops must complete, and no exception can leave an
