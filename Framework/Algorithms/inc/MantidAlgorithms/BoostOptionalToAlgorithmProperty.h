@@ -1,10 +1,14 @@
 #ifndef MANTID_ALGORITHMS_BOOSTOPTIONALTOALGORITHMPROPERTY_H_
 #define MANTID_ALGORITHMS_BOOSTOPTIONALTOALGORITHMPROPERTY_H_
 
+#include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument.h"
+#include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
+#include <string>
 
-namespace {
-
+namespace Mantid {
+namespace Algorithms {
 template <typename T>
 T checkForMandatoryDefault(Mantid::API::Algorithm *const alg,
                            std::string propName,
@@ -44,7 +48,7 @@ checkForOptionalDefault(Mantid::API::Algorithm *const alg, std::string propName,
     return boost::optional<T>(static_cast<T>(value));
   }
 }
-
-} // namespace
+} // Algorithms
+} // Mantid
 
 #endif // MANTID_ALGORITHMS_BOOSTOPTIONALTOALGORITHMPROPERTY_H_
