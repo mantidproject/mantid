@@ -53,7 +53,7 @@ private:
                                               const std::vector<std::string> &);
   std::vector<double> squareVector(std::vector<double>);
   std::vector<double> cloneVector(const std::vector<double> &);
-  API::MatrixWorkspace_sptr convertInputToElasticQ(API::MatrixWorkspace_sptr &,
+  void convertInputToElasticQ(API::MatrixWorkspace_sptr &,
                                                    const std::string &);
   void calculateEISF(API::ITableWorkspace_sptr &);
   std::string convertBackToShort(const std::string &);

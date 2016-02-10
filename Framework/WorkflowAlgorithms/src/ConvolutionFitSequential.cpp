@@ -185,7 +185,7 @@ void ConvolutionFitSequential::exec() {
 
   // Convert input workspace to get Q axis
   const std::string tempFitWsName = "__convfit_fit_ws";
-  auto tempFitWs = convertInputToElasticQ(inputWs, tempFitWsName);
+  convertInputToElasticQ(inputWs, tempFitWsName);
 
   Progress plotPeakStringProg(this, 0.0, 0.05, specMax - specMin);
   // Construct plotpeak string
@@ -454,15 +454,13 @@ ConvolutionFitSequential::cloneVector(const std::vector<double> &original) {
 }
 
 /**
- * Converts the input workspaces to get the Elastic Q axis
+ * Converts the input workspaces to spectrum axis to ElasticQ and adds it to the
+ * ADS to be used by PlotPeakBylogValue
  * @param inputWs - The MatrixWorkspace to be converted
  * @param wsName - The desired name of the output workspace
- * @return Shared pointer to the converted workspace
  */
-API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
+void ConvolutionFitSequential::convertInputToElasticQ(
     API::MatrixWorkspace_sptr &inputWs, const std::string &wsName) {
-  auto tempFitWs = WorkspaceFactory::Instance().create(
-      "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
   auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
     auto convSpec = createChildAlgorithm("ConvertSpectrumAxis");
@@ -479,16 +477,14 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
       throw std::runtime_error("Input must have axis values of Q");
     }
     auto cloneWs = createChildAlgorithm("CloneWorkspace");
+	cloneWs->setAlwaysStoreInADS(true);
     cloneWs->setProperty("InputWorkspace", inputWs);
     cloneWs->setProperty("OutputWorkspace", wsName);
     cloneWs->executeAsChildAlg();
-    tempFitWs = cloneWs->getProperty("OutputWorkspace");
   } else {
     throw std::runtime_error(
         "Input workspace must have either spectra or numeric axis.");
   }
-
-  return tempFitWs;
 }
 
 /**
