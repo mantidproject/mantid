@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/ComplexVector.h"
 #include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/GSLMatrix.h"
 
 #include "MantidKernel/Matrix.h"
 
@@ -20,10 +21,10 @@ namespace CurveFitting {
 class ComplexMatrix;
 
 // matrix transpose helper
-struct Tr {
-  const ComplexMatrix &matrix;
-  Tr(const ComplexMatrix &m) : matrix(m) {}
-};
+//struct Tr {
+//  const ComplexMatrix &matrix;
+//  Tr(const ComplexMatrix &m) : matrix(m) {}
+//};
 
 // mutrix multiplication helper
 struct ComplexMatrixMult2 {
@@ -34,13 +35,13 @@ struct ComplexMatrixMult2 {
   ComplexMatrixMult2(const ComplexMatrix &m1, const ComplexMatrix &m2)
       : m_1(m1), m_2(m2), tr1(false), tr2(false) {}
 
-  ComplexMatrixMult2(const Tr &m1, const ComplexMatrix &m2)
+  ComplexMatrixMult2(const Tr<ComplexMatrix> &m1, const ComplexMatrix &m2)
       : m_1(m1.matrix), m_2(m2), tr1(true), tr2(false) {}
 
-  ComplexMatrixMult2(const ComplexMatrix &m1, const Tr &m2)
+  ComplexMatrixMult2(const ComplexMatrix &m1, const Tr<ComplexMatrix> &m2)
       : m_1(m1), m_2(m2.matrix), tr1(false), tr2(true) {}
 
-  ComplexMatrixMult2(const Tr &m1, const Tr &m2)
+  ComplexMatrixMult2(const Tr<ComplexMatrix> &m1, const Tr<ComplexMatrix> &m2)
       : m_1(m1.matrix), m_2(m2.matrix), tr1(true), tr2(true) {}
 };
 
@@ -56,7 +57,7 @@ struct ComplexMatrixMult3 {
       : m_1(m1), m_2(mm.m_1), m_3(mm.m_2), tr1(false), tr2(mm.tr1),
         tr3(mm.tr2) {}
 
-  ComplexMatrixMult3(const Tr &m1, const ComplexMatrixMult2 &mm)
+  ComplexMatrixMult3(const Tr<ComplexMatrix> &m1, const ComplexMatrixMult2 &mm)
       : m_1(m1.matrix), m_2(mm.m_1), m_3(mm.m_2), tr1(true), tr2(mm.tr1),
         tr3(mm.tr2) {}
 
@@ -64,7 +65,7 @@ struct ComplexMatrixMult3 {
       : m_1(mm.m_1), m_2(mm.m_2), m_3(m2), tr1(mm.tr1), tr2(mm.tr2),
         tr3(false) {}
 
-  ComplexMatrixMult3(const ComplexMatrixMult2 &mm, const Tr &m2)
+  ComplexMatrixMult3(const ComplexMatrixMult2 &mm, const Tr<ComplexMatrix> &m2)
       : m_1(mm.m_1), m_2(mm.m_2), m_3(m2.matrix), tr1(mm.tr1), tr2(mm.tr2),
         tr3(true) {}
 };
@@ -178,6 +179,8 @@ public:
   ComplexType det();
   /// Calculate the eigensystem of a Hermitian matrix
   void eigenSystemHermitian(GSLVector &eigenValues, ComplexMatrix &eigenVectors);
+
+  Tr<ComplexMatrix> tr() {return Tr<ComplexMatrix>(*this);}
 };
 
 /// Overloaded operator for matrix multiplication
@@ -190,21 +193,21 @@ inline ComplexMatrixMult2 operator*(const ComplexMatrix &m1, const ComplexMatrix
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix transposed
 /// @param m2 :: Second matrix
-inline ComplexMatrixMult2 operator*(const Tr &m1, const ComplexMatrix &m2) {
+inline ComplexMatrixMult2 operator*(const Tr<ComplexMatrix> &m1, const ComplexMatrix &m2) {
   return ComplexMatrixMult2(m1, m2);
 }
 
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix
 /// @param m2 :: Second matrix transposed
-inline ComplexMatrixMult2 operator*(const ComplexMatrix &m1, const Tr &m2) {
+inline ComplexMatrixMult2 operator*(const ComplexMatrix &m1, const Tr<ComplexMatrix> &m2) {
   return ComplexMatrixMult2(m1, m2);
 }
 
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix transposed
 /// @param m2 :: Second matrix transposed
-inline ComplexMatrixMult2 operator*(const Tr &m1, const Tr &m2) {
+inline ComplexMatrixMult2 operator*(const Tr<ComplexMatrix> &m1, const Tr<ComplexMatrix> &m2) {
   return ComplexMatrixMult2(m1, m2);
 }
 
@@ -228,7 +231,7 @@ inline ComplexMatrixMult3 operator*(const ComplexMatrixMult2 &mm, const ComplexM
 /// product of two other matrices.
 /// @param m :: A transposed matrix
 /// @param mm :: Product of two matrices
-inline ComplexMatrixMult3 operator*(const Tr &m, const ComplexMatrixMult2 &mm) {
+inline ComplexMatrixMult3 operator*(const Tr<ComplexMatrix> &m, const ComplexMatrixMult2 &mm) {
   return ComplexMatrixMult3(m, mm);
 }
 
@@ -236,7 +239,7 @@ inline ComplexMatrixMult3 operator*(const Tr &m, const ComplexMatrixMult2 &mm) {
 /// product of two other matrices.
 /// @param mm :: Product of two matrices
 /// @param m :: A transposed matrix
-inline ComplexMatrixMult3 operator*(const ComplexMatrixMult2 &mm, const Tr &m) {
+inline ComplexMatrixMult3 operator*(const ComplexMatrixMult2 &mm, const Tr<ComplexMatrix> &m) {
   return ComplexMatrixMult3(mm, m);
 }
 
@@ -247,7 +250,7 @@ inline std::ostream &operator<<(std::ostream &ostr, const ComplexMatrix &m) {
   for (size_t i = 0; i < m.size1(); ++i) {
     for (size_t j = 0; j < m.size2(); ++j) {
       auto value = m.get(i,j);
-      ostr << std::setw(28) << value.dat[0] << "+" << value.dat[1] << "j ";
+      ostr << std::setw(28) << value.real() << "+" << value.imag() << "j ";
     }
     ostr << std::endl;
   }

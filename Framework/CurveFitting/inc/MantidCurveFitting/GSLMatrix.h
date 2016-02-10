@@ -19,9 +19,10 @@ namespace CurveFitting {
 class GSLMatrix;
 
 // matrix transpose helper
+template<class M>
 struct Tr {
-  const GSLMatrix &matrix;
-  Tr(const GSLMatrix &m) : matrix(m) {}
+  const M &matrix;
+  Tr(const M &m) : matrix(m) {}
 };
 
 // mutrix multiplication helper
@@ -33,13 +34,13 @@ struct GSLMatrixMult2 {
   GSLMatrixMult2(const GSLMatrix &m1, const GSLMatrix &m2)
       : m_1(m1), m_2(m2), tr1(false), tr2(false) {}
 
-  GSLMatrixMult2(const Tr &m1, const GSLMatrix &m2)
+  GSLMatrixMult2(const Tr<GSLMatrix> &m1, const GSLMatrix &m2)
       : m_1(m1.matrix), m_2(m2), tr1(true), tr2(false) {}
 
-  GSLMatrixMult2(const GSLMatrix &m1, const Tr &m2)
+  GSLMatrixMult2(const GSLMatrix &m1, const Tr<GSLMatrix> &m2)
       : m_1(m1), m_2(m2.matrix), tr1(false), tr2(true) {}
 
-  GSLMatrixMult2(const Tr &m1, const Tr &m2)
+  GSLMatrixMult2(const Tr<GSLMatrix> &m1, const Tr<GSLMatrix> &m2)
       : m_1(m1.matrix), m_2(m2.matrix), tr1(true), tr2(true) {}
 };
 
@@ -55,7 +56,7 @@ struct GSLMatrixMult3 {
       : m_1(m1), m_2(mm.m_1), m_3(mm.m_2), tr1(false), tr2(mm.tr1),
         tr3(mm.tr2) {}
 
-  GSLMatrixMult3(const Tr &m1, const GSLMatrixMult2 &mm)
+  GSLMatrixMult3(const Tr<GSLMatrix> &m1, const GSLMatrixMult2 &mm)
       : m_1(m1.matrix), m_2(mm.m_1), m_3(mm.m_2), tr1(true), tr2(mm.tr1),
         tr3(mm.tr2) {}
 
@@ -63,7 +64,7 @@ struct GSLMatrixMult3 {
       : m_1(mm.m_1), m_2(mm.m_2), m_3(m2), tr1(mm.tr1), tr2(mm.tr2),
         tr3(false) {}
 
-  GSLMatrixMult3(const GSLMatrixMult2 &mm, const Tr &m2)
+  GSLMatrixMult3(const GSLMatrixMult2 &mm, const Tr<GSLMatrix> &m2)
       : m_1(mm.m_1), m_2(mm.m_2), m_3(m2.matrix), tr1(mm.tr1), tr2(mm.tr2),
         tr3(true) {}
 };
@@ -177,6 +178,8 @@ public:
   double det();
   /// Calculate the eigensystem of a symmetric matrix
   void eigenSystem(GSLVector &eigenValues, GSLMatrix &eigenVectors);
+
+  Tr<GSLMatrix> tr() {return Tr<GSLMatrix>(*this);}
 };
 
 /// Overloaded operator for matrix multiplication
@@ -189,21 +192,21 @@ inline GSLMatrixMult2 operator*(const GSLMatrix &m1, const GSLMatrix &m2) {
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix transposed
 /// @param m2 :: Second matrix
-inline GSLMatrixMult2 operator*(const Tr &m1, const GSLMatrix &m2) {
+inline GSLMatrixMult2 operator*(const Tr<GSLMatrix> &m1, const GSLMatrix &m2) {
   return GSLMatrixMult2(m1, m2);
 }
 
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix
 /// @param m2 :: Second matrix transposed
-inline GSLMatrixMult2 operator*(const GSLMatrix &m1, const Tr &m2) {
+inline GSLMatrixMult2 operator*(const GSLMatrix &m1, const Tr<GSLMatrix> &m2) {
   return GSLMatrixMult2(m1, m2);
 }
 
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix transposed
 /// @param m2 :: Second matrix transposed
-inline GSLMatrixMult2 operator*(const Tr &m1, const Tr &m2) {
+inline GSLMatrixMult2 operator*(const Tr<GSLMatrix> &m1, const Tr<GSLMatrix> &m2) {
   return GSLMatrixMult2(m1, m2);
 }
 
@@ -227,7 +230,7 @@ inline GSLMatrixMult3 operator*(const GSLMatrixMult2 &mm, const GSLMatrix &m) {
 /// product of two other matrices.
 /// @param m :: A transposed matrix
 /// @param mm :: Product of two matrices
-inline GSLMatrixMult3 operator*(const Tr &m, const GSLMatrixMult2 &mm) {
+inline GSLMatrixMult3 operator*(const Tr<GSLMatrix> &m, const GSLMatrixMult2 &mm) {
   return GSLMatrixMult3(m, mm);
 }
 
@@ -235,7 +238,7 @@ inline GSLMatrixMult3 operator*(const Tr &m, const GSLMatrixMult2 &mm) {
 /// product of two other matrices.
 /// @param mm :: Product of two matrices
 /// @param m :: A transposed matrix
-inline GSLMatrixMult3 operator*(const GSLMatrixMult2 &mm, const Tr &m) {
+inline GSLMatrixMult3 operator*(const GSLMatrixMult2 &mm, const Tr<GSLMatrix> &m) {
   return GSLMatrixMult3(mm, m);
 }
 

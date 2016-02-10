@@ -101,7 +101,7 @@ size_t ComplexMatrix::size2() const { return m_matrix ? m_matrix->size2 : 0; }
 /// @param value :: The new vaule
 void ComplexMatrix::set(size_t i, size_t j, ComplexType value) {
   if (i < m_matrix->size1 && j < m_matrix->size2)
-    gsl_matrix_complex_set(m_matrix, i, j, value);
+    gsl_matrix_complex_set(m_matrix, i, j, {value.real(), value.imag()});
   else {
     throw std::out_of_range("ComplexMatrix indices are out of range.");
   }
@@ -111,8 +111,10 @@ void ComplexMatrix::set(size_t i, size_t j, ComplexType value) {
 /// @param i :: The row
 /// @param j :: The column
 ComplexType ComplexMatrix::get(size_t i, size_t j) const {
-  if (i < m_matrix->size1 && j < m_matrix->size2)
-    return gsl_matrix_complex_get(m_matrix, i, j);
+  if (i < m_matrix->size1 && j < m_matrix->size2){
+    auto value = gsl_matrix_complex_get(m_matrix, i, j);
+    return ComplexType(GSL_REAL(value), GSL_IMAG(value));
+  }
   throw std::out_of_range("ComplexMatrix indices are out of range.");
 }
 
@@ -142,7 +144,7 @@ ComplexMatrix &ComplexMatrix::operator+=(const ComplexMatrix &M) {
 /// add a constant to this matrix
 /// @param d :: A number
 ComplexMatrix &ComplexMatrix::operator+=(const ComplexType &d) {
-  gsl_matrix_complex_add_constant(m_matrix, d);
+  gsl_matrix_complex_add_constant(m_matrix, {d.real(), d.imag()});
   return *this;
 }
 /// subtract a matrix from this
@@ -154,7 +156,7 @@ ComplexMatrix &ComplexMatrix::operator-=(const ComplexMatrix &M) {
 /// multiply this matrix by a number
 /// @param d :: A number
 ComplexMatrix &ComplexMatrix::operator*=(const ComplexType &d) {
-  gsl_matrix_complex_scale(m_matrix, d);
+  gsl_matrix_complex_scale(m_matrix, {d.real(), d.imag()});
   return *this;
 }
 
@@ -248,9 +250,9 @@ ComplexType ComplexMatrix::det() {
   ComplexMatrix LU(*this);
   gsl_permutation *p = gsl_permutation_alloc(n);
   gsl_linalg_complex_LU_decomp(LU.gsl(), p, &s);
-  ComplexType res = gsl_linalg_complex_LU_det(LU.gsl(), s);
+  auto res = gsl_linalg_complex_LU_det(LU.gsl(), s);
   gsl_permutation_free(p);
-  return res;
+  return ComplexType(GSL_REAL(res), GSL_IMAG(res));
 }
 
 /// Calculate the eigensystem of a Hermitian matrix

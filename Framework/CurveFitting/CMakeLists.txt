@@ -53,6 +53,7 @@ set ( SRC_FILES
 	src/Functions/ComptonProfile.cpp
 	src/Functions/ComptonScatteringCountRate.cpp
 	src/Functions/Convolution.cpp
+	src/Functions/CrystalElectricField.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
 	src/Functions/DiffRotDiscreteCircle.cpp
@@ -179,6 +180,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/ComptonProfile.h
 	inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/Functions/Convolution.h
+	inc/MantidCurveFitting/Functions/CrystalElectricField.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h
 	inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h

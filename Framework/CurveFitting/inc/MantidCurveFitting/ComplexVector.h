@@ -6,11 +6,12 @@
 
 #include <ostream>
 #include <vector>
+#include <complex>
 
 namespace Mantid {
 namespace CurveFitting {
 
-typedef gsl_complex ComplexType;
+typedef std::complex<double> ComplexType;
 
 /**
 A wrapper around gsl_vector.

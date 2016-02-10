@@ -68,7 +68,7 @@ size_t ComplexVector::size() const { return m_vector->size; }
 /// @param value :: The new value
 void ComplexVector::set(size_t i, const ComplexType &value) {
   if (i < m_vector->size) {
-    gsl_vector_complex_set(m_vector, i, value);
+    gsl_vector_complex_set(m_vector, i, {value.real(), value.imag()});
 
   } else {
     std::stringstream errmsg;
@@ -81,7 +81,8 @@ void ComplexVector::set(size_t i, const ComplexType &value) {
 /// @param i :: The element index
 ComplexType ComplexVector::get(size_t i) const {
   if (i < m_vector->size) {
-    return gsl_vector_complex_get(m_vector, i);
+    auto value = gsl_vector_complex_get(m_vector, i);
+    return ComplexType(GSL_REAL(value), GSL_IMAG(value));
   }
 
   std::stringstream errmsg;
@@ -116,7 +117,7 @@ ComplexVector &ComplexVector::operator-=(const ComplexVector &v) {
 /// Multiply by a number
 /// @param d :: The number
 ComplexVector &ComplexVector::operator*=(const ComplexType d) {
-  gsl_vector_complex_scale(gsl(), d);
+  gsl_vector_complex_scale(gsl(), {d.real(), d.imag()});
   return *this;
 }
 
@@ -127,7 +128,7 @@ std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {
   ostr << std::scientific << std::setprecision(6);
   for (size_t j = 0; j < v.size(); ++j) {
     auto value = v.get(j);
-    ostr << std::setw(28) << value.dat[0] << "+" << value.dat[1] << "j";
+    ostr << std::setw(28) << value.real() << "+" << value.imag() << "j";
   }
   ostr.flags(fflags);
   return ostr;

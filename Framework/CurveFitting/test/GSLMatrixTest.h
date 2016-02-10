@@ -25,7 +25,7 @@ public:
     GSLMatrix m1(2, 2);
     GSLMatrix m2(2, 2);
 
-    GSLMatrixMult2 mult2 = Tr(m1) * m2;
+    GSLMatrixMult2 mult2 = m1.tr() * m2;
 
     TS_ASSERT_EQUALS(mult2.tr1, true);
     TS_ASSERT_EQUALS(mult2.tr2, false);
@@ -37,7 +37,7 @@ public:
     GSLMatrix m1(2, 2);
     GSLMatrix m2(2, 2);
 
-    GSLMatrixMult2 mult2 = m1 * Tr(m2);
+    GSLMatrixMult2 mult2 = m1 * m2.tr();
 
     TS_ASSERT_EQUALS(mult2.tr1, false);
     TS_ASSERT_EQUALS(mult2.tr2, true);
@@ -49,7 +49,7 @@ public:
     GSLMatrix m1(2, 2);
     GSLMatrix m2(2, 2);
 
-    GSLMatrixMult2 mult2 = Tr(m1) * Tr(m2);
+    GSLMatrixMult2 mult2 = m1.tr() * m2.tr();
 
     TS_ASSERT_EQUALS(mult2.tr1, true);
     TS_ASSERT_EQUALS(mult2.tr2, true);
@@ -78,21 +78,21 @@ public:
     TS_ASSERT_EQUALS(m3.get(1, 0), 43.);
     TS_ASSERT_EQUALS(m3.get(1, 1), 50.);
 
-    m3 = Tr(m1) * m2;
+    m3 = m1.tr() * m2;
 
     TS_ASSERT_EQUALS(m3.get(0, 0), 26.);
     TS_ASSERT_EQUALS(m3.get(0, 1), 30.);
     TS_ASSERT_EQUALS(m3.get(1, 0), 38.);
     TS_ASSERT_EQUALS(m3.get(1, 1), 44.);
 
-    m3 = m1 * Tr(m2);
+    m3 = m1 * m2.tr();
 
     TS_ASSERT_EQUALS(m3.get(0, 0), 17.);
     TS_ASSERT_EQUALS(m3.get(0, 1), 23.);
     TS_ASSERT_EQUALS(m3.get(1, 0), 39.);
     TS_ASSERT_EQUALS(m3.get(1, 1), 53.);
 
-    m3 = Tr(m1) * Tr(m2);
+    m3 = m1.tr() * m2.tr();
 
     TS_ASSERT_EQUALS(m3.get(0, 0), 23.);
     TS_ASSERT_EQUALS(m3.get(0, 1), 31.);
@@ -119,7 +119,7 @@ public:
 
     GSLMatrix m;
 
-    m = Tr(m1) * m2 * m3;
+    m = m1.tr() * m2 * m3;
 
     TS_ASSERT_EQUALS(m.size1(), 2);
     TS_ASSERT_EQUALS(m.size2(), 2);
@@ -239,7 +239,7 @@ public:
     TS_ASSERT_EQUALS(Q.size1(), n);
     TS_ASSERT_EQUALS(Q.size2(), n);
     {
-      GSLMatrix D = Tr(Q) * m * Q;
+      GSLMatrix D = Q.tr() * m * Q;
       double trace_m = 0.0;
       double trace_D = 0.0;
       double det = 1.0;
@@ -253,7 +253,7 @@ public:
       TS_ASSERT_DELTA(det, m.det(), 1e-10);
     }
     {
-      GSLMatrix D = Tr(Q) * Q;
+      GSLMatrix D = Q.tr() * Q;
       for (size_t i = 0; i < n; ++i) {
         TS_ASSERT_DELTA(D.get(i, i), 1.0, 1e-10);
       }
