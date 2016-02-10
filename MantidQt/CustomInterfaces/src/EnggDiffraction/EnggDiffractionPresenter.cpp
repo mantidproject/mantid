@@ -1264,7 +1264,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
         for (size_t bidx = 0; bidx < banks.size(); bidx++) {
           if (banks[bidx]) {
             bankIDs.push_back(bidx + 1);
-            specs.push_back("");
+            specs.emplace_back("");
             effectiveFilenames = outputFocusFilenames(runNo, banks);
           }
         }

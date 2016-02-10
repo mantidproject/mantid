@@ -63,11 +63,8 @@ void SmoothNeighbours::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Flat");
-  propOptions.push_back("Linear");
-  propOptions.push_back("Parabolic");
-  propOptions.push_back("Gaussian");
+  std::vector<std::string> propOptions{"Flat", "Linear", "Parabolic",
+                                       "Gaussian"};
   declareProperty("WeightedSum", "Flat",
                   boost::make_shared<StringListValidator>(propOptions),
                   "What sort of Weighting scheme to use?\n"
@@ -130,9 +127,7 @@ void SmoothNeighbours::init() {
   // -- Non-uniform properties
   // ----------------------------------------------------------------------
 
-  std::vector<std::string> radiusPropOptions;
-  radiusPropOptions.push_back("Meters");
-  radiusPropOptions.push_back("NumberOfPixels");
+  std::vector<std::string> radiusPropOptions{"Meters", "NumberOfPixels"};
   declareProperty(
       "RadiusUnits", "Meters",
       boost::make_shared<StringListValidator>(radiusPropOptions),

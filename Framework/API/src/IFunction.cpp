@@ -1041,7 +1041,7 @@ void IFunction::setAttribute(const std::string &name,
 */
 void IFunction::declareAttribute(
     const std::string &name, const API::IFunction::Attribute &defaultValue) {
-  m_attrs.insert(std::make_pair(name, defaultValue));
+  m_attrs.emplace(name, defaultValue);
 }
 
 /// Initialize the function. Calls declareAttributes & declareParameters

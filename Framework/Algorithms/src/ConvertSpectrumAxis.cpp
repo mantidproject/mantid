@@ -40,16 +40,16 @@ void ConvertSpectrumAxis::init() {
       "The name to use for the output workspace.");
   std::vector<std::string> targetOptions =
       Mantid::Kernel::UnitFactory::Instance().getKeys();
-  targetOptions.push_back("theta");
-  targetOptions.push_back("signed_theta");
+  targetOptions.emplace_back("theta");
+  targetOptions.emplace_back("signed_theta");
   declareProperty("Target", "",
                   boost::make_shared<StringListValidator>(targetOptions),
                   "The unit to which the spectrum axis should be converted. "
                   "This can be either \"theta\" (for <math>\\theta</math> "
                   "degrees), or any of the IDs known to the [[Unit Factory]].");
   std::vector<std::string> eModeOptions;
-  eModeOptions.push_back("Direct");
-  eModeOptions.push_back("Indirect");
+  eModeOptions.emplace_back("Direct");
+  eModeOptions.emplace_back("Indirect");
   declareProperty("EMode", "Direct",
                   boost::make_shared<StringListValidator>(eModeOptions),
                   "Some unit conversions require this value to be set "
@@ -116,7 +116,7 @@ void ConvertSpectrumAxis::exec() {
       toUnit->fromTOF(xval, emptyVector, l1val, l2, twoTheta, emode, efixed,
                       delta);
       double value = (xval.front() + xval.back()) / 2;
-      indexMap.insert(std::make_pair(value, i));
+      indexMap.emplace(value, i);
     }
   } else {
     // Set up binding to memeber funtion. Avoids condition as part of loop over
@@ -135,7 +135,7 @@ void ConvertSpectrumAxis::exec() {
       try {
         IDetector_const_sptr det = inputWS->getDetector(i);
         // Invoke relevant member function.
-        indexMap.insert(std::make_pair(thetaFunction(det) * 180.0 / M_PI, i));
+        indexMap.emplace(thetaFunction(det) * 180.0 / M_PI, i);
       } catch (Exception::NotFoundError &) {
         if (!warningGiven)
           g_log.warning("The instrument definition is incomplete - spectra "

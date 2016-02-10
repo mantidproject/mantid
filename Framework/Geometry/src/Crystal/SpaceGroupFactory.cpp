@@ -438,9 +438,8 @@ void SpaceGroupFactoryImpl::subscribe(
     throw std::runtime_error("Cannot register null-generator.");
   }
 
-  m_numberMap.insert(
-      std::make_pair(generator->getNumber(), generator->getHMSymbol()));
-  m_generatorMap.insert(std::make_pair(generator->getHMSymbol(), generator));
+  m_numberMap.emplace(generator->getNumber(), generator->getHMSymbol());
+  m_generatorMap.emplace(generator->getHMSymbol(), generator);
 
   // Clear the point group map
   m_pointGroupMap.clear();

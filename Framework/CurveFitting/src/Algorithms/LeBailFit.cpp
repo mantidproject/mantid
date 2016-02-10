@@ -129,18 +129,14 @@ void LeBailFit::init() {
       "Region of data (TOF) for LeBail fit.  Default is whole range. ");
 
   // Functionality: Fit/Calculation/Background
-  std::vector<std::string> functions;
-  functions.push_back("LeBailFit");
-  functions.push_back("Calculation");
-  functions.push_back("MonteCarlo");
-  functions.push_back("RefineBackground");
+  std::vector<std::string> functions{"LeBailFit", "Calculation", "MonteCarlo",
+                                     "RefineBackground"};
   auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
   this->declareProperty("Function", "LeBailFit", validator, "Functionality");
 
   // Peak type
-  vector<string> peaktypes;
-  peaktypes.push_back("ThermalNeutronBk2BkExpConvPVoigt");
-  peaktypes.push_back("NeutronBk2BkExpConvPVoigt");
+  vector<string> peaktypes{"ThermalNeutronBk2BkExpConvPVoigt",
+                           "NeutronBk2BkExpConvPVoigt"};
   auto peaktypevalidator = boost::make_shared<StringListValidator>(peaktypes);
   declareProperty("PeakType", "ThermalNeutronBk2BkExpConvPVoigt",
                   peaktypevalidator, "Peak profile type.");
@@ -148,10 +144,8 @@ void LeBailFit::init() {
   /*------------------------  Background Related Properties
    * ---------------------------------*/
   // About background:  Background type, input (table workspace or array)
-  std::vector<std::string> bkgdtype;
-  bkgdtype.push_back("Polynomial");
-  bkgdtype.push_back("Chebyshev");
-  bkgdtype.push_back("FullprofPolynomial");
+  std::vector<std::string> bkgdtype{"Polynomial", "Chebyshev",
+                                    "FullprofPolynomial"};
   auto bkgdvalidator =
       boost::make_shared<Kernel::StringListValidator>(bkgdtype);
   declareProperty("BackgroundType", "Polynomial", bkgdvalidator,
@@ -405,7 +399,7 @@ void LeBailFit::processInputBackground() {
     size_t i0 = 0;
     if (m_backgroundType == "FullprofPolynomial") {
       // TODO - Add this special case to Wiki
-      m_backgroundParameterNames.push_back("Bkpos");
+      m_backgroundParameterNames.emplace_back("Bkpos");
       if (m_backgroundParameters[0] < m_startX ||
           m_backgroundParameters[0] > m_endX)
         g_log.warning(
@@ -975,7 +969,7 @@ void LeBailFit::parseInstrumentParametersTable() {
         trow >> dblvalue;
         g_log.debug() << "Value = " << dblvalue << ".\n";
         ;
-        tempdblmap.insert(std::make_pair(colname, dblvalue));
+        tempdblmap.emplace(colname, dblvalue);
       } else {
         // string data
         g_log.debug() << "Col-name = " << colname << ", ";
@@ -986,7 +980,7 @@ void LeBailFit::parseInstrumentParametersTable() {
                        strvalue.end());
 
         g_log.debug() << "Value = " << strvalue << ".\n";
-        tempstrmap.insert(std::make_pair(colname, strvalue));
+        tempstrmap.emplace(colname, strvalue);
       }
     }
 
@@ -1071,9 +1065,8 @@ void LeBailFit::parseInstrumentParametersTable() {
     newparameter.minrecordvalue = newparameter.maxvalue + 1.0;
     newparameter.maxrecordvalue = newparameter.minvalue - 1.0;
 
-    m_funcParameters.insert(std::make_pair(newparameter.name, newparameter));
-    m_origFuncParameters.insert(
-        std::make_pair(newparameter.name, newparameter.curvalue));
+    m_funcParameters.emplace(newparameter.name, newparameter);
+    m_origFuncParameters.emplace(newparameter.name, newparameter.curvalue);
 
     g_log.information() << "Inserting Parameter " << newparameter.name << " = "
                         << newparameter.curvalue << ".\n";
@@ -1158,7 +1151,7 @@ void LeBailFit::parseBraggPeaksParametersTable() {
       trow >> peakheight;
     }
 
-    m_inputPeakInfoVec.push_back(make_pair(hkl, peakheight));
+    m_inputPeakInfoVec.emplace_back(hkl, peakheight);
   } // ENDFOR row
 
   g_log.information() << "Imported HKL TableWorkspace.   Size of Rows = "
@@ -1218,7 +1211,7 @@ void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
     if (parname.size() > 0 && (parname[0] == 'A' || parname == "Bkpos")) {
       // Insert parameter name starting with A or Bkpos (special case for
       // FullprofPolynomial)
-      parmap.insert(std::make_pair(parname, parvalue));
+      parmap.emplace(parname, parvalue);
     }
   }
 
@@ -1811,9 +1804,7 @@ void LeBailFit::setupRandomWalkStrategyFromTable(
       giter->second.push_back(parname);
     } else {
       // First instance in the new group.
-      vector<string> newpars;
-      newpars.push_back(parname);
-      m_MCGroups.insert(make_pair(group, newpars));
+      m_MCGroups.emplace(group, vector<string>{parname});
     }
 
     // 3. Set up MC parameters, A0, A1, non-negative
@@ -1861,7 +1852,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   addParameterToMCMinimize(geomparams, "Zerot");
   addParameterToMCMinimize(geomparams, "Width");
   addParameterToMCMinimize(geomparams, "Tcross");
-  m_MCGroups.insert(make_pair(0, geomparams));
+  m_MCGroups.emplace(0, geomparams);
 
   dboutss << "Geometry parameters: ";
   for (auto &geomparam : geomparams)
@@ -1874,7 +1865,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   addParameterToMCMinimize(alphs, "Alph1");
   addParameterToMCMinimize(alphs, "Alph0t");
   addParameterToMCMinimize(alphs, "Alph1t");
-  m_MCGroups.insert(make_pair(1, alphs));
+  m_MCGroups.emplace(1, alphs);
 
   dboutss << "Alpha parameters";
   for (auto &alph : alphs)
@@ -1887,7 +1878,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   addParameterToMCMinimize(betas, "Beta1");
   addParameterToMCMinimize(betas, "Beta0t");
   addParameterToMCMinimize(betas, "Beta1t");
-  m_MCGroups.insert(make_pair(2, betas));
+  m_MCGroups.emplace(2, betas);
 
   dboutss << "Beta parameters";
   for (auto &beta : betas)
@@ -1899,7 +1890,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   addParameterToMCMinimize(sigs, "Sig0");
   addParameterToMCMinimize(sigs, "Sig1");
   addParameterToMCMinimize(sigs, "Sig2");
-  m_MCGroups.insert(make_pair(3, sigs));
+  m_MCGroups.emplace(3, sigs);
 
   dboutss << "Sig parameters";
   for (auto &sig : sigs)
@@ -2657,7 +2648,7 @@ LeBailFit::convertToDoubleMap(std::map<std::string, Parameter> &inmap) {
   std::map<std::string, double> outmap;
   std::map<std::string, Parameter>::iterator miter;
   for (miter = inmap.begin(); miter != inmap.end(); ++miter) {
-    outmap.insert(std::make_pair(miter->first, miter->second.curvalue));
+    outmap.emplace(miter->first, miter->second.curvalue);
   }
 
   return outmap;

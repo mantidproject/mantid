@@ -761,7 +761,7 @@ literals
     if (mc != literalMap.end())
       mc->second++;
     else
-      literalMap.insert(std::pair<int, int>(V, 1));
+      literalMap.emplace(V, 1);
   }
   std::vector<Acomp>::const_iterator cc;
   for (cc = Comp.begin(); cc != Comp.end(); ++cc)
@@ -785,7 +785,7 @@ literals
     if (mc != literalMap.end())
       mc->second++;
     else
-      literalMap.insert(std::pair<int, int>(*uc, 1));
+      literalMap.emplace(*uc, 1);
   }
   std::vector<Acomp>::const_iterator cc;
   for (cc = Comp.begin(); cc != Comp.end(); ++cc) {

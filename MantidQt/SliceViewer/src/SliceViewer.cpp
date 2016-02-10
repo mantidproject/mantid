@@ -66,6 +66,27 @@ using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
 using MantidQt::API::AlgorithmRunner;
 
+namespace {
+/*
+Checks if the rebinning is in a consistent state, ie if rebin mode is selected and there
+is a rebin workspace or there is no rebin workspace and no rebin mode selected.
+The state is inconsistent if rebin mode is selected and there is no workspace.
+*/
+  bool isRebinInConsistentState(Mantid::API::IMDWorkspace* rebinnedWS, bool useRebinMode) {
+    return (rebinnedWS != nullptr) && useRebinMode;
+  }
+
+/**
+ * Checks if the colors scale range should be automatically set. We should provide auto scaling
+ * on load if the workspaces is either loaded the first time or if it is explictly selected.
+ */
+  bool shouldAutoScaleForNewlySetWorkspace(bool isFirstWorkspaceOpen, bool isAutoScalingOnLoad) {
+    return !isFirstWorkspaceOpen || isAutoScalingOnLoad;
+  }
+
+}
+
+
 namespace MantidQt {
 namespace SliceViewer {
 
@@ -1393,6 +1414,7 @@ void SliceViewer::findRangeSlice() {
     }
     else {
       workspace_used = this->m_overlayWS;
+    }
     }
   }
 

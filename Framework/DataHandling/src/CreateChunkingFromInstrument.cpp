@@ -116,12 +116,7 @@ void CreateChunkingFromInstrument::init() {
                   "as separate groups. "
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
-  vector<string> grouping;
-  grouping.push_back("");
-  grouping.push_back("All");
-  grouping.push_back("Group");
-  grouping.push_back("Column");
-  grouping.push_back("bank");
+  vector<string> grouping{"", "All", "Group", "Column", "bank"};
   declareProperty(
       PARAM_CHUNK_BY, "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "
@@ -401,8 +396,8 @@ void CreateChunkingFromInstrument::exec() {
   } else if (inst->getName().compare("SNAP") == 0 &&
              groupLevel.compare("Group") == 0) {
     groupNames.clear();
-    groupNames.push_back("East");
-    groupNames.push_back("West");
+    groupNames.emplace_back("East");
+    groupNames.emplace_back("West");
   }
 
   // set up a progress bar with the "correct" number of steps

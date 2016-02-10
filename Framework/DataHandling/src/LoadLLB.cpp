@@ -27,7 +27,7 @@ LoadLLB::LoadLLB()
       m_numberOfTubes(0), m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
       m_numberOfHistograms(0), m_wavelength(0.0), m_channelWidth(0.0),
       m_loader() {
-  m_supportedInstruments.push_back("MIBEMOL");
+  m_supportedInstruments.emplace_back("MIBEMOL");
 }
 
 //----------------------------------------------------------------------------------------------

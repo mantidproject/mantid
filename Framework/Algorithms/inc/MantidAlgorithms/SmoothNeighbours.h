@@ -35,15 +35,15 @@ public:
   @return filtered spectra-distance map.
   */
   SpectraDistanceMap apply(SpectraDistanceMap &unfiltered) const {
-    SpectraDistanceMap::iterator it = unfiltered.begin();
     SpectraDistanceMap neighbSpectra;
-    while (it != unfiltered.end()) {
-      // Strip out spectra that don't meet the radius criteria.
-      if (it->second.norm() <= m_cutoff) {
-        neighbSpectra.insert(std::make_pair(it->first, it->second));
-      }
-      it++;
-    }
+    double cutoff{m_cutoff};
+    std::copy_if(
+        unfiltered.begin(), unfiltered.end(),
+        std::inserter(neighbSpectra, neighbSpectra.end()),
+        [cutoff](
+            const std::pair<specid_t, Mantid::Kernel::V3D> &spectraDistance) {
+          return spectraDistance.second.norm() <= cutoff;
+        });
     return neighbSpectra;
   }
 

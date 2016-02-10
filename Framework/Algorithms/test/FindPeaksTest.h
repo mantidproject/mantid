@@ -199,7 +199,7 @@ public:
       string parname = vecnames[i];
       if (parname != "spectrum") {
         double parvalue = tablews->cell<double>(rowindex, i);
-        parammap.insert(make_pair(parname, parvalue));
+        parammap.emplace(parname, parvalue);
         cout << "Add parameter " << parname << " = " << parvalue << "\n";
       }
     }

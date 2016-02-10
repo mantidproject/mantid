@@ -44,8 +44,8 @@ LoadMLZ::LoadMLZ() : API::IFileLoader<Kernel::NexusDescriptor>() {
   m_chopper_ratio = 0;
   m_l1 = 0;
   m_l2 = 0;
-  m_supportedInstruments.push_back("TOFTOF");
-  m_supportedInstruments.push_back("DNS");
+  m_supportedInstruments.emplace_back("TOFTOF");
+  m_supportedInstruments.emplace_back("DNS");
 }
 
 //---------------------------------------------------------------------------

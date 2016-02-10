@@ -58,10 +58,7 @@ void LoadVulcanCalFile::init() {
       new FileProperty("OffsetFilename", "", FileProperty::Load, ".dat"),
       "Path to the VULCAN offset file. ");
 
-  vector<string> groupoptions;
-  groupoptions.push_back("6Modules");
-  groupoptions.push_back("2Banks");
-  groupoptions.push_back("1Bank");
+  vector<string> groupoptions{"6Modules", "2Banks", "1Bank"};
 
   declareProperty(
       "Grouping", "6Modules",
@@ -169,7 +166,7 @@ void LoadVulcanCalFile::processInOutProperites() {
     double theta = 0.5 * vec_2thetas[i];
     double effl = difc / (252.777 * 2.0 * sin(theta / 180. * M_PI));
 
-    m_effLTheta.insert(make_pair(bankid, make_pair(effl, theta)));
+    m_effLTheta.emplace(bankid, make_pair(effl, theta));
   }
 
   // Create offset workspace
@@ -365,7 +362,7 @@ void LoadVulcanCalFile::readOffsetFile(
     if (!(iss >> pid >> offset))
       continue;
     detid_t detid = static_cast<detid_t>(pid);
-    map_detoffset.insert(make_pair(detid, offset));
+    map_detoffset.emplace(detid, offset);
   }
 
   return;
@@ -386,7 +383,7 @@ void LoadVulcanCalFile::processOffsets(
     detid_t tmpid = det->getID();
 
     // Map between detector ID and workspace index
-    map_det2index.insert(make_pair(tmpid, i));
+    map_det2index.emplace(tmpid, i);
   }
 
   // Map from VULCAN offset to Mantid instrument: Validate
@@ -397,7 +394,7 @@ void LoadVulcanCalFile::processOffsets(
     detid_t pid = miter.first;
     auto fiter = map_det2index.find(pid);
     if (fiter == map_det2index.end()) {
-      map_verify.insert(make_pair(pid, make_pair(false, -1)));
+      map_verify.emplace(pid, make_pair(false, -1));
     } else {
       size_t wsindex = fiter->second;
       // Get bank ID from instrument tree
@@ -412,7 +409,7 @@ void LoadVulcanCalFile::processOffsets(
       int bank = atoi(terms2.back().c_str());
       set_bankID.insert(bank);
 
-      map_verify.insert(make_pair(pid, make_pair(true, bank)));
+      map_verify.emplace(pid, make_pair(true, bank));
     }
   }
 
@@ -479,7 +476,7 @@ void LoadVulcanCalFile::processOffsets(
       globalfactor += intermodulelogcorr;
     }
 
-    map_bankLogCorr.insert(make_pair(bankid, globalfactor));
+    map_bankLogCorr.emplace(bankid, globalfactor);
   }
 
   // Calcualte the offset for each detector (log now still)

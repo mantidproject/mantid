@@ -2072,7 +2072,7 @@ void InstrumentDefinitionParser::setLogfile(
             logfileID, value, interpolation, formula, formulaUnit, resultUnit,
             paramName, type, tie, constraint, penaltyFactor, fittingFunction,
             extractSingleValueAs, eq, comp, m_angleConvertConst, description));
-    auto inserted = logfileCache.insert(std::make_pair(cacheKey, cacheValue));
+    auto inserted = logfileCache.emplace(cacheKey, cacheValue);
     if (!inserted.second) {
       logfileCache[cacheKey] = cacheValue;
     }

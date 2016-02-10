@@ -239,10 +239,7 @@ void AccumulateMD::init() {
   declareProperty(new ArrayProperty<double>("EFix", Direction::Input),
                   "datasource energy values in meV");
 
-  std::vector<std::string> e_mode_options;
-  e_mode_options.push_back("Elastic");
-  e_mode_options.push_back("Direct");
-  e_mode_options.push_back("Indirect");
+  std::vector<std::string> e_mode_options{"Elastic", "Direct", "Indirect"};
 
   declareProperty("Emode", "Direct",
                   boost::make_shared<StringListValidator>(e_mode_options),

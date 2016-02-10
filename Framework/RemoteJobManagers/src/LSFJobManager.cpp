@@ -1324,10 +1324,10 @@ LSFJobManager::makeHeaders(const std::string &contentType,
         std::pair<std::string, std::string>("Content-Type", contentType));
   }
   if (!token.empty()) {
-    headers.insert(std::make_pair("Cookie", token));
+    headers.emplace("Cookie", token);
   }
   if (!acceptType.empty()) {
-    headers.insert(std::make_pair("Accept", acceptType));
+    headers.emplace("Accept", acceptType);
   }
 
   return headers;

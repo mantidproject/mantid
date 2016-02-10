@@ -1294,7 +1294,7 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
   extension.tableView= new QTableView();
 
   // Add it to the extension collection, so we can set it up in place
-  m_extensions.insert(std::make_pair(type, extension));
+  m_extensions.emplace(type, extension);
   auto mapped_extension = m_extensions[type];
 
   // Add a new tab

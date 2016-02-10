@@ -52,9 +52,7 @@ void FFT::init() {
   declareProperty("Imaginary", EMPTY_INT(), mustBePositive,
                   "Spectrum number to use as imaginary part for transform");
 
-  std::vector<std::string> fft_dir;
-  fft_dir.push_back("Forward");
-  fft_dir.push_back("Backward");
+  std::vector<std::string> fft_dir{"Forward", "Backward"};
   declareProperty("Transform", "Forward",
                   boost::make_shared<StringListValidator>(fft_dir),
                   "Direction of the transform: forward or backward");

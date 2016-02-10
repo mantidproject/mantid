@@ -51,8 +51,8 @@ void ConvertAxisByFormula::init() {
                   "Name of the output workspace");
 
   std::vector<std::string> axisOptions;
-  axisOptions.push_back("X");
-  axisOptions.push_back("Y");
+  axisOptions.emplace_back("X");
+  axisOptions.emplace_back("Y");
   declareProperty("Axis", "X",
                   boost::make_shared<StringListValidator>(axisOptions),
                   "The axis to modify");
