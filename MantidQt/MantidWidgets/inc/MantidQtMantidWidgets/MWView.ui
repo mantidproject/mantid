@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>941</width>
-    <height>718</height>
+    <width>706</width>
+    <height>462</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,16 +18,30 @@
     <rect>
      <x>19</x>
      <y>19</y>
-     <width>911</width>
-     <height>691</height>
+     <width>681</width>
+     <height>441</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="viewer">
     <item>
-     <widget class="MantidQt::MantidWidgets::SafeQwtPlot" name="plot2D"/>
+     <widget class="MantidQt::MantidWidgets::SafeQwtPlot" name="plot2D">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
     </item>
     <item>
-     <widget class="MantidQt::MantidWidgets::ColorBarWidget" name="colorBar" native="true"/>
+     <widget class="MantidQt::MantidWidgets::ColorBarWidget" name="colorBar" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

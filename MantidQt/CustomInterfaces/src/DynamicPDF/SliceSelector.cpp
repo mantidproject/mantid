@@ -84,7 +84,8 @@ void SliceSelector::loadSlices(const QString &workspaceName) {
   m_uiForm.spinboxSliceSelector->setValue(0);
 
   /// initialize the 2D view of the slices;
-
+  m_uiForm.slices2DPlot->setWorkspace(m_loadedWorkspace->m_ws);
+  m_uiForm.slices2DPlot->updateDisplay();
 
   /// initialize the preview plot
   updatePlotSelectedSlice();
