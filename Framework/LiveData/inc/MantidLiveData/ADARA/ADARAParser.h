@@ -29,10 +29,10 @@ public:
   /// Destructor
   virtual ~Parser();
 
-  ssize_t last_bytes_read;
-  ssize_t last_last_bytes_read;
-  ssize_t last_pkts_parsed;
-  ssize_t last_last_pkts_parsed;
+  long last_bytes_read;
+  long last_last_bytes_read;
+  long last_pkts_parsed;
+  long last_last_pkts_parsed;
   unsigned long last_total_bytes;
   unsigned long last_last_total_bytes;
   unsigned int last_total_packets;
