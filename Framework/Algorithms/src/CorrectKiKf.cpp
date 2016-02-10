@@ -56,18 +56,18 @@ void CorrectKiKf::exec() {
   this->inputWS = this->getProperty("InputWorkspace");
   this->outputWS = this->getProperty("OutputWorkspace");
 
-  // If input and output workspaces are not the same, create a new workspace for
-  // the output
-  if (this->outputWS != this->inputWS) {
-    this->outputWS = API::WorkspaceFactory::Instance().create(this->inputWS);
-  }
-
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventW != nullptr) {
     this->execEvent();
     return;
+  }
+
+  // If input and output workspaces are not the same, create a new workspace for
+  // the output
+  if (this->outputWS != this->inputWS) {
+    this->outputWS = API::WorkspaceFactory::Instance().create(this->inputWS);
   }
 
   const size_t size = this->inputWS->blocksize();
@@ -191,31 +191,17 @@ void CorrectKiKf::execEvent() {
   g_log.information("Processing event workspace");
 
   const MatrixWorkspace_const_sptr matrixInputWS =
-      this->getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS =
+      getProperty("InputWorkspace");
+  auto inputWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS =
-      this->getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS)
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-    this->setProperty("OutputWorkspace", matrixOutputWS);
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
+    setProperty("OutputWorkspace", matrixOutputWS);
   }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   const std::string emodeStr = getProperty("EMode");
   double efixedProp = getProperty("EFixed"), efixed;

@@ -320,23 +320,14 @@ void ResampleX::exec() {
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (inputEventWS != nullptr) {
     if (m_preserveEvents) {
-      EventWorkspace_sptr outputEventWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
       if (inPlace) {
         g_log.debug() << "Rebinning event workspace in place\n";
       } else {
         g_log.debug() << "Rebinning event workspace out of place\n";
-
-        // copy the event workspace to a new EventWorkspace
-        outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(
-            API::WorkspaceFactory::Instance().create(
-                "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-        // copy geometry over.
-        API::WorkspaceFactory::Instance().initializeFromParent(
-            inputEventWS, outputEventWS, false);
-        // copy over the data as well.
-        outputEventWS->copyDataFrom((*inputEventWS));
+        outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
       }
+      auto outputEventWS =
+          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
       if (common_limits) {
         // get the delta from the first since they are all the same
@@ -366,9 +357,7 @@ void ResampleX::exec() {
         PARALLEL_CHECK_INTERUPT_REGION
       }
 
-      this->setProperty(
-          "OutputWorkspace",
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outputEventWS));
+      setProperty("OutputWorkspace", outputEventWS);
     }    // end if (m_preserveEvents)
     else // event workspace -> matrix workspace
     {
