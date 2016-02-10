@@ -23,24 +23,24 @@ namespace ADARA {
 class DLLExport Parser {
 public:
   /// Constructor
-  Parser(unsigned int inital_buffer_size = 1024 * 1024,
-         unsigned int max_pkt_size = 8 * 1024 * 1024);
+  Parser(uint32_t inital_buffer_size = 1024 * 1024,
+         uint32_t max_pkt_size = 8 * 1024 * 1024);
 
   /// Destructor
   virtual ~Parser();
 
-  long last_bytes_read;
-  long last_last_bytes_read;
-  long last_pkts_parsed;
-  long last_last_pkts_parsed;
-  unsigned long last_total_bytes;
-  unsigned long last_last_total_bytes;
-  unsigned int last_total_packets;
-  unsigned int last_last_total_packets;
-  unsigned int last_read_count;
-  unsigned int last_last_read_count;
-  unsigned int last_loop_count;
-  unsigned int last_last_loop_count;
+  int64_t last_bytes_read;
+  int64_t last_last_bytes_read;
+  int64_t last_pkts_parsed;
+  int64_t last_last_pkts_parsed;
+  uint64_t last_total_bytes;
+  uint64_t last_last_total_bytes;
+  uint32_t last_total_packets;
+  uint32_t last_last_total_packets;
+  uint32_t last_read_count;
+  uint32_t last_last_read_count;
+  uint32_t last_loop_count;
+  uint32_t last_last_loop_count;
   double last_parse_elapsed_total;
   double last_last_parse_elapsed_total;
   double last_read_elapsed_total;
