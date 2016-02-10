@@ -220,7 +220,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         try:
             all_spectra = [item for sublist in self._spectra for item in sublist]
             self._raise_error_if_mix_fwd_back(all_spectra)
-            self._raise_error_if_non_valid_mode_scattering(self._diff_opt, self._back_scattering)
+            self._raise_error_mode_scatter(self._diff_opt, self._back_scattering)
             self._set_spectra_type(all_spectra[0])
             self._setup_raw(all_spectra)
             self._create_foil_workspaces()
@@ -267,7 +267,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _raise_error_if_non_valid_period_scattering(self, run_str,  back_scattering):
+    def _raise_error_period_scatter(self, run_str, back_scattering):
         """
         Checks that the input is valid for the number of periods in the data with the current scattering
         2 Period - Only Forward Scattering
@@ -290,7 +290,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _raise_error_if_non_valid_mode_scattering(self, mode, back_scattering):
+    def _raise_error_mode_scatter(self, mode, back_scattering):
         """
         Checks that the input is valid for the Mode of operation selected with the current scattering
         SingleDifference - Forward Scattering
@@ -320,7 +320,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         except ValueError:
             run_str = runs[0]
 
-        self._raise_error_if_non_valid_period_scattering(run_str, self._back_scattering)
+        self._raise_error_period_scatter(run_str, self._back_scattering)
         all_spectra = [item for sublist in self._spectra for item in sublist]
         ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
                    EnableLogging=_LOGGING_)
@@ -514,7 +514,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self.summed_ws, self.summed_mon = "__loadraw_evs", "__loadraw_evs_monitors"
         for index, run in enumerate(runs):
             run = inst_prefix + str(run)
-            self._raise_error_if_non_valid_period_scattering(run, self._back_scattering)
+            self._raise_error_period_scatter(run, self._back_scattering)
             if index == 0:
                 out_name, out_mon = SUMMED_WS, SUMMED_MON
             else:
