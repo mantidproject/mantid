@@ -21,7 +21,7 @@ from mantidqtpython import GraphOptions
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
-from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker)
+from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker, InstrumentView)
 				  
 print dir(mantidqtpython)
 
@@ -681,6 +681,10 @@ def getMantidMatrix(name):
 
 	
 InstrumentWidget = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidget
+InstrumentWidgetRenderTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetRenderTab
+InstrumentWidgetPickTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetPickTab
+InstrumentWidgetMaskTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetMaskTab
+InstrumentWidgetTreeTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetTreeTab
 
 def getInstrumentView(name, tab=InstrumentWidget.RENDER):
     """Create an instrument view window based on the given workspace.
@@ -695,24 +699,7 @@ def getInstrumentView(name, tab=InstrumentWidget.RENDER):
     ads = _get_analysis_data_service()
     if name not in ads:
         raise ValueError("Workspace '%s' does not exist" % name)
-    return new_proxy(proxies.InstrumentWidget, _qti.app.mantidUI.getInstrumentView, name, tab)
-
-def getInstrumentWindow(name, tab=InstrumentWidget.RENDER):
-    """Create an instrument view window based on the given workspace.
-
-    Args:
-        name: The name of the workspace.
-        tab: The index of the tab to display initially, (default=InstrumentWidget.RENDER)
-
-    Returns:
-        A handle to the created MDIWindow which contains the instrument view widget.
-    """
-    ads = _get_analysis_data_service()
-
-    if name not in ads:
-        raise ValueError("Warkspace '%s' does not exist" % name)
-
-    return new_proxy(proxies.MDIWindow, _qti.app.mantidUI.getInstrumentWindow, name, tab)
+    return new_proxy(proxies.InstrumentView, _qti.app.mantidUI.getInstrumentView, name, tab)
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
     """Create a MantidMatrix object from the named workspace.

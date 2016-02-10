@@ -193,6 +193,18 @@ namespace MantidQt
 			}
 		}
 
+		QString InstrumentWidget::getWorkspaceName() const { 
+			return m_workspaceName; 
+		}
+
+		std::string InstrumentWidget::getWorkspaceNameStdString() const {
+			return m_workspaceName.toStdString();
+		}
+
+		void InstrumentWidget::renameWorkspace(const std::string &workspace) {
+			m_workspaceName = QString::fromStdString(workspace);
+		}
+
 		/**
 		* Init the geometry and colour map outside constructor to prevent creating a
 		* broken MdiSubwindow.
@@ -1230,6 +1242,10 @@ namespace MantidQt
 			return QString::fromAscii(InstrumentWidgetSettingsGroup) + "/" +
 				QString::fromStdString(
 					getInstrumentActor()->getInstrument()->getName());
+		}
+
+		bool InstrumentWidget::hasWorkspace(const std::string &wsName) const {
+			return wsName == getWorkspaceNameStdString();
 		}
 
 		void InstrumentWidget::handleWorkspaceReplacement(

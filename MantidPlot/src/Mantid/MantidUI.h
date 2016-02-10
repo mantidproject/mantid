@@ -38,6 +38,7 @@ class MantidDockWidget;
 class AlgorithmDockWidget;
 class RemoteClusterDockWidget;
 class AlgorithmMonitor;
+class InstrumentWindow;
 
 namespace MantidQt
 {
@@ -48,7 +49,6 @@ namespace MantidQt
   namespace MantidWidgets
   {
     class FitPropertyBrowser;
-	class InstrumentWidget;
   }
   namespace SliceViewer
   {
@@ -419,9 +419,7 @@ signals:
     void manageMantidWorkspaces();
 
     //Python related functions
-    MantidQt::MantidWidgets::InstrumentWidget* getInstrumentView(const QString & wsName, int tab = -1);
-
-	MdiSubWindow *getInstrumentWindow(const QString & wsName, int tab = -1);
+    InstrumentWindow *getInstrumentView(const QString & wsName, int tab = -1);
 
     void showMantidInstrument();
 
@@ -562,7 +560,7 @@ private:
 
   // keep track of the last shown, which will be refreshed or killed/rebuilt if showing only one inst. window
   // QPointer handles when events, etc. destroy these windows
-  QPointer<MantidQt::MantidWidgets::InstrumentWidget> m_lastShownInstrumentWin;
+  QPointer<InstrumentWindow> m_lastShownInstrumentWin;
   QPointer<MantidQt::SliceViewer::SliceViewerWindow> m_lastShownSliceViewWin;
   QPointer<MantidQt::SpectrumView::SpectrumView> m_lastShownSpectrumViewerWin;
   QPointer<MultiLayer> m_lastShownColorFillWin;

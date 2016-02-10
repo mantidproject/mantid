@@ -563,7 +563,7 @@ class MantidMatrix(MDIWindow):
         return new_proxy(Graph, self._getHeldObject().plotGraph2D, type)
 
 #-----------------------------------------------------------------------------
-class InstrumentWidget(MDIWindow):
+class InstrumentView(MDIWindow):
     """Proxy for the instrument window
     """
 

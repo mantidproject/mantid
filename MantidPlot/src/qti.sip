@@ -1364,6 +1364,94 @@ private:
   MantidMatrix(const MantidMatrix&);
 };
 
+class InstrumentWindow: MdiSubWindow /PyName=InstrumentView/
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindow.h"
+%End
+
+%Docstring
+    The InstrumentWindow contains functionality for exploring
+    a 3D model of an instrument. It is a tabbed widget offering
+    rendering, picking, masking and grouping functions. There is
+    also a tree view of the instrument hierarchy.
+
+    For further help see the functions defined on each of the following
+		- InstrumentWidget
+        - InstrumentWidgetRenderTab
+        - InstrumentWidgetPickTab
+        - InstrumentWidgetMaskTab
+%End
+
+public:
+  // Note this enum is also defined in InstrumentWidgetTab and InstrumentWidget
+  MantidQt::MantidWidgets::InstrumentWidgetTab * getTab(const QString & title) const;
+%Docstring
+    Returns a handler to the requested tab
+
+    Args:
+
+        title The full title of a tab in the window
+
+    Returns:
+        a pointer to the requested tab widget
+
+%End
+
+  MantidQt::MantidWidgets::InstrumentWidgetTab * getTab(int tab) const;
+%Docstring
+    Returns a handler to the requested tab
+
+    Args:
+        tab One of the Tab enumeration types:
+	    InstrumentWidget.RENDER,InstrumentWidget.PICK,
+	    InstrumentWidget.MASK,InstrumentWidget.TREE
+
+    Returns:
+        a pointer to the requested tab widget
+
+%End
+
+  void setBinRange(double min_value, double max_value);
+%Docstring
+    Updates the integration range over which the colours
+    are calculated
+
+    Args:
+        min_value The minimum value over which the data is integrated
+        max_value The maximum value over which the data is integrated
+
+%End
+
+  bool overlay(const QString & wsName);
+%Docstring
+    Overlays a workspace onto an unwrapped surface on the instrument view.
+    Raises a dialog box if the current surface is not unwrapped.
+
+    Args:
+        wsName The name of the workspace
+
+    Returns:
+        A boolean indicating if the overlay was successful or not
+
+%End
+
+  // -- Deprecated in favour of specific tab functions --
+  // Deprecation is done in mantidplot.py module rather than using
+  // sip /Deprecated/annotation so that the message can be customised
+  void changeColormap();
+  void changeColormap(const QString & file);
+  void setColorMapMinValue(double);
+  void setColorMapMaxValue(double);
+  void setColorMapRange(double, double);
+  void selectComponent(const QString &);
+  void setScaleType(GraphOptions::ScaleType);
+  void setViewType(const QString &);
+
+private:
+InstrumentWindow();
+InstrumentWindow(const InstrumentWindow &);
+};
 
 class MantidUI: QObject
 {
@@ -1394,19 +1482,14 @@ public:
 
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);
-  MdiSubWindow* getInstrumentWindow(const QString &, int tab = -1);
+  InstrumentWindow* getInstrumentView(const QString &, int tab = -1);
 %MethodCode
-  sipRes = sipCpp->getInstrumentWindow(*a0,a1);
+  sipRes = sipCpp->getInstrumentView(*a0,a1);
   if(sipRes) sipRes->hide();
 %End
   // Methods relating to creating or getting handles to GUI objects
   MantidMatrix* getMantidMatrix(const QString &);
   QString getSelectedWorkspaceName();
-  MantidQt::MantidWidgets::InstrumentWidget* getInstrumentView(const QString &, int tab = -1);
-%MethodCode
-  sipRes = sipCpp->getInstrumentView(*a0,a1);
-  if(sipRes) sipRes->hide();
-%End
   MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
   Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName,
       QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;

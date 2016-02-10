@@ -133,7 +133,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
         self.try_closing(g, "importMatrixWorkspace().plotGraph3D()")
 
     def test_closing_getInstrumentView(self):
-        iv = getInstrumentWindow("IRS26173")
+        iv = getInstrumentView("IRS26173")
         self.try_closing(iv, "getInstrumentView()")
 
     def test_convertToWaterfall(self):
@@ -155,7 +155,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
         mm.close()
 
     def test_dock_method_produces_docked_window_on_instrument_view(self):
-        iv = getInstrumentWindow("IRS26173")
+        iv = getInstrumentView("IRS26173")
         self.do_dock_test_and_close(iv)
 
     def do_dock_test_and_close(self, win):

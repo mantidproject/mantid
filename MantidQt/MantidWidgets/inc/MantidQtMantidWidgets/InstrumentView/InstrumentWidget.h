@@ -6,12 +6,19 @@
 #include "..\WidgetDllOption.h"
 
 #include "MantidAPI/AlgorithmObserver.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidQtAPI/GraphOptions.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include <boost/shared_ptr.hpp>
 
+namespace Mantid
+{
+	namespace API
+	{
+		class IPeaksWorkspace;
+	}
+}
 
 
 // Qt forward declarations
@@ -85,14 +92,9 @@ namespace MantidQt
 				double scaleMin = 0.0, double scaleMax = 0.0,
 				bool setDefaultView = true);
 			~InstrumentWidget();
-			QString getWorkspaceName() const { return m_workspaceName; }
-			std::string getWorkspaceNameStdString() const {
-				return m_workspaceName.toStdString();
-			}
-			void renameWorkspace(const std::string &workspace) {
-				m_workspaceName = QString::fromStdString(workspace);
-			}
-
+			QString getWorkspaceName() const;
+			std::string getWorkspaceNameStdString() const;
+			void renameWorkspace(const std::string &workspace);
 			SurfaceType getSurfaceType() const { return m_surfaceType; }
 			/// Get pointer to the projection surface
 			boost::shared_ptr<ProjectionSurface> getSurface() const;
@@ -129,9 +131,7 @@ namespace MantidQt
 			/// Get a name for a instrument-specific settings group
 			QString getInstrumentSettingsGroupName() const;
 
-			bool hasWorkspace(const std::string &wsName) {
-				return wsName == getWorkspaceNameStdString();
-			}
+			bool hasWorkspace(const std::string &wsName) const;
 			void handleWorkspaceReplacement(const std::string &wsName,
 				const boost::shared_ptr<Workspace> workspace);
 

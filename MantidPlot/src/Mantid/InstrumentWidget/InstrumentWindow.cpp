@@ -88,3 +88,51 @@ void InstrumentWindow::clearADSHandle() {
   confirmClose(false);
   close();
 }
+
+InstrumentWidgetTab *InstrumentWindow::getTab(const QString &title) const {
+  return m_instrumentWidget->getTab(title);
+}
+
+InstrumentWidgetTab *InstrumentWindow::getTab(int tab) const {
+  return m_instrumentWidget->getTab((InstrumentWidget::Tab)tab);
+}
+
+void InstrumentWindow::setBinRange(double min_value, double max_value) {
+  return m_instrumentWidget->setBinRange(min_value, max_value);
+}
+
+bool InstrumentWindow::overlay(const QString &wsName) {
+  return m_instrumentWidget->overlay(wsName);
+}
+
+void InstrumentWindow::changeColormap() {
+  return m_instrumentWidget->changeColormap();
+}
+
+void InstrumentWindow::changeColormap(const QString &file) {
+  return m_instrumentWidget->changeColormap(file);
+}
+
+void InstrumentWindow::setColorMapMinValue(double min_value) {
+  return m_instrumentWidget->setColorMapMinValue(min_value);
+}
+
+void InstrumentWindow::setColorMapMaxValue(double max_value) {
+  return m_instrumentWidget->setColorMapMaxValue(max_value);
+}
+
+void InstrumentWindow::setColorMapRange(double min_value, double max_value) {
+  return m_instrumentWidget->setColorMapRange(min_value, max_value);
+}
+
+void InstrumentWindow::selectComponent(const QString &name) {
+  return m_instrumentWidget->selectComponent(name);
+}
+
+void InstrumentWindow::setScaleType(GraphOptions::ScaleType type) {
+  return m_instrumentWidget->setScaleType(type);
+}
+
+void InstrumentWindow::setViewType(const QString &type) {
+  return m_instrumentWidget->setViewType(type);
+}
