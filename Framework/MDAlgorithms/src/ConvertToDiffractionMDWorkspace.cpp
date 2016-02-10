@@ -438,7 +438,6 @@ void ConvertToDiffractionMDWorkspace::exec() {
     std::vector<double> extents = getProperty("Extents");
     // Replicate a single min,max into several
     if (extents.size() == 2) {
-      extents.reserve(2 * nd);
       for (size_t d = 1; d < nd; d++) {
         extents.push_back(extents[0]);
         extents.push_back(extents[1]);

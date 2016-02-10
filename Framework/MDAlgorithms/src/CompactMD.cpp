@@ -118,9 +118,7 @@ void CompactMD::exec() {
 
   const size_t nDimensions = input_ws->getNumDims();
   std::vector<Mantid::coord_t> minVector;
-  minVector.reserve(nDimensions);
   std::vector<Mantid::coord_t> maxVector;
-  maxVector.reserve(nDimensions);
 
   // fill the min/max vectors with values per dimension.
   for (size_t index = 0; index < nDimensions; index++) {

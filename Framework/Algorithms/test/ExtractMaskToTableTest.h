@@ -55,10 +55,7 @@ public:
     // Case: A does not contain B; but the intersection between A and B is not
     // empty
     vecA.clear();
-    vecA.reserve(10);
-
     vecB.clear();
-    vecB.reserve(10);
 
     for (int i = 0; i < 10; ++i)
       vecA.push_back(i * 3);
@@ -72,10 +69,7 @@ public:
 
     // Case: B has a larger range than A
     vecA.clear();
-    vecA.reserve(10);
-
     vecB.clear();
-    vecB.reserve(13);
 
     for (int i = 0; i < 10; ++i)
       vecA.push_back(5 + i * 2);

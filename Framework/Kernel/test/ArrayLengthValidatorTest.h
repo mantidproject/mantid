@@ -82,7 +82,6 @@ public:
   void testValidator() {
     ArrayLengthValidator<int> vi(3);
     std::vector<int> a;
-    a.reserve(3);
     a.push_back(3);
     TS_ASSERT_DIFFERS(vi.isValid(a).length(), 0);
     a.push_back(-1);
@@ -93,7 +92,6 @@ public:
   void testValidatorRange() {
     ArrayLengthValidator<int> vi(2, 3);
     std::vector<int> a;
-    a.reserve(4);
     a.push_back(3);
     TS_ASSERT_DIFFERS(vi.isValid(a).length(), 0);
     a.push_back(11);

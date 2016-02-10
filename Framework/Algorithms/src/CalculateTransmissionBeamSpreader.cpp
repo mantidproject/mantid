@@ -140,8 +140,9 @@ void CalculateTransmissionBeamSpreader::exec() {
   // Note: Replaced PARALLEL_SECTION with this OMP for loop, due to occasional
   // unexplained segfault.
   std::vector<MatrixWorkspace_sptr> in_ws{sample_scatterWS, direct_scatterWS,
-                                          sample_spreaderWS, direct_spreaderWS},
-      out_ws(4);
+                                          sample_spreaderWS, direct_spreaderWS};
+
+  std::vector<MatrixWorkspace_sptr> out_ws(4);
 
   PARALLEL_FOR_IF(true)
   for (int i = 0; i < 4; i++) {

@@ -110,8 +110,9 @@ void ConvertToDetectorFaceMD::convertEventList(
                               runIndex, detectorID, center);
     } else if (nd == 4) {
       coord_t center[4] = {x, y, tof, bankNum};
-      out_events.emplace_back(float(it->weight()), float(it->errorSquared()),
-                              runIndex, detectorID, center);
+      out_events.emplace_back(static_cast<float>(it->weight()),
+                              static_cast<float>(it->errorSquared()), runIndex,
+                              detectorID, center);
     }
   }
 
