@@ -29,7 +29,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         """
         PythonAlgorithm.__init__(self)
 
-
         return
 
     def category(self):
@@ -65,16 +64,20 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         self.declareProperty("Header", "", "String in the header file.")
 
+        self.declareProperty('DateTitleInHeader', True,
+                             'If true, then the first 2 lines of header will be experiment date and title.'
+                             'Otherwise, there will be only 1 line in header.')
+
         self.declareProperty('SeparateHeaderFile', True,
                              'If true, then the header is written to another file.'
-                             'Otherwise, header will be in the same outputfile.')
+                             'Otherwise, header will be in the same output file.')
 
         # Time zone
-        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",\
-                "Europe/Paris", "Europe/Copenhagen"]
+        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London",
+                     "GMT+0", "Europe/Paris", "Europe/Copenhagen"]
 
-        description = "Sample logs recorded in NeXus files (in SNS) are in UTC time.  TimeZone " + \
-            "can allow the algorithm to output the log with local time."
+        description = "Sample logs recorded in NeXus files (in SNS) are in UTC time. " \
+                      "TimeZone can allow the algorithm to output the log with local time."
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones), description)
 
         # Log time tolerance
@@ -96,8 +99,12 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             assert self._wksp is not None
 
             # get date and description to write
-            testdatetime = self._wksp.getRun().getProperty("run_start").value
-            description = "Type your description here"
+            if self.getProperty('DateTitleInHeader').value:
+                testdatetime = self._wksp.getRun().getProperty("run_start").value
+                description = self._wksp.getTitle()
+            else:
+                testdatetime = None
+                description = None
             self._writeHeaderFile(testdatetime, description)
 
         # Read in logs
@@ -174,36 +181,46 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
     def _writeLogFile(self, logtimesdict, logvaluedict, loglength, localtimediff):
         """ Write the logs to file
         """
-        wbuf = ""
+        write_buffer = ''
 
         # Init time
         if loglength > 0:
+            # If there are more than 0 log to output
+            vec_time = None
+            init_abs_time = 0
+            # Try to get the time vector
             for log in logtimesdict.keys():
                 if logtimesdict[log] is not None:
                     time0 = logtimesdict[log][0]
-                    abstime_init = time0.totalNanoseconds() * 1.E-9 - localtimediff
-                    times = logtimesdict[log]
+                    init_abs_time = time0.totalNanoseconds() * 1.E-9 - localtimediff
+                    vec_time = logtimesdict[log]
                     break
+                # END-IF
+            # END-FOR
 
-        # Loop
-        for i in xrange(loglength):
-            abstime = times[i].totalNanoseconds() * 1.E-9 - localtimediff
-            reltime = abstime - abstime_init
-            # Write absoute time and relative time
-            wbuf += "%.6f\t%.6f\t" % (abstime, reltime)
-            # Write each log value
-            for samplelog in self._sampleloglist:
-                if logvaluedict[samplelog] is not None:
-                    logvalue = logvaluedict[samplelog][i]
-                else:
-                    logvalue = 0.
-                wbuf += "%.6f\t" % (logvalue)
-            wbuf += "\n"
-        # ENDFOR
+            assert vec_time is not None, 'All logs are empty!'
+
+            # Loop over all logs
+            for i in xrange(loglength):
+                # get absolute time and relative time
+                abstime = vec_time[i].totalNanoseconds() * 1.E-9 - localtimediff
+                reltime = abstime - init_abs_time
+                # write absolute time and relative time as column 0 and 1
+                write_buffer += "%.6f\t%.6f\t" % (abstime, reltime)
+                # Write each log value
+                for samplelog in self._sampleloglist:
+                    if logvaluedict[samplelog] is not None:
+                        logvalue = logvaluedict[samplelog][i]
+                    else:
+                        logvalue = 0.
+                    write_buffer += "%.6f\t" % (logvalue)
+                write_buffer += "\n"
+            # END-FOR(i)
+        # END-IF
 
         try:
             ofile = open(self._outputfilename, "w")
-            ofile.write(wbuf)
+            ofile.write(write_buffer)
             ofile.close()
         except IOError:
             raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
@@ -451,20 +468,27 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
     def _writeHeaderFile(self, test_datetime, description):
         """
         Write the header file for a LoadFrame
+        Requirements: test_datetime and description are either None or string
         @param test_datetime:
         @param description:
         @return:
         """
-        # Construct 3 lines of the header file
-        testdatetime_mk = DateAndTime(test_datetime)
-        line0 = "Test date: %s (%.6f) Time Zone: %s" % (
-            str(test_datetime), float(testdatetime_mk.totalNanoseconds()) / 1.0E9, self._timezone)
-        line1 = "Test description: %s" % (description)
+        if test_datetime is None or description is None:
+            line0 = ''
+            line1 = ''
+        else:
+            # Construct 3 lines of the header file
+            testdatetime_mk = DateAndTime(test_datetime)
+            line0 = 'Test date: %s (%.6f) Time Zone: %s\n' % (str(test_datetime),
+                                                              float(testdatetime_mk.totalNanoseconds()) / 1.0E9,
+                                                              self._timezone)
+            line1 = 'Test description: %s\n' % description
+        # END-IF-ELSE
         line2 = self._headercontent
 
         # Write file
-        wbuf = line0 + "\n" + line1 + "\n" + line2 + "\n"
-        # headerfilename = self._outputfilename.split(".")[0] + "_header.txt"
+        wbuf = line0 + line1 + line2 + '\n'
+
         filepath = os.path.dirname(self._outputfilename)
         basename = os.path.basename(self._outputfilename)
         if self._writeHeaderToSeparateFile is True:
@@ -484,6 +508,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             self.log().error(str(err))
 
         return
+
 
 def getLocalTimeShiftInSecond(utctime, localtimezone, currentlogger = None):
     """ Calculate the difference between UTC time and local time of given
