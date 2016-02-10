@@ -1415,7 +1415,6 @@ void SliceViewer::findRangeSlice() {
     else {
       workspace_used = this->m_overlayWS;
     }
-    }
   }
 
   if (!workspace_used)
