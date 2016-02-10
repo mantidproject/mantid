@@ -70,8 +70,8 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
       m_workspaceInitialized(false), m_socket(), m_isConnected(false),
       m_pauseNetRead(false), m_stopThread(false), m_runPaused(false),
       m_ignorePackets(true), m_filterUntilRunStart(false)
-      // ADARA::Parser() will accept values for buffer size and max packet size,
-      // but the defaults will work fine
+// ADARA::Parser() will accept values for buffer size and max packet size,
+// but the defaults will work fine
 {
 
   // Perform all the workspace initialization steps (including actually creating
@@ -98,8 +98,7 @@ SNSLiveEventDataListener::~SNSLiveEventDataListener() {
     try {
       m_thread.join(RECV_TIMEOUT * 2 *
                     1000); // *1000 because join() wants time in milliseconds
-    }
-    catch (Poco::TimeoutException &) {
+    } catch (Poco::TimeoutException &) {
       // And just what do we do here?!?
       // Log a message, sure, but other than that we can either hang the
       // Mantid process waiting for a thread that will apparently never exit
@@ -122,12 +121,12 @@ SNSLiveEventDataListener::~SNSLiveEventDataListener() {
 /// @param address The address to attempt to connect to
 /// @return Returns true if the connection succeeds.  False otherwise.
 bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
-    // The SocketAddress class will throw various exceptions if it encounters an
-    // error.  We're assuming the calling function will catch any exceptions
-    // that are important.
-    // Note: Right now, it's the factory class that actually calls connect(),
-    // and it doesn't check the return value.  (It does, however, trap the Poco
-    // exceptions.)
+// The SocketAddress class will throw various exceptions if it encounters an
+// error.  We're assuming the calling function will catch any exceptions
+// that are important.
+// Note: Right now, it's the factory class that actually calls connect(),
+// and it doesn't check the return value.  (It does, however, trap the Poco
+// exceptions.)
 {
   bool rv = false; // assume failure
 
@@ -138,8 +137,7 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     Poco::Net::SocketAddress tempAddress("localhost:31415");
     try {
       m_socket.connect(tempAddress); // BLOCKING connect
-    }
-    catch (...) {
+    } catch (...) {
       g_log.error() << "Connection to " << tempAddress.toString() << " failed."
                     << std::endl;
       return false;
@@ -147,8 +145,7 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
   } else {
     try {
       m_socket.connect(address); // BLOCKING connect
-    }
-    catch (...) {
+    } catch (...) {
       g_log.debug() << "Connection to " << address.toString() << " failed."
                     << std::endl;
       return false;
@@ -214,7 +211,7 @@ void SNSLiveEventDataListener::run() {
     // First thing to do is send a hello packet
     uint32_t typeVal =
         ADARA_PKT_TYPE(ADARA::PacketType::Type::CLIENT_HELLO_TYPE, 0);
-    uint32_t helloPkt[5] = { 4, typeVal, 0, 0, 0 };
+    uint32_t helloPkt[5] = {4, typeVal, 0, 0, 0};
     // TODO: The packet version should be bumped to 1 and we should add
     // the extra flags field.  This will have to wait until we're ready
     // to update the StartLiveListener GUI, though.
@@ -230,8 +227,8 @@ void SNSLiveEventDataListener::run() {
         1000000000); // divide by a billion to get time in seconds
 
     if (m_socket.sendBytes(helloPkt, sizeof(helloPkt)) != sizeof(helloPkt))
-        // Yes, I know a send isn't guaranteed to send the whole buffer in one
-        // call.  I'm treating such a case as an error anyway.
+    // Yes, I know a send isn't guaranteed to send the whole buffer in one
+    // call.  I'm treating such a case as an error anyway.
     {
       g_log.error("SNSLiveEventDataListener::run(): Failed to send client "
                   "hello packet. Thread exiting.");
@@ -261,13 +258,11 @@ void SNSLiveEventDataListener::run() {
         int bytesRead = 0;
         try {
           bytesRead = m_socket.receiveBytes(bufFillAddr, bufFillLen);
-        }
-        catch (Poco::TimeoutException &) {
+        } catch (Poco::TimeoutException &) {
           // Don't need to stop processing or anything - just log a warning
           g_log.warning(
               "Timeout reading from the network.  Is SMS still sending?");
-        }
-        catch (Poco::Net::NetException &e) {
+        } catch (Poco::Net::NetException &e) {
           std::string msg("Parser::read(): ");
           msg += e.name();
           throw std::runtime_error(msg);
@@ -298,8 +293,7 @@ void SNSLiveEventDataListener::run() {
     // NOTE: For the default exception handler, we actually create a new
     // runtime_error object and throw that, since there's no exception object
     // passed in to the handler.
-  }
-  catch (ADARA::invalid_packet &e) { // exception handler for invalid packets
+  } catch (ADARA::invalid_packet &e) { // exception handler for invalid packets
     // For now, log it and let the thread exit.  In the future, we might
     // try to recover from this.  (A bad event packet could probably just
     // be ignored, for example)
@@ -312,9 +306,8 @@ void SNSLiveEventDataListener::run() {
 
     m_backgroundException =
         boost::shared_ptr<std::runtime_error>(new ADARA::invalid_packet(e));
-  }
-  catch (std::runtime_error &e) { // exception handler for generic runtime
-                                  // exceptions
+  } catch (std::runtime_error &e) { // exception handler for generic runtime
+                                    // exceptions
     g_log.fatal() << "Caught a runtime exception.\n"
                   << "Exception message: " << e.what() << ".\n"
                   << "Thread will exit.\n";
@@ -322,9 +315,8 @@ void SNSLiveEventDataListener::run() {
 
     m_backgroundException =
         boost::shared_ptr<std::runtime_error>(new std::runtime_error(e));
-  }
-  catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some
-                                     // other things) can throw these errors
+  } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some
+                                       // other things) can throw these errors
     g_log.fatal() << "Caught an invalid argument exception.\n"
                   << "Exception message: " << e.what() << ".\n"
                   << "Thread will exit.\n";
@@ -336,8 +328,7 @@ void SNSLiveEventDataListener::run() {
     newMsg += e.what();
     m_backgroundException =
         boost::shared_ptr<std::runtime_error>(new std::runtime_error(newMsg));
-  }
-  catch (...) { // Default exception handler
+  } catch (...) { // Default exception handler
     g_log.fatal(
         "Uncaught exception in SNSLiveEventDataListener network read thread."
         " Thread is exiting.");
@@ -1110,10 +1101,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
           } else if ((pvType == "integer") || (pvType == "unsigned") ||
                      (pvType == "unsigned integer") ||
                      (pvType.compare(0, 5, "enum_") == 0))
-              // Note: Mantid doesn't currently support unsigned int properties
-              // Note: We're treating enums as ints (at least for now)
-              // Note: ADARA doesn't currently define an integer variable value
-              // packet (only unsigned)
+          // Note: Mantid doesn't currently support unsigned int properties
+          // Note: We're treating enums as ints (at least for now)
+          // Note: ADARA doesn't currently define an integer variable value
+          // packet (only unsigned)
           {
             prop = new TimeSeriesProperty<int>(pvName);
           } else if (pvType == "string") {
@@ -1343,8 +1334,8 @@ bool SNSLiveEventDataListener::haveRequiredLogs() {
 /// Adds an event to the workspace
 void SNSLiveEventDataListener::appendEvent(
     uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime)
-    // NOTE: This function does NOT lock the mutex!  Make sure you do that
-    // before calling this function!
+// NOTE: This function does NOT lock the mutex!  Make sure you do that
+// before calling this function!
 {
   // It'd be nice to use operator[], but we might end up inserting a value....
   // Have to use find() instead.
@@ -1508,9 +1499,8 @@ ILiveListener::RunStatus SNSLiveEventDataListener::runStatus() {
 // are
 // older than we requested.)
 // Returns false if the packet should be processed, true if is should be ignored
-bool
-SNSLiveEventDataListener::ignorePacket(const ADARA::PacketHeader &hdr,
-                                       const ADARA::RunStatus::Enum status) {
+bool SNSLiveEventDataListener::ignorePacket(
+    const ADARA::PacketHeader &hdr, const ADARA::RunStatus::Enum status) {
   // Since we're filtering based on time (either the absolute timestamp or
   // nothing
   // before the start of the most recent run), once we've determined a given

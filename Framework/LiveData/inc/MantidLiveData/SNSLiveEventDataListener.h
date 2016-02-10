@@ -59,9 +59,7 @@ public:
   // logic it uses for updating m_status is only valid if the function
   // is only called by the MonitorLiveData algorithm.
 
-  int runNumber() const {
-    return m_runNumber;
-  };
+  int runNumber() const { return m_runNumber; };
 
   bool isConnected();
 
@@ -199,7 +197,7 @@ private:
   // Maps the device ID / variable ID pair to the actual packet.  Using a map
   // means we will only keep one packet (the most recent one) for each variable
   typedef std::map<std::pair<unsigned, unsigned>,
-                   boost::shared_ptr<ADARA::Packet> > VariableMapType;
+                   boost::shared_ptr<ADARA::Packet>> VariableMapType;
   VariableMapType m_variableMap;
 
   // Process all the variable value packets stored in m_variableMap
@@ -214,9 +212,9 @@ private:
   // packets that are older than we requested.)
   // Returns false if the packet should be processed, true if is should be
   // ignored
-  bool ignorePacket(const ADARA::PacketHeader &hdr,
-                    const ADARA::RunStatus::Enum status =
-                        ADARA::RunStatus::NO_RUN);
+  bool
+  ignorePacket(const ADARA::PacketHeader &hdr,
+               const ADARA::RunStatus::Enum status = ADARA::RunStatus::NO_RUN);
   void setRunDetails(const ADARA::RunStatusPkt &pkt);
 
   // We have to defer calling setRunDetails() at the start of a run until the

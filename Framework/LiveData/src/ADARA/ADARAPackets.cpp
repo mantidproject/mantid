@@ -107,7 +107,7 @@ MappedDataPkt::MappedDataPkt(const MappedDataPkt &pkt) : RawDataPkt(pkt) {}
 RTDLPkt::RTDLPkt(const uint8_t *data, uint32_t len)
     : Packet(data, len),
       m_fields(reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload())))
-      // Note: RTDLPkt m_fields can't be "const", as we Modify Pulse Charge!
+// Note: RTDLPkt m_fields can't be "const", as we Modify Pulse Charge!
 {
   if (m_version == 0x00 && m_payload_len != 120)
     throw invalid_packet("RTDL V0 Packet is incorrect length");
@@ -121,7 +121,7 @@ RTDLPkt::RTDLPkt(const uint8_t *data, uint32_t len)
 RTDLPkt::RTDLPkt(const RTDLPkt &pkt)
     : Packet(pkt),
       m_fields(reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload())))
-      // Note: RTDLPkt m_fields can't be "const", as we Modify Pulse Charge!
+// Note: RTDLPkt m_fields can't be "const", as we Modify Pulse Charge!
 {}
 
 /* ------------------------------------------------------------------------ */
@@ -286,7 +286,7 @@ BeamMonitorPkt::BeamMonitorPkt(const BeamMonitorPkt &pkt)
 
 #define EVENT_COUNT_MASK 0x003FFFFF // lower 22 bits
 bool BeamMonitorPkt::nextSection() const
-    // Returns true if there is a next section.  False if there isn't.
+// Returns true if there is a next section.  False if there isn't.
 {
   bool RV = false; // assume we're at the last section
   unsigned newSectionStart;

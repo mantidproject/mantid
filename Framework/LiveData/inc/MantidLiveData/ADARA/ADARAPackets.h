@@ -207,14 +207,14 @@ public:
   BankedEventPkt(const BankedEventPkt &pkt);
 
   enum Flags {
-    ERROR_PIXELS        = 0x00001,
-    PARTIAL_DATA        = 0x00002,
-    PULSE_VETO          = 0x00004,
-    MISSING_RTDL        = 0x00008,
-    MAPPING_ERROR       = 0x00010,
-    DUPLICATE_PULSE     = 0x00020,
+    ERROR_PIXELS = 0x00001,
+    PARTIAL_DATA = 0x00002,
+    PULSE_VETO = 0x00004,
+    MISSING_RTDL = 0x00008,
+    MAPPING_ERROR = 0x00010,
+    DUPLICATE_PULSE = 0x00020,
     PCHARGE_UNCORRECTED = 0x00040,
-    VETO_UNCORRECTED    = 0x00080,
+    VETO_UNCORRECTED = 0x00080,
   };
 
   uint32_t pulseCharge(void) const { return m_fields[0]; }
@@ -371,9 +371,9 @@ public:
   ClientHelloPkt(const ClientHelloPkt &pkt);
 
   enum Flags {
-    PAUSE_AGNOSTIC    = 0x0000,
-    NO_PAUSE_DATA     = 0x0001,
-    SEND_PAUSE_DATA   = 0x0002,
+    PAUSE_AGNOSTIC = 0x0000,
+    NO_PAUSE_DATA = 0x0001,
+    SEND_PAUSE_DATA = 0x0002,
   };
 
   uint32_t requestedStartTime(void) const { return m_reqStart; }
