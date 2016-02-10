@@ -367,31 +367,15 @@ void AlignDetectors::execEvent() {
 
   // convert the input workspace into the event workspace we already know it is
   const MatrixWorkspace_const_sptr matrixInputWS =
-      this->getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+      getProperty("InputWorkspace");
 
   // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS =
-      this->getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS)
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
     this->setProperty("OutputWorkspace", matrixOutputWS);
   }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // Set the final unit that our output workspace will have
   setXAxisUnits(outputWS);
@@ -405,7 +389,7 @@ void AlignDetectors::execEvent() {
     PARALLEL_START_INTERUPT_REGION
 
     auto toDspacing = converter.getConversionFunc(
-        inputWS->getSpectrum(size_t(i))->getDetectorIDs());
+        outputWS->getSpectrum(size_t(i))->getDetectorIDs());
     outputWS->getEventList(i).convertTof(toDspacing);
 
     progress.report();
