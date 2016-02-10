@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>535</width>
-    <height>654</height>
+    <width>613</width>
+    <height>850</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -29,18 +29,24 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QGroupBox" name="groupLoadSlices">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="title">
-       <string>Loads Slices</string>
+       <string>Input</string>
       </property>
       <layout class="QGridLayout" name="loRangeBinning">
        <property name="topMargin">
-        <number>0</number>
+        <number>9</number>
        </property>
        <property name="bottomMargin">
-        <number>0</number>
+        <number>9</number>
        </property>
        <item row="0" column="0">
-        <widget class="MantidQt::MantidWidgets::DataSelector" name="dataSelector"/>
+        <widget class="MantidQt::MantidWidgets::DataSelector" name="dataSelector" native="true"/>
        </item>
       </layout>
      </widget>
@@ -89,13 +95,26 @@
      <layout class="QHBoxLayout" name="layout2Dview">
       <item>
        <widget class="QSlider" name="sliderSelectSlice">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="MantidQt::MantidWidgets::MWView" name="slices2DPlot"/>
+       <widget class="MantidQt::MantidWidgets::MWView" name="slices2DPlot" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -108,7 +127,7 @@
        <item>
         <widget class="MantidQt::MantidWidgets::PreviewPlot" name="previewPlotSelectedSlice" native="true">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -188,17 +207,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QwtPlot</class>
-   <extends>QFrame</extends>
-   <header>qwt_plot.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::MWView</class>
-   <extends>Qwidget</extends>
-   <header>MantidQtMantidWidgets/MWView.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
@@ -208,6 +216,11 @@
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/PreviewPlot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWView.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

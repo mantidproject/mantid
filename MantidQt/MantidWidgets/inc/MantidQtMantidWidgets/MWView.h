@@ -10,6 +10,7 @@
 // includes for workspace handling
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 namespace Mantid{
 namespace API{
@@ -26,6 +27,9 @@ class MdSettings;
 
 namespace MantidWidgets {
 class ColorBarWidget;
+
+using MWDimension_sptr = boost::shared_ptr<Mantid::API::MWDimension>;
+using MWDimension_const_sptr = boost::shared_ptr<const Mantid::API::MWDimension>;
 
 /** A viewer for a Matrix Workspace.
  *
@@ -66,6 +70,7 @@ public:
   ~MWView();
   void loadColorMap(QString filename = QString() );
   void setWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+  void updateDisplay();
 
 signals:
   /// Signal emitted when someone uses setWorkspace() on MWView
@@ -80,8 +85,9 @@ private:
   void initLayout();
   void loadSettings();
   void saveSettings();
-  void updateDisplay();
   void checkRangeLimits();
+  void findRangeFull();
+  void setVectorDimensions();
 
   Ui::MWView m_uiForm;
   /// Spectrogram plot of MWView
@@ -94,8 +100,13 @@ private:
   boost::shared_ptr<MantidQt::API::MdSettings>  m_mdSettings;
   /// Workspace being shown
   Mantid::API::MatrixWorkspace_sptr m_workspace;
-
+  /// The calculated range of values in the FULL data set
+  QwtDoubleInterval m_colorRangeFull;
+  Mantid::API::MDNormalization m_normalization;
+  /// Vector of the dimensions to show.
+  std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;
 };
+
 
 } // namespace MantidWidgets
 } // namespace MantidQt
