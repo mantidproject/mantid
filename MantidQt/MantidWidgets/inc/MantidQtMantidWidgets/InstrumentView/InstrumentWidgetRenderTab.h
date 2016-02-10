@@ -120,4 +120,4 @@ namespace MantidQt
 		};
 	}//MantidWidgets
 }//MantidQt
-#endif /*INSTRUMENTWIDGETRENDERTAB_H_*/*/
+#endif /*INSTRUMENTWIDGETRENDERTAB_H_*/
