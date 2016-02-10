@@ -26,7 +26,9 @@
 #include <vtkTransform.h>
 #include <vtkTransformPolyDataFilter.h>
 #include <vtkPVGlyphFilter.h>
+#include <vtkRegularPolygonSource.h>
 #include <vtkSmartPointer.h>
+#include <vtkNew.h>
 
 #include <vtkLineSource.h>
 #include <cmath>
@@ -188,16 +190,43 @@ namespace VATES
       const Mantid::Geometry::PeakShape& shape = m_workspace->getPeakPtr(i)->getPeakShape();
 
       // Pick the radius up from the factory if possible, otherwise use the user-provided value.
-      vtkPolyDataAlgorithm* shapeMarker = NULL;
+      vtkPolyDataAlgorithm *shapeMarker = nullptr;
       if(shape.shapeName() == Mantid::DataObjects::PeakShapeSpherical::sphereShapeName())
       {
         const Mantid::DataObjects::PeakShapeSpherical& sphericalShape = dynamic_cast<const Mantid::DataObjects::PeakShapeSpherical&>(shape);
         double peakRadius = sphericalShape.radius();
-        vtkSphereSource *sphere = vtkSphereSource::New();
+        /*vtkSphereSource *sphere = vtkSphereSource::New();
         sphere->SetRadius(peakRadius);
         sphere->SetPhiResolution(resolution);
         sphere->SetThetaResolution(resolution);
         shapeMarker = sphere;
+        */
+        auto polygonSource = vtkRegularPolygonSource::New();
+        polygonSource->GeneratePolygonOff(); // Uncomment this line to generate
+                                             // only the outline of the circle
+        polygonSource->SetNumberOfSides(resolution * 10);
+        polygonSource->SetRadius(peakRadius);
+        polygonSource->SetCenter(0, 0, 0);
+
+        polygonSource->SetNormal(0, 0, 1);
+        vtkPVGlyphFilter *glyphFilter1 = vtkPVGlyphFilter::New();
+        glyphFilter1->SetInputData(peakDataSet);
+        glyphFilter1->SetSourceConnection(polygonSource->GetOutputPort());
+        glyphFilter1->Update();
+        vtkPolyData *glyphed1 = glyphFilter1->GetOutput();
+        appendFilter->AddInputData(glyphed1);
+
+        polygonSource->SetNormal(0, 1, 0);
+        vtkPVGlyphFilter *glyphFilter2 = vtkPVGlyphFilter::New();
+        glyphFilter2->SetInputData(peakDataSet);
+        glyphFilter2->SetSourceConnection(polygonSource->GetOutputPort());
+        glyphFilter2->Update();
+        vtkPolyData *glyphed2 = glyphFilter2->GetOutput();
+        appendFilter->AddInputData(glyphed2);
+
+        polygonSource->SetNormal(1, 0, 0);
+        shapeMarker = polygonSource;
+
       }
       else if (shape.shapeName() == Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName())
       {
