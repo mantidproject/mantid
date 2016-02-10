@@ -96,10 +96,10 @@ void CrossCorrelate::exec() {
     throw std::runtime_error(
         "Must specify WorkspaceIndexMin<WorkspaceIndexMax");
   // Get the number of spectra in range specmin to specmax
-  int nspecs = specmax - specmin;
+  int nspecs = 1 + specmax - specmin;
   // Indexes of all spectra in range
   std::vector<size_t> indexes(boost::make_counting_iterator(specmin),
-                              boost::make_counting_iterator(specmax));
+                              boost::make_counting_iterator(specmax+1));
 
   std::ostringstream mess;
   if (nspecs == 0) // Throw if no spectra in range
