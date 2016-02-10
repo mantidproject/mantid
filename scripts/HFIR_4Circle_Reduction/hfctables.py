@@ -83,7 +83,7 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
         """
         # check requirement
         assert isinstance(vec_hkl, list), 'Input HKL must be a list but not %s.' % str(type(vec_hkl))
-        assert len(vec_hkl, 3)
+        assert len(vec_hkl) == 3
 
         # locate
         index_h = Peak_Integration_Table_Setup.index(('H', 'float'))
@@ -97,7 +97,7 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
         """
         Set up Q value
         """
-        assert len(vec_q, 3)
+        assert len(vec_q) == 3
 
         # locate
         index_q_x = Peak_Integration_Table_Setup.index(('Q_x', 'float'))
@@ -176,7 +176,7 @@ class UBMatrixTable(tableBase.NTableWidget):
         :return:
         """
         # Check
-        assert isinstance(matrix, numpy.ndarray)
+        assert isinstance(matrix, numpy.ndarray), 'Input matrix must be numpy.ndarray, but not %s' % str(type(matrix))
         assert matrix.shape == (3, 3)
 
         for i in xrange(3):
@@ -300,7 +300,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
     def set_hkl(self, i_row, hkl, error=None):
         """
         Set HKL to table
-        :param irow:
+        :param i_row:
         :param hkl:
         """
         # Check
@@ -395,7 +395,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return return_list
 
-
     def get_merged_ws_name(self, i_row):
         """
         Get ...
@@ -457,7 +456,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
     def set_pt_by_row(self, row_number, pt_list):
         """
-        :param scan_no:
+        :param row_number:
         :param pt_list:
         :return:
         """
@@ -583,8 +582,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
         """
         tableBase.NTableWidget.__init__(self, parent)
 
-        self._myScanInfoDict = dict()
-        self._myScanList = list()
+        self._myScanSummaryList = list()
 
         return
 
@@ -614,12 +612,25 @@ class ScanSurveyTable(tableBase.NTableWidget):
         """
         assert isinstance(num_rows, int)
         assert num_rows > 0
-        assert len(self._myScanList) > 0
+        assert len(self._myScanSummaryList) > 0
 
-        for i_ref in xrange(min(num_rows, len(self._myScanList))):
+        for i_ref in xrange(min(num_rows, len(self._myScanSummaryList))):
             # get counts
+            scan_summary = self._myScanSummaryList[i_ref]
+            # check
+            assert isinstance(scan_summary, list)
+            assert len(scan_summary) == len(self._myColumnNameList) - 1
+            # modify for appending to table
+            row_items = scan_summary[:]
+            max_count = row_items.pop(0)
+            row_items.insert(2, max_count)
+            row_items.append(False)
+            # append
+            self.append_row(row_items)
+
+            """
             counts = self._myScanList[i_ref]
-            dict_value = self._myScanInfoDict[counts]
+            dict_value = self._myScanSummaryList[counts]
             if isinstance(dict_value, tuple):
                 row_items = list(dict_value)
                 row_items.insert(2, counts)
@@ -636,25 +647,23 @@ class ScanSurveyTable(tableBase.NTableWidget):
             else:
                 err_msg = 'Type %s is not a supported value type of counts dictionary.' % str(type(dict_value))
                 raise RuntimeError(err_msg)
+            """
         # END-FOR
 
         return
 
-    def set_survey_result(self, survey_scan_dict):
+    def set_survey_result(self, scan_summary_list):
         """
 
-        :param survey_scan_dict:
+        :param scan_summary_list:
         :return:
         """
         # check
-        assert isinstance(survey_scan_dict, dict)
+        assert isinstance(scan_summary_list, list)
 
-        # Sort and add to table
-        scan_list = survey_scan_dict.keys()
-        scan_list.sort(reverse=True)
-
-        self._myScanInfoDict = survey_scan_dict
-        self._myScanList = scan_list
+        # Sort and set to class variable
+        scan_summary_list.sort(reverse=True)
+        self._myScanSummaryList = scan_summary_list
 
         return
 

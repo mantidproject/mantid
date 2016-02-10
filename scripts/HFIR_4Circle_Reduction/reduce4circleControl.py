@@ -222,7 +222,7 @@ class CWSCDReductionControl(object):
         self._cacheDataOnly = False
 
         # Dictionary to store survey information
-        self._surveyDict = dict()
+        self._scanSummaryList = list()
 
         # Tuple to hold the result of refining UB
         self._refinedUBTup = None
@@ -631,6 +631,16 @@ class CWSCDReductionControl(object):
 
         return array2d
 
+    def get_refined_ub_matrix(self):
+        """
+        Get refined UB matrix and lattice parameters
+        :return:
+        """
+        assert isinstance(self._refinedUBTup, tuple)
+        assert len(self._refinedUBTup) == 4
+
+        return self._refinedUBTup[1], self._refinedUBTup[2], self._refinedUBTup[3]
+
     def get_sample_log_value(self, exp_number, scan_number, pt_number, log_name):
         """
         Get sample log's value
@@ -884,27 +894,31 @@ class CWSCDReductionControl(object):
 
         return
 
-    def load_scan_survey_file(self, csv_file_name):
+    @staticmethod
+    def load_scan_survey_file(csv_file_name):
         """ Load scan survey from a csv file
         :param csv_file_name:
-        :return:
+        :return: 2-tuple as header and list
         """
-        # TODO/NOW/1st - documentation + requirements test
+        # check
+        assert isinstance(csv_file_name, str)
+        row_list = list()
 
-        # open file
+        # open file and parse
         with open(csv_file_name, 'r') as csv_file:
             reader = csv.reader(csv_file, delimiter=',', quotechar='|')
+
+            # get header
             header = reader.next()
+
+            # body
             for row in reader:
-                # ignore the first line as title
-                print row, type(row)
+                row_list.append(row)
+                # print row, type(row)
+            # END-FOR
+        # END-WITH
 
-                # ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L'] <type 'list'>
-                # ['32.0', '305', '35', '-0.1318', '-0.0102', '12.9921'] <type 'list'>
-                # ...
-                # ['24.0', '(306, 20, -0.142, -0.0109, 13.9916)', '(308, 33, -0.1623, -0.0125, 15.9903)'] <type 'list'>
-
-        return
+        return header, row_list
 
     def load_spice_scan_file(self, exp_no, scan_no, spice_file_name=None):
         """
@@ -1356,10 +1370,10 @@ class CWSCDReductionControl(object):
             assert peak_ws is not tuple
 
             # Combine peak workspace
-            ub_peak_ws = api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws_name,
-                                                    RHSWorkspace=peak_ws,
-                                                    CombineMatchingPeaks=False,
-                                                    OutputWorkspace=ub_peak_ws_name)
+            api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws_name,
+                                       RHSWorkspace=peak_ws,
+                                       CombineMatchingPeaks=False,
+                                       OutputWorkspace=ub_peak_ws_name)
         # END-FOR(i_peak_info)
 
         # Calculate UB matrix
@@ -1396,7 +1410,10 @@ class CWSCDReductionControl(object):
         """
         # Check requirements
         assert isinstance(file_name, str)
-        assert len(self._surveyDict) > 0
+        assert len(self._scanSummaryList) > 0
+
+        # Sort
+        self._scanSummaryList.sort(reverse=True)
 
         # File name
         if file_name.endswith('.csv') is False:
@@ -1407,21 +1424,13 @@ class CWSCDReductionControl(object):
         with open(file_name, 'w') as csvfile:
             csv_writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow(titles)
-            for counts in self._surveyDict.keys():
-                survey_value = self._surveyDict[counts]
 
-                if isinstance(survey_value, tuple):
-                    # single value mode: create a single element list
-                    survey_value = [survey_value]
+            for scan_summary in self._scanSummaryList:
+                # check type
+                assert isinstance(scan_summary, list)
 
-                # output
-                for items in survey_value:
-                    # convert tuple to list
-                    items = list(items)
-                    # insert counts as the first element
-                    items.insert(0, counts)
-                    # write to csv
-                    csv_writer.writerow(items)
+                # write to csv
+                csv_writer.writerow(scan_summary)
             # END-FOR
         # END-WITH
 
@@ -1583,7 +1592,7 @@ class CWSCDReductionControl(object):
         """ Load all the SPICE ascii file to get the big picture such that
         * the strongest peaks and their HKL in order to make data reduction and analysis more convenient
         :param exp_number: experiment number
-        :return: a dictionary. key = max_count
+        :return: a list. first item is max_count
         """
         # Check
         assert isinstance(exp_number, int)
@@ -1593,7 +1602,7 @@ class CWSCDReductionControl(object):
             end_scan = MAX_SCAN_NUMBER
 
         # Output workspace
-        counts_dict = dict()
+        scan_sum_list = list()
 
         # Download and
         for scan_number in xrange(start_scan, end_scan):
@@ -1618,6 +1627,8 @@ class CWSCDReductionControl(object):
 
                 max_count = 0
                 max_row = 0
+                max_h = max_k = max_l = 0
+
                 for i_row in xrange(num_rows):
                     det_count = spice_table_ws.cell(i_row, 5)
                     h = spice_table_ws.cell(i_row, h_col_index)
@@ -1626,14 +1637,13 @@ class CWSCDReductionControl(object):
                     if det_count > max_count:
                         max_count = det_count
                         max_row = i_row
+                        max_h = h
+                        max_k = k
+                        max_l = l
                 # END-FOR
-                if max_count in counts_dict:
-                    # in case that there are some scans that have same maximum counts
-                    if isinstance(counts_dict[max_count], tuple):
-                        counts_dict[max_count] = [counts_dict[max_count]]
-                    counts_dict[max_count].append((scan_number, max_row, h, k, l))
-                else:
-                    counts_dict[max_count] = (scan_number, max_row, h, k, l)
+
+                scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l])
+
             except RuntimeError as e:
                 print e
                 return False, str(e)
@@ -1642,9 +1652,9 @@ class CWSCDReductionControl(object):
 
         # END-FOR (scan_number)
 
-        self._surveyDict = counts_dict
+        self._scanSummaryList = scan_sum_list
 
-        return counts_dict
+        return scan_sum_list
 
 
 def get_spice_file_name(exp_number, scan_number):

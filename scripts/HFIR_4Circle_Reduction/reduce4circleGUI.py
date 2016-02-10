@@ -804,13 +804,13 @@ class MainWindow(QtGui.QMainWindow):
                                                               file_filter))
 
         # call controller to load
-        counts_dict = self._myControl.load_scan_survey_file(csv_file_name)
-        assert isinstance(counts_dict, dict), 'Returned value from load scan survey file must be a dictionary.'
+        header, scan_sum_list = self._myControl.load_scan_survey_file(csv_file_name)
+        assert isinstance(scan_sum_list, list), 'Returned value from load scan survey file must be a dictionary.'
 
         # set the table
-        self.ui.tableWidget_surveyTable.set_survey_result(counts_dict)
+        self.ui.tableWidget_surveyTable.set_survey_result(scan_sum_list)
         self.ui.tableWidget_surveyTable.remove_all_rows()
-        self.ui.tableWidget_surveyTable.show_survey(num_rows)
+        self.ui.tableWidget_surveyTable.show_reflections(num_rows)
 
         return
 
@@ -1164,10 +1164,8 @@ class MainWindow(QtGui.QMainWindow):
         max_number = int(self.ui.lineEdit_numSurveyOutput.text())
 
         # Get value
-        counts_dict = self._myControl.survey(exp_number, start_scan, end_scan)
-        print '[DB-BAT] Counts dictionary: ', counts_dict
-        self.ui.tableWidget_surveyTable.set_survey_result(counts_dict)
-
+        scan_sum_list = self._myControl.survey(exp_number, start_scan, end_scan)
+        self.ui.tableWidget_surveyTable.set_survey_result(scan_sum_list)
         self.ui.tableWidget_surveyTable.show_reflections(max_number)
 
         return

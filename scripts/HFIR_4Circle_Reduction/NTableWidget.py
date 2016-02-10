@@ -211,6 +211,17 @@ class NTableWidget(QtGui.QTableWidget):
 
         return
 
+    def remove_all_rows(self):
+        """
+        Remove all rows
+        :return:
+        """
+        num_rows = self.rowCount()
+        for i_row in xrange(1, num_rows+1):
+            self.removeRow(num_rows - i_row)
+
+        return
+
     def select_all_rows(self, status):
         """
         Purpose: select or deselect all rows in the table if applied
@@ -232,7 +243,7 @@ class NTableWidget(QtGui.QTableWidget):
         num_rows = self.rowCount()
         for row_index in xrange(num_rows):
             if self.get_cell_value(row_index, status_col_index) != status:
-                self.set_value_cell(row_index, status_col_index, status)
+                self.update_cell_value(row_index, status_col_index, status)
         # END-FOR
 
         return
@@ -321,8 +332,8 @@ class NTableWidget(QtGui.QTableWidget):
                 cell_item.setText(_fromUtf8(str(value)))
         elif cell_item is None and cell_widget is not None:
             # TableCellWidget
-            if isinstance(cell_item, QtGui.QCheckBox) is True:
-                cell_item.setChecked(value)
+            if isinstance(cell_widget, QtGui.QCheckBox) is True:
+                cell_widget.setChecked(value)
             else:
                 raise TypeError('Cell of type %s is not supported.' % str(type(cell_item)))
         else:
