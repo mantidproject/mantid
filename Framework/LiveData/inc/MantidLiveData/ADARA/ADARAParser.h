@@ -28,6 +28,29 @@ public:
 
   /// Destructor
   virtual ~Parser();
+  
+  ssize_t last_bytes_read;
+  ssize_t last_last_bytes_read;
+  ssize_t last_pkts_parsed;
+  ssize_t last_last_pkts_parsed;
+  unsigned long last_total_bytes;
+  unsigned long last_last_total_bytes;
+  unsigned int last_total_packets;
+  unsigned int last_last_total_packets;
+  unsigned int last_read_count;
+  unsigned int last_last_read_count;
+  unsigned int last_loop_count;
+  unsigned int last_last_loop_count;
+  double last_parse_elapsed_total;
+  double last_last_parse_elapsed_total;
+  double last_read_elapsed_total;
+  double last_last_read_elapsed_total;
+  double last_parse_elapsed;
+  double last_last_parse_elapsed;
+  double last_read_elapsed;
+  double last_last_read_elapsed;
+  double last_elapsed;
+  double last_last_elapsed;
 
 protected:
   /** @name Buffer Manipulation Functions
@@ -37,7 +60,7 @@ protected:
     *
     * bufferFillAddress() returns the address at which to begin
     * placing additional data. bufferFillLength() returns the
-    *  maximum amount of data that can be appended at that address.
+    * maximum amount of data that can be appended at that address.
     * The address is guaranteed to be non-NULL if the length is
     * non-zero, but will be NULL if length is zero.
     * Users must not cache the return values from these functions
@@ -169,7 +192,7 @@ private:
   unsigned int m_oversize_len;
   unsigned int m_oversize_offset;
 
-  std::map<PacketType::Enum, uint64_t> m_discarded_packets;
+  std::map<PacketType::Type, uint64_t>	m_discarded_packets;
 };
 
 } /* namespacce ADARA */

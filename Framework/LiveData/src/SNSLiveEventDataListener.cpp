@@ -210,7 +210,13 @@ void SNSLiveEventDataListener::run() {
     }
 
     // First thing to do is send a hello packet
-    uint32_t helloPkt[5] = {4, ADARA::PacketType::CLIENT_HELLO_V0, 0, 0, 0};
+    uint32_t typeVal =
+      ADARA_PKT_TYPE( ADARA::PacketType::Type::CLIENT_HELLO_TYPE, 0);
+    uint32_t helloPkt[5] = {4, typeVal, 0, 0, 0};
+    // TODO: The packet version should be bumped to 1 and we should add
+    // the extra flags field.  This will have to wait until we're ready
+    // to update the StartLiveListener GUI, though.
+      
     Poco::Timestamp now;
     uint32_t now_usec =
         static_cast<uint32_t>(now.epochMicroseconds() - now.epochTime());
@@ -1511,7 +1517,7 @@ bool SNSLiveEventDataListener::ignorePacket(
 
   // Are we looking for the start of the run?
   if (m_filterUntilRunStart) {
-    if (hdr.type() == ADARA::PacketType::RUN_STATUS_V0 &&
+    if (hdr.base_type() == ADARA::PacketType::Type::RUN_STATUS_TYPE &&
         status == ADARA::RunStatus::NEW_RUN) {
       // A new run is starting...
       m_ignorePackets = false;
