@@ -8,8 +8,8 @@
 try:
     import pymantidplot
     from pymantidplot import *
-except ImportError, Exc:
-    raise ImportError('Could not import mantidplot (when trying to import pymantidplot). Something is broken in this installation, please check.'+str(Exc))
+except ImportError:
+    raise ImportError('Could not import mantidplot (when trying to import pymantidplot). Something is broken in this installation, please check.')
 
 try:
     # import pyplot and also bring it into the standard MantidPlot namespace

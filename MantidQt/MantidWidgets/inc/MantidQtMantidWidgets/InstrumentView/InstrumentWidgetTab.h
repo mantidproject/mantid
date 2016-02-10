@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTWIDGETTAB_H
 #define INSTRUMENTWIDGETTAB_H
 
-#include "..\WidgetDllOption.h"
+#include <WidgetDllOption.h>
 #include "InstrumentWidgetTypes.h"
 
 #include <QFrame>

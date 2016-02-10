@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTWIDGETTREETAB_H_
 #define INSTRUMENTWIDGETTREETAB_H_
 
-#include "..\WidgetDllOption.h"
+#include <WidgetDllOption.h>
 #include "InstrumentWidgetTab.h"
 
 #include <QModelIndex>

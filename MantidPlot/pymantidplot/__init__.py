@@ -23,8 +23,6 @@ from mantidqtpython import GraphOptions
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
 from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker, InstrumentView)
 				  
-print dir(mantidqtpython)
-
 # Make the ApplicationWindow instance accessible from the mantidplot namespace
 from _qti import app
 

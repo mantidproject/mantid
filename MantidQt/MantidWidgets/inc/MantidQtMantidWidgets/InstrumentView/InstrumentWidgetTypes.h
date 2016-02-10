@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTWIDGETTYPES_H_
 #define INSTRUMENTWIDGETTYPES_H_
 
-#include "..\WidgetDllOption.h"
+#include <WidgetDllOption.h>
 
 namespace MantidQt
 {

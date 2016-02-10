@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTWIDGETMASKTAB_H_
 #define INSTRUMENTWIDGETMASKTAB_H_
 
-#include "..\WidgetDllOption.h"
+#include <WidgetDllOption.h>
 #include "InstrumentWidgetTab.h"
 #include "MantidGLWidget.h"
 

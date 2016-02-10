@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTWIDGETPICKTAB_H_
 #define INSTRUMENTWIDGETPICKTAB_H_
 
-#include "..\WidgetDllOption.h"
+#include <WidgetDllOption.h>
 #include "InstrumentWidgetTab.h"
 #include "MantidGLWidget.h"
 
