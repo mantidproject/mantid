@@ -258,9 +258,27 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_integrate_peaks(self):
-        """
+        """ Integrate peaks
         Integrate peaks
         :return:
+        """
+        # Determine the workspace/scan to integrate
+        merged_ws_name = str(self.ui.comboBox_mergedScanWSName.currentText()).strip()
+        if len(merged_ws_name) == 0:
+            # merge a scan
+            scan_number = gutil.parse_integers_editors([self.ui.lineEdit_scanIntegratePeak])[0]
+            if scan_number is None:
+                self.pop_one_button_dialog('Scan number is not given!')
+                return
+            pt_list = gutil.parse_integer_list(str(self.ui.lineEdit_ptNumListIntPeak.text()))
+            self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_list, target_ws_name=None,
+                                                 target_frame=None)
+        else:
+            if self._myControl.does_workspace_exist(merged_ws_name) is False:
+                self.pop_one_button_dialog('Merged MDEventWorkspace %s does not exist!' % merged_ws_name)
+                return
+        # END-IF-ELSE
+
         """
         # Get peak integration parameters
         line_editors = [self.ui.lineEdit_peakRadius,
@@ -294,6 +312,7 @@ class MainWindow(QtGui.QMainWindow):
                                             peak_radius, bkgd_inner_radius, bkgd_outer_radius,
                                             is_cylinder)
         # END-FOR
+        """
 
         return
 
@@ -957,9 +976,10 @@ class MainWindow(QtGui.QMainWindow):
             merged_name = '???'
             group_name = '???'
 
-            status, ret_tup = self._myControl.merge_pts_in_scan_v2(exp_no=None, scan_no=scan_no,
-                                                                   target_ws_name=out_ws_name,
-                                                                   target_frame=frame)
+            status, ret_tup = self._myControl.merge_pts_in_scan(exp_no=None, scan_no=scan_no,
+                                                                pt_list=[],
+                                                                target_ws_name=out_ws_name,
+                                                                target_frame=frame)
             merge_status = 'Done'
             merged_name = ret_tup[0]
             group_name = ret_tup[1]

@@ -1023,12 +1023,13 @@ class CWSCDReductionControl(object):
 
         return
 
-    def merge_pts_in_scan(self, exp_no, scan_no, target_ws_name, target_frame):
+    def merge_pts_in_scan(self, exp_no, scan_no, pt_list, target_ws_name, target_frame):
         """
         Merge Pts in Scan
         All the workspaces generated as internal results will be grouped
         :param exp_no:
         :param scan_no:
+        :param pt_list:
         :param target_ws_name:
         :param target_frame:
         :return: (merged workspace name, workspace group name)
@@ -1038,6 +1039,7 @@ class CWSCDReductionControl(object):
             exp_no = self._expNumber
         assert isinstance(exp_no, int)
         assert isinstance(scan_no, int)
+        assert isinstance(pt_list, list)
         assert isinstance(target_frame, str)
         assert isinstance(target_ws_name, str)
 
@@ -1053,119 +1055,26 @@ class CWSCDReductionControl(object):
         else:
             raise RuntimeError('Target frame %s is not supported.' % target_frame)
 
-        # Process data and save
-        status, pt_num_list = self.get_pt_numbers(exp_no, scan_no, True)
-        if status is False:
-            err_msg = pt_num_list
-            return False, err_msg
+        # Get list of Pt.
+        if len(pt_list) > 0:
+            # user specified
+            pt_num_list = pt_list
         else:
-            print '[DB] Number of Pts for Scan %d is %d' % (scan_no, len(pt_num_list))
-            print '[DB] Data directory: %s' % self._dataDir
-        max_pts = 0
-        ws_names_str = ''
-        ws_names_to_group = ''
-
-        for pt in pt_num_list:
-            try:
-                self.download_spice_xml_file(scan_no, pt, overwrite=False)
-                api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no, ScanList='%d' % scan_no, PtLists='-1,%d' % pt,
-                                              DataDirectory=self._dataDir,
-                                              GenerateVirtualInstrument=False,
-                                              OutputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
-                                              DetectorTableWorkspace='MockDetTable')
-
-                out_q_name = 'HB3A_Exp%d_Scan%d_Pt%d_MD' % (exp_no, scan_no, pt)
-                api.ConvertCWSDExpToMomentum(InputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
-                                             CreateVirtualInstrument=False,
-                                             OutputWorkspace=out_q_name,
-                                             Directory=self._dataDir)
-
-                ws_names_to_group += out_q_name + ','
-                if target_frame == 'hkl':
-                    out_hkl_name = 'HKL_Scan%d_Pt%d' % (scan_no, pt)
-                    api.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
-                                           UBMatrix=ub_matrix_1d,
-                                           OutputWorkspace=out_hkl_name)
-                    ws_names_str += out_hkl_name + ','
-                    ws_names_to_group += out_hkl_name + ','
-                else:
-                    ws_names_str += out_q_name + ','
-
-            except RuntimeError as e:
-                print '[Error] Reducing scan %d pt %d due to %s' % (scan_no, pt, str(e))
-                continue
-
+            # default: all Pt. of scan
+            status, pt_num_list = self.get_pt_numbers(exp_no, scan_no, True)
+            if status is False:
+                err_msg = pt_num_list
+                return False, err_msg
             else:
-                max_pts = pt
-        # END-FOR
-
-        # Merge
-        if target_frame == 'qsample':
-            out_ws_name = target_ws_name + '_QSample'
-        elif target_frame == 'hkl':
-            out_ws_name = target_ws_name + '_HKL'
-        else:
-            raise RuntimeError('Impossible to have target frame %s' % target_frame)
-
-        ws_names_str = ws_names_str[:-1]
-        api.MergeMD(InputWorkspaces=ws_names_str, OutputWorkspace=out_ws_name, SplitInto=max_pts)
-        out_ws = AnalysisDataService.retrieve(out_ws_name)
-        self._mergedWSManager[out_ws_name] = (out_ws, target_frame, exp_no, scan_no, None)
-
-        # Group workspaces
-        group_name = 'Group_Exp406_Scan%d' % scan_no
-        api.GroupWorkspaces(InputWorkspaces=ws_names_to_group, OutputWorkspace=group_name)
-        spice_table_name = get_spice_table_name(exp_no, scan_no)
-        api.GroupWorkspaces(InputWorkspaces='%s,%s' % (group_name, spice_table_name), OutputWorkspace=group_name)
-
-        ret_tup = out_ws_name, group_name
-
-        return ret_tup
-
-    def merge_pts_in_scan_v2(self, exp_no, scan_no, target_ws_name, target_frame):
-        """
-        Merge Pts in Scan
-        All the workspaces generated as internal results will be grouped
-        :param exp_no:
-        :param scan_no:
-        :param target_ws_name:
-        :param target_frame:
-        :return: (merged workspace name, workspace group name)
-        """
-        # Check
-        if exp_no is None:
-            exp_no = self._expNumber
-        assert isinstance(exp_no, int)
-        assert isinstance(scan_no, int)
-        assert isinstance(target_frame, str)
-        assert isinstance(target_ws_name, str)
-
-        ub_matrix_1d = None
-
-        # Target frame
-        if target_frame.lower().startswith('hkl'):
-            target_frame = 'hkl'
-            ub_matrix_1d = self._myUBMatrixDict[self._expNumber].reshape(9,)
-        elif target_frame.lower().startswith('q-sample'):
-            target_frame = 'qsample'
-
-        else:
-            raise RuntimeError('Target frame %s is not supported.' % target_frame)
-
-        # Process data and save
-        status, pt_num_list = self.get_pt_numbers(exp_no, scan_no, True)
-        if status is False:
-            err_msg = pt_num_list
-            return False, err_msg
-        else:
-            print '[DB] Number of Pts for Scan %d is %d' % (scan_no, len(pt_num_list))
-            print '[DB] Data directory: %s' % self._dataDir
+                print '[DB] Number of Pts for Scan %d is %d' % (scan_no, len(pt_num_list))
+                print '[DB] Data directory: %s' % self._dataDir
+        # END-IF
         max_pts = 0
         ws_names_str = ''
         ws_names_to_group = ''
 
         # construct a list of Pt as the input of CollectHB3AExperimentInfo
-        pt_list_str = '-1'
+        pt_list_str = '-1'  # header
         err_msg = ''
         for pt in pt_num_list:
             # Download file

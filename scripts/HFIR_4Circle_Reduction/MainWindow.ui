@@ -193,7 +193,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>5</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -2298,7 +2298,13 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QComboBox" name="comboBox_mergedScanWSName"/>
+               <widget class="QComboBox" name="comboBox_mergedScanWSName">
+                <item>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </item>
+               </widget>
               </item>
               <item row="1" column="7">
                <widget class="QCheckBox" name="checkBox_integrateOnEdge">
@@ -2310,7 +2316,7 @@ p, li { white-space: pre-wrap; }
               <item row="2" column="7">
                <widget class="QComboBox" name="comboBox_cylinderIntOption"/>
               </item>
-              <item row="1" column="8">
+              <item row="0" column="8">
                <widget class="QPushButton" name="pushButton_integratePeak">
                 <property name="font">
                  <font>
@@ -2323,7 +2329,7 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
-              <item row="0" column="8">
+              <item row="1" column="8">
                <widget class="QPushButton" name="pushButton_findPeaks">
                 <property name="font">
                  <font>
@@ -2335,6 +2341,22 @@ p, li { white-space: pre-wrap; }
                  <string>Find Peaks</string>
                 </property>
                </widget>
+              </item>
+              <item row="2" column="8">
+               <widget class="QPushButton" name="pushButton_loadMask">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Load Mask</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="7">
+               <widget class="QComboBox" name="comboBox_maskWSList"/>
               </item>
              </layout>
             </item>
