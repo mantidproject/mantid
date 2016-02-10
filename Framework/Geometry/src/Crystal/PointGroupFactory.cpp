@@ -57,9 +57,9 @@ bool PointGroupFactoryImpl::isSubscribed(const std::string &hmSymbol) const {
 std::vector<std::string>
 PointGroupFactoryImpl::getAllPointGroupSymbols() const {
   std::vector<std::string> pointGroups;
-
-  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
-    pointGroups.push_back(it->first);
+  pointGroups.reserve(m_generatorMap.size());
+  for (const auto &generator : m_generatorMap) {
+    pointGroups.push_back(generator.first);
   }
 
   return pointGroups;
@@ -71,11 +71,11 @@ std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(
     const PointGroup::CrystalSystem &crystalSystem) {
   std::vector<std::string> pointGroups;
 
-  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
-    PointGroup_sptr pointGroup = getPrototype(it->first);
+  for (auto &generator : m_generatorMap) {
+    PointGroup_sptr pointGroup = getPrototype(generator.first);
 
     if (pointGroup->crystalSystem() == crystalSystem) {
-      pointGroups.push_back(it->first);
+      pointGroups.push_back(generator.first);
     }
   }
 
@@ -150,7 +150,7 @@ void PointGroupFactoryImpl::subscribe(
     throw std::runtime_error("Cannot register null-generator.");
   }
 
-  m_generatorMap.insert(std::make_pair(generator->getHMSymbol(), generator));
+  m_generatorMap.emplace(generator->getHMSymbol(), generator);
 }
 
 PointGroup_sptr PointGroupFactoryImpl::constructFromPrototype(

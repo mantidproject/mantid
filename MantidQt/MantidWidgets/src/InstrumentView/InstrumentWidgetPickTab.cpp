@@ -884,7 +884,7 @@ namespace MantidQt
 				//attempt to insert this will fail silently if the key already exists
 				if (mapCmptToNameVector.find(paramCompId) == mapCmptToNameVector.end())
 				{
-					mapCmptToNameVector.insert(std::pair<Mantid::Geometry::ComponentID, std::vector<std::string> >(paramCompId, std::vector<std::string>()));
+					mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
 				}
 				//get the vector out and add the name
 				mapCmptToNameVector[paramCompId].push_back(paramName);

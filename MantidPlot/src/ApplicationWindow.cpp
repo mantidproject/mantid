@@ -11561,7 +11561,7 @@ void ApplicationWindow::populateMantidTreeWidget(const QString &s) {
           // execute the algorithm
           alg->execute();
           // name picked because random and won't ever be used.
-          inputWsVec.push_back("boevsMoreBoevs");
+          inputWsVec.emplace_back("boevsMoreBoevs");
         }
 
         // Group the workspaces as they were when the project was saved

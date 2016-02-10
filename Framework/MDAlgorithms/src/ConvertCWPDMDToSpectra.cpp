@@ -53,10 +53,8 @@ void ConvertCWPDMDToSpectra::init() {
                                                          Direction::Output),
                   "Name of the output workspace for reduced data.");
 
-  std::vector<std::string> vecunits;
-  vecunits.push_back("2theta");
-  vecunits.push_back("dSpacing");
-  vecunits.push_back("Momentum Transfer (Q)");
+  std::vector<std::string> vecunits{"2theta", "dSpacing",
+                                    "Momentum Transfer (Q)"};
   auto unitval = boost::make_shared<ListValidator<std::string>>(vecunits);
   declareProperty("UnitOutput", "2theta", unitval,
                   "Unit of the output workspace.");
@@ -144,7 +142,7 @@ void ConvertCWPDMDToSpectra::exec() {
               << " must exist for run " << runid << ".";
         throw std::runtime_error(errss.str());
       }
-      map_runWavelength.insert(std::make_pair(runid, thislambda));
+      map_runWavelength.emplace(runid, thislambda);
     }
   }
 
@@ -695,8 +693,7 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
   const Run &srcrun = lastexpinfo->run();
 
   const std::vector<Kernel::Property *> &vec_srcprop = srcrun.getProperties();
-  for (size_t i = 0; i < vec_srcprop.size(); ++i) {
-    Property *p = vec_srcprop[i];
+  for (auto p : vec_srcprop) {
     targetrun.addProperty(p->clone());
     g_log.debug() << "Cloned property " << p->name() << "\n";
   }

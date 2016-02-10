@@ -572,8 +572,7 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
       m_parents = 0;
       return makeInstrumentMap(countsWS);
     }
-    mymap.insert(std::pair<Mantid::Geometry::ComponentID, size_t>(
-        anc[m_parents - 1]->getComponentID(), i));
+    mymap.emplace(anc[m_parents - 1]->getComponentID(), i);
   }
 
   std::vector<std::vector<size_t>> speclist;
@@ -619,19 +618,17 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
   std::vector<double> medianvec;
   g_log.debug("Calculating the median count rate of the spectra");
 
-  for (size_t j = 0; j < indexmap.size(); ++j) {
+  for (auto hists : indexmap) {
     std::vector<double> medianInput;
-    std::vector<size_t> hists = indexmap.at(j);
-
     const int nhists = static_cast<int>(hists.size());
     // The maximum possible length is that of workspace length
     medianInput.reserve(nhists);
 
     bool checkForMask = false;
     Geometry::Instrument_const_sptr instrument = input->getInstrument();
-    if (instrument != NULL) {
-      checkForMask = ((instrument->getSource() != NULL) &&
-                      (instrument->getSample() != NULL));
+    if (instrument != nullptr) {
+      checkForMask = ((instrument->getSource() != nullptr) &&
+                      (instrument->getSample() != nullptr));
     }
 
     PARALLEL_FOR1(input)

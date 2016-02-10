@@ -139,8 +139,8 @@ void LoadIsawDetCal::exec() {
     std::vector<IComponent_const_sptr> comps;
     inst->getChildren(comps, true);
 
-    for (size_t i = 0; i < comps.size(); i++) {
-      std::string bankName = comps[i]->getName();
+    for (auto &comp : comps) {
+      std::string bankName = comp->getName();
       boost::trim(bankName);
       boost::erase_all(bankName, bankPart);
       int bank = 0;
@@ -412,7 +412,7 @@ void LoadIsawDetCal::center(double x, double y, double z, std::string detname,
   Instrument_sptr inst = getCheckInst(ws);
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
-  if (comp == 0) {
+  if (comp == nullptr) {
     std::ostringstream mess;
     mess << "Component with name " << detname << " was not found.";
     g_log.error(mess.str());

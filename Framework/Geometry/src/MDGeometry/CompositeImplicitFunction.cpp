@@ -21,7 +21,7 @@ CompositeImplicitFunction::~CompositeImplicitFunction() {}
 bool CompositeImplicitFunction::addFunction(
     Mantid::Geometry::MDImplicitFunction_sptr constituentFunction) {
   bool bSuccess = false;
-  if (constituentFunction.get() != NULL) {
+  if (constituentFunction.get() != nullptr) {
     this->m_Functions.push_back(constituentFunction);
     bSuccess = true;
   }
@@ -46,8 +46,8 @@ std::string CompositeImplicitFunction::toXMLString() const {
   functionElement->appendChild(parameterListElement);
 
   std::string functionXML;
-  for (auto it = m_Functions.begin(); it != m_Functions.end(); ++it) {
-    functionXML += (*it)->toXMLString();
+  for (const auto &Function : m_Functions) {
+    functionXML += Function->toXMLString();
   }
   AutoPtr<Text> functionFormatText = pDoc->createTextNode("%s");
   functionElement->appendChild(functionFormatText);

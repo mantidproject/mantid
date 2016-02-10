@@ -67,11 +67,11 @@ void ConvertToMD::init() {
   this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
                                20 /*MaxRecursionDepth*/);
   // additional box controller settings property.
-  auto mustBeMoreThen1 = boost::make_shared<BoundedValidator<int>>();
-  mustBeMoreThen1->setLower(1);
+  auto mustBeMoreThan1 = boost::make_shared<BoundedValidator<int>>();
+  mustBeMoreThan1->setLower(1);
 
   declareProperty(
-      new PropertyWithValue<int>("MinRecursionDepth", 1, mustBeMoreThen1),
+      new PropertyWithValue<int>("MinRecursionDepth", 1, mustBeMoreThan1),
       "Optional. If specified, then all the boxes will be split to this "
       "minimum recursion depth. 0 = no splitting, "
       "1 = one level of splitting, etc. \n Be careful using this since it can "
@@ -302,8 +302,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
       UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
       unitConv.updateConversion(spectra_index);
-      for (size_t i = 0; i < binBoundaries.size(); i++) {
-        binBoundaries[i] = unitConv.convertUnits(binBoundaries[i]);
+      for (double &binBoundarie : binBoundaries) {
+        binBoundarie = unitConv.convertUnits(binBoundarie);
       }
     }
     // sort bin boundaries in case if unit transformation have swapped them.
@@ -320,9 +320,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
     const auto &dets = m_InWS2D->getSpectrum(i)->getDetectorIDs();
     if (!dets.empty()) {
-      std::vector<detid_t> id_vector;
-      std::copy(dets.begin(), dets.end(), std::back_inserter(id_vector));
-      mapping->insert(std::make_pair(id_vector.front(), id_vector));
+      mapping->emplace(*dets.begin(),
+                       std::vector<detid_t>(dets.begin(), dets.end()));
     }
   }
 
@@ -530,11 +529,7 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws) {
     createNewWs = true;
   } else {
     bool shouldOverwrite = getProperty("OverwriteExisting");
-    if (shouldOverwrite) {
-      createNewWs = true;
-    } else {
-      createNewWs = false;
-    }
+    createNewWs = shouldOverwrite;
   }
   return createNewWs;
 }

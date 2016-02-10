@@ -91,7 +91,7 @@ protected:
 
 private:
   /// Keep paramater aliases
-  std::map<std::string, size_t> m_alias;
+  std::map<std::string, size_t> m_aliases;
 };
 
 } // namespace API

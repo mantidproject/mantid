@@ -1,9 +1,8 @@
 #ifndef MANTID_API_ALGORITHM_H_
 #define MANTID_API_ALGORITHM_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include <atomic>
+
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyManagerOwner.h"
@@ -356,9 +355,9 @@ protected:
   virtual void fillHistory();
 
   /// Set to true to stop execution
-  bool m_cancel;
+  std::atomic<bool> m_cancel;
   /// Set if an exception is thrown, and not caught, within a parallel region
-  bool m_parallelException;
+  std::atomic<bool> m_parallelException;
 
   friend class WorkspaceHistory; // Allow workspace history loading to adjust
                                  // g_execCount
@@ -427,7 +426,7 @@ private:
   /// recorded. Applicable to child algs only
   bool m_alwaysStoreInADS; ///< Always store in the ADS, even for child algos
   bool m_runningAsync;     ///< Algorithm is running asynchronously
-  bool m_running;          ///< Algorithm is running
+  std::atomic<bool> m_running; ///< Algorithm is running
   bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
   bool m_isAlgStartupLoggingEnabled; /// Whether to log alg startup and
                                      /// closedown messages from the base class
@@ -459,8 +458,6 @@ private:
   int m_singleGroup;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
-  /// A non-recursive mutex for thread-safety
-  mutable Kernel::Mutex m_mutex;
 };
 
 /// Typedef for a shared pointer to an Algorithm

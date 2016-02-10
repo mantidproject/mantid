@@ -97,8 +97,8 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
                                    "-SEP-", "-OCT-", "-NOV-", "-DEC-"};
 
   bool foundMonth(false);
-  for (size_t i = 0; i < 12; ++i) {
-    if (!boost::ifind_first(fileline, MONTHS[i]).empty()) {
+  for (auto &month : MONTHS) {
+    if (!boost::ifind_first(fileline, month).empty()) {
       foundMonth = true;
       break;
     }
@@ -342,8 +342,8 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
 
     // now read in the Y values
     MantidVec &YOut = outWrksp->dataY(i);
-    for (auto it = YOut.begin(), end = YOut.end(); it != end; ++it) {
-      m_fileIn >> *it;
+    for (double &value : YOut) {
+      m_fileIn >> value;
     }
     prog.report("Loading Y data");
   } // loop on to the next spectrum
@@ -351,8 +351,8 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   // the error values form one big block after the Y-values
   for (size_t i = 0; i < nAxis1Values; ++i) {
     MantidVec &EOut = outWrksp->dataE(i);
-    for (auto it = EOut.begin(), end = EOut.end(); it != end; ++it) {
-      m_fileIn >> *it;
+    for (double &value : EOut) {
+      m_fileIn >> value;
     }
     prog.report("Loading error estimates");
   } // loop on to the next spectrum

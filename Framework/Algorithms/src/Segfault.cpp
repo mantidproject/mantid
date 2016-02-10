@@ -49,7 +49,7 @@ void Segfault::exec() {
 
   if (!dryrun) {
     // NULL pointer dereference
-    int *ptr = NULL;
+    int *ptr = nullptr;
     *ptr = 1;
   }
 }

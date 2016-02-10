@@ -40,9 +40,9 @@ void LiveDataAlgorithm::initProps() {
   std::vector<std::string> instruments;
   auto &instrInfo =
       Kernel::ConfigService::Instance().getFacility().instruments();
-  for (auto it = instrInfo.begin(); it != instrInfo.end(); ++it) {
-    if (!it->liveDataAddress().empty()) {
-      instruments.push_back(it->name());
+  for (const auto &instrument : instrInfo) {
+    if (!instrument.liveDataAddress().empty()) {
+      instruments.push_back(instrument.name());
     }
   }
 #ifndef NDEBUG
@@ -81,10 +81,7 @@ void LiveDataAlgorithm::initProps() {
                   "data. Only for command line usage, does not appear on the "
                   "user interface.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Add");
-  propOptions.push_back("Replace");
-  propOptions.push_back("Append");
+  std::vector<std::string> propOptions{"Add", "Replace", "Append"};
   declareProperty(
       "AccumulationMethod", "Add",
       boost::make_shared<StringListValidator>(propOptions),
@@ -121,10 +118,7 @@ void LiveDataAlgorithm::initProps() {
                                          Direction::Input),
       "A Python script that will be run to process the accumulated data.");
 
-  std::vector<std::string> runOptions;
-  runOptions.push_back("Restart");
-  runOptions.push_back("Stop");
-  runOptions.push_back("Rename");
+  std::vector<std::string> runOptions{"Restart", "Stop", "Rename"};
   declareProperty("RunTransitionBehavior", "Restart",
                   boost::make_shared<StringListValidator>(runOptions),
                   "What to do at run start/end boundaries?\n"
@@ -161,8 +155,7 @@ void LiveDataAlgorithm::initProps() {
  */
 void LiveDataAlgorithm::copyPropertyValuesFrom(const LiveDataAlgorithm &other) {
   std::vector<Property *> props = this->getProperties();
-  for (size_t i = 0; i < props.size(); i++) {
-    Property *prop = props[i];
+  for (auto prop : props) {
     this->setPropertyValue(prop->name(), other.getPropertyValue(prop->name()));
   }
 }

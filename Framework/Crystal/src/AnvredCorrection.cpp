@@ -146,8 +146,8 @@ void AnvredCorrection::exec() {
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWS);
   if (eventW)
-    eventW->sortAll(TOF_SORT, NULL);
-  if ((getProperty("PreserveEvents")) && (eventW != NULL) &&
+    eventW->sortAll(TOF_SORT, nullptr);
+  if ((getProperty("PreserveEvents")) && (eventW != nullptr) &&
       !m_returnTransmissionOnly) {
     // Input workspace is an event workspace. Use the other exec method
     this->execEvent();
@@ -272,7 +272,7 @@ void AnvredCorrection::execEvent() {
   correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2,
                                                1));
-  correctionFactors->sortAll(TOF_SORT, NULL);
+  correctionFactors->sortAll(TOF_SORT, nullptr);
   // Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(
       m_inputWS, correctionFactors, true);

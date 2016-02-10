@@ -9,16 +9,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 std::vector<std::string> MANTID_MDALGORITHMS_DLL
-splitByCommas(const std::string &names_string);
-
-std::vector<std::string> MANTID_MDALGORITHMS_DLL
-findNamesInBrackets(const std::string &names_string);
-
-std::vector<std::string> MANTID_MDALGORITHMS_DLL
 parseDimensionNames(const std::string &names_string);
-
-std::vector<std::string> MANTID_MDALGORITHMS_DLL
-removeBracketedNames(const std::string &names_string);
 
 /** MaskMD : Mask an MDWorkspace. Can provide complex masking shapes over an
   exisitng MDWorkspace. Operates on a MDWorkspace in-situ.

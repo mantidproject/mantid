@@ -43,9 +43,8 @@ public:
         inputWSName("CalculateCoverageDGSTest_InputWS");
     MatrixWorkspace_sptr inputWorkspace =
         WorkspaceCreationHelper::Create2DWorkspace(1, 1);
-    std::vector<V3D> detectorPositions;
+    std::vector<V3D> detectorPositions{{1, 1, 1}};
     V3D sampPos(0., 0., 0.), sourcePos(0, 0, -1.);
-    detectorPositions.push_back(V3D(1, 1, 1));
     WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(
         inputWorkspace, sampPos, sourcePos, detectorPositions);
     OrientedLattice ol(2, 2, 2, 90, 90, 90);

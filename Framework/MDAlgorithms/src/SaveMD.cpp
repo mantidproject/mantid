@@ -155,12 +155,12 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // saveable and that the boxes were not saved.
       BoxFlatStruct.setBoxesFilePositions(true);
       prog->resetNumSteps(boxes.size(), 0.06, 0.90);
-      for (size_t i = 0; i < boxes.size(); i++) {
-        auto saveableTag = boxes[i]->getISaveable();
+      for (auto &boxe : boxes) {
+        auto saveableTag = boxe->getISaveable();
         if (saveableTag) // only boxes can be saveable
         {
           // do not spend time on empty boxes
-          if (boxes[i]->getDataInMemorySize() == 0)
+          if (boxe->getDataInMemorySize() == 0)
             continue;
           // save boxes directly using the boxes file postion, precalculated in
           // boxFlatStructure.

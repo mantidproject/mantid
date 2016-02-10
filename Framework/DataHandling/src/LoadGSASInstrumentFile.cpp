@@ -151,7 +151,7 @@ void LoadGSASInstrumentFile::exec() {
                   << ".\n";
     map<string, double> parammap;
     parseBank(parammap, lines, bankid, bankStartIndex[bankid - 1]);
-    bankparammap.insert(make_pair(bankid, parammap));
+    bankparammap.emplace(bankid, parammap);
     g_log.debug() << "Bank starts at line" << bankStartIndex[i] + 1 << "\n";
   }
 
@@ -172,17 +172,17 @@ void LoadGSASInstrumentFile::exec() {
     if (bankIds.size()) {
       // If user provided a list of banks, check that they exist in the .prm
       // file
-      for (size_t i = 0; i < bankIds.size(); i++) {
-        if (!bankparammap.count(bankIds[i])) {
+      for (auto bankId : bankIds) {
+        if (!bankparammap.count(bankId)) {
           std::stringstream errorString;
-          errorString << "Bank " << bankIds[i] << " not found in .prm file";
+          errorString << "Bank " << bankId << " not found in .prm file";
           throw runtime_error(errorString.str());
         }
       }
     } else {
       // Else, use all available banks
-      for (auto it = bankparammap.begin(); it != bankparammap.end(); ++it) {
-        bankIds.push_back(static_cast<int>(it->first));
+      for (auto &bank : bankparammap) {
+        bankIds.push_back(static_cast<int>(bank.first));
       }
     }
 

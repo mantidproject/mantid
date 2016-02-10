@@ -85,7 +85,9 @@ set ( SRC_FILES
 	src/Reflectometry/ReflNexusMeasurementItemSource.cpp
 	src/Reflectometry/ReflSearchModel.cpp
 	src/Reflectometry/ReflTableSchema.cpp
-    src/Reflectometry/TransferResults.cpp
+	src/Reflectometry/TransferResults.cpp
+	src/SANSBackgroundCorrectionSettings.cpp
+	src/SANSBackgroundCorrectionWidget.cpp
 	src/SANSAddFiles.cpp
 	src/SANSConstants.cpp
 	src/SANSDiagnostics.cpp
@@ -218,7 +220,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h
-    inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
+	inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
+	inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h
+	inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSConstants.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
@@ -330,6 +334,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h
                 inc/MantidQtCustomInterfaces/SampleTransmission.h
+		inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
@@ -396,15 +401,19 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflOptionsDialog.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflWindow.ui
                inc/MantidQtCustomInterfaces/SampleTransmission.ui
+	       inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
+               inc/MantidQtCustomInterfaces/Tomography/ImgFormatsConversion.ui
                inc/MantidQtCustomInterfaces/Tomography/ImageSelectCoRAndRegions.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtGUI.ui
+               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabEnergy.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabFiltersSettings.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSetup.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabRun.ui
+               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSetup.ui
+               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabVisualize.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigAstra.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigCustom.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigSavu.ui

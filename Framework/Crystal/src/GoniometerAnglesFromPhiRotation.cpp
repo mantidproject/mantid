@@ -199,7 +199,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
   PeaksWorkspace_sptr Peakss = getProperty("PeaksWorkspace2");
 
   if (!Run1HasOrientedLattice)
-    PeaksRun1->mutableSample().setOrientedLattice(NULL);
+    PeaksRun1->mutableSample().setOrientedLattice(nullptr);
 
   double dphi = (double)getProperty("Phi2") - (double)getProperty("Run1Phi");
   Kernel::Matrix<double> Gon22(3, 3, true);
@@ -218,9 +218,8 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   API::FrameworkManager::Instance();
 
-  for (size_t d = 0; d < directionList.size(); d++)
+  for (auto dir : directionList)
     for (int sgn = 1; sgn > -2; sgn -= 2) {
-      V3D dir = directionList[d];
       dir.normalize();
       Quat Q(sgn * dphi, dir);
       Q.normalize();

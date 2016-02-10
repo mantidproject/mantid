@@ -21,8 +21,8 @@ FileValidator::FileValidator(const std::vector<std::string> &extensions,
                              bool testFileExists, bool testCanWrite)
     : TypedValidator<std::string>(), m_testExist(testFileExists),
       m_testCanWrite(testCanWrite) {
-  for (auto it = extensions.begin(); it != extensions.end(); ++it) {
-    const std::string ext = boost::to_lower_copy(*it);
+  for (const auto &extension : extensions) {
+    const std::string ext = boost::to_lower_copy(extension);
     if (std::find(m_extensions.begin(), m_extensions.end(), ext) ==
         m_extensions.end()) {
       m_extensions.push_back(ext);
@@ -66,9 +66,8 @@ std::string FileValidator::checkValidity(const std::string &value) const {
       g_log.debug() << "Unrecognised extension in file \"" << value << "\"";
       if (!this->m_extensions.empty()) {
         g_log.debug() << " [ ";
-        for (auto it = this->m_extensions.begin();
-             it != this->m_extensions.end(); ++it)
-          g_log.debug() << *it << " ";
+        for (const auto &extension : this->m_extensions)
+          g_log.debug() << extension << " ";
         g_log.debug() << "]";
       }
       g_log.debug() << "\"." << std::endl;
@@ -166,10 +165,10 @@ bool FileValidator::endswith(const std::string &value) const {
                  tolower);
 
   // check for the ending
-  for (auto it = m_extensions.begin(); it != m_extensions.end(); ++it) {
-    if (has_ending(value, *it)) // original case
+  for (const auto &extension : m_extensions) {
+    if (has_ending(value, extension)) // original case
       return true;
-    if (has_ending(value_copy, *it)) // lower case
+    if (has_ending(value_copy, extension)) // lower case
       return true;
   }
   return false;

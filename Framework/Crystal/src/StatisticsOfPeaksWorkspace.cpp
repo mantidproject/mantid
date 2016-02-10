@@ -44,8 +44,9 @@ void StatisticsOfPeaksWorkspace::init() {
                                                         Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> propOptions;
-  for (size_t i = 0; i < m_pointGroups.size(); ++i)
-    propOptions.push_back(m_pointGroups[i]->getName());
+  propOptions.reserve(m_pointGroups.size());
+  for (auto &pointGroup : m_pointGroups)
+    propOptions.push_back(pointGroup->getName());
   declareProperty("PointGroup", propOptions[0],
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which point group applies to this crystal?");
@@ -53,8 +54,9 @@ void StatisticsOfPeaksWorkspace::init() {
   std::vector<std::string> centeringOptions;
   std::vector<ReflectionCondition_sptr> reflectionConditions =
       getAllReflectionConditions();
-  for (size_t i = 0; i < reflectionConditions.size(); ++i)
-    centeringOptions.push_back(reflectionConditions[i]->getName());
+  centeringOptions.reserve(reflectionConditions.size());
+  for (auto &reflectionCondition : reflectionConditions)
+    centeringOptions.push_back(reflectionCondition->getName());
   declareProperty("LatticeCentering", centeringOptions[0],
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
@@ -65,11 +67,8 @@ void StatisticsOfPeaksWorkspace::init() {
   declareProperty(new WorkspaceProperty<ITableWorkspace>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  std::vector<std::string> sortTypes;
-  sortTypes.push_back("ResolutionShell");
-  sortTypes.push_back("Bank");
-  sortTypes.push_back("RunNumber");
-  sortTypes.push_back("Overall");
+  std::vector<std::string> sortTypes{"ResolutionShell", "Bank", "RunNumber",
+                                     "Overall"};
   declareProperty("SortBy", sortTypes[0],
                   boost::make_shared<StringListValidator>(sortTypes),
                   "Sort the peaks by bank, run number(default) or only overall "

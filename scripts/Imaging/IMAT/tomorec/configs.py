@@ -74,6 +74,8 @@ class PreProcConfig(object):
         # defaults that look sensible for the MCP detector:
         # median_filter=3, rotate=-1, crop=[0,  252, 0, 512], MCP correction: on
         self.input_dir = None
+        self.input_dir_flat = None
+        self.input_dir_dark = None
         self.in_img_format = 'tiff'
         self.out_img_format = 'tiff'
         self.max_angle = 360
@@ -104,6 +106,8 @@ class PreProcConfig(object):
         else:
             mystr += "Input path (absolute): {0}\n".format('cannot find because the input '
                                                            'path has not been set')
+        mystr += "Input path for flat (open beam) images (relative): {0}\n".format(self.input_dir_flat)
+        mystr += "Input path for dark images (relative): {0}\n".format(self.input_dir_dark)
         mystr += "Input image format: {0}\n".format(self.in_img_format)
         mystr += "Output image format: {0}\n".format(self.out_img_format)
         mystr += "Maximum angle:: {0}\n".format(self.max_angle)

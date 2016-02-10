@@ -65,7 +65,7 @@ const std::string THICKNESS_PARAM = "TubeThickness";
 // this default constructor calls default constructors and sets other member
 // data to impossible (flag) values
 DetectorEfficiencyCor::DetectorEfficiencyCor()
-    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(NULL), m_Ei(-1.0),
+    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr), m_Ei(-1.0),
       m_ki(-1.0), m_shapeCache(), m_samplePos(), m_spectraSkipped() {
   m_shapeCache.clear();
 }
@@ -317,8 +317,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       detAxis = V3D(0, 1, 0);
       // assume radi in z and x and the axis is in the y
       PARALLEL_CRITICAL(deteff_shapecachea) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -330,8 +330,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       // assume that y and z are radi of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
       PARALLEL_CRITICAL(deteff_shapecacheb) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -340,8 +340,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       detRadius = xDist / 2.0;
       detAxis = V3D(0, 0, 1);
       PARALLEL_CRITICAL(deteff_shapecachec) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }

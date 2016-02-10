@@ -353,12 +353,12 @@ void Peak::setInstrument(Geometry::Instrument_const_sptr inst) {
 
   // Cache some positions
   const Geometry::IComponent_const_sptr sourceObj = m_inst->getSource();
-  if (sourceObj == NULL)
+  if (sourceObj == nullptr)
     throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed "
                                                "to get source component from "
                                                "instrument");
   const Geometry::IComponent_const_sptr sampleObj = m_inst->getSample();
-  if (sampleObj == NULL)
+  if (sampleObj == nullptr)
     throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed "
                                                "to get sample component from "
                                                "instrument");
@@ -965,7 +965,7 @@ accessing its position. Throws if null.
 */
 Mantid::Kernel::V3D Peak::getDetectorPosition() const {
   auto det = getDetector();
-  if (det == NULL) {
+  if (det == nullptr) {
     throw Mantid::Kernel::Exception::NullPointerException("Peak", "Detector");
   }
   return getDetector()->getPos();
