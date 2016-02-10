@@ -261,6 +261,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   vtkIOLegacy
   vtkFiltersExtraction
   vtkFiltersSources
+  vtkPVVTKExtensionsDefault
   ${vtkjsoncpp_LIBRARIES}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
