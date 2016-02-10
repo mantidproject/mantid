@@ -50,10 +50,6 @@ private:
 
   /// Compute the function
   void massProfile(double *result, const size_t nData) const;
-
-  /// Helper to allow the amplitude to be specified separately
-  void massProfile(double *result, const size_t nData,
-                   const double amplitude) const;
 };
 
 } // namespace Functions

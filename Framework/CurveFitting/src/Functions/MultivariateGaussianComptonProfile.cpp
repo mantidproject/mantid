@@ -13,6 +13,10 @@ namespace Functions {
 using namespace CurveFitting;
 DECLARE_FUNCTION(MultivariateGaussianComptonProfile)
 
+const char *SIGMA_X_PARAM = "SigmaX";
+const char *SIGMA_Y_PARAM = "SigmaY";
+const char *SIGMA_Z_PARAM = "SigmaZ";
+
 /**
  */
 MultivariateGaussianComptonProfile::MultivariateGaussianComptonProfile()
@@ -28,7 +32,9 @@ std::string MultivariateGaussianComptonProfile::name() const {
 /**
  */
 void MultivariateGaussianComptonProfile::declareParameters() {
-  // TODO
+  declareParameter(SIGMA_X_PARAM, 1.0, "Sigma X parameter");
+  declareParameter(SIGMA_Y_PARAM, 1.0, "Sigma Y parameter");
+  declareParameter(SIGMA_Z_PARAM, 1.0, "Sigma Z parameter");
 }
 
 /*
@@ -61,18 +67,6 @@ size_t MultivariateGaussianComptonProfile::fillConstraintMatrix(
  */
 void MultivariateGaussianComptonProfile::massProfile(double *result,
                                                      const size_t nData) const {
-  const double amplitude(getParameter(1));
-  this->massProfile(result, nData, amplitude);
-}
-
-/**
- * @param result A pre-sized output vector that should be filled with the
- *               results
- * @param nData The size of the array
- * @param amplitude A fixed value for the amplitude
- */
-void MultivariateGaussianComptonProfile::massProfile(
-    double *result, const size_t nData, const double amplitude) const {
   // TODO
 }
 
