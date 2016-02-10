@@ -16,6 +16,9 @@ set ( SRC_FILES
 	src/PeakOverlayViewFactoryBase.cpp
 	src/PeakOverlayViewFactorySelector.cpp  
 	src/PeakPalette.cpp
+	src/PeakRepresentationCross.cpp
+        #src/PeakRepresentationEllipsoid.cpp
+        #src/PeakRepresentationSphere.cpp
 	src/PeaksTableColumnsDialog.cpp
 	src/PeaksViewer.cpp
 	src/PeaksWorkspaceWidget.cpp
@@ -56,6 +59,10 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakOverlayViewFactorySelector.h
 	inc/MantidQtSliceViewer/PeakPalette.h
 	inc/MantidQtSliceViewer/PeaksPresenter.h
+        inc/MantidQtSliceViewer/PeakRepresentation.h
+	inc/MantidQtSliceViewer/PeakRepresentationCross.h
+        #inc/MantidQtSliceViewer/PeakRepresentationEllipsoid.h
+        #inc/MantidQtSliceViewer/PeakRepresentationSphere.h
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
 	inc/MantidQtSliceViewer/PeaksViewer.h
 	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h
@@ -114,6 +121,7 @@ set ( TEST_FILES
     test/ConcretePeaksPresenterTest.h
     test/PeakBoundingBoxTest.h
     test/PeakPaletteTest.h
+    test/PeakRepresentationCrossTest.h
     test/PhysicalCrossPeakTest.h
     test/PhysicalSphericalPeakTest.h
     test/NullPeaksPresenterTest.h
