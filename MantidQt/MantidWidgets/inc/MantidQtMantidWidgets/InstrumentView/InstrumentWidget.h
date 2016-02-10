@@ -3,7 +3,7 @@
 
 #include "InstrumentWidgetTypes.h"
 #include "MantidGLWidget.h"
-#include "..\WidgetDllOption.h"
+#include <WidgetDllOption.h>
 
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
