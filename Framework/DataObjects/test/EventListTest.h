@@ -1721,18 +1721,10 @@ public:
     outputs.emplace(-1, new EventList());
 
     // Generate time splitters
-    std::vector<int64_t> vec_splitTimes;
-    std::vector<int> vec_splitGroup;
-    vec_splitTimes.reserve(10);
-    // Start only at 100
-    for (int i = 1; i <= 10; i++) {
-      vec_splitTimes.push_back(i * 1000000);
-    }
-    vec_splitGroup.assign(vec_splitTimes.size(), -1);
-    vec_splitGroup[1] = 2;
-    vec_splitGroup[3] = 4;
-    vec_splitGroup[5] = 6;
-    vec_splitGroup[7] = 8;
+    std::vector<int64_t> vec_splitTimes{1000000, 2000000, 3000000, 4000000,
+                                        5000000, 6000000, 7000000, 8000000,
+                                        9000000, 10000000};
+    std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1, -1};
 
     for (size_t i = 0; i < vec_splitTimes.size() - 1; ++i) {
       std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i + 1]
