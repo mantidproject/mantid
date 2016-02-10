@@ -54,135 +54,135 @@ const std::string TAG_NAME = "XXX_TAG_NAME_XXX";
 
 #define ADARA_PKT_VERSION( _type )  ( (_type) & 0xff )
 namespace PacketType {
-  enum Type {
-    RAW_EVENT_TYPE              =   0x0000,
-    RTDL_TYPE                   =   0x0001,
-    SOURCE_LIST_TYPE            =   0x0002,
-    MAPPED_EVENT_TYPE           =   0x0003,
-    BANKED_EVENT_TYPE           =   0x4000,
-    BEAM_MONITOR_EVENT_TYPE     =   0x4001,
-    PIXEL_MAPPING_TYPE          =   0x4002,
-    RUN_STATUS_TYPE             =   0x4003,
-    RUN_INFO_TYPE               =   0x4004,
-    TRANS_COMPLETE_TYPE         =   0x4005,
-    CLIENT_HELLO_TYPE           =   0x4006,
-    STREAM_ANNOTATION_TYPE      =   0x4007,
-    SYNC_TYPE                   =   0x4008,
-    HEARTBEAT_TYPE              =   0x4009,
-    GEOMETRY_TYPE               =   0x400A,
-    BEAMLINE_INFO_TYPE          =   0x400B,
-    DATA_DONE_TYPE              =   0x400C,
-    BEAM_MONITOR_CONFIG_TYPE    =   0x400D,
-    DETECTOR_BANK_SETS_TYPE     =   0x400E,
-    DEVICE_DESC_TYPE            =   0x8000,
-    VAR_VALUE_U32_TYPE          =   0x8001,
-    VAR_VALUE_DOUBLE_TYPE       =   0x8002,
-    VAR_VALUE_STRING_TYPE       =   0x8003,
-  };
+enum Type {
+  RAW_EVENT_TYPE              =   0x0000,
+  RTDL_TYPE                   =   0x0001,
+  SOURCE_LIST_TYPE            =   0x0002,
+  MAPPED_EVENT_TYPE           =   0x0003,
+  BANKED_EVENT_TYPE           =   0x4000,
+  BEAM_MONITOR_EVENT_TYPE     =   0x4001,
+  PIXEL_MAPPING_TYPE          =   0x4002,
+  RUN_STATUS_TYPE             =   0x4003,
+  RUN_INFO_TYPE               =   0x4004,
+  TRANS_COMPLETE_TYPE         =   0x4005,
+  CLIENT_HELLO_TYPE           =   0x4006,
+  STREAM_ANNOTATION_TYPE      =   0x4007,
+  SYNC_TYPE                   =   0x4008,
+  HEARTBEAT_TYPE              =   0x4009,
+  GEOMETRY_TYPE               =   0x400A,
+  BEAMLINE_INFO_TYPE          =   0x400B,
+  DATA_DONE_TYPE              =   0x400C,
+  BEAM_MONITOR_CONFIG_TYPE    =   0x400D,
+  DETECTOR_BANK_SETS_TYPE     =   0x400E,
+  DEVICE_DESC_TYPE            =   0x8000,
+  VAR_VALUE_U32_TYPE          =   0x8001,
+  VAR_VALUE_DOUBLE_TYPE       =   0x8002,
+  VAR_VALUE_STRING_TYPE       =   0x8003,
+};
 
-  enum Version {
-    RAW_EVENT_VERSION           =   0x00,
-    RTDL_VERSION                =   0x00,
-    SOURCE_LIST_VERSION         =   0x00,
-    MAPPED_EVENT_VERSION        =   0x00,
-    BANKED_EVENT_VERSION        =   0x01,
-    BEAM_MONITOR_EVENT_VERSION  =   0x01,
-    PIXEL_MAPPING_VERSION       =   0x00,
-    RUN_STATUS_VERSION          =   0x00,
-    RUN_INFO_VERSION            =   0x00,
-    TRANS_COMPLETE_VERSION      =   0x00,
-    CLIENT_HELLO_VERSION        =   0x01,
-    STREAM_ANNOTATION_VERSION   =   0x00,
-    SYNC_VERSION                =   0x00,
-    HEARTBEAT_VERSION           =   0x00,
-    GEOMETRY_VERSION            =   0x00,
-    BEAMLINE_INFO_VERSION       =   0x01,
-    DATA_DONE_VERSION           =   0x00,
-    BEAM_MONITOR_CONFIG_VERSION =   0x00,
-    DETECTOR_BANK_SETS_VERSION  =   0x00,
-    DEVICE_DESC_VERSION         =   0x00,
-    VAR_VALUE_U32_VERSION       =   0x00,
-    VAR_VALUE_DOUBLE_VERSION    =   0x00,
-    VAR_VALUE_STRING_VERSION    =   0x00,
-  };
+enum Version {
+  RAW_EVENT_VERSION           =   0x00,
+  RTDL_VERSION                =   0x00,
+  SOURCE_LIST_VERSION         =   0x00,
+  MAPPED_EVENT_VERSION        =   0x00,
+  BANKED_EVENT_VERSION        =   0x01,
+  BEAM_MONITOR_EVENT_VERSION  =   0x01,
+  PIXEL_MAPPING_VERSION       =   0x00,
+  RUN_STATUS_VERSION          =   0x00,
+  RUN_INFO_VERSION            =   0x00,
+  TRANS_COMPLETE_VERSION      =   0x00,
+  CLIENT_HELLO_VERSION        =   0x01,
+  STREAM_ANNOTATION_VERSION   =   0x00,
+  SYNC_VERSION                =   0x00,
+  HEARTBEAT_VERSION           =   0x00,
+  GEOMETRY_VERSION            =   0x00,
+  BEAMLINE_INFO_VERSION       =   0x01,
+  DATA_DONE_VERSION           =   0x00,
+  BEAM_MONITOR_CONFIG_VERSION =   0x00,
+  DETECTOR_BANK_SETS_VERSION  =   0x00,
+  DEVICE_DESC_VERSION         =   0x00,
+  VAR_VALUE_U32_VERSION       =   0x00,
+  VAR_VALUE_DOUBLE_VERSION    =   0x00,
+  VAR_VALUE_STRING_VERSION    =   0x00,
+};
 }
 
 /* These are defined in the SNS Timing Master Functional System Description,
  * section 1.3.4.
  */
 namespace PulseFlavor {
-  enum Enum {
-    NO_BEAM           = 0,
-    NORMAL            = 1,
-    NORMAL_TGT_1      = 1,
-    NORMAL_TGT_2      = 2,
-    DIAG_10us         = 3,
-    DIAG_50us         = 4,
-    DIAG_100us        = 5,
-    SPECIAL_PHYSICS_1 = 6,
-    SPECIAL_PHYSICS_2 = 7
-  };
+enum Enum {
+  NO_BEAM           = 0,
+  NORMAL            = 1,
+  NORMAL_TGT_1      = 1,
+  NORMAL_TGT_2      = 2,
+  DIAG_10us         = 3,
+  DIAG_50us         = 4,
+  DIAG_100us        = 5,
+  SPECIAL_PHYSICS_1 = 6,
+  SPECIAL_PHYSICS_2 = 7
+};
 }
 
 namespace RunStatus {
-  enum Enum {
-    NO_RUN  = 0,
-    NEW_RUN = 1,
-    RUN_EOF = 2,
-    RUN_BOF = 3,
-    END_RUN = 4,
-    STATE   = 5,
-  };
+enum Enum {
+  NO_RUN  = 0,
+  NEW_RUN = 1,
+  RUN_EOF = 2,
+  RUN_BOF = 3,
+  END_RUN = 4,
+  STATE   = 5,
+};
 }
 
 namespace VariableStatus {
-  enum Enum {
-    OK                    = 0, // EPICS: NO_ALARM
-    READ_ERROR            = 1,
-    WRITE_ERROR           = 2,
-    HIHI_LIMIT            = 3,
-    HIGH_LIMIT            = 4,
-    LOLO_LIMIT            = 5,
-    LOW_LIMIT             = 6,
-    BAD_STATE             = 7,
-    CHANGED_STATE         = 8,
-    NO_COMMUNICATION      = 9,
-    COMMUNICATION_TIMEOUT = 10,
-    HARDWARE_LIMIT        = 11,
-    BAD_CALCULATION       = 12,
-    INVALID_SCAN          = 13,
-    LINK_FAILED           = 14,
-    INVALID_STATE         = 15,
-    BAD_SUBROUTINE        = 16,
-    UNDEFINED_ALARM       = 17,
-    DISABLED              = 18,
-    SIMULATED             = 19,
-    READ_PERMISSION       = 20,
-    WRITE_PERMISSION      = 21,
-    UPSTREAM_DISCONNECTED = 0xfffe,
-    NOT_REPORTED          = 0xffff,
-  };
+enum Enum {
+  OK                    = 0, // EPICS: NO_ALARM
+  READ_ERROR            = 1,
+  WRITE_ERROR           = 2,
+  HIHI_LIMIT            = 3,
+  HIGH_LIMIT            = 4,
+  LOLO_LIMIT            = 5,
+  LOW_LIMIT             = 6,
+  BAD_STATE             = 7,
+  CHANGED_STATE         = 8,
+  NO_COMMUNICATION      = 9,
+  COMMUNICATION_TIMEOUT = 10,
+  HARDWARE_LIMIT        = 11,
+  BAD_CALCULATION       = 12,
+  INVALID_SCAN          = 13,
+  LINK_FAILED           = 14,
+  INVALID_STATE         = 15,
+  BAD_SUBROUTINE        = 16,
+  UNDEFINED_ALARM       = 17,
+  DISABLED              = 18,
+  SIMULATED             = 19,
+  READ_PERMISSION       = 20,
+  WRITE_PERMISSION      = 21,
+  UPSTREAM_DISCONNECTED = 0xfffe,
+  NOT_REPORTED          = 0xffff,
+};
 }
 
 namespace VariableSeverity {
-  enum Enum {
-    OK           = 0, // EPICS: NO_ALARM
-    MINOR_ALARM  = 1,
-    MAJOR_ALARM  = 2,
-    INVALID      = 3,
-    NOT_REPORTED = 0xffff,
-  };
+enum Enum {
+  OK           = 0, // EPICS: NO_ALARM
+  MINOR_ALARM  = 1,
+  MAJOR_ALARM  = 2,
+  INVALID      = 3,
+  NOT_REPORTED = 0xffff,
+};
 }
 
 namespace MarkerType {
-  enum Enum {
-    GENERIC,
-    SCAN_START,
-    SCAN_STOP,
-    PAUSE,
-    RESUME,
-    OVERALL_RUN_COMMENT,
-  };
+enum Enum {
+  GENERIC,
+  SCAN_START,
+  SCAN_STOP,
+  PAUSE,
+  RESUME,
+  OVERALL_RUN_COMMENT,
+};
 }
 
 struct Event {

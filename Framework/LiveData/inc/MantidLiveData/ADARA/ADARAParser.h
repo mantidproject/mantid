@@ -28,7 +28,7 @@ public:
 
   /// Destructor
   virtual ~Parser();
-  
+
   ssize_t last_bytes_read;
   ssize_t last_last_bytes_read;
   ssize_t last_pkts_parsed;
@@ -192,7 +192,7 @@ private:
   unsigned int m_oversize_len;
   unsigned int m_oversize_offset;
 
-  std::map<PacketType::Type, uint64_t>	m_discarded_packets;
+  std::map<PacketType::Type, uint64_t> m_discarded_packets;
 };
 
 } /* namespacce ADARA */

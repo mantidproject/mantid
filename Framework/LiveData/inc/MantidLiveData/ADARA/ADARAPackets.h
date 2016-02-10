@@ -14,12 +14,12 @@ namespace ADARA {
 class DLLExport PacketHeader {
 public:
   PacketHeader(const uint8_t *data) {
-    const uint32_t *field = (const uint32_t *) data;
+    const uint32_t *field = (const uint32_t *)data;
 
     m_payload_len = field[0];
     m_type = field[1];
-    m_base_type = (PacketType::Type) ADARA_BASE_PKT_TYPE( m_type );
-    m_version = (PacketType::Version) ADARA_PKT_VERSION( m_type );
+    m_base_type = (PacketType::Type)ADARA_BASE_PKT_TYPE(m_type);
+    m_version = (PacketType::Version)ADARA_PKT_VERSION(m_type);
 
 #if 0
 // NOTE: Windows doesn't have struct timespec and Mantid doesn't really need this,
@@ -151,7 +151,7 @@ public:
 
   void setVetoFlags(uint16_t vetoFlags) {
     m_fields[1] &= 0xffc003ff;
-    m_fields[1] |= ( vetoFlags & 0xfff ) << 10;
+    m_fields[1] |= (vetoFlags & 0xfff) << 10;
   }
 
   uint16_t cycle(void) const { return m_fields[1] & 0x3ff; }
@@ -249,8 +249,8 @@ private:
   mutable unsigned m_curFieldIndex;  // where we currently are in the packet
 
   // Data about the current source section
-  mutable unsigned
-      m_sourceStartIndex; // index into m_fields for the start of this source
+  mutable unsigned m_sourceStartIndex; // index into m_fields for the start of
+                                       // this source
   mutable uint32_t m_bankCount;
   mutable uint32_t m_TOFOffset;
   mutable bool m_isCorrected;
@@ -258,8 +258,8 @@ private:
                               // start of the section)
 
   // Data about the current bank
-  mutable unsigned
-      m_bankStartIndex; // index into m_fields for the start of this source
+  mutable unsigned m_bankStartIndex; // index into m_fields for the start of
+                                     // this source
   mutable uint32_t m_bankId;
   mutable uint32_t m_eventCount;
 
@@ -295,8 +295,8 @@ private:
   const uint32_t *m_fields;
 
   // Data about the current monitor section
-  mutable uint32_t
-      m_sectionStartIndex; // index into m_fields for the start of this section
+  mutable uint32_t m_sectionStartIndex; // index into m_fields for the start of
+                                        // this section
 
   // used to keep nextEvent from running past the end of the section
   mutable uint32_t m_eventNum;
