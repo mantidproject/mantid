@@ -23,15 +23,18 @@ public:
   ~IntegratePeaksCWSD();
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "IntegratePeaksCWSD"; };
+  virtual const std::string name() const { return "IntegratePeaksCWSD"; }
+
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Integrate single-crystal peaks in reciprocal space, for "
-           "MDEventWorkspaces.";
+           "MDEventWorkspaces from reactor-source single crystal "
+           "diffractometer.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  virtual int version() const { return 1; }
+
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MDAlgorithms\\Peaks"; }
 
