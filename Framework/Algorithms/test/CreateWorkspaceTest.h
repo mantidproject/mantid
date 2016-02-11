@@ -19,11 +19,7 @@ public:
     Mantid::Algorithms::CreateWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    std::vector<double> dataEYX;
-
-    for (int i = 0; i < 3; i++) {
-      dataEYX.push_back(i * 1.234);
-    }
+    std::vector<double> dataEYX{0.0, 1.234, 2.468};
 
     std::vector<std::string> qvals{"9.876"};
 
@@ -94,11 +90,7 @@ public:
     alg.setProperty<std::vector<std::string>>("VerticalAxisValues", textAxis);
     alg.setProperty<int>("NSpec", 4);
 
-    std::vector<double> values;
-    values.push_back(1.0);
-    values.push_back(2.0);
-    values.push_back(3.0);
-    values.push_back(4.0);
+    std::vector<double> values{1.0, 2.0, 3.0, 4.0};
 
     alg.setProperty<std::vector<double>>("DataX", std::vector<double>(2, 1.1));
     alg.setProperty<std::vector<double>>("DataY", values);

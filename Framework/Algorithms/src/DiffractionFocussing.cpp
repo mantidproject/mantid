@@ -188,10 +188,7 @@ void DiffractionFocussing::RebinWorkspace(
   double step = 0;
 
   calculateRebinParams(workspace, min, max, step);
-  std::vector<double> paramArray;
-  paramArray.push_back(min);
-  paramArray.push_back(-step);
-  paramArray.push_back(max);
+  std::vector<double> paramArray{min, -step, max};
 
   g_log.information() << "Rebinning from " << min << " to " << max << " in "
                       << step << " logaritmic steps.\n";

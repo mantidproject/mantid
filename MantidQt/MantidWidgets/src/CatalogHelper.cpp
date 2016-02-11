@@ -171,7 +171,9 @@ namespace MantidQt
 
       // These two vectors are required by the "CatalogDownloadDataFiles" algorithm.
       std::vector<int64_t> fileIDs;
+      fileIDs.reserve(userSelectedFiles.size());
       std::vector<std::string> fileNames;
+      fileNames.reserve(userSelectedFiles.size());
 
       // For each pair in userSelectedFiles we want to add them to their related vector to pass to the algorithm.
       for (auto it = userSelectedFiles.begin(); it != userSelectedFiles.end(); ++it)

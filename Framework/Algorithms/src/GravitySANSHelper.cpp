@@ -109,9 +109,16 @@ double GravitySANSHelper::gravitationalDrop(API::MatrixWorkspace_const_sptr ws,
       g * NeutronMass * NeutronMass / (2.0 * h * h);
 
   const V3D samplePos = ws->getInstrument()->getSample()->getPos();
-  const double pathLength = det->getPos().distance(samplePos) + extraLength;
+
+  // Perform a path length correction if an Lextra is specified.
+  // The correction is Lcorr^2 = (L + Lextra)^2 -(LExtra)^2
+  const auto pathLengthWithExtraLength =
+      det->getPos().distance(samplePos) + extraLength;
+  const auto pathLengthSquared =
+      std::pow(pathLengthWithExtraLength, 2) - std::pow(extraLength, 2);
+
   // Want L2 (sample-pixel distance) squared, times the prefactor g^2/h^2
-  const double L2 = gm2_OVER_2h2 * std::pow(pathLength, 2);
+  const double L2 = gm2_OVER_2h2 * pathLengthSquared;
 
   return waveLength * waveLength * L2;
 }

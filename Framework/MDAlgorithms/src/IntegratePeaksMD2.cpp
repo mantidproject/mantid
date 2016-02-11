@@ -57,9 +57,6 @@ void IntegratePeaksMD2::init() {
                                                            Direction::Input),
                   "An input MDEventWorkspace.");
 
-  std::vector<std::string> propOptions{"Q (lab frame)", "Q (sample frame)",
-                                       "HKL"};
-
   declareProperty(
       new PropertyWithValue<double>("PeakRadius", 1.0, Direction::Input),
       "Fixed radius around each peak position in which to integrate (in the "

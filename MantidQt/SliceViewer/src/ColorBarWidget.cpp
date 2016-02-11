@@ -53,6 +53,8 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   QObject::connect(ui.valMax, SIGNAL(editingFinished()), this, SLOT(changedMaximum()));
   QObject::connect(ui.valMin, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMinimum()));
   QObject::connect(ui.valMax, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMaximum()));
+  QObject::connect(ui.valMin, SIGNAL(valueChanged(double)), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(valueChanged(double)), this, SLOT(changedMaximum()));
   QObject::connect(m_colorBar, SIGNAL(mouseMoved(QPoint, double)), this, SLOT(colorBarMouseMoved(QPoint, double)));
 
   // Initial view
@@ -381,6 +383,15 @@ void ColorBarWidget::setAutoScale(bool autoscale) {
  * @returns Whether the box is checked or not
  */
 bool ColorBarWidget::getAutoScale() const { return ui.autoScale->isChecked(); }
+
+/**
+ * Gets the state of the "Autoscale for current slice" checkbox
+ * @returns true if it is checked else false
+ */
+bool ColorBarWidget::getAutoColorScaleforCurrentSlice() const {
+  return ui.autoScaleForCurrentSlice->isChecked();
+}
+
 
 ColorBarWidget::~ColorBarWidget()
 {
