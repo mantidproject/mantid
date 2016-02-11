@@ -1,6 +1,7 @@
-#include "MantidQtSliceViewer/PeakRepresentationCross.h"
+#include "MantidQtSliceViewer/PeakPrimitives.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
-
+#include "MantidQtSliceViewer/PeakRepresentationCross.h"
+#include "MantidKernel/V2D.h"
 #include <QPainter>
 
 namespace MantidQt
@@ -8,24 +9,156 @@ namespace MantidQt
 namespace SliceViewer
 {
 
+PeakRepresentationCross::PeakRepresentationCross(
+    const Mantid::Kernel::V3D &origin, const double &maxZ, const double &minZ)
+    : m_originalOrigin(origin), m_origin(origin), m_intoViewFraction(0.015),
+      m_effectiveRadius((maxZ - minZ) * m_intoViewFraction), m_opacityMax(0.8),
+      m_opacityMin(0.0),
+      m_opacityGradient((m_opacityMin - m_opacityMax) / m_effectiveRadius),
+      m_crossViewFraction(0.015), m_opacityAtDistance(0.0), m_slicePoint(0.0)
+{
+}
 
-void PeakRepresentationCross::draw(QPainter &painter) {}
+/**
+ *Set the distance between the plane and the center of the peak in md
+ *coordinates
+ *@param z : position of the plane slice in the z dimension.
+ */
+void PeakRepresentationCross::setSlicePoint(const double &z)
+{
+    m_slicePoint = z;
+    const double distanceAbs = std::abs(z - m_origin.Z());
 
-void PeakRepresentationCross::setSlicePoint(const double &) {}
+    // Apply a linear transform to convert from a distance to an opacity between
+    // opacityMin and opacityMax.
+    m_opacityAtDistance = (m_opacityGradient * distanceAbs) + m_opacityMax;
+}
 
-void PeakRepresentationCross::movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) {}
+/**
+ * Move the peak position according the the transform.
+ * @param peakTransform : Tranform to use.
+ */
+void PeakRepresentationCross::movePosition(
+    Mantid::Geometry::PeakTransform_sptr peakTransform)
+{
+    m_origin = peakTransform->transform(m_originalOrigin);
+}
 
-PeakBoundingBox PeakRepresentationCross::getBoundingBox() const {}
+/**
+ *
+ *@return bounding box for peak in natural coordinates.
+ */
+PeakBoundingBox PeakRepresentationCross::getBoundingBox() const
+{
+    using Mantid::Kernel::V2D;
+    const Left left(m_origin.X() - m_effectiveRadius);
+    const Right right(m_origin.X() + m_effectiveRadius);
+    const Bottom bottom(m_origin.Y() - m_effectiveRadius);
+    const Top top(m_origin.Y() + m_effectiveRadius);
+    const SlicePoint slicePoint(m_origin.Z());
 
-void PeakRepresentationCross::setOccupancyInView(const double fraction) {}
+    return PeakBoundingBox(left, right, top, bottom, slicePoint);
+}
 
-void PeakRepresentationCross::setOccupancyIntoView(const double fraction) {}
+void PeakRepresentationCross::setOccupancyInView(const double fraction)
+{
+    m_crossViewFraction = fraction;
+    setSlicePoint(m_slicePoint);
+}
 
-double PeakRepresentationCross::getEffectiveRadius() const {}
+void PeakRepresentationCross::setOccupancyIntoView(const double fraction)
+{
+    if (fraction != 0) {
+        m_effectiveRadius *= (fraction / m_intoViewFraction);
+        m_intoViewFraction = fraction;
+        setSlicePoint(m_slicePoint);
+    }
+}
 
-double PeakRepresentationCross::getOccupancyInView() const {}
+/**
+ * Gets the effective peak radius of the cross representation
+ * @return the effective radis
+ */
+double PeakRepresentationCross::getEffectiveRadius() const
+{
+    return m_effectiveRadius;
+}
 
-double PeakRepresentationCross::getOccupancyIntoView() const {}
+double PeakRepresentationCross::getOccupancyInView() const
+{
+    return m_crossViewFraction;
+}
 
+double PeakRepresentationCross::getOccupancyIntoView() const
+{
+    return m_intoViewFraction;
+}
+
+std::shared_ptr<PeakPrimitives> PeakRepresentationCross::getDrawingInformation(
+    PeakRepresentationViewInformation viewInformation)
+{
+    auto drawingInformation = std::make_shared<PeakPrimitivesCross>(
+        Mantid::Kernel::V3D() /*Peak Origin*/, 0.0 /*peakOpacityAtDistance*/,
+        0 /*peakHalfCrossWidth*/, 0 /*peakHalfCrossHeight*/,
+        0 /*peakLineWidth*/);
+
+    const int halfCrossHeight
+        = int(viewInformation.windowHeight * m_crossViewFraction);
+    const int halfCrossWidth
+        = int(viewInformation.windowWidth * m_crossViewFraction);
+
+    drawingInformation->peakHalfCrossHeight = halfCrossHeight;
+    drawingInformation->peakHalfCrossWidth = halfCrossWidth;
+    drawingInformation->peakLineWidth = 2;
+    drawingInformation->peakOpacityAtDistance = m_opacityAtDistance;
+    drawingInformation->peakOrigin = m_origin;
+
+    return drawingInformation;
+}
+
+void PeakRepresentationCross::doDraw(
+    QPainter &painter, QColor &peakColor,
+    std::shared_ptr<PeakPrimitives> drawingInformation,
+    PeakRepresentationViewInformation viewInformation)
+{
+    auto drawingInformationCross
+        = std::static_pointer_cast<PeakPrimitivesCross>(drawingInformation);
+
+    // Setup the QPainter
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    // Add a pen with color, style and stroke
+    QPen pen(peakColor);
+    pen.setWidth(drawingInformationCross->peakLineWidth);
+    pen.setStyle(Qt::SolidLine);
+    painter.setPen(pen);
+
+    painter.setOpacity(drawingInformationCross->peakOpacityAtDistance);
+
+    // Creat the actual lines and have them drawn by the painter
+    const int halfCrossHeight = drawingInformationCross->peakHalfCrossHeight;
+    const int halfCrossWidth = drawingInformationCross->peakHalfCrossWidth;
+
+    const auto xOriginWindow = viewInformation.xOriginWindow;
+    const auto yOriginWindow = viewInformation.yOriginWindow;
+
+    QPoint bottomL(xOriginWindow - halfCrossWidth,
+                   yOriginWindow - halfCrossHeight);
+    QPoint bottomR(xOriginWindow + halfCrossWidth,
+                   yOriginWindow - halfCrossHeight);
+    QPoint topL(xOriginWindow - halfCrossWidth,
+                yOriginWindow + halfCrossHeight);
+    QPoint topR(xOriginWindow + halfCrossWidth,
+                yOriginWindow + halfCrossHeight);
+
+    painter.drawLine(bottomL, topR);
+    painter.drawLine(bottomR, topL);
+    painter.end();
+}
+
+const Mantid::Kernel::V3D &PeakRepresentationCross::getOrigin() const
+{
+    return m_origin;
+}
 }
 }

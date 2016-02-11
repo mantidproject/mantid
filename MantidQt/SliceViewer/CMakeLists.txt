@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/PeakOverlayViewFactoryBase.cpp
 	src/PeakOverlayViewFactorySelector.cpp  
 	src/PeakPalette.cpp
+	src/PeakRepresentation.cpp
 	src/PeakRepresentationCross.cpp
         #src/PeakRepresentationEllipsoid.cpp
         #src/PeakRepresentationSphere.cpp
@@ -59,6 +60,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakOverlayViewFactorySelector.h
 	inc/MantidQtSliceViewer/PeakPalette.h
 	inc/MantidQtSliceViewer/PeaksPresenter.h
+	inc/MantidQtSliceViewer/PeakPrimitives.h
         inc/MantidQtSliceViewer/PeakRepresentation.h
 	inc/MantidQtSliceViewer/PeakRepresentationCross.h
         #inc/MantidQtSliceViewer/PeakRepresentationEllipsoid.h

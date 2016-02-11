@@ -3,6 +3,17 @@
 
 #include "MantidQtSliceViewer/PeakRepresentation.h"
 
+namespace
+{
+struct PeakDrawInformationPeak {
+    int peakHalfCrossWidth;
+    int peakHalfCrossHeight;
+    int peakLineWidth;
+    double peakOpacityAtDistance;
+    Mantid::Kernel::V3D peakOrigin;
+};
+}
+
 namespace MantidQt
 {
 namespace SliceViewer
@@ -11,12 +22,12 @@ namespace SliceViewer
 class PeakRepresentationCross : public PeakRepresentation
 {
 public:
-    /// Draw
-    void draw(QPainter &painter) override;
+    PeakRepresentationCross(const Mantid::Kernel::V3D& origin, const double& maxZ, const double& minZ);
     /// Setter for the slice point
     void setSlicePoint(const double &) override;
     /// Transform the coordinates.
-    void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
+    void
+    movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
     /// Get the bounding box.
     PeakBoundingBox getBoundingBox() const override;
     /// Set the size of the cross peak in the viewing plane
@@ -29,6 +40,14 @@ public:
     double getOccupancyInView() const override;
     /// Get the depth occupancy (fractional into the projection plane)
     double getOccupancyIntoView() const override;
+    /// Get the origin
+    const Mantid::Kernel::V3D& getOrigin() const override;
+
+protected:
+    std::shared_ptr<PeakPrimitives> getDrawingInformation(
+        PeakRepresentationViewInformation viewInformation) override;
+    void doDraw(QPainter &painter, QColor& peakColor,
+                std::shared_ptr<PeakPrimitives> drawingInformation, PeakRepresentationViewInformation viewInformation) override;
 
 private:
     /// Original origin x=h, y=k, z=l
@@ -54,3 +73,4 @@ private:
 };
 }
 }
+#endif
