@@ -34,6 +34,7 @@ namespace SpectrumView
  *                       cuts through the image at the left side of the image.
  * @param tableWidget   The widget where the information about a pointed
  *                       at location will be displayed.
+ * @param isTrackingOn  Flag to start SpectrumDisplay with tracking on or off.
  */
 SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
                                    ISliderHandler*  sliderHandler,
