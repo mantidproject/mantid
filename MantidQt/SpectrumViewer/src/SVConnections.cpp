@@ -113,14 +113,14 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   QObject::connect(m_svUI->vgraphSplitter, SIGNAL(splitterMoved(int, int)),
                    this, SLOT(vgraphSplitterMoved()) );
 
-  //QObject::connect(m_svUI->x_min_input, SIGNAL( returnPressed() ),
-  //                 this, SLOT(imageHorizontalRangeChanged()) );
+  QObject::connect(m_svUI->x_min_input, SIGNAL( returnPressed() ),
+                   this, SLOT(imageHorizontalRangeChanged()) );
 
-  //QObject::connect(m_svUI->x_max_input, SIGNAL( returnPressed() ),
-  //                 this, SLOT(imageHorizontalRangeChanged()) );
+  QObject::connect(m_svUI->x_max_input, SIGNAL( returnPressed() ),
+                   this, SLOT(imageHorizontalRangeChanged()) );
 
-  //QObject::connect(m_svUI->step_input, SIGNAL( returnPressed() ),
-  //                 this, SLOT(imageHorizontalRangeChanged()) );
+  QObject::connect(m_svUI->step_input, SIGNAL( returnPressed() ),
+                   this, SLOT(imageHorizontalRangeChanged()) );
 
   QObject::connect(m_svUI->imageVerticalScrollBar, SIGNAL(valueChanged(int)),
                    this, SLOT(scrollBarMoved()) );
@@ -719,6 +719,7 @@ void SVConnections::setSpectrumDisplay(SpectrumDisplay* spectrumDisplay)
     m_spectrumDisplays.append(spectrumDisplay);
   }
   m_currentSpectrumDisplay = spectrumDisplay;
+  m_currentSpectrumDisplay->updateRange();
 }
 /// Get the currently visible display
 SpectrumDisplay* SVConnections::getCurrentSpectrumDisplay() const {
