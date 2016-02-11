@@ -53,8 +53,8 @@ protected:
   virtual void doDraw(QPainter& painter, QColor& peakColor, std::shared_ptr<PeakPrimitives> drawingInformation, PeakRepresentationViewInformation viewInformation) = 0;
 };
 
-typedef std::shared_ptr<PeakRepresentation> PeakRepresentation_spr;
-typedef std::vector<PeakRepresentation_spr> VecPeakRepresentation;
+typedef std::shared_ptr<PeakRepresentation> PeakRepresentation_sptr;
+typedef std::vector<PeakRepresentation_sptr> VecPeakRepresentation;
 
 }
 }
