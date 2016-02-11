@@ -66,9 +66,8 @@ void FFT::init() {
 
 /** Executes the algorithm
  *
- *  @throw std::invalid_argument if the input properties are invalid
-                                 or the bins of the spectrum being transformed
- do not have constant width
+ *  The bins of the spectrum being transformed must have constant width
+ *  (unless AcceptXRoundingErrors is set to true)
  */
 void FFT::exec() {
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
@@ -83,18 +82,6 @@ void FFT::exec() {
   const MantidVec &X = inWS->readX(iReal);
   const int ySize = static_cast<int>(inWS->blocksize());
   const int xSize = static_cast<int>(X.size());
-
-  int nHist = static_cast<int>(inWS->getNumberHistograms());
-  if (iReal >= nHist)
-    throw std::invalid_argument("Property Real is out of range");
-  if (isComplex) {
-    const int yImagSize = static_cast<int>(inImagWS->blocksize());
-    if (ySize != yImagSize)
-      throw std::length_error("Real and Imaginary sizes do not match");
-    nHist = static_cast<int>(inImagWS->getNumberHistograms());
-    if (iImag >= nHist)
-      throw std::invalid_argument("Property Imaginary is out of range");
-  }
 
   gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(ySize);
   gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(ySize);
@@ -296,6 +283,8 @@ void FFT::exec() {
  * Perform validation of input properties:
  * - input workspace must not be empty
  * - X values must be evenly spaced (unless accepting rounding errors)
+ * - Real and Imaginary spectra must be in range of input workspace
+ * - If complex, real and imaginary workspaces must be the same size
  * @returns :: map of property names to errors (empty map if no errors)
  */
 std::map<std::string, std::string> FFT::validateInputs() {
@@ -303,6 +292,7 @@ std::map<std::string, std::string> FFT::validateInputs() {
 
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
   const int iReal = getProperty("Real");
+  const int iImag = getProperty("Imaginary");
   const MantidVec &X = inWS->readX(iReal);
 
   // check that the workspace isn't empty
@@ -314,6 +304,24 @@ std::map<std::string, std::string> FFT::validateInputs() {
     if (areBinWidthsUneven(X)) {
       errors["InputWorkspace"] =
           "X axis must be linear (all bins have same width)";
+    }
+  }
+
+  // check real, imaginary spectrum numbers and workspace sizes
+  int nHist = static_cast<int>(inWS->getNumberHistograms());
+  if (iReal >= nHist) {
+    errors["Real"] = "Real out of range";
+  }
+  if (iImag != EMPTY_INT()) {
+    MatrixWorkspace_const_sptr inImagWS = getProperty("InputImagWorkspace");
+    if (inImagWS) {
+      if (inWS->blocksize() != inImagWS->blocksize()) {
+        errors["Imaginary"] = "Real and Imaginary sizes do not match";
+      }
+      nHist = static_cast<int>(inImagWS->getNumberHistograms());
+    }
+    if (iImag >= nHist) {
+      errors["Imaginary"] = "Imaginary out of range";
     }
   }
 
