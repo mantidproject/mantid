@@ -549,7 +549,6 @@ std::string GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance, Kernel
   lattice.setUB(UB);
   U = lattice.getU();
 
-  std::cout << UB <<"\n";
  return IndexingUtils::GetLatticeParameterString(UB);
 
 }
@@ -644,7 +643,7 @@ void SCDCalibratePanels::exec() {
   QErrTable->addColumn("int", "Theoretical Column");
   QErrTable->addColumn("int", "Calculated Row");
   QErrTable->addColumn("int", "Theoretical Row");
-  QErrTable->addColumn("double", "Calculated TOF ");
+  QErrTable->addColumn("double", "Calculated TOF");
   QErrTable->addColumn("double", "Theoretical TOF");
   double chisqSum = 0;
   int NDofSum = 0;
@@ -856,12 +855,13 @@ void SCDCalibratePanels::exec() {
 
     int Niterations = getProperty("NumIterations");
     std::string minimizerError = getProperty("MinimizerError");
+    std::string minimizer = getProperty("Minimizer");
     fit_alg->setProperty("Function", iFunc);
     fit_alg->setProperty("MaxIterations", Niterations);
     fit_alg->setProperty("InputWorkspace", ws);
     fit_alg->setProperty("Output", "out");
     fit_alg->setProperty("CalcErrors", false);
-    fit_alg->setPropertyValue("Minimizer", "Levenberg-Marquardt,AbsError=" +
+    fit_alg->setPropertyValue("Minimizer", minimizer+",AbsError=" +
                                                minimizerError + ",RelError=" +
                                                minimizerError);
     fit_alg->executeAsChildAlg();
@@ -1115,7 +1115,6 @@ void SCDCalibratePanels::exec() {
   Geometry::OrientedLattice lattice(a, b, c, alpha, beta, gamma, U);
   Kernel::Matrix<double> UB(3, 3);
   UB = lattice.getUB();
-  std::cout << UB <<"\n";
   for (int j = 0; j < peaksWs->getNumberPeaks(); ++j) {
     const Geometry::IPeak &peak = peaksWs->getPeak(j);
     string bankName = peak.getBankName();
@@ -1434,13 +1433,13 @@ void SCDCalibratePanels::init() {
                   "Lattice Parameter gamma in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
 
-  declareProperty("useL0", true, "Fit the L0(source to sample) distance");
-  declareProperty("usetimeOffset", true, "Fit the time offset value");
-  declareProperty("usePanelWidth", true, "Fit the Panel Width value");
-  declareProperty("usePanelHeight", true, "Fit the Panel Height");
+  declareProperty("useL0", false, "Fit the L0(source to sample) distance");
+  declareProperty("usetimeOffset", false, "Fit the time offset value");
+  declareProperty("usePanelWidth", false, "Fit the Panel Width value");
+  declareProperty("usePanelHeight", false, "Fit the Panel Height");
   declareProperty("usePanelPosition", true, "Fit the PanelPosition");
-  declareProperty("usePanelOrientation", true, "Fit the PanelOrientation");
-  declareProperty("RotateCenters", false,
+  declareProperty("usePanelOrientation", false, "Fit the PanelOrientation");
+  declareProperty("RotateCenters", true,
                   "Rotate bank Centers with panel orientations");
   declareProperty("AllowSampleShift", false,
                   "Allow and fit for a sample that is off center");
@@ -1506,7 +1505,16 @@ void SCDCalibratePanels::init() {
   declareProperty("tolerance", .12, mustBePositive,
                   "offset of hkl values from integer for GOOD Peaks");
   declareProperty("MinimizerError", 1.e-12, mustBePositive,
-                  "error for Levenberg-Marquardt minimizer");
+                  "error for minimizer");
+  std::vector<std::string> minimizerOptions;
+  minimizerOptions.push_back("Levenberg-Marquardt");
+  minimizerOptions.push_back("Simplex");
+  declareProperty("Minimizer", "Levenberg-Marquardt",
+                  Kernel::IValidator_sptr(
+                      new Kernel::ListValidator<std::string>(minimizerOptions)),
+                  "If Levenberg-Marquardt does not find minimum, "
+                  "try Simplex which works better with a poor inital starting point.",
+                  Kernel::Direction::Input);
   declareProperty("NumIterations", 60, "Number of iterations");
   declareProperty(
       "MaxRotationChangeDegrees", 5.0,
@@ -1519,6 +1527,7 @@ void SCDCalibratePanels::init() {
   const string TOLERANCES("Tolerance settings");
   setPropertyGroup("tolerance", TOLERANCES);
   setPropertyGroup("MinimizerError", TOLERANCES);
+  setPropertyGroup("Minimizer", TOLERANCES);
   setPropertyGroup("NumIterations", TOLERANCES);
   setPropertyGroup("MaxRotationChangeDegrees", TOLERANCES);
   setPropertyGroup("MaxPositionChange_meters", TOLERANCES);
