@@ -1,9 +1,9 @@
 #ifndef INSTRUMENTWIDGETMASKTAB_H_
 #define INSTRUMENTWIDGETMASKTAB_H_
 
-#include <WidgetDllOption.h>
-#include "InstrumentWidgetTab.h"
-#include "MantidGLWidget.h"
+#include <MantidQtMantidWidgets/WidgetDllOption.h>
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h"
+#include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
 
 #include "MantidGeometry/Instrument.h"
 

@@ -1,4 +1,4 @@
-#include "OpenGLError.h"
+#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
 #include <sstream>
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"

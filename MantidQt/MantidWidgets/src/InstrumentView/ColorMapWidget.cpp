@@ -1,8 +1,8 @@
-#include "ColorMapWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/ColorMapWidget.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtAPI/GraphOptions.h"
 #include "MantidQtAPI/PowerScaleEngine.h"
-#include "DoubleSpinBox.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 
 #include <QVBoxLayout>
 #include <QGridLayout>

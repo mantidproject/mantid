@@ -1,8 +1,8 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
-#include "GLObject.h"
-#include "ObjCompAssemblyActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLObject.h"
+#include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 

@@ -1,4 +1,4 @@
-#include "RotationSurface.h"
+#include "MantidQtMantidWidgets/InstrumentView/RotationSurface.h"
 #include "MantidKernel/Logger.h"
 
 #include <QCursor>

@@ -4,7 +4,7 @@
 
 #include "AxisDetails.h"
 #include "ApplicationWindow.h"
-#include "DoubleSpinBox.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 #include <qwt_scale_widget.h>
 //#include <qwt_plot.h>
 #include "MantidQtAPI/qwt_compat.h"

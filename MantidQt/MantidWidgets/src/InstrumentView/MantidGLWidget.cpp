@@ -1,10 +1,10 @@
  #ifdef WIN32
 #include <windows.h>
 #endif
-#include "MantidGLWidget.h"
-#include "OpenGLError.h"
-#include "UnwrappedSurface.h"
-#include "Projection3D.h"
+#include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
+#include "MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h"
+#include "MantidQtMantidWidgets/InstrumentView/Projection3D.h"
 
 #include <boost/shared_ptr.hpp>
 

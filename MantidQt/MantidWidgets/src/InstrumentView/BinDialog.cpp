@@ -1,4 +1,4 @@
-#include "BinDialog.h"
+#include "MantidQtMantidWidgets/InstrumentView/BinDialog.h"
 
 ///< Qt Includes
 #include <QString>

@@ -1,4 +1,4 @@
-#include "Shape2DCollection.h"
+#include "MantidQtMantidWidgets/InstrumentView/Shape2DCollection.h"
 
 #include <QPainter>
 #include <QMouseEvent>

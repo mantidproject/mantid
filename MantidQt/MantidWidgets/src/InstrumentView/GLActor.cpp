@@ -1,5 +1,5 @@
-#include "GLActor.h"
-#include "GLActorVisitor.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
 
 namespace MantidQt
 {

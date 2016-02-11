@@ -1,8 +1,8 @@
-#include "UnwrappedSurface.h"
-#include "GLColor.h"
-#include "MantidGLWidget.h"
-#include "OpenGLError.h"
-#include "PeakMarker2D.h"
+#include "MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLColor.h"
+#include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
+#include "MantidQtMantidWidgets/InstrumentView/PeakMarker2D.h"
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"

@@ -1,9 +1,9 @@
 #ifndef INSTRUMENTWIDGETPICKTAB_H_
 #define INSTRUMENTWIDGETPICKTAB_H_
 
-#include <WidgetDllOption.h>
-#include "InstrumentWidgetTab.h"
-#include "MantidGLWidget.h"
+#include <MantidQtMantidWidgets/WidgetDllOption.h>
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h"
+#include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/ICompAssembly.h"

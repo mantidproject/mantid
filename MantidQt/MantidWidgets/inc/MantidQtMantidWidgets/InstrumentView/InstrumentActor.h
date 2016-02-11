@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTACTOR_H_
 #define INSTRUMENTACTOR_H_
 
-#include "WidgetDllOption.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "GLColor.h"
 #include "GLActor.h"
 #include "GLActorCollection.h"

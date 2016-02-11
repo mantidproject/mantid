@@ -1,5 +1,5 @@
-#include "XIntegrationControl.h"
-#include "InstrumentWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
 
 #include "MantidKernel/ConfigService.h"
 

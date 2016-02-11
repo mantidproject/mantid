@@ -1,8 +1,8 @@
-#include "Viewport.h"
+#include "MantidQtMantidWidgets/InstrumentView/Viewport.h"
 #include <math.h>
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidKernel/V3D.h"
-#include "OpenGLError.h"
+#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
 #include <limits>
 
 namespace MantidQt

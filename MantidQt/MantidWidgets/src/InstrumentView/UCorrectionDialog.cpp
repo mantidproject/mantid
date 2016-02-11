@@ -1,4 +1,4 @@
-#include "UCorrectionDialog.h"
+#include "MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h"
 #include <ui_UCorrectionDialog.h>
 
 namespace MantidQt

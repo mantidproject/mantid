@@ -1,4 +1,4 @@
-#include "MaskBinsData.h"
+#include "MantidQtMantidWidgets/InstrumentView/MaskBinsData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 

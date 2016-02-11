@@ -1,5 +1,5 @@
-#include "PeakOverlay.h"
-#include "UnwrappedSurface.h"
+#include "MantidQtMantidWidgets/InstrumentView/PeakOverlay.h"
+#include "MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 

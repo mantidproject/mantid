@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTWIDGETRENDERTAB_H_
 #define INSTRUMENTWIDGETRENDERTAB_H_
 
-#include <WidgetDllOption.h>
+#include <MantidQtMantidWidgets/WidgetDllOption.h>
 #include "InstrumentWidgetTab.h"
 
 #include "MantidQtAPI/GraphOptions.h"

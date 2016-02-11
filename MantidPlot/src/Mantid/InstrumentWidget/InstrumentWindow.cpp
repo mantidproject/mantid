@@ -4,8 +4,8 @@
 #include "MantidAPI/Workspace.h"
 #include "TSVSerialiser.h"
 
-#include <InstrumentWidget.h>
-#include <ProjectionSurface.h>
+#include <MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h>
+#include <MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h>
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;

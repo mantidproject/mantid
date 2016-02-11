@@ -1,5 +1,5 @@
-#include "OneCurvePlot.h"
-#include "PeakMarker2D.h"
+#include "MantidQtMantidWidgets/InstrumentView/OneCurvePlot.h"
+#include "MantidQtMantidWidgets/InstrumentView/PeakMarker2D.h"
 
 #include <qwt_plot_curve.h>
 #include <qwt_scale_div.h>

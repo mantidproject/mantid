@@ -1,9 +1,9 @@
-#include "InstrumentWidget.h"
-#include "InstrumentWidgetTreeTab.h"
-#include "InstrumentTreeWidget.h"
-#include "InstrumentActor.h"
-#include "ProjectionSurface.h"
-#include "GLActorVisitor.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentTreeWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
 
 #include <QVBoxLayout>
 #include <QMessageBox>

@@ -1,12 +1,12 @@
  #ifdef WIN32
 #include <windows.h>
 #endif
-#include "Projection3D.h"
-#include "GLActor.h"
-#include "GLColor.h"
-#include "UnwrappedCylinder.h"
-#include "UnwrappedSphere.h"
-#include "OpenGLError.h"
+#include "MantidQtMantidWidgets/InstrumentView/Projection3D.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLColor.h"
+#include "MantidQtMantidWidgets/InstrumentView/UnwrappedCylinder.h"
+#include "MantidQtMantidWidgets/InstrumentView/UnwrappedSphere.h"
+#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"

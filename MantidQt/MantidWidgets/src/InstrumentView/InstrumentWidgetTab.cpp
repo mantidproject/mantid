@@ -1,5 +1,5 @@
-#include "InstrumentWidgetTab.h"
-#include "InstrumentWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
 
 namespace MantidQt
 {

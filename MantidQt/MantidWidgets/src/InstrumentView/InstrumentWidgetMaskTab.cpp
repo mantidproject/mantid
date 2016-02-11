@@ -1,8 +1,8 @@
-#include "InstrumentWidget.h"
-#include "InstrumentWidgetMaskTab.h"
-#include "InstrumentActor.h"
-#include "ProjectionSurface.h"
-#include "DetXMLFile.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtMantidWidgets/InstrumentView/DetXMLFile.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"

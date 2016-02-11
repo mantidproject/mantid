@@ -4,7 +4,7 @@
 //---------------------------------------
 // Includes
 //--------------------------------------
-#include <WidgetDllOption.h>
+#include <MantidQtMantidWidgets/WidgetDllOption.h>
 #include <QTreeView>
 #include "InstrumentTreeModel.h"
 #include "MantidGeometry/IComponent.h"

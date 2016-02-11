@@ -1,7 +1,7 @@
-#include "ObjCompAssemblyActor.h"
-#include "ObjComponentActor.h"
-#include "InstrumentActor.h"
-#include "OpenGLError.h"
+#include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"

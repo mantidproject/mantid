@@ -1,8 +1,8 @@
-#include "PanelsSurface.h"
-#include "GLActorVisitor.h"
-#include "CompAssemblyActor.h"
-#include "ObjCompAssemblyActor.h"
-#include "RectangularDetectorActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/PanelsSurface.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
+#include "MantidQtMantidWidgets/InstrumentView/CompAssemblyActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
 
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidKernel/Logger.h"

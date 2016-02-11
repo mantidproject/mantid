@@ -1,11 +1,11 @@
-#include "GLActorVisitor.h"
-#include "GLActor.h"
-#include "GLActorCollection.h"
-#include "ComponentActor.h"
-#include "CompAssemblyActor.h"
-#include "ObjCompAssemblyActor.h"
-#include "InstrumentActor.h"
-#include "RectangularDetectorActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLActorCollection.h"
+#include "MantidQtMantidWidgets/InstrumentView/ComponentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/CompAssemblyActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
 
 namespace MantidQt
 {

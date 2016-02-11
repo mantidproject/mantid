@@ -1,7 +1,7 @@
 #ifndef PROJECTIONSURFACE_H
 #define PROJECTIONSURFACE_H
 
-#include "WidgetDllOption.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidGeometry/IComponent.h"

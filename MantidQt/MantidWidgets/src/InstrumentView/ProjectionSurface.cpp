@@ -1,7 +1,7 @@
-#include "ProjectionSurface.h"
-#include "GLColor.h"
-#include "MantidGLWidget.h"
-#include "OpenGLError.h"
+#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtMantidWidgets/InstrumentView/GLColor.h"
+#include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
 
 
 #include "MantidGeometry/IDetector.h"

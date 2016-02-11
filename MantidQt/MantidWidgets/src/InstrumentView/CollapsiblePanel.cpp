@@ -1,4 +1,4 @@
-#include "CollapsiblePanel.h"
+#include "MantidQtMantidWidgets/InstrumentView/CollapsiblePanel.h"
 #include <QVBoxLayout>
 #include <QMouseEvent>
 #include <QPainter>

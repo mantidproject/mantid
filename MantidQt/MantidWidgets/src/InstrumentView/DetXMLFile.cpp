@@ -1,4 +1,4 @@
-#include "DetXMLFile.h"
+#include "MantidQtMantidWidgets/InstrumentView/DetXMLFile.h"
 
 #include <QTemporaryFile>
 #include <QDir>

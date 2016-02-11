@@ -1,5 +1,5 @@
-#include "ComponentActor.h"
-#include "InstrumentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/ComponentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IObjComponent.h"

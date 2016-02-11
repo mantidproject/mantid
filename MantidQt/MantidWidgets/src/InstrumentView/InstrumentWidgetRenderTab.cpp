@@ -1,9 +1,9 @@
-#include "InstrumentWidgetRenderTab.h"
-#include "ProjectionSurface.h"
-#include "UnwrappedSurface.h"
-#include "Projection3D.h"
-#include "RotationSurface.h"
-#include "UCorrectionDialog.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
+#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h"
+#include "MantidQtMantidWidgets/InstrumentView/Projection3D.h"
+#include "MantidQtMantidWidgets/InstrumentView/RotationSurface.h"
+#include "MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h"
 
 #include <QMenu>
 #include <QVBoxLayout>
@@ -24,9 +24,9 @@
 #include <qwt_scale_engine.h>
 
 #include "MantidKernel/ConfigService.h"
-#include "InstrumentWidget.h"
-#include "BinDialog.h"
-#include "ColorMapWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/BinDialog.h"
+#include "MantidQtMantidWidgets/InstrumentView/ColorMapWidget.h"
 
 #include <limits>
 
