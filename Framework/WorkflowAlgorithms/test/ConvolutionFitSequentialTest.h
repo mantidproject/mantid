@@ -146,7 +146,7 @@ public:
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-	TS_ASSERT(alg.isExecuted());
+    TS_ASSERT(alg.isExecuted());
 
     // Retrieve and analyse parameter table - Param table does not require
     // further testing as this is tested in the ProcessIndirectFitParameters
@@ -197,13 +197,13 @@ public:
     TS_ASSERT_EQUALS(memberLogs.at(6)->value(), "ReductionWs_");
     TS_ASSERT_EQUALS(memberLogs.at(7)->value(), "1");
 
-	AnalysisDataService::Instance().clear();
+    AnalysisDataService::Instance().clear();
   }
 
   void test_exec_with_sqw_file() {
     auto sqwWs = createGenericWorkspace("SqwWs_", true);
-	auto resWs = createGenericWorkspace("ResolutionWs_", false);
-	auto convFitRes = createGenericWorkspace("__ConvFit_Resolution", false);
+    auto resWs = createGenericWorkspace("ResolutionWs_", false);
+    auto convFitRes = createGenericWorkspace("__ConvFit_Resolution", false);
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", sqwWs);
@@ -223,9 +223,9 @@ public:
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-	TS_ASSERT(alg.isExecuted());
+    TS_ASSERT(alg.isExecuted());
 
-	// Assert that output is in ADS
+    // Assert that output is in ADS
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
             "SqwWs_conv_1LFixF_s0_to_0_Parameters"));
@@ -238,7 +238,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             "SqwWs_conv_1LFixF_s0_to_0_Workspaces"));
 
-	AnalysisDataService::Instance().clear();
+    AnalysisDataService::Instance().clear();
   }
 
   //------------------------ Private Functions---------------------------
@@ -250,7 +250,8 @@ public:
     const auto yData = boost::assign::list_of(0)(1)(3)(1)(0)
                            .convert_to_container<Mantid::MantidVec>();
 
-    auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
+    auto createWorkspace =
+        AlgorithmManager::Instance().create("CreateWorkspace");
     createWorkspace->initialize();
     if (numericAxis) {
       createWorkspace->setProperty("UnitX", "DeltaE");
