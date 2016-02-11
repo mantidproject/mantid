@@ -18,6 +18,7 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
   m_instrumentWidget = new InstrumentWidget(wsName, this);
   this->setWidget(m_instrumentWidget);
   confirmClose(parent->confirmCloseInstrWindow);
+  resize(m_instrumentWidget->size());
 }
 
 InstrumentWindow::~InstrumentWindow() {}
