@@ -95,6 +95,8 @@ protected:
 
 private:
   void updateHandlers();
+  void loadSettings();
+  void saveSettings() const;
 
   QList<MatrixWSDataSource_sptr> m_dataSource;
   QList<boost::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;

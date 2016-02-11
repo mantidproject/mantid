@@ -41,6 +41,7 @@ SpectrumView::SpectrumView(QWidget *parent) :
   connect(m_ui->tracking_always_on, SIGNAL(toggled(bool)), this, SLOT(changeTracking(bool)));
   updateHandlers();
   setAcceptDrops(true);
+  loadSettings();
 
   // Watch for the deletion of the associated workspace
   observeAfterReplace();
@@ -51,6 +52,7 @@ SpectrumView::SpectrumView(QWidget *parent) :
 
 SpectrumView::~SpectrumView()
 {
+  saveSettings();
   if(m_emodeHandler)
     delete m_emodeHandler;
 }
@@ -263,8 +265,25 @@ bool SpectrumView::isTrackingOn() const {
 }
 
 void SpectrumView::changeTracking(bool on) {
+  if (m_spectrumDisplay.isEmpty()) {
+    return;
+  }
   auto tab = m_ui->imageTabs->currentIndex();
   m_spectrumDisplay[tab]->setTrackingOn(on);
+}
+
+/// Load settings
+void SpectrumView::loadSettings() {
+  QSettings settings;
+  settings.beginGroup("Mantid/MultiDatasetFit");
+  m_ui->tracking_always_on->setChecked(settings.value("CursorTracking", true).toBool());
+}
+
+/// Save settings
+void SpectrumView::saveSettings() const {
+  QSettings settings;
+  settings.beginGroup("Mantid/MultiDatasetFit");
+  settings.setValue("CursorTracking",m_ui->tracking_always_on->isChecked());
 }
 
 } // namespace SpectrumView
