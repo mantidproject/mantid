@@ -43,7 +43,7 @@ endif()
 # Check if we have a new enough version for these flags
 if ( CMAKE_COMPILER_IS_GNUCXX )
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
-    #set(GNUFLAGS "${GNUFLAGS} -Wsuggest-override -Wsuggest-final-types -Wsuggest-final-methods")
+    set(GNUFLAGS "${GNUFLAGS} -Wsuggest-override -Wsuggest-final-types -Wsuggest-final-methods")
     option(ENABLE_LTO "Enable link-time optimization in release builds" ON)
   else()
     option(ENABLE_LTO "Enable link-time optimization in release builds" OFF)
