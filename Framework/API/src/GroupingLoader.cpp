@@ -2,6 +2,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/SingletonHolder.h"
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/NodeList.h>
 
 using namespace Poco::XML;
