@@ -40,8 +40,11 @@ DECLARE_SUBWINDOW(SliceSelector)
 /// Constructor
 // SliceSelector::SliceSelector(QWidget *parent) : UserSubWindow{parent},
 // m_loadedWorkspace{nullptr}, m_BackgroundRemover{nullptr} {
-SliceSelector::SliceSelector(QWidget *parent)
-    : UserSubWindow{parent}, m_loadedWorkspace{nullptr} {}
+SliceSelector::SliceSelector(QWidget *parent) :
+  UserSubWindow{parent},
+  m_loadedWorkspace() {
+
+}
 
 SliceSelector::~SliceSelector() { m_selectedWorkspaceIndex = 0; }
 
