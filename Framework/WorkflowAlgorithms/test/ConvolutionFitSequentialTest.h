@@ -14,8 +14,6 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <boost/assign/list_of.hpp>
-
 using Mantid::Algorithms::ConvolutionFitSequential;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -245,10 +243,8 @@ public:
 
   MatrixWorkspace_sptr createGenericWorkspace(const std::string &wsName,
                                               const bool numericAxis) {
-    const auto xData = boost::assign::list_of(1)(2)(3)(4)(5)
-                           .convert_to_container<Mantid::MantidVec>();
-    const auto yData = boost::assign::list_of(0)(1)(3)(1)(0)
-                           .convert_to_container<Mantid::MantidVec>();
+    const std::vector<double> xData{1, 2, 3, 4, 5};
+    const std::vector<double> yData{0, 1, 3, 1, 0};
 
     auto createWorkspace =
         AlgorithmManager::Instance().create("CreateWorkspace");
