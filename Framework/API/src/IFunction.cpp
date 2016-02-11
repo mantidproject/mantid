@@ -1,8 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IConstraint.h"
@@ -10,17 +9,18 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
-
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
 

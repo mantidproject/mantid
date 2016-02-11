@@ -20,7 +20,8 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 namespace Mantid {
 namespace API {
@@ -29,6 +30,7 @@ namespace API {
 //----------------------------------------------------------------------
 class ITableWorkspace;
 class IPeaksWorkspace;
+class Workspace;
 
 /** The WorkspaceFactory class is in charge of the creation of all types
     of workspaces. It inherits most of its implementation from
