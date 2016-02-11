@@ -9,6 +9,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 // #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"

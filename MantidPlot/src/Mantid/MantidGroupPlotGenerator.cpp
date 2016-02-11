@@ -1,5 +1,7 @@
 #include "MantidGroupPlotGenerator.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+
 using Mantid::API::WorkspaceGroup_const_sptr;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::API::MatrixWorkspace_const_sptr;

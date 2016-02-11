@@ -4,9 +4,12 @@
 #include "OpenGLError.h"
 
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidKernel/Unit.h"
 #include "MantidQtMantidWidgets/InputController.h"
 
 #include <QRgb>

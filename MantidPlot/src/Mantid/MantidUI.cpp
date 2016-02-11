@@ -21,23 +21,23 @@
 #include "../Folder.h"
 #include "../TiledWindow.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/EnvironmentHistory.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitConversion.h"
-#include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include "InstrumentWidget/InstrumentWindow.h"
 
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
-
-#include "MantidKernel/EnvironmentHistory.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace.h"

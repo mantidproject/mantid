@@ -17,7 +17,9 @@
 #include "TSVSerialiser.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <Poco/Path.h>
 

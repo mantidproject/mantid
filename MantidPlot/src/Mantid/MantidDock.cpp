@@ -13,8 +13,9 @@
 #include <MantidAPI/FileProperty.h>
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include <MantidAPI/WorkspaceGroup.h>
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidKernel/make_unique.h>

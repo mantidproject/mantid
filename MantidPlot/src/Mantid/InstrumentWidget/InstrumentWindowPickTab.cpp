@@ -12,6 +12,7 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
