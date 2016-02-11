@@ -258,9 +258,7 @@ DECLARE_ALGORITHM(PerformIndexOperations)
 //------------------------------------------------------------------------------
 /** Constructor
  */
-PerformIndexOperations::PerformIndexOperations() {
-  useAlgorithm("GroupDetectors", 2);
-}
+PerformIndexOperations::PerformIndexOperations() {}
 
 //------------------------------------------------------------------------------
 /** Destructor
