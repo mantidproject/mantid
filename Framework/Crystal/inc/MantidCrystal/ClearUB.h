@@ -5,6 +5,11 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+
+namespace API {
+class ExperimentInfo;
+}
+
 namespace Crystal {
 
 /** ClearUB : Clear the UB matrix from a workspace by removing the oriented

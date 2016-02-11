@@ -1,6 +1,8 @@
 #include "MantidCrystal/PeakIntensityVsRadius.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ListValidator.h"
 

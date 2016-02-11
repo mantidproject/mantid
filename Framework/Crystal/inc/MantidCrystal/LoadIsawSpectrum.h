@@ -1,8 +1,8 @@
 #ifndef MANTID_CRYSTAL_LoadIsawSpectrum_H_
 #define MANTID_CRYSTAL_LoadIsawSpectrum_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace Crystal {
