@@ -5,6 +5,7 @@
 #include "MantidQtSliceViewer/PeakPrimitives.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 
+
 class QPainter;
 class QColor;
 
@@ -51,6 +52,9 @@ protected:
   virtual std::shared_ptr<PeakPrimitives> getDrawingInformation(PeakRepresentationViewInformation viewInformation) = 0;
   virtual void doDraw(QPainter& painter, QColor& peakColor, std::shared_ptr<PeakPrimitives> drawingInformation, PeakRepresentationViewInformation viewInformation) = 0;
 };
+
+typedef std::shared_ptr<PeakRepresentation> PeakRepresentation_spr;
+typedef std::vector<PeakRepresentation_spr> VecPeakRepresentation;
 
 }
 }

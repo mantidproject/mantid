@@ -21,6 +21,7 @@ set ( SRC_FILES
         #src/PeakRepresentationEllipsoid.cpp
         #src/PeakRepresentationSphere.cpp
 	src/PeaksTableColumnsDialog.cpp
+	src/PeakView.cpp
 	src/PeaksViewer.cpp
 	src/PeaksWorkspaceWidget.cpp
 	src/PhysicalCrossPeak.cpp
@@ -66,6 +67,7 @@ set ( INC_FILES
         #inc/MantidQtSliceViewer/PeakRepresentationEllipsoid.h
         #inc/MantidQtSliceViewer/PeakRepresentationSphere.h
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
+	inc/MantidQtSliceViewer/PeakView.h
 	inc/MantidQtSliceViewer/PeaksViewer.h
 	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.h
