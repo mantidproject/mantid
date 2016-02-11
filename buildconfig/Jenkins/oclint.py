@@ -69,6 +69,8 @@ def lint(oclint, out_file, config):
 
 
 def combine_outputs(output_files):
+    print "combining output files"
+
     # first file
     base_tree = ET.ElementTree(file=output_files[0])
     base_root = base_tree.getroot()
@@ -116,15 +118,16 @@ if __name__ == "__main__":
 
     with open(args.compile_commands, 'r') as r_handler:
         json_objects = json.loads(r_handler.read())
-    print json_objects
 
     if len(json_objects) <= maxCountPerFile:
         lint(args.oclint, 'oclint.xml', config)
     else:
         json_file = rename(args.compile_commands, 'input.json')
-        json_files = split_json(json_objects)
-        xml_files = lint_jsonfiles(args.oclint, json_files, config)
-        combine_outputs(xml_files)
-        for xml_file in xml_files:
-            os.remove(xml_file)
-        rename(json_file, args.compile_commands)
+        try:
+            json_files = split_json(json_objects)
+            xml_files = lint_jsonfiles(args.oclint, json_files, config)
+            combine_outputs(xml_files)
+            for xml_file in xml_files:
+                os.remove(xml_file)
+        finally:
+            rename(json_file, args.compile_commands)
