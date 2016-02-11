@@ -342,11 +342,6 @@ VecCommands interpret(const std::string &processingInstructions) {
 /** Execute the algorithm.
  */
 void PerformIndexOperations::exec() {
-  g_log.error("PerformIndexOperations has been deprecated. It will be "
-              "removed in the next release of Mantid. The same functionality "
-              "is provided by GroupDetectors-v2. Its GroupingPattern "
-              "property accepts the same syntax as PerformIndexOperations' "
-              "ProcessingInstructions property.");
   MatrixWorkspace_sptr inputWorkspace = this->getProperty("InputWorkspace");
   const std::string processingInstructions =
       this->getProperty("ProcessingInstructions");
