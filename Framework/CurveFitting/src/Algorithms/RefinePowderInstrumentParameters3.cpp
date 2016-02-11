@@ -634,17 +634,8 @@ bool RefinePowderInstrumentParameters3::acceptOrDenyChange(double curchisq,
     // Higher Rwp. Take a chance to accept
     double dice = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
     double bar = exp(-(newchisq - curchisq) / (curchisq * temperature));
-    // double bar = exp(-(newrwp-currwp)/m_bestRwp);
-    // g_log.notice() << "[DBx329] Bar = " << bar << ", Dice = " << dice <<
-    // endl;
-    if (dice < bar) {
-      // random number (dice, 0 and 1) is smaller than bar (between -infty and
-      // 0)
-      accept = true;
-    } else {
-      // Reject
-      accept = false;
-    }
+    // random number (dice, 0 and 1) is smaller than bar (between -infty and
+    accept = dice < bar;
   }
 
   return accept;
