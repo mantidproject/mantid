@@ -464,7 +464,7 @@ void ConvolutionFitSequential::convertInputToElasticQ(
   auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
     auto convSpec = createChildAlgorithm("ConvertSpectrumAxis");
-    // remains in ADS for use in embedded algorithm call
+	// Store in ADS to allow use by PlotPeakByLogValue
     convSpec->setAlwaysStoreInADS(true);
     convSpec->setProperty("InputWorkSpace", inputWs);
     convSpec->setProperty("OutputWorkSpace", wsName);
@@ -477,7 +477,8 @@ void ConvolutionFitSequential::convertInputToElasticQ(
       throw std::runtime_error("Input must have axis values of Q");
     }
     auto cloneWs = createChildAlgorithm("CloneWorkspace");
-	cloneWs->setAlwaysStoreInADS(true);
+	// Store in ADS to allow use by PlotPeakByLogValue
+    cloneWs->setAlwaysStoreInADS(true);
     cloneWs->setProperty("InputWorkspace", inputWs);
     cloneWs->setProperty("OutputWorkspace", wsName);
     cloneWs->executeAsChildAlg();
