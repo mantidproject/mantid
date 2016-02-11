@@ -1601,7 +1601,11 @@ public:
                      SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
                      RENDERMODE_SIZE };
   enum Tab { RENDER, PICK, MASK, TREE };
-
+  
+  InstrumentWidget(const QString &wsName, QWidget *parent = nullptr,
+				bool resetGeometry = true, bool autoscaling = true,
+				double scaleMin = 0.0, double scaleMax = 0.0,
+				bool setDefaultView = true);
 
   MantidQt::MantidWidgets::InstrumentWidgetTab * getTab(const QString & title) const;
 %Docstring
@@ -1667,7 +1671,6 @@ public:
   void setViewType(const QString &);
 
 private:
-InstrumentWidget();
 InstrumentWidget(const MantidQt::MantidWidgets::InstrumentWidget &);
 };
 
