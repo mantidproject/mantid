@@ -159,10 +159,19 @@ void IqtFit::run() {
 
   func->applyTies();
 
-  std::string function = std::string(func->asString());
-  QString fitType = fitTypeString();
-  QString specMin = m_uiForm.spSpectraMin->text();
-  QString specMax = m_uiForm.spSpectraMax->text();
+  const auto function = std::string(func->asString());
+  const auto fitType = fitTypeString();
+  const auto specMin = m_uiForm.spSpectraMin->value();
+  const auto specMax = m_uiForm.spSpectraMax->value();
+  const auto minimizer = minimizerString("$outputname_$wsindex");
+  const auto save = m_uiForm.ckSave->isChecked();
+  const auto plot = m_uiForm.cbPlotType->currentText().toStdString();
+  const auto startX =
+      boost::lexical_cast<double>(m_properties["StartX"]->valueText());
+  const auto endX =
+      boost::lexical_cast<double>(m_properties["EndX"]->valueText());
+  const auto maxIt =
+      boost::lexical_cast<double>(m_properties["MaxIterations"]->valueText());
 
   QString pyInput =
       "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
@@ -177,15 +186,15 @@ void IqtFit::run() {
                                             "endx = " +
       m_properties["EndX"]->valueText() + "\n"
                                           "plot = '" +
-      m_uiForm.cbPlotType->currentText() + "'\n"
-                                           "spec_min = " +
-      specMin + "\n"
-                "spec_max = " +
-      specMax + "\n"
-                "spec_max = None\n"
-                "minimizer = '" +
-      minimizerString("$outputname_$wsindex") + "'\n"
-                                                "max_iterations = " +
+      QString::fromStdString(plot) + "'\n"
+                                     "spec_min = " +
+      QString::number(specMin) + "\n"
+                                 "spec_max = " +
+      QString::number(specMax) + "\n"
+                                 "spec_max = None\n"
+                                 "minimizer = '" +
+      minimizer + "'\n"
+                  "max_iterations = " +
       QString::number(m_dblManager->value(m_properties["MaxIterations"])) +
       "\n";
 
@@ -194,7 +203,7 @@ void IqtFit::run() {
   else
     pyInput += "constrain_intens = False \n";
 
-  if (m_uiForm.ckSave->isChecked())
+  if (save)
     pyInput += "save = True\n";
   else
     pyInput += "save = False\n";
@@ -206,11 +215,26 @@ void IqtFit::run() {
                "Plot=plot, minimizer=minimizer, "
                "max_iterations=max_iterations)\n";
   } else {
-    pyInput += "furyfitMult(input, func, ftype, startx, endx, "
-               "spec_min=spec_min, spec_max=spec_max, "
-               "intensities_constrained=constrain_intens, Save=save, "
-               "Plot=plot, minimizer=minimizer, "
-               "max_iterations=max_iterations)\n";
+
+    auto furyFitMultiple =
+        AlgorithmManager::Instance().create("FuryFitMultiple");
+    furyFitMultiple->initialize();
+    furyFitMultiple->setProperty("InputWorkspace",
+                                 m_ffInputWSName.toStdString());
+    furyFitMultiple->setProperty("Function", function);
+    furyFitMultiple->setProperty("FitType", fitType.toStdString());
+    furyFitMultiple->setProperty("StartX", startX);
+    furyFitMultiple->setProperty("EndX", endX);
+    furyFitMultiple->setProperty("SpecMin", specMin);
+    furyFitMultiple->setProperty("SpecMax", specMax);
+    furyFitMultiple->setProperty("Minimizer", minimizer.toStdString());
+    furyFitMultiple->setProperty("MaxIterations", maxIt);
+    furyFitMultiple->setProperty("ConstrainIntensities", constrainIntens);
+    furyFitMultiple->setProperty("Save", save);
+    furyFitMultiple->setProperty("Plot", plot);
+
+    m_batchAlgoRunner->addAlgorithm(furyFitMultiple);
+    m_batchAlgoRunner->executeBatch();
   }
 
   QString pyOutput = runPythonCode(pyInput);
@@ -218,7 +242,7 @@ void IqtFit::run() {
   // Set the result workspace for Python script export
   QString inputWsName = QString::fromStdString(m_ffInputWS->getName());
   QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) +
-                         "_fury_" + fitType + specMin + "_to_" + specMax +
+                         "_fury_" + fitType + QString::number(specMin) + "_to_" + QString::number(specMax) +
                          "_Workspaces";
   m_pythonExportWsName = resultWsName.toStdString();
 
