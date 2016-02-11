@@ -260,6 +260,9 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabCalib.comboBox_calib_cropped_bank_name->setCurrentIndex(0);
 
+  m_uiTabCalib.checkBox_PlotData_Calib->setChecked(
+	  qs.value("user-param-calib-plot-data", true).toBool());
+  
   // user params - focusing
   m_uiTabFocus.lineEdit_run_num->setUserInput(
       qs.value("user-params-focus-runno", "").toString());
@@ -612,6 +615,63 @@ void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName) {
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
+// shahroz
+void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
+  std::string pyCode =
+      "van_curves_ws = workspace(\"engggui_vanadium_curves_ws\")\n"
+      "plot(van_curves_ws, [0, 1, 2])";
+
+  std::string status =
+      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+
+  m_logMsgs.push_back(
+      "Plotted output calibration vanadium curves, with status string " +
+      status);
+  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
+};
+
+void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
+    const std::string &wsName, double &difc, double &tzero) {
+
+  std::string pyCode =
+      "bank_ws = workspace(" + wsName +
+      ")\n"
+      "xVal = []\n"
+      "yVal = []\n"
+      "y2Val = []\n"
+
+      "for i in range(0, bank_ws.rowCount()):\n"
+      " xVal.append(bank_ws.cell()i, 0))\n"
+      " yVal.append(bank_ws.cell()i, 5))\n"
+      " difc=" +
+      boost::lexical_cast<std::string>(difc) + "\n" + " tzero=" +
+      boost::lexical_cast<std::string>(tzero) + "\n" +
+      " y2Val.append(xVal[i] * difc + tzero)\n"
+
+      "ws1 = CreateWorkspace(DataX=xVal, DataY=yVal, UnitX=\"Expected Peaks "
+      "Centre(dSpacing, A)\", YUnitLabel = \"Fitted Peaks Centre(TOF, us)\")\n"
+      "ws2 = CreateWorkspace(DataX=xVal, DataY=y2Val)\n"
+      "AppendSpectra(ws1, ws2, OutputWorkspace=\"engggui_difc_zero_peaks\")\n"
+
+      "DeleteWorkspace(ws1)\n"
+      "DeleteWorkspace(ws1)\n"
+
+      "engggui_difc_zero_peaks = workspace(\"engggui_difc_zero_peaks\")\n"
+      "calWin = plotSpectrum(engggui_difc_zero_peaks, [0, 1]).activeLayer()\n"
+
+      "calWin.setTitle(\"Engg Gui Difc Zero Peaks\")\n"
+      "calWin.setAxisTitle(Layer.Bottom, \"Expected Peaks Centre(dSpacing, "
+      "A)\")\n"
+      "calWin.setCurveLineStyle(0, QtCore.Qt.DotLine)\n";
+
+  std::string status =
+      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+
+  m_logMsgs.push_back(
+      "Plotted output calibration ceria peaks, with status string " + status);
+  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
+}
+
 void EnggDiffractionViewQtGUI::resetFocus() {
   m_uiTabFocus.lineEdit_run_num->setText("");
   m_uiTabFocus.checkBox_focus_bank1->setChecked(true);
@@ -893,7 +953,12 @@ bool EnggDiffractionViewQtGUI::focusedOutWorkspace() const {
   return m_uiTabFocus.checkBox_FocusedWS->checkState();
 }
 
-bool EnggDiffractionViewQtGUI::saveOutputFiles() const {
+// shahroz
+bool EnggDiffractionViewQtGUI::plotCalibWorkspace() const {
+	return m_uiTabCalib.checkBox_PlotData_Calib->checkState();
+}
+
+bool EnggDiffractionViewQtGUI::saveFocusedOutputFiles() const {
   return m_uiTabFocus.checkBox_SaveOutputFiles->checkState();
 }
 
