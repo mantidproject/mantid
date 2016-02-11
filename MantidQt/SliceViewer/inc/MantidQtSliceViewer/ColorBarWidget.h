@@ -81,6 +81,9 @@ public:
   void setAutoScale(bool autoscale);
   bool getAutoScale() const;
 
+  bool getAutoColorScaleforCurrentSlice() const;
+
+
 public slots:
   void changedMinimum();
   void changedMaximum();

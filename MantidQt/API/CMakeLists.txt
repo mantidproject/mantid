@@ -89,6 +89,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/MantidColorMap.h
 	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtWorkspaceData.h
+	inc/MantidQtAPI/MantidAlgorithmMetatype.h
 	inc/MantidQtAPI/MdConstants.h
 	inc/MantidQtAPI/MdPlottingCmapsProvider.h
 	inc/MantidQtAPI/MdSettings.h

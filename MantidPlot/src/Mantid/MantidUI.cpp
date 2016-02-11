@@ -25,9 +25,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
+#include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitConversion.h"
-#include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtAPI/AlgorithmInputHistory.h"
@@ -85,6 +85,7 @@
 using namespace std;
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
 
@@ -2043,39 +2044,34 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   //Need a new window
   const QString windowName(QString("InstrumentWindow:") + wsName);
-  InstrumentWindow *insWin = new InstrumentWindow(wsName,QString("Instrument"),appWindow(),windowName);
+  
   try
   {
-    insWin->init();
+    InstrumentWindow *insWin = new InstrumentWindow(
+        wsName, QString("Instrument"), appWindow(), windowName);
+
+    insWin->selectTab(tab);
+
+    appWindow()->addMdiSubWindow(insWin);
+
+    QApplication::restoreOverrideCursor();
+    return insWin;
   }
   catch(const std::exception& e)
   {
     QApplication::restoreOverrideCursor();
     QString errorMessage = "Instrument view cannot be created:\n\n" + QString(e.what());
     QMessageBox::critical(appWindow(),"MantidPlot - Error",errorMessage);
-    if (insWin)
-    {
-      appWindow()->closeWindow(insWin);
-      insWin->close();
-    }
+
     return NULL;
   }
-
-  insWin->selectTab(tab);
-
-  appWindow()->addMdiSubWindow(insWin);
-
-  connect(insWin, SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
-    SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
-
-  QApplication::restoreOverrideCursor();
-  return insWin;
 }
 
 
 void MantidUI::showMantidInstrument(const QString& wsName)
 {
   InstrumentWindow *insWin = getInstrumentView(wsName);
+
   if (!insWin)
   {
     m_lastShownInstrumentWin = NULL;
@@ -2090,14 +2086,14 @@ void MantidUI::showMantidInstrument(const QString& wsName)
       m_lastShownInstrumentWin->close();
       QPoint p = m_lastShownInstrumentWin->pos();
       delete m_lastShownInstrumentWin;
-      insWin->move(p);
+	  insWin->move(p);
     }
   }
   m_lastShownInstrumentWin = insWin;
 
   if (!insWin->isVisible())
   {
-    insWin->show();
+	  insWin->show();
   }
 }
 
