@@ -88,7 +88,7 @@ public:
    */
   inline bool isPointBounded(const coord_t *coords) const {
     coord_t total = 0;
-    for (size_t d = 0; d < m_nd; d++) {
+    for (size_t d = 0; d < m_nd; ++d) {
       total += m_normal[d] * coords[d];
     }
     return (total >= m_inequality);
@@ -103,7 +103,7 @@ public:
    */
   inline bool isPointBounded(const Mantid::Kernel::VMD &coords) const {
     coord_t total = 0;
-    for (size_t d = 0; d < m_nd; d++) {
+    for (size_t d = 0; d < m_nd; ++d) {
       total += m_normal[d] * static_cast<coord_t>(coords[d]);
     }
     return (total >= m_inequality);
@@ -118,7 +118,7 @@ public:
    */
   inline bool isPointBounded(const std::vector<coord_t> &coords) const {
     coord_t total = 0;
-    for (size_t d = 0; d < m_nd; d++) {
+    for (size_t d = 0; d < m_nd; ++d) {
       total += m_normal[d] * coords[d];
     }
     return (total >= m_inequality);
@@ -136,7 +136,7 @@ public:
    */
   inline bool isPointInside(const coord_t *coords) const {
     coord_t total = 0;
-    for (size_t d = 0; d < m_nd; d++) {
+    for (size_t d = 0; d < m_nd; ++d) {
       total += m_normal[d] * coords[d];
     }
     return (total > m_inequality);
@@ -154,7 +154,7 @@ public:
    */
   inline bool isPointInside(const std::vector<coord_t> &coords) const {
     coord_t total = 0;
-    for (size_t d = 0; d < m_nd; d++) {
+    for (size_t d = 0; d < m_nd; ++d) {
       total += m_normal[d] * coords[d];
     }
     return (total > m_inequality);
@@ -189,7 +189,7 @@ private:
   void construct(IterableType normal, IterableType point) {
     m_normal = new coord_t[m_nd];
     m_inequality = 0;
-    for (size_t d = 0; d < m_nd; d++) {
+    for (size_t d = 0; d < m_nd; ++d) {
       m_normal[d] = static_cast<coord_t>(normal[d]);
       m_inequality += static_cast<coord_t>(point[d]) * m_normal[d];
     }
