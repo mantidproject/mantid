@@ -1,9 +1,11 @@
 #include "MantidCurveFitting/Algorithms/NormaliseByPeakArea.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidKernel/BoundedValidator.h"

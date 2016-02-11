@@ -1,4 +1,5 @@
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/BoundedValidator.h"

@@ -1,11 +1,14 @@
 #include "MantidCurveFitting/Algorithms/PawleyFit.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitConversion.h"

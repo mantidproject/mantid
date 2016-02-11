@@ -2,10 +2,17 @@
 #define MANTID_CURVEFITTING_CALCULATEGAMMABACKGROUND_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDTypes.h"
 
 #include <unordered_map>
 
 namespace Mantid {
+
+namespace Kernel {
+class V3D;
+}
+
 namespace CurveFitting {
 namespace Functions {
 struct ResolutionParams;

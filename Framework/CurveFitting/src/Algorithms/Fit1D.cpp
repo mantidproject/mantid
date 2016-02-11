@@ -2,21 +2,24 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/Fit1D.h"
-#include <sstream>
-#include <numeric>
-#include <cmath>
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <boost/tokenizer.hpp>
+
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_blas.h>
-#include <boost/tokenizer.hpp>
-#include "MantidKernel/BoundedValidator.h"
+
+#include <cmath>
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
