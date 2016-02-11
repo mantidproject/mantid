@@ -7,18 +7,18 @@ import os.path
 
 class FuryFitMultiple(PythonAlgorithm):
 
-    _inputWs
-    _function
-    _fit_type
-    _start_x
-    _end_x
-    _spec_min
-    _spec_max
-    _intensities_constrained
-    _minimizer
-    _max_iterations
-    _save
-    _plot
+    _input_ws = None
+    _function = None
+    _fit_type = None
+    _start_x = None
+    _end_x = None
+    _spec_min = None
+    _spec_max = None
+    _intensities_constrained = None
+    _minimizer = None
+    _max_iterations = None
+    _save = None
+    _plot = None
 
     def category(self):
         return "Workflow\\MIDAS"
@@ -30,19 +30,19 @@ class FuryFitMultiple(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='The _iqt.nxs InputWorkspace used by the algorithm')
-        self.declareProperty(name='Function', '',
+        self.declareProperty(name='Function', defaultValue='',
                              doc='The function to use in fitting')
-        self.declareProperty(name='FitType', '',
+        self.declareProperty(name='FitType', defaultValue='',
                              doc='The type of fit being carried out')
-        self.declareProperty(name='StartX', defaultValue=0,
+        self.declareProperty(name='StartX', defaultValue=0.0,
                              doc="The first value for X")
-        self.declareProperty(name='EndX', '',
+        self.declareProperty(name='EndX', defaultValue=0.2,
                              doc="The last value for X")
         self.declareProperty(name='SpecMin', defaultValue=0,
                              doc='Minimum spectra in the worksapce to fit')
-        self.declareProperty(name='SpecMax', '',
+        self.declareProperty(name='SpecMax', defaultValue=0,
                              doc='Maximum spectra in the worksapce to fit')
-        self.declareProperty(name='Minimizer','Levenberg-Marquardt',
+        self.declareProperty(name='Minimizer', defaultValue='Levenberg-Marquardt',
                              doc='The minimizer to use in fitting')
         self.declareProperty(name="MaxIterations", defaultValue=500,
                              doc="The Maximum number of iterations for the fit")
@@ -58,16 +58,15 @@ class FuryFitMultiple(PythonAlgorithm):
         self._get_properties()
         issues = dict()
 
-        input_workspace = mtd[self._input_ws]
-        maximum_possible_spectra = input_workspace.getNumberhistograms()
-        maximum_possible_x = input_workspace.readX(0)[input_workspace.blocksize()]
+        maximum_possible_spectra = self._input_ws.getNumberHistograms()
+        maximum_possible_x = self._input_ws.readX(0)[self._input_ws.blocksize() - 1]
         # Validate SpecMin/Max
 
         if self._spec_max > maximum_possible_spectra:
             issues['SpecMax'] = ('SpecMax must be smaller or equal to the number of spectra in the input workspace, %d' % maximum_possible_spectra)
         if self._spec_min < 0:
             issues['SpecMin'] = 'SpecMin can not be less than 0'
-        if self._spec_max < self.spec_min:
+        if self._spec_max < self._spec_min:
             issues['SpecMax'] = 'SpecMax must be more than or equal to SpecMin'
 
         # Validate Start/EndX
@@ -75,7 +74,7 @@ class FuryFitMultiple(PythonAlgorithm):
             issues['EndX'] = ('EndX must be less than the highest x value in the workspace, %d' % maximum_possible_x)
         if self._start_x < 0:
             issues['StartX'] = 'StartX can not be less than 0'
-        if self._start_x < self._end_x:
+        if self._start_x > self._end_x:
             issues['EndX'] = 'EndX must be more than StartX'
 
         return issues
