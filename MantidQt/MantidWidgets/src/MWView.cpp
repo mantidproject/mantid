@@ -1,4 +1,5 @@
 #include "MantidQtMantidWidgets/MWView.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 // includes for workspace handling
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -28,8 +29,7 @@ namespace MantidWidgets {
 MWView::MWView(QWidget *parent)
     : QWidget(parent),
       m_mdSettings(boost::make_shared<MantidQt::API::MdSettings>()),
-      m_workspace(),
-      m_dimensions() {
+      m_workspace(), m_dimensions() {
   m_spect = new QwtPlotSpectrogram();
   m_data = new MantidQt::API::QwtRasterDataMD();
   m_normalization = Mantid::API::NoNormalization;
@@ -82,7 +82,7 @@ void MWView::updateDisplay() {
   if (!m_workspace)
     return;
   m_data->setRange(m_uiForm.colorBar->getViewRange());
-  std::vector<Mantid::coord_t> slicePoint{0,0};
+  std::vector<Mantid::coord_t> slicePoint{0, 0};
   constexpr size_t dimX(0);
   constexpr size_t dimY(1);
   Mantid::Geometry::IMDDimension_const_sptr X = m_dimensions[dimX];
@@ -90,9 +90,9 @@ void MWView::updateDisplay() {
   m_data->setSliceParams(dimX, dimY, X, Y, slicePoint);
   double left{X->getMinimum()};
   double top{Y->getMinimum()};
-  double width{X->getMaximum()-X->getMinimum()};
-  double height{Y->getMaximum()-Y->getMinimum()};
-  QwtDoubleRect bounds{left,top,width, height};
+  double width{X->getMaximum() - X->getMinimum()};
+  double height{Y->getMaximum() - Y->getMinimum()};
+  QwtDoubleRect bounds{left, top, width, height};
   m_data->setBoundingRect(bounds.normalized());
   m_spect->setColorMap(m_uiForm.colorBar->getColorMap());
   m_spect->setData(*m_data);
@@ -236,7 +236,8 @@ void MWView::setVectorDimensions() {
   m_dimensions.clear();
   for (size_t d = 0; d < m_workspace->getNumDims(); d++) {
     Mantid::Geometry::MDHistoDimension_sptr dimension(
-        new Mantid::Geometry::MDHistoDimension(m_workspace->getDimension(d).get()));
+        new Mantid::Geometry::MDHistoDimension(
+            m_workspace->getDimension(d).get()));
     m_dimensions.push_back(dimension);
   }
 }

@@ -12,15 +12,15 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
-namespace Mantid{
-namespace API{
+namespace Mantid {
+namespace API {
 class MWDimension;
 }
 }
 
 namespace MantidQt {
 
-namespace API{
+namespace API {
 class QwtRasterDataMD;
 class MdSettings;
 }
@@ -29,7 +29,8 @@ namespace MantidWidgets {
 class ColorBarWidget;
 
 using MWDimension_sptr = boost::shared_ptr<Mantid::API::MWDimension>;
-using MWDimension_const_sptr = boost::shared_ptr<const Mantid::API::MWDimension>;
+using MWDimension_const_sptr =
+    boost::shared_ptr<const Mantid::API::MWDimension>;
 
 /** A viewer for a Matrix Workspace.
  *
@@ -68,7 +69,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWView : public QWidget {
 public:
   MWView(QWidget *parent = 0);
   ~MWView();
-  void loadColorMap(QString filename = QString() );
+  void loadColorMap(QString filename = QString());
   void setWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
   void updateDisplay();
 
@@ -97,7 +98,7 @@ private:
   /// File of the last loaded color map.
   QString m_currentColorMapFile;
   /// Md Settings for color maps
-  boost::shared_ptr<MantidQt::API::MdSettings>  m_mdSettings;
+  boost::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
   /// Workspace being shown
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   /// The calculated range of values in the FULL data set
@@ -106,7 +107,6 @@ private:
   /// Vector of the dimensions to show.
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;
 };
-
 
 } // namespace MantidWidgets
 } // namespace MantidQt
