@@ -356,8 +356,6 @@ void ResampleX::exec() {
         }
         PARALLEL_CHECK_INTERUPT_REGION
       }
-
-      setProperty("OutputWorkspace", outputEventWS);
     }    // end if (m_preserveEvents)
     else // event workspace -> matrix workspace
     {
@@ -417,10 +415,9 @@ void ResampleX::exec() {
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
       outputWS->setYUnit(inputEventWS->YUnit());
       outputWS->setYUnitLabel(inputEventWS->YUnitLabel());
-
-      // Assign it to the output workspace property
-      setProperty("OutputWorkspace", outputWS);
     }
+    // Assign it to the output workspace property
+    setProperty("OutputWorkspace", outputWS);
     return;
   } else // (inputeventWS != NULL)
   {
