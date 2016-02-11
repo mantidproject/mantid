@@ -308,13 +308,13 @@ std::map<std::string, std::string> FFT::validateInputs() {
   // check that the workspace isn't empty
   if (X.size() < 2) {
     errors["InputWorkspace"] = "Input workspace must have at least two values";
-  }
-
-  // Check that the x values are evenly spaced
-  // If accepting rounding errors, just give a warning if bins are different.
-  if (areBinWidthsUneven(X)) {
-    errors["InputWorkspace"] =
-        "X axis must be linear (all bins have same width)";
+  } else {
+    // Check that the x values are evenly spaced
+    // If accepting rounding errors, just give a warning if bins are different.
+    if (areBinWidthsUneven(X)) {
+      errors["InputWorkspace"] =
+          "X axis must be linear (all bins have same width)";
+    }
   }
 
   return errors;
