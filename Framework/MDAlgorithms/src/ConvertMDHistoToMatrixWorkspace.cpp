@@ -2,16 +2,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidAPI/NullCoordTransform.h"
 #include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits.hpp>
+
 #include <sstream>
 
 using namespace Mantid::Kernel;

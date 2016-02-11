@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -7,8 +8,13 @@
 #include "MantidAPI/Progress.h"
 
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -16,15 +22,9 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/MDEventFactory.h"
-
 #include "MantidMDAlgorithms/ReflectometryTransformKiKf.h"
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 #include "MantidMDAlgorithms/ReflectometryTransformP.h"
-
-#include "MantidGeometry/MDGeometry/QLab.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>

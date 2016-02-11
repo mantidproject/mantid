@@ -1,9 +1,11 @@
 #include "MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/IMDIterator.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

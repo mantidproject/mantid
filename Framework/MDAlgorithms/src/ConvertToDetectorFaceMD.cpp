@@ -1,14 +1,14 @@
 #include "MantidMDAlgorithms/ConvertToDetectorFaceMD.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/System.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ArrayProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
