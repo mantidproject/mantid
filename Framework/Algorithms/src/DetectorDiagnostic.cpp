@@ -8,6 +8,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include <boost/iterator/counting_iterator.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
 #include <cfloat>
@@ -529,14 +530,9 @@ DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
 
 std::vector<std::vector<size_t>>
 DetectorDiagnostic::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
-  std::vector<std::vector<size_t>> mymap;
-  std::vector<size_t> single;
-
-  for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    single.push_back(i);
-  }
-  mymap.push_back(single);
-  return mymap;
+  return {
+      {boost::counting_iterator<std::size_t>(0),
+       boost::counting_iterator<std::size_t>(countsWS->getNumberHistograms())}};
 }
 /** This function will check how to group spectra when calculating median
  *

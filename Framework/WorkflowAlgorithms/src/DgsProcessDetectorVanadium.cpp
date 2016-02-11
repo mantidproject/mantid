@@ -117,10 +117,9 @@ void DgsProcessDetectorVanadium::exec() {
   }
 
   // Rebin the data (not Integration !?!?!?)
-  std::vector<double> binning;
-  binning.push_back(detVanIntRangeLow);
-  binning.push_back(detVanIntRangeHigh - detVanIntRangeLow);
-  binning.push_back(detVanIntRangeHigh);
+  std::vector<double> binning{detVanIntRangeLow,
+                              detVanIntRangeHigh - detVanIntRangeLow,
+                              detVanIntRangeHigh};
 
   IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", inputWS);

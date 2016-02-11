@@ -262,10 +262,8 @@ void CutMD::init() {
                                   "MDHistoWorkspace as output. This is DND "
                                   "only in Horace terminology.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back(AutoMethod);
-  propOptions.push_back(RLUMethod);
-  propOptions.push_back(InvAngstromMethod);
+  std::vector<std::string> propOptions{AutoMethod, RLUMethod,
+                                       InvAngstromMethod};
   char buffer[1024];
   std::sprintf(
       buffer, "How will the Q units of the input workspace be interpreted? "
@@ -289,12 +287,9 @@ void CutMD::exec() {
   const IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
   const size_t numDims = inWS->getNumDims();
   const ITableWorkspace_sptr projectionWS = getProperty("Projection");
-  std::vector<std::vector<double>> pbins(5);
-  pbins[0] = getProperty("P1Bin");
-  pbins[1] = getProperty("P2Bin");
-  pbins[2] = getProperty("P3Bin");
-  pbins[3] = getProperty("P4Bin");
-  pbins[4] = getProperty("P5Bin");
+  std::vector<std::vector<double>> pbins{
+      getProperty("P1Bin"), getProperty("P2Bin"), getProperty("P3Bin"),
+      getProperty("P4Bin"), getProperty("P5Bin")};
 
   Workspace_sptr sliceWS; // output worskpace
 
@@ -338,10 +333,9 @@ void CutMD::exec() {
     }
 
     // Get extents in projection
-    std::vector<MinMax> extentLimits;
-    extentLimits.push_back(getDimensionExtents(eventInWS, 0));
-    extentLimits.push_back(getDimensionExtents(eventInWS, 1));
-    extentLimits.push_back(getDimensionExtents(eventInWS, 2));
+    std::vector<MinMax> extentLimits{getDimensionExtents(eventInWS, 0),
+                                     getDimensionExtents(eventInWS, 1),
+                                     getDimensionExtents(eventInWS, 2)};
 
     // Scale projection
     DblMatrix projectionMatrix(3, 3);
