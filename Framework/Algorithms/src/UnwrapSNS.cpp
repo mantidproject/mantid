@@ -188,7 +188,7 @@ void UnwrapSNS::exec() {
 void UnwrapSNS::execEvent() {
   // set up the output workspace
   MatrixWorkspace_sptr matrixOutW = this->getProperty("OutputWorkspace");
-  if (matrixOutW == m_inputWS) {
+  if (matrixOutW != m_inputWS) {
     matrixOutW = MatrixWorkspace_sptr(m_inputWS->clone().release());
     setProperty("OutputWorkspace", matrixOutW);
   }
