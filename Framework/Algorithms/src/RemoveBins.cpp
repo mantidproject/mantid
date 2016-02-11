@@ -50,9 +50,7 @@ void RemoveBins::init() {
                   "The unit in which XMin/XMax are being given. If not given, "
                   "it will peak the unit from the Input workspace X unit.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("None");
-  propOptions.push_back("Linear");
+  std::vector<std::string> propOptions{"None", "Linear"};
   declareProperty("Interpolation", "None",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Whether mid-axis bins should be interpolated linearly "
@@ -199,7 +197,7 @@ void RemoveBins::checkProperties() {
   }
 
   const std::string interpolation = getProperty("Interpolation");
-  m_interpolate = (interpolation == "Linear" ? true : false);
+  m_interpolate = (interpolation == "Linear");
 
   return;
 }
@@ -273,7 +271,7 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
   // Get the distance between the source and the sample (assume in metres)
   Geometry::IComponent_const_sptr sample = instrument->getSample();
   // Check for valid instrument
-  if (sample == NULL) {
+  if (sample == nullptr) {
     throw Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get sample");
   }
@@ -304,9 +302,8 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
  * the vector)
  */
 int RemoveBins::findIndex(const double &value, const MantidVec &vec) {
-  MantidVec::const_iterator pos =
-      std::lower_bound(vec.begin(), vec.end(), value);
-  return static_cast<int>(pos - vec.begin());
+  auto pos = std::lower_bound(vec.cbegin(), vec.cend(), value);
+  return static_cast<int>(std::distance(vec.cbegin(), pos));
 }
 
 /** Zeroes data (Y/E) at the end of a spectrum

@@ -140,7 +140,7 @@ void Rebin::exec() {
   EventWorkspace_const_sptr eventInputWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
-  if (eventInputWS != NULL) {
+  if (eventInputWS != nullptr) {
     //------- EventWorkspace as input -------------------------------------
     EventWorkspace_sptr eventOutputWS =
         boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
@@ -356,7 +356,7 @@ void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
   // Get a reference to the list of masked bins for this spectrum
   const MatrixWorkspace::MaskList &mask = inputWS->maskedBins(hist);
   // Now iterate over the list, building up a vector of the masked bins
-  MatrixWorkspace::MaskList::const_iterator it = mask.begin();
+  auto it = mask.cbegin();
   const MantidVec &XValues = inputWS->readX(hist);
   masked_bins.push_back(XValues[(*it).first]);
   weights.push_back((*it).second);

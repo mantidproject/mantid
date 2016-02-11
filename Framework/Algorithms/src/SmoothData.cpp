@@ -170,7 +170,7 @@ int SmoothData::validateSpectrumInGroup(size_t wi) {
     return -1;
   }
 
-  std::set<detid_t>::const_iterator it = dets.begin();
+  auto it = dets.cbegin();
   if (*it < 0) // bad pixel id
     return -1;
 

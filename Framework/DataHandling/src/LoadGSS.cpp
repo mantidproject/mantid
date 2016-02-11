@@ -107,7 +107,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   std::vector<double> vecX, vecY, vecE;
 
   // progress
-  Progress *prog = NULL;
+  Progress *prog = nullptr;
 
   // Parameters for reading file
   char currentLine[256];
@@ -145,7 +145,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   while (!input.eof() && input.getline(currentLine, 256)) {
     // Initialize progress after NSpec is imported
-    if (nSpec != 0 && prog == NULL) {
+    if (nSpec != 0 && prog == nullptr) {
       prog = new Progress(this, 0.0, 1.0, nSpec);
     }
 
@@ -232,7 +232,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         vecY.clear();
         vecE.clear();
 
-        if (prog != NULL)
+        if (prog != nullptr)
           prog->report();
       }
 
@@ -430,7 +430,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   */
 double LoadGSS::convertToDouble(std::string inputstring) {
   std::string temps = "";
-  int isize = (int)inputstring.size();
+  int isize = static_cast<int>(inputstring.size());
   for (int i = 0; i < isize; i++) {
     char thechar = inputstring[i];
     if ((thechar <= 'Z' && thechar >= 'A') ||
@@ -494,7 +494,8 @@ void LoadGSS::createInstrumentGeometry(
   // Add detectors
   // The L2 and 2-theta values from Raw file assumed to be relative to sample
   // position
-  const int numDetector = (int)detectorids.size(); // number of detectors
+  const int numDetector =
+      static_cast<int>(detectorids.size()); // number of detectors
   // std::vector<int> detID = detectorids;    // detector IDs
   // std::vector<double> angle = twothetas;  // angle between indicent beam and
   // direction from sample to detector (two-theta)

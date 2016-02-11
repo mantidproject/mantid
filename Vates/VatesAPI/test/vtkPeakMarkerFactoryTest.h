@@ -7,6 +7,7 @@
 #include "MockObjects.h"
 
 #include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -61,7 +62,8 @@ public:
 
     vtkPeakMarkerFactory factory("signal", dims);
     factory.initialize(pw_ptr);
-    vtkPolyData * set = factory.create(updateProgress);
+    auto set =
+        vtkSmartPointer<vtkPolyData>::Take(factory.create(updateProgress));
 
     // As the marker type are three axes(2 points), we expect 5*2*3 points
     // The angle is 45degrees and the size is 0.3
@@ -71,7 +73,6 @@ public:
 
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&pw));
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&peak1));
-    set->Delete();
   }
 
   void test_progress_updates()
@@ -94,8 +95,7 @@ public:
 
     vtkPeakMarkerFactory factory("signal", vtkPeakMarkerFactory::Peak_in_Q_lab);
     factory.initialize(pw_ptr);
-    vtkPolyData * set = factory.create(mockProgress);
-    set->Delete();
+    auto set = vtkSmartPointer<vtkPolyData>::Take(factory.create(mockProgress));
 
     TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgress));
   }

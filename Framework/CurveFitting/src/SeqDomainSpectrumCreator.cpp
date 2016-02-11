@@ -60,8 +60,7 @@ void SeqDomainSpectrumCreator::createDomain(
   size_t numberOfHistograms = m_matrixWorkspace->getNumberHistograms();
   for (size_t i = 0; i < numberOfHistograms; ++i) {
     if (histogramIsUsable(i)) {
-      FunctionDomain1DSpectrumCreator *spectrumDomain =
-          new FunctionDomain1DSpectrumCreator;
+      auto spectrumDomain = new FunctionDomain1DSpectrumCreator;
       spectrumDomain->setMatrixWorkspace(m_matrixWorkspace);
       spectrumDomain->setWorkspaceIndex(i);
 

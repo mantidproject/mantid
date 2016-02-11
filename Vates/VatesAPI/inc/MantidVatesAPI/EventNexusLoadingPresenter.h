@@ -37,8 +37,11 @@ namespace Mantid
     class DLLExport EventNexusLoadingPresenter : public MDEWLoadingPresenter
     {
     public:
-      EventNexusLoadingPresenter(MDLoadingView* view, const std::string fileName);
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& loadingProgressUpdate, ProgressAction& drawingProgressUpdate);
+      EventNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view,
+                                 const std::string fileName);
+      virtual vtkSmartPointer<vtkDataSet>
+      execute(vtkDataSetFactory *factory, ProgressAction &loadingProgressUpdate,
+              ProgressAction &drawingProgressUpdate);
       virtual void executeLoadMetadata();
       virtual bool hasTDimensionAvailable() const;
       virtual std::vector<double> getTimeStepValues() const;

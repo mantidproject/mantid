@@ -60,6 +60,12 @@ namespace CustomInterfaces
     void onFittedPeaksChanged();
     void onDataChanged();
 
+    /// Executed when user clicks "Plot guess"
+    void onPlotGuess();
+
+    // Remove plots from graph
+    void removePlots();
+
   private:
     /// Associated view
     IALCPeakFittingView* const m_view;

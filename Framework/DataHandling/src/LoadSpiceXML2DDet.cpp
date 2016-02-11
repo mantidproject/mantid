@@ -180,10 +180,9 @@ const std::string LoadSpiceXML2DDet::summary() const {
  * @brief LoadSpiceXML2DDet::init
  */
 void LoadSpiceXML2DDet::init() {
-  std::vector<std::string> xmlext;
-  xmlext.push_back(".xml");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::FileAction::Load, xmlext),
+      new FileProperty("Filename", "", FileProperty::FileAction::Load,
+                       {".xml"}),
       "XML file name for one scan including 2D detectors counts from SPICE");
 
   declareProperty(
@@ -559,8 +558,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
     for (size_t ic = 1; ic < colnames.size(); ++ic) {
       double logvalue = spicetablews->cell<double>(ir, ic);
       std::string &logname = colnames[ic];
-      TimeSeriesProperty<double> *newlogproperty =
-          new TimeSeriesProperty<double>(logname);
+      auto newlogproperty = new TimeSeriesProperty<double>(logname);
       newlogproperty->addValue(anytime, logvalue);
       matrixws->mutableRun().addProperty(newlogproperty);
     }

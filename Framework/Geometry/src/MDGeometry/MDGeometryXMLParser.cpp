@@ -47,17 +47,15 @@ void MDGeometryXMLParser::validate() const {
 Peforms the processing associated with these transformations.
 */
 void MDGeometryXMLParser::execute() {
-  typedef std::vector<Mantid::Geometry::IMDDimension_sptr>::iterator Iterator;
-
   Poco::XML::DOMParser pParser;
   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(m_xmlToProcess);
   Poco::XML::Element *pRootElem = pDoc->documentElement();
   // Apply root node checking if supplied.
-  Poco::XML::Element *geometryXMLElement = NULL;
+  Poco::XML::Element *geometryXMLElement = nullptr;
   if (!m_rootNodeName.empty()) {
     Poco::XML::Element *temp = pRootElem->getChildElement(m_rootNodeName);
     geometryXMLElement = temp;
-    if (geometryXMLElement == NULL) {
+    if (geometryXMLElement == nullptr) {
       std::string message =
           "Root node was not found to be the expected value of " +
           m_rootNodeName;
@@ -89,7 +87,7 @@ void MDGeometryXMLParser::execute() {
                 MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
   if (!xDimId.empty()) {
-    Iterator xDimensionIt =
+    auto xDimensionIt =
         find_if(vecAllDims.begin(), vecAllDims.end(), findID(xDimId));
     if (xDimensionIt == vecAllDims.end()) {
       throw std::invalid_argument("Cannot determine x-dimension mapping.");
@@ -108,7 +106,7 @@ void MDGeometryXMLParser::execute() {
           ->innerText();
 
   if (!yDimId.empty()) {
-    Iterator yDimensionIt =
+    auto yDimensionIt =
         find_if(vecAllDims.begin(), vecAllDims.end(), findID(yDimId));
     if (yDimensionIt == vecAllDims.end()) {
       throw std::invalid_argument("Cannot determine y-dimension mapping.");
@@ -127,7 +125,7 @@ void MDGeometryXMLParser::execute() {
           ->innerText();
 
   if (!zDimId.empty()) {
-    Iterator zDimensionIt =
+    auto zDimensionIt =
         find_if(vecAllDims.begin(), vecAllDims.end(), findID(zDimId));
     if (zDimensionIt == vecAllDims.end()) {
       throw std::invalid_argument("Cannot determine z-dimension mapping.");
@@ -145,7 +143,7 @@ void MDGeometryXMLParser::execute() {
                 MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
   if (!tDimId.empty()) {
-    Iterator tDimensionIt =
+    auto tDimensionIt =
         find_if(vecAllDims.begin(), vecAllDims.end(), findID(tDimId));
     if (tDimensionIt == vecAllDims.end()) {
       throw std::invalid_argument("Cannot determine t-dimension mapping.");
@@ -268,7 +266,7 @@ MDGeometryXMLParser::getAllDimensions() const {
 */
 bool MDGeometryXMLParser::hasXDimension() const {
   validate();
-  return NULL != m_xDimension.get();
+  return nullptr != m_xDimension.get();
 }
 
 /**
@@ -277,7 +275,7 @@ bool MDGeometryXMLParser::hasXDimension() const {
 */
 bool MDGeometryXMLParser::hasYDimension() const {
   validate();
-  return NULL != m_yDimension.get();
+  return nullptr != m_yDimension.get();
 }
 
 /**
@@ -286,7 +284,7 @@ bool MDGeometryXMLParser::hasYDimension() const {
 */
 bool MDGeometryXMLParser::hasZDimension() const {
   validate();
-  return NULL != m_zDimension.get();
+  return nullptr != m_zDimension.get();
 }
 
 /**
@@ -295,7 +293,7 @@ bool MDGeometryXMLParser::hasZDimension() const {
 */
 bool MDGeometryXMLParser::hasTDimension() const {
   validate();
-  return NULL != m_tDimension.get();
+  return nullptr != m_tDimension.get();
 }
 
 /**

@@ -148,16 +148,16 @@ FastReadOnlyFile::FastReadOnlyFile(const char *filename) {
 }
 FastReadOnlyFile::~FastReadOnlyFile() {
   fclose(m_handle);
-  m_handle = NULL;
+  m_handle = nullptr;
 }
 void *FastReadOnlyFile::handle() const { return m_handle; }
 bool FastReadOnlyFile::read(void *buffer, uint32_t size) {
-  return 1 == fread(buffer, (size_t)size, 1, m_handle);
+  return 1 == fread(buffer, static_cast<size_t>(size), 1, m_handle);
 }
 bool FastReadOnlyFile::seek(int64_t offset, int whence, int64_t *newPosition) {
   return (0 == fseek(m_handle, offset, whence)) &&
-         ((newPosition == NULL) ||
-          (0 <= (*newPosition = (int64_t)ftell(m_handle))));
+         ((newPosition == nullptr) ||
+          (0 <= (*newPosition = static_cast<int64_t>(ftell(m_handle)))));
 }
 #endif
 
@@ -176,10 +176,10 @@ template <size_t N> int64_t octalToInt(char(&str)[N]) {
 
 // construction
 File::File(const std::string &path)
-    : m_good(true), m_file(path.c_str()), m_selected((size_t)-1), m_position(0),
-      m_size(0), m_bufferPosition(0), m_bufferAvailable(0) {
+    : m_good(true), m_file(path.c_str()), m_selected(static_cast<size_t>(-1)),
+      m_position(0), m_size(0), m_bufferPosition(0), m_bufferAvailable(0) {
 
-  m_good = m_file.handle() != NULL;
+  m_good = m_file.handle() != nullptr;
   while (m_good) {
     EntryHeader header;
     int64_t position;
@@ -202,7 +202,7 @@ File::File(const std::string &path)
       m_fileInfos.push_back(fileInfo);
     }
 
-    size_t offset = (size_t)(fileInfo.Size % 512);
+    size_t offset = static_cast<size_t>(fileInfo.Size % 512);
     if (offset != 0)
       offset = 512 - offset;
 
@@ -239,24 +239,24 @@ bool File::select(const char *file) {
       return m_good &= m_file.seek(info.Offset, SEEK_SET);
     }
 
-  m_selected = (size_t)-1;
+  m_selected = static_cast<size_t>(-1);
   m_position = 0;
   m_size = 0;
   return false;
 }
 bool File::skip(uint64_t offset) {
-  if (!m_good || (m_selected == (size_t)-1))
+  if (!m_good || (m_selected == static_cast<size_t>(-1)))
     return false;
 
-  bool overrun = offset > (uint64_t)(m_size - m_position);
+  bool overrun = offset > static_cast<uint64_t>(m_size - m_position);
   if (overrun)
     offset = m_size - m_position;
 
   m_position += offset;
 
-  uint64_t bufferPosition = (uint64_t)m_bufferPosition + offset;
+  uint64_t bufferPosition = static_cast<uint64_t>(m_bufferPosition) + offset;
   if (bufferPosition <= m_bufferAvailable)
-    m_bufferPosition = (size_t)bufferPosition;
+    m_bufferPosition = static_cast<size_t>(bufferPosition);
   else {
     m_good &= m_file.seek(bufferPosition - m_bufferAvailable, SEEK_CUR);
 
@@ -267,13 +267,13 @@ bool File::skip(uint64_t offset) {
   return m_good && !overrun;
 }
 size_t File::read(void *dst, size_t size) {
-  if (!m_good || (m_selected == (size_t)-1))
+  if (!m_good || (m_selected == static_cast<size_t>(-1)))
     return 0;
 
-  if ((int64_t)size > (m_size - m_position))
-    size = (size_t)(m_size - m_position);
+  if (static_cast<int64_t>(size) > (m_size - m_position))
+    size = static_cast<size_t>(m_size - m_position);
 
-  auto ptr = (uint8_t *)dst;
+  auto ptr = reinterpret_cast<uint8_t *>(dst);
   size_t result = 0;
 
   if (m_bufferPosition != m_bufferAvailable) {
@@ -290,8 +290,8 @@ size_t File::read(void *dst, size_t size) {
   }
 
   while (size != 0) {
-    auto bytesToRead =
-        (uint32_t)std::min<size_t>(size, std::numeric_limits<uint32_t>::max());
+    auto bytesToRead = static_cast<uint32_t>(
+        std::min<size_t>(size, std::numeric_limits<uint32_t>::max()));
 
     m_good &= m_file.read(ptr, bytesToRead);
     if (!m_good)
@@ -307,7 +307,7 @@ size_t File::read(void *dst, size_t size) {
   return result;
 }
 int File::read_byte() {
-  if (!m_good || (m_selected == (size_t)-1))
+  if (!m_good || (m_selected == static_cast<size_t>(-1)))
     return -1;
 
   if (m_bufferPosition == m_bufferAvailable) {
@@ -317,8 +317,8 @@ int File::read_byte() {
     m_bufferPosition = 0;
     m_bufferAvailable = 0;
 
-    uint32_t size =
-        (uint32_t)std::min<int64_t>(sizeof(m_buffer), m_size - m_position);
+    uint32_t size = static_cast<uint32_t>(
+        std::min<int64_t>(sizeof(m_buffer), m_size - m_position));
     m_good &= m_file.read(m_buffer, size);
 
     if (m_good)

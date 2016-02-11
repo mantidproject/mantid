@@ -260,21 +260,14 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails()
   instDetails["reflection"] = QString::fromStdString(reflection);
 
   // List of values to get from IPF
-  std::vector<std::string> ipfElements;
-  ipfElements.push_back("analysis-type");
-  ipfElements.push_back("spectra-min");
-  ipfElements.push_back("spectra-max");
-  ipfElements.push_back("Efixed");
-  ipfElements.push_back("peak-start");
-  ipfElements.push_back("peak-end");
-  ipfElements.push_back("back-start");
-  ipfElements.push_back("back-end");
-  ipfElements.push_back("rebin-default");
-  ipfElements.push_back("cm-1-convert-choice");
-  ipfElements.push_back("save-nexus-choice");
-  ipfElements.push_back("save-ascii-choice");
-  ipfElements.push_back("fold-frames-choice");
-  ipfElements.push_back("resolution");
+  std::vector<std::string> ipfElements{
+      "analysis-type",      "spectra-min",
+      "spectra-max",        "Efixed",
+      "peak-start",         "peak-end",
+      "back-start",         "back-end",
+      "rebin-default",      "cm-1-convert-choice",
+      "save-nexus-choice",  "save-ascii-choice",
+      "fold-frames-choice", "resolution"};
 
   // In the IRIS IPF there is no fmica component
   if(instrumentName == "IRIS" && analyser == "fmica")

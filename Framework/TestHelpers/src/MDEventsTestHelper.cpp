@@ -72,7 +72,7 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
       "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
   InstrumentDefinitionParser parser(filename, "MINITOPAZ",
                                     Strings::loadFile(filename));
-  auto instrument = parser.parseXML(NULL);
+  auto instrument = parser.parseXML(nullptr);
   retVal->populateInstrumentParameters();
   retVal->setInstrument(instrument);
 
@@ -161,7 +161,7 @@ MDBox<MDLeanEvent<1>, 1> *makeMDBox1(size_t splitInto,
   // Splits into 10 boxes
   splitter->setSplitInto(splitInto);
   // Set the size
-  MDBox<MDLeanEvent<1>, 1> *out = new MDBox<MDLeanEvent<1>, 1>(splitter);
+  auto *out = new MDBox<MDLeanEvent<1>, 1>(splitter);
   out->setExtents(0, 0.0, 10.0);
   out->calcVolume();
   return out;
@@ -173,18 +173,17 @@ MDBox<MDLeanEvent<1>, 1> *makeMDBox1(size_t splitInto,
    tests !!!!**/
 MDBox<MDLeanEvent<3>, 3> *makeMDBox3() {
   // Split at 5 events
-
-  BoxController *splitter = new BoxController(3);
-
+  auto splitter = new BoxController(3);
   splitter->setSplitThreshold(5);
   // Splits into 10x5x2 boxes
   splitter->setSplitInto(10);
   splitter->setSplitInto(1, 5);
   splitter->setSplitInto(2, 2);
   // Set the size to 10.0 in all directions
-  MDBox<MDLeanEvent<3>, 3> *out = new MDBox<MDLeanEvent<3>, 3>(splitter);
-  for (size_t d = 0; d < 3; d++)
+  auto out = new MDBox<MDLeanEvent<3>, 3>(splitter);
+  for (size_t d = 0; d < 3; ++d) {
     out->setExtents(d, 0.0, 10.0);
+  }
   out->calcVolume();
   return out;
 }
@@ -242,12 +241,7 @@ MDHistoWorkspace_sptr
 makeFakeMDHistoWorkspaceGeneral(size_t numDims, double signal,
                                 double errorSquared, size_t *numBins,
                                 coord_t *min, coord_t *max, std::string name) {
-  std::vector<std::string> names;
-  names.push_back("x");
-  names.push_back("y");
-  names.push_back("z");
-  names.push_back("t");
-
+  std::vector<std::string> names{"x", "y", "z", "t"};
   // Create MDFrame of General Frame type
   Mantid::Geometry::GeneralFrame frame(
       Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
@@ -257,9 +251,8 @@ makeFakeMDHistoWorkspaceGeneral(size_t numDims, double signal,
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
         names[d], names[d], frame, min[d], max[d], numBins[d])));
 
-  MDHistoWorkspace *ws = NULL;
-  ws = new MDHistoWorkspace(dimensions);
-  MDHistoWorkspace_sptr ws_sptr(ws);
+  MDHistoWorkspace_sptr ws_sptr =
+      boost::make_shared<MDHistoWorkspace>(dimensions);
   ws_sptr->setTo(signal, errorSquared, 1.0 /* num events */);
   if (!name.empty())
     AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
@@ -292,9 +285,8 @@ MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
         names[d], names[d], frame, min[d], max[d], numBins[d])));
 
-  MDHistoWorkspace *ws = NULL;
-  ws = new MDHistoWorkspace(dimensions);
-  MDHistoWorkspace_sptr ws_sptr(ws);
+  MDHistoWorkspace_sptr ws_sptr =
+      boost::make_shared<MDHistoWorkspace>(dimensions);
   ws_sptr->setTo(signal, errorSquared, 1.0 /* num events */);
   if (!name.empty())
     AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
@@ -319,39 +311,42 @@ Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
     double signal, size_t numDims, const Mantid::Geometry::MDFrame &frame,
     size_t numBins, coord_t max, double errorSquared, std::string name,
     double numEvents) {
-  MDHistoWorkspace *ws = NULL;
+  // MDHistoWorkspace *ws = nullptr;
+  MDHistoWorkspace_sptr ws_sptr;
   if (numDims == 1) {
-    ws = new MDHistoWorkspace(MDHistoDimension_sptr(
-        new MDHistoDimension("x", "x", frame, 0.0, max, numBins)));
+    ws_sptr = boost::make_shared<MDHistoWorkspace>(
+        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
+                                             numBins));
   } else if (numDims == 2) {
-    ws = new MDHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension(
-                                  "x", "x", frame, 0.0, max, numBins)),
-                              MDHistoDimension_sptr(new MDHistoDimension(
-                                  "y", "y", frame, 0.0, max, numBins)));
+    ws_sptr = boost::make_shared<MDHistoWorkspace>(
+        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
+                                             numBins),
+        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max,
+                                             numBins));
   } else if (numDims == 3) {
-    ws = new MDHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension(
-                                  "x", "x", frame, 0.0, max, numBins)),
-                              MDHistoDimension_sptr(new MDHistoDimension(
-                                  "y", "y", frame, 0.0, max, numBins)),
-                              MDHistoDimension_sptr(new MDHistoDimension(
-                                  "z", "z", frame, 0.0, max, numBins)));
+    ws_sptr = boost::make_shared<MDHistoWorkspace>(
+        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
+                                             numBins),
+        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max,
+                                             numBins),
+        boost::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max,
+                                             numBins));
   } else if (numDims == 4) {
-    ws = new MDHistoWorkspace(
-        MDHistoDimension_sptr(
-            new MDHistoDimension("x", "x", frame, 0.0, max, numBins)),
-        MDHistoDimension_sptr(
-            new MDHistoDimension("y", "y", frame, 0.0, max, numBins)),
-        MDHistoDimension_sptr(
-            new MDHistoDimension("z", "z", frame, 0.0, max, numBins)),
-        MDHistoDimension_sptr(
-            new MDHistoDimension("t", "t", frame, 0.0, max, numBins)));
+    ws_sptr = boost::make_shared<MDHistoWorkspace>(
+        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
+                                             numBins),
+        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max,
+                                             numBins),
+        boost::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max,
+                                             numBins),
+        boost::make_shared<MDHistoDimension>("t", "t", frame, 0.0f, max,
+                                             numBins));
   }
 
-  if (!ws)
+  if (!ws_sptr)
     throw std::runtime_error(
         " invalid or unsupported number of dimensions given");
 
-  MDHistoWorkspace_sptr ws_sptr(ws);
   ws_sptr->setTo(signal, errorSquared, numEvents);
   ws_sptr->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo()));
   if (!name.empty())

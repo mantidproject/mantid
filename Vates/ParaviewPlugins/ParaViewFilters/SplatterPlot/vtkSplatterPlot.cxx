@@ -6,6 +6,7 @@
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkFieldData.h"
+#include "vtkSmartPointer.h"
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
@@ -22,19 +23,15 @@ using namespace Mantid::VATES;
 
 vtkStandardNewMacro(vtkSplatterPlot)
 
-/// Constructor
-vtkSplatterPlot::vtkSplatterPlot() : m_numberPoints(0), m_topPercentile(0.0),
-  m_presenter(NULL), m_wsName(""), m_time(0)
-{
+    /// Constructor
+    vtkSplatterPlot::vtkSplatterPlot()
+    : m_numberPoints(0), m_topPercentile(0.0), m_wsName(""), m_time(0) {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
 }
 
 /// Destructor
-vtkSplatterPlot::~vtkSplatterPlot()
-{
-  delete m_presenter;
-}
+vtkSplatterPlot::~vtkSplatterPlot() {}
 
 /**
  * Sets number of points.
@@ -48,8 +45,7 @@ void vtkSplatterPlot::SetNumberOfPoints(int nPoints)
     if(m_numberPoints != temp)
     {
       m_numberPoints = temp;
-      if (NULL != m_presenter)
-      {
+      if (nullptr != m_presenter) {
         m_presenter->SetNumberOfPoints(m_numberPoints);
       }
       this->Modified();
@@ -68,8 +64,7 @@ void vtkSplatterPlot::SetTopPercentile(double topPercentile)
     if (m_topPercentile != topPercentile)
     {
       m_topPercentile = topPercentile;
-      if (NULL != m_presenter)
-      {
+      if (nullptr != m_presenter) {
         m_presenter->SetPercentToUse(m_topPercentile);
       }
       this->Modified();
@@ -90,11 +85,11 @@ int vtkSplatterPlot::RequestData(vtkInformation *,
                                  vtkInformationVector **inputVector,
                                  vtkInformationVector *outputVector)
 {
-  if (NULL != m_presenter)
-  {
+  if (nullptr != m_presenter) {
     // Get the info objects
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    vtkDataSet *output = vtkDataSet::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
+    vtkDataSet *output =
+        vtkDataSet::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
     if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {
@@ -109,7 +104,7 @@ int vtkSplatterPlot::RequestData(vtkInformation *,
 
     FilterUpdateProgressAction<vtkSplatterPlot> drawUpdateProgress(this,
                                                                    "Drawing...");
-    vtkDataSet* product = m_presenter->create(drawUpdateProgress);
+    auto product = m_presenter->create(drawUpdateProgress);
 
     // Extract the relevant metadata from the underlying source
     m_presenter->setMetadata(input->GetFieldData(), product);
@@ -135,12 +130,11 @@ int vtkSplatterPlot::RequestInformation(vtkInformation *,
                                         vtkInformationVector **inputVector,
                                         vtkInformationVector *)
 {
-  if (NULL == m_presenter)
-  {
+  if (nullptr == m_presenter) {
     std::string scalarName = "signal";
-    m_presenter = new vtkSplatterPlotFactory(ThresholdRange_scptr(new NoThresholdRange),
-                                             scalarName, m_numberPoints,
-                                             m_topPercentile);
+    m_presenter = Mantid::Kernel::make_unique<vtkSplatterPlotFactory>(
+        boost::make_shared<NoThresholdRange>(), scalarName, m_numberPoints,
+        m_topPercentile);
 
     // Get the info objects
     vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
@@ -179,12 +173,10 @@ void vtkSplatterPlot::updateAlgorithmProgress(double progress, const std::string
  */
 double vtkSplatterPlot::GetMinValue()
 {
-  if (NULL == m_presenter)
-  {
+  if (nullptr == m_presenter) {
     return 0.0;
   }
-  try
-  {
+  try {
     return m_presenter->getMinValue();
   }
   catch (std::runtime_error &)
@@ -200,12 +192,10 @@ double vtkSplatterPlot::GetMinValue()
  */
 double vtkSplatterPlot::GetMaxValue()
 {
-  if (NULL == m_presenter)
-  {
+  if (nullptr == m_presenter) {
     return 0.0;
   }
-  try
-  {
+  try {
     return m_presenter->getMaxValue();
   }
   catch (std::runtime_error &)
@@ -220,12 +210,10 @@ double vtkSplatterPlot::GetMaxValue()
  */
 const char* vtkSplatterPlot::GetInstrument()
 {
-  if (NULL == m_presenter)
-  {
+  if (nullptr == m_presenter) {
     return "";
   }
-  try
-  {
+  try {
     return m_presenter->getInstrument().c_str();
   }
   catch (std::runtime_error &)

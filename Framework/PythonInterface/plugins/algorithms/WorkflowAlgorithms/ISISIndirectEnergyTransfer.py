@@ -243,7 +243,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
                 # Scale
                 if self._scale_factor != 1.0:
-                    Scale(InputWorkspaces=ws_name,
+                    Scale(InputWorkspace=ws_name,
                           OutputWorkspace=ws_name,
                           Factor=self._scale_factor,
                           Operation='Multiply')

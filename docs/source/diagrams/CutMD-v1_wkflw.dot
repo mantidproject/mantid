@@ -1,0 +1,47 @@
+digraph CutMD {
+  label="CutMD Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    Projection
+    OutputWorkspace
+    InputWorkspace
+    NoPix
+    InterpretQDimensionUnits
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    sliceMD            [label="SliceMD v1"]
+    binMD             [label="BinMD v1"]
+  }
+  
+  subgraph decisions {
+    $decision_style
+    noPixQuestion    [label="NoPix?"]
+  }
+  
+  subgraph calculation{
+    $process_style
+    scale   [label="Scale between rlu and inverse angstroms if required"]
+    extents   [label="Calculate extents of the new workspace"]
+    
+  }
+
+  Projection                ->  scale  
+  InterpretQDimensionUnits  ->  scale
+  NoPix                     -> noPixQuestion
+  
+  InputWorkspace            ->  scale
+  scale                     ->  extents
+  extents                   ->  noPixQuestion
+  
+  noPixQuestion -> binMD    [label="Yes"]
+  noPixQuestion -> sliceMD  [label="No"]
+  
+  sliceMD                   -> OutputWorkspace
+  binMD                     -> OutputWorkspace
+
+}
+

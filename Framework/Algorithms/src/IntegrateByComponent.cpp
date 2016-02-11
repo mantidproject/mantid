@@ -78,9 +78,8 @@ void IntegrateByComponent::exec() {
     std::vector<std::vector<size_t>> specmap = makeMap(integratedWS, parents);
     API::Progress prog(this, 0.3, 1.0, specmap.size());
     // calculate averages
-    for (size_t j = 0; j < specmap.size(); ++j) {
+    for (auto hists : specmap) {
       prog.report();
-      std::vector<size_t> hists = specmap.at(j);
       std::vector<double> averageYInput, averageEInput;
       Geometry::Instrument_const_sptr instrument =
           integratedWS->getInstrument();
@@ -214,8 +213,7 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
         parents = 0;
         return makeInstrumentMap(countsWS);
       }
-      mymap.insert(std::pair<Mantid::Geometry::ComponentID, size_t>(
-          anc[parents - 1]->getComponentID(), i));
+      mymap.emplace(anc[parents - 1]->getComponentID(), i);
     } catch (Mantid::Kernel::Exception::NotFoundError &e) {
       // do nothing
       g_log.debug(e.what());

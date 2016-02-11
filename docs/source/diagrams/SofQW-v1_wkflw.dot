@@ -1,0 +1,32 @@
+digraph  {
+  $global_style
+
+  subgraph params {
+    $param_style
+    Method
+    InputWorkspace
+    QAxisBinning
+    EMode
+    EFixed
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    SofQW
+    SofQWCentre
+    SofQWPolygon
+    SofQWNormalisedPolygon
+  }
+
+  Method -> SofQW
+
+  InputWorkspace -> SofQW
+  QAxisBinning -> SofQW
+  EMode -> SofQW
+  EFixed -> SofQW
+
+  SofQW -> SofQWCentre [label="Method=Centre"]
+  SofQW -> SofQWPolygon [label="Method=Polygon"]
+  SofQW -> SofQWNormalisedPolygon [label="Method=NormalisedPolygon"]
+
+}

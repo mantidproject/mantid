@@ -38,9 +38,12 @@ namespace MantidQt
       transferRuns(SearchResultMap &searchResults,
                    Mantid::Kernel::ProgressBase &progress);
 
-      virtual ReflLegacyTransferStrategy *clone() const;
+      std::unique_ptr<ReflLegacyTransferStrategy> clone() const;
 
       virtual bool knownFileType(const std::string &filename) const;
+
+    private:
+      virtual ReflLegacyTransferStrategy *doClone() const;
     };
   }
 }

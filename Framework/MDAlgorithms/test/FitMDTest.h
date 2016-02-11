@@ -31,7 +31,6 @@ public:
   virtual void jumpTo(size_t index);
   virtual bool next();
   virtual bool next(size_t) { return false; }
-  virtual signal_t getNormalizedSignalWithMask() const;
   virtual signal_t getNormalizedSignal() const;
   virtual signal_t getNormalizedError() const;
   virtual signal_t getSignal() const { return 0; }
@@ -91,10 +90,6 @@ bool IMDWorkspaceTesterIterator::next() {
     ++ix;
   }
   return true;
-}
-
-signal_t IMDWorkspaceTesterIterator::getNormalizedSignalWithMask() const {
-  return signal_t(m_ws->readY(iy)[ix]);
 }
 
 signal_t IMDWorkspaceTesterIterator::getNormalizedSignal() const {

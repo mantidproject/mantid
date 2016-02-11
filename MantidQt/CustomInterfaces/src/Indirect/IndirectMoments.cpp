@@ -107,19 +107,30 @@ namespace CustomInterfaces
     return true;
   }
 
-  void IndirectMoments::handleSampleInputReady(const QString& filename)
-  {
-    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
+  /**
+   * Clears previous plot data (in both preview and raw plot) and sets the new
+   * range bars
+   */
+  void IndirectMoments::handleSampleInputReady(const QString &filename) {
+    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+               SLOT(updateProperties(QtProperty *, double)));
 
+    // Clears previous plotted data
     m_uiForm.ppRawPlot->clear();
+    m_uiForm.ppMomentsPreview->clear();
+
+    // Update plot and change data in interface
     m_uiForm.ppRawPlot->addSpectrum("Raw", filename, 0);
     QPair<double, double> range = m_uiForm.ppRawPlot->getCurveRange("Raw");
 
     auto xRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
-    setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
-    setPlotPropertyRange(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+    setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
+                     range);
+    setPlotPropertyRange(xRangeSelector, m_properties["EMin"],
+                         m_properties["EMax"], range);
 
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+            SLOT(updateProperties(QtProperty *, double)));
   }
 
   /**

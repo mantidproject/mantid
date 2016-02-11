@@ -25,7 +25,7 @@ PoldiDeadWireDecorator::PoldiDeadWireDecorator(
   std::vector<detid_t> allDetectorIds = poldiInstrument->getDetectorIDs();
   std::vector<detid_t> deadDetectorIds(allDetectorIds.size());
 
-  std::vector<detid_t>::iterator endIterator = std::remove_copy_if(
+  auto endIterator = std::remove_copy_if(
       allDetectorIds.begin(), allDetectorIds.end(), deadDetectorIds.begin(),
       boost::bind<bool>(&PoldiDeadWireDecorator::detectorIsNotMasked,
                         poldiInstrument, _1));

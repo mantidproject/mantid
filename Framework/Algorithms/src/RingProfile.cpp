@@ -177,7 +177,7 @@ void RingProfile::exec() {
   std::vector<double> angles(output_bins.size() + 1);
   // we always keep the angle in relative from where it starts and growing in
   // its sense.
-  for (int j = 0; j < (int)angles.size(); j++)
+  for (int j = 0; j < static_cast<int>(angles.size()); j++)
     refX[j] = bin_size * j;
 
   // configure the axis
@@ -396,7 +396,7 @@ void RingProfile::checkInputsForNumericWorkspace(
 void RingProfile::processInstrumentRingProfile(
     const API::MatrixWorkspace_sptr inputWS, std::vector<double> &output_bins) {
 
-  for (int i = 0; i < (int)inputWS->getNumberHistograms(); i++) {
+  for (int i = 0; i < static_cast<int>(inputWS->getNumberHistograms()); i++) {
     m_progress->report("Computing ring bins positions for detectors");
     // for the detector based, the positions will be taken from the detector
     // itself.
@@ -496,7 +496,7 @@ void RingProfile::processNumericImageRingProfile(
   std::vector<int> bin_n(inputWS->dataY(0).size(), -1);
 
   // consider that each spectrum is a row in the image
-  for (int i = 0; i < (int)inputWS->getNumberHistograms(); i++) {
+  for (int i = 0; i < static_cast<int>(inputWS->getNumberHistograms()); i++) {
     m_progress->report("Computing ring bins positions for pixels");
     // get bin for the pixels inside this spectrum
     // for each column of the image
@@ -622,7 +622,7 @@ int RingProfile::fromAngleToBin(double angle, bool degree) {
   }
 
   angle /= bin_size;
-  return (int)angle;
+  return static_cast<int>(angle);
 }
 
 } // namespace Algorithms

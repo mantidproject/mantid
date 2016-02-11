@@ -30,7 +30,7 @@ DECLARE_ALGORITHM(RemoveLowResTOF)
 RemoveLowResTOF::RemoveLowResTOF()
     : m_inputWS(), m_inputEvWS(), m_DIFCref(0.), m_K(0.), m_instrument(),
       m_sample(), m_L1(0.), m_Tmin(0.), m_wavelengthMin(0.),
-      m_numberOfSpectra(0), m_progress(NULL), m_outputLowResTOF(false) {}
+      m_numberOfSpectra(0), m_progress(nullptr), m_outputLowResTOF(false) {}
 
 /// Destructor
 RemoveLowResTOF::~RemoveLowResTOF() { delete m_progress; }
@@ -120,7 +120,7 @@ void RemoveLowResTOF::exec() {
 
   // go off and do the event version if appropriate
   m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
-  if (m_inputEvWS != NULL) {
+  if (m_inputEvWS != nullptr) {
     this->execEvent();
     return;
   }
@@ -148,8 +148,7 @@ void RemoveLowResTOF::exec() {
     // calculate where to zero out to
     double tofMin = this->calcTofMin(workspaceIndex);
     const MantidVec &X = m_inputWS->readX(0);
-    MantidVec::const_iterator last =
-        std::lower_bound(X.begin(), X.end(), tofMin);
+    auto last = std::lower_bound(X.cbegin(), X.cend(), tofMin);
     if (last == X.end())
       --last;
     size_t endBin = last - X.begin();
@@ -309,9 +308,8 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex) {
     }
   } else {
     double l2 = 0;
-    for (std::set<detid_t>::const_iterator it = detSet.begin();
-         it != detSet.end(); ++it) {
-      l2 += m_instrument->getDetector(*it)->getDistance(*m_sample);
+    for (auto det : detSet) {
+      l2 += m_instrument->getDetector(det)->getDistance(*m_sample);
     }
     l2 /= static_cast<double>(detSet.size());
 

@@ -161,8 +161,8 @@ public:
   void testPlot1DString()
   {
     std::vector<std::string> ws_names;
-    ws_names.push_back("workspace1");
-    ws_names.push_back("workspace2");
+    ws_names.emplace_back("workspace1");
+    ws_names.emplace_back("workspace2");
 
     std::string output = plot1DString(ws_names, "Plot Title");
 
@@ -199,9 +199,9 @@ public:
   void testVectorString()
   {
     std::vector<std::string> stringVector;
-    stringVector.push_back("A");
-    stringVector.push_back("B");
-    stringVector.push_back("C");
+    stringVector.emplace_back("A");
+    stringVector.emplace_back("B");
+    stringVector.emplace_back("C");
 
     const std::string stringOutput = vectorString(stringVector);
 
@@ -289,36 +289,24 @@ public:
     boost::split(notebookLines, output, boost::is_any_of("\n"));
 
     const std::string result[] = {
-      "def plotWithOptions(ax, ws, ops, n):",
-      "    \"\"\"",
-      "    Enable/disable legend, grid, limits according to",
-      "    options (ops) for the given axes (ax).",
-      "    Plot with or without errorbars.",
-      "    \"\"\"",
-      "    ws_plot = ConvertToPointData(ws)",
-      "    if ops['errorbars']:",
-      "        ax.errorbar(ws_plot.readX(0), ws_plot.readY(0), yerr=ws_plot.readE(0), label=ws.name())",
-      "    else:",
-      "        ax.plot(ws_plot.readX(0), ws_plot.readY(0), label=ws.name())",
+      "#Import some useful tools for plotting",
+        "from MantidIPython import *"
     };
 
-    // Check that the first 10 lines are output as expected
-    for (int i=0; i<11; ++i)
-    {
-      TS_ASSERT_EQUALS(notebookLines[i], result[i])
-    }
-
+    // Check that the lines are output as expected
+    TS_ASSERT_EQUALS(notebookLines[0], result[0]);
+    TS_ASSERT_EQUALS(notebookLines[1], result[1]);
   }
 
   void testPlotsString()
   {
     std::vector<std::string> unstitched_ws;
-    unstitched_ws.push_back("TEST_WS1");
-    unstitched_ws.push_back("TEST_WS2");
+    unstitched_ws.emplace_back("TEST_WS1");
+    unstitched_ws.emplace_back("TEST_WS2");
 
     std::vector<std::string> IvsLam_ws;
-    IvsLam_ws.push_back("TEST_WS3");
-    IvsLam_ws.push_back("TEST_WS4");
+    IvsLam_ws.emplace_back("TEST_WS3");
+    IvsLam_ws.emplace_back("TEST_WS4");
 
     std::string output = plotsString(unstitched_ws, IvsLam_ws, "TEST_WS5");
 
@@ -401,9 +389,9 @@ public:
   void testVectorParamString()
   {
     std::vector<std::string> stringVector;
-    stringVector.push_back("A");
-    stringVector.push_back("B");
-    stringVector.push_back("C");
+    stringVector.emplace_back("A");
+    stringVector.emplace_back("B");
+    stringVector.emplace_back("C");
 
     const std::string stringOutput = vectorParamString("PARAM_NAME", stringVector);
 

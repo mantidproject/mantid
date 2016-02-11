@@ -1185,6 +1185,12 @@ bool FitPropertyBrowser::convolveMembers() const
     return m_boolManager->value(m_convolveMembers);
 }
 
+/// Get the max number of iterations
+int FitPropertyBrowser::maxIterations() const
+{
+  return m_intManager->value(m_maxIterations);
+}
+
 /// Get the registered function names
 void FitPropertyBrowser::populateFunctionNames()
 {

@@ -248,9 +248,9 @@ void Rebunch::rebunch_point(const std::vector<double> &xold,
       i_in++;
     }
     // average contributing x values
-    xnew[j] = xsum / (double)n_bunch;
-    ynew[j] = ysum / (double)n_bunch;
-    enew[j] = sqrt(esum) / (double)n_bunch;
+    xnew[j] = xsum / static_cast<double>(n_bunch);
+    ynew[j] = ysum / static_cast<double>(n_bunch);
+    enew[j] = sqrt(esum) / static_cast<double>(n_bunch);
     j++;
   }
   if (rem != 0) {
@@ -263,9 +263,9 @@ void Rebunch::rebunch_point(const std::vector<double> &xold,
       esum += eold[i_in] * eold[i_in];
       i_in++;
     }
-    xnew[j] = xsum / (double)rem;
-    ynew[j] = ysum / (double)rem;
-    enew[j] = sqrt(esum) / (double)rem;
+    xnew[j] = xsum / static_cast<double>(rem);
+    ynew[j] = ysum / static_cast<double>(rem);
+    enew[j] = sqrt(esum) / static_cast<double>(rem);
   }
 }
 

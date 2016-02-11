@@ -108,11 +108,11 @@ void CreateLogTimeCorrection::getInstrumentSetup() {
 
   // 2. Get detector IDs
   std::vector<detid_t> detids = m_instrument->getDetectorIDs(true);
-  for (size_t i = 0; i < detids.size(); ++i) {
-    IDetector_const_sptr detector = m_instrument->getDetector(detids[i]);
+  for (auto &detid : detids) {
+    IDetector_const_sptr detector = m_instrument->getDetector(detid);
     V3D detpos = detector->getPos();
     double l2 = detpos.distance(samplepos);
-    m_l2map.insert(make_pair(detids[i], l2));
+    m_l2map.emplace(detid, l2);
   }
 
   // 3. Output information
@@ -134,7 +134,7 @@ void CreateLogTimeCorrection::calculateCorrection() {
     int detid = miter->first;
     double l2 = miter->second;
     double corrfactor = m_L1 / (m_L1 + l2);
-    m_correctionMap.insert(make_pair(detid, corrfactor));
+    m_correctionMap.emplace(detid, corrfactor);
   }
 }
 

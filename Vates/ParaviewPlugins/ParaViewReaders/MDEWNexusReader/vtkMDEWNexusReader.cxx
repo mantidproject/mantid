@@ -12,6 +12,7 @@
 #include "vtkPVInformationKeys.h"
 #include "vtkBox.h"
 #include "vtkUnstructuredGrid.h"
+#include "vtkNew.h"
 
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
@@ -28,23 +29,16 @@ using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::Geometry::IMDDimension_sptr;
 
-
-vtkMDEWNexusReader::vtkMDEWNexusReader() : 
-  m_presenter(NULL),
-  m_loadInMemory(false),
-  m_depth(1),
-  m_time(0),
-  m_normalization(NoNormalization)
-{
+vtkMDEWNexusReader::vtkMDEWNexusReader()
+    : m_loadInMemory(false), m_depth(1), m_time(0),
+      m_normalization(NoNormalization) {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
-
 }
 
 vtkMDEWNexusReader::~vtkMDEWNexusReader()
 {
-  delete m_presenter;
   this->SetFileName(0);
 }
 
@@ -91,18 +85,13 @@ void vtkMDEWNexusReader::SetInMemory(bool inMemory)
   Gets the geometry xml from the workspace. Allows object panels to configure themeselves.
   @return geometry xml const * char reference.
 */
-const char* vtkMDEWNexusReader::GetInputGeometryXML()
-{
-  if(m_presenter == NULL)
-  {
+const char *vtkMDEWNexusReader::GetInputGeometryXML() {
+  if (m_presenter == nullptr) {
     return "";
   }
-  try
-  {
+  try {
     return m_presenter->getGeometryXML().c_str();
-  }
-  catch(std::runtime_error&)
-  {
+  } catch (std::runtime_error &) {
     return "";
   }
 }
@@ -133,22 +122,26 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   FilterUpdateProgressAction<vtkMDEWNexusReader> loadingProgressAction(this, "Loading...");
   FilterUpdateProgressAction<vtkMDEWNexusReader> drawingProgressAction(this, "Drawing...");
 
-  ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
-  vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, m_normalization);
-  vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, m_normalization);
-  vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, m_normalization);
+  ThresholdRange_scptr thresholdRange =
+      boost::make_shared<IgnoreZerosThresholdRange>();
+  auto hexahedronFactory = Mantid::Kernel::make_unique<vtkMDHexFactory>(
+      thresholdRange, m_normalization);
 
-  hexahedronFactory->SetSuccessor(quadFactory);
-  quadFactory->SetSuccessor(lineFactory);
+  hexahedronFactory->setSuccessor(Mantid::Kernel::make_unique<vtkMDQuadFactory>(
+                                      thresholdRange, m_normalization))
+      .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
+          thresholdRange, m_normalization));
+
   hexahedronFactory->setTime(m_time);
-  vtkDataSet* product = m_presenter->execute(hexahedronFactory, loadingProgressAction, drawingProgressAction);
-  
+  vtkDataSet *product = m_presenter->execute(
+      hexahedronFactory.get(), loadingProgressAction, drawingProgressAction);
+
   //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
-  vtkBox* box = vtkBox::New();
+  vtkNew<vtkBox> box;
   box->SetBounds(product->GetBounds());
-  vtkPVClipDataSet* clipper = vtkPVClipDataSet::New();
+  vtkNew<vtkPVClipDataSet> clipper;
   clipper->SetInputData(0, product);
-  clipper->SetClipFunction(box);
+  clipper->SetClipFunction(box.GetPointer());
   clipper->SetInsideOut(true);
   clipper->Update();
   vtkDataSet* clipperOutput = clipper->GetOutput();
@@ -159,20 +152,20 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   output->ShallowCopy(clipperOutput);
 
   m_presenter->setAxisLabels(output);
-
-  clipper->Delete();
   
   return 1;
 }
 
 int vtkMDEWNexusReader::RequestInformation(
-  vtkInformation *vtkNotUsed(request),
-  vtkInformationVector **vtkNotUsed(inputVector),
-  vtkInformationVector *outputVector)
-{
-  if(m_presenter == NULL)
-  {
-    m_presenter = new MDEWEventNexusLoadingPresenter(new MDLoadingViewAdapter<vtkMDEWNexusReader>(this), FileName);
+    vtkInformation *vtkNotUsed(request),
+    vtkInformationVector **vtkNotUsed(inputVector),
+    vtkInformationVector *outputVector) {
+  if (m_presenter == nullptr) {
+    std::unique_ptr<MDLoadingView> view =
+        Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWNexusReader>>(
+            this);
+    m_presenter = Mantid::Kernel::make_unique<MDEWEventNexusLoadingPresenter>(
+        std::move(view), FileName);
     m_presenter->executeLoadMetadata();
     setTimeRange(outputVector);
   }
@@ -186,7 +179,10 @@ void vtkMDEWNexusReader::PrintSelf(ostream& os, vtkIndent indent)
 
 int vtkMDEWNexusReader::CanReadFile(const char* fname)
 {
-  MDEWEventNexusLoadingPresenter temp(new MDLoadingViewAdapter<vtkMDEWNexusReader>(this), fname);
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWNexusReader>>(
+          this);
+  MDEWEventNexusLoadingPresenter temp(std::move(view), fname);
   return temp.canReadFile();
 }
 

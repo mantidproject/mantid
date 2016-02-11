@@ -46,12 +46,12 @@ class vtkDataSetFactory;
 
 class DLLExport MDHWInMemoryLoadingPresenter : public MDHWLoadingPresenter {
 public:
-  MDHWInMemoryLoadingPresenter(MDLoadingView *view,
+  MDHWInMemoryLoadingPresenter(std::unique_ptr<MDLoadingView> view,
                                WorkspaceProvider *repository,
                                std::string wsName);
-  virtual vtkDataSet *execute(vtkDataSetFactory *factory,
-                              ProgressAction &rebinningProgressUpdate,
-                              ProgressAction &drawingProgressUpdate);
+  virtual vtkSmartPointer<vtkDataSet>
+  execute(vtkDataSetFactory *factory, ProgressAction &rebinningProgressUpdate,
+          ProgressAction &drawingProgressUpdate);
   virtual void executeLoadMetadata();
   virtual ~MDHWInMemoryLoadingPresenter();
   virtual bool canReadFile() const;

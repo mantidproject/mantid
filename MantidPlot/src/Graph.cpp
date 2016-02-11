@@ -968,6 +968,10 @@ void Graph::enableAutoscaling(bool yes) {
       d_plot->setAxisScaleDiv(i, *d_plot->axisScaleDiv(i));
     }
   }
+  // Propagate this to spectrogram
+  if (spectrogram()) {
+    spectrogram()->setColorMapAutoScale(yes);
+  }
 }
 
 void Graph::setAutoScale() {

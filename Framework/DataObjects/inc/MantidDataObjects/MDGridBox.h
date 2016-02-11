@@ -208,6 +208,9 @@ public:
   typedef std::vector<MDBoxBase<MDE, nd> *> boxVector_t;
 
 private:
+  /// Compute the index of the child box for the given event
+  size_t calculateChildIndex(const MDE &event) const;
+
   /// Each dimension is split into this many equally-sized boxes
   size_t split[nd];
   /** Cumulative dimension splitting: split[n] = 1*split[0]*split[..]*split[n-1]

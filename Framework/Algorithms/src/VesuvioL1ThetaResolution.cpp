@@ -131,7 +131,7 @@ void VesuvioL1ThetaResolution::exec() {
       WorkspaceFactory::Instance().create("Workspace2D", 4, numHist, numHist);
 
   // Set vertical axis to statistic labels
-  TextAxis *specAxis = new TextAxis(4);
+  auto specAxis = new TextAxis(4);
   specAxis->setLabel(0, "l1_Mean");
   specAxis->setLabel(1, "l1_StdDev");
   specAxis->setLabel(2, "theta_Mean");

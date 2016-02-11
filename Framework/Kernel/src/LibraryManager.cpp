@@ -89,9 +89,8 @@ bool LibraryManagerImpl::skip(const std::string &filename) {
     initialized = true;
   }
   bool skipme(false);
-  for (std::set<std::string>::const_iterator itr = excludes.begin();
-       itr != excludes.end(); ++itr) {
-    if (filename.find(*itr) != std::string::npos) {
+  for (const auto &exclude : excludes) {
+    if (filename.find(exclude) != std::string::npos) {
       skipme = true;
       break;
     }
@@ -125,8 +124,7 @@ bool LibraryManagerImpl::loadLibrary(const std::string &filepath) {
     if (dlwrap->OpenLibrary(libName, directory.toString())) {
       // Successfully opened, so add to map
       g_log.debug("Opened library: " + libName + ".\n");
-      OpenLibs.insert(std::pair<std::string, boost::shared_ptr<LibraryWrapper>>(
-          libName, dlwrap));
+      OpenLibs.emplace(libName, dlwrap);
       return true;
     } else {
       return false;

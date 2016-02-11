@@ -1,5 +1,6 @@
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include <algorithm>
 
 namespace Mantid {
 namespace Geometry {
@@ -59,16 +60,16 @@ std::string SpaceGroup::hmSymbol() const { return m_hmSymbol; }
  * @return :: true if the reflection is allowed, false otherwise.
  */
 bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    if ((*op).hasTranslation()) {
+  for (const auto &operation : m_allOperations) {
+    if (operation.hasTranslation()) {
       /* Floating point precision problem:
        *    (H . v) % 1.0 is not always exactly 0, so instead:
        *    | [(H . v) + delta] % 1.0 | > 1e-14 is checked
        * The transformation is only performed if necessary.
        */
-      if ((fabs(fmod(fabs(hkl.scalar_prod((*op).reducedVector())) + 1e-15,
+      if ((fabs(fmod(fabs(hkl.scalar_prod(operation.reducedVector())) + 1e-15,
                      1.0)) > 1e-14) &&
-          ((*op).transformHKL(hkl) == hkl)) {
+          (operation.transformHKL(hkl) == hkl)) {
         return false;
       }
     }
@@ -104,13 +105,13 @@ Group_const_sptr SpaceGroup::getSiteSymmetryGroup(const V3D &position) const {
   V3D wrappedPosition = Geometry::getWrappedVector(position);
 
   std::vector<SymmetryOperation> siteSymmetryOps;
-
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    if (Geometry::getWrappedVector((*op) * wrappedPosition) ==
-        wrappedPosition) {
-      siteSymmetryOps.push_back(*op);
-    }
-  }
+  AtomPositionsEqual comparator;
+  std::copy_if(m_allOperations.begin(), m_allOperations.end(),
+               std::inserter(siteSymmetryOps, siteSymmetryOps.begin()),
+               [&](const SymmetryOperation &op) {
+                 return Geometry::getWrappedVector(op * wrappedPosition) ==
+                        wrappedPosition;
+               });
 
   return GroupFactory::create<Group>(siteSymmetryOps);
 }

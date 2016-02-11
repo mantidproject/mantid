@@ -153,9 +153,8 @@ void PoldiAutoCorrelation5::logConfigurationInformation(
     g_log.information() << "_Poldi -     Number of dead wires: "
                         << deadWires.size() << std::endl;
     g_log.information() << "_Poldi -     Wire indices: ";
-    for (std::set<int>::const_iterator dw = deadWires.begin();
-         dw != deadWires.end(); ++dw) {
-      g_log.information() << *dw << " ";
+    for (auto deadWire : deadWires) {
+      g_log.information() << deadWire << " ";
     }
     g_log.information() << std::endl;
   }

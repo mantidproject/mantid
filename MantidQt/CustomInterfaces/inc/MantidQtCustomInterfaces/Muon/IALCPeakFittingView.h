@@ -56,6 +56,9 @@ namespace CustomInterfaces
     /// @return A peak currently represented by the peak picker
     virtual IPeakFunction_const_sptr peakPicker() const = 0;
 
+    /// Clears any guess from the plot
+    virtual void clearGuess() = 0;
+
   public slots:
     /// Performs any necessary initialization
     virtual void initialize() = 0;
@@ -97,6 +100,9 @@ namespace CustomInterfaces
     /// Opens the Mantid Wiki web page
     virtual void help() = 0;
 
+    /// Changes button text and emits signal
+    virtual void plotGuess() = 0;
+
   signals:
     /// Request to perform peak fitting
     void fitRequested();
@@ -108,7 +114,13 @@ namespace CustomInterfaces
     void peakPickerChanged();
 
     /// Parameter value is changed in the Function Browser _either by user or programmatically_
-    void parameterChanged(const QString& funcIndex, const QString& paramName);
+    void parameterChanged(const QString &funcIndex, const QString &paramName);
+
+    /// Request to plot guess
+    void plotGuessRequested();
+
+    /// Request to remove guess from plot
+    void removeGuessRequested();
   };
 
 } // namespace CustomInterfaces

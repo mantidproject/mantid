@@ -4,7 +4,6 @@ from mantid.kernel import Direction, StringListValidator
 import mantid.simpleapi as api
 import numpy as np
 import scipy as sp
-import mlzutils
 
 
 class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
@@ -96,7 +95,7 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
     def PyExec(self):
         """ Main execution body
         """
-        input_ws = self.getProperty("InputWorkspace").value
+        input_ws   = self.getProperty("InputWorkspace").value
         outws_name = self.getPropertyValue("OutputWorkspace")
         choice_tof = self.getProperty("ChoiceElasticTof").value
 
@@ -118,20 +117,18 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
         if choice_tof == 'FitSample':
             prog_reporter.report("Fit function")
             for idx in range(nb_hist):
-                tof_elastic[idx] = mlzutils.do_fit_gaussian(input_ws, idx, self.log())[0]
+                tof_elastic[idx] = api.FitGaussian(input_ws, idx)[0]
 
         if choice_tof == 'FitVanadium':
             vanaws = self.getProperty("VanadiumWorkspace").value
             prog_reporter.report("Fit function")
             for idx in range(nb_hist):
-                tof_elastic[idx] = mlzutils.do_fit_gaussian(vanaws, idx, self.log())[0]
+                tof_elastic[idx] = api.FitGaussian(vanaws, idx)[0]
 
         self.log().debug("Tel = " + str(tof_elastic))
-        clone = self.createChildAlgorithm("CloneWorkspace")
-        clone.setProperty("InputWorkspace", input_ws)
-        clone.setPropertyValue("OutputWorkspace", outws_name)
-        clone.execute()
-        outws = clone.getProperty("OutputWorkspace").value
+
+        outws = api.CloneWorkspace(input_ws,OutputWorkspace=outws_name)
+
         # mask detectors with EPP=0
         zeros = np.where(tof_elastic == 0)[0]
         if len(zeros) > 0:

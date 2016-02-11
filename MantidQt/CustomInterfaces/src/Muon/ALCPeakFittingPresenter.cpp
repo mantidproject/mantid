@@ -27,12 +27,15 @@ namespace CustomInterfaces
 
     connect(m_model, SIGNAL(fittedPeaksChanged()), SLOT(onFittedPeaksChanged()));
     connect(m_model, SIGNAL(dataChanged()), SLOT(onDataChanged()));
+    connect(m_view, SIGNAL(plotGuessRequested()), SLOT(onPlotGuess()));
+    connect(m_view, SIGNAL(removeGuessRequested()), SLOT(removePlots()));
   }
 
   void ALCPeakFittingPresenter::fit()
   {
     IFunction_const_sptr func = m_view->function("");
     if ( func ) {
+      m_view->clearGuess();
       m_model->fitPeaks(func);
     } else {
        m_view->displayError("Couldn't fit an empty function");
@@ -112,5 +115,25 @@ namespace CustomInterfaces
                          ALCHelper::curveErrorsFromWs(m_model->data(), 0));
   }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+  /**
+   * Called when user clicks "Plot guess" on the view.
+   * Plots the current guess fit on the graph.
+   */
+  void ALCPeakFittingPresenter::onPlotGuess() {
+    if (auto func = m_view->function("")) {
+      auto xdata = m_model->data()->readX(0);
+      m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(func, xdata)));
+    } else {
+      removePlots();
+    }
+  }
+
+  /**
+   * Removes any fit function from the graph.
+   */
+  void ALCPeakFittingPresenter::removePlots() {
+    m_view->setFittedCurve(*(ALCHelper::emptyCurveData()));
+  }
+
+  } // namespace CustomInterfaces
+  } // namespace MantidQt

@@ -107,9 +107,7 @@ void RefReduction::init() {
   setPropertySettings("AngleOffset", new VisibleWhenProperty(
                                          "Instrument", IS_EQUAL_TO, "REF_L"));
 
-  std::vector<std::string> instrOptions;
-  instrOptions.push_back("REF_L");
-  instrOptions.push_back("REF_M");
+  std::vector<std::string> instrOptions{"REF_L", "REF_M"};
   declareProperty("Instrument", "REF_M",
                   boost::make_shared<StringListValidator>(instrOptions),
                   "Instrument to reduce for");
@@ -553,7 +551,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   if (!isEmpty(nBins))
     tofStep = (tofMax - tofMin) / nBins;
   else
-    nBins = (int)floor((tofMax - tofMin) / tofStep);
+    nBins = static_cast<int>(floor((tofMax - tofMin) / tofStep));
 
   std::vector<double> params;
   params.push_back(tofMin);

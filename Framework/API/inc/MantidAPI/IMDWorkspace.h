@@ -33,7 +33,7 @@ enum MDNormalization {
   NumEventsNormalization = 2
 };
 
-static const signal_t MDMaskValue = 0.0;
+static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 
 /** Basic MD Workspace Abstract Class.
  *
@@ -119,6 +119,10 @@ public:
   IMDIterator *
   createIterator(Mantid::Geometry::MDImplicitFunction *function = NULL) const;
 
+  std::string getConvention() const;
+  void setConvention(std::string m_convention);
+  std::string changeQConvention();
+
   signal_t getSignalAtVMD(const Mantid::Kernel::VMD &coords,
                           const Mantid::API::MDNormalization &normalization =
                               Mantid::API::VolumeNormalization) const;
@@ -162,6 +166,7 @@ protected:
   virtual const std::string toString() const;
 
 private:
+  std::string m_convention;
   virtual IMDWorkspace *doClone() const = 0;
 };
 

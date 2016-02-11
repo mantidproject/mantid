@@ -98,7 +98,7 @@ void ShiftLogTime::exec() {
   }
 
   // Create the new log
-  TimeSeriesProperty<double> *newlog = new TimeSeriesProperty<double>(logname);
+  auto newlog = new TimeSeriesProperty<double>(logname);
   newlog->setUnits(oldlog->units());
   newlog->create(times, values);
 

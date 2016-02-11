@@ -18,6 +18,11 @@ The correction goes as follows:
 where
 
         :math:`\Phi_{sample} = \frac{M_{sample}}{M_{ref}} \Phi_{ref}`
+        
+Workflow
+########
+
+.. diagram:: SANSBeamFluxCorrection-v1_wkflw.dot
 
 Usage
 -----

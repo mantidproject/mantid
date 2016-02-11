@@ -17,8 +17,6 @@ namespace {
 ///@cond
 // const char * WSINDEX_NAME = "WorkspaceIndex";
 const char *MASS_NAME = "Mass";
-
-const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
 ///@endcond
 }
 

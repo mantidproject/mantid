@@ -42,7 +42,9 @@ public:
   virtual ~ExportTimeSeriesLog();
 
   virtual const std::string name() const { return "ExportTimeSeriesLog"; };
+
   virtual int version() const { return 1; };
+
   virtual const std::string category() const {
     return "Diffraction\\DataHandling;Events\\EventFiltering";
   };
@@ -53,7 +55,7 @@ public:
   }
 
 private:
-  API::MatrixWorkspace_sptr m_dataWS;
+  API::MatrixWorkspace_sptr m_inputWS;
   API::MatrixWorkspace_sptr m_outWS;
 
   std::vector<int64_t> mSETimes;
@@ -67,14 +69,25 @@ private:
 
   void exec();
 
-  void exportLog(std::string logname, int numberexports, bool outputeventws);
+  bool
+  calculateTimeSeriesRangeByTime(std::vector<Kernel::DateAndTime> &vec_times,
+                                 const double &rel_start_time, size_t &i_start,
+                                 const double &rel_stop_time, size_t &i_stop,
+                                 const double &time_factor);
 
-  void setupEventWorkspace(int numentries,
+  void exportLog(const std::string &logname, const std::string timeunit,
+                 const double &starttime, const double &stoptime,
+                 const bool exportepoch, bool outputeventws, int numentries);
+
+  void setupEventWorkspace(const size_t &start_index, const size_t &stop_index,
+                           int numentries,
                            std::vector<Kernel::DateAndTime> &times,
-                           std::vector<double> values);
+                           std::vector<double> values, const bool &epochtime);
 
-  void setupWorkspace2D(int numentries, std::vector<Kernel::DateAndTime> &times,
-                        std::vector<double> values);
+  void setupWorkspace2D(const size_t &start_index, const size_t &stop_index,
+                        int numentries, std::vector<Kernel::DateAndTime> &times,
+                        std::vector<double> values, const bool &epochtime,
+                        const double &timeunitfactor);
 };
 
 } // namespace Algorithms

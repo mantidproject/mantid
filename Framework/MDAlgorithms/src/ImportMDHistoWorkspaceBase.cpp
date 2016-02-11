@@ -172,8 +172,8 @@ ImportMDHistoWorkspaceBase::validateInputs() {
   targetFrames.push_back(Mantid::Geometry::QSample::QSampleName);
 
   auto isValidFrame = true;
-  for (auto it = frames.begin(); it != frames.end(); ++it) {
-    auto result = checkIfFrameValid(*it, targetFrames);
+  for (auto &frame : frames) {
+    auto result = checkIfFrameValid(frame, targetFrames);
     if (!result) {
       isValidFrame = result;
     }
@@ -187,7 +187,7 @@ ImportMDHistoWorkspaceBase::validateInputs() {
     std::string message = "The selected frames can be 'HKL', 'QSample', 'QLab' "
                           "or 'General Frame'. You must specify as many frames "
                           "as there are dimensions.";
-    errors.insert(std::make_pair(framePropertyName, message));
+    errors.emplace(framePropertyName, message);
   }
   return errors;
 }
@@ -200,9 +200,8 @@ ImportMDHistoWorkspaceBase::validateInputs() {
  */
 bool ImportMDHistoWorkspaceBase::checkIfFrameValid(
     const std::string &frame, const std::vector<std::string> &targetFrames) {
-  for (auto targetFrame = targetFrames.begin();
-       targetFrame != targetFrames.end(); ++targetFrame) {
-    if (*targetFrame == frame) {
+  for (const auto &targetFrame : targetFrames) {
+    if (targetFrame == frame) {
       return true;
     }
   }

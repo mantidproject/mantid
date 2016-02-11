@@ -88,10 +88,10 @@ time_t utc_mktime(struct tm *utctime) {
   tmp = *utctime;
   tmp.tm_isdst = -1;
   result = mktime(&tmp);
-  if (result == (time_t)-1)
-    return (time_t)-1;
-  if (gmtime_r_portable(&result, &check) == NULL)
-    return (time_t)-1;
+  if (result == static_cast<time_t>(-1))
+    return static_cast<time_t>(-1);
+  if (gmtime_r_portable(&result, &check) == nullptr)
+    return static_cast<time_t>(-1);
 
   // loop until match
   int counter = 0;
@@ -108,11 +108,11 @@ time_t utc_mktime(struct tm *utctime) {
     tmp.tm_isdst = -1;
 
     result = mktime(&tmp);
-    if (result == (time_t)-1)
-      return (time_t)-1;
+    if (result == static_cast<time_t>(-1))
+      return static_cast<time_t>(-1);
     gmtime_r_portable(&result, &check);
-    if (gmtime_r_portable(&result, &check) == NULL)
-      return (time_t)-1;
+    if (gmtime_r_portable(&result, &check) == nullptr)
+      return static_cast<time_t>(-1);
     // Seems like there can be endless loops at the end of a month? E.g. sep 30,
     // 2010 at 4:40 pm. This is to avoid it.
     counter++;
@@ -863,9 +863,9 @@ void DateAndTime::createVector(const DateAndTime start,
   size_t num = seconds.size();
   out.resize(num);
   size_t i = 0;
-  for (auto it = seconds.begin(); it != seconds.end(); ++it) {
+  for (double second : seconds) {
     out[i]._nanoseconds =
-        startnano + static_cast<int64_t>((*it) * 1000000000.0);
+        startnano + static_cast<int64_t>(second * 1000000000.0);
     i++;
   }
 }

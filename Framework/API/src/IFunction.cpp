@@ -46,7 +46,7 @@ IFunction::~IFunction() {
   m_attrs.clear();
   if (m_handler) {
     delete m_handler;
-    m_handler = NULL;
+    m_handler = nullptr;
   }
 }
 
@@ -109,7 +109,7 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
  */
 ParameterTie *IFunction::tie(const std::string &parName,
                              const std::string &expr, bool isDefault) {
-  ParameterTie *ti = new ParameterTie(this, parName, expr, isDefault);
+  auto ti = new ParameterTie(this, parName, expr, isDefault);
   addTie(ti);
   this->fix(getParameterIndex(*ti));
   return ti;
@@ -128,13 +128,13 @@ void IFunction::addTies(const std::string &ties, bool isDefault) {
   Expression list;
   list.parse(ties);
   list.toList();
-  for (auto t = list.begin(); t != list.end(); ++t) {
-    if (t->name() == "=" && t->size() >= 2) {
-      size_t n = t->size() - 1;
-      const std::string value = (*t)[n].str();
+  for (const auto &t : list) {
+    if (t.name() == "=" && t.size() >= 2) {
+      size_t n = t.size() - 1;
+      const std::string value = t[n].str();
       for (size_t i = n; i != 0;) {
         --i;
-        this->tie((*t)[i].name(), value, isDefault);
+        this->tie(t[i].name(), value, isDefault);
       }
     }
   }
@@ -159,9 +159,8 @@ std::string IFunction::asString() const {
   ostr << "name=" << this->name();
   // print the attributes
   std::vector<std::string> attr = this->getAttributeNames();
-  for (size_t i = 0; i < attr.size(); i++) {
-    std::string attName = attr[i];
-    std::string attValue = this->getAttribute(attr[i]).value();
+  for (const auto &attName : attr) {
+    std::string attValue = this->getAttribute(attName).value();
     if (!attValue.empty() && attValue != "\"\"") {
       ostr << ',' << attName << '=' << attValue;
     }
@@ -222,9 +221,9 @@ void IFunction::addConstraints(const std::string &str, bool isDefault) {
   Expression list;
   list.parse(str);
   list.toList();
-  for (auto expr = list.begin(); expr != list.end(); ++expr) {
+  for (const auto &expr : list) {
     IConstraint *c =
-        ConstraintFactory::Instance().createInitialized(this, *expr, isDefault);
+        ConstraintFactory::Instance().createInitialized(this, expr, isDefault);
     this->addConstraint(c);
   }
 }
@@ -253,17 +252,10 @@ void IFunction::setHandler(FunctionHandler *handler) {
 
 /// Function to return all of the categories that contain this function
 const std::vector<std::string> IFunction::categories() const {
-  std::vector<std::string> res;
   Poco::StringTokenizer tokenizer(category(), categorySeparator(),
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
-
-  for (; h != tokenizer.end(); ++h) {
-    res.push_back(*h);
-  }
-
-  return res;
+  return std::vector<std::string>(tokenizer.begin(), tokenizer.end());
 }
 
 /**
@@ -744,7 +736,7 @@ void IFunction::setMatrixWorkspace(
             // update value
             IFunctionWithLocation *testWithLocation =
                 dynamic_cast<IFunctionWithLocation *>(this);
-            if (testWithLocation == NULL ||
+            if (testWithLocation == nullptr ||
                 (fitParam.getLookUpTable().containData() == false &&
                  fitParam.getFormula().compare("") == 0)) {
               setParameter(i, fitParam.getValue());
@@ -808,14 +800,13 @@ void IFunction::setMatrixWorkspace(
                 if (!resultUnitStr.empty()) {
                   std::vector<std::string> allUnitStr =
                       Kernel::UnitFactory::Instance().getKeys();
-                  for (unsigned iUnit = 0; iUnit < allUnitStr.size(); iUnit++) {
-                    size_t found = resultUnitStr.find(allUnitStr[iUnit]);
+                  for (auto &iUnit : allUnitStr) {
+                    size_t found = resultUnitStr.find(iUnit);
                     if (found != std::string::npos) {
-                      size_t len = allUnitStr[iUnit].size();
+                      size_t len = iUnit.size();
                       std::stringstream readDouble;
                       Kernel::Unit_sptr unt =
-                          Kernel::UnitFactory::Instance().create(
-                              allUnitStr[iUnit]);
+                          Kernel::UnitFactory::Instance().create(iUnit);
                       readDouble << 1.0 / convertValue(1.0, unt, workspace, wi);
                       resultUnitStr.replace(found, len, readDouble.str());
                     }
@@ -937,7 +928,7 @@ void IFunction::convertValue(std::vector<double> &values,
     // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
     Instrument_const_sptr instrument = ws->getInstrument();
     Geometry::IComponent_const_sptr sample = instrument->getSample();
-    if (sample == NULL) {
+    if (sample == nullptr) {
       g_log.error()
           << "No sample defined instrument. Cannot convert units for function\n"
           << "Ignore convertion.";
@@ -1009,8 +1000,8 @@ void IFunction::setAttributeValue(const std::string &attName,
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names(nAttributes(), "");
   size_t index(0);
-  for (auto iter = m_attrs.begin(); iter != m_attrs.end(); ++iter) {
-    names[index] = iter->first;
+  for (const auto &attr : m_attrs) {
+    names[index] = attr.first;
     ++index;
   }
   return names;
@@ -1050,7 +1041,7 @@ void IFunction::setAttribute(const std::string &name,
 */
 void IFunction::declareAttribute(
     const std::string &name, const API::IFunction::Attribute &defaultValue) {
-  m_attrs.insert(std::make_pair(name, defaultValue));
+  m_attrs.emplace(name, defaultValue);
 }
 
 /// Initialize the function. Calls declareAttributes & declareParameters

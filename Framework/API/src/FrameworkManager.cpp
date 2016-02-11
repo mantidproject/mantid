@@ -8,6 +8,7 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/UsageService.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
@@ -222,7 +223,10 @@ void FrameworkManagerImpl::clear() {
   clearPropertyManagers();
 }
 
-void FrameworkManagerImpl::shutdown() { clear(); }
+void FrameworkManagerImpl::shutdown() {
+  Kernel::UsageService::Instance().shutdown();
+  clear();
+}
 
 /**
  * Clear memory associated with the AlgorithmManager
@@ -412,6 +416,20 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
   }
   Mantid::API::MemoryManager::Instance().releaseFreeMemory();
   return retVal;
+}
+
+void FrameworkManagerImpl::setupUsageReporting() {
+  int enabled = 0;
+  int interval = 0;
+  int retVal = Kernel::ConfigService::Instance().getValue(
+      "Usage.BufferCheckInterval", interval);
+  if ((retVal == 1) && (interval > 0)) {
+    Kernel::UsageService::Instance().setInterval(interval);
+  }
+  retVal = Kernel::ConfigService::Instance().getValue("usagereports.enabled",
+                                                      enabled);
+  Kernel::UsageService::Instance().setEnabled((retVal == 1) && (enabled > 0));
+  Kernel::UsageService::Instance().registerStartup();
 }
 
 } // namespace API

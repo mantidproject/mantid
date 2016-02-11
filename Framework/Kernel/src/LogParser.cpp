@@ -38,7 +38,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
   std::ifstream file(logFName.c_str());
   if (!file) {
     g_log.warning() << "Cannot open log file " << logFName << "\n";
-    return 0;
+    return nullptr;
   }
 
   // Change times and new values read from file
@@ -91,15 +91,14 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
     isNumeric = !istr.fail();
     old_data = sdata;
 
-    change_times.insert(std::make_pair(stime, sdata));
+    change_times.emplace(stime, sdata);
   }
 
   if (change_times.empty())
-    return 0;
+    return nullptr;
 
   if (isNumeric) {
-    Kernel::TimeSeriesProperty<double> *logv =
-        new Kernel::TimeSeriesProperty<double>(name);
+    auto logv = new Kernel::TimeSeriesProperty<double>(name);
     auto it = change_times.begin();
     for (; it != change_times.end(); ++it) {
       std::istringstream istr(it->second);
@@ -109,15 +108,14 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
     }
     return logv;
   } else {
-    Kernel::TimeSeriesProperty<std::string> *logv =
-        new Kernel::TimeSeriesProperty<std::string>(name);
+    auto logv = new Kernel::TimeSeriesProperty<std::string>(name);
     auto it = change_times.begin();
     for (; it != change_times.end(); ++it) {
       logv->addValue(it->first, it->second);
     }
     return logv;
   }
-  return 0;
+  return nullptr;
 }
 
 /**

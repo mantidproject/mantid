@@ -16,10 +16,11 @@
 
 #include <set>
 
+#include "MantidUI.h"
+
 //----------------------------------
 // Forward declarations
 //----------------------------------
-class MantidUI;
 class IntervalList;
 
 /** 
@@ -185,56 +186,60 @@ private:
   /// The IntervalList against which to validate.
   IntervalList m_intervalList;
 };
- 
-class MantidWSIndexDialog : public QDialog
-{
+
+class MantidWSIndexWidget : public QWidget {
   Q_OBJECT
 
   /** Auxiliar class to wrap the QLine allowing to have a warn to the user for
- *  invalid inputs. 
+ *  invalid inputs.
 */
-class QLineEditWithErrorMark : public QWidget{
-public:
-  /// constructor that will join togheter the QLineEdit and an 'invisible' * label.
-  explicit QLineEditWithErrorMark(QWidget *parent = 0);
-  /// virtual destructor to allow Qt to deallocate all objects
-  virtual ~QLineEditWithErrorMark(){};
-  /// provide acess to the QLineEdit
-  QLineEdit * lineEdit(){return _lineEdit;}; 
-  /// if Error is not empty, it will make the * label visible and set the tooltip as the error.
-  void setError(QString error); 
-private: 
-  QLineEdit * _lineEdit; 
-  QLabel * m_validLbl;
-};
+  class QLineEditWithErrorMark : public QWidget {
+  public:
+    /// constructor that will join togheter the QLineEdit and an 'invisible' *
+    /// label.
+    explicit QLineEditWithErrorMark(QWidget *parent = 0);
+    /// virtual destructor to allow Qt to deallocate all objects
+    virtual ~QLineEditWithErrorMark(){};
+    /// provide acess to the QLineEdit
+    QLineEdit *lineEdit() { return _lineEdit; };
+    /// if Error is not empty, it will make the * label visible and set the
+    /// tooltip as the error.
+    void setError(QString error);
+
+  private:
+    QLineEdit *_lineEdit;
+    QLabel *m_validLbl;
+  };
 
 public:
   /**
     * POD structure to hold all user-selected input
     */
   struct UserInput {
-    QMultiMap<QString,std::set<int> > plots;
+    QMultiMap<QString, std::set<int>> plots;
     bool waterfall;
   };
 
-/// Constructor - same parameters as one of the parent constructors, along with a 
+  /// Constructor - same parameters as one of the parent constructors, along
+  /// with a
   /// list of the names of workspaces to be plotted.
-  MantidWSIndexDialog(MantidUI* parent, Qt::WFlags flags, QList<QString> wsNames,
+  MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags, QList<QString> wsNames,
                       const bool showWaterfallOption = false);
 
   /// Returns a structure holding all of the selected options
   UserInput getSelections() const;
-  /// Returns the QMultiMap that contains all the workspaces that are to be plotted, 
+  /// Returns the QMultiMap that contains all the workspaces that are to be
+  /// plotted,
   /// mapped to the set of workspace indices.
-  QMultiMap<QString,std::set<int> > getPlots() const;
+  QMultiMap<QString, std::set<int>> getPlots() const;
   /// Returns whether the waterfall option has been selected
   bool waterfallPlotRequested() const;
+  /// Called by dialog when plot requested
+  bool plotRequested();
+  /// Called by dialog when plot all requested
+  void plotAllRequested();
 
 private slots:
-  /// Called when the OK button is pressed.
-  void plot();
-  /// Called when the "Plot All" button is pressed.
-  void plotAll();
   /// Called when the wsField has been edited.
   void editedWsField();
   /// Called when the spectraField has been edited.
@@ -249,45 +254,81 @@ private:
   void initSpectraBox();
   /// Initialize the layout of the options check boxes
   void initOptionsBoxes();
-  /// Initializes the layout of the buttons
-  void initButtons();
 
   /// Check to see if all workspaces have a spectrum axis
   void checkForSpectraAxes();
 
-  /// Generates an IntervalList which defines which workspace indices the user can
+  /// Generates an IntervalList which defines which workspace indices the user
+  /// can
   /// ask to plot.
   void generateWsIndexIntervals();
-  /// Generates an IntervalList which defines which spectra IDs the user can ask to plot.
+  /// Generates an IntervalList which defines which spectra IDs the user can ask
+  /// to plot.
   void generateSpectraIdIntervals();
 
   /// Whether or not there are any common spectra IDs between workspaces.
   bool usingSpectraIDs() const;
-
-  /// A pointer to the parent MantidUI object
-  MantidUI* m_mantidUI;
 
   /// Do we allow the user to ask for a range of spectra IDs or not?
   bool m_spectra;
 
   /// Do we allow the display of the waterfall option
   bool m_waterfall;
-  
+
   /// Pointers to the obligatory Qt objects:
   QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage;
   QLineEditWithErrorMark *m_wsField, *m_spectraField;
-  QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox; 
-  QHBoxLayout *m_optionsBox, *m_buttonBox;
+  QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox;
+  QHBoxLayout *m_optionsBox;
   QCheckBox *m_waterfallOpt;
-  QPushButton *m_okButton, *m_cancelButton, *m_plotAllButton;
 
-  
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;
   /// IntervalLists for the range of indices/IDs AVAILABLE to the user.
   IntervalList m_wsIndexIntervals, m_spectraIdIntervals;
   /// IntervalLists for the range of indices/IDs CHOSEN by the user.
   IntervalList m_wsIndexChoice, m_spectraIdChoice;
+};
+
+class MantidWSIndexDialog : public QDialog {
+  Q_OBJECT
+
+public:
+  /// Constructor - same parameters as one of the parent constructors, along
+  /// with a
+  /// list of the names of workspaces to be plotted.
+  MantidWSIndexDialog(MantidUI *parent, Qt::WFlags flags,
+                      QList<QString> wsNames,
+                      const bool showWaterfallOption = false,
+                      const bool showPlotAll = true);
+  /// Returns a structure holding all of the selected options
+  MantidWSIndexWidget::UserInput getSelections() const;
+  /// Returns the QMultiMap that contains all the workspaces that are to be
+  /// plotted,
+  /// mapped to the set of workspace indices.
+  QMultiMap<QString, std::set<int>> getPlots() const;
+  /// Returns whether the waterfall option has been selected
+  bool waterfallPlotRequested() const;
+private slots:
+  /// Called when the OK button is pressed.
+  void plot();
+  /// Called when the "Plot All" button is pressed.
+  void plotAll();
+
+private:
+  MantidWSIndexWidget m_widget;
+  /// Initializes the layout of the dialog
+  void init();
+  /// Initializes the layout of the buttons
+  void initButtons();
+  /// A pointer to the parent MantidUI object
+  MantidUI *m_mantidUI;
+  /// Do we allow the display of the "Plot all" button
+  bool m_plotAll;
+  /// Qt objects
+  QPushButton *m_okButton, *m_cancelButton, *m_plotAllButton;
+  QHBoxLayout *m_buttonBox;
+  QVBoxLayout *m_outer;
 };
 
 #endif //MANTIDWSINDEXDIALOG_H_

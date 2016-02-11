@@ -79,8 +79,9 @@ static const double meVtoKelvin = 11.604519;
 static const double E_mev_toNeutronWavenumberSq =
     1.0e20 * h_bar * h_bar / (2 * NeutronMass * meV); //[meV*Angstrom^2]
 
-/**  Muon lifetime. Taken from MuLan experiment on 08/12/2008. */
-static const double MuonLifetime = 2.197019e-6;
+/**  Muon lifetime. Taken from Particle Data Group on 15/1/2016
+ * <http://pdg.lbl.gov/2015/tables/rpp2015-sum-leptons.pdf>. */
+static const double MuonLifetime = 2.1969811e-6;
 
 /** Standard atmospheric pressure in kPa.
  * Taken from

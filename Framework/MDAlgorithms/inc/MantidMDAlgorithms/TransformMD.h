@@ -50,6 +50,7 @@ public:
 private:
   void init();
   void exec();
+  void reverse(signal_t *array, size_t arrayLength);
 
   template <typename MDE, size_t nd>
   void

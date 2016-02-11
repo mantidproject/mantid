@@ -25,14 +25,13 @@ void CorrectToFile::init() {
 
   std::vector<std::string> propOptions =
       Kernel::UnitFactory::Instance().getKeys();
-  propOptions.push_back("SpectrumNumber");
+  propOptions.emplace_back("SpectrumNumber");
   declareProperty("FirstColumnValue", "Wavelength",
                   boost::make_shared<Kernel::StringListValidator>(propOptions),
                   "The units of the first column of the correction file "
                   "(default wavelength)");
 
-  std::vector<std::string> operations(1, std::string("Divide"));
-  operations.push_back("Multiply");
+  std::vector<std::string> operations{"Divide", "Multiply"};
   declareProperty("WorkspaceOperation", "Divide",
                   boost::make_shared<Kernel::StringListValidator>(operations),
                   "Allowed values: Divide, Multiply (default is divide)");
@@ -75,7 +74,7 @@ void CorrectToFile::exec() {
     const MantidVec &Ecor = rkhInput->readE(0);
 
     const bool histogramData = outputWS->isHistogramData();
-    const bool divide = (operation == "Divide") ? true : false;
+    const bool divide = operation == "Divide";
     double Yfactor, correctError;
 
     const int64_t nOutSpec =
@@ -97,8 +96,7 @@ void CorrectToFile::exec() {
         const double currentX =
             histogramData ? (xIn[j] + xIn[j + 1]) / 2.0 : xIn[j];
         // Find out the index of the first correction point after this value
-        MantidVec::const_iterator pos =
-            std::lower_bound(Xcor.begin(), Xcor.end(), currentX);
+        auto pos = std::lower_bound(Xcor.cbegin(), Xcor.cend(), currentX);
         const size_t index = pos - Xcor.begin();
         if (index == Xcor.size()) {
           // If we're past the end of the correction factors vector, use the

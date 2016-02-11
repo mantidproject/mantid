@@ -1,6 +1,7 @@
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "vtkCharArray.h"
 #include "vtkFieldData.h"
+#include "vtkNew.h"
 
 namespace Mantid
 {
@@ -21,16 +22,15 @@ void MetadataToFieldData::execute(vtkFieldData* fieldData, std::string metaData,
     fieldData->RemoveArray(id.c_str());
   }
   //create new.
-  vtkCharArray* newArry = vtkCharArray::New();
+  vtkNew<vtkCharArray> newArry;
   newArry->Allocate(metaData.size());
   newArry->SetName(id.c_str());
-  fieldData->AddArray(newArry);
+  fieldData->AddArray(newArry.GetPointer());
 
   for(unsigned int i = 0 ; i < metaData.size(); i++)
   {
     newArry->InsertNextValue(metaData.at(i));
   }
-  newArry->Delete();
 }
 
 }

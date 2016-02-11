@@ -6,6 +6,7 @@
 #include <vtkFieldData.h>
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include <boost/algorithm/string.hpp>
+#include <vtkNew.h>
 
 using Mantid::VATES::MetadataToFieldData;
 
@@ -36,20 +37,18 @@ public:
     std::string testData = "<test data/>%s";
     const std::string id = "1";
 
-    vtkFieldData* fieldData = vtkFieldData::New();
-    vtkCharArray* charArray = vtkCharArray::New();
+    vtkNew<vtkFieldData> fieldData;
+    vtkNew<vtkCharArray> charArray;
     charArray->SetName(id.c_str());
-    fieldData->AddArray(charArray);
+    fieldData->AddArray(charArray.GetPointer());
 
     MetadataToFieldData function;
-    function(fieldData, testData, id);
+    function(fieldData.GetPointer(), testData, id);
 
     //convert vtkchararray back into a string.
     vtkCharArray* carry = dynamic_cast<vtkCharArray*> (fieldData->GetArray(id.c_str()));
 
     TSM_ASSERT_EQUALS("The result does not match the input. Metadata not properly converted.", testData, convertCharArrayToString(carry));
-    charArray->Delete();
-    fieldData->Delete();
   }
 
   void testMetaDataToFieldDataWithEmptyFieldData()
@@ -57,15 +56,14 @@ public:
     std::string testData = "<test data/>%s";
     const std::string id = "1";
 
-    vtkFieldData* emptyFieldData = vtkFieldData::New();
+    vtkNew<vtkFieldData> emptyFieldData;
     MetadataToFieldData function;
-    function(emptyFieldData, testData.c_str(), id.c_str());
+    function(emptyFieldData.GetPointer(), testData.c_str(), id.c_str());
 
     //convert vtkchararray back into a string.
     vtkCharArray* carry = dynamic_cast<vtkCharArray*> (emptyFieldData->GetArray(id.c_str()));
 
     TSM_ASSERT_EQUALS("The result does not match the input. Metadata not properly converted.", testData, convertCharArrayToString(carry));
-    emptyFieldData->Delete();
   }
 
 };

@@ -78,14 +78,14 @@ Kernel::Logger g_log("OCGeometryGenerator");
 * @param obj :: input object
 */
 OCGeometryGenerator::OCGeometryGenerator(const Object *obj) : Obj(obj) {
-  ObjSurface = NULL;
+  ObjSurface = nullptr;
 }
 
 /**
 * Generate geometry, it uses OpenCascade to generate surface triangles.
 */
 void OCGeometryGenerator::Generate() {
-  if (ObjSurface == NULL) {
+  if (ObjSurface == nullptr) {
     AnalyzeObject();
   }
 }
@@ -94,7 +94,7 @@ void OCGeometryGenerator::Generate() {
 * Destroy the surface generated for the object
 */
 OCGeometryGenerator::~OCGeometryGenerator() {
-  if (ObjSurface != NULL) {
+  if (ObjSurface != nullptr) {
     delete ObjSurface;
   }
 }
@@ -103,11 +103,11 @@ OCGeometryGenerator::~OCGeometryGenerator() {
 * Analyzes the rule tree in object and creates a Topology Shape
 */
 void OCGeometryGenerator::AnalyzeObject() {
-  if (Obj != NULL) // If object exists
+  if (Obj != nullptr) // If object exists
   {
     // Get the top rule tree in Obj
     const Rule *top = Obj->topRule();
-    if (top == NULL) {
+    if (top == nullptr) {
       ObjSurface = new TopoDS_Shape();
       return;
     }
@@ -129,7 +129,7 @@ TopoDS_Shape *OCGeometryGenerator::getObjectSurface() { return ObjSurface; }
 
 int OCGeometryGenerator::getNumberOfTriangles() {
   int countFace = 0;
-  if (ObjSurface != NULL) {
+  if (ObjSurface != nullptr) {
     TopExp_Explorer Ex;
     for (Ex.Init(*ObjSurface, TopAbs_FACE); Ex.More(); Ex.Next()) {
       TopoDS_Face F = TopoDS::Face(Ex.Current());
@@ -143,7 +143,7 @@ int OCGeometryGenerator::getNumberOfTriangles() {
 
 int OCGeometryGenerator::getNumberOfPoints() {
   int countVert = 0;
-  if (ObjSurface != NULL) {
+  if (ObjSurface != nullptr) {
     TopExp_Explorer Ex;
     for (Ex.Init(*ObjSurface, TopAbs_FACE); Ex.More(); Ex.Next()) {
       TopoDS_Face F = TopoDS::Face(Ex.Current());
@@ -156,7 +156,7 @@ int OCGeometryGenerator::getNumberOfPoints() {
 }
 
 double *OCGeometryGenerator::getTriangleVertices() {
-  double *points = NULL;
+  double *points = nullptr;
   int nPts = this->getNumberOfPoints();
   if (nPts > 0) {
     points = new double[static_cast<std::size_t>(nPts) * 3];
@@ -181,7 +181,7 @@ double *OCGeometryGenerator::getTriangleVertices() {
 }
 
 int *OCGeometryGenerator::getTriangleFaces() {
-  int *faces = NULL;
+  int *faces = nullptr;
   int nFaces = this->getNumberOfTriangles(); // was Points
   if (nFaces > 0) {
     faces = new int[static_cast<std::size_t>(nFaces) * 3];

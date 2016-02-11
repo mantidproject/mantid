@@ -58,8 +58,13 @@ void LoadHKL::exec() {
   //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM, TRANSMISSION,
   //    DN, TWOTH, DSP))
   // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
+  // Default for kf-ki has -q
+  double qSign = -1.0;
+  std::string convention = ConfigService::Instance().getString("Q.convention");
+  if (convention == "Crystallography")
+    qSign = 1.0;
   Instrument_sptr inst(new Geometry::Instrument);
-  Detector *detector = new Detector("det1", -1, 0);
+  Detector *detector = new Detector("det1", -1, nullptr);
   detector->setPos(0.0, 0.0, 0.0);
   inst->add(detector); // This takes care of deletion
   inst->markAsDetector(detector);
@@ -94,18 +99,18 @@ void LoadHKL::exec() {
     double scattering = atof(line.substr(72, 9).c_str());
     static_cast<void>(atof(line.substr(81, 9).c_str())); // dspace
     if (first) {
-      mu1 = -(double)std::log(trans) / tbar;
+      mu1 = -std::log(trans) / tbar;
       wl1 = wl / 1.8;
       sc1 = scattering;
       astar1 = 1.0 / trans;
       first = false;
     } else {
-      mu2 = -(double)std::log(trans) / tbar;
+      mu2 = -std::log(trans) / tbar;
       wl2 = wl / 1.8;
     }
 
     Peak peak(inst, scattering, wl);
-    peak.setHKL(-h, -k, -l);
+    peak.setHKL(qSign * h, qSign * k, qSign * l);
     peak.setIntensity(Inti);
     peak.setSigmaIntensity(SigI);
     peak.setRunNumber(run);
@@ -123,7 +128,7 @@ void LoadHKL::exec() {
   double amu = (mu2 - 1.0 * mu1) / (-1.0 * wl1 + wl2);
   double smu = mu1 - wl1 * amu;
   double theta = sc1 * radtodeg_half;
-  int i = (int)(theta / 5.);
+  int i = static_cast<int>(theta / 5.);
   double x0, x1, x2;
   gsl_poly_solve_cubic(pc[2][i] / pc[3][i], pc[1][i] / pc[3][i],
                        (pc[0][i] - astar1) / pc[3][i], &x0, &x1, &x2);

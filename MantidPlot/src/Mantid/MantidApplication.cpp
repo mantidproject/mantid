@@ -5,6 +5,7 @@
 #include "MantidQtAPI/MantidDialog.h"
 
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/UsageService.h"
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -20,6 +21,7 @@ namespace
 /// Constructor
 MantidApplication::MantidApplication(int &argc, char ** argv ) : QApplication(argc, argv)
 {
+  Mantid::Kernel::UsageService::Instance().setApplication("mantidplot");
 }
 
 bool MantidApplication::notify( QObject * receiver, QEvent * event )

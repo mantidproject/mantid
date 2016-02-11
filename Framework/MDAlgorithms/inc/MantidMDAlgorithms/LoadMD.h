@@ -66,6 +66,9 @@ private:
   /// Run the algorithm
   void exec();
 
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention;
+
   /// Helper method
   template <typename MDE, size_t nd>
   void doLoad(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
@@ -83,6 +86,8 @@ private:
   void loadDimensions2();
 
   void loadCoordinateSystem();
+
+  void loadQConvention();
 
   void loadVisualNormalization(
       const std::string &key,
@@ -114,6 +119,8 @@ private:
   std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
   /// Coordinate system
   Kernel::SpecialCoordinateSystem m_coordSystem;
+  /// QConvention
+  std::string m_QConvention;
   /// load only the box structure with empty boxes but do not tload boxes events
   bool m_BoxStructureAndMethadata;
 

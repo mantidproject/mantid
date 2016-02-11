@@ -267,10 +267,8 @@ std::vector<double> PoldiAutoCorrelationCore::calculateDWeights(
   std::vector<double> tofs;
   tofs.reserve(tofsFor1Angstrom.size());
 
-  for (std::vector<double>::const_iterator tofFor1Angstrom =
-           tofsFor1Angstrom.begin();
-       tofFor1Angstrom != tofsFor1Angstrom.end(); ++tofFor1Angstrom) {
-    tofs.push_back(*tofFor1Angstrom * deltaD);
+  for (double tofFor1Angstrom : tofsFor1Angstrom) {
+    tofs.push_back(tofFor1Angstrom * deltaD);
   }
 
   double sum = std::accumulate(tofs.begin(), tofs.end(), 0.0);
@@ -302,9 +300,7 @@ PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
     std::vector<UncertainValue> current;
     current.reserve(m_chopper->slitTimes().size());
 
-    for (std::vector<double>::const_iterator slitOffset =
-             m_chopper->slitTimes().begin();
-         slitOffset != m_chopper->slitTimes().end(); ++slitOffset) {
+    for (double slitOffset : m_chopper->slitTimes()) {
       /* For each offset, the sum of correlation intensity and error (for each
        * detector element)
        * is computed from the counts in the space/time location possible for
@@ -316,7 +312,7 @@ PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
       std::vector<UncertainValue> cmess(m_detector->elementCount());
       std::transform(m_indices.begin(), m_indices.end(), cmess.begin(),
                      boost::bind(&PoldiAutoCorrelationCore::getCMessAndCSigma,
-                                 this, dValue, *slitOffset, _1));
+                                 this, dValue, slitOffset, _1));
 
       UncertainValue sum =
           std::accumulate(cmess.begin(), cmess.end(), UncertainValue(0.0, 0.0),
@@ -576,10 +572,9 @@ PoldiAutoCorrelationCore::getDistances(const std::vector<int> &elements) const {
   std::vector<double> distances;
   distances.reserve(elements.size());
 
-  for (std::vector<int>::const_iterator element = elements.begin();
-       element != elements.end(); ++element) {
+  for (auto element : elements) {
     distances.push_back(chopperDistance +
-                        m_detector->distanceFromSample(*element));
+                        m_detector->distanceFromSample(element));
   }
 
   return distances;
@@ -686,9 +681,8 @@ double PoldiAutoCorrelationCore::getSumOfCounts(
   double sum = 0.0;
 
   for (int t = 0; t < timeBinCount; ++t) {
-    for (std::vector<int>::const_iterator e = detectorElements.begin();
-         e != detectorElements.end(); ++e) {
-      sum += getCounts(*e, t);
+    for (auto detectorElement : detectorElements) {
+      sum += getCounts(detectorElement, t);
     }
   }
 

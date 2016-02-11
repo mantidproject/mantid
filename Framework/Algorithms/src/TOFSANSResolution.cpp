@@ -171,9 +171,10 @@ void TOFSANSResolution::exec() {
       // TODO: change this so that we don't have to pass in the binning
       // parameters
       if (binParams[1] > 0.0) {
-        iq = (int)floor((q - binParams[0]) / binParams[1]);
+        iq = static_cast<int>(floor((q - binParams[0]) / binParams[1]));
       } else {
-        iq = (int)floor(log(q / binParams[0]) / log(1.0 - binParams[1]));
+        iq = static_cast<int>(
+            floor(log(q / binParams[0]) / log(1.0 - binParams[1])));
       }
 
       const double L2 = scattered_flight_path.norm();

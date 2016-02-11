@@ -54,7 +54,7 @@ void Voigt::declareParameters() {
  */
 void Voigt::functionLocal(double *out, const double *xValues,
                           const size_t nData) const {
-  calculateFunctionAndDerivative(xValues, nData, out, NULL);
+  calculateFunctionAndDerivative(xValues, nData, out, nullptr);
 }
 
 /**
@@ -66,7 +66,7 @@ void Voigt::functionLocal(double *out, const double *xValues,
  */
 void Voigt::functionDerivLocal(API::Jacobian *out, const double *xValues,
                                const size_t nData) {
-  calculateFunctionAndDerivative(xValues, nData, NULL, out);
+  calculateFunctionAndDerivative(xValues, nData, nullptr, out);
 }
 
 /**

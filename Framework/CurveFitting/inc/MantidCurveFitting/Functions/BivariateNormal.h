@@ -105,7 +105,7 @@ public:
 
   std::vector<std::string> getAttributeNames() const {
     std::vector<std::string> V;
-    V.push_back("CalcVariances");
+    V.emplace_back("CalcVariances");
     return V;
   }
 

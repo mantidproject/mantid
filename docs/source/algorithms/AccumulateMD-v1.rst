@@ -25,6 +25,11 @@ Clean
 ###########
 It is possible to get confused about what data has been included in an MDWorkspace if it is built up slowly over an experiment. Use this option to start afresh; it creates a new workspace using all of the data in DataSources which are available, rather then appending to the existing workspace.
 
+Workflow
+########
+
+.. diagram:: AccumulateMD-v1_wkflw.dot
+
 Usage
 -----
 

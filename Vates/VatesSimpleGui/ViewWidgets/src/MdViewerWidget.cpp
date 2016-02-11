@@ -4,8 +4,6 @@
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "MantidQtAPI/PythonThreading.h"
-
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/Logger.h"
@@ -726,7 +724,6 @@ void MdViewerWidget::renderingDone()
  */
 void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName)
 {
-  ScopedPythonGIL gil;
   Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   // Workaround: Note that setting to the standard view was part of the eventFilter. This causes the
   //             VSI window to not close properly. Moving it here ensures that we have the switch, but
@@ -983,8 +980,8 @@ ModeControlWidget::Views MdViewerWidget::checkViewAgainstWorkspace(ModeControlWi
  */
 void MdViewerWidget::setupPluginMode()
 {
-  ScopedPythonGIL gil;
-  this->useCurrentColorSettings = false; // Don't use the current color map at start up.
+  // Don't use the current color map at start up.
+  this->useCurrentColorSettings = false; 
   this->setupUiAndConnections();
   this->createMenus();
   this->setupMainView();
@@ -1205,7 +1202,6 @@ void MdViewerWidget::shutdown()
 {
   // This seems to cure a XInitThreads error.
   pqPVApplicationCore::instance()->deleteLater();
-  ScopedPythonGIL gil;
   // Ensure that the MathText utilties are cleaned up as they call Python cleanup code
   // and we need to make sure this can happen before MantidPlot shuts down the interpreter
   vtkMathTextUtilitiesCleanup();
@@ -1334,9 +1330,9 @@ void MdViewerWidget::connectColorSelectionWidget()
 {
   // Set the color selection widget signal -> view slot connection
   QObject::connect(this->ui.colorSelectionWidget,
-                   SIGNAL(colorMapChanged(const pqColorMapModel *)),
+                   SIGNAL(colorMapChanged(const Json::Value &)),
                    this->currentView,
-                   SLOT(onColorMapChange(const pqColorMapModel *)));
+                   SLOT(onColorMapChange(const Json::Value &)));
   QObject::connect(this->ui.colorSelectionWidget,
                    SIGNAL(colorScaleChanged(double, double)),
                    this->currentView,

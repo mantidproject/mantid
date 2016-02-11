@@ -119,7 +119,7 @@ void CylinderAbsorption::initialiseCachedDistances() {
         Track incoming(m_elementPositions[counter], m_beamDirection * -1.0);
 
         m_sampleObject->interceptSurface(incoming);
-        m_L1s[counter] = incoming.begin()->distFromStart;
+        m_L1s[counter] = incoming.cbegin()->distFromStart;
 
         // Also calculate element volumes here
         const double outerR = R + (m_deltaR / 2.0);

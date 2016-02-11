@@ -52,9 +52,7 @@ void FFT::init() {
   declareProperty("Imaginary", EMPTY_INT(), mustBePositive,
                   "Spectrum number to use as imaginary part for transform");
 
-  std::vector<std::string> fft_dir;
-  fft_dir.push_back("Forward");
-  fft_dir.push_back("Backward");
+  std::vector<std::string> fft_dir{"Forward", "Backward"};
   declareProperty("Transform", "Forward",
                   boost::make_shared<StringListValidator>(fft_dir),
                   "Direction of the transform: forward or backward");
@@ -174,7 +172,7 @@ void FFT::exec() {
   // at point with index i = ySize/2. If shift == false the zero is at i = 0
   const bool centerShift = true;
 
-  API::TextAxis *tAxis = new API::TextAxis(nOut);
+  auto tAxis = new API::TextAxis(nOut);
   int iRe = 0;
   int iIm = 1;
   int iAbs = 2;

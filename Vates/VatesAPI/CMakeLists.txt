@@ -212,11 +212,11 @@ vtkCommonDataModel
 vtkIOLegacy
 vtkFiltersExtraction
 vtkFiltersSources
+${vtkjsoncpp_LIBRARIES}
 vtkPVVTKExtensionsDefault
 ${QWT_LIBRARIES}
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
-${JSONCPP_LIBRARIES}
 ${NEXUS_LIBRARIES}
 )
 
@@ -261,9 +261,9 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   vtkIOLegacy
   vtkFiltersExtraction
   vtkFiltersSources
+  ${vtkjsoncpp_LIBRARIES}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${JSONCPP_LIBRARIES}
   ${GMOCK_LIBRARIES} 
   ${QWT_LIBRARIES}
   ${GTEST_LIBRARIES} )

@@ -111,7 +111,7 @@ void SplineInterpolation::exec() {
     // check if we want derivatives
     if (order > 0) {
       derivs[i] = WorkspaceFactory::Instance().create(mws, order);
-      NumericAxis *vAxis = new API::NumericAxis(order);
+      auto vAxis = new API::NumericAxis(order);
 
       // calculate the derivatives for each order chosen
       for (int j = 0; j < order; ++j) {

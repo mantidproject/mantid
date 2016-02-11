@@ -2,27 +2,13 @@
 
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
 #include "MantidQtAPI/MdConstants.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
 
-// Have to deal with ParaView warnings and Intel compiler the hard way.
-#if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
-#endif
-
-#include <pqBuiltinColorMaps.h>
-#include <pqChartValue.h>
-#include <pqColorMapModel.h>
-#include <pqColorPresetManager.h>
-#include <pqColorPresetModel.h>
-
-#include <vtkPVXMLElement.h>
-#include <vtkPVXMLParser.h>
-
-#if defined(__INTEL_COMPILER)
-  #pragma warning enable 1170
-#endif
+#include "pqPresetDialog.h"
+#include "vtk_jsoncpp.h"
+#include "vtkSMTransferFunctionPresets.h"
+#include "vtkNew.h"
 
 #include <QDir>
 #include <QDoubleValidator>
@@ -41,16 +27,13 @@ namespace SimpleGui
  * sub-components and connections.
  * @param parent the parent widget of the mode control widget
  */
-ColorSelectionWidget::ColorSelectionWidget(QWidget *parent): QWidget(parent),
-    colorMapManager(new ColorMapManager()), m_minHistoric(0.01), m_maxHistoric(0.01),
-    m_ignoreColorChangeCallbacks(false), m_inProcessUserRequestedAutoScale(false), m_colorScaleLock(NULL)
-{
+ColorSelectionWidget::ColorSelectionWidget(QWidget *parent)
+    : QWidget(parent), m_minHistoric(0.01), m_maxHistoric(0.01),
+      m_ignoreColorChangeCallbacks(false),
+      m_inProcessUserRequestedAutoScale(false), m_colorScaleLock(NULL) {
   this->m_ui.setupUi(this);
   this->m_ui.autoColorScaleCheckBox->setChecked(true);
   this->setEditorStatus(false);
-
-  this->m_presets = new pqColorPresetManager(this);
-  this->m_presets->restoreSettings();
 
   this->loadBuiltinColorPresets();
 
@@ -94,32 +77,27 @@ void ColorSelectionWidget::setEditorStatus(bool status)
 }
 
 /**
- * This function sets up various color maps. This is copied verbaitum from
- * pqColorScaleEditor.
+ * This function sets up various color maps.
  */
 void ColorSelectionWidget::loadBuiltinColorPresets()
 {
-  pqColorPresetModel *presetModel = this->m_presets->getModel();
-
-  // Associate the colormap value with the index a continuous index
-
-  // create xml parser
-  vtkPVXMLParser *xmlParser = vtkPVXMLParser::New();
-
-  // 1. Get builtinw color maps (Reading fragment requires: InitializeParser, ParseChunk, CleanupParser) 
-  const char *xml = pqComponentsGetColorMapsXML();
-  xmlParser->InitializeParser();
-  xmlParser->ParseChunk(xml, static_cast<unsigned>(strlen(xml)));
-  xmlParser->CleanupParser();
-  this->addColorMapsFromXML(xmlParser, presetModel);
- 
-  // 2. Add color maps from Slice Viewer, IDL and Matplotlib
-  this->addColorMapsFromFile("All_slice_viewer_cmaps_for_vsi.xml", xmlParser, presetModel);
-  this->addColorMapsFromFile("All_idl_cmaps.xml", xmlParser, presetModel);
-  this->addColorMapsFromFile("All_mpl_cmaps.xml", xmlParser, presetModel);
-
-  // cleanup parser
-  xmlParser->Delete();
+  // the destructor of vtkSMTransferFunctionPresets copies these colormaps to
+  // the vtkSMSettings singleton.
+  vtkNew<vtkSMTransferFunctionPresets> presets;
+  // Check for colormap "Viridis". If preset, assume custom colormaps have
+  // already been loaded.
+  auto viridisColormap = presets->GetFirstPresetWithName("Viridis");
+  if (viridisColormap.empty()) {
+    const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
+                                      "All_idl_cmaps.json",
+                                      "All_mpl_cmaps.json"};
+    const std::string colorMapDirectory =
+        Kernel::ConfigService::Instance().getString("colormaps.directory");
+    for (const auto &baseName : filenames) {
+      std::string colorMap = colorMapDirectory + baseName;
+      presets->ImportPresets(colorMap.c_str());
+    }
+  }
 }
 
  /**
@@ -128,76 +106,35 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
   */
   void ColorSelectionWidget::loadColorMap(bool viewSwitched)
   {
-    int defaultColorMapIndex = this->colorMapManager->getDefaultColorMapIndex(viewSwitched);
 
-    const pqColorMapModel *colorMap = this->m_presets->getModel()->getColorMap(defaultColorMapIndex);
+    QString defaultColorMap;
 
-    if (colorMap)
-    {
-      emit this->colorMapChanged(colorMap);
+    // If the view has switched or the VSI is loaded use the last color map
+    // index
+    if (viewSwitched) {
+      defaultColorMap = m_mdSettings.getLastSessionColorMap();
+    } else {
+      // Check if the user wants a general MD color map
+      if (m_mdSettings.getUsageGeneralMdColorMap()) {
+        // The name is sufficient for the VSI to find the color map
+        defaultColorMap = m_mdSettings.getGeneralMdColorMapName();
+      } else {
+        // Check if the user wants to use the last session
+        if (m_mdSettings.getUsageLastSession()) {
+          defaultColorMap = m_mdSettings.getLastSessionColorMap();
+        } else {
+          defaultColorMap = m_mdSettings.getUserSettingColorMap();
+        }
+      }
     }
+
+    Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
+    pqPresetDialog preset(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
+    preset.setCurrentPreset(defaultColorMap.toStdString().c_str());
+    Json::Value colorMap = preset.currentPreset();
+    if (!colorMap.empty())
+      this->onApplyPreset(colorMap);
   }
-
-/**
- * This function takes color maps from a XML file, parses them and loads and
- * adds them to the color preset model.
- * @param fileName : The file with color maps to parse.
- * @param parser : The XML parser with the color maps.
- * @param model : The color preset model to add the maps too.
- */
-void ColorSelectionWidget::addColorMapsFromFile(std::string fileName,
-                                                vtkPVXMLParser *parser,
-                                                pqColorPresetModel *model)
-{
-  std::string colorMapDir = Kernel::ConfigService::Instance().getString("colormaps.directory");
-  if (!colorMapDir.empty())
-  {
-    QFileInfo cmaps(QDir(QString::fromStdString(colorMapDir)),
-                    QString::fromStdString(fileName));
-    if (cmaps.exists())
-    {
-      parser->SetFileName(cmaps.absoluteFilePath().toStdString().c_str());
-      parser->Parse();
-      this->addColorMapsFromXML(parser, model);
-    }
-  }
-}
-
-/**
- * This function takes a XML parser and loads and adds color maps to the color
- * preset model.
- * @param parser : The XML parser with the color maps.
- * @param model : The color preset model to add the maps too.
- */
-void ColorSelectionWidget::addColorMapsFromXML(vtkPVXMLParser *parser,
-                                               pqColorPresetModel *model)
-{
-  // parse each color map element
-  vtkPVXMLElement *root = parser->GetRootElement();
-  for(unsigned int i = 0; i < root->GetNumberOfNestedElements(); i++)
-  {
-    vtkPVXMLElement *colorMapElement = root->GetNestedElement(i);
-    if(std::string("ColorMap") != colorMapElement->GetName())
-    {
-      continue;
-    }
-
-    // load color map from its XML
-    pqColorMapModel colorMap =
-        pqColorPresetManager::createColorMapFromXML(colorMapElement);
-    QString name = colorMapElement->GetAttribute("name");
-
-    // Only add the color map if the name does not exist yet
-    if (!this->colorMapManager->isRecordedColorMap(name.toStdString()))
-    {
-      // add color map to the model
-      model->addBuiltinColorMap(colorMap, name);
-
-      // add color map to the color map manager
-      this->colorMapManager->readInColorMap(name.toStdString());
-    }
-  }
-}
 
 /**
  * Changes the status of the autoScaling checkbox. This is in
@@ -274,21 +211,15 @@ void ColorSelectionWidget::autoCheckBoxClicked(bool wasOn)
 void ColorSelectionWidget::loadPreset()
 {
   Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
-  this->m_presets->setUsingCloseButton(false);
-  if (this->m_presets->exec() == QDialog::Accepted)
-  {
-    // Get the color map from the selection.
-    QItemSelectionModel *selection = this->m_presets->getSelectionModel();
-    QModelIndex index = selection->currentIndex();
-    const pqColorMapModel *colorMap = this->m_presets->getModel()->getColorMap(index.row());
-
-    if (colorMap)
-    {
-      // Persist the color map change
-      this->colorMapManager->setNewActiveColorMap(index.row());
-      emit this->colorMapChanged(colorMap);
-    }
-  }
+  pqPresetDialog preset(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
+  preset.setCustomizableLoadColors(false, false);
+  preset.setCustomizableLoadOpacities(false, false);
+  preset.setCustomizableUsePresetRange(false, false);
+  preset.setCustomizableLoadAnnotations(false, false);
+  preset.setCurrentPreset(m_mdSettings.getLastSessionColorMap());
+  this->connect(&preset, SIGNAL(applyPreset(const Json::Value &)), this,
+                SLOT(onApplyPreset(const Json::Value &)));
+  preset.exec();
 }
 
 /**
@@ -348,6 +279,14 @@ void ColorSelectionWidget::useLogScalingClicked(bool on)
   getColorScaleRange();
 
   emit this->logScale(on);
+}
+
+void ColorSelectionWidget::onApplyPreset(const Json::Value &value) {
+  std::string presetName = value["Name"].asString();
+  if (!presetName.empty()) {
+    m_mdSettings.setLastSessionColorMap(QString::fromStdString(presetName));
+  }
+  emit this->colorMapChanged(value);
 }
 
 /**

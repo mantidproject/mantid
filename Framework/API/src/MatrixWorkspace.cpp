@@ -43,7 +43,7 @@ MatrixWorkspace::MatrixWorkspace(
       m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks(),
       m_indexCalculator(),
       m_nearestNeighboursFactory(
-          (nnFactory == NULL) ? new NearestNeighboursFactory : nnFactory),
+          (nnFactory == nullptr) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
@@ -78,8 +78,8 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete
 // workspaces, so I moved this from protected to public.
 MatrixWorkspace::~MatrixWorkspace() {
-  for (unsigned int i = 0; i < m_axes.size(); ++i) {
-    delete m_axes[i];
+  for (auto &axis : m_axes) {
+    delete axis;
   }
 }
 
@@ -469,8 +469,8 @@ detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(
         map[*detList.begin()] = workspaceIndex;
     } else {
       // Allow multiple detectors per workspace index
-      for (auto it = detList.begin(); it != detList.end(); ++it)
-        map[*it] = workspaceIndex;
+      for (auto det : detList)
+        map[det] = workspaceIndex;
     }
 
     // Ignore if the detector list is empty.
@@ -519,12 +519,11 @@ void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
 
     // Allow multiple detectors per workspace index, or,
     // If only one is allowed, then this has thrown already
-    for (std::set<detid_t>::const_iterator it = detList.begin();
-         it != detList.end(); ++it) {
-      int index = *it + offset;
+    for (auto det : detList) {
+      int index = det + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
-                         "): detector ID found (" << *it
+                         "): detector ID found (" << det
                       << " at workspace index " << workspaceIndex
                       << ") is invalid." << std::endl;
       } else
@@ -550,8 +549,8 @@ void MatrixWorkspace::getIndicesFromSpectra(
   indexList.clear();
   indexList.reserve(this->getNumberHistograms());
 
-  std::vector<specid_t>::const_iterator iter = spectraList.begin();
-  while (iter != spectraList.end()) {
+  auto iter = spectraList.cbegin();
+  while (iter != spectraList.cend()) {
     for (size_t i = 0; i < this->getNumberHistograms(); ++i) {
       if (this->getSpectrum(i)->getSpectrumNo() == *iter) {
         indexList.push_back(i);
@@ -596,19 +595,18 @@ void MatrixWorkspace::getIndicesFromDetectorIDs(
   std::map<detid_t, std::set<size_t>> detectorIDtoWSIndices;
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     auto detIDs = getSpectrum(i)->getDetectorIDs();
-    for (auto it = detIDs.begin(); it != detIDs.end(); ++it) {
-      detectorIDtoWSIndices[*it].insert(i);
+    for (auto detID : detIDs) {
+      detectorIDtoWSIndices[detID].insert(i);
     }
   }
 
   indexList.clear();
   indexList.reserve(detIdList.size());
-  for (size_t j = 0; j < detIdList.size(); ++j) {
-    auto wsIndices = detectorIDtoWSIndices.find(detIdList[j]);
+  for (const auto detId : detIdList) {
+    auto wsIndices = detectorIDtoWSIndices.find(detId);
     if (wsIndices != detectorIDtoWSIndices.end()) {
-      for (auto it = wsIndices->second.begin(); it != wsIndices->second.end();
-           ++it) {
-        indexList.push_back(*it);
+      for (auto index : wsIndices->second) {
+        indexList.push_back(index);
       }
     }
   }
@@ -625,20 +623,17 @@ void MatrixWorkspace::getIndicesFromDetectorIDs(
 void MatrixWorkspace::getSpectraFromDetectorIDs(
     const std::vector<detid_t> &detIdList,
     std::vector<specid_t> &spectraList) const {
-  std::vector<detid_t>::const_iterator it_start = detIdList.begin();
-  std::vector<detid_t>::const_iterator it_end = detIdList.end();
 
   spectraList.clear();
 
   // Try every detector in the list
-  std::vector<detid_t>::const_iterator it;
-  for (it = it_start; it != it_end; ++it) {
+  for (auto detId : detIdList) {
     bool foundDet = false;
     specid_t foundSpecNum = 0;
 
     // Go through every histogram
     for (size_t i = 0; i < this->getNumberHistograms(); i++) {
-      if (this->getSpectrum(i)->hasDetectorID(*it)) {
+      if (this->getSpectrum(i)->hasDetectorID(detId)) {
         foundDet = true;
         foundSpecNum = this->getSpectrum(i)->getSpectrumNo();
         break;
@@ -801,7 +796,7 @@ double MatrixWorkspace::detectorSignedTwoTheta(
 
   Geometry::IComponent_const_sptr source = instrument->getSource();
   Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
         "sample");
@@ -831,7 +826,7 @@ double
 MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const {
   Geometry::IComponent_const_sptr source = getInstrument()->getSource();
   Geometry::IComponent_const_sptr sample = getInstrument()->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
         "sample");
@@ -956,7 +951,7 @@ bool &MatrixWorkspace::isDistribution(bool newValue) {
 *  @return whether the workspace contains histogram data
 */
 bool MatrixWorkspace::isHistogramData() const {
-  return (readX(0).size() == blocksize() ? false : true);
+  return (readX(0).size() != blocksize());
 }
 
 /**
@@ -1016,12 +1011,11 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
   spec->clearData();
 
   const std::set<detid_t> dets = spec->getDetectorIDs();
-  for (std::set<detid_t>::const_iterator iter = dets.begin();
-       iter != dets.end(); ++iter) {
+  for (auto detId : dets) {
     try {
       if (const Geometry::Detector *det =
               dynamic_cast<const Geometry::Detector *>(
-                  sptr_instrument->getDetector(*iter).get())) {
+                  sptr_instrument->getDetector(detId).get())) {
         m_parmap->addBool(det, "masked", true); // Thread-safe method
       }
     } catch (Kernel::Exception::NotFoundError &) {
@@ -1085,11 +1079,11 @@ void MatrixWorkspace::flagMasked(const size_t &spectrumIndex,
     // First get a reference to the list for this spectrum (or create a new
     // list)
     MaskList &binList = m_masks[spectrumIndex];
-    MaskList::iterator it = binList.find(binIndex);
+    auto it = binList.find(binIndex);
     if (it != binList.end()) {
       binList.erase(it);
     }
-    binList.insert(std::make_pair(binIndex, weight));
+    binList.emplace(binIndex, weight);
   }
 }
 
@@ -1102,7 +1096,7 @@ bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {
   // against throwing here).
   if (workspaceIndex >= this->getNumberHistograms())
     return false;
-  return (m_masks.find(workspaceIndex) == m_masks.end()) ? false : true;
+  return m_masks.find(workspaceIndex) != m_masks.end();
 }
 
 /** Returns the list of masked bins for a spectrum.
@@ -1113,7 +1107,7 @@ bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {
 */
 const MatrixWorkspace::MaskList &
 MatrixWorkspace::maskedBins(const size_t &workspaceIndex) const {
-  std::map<int64_t, MaskList>::const_iterator it = m_masks.find(workspaceIndex);
+  auto it = m_masks.find(workspaceIndex);
   // Throw if there are no masked bins for this spectrum. The caller should
   // check first using hasMaskedBins!
   if (it == m_masks.end()) {
@@ -1238,8 +1232,7 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
     throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower than "
                             "lowest in current range.");
   }
-  MantidVec::const_iterator lowit =
-      std::lower_bound(xValues.begin(), xValues.end(), xValue);
+  auto lowit = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
   if (lowit == xValues.end()) {
     throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater "
                             "than highest in current range.");
@@ -1256,7 +1249,7 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
 }
 
 uint64_t MatrixWorkspace::getNPoints() const {
-  return (uint64_t)(this->size());
+  return static_cast<uint64_t>(this->size());
 }
 
 //================================= FOR MDGEOMETRY
@@ -1283,7 +1276,7 @@ class MWDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWDimension(const Axis *axis, const std::string &dimensionId)
       : m_axis(*axis), m_dimensionId(dimensionId),
-        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL),
+        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
         m_frame(new Geometry::GeneralFrame(m_axis.unit()->label(),
                                            m_axis.unit()->label())) {}
 
@@ -1438,11 +1431,11 @@ private:
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimension(size_t index) const {
   if (index == 0) {
-    MWXDimension *dimension = new MWXDimension(this, xDimensionId);
+    auto dimension = new MWXDimension(this, xDimensionId);
     return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
   } else if (index == 1) {
     Axis *yAxis = this->getAxis(1);
-    MWDimension *dimension = new MWDimension(yAxis, yDimensionId);
+    auto dimension = new MWDimension(yAxis, yDimensionId);
     return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
   } else
     throw std::invalid_argument("MatrixWorkspace only has 2 dimensions.");
@@ -1451,7 +1444,7 @@ MatrixWorkspace::getDimension(size_t index) const {
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimensionWithId(std::string id) const {
   int nAxes = this->axes();
-  IMDDimension *dim = NULL;
+  IMDDimension *dim = nullptr;
   for (int i = 0; i < nAxes; i++) {
     Axis *xAxis = this->getAxis(i);
     const std::string &knownId = getDimensionIdFromAxis(i);
@@ -1460,7 +1453,7 @@ MatrixWorkspace::getDimensionWithId(std::string id) const {
       break;
     }
   }
-  if (NULL == dim) {
+  if (nullptr == dim) {
     std::string message = "Cannot find id : " + id;
     throw std::overflow_error(message);
   }
@@ -1567,7 +1560,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
 
   if (wi < nhist) {
     const MantidVec &X = this->readX(wi);
-    MantidVec::const_iterator it = std::lower_bound(X.begin(), X.end(), x);
+    auto it = std::lower_bound(X.cbegin(), X.cend(), x);
     if (it == X.end()) {
       // Out of range
       return std::numeric_limits<double>::quiet_NaN();
@@ -1626,9 +1619,9 @@ void MatrixWorkspace::saveSpectraMapNexus(
     const ::NeXus::NXcompression compression) const {
   // Count the total number of detectors
   std::size_t nDetectors = 0;
-  for (size_t i = 0; i < spec.size(); i++) {
-    size_t wi = size_t(spec[i]); // Workspace index
-    nDetectors += this->getSpectrum(wi)->getDetectorIDs().size();
+  for (auto index : spec) {
+    nDetectors +=
+        this->getSpectrum(static_cast<size_t>(index))->getDetectorIDs().size();
   }
 
   if (nDetectors < 1) {

@@ -84,17 +84,14 @@ void DiffractionFocussing::exec() {
   if (iprogress_step == 0)
     iprogress_step = 1;
   std::vector<int64_t> resultIndeces;
-  for (std::set<int64_t>::const_iterator g = groupNumbers.begin();
-       g != groupNumbers.end(); ++g) {
+  for (auto g = groupNumbers.cbegin(); g != groupNumbers.end(); ++g) {
     if (iprogress++ % iprogress_step == 0) {
       progress(0.68 + double(iprogress) / iprogress_count / 3);
     }
-    std::multimap<int64_t, int64_t>::const_iterator from =
-        detectorGroups.lower_bound(*g);
-    std::multimap<int64_t, int64_t>::const_iterator to =
-        detectorGroups.upper_bound(*g);
+    auto from = detectorGroups.lower_bound(*g);
+    auto to = detectorGroups.upper_bound(*g);
     std::vector<detid_t> detectorList;
-    for (std::multimap<int64_t, int64_t>::const_iterator d = from; d != to; ++d)
+    for (auto d = from; d != to; ++d)
       detectorList.push_back(static_cast<detid_t>(d->second));
     // Want version 1 of GroupDetectors here
     API::IAlgorithm_sptr childAlg =
@@ -191,10 +188,7 @@ void DiffractionFocussing::RebinWorkspace(
   double step = 0;
 
   calculateRebinParams(workspace, min, max, step);
-  std::vector<double> paramArray;
-  paramArray.push_back(min);
-  paramArray.push_back(-step);
-  paramArray.push_back(max);
+  std::vector<double> paramArray{min, -step, max};
 
   g_log.information() << "Rebinning from " << min << " to " << max << " in "
                       << step << " logaritmic steps.\n";
@@ -267,7 +261,7 @@ bool DiffractionFocussing::readGroupingFile(
     // if ( ! istr.good() ) return false;
     // only allow groups with +ve ids
     if ((sel) && (group > 0)) {
-      detectorGroups.insert(std::make_pair(group, udet));
+      detectorGroups.emplace(group, udet);
     }
   }
   return true;

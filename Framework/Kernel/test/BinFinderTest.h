@@ -20,11 +20,8 @@ using std::endl;
 class BinFinderTest : public CxxTest::TestSuite {
 public:
   void testLinearBins() {
-    std::vector<double> bp;
     // 0 to 100 in steps of 2.
-    bp.push_back(0.0);
-    bp.push_back(2.0);
-    bp.push_back(100.0);
+    std::vector<double> bp{0.0, 2.0, 100.0};
     BinFinder bf(bp);
     // Try a few indices
     TS_ASSERT_EQUALS(bf.bin(-0.1), -1);
@@ -38,11 +35,9 @@ public:
   }
 
   void testLogBins() {
-    std::vector<double> bp;
     // 2 to 1024, multiplying by 2 at each bin
-    bp.push_back(2.0);
-    bp.push_back(-1.0);
-    bp.push_back(1024.0);
+    std::vector<double> bp{2.0, -1.0, 1024.0};
+
     BinFinder bf(bp);
     // Try a few indices
     TS_ASSERT_EQUALS(bf.bin(1.8), -1);
@@ -65,14 +60,7 @@ public:
 
   void testCompoundBins() {
     // 3 binning regions
-    std::vector<double> bp;
-    bp.push_back(-10.0);
-    bp.push_back(10.0);
-    bp.push_back(102.0);
-    bp.push_back(100.0); // now step in 100
-    bp.push_back(1000.0);
-    bp.push_back(1000.0); // now step in 100
-    bp.push_back(10000.0);
+    std::vector<double> bp{-10.0, 10.0, 102.0, 100.0, 1000.0, 1000.0, 10000.0};
     BinFinder bf(bp);
     // Try a few indices
     TS_ASSERT_EQUALS(bf.bin(-11), -1);
@@ -94,12 +82,7 @@ public:
   }
 
   void testCompoundBinsWithLog() {
-    std::vector<double> bp;
-    bp.push_back(2.0);
-    bp.push_back(-1.0);
-    bp.push_back(1100.0);
-    bp.push_back(100.0); // now linear
-    bp.push_back(2000.0);
+    std::vector<double> bp{2.0, -1.0, 1100.0, 100.0, 2000.0};
     BinFinder bf(bp);
     // Try a few indices
     TS_ASSERT_EQUALS(bf.bin(1.8), -1);
@@ -116,10 +99,7 @@ public:
   /// Compare the # of bins that the BinFinder computes to the # found by the
   /// vector helper.
   void compareBin(double x1, double step, double x2) {
-    std::vector<double> bp;
-    bp.push_back(x1);
-    bp.push_back(step);
-    bp.push_back(x2);
+    std::vector<double> bp{x1, step, x2};
     BinFinder bf(bp);
     std::vector<double> X;
     VectorHelper::createAxisFromRebinParams(bp, X);

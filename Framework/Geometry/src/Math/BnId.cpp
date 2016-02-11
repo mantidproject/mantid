@@ -91,10 +91,9 @@ int BnId::operator==(const BnId &A) const
 {
   if (A.size != size || A.Tnum != Tnum || A.Znum != Znum)
     return 0;
-  std::vector<int>::const_iterator vc;
-  std::vector<int>::const_iterator ac = A.Tval.begin();
-  for (vc = Tval.begin(); vc != Tval.end(); ++vc, ++ac) {
-    if (ac == A.Tval.end()) // This should neve happen
+  auto ac = A.Tval.cbegin();
+  for (auto vc = Tval.cbegin(); vc != Tval.cend(); ++vc, ++ac) {
+    if (ac == A.Tval.cend()) // This should never happen
       return 0;
     if (*vc != *ac)
       return 0;
@@ -150,9 +149,9 @@ int BnId::operator<(const BnId &A) const
   if (Tnum != A.Tnum)
     return (Tnum < A.Tnum) ? 1 : 0;
 
-  std::vector<int>::const_reverse_iterator tvc = Tval.rbegin();
-  std::vector<int>::const_reverse_iterator avc = A.Tval.rbegin();
-  while (tvc != Tval.rend()) {
+  auto tvc = Tval.crbegin();
+  auto avc = A.Tval.crbegin();
+  while (tvc != Tval.crend()) {
     if (*tvc != *avc)
       return *tvc < *avc;
     ++tvc;
@@ -318,10 +317,9 @@ std::pair<int, BnId> BnId::makeCombination(const BnId &A) const
   int flag(0);                    // numb of diff
   std::pair<int, int> Tcnt(0, 0); // this counter
   std::pair<int, int> Acnt(0, 0); // A counter
-  std::vector<int>::const_iterator tvc;
-  std::vector<int>::const_iterator avc = A.Tval.begin();
+  auto avc = A.Tval.cbegin();
   std::vector<int>::const_iterator chpt; // change point
-  for (tvc = Tval.begin(); tvc != Tval.end(); ++tvc, ++avc) {
+  for (auto tvc = Tval.cbegin(); tvc != Tval.cend(); ++tvc, ++avc) {
     if ((*avc * *tvc) < 0) // false/true
     {
       if (flag) // failed

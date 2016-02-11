@@ -60,9 +60,9 @@ void LoadRawHelper::init() {
                   "periods will be stored in separate workspaces called "
                   "OutputWorkspace_PeriodNo.");
 
-  m_cache_options.push_back("If Slow");
-  m_cache_options.push_back("Always");
-  m_cache_options.push_back("Never");
+  m_cache_options.emplace_back("If Slow");
+  m_cache_options.emplace_back("Always");
+  m_cache_options.emplace_back("Never");
   declareProperty("Cache", "If Slow",
                   boost::make_shared<StringListValidator>(m_cache_options),
                   "An option allowing the algorithm to cache a remote file on "
@@ -87,7 +87,7 @@ void LoadRawHelper::init() {
  */
 FILE *LoadRawHelper::openRawFile(const std::string &fileName) {
   FILE *file = fopen(fileName.c_str(), "rb");
-  if (file == NULL) {
+  if (file == nullptr) {
     g_log.error("Unable to open file " + fileName);
     throw Exception::FileError("Unable to open File:", fileName);
   }
@@ -424,15 +424,15 @@ LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
 
   if (!m_monitordetectorList.empty()) {
     const auto &map = mapping.getMapping();
-    for (auto it = map.begin(); it != map.end(); ++it) {
-      auto detIDs = it->second;
+    for (const auto &SpectrumDetectorPair : map) {
+      auto detIDs = SpectrumDetectorPair.second;
       // Both m_monitordetectorList & detIDs should be (very) short so the
       // nested loop shouldn't be too evil
-      for (auto detIt = detIDs.begin(); detIt != detIDs.end(); ++detIt) {
+      for (auto detID : detIDs) {
         if (std::find(m_monitordetectorList.begin(),
                       m_monitordetectorList.end(),
-                      *detIt) != m_monitordetectorList.end()) {
-          spectrumIndices.push_back(it->first);
+                      detID) != m_monitordetectorList.end()) {
+          spectrumIndices.push_back(SpectrumDetectorPair.first);
         }
       }
     }
@@ -472,7 +472,7 @@ bool LoadRawHelper::isAscii(FILE *file) const {
 std::vector<boost::shared_ptr<MantidVec>>
 LoadRawHelper::getTimeChannels(const int64_t &regimes,
                                const int64_t &lengthIn) {
-  float *const timeChannels = new float[lengthIn];
+  auto const timeChannels = new float[lengthIn];
   isisRaw->getTimeChannels(timeChannels, static_cast<int>(lengthIn));
 
   std::vector<boost::shared_ptr<MantidVec>> timeChannelsVec;
@@ -495,7 +495,7 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
     // In this case, also need to populate the map of spectrum-regime
     // correspondence
     const int64_t ndet = static_cast<int64_t>(isisRaw->i_det);
-    std::map<specid_t, specid_t>::iterator hint = m_specTimeRegimes.begin();
+    auto hint = m_specTimeRegimes.begin();
     for (int64_t j = 0; j < ndet; ++j) {
       // No checking for consistency here - that all detectors for given
       // spectrum
@@ -762,7 +762,7 @@ void LoadRawHelper::createPeriodLogs(
  */
 void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
                                       ISISRAW *const rawFile) const {
-  ISISRAW *localISISRaw(NULL);
+  ISISRAW *localISISRaw(nullptr);
   if (!rawFile) {
     localISISRaw = isisRaw.get();
   } else {
@@ -956,8 +956,7 @@ specid_t LoadRawHelper::calculateWorkspaceSize() {
 
     if (m_list) {
       if (m_interval) {
-        for (std::vector<specid_t>::iterator it = m_spec_list.begin();
-             it != m_spec_list.end();)
+        for (auto it = m_spec_list.begin(); it != m_spec_list.end();)
           if (*it >= m_spec_min && *it < m_spec_max) {
             it = m_spec_list.erase(it);
           } else
@@ -1289,7 +1288,7 @@ bool LoadRawHelper::isAscii(const std::string &filename) {
   // Call it a binary file if we find a non-ascii character in the first 256
   // bytes of the file.
   for (char *p = data; p < pend; ++p) {
-    unsigned long ch = (unsigned long)*p;
+    unsigned long ch = static_cast<unsigned long>(*p);
     if (!(ch <= 0x7F)) {
       return false;
     }

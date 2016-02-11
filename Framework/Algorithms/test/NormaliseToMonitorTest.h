@@ -281,9 +281,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         norm5.setPropertyValue("OutputWorkspace", "normMon5"));
 
-    std::auto_ptr<MonIDPropChanger> pID =
-        std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger(
-            "InputWorkspace", "MonitorSpectrum", "MonitorWorkspace"));
+    auto pID = Mantid::Kernel::make_unique<MonIDPropChanger>(
+        "InputWorkspace", "MonitorSpectrum", "MonitorWorkspace");
 
     // property is enabled but the conditions have not changed;
     TS_ASSERT(pID->isEnabled(&norm5));
@@ -322,9 +321,8 @@ public:
         norm6.setPropertyValue("InputWorkspace", "normMon"));
     TS_ASSERT_THROWS_NOTHING(
         norm6.setPropertyValue("OutputWorkspace", "normMon6"));
-    std::auto_ptr<MonIDPropChanger> pID =
-        std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger(
-            "InputWorkspace", "MonitorSpectrum", "MonitorWorkspace"));
+    auto pID = Mantid::Kernel::make_unique<MonIDPropChanger>(
+        "InputWorkspace", "MonitorSpectrum", "MonitorWorkspace");
     // first time in a row the condition has changed as it shluld read the
     // monitors from the workspace
     TS_ASSERT(pID->isConditionChanged(&norm6));

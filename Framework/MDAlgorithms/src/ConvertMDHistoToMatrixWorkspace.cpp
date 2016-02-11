@@ -187,7 +187,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   std::vector<Mantid::signal_t> Y;
   std::vector<Mantid::signal_t> E;
 
-  inputWorkspace->getLinePlot(start, end, normalization, X, Y, E);
+  inputWorkspace->getLineData(start, end, normalization, X, Y, E);
 
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create("Workspace2D", 1, X.size(), Y.size());

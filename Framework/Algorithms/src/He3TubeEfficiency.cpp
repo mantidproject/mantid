@@ -28,8 +28,8 @@ DECLARE_ALGORITHM(He3TubeEfficiency)
 
 /// Default constructor
 He3TubeEfficiency::He3TubeEfficiency()
-    : Algorithm(), inputWS(), outputWS(), paraMap(NULL), shapeCache(),
-      samplePos(), spectraSkipped(), progress(NULL) {
+    : Algorithm(), inputWS(), outputWS(), paraMap(nullptr), shapeCache(),
+      samplePos(), spectraSkipped(), progress(nullptr) {
   this->shapeCache.clear();
 }
 
@@ -103,7 +103,7 @@ void He3TubeEfficiency::exec() {
   // Check if it is an event workspace
   DataObjects::EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
-  if (eventW != NULL) {
+  if (eventW != nullptr) {
     this->execEvent();
     return;
   }
@@ -169,12 +169,11 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex) {
   const Mantid::MantidVec yValues = this->inputWS->readY(spectraIndex);
   const Mantid::MantidVec eValues = this->inputWS->readE(spectraIndex);
 
-  std::vector<double>::const_iterator yinItr = yValues.begin();
-  std::vector<double>::const_iterator einItr = eValues.begin();
-  Mantid::MantidVec::const_iterator xItr =
-      this->inputWS->readX(spectraIndex).begin();
-  Mantid::MantidVec::iterator youtItr = yout.begin();
-  Mantid::MantidVec::iterator eoutItr = eout.begin();
+  auto yinItr = yValues.cbegin();
+  auto einItr = eValues.cbegin();
+  auto xItr = this->inputWS->readX(spectraIndex).cbegin();
+  auto youtItr = yout.begin();
+  auto eoutItr = eout.begin();
 
   for (; youtItr != yout.end(); ++youtItr, ++eoutItr) {
     const double wavelength = (*xItr + *(xItr + 1)) / 2.0;
@@ -343,7 +342,7 @@ double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
   }
   // the first part of the track will be the part inside the shape,
   // return its length
-  return track.begin()->distInsideObject;
+  return track.cbegin()->distInsideObject;
 }
 
 /**

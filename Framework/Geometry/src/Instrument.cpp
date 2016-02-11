@@ -19,16 +19,16 @@ Kernel::Logger g_log("Instrument");
 
 /// Default constructor
 Instrument::Instrument()
-    : CompAssembly(), m_detectorCache(), m_sourceCache(0),
-      m_chopperPoints(new std::vector<const ObjComponent *>), m_sampleCache(0),
-      m_defaultView("3D"), m_defaultViewAxis("Z+"),
+    : CompAssembly(), m_detectorCache(), m_sourceCache(nullptr),
+      m_chopperPoints(new std::vector<const ObjComponent *>),
+      m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(new ReferenceFrame) {}
 
 /// Constructor with name
 Instrument::Instrument(const std::string &name)
-    : CompAssembly(name), m_detectorCache(), m_sourceCache(0),
-      m_chopperPoints(new std::vector<const ObjComponent *>), m_sampleCache(0),
-      m_defaultView("3D"), m_defaultViewAxis("Z+"),
+    : CompAssembly(name), m_detectorCache(), m_sourceCache(nullptr),
+      m_chopperPoints(new std::vector<const ObjComponent *>),
+      m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(new ReferenceFrame) {}
 
 /** Constructor to create a parametrized instrument
@@ -50,9 +50,9 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
  *  in indirect instruments.
  */
 Instrument::Instrument(const Instrument &instr)
-    : CompAssembly(instr), m_sourceCache(NULL),
+    : CompAssembly(instr), m_sourceCache(nullptr),
       m_chopperPoints(new std::vector<const ObjComponent *>),
-      m_sampleCache(NULL), /* Should only be temporarily null */
+      m_sampleCache(nullptr), /* Should only be temporarily null */
       m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
       m_monitorCache(instr.m_monitorCache), m_defaultView(instr.m_defaultView),
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(),
@@ -182,11 +182,9 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
     const detid2det_map &in_dets =
         static_cast<const Instrument *>(m_base)->m_detectorCache;
     // And turn them into parametrized versions
-    for (detid2det_map::const_iterator it = in_dets.begin();
-         it != in_dets.end(); ++it) {
-      out_map.insert(std::pair<detid_t, IDetector_sptr>(
-          it->first,
-          ParComponentFactory::createDetector(it->second.get(), m_map)));
+    for (const auto &in_det : in_dets) {
+      out_map.emplace(in_det.first, ParComponentFactory::createDetector(
+                                        in_det.second.get(), m_map));
     }
   } else {
     // You can just return the detector cache directly.
@@ -201,16 +199,14 @@ std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
   if (m_map) {
     const detid2det_map &in_dets =
         static_cast<const Instrument *>(m_base)->m_detectorCache;
-    for (detid2det_map::const_iterator it = in_dets.begin();
-         it != in_dets.end(); ++it)
-      if (!skipMonitors || !it->second->isMonitor())
-        out.push_back(it->first);
+    for (const auto &in_det : in_dets)
+      if (!skipMonitors || !in_det.second->isMonitor())
+        out.push_back(in_det.first);
   } else {
     const detid2det_map &in_dets = m_detectorCache;
-    for (detid2det_map::const_iterator it = in_dets.begin();
-         it != in_dets.end(); ++it)
-      if (!skipMonitors || !it->second->isMonitor())
-        out.push_back(it->first);
+    for (const auto &in_det : in_dets)
+      if (!skipMonitors || !in_det.second->isMonitor())
+        out.push_back(in_det.first);
   }
   return out;
 }
@@ -231,15 +227,13 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
     if (m_map) {
       const detid2det_map &in_dets =
           static_cast<const Instrument *>(m_base)->m_detectorCache;
-      for (detid2det_map::const_iterator it = in_dets.begin();
-           it != in_dets.end(); ++it)
-        if (it->second->isMonitor())
+      for (const auto &in_det : in_dets)
+        if (in_det.second->isMonitor())
           monitors += 1;
     } else {
       const detid2det_map &in_dets = m_detectorCache;
-      for (detid2det_map::const_iterator it = in_dets.begin();
-           it != in_dets.end(); ++it)
-        if (it->second->isMonitor())
+      for (const auto &in_det : in_dets)
+        if (in_det.second->isMonitor())
           monitors += 1;
     }
     return (numDetIDs - monitors);
@@ -468,7 +462,7 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
     IDetector_const_sptr baseDet = m_instr->getDetector(detector_id);
     return ParComponentFactory::createDetector(baseDet.get(), m_map);
   } else {
-    detid2det_map::const_iterator it = m_detectorCache.find(detector_id);
+    auto it = m_detectorCache.find(detector_id);
     if (it == m_detectorCache.end()) {
       std::stringstream readInt;
       readInt << detector_id;
@@ -486,21 +480,21 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
   *  @returns A const pointer to the detector object
   */
 const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
-  detid2det_map::const_iterator it = m_instr->m_detectorCache.find(detector_id);
+  auto it = m_instr->m_detectorCache.find(detector_id);
   if (it == m_instr->m_detectorCache.end()) {
-    return NULL;
+    return nullptr;
   }
   return it->second.get();
 }
 
 bool Instrument::isMonitor(const detid_t &detector_id) const {
   // Find the (base) detector object in the map.
-  detid2det_map::const_iterator it = m_instr->m_detectorCache.find(detector_id);
+  auto it = m_instr->m_detectorCache.find(detector_id);
   if (it == m_instr->m_detectorCache.end())
     return false;
   // This is the detector
   const Detector *det = dynamic_cast<const Detector *>(it->second.get());
-  if (det == NULL)
+  if (det == nullptr)
     return false;
   return det->isMonitor();
 }
@@ -509,9 +503,8 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
   if (detector_ids.empty())
     return false;
 
-  for (std::set<detid_t>::const_iterator it = detector_ids.begin();
-       it != detector_ids.end(); ++it) {
-    if (this->isMonitor(*it))
+  for (auto detector_id : detector_ids) {
+    if (this->isMonitor(detector_id))
       return true;
   }
   return false;
@@ -528,12 +521,12 @@ bool Instrument::isDetectorMasked(const detid_t &detector_id) const {
   if (!isParametrized())
     return false;
   // Find the (base) detector object in the map.
-  detid2det_map::const_iterator it = m_instr->m_detectorCache.find(detector_id);
+  auto it = m_instr->m_detectorCache.find(detector_id);
   if (it == m_instr->m_detectorCache.end())
     return false;
   // This is the detector
   const Detector *det = dynamic_cast<const Detector *>(it->second.get());
-  if (det == NULL)
+  if (det == nullptr)
     return false;
   // Access the parameter map directly.
   Parameter_sptr maskedParam = m_map->get(det, "masked");
@@ -557,9 +550,8 @@ bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const {
   if (detector_ids.empty())
     return false;
 
-  for (std::set<detid_t>::const_iterator it = detector_ids.begin();
-       it != detector_ids.end(); ++it) {
-    if (!this->isDetectorMasked(*it))
+  for (auto detector_id : detector_ids) {
+    if (!this->isDetectorMasked(detector_id))
       return false;
   }
   return true;
@@ -714,7 +706,7 @@ void Instrument::markAsDetector(const IDetector *det) {
 
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
-  std::map<int, IDetector_const_sptr>::iterator it = m_detectorCache.end();
+  auto it = m_detectorCache.end();
   m_detectorCache.insert(it, std::map<int, IDetector_const_sptr>::value_type(
                                  det->getID(), det_sptr));
 }
@@ -760,8 +752,7 @@ void Instrument::removeDetector(IDetector *det) {
   m_detectorCache.erase(id);
   // Also need to remove from monitor cache if appropriate
   if (det->isMonitor()) {
-    std::vector<detid_t>::iterator it =
-        std::find(m_monitorCache.begin(), m_monitorCache.end(), id);
+    auto it = std::find(m_monitorCache.begin(), m_monitorCache.end(), id);
     if (it != m_monitorCache.end())
       m_monitorCache.erase(it);
   }
@@ -832,10 +823,8 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
       m_cachedBoundingBox = new BoundingBox();
       ComponentID sourceID = getSource()->getComponentID();
       // Loop over the children and define a box large enough for all of them
-      for (const_comp_it it = m_children.begin(); it != m_children.end();
-           ++it) {
+      for (auto component : m_children) {
         BoundingBox compBox;
-        IComponent *component = *it;
         if (component && component->getComponentID() != sourceID) {
           component->getBoundingBox(compBox);
           m_cachedBoundingBox->grow(compBox);
@@ -958,16 +947,15 @@ double Instrument::calcConversion(
     const std::map<detid_t, double> &offsets) {
   double factor = 0.;
   double offset;
-  for (std::vector<detid_t>::const_iterator iter = detectors.begin();
-       iter != detectors.end(); ++iter) {
-    std::map<detid_t, double>::const_iterator off_iter = offsets.find(*iter);
-    if (off_iter != offsets.end()) {
-      offset = offsets.find(*iter)->second;
+  for (auto detector : detectors) {
+    auto off_iter = offsets.find(detector);
+    if (off_iter != offsets.cend()) {
+      offset = offsets.find(detector)->second;
     } else {
       offset = 0.;
     }
     factor += calcConversion(l1, beamline, beamline_norm, samplePos,
-                             instrument->getDetector(*iter), offset);
+                             instrument->getDetector(detector), offset);
   }
   return factor / static_cast<double>(detectors.size());
 }
@@ -986,7 +974,7 @@ void Instrument::getInstrumentParameters(double &l1, Kernel::V3D &beamline,
                                          Kernel::V3D &samplePos) const {
   // Get some positions
   const IComponent_const_sptr sourceObj = this->getSource();
-  if (sourceObj == NULL) {
+  if (sourceObj == nullptr) {
     throw Exception::InstrumentDefinitionError(
         "Failed to get source component from instrument");
   }

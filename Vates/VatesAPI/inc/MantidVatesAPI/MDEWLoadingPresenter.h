@@ -46,8 +46,8 @@ namespace Mantid
     class DLLExport MDEWLoadingPresenter : public MDLoadingPresenter
     {
     public:
-      MDEWLoadingPresenter(MDLoadingView* view);
-      const std::string& getGeometryXML() const;
+      MDEWLoadingPresenter(std::unique_ptr<MDLoadingView> view);
+      const std::string &getGeometryXML() const;
       virtual bool hasTDimensionAvailable() const;
       virtual std::vector<double> getTimeStepValues() const;
       virtual std::string getTimeStepLabel() const;
@@ -61,7 +61,7 @@ namespace Mantid
       /*---------------------------------------------------------------------------
       Common/shared operations and members for all MDEW file-type loading.
       ---------------------------------------------------------------------------*/
-      MDLoadingView* m_view;
+      std::unique_ptr<MDLoadingView> m_view;
       Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy> xmlBuilder;
 
       Mantid::Geometry::IMDDimension_sptr tDimension;

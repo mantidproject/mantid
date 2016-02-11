@@ -112,6 +112,9 @@ private:
 
   /// Parse the header and fill the headerInfo struct
   bool parseAsciiHeader(AsciiFileHeader &headerInfo);
+  /// Set a new detector parameter
+  void setDetectorParameter(const Geometry::IDetector_const_sptr &det,
+                            const std::string &name, double value);
   /// Set the new detector positions
   void setDetectorPositions(const std::vector<int32_t> &detID,
                             const std::vector<float> &l2,

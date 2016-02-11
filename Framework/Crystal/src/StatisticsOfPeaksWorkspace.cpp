@@ -1,5 +1,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/StatisticsOfPeaksWorkspace.h"
+#include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -43,11 +44,22 @@ void StatisticsOfPeaksWorkspace::init() {
                                                         Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> propOptions;
-  for (size_t i = 0; i < m_pointGroups.size(); ++i)
-    propOptions.push_back(m_pointGroups[i]->getName());
+  propOptions.reserve(m_pointGroups.size());
+  for (auto &pointGroup : m_pointGroups)
+    propOptions.push_back(pointGroup->getName());
   declareProperty("PointGroup", propOptions[0],
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which point group applies to this crystal?");
+
+  std::vector<std::string> centeringOptions;
+  std::vector<ReflectionCondition_sptr> reflectionConditions =
+      getAllReflectionConditions();
+  centeringOptions.reserve(reflectionConditions.size());
+  for (auto &reflectionCondition : reflectionConditions)
+    centeringOptions.push_back(reflectionCondition->getName());
+  declareProperty("LatticeCentering", centeringOptions[0],
+                  boost::make_shared<StringListValidator>(centeringOptions),
+                  "Appropriate lattice centering for the peaks.");
 
   declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
                                                         Direction::Output),
@@ -55,11 +67,8 @@ void StatisticsOfPeaksWorkspace::init() {
   declareProperty(new WorkspaceProperty<ITableWorkspace>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  std::vector<std::string> sortTypes;
-  sortTypes.push_back("ResolutionShell");
-  sortTypes.push_back("Bank");
-  sortTypes.push_back("RunNumber");
-  sortTypes.push_back("Overall");
+  std::vector<std::string> sortTypes{"ResolutionShell", "Bank", "RunNumber",
+                                     "Overall"};
   declareProperty("SortBy", sortTypes[0],
                   boost::make_shared<StringListValidator>(sortTypes),
                   "Sort the peaks by bank, run number(default) or only overall "
@@ -162,6 +171,7 @@ void StatisticsOfPeaksWorkspace::exec() {
 void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
                                            std::string runName) {
   std::string pointGroup = getPropertyValue("PointGroup");
+  std::string latticeCentering = getPropertyValue("LatticeCentering");
   std::string wkspName = getPropertyValue("OutputWorkspace");
   std::string tableName = getPropertyValue("StatisticsTable");
   API::IAlgorithm_sptr statsAlg = createChildAlgorithm("SortHKL");
@@ -169,6 +179,7 @@ void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
   statsAlg->setPropertyValue("OutputWorkspace", wkspName);
   statsAlg->setPropertyValue("StatisticsTable", tableName);
   statsAlg->setProperty("PointGroup", pointGroup);
+  statsAlg->setProperty("LatticeCentering", latticeCentering);
   statsAlg->setProperty("RowName", runName);
   if (runName.compare("Overall") != 0)
     statsAlg->setProperty("Append", true);

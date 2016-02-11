@@ -1,4 +1,4 @@
-.. algorithm::
+﻿.. algorithm::
 
 .. summary::
 
@@ -49,6 +49,18 @@ Veto pulses can be filtered out in a separate step using
 :ref:`algm-FilterByLogValue`:
 
 ``FilterByLogValue(InputWorkspace="ws", OutputWorkspace="ws", LogName="veto_pulse_time", PulseFilter="1")``
+
+Data Loaded from Nexus File
+###########################
+
+The nexus file must have ``/raw_data_1`` or ``/entry`` as its main group and
+that group be of type ``NXentry``. It also needs a group of type ``NXevent_data``.
+
+The data is read from each group of type ``NXevent_data``.
+
+If the file has an ``isis_vms_compat`` then it is taken to be an ISIS file and 
+the data will be modified according to the information obtained from this group.
+
 
 Usage
 -----
