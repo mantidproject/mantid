@@ -977,7 +977,10 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     g_log.notice() << " * Bank " << i + 1 << " calibrated, "
                    << "difc: " << difc[i] << ", zero: " << tzero[i]
                    << std::endl;
+
   }
+  // plots the calibrated workspaces
+  plotCalibWorkspace(difc, tzero);
 
   // Creates appropriate directory
   Poco::Path saveDir = outFilesDir("Calibration");
@@ -1582,7 +1585,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   g_log.notice() << "Saved focused workspace as file: " << fullFilename
                  << std::endl;
 
-  bool saveOutputFiles = m_view->saveOutputFiles();
+  bool saveOutputFiles = m_view->saveFocusedOutputFiles();
 
   if (saveOutputFiles) {
     try {
@@ -2096,6 +2099,24 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
     } else if (plotType == PlotMode::MULTIPLE) {
       m_view->plotFocusedSpectrum(outWSName);
     }
+  }
+}
+
+/**
+* Check if the plot calibration check-box is ticked
+* python script is passed on to mantid python window
+* which plots the workspaces with customisation
+* 
+* @param difc vector of double passed on to py script
+* @param tzero vector of double to plot graph
+*/
+void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
+                                                  std::vector<double> tzero) {
+  const bool plotCalibWS = m_view->plotCalibWorkspace();
+  if (plotCalibWS) {
+    m_view->plotDifcZeroCalibOutput(difc, tzero);
+	m_view->plotVanCurvesCalibOutput();
+  
   }
 }
 

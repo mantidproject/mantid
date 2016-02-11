@@ -617,12 +617,12 @@ void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName) {
 
 // shahroz
 void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
-  std::string pyCode =
+  std::string pyCode1 =
       "van_curves_ws = workspace(\"engggui_vanadium_curves_ws\")\n"
       "plot(van_curves_ws, [0, 1, 2])";
 
   std::string status =
-      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+      runPythonCode(QString::fromStdString(pyCode1), false).toStdString();
 
   m_logMsgs.push_back(
       "Plotted output calibration vanadium curves, with status string " +
@@ -630,39 +630,52 @@ void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 };
 
-void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
-    const std::string &wsName, double &difc, double &tzero) {
+void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(std::vector<double> &difc,
+	std::vector<double> &tzero) {
+
+	auto bank1 = size_t(1);
+	auto bank2 = size_t(2);
 
   std::string pyCode =
-      "bank_ws = workspace(" + wsName +
-      ")\n"
-      "xVal = []\n"
-      "yVal = []\n"
-      "y2Val = []\n"
+      "for i in range(1, 3):\n"
+      " bank_ws = workspace(\"engggui_calibration_bank_\" + str(i))\n"
 
-      "for i in range(0, bank_ws.rowCount()):\n"
-      " xVal.append(bank_ws.cell()i, 0))\n"
-      " yVal.append(bank_ws.cell()i, 5))\n"
-      " difc=" +
-      boost::lexical_cast<std::string>(difc) + "\n" + " tzero=" +
-      boost::lexical_cast<std::string>(tzero) + "\n" +
-      " y2Val.append(xVal[i] * difc + tzero)\n"
+      " xVal = []\n"
+      " yVal = []\n"
+      " y2Val = []\n"
 
-      "ws1 = CreateWorkspace(DataX=xVal, DataY=yVal, UnitX=\"Expected Peaks "
-      "Centre(dSpacing, A)\", YUnitLabel = \"Fitted Peaks Centre(TOF, us)\")\n"
-      "ws2 = CreateWorkspace(DataX=xVal, DataY=y2Val)\n"
-      "AppendSpectra(ws1, ws2, OutputWorkspace=\"engggui_difc_zero_peaks\")\n"
+      " for irow in range(0, bank_ws.rowCount()):\n"
+      "  xVal.append(bank_ws.cell(irow, 0))\n"
+      "  yVal.append(bank_ws.cell(irow, 5))\n"
+      
+	  "  if (i == 1):\n"
+	  "   difc=" + boost::lexical_cast<std::string>(difc[bank1]) + "\n" +
+	  "   tzero=" + boost::lexical_cast<std::string>(tzero[bank1]) + "\n" +
+	  "  else:\n"
+	  "   difc=" + boost::lexical_cast<std::string>(difc[bank2]) + "\n" +
+	  "   tzero=" + boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
 
-      "DeleteWorkspace(ws1)\n"
-      "DeleteWorkspace(ws1)\n"
+      "  y2Val.append(xVal[irow] * difc + tzero)\n"
 
-      "engggui_difc_zero_peaks = workspace(\"engggui_difc_zero_peaks\")\n"
-      "calWin = plotSpectrum(engggui_difc_zero_peaks, [0, 1]).activeLayer()\n"
+      " ws1 = CreateWorkspace(DataX=xVal, DataY=yVal, UnitX=\"Expected Peaks "
+      " Centre(dSpacing, A)\", YUnitLabel = \"Fitted Peaks Centre(TOF, us)\")\n"
+      " ws2 = CreateWorkspace(DataX=xVal, DataY=y2Val)\n"
+      " output_ws = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+      " AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)\n"
 
-      "calWin.setTitle(\"Engg Gui Difc Zero Peaks\")\n"
-      "calWin.setAxisTitle(Layer.Bottom, \"Expected Peaks Centre(dSpacing, "
-      "A)\")\n"
-      "calWin.setCurveLineStyle(0, QtCore.Qt.DotLine)\n";
+      " DeleteWorkspace(ws1)\n"
+      " DeleteWorkspace(ws2)\n"
+
+      " DifcZeroWs = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+
+      " DifcZeroWs = workspace(DifcZeroWs)\n"
+      " DifcZeroWs = plotSpectrum(DifcZeroWs, [0, 1]).activeLayer()\n"
+
+      " DifcZeroWs.setTitle(\"Engg Gui Difc Zero Peaks Bank \" + str(i))\n"
+      " DifcZeroWs.setAxisTitle(Layer.Bottom, \"Expected Peaks "
+      "Centre(dSpacing, "
+      " A)\")\n"
+      " DifcZeroWs.setCurveLineStyle(0, QtCore.Qt.DotLine)\n";
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
