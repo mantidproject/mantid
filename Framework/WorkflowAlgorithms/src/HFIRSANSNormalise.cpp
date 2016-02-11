@@ -2,9 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/HFIRSANSNormalise.h"
-#include <boost/algorithm/string.hpp>
-#include "Poco/NumberFormatter.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
+
+#include <boost/algorithm/string.hpp>
+
+#include "Poco/NumberFormatter.h"
+
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

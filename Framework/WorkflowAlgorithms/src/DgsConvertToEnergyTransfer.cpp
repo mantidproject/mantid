@@ -1,4 +1,5 @@
 #include "MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/IDetector.h"

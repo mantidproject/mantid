@@ -1,6 +1,7 @@
 #include "MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h"
 
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 
 #include "MantidKernel/MandatoryValidator.h"

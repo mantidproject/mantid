@@ -2,6 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
