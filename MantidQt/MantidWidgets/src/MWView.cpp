@@ -26,7 +26,9 @@ namespace MantidWidgets {
 //               ++++++++++++++++++++++++++++++++
 
 MWView::MWView(QWidget *parent)
-    : QWidget(parent), m_mdSettings{nullptr}, m_workspace{nullptr},
+    : QWidget(parent),
+      m_mdSettings(new MantidQt::API::MdSettings()),
+      m_workspace{nullptr},
       m_dimensions() {
   m_spect = new QwtPlotSpectrogram();
   m_data = new MantidQt::API::QwtRasterDataMD();
