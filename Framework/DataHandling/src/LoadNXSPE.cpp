@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectraAxis.h"
 
@@ -10,15 +11,17 @@
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
+
+#include <boost/regex.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <boost/regex.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {
 namespace DataHandling {

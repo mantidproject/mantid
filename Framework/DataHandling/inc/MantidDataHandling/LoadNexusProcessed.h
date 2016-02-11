@@ -7,6 +7,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include "MantidNexus/NexusClasses.h"
 

@@ -1,10 +1,9 @@
 #include "MantidDataHandling/SavePAR.h"
+#include "MantidDataHandling/FindDetectorsPar.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
-
-#include "MantidDataHandling/FindDetectorsPar.h"
-
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"

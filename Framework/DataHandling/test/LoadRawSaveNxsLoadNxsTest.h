@@ -1,6 +1,7 @@
 #ifndef LOADRAWSAVENXSLOADNXSTEST_H_
 #define LOADRAWSAVENXSLOADNXSTEST_H_
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"

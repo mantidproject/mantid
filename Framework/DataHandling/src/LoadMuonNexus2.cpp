@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -14,6 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 

@@ -1,5 +1,7 @@
 #include "MantidDataHandling/LoadILLSANS.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/UnitFactory.h"
 

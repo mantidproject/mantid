@@ -7,6 +7,15 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+
+namespace Geometry {
+class IComponent;
+}
+
+namespace Kernel {
+class V3D;
+}
+
 namespace DataHandling {
 /** @class SetScalingPSD SetScalingPSD.h MantidAlgorithm/SetScalingPSD.h
 

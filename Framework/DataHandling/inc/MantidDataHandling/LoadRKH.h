@@ -5,6 +5,8 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/cow_ptr.h"
+
 #include <fstream>
 
 namespace Mantid {

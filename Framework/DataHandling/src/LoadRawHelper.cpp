@@ -2,32 +2,35 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "LoadRaw/isisraw2.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Glob.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "LoadRaw/isisraw2.h"
-#include "MantidDataHandling/LoadLog.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadAscii.h"
+#include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/RawFileInfo.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/shared_ptr.hpp>
+
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/DateTimeFormat.h>
+
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
-#include "MantidKernel/Strings.h"
 
 namespace Mantid {
 namespace DataHandling {

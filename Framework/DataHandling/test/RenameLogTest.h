@@ -2,6 +2,7 @@
 #define MANTID_DATAHANDLING_RENAMELOGTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 

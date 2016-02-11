@@ -1,6 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LoadHelper_H_
 #define MANTID_DATAHANDLING_LoadHelper_H_
 
+#include "MantidAPI/Run.h"
 #include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
 

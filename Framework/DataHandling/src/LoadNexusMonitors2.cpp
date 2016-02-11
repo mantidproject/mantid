@@ -5,14 +5,17 @@
 
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/lexical_cast.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <map>

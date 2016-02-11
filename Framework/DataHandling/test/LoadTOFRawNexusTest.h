@@ -1,14 +1,17 @@
 #ifndef LOADTOFRAWNEXUSTEST_H_
 #define LOADTOFRAWNEXUSTEST_H_
 
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadTOFRawNexus.h"
+
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MemoryManager.h"
+
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/MemoryManager.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

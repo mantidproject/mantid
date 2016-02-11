@@ -1,13 +1,11 @@
-#include <cmath>
-#include <cstdlib>
-#include <fstream>
-#include <iterator>
-
 #include "MantidDataHandling/LoadPreNexusMonitors.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/BinaryFile.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
@@ -22,6 +20,11 @@
 #include <Poco/Path.h>
 #include <Poco/SAX/InputSource.h>
 
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <iterator>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -30,7 +33,6 @@ DECLARE_ALGORITHM(LoadPreNexusMonitors)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
 
 // Some constants for property names
 static const std::string RUNINFO_FILENAME("RunInfoFilename");

@@ -1,6 +1,7 @@
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <Poco/DOM/AutoPtr.h>

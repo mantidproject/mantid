@@ -2,13 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadCanSAS1D2.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

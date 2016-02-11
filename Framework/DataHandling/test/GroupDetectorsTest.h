@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/GroupDetectors.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"

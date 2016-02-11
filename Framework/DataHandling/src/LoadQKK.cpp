@@ -3,19 +3,20 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadQKK.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-
 #include "MantidKernel/UnitFactory.h"
-
 #include "MantidNexus/NexusClasses.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+
 #include <Poco/File.h>
+
 #include <fstream>
 
 using namespace Mantid::DataHandling;

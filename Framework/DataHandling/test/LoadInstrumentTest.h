@@ -3,6 +3,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/Workspace.h"
@@ -16,10 +18,10 @@
 #include "MantidKernel/Strings.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+
 #include <fstream>
 #include <string>
 #include <vector>
-#include "MantidAPI/ExperimentInfo.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

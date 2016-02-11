@@ -3,9 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus1.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -22,14 +24,15 @@
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
-#include "MantidAPI/SpectrumDetectorMapping.h"
 
-#include <Poco/Path.h>
-#include <limits>
-#include <cmath>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
+
+#include <Poco/Path.h>
+
+#include <cmath>
+#include <limits>
 
 namespace Mantid {
 namespace DataHandling {

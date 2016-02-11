@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadLLB.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadLLB;

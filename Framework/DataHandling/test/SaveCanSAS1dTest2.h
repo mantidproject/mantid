@@ -2,6 +2,7 @@
 #define SAVECANSAS1D2TEST_H
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveCanSAS1D2.h"
 #include "MantidDataHandling/LoadCanSAS1D.h"

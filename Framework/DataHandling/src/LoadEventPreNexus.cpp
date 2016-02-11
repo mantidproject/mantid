@@ -1,4 +1,5 @@
 #include "MantidDataHandling/LoadEventPreNexus.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"

@@ -1,9 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LOADDAVEGRP_H_
 #define MANTID_DATAHANDLING_LOADDAVEGRP_H_
 
-#include "MantidAPI/IFileLoader.h"
 #include <fstream>
 #include <string>
+
+#include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace DataHandling {

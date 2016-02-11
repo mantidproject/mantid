@@ -1,9 +1,11 @@
 #ifndef MANTID_DATAHANDLING_PDLOADCHARACTERIZATIONS_H_
 #define MANTID_DATAHANDLING_PDLOADCHARACTERIZATIONS_H_
 
+#include <iosfwd>
+
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include <iosfwd>
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {

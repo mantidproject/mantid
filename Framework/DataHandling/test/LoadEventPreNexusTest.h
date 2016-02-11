@@ -10,12 +10,15 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidDataHandling/LoadEventPreNexus.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
+
 #include <sys/stat.h>
 
 using namespace Mantid;

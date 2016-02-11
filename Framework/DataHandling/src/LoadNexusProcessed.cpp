@@ -29,9 +29,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
 
-#include <Poco/StringTokenizer.h>
-
 #include <nexus/NeXusException.hpp>
+
+#include <Poco/StringTokenizer.h>
 
 namespace Mantid {
 namespace DataHandling {

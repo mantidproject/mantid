@@ -2,13 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadSpec.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/FileProperty.h"
-#include <fstream>
-#include <cstring>
+
 #include <boost/tokenizer.hpp>
+
+#include <cstring>
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {

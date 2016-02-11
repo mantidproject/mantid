@@ -1,12 +1,14 @@
+#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/cow_ptr.h"
 #include <nexus/NeXusFile.hpp>
+
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 

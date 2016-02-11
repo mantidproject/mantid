@@ -1,8 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADDIFFCAL_H_
 #define MANTID_DATAHANDLING_LOADDIFFCAL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
 
 namespace H5 {
 class H5File;

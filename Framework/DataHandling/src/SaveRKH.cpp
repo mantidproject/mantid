@@ -2,8 +2,12 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveRKH.h"
-#include "MantidKernel/UnitFactory.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/UnitFactory.h"
+
 #include <Poco/LocalDateTime.h>
 #include <Poco/DateTimeFormatter.h>
 

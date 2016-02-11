@@ -1,20 +1,23 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
-#include <fstream>
 
-#include <boost/tokenizer.hpp>
-#include <Poco/StringTokenizer.h>
 // String utilities
 #include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
+
+#include <Poco/StringTokenizer.h>
+
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {

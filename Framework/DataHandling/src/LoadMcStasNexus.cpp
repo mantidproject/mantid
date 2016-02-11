@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadMcStasNexus.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"

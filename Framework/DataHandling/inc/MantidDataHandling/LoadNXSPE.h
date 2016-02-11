@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidGeometry/Objects/Object.h"
 
 namespace Mantid {
 namespace DataHandling {
