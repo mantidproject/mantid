@@ -83,8 +83,8 @@ void MWView::updateDisplay() {
     return;
   m_data->setRange(m_uiForm.colorBar->getViewRange());
   std::vector<Mantid::coord_t> slicePoint{0,0};
-  size_t dimX{0};
-  size_t dimY{1};
+  constexpr size_t dimX(0);
+  constexpr size_t dimY(1);
   Mantid::Geometry::IMDDimension_const_sptr X = m_dimensions[dimX];
   Mantid::Geometry::IMDDimension_const_sptr Y = m_dimensions[dimY];
   m_data->setSliceParams(dimX, dimY, X, Y, slicePoint);
