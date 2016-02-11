@@ -3,15 +3,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/SingletonHolder.h"
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/Text.h>
 #include <boost/make_shared.hpp>
-#include <vector>
 
 namespace Mantid {
 namespace API {
