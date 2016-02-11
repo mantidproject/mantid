@@ -167,11 +167,11 @@ void IqtFit::run() {
   const auto save = m_uiForm.ckSave->isChecked();
   const auto plot = m_uiForm.cbPlotType->currentText().toStdString();
   const auto startX =
-      boost::lexical_cast<double>(m_properties["StartX"]->valueText());
+      boost::lexical_cast<double>(m_properties["StartX"]->valueText().toStdString());
   const auto endX =
-      boost::lexical_cast<double>(m_properties["EndX"]->valueText());
+      boost::lexical_cast<double>(m_properties["EndX"]->valueText().toStdString());
   const auto maxIt =
-      boost::lexical_cast<double>(m_properties["MaxIterations"]->valueText());
+      boost::lexical_cast<double>(m_properties["MaxIterations"]->valueText().toStdString());
 
   QString pyInput =
       "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
