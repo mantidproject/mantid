@@ -8,6 +8,7 @@
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include <boost/shared_ptr.hpp>

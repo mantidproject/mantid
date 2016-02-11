@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
