@@ -27,7 +27,7 @@ namespace MantidWidgets {
 
 MWView::MWView(QWidget *parent)
     : QWidget(parent),
-      m_mdSettings(new MantidQt::API::MdSettings()),
+      m_mdSettings(boost::make_shared<MantidQt::API::MdSettings>()),
       m_workspace(),
       m_dimensions() {
   m_spect = new QwtPlotSpectrogram();
