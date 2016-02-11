@@ -7,6 +7,19 @@ import os.path
 
 class FuryFitMultiple(PythonAlgorithm):
 
+    _inputWs
+    _function
+    _fit_type
+    _start_x
+    _end_x
+    _spec_min
+    _spec_max
+    _intensities_constrained
+    _minimizer
+    _max_iterations
+    _save
+    _plot
+
     def category(self):
         return "Workflow\\MIDAS"
 
@@ -40,26 +53,53 @@ class FuryFitMultiple(PythonAlgorithm):
         self.declareProperty(name='Plot', defaultValue='None', validator=StringListValidator(['None', 'Intensity', 'Tau', 'Beta', 'All']),
                              doc='Switch Plot Off/On')
 
+
+    def validateInputs(self):
+        self._get_properties()
+        issues = dict()
+
+        input_workspace = mtd[self._input_ws]
+        maximum_possible_spectra = input_workspace.getNumberhistograms()
+        maximum_possible_x = input_workspace.readX(0)[input_workspace.blocksize()]
+        # Validate SpecMin/Max
+
+        if self._spec_max > maximum_possible_spectra:
+            issues['SpecMax'] = ('SpecMax must be smaller or equal to the number of spectra in the input workspace, %d' % maximum_possible_spectra)
+        if self._spec_min < 0:
+            issues['SpecMin'] = 'SpecMin can not be less than 0'
+        if self._spec_max < self.spec_min:
+            issues['SpecMax'] = 'SpecMax must be more than or equal to SpecMin'
+
+        # Validate Start/EndX
+        if self._end_x > maximum_possible_x:
+            issues['EndX'] = ('EndX must be less than the highest x value in the workspace, %d' % maximum_possible_x)
+        if self._start_x < 0:
+            issues['StartX'] = 'StartX can not be less than 0'
+        if self._start_x < self._end_x:
+            issues['EndX'] = 'EndX must be more than StartX'
+
+        return issues
+
+    def _get_properties(self):
+        self._input_ws = self.getProperty('InputWorkspace').value
+        self._function = self.getProperty('Function').value
+        self._fit_type = self.getProperty('FitType').value
+        self._start_x = self.getProperty('StartX').value
+        self._end_x = self.getProperty('EndX').value
+        self._spec_min = self.getProperty('SpecMin').value
+        self._spec_max = self.getProperty('SpecMax').value
+        self._intensities_constrained = self.getProperty('ConstrainIntensities').value
+        self._minimizer = self.getProperty('Minimizer').value
+        self._max_iterations = self.getProperty('MaxIterations').value
+        self._save = self.getProperty('Save').value
+        self._plot = self.getProperty('Plot').value
+
     def PyExec(self):
         from IndirectDataAnalysis import furyfitMult
 
-        # Get algorithm input
-        inputWs = self.getProperty('InputWorkspace').value
-        function = self.getProperty('Function').value
-        fit_type = self.getProperty('FitType').value
-        start_x = self.getProperty('StartX').value
-        end_x = self.getProperty('EndX').value
-        spec_min = self.getProperty('SpecMin').value
-        spec_max = self.getProperty('SpecMax').value
-        intensities_constrained = self.getProperty('ConstrainIntensities').value
-        minimizer = self.getProperty('Minimizer').value
-        max_iterations = self.getProperty('MaxIterations').value
-        save = self.getProperty('Save').value
-        plot = self.getProperty('Plot').value
-
         # Run FuryFitMultiple algorithm from indirectDataAnalysis
-        furyfitMult(inputWs, function, fit_type, start_x, end_x,
-                    spec_min, spec_max, intensities_constrained,
-                    minimizer, max_iterations, save, plot)
+        furyfitMult(self._input_ws, self._function, self._fit_type, self._start_x, self._end_x,
+                    self._spec_min, self._spec_max, self._intensities_constrained,
+                    self._minimizer, self._max_iterations, self._save, self._plot)
 
 AlgorithmFactory.subscribe(FuryFitMultiple)
