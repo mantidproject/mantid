@@ -17,7 +17,7 @@ namespace MantidQt
       if(!parent)
         throw std::invalid_argument("PeakOverlayViewFactoryBase parent widget is null");
 
-      PeakPalette defaultPalette;
+      PeakPalette<QColor> defaultPalette;
       auto peakColourEnum = defaultPalette.foregroundIndexToColour(static_cast<int>(workspaceNumber));
       auto backColourEnum = defaultPalette.backgroundIndexToColour(static_cast<int>(workspaceNumber));
       m_peakColour = QColor(peakColourEnum);

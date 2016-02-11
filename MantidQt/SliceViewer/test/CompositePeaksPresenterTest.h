@@ -374,10 +374,10 @@ public:
 
   void test_default_palette()
   {
-    PeakPalette actualDefaultPalette;
+    PeakPalette<QColor> actualDefaultPalette;
 
     CompositePeaksPresenter presenter(&_fakeZoomableView);
-    PeakPalette presenterDefaultPalette = presenter.getPalette();
+    PeakPalette<QColor> presenterDefaultPalette = presenter.getPalette();
 
     TSM_ASSERT_EQUALS("CompositePeaksPresenter should be using a default palette until changed.", actualDefaultPalette, presenterDefaultPalette);
   }
@@ -403,7 +403,7 @@ public:
     composite.setBackgroundColour(peaksWS, newColour);
 
     // Check that the internal palette has been correctly updated.
-    PeakPalette updatedPalette = composite.getPalette();
+    PeakPalette<QColor> updatedPalette = composite.getPalette();
     TS_ASSERT_EQUALS(newColour, updatedPalette.backgroundIndexToColour(0));
 
     // Check that the colour was correctly set on the subject presenter.
@@ -431,7 +431,7 @@ public:
     composite.setForegroundColour(peaksWS, newColour);
 
     // Check that the internal palette has been correctly updated.
-    PeakPalette updatedPalette = composite.getPalette();
+    PeakPalette<QColor> updatedPalette = composite.getPalette();
     TS_ASSERT_EQUALS(newColour, updatedPalette.foregroundIndexToColour(0));
 
     // Check that the colour was correctly set on the subject presenter.

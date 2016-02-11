@@ -49,11 +49,11 @@ PeakViewFactory::PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS,
                                  Mantid::API::IPeaksWorkspace_sptr peaksWS,
                                  QwtPlot *plot, QWidget *parent,
                                  const int plotXIndex, const int plotYIndex,
-                                 const size_t colourNumber)
+                                 const size_t colorNumber)
     : PeakOverlayViewFactoryBase(plot, parent, plotXIndex, plotYIndex,
-                                 colourNumber),
+                                 colorNumber),
       m_mdWS(mdWS), m_peaksWS(peaksWS)
-{
+{// TODO Set colors here from PeakViewPalette
 }
 
 PeakViewFactory::~PeakViewFactory() {}
@@ -75,7 +75,7 @@ boost::shared_ptr<PeakOverlayView> PeakViewFactory::createView(
     // TODO need to take care of color here
     return boost::make_shared<PeakView>(presenter, m_plot, m_parent,
                                         peakRepresentations, m_plotXIndex,
-                                        m_plotYIndex /*TODO COLOR*/);
+                                        m_plotYIndex, m_foregroundColor, m_backgroundColor);
 }
 
 PeakRepresentation_sptr PeakViewFactory::createSinglePeakRepresentation(
@@ -133,6 +133,10 @@ void PeakViewFactory::swapPeaksWorkspace(
 }
 
 // TODO REMOVE< wont be needed anymore
-int PeakViewFactory::FOM() const { return 1; }
+int PeakViewFactory::FOM() const { return 100; }
+
+
+
+
 }
 }

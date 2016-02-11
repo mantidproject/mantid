@@ -89,7 +89,7 @@ void CompositePeaksPresenter::clear() {
   if (!m_subjects.empty()) {
     m_subjects.clear();
     this->m_zoomablePlottingWidget->detach();
-    PeakPalette temp;
+    PeakPalette<QColor> temp;
     m_palette = temp;
   }
 }
@@ -251,7 +251,7 @@ std::string CompositePeaksPresenter::getTransformName() const {
 /**
 @return a copy of the peaks palette.
 */
-PeakPalette CompositePeaksPresenter::getPalette() const {
+PeakPalette<QColor> CompositePeaksPresenter::getPalette() const {
   return this->m_palette;
 }
 

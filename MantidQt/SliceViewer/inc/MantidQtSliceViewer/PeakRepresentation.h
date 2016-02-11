@@ -3,17 +3,16 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtSliceViewer/PeakPrimitives.h"
+#include "MantidQtSliceViewer/PeakViewPalette.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 
 
 class QPainter;
-class QColor;
 
 namespace MantidQt
 {
 namespace SliceViewer
 {
-
 struct PeakRepresentationViewInformation {
   double windowHeight;
   double windowWidth;
@@ -28,7 +27,7 @@ class PeakBoundingBox;
 class DLLExport PeakRepresentation {
 public:
   /// Draw template method
-  void draw(QPainter& painter, QColor& peakColor, PeakRepresentationViewInformation viewInformation);
+  void draw(QPainter& painter, PeakViewColor& foregroundColor, PeakViewColor& backgroundColor, PeakRepresentationViewInformation viewInformation);
   /// Setter for the slice point
   virtual void setSlicePoint(const double&) = 0;
   /// Transform the coordinates.
@@ -50,7 +49,7 @@ public:
 
 protected:
   virtual std::shared_ptr<PeakPrimitives> getDrawingInformation(PeakRepresentationViewInformation viewInformation) = 0;
-  virtual void doDraw(QPainter& painter, QColor& peakColor, std::shared_ptr<PeakPrimitives> drawingInformation, PeakRepresentationViewInformation viewInformation) = 0;
+  virtual void doDraw(QPainter& painter, PeakViewColor& foregroundColor, PeakViewColor& backgroundColor, std::shared_ptr<PeakPrimitives> drawingInformation, PeakRepresentationViewInformation viewInformation) = 0;
 };
 
 typedef std::shared_ptr<PeakRepresentation> PeakRepresentation_sptr;

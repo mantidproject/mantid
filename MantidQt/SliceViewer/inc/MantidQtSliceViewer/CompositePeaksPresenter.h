@@ -107,7 +107,7 @@ public:
   bool getShowBackground(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
   /// Get a copy of the palette in its current state.
-  PeakPalette getPalette() const;
+  PeakPalette<QColor> getPalette() const;
   /// Setter for indicating whether the background radius will be shown.
   void setBackgroundRadiusShown(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
@@ -173,7 +173,7 @@ private:
   /// Get the presenter from a workspace name.
   SubjectContainer::iterator getPresenterIteratorFromName(const QString &name);
   /// Colour pallette.
-  PeakPalette m_palette;
+  PeakPalette<QColor> m_palette;
   /// Zoomable peaks view.
   ZoomablePeaksView *const m_zoomablePlottingWidget;
   /// Default behaviour

@@ -3,6 +3,7 @@
 
 #include "MantidQtSliceViewer/PeakOverlayInteractive.h"
 #include "PeakRepresentation.h"
+#include "MantidQtSliceViewer/PeakViewPalette.h"
 
 namespace MantidQt
 {
@@ -14,7 +15,7 @@ class PeakView : public PeakOverlayInteractive
 public:
     PeakView(PeaksPresenter *const presenter, QwtPlot *plot, QWidget *parent,
              const VecPeakRepresentation &vecPeakRepresentation,
-             const int plotXIndex, const int plotYIndex /*TODO CPOLOR*/);
+             const int plotXIndex, const int plotYIndex, PeakViewColor foregroundColor, PeakViewColor backgroundColor);
 
     virtual ~PeakView();
 
@@ -99,6 +100,11 @@ private:
 
     /// Show the background radius.
     bool m_showBackground;
+
+
+    /// Foreground color
+    PeakViewColor m_foregroundColor;
+    PeakViewColor m_backgroundColor;
 };
 }
 }

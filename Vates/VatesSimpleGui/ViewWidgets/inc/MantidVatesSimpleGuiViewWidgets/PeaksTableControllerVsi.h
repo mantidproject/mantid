@@ -63,7 +63,7 @@ private:
   void updatePeakWorkspaceColor();
   void setPeakSourceColorToDefault();
   std::map<std::string, QColor> getColors();
-  MantidQt::SliceViewer::PeakPalette m_peakPalette;
+  MantidQt::SliceViewer::PeakPalette<QColor> m_peakPalette;
   boost::shared_ptr<CameraManager> m_cameraManager;
   boost::shared_ptr<Mantid::VATES::CompositePeaksPresenterVsi> m_presenter;
   /// Object for choosing a PeakTransformFactory based on the workspace type.

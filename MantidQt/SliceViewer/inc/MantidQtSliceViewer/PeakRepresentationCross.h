@@ -46,7 +46,7 @@ public:
 protected:
     std::shared_ptr<PeakPrimitives> getDrawingInformation(
         PeakRepresentationViewInformation viewInformation) override;
-    void doDraw(QPainter &painter, QColor& peakColor,
+    void doDraw(QPainter &painter, PeakViewColor& foregroundColor, PeakViewColor& backgroundColor,
                 std::shared_ptr<PeakPrimitives> drawingInformation, PeakRepresentationViewInformation viewInformation) override;
 
 private:

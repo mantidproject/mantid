@@ -1,6 +1,7 @@
 #include "MantidQtSliceViewer/PeakPrimitives.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeakRepresentationCross.h"
+#include "MantidQtSliceViewer/PeakViewPalette.h"
 #include "MantidKernel/V2D.h"
 #include <QPainter>
 
@@ -116,8 +117,7 @@ std::shared_ptr<PeakPrimitives> PeakRepresentationCross::getDrawingInformation(
     return drawingInformation;
 }
 
-void PeakRepresentationCross::doDraw(
-    QPainter &painter, QColor &peakColor,
+void PeakRepresentationCross::doDraw(QPainter &painter, PeakViewColor &foregroundColor, PeakViewColor &,
     std::shared_ptr<PeakPrimitives> drawingInformation,
     PeakRepresentationViewInformation viewInformation)
 {
@@ -128,7 +128,9 @@ void PeakRepresentationCross::doDraw(
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Add a pen with color, style and stroke
-    QPen pen(peakColor);
+    auto foregroundColorCross = foregroundColor.colorCross;
+
+    QPen pen(foregroundColorCross);
     pen.setWidth(drawingInformationCross->peakLineWidth);
     pen.setStyle(Qt::SolidLine);
     painter.setPen(pen);

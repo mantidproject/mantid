@@ -3,13 +3,17 @@
 
 #include "MantidQtSliceViewer/PeakOverlayViewFactoryBase.h"
 #include "MantidQtSliceViewer/PeakRepresentation.h"
+#include "MantidQtSliceViewer/PeakViewPalette.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
+
+#include <QColor>
 
 namespace MantidQt
 {
 namespace SliceViewer
 {
+
 
 class PeakViewFactory : public PeakOverlayViewFactoryBase
 {
@@ -17,7 +21,7 @@ public:
     PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS,
                     Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot *plot,
                     QWidget *parent, const int plotXIndex, const int plotYIndex,
-                    const size_t colourNumber = 0);
+                    const size_t colorNumber = 0);
     virtual ~PeakViewFactory();
     boost::shared_ptr<PeakOverlayView> createView(
         PeaksPresenter *const presenter,
@@ -47,10 +51,20 @@ private:
         Mantid::Kernel::V3D position,
         const Mantid::Geometry::IPeak &peak) const;
 
+    // Set color palette
+    void setColors(const size_t colourNumber) const;
+
     // The actual workspace
     Mantid::API::IMDWorkspace_sptr m_mdWS;
+
     /// Peaks workspace.
     Mantid::API::IPeaksWorkspace_sptr m_peaksWS;
+
+    /// Color foreground
+    PeakViewColor m_foregroundColor;
+
+    /// Color background
+    PeakViewColor m_backgroundColor;
 };
 }
 }

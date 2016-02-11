@@ -14,14 +14,14 @@ public:
 
   void test_paletteSize()
   {
-    PeakPalette palette;
+    PeakPalette<QColor> palette;
     const int expectedNumberOfEntries = 10;
     TSM_ASSERT_EQUALS("\n\nPalette should have a default and fixed size\n", expectedNumberOfEntries, palette.paletteSize());
   }
 
   void test_default_foreground_colours_unique()
   {
-    PeakPalette palette;
+    PeakPalette<QColor> palette;
     for(int i = 0; i < palette.paletteSize()-1; ++i)
     {
       TS_ASSERT_DIFFERS(palette.foregroundIndexToColour(i), palette.foregroundIndexToColour(i+1));
@@ -30,7 +30,7 @@ public:
 
   void test_default_background_colours_unique()
   {
-    PeakPalette palette;
+    PeakPalette<QColor> palette;
     for(int i = 0; i < palette.paletteSize()-1; ++i)
     {
       TS_ASSERT_DIFFERS(palette.backgroundIndexToColour(i), palette.backgroundIndexToColour(i+1));
@@ -42,7 +42,7 @@ public:
     const int indexTooHigh = 10;
     const int indexTooLow = -1;
 
-    PeakPalette palette;
+    PeakPalette<QColor> palette;
     TSM_ASSERT_THROWS("\n\nIndex > Max Index, should throw.\n", palette.foregroundIndexToColour(indexTooHigh), std::out_of_range);
     TSM_ASSERT_THROWS("\n\nIndex < Max Index, should throw.\n", palette.foregroundIndexToColour(indexTooLow), std::out_of_range);
   }
@@ -52,14 +52,14 @@ public:
     const int indexTooHigh = 10;
     const int indexTooLow = -1;
 
-    PeakPalette palette;
+    PeakPalette<QColor> palette;
     TSM_ASSERT_THROWS("\n\nIndex > Max Index, should throw.\n", palette.backgroundIndexToColour(indexTooHigh), std::out_of_range);
     TSM_ASSERT_THROWS("\n\nIndex < Max Index, should throw.\n", palette.backgroundIndexToColour(indexTooLow), std::out_of_range);
   }
 
   void test_setForgroundColour()
   {
-    PeakPalette palette;
+    PeakPalette<QColor> palette;
     const int indexToChange = 0;
     const QColor originalColour = palette.foregroundIndexToColour(indexToChange);
     const QColor requestColour(Qt::black);
@@ -77,7 +77,7 @@ public:
 
   void test_setBackgroundColour()
   {
-    PeakPalette palette;
+    PeakPalette<QColor> palette;
     const int indexToChange = 0;
     const QColor originalColour = palette.backgroundIndexToColour(indexToChange);
     const QColor requestColour = Qt::black;
@@ -98,7 +98,7 @@ public:
     const int indexTooHigh = 10;
     const int indexTooLow = -1;
 
-    PeakPalette palette;
+    PeakPalette<QColor> palette;
     TSM_ASSERT_THROWS("\n\nIndex is > Max Index. Should throw\n.", palette.setForegroundColour(indexTooHigh, Qt::red), std::out_of_range);
     TSM_ASSERT_THROWS("\n\nIndex is < Min Index. Should throw\n", palette.setForegroundColour(indexTooLow, Qt::red), std::out_of_range);
   }
@@ -108,7 +108,7 @@ public:
     const int indexTooHigh = 10;
     const int indexTooLow = -1;
 
-    PeakPalette palette;
+    PeakPalette<QColor> palette;
     TSM_ASSERT_THROWS("\n\nIndex is > Max Index. Should throw\n.", palette.setBackgroundColour(indexTooHigh, Qt::red), std::out_of_range);
     TSM_ASSERT_THROWS("\n\nIndex is < Min Index. Should throw\n", palette.setBackgroundColour(indexTooLow, Qt::red), std::out_of_range);
   }
@@ -116,12 +116,12 @@ public:
   void testCopy()
   {
     // Create an original, and modify the palette a little, so we can be sure that the copy is a genuine copy of the current state.
-    PeakPalette original;
+    PeakPalette<QColor> original;
     original.setForegroundColour(0, Qt::red);
     original.setBackgroundColour(0, Qt::blue);
 
     // Make a copy.
-    PeakPalette copy(original);
+    PeakPalette<QColor> copy(original);
 
     // Check the size.
     TSM_ASSERT_EQUALS("\n\nSize of the copy is not the same as the size of the original.\n", original.paletteSize(), copy.paletteSize());
@@ -138,12 +138,12 @@ public:
   void testAssignment()
   {
     // Create an original, and modify the palette a little, so we can be sure that the copy is a genuine copy of the current state.
-    PeakPalette A;
+    PeakPalette A<QColor>;
     A.setForegroundColour(0, Qt::red);
     A.setBackgroundColour(0, Qt::blue);
 
     // Make another.
-    PeakPalette B;
+    PeakPalette B<QColor>;
 
     // Make A == B
     B = A;
@@ -167,16 +167,16 @@ public:
 
   void test_are_equal()
   {
-    PeakPalette A;
-    PeakPalette B;
+    PeakPalette A<QColor>;
+    PeakPalette B<QColor>;
 
     TS_ASSERT_EQUALS(A, B);
   }
 
   void test_are_not_equal_after_changing_a_foreground_colour()
   {
-    PeakPalette A;
-    PeakPalette B;
+    PeakPalette A<QColor>;
+    PeakPalette B<QColor>;
 
     const int modifyIndex = 0;
     QColor originalColourAtIndex = A.backgroundIndexToColour(modifyIndex);
@@ -194,8 +194,8 @@ public:
 
   void test_not_not_equal_after_changing_a_backgroundcolour()
   {
-    PeakPalette A;
-    PeakPalette B;
+    PeakPalette A<QColor>;
+    PeakPalette B<QColor>;
 
     const int modifyIndex = 0;
     QColor originalColourAtIndex = A.backgroundIndexToColour(modifyIndex);

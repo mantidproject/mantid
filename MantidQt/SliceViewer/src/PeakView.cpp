@@ -13,11 +13,11 @@ namespace SliceViewer
 PeakView::PeakView(PeaksPresenter *const presenter, QwtPlot *plot,
                    QWidget *parent,
                    const VecPeakRepresentation &vecPeakRepresentation,
-                   const int plotXIndex, const int plotYIndex /*TODO CPOLOR*/)
+                   const int plotXIndex, const int plotYIndex, PeakViewColor foregroundColor, PeakViewColor backgroundColor)
     : PeakOverlayInteractive(presenter, plot, plotXIndex, plotYIndex, parent),
       m_peaks(vecPeakRepresentation),
-      /*TODO COLOR*/ m_cachedOccupancyIntoView(0), m_cachedOccupancyInView(0),
-      m_showBackground(false)
+      m_cachedOccupancyIntoView(0), m_cachedOccupancyInView(0),
+      m_showBackground(false), m_foregroundColor(foregroundColor), m_backgroundColor(backgroundColor)
 {
 }
 
@@ -49,9 +49,7 @@ void PeakView::doPaintPeaks(QPaintEvent *)
             peakRepresentationViewInformation.yOriginWindow = yOriginWindow;
 
             QPainter painter(this);
-            // TODO create color information
-            QColor color;
-            peak->draw(painter, color, peakRepresentationViewInformation);
+            peak->draw(painter, m_foregroundColor, m_backgroundColor, peakRepresentationViewInformation);
         }
     }
 }
@@ -72,7 +70,7 @@ void PeakView::setSlicePoint(const double &point,
             m_peaks[i]->setSlicePoint(point);
         }
     }
-    this->update(); // repaint
+    this->update();
 }
 
 void PeakView::hideView() { this->hide(); }
@@ -86,18 +84,6 @@ void PeakView::movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform)
     for (auto &peak : m_peaks) {
         peak->movePosition(peakTransform);
     }
-}
-
-void PeakView::changeForegroundColour(const QColor)
-{
-    // TODO how to change color for differnt representations:
-    // this->m_peakColour = QColor(colour);
-}
-
-/// Change background colour
-void PeakView::changeBackgroundColour(const QColor)
-{
-    // TODO how to change color for differnt representations:
 }
 
 void PeakView::showBackgroundRadius(const bool )
@@ -118,6 +104,8 @@ PeakBoundingBox PeakView::getBoundingBox(const int peakIndex) const
 
 void PeakView::changeOccupancyInView(const double fraction)
 {
+  // TODO check if this makes sense
+
     for (const auto &peak : m_peaks) {
         peak->setOccupancyInView(fraction);
     }
@@ -126,6 +114,7 @@ void PeakView::changeOccupancyInView(const double fraction)
 
 void PeakView::changeOccupancyIntoView(const double fraction)
 {
+  // TODO check if this makes sense
     for (const auto &peak : m_peaks) {
         peak->setOccupancyIntoView(fraction);
     }
@@ -148,13 +137,12 @@ bool PeakView::positionOnly() const
 {
     // TODO how to set this for differnt peak types, probably always false from
     // now on
-  return true;
+  return false;
 }
 
 double PeakView::getRadius() const
 {
-    // TODO how to set this for differnt peak types, probably always false from
-    // now on
+    // TODO how to set this for differnt peak types
   return 0.0;
 }
 
@@ -179,6 +167,19 @@ QColor PeakView::getForegroundColour() const
     /// TODO Have a general color object with a map for the differnt
     /// representations
     return QColor();
+}
+
+void PeakView::changeForegroundColour(const QColor)
+{
+    // TODO how to change color for differnt representations:
+    // this->m_peakColour = QColor(colour);
+}
+
+/// Change background colour
+void PeakView::changeBackgroundColour(const QColor)
+{
+    // TODO how to change color for differnt representations:
+  // Introduce PeakColorView struct
 }
 
 void PeakView::takeSettingsFrom(const PeakOverlayView *const)
