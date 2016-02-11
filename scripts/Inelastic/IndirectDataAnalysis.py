@@ -102,9 +102,9 @@ def furyfitMult(inputWS, function, ftype, startx, endx,
                 minimizer='Levenberg-Marquardt', max_iterations=500,
                 Save=False, Plot='None'):
     StartTime('FuryFit Multi')
-
-    nHist = mtd[inputWS].getNumberHistograms()
-    output_workspace = getWSprefix(inputWS) + 'fury_1Smult_s0_to_' + str(nHist-1)
+    mtd.addOrReplace(inputWS.getName(), inputWS)
+    nHist = inputWS.getNumberHistograms()
+    output_workspace = getWSprefix(inputWS.getName()) + 'fury_1Smult_s0_to_' + str(nHist-1)
 
     option = ftype[:-2]
     logger.information('Option: '+option)
