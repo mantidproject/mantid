@@ -35,7 +35,7 @@ public:
   void test_shared_ptr_is_passed_successfully_to_concrete_validator() {
     Mantid::Kernel::IValidator_sptr valueChecker =
         boost::make_shared<SharedPtrTypedValidator>();
-    const boost::shared_ptr<Holder> testPtr(new Holder);
+    const boost::shared_ptr<Holder> testPtr = boost::make_shared<Holder>();
 
     checkIsValidReturnsEmptyString<boost::shared_ptr<Holder>>(valueChecker,
                                                               testPtr);
@@ -52,7 +52,8 @@ public:
   test_DataItem_sptr_descendent_is_passed_successfully_to_concrete_validator() {
     Mantid::Kernel::IValidator_sptr valueChecker =
         boost::make_shared<DataItemSptrTypedValidator>();
-    boost::shared_ptr<FakeDataItem> fakeData(new FakeDataItem);
+    boost::shared_ptr<FakeDataItem> fakeData =
+        boost::make_shared<FakeDataItem>();
     checkIsValidReturnsEmptyString<boost::shared_ptr<FakeDataItem>>(
         valueChecker, fakeData);
   }

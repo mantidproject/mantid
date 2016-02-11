@@ -23,7 +23,7 @@ public:
   static void destroySuite(PoldiDetectorDecoratorTest *suite) { delete suite; }
 
   PoldiDetectorDecoratorTest() {
-    m_detector = boost::shared_ptr<MockDetector>(new MockDetector);
+    m_detector = boost::make_shared<MockDetector>();
   }
 
   void testInitialization() {

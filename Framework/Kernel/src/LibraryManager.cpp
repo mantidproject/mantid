@@ -9,6 +9,7 @@
 #include <Poco/File.h>
 #include <Poco/DirectoryIterator.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Kernel {
@@ -109,7 +110,7 @@ bool LibraryManagerImpl::loadLibrary(const std::string &filepath) {
   if (libName.empty())
     return false;
   // The wrapper will unload the library when it is deleted
-  boost::shared_ptr<LibraryWrapper> dlwrap(new LibraryWrapper);
+  auto dlwrap = boost::make_shared<LibraryWrapper>();
   std::string libNameLower = boost::algorithm::to_lower_copy(libName);
 
   // Check that a libray with this name has not already been loaded

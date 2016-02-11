@@ -32,7 +32,8 @@ public:
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
-    boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
+    boost::shared_ptr<Instrument> testInst =
+        boost::make_shared<Instrument>("testInst");
     testWS->setInstrument(testInst);
 
     // Define a source and sample position

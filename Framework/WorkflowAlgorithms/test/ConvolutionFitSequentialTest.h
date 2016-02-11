@@ -270,7 +270,8 @@ public:
   MatrixWorkspace_sptr create2DWorkspace(int xlen, int ylen) {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         xlen, ylen, false, false, true, "testInst");
-    boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen, 0.0));
+    boost::shared_ptr<Mantid::MantidVec> x1 =
+        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
     boost::shared_ptr<Mantid::MantidVec> y1(
         new Mantid::MantidVec(xlen - 1, 3.0));
     boost::shared_ptr<Mantid::MantidVec> e1(
