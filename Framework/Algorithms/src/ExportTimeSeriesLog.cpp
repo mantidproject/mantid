@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ExportTimeSeriesLog.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IEventList.h"

@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/WorkspaceJoiners.h"
 
+#include "MantidAPI/Axis.h"
+
 namespace Mantid {
 namespace Algorithms {
 

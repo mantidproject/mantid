@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/WienerSmooth.h"
+
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ArrayProperty.h"
 

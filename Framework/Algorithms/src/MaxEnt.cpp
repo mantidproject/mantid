@@ -1,5 +1,5 @@
 #include "MantidAlgorithms/MaxEnt.h"
-
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <boost/shared_array.hpp>

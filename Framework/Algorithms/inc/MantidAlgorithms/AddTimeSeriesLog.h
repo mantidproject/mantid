@@ -4,6 +4,11 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+
+namespace API {
+class Run;
+}
+
 namespace Algorithms {
 
 /**

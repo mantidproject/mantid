@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RemoveBackground.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"

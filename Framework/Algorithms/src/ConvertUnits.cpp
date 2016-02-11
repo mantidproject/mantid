@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"

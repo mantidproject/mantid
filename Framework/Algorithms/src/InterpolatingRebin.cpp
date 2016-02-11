@@ -2,9 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/InterpolatingRebin.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>

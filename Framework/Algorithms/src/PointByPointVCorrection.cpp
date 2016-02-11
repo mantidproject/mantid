@@ -2,7 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PointByPointVCorrection.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
+
 #include <cfloat>
 #include <cmath>
 #include <numeric>

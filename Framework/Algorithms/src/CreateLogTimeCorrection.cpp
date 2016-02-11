@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/CreateLogTimeCorrection.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 #include <fstream>
 

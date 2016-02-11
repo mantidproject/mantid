@@ -2,12 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFTSmooth2.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ListValidator.h"
+
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
-
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace Algorithms {

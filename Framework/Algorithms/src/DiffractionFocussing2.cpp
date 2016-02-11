@@ -5,6 +5,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"

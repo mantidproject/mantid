@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFTSmooth.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidKernel/BoundedValidator.h"

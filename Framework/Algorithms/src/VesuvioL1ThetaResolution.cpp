@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Statistics.h"

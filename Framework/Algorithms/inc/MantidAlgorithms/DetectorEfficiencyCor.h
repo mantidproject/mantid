@@ -3,11 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/V3D.h"
-#include <climits>
-#include <list>
-#include <map>
-#include <string>
-#include <vector>
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
 namespace Algorithms {

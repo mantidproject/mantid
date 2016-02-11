@@ -1,4 +1,7 @@
 #include "MantidAlgorithms/CopyLogs.h"
+
+#include "MantidAPI/Run.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Property.h"
 

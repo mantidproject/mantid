@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SolidAngle.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 

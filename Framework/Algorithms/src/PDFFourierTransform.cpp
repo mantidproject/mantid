@@ -1,9 +1,11 @@
 #include "MantidAlgorithms/PDFFourierTransform.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+
 #include <sstream>
 #include <math.h>
 

@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/RebinByTimeBase.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"

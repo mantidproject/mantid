@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {

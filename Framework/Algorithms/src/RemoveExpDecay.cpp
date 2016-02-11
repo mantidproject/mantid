@@ -1,14 +1,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <cmath>
-#include <vector>
-
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAlgorithms/RemoveExpDecay.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAlgorithms/RemoveExpDecay.h"
+
+#include <cmath>
+#include <vector>
 
 namespace Mantid {
 namespace Algorithms {

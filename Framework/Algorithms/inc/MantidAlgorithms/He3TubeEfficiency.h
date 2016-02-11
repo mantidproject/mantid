@@ -3,10 +3,17 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/V3D.h"
-#include <map>
-#include <vector>
+#include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
+
+// forward declarations
+namespace Geometry {
+class IDetector;
+class Object;
+class ParameterMap;
+}
+
 namespace Algorithms {
 /**
     Corrects the input workspace for helium3 tube efficiency based on an

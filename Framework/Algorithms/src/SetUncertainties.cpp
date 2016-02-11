@@ -2,7 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SetUncertainties.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
+
 #include <vector>
 
 namespace Mantid {

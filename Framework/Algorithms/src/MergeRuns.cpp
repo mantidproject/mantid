@@ -1,9 +1,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAlgorithms/MergeRuns.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/MergeRuns.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 

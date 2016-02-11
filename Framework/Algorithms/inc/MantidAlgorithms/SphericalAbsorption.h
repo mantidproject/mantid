@@ -5,8 +5,23 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
+
+// forward declaration from other Mantid modules
+namespace API {
+class Sample;
+}
+
+namespace Kernel {
+class V3D;
+}
+
+namespace Geometry {
+class Object;
+}
+
 namespace Algorithms {
 /** A spherical absorption correction algorithm.
 

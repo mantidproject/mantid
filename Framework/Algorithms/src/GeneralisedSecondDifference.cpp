@@ -1,12 +1,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <sstream>
-#include <numeric>
+#include "MantidAlgorithms/GeneralisedSecondDifference.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include "MantidAlgorithms/GeneralisedSecondDifference.h"
-#include "MantidKernel/BoundedValidator.h"
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {

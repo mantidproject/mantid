@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IComponent.h"
 
 #include <boost/random/mersenne_twister.hpp>
 

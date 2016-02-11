@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertEmptyToTof.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"

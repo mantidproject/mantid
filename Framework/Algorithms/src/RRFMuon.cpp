@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RRFMuon.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {

@@ -1,10 +1,12 @@
 #include "MantidAlgorithms/ResampleX.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+
 #include <sstream>
 
 namespace Mantid {

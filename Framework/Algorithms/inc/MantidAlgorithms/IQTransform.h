@@ -5,8 +5,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+
+namespace Kernel {
+namespace Units {
+class Label;
+}
+}
+
 namespace Algorithms {
 /** This algorithm permits the linearisation of reduced SANS data by applying a
    chosen transformation

@@ -1,10 +1,12 @@
 #include "MantidAlgorithms/StripPeaks.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/PhysicalConstants.h"
+
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {

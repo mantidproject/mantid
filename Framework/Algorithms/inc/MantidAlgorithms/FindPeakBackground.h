@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_FindPeakBackground_H_
 #define MANTID_ALGORITHMS_FindPeakBackground_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {

@@ -2,12 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebunch.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace_fwd.h"
-
-#include <sstream>
-#include <numeric>
-#include <cmath>
 #include "MantidKernel/BoundedValidator.h"
+
+#include <cmath>
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {

@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"

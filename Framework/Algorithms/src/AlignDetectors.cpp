@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AlignDetectors.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
@@ -10,8 +12,9 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/V3D.h"
+
 #include <fstream>
 #include <sstream>
 

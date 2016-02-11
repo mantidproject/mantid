@@ -10,6 +10,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/random/uniform_int.hpp>

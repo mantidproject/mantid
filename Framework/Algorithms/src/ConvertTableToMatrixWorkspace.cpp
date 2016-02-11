@@ -2,13 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertTableToMatrixWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits.hpp>
+
 #include <sstream>
 
 namespace Mantid {

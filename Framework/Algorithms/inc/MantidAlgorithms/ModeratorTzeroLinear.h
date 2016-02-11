@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace Algorithms {

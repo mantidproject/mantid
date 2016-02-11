@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/CalMuonDetectorPhases.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 

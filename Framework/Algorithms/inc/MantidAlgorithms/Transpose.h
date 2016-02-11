@@ -7,6 +7,12 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+
+// forward declarations
+namespace API {
+class Axis;
+}
+
 namespace Algorithms {
 /**
 This algorithm "transposes" the bins of the input workspace into a single

@@ -2,7 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ExtractFFTSpectrum.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 

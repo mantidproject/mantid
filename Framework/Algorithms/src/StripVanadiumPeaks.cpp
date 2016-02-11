@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/StripVanadiumPeaks.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"

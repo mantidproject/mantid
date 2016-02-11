@@ -1,10 +1,13 @@
 #include "MantidAlgorithms/SumEventsByLogValue.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/Column.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/Column.h"
+
 #include <numeric>
 
 namespace Mantid {

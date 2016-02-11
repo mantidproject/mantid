@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ChangeBinOffset.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 
