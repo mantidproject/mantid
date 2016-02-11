@@ -489,6 +489,45 @@ public:
     FrameworkManager::Instance().deleteWorkspace("FFT_WS_empty");
   }
 
+  void testRealOutOfRange_Throws() {
+    auto inputWS = createWS(100, 0, "real_out_of_range");
+    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setProperty("InputWorkspace", inputWS);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setPropertyValue("Real", "100");
+    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_real_out_of_range");
+  }
+
+  void testImaginaryOutOfRange_Throws() {
+    auto inputWS = createWS(100, 0, "imaginary_out_of_range");
+    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setProperty("InputWorkspace", inputWS);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setPropertyValue("Real", "0");
+    fft->setPropertyValue("Imaginary", "100");
+    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    FrameworkManager::Instance().deleteWorkspace(
+        "FFT_WS_imaginary_out_of_range");
+  }
+
+  void testRealImaginarySizeMismatch_Throws() {
+    auto inputWS = createWS(100, 0, "real_mismatch");
+    auto inImagWS = createWS(99, 0, "imag_mismatch");
+    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setProperty("InputWorkspace", inputWS);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setPropertyValue("Real", "0");
+    fft->setPropertyValue("Imaginary", "0");
+    fft->setProperty("InputImagWorkspace", inImagWS);
+    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_real_mismatch");
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_imag_mismatch");
+  }
+
 private:
   MatrixWorkspace_sptr createWS(int n, int dn, const std::string &name) {
     FrameworkManager::Instance();
