@@ -96,7 +96,7 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
 
   m_svUI->action_Vscroll->setCheckable(true);
   m_svUI->action_Vscroll->setChecked(false);
-  m_svUI->imageVerticalScrollBar->show();
+  m_svUI->imageVerticalScrollBar->hide();
   m_svUI->imageVerticalScrollBar->setEnabled(false);
 
   m_svUI->intensity_slider->setTickInterval(10);
@@ -720,6 +720,7 @@ void SVConnections::setSpectrumDisplay(SpectrumDisplay* spectrumDisplay)
   }
   m_currentSpectrumDisplay = spectrumDisplay;
   m_currentSpectrumDisplay->updateRange();
+  m_currentSpectrumDisplay->setTrackingOn(m_svMainWindow->isTrackingOn());
 }
 /// Get the currently visible display
 SpectrumDisplay* SVConnections::getCurrentSpectrumDisplay() const {

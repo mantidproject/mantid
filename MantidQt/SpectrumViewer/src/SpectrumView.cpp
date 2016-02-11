@@ -38,6 +38,7 @@ SpectrumView::SpectrumView(QWidget *parent) :
   //m_ui->x_min_input->setValidator(new QDoubleValidator(this));
   connect(m_ui->imageTabs,SIGNAL(currentChanged(int)),this,SLOT(changeSpectrumDisplay(int)));
   connect(m_ui->imageTabs,SIGNAL(tabCloseRequested(int)),this,SLOT(respondToTabCloseReqest(int)));
+  connect(m_ui->tracking_always_on, SIGNAL(toggled(bool)), this, SLOT(changeTracking(bool)));
   updateHandlers();
   setAcceptDrops(true);
 
@@ -125,7 +126,8 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
                                            m_sliderHandler,
                                            m_rangeHandler,
                                            m_hGraph.get(), m_vGraph.get(),
-                                           m_ui->image_table);
+                                           m_ui->image_table,
+                                           isTrackingOn());
   spectrumDisplay->setDataSource( dataSource );
 
   if (isFirstPlot)
@@ -251,6 +253,18 @@ void SpectrumView::respondToTabCloseReqest(int tab)
   if (m_spectrumDisplay.size() == 1) {
     m_ui->imageTabs->setTabsClosable(false);
   }
+}
+
+/**
+ * Check if mouse tracking should be "always on".
+ */
+bool SpectrumView::isTrackingOn() const {
+  return m_ui->tracking_always_on->isChecked();
+}
+
+void SpectrumView::changeTracking(bool on) {
+  auto tab = m_ui->imageTabs->currentIndex();
+  m_spectrumDisplay[tab]->setTrackingOn(on);
 }
 
 } // namespace SpectrumView

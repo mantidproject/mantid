@@ -40,7 +40,8 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
                                    IRangeHandler*   rangeHander,
                                    GraphDisplay*    hGraph,
                                    GraphDisplay*    vGraph,
-                                   QTableWidget*    tableWidget ) :
+                                   QTableWidget*    tableWidget,
+                                   bool             isTrackingOn) :
   m_spectrumPlot(spectrumPlot),
   m_sliderHandler(sliderHandler),
   m_rangeHandler(rangeHander),
@@ -63,7 +64,11 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
   setupSpectrumPlotItem();
   m_imagePicker = new TrackingPicker( spectrumPlot->canvas() );
   m_imagePicker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
-  m_imagePicker->setTrackerMode(QwtPicker::ActiveOnly);
+  if (isTrackingOn) {
+    m_imagePicker->setTrackerMode(QwtPicker::AlwaysOn);
+  } else {
+    m_imagePicker->setTrackerMode(QwtPicker::ActiveOnly);
+  }
   m_imagePicker->setRubberBandPen(QColor(Qt::gray));
 
   m_imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
@@ -670,6 +675,18 @@ void SpectrumDisplay::removeOther(const boost::shared_ptr<SpectrumDisplay>& othe
 void SpectrumDisplay::imagePickerMoved(const QPoint & point)
 {
   setPointedAtPoint( point );
+}
+
+/**
+ * Set/unset mouse tracking "always on". When tracking is always on
+ * the 1D plots get updated when the mouse moves (no need to click).
+ */
+void SpectrumDisplay::setTrackingOn(bool on) {
+  if (on) {
+    m_imagePicker->setTrackerMode(QwtPicker::AlwaysOn);
+  } else {
+    m_imagePicker->setTrackerMode(QwtPicker::ActiveOnly);
+  }
 }
 
 } // namespace SpectrumView
