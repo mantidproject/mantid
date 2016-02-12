@@ -54,6 +54,8 @@ public:
 
   void setZerosAsNan(bool val);
 
+  bool isZerosAsNan() const;
+
   void setNormalization(Mantid::API::MDNormalization normalization);
   Mantid::API::MDNormalization getNormalization() const;
 

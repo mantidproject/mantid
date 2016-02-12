@@ -4,6 +4,7 @@ set ( SRC_FILES
     src/CatalogSearch.cpp
     src/CatalogSelector.cpp
     src/CheckboxHeader.cpp
+    src/ColorBarWidget.cpp
     src/DataSelector.cpp
     src/DiagResults.cpp
     src/DoubleDialogEditor.cpp
@@ -23,6 +24,7 @@ set ( SRC_FILES
     src/MantidHelpWindow.cpp
     src/MWDiag.cpp
     src/MWRunFiles.cpp
+    src/MWView.cpp
     src/MessageDisplay.cpp
     src/MultifitSetupDialog.cpp
     src/MuonFitPropertyBrowser.cpp
@@ -101,6 +103,7 @@ set ( SRC_FILES
 set ( MOC_FILES 
     inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
     inc/MantidQtMantidWidgets/CheckboxHeader.h
+    inc/MantidQtMantidWidgets/ColorBarWidget.h
     inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
     inc/MantidQtMantidWidgets/DoubleDialogEditor.h
@@ -125,6 +128,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MuonSequentialFitDialog.h
     inc/MantidQtMantidWidgets/MWDiag.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
+    inc/MantidQtMantidWidgets/MWView.h
     inc/MantidQtMantidWidgets/PeakPicker.h
     inc/MantidQtMantidWidgets/PeriodicTableWidget.h
     inc/MantidQtMantidWidgets/pqHelpWindow.h
@@ -232,9 +236,11 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/DataSelector.ui
     inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/CatalogSelector.ui
+    inc/MantidQtMantidWidgets/ColorBarWidget.ui
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
+    inc/MantidQtMantidWidgets/MWView.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
     inc/MantidQtMantidWidgets/MuonSequentialFitDialog.ui
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.ui
