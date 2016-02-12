@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <iostream>
+#include <numeric>
 #include <sstream>
 
 namespace Mantid {
