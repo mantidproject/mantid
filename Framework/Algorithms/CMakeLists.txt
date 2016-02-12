@@ -133,6 +133,7 @@ set ( SRC_FILES
 	src/GenerateIPythonNotebook.cpp
 	src/GeneratePeaks.cpp
 	src/GeneratePythonScript.cpp
+        src/GeometryInfo.cpp
 	src/GetAllEi.cpp
 	src/GetDetOffsetsMultiPeaks.cpp
 	src/GetDetectorOffsets.cpp
@@ -414,6 +415,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GenerateIPythonNotebook.h
 	inc/MantidAlgorithms/GeneratePeaks.h
 	inc/MantidAlgorithms/GeneratePythonScript.h
+        inc/MantidAlgorithms/GeometryInfo.h
 	inc/MantidAlgorithms/GetAllEi.h
 	inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
 	inc/MantidAlgorithms/GetDetectorOffsets.h
@@ -700,6 +702,7 @@ set ( TEST_FILES
 	GenerateIPythonNotebookTest.h
 	GeneratePeaksTest.h
 	GeneratePythonScriptTest.h
+        GeometryInfoTest.h
 	GetAllEiTest.h
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
