@@ -69,8 +69,9 @@ private:
   /// Create the fitting function as string
   std::string createFittingFunction(double freq, bool fixFreq);
   /// Extract asymmetry and phase from fitting results
-  API::ITableWorkspace_sptr
-  extractDetectorInfo(const API::ITableWorkspace_sptr &paramTab, size_t nspec);
+  void extractDetectorInfo(const API::ITableWorkspace_sptr &paramTab,
+                           const API::ITableWorkspace_sptr &resultsTab,
+                           const int ispec);
   /// Find frequency to use in sequential fit
   double getFrequency(const API::MatrixWorkspace_sptr &ws);
   /// Get frequency hint to use when finding frequency
@@ -79,8 +80,6 @@ private:
   double getStartTime() const;
   /// Get end time for fit
   double getEndTime() const;
-  /// Remove temporary workspaces from ADS
-  void clearUpADS(const std::string &groupName) const;
   /// Calculate detector efficiency (alpha)
   double getAlpha(const API::MatrixWorkspace_sptr &ws,
                   const std::vector<int> &forward,
@@ -96,10 +95,10 @@ private:
   void getGroupingFromInstrument(const API::MatrixWorkspace_sptr &ws,
                                  std::vector<int> &forward,
                                  std::vector<int> &backward);
+  /// Report progress in GUI
+  void reportProgress(const int thisSpectrum, const int totalSpectra);
   /// Pointer to input workspace
   API::MatrixWorkspace_sptr m_inputWS;
-  /// Name of workspace to put in ADS temporarily
-  const static std::string m_workspaceName;
 };
 } // namespace Algorithms
 } // namespace Mantid

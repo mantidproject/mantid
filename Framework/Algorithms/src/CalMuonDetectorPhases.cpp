@@ -19,9 +19,6 @@ using API::Progress;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalMuonDetectorPhases)
 
-// Define name for temporary workspace
-const std::string CalMuonDetectorPhases::m_workspaceName = "CMDPInput";
-
 //----------------------------------------------------------------------------------------------
 /** Initializes the algorithm's properties.
  */
@@ -114,7 +111,7 @@ void CalMuonDetectorPhases::exec() {
 
   // Create the output workspaces
   auto tab = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  auto group = API::WorkspaceGroup_sptr(new API::WorkspaceGroup());
+  auto group = boost::make_shared<API::WorkspaceGroup>();
 
   // Get the name of 'DataFitted'
   std::string groupName = getPropertyValue("DataFitted");
@@ -144,95 +141,69 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   int nspec = static_cast<int>(ws->getNumberHistograms());
 
   // Create the fitting function f(x) = A * sin ( w * x + p )
+  // The same function and initial parameters are used for each fit
   std::string funcStr = createFittingFunction(freq, true);
 
-  // Create the input string. Workspace must be in the ADS (temporarily)
-  API::AnalysisDataService::Instance().addOrReplace(m_workspaceName, ws);
-  std::ostringstream input;
-  for (int i = 0; i < nspec; i++) {
-    input << m_workspaceName << ",i" << i << ";";
+  // Set up results table
+  resTab->addColumn("int", "Detector");
+  resTab->addColumn("double", "Asymmetry");
+  resTab->addColumn("double", "Phase");
+
+  // Loop through fitting all spectra individually
+  const static std::string success = "success";
+  for (int ispec = 0; ispec < nspec; ispec++) {
+    reportProgress(ispec, nspec);
+    auto fit = createChildAlgorithm("Fit");
+    fit->initialize();
+    fit->setPropertyValue("Function", funcStr);
+    fit->setProperty("InputWorkspace", ws);
+    fit->setProperty("WorkspaceIndex", ispec);
+    fit->setProperty("CreateOutput", true);
+    fit->setPropertyValue("Output", groupName);
+    fit->execute();
+
+    std::string status = fit->getProperty("OutputStatus");
+    if (!fit->isExecuted() || status != success) {
+      throw std::runtime_error("Fit failed for spectrum " + ispec);
+    }
+
+    API::MatrixWorkspace_sptr fitOut = fit->getProperty("OutputWorkspace");
+    resGroup->addWorkspace(fitOut);
+    API::ITableWorkspace_sptr tab = fit->getProperty("OutputParameters");
+    // Now we have our fitting results stored in tab
+    // but we need to extract the relevant information, i.e.
+    // the detector phases (parameter 'p') and asymmetries ('A')
+    extractDetectorInfo(tab, resTab, ispec);
   }
-
-  auto fit = createChildAlgorithm("PlotPeakByLogValue");
-  fit->initialize();
-  fit->addObserver(this->progressObserver());
-  setChildStartProgress(0.);
-  setChildEndProgress(1.);
-  fit->setPropertyValue("Function", funcStr);
-  fit->setPropertyValue("Input", input.str());
-  fit->setPropertyValue("OutputWorkspace", groupName);
-  fit->setPropertyValue(
-      "FitType", "Individual"); // each fit starts with same initial parameters
-  fit->setProperty("CreateOutput", true);
-  fit->execute();
-
-  // Get the fitting results - stored in ADS
-  std::string resultsName(groupName);
-  resGroup = boost::dynamic_pointer_cast<API::WorkspaceGroup>(
-      API::AnalysisDataService::Instance().retrieve(
-          resultsName.append("_Workspaces")));
-
-  // Get the parameter table
-  API::ITableWorkspace_sptr tab = fit->getProperty("OutputWorkspace");
-  // Now we have our fitting results stored in tab
-  // but we need to extract the relevant information, i.e.
-  // the detector phases (parameter 'p') and asymmetries ('A')
-  resTab = extractDetectorInfo(tab, static_cast<size_t>(nspec));
-
-  // Clear temporary workspaces out of ADS
-  clearUpADS(groupName);
 }
 
 /** Extracts detector asymmetries and phases from fitting results
+* and adds a new row to the results table with them
 * @param paramTab :: [input] Output parameter table resulting from the fit
-* @param nspec :: [input] Number of detectors/spectra
-* @return :: A new table workspace storing the asymmetries and phases
+* @param resultsTab :: [input] Results table to update with a new row
+* @param ispec :: [input] Spectrum number
 */
-API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
-    const API::ITableWorkspace_sptr &paramTab, size_t nspec) {
+void CalMuonDetectorPhases::extractDetectorInfo(
+    const API::ITableWorkspace_sptr &paramTab,
+    const API::ITableWorkspace_sptr &resultsTab, const int ispec) {
 
-  // Make sure paramTable is the right size
-  // It should contain as many rows as spectra
-  if (paramTab->rowCount() != nspec) {
-    throw std::invalid_argument(
-        "Can't extract detector parameters from fit results");
+  double asym = paramTab->Double(0, 1);
+  double omega = paramTab->Double(1, 1);
+  double phase = paramTab->Double(2, 1);
+  // If asym<0, take the absolute value and add \pi to phase
+  // f(x) = A * sin( w * x + p) = -A * sin( w * x + p + PI)
+  if (asym < 0) {
+    asym = -asym;
+    phase = phase + M_PI;
   }
-
-  // Create the table to store detector info
-  auto tab = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  tab->addColumn("int", "Detector");
-  tab->addColumn("double", "Asymmetry");
-  tab->addColumn("double", "Phase");
-
-  // Reference frequency, all w values should be the same
-  double omegaRef = paramTab->Double(0, 3);
-
-  for (size_t s = 0; s < nspec; s++) {
-    // The following '3' factor corresponds to the number of function params
-    double asym = paramTab->Double(s, 1);
-    double omega = paramTab->Double(s, 3);
-    double phase = paramTab->Double(s, 5);
-    // If omega != omegaRef something went wrong with the fit
-    if (omega != omegaRef) {
-      throw std::runtime_error("Fit failed");
-    }
-    // If asym<0, take the absolute value and add \pi to phase
-    // f(x) = A * sin( w * x + p) = -A * sin( w * x + p + PI)
-    if (asym < 0) {
-      asym = -asym;
-      phase = phase + M_PI;
-    }
-    // Now convert phases to interval [0, 2PI)
-    int factor = static_cast<int>(floor(phase / 2 / M_PI));
-    if (factor) {
-      phase = phase - factor * 2 * M_PI;
-    }
-    // Copy parameters to new table
-    API::TableRow row = tab->appendRow();
-    row << static_cast<int>(s) << asym << phase;
+  // Now convert phases to interval [0, 2PI)
+  int factor = static_cast<int>(floor(phase / 2 / M_PI));
+  if (factor) {
+    phase = phase - factor * 2 * M_PI;
   }
-
-  return tab;
+  // Copy parameters to new row in results table
+  API::TableRow row = resultsTab->appendRow();
+  row << ispec << asym << phase;
 }
 
 /** Creates the fitting function f(x) = A * sin( w*x + p) + B as string
@@ -540,17 +511,16 @@ double CalMuonDetectorPhases::fitFrequencyFromAsymmetry(
 }
 
 /**
- * Removes temporary workspaces from the ADS
+ * Updates the algorithm progress
+ * @param thisSpectrum :: [input] Spectrum number currently being fitted
+ * @param totalSpectra :: [input] Total number of spectra to fit
  */
-void CalMuonDetectorPhases::clearUpADS(const std::string &groupName) const {
-  std::ostringstream workspaces, covariance, parameters;
-  API::AnalysisDataService::Instance().remove(m_workspaceName);
-  workspaces << groupName << "_Workspaces";
-  API::AnalysisDataService::Instance().deepRemoveGroup(workspaces.str());
-  covariance << groupName << "_NormalisedCovarianceMatrices";
-  API::AnalysisDataService::Instance().deepRemoveGroup(covariance.str());
-  parameters << groupName << "_Parameters";
-  API::AnalysisDataService::Instance().deepRemoveGroup(parameters.str());
+void CalMuonDetectorPhases::reportProgress(const int thisSpectrum,
+                                           const int totalSpectra) {
+  double proportionDone = (double)thisSpectrum / (double)totalSpectra;
+  std::ostringstream progMessage;
+  progMessage << "Fitting " << thisSpectrum + 1 << " of " << totalSpectra;
+  this->progress(proportionDone, progMessage.str());
 }
 
 } // namespace Algorithms
