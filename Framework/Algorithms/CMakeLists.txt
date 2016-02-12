@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/ApplyTransmissionCorrection.cpp
 	src/AsymmetryCalc.cpp
 	src/AverageLogData.cpp
+        src/BasicInstrumentInfo.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
@@ -298,6 +299,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/AsymmetryCalc.h
 	inc/MantidAlgorithms/AverageLogData.h
+	inc/MantidAlgorithms/BasicInstrumentInfo.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
@@ -589,6 +591,7 @@ set ( TEST_FILES
 	ApplyTransmissionCorrectionTest.h
 	AsymmetryCalcTest.h
 	AverageLogDataTest.h
+	BasicInstrumentInfoTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
