@@ -366,7 +366,8 @@ public:
   *
   */
   virtual void plotDifcZeroCalibOutput(std::vector<double> &difc,
-                                       std::vector<double> &tzero) = 0;
+                                       std::vector<double> &tzero,
+                                       std::string &specNo) = 0;
 
   /**
   * Produces a single spectrum graph for focused output. Runs

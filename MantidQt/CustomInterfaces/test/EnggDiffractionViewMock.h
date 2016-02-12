@@ -156,8 +156,9 @@ public:
   MOCK_METHOD0(plotVanCurvesCalibOutput, void());
 
   // virtual void plotDifcZeroCalibOutput();
-  MOCK_METHOD2(plotDifcZeroCalibOutput,
-               void(std::vector<double> &difc, std::vector<double> &tzero));
+  MOCK_METHOD3(plotDifcZeroCalibOutput,
+               void(std::vector<double> &difc, std::vector<double> &tzero,
+                    std::string &specNo));
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

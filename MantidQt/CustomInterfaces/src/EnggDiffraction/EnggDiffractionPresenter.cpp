@@ -938,7 +938,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   const size_t bankNo2 = 2;
   std::vector<double> difc, tzero;
 
-  if (specNos != "") {
+  bool specNumUsed = specNos != "";
+  if (specNumUsed) {
     difc.resize(bankNo1);
     tzero.resize(bankNo1);
   } else {
@@ -954,7 +955,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       alg->setProperty("InputWorkspace", ceriaWS);
       alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
       alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-      if (specNos != "")
+      if (specNumUsed)
         alg->setPropertyValue(g_calibCropIdentifier,
                               boost::lexical_cast<std::string>(specNos));
       else
@@ -1001,7 +1002,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                  << std::endl;
 
   // plots the calibrated workspaces.
-  plotCalibWorkspace(difc, tzero);
+  plotCalibWorkspace(difc, tzero, specNos);
 }
 
 /**
@@ -2127,12 +2128,14 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
 * @param tzero vector of double to plot graph
 */
 void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
-                                                  std::vector<double> tzero) {
+                                                  std::vector<double> tzero,
+                                                  std::string specNos) {
   const bool plotCalibWS = m_view->plotCalibWorkspace();
   if (plotCalibWS) {
-    m_view->plotDifcZeroCalibOutput(difc, tzero);
     m_view->plotVanCurvesCalibOutput();
-    // for some reason which ever one is plot first seems to be generated
+    if (specNos == "" || g_calibCropIdentifier == "Bank") {
+      m_view->plotDifcZeroCalibOutput(difc, tzero, specNos);
+    }
   }
 }
 
