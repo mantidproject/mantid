@@ -1,10 +1,13 @@
-{
-    "CYCLOMATIC_COMPLEXITY": 10,
-    "LONG_CLASS": 1000,
-    "LONG_LINE": 200,
-    "LONG_METHOD": 100,
-    "MINIMUM_CASES_IN_SWITCH": 3,
-    "NPATH_COMPLEXITY": 200,
-    "NCSS_METHOD": 30,
-    "NESTED_BLOCK_DEPTH": 5
-}
+[
+	"-max-priority-1 100",
+	"-max-priority-2 5000",
+	"-max-priority-3 10000",
+	"-rc CYCLOMATIC_COMPLEXITY 10",
+	"-rc LONG_CLASS 1000",
+	"-rc LONG_LINE 200",
+	"-rc LONG_METHOD 100",
+	"-rc MINIMUM_CASES_IN_SWITCH 3",
+	"-rc NPATH_COMPLEXITY 200",
+	"-rc NCSS_METHOD 30",
+	"-rc NESTED_BLOCK_DEPTH 5"
+]
