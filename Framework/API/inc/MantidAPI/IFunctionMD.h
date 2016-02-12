@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/FunctionFactory.h"
