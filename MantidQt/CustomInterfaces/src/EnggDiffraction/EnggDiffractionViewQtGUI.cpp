@@ -368,6 +368,9 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("user-params-calib-cropped-group-checkbox",
               m_uiTabCalib.groupBox_calib_cropped->isChecked());
 
+  qs.setValue("user-param-calib-plot-data",
+              m_uiTabCalib.checkBox_PlotData_Calib->isChecked());
+
   // user params - focusing
   qs.setValue("user-params-focus-runno",
               m_uiTabFocus.lineEdit_run_num->getText());
@@ -534,6 +537,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabCalib.groupBox_calib_cropped->setEnabled(enable);
   m_uiTabCalib.pushButton_new_cropped_calib->setEnabled(enable);
   m_ui.pushButton_close->setEnabled(enable);
+  m_uiTabCalib.checkBox_PlotData_Calib->setEnabled(enable);
 
   // focus
   m_uiTabFocus.lineEdit_run_num->setEnabled(enable);

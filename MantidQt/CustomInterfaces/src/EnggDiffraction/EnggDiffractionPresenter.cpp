@@ -979,9 +979,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                    << std::endl;
 
   }
-  // plots the calibrated workspaces
-  plotCalibWorkspace(difc, tzero);
-
   // Creates appropriate directory
   Poco::Path saveDir = outFilesDir("Calibration");
 
@@ -995,6 +992,9 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero);
   g_log.notice() << "Calibration file written as " << outFullPath.toString()
                  << std::endl;
+
+  // plots the calibrated workspaces.
+  plotCalibWorkspace(difc, tzero);
 }
 
 /**
@@ -2116,6 +2116,7 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
   if (plotCalibWS) {
     m_view->plotDifcZeroCalibOutput(difc, tzero);
 	m_view->plotVanCurvesCalibOutput();
+	// for some reason which ever one is plot first seems to be generated
   
   }
 }
