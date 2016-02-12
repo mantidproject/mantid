@@ -6,7 +6,6 @@
 #include "MantidGeometry/IDTypes.h"
 
 #include <string>
-#include <vector>
 
 namespace Mantid {
 namespace API {

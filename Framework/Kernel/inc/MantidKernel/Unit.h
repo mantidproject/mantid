@@ -4,7 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitLabel.h"
 #include <map>
 #include <vector>
