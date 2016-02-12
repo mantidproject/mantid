@@ -136,6 +136,7 @@ if __name__ == "__main__":
             xml_files = lint_jsonfiles(args.oclint, json_files, config)
             combine_outputs(xml_files)
             for xml_file in xml_files:
-                os.remove(xml_file)
+                if os.path.exists(xml_file):
+                    os.remove(xml_file)
         finally:
             rename(json_file, args.compile_commands)
