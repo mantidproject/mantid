@@ -19,8 +19,8 @@ public:
   static void destroySuite(BasicInstrumentInfoTest *suite) { delete suite; }
 
   BasicInstrumentInfoTest() {
-    workspace = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-        1, 2, false);
+    workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        1, 1, false);
   }
 
   void test_constructor() {
@@ -45,8 +45,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(info.getSample());
   }
 
+  void test_getSourcePos() {
+    auto info = BasicInstrumentInfo(*workspace);
+    TS_ASSERT_EQUALS(info.getSourcePos(), Kernel::V3D(-20.0,0.0,0.0));
+  }
+
+  void test_getSamplePos() {
+    auto info = BasicInstrumentInfo(*workspace);
+    TS_ASSERT_EQUALS(info.getSamplePos(), Kernel::V3D(0.0,0.0,0.0));
+  }
+
+  void test_getL1() {
+    auto info = BasicInstrumentInfo(*workspace);
+    TS_ASSERT_EQUALS(info.getL1(), 20.0);
+  }
+
 private:
-  EventWorkspace_sptr workspace;
+  Workspace2D_sptr workspace;
 };
 
 #endif /* MANTID_ALGORITHMS_BASICINSTRUMENTINFOTEST_H_ */

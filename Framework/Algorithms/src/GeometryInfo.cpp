@@ -36,9 +36,7 @@ bool GeometryInfo::isMonitor() const { return m_detector->isMonitor(); }
 bool GeometryInfo::isMasked() const { return m_detector->isMasked(); }
 
 double GeometryInfo::getL1() const {
-  auto &source = m_instrument_info.getSource();
-  auto &sample = m_instrument_info.getSample();
-  return source.getDistance(sample);
+  return m_instrument_info.getL1();
 }
 
 double GeometryInfo::getL2() const {
@@ -53,12 +51,8 @@ double GeometryInfo::getL2() const {
 }
 
 double GeometryInfo::getTwoTheta() const {
-  auto &source = m_instrument_info.getSource();
-  auto &sample = m_instrument_info.getSample();
-
-  // TODO move these to BasicInstrumentInfo
-  const Kernel::V3D samplePos = sample.getPos();
-  const Kernel::V3D beamLine = samplePos - source.getPos();
+  const Kernel::V3D samplePos = m_instrument_info.getSamplePos();
+  const Kernel::V3D beamLine = samplePos - m_instrument_info.getSourcePos();
 
   if (beamLine.nullVector()) {
     throw Kernel::Exception::InstrumentDefinitionError(
@@ -69,12 +63,8 @@ double GeometryInfo::getTwoTheta() const {
 }
 
 double GeometryInfo::getSignedTwoTheta() const {
-  auto &source = m_instrument_info.getSource();
-  auto &sample = m_instrument_info.getSample();
-
-  // TODO move these to BasicInstrumentInfo
-  const Kernel::V3D samplePos = sample.getPos();
-  const Kernel::V3D beamLine = samplePos - source.getPos();
+  const Kernel::V3D samplePos = m_instrument_info.getSamplePos();
+  const Kernel::V3D beamLine = samplePos - m_instrument_info.getSourcePos();
 
   if (beamLine.nullVector()) {
     throw Kernel::Exception::InstrumentDefinitionError(
