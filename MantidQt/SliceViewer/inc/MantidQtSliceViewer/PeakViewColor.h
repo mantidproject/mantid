@@ -1,5 +1,5 @@
-#ifndef MANTID_SLICEVIEWER_PEAK_VIEW_PALETTE_H_
-#define MANTID_SLICEVIEWER_PEAK_VIEW_PALETTE_H_
+#ifndef MANTID_SLICEVIEWER_PEAK_VIEW_COLOR_H_
+#define MANTID_SLICEVIEWER_PEAK_VIEW_COLOR_H_
 
 #include <QColor>
 
@@ -11,7 +11,5 @@ struct PeakViewColor {
     QColor colorSphere;
     QColor colorEllipsoid;
 };
-
-
 
 #endif

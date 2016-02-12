@@ -1,7 +1,7 @@
 #include "MantidQtSliceViewer/PeakPrimitives.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeakRepresentationCross.h"
-#include "MantidQtSliceViewer/PeakViewPalette.h"
+#include "MantidQtSliceViewer/PeakViewColor.h"
 #include "MantidKernel/V2D.h"
 #include <QPainter>
 
@@ -162,5 +162,11 @@ const Mantid::Kernel::V3D &PeakRepresentationCross::getOrigin() const
 {
     return m_origin;
 }
+
+void PeakRepresentationCross::showBackgroundRadius(const bool) {
+  // Do nothing
+}
+
+
 }
 }

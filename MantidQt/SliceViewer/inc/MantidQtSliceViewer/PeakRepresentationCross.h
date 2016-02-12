@@ -42,6 +42,8 @@ public:
     double getOccupancyIntoView() const override;
     /// Get the origin
     const Mantid::Kernel::V3D& getOrigin() const override;
+    /// Show the background radius
+    void showBackgroundRadius(const bool show) override;
 
 protected:
     std::shared_ptr<PeakPrimitives> getDrawingInformation(

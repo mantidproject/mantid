@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtSliceViewer/PeakPrimitives.h"
-#include "MantidQtSliceViewer/PeakViewPalette.h"
+#include "MantidQtSliceViewer/PeakViewColor.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 
 
@@ -46,6 +46,8 @@ public:
   virtual double getOccupancyIntoView() const = 0;
   /// Gets the origin
   virtual const Mantid::Kernel::V3D& getOrigin() const = 0;
+  /// Show the background radius
+  virtual void showBackgroundRadius(const bool show) = 0;
 
 protected:
   virtual std::shared_ptr<PeakPrimitives> getDrawingInformation(PeakRepresentationViewInformation viewInformation) = 0;

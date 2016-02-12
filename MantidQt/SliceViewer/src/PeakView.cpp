@@ -88,13 +88,10 @@ void PeakView::movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform)
 
 void PeakView::showBackgroundRadius(const bool )
 {
-#if 0
-  THIS IS A SPHERE ISSUE
   for(const auto& peak : m_peaks) {
     peak->showBackgroundRadius(show);
   }
   m_showBackground = show;
-#endif
 }
 
 PeakBoundingBox PeakView::getBoundingBox(const int peakIndex) const
@@ -142,44 +139,39 @@ bool PeakView::positionOnly() const
 
 double PeakView::getRadius() const
 {
-    // TODO how to set this for differnt peak types
-  return 0.0;
+  // TODO how to get an effective radius for varying peaks?
+  return m_peaks[0]->getEffectiveRadius();
 }
 
 bool PeakView::isBackgroundShown() const
 {
-    // TODO how to set this for differnt peak types, probably always false from
-    // now on
-    return true;
+    // This might be odd for cross-types
+    return m_showBackground;
 }
 
 /// Get the current background colour
 QColor PeakView::getBackgroundColour() const
 {
-    // TODO how to set this for differnt peak types, probably always false from
-    // now on
+    // TODO : REMOVE
   return QColor();
 }
 
 /// Get the current foreground colour
 QColor PeakView::getForegroundColour() const
 {
-    /// TODO Have a general color object with a map for the differnt
-    /// representations
+    /// TODO : REMOVE
     return QColor();
 }
 
 void PeakView::changeForegroundColour(const QColor)
 {
-    // TODO how to change color for differnt representations:
-    // this->m_peakColour = QColor(colour);
+  // TODO: REMOVE
 }
 
 /// Change background colour
 void PeakView::changeBackgroundColour(const QColor)
 {
-    // TODO how to change color for differnt representations:
-  // Introduce PeakColorView struct
+    // TODO : REMOVE
 }
 
 void PeakView::takeSettingsFrom(const PeakOverlayView *const)
@@ -187,5 +179,25 @@ void PeakView::takeSettingsFrom(const PeakOverlayView *const)
     // TODO how to set this for differnt peak types, probably always false from
     // now on
 }
+
+void PeakView::changeForegroundColour(const PeakViewColor peakViewColor) {
+  m_foregroundColor = peakViewColor;
+}
+
+
+void PeakView::changeBackgroundColour(const PeakViewColor peakViewColor) {
+  m_backgroundColor = peakViewColor;
+}
+
+PeakViewColor PeakView::getBackgroundPeakViewColor() const {
+  return m_backgroundColor;
+}
+
+
+PeakViewColor PeakView::getForegroundPeakViewColor() const {
+  return m_foregroundColor;
+}
+
+
 }
 }

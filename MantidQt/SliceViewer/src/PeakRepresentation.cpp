@@ -1,5 +1,5 @@
 #include "MantidQtSliceViewer/PeakRepresentation.h"
-#include "MantidQtSliceViewer/PeakViewPalette.h"
+#include "MantidQtSliceViewer/PeakViewColor.h"
 #include <QPainter>
 
 namespace MantidQt

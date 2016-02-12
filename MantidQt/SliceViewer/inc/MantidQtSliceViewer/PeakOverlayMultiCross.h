@@ -92,6 +92,15 @@ namespace SliceViewer
     /// Take settings from another view
     virtual void takeSettingsFrom(const PeakOverlayView * const);
 
+    /// Change foreground colour -- overload for PeakViewColor
+    void changeForegroundColour(const PeakViewColor) override;
+    /// Change background colour -- overload for PeakViewColor
+    void changeBackgroundColour(const PeakViewColor) override;
+    /// Get the current background colour
+    PeakViewColor getBackgroundPeakViewColor() const override;
+    /// Get the current foreground colour
+    PeakViewColor getForegroundPeakViewColor() const override;
+
   private:
 
     /// Pure virtual on PeakOverlayInteractive

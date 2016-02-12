@@ -217,5 +217,24 @@ namespace MantidQt
         this->showBackgroundRadius(source->isBackgroundShown());
     }
 
+    void PeakOverlayMultiCross::changeForegroundColour(const PeakViewColor) {
+      // DO NOTHING
+    }
+
+
+    void PeakOverlayMultiCross::changeBackgroundColour(const PeakViewColor) {
+      // DO NOTHING
+    }
+
+    PeakViewColor PeakOverlayMultiCross::getBackgroundPeakViewColor() const {
+      return PeakViewColor();
+    }
+
+
+    PeakViewColor PeakOverlayMultiCross::getForegroundPeakViewColor() const {
+      return PeakViewColor();
+    }
+
+
   } // namespace Mantid
 } // namespace SliceViewer

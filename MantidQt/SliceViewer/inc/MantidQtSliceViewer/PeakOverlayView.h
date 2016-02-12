@@ -5,6 +5,7 @@
 #include "MantidKernel/V2D.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
+#include "MantidQtSliceViewer/PeakViewColor.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include <QPointF>
 #include <boost/shared_ptr.hpp>
@@ -13,6 +14,7 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+
     /** Abstract view in MVP model representing a PeakOverlay.
     
     @date 2012-08-24
@@ -88,6 +90,15 @@ namespace MantidQt
       virtual ~PeakOverlayView()
       {
       }
+
+      /// Change foreground colour -- overload for PeakViewColor
+      virtual void changeForegroundColour(const PeakViewColor) = 0;
+      /// Change background colour -- overload for PeakViewColor
+      virtual void changeBackgroundColour(const PeakViewColor) = 0;
+      /// Get the current background colour
+      virtual PeakViewColor getBackgroundPeakViewColor() const = 0;
+      /// Get the current foreground colour
+      virtual PeakViewColor getForegroundPeakViewColor() const = 0;
     };
 
     typedef boost::shared_ptr<const PeakOverlayView> PeakOverlayView_const_sptr;

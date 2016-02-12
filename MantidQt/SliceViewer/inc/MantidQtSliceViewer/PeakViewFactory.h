@@ -3,7 +3,7 @@
 
 #include "MantidQtSliceViewer/PeakOverlayViewFactoryBase.h"
 #include "MantidQtSliceViewer/PeakRepresentation.h"
-#include "MantidQtSliceViewer/PeakViewPalette.h"
+#include "MantidQtSliceViewer/PeakViewColor.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 
@@ -52,7 +52,7 @@ private:
         const Mantid::Geometry::IPeak &peak) const;
 
     // Set color palette
-    void setColors(const size_t colourNumber) const;
+    void setForegroundAndBackgroundColors(const size_t colourNumber);
 
     // The actual workspace
     Mantid::API::IMDWorkspace_sptr m_mdWS;

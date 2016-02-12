@@ -3,7 +3,6 @@
 
 #include "MantidQtSliceViewer/PeakOverlayInteractive.h"
 #include "PeakRepresentation.h"
-#include "MantidQtSliceViewer/PeakViewPalette.h"
 
 namespace MantidQt
 {
@@ -81,6 +80,18 @@ public:
 
     /// Take settings from another view
     void takeSettingsFrom(const PeakOverlayView *const) override;
+
+    /// Change foreground colour -- overload for PeakViewColor
+    void changeForegroundColour(const PeakViewColor peakViewColor) override;
+
+    /// Change background colour -- overload for PeakViewColor
+    void changeBackgroundColour(const PeakViewColor peakViewColor) override;
+
+    /// Get the current background colour
+    PeakViewColor getBackgroundPeakViewColor() const override;
+
+    /// Get the current foreground colour
+    PeakViewColor getForegroundPeakViewColor() const override;
 
 private:
     /// Draw the peak representations. Pure virtual on base class.
