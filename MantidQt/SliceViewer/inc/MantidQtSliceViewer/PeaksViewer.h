@@ -48,6 +48,8 @@ public slots:
   void onPeakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
   void onBackgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr,
                                  QColor);
+  void onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor);
+  void onBackgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor);
   void onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool);
   void onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
   void onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, bool);

@@ -44,6 +44,12 @@ public:
   }
   void setBackgroundColor(const QColor) { /*Do nothing*/
   }
+  virtual void setForegroundColor(const PeakViewColor) {
+    /*Do nothing*/
+  }
+  virtual void setBackgroundColor(const PeakViewColor) {
+    /*Do nothing*/
+  }
   void showBackgroundRadius(const bool) { /*Do nothing*/
   }
   void setShown(const bool) { /*Do nothing*/
@@ -97,11 +103,24 @@ public:
   void
   setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
                       const QColor);
+  void
+  setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
+                      const PeakViewColor);
+  /// Change the background representation for the peaks of this workspace
+  void
+  setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
+                      const PeakViewColor);
   /// Get the foreground colour corresponding to the workspace
   QColor getForegroundColour(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
   /// Get the background colour corresponding to the workspace
   QColor getBackgroundColour(
+      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
+  /// Get the foreground colour corresponding to the workspace
+  PeakViewColor getForegroundPeakViewColor(
+      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
+  /// Get the background colour corresponding to the workspace
+  PeakViewColor getBackgroundPeakViewColor(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
   /// Determine if the background is shown or not.
   bool getShowBackground(
@@ -174,6 +193,8 @@ private:
   SubjectContainer::iterator getPresenterIteratorFromName(const QString &name);
   /// Colour pallette.
   PeakPalette<QColor> m_palette;
+  /// Color palette
+  PeakPalette<PeakViewColor> m_palettePeakViewColor;
   /// Zoomable peaks view.
   ZoomablePeaksView *const m_zoomablePlottingWidget;
   /// Default behaviour

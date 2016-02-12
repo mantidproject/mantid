@@ -26,10 +26,13 @@ Constructor
 PeaksWorkspaceWidget::PeaksWorkspaceWidget(
     Mantid::API::IPeaksWorkspace_const_sptr ws,
     const std::string &coordinateSystem, const QColor &defaultForegroundColour,
-    const QColor &defaultBackgroundColour, const bool canAddPeaks, PeaksViewer *parent)
+    const QColor &defaultBackgroundColour, const PeakViewColor &defaultForegroundPeakViewColor,
+    const PeakViewColor &defaultBackgroundPeakViewColor, const bool canAddPeaks, PeaksViewer *parent)
     : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem),
       m_foregroundColour(defaultForegroundColour),
       m_backgroundColour(defaultBackgroundColour),
+      m_foregroundPeakViewColor(defaultForegroundPeakViewColor),
+      m_backgroundPeakViewColor(defaultBackgroundPeakViewColor),
       m_parent(parent) {
 
   ui.setupUi(this);
@@ -41,6 +44,7 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
           SLOT(onBackgroundColourClicked()));
   connect(ui.btnPeakColor, SIGNAL(clicked()), this,
           SLOT(onForegroundColourClicked()));
+  // TODO need to connect to PeakViewColor here     <--------------------------------
   connect(ui.btnRemove, SIGNAL(clicked()), this,
           SLOT(onRemoveWorkspaceClicked()));
   connect(ui.btnHide, SIGNAL(clicked()), this, SLOT(onToggleHideInPlot()));
@@ -228,6 +232,25 @@ void PeaksWorkspaceWidget::setBackgroundColor(const QColor &backgroundColor) {
 void PeaksWorkspaceWidget::setForegroundColor(const QColor &foregroundColor) {
   ui.btnPeakColor->setBackgroundColor(foregroundColor);
 }
+
+/**
+ * Set the background color
+ * @param backgroundColor
+ */
+void PeaksWorkspaceWidget::setBackgroundColor(const PeakViewColor &) {
+  // TODO add functionality here when button for PeakViewColor exist
+  //ui.btnBackgroundColor->setBackgroundColor(backgroundColor);
+}
+
+/**
+ * Set the foreground color
+ * @param foregroundColor
+ */
+void PeaksWorkspaceWidget::setForegroundColor(const PeakViewColor &) {
+  // TODO add functionality here when button for PeakViewColor exist
+  //ui.btnPeakColor->setBackgroundColor(foregroundColor);
+}
+
 
 /**
  * Set show/hide background

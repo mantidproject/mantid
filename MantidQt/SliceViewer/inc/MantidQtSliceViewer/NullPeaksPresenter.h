@@ -26,6 +26,16 @@ public:
   }
   void setBackgroundColor(const QColor) { /*Do nothing*/
   }
+  void setForegroundColor(const PeakViewColor) { /*Do nothing*/
+  }
+  void setBackgroundColor(const PeakViewColor) { /*Do nothing*/
+  }
+  PeakViewColor getBackgroundPeakViewColor() const {
+    return PeakViewColor();
+  }
+  PeakViewColor getForegroundPeakViewColor() const {
+    return PeakViewColor();
+  }
   std::string getTransformName() const { return ""; }
   void showBackgroundRadius(const bool) { /*Do nothing*/
   }
