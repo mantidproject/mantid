@@ -3,6 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/RRFMuon.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Algorithms;

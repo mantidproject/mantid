@@ -5,6 +5,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/NormaliseToMonitor.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 
