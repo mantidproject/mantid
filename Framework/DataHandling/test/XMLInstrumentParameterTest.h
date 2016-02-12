@@ -67,7 +67,8 @@ public:
   // checks that this is done ok
   void testParsing() {
     IComponent *comp(NULL);
-    boost::shared_ptr<Interpolation> interpolation(new Interpolation);
+    boost::shared_ptr<Interpolation> interpolation =
+        boost::make_shared<Interpolation>();
     std::vector<std::string> constraint;
     std::string penaltyFactor;
     std::string fitFunc;

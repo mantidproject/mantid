@@ -181,7 +181,7 @@ void PeakHKLErrors::cLone(
 boost::shared_ptr<Geometry::Instrument>
 PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
   Geometry::Instrument_const_sptr instSave = Peaks->getPeak(0).getInstrument();
-  boost::shared_ptr<Geometry::ParameterMap> pmap(new Geometry::ParameterMap());
+  auto pmap = boost::make_shared<Geometry::ParameterMap>();
   boost::shared_ptr<const Geometry::ParameterMap> pmapSv =
       instSave->getParameterMap();
 
@@ -189,20 +189,18 @@ PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
     g_log.error(" Peaks workspace does not have an instrument");
     throw std::invalid_argument(" Not all peaks have an instrument");
   }
-  boost::shared_ptr<Geometry::Instrument> instChange(
-      new Geometry::Instrument());
+  auto instChange = boost::shared_ptr<Geometry::Instrument>();
 
   if (!instSave->isParametrized()) {
 
     boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
-    boost::shared_ptr<Geometry::Instrument> Pinsta(
-        new Geometry::Instrument(instSave, pmap));
+    auto Pinsta = boost::make_shared<Geometry::Instrument>(instSave, pmap);
 
     instChange = Pinsta;
   } else // catch(... )
   {
-    boost::shared_ptr<Geometry::Instrument> P1(
-        new Geometry::Instrument(instSave->baseInstrument(), pmap));
+    auto P1 = boost::make_shared<Geometry::Instrument>(
+        instSave->baseInstrument(), pmap);
     instChange = P1;
   }
 

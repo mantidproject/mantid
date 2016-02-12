@@ -210,8 +210,8 @@ void LoadISISNexus2::exec() {
   size_t total_specs =
       prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_loadBlockInfo);
 
-  m_progress = boost::shared_ptr<API::Progress>(new Progress(
-      this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods));
+  m_progress = boost::make_shared<API::Progress>(
+      this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods);
 
   DataObjects::Workspace2D_sptr local_workspace =
       boost::dynamic_pointer_cast<DataObjects::Workspace2D>(

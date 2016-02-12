@@ -127,7 +127,7 @@ PreprocessDetectorsToMD::createTableWorkspace(
   const size_t nHist = inputWS->getNumberHistograms();
 
   // set the target workspace
-  auto targWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(nHist));
+  auto targWS = boost::make_shared<TableWorkspace>(nHist);
   // detectors positions
   if (!targWS->addColumn("V3D", "DetDirections"))
     throw(std::runtime_error("Can not add column DetDirectrions"));
