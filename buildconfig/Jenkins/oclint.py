@@ -77,7 +77,7 @@ def combine_outputs(output_files):
     base_tree = None
     base_root = None
 
-    for filename in outputfiles:
+    for filename in output_files:
         if not os.path.exists(filename):
             continue
 
