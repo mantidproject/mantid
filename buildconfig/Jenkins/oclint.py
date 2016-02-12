@@ -74,17 +74,22 @@ def lint(oclint, out_file, config):
 def combine_outputs(output_files):
     print "combining output files"
 
-    # first file
-    base_tree = ET.ElementTree(file=output_files[0])
-    base_root = base_tree.getroot()
+    base_tree = None
+    base_root = None
 
-    left_files = output_files[1:len(output_files)-1]
-    for left_file in left_files:
+    for filename in outputfiles:
+        if not os.path.exists(filename):
+            continue
+
         tree = ET.ElementTree(file=left_file)
         root = tree.getroot()
 
-        for child in root:
-            base_root.append(child)
+        if base_tree is None:
+            base_tree = tree
+            base_root = root
+        else:
+            for child in root:
+                base_root.append(child)
 
     base_tree.write('oclint.xml', encoding='utf-8', xml_declaration=True)
 
