@@ -4,6 +4,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/OptionalBool.h"
+#include <cmath>
 
 namespace Mantid {
 namespace Kernel {
