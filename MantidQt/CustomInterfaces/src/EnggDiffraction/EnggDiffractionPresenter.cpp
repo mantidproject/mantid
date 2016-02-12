@@ -2126,6 +2126,7 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
 *
 * @param difc vector of double passed on to py script
 * @param tzero vector of double to plot graph
+* @param specNos string carrying cropped calib info
 */
 void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
                                                   std::vector<double> tzero,
