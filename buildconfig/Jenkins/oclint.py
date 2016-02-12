@@ -21,7 +21,7 @@ def load_config_json(filename):
 
     commandline = ["-rc %s=%d" % (key, config[key]) for key in config.keys()]
     commandline.append("-max-priority-1 100")
-    commandline.append("-max-priority-2 1000")
+    commandline.append("-max-priority-2 5000")
     commandline.append("-max-priority-3 10000")
     commandline = [str(item) for item in commandline]
 
