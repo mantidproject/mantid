@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidKernel/UnitFactory.h"
 
