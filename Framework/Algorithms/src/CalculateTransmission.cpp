@@ -272,10 +272,9 @@ CalculateTransmission::extractSpectra(API::MatrixWorkspace_sptr ws,
   // means that lexical_cast cannot be used directly as the call is ambiguous
   // so we need to define a function pointer that can resolve the overloaded
   // lexical_cast function
-  typedef std::string (*from_size_t)(const size_t &);
-
   std::transform(indices.begin(), indices.end(), indexStrings.begin(),
-                 (from_size_t)boost::lexical_cast<std::string, size_t>);
+                 std::function<std::string(size_t)>(
+                     boost::lexical_cast<std::string, size_t>));
   const std::string commaIndexList = boost::algorithm::join(indexStrings, ",");
 
   double start = m_done;

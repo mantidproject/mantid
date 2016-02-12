@@ -442,8 +442,9 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
                errors.begin() + (i + 1) * m_numBins);
     } else {
       // Now take the sqrt(Y) to give E
-      E = Y;
-      std::transform(E.begin(), E.end(), E.begin(), (double (*)(double))sqrt);
+      E = MantidVec();
+      std::transform(Y.begin(), Y.end(), std::back_inserter(E),
+                     std::function<double(double)>(sqrt));
     }
   }
 

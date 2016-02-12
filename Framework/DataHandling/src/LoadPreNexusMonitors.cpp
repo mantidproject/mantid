@@ -192,7 +192,7 @@ void LoadPreNexusMonitors::exec() {
     MantidVec error(buffer.begin(), buffer.end());
     // Now take the sqrt()
     std::transform(error.begin(), error.end(), error.begin(),
-                   (double (*)(double))sqrt);
+                   std::function<double(double)>(sqrt));
 
     localWorkspace->dataX(i) = time_bins;
     localWorkspace->dataY(i) = intensity;

@@ -1733,7 +1733,8 @@ int IntegratePeakTimeSlices::find(Mantid::MantidVec const &X,
   if (sgn * (time - X[X.size() - 1]) >= 0)
     return static_cast<int>(X.size()) - 1;
 
-  for (size_t i = 0; i < (size_t)X.size() - static_cast<size_t>(1); i++) {
+  size_t end = static_cast<size_t>(X.size() - 1u);
+  for (size_t i = 0; i < end; i++) {
     if (sgn * (time - X[i]) >= 0 &&
         sgn * (X[i + static_cast<size_t>(1)] - time) >= 0)
       return static_cast<int>(i);
@@ -2102,12 +2103,12 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
   {
     done = true;
     g_log.error() << "Bivariate Error for PeakNum="
-                  << (int)getProperty("PeakIndex") << ":"
+                  << static_cast<int>(getProperty("PeakIndex")) << ":"
                   << std::string(Ex1.what()) << std::endl;
   } catch (...) {
     done = true;
     g_log.error() << "Bivariate Error A for peakNum="
-                  << (int)getProperty("PeakIndex") << std::endl;
+                  << static_cast<int>(getProperty("PeakIndex")) << std::endl;
   }
   if (!done) // Bivariate error happened
   {

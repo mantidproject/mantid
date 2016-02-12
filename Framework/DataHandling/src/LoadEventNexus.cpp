@@ -1206,10 +1206,10 @@ void LoadEventNexus::init() {
   setPropertyGroup("FilterMonByTimeStart", grp4);
   setPropertyGroup("FilterMonByTimeStop", grp4);
 
-  declareProperty("SpectrumMin", (int32_t)EMPTY_INT(), mustBePositive,
-                  "The number of the first spectrum to read.");
-  declareProperty("SpectrumMax", (int32_t)EMPTY_INT(), mustBePositive,
-                  "The number of the last spectrum to read.");
+  declareProperty("SpectrumMin", static_cast<int32_t>(EMPTY_INT()),
+                  mustBePositive, "The number of the first spectrum to read.");
+  declareProperty("SpectrumMax", static_cast<int32_t>(EMPTY_INT()),
+                  mustBePositive, "The number of the last spectrum to read.");
   declareProperty(new ArrayProperty<int32_t>("SpectrumList"),
                   "A comma-separated list of individual spectra to read.");
 

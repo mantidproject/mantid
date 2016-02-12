@@ -271,7 +271,8 @@ std::string ISISHistoDataListener::getString(const std::string &par) const {
   const int maxSize = 1024;
   char buffer[maxSize];
   int dim = maxSize, ndims = 1;
-  if (IDCgetparc(m_daeHandle, par.c_str(), (char *)buffer, &dim, &ndims) != 0) {
+  if (IDCgetparc(m_daeHandle, par.c_str(), static_cast<char *>(buffer), &dim,
+                 &ndims) != 0) {
     g_log.error("Unable to read " + par + " from DAE " + m_daeName);
     throw Kernel::Exception::FileError("Unable to read " + par + " from DAE ",
                                        m_daeName);
