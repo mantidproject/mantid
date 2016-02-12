@@ -138,12 +138,12 @@ public:
   void testAssignment()
   {
     // Create an original, and modify the palette a little, so we can be sure that the copy is a genuine copy of the current state.
-    PeakPalette A<QColor>;
+    PeakPalette<QColor> A;
     A.setForegroundColour(0, Qt::red);
     A.setBackgroundColour(0, Qt::blue);
 
     // Make another.
-    PeakPalette B<QColor>;
+    PeakPalette<QColor> B;
 
     // Make A == B
     B = A;
@@ -167,16 +167,16 @@ public:
 
   void test_are_equal()
   {
-    PeakPalette A<QColor>;
-    PeakPalette B<QColor>;
+    PeakPalette<QColor> A;
+    PeakPalette<QColor> B;
 
     TS_ASSERT_EQUALS(A, B);
   }
 
   void test_are_not_equal_after_changing_a_foreground_colour()
   {
-    PeakPalette A<QColor>;
-    PeakPalette B<QColor>;
+    PeakPalette<QColor> A;
+    PeakPalette<QColor> B;
 
     const int modifyIndex = 0;
     QColor originalColourAtIndex = A.backgroundIndexToColour(modifyIndex);
@@ -194,8 +194,8 @@ public:
 
   void test_not_not_equal_after_changing_a_backgroundcolour()
   {
-    PeakPalette A<QColor>;
-    PeakPalette B<QColor>;
+    PeakPalette<QColor> A;
+    PeakPalette<QColor> B;
 
     const int modifyIndex = 0;
     QColor originalColourAtIndex = A.backgroundIndexToColour(modifyIndex);
@@ -211,6 +211,21 @@ public:
     TS_ASSERT_EQUALS(A, B);
   }
 
+
+  // ----- Tests for PeakViewColor
+  void test_that_peak_view_color_specialization_produces_output_with_three_colors() {
+    // Arrange
+    PeakPalette<PeakViewColor> palette;
+
+    const int index = 2;
+
+    // Act + Assert
+    PeakViewColor foregroundColor;
+    PeakViewColor backgroundColor;
+
+    TSM_ASSERT_THROWS_NOTHING("Should happily create the foreground color", foregroundColor = palette.foregroundIndexToColour(index));
+    TSM_ASSERT_THROWS_NOTHING("Should happily create the background color", backgroundColor = palette.backgroundIndexToColour(index));
+  }
 };
 
 #endif

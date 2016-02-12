@@ -8,6 +8,7 @@
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
+#include "MantidQtSliceViewer/PeakViewColor.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -132,6 +133,10 @@ public:
   MOCK_CONST_METHOD0(isBackgroundShown, bool());
   MOCK_CONST_METHOD0(getForegroundColour, QColor());
   MOCK_CONST_METHOD0(getBackgroundColour, QColor());
+  MOCK_METHOD1(changeForegroundColour, void(const PeakViewColor));
+  MOCK_METHOD1(changeBackgroundColour, void(const PeakViewColor));
+  MOCK_CONST_METHOD0(getBackgroundPeakViewColor, PeakViewColor());
+  MOCK_CONST_METHOD0(getForegroundPeakViewColor, PeakViewColor());
   MOCK_METHOD0(peakDeletionMode, void());
   MOCK_METHOD0(peakAdditionMode, void());
   MOCK_METHOD0(peakDisplayMode, void());

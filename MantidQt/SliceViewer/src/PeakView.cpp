@@ -86,7 +86,7 @@ void PeakView::movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform)
     }
 }
 
-void PeakView::showBackgroundRadius(const bool )
+void PeakView::showBackgroundRadius(const bool show)
 {
   for(const auto& peak : m_peaks) {
     peak->showBackgroundRadius(show);
@@ -101,8 +101,6 @@ PeakBoundingBox PeakView::getBoundingBox(const int peakIndex) const
 
 void PeakView::changeOccupancyInView(const double fraction)
 {
-  // TODO check if this makes sense
-
     for (const auto &peak : m_peaks) {
         peak->setOccupancyInView(fraction);
     }
@@ -111,7 +109,6 @@ void PeakView::changeOccupancyInView(const double fraction)
 
 void PeakView::changeOccupancyIntoView(const double fraction)
 {
-  // TODO check if this makes sense
     for (const auto &peak : m_peaks) {
         peak->setOccupancyIntoView(fraction);
     }
@@ -139,7 +136,6 @@ bool PeakView::positionOnly() const
 
 double PeakView::getRadius() const
 {
-  // TODO how to get an effective radius for varying peaks?
   return m_peaks[0]->getEffectiveRadius();
 }
 

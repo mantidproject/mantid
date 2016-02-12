@@ -2,6 +2,7 @@
 #define MANTID_SLICEVIEWER_PEAKPALETTE_H
 
 #include "MantidKernel/System.h"
+#include "MantidQtSliceViewer/PeakViewColor.h"
 #include <algorithm>
 #include <sstream>
 #include <stdexcept>
@@ -13,17 +14,8 @@ namespace MantidQt
 namespace SliceViewer
 {
 
-template <typename C = QColor> class DLLExport PeakPalette
+template <typename C> class DLLExport PeakPalette
 {
-private:
-    typedef std::map<int, C> ColourMapType;
-    ColourMapType m_backgroundMap;
-    ColourMapType m_foregroundMap;
-    typename ColourMapType::iterator safeFetchPair(ColourMapType &map,
-                                                   const int index);
-    typename ColourMapType::const_iterator
-    safeFetchPair(const ColourMapType &map, const int index) const;
-
 public:
     PeakPalette();
     PeakPalette(const PeakPalette &other);
@@ -35,6 +27,15 @@ public:
     int paletteSize() const;
     bool operator==(const PeakPalette &other) const;
     ~PeakPalette();
+
+private:
+    typedef std::map<int, C> ColourMapType;
+    ColourMapType m_backgroundMap;
+    ColourMapType m_foregroundMap;
+    typename ColourMapType::iterator safeFetchPair(ColourMapType &map,
+                                                   const int index);
+    typename ColourMapType::const_iterator
+    safeFetchPair(const ColourMapType &map, const int index) const;
 };
 
 template <typename C> PeakPalette<C>::PeakPalette() {}
@@ -149,6 +150,10 @@ bool PeakPalette<C>::operator==(const PeakPalette &other) const
     }
     return areEqual;
 }
+
+// Forward declaration for template specialization
+template <> PeakPalette<QColor>::PeakPalette();
+template <> PeakPalette<PeakViewColor>::PeakPalette();
 
 } // namespace
 }
