@@ -70,8 +70,8 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
       m_workspaceInitialized(false), m_socket(), m_isConnected(false),
       m_pauseNetRead(false), m_stopThread(false), m_runPaused(false),
       m_ignorePackets(true), m_filterUntilRunStart(false)
-// ADARA::Parser() will accept values for buffer size and max packet size, but
-// the defaults will work fine
+// ADARA::Parser() will accept values for buffer size and max packet size,
+// but the defaults will work fine
 {
 
   // Perform all the workspace initialization steps (including actually creating
@@ -122,11 +122,10 @@ SNSLiveEventDataListener::~SNSLiveEventDataListener() {
 /// @return Returns true if the connection succeeds.  False otherwise.
 bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 // The SocketAddress class will throw various exceptions if it encounters an
-// error
-// We're assuming the calling function will catch any exceptions that are
-// important
-// Note: Right now, it's the factory class that actually calls connect(), and it
-// doesn't check the return value.  (It does, however, trap the Poco
+// error.  We're assuming the calling function will catch any exceptions
+// that are important.
+// Note: Right now, it's the factory class that actually calls connect(),
+// and it doesn't check the return value.  (It does, however, trap the Poco
 // exceptions.)
 {
   bool rv = false; // assume failure
@@ -210,7 +209,13 @@ void SNSLiveEventDataListener::run() {
     }
 
     // First thing to do is send a hello packet
-    uint32_t helloPkt[5] = {4, ADARA::PacketType::CLIENT_HELLO_V0, 0, 0, 0};
+    uint32_t typeVal =
+        ADARA_PKT_TYPE(ADARA::PacketType::Type::CLIENT_HELLO_TYPE, 0);
+    uint32_t helloPkt[5] = {4, typeVal, 0, 0, 0};
+    // TODO: The packet version should be bumped to 1 and we should add
+    // the extra flags field.  This will have to wait until we're ready
+    // to update the StartLiveListener GUI, though.
+
     Poco::Timestamp now;
     uint32_t now_usec =
         static_cast<uint32_t>(now.epochMicroseconds() - now.epochTime());
@@ -222,8 +227,8 @@ void SNSLiveEventDataListener::run() {
         1000000000); // divide by a billion to get time in seconds
 
     if (m_socket.sendBytes(helloPkt, sizeof(helloPkt)) != sizeof(helloPkt))
-    // Yes, I know a send isn't guaranteed to send the whole buffer in one call.
-    // I'm treating such a case as an error anyway.
+    // Yes, I know a send isn't guaranteed to send the whole buffer in one
+    // call.  I'm treating such a case as an error anyway.
     {
       g_log.error("SNSLiveEventDataListener::run(): Failed to send client "
                   "hello packet. Thread exiting.");
@@ -301,9 +306,8 @@ void SNSLiveEventDataListener::run() {
 
     m_backgroundException =
         boost::shared_ptr<std::runtime_error>(new ADARA::invalid_packet(e));
-
-  } catch (std::runtime_error &
-               e) { // exception handler for generic runtime exceptions
+  } catch (std::runtime_error &e) { // exception handler for generic runtime
+                                    // exceptions
     g_log.fatal() << "Caught a runtime exception.\n"
                   << "Exception message: " << e.what() << ".\n"
                   << "Thread will exit.\n";
@@ -311,10 +315,8 @@ void SNSLiveEventDataListener::run() {
 
     m_backgroundException =
         boost::shared_ptr<std::runtime_error>(new std::runtime_error(e));
-
-  } catch (std::invalid_argument &
-               e) { // TimeSeriesProperty (and possibly some other things) can
-                    // can throw these errors
+  } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some
+                                       // other things) can throw these errors
     g_log.fatal() << "Caught an invalid argument exception.\n"
                   << "Exception message: " << e.what() << ".\n"
                   << "Thread will exit.\n";
@@ -326,7 +328,6 @@ void SNSLiveEventDataListener::run() {
     newMsg += e.what();
     m_backgroundException =
         boost::shared_ptr<std::runtime_error>(new std::runtime_error(newMsg));
-
   } catch (...) { // Default exception handler
     g_log.fatal(
         "Uncaught exception in SNSLiveEventDataListener network read thread."
@@ -1511,7 +1512,7 @@ bool SNSLiveEventDataListener::ignorePacket(
 
   // Are we looking for the start of the run?
   if (m_filterUntilRunStart) {
-    if (hdr.type() == ADARA::PacketType::RUN_STATUS_V0 &&
+    if (hdr.base_type() == ADARA::PacketType::Type::RUN_STATUS_TYPE &&
         status == ADARA::RunStatus::NEW_RUN) {
       // A new run is starting...
       m_ignorePackets = false;
