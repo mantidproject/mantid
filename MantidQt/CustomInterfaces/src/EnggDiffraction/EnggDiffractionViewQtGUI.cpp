@@ -615,14 +615,13 @@ void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName) {
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
-// shahroz
 void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
-  std::string pyCode1 =
+  std::string pyCode =
       "van_curves_ws = workspace(\"engggui_vanadium_curves_ws\")\n"
       "plot(van_curves_ws, [0, 1, 2])";
 
   std::string status =
-      runPythonCode(QString::fromStdString(pyCode1), false).toStdString();
+      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
 
   m_logMsgs.push_back(
       "Plotted output calibration vanadium curves, with status string " +
@@ -633,8 +632,8 @@ void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
 void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(std::vector<double> &difc,
 	std::vector<double> &tzero) {
 
-	auto bank1 = size_t(1);
-	auto bank2 = size_t(2);
+	size_t bank1 = size_t(0);
+	size_t bank2 = size_t(1);
 
   std::string pyCode =
       "for i in range(1, 3):\n"
@@ -966,7 +965,6 @@ bool EnggDiffractionViewQtGUI::focusedOutWorkspace() const {
   return m_uiTabFocus.checkBox_FocusedWS->checkState();
 }
 
-// shahroz
 bool EnggDiffractionViewQtGUI::plotCalibWorkspace() const {
 	return m_uiTabCalib.checkBox_PlotData_Calib->checkState();
 }
