@@ -257,6 +257,62 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def try_plot_3d(self):
+        """ Mock test
+        :return:
+        """
+        import numpy as np
+        from mpl_toolkits.mplot3d import Axes3D
+        import matplotlib.pyplot as plt
+
+        # Dataset generation
+        a, b, c = 10., 28., 8. / 3.
+        def lorenz_map(X, dt = 1e-2):
+            X_dt = np.array([a * (X[1] - X[0]), X[0] * (b - X[2]) - X[1], X[0] * X[1] - c * X[2]])
+            return X + dt * X_dt
+
+        def parse3DFile(filename):
+            """
+            """
+            ifile = open(filename, 'r')
+            lines = ifile.readlines()
+            ifile.close()
+
+            points = np.zeros((len(lines), 3))
+            for i in xrange(len(lines)):
+                line = lines[i].strip()
+                terms = line.split(',')
+                for j in xrange(3):
+                    points[i][j] = float(terms[j])
+            return points
+
+        points = np.zeros((2000, 3))
+        X = np.array([.1, .0, .0])
+        for i in range(points.shape[0]):
+            points[i], X = X, lorenz_map(X)
+
+        #points0 = parse3DFile('exp355_scan38_pt11_qsample.dat')
+        #points1 = parse3DFile('hkl.dat')
+
+        # Plotting
+        fig = plt.figure()
+        ax = fig.gca(projection = '3d')
+
+        ax.set_xlim(1.0, 2.1)
+        ax.set_ylim(-3.2, 2.6)
+        ax.set_zlim(-5.2, 2.5)
+
+        ax.set_xlabel('X axis')
+        ax.set_ylabel('Y axis')
+        ax.set_zlabel('Z axis')
+        ax.set_title('Lorenz Attractor a=%0.2f b=%0.2f c=%0.2f' % (a, b, c))
+
+        ax.scatter(points[:, 0], points[:, 1],  points[:, 2], zdir = 'y', c = 'r')
+        #ax.scatter(points0[:, 0], points0[:, 1],  points0[:, 2], zdir = 'y', c = 'r')  # c = 'k', 'r'
+        #ax.scatter(points1[:, 0], points1[:, 1],  points1[:, 2], zdir = 'y', c = (0.6, 0.1, 0.9))
+
+        plt.show()
+
     def do_integrate_peaks(self):
         """ Integrate peaks
         Integrate peaks
@@ -272,7 +328,7 @@ class MainWindow(QtGui.QMainWindow):
                 return
             pt_list = gutil.parse_integer_list(str(self.ui.lineEdit_ptNumListIntPeak.text()))
             self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_list, target_ws_name=None,
-                                                 target_frame=None)
+                                              target_frame=None)
         else:
             if self._myControl.does_workspace_exist(merged_ws_name) is False:
                 self.pop_one_button_dialog('Merged MDEventWorkspace %s does not exist!' % merged_ws_name)
@@ -1412,29 +1468,34 @@ class MainWindow(QtGui.QMainWindow):
         """
         settings = QtCore.QSettings()
 
+        # TODO/NOW/1st: if return is QPyNullVariant from settings.value, then skip!
+
         # directories
-        spice_dir = settings.value('local_spice_dir', '')
-        self.ui.lineEdit_localSpiceDir.setText(spice_dir)
-        work_dir = settings.value('work_dir')
-        self.ui.lineEdit_workDir.setText(work_dir)
+        try:
+            spice_dir = settings.value('local_spice_dir', '')
+            self.ui.lineEdit_localSpiceDir.setText(spice_dir)
+            work_dir = settings.value('work_dir')
+            self.ui.lineEdit_workDir.setText(work_dir)
 
-        # experiment number
-        exp_num = settings.value('exp_number')
-        self.ui.lineEdit_exp.setText(exp_num)
+            # experiment number
+            exp_num = settings.value('exp_number')
+            self.ui.lineEdit_exp.setText(exp_num)
 
-        # lattice parameters
-        lattice_a = settings.value('a')
-        self.ui.lineEdit_a.setText(lattice_a)
-        lattice_b = settings.value('b')
-        self.ui.lineEdit_b.setText(lattice_b)
-        lattice_c = settings.value('c')
-        self.ui.lineEdit_c.setText(lattice_c)
-        lattice_alpha = settings.value('alpha')
-        self.ui.lineEdit_alpha.setText(lattice_alpha)
-        lattice_beta = settings.value('beta')
-        self.ui.lineEdit_beta.setText(lattice_beta)
-        lattice_gamma = settings.value('gamma')
-        self.ui.lineEdit_gamma.setText(lattice_gamma)
+            # lattice parameters
+            lattice_a = settings.value('a')
+            self.ui.lineEdit_a.setText(lattice_a)
+            lattice_b = settings.value('b')
+            self.ui.lineEdit_b.setText(lattice_b)
+            lattice_c = settings.value('c')
+            self.ui.lineEdit_c.setText(lattice_c)
+            lattice_alpha = settings.value('alpha')
+            self.ui.lineEdit_alpha.setText(lattice_alpha)
+            lattice_beta = settings.value('beta')
+            self.ui.lineEdit_beta.setText(lattice_beta)
+            lattice_gamma = settings.value('gamma')
+            self.ui.lineEdit_gamma.setText(lattice_gamma)
+        except TypeError as e:
+            return
 
         return
 

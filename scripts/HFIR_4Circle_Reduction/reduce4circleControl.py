@@ -1311,6 +1311,17 @@ class CWSCDReductionControl(object):
 
         return True, (refined_ub_matrix, lattice, lattice_error)
 
+    def refine_ub_matrix_least_info(self):
+        """
+        Refine UB matrix with least information from user
+        :return:
+        """
+        # TODO/NOW/1st: Implement!
+        api.FindUBFFT()
+
+        return
+
+
     def save_scan_survey(self, file_name):
         """
         Save scan-survey's result to a csv file
