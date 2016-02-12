@@ -81,7 +81,7 @@ def combine_outputs(output_files):
         if not os.path.exists(filename):
             continue
 
-        tree = ET.ElementTree(file=left_file)
+        tree = ET.ElementTree(file=filename)
         root = tree.getroot()
 
         if base_tree is None:
