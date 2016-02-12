@@ -1,16 +1,17 @@
 #include "MantidLiveData/ISISLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
 
-#include "MantidAPI/LiveListenerFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #ifdef GCC_VERSION
 // Avoid compiler warnings on gcc from unused static constants in

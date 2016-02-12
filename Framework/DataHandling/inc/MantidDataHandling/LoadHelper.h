@@ -6,6 +6,11 @@
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
+
+namespace Kernel {
+class Quat;
+}
+
 namespace DataHandling {
 
 /** LoadHelper : Auxiliary File for Loading Files

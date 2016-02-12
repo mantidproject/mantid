@@ -10,6 +10,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
