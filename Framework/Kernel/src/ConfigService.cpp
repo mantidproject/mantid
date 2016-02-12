@@ -30,18 +30,15 @@
 #pragma warning(disable : 4250)
 #endif
 #include <Poco/Logger.h>
-#include <Poco/Channel.h>
 #include <Poco/SplitterChannel.h>
 #include <Poco/LoggingRegistry.h>
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
 
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
 
 #include <fstream>
-#include <iostream>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>

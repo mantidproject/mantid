@@ -1,5 +1,4 @@
 #include "MantidKernel/ICatalogInfo.h"
-#include <string>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 

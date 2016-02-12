@@ -3,13 +3,8 @@
 
 #include <algorithm>
 #include <cfloat>
-#include <cmath>
 #include <iostream>
-#include <limits>
-#include <numeric>
 #include <sstream>
-#include <stdexcept>
-#include <functional>
 
 namespace Mantid {
 namespace Kernel {

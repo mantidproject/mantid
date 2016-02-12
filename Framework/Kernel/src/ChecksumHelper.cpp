@@ -6,7 +6,6 @@
 #include <Poco/DigestStream.h>
 
 #include <fstream>
-#include <sstream>
 
 namespace Mantid {
 namespace Kernel {

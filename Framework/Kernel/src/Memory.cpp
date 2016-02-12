@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <fstream>
 #include <malloc.h>
-#include <stdio.h>
 #include <sys/resource.h>
 #endif
 #ifdef __APPLE__

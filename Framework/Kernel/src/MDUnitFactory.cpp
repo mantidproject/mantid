@@ -1,8 +1,5 @@
 #include "MantidKernel/MDUnitFactory.h"
-#include "MantidKernel/MDUnit.h"
-#include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include <memory>
 #include <boost/regex.hpp>
 
 namespace Mantid {
