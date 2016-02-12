@@ -478,10 +478,11 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
                double alpha, double beta, double gamma, double tolerance) {
   // put together a list of indexed peaks
   std::vector<V3D> hkl;
-  hkl.reserve(peaksWs->getNumberPeaks());
+  int nPeaks = peaksWs->getNumberPeaks();
+  hkl.reserve(nPeaks);
   std::vector<V3D> qVecs;
-  qVecs.reserve(peaksWs->getNumberPeaks());
-  for (int i = 0; i < peaksWs->getNumberPeaks(); i++) {
+  qVecs.reserve(nPeaks);
+  for (int i = 0; i < nPeaks; i++) {
     const Peak &peak = peaksWs->getPeak(i);
     if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance)) {
       hkl.push_back(peak.getHKL());
@@ -528,11 +529,12 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
  */
 std::string GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance, Kernel::Matrix<double> &U) {
   // put together a list of indexed peaks
+  int nPeaks = peaksWs->getNumberPeaks();
   std::vector<V3D> hkl;
-  hkl.reserve(peaksWs->getNumberPeaks());
+  hkl.reserve(nPeaks);
   std::vector<V3D> qVecs;
-  qVecs.reserve(peaksWs->getNumberPeaks());
-  for (int i = 0; i < peaksWs->getNumberPeaks(); i++) {
+  qVecs.reserve(nPeaks);
+  for (int i = 0; i < nPeaks; i++) {
     const Peak &peak = peaksWs->getPeak(i);
     if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance)) {
       hkl.push_back(peak.getHKL());
@@ -585,7 +587,7 @@ static inline void constrain(IFunction_sptr &iFunc, const string &parName,
 
 void SCDCalibratePanels::exec() {
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
-
+   int nPeaks = peaksWs->getNumberPeaks();
   double a = getProperty("a");
   double b = getProperty("b");
   double c = getProperty("c");
@@ -627,24 +629,21 @@ void SCDCalibratePanels::exec() {
 
   //----------------- Set Up Bank Name Vectors -------------------------
   set<string, compareBanks> AllBankNames;
-  for (int i = 0; i < peaksWs->getNumberPeaks(); ++i)
+  for (int i = 0; i < nPeaks; ++i)
     AllBankNames.insert(peaksWs->getPeak(i).getBankName());
 
   vector<vector<string>> Groups;
   CalculateGroups(AllBankNames, Grouping, bankPrefix, bankingCode, Groups);
 
-  //----------------- Calculate & Create Qerror table------------------
-  this->progress(.98, "Creating Qerror table");
-  ITableWorkspace_sptr QErrTable =
-      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  QErrTable->addColumn("int", "Bank Number");
-  QErrTable->addColumn("int", "Peak Number");
-  QErrTable->addColumn("int", "Calculated Column");
-  QErrTable->addColumn("int", "Theoretical Column");
-  QErrTable->addColumn("int", "Calculated Row");
-  QErrTable->addColumn("int", "Theoretical Row");
-  QErrTable->addColumn("double", "Calculated TOF");
-  QErrTable->addColumn("double", "Theoretical TOF");
+  //----------------- Calculate & Create Calculated vs Theoretical workspaces------------------,);
+  int nGroups = static_cast<int>(Groups.size());
+  MatrixWorkspace_sptr ColWksp =
+      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,nPeaks,nPeaks);
+  MatrixWorkspace_sptr RowWksp =
+      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,nPeaks,nPeaks);
+  MatrixWorkspace_sptr TofWksp =
+      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,nPeaks,nPeaks);
+
   double chisqSum = 0;
   int NDofSum = 0;
   if (!GoodStart(peaksWs, a, b, c, alpha, beta, gamma, tolerance)) {
@@ -672,7 +671,7 @@ void SCDCalibratePanels::exec() {
   for (auto it0l0 = 0; it0l0 != Niter; ++it0l0) {
     detcal.clear();
   PARALLEL_FOR1(peaksWs)
-  for (int iGr = 0; iGr < static_cast<int>(Groups.size()); iGr++) {
+  for (int iGr = 0; iGr < nGroups; iGr++) {
     PARALLEL_START_INTERUPT_REGION
     auto group = Groups.begin() + iGr;
     vector<string> banksVec;
@@ -777,7 +776,7 @@ void SCDCalibratePanels::exec() {
     iFunc->setParameter("f0_Zrot", Zrot0);
 
     set<string> MyBankNames;
-    for (int i = 0; i < peaksWs->getNumberPeaks(); ++i)
+    for (int i = 0; i < nPeaks; ++i)
       MyBankNames.insert(banksVec[0]);
     int startX = bounds[0];
     int endXp1 = bounds[group->size()];
@@ -954,7 +953,7 @@ void SCDCalibratePanels::exec() {
 
       //--------------------- Create Result Table Workspace-------------------
       this->progress(.92, "Creating Results table");
-      createResultWorkspace(static_cast<int>(Groups.size()), iGr + 1, names,
+      createResultWorkspace(nGroups, iGr + 1, names,
                             params, errs);
 
       //---------------- Create new instrument with ------------------------
@@ -1015,7 +1014,7 @@ void SCDCalibratePanels::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
   std::vector<double> l0vec, t0vec;
   std::string line, seven;
-  for (int iGr = 0; iGr < static_cast<int>(Groups.size()); iGr++) {
+  for (int iGr = 0; iGr < nGroups; iGr++) {
     std::ifstream infile(DetCalFileName +
                          boost::lexical_cast<std::string>(iGr));
     while (std::getline(infile, line)) {
@@ -1083,13 +1082,14 @@ void SCDCalibratePanels::exec() {
     outfile << *itdet << "\n";
   outfile.close();
 
-  QErrTable->setComment(string("Errors in Q for each Peak"));
-  setProperty("QErrorWorkspace", QErrTable);
+  setProperty("ColWorkspace", ColWksp);
+  setProperty("RowWorkspace", RowWksp);
+  setProperty("TofWorkspace", TofWksp);
   setProperty("ChiSqOverDOF", chisqSum);
   setProperty("DOF", NDofSum);
 
   set<string> bankNames;
-  for (int i = 0; i < peaksWs->getNumberPeaks(); ++i) {
+  for (int i = 0; i < nPeaks; ++i) {
     IPeak &peak = peaksWs->getPeak(i);
     instrument =
           peak.getInstrument();
@@ -1115,21 +1115,36 @@ void SCDCalibratePanels::exec() {
   Geometry::OrientedLattice lattice(a, b, c, alpha, beta, gamma, U);
   Kernel::Matrix<double> UB(3, 3);
   UB = lattice.getUB();
-  for (int j = 0; j < peaksWs->getNumberPeaks(); ++j) {
+  int bankLast = -1;
+  int iSpectrum = -1;
+  int icount = 0;
+
+  for (int j = 0; j < nPeaks; ++j) {
     const Geometry::IPeak &peak = peaksWs->getPeak(j);
     string bankName = peak.getBankName();
     size_t k = bankName.find_last_not_of("0123456789");
     int bank = 0;
     if (k < bankName.length())
       bank = boost::lexical_cast<int>(bankName.substr(k + 1));
+    if (bank != bankLast) {
+      iSpectrum++;
+      ColWksp->getSpectrum(iSpectrum)->setSpectrumNo(specid_t(bank));
+      RowWksp->getSpectrum(iSpectrum)->setSpectrumNo(specid_t(bank));
+      TofWksp->getSpectrum(iSpectrum)->setSpectrumNo(specid_t(bank));
+      bankLast=bank;
+      icount = 0;
+    }
 
     try {
       V3D q_lab =  (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
       Peak theoretical(peak.getInstrument(), q_lab);
-      Mantid::API::TableRow row = QErrTable->appendRow();
-      row << bank << j << peak.getCol() << theoretical.getCol()
-          << peak.getRow() << theoretical.getRow()
-          << peak.getTOF() << theoretical.getTOF();
+      ColWksp->dataX(iSpectrum)[icount] = peak.getCol();
+      ColWksp->dataY(iSpectrum)[icount] = theoretical.getCol();
+      RowWksp->dataX(iSpectrum)[icount] = peak.getRow();
+      RowWksp->dataY(iSpectrum)[icount] = theoretical.getRow();
+      TofWksp->dataX(iSpectrum)[icount] = peak.getTOF();
+      TofWksp->dataY(iSpectrum)[icount] = theoretical.getTOF();
+      icount++;
     } catch (...) {
       g_log.debug() << "Problem only in printing peaks" << std::endl;
     }
@@ -1490,15 +1505,27 @@ void SCDCalibratePanels::init() {
       "Workspace of Results");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
-          "QErrorWorkspace", "QErrorWorkspace", Kernel::Direction::Output),
-      "Workspace of Errors in Q");
+      new WorkspaceProperty<MatrixWorkspace>(
+          "ColWorkspace", "ColWorkspace", Kernel::Direction::Output),
+      "Workspace comparing calculated and theoretical");
+
+  declareProperty(
+      new WorkspaceProperty<MatrixWorkspace>(
+          "RowWorkspace", "RowWorkspace", Kernel::Direction::Output),
+      "Workspace comparing calculated and theoretical");
+
+  declareProperty(
+      new WorkspaceProperty<MatrixWorkspace>(
+          "TofWorkspace", "TofWorkspace", Kernel::Direction::Output),
+      "Workspace comparing calculated and theoretical");
 
   const string OUTPUTS("Outputs");
   setPropertyGroup("DetCalFilename", OUTPUTS);
   setPropertyGroup("XmlFilename", OUTPUTS);
   setPropertyGroup("ResultWorkspace", OUTPUTS);
-  setPropertyGroup("QErrorWorkspace", OUTPUTS);
+  setPropertyGroup("ColWorkspace", OUTPUTS);
+  setPropertyGroup("RowWorkspace", OUTPUTS);
+  setPropertyGroup("TofWorkspace", OUTPUTS);
 
   //------------------------------------ Tolerance
   // settings-------------------------
