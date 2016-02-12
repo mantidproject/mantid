@@ -53,7 +53,8 @@ public:
   void do_test(MockPeak & peak1, vtkPeakMarkerFactory::ePeakDimensions dims)
   {
     FakeProgressAction updateProgress;
-    boost::shared_ptr<MockPeaksWorkspace> pw_ptr(new MockPeaksWorkspace());
+    boost::shared_ptr<MockPeaksWorkspace> pw_ptr =
+        boost::make_shared<MockPeaksWorkspace>();
     MockPeaksWorkspace & pw = *pw_ptr;
 
     //Peaks workspace will return 5 identical peaks
@@ -86,7 +87,8 @@ public:
     //Expectation checks that progress should be >= 0 and <= 100 and called at least once!
     EXPECT_CALL(mockProgress, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
-    boost::shared_ptr<MockPeaksWorkspace> pw_ptr(new MockPeaksWorkspace());
+    boost::shared_ptr<MockPeaksWorkspace> pw_ptr =
+        boost::make_shared<MockPeaksWorkspace>();
     MockPeaksWorkspace & pw = *pw_ptr;
 
     //Peaks workspace will return 5 identical peaks

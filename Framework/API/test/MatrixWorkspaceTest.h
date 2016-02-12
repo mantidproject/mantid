@@ -144,7 +144,8 @@ public:
   }
 
   void testDetectorMappingCopiedWhenAWorkspaceIsCopied() {
-    boost::shared_ptr<MatrixWorkspace> parent(new WorkspaceTester);
+    boost::shared_ptr<MatrixWorkspace> parent =
+        boost::make_shared<WorkspaceTester>();
     parent->initialize(1, 1, 1);
     parent->getSpectrum(0)->setSpectrumNo(99);
     parent->getSpectrum(0)->setDetectorID(999);

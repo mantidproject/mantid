@@ -286,7 +286,7 @@ Instrument_sptr
 SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
 
   Geometry::Instrument_const_sptr instSave = peak.getInstrument();
-  boost::shared_ptr<Geometry::ParameterMap> pmap(new ParameterMap());
+  auto pmap = boost::make_shared<ParameterMap>();
   boost::shared_ptr<const Geometry::ParameterMap> pmapSv =
       instSave->getParameterMap();
 
@@ -294,13 +294,11 @@ SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
     g_log.error(" Not all peaks have an instrument");
     throw std::invalid_argument(" Not all peaks have an instrument");
   }
-  boost::shared_ptr<Geometry::Instrument> instChange(
-      new Geometry::Instrument());
+  auto instChange = boost::make_shared<Geometry::Instrument>();
 
   if (!instSave->isParametrized()) {
     boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
-    boost::shared_ptr<Geometry::Instrument> Pinsta(
-        new Geometry::Instrument(instSave, pmap));
+    auto Pinsta = boost::make_shared<Geometry::Instrument>(instSave, pmap);
 
     instChange = Pinsta;
   } else // catch(...)
@@ -310,8 +308,8 @@ SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
         boost::dynamic_pointer_cast<const IComponent>(instSave);
     // updateParams(pmapSv, pmap, inst3);
 
-    boost::shared_ptr<Geometry::Instrument> P1(
-        new Geometry::Instrument(instSave->baseInstrument(), pmap));
+    auto P1 = boost::make_shared<Geometry::Instrument>(
+        instSave->baseInstrument(), pmap);
     instChange = P1;
   }
 
@@ -1353,8 +1351,8 @@ void SCDPanelErrors::setAttribute(const std::string &attName,
 
   if (recalcB) {
     if (a_set && b_set && c_set && alpha_set && beta_set && gamma_set) {
-      m_unitCell = boost::shared_ptr<Geometry::UnitCell>(
-          new Geometry::UnitCell(a, b, c, alpha, beta, gamma));
+      m_unitCell =
+          boost::make_shared<Geometry::UnitCell>(a, b, c, alpha, beta, gamma);
     }
   }
 }

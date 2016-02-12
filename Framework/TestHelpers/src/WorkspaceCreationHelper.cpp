@@ -204,7 +204,7 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
   const int nhist = static_cast<int>(workspace->getNumberHistograms());
   if (workspace->getInstrument()->nelements() == 0) {
     // We need detectors to be able to mask them.
-    boost::shared_ptr<Instrument> instrument(new Instrument);
+    auto instrument = boost::make_shared<Instrument>();
     workspace->setInstrument(instrument);
 
     std::string xmlShape = "<sphere id=\"shape\"> ";
@@ -344,9 +344,9 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
   space->getAxis(0)->setUnit("TOF");
   space->setYUnit("Counts");
 
-  boost::shared_ptr<Instrument> testInst(new Instrument(instrumentName));
+  auto testInst = boost::make_shared<Instrument>(instrumentName);
   testInst->setReferenceFrame(
-      boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+      boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
   space->setInstrument(testInst);
 
   const double pixelRadius(0.05);
@@ -1258,7 +1258,7 @@ createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
   const size_t nHist = inputWS->getNumberHistograms();
 
   // set the target workspace
-  auto targWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(nHist));
+  auto targWS = boost::make_shared<TableWorkspace>(nHist);
   // detectors positions
   if (!targWS->addColumn("V3D", "DetDirections"))
     throw(std::runtime_error("Can not add column DetDirectrions"));

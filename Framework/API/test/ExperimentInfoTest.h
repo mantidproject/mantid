@@ -77,7 +77,7 @@ public:
 
   void test_GetSetInstrument_default() {
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
@@ -274,7 +274,7 @@ public:
     ws.mutableSample().setName("test");
     OrientedLattice latt(1, 2, 3, 90, 90, 90);
     ws.mutableSample().setOrientedLattice(&latt);
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
     ws.setModeratorModel(new FakeSource);
@@ -291,7 +291,7 @@ public:
     ws.mutableSample().setName("test");
     OrientedLattice latt(1, 2, 3, 90, 90, 90);
     ws.mutableSample().setOrientedLattice(&latt);
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
     ws.setModeratorModel(new FakeSource);
@@ -308,7 +308,7 @@ public:
     ws.mutableSample().setName("test");
     OrientedLattice latt(1, 2, 3, 90, 90, 90);
     ws.mutableSample().setOrientedLattice(&latt);
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
     ws.setModeratorModel(new FakeSource);
@@ -564,7 +564,7 @@ public:
     NexusTestHelper th(true);
     th.createFile(filename);
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("GEM");
     inst1->setFilename("GEM_Definition.xml");
     inst1->setXmlText("");
@@ -590,7 +590,7 @@ public:
     NexusTestHelper th(true);
     th.createFile(filename);
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("");
     inst1->setFilename("");
     inst1->setXmlText("");
@@ -760,7 +760,7 @@ private:
 
   ExperimentInfo_sptr createTestInfoWithChopperPoints(const size_t npoints) {
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     auto source = new ObjComponent("source");
     inst1->add(source);

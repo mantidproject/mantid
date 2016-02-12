@@ -108,7 +108,7 @@ void LoadSPE::exec() {
   if (comment[4] == 'Q' || comment[4] == 'q') {
     phiAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else {
-    phiAxis->unit() = boost::shared_ptr<Unit>(new Units::Phi);
+    phiAxis->unit() = boost::make_shared<Units::Phi>();
   }
 
   // Read in phi grid
