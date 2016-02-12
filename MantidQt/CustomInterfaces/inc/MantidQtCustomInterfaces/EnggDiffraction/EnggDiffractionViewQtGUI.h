@@ -145,7 +145,8 @@ public:
   virtual void plotVanCurvesCalibOutput();
 
   virtual void plotDifcZeroCalibOutput(std::vector<double> &difc,
-                                       std::vector<double> &tzero);
+                                       std::vector<double> &tzero,
+                                       std::string &specNo);
 
   virtual bool saveFocusedOutputFiles() const;
 

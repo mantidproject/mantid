@@ -261,8 +261,8 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabCalib.comboBox_calib_cropped_bank_name->setCurrentIndex(0);
 
   m_uiTabCalib.checkBox_PlotData_Calib->setChecked(
-	  qs.value("user-param-calib-plot-data", true).toBool());
-  
+      qs.value("user-param-calib-plot-data", true).toBool());
+
   // user params - focusing
   m_uiTabFocus.lineEdit_run_num->setUserInput(
       qs.value("user-params-focus-runno", "").toString());
@@ -631,16 +631,29 @@ void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
       "Plotted output calibration vanadium curves, with status string " +
       status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
-};
+}
 
-void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(std::vector<double> &difc,
-	std::vector<double> &tzero) {
+void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
+    std::vector<double> &difc, std::vector<double> &tzero,
+    std::string &specNo) {
 
-	size_t bank1 = size_t(0);
-	size_t bank2 = size_t(1);
+  size_t bank1 = size_t(0);
+  size_t bank2 = size_t(1);
+  std::string pyRange;
+
+  // sets the range to plot appropriate graph for the particular bank
+  if (specNo == "North") {
+    pyRange = "1, 2";
+  } else if (specNo == "South") {
+    pyRange = "2, 3";
+    bank2 = size_t(0);
+  } else {
+    pyRange = "1, 3";
+  }
 
   std::string pyCode =
-      "for i in range(1, 3):\n"
+      "for i in range(" + pyRange +
+      "):\n"
       " bank_ws = workspace(\"engggui_calibration_bank_\" + str(i))\n"
 
       " xVal = []\n"
@@ -650,18 +663,22 @@ void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(std::vector<double> &difc
       " for irow in range(0, bank_ws.rowCount()):\n"
       "  xVal.append(bank_ws.cell(irow, 0))\n"
       "  yVal.append(bank_ws.cell(irow, 5))\n"
-      
-	  "  if (i == 1):\n"
-	  "   difc=" + boost::lexical_cast<std::string>(difc[bank1]) + "\n" +
-	  "   tzero=" + boost::lexical_cast<std::string>(tzero[bank1]) + "\n" +
-	  "  else:\n"
-	  "   difc=" + boost::lexical_cast<std::string>(difc[bank2]) + "\n" +
-	  "   tzero=" + boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
+
+      "  if (i == 1):\n"
+      "   difc=" +
+      boost::lexical_cast<std::string>(difc[bank1]) + "\n" + "   tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank1]) + "\n" + "  else:\n"
+
+                                                              "   difc=" +
+      boost::lexical_cast<std::string>(difc[bank2]) + "\n" + "   tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
 
       "  y2Val.append(xVal[irow] * difc + tzero)\n"
 
-      " ws1 = CreateWorkspace(DataX=xVal, DataY=yVal, UnitX=\"Expected Peaks "
-      " Centre(dSpacing, A)\", YUnitLabel = \"Fitted Peaks Centre(TOF, us)\")\n"
+      " ws1 = CreateWorkspace(DataX=xVal, DataY=yVal, UnitX=\"Expected "
+      "Peaks "
+      " Centre(dSpacing, A)\", YUnitLabel = \"Fitted Peaks Centre(TOF, "
+      "us)\")\n"
       " ws2 = CreateWorkspace(DataX=xVal, DataY=y2Val)\n"
       " output_ws = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
       " AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)\n"
@@ -674,7 +691,8 @@ void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(std::vector<double> &difc
       " DifcZeroWs = workspace(DifcZeroWs)\n"
       " DifcZeroWs = plotSpectrum(DifcZeroWs, [0, 1]).activeLayer()\n"
 
-      " DifcZeroWs.setTitle(\"Engg Gui Difc Zero Peaks Bank \" + str(i))\n"
+      " DifcZeroWs.setTitle(\"Engg Gui Difc Zero Peaks Bank \" + "
+      "str(i))\n"
       " DifcZeroWs.setAxisTitle(Layer.Bottom, \"Expected Peaks "
       "Centre(dSpacing, "
       " A)\")\n"
@@ -970,7 +988,7 @@ bool EnggDiffractionViewQtGUI::focusedOutWorkspace() const {
 }
 
 bool EnggDiffractionViewQtGUI::plotCalibWorkspace() const {
-	return m_uiTabCalib.checkBox_PlotData_Calib->checkState();
+  return m_uiTabCalib.checkBox_PlotData_Calib->checkState();
 }
 
 bool EnggDiffractionViewQtGUI::saveFocusedOutputFiles() const {
