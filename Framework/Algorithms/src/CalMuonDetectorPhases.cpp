@@ -164,7 +164,9 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
 
     std::string status = fit->getProperty("OutputStatus");
     if (!fit->isExecuted() || status != success) {
-      throw std::runtime_error("Fit failed for spectrum " + ispec);
+      std::ostringstream error;
+      error << "Fit failed for spectrum " << ispec;
+      throw std::runtime_error(error.str());
     }
 
     API::MatrixWorkspace_sptr fitOut = fit->getProperty("OutputWorkspace");
@@ -188,7 +190,6 @@ void CalMuonDetectorPhases::extractDetectorInfo(
     const API::ITableWorkspace_sptr &resultsTab, const int ispec) {
 
   double asym = paramTab->Double(0, 1);
-  double omega = paramTab->Double(1, 1);
   double phase = paramTab->Double(2, 1);
   // If asym<0, take the absolute value and add \pi to phase
   // f(x) = A * sin( w * x + p) = -A * sin( w * x + p + PI)
