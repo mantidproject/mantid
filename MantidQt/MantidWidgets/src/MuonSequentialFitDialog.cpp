@@ -3,8 +3,9 @@
 
 #include "MantidAPI/AnalysisDataService.h" 
 #include "MantidAPI/AlgorithmProxy.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 namespace MantidQt
 {
