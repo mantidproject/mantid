@@ -6,8 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/V3D.h"
+
 #include "BoundingBox.h"
 #include <map>
 
@@ -15,6 +14,11 @@ namespace Mantid {
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
+namespace Kernel {
+class V3D;
+ class Material;
+}
+
 namespace Geometry {
 class Rule;
 class CompGrp;

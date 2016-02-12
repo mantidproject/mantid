@@ -15,8 +15,10 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Tolerance.h"
+
 #include <deque>
 #include <iostream>
 #include <stack>

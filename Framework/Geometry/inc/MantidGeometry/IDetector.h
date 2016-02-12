@@ -5,12 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDTypes.h"
-#include <stdexcept>
-#include <map>
 
 namespace Mantid {
 namespace Kernel {
