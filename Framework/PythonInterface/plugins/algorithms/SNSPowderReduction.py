@@ -637,22 +637,26 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             assert run_number > 0, 'Run number %s must be larger than 0.' % run_number
 
         # Form output workspaces' names
-        out_ws_name_list = ['%s_%d' % (self._instrument, runNum) for runNum in run_number_list]
+        file_number_list = ['%s_%d' % (self._instrument, runNum) for runNum in run_number_list]
+        out_ws_name_list = ['%s_%d_loadsum' % (self._instrument, runNum) for runNum in run_number_list]
 
         sample_ws_name = None
         info = None
         SUFFIX = self.getProperty("Extension").value
 
-        for ws_name in out_ws_name_list:
-            self.log().debug("[Sum] processing %s" % ws_name)
-            temp_ws = api.LoadEventAndCompress(Filename=ws_name+SUFFIX,
+        # for ws_name in out_ws_name_list:
+        for i_run in xrange(len(run_number_list)):
+            run_number = file_number_list[i_run]
+            ws_name = out_ws_name_list[i_run]
+            self.log().debug("[Sum] processing %s" % run_number)
+            temp_ws = api.LoadEventAndCompress(Filename=run_number+SUFFIX,
                                                OutputWorkspace=ws_name,
                                                MaxChunkSize=self._chunks,
                                                FilterBadPulses=self._filterBadPulses,
                                                CompressTOFTolerance=self.COMPRESS_TOL_TOF, **filterWall)
             assert temp_ws is not None
             if temp_ws.id() == EVENT_WORKSPACE_ID:
-                self.log().warning('Load event file %s, compress it and get %d events.' % (ws_name+SUFFIX,
+                self.log().warning('Load event file %s, compress it and get %d events.' % (run_number+SUFFIX,
                                                                                            temp_ws.getNumberEvents()))
 
             tempinfo = self._getinfo(ws_name)
@@ -669,6 +673,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                    OutputWorkspace=sample_ws_name,
                                    ClearRHSWorkspace=allEventWorkspaces(sample_ws_name, ws_name))
                 assert temp_ws is not None
+                self.log().warning('Delete workspace %s @ L672.' % ws_name)
                 api.DeleteWorkspace(ws_name)
 
                 # comparess events
@@ -679,19 +684,22 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     assert temp_ws is not None
         # END-FOR
 
-        # Rename to user specified output workspace
-        if sample_ws_name != outName:
-            api.RenameWorkspace(InputWorkspace=sample_ws_name,
-                                OutputWorkspace=outName)
-
+        # Normalize by current with new name
         if self._normalisebycurrent is True:
             self.log().warning('[SPECIAL DB] Normalize current to workspace %s' % sample_ws_name)
-            temp_ws = self.get_workspace(sample_ws_name)
+            # temp_ws = self.get_workspace(sample_ws_name)
             if not (temp_ws.id() == EVENT_WORKSPACE_ID and temp_ws.getNumberEvents() == 0):
                 temp_ws = api.NormaliseByCurrent(InputWorkspace=sample_ws_name,
                                                  OutputWorkspace=sample_ws_name)
                 assert temp_ws is not None
                 temp_ws.getRun()['gsas_monitor'] = 1
+            # END-IF
+        # ENDI-IF
+
+        # Rename to user specified output workspace
+        if sample_ws_name != outName:
+            api.RenameWorkspace(InputWorkspace=sample_ws_name,
+                                OutputWorkspace=outName)
 
         return outName
 
@@ -1274,7 +1282,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     van_bkgd_run_number = van_bkgd_run_number_list[0]
                 else:
                     van_bkgd_run_number = van_bkgd_run_number_list[samRunIndex]
-                van_bkgd_ws_name = "%s_%d" % (self._instrument, van_bkgd_run_number)
+                van_bkgd_ws_name = "%s_%d_vb" % (self._instrument, van_bkgd_run_number)
 
                 # load background runs and sum if necessary
                 if self.getProperty("Sum").value:
