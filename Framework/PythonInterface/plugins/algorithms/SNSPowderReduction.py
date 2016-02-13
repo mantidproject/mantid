@@ -1234,7 +1234,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return can_run_ws_name
 
     def _process_vanadium_runs(self, van_run_number_list, timeFilterWall, samRunIndex, calib, **focuspos):
-        # TODO/FIXME/NOW: Clean the codes for _process_vanadium_runs
+        # Maitenance/NOW: Clean the codes for _process_vanadium_runs
         """
         Purpose:
         Requirements:
