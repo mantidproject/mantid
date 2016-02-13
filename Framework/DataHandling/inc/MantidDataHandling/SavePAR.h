@@ -61,19 +61,19 @@ public:
   /// (Empty) Constructor
   SavePAR() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SavePAR() {}
+  ~SavePAR() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SavePAR"; }
+  const std::string name() const override { return "SavePAR"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Writes the detector geometry information of a workspace into a "
            "Tobyfit PAR format file.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\SPE;Inelastic\\DataHandling";
   }
   /** the method used in tests. It requested the ChildAlgorithm, which does the
@@ -88,9 +88,9 @@ public:
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// The name of the table workpsace with detectors positions used in tests
   std::string det_par_ws_name;
 };

@@ -43,25 +43,25 @@ class MANTID_SINQ_DLL PoldiResidualCorrelationCore
     : public PoldiAutoCorrelationCore {
 public:
   PoldiResidualCorrelationCore(Kernel::Logger &g_log, double weight = 0.0);
-  virtual ~PoldiResidualCorrelationCore() {}
+  ~PoldiResidualCorrelationCore() override {}
 
   double getWeight() const;
   void setWeight(double newWeight);
 
 protected:
-  double getNormCounts(int x, int y) const;
+  double getNormCounts(int x, int y) const override;
   double
   reduceChopperSlitList(const std::vector<UncertainValue> &valuesWithSigma,
-                        double weight) const;
+                        double weight) const override;
   double calculateAverage(const std::vector<double> &values) const;
   double calculateAverageDeviationFromValue(const std::vector<double> &values,
                                             double value) const;
   double calculateCorrelationBackground(double sumOfCorrelationCounts,
-                                        double sumOfCounts) const;
+                                        double sumOfCounts) const override;
 
   DataObjects::Workspace2D_sptr
   finalizeCalculation(const std::vector<double> &correctedCorrelatedIntensities,
-                      const std::vector<double> &dValues) const;
+                      const std::vector<double> &dValues) const override;
   void distributeCorrelationCounts(
       const std::vector<double> &correctedCorrelatedIntensities,
       const std::vector<double> &dValues) const;

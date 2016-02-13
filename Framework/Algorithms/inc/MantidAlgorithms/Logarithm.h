@@ -51,20 +51,20 @@ namespace Algorithms {
 class DLLExport Logarithm : public UnaryOperation {
 public:
   Logarithm();
-  virtual ~Logarithm(void){};
+  ~Logarithm(void) override{};
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "Logarithm"; }
+  const std::string name() const override { return "Logarithm"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Logarithm function calculates the logarithm of the data, held in a "
            "workspace. A user can choose between natural (default) or base 10 "
            "logarithm";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Arithmetic"; }
+  const std::string category() const override { return "Arithmetic"; }
 
 private:
   /// The value to replace ln(0)
@@ -73,14 +73,14 @@ private:
   bool is_natural;
 
   /// Declare additional properties for this algorithm
-  virtual void defineProperties();
+  void defineProperties() override;
   /// get properties from GUI
-  virtual void retrieveProperties();
+  void retrieveProperties() override;
   /// Actually the function, which is run on values when the operation is
   /// performed
-  virtual void performUnaryOperation(const double XIn, const double YIn,
-                                     const double EIn, double &YOut,
-                                     double &EOut);
+  void performUnaryOperation(const double XIn, const double YIn,
+                             const double EIn, double &YOut,
+                             double &EOut) override;
 };
 
 } // End namespace Algorithms

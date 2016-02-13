@@ -43,18 +43,18 @@ public:
   /// Constructor
   SCARFTomoReconstruction();
   /// Virtual destructor
-  virtual ~SCARFTomoReconstruction() {}
+  ~SCARFTomoReconstruction() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SCARFTomoReconstruction"; }
+  const std::string name() const override { return "SCARFTomoReconstruction"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Perform a control action on jobs running on the SCARF computer "
            "cluster at RAL, STFC (http://www.scarf.rl.ac.uk/)";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Remote"; }
+  const std::string category() const override { return "Remote"; }
 
 protected:
   /// different methods (HTTP requests) to process reconstruction job commands
@@ -84,9 +84,9 @@ protected:
       const std::string &method = std::string(), const std::string &body = "");
 
 private:
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   // helper for the submit request
   std::string buildSubmitBody(const std::string &appName,

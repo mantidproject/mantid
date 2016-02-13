@@ -59,11 +59,11 @@ public:
   /// Default constructor
   LoadNexusProcessed();
   /// Destructor
-  ~LoadNexusProcessed();
+  ~LoadNexusProcessed() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadNexusProcessed"; }
+  const std::string name() const override { return "LoadNexusProcessed"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The LoadNexusProcessed algorithm will read the given Nexus "
            "Processed data file containing a Mantid Workspace. The data is "
            "placed in the named workspace. LoadNexusProcessed may be invoked "
@@ -71,18 +71,18 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// Create the workspace name if it's part of a group workspace
   std::string buildWorkspaceName(const std::string &name,

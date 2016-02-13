@@ -41,11 +41,11 @@ public:
   /// (Empty) Constructor
   ElasticWindow() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~ElasticWindow() {}
+  ~ElasticWindow() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ElasticWindow"; }
+  const std::string name() const override { return "ElasticWindow"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm performs an integration over an energy range, with "
            "the option to subtract a background over a second range, then "
            "transposes the result into a single-spectrum workspace with units "
@@ -53,15 +53,15 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Inelastic\\Indirect"; }
+  const std::string category() const override { return "Inelastic\\Indirect"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

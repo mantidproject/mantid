@@ -52,81 +52,81 @@ public:
   /// Default constructor
   ParamFunction() {}
   /// Virtual destructor
-  virtual ~ParamFunction();
+  ~ParamFunction() override;
 
   /// Set i-th parameter
-  virtual void setParameter(size_t, const double &value,
-                            bool explicitlySet = true);
+  void setParameter(size_t, const double &value,
+                    bool explicitlySet = true) override;
   /// Set i-th parameter description
-  virtual void setParameterDescription(size_t, const std::string &description);
+  void setParameterDescription(size_t, const std::string &description) override;
   /// Get i-th parameter
-  virtual double getParameter(size_t i) const;
+  double getParameter(size_t i) const override;
   /// Set parameter by name.
-  virtual void setParameter(const std::string &name, const double &value,
-                            bool explicitlySet = true);
+  void setParameter(const std::string &name, const double &value,
+                    bool explicitlySet = true) override;
   /// Set description of parameter by name.
-  virtual void setParameterDescription(const std::string &name,
-                                       const std::string &description);
+  void setParameterDescription(const std::string &name,
+                               const std::string &description) override;
   /// Get parameter by name.
-  virtual double getParameter(const std::string &name) const;
+  double getParameter(const std::string &name) const override;
   /// Total number of parameters
-  virtual size_t nParams() const { return m_parameters.size(); }
+  size_t nParams() const override { return m_parameters.size(); }
   /// Returns the index of parameter name
-  virtual size_t parameterIndex(const std::string &name) const;
+  size_t parameterIndex(const std::string &name) const override;
   /// Returns the name of parameter i
-  virtual std::string parameterName(size_t i) const;
+  std::string parameterName(size_t i) const override;
   /// Returns the description of parameter i
-  virtual std::string parameterDescription(size_t i) const;
+  std::string parameterDescription(size_t i) const override;
   /// Checks if a parameter has been set explicitly
-  virtual bool isExplicitlySet(size_t i) const;
+  bool isExplicitlySet(size_t i) const override;
   /// Get the fitting error for a parameter
-  virtual double getError(size_t i) const;
+  double getError(size_t i) const override;
   /// Set the fitting error for a parameter
-  virtual void setError(size_t i, double err);
+  void setError(size_t i, double err) override;
 
   /// Check if a declared parameter i is active
-  virtual bool isFixed(size_t i) const;
+  bool isFixed(size_t i) const override;
   /// Removes a declared parameter i from the list of active
-  virtual void fix(size_t i);
+  void fix(size_t i) override;
   /// Restores a declared parameter i to the active status
-  virtual void unfix(size_t i);
+  void unfix(size_t i) override;
 
   /// Return parameter index from a parameter reference. Usefull for constraints
   /// and ties in composite functions
-  virtual size_t getParameterIndex(const ParameterReference &ref) const;
+  size_t getParameterIndex(const ParameterReference &ref) const override;
   /// Get the containing function
   IFunction_sptr getContainingFunction(const ParameterReference &ref) const;
   /// Get the containing function
   IFunction_sptr getContainingFunction(IFunction_sptr fun);
 
   /// Apply the ties
-  virtual void applyTies();
+  void applyTies() override;
   /// Remove all ties
-  virtual void clearTies();
-  virtual void removeTie(const std::string &parName) {
+  void clearTies() override;
+  void removeTie(const std::string &parName) override {
     IFunction::removeTie(parName);
   }
   /// Removes i-th parameter's tie
-  virtual bool removeTie(size_t i);
+  bool removeTie(size_t i) override;
   /// Get the tie of i-th parameter
-  virtual ParameterTie *getTie(size_t i) const;
+  ParameterTie *getTie(size_t i) const override;
 
   /// Add a constraint to function
-  virtual void addConstraint(IConstraint *ic);
+  void addConstraint(IConstraint *ic) override;
   /// Get constraint of i-th parameter
-  virtual IConstraint *getConstraint(size_t i) const;
+  IConstraint *getConstraint(size_t i) const override;
   /// Remove a constraint
-  virtual void removeConstraint(const std::string &parName);
+  void removeConstraint(const std::string &parName) override;
   /// Set parameters to satisfy constraints
-  void setUpForFit();
+  void setUpForFit() override;
 
 protected:
   /// Declare a new parameter
-  virtual void declareParameter(const std::string &name, double initValue = 0,
-                                const std::string &description = "");
+  void declareParameter(const std::string &name, double initValue = 0,
+                        const std::string &description = "") override;
 
   /// Add a new tie
-  virtual void addTie(ParameterTie *tie);
+  void addTie(ParameterTie *tie) override;
   /// Get the address of the parameter. For use in UserFunction with mu::Parser
   virtual double *getParameterAddress(size_t i);
 

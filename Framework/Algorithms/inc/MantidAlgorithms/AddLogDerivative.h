@@ -38,20 +38,20 @@ namespace Algorithms {
 class DLLExport AddLogDerivative : public API::Algorithm {
 public:
   AddLogDerivative();
-  ~AddLogDerivative();
+  ~AddLogDerivative() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "AddLogDerivative"; };
+  const std::string name() const override { return "AddLogDerivative"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Add a sample log that is the first or second derivative of an "
            "existing sample log.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Logs"; }
+  const std::string category() const override { return "DataHandling\\Logs"; }
 
   static Mantid::Kernel::TimeSeriesProperty<double> *
   makeDerivative(API::Progress &progress,
@@ -60,9 +60,9 @@ public:
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

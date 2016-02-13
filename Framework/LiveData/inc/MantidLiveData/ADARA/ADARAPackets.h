@@ -495,7 +495,7 @@ class DLLExport DetectorBankSetsPkt : public Packet {
 public:
   DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt);
 
-  virtual ~DetectorBankSetsPkt();
+  ~DetectorBankSetsPkt() override;
 
   // Detector Bank Set Name, alphanumeric characters...
   static const size_t SET_NAME_SIZE = 16;

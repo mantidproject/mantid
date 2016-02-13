@@ -33,26 +33,26 @@ namespace Algorithms {
 class DLLExport BinaryOperateMasks : public API::Algorithm {
 public:
   BinaryOperateMasks();
-  ~BinaryOperateMasks();
+  ~BinaryOperateMasks() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "BinaryOperateMasks"; };
+  const std::string name() const override { return "BinaryOperateMasks"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs binary operation, including and, or and xor, on two mask "
            "Workspaces, i.e., SpecialWorkspace2D.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Masking"; }
+  const std::string category() const override { return "Transforms\\Masking"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

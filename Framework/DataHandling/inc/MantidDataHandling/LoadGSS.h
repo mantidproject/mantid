@@ -42,13 +42,13 @@ public:
 
   /// Virtual destructor
 
-  virtual ~LoadGSS() {}
+  ~LoadGSS() override {}
 
   /// Algorithm's name
-  virtual const std::string name() const { return "LoadGSS"; }
+  const std::string name() const override { return "LoadGSS"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a GSS file such as that saved by SaveGSS. This is not a "
            "lossless process, as SaveGSS truncates some data. There is no "
            "instrument assosciated with the resulting workspace.  'Please "
@@ -57,22 +57,22 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Text";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
 
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Main method to load GSAS
   API::MatrixWorkspace_sptr loadGSASFile(const std::string &filename,

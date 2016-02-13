@@ -820,7 +820,7 @@ public:
   }
 
   // Execute the sort as specified.
-  void run() {
+  void run() override {
     if (!m_WS)
       return;
     for (size_t wi = m_wiStart; wi < m_wiStop; wi++) {

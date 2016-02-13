@@ -48,16 +48,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport Rebin2D : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "Rebin2D"; }
+  const std::string name() const override { return "Rebin2D"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Rebins both axes of a 2D workspace using the given parameters";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Transforms\\Rebin"; }
+  const std::string category() const override { return "Transforms\\Rebin"; }
 
 protected:
   /// Progress reporter
@@ -65,9 +65,9 @@ protected:
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Setup the output workspace
   API::MatrixWorkspace_sptr
   createOutputWorkspace(API::MatrixWorkspace_const_sptr parent,

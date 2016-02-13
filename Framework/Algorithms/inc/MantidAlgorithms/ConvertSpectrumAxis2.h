@@ -48,11 +48,11 @@ public:
   /// (Empty) Constructor
   ConvertSpectrumAxis2();
   /// Virtual destructor
-  virtual ~ConvertSpectrumAxis2() {}
+  ~ConvertSpectrumAxis2() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvertSpectrumAxis"; }
+  const std::string name() const override { return "ConvertSpectrumAxis"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Converts the axis of a Workspace2D which normally holds spectrum "
            "numbers to one of Q, Q^2 or theta.  'Note': After running this "
            "algorithm, some features will be unavailable on the workspace as "
@@ -61,17 +61,17 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (2); }
+  int version() const override { return (2); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Transforms\\Units;Transforms\\Axes";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Converting to theta.
   void createThetaMap(API::Progress &progress, const std::string &target,
                       API::MatrixWorkspace_sptr &inputWS, size_t nHist);

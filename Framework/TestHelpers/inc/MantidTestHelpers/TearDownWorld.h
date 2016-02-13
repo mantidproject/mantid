@@ -33,7 +33,8 @@
  * when its tearDownWorld() method is called.
  */
 class ClearAlgorithmManager : public CxxTest::GlobalFixture {
-  bool tearDownWorld();
+  bool tearDownWorld() override override override override override override
+      override override override override override override override;
 };
 
 //-----------------------------------------------------------------------------
@@ -43,7 +44,8 @@ class ClearAlgorithmManager : public CxxTest::GlobalFixture {
  * when its tearDownWorld() method is called.
  */
 class ClearADS : public CxxTest::GlobalFixture {
-  bool tearDownWorld();
+  bool tearDownWorld() override override override override override override
+      override override override override override override override;
 };
 
 //-----------------------------------------------------------------------------
@@ -53,7 +55,8 @@ class ClearADS : public CxxTest::GlobalFixture {
  * when its tearDownWorld() method is called.
  */
 class ClearPropertyManagerDataService : public CxxTest::GlobalFixture {
-  bool tearDownWorld();
+  bool tearDownWorld() override override override override override override
+      override override override override override override override;
 };
 
 #endif // TEARDOWNWORLD_H_

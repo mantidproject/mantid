@@ -80,14 +80,14 @@ public:
   void initialize(const std::size_t &NVectors, const std::size_t &XLength,
                   const std::size_t &YLength);
   /// Delete
-  virtual ~MatrixWorkspace();
+  ~MatrixWorkspace() override;
 
   /// Returns a clone of the workspace
   MatrixWorkspace_uptr clone() const { return MatrixWorkspace_uptr(doClone()); }
 
   using IMDWorkspace::toString;
   /// String description of state
-  const std::string toString() const;
+  const std::string toString() const override;
 
   /**@name Instrument queries */
   //@{
@@ -97,7 +97,7 @@ public:
 
   //@}
 
-  virtual void populateInstrumentParameters();
+  void populateInstrumentParameters() override;
 
   /** @name Nearest neighbours */
   /// Build and populate the NearestNeighbours object
@@ -145,7 +145,7 @@ public:
   bool hasGroupedDetectors() const;
 
   /// Get the footprint in memory in bytes.
-  virtual size_t getMemorySize() const;
+  size_t getMemorySize() const override;
   virtual size_t getMemorySizeForXAxes() const;
 
   // Section required for iteration
@@ -157,9 +157,9 @@ public:
   virtual std::size_t getNumberHistograms() const = 0;
 
   /// Sets MatrixWorkspace title
-  virtual void setTitle(const std::string &);
+  void setTitle(const std::string &) override;
   /// Gets MatrixWorkspace title (same as Run object run_title property)
-  virtual const std::string getTitle() const;
+  const std::string getTitle() const override;
 
   virtual Kernel::DateAndTime getFirstPulseTime() const;
   Kernel::DateAndTime getLastPulseTime() const;
@@ -385,11 +385,11 @@ public:
   //=====================================================================================
   // MD Geometry methods
   //=====================================================================================
-  virtual size_t getNumDims() const;
-  virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>
-  getDimension(size_t index) const;
-  virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>
-  getDimensionWithId(std::string id) const;
+  size_t getNumDims() const override;
+  boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+  getDimension(size_t index) const override;
+  boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+  getDimensionWithId(std::string id) const override;
   //=====================================================================================
   // End MD Geometry methods
   //=====================================================================================
@@ -399,41 +399,42 @@ public:
   //=====================================================================================
 
   /// Gets the number of points available on the workspace.
-  virtual uint64_t getNPoints() const;
+  uint64_t getNPoints() const override;
   /// Get the number of points available on the workspace.
-  virtual uint64_t getNEvents() const { return this->getNPoints(); }
+  uint64_t getNEvents() const override { return this->getNPoints(); }
   /// Dimension id for x-dimension.
   static const std::string xDimensionId;
   /// Dimensin id for y-dimension.
   static const std::string yDimensionId;
   /// Generate a line plot through the matrix workspace.
-  virtual void getLinePlot(const Mantid::Kernel::VMD &start,
-                           const Mantid::Kernel::VMD &end,
-                           Mantid::API::MDNormalization normalize,
-                           std::vector<coord_t> &x, std::vector<signal_t> &y,
-                           std::vector<signal_t> &e) const;
+  void getLinePlot(const Mantid::Kernel::VMD &start,
+                   const Mantid::Kernel::VMD &end,
+                   Mantid::API::MDNormalization normalize,
+                   std::vector<coord_t> &x, std::vector<signal_t> &y,
+                   std::vector<signal_t> &e) const override;
   /// Get the signal at a coordinate in the workspace.
-  virtual signal_t
-  getSignalAtCoord(const coord_t *coords,
-                   const Mantid::API::MDNormalization &normalization) const;
-  /// Get the signal at a coordinate in the workspace
-  virtual signal_t getSignalWithMaskAtCoord(
+  signal_t getSignalAtCoord(
       const coord_t *coords,
-      const Mantid::API::MDNormalization &normalization) const;
+      const Mantid::API::MDNormalization &normalization) const override;
+  /// Get the signal at a coordinate in the workspace
+  signal_t getSignalWithMaskAtCoord(
+      const coord_t *coords,
+      const Mantid::API::MDNormalization &normalization) const override;
   /// Create iterators. Partitions the iterators according to the number of
   /// cores.
-  virtual std::vector<IMDIterator *>
-  createIterators(size_t suggestedNumCores = 1,
-                  Mantid::Geometry::MDImplicitFunction *function = NULL) const;
+  std::vector<IMDIterator *> createIterators(
+      size_t suggestedNumCores = 1,
+      Mantid::Geometry::MDImplicitFunction *function = NULL) const override;
 
   /// Apply masking.
-  void setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion);
+  void
+  setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion) override;
   /// Clear exsting masking.
-  void clearMDMasking();
+  void clearMDMasking() override;
 
   /// @return the special coordinate system used if any.
-  virtual Mantid::Kernel::SpecialCoordinateSystem
-  getSpecialCoordinateSystem() const;
+  Mantid::Kernel::SpecialCoordinateSystem
+  getSpecialCoordinateSystem() const override;
 
   //=====================================================================================
   // End IMDWorkspace methods
@@ -486,7 +487,7 @@ protected:
   std::vector<Axis *> m_axes;
 
 private:
-  virtual MatrixWorkspace *doClone() const = 0;
+  MatrixWorkspace *doClone() const override = 0;
 
   /// Create an MantidImage instance.
   MantidImage_sptr

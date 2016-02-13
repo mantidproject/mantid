@@ -44,26 +44,26 @@ public:
   /// Default constructor
   UnGroupWorkspace() : API::Algorithm(){};
   /// Destructor
-  virtual ~UnGroupWorkspace(){};
+  ~UnGroupWorkspace() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "UnGroupWorkspace"; }
+  const std::string name() const override { return "UnGroupWorkspace"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Takes a group workspace as input and ungroups the workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Transforms\\Grouping;Utility\\Workspaces";
   }
 
 private:
   /// Overridden Init method
-  void init();
+  void init() override;
   /// overridden execute method
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithm

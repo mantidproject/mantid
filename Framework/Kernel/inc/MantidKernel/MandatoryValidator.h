@@ -63,7 +63,7 @@ template <typename T> struct IsEmpty {
 template <typename TYPE>
 class DLLExport MandatoryValidator : public TypedValidator<TYPE> {
 public:
-  IValidator_sptr clone() const {
+  IValidator_sptr clone() const override {
     return boost::make_shared<MandatoryValidator>();
   }
 
@@ -73,7 +73,7 @@ private:
    *  @param value :: the string to test
    *  @return "A value must be entered for this parameter" if empty or ""
    */
-  std::string checkValidity(const TYPE &value) const {
+  std::string checkValidity(const TYPE &value) const override {
     if (Detail::IsEmpty<TYPE>::check(value))
       return "A value must be entered for this parameter";
     else

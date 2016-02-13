@@ -9,21 +9,21 @@ namespace Algorithms {
 class DLLExport ChangeLogTime : public API::Algorithm {
 public:
   ChangeLogTime();
-  ~ChangeLogTime();
+  ~ChangeLogTime() override;
 
-  const std::string name() const;
-  int version() const;
-  const std::string category() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
   /// Algorithm's summary
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Adds a constant to the times for the requested log.";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Mantid

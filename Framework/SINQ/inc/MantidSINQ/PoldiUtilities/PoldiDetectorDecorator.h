@@ -44,25 +44,26 @@ public:
       boost::shared_ptr<PoldiAbstractDetector> decoratedDetector =
           boost::shared_ptr<PoldiAbstractDetector>());
 
-  virtual ~PoldiDetectorDecorator() {}
+  ~PoldiDetectorDecorator() override {}
 
   void setDecoratedDetector(boost::shared_ptr<PoldiAbstractDetector> detector);
   boost::shared_ptr<PoldiAbstractDetector> decoratedDetector();
 
-  virtual void
-  loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
+  void
+  loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) override;
 
-  virtual double efficiency();
+  double efficiency() override;
 
-  virtual double twoTheta(int elementIndex);
-  virtual double distanceFromSample(int elementIndex);
+  double twoTheta(int elementIndex) override;
+  double distanceFromSample(int elementIndex) override;
 
-  virtual size_t elementCount();
-  virtual size_t centralElement();
+  size_t elementCount() override;
+  size_t centralElement() override;
 
-  virtual const std::vector<int> &availableElements();
+  const std::vector<int> &availableElements() override;
 
-  virtual std::pair<double, double> qLimits(double lambdaMin, double lambdaMax);
+  std::pair<double, double> qLimits(double lambdaMin,
+                                    double lambdaMax) override;
 
 protected:
   virtual void detectorSetHook();

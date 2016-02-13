@@ -22,28 +22,28 @@ public:
   /** Constructor   */
   ConvertToDiffractionMDWorkspace2() {}
   /** Destructor   */
-  virtual ~ConvertToDiffractionMDWorkspace2() {}
+  ~ConvertToDiffractionMDWorkspace2() override {}
 
   /// Algorithm's name for identification
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "ConvertToDiffractionMDWorkspace";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, "
            "Qz) for an elastic diffraction experiment.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "MDAlgorithms\\Creation";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   // the target frame names exposed as the algorithm properties and recognized
   // by old convertToDiffractionWorkspace algorithm.

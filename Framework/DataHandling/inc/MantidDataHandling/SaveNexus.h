@@ -52,26 +52,26 @@ public:
   SaveNexus();
 
   /// Destructor
-  ~SaveNexus() {}
+  ~SaveNexus() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveNexus"; };
+  const std::string name() const override { return "SaveNexus"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The SaveNexus algorithm will write the given Mantid workspace to a "
            "NeXus file. SaveNexus currently just invokes SaveNexusProcessed.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// The name and path of the input file
   std::string m_filename;
@@ -87,11 +87,12 @@ private:
   void runSaveNexusProcessed();
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue, int perioidNum);
+                          const std::string &propertyValue,
+                          int perioidNum) override;
 
 protected:
   /// Override process groups
-  virtual bool processGroups();
+  bool processGroups() override;
 };
 
 } // namespace DataHandling

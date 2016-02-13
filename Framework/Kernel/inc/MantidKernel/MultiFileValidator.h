@@ -48,12 +48,12 @@ public:
   MultiFileValidator();
   MultiFileValidator(const MultiFileValidator &mfv);
   explicit MultiFileValidator(const std::vector<std::string> &extensions);
-  virtual ~MultiFileValidator();
+  ~MultiFileValidator() override;
 
-  IValidator_sptr clone() const;
+  IValidator_sptr clone() const override;
 
   /// Returns the set of allowed extensions.
-  virtual std::vector<std::string> allowedValues() const;
+  std::vector<std::string> allowedValues() const override;
 
 protected:
   /// FileValidator instance used for validating multiple files.
@@ -61,8 +61,8 @@ protected:
 
 private:
   /// Returns an error if at least one of the files is not valid, else "".
-  virtual std::string
-  checkValidity(const std::vector<std::vector<std::string>> &values) const;
+  std::string checkValidity(
+      const std::vector<std::vector<std::string>> &values) const override;
 };
 
 } // namespace Kernel
