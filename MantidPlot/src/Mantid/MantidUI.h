@@ -115,7 +115,7 @@ public:
   explicit MantidUI(ApplicationWindow *aw);
 
   // Destructor
-  ~MantidUI();
+  ~MantidUI() override;
 
   //Clear the framework
   void shutdown();

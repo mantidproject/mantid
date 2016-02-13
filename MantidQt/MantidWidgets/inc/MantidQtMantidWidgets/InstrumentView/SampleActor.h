@@ -57,9 +57,11 @@ namespace MantidQt
 		public:
 			SampleActor(const InstrumentActor& instrActor, const Mantid::API::Sample& sample, const ObjComponentActor* samplePosActor); ///< Constructor
 			virtual std::string type()const { return "SampleActor"; } ///< Type of the GL object
-			void draw(bool picking)const;
-			void getBoundingBox(Mantid::Kernel::V3D& minBound, Mantid::Kernel::V3D& maxBound)const;
-			void setColor(const GLColor& c) { m_color = c; }
+                        void draw(bool picking) const override;
+                        void getBoundingBox(
+                            Mantid::Kernel::V3D &minBound,
+                            Mantid::Kernel::V3D &maxBound) const override;
+                        void setColor(const GLColor& c) { m_color = c; }
 			const ObjComponentActor* getSamplePosActor()const { return m_samplePosActor; }
 		protected:
 			const InstrumentActor& m_instrActor;

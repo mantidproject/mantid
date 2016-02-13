@@ -59,22 +59,29 @@ namespace MantidQt
 			/// Constructor
 			InstrumentActor(const QString &wsName, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
 			///< Destructor
-			~InstrumentActor();
-			///< Type of the GL object
+                        ~InstrumentActor() override;
+                        ///< Type of the GL object
 			virtual std::string type()const { return "InstrumentActor"; }
 			/// Draw the instrument in 3D
-			void draw(bool picking = false)const;
-			/// Return the bounding box in 3D
-			void getBoundingBox(Mantid::Kernel::V3D& minBound, Mantid::Kernel::V3D& maxBound)const { m_scene.getBoundingBox(minBound, maxBound); }
-			/// Run visitors callback on each component
-			bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
-			/// Run visitors callback on each component (const version)
-			bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll) const;
-			/// Toggle the visibility of the child actors (if exist).
-			virtual void setChildVisibility(bool);
-			/// Check if any child is visible
-			virtual bool hasChildVisible() const;
-			/// Get the underlying instrument
+                        void draw(bool picking = false) const override;
+                        /// Return the bounding box in 3D
+                        void getBoundingBox(
+                            Mantid::Kernel::V3D &minBound,
+                            Mantid::Kernel::V3D &maxBound) const override {
+                          m_scene.getBoundingBox(minBound, maxBound);
+                        }
+                        /// Run visitors callback on each component
+                        bool accept(GLActorVisitor &visitor,
+                                    VisitorAcceptRule rule = VisitAll) override;
+                        /// Run visitors callback on each component (const version)
+                        bool accept(
+                            GLActorConstVisitor &visitor,
+                            VisitorAcceptRule rule = VisitAll) const override;
+                        /// Toggle the visibility of the child actors (if exist).
+                        void setChildVisibility(bool) override;
+                        /// Check if any child is visible
+                        bool hasChildVisible() const override;
+                        /// Get the underlying instrument
 			boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
 			/// Get the associated data workspace
 			boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
@@ -277,14 +284,14 @@ namespace MantidQt
 		public:
 			explicit SetVisibleComponentVisitor(const Mantid::Geometry::ComponentID id)
 				: m_id(id) {}
-			bool visit(GLActor*);
-			bool visit(GLActorCollection*);
-			bool visit(ComponentActor* actor);
-			bool visit(CompAssemblyActor* actor);
-			bool visit(ObjCompAssemblyActor* actor);
-			bool visit(InstrumentActor* actor);
-			bool visit(RectangularDetectorActor* actor);
-			Mantid::Geometry::ComponentID getID()const { return m_id; }
+                        bool visit(GLActor *) override;
+                        bool visit(GLActorCollection *) override;
+                        bool visit(ComponentActor *actor) override;
+                        bool visit(CompAssemblyActor *actor) override;
+                        bool visit(ObjCompAssemblyActor *actor) override;
+                        bool visit(InstrumentActor *actor) override;
+                        bool visit(RectangularDetectorActor *actor) override;
+                        Mantid::Geometry::ComponentID getID()const { return m_id; }
 		private:
 			Mantid::Geometry::ComponentID m_id;
 		};
@@ -300,8 +307,9 @@ namespace MantidQt
 			/// @param on :: If true then all non-detectors will be made visible or invisible if false.
 			explicit SetVisibleNonDetectorVisitor(bool on) : m_on(on) {}
 			using GLActorVisitor::visit;
-			bool visit(GLActor*);
-		private:
+                        bool visit(GLActor *) override;
+
+                private:
 			bool m_on;
 		};
 
@@ -314,8 +322,8 @@ namespace MantidQt
 			explicit FindComponentVisitor(const Mantid::Geometry::ComponentID id)
 				: m_id(id), m_actor(NULL) {}
 			using GLActorVisitor::visit;
-			bool visit(GLActor*);
-			ComponentActor* getActor()const { return m_actor; }
+                        bool visit(GLActor *) override;
+                        ComponentActor* getActor()const { return m_actor; }
 		private:
 			Mantid::Geometry::ComponentID m_id;
 			mutable ComponentActor* m_actor;

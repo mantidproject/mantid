@@ -39,13 +39,14 @@ class FitModelHandler : public QXmlDefaultHandler
 public:
   explicit FitModelHandler(Fit *fit);
 
-    bool startElement(const QString &namespaceURI, const QString &localName,
-                       const QString &qName, const QXmlAttributes &attributes);
-    bool endElement(const QString &namespaceURI, const QString &localName,
-                     const QString &qName);
-    bool characters(const QString &str);
-    bool fatalError(const QXmlParseException &){return false;};
-    QString errorString() const;
+  bool startElement(const QString &namespaceURI, const QString &localName,
+                    const QString &qName,
+                    const QXmlAttributes &attributes) override;
+  bool endElement(const QString &namespaceURI, const QString &localName,
+                  const QString &qName) override;
+  bool characters(const QString &str) override;
+  bool fatalError(const QXmlParseException &) override { return false; };
+  QString errorString() const override;
 
 private:
     Fit* d_fit;

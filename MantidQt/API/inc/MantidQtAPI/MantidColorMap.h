@@ -40,8 +40,8 @@ class EXPORT_OPT_MANTIDQT_API MantidColorMap : public QwtColorMap
 public:
   MantidColorMap();
   explicit MantidColorMap(const QString & filename, GraphOptions::ScaleType type);
-  virtual ~MantidColorMap();
-  QwtColorMap* copy() const;
+  ~MantidColorMap() override;
+  QwtColorMap *copy() const override;
 
   void changeScaleType(GraphOptions::ScaleType type);
 
@@ -57,13 +57,14 @@ public:
 
   void setupDefaultMap();
 
-  QRgb rgb(const QwtDoubleInterval & interval, double value) const;
+  QRgb rgb(const QwtDoubleInterval &interval, double value) const override;
 
   double normalize(const QwtDoubleInterval &interval, double value) const;
 
-  unsigned char colorIndex (const QwtDoubleInterval &interval, double value) const;
+  unsigned char colorIndex(const QwtDoubleInterval &interval,
+                           double value) const override;
 
-  QVector<QRgb> colorTable(const QwtDoubleInterval & interval) const;
+  QVector<QRgb> colorTable(const QwtDoubleInterval &interval) const override;
 
   /**
    * Retrieve the scale type

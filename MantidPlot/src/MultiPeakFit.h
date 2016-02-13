@@ -52,22 +52,22 @@ class MultiPeakFit : public Fit
 		static QStringList generateExplanationList(int order);
 
 		//! Used by the GaussFit and LorentzFit derived classes to calculate initial values for the parameters
-		void guessInitialValues();
+                void guessInitialValues() override;
 
-		virtual double eval(double *par, double x);
-		double evalPeak(double *par, double x, int peak);
+                double eval(double *par, double x) override;
+                double evalPeak(double *par, double x, int peak);
 
 	private:
 		void init(int);
 
-		QString logFitInfo(int iterations, int status);
-		void generateFitCurve();
-		static QString peakFormula(int peakIndex, PeakProfile profile);
+                QString logFitInfo(int iterations, int status) override;
+                void generateFitCurve() override;
+                static QString peakFormula(int peakIndex, PeakProfile profile);
 		//! Inserts a peak function curve into the plot
 		void insertPeakFunctionCurve(double *x, double *y, int peak);
-		void customizeFitResults();
+                void customizeFitResults() override;
 
-		//! Number of peaks
+                //! Number of peaks
 		int d_peaks;
 
 		//! Tells weather the peak curves should be displayed together with the best line fit.
@@ -118,11 +118,11 @@ class GaussAmpFit : public Fit
 		GaussAmpFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end);
 		GaussAmpFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 0, int endRow = -1);
 
-		void guessInitialValues();
-        double eval(double *par, double x);
+                void guessInitialValues() override;
+                double eval(double *par, double x) override;
 
-	private:
+        private:
 		void init();
-		void calculateFitCurveData(double *X, double *Y);
+                void calculateFitCurveData(double *X, double *Y) override;
 };
 #endif

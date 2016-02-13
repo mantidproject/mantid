@@ -44,7 +44,7 @@ class FindDialog : public QDialog
 
 public:
     FindDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
-    ~FindDialog();
+    ~FindDialog() override;
 
 private:
 	QPushButton* buttonFind;
@@ -69,7 +69,7 @@ public slots:
 
 protected slots:
 
-	void accept();
+  void accept() override;
 };
 
 #endif // exportDialog_H

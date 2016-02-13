@@ -180,7 +180,7 @@ public:
   IntervalListValidator(QObject* parent, const IntervalList& intervals);
 
   /// Overriden method to validate a given QString, at a particular position
-  virtual State validate(QString&, int&) const;
+  State validate(QString &, int &) const override;
 
 private:
   /// The IntervalList against which to validate.
@@ -199,7 +199,7 @@ class MantidWSIndexWidget : public QWidget {
     /// label.
     explicit QLineEditWithErrorMark(QWidget *parent = 0);
     /// virtual destructor to allow Qt to deallocate all objects
-    virtual ~QLineEditWithErrorMark(){};
+    ~QLineEditWithErrorMark() override{};
     /// provide acess to the QLineEdit
     QLineEdit *lineEdit() { return _lineEdit; };
     /// if Error is not empty, it will make the * label visible and set the

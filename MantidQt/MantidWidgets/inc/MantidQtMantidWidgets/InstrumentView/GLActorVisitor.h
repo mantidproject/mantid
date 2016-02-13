@@ -73,9 +73,10 @@ namespace MantidQt
 		public:
 			explicit SetAllVisibleVisitor(bool showNonDet) : m_showNonDet(showNonDet) {}
 			using GLActorVisitor::visit;
-			bool visit(GLActor*);
-			bool visit(ComponentActor *actor);
-		private:
+                        bool visit(GLActor *) override;
+                        bool visit(ComponentActor *actor) override;
+
+                private:
 			bool m_showNonDet;
 		};
 	}//MantidWidgets
