@@ -1233,18 +1233,22 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return can_run_ws_name
 
     def _process_vanadium_runs(self, van_run_number_list, timeFilterWall, samRunIndex, calib, **focuspos):
-        # TODO/FIXME/NOW: Clean the codes for _process_vanadium_runs
         """
-        Purpose:
-        Requirements:
-        Guarantees:
-        :param van_run_number_list:
+        Purpose: process vanadium runs
+        Requirements: if more than 1 run in given run number list, then samRunIndex must be given.
+        Guarantees: have vanadium run reduced.
+        :param van_run_number_list: list of vanadium run
+        :param timeFilterWall: time filter wall
+        :param samRunIndex: sample run index
+        :param calib: calibration run
+        :param focuspos:
         :return:
         """
         # get the right van run number to this sample
         if len(van_run_number_list) == 1:
             van_run_number = van_run_number_list[0]
         else:
+            assert isinstance(samRunIndex, int)
             van_run_number = van_run_number_list[samRunIndex]
 
         # get handle on workspace of this van run and make sure its unit is T.O.F
