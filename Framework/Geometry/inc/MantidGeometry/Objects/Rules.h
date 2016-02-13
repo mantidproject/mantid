@@ -133,8 +133,8 @@ valid rule B
 class MANTID_GEOMETRY_DLL Intersection : public Rule {
 
 private:
-  std::unique_ptr<Rule> A;       ///< Rule 1
-  std::unique_ptr<Rule> B;       ///< Rule 2
+  std::unique_ptr<Rule> A; ///< Rule 1
+  std::unique_ptr<Rule> B; ///< Rule 2
   Intersection *
   doClone() const override; ///< Makes a copy of the whole downward tree
 protected:

@@ -66,16 +66,15 @@ public:
   // ------------------------------------------------------
   Kernel::ISaveable *getISaveable() override;
   Kernel::ISaveable *getISaveable() const override;
-  void setFileBacked(const uint64_t /*fileLocation*/,
-                             const size_t /*fileSize*/,
-                             const bool /*markSaved*/) override;
+  void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/,
+                     const bool /*markSaved*/) override;
   void setFileBacked() override;
   void clearFileBacked(bool loadDiskBackedData) override;
   //-----------------------------------------------------------------------------------------------
   void saveAt(API::IBoxControllerIO *const /* */,
-                      uint64_t /*position*/) const override;
-  void loadAndAddFrom(API::IBoxControllerIO *const /* */,
-                              uint64_t /*position*/, size_t /* Size */) override;
+              uint64_t /*position*/) const override;
+  void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/,
+                      size_t /* Size */) override;
   void reserveMemoryForLoad(uint64_t /* Size */) override;
   /**drop events data from memory but keep averages (and file-backed info) */
   void clearDataFromMemory() override;
@@ -102,7 +101,8 @@ public:
 
   /// Sets the children from a vector of children
   void setChildren(const std::vector<API::IMDNode *> & /*boxes*/,
-                   const size_t /*indexStart*/, const size_t /*indexEnd*/) override {
+                   const size_t /*indexStart*/,
+                   const size_t /*indexEnd*/) override {
     throw std::runtime_error("MDBox cannot have children.");
   }
 
@@ -131,7 +131,7 @@ public:
   std::vector<MDE> *getEventsCopy() override;
 
   void getEventsData(std::vector<coord_t> &coordTable,
-                             size_t &nColumns) const override;
+                     size_t &nColumns) const override;
   void setEventsData(const std::vector<coord_t> &coordTable) override;
 
   void addEvent(const MDE &Evnt) override;
@@ -145,23 +145,23 @@ public:
   /*--------------->  EVENTS from event data
    * <-------------------------------------------------------------*/
   void buildAndAddEvent(const signal_t Signal, const signal_t errorSq,
-                                const std::vector<coord_t> &point,
-                                uint16_t runIndex, uint32_t detectorId) override;
-  void buildAndAddEventUnsafe(const signal_t Signal,
-                                      const signal_t errorSq,
-                                      const std::vector<coord_t> &point,
-                                      uint16_t runIndex, uint32_t detectorId) override;
+                        const std::vector<coord_t> &point, uint16_t runIndex,
+                        uint32_t detectorId) override;
+  void buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq,
+                              const std::vector<coord_t> &point,
+                              uint16_t runIndex, uint32_t detectorId) override;
   size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
-                                   const std::vector<coord_t> &Coord,
-                                   const std::vector<uint16_t> &runIndex,
-                                   const std::vector<uint32_t> &detectorId) override;
+                           const std::vector<coord_t> &Coord,
+                           const std::vector<uint16_t> &runIndex,
+                           const std::vector<uint32_t> &detectorId) override;
 
   //---------------------------------------------------------------------------------------------------------------------------------
   void centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const override;
-  void generalBin(MDBin<MDE, nd> &bin,
-                  Mantid::Geometry::MDImplicitFunction &function) const override;
-  void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ =
-                            NULL) override { /* Do nothing with a box default. */
+  void
+  generalBin(MDBin<MDE, nd> &bin,
+             Mantid::Geometry::MDImplicitFunction &function) const override;
+  void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)
+      override { /* Do nothing with a box default. */
   }
 
   //---------------------------------------------------------------------------------------------------------------------------------
@@ -192,7 +192,8 @@ public:
   void getBoxes(std::vector<MDBoxBase<MDE, nd> *> &boxes, size_t maxDepth,
                 bool leafOnly, Mantid::Geometry::MDImplicitFunction *function);
   void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
-                bool leafOnly, Mantid::Geometry::MDImplicitFunction *function) override;
+                bool leafOnly,
+                Mantid::Geometry::MDImplicitFunction *function) override;
   //------------------------------------------------------------------------------------------------------------------------------------
   void transformDimensions(std::vector<double> &scaling,
                            std::vector<double> &offset) override;

@@ -62,28 +62,27 @@ public:
     *the moment so it is always NULL */
   Kernel::ISaveable *getISaveable() const override { return NULL; }
   /**Recursively make all underlaying boxes file-backed*/
-  void setFileBacked(const uint64_t /*fileLocation*/,
-                             const size_t /*fileSize*/,
-                             const bool /*markSaved*/) override;
+  void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/,
+                     const bool /*markSaved*/) override;
   void setFileBacked() override;
   void clearFileBacked(bool loadDiskBackedData) override;
   void clear() override;
-  void clearDataFromMemory() override { /*it seems works on boxes only though recursive
-                                  clearing makes sence, not yet implemented*/
+  void clearDataFromMemory()
+      override { /*it seems works on boxes only though recursive
+           clearing makes sence, not yet implemented*/
   }
   /**Save the box at specific disk position using the class, respoinsible for
    * the file IO. */
   void saveAt(API::IBoxControllerIO *const /* */,
-                      uint64_t /*position*/) const override { /*Not saveable */
+              uint64_t /*position*/) const override { /*Not saveable */
   }
   /**Load the box data of specified size from the disk location provided using
    * the class, respoinsible for the file IO. */
-  void loadAndAddFrom(API::IBoxControllerIO *const /* */,
-                              uint64_t /*position*/,
-                              size_t /* Size */) override { /*Not directly loadable */
+  void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/,
+                      size_t /* Size */) override { /*Not directly loadable */
   }
-  void
-      reserveMemoryForLoad(uint64_t /* Size */) override { /*Not directly loadable */
+  void reserveMemoryForLoad(
+      uint64_t /* Size */) override { /*Not directly loadable */
   }
   //-------------------------------------------------------------------------------------------------------
 
@@ -116,7 +115,8 @@ public:
   void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
                 bool leafOnly) override;
   void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
-                bool leafOnly, Mantid::Geometry::MDImplicitFunction *function) override;
+                bool leafOnly,
+                Mantid::Geometry::MDImplicitFunction *function) override;
 
   const API::IMDNode *getBoxAtCoord(const coord_t *coords) override;
 
@@ -133,22 +133,22 @@ public:
   /*--------------->  EVENTS from event data
    * <-------------------------------------------------------------*/
   void buildAndAddEvent(const signal_t Signal, const signal_t errorSq,
-                                const std::vector<coord_t> &point,
-                                uint16_t runIndex, uint32_t detectorId) override;
-  void buildAndAddEventUnsafe(const signal_t Signal,
-                                      const signal_t errorSq,
-                                      const std::vector<coord_t> &point,
-                                      uint16_t runIndex, uint32_t detectorId) override;
+                        const std::vector<coord_t> &point, uint16_t runIndex,
+                        uint32_t detectorId) override;
+  void buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq,
+                              const std::vector<coord_t> &point,
+                              uint16_t runIndex, uint32_t detectorId) override;
   size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
-                                   const std::vector<coord_t> &Coord,
-                                   const std::vector<uint16_t> &runIndex,
-                                   const std::vector<uint32_t> &detectorId) override;
+                           const std::vector<coord_t> &Coord,
+                           const std::vector<uint16_t> &runIndex,
+                           const std::vector<uint32_t> &detectorId) override;
   //----------------------------------------------------------------------------------------------------------------------
 
   void centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const override;
 
-  void generalBin(MDBin<MDE, nd> & /*bin*/,
-                  Mantid::Geometry::MDImplicitFunction & /*function*/) const override {}
+  void generalBin(
+      MDBin<MDE, nd> & /*bin*/,
+      Mantid::Geometry::MDImplicitFunction & /*function*/) const override {}
 
   void integrateSphere(Mantid::API::CoordTransform &radiusTransform,
                        const coord_t radiusSquared, signal_t &signal,
@@ -188,7 +188,8 @@ public:
   //-------------------------------------------------------------------------
   /** The function used to satisfy IMDNode interface but the physical meaning is
    * unclear */
-  void calculateCentroid(coord_t * /*centroid*/, const int /*runindex*/) const override {
+  void calculateCentroid(coord_t * /*centroid*/,
+                         const int /*runindex*/) const override {
     throw(std::runtime_error("This function should not be called on MDGridBox "
                              "(as its meaning for MDbox is dubious too)"));
   }
