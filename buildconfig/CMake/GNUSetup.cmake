@@ -44,7 +44,18 @@ endif()
 if ( CMAKE_COMPILER_IS_GNUCXX )
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
     set(GNUFLAGS "${GNUFLAGS} -Wsuggest-override -Wsuggest-final-types -Wsuggest-final-methods")
+    option(ENABLE_LTO "Enable link-time optimization in release builds" ON)
+  else()
+    option(ENABLE_LTO "Enable link-time optimization in release builds" OFF)
   endif()
+  mark_as_advanced(ENABLE_LTO)
+endif()
+
+if(ENABLE_LTO)
+  # Avoid fat lto objects which are reported to double compile time.
+  set(GCC_LTO_FLAGS "-flto -fno-fat-lto-objects -fuse-linker-plugin")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${GCC_LTO_FLAGS}")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${GCC_LTO_FLAGS}")
 endif()
 
 # Add some options for debug build to help the Zoom profiler
