@@ -50,36 +50,38 @@ public:
   BoxControllerDummyIO(const Mantid::API::BoxController *theBC);
 
   ///@return true if the file to write events is opened and false otherwise
-  pened() const override { return (m_isOpened); }
+  bool isOpened() const override { return (m_isOpened); }
   /// get the full file name of the file used for IO operations
-  d::string &getFileName() const override { return m_fileName; }
+  const std::string &getFileName() const override { return m_fileName; }
   /**Return the size of the NeXus data block used in NeXus data array*/
-  size_t getDataChunk() const override { return 1; }
+  size_t getDataChunk() const { return 1; }
 
-  nFile(const std::string &fileName, const std::string &mode) override;
-  eBlock(const std::vector<float> & /* DataBlock */,
-         const uint64_t /*blockPosition*/) const override;
-  eBlock(const std::vector<double> & /* DataBlock */,
-         const uint64_t /*blockPosition*/) const override {
+  bool openFile(const std::string &fileName, const std::string &mode) override;
+  void saveBlock(const std::vector<float> & /* DataBlock */,
+                         const uint64_t /*blockPosition*/) const override;
+  void saveBlock(const std::vector<double> & /* DataBlock */,
+                         const uint64_t /*blockPosition*/) const override {
     throw Mantid::Kernel::Exception::NotImplementedError(
         "Saving double presision events blocks is not supported at the moment");
   }
-  dBlock(std::vector<float> & /* Block */, const uint64_t /*blockPosition*/,
-         const size_t /*BlockSize*/) const override;
-  dBlock(std::vector<double> & /* Block */, const uint64_t /*blockPosition*/,
-         const size_t /*BlockSize*/) const override {
+  void loadBlock(std::vector<float> & /* Block */,
+                         const uint64_t /*blockPosition*/,
+                         const size_t /*BlockSize*/) const override;
+  void loadBlock(std::vector<double> & /* Block */,
+                         const uint64_t /*blockPosition*/,
+                         const size_t /*BlockSize*/) const override {
     throw Mantid::Kernel::Exception::NotImplementedError(
         "Loading double presision events blocks is not supported at the "
         "moment");
   }
-  shData() const override{};
-  seFile() override { m_isOpened = false; }
+  void flushData() const override {};
+  void closeFile() override { m_isOpened = false; }
 
-  rollerDummyIO() override;
+  ~BoxControllerDummyIO() override;
   // Auxiliary functions. Used to change default state of this object which is
   // not fully supported. Should be replaced by some IBoxControllerIO factory
-  DataType(const size_t coordSize, const std::string &typeName) override;
-  DataType(size_t &coordSize, std::string &typeName) const override;
+  void setDataType(const size_t coordSize, const std::string &typeName) override;
+  void getDataType(size_t &coordSize, std::string &typeName) const override;
 
   // Auxiliary functions (non-virtual, used at testing)
   int64_t getNDataColums() const { return 2; }
