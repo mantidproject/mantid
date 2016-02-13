@@ -673,7 +673,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                    OutputWorkspace=sample_ws_name,
                                    ClearRHSWorkspace=allEventWorkspaces(sample_ws_name, ws_name))
                 assert temp_ws is not None
-                self.log().warning('Delete workspace %s @ L672.' % ws_name)
                 api.DeleteWorkspace(ws_name)
 
                 # comparess events
@@ -1234,7 +1233,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return can_run_ws_name
 
     def _process_vanadium_runs(self, van_run_number_list, timeFilterWall, samRunIndex, calib, **focuspos):
-        # Maitenance/NOW: Clean the codes for _process_vanadium_runs
+        # TODO/FIXME/NOW: Clean the codes for _process_vanadium_runs
         """
         Purpose:
         Requirements:
