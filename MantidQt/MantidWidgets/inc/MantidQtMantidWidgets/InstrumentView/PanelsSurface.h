@@ -50,14 +50,16 @@ namespace MantidQt
 			PanelsSurface(
 				const InstrumentActor *rootActor,
 				const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis);
-			~PanelsSurface();
-			void init();
-			void project(const Mantid::Kernel::V3D &, double &, double &, double &, double &) const;
+                        ~PanelsSurface() override;
+                        void init() override;
+                        void project(const Mantid::Kernel::V3D &, double &,
+                                     double &, double &,
+                                     double &) const override;
 
-		protected:
-
-			void rotate(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const;
-			//void drawCustom(QPainter *painter) const;
+                protected:
+                  void rotate(const UnwrappedDetector &udet,
+                              Mantid::Kernel::Quat &R) const override;
+                        //void drawCustom(QPainter *painter) const;
 
 			// Setup the projection axes
 			void setupAxes();

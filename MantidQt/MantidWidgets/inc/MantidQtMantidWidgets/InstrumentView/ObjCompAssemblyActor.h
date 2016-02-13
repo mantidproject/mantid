@@ -51,14 +51,24 @@ namespace MantidQt
 		public:
 			/// Constructor
 			ObjCompAssemblyActor(const InstrumentActor& instrActor, Mantid::Geometry::ComponentID compID);
-			virtual ~ObjCompAssemblyActor();								   ///< Destructor
-			virtual std::string type()const { return "ObjCompAssemblyActor"; } ///< Type of the GL object
-			virtual void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-															//virtual void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const;
-			virtual void setColors();
-			bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
-			bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll)const;
-		private:
+                        ~ObjCompAssemblyActor() override; ///< Destructor
+                        std::string type() const override {
+                          return "ObjCompAssemblyActor";
+                        } ///< Type of the GL object
+                        void draw(bool picking = false)
+                            const override; ///< Method that defines
+                                            ///ObjComponent geometry. Calls
+                                            ///ObjComponent draw method
+                        // virtual void getBoundingBox(Mantid::Kernel::V3D&
+                        // minBound,Mantid::Kernel::V3D& maxBound)const;
+                        void setColors() override;
+                        bool accept(GLActorVisitor &visitor,
+                                    VisitorAcceptRule rule = VisitAll) override;
+                        bool accept(
+                            GLActorConstVisitor &visitor,
+                            VisitorAcceptRule rule = VisitAll) const override;
+
+                private:
 			void setDetectorColor(unsigned char* data, size_t i, GLColor c)const; ///< set colour to a detector
 			void setDataColors() const;
 			void setPickColors() const;

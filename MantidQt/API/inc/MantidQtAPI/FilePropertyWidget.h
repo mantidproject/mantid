@@ -45,8 +45,8 @@ namespace API
 
   public:
     FilePropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
-    virtual ~FilePropertyWidget();
-    
+    ~FilePropertyWidget() override;
+
     static QString openFileDialog(Mantid::Kernel::Property * baseProp);
     static QStringList openMultipleFileDialog(Mantid::Kernel::Property * baseProp);
 

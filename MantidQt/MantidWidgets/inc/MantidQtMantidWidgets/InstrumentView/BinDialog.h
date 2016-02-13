@@ -50,8 +50,8 @@ namespace MantidQt
 
 		public:
 			explicit BinDialog(QWidget *parent = 0);
-			~BinDialog();
-			void setIntegralMinMax(double, double, bool);
+                        ~BinDialog() override;
+                        void setIntegralMinMax(double, double, bool);
 		signals:
 			/// This signal is sent when changing the bin range selected.
 			/// Parameters are: min, max, and a bool set to true to mean "everything"

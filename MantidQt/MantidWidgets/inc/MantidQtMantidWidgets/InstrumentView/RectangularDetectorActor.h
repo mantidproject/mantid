@@ -60,9 +60,9 @@ namespace MantidQt
 			/// Constructor
 			RectangularDetectorActor(const InstrumentActor& instrActor, const Mantid::Geometry::ComponentID& compID);
 			/// Destructor
-			virtual ~RectangularDetectorActor();
+                        ~RectangularDetectorActor() override;
 
-		private:
+                private:
 			void AppendBoundingBox(const Mantid::Kernel::V3D& minBound, const Mantid::Kernel::V3D& maxBound);
 
 		protected:
@@ -75,16 +75,28 @@ namespace MantidQt
 			virtual void initChilds(bool) {}
 
 		public:
-			virtual std::string type()const { return "RectangularDetectorActor"; } ///< Type of the GL object
+                  std::string type() const override {
+                    return "RectangularDetectorActor";
+                  } ///< Type of the GL object
 
-			void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-			void getBoundingBox(Mantid::Kernel::V3D& minBound, Mantid::Kernel::V3D& maxBound)const;
-			bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
-			bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll)const;
-			bool isChildDetector(const Mantid::Geometry::ComponentID& id) const;
-			virtual void setColors();
+                  void
+                  draw(bool picking = false) const override; ///< Method that
+                                                             ///defines
+                                                             ///ObjComponent
+                                                             ///geometry. Calls
+                                                             ///ObjComponent
+                                                             ///draw method
+                  void
+                  getBoundingBox(Mantid::Kernel::V3D &minBound,
+                                 Mantid::Kernel::V3D &maxBound) const override;
+                  bool accept(GLActorVisitor &visitor,
+                              VisitorAcceptRule rule = VisitAll) override;
+                  bool accept(GLActorConstVisitor &visitor,
+                              VisitorAcceptRule rule = VisitAll) const override;
+                        bool isChildDetector(const Mantid::Geometry::ComponentID& id) const;
+                        void setColors() override;
 
-			int genTexture(char * & image_data, std::vector<GLColor>& list, bool useDetectorIDs);
+                        int genTexture(char * & image_data, std::vector<GLColor>& list, bool useDetectorIDs);
 			void uploadTexture(char * & image_data)const;
 
 		private:

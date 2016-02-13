@@ -28,20 +28,22 @@ namespace MantidQt
 
 		public:
 			Projection3D(const InstrumentActor* rootActor, int winWidth, int winHeight);
-			~Projection3D();
-			virtual RectF getSurfaceBounds()const;
+                        ~Projection3D() override;
+                        RectF getSurfaceBounds() const override;
 
-			void setViewDirection(const QString& vd);
+                        void setViewDirection(const QString& vd);
 			void set3DAxesState(bool on);
 			void setWireframe(bool on);
 
-			virtual void componentSelected(Mantid::Geometry::ComponentID = NULL);
-			virtual void getSelectedDetectors(QList<int>& dets);
-			virtual void getMaskedDetectors(QList<int>& dets)const;
-			virtual void resize(int, int);
-			virtual QString getInfoText()const;
+                        void componentSelected(
+                            Mantid::Geometry::ComponentID = NULL) override;
+                        void getSelectedDetectors(QList<int> &dets) override;
+                        void
+                        getMaskedDetectors(QList<int> &dets) const override;
+                        void resize(int, int) override;
+                        QString getInfoText() const override;
 
-		signals:
+                signals:
 			void finishedMove();
 
 			protected slots:
@@ -55,11 +57,12 @@ namespace MantidQt
 			void finishMove();
 
 		protected:
-			virtual void init() {}
-			virtual void drawSurface(MantidGLWidget* widget, bool picking = false)const;
-			virtual void changeColorMap();
+                  void init() override {}
+                  void drawSurface(MantidGLWidget *widget,
+                                   bool picking = false) const override;
+                  void changeColorMap() override;
 
-			void drawAxes(double axis_length = 100.0)const;
+                        void drawAxes(double axis_length = 100.0)const;
 			void setLightingModel(bool picking)const;
 
 			bool m_drawAxes;
