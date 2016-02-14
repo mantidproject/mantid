@@ -269,7 +269,7 @@ void ConvertAxesToRealSpace::exec() {
   for (int i = 0; i < nOutputHist; ++i) {
     MantidVec &errorVec = outputWs->dataE(i);
     std::transform(errorVec.begin(), errorVec.end(), errorVec.begin(),
-                   std::function<double(double)>(sqrt));
+                   static_cast<double (*)(double)>(sqrt));
     progress.report("Completing Error Calculation");
   }
 

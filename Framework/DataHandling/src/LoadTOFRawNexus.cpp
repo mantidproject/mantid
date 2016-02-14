@@ -444,7 +444,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
       // Now take the sqrt(Y) to give E
       E = MantidVec();
       std::transform(Y.begin(), Y.end(), std::back_inserter(E),
-                     std::function<double(double)>(sqrt));
+                     static_cast<double (*)(double)>(sqrt));
     }
   }
 
