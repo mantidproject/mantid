@@ -17,7 +17,7 @@
 
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IObjComponent.h"
 
 #include "MantidKernel/ConfigService.h"

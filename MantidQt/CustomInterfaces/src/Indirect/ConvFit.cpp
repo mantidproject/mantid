@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
