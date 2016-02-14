@@ -18,7 +18,7 @@ public:
   MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
                 const bool includeMonitors = false);
   MaskWorkspace(const API::MatrixWorkspace_const_sptr parent);
-  ~MaskWorkspace();
+  ~MaskWorkspace() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<MaskWorkspace> clone() const {
@@ -42,10 +42,10 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  MaskWorkspace(const MaskWorkspace &other);
+  MaskWorkspace(const MaskWorkspace &other) = default;
 
   /// Protected copy assignment operator. Assignment not implemented.
-  MaskWorkspace &operator=(const MaskWorkspace &other);
+  MaskWorkspace &operator=(const MaskWorkspace &other) = delete;
 
   /// Return human-readable string
   virtual const std::string toString() const;

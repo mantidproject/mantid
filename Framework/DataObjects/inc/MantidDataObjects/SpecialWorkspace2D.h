@@ -29,7 +29,7 @@ public:
   SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
                      const bool includeMonitors = false);
   SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent);
-  ~SpecialWorkspace2D();
+  ~SpecialWorkspace2D() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<SpecialWorkspace2D> clone() const {
@@ -64,9 +64,9 @@ private:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  SpecialWorkspace2D(const SpecialWorkspace2D &other);
+  SpecialWorkspace2D(const SpecialWorkspace2D &other) = default;
   /// Protected copy assignment operator. Assignment not implemented.
-  SpecialWorkspace2D &operator=(const SpecialWorkspace2D &other);
+  SpecialWorkspace2D &operator=(const SpecialWorkspace2D &other) = delete;
 
   virtual void init(const size_t &NVectors, const size_t &XLength,
                     const size_t &YLength);

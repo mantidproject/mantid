@@ -15,7 +15,7 @@ namespace API {
 class DLLExport NullCoordTransform : public Mantid::API::CoordTransform {
 public:
   NullCoordTransform(size_t ndims = 3);
-  virtual ~NullCoordTransform();
+  virtual ~NullCoordTransform() = default;
   std::string toXMLString() const;
   std::string id() const;
   void apply(const Mantid::coord_t *inputVector,

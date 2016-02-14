@@ -36,9 +36,6 @@ Convolution::Convolution() {
   setAttributeValue("NumDeriv", true);
 }
 
-/// Destructor
-Convolution::~Convolution() {}
-
 void Convolution::init() {}
 
 void Convolution::functionDeriv(const FunctionDomain &domain,

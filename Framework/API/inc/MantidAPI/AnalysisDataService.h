@@ -170,7 +170,7 @@ private:
   /// Private, unimplemented copy assignment operator
   AnalysisDataServiceImpl &operator=(const AnalysisDataServiceImpl &);
   /// Private destructor
-  virtual ~AnalysisDataServiceImpl();
+  virtual ~AnalysisDataServiceImpl() = default;
 
   /// The string of illegal characters
   std::string m_illegalChars;

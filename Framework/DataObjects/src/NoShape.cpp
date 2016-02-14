@@ -11,11 +11,6 @@ namespace DataObjects {
 NoShape::NoShape() {}
 
 /**
- * @brief Destructor
- */
-NoShape::~NoShape() {}
-
-/**
  * @brief Serialize to JSON object
  * @return JSON object as std::string
  */

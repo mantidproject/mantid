@@ -125,7 +125,7 @@ public:
 
   // TableColumn();
   /// Virtual destructor.
-  virtual ~TableColumn() {}
+  virtual ~TableColumn() = default;
   /// Number of individual elements in the column.
   size_t size() const { return m_data.size(); }
   /// Type id of the data in the column

@@ -70,7 +70,7 @@ public:
   std::unique_ptr<Rule> clone() const {
     return std::unique_ptr<Rule>(doClone());
   }
-  virtual ~Rule();
+  virtual ~Rule() = default;
   virtual std::string className() const {
     return "Rule";
   } ///< Returns class name as string
@@ -298,8 +298,8 @@ private:
   CompObj *doClone() const;
 
 protected:
-  CompObj(const CompObj &);
-  CompObj &operator=(const CompObj &);
+  CompObj(const CompObj &) = default;
+  CompObj &operator=(const CompObj &) = default;
 
 public:
   CompObj();
@@ -402,7 +402,7 @@ private:
   BoolValue *doClone() const;
 
 protected:
-  BoolValue(const BoolValue &);
+  BoolValue(const BoolValue &) = default;
   BoolValue &operator=(const BoolValue &);
 
 public:

@@ -62,7 +62,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   ColumnFactoryImpl &operator=(const ColumnFactoryImpl &);
   /// Private Destructor
-  virtual ~ColumnFactoryImpl();
+  virtual ~ColumnFactoryImpl() = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

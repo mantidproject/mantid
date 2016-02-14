@@ -64,7 +64,7 @@ public:
                      const double lowerBound, bool isDefault = false);
 
   /// Destructor
-  virtual ~BoundaryConstraint() {}
+  virtual ~BoundaryConstraint() = default;
 
   /// Initialize the constraint from an expression
   void initialize(API::IFunction *fun, const API::Expression &expr,

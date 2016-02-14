@@ -42,7 +42,7 @@ class MANTID_GEOMETRY_DLL StructureFactorCalculatorSummation
     : public StructureFactorCalculator {
 public:
   StructureFactorCalculatorSummation();
-  virtual ~StructureFactorCalculatorSummation() {}
+  virtual ~StructureFactorCalculatorSummation() = default;
 
   StructureFactor getF(const Kernel::V3D &hkl) const;
 

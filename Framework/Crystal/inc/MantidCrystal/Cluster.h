@@ -41,7 +41,7 @@ public:
   Cluster(const size_t &label);
 
   /// Destructor
-  virtual ~Cluster();
+  virtual ~Cluster() = default;
 
   /// integrate the cluster
   ClusterIntegratedValues

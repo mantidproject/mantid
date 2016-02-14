@@ -22,11 +22,6 @@ MultipleExperimentInfos::MultipleExperimentInfos(
   this->copyExperimentInfos(other);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MultipleExperimentInfos::~MultipleExperimentInfos() {}
-
 //-----------------------------------------------------------------------------------------------
 /** Get the ExperimentInfo for the given run Index
  *

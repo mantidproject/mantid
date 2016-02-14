@@ -47,11 +47,6 @@ Kernel::Logger g_log("Run");
 Run::Run() : m_goniometer(), m_histoBins() {}
 
 /**
- * Destructor
- */
-Run::~Run() {}
-
-/**
  * Copy constructor
  * @param copy :: The object to initialize the copy from
  */

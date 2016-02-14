@@ -45,7 +45,7 @@ public:
   PoldiSourceSpectrum(Kernel::Interpolation spectrum);
   PoldiSourceSpectrum(Geometry::Instrument_const_sptr poldiInstrument);
 
-  ~PoldiSourceSpectrum() {}
+  ~PoldiSourceSpectrum() = default;
 
   double intensity(double wavelength) const;
 

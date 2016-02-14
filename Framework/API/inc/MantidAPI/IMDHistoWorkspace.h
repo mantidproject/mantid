@@ -39,7 +39,7 @@ class DLLExport IMDHistoWorkspace : public IMDWorkspace,
                                     public MultipleExperimentInfos {
 public:
   IMDHistoWorkspace();
-  virtual ~IMDHistoWorkspace();
+  virtual ~IMDHistoWorkspace() = default;
 
   /// Returns a clone of the workspace
   IMDHistoWorkspace_uptr clone() const {
@@ -107,9 +107,9 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IMDHistoWorkspace(const IMDHistoWorkspace &other);
+  IMDHistoWorkspace(const IMDHistoWorkspace &other) = default;
   /// Protected copy assignment operator. Assignment not implemented.
-  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &other);
+  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &other) = delete;
 
   virtual const std::string toString() const;
 

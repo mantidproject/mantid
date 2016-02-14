@@ -49,7 +49,7 @@ public:
   /// Equals operator
   bool operator==(const PeakShapeEllipsoid &other) const;
   /// Destructor
-  virtual ~PeakShapeEllipsoid();
+  virtual ~PeakShapeEllipsoid() = default;
   /// Get radii
   std::vector<double> abcRadii() const;
   /// Get background inner radii

@@ -42,7 +42,7 @@ class DLLExport ExpDecayMuon : public API::ParamFunction,
                                public API::IFunction1D {
 public:
   /// Destructor
-  virtual ~ExpDecayMuon() {}
+  virtual ~ExpDecayMuon() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "ExpDecayMuon"; }

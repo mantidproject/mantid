@@ -8,9 +8,6 @@ namespace API {
 ImplicitFunctionParameterParserFactoryImpl::
     ImplicitFunctionParameterParserFactoryImpl() {}
 
-ImplicitFunctionParameterParserFactoryImpl::
-    ~ImplicitFunctionParameterParserFactoryImpl() {}
-
 boost::shared_ptr<ImplicitFunctionParameterParser>
 ImplicitFunctionParameterParserFactoryImpl::create(
     const std::string &xmlString) const {

@@ -65,7 +65,7 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL SymmetryOperationSymbolParser {
 public:
-  ~SymmetryOperationSymbolParser() {}
+  ~SymmetryOperationSymbolParser() = default;
 
   static std::pair<Kernel::IntMatrix, V3R>
   parseIdentifier(const std::string &identifier);
@@ -75,7 +75,7 @@ public:
                                              const V3R &vector);
 
 protected:
-  SymmetryOperationSymbolParser();
+  SymmetryOperationSymbolParser() = default;
 
   static void verifyMatrix(const Kernel::IntMatrix &matrix);
   static bool isValidMatrixRow(const int *element, size_t columnNumber);

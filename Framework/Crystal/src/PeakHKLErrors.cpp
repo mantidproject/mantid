@@ -36,8 +36,6 @@ PeakHKLErrors::PeakHKLErrors() : ParamFunction(), IFunction1D() {
   initMode = 0;
 }
 
-PeakHKLErrors::~PeakHKLErrors() {}
-
 void PeakHKLErrors::init() {
   declareParameter("SampleXOffset", 0.0, "Sample x offset");
   declareParameter("SampleYOffset", 0.0, "Sample y offset");
@@ -512,8 +510,6 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     // For parameters the getGoniometerMatrix should remove GonRot, for derivs
     // wrt GonRot*, wrt chi*,phi*,etc.
 
-    V3D hkl = UBinv * peak.getQSampleFrame();
-
     // Deriv wrt chi phi and omega
     if (phiParamNum < nParams()) {
       Matrix<double> chiMatrix = RotationMatrixAboutRegAxis(chi, 'z');
@@ -594,7 +590,6 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     V3D D = peak.getDetPos() - samplePosition;
     double vmag = (L0 + D.norm()) / peak.getTOF();
     double t1 = peak.getTOF() - L0 / vmag;
-    V3D V = D / t1;
 
     // Derivs wrt sample x, y, z
     // Ddsx =( - 1, 0, 0),  d|D|^2/dsx -> 2|D|d|D|/dsx =d(tranp(D)* D)/dsx =2

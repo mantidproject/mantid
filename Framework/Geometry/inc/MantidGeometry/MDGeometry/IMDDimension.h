@@ -55,7 +55,7 @@ National Laboratory & European Spallation Source
 class MANTID_GEOMETRY_DLL IMDDimension {
 public:
   /// Destructor
-  virtual ~IMDDimension() {}
+  virtual ~IMDDimension() = default;
 
   /// @return the name of the dimension as can be displayed along the axis
   virtual std::string getName() const = 0;

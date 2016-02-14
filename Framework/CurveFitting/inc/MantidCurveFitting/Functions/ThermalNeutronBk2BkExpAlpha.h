@@ -39,7 +39,7 @@ class DLLExport ThermalNeutronBk2BkExpAlpha : virtual public API::IFunction1D,
                                               public API::ParamFunction {
 public:
   ThermalNeutronBk2BkExpAlpha();
-  virtual ~ThermalNeutronBk2BkExpAlpha();
+  virtual ~ThermalNeutronBk2BkExpAlpha() = default;
 
   /// Override
   virtual void function1D(double *out, const double *xValues,

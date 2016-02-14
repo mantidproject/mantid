@@ -72,7 +72,7 @@ public:
   /// (Empty) Constructor
   AbsorptionCorrection();
   /// Virtual destructor
-  virtual ~AbsorptionCorrection() {}
+  virtual ~AbsorptionCorrection() = default;
   /// Algorithm's category for identification
   virtual const std::string category() const {
     return "CorrectionFunctions\\AbsorptionCorrections";

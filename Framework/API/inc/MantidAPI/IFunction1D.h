@@ -61,7 +61,7 @@ public:
   /// Virtual destructor
   /// (avoids warnings about non-trivial move assignment in virtually inheriting
   /// classes)
-  virtual ~IFunction1D() {}
+  virtual ~IFunction1D() = default;
 
   /* Overidden methods */
 

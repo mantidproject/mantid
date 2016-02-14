@@ -19,12 +19,6 @@ public:
   /// Constructor
   PeakTransformHKL(const std::string &xPlotLabel,
                    const std::string &yPlotLabel);
-  /// Destructor
-  virtual ~PeakTransformHKL();
-  /// Copy Constructor
-  PeakTransformHKL(const PeakTransformHKL &other);
-  /// Assigmentent
-  PeakTransformHKL &operator=(const PeakTransformHKL &other);
   /// Virtual constructor
   PeakTransform_sptr clone() const;
   /// Transform peak.

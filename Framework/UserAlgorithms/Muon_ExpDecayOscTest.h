@@ -40,7 +40,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport Muon_ExpDecayOscTest : public API::IPeakFunction {
 public:
   /// Destructor
-  virtual ~Muon_ExpDecayOscTest(){};
+  virtual ~Muon_ExpDecayOscTest() = default;
+  ;
 
   /// overwrite IPeakFunction base class methods
 

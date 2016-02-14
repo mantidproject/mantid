@@ -42,7 +42,7 @@ namespace CostFunctions {
 class DLLExport CostFuncUnweightedLeastSquares : public CostFuncLeastSquares {
 public:
   CostFuncUnweightedLeastSquares();
-  virtual ~CostFuncUnweightedLeastSquares() {}
+  virtual ~CostFuncUnweightedLeastSquares() = default;
 
   std::string name() const { return "Unweighted least squares"; }
   std::string shortName() const { return "Chi-sq-unw."; }

@@ -15,11 +15,6 @@ namespace DataObjects {
  */
 PeakShapeEllipsoidFactory::PeakShapeEllipsoidFactory() {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakShapeEllipsoidFactory::~PeakShapeEllipsoidFactory() {}
-
 /**
  * @brief Create the PeakShape
  * @param source : source JSON

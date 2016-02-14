@@ -46,7 +46,7 @@ namespace CurveFitting {
 class MANTID_CURVEFITTING_DLL SeqDomain : public API::FunctionDomain {
 public:
   SeqDomain() : API::FunctionDomain(), m_currentIndex(0) {}
-  virtual ~SeqDomain() {}
+  virtual ~SeqDomain() = default;
   /// Return the number of points in the domain
   virtual size_t size() const;
   /// Return the number of parts in the domain

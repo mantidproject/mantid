@@ -29,7 +29,7 @@ class DLLExport PawleyParameterFunction : virtual public API::IFunction,
                                           virtual public API::ParamFunction {
 public:
   PawleyParameterFunction();
-  virtual ~PawleyParameterFunction() {}
+  virtual ~PawleyParameterFunction() = default;
 
   /// Returns the function name
   std::string name() const { return "PawleyParameterFunction"; }
@@ -114,7 +114,7 @@ typedef boost::shared_ptr<PawleyParameterFunction> PawleyParameterFunction_sptr;
 class DLLExport PawleyFunction : public API::IPawleyFunction {
 public:
   PawleyFunction();
-  virtual ~PawleyFunction() {}
+  virtual ~PawleyFunction() = default;
 
   /// Returns the name of the function.
   std::string name() const { return "PawleyFunction"; }

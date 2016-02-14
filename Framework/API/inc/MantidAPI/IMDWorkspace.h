@@ -72,7 +72,7 @@ static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
   IMDWorkspace();
-  virtual ~IMDWorkspace();
+  virtual ~IMDWorkspace() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<IMDWorkspace> clone() const {

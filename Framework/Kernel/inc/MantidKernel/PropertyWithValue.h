@@ -347,7 +347,7 @@ public:
   }
 
   /// Virtual destructor
-  virtual ~PropertyWithValue() {}
+  virtual ~PropertyWithValue() = default;
 
   /** Get the value of the property as a string
    *  @return The property's value

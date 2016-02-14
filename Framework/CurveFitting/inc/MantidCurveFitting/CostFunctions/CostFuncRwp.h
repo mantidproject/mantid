@@ -49,7 +49,7 @@ public:
   /// Constructor
   CostFuncRwp();
   /// Virtual destructor
-  virtual ~CostFuncRwp() {}
+  virtual ~CostFuncRwp() = default;
 
   /// Get name of minimizer
   virtual std::string name() const { return "Rwp"; }

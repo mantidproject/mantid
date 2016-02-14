@@ -123,7 +123,7 @@ public:
   /// Assignment operator
   FileError &operator=(const FileError &A);
   /// Destructor
-  ~FileError() throw() {}
+  ~FileError() throw() = default;
 
   const char *what() const throw();
 };
@@ -151,7 +151,7 @@ public:
   /// Assignment operator
   ParseError &operator=(const ParseError &A);
   /// Destructor
-  ~ParseError() throw() {}
+  ~ParseError() throw() = default;
 
   const char *what() const throw();
 };
@@ -160,11 +160,7 @@ public:
 class MANTID_KERNEL_DLL NotImplementedError : public std::logic_error {
 public:
   NotImplementedError(const std::string &);
-  NotImplementedError(const NotImplementedError &A);
-  /// Assignment operator
-  NotImplementedError &operator=(const NotImplementedError &A);
-  /// Destructor
-  ~NotImplementedError() throw() {}
+  ~NotImplementedError() throw() = default;
 
   const char *what() const throw();
 };
@@ -186,7 +182,7 @@ public:
   /// Assignment operator
   NotFoundError &operator=(const NotFoundError &A);
   /// Destructor
-  ~NotFoundError() throw() {}
+  ~NotFoundError() throw() = default;
 
   const char *what() const throw();
 };
@@ -205,7 +201,7 @@ public:
   /// Assignment operator
   ExistsError &operator=(const ExistsError &A);
   /// Destructor
-  ~ExistsError() throw() {}
+  ~ExistsError() throw() = default;
 
   const char *what() const throw();
 };
@@ -245,7 +241,7 @@ public:
   /// Assignment operator
   AbsObjMethod &operator=(const AbsObjMethod &A);
   /// Destructor
-  ~AbsObjMethod() throw() {}
+  ~AbsObjMethod() throw() = default;
 
   const char *what() const throw();
 };
@@ -266,7 +262,7 @@ public:
   /// Assignment operator
   InstrumentDefinitionError &operator=(const InstrumentDefinitionError &A);
   /// Destructor
-  ~InstrumentDefinitionError() throw() {}
+  ~InstrumentDefinitionError() throw() = default;
 
   const char *what() const throw();
 };
@@ -288,7 +284,7 @@ public:
   /// Assignment operator
   OpenGLError &operator=(const OpenGLError &A);
   /// Destructor
-  ~OpenGLError() throw() {}
+  ~OpenGLError() throw() = default;
 
   const char *what() const throw();
 };
@@ -309,7 +305,7 @@ public:
   MisMatch(const T &, const T &, const std::string &);
   MisMatch(const MisMatch<T> &A);
   MisMatch<T> &operator=(const MisMatch<T> &rhs);
-  ~MisMatch() throw() {}
+  ~MisMatch() throw() = default;
 
   /// Overloaded reporting method
   const char *what() const throw();
@@ -332,7 +328,7 @@ public:
   IndexError(const size_t V, const size_t B, const std::string &Place);
   IndexError(const IndexError &A);
   IndexError &operator=(const IndexError &A);
-  ~IndexError() throw() {}
+  ~IndexError() throw() = default;
 
   /// Overloaded reporting method
   const char *what() const throw();
@@ -350,11 +346,7 @@ private:
 
 public:
   NullPointerException(const std::string &place, const std::string &objectName);
-  NullPointerException(const NullPointerException &);
-  ~NullPointerException() throw() {}
-
-  NullPointerException &operator=(const NullPointerException &);
-
+  ~NullPointerException() throw() = default;
   /// Overloaded reporting method
   const char *what() const throw();
 };
@@ -372,11 +364,6 @@ private:
 
 public:
   InternetError(const std::string &message, const int &errorCode = 0);
-  InternetError(const InternetError &);
-  ~InternetError() throw() {}
-
-  InternetError &operator=(const InternetError &);
-
   /// Overloaded reporting method
   const char *what() const throw();
   const int &errorCode() const;

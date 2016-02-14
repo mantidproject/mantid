@@ -44,7 +44,8 @@ public:
   /// Constructor
   DeltaFunction();
   /// Destructor
-  virtual ~DeltaFunction(){};
+  virtual ~DeltaFunction() = default;
+  ;
 
   /// overwrite IPeakFunction base class methods
   virtual double centre() const { return 0; }

@@ -80,7 +80,7 @@ public:
                       std::string value = "");
 
   /// Destructor
-  virtual ~EnabledWhenProperty();
+  virtual ~EnabledWhenProperty() = default;
 
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the

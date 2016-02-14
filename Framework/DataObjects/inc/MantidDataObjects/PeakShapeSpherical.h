@@ -47,7 +47,7 @@ public:
                      std::string algorithmName = std::string(),
                      int algorithmVersion = -1);
   /// Destructor
-  virtual ~PeakShapeSpherical();
+  virtual ~PeakShapeSpherical() = default;
   /// Copy constructor
   PeakShapeSpherical(const PeakShapeSpherical &other);
   /// Assignment operator

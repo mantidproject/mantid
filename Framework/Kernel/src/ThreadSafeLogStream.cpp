@@ -16,11 +16,6 @@ ThreadSafeLogStreamBuf::ThreadSafeLogStreamBuf(Poco::Logger &logger,
                                                Poco::Message::Priority priority)
     : Poco::LogStreamBuf(logger, priority), m_messages() {}
 
-/**
- * Destructor
- */
-ThreadSafeLogStreamBuf::~ThreadSafeLogStreamBuf() {}
-
 int ThreadSafeLogStreamBuf::overflow(char c) {
   return Poco::UnbufferedStreamBuf::overflow(c);
 }
@@ -60,11 +55,6 @@ ThreadSafeLogIOS::ThreadSafeLogIOS(Poco::Logger &logger,
 }
 
 /**
- * Destructor
- */
-ThreadSafeLogIOS::~ThreadSafeLogIOS() {}
-
-/**
  * Return the underlying buffer for this stream
  * @returns The thread-safe buffer associated with this stream
  */
@@ -91,11 +81,6 @@ ThreadSafeLogStream::ThreadSafeLogStream(const std::string &loggerName,
                                          Poco::Message::Priority priority)
     : ThreadSafeLogIOS(Poco::Logger::get(loggerName), priority),
       std::ostream(&m_buf) {}
-
-/**
- * Destructor
- */
-ThreadSafeLogStream::~ThreadSafeLogStream() {}
 
 /**
  * Return a reference to the log stream with the priority set to fatal

@@ -56,7 +56,7 @@ private:
   /// Private Constructor for singleton class
   TransformScaleFactoryImpl();
   /// Private destructor for singleton
-  virtual ~TransformScaleFactoryImpl();
+  virtual ~TransformScaleFactoryImpl() = default;
   /// Override the DynamicFactory::createUnwrapped() method. We don't want it
   /// used here.
   ITransformScale *createUnwrapped(const std::string &className) const;

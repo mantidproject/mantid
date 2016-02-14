@@ -37,7 +37,7 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL QLab : public MDFrame {
 public:
   QLab();
-  virtual ~QLab();
+  virtual ~QLab() = default;
   Mantid::Kernel::UnitLabel getUnitLabel() const;
   const Mantid::Kernel::MDUnit &getMDUnit() const;
   bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const;

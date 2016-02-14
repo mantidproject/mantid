@@ -45,8 +45,6 @@ public:
   /// Allows a for a vector of required strings to be passed to the validator
   void setRequiredStrings(const std::vector<std::string> &);
 
-  virtual ~StringContainsValidator();
-
 private:
   /// Checks the value is valid
   std::string checkValidity(const std::string &value) const;

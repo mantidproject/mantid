@@ -73,7 +73,8 @@ public:
 
 /// Default constructor
 template <typename VectorValueParameterType>
-VectorParameterParser<VectorValueParameterType>::VectorParameterParser() {}
+VectorParameterParser<VectorValueParameterType>::VectorParameterParser() =
+    default;
 
 //----------------------------------------------------------------------
 /* Parse the value aspect of the parameter only.

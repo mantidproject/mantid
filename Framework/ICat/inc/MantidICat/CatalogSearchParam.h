@@ -38,7 +38,7 @@ public:
   /// constructor
   CatalogSearchParam();
   /// Destructor
-  ~CatalogSearchParam();
+  ~CatalogSearchParam() = default;
 
   /// Set the start run to search for.
   void setRunStart(const double &startRun);

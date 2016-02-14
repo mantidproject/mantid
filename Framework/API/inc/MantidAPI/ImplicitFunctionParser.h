@@ -98,7 +98,7 @@ public:
   createFunctionBuilder(Poco::XML::Element *functionElement) = 0;
   virtual void setSuccessorParser(ImplicitFunctionParser *parser) = 0;
   virtual void setParameterParser(ImplicitFunctionParameterParser *parser) = 0;
-  virtual ~ImplicitFunctionParser() {}
+  virtual ~ImplicitFunctionParser() = default;
 };
 }
 }

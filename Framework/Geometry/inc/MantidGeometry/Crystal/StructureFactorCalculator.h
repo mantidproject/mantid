@@ -40,8 +40,8 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL StructureFactorCalculator {
 public:
-  StructureFactorCalculator();
-  virtual ~StructureFactorCalculator() {}
+  StructureFactorCalculator() = default;
+  virtual ~StructureFactorCalculator() = default;
 
   void setCrystalStructure(const CrystalStructure &crystalStructure);
 

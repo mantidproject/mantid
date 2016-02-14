@@ -83,7 +83,7 @@ class MANTID_GEOMETRY_DLL CyclicGroup : public Group {
 public:
   CyclicGroup(const std::string &symmetryOperationString);
   CyclicGroup(const SymmetryOperation &symmetryOperation);
-  virtual ~CyclicGroup() {}
+  virtual ~CyclicGroup() = default;
 
 protected:
   std::vector<SymmetryOperation>

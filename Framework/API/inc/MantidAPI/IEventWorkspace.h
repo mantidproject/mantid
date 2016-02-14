@@ -63,7 +63,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IEventWorkspace(const IEventWorkspace &other) : MatrixWorkspace(other) {}
+  IEventWorkspace(const IEventWorkspace &other) = default;
   /// Protected copy assignment operator. Assignment not implemented.
   IEventWorkspace &operator=(const IEventWorkspace &other);
 

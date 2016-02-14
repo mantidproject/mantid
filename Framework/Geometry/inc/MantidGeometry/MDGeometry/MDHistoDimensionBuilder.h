@@ -21,7 +21,7 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL MDHistoDimensionBuilder {
 public:
   MDHistoDimensionBuilder();
-  ~MDHistoDimensionBuilder();
+  ~MDHistoDimensionBuilder() = default;
   void setName(std::string name);
   void setId(std::string id);
   void setUnits(const Kernel::UnitLabel &units);

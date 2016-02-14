@@ -52,7 +52,7 @@ class MatrixWorkspace;
 class MANTID_API_DLL TextAxis : public Axis {
 public:
   TextAxis(const std::size_t &length);
-  virtual ~TextAxis() {}
+  virtual ~TextAxis() = default;
   virtual Axis *clone(const MatrixWorkspace *const parentWorkspace);
   virtual Axis *clone(const std::size_t length,
                       const MatrixWorkspace *const parentWorkspace);

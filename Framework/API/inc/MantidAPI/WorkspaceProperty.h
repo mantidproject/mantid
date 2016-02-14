@@ -192,7 +192,7 @@ public:
   }
 
   /// Virtual destructor
-  virtual ~WorkspaceProperty() {}
+  virtual ~WorkspaceProperty() = default;
 
   /** Get the name of the workspace
   *  @return The workspace's name

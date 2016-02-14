@@ -44,7 +44,7 @@ public:
   /// Default constructor
   IConstraint() : ParameterReference() {}
   /// Virtual destructor
-  virtual ~IConstraint() {}
+  virtual ~IConstraint() = default;
 
   /// Initialize the constraint from an expression
   virtual void initialize(IFunction *fun, const Expression &expr,

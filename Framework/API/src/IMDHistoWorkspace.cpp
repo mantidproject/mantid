@@ -15,17 +15,6 @@ namespace API {
 IMDHistoWorkspace::IMDHistoWorkspace()
     : IMDWorkspace(), MultipleExperimentInfos() {}
 
-//----------------------------------------------------------------------------------------------
-/** Copy Constructor
- */
-IMDHistoWorkspace::IMDHistoWorkspace(const IMDHistoWorkspace &other)
-    : IMDWorkspace(other), MultipleExperimentInfos(other) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IMDHistoWorkspace::~IMDHistoWorkspace() {}
-
 const std::string IMDHistoWorkspace::toString() const {
   std::ostringstream os;
   os << IMDWorkspace::toString();

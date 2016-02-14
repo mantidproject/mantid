@@ -50,7 +50,7 @@ class DLLExport PeakHKLErrors : public API::ParamFunction,
                                 public API::IFunction1D {
 public:
   PeakHKLErrors();
-  virtual ~PeakHKLErrors();
+  virtual ~PeakHKLErrors() = default;
 
   std::string name() const { return std::string("PeakHKLErrors"); };
 

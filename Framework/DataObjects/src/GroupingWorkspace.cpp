@@ -37,11 +37,6 @@ GroupingWorkspace::GroupingWorkspace(Geometry::Instrument_const_sptr inst)
     : SpecialWorkspace2D(inst) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-GroupingWorkspace::~GroupingWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /** Fill a map with key = detector ID, value = group number
  * by using the values in Y.
  * Group values of 0 are converted to -1.

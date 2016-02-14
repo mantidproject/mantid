@@ -110,9 +110,9 @@ public:
   virtual det_topology getTopology(Kernel::V3D &center) const = 0;
 
   /// (Empty) Constructor
-  IDetector() {}
+  IDetector() = default;
   /// Virtual destructor
-  virtual ~IDetector() {}
+  virtual ~IDetector() = default;
 };
 
 /// Shared pointer to IDetector

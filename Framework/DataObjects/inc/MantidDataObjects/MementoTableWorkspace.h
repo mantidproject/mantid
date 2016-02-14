@@ -38,7 +38,7 @@ class DLLExport MementoTableWorkspace : public TableWorkspace {
 public:
   static bool isMementoWorkspace(const Mantid::API::ITableWorkspace &candidate);
   MementoTableWorkspace(int nRows = 0);
-  ~MementoTableWorkspace();
+  ~MementoTableWorkspace() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<MementoTableWorkspace> clone() const {
@@ -47,8 +47,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  MementoTableWorkspace(const MementoTableWorkspace &other)
-      : TableWorkspace(other) {}
+  MementoTableWorkspace(const MementoTableWorkspace &other) = default;
   /// Protected copy assignment operator. Assignment not implemented.
   MementoTableWorkspace &operator=(const MementoTableWorkspace &other);
 

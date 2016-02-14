@@ -41,7 +41,7 @@ National Laboratory & European Spallation Source
 class DLLExport GausOsc : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Destructor
-  virtual ~GausOsc() {}
+  virtual ~GausOsc() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "GausOsc"; }

@@ -80,8 +80,10 @@ private:
   /// Disallow assignment
   RemoteJobManagerFactoryImpl &operator=(const RemoteJobManagerFactoryImpl &);
 
-  /// Private Destructor
-  virtual ~RemoteJobManagerFactoryImpl();
+  /**
+   * Private destructor, prevent client code from using this.
+   */
+  virtual ~RemoteJobManagerFactoryImpl() = default;
 
   // Unhide the inherited create method but make it private
   using Kernel::DynamicFactory<IRemoteJobManager>::create;

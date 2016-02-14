@@ -12,11 +12,6 @@ HardThresholdBackground::HardThresholdBackground(
     const Mantid::API::MDNormalization normalization)
     : m_thresholdSignal(thresholdSignal), m_normalization(normalization) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-HardThresholdBackground::~HardThresholdBackground() {}
-
 HardThresholdBackground::HardThresholdBackground(
     const HardThresholdBackground &other)
     : m_thresholdSignal(other.m_thresholdSignal),

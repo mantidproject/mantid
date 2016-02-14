@@ -17,7 +17,7 @@ public:
   /**
   Constructor
   */
-  ConcretePeakTransformFactory() {}
+  ConcretePeakTransformFactory() = default;
 
   /**
   Overriden Factory Method.
@@ -38,7 +38,7 @@ public:
   }
 
   /// Destructor
-  virtual ~ConcretePeakTransformFactory() {}
+  virtual ~ConcretePeakTransformFactory() = default;
 };
 }
 }

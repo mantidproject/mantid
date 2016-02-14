@@ -34,10 +34,5 @@ IDomainCreator *DomainCreatorFactoryImpl::createDomainCreator(
 DomainCreatorFactoryImpl::DomainCreatorFactoryImpl()
     : Kernel::DynamicFactory<IDomainCreator>() {}
 
-/**
- * Destructor
- */
-DomainCreatorFactoryImpl::~DomainCreatorFactoryImpl() {}
-
 } // namespace API
 } // namespace Mantid

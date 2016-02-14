@@ -37,7 +37,7 @@ class MANTID_API_DLL BinEdgeAxis : public NumericAxis {
 public:
   BinEdgeAxis(const std::size_t &length);
   BinEdgeAxis(const std::vector<double> &edges);
-  virtual ~BinEdgeAxis() {}
+  virtual ~BinEdgeAxis() = default;
 
   virtual Axis *clone(const MatrixWorkspace *const parentWorkspace);
   virtual Axis *clone(const std::size_t length,

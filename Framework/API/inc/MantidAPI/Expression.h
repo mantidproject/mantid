@@ -148,10 +148,6 @@ private:
      */
     Token(size_t i, size_t j, size_t k, size_t p)
         : is(i), ie(j), is1(k), prec(p) {}
-    /**
-     * The copy constructor.
-     */
-    Token(const Token &t) : is(t.is), ie(t.ie), is1(t.is1), prec(t.prec) {}
     size_t is;   ///< The index of the first symbol of the token.
     size_t ie;   ///< The index of the last symbol of the token.
     size_t is1;  ///< The index of the first symbol of the next token.

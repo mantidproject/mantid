@@ -95,7 +95,7 @@ class MANTID_GEOMETRY_DLL IsotropicAtomBraggScatterer
     : public BraggScattererInCrystalStructure {
 public:
   IsotropicAtomBraggScatterer();
-  virtual ~IsotropicAtomBraggScatterer() {}
+  virtual ~IsotropicAtomBraggScatterer() = default;
 
   std::string name() const { return "IsotropicAtomBraggScatterer"; }
   BraggScatterer_sptr clone() const;

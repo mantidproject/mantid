@@ -15,7 +15,6 @@ set ( SRC_FILES
 	src/Crystal/HKLFilter.cpp
 	src/Crystal/HKLFilterWavelength.cpp
 	src/Crystal/HKLGenerator.cpp
-	src/Crystal/IPeak.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/IsotropicAtomBraggScatterer.cpp
 	src/Crystal/NiggliCell.cpp

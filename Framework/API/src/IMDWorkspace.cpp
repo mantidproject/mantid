@@ -23,9 +23,6 @@ IMDWorkspace::IMDWorkspace(const IMDWorkspace &other)
   m_convention = other.getConvention();
 }
 
-/// Destructor
-IMDWorkspace::~IMDWorkspace() {}
-
 /** Creates a single iterator and returns it.
  *
  * This calls createIterators(), a pure virtual method on IMDWorkspace which

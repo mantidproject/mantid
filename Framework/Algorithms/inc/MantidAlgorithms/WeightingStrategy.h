@@ -43,7 +43,7 @@ public:
   /// Constructor
   WeightingStrategy();
   /// Destructor
-  virtual ~WeightingStrategy();
+  virtual ~WeightingStrategy() = default;
   /**
   Calculate the weight at distance from epicenter.
   @param distance : difference between the central detector location and the

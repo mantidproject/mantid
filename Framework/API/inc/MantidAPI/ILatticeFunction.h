@@ -41,7 +41,7 @@ namespace API {
 class MANTID_API_DLL ILatticeFunction : public FunctionParameterDecorator {
 public:
   ILatticeFunction();
-  virtual ~ILatticeFunction() {}
+  virtual ~ILatticeFunction() = default;
 
   void function(const FunctionDomain &domain, FunctionValues &values) const;
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian);

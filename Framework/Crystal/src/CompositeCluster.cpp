@@ -25,11 +25,6 @@ namespace Crystal {
  */
 CompositeCluster::CompositeCluster() {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CompositeCluster::~CompositeCluster() {}
-
 /**
  * Integrate the composite cluster.
  * @param ws : Workspace to integrate

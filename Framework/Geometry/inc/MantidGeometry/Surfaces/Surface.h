@@ -53,12 +53,10 @@ public:
   static const int Nprecision = 10; ///< Precision of the output
 
   Surface();
-  Surface(const Surface &);
   std::unique_ptr<Surface> clone() const {
     return std::unique_ptr<Surface>(doClone());
   };
-  Surface &operator=(const Surface &);
-  virtual ~Surface();
+  virtual ~Surface() = default;
 
   /// Effective typeid
   virtual std::string className() const { return "Surface"; }

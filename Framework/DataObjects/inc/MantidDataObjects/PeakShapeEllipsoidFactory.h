@@ -33,7 +33,7 @@ namespace DataObjects {
 class DLLExport PeakShapeEllipsoidFactory : public PeakShapeFactory {
 public:
   PeakShapeEllipsoidFactory();
-  virtual ~PeakShapeEllipsoidFactory();
+  virtual ~PeakShapeEllipsoidFactory() = default;
 
   // PeakShapeFactory interface
 

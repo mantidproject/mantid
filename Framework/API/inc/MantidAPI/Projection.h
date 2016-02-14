@@ -61,7 +61,7 @@ public:
   /// Assignment operator
   Projection &operator=(const Projection &other);
   /// Destructor
-  virtual ~Projection();
+  virtual ~Projection() = default;
   /// Retrieves the offset for the given dimension
   double getOffset(size_t nd);
   /// Retrieves the axis vector for the given dimension

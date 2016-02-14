@@ -56,7 +56,7 @@ private:
 
 public:
   EventWorkspaceCollection();
-  virtual ~EventWorkspaceCollection();
+  virtual ~EventWorkspaceCollection() = default;
 
   void setNPeriods(
       size_t nPeriods,

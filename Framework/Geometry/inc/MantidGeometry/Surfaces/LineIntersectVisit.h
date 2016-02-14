@@ -61,7 +61,7 @@ private:
 public:
   LineIntersectVisit(const Kernel::V3D &, const Kernel::V3D &);
   /// Destructor
-  virtual ~LineIntersectVisit() {}
+  virtual ~LineIntersectVisit() = default;
 
   void Accept(const Surface &);
   void Accept(const Quadratic &);

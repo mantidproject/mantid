@@ -124,7 +124,7 @@ public:
       const std::string &name,
       const std::vector<std::string> &exts = std::vector<std::string>());
 
-  ~MultipleFileProperty();
+  ~MultipleFileProperty() = default;
 
   /// 'Virtual copy constructor
   virtual MultipleFileProperty *clone() const {

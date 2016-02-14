@@ -42,7 +42,7 @@ class DLLExport MuonFInteraction : public API::ParamFunction,
                                    public API::IFunction1D {
 public:
   /// Destructor
-  virtual ~MuonFInteraction() {}
+  virtual ~MuonFInteraction() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "MuonFInteraction"; }

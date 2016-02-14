@@ -64,7 +64,7 @@ public:
     return m_MDNode->getDataInMemorySize();
   }
 
-  ~MDBoxSaveable() {}
+  ~MDBoxSaveable() = default;
 
 private:
   API::IMDNode *const m_MDNode;

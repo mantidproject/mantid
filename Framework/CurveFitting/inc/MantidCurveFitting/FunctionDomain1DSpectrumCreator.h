@@ -46,7 +46,7 @@ namespace CurveFitting {
 class DLLExport FunctionDomain1DSpectrumCreator : public API::IDomainCreator {
 public:
   FunctionDomain1DSpectrumCreator();
-  virtual ~FunctionDomain1DSpectrumCreator() {}
+  virtual ~FunctionDomain1DSpectrumCreator() = default;
 
   void setMatrixWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
   void setWorkspaceIndex(size_t workspaceIndex);

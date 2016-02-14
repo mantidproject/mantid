@@ -43,7 +43,7 @@ public:
   explicit FileValidator(
       const std::vector<std::string> &extensions = std::vector<std::string>(),
       bool testFileExists = true, bool testCanWrite = false);
-  virtual ~FileValidator();
+  virtual ~FileValidator() = default;
   virtual std::vector<std::string> allowedValues() const;
   IValidator_sptr clone() const;
 

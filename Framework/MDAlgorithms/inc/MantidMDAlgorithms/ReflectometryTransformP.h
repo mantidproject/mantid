@@ -39,7 +39,7 @@ public:
   ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin,
                           double pDiffMax, double incidentTheta,
                           int numberOfBinsQx = 100, int numberOfBinsQz = 100);
-  virtual ~ReflectometryTransformP();
+  virtual ~ReflectometryTransformP() = default;
 };
 
 } // namespace MDAlgorithms

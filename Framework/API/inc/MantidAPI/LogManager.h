@@ -54,7 +54,7 @@ public:
   LogManager();
   /// Destructor. Doesn't need to be virtual as long as nothing inherits from
   /// this class.
-  virtual ~LogManager();
+  virtual ~LogManager() = default;
   /// Copy constructor
   LogManager(const LogManager &copy);
   /// Assignment operator

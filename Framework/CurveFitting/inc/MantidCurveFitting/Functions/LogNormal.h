@@ -42,7 +42,7 @@ public:
   /// Constructor
   LogNormal();
   /// Destructor
-  virtual ~LogNormal() {}
+  virtual ~LogNormal() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "LogNormal"; }

@@ -47,7 +47,8 @@ public:
   ElasticDiffSphere();
 
   /// Destructor
-  virtual ~ElasticDiffSphere(){};
+  virtual ~ElasticDiffSphere() = default;
+  ;
 
   /// overwrite IFunction base class methods
   virtual std::string name() const { return "ElasticDiffSphere"; }
@@ -83,7 +84,7 @@ class DLLExport InelasticDiffSphere : public API::ParamFunction,
 public:
   InelasticDiffSphere();
 
-  virtual ~InelasticDiffSphere() {}
+  virtual ~InelasticDiffSphere() = default;
 
   /// overwrite IFunction base class methods
   virtual void init();
@@ -142,7 +143,8 @@ class DLLExport DiffSphere : public API::ImmutableCompositeFunction {
 
 public:
   /// Destructor
-  ~DiffSphere(){};
+  ~DiffSphere() = default;
+  ;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "DiffSphere"; }

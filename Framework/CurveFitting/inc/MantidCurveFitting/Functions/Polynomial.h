@@ -35,7 +35,7 @@ namespace Functions {
 class DLLExport Polynomial : public BackgroundFunction {
 public:
   Polynomial();
-  virtual ~Polynomial();
+  virtual ~Polynomial() = default;
 
   /// Overwrite IFunction base class
   std::string name() const { return "Polynomial"; }

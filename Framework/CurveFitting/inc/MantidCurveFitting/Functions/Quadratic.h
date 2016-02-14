@@ -47,7 +47,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport Quadratic : public BackgroundFunction {
 public:
   /// Destructor
-  virtual ~Quadratic(){};
+  virtual ~Quadratic() = default;
+  ;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "Quadratic"; }

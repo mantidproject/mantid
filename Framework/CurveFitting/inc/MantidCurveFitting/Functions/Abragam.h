@@ -46,7 +46,7 @@ class DLLExport Abragam : public API::ParamFunction,
                           public API::IFunction1D {
 public:
   /// Destructor
-  virtual ~Abragam() {}
+  virtual ~Abragam() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "Abragam"; }

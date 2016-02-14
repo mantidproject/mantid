@@ -105,8 +105,6 @@ Projection &Projection::operator=(const Projection &other) {
   return *this;
 }
 
-Projection::~Projection() {}
-
 double Projection::getOffset(size_t nd) {
   if (nd >= 3)
     throw std::invalid_argument("given axis out of range");

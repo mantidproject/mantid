@@ -39,7 +39,7 @@ class MANTID_KERNEL_DLL MDUnitFactory
 
 public:
   /// Destructor
-  virtual ~MDUnitFactory() {}
+  virtual ~MDUnitFactory() = default;
 
 private:
   /// Create the product

@@ -41,7 +41,7 @@ class DLLExport Bk2BkExpConvPV : virtual public API::IPeakFunction,
                                  virtual public API::IFunctionMW {
 public:
   Bk2BkExpConvPV();
-  virtual ~Bk2BkExpConvPV();
+  virtual ~Bk2BkExpConvPV() = default;
 
   /// overwrite IPeakFunction base class methods
   virtual double centre() const;

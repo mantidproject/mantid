@@ -37,7 +37,7 @@ class DLLExport ProductLinearExp : public API::ParamFunction,
                                    public API::IFunction1D {
 public:
   ProductLinearExp();
-  virtual ~ProductLinearExp();
+  virtual ~ProductLinearExp() = default;
 
   std::string name() const { return "ProductLinearExp"; }
 

@@ -49,7 +49,7 @@ namespace Functions {
 */
 class DLLExport PseudoVoigt : public API::IPeakFunction {
 public:
-  virtual ~PseudoVoigt() {}
+  virtual ~PseudoVoigt() = default;
 
   double centre() const { return getParameter("PeakCentre"); }
   double height() const { return getParameter("Height"); }

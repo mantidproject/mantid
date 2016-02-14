@@ -58,9 +58,9 @@ private:
   /// These methods are required to create a singleton.
   friend struct Kernel::CreateUsingNew<CatalogManagerImpl>;
   CatalogManagerImpl();
-  CatalogManagerImpl(const CatalogManagerImpl &);
-  CatalogManagerImpl &operator=(const CatalogManagerImpl &);
-  virtual ~CatalogManagerImpl();
+  CatalogManagerImpl(const CatalogManagerImpl &) = delete;
+  CatalogManagerImpl &operator=(const CatalogManagerImpl &) = delete;
+  virtual ~CatalogManagerImpl() = default;
 
   // Holds a list of active catalogs and uses their sessionId as unique
   // identifier.

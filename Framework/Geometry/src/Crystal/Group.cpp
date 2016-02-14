@@ -25,20 +25,6 @@ Group::Group(const std::vector<SymmetryOperation> &symmetryOperations)
   setSymmetryOperations(symmetryOperations);
 }
 
-/// Copy constructor.
-Group::Group(const Group &other)
-    : m_allOperations(other.m_allOperations),
-      m_operationSet(other.m_operationSet), m_axisSystem(other.m_axisSystem) {}
-
-/// Assignment operator.
-Group &Group::operator=(const Group &other) {
-  m_allOperations = other.m_allOperations;
-  m_operationSet = other.m_operationSet;
-  m_axisSystem = other.m_axisSystem;
-
-  return *this;
-}
-
 /// Returns the order of the group, which is the number of symmetry operations.
 size_t Group::order() const { return m_allOperations.size(); }
 

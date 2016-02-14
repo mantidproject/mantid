@@ -44,7 +44,7 @@ public:
   MDPlaneImplicitFunction(const size_t nd, const double *normal,
                           const double *point);
   /// Class destructor.
-  virtual ~MDPlaneImplicitFunction();
+  virtual ~MDPlaneImplicitFunction() = default;
 
   /// Overriding the addPlane for check
   void addPlane(const MDPlane &plane);

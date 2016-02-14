@@ -65,7 +65,7 @@ public:
   BnId(const size_t, unsigned int);
   BnId(const BnId &);
   BnId &operator=(const BnId &);
-  ~BnId();
+  ~BnId() = default;
 
   int operator==(const BnId &) const; ///< Equals operator for tri-state object
   int operator<(const BnId &) const;  ///< operator> for tri-state object

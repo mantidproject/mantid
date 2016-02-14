@@ -43,7 +43,7 @@ class DLLExport ExpDecayOsc : public API::ParamFunction,
                               public API::IFunction1D {
 public:
   /// Destructor
-  virtual ~ExpDecayOsc() {}
+  virtual ~ExpDecayOsc() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "ExpDecayOsc"; }

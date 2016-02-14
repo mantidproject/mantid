@@ -67,7 +67,6 @@ public:
 
   //  //! Copy constructor
   //  RectangularDetector(const RectangularDetector&);
-  virtual ~RectangularDetector();
   //! Make a clone of the present component
   virtual IComponent *clone() const;
 

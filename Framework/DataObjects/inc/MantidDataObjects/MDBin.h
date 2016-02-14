@@ -30,7 +30,7 @@ public:
   MDBin();
 
   /// Destructor
-  ~MDBin() {}
+  ~MDBin() = default;
 
   /** The accumulated signal in this bin.
    * This is public so as to avoid the need (and slowdown) of getters/setters

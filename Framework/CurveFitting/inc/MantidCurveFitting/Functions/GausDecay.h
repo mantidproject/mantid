@@ -41,7 +41,7 @@ National Laboratory & European Spallation Source
 class DLLExport GausDecay : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Destructor
-  virtual ~GausDecay() {}
+  virtual ~GausDecay() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "GausDecay"; }

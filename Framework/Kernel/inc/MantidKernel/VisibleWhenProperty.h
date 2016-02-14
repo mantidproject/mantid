@@ -47,7 +47,7 @@ public:
                       std::string value = "");
 
   /// Destructor
-  virtual ~VisibleWhenProperty();
+  virtual ~VisibleWhenProperty() = default;
 
   //--------------------------------------------------------------------------------------------
   /// Return true always

@@ -73,11 +73,6 @@ UsageServiceImpl::UsageServiceImpl()
   setInterval(60);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-UsageServiceImpl::~UsageServiceImpl() {}
-
 void UsageServiceImpl::setApplication(const std::string &name) {
   m_application = name;
 }

@@ -63,7 +63,7 @@ public:
   ThreadSafeLogStreamBuf(Poco::Logger &logger,
                          Poco::Message::Priority priority);
   /// Destructor
-  ~ThreadSafeLogStreamBuf();
+  ~ThreadSafeLogStreamBuf() = default;
 
 public:
   int overflow(char c);
@@ -92,7 +92,7 @@ public:
   /// Constructor
   ThreadSafeLogIOS(Poco::Logger &logger, Poco::Message::Priority priority);
   /// Destructor
-  ~ThreadSafeLogIOS();
+  ~ThreadSafeLogIOS() = default;
   // Return a pointer to the stream buffer object
   Poco::LogStreamBuf *rdbuf();
 
@@ -130,7 +130,7 @@ public:
       const std::string &loggerName,
       Poco::Message::Priority priority = Poco::Message::PRIO_INFORMATION);
   /// Destroys the ThreadSafeLogStream.
-  ~ThreadSafeLogStream();
+  ~ThreadSafeLogStream() = default;
   /// Sets the priority for log messages to Poco::Message::PRIO_FATAL.
   ThreadSafeLogStream &fatal();
   /// Sets the priority for log messages to Poco::Message::PRIO_FATAL

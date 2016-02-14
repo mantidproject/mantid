@@ -75,7 +75,7 @@ public:
 
   DiskBuffer();
   DiskBuffer(uint64_t m_writeBufferSize);
-  virtual ~DiskBuffer();
+  virtual ~DiskBuffer() = default;
 
   void toWrite(ISaveable *item);
   void flushCache();

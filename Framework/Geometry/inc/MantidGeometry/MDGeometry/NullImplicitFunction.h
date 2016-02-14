@@ -44,8 +44,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport NullImplicitFunction
     : public Mantid::Geometry::MDImplicitFunction {
 public:
-  NullImplicitFunction();
-  virtual ~NullImplicitFunction();
   virtual std::string getName() const;
   virtual std::string toXMLString() const;
   //----------------------MDImplicit function methods ------------

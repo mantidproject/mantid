@@ -101,14 +101,13 @@ public:
                                           validator, direction) {}
 
   /// Copy constructor
-  ArrayProperty(const ArrayProperty &right)
-      : PropertyWithValue<std::vector<T>>(right) {}
+  ArrayProperty(const ArrayProperty &right) = default;
 
   /// 'Virtual copy constructor'
   ArrayProperty<T> *clone() const { return new ArrayProperty<T>(*this); }
 
   /// Virtual destructor
-  virtual ~ArrayProperty() {}
+  virtual ~ArrayProperty() = default;
 
   // Unhide the base class assignment operator
   using PropertyWithValue<std::vector<T>>::operator=;

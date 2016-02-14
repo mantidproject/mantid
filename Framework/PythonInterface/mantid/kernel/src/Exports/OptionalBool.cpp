@@ -50,7 +50,7 @@ private:
 public:
   typedef OptionalBool HeldType;
 
-  virtual ~OptionalBoolPropertyValueHandler() {}
+  virtual ~OptionalBoolPropertyValueHandler() = default;
 
   /**
    * Set function to handle Python -> C++ calls and get the correct type

@@ -51,7 +51,7 @@ ANNbruteForce::ANNbruteForce( // constructor from point array
   pts = pa;
 }
 
-ANNbruteForce::~ANNbruteForce() {} // destructor (empty)
+ANNbruteForce::~ANNbruteForce() = default; // destructor (empty)
 
 void ANNbruteForce::annkSearch( // approx k near neighbor search
     ANNpoint q,                 // query point

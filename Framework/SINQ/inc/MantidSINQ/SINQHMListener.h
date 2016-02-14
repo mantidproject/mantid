@@ -42,7 +42,7 @@
 class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::ILiveListener {
 public:
   SINQHMListener();
-  ~SINQHMListener();
+  ~SINQHMListener() = default;
 
   std::string name() const { return "SINQHMListener"; }
   bool supportsHistory() const { return false; }

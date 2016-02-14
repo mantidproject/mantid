@@ -42,7 +42,7 @@ private:
   PropertyManagerDataServiceImpl &
   operator=(const PropertyManagerDataServiceImpl &);
   /// Destructor
-  ~PropertyManagerDataServiceImpl();
+  ~PropertyManagerDataServiceImpl() = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

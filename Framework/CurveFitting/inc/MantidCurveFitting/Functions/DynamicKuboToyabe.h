@@ -48,7 +48,7 @@ public:
   DynamicKuboToyabe();
 
   /// Destructor
-  virtual ~DynamicKuboToyabe() {}
+  virtual ~DynamicKuboToyabe() = default;
 
   /// overwrite base class methods
   std::string name() const { return "DynamicKuboToyabe"; }

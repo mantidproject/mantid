@@ -36,7 +36,7 @@ public:
   /// Constructor
   NoShape();
   /// Destructor
-  virtual ~NoShape();
+  virtual ~NoShape() = default;
   /// Serialize
   std::string toJSON() const;
   /// Clone

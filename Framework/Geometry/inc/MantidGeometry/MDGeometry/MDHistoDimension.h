@@ -52,7 +52,7 @@ public:
         m_binWidth(other->getBinWidth()) {}
 
   /// Destructor
-  virtual ~MDHistoDimension() {}
+  virtual ~MDHistoDimension() = default;
 
   /// Return the name of the dimension as can be displayed along the axis
   virtual std::string getName() const { return m_name; }

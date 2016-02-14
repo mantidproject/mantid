@@ -57,7 +57,7 @@ public:
             Mantid::API::BoxController *const otherBC);
 
   /// Destructor
-  virtual ~MDBoxBase() {}
+  virtual ~MDBoxBase() = default;
   ///@return the type of the event this box contains
   virtual std::string getEventType() const { return MDE::getTypeName(); }
   ///@return the length of the coordinates (in bytes), the events in the box

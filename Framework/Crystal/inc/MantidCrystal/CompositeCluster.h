@@ -35,7 +35,7 @@ namespace Crystal {
 class DLLExport CompositeCluster : public ICluster {
 public:
   CompositeCluster();
-  virtual ~CompositeCluster();
+  virtual ~CompositeCluster() = default;
 
   /// integrate the cluster
   ICluster::ClusterIntegratedValues

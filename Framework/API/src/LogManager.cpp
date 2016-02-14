@@ -35,16 +35,10 @@ const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
 LogManager::LogManager() : m_manager(), m_singleValueCache() {}
 
 /**
- * Destructor
- */
-LogManager::~LogManager() {}
-
-/**
  * Copy constructor
  * @param copy :: The object to initialize the copy from
  */
-LogManager::LogManager(const LogManager &copy)
-    : m_manager(copy.m_manager), m_singleValueCache(copy.m_singleValueCache) {}
+LogManager::LogManager(const LogManager &copy) = default;
 
 //-----------------------------------------------------------------------------------------------
 /**

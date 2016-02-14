@@ -49,7 +49,7 @@ public:
   Run();
   /// Destructor. Doesn't need to be virtual as long as nothing inherits from
   /// this class.
-  ~Run();
+  ~Run() = default;
   /// Copy constructor
   Run(const Run &copy);
   /// Assignment operator

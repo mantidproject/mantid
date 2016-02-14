@@ -115,8 +115,6 @@ private:
 
 class DLLExport MappedDataPkt : public RawDataPkt {
 public:
-  MappedDataPkt(const MappedDataPkt &pkt);
-
 private:
   MappedDataPkt(const uint8_t *data, uint32_t len);
 
@@ -169,8 +167,6 @@ private:
 
 class DLLExport SourceListPkt : public Packet {
 public:
-  SourceListPkt(const SourceListPkt &pkt);
-
   const uint32_t *ids(void) const { return (const uint32_t *)payload(); }
   uint32_t num_ids(void) const {
     return (uint32_t)payload_length() / (uint32_t)sizeof(uint32_t);
@@ -286,9 +282,7 @@ private:
 
 class DLLExport PixelMappingPkt : public Packet {
 public:
-  PixelMappingPkt(const PixelMappingPkt &pkt);
   // TODO implement accessors for fields
-
 private:
   PixelMappingPkt(const uint8_t *data, uint32_t len);
 
@@ -316,10 +310,7 @@ private:
 
 class DLLExport RunInfoPkt : public Packet {
 public:
-  RunInfoPkt(const RunInfoPkt &pkt);
-
   const std::string &info(void) const { return m_xml; }
-
 private:
   std::string m_xml;
 
@@ -346,10 +337,7 @@ private:
 
 class DLLExport ClientHelloPkt : public Packet {
 public:
-  ClientHelloPkt(const ClientHelloPkt &pkt);
-
   uint32_t requestedStartTime(void) const { return m_reqStart; }
-
 private:
   uint32_t m_reqStart;
 
@@ -387,9 +375,7 @@ private:
 
 class DLLExport SyncPkt : public Packet {
 public:
-  SyncPkt(const SyncPkt &pkt);
   // TODO implement accessors for fields
-
 private:
   SyncPkt(const uint8_t *data, uint32_t len);
 
@@ -398,8 +384,6 @@ private:
 
 class DLLExport HeartbeatPkt : public Packet {
 public:
-  HeartbeatPkt(const HeartbeatPkt &pkt);
-
 private:
   HeartbeatPkt(const uint8_t *data, uint32_t len);
 
@@ -408,10 +392,7 @@ private:
 
 class DLLExport GeometryPkt : public Packet {
 public:
-  GeometryPkt(const GeometryPkt &pkt);
-
   const std::string &info(void) const { return m_xml; }
-
 private:
   std::string m_xml;
 
@@ -422,8 +403,6 @@ private:
 
 class DLLExport BeamlineInfoPkt : public Packet {
 public:
-  BeamlineInfoPkt(const BeamlineInfoPkt &pkt);
-
   const uint32_t &targetNumber(void) const { return m_targetNumber; }
 
   const std::string &id(void) const { return m_id; }
@@ -616,8 +595,6 @@ private:
 
 class DLLExport DataDonePkt : public Packet {
 public:
-  DataDonePkt(const DataDonePkt &pkt);
-
 private:
   DataDonePkt(const uint8_t *data, uint32_t len);
 
@@ -626,8 +603,6 @@ private:
 
 class DLLExport DeviceDescriptorPkt : public Packet {
 public:
-  DeviceDescriptorPkt(const DeviceDescriptorPkt &pkt);
-
   uint32_t devId(void) const { return m_devId; }
   const std::string &description(void) const { return m_desc; }
 

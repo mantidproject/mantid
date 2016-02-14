@@ -59,7 +59,7 @@ public:
   /// Get the peak center
   Mantid::Kernel::V3D peakCenter(const Mantid::Geometry::IPeak &peak) const;
   /// Destructor
-  virtual ~PeakClusterProjection();
+  virtual ~PeakClusterProjection() = default;
 
 private:
   // Disabled copy and assignment.

@@ -7,7 +7,7 @@ namespace Mantid {
 
 TestChannel::TestChannel() {}
 
-TestChannel::~TestChannel() {}
+TestChannel::~TestChannel() = default;
 
 void TestChannel::log(const Poco::Message &msg) { _msgList.push_back(msg); }
 

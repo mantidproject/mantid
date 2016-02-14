@@ -64,7 +64,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   ScriptRepositoryFactoryImpl &operator=(const ScriptRepositoryFactoryImpl &);
   /// Private Destructor
-  virtual ~ScriptRepositoryFactoryImpl();
+  virtual ~ScriptRepositoryFactoryImpl() = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

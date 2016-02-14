@@ -88,7 +88,7 @@ public:
   ScriptRepositoryImpl(const std::string &local_repository = std::string(),
                        const std::string &remote_url = std::string());
 
-  virtual ~ScriptRepositoryImpl() throw();
+  virtual ~ScriptRepositoryImpl() throw() = default;
 
   void connect(const std::string &server);
 

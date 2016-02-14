@@ -42,7 +42,7 @@ public:
   /// Virtual destructor
   /// (avoids warnings about non-trivial move assignment in virtually inheriting
   /// classes)
-  virtual ~IPeakFunction() {}
+  virtual ~IPeakFunction() = default;
   /// Returns the peak FWHM
   virtual double fwhm() const = 0;
 

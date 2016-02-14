@@ -24,11 +24,6 @@ OffsetsWorkspace::OffsetsWorkspace() {}
 OffsetsWorkspace::OffsetsWorkspace(Geometry::Instrument_const_sptr inst)
     : SpecialWorkspace2D(inst) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-OffsetsWorkspace::~OffsetsWorkspace() {}
-
 } // namespace Mantid
 } // namespace DataObjects
 

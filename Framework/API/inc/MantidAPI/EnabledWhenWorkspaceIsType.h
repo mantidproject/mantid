@@ -55,7 +55,7 @@ public:
         m_enabledSetting(enabledSetting) {}
 
   /// Destructor
-  virtual ~EnabledWhenWorkspaceIsType() {}
+  virtual ~EnabledWhenWorkspaceIsType() = default;
 
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the

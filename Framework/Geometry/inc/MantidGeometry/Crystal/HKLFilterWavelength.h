@@ -42,7 +42,7 @@ class MANTID_GEOMETRY_DLL HKLFilterWavelength : public HKLFilter {
 public:
   HKLFilterWavelength(const Kernel::DblMatrix &ub, double lambdaMin,
                       double lambdaMax);
-  virtual ~HKLFilterWavelength() {}
+  virtual ~HKLFilterWavelength() = default;
 
   std::string getDescription() const;
   bool isAllowed(const Kernel::V3D &hkl) const;

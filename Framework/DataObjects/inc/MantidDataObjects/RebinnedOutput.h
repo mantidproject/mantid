@@ -43,7 +43,7 @@ public:
   /// Class constructor.
   RebinnedOutput();
   /// Class destructor.
-  virtual ~RebinnedOutput();
+  virtual ~RebinnedOutput() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<RebinnedOutput> clone() const {
@@ -70,9 +70,9 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  RebinnedOutput(const RebinnedOutput &other);
+  RebinnedOutput(const RebinnedOutput &other) = default;
   /// Protected copy assignment operator. Assignment not implemented.
-  RebinnedOutput &operator=(const RebinnedOutput &other);
+  RebinnedOutput &operator=(const RebinnedOutput &other) = delete;
 
   /// Called by initialize() in MatrixWorkspace
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,

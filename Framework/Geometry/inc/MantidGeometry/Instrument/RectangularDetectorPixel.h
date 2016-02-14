@@ -57,7 +57,7 @@ public:
                            RectangularDetector *panel, size_t row, size_t col);
 
   RectangularDetectorPixel();
-  virtual ~RectangularDetectorPixel();
+  virtual ~RectangularDetectorPixel() = default;
 
   virtual const Kernel::V3D getRelativePos() const;
 

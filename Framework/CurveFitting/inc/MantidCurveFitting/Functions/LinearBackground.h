@@ -46,7 +46,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport LinearBackground : public BackgroundFunction {
 public:
   /// Destructor
-  virtual ~LinearBackground(){};
+  virtual ~LinearBackground() = default;
+  ;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "LinearBackground"; }

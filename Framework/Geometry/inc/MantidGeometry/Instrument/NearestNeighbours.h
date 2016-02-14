@@ -64,7 +64,8 @@ public:
                     bool ignoreMasked = true);
 
   /// Default (empty) destructor
-  virtual ~NearestNeighbours(){};
+  virtual ~NearestNeighbours() = default;
+  ;
 
   // Neighbouring spectra by radius
   std::map<specid_t, Mantid::Kernel::V3D>

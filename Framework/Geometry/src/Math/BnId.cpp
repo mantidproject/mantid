@@ -75,12 +75,6 @@ BnId &BnId::operator=(const BnId &A)
   return *this;
 }
 
-BnId::~BnId()
-/**
-  Destructor
- */
-{}
-
 int BnId::operator==(const BnId &A) const
 /**
   Tri-state return of the equality

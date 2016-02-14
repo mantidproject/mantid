@@ -38,7 +38,7 @@ class MANTID_GEOMETRY_DLL QSample : public MDFrame {
 public:
   static const std::string QSampleName;
   QSample();
-  virtual ~QSample();
+  virtual ~QSample() = default;
   Kernel::UnitLabel getUnitLabel() const;
   const Kernel::MDUnit &getMDUnit() const;
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const;

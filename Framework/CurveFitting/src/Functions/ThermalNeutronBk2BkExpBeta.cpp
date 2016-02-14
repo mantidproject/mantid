@@ -27,11 +27,6 @@ DECLARE_FUNCTION(ThermalNeutronBk2BkExpBeta)
 ThermalNeutronBk2BkExpBeta::ThermalNeutronBk2BkExpBeta() {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ThermalNeutronBk2BkExpBeta::~ThermalNeutronBk2BkExpBeta() {}
-
-//----------------------------------------------------------------------------------------------
 /** Defintion of parameter
   */
 void ThermalNeutronBk2BkExpBeta::init() {

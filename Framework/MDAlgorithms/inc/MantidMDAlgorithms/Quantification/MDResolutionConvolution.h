@@ -62,7 +62,7 @@ public:
   MDResolutionConvolution(const API::IFunctionMD &fittingFunction,
                           const std::string &fgModelName);
   /// Virtual destructor for a base class
-  virtual ~MDResolutionConvolution() {}
+  virtual ~MDResolutionConvolution() = default;
 
   /// Function category
   virtual const std::string category() const { return "Quantification"; }

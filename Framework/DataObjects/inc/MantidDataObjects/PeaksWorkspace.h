@@ -86,7 +86,7 @@ public:
     return API::LogManager_const_sptr(new API::LogManager(this->run()));
   }
 
-  virtual ~PeaksWorkspace();
+  virtual ~PeaksWorkspace() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<PeaksWorkspace> clone() const {

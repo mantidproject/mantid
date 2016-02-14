@@ -38,7 +38,7 @@ public:
   // Constructor
   PeakNoShapeFactory();
   // Destructor
-  virtual ~PeakNoShapeFactory();
+  virtual ~PeakNoShapeFactory() = default;
   // Factory method
   Mantid::Geometry::PeakShape *create(const std::string &source) const;
   // Set successor. No shape will not delegate.

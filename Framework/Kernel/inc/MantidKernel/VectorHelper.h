@@ -154,7 +154,7 @@ template <typename T> std::vector<T> normalizeVector(const std::vector<T> &x) {
 /// Functor used for computing the sum of the square values of a vector, using
 /// the accumulate algorithm
 template <class T> struct SumGaussError : public std::binary_function<T, T, T> {
-  SumGaussError() {}
+  SumGaussError() = default;
   /// Sums the arguments in quadrature
   inline T operator()(const T &l, const T &r) const {
     return sqrt(l * l + r * r);
@@ -168,7 +168,7 @@ template <class T> struct SumGaussError : public std::binary_function<T, T, T> {
  * (variance = error^2)
  */
 template <class T> struct AddVariance : public std::binary_function<T, T, T> {
-  AddVariance() {}
+  AddVariance() = default;
   /// adds the square of the left-hand argument to the right hand argument and
   /// takes the square root
   T operator()(const T &r, const T &x) const { return sqrt(r * r + x); }
@@ -176,28 +176,28 @@ template <class T> struct AddVariance : public std::binary_function<T, T, T> {
 
 /// Functor to accumulate a sum of squares
 template <class T> struct SumSquares : public std::binary_function<T, T, T> {
-  SumSquares() {}
+  SumSquares() = default;
   /// Adds the square of the right-hand argument to the left hand one
   T operator()(const T &r, const T &x) const { return (r + x * x); }
 };
 
 /// Functor giving the product of the squares of the arguments
 template <class T> struct TimesSquares : public std::binary_function<T, T, T> {
-  TimesSquares() {}
+  TimesSquares() = default;
   /// Multiplies the squares of the arguments
   T operator()(const T &l, const T &r) const { return (r * r * l * l); }
 };
 
 /// Square functor
 template <class T> struct Squares : public std::unary_function<T, T> {
-  Squares() {}
+  Squares() = default;
   /// Returns the square of the argument
   T operator()(const T &x) const { return (x * x); }
 };
 
 /// Log functor
 template <class T> struct Log : public std::unary_function<T, T> {
-  Log() {}
+  Log() = default;
   /// Returns the logarithm of the argument
   /// @throws std::range_error if x <= 0
   T operator()(const T &x) const {
@@ -210,7 +210,7 @@ template <class T> struct Log : public std::unary_function<T, T> {
 
 // Non-throwing version of the Log functor
 template <class T> struct LogNoThrow : public std::unary_function<T, T> {
-  LogNoThrow() {}
+  LogNoThrow() = default;
   // Returns the logarithm of the argument
   T operator()(const T &x) const { return std::log(x); }
 };
@@ -218,7 +218,7 @@ template <class T> struct LogNoThrow : public std::unary_function<T, T> {
 /// Divide functor with result reset to 0 if the denominator is null
 template <class T>
 struct DividesNonNull : public std::binary_function<T, T, T> {
-  DividesNonNull() {}
+  DividesNonNull() = default;
   /// Returns l/r if r is non-zero, otherwise returns l.
   T operator()(const T &l, const T &r) const {
     if (std::fabs(r) < 1e-12)
@@ -229,7 +229,7 @@ struct DividesNonNull : public std::binary_function<T, T, T> {
 
 /// A binary functor to compute the simple average of 2 numbers
 template <class T> struct SimpleAverage : public std::binary_function<T, T, T> {
-  SimpleAverage() {}
+  SimpleAverage() = default;
   /// Return the average of the two arguments
   T operator()(const T &x, const T &y) const {
     return static_cast<T>(0.5) * (x + y);

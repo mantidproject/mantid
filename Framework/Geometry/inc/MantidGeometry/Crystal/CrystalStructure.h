@@ -93,7 +93,7 @@ public:
   CrystalStructure(const CrystalStructure &other);
   CrystalStructure &operator=(const CrystalStructure &other);
 
-  ~CrystalStructure() {}
+  ~CrystalStructure() = default;
 
   UnitCell cell() const;
   void setCell(const UnitCell &cell);

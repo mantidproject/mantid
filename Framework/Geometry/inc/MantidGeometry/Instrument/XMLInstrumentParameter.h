@@ -67,7 +67,7 @@ public:
       double angleConvertConst, const std::string &description);
 
   /// Destructor
-  ~XMLInstrumentParameter() {}
+  ~XMLInstrumentParameter() = default;
 
   // XML attributes from instrument definition file or instrument parameter file
   const std::string m_logfileID; ///< logfile id

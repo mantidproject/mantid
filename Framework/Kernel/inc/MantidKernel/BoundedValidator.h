@@ -61,7 +61,7 @@ public:
         m_lowerBound(lowerBound), m_upperBound(upperBound) {}
 
   /// Destructor
-  virtual ~BoundedValidator() {}
+  virtual ~BoundedValidator() = default;
 
   /// Return if it has a lower bound
   bool hasLower() const { return m_hasLowerBound; }

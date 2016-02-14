@@ -88,7 +88,7 @@ protected:
   /// Constructor
   UsageServiceImpl();
   /// Destructor
-  virtual ~UsageServiceImpl();
+  virtual ~UsageServiceImpl() = default;
   /// generates the message body for a startup message
   virtual std::string generateStartupMessage();
   /// generates the message body for a feature usage message

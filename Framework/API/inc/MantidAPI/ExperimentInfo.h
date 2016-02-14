@@ -40,7 +40,7 @@ public:
   /// Default constructor
   ExperimentInfo();
   /// Virtual destructor
-  virtual ~ExperimentInfo();
+  virtual ~ExperimentInfo() = default;
   /// Copy constructor
   ExperimentInfo(const ExperimentInfo &);
   /// Copy everything from the given experiment object

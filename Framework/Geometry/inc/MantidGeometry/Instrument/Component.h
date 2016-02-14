@@ -90,7 +90,7 @@ public:
             const Kernel::Quat &rotation, IComponent *parent = 0);
 
   ///  destructor
-  ~Component();
+  ~Component() = default;
 
   IComponent *clone() const;
 

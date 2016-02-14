@@ -45,7 +45,7 @@ public:
                 std::string algorithmName = std::string(),
                 int algorithmVersion = -1);
   /// Destructor
-  virtual ~PeakShapeBase();
+  virtual ~PeakShapeBase() = default;
   /// Get the coordinate frame
   Kernel::SpecialCoordinateSystem frame() const;
   /// Get the name of the algorithm used to make this shape

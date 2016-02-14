@@ -64,7 +64,7 @@ typedef boost::shared_ptr<CompositeBraggScatterer> CompositeBraggScatterer_sptr;
 class MANTID_GEOMETRY_DLL CompositeBraggScatterer : public BraggScatterer {
 public:
   CompositeBraggScatterer();
-  virtual ~CompositeBraggScatterer() {}
+  virtual ~CompositeBraggScatterer() = default;
 
   static CompositeBraggScatterer_sptr create();
   static CompositeBraggScatterer_sptr

@@ -37,7 +37,7 @@ class DLLExport ProductQuadraticExp : public API::ParamFunction,
                                       public API::IFunction1D {
 public:
   ProductQuadraticExp();
-  virtual ~ProductQuadraticExp();
+  virtual ~ProductQuadraticExp() = default;
 
   std::string name() const { return "ProductQuadraticExp"; }
 

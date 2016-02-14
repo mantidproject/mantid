@@ -107,11 +107,6 @@ ReflectometryTransform::ReflectometryTransform(
 }
 
 /**
- * Destructor
- */
-ReflectometryTransform::~ReflectometryTransform() {}
-
-/**
  * Creates an MD workspace
  * @param a : pointer to the first dimension of the MDWorkspace
   *@param b : pointer to the second dimension of the MDWorkspace

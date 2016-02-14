@@ -46,7 +46,8 @@ public:
          const ISpectrumDetectorMapping &spectraMap,
          bool ignoreMasked = false) = 0;
   /// Destructor
-  virtual ~INearestNeighboursFactory(){};
+  virtual ~INearestNeighboursFactory() = default;
+  ;
 };
 
 } // namespace Geometry

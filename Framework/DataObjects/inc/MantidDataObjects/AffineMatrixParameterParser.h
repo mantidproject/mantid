@@ -26,7 +26,7 @@ public:
   /// Set a successor parser for chain-of-responsibility type reading.
   virtual void setSuccessorParser(ImplicitFunctionParameterParser *);
   /// Destructor
-  virtual ~AffineMatrixParameterParser();
+  virtual ~AffineMatrixParameterParser() = default;
 
 private:
   /// Assignment operator

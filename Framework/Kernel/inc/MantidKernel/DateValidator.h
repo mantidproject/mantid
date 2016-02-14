@@ -38,10 +38,6 @@ namespace Kernel {
 */
 class MANTID_KERNEL_DLL DateValidator : public TypedValidator<std::string> {
 public:
-  /// Default constructor
-  DateValidator();
-  /// Destructor
-  virtual ~DateValidator();
   /// Clone the current state
   IValidator_sptr clone() const;
 

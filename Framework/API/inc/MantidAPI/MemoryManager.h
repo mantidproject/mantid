@@ -64,7 +64,7 @@ private:
   /// Class cannot be instantiated by normal means
   MemoryManagerImpl();
   /// Destructor
-  ~MemoryManagerImpl();
+  ~MemoryManagerImpl() = default;
   /// Copy constructor
   MemoryManagerImpl(const MemoryManagerImpl &);
   /// Standard Assignment operator

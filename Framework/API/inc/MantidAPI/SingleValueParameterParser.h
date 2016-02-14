@@ -76,7 +76,7 @@ public:
 /// Default constructor
 template <class SingleValueParameterType>
 SingleValueParameterParser<
-    SingleValueParameterType>::SingleValueParameterParser() {}
+    SingleValueParameterType>::SingleValueParameterParser() = default;
 
 //------------------------------------------------------------------------------
 /* Creates a parameter from an xml element, otherwise defers to a successor

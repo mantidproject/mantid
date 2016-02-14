@@ -57,7 +57,7 @@ public:
   enum CenteringType { P, I, A, B, C, F, Robv, Rrev };
 
   CenteringGroup(const std::string &centeringSymbol);
-  virtual ~CenteringGroup() {}
+  virtual ~CenteringGroup() = default;
 
   CenteringType getType() const;
   std::string getSymbol() const;
@@ -73,7 +73,7 @@ typedef boost::shared_ptr<const CenteringGroup> CenteringGroup_const_sptr;
 /// Helper class to keep this out of the interface of CenteringGroup.
 class MANTID_GEOMETRY_DLL CenteringGroupCreatorImpl {
 public:
-  ~CenteringGroupCreatorImpl() {}
+  ~CenteringGroupCreatorImpl() = default;
 
   CenteringGroup::CenteringType
   getCenteringType(const std::string &centeringSymbol) const;

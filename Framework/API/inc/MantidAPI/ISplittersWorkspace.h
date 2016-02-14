@@ -38,12 +38,12 @@ public:
   /*
    * Constructor
    */
-  ISplittersWorkspace() {}
+  ISplittersWorkspace() = default;
 
   /*
    * Destructor
    */
-  virtual ~ISplittersWorkspace();
+  virtual ~ISplittersWorkspace() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<ISplittersWorkspace> clone() const {

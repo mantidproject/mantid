@@ -10,8 +10,6 @@ EnabledWhenProperty::EnabledWhenProperty(std::string otherPropName,
     : IPropertySettings(), m_otherPropName(otherPropName), m_when(when),
       m_value(value) {}
 
-EnabledWhenProperty::~EnabledWhenProperty() {}
-
 bool EnabledWhenProperty::fulfillsCriterion(
     const IPropertyManager *algo) const {
   // Find the property

@@ -10,11 +10,6 @@ PeakShapeBase::PeakShapeBase(Kernel::SpecialCoordinateSystem frame,
     : m_frame(frame), m_algorithmName(algorithmName),
       m_algorithmVersion(algorithmVersion) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakShapeBase::~PeakShapeBase() {}
-
 /**
  * @brief Copy constructor
  * @param other : source of the copy

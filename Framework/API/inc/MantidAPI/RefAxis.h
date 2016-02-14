@@ -43,7 +43,7 @@ class MANTID_API_DLL RefAxis : public NumericAxis {
 public:
   RefAxis(const std::size_t &length,
           const MatrixWorkspace *const parentWorkspace);
-  virtual ~RefAxis();
+  virtual ~RefAxis() = default;
 
   Axis *clone(const MatrixWorkspace *const parentWorkspace);
   Axis *clone(const std::size_t length,

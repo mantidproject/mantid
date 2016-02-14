@@ -81,7 +81,7 @@ public:
   /// Constructor.
   TableWorkspace(size_t nrows = 0);
   /// Virtual destructor.
-  virtual ~TableWorkspace();
+  virtual ~TableWorkspace() = default;
   /// Returns a clone of the workspace
   std::unique_ptr<TableWorkspace> clone() const {
     return std::unique_ptr<TableWorkspace>(doClone());

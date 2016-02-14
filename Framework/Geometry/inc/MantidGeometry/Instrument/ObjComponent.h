@@ -65,7 +65,6 @@ public:
   explicit ObjComponent(
       const std::string &name, Object_const_sptr shape, IComponent *parent = 0,
       Kernel::Material_sptr material = Kernel::Material_sptr());
-  virtual ~ObjComponent();
 
   /** Virtual Copy Constructor
    *  @returns A pointer to a copy of the input ObjComponent

@@ -50,7 +50,7 @@ public:
   /// Constructor
   CubicSpline();
   /// Destructor
-  ~CubicSpline();
+  ~CubicSpline() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "CubicSpline"; }

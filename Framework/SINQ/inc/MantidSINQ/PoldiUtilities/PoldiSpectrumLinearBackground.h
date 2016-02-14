@@ -48,7 +48,7 @@ class MANTID_SINQ_DLL PoldiSpectrumLinearBackground
       public IPoldiFunction1D {
 public:
   PoldiSpectrumLinearBackground();
-  virtual ~PoldiSpectrumLinearBackground() {}
+  virtual ~PoldiSpectrumLinearBackground() = default;
 
   virtual std::string name() const { return "PoldiSpectrumLinearBackground"; }
 

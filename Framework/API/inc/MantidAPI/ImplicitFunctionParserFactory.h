@@ -65,7 +65,7 @@ private:
   ImplicitFunctionParserFactoryImpl &
   operator=(const ImplicitFunctionParserFactoryImpl &);
   /// Private Destructor
-  virtual ~ImplicitFunctionParserFactoryImpl();
+  virtual ~ImplicitFunctionParserFactoryImpl() = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

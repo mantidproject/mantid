@@ -63,7 +63,7 @@ public:
                           const detid_t *const detectorIDs,
                           size_t arrayLengths);
   SpectrumDetectorMapping();
-  virtual ~SpectrumDetectorMapping();
+  virtual ~SpectrumDetectorMapping() = default;
 
   std::set<specid_t> getSpectrumNumbers() const;
   const std::set<detid_t> &

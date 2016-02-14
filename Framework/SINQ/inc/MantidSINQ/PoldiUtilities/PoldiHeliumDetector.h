@@ -43,7 +43,7 @@ using namespace Kernel;
 class MANTID_SINQ_DLL PoldiHeliumDetector : public PoldiAbstractDetector {
 public:
   PoldiHeliumDetector();
-  ~PoldiHeliumDetector() {}
+  ~PoldiHeliumDetector() = default;
 
   void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
 

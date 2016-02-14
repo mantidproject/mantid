@@ -23,7 +23,8 @@ public:
   /**
    Destructor
    */
-  ~CalculateReflectometryKiKf(){};
+  ~CalculateReflectometryKiKf() = default;
+  ;
 
   /**
    Setter for the incident theta value require for the calculation. Internally

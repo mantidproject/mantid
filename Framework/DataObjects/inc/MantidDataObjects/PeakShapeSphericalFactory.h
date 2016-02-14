@@ -40,7 +40,7 @@ public:
   /// Constructor
   PeakShapeSphericalFactory();
   /// Destructor
-  virtual ~PeakShapeSphericalFactory();
+  virtual ~PeakShapeSphericalFactory() = default;
   /// Make product
   Mantid::Geometry::PeakShape *create(const std::string &source) const;
   /// Set a successor should this factory be unsuitable

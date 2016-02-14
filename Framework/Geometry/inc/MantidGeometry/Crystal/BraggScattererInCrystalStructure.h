@@ -46,7 +46,7 @@ class MANTID_GEOMETRY_DLL BraggScattererInCrystalStructure
     : public BraggScatterer {
 public:
   BraggScattererInCrystalStructure();
-  virtual ~BraggScattererInCrystalStructure() {}
+  virtual ~BraggScattererInCrystalStructure() = default;
 
   Kernel::V3D getPosition() const;
   UnitCell getCell() const;

@@ -50,11 +50,7 @@ public:
   /// (Empty) Constructor
   Unit();
   /// Virtual destructor
-  virtual ~Unit();
-  /// Copy Constructor
-  Unit(const Unit &other);
-  /// Copy assignment operator
-  Unit &operator=(const Unit &rhs);
+  virtual ~Unit() = default;
 
   /// @return a cloned instance of the other
   virtual Unit *clone() const = 0;
@@ -270,7 +266,7 @@ public:
   /// Constructor
   Empty() : Unit() {}
   /// Destructor
-  ~Empty() {}
+  ~Empty() = default;
 };
 
 //=================================================================================================
@@ -287,7 +283,7 @@ public:
   virtual Unit *clone() const;
 
   /// Destructor
-  ~Label() {}
+  ~Label() = default;
 
 private:
   /// Caption
@@ -334,7 +330,7 @@ public:
   /// Constructor
   Wavelength();
   /// Destructor
-  ~Wavelength() {}
+  ~Wavelength() = default;
 
 protected:
   double sfpTo;      ///< Extra correction factor in to conversion
@@ -363,7 +359,7 @@ public:
   /// Constructor
   Energy();
   /// Destructor
-  ~Energy() {}
+  ~Energy() = default;
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -388,7 +384,7 @@ public:
   /// Constructor
   Energy_inWavenumber();
   /// Destructor
-  ~Energy_inWavenumber() {}
+  ~Energy_inWavenumber() = default;
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -413,7 +409,7 @@ public:
   /// Constructor
   dSpacing();
   /// Destructor
-  ~dSpacing() {}
+  ~dSpacing() = default;
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -437,7 +433,7 @@ public:
   /// Constructor
   MomentumTransfer();
   /// Destructor
-  ~MomentumTransfer() {}
+  ~MomentumTransfer() = default;
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -462,7 +458,7 @@ public:
   /// Constructor
   QSquared();
   /// Destructor
-  ~QSquared() {}
+  ~QSquared() = default;
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -488,7 +484,7 @@ public:
   /// Constructor
   DeltaE();
   /// Destructor
-  ~DeltaE() {}
+  ~DeltaE() = default;
 
 protected:
   double factorTo;    ///< Constant factor for to conversion
@@ -513,7 +509,7 @@ public:
   /// Constructor
   DeltaE_inWavenumber();
   /// Destructor
-  ~DeltaE_inWavenumber() {}
+  ~DeltaE_inWavenumber() = default;
 };
 
 //=================================================================================================
@@ -534,7 +530,7 @@ public:
   /// Constructor
   Momentum();
   /// Destructor
-  ~Momentum() {}
+  ~Momentum() = default;
 
 protected:
   double sfpTo;      ///< Extra correction factor in to conversion
@@ -562,7 +558,7 @@ public:
   /// Constructor
   SpinEchoLength();
   /// Destructor
-  ~SpinEchoLength() {}
+  ~SpinEchoLength() = default;
 };
 
 //=================================================================================================
@@ -583,7 +579,7 @@ public:
   /// Constructor
   SpinEchoTime();
   /// Destructor
-  ~SpinEchoTime() {}
+  ~SpinEchoTime() = default;
 };
 
 //=================================================================================================
@@ -604,7 +600,7 @@ public:
   /// Constructor
   Time();
   /// Destructor
-  ~Time() {}
+  ~Time() = default;
 
 protected:
   double factorTo;   ///< Constant factor for to conversion

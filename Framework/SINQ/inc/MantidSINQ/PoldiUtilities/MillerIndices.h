@@ -42,7 +42,7 @@ public:
   MillerIndices(int h = 0, int k = 0, int l = 0);
   MillerIndices(std::vector<int> hkl);
   MillerIndices(const Kernel::V3D &hkl);
-  ~MillerIndices() {}
+  ~MillerIndices() = default;
 
   int h() const;
   int k() const;

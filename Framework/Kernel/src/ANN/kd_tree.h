@@ -47,7 +47,7 @@ using namespace std; // make std:: available
 
 class ANNkd_node { // generic kd-tree node (empty shell)
 public:
-  virtual ~ANNkd_node() {} // virtual distroyer
+  virtual ~ANNkd_node() = default; // virtual distroyer
 
   virtual void ann_search(ANNdist) = 0;     // tree search
   virtual void ann_pri_search(ANNdist) = 0; // priority search
@@ -104,7 +104,7 @@ public:
     bkt = b;   // the bucket
   }
 
-  ~ANNkd_leaf() {} // destructor (none)
+  ~ANNkd_leaf() = default; // destructor (none)
 
   virtual void getStats(                       // get tree statistics
       int dim,                                 // dimension of space

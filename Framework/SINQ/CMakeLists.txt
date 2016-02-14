@@ -12,8 +12,7 @@ set ( SRC_FILES
 	src/PoldiPeakSearch.cpp
 	src/PoldiPeakSummary.cpp
 	src/PoldiTruncateData.cpp
-	src/PoldiUtilities/IPoldiFunction1D.cpp
-	src/PoldiUtilities/MillerIndices.cpp
+        src/PoldiUtilities/MillerIndices.cpp
 	src/PoldiUtilities/Poldi2DFunction.cpp
 	src/PoldiUtilities/PoldiAutoCorrelationCore.cpp
 	src/PoldiUtilities/PoldiBasicChopper.cpp

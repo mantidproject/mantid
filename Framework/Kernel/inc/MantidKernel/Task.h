@@ -35,7 +35,7 @@ public:
   Task(double cost) : m_cost(cost) {}
 
   /// Destructor
-  virtual ~Task() {}
+  virtual ~Task() = default;
 
   //---------------------------------------------------------------------------------------------
   /** Main method that performs the work for the task. */

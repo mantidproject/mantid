@@ -13,14 +13,6 @@ General::General()
 */
 {}
 
-General::General(const General &A)
-    : Quadratic(A)
-/**
-  Standard Copy Constructor
-  @param A :: General Object to copy
-*/
-{}
-
 General *General::doClone() const
 /**
 Makes a clone (implicit virtual copy constructor)
@@ -37,19 +29,6 @@ std::unique_ptr<General> General::clone() const
 */
 {
   return std::unique_ptr<General>(doClone());
-}
-
-General &General::operator=(const General &A)
-/**
-  Standard assignment operator
-  @param A :: General Object to copy
-  @return *this
-*/
-{
-  if (this != &A) {
-    Quadratic::operator=(A);
-  }
-  return *this;
 }
 
 int General::setSurface(const std::string &Pstr)

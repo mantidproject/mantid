@@ -45,11 +45,6 @@ PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius,
   }
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakShapeSpherical::~PeakShapeSpherical() {}
-
 /**
  * @brief Copy constructor from other PeakShapeSpherical
  * @param other : source of the copy

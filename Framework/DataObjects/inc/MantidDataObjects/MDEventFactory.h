@@ -44,8 +44,8 @@ public:
     NumBoxTypes =
         4 //< Number of different types of the events, used as metaloop splitter
   };
-  MDEventFactory() {}
-  ~MDEventFactory() {}
+  MDEventFactory() = default;
+  ~MDEventFactory() = default;
 
   // create MD workspace factory call
   static API::IMDEventWorkspace_sptr CreateMDWorkspace(

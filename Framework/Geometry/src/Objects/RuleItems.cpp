@@ -977,29 +977,6 @@ CompObj::CompObj()
 */
 {}
 
-CompObj::CompObj(const CompObj &A)
-    : Rule(A), objN(A.objN), key(A.key)
-/**
-  Standard copy constructor
-  @param A :: CompObj to copy
- */
-{}
-
-CompObj &CompObj::operator=(const CompObj &A)
-/**
-  Standard assignment operator
-  @param A :: CompObj to copy
-  @return *this
- */
-{
-  if (this != &A) {
-    Rule::operator=(A);
-    objN = A.objN;
-    key = A.key;
-  }
-  return *this;
-}
-
 CompObj *CompObj::doClone() const
 /**
   Clone of this
@@ -1269,14 +1246,6 @@ BoolValue::BoolValue()
     : Rule(), status(-1)
 /**
   Constructor
-*/
-{}
-
-BoolValue::BoolValue(const BoolValue &A)
-    : Rule(A), status(A.status)
-/**
-  Copy Constructor
-  @param A :: BoolValue to copy
 */
 {}
 

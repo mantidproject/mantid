@@ -36,7 +36,7 @@ namespace Functions {
 class DLLExport FlatBackground : public BackgroundFunction {
 public:
   FlatBackground();
-  virtual ~FlatBackground();
+  virtual ~FlatBackground() = default;
 
   std::string name() const;
   virtual void function1D(double *out, const double *xValues,

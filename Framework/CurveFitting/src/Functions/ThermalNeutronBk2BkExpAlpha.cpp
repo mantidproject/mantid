@@ -27,11 +27,6 @@ DECLARE_FUNCTION(ThermalNeutronBk2BkExpAlpha)
 ThermalNeutronBk2BkExpAlpha::ThermalNeutronBk2BkExpAlpha() {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ThermalNeutronBk2BkExpAlpha::~ThermalNeutronBk2BkExpAlpha() {}
-
-//----------------------------------------------------------------------------------------------
 /** Defintion of parameter
   */
 void ThermalNeutronBk2BkExpAlpha::init() {

@@ -45,7 +45,7 @@ class MANTID_SINQ_DLL PoldiPeak {
 public:
   enum FwhmRelation { AbsoluteQ, AbsoluteD, Relative };
 
-  ~PoldiPeak() {}
+  ~PoldiPeak() = default;
 
   PoldiPeak_sptr clone() const;
 

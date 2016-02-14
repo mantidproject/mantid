@@ -66,7 +66,7 @@ public:
   FunctionProperty *clone() const { return new FunctionProperty(*this); }
 
   /// Virtual destructor
-  virtual ~FunctionProperty();
+  virtual ~FunctionProperty() = default;
 
   /// Get the function definition string
   virtual std::string value() const;

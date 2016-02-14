@@ -43,7 +43,8 @@ class DLLExport IkedaCarpenterPV : virtual public API::IPeakFunction,
                                    virtual public API::IFunctionMW {
 public:
   /// Destructor
-  virtual ~IkedaCarpenterPV(){};
+  virtual ~IkedaCarpenterPV() = default;
+  ;
 
   /// contruction used for standard fitting
   IkedaCarpenterPV(){};

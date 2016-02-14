@@ -53,7 +53,7 @@ class MANTID_GEOMETRY_DLL MDFrameFactory
     : public Kernel::ChainableFactory<MDFrameFactory, MDFrame,
                                       MDFrameArgument> {
 public:
-  virtual ~MDFrameFactory() {}
+  virtual ~MDFrameFactory() = default;
 };
 
 /// Helper typedef

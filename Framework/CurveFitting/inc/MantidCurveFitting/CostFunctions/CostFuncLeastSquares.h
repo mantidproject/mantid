@@ -45,7 +45,7 @@ public:
   /// Constructor
   CostFuncLeastSquares();
   /// Virtual destructor
-  virtual ~CostFuncLeastSquares() {}
+  virtual ~CostFuncLeastSquares() = default;
 
   /// Get name of minimizer
   virtual std::string name() const { return "Least squares"; }

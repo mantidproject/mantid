@@ -41,7 +41,7 @@ National Laboratory & European Spallation Source
 class DLLExport EndErfc : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Destructor
-  virtual ~EndErfc() {}
+  virtual ~EndErfc() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "EndErfc"; }

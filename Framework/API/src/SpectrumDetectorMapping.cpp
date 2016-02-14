@@ -88,9 +88,6 @@ void SpectrumDetectorMapping::fillMapFromVector(
 SpectrumDetectorMapping::SpectrumDetectorMapping()
     : m_indexIsSpecNo(false), m_mapping() {}
 
-/// Destructor
-SpectrumDetectorMapping::~SpectrumDetectorMapping() {}
-
 /// @returns An ordered set of the unique spectrum numbers
 std::set<specid_t> SpectrumDetectorMapping::getSpectrumNumbers() const {
   std::set<specid_t> specs;

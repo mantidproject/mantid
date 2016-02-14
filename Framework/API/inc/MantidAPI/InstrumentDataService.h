@@ -46,7 +46,7 @@ private:
   /// Private, unimplemented copy assignment operator
   InstrumentDataServiceImpl &operator=(const InstrumentDataServiceImpl &);
   /// Destructor
-  ~InstrumentDataServiceImpl();
+  ~InstrumentDataServiceImpl() = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

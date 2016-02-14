@@ -38,7 +38,7 @@ class MANTID_GEOMETRY_DLL UnknownFrame : public MDFrame {
 public:
   UnknownFrame(std::unique_ptr<Kernel::MDUnit> unit);
   UnknownFrame(const Kernel::UnitLabel &unit);
-  virtual ~UnknownFrame();
+  virtual ~UnknownFrame() = default;
   std::string name() const;
   bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const;
   bool isQ() const;

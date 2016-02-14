@@ -64,8 +64,6 @@ SurfaceFactory::SurfaceFactory(const SurfaceFactory &A)
     SGrid.push_back(MapType::value_type(vc->first, vc->second->clone()));
 }
 
-SurfaceFactory::~SurfaceFactory() {}
-
 void SurfaceFactory::registerSurface()
 /**
   Register tallies to be used

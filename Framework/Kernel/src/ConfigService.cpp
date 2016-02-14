@@ -117,7 +117,7 @@ public:
   }
 
   /// Virtual destructor
-  virtual ~WrappedObject() {}
+  virtual ~WrappedObject() = default;
 
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }

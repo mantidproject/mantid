@@ -35,7 +35,7 @@ class MANTID_SINQ_DLL PoldiSpectrumPawleyFunction
     : public PoldiSpectrumDomainFunction {
 public:
   PoldiSpectrumPawleyFunction();
-  virtual ~PoldiSpectrumPawleyFunction() {}
+  virtual ~PoldiSpectrumPawleyFunction() = default;
 
   std::string name() const { return "PoldiSpectrumPawleyFunction"; }
 

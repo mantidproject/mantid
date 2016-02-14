@@ -48,7 +48,7 @@ class DLLExport FABADAMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor
   FABADAMinimizer();
-  virtual ~FABADAMinimizer();
+  virtual ~FABADAMinimizer() = default;
   /// Name of the minimizer.
   std::string name() const { return "FABADA"; }
   /// Initialize minimizer, i.e. pass a function to minimize.

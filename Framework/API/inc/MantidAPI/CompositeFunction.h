@@ -62,7 +62,7 @@ public:
   /// Default constructor
   CompositeFunction();
   /// Destructor
-  virtual ~CompositeFunction();
+  virtual ~CompositeFunction() = default;
 
   /* Overriden methods */
 

@@ -43,7 +43,7 @@ public:
 
   WorkspaceSingleValue(double value = 0.0, double error = 0.0);
 
-  virtual ~WorkspaceSingleValue();
+  virtual ~WorkspaceSingleValue() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<WorkspaceSingleValue> clone() const {

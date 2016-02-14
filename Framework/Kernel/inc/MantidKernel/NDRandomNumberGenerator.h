@@ -43,7 +43,8 @@ public:
   /// Constructor
   NDRandomNumberGenerator(const unsigned int ndims);
   /// Virtual destructor to ensure that all inheriting classes have one
-  virtual ~NDRandomNumberGenerator(){};
+  virtual ~NDRandomNumberGenerator() = default;
+  ;
 
   /// Returns the number of dimensions the point will be generated in, i.e. the
   /// size

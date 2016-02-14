@@ -46,7 +46,7 @@ public:
   /// Constructor
   BSpline();
   /// Destructor
-  ~BSpline();
+  ~BSpline() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "BSpline"; }

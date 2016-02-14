@@ -116,7 +116,7 @@ public:
   /// Constructor
   Convolution();
   /// Destructor
-  ~Convolution();
+  ~Convolution() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "Convolution"; }

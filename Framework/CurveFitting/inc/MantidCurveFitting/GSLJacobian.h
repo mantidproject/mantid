@@ -59,7 +59,7 @@ public:
   }
 
   /// Destructor.
-  ~GSLJacobian() {}
+  ~GSLJacobian() = default;
 
   GSLMatrix &matrix() { return m_J; }
 

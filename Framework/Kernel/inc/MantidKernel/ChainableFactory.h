@@ -36,7 +36,7 @@ template <typename Factory, typename Product, typename Argument>
 class DLLExport ChainableFactory : public Chainable<Factory> {
 public:
   /// Destructor
-  virtual ~ChainableFactory() {}
+  virtual ~ChainableFactory() = default;
 
   /**
    * Factory method wrapper. Wraps results in smart pointer.

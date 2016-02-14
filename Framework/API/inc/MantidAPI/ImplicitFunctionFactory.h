@@ -61,7 +61,7 @@ public:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   ImplicitFunctionFactoryImpl &operator=(const ImplicitFunctionFactoryImpl &);
   /// Private Destructor
-  virtual ~ImplicitFunctionFactoryImpl();
+  virtual ~ImplicitFunctionFactoryImpl() = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

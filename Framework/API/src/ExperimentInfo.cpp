@@ -46,11 +46,6 @@ ExperimentInfo::ExperimentInfo()
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExperimentInfo::~ExperimentInfo() {}
-
 //---------------------------------------------------------------------------------------
 /**
  * Constructs the object from a copy if the input. This leaves the new mutex

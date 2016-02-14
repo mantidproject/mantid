@@ -48,7 +48,7 @@ public:
   /// String description of the type of component
   virtual std::string type() const { return "ICompAssembly"; }
 
-  virtual ~ICompAssembly() {}
+  virtual ~ICompAssembly() = default;
   /// Make a clone of the present component
   virtual IComponent *clone() const = 0;
   /// Return the number of elements in the assembly

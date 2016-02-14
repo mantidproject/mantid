@@ -47,7 +47,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport Lorentzian : public API::IPeakFunction {
 public:
   /// Destructor
-  virtual ~Lorentzian(){};
+  virtual ~Lorentzian() = default;
+  ;
 
   /// overwrite IPeakFunction base class methods
   virtual double centre() const { return getParameter("PeakCentre"); }

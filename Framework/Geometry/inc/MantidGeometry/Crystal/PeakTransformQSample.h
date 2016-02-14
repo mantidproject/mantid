@@ -20,13 +20,6 @@ public:
   /// Constructor
   PeakTransformQSample(const std::string &xPlotLabel,
                        const std::string &yPlotLabel);
-  /// Destructor
-  virtual ~PeakTransformQSample();
-  /// Copy constructor
-  PeakTransformQSample(const PeakTransformQSample &other);
-  /// Assigment
-  PeakTransformQSample &operator=(const PeakTransformQSample &other);
-  /// Virtual constructor
   PeakTransform_sptr clone() const;
   /// Transform peak.
   Mantid::Kernel::V3D transformPeak(const Mantid::Geometry::IPeak &peak) const;

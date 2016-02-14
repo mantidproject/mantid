@@ -106,7 +106,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   MDTransfFactoryImpl &operator=(const MDTransfFactoryImpl &);
   /// Private Destructor
-  virtual ~MDTransfFactoryImpl();
+  virtual ~MDTransfFactoryImpl() = default;
 
   /// Stores pointers to already created unit instances, with their name as the
   /// key

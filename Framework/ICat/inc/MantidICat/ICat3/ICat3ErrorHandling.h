@@ -47,9 +47,9 @@ namespace ICat {
 class CErrorHandling {
 public:
   /// Constructor
-  CErrorHandling();
+  CErrorHandling() = default;
   /// Destructor
-  ~CErrorHandling();
+  ~CErrorHandling() = default;
 
   /** This method throws the error string returned by gsoap to mantid upper
    * layer
@@ -69,7 +69,7 @@ public:
   /// constructor
   SessionException(const std::string &error);
   /// destructor
-  ~SessionException() throw() {}
+  ~SessionException() throw() = default;
   /// return the error message
   const char *what() const throw();
 };

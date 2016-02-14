@@ -37,7 +37,7 @@ class DLLExport MultipleExperimentInfos {
 public:
   MultipleExperimentInfos();
   MultipleExperimentInfos(const MultipleExperimentInfos &other);
-  virtual ~MultipleExperimentInfos();
+  virtual ~MultipleExperimentInfos() = default;
 
   ExperimentInfo_sptr getExperimentInfo(const uint16_t runIndex);
 

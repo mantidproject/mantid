@@ -47,7 +47,7 @@ public:
   SeqDomainSpectrumCreator(Kernel::IPropertyManager *manager,
                            const std::string &workspacePropertyName);
 
-  virtual ~SeqDomainSpectrumCreator() {}
+  virtual ~SeqDomainSpectrumCreator() = default;
 
   virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
                             boost::shared_ptr<API::FunctionValues> &values,

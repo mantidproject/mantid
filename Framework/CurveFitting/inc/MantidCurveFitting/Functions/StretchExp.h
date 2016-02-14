@@ -43,7 +43,7 @@ public:
   /// Constructor
   StretchExp();
   /// Destructor
-  virtual ~StretchExp() {}
+  virtual ~StretchExp() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "StretchExp"; }

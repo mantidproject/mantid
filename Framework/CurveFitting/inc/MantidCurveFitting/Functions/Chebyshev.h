@@ -48,7 +48,8 @@ public:
   /// Constructor
   Chebyshev();
   /// Destructor
-  ~Chebyshev(){};
+  ~Chebyshev() = default;
+  ;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "Chebyshev"; }

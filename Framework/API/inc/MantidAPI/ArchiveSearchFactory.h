@@ -52,7 +52,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   ArchiveSearchFactoryImpl &operator=(const ArchiveSearchFactoryImpl &);
   /// Private Destructor
-  virtual ~ArchiveSearchFactoryImpl() {}
+  virtual ~ArchiveSearchFactoryImpl() = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

@@ -9,11 +9,6 @@ namespace DataObjects {
  */
 PeakNoShapeFactory::PeakNoShapeFactory() {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakNoShapeFactory::~PeakNoShapeFactory() {}
-
 void PeakNoShapeFactory::setSuccessor(
     boost::shared_ptr<const PeakShapeFactory>) {}
 

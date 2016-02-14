@@ -48,17 +48,6 @@ using Kernel::V3D;
 using Kernel::Quat;
 
 /**
- * Constructor
- */
-OCGeometryRenderer::OCGeometryRenderer() {}
-
-/**
- * Destructor
- * Deletes the display list
- */
-OCGeometryRenderer::~OCGeometryRenderer() {}
-
-/**
  * Renders Object surface given as OpenCascade topology shape
  * @param ObjSurf :: object's surface stored in topology shape
  */

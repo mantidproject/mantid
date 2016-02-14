@@ -64,7 +64,8 @@ public:
 ////////////////////////////////////////////////////////////////////
 
 template <typename VectorValueParameterType>
-Vector3DParameterParser<VectorValueParameterType>::Vector3DParameterParser() {}
+Vector3DParameterParser<VectorValueParameterType>::Vector3DParameterParser() =
+    default;
 
 template <typename VectorValueParameterType>
 VectorValueParameterType *
@@ -109,7 +110,8 @@ void Vector3DParameterParser<VectorValueParameterType>::setSuccessorParser(
 }
 
 template <typename VectorValueParameterType>
-Vector3DParameterParser<VectorValueParameterType>::~Vector3DParameterParser() {}
+Vector3DParameterParser<VectorValueParameterType>::~Vector3DParameterParser() =
+    default;
 
 // Declare types based on this template.
 

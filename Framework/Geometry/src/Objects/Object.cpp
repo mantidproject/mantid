@@ -106,7 +106,7 @@ Object &Object::operator=(const Object &A) {
 * Destructor
 * Deletes the rule
 */
-Object::~Object() {}
+Object::~Object() = default;
 
 /**
  * @param material The new Material that the object is composed from

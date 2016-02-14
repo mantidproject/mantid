@@ -29,7 +29,7 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL AbstractSymmetryElementGenerator {
 public:
-  virtual ~AbstractSymmetryElementGenerator() {}
+  virtual ~AbstractSymmetryElementGenerator() = default;
 
   /// Must generate a valid SymmetryElement from the given operation.
   virtual SymmetryElement_sptr
@@ -52,7 +52,7 @@ class MANTID_GEOMETRY_DLL SymmetryElementIdentityGenerator
     : public AbstractSymmetryElementGenerator {
 public:
   SymmetryElementIdentityGenerator() {}
-  ~SymmetryElementIdentityGenerator() {}
+  ~SymmetryElementIdentityGenerator() = default;
 
   SymmetryElement_sptr
   generateElement(const SymmetryOperation &operation) const;
@@ -68,7 +68,7 @@ class MANTID_GEOMETRY_DLL SymmetryElementTranslationGenerator
     : public AbstractSymmetryElementGenerator {
 public:
   SymmetryElementTranslationGenerator() {}
-  ~SymmetryElementTranslationGenerator() {}
+  ~SymmetryElementTranslationGenerator() = default;
 
   SymmetryElement_sptr
   generateElement(const SymmetryOperation &operation) const;
@@ -84,7 +84,7 @@ class MANTID_GEOMETRY_DLL SymmetryElementInversionGenerator
     : public AbstractSymmetryElementGenerator {
 public:
   SymmetryElementInversionGenerator() {}
-  ~SymmetryElementInversionGenerator() {}
+  ~SymmetryElementInversionGenerator() = default;
 
   SymmetryElement_sptr
   generateElement(const SymmetryOperation &operation) const;
@@ -111,7 +111,7 @@ MANTID_GEOMETRY_DLL gsl_matrix *getGSLIdentityMatrix(size_t rows, size_t cols);
 class MANTID_GEOMETRY_DLL SymmetryElementWithAxisGenerator
     : public AbstractSymmetryElementGenerator {
 public:
-  ~SymmetryElementWithAxisGenerator() {}
+  ~SymmetryElementWithAxisGenerator() = default;
 
 protected:
   V3R determineTranslation(const SymmetryOperation &operation) const;
@@ -132,7 +132,7 @@ class MANTID_GEOMETRY_DLL SymmetryElementRotationGenerator
     : public SymmetryElementWithAxisGenerator {
 public:
   SymmetryElementRotationGenerator() {}
-  ~SymmetryElementRotationGenerator() {}
+  ~SymmetryElementRotationGenerator() = default;
 
   SymmetryElement_sptr
   generateElement(const SymmetryOperation &operation) const;
@@ -159,7 +159,7 @@ class MANTID_GEOMETRY_DLL SymmetryElementMirrorGenerator
     : public SymmetryElementWithAxisGenerator {
 public:
   SymmetryElementMirrorGenerator() {}
-  ~SymmetryElementMirrorGenerator() {}
+  ~SymmetryElementMirrorGenerator() = default;
 
   SymmetryElement_sptr
   generateElement(const SymmetryOperation &operation) const;
@@ -233,7 +233,7 @@ protected:
 */
 class MANTID_GEOMETRY_DLL SymmetryElementFactoryImpl {
 public:
-  virtual ~SymmetryElementFactoryImpl() {}
+  virtual ~SymmetryElementFactoryImpl() = default;
 
   SymmetryElement_sptr createSymElement(const SymmetryOperation &operation);
 

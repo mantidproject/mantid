@@ -43,7 +43,7 @@ class DLLExport ThermalNeutronDtoTOFFunction : virtual public API::IFunction1D,
                                                public API::ParamFunction {
 public:
   ThermalNeutronDtoTOFFunction();
-  virtual ~ThermalNeutronDtoTOFFunction();
+  virtual ~ThermalNeutronDtoTOFFunction() = default;
 
   /// Override
   virtual void function1D(double *out, const double *xValues,

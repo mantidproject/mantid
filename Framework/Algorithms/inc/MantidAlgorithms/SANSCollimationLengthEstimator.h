@@ -32,8 +32,8 @@ namespace Mantid {
 namespace Algorithms {
 class DLLExport SANSCollimationLengthEstimator {
 public:
-  SANSCollimationLengthEstimator();
-  ~SANSCollimationLengthEstimator();
+  SANSCollimationLengthEstimator() = default;
+  ~SANSCollimationLengthEstimator() = default;
   double provideCollimationLength(Mantid::API::MatrixWorkspace_sptr workspace);
 
 private:

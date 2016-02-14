@@ -44,7 +44,8 @@ public:
   /// Constructor
   ProductFunction(){};
   /// Destructor
-  ~ProductFunction(){};
+  ~ProductFunction() = default;
+  ;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "ProductFunction"; }

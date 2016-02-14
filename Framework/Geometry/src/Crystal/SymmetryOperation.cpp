@@ -45,24 +45,6 @@ SymmetryOperation::SymmetryOperation(const Mantid::Kernel::DblMatrix &matrix,
   init(convertMatrix<int>(matrix), vector);
 }
 
-/// Copy-constructor
-SymmetryOperation::SymmetryOperation(const SymmetryOperation &other)
-    : m_order(other.m_order), m_inverseMatrix(other.m_inverseMatrix),
-      m_reducedVector(other.m_reducedVector), m_identifier(other.m_identifier),
-      m_matrixVectorPair(other.m_matrixVectorPair) {}
-
-/// Assignment operator
-SymmetryOperation &SymmetryOperation::
-operator=(const SymmetryOperation &other) {
-  m_order = other.m_order;
-  m_inverseMatrix = other.m_inverseMatrix;
-  m_reducedVector = other.m_reducedVector;
-  m_identifier = other.m_identifier;
-  m_matrixVectorPair = other.m_matrixVectorPair;
-
-  return *this;
-}
-
 /// Initialize from matrix and vector.
 void SymmetryOperation::init(const Kernel::IntMatrix &matrix,
                              const V3R &vector) {

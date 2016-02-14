@@ -40,7 +40,7 @@ namespace API {
   */
 class DLLExport IFunction1DSpectrum : public virtual IFunction {
 public:
-  virtual ~IFunction1DSpectrum() {}
+  virtual ~IFunction1DSpectrum() = default;
 
   virtual void function(const FunctionDomain &domain,
                         FunctionValues &values) const;

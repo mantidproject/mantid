@@ -54,7 +54,7 @@ public:
   virtual HardThresholdBackground *clone() const;
 
   /// Destructor
-  virtual ~HardThresholdBackground();
+  virtual ~HardThresholdBackground() = default;
 
 private:
   /// Cutoff

@@ -1343,7 +1343,7 @@ public:
   const Kernel::MDUnit &getMDUnits() const { return m_frame->getMDUnit(); }
   const Geometry::MDFrame &getMDFrame() const { return *m_frame; }
 
-  virtual ~MWDimension() {}
+  virtual ~MWDimension() = default;
 
 private:
   const Axis &m_axis;
@@ -1365,7 +1365,7 @@ public:
     m_X = ws->readX(0);
   }
 
-  virtual ~MWXDimension() {}
+  virtual ~MWXDimension() = default;
 
   /// the name of the dimennlsion as can be displayed along the axis
   virtual std::string getName() const {

@@ -42,7 +42,7 @@ class DLLExport StaticKuboToyabe : public API::ParamFunction,
                                    public API::IFunction1D {
 public:
   /// Destructor
-  virtual ~StaticKuboToyabe() {}
+  virtual ~StaticKuboToyabe() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "StaticKuboToyabe"; }

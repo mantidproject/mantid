@@ -328,10 +328,6 @@ void IntegratePeakTimeSlices::exec() {
           MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
               std::string("Workspace2D"), 3, NN, NN);
 
-          Kernel::V3D CentPos = m_center +
-                                m_yvec * (Centy - m_ROW) * m_cellHeight +
-                                m_xvec * (Centx - m_COL) * m_cellWidth;
-
           auto XXX = boost::make_shared<DataModeHandler>(
               R, R, Centy, Centx, m_cellWidth, m_cellHeight,
               getProperty("CalculateVariances"), NBadEdgeCells,
@@ -818,8 +814,6 @@ int IntegratePeakTimeSlices::CalculateTimeChannelSpan(
     const int specNum, int &Centerchan) {
   UNUSED_ARG(specNum);
   double Q = peak.getQLabFrame().norm(); // getQ( peak)/2/M_PI;
-
-  V3D pos = peak.getDetPos();
   double time = peak.getTOF();
   double dtime = dQ / Q * time;
   int chanCenter = find(X, time);

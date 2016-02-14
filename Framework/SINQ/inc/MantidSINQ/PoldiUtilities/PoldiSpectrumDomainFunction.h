@@ -143,7 +143,7 @@ public:
         m_jacobian(nValues * nParams) {}
 
   /// Destructor
-  ~LocalJacobian() {}
+  ~LocalJacobian() = default;
 
   /// Implementation of API::Jacobian::set. Throws std::out_of_range on invalid
   /// index.
@@ -238,7 +238,7 @@ class MANTID_SINQ_DLL PoldiSpectrumDomainFunction
       public IPoldiFunction1D {
 public:
   PoldiSpectrumDomainFunction();
-  virtual ~PoldiSpectrumDomainFunction() {}
+  virtual ~PoldiSpectrumDomainFunction() = default;
 
   virtual std::string name() const { return "PoldiSpectrumDomainFunction"; }
 

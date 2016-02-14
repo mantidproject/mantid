@@ -59,7 +59,7 @@ private:
 
 public:
   static SurfaceFactory *Instance();
-  ~SurfaceFactory();
+  ~SurfaceFactory() = default;
 
   std::unique_ptr<Surface> createSurface(const std::string &) const;
   std::unique_ptr<Surface> createSurfaceID(const std::string &) const;

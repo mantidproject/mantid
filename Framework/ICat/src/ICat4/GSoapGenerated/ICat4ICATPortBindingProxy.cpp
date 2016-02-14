@@ -37,7 +37,7 @@ ICATPortBindingProxy::ICATPortBindingProxy(soap_mode imode, soap_mode omode) {
   ICATPortBindingProxy_init(imode, omode);
 }
 
-ICATPortBindingProxy::~ICATPortBindingProxy() {}
+ICATPortBindingProxy::~ICATPortBindingProxy() = default;
 
 void ICATPortBindingProxy::ICATPortBindingProxy_init(soap_mode imode,
                                                      soap_mode omode) {

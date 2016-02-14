@@ -11,9 +11,6 @@ MDHistoDimensionBuilder::MDHistoDimensionBuilder()
     : m_units(Kernel::Units::Symbol::EmptyLabel), m_min(0), m_max(0),
       m_nbins(0), m_minSet(false), m_maxSet(false), m_frameName("") {}
 
-/// Destructor
-MDHistoDimensionBuilder::~MDHistoDimensionBuilder() {}
-
 /*
 Copy constructor
 @param other : source of the copy

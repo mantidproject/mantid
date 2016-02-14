@@ -54,7 +54,7 @@ public:
   }
 
   /// Destructor
-  virtual ~IPeaksWorkspace();
+  virtual ~IPeaksWorkspace() = default;
 
   /// Returns a clone of the workspace
   IPeaksWorkspace_uptr clone() const { return IPeaksWorkspace_uptr(doClone()); }

@@ -43,7 +43,7 @@ class MANTID_SINQ_DLL PoldiSpectrumConstantBackground
       public IPoldiFunction1D {
 public:
   PoldiSpectrumConstantBackground();
-  virtual ~PoldiSpectrumConstantBackground();
+  virtual ~PoldiSpectrumConstantBackground() = default;
 
   virtual std::string name() const { return "PoldiSpectrumConstantBackground"; }
 

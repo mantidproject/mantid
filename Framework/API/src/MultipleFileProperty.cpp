@@ -61,11 +61,6 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
 }
 
 /**
- * Destructor
- */
-MultipleFileProperty::~MultipleFileProperty() {}
-
-/**
  * Convert the given propValue into a comma and plus separated list of full
  *filenames, and pass to the parent's
  * setValue method to store as a vector of vector of strings.

@@ -44,7 +44,7 @@ template <class Type> class DLLExport VectorColumn : public API::Column {
 public:
   VectorColumn() { m_type = typeName(); }
 
-  virtual ~VectorColumn() {}
+  virtual ~VectorColumn() = default;
 
   /// Number of individual elements in the column
   virtual size_t size() const { return m_data.size(); }

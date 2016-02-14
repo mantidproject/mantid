@@ -22,8 +22,6 @@ FunctionFactoryImpl::FunctionFactoryImpl()
   Mantid::Kernel::LibraryManager::Instance();
 }
 
-FunctionFactoryImpl::~FunctionFactoryImpl() {}
-
 IFunction_sptr
 FunctionFactoryImpl::createFunction(const std::string &type) const {
   IFunction_sptr fun = create(type);

@@ -50,7 +50,7 @@ public:
 
   NumericAxis(const std::size_t &length);
   NumericAxis(const std::vector<double> &centres);
-  virtual ~NumericAxis() {}
+  virtual ~NumericAxis() = default;
 
   virtual Axis *clone(const MatrixWorkspace *const parentWorkspace);
   virtual Axis *clone(const std::size_t length,

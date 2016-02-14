@@ -42,7 +42,7 @@ public:
   /// Constructor
   ExpDecay();
   /// Destructor
-  virtual ~ExpDecay() {}
+  virtual ~ExpDecay() = default;
 
   /// overwrite IFunction base class methods
   std::string name() const { return "ExpDecay"; }

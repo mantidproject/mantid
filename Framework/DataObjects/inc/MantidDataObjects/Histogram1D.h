@@ -38,9 +38,6 @@ protected:
 
 public:
   Histogram1D();
-  Histogram1D(const Histogram1D &);
-  Histogram1D &operator=(const Histogram1D &);
-  virtual ~Histogram1D();
 
   /// Sets the data.
   void setData(const MantidVec &Y) { refY.access() = Y; };

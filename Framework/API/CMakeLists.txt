@@ -69,7 +69,6 @@ set ( SRC_FILES
 	src/IPeaksWorkspace.cpp
 	src/IPowderDiffPeakFunction.cpp
 	src/ISpectrum.cpp
-	src/ISplittersWorkspace.cpp
 	src/ITableWorkspace.cpp
 	src/IkedaCarpenterModerator.cpp
 	src/ImmutableCompositeFunction.cpp

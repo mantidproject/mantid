@@ -41,7 +41,7 @@ public:
   MatrixWorkspaceMDIterator(const MatrixWorkspace *workspace,
                             Mantid::Geometry::MDImplicitFunction *function,
                             size_t beginWI = 0, size_t endWI = size_t(-1));
-  virtual ~MatrixWorkspaceMDIterator();
+  virtual ~MatrixWorkspaceMDIterator() = default;
   virtual size_t getDataSize() const;
 
   virtual bool valid() const;

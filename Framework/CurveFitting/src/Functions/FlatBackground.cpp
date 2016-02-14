@@ -18,11 +18,6 @@ DECLARE_FUNCTION(FlatBackground)
  */
 FlatBackground::FlatBackground() {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FlatBackground::~FlatBackground() {}
-
 /// Name of the function
 std::string FlatBackground::name() const { return "FlatBackground"; }
 

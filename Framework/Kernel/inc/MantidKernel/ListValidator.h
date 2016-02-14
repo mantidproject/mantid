@@ -73,7 +73,8 @@ public:
     }
   }
   /// Destructor
-  virtual ~ListValidator(){};
+  virtual ~ListValidator() = default;
+  ;
   /// Clone the validator
   IValidator_sptr clone() const {
     return boost::make_shared<ListValidator<TYPE>>(*this);

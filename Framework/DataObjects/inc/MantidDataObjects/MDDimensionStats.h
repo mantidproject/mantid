@@ -19,7 +19,7 @@ public:
   MDDimensionStats() : total(0.0), totalApproxVariance(0.0), numPoints(0) {}
 
   /// Destructor (empty)
-  ~MDDimensionStats() {}
+  ~MDDimensionStats() = default;
 
   //---------------------------------------------------------------------------------------
   /** Returns the mean position of events in this dimension */

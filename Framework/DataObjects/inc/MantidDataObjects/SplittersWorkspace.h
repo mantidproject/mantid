@@ -48,7 +48,7 @@ class DLLExport SplittersWorkspace : public DataObjects::TableWorkspace,
                                      public API::ISplittersWorkspace {
 public:
   SplittersWorkspace();
-  virtual ~SplittersWorkspace();
+  virtual ~SplittersWorkspace() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<SplittersWorkspace> clone() const {
@@ -65,8 +65,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  SplittersWorkspace(const SplittersWorkspace &other)
-      : TableWorkspace(other), ISplittersWorkspace(other) {}
+  SplittersWorkspace(const SplittersWorkspace &other) = default;
   /// Protected copy assignment operator. Assignment not implemented.
   SplittersWorkspace &operator=(const SplittersWorkspace &other);
 

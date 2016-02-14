@@ -171,7 +171,7 @@ public:
     /// Assignment operator
     CancelException &operator=(const CancelException &A);
     /// Destructor
-    ~CancelException() throw() {}
+    ~CancelException() throw(){};
 
     /// Returns the message string.
     const char *what() const throw() { return outMessage.c_str(); }

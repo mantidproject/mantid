@@ -142,7 +142,7 @@ public:
   /// Constructor.
   ILiveListener();
   /// Destructor. Should handle termination of any socket connections.
-  virtual ~ILiveListener();
+  virtual ~ILiveListener() = default;
 
 protected:
   bool m_dataReset; ///< Indicates the receipt of a reset signal from the DAS.

@@ -44,7 +44,7 @@ public:
   UncertainValue();
   explicit UncertainValue(double value);
   UncertainValue(double value, double error);
-  ~UncertainValue() {}
+  ~UncertainValue() = default;
 
   double value() const;
   double error() const;

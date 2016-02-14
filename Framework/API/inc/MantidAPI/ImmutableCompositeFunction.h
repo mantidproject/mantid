@@ -44,7 +44,7 @@ public:
   /// Default constructor
   ImmutableCompositeFunction() : CompositeFunction() {}
   // Destructor
-  ~ImmutableCompositeFunction() {}
+  ~ImmutableCompositeFunction() = default;
 
   /* Overriden methods */
 

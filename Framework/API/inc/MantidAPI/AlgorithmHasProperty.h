@@ -49,7 +49,7 @@ public:
   /// Constructor
   AlgorithmHasProperty(const std::string &propName);
   /// Destructor
-  ~AlgorithmHasProperty();
+  ~AlgorithmHasProperty() = default;
   /**
    * Get a string representation of the type
    * @returns A string containing the validator type

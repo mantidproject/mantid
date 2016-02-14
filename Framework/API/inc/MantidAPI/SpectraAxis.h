@@ -47,7 +47,7 @@ class MatrixWorkspace;
 class MANTID_API_DLL SpectraAxis : public Axis {
 public:
   explicit SpectraAxis(const MatrixWorkspace *const parentWorkspace);
-  virtual ~SpectraAxis() {}
+  virtual ~SpectraAxis() = default;
   virtual Axis *clone(const MatrixWorkspace *const parentWorkspace);
   virtual Axis *clone(const std::size_t length,
                       const MatrixWorkspace *const parentWorkspace);

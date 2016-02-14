@@ -94,8 +94,6 @@ MappedDataPkt::MappedDataPkt(const uint8_t *data, uint32_t len)
     throw invalid_packet("MappedDataPacket is too short");
 }
 
-MappedDataPkt::MappedDataPkt(const MappedDataPkt &pkt) : RawDataPkt(pkt) {}
-
 /* ------------------------------------------------------------------------ */
 
 RTDLPkt::RTDLPkt(const uint8_t *data, uint32_t len)
@@ -115,8 +113,6 @@ RTDLPkt::RTDLPkt(const RTDLPkt &pkt)
 
 SourceListPkt::SourceListPkt(const uint8_t *data, uint32_t len)
     : Packet(data, len) {}
-
-SourceListPkt::SourceListPkt(const SourceListPkt &pkt) : Packet(pkt) {}
 
 /* ------------------------------------------------------------------------ */
 
@@ -330,8 +326,6 @@ bool BeamMonitorPkt::nextEvent(bool &risingEdge, uint32_t &cycle,
 PixelMappingPkt::PixelMappingPkt(const uint8_t *data, uint32_t len)
     : Packet(data, len) {}
 
-PixelMappingPkt::PixelMappingPkt(const PixelMappingPkt &pkt) : Packet(pkt) {}
-
 /* ------------------------------------------------------------------------ */
 
 RunStatusPkt::RunStatusPkt(const uint8_t *data, uint32_t len)
@@ -361,8 +355,6 @@ RunInfoPkt::RunInfoPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
    */
   m_xml.assign(xml, size);
 }
-
-RunInfoPkt::RunInfoPkt(const RunInfoPkt &pkt) : Packet(pkt), m_xml(pkt.m_xml) {}
 
 /* ------------------------------------------------------------------------ */
 
@@ -400,9 +392,6 @@ ClientHelloPkt::ClientHelloPkt(const uint8_t *data, uint32_t len)
   m_reqStart = *reinterpret_cast<const uint32_t *>(payload());
 }
 
-ClientHelloPkt::ClientHelloPkt(const ClientHelloPkt &pkt)
-    : Packet(pkt), m_reqStart(pkt.m_reqStart) {}
-
 /* ------------------------------------------------------------------------ */
 
 AnnotationPkt::AnnotationPkt(const uint8_t *data, uint32_t len)
@@ -431,8 +420,6 @@ SyncPkt::SyncPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
     throw invalid_packet("Sync packet has oversize string");
 }
 
-SyncPkt::SyncPkt(const SyncPkt &pkt) : Packet(pkt) {}
-
 /* ------------------------------------------------------------------------ */
 
 HeartbeatPkt::HeartbeatPkt(const uint8_t *data, uint32_t len)
@@ -440,8 +427,6 @@ HeartbeatPkt::HeartbeatPkt(const uint8_t *data, uint32_t len)
   if (m_payload_len)
     throw invalid_packet("Heartbeat packet is incorrect size");
 }
-
-HeartbeatPkt::HeartbeatPkt(const HeartbeatPkt &pkt) : Packet(pkt) {}
 
 /* ------------------------------------------------------------------------ */
 
@@ -461,9 +446,6 @@ GeometryPkt::GeometryPkt(const uint8_t *data, uint32_t len)
    */
   m_xml.assign(xml, size);
 }
-
-GeometryPkt::GeometryPkt(const GeometryPkt &pkt)
-    : Packet(pkt), m_xml(pkt.m_xml) {}
 
 /* ------------------------------------------------------------------------ */
 
@@ -497,10 +479,6 @@ BeamlineInfoPkt::BeamlineInfoPkt(const uint8_t *data, uint32_t len)
   info += shortName_len;
   m_longName.assign(info, longName_len);
 }
-
-BeamlineInfoPkt::BeamlineInfoPkt(const BeamlineInfoPkt &pkt)
-    : Packet(pkt), m_targetNumber(pkt.m_targetNumber), m_id(pkt.m_id),
-      m_shortName(pkt.m_shortName), m_longName(pkt.m_longName) {}
 
 /* ------------------------------------------------------------------------ */
 
@@ -644,8 +622,6 @@ DataDonePkt::DataDonePkt(const uint8_t *data, uint32_t len)
     throw invalid_packet("DataDone packet is incorrect size");
 }
 
-DataDonePkt::DataDonePkt(const DataDonePkt &pkt) : Packet(pkt) {}
-
 /* ------------------------------------------------------------------------ */
 
 DeviceDescriptorPkt::DeviceDescriptorPkt(const uint8_t *data, uint32_t len)
@@ -666,9 +642,6 @@ DeviceDescriptorPkt::DeviceDescriptorPkt(const uint8_t *data, uint32_t len)
   m_devId = fields[0];
   m_desc.assign(reinterpret_cast<const char *>(&fields[2]), size);
 }
-
-DeviceDescriptorPkt::DeviceDescriptorPkt(const DeviceDescriptorPkt &pkt)
-    : Packet(pkt), m_devId(pkt.m_devId), m_desc(pkt.m_desc) {}
 
 /* ------------------------------------------------------------------------ */
 

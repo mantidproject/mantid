@@ -22,7 +22,8 @@ public:
   /**
    * Destructor
    */
-  ~CalculateReflectometryP(){};
+  ~CalculateReflectometryP() = default;
+  ;
 
   /**
    Setter for the incident theta value require for the calculation. Internally

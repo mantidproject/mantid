@@ -46,7 +46,8 @@ public:
   ElasticDiffRotDiscreteCircle();
 
   /// Destructor
-  virtual ~ElasticDiffRotDiscreteCircle(){};
+  virtual ~ElasticDiffRotDiscreteCircle() = default;
+  ;
 
   /// overwrite IFunction base class methods
   virtual std::string name() const { return "ElasticDiffRotDiscreteCircle"; }
@@ -70,7 +71,7 @@ public:
   InelasticDiffRotDiscreteCircle();
 
   /// Destructor
-  virtual ~InelasticDiffRotDiscreteCircle() {}
+  virtual ~InelasticDiffRotDiscreteCircle() = default;
 
   virtual std::string name() const { return "InelasticDiffRotDiscreteCircle"; }
 
@@ -100,7 +101,8 @@ private:
 class DLLExport DiffRotDiscreteCircle : public API::ImmutableCompositeFunction {
 public:
   /// Destructor
-  ~DiffRotDiscreteCircle(){};
+  ~DiffRotDiscreteCircle() = default;
+  ;
 
   virtual std::string name() const { return "DiffRotDiscreteCircle"; }
 

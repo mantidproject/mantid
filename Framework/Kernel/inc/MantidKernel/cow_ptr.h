@@ -91,8 +91,7 @@ cow_ptr<DataType>::cow_ptr()
   @param A :: object to copy
 */
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A)
-    : Data(A.Data) {}
+cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) = default;
 
 /**
   Assignment operator : double references the data object
@@ -126,7 +125,7 @@ cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) {
   Destructor : No work is required since Data is
   a shared_ptr.
 */
-template <typename DataType> cow_ptr<DataType>::~cow_ptr() {}
+template <typename DataType> cow_ptr<DataType>::~cow_ptr() = default;
 
 /**
   Access function.

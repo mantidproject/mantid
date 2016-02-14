@@ -42,7 +42,6 @@ public:
   GeneralFrame(const std::string &frameName, const Kernel::UnitLabel &unit);
   GeneralFrame(const std::string &frameName,
                std::unique_ptr<Mantid::Kernel::MDUnit> unit);
-  virtual ~GeneralFrame();
   Kernel::UnitLabel getUnitLabel() const;
   const Kernel::MDUnit &getMDUnit() const;
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const;

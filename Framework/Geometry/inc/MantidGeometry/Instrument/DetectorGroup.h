@@ -49,7 +49,7 @@ public:
   DetectorGroup();
   DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
                 bool warnAboutMasked = false);
-  virtual ~DetectorGroup();
+  virtual ~DetectorGroup() = default;
 
   void addDetector(IDetector_const_sptr det, bool &warn);
 

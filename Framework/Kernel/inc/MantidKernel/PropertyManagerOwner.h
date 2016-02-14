@@ -52,7 +52,7 @@ public:
   PropertyManagerOwner();
   PropertyManagerOwner(const PropertyManagerOwner &);
   PropertyManagerOwner &operator=(const PropertyManagerOwner &);
-  virtual ~PropertyManagerOwner() {}
+  virtual ~PropertyManagerOwner() = default;
 
   // Function to declare properties (i.e. store them)
   void declareProperty(Property *p, const std::string &doc = "");
