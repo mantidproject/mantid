@@ -10,6 +10,8 @@
 #include <nexus/NeXusException.hpp>
 #include "MantidDataObjects/Events.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include <memory>

@@ -5,11 +5,13 @@
 #include <cmath>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAlgorithms/Plus.h"
+#include "MantidAlgorithms/PolynomialCorrection.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/FindDeadDetectors.h"
-#include "MantidAlgorithms/PolynomialCorrection.h"
+#include "MantidGeometry/Instrument.h"
+
 #include <fstream>
 #include <Poco/File.h>
 

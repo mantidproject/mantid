@@ -4,6 +4,7 @@
 #include "MantidDataHandling/SaveILLCosmosAscii.h"
 #include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 
 #include <fstream>

@@ -9,6 +9,10 @@
 
 namespace Mantid {
 
+namespace Geometry {
+class IComponent;
+}
+
 namespace Kernel {
 class Unit;
 }

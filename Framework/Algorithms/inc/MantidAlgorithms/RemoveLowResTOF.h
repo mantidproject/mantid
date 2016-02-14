@@ -4,6 +4,7 @@
 // includes
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/IComponent.h"
 
 namespace Mantid {
 namespace Algorithms {

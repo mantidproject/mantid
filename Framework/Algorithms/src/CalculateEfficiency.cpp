@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/CalculateEfficiency.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <vector>
 

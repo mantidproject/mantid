@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/PointByPointVCorrection.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <cfloat>

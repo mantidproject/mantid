@@ -11,6 +11,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Timer.h"
 
 #include <boost/make_shared.hpp>

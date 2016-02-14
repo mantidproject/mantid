@@ -4,6 +4,8 @@
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"

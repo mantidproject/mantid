@@ -4,6 +4,7 @@
 #include "MantidDataHandling/LoadIDFFromNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <Poco/DOM/Document.h>

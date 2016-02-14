@@ -8,10 +8,13 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <Poco/File.h>
 #include <fstream>
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;

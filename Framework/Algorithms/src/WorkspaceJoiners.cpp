@@ -4,6 +4,8 @@
 #include "MantidAlgorithms/WorkspaceJoiners.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace Algorithms {

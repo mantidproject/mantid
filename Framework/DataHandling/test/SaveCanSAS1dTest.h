@@ -6,6 +6,7 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveCanSAS1D.h"
 #include "MantidDataHandling/LoadCanSAS1D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>

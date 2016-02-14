@@ -11,6 +11,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"

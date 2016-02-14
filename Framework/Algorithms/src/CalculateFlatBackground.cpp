@@ -6,6 +6,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Instrument_fwd.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -329,11 +330,6 @@ private:
   /// Pointer to the reference frame object.
   boost::shared_ptr<ReferenceFrame> m_referenceFrame;
 };
-
-/// Shared pointer to an instrument object
-typedef boost::shared_ptr<Instrument> Instrument_sptr;
-/// Shared pointer to an const instrument object
-typedef boost::shared_ptr<const Instrument> Instrument_const_sptr;
 
 } // namespace Geometry
 } // Namespace Mantid

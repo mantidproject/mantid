@@ -6,8 +6,9 @@
 
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/Axis.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

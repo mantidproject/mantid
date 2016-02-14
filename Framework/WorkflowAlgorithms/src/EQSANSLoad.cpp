@@ -3,14 +3,15 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSLoad.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include <MantidAPI/Axis.h>
-#include <MantidAPI/FileFinder.h>
-#include <MantidAPI/FileProperty.h>
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 

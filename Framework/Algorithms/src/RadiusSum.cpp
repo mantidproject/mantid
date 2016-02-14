@@ -3,10 +3,11 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/IObjComponent.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IObjComponent.h"
 
 #include <boost/foreach.hpp>
 
