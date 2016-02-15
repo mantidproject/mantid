@@ -3,7 +3,7 @@ from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup, ITableWorkspace
 
 
-class FuryFitMultipleTest(unittest.TestCase):
+class IqtFitMultipleTest(unittest.TestCase):
 
     _iqt_ws = None
     _function = r'name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=0.972332,Tau=0.0247558,Beta=1;ties=(f1.Intensity=1-f0.A0)'
@@ -133,9 +133,9 @@ class FuryFitMultipleTest(unittest.TestCase):
 
     def test_basic(self):
         """
-        Tests a basic run of FuryfitMultiple.
+        Tests a basic run of IqtfitMultiple.
         """
-        result, params, fit_group = FuryFitMultiple(InputWorkspace=self._iqt_ws,
+        result, params, fit_group = IqtFitMultiple(InputWorkspace=self._iqt_ws,
                                                     Function=self._function,
                                                     FitType='1S_s',
                                                     StartX=0,
@@ -150,7 +150,7 @@ class FuryFitMultipleTest(unittest.TestCase):
 #----------------------------------------Failure cases-------------------------------------
 
     def test_minimum_spectra_number_less_than_0(self):
-        self.assertRaises(RuntimeError, FuryFitMultiple,
+        self.assertRaises(RuntimeError, IqtFitMultiple,
                           InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
@@ -162,7 +162,7 @@ class FuryFitMultipleTest(unittest.TestCase):
                           OutputWorkspaceGroup='fit_group')
 
     def test_maximum_spectra_more_than_workspace_spectra(self):
-        self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
+        self.assertRaises(RuntimeError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
                           EndX=0.2,
@@ -173,7 +173,7 @@ class FuryFitMultipleTest(unittest.TestCase):
                           OutputWorkspaceGroup='fit_group')
 
     def test_minimum_spectra_more_than_maximum_spectra(self):
-        self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
+        self.assertRaises(RuntimeError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
                           EndX=0.2,
@@ -184,7 +184,7 @@ class FuryFitMultipleTest(unittest.TestCase):
                           OutputWorkspaceGroup='fit_group')
 
     def test_minimum_x_less_than_0(self):
-        self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
+        self.assertRaises(RuntimeError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
                           StartX=-0.2,
@@ -196,7 +196,7 @@ class FuryFitMultipleTest(unittest.TestCase):
                           OutputWorkspaceGroup='fit_group')
 
     def test_maximum_x_more_than_workspace_max_x(self):
-        self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
+        self.assertRaises(RuntimeError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
                           StartX=0,
@@ -208,7 +208,7 @@ class FuryFitMultipleTest(unittest.TestCase):
                           OutputWorkspaceGroup='fit_group')
 
     def test_minimum_spectra_more_than_maximum_spectra(self):
-        self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
+        self.assertRaises(RuntimeError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
                           StartX=0.2,

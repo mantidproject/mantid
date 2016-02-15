@@ -5,7 +5,7 @@ from mantid.kernel import *
 from mantid.simpleapi import *
 import os.path
 
-class FuryFitMultiple(PythonAlgorithm):
+class IqtFitMultiple(PythonAlgorithm):
 
     _input_ws = None
     _function = None
@@ -107,16 +107,16 @@ class FuryFitMultiple(PythonAlgorithm):
                                           furyFitSaveWorkspaces,
                                           furyfitPlotSeq)
 
-        # Run FuryFitMultiple algorithm from indirectDataAnalysis
+        # Run IqtFitMultiple algorithm from indirectDataAnalysis
         nHist = self._input_ws.getNumberHistograms()
-        output_workspace = getWSprefix(self._input_ws.getName()) + 'fury_1Smult_s0_to_' + str(nHist-1)
+        output_workspace = getWSprefix(self._input_ws.getName()) + 'Iqt_1Smult_s0_to_' + str(nHist-1)
 
         option = self._fit_type[:-2]
         logger.information('Option: '+ option)
         logger.information('Function: '+ self._function)
 
         #prepare input workspace for fitting
-        tmp_fit_workspace = "__furyfit_fit_ws"
+        tmp_fit_workspace = "__Iqtfit_fit_ws"
         if self._spec_max is None:
             CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace,
                           XMin=self._start_x, XMax=self._end_x,
@@ -186,4 +186,4 @@ class FuryFitMultiple(PythonAlgorithm):
         self.setProperty('OutputWorkspaceGroup', fit_group)
 
 
-AlgorithmFactory.subscribe(FuryFitMultiple)
+AlgorithmFactory.subscribe(IqtFitMultiple)

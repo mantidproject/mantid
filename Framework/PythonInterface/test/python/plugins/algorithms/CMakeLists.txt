@@ -32,7 +32,6 @@ set ( TEST_PY_FILES
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
-  FuryFitMultipleTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
   IndirectAnnulusAbsorptionTest.py
@@ -42,6 +41,7 @@ set ( TEST_PY_FILES
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
   ILLIN16BCalibrationTest.py
+  IqtFitMultipleTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
