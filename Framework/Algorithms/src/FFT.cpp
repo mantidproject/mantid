@@ -346,7 +346,8 @@ bool FFT::areBinWidthsUneven(const MantidVec &xValues) const {
   const double dx = [&] {
     if (acceptXRoundingErrors) {
       // use average bin width
-      return (xValues[xValues.size() - 1] - xValues[0]) / (xValues.size() - 1);
+      return (xValues[xValues.size() - 1] - xValues[0]) /
+             static_cast<double>(xValues.size() - 1);
     } else {
       // use first bin width
       return xValues[1] - xValues[0];
@@ -357,7 +358,7 @@ bool FFT::areBinWidthsUneven(const MantidVec &xValues) const {
   // Otherwise just compare each difference in turn to the tolerance.
   auto difference = [&](size_t i) {
     if (acceptXRoundingErrors) {
-      return std::abs((xValues[i] - xValues[0] - i * dx) / dx);
+      return std::abs((xValues[i] - xValues[0] - (double)i * dx) / dx);
     } else {
       return std::abs(dx - xValues[i + 1] + xValues[i]) / dx;
     }

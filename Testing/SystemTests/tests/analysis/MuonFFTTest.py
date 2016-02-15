@@ -10,20 +10,20 @@ class MuonFFTTest(stresstesting.MantidStressTest):
         Load(Filename='MUSR00022725.nxs', OutputWorkspace='MUSR00022725')
         CropWorkspace(InputWorkspace='MUSR00022725', OutputWorkspace='MUSR00022725', XMin=0, XMax=4, EndWorkspaceIndex=63)
 
-	# create a PhaseTable with detector information
-	tab = CreateEmptyTableWorkspace()
-	tab.addColumn('int', 'DetID')
-	tab.addColumn('double', 'Phase')
-	tab.addColumn('double', 'Asym')
-	for i in range(0,32):
-	    phi = 2*pi*i/32.
-	    tab.addRow([i + 1, 0.2, phi])
-	for i in range(0,32):
-	    phi = 2*pi*i/32.
-	    tab.addRow([i + 33, 0.2, phi])
-	ows = PhaseQuad(InputWorkspace='MUSR00022725', PhaseTable='tab')
+        # create a PhaseTable with detector information
+        tab = CreateEmptyTableWorkspace()
+        tab.addColumn('int', 'DetID')
+        tab.addColumn('double', 'Phase')
+        tab.addColumn('double', 'Asym')
+        for i in range(0,32):
+            phi = 2*pi*i/32.
+            tab.addRow([i + 1, 0.2, phi])
+        for i in range(0,32):
+            phi = 2*pi*i/32.
+            tab.addRow([i + 33, 0.2, phi])
+        ows = PhaseQuad(InputWorkspace='MUSR00022725', PhaseTable='tab')
 
-	FFT(ows, Real=0, Imaginary=1, AcceptXRoundingErrors=True, OutputWorkspace='MuonFFTResults')
+        FFT(ows, Real=0, Imaginary=1, AcceptXRoundingErrors=True, OutputWorkspace='MuonFFTResults')
 
     def validate(self):
         self.tolerance = 1E-1
