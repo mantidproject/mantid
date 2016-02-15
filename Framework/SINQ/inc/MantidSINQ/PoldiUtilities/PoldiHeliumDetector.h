@@ -43,21 +43,22 @@ using namespace Kernel;
 class MANTID_SINQ_DLL PoldiHeliumDetector : public PoldiAbstractDetector {
 public:
   PoldiHeliumDetector();
-  ~PoldiHeliumDetector() = default;
 
-  void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
+  void
+  loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) override;
 
-  double efficiency();
+  double efficiency() override;
 
-  double twoTheta(int elementIndex);
-  double distanceFromSample(int elementIndex);
+  double twoTheta(int elementIndex) override;
+  double distanceFromSample(int elementIndex) override;
 
-  size_t elementCount();
-  size_t centralElement();
+  size_t elementCount() override;
+  size_t centralElement() override;
 
-  const std::vector<int> &availableElements();
+  const std::vector<int> &availableElements() override;
 
-  std::pair<double, double> qLimits(double lambdaMin, double lambdaMax);
+  std::pair<double, double> qLimits(double lambdaMin,
+                                    double lambdaMax) override;
 
 protected:
   double phi(int elementIndex);

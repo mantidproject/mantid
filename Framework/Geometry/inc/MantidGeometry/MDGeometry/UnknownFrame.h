@@ -38,16 +38,15 @@ class MANTID_GEOMETRY_DLL UnknownFrame : public MDFrame {
 public:
   UnknownFrame(std::unique_ptr<Kernel::MDUnit> unit);
   UnknownFrame(const Kernel::UnitLabel &unit);
-  virtual ~UnknownFrame() = default;
-  std::string name() const;
-  bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const;
-  bool isQ() const;
-  bool isSameType(const MDFrame &frame) const;
-  Mantid::Kernel::UnitLabel getUnitLabel() const;
-  const Mantid::Kernel::MDUnit &getMDUnit() const;
+  std::string name() const override;
+  bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const override;
+  bool isQ() const override;
+  bool isSameType(const MDFrame &frame) const override;
+  Mantid::Kernel::UnitLabel getUnitLabel() const override;
+  const Mantid::Kernel::MDUnit &getMDUnit() const override;
   Mantid::Kernel::SpecialCoordinateSystem
-  equivalientSpecialCoordinateSystem() const;
-  UnknownFrame *clone() const;
+  equivalientSpecialCoordinateSystem() const override;
+  UnknownFrame *clone() const override;
   // Type name
   static const std::string UnknownFrameName;
 

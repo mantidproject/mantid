@@ -25,7 +25,7 @@ public:
   /// Return the thread number of this thread.
   size_t threadnum() { return m_threadnum; }
 
-  virtual void run();
+  void run() override;
 
   void clearWait();
 

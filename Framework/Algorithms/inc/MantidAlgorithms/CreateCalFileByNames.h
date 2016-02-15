@@ -65,20 +65,20 @@ public:
   /// (Empty) Constructor
   CreateCalFileByNames();
   /// Virtual destructor
-  virtual ~CreateCalFileByNames() {}
+  ~CreateCalFileByNames() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "CreateCalFileByNames"; }
+  const std::string name() const override { return "CreateCalFileByNames"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Create a calibration file (extension .cal) for diffraction "
            "focusing based on the names of the components in the instrument "
            "tree.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling\\CalFiles";
   }
 
@@ -86,9 +86,9 @@ private:
   /// Calibration entries map
   typedef std::map<int, std::pair<int, int>> instrcalmap;
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// The name and path of the input file
   std::string m_filename;
   /// Determine whether the grouping file already exists.

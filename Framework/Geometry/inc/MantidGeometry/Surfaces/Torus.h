@@ -48,9 +48,9 @@ private:
   double Dradius;      ///< Inner radius
   double Displacement; ///< Displacement
 
-  void rotate(const Kernel::Matrix<double> &);
-  void displace(const Kernel::V3D &);
-  Torus *doClone() const;
+  void rotate(const Kernel::Matrix<double> &) override;
+  void displace(const Kernel::V3D &) override;
+  Torus *doClone() const override;
 
 protected:
   Torus(const Torus &) = default;
@@ -58,25 +58,25 @@ protected:
 
 public:
   /// Public identifier
-  virtual std::string className() const { return "Torus"; }
+  std::string className() const override { return "Torus"; }
 
   Torus();
   std::unique_ptr<Torus> clone() const;
   int operator==(const Torus &) const;
 
   /// Accept visitor for line calculation
-  virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
+  void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }
 
-  int setSurface(const std::string &Pstr);
-  int side(const Kernel::V3D &R) const;
-  int onSurface(const Kernel::V3D &R) const;
-  double distance(const Kernel::V3D &Pt) const;
+  int setSurface(const std::string &Pstr) override;
+  int side(const Kernel::V3D &R) const override;
+  int onSurface(const Kernel::V3D &R) const override;
+  double distance(const Kernel::V3D &Pt) const override;
 
   /// Return centre point
   Kernel::V3D getCentre() const { return Centre; }
   /// Central normal
   Kernel::V3D getNormal() const { return Normal; }
-  Kernel::V3D surfaceNormal(const Kernel::V3D &Pt) const;
+  Kernel::V3D surfaceNormal(const Kernel::V3D &Pt) const override;
 
   void setCentre(const Kernel::V3D &A);
   void setNorm(const Kernel::V3D &A);
@@ -90,11 +90,11 @@ public:
   /// TODO:
   void setTubeRadius(double dist);
 
-  void write(std::ostream &OX) const;
+  void write(std::ostream &OX) const override;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin);
+                      double &ymin, double &zmin) override;
 #ifdef ENABLE_OPENCASCADE
-  virtual TopoDS_Shape createShape();
+  TopoDS_Shape createShape() override;
 #endif
 };
 

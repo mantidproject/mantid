@@ -93,12 +93,8 @@ private:
   WorkspaceFactoryImpl(const WorkspaceFactoryImpl &);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &);
-  /** Private destructor
-   *  Prevents client from calling 'delete' on the pointer handed
-   *  out by Instance
-   */
-  virtual ~WorkspaceFactoryImpl() = default;
-
+  /// Private Destructor
+  ~WorkspaceFactoryImpl() = default;
   // Unhide the inherited create method but make it private
   using Kernel::DynamicFactory<Workspace>::create;
 };

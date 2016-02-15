@@ -48,18 +48,18 @@ class MANTID_API_DLL TransformScaleFactoryImpl
     : public Kernel::DynamicFactory<ITransformScale> {
 public:
   /// Returns scaling transform
-  boost::shared_ptr<ITransformScale> create(const std::string &type) const;
+  boost::shared_ptr<ITransformScale>
+  create(const std::string &type) const override;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<TransformScaleFactoryImpl>;
 
   /// Private Constructor for singleton class
   TransformScaleFactoryImpl();
-  /// Private destructor for singleton
-  virtual ~TransformScaleFactoryImpl() = default;
+  ~TransformScaleFactoryImpl() override = default;
   /// Override the DynamicFactory::createUnwrapped() method. We don't want it
   /// used here.
-  ITransformScale *createUnwrapped(const std::string &className) const;
+  ITransformScale *createUnwrapped(const std::string &className) const override;
   /// Private copy constructor - NO COPY ALLOWED
   TransformScaleFactoryImpl(const TransformScaleFactoryImpl &);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED

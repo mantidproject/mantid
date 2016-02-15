@@ -62,7 +62,8 @@ class MANTID_API_DLL RemoteJobManagerFactoryImpl
 public:
   /// Create a remote job manager that will know how to use the
   /// underlying mechanism that suits the compute resource passed
-  IRemoteJobManager_sptr create(const std::string &computeResourceName) const;
+  IRemoteJobManager_sptr
+  create(const std::string &computeResourceName) const override;
 
   /// alternative (lower level) create where the specific type of
   /// manager and base URL are directly given
@@ -79,11 +80,7 @@ private:
   RemoteJobManagerFactoryImpl(const RemoteJobManagerFactoryImpl &);
   /// Disallow assignment
   RemoteJobManagerFactoryImpl &operator=(const RemoteJobManagerFactoryImpl &);
-
-  /**
-   * Private destructor, prevent client code from using this.
-   */
-  virtual ~RemoteJobManagerFactoryImpl() = default;
+  ~RemoteJobManagerFactoryImpl() override = default;
 
   // Unhide the inherited create method but make it private
   using Kernel::DynamicFactory<IRemoteJobManager>::create;

@@ -43,16 +43,14 @@ public:
                           const float *point);
   MDPlaneImplicitFunction(const size_t nd, const double *normal,
                           const double *point);
-  /// Class destructor.
-  virtual ~MDPlaneImplicitFunction() = default;
 
   /// Overriding the addPlane for check
   void addPlane(const MDPlane &plane);
 
   /// @return the MDPlaneImplicitFunction type name.
-  virtual std::string getName() const;
+  std::string getName() const override;
   /// @return the XML representation of the MDPlaneImplicitFunction
-  virtual std::string toXMLString() const;
+  std::string toXMLString() const override;
 
 private:
   /// Set defaults to origin if not used.

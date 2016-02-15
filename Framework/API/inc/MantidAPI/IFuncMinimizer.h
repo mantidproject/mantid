@@ -41,8 +41,6 @@ class IFitFunction;
 */
 class MANTID_API_DLL IFuncMinimizer : public Kernel::PropertyManager {
 public:
-  /// Virtual destructor
-  virtual ~IFuncMinimizer() = default;
 
   /// Initialize minimizer.
   /// @param function :: Function to minimize

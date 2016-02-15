@@ -62,7 +62,7 @@ namespace MantidQt
       /// Default Constructor
       InstrumentSelector(QWidget *parent = NULL, bool init = true);
       /// Destructor
-      virtual ~InstrumentSelector();
+      ~InstrumentSelector() override;
       /// Return the list of techniques
       QStringList getTechniques() const;
       /// Set the list of techniques

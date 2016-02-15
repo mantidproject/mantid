@@ -42,12 +42,11 @@ class MANTID_GEOMETRY_DLL StructureFactorCalculatorSummation
     : public StructureFactorCalculator {
 public:
   StructureFactorCalculatorSummation();
-  virtual ~StructureFactorCalculatorSummation() = default;
-
-  StructureFactor getF(const Kernel::V3D &hkl) const;
+  StructureFactor getF(const Kernel::V3D &hkl) const override;
 
 protected:
-  void crystalStructureSetHook(const CrystalStructure &crystalStructure);
+  void
+  crystalStructureSetHook(const CrystalStructure &crystalStructure) override;
 
   void updateUnitCellScatterers(const CrystalStructure &crystalStructure);
   std::string getV3DasString(const Kernel::V3D &point) const;

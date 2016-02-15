@@ -54,22 +54,22 @@ public:
   /// Default constructor
   GetEi2();
   /// Initialize the algorithm
-  void init();
+  void init() override;
   /// Execute the algorithm
-  void exec();
+  void exec() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "GetEi"; }
+  const std::string name() const override { return "GetEi"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates the kinetic energy of neutrons leaving the source based "
            "on the time it takes for them to travel between two monitors.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Inelastic\\Ei"; }
+  const std::string category() const override { return "Inelastic\\Ei"; }
 
 private:
   /// Calculate Ei from the initial guess given

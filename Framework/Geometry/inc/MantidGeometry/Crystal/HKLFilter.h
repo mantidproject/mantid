@@ -94,7 +94,6 @@ typedef boost::shared_ptr<const HKLFilter> HKLFilter_const_sptr;
 class MANTID_GEOMETRY_DLL HKLFilterUnaryLogicOperation : public HKLFilter {
 public:
   HKLFilterUnaryLogicOperation(const HKLFilter_const_sptr &filter);
-  ~HKLFilterUnaryLogicOperation() = default;
 
   /// Returns the operand of the function.
   const HKLFilter_const_sptr &getOperand() const { return m_operand; }
@@ -110,10 +109,9 @@ public:
   /// null pointer.
   HKLFilterNot(const HKLFilter_const_sptr &filter)
       : HKLFilterUnaryLogicOperation(filter) {}
-  ~HKLFilterNot() = default;
 
-  std::string getDescription() const;
-  bool isAllowed(const Kernel::V3D &hkl) const;
+  std::string getDescription() const override;
+  bool isAllowed(const Kernel::V3D &hkl) const override;
 };
 
 /// Base class for binary logic operations for HKLFilter.
@@ -121,7 +119,6 @@ class MANTID_GEOMETRY_DLL HKLFilterBinaryLogicOperation : public HKLFilter {
 public:
   HKLFilterBinaryLogicOperation(const HKLFilter_const_sptr &lhs,
                                 const HKLFilter_const_sptr &rhs);
-  virtual ~HKLFilterBinaryLogicOperation() = default;
 
   /// Returns the left-hand side operand of the operation.
   const HKLFilter_const_sptr &getLHS() const { return m_lhs; }
@@ -141,10 +138,9 @@ public:
   /// the operands is null.
   HKLFilterAnd(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs)
       : HKLFilterBinaryLogicOperation(lhs, rhs) {}
-  ~HKLFilterAnd() = default;
 
-  std::string getDescription() const;
-  bool isAllowed(const Kernel::V3D &hkl) const;
+  std::string getDescription() const override;
+  bool isAllowed(const Kernel::V3D &hkl) const override;
 };
 
 /// Logical "Or"-operation for HKLFilter.
@@ -154,10 +150,9 @@ public:
   /// the operands is null.
   HKLFilterOr(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs)
       : HKLFilterBinaryLogicOperation(lhs, rhs) {}
-  ~HKLFilterOr() = default;
 
-  std::string getDescription() const;
-  bool isAllowed(const Kernel::V3D &hkl) const;
+  std::string getDescription() const override;
+  bool isAllowed(const Kernel::V3D &hkl) const override;
 };
 
 MANTID_GEOMETRY_DLL const HKLFilter_const_sptr

@@ -51,7 +51,7 @@ public:
 
 private:
     void init(int m);
-    void calculateOutputData(double *x, double *y);
+    void calculateOutputData(double *x, double *y) override;
     void smoothFFT(double *x, double *y);
     void smoothAverage(double *x, double *y);
     void smoothSavGol(double *x, double *y);

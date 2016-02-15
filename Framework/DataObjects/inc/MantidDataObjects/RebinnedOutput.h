@@ -42,8 +42,6 @@ class DLLExport RebinnedOutput : public Workspace2D {
 public:
   /// Class constructor.
   RebinnedOutput();
-  /// Class destructor.
-  virtual ~RebinnedOutput() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<RebinnedOutput> clone() const {
@@ -51,7 +49,7 @@ public:
   }
 
   /// Get the workspace ID.
-  virtual const std::string id() const;
+  const std::string id() const override;
 
   /// Returns the fractional area
   virtual MantidVec &dataF(const std::size_t index);
@@ -75,14 +73,14 @@ protected:
   RebinnedOutput &operator=(const RebinnedOutput &other) = delete;
 
   /// Called by initialize() in MatrixWorkspace
-  virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
-                    const std::size_t &YLength);
+  void init(const std::size_t &NVectors, const std::size_t &XLength,
+            const std::size_t &YLength) override;
 
   /// A vector that holds the 1D vectors for the fractional area.
   std::vector<MantidVec> fracArea;
 
 private:
-  virtual RebinnedOutput *doClone() const { return new RebinnedOutput(*this); }
+  RebinnedOutput *doClone() const override { return new RebinnedOutput(*this); }
 };
 
 /// shared pointer to the RebinnedOutput class

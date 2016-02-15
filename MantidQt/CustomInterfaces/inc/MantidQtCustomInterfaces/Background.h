@@ -31,8 +31,8 @@ namespace MantidQt
       
     private:
       void initLayout();
-      void showEvent(QShowEvent*);
-      void closeEvent(QCloseEvent*);
+      void showEvent(QShowEvent *) override;
+      void closeEvent(QCloseEvent *) override;
       bool sanityCheck();
     
     private:

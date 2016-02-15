@@ -70,7 +70,7 @@ public:
   void addSpecialTextMapping(QString text, double value);
 
   QString textFromValue ( double value ) const;
-  virtual QValidator::State validate ( QString & input, int & pos ) const;
+  QValidator::State validate(QString &input, int &pos) const override;
 
   signals:
   void valueChanged ( double d );
@@ -81,9 +81,9 @@ private slots:
   void interpretText(bool notify=true);
 
 protected:
-  void stepBy ( int steps );
-  StepEnabled stepEnabled () const;
-  void focusInEvent(QFocusEvent *);
+  void stepBy(int steps) override;
+  StepEnabled stepEnabled() const override;
+  void focusInEvent(QFocusEvent *) override;
 
 private:
   char d_format;

@@ -103,11 +103,8 @@ public:
   ScriptRepoException(const std::string &info, const std::string &system,
                       const std::string &file = std::string(), int line = -1);
 
-  /// Destructor
-  ~ScriptRepoException() throw() = default;
-
   /// Returns the message string.
-  const char *what() const throw();
+  const char *what() const throw() override;
 
   /// Returns the error description with technical details on the origin and
   /// cause.

@@ -41,8 +41,7 @@ private:
   /// Private, unimplemented copy assignment operator
   PropertyManagerDataServiceImpl &
   operator=(const PropertyManagerDataServiceImpl &);
-  /// Destructor
-  ~PropertyManagerDataServiceImpl() = default;
+  ~PropertyManagerDataServiceImpl() override = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

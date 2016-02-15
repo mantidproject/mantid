@@ -48,8 +48,6 @@ public:
   PeakShapeEllipsoid &operator=(const PeakShapeEllipsoid &other);
   /// Equals operator
   bool operator==(const PeakShapeEllipsoid &other) const;
-  /// Destructor
-  virtual ~PeakShapeEllipsoid() = default;
   /// Get radii
   std::vector<double> abcRadii() const;
   /// Get background inner radii
@@ -63,14 +61,14 @@ public:
       Kernel::Matrix<double> &invertedGoniometerMatrix) const;
 
   /// PeakShape interface
-  std::string toJSON() const;
+  std::string toJSON() const override;
   /// Clone ellipsoid
-  PeakShapeEllipsoid *clone() const;
+  PeakShapeEllipsoid *clone() const override;
   /// Get the peak shape
-  std::string shapeName() const;
+  std::string shapeName() const override;
 
   /// PeakBase interface
-  double radius() const;
+  double radius() const override;
 
   static const std::string ellipsoidShapeName();
 

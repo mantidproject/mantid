@@ -39,26 +39,26 @@ public:
   /// Default constructor
   PhaseQuadMuon(){};
   /// Destructor
-  virtual ~PhaseQuadMuon(){};
+  ~PhaseQuadMuon() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "PhaseQuad"; }
+  const std::string name() const override { return "PhaseQuad"; }
   /// Summary of algorithm's purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Generates a quadrature phase signal.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Muon"; }
+  const std::string category() const override { return "Muon"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Validate inputs
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
   /// Calculate the normalization constants
   std::vector<double> getExponentialDecay(const API::MatrixWorkspace_sptr &ws);
   /// Create squashograms

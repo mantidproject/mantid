@@ -43,26 +43,25 @@ class MANTID_API_DLL RefAxis : public NumericAxis {
 public:
   RefAxis(const std::size_t &length,
           const MatrixWorkspace *const parentWorkspace);
-  virtual ~RefAxis() = default;
 
-  Axis *clone(const MatrixWorkspace *const parentWorkspace);
+  Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
   Axis *clone(const std::size_t length,
-              const MatrixWorkspace *const parentWorkspace);
-  virtual std::size_t length() const { return m_size; }
+              const MatrixWorkspace *const parentWorkspace) override;
+  std::size_t length() const override { return m_size; }
   /// Get a value at the specified index
-  virtual double operator()(const std::size_t &index,
-                            const std::size_t &verticalIndex) const;
-  virtual void setValue(const std::size_t &index, const double &value);
-  virtual bool operator==(const Axis &) const;
-  virtual bool equalWithinTolerance(const Axis &axis2,
-                                    const double tolerance) const;
+  double operator()(const std::size_t &index,
+                    const std::size_t &verticalIndex) const override;
+  void setValue(const std::size_t &index, const double &value) override;
+  bool operator==(const Axis &) const override;
+  bool equalWithinTolerance(const Axis &axis2,
+                            const double tolerance) const override;
   // We must override these to prevent access to NumericAxis::m_values and
   // m_edges, which are unused by RefAxis and thus do not hold sensible values.
-  virtual size_t indexOfValue(const double value) const;
-  virtual std::vector<double> createBinBoundaries() const;
-  virtual const std::vector<double> &getValues() const;
-  virtual double getMin() const;
-  virtual double getMax() const;
+  size_t indexOfValue(const double value) const override;
+  std::vector<double> createBinBoundaries() const override;
+  const std::vector<double> &getValues() const override;
+  double getMin() const override;
+  double getMax() const override;
 
 private:
   RefAxis(const RefAxis &right, const MatrixWorkspace *const parentWorkspace);

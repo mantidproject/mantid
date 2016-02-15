@@ -55,7 +55,7 @@ class MANTID_GEOMETRY_DLL ObjComponent : public virtual IObjComponent,
                                          public Component {
 public:
   /// type string
-  virtual std::string type() const { return "PhysicalComponent"; }
+  std::string type() const override { return "PhysicalComponent"; }
 
   /// Constructor for parametrized component
   ObjComponent(const IComponent *base, const ParameterMap *map);
@@ -69,17 +69,17 @@ public:
   /** Virtual Copy Constructor
    *  @returns A pointer to a copy of the input ObjComponent
    */
-  virtual IComponent *clone() const { return new ObjComponent(*this); }
+  IComponent *clone() const override { return new ObjComponent(*this); }
 
-  bool isValid(const Kernel::V3D &point) const;
-  bool isOnSide(const Kernel::V3D &point) const;
-  int interceptSurface(Track &track) const;
-  double solidAngle(const Kernel::V3D &observer) const;
+  bool isValid(const Kernel::V3D &point) const override;
+  bool isOnSide(const Kernel::V3D &point) const override;
+  int interceptSurface(Track &track) const override;
+  double solidAngle(const Kernel::V3D &observer) const override;
   ///@todo This should go in favour of just the class related one.
   void boundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                    double &ymin, double &zmin) const;
   /// get bounding box, which may or may not be axis aligned;
-  void getBoundingBox(BoundingBox &absoluteBB) const;
+  void getBoundingBox(BoundingBox &absoluteBB) const override;
   /// get Height (Y-dimension) value for component
   virtual double getHeight() const;
   /// get Width (X-dimension) value for component
@@ -87,18 +87,18 @@ public:
   /// get Depth (Z-dimension) value for component
   virtual double getDepth() const;
 
-  int getPointInObject(Kernel::V3D &point) const;
+  int getPointInObject(Kernel::V3D &point) const override;
   // Rendering member functions
-  void draw() const;
-  void drawObject() const;
-  void initDraw() const;
+  void draw() const override;
+  void drawObject() const override;
+  void initDraw() const override;
 
   /// Return the shape of the component
-  const Object_const_sptr shape() const;
+  const Object_const_sptr shape() const override;
   /// Set a new shape on the component
   void setShape(Object_const_sptr newShape);
   /// Return the material this component is made from
-  const Kernel::Material_const_sptr material() const;
+  const Kernel::Material_const_sptr material() const override;
 
 protected:
   /// The physical geometry representation

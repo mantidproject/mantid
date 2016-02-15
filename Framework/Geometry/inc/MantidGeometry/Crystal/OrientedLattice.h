@@ -85,7 +85,7 @@ private:
   Kernel::DblMatrix UB;
 
   /** Make recalculateFromGstar private. */
-  void recalculateFromGstar(const Kernel::DblMatrix &NewGstar) {
+  void recalculateFromGstar(const Kernel::DblMatrix &NewGstar) override {
     UnitCell::recalculateFromGstar(NewGstar);
   }
 };

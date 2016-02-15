@@ -8,10 +8,10 @@ class LowHighStepInputWidget : public BinInputWidget
 {  
   Q_OBJECT
 public:
-  virtual int getEntry(double min, double max) const;
-  virtual void setEntry(int nBins, double min, double max);
+  int getEntry(double min, double max) const override;
+  void setEntry(int nBins, double min, double max) override;
   LowHighStepInputWidget();
-  ~LowHighStepInputWidget();
+  ~LowHighStepInputWidget() override;
 private slots:
   void nBinsListener();
 private:

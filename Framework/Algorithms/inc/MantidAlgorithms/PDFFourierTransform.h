@@ -12,28 +12,28 @@ namespace Algorithms {
 class DLLExport PDFFourierTransform : public API::Algorithm {
 public:
   PDFFourierTransform();
-  ~PDFFourierTransform();
+  ~PDFFourierTransform() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Fourier transform from S(Q) to G(r), which is paired distribution "
            "function (PDF). G(r) will be stored in another named workspace.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const;
+  int version() const override;
   /// Algorithm's category for identification
-  virtual const std::string category() const;
+  const std::string category() const override;
   /// @copydoc Algorithm::validateInputs()
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Initialize the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Mantid

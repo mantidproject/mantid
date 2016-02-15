@@ -60,9 +60,6 @@ public:
         m_lowerExclusive(exclusive), m_upperExclusive(exclusive),
         m_lowerBound(lowerBound), m_upperBound(upperBound) {}
 
-  /// Destructor
-  virtual ~BoundedValidator() = default;
-
   /// Return if it has a lower bound
   bool hasLower() const { return m_hasLowerBound; }
   /// Return if it has a lower bound
@@ -122,7 +119,7 @@ public:
   }
 
   /// Clone the current state
-  IValidator_sptr clone() const {
+  IValidator_sptr clone() const override {
     return boost::make_shared<BoundedValidator>(*this);
   }
 
@@ -148,7 +145,7 @@ private:
    *  @returns An error message to display to users or an empty string on no
    *error
    */
-  std::string checkValidity(const TYPE &value) const {
+  std::string checkValidity(const TYPE &value) const override {
     // declare a class that can do conversions to string
     std::ostringstream error;
     // load in the "no error" condition

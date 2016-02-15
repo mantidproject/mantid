@@ -47,9 +47,6 @@ class MANTID_API_DLL Run : public LogManager {
 public:
   /// Default constructor
   Run();
-  /// Destructor. Doesn't need to be virtual as long as nothing inherits from
-  /// this class.
-  ~Run() = default;
   /// Copy constructor
   Run(const Run &copy);
   /// Assignment operator
@@ -59,13 +56,13 @@ public:
 
   /// Filter the logs by time
   void filterByTime(const Kernel::DateAndTime start,
-                    const Kernel::DateAndTime stop);
+                    const Kernel::DateAndTime stop) override;
   /// Split the logs based on the given intervals
   void splitByTime(Kernel::TimeSplitterType &splitter,
-                   std::vector<LogManager *> outputs) const;
+                   std::vector<LogManager *> outputs) const override;
 
   /// Return an approximate memory size for the object in bytes
-  size_t getMemorySize() const;
+  size_t getMemorySize() const override;
 
   /// Set the proton charge
   void setProtonCharge(const double charge);
@@ -99,10 +96,10 @@ public:
 
   /// Save the run to a NeXus file with a given group name
   void saveNexus(::NeXus::File *file, const std::string &group,
-                 bool keepOpen = false) const;
+                 bool keepOpen = false) const override;
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file, const std::string &group,
-                 bool keepOpen = false);
+                 bool keepOpen = false) override;
 
 private:
   /// Calculate the gonoimeter matrix

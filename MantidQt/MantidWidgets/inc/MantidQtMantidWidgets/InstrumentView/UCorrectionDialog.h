@@ -17,9 +17,9 @@ namespace MantidQt
 			Q_OBJECT
 		public:
 			UCorrectionDialog(QWidget *parent, QPointF oldValue, bool isManual);
-			~UCorrectionDialog();
+                        ~UCorrectionDialog() override;
 
-			bool applyCorrection() const;
+                        bool applyCorrection() const;
 			QPointF getValue() const;
 
 		private:

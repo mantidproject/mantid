@@ -18,27 +18,27 @@ public:
   MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
                 const bool includeMonitors = false);
   MaskWorkspace(const API::MatrixWorkspace_const_sptr parent);
-  ~MaskWorkspace() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<MaskWorkspace> clone() const {
     return std::unique_ptr<MaskWorkspace>(doClone());
   }
 
-  bool isMasked(const detid_t detectorID) const;
-  bool isMasked(const std::set<detid_t> &detectorIDs) const;
+  bool isMasked(const detid_t detectorID) const override;
+  bool isMasked(const std::set<detid_t> &detectorIDs) const override;
   bool isMaskedIndex(const std::size_t wkspIndex) const;
-  void setMasked(const detid_t detectorID, const bool mask = true);
-  void setMasked(const std::set<detid_t> &detectorIDs, const bool mask = true);
+  void setMasked(const detid_t detectorID, const bool mask = true) override;
+  void setMasked(const std::set<detid_t> &detectorIDs,
+                 const bool mask = true) override;
   void setMaskedIndex(const std::size_t wkspIndex, const bool mask = true);
-  std::size_t getNumberMasked() const;
+  std::size_t getNumberMasked() const override;
   std::set<detid_t> getMaskedDetectors() const;
   std::set<std::size_t> getMaskedWkspIndices() const;
 
-  virtual const std::string id() const;
+  const std::string id() const override;
 
   /// Copy the set up from another workspace
-  virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
+  void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews) override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -48,12 +48,12 @@ protected:
   MaskWorkspace &operator=(const MaskWorkspace &other) = delete;
 
   /// Return human-readable string
-  virtual const std::string toString() const;
+  const std::string toString() const override;
 
 private:
-  virtual MaskWorkspace *doClone() const { return new MaskWorkspace(*this); }
+  MaskWorkspace *doClone() const override { return new MaskWorkspace(*this); }
 
-  virtual IMaskWorkspace *doInterfaceClone() const { return doClone(); };
+  IMaskWorkspace *doInterfaceClone() const override { return doClone(); };
   /// Clear original incorrect mask
   void clearMask();
 

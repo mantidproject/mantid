@@ -40,14 +40,14 @@ public:
   StringContainsValidator();
 
   /// Clone the current state
-  IValidator_sptr clone() const;
+  IValidator_sptr clone() const override;
 
   /// Allows a for a vector of required strings to be passed to the validator
   void setRequiredStrings(const std::vector<std::string> &);
 
 private:
   /// Checks the value is valid
-  std::string checkValidity(const std::string &value) const;
+  std::string checkValidity(const std::string &value) const override;
 
   /// A vector of the sub strings the string must contain in order to pass
   /// validation

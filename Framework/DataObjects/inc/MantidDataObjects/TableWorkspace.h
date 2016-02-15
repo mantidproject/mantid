@@ -80,38 +80,39 @@ class MANTID_DATAOBJECTS_DLL TableWorkspace : public API::ITableWorkspace {
 public:
   /// Constructor.
   TableWorkspace(size_t nrows = 0);
-  /// Virtual destructor.
-  virtual ~TableWorkspace() = default;
   /// Returns a clone of the workspace
   std::unique_ptr<TableWorkspace> clone() const {
     return std::unique_ptr<TableWorkspace>(doClone());
   }
   /// Return the workspace typeID
-  virtual const std::string id() const { return "TableWorkspace"; }
+  const std::string id() const override { return "TableWorkspace"; }
   /// Get the footprint in memory in KB.
-  virtual size_t getMemorySize() const;
+  size_t getMemorySize() const override;
   /// Creates a new column.
-  API::Column_sptr addColumn(const std::string &type, const std::string &name);
+  API::Column_sptr addColumn(const std::string &type,
+                             const std::string &name) override;
   /// Removes a column.
-  void removeColumn(const std::string &name);
+  void removeColumn(const std::string &name) override;
   /// Number of columns in the workspace.
-  size_t columnCount() const { return static_cast<int>(m_columns.size()); }
+  size_t columnCount() const override {
+    return static_cast<int>(m_columns.size());
+  }
   /// Gets the shared pointer to a column.
-  API::Column_sptr getColumn(const std::string &name);
-  API::Column_const_sptr getColumn(const std::string &name) const;
+  API::Column_sptr getColumn(const std::string &name) override;
+  API::Column_const_sptr getColumn(const std::string &name) const override;
   /// Gets the shared pointer to a column.
-  API::Column_sptr getColumn(size_t index);
+  API::Column_sptr getColumn(size_t index) override;
   /// Gets the shared pointer to a column by index - return none-modifyable
   /// column.
-  API::Column_const_sptr getColumn(size_t index) const;
+  API::Column_const_sptr getColumn(size_t index) const override;
   /// Returns a vector of all column names.
-  std::vector<std::string> getColumnNames() const;
+  std::vector<std::string> getColumnNames() const override;
   /// Number of rows in the workspace.
-  size_t rowCount() const { return m_rowCount; }
+  size_t rowCount() const override { return m_rowCount; }
   /**Get access to shared pointer containing workspace porperties */
-  API::LogManager_sptr logs() { return m_LogManager; }
+  API::LogManager_sptr logs() override { return m_LogManager; }
   /**Get constant access to shared pointer containing workspace porperties */
-  API::LogManager_const_sptr getLogs() const { return m_LogManager; }
+  API::LogManager_const_sptr getLogs() const override { return m_LogManager; }
 
   /** get access to column vecotor for index i.
    *
@@ -210,12 +211,12 @@ public:
   }
 
   /// Resizes the workspace.
-  void setRowCount(size_t count);
+  void setRowCount(size_t count) override;
   /// Inserts a row before row pointed to by index and fills it with default
   /// vales.
-  size_t insertRow(size_t index);
+  size_t insertRow(size_t index) override;
   /// Delets a row if it exists.
-  void removeRow(size_t index);
+  void removeRow(size_t index) override;
 
   /** This method finds the row and column index of an integer cell value in a
    * table workspace
@@ -223,7 +224,7 @@ public:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  virtual void find(size_t value, size_t &row, const size_t &col) {
+  void find(size_t value, size_t &row, const size_t &col) override {
     findValue(value, row, col);
   }
   /** This method finds the row and column index of an string cell value in a
@@ -232,7 +233,7 @@ public:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  virtual void find(std::string value, size_t &row, const size_t &col) {
+  void find(std::string value, size_t &row, const size_t &col) override {
     findValue(value, row, col);
   }
   /** This method finds the row and column index of an float value in a table
@@ -241,7 +242,7 @@ public:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  virtual void find(float value, size_t &row, const size_t &col) {
+  void find(float value, size_t &row, const size_t &col) override {
     findValue(value, row, col);
   }
   /** This method finds the row and column index of an API::Bollean value in a
@@ -250,7 +251,7 @@ public:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  virtual void find(API::Boolean value, size_t &row, const size_t &col) {
+  void find(API::Boolean value, size_t &row, const size_t &col) override {
     findValue(value, row, col);
   }
   /** This method finds the row and column index of an double cell value in a
@@ -259,7 +260,7 @@ public:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  virtual void find(double value, size_t &row, const size_t &col) {
+  void find(double value, size_t &row, const size_t &col) override {
     findValue(value, row, col);
   }
   /** This method finds the row and column index of an Mantid::Kernel::V3D cell
@@ -268,7 +269,8 @@ public:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(Mantid::Kernel::V3D value, size_t &row, const size_t &col) {
+  void find(Mantid::Kernel::V3D value, size_t &row,
+            const size_t &col) override {
     findValue(value, row, col);
   }
   /** Casts cells through converting their values to/from double without type
@@ -286,7 +288,7 @@ public:
   }
 
   /// Sort this table. @see ITableWorkspace::sort
-  void sort(std::vector<std::pair<std::string, bool>> &criteria);
+  void sort(std::vector<std::pair<std::string, bool>> &criteria) override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -295,7 +297,7 @@ protected:
   TableWorkspace &operator=(const TableWorkspace &other);
 
 private:
-  virtual TableWorkspace *doClone() const { return new TableWorkspace(*this); }
+  TableWorkspace *doClone() const override { return new TableWorkspace(*this); }
 
   /// template method to find a given value in a table.
   template <typename Type>

@@ -47,27 +47,26 @@ class MatrixWorkspace;
 class MANTID_API_DLL SpectraAxis : public Axis {
 public:
   explicit SpectraAxis(const MatrixWorkspace *const parentWorkspace);
-  virtual ~SpectraAxis() = default;
-  virtual Axis *clone(const MatrixWorkspace *const parentWorkspace);
-  virtual Axis *clone(const std::size_t length,
-                      const MatrixWorkspace *const parentWorkspace);
-  virtual std::size_t length() const;
+  Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
+  Axis *clone(const std::size_t length,
+              const MatrixWorkspace *const parentWorkspace) override;
+  std::size_t length() const override;
   /// If this is a spectra Axis - always true for this class
-  virtual bool isSpectra() const { return true; }
-  virtual double operator()(const std::size_t &index,
-                            const std::size_t &verticalIndex = 0) const;
-  virtual void setValue(const std::size_t &index, const double &value);
-  size_t indexOfValue(const double value) const;
-  virtual bool operator==(const Axis &) const;
-  std::string label(const std::size_t &index) const;
+  bool isSpectra() const override { return true; }
+  double operator()(const std::size_t &index,
+                    const std::size_t &verticalIndex = 0) const override;
+  void setValue(const std::size_t &index, const double &value) override;
+  size_t indexOfValue(const double value) const override;
+  bool operator==(const Axis &) const override;
+  std::string label(const std::size_t &index) const override;
 
-  specid_t spectraNo(const std::size_t &index) const;
+  specid_t spectraNo(const std::size_t &index) const override;
   // Get a map that contains the spectra index as the key and the index in the
   // array as teh value
   void getSpectraIndexMap(spec2index_map &) const;
 
-  double getMin() const;
-  double getMax() const;
+  double getMin() const override;
+  double getMax() const override;
 
 private:
   /// Default constructor

@@ -50,14 +50,11 @@ private:
 public:
   typedef OptionalBool HeldType;
 
-  virtual ~OptionalBoolPropertyValueHandler() = default;
-
   /**
    * Set function to handle Python -> C++ calls and get the correct type
    */
-  virtual void set(Mantid::Kernel::IPropertyManager *alg,
-                   const std::string &name,
-                   const boost::python::object &value) const {
+  void set(Mantid::Kernel::IPropertyManager *alg, const std::string &name,
+           const boost::python::object &value) const override {
 
     alg->setProperty<OptionalBool>(name, fromPyObj(value));
   }
@@ -65,10 +62,10 @@ public:
   /**
    * Create a PropertyWithValue from the given python object value
    */
-  virtual Mantid::Kernel::Property *
+  Mantid::Kernel::Property *
   create(const std::string &name, const boost::python::object &value,
          const boost::python::object &validator,
-         const unsigned int direction) const {
+         const unsigned int direction) const override {
     using boost::python::extract;
 
     auto optBool = fromPyObj(value);

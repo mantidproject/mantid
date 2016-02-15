@@ -86,8 +86,6 @@ private:
   FunctionFactoryImpl(const FunctionFactoryImpl &);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   FunctionFactoryImpl &operator=(const FunctionFactoryImpl &);
-  /// Private Destructor
-  virtual ~FunctionFactoryImpl() = default;
 
   /// These methods shouldn't be used to create functions
   using Kernel::DynamicFactory<IFunction>::create;

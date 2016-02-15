@@ -37,16 +37,12 @@ namespace Kernel {
 class MANTID_KERNEL_DLL MDUnitFactory
     : public ChainableFactory<MDUnitFactory, MDUnit, std::string> {
 
-public:
-  /// Destructor
-  virtual ~MDUnitFactory() = default;
-
 private:
   /// Create the product
-  virtual MDUnit *createRaw(const std::string &unitString) const = 0;
+  MDUnit *createRaw(const std::string &unitString) const override = 0;
 
   /// Indicate an ability to intepret the string
-  virtual bool canInterpret(const std::string &unitString) const = 0;
+  bool canInterpret(const std::string &unitString) const override = 0;
 };
 
 //-----------------------------------------------------------------------
@@ -54,18 +50,19 @@ private:
 //-----------------------------------------------------------------------
 
 class MANTID_KERNEL_DLL LabelUnitFactory : public MDUnitFactory {
-  LabelUnit *createRaw(const std::string &unitString) const;
-  bool canInterpret(const std::string &unitString) const;
+  LabelUnit *createRaw(const std::string &unitString) const override;
+  bool canInterpret(const std::string &unitString) const override;
 };
 
 class MANTID_KERNEL_DLL InverseAngstromsUnitFactory : public MDUnitFactory {
-  InverseAngstromsUnit *createRaw(const std::string &unitString) const;
-  bool canInterpret(const std::string &unitString) const;
+  InverseAngstromsUnit *createRaw(const std::string &unitString) const override;
+  bool canInterpret(const std::string &unitString) const override;
 };
 
 class MANTID_KERNEL_DLL ReciprocalLatticeUnitFactory : public MDUnitFactory {
-  ReciprocalLatticeUnit *createRaw(const std::string &unitString) const;
-  bool canInterpret(const std::string &unitString) const;
+  ReciprocalLatticeUnit *
+  createRaw(const std::string &unitString) const override;
+  bool canInterpret(const std::string &unitString) const override;
 };
 
 typedef std::unique_ptr<MDUnitFactory> MDUnitFactory_uptr;

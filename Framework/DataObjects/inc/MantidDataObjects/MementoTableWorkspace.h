@@ -38,7 +38,6 @@ class DLLExport MementoTableWorkspace : public TableWorkspace {
 public:
   static bool isMementoWorkspace(const Mantid::API::ITableWorkspace &candidate);
   MementoTableWorkspace(int nRows = 0);
-  ~MementoTableWorkspace() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<MementoTableWorkspace> clone() const {
@@ -52,7 +51,7 @@ protected:
   MementoTableWorkspace &operator=(const MementoTableWorkspace &other);
 
 private:
-  virtual MementoTableWorkspace *doClone() const {
+  MementoTableWorkspace *doClone() const override {
     return new MementoTableWorkspace(*this);
   }
 

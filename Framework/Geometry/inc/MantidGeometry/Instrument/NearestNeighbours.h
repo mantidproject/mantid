@@ -63,16 +63,13 @@ public:
                     const ISpectrumDetectorMapping &spectraMap,
                     bool ignoreMasked = true);
 
-  /// Default (empty) destructor
-  virtual ~NearestNeighbours() = default;
-  ;
-
   // Neighbouring spectra by radius
   std::map<specid_t, Mantid::Kernel::V3D>
-  neighboursInRadius(specid_t spectrum, double radius = 0.0) const;
+  neighboursInRadius(specid_t spectrum, double radius = 0.0) const override;
 
   // Neighbouring spectra by
-  std::map<specid_t, Mantid::Kernel::V3D> neighbours(specid_t spectrum) const;
+  std::map<specid_t, Mantid::Kernel::V3D>
+  neighbours(specid_t spectrum) const override;
 
 protected:
   /// Get the spectra associated with all in the instrument

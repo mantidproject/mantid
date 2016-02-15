@@ -56,11 +56,11 @@ public:
   /// Default constructor
   ReplaceSpecialValues();
   /// Destructor
-  virtual ~ReplaceSpecialValues() {}
+  ~ReplaceSpecialValues() override {}
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "ReplaceSpecialValues"; }
+  const std::string name() const override { return "ReplaceSpecialValues"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Replaces instances of NaN and infinity in the workspace with user "
            "defined numbers. If a replacement value is not provided the check "
            "will not occur. This algorithm can also be used to replace numbers "
@@ -68,18 +68,19 @@ public:
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\SpecialCorrections";
   }
 
 private:
   // Overridden UnaryOperation methods
-  void defineProperties();
-  void retrieveProperties();
+  void defineProperties() override;
+  void retrieveProperties() override;
   void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut, double &EOut);
+                             const double EIn, double &YOut,
+                             double &EOut) override;
 
   /// returns true if the value is NaN
   bool checkIfNan(const double &value) const;

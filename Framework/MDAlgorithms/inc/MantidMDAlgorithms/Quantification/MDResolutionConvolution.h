@@ -61,11 +61,8 @@ public:
   /// a fit
   MDResolutionConvolution(const API::IFunctionMD &fittingFunction,
                           const std::string &fgModelName);
-  /// Virtual destructor for a base class
-  virtual ~MDResolutionConvolution() = default;
-
   /// Function category
-  virtual const std::string category() const { return "Quantification"; }
+  const std::string category() const override { return "Quantification"; }
 
   /**
    * Called once before any fit/simulation is started to allow caching of
@@ -97,7 +94,7 @@ public:
 
   /// Declares the parameters. Overridden here to ensure that concrete models
   /// override it
-  void declareAttributes();
+  void declareAttributes() override;
   /// Setup the reference to the function under fit (required for factory)
   void setFittingFunction(const API::IFunctionMD &fittingFunction);
   /// Set a pointer to a foreground model from a string name (required for
@@ -107,7 +104,7 @@ public:
   /// know
   /// on the convolution type
   void setAttribute(const std::string &name,
-                    const API::IFunction::Attribute &value);
+                    const API::IFunction::Attribute &value) override;
 
   /// Returns a reference to the foreground model
   const ForegroundModel &foregroundModel() const;
@@ -121,7 +118,7 @@ private:
 
   /// Required for function interface
   void function(const Mantid::API::FunctionDomain &,
-                Mantid::API::FunctionValues &) const {};
+                Mantid::API::FunctionValues &) const override{};
 
   /// A reference to the main function under minimzation
   const API::IFunctionMD *m_fittingFunction;

@@ -80,7 +80,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   UnitFactoryImpl &operator=(const UnitFactoryImpl &);
   /// Private Destructor
-  virtual ~UnitFactoryImpl() = default;
+  ~UnitFactoryImpl() override = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

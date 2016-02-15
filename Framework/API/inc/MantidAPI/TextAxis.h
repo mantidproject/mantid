@@ -52,29 +52,28 @@ class MatrixWorkspace;
 class MANTID_API_DLL TextAxis : public Axis {
 public:
   TextAxis(const std::size_t &length);
-  virtual ~TextAxis() = default;
-  virtual Axis *clone(const MatrixWorkspace *const parentWorkspace);
-  virtual Axis *clone(const std::size_t length,
-                      const MatrixWorkspace *const parentWorkspace);
-  virtual std::size_t length() const { return m_values.size(); }
+  Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
+  Axis *clone(const std::size_t length,
+              const MatrixWorkspace *const parentWorkspace) override;
+  std::size_t length() const override { return m_values.size(); }
   /// If this is a TextAxis, always return true for this class
-  virtual bool isText() const { return true; }
+  bool isText() const override { return true; }
   /// Get a value at the specified index
-  virtual double operator()(const std::size_t &index,
-                            const std::size_t &verticalIndex = 0) const;
+  double operator()(const std::size_t &index,
+                    const std::size_t &verticalIndex = 0) const override;
   /// Set the value at the specified index
-  virtual void setValue(const std::size_t &index, const double &value);
-  size_t indexOfValue(const double value) const;
+  void setValue(const std::size_t &index, const double &value) override;
+  size_t indexOfValue(const double value) const override;
 
-  virtual bool operator==(const Axis &) const;
+  bool operator==(const Axis &) const override;
   /// Get the label at the specified index
-  std::string label(const std::size_t &index) const;
+  std::string label(const std::size_t &index) const override;
   /// Set the label at the given index
   void setLabel(const std::size_t &index, const std::string &lbl);
   /// returns min value defined on axis
-  double getMin() const;
+  double getMin() const override;
   /// returns max value defined on axis
-  double getMax() const;
+  double getMax() const override;
 
 private:
   /// Private, undefined copy assignment operator

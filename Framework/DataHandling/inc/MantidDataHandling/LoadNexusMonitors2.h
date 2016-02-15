@@ -49,32 +49,28 @@ public:
   LoadNexusMonitors2();
 
   /// Destructor
-  virtual ~LoadNexusMonitors2();
+  ~LoadNexusMonitors2() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const override {
-    return "LoadNexusMonitors";
-  }
+  const std::string name() const override { return "LoadNexusMonitors"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const override {
+  const std::string summary() const override {
     return "Load all monitors from a NeXus file into a workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const override { return 2; }
+  int version() const override { return 2; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const override {
-    return "DataHandling\\Nexus";
-  }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
 protected:
   /// Initialise algorithm
-  virtual void init() override;
+  void init() override;
 
   /// Execute algorithm
-  virtual void exec() override;
+  void exec() override;
 
 private:
   /// Fix the detector numbers if the defaults are not correct

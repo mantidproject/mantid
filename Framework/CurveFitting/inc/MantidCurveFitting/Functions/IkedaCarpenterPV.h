@@ -42,24 +42,21 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport IkedaCarpenterPV : virtual public API::IPeakFunction,
                                    virtual public API::IFunctionMW {
 public:
-  /// Destructor
-  virtual ~IkedaCarpenterPV() = default;
-  ;
 
   /// contruction used for standard fitting
   IkedaCarpenterPV(){};
 
   /// overwrite IPeakFunction base class methods
-  virtual double centre() const;
-  virtual double height() const;
-  virtual double fwhm() const;
-  virtual void setCentre(const double c);
-  virtual void setHeight(const double h);
-  virtual void setFwhm(const double w);
+  double centre() const override;
+  double height() const override;
+  double fwhm() const override;
+  void setCentre(const double c) override;
+  void setHeight(const double h) override;
+  void setFwhm(const double w) override;
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "IkedaCarpenterPV"; }
-  virtual const std::string category() const { return "Peak"; }
+  std::string name() const override { return "IkedaCarpenterPV"; }
+  const std::string category() const override { return "Peak"; }
 
   // define these instead of functionLocal if you want to custom specify the
   // calculation
@@ -70,15 +67,15 @@ public:
   // int& nData);
 
 protected:
-  virtual void functionLocal(double *out, const double *xValues,
-                             const size_t nData) const;
-  virtual void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                                  const size_t nData);
-  virtual void functionDeriv(const API::FunctionDomain &domain,
-                             API::Jacobian &jacobian);
+  void functionLocal(double *out, const double *xValues,
+                     const size_t nData) const override;
+  void functionDerivLocal(API::Jacobian *out, const double *xValues,
+                          const size_t nData) override;
+  void functionDeriv(const API::FunctionDomain &domain,
+                     API::Jacobian &jacobian) override;
 
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
 
 private:
   /// container for storing wavelength values for each data point

@@ -62,8 +62,6 @@ public:
   /// Constructor
   ThreadSafeLogStreamBuf(Poco::Logger &logger,
                          Poco::Message::Priority priority);
-  /// Destructor
-  ~ThreadSafeLogStreamBuf() = default;
 
 public:
   int overflow(char c);
@@ -71,7 +69,7 @@ public:
 
 private:
   /// Overridden fron base to write to the device in a thread-safe manner.
-  int writeToDevice(char c);
+  int writeToDevice(char c) override;
 
 private:
   /// Store a map of thread indices to messages
@@ -91,8 +89,6 @@ class MANTID_KERNEL_DLL ThreadSafeLogIOS : public virtual std::ios {
 public:
   /// Constructor
   ThreadSafeLogIOS(Poco::Logger &logger, Poco::Message::Priority priority);
-  /// Destructor
-  ~ThreadSafeLogIOS() = default;
   // Return a pointer to the stream buffer object
   Poco::LogStreamBuf *rdbuf();
 
@@ -129,8 +125,6 @@ public:
   ThreadSafeLogStream(
       const std::string &loggerName,
       Poco::Message::Priority priority = Poco::Message::PRIO_INFORMATION);
-  /// Destroys the ThreadSafeLogStream.
-  ~ThreadSafeLogStream() = default;
   /// Sets the priority for log messages to Poco::Message::PRIO_FATAL.
   ThreadSafeLogStream &fatal();
   /// Sets the priority for log messages to Poco::Message::PRIO_FATAL

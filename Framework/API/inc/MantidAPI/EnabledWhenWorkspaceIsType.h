@@ -54,9 +54,6 @@ public:
       : IPropertySettings(), m_otherPropName(otherPropName),
         m_enabledSetting(enabledSetting) {}
 
-  /// Destructor
-  virtual ~EnabledWhenWorkspaceIsType() = default;
-
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the
    * other property values?
@@ -98,19 +95,19 @@ public:
   //--------------------------------------------------------------------------------------------
   /// Return true/false based on whether the other property satisfies the
   /// criterion
-  virtual bool isEnabled(const Kernel::IPropertyManager *algo) const {
+  bool isEnabled(const Kernel::IPropertyManager *algo) const override {
     return fulfillsCriterion(algo);
   }
 
   //--------------------------------------------------------------------------------------------
   /// Return true always
-  virtual bool isVisible(const Kernel::IPropertyManager *) const {
+  bool isVisible(const Kernel::IPropertyManager *) const override {
     return true;
   }
 
   //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of validator
-  virtual IPropertySettings *clone() {
+  IPropertySettings *clone() override {
     EnabledWhenWorkspaceIsType *out =
         new EnabledWhenWorkspaceIsType<T>(m_otherPropName, m_enabledSetting);
     return out;

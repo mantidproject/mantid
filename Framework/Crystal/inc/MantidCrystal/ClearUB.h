@@ -34,16 +34,16 @@ namespace Crystal {
 class DLLExport ClearUB : public API::Algorithm {
 public:
   ClearUB();
-  virtual ~ClearUB();
+  ~ClearUB() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Clears the UB by removing the oriented lattice from the sample.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 protected:
   bool doExecute(Mantid::API::Workspace *const ws, bool dryRun);
@@ -52,8 +52,8 @@ private:
   bool
   clearSingleExperimentInfo(Mantid::API::ExperimentInfo *const experimentInfo,
                             const bool dryRun) const;
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Crystal

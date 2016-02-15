@@ -43,17 +43,15 @@ class DLLExport ThermalNeutronDtoTOFFunction : virtual public API::IFunction1D,
                                                public API::ParamFunction {
 public:
   ThermalNeutronDtoTOFFunction();
-  virtual ~ThermalNeutronDtoTOFFunction() = default;
-
   /// Override
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "ThermalNeutronDtoTOFFunction"; }
+  std::string name() const override { return "ThermalNeutronDtoTOFFunction"; }
 
   /// Overwrite IFunction
-  virtual const std::string category() const { return "General"; }
+  const std::string category() const override { return "General"; }
 
   /// Calculate function values
   void function1D(std::vector<double> &out,
@@ -61,7 +59,7 @@ public:
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
 
 private:
   /// Core function (inline) to calcualte TOF_h from d-spacing
@@ -78,7 +76,7 @@ private:
 
   /// Derviate to overwritten
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
 
   // void functionDeriv(const API::FunctionDomain& domain, API::Jacobian&
   // jacobian);

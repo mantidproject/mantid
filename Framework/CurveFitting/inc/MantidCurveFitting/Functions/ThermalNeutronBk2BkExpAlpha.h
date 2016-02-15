@@ -39,21 +39,20 @@ class DLLExport ThermalNeutronBk2BkExpAlpha : virtual public API::IFunction1D,
                                               public API::ParamFunction {
 public:
   ThermalNeutronBk2BkExpAlpha();
-  virtual ~ThermalNeutronBk2BkExpAlpha() = default;
 
   /// Override
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "ThermalNeutronBk2BkExpAlpha"; }
+  std::string name() const override { return "ThermalNeutronBk2BkExpAlpha"; }
 
   /// Overwrite IFunction
-  virtual const std::string category() const { return "General"; }
+  const std::string category() const override { return "General"; }
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
 
 private:
   /// Derivative
@@ -61,7 +60,7 @@ private:
 
   /// Derivative to overwrite
   void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian);
+                     API::Jacobian &jacobian) override;
 
   /// Core function (inline) to calcualte TOF_h from d-spacing
   inline double corefunction(double dh, double width, double tcross,

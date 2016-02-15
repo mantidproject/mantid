@@ -63,7 +63,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_GEOMETRY_DLL Instrument : public CompAssembly {
 public:
   /// String description of the type of component
-  virtual std::string type() const { return "Instrument"; }
+  std::string type() const override { return "Instrument"; }
 
   Instrument(const boost::shared_ptr<const Instrument> instr,
              boost::shared_ptr<ParameterMap> map);
@@ -71,9 +71,9 @@ public:
   Instrument(const std::string &name);
   Instrument(const Instrument &);
   /// Virtual destructor
-  virtual ~Instrument();
+  ~Instrument() override;
 
-  Instrument *clone() const;
+  Instrument *clone() const override;
 
   IComponent_const_sptr getSource() const;
   IObjComponent_const_sptr getChopperPoint(const size_t index = 0) const;
@@ -147,7 +147,7 @@ public:
   size_t numMonitors() const;
 
   /// Get the bounding box for this component and store it in the given argument
-  void getBoundingBox(BoundingBox &boundingBox) const;
+  void getBoundingBox(BoundingBox &boundingBox) const override;
 
   /// Get pointers to plottable components
   boost::shared_ptr<const std::vector<IObjComponent_const_sptr>>

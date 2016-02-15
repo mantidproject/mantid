@@ -120,13 +120,13 @@ namespace MantidQt
 		public:
 			PeakOverlay(UnwrappedSurface *surface,
 				boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
-			~PeakOverlay() {}
-			/// Override the drawing method
-			void draw(QPainter &painter) const;
-			virtual void removeShapes(const QList<Shape2D *> &);
-			virtual void clear();
+                        ~PeakOverlay() override {}
+                        /// Override the drawing method
+                        void draw(QPainter &painter) const override;
+                        void removeShapes(const QList<Shape2D *> &) override;
+                        void clear() override;
 
-			/// Create the markers
+                        /// Create the markers
 			void createMarkers(const PeakMarker2D::Style &style);
 			void addMarker(PeakMarker2D *m);
 			QList<PeakMarker2D *> getMarkersWithID(int detID) const;
@@ -149,10 +149,11 @@ namespace MantidQt
 
 		private:
 			/// A WorkspaceObserver handle implemented.
-			virtual void afterReplaceHandle(const std::string &wsName,
-				const Mantid::API::Workspace_sptr ws);
+                  void afterReplaceHandle(
+                      const std::string &wsName,
+                      const Mantid::API::Workspace_sptr ws) override;
 
-			PeakMarker2D::Style getCurrentStyle() const;
+                        PeakMarker2D::Style getCurrentStyle() const;
 			void recreateMarkers(const PeakMarker2D::Style &style);
 
 			QMultiHash<int, PeakMarker2D *>

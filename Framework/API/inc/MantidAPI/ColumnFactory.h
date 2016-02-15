@@ -50,7 +50,7 @@ class Column;
 class MANTID_API_DLL ColumnFactoryImpl : public Kernel::DynamicFactory<Column> {
 public:
   /// Creates an instance of a column
-  boost::shared_ptr<Column> create(const std::string &type) const;
+  boost::shared_ptr<Column> create(const std::string &type) const override;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ColumnFactoryImpl>;
@@ -62,7 +62,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   ColumnFactoryImpl &operator=(const ColumnFactoryImpl &);
   /// Private Destructor
-  virtual ~ColumnFactoryImpl() = default;
+  ~ColumnFactoryImpl() override = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

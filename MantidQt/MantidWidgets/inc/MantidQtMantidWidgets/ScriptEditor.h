@@ -91,7 +91,9 @@ public:
   {
   public:
     /// Return a message
-    const char* what() const throw() { return "File saving was cancelled"; }
+    const char *what() const throw() override {
+      return "File saving was cancelled";
+    }
   };
 
 
@@ -100,7 +102,7 @@ public:
   ScriptEditor(QWidget* parent = 0, QsciLexer* lexer = NULL,
                const QString & settingsGroup = "");
   ///Destructor
-  ~ScriptEditor();
+  ~ScriptEditor() override;
 
   /// Set the name of the group to save the settings for
   void setSettingsGroup(const QString & name);
@@ -112,7 +114,7 @@ public:
   void writeSettings();
 
   /// Set a new code lexer for this object
-  void setLexer(QsciLexer *);
+  void setLexer(QsciLexer *) override;
   // Make the object resize to margin to fit the contents
   void setAutoMarginResize();
   /// Enable the auto complete
@@ -121,13 +123,13 @@ public:
   void disableAutoCompletion();
 
   // Size hint
-  QSize sizeHint() const;
+  QSize sizeHint() const override;
   // Unhide base class method to avoid intel compiler warning
   using QsciScintilla::setText;
   /// Set the text on a given line number
   void setText(int lineno, const QString& text,int index=0);
   ///Capture key presses
-  void keyPressEvent(QKeyEvent* event);
+  void keyPressEvent(QKeyEvent *event) override;
   /// The current filename
   inline QString fileName() const
   {
@@ -144,7 +146,7 @@ public:
   
 
   /// Override so that ctrl + mouse wheel will zoom in and out
-  void wheelEvent( QWheelEvent * e );
+  void wheelEvent(QWheelEvent *e) override;
 
   /// Return a pointer to the object responsible for code completion
   inline QsciAPIs * scintillaAPI() const
@@ -176,7 +178,7 @@ public slots:
   virtual void showFindReplaceDialog();
 
   /// Override zoomTo slot
-  virtual void zoomTo(int level);
+  void zoomTo(int level) override;
 
 signals:
   /// Inform observers that undo information is available
@@ -191,10 +193,10 @@ signals:
 protected:
   /// Write to the given device
   virtual void writeToDevice(QIODevice & device) const;
-  
-  virtual void dropEvent(QDropEvent *de);
-  virtual void dragMoveEvent(QDragMoveEvent *de);
-  virtual void dragEnterEvent(QDragEnterEvent *de);
+
+  void dropEvent(QDropEvent *de) override;
+  void dragMoveEvent(QDragMoveEvent *de) override;
+  void dragEnterEvent(QDragEnterEvent *de) override;
 
 private slots:
 

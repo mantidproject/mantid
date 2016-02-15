@@ -47,17 +47,15 @@ public:
 
   InvalidParameter(std::string value);
 
-  std::string getName() const;
+  std::string getName() const override;
 
   std::string getValue() const;
 
-  bool isValid() const;
+  bool isValid() const override;
 
-  Mantid::MDAlgorithms::InvalidParameter *clone() const;
+  Mantid::MDAlgorithms::InvalidParameter *clone() const override;
 
-  std::string toXMLString() const;
-
-  ~InvalidParameter() = default;
+  std::string toXMLString() const override;
 
   static std::string parameterName() { return "InvalidParameter"; }
 };

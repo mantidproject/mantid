@@ -23,7 +23,6 @@ public:
   GroupingWorkspace(Geometry::Instrument_const_sptr inst);
   GroupingWorkspace();
   GroupingWorkspace(size_t numvectors);
-  ~GroupingWorkspace() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<GroupingWorkspace> clone() const {
@@ -32,7 +31,7 @@ public:
 
   /** Gets the name of the workspace type
   @return Standard string name  */
-  virtual const std::string id() const { return "GroupingWorkspace"; }
+  const std::string id() const override { return "GroupingWorkspace"; }
 
   void makeDetectorIDToGroupMap(std::map<detid_t, int> &detIDToGroup,
                                 int64_t &ngroups) const;
@@ -46,7 +45,7 @@ protected:
   GroupingWorkspace &operator=(const GroupingWorkspace &other);
 
 private:
-  virtual GroupingWorkspace *doClone() const {
+  GroupingWorkspace *doClone() const override {
     return new GroupingWorkspace(*this);
   }
 };

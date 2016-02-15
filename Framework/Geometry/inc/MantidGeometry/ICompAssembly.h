@@ -46,11 +46,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_GEOMETRY_DLL ICompAssembly : public virtual IComponent {
 public:
   /// String description of the type of component
-  virtual std::string type() const { return "ICompAssembly"; }
-
-  virtual ~ICompAssembly() = default;
+  std::string type() const override { return "ICompAssembly"; }
   /// Make a clone of the present component
-  virtual IComponent *clone() const = 0;
+  IComponent *clone() const override = 0;
   /// Return the number of elements in the assembly
   virtual int nelements() const = 0;
   /// Add a component to the assembly

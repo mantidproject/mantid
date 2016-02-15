@@ -681,25 +681,25 @@ public:
 
 // SAX content handler for grapping stuff quickly from IDF
 class myContentHandler : public Poco::XML::ContentHandler {
-  virtual void startElement(const XMLString &, const XMLString &localName,
-                            const XMLString &, const Attributes &attrList) {
+  void startElement(const XMLString &, const XMLString &localName,
+                    const XMLString &, const Attributes &attrList) override {
     if (localName == "instrument") {
       throw DummyException(
           static_cast<std::string>(attrList.getValue("", "valid-from")),
           static_cast<std::string>(attrList.getValue("", "valid-to")));
     }
   }
-  virtual void endElement(const XMLString &, const XMLString &,
-                          const XMLString &) {}
-  virtual void startDocument() {}
-  virtual void endDocument() {}
-  virtual void characters(const XMLChar[], int, int) {}
-  virtual void endPrefixMapping(const XMLString &) {}
-  virtual void ignorableWhitespace(const XMLChar[], int, int) {}
-  virtual void processingInstruction(const XMLString &, const XMLString &) {}
-  virtual void setDocumentLocator(const Locator *) {}
-  virtual void skippedEntity(const XMLString &) {}
-  virtual void startPrefixMapping(const XMLString &, const XMLString &) {}
+  void endElement(const XMLString &, const XMLString &,
+                  const XMLString &) override {}
+  void startDocument() override {}
+  void endDocument() override {}
+  void characters(const XMLChar[], int, int) override {}
+  void endPrefixMapping(const XMLString &) override {}
+  void ignorableWhitespace(const XMLChar[], int, int) override {}
+  void processingInstruction(const XMLString &, const XMLString &) override {}
+  void setDocumentLocator(const Locator *) override {}
+  void skippedEntity(const XMLString &) override {}
+  void startPrefixMapping(const XMLString &, const XMLString &) override {}
 };
 
 //---------------------------------------------------------------------------------------

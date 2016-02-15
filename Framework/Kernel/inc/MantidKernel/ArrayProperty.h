@@ -104,18 +104,19 @@ public:
   ArrayProperty(const ArrayProperty &right) = default;
 
   /// 'Virtual copy constructor'
-  ArrayProperty<T> *clone() const { return new ArrayProperty<T>(*this); }
+  ArrayProperty<T> *clone() const override {
+    return new ArrayProperty<T>(*this);
+  }
 
-  /// Virtual destructor
-  virtual ~ArrayProperty() = default;
-
+  ~ArrayProperty() override = default;
+  
   // Unhide the base class assignment operator
   using PropertyWithValue<std::vector<T>>::operator=;
 
   /** Returns the values stored in the ArrayProperty
    *  @return The stored values as a comma-separated list
    */
-  std::string value() const {
+  std::string value() const override {
     // Implemented this method for documentation reasons. Just calls base class
     // method.
     return PropertyWithValue<std::vector<T>>::value();
@@ -126,7 +127,7 @@ public:
    * comma-separated list
    *  @return True if the assignment was successful
    */
-  std::string setValue(const std::string &value) {
+  std::string setValue(const std::string &value) override {
     // Implemented this method for documentation reasons. Just calls base class
     // method.
     return PropertyWithValue<std::vector<T>>::setValue(value);

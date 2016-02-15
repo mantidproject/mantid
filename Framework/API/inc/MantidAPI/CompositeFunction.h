@@ -61,104 +61,103 @@ class MANTID_API_DLL CompositeFunction : public virtual IFunction {
 public:
   /// Default constructor
   CompositeFunction();
-  /// Destructor
-  virtual ~CompositeFunction() = default;
 
   /* Overriden methods */
 
   /// Returns the function's name
-  virtual std::string name() const { return "CompositeFunction"; }
+  std::string name() const override { return "CompositeFunction"; }
   /// Writes itself into a string
-  std::string asString() const;
+  std::string asString() const override;
   /// Sets the workspace for each member function
-  void setWorkspace(boost::shared_ptr<const Workspace> ws);
+  void setWorkspace(boost::shared_ptr<const Workspace> ws) override;
   /// Set matrix workspace
   void
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX);
+                     size_t wi, double startX, double endX) override;
 
   /// Function you want to fit to.
-  virtual void function(const FunctionDomain &domain,
-                        FunctionValues &values) const;
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override;
   /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian);
+  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
 
   /// Set i-th parameter
-  void setParameter(size_t, const double &value, bool explicitlySet = true);
+  void setParameter(size_t, const double &value,
+                    bool explicitlySet = true) override;
   /// Set i-th parameter description
-  void setParameterDescription(size_t, const std::string &description);
+  void setParameterDescription(size_t, const std::string &description) override;
   /// Get i-th parameter
-  double getParameter(size_t i) const;
+  double getParameter(size_t i) const override;
   /// Set parameter by name.
   void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true);
+                    bool explicitlySet = true) override;
   /// Set description of parameter by name.
   void setParameterDescription(const std::string &name,
-                               const std::string &description);
+                               const std::string &description) override;
   /// Get parameter by name.
-  double getParameter(const std::string &name) const;
+  double getParameter(const std::string &name) const override;
   /// Total number of parameters
-  size_t nParams() const;
+  size_t nParams() const override;
   /// Returns the index of parameter name
-  size_t parameterIndex(const std::string &name) const;
+  size_t parameterIndex(const std::string &name) const override;
   /// Returns the name of parameter i
-  std::string parameterName(size_t i) const;
+  std::string parameterName(size_t i) const override;
   /// Returns the description of parameter i
-  std::string parameterDescription(size_t i) const;
+  std::string parameterDescription(size_t i) const override;
   /// Checks if a parameter has been set explicitly
-  bool isExplicitlySet(size_t i) const;
+  bool isExplicitlySet(size_t i) const override;
   /// Get the fitting error for a parameter
-  virtual double getError(size_t i) const;
+  double getError(size_t i) const override;
   /// Set the fitting error for a parameter
-  virtual void setError(size_t i, double err);
+  void setError(size_t i, double err) override;
 
   /// Check if a parameter is active
-  bool isFixed(size_t i) const;
+  bool isFixed(size_t i) const override;
   /// Removes a parameter from the list of active
-  void fix(size_t i);
+  void fix(size_t i) override;
   /// Restores a declared parameter i to the active status
-  void unfix(size_t i);
+  void unfix(size_t i) override;
 
   /// Value of i-th active parameter. Override this method to make fitted
   /// parameters different from the declared
-  double activeParameter(size_t i) const;
+  double activeParameter(size_t i) const override;
   /// Set new value of i-th active parameter. Override this method to make
   /// fitted parameters different from the declared
-  void setActiveParameter(size_t i, double value);
+  void setActiveParameter(size_t i, double value) override;
   /// Update parameters after a fitting iteration
   void updateActive(const double *in);
   /// Returns the name of active parameter i
-  std::string nameOfActive(size_t i) const;
+  std::string nameOfActive(size_t i) const override;
   /// Returns the name of active parameter i
-  std::string descriptionOfActive(size_t i) const;
+  std::string descriptionOfActive(size_t i) const override;
   /// Check if an active parameter i is actually active
-  bool isActive(size_t i) const;
+  bool isActive(size_t i) const override;
 
   /// Return parameter index from a parameter reference.
-  size_t getParameterIndex(const ParameterReference &ref) const;
+  size_t getParameterIndex(const ParameterReference &ref) const override;
   /// Get the containing function
   IFunction_sptr getContainingFunction(const ParameterReference &ref) const;
 
   /// Apply the ties
-  void applyTies();
+  void applyTies() override;
   /// Remove all ties
-  void clearTies();
+  void clearTies() override;
   // Unhide base class function: removeTie(string). Avoids Intel compiler
   // warning
   using IFunction::removeTie;
   /// Removes i-th parameter's tie
-  bool removeTie(size_t i);
+  bool removeTie(size_t i) override;
   /// Get the tie of i-th parameter
-  ParameterTie *getTie(size_t i) const;
+  ParameterTie *getTie(size_t i) const override;
 
   /// Overwrite IFunction methods
-  void addConstraint(IConstraint *ic);
+  void addConstraint(IConstraint *ic) override;
   /// Get constraint of i-th parameter
-  virtual IConstraint *getConstraint(size_t i) const;
+  IConstraint *getConstraint(size_t i) const override;
   /// Prepare function for a fit
-  void setUpForFit();
+  void setUpForFit() override;
   /// Remove a constraint
-  void removeConstraint(const std::string &parName);
+  void removeConstraint(const std::string &parName) override;
 
   /* CompositeFunction own methods */
 
@@ -217,12 +216,12 @@ public:
 
 protected:
   /// Function initialization. Declare function parameters in this method.
-  void init();
+  void init() override;
   /// Declare a new parameter
-  virtual void declareParameter(const std::string &name, double initValue = 0,
-                                const std::string &description = "");
+  void declareParameter(const std::string &name, double initValue = 0,
+                        const std::string &description = "") override;
   /// Add a new tie
-  virtual void addTie(ParameterTie *tie);
+  void addTie(ParameterTie *tie) override;
 
   size_t paramOffset(size_t i) const { return m_paramOffsets[i]; }
 
@@ -282,7 +281,7 @@ public:
    * @param iP :: The parameter index of an individual function.
    * @param value :: The derivative value
    */
-  void set(size_t iY, size_t iP, double value) {
+  void set(size_t iY, size_t iP, double value) override {
     m_J->set(m_iY0 + iY, m_iP0 + iP, value);
   }
   /**
@@ -290,12 +289,14 @@ public:
    * @param iY :: The index of the data point
    * @param iP :: The parameter index of an individual function.
    */
-  double get(size_t iY, size_t iP) { return m_J->get(m_iY0 + iY, m_iP0 + iP); }
+  double get(size_t iY, size_t iP) override {
+    return m_J->get(m_iY0 + iY, m_iP0 + iP);
+  }
   /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
    *   @param value :: Value to add
    *   @param iP :: The index of an active parameter.
    */
-  virtual void addNumberToColumn(const double &value, const size_t &iP) {
+  void addNumberToColumn(const double &value, const size_t &iP) override {
     m_J->addNumberToColumn(value, m_iP0 + iP);
   }
 };

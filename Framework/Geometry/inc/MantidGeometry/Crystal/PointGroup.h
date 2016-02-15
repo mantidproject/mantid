@@ -46,7 +46,6 @@ public:
 
   PointGroup(const std::string &symbolHM, const Group &group,
              const std::string &description = "");
-
   /// Name of the point group
   std::string getName() const { return m_name; }
   /// Hermann-Mauguin symbol

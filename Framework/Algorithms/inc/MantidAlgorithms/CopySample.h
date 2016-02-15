@@ -48,29 +48,29 @@ National Laboratory & European Spallation Source
 class DLLExport CopySample : public API::Algorithm {
 public:
   CopySample();
-  ~CopySample();
+  ~CopySample() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "CopySample"; };
+  const std::string name() const override { return "CopySample"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Copy some/all the sample information from one workspace to "
            "another.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Sample;Utility\\Workspaces";
   }
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Function to copy information from one sample to another
   void copyParameters(API::Sample &from, API::Sample &to, bool nameFlag,
                       bool materialFlag, bool environmentFlag, bool shapeFlag,

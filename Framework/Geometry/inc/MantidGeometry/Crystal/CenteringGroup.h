@@ -57,8 +57,6 @@ public:
   enum CenteringType { P, I, A, B, C, F, Robv, Rrev };
 
   CenteringGroup(const std::string &centeringSymbol);
-  virtual ~CenteringGroup() = default;
-
   CenteringType getType() const;
   std::string getSymbol() const;
 

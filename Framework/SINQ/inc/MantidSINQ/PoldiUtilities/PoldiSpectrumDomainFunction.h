@@ -108,9 +108,9 @@ public:
       : m_jacobian(jacobian), m_offset(offset), m_factors(factors),
         m_factorOffset(factorOffset), m_domainSize(domainSize) {}
 
-  double get(size_t iY, size_t iP) { return m_jacobian.get(iY, iP); }
+  double get(size_t iY, size_t iP) override { return m_jacobian.get(iY, iP); }
 
-  void set(size_t iY, size_t iP, double value) {
+  void set(size_t iY, size_t iP, double value) override {
     size_t realY = (m_offset + iY) % m_domainSize;
     m_jacobian.set(realY, iP, m_jacobian.get(realY, iP) +
                                   value * m_factors[m_factorOffset + iY]);
@@ -142,18 +142,17 @@ public:
       : Jacobian(), m_nValues(nValues), m_nParams(nParams),
         m_jacobian(nValues * nParams) {}
 
-  /// Destructor
-  ~LocalJacobian() = default;
-
   /// Implementation of API::Jacobian::set. Throws std::out_of_range on invalid
   /// index.
-  void set(size_t iY, size_t iP, double value) {
+  void set(size_t iY, size_t iP, double value) override {
     m_jacobian[safeIndex(iY, iP)] = value;
   }
 
   /// Implementation of API::Jacobian::get. Throws std::out_of_range on invalid
   /// index.
-  double get(size_t iY, size_t iP) { return m_jacobian[safeIndex(iY, iP)]; }
+  double get(size_t iY, size_t iP) override {
+    return m_jacobian[safeIndex(iY, iP)];
+  }
 
   /// Provides raw pointer access to the underlying std::vector. Required for
   /// adept-interface.
@@ -238,33 +237,31 @@ class MANTID_SINQ_DLL PoldiSpectrumDomainFunction
       public IPoldiFunction1D {
 public:
   PoldiSpectrumDomainFunction();
-  virtual ~PoldiSpectrumDomainFunction() = default;
 
-  virtual std::string name() const { return "PoldiSpectrumDomainFunction"; }
+  std::string name() const override { return "PoldiSpectrumDomainFunction"; }
 
-  virtual void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
-  virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
-                                  API::FunctionValues &values) const;
+  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
+  void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
+                          API::FunctionValues &values) const override;
 
-  virtual void
-  functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
-                          API::Jacobian &jacobian);
+  void functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
+                               API::Jacobian &jacobian) override;
 
   void poldiFunction1D(const std::vector<int> &indices,
                        const API::FunctionDomain1D &domain,
-                       API::FunctionValues &values) const;
+                       API::FunctionValues &values) const override;
 
   API::IPeakFunction_sptr getProfileFunction() const;
 
 protected:
-  virtual void init();
+  void init() override;
 
   void initializeParametersFromWorkspace(
       const DataObjects::Workspace2D_const_sptr &workspace2D);
   void initializeInstrumentParameters(
       const PoldiInstrumentAdapter_sptr &poldiInstrument);
 
-  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
+  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) override;
 
   std::vector<double>
   getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper);

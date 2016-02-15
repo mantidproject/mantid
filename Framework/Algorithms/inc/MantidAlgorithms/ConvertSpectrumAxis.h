@@ -53,11 +53,11 @@ public:
   /// (Empty) Constructor
   ConvertSpectrumAxis() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~ConvertSpectrumAxis() {}
+  ~ConvertSpectrumAxis() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvertSpectrumAxis"; }
+  const std::string name() const override { return "ConvertSpectrumAxis"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Converts the axis of a Workspace2D which normally holds spectrum "
            "numbers to some other unit, which will normally be some physical "
            "value about the instrument such as Q, Q^2 or theta.  'Note': After "
@@ -67,17 +67,17 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Transforms\\Units;Transforms\\Axes";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Getting Efixed
   double getEfixed(Geometry::IDetector_const_sptr detector,
                    API::MatrixWorkspace_const_sptr inputWS, int emode) const;

@@ -45,20 +45,16 @@ public:
   /// Constructor
   ElasticDiffRotDiscreteCircle();
 
-  /// Destructor
-  virtual ~ElasticDiffRotDiscreteCircle() = default;
-  ;
-
   /// overwrite IFunction base class methods
-  virtual std::string name() const { return "ElasticDiffRotDiscreteCircle"; }
+  std::string name() const override { return "ElasticDiffRotDiscreteCircle"; }
 
-  virtual const std::string category() const { return "QuasiElastic"; }
+  const std::string category() const override { return "QuasiElastic"; }
 
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
 
   /// A rescaling of the peak intensity
-  double HeightPrefactor() const;
+  double HeightPrefactor() const override;
 };
 
 /* Class representing the inelastic portion of DiffRotDiscreteCircle
@@ -70,22 +66,19 @@ public:
   /// Constructor
   InelasticDiffRotDiscreteCircle();
 
-  /// Destructor
-  virtual ~InelasticDiffRotDiscreteCircle() = default;
+  std::string name() const override { return "InelasticDiffRotDiscreteCircle"; }
 
-  virtual std::string name() const { return "InelasticDiffRotDiscreteCircle"; }
+  const std::string category() const override { return "QuasiElastic"; }
 
-  virtual const std::string category() const { return "QuasiElastic"; }
-
-  virtual void init();
+  void init() override;
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
 private:
   /// Cache Q values from the workspace
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
 
   const double m_hbar; // Plank constant, in meV*THz (or ueV*PHz)
 
@@ -100,17 +93,14 @@ private:
  */
 class DLLExport DiffRotDiscreteCircle : public API::ImmutableCompositeFunction {
 public:
-  /// Destructor
-  ~DiffRotDiscreteCircle() = default;
-  ;
 
-  virtual std::string name() const { return "DiffRotDiscreteCircle"; }
+  std::string name() const override { return "DiffRotDiscreteCircle"; }
 
-  virtual const std::string category() const { return "QuasiElastic"; }
+  const std::string category() const override { return "QuasiElastic"; }
 
   virtual int version() const { return 1; }
 
-  virtual void init();
+  void init() override;
 
   /// Propagate an attribute to member functions
   virtual void trickleDownAttribute(const std::string &name);
@@ -120,7 +110,7 @@ public:
                                 const API::IFunction::Attribute &defaultValue);
 
   /// Override parent definition
-  virtual void setAttribute(const std::string &attName, const Attribute &att);
+  void setAttribute(const std::string &attName, const Attribute &att) override;
 
 private:
   boost::shared_ptr<ElasticDiffRotDiscreteCircle> m_elastic;

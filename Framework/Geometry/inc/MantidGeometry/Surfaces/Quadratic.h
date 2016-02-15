@@ -24,7 +24,7 @@ Holds a basic surface with equation form
 class MANTID_GEOMETRY_DLL Quadratic : public Surface {
 private:
   void matrixForm(Kernel::Matrix<double> &, Kernel::V3D &, double &) const;
-  Quadratic *doClone() const = 0;
+  Quadratic *doClone() const override = 0;
 
 protected:
   std::vector<double> BaseEqn; ///< Base equation (as a 10 point vector)
@@ -38,32 +38,32 @@ public:
   std::unique_ptr<Quadratic> clone() const;
 
   /// Accept visitor for line calculation
-  virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
+  void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }
 
   /// Effective typeid
-  virtual std::string className() const { return "Quadratic"; }
+  std::string className() const override { return "Quadratic"; }
 
   const std::vector<double> &copyBaseEqn() const {
     return BaseEqn;
   } ///< access BaseEquation vector
 
-  virtual int side(const Kernel::V3D &) const;
+  int side(const Kernel::V3D &) const override;
 
   virtual void setBaseEqn() = 0; ///< Abstract set baseEqn
   double eqnValue(const Kernel::V3D &) const;
 
-  virtual int
-  onSurface(const Kernel::V3D &) const; ///< is point valid on surface
-  virtual double distance(const Kernel::V3D &)
-      const; ///< distance between point and surface (approx)
-  virtual Kernel::V3D
-  surfaceNormal(const Kernel::V3D &) const; ///< Normal at surface
+  int onSurface(
+      const Kernel::V3D &) const override; ///< is point valid on surface
+  double distance(const Kernel::V3D &)
+      const override; ///< distance between point and surface (approx)
+  Kernel::V3D
+  surfaceNormal(const Kernel::V3D &) const override; ///< Normal at surface
 
-  virtual void displace(const Kernel::V3D &);
-  virtual void rotate(const Kernel::Matrix<double> &);
+  void displace(const Kernel::V3D &) override;
+  void rotate(const Kernel::Matrix<double> &) override;
 
-  virtual void write(std::ostream &) const;
-  virtual void print() const;
+  void write(std::ostream &) const override;
+  void print() const override;
 };
 
 } // NAMESPACE Geometry

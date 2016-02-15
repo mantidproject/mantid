@@ -131,17 +131,16 @@ public:
   bool __item;
 
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 10;
   } /* = unique id SOAP_TYPE_ICat4_xsd__boolean */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   xsd__boolean() { xsd__boolean::soap_default(NULL); }
-  virtual ~xsd__boolean() = default;
 };
 #endif
 
@@ -153,17 +152,16 @@ public:
   time_t __item;
 
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 12;
   } /* = unique id SOAP_TYPE_ICat4_xsd__dateTime */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   xsd__dateTime() { xsd__dateTime::soap_default(NULL); }
-  virtual ~xsd__dateTime() = default;
 };
 #endif
 
@@ -175,17 +173,16 @@ public:
   double __item;
 
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 14;
   } /* = unique id SOAP_TYPE_ICat4_xsd__double */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   xsd__double() { xsd__double::soap_default(NULL); }
-  virtual ~xsd__double() = default;
 };
 #endif
 
@@ -197,17 +194,16 @@ public:
   int __item;
 
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 16;
   } /* = unique id SOAP_TYPE_ICat4_xsd__int */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   xsd__int() { xsd__int::soap_default(NULL); }
-  virtual ~xsd__int() = default;
 };
 #endif
 
@@ -219,17 +215,16 @@ public:
   LONG64 __item;
 
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 17;
   } /* = unique id SOAP_TYPE_ICat4_xsd__long */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   xsd__long() { xsd__long::soap_default(NULL); }
-  virtual ~xsd__long() = default;
 };
 #endif
 
@@ -245,17 +240,16 @@ public:
   std::string __item;
 
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 19;
   } /* = unique id SOAP_TYPE_ICat4_xsd__string */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   xsd__string() { xsd__string::soap_default(NULL); }
-  virtual ~xsd__string() = default;
 };
 #endif
 
@@ -267,17 +261,16 @@ public:
   enum ns1__icatExceptionType __item;
 
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 114;
   } /* = unique id SOAP_TYPE_ICat4_ns1__icatExceptionType_ */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__icatExceptionType_() { ns1__icatExceptionType_::soap_default(NULL); }
-  virtual ~ns1__icatExceptionType_() = default;
 };
 #endif
 
@@ -289,17 +282,16 @@ public:
   enum ns1__studyStatus __item;
 
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 116;
   } /* = unique id SOAP_TYPE_ICat4_ns1__studyStatus_ */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__studyStatus_() { ns1__studyStatus_::soap_default(NULL); }
-  virtual ~ns1__studyStatus_() = default;
 };
 #endif
 
@@ -311,17 +303,16 @@ public:
   enum ns1__parameterValueType __item;
 
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 118;
   } /* = unique id SOAP_TYPE_ICat4_ns1__parameterValueType_ */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__parameterValueType_() { ns1__parameterValueType_::soap_default(NULL); }
-  virtual ~ns1__parameterValueType_() = default;
 };
 #endif
 
@@ -333,17 +324,16 @@ public:
   enum ns1__relType __item;
 
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 120;
   } /* = unique id SOAP_TYPE_ICat4_ns1__relType_ */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__relType_() { ns1__relType_::soap_default(NULL); }
-  virtual ~ns1__relType_() = default;
 };
 #endif
 
@@ -355,17 +345,16 @@ public:
   enum ns1__accessType __item;
 
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 122;
   } /* = unique id SOAP_TYPE_ICat4_ns1__accessType_ */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__accessType_() { ns1__accessType_::soap_default(NULL); }
-  virtual ~ns1__accessType_() = default;
 };
 #endif
 
@@ -376,17 +365,16 @@ class SOAP_CMAC ns1__luceneClear : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 21;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneClear */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__luceneClear() { ns1__luceneClear::soap_default(NULL); }
-  virtual ~ns1__luceneClear() = default;
 };
 #endif
 
@@ -395,17 +383,16 @@ public:
 /* Primitive ns1:luceneClearResponse schema type: */
 class SOAP_CMAC ns1__luceneClearResponse : public xsd__anyType {
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 22;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneClearResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__luceneClearResponse() { ns1__luceneClearResponse::soap_default(NULL); }
-  virtual ~ns1__luceneClearResponse() = default;
 };
 #endif
 
@@ -419,17 +406,16 @@ public:
   enum ns1__icatExceptionType *
       type; /* optional element of type ns1:icatExceptionType */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 23;
   } /* = unique id SOAP_TYPE_ICat4_ns1__IcatException */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__IcatException() { ns1__IcatException::soap_default(NULL); }
-  virtual ~ns1__IcatException() = default;
 };
 #endif
 
@@ -442,17 +428,16 @@ public:
   std::vector<class ns1__entityBaseBean *>
       beans; /* optional element of type ns1:entityBaseBean */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 24;
   } /* = unique id SOAP_TYPE_ICat4_ns1__createMany */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__createMany() { ns1__createMany::soap_default(NULL); }
-  virtual ~ns1__createMany() = default;
 };
 #endif
 
@@ -467,17 +452,16 @@ public:
   LONG64 *id;            /* optional element of type xsd:long */
   std::string *modId;    /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 25;
   } /* = unique id SOAP_TYPE_ICat4_ns1__entityBaseBean */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__entityBaseBean() { ns1__entityBaseBean::soap_default(NULL); }
-  virtual ~ns1__entityBaseBean() = default;
 };
 #endif
 
@@ -493,17 +477,16 @@ public:
                                                                   xsd:long
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 26;
   } /* = unique id SOAP_TYPE_ICat4_ns1__createManyResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__createManyResponse() { ns1__createManyResponse::soap_default(NULL); }
-  virtual ~ns1__createManyResponse() = default;
 };
 #endif
 
@@ -515,17 +498,16 @@ public:
   std::string *sessionId;    /* optional element of type xsd:string */
   ns1__entityBaseBean *bean; /* optional element of type ns1:entityBaseBean */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 27;
   } /* = unique id SOAP_TYPE_ICat4_ns1__create */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__create() { ns1__create::soap_default(NULL); }
-  virtual ~ns1__create() = default;
 };
 #endif
 
@@ -541,17 +523,16 @@ public:
                                                                   xsd:long
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 28;
   } /* = unique id SOAP_TYPE_ICat4_ns1__createResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__createResponse() { ns1__createResponse::soap_default(NULL); }
-  virtual ~ns1__createResponse() = default;
 };
 #endif
 
@@ -562,17 +543,16 @@ class SOAP_CMAC ns1__getProperties : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 29;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getProperties */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getProperties() { ns1__getProperties::soap_default(NULL); }
-  virtual ~ns1__getProperties() = default;
 };
 #endif
 
@@ -588,19 +568,18 @@ public:
                                                                   xsd:string
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 30;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getPropertiesResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getPropertiesResponse() {
     ns1__getPropertiesResponse::soap_default(NULL);
   }
-  virtual ~ns1__getPropertiesResponse() = default;
 };
 #endif
 
@@ -614,17 +593,16 @@ public:
   int maxCount;            /* required element of type xsd:int */
   std::string *entityName; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 31;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneSearch */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__luceneSearch() { ns1__luceneSearch::soap_default(NULL); }
-  virtual ~ns1__luceneSearch() = default;
 };
 #endif
 
@@ -640,17 +618,16 @@ public:
                                                                   xsd:string
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 32;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneSearchResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__luceneSearchResponse() { ns1__luceneSearchResponse::soap_default(NULL); }
-  virtual ~ns1__luceneSearchResponse() = default;
 };
 #endif
 
@@ -662,17 +639,16 @@ public:
   std::string *sessionId;  /* optional element of type xsd:string */
   std::string *entityName; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 33;
   } /* = unique id SOAP_TYPE_ICat4_ns1__lucenePopulate */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__lucenePopulate() { ns1__lucenePopulate::soap_default(NULL); }
-  virtual ~ns1__lucenePopulate() = default;
 };
 #endif
 
@@ -681,19 +657,18 @@ public:
 /* Primitive ns1:lucenePopulateResponse schema type: */
 class SOAP_CMAC ns1__lucenePopulateResponse : public xsd__anyType {
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 34;
   } /* = unique id SOAP_TYPE_ICat4_ns1__lucenePopulateResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__lucenePopulateResponse() {
     ns1__lucenePopulateResponse::soap_default(NULL);
   }
-  virtual ~ns1__lucenePopulateResponse() = default;
 };
 #endif
 
@@ -706,17 +681,16 @@ public:
   std::string *query;     /* optional element of type xsd:string */
   LONG64 primaryKey;      /* required element of type xsd:long */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 35;
   } /* = unique id SOAP_TYPE_ICat4_ns1__get */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__get() { ns1__get::soap_default(NULL); }
-  virtual ~ns1__get() = default;
 };
 #endif
 
@@ -732,17 +706,16 @@ public:
                                                                   ns1:entityBaseBean
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 36;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getResponse() { ns1__getResponse::soap_default(NULL); }
-  virtual ~ns1__getResponse() = default;
 };
 #endif
 
@@ -751,17 +724,16 @@ public:
 /* Primitive ns1:getEntityNames schema type: */
 class SOAP_CMAC ns1__getEntityNames : public xsd__anyType {
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 37;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getEntityNames */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getEntityNames() { ns1__getEntityNames::soap_default(NULL); }
-  virtual ~ns1__getEntityNames() = default;
 };
 #endif
 
@@ -777,19 +749,18 @@ public:
                                                                   xsd:string
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 38;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getEntityNamesResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getEntityNamesResponse() {
     ns1__getEntityNamesResponse::soap_default(NULL);
   }
-  virtual ~ns1__getEntityNamesResponse() = default;
 };
 #endif
 
@@ -798,17 +769,16 @@ public:
 /* Primitive ns1:getApiVersion schema type: */
 class SOAP_CMAC ns1__getApiVersion : public xsd__anyType {
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 39;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getApiVersion */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getApiVersion() { ns1__getApiVersion::soap_default(NULL); }
-  virtual ~ns1__getApiVersion() = default;
 };
 #endif
 
@@ -824,19 +794,18 @@ public:
                                                                   xsd:string
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 40;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getApiVersionResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getApiVersionResponse() {
     ns1__getApiVersionResponse::soap_default(NULL);
   }
-  virtual ~ns1__getApiVersionResponse() = default;
 };
 #endif
 
@@ -847,17 +816,16 @@ class SOAP_CMAC ns1__luceneGetPopulating : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 41;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneGetPopulating */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__luceneGetPopulating() { ns1__luceneGetPopulating::soap_default(NULL); }
-  virtual ~ns1__luceneGetPopulating() = default;
 };
 #endif
 
@@ -873,19 +841,18 @@ public:
                                                                   xsd:string
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 42;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneGetPopulatingResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__luceneGetPopulatingResponse() {
     ns1__luceneGetPopulatingResponse::soap_default(NULL);
   }
-  virtual ~ns1__luceneGetPopulatingResponse() = default;
 };
 #endif
 
@@ -897,17 +864,16 @@ public:
   std::string *sessionId;    /* optional element of type xsd:string */
   ns1__entityBaseBean *bean; /* optional element of type ns1:entityBaseBean */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 43;
   } /* = unique id SOAP_TYPE_ICat4_ns1__update */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__update() { ns1__update::soap_default(NULL); }
-  virtual ~ns1__update() = default;
 };
 #endif
 
@@ -916,17 +882,16 @@ public:
 /* Primitive ns1:updateResponse schema type: */
 class SOAP_CMAC ns1__updateResponse : public xsd__anyType {
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 44;
   } /* = unique id SOAP_TYPE_ICat4_ns1__updateResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__updateResponse() { ns1__updateResponse::soap_default(NULL); }
-  virtual ~ns1__updateResponse() = default;
 };
 #endif
 
@@ -939,17 +904,16 @@ public:
   std::vector<ns1__entityBaseBean *>
       beans; /* optional element of type ns1:entityBaseBean */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 45;
   } /* = unique id SOAP_TYPE_ICat4_ns1__deleteMany */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__deleteMany() { ns1__deleteMany::soap_default(NULL); }
-  virtual ~ns1__deleteMany() = default;
 };
 #endif
 
@@ -958,17 +922,16 @@ public:
 /* Primitive ns1:deleteManyResponse schema type: */
 class SOAP_CMAC ns1__deleteManyResponse : public xsd__anyType {
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 46;
   } /* = unique id SOAP_TYPE_ICat4_ns1__deleteManyResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__deleteManyResponse() { ns1__deleteManyResponse::soap_default(NULL); }
-  virtual ~ns1__deleteManyResponse() = default;
 };
 #endif
 
@@ -979,17 +942,16 @@ class SOAP_CMAC ns1__getUserName : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 47;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getUserName */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getUserName() { ns1__getUserName::soap_default(NULL); }
-  virtual ~ns1__getUserName() = default;
 };
 #endif
 
@@ -1005,17 +967,16 @@ public:
                                                                   xsd:string
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 48;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getUserNameResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getUserNameResponse() { ns1__getUserNameResponse::soap_default(NULL); }
-  virtual ~ns1__getUserNameResponse() = default;
 };
 #endif
 
@@ -1026,17 +987,16 @@ class SOAP_CMAC ns1__refresh : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 49;
   } /* = unique id SOAP_TYPE_ICat4_ns1__refresh */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
-  ns1__refresh() { ns1__refresh::soap_default(NULL); }
-  virtual ~ns1__refresh() = default;
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
+  ns1__refresh() { ns1__refresh::soap_default(NULL);}
 };
 #endif
 
@@ -1045,17 +1005,16 @@ public:
 /* Primitive ns1:refreshResponse schema type: */
 class SOAP_CMAC ns1__refreshResponse : public xsd__anyType {
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 50;
   } /* = unique id SOAP_TYPE_ICat4_ns1__refreshResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__refreshResponse() { ns1__refreshResponse::soap_default(NULL); }
-  virtual ~ns1__refreshResponse() = default;
 };
 #endif
 
@@ -1114,17 +1073,16 @@ public:
   _ns1__login_credentials
       credentials; /* required element of type ns1:login-credentials */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 51;
   } /* = unique id SOAP_TYPE_ICat4_ns1__login */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__login() { ns1__login::soap_default(NULL); }
-  virtual ~ns1__login() = default;
 };
 #endif
 
@@ -1140,17 +1098,16 @@ public:
                                                                   xsd:string
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 52;
   } /* = unique id SOAP_TYPE_ICat4_ns1__loginResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__loginResponse() { ns1__loginResponse::soap_default(NULL); }
-  virtual ~ns1__loginResponse() = default;
 };
 #endif
 
@@ -1210,17 +1167,16 @@ public:
   class ns1__log *arg32;        /* optional element of type ns1:log */
   class ns1__publicStep *arg33; /* optional element of type ns1:publicStep */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 53;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dummy */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__dummy() { ns1__dummy::soap_default(NULL); }
-  virtual ~ns1__dummy() = default;
 };
 #endif
 
@@ -1229,17 +1185,16 @@ public:
 /* Primitive ns1:dummyResponse schema type: */
 class SOAP_CMAC ns1__dummyResponse : public xsd__anyType {
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 93;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dummyResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__dummyResponse() { ns1__dummyResponse::soap_default(NULL); }
-  virtual ~ns1__dummyResponse() = default;
 };
 #endif
 
@@ -1250,17 +1205,16 @@ class SOAP_CMAC ns1__getEntityInfo : public xsd__anyType {
 public:
   std::string *beanName; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 94;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getEntityInfo */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getEntityInfo() { ns1__getEntityInfo::soap_default(NULL); }
-  virtual ~ns1__getEntityInfo() = default;
 };
 #endif
 
@@ -1276,19 +1230,18 @@ public:
                                                                   ns1:entityInfo
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 95;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getEntityInfoResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getEntityInfoResponse() {
     ns1__getEntityInfoResponse::soap_default(NULL);
   }
-  virtual ~ns1__getEntityInfoResponse() = default;
 };
 #endif
 
@@ -1303,17 +1256,16 @@ public:
   std::vector<class ns1__entityField *>
       fields; /* optional element of type ns1:entityField */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 96;
   } /* = unique id SOAP_TYPE_ICat4_ns1__entityInfo */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__entityInfo() { ns1__entityInfo::soap_default(NULL); }
-  virtual ~ns1__entityInfo() = default;
 };
 #endif
 
@@ -1324,17 +1276,16 @@ class SOAP_CMAC ns1__constraint : public xsd__anyType {
 public:
   std::vector<std::string> fieldNames; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 97;
   } /* = unique id SOAP_TYPE_ICat4_ns1__constraint */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__constraint() { ns1__constraint::soap_default(NULL); }
-  virtual ~ns1__constraint() = default;
 };
 #endif
 
@@ -1350,17 +1301,16 @@ public:
   int *stringLength;          /* optional element of type xsd:int */
   std::string *type;          /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 98;
   } /* = unique id SOAP_TYPE_ICat4_ns1__entityField */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__entityField() { ns1__entityField::soap_default(NULL); }
-  virtual ~ns1__entityField() = default;
 };
 #endif
 
@@ -1371,17 +1321,16 @@ class SOAP_CMAC ns1__luceneCommit : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 99;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneCommit */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__luceneCommit() { ns1__luceneCommit::soap_default(NULL); }
-  virtual ~ns1__luceneCommit() = default;
 };
 #endif
 
@@ -1390,17 +1339,16 @@ public:
 /* Primitive ns1:luceneCommitResponse schema type: */
 class SOAP_CMAC ns1__luceneCommitResponse : public xsd__anyType {
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 100;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneCommitResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__luceneCommitResponse() { ns1__luceneCommitResponse::soap_default(NULL); }
-  virtual ~ns1__luceneCommitResponse() = default;
 };
 #endif
 
@@ -1414,17 +1362,16 @@ public:
   int maxCount;            /* required element of type xsd:int */
   std::string *entityName; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 101;
   } /* = unique id SOAP_TYPE_ICat4_ns1__searchText */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__searchText() { ns1__searchText::soap_default(NULL); }
-  virtual ~ns1__searchText() = default;
 };
 #endif
 
@@ -1440,17 +1387,16 @@ public:
                                                                   xsd:anyType
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 102;
   } /* = unique id SOAP_TYPE_ICat4_ns1__searchTextResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__searchTextResponse() { ns1__searchTextResponse::soap_default(NULL); }
-  virtual ~ns1__searchTextResponse() = default;
 };
 #endif
 
@@ -1462,17 +1408,16 @@ public:
   std::string *sessionId;    /* optional element of type xsd:string */
   ns1__entityBaseBean *bean; /* optional element of type ns1:entityBaseBean */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 103;
   } /* = unique id SOAP_TYPE_ICat4_ns1__delete */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__delete() { ns1__delete::soap_default(NULL); }
-  virtual ~ns1__delete() = default;
 };
 #endif
 
@@ -1481,17 +1426,16 @@ public:
 /* Primitive ns1:deleteResponse schema type: */
 class SOAP_CMAC ns1__deleteResponse : public xsd__anyType {
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 104;
   } /* = unique id SOAP_TYPE_ICat4_ns1__deleteResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__deleteResponse() { ns1__deleteResponse::soap_default(NULL); }
-  virtual ~ns1__deleteResponse() = default;
 };
 #endif
 
@@ -1505,17 +1449,16 @@ public:
   enum ns1__accessType *
       accessType; /* optional element of type ns1:accessType */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 105;
   } /* = unique id SOAP_TYPE_ICat4_ns1__isAccessAllowed */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__isAccessAllowed() { ns1__isAccessAllowed::soap_default(NULL); }
-  virtual ~ns1__isAccessAllowed() = default;
 };
 #endif
 
@@ -1531,19 +1474,18 @@ public:
                                                                   xsd:boolean
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 106;
   } /* = unique id SOAP_TYPE_ICat4_ns1__isAccessAllowedResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__isAccessAllowedResponse() {
     ns1__isAccessAllowedResponse::soap_default(NULL);
   }
-  virtual ~ns1__isAccessAllowedResponse() = default;
 };
 #endif
 
@@ -1555,17 +1497,16 @@ public:
   std::string *sessionId; /* optional element of type xsd:string */
   std::string *query;     /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 107;
   } /* = unique id SOAP_TYPE_ICat4_ns1__search */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__search() { ns1__search::soap_default(NULL); }
-  virtual ~ns1__search() = default;
 };
 #endif
 
@@ -1581,17 +1522,16 @@ public:
                                                                   xsd:anyType
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 108;
   } /* = unique id SOAP_TYPE_ICat4_ns1__searchResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__searchResponse() { ns1__searchResponse::soap_default(NULL); }
-  virtual ~ns1__searchResponse() = default;
 };
 #endif
 
@@ -1602,17 +1542,16 @@ class SOAP_CMAC ns1__logout : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 109;
   } /* = unique id SOAP_TYPE_ICat4_ns1__logout */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__logout() { ns1__logout::soap_default(NULL); }
-  virtual ~ns1__logout() = default;
 };
 #endif
 
@@ -1621,17 +1560,16 @@ public:
 /* Primitive ns1:logoutResponse schema type: */
 class SOAP_CMAC ns1__logoutResponse : public xsd__anyType {
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 110;
   } /* = unique id SOAP_TYPE_ICat4_ns1__logoutResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__logoutResponse() { ns1__logoutResponse::soap_default(NULL); }
-  virtual ~ns1__logoutResponse() = default;
 };
 #endif
 
@@ -1642,17 +1580,16 @@ class SOAP_CMAC ns1__getRemainingMinutes : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 111;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getRemainingMinutes */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getRemainingMinutes() { ns1__getRemainingMinutes::soap_default(NULL); }
-  virtual ~ns1__getRemainingMinutes() = default;
 };
 #endif
 
@@ -1668,19 +1605,18 @@ public:
                                                                   xsd:double
                                                                   */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 112;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getRemainingMinutesResponse */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getRemainingMinutesResponse() {
     ns1__getRemainingMinutesResponse::soap_default(NULL);
   }
-  virtual ~ns1__getRemainingMinutesResponse() = default;
 };
 #endif
 
@@ -1710,17 +1646,16 @@ public:
   std::vector<ns1__relatedDatafile *>
       sourceDatafiles; /* optional element of type ns1:relatedDatafile */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 54;
   } /* = unique id SOAP_TYPE_ICat4_ns1__datafile */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__datafile() { ns1__datafile::soap_default(NULL); }
-  virtual ~ns1__datafile() = default;
 };
 #endif
 
@@ -1733,19 +1668,18 @@ public:
       dataCollection;      /* optional element of type ns1:dataCollection */
   ns1__datafile *datafile; /* optional element of type ns1:datafile */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 55;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dataCollectionDatafile */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__dataCollectionDatafile() {
     ns1__dataCollectionDatafile::soap_default(NULL);
   }
-  virtual ~ns1__dataCollectionDatafile() = default;
 };
 #endif
 
@@ -1765,17 +1699,16 @@ public:
   std::vector<ns1__dataCollectionParameter *>
       parameters; /* optional element of type ns1:dataCollectionParameter */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 56;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dataCollection */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__dataCollection() { ns1__dataCollection::soap_default(NULL); }
-  virtual ~ns1__dataCollection() = default;
 };
 #endif
 
@@ -1788,19 +1721,18 @@ public:
       dataCollection;    /* optional element of type ns1:dataCollection */
   ns1__dataset *dataset; /* optional element of type ns1:dataset */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 57;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dataCollectionDataset */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__dataCollectionDataset() {
     ns1__dataCollectionDataset::soap_default(NULL);
   }
-  virtual ~ns1__dataCollectionDataset() = default;
 };
 #endif
 
@@ -1828,17 +1760,16 @@ public:
   time_t *startDate;      /* optional element of type xsd:dateTime */
   ns1__datasetType *type; /* optional element of type ns1:datasetType */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 58;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dataset */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__dataset() { ns1__dataset::soap_default(NULL); }
-  virtual ~ns1__dataset() = default;
 };
 #endif
 
@@ -1876,17 +1807,16 @@ public:
       type;             /* optional element of type ns1:investigationType */
   std::string *visitId; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 59;
   } /* = unique id SOAP_TYPE_ICat4_ns1__investigation */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__investigation() { ns1__investigation::soap_default(NULL); }
-  virtual ~ns1__investigation() = default;
 };
 #endif
 
@@ -1919,17 +1849,17 @@ public:
       sampleTypes;  /* optional element of type ns1:sampleType */
   std::string *url; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 60;
   } /* = unique id SOAP_TYPE_ICat4_ns1__facility */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__facility() { ns1__facility::soap_default(NULL); }
-  virtual ~ns1__facility() = default;
+
 };
 #endif
 
@@ -1943,17 +1873,16 @@ public:
   std::string *name;            /* optional element of type xsd:string */
   std::string *version;         /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 61;
   } /* = unique id SOAP_TYPE_ICat4_ns1__application */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__application() { ns1__application::soap_default(NULL); }
-  virtual ~ns1__application() = default;
 };
 #endif
 
@@ -1969,17 +1898,16 @@ public:
   ns1__dataCollection *
       outputDataCollection; /* optional element of type ns1:dataCollection */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 62;
   } /* = unique id SOAP_TYPE_ICat4_ns1__job */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__job() { ns1__job::soap_default(NULL); }
-  virtual ~ns1__job() = default;
 };
 #endif
 
@@ -1996,17 +1924,16 @@ public:
   std::string *type;        /* optional element of type xsd:string */
   std::string *version;     /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 63;
   } /* = unique id SOAP_TYPE_ICat4_ns1__datafileFormat */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__datafileFormat() { ns1__datafileFormat::soap_default(NULL); }
-  virtual ~ns1__datafileFormat() = default;
 };
 #endif
 
@@ -2021,17 +1948,16 @@ public:
   ns1__facility *facility;  /* optional element of type ns1:facility */
   std::string *name;        /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 64;
   } /* = unique id SOAP_TYPE_ICat4_ns1__datasetType */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__datasetType() { ns1__datasetType::soap_default(NULL); }
-  virtual ~ns1__datasetType() = default;
 };
 #endif
 
@@ -2046,17 +1972,16 @@ public:
   std::string *name;        /* optional element of type xsd:string */
   time_t *startDate;        /* optional element of type xsd:dateTime */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 65;
   } /* = unique id SOAP_TYPE_ICat4_ns1__facilityCycle */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__facilityCycle() { ns1__facilityCycle::soap_default(NULL); }
-  virtual ~ns1__facilityCycle() = default;
 };
 #endif
 
@@ -2078,17 +2003,16 @@ public:
   std::string *type;            /* optional element of type xsd:string */
   std::string *url;             /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 66;
   } /* = unique id SOAP_TYPE_ICat4_ns1__instrument */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__instrument() { ns1__instrument::soap_default(NULL); }
-  virtual ~ns1__instrument() = default;
 };
 #endif
 
@@ -2100,17 +2024,16 @@ public:
   ns1__instrument *instrument; /* optional element of type ns1:instrument */
   ns1__user *user;             /* optional element of type ns1:user */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 67;
   } /* = unique id SOAP_TYPE_ICat4_ns1__instrumentScientist */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__instrumentScientist() { ns1__instrumentScientist::soap_default(NULL); }
-  virtual ~ns1__instrumentScientist() = default;
 };
 #endif
 
@@ -2130,17 +2053,16 @@ public:
   std::vector<ns1__userGroup *>
       userGroups; /* optional element of type ns1:userGroup */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 68;
   } /* = unique id SOAP_TYPE_ICat4_ns1__user */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__user() { ns1__user::soap_default(NULL); }
-  virtual ~ns1__user() = default;
 };
 #endif
 
@@ -2154,17 +2076,16 @@ public:
   std::string *role; /* optional element of type xsd:string */
   ns1__user *user;   /* optional element of type ns1:user */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 69;
   } /* = unique id SOAP_TYPE_ICat4_ns1__investigationUser */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__investigationUser() { ns1__investigationUser::soap_default(NULL); }
-  virtual ~ns1__investigationUser() = default;
 };
 #endif
 
@@ -2181,17 +2102,16 @@ public:
       studyInvestigations; /* optional element of type ns1:studyInvestigation */
   ns1__user *user;         /* optional element of type ns1:user */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 70;
   } /* = unique id SOAP_TYPE_ICat4_ns1__study */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__study() { ns1__study::soap_default(NULL); }
-  virtual ~ns1__study() = default;
 };
 #endif
 
@@ -2204,17 +2124,16 @@ public:
       investigation; /* optional element of type ns1:investigation */
   ns1__study *study; /* optional element of type ns1:study */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 71;
   } /* = unique id SOAP_TYPE_ICat4_ns1__studyInvestigation */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__studyInvestigation() { ns1__studyInvestigation::soap_default(NULL); }
-  virtual ~ns1__studyInvestigation() = default;
 };
 #endif
 
@@ -2226,17 +2145,16 @@ public:
   ns1__grouping *grouping; /* optional element of type ns1:grouping */
   ns1__user *user;         /* optional element of type ns1:user */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 72;
   } /* = unique id SOAP_TYPE_ICat4_ns1__userGroup */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__userGroup() { ns1__userGroup::soap_default(NULL); }
-  virtual ~ns1__userGroup() = default;
 };
 #endif
 
@@ -2250,17 +2168,16 @@ public:
   std::vector<ns1__userGroup *>
       userGroups; /* optional element of type ns1:userGroup */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 73;
   } /* = unique id SOAP_TYPE_ICat4_ns1__grouping */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__grouping() { ns1__grouping::soap_default(NULL); }
-  virtual ~ns1__grouping() = default;
 };
 #endif
 
@@ -2273,17 +2190,16 @@ public:
   ns1__grouping *grouping; /* optional element of type ns1:grouping */
   std::string *what;       /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 74;
   } /* = unique id SOAP_TYPE_ICat4_ns1__rule */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__rule() { ns1__rule::soap_default(NULL); }
-  virtual ~ns1__rule() = default;
 };
 #endif
 
@@ -2296,19 +2212,18 @@ public:
   ns1__investigation *
       investigation; /* optional element of type ns1:investigation */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 75;
   } /* = unique id SOAP_TYPE_ICat4_ns1__investigationInstrument */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__investigationInstrument() {
     ns1__investigationInstrument::soap_default(NULL);
   }
-  virtual ~ns1__investigationInstrument() = default;
 };
 #endif
 
@@ -2323,17 +2238,16 @@ public:
       investigations; /* optional element of type ns1:investigation */
   std::string *name;  /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 76;
   } /* = unique id SOAP_TYPE_ICat4_ns1__investigationType */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__investigationType() { ns1__investigationType::soap_default(NULL); }
-  virtual ~ns1__investigationType() = default;
 };
 #endif
 
@@ -2374,17 +2288,16 @@ public:
       valueType; /* optional element of type ns1:parameterValueType */
   bool verified; /* required element of type xsd:boolean */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 77;
   } /* = unique id SOAP_TYPE_ICat4_ns1__parameterType */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__parameterType() { ns1__parameterType::soap_default(NULL); }
-  virtual ~ns1__parameterType() = default;
 };
 #endif
 
@@ -2401,17 +2314,16 @@ public:
   std::string *stringValue; /* optional element of type xsd:string */
   ns1__parameterType *type; /* optional element of type ns1:parameterType */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 79;
   } /* = unique id SOAP_TYPE_ICat4_ns1__parameter */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__parameter() { ns1__parameter::soap_default(NULL); }
-  virtual ~ns1__parameter() = default;
 };
 #endif
 
@@ -2423,19 +2335,18 @@ public:
   ns1__parameterType *type; /* optional element of type ns1:parameterType */
   std::string *value;       /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 83;
   } /* = unique id SOAP_TYPE_ICat4_ns1__permissibleStringValue */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__permissibleStringValue() {
     ns1__permissibleStringValue::soap_default(NULL);
   }
-  virtual ~ns1__permissibleStringValue() = default;
 };
 #endif
 
@@ -2453,17 +2364,16 @@ public:
       parameters;        /* optional element of type ns1:sampleParameter */
   ns1__sampleType *type; /* optional element of type ns1:sampleType */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 85;
   } /* = unique id SOAP_TYPE_ICat4_ns1__sample */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__sample() { ns1__sample::soap_default(NULL); }
-  virtual ~ns1__sample() = default;
 };
 #endif
 
@@ -2478,17 +2388,16 @@ public:
   std::string *safetyInformation; /* optional element of type xsd:string */
   std::vector<ns1__sample *> samples; /* optional element of type ns1:sample */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 86;
   } /* = unique id SOAP_TYPE_ICat4_ns1__sampleType */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__sampleType() { ns1__sampleType::soap_default(NULL); }
-  virtual ~ns1__sampleType() = default;
 };
 #endif
 
@@ -2501,17 +2410,16 @@ public:
       investigation; /* optional element of type ns1:investigation */
   std::string *name; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 87;
   } /* = unique id SOAP_TYPE_ICat4_ns1__keyword */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__keyword() { ns1__keyword::soap_default(NULL); }
-  virtual ~ns1__keyword() = default;
 };
 #endif
 
@@ -2528,17 +2436,16 @@ public:
   std::string *repositoryId; /* optional element of type xsd:string */
   std::string *url;          /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 88;
   } /* = unique id SOAP_TYPE_ICat4_ns1__publication */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__publication() { ns1__publication::soap_default(NULL); }
-  virtual ~ns1__publication() = default;
 };
 #endif
 
@@ -2553,17 +2460,16 @@ public:
       investigation; /* optional element of type ns1:investigation */
   time_t *startDate; /* optional element of type xsd:dateTime */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 89;
   } /* = unique id SOAP_TYPE_ICat4_ns1__shift */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__shift() { ns1__shift::soap_default(NULL); }
-  virtual ~ns1__shift() = default;
 };
 #endif
 
@@ -2576,17 +2482,16 @@ public:
   std::string *relation;         /* optional element of type xsd:string */
   ns1__datafile *sourceDatafile; /* optional element of type ns1:datafile */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 90;
   } /* = unique id SOAP_TYPE_ICat4_ns1__relatedDatafile */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__relatedDatafile() { ns1__relatedDatafile::soap_default(NULL); }
-  virtual ~ns1__relatedDatafile() = default;
 };
 #endif
 
@@ -2601,17 +2506,16 @@ public:
   std::string *operation;  /* optional element of type xsd:string */
   std::string *query;      /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 91;
   } /* = unique id SOAP_TYPE_ICat4_ns1__log */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__log() { ns1__log::soap_default(NULL); }
-  virtual ~ns1__log() = default;
 };
 #endif
 
@@ -2623,17 +2527,16 @@ public:
   std::string *field;  /* optional element of type xsd:string */
   std::string *origin; /* optional element of type xsd:string */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 92;
   } /* = unique id SOAP_TYPE_ICat4_ns1__publicStep */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__publicStep() { ns1__publicStep::soap_default(NULL); }
-  virtual ~ns1__publicStep() = default;
 };
 #endif
 
@@ -2645,19 +2548,18 @@ public:
   ns1__dataCollection *
       dataCollection; /* optional element of type ns1:dataCollection */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 78;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dataCollectionParameter */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__dataCollectionParameter() {
     ns1__dataCollectionParameter::soap_default(NULL);
   }
-  virtual ~ns1__dataCollectionParameter() = default;
 };
 #endif
 
@@ -2668,17 +2570,16 @@ class SOAP_CMAC ns1__datafileParameter : public ns1__parameter {
 public:
   ns1__datafile *datafile; /* optional element of type ns1:datafile */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 80;
   } /* = unique id SOAP_TYPE_ICat4_ns1__datafileParameter */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__datafileParameter() { ns1__datafileParameter::soap_default(NULL); }
-  virtual ~ns1__datafileParameter() = default;
 };
 #endif
 
@@ -2689,17 +2590,16 @@ class SOAP_CMAC ns1__datasetParameter : public ns1__parameter {
 public:
   ns1__dataset *dataset; /* optional element of type ns1:dataset */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 81;
   } /* = unique id SOAP_TYPE_ICat4_ns1__datasetParameter */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__datasetParameter() { ns1__datasetParameter::soap_default(NULL); }
-  virtual ~ns1__datasetParameter() = default;
 };
 #endif
 
@@ -2711,19 +2611,18 @@ public:
   ns1__investigation *
       investigation; /* optional element of type ns1:investigation */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 82;
   } /* = unique id SOAP_TYPE_ICat4_ns1__investigationParameter */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__investigationParameter() {
     ns1__investigationParameter::soap_default(NULL);
   }
-  virtual ~ns1__investigationParameter() = default;
 };
 #endif
 
@@ -2734,17 +2633,16 @@ class SOAP_CMAC ns1__sampleParameter : public ns1__parameter {
 public:
   ns1__sample *sample; /* optional element of type ns1:sample */
 public:
-  virtual int soap_type() const {
+  int soap_type() const override {
     return 84;
   } /* = unique id SOAP_TYPE_ICat4_ns1__sampleParameter */
-  virtual void soap_default(struct soap *);
-  virtual void soap_serialize(struct soap *) const;
-  virtual int soap_put(struct soap *, const char *, const char *) const;
-  virtual int soap_out(struct soap *, const char *, int, const char *) const;
-  virtual void *soap_get(struct soap *, const char *, const char *);
-  virtual void *soap_in(struct soap *, const char *, const char *);
+  void soap_default(struct soap *) override;
+  void soap_serialize(struct soap *) const override;
+  int soap_put(struct soap *, const char *, const char *) const override;
+  int soap_out(struct soap *, const char *, int, const char *) const override;
+  void *soap_get(struct soap *, const char *, const char *) override;
+  void *soap_in(struct soap *, const char *, const char *) override;
   ns1__sampleParameter() { ns1__sampleParameter::soap_default(NULL); }
-  virtual ~ns1__sampleParameter() = default;
 };
 #endif
 

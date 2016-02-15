@@ -37,17 +37,16 @@ class DLLExport ProductLinearExp : public API::ParamFunction,
                                    public API::IFunction1D {
 public:
   ProductLinearExp();
-  virtual ~ProductLinearExp() = default;
 
-  std::string name() const { return "ProductLinearExp"; }
+  std::string name() const override { return "ProductLinearExp"; }
 
-  virtual const std::string category() const { return "Calibrate"; }
+  const std::string category() const override { return "Calibrate"; }
 
 protected:
-  virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                               const size_t nData);
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+                       const size_t nData) override;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 };
 
 } // namespace Functions

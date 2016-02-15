@@ -47,85 +47,85 @@ public:
   // Construct a peak from a reference to the interface
 
   explicit Peak(const Geometry::IPeak &ipeak);
-  virtual ~Peak() = default;
 
-  void setDetectorID(int id);
-  int getDetectorID() const;
+  void setDetectorID(int id) override;
+  int getDetectorID() const override;
   void addContributingDetID(const int id);
   void removeContributingDetector(const int id);
   const std::set<int> &getContributingDetIDs() const;
 
-  void setInstrument(Geometry::Instrument_const_sptr inst);
-  Geometry::IDetector_const_sptr getDetector() const;
-  Geometry::Instrument_const_sptr getInstrument() const;
+  void setInstrument(Geometry::Instrument_const_sptr inst) override;
+  Geometry::IDetector_const_sptr getDetector() const override;
+  Geometry::Instrument_const_sptr getInstrument() const override;
 
-  bool findDetector();
+  bool findDetector() override;
 
-  int getRunNumber() const;
-  void setRunNumber(int m_RunNumber);
+  int getRunNumber() const override;
+  void setRunNumber(int m_RunNumber) override;
 
-  double getMonitorCount() const;
-  void setMonitorCount(double m_MonitorCount);
+  double getMonitorCount() const override;
+  void setMonitorCount(double m_MonitorCount) override;
 
-  double getH() const;
-  double getK() const;
-  double getL() const;
-  Mantid::Kernel::V3D getHKL() const;
-  void setH(double m_H);
-  void setK(double m_K);
-  void setL(double m_L);
+  double getH() const override;
+  double getK() const override;
+  double getL() const override;
+  Mantid::Kernel::V3D getHKL() const override;
+  void setH(double m_H) override;
+  void setK(double m_K) override;
+  void setL(double m_L) override;
   void setBankName(std::string m_BankName);
-  void setHKL(double H, double K, double L);
-  void setHKL(Mantid::Kernel::V3D HKL);
+  void setHKL(double H, double K, double L) override;
+  void setHKL(Mantid::Kernel::V3D HKL) override;
   void resetHKL();
 
-  Mantid::Kernel::V3D getQLabFrame() const;
-  Mantid::Kernel::V3D getQSampleFrame() const;
-  Mantid::Kernel::V3D getDetectorPosition() const;
-  Mantid::Kernel::V3D getDetectorPositionNoCheck() const;
+  Mantid::Kernel::V3D getQLabFrame() const override;
+  Mantid::Kernel::V3D getQSampleFrame() const override;
+  Mantid::Kernel::V3D getDetectorPosition() const override;
+  Mantid::Kernel::V3D getDetectorPositionNoCheck() const override;
 
-  void setQSampleFrame(
-      Mantid::Kernel::V3D QSampleFrame,
-      boost::optional<double> detectorDistance = boost::optional<double>());
-  void setQLabFrame(
-      Mantid::Kernel::V3D QLabFrame,
-      boost::optional<double> detectorDistance = boost::optional<double>());
+  void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
+                       boost::optional<double> detectorDistance =
+                           boost::optional<double>()) override;
+  void setQLabFrame(Mantid::Kernel::V3D QLabFrame,
+                    boost::optional<double> detectorDistance =
+                        boost::optional<double>()) override;
 
-  void setWavelength(double wavelength);
-  double getWavelength() const;
-  double getScattering() const;
-  double getDSpacing() const;
-  double getTOF() const;
+  void setWavelength(double wavelength) override;
+  double getWavelength() const override;
+  double getScattering() const override;
+  double getDSpacing() const override;
+  double getTOF() const override;
 
-  double getInitialEnergy() const;
-  double getFinalEnergy() const;
-  void setInitialEnergy(double m_InitialEnergy);
-  void setFinalEnergy(double m_FinalEnergy);
+  double getInitialEnergy() const override;
+  double getFinalEnergy() const override;
+  void setInitialEnergy(double m_InitialEnergy) override;
+  void setFinalEnergy(double m_FinalEnergy) override;
 
-  double getIntensity() const;
-  double getSigmaIntensity() const;
+  double getIntensity() const override;
+  double getSigmaIntensity() const override;
 
-  void setIntensity(double m_Intensity);
-  void setSigmaIntensity(double m_SigmaIntensity);
+  void setIntensity(double m_Intensity) override;
+  void setSigmaIntensity(double m_SigmaIntensity) override;
 
-  double getBinCount() const;
-  void setBinCount(double m_BinCount);
+  double getBinCount() const override;
+  void setBinCount(double m_BinCount) override;
 
-  Mantid::Kernel::Matrix<double> getGoniometerMatrix() const;
-  void setGoniometerMatrix(Mantid::Kernel::Matrix<double> m_GoniometerMatrix);
+  Mantid::Kernel::Matrix<double> getGoniometerMatrix() const override;
+  void setGoniometerMatrix(
+      Mantid::Kernel::Matrix<double> m_GoniometerMatrix) override;
 
-  std::string getBankName() const;
-  int getRow() const;
-  int getCol() const;
+  std::string getBankName() const override;
+  int getRow() const override;
+  int getCol() const override;
 
-  Mantid::Kernel::V3D getDetPos() const;
-  double getL1() const;
-  double getL2() const;
+  Mantid::Kernel::V3D getDetPos() const override;
+  double getL1() const override;
+  double getL2() const override;
 
   double getValueByColName(const std::string &name) const;
 
   /// Get the peak shape.
-  const Mantid::Geometry::PeakShape &getPeakShape() const;
+  const Mantid::Geometry::PeakShape &getPeakShape() const override;
 
   /// Set the PeakShape
   void setPeakShape(Mantid::Geometry::PeakShape *shape);

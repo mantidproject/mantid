@@ -186,7 +186,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Run the data processing
   */
-  void run() {
+  void run() override {
     // Local tof limits
     double my_shortest_tof =
         static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
@@ -792,7 +792,7 @@ public:
   }
 
   //---------------------------------------------------------------------------------------------------
-  void run() {
+  void run() override {
     // The vectors we will be filling
     auto event_index_ptr = new std::vector<uint64_t>();
     std::vector<uint64_t> &event_index = *event_index_ptr;

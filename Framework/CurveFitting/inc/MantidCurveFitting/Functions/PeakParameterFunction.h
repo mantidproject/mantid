@@ -48,17 +48,17 @@ class MANTID_CURVEFITTING_DLL PeakParameterFunction
       virtual public API::FunctionParameterDecorator {
 public:
   PeakParameterFunction() : FunctionParameterDecorator() {}
-  virtual ~PeakParameterFunction() = default;
 
-  std::string name() const { return "PeakParameterFunction"; }
+  std::string name() const override { return "PeakParameterFunction"; }
 
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
   void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian);
+                     API::Jacobian &jacobian) override;
 
 protected:
-  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
+  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) override;
 
   API::IPeakFunction_sptr m_peakFunction;
 };

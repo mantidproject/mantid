@@ -48,18 +48,16 @@ class DLLExport CostFuncRwp : public CostFuncLeastSquares {
 public:
   /// Constructor
   CostFuncRwp();
-  /// Virtual destructor
-  virtual ~CostFuncRwp() = default;
 
   /// Get name of minimizer
-  virtual std::string name() const { return "Rwp"; }
+  std::string name() const override { return "Rwp"; }
 
   /// Get short name of minimizer - useful for say labels in guis
-  virtual std::string shortName() const { return "Rwp"; }
+  std::string shortName() const override { return "Rwp"; }
 
 private:
-  virtual std::vector<double>
-  getFitWeights(API::FunctionValues_sptr values) const;
+  std::vector<double>
+  getFitWeights(API::FunctionValues_sptr values) const override;
 
   /// Get weight (1/sigma)
   double getWeight(API::FunctionValues_sptr values, size_t i,

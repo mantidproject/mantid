@@ -35,19 +35,19 @@ namespace DataHandling {
 class DLLExport PDLoadCharacterizations : public API::Algorithm {
 public:
   PDLoadCharacterizations();
-  virtual ~PDLoadCharacterizations();
+  ~PDLoadCharacterizations() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load a characterization file used in Powder Diffraction Reduction.";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void readFocusInfo(std::ifstream &file);
   void readCharInfo(std::ifstream &file, API::ITableWorkspace_sptr &wksp);
   void readExpIni(const std::string &filename, API::ITableWorkspace_sptr &wksp);

@@ -52,78 +52,80 @@ public:
   PropertyManagerOwner();
   PropertyManagerOwner(const PropertyManagerOwner &);
   PropertyManagerOwner &operator=(const PropertyManagerOwner &);
-  virtual ~PropertyManagerOwner() = default;
 
   // Function to declare properties (i.e. store them)
-  void declareProperty(Property *p, const std::string &doc = "");
+  void declareProperty(Property *p, const std::string &doc = "") override;
 
   using IPropertyManager::declareProperty;
 
   // Sets all the declared properties from
-  void setProperties(
-      const std::string &propertiesJson,
-      const std::set<std::string> &ignoreProperties = std::set<std::string>());
+  void setProperties(const std::string &propertiesJson,
+                     const std::set<std::string> &ignoreProperties =
+                         std::set<std::string>()) override;
 
   // Sets all the declared properties from a json object
-  void setProperties(
-      const ::Json::Value &jsonValue,
-      const std::set<std::string> &ignoreProperties = std::set<std::string>());
+  void setProperties(const ::Json::Value &jsonValue,
+                     const std::set<std::string> &ignoreProperties =
+                         std::set<std::string>()) override;
 
   // sets all the declared properties using a simple string format
-  void setPropertiesWithSimpleString(
-      const std::string &propertiesString,
-      const std::set<std::string> &ignoreProperties = std::set<std::string>());
+  void
+  setPropertiesWithSimpleString(const std::string &propertiesString,
+                                const std::set<std::string> &ignoreProperties =
+                                    std::set<std::string>()) override;
 
-  void setPropertyValue(const std::string &name, const std::string &value);
-  void setPropertyOrdinal(const int &index, const std::string &value);
+  void setPropertyValue(const std::string &name,
+                        const std::string &value) override;
+  void setPropertyOrdinal(const int &index, const std::string &value) override;
 
   /// Make m_properties point to the same PropertyManager as po.
   virtual void copyPropertiesFrom(const PropertyManagerOwner &po) {
     *this = po;
   }
 
-  bool existsProperty(const std::string &name) const;
-  bool validateProperties() const;
-  size_t propertyCount() const;
+  bool existsProperty(const std::string &name) const override;
+  bool validateProperties() const override;
+  size_t propertyCount() const override;
 
-  virtual std::string getPropertyValue(const std::string &name) const;
-  const std::vector<Property *> &getProperties() const;
+  std::string getPropertyValue(const std::string &name) const override;
+  const std::vector<Property *> &getProperties() const override;
 
   /// Get the value of a property
-  virtual TypedValue getProperty(const std::string &name) const;
+  TypedValue getProperty(const std::string &name) const override;
 
   /// Return the property manager serialized as a string.
-  virtual std::string asString(bool withDefaultValues = false) const;
+  std::string asString(bool withDefaultValues = false) const override;
 
   /// Return the property manager serialized as a json object.
-  virtual ::Json::Value asJson(bool withDefaultValues = false) const;
+  ::Json::Value asJson(bool withDefaultValues = false) const override;
 
   bool isDefault(const std::string &name) const;
 
   /// Removes the property from management
-  void removeProperty(const std::string &name, const bool delproperty = true);
+  void removeProperty(const std::string &name,
+                      const bool delproperty = true) override;
   /// Clears all properties under management
-  void clear();
+  void clear() override;
   /// Override this method to perform a custom action right after a property was
   /// set.
   /// The argument is the property name. Default - do nothing.
-  virtual void afterPropertySet(const std::string &);
+  void afterPropertySet(const std::string &) override;
 
-  virtual void filterByTime(const DateAndTime & /*start*/,
-                            const DateAndTime & /*stop*/) {
+  void filterByTime(const DateAndTime & /*start*/,
+                    const DateAndTime & /*stop*/) override {
     throw(std::runtime_error("Not yet implmented"));
   }
-  virtual void splitByTime(std::vector<SplittingInterval> & /*splitter*/,
-                           std::vector<PropertyManager *> /* outputs*/) const {
+  void splitByTime(std::vector<SplittingInterval> & /*splitter*/,
+                   std::vector<PropertyManager *> /* outputs*/) const override {
     throw(std::runtime_error("Not yet implmented"));
   }
-  virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/) {
+  void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/) override {
     throw(std::runtime_error("Not yet implmented"));
   }
 
 public:
-  Property *getPointerToProperty(const std::string &name) const;
-  Property *getPointerToPropertyOrdinal(const int &index) const;
+  Property *getPointerToProperty(const std::string &name) const override;
+  Property *getPointerToPropertyOrdinal(const int &index) const override;
 
 private:
   /// Shared pointer to the 'real' property manager

@@ -38,32 +38,32 @@ namespace MDAlgorithms {
 class MANTID_MDALGORITHMS_DLL ConvertCWSDMDtoHKL : public API::Algorithm {
 public:
   ConvertCWSDMDtoHKL();
-  virtual ~ConvertCWSDMDtoHKL();
+  ~ConvertCWSDMDtoHKL() override;
 
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvertCWSDMDtoHKL"; }
+  const std::string name() const override { return "ConvertCWSDMDtoHKL"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Convert constant wavelength single crystal diffractomer's data"
            "in MDEventWorkspace and in unit of Q-sample to the HKL space "
            "by UB matrix.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\ConstantWavelength";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
 
   /// Execution code
-  void exec();
+  void exec() override;
 
   void exportEvents(API::IMDEventWorkspace_sptr mdws,
                     std::vector<Kernel::V3D> &vec_event_qsample,

@@ -116,9 +116,6 @@ public:
     m_pPtr = static_cast<T *>(this);
   }
 
-  /// Virtual destructor
-  virtual ~WrappedObject() = default;
-
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }
   /// Overloaded * operator returns the wrapped object pointer

@@ -35,15 +35,15 @@ namespace Algorithms {
 class DLLExport ResampleX : public Algorithms::Rebin {
 public:
   ResampleX();
-  virtual ~ResampleX();
+  ~ResampleX() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string alias() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string alias() const override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Resample the x-axis of the data with the requested number of "
            "points.";
   }
@@ -55,14 +55,14 @@ public:
   void setOptions(const int numBins, const bool useLogBins, const bool isDist);
 
 private:
-  const std::string workspaceMethodName() const {
+  const std::string workspaceMethodName() const override {
     return "";
   } // Override the one from Rebin to ignore us
 
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
   bool m_useLogBinning;
   bool m_preserveEvents;
   int m_numBins;

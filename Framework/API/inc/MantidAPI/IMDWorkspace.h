@@ -72,7 +72,6 @@ static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
   IMDWorkspace();
-  virtual ~IMDWorkspace() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<IMDWorkspace> clone() const {
@@ -163,11 +162,11 @@ protected:
   /// Protected copy assignment operator. Assignment not implemented.
   IMDWorkspace &operator=(const IMDWorkspace &other);
 
-  virtual const std::string toString() const;
+  const std::string toString() const override;
 
 private:
   std::string m_convention;
-  virtual IMDWorkspace *doClone() const = 0;
+  IMDWorkspace *doClone() const override = 0;
 };
 
 /// Shared pointer to the IMDWorkspace base class

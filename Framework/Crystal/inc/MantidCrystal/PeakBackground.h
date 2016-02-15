@@ -62,17 +62,15 @@ public:
                  const Mantid::Kernel::SpecialCoordinateSystem coordinates);
 
   /// Overriden is background function
-  virtual bool isBackground(Mantid::API::IMDIterator *iterator) const;
+  bool isBackground(Mantid::API::IMDIterator *iterator) const override;
 
   /// Overriden configure iterator function.
-  virtual void
-  configureIterator(Mantid::API::IMDIterator *const iterator) const;
+  void
+  configureIterator(Mantid::API::IMDIterator *const iterator) const override;
 
   /// Virutal constructor
-  virtual PeakBackground *clone() const;
+  PeakBackground *clone() const override;
 
-  /// Destructor
-  virtual ~PeakBackground() = default;
 };
 
 } // namespace Crystal

@@ -29,7 +29,6 @@ public:
   SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
                      const bool includeMonitors = false);
   SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent);
-  ~SpecialWorkspace2D() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<SpecialWorkspace2D> clone() const {
@@ -38,7 +37,7 @@ public:
 
   /** Gets the name of the workspace type
   @return Standard string name  */
-  virtual const std::string id() const { return "SpecialWorkspace2D"; }
+  const std::string id() const override { return "SpecialWorkspace2D"; }
 
   double getValue(const detid_t detectorID) const;
   double getValue(const detid_t detectorID, const double defaultValue) const;
@@ -57,7 +56,7 @@ public:
   virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
 
 private:
-  virtual SpecialWorkspace2D *doClone() const {
+  SpecialWorkspace2D *doClone() const override {
     return new SpecialWorkspace2D(*this);
   }
   bool isCompatible(boost::shared_ptr<const SpecialWorkspace2D> ws);
@@ -68,11 +67,11 @@ protected:
   /// Protected copy assignment operator. Assignment not implemented.
   SpecialWorkspace2D &operator=(const SpecialWorkspace2D &other) = delete;
 
-  virtual void init(const size_t &NVectors, const size_t &XLength,
-                    const size_t &YLength);
+  void init(const size_t &NVectors, const size_t &XLength,
+            const size_t &YLength) override;
 
   /// Return human-readable string
-  virtual const std::string toString() const;
+  const std::string toString() const override;
 
   void binaryAND(boost::shared_ptr<const SpecialWorkspace2D> ws);
   void binaryOR(boost::shared_ptr<const SpecialWorkspace2D> ws);

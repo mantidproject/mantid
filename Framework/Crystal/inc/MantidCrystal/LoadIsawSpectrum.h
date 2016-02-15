@@ -35,27 +35,27 @@ National Laboratory & European Spallation Source
 class DLLExport LoadIsawSpectrum : public API::Algorithm {
 public:
   LoadIsawSpectrum();
-  ~LoadIsawSpectrum();
+  ~LoadIsawSpectrum() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "LoadIsawSpectrum"; };
+  const std::string name() const override { return "LoadIsawSpectrum"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load incident spectrum and detector efficiency correction file.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Crystal\\DataHandling;DataHandling\\Text";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   double spectrumCalc(double TOF, int iSpec,
                       std::vector<std::vector<double>> time,

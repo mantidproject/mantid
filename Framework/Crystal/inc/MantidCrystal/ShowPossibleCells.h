@@ -39,29 +39,29 @@ namespace Crystal {
 class DLLExport ShowPossibleCells : public API::Algorithm {
 public:
   ShowPossibleCells();
-  ~ShowPossibleCells();
+  ~ShowPossibleCells() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "ShowPossibleCells"; };
+  const std::string name() const override { return "ShowPossibleCells"; };
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
 
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Crystal\\Cell"; }
+  const std::string category() const override { return "Crystal\\Cell"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Show conventional cells corresponding to the UB stored with the "
            "sample for this peaks works space.";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
 
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Crystal

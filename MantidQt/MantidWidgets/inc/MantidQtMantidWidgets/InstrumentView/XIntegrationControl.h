@@ -33,10 +33,10 @@ namespace MantidQt
 			void changed(double, double);
 			void running(double, double);
 		protected:
-			void	mouseMoveEvent(QMouseEvent * e);
-			void	resizeEvent(QResizeEvent * e);
-			bool eventFilter(QObject *object, QEvent *e);
-			void updateMinMax();
+                  void mouseMoveEvent(QMouseEvent *e) override;
+                  void resizeEvent(QResizeEvent *e) override;
+                  bool eventFilter(QObject *object, QEvent *e) override;
+                        void updateMinMax();
 		private:
 			int m_resizeMargin; ///< distance from the left (or right) end of the slider within which it can be resized
 			bool m_init;

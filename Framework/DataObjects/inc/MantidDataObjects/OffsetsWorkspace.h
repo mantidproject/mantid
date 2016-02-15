@@ -20,7 +20,6 @@ class DLLExport OffsetsWorkspace : public SpecialWorkspace2D {
 public:
   OffsetsWorkspace();
   OffsetsWorkspace(Geometry::Instrument_const_sptr inst);
-  ~OffsetsWorkspace() = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<OffsetsWorkspace> clone() const {
@@ -29,7 +28,7 @@ public:
 
   /** Gets the name of the workspace type
   @return Standard string name  */
-  virtual const std::string id() const { return "OffsetsWorkspace"; }
+  const std::string id() const override { return "OffsetsWorkspace"; }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -38,7 +37,7 @@ protected:
   OffsetsWorkspace &operator=(const OffsetsWorkspace &other) = delete;
 
 private:
-  virtual OffsetsWorkspace *doClone() const {
+  OffsetsWorkspace *doClone() const override {
     return new OffsetsWorkspace(*this);
   }
 };

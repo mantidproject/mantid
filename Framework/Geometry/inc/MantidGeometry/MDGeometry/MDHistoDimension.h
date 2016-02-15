@@ -51,22 +51,19 @@ public:
         m_max(other->getMaximum()), m_numBins(other->getNBins()),
         m_binWidth(other->getBinWidth()) {}
 
-  /// Destructor
-  virtual ~MDHistoDimension() = default;
-
   /// Return the name of the dimension as can be displayed along the axis
-  virtual std::string getName() const { return m_name; }
+  std::string getName() const override { return m_name; }
 
   /// Return the md frame
-  const MDFrame &getMDFrame() const { return *m_frame; }
+  const MDFrame &getMDFrame() const override { return *m_frame; }
 
   /// Return the units of the dimension as a string
-  virtual const Kernel::UnitLabel getUnits() const {
+  const Kernel::UnitLabel getUnits() const override {
     return m_frame->getUnitLabel();
   }
 
   /// Returns the unit
-  virtual const Kernel::MDUnit &getMDUnits() const {
+  const Kernel::MDUnit &getMDUnits() const override {
     return m_frame->getMDUnit();
   }
 
@@ -74,35 +71,35 @@ public:
    * A dimension can be usually found by its ID and various
    * various method exist to manipulate set of dimensions by their names.
    */
-  virtual std::string getDimensionId() const { return m_dimensionId; }
+  std::string getDimensionId() const override { return m_dimensionId; }
 
   /// Returns the maximum extent of this dimension
-  virtual coord_t getMaximum() const { return m_max; }
+  coord_t getMaximum() const override { return m_max; }
 
   /// Returns the minimum extent of this dimension
-  virtual coord_t getMinimum() const { return m_min; }
+  coord_t getMinimum() const override { return m_min; }
 
   /// number of bins dimension have (an integrated has one). A axis directed
   /// along dimension would have getNBins+1 axis points.
-  virtual size_t getNBins() const { return m_numBins; }
+  size_t getNBins() const override { return m_numBins; }
 
   /// Dimensions must be xml serializable.
-  virtual std::string toXMLString() const;
+  std::string toXMLString() const override;
 
   ///  Get coordinate for index;
-  virtual coord_t getX(size_t index) const {
+  coord_t getX(size_t index) const override {
     return static_cast<coord_t>(index) * m_binWidth + m_min;
   }
 
   /// Return the width of one bin.
-  coord_t getBinWidth() const { return m_binWidth; }
+  coord_t getBinWidth() const override { return m_binWidth; }
 
   /** Change the extents and number of bins
    * @param nBins :: number of bins
    * @param min :: extents minimum
    * @param max :: extents maximum
    */
-  void setRange(size_t nBins, coord_t min, coord_t max) {
+  void setRange(size_t nBins, coord_t min, coord_t max) override {
     if (max < min) {
       throw std::invalid_argument("Error making MDHistoDimension. Cannot have "
                                   "dimension with min > max");

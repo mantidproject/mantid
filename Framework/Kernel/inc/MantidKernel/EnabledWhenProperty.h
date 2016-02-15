@@ -79,9 +79,6 @@ public:
   EnabledWhenProperty(std::string otherPropName, ePropertyCriterion when,
                       std::string value = "");
 
-  /// Destructor
-  virtual ~EnabledWhenProperty() = default;
-
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the
    * other property values?
@@ -93,16 +90,16 @@ public:
   //--------------------------------------------------------------------------------------------
   /// Return true/false based on whether the other property satisfies the
   /// criterion
-  virtual bool isEnabled(const IPropertyManager *algo) const;
+  bool isEnabled(const IPropertyManager *algo) const override;
 
   //--------------------------------------------------------------------------------------------
   /// Return true always
-  virtual bool isVisible(const IPropertyManager *) const;
+  bool isVisible(const IPropertyManager *) const override;
   /// does nothing in this case and put here to satisfy the interface.
   void modify_allowed_values(Property *const);
   //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of validator
-  virtual IPropertySettings *clone();
+  IPropertySettings *clone() override;
 
 protected:
   /// Name of the OTHER property that we will check.

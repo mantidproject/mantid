@@ -44,23 +44,21 @@ template <class Type> class DLLExport VectorColumn : public API::Column {
 public:
   VectorColumn() { m_type = typeName(); }
 
-  virtual ~VectorColumn() = default;
-
   /// Number of individual elements in the column
-  virtual size_t size() const { return m_data.size(); }
+  size_t size() const override { return m_data.size(); }
 
   /// Returns typeid for the data in the column
-  virtual const std::type_info &get_type_info() const {
+  const std::type_info &get_type_info() const override {
     return typeid(std::vector<Type>);
   }
 
   /// Returns typeid for the pointer type to the data element in the column
-  virtual const std::type_info &get_pointer_type_info() const {
+  const std::type_info &get_pointer_type_info() const override {
     return typeid(std::vector<Type> *);
   }
 
   /// Print specified item to the stream
-  virtual void print(size_t index, std::ostream &s) const {
+  void print(size_t index, std::ostream &s) const override {
     const std::vector<Type> &values = m_data.at(index);
 
     auto it = values.begin();
@@ -77,7 +75,7 @@ public:
   }
 
   /// Set item from a string value
-  virtual void read(size_t index, const std::string &text) {
+  void read(size_t index, const std::string &text) override {
     std::vector<Type> newValues;
 
     boost::char_separator<char> delim(",");
@@ -100,10 +98,10 @@ public:
   }
 
   /// Specialized type check
-  virtual bool isBool() const { return false; }
+  bool isBool() const override { return false; }
 
   /// Overall memory size taken by the column (bytes)
-  virtual long int sizeOfData() const {
+  long int sizeOfData() const override {
     long int size(0);
 
     for (auto elemIt = m_data.begin(); elemIt != m_data.end(); ++elemIt) {
@@ -114,7 +112,7 @@ public:
   }
 
   /// Create another copy of the column
-  virtual VectorColumn *clone() const {
+  VectorColumn *clone() const override {
     VectorColumn *newColumn = new VectorColumn<Type>();
     newColumn->m_data = m_data;
     newColumn->setName(m_name);
@@ -123,13 +121,13 @@ public:
   }
 
   /// Cast to double
-  virtual double toDouble(size_t i) const {
+  double toDouble(size_t i) const override {
     UNUSED_ARG(i);
     throw std::runtime_error("VectorColumn is not convertible to double.");
   }
 
   /// Assign from double
-  virtual void fromDouble(size_t i, double value) {
+  void fromDouble(size_t i, double value) override {
     UNUSED_ARG(i);
     UNUSED_ARG(value);
     throw std::runtime_error("VectorColumn is not assignable from double.");
@@ -137,22 +135,22 @@ public:
 
 protected:
   /// Sets the new column size.
-  virtual void resize(size_t count) { m_data.resize(count); }
+  void resize(size_t count) override { m_data.resize(count); }
 
   /// Inserts an item.
-  virtual void insert(size_t index) {
+  void insert(size_t index) override {
     // Insert empty vector at the given position
     m_data.insert(m_data.begin() + index, std::vector<Type>());
   }
 
   /// Removes an item.
-  virtual void remove(size_t index) { m_data.erase(m_data.begin() + index); }
+  void remove(size_t index) override { m_data.erase(m_data.begin() + index); }
 
   /// Pointer to a data element
-  virtual void *void_pointer(size_t index) { return &m_data.at(index); }
+  void *void_pointer(size_t index) override { return &m_data.at(index); }
 
   /// Pointer to a data element
-  virtual const void *void_pointer(size_t index) const {
+  const void *void_pointer(size_t index) const override {
     return &m_data.at(index);
   }
 

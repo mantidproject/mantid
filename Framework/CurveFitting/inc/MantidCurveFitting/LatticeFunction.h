@@ -44,21 +44,20 @@ namespace CurveFitting {
 class DLLExport LatticeFunction : public API::ILatticeFunction {
 public:
   LatticeFunction();
-  virtual ~LatticeFunction() = default;
 
-  std::string name() const { return "LatticeFunction"; }
+  std::string name() const override { return "LatticeFunction"; }
 
   void functionLattice(const API::LatticeDomain &latticeDomain,
-                       API::FunctionValues &values) const;
+                       API::FunctionValues &values) const override;
 
-  void setLatticeSystem(const std::string &crystalSystem);
-  void setUnitCell(const std::string &unitCellString);
-  void setUnitCell(const Geometry::UnitCell &unitCell);
-  Geometry::UnitCell getUnitCell() const;
+  void setLatticeSystem(const std::string &crystalSystem) override;
+  void setUnitCell(const std::string &unitCellString) override;
+  void setUnitCell(const Geometry::UnitCell &unitCell) override;
+  Geometry::UnitCell getUnitCell() const override;
 
 protected:
-  void init();
-  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
+  void init() override;
+  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) override;
 
 private:
   Functions::PawleyParameterFunction_sptr m_cellParameters;

@@ -49,25 +49,25 @@ public:
   /// no arg constructor
   MultiplyRange() : API::Algorithm() {}
   /// virtual destructor
-  virtual ~MultiplyRange() {}
+  ~MultiplyRange() override {}
 
-  virtual const std::string name() const { return "MultiplyRange"; }
+  const std::string name() const override { return "MultiplyRange"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "An algorithm to multiply a range of bins in a workspace by the "
            "factor given.";
   }
 
-  virtual int version() const { return (1); }
-  virtual const std::string category() const {
+  int version() const override { return (1); }
+  const std::string category() const override {
     return "Arithmetic;CorrectionFunctions";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

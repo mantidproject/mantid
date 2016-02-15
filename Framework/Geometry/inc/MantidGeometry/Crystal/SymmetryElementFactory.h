@@ -52,11 +52,10 @@ class MANTID_GEOMETRY_DLL SymmetryElementIdentityGenerator
     : public AbstractSymmetryElementGenerator {
 public:
   SymmetryElementIdentityGenerator() {}
-  ~SymmetryElementIdentityGenerator() = default;
 
   SymmetryElement_sptr
-  generateElement(const SymmetryOperation &operation) const;
-  bool canProcess(const SymmetryOperation &operation) const;
+  generateElement(const SymmetryOperation &operation) const override;
+  bool canProcess(const SymmetryOperation &operation) const override;
 };
 
 /** @class SymmetryElementTranslationGenerator
@@ -68,11 +67,10 @@ class MANTID_GEOMETRY_DLL SymmetryElementTranslationGenerator
     : public AbstractSymmetryElementGenerator {
 public:
   SymmetryElementTranslationGenerator() {}
-  ~SymmetryElementTranslationGenerator() = default;
 
   SymmetryElement_sptr
-  generateElement(const SymmetryOperation &operation) const;
-  bool canProcess(const SymmetryOperation &operation) const;
+  generateElement(const SymmetryOperation &operation) const override;
+  bool canProcess(const SymmetryOperation &operation) const override;
 };
 
 /** @class SymmetryElementInversionGenerator
@@ -84,11 +82,10 @@ class MANTID_GEOMETRY_DLL SymmetryElementInversionGenerator
     : public AbstractSymmetryElementGenerator {
 public:
   SymmetryElementInversionGenerator() {}
-  ~SymmetryElementInversionGenerator() = default;
 
   SymmetryElement_sptr
-  generateElement(const SymmetryOperation &operation) const;
-  bool canProcess(const SymmetryOperation &operation) const;
+  generateElement(const SymmetryOperation &operation) const override;
+  bool canProcess(const SymmetryOperation &operation) const override;
 };
 
 MANTID_GEOMETRY_DLL gsl_matrix *getGSLMatrix(const Kernel::IntMatrix &matrix);
@@ -111,7 +108,6 @@ MANTID_GEOMETRY_DLL gsl_matrix *getGSLIdentityMatrix(size_t rows, size_t cols);
 class MANTID_GEOMETRY_DLL SymmetryElementWithAxisGenerator
     : public AbstractSymmetryElementGenerator {
 public:
-  ~SymmetryElementWithAxisGenerator() = default;
 
 protected:
   V3R determineTranslation(const SymmetryOperation &operation) const;
@@ -132,18 +128,18 @@ class MANTID_GEOMETRY_DLL SymmetryElementRotationGenerator
     : public SymmetryElementWithAxisGenerator {
 public:
   SymmetryElementRotationGenerator() {}
-  ~SymmetryElementRotationGenerator() = default;
 
   SymmetryElement_sptr
-  generateElement(const SymmetryOperation &operation) const;
-  bool canProcess(const SymmetryOperation &operation) const;
+  generateElement(const SymmetryOperation &operation) const override;
+  bool canProcess(const SymmetryOperation &operation) const override;
 
 protected:
   SymmetryElementRotation::RotationSense
   determineRotationSense(const SymmetryOperation &operation,
                          const V3R &rotationAxis) const;
 
-  std::string determineSymbol(const SymmetryOperation &operation) const;
+  std::string
+  determineSymbol(const SymmetryOperation &operation) const override;
 };
 
 /** @class SymmetryElementMirrorGenerator
@@ -159,14 +155,14 @@ class MANTID_GEOMETRY_DLL SymmetryElementMirrorGenerator
     : public SymmetryElementWithAxisGenerator {
 public:
   SymmetryElementMirrorGenerator() {}
-  ~SymmetryElementMirrorGenerator() = default;
 
   SymmetryElement_sptr
-  generateElement(const SymmetryOperation &operation) const;
-  bool canProcess(const SymmetryOperation &operation) const;
+  generateElement(const SymmetryOperation &operation) const override;
+  bool canProcess(const SymmetryOperation &operation) const override;
 
 protected:
-  std::string determineSymbol(const SymmetryOperation &operation) const;
+  std::string
+  determineSymbol(const SymmetryOperation &operation) const override;
 
   static std::map<V3R, std::string> g_glideSymbolMap;
 };

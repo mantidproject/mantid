@@ -33,12 +33,12 @@ namespace DataObjects {
 class DLLExport PeakShapeEllipsoidFactory : public PeakShapeFactory {
 public:
   PeakShapeEllipsoidFactory();
-  virtual ~PeakShapeEllipsoidFactory() = default;
 
   // PeakShapeFactory interface
 
-  Mantid::Geometry::PeakShape *create(const std::string &source) const;
-  void setSuccessor(boost::shared_ptr<const PeakShapeFactory> successorFactory);
+  Mantid::Geometry::PeakShape *create(const std::string &source) const override;
+  void setSuccessor(
+      boost::shared_ptr<const PeakShapeFactory> successorFactory) override;
 
 private:
   /// Successor factory

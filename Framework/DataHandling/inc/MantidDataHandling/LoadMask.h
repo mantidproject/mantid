@@ -46,29 +46,29 @@ namespace DataHandling {
 class DLLExport LoadMask : public API::Algorithm {
 public:
   LoadMask();
-  ~LoadMask();
+  ~LoadMask() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "LoadMask"; };
+  const std::string name() const override { return "LoadMask"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load file containing masking information to a SpecialWorkspace2D "
            "(masking workspace). This algorithm is renamed from "
            "LoadMaskingFile.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Masking;Transforms\\Masking";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Initialize XML parser
   void initializeXMLParser(const std::string &filename);
   /// Parse XML

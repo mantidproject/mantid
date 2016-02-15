@@ -42,14 +42,14 @@ namespace CostFunctions {
 class DLLExport CostFuncUnweightedLeastSquares : public CostFuncLeastSquares {
 public:
   CostFuncUnweightedLeastSquares();
-  virtual ~CostFuncUnweightedLeastSquares() = default;
 
-  std::string name() const { return "Unweighted least squares"; }
-  std::string shortName() const { return "Chi-sq-unw."; }
+  std::string name() const override { return "Unweighted least squares"; }
+  std::string shortName() const override { return "Chi-sq-unw."; }
 
 protected:
-  void calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel);
-  std::vector<double> getFitWeights(API::FunctionValues_sptr values) const;
+  void calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel) override;
+  std::vector<double>
+  getFitWeights(API::FunctionValues_sptr values) const override;
 
   double getResidualVariance() const;
 };

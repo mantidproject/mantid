@@ -41,26 +41,26 @@ class DLLExport NeutronBk2BkExpConvPVoigt
 
 public:
   NeutronBk2BkExpConvPVoigt();
-  virtual ~NeutronBk2BkExpConvPVoigt() = default;
 
   /// Overwrite IFunction base class method: name
-  std::string name() const { return "NeutronBk2BkExpConvPVoigt"; }
+  std::string name() const override { return "NeutronBk2BkExpConvPVoigt"; }
 
   /// Overwrite IFunction base class method: category
-  virtual const std::string category() const { return "General"; }
+  const std::string category() const override { return "General"; }
 
   /// Get peak parameters
-  virtual double getPeakParameter(std::string);
+  double getPeakParameter(std::string) override;
 
   /// Calculate peak parameters (alpha, beta, sigma2..)
-  virtual void calculateParameters(bool explicitoutput) const;
+  void calculateParameters(bool explicitoutput) const override;
 
   /// Override setting a new value to the i-th parameter
-  void setParameter(size_t i, const double &value, bool explicitlySet = true);
+  void setParameter(size_t i, const double &value,
+                    bool explicitlySet = true) override;
 
   /// Override setting a new value to a parameter by name
   void setParameter(const std::string &name, const double &value,
-                    bool explicitlySe = true);
+                    bool explicitlySe = true) override;
 
   /// Set peak's height
   // virtual void setHeight(const double h);
@@ -68,12 +68,12 @@ public:
   // virtual double height()const;
 
   using IFunction1D::function;
-  virtual void function(std::vector<double> &out,
-                        const std::vector<double> &xValues) const;
+  void function(std::vector<double> &out,
+                const std::vector<double> &xValues) const override;
 
   /// Function you want to fit to.
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
 private:
   //----- Overwrite IFunction ------------------------------------------------
@@ -88,7 +88,7 @@ private:
   // API::Jacobian& jacobian);
 
   /// Overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
 
 private:
   /// Calcualte H and Eta

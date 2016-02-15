@@ -122,10 +122,7 @@ public:
   FileError(const FileError &A);
   /// Assignment operator
   FileError &operator=(const FileError &A);
-  /// Destructor
-  ~FileError() throw() = default;
-
-  const char *what() const throw();
+  const char *what() const throw() override;
 };
 
 /// Records the filename, the description of failure and the line on which it
@@ -150,19 +147,14 @@ public:
   ParseError(const ParseError &A);
   /// Assignment operator
   ParseError &operator=(const ParseError &A);
-  /// Destructor
-  ~ParseError() throw() = default;
-
-  const char *what() const throw();
+  const char *what() const throw() override;
 };
 
 /// Marks code as not implemented yet.
 class MANTID_KERNEL_DLL NotImplementedError : public std::logic_error {
 public:
   NotImplementedError(const std::string &);
-  ~NotImplementedError() throw() = default;
-
-  const char *what() const throw();
+  const char *what() const throw() override;
 };
 
 /// Exception for when an item is not found in a collection.
@@ -181,10 +173,7 @@ public:
   NotFoundError(const NotFoundError &A);
   /// Assignment operator
   NotFoundError &operator=(const NotFoundError &A);
-  /// Destructor
-  ~NotFoundError() throw() = default;
-
-  const char *what() const throw();
+  const char *what() const throw() override;
 };
 
 /// Exception for when an item is already in a collection.
@@ -200,10 +189,8 @@ public:
   ExistsError(const ExistsError &A);
   /// Assignment operator
   ExistsError &operator=(const ExistsError &A);
-  /// Destructor
-  ~ExistsError() throw() = default;
 
-  const char *what() const throw();
+  const char *what() const throw() override;
 };
 
 /**
@@ -240,10 +227,8 @@ public:
   AbsObjMethod(const AbsObjMethod &A);
   /// Assignment operator
   AbsObjMethod &operator=(const AbsObjMethod &A);
-  /// Destructor
-  ~AbsObjMethod() throw() = default;
 
-  const char *what() const throw();
+  const char *what() const throw() override;
 };
 
 /// Exception for errors associated with the instrument definition.
@@ -261,10 +246,8 @@ public:
   InstrumentDefinitionError(const InstrumentDefinitionError &A);
   /// Assignment operator
   InstrumentDefinitionError &operator=(const InstrumentDefinitionError &A);
-  /// Destructor
-  ~InstrumentDefinitionError() throw() = default;
 
-  const char *what() const throw();
+  const char *what() const throw() override;
 };
 
 /**
@@ -283,10 +266,8 @@ public:
   OpenGLError(const OpenGLError &A);
   /// Assignment operator
   OpenGLError &operator=(const OpenGLError &A);
-  /// Destructor
-  ~OpenGLError() throw() = default;
 
-  const char *what() const throw();
+  const char *what() const throw() override;
 };
 /**
 \class MisMatch
@@ -305,10 +286,9 @@ public:
   MisMatch(const T &, const T &, const std::string &);
   MisMatch(const MisMatch<T> &A);
   MisMatch<T> &operator=(const MisMatch<T> &rhs);
-  ~MisMatch() throw() = default;
 
   /// Overloaded reporting method
-  const char *what() const throw();
+  const char *what() const throw() override;
 };
 
 /**
@@ -328,10 +308,9 @@ public:
   IndexError(const size_t V, const size_t B, const std::string &Place);
   IndexError(const IndexError &A);
   IndexError &operator=(const IndexError &A);
-  ~IndexError() throw() = default;
 
   /// Overloaded reporting method
-  const char *what() const throw();
+  const char *what() const throw() override;
 };
 
 /** Exception thrown when an attempt is made to dereference a null pointer
@@ -346,9 +325,8 @@ private:
 
 public:
   NullPointerException(const std::string &place, const std::string &objectName);
-  ~NullPointerException() throw() = default;
   /// Overloaded reporting method
-  const char *what() const throw();
+  const char *what() const throw() override;
 };
 
 /** Exception thrown when error occurs accessing an internet resource
@@ -365,7 +343,7 @@ private:
 public:
   InternetError(const std::string &message, const int &errorCode = 0);
   /// Overloaded reporting method
-  const char *what() const throw();
+  const char *what() const throw() override;
   const int &errorCode() const;
 };
 

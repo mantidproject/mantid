@@ -36,11 +36,11 @@ public:
   /// Get the type of the validator
   std::string getType() const { return "IncreasingAxis"; }
   /// Clone the current state
-  Kernel::IValidator_sptr clone() const;
+  Kernel::IValidator_sptr clone() const override;
 
 private:
   /// Check for validity
-  std::string checkValidity(const MatrixWorkspace_sptr &value) const;
+  std::string checkValidity(const MatrixWorkspace_sptr &value) const override;
 };
 
 } // namespace API

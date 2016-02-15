@@ -46,22 +46,20 @@ public:
                      Kernel::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(),
                      int algorithmVersion = -1);
-  /// Destructor
-  virtual ~PeakShapeSpherical() = default;
   /// Copy constructor
   PeakShapeSpherical(const PeakShapeSpherical &other);
   /// Assignment operator
   PeakShapeSpherical &operator=(const PeakShapeSpherical &other);
   /// Serialization method
-  virtual std::string toJSON() const;
+  std::string toJSON() const override;
   /// Clone the peak shape
-  virtual PeakShapeSpherical *clone() const;
+  PeakShapeSpherical *clone() const override;
   /// Shape name
-  std::string shapeName() const;
+  std::string shapeName() const override;
   /// Equals operator
   bool operator==(const PeakShapeSpherical &other) const;
   /// Peak radius
-  double radius() const;
+  double radius() const override;
   /// Peak outer background radius
   boost::optional<double> backgroundOuterRadius() const;
   /// Peak inner background radius

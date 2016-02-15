@@ -71,10 +71,9 @@ class MANTID_GEOMETRY_DLL AlgorithmicSpaceGroupGenerator
 public:
   AlgorithmicSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                                  const std::string &generatorInformation);
-  virtual ~AlgorithmicSpaceGroupGenerator() = default;
 
 protected:
-  Group_const_sptr generateGroup() const;
+  Group_const_sptr generateGroup() const override;
   std::string getCenteringSymbol() const;
 };
 
@@ -85,10 +84,9 @@ class MANTID_GEOMETRY_DLL TransformationSpaceGroupGenerator
 public:
   TransformationSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                                     const std::string &generatorInformation);
-  virtual ~TransformationSpaceGroupGenerator() = default;
 
 protected:
-  Group_const_sptr generateGroup() const;
+  Group_const_sptr generateGroup() const override;
   virtual SpaceGroup_const_sptr getBaseSpaceGroup() const;
 
   void setBaseAndTransformation(const std::string &generatorInformation);
@@ -104,10 +102,9 @@ class MANTID_GEOMETRY_DLL TabulatedSpaceGroupGenerator
 public:
   TabulatedSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                                const std::string &generatorInformation);
-  virtual ~TabulatedSpaceGroupGenerator() = default;
 
 protected:
-  Group_const_sptr generateGroup() const;
+  Group_const_sptr generateGroup() const override;
 };
 
 /**

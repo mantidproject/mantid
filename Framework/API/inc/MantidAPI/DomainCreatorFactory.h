@@ -61,7 +61,7 @@ private:
   /// No copying
   DISABLE_COPY_AND_ASSIGN(DomainCreatorFactoryImpl)
   /// Private Destructor for singleton
-  virtual ~DomainCreatorFactoryImpl() = default;
+  ~DomainCreatorFactoryImpl() override = default;
 
   // Do not use default methods
   using Kernel::DynamicFactory<IDomainCreator>::create;

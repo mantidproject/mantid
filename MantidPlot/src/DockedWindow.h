@@ -25,9 +25,8 @@ public slots:
   void dragMouseMove(QPoint);
 
 protected:
-
-  bool event(QEvent *ev);
-  void moveEvent(QMoveEvent *ev);
+  bool event(QEvent *ev) override;
+  void moveEvent(QMoveEvent *ev) override;
 
 private:
 

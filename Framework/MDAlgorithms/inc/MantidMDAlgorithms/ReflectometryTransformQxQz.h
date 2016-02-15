@@ -46,8 +46,6 @@ public:
                              double qzMax, double incidentTheta,
                              int numberOfBinsQx = 100,
                              int numberOfBinsQz = 100);
-  /// Destructor
-  virtual ~ReflectometryTransformQxQz() = default;
 
 private:
   DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformQxQz)
