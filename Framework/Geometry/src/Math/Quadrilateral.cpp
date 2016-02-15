@@ -85,16 +85,16 @@ const Kernel::V2D &Quadrilateral::at(const size_t index) const {
  * @return True if the point is inside the polygon or on the edge
  */
 bool Quadrilateral::contains(const Kernel::V2D &point) const {
-	ConvexPolygon quadAsPoly = this->toPoly();
-	return quadAsPoly.contains(point);
+  ConvexPolygon quadAsPoly = this->toPoly();
+  return quadAsPoly.contains(point);
 }
 
 /**
  * @return True if the given polygon is completely encosed by this one
  */
 bool Quadrilateral::contains(const ConvexPolygon &poly) const {
-	ConvexPolygon quadAsPoly = this->toPoly();
-	return quadAsPoly.contains(poly);
+  ConvexPolygon quadAsPoly = this->toPoly();
+  return quadAsPoly.contains(poly);
 }
 
 /**
