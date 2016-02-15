@@ -216,24 +216,23 @@ void IqtFit::run() {
                "max_iterations=max_iterations)\n";
   } else {
 
-    auto furyFitMultiple =
-        AlgorithmManager::Instance().create("FuryFitMultiple");
-    furyFitMultiple->initialize();
-    furyFitMultiple->setProperty("InputWorkspace",
-                                 m_ffInputWSName.toStdString());
-    furyFitMultiple->setProperty("Function", function);
-    furyFitMultiple->setProperty("FitType", fitType.toStdString());
-    furyFitMultiple->setProperty("StartX", startX);
-    furyFitMultiple->setProperty("EndX", endX);
-    furyFitMultiple->setProperty("SpecMin", specMin);
-    furyFitMultiple->setProperty("SpecMax", specMax);
-    furyFitMultiple->setProperty("Minimizer", minimizer.toStdString());
-    furyFitMultiple->setProperty("MaxIterations", maxIt);
-    furyFitMultiple->setProperty("ConstrainIntensities", constrainIntens);
-    furyFitMultiple->setProperty("Save", save);
-    furyFitMultiple->setProperty("Plot", plot);
+    auto iqtFitMultiple = AlgorithmManager::Instance().create("IqtFitMultiple");
+    iqtFitMultiple->initialize();
+    iqtFitMultiple->setProperty("InputWorkspace",
+                                m_ffInputWSName.toStdString());
+    iqtFitMultiple->setProperty("Function", function);
+    iqtFitMultiple->setProperty("FitType", fitType.toStdString());
+    iqtFitMultiple->setProperty("StartX", startX);
+    iqtFitMultiple->setProperty("EndX", endX);
+    iqtFitMultiple->setProperty("SpecMin", specMin);
+    iqtFitMultiple->setProperty("SpecMax", specMax);
+    iqtFitMultiple->setProperty("Minimizer", minimizer.toStdString());
+    iqtFitMultiple->setProperty("MaxIterations", maxIt);
+    iqtFitMultiple->setProperty("ConstrainIntensities", constrainIntens);
+    iqtFitMultiple->setProperty("Save", save);
+    iqtFitMultiple->setProperty("Plot", plot);
 
-    m_batchAlgoRunner->addAlgorithm(furyFitMultiple);
+    m_batchAlgoRunner->addAlgorithm(iqtFitMultiple);
     m_batchAlgoRunner->executeBatch();
   }
 
