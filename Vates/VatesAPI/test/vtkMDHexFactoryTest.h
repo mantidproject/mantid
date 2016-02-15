@@ -318,8 +318,9 @@ public :
 
     TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
-    const size_t expected_n_points = 8*32768;
-    const size_t expected_n_cells = 32768;
+    // Slice expected to be 1 bin thick (4 boxes thick in this case)
+    const size_t expected_n_points = 8*4*32768;
+    const size_t expected_n_cells = 4*32768;
     const size_t expected_n_signals = expected_n_cells;
 
     TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
