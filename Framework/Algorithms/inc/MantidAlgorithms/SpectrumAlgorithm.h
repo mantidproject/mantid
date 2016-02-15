@@ -10,7 +10,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-class MANTID_API_DLL SpectrumAlgorithm : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SpectrumAlgorithm : public API::Algorithm {
 public:
   virtual ~SpectrumAlgorithm() override = default;
 

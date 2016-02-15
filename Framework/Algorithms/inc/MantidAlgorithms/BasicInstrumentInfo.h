@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "MantidKernel/V3D.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 
@@ -18,7 +19,7 @@ class MatrixWorkspace;
 
 namespace Algorithms {
 
-class BasicInstrumentInfo {
+class MANTID_ALGORITHMS_DLL BasicInstrumentInfo {
 public:
   BasicInstrumentInfo(const API::MatrixWorkspace &workspace);
 
