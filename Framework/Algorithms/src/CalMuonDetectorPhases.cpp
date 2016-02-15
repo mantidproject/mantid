@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/CalMuonDetectorPhases.h"
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/ITableWorkspace.h"
