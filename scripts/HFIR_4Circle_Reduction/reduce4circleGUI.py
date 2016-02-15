@@ -102,6 +102,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_reset_ub_peaks_hkl)
         self.connect(self.ui.pushButton_selectAllPeaks, QtCore.SIGNAL('clicked()'),
                      self.do_select_all_peaks)
+        self.connect(self.ui.pushButton_viewScan3D, QtCore.SIGNAL('clicked()'),
+                     self.do_view_data_3d)
 
         self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub)
@@ -753,20 +755,23 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_find_peak(self):
-        """ Find peak in a given scan/pt and record it
+        """ Find peak in a given scan and record it
         """
         # Get experiment, scan and pt
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_scanNumber,
-                                                        self.ui.lineEdit_ptNumber])
+                                                        self.ui.lineEdit_scanNumber])
         if status is True:
-            exp_no, scan_no, pt_no = ret_obj
+            exp_no, scan_no = ret_obj
         else:
             self.pop_one_button_dialog(ret_obj)
             return
 
+        # merge peak if necessary
+        if self._myControl.has_merged_data(exp_no, scan_no) is False:
+            self._myControl.merge_pts_in_scan(exp_no, scan_no)
+
         # Find peak
-        status, err_msg = self._myControl.find_peak(exp_no, scan_no, pt_no)
+        status, err_msg = self._myControl.find_peak(exp_no, scan_no)
         if status is False:
             self.pop_one_button_dialog(ret_obj)
             return
@@ -1258,6 +1263,29 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(err_msg)
 
         return url_is_good
+
+    def do_view_data_3d(self):
+        """
+        View merged scan data in 3D after FindPeaks
+        :return:
+        """
+        # TODO/NOW/1st
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_scanNumber])
+        if status:
+            scan_number = ret_obj[0]
+        else:
+            blabla
+
+        # Check
+        if self._myControl.has_merged_data(exp_number, scan_number) is False:
+            balbla
+
+        # Get data
+        data_points = self._myControl.get_merged_data(scan_number)
+
+        # Plot
+
+        raise
 
     def do_view_survey_peak(self):
         """ View survey peak

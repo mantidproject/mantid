@@ -344,6 +344,7 @@ class CWSCDReductionControl(object):
         assert isinstance(scan_number, int)
 
         # Generate the URL for SPICE data file
+        # TODO/NOW - refactor to method
         file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, exp_number,
                                                                     exp_number, scan_number)
         file_name = '%s_exp%04d_scan%04d.dat' % (self._instrumentName, exp_number, scan_number)
@@ -473,13 +474,15 @@ class CWSCDReductionControl(object):
 
         return bkgd_ws.name()
 
-    def existDataFile(self, scanno, ptno):
+    def does_file_exist(self, scanno, ptno):
         """
         Check whether data file for a scan or pt number exists
         :param scanno:
         :param ptno:
         :return:
         """
+        # TODO/NOW - clean this method
+        # FIXME/NOW - add this one to download file
         # Check spice file
         spice_file_name = '%s_exp%04d_scan%04d.dat'%(self._instrumentName,
                                                    self._expNumber, scanno)
@@ -496,7 +499,7 @@ class CWSCDReductionControl(object):
 
         return True, ""
 
-    def find_peak(self, exp_number, scan_number, pt_number):
+    def find_peak(self, exp_number, scan_number, pt_number=None):
         """ Find 1 peak in sample Q space for UB matrix
         :param scan_number:
         :param pt_number:
@@ -507,7 +510,7 @@ class CWSCDReductionControl(object):
         # Check
         assert isinstance(exp_number, int)
         assert isinstance(scan_number, int)
-        assert isinstance(pt_number, int)
+        assert isinstance(pt_number, int) or pt_number is None
 
         # Download or make sure data are there
         status_sp, err_msg_sp = self.download_spice_file(exp_number, scan_number, over_write=False)
@@ -516,6 +519,13 @@ class CWSCDReductionControl(object):
         if status_sp is False or status_det is False:
             return False, 'Unable to access data (1) %s (2) %s' % (err_msg_sp, err_msg_det)
 
+        # Check whether the MDEventWorkspace used to find peaks exists
+        if self.has_merged_data(exp_number, scan_number):
+            pass
+        else:
+            self.merge_pts_in_scan(exp_number, scan_number, [pt_number])
+
+        """ Disabled...
         # Collect reduction information: example
         exp_info_ws_name = get_pt_info_ws_name(exp_number, scan_number)
         virtual_instrument_info_table_name = get_virtual_instrument_table_name(exp_number, scan_number, pt_number)
@@ -535,7 +545,8 @@ class CWSCDReductionControl(object):
                                      CreateVirtualInstrument=False,
                                      OutputWorkspace=pt_md_ws_name,
                                      Directory=self._dataDir)
-
+        """
+        # TODO/NOW/FIXME/1st - MODIFY the following codes for new workflow! Remember to update documentation!
         # Find peak in Q-space
         pt_peak_ws_name = get_single_pt_peak_ws_name(exp_number, scan_number, pt_number)
         print '[DB] Found peaks are output workspace %s.' % pt_peak_ws_name
@@ -664,6 +675,15 @@ class CWSCDReductionControl(object):
 
         return md_ws.getExperimentInfo(0).run().getProperty(log_name).value
 
+    def get_merged_data(self, scan_number):
+        """
+        Get merged data in format of numpy.ndarray to plot
+        :param scan_number:
+        :return: numpy.ndarray. shape = (?, 3)
+        """
+        # TODO/NOW/1st - everything
+        return
+
     def get_merged_scan_info(self, ws_name):
         """
         Get some information of merged scan
@@ -720,6 +740,17 @@ class CWSCDReductionControl(object):
                                                                            pt_number)
 
         return True, self._myUBPeakWSDict[(exp_number, scan_number, pt_number)]
+
+    def has_merged_data(self, exp_number, scan_number, pt_number_list=None):
+        """
+
+        :param scan_number:
+        :param pt_number_list:
+        :return:
+        """
+        # TODO/NOW/1st - everything
+
+        return
 
     def index_peak(self, ub_matrix, scan_number, pt_number):
         """ Index peaks in a Pt.
@@ -971,6 +1002,7 @@ class CWSCDReductionControl(object):
         """
         # Form XMIL file as ~/../HB3A_exp355_scan%04d_%04d.xml'%(scan_no, pt)
         if xml_file_name is None:
+            # TODO/NOW - refactor to method
             xml_file_name = os.path.join(self._dataDir,
                                          'HB3A_exp%d_scan%04d_%04d.xml' % (exp_no, scan_no, pt_no))
 
@@ -1037,6 +1069,7 @@ class CWSCDReductionControl(object):
         :param target_frame:
         :return: (merged workspace name, workspace group name)
         """
+        # TODO/1st: (1) refactor workspace name (2) Create a dictionary to store the result
         # Check
         if exp_no is None:
             exp_no = self._expNumber
@@ -1105,6 +1138,7 @@ class CWSCDReductionControl(object):
         # END-FOR(pt)
 
         # Convert to Q-sample
+        # TODO/NOW - refactor to method
         out_q_name = 'HB3A_Exp%d_Scan%d_MD' % (exp_no, scan_no)
         try:
             api.ConvertCWSDExpToMomentum(InputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
@@ -1114,6 +1148,29 @@ class CWSCDReductionControl(object):
         except RuntimeError as e:
             err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
             return False, err_msg
+
+
+        """ Compare with ...!!!!
+        # Collect reduction information: example
+        exp_info_ws_name = get_pt_info_ws_name(exp_number, scan_number)
+        virtual_instrument_info_table_name = get_virtual_instrument_table_name(exp_number, scan_number, pt_number)
+        api.CollectHB3AExperimentInfo(ExperimentNumber=exp_number,
+                                      GenerateVirtualInstrument=False,
+                                      ScanList=[scan_number],
+                                      PtLists=[-1, pt_number],
+                                      DataDirectory=self._dataDir,
+                                      GetFileFromServer=False,
+                                      Detector2ThetaTolerance=0.01,
+                                      OutputWorkspace=exp_info_ws_name,
+                                      DetectorTableWorkspace=virtual_instrument_info_table_name)
+
+        # Load XML file to MD
+        pt_md_ws_name = get_single_pt_md_name(exp_number, scan_number, pt_number)
+        api.ConvertCWSDExpToMomentum(InputWorkspace=exp_info_ws_name,
+                                     CreateVirtualInstrument=False,
+                                     OutputWorkspace=pt_md_ws_name,
+                                     Directory=self._dataDir)
+        """
 
         if target_frame == 'hkl':
             out_hkl_name = 'HKL_Scan%d' % (scan_no)
@@ -1532,6 +1589,7 @@ class CWSCDReductionControl(object):
             # form file URL
             file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, exp_number,
                                                                         exp_number, scan_number)
+            # TODO/NOW - refactor to algorithm
             file_name = '%s_exp%04d_scan%04d.dat' % ('HB3A', exp_number, scan_number)
             file_name = os.path.join(self._dataDir, file_name)
 
