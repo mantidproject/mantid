@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/SpectrumAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,10 +42,10 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ApplyTransmissionCorrection : public API::Algorithm {
+class DLLExport ApplyTransmissionCorrection : public SpectrumAlgorithm {
 public:
   /// (Empty) Constructor
-  ApplyTransmissionCorrection() : API::Algorithm() {}
+  ApplyTransmissionCorrection() : SpectrumAlgorithm() {}
   /// Virtual destructor
   virtual ~ApplyTransmissionCorrection() {}
   /// Algorithm's name
