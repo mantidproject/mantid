@@ -62,10 +62,7 @@ private:
 
 public:
   cow_ptr();
-  cow_ptr(const cow_ptr<DataType> &);
-  cow_ptr<DataType> &operator=(const cow_ptr<DataType> &);
   cow_ptr<DataType> &operator=(const ptr_type &);
-  ~cow_ptr();
 
   const DataType &operator*() const {
     return *Data;
@@ -84,28 +81,7 @@ public:
 */
 template <typename DataType>
 cow_ptr<DataType>::cow_ptr()
-    : Data(new DataType()) {}
-
-/**
-  Copy constructor : double references the data object
-  @param A :: object to copy
-*/
-template <typename DataType>
-cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) = default;
-
-/**
-  Assignment operator : double references the data object
-  maybe drops the old reference.
-  @param A :: object to copy
-  @return *this
-*/
-template <typename DataType>
-cow_ptr<DataType> &cow_ptr<DataType>::operator=(const cow_ptr<DataType> &A) {
-  if (this != &A) {
-    Data = A.Data;
-  }
-  return *this;
-}
+    : Data(boost::make_shared<DataType>()) {}
 
 /**
   Assignment operator : double references the data object
@@ -120,12 +96,6 @@ cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) {
   }
   return *this;
 }
-
-/**
-  Destructor : No work is required since Data is
-  a shared_ptr.
-*/
-template <typename DataType> cow_ptr<DataType>::~cow_ptr() = default;
 
 /**
   Access function.
