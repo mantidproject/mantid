@@ -61,13 +61,10 @@ public:
 private:
   /// Constructor private as not needed
   DllOpen() = default;
-  ;
   /// Copy operator private as not needed
   DllOpen(const DllOpen &) = default;
-  ;
   /// Destructor private as not needed
   ~DllOpen() = default;
-  ;
 
   // private functions specific to implementation
   /// Implementation specifc static method for opening a shared library

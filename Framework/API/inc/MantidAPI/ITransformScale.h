@@ -46,10 +46,8 @@ namespace API {
 class MANTID_API_DLL ITransformScale {
 public:
   ITransformScale() = default;
-  ;
   /// Virtual destructor needed for an abstract class
   virtual ~ITransformScale() = default;
-  ;
   virtual const std::string name() const { return "ITransformScale"; }
   /// The scaling transformation. Define in derived classes
   virtual void transform(std::vector<double> &gd) = 0;

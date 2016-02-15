@@ -48,7 +48,6 @@ class DLLExport TimeAtSampleStrategy {
 public:
   virtual Correction calculate(const size_t &workspace_index) const = 0;
   virtual ~TimeAtSampleStrategy() = default;
-  ;
 };
 
 } // namespace Algorithms

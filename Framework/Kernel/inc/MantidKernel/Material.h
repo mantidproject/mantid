@@ -62,7 +62,6 @@ public:
       const double pressure = PhysicalConstants::StandardAtmosphere);
   /// Virtual destructor.
   virtual ~Material() = default;
-  ;
 
   /// Returns the name of the material
   const std::string &name() const;

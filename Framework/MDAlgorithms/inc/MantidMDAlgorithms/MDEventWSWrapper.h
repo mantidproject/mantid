@@ -59,7 +59,6 @@ class DLLExport MDEventWSWrapper {
 public:
   MDEventWSWrapper();
   virtual ~MDEventWSWrapper() = default;
-  ;
   /// get maximal number of dimensions, allowed for the algorithm and embedded
   /// in algorithm during compilation time.
   static size_t getMaxNDim() { return MAX_N_DIM; }

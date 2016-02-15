@@ -47,7 +47,6 @@ public:
          bool ignoreMasked = false) = 0;
   /// Destructor
   virtual ~INearestNeighboursFactory() = default;
-  ;
 };
 
 } // namespace Geometry

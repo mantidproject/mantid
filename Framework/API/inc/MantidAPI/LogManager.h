@@ -56,7 +56,7 @@ public:
   /// this class.
   virtual ~LogManager() = default;
   /// Copy constructor
-  LogManager(const LogManager &copy);
+  LogManager(const LogManager &) = default;
   /// Assignment operator
   const LogManager &operator=(const LogManager &rhs);
 

@@ -67,8 +67,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_API_DLL IRemoteJobManager {
 public:
   virtual ~IRemoteJobManager() = default;
-  ;
-
   /**
    * Status and general information about jobs running on (remote)
    * compute resources.

@@ -312,8 +312,6 @@ class MANTID_API_DLL ScriptRepository {
 public:
   /// Virtual destructor (always needed for abstract classes)
   virtual ~ScriptRepository() = default;
-  ;
-
   /**
      Return the information about the script through the Mantid::API::ScriptInfo
      struct.

@@ -66,7 +66,6 @@ public:
 
   /// Virtual destructor
   virtual ~ICluster() = default;
-  ;
 
   /// Set the root cluster
   virtual void setRootCluster(ICluster const *root) = 0;

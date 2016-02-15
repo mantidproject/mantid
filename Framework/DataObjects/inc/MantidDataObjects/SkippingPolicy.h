@@ -39,7 +39,6 @@ class DLLExport SkippingPolicy {
 public:
   virtual bool keepGoing() const = 0;
   virtual ~SkippingPolicy() = default;
-  ;
 };
 
 /// Policy that indicates skipping of masked bins.

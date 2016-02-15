@@ -48,7 +48,6 @@ public:
   ISaveable();
   ISaveable(const ISaveable &other);
   virtual ~ISaveable() = default;
-  ;
 
   ///** @return the position in the file where the data will be stored. This is
   /// used to optimize file writing. */

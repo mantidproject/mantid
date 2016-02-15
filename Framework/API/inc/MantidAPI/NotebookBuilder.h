@@ -45,8 +45,6 @@ public:
   NotebookBuilder(boost::shared_ptr<HistoryView> view,
                   std::string versionSpecificity = "old");
   virtual ~NotebookBuilder() = default;
-  ;
-
   /// build an ipython notebook from the history view
   const std::string build(std::string ws_name, std::string ws_title,
                           std::string ws_comment);

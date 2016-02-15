@@ -56,7 +56,6 @@ public:
   virtual std::string getMangledName() const = 0;
   virtual bool exists() const = 0;
   virtual ~AbstractIDFObject() = default;
-  ;
 
 private:
   AbstractIDFObject(const AbstractIDFObject &);

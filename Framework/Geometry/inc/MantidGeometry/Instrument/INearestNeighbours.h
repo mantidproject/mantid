@@ -54,7 +54,6 @@ class MANTID_GEOMETRY_DLL INearestNeighbours {
 public:
   /// Default (empty) destructor
   virtual ~INearestNeighbours() = default;
-  ;
 
   // Neighbouring spectra by radius
   virtual std::map<specid_t, Mantid::Kernel::V3D>

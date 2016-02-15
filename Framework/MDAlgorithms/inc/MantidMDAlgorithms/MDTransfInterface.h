@@ -166,7 +166,6 @@ public:
   virtual MDTransfInterface *clone() const = 0;
   // destructor
   virtual ~MDTransfInterface() = default;
-  ;
   /** set up transformation from the class, which can provide all variables
    * necessary for the conversion */
   virtual void initialize(const MDWSDescription &) = 0;

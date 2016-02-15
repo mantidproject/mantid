@@ -64,8 +64,6 @@ public:
 
   /// Virtual destructor
   virtual ~Jacobian() = default;
-  ;
-
 protected:
 };
 

@@ -38,7 +38,6 @@ class DLLExport PeakShapeFactory {
 public:
   /// Destructor
   virtual ~PeakShapeFactory() = default;
-  ;
   /// Make the product
   virtual Mantid::Geometry::PeakShape *
   create(const std::string &source) const = 0;

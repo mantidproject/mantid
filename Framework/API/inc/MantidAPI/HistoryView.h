@@ -49,8 +49,6 @@ class MANTID_API_DLL HistoryView {
 public:
   HistoryView(const WorkspaceHistory &wsHist);
   virtual ~HistoryView() = default;
-  ;
-
   void unroll(size_t index);
   void unrollAll();
   void roll(size_t index);
