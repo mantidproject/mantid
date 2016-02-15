@@ -163,6 +163,19 @@ public:
     TS_ASSERT_DELTA(roundUp(-4.1, 1.0), -4.0, 1e-5);
   }
 
+  void test_roundDown_positive_numbers() {
+    TS_ASSERT_DELTA(roundDown(3.7, 1.0), 3.0, 1e-5);
+    TS_ASSERT_DELTA(roundDown(3.7, 7.1), 0.0, 1e-5);
+    TS_ASSERT_DELTA(roundDown(7.1, 7.1), 7.1, 1e-5);
+  }
+
+  void test_roundDown_negative_numbers() {
+    TS_ASSERT_DELTA(roundDown(-0.5, 3.1), -3.1, 1e-5);
+    TS_ASSERT_DELTA(roundDown(-4.1, 3.1), -6.2, 1e-5);
+    TS_ASSERT_DELTA(roundDown(-4.1, 1.0), -5.0, 1e-5);
+    TS_ASSERT_DELTA(roundDown(-4.0, 1.0), -4.0, 1e-5);
+  }
+
   /*Demonstrative tests*/
   void testIgnoresDimensionality() { doDimensionalityTesting(true); }
 
