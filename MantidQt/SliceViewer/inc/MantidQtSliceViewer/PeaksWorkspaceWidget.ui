@@ -275,12 +275,77 @@
            <property name="text">
             <string/>
            </property>
+           <property name="icon">
+            <iconset resource="../../icons/SliceViewerIcons.qrc">
+             <normaloff>:/SliceViewer/icons/peak_cross.png</normaloff>:/SliceViewer/icons/peak_cross.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnPeakColorSphere">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>20</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../icons/SliceViewerIcons.qrc">
+             <normaloff>:/SliceViewer/icons/peak_sphere.png</normaloff>:/SliceViewer/icons/peak_sphere.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnPeakColorEllipsoid">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>20</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../icons/SliceViewerIcons.qrc">
+             <normaloff>:/SliceViewer/icons/peak_ellipsoid.png</normaloff>:/SliceViewer/icons/peak_ellipsoid.png</iconset>
+           </property>
           </widget>
          </item>
         </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <property name="spacing">
+          <number>1</number>
+         </property>
          <item>
           <widget class="QLabel" name="lblShowBackgroundColour">
            <property name="sizePolicy">
@@ -322,6 +387,64 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="btnBackgroundColorSphere">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>20</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../icons/SliceViewerIcons.qrc">
+             <normaloff>:/SliceViewer/icons/peak_sphere.png</normaloff>:/SliceViewer/icons/peak_sphere.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnBackgroundColorEllipsoid">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>20</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../icons/SliceViewerIcons.qrc">
+             <normaloff>:/SliceViewer/icons/peak_ellipsoid.png</normaloff>:/SliceViewer/icons/peak_ellipsoid.png</iconset>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -354,6 +477,7 @@
   </layout>
  </widget>
  <resources>
+  <include location="../../icons/SliceViewerIcons.qrc"/>
   <include location="../../../../images/images.qrc"/>
  </resources>
  <connections/>

@@ -58,6 +58,10 @@ private:
   void populate();
   /// Create the MVC table for peaks display
   void createTableMVC();
+  /// Sets up the background peak view colors
+  void onBackgroundPeakViewColorClicked();
+  /// Sets up the foreground peak view colors
+  void onForegroundPeakViewColorClicked();
   /// Auto-generated UI controls.
   Ui::PeaksWorkspaceWidget ui;
   /// Peaks workspace to view.
@@ -82,6 +86,15 @@ private:
 private slots:
   void onBackgroundColourClicked();
   void onForegroundColourClicked();
+
+
+  void onBackgroundColorCrossClicked();
+  void onForegroundColorCrossClicked();
+  void onBackgroundColorSphereClicked();
+  void onForegroundColorSphereClicked();
+  void onBackgroundColorEllipsoidClicked();
+  void onForegroundColorEllipsoidClicked();
+
   void onShowBackgroundChanged(bool);
   void onRemoveWorkspaceClicked();
   void onToggleHideInPlot();

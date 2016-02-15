@@ -297,7 +297,7 @@ void PeaksViewer::performUpdate() {
           candidateWidget->getPeaksWorkspace();
       if (candidateWorkspace == ws) {
         // We have the right widget to update.
-        candidateWidget->setBackgroundColor(backgroundColor);
+        candidateWidget->setBackgroundColor(backgroundColor); // TODO Remove old style
         candidateWidget->setForegroundColor(foregroundColor);
         candidateWidget->setBackgroundColor(backgroundPeakViewColor);
         candidateWidget->setForegroundColor(foregroundPeakViewColor);

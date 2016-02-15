@@ -8,6 +8,14 @@
 
 
 
+namespace {
+QColor getSelectedColor() {
+  QColorDialog colourDlg;
+  colourDlg.result();
+  return colourDlg.getColor();
+}
+}
+
 namespace MantidQt {
 namespace SliceViewer {
 
@@ -40,11 +48,31 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
   // Connect internal signals-slots.
   connect(ui.ckShowBackground, SIGNAL(clicked(bool)), this,
           SLOT(onShowBackgroundChanged(bool)));
+
+  // TODO REMOVE Colors for old style
   connect(ui.btnBackgroundColor, SIGNAL(clicked()), this,
           SLOT(onBackgroundColourClicked()));
   connect(ui.btnPeakColor, SIGNAL(clicked()), this,
           SLOT(onForegroundColourClicked()));
-  // TODO need to connect to PeakViewColor here     <--------------------------------
+
+  // Colors for Cross
+  connect(ui.btnBackgroundColor, SIGNAL(clicked()), this,
+          SLOT(onBackgroundColorCrossClicked()));
+  connect(ui.btnPeakColor, SIGNAL(clicked()), this,
+          SLOT(onForegroundColorCrossClicked()));
+
+  // Colors for Sphere
+  connect(ui.btnBackgroundColorSphere, SIGNAL(clicked()), this,
+          SLOT(onBackgroundColorSphereClicked()));
+  connect(ui.btnPeakColorSphere, SIGNAL(clicked()), this,
+          SLOT(onForegroundColorSphereClicked()));
+
+  // Colors for Ellipsoid
+  connect(ui.btnBackgroundColorEllipsoid, SIGNAL(clicked()), this,
+          SLOT(onBackgroundColorEllipsoidClicked()));
+  connect(ui.btnPeakColorEllipsoid, SIGNAL(clicked()), this,
+          SLOT(onForegroundColorEllipsoidClicked()));
+
   connect(ui.btnRemove, SIGNAL(clicked()), this,
           SLOT(onRemoveWorkspaceClicked()));
   connect(ui.btnHide, SIGNAL(clicked()), this, SLOT(onToggleHideInPlot()));
@@ -56,11 +84,17 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
   ui.btnBackgroundColor->setStyle(new QPlastiqueStyle);
   ui.btnPeakColor->setStyle(new QPlastiqueStyle);
 
+  ui.btnBackgroundColorSphere->setStyle(new QPlastiqueStyle);
+  ui.btnPeakColorSphere->setStyle(new QPlastiqueStyle);
+  ui.btnBackgroundColorEllipsoid->setStyle(new QPlastiqueStyle);
+  ui.btnPeakColorEllipsoid->setStyle(new QPlastiqueStyle);
+
+
   // Hide controls that don't apply when peaks are integrated.
   const bool integratedPeaks = m_ws->hasIntegratedPeaks();
   ui.btnBackgroundColor->setVisible(integratedPeaks);
-  ui.ckShowBackground->setVisible(integratedPeaks);
-  ui.lblShowBackgroundColour->setVisible(integratedPeaks);
+  ui.ckShowBackground->setVisible(true);
+  ui.lblShowBackgroundColour->setVisible(true);
 
   // Don't allow peaks to be added if it has been forbidden
   ui.btnAddPeak->setEnabled(canAddPeaks);
@@ -177,6 +211,28 @@ void PeaksWorkspaceWidget::onBackgroundColourClicked() {
 }
 
 /**
+ * Handler for changing the foreground colour of an integrated peak.
+*/
+void PeaksWorkspaceWidget::onForegroundPeakViewColorClicked() {
+  auto foregroundColorCross = ui.btnPeakColor->palette().button().color();
+  auto foregroundColorSphere = ui.btnPeakColorSphere->palette().button().color();
+  auto foregroundColorEllipsoid = ui.btnPeakColorEllipsoid->palette().button().color();
+  PeakViewColor color(foregroundColorCross, foregroundColorSphere, foregroundColorEllipsoid);
+  emit peakColorchanged(this->m_ws, color);
+}
+
+/**
+ * Handler for changing the background colour of an integrated peak.
+*/
+void PeaksWorkspaceWidget::onBackgroundPeakViewColorClicked() {
+  auto backgroundColorCross = ui.btnBackgroundColor->palette().button().color();
+  auto backgroundColorSphere = ui.btnBackgroundColorSphere->palette().button().color();
+  auto backgroundColorEllipsoid = ui.btnBackgroundColorEllipsoid->palette().button().color();
+  PeakViewColor color(backgroundColorCross, backgroundColorSphere, backgroundColorEllipsoid);
+  emit backgroundColorChanged(this->m_ws, color);
+}
+
+/**
 Handler or showing/hiding the background radius of integrated peaks.
 @param show : TRUE if the background radius is to be shown.
 */
@@ -235,22 +291,37 @@ void PeaksWorkspaceWidget::setForegroundColor(const QColor &foregroundColor) {
 
 /**
  * Set the background color
- * @param backgroundColor
+ * @param backgroundColor: a peak view color for the background buttons
  */
-void PeaksWorkspaceWidget::setBackgroundColor(const PeakViewColor &) {
-  // TODO add functionality here when button for PeakViewColor exist
-  //ui.btnBackgroundColor->setBackgroundColor(backgroundColor);
+void PeaksWorkspaceWidget::setBackgroundColor(const PeakViewColor & backgroundColor) {
+#if 0
+  // Need to set the three buttons sepearately
+  auto backgroundColorCross = backgroundColor.colorCross;
+  auto backgroundColorSphere = backgroundColor.colorSphere;
+  auto backgroundColorEllipsoid = backgroundColor.colorEllipsoid;
+
+  ui.btnBackgroundColor->setBackgroundColor(backgroundColorCross);
+  ui.btnBackgroundColorSphere->setBackgroundColor(backgroundColorSphere);
+  ui.btnBackgroundColorEllipsoid->setBackgroundColor(backgroundColorEllipsoid);
+#endif
 }
 
 /**
  * Set the foreground color
  * @param foregroundColor
  */
-void PeaksWorkspaceWidget::setForegroundColor(const PeakViewColor &) {
-  // TODO add functionality here when button for PeakViewColor exist
-  //ui.btnPeakColor->setBackgroundColor(foregroundColor);
-}
+void PeaksWorkspaceWidget::setForegroundColor(const PeakViewColor & foregroundColor) {
+#if 0
+  // Need to set the three buttons sepearately
+  auto foregroundColorCross = foregroundColor.colorCross;
+  auto foregroundColorSphere = foregroundColor.colorSphere;
+  auto foregroundColorEllipsoid = foregroundColor.colorEllipsoid;
 
+  ui.btnPeakColor->setBackgroundColor(foregroundColorCross);
+  ui.btnPeakColorSphere->setBackgroundColor(foregroundColorSphere);
+  ui.btnPeakColorEllipsoid->setBackgroundColor(foregroundColorEllipsoid);
+#endif
+}
 
 /**
  * Set show/hide background
@@ -341,6 +412,63 @@ void PeaksWorkspaceWidget::exitClearPeaksMode() {
 void PeaksWorkspaceWidget::exitAddPeaksMode() {
     SignalBlocker<QPushButton> scopedBlocker(ui.btnAddPeak);
     scopedBlocker->setChecked(false);
+}
+
+
+void PeaksWorkspaceWidget::onBackgroundColorCrossClicked() {
+  // TODO bring to life when old style color is gone
+#if 0
+  auto selectedColor = getSelectedColor();
+  if (selectedColor.isValid()) {
+    ui.btnBackgroundColor->setBackgroundColor(selectedColor);
+    onBackgroundPeakViewColorClicked();
+  }
+#endif
+}
+
+void PeaksWorkspaceWidget::onForegroundColorCrossClicked() {
+  // TODO bring to life when old style color is gone
+#if 0
+  auto selectedColor = getSelectedColor();
+  if (selectedColor.isValid()) {
+
+
+    ui.btnPeakColor->setBackgroundColor(selectedColor);
+    onForegroundPeakViewColorClicked();
+  }
+ #endif
+}
+
+void PeaksWorkspaceWidget::onBackgroundColorSphereClicked() {
+  auto selectedColor = getSelectedColor();
+  if (selectedColor.isValid()) {
+    ui.btnBackgroundColorSphere->setBackgroundColor(selectedColor);
+    onBackgroundPeakViewColorClicked();
+  }
+}
+
+void PeaksWorkspaceWidget::onForegroundColorSphereClicked() {
+  auto selectedColor = getSelectedColor();
+  if (selectedColor.isValid()) {
+    ui.btnPeakColorSphere->setBackgroundColor(selectedColor);
+    onForegroundPeakViewColorClicked();
+  }
+}
+
+void PeaksWorkspaceWidget::onBackgroundColorEllipsoidClicked() {
+  auto selectedColor = getSelectedColor();
+  if (selectedColor.isValid()) {
+    ui.btnBackgroundColorEllipsoid->setBackgroundColor(selectedColor);
+    onBackgroundPeakViewColorClicked();
+  }
+}
+
+void PeaksWorkspaceWidget::onForegroundColorEllipsoidClicked() {
+  auto selectedColor = getSelectedColor();
+  if (selectedColor.isValid()) {
+    ui.btnPeakColorEllipsoid->setBackgroundColor(selectedColor);
+    onForegroundPeakViewColorClicked();
+  }
 }
 
 } // namespace
