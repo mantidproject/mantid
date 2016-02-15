@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -82,15 +81,16 @@ private:
   void init();
   void exec();
 
+  API::MatrixWorkspace_sptr rangeFilterEventWorkspace(
+      API::MatrixWorkspace_sptr eventWorkspace, double minRange,
+      double maxRange);
+
   /// Get the input workspace
-  API::MatrixWorkspace_const_sptr getInputWorkspace();
+  API::MatrixWorkspace_sptr getInputWorkspace();
   /// Create the outputworkspace
   API::MatrixWorkspace_sptr
-  getOutputWorkspace(API::MatrixWorkspace_const_sptr inWS, const int minSpec,
+  getOutputWorkspace(API::MatrixWorkspace_sptr inWS, const int minSpec,
                      const int maxSpec);
-
-  /// Input event workspace
-  DataObjects::EventWorkspace_const_sptr inputEventWS;
 };
 
 } // namespace Algorithm
