@@ -28,9 +28,10 @@ void trimToken(std::string &s) {
 // tokens.
 void emptyFinalToken(const std::string &str, const std::string &delims,
                      std::vector<std::string> &tokens) {
-  const auto pos = std::find_first_of(str.end() - 1, str.end(), delims.begin(),
-                                      delims.end());
-  if (pos != str.end()) {
+
+  const auto pos = std::find(delims.cbegin(), delims.cend(), str.back());
+
+  if (pos != delims.cend()) {
     tokens.emplace_back();
   }
 }
