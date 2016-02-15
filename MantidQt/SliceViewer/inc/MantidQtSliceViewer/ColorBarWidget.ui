@@ -55,7 +55,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QScienceSpinBox" name="valMax">
+      <widget class="MantidQt::API::QScienceSpinBox" name="valMax">
        <property name="toolTip">
         <string>Maximum value in the color scale</string>
        </property>
@@ -71,7 +71,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QScienceSpinBox" name="valMin">
+      <widget class="MantidQt::API::QScienceSpinBox" name="valMin">
        <property name="toolTip">
         <string>Minimum value in the color scale</string>
        </property>
@@ -107,9 +107,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QScienceSpinBox</class>
+   <class>MantidQt::API::QScienceSpinBox</class>
    <extends>QDoubleSpinBox</extends>
-   <header location="global">MantidQtSliceViewer/QScienceSpinBox.h</header>
+   <header>MantidQtAPI/QScienceSpinBox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
