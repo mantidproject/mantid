@@ -61,10 +61,8 @@ private slots:
 	bool apply();
 	void prevColumn();
 	void nextColumn();
-	void insertFunction();
 	void insertCol();
 	void insertCell();
-	void insertExplain(int index);
 	void updateColumn(int sc);
 
 private:
@@ -74,9 +72,7 @@ private:
 	QSize sizeHint() const ;
 	void customEvent( QEvent *e );
 
-    QComboBox* functions;
     QComboBox* boxColumn;
-    QPushButton* btnAddFunction;
     QPushButton* btnAddCol;
     QPushButton* btnCancel;
     QPushButton *buttonPrev;
