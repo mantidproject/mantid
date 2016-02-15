@@ -1,5 +1,5 @@
 #pylint: disable=no-init
-from mantid import config, logger, AlgorithmFactory, Progress
+from mantid import config, logger, AlgorithmFactory
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -19,6 +19,10 @@ class IqtFitMultiple(PythonAlgorithm):
     _max_iterations = None
     _save = None
     _plot = None
+    _result_name = None
+    _parameter_name = None
+    _fit_group_name = None
+
 
     def category(self):
         return "Workflow\\MIDAS"
@@ -98,6 +102,9 @@ class IqtFitMultiple(PythonAlgorithm):
         self._max_iterations = self.getProperty('MaxIterations').value
         self._save = self.getProperty('Save').value
         self._plot = self.getProperty('Plot').value
+        self._result_name = self.getPropertyValue('OutputResultWorkspace')
+        self._parameter_name = self.getPropertyValue('OutputParameterWorkspace')
+        self._fit_group_name = self.getPropertyValue('OutputWorkspaceGroup')
 
     def PyExec(self):
         from IndirectDataAnalysis import (getWSprefix, convertToElasticQ,
@@ -111,7 +118,7 @@ class IqtFitMultiple(PythonAlgorithm):
         setup_prog.report('generating output name')
         # Run IqtFitMultiple algorithm from indirectDataAnalysis
         nHist = self._input_ws.getNumberHistograms()
-        output_workspace = getWSprefix(self._input_ws.getName()) + 'Iqt_1Smult_s0_to_' + str(nHist-1)
+        output_workspace = self._input_ws.getName()
 
         option = self._fit_type[:-2]
         logger.information('Option: '+ option)
@@ -149,51 +156,53 @@ class IqtFitMultiple(PythonAlgorithm):
         fit_prog.report('Fitting complete')
 
         conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
+        conclusion_prog.report('Renaming workspaces')
+        RenameWorkspace(InputWorkspace=output_workspace, OutputWorkspace=self._result_name)
+        RenameWorkspace(InputWorkspace=output_workspace + "_Workspaces", OutputWorkspace=self._fit_group_name)
+        RenameWorkspace(InputWorkspace=output_workspace + "_Parameters", OutputWorkspace=self._parameter_name)
+
         conclusion_prog.report('Tansposing parameter table')
-        params_table = output_workspace + '_Parameters'
-        transposeFitParametersTable(params_table)
+        transposeFitParametersTable(self._parameter_name)
 
         #set first column of parameter table to be axis values
         x_axis = mtd[tmp_fit_workspace].getAxis(1)
         axis_values = x_axis.extractValues()
         for i, value in enumerate(axis_values):
-            mtd[params_table].setCell('axis-1', i, value)
+            mtd[self._parameter_name].setCell('axis-1', i, value)
 
         #convert parameters to matrix workspace
-        result_workspace = output_workspace + "_Result"
         parameter_names = 'A0,Intensity,Tau,Beta'
         conclusion_prog.report('Processing indirect fit parameters')
-        result_workspace = ProcessIndirectFitParameters(InputWorkspace=params_table, ColumnX="axis-1", XAxisUnit="MomentumTransfer", ParameterNames=parameter_names)
+        self._result_name = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name, ColumnX="axis-1", XAxisUnit="MomentumTransfer", ParameterNames=parameter_names)
 
-        fit_group = output_workspace + '_Workspaces'
 
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
                         'intensities_constrained': self._intensities_constrained, 'beta_constrained': True}
 
         conclusion_prog.report('Copying sample logs')
-        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=result_workspace)
-        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=fit_group)
+        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._result_name)
+        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._fit_group_name)
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]
         conclusion_prog.report('Adding sample logs')
-        AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
-        AddSampleLogMultiple(Workspace=fit_group, LogNames=log_names, LogValues=log_values)
+        AddSampleLogMultiple(Workspace=self._result_name, LogNames=log_names, LogValues=log_values)
+        AddSampleLogMultiple(Workspace=self._fit_group_name, LogNames=log_names, LogValues=log_values)
 
         DeleteWorkspace(tmp_fit_workspace)
 
         if self._save:
             conclusion_prog.report('Saving')
-            save_workspaces = [result_workspace]
+            save_workspaces = [self._result_name]
             furyFitSaveWorkspaces(save_workspaces)
 
         if self._plot != 'None':
             conclusion_prog.report('Plotting')
-            furyfitPlotSeq(result_workspace, Plot)
+            furyfitPlotSeq(self._result_name, Plot)
 
-        self.setProperty('OutputResultWorkspace', result_workspace)
-        self.setProperty('OutputParameterWorkspace', params_table)
-        self.setProperty('OutputWorkspaceGroup', fit_group)
+        self.setProperty('OutputResultWorkspace', self._result_name)
+        self.setProperty('OutputParameterWorkspace', self._parameter_name)
+        self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
         conclusion_prog.report('Algorithm complete')
 
 
