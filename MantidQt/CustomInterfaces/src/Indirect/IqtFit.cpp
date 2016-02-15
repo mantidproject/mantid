@@ -161,8 +161,8 @@ void IqtFit::run() {
 
   const auto function = std::string(func->asString());
   const auto fitType = fitTypeString();
-  const auto specMin = m_uiForm.spSpectraMin->value();
-  const auto specMax = m_uiForm.spSpectraMax->value();
+  const long specMin = m_uiForm.spSpectraMin->value();
+  const long specMax = m_uiForm.spSpectraMax->value();
   const auto minimizer = minimizerString("$outputname_$wsindex");
   const auto save = m_uiForm.ckSave->isChecked();
   const auto plot = m_uiForm.cbPlotType->currentText().toStdString();
@@ -171,10 +171,10 @@ void IqtFit::run() {
   const auto endX =
       boost::lexical_cast<double>(m_properties["EndX"]->valueText().toStdString());
   const auto maxIt =
-      boost::lexical_cast<double>(m_properties["MaxIterations"]->valueText().toStdString());
+      boost::lexical_cast<long>(m_properties["MaxIterations"]->valueText().toStdString());
 
   QString pyInput =
-      "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
+      "from IndirectDataAnalysis import furyfitSeq,\n"
       "input = '" +
       m_ffInputWSName + "'\n"
                         "func = r'" +
@@ -231,6 +231,9 @@ void IqtFit::run() {
     iqtFitMultiple->setProperty("ConstrainIntensities", constrainIntens);
     iqtFitMultiple->setProperty("Save", save);
     iqtFitMultiple->setProperty("Plot", plot);
+    iqtFitMultiple->setProperty("OutputResultWorkspace", "Result");
+    iqtFitMultiple->setProperty("OutputParameterWorkspace", "Params");
+    iqtFitMultiple->setProperty("OutputWorkspaceGroup", "FitGroup");
 
     m_batchAlgoRunner->addAlgorithm(iqtFitMultiple);
     m_batchAlgoRunner->executeBatch();
