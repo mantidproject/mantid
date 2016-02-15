@@ -16,7 +16,6 @@ DECLARE_ALGORITHM(QueryRemoteJob)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 

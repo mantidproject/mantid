@@ -9,6 +9,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
 
 using namespace Mantid::API;

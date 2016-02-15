@@ -7,17 +7,13 @@
 #ifndef Q_MOC_RUN
 #include <boost/scoped_ptr.hpp>
 #endif
+
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/Sample.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidKernel/EmptyValues.h"
 
 namespace Mantid {
 //----------------------------------------------------------------------------
@@ -28,7 +24,9 @@ class ParameterMap;
 class INearestNeighbours;
 class INearestNeighboursFactory;
 }
+
 namespace API {
+class Axis;
 class SpectrumDetectorMapping;
 
 /// typedef for the image type

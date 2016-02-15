@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IDetector.h"
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {

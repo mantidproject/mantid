@@ -5,6 +5,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MultiThreaded.h"

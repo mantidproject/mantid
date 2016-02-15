@@ -1,13 +1,17 @@
 #include "MantidSINQ/LoadFlexiNexus.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Utils.h"
+
+#include <boost/algorithm/string.hpp>
+
 #include <fstream>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadFlexiNexus)

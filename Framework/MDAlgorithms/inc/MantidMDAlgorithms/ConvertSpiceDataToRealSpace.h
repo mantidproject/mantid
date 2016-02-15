@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_
 #define MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/FileDescriptor.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

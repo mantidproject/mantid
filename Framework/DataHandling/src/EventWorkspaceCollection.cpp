@@ -1,6 +1,7 @@
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 
 #include <vector>

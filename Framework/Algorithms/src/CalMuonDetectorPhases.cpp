@@ -1,13 +1,16 @@
 #include "MantidAlgorithms/CalMuonDetectorPhases.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {
 namespace Algorithms {

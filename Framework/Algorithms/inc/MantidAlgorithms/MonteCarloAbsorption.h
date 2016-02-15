@@ -6,10 +6,21 @@
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <boost/random/mersenne_twister.hpp>
 
 namespace Mantid {
+
+// forward declarations from other Mantid modules
+namespace Kernel {
+class Material;
+}
+
+namespace API {
+class SampleEnvironment;
+}
+
 namespace Geometry {
 class IDetector;
 class Object;

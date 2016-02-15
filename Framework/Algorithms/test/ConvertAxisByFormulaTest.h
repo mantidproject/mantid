@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/Axis.h"
 
 using Mantid::Algorithms::ConvertAxisByFormula;
 

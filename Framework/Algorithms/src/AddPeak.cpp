@@ -1,8 +1,11 @@
 #include "MantidAlgorithms/AddPeak.h"
-#include "MantidKernel/System.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::PhysicalConstants;
 

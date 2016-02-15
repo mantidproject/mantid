@@ -1,4 +1,5 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidCrystal/ShowPeakHKLOffsets.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"

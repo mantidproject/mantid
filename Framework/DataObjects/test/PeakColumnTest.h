@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
+#include "MantidKernel/Exception.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 

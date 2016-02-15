@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/SpecularReflectionCalculateTheta.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+
 #include <cmath>
 
 using namespace Mantid::Kernel;
