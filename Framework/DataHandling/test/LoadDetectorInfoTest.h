@@ -7,6 +7,7 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"

@@ -5,6 +5,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include <boost/assign.hpp>
 
 using namespace Mantid::API;

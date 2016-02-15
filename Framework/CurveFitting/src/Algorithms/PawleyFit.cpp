@@ -6,6 +6,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/cow_ptr.h"

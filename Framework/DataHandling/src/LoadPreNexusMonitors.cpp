@@ -3,6 +3,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UnitFactory.h"

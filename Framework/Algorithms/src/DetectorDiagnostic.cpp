@@ -2,12 +2,13 @@
 // Includes
 //--------------------------------------------------------------------------
 #include "MantidAlgorithms/DetectorDiagnostic.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspaceHelpers.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidDataObjects/EventWorkspaceHelpers.h"
-#include "MantidDataObjects/MaskWorkspace.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
 #include <cfloat>

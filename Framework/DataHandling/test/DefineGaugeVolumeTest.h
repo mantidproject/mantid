@@ -5,6 +5,7 @@
 #include "MantidDataHandling/DefineGaugeVolume.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

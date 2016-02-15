@@ -2,8 +2,9 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"

@@ -7,6 +7,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <cmath>
 #include <vector>

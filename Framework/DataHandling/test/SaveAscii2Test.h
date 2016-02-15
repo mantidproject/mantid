@@ -5,6 +5,7 @@
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <fstream>
 #include <Poco/File.h>
 

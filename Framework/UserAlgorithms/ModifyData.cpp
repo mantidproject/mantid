@@ -1,5 +1,6 @@
 #include "ModifyData.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {
 namespace Algorithms {

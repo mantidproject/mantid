@@ -11,6 +11,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/EmptyValues.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>

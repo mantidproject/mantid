@@ -2,6 +2,7 @@
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/OptionalBool.h"

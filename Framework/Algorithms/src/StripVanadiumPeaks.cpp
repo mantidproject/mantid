@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/StripVanadiumPeaks.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"

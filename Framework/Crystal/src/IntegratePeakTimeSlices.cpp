@@ -14,6 +14,7 @@
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 //#include "MantidGeometry/Surfaces/Surface.h"
 

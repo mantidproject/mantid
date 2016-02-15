@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/RadiusSum.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"

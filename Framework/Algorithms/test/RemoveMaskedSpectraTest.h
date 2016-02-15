@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/RemoveMaskedSpectra.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::Algorithms::RemoveMaskedSpectra;

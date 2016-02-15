@@ -4,12 +4,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
-#include "MantidDataHandling/LoadSpiceAscii.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Property.h"

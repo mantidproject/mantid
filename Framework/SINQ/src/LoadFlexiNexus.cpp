@@ -1,6 +1,7 @@
 #include "MantidSINQ/LoadFlexiNexus.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ArrayProperty.h"

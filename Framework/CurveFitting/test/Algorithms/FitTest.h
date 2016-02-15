@@ -7,6 +7,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "FitTestHelpers.h"
 

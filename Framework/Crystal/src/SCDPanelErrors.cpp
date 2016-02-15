@@ -1,6 +1,7 @@
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 

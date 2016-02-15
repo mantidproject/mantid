@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/FFTDerivative.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>

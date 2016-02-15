@@ -9,6 +9,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SampleShapeValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidGeometry/Instrument.h"

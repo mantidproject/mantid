@@ -4,6 +4,8 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
