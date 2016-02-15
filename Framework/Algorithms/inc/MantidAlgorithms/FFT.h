@@ -58,6 +58,10 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  /// Perform validation of inputs
+  std::map<std::string, std::string> validateInputs() override;
+  /// Check whether supplied values are evenly spaced
+  bool areBinWidthsUneven(const MantidVec &xValues) const;
 };
 
 } // namespace Algorithm
