@@ -161,13 +161,13 @@ public:
   void generalBin(MDBin<MDE, nd> &bin,
                   Mantid::Geometry::MDImplicitFunction &function) const;
   void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ =
-                            NULL) { /* Do nothing with a box default. */
+                            nullptr) { /* Do nothing with a box default. */
   }
 
   //---------------------------------------------------------------------------------------------------------------------------------
   /** Recalculate signal and various averages dependent on signal and the signal
    * coordinates */
-  void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL);
+  void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr);
   void calculateCentroid(coord_t *centroid) const;
   void calculateCentroid(coord_t *centroid, const int runindex) const;
   coord_t *getCentroid() const;

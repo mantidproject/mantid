@@ -61,7 +61,7 @@ public:
   //---------------------------------------------------------------------------------------------
   /** Main method that performs the work for the task. */
   virtual void run() {
-    if (m_voidFunc != NULL)
+    if (m_voidFunc != nullptr)
       m_voidFunc();
     else
       throw std::runtime_error("FunctionTask: NULL method pointer provided.");

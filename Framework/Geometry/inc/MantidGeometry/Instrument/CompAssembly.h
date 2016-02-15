@@ -59,7 +59,7 @@ public:
   /// Constructor for parametrized version
   CompAssembly(const IComponent *base, const ParameterMap *map);
   //! Constructor with a name and parent reference
-  CompAssembly(const std::string &, IComponent *reference = 0);
+  CompAssembly(const std::string &, IComponent *reference = nullptr);
   //! Copy constructor
   CompAssembly(const CompAssembly &);
   virtual ~CompAssembly();

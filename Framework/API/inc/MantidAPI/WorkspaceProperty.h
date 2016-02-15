@@ -419,7 +419,7 @@ private:
       } else {
         // ... and if it is a workspace of incorrect type, exclude the group by
         // returning an error.
-        if (NULL == boost::dynamic_pointer_cast<TYPE>(memberWs)) {
+        if (nullptr == boost::dynamic_pointer_cast<TYPE>(memberWs)) {
           error = "Workspace " + memberWsName + " is not of type " +
                   Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::type() +
                   ".";

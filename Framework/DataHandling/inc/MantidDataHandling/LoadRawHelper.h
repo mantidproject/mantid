@@ -70,7 +70,7 @@ public:
   FILE *openRawFile(const std::string &fileName);
   /// Read in run parameters Public so that LoadRaw2 can use it
   void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
-                         ISISRAW *const = NULL) const;
+                         ISISRAW *const = nullptr) const;
 
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(Kernel::FileDescriptor &descriptor) const;

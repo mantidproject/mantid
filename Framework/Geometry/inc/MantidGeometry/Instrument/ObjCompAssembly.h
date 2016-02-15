@@ -57,7 +57,7 @@ public:
   ObjCompAssembly(const IComponent *base, const ParameterMap *map);
 
   //! Constructor with a name and parent reference
-  ObjCompAssembly(const std::string &, IComponent *reference = 0);
+  ObjCompAssembly(const std::string &, IComponent *reference = nullptr);
   //! Copy constructor
   ObjCompAssembly(const ObjCompAssembly &);
   virtual ~ObjCompAssembly();

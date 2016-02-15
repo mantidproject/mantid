@@ -335,7 +335,7 @@ public:
   TableColumn_ptr(boost::shared_ptr<API::Column> c)
       : boost::shared_ptr<TableColumn<T>>(
             boost::dynamic_pointer_cast<TableColumn<T>>(c)) {
-    if (this->get() == NULL) {
+    if (this->get() == nullptr) {
       std::string str = "Data type of column " + c->name() +
                         " does not match " + typeid(T).name();
       throw std::runtime_error(str);
@@ -351,7 +351,7 @@ public:
     */
   TableColumn_ptr(boost::shared_ptr<API::Column> c)
       : TableColumn_ptr<API::Boolean>(c) {
-    if (this->get() == NULL) {
+    if (this->get() == nullptr) {
       std::string str = "Data type of column " + c->name() +
                         " does not match " + typeid(API::Boolean).name();
       throw std::runtime_error(str);

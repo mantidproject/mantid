@@ -51,7 +51,7 @@ protected:
   uint8_t *bufferFillAddress(void) const {
     if (bufferFillLength())
       return m_buffer + m_len;
-    return NULL;
+    return nullptr;
   }
 
   unsigned int bufferFillLength(void) const { return m_size - m_len; }

@@ -55,19 +55,19 @@ class DLLExport MDHistoWorkspaceIterator : public Mantid::API::IMDIterator {
 public:
   MDHistoWorkspaceIterator(
       MDHistoWorkspace_const_sptr workspace, SkippingPolicy *skippingPolicy,
-      Mantid::Geometry::MDImplicitFunction *function = NULL,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(
       const MDHistoWorkspace *workspace, SkippingPolicy *skippingPolicy,
-      Mantid::Geometry::MDImplicitFunction *function = NULL,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(
       MDHistoWorkspace_const_sptr workspace,
-      Mantid::Geometry::MDImplicitFunction *function = NULL,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(
       const MDHistoWorkspace *workspace,
-      Mantid::Geometry::MDImplicitFunction *function = NULL,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   virtual ~MDHistoWorkspaceIterator();
 

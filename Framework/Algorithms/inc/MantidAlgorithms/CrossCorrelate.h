@@ -59,12 +59,12 @@ namespace Algorithms {
 class DLLExport CrossCorrelate : public API::Algorithm {
 public:
   /// (Empty) Constructor
-  CrossCorrelate() : API::Algorithm(), m_progress(NULL) {}
+  CrossCorrelate() : API::Algorithm(), m_progress(nullptr) {}
   /// Virtual destructor
   virtual ~CrossCorrelate() {
     if (m_progress)
       delete m_progress;
-    m_progress = NULL;
+    m_progress = nullptr;
   }
   /// Algorithm's name
   virtual const std::string name() const { return "CrossCorrelate"; }

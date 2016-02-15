@@ -73,9 +73,9 @@ public:
   uint64_t getNPoints() const { return m_length; }
   /// get number of contributed events
   uint64_t getNEvents() const;
-  virtual std::vector<Mantid::API::IMDIterator *>
-  createIterators(size_t suggestedNumCores = 1,
-                  Mantid::Geometry::MDImplicitFunction *function = NULL) const;
+  virtual std::vector<Mantid::API::IMDIterator *> createIterators(
+      size_t suggestedNumCores = 1,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const;
 
   virtual void getLinePlot(const Mantid::Kernel::VMD &start,
                            const Mantid::Kernel::VMD &end,

@@ -45,7 +45,7 @@ public:
   virtual Task *pop(size_t threadnum) {
     UNUSED_ARG(threadnum);
 
-    Task *temp = NULL;
+    Task *temp = nullptr;
 
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
@@ -75,7 +75,7 @@ public:
           }
         }
       }
-      if (temp == NULL) {
+      if (temp == nullptr) {
         // Nothing was found, meaning all mutexes are in use
         // Try the first non-empty map
         SuperMap::iterator it = m_supermap.begin();

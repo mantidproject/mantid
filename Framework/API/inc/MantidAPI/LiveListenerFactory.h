@@ -52,7 +52,7 @@ class MANTID_API_DLL LiveListenerFactoryImpl
 public:
   boost::shared_ptr<ILiveListener>
   create(const std::string &instrumentName, bool connect,
-         const Kernel::IPropertyManager *props = NULL) const;
+         const Kernel::IPropertyManager *props = nullptr) const;
   bool checkConnection(const std::string &instrumentName) const;
 
 private:

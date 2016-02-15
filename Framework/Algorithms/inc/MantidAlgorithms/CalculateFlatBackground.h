@@ -54,12 +54,12 @@ public:
   /// (Empty) Constructor
   CalculateFlatBackground()
       : API::Algorithm(), m_convertedFromRawCounts(false),
-        m_skipMonitors(false), m_nullifyNegative(true), m_progress(NULL) {}
+        m_skipMonitors(false), m_nullifyNegative(true), m_progress(nullptr) {}
   /// Virtual destructor
   virtual ~CalculateFlatBackground() {
     if (m_progress)
       delete m_progress;
-    m_progress = NULL;
+    m_progress = nullptr;
   }
   /// Algorithm's name
   virtual const std::string name() const { return "CalculateFlatBackground"; }

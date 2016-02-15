@@ -50,7 +50,7 @@ namespace DataObjects {
 TMDE(MDEventWorkspace)::MDEventWorkspace(
     Mantid::API::MDNormalization preferredNormalization,
     Mantid::API::MDNormalization preferredNormalizationHisto)
-    : API::IMDEventWorkspace(), data(NULL),
+    : API::IMDEventWorkspace(), data(nullptr),
       m_BoxController(new BoxController(nd)),
       m_displayNormalization(preferredNormalization),
       m_displayNormalizationHisto(preferredNormalizationHisto),
@@ -63,7 +63,7 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(
 /** Copy constructor
  */
 TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
-    : IMDEventWorkspace(other), data(NULL),
+    : IMDEventWorkspace(other), data(nullptr),
       m_BoxController(other.m_BoxController->clone()),
       m_displayNormalization(other.m_displayNormalization),
       m_displayNormalizationHisto(other.m_displayNormalizationHisto),
@@ -198,7 +198,7 @@ TMDE(void MDEventWorkspace)::setMinRecursionDepth(size_t minDepth) {
       if (gbox) {
         // Split ALL the contents.
         for (size_t j = 0; j < gbox->getNumChildren(); j++)
-          gbox->splitContents(j, NULL);
+          gbox->splitContents(j, nullptr);
       }
     }
   }
@@ -762,12 +762,12 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
 
     // Look for the box at this coordinate
     // const MDBoxBase<MDE,nd> * box = NULL;
-    const IMDNode *box = NULL;
+    const IMDNode *box = nullptr;
 
     if (isInBounds(coord.getBareArray())) {
       box = this->data->getBoxAtCoord(coord.getBareArray());
 
-      if (box != NULL) {
+      if (box != nullptr) {
         if (!box->getIsMasked()) {
           // What is our normalization factor?
           signal_t normalizer = 1.0;

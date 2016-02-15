@@ -198,12 +198,12 @@ protected:
   mutable Kernel::V3D groupCentre;
 
   // functions inherited from IComponent
-  Component *clone() const { return NULL; }
-  ComponentID getComponentID(void) const { return NULL; }
+  Component *clone() const { return nullptr; }
+  ComponentID getComponentID(void) const { return nullptr; }
   boost::shared_ptr<const IComponent> getParent() const {
     return boost::shared_ptr<const IComponent>();
   }
-  virtual const IComponent *getBareParent() const { return NULL; }
+  virtual const IComponent *getBareParent() const { return nullptr; }
   std::vector<boost::shared_ptr<const IComponent>> getAncestors() const {
     return std::vector<boost::shared_ptr<const IComponent>>();
   }

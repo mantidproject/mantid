@@ -151,11 +151,11 @@ class ANNkd_split : public ANNkd_node // splitting node of a kd-tree
                        // rectangle along cut_dim
   ANNkd_ptr child[2];  // left and right children
 public:
-  ANNkd_split(                                  // constructor
-      int cd,                                   // cutting dimension
-      ANNcoord cv,                              // cutting value
-      ANNcoord lv, ANNcoord hv,                 // low and high values
-      ANNkd_ptr lc = NULL, ANNkd_ptr hc = NULL) // children
+  ANNkd_split(                                        // constructor
+      int cd,                                         // cutting dimension
+      ANNcoord cv,                                    // cutting value
+      ANNcoord lv, ANNcoord hv,                       // low and high values
+      ANNkd_ptr lc = nullptr, ANNkd_ptr hc = nullptr) // children
   {
     cut_dim = cd;         // cutting dimension
     cut_val = cv;         // cutting value
@@ -167,9 +167,9 @@ public:
 
   ~ANNkd_split() // destructor
   {
-    if (child[ANN_LO] != NULL && child[ANN_LO] != KD_TRIVIAL)
+    if (child[ANN_LO] != nullptr && child[ANN_LO] != KD_TRIVIAL)
       delete child[ANN_LO];
-    if (child[ANN_HI] != NULL && child[ANN_HI] != KD_TRIVIAL)
+    if (child[ANN_HI] != nullptr && child[ANN_HI] != KD_TRIVIAL)
       delete child[ANN_HI];
   }
 

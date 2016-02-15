@@ -53,7 +53,7 @@ public:
         DomainType domainType = Simple);
   /// Constructor
   FitMD(DomainType domainType)
-      : API::IDomainCreator(NULL, std::vector<std::string>(), domainType),
+      : API::IDomainCreator(nullptr, std::vector<std::string>(), domainType),
         m_startIndex(0), m_count(0) {}
   /// Initialize
   void initialize(Kernel::IPropertyManager *pm,

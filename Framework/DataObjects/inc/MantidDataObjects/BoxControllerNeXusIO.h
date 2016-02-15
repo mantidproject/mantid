@@ -43,7 +43,7 @@ public:
   BoxControllerNeXusIO(API::BoxController *const theBC);
 
   ///@return true if the file to write events is opened and false otherwise
-  virtual bool isOpened() const { return (m_File != NULL); }
+  virtual bool isOpened() const { return (m_File != nullptr); }
   /// get the full file name of the file used for IO operations
   virtual const std::string &getFileName() const { return m_fileName; }
   /**Return the size of the NeXus data block used in NeXus data array*/

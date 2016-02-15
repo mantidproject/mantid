@@ -674,10 +674,10 @@ private:
     Kernel::DateAndTime start_t = Kernel::DateAndTime(start_time);
     NXInfo vinfo = getDataSetInfo("value");
     if (!vinfo)
-      return NULL;
+      return nullptr;
 
     if (vinfo.dims[0] != times.dim0())
-      return NULL;
+      return nullptr;
 
     if (vinfo.type == NX_CHAR) {
       Kernel::TimeSeriesProperty<std::string> *logv =
@@ -721,7 +721,7 @@ private:
       NXInt value(*this, "value");
       return loadValues<NXInt, TYPE>(logName, value, start_t, times);
     }
-    return NULL;
+    return nullptr;
   }
 
   /// Loads the values in the log into the workspace

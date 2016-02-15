@@ -66,7 +66,7 @@ public:
   virtual ~FindPeaks() {
     if (m_progress)
       delete m_progress;
-    m_progress = NULL;
+    m_progress = nullptr;
   }
   /// Algorithm's name
   virtual const std::string name() const { return "FindPeaks"; }
