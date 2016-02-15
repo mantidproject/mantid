@@ -151,14 +151,9 @@ class IqtFitMultiple(PythonAlgorithm):
 
         #convert parameters to matrix workspace
         result_workspace = output_workspace + "_Result"
-        parameter_names = ['A0', 'Intensity', 'Tau', 'Beta']
-        convertParametersToWorkspace(params_table, "axis-1", parameter_names, result_workspace)
+        parameter_names = 'A0,Intensity,Tau,Beta'
+        result_workspace = ProcessIndirectFitParameters(InputWorkspace=params_table, ColumnX="axis-1", XAxisUnit="MomentumTransfer", ParameterNames=parameter_names)
 
-        #set x units to be momentum transfer
-        axis = mtd[result_workspace].getAxis(0)
-        axis.setUnit("MomentumTransfer")
-
-        result_workspace = output_workspace + '_Result'
         fit_group = output_workspace + '_Workspaces'
 
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
