@@ -52,6 +52,8 @@ class FuryFitMultiple(PythonAlgorithm):
                              doc="Should the Output of the algorithm be saved to working directory")
         self.declareProperty(name='Plot', defaultValue='None', validator=StringListValidator(['None', 'Intensity', 'Tau', 'Beta', 'All']),
                              doc='Switch Plot Off/On')
+        self.declareProperty(MatrixWorkspaceProperty('OutputResultWorkspace', '', direction=Direction.Output),
+                             doc='The outputworkspace containing the results of the fit data')
 
 
     def validateInputs(self):
@@ -174,5 +176,8 @@ class FuryFitMultiple(PythonAlgorithm):
 
         if self._plot != 'None':
             furyfitPlotSeq(result_workspace, Plot)
+
+        self.setProperty('OutputResultWorkspace', result_workspace)
+
 
 AlgorithmFactory.subscribe(FuryFitMultiple)
