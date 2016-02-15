@@ -1,11 +1,3 @@
-//
-//  StringTokenizer.cpp
-//  Mantid
-//
-//  Created by Hahn, Steven E. on 1/31/16.
-//
-//
-
 #include "MantidKernel/StringTokenizer.h"
 #include <algorithm>
 #include <functional>
@@ -17,19 +9,19 @@ namespace {
 // implement our own trim function to avoid the locale overhead in boost::trim.
 
 // trim from start
-void ltrim(std::string &s) {
+void trimTokenFromStart(std::string &s) {
   s.erase(s.begin(), std::find_if_not(s.begin(), s.end(), ::isspace));
 }
 
 // trim from end
-void rtrim(std::string &s) {
+void trimTokenFromEnd(std::string &s) {
   s.erase(std::find_if_not(s.rbegin(), s.rend(), ::isspace).base(), s.end());
 }
 
 // trim from both ends
-void trim(std::string &s) {
-  ltrim(s);
-  rtrim(s);
+void trimToken(std::string &s) {
+  trimTokenFromStart(s);
+  trimTokenFromEnd(s);
 }
 
 // If the final character is a separator, we need to add an empty string to
@@ -58,9 +50,9 @@ void for_each_token(InputIt first, InputIt last, ForwardIt s_first,
   }
 }
 
-// split keeping whitespace and empty tokens.
-std::vector<std::string> split0(const std::string &str,
-                                const std::string &delims) {
+std::vector<std::string>
+splitKeepingWhitespaceEmptyTokens(const std::string &str,
+                                  const std::string &delims) {
   std::vector<std::string> output;
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first,
@@ -70,9 +62,9 @@ std::vector<std::string> split0(const std::string &str,
   return output;
 }
 
-// split keeping whitespace and ignoring empty tokens.
-std::vector<std::string> split1(const std::string &str,
-                                const std::string &delims) {
+std::vector<std::string>
+splitKeepingWhitespaceIgnoringEmptyTokens(const std::string &str,
+                                          const std::string &delims) {
   std::vector<std::string> output;
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first,
@@ -83,29 +75,29 @@ std::vector<std::string> split1(const std::string &str,
   return output;
 }
 
-// split trimming whitespace and keeping empty tokens.
-std::vector<std::string> split2(const std::string &str,
-                                const std::string &delims) {
+std::vector<std::string>
+splitIgnoringWhitespaceKeepingEmptyTokens(const std::string &str,
+                                          const std::string &delims) {
   std::vector<std::string> output;
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first,
                            std::string::const_iterator second) {
                    output.emplace_back(first, second);
-                   trim(output.back());
+                   trimToken(output.back());
                  });
   return output;
 }
 
-// split trimming whitespace and ignoring empty tokens.
-std::vector<std::string> split3(const std::string &str,
-                                const std::string &delims) {
+std::vector<std::string>
+splitIgnoringWhitespaceEmptyTokens(const std::string &str,
+                                   const std::string &delims) {
   std::vector<std::string> output;
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first,
                            std::string::const_iterator second) {
                    if (first != second) {
                      output.emplace_back(first, second);
-                     trim(output.back());
+                     trimToken(output.back());
                      if (output.back().empty())
                        output.pop_back();
                    }
@@ -131,7 +123,7 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
     throw std::runtime_error(
         "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
         std::to_string(options));
-  // if str is empty, then there is no workt to do. exit early.
+  // if str is empty, then there is no work to do. exit early.
   if (str.empty())
     return;
 
@@ -142,30 +134,30 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
   // cases 4-7 will not check and ignore a potential empty token at the end.
   switch (options) {
   case 0:
-    m_tokens = split0(str, separators);
+    m_tokens = splitKeepingWhitespaceEmptyTokens(str, separators);
     emptyFinalToken(str, separators, m_tokens);
     break;
   case 1:
-    m_tokens = split1(str, separators);
+    m_tokens = splitKeepingWhitespaceIgnoringEmptyTokens(str, separators);
     break;
   case 2:
-    m_tokens = split2(str, separators);
+    m_tokens = splitIgnoringWhitespaceKeepingEmptyTokens(str, separators);
     emptyFinalToken(str, separators, m_tokens);
     break;
   case 3:
-    m_tokens = split3(str, separators);
+    m_tokens = splitIgnoringWhitespaceEmptyTokens(str, separators);
     break;
   case 4:
-    m_tokens = split0(str, separators);
+    m_tokens = splitKeepingWhitespaceEmptyTokens(str, separators);
     break;
   case 5:
-    m_tokens = split1(str, separators);
+    m_tokens = splitKeepingWhitespaceIgnoringEmptyTokens(str, separators);
     break;
   case 6:
-    m_tokens = split2(str, separators);
+    m_tokens = splitIgnoringWhitespaceKeepingEmptyTokens(str, separators);
     break;
   case 7:
-    m_tokens = split3(str, separators);
+    m_tokens = splitIgnoringWhitespaceEmptyTokens(str, separators);
     break;
   }
 }
