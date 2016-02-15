@@ -125,8 +125,8 @@ private:
 
   ILiveListener::RunStatus m_status;
   int m_runNumber;
-  DataObjects::EventWorkspace_sptr
-      m_eventBuffer; ///< Used to buffer events between calls to extractData()
+  DataObjects::EventWorkspace_sptr m_eventBuffer;
+  ///< Used to buffer events between calls to extractData()
 
   bool m_workspaceInitialized;
   std::string m_wsName;
@@ -154,9 +154,8 @@ private:
   bool m_stopThread; // background thread checks this periodically.
                      // If true, the thread exits
 
-  Kernel::DateAndTime
-      m_startTime; // The requested start time for the data stream
-                   // (needed by the run() function)
+  Kernel::DateAndTime m_startTime; // The requested start time for the data
+                                   // stream (needed by the run() function)
 
   // Used to initialize the scan_index property if we haven't received a packet
   // with the 'real' value by the time we call initWorkspacePart2.  (We can't
