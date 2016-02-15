@@ -119,11 +119,7 @@ splitIgnoringWhitespaceEmptyTokens(const std::string &str,
 Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
                                                  const std::string &separators,
                                                  unsigned options) {
-  // check options variable is in the range 0-7.
-  if (options > 7)
-    throw std::runtime_error(
-        "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
-        std::to_string(options));
+
   // if str is empty, then there is no work to do. exit early.
   if (str.empty())
     return;
@@ -161,4 +157,10 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
     m_tokens = splitIgnoringWhitespaceEmptyTokens(str, separators);
     break;
   }
+
+  // check options variable is in the range 0-7.
+  if (options > 7)
+    throw std::runtime_error(
+        "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
+        std::to_string(options));
 }
