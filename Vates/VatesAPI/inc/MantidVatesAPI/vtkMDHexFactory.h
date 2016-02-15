@@ -20,6 +20,12 @@ namespace Mantid
 namespace VATES
 {
 
+/// Round up to next multiple of factor
+coord_t roundUp(const coord_t num_to_round, const coord_t factor);
+
+/// Round down to previous multiple of factor
+coord_t roundDown(const coord_t num_to_round, const coord_t factor);
+
 /** Class is used to generate vtkUnstructuredGrids from IMDEventWorkspaces. Utilises the non-uniform nature of the underlying workspace grid/box structure
 as the basis for generating visualisation cells. The recursion depth through the box structure is configurable.
 
@@ -77,6 +83,10 @@ public:
   void setTime(double timeStep);
 
 private:
+
+  coord_t getNextBinBoundary(Mantid::API::IMDEventWorkspace_sptr imdws) const;
+
+  coord_t getPreviousBinBoundary(Mantid::API::IMDEventWorkspace_sptr imdws) const;
 
   template<typename MDE, size_t nd>
   void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;
