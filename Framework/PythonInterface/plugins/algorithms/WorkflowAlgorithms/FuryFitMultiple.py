@@ -102,36 +102,36 @@ class FuryFitMultiple(PythonAlgorithm):
                                           furyfitPlotSeq)
 
         # Run FuryFitMultiple algorithm from indirectDataAnalysis
-        nHist = inputWS.getNumberHistograms()
-        output_workspace = getWSprefix(inputWS.getName()) + 'fury_1Smult_s0_to_' + str(nHist-1)
+        nHist = self._input_ws.getNumberHistograms()
+        output_workspace = getWSprefix(self._input_ws.getName()) + 'fury_1Smult_s0_to_' + str(nHist-1)
 
-        option = ftype[:-2]
-        logger.information('Option: '+option)
-        logger.information('Function: '+function)
+        option = self._fit_type[:-2]
+        logger.information('Option: '+ option)
+        logger.information('Function: '+ self._function)
 
         #prepare input workspace for fitting
         tmp_fit_workspace = "__furyfit_fit_ws"
-        if spec_max is None:
-            CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace,
-                          XMin=startx, XMax=endx,
-                          StartWorkspaceIndex=spec_min)
+        if self._spec_max is None:
+            CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace,
+                          XMin=self._start_x, XMax=self._end_x,
+                          StartWorkspaceIndex=self._spec_min)
         else:
-            CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace,
-                          XMin=startx, XMax=endx,
-                          StartWorkspaceIndex=spec_min, EndWorkspaceIndex=spec_max)
+            CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace,
+                          XMin=self._start_x, XMax=self._end_x,
+                          StartWorkspaceIndex=self._spec_min, EndWorkspaceIndex=self._spec_max)
 
         ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
         convertToElasticQ(tmp_fit_workspace)
 
         #fit multi-domian functino to workspace
-        multi_domain_func, kwargs = createFuryMultiDomainFunction(function, tmp_fit_workspace)
+        multi_domain_func, kwargs = createFuryMultiDomainFunction(self._function, tmp_fit_workspace)
         Fit(Function=multi_domain_func,
             InputWorkspace=tmp_fit_workspace,
             WorkspaceIndex=0,
             Output=output_workspace,
             CreateOutput=True,
-            Minimizer=minimizer,
-            MaxIterations=max_iterations,
+            Minimizer=self._minimizer,
+            MaxIterations=self._max_iterations,
             **kwargs)
 
         params_table = output_workspace + '_Parameters'
@@ -155,11 +155,11 @@ class FuryFitMultiple(PythonAlgorithm):
         result_workspace = output_workspace + '_Result'
         fit_group = output_workspace + '_Workspaces'
 
-        sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': ftype,
-                        'intensities_constrained': intensities_constrained, 'beta_constrained': True}
+        sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
+                        'intensities_constrained': self._intensities_constrained, 'beta_constrained': True}
 
-        CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
-        CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
+        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=result_workspace)
+        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=fit_group)
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]
@@ -168,11 +168,11 @@ class FuryFitMultiple(PythonAlgorithm):
 
         DeleteWorkspace(tmp_fit_workspace)
 
-        if Save:
+        if self._save:
             save_workspaces = [result_workspace]
             furyFitSaveWorkspaces(save_workspaces)
 
-        if Plot != 'None':
+        if self._plot != 'None':
             furyfitPlotSeq(result_workspace, Plot)
 
 AlgorithmFactory.subscribe(FuryFitMultiple)
