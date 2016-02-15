@@ -45,10 +45,13 @@ namespace MantidQt
       int m_FOM;
     public:
       PeakOverlayMultiSphereFactory(Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const int plotXIndex, const int plotYIndex, const size_t colourNumber=0);
-      virtual ~PeakOverlayMultiSphereFactory();
-      virtual boost::shared_ptr<PeakOverlayView> createView(PeaksPresenter* const presenter, Mantid::Geometry::PeakTransform_const_sptr transform) const;
-      virtual int FOM() const;
-      virtual void swapPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace>& peaksWS);
+      ~PeakOverlayMultiSphereFactory() override;
+      boost::shared_ptr<PeakOverlayView> createView(
+          PeaksPresenter *const presenter,
+          Mantid::Geometry::PeakTransform_const_sptr transform) const override;
+      int FOM() const override;
+      void swapPeaksWorkspace(
+          boost::shared_ptr<Mantid::API::IPeaksWorkspace> &peaksWS) override;
     };
   }
 }

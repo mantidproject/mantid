@@ -43,7 +43,7 @@ public:
                              const TimeSeriesProperty<bool> &filterProp,
                              const bool transferOwnserhip = false);
   /// Destructor
-  ~FilteredTimeSeriesProperty();
+  ~FilteredTimeSeriesProperty() override;
 
   /// Access the unfiltered log
   const TimeSeriesProperty<HeldType> *unfiltered() const;

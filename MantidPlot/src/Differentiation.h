@@ -43,6 +43,6 @@ public:
 
 private:
     void init();
-    void output();
+    void output() override;
 };
 #endif

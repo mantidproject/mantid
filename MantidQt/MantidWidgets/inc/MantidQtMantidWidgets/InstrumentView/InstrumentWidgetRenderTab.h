@@ -34,11 +34,11 @@ namespace MantidQt
 
 		public:
 			explicit InstrumentWidgetRenderTab(InstrumentWidget *instrWindow);
-			~InstrumentWidgetRenderTab();
-			void initSurface();
-			void saveSettings(QSettings&)const;
-			void loadSettings(const QSettings&);
-			void setupColorBarScaling(const MantidColorMap&, double);
+                        ~InstrumentWidgetRenderTab() override;
+                        void initSurface() override;
+                        void saveSettings(QSettings &) const override;
+                        void loadSettings(const QSettings &) override;
+                        void setupColorBarScaling(const MantidColorMap&, double);
 			GraphOptions::ScaleType getScaleType()const;
 			void setScaleType(GraphOptions::ScaleType type);
 			void setAxis(const QString& axisName);
@@ -78,8 +78,8 @@ namespace MantidQt
 			void setUCorrection();
 
 		private:
-			void showEvent(QShowEvent *);
-			QMenu* createPeaksMenu();
+                  void showEvent(QShowEvent *) override;
+                        QMenu* createPeaksMenu();
 			QFrame * setupAxisFrame();
 			void setPrecisionMenuItemChecked(int n);
 			void enable3DSurface(bool on);

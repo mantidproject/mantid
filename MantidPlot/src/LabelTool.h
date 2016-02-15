@@ -48,9 +48,9 @@ class LabelTool : public QObject, public QVector<QPoint>, public PlotToolInterfa
   Q_OBJECT
 public:
   explicit LabelTool(Graph *graph);
- virtual ~LabelTool();
- virtual int rtti() const {return PlotToolInterface::Rtti_LabelTool;};
- 
+  ~LabelTool() override;
+  int rtti() const override { return PlotToolInterface::Rtti_LabelTool; };
+
  void removeTextBox();
 
 protected:

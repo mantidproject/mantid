@@ -36,27 +36,27 @@ namespace Algorithms {
 class DLLExport RayTracerTester : public API::Algorithm {
 public:
   RayTracerTester();
-  ~RayTracerTester();
+  ~RayTracerTester() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "RayTracerTester"; };
+  const std::string name() const override { return "RayTracerTester"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Algorithm to test ray tracer by spraying evenly spaced rays "
            "around.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility\\Development"; }
+  const std::string category() const override { return "Utility\\Development"; }
 
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
 };
 
 } // namespace Algorithms

@@ -53,7 +53,7 @@ public:
   fraction(const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t>> &
                extents) const;
 
-  virtual ~MDBoxImplicitFunction();
+  ~MDBoxImplicitFunction() override;
 
 private:
   void construct(const Mantid::Kernel::VMD &min,

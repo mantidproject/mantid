@@ -168,9 +168,9 @@ public:
 	enum {RTTI = 1001};
 
 	void setActive( bool o );
-	void cancelRename(int){return;};
+        void cancelRename(int) override { return; };
 
-	virtual int rtti() const {return (int)RTTI;};
+        int rtti() const override { return (int)RTTI; };
 
     Folder *folder() { return myFolder; };
 
@@ -204,15 +204,17 @@ protected slots:
 	void expandedItem(Q3ListViewItem *item);
 
 protected:
-	void startDrag();
+  void startDrag() override;
 
-    void contentsDropEvent( QDropEvent *e );
-    void contentsMouseMoveEvent( QMouseEvent *e );
-    void contentsMousePressEvent( QMouseEvent *e );
-	void contentsMouseDoubleClickEvent( QMouseEvent* e );
-	void keyPressEvent ( QKeyEvent * e );
-    void contentsMouseReleaseEvent( QMouseEvent *){mousePressed = false;};
-	void enterEvent(QEvent *){mousePressed = false;};
+  void contentsDropEvent(QDropEvent *e) override;
+  void contentsMouseMoveEvent(QMouseEvent *e) override;
+  void contentsMousePressEvent(QMouseEvent *e) override;
+  void contentsMouseDoubleClickEvent(QMouseEvent *e) override;
+  void keyPressEvent(QKeyEvent *e) override;
+  void contentsMouseReleaseEvent(QMouseEvent *) override {
+    mousePressed = false;
+  };
+  void enterEvent(QEvent *) override { mousePressed = false; };
 
 signals:
 	void dragItems(QList<Q3ListViewItem *> items);

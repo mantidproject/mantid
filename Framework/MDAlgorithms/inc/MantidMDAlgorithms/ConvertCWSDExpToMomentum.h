@@ -37,27 +37,27 @@ namespace MDAlgorithms {
 class DLLExport ConvertCWSDExpToMomentum : public API::Algorithm {
 public:
   ConvertCWSDExpToMomentum();
-  virtual ~ConvertCWSDExpToMomentum();
+  ~ConvertCWSDExpToMomentum() override;
 
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvertCWSDExpToMomentum"; }
+  const std::string name() const override { return "ConvertCWSDExpToMomentum"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load and convert a set of files in an HB3A experiment.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\ConstantWavelength;DataHandling\\Text";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void addMDEvents(bool usevirtual);
 

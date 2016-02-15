@@ -10,18 +10,18 @@ namespace Algorithms {
 class DLLExport RemoveLowResTOF : public API::Algorithm {
 public:
   RemoveLowResTOF();
-  virtual ~RemoveLowResTOF();
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
+  ~RemoveLowResTOF() override;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Removes low resolution Time of Flight data.";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void execEvent();
 
   API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace

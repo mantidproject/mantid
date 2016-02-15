@@ -12,28 +12,28 @@ public:
   /// (Empty) Constructor
   MonitorEfficiencyCorUser(); // : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~MonitorEfficiencyCorUser();
+  ~MonitorEfficiencyCorUser() override;
   /// Algorithm's name
-  virtual const std::string name() const { return "MonitorEfficiencyCorUser"; }
+  const std::string name() const override { return "MonitorEfficiencyCorUser"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm normalises the counts by the monitor counts with "
            "additional efficiency correction according to the formula set in "
            "the instrument parameters file.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\NormalisationCorrections";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   double calculateFormulaValue(const std::string &, double);
   std::string getValFromInstrumentDef(const std::string &);

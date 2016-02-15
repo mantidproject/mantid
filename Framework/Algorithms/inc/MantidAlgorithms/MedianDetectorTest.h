@@ -73,17 +73,17 @@ public:
   /// constructor
   MedianDetectorTest();
   /// Destructor
-  virtual ~MedianDetectorTest(){};
+  ~MedianDetectorTest() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MedianDetectorTest"; }
-  virtual const std::string category() const;
+  const std::string name() const override { return "MedianDetectorTest"; }
+  const std::string category() const override;
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   // The different steps of the calculation, all called by exec()
   /// Loads and checks the values passed to the algorithm

@@ -38,29 +38,29 @@ namespace Algorithms {
 class DLLExport IdentifyNoisyDetectors : public API::Algorithm {
 public:
   IdentifyNoisyDetectors() : API::Algorithm() {} ///< Empty constructor
-  virtual ~IdentifyNoisyDetectors() {}           ///< Empty destructor
+  ~IdentifyNoisyDetectors() override {}          ///< Empty destructor
 
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "IdentifyNoisyDetectors";
   } ///< @return the algorithms name
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm creates a single-column workspace where the Y "
            "values are populated withs 1s and 0s, 0 signifying that the "
            "detector is to be considered 'bad' based on the method described "
            "below.";
   }
 
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diagnostics";
   } ///< @return the algorithms category
-  virtual int version() const {
+  int version() const override {
     return (1);
   } ///< @return version number of algorithm
 
 private:
-  void init(); ///< Initialise the algorithm. Declare properties, etc.
-  void exec(); ///< Executes the algorithm.
+  void init() override; ///< Initialise the algorithm. Declare properties, etc.
+  void exec() override; ///< Executes the algorithm.
 
   void getStdDev(API::Progress &progress,
                  Mantid::API::MatrixWorkspace_sptr valid,

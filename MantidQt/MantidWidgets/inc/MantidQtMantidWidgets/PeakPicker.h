@@ -46,12 +46,12 @@ namespace MantidWidgets
     PeakPicker(QwtPlot* plot, QColor color);
 
     /// Correct QwtPlotItem type info
-    virtual int rtti() const { return QwtPlotItem::Rtti_PlotMarker; }
+    int rtti() const override { return QwtPlotItem::Rtti_PlotMarker; }
 
     /// Draw the peak picker
     /// @see QwtPlotItem::draw
-    virtual void draw(QPainter* painter, const QwtScaleMap& xMap, const QwtScaleMap& yMap,
-                      const QRect& canvasRect) const;
+    void draw(QPainter *painter, const QwtScaleMap &xMap,
+              const QwtScaleMap &yMap, const QRect &canvasRect) const override;
 
     /// @return Currently represented peak
     Mantid::API::IPeakFunction_const_sptr peak() const;
@@ -72,7 +72,7 @@ namespace MantidWidgets
     static const QCursorShape DEFAULT_CURSOR;
 
     /// Event filter installed for the plot
-    bool eventFilter(QObject* object, QEvent* event);
+    bool eventFilter(QObject *object, QEvent *event) override;
 
     /// The plot peak picker operates on
     QwtPlot* m_plot;

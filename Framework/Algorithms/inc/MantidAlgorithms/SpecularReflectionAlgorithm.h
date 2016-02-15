@@ -57,7 +57,7 @@ protected:
 
 public:
   /// Destructor
-  virtual ~SpecularReflectionAlgorithm() = 0;
+  ~SpecularReflectionAlgorithm() override = 0;
 };
 
 } // namespace Algorithms

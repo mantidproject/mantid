@@ -22,10 +22,10 @@ public:
   FitOneSinglePeak();
 
   /// Desctructor
-  virtual ~FitOneSinglePeak();
+  ~FitOneSinglePeak() override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Fit a single peak with checking mechanism. ";
   }
 
@@ -81,14 +81,14 @@ public:
 
 private:
   /// Name
-  virtual const std::string name() const { return "FitOneSinglePeak"; }
+  const std::string name() const override { return "FitOneSinglePeak"; }
 
   /// Version
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Init
-  void init();
+  void init() override;
   /// Exec
-  void exec();
+  void exec() override;
 
   /// Check whether it is ready to fit
   bool hasSetupToFitPeak(std::string &errmsg);
@@ -254,22 +254,22 @@ private:
 class DLLExport FitPeak : public API::Algorithm {
 public:
   FitPeak();
-  virtual ~FitPeak();
+  ~FitPeak() override;
 
   /// Algorithm's name
-  virtual const std::string name() const { return "FitPeak"; }
+  const std::string name() const override { return "FitPeak"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Fit a single peak with checking mechanism. ";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Optimization"; }
+  const std::string category() const override { return "Optimization"; }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Process input propeties
   void processProperties();

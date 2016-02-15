@@ -51,24 +51,24 @@ public:
   /// Default constructor
   MuonRemoveExpDecay() : API::Algorithm(){};
   /// Destructor
-  virtual ~MuonRemoveExpDecay(){};
+  ~MuonRemoveExpDecay() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "RemoveExpDecay"; }
+  const std::string name() const override { return "RemoveExpDecay"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm removes the exponential decay from a muon "
            "workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Muon"; }
+  const std::string category() const override { return "Muon"; }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void removeDecayError(const MantidVec &inX, const MantidVec &inY,
                         MantidVec &outY);
   void removeDecayData(const MantidVec &inX, const MantidVec &inY,

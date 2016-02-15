@@ -23,27 +23,27 @@ class DLLExport CreateMDWorkspace
     : public MDAlgorithms::BoxControllerSettingsAlgorithm {
 public:
   CreateMDWorkspace();
-  ~CreateMDWorkspace();
+  ~CreateMDWorkspace() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "CreateMDWorkspace"; }
+  const std::string name() const override { return "CreateMDWorkspace"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Creates an empty MDEventWorkspace with a given number of "
            "dimensions.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "MDAlgorithms\\Creation";
   }
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   template <typename MDE, size_t nd>
   void finish(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);

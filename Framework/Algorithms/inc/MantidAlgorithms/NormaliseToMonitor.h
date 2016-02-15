@@ -71,27 +71,27 @@ namespace Algorithms {
 class DLLExport NormaliseToMonitor : public API::Algorithm {
 public:
   NormaliseToMonitor();
-  virtual ~NormaliseToMonitor();
+  ~NormaliseToMonitor() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "NormaliseToMonitor"; }
+  const std::string name() const override { return "NormaliseToMonitor"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Normalizes a 2D workspace by a specified spectrum, spectrum, "
            "described by a monitor ID or spectrun provided in a separate "
            "worskspace. ";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\NormalisationCorrections";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
 protected: // for testing
   void checkProperties(const API::MatrixWorkspace_sptr &inputWorkspace);
@@ -139,16 +139,17 @@ public:
       : hostWSname(WSProperty), SpectraNum(SpectrToNormByProperty),
         MonitorWorkspaceProp(MonitorWorkspace), is_enabled(true) {}
   // if input to this property is enabled
-  bool isEnabled(const Mantid::Kernel::IPropertyManager *algo) const;
-  bool isConditionChanged(const Mantid::Kernel::IPropertyManager *algo) const;
+  bool isEnabled(const Mantid::Kernel::IPropertyManager *algo) const override;
+  bool isConditionChanged(
+      const Mantid::Kernel::IPropertyManager *algo) const override;
   void applyChanges(const Mantid::Kernel::IPropertyManager *algo,
-                    Kernel::Property *const pProp);
+                    Kernel::Property *const pProp) override;
 
   // interface needs it but if indeed proper clone used -- do not know.
-  virtual IPropertySettings *clone() {
+  IPropertySettings *clone() override {
     return new MonIDPropChanger(hostWSname, SpectraNum, MonitorWorkspaceProp);
   }
-  virtual ~MonIDPropChanger(){};
+  ~MonIDPropChanger() override{};
 
 private:
   // the name of the property, which specifies the workspace which has to be

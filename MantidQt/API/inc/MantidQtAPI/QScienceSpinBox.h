@@ -21,8 +21,8 @@ public:
   int decimals() const;
   void setDecimals(int value);
 
-  QString textFromValue(double value) const;
-  double valueFromText(const QString &text) const;
+  QString textFromValue(double value) const override;
+  double valueFromText(const QString &text) const override;
 
   void setLogSteps(bool logSteps);
 
@@ -38,11 +38,11 @@ private:
   bool isIntermediateValue(const QString &str) const;
   QVariant validateAndInterpret(QString &input, int &pos,
                                 QValidator::State &state) const;
-  QValidator::State validate(QString &text, int &pos) const;
-  void fixup(QString &input) const;
+  QValidator::State validate(QString &text, int &pos) const override;
+  void fixup(QString &input) const override;
   QString stripped(const QString &t, int *pos) const;
   double round(double value) const;
-  void stepBy(int steps);
+  void stepBy(int steps) override;
 
 public slots:
   void stepDown();

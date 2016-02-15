@@ -57,7 +57,7 @@ namespace MantidQt
       MessageDisplay(LogLevelControl logLevelControl,
                      QWidget *parent=NULL);
       ///Destructor
-      ~MessageDisplay();
+      ~MessageDisplay() override;
 
       // Setup logging framework connections
       void attachLoggingChannel();

@@ -34,37 +34,37 @@ namespace Functions {
 class DLLExport FullprofPolynomial : public BackgroundFunction {
 public:
   FullprofPolynomial();
-  virtual ~FullprofPolynomial();
+  ~FullprofPolynomial() override;
 
   /// Overwrite IFunction base class
-  std::string name() const { return "FullprofPolynomial"; }
+  std::string name() const override { return "FullprofPolynomial"; }
 
-  virtual const std::string category() const { return "Background"; }
+  const std::string category() const override { return "Background"; }
 
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
-  virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                               const size_t nData);
+  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+                       const size_t nData) override;
 
   // virtual void functionLocal(std::vector<double> &out, std::vector<double>
   // xValues) const;
 
   /// Returns the number of attributes associated with the function (polynomial
   /// order n)
-  size_t nAttributes() const { return 1; }
+  size_t nAttributes() const override { return 1; }
 
   /// Returns a list of attribute names
-  std::vector<std::string> getAttributeNames() const;
+  std::vector<std::string> getAttributeNames() const override;
 
   /// Return a value of attribute attName
-  Attribute getAttribute(const std::string &attName) const;
+  Attribute getAttribute(const std::string &attName) const override;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute &);
+  void setAttribute(const std::string &attName, const Attribute &) override;
 
   /// Check if attribute attName exists
-  bool hasAttribute(const std::string &attName) const;
+  bool hasAttribute(const std::string &attName) const override;
 
 private:
   /// Polynomial order
