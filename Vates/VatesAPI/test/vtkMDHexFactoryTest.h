@@ -159,6 +159,19 @@ public:
     TS_ASSERT_THROWS(factory.create(progressUpdater), std::runtime_error);
   }
 
+  void test_roundUp_positive_numbers() {
+    TS_ASSERT_DELTA(roundUp(3.7, 1.0), 4.0, 1e-5);
+    TS_ASSERT_DELTA(roundUp(3.7, 7.1), 7.1, 1e-5);
+    TS_ASSERT_DELTA(roundUp(7.1, 7.1), 14.2, 1e-5);
+    TS_ASSERT_DELTA(roundUp(0.0, 3.1), 3.1, 1e-5);
+  }
+
+  void test_roundUp_negative_numbers() {
+    TS_ASSERT_DELTA(roundUp(-0.5, 3.1), 0.0, 1e-5);
+    TS_ASSERT_DELTA(roundUp(-4.1, 3.1), -3.1, 1e-5);
+    TS_ASSERT_DELTA(roundUp(-4.1, 1.0), -4.0, 1e-5);
+  }
+
   /*Demonstrative tests*/
   void testIgnoresDimensionality()
   {
@@ -191,7 +204,7 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,  product->GetNumberOfPoints());
     TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
     TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
-    
+
     /*Check dataset bounds*/
     double* bounds = product->GetBounds();
     TS_ASSERT_EQUALS(0, bounds[0]);
@@ -247,7 +260,7 @@ class vtkMDHexFactoryTestPerformance : public CxxTest::TestSuite
 {
 
 private:
-  
+
   Mantid::DataObjects::MDEventWorkspace3Lean::sptr m_ws3;
   Mantid::DataObjects::MDEventWorkspace4Lean::sptr m_ws4;
 
@@ -280,7 +293,7 @@ public :
     TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,  product->GetNumberOfPoints());
     TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
     TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
-    
+
     if (false)
     {
       /*Check dataset bounds - this call takes a significant amount of time and so should only be used for debugging.*/
@@ -305,8 +318,8 @@ public :
 
     TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
-    const size_t expected_n_points = 8*65536;
-    const size_t expected_n_cells = 65536;
+    const size_t expected_n_points = 8*32768;
+    const size_t expected_n_cells = 32768;
     const size_t expected_n_signals = expected_n_cells;
 
     TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
