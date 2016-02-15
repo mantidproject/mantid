@@ -11,7 +11,6 @@
 #include "MantidAPI/AlgorithmFactory.h" //for the factory macro
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/EmptyValues.h"
