@@ -15,7 +15,6 @@
 #include <Poco/File.h>
 #include <fstream>
 
-
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

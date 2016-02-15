@@ -9,7 +9,6 @@
 
 #include <boost/make_shared.hpp>
 
-
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 

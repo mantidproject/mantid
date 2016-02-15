@@ -9,7 +9,6 @@
 
 #include "Poco/NumberFormatter.h"
 
-
 namespace Mantid {
 namespace WorkflowAlgorithms {
 

@@ -3,7 +3,6 @@
 #include "MantidGeometry/Instrument.h"
 #include <math.h>
 
-
 namespace Mantid {
 namespace Algorithms {
 using Kernel::V3D;

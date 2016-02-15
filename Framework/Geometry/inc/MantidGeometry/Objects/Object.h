@@ -16,7 +16,7 @@ namespace Mantid {
 //----------------------------------------------------------------------
 namespace Kernel {
 class V3D;
- class Material;
+class Material;
 }
 
 namespace Geometry {
