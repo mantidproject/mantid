@@ -54,6 +54,13 @@ With the help of Cropped Calibration user can also calibrate according
 to bank or by setting the SpectrumIDs once the Cropped Calibration group
 box has been enabled.
 
+The plot Calibrated Workspace check-box will enable user to plot
+vanadium curves and Ceria peaks. For Ceria peaks there will be two
+workspace generated and plotted, one for each bank, whereas for cropped
+calibration there will only be only one workspace generate and
+plotted, depending on the selected bank. The Ceria peaks utilises the
+difc/tzero fitting per bank.
+
 Parameters
 ^^^^^^^^^^
 

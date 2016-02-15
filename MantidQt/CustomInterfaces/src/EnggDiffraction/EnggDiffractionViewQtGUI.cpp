@@ -643,11 +643,15 @@ void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
 
   // sets the range to plot appropriate graph for the particular bank
   if (specNo == "North") {
+    // only enable script to plot bank 1
     pyRange = "1, 2";
   } else if (specNo == "South") {
+    // only enables python script to plot bank 2
+    // as bank 2 data will be located in difc[0] & tzero[0] - refactor
     pyRange = "2, 3";
     bank2 = size_t(0);
   } else {
+    // enables python script to plot bank 1 & 2
     pyRange = "1, 3";
   }
 
