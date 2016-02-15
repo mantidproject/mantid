@@ -35,9 +35,7 @@ bool GeometryInfo::isMonitor() const { return m_detector->isMonitor(); }
 
 bool GeometryInfo::isMasked() const { return m_detector->isMasked(); }
 
-double GeometryInfo::getL1() const {
-  return m_instrument_info.getL1();
-}
+double GeometryInfo::getL1() const { return m_instrument_info.getL1(); }
 
 double GeometryInfo::getL2() const {
   if (!isMonitor()) {

@@ -27,16 +27,10 @@ const Geometry::IComponent &BasicInstrumentInfo::getSample() const {
   return *m_sample;
 }
 
-Kernel::V3D BasicInstrumentInfo::getSourcePos() const {
-  return m_sourcePos;
-}
+Kernel::V3D BasicInstrumentInfo::getSourcePos() const { return m_sourcePos; }
 
-Kernel::V3D BasicInstrumentInfo::getSamplePos() const {
-  return m_samplePos;
-}
+Kernel::V3D BasicInstrumentInfo::getSamplePos() const { return m_samplePos; }
 
-double BasicInstrumentInfo::getL1() const {
-  return m_L1;
-}
+double BasicInstrumentInfo::getL1() const { return m_L1; }
 }
 }

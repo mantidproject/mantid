@@ -47,12 +47,12 @@ public:
 
   void test_getSourcePos() {
     auto info = BasicInstrumentInfo(*workspace);
-    TS_ASSERT_EQUALS(info.getSourcePos(), Kernel::V3D(-20.0,0.0,0.0));
+    TS_ASSERT_EQUALS(info.getSourcePos(), Kernel::V3D(-20.0, 0.0, 0.0));
   }
 
   void test_getSamplePos() {
     auto info = BasicInstrumentInfo(*workspace);
-    TS_ASSERT_EQUALS(info.getSamplePos(), Kernel::V3D(0.0,0.0,0.0));
+    TS_ASSERT_EQUALS(info.getSamplePos(), Kernel::V3D(0.0, 0.0, 0.0));
   }
 
   void test_getL1() {
