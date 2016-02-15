@@ -17,10 +17,8 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksWorkspaceWidget : public QWidget {
 public:
   PeaksWorkspaceWidget(Mantid::API::IPeaksWorkspace_const_sptr ws,
                        const std::string &coordinateSystem,
-                       const QColor &defaultForegroundColour,
-                       const QColor &defaultBackgroundColour,
-                       const PeakViewColor &defaultForegroundPeakViewColor,
-                       const PeakViewColor &defaultBackgroundPeakViewColor,
+                       PeakViewColor defaultForegroundPeakViewColor,
+                       PeakViewColor defaultBackgroundPeakViewColor,
                        const bool canAddPeaks,
                        PeaksViewer *parent);
 
@@ -29,8 +27,6 @@ public:
   void setShownColumns(std::set<QString> &cols);
   virtual ~PeaksWorkspaceWidget();
   Mantid::API::IPeaksWorkspace_const_sptr getPeaksWorkspace() const;
-  void setBackgroundColor(const QColor &backgroundColor);
-  void setForegroundColor(const QColor &foregroundColor);
   void setBackgroundColor(const PeakViewColor &backgroundColor);
   void setForegroundColor(const PeakViewColor &foregroundColor);
   void setShowBackground(bool showBackground);
@@ -68,10 +64,6 @@ private:
   Mantid::API::IPeaksWorkspace_const_sptr m_ws;
   /// Coordinate system.
   const std::string m_coordinateSystem;
-  /// Foreground colour
-  QColor m_foregroundColour;
-  /// Background colour
-  QColor m_backgroundColour;
   /// Foreground PeakViewColor
   PeakViewColor m_foregroundPeakViewColor;
   /// Background PeakViewColor
@@ -84,10 +76,6 @@ private:
   PeaksViewer* const m_parent;
 
 private slots:
-  void onBackgroundColourClicked();
-  void onForegroundColourClicked();
-
-
   void onBackgroundColorCrossClicked();
   void onForegroundColorCrossClicked();
   void onBackgroundColorSphereClicked();

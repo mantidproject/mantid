@@ -28,7 +28,7 @@ namespace MantidQt
      * @param backColour : background colour
      */
     PeakOverlayMultiSphere::PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks,
-                                                   const int plotXIndex, const int plotYIndex, const QColor& peakColour, const QColor& backColour) :
+                                                   const int plotXIndex, const int plotYIndex, const PeakViewColor& peakColour, const PeakViewColor& backColour) :
         PeakOverlayInteractive(presenter, plot, plotXIndex, plotYIndex, parent), m_physicalPeaks(vecPhysicalPeaks),
         m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false)
     {
@@ -201,8 +201,8 @@ namespace MantidQt
 
     void PeakOverlayMultiSphere::takeSettingsFrom(const PeakOverlayView * const source)
     {
-        this->changeForegroundColour(source->getForegroundColour());
-        this->changeBackgroundColour(source->getBackgroundColour());
+        this->changeForegroundColour(source->getForegroundPeakViewColor());
+        this->changeBackgroundColour(source->getBackgroundPeakViewColor());
         this->showBackgroundRadius(source->isBackgroundShown());
     }
 

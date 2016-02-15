@@ -22,10 +22,6 @@ public:
     SetPeaksWorkspaces empty;
     return empty;
   }
-  void setForegroundColor(const QColor) { /*Do nothing*/
-  }
-  void setBackgroundColor(const QColor) { /*Do nothing*/
-  }
   void setForegroundColor(const PeakViewColor) { /*Do nothing*/
   }
   void setBackgroundColor(const PeakViewColor) { /*Do nothing*/

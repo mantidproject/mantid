@@ -40,10 +40,6 @@ public:
   virtual bool changeShownDim();
   virtual bool isLabelOfFreeAxis(const std::string &label) const;
   SetPeaksWorkspaces presentedWorkspaces() const;
-  void setForegroundColor(const QColor) { /*Do nothing*/
-  }
-  void setBackgroundColor(const QColor) { /*Do nothing*/
-  }
   virtual void setForegroundColor(const PeakViewColor) {
     /*Do nothing*/
   }
@@ -95,14 +91,6 @@ public:
   virtual double getPeakSizeIntoProjection() const;
   /// Enter peak edit mode.
   void peakEditMode(EditMode mode);
-  /// Change the foreground representation for the peaks of this workspace
-  void
-  setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                      const QColor);
-  /// Change the background representation for the peaks of this workspace
-  void
-  setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                      const QColor);
   void
   setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
                       const PeakViewColor);
@@ -110,12 +98,6 @@ public:
   void
   setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
                       const PeakViewColor);
-  /// Get the foreground colour corresponding to the workspace
-  QColor getForegroundColour(
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
-  /// Get the background colour corresponding to the workspace
-  QColor getBackgroundColour(
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
   /// Get the foreground colour corresponding to the workspace
   PeakViewColor getForegroundPeakViewColor(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
@@ -126,7 +108,7 @@ public:
   bool getShowBackground(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
   /// Get a copy of the palette in its current state.
-  PeakPalette<QColor> getPalette() const;
+  PeakPalette<PeakViewColor> getPalette() const;
   /// Setter for indicating whether the background radius will be shown.
   void setBackgroundRadiusShown(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
@@ -191,8 +173,6 @@ private:
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
   /// Get the presenter from a workspace name.
   SubjectContainer::iterator getPresenterIteratorFromName(const QString &name);
-  /// Colour pallette.
-  PeakPalette<QColor> m_palette;
   /// Color palette
   PeakPalette<PeakViewColor> m_palettePeakViewColor;
   /// Zoomable peaks view.

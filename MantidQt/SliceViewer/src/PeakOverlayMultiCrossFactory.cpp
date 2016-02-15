@@ -53,7 +53,7 @@ namespace MantidQt
       }
 
       // Make the overlay widget.
-      return boost::make_shared<PeakOverlayMultiCross>(presenter, m_plot, m_parent, physicalPeaks, m_plotXIndex, m_plotYIndex, this->m_peakColour);
+      return boost::make_shared<PeakOverlayMultiCross>(presenter, m_plot, m_parent, physicalPeaks, m_plotXIndex, m_plotYIndex, m_foregroundViewColor);
     }
 
     int PeakOverlayMultiCrossFactory::FOM() const

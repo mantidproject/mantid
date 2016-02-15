@@ -89,8 +89,6 @@ void CompositePeaksPresenter::clear() {
   if (!m_subjects.empty()) {
     m_subjects.clear();
     this->m_zoomablePlottingWidget->detach();
-    PeakPalette<QColor> temp;
-    m_palette = temp;
     PeakPalette<PeakViewColor> tempPeakViewColor;
     m_palettePeakViewColor = tempPeakViewColor;
   }
@@ -210,43 +208,6 @@ Set the foreground colour of the peaks.
 */
 void CompositePeaksPresenter::setForegroundColour(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-    const QColor colour) {
-  SubjectContainer::iterator iterator = getPresenterIteratorFromWorkspace(ws);
-
-  // Update the palette the foreground colour
-  const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
-  m_palette.setForegroundColour(pos, colour);
-
-  // Apply the foreground colour
-  (*iterator)->setForegroundColor(colour);
-}
-
-/**
-Set the background colour of the peaks.
-@ workspace containing the peaks to re-colour
-@ colour to use for re-colouring
-*/
-void CompositePeaksPresenter::setBackgroundColour(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-    const QColor colour) {
-  SubjectContainer::iterator iterator = getPresenterIteratorFromWorkspace(ws);
-
-  // Update the palette background colour.
-  const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
-  m_palette.setBackgroundColour(pos, colour);
-
-  // Apply the background colour
-  (*iterator)->setBackgroundColor(colour);
-}
-
-
-/**
-Set the foreground colour of the peaks.
-@ workspace containing the peaks to re-colour
-@ colour to use for re-colouring
-*/
-void CompositePeaksPresenter::setForegroundColour(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
     const PeakViewColor color) {
   SubjectContainer::iterator iterator = getPresenterIteratorFromWorkspace(ws);
 
@@ -291,40 +252,8 @@ std::string CompositePeaksPresenter::getTransformName() const {
 /**
 @return a copy of the peaks palette.
 */
-PeakPalette<QColor> CompositePeaksPresenter::getPalette() const {
-  return this->m_palette;
-}
-
-/**
-@param ws: PeakWorkspace to get the colour for.
-@return the foreground colour corresponding to the peaks workspace.
-*/
-QColor CompositePeaksPresenter::getForegroundColour(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const {
-  if (useDefault()) {
-    throw std::runtime_error("Foreground colours from palette cannot be "
-                             "fetched until nested presenters are added.");
-  }
-  SubjectContainer::const_iterator iterator =
-      getPresenterIteratorFromWorkspace(ws);
-  const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
-  return m_palette.foregroundIndexToColour(pos);
-}
-
-/**
-@param ws: PeakWorkspace to get the colour for.
-@return the background colour corresponding to the peaks workspace.
-*/
-QColor CompositePeaksPresenter::getBackgroundColour(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const {
-  if (useDefault()) {
-    throw std::runtime_error("Background colours from palette cannot be "
-                             "fetched until nested presenters are added.");
-  }
-  SubjectContainer::const_iterator iterator =
-      getPresenterIteratorFromWorkspace(ws);
-  const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
-  return m_palette.backgroundIndexToColour(pos);
+PeakPalette<PeakViewColor> CompositePeaksPresenter::getPalette() const {
+  return this->m_palettePeakViewColor;
 }
 
 
@@ -341,7 +270,6 @@ PeakViewColor CompositePeaksPresenter::getForegroundPeakViewColor(
   SubjectContainer::const_iterator iterator =
       getPresenterIteratorFromWorkspace(ws);
   const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
-  return PeakViewColor();
   return m_palettePeakViewColor.foregroundIndexToColour(pos);
 }
 
@@ -358,8 +286,6 @@ PeakViewColor CompositePeaksPresenter::getBackgroundPeakViewColor(
   SubjectContainer::const_iterator iterator =
       getPresenterIteratorFromWorkspace(ws);
   const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
-  return PeakViewColor();
-
   return m_palettePeakViewColor.backgroundIndexToColour(pos);
 }
 
@@ -610,9 +536,6 @@ void CompositePeaksPresenter::performUpdate() {
     auto presenter = (*presenterIterator);
     const int pos =
         static_cast<int>(std::distance(m_subjects.begin(), presenterIterator));
-    m_palette.setBackgroundColour(pos, presenter->getBackgroundColor());
-    m_palette.setForegroundColour(pos, presenter->getForegroundColor());
-
     m_palettePeakViewColor.setBackgroundColour(pos, presenter->getBackgroundPeakViewColor());
     m_palettePeakViewColor.setForegroundColour(pos, presenter->getForegroundPeakViewColor());
 

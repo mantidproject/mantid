@@ -52,10 +52,6 @@ namespace MantidQt
       virtual void showView() = 0;
       /// Move the peak overlay to a new position.
       virtual void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) = 0;
-      /// Change foreground colour
-      virtual void changeForegroundColour(const QColor) = 0;
-      /// Change background colour
-      virtual void changeBackgroundColour(const QColor) = 0;
       /// Show the background radius
       virtual void showBackgroundRadius(const bool){}
       /// Changes the size of the overlay to be the requested fraction of the current view width.
@@ -74,10 +70,6 @@ namespace MantidQt
       virtual double getRadius() const = 0;
       /// Determine if the background is shown.
       virtual bool isBackgroundShown() const = 0;
-      /// Get the current background colour
-      virtual QColor getBackgroundColour() const = 0;
-      /// Get the current foreground colour
-      virtual QColor getForegroundColour() const = 0;
       /// Enter deletion mode
       virtual void peakDeletionMode() = 0;
       /// Enter addition mode
@@ -86,11 +78,6 @@ namespace MantidQt
       virtual void peakDisplayMode() = 0;
       /// Take settings from.
       virtual void takeSettingsFrom(PeakOverlayView const * const) = 0;
-      /// Destructor
-      virtual ~PeakOverlayView()
-      {
-      }
-
       /// Change foreground colour -- overload for PeakViewColor
       virtual void changeForegroundColour(const PeakViewColor) = 0;
       /// Change background colour -- overload for PeakViewColor
@@ -99,6 +86,10 @@ namespace MantidQt
       virtual PeakViewColor getBackgroundPeakViewColor() const = 0;
       /// Get the current foreground colour
       virtual PeakViewColor getForegroundPeakViewColor() const = 0;
+      /// Destructor
+      virtual ~PeakOverlayView()
+      {
+      }
     };
 
     typedef boost::shared_ptr<const PeakOverlayView> PeakOverlayView_const_sptr;

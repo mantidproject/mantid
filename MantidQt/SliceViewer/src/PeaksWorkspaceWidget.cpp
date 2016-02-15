@@ -33,12 +33,9 @@ Constructor
 */
 PeaksWorkspaceWidget::PeaksWorkspaceWidget(
     Mantid::API::IPeaksWorkspace_const_sptr ws,
-    const std::string &coordinateSystem, const QColor &defaultForegroundColour,
-    const QColor &defaultBackgroundColour, const PeakViewColor &defaultForegroundPeakViewColor,
-    const PeakViewColor &defaultBackgroundPeakViewColor, const bool canAddPeaks, PeaksViewer *parent)
+    const std::string &coordinateSystem, PeakViewColor defaultForegroundPeakViewColor,
+    PeakViewColor defaultBackgroundPeakViewColor, const bool canAddPeaks, PeaksViewer *parent)
     : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem),
-      m_foregroundColour(defaultForegroundColour),
-      m_backgroundColour(defaultBackgroundColour),
       m_foregroundPeakViewColor(defaultForegroundPeakViewColor),
       m_backgroundPeakViewColor(defaultBackgroundPeakViewColor),
       m_parent(parent) {
@@ -48,12 +45,6 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
   // Connect internal signals-slots.
   connect(ui.ckShowBackground, SIGNAL(clicked(bool)), this,
           SLOT(onShowBackgroundChanged(bool)));
-
-  // TODO REMOVE Colors for old style
-  connect(ui.btnBackgroundColor, SIGNAL(clicked()), this,
-          SLOT(onBackgroundColourClicked()));
-  connect(ui.btnPeakColor, SIGNAL(clicked()), this,
-          SLOT(onForegroundColourClicked()));
 
   // Colors for Cross
   connect(ui.btnBackgroundColor, SIGNAL(clicked()), this,
@@ -175,8 +166,14 @@ void PeaksWorkspaceWidget::populate() {
   ui.lblWorkspaceCoordinates->setText("Coords: " + coordinateText);
   ui.lblWorkspaceCoordinates->setToolTip(coordinateText);
 
-  ui.btnBackgroundColor->setBackgroundColor(m_backgroundColour);
-  ui.btnPeakColor->setBackgroundColor(m_foregroundColour);
+  // Set the default colors
+  ui.btnPeakColor->setBackgroundColor(m_foregroundPeakViewColor.colorCross);
+  ui.btnPeakColorSphere->setBackgroundColor(m_foregroundPeakViewColor.colorSphere);
+  ui.btnPeakColorEllipsoid->setBackgroundColor(m_foregroundPeakViewColor.colorEllipsoid);
+
+  ui.btnBackgroundColor->setBackgroundColor(m_backgroundPeakViewColor.colorCross);
+  ui.btnBackgroundColorSphere->setBackgroundColor(m_backgroundPeakViewColor.colorSphere);
+  ui.btnBackgroundColorEllipsoid->setBackgroundColor(m_backgroundPeakViewColor.colorEllipsoid);
 
   // Setup table
   createTableMVC();
@@ -184,31 +181,6 @@ void PeaksWorkspaceWidget::populate() {
 
 /// Destructor
 PeaksWorkspaceWidget::~PeaksWorkspaceWidget() {}
-
-/**
-Handler for changing the foreground colour of an integrated peak.
-*/
-void PeaksWorkspaceWidget::onForegroundColourClicked() {
-  QColorDialog colourDlg;
-  colourDlg.result();
-  QColor selectedColour = colourDlg.getColor();
-  if (selectedColour.isValid()) {
-    ui.btnPeakColor->setBackgroundColor(selectedColour);
-    emit peakColourChanged(this->m_ws, selectedColour);
-  }
-}
-
-/**
-Handler for changing the background colour of an integrated peak.
-*/
-void PeaksWorkspaceWidget::onBackgroundColourClicked() {
-  QColorDialog colourDlg;
-  QColor selectedColour = colourDlg.getColor();
-  if (selectedColour.isValid()) {
-    ui.btnBackgroundColor->setBackgroundColor(selectedColour);
-    emit backgroundColourChanged(this->m_ws, selectedColour);
-  }
-}
 
 /**
  * Handler for changing the foreground colour of an integrated peak.
@@ -273,28 +245,12 @@ PeaksWorkspaceWidget::getPeaksWorkspace() const {
   return m_ws;
 }
 
-/**
- * Set the background color
- * @param backgroundColor
- */
-void PeaksWorkspaceWidget::setBackgroundColor(const QColor &backgroundColor) {
-  ui.btnBackgroundColor->setBackgroundColor(backgroundColor);
-}
-
-/**
- * Set the foreground color
- * @param foregroundColor
- */
-void PeaksWorkspaceWidget::setForegroundColor(const QColor &foregroundColor) {
-  ui.btnPeakColor->setBackgroundColor(foregroundColor);
-}
 
 /**
  * Set the background color
  * @param backgroundColor: a peak view color for the background buttons
  */
 void PeaksWorkspaceWidget::setBackgroundColor(const PeakViewColor & backgroundColor) {
-#if 0
   // Need to set the three buttons sepearately
   auto backgroundColorCross = backgroundColor.colorCross;
   auto backgroundColorSphere = backgroundColor.colorSphere;
@@ -303,7 +259,6 @@ void PeaksWorkspaceWidget::setBackgroundColor(const PeakViewColor & backgroundCo
   ui.btnBackgroundColor->setBackgroundColor(backgroundColorCross);
   ui.btnBackgroundColorSphere->setBackgroundColor(backgroundColorSphere);
   ui.btnBackgroundColorEllipsoid->setBackgroundColor(backgroundColorEllipsoid);
-#endif
 }
 
 /**
@@ -311,7 +266,6 @@ void PeaksWorkspaceWidget::setBackgroundColor(const PeakViewColor & backgroundCo
  * @param foregroundColor
  */
 void PeaksWorkspaceWidget::setForegroundColor(const PeakViewColor & foregroundColor) {
-#if 0
   // Need to set the three buttons sepearately
   auto foregroundColorCross = foregroundColor.colorCross;
   auto foregroundColorSphere = foregroundColor.colorSphere;
@@ -320,7 +274,6 @@ void PeaksWorkspaceWidget::setForegroundColor(const PeakViewColor & foregroundCo
   ui.btnPeakColor->setBackgroundColor(foregroundColorCross);
   ui.btnPeakColorSphere->setBackgroundColor(foregroundColorSphere);
   ui.btnPeakColorEllipsoid->setBackgroundColor(foregroundColorEllipsoid);
-#endif
 }
 
 /**
@@ -416,27 +369,19 @@ void PeaksWorkspaceWidget::exitAddPeaksMode() {
 
 
 void PeaksWorkspaceWidget::onBackgroundColorCrossClicked() {
-  // TODO bring to life when old style color is gone
-#if 0
   auto selectedColor = getSelectedColor();
   if (selectedColor.isValid()) {
     ui.btnBackgroundColor->setBackgroundColor(selectedColor);
     onBackgroundPeakViewColorClicked();
   }
-#endif
 }
 
 void PeaksWorkspaceWidget::onForegroundColorCrossClicked() {
-  // TODO bring to life when old style color is gone
-#if 0
   auto selectedColor = getSelectedColor();
   if (selectedColor.isValid()) {
-
-
     ui.btnPeakColor->setBackgroundColor(selectedColor);
     onForegroundPeakViewColorClicked();
   }
- #endif
 }
 
 void PeaksWorkspaceWidget::onBackgroundColorSphereClicked() {

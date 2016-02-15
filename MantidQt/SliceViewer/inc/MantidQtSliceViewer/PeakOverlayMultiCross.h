@@ -51,7 +51,7 @@ namespace SliceViewer
   public:
     /// Constructor
     PeakOverlayMultiCross(PeaksPresenter* const peaksPresenter, QwtPlot * plot, QWidget * parent, const VecPhysicalCrossPeak& vecPhysicalPeaks, const int plotXIndex, const int plotYIndex,
-                          const QColor& peakColour);
+                          const PeakViewColor& peakColour);
     /// Destructor
     virtual ~PeakOverlayMultiCross();
     /// Set the slice point at position.
@@ -64,10 +64,6 @@ namespace SliceViewer
     virtual void updateView();
     /// Move the position of the peak, by using a different configuration of the existing origin indexes.
     void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform);
-    /// Change foreground colour
-    virtual void changeForegroundColour(const QColor);
-    /// Change background colour
-    virtual void changeBackgroundColour(const QColor);
     /// Get a bounding box for this peak.
     virtual PeakBoundingBox getBoundingBox(const int peakIndex) const;
     /// Changes the size of the overlay to be the requested fraction of the current view width.
@@ -84,10 +80,6 @@ namespace SliceViewer
     virtual double getRadius() const;
     /// Is the background radius visible
     virtual bool isBackgroundShown() const;
-    /// Get the foreground colour
-    virtual QColor getForegroundColour() const;
-    /// Get the background colour
-    virtual QColor getBackgroundColour() const;
 
     /// Take settings from another view
     virtual void takeSettingsFrom(const PeakOverlayView * const);
@@ -109,7 +101,7 @@ namespace SliceViewer
     /// Physical model of the spacial cross peaks
     VecPhysicalCrossPeak m_physicalPeaks;
     /// Peak colour
-    QColor m_peakColour;
+    PeakViewColor m_foregroundPeakViewColor;
     /// Peaks in the workspace that are viewable in the present view.
     std::vector<bool> m_viewablePeaks;
     /// Cached occupancy into the view

@@ -145,31 +145,6 @@ bool PeakView::isBackgroundShown() const
     return m_showBackground;
 }
 
-/// Get the current background colour
-QColor PeakView::getBackgroundColour() const
-{
-    // TODO : REMOVE
-  return QColor();
-}
-
-/// Get the current foreground colour
-QColor PeakView::getForegroundColour() const
-{
-    /// TODO : REMOVE
-    return QColor();
-}
-
-void PeakView::changeForegroundColour(const QColor)
-{
-  // TODO: REMOVE
-}
-
-/// Change background colour
-void PeakView::changeBackgroundColour(const QColor)
-{
-    // TODO : REMOVE
-}
-
 void PeakView::takeSettingsFrom(const PeakOverlayView *const)
 {
     // TODO how to set this for differnt peak types, probably always false from

@@ -23,10 +23,10 @@ namespace MantidQt
     /** Constructor
     */
     PeakOverlayMultiCross::PeakOverlayMultiCross(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent,
-                                                 const VecPhysicalCrossPeak&  vecPhysicalPeaks, const int plotXIndex, const int plotYIndex, const QColor& peakColour)
+                                                 const VecPhysicalCrossPeak&  vecPhysicalPeaks, const int plotXIndex, const int plotYIndex, const PeakViewColor& peakColour)
       : PeakOverlayInteractive ( presenter, plot, plotXIndex, plotYIndex, parent ),
       m_physicalPeaks(vecPhysicalPeaks),
-      m_peakColour(peakColour),
+      m_foregroundPeakViewColor(peakColour),
       m_cachedOccupancyIntoView(0),
       m_cachedOccupancyInView(0)
     {
@@ -82,7 +82,7 @@ namespace MantidQt
           const int yOriginWindows = m_plot->transform( QwtPlot::yLeft, drawObject.peakOrigin.Y() );
           QPainter painter(this);
           painter.setRenderHint( QPainter::Antialiasing );
-          QPen pen(m_peakColour);
+          QPen pen(m_foregroundPeakViewColor.colorCross);
 
           pen.setWidth(drawObject.peakLineWidth); 
           painter.setPen( pen );  
@@ -126,16 +126,6 @@ namespace MantidQt
       {
         m_physicalPeaks[i]->movePosition(transform);
       }
-    }
-
-    void PeakOverlayMultiCross::changeForegroundColour(const QColor colour)
-    {
-      this->m_peakColour = QColor(colour);
-    }
-
-    void PeakOverlayMultiCross::changeBackgroundColour(const QColor)
-    {
-      // Do nothing with the background colour for a peak widget of this type.
     }
 
     /**
@@ -198,27 +188,17 @@ namespace MantidQt
       return false; // The background is not displayed for this view type.
     }
 
-    QColor PeakOverlayMultiCross::getBackgroundColour() const
-    {
-      return m_peakColour; // Doesn't really do anything since there is no background for a cross marker.
-    }
-
-    QColor PeakOverlayMultiCross::getForegroundColour() const
-    {
-      return m_peakColour;
-    }
-
     void PeakOverlayMultiCross::takeSettingsFrom(const PeakOverlayView * const source)
     {
-        this->changeForegroundColour(source->getForegroundColour());
-        this->changeBackgroundColour(source->getBackgroundColour());
+        this->changeForegroundColour(source->getBackgroundPeakViewColor());
+        this->changeBackgroundColour(source->getBackgroundPeakViewColor());
         this->changeOccupancyIntoView(source->getOccupancyIntoView());
         this->changeOccupancyInView(source->getOccupancyInView());
         this->showBackgroundRadius(source->isBackgroundShown());
     }
 
-    void PeakOverlayMultiCross::changeForegroundColour(const PeakViewColor) {
-      // DO NOTHING
+    void PeakOverlayMultiCross::changeForegroundColour(const PeakViewColor peakViewColor) {
+      m_foregroundPeakViewColor = PeakViewColor(peakViewColor);
     }
 
 
@@ -227,12 +207,12 @@ namespace MantidQt
     }
 
     PeakViewColor PeakOverlayMultiCross::getBackgroundPeakViewColor() const {
-      return PeakViewColor();
+      // DO NOTHING
     }
 
 
     PeakViewColor PeakOverlayMultiCross::getForegroundPeakViewColor() const {
-      return PeakViewColor();
+      return m_foregroundPeakViewColor;
     }
 
 

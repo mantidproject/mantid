@@ -50,7 +50,7 @@ namespace SliceViewer
   public:
     /// Constructor
     PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, const int plotXIndex, const int plotYIndex,
-                           const QColor& peakColour, const QColor& backColour);
+                           const PeakViewColor& peakColour, const PeakViewColor& backColour);
     /// Destructor
     virtual ~PeakOverlayMultiSphere();
     /// Set the slice point at position.

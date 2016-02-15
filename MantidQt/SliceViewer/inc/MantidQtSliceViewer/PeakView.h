@@ -36,12 +36,6 @@ public:
     void
     movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
 
-    /// Change foreground colour
-    void changeForegroundColour(const QColor) override;
-
-    /// Change background colour
-    void changeBackgroundColour(const QColor) override;
-
     /// Show the background radius
     void showBackgroundRadius(const bool show) override;
 
@@ -71,12 +65,6 @@ public:
 
     /// Determine if the background radius is shown.
     bool isBackgroundShown() const override;
-
-    /// Get the current background colour
-    QColor getBackgroundColour() const override;
-
-    /// Get the current foreground colour
-    QColor getForegroundColour() const override;
 
     /// Take settings from another view
     void takeSettingsFrom(const PeakOverlayView *const) override;

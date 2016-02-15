@@ -39,8 +39,6 @@ public:
   virtual bool changeShownDim();
   virtual bool isLabelOfFreeAxis(const std::string &label) const;
   SetPeaksWorkspaces presentedWorkspaces() const;
-  void setForegroundColor(const QColor) override;
-  void setBackgroundColor(const QColor) override;
   void setForegroundColor(const PeakViewColor) override;
   void setBackgroundColor(const PeakViewColor) override;
   std::string getTransformName() const;
@@ -54,8 +52,6 @@ public:
   virtual double getPeakSizeIntoProjection() const;
   virtual void registerOwningPresenter(UpdateableOnDemand *owner);
   virtual bool getShowBackground() const;
-  virtual QColor getBackgroundColor() const;
-  virtual QColor getForegroundColor() const;
   PeakViewColor getBackgroundPeakViewColor() const override;
   PeakViewColor getForegroundPeakViewColor() const override;
   virtual void zoomToPeak(const int index);
