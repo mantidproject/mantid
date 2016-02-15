@@ -134,7 +134,6 @@ typedef boost::shared_ptr<SymmetryElementTranslation>
  */
 class MANTID_GEOMETRY_DLL SymmetryElementWithAxis : public SymmetryElement {
 public:
-
   /// Returns the internally stored axis.
   V3R getAxis() const { return m_axis; }
 

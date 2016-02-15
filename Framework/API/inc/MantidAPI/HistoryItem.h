@@ -51,6 +51,7 @@ public:
   size_t numberOfChildren() const {
     return m_algorithmHistory->childHistorySize();
   }
+
 private:
   AlgorithmHistory_const_sptr m_algorithmHistory;
   bool m_unrolled;

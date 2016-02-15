@@ -104,6 +104,5 @@ bool PeakTransformSelector::hasFactoryForTransform(
   }
   return hasFactoryForTransform;
 }
-
 }
 }

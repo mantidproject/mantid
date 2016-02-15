@@ -58,7 +58,6 @@ Torus::Torus()
   throw Kernel::Exception::NotImplementedError("Torus is not implemented.");
 }
 
-
 Torus *Torus::doClone() const
 /**
   Makes a clone (implicit virtual copy constructor)

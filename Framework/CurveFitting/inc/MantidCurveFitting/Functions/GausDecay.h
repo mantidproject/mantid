@@ -40,7 +40,6 @@ National Laboratory & European Spallation Source
 
 class DLLExport GausDecay : public API::ParamFunction, public API::IFunction1D {
 public:
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "GausDecay"; }
 

@@ -136,7 +136,6 @@ private:
 class DLLExport DiffSphere : public API::ImmutableCompositeFunction {
 
 public:
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "DiffSphere"; }
 

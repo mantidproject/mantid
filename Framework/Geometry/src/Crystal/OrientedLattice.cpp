@@ -21,7 +21,6 @@ OrientedLattice::OrientedLattice(const DblMatrix &Umatrix) : UnitCell() {
     throw std::invalid_argument("U is not a proper rotation");
 }
 
-
 /** Constructor
 @param _a :: lattice parameter \f$ a \f$ with \f$\alpha = \beta = \gamma =
 90^\circ \f$

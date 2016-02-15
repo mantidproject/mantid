@@ -39,7 +39,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Muon_ExpDecayOscTest : public API::IPeakFunction {
 public:
-
   /// overwrite IPeakFunction base class methods
 
   double centre() const override { return getParameter("lambda"); }

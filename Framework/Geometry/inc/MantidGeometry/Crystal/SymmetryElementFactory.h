@@ -108,7 +108,6 @@ MANTID_GEOMETRY_DLL gsl_matrix *getGSLIdentityMatrix(size_t rows, size_t cols);
 class MANTID_GEOMETRY_DLL SymmetryElementWithAxisGenerator
     : public AbstractSymmetryElementGenerator {
 public:
-
 protected:
   V3R determineTranslation(const SymmetryOperation &operation) const;
   V3R determineAxis(const Kernel::IntMatrix &matrix) const;

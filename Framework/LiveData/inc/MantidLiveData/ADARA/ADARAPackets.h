@@ -333,6 +333,7 @@ private:
 class DLLExport RunInfoPkt : public Packet {
 public:
   const std::string &info(void) const { return m_xml; }
+
 private:
   std::string m_xml;
 
@@ -359,7 +360,6 @@ private:
 
 class DLLExport ClientHelloPkt : public Packet {
 public:
-
   enum Flags {
     PAUSE_AGNOSTIC = 0x0000,
     NO_PAUSE_DATA = 0x0001,
@@ -425,6 +425,7 @@ private:
 class DLLExport GeometryPkt : public Packet {
 public:
   const std::string &info(void) const { return m_xml; }
+
 private:
   std::string m_xml;
 
