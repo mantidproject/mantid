@@ -7,6 +7,10 @@
 
 namespace Mantid {
 
+namespace API {
+class Run;
+}
+
 namespace Kernel {
 /// forward declaration
 class PropertyMantager;

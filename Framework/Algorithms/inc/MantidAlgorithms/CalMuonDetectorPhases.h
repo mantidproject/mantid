@@ -3,6 +3,8 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+
 namespace Mantid {
 namespace Algorithms {
 

@@ -1,8 +1,9 @@
 #ifndef MANTID_ALGORITHMS_STITCH1D_H_
 #define MANTID_ALGORITHMS_STITCH1D_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
+
 #include <boost/tuple/tuple.hpp>
 
 namespace Mantid {

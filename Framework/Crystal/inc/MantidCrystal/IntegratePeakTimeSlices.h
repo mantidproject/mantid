@@ -8,18 +8,16 @@
 #define INTEGRATEPEAKTIMESLICES_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/IAlgorithm.h"
 
 #include <array>
 

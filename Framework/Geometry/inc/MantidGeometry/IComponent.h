@@ -6,15 +6,21 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
+
 #include <string>
 #include <vector>
 #include <set>
+
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
 
 namespace Mantid {
+
+namespace Kernel {
+class Quat;
+}
+
 namespace Geometry {
 //---------------------------------------------------------
 // Forward declarations

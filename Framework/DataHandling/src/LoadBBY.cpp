@@ -1,4 +1,8 @@
+#include <math.h>
+#include <stdio.h>
+
 #include "MantidDataHandling/LoadBBY.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -10,8 +14,6 @@
 #include "MantidNexus/NexusClasses.h"
 
 #include <Poco/TemporaryFile.h>
-#include <math.h>
-#include <stdio.h>
 
 namespace Mantid {
 namespace DataHandling {

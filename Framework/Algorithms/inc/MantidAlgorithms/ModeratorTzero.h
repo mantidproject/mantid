@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
 
 namespace Mantid {

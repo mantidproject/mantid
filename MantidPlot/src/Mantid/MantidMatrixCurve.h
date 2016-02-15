@@ -4,6 +4,7 @@
 #include "MantidCurve.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 // Forward definitions
 class MantidUI;

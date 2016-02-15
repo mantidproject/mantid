@@ -1,5 +1,7 @@
 #include "MantidAlgorithms/StripVanadiumPeaks2.h"
-#include "MantidKernel/System.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 

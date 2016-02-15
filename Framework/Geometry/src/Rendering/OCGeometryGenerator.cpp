@@ -9,8 +9,10 @@
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
+
 #include <climits> // Needed for g++4.4 on Mac with OpenCASCADE 6.3.0
 #include <cmath>
 #include <vector>

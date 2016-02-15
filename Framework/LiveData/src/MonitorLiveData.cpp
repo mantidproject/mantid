@@ -1,10 +1,12 @@
-#include "MantidLiveData/MonitorLiveData.h"
-#include "MantidKernel/System.h"
-#include "MantidLiveData/LoadLiveData.h"
-#include <Poco/Thread.h>
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
+#include "MantidLiveData/LoadLiveData.h"
+#include "MantidLiveData/MonitorLiveData.h"
+
+#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

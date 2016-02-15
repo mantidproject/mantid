@@ -4,8 +4,9 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>

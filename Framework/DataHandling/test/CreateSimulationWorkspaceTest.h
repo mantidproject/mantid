@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using Mantid::DataHandling::CreateSimulationWorkspace;
 

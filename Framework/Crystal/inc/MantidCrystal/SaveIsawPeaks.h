@@ -3,8 +3,14 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
+
+namespace Kernel {
+class V3D;
+}
+
 namespace Crystal {
 
 /** Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.
