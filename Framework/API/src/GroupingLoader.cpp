@@ -1,5 +1,6 @@
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/SingletonHolder.h"
 #include <boost/make_shared.hpp>
 #include <Poco/DOM/Document.h>
