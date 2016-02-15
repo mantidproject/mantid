@@ -2,6 +2,7 @@
 #include "MantidKernel/Exception.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cassert>
 #include <sstream>
 
