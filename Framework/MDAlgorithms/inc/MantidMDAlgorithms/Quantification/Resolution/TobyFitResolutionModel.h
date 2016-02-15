@@ -67,14 +67,13 @@ public:
   TobyFitResolutionModel(const API::IFunctionMD &fittedFunction,
                          const std::string &fgModelName);
   /// Destructor
-  ~TobyFitResolutionModel();
+  ~TobyFitResolutionModel() override;
 
   /// Returns the function's name
-  std::string name() const { return "TobyFitResolutionModel"; }
+  std::string name() const override { return "TobyFitResolutionModel"; }
   /// Returns the value of the model convoluted with the resolution
-  virtual double signal(const API::IMDIterator &box,
-                        const uint16_t innerRunIndex,
-                        const size_t eventIndex) const;
+  double signal(const API::IMDIterator &box, const uint16_t innerRunIndex,
+                const size_t eventIndex) const override;
 
 private:
   DISABLE_COPY_AND_ASSIGN(TobyFitResolutionModel)
@@ -82,12 +81,12 @@ private:
   friend class TobyFitYVector;
 
   /// Declare function attributes
-  void declareAttributes();
+  void declareAttributes() override;
   /// Declare fitting parameters
-  void declareParameters();
+  void declareParameters() override;
   /// Cache some frequently used attributes
   void setAttribute(const std::string &name,
-                    const API::IFunction::Attribute &value);
+                    const API::IFunction::Attribute &value) override;
 
   /// Calculate resolution coefficients
   void calculateResolutionCoefficients(const CachedExperimentInfo &observation,
@@ -109,16 +108,16 @@ private:
                     const double sumSigmaSqr, const double avgSigma) const;
 
   /// Called before a function evaluation begins
-  void functionEvalStarting();
+  void functionEvalStarting() override;
   /// Called after a function evaluation is finished
-  void functionEvalFinished();
+  void functionEvalFinished() override;
   /// Called just before the monte carlo loop starts
   void monteCarloLoopStarting() const;
 
   /// Cache detector observations once when the workspace is set
-  void preprocess(const API::IMDEventWorkspace_const_sptr &workspace);
+  void preprocess(const API::IMDEventWorkspace_const_sptr &workspace) override;
   /// Called just before the fitting job starts
-  void setUpForFit();
+  void setUpForFit() override;
   /// Set up the calculator for the given number of threads
   void setNThreads(int nthreads);
   /// Setup the random number generator based on the given type
@@ -128,7 +127,7 @@ private:
 
   /// Required by the interface. Does nothing
   void function(const Mantid::API::FunctionDomain &,
-                Mantid::API::FunctionValues &) const {}
+                Mantid::API::FunctionValues &) const override {}
 
   /// Storage for currently in use random number generators
   mutable std::vector<Kernel::NDRandomNumberGenerator *> m_randomNumbers;

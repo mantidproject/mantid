@@ -66,36 +66,36 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport LoadFITS : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadFITS();
-  virtual ~LoadFITS() {}
+  ~LoadFITS() override {}
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadFITS"; }
+  const std::string name() const override { return "LoadFITS"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load FITS files into workspaces of type Workspace2D.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Tomography";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
   /// Returns a value indicating whether or not loader wants to load multiple
   /// files into a single workspace
-  virtual bool loadMutipleAsOne() { return true; }
+  bool loadMutipleAsOne() override { return true; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Loads the FITS header(s) into a struct
   void doLoadHeaders(const std::vector<std::string> &paths,

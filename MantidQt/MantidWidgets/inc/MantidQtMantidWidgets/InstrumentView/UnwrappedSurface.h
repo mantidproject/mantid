@@ -90,13 +90,15 @@ namespace MantidQt
 
 			/** @name Implemented public virtual methods */
 			//@{
-			void componentSelected(Mantid::Geometry::ComponentID = NULL);
-			void getSelectedDetectors(QList<int>& dets);
-			void getMaskedDetectors(QList<int>& dets)const;
-			void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
-			QString getInfoText()const;
-			RectF getSurfaceBounds()const;
-			//@}
+                        void componentSelected(
+                            Mantid::Geometry::ComponentID = NULL) override;
+                        void getSelectedDetectors(QList<int> &dets) override;
+                        void
+                        getMaskedDetectors(QList<int> &dets) const override;
+                        void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
+                        QString getInfoText() const override;
+                        RectF getSurfaceBounds() const override;
+                        //@}
 
 			/** @name New public virtual methods */
 			//@{
@@ -136,10 +138,12 @@ namespace MantidQt
 
 			/** @name Implemented protected virtual methods */
 			//@{
-			void drawSurface(MantidGLWidget* widget, bool picking = false)const;
-			void drawSimpleToImage(QImage* image, bool picking = false)const;
-			void changeColorMap();
-			//@}
+                  void drawSurface(MantidGLWidget *widget,
+                                   bool picking = false) const override;
+                  void drawSimpleToImage(QImage *image,
+                                         bool picking = false) const override;
+                  void changeColorMap() override;
+                        //@}
 
 			/** @name New protected virtual methods */
 			//@{

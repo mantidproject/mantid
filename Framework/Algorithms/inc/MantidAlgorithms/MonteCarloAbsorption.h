@@ -50,27 +50,27 @@ public:
   /// Constructor
   MonteCarloAbsorption();
   /// Destructor
-  ~MonteCarloAbsorption();
+  ~MonteCarloAbsorption() override;
 
   /// Algorithm's name
-  virtual const std::string name() const { return "MonteCarloAbsorption"; }
+  const std::string name() const override { return "MonteCarloAbsorption"; }
   /// Algorithm's version
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\AbsorptionCorrections";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates attenuation due to absorption and scattering in a "
            "sample & its environment using a weighted Monte Carlo.";
   }
 
 private:
   /// Initialize the algorithm
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Do the simulation for the given detector and wavelength
   void doSimulation(const Geometry::IDetector *const detector,

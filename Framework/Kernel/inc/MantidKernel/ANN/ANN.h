@@ -591,34 +591,34 @@ public:
       int n,            // number of points
       int dd);          // dimension
 
-  ~ANNbruteForce(); // destructor
+  ~ANNbruteForce() override; // destructor
 
-  void annkSearch(        // approx k near neighbor search
-      ANNpoint q,         // query point
-      int k,              // number of near neighbors to return
-      ANNidxArray nn_idx, // nearest neighbor array (modified)
-      ANNdistArray dd,    // dist to near neighbors (modified)
-      double eps = 0.0);  // error bound
+  void annkSearch(                // approx k near neighbor search
+      ANNpoint q,                 // query point
+      int k,                      // number of near neighbors to return
+      ANNidxArray nn_idx,         // nearest neighbor array (modified)
+      ANNdistArray dd,            // dist to near neighbors (modified)
+      double eps = 0.0) override; // error bound
 
-  int annkFRSearch(                 // approx fixed-radius kNN search
-      ANNpoint q,                   // query point
-      ANNdist sqRad,                // squared radius
-      int k = 0,                    // number of near neighbors to return
-      ANNidxArray nn_idx = nullptr, // nearest neighbor array (modified)
-      ANNdistArray dd = nullptr,    // dist to near neighbors (modified)
-      double eps = 0.0);            // error bound
+  int annkFRSearch(               // approx fixed-radius kNN search
+      ANNpoint q,                 // query point
+      ANNdist sqRad,              // squared radius
+      int k = 0,                  // number of near neighbors to return
+      ANNidxArray nn_idx = nullptr,  // nearest neighbor array (modified)
+      ANNdistArray dd = nullptr,     // dist to near neighbors (modified)
+      double eps = 0.0) override; // error bound
 
-  int theDim() // return dimension of space
+  int theDim() override // return dimension of space
   {
     return dim;
   }
 
-  int nPoints() // return number of points
+  int nPoints() override // return number of points
   {
     return n_pts;
   }
 
-  ANNpointArray thePoints() // return pointer to points
+  ANNpointArray thePoints() override // return pointer to points
   {
     return pts;
   }
@@ -803,14 +803,14 @@ public:
   ANNkd_tree(            // build from dump file
       std::istream &in); // input stream for dump file
 
-  ~ANNkd_tree(); // tree destructor
+  ~ANNkd_tree() override; // tree destructor
 
-  void annkSearch(        // approx k near neighbor search
-      ANNpoint q,         // query point
-      int k,              // number of near neighbors to return
-      ANNidxArray nn_idx, // nearest neighbor array (modified)
-      ANNdistArray dd,    // dist to near neighbors (modified)
-      double eps = 0.0);  // error bound
+  void annkSearch(                // approx k near neighbor search
+      ANNpoint q,                 // query point
+      int k,                      // number of near neighbors to return
+      ANNidxArray nn_idx,         // nearest neighbor array (modified)
+      ANNdistArray dd,            // dist to near neighbors (modified)
+      double eps = 0.0) override; // error bound
 
   void annkPriSearch(     // priority k near neighbor search
       ANNpoint q,         // query point
@@ -825,19 +825,19 @@ public:
       int k,                        // number of neighbors to return
       ANNidxArray nn_idx = nullptr, // nearest neighbor array (modified)
       ANNdistArray dd = nullptr,    // dist to near neighbors (modified)
-      double eps = 0.0);            // error bound
+      double eps = 0.0) override;   // error bound
 
-  int theDim() // return dimension of space
+  int theDim() override // return dimension of space
   {
     return dim;
   }
 
-  int nPoints() // return number of points
+  int nPoints() override // return number of points
   {
     return n_pts;
   }
 
-  ANNpointArray thePoints() // return pointer to points
+  ANNpointArray thePoints() override // return pointer to points
   {
     return pts;
   }

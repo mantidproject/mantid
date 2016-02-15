@@ -72,13 +72,13 @@ public:
   /// (Empty) Constructor
   AbsorptionCorrection();
   /// Virtual destructor
-  virtual ~AbsorptionCorrection() {}
+  ~AbsorptionCorrection() override {}
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\AbsorptionCorrections";
   }
   /// Algorithm's summary
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates an approximation of the attenuation due to absorption "
            "and single scattering in a generic sample shape. The sample shape "
            "can be defined by the CreateSampleShape algorithm.";
@@ -117,9 +117,9 @@ protected:
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);

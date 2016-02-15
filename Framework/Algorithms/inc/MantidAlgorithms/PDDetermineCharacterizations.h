@@ -42,13 +42,13 @@ namespace Algorithms {
 class DLLExport PDDetermineCharacterizations : public API::Algorithm {
 public:
   PDDetermineCharacterizations();
-  virtual ~PDDetermineCharacterizations();
+  ~PDDetermineCharacterizations() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
-  virtual std::map<std::string, std::string> validateInputs();
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   double getLogValue(API::Run &run, const std::string &propName);
@@ -56,8 +56,8 @@ private:
   void setDefaultsInPropManager();
   void overrideRunNumProperty(const std::string &inputName,
                               const std::string &propName);
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   Kernel::PropertyManager_sptr m_propertyManager;
   API::ITableWorkspace_sptr m_characterizations;

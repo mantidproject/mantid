@@ -47,18 +47,20 @@ class muParserScript: public Script
     muParserScript(ScriptingEnv *env, const QString &name,
                    QObject *context, bool checkMultilineCode = true);
 
-  bool compilesToCompleteStatement(const QString &) const { return true; };
+    bool compilesToCompleteStatement(const QString &) const override {
+      return true;
+    };
 
   public slots:
-    QVariant evaluateImpl();
+    QVariant evaluateImpl() override;
     double evalSingleLine();
     QString evalSingleLineToString(const QLocale& locale, char f, int prec);
-    bool compileImpl();
-    bool executeImpl();
-    void abortImpl();
-    bool setQObject(QObject *val, const char *name);
-    bool setInt(int val, const char* name);
-    bool setDouble(double val, const char* name);
+    bool compileImpl() override;
+    bool executeImpl() override;
+    void abortImpl() override;
+    bool setQObject(QObject *val, const char *name) override;
+    bool setInt(int val, const char *name) override;
+    bool setDouble(double val, const char *name) override;
     double* defineVariable(const char *name, double val = 0.0);
     int codeLines(){return muCode.size();};
 

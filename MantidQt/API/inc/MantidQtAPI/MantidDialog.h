@@ -77,7 +77,7 @@ public:
   /// DefaultConstructor
   MantidDialog(QWidget* parent = 0);
   /// Destructor
-  virtual ~MantidDialog();
+  ~MantidDialog() override;
 
   /// Handles the exception caught in an event handler.
   static bool handle( QObject* receiver, const std::exception& e );

@@ -33,28 +33,28 @@ namespace Algorithms {
 class DLLExport FindPeakBackground : public API::Algorithm {
 public:
   FindPeakBackground();
-  virtual ~FindPeakBackground();
+  ~FindPeakBackground() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FindPeakBackground"; }
+  const std::string name() const override { return "FindPeakBackground"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Separates background from signal for spectra of a workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Utility\\Calculation"; }
+  const std::string category() const override { return "Utility\\Calculation"; }
 
 private:
   std::string m_backgroundType; //< The type of background to fit
 
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
   double moment4(MantidVec &X, size_t n, double mean);
   void estimateBackground(const MantidVec &X, const MantidVec &Y,
                           const size_t i_min, const size_t i_max,

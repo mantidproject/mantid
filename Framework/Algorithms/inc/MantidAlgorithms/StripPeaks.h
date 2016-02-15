@@ -58,28 +58,28 @@ public:
   /// (Empty) Constructor
   StripPeaks();
   /// Virtual destructor
-  virtual ~StripPeaks() {}
+  ~StripPeaks() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "StripPeaks"; }
+  const std::string name() const override { return "StripPeaks"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm attempts to find all the peaks in all spectra of a "
            "workspace and subtract them from the data, leaving just the "
            "'background'.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\PeakCorrections;Optimization\\PeakFinding";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   API::ITableWorkspace_sptr findPeaks(API::MatrixWorkspace_sptr WS);
   API::MatrixWorkspace_sptr removePeaks(API::MatrixWorkspace_const_sptr input,

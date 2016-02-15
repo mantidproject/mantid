@@ -29,11 +29,15 @@ namespace MantidQt
 			};
 			PeakMarker2D(PeakOverlay& peakOverlay, double u, double v, const Style& style = Style());
 			/* --- Implemented Shape2D virtual methods --- */
-			virtual Shape2D* clone()const { return new PeakMarker2D(*this); }
-			virtual bool selectAt(const QPointF& p)const;
-			virtual bool contains(const QPointF& p)const { return m_boundingRect.contains(p); }
-			virtual void addToPath(QPainterPath& path) const;
-			/* --- Own public methods --- */
+                        Shape2D *clone() const override {
+                          return new PeakMarker2D(*this);
+                        }
+                        bool selectAt(const QPointF &p) const override;
+                        bool contains(const QPointF &p) const override {
+                          return m_boundingRect.contains(p);
+                        }
+                        void addToPath(QPainterPath &path) const override;
+                        /* --- Own public methods --- */
 			/// Set new marker size to s
 			void setMarkerSize(const int& s);
 			/// Get marker size
@@ -58,9 +62,9 @@ namespace MantidQt
 			QString getLabel()const { return m_label; }
 		protected:
 			/* --- Implemented Shape2D protected virtual methods --- */
-			virtual void drawShape(QPainter& painter) const;
-			virtual void refit() {}
-			/* --- Own protected methods --- */
+                  void drawShape(QPainter &painter) const override;
+                  void refit() override {}
+                        /* --- Own protected methods --- */
 			void drawCircle(QPainter& painter)const;
 			void drawDiamond(QPainter& painter)const;
 			void drawSquare(QPainter& painter)const;

@@ -64,7 +64,7 @@ public:
   SpaceGroup(const SpaceGroup &other);
   SpaceGroup &operator=(const SpaceGroup &other);
 
-  virtual ~SpaceGroup() {}
+  ~SpaceGroup() override {}
 
   size_t number() const;
   std::string hmSymbol() const;

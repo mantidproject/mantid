@@ -58,24 +58,26 @@ public:
   /// Initialize
   void initialize(Kernel::IPropertyManager *pm,
                   const std::string &workspacePropertyName,
-                  DomainType domainType);
+                  DomainType domainType) override;
 
   /// declare properties that specify the dataset within the workspace to fit
   /// to.
-  virtual void declareDatasetProperties(const std::string &suffix = "",
-                                        bool addProp = true);
+  void declareDatasetProperties(const std::string &suffix = "",
+                                bool addProp = true) override;
   /// Create a domain from the input workspace
-  virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &,
-                            boost::shared_ptr<API::FunctionValues> &,
-                            size_t i0);
-  virtual boost::shared_ptr<API::Workspace> createOutputWorkspace(
-      const std::string &baseName, API::IFunction_sptr function,
-      boost::shared_ptr<API::FunctionDomain> domain,
-      boost::shared_ptr<API::FunctionValues> values,
-      const std::string &outputWorkspacePropertyName = "OutputWorkspace");
+  void createDomain(boost::shared_ptr<API::FunctionDomain> &,
+                    boost::shared_ptr<API::FunctionValues> &,
+                    size_t i0) override;
+  boost::shared_ptr<API::Workspace>
+  createOutputWorkspace(const std::string &baseName,
+                        API::IFunction_sptr function,
+                        boost::shared_ptr<API::FunctionDomain> domain,
+                        boost::shared_ptr<API::FunctionValues> values,
+                        const std::string &outputWorkspacePropertyName =
+                            "OutputWorkspace") override;
 
   /// Return the size of the domain to be created.
-  virtual size_t getDomainSize() const;
+  size_t getDomainSize() const override;
   /// Set the workspace
   void setWorkspace(boost::shared_ptr<API::IMDWorkspace> IMDWorkspace) {
     m_IMDWorkspace = IMDWorkspace;

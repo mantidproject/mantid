@@ -42,25 +42,25 @@ class TOPAZLiveEventDataListener : public API::ILiveListener,
                                    public Poco::Runnable {
 public:
   TOPAZLiveEventDataListener();
-  virtual ~TOPAZLiveEventDataListener();
+  ~TOPAZLiveEventDataListener() override;
 
-  std::string name() const { return "TOPAZLiveEventDataListener"; }
-  bool supportsHistory() const { return false; }
-  bool buffersEvents() const { return true; }
+  std::string name() const override { return "TOPAZLiveEventDataListener"; }
+  bool supportsHistory() const override { return false; }
+  bool buffersEvents() const override { return true; }
 
-  bool connect(const Poco::Net::SocketAddress &address);
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime());
-  boost::shared_ptr<API::Workspace> extractData();
+  bool connect(const Poco::Net::SocketAddress &address) override;
+  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  boost::shared_ptr<API::Workspace> extractData() override;
 
-  ILiveListener::RunStatus runStatus();
+  ILiveListener::RunStatus runStatus() override;
   // Called by the MonitorLiveData algorithm.
 
-  int runNumber() const { return m_runNumber; };
+  int runNumber() const override { return m_runNumber; };
 
-  bool isConnected();
+  bool isConnected() override;
 
-  virtual void run(); // the background thread.  What gets executed when we
-                      // call POCO::Thread::start()
+  void run() override; // the background thread.  What gets executed when we
+                       // call POCO::Thread::start()
 protected:
 private:
   void initWorkspace();

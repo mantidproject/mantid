@@ -55,26 +55,24 @@ however, some visualisation frameworks won't be able to treat these factories in
       vtkMDHistoQuadFactory(const vtkMDHistoQuadFactory& other);
 
       /// Destructor
-      virtual ~vtkMDHistoQuadFactory();
+      ~vtkMDHistoQuadFactory() override;
 
       /// Factory Method.
-      virtual vtkSmartPointer<vtkDataSet>
-      create(ProgressAction &progressUpdating) const;
+      vtkSmartPointer<vtkDataSet>
+      create(ProgressAction &progressUpdating) const override;
 
-      virtual void initialize(Mantid::API::Workspace_sptr);
+      void initialize(Mantid::API::Workspace_sptr) override;
 
       typedef std::vector<std::vector<UnstructuredPoint> > Plane;
 
       typedef std::vector<UnstructuredPoint> Column;
 
-      virtual std::string getFactoryTypeName() const
-      {
+      std::string getFactoryTypeName() const override {
         return "vtkMDHistoQuadFactory";
       }
 
     protected:
-
-      virtual void validate() const;
+      void validate() const override;
 
     private:
       Mantid::DataObjects::MDHistoWorkspace_sptr m_workspace;

@@ -48,23 +48,23 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport LoadSNSspec : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSNSspec();
-  ~LoadSNSspec() {}
-  virtual const std::string name() const { return "LoadSNSspec"; }
+  ~LoadSNSspec() override {}
+  const std::string name() const override { return "LoadSNSspec"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads data from a text file and stores it in a 2D workspace "
            "(Workspace2D class).";
   }
 
-  virtual int version() const { return 1; }
-  virtual const std::string category() const { return "DataHandling\\Text"; }
+  int version() const override { return 1; }
+  const std::string category() const override { return "DataHandling\\Text"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Allowed values for the cache property
   std::vector<std::string> m_seperator_options;

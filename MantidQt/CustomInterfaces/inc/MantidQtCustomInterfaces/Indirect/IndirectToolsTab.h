@@ -45,7 +45,7 @@ class DLLExport IndirectToolsTab : public IndirectTab {
 
 public:
   IndirectToolsTab(QWidget *parent = 0);
-  ~IndirectToolsTab();
+  ~IndirectToolsTab() override;
 
   /// Base methods implemented in derived classes
   virtual void loadSettings(const QSettings &settings) = 0;
@@ -55,9 +55,9 @@ signals:
   void executePythonScript(const QString &pyInput, bool output);
 
 protected:
-  virtual void setup() = 0;
-  virtual void run() = 0;
-  virtual bool validate() = 0;
+  void setup() override = 0;
+  void run() override = 0;
+  bool validate() override = 0;
 
   void runPythonScript(const QString &pyInput);
 };

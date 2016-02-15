@@ -48,26 +48,28 @@ public:
   //};
 
   SliceMD();
-  ~SliceMD();
+  ~SliceMD() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SliceMD"; };
+  const std::string name() const override { return "SliceMD"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Make a MDEventWorkspace containing the events in a slice of an "
            "input MDEventWorkspace.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "MDAlgorithms\\Slicing"; }
+  const std::string category() const override {
+    return "MDAlgorithms\\Slicing";
+  }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   /// Helper method
   template <typename MDE, size_t nd>

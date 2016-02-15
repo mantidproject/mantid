@@ -62,7 +62,7 @@ namespace Mantid
         public:
           RebinnedSourcesManager(QWidget* parent = 0);
 
-          ~RebinnedSourcesManager();
+          ~RebinnedSourcesManager() override;
 
           void checkSource(pqPipelineSource* source, std::string& inputWorkspace, std::string& outputWorkspace,  std::string algorithmType);
 
@@ -81,11 +81,18 @@ namespace Mantid
 
           void triggerAcceptForNewFilters();
         protected:
-          void addHandle(const std::string &workspaceName, const boost::shared_ptr<Mantid::API::Workspace> workspace);
+          void addHandle(const std::string &workspaceName,
+                         const boost::shared_ptr<Mantid::API::Workspace>
+                             workspace) override;
 
-          void preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> );
+          void preDeleteHandle(
+              const std::string &wsName,
+              const boost::shared_ptr<Mantid::API::Workspace>) override;
 
-          void afterReplaceHandle(const std::string &workspaceName, const boost::shared_ptr<Mantid::API::Workspace> workspace);
+          void
+          afterReplaceHandle(const std::string &workspaceName,
+                             const boost::shared_ptr<Mantid::API::Workspace>
+                                 workspace) override;
 
         private slots:
           void onRebinnedSourceDestroyed();

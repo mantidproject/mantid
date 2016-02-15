@@ -48,18 +48,18 @@ class DLLExport FABADAMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor
   FABADAMinimizer();
-  virtual ~FABADAMinimizer();
+  ~FABADAMinimizer() override;
   /// Name of the minimizer.
-  std::string name() const { return "FABADA"; }
+  std::string name() const override { return "FABADA"; }
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function,
-                          size_t maxIterations);
+  void initialize(API::ICostFunction_sptr function,
+                  size_t maxIterations) override;
   /// Do one iteration.
-  virtual bool iterate(size_t iter);
+  bool iterate(size_t iter) override;
   /// Return current value of the cost function
-  virtual double costFunctionVal();
+  double costFunctionVal() override;
   /// Finalize minimization, eg store additional outputs
-  virtual void finalize();
+  void finalize() override;
 
 private:
   /// Pointer to the cost function. Must be the least squares.

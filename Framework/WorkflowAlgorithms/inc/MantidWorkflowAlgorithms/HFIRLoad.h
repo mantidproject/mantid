@@ -48,23 +48,23 @@ public:
   /// Constructor
   HFIRLoad() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~HFIRLoad() {}
+  ~HFIRLoad() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "HFIRLoad"; }
+  const std::string name() const override { return "HFIRLoad"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const { return "Load HFIR SANS data."; }
+  const std::string summary() const override { return "Load HFIR SANS data."; }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Workflow\\SANS\\UsesPropertyManager";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   void moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS, double &center_x,
                         double &center_y);
 };

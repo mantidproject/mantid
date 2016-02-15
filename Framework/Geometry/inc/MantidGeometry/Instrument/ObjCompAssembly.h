@@ -50,7 +50,7 @@ class MANTID_GEOMETRY_DLL ObjCompAssembly : public virtual ICompAssembly,
       const_comp_it; ///< Const iterator type
 public:
   /// String description of the type of component
-  virtual std::string type() const { return "ObjCompAssembly"; }
+  std::string type() const override { return "ObjCompAssembly"; }
   //! Empty constructor
   // ObjCompAssembly();
 
@@ -60,37 +60,37 @@ public:
   ObjCompAssembly(const std::string &, IComponent *reference = nullptr);
   //! Copy constructor
   ObjCompAssembly(const ObjCompAssembly &);
-  virtual ~ObjCompAssembly();
+  ~ObjCompAssembly() override;
   //! Make a clone of the present component
-  virtual IComponent *clone() const;
+  IComponent *clone() const override;
   //! Return the number of elements in the assembly
-  int nelements() const;
+  int nelements() const override;
   //! Add a component to the assembly
-  int add(IComponent *);
+  int add(IComponent *) override;
   //! Add a copy (clone) of a component
-  int addCopy(IComponent *);
+  int addCopy(IComponent *) override;
   //! Add a copy (clone) of a component and rename it
-  int addCopy(IComponent *, const std::string &);
+  int addCopy(IComponent *, const std::string &) override;
   //! Get a pointer to the ith component within the assembly. Easier to use than
   //[] when you have a pointer
-  boost::shared_ptr<IComponent> getChild(const int i) const {
+  boost::shared_ptr<IComponent> getChild(const int i) const override {
     return (*this)[i];
   }
   //! Get all children
   void getChildren(std::vector<IComponent_const_sptr> &outVector,
-                   bool recursive) const;
+                   bool recursive) const override;
   //! Returns a pointer to the first component of assembly encountered with the
   // given name
-  virtual boost::shared_ptr<const IComponent>
-  getComponentByName(const std::string &cname, int nlevels = 0) const;
+  boost::shared_ptr<const IComponent>
+  getComponentByName(const std::string &cname, int nlevels = 0) const override;
   //! Get a pointer to the ith component in the assembly
-  boost::shared_ptr<IComponent> operator[](int i) const;
+  boost::shared_ptr<IComponent> operator[](int i) const override;
   //! Print information about all children
-  void printChildren(std::ostream &) const;
-  void printTree(std::ostream &) const;
+  void printChildren(std::ostream &) const override;
+  void printTree(std::ostream &) const override;
 
-  const Kernel::Quat getRotation() const;
-  Kernel::V3D getPos() const;
+  const Kernel::Quat getRotation() const override;
+  Kernel::V3D getPos() const override;
 
   //! Set the outline of the assembly
   boost::shared_ptr<Object> createOutline();
@@ -98,9 +98,9 @@ public:
 
   /** Test the intersection of the ray with the children of the component
    * assembly  */
-  virtual void testIntersectionWithChildren(
+  void testIntersectionWithChildren(
       Track & /*testRay*/,
-      std::deque<IComponent_const_sptr> & /*searchQueue*/) const;
+      std::deque<IComponent_const_sptr> & /*searchQueue*/) const override;
 
 private:
   /// Private copy assignment operator

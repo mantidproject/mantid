@@ -125,25 +125,29 @@ public:
 
   // TableColumn();
   /// Virtual destructor.
-  virtual ~TableColumn() {}
+  ~TableColumn() override {}
   /// Number of individual elements in the column.
-  size_t size() const { return m_data.size(); }
+  size_t size() const override { return m_data.size(); }
   /// Type id of the data in the column
-  const std::type_info &get_type_info() const { return typeid(Type); }
+  const std::type_info &get_type_info() const override { return typeid(Type); }
   /// Type id of the pointer to data in the column
-  const std::type_info &get_pointer_type_info() const { return typeid(Type *); }
+  const std::type_info &get_pointer_type_info() const override {
+    return typeid(Type *);
+  }
   /// Output to an ostream.
-  void print(size_t index, std::ostream &s) const { s << m_data[index]; }
+  void print(size_t index, std::ostream &s) const override {
+    s << m_data[index];
+  }
   /// Read in a string and set the value at the given index
-  void read(size_t index, const std::string &text);
+  void read(size_t index, const std::string &text) override;
   /// Type check
-  bool isBool() const { return typeid(Type) == typeid(API::Boolean); }
+  bool isBool() const override { return typeid(Type) == typeid(API::Boolean); }
   /// Memory used by the column
-  long int sizeOfData() const {
+  long int sizeOfData() const override {
     return static_cast<long int>(m_data.size() * sizeof(Type));
   }
   /// Clone
-  virtual TableColumn *clone() const {
+  TableColumn *clone() const override {
     TableColumn *temp = new TableColumn();
     temp->m_data = this->m_data;
     temp->setName(this->m_name);
@@ -158,7 +162,7 @@ public:
    * is throw.
    * @param i :: The index to an element.
    */
-  virtual double toDouble(size_t i) const {
+  double toDouble(size_t i) const override {
     typedef
         typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
                                   Type, InconvertibleToDoubleType>::type
@@ -175,7 +179,7 @@ public:
    * @param i :: The index to an element.
    * @param value: cast this value
    */
-  virtual void fromDouble(size_t i, double value) {
+  void fromDouble(size_t i, double value) override {
     typedef
         typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
                                   Type, InconvertibleToDoubleType>::type
@@ -193,7 +197,7 @@ public:
 
   /// return a value casted to double; the users responsibility is to be sure,
   /// that the casting is possible
-  double operator[](size_t i) const {
+  double operator[](size_t i) const override {
     try {
       return boost::lexical_cast<double>(m_data[i]);
     } catch (...) {
@@ -203,30 +207,32 @@ public:
 
   /// Sort a vector of indices according to values in corresponding cells of
   /// this column.
-  virtual void
+  void
   sortIndex(bool ascending, size_t start, size_t end,
             std::vector<size_t> &indexVec,
-            std::vector<std::pair<size_t, size_t>> &equalRanges) const;
+            std::vector<std::pair<size_t, size_t>> &equalRanges) const override;
 
   /// Re-arrange values in this column according to indices in indexVec
-  virtual void sortValues(const std::vector<size_t> &indexVec);
+  void sortValues(const std::vector<size_t> &indexVec) override;
 
 protected:
   /// Resize.
-  void resize(size_t count) { m_data.resize(count); }
+  void resize(size_t count) override { m_data.resize(count); }
   /// Inserts default value at position index.
-  void insert(size_t index) {
+  void insert(size_t index) override {
     if (index < m_data.size())
       m_data.insert(m_data.begin() + index, Type());
     else
       m_data.push_back(Type());
   }
   /// Removes an item at index.
-  void remove(size_t index) { m_data.erase(m_data.begin() + index); }
+  void remove(size_t index) override { m_data.erase(m_data.begin() + index); }
   /// Returns a pointer to the data element.
-  void *void_pointer(size_t index) { return &m_data.at(index); }
+  void *void_pointer(size_t index) override { return &m_data.at(index); }
   /// Returns a pointer to the data element.
-  const void *void_pointer(size_t index) const { return &m_data.at(index); }
+  const void *void_pointer(size_t index) const override {
+    return &m_data.at(index);
+  }
 
 private:
   /// Column data

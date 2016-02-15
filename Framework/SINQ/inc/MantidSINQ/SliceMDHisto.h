@@ -37,24 +37,26 @@ public:
   /// Default constructor
   SliceMDHisto();
   /// Virtual destructor
-  virtual ~SliceMDHisto() {}
+  ~SliceMDHisto() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SliceMDHisto"; }
+  const std::string name() const override { return "SliceMDHisto"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Extracts a hyperslab of data from a MDHistoWorkspace";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "MDAlgorithms\\Slicing"; }
+  const std::string category() const override {
+    return "MDAlgorithms\\Slicing";
+  }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   unsigned int m_rank;
   std::vector<int> m_dim;

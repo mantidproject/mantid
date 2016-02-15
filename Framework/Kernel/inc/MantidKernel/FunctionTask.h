@@ -60,7 +60,7 @@ public:
 
   //---------------------------------------------------------------------------------------------
   /** Main method that performs the work for the task. */
-  virtual void run() {
+  void run() override {
     if (m_voidFunc != nullptr)
       m_voidFunc();
     else

@@ -54,26 +54,26 @@ public:
   SaveISISNexus();
 
   /// Destructor
-  ~SaveISISNexus() {}
+  ~SaveISISNexus() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveISISNexus"; };
+  const std::string name() const override { return "SaveISISNexus"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The SaveISISNexus algorithm will convert a RAW file to a NeXus "
            "file.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   ISISRAW2 *m_isisRaw;
   NXhandle handle;

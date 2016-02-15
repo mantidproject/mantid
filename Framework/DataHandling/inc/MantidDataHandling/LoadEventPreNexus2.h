@@ -93,30 +93,30 @@ public:
   /// Constructor
   LoadEventPreNexus2();
   /// Virtual destructor
-  virtual ~LoadEventPreNexus2();
+  ~LoadEventPreNexus2() override;
   /// Algorithm's name
-  virtual const std::string name() const { return "LoadEventPreNexus"; }
+  const std::string name() const override { return "LoadEventPreNexus"; }
   /// Algorithm's version
-  virtual int version() const { return (2); }
+  int version() const override { return (2); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\PreNexus";
   }
   /// Algorithm's aliases
-  virtual const std::string alias() const { return "LoadEventPreNeXus2"; }
+  const std::string alias() const override { return "LoadEventPreNeXus2"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads SNS raw neutron event data format and stores it in a "
            "workspace.";
   }
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   Mantid::API::Progress *prog;
 

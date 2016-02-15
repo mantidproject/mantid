@@ -55,9 +55,12 @@ namespace MantidQt
 		public:
 			ComponentActor(const InstrumentActor &instrActor, const Mantid::Geometry::ComponentID &compID); ///< Default Constructor
 			virtual std::string type()const { return "ComponentActor"; } ///< Type of the GL object
-			bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
-			bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll)const;
-			boost::shared_ptr<const Mantid::Geometry::IComponent> getComponent() const;
+                        bool accept(GLActorVisitor &visitor,
+                                    VisitorAcceptRule rule = VisitAll) override;
+                        bool accept(
+                            GLActorConstVisitor &visitor,
+                            VisitorAcceptRule rule = VisitAll) const override;
+                        boost::shared_ptr<const Mantid::Geometry::IComponent> getComponent() const;
 			boost::shared_ptr<const Mantid::Geometry::IObjComponent> getObjComponent() const;
 			boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector() const;
 			boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly> getObjCompAssembly() const;

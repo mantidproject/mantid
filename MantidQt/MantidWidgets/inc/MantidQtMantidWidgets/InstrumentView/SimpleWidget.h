@@ -20,8 +20,8 @@ namespace MantidQt
 		public:
 			/// Constructor
 			explicit SimpleWidget(QWidget *parent);
-			~SimpleWidget();
-			/// Assign a surface to draw on
+                        ~SimpleWidget() override;
+                        /// Assign a surface to draw on
 			void setSurface(boost::shared_ptr<ProjectionSurface> surface);
 			/// Return the surface
 			boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
@@ -32,16 +32,16 @@ namespace MantidQt
 			/// Save the image into a file
 			void saveToFile(const QString & filename);
 		protected:
-			void paintEvent(QPaintEvent*);
-			void resizeEvent(QResizeEvent*);
-			void mousePressEvent(QMouseEvent*);
-			void mouseMoveEvent(QMouseEvent*);
-			void mouseReleaseEvent(QMouseEvent*);
-			void wheelEvent(QWheelEvent*);
-			void keyPressEvent(QKeyEvent*);
-			void enterEvent(QEvent*);
-			void leaveEvent(QEvent*);
-			///< The projection surface
+                  void paintEvent(QPaintEvent *) override;
+                  void resizeEvent(QResizeEvent *) override;
+                  void mousePressEvent(QMouseEvent *) override;
+                  void mouseMoveEvent(QMouseEvent *) override;
+                  void mouseReleaseEvent(QMouseEvent *) override;
+                  void wheelEvent(QWheelEvent *) override;
+                  void keyPressEvent(QKeyEvent *) override;
+                  void enterEvent(QEvent *) override;
+                  void leaveEvent(QEvent *) override;
+                        ///< The projection surface
 			boost::shared_ptr<ProjectionSurface> m_surface;
 		};
 	}//MantidWidgets

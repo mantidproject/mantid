@@ -55,21 +55,21 @@ public:
     m_slit_to_source[2] = 12150;
   }
   /// Virtual destructor
-  virtual ~EQSANSLoad() {}
+  ~EQSANSLoad() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "EQSANSLoad"; }
+  const std::string name() const override { return "EQSANSLoad"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const { return "Load EQSANS data."; }
+  const std::string summary() const override { return "Load EQSANS data."; }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Workflow\\SANS"; }
+  const std::string category() const override { return "Workflow\\SANS"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   std::string findConfigFile(const int &run);
   void readConfigFile(const std::string &filePath);
   void readRectangularMasks(const std::string &line);

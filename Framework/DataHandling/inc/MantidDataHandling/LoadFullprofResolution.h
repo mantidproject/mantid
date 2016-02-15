@@ -42,20 +42,20 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport LoadFullprofResolution : public API::Algorithm {
 public:
   LoadFullprofResolution();
-  virtual ~LoadFullprofResolution();
+  ~LoadFullprofResolution() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadFullprofResolution"; }
+  const std::string name() const override { return "LoadFullprofResolution"; }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load Fullprof's resolution (.irf) file to one or multiple "
            "TableWorkspace(s) and/or where this is supported."
            " See description section, translate fullprof resolution fitting "
@@ -125,9 +125,9 @@ public:
 
 private:
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Load file to a vector of strings
   void loadFile(std::string filename, std::vector<std::string> &lines);

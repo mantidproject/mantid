@@ -44,25 +44,25 @@ public:
   /// (Empty) Constructor
   SetSampleMaterial();
   /// Virtual destructor
-  virtual ~SetSampleMaterial();
+  ~SetSampleMaterial() override;
   /// Algorithm's name
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Sets the neutrons information in the sample.";
   }
 
   /// Algorithm's version
-  virtual int version() const;
+  int version() const override;
   /// Algorithm's category for identification
-  virtual const std::string category() const;
-  virtual std::map<std::string, std::string> validateInputs();
+  const std::string category() const override;
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Print out the list of information for the material
   void fixNeutron(PhysicalConstants::NeutronAtom &neutron, double coh_xs,
                   double inc_xs, double abs_xs, double tot_xs);

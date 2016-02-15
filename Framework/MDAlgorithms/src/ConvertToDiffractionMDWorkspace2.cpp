@@ -28,7 +28,7 @@ DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace2)
 class DisabledProperty : public EnabledWhenProperty {
 public:
   DisabledProperty() : EnabledWhenProperty("NonExistingProperty", IS_DEFAULT) {}
-  virtual bool fulfillsCriterion(const IPropertyManager * /*algo*/) const {
+  bool fulfillsCriterion(const IPropertyManager * /*algo*/) const override {
     return false;
   }
 };

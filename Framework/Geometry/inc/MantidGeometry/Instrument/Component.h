@@ -90,77 +90,78 @@ public:
             const Kernel::Quat &rotation, IComponent *parent = nullptr);
 
   ///  destructor
-  ~Component();
+  ~Component() override;
 
-  IComponent *clone() const;
+  IComponent *clone() const override;
 
   //! Returns the ComponentID - a unique identifier of the component.
-  ComponentID getComponentID() const;
+  ComponentID getComponentID() const override;
   //! Returns const pointer to base component if this component is parametrized
   // or pointer to itself if not. Currently is the same as getComponentID bar
   // const cast;
-  IComponent const *getBaseComponent() const;
+  IComponent const *getBaseComponent() const override;
 
   //! Assign a parent IComponent. Previous parent link is lost
-  void setParent(IComponent *);
+  void setParent(IComponent *) override;
 
   //! Return a pointer to the current parent. as shared pointer
-  boost::shared_ptr<const IComponent> getParent() const;
+  boost::shared_ptr<const IComponent> getParent() const override;
   //! Return an array of all ancestors
-  std::vector<boost::shared_ptr<const IComponent>> getAncestors() const;
+  std::vector<boost::shared_ptr<const IComponent>>
+  getAncestors() const override;
 
   bool isParentNamed(const std::string &expectedName, int maxDepth = -1) const;
 
   //! Set the IComponent name
-  void setName(const std::string &);
+  void setName(const std::string &) override;
 
   //! Get the IComponent name
-  std::string getName() const;
+  std::string getName() const override;
 
   //! Get the full pathname
-  std::string getFullName() const;
+  std::string getFullName() const override;
 
   //! Set the IComponent position, x, y, z respective to parent (if present)
   // otherwise absolute
-  void setPos(double, double, double);
-  void setPos(const Kernel::V3D &);
+  void setPos(double, double, double) override;
+  void setPos(const Kernel::V3D &) override;
 
   //! Set the orientation Kernel::Quaternion relative to parent (if present)
   // otherwise absolute
-  void setRot(const Kernel::Quat &);
+  void setRot(const Kernel::Quat &) override;
 
   //! Translate the IComponent (vector form). This is relative to parent if
   // present.
-  void translate(const Kernel::V3D &);
+  void translate(const Kernel::V3D &) override;
 
   //! Translate the IComponent (x,y,z form). This is relative to parent if
   // present.
-  void translate(double, double, double);
+  void translate(double, double, double) override;
 
   //! Rotate the IComponent. This is relative to parent.
-  void rotate(const Kernel::Quat &);
+  void rotate(const Kernel::Quat &) override;
 
   //! Rotate the IComponent by an angle in degrees with respect to an axis.
-  void rotate(double, const Kernel::V3D &);
+  void rotate(double, const Kernel::V3D &) override;
 
   //! Get the position relative to the parent IComponent (absolute if no parent)
-  virtual const Kernel::V3D getRelativePos() const;
+  const Kernel::V3D getRelativePos() const override;
 
   //! Get the position of the IComponent. Tree structure is traverse through the
   // parent chain
-  virtual Kernel::V3D getPos() const;
+  Kernel::V3D getPos() const override;
 
   //! Get the relative Orientation
-  const Kernel::Quat &getRelativeRot() const;
+  const Kernel::Quat &getRelativeRot() const override;
 
   //! Get the absolute orientation of the IComponent
-  virtual const Kernel::Quat getRotation() const;
+  const Kernel::Quat getRotation() const override;
 
   //! Get the distance to another IComponent
-  double getDistance(const IComponent &) const;
+  double getDistance(const IComponent &) const override;
 
   /// Get the bounding box for this component and store it in the given argument
-  virtual void getBoundingBox(BoundingBox &boundingBox) const;
+  void getBoundingBox(BoundingBox &boundingBox) const override;
 
   /** @name ParameterMap access */
   //@{
@@ -168,13 +169,13 @@ public:
   // resort to
   // one for each type, luckily there won't be too many
   /// Return the parameter names
-  virtual std::set<std::string> getParameterNames(bool recursive = true) const;
+  std::set<std::string> getParameterNames(bool recursive = true) const override;
   /// return the parameter names and the component they are from
-  virtual std::map<std::string, ComponentID>
-  getParameterNamesByComponent() const;
+  std::map<std::string, ComponentID>
+  getParameterNamesByComponent() const override;
   /// Returns a boolean indicating if the component has the named parameter
-  virtual bool hasParameter(const std::string &name,
-                            bool recursive = true) const;
+  bool hasParameter(const std::string &name,
+                    bool recursive = true) const override;
 
   /**
   * Get a parameter defined as a double
@@ -184,7 +185,7 @@ public:
   * @returns A list of values
   */
   std::vector<double> getNumberParameter(const std::string &pname,
-                                         bool recursive = true) const {
+                                         bool recursive = true) const override {
     return getParameter<double>(pname, recursive);
   }
 
@@ -196,7 +197,7 @@ public:
   * @returns A list of values
   */
   std::vector<int> getIntParameter(const std::string &pname,
-                                   bool recursive = true) const {
+                                   bool recursive = true) const override {
     return getParameter<int>(pname, recursive);
   }
 
@@ -210,7 +211,7 @@ public:
   * is not found
   */
   std::string getParameterType(const std::string &pname,
-                               bool recursive = true) const {
+                               bool recursive = true) const override {
     Parameter_sptr param = Parameter_sptr(); // Null shared pointer
     if (recursive) {
       param = m_map->getRecursive(this, pname);
@@ -245,7 +246,7 @@ public:
   * @returns A list of values
   */
   std::vector<bool> getBoolParameter(const std::string &pname,
-                                     bool recursive = true) const {
+                                     bool recursive = true) const override {
     return getParameter<bool>(pname, recursive);
   }
 
@@ -256,8 +257,9 @@ public:
   * components
   * @returns A list of values
   */
-  std::vector<Kernel::V3D> getPositionParameter(const std::string &pname,
-                                                bool recursive = true) const {
+  std::vector<Kernel::V3D>
+  getPositionParameter(const std::string &pname,
+                       bool recursive = true) const override {
     return getParameter<Kernel::V3D>(pname, recursive);
   }
 
@@ -268,8 +270,9 @@ public:
   * components
   * @returns A list of values
   */
-  std::vector<Kernel::Quat> getRotationParameter(const std::string &pname,
-                                                 bool recursive = true) const {
+  std::vector<Kernel::Quat>
+  getRotationParameter(const std::string &pname,
+                       bool recursive = true) const override {
     return getParameter<Kernel::Quat>(pname, recursive);
   }
 
@@ -280,14 +283,15 @@ public:
   * components
   * @returns A list of values
   */
-  std::vector<std::string> getStringParameter(const std::string &pname,
-                                              bool recursive = true) const {
+  std::vector<std::string>
+  getStringParameter(const std::string &pname,
+                     bool recursive = true) const override {
     return getParameter<std::string>(pname, recursive);
   }
   //@}
 
   std::string getParameterAsString(const std::string &pname,
-                                   bool recursive = true) const {
+                                   bool recursive = true) const override {
     std::string retVal = "";
     if (m_map) {
       retVal = m_map->getString(this, pname, recursive);
@@ -295,22 +299,22 @@ public:
     return retVal;
   }
 
-  void printSelf(std::ostream &) const;
+  void printSelf(std::ostream &) const override;
 
   /// Returns the address of the base component
   const IComponent *base() const { return m_base; }
 
   /// Returns the ScaleFactor
-  virtual Kernel::V3D getScaleFactor() const;
+  Kernel::V3D getScaleFactor() const override;
 
   /** Returns the bare pointer to the IComponent parent */
-  const IComponent *getBareParent() const { return m_parent; }
+  const IComponent *getBareParent() const override { return m_parent; }
 
   virtual void readXMLAttributes(const Poco::XML::Attributes &attr);
   virtual void writeXML(Poco::XML::XMLWriter &writer) const;
   virtual void appendXML(std::ostream &xmlStream) const;
 
-  bool isParametrized() const;
+  bool isParametrized() const override;
 
 protected:
   /// Parent component in the tree
