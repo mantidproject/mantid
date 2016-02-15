@@ -173,7 +173,7 @@ std::istream &operator>>(std::istream &in, Interpolation &f) {
   typedef Mantid::Kernel::StringTokenizer tokenizer;
   std::string str;
   getline(in, str);
-  tokenizer values(str, ";", tokenizer::TOK_TRIM);
+  tokenizer values(str, ";", {tokenizer::Options::TOK_TRIM});
 
   f.setMethod(values[0]);
   f.setXUnit(values[1]);

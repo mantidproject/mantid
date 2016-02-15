@@ -78,8 +78,8 @@ void splitPath(const std::string &path, std::vector<std::string> &splitted) {
     return;
   }
 
-  int options = Mantid::Kernel::StringTokenizer::TOK_TRIM +
-                Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
+  auto options = {Mantid::Kernel::StringTokenizer::Options::TOK_TRIM,
+                  Mantid::Kernel::StringTokenizer::Options::TOK_IGNORE_EMPTY};
 
   splitted.clear();
   Mantid::Kernel::StringTokenizer tokenizer(path, ";,", options);

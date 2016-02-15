@@ -57,7 +57,7 @@ public:
   StringTokenizer() = default;
   /// Constructor requiring a string to tokenize and a string of separators.
   StringTokenizer(const std::string &str, const std::string &separators,
-                  unsigned options = 0);
+                  std::initializer_list<Options> options = {});
 
   /// Destroys the tokenizer.
   ~StringTokenizer() = default;

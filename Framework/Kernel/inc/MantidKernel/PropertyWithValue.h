@@ -150,8 +150,8 @@ template <typename T>
 void toValue(const std::string &strvalue, std::vector<T> &value) {
   // Split up comma-separated properties
   typedef Mantid::Kernel::StringTokenizer tokenizer;
-  tokenizer values(strvalue, ",",
-                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  tokenizer values(strvalue, ",", {tokenizer::Options::TOK_IGNORE_EMPTY,
+                                   tokenizer::Options::TOK_TRIM});
 
   value.clear();
   value.reserve(values.count());
@@ -166,15 +166,17 @@ void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
              const std::string &outerDelimiter = ",",
              const std::string &innerDelimiter = "+") {
   typedef Mantid::Kernel::StringTokenizer tokenizer;
-  tokenizer tokens(strvalue, outerDelimiter,
-                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  tokenizer tokens(
+      strvalue, outerDelimiter,
+      {tokenizer::Options::TOK_IGNORE_EMPTY, tokenizer::Options::TOK_TRIM});
 
   value.clear();
   value.reserve(tokens.count());
 
   for (tokenizer::Iterator oIt = tokens.begin(); oIt != tokens.end(); ++oIt) {
-    tokenizer values(*oIt, innerDelimiter,
-                     tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+    tokenizer values(
+        *oIt, innerDelimiter,
+        {tokenizer::Options::TOK_IGNORE_EMPTY, tokenizer::Options::TOK_TRIM});
     std::vector<T> vect;
 
     for (tokenizer::Iterator iIt = values.begin(); iIt != values.end(); ++iIt)
@@ -200,8 +202,8 @@ template <typename T> T extractToValueVector(const std::string &strvalue) {
   inline void toValue<type>(const std::string &strvalue,                       \
                             std::vector<type> &value) {                        \
     typedef Mantid::Kernel::StringTokenizer tokenizer;                         \
-    tokenizer values(strvalue, ",",                                            \
-                     tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);       \
+    tokenizer values(strvalue, ",", {tokenizer::Options::TOK_IGNORE_EMPTY,     \
+                                     tokenizer::Options::TOK_TRIM});           \
     value.clear();                                                             \
     value.reserve(values.count());                                             \
     for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it) {  \
