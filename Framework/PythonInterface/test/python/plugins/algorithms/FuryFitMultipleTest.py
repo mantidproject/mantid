@@ -23,6 +23,10 @@ class FuryFitMultipleTest(unittest.TestCase):
         self._validate_matrix_shape(result)
         self._validate_group_shape(fit_group)
 
+        self._validate_table_values(params)
+        self._validate_matrix_values(result)
+        self._validate_group_values(fit_group)
+
 
     def _validate_table_shape(self, tableWS):
         # Check length of rows and columns
@@ -74,6 +78,56 @@ class FuryFitMultipleTest(unittest.TestCase):
 
         # Check bin units
         self.assertEquals('ns', str(sub_ws.getAxis(0).getUnit().symbol()))
+
+
+    def _validate_table_values(self, tableWS):
+        # Check column data
+        column = tableWS.column(0)
+        self.assertEquals(round(column[0], 6), 0.483619)
+        self.assertEquals(round(column[1], 6), 0.607871)
+        self.assertEquals(round(column[-1], 5), 1.84519)
+
+        # Check row data
+        row = tableWS.row(0)
+        self.assertEquals(round(row['axis-1'], 6),  0.483619)
+        self.assertEquals(round(row['f1.Intensity'], 6), 0.979517)
+        self.assertEquals(round(row['f1.Tau'], 7), 0.0246719)
+
+    def _validate_matrix_values(self, matrixWS):
+        # Check f0.A0
+        a0 = matrixWS.readY(0)
+        self.assertEquals(round(a0[0], 7), 0.0204827)
+        self.assertEquals(round(a0[-1],7), 0.0229125)
+
+        # Check f1.Intensity
+        intensity = matrixWS.readY(1)
+        self.assertEquals(round(intensity[0], 6), 0.979517)
+        self.assertEquals(round(intensity[-1],6), 0.977088)
+
+        # Check f1.Tau
+        tau = matrixWS.readY(2)
+        self.assertEquals(round(tau[0], 7), 0.0246719)
+        self.assertEquals(round(tau[-1],8), 0.00253487)
+
+        # Check f1.Beta
+        beta = matrixWS.readY(3)
+        self.assertEquals(round(beta[0], 6), 0.781177)
+        self.assertEquals(round(beta[-1],6), 0.781177)
+
+    def _validate_group_values(self, groupWS):
+        sub_ws = groupWS.getItem(0)
+        # Check Data
+        data = sub_ws.readY(0)
+        self.assertEquals(round(data[0], 5), 1)
+        self.assertEquals(round(data[-1],7),0.0450769)
+        # Check Calc
+        calc = sub_ws.readY(1)
+        self.assertEquals(round(calc[0], 5), 1)
+        self.assertEquals(round(calc[-1],7),0.0264651)
+        # Check Diff
+        diff = sub_ws.readY(2)
+        self.assertEquals(round(diff[0], 19), -5.31797e-14)
+        self.assertEquals(round(diff[-1],6), 0.018612)
 
 #---------------------------------------Success cases--------------------------------------
 
@@ -131,7 +185,7 @@ class FuryFitMultipleTest(unittest.TestCase):
                           EndX=0.2,
                           SpecMin=0,
                           SpecMax=16)
-                
+
     def test_maximum_x_more_than_workspace_max_x(self):
         self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
                           Function=self._function,
@@ -139,8 +193,8 @@ class FuryFitMultipleTest(unittest.TestCase):
                           StartX=0,
                           EndX=0.4,
                           SpecMin=0,
-                          SpecMax=16)                
-                
+                          SpecMax=16)
+
     def test_minimum_spectra_more_than_maximum_spectra(self):
         self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
                           Function=self._function,
