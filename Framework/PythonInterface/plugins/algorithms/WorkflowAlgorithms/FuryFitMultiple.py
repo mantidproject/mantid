@@ -54,6 +54,8 @@ class FuryFitMultiple(PythonAlgorithm):
                              doc='Switch Plot Off/On')
         self.declareProperty(MatrixWorkspaceProperty('OutputResultWorkspace', '', direction=Direction.Output),
                              doc='The outputworkspace containing the results of the fit data')
+        self.declareProperty(ITableWorkspaceProperty('OutputParameterWorkspace', '', direction=Direction.Output),
+                             doc='The outputworkspace containing the parameters for each fit')
 
 
     def validateInputs(self):
@@ -178,6 +180,7 @@ class FuryFitMultiple(PythonAlgorithm):
             furyfitPlotSeq(result_workspace, Plot)
 
         self.setProperty('OutputResultWorkspace', result_workspace)
+        self.setProperty('OutputParameterWorkspace', params_table)
 
 
 AlgorithmFactory.subscribe(FuryFitMultiple)
