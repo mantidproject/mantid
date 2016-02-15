@@ -145,8 +145,6 @@ class FuryFitMultipleTest(unittest.TestCase):
                                                     ConstrainIntensities=True,
                                                     Save=False,
                                                     Plot='None')
-        #params = mtd['irs26176_graphite002_fury_1Smult_s0_to_16_Parameters']
-        #fit_group  = mtd['irs26176_graphite002_fury_1Smult_s0_to_16_Workspaces']
         self._validate_output(params, result, fit_group)
 
 #----------------------------------------Failure cases-------------------------------------
