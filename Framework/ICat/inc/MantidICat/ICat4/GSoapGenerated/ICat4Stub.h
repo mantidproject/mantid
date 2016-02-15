@@ -342,7 +342,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__relType_() { ns1__relType_::soap_default(nullptrptr); }
+  ns1__relType_() { ns1__relType_::soap_default(nullptr); }
   ~ns1__relType_() override {}
 };
 #endif
@@ -364,7 +364,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__accessType_() { ns1__accessType_::soap_default(nullptrptr); }
+  ns1__accessType_() { ns1__accessType_::soap_default(nullptr); }
   ~ns1__accessType_() override {}
 };
 #endif
@@ -385,7 +385,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__luceneClear() { ns1__luceneClear::soap_default(nullptrptr); }
+  ns1__luceneClear() { ns1__luceneClear::soap_default(nullptr); }
   ~ns1__luceneClear() override {}
 };
 #endif
@@ -404,7 +404,9 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__luceneClearResponse() { ns1__luceneClearResponse::soap_default(nullptrptr); }
+  ns1__luceneClearResponse() {
+    ns1__luceneClearResponse::soap_default(nullptr);
+  }
   ~ns1__luceneClearResponse() override {}
 };
 #endif
@@ -428,7 +430,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__IcatException() { ns1__IcatException::soap_default(nullptrptr); }
+  ns1__IcatException() { ns1__IcatException::soap_default(nullptr); }
   ~ns1__IcatException() override {}
 };
 #endif
@@ -451,7 +453,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__createMany() { ns1__createMany::soap_default(nullptrptr); }
+  ns1__createMany() { ns1__createMany::soap_default(nullptr); }
   ~ns1__createMany() override {}
 };
 #endif
@@ -476,7 +478,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__entityBaseBean() { ns1__entityBaseBean::soap_default(nullptrptr); }
+  ns1__entityBaseBean() { ns1__entityBaseBean::soap_default(nullptr); }
   ~ns1__entityBaseBean() override {}
 };
 #endif
@@ -502,7 +504,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__createManyResponse() { ns1__createManyResponse::soap_default(nullptrptr); }
+  ns1__createManyResponse() { ns1__createManyResponse::soap_default(nullptr); }
   ~ns1__createManyResponse() override {}
 };
 #endif
@@ -524,7 +526,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__create() { ns1__create::soap_default(nullptrptr); }
+  ns1__create() { ns1__create::soap_default(nullptr); }
   ~ns1__create() override {}
 };
 #endif
@@ -550,7 +552,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__createResponse() { ns1__createResponse::soap_default(nullptrptr); }
+  ns1__createResponse() { ns1__createResponse::soap_default(nullptr); }
   ~ns1__createResponse() override {}
 };
 #endif
@@ -571,7 +573,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__getProperties() { ns1__getProperties::soap_default(nullptrptr); }
+  ns1__getProperties() { ns1__getProperties::soap_default(nullptr); }
   ~ns1__getProperties() override {}
 };
 #endif
@@ -598,7 +600,7 @@ public:
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getPropertiesResponse() {
-    ns1__getPropertiesResponse::soap_default(nullptrptr);
+    ns1__getPropertiesResponse::soap_default(nullptr);
   }
   ~ns1__getPropertiesResponse() override {}
 };
@@ -623,7 +625,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__luceneSearch() { ns1__luceneSearch::soap_default(nullptrptr); }
+  ns1__luceneSearch() { ns1__luceneSearch::soap_default(nullptr); }
   ~ns1__luceneSearch() override {}
 };
 #endif
@@ -649,7 +651,9 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__luceneSearchResponse() { ns1__luceneSearchResponse::soap_default(nullptrptr); }
+  ns1__luceneSearchResponse() {
+    ns1__luceneSearchResponse::soap_default(nullptr);
+  }
   ~ns1__luceneSearchResponse() override {}
 };
 #endif
@@ -671,7 +675,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__lucenePopulate() { ns1__lucenePopulate::soap_default(nullptrptr); }
+  ns1__lucenePopulate() { ns1__lucenePopulate::soap_default(nullptr); }
   ~ns1__lucenePopulate() override {}
 };
 #endif
@@ -691,7 +695,7 @@ public:
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
   ns1__lucenePopulateResponse() {
-    ns1__lucenePopulateResponse::soap_default(nullptrptr);
+    ns1__lucenePopulateResponse::soap_default(nullptr);
   }
   ~ns1__lucenePopulateResponse() override {}
 };
@@ -715,7 +719,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__get() { ns1__get::soap_default(nullptrptr); }
+  ns1__get() { ns1__get::soap_default(nullptr); }
   ~ns1__get() override {}
 };
 #endif
@@ -741,7 +745,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__getResponse() { ns1__getResponse::soap_default(nullptrptr); }
+  ns1__getResponse() { ns1__getResponse::soap_default(nullptr); }
   ~ns1__getResponse() override {}
 };
 #endif
@@ -760,7 +764,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__getEntityNames() { ns1__getEntityNames::soap_default(nullptrptr); }
+  ns1__getEntityNames() { ns1__getEntityNames::soap_default(nullptr); }
   ~ns1__getEntityNames() override {}
 };
 #endif
@@ -787,7 +791,7 @@ public:
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getEntityNamesResponse() {
-    ns1__getEntityNamesResponse::soap_default(nullptrptr);
+    ns1__getEntityNamesResponse::soap_default(nullptr);
   }
   ~ns1__getEntityNamesResponse() override {}
 };
@@ -807,7 +811,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__getApiVersion() { ns1__getApiVersion::soap_default(nullptrptr); }
+  ns1__getApiVersion() { ns1__getApiVersion::soap_default(nullptr); }
   ~ns1__getApiVersion() override {}
 };
 #endif
@@ -834,7 +838,7 @@ public:
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
   ns1__getApiVersionResponse() {
-    ns1__getApiVersionResponse::soap_default(nullptrptr);
+    ns1__getApiVersionResponse::soap_default(nullptr);
   }
   ~ns1__getApiVersionResponse() override {}
 };
@@ -856,7 +860,9 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__luceneGetPopulating() { ns1__luceneGetPopulating::soap_default(nullptrptr); }
+  ns1__luceneGetPopulating() {
+    ns1__luceneGetPopulating::soap_default(nullptr);
+  }
   ~ns1__luceneGetPopulating() override {}
 };
 #endif
@@ -883,7 +889,7 @@ public:
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
   ns1__luceneGetPopulatingResponse() {
-    ns1__luceneGetPopulatingResponse::soap_default(nullptrptr);
+    ns1__luceneGetPopulatingResponse::soap_default(nullptr);
   }
   ~ns1__luceneGetPopulatingResponse() override {}
 };
@@ -1345,7 +1351,7 @@ class SOAP_CMAC ns1__entityField : public xsd__anyType {
 public:
   std::string *comment;       /* optional element of type xsd:string */
   std::string *name;          /* optional element of type xsd:string */
-  bool notnullptrable;           /* required element of type xsd:boolean */
+  bool notNullable;           /* required element of type xsd:boolean */
   enum ns1__relType *relType; /* optional element of type ns1:relType */
   int *stringLength;          /* optional element of type xsd:int */
   std::string *type;          /* optional element of type xsd:string */
