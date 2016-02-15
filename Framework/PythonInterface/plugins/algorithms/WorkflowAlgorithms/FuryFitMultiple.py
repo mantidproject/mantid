@@ -94,11 +94,85 @@ class FuryFitMultiple(PythonAlgorithm):
         self._plot = self.getProperty('Plot').value
 
     def PyExec(self):
-        from IndirectDataAnalysis import furyfitMult
+        from IndirectDataAnalysis import (getWSprefix, convertToElasticQ,
+                                          createFuryMultiDomainFunction,
+                                          transposeFitParametersTable,
+                                          convertParametersToWorkspace,
+                                          furyFitSaveWorkspaces,
+                                          furyfitPlotSeq)
 
         # Run FuryFitMultiple algorithm from indirectDataAnalysis
-        furyfitMult(self._input_ws, self._function, self._fit_type, self._start_x, self._end_x,
-                    self._spec_min, self._spec_max, self._intensities_constrained,
-                    self._minimizer, self._max_iterations, self._save, self._plot)
+        nHist = inputWS.getNumberHistograms()
+        output_workspace = getWSprefix(inputWS.getName()) + 'fury_1Smult_s0_to_' + str(nHist-1)
+
+        option = ftype[:-2]
+        logger.information('Option: '+option)
+        logger.information('Function: '+function)
+
+        #prepare input workspace for fitting
+        tmp_fit_workspace = "__furyfit_fit_ws"
+        if spec_max is None:
+            CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace,
+                          XMin=startx, XMax=endx,
+                          StartWorkspaceIndex=spec_min)
+        else:
+            CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace,
+                          XMin=startx, XMax=endx,
+                          StartWorkspaceIndex=spec_min, EndWorkspaceIndex=spec_max)
+
+        ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
+        convertToElasticQ(tmp_fit_workspace)
+
+        #fit multi-domian functino to workspace
+        multi_domain_func, kwargs = createFuryMultiDomainFunction(function, tmp_fit_workspace)
+        Fit(Function=multi_domain_func,
+            InputWorkspace=tmp_fit_workspace,
+            WorkspaceIndex=0,
+            Output=output_workspace,
+            CreateOutput=True,
+            Minimizer=minimizer,
+            MaxIterations=max_iterations,
+            **kwargs)
+
+        params_table = output_workspace + '_Parameters'
+        transposeFitParametersTable(params_table)
+
+        #set first column of parameter table to be axis values
+        x_axis = mtd[tmp_fit_workspace].getAxis(1)
+        axis_values = x_axis.extractValues()
+        for i, value in enumerate(axis_values):
+            mtd[params_table].setCell('axis-1', i, value)
+
+        #convert parameters to matrix workspace
+        result_workspace = output_workspace + "_Result"
+        parameter_names = ['A0', 'Intensity', 'Tau', 'Beta']
+        convertParametersToWorkspace(params_table, "axis-1", parameter_names, result_workspace)
+
+        #set x units to be momentum transfer
+        axis = mtd[result_workspace].getAxis(0)
+        axis.setUnit("MomentumTransfer")
+
+        result_workspace = output_workspace + '_Result'
+        fit_group = output_workspace + '_Workspaces'
+
+        sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': ftype,
+                        'intensities_constrained': intensities_constrained, 'beta_constrained': True}
+
+        CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
+        CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
+
+        log_names = [item[0] for item in sample_logs]
+        log_values = [item[1] for item in sample_logs]
+        AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
+        AddSampleLogMultiple(Workspace=fit_group, LogNames=log_names, LogValues=log_values)
+
+        DeleteWorkspace(tmp_fit_workspace)
+
+        if Save:
+            save_workspaces = [result_workspace]
+            furyFitSaveWorkspaces(save_workspaces)
+
+        if Plot != 'None':
+            furyfitPlotSeq(result_workspace, Plot)
 
 AlgorithmFactory.subscribe(FuryFitMultiple)
