@@ -162,7 +162,8 @@ public:
       }
 
       // Set up the peaks workspace
-      boost::shared_ptr<MockPeaksWorkspaceFilter> pw_ptr(new MockPeaksWorkspaceFilter());
+      boost::shared_ptr<MockPeaksWorkspaceFilter> pw_ptr =
+          boost::make_shared<MockPeaksWorkspaceFilter>();
       MockPeaksWorkspaceFilter & pw = *pw_ptr;
 
       EXPECT_CALL(pw, getNumberPeaks()).Times(1).WillRepeatedly(Return(1));
@@ -211,7 +212,8 @@ public:
     double peakRadius = 5;
     Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::SpecialCoordinateSystem::QSample;
     Mantid::Geometry::PeakShape_sptr shape(new Mantid::DataObjects::PeakShapeSpherical(peakRadius, coordinateSystem, "test", 1));
-    boost::shared_ptr<MockPeakFilter> peak(new MockPeakFilter());
+    boost::shared_ptr<MockPeakFilter> peak =
+        boost::make_shared<MockPeakFilter>();
     peak->setPeakShape(shape);
 
     std::vector<std::pair<boost::shared_ptr<MockPeakFilter>, Mantid::Kernel::V3D>> fakeSinglePeakPeakWorkspaces;
@@ -252,7 +254,8 @@ public:
 
     Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::SpecialCoordinateSystem::QSample;
     Mantid::Geometry::PeakShape_sptr shape(new Mantid::DataObjects::PeakShapeEllipsoid(directions, radii, radii, radii , coordinateSystem, "test", 1));
-    boost::shared_ptr<MockPeakFilter> peak(new MockPeakFilter());
+    boost::shared_ptr<MockPeakFilter> peak =
+        boost::make_shared<MockPeakFilter>();
     peak->setPeakShape(shape);
 
     std::vector<std::pair<boost::shared_ptr<MockPeakFilter>, Mantid::Kernel::V3D>> fakeSinglePeakPeakWorkspaces;
@@ -284,7 +287,8 @@ public:
     Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::SpecialCoordinateSystem::QSample;
     double radius = peaksFilter.getRadiusNoShape();
     Mantid::Geometry::PeakShape_sptr shape(new Mantid::DataObjects::NoShape());
-    boost::shared_ptr<MockPeakFilter> peak(new MockPeakFilter());
+    boost::shared_ptr<MockPeakFilter> peak =
+        boost::make_shared<MockPeakFilter>();
     peak->setPeakShape(shape);
 
     std::vector<std::pair<boost::shared_ptr<MockPeakFilter>, Mantid::Kernel::V3D>> fakeSinglePeakPeakWorkspaces;
@@ -315,14 +319,16 @@ public:
     double peakRadius = 5;
     Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::SpecialCoordinateSystem::QSample;
     Mantid::Geometry::PeakShape_sptr shape(new Mantid::DataObjects::PeakShapeSpherical(peakRadius, coordinateSystem, "test", 1));
-    boost::shared_ptr<MockPeakFilter> peak(new MockPeakFilter());
+    boost::shared_ptr<MockPeakFilter> peak =
+        boost::make_shared<MockPeakFilter>();
     peak->setPeakShape(shape);
 
     // Peak 2
     Mantid::Kernel::V3D coordinate2(12,0,0);
     double peakRadius2 = 5;
     Mantid::Geometry::PeakShape_sptr shape2(new Mantid::DataObjects::PeakShapeSpherical(peakRadius2, coordinateSystem, "test", 1));
-    boost::shared_ptr<MockPeakFilter> peak2(new MockPeakFilter());
+    boost::shared_ptr<MockPeakFilter> peak2 =
+        boost::make_shared<MockPeakFilter>();
     peak2->setPeakShape(shape2);
 
     std::vector<PeaksFilterDataContainer> peakData;

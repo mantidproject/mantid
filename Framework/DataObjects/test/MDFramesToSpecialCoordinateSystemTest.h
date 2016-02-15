@@ -22,7 +22,8 @@ class MDFramesToSpecialCoordinateSystemTest : public CxxTest::TestSuite {
 public:
   void test_that_throws_for_non_md_workspace() {
     // Arrange
-    const boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
+    const boost::shared_ptr<MatrixWorkspace> ws =
+        boost::make_shared<WorkspaceTester>();
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
     // Act + Assert
     TSM_ASSERT_THROWS(

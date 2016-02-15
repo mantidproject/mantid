@@ -597,12 +597,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
   const double step =
       (XMax - XMin) / static_cast<double>(workspace->blocksize());
 
-  std::vector<double> retval;
-  retval.push_back(XMin);
-  retval.push_back(step);
-  retval.push_back(XMax);
-
-  return retval;
+  return {XMin, step, XMax};
 }
 
 /** Reverses the workspace if X values are in descending order

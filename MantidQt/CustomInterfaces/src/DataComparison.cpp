@@ -387,7 +387,7 @@ void DataComparison::plotWorkspaces()
     QColor curveColour = colourSelector->itemData(colourSelector->currentIndex()).value<QColor>();
 
     // Create a new curve and attach it to the plot
-    boost::shared_ptr<QwtPlotCurve> curve(new QwtPlotCurve);
+    auto curve = boost::make_shared<QwtPlotCurve>();
     curve->setData(wsData);
     curve->setPen(curveColour);
     curve->attach(m_plot);
@@ -556,7 +556,7 @@ void DataComparison::plotDiffWorkspace()
 
   // Create curve and add to plot
   QwtWorkspaceSpectrumData wsData(*diffWorkspace, 0, false, false);
-  boost::shared_ptr<QwtPlotCurve> curve(new QwtPlotCurve);
+  auto curve = boost::make_shared<QwtPlotCurve>();
   curve->setData(wsData);
   curve->setPen(QColor(Qt::green));
   curve->attach(m_plot);

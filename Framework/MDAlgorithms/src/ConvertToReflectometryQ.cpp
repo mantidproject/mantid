@@ -187,10 +187,8 @@ void ConvertToReflectometryQ::init() {
                                                          compositeValidator),
                   "An input workspace in wavelength");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back(qSpaceTransform());
-  propOptions.push_back(pSpaceTransform());
-  propOptions.push_back(kSpaceTransform());
+  std::vector<std::string> propOptions{qSpaceTransform(), pSpaceTransform(),
+                                       kSpaceTransform()};
 
   declareProperty(
       "OutputDimensions", "Q (lab frame)",
@@ -200,9 +198,7 @@ void ConvertToReflectometryQ::init() {
       "  P (lab frame): Momentum in the sample frame.\n"
       "  K initial and final vectors in the z plane.");
 
-  std::vector<std::string> transOptions;
-  transOptions.push_back(centerTransform());
-  transOptions.push_back(normPolyTransform());
+  std::vector<std::string> transOptions{centerTransform(), normPolyTransform()};
 
   declareProperty("Method", centerTransform(),
                   boost::make_shared<StringListValidator>(transOptions),
@@ -219,11 +215,7 @@ void ConvertToReflectometryQ::init() {
       "An input incident theta value specified in degrees."
       "Optional input value for the incident theta specified in degrees.");
 
-  std::vector<double> extents(4, 0);
-  extents[0] = -50;
-  extents[1] = +50;
-  extents[2] = -50;
-  extents[3] = +50;
+  std::vector<double> extents{-50, +50, -50, +50};
   declareProperty(new ArrayProperty<double>("Extents", extents),
                   "A comma separated list of min, max for each dimension. "
                   "Takes four values in the form dim_0_min, dim_0_max, "

@@ -426,11 +426,8 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
   std::string durationlogname = getProperty("DurationLogName");      //"time"
   std::string rotanglelogname = getProperty("RotationAngleLogName"); // "2theta"
 
-  std::vector<std::string> lognames;
-  lognames.push_back(ptname);
-  lognames.push_back(monitorlogname);
-  lognames.push_back(durationlogname);
-  lognames.push_back(rotanglelogname);
+  std::vector<std::string> lognames{ptname, monitorlogname, durationlogname,
+                                    rotanglelogname};
 
   std::vector<size_t> ilognames(lognames.size());
 

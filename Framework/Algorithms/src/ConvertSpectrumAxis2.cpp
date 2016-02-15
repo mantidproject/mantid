@@ -220,7 +220,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
       targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
-    newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
+    newAxis->unit() = boost::make_shared<Units::Degrees>();
   } else if (targetUnit == "ElasticQ") {
     newAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else if (targetUnit == "ElasticQSquared") {

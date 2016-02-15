@@ -41,7 +41,7 @@ public:
     input->getSpectrum(0)->setSpectrumNo(0);
     input->getSpectrum(1)->setSpectrumNo(1);
     input->getSpectrum(2)->setSpectrumNo(2);
-    boost::shared_ptr<Instrument> instr(new Instrument);
+    boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
     input->setInstrument(instr);
     Mantid::Geometry::Detector *mon =
         new Mantid::Geometry::Detector("monitor", 0, NULL);
@@ -357,7 +357,7 @@ public:
     // create ws without monitors.
     MatrixWorkspace_sptr input =
         WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
-    boost::shared_ptr<Instrument> instr(new Instrument);
+    boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
     input->setInstrument(instr);
     AnalysisDataService::Instance().add("someWS", input);
 

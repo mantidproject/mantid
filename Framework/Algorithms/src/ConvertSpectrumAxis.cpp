@@ -97,9 +97,8 @@ void ConvertSpectrumAxis::exec() {
     const double delta = 0.0;
     double efixed;
     for (size_t i = 0; i < nHist; i++) {
-      std::vector<double> xval;
-      xval.push_back(inputWS->readX(i).front());
-      xval.push_back(inputWS->readX(i).back());
+      std::vector<double> xval{inputWS->readX(i).front(),
+                               inputWS->readX(i).back()};
       IDetector_const_sptr detector = inputWS->getDetector(i);
       double twoTheta, l1val, l2;
       if (!detector->isMonitor()) {
@@ -156,7 +155,7 @@ void ConvertSpectrumAxis::exec() {
   outputWS->replaceAxis(1, newAxis);
   // The unit of this axis is radians. Use the 'radians' unit defined above.
   if (unitTarget == "theta" || unitTarget == "signed_theta") {
-    newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
+    newAxis->unit() = boost::make_shared<Units::Degrees>();
   } else {
     newAxis->unit() = UnitFactory::Instance().create(unitTarget);
   }

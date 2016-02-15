@@ -6,7 +6,6 @@
 //----------------------------------
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
-#include "MantidAlgorithmMetatype.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
@@ -20,6 +19,7 @@
 
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtAPI/MantidAlgorithmMetatype.h"
 
 #include <Poco/NObserver.h>
 
@@ -40,6 +40,7 @@ class AlgorithmDockWidget;
 class RemoteClusterDockWidget;
 class AlgorithmMonitor;
 class InstrumentWindow;
+
 namespace MantidQt
 {
   namespace API
@@ -419,7 +420,7 @@ signals:
     void manageMantidWorkspaces();
 
     //Python related functions
-    InstrumentWindow* getInstrumentView(const QString & wsName, int tab = -1);
+    InstrumentWindow *getInstrumentView(const QString & wsName, int tab = -1);
 
     void showMantidInstrument();
 

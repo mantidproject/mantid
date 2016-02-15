@@ -151,7 +151,7 @@ void SimulateResolutionConvolvedModel::createDomains() {
  * @return The generated MD event workspace
  */
 void SimulateResolutionConvolvedModel::createOutputWorkspace() {
-  m_outputWS = boost::shared_ptr<QOmegaWorkspace>(new QOmegaWorkspace);
+  m_outputWS = boost::make_shared<QOmegaWorkspace>();
 
   // Bins extents and meta data
   // Set sensible defaults for splitting behaviour

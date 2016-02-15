@@ -123,7 +123,7 @@ namespace API
     try
     {
       Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
-      auto algProxy = boost::shared_ptr<AlgorithmProxy>(new AlgorithmProxy(alg));
+      auto algProxy = boost::make_shared<AlgorithmProxy>(alg);
       algProxy->initialize();
 
       // Set the algorithm ptr. This will redo the layout

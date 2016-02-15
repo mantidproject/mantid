@@ -156,8 +156,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   yvalB.assign(xRef.size(), 0.0);
 
   if (N < 4) // If not well indexed
-    return boost::shared_ptr<DataObjects::Workspace2D>(
-        new DataObjects::Workspace2D);
+    return boost::make_shared<DataObjects::Workspace2D>();
 
   MatrixWorkspace_sptr mwkspc =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * N, 3 * N);
@@ -309,7 +308,7 @@ boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
   bool xml = (preprocessCommand == "C)Apply a LoadParameter.xml type file");
 
   boost::shared_ptr<const ParameterMap> pmap0 = instrument->getParameterMap();
-  boost::shared_ptr<ParameterMap> pmap1(new ParameterMap());
+  auto pmap1 = boost::make_shared<ParameterMap>();
 
   for (auto bankName : AllBankNames) {
     updateBankParams(instrument->getComponentByName(bankName), pmap1, pmap0);
@@ -901,11 +900,11 @@ void SCDCalibratePanels::exec() {
       //---------------- Create new instrument with ------------------------
       //--------------new parameters to SAVE to files---------------------
 
-      boost::shared_ptr<ParameterMap> pmap(new ParameterMap());
+      auto pmap = boost::make_shared<ParameterMap>();
       boost::shared_ptr<const ParameterMap> pmapOld =
           instrument->getParameterMap();
-      boost::shared_ptr<const Instrument> NewInstrument(
-          new Instrument(instrument->baseInstrument(), pmap));
+      boost::shared_ptr<const Instrument> NewInstrument =
+          boost::make_shared<Instrument>(instrument->baseInstrument(), pmap);
 
       boost::shared_ptr<const RectangularDetector> bank_rect;
       double rotx, roty, rotz;

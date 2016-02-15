@@ -38,7 +38,7 @@ Description          : General plot options dialog
 #include "ColorButton.h"
 #include "TextFormatButtons.h"
 #include "Table.h"
-#include "DoubleSpinBox.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 #include "ScaleDraw.h"
 #include <float.h>
 

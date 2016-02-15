@@ -159,7 +159,7 @@ public:
 
     // Check running algorithm for same XML file leads to same instrument object
     // being attached
-    boost::shared_ptr<Instrument> instr(new Instrument());
+    boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
     output->setInstrument(instr);
     TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), instr);
     LoadInstrument loadAgain;

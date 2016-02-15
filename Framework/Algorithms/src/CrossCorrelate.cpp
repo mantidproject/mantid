@@ -8,6 +8,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include <boost/iterator/counting_iterator.hpp>
 
 #include <numeric>
 #include <sstream>
@@ -96,13 +97,10 @@ void CrossCorrelate::exec() {
     throw std::runtime_error(
         "Must specify WorkspaceIndexMin<WorkspaceIndexMax");
   // Get the number of spectra in range specmin to specmax
-  int nspecs = 0;
-  std::vector<size_t> indexes;        // Indexes of all spectra in range
-  indexes.reserve(specmax - specmin); // reserve at leat enough space
-  for (int i = specmin; i <= specmax; ++i) {
-    indexes.push_back(i); // If spectrum found then add its index to a vector.
-    ++nspecs;
-  }
+  int nspecs = 1 + specmax - specmin;
+  // Indexes of all spectra in range
+  std::vector<size_t> indexes(boost::make_counting_iterator(specmin),
+                              boost::make_counting_iterator(specmax + 1));
 
   std::ostringstream mess;
   if (nspecs == 0) // Throw if no spectra in range

@@ -9,8 +9,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
-#include "boost/algorithm/string.hpp"
-#include "boost/make_shared.hpp"
+#include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>

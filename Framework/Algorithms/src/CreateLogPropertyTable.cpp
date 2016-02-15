@@ -190,6 +190,7 @@ retrieveMatrixWsList(const std::vector<std::string> &wsNames,
 
       // Retrieve pointers to all the child workspaces.
       std::vector<MatrixWorkspace_sptr> childWsList;
+      childWsList.reserve(childNames.size());
       for (const auto &childName : childNames) {
         childWsList.push_back(
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(

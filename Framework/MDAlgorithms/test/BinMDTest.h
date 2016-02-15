@@ -440,10 +440,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
 
-    std::vector<int> OutputBins;
-    OutputBins.push_back(binsX);
-    OutputBins.push_back(binsY);
-    OutputBins.push_back(binsZ);
+    std::vector<int> OutputBins{binsX, binsY, binsZ};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputBins", OutputBins));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("OutputExtents", "0,10, 0,10, 0,10"));

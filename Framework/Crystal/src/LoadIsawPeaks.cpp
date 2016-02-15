@@ -305,9 +305,9 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // bug
   tempWS->populateInstrumentParameters();
   Geometry::Instrument_const_sptr instr_old = tempWS->getInstrument();
-  boost::shared_ptr<ParameterMap> map(new ParameterMap());
-  Geometry::Instrument_const_sptr instr(
-      new Geometry::Instrument(instr_old->baseInstrument(), map));
+  auto map = boost::make_shared<ParameterMap>();
+  auto instr = boost::make_shared<const Geometry::Instrument>(
+      instr_old->baseInstrument(), map);
 
   std::string s = ApplyCalibInfo(in, "", instr_old, instr, T0);
   outWS->setInstrument(instr);

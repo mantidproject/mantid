@@ -1238,7 +1238,7 @@ DataObjects::TableWorkspace_sptr
 RefinePowderInstrumentParameters::genMCResultTable() {
   // 1. Create table workspace
   DataObjects::TableWorkspace_sptr tablews =
-      boost::shared_ptr<TableWorkspace>(new TableWorkspace());
+      boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("double", "Chi2");
   tablews->addColumn("double", "GSLChi2");

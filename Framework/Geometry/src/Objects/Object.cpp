@@ -19,6 +19,8 @@
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Tolerance.h"
 
+#include <boost/make_shared.hpp>
+
 #include <deque>
 #include <iostream>
 #include <stack>
@@ -40,7 +42,7 @@ Object::Object()
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
       m_material() // empty by default
 {
-  handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
+  handle = boost::make_shared<CacheGeometryHandler>(this);
 }
 
 /**
@@ -55,7 +57,7 @@ Object::Object(const std::string &shapeXML)
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
       m_shapeXML(shapeXML), m_material() // empty by default
 {
-  handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
+  handle = boost::make_shared<CacheGeometryHandler>(this);
 }
 
 /**
