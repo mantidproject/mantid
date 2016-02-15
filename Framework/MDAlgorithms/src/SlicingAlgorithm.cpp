@@ -600,7 +600,7 @@ void SlicingAlgorithm::createAlignedTransform() {
     // Changed # of dimensions - can't reverse the transform
     m_transformToOriginal = nullptr;
     g_log.warning("SlicingAlgorithm: Your slice will cause the output "
-                  "workspace to have less dimensions than the input. This will "
+                  "workspace to have fewer dimensions than the input. This will "
                   "affect your ability to create subsequent slices.");
   }
 }
