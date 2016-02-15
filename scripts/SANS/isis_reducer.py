@@ -35,7 +35,7 @@ if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
 
-# Version number
+## Version number
 __version__ = '0.0'
 
 current_settings = None
@@ -355,7 +355,7 @@ class ISISReducer(Reducer):
 
         return name
 
-# pylint: disable=global-statement
+    # pylint: disable=global-statement
     def deep_copy(self):
         """
             Returns a copy of the reducer that was created when the settings were set but
@@ -549,7 +549,7 @@ class ISISReducer(Reducer):
         if not self._monitor_set or override:
             self.instrument.set_incident_mon(specNum)
 
-    def set_trans_spectrum(self, specNum, interp=False, _override=True):
+    def set_trans_spectrum(self, specNum, interp=False, override=True):
         self.instrument.incid_mon_4_trans_calc = int(specNum)
 
         self.transmission_calculator.interpolate = interp
@@ -676,8 +676,7 @@ class ISISReducer(Reducer):
             try:
                 if wk and wk in mtd:
                     DeleteWorkspace(Workspace=wk)
-            # pylint: disable=bare-except
-            except:
+            except (StandardError, Warning):
                 # if the workspace can't be deleted this function does nothing
                 pass
 
