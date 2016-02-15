@@ -134,8 +134,8 @@ protected:
     bool eventFilter(QObject *obj, QEvent *ev) override;
 
     Grid *d_grid;
-        QMap<int, QwtPlotItem*> d_curves;
-	QMap<int, QwtPlotMarker*> d_markers;
+    QMap<int, QwtPlotItem *> d_curves;
+        QMap<int, QwtPlotMarker*> d_markers;
 
 	int minTickLength, majTickLength;
 	int marker_key;

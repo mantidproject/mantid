@@ -54,7 +54,7 @@ private slots:
 	//! Accept changes and quit
   void accept() override;
   //! Apply changes
-        void apply();
+  void apply();
 
 private:
     QPushButton* buttonOk, *buttonApply;

@@ -66,22 +66,22 @@ public:
   /** Iterator referring to first element in the container.
   * @return an iterator referring to the first element in the container.
   */
-  Iterator begin() { return m_tokens.begin(); };
+  Iterator begin() { return m_tokens.begin(); }
 
   /** Iterator referring to the past-the-end element in the container.
    * @return an iterator referring to the past-the-end element in the container.
    */
-  Iterator end() { return m_tokens.end(); };
+  Iterator end() { return m_tokens.end(); }
 
   /** Const iterator referring to first element in the container.
   * @return a const iterator referring to the first element in the container.
   */
-  ConstIterator cbegin() const { return m_tokens.cbegin(); };
+  ConstIterator cbegin() const { return m_tokens.cbegin(); }
   /** Const iterator referring to the past-the-end element in the container.
    * @return a const iterator referring to the past-the-end element in the
    * container.
    */
-  ConstIterator cend() const { return m_tokens.cend(); };
+  ConstIterator cend() const { return m_tokens.cend(); }
 
   /** Get a const reference to the index'th token. Indexing an out-of-range
    * element won't throw, but is otherwise undefined behavior.
@@ -90,36 +90,36 @@ public:
    */
   const std::string &operator[](std::size_t index) const {
     return m_tokens[index];
-  };
+  }
 
   /** Get a const reference to the index'th token. Indexing an out-of-range
   * element won't throw, but is otherwise undefined behavior.
   * @param index Index of the requested token.
   * @return a const reference to the index'th token.
   */
-  std::string &operator[](std::size_t index) { return m_tokens[index]; };
+  std::string &operator[](std::size_t index) { return m_tokens[index]; }
 
   /// Returns a vector of tokenized strings.
-  const TokenVec &asVector() { return m_tokens; };
+  const TokenVec &asVector() { return m_tokens; }
 
   /** Get a const reference to the index'th token.
    * @param index Index of the requested token.
    * @return a const reference to the index'th token.
    * @throw Throws std::out_of_range if the index is out of range.
    */
-  const std::string &at(std::size_t index) const { return m_tokens.at(index); };
+  const std::string &at(std::size_t index) const { return m_tokens.at(index); }
 
   /** Get a reference to the index'th token.
    * @param index Index of the requested token.
    * @return a reference to the index'th token.
    * @throw Throws std::out_of_range if the index is out of range.
    */
-  std::string &at(std::size_t index) { return m_tokens.at(index); };
+  std::string &at(std::size_t index) { return m_tokens.at(index); }
 
   /** Get the total number of tokens.
    * @return the total number of tokens.
    */
-  std::size_t count() const { return m_tokens.size(); };
+  std::size_t count() const { return m_tokens.size(); }
 
 private:
   std::vector<std::string> m_tokens;

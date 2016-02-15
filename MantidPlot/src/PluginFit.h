@@ -48,7 +48,7 @@ class PluginFit : public Fit
 
               private:
                 void init();
-		typedef double (*fitFunctionEval)(double, double *);
+                typedef double (*fitFunctionEval)(double, double *);
                 void calculateFitCurveData(double *X, double *Y) override;
                 fitFunctionEval f_eval;
 };

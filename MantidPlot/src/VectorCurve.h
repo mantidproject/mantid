@@ -59,7 +59,7 @@ public:
                         const QwtScaleMap &yMap, int from, int to) const;
 
         void drawArrowHead(QPainter *p, int xs, int ys, int xe, int ye) const;
-	double theta(int x0, int y0, int x1, int y1) const;
+        double theta(int x0, int y0, int x1, int y1) const;
 
 	QString vectorEndXAColName(){return d_end_x_a;};
 	QString vectorEndYMColName(){return d_end_y_m;};

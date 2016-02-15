@@ -144,8 +144,8 @@ public slots:
         //@}v
 
         //! \name Column Operations
-	//@{
-	void removeCol();
+        //@{
+        void removeCol();
 	void removeCol(const QStringList& list);
 	void insertCol();
 	void insertCols(int start, int count);
@@ -318,7 +318,7 @@ public slots:
         std::string saveToProject(ApplicationWindow *app) override;
         std::string saveTableMetadata();
 
-        void restore(QString& spec);
+        void restore(QString &spec);
 
         //! This changes the general background color (color of the table widget, not the cells)
 	void setBackgroundColor(const QColor& col);
@@ -345,7 +345,7 @@ public slots:
         //! modified. Triggers the update of 2D plots.
         void notifyChanges();
 
-	//! Notifies the main application that the width of a table column has been modified by the user.
+        //! Notifies the main application that the width of a table column has been modified by the user.
 	void colWidthModified(int, int, int);
 
   //! is this table editable

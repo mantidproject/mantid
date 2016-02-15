@@ -114,8 +114,9 @@ public:
         QwtDoubleRect boundingRect() const override;
         void setBoundingRect(double xs, double ys, double xe, double ye);
 
-        //! Recalculates the bounding rectangle in values coordinates using the pixel coordinats when the scales change
-	void updateBoundingRect();
+        //! Recalculates the bounding rectangle in values coordinates using the
+        //! pixel coordinats when the scales change
+        void updateBoundingRect();
 
 	//! Returns the state of #d_editable.
 	bool editable() const { return d_editable; }
@@ -130,8 +131,8 @@ private:
             const QRect &r) const override;
   double theta(int xs, int ys, int xe, int ye) const;
 
-        //! Flag specifying if the start arrow is visible
-	bool d_start_arrow;
+  //! Flag specifying if the start arrow is visible
+        bool d_start_arrow;
 
 	//! Flag specifying if the end arrow is visible
 	bool d_end_arrow;

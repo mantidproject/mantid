@@ -58,7 +58,7 @@ private slots:
         void accept() override;
         void apply();
         void updateDisplay(int item);
-	void enablePrecision(int f);
+        void enablePrecision(int f);
 	void setNumericFormat(int type, int prec, bool allRightColumns);
 	void setDayFormat(const QString& format, bool allRightColumns);
 	void setMonthFormat(const QString& format, bool allRightColumns);

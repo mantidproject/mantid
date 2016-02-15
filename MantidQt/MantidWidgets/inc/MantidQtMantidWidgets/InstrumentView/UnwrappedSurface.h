@@ -184,10 +184,10 @@ protected:
   QMap<Mantid::Geometry::ComponentID, QRectF> m_assemblies;
 
   bool m_flippedView; ///< if false the image is seen from the sample. if true
-                      ///the view is looking towards the sample.
+  /// the view is looking towards the sample.
   mutable bool m_startPeakShapes; ///< set to true to start creating
-                                  ///m_peakShapes from m_peaksWorkspace, return
-                                  ///to false after creation
+  /// m_peakShapes from m_peaksWorkspace, return
+  /// to false after creation
 
   /// Zoom stack
   QStack<RectF> m_zoomStack;

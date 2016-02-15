@@ -271,7 +271,7 @@ signals:
   // other
   void redrawRequired(); ///< request redrawing of self
   void updateInfoText(); ///< request update of the info string at bottom of
-                         ///InstrumentWindow
+  /// InstrumentWindow
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
 protected slots:
@@ -330,7 +330,7 @@ protected:
   mutable bool m_showPeakLabels;    ///< flag to show peak hkl labels
   bool m_showPeakRelativeIntensity; ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle; ///< index of a default PeakMarker2D style to
-                                 ///use with a new PeakOverlay.
+  /// use with a new PeakOverlay.
 
 private:
   /// Get the current input controller

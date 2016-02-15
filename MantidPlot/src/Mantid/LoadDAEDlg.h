@@ -20,8 +20,8 @@ public:
   ~loadDAEDlg() override;
 
   const QString &getHostName() { return m_hostName; }
-        const QString& getWorkspaceName() { return m_workspaceName; }
-	const QString& getSpectrumMin() { return m_spectrum_min; }
+  const QString &getWorkspaceName() { return m_workspaceName; }
+        const QString& getSpectrumMin() { return m_spectrum_min; }
 	const QString& getSpectrumMax() { return m_spectrum_max; }
 	const QString& getSpectrumList() { return m_spectrum_list; }
   int updateInterval(){return m_updateInterval;}

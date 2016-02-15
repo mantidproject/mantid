@@ -72,11 +72,13 @@ class LineProfileTool : public QWidget, public PlotToolInterface
                 };
 
               signals:
-                /** Emitted whenever a new message should be presented to the user.
-		 *
-		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
-		 */
-		void statusText(const QString&);
+                /** Emitted whenever a new message should be presented to the
+                 * user.
+                 *
+                 * You don't have to connect to this signal if you alreay
+                 * specified a reciever during initialization.
+                 */
+                void statusText(const QString&);
 
 	protected:
 		int averageImagePixel(const QImage &image, int px, int py, bool moreHorizontal);

@@ -163,7 +163,7 @@ public slots:
         void print() override;
         void printAllLayers(QPainter *painter);
         void printActiveLayer();
-	//@}
+        //@}
 
 	void setFonts(const QFont& titleFnt, const QFont& scaleFnt,
 							const QFont& numbersFnt, const QFont& legendFnt);
@@ -223,11 +223,11 @@ private:
   void keyPressEvent(QKeyEvent *) override;
   bool eventFilter(QObject *object, QEvent *) override;
   void releaseLayer();
-        void resizeLayers(QResizeEvent *re);
-        bool focusNextPrevChild(bool next) override;
-        void dragEnterEvent(QDragEnterEvent *event) override;
-        void dropEvent(QDropEvent *event) override;
-        //@}
+  void resizeLayers(QResizeEvent *re);
+  bool focusNextPrevChild(bool next) override;
+  void dragEnterEvent(QDragEnterEvent *event) override;
+  void dropEvent(QDropEvent *event) override;
+  //@}
 
   void removeLayerSelectionFrame();
 

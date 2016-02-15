@@ -81,8 +81,8 @@ protected slots:
 public slots:
   void accept() override;
   void acceptFunction();
-        void acceptParametric();
-	void acceptPolar();
+  void acceptParametric();
+        void acceptPolar();
 	void setCurveToModify(Graph *g, int curve);
 	void insertParamFunctionsList(const QStringList& xList, const QStringList& yList);
 	void insertPolarFunctionsList(const QStringList& rList, const QStringList& thetaList);

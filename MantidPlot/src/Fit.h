@@ -69,7 +69,8 @@ class Fit : public Filter
                 };
 
                 //! Sets the data set to be used for weighting
-                bool setWeightingData(WeightingMethod w, const QString& colName = QString::null);
+                bool setWeightingData(WeightingMethod w,
+                                      const QString &colName = QString::null);
 
                 void setDataCurve(int curve, double start, double end) override;
                 bool setDataFromTable(Table *t, const QString &xColName,
@@ -77,8 +78,8 @@ class Fit : public Filter
                                       int to = -1) override;
 
                 QString resultFormula() { return d_result_formula; };
-                QString formula(){return d_formula;};
-		virtual void setFormula(const QString&){};
+                QString formula() { return d_formula; };
+                virtual void setFormula(const QString&){};
 
 		int numParameters(){return d_p;};
 		QStringList parameterNames(){return d_param_names;};
@@ -101,9 +102,9 @@ class Fit : public Filter
                 QString legendInfo() override;
 
                 //! Returns a vector with the fit results
-                double* results(){return d_results;};
+                double *results() { return d_results; };
 
-		//! Returns a vector with the standard deviations of the results
+                //! Returns a vector with the standard deviations of the results
 		double* errors();
 
 		//! Returns the sum of squares of the residuals from the best-fit line

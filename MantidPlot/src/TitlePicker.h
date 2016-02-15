@@ -49,5 +49,5 @@ signals:
 private:
   bool eventFilter(QObject *, QEvent *) override;
   QwtTextLabel *title;
-        bool d_selected;
+  bool d_selected;
 };

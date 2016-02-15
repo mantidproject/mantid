@@ -47,7 +47,7 @@ class PolynomialFit : public Fit
                 int order() { return d_order; };
                 void setOrder(int order);
 
-		static QString generateFormula(int order);
+                static QString generateFormula(int order);
 		static QStringList generateParameterList(int order);
 
                 double eval(double *par, double x) override;

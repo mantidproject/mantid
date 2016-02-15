@@ -57,7 +57,7 @@ private:
     void output() override;
 
     double trapez();
-        double trapezf(int n);
+    double trapezf(int n);
     //! Returns the number of iterations used to calculate the area if d_integrand = AnalyticalFunction.
     int romberg();
 

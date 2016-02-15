@@ -51,7 +51,7 @@ namespace MantidQt
                         virtual void
                         loadSettings(const QSettings &settings) = 0;
                 };
-	} // namespace CustomInterfaces
+        } // namespace CustomInterfaces
 } // namespace Mantid
 
 #endif

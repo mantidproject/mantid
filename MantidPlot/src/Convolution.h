@@ -42,8 +42,8 @@ public:
                           const QString &responseColName, int = 1,
                           int = -1) override;
     //! Returns the size of the signal data set
-        int signalDataSize(){return d_n_signal;};
-	//! Returns the size of the response data set
+    int signalDataSize() { return d_n_signal; };
+        //! Returns the size of the response data set
 	int responseDataSize(){return d_n_response;};
 
 protected:
@@ -55,8 +55,8 @@ protected:
 private:
   void output() override;
   //! Size of the signal data set
-        int d_n_signal;
-	//! Size of the response data set
+  int d_n_signal;
+        //! Size of the response data set
 	int d_n_response;
 };
 

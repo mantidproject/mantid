@@ -59,7 +59,7 @@ public:
         ~ContourLinesEditor() override;
         //! Use this function to initialize the values.
         void setSpectrogram(Spectrogram *sp);
-	//! Updates levels in the target spectrogram and replots it.
+        //! Updates levels in the target spectrogram and replots it.
 	void updateContourLevels();
 	void updateContourPens();
 	//! Updates cell items when spectrogram contour lines changed.

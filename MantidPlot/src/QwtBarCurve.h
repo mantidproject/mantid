@@ -45,8 +45,8 @@ public:
 
         BarStyle orientation() { return bar_style; };
 
-        void setGap (int gap);
-	int gap() const {return bar_gap;};
+        void setGap(int gap);
+        int gap() const {return bar_gap;};
 
 	void setOffset(int offset);
 	int offset() const {return bar_offset;};

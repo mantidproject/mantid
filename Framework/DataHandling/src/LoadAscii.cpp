@@ -12,8 +12,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
 #include <MantidKernel/StringTokenizer.h>
-=======
->>>>>>> origin/master
 // String utilities
 #include <boost/algorithm/string.hpp>
 

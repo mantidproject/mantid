@@ -129,18 +129,18 @@ protected:
   ProjectionType m_projectionType; ///< Type of display projection
   int m_width;                     ///< Width of the viewport in pixels
   int m_height;                    ///< Height of the viewport in pixels
-  double m_left;  ///< Ortho/Prespective Projection xmin value (Left side of the
-                  ///x axis)
+  double m_left; ///< Ortho/Prespective Projection xmin value (Left side of the
+  /// x axis)
   double m_right; ///< Ortho/Prespective Projection xmax value (Right side of
-                  ///the x axis)
+  /// the x axis)
   double m_bottom; ///< Ortho/Prespective Projection ymin value (Bottom side of
-                   ///the y axis)
-  double m_top;  ///< Ortho/Prespective Projection ymax value (Top side of the y
-                 ///axis)
+  /// the y axis)
+  double m_top; ///< Ortho/Prespective Projection ymax value (Top side of the y
+  /// axis)
   double m_near; ///< Ortho/Prespective Projection zmin value (Near side of the
-                 ///z axis)
-  double m_far;  ///< Ortho/Prespective Projection zmax value (Far side of the z
-                 ///axis)
+  /// z axis)
+  double m_far; ///< Ortho/Prespective Projection zmax value (Far side of the z
+  /// axis)
 
   /* Trackball rotation */
 

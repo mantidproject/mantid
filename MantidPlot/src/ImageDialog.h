@@ -48,8 +48,8 @@ public:
 protected slots:
   void accept() override;
   void update();
-        void adjustHeight(int width);
-	void adjustWidth(int height);
+  void adjustHeight(int width);
+        void adjustWidth(int height);
 
 signals:
 	void setGeometry(int, int, int, int);

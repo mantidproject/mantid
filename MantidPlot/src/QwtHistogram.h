@@ -42,8 +42,8 @@ public:
         QwtDoubleRect boundingRect() const override;
 
         void setBinning(bool autoBin, double size, double begin, double end);
-        bool autoBinning(){return d_autoBin;};
-	double begin(){return d_begin;};
+        bool autoBinning() { return d_autoBin; };
+        double begin(){return d_begin;};
 	double end(){return d_end;};
 	double binSize(){return d_bin_size;};
 
@@ -66,7 +66,7 @@ private:
   void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
             const QRect &rect) const override {
     DataCurve::draw(p, xMap, yMap, rect);
-        }
+  }
 
     void loadDataFromMatrix();
     Matrix *d_matrix;

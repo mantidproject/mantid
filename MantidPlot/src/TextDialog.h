@@ -91,7 +91,7 @@ private slots:
         void accept() override;
         //! Apply changes
         void apply();
-	void setDefaultValues();
+        void setDefaultValues();
 
 	void updateTransparency(int alpha);
 

@@ -49,8 +49,8 @@ public:
 protected slots:
   void accept() override;
   void update();
-        void enableLayoutOptions(bool ok);
-	void swapLayers();
+  void enableLayoutOptions(bool ok);
+        void swapLayers();
 
 private:
 	MultiLayer *multi_layer;

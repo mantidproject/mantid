@@ -94,9 +94,9 @@ Qt::ItemFlags InstrumentTreeModel::flags(const QModelIndex &index) const {
 QVariant InstrumentTreeModel::headerData(int section,
                                          Qt::Orientation orientation,
                                          int role) const {
-  (void)section; // avoid compiler warning
+  (void)section;     // avoid compiler warning
   (void)orientation; // avoid compiler warning
-  (void)role; // avoid compiler warning
+  (void)role;        // avoid compiler warning
   return QVariant();
 }
 

@@ -67,8 +67,8 @@ private slots:
   void accept() override;
   bool updatePlot();
 
-        void pickTitleFont();
-	void viewAxisOptions(int axis);
+  void pickTitleFont();
+        void viewAxisOptions(int axis);
 	QFont axisFont(int axis);
 	void pickAxisLabelFont();
 	void pickNumbersFont();

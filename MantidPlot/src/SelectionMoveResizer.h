@@ -105,8 +105,8 @@ class SelectionMoveResizer : public QWidget
            */
           bool eventFilter(QObject *o, QEvent *e) override;
           //! Returns true if w is one of targets, false else.
-                bool contains(QWidget *w) const { return d_widgets.contains(w); };
-		//! Returns true if m is one of targets, false else.
+          bool contains(QWidget *w) const { return d_widgets.contains(w); };
+                //! Returns true if m is one of targets, false else.
 		bool contains(LegendWidget *m) const { return d_legend_markers.contains(m); };
 		//! Returns true if m is one of targets, false else.
 		bool contains(ArrowMarker *m) const { return d_line_markers.contains(m); };
@@ -179,7 +179,7 @@ class SelectionMoveResizer : public QWidget
 
               private:
                 //! Size of resize handle in pixels.
-		static const int handler_size = 10;
+                static const int handler_size = 10;
 		//! Return one of the rectangles to be filled for starting resize operations.
 		static const QRect handlerRect(QRect rect, Operation op);
 		//! Apply operation specified by #d_op and #d_op_dp to in.

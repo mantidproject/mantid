@@ -68,7 +68,13 @@ public:
         ~Graph3D() override;
 
         enum PlotType { Scatter = 0, Trajectory = 1, Bars = 2, Ribbon = 3 };
-        enum PointStyle{None = 0, Dots = 1, VerticalBars = 2, HairCross = 3, Cones = 4};
+        enum PointStyle {
+          None = 0,
+          Dots = 1,
+          VerticalBars = 2,
+          HairCross = 3,
+          Cones = 4
+        };
 
 public slots:
 	void copy(Graph3D* g);
@@ -119,8 +125,8 @@ public slots:
     bool eventFilter(QObject *object, QEvent *e) override;
     void resizeEvent(QResizeEvent *) override;
     void scaleFonts(double factor);
-        void setIgnoreFonts(bool ok){ignoreFonts = ok;};
-	//@}
+    void setIgnoreFonts(bool ok) { ignoreFonts = ok; };
+        //@}
 
 	//! \name Axes
 	//@{
@@ -241,7 +247,8 @@ public slots:
 
         void print() override;
         void copyImage();
-        void exportImage(const QString& fileName, int quality = 100, bool transparent = false);
+        void exportImage(const QString &fileName, int quality = 100,
+                         bool transparent = false);
         void exportPDF(const QString &fileName) override;
     void exportVector(const QString& fileName);
     void exportToFile(const QString& fileName);
@@ -251,8 +258,8 @@ public slots:
     std::string saveToProject(ApplicationWindow *app) override;
 
     void zoomChanged(double);
-        void rotationChanged(double, double, double);
-	void scaleChanged(double, double, double);
+    void rotationChanged(double, double, double);
+        void scaleChanged(double, double, double);
 	void shiftChanged(double, double, double);
 
 	//! \name Colors
@@ -407,8 +414,8 @@ public:
     Triple operator()(double u, double v) override;
 
     unsigned int rows() { return d_rows; };
-        unsigned int columns(){return d_columns;};
-	void setMesh (unsigned int columns, unsigned int rows);
+    unsigned int columns() { return d_columns; };
+        void setMesh (unsigned int columns, unsigned int rows);
 
 	bool uPeriodic(){return d_u_periodic;};
 	bool vPeriodic(){return d_v_periodic;};

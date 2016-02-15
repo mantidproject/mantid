@@ -52,7 +52,7 @@ protected:
   Mantid::Kernel::V3D m_xaxis; ///< The x axis
   Mantid::Kernel::V3D m_yaxis; ///< The y axis
   bool m_manual_u_correction;  ///< Flag set to prevent automatic
-                               ///FindAndCorrectUGap()
+  /// FindAndCorrectUGap()
 };
 } // MantidWidgets
 } // MantidQt
