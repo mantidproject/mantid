@@ -63,10 +63,6 @@ namespace SliceViewer
     virtual void updateView();
     /// Move the position of the peak, by using a different configuration of the existing origin indexes.
     void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform);
-    /// Change foreground colour
-    virtual void changeForegroundColour(const QColor);
-    /// Change background colour
-    virtual void changeBackgroundColour(const QColor);
     /// Show the background radius
     virtual void showBackgroundRadius(const bool show);
     /// Get a bounding box for this peak.
@@ -85,10 +81,6 @@ namespace SliceViewer
     virtual double getRadius() const;
     /// Determine if the background radius is shown.
     virtual bool isBackgroundShown() const;
-    /// Get the current background colour
-    virtual QColor getBackgroundColour() const;
-    /// Get the current foreground colour
-    virtual QColor getForegroundColour() const;
     /// Take settings from another view
     void takeSettingsFrom(const PeakOverlayView * const);
 
@@ -108,9 +100,9 @@ namespace SliceViewer
     /// Physical peak object
     VecPhysicalSphericalPeak m_physicalPeaks;
     /// Peak colour
-    QColor m_peakColour;
+    PeakViewColor m_peakColour;
     /// Back colour
-    QColor m_backColour;
+    PeakViewColor m_backColour;
     /// Peaks in the workspace that are viewable in the present view.
     std::vector<bool> m_viewablePeaks;
     /// Show the background radius.

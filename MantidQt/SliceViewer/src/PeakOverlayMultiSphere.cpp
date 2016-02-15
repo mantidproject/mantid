@@ -80,7 +80,7 @@ namespace MantidQt
         QPainterPath peakRadiusInnerPath;
         peakRadiusInnerPath.addEllipse(originWindows, drawObject.peakInnerRadiusX,
             drawObject.peakInnerRadiusY);
-        QPen pen(m_peakColour);
+        QPen pen(m_peakColour.colorSphere);
         pen.setWidth(2);
         pen.setStyle(Qt::DashLine);
         painter.strokePath(peakRadiusInnerPath, pen);
@@ -95,7 +95,7 @@ namespace MantidQt
           backgroundInnerPath.addEllipse(originWindows, drawObject.backgroundInnerRadiusX,
               drawObject.backgroundInnerRadiusY);
           QPainterPath backgroundRadiusFill = backgroundOuterPath.subtracted(backgroundInnerPath);
-          painter.fillPath(backgroundRadiusFill, m_backColour);
+          painter.fillPath(backgroundRadiusFill, m_backColour.colorSphere);
         }
         painter.end();
       }
@@ -123,16 +123,6 @@ namespace MantidQt
       { 
         m_physicalPeaks[i]->movePosition(transform);
       }
-    }
-
-    void PeakOverlayMultiSphere::changeForegroundColour(const QColor colour)
-    {
-      this->m_peakColour = colour;
-    }
-
-    void PeakOverlayMultiSphere::changeBackgroundColour(const QColor colour)
-    {
-      this->m_backColour = colour;
     }
 
     void PeakOverlayMultiSphere::showBackgroundRadius(const bool show)
@@ -187,17 +177,6 @@ namespace MantidQt
     {
       return m_showBackground;
     }
-
-    QColor PeakOverlayMultiSphere::getBackgroundColour() const
-    {
-      return m_backColour;
-    }
-
-    QColor PeakOverlayMultiSphere::getForegroundColour() const
-    {
-      return m_peakColour;
-    }
-
 
     void PeakOverlayMultiSphere::takeSettingsFrom(const PeakOverlayView * const source)
     {
