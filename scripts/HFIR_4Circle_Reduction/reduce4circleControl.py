@@ -629,6 +629,9 @@ class CWSCDReductionControl(object):
             for j in xrange(DET_Y_SIZE):
                 array2d[i][j] = raw_ws.readY(i * DET_X_SIZE + j)[0]
 
+        # Rotate the output matrix
+        array2d = numpy.rot90(array2d, 1)
+
         return array2d
 
     def get_refined_ub_matrix(self):
