@@ -355,14 +355,14 @@ public:
 
   /**
   * Produces vanadium curves graph with three spectrum for calib
-  * output. Runsm plotSpectrum function via python.
+  * output.
   *
   */
   virtual void plotVanCurvesCalibOutput() = 0;
 
   /**
   * Produces ceria peaks graph with two spectrum for calib
-  * output. Runs the plotSpectrum function via python.
+  * output.
   *
   */
   virtual void plotDifcZeroCalibOutput(std::vector<double> &difc,
@@ -370,24 +370,21 @@ public:
                                        std::string &specNo) = 0;
 
   /**
-  * Produces a single spectrum graph for focused output. Runs
-  * plotSpectrum function via python.
+  * Produces a single spectrum graph for focused output.
   *
   * @param wsName name of the workspace to plot (must be in the ADS)
   */
   virtual void plotFocusedSpectrum(const std::string &wsName) = 0;
 
   /**
- * Produces a waterfall spectrum graph for focused output. Runs
- * plotSpectrum function via python.
+ * Produces a waterfall spectrum graph for focused output.
  *
  * @param wsName name of the workspace to plot (must be in the ADS)
  */
   virtual void plotWaterfallSpectrum(const std::string &wsName) = 0;
 
   /**
-  * Produces a replaceable spectrum graph for focused output. Runs
-  * plotSpectrum function via python.
+  * Produces a replaceable spectrum graph for focused output.
   *
   * @param wsName name of the workspace to plot (must be in the ADS)
   */
