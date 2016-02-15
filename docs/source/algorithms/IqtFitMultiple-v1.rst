@@ -35,7 +35,7 @@ Usage
     function = r'name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=0.972332,Tau=0.0247558,Beta=1;ties=(f1.Intensity=1-f0.A0)'
 
     #run IqtFitMultiple
-    result, params, fit_group = IqtFitMultiple(InputWorkspace=input_ws, Function=function, FitType='1S_s')
+    result, params, fit_group = IqtFitMultiple(InputWorkspace=input_ws, Function=function, FitType='1S_s', StartX=0, EndX=0.2, SpecMin=0, SpecMax=16)
 
 
 .. categories::
