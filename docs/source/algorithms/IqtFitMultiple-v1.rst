@@ -30,20 +30,12 @@ Usage
 
 .. code-block:: python
     
-    #create a dummy workspace
-    function = "name=ExpDecay,Height=1,Lifetime=0.035"
-    ws = CreateSampleWorkspace("Histogram", Function="User Defined", UserDefinedFunction=function, XMin=0, XMax=0.5, BinWidth=0.01, XUnit="Time", NumBanks=1)
-
-    #load instrument defintion and parameters
-    LoadInstrument(ws, InstrumentName='IRIS', RewriteSpectraMap=True)
-    param_file = config['instrumentDefinition.directory'] + 'IRIS_graphite_002_Parameters.xml'
-    LoadParameterFile(ws, param_file)
-
-    ws = CropWorkspace(ws, StartWorkspaceIndex=3, EndWorkspaceIndex=12)
-    ws = RenameWorkspace(ws, OutputWorkspace="irs10001_graphite002_iqt")
+    #Load in iqt data
+    input_ws = Load(Filename='iris26176_graphite002_iqt.nxs')
+    function = r'name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=0.972332,Tau=0.0247558,Beta=1;ties=(f1.Intensity=1-f0.A0)'
 
     #run IqtFitMultiple
-    IqtFitMultiple(RunNumber='10001', InputType='Workspace', Instrument='irs', Analyser='graphite002')
+    result, params, fit_group = IqtFitMultiple(InputWorkspace=input_ws, Function=function, FitType='1S_s')
 
 
 .. categories::
