@@ -5,6 +5,7 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #endif
 
 #include <vector>
