@@ -16,7 +16,7 @@ class ISpectrum;
 
 namespace Algorithms {
 
-class GeometryInfo {
+class MANTID_ALGORITHMS_DLL GeometryInfo {
 public:
   GeometryInfo(const BasicInstrumentInfo &instrument_info,
                const API::ISpectrum &spectrum);
