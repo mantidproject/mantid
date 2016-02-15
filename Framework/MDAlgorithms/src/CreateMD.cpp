@@ -447,8 +447,6 @@ Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
 
   std::vector<std::vector<double>> ub_params{alatt, angdeg, u, v};
 
-  std::vector<double> goniometer_params{psi, gl, gs};
-
   if (any_given(ub_params) && !all_given(ub_params)) {
     throw std::invalid_argument(
         "Either specify all of alatt, angledeg, u, v or none of them");
