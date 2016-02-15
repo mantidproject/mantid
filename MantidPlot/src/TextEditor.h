@@ -40,7 +40,7 @@ class TextEditor: public QTextEdit
 
 public:
   explicit TextEditor(Graph *g);
-    ~TextEditor();
+  ~TextEditor() override;
     void formatText(const QString & prefix, const QString & postfix);
 
 signals:
@@ -49,9 +49,9 @@ public slots:
     void addSymbol(const QString & letter);
 
 private:
-	void closeEvent(QCloseEvent *e);
-	QString d_initial_text;
-	QWidget *d_target;
+  void closeEvent(QCloseEvent *e) override;
+  QString d_initial_text;
+        QWidget *d_target;
 };
 
 #endif

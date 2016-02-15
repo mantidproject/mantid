@@ -3,12 +3,16 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AbsorptionCorrection.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -21,7 +25,7 @@ using namespace API;
 using namespace Mantid::PhysicalConstants;
 
 AbsorptionCorrection::AbsorptionCorrection()
-    : API::Algorithm(), m_inputWS(), m_sampleObject(NULL), m_L1s(),
+    : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
       m_sampleVolume(0.0), m_refAtten(0.0), m_scattering(0), n_lambda(0),
       m_xStep(0), m_emode(0), m_lambdaFixed(0.), EXPONENTIAL() {}
@@ -63,19 +67,14 @@ void AbsorptionCorrection::init() {
       "The number of wavelength points for which the numerical integral is\n"
       "calculated (default: all points)");
 
-  std::vector<std::string> exp_options;
-  exp_options.push_back("Normal");
-  exp_options.push_back("FastApprox");
+  std::vector<std::string> exp_options{"Normal", "FastApprox"};
   declareProperty(
       "ExpMethod", "Normal",
       boost::make_shared<StringListValidator>(exp_options),
       "Select the method to use to calculate exponentials, normal or a\n"
       "fast approximation (default: Normal)");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Elastic");
-  propOptions.push_back("Direct");
-  propOptions.push_back("Indirect");
+  std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
   declareProperty("EMode", "Elastic",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The energy mode (default: elastic)");

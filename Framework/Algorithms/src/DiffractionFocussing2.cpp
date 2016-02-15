@@ -5,9 +5,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
@@ -145,7 +147,7 @@ void DiffractionFocussing2::exec() {
   double eventXMax = 0.;
 
   m_eventW = boost::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
-  if (m_eventW != NULL) {
+  if (m_eventW != nullptr) {
     if (getProperty("PreserveEvents")) {
       // Input workspace is an event workspace. Use the other exec method
       this->execEvent();
@@ -153,7 +155,7 @@ void DiffractionFocussing2::exec() {
       return;
     } else {
       // get the full d-spacing range
-      m_eventW->sortAll(DataObjects::TOF_SORT, NULL);
+      m_eventW->sortAll(DataObjects::TOF_SORT, nullptr);
       m_matrixInputW->getXMinMax(eventXMin, eventXMax);
     }
   }
@@ -573,9 +575,9 @@ void DiffractionFocussing2::determineRebinParameters() {
   // whether or not to bother checking for a mask
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = m_matrixInputW->getInstrument();
-  if (instrument != NULL) {
-    checkForMask = ((instrument->getSource() != NULL) &&
-                    (instrument->getSample() != NULL));
+  if (instrument != nullptr) {
+    checkForMask = ((instrument->getSource() != nullptr) &&
+                    (instrument->getSample() != nullptr));
   }
 
   groupAtWorkspaceIndex.resize(nHist);
@@ -589,7 +591,7 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     // the spectrum is the real thing we want to work with
     const ISpectrum *spec = m_matrixInputW->getSpectrum(wi);
-    if (spec == NULL) {
+    if (spec == nullptr) {
       groupAtWorkspaceIndex[wi] = -1;
       continue;
     }
@@ -603,9 +605,8 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     // Create the group range in the map if it isn't already there
     if (gpit == group2minmax.end()) {
-      gpit = group2minmax.insert(std::make_pair(
-                                     group, std::make_pair(
-                                                BIGGEST, -1. * BIGGEST))).first;
+      gpit = group2minmax.emplace(group, std::make_pair(BIGGEST, -1. * BIGGEST))
+                 .first;
     }
     const double min = (gpit->second).first;
     const double max = (gpit->second).second;
@@ -652,7 +653,7 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     // Build up the X vector.
     boost::shared_ptr<MantidVec> xnew =
-        boost::shared_ptr<MantidVec>(new MantidVec(xPoints)); // New X vector
+        boost::make_shared<MantidVec>(xPoints); // New X vector
     (*xnew)[0] = Xmin;
     for (int64_t j = 1; j < xPoints; j++) {
       (*xnew)[j] = Xmin * (1.0 + step);

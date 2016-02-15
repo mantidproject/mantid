@@ -386,8 +386,8 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
   }
   // Clear the original workspace
   setOriginalWorkspace(boost::shared_ptr<Workspace>());
-  setTransformFromOriginal(NULL);
-  setTransformToOriginal(NULL);
+  setTransformFromOriginal(nullptr);
+  setTransformToOriginal(nullptr);
 }
 
 //---------------------------------------------------------------------------------------------------

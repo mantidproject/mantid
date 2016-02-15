@@ -205,12 +205,13 @@ std::string createDocString(IAlgorithm &self) {
  */
 struct AllowCThreads {
   explicit AllowCThreads(const object &algm)
-      : m_tracefunc(NULL), m_tracearg(NULL), m_saved(NULL), m_tracking(false) {
+      : m_tracefunc(nullptr), m_tracearg(nullptr), m_saved(nullptr),
+        m_tracking(false) {
     PyThreadState *curThreadState = PyThreadState_GET();
     m_tracefunc = curThreadState->c_tracefunc;
     m_tracearg = curThreadState->c_traceobj;
     Py_XINCREF(m_tracearg);
-    PyEval_SetTrace(NULL, NULL);
+    PyEval_SetTrace(nullptr, nullptr);
     if (!isNone(algm)) {
       _trackAlgorithmInThread(curThreadState->thread_id, algm);
       m_tracking = true;

@@ -60,7 +60,7 @@ signals:
 
 protected:
   void init(bool showNoSymbol);
-  void focusInEvent(QFocusEvent *);
+  void focusInEvent(QFocusEvent *) override;
 
 private:
   static size_t numberOfSymbols();

@@ -117,7 +117,7 @@ public:
   }
 
   /// Virtual destructor
-  virtual ~WrappedObject() {}
+  ~WrappedObject() override {}
 
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }
@@ -141,9 +141,9 @@ private:
 
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl()
-    : m_pConf(NULL), m_pSysConfig(NULL), m_changed_keys(), m_ConfigPaths(),
-      m_AbsolutePaths(), m_strBaseDir(""), m_PropertyString(""),
-      m_properties_file_name("Mantid.properties"),
+    : m_pConf(nullptr), m_pSysConfig(nullptr), m_changed_keys(),
+      m_ConfigPaths(), m_AbsolutePaths(), m_strBaseDir(""),
+      m_PropertyString(""), m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
       // Use a different user properties file for an mpi-enabled build to avoid
       // confusion if both are used on the same file system
@@ -155,7 +155,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
-  m_pConf = 0;
+  m_pConf = nullptr;
 
   // Register the FilterChannel with the Poco logging factory
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
@@ -191,25 +191,22 @@ ConfigServiceImpl::ConfigServiceImpl()
 
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
-  m_ConfigPaths.insert(
-      std::make_pair("mantidqt.python_interfaces_directory", true));
-  m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
-  m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
-  m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
-  m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
-  m_ConfigPaths.insert(
-      std::make_pair("instrumentDefinition.vtpDirectory", true));
-  m_ConfigPaths.insert(std::make_pair("groupingFiles.directory", true));
-  m_ConfigPaths.insert(std::make_pair("maskFiles.directory", true));
-  m_ConfigPaths.insert(std::make_pair("colormaps.directory", true));
-  m_ConfigPaths.insert(
-      std::make_pair("requiredpythonscript.directories", true));
-  m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
-  m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
-  m_ConfigPaths.insert(std::make_pair("python.plugins.directories", true));
-  m_ConfigPaths.insert(std::make_pair("user.python.plugins.directories", true));
-  m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
-  m_ConfigPaths.insert(std::make_pair("icatDownload.directory", true));
+  m_ConfigPaths.emplace("mantidqt.python_interfaces_directory", true);
+  m_ConfigPaths.emplace("plugins.directory", true);
+  m_ConfigPaths.emplace("pvplugins.directory", true);
+  m_ConfigPaths.emplace("mantidqt.plugins.directory", true);
+  m_ConfigPaths.emplace("instrumentDefinition.directory", true);
+  m_ConfigPaths.emplace("instrumentDefinition.vtpDirectory", true);
+  m_ConfigPaths.emplace("groupingFiles.directory", true);
+  m_ConfigPaths.emplace("maskFiles.directory", true);
+  m_ConfigPaths.emplace("colormaps.directory", true);
+  m_ConfigPaths.emplace("requiredpythonscript.directories", true);
+  m_ConfigPaths.emplace("pythonscripts.directory", true);
+  m_ConfigPaths.emplace("pythonscripts.directories", true);
+  m_ConfigPaths.emplace("python.plugins.directories", true);
+  m_ConfigPaths.emplace("user.python.plugins.directories", true);
+  m_ConfigPaths.emplace("datasearch.directories", true);
+  m_ConfigPaths.emplace("icatDownload.directory", true);
 
   // attempt to load the default properties file that resides in the directory
   // of the executable
@@ -405,7 +402,7 @@ void ConfigServiceImpl::configureLogging() {
 
         // Try to create or append to the file. If it fails, use the default
         FILE *fp = fopen(m_logFilePath.c_str(), "a+");
-        if (fp == NULL) {
+        if (fp == nullptr) {
           std::cerr
               << "Error writing to log file path given in properties file: \""
               << m_logFilePath << "\". Will use a default path instead."
@@ -489,7 +486,7 @@ void ConfigServiceImpl::convertRelativeToAbsolute() {
 
     std::string value(m_pConf->getString(key));
     value = makeAbsolute(value, key);
-    m_AbsolutePaths.insert(std::make_pair(key, value));
+    m_AbsolutePaths.emplace(key, value);
   }
 }
 
@@ -1302,18 +1299,18 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
 #ifdef __APPLE__
   cmd = "sw_vers"; // mac
 #elif _WIN32
-  cmd = "wmic";              // windows
-  args.push_back("os");      // windows
-  args.push_back("get");     // windows
-  args.push_back("Caption"); // windows
-  args.push_back("/value");  // windows
+  cmd = "wmic";                 // windows
+  args.emplace_back("os");      // windows
+  args.emplace_back("get");     // windows
+  args.emplace_back("Caption"); // windows
+  args.emplace_back("/value");  // windows
 #endif
 
   if (!cmd.empty()) {
     try {
       Poco::Pipe outPipe, errorPipe;
       Poco::ProcessHandle ph =
-          Poco::Process::launch(cmd, args, 0, &outPipe, &errorPipe);
+          Poco::Process::launch(cmd, args, nullptr, &outPipe, &errorPipe);
       const int rc = ph.wait();
       // Only if the command returned successfully.
       if (rc == 0) {
@@ -1980,7 +1977,7 @@ void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
 */
 void ConfigServiceImpl::setFilterChannelLogLevel(
     const std::string &filterChannelName, int logLevel) {
-  Poco::Channel *channel = NULL;
+  Poco::Channel *channel = nullptr;
   try {
     channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
         filterChannelName);

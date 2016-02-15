@@ -207,10 +207,10 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     std::vector<std::string> tools;
-    tools.push_back("Astra Toolbox");
-    tools.push_back("TomoPy");
+    tools.emplace_back("Astra Toolbox");
+    tools.emplace_back("TomoPy");
     tools.push_back(g_ccpi);
-    tools.push_back("Savu");
+    tools.emplace_back("Savu");
 
     TSM_ASSERT_EQUALS("There should be 4 tools in this test", tools.size(), 4);
     // up to this index the tools are supported
@@ -300,8 +300,8 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     std::vector<std::string> msgs;
-    msgs.push_back("foo log");
-    msgs.push_back("baz log");
+    msgs.emplace_back("foo log");
+    msgs.emplace_back("baz log");
 
     EXPECT_CALL(mockView, logMsgs()).Times(1).WillOnce(Return(msgs));
 

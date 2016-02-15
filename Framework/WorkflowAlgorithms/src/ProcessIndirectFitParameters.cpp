@@ -1,6 +1,7 @@
 #include "MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h"
 
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 
 #include "MantidKernel/MandatoryValidator.h"
@@ -53,7 +54,7 @@ const std::string ProcessIndirectFitParameters::summary() const {
 void ProcessIndirectFitParameters::init() {
 
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
-  unitOptions.push_back("");
+  unitOptions.emplace_back("");
 
   declareProperty(new WorkspaceProperty<ITableWorkspace>("InputWorkspace", "",
                                                          Direction::Input),

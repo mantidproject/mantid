@@ -1,4 +1,8 @@
+#include <math.h>
+#include <stdio.h>
+
 #include "MantidDataHandling/LoadBBY.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -10,8 +14,6 @@
 #include "MantidNexus/NexusClasses.h"
 
 #include <Poco/TemporaryFile.h>
-#include <math.h>
-#include <stdio.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -119,14 +121,14 @@ void LoadBBY::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
   exts.clear();
-  exts.push_back(".tar");
+  exts.emplace_back(".tar");
   declareProperty(
       new API::FileProperty(FilenameStr, "", API::FileProperty::Load, exts),
       "The input filename of the stored data");
 
   // mask
   exts.clear();
-  exts.push_back(".xml");
+  exts.emplace_back(".xml");
   declareProperty(
       new API::FileProperty(MaskStr, "", API::FileProperty::OptionalLoad, exts),
       "The input filename of the mask data");
@@ -249,7 +251,7 @@ void LoadBBY::exec() {
   // load events
   size_t numberHistograms = eventWS->getNumberHistograms();
 
-  std::vector<EventVector_pt> eventVectors(numberHistograms, NULL);
+  std::vector<EventVector_pt> eventVectors(numberHistograms, nullptr);
   std::vector<size_t> eventCounts(numberHistograms, 0);
 
   // phase correction

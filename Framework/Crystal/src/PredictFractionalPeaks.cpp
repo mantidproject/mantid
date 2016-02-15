@@ -5,11 +5,12 @@
 *      Author: ruth
 */
 #include "MantidCrystal/PredictFractionalPeaks.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 //#include "MantidKernel/Strings.h"
 namespace Mantid {

@@ -1,4 +1,6 @@
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -23,7 +25,7 @@ namespace {
 template <typename T>
 void createOrUpdateValue(API::Run &run, const std::string &name,
                          const std::string &time, const T value) {
-  TimeSeriesProperty<T> *timeSeries(NULL);
+  TimeSeriesProperty<T> *timeSeries(nullptr);
   if (run.hasProperty(name)) {
     timeSeries = dynamic_cast<TimeSeriesProperty<T> *>(run.getLogData(name));
     if (!timeSeries)

@@ -64,10 +64,10 @@ public:
 	void showGeneralTab();
 
 private slots:
-	void accept();
-	bool updatePlot();
+  void accept() override;
+  bool updatePlot();
 
-	void pickTitleFont();
+        void pickTitleFont();
 	void viewAxisOptions(int axis);
 	QFont axisFont(int axis);
 	void pickAxisLabelFont();

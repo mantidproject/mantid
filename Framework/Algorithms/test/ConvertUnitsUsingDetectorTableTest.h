@@ -8,6 +8,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/UnitFactory.h"
 

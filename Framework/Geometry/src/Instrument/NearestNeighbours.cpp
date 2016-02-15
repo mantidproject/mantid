@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 // Nearest neighbours library
 #include "MantidKernel/ANN/ANN.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Timer.h"
 
 namespace Mantid {
@@ -256,7 +257,7 @@ std::map<specid_t, IDetector_const_sptr> NearestNeighbours::getSpectraDetectors(
     // Always ignore monitors and ignore masked detectors if requested.
     bool heedMasking = !m_bIgnoreMaskedDetectors && det->isMasked();
     if (!det->isMonitor() && !heedMasking) {
-      spectra.insert(std::make_pair(citr->first, det));
+      spectra.emplace(citr->first, det);
     }
   }
   return spectra;

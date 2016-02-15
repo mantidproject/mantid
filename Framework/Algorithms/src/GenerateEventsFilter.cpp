@@ -28,7 +28,7 @@ DECLARE_ALGORITHM(GenerateEventsFilter)
 GenerateEventsFilter::GenerateEventsFilter()
     : API::Algorithm(), m_dataWS(), m_splitWS(), m_filterWS(), m_filterInfoWS(),
       m_startTime(), m_stopTime(), m_runEndTime(),
-      m_timeUnitConvertFactorToNS(0.), m_dblLog(NULL), m_intLog(NULL),
+      m_timeUnitConvertFactorToNS(0.), m_dblLog(nullptr), m_intLog(nullptr),
       m_logAtCentre(false), m_logTimeTolerance(0.), m_forFastLog(false),
       m_splitters(), m_vecSplitterTime(), m_vecSplitterGroup(),
       m_useParallel(false), m_vecSplitterTimeSet(), m_vecGroupIndexSet() {}
@@ -92,10 +92,7 @@ void GenerateEventsFilter::init() {
   setPropertySettings("TimeInterval",
                       new VisibleWhenProperty("LogName", IS_EQUAL_TO, ""));
 
-  std::vector<std::string> timeoptions;
-  timeoptions.push_back("Seconds");
-  timeoptions.push_back("Nanoseconds");
-  timeoptions.push_back("Percent");
+  std::vector<std::string> timeoptions{"Seconds", "Nanoseconds", "Percent"};
   declareProperty(
       "UnitOfTime", "Seconds",
       boost::make_shared<Kernel::StringListValidator>(timeoptions),
@@ -126,10 +123,7 @@ void GenerateEventsFilter::init() {
   setPropertySettings("LogValueInterval",
                       new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
-  std::vector<std::string> filteroptions;
-  filteroptions.push_back("Both");
-  filteroptions.push_back("Increase");
-  filteroptions.push_back("Decrease");
+  std::vector<std::string> filteroptions{"Both", "Increase", "Decrease"};
   declareProperty(
       "FilterLogValueByChangingDirection", "Both",
       boost::make_shared<Kernel::StringListValidator>(filteroptions),
@@ -147,10 +141,7 @@ void GenerateEventsFilter::init() {
   setPropertySettings("TimeTolerance",
                       new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
-  vector<string> logboundoptions;
-  logboundoptions.push_back("Centre");
-  logboundoptions.push_back("Left");
-  logboundoptions.push_back("Other");
+  vector<string> logboundoptions{"Centre", "Left", "Other"};
   auto logvalidator = boost::make_shared<StringListValidator>(logboundoptions);
   declareProperty(
       "LogBoundary", "Centre", logvalidator,
@@ -171,9 +162,7 @@ void GenerateEventsFilter::init() {
       "Title of output splitters workspace and information workspace.");
 
   // Linear or parallel
-  vector<string> processoptions;
-  processoptions.push_back("Serial");
-  processoptions.push_back("Parallel");
+  vector<string> processoptions{"Serial", "Parallel"};
   auto procvalidator = boost::make_shared<StringListValidator>(processoptions);
   declareProperty(
       "UseParallelProcessing", "Serial", procvalidator,
@@ -729,7 +718,7 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
 
   double curvalue = minvalue;
   while (curvalue - valuetolerance < maxvalue) {
-    indexwsindexmap.insert(std::make_pair(index, wsindex));
+    indexwsindexmap.emplace(index, wsindex);
 
     // Log interval/value boundary
     double lowbound = curvalue - valuetolerance;

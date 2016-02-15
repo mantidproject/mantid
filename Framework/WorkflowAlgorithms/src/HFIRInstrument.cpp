@@ -7,6 +7,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidGeometry/Instrument.h"
 #include "Poco/NumberParser.h"
 
 namespace Mantid {

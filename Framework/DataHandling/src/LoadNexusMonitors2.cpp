@@ -5,14 +5,18 @@
 
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/lexical_cast.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -579,7 +583,7 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
  **/
 bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   bool res = true;
-  ::NeXus::File *f = NULL;
+  ::NeXus::File *f = nullptr;
   try {
     f = new ::NeXus::File(fname);
     if (f)

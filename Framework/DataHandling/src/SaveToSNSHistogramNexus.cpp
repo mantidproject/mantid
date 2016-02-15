@@ -7,8 +7,9 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveToSNSHistogramNexus.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Memory.h"
@@ -93,7 +94,7 @@ int SaveToSNSHistogramNexus::add_path(const char *path) {
 int SaveToSNSHistogramNexus::remove_path(const char *path) {
   char *tstr;
   tstr = strrchr(current_path, '/');
-  if (tstr != NULL && !strcmp(path, tstr + 1)) {
+  if (tstr != nullptr && !strcmp(path, tstr + 1)) {
     *tstr = '\0';
   } else {
     printf("path error\n");
@@ -277,7 +278,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
       new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];
 
   // Only allocate an array for errors if it is needed
-  float *errors = NULL;
+  float *errors = nullptr;
   if (doBoth)
     errors =
         new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];

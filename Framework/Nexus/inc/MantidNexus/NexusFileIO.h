@@ -413,13 +413,13 @@ void NexusFileIO::writeNumericTimeLog(
   status = NXopengroup(fileID, logName.c_str(), "NXlog");
   // write log data
   std::vector<std::string> attributes, avalues;
-  attributes.push_back("type");
+  attributes.emplace_back("type");
   avalues.push_back(logValueType<T>());
   writeNxFloatArray("value", values, attributes, avalues);
   attributes.clear();
   avalues.clear();
   // get ISO time, and save it as an attribute
-  attributes.push_back("start");
+  attributes.emplace_back("start");
   avalues.push_back(t0.toISO8601String());
 
   writeNxFloatArray("time", times, attributes, avalues);

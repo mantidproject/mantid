@@ -88,9 +88,9 @@ private slots:
 	//! Let the user select another font
 	void customFont();
 	//! Accept changes and close dialog
-	void accept();
-	//! Apply changes
-	void apply();
+        void accept() override;
+        //! Apply changes
+        void apply();
 	void setDefaultValues();
 
 	void updateTransparency(int alpha);

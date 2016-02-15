@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/PDDetermineCharacterizations.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -54,21 +55,21 @@ const std::string PDDetermineCharacterizations::summary() const {
 
 /**
  * These should match those in LoadPDCharacterizations
+ * - "frequency" double
+ * -  "wavelength" (double)
+ * -  "bank" (integer)
+ * -  "container" (string)
+ * -  "vanadium" (string)
+ * -  "empty" (string)
+ * -  "d_min" (string)
+ * -  "d_max" (string)
+ * -  "tof_min" (double)
+ * -  "tof_max" (double)
  * @return The list of expected column names
  */
 std::vector<std::string> getColumnNames() {
-  std::vector<std::string> names;
-  names.push_back("frequency");  // double
-  names.push_back("wavelength"); // double
-  names.push_back("bank");       // integer
-  names.push_back("container");  // string
-  names.push_back("vanadium");   // string
-  names.push_back("empty");      // string
-  names.push_back("d_min");      // string
-  names.push_back("d_max");      // string
-  names.push_back("tof_min");    // double
-  names.push_back("tof_max");    // double
-  return names;
+  return {"frequency", "wavelength", "bank",  "container", "vanadium",
+          "empty",     "d_min",      "d_max", "tof_min",   "tof_max"};
 }
 
 /// More intesive input checking. @see Algorithm::validateInputs
@@ -126,17 +127,13 @@ void PDDetermineCharacterizations::init() {
   declareProperty(new Kernel::ArrayProperty<int32_t>("NormBackRun", "0"),
                   "Normalization background" + defaultMsg);
 
-  std::vector<std::string> defaultFrequencyNames;
-  defaultFrequencyNames.push_back("SpeedRequest1");
-  defaultFrequencyNames.push_back("Speed1");
-  defaultFrequencyNames.push_back("frequency");
+  std::vector<std::string> defaultFrequencyNames{"SpeedRequest1", "Speed1",
+                                                 "frequency"};
   declareProperty(new Kernel::ArrayProperty<std::string>(FREQ_PROP_NAME,
                                                          defaultFrequencyNames),
                   "Candidate log names for frequency");
 
-  std::vector<std::string> defaultWavelengthNames;
-  defaultWavelengthNames.push_back("LambdaRequest");
-  defaultWavelengthNames.push_back("lambda");
+  std::vector<std::string> defaultWavelengthNames{"LambdaRequest", "lambda"};
   declareProperty(new Kernel::ArrayProperty<std::string>(
                       WL_PROP_NAME, defaultWavelengthNames),
                   "Candidate log names for wave length");

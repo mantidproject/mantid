@@ -36,25 +36,25 @@ public:
   /// Default constructor
   EQSANSTofStructure();
   /// Virtual destructor
-  virtual ~EQSANSTofStructure() {}
+  ~EQSANSTofStructure() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "EQSANSTofStructure"; }
+  const std::string name() const override { return "EQSANSTofStructure"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Corrects the TOF of raw EQSANS data. This algorithm needs to be "
            "run once on every data set.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS"; }
+  const std::string category() const override { return "SANS"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   // void execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS, bool
   // frame_skipping);
   void execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS,

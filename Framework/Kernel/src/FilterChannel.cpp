@@ -7,7 +7,7 @@
 
 namespace Poco {
 
-FilterChannel::FilterChannel() : _channel(0), _priority(8) {}
+FilterChannel::FilterChannel() : _channel(nullptr), _priority(8) {}
 
 FilterChannel::~FilterChannel() { close(); }
 
@@ -45,7 +45,7 @@ void FilterChannel::log(const Message &msg) {
 
 void FilterChannel::close() {
   FastMutex::ScopedLock lock(_mutex);
-  if (_channel != NULL) {
+  if (_channel != nullptr) {
     _channel->release();
   }
 }

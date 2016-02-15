@@ -329,7 +329,8 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
   }
   // Check if masked
   const API::IMDNode *box = data->getBoxAtCoord(coords);
-  if (!box) return MDMaskValue;
+  if (!box)
+    return MDMaskValue;
   if (box->getIsMasked()) {
     return MDMaskValue;
   }
@@ -379,7 +380,7 @@ TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
 TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
   std::vector<std::string> out;
   std::ostringstream mess;
- 
+
   size_t mem;
   mem = (this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE, nd>)) /
         1024;
@@ -746,9 +747,9 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
                                          std::vector<signal_t> &y,
                                          std::vector<signal_t> &e) const {
   // TODO: Don't use a fixed number of points later
-  size_t numPoints = 200;
+  size_t numPoints = 500;
 
-  VMD step = (end - start) / double(numPoints);
+  VMD step = (end - start) / double(numPoints - 1);
   double stepLength = step.norm();
 
   // These will be the curve as plotted
@@ -758,22 +759,16 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
   for (size_t i = 0; i < numPoints; i++) {
     // Coordinate along the line
     VMD coord = start + step * double(i);
-    // Record the position along the line
-    x.push_back(static_cast<coord_t>(stepLength * double(i)));
 
     // Look for the box at this coordinate
     // const MDBoxBase<MDE,nd> * box = NULL;
     const IMDNode *box = NULL;
 
-    // TODO: make the logic/reuse in the following nicer.
     if (isInBounds(coord.getBareArray())) {
       box = this->data->getBoxAtCoord(coord.getBareArray());
 
       if (box != NULL) {
-        if (box->getIsMasked()) {
-          y.push_back(MDMaskValue);
-          e.push_back(MDMaskValue);
-        } else {
+        if (!box->getIsMasked()) {
           // What is our normalization factor?
           signal_t normalizer = 1.0;
           switch (normalize) {
@@ -786,23 +781,26 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
             normalizer = 1.0 / double(box->getNPoints());
             break;
           }
-
+          // Record the position along the line
+          x.push_back(static_cast<coord_t>(stepLength * double(i)));
           // And add the normalized signal/error to the list
           y.push_back(box->getSignal() * normalizer);
           e.push_back(box->getError() * normalizer);
         }
       } else {
+        // Record the position along the line
+        x.push_back(static_cast<coord_t>(stepLength * double(i)));
         y.push_back(std::numeric_limits<double>::quiet_NaN());
         e.push_back(std::numeric_limits<double>::quiet_NaN());
       }
     } else {
+      // Record the position along the line
+      x.push_back(static_cast<coord_t>(stepLength * double(i)));
       // Point is outside the workspace. Add NANs
       y.push_back(std::numeric_limits<double>::quiet_NaN());
       e.push_back(std::numeric_limits<double>::quiet_NaN());
     }
   }
-  // And the last point
-  x.push_back((end - start).norm());
 }
 
 /**

@@ -1,9 +1,13 @@
 #include "MantidAlgorithms/He3TubeEfficiency.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -28,8 +32,8 @@ DECLARE_ALGORITHM(He3TubeEfficiency)
 
 /// Default constructor
 He3TubeEfficiency::He3TubeEfficiency()
-    : Algorithm(), inputWS(), outputWS(), paraMap(NULL), shapeCache(),
-      samplePos(), spectraSkipped(), progress(NULL) {
+    : Algorithm(), inputWS(), outputWS(), paraMap(nullptr), shapeCache(),
+      samplePos(), spectraSkipped(), progress(nullptr) {
   this->shapeCache.clear();
 }
 
@@ -103,7 +107,7 @@ void He3TubeEfficiency::exec() {
   // Check if it is an event workspace
   DataObjects::EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
-  if (eventW != NULL) {
+  if (eventW != nullptr) {
     this->execEvent();
     return;
   }

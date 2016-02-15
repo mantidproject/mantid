@@ -150,7 +150,7 @@ void PointGroupFactoryImpl::subscribe(
     throw std::runtime_error("Cannot register null-generator.");
   }
 
-  m_generatorMap.insert(std::make_pair(generator->getHMSymbol(), generator));
+  m_generatorMap.emplace(generator->getHMSymbol(), generator);
 }
 
 PointGroup_sptr PointGroupFactoryImpl::constructFromPrototype(

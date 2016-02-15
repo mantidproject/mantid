@@ -1,5 +1,8 @@
 #include "MantidAlgorithms/ClearMaskFlag.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+
 namespace Mantid {
 namespace Algorithms {
 

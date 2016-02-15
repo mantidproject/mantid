@@ -34,7 +34,7 @@ Description          : Preferences dialog
 #include "ColorButton.h"
 #include "ColorBox.h"
 #include "pixmaps.h"
-#include "DoubleSpinBox.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 #include "SendToProgramDialog.h"
 #include "Mantid/MantidUI.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
@@ -1167,7 +1167,7 @@ void ConfigDialog::populateProgramTree()
       programKeysAndDetails[programKeys[j]] = (Mantid::Kernel::ConfigService::Instance().getString(("workspace.sendto." + programNames[i] + "." + programKeys[j])));
     }
 
-    m_sendToSettings.insert(std::make_pair(programNames[i], programKeysAndDetails));
+    m_sendToSettings.emplace(programNames[i], programKeysAndDetails);
   }
   updateProgramTree();
 }

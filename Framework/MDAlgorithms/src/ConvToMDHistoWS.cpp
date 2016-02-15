@@ -178,7 +178,7 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress) {
     return;
 
   //--->>> Thread control stuff
-  Kernel::ThreadSchedulerFIFO *ts(NULL);
+  Kernel::ThreadSchedulerFIFO *ts(nullptr);
   int nThreads(m_NumThreads);
   if (nThreads < 0)
     nThreads = 0; // negative m_NumThreads correspond to all cores used, 0 no
@@ -222,8 +222,9 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress) {
           tp.joinAll();
       } else {
         m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(
-            NULL); // it is done this way as it is possible trying to do single
-                   // threaded split more efficiently
+            nullptr); // it is done this way as it is possible trying to do
+                      // single
+                      // threaded split more efficiently
       }
       // Count the new # of boxes.
       lastNumBoxes = bc->getTotalNumMDBoxes();
@@ -251,7 +252,7 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress) {
     m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
     tp.joinAll();
   } else {
-    m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
+    m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(nullptr);
   }
   m_OutWSWrapper->pWorkspace()->refreshCache();
   // m_OutWSWrapper->refreshCentroid();

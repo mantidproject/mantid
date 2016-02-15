@@ -6,7 +6,9 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 
@@ -67,7 +69,7 @@ void FindDetectorsPar::exec() {
 
   // Get the input workspace
   const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-  if (inputWS.get() == NULL) {
+  if (inputWS.get() == nullptr) {
     throw(Kernel::Exception::NotFoundError(
         "can not obtain InoputWorkspace for the algorithm to work", ""));
   }

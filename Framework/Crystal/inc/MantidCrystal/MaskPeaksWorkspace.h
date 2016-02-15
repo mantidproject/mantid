@@ -42,16 +42,16 @@ public:
   /// Default constructor
   MaskPeaksWorkspace();
   /// Destructor
-  virtual ~MaskPeaksWorkspace();
+  ~MaskPeaksWorkspace() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MaskPeaksWorkspace"; }
+  const std::string name() const override { return "MaskPeaksWorkspace"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal\\Peaks"; }
+  const std::string category() const override { return "Crystal\\Peaks"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Masks a peaks workspace.";
   }
 
@@ -59,8 +59,8 @@ private:
   API::MatrixWorkspace_sptr m_inputW; ///< A pointer to the input workspace
 
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   std::size_t getWkspIndex(const detid2index_map &pixel_to_wi,
                            Geometry::IComponent_const_sptr comp, const int x,
                            const int y);

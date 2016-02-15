@@ -4,8 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
-#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;

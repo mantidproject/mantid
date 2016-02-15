@@ -6,7 +6,10 @@
 #include "MantidAPI/HistoryView.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
+#include "MantidKernel/Strings.h"
+
 #include <boost/algorithm/string/split.hpp>
+
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 

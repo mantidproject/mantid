@@ -2,13 +2,17 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadILL.h"
+#include "MantidDataHandling/LoadHelper.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadHelper.h"
 
 #include <boost/algorithm/string/predicate.hpp> // boost::starts_with
 
@@ -66,9 +70,9 @@ LoadILL::LoadILL() : API::IFileLoader<Kernel::NexusDescriptor>() {
   m_monitorElasticPeakPosition = 0;
   m_l1 = 0;
   m_l2 = 0;
-  m_supportedInstruments.push_back("IN4");
-  m_supportedInstruments.push_back("IN5");
-  m_supportedInstruments.push_back("IN6");
+  m_supportedInstruments.emplace_back("IN4");
+  m_supportedInstruments.emplace_back("IN5");
+  m_supportedInstruments.emplace_back("IN6");
 }
 
 /**
@@ -171,7 +175,7 @@ int LoadILL::getEPPFromVanadium(const std::string &filenameVanadium,
                                 MatrixWorkspace_sptr vanaWS) {
   int calculatedDetectorElasticPeakPosition = -1;
 
-  if (vanaWS != NULL) {
+  if (vanaWS != nullptr) {
 
     // Check if it has been store on the run object for this workspace
     if (vanaWS->run().hasProperty("EPP")) {

@@ -38,25 +38,27 @@ public:
   /// (Empty) Constructor
   SANSSensitivityCorrection() : API::Algorithm() { m_output_message = ""; }
   /// Virtual destructor
-  virtual ~SANSSensitivityCorrection() {}
+  ~SANSSensitivityCorrection() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SANSSensitivityCorrection"; }
+  const std::string name() const override {
+    return "SANSSensitivityCorrection";
+  }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Perform SANS sensitivity correction.";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Workflow\\SANS\\UsesPropertyManager";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Check whether we have a processed file of not
   bool fileCheck(const std::string &filePath);
 

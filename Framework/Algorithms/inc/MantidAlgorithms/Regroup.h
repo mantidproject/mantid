@@ -49,18 +49,18 @@ public:
   /// Default constructor
   Regroup() : API::Algorithm(){};
   /// Destructor
-  virtual ~Regroup(){};
+  ~Regroup() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Regroup"; }
+  const std::string name() const override { return "Regroup"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Regroups data with new bin boundaries.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Rebin"; }
+  const std::string category() const override { return "Transforms\\Rebin"; }
 
   int newAxis(const std::vector<double> &params,
               const std::vector<double> &xold, std::vector<double> &xnew,
@@ -68,8 +68,8 @@ public:
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void rebin(const std::vector<double> &, const std::vector<double> &,
              const std::vector<double> &, const std::vector<int> &,

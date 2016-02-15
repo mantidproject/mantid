@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -426,7 +427,7 @@ ReflectometryReductionOne::getSurfaceSampleComponent(
     sampleComponent = this->getPropertyValue("SampleComponentName");
   }
   auto searchResult = inst->getComponentByName(sampleComponent);
-  if (searchResult == NULL) {
+  if (searchResult == nullptr) {
     throw std::invalid_argument(sampleComponent +
                                 " does not exist. Check input properties.");
   }
@@ -453,7 +454,7 @@ ReflectometryReductionOne::getDetectorComponent(
   }
   boost::shared_ptr<const IComponent> searchResult =
       inst->getComponentByName(componentToCorrect);
-  if (searchResult == NULL) {
+  if (searchResult == nullptr) {
     throw std::invalid_argument(componentToCorrect +
                                 " does not exist. Check input properties.");
   }

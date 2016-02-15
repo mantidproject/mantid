@@ -2,19 +2,22 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CreateLogPropertyTable.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
+
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include "boost/shared_ptr.hpp"
 
-#include <vector>
-#include <map>
 #include <assert.h>
+#include <map>
+#include <vector>
 
 namespace Mantid {
 namespace Algorithms {
@@ -187,6 +190,7 @@ retrieveMatrixWsList(const std::vector<std::string> &wsNames,
 
       // Retrieve pointers to all the child workspaces.
       std::vector<MatrixWorkspace_sptr> childWsList;
+      childWsList.reserve(childNames.size());
       for (const auto &childName : childNames) {
         childWsList.push_back(
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -231,9 +235,9 @@ const std::map<std::string, GroupPolicy> &getGroupPolicyMap() {
 
   // Populate the map if empty.
   if (map.empty()) {
-    map.insert(std::make_pair("All", ALL));
-    map.insert(std::make_pair("First", FIRST));
-    map.insert(std::make_pair("None", NONE));
+    map.emplace("All", ALL);
+    map.emplace("First", FIRST);
+    map.emplace("None", NONE);
   }
 
   return map;
@@ -286,12 +290,12 @@ const std::map<std::string, Math::StatisticType> &getStatisticTypeMap() {
 
   // Populate the map if empty.
   if (map.empty()) {
-    map.insert(std::make_pair("FirstValue", Math::StatisticType::FirstValue));
-    map.insert(std::make_pair("LastValue", Math::StatisticType::LastValue));
-    map.insert(std::make_pair("Minimum", Math::StatisticType::Minimum));
-    map.insert(std::make_pair("Maximum", Math::StatisticType::Maximum));
-    map.insert(std::make_pair("Mean", Math::StatisticType::Mean));
-    map.insert(std::make_pair("Median", Math::StatisticType::Median));
+    map.emplace("FirstValue", Math::StatisticType::FirstValue);
+    map.emplace("LastValue", Math::StatisticType::LastValue);
+    map.emplace("Minimum", Math::StatisticType::Minimum);
+    map.emplace("Maximum", Math::StatisticType::Maximum);
+    map.emplace("Mean", Math::StatisticType::Mean);
+    map.emplace("Median", Math::StatisticType::Median);
   }
 
   return map;

@@ -4,8 +4,9 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
@@ -378,9 +379,8 @@ namespace MantidQt
         Mantid::Geometry::IComponent_sptr comp=(*inst)[i];
         boost::shared_ptr<Mantid::Geometry::RectangularDetector> det = 
           boost::dynamic_pointer_cast<Mantid::Geometry::RectangularDetector>( comp );
-        if (det)
-        { 
-          boost::shared_ptr<RectDetectorDetails> rect(new RectDetectorDetails);
+        if (det) {
+          auto rect = boost::make_shared<RectDetectorDetails>();
           rect->setDetectorName(QString::fromStdString(det->getName()));
           rect->setMinimumDetectorId(det->minDetectorID());
           rect->setMaximumDetectorId(det->maxDetectorID());
@@ -397,10 +397,9 @@ namespace MantidQt
             for (int j=0; j < assem->nelements(); j++)
             {
               det = boost::dynamic_pointer_cast<Mantid::Geometry::RectangularDetector>( (*assem)[j] );
-              if (det) 
-              { 
+              if (det) {
 
-                boost::shared_ptr<RectDetectorDetails> rect(new RectDetectorDetails);
+                auto rect = boost::make_shared<RectDetectorDetails>();
                 rect->setDetectorName(QString::fromStdString(det->getName()));
                 rect->setMinimumDetectorId(det->minDetectorID());
                 rect->setMaximumDetectorId(det->maxDetectorID());

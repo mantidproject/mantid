@@ -1,16 +1,21 @@
 #include "MantidAlgorithms/RadiusSum.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidGeometry/IObjComponent.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include <numeric>
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IObjComponent.h"
+
+#include <boost/foreach.hpp>
+
 #include <limits>
 #include <math.h>
+#include <numeric>
 #include <sstream>
-#include <boost/foreach.hpp>
 
 using namespace Mantid::Kernel;
 

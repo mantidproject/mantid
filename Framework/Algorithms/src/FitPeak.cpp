@@ -592,7 +592,7 @@ void FitOneSinglePeak::push(IFunction_const_sptr func,
   size_t nParam = funcparnames.size();
   for (size_t i = 0; i < nParam; ++i) {
     double parvalue = func->getParameter(i);
-    funcparammap.insert(make_pair(funcparnames[i], parvalue));
+    funcparammap.emplace(funcparnames[i], parvalue);
   }
 
   return;
@@ -615,7 +615,7 @@ void FitOneSinglePeak::storeFunctionError(
   size_t nParam = funcparnames.size();
   for (size_t i = 0; i < nParam; ++i) {
     double parerror = func->getError(i);
-    paramerrormap.insert(make_pair(funcparnames[i], parerror));
+    paramerrormap.emplace(funcparnames[i], parerror);
   }
 
   return;
@@ -1130,13 +1130,9 @@ void FitPeak::init() {
       new ArrayProperty<double>("FittedPeakParameterValues", Direction::Output),
       "Fitted peak parameter values. ");
 
-  vector<string> bkgdtypes;
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Flat (A0)");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Linear (A0, A1)");
-  bkgdtypes.push_back("Quadratic");
-  bkgdtypes.push_back("Quadratic (A0, A1, A2)");
+  vector<string> bkgdtypes{"Flat",      "Flat (A0)",
+                           "Linear",    "Linear (A0, A1)",
+                           "Quadratic", "Quadratic (A0, A1, A2)"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
@@ -1193,9 +1189,7 @@ void FitPeak::init() {
                   "from proposed value more than "
                   "the given value, fit is treated as failure. ");
 
-  vector<string> costFuncOptions;
-  costFuncOptions.push_back("Chi-Square");
-  costFuncOptions.push_back("Rwp");
+  vector<string> costFuncOptions{"Chi-Square", "Rwp"};
   declareProperty("CostFunction", "Chi-Square",
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(costFuncOptions)),

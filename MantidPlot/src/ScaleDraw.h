@@ -57,10 +57,10 @@ public:
 	void setFormula(const QString& formula) {d_formula = formula;};
 
 	double transformValue(double value) const;
-	virtual QwtText label(double value) const;
+        QwtText label(double value) const override;
 
-	int labelNumericPrecision(){return d_prec;};
-	void setNumericPrecision(int prec){d_prec = prec;};
+        int labelNumericPrecision() { return d_prec; };
+        void setNumericPrecision(int prec){d_prec = prec;};
 
 	int majorTicksStyle()const{return d_majTicks;};
 	void setMajorTicksStyle(TicksStyle type){d_majTicks = type;};
@@ -93,11 +93,11 @@ public:
 	NameFormat nameFormat(){return d_name_format;};
 
 protected:
-	virtual void draw (QPainter *, const QPalette &) const;
-    virtual void drawLabel(QPainter *painter, double value) const;
-	virtual void drawTick(QPainter *p, double value, int len) const;
-	virtual void drawBackbone(QPainter *painter) const;
-	void drawBreak(QPainter *) const;
+  void draw(QPainter *, const QPalette &) const override;
+  void drawLabel(QPainter *painter, double value) const override;
+  void drawTick(QPainter *p, double value, int len) const override;
+  void drawBackbone(QPainter *painter) const override;
+  void drawBreak(QPainter *) const;
 
 private:
 	//! Pointer to the parent plot

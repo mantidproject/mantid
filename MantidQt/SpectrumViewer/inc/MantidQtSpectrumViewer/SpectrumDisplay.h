@@ -59,12 +59,10 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay: public QObject
   public:
 
      /// Make an SpectrumDisplay to display with the given widgets and controls
-     SpectrumDisplay( QwtPlot*        spectrumPlot,
-                      ISliderHandler* sliderHandler,
-                      IRangeHandler*  rangeHandler,
-                      GraphDisplay*   hGraph,
-                      GraphDisplay*   vGraph,
-                      QTableWidget*   tableWidget );
+    SpectrumDisplay(QwtPlot *spectrumPlot, ISliderHandler *sliderHandler,
+                    IRangeHandler *rangeHandler, GraphDisplay *hGraph,
+                    GraphDisplay *vGraph, QTableWidget *tableWidget,
+                    bool isTrackingOn = true);
 
      virtual ~SpectrumDisplay();
 
@@ -125,6 +123,8 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay: public QObject
      void addOther(const boost::shared_ptr<SpectrumDisplay>& other);
      void addOthers(const QList<boost::shared_ptr<SpectrumDisplay>>& others);
      void removeOther(const boost::shared_ptr<SpectrumDisplay>& other);
+
+     void setTrackingOn(bool on);
 
   protected:
      SpectrumPlotItem*    m_spectrumPlotItem;

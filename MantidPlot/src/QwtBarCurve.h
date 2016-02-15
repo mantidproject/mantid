@@ -41,11 +41,11 @@ public:
 
 	void copy(const QwtBarCurve *b);
 
-	virtual QwtDoubleRect boundingRect() const;
+        QwtDoubleRect boundingRect() const override;
 
-	BarStyle orientation(){return bar_style;};
+        BarStyle orientation() { return bar_style; };
 
-	void setGap (int gap);
+        void setGap (int gap);
 	int gap() const {return bar_gap;};
 
 	void setOffset(int offset);
@@ -55,11 +55,11 @@ public:
 
 private:
 	using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
-	virtual void draw(QPainter *painter,const QwtScaleMap &xMap,
-		const QwtScaleMap &yMap, int from, int to) const;
+        void draw(QPainter *painter, const QwtScaleMap &xMap,
+                  const QwtScaleMap &yMap, int from, int to) const override;
 
-	int bar_gap, bar_offset;
-	BarStyle bar_style;
+        int bar_gap, bar_offset;
+        BarStyle bar_style;
 };
 
 #endif

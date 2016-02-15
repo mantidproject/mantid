@@ -6,10 +6,12 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/date_parsing.hpp>

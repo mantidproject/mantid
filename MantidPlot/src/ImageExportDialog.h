@@ -92,9 +92,9 @@ public:
 	void selectFilter(const QString & filter);
 	
 protected slots:
-	void closeEvent(QCloseEvent*);
-	//! Update which options are visible and enabled based on the output format.
-	void updateAdvancedOptions (const QString &filter);
+  void closeEvent(QCloseEvent *) override;
+  //! Update which options are visible and enabled based on the output format.
+        void updateAdvancedOptions (const QString &filter);
 };
 
 #endif

@@ -52,9 +52,9 @@ public:
 
 private slots:
 	//! Accept changes and quit
-	void accept();
-	//! Apply changes
-	void apply();
+  void accept() override;
+  //! Apply changes
+        void apply();
 	//! Activate the numeric precision choice box
 	void showPrecisionBox(int item);
 

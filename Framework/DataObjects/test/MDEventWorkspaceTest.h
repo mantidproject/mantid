@@ -554,6 +554,8 @@ public:
     std::vector<coord_t> x;
     std::vector<signal_t> y, e;
     ew->getLinePlot(start, end, NoNormalization, x, y, e);
+    TS_ASSERT_EQUALS(y.size(), 500);
+    TS_ASSERT_EQUALS(x.size(), 500);
     for (size_t i = 0; i < y.size(); i += 10) {
       TS_ASSERT_EQUALS(y[i], signal);
     }
@@ -581,13 +583,15 @@ public:
     ew->refreshCache();
 
     Mantid::Kernel::VMD start(0, 0, 0);
-    Mantid::Kernel::VMD end(2, 0, 0);
+    Mantid::Kernel::VMD end(5, 0, 0);
     std::vector<coord_t> x;
     std::vector<signal_t> y, e;
     ew->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(y.size(), 200);
-    TS_ASSERT(boost::math::isnan(y[60])); // Masked data is NaN
-    TS_ASSERT_EQUALS(y[180], 3.0);        // Unmasked data
+    // Masked data is omitted from line
+    TS_ASSERT_EQUALS(y.size(), 325);
+    TS_ASSERT_EQUALS(x.size(), 325);
+    // Unmasked data
+    TS_ASSERT_EQUALS(y[300], 3.0);
   }
 
   void test_that_sets_default_normalization_flags_to_volume_normalization() {

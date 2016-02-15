@@ -598,7 +598,7 @@ Kernel::Property *NXLog::createSingleValueProperty() {
     bool state = value[0] != 0;
     prop = new Kernel::PropertyWithValue<bool>(name(), state);
   } else {
-    prop = NULL;
+    prop = nullptr;
   }
 
   return prop;
@@ -627,7 +627,7 @@ Kernel::Property *NXLog::createTimeSeries(const std::string &start_time,
       std::transform(times(), times() + times.dim0(), times(),
                      std::bind2nd(std::multiplies<double>(), 60));
     } else if (!units.empty() && units.substr(0, 6) != "second") {
-      return NULL;
+      return nullptr;
     }
     return parseTimeSeries(logName, times, start_time);
   } else if (vinfo.type == NX_FLOAT32) {
@@ -639,12 +639,12 @@ Kernel::Property *NXLog::createTimeSeries(const std::string &start_time,
       std::transform(times(), times() + times.dim0(), times(),
                      std::bind2nd(std::multiplies<float>(), 60));
     } else if (!units.empty() && units.substr(0, 6) != "second") {
-      return NULL;
+      return nullptr;
     }
     return parseTimeSeries(logName, times, start_time);
   }
 
-  return NULL;
+  return nullptr;
 }
 
 } // namespace DataHandling

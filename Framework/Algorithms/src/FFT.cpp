@@ -2,9 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFT.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidAPI/TextAxis.h"
 
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_errno.h>
@@ -52,9 +54,7 @@ void FFT::init() {
   declareProperty("Imaginary", EMPTY_INT(), mustBePositive,
                   "Spectrum number to use as imaginary part for transform");
 
-  std::vector<std::string> fft_dir;
-  fft_dir.push_back("Forward");
-  fft_dir.push_back("Backward");
+  std::vector<std::string> fft_dir{"Forward", "Backward"};
   declareProperty("Transform", "Forward",
                   boost::make_shared<StringListValidator>(fft_dir),
                   "Direction of the transform: forward or backward");

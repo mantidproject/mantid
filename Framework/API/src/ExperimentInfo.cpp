@@ -686,25 +686,25 @@ public:
 
 // SAX content handler for grapping stuff quickly from IDF
 class myContentHandler : public Poco::XML::ContentHandler {
-  virtual void startElement(const XMLString &, const XMLString &localName,
-                            const XMLString &, const Attributes &attrList) {
+  void startElement(const XMLString &, const XMLString &localName,
+                    const XMLString &, const Attributes &attrList) override {
     if (localName == "instrument") {
       throw DummyException(
           static_cast<std::string>(attrList.getValue("", "valid-from")),
           static_cast<std::string>(attrList.getValue("", "valid-to")));
     }
   }
-  virtual void endElement(const XMLString &, const XMLString &,
-                          const XMLString &) {}
-  virtual void startDocument() {}
-  virtual void endDocument() {}
-  virtual void characters(const XMLChar[], int, int) {}
-  virtual void endPrefixMapping(const XMLString &) {}
-  virtual void ignorableWhitespace(const XMLChar[], int, int) {}
-  virtual void processingInstruction(const XMLString &, const XMLString &) {}
-  virtual void setDocumentLocator(const Locator *) {}
-  virtual void skippedEntity(const XMLString &) {}
-  virtual void startPrefixMapping(const XMLString &, const XMLString &) {}
+  void endElement(const XMLString &, const XMLString &,
+                  const XMLString &) override {}
+  void startDocument() override {}
+  void endDocument() override {}
+  void characters(const XMLChar[], int, int) override {}
+  void endPrefixMapping(const XMLString &) override {}
+  void ignorableWhitespace(const XMLChar[], int, int) override {}
+  void processingInstruction(const XMLString &, const XMLString &) override {}
+  void setDocumentLocator(const Locator *) override {}
+  void skippedEntity(const XMLString &) override {}
+  void startPrefixMapping(const XMLString &, const XMLString &) override {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -1072,7 +1072,7 @@ void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename,
       instr = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      instr = parser.parseXML(NULL);
+      instr = parser.parseXML(nullptr);
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instr);
     }
@@ -1144,7 +1144,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     // if( comp_name == prev_name ) continue; this blocks reading in different
     // parameters of the same component. RNT
     // prev_name = comp_name;
-    const Geometry::IComponent *comp = NULL;
+    const Geometry::IComponent *comp = nullptr;
     if (comp_name.find("detID:") != std::string::npos) {
       int detID = atoi(comp_name.substr(6).c_str());
       comp = instr->getDetector(detID).get();
@@ -1190,7 +1190,7 @@ void ExperimentInfo::populateWithParameter(
   ParameterValue paramValue(paramInfo,
                             runData); // Defines implicit conversion operator
 
-  const std::string *pDescription = NULL;
+  const std::string *pDescription = nullptr;
   if (!paramInfo.m_description.empty())
     pDescription = &paramInfo.m_description;
 

@@ -63,7 +63,7 @@ void ProcessDasNexusLog::exec() {
 
   // 2. Check Input
   // 1. Get log
-  Kernel::Property *log(NULL);
+  Kernel::Property *log(nullptr);
   try {
     log = inWS->run().getProperty(inlogname);
   } catch (Exception::NotFoundError &) {

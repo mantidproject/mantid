@@ -28,14 +28,13 @@ public:
     double sigi_some[] = {27.4590, 26.5141, 24.5561};
 
     // synthesize three peaks
-    std::vector<std::pair<double, V3D>> peak_q_list;
+
     V3D peak_1(10, 0, 0);
     V3D peak_2(0, 5, 0);
     V3D peak_3(0, 0, 4);
+    std::vector<std::pair<double, V3D>> peak_q_list{
+        {1., peak_1}, {1., peak_2}, {1., peak_3}};
 
-    peak_q_list.push_back(std::make_pair(1., peak_1));
-    peak_q_list.push_back(std::make_pair(1., peak_2));
-    peak_q_list.push_back(std::make_pair(1., peak_3));
     // synthesize a UB-inverse to map
     DblMatrix UBinv(3, 3, false); // Q to h,k,l
     UBinv.setRow(0, V3D(.1, 0, 0));

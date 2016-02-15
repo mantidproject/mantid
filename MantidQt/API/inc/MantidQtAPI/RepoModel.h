@@ -140,7 +140,7 @@ private:
     class UploadForm: public QDialog{
     public:
       UploadForm(const QString & file2upload, QWidget * parent = 0);
-      virtual ~UploadForm();
+      ~UploadForm() override;
       QString email(); 
       QString author(); 
       QString comment();
@@ -163,7 +163,7 @@ private:
     class DeleteQueryBox : public QMessageBox{
     public: 
       DeleteQueryBox(const QString & path, QWidget* parent = 0);
-      virtual ~DeleteQueryBox(); 
+      ~DeleteQueryBox() override;
       QString comment();
     private: 
       QTextEdit * comment_te; 
@@ -173,26 +173,26 @@ public:
     /// constructor
     RepoModel(QObject *parent = 0);
     /// destructor
-    ~RepoModel();
+    ~RepoModel() override;
     /// access to the ScriptRepository data
-    QVariant data(const QModelIndex & index, int role)const;
+    QVariant data(const QModelIndex &index, int role) const override;
     /// information on the available interaction
-    Qt::ItemFlags flags(const QModelIndex & index) const;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
     /// header strings
     QVariant headerData(int section, Qt::Orientation orientation,
-                        int role = Qt::DisplayRole) const;
+                        int role = Qt::DisplayRole) const override;
     /// access to the index
     QModelIndex index(int row, int column,
-                      const QModelIndex &parent = QModelIndex()) const;
+                      const QModelIndex &parent = QModelIndex()) const override;
     /// access to parent
-    QModelIndex parent(const QModelIndex &index) const;
+    QModelIndex parent(const QModelIndex &index) const override;
     //// provide the number of the rows
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     /// provide the nubmer of the coluns
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     /// change data
     bool setData(const QModelIndex &index, const QVariant &value,
-                  int role = Qt::EditRole);
+                 int role = Qt::EditRole) override;
 
     static const QString & localOnlySt(); 
     static const QString & remoteOnlySt(); 

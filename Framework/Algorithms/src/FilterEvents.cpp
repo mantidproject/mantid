@@ -91,12 +91,8 @@ void FilterEvents::init() {
                   "and continuous. ");
 
   // TOF correction
-  vector<string> corrtypes;
-  corrtypes.push_back("None");
-  corrtypes.push_back("Customized");
-  corrtypes.push_back("Direct");
-  corrtypes.push_back("Elastic");
-  corrtypes.push_back("Indirect");
+  vector<string> corrtypes{"None", "Customized", "Direct", "Elastic",
+                           "Indirect"};
   declareProperty("CorrectionToSample", "None",
                   boost::make_shared<StringListValidator>(corrtypes),
                   "Type of correction on neutron events to sample time from "
@@ -120,9 +116,7 @@ void FilterEvents::init() {
       new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Direct"));
 
   // Algorithm to spectra without detectors
-  vector<string> spec_no_det;
-  spec_no_det.push_back("Skip");
-  spec_no_det.push_back("Skip only if TOF correction");
+  vector<string> spec_no_det{"Skip", "Skip only if TOF correction"};
   declareProperty("SpectrumWithoutDetector", "Skip",
                   boost::make_shared<StringListValidator>(spec_no_det),
                   "Approach to deal with spectrum without detectors. ");
@@ -507,9 +501,7 @@ void FilterEvents::createOutputWorkspaces() {
   if (m_hasInfoWS) {
     for (size_t ir = 0; ir < m_informationWS->rowCount(); ++ir) {
       API::TableRow row = m_informationWS->getRow(ir);
-      int &indexws = row.Int(0);
-      std::string &info = row.String(1);
-      infomap.insert(std::make_pair(indexws, info));
+      infomap.emplace(row.Int(0), row.String(1));
     }
   }
 
@@ -556,7 +548,7 @@ void FilterEvents::createOutputWorkspaces() {
                 "EventWorkspace", m_eventWS->getNumberHistograms(), 2, 1));
     API::WorkspaceFactory::Instance().initializeFromParent(m_eventWS, optws,
                                                            false);
-    m_outputWS.insert(std::make_pair(wsgroup, optws));
+    m_outputWS.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace
     if (m_hasInfoWS) {
@@ -740,7 +732,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     row >> detid >> offset_factor;
     if (offset_factor >= 0 && offset_factor <= 1) {
       // Valid offset (factor value)
-      toffactormap.insert(make_pair(detid, offset_factor));
+      toffactormap.emplace(detid, offset_factor);
     } else {
       // Error, throw!
       stringstream errss;
@@ -754,7 +746,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     if (hasshift) {
       double shift;
       row >> shift;
-      tofshiftmap.insert(make_pair(detid, shift));
+      tofshiftmap.emplace(detid, shift);
     }
   } // ENDFOR(row i)
 
@@ -880,7 +872,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
           int index = wsiter->first;
           DataObjects::EventList *output_el =
               wsiter->second->getEventListPtr(iws);
-          outputs.insert(std::make_pair(index, output_el));
+          outputs.emplace(index, output_el);
         }
       }
 
@@ -982,7 +974,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
           int index = wsiter->first;
           DataObjects::EventList *output_el =
               wsiter->second->getEventListPtr(iws);
-          outputs.insert(std::make_pair(index, output_el));
+          outputs.emplace(index, output_el);
         }
       }
 

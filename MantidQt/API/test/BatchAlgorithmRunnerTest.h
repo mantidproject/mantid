@@ -5,6 +5,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/BatchAlgorithmRunner.h"
 
 using namespace Mantid::API;

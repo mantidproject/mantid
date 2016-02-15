@@ -45,10 +45,11 @@ class Filter : public QObject
 	public:
         Filter(ApplicationWindow *parent, Table *t = 0, const QString& name = QString());
 		Filter(ApplicationWindow *parent, Graph *g = 0, const QString& name = QString());
-		~Filter();
+                ~Filter() override;
 
-		//! Actually does the job. Should be reimplemented in derived classes.
-		virtual bool run();
+                //! Actually does the job. Should be reimplemented in derived
+                //! classes.
+                virtual bool run();
 
         virtual void setDataCurve(int curve, double start, double end);
 		bool setDataFromCurve(const QString& curveTitle, Graph *g = 0);

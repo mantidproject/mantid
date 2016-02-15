@@ -8,6 +8,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -29,12 +30,15 @@ public:
     Workspace_sptr space =
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, 11, 10);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    boost::shared_ptr<Mantid::MantidVec> x(new Mantid::MantidVec(11));
+    boost::shared_ptr<Mantid::MantidVec> x =
+        boost::make_shared<Mantid::MantidVec>(11);
     for (int i = 0; i < 11; ++i) {
       (*x)[i] = i * 1000;
     }
-    boost::shared_ptr<Mantid::MantidVec> a(new Mantid::MantidVec(10));
-    boost::shared_ptr<Mantid::MantidVec> e(new Mantid::MantidVec(10));
+    boost::shared_ptr<Mantid::MantidVec> a =
+        boost::make_shared<Mantid::MantidVec>(10);
+    boost::shared_ptr<Mantid::MantidVec> e =
+        boost::make_shared<Mantid::MantidVec>(10);
     for (int i = 0; i < 10; ++i) {
       (*a)[i] = i;
       (*e)[i] = sqrt(double(i));

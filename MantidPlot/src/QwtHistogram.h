@@ -39,15 +39,15 @@ public:
 
         void copy(const QwtHistogram *h);
 
-	QwtDoubleRect boundingRect() const;
+        QwtDoubleRect boundingRect() const override;
 
-	void setBinning(bool autoBin, double size, double begin, double end);
-	bool autoBinning(){return d_autoBin;};
+        void setBinning(bool autoBin, double size, double begin, double end);
+        bool autoBinning(){return d_autoBin;};
 	double begin(){return d_begin;};
 	double end(){return d_end;};
 	double binSize(){return d_bin_size;};
 
-    void loadData();
+        void loadData() override;
     void initData(double* Y, int size);
 
     double mean(){return d_mean;};
@@ -58,16 +58,15 @@ public:
 	Matrix* matrix(){return d_matrix;};
 
 private:
-	void draw(QPainter *painter,const QwtScaleMap &xMap,
-		const QwtScaleMap &yMap, int from, int to) const;
-	// Implement overloaded virtual method to just pass up to the base class to avoid
-	// an Intel compiler warning
-	void draw(QPainter *p,
-	    const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-	    const QRect& rect) const
-	{
-	  DataCurve::draw(p,xMap,yMap,rect);
-	}
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            int from, int to) const override;
+  // Implement overloaded virtual method to just pass up to the base class to
+  // avoid
+  // an Intel compiler warning
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            const QRect &rect) const override {
+    DataCurve::draw(p, xMap, yMap, rect);
+        }
 
     void loadDataFromMatrix();
     Matrix *d_matrix;

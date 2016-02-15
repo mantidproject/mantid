@@ -318,8 +318,8 @@ const std::vector<std::string> AlgorithmProxy::categories() const {
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);
-  if (depo != NULL) {
-    res.push_back("Deprecated");
+  if (depo != nullptr) {
+    res.emplace_back("Deprecated");
   }
   return res;
 }

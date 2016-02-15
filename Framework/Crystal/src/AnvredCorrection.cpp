@@ -2,13 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCrystal/AnvredCorrection.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/MemoryManager.h"
+#include "MantidGeometry/Instrument.h"
+
 #include "boost/assign.hpp"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
@@ -146,8 +150,8 @@ void AnvredCorrection::exec() {
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWS);
   if (eventW)
-    eventW->sortAll(TOF_SORT, NULL);
-  if ((getProperty("PreserveEvents")) && (eventW != NULL) &&
+    eventW->sortAll(TOF_SORT, nullptr);
+  if ((getProperty("PreserveEvents")) && (eventW != nullptr) &&
       !m_returnTransmissionOnly) {
     // Input workspace is an event workspace. Use the other exec method
     this->execEvent();
@@ -272,7 +276,7 @@ void AnvredCorrection::execEvent() {
   correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2,
                                                1));
-  correctionFactors->sortAll(TOF_SORT, NULL);
+  correctionFactors->sortAll(TOF_SORT, nullptr);
   // Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(
       m_inputWS, correctionFactors, true);

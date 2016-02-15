@@ -42,12 +42,14 @@ class PluginFit : public Fit
 		PluginFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1);
 
 		bool load(const QString& pluginName);
-        double eval(double *par, double x){return f_eval(x, par);};
+                double eval(double *par, double x) override {
+                  return f_eval(x, par);
+                };
 
-	private:
-		void init();
+              private:
+                void init();
 		typedef double (*fitFunctionEval)(double, double *);
-		void calculateFitCurveData(double *X, double *Y);
-		fitFunctionEval f_eval;
+                void calculateFitCurveData(double *X, double *Y) override;
+                fitFunctionEval f_eval;
 };
 #endif

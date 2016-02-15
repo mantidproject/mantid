@@ -1,6 +1,10 @@
 #include "MantidDataHandling/SavePDFGui.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MantidVersion.h"
+
 #include <fstream>
 
 namespace Mantid {

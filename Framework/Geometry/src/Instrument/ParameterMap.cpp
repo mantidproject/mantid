@@ -344,7 +344,7 @@ void ParameterMap::add(const IComponent *comp,
     if (existing_par != m_map.end()) {
       existing_par->second = par;
     } else {
-      m_map.insert(std::make_pair(comp->getComponentID(), par));
+      m_map.emplace(comp->getComponentID(), par);
     }
   }
 }
@@ -837,7 +837,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
 Parameter_sptr ParameterMap::getRecursiveByType(const IComponent *comp,
                                                 const std::string &type) const {
   boost::shared_ptr<const IComponent> compInFocus(comp, NoDeleting());
-  while (compInFocus != NULL) {
+  while (compInFocus != nullptr) {
     Parameter_sptr param = getByType(compInFocus.get(), type);
     if (param) {
       return param;
@@ -1046,11 +1046,10 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
                                         const ParameterMap *oldPMap) {
 
   std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
-
   for (const auto &oldParameterName : oldParameterNames) {
     Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
     // Insert the fetched parameter in the m_map
-    m_map.insert(std::make_pair(newComp->getComponentID(), thisParameter));
+    m_map.emplace(newComp->getComponentID(), thisParameter);
   }
 }
 

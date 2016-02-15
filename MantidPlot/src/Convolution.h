@@ -38,9 +38,11 @@ Q_OBJECT
 public:
     Convolution(ApplicationWindow *parent, Table *t, const QString& signalColName, const QString& responseColName);
 
-	bool setDataFromTable(Table *t, const QString& signalColName, const QString& responseColName, int = 1, int = -1);
-	//! Returns the size of the signal data set
-	int signalDataSize(){return d_n_signal;};
+    bool setDataFromTable(Table *t, const QString &signalColName,
+                          const QString &responseColName, int = 1,
+                          int = -1) override;
+    //! Returns the size of the signal data set
+        int signalDataSize(){return d_n_signal;};
 	//! Returns the size of the response data set
 	int responseDataSize(){return d_n_response;};
 
@@ -51,9 +53,9 @@ protected:
 	void convlv(double *sig, int n, double *dres, int m, int sign);
 
 private:
-    virtual void output();
-	//! Size of the signal data set
-	int d_n_signal;
+  void output() override;
+  //! Size of the signal data set
+        int d_n_signal;
 	//! Size of the response data set
 	int d_n_response;
 };
@@ -66,7 +68,7 @@ public:
     Deconvolution(ApplicationWindow *parent, Table *t, const QString& realColName, const QString& imagColName = QString());
 
 private:
-    void output();
+  void output() override;
 };
 
 #endif

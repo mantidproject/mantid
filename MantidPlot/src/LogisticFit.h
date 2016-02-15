@@ -41,12 +41,15 @@ class LogisticFit : public Fit
 		LogisticFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end);
 		LogisticFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1);
 
-		void guessInitialValues();
-        double eval(double *par, double x){return (par[0]-par[1])/(1+pow(x/par[2], par[3]))+par[1];};
+                void guessInitialValues() override;
+                double eval(double *par, double x) override {
+                  return (par[0] - par[1]) / (1 + pow(x / par[2], par[3])) +
+                         par[1];
+                };
 
-	private:
-		void init();
-		void calculateFitCurveData(double *X, double *Y);
+              private:
+                void init();
+                void calculateFitCurveData(double *X, double *Y) override;
 };
 
 #endif

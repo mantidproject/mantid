@@ -46,9 +46,9 @@ public:
 	void setSize(const QSize& size);
 
 protected slots:
-	void accept();
-	void update();
-	void adjustHeight(int width);
+  void accept() override;
+  void update();
+        void adjustHeight(int width);
 	void adjustWidth(int height);
 
 signals:

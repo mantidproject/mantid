@@ -4,11 +4,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SetScalingPSD.h"
+#include "LoadRaw/isisraw.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "LoadRaw/isisraw.h"
+#include "MantidKernel/V3D.h"
 
 #include <cmath>
 #include <fstream>
@@ -340,7 +343,7 @@ void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,
   (void)rawfile; // Avoid compiler warning
 
   // open raw file
-  ISISRAW iraw(NULL);
+  ISISRAW iraw(nullptr);
   if (iraw.readFromFile(m_filename.c_str(), false) != 0) {
     g_log.error("Unable to open file " + m_filename);
     throw Exception::FileError("Unable to open File:", m_filename);

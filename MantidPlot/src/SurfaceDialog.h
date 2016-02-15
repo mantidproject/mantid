@@ -48,9 +48,9 @@ public:
     SurfaceDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
 
 public slots:
-	void accept();
-	void setFunction(Graph3D *);
-	void setParametricSurface(Graph3D *);
+  void accept() override;
+  void setFunction(Graph3D *);
+        void setParametricSurface(Graph3D *);
 
 private slots:
 	void clearList();

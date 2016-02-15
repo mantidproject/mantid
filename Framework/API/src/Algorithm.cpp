@@ -86,8 +86,8 @@ size_t Algorithm::g_execCount = 0;
 /// Constructor
 Algorithm::Algorithm()
     : PropertyManagerOwner(), m_cancel(false), m_parallelException(false),
-      m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(NULL),
-      m_notificationCenter(NULL), m_progressObserver(NULL),
+      m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(nullptr),
+      m_notificationCenter(nullptr), m_progressObserver(nullptr),
       m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
       m_recordHistoryForChild(false), m_alwaysStoreInADS(false),
       m_runningAsync(false), m_running(false), m_rethrow(false),
@@ -166,10 +166,7 @@ void Algorithm::setAlwaysStoreInADS(const bool doStore) {
 void Algorithm::setRethrows(const bool rethrow) { this->m_rethrow = rethrow; }
 
 /// True if the algorithm is running.
-bool Algorithm::isRunning() const {
-  Poco::FastMutex::ScopedLock _lock(m_mutex);
-  return m_running;
-}
+bool Algorithm::isRunning() const { return m_running; }
 
 //---------------------------------------------------------------------------------------------
 /**  Add an observer to a notification
@@ -213,8 +210,8 @@ const std::vector<std::string> Algorithm::categories() const {
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);
-  if (depo != NULL) {
-    res.push_back("Deprecated");
+  if (depo != nullptr) {
+    res.emplace_back("Deprecated");
   }
   return res;
 }
@@ -433,7 +430,7 @@ bool Algorithm::execute() {
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
   {
     DeprecatedAlgorithm *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
-    if (depo != NULL)
+    if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
   }
   // Start by freeing up any memory available.
@@ -565,7 +562,6 @@ bool Algorithm::execute() {
   try {
     try {
       if (!isChild()) {
-        Poco::FastMutex::ScopedLock _lock(m_mutex);
         m_running = true;
       }
 
@@ -1496,7 +1492,6 @@ const Poco::AbstractObserver &Algorithm::progressObserver() const {
  * Cancel an algorithm
  */
 void Algorithm::cancel() {
-  Poco::FastMutex::ScopedLock _lock(m_mutex);
   // set myself to be cancelled
   m_cancel = true;
 
@@ -1513,7 +1508,6 @@ void Algorithm::cancel() {
  * and check if the algorithm has requested that it be cancelled.
  */
 void Algorithm::interruption_point() {
-  Poco::FastMutex::ScopedLock _lock(m_mutex);
   // only throw exceptions if the code is not multi threaded otherwise you
   // contravene the OpenMP standard
   // that defines that all loops must complete, and no exception can leave an

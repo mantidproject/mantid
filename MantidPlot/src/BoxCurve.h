@@ -44,10 +44,10 @@ public:
 
 	void copy(const BoxCurve *b);
 
-	virtual QwtDoubleRect boundingRect() const;
+        QwtDoubleRect boundingRect() const override;
 
-	QwtSymbol::Style minStyle(){return min_style;};
-	void setMinStyle(QwtSymbol::Style s){min_style = s;};
+        QwtSymbol::Style minStyle() { return min_style; };
+        void setMinStyle(QwtSymbol::Style s){min_style = s;};
 
 	QwtSymbol::Style maxStyle(){return max_style;};
 	void setMaxStyle(QwtSymbol::Style s){max_style = s;};
@@ -75,15 +75,15 @@ public:
 	int whiskersRangeType(){return w_range;};
 	void setWhiskersRange(int type, double coeff);
 
-    void loadData();
+        void loadData() override;
 
 private:
 	using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
-	void draw(QPainter *painter,const QwtScaleMap &xMap,
-		const QwtScaleMap &yMap, int from, int to) const;
-	void drawBox(QPainter *painter, const QwtScaleMap &xMap,
-				const QwtScaleMap &yMap, double *dat, int size) const;
-	using DataCurve::drawSymbols; // Unhide base class method (avoids Intel compiler warning)
+        void draw(QPainter *painter, const QwtScaleMap &xMap,
+                  const QwtScaleMap &yMap, int from, int to) const override;
+        void drawBox(QPainter *painter, const QwtScaleMap &xMap,
+                     const QwtScaleMap &yMap, double *dat, int size) const;
+        using DataCurve::drawSymbols; // Unhide base class method (avoids Intel compiler warning)
 	void drawSymbols(QPainter *painter, const QwtScaleMap &xMap,
 				const QwtScaleMap &yMap, double *dat, int size) const;
 
@@ -103,11 +103,13 @@ public:
 		d_x = x;
 	};
 
-    virtual QwtData *copy() const{return new QwtSingleArrayData(d_x, d_y, size());};
+        QwtData *copy() const override {
+          return new QwtSingleArrayData(d_x, d_y, size());
+        };
 
-    virtual size_t size() const{return d_y.size();};
-    virtual double x(size_t) const{return d_x;};
-    virtual double y(size_t i) const{return d_y[static_cast<int>(i)];};
+        size_t size() const override { return d_y.size(); };
+        double x(size_t) const override { return d_x; };
+        double y(size_t i) const override { return d_y[static_cast<int>(i)]; };
 
 private:
     QwtArray<double> d_y;

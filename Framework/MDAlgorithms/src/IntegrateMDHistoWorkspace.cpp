@@ -213,7 +213,7 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
 
 /**
  * Perform a weighted sum at the iterator position. This function does not
- * increment the iterator.
+ * increment the iterator. Masked bins do not contribute.
  * @param iterator : Iterator to use in sum
  * @param box : Box implicit function defining valid region.
  * @param sumSignal : Accumlation in/out ref.
@@ -223,11 +223,13 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
 void performWeightedSum(MDHistoWorkspaceIterator const *const iterator,
                         MDBoxImplicitFunction &box, double &sumSignal,
                         double &sumSQErrors, double &sumNEvents) {
-  const double weight = box.fraction(iterator->getBoxExtents());
-  sumSignal += weight * iterator->getSignal();
-  const double error = iterator->getError();
-  sumSQErrors += weight * (error * error);
-  sumNEvents += weight * double(iterator->getNumEventsFraction());
+  if (!iterator->getIsMasked()) {
+    const double weight = box.fraction(iterator->getBoxExtents());
+    sumSignal += weight * iterator->getSignal();
+    const double error = iterator->getError();
+    sumSQErrors += weight * (error * error);
+    sumNEvents += weight * double(iterator->getNumEventsFraction());
+  }
 }
 
 namespace Mantid {
@@ -352,7 +354,7 @@ void IntegrateMDHistoWorkspace::exec() {
     const int nThreads = Mantid::API::FrameworkManager::Instance()
                              .getNumOMPThreads(); // NThreads to Request
 
-    auto outIterators = outWS->createIterators(nThreads, NULL);
+    auto outIterators = outWS->createIterators(nThreads, nullptr);
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < int(outIterators.size()); ++i) {
@@ -444,7 +446,7 @@ Mantid::MDAlgorithms::IntegrateMDHistoWorkspace::validateInputs() {
     std::vector<double> binning = this->getProperty(propertyName);
     std::string result = checkBinning(binning);
     if (!result.empty()) {
-      errors.insert(std::make_pair(propertyName, result));
+      errors.emplace(propertyName, result);
     }
   }
   return errors;

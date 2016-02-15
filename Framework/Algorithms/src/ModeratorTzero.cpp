@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ModeratorTzero.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -47,10 +49,7 @@ void ModeratorTzero::init() {
                   "The name of the output workspace");
 
   // declare the instrument scattering mode
-  std::vector<std::string> EModeOptions;
-  EModeOptions.push_back("Indirect");
-  EModeOptions.push_back("Direct");
-  EModeOptions.push_back("Elastic");
+  std::vector<std::string> EModeOptions{"Indirect", "Direct", "Elastic"};
   this->declareProperty("EMode", "Indirect",
                         boost::make_shared<StringListValidator>(EModeOptions),
                         "The energy mode (default: Indirect)");
@@ -104,7 +103,7 @@ void ModeratorTzero::exec() {
   // Run execEvent if eventWorkSpace
   EventWorkspace_const_sptr eventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventWS != NULL) {
+  if (eventWS != nullptr) {
     execEvent(emode);
     return;
   }

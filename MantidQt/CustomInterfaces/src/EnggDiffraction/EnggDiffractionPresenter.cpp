@@ -307,8 +307,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
     g_sumOfFilesFocus = "cropped";
-    std::vector<std::string> firstRun;
-    firstRun.push_back(multi_RunNo[0]);
+    std::vector<std::string> firstRun{multi_RunNo[0]};
 
     // to avoid multiple loops, use firstRun instead as the
     // multi-run number is not required for sumOfFiles
@@ -345,8 +344,7 @@ void EnggDiffractionPresenter::processFocusTexture() {
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
     g_sumOfFilesFocus = "texture";
-    std::vector<std::string> firstRun;
-    firstRun.push_back(multi_RunNo[0]);
+    std::vector<std::string> firstRun{multi_RunNo[0]};
 
     // to avoid multiple loops, use firstRun instead as the
     // multi-run number is not required for sumOfFiles
@@ -967,9 +965,10 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
           "3.1243, 2.7057, 1.9132, 1.6316, 1.5621, "
           "1.3529, 1.2415, 1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, "
           "0.8556, 0.8252, 0.8158, 0.7811");
-      alg->setPropertyValue("OutputParametersTableName",
-                            "engggui_calibration_bank_" +
-                                boost::lexical_cast<std::string>(i + 1));
+      const std::string outFitParamsTblName =
+          "engggui_calibration_bank_" + boost::lexical_cast<std::string>(i + 1);
+      alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
+      alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
       alg->execute();
     } catch (std::runtime_error &re) {
       g_log.error() << "Error in calibration. ",
@@ -1138,9 +1137,10 @@ EnggDiffractionPresenter::outputFocusFilenames(const std::string &runNo,
                                                const std::vector<bool> &banks) {
   const std::string instStr = m_view->currentInstrument();
   std::vector<std::string> res;
+  res.reserve(banks.size());
+  std::string prefix = instStr + "_" + runNo + "_focused_bank_";
   for (size_t b = 1; b <= banks.size(); b++) {
-    res.push_back(instStr + "_" + runNo + "_focused_bank_" +
-                  boost::lexical_cast<std::string>(b) + ".nxs");
+    res.emplace_back(prefix + boost::lexical_cast<std::string>(b) + ".nxs");
   }
   return res;
 }
@@ -1170,9 +1170,11 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
   const std::string instStr = m_view->currentInstrument();
 
   std::vector<std::string> res;
+  res.reserve(bankIDs.size());
+  std::string prefix = instStr + "_" + runNo + "_focused_texture_bank_";
   for (size_t b = 0; b < bankIDs.size(); b++) {
-    res.push_back(instStr + "_" + runNo + "_focused_texture_bank_" +
-                  boost::lexical_cast<std::string>(bankIDs[b]) + ".nxs");
+    res.emplace_back(prefix + boost::lexical_cast<std::string>(bankIDs[b]) +
+                     ".nxs");
   }
 
   return res;
@@ -1272,7 +1274,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
         for (size_t bidx = 0; bidx < banks.size(); bidx++) {
           if (banks[bidx]) {
             bankIDs.push_back(bidx + 1);
-            specs.push_back("");
+            specs.emplace_back("");
             effectiveFilenames = outputFocusFilenames(runNo, banks);
           }
         }
@@ -1858,13 +1860,12 @@ EnggDiffractionPresenter::loadToPreproc(const std::string runNo) {
     auto load =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
-	if (Poco::File(runNoDir).exists()) {
-		load->setPropertyValue("Filename", runNoDir);
-	}
-	else {
-		load->setPropertyValue("Filename", instStr + runNo);
-	}
-	const std::string inWSName = "engggui_preproc_input_ws";
+    if (Poco::File(runNoDir).exists()) {
+      load->setPropertyValue("Filename", runNoDir);
+    } else {
+      load->setPropertyValue("Filename", instStr + runNo);
+    }
+    const std::string inWSName = "engggui_preproc_input_ws";
     load->setPropertyValue("OutputWorkspace", inWSName);
 
     load->execute();

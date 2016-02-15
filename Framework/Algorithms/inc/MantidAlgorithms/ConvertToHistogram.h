@@ -40,25 +40,29 @@ namespace Algorithms {
 class DLLExport ConvertToHistogram : public XDataConverter {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "ConvertToHistogram"; }
+  const std::string name() const override { return "ConvertToHistogram"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Converts a workspace containing point data into one containing "
            "histograms.";
   }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Axes"; }
+  const std::string category() const override { return "Transforms\\Axes"; }
 
 private:
   /// Returns true if the algorithm needs to be run.
-  bool isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const;
+  bool
+  isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const override;
   /// Checks the input workspace is consistent, throwing if not
-  bool isWorkspaceLogical(const API::MatrixWorkspace_sptr inputWS) const;
+  bool
+  isWorkspaceLogical(const API::MatrixWorkspace_sptr inputWS) const override;
   /// Returns the size of the new X vector
-  std::size_t getNewXSize(const API::MatrixWorkspace_sptr inputWS) const;
+  std::size_t
+  getNewXSize(const API::MatrixWorkspace_sptr inputWS) const override;
   /// Calculate the X point values. Implement in an inheriting class.
-  void calculateXPoints(const MantidVec &inputX, MantidVec &outputX) const;
+  void calculateXPoints(const MantidVec &inputX,
+                        MantidVec &outputX) const override;
 };
 
 } // namespace Algorithm

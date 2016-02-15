@@ -53,12 +53,14 @@ public:
   FunctionCurve(const Mantid::API::IFunction* fun, 
     const QString& wsName, int wsIndex = 0, const QString& name = QString());
 	FunctionCurve(const FunctionCurve& c);
-  ~FunctionCurve();
+        ~FunctionCurve() override;
 
-  PlotCurve* clone(const Graph*)const{return new FunctionCurve(*this);}
+        PlotCurve *clone(const Graph *) const override {
+          return new FunctionCurve(*this);
+        }
 
-	double startRange(){return d_from;};
-	double endRange(){return d_to;};
+        double startRange() { return d_from; };
+        double endRange(){return d_to;};
 	void setRange(double from, double to);
 
 	QStringList formulas(){return d_formulas;};
@@ -86,7 +88,9 @@ public:
   void loadMantidData(boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws, size_t wi);
  
   /// No error bars on this curve: Always return an empty list.
-  QList<ErrorBarSettings *> errorBarSettingsList() const {return QList<ErrorBarSettings*>();}
+  QList<ErrorBarSettings *> errorBarSettingsList() const override {
+    return QList<ErrorBarSettings *>();
+  }
 
   /// returns identifier where this curve plots a IFunction
   const Mantid::API::IFunction* getIFunctionIdentifier() const {return m_identifier;};

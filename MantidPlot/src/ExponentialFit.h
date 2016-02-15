@@ -42,14 +42,16 @@ class ExponentialFit : public Fit
 				double start, double end, bool expGrowth = false);
 		ExponentialFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1, bool expGrowth = false);
 
-        double eval(double *par, double x){return par[0]*exp(-par[1]*x) + par[2];};
+                double eval(double *par, double x) override {
+                  return par[0] * exp(-par[1] * x) + par[2];
+                };
 
-	private:
-		void init();
-		void customizeFitResults();
-		void calculateFitCurveData(double *X, double *Y);
+              private:
+                void init();
+                void customizeFitResults() override;
+                void calculateFitCurveData(double *X, double *Y) override;
 
-		bool is_exp_growth;
+                bool is_exp_growth;
 };
 
 class TwoExpFit : public Fit
@@ -62,12 +64,15 @@ class TwoExpFit : public Fit
 		TwoExpFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end);
 		TwoExpFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1);
 
-        double eval(double *par, double x){return par[0]*exp(-par[1]*x)+par[2]*exp(-par[3]*x)+par[4];};
+                double eval(double *par, double x) override {
+                  return par[0] * exp(-par[1] * x) + par[2] * exp(-par[3] * x) +
+                         par[4];
+                };
 
-	private:
-		void init();
-		void customizeFitResults();
-		void calculateFitCurveData(double *X, double *Y);
+              private:
+                void init();
+                void customizeFitResults() override;
+                void calculateFitCurveData(double *X, double *Y) override;
 };
 
 class ThreeExpFit : public Fit
@@ -80,11 +85,14 @@ class ThreeExpFit : public Fit
 		ThreeExpFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end);
 		ThreeExpFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1);
 
-        double eval(double *par, double x){return par[0]*exp(-x*par[1])+par[2]*exp(-x*par[3])+par[4]*exp(-x*par[5])+par[6];};
+                double eval(double *par, double x) override {
+                  return par[0] * exp(-x * par[1]) + par[2] * exp(-x * par[3]) +
+                         par[4] * exp(-x * par[5]) + par[6];
+                };
 
-	private:
-		void init();
-		void customizeFitResults();
-		void calculateFitCurveData(double *X, double *Y);
+              private:
+                void init();
+                void customizeFitResults() override;
+                void calculateFitCurveData(double *X, double *Y) override;
 };
 #endif

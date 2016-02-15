@@ -46,11 +46,11 @@ namespace MantidQt
 
 		public:
 			IndirectSimulationTab(QWidget * parent = 0);
-			~IndirectSimulationTab();
+                        ~IndirectSimulationTab() override;
 
-			virtual void loadSettings(const QSettings& settings) = 0;
-
-		};
+                        virtual void
+                        loadSettings(const QSettings &settings) = 0;
+                };
 	} // namespace CustomInterfaces
 } // namespace Mantid
 

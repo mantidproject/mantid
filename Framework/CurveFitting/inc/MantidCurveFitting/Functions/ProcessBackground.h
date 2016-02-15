@@ -67,16 +67,16 @@ private:
 class DLLExport ProcessBackground : public API::Algorithm {
 public:
   ProcessBackground();
-  virtual ~ProcessBackground();
+  ~ProcessBackground() override;
 
-  virtual const std::string category() const { return "Diffraction\\Utility"; }
+  const std::string category() const override { return "Diffraction\\Utility"; }
 
-  virtual const std::string name() const { return "ProcessBackground"; }
+  const std::string name() const override { return "ProcessBackground"; }
 
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "ProcessBackground provides some tools to process powder "
            "diffraction pattern's "
            "background in order to help Le Bail Fit.";
@@ -84,10 +84,10 @@ public:
 
 private:
   /// Define properties
-  virtual void init();
+  void init() override;
 
   /// Execution body
-  virtual void exec();
+  void exec() override;
 
   /// Set up dummy output optional workspaces
   void setupDummyOutputWSes();

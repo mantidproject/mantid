@@ -135,7 +135,7 @@ void TransposeMD::exec() {
   const int nThreads = Mantid::API::FrameworkManager::Instance()
                            .getNumOMPThreads(); // NThreads to Request
 
-  auto iterators = inWS->createIterators(nThreads, NULL);
+  auto iterators = inWS->createIterators(nThreads, nullptr);
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int it = 0; it < int(iterators.size()); ++it) {

@@ -4,7 +4,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
-
+#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

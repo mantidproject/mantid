@@ -19,27 +19,27 @@ namespace DataHandling {
 class DLLExport LoadLogsForSNSPulsedMagnet : public API::Algorithm {
 public:
   LoadLogsForSNSPulsedMagnet();
-  ~LoadLogsForSNSPulsedMagnet();
+  ~LoadLogsForSNSPulsedMagnet() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "LoadLogsForSNSPulsedMagnet";
   };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Both log files are in binary format";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Logs"; }
+  const std::string category() const override { return "DataHandling\\Logs"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   /// Parse DelayTime log file
   void ParseDelayTimeLogFile();

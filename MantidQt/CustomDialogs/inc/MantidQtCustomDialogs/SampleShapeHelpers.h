@@ -106,8 +106,7 @@ struct ShapeDetailsInstantiator : public BaseInstantiator
   /// Default constructor
   ShapeDetailsInstantiator() {}
   ///Create an instance of this type
-  ShapeDetails* createInstance() const
-  {
+  ShapeDetails *createInstance() const override {
     return static_cast<ShapeDetails*>(new T);
   }
 
@@ -129,7 +128,7 @@ public:
   ///Constructor
   ShapeDetails(QWidget *parent = 0) : QWidget(parent), m_idvalue(""), m_isComplement(false) {}
   ///Constructor
-  virtual ~ShapeDetails() {}
+  ~ShapeDetails() override {}
 
   ///Write out the XML definition for this shape
   virtual QString writeXML() const = 0;
@@ -178,10 +177,10 @@ public:
   SphereDetails(QWidget *parent = 0);
 
   ///Default destructor
-  ~SphereDetails() { --g_nspheres; }
+  ~SphereDetails() override { --g_nspheres; }
 
   //Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Line edit for radius value
@@ -208,10 +207,10 @@ public:
   CylinderDetails(QWidget *parent = 0);
 
   ///Default destructor
-  ~CylinderDetails() { --g_ncylinders; }
+  ~CylinderDetails() override { --g_ncylinders; }
 
   //Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Line edits to enter values
@@ -238,10 +237,10 @@ public:
   InfiniteCylinderDetails(QWidget *parent = 0);
 
   ///Default destructor
-  ~InfiniteCylinderDetails() { --g_ninfcyls; }
+  ~InfiniteCylinderDetails() override { --g_ninfcyls; }
 
   //Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Line edits to enter values
@@ -268,10 +267,10 @@ public:
   SliceOfCylinderRingDetails(QWidget *parent = 0);
 
   ///Default destructor
-  ~SliceOfCylinderRingDetails() { --g_ncylrings; }
+  ~SliceOfCylinderRingDetails() override { --g_ncylrings; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Line edits to enter values
@@ -296,10 +295,10 @@ public:
   ConeDetails(QWidget *parent = 0);
 
   ///Default destructor
-  ~ConeDetails() { --g_ncones; }
+  ~ConeDetails() override { --g_ncones; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Line edits to enter values
@@ -326,10 +325,10 @@ public:
   InfiniteConeDetails(QWidget *parent = 0);
 
   ///Default destructor
-  ~InfiniteConeDetails() { --g_ninfcones; }
+  ~InfiniteConeDetails() override { --g_ninfcones; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Line edits to enter values
@@ -354,10 +353,10 @@ public:
   InfinitePlaneDetails(QWidget *parent = 0);
 
   ///Default destructor
-  ~InfinitePlaneDetails() { --g_ninfplanes; }
+  ~InfinitePlaneDetails() override { --g_ninfplanes; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Centre and axis point boxes
@@ -380,10 +379,10 @@ public:
   CuboidDetails(QWidget *parent = 0);
 
   ///Default destructor
-  ~CuboidDetails() { --g_ncuboids; }
+  ~CuboidDetails() override { --g_ncuboids; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Corner points
@@ -406,10 +405,10 @@ public:
   HexahedronDetails(QWidget *parent = 0);
 
   ///Default destructor
-  ~HexahedronDetails() { --g_nhexahedrons; }
+  ~HexahedronDetails() override { --g_nhexahedrons; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Corner points

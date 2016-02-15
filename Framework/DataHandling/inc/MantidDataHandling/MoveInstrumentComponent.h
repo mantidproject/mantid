@@ -67,27 +67,27 @@ public:
   MoveInstrumentComponent();
 
   /// Destructor
-  ~MoveInstrumentComponent() {}
+  ~MoveInstrumentComponent() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MoveInstrumentComponent"; };
+  const std::string name() const override { return "MoveInstrumentComponent"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Moves an instrument component to a new position.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Instrument";
   }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 };
 
 } // namespace DataHandling

@@ -42,22 +42,23 @@ public:
 
 	VectorCurve(VectorStyle style, Table *t, const QString& xColName, const char *name,
 				const QString& endCol1, const QString& endCol2, int startRow, int endRow);
-	~VectorCurve();
+        ~VectorCurve() override;
 
-	enum Position{Tail, Middle, Head};
+        enum Position { Tail, Middle, Head };
 
-	void copy(const VectorCurve *vc);
+        void copy(const VectorCurve *vc);
 
-	QwtDoubleRect boundingRect() const;
+        QwtDoubleRect boundingRect() const override;
 
-	using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
-	void draw(QPainter *painter,const QwtScaleMap &xMap,
-		const QwtScaleMap &yMap, int from, int to) const;
+        using DataCurve::draw; // Unhide base class method (avoids Intel
+                               // compiler warning)
+        void draw(QPainter *painter, const QwtScaleMap &xMap,
+                  const QwtScaleMap &yMap, int from, int to) const override;
 
-	void drawVector(QPainter *painter, const QwtScaleMap &xMap,
-		const QwtScaleMap &yMap, int from, int to) const;
+        void drawVector(QPainter *painter, const QwtScaleMap &xMap,
+                        const QwtScaleMap &yMap, int from, int to) const;
 
-	void drawArrowHead(QPainter *p, int xs, int ys, int xe, int ye) const;
+        void drawArrowHead(QPainter *p, int xs, int ys, int xe, int ye) const;
 	double theta(int x0, int y0, int x1, int y1) const;
 
 	QString vectorEndXAColName(){return d_end_x_a;};
@@ -86,11 +87,12 @@ public:
 	int vectorStyle(){return d_style;};
 	void setVectorStyle(int style){d_style = style;};
 
-	bool updateData(Table *t, const QString& colName);
-	void loadData();
+        bool updateData(Table *t, const QString &colName) override;
+        void loadData() override;
 
-    QString plotAssociation() const;
-	void updateColumnNames(const QString& oldName, const QString& newName, bool updateTableName);
+        QString plotAssociation() const override;
+        void updateColumnNames(const QString &oldName, const QString &newName,
+                               bool updateTableName) override;
 
 protected:
 	QwtArrayData *vectorEnd;

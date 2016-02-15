@@ -4,8 +4,8 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include "MantidGeometry/IDTypes.h"
+
 #include <string>
-#include <vector>
 
 namespace Mantid {
 namespace API {

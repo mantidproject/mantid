@@ -6,6 +6,7 @@
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <cstdio>
 
 // Register the algorithm into the AlgorithmFactory

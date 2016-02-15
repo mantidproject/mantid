@@ -4,6 +4,7 @@
 #include "MantidWorkflowAlgorithms/SANSBeamFluxCorrection.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
 #include "Poco/Path.h"
 
@@ -12,7 +13,6 @@ namespace WorkflowAlgorithms {
 
 using namespace Kernel;
 using namespace API;
-using namespace Geometry;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSBeamFluxCorrection)
@@ -25,10 +25,7 @@ void SANSBeamFluxCorrection::init() {
       new WorkspaceProperty<>("InputMonitorWorkspace", "", Direction::Input),
       "Workspace containing the monitor counts for the sample data");
 
-  std::vector<std::string> exts;
-  exts.push_back("_event.nxs");
-  exts.push_back(".nxs");
-  exts.push_back(".nxs.h5");
+  std::vector<std::string> exts{"_event.nxs", ".nxs", ".nxs.h5"};
   declareProperty(new API::FileProperty("ReferenceFluxFilename", "",
                                         API::FileProperty::Load, exts),
                   "File containing the reference flux spectrum.");

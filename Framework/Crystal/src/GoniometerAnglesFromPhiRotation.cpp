@@ -1,6 +1,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
@@ -199,7 +200,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
   PeaksWorkspace_sptr Peakss = getProperty("PeaksWorkspace2");
 
   if (!Run1HasOrientedLattice)
-    PeaksRun1->mutableSample().setOrientedLattice(NULL);
+    PeaksRun1->mutableSample().setOrientedLattice(nullptr);
 
   double dphi = (double)getProperty("Phi2") - (double)getProperty("Run1Phi");
   Kernel::Matrix<double> Gon22(3, 3, true);

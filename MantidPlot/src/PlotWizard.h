@@ -103,16 +103,16 @@ public slots:
 	//! Add column as Y error
 	void addYErrCol();
 	//! Accept settings, close the dialog
-	void accept();
-	//! Add column as Z
-	void addZCol();
+        void accept() override;
+        //! Add column as Z
+        void addZCol();
 
 private:
     void plot3D(const QStringList& lst);
     void plot3DRibbon(const QStringList& lst);
 	//! Display a warning that a new curve must be added first before the selection of the columns
 	bool noCurves();
-    QSize sizeHint() const;
+        QSize sizeHint() const override;
 
 signals:
 	//! Emitted when new plots need to be created

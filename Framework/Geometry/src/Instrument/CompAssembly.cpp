@@ -16,14 +16,14 @@ using Kernel::Quat;
 /** Empty constructor
  */
 CompAssembly::CompAssembly()
-    : Component(), m_children(), m_cachedBoundingBox(NULL) {}
+    : Component(), m_children(), m_cachedBoundingBox(nullptr) {}
 
 /** Constructor for a parametrized CompAssembly
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  * */
 CompAssembly::CompAssembly(const IComponent *base, const ParameterMap *map)
-    : Component(base, map), m_children(), m_cachedBoundingBox(NULL) {}
+    : Component(base, map), m_children(), m_cachedBoundingBox(nullptr) {}
 
 /** Valued constructor
  *  @param n :: name of the assembly
@@ -35,7 +35,7 @@ CompAssembly::CompAssembly(const IComponent *base, const ParameterMap *map)
  *  this is registered as a children of reference.
  */
 CompAssembly::CompAssembly(const std::string &n, IComponent *reference)
-    : Component(n, reference), m_children(), m_cachedBoundingBox(NULL) {
+    : Component(n, reference), m_children(), m_cachedBoundingBox(nullptr) {
   if (reference) {
     ICompAssembly *test = dynamic_cast<ICompAssembly *>(reference);
     if (test) {
@@ -287,9 +287,7 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
   // are higher-level components
   // I found some useful info here
   // http://www.cs.bu.edu/teaching/c/tree/breadth-first/
-  std::deque<boost::shared_ptr<const ICompAssembly>> nodeQueue;
-  // Need to be able to enter the while loop
-  nodeQueue.push_back(thisNode);
+  std::deque<boost::shared_ptr<const ICompAssembly>> nodeQueue{thisNode};
   const bool limitSearch(nlevels > 0);
   while (!nodeQueue.empty()) {
     // get the next node in the queue

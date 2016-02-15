@@ -64,14 +64,14 @@ typedef boost::shared_ptr<CompositeBraggScatterer> CompositeBraggScatterer_sptr;
 class MANTID_GEOMETRY_DLL CompositeBraggScatterer : public BraggScatterer {
 public:
   CompositeBraggScatterer();
-  virtual ~CompositeBraggScatterer() {}
+  ~CompositeBraggScatterer() override {}
 
   static CompositeBraggScatterer_sptr create();
   static CompositeBraggScatterer_sptr
   create(const std::vector<BraggScatterer_sptr> &scatterers);
 
-  std::string name() const { return "CompositeBraggScatterer"; }
-  BraggScatterer_sptr clone() const;
+  std::string name() const override { return "CompositeBraggScatterer"; }
+  BraggScatterer_sptr clone() const override;
 
   virtual void addScatterer(const BraggScatterer_sptr &scatterer);
   void setScatterers(const std::vector<BraggScatterer_sptr> &scatterers);
@@ -80,10 +80,11 @@ public:
   void removeScatterer(size_t i);
   void removeAllScatterers();
 
-  StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
+  StructureFactor
+  calculateStructureFactor(const Kernel::V3D &hkl) const override;
 
 protected:
-  void afterPropertySet(const std::string &propertyName);
+  void afterPropertySet(const std::string &propertyName) override;
   void propagateProperty(const std::string &propertyName);
   void propagatePropertyToScatterer(BraggScatterer_sptr &scatterer,
                                     const std::string &propertyName,

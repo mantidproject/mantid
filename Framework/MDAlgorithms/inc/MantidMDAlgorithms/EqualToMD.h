@@ -36,19 +36,20 @@ namespace MDAlgorithms {
 class DLLExport EqualToMD : public BooleanBinaryOperationMD {
 public:
   EqualToMD();
-  virtual ~EqualToMD();
+  ~EqualToMD() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
+  const std::string name() const override;
+  int version() const override;
 
 private:
-  void initExtraProperties();
-  bool acceptScalar() const { return true; }
-  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand);
-  void
-  execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                  Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
+  void initExtraProperties() override;
+  bool acceptScalar() const override { return true; }
+  void execHistoHisto(
+      Mantid::DataObjects::MDHistoWorkspace_sptr out,
+      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
+  void execHistoScalar(
+      Mantid::DataObjects::MDHistoWorkspace_sptr out,
+      Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
 };
 
 } // namespace MDAlgorithms

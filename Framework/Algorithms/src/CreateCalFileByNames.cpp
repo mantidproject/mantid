@@ -103,7 +103,7 @@ void CreateCalFileByNames::exec() {
 
   if (current.get()) {
     top_group = group_map[current->getName()]; // Return 0 if not in map
-    assemblies.push(std::make_pair(current, top_group));
+    assemblies.emplace(current, top_group);
   }
 
   std::string filename = getProperty("GroupingFilename");
@@ -141,7 +141,7 @@ void CreateCalFileByNames::exec() {
             child_group = group_map[currentchild->getName()];
             if (child_group == 0)
               child_group = top_group;
-            assemblies.push(std::make_pair(currentchild, child_group));
+            assemblies.emplace(currentchild, child_group);
           }
         }
       }

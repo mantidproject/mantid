@@ -412,7 +412,7 @@ void LoadIsawDetCal::center(double x, double y, double z, std::string detname,
   Instrument_sptr inst = getCheckInst(ws);
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
-  if (comp == 0) {
+  if (comp == nullptr) {
     std::ostringstream mess;
     mess << "Component with name " << detname << " was not found.";
     g_log.error(mess.str());

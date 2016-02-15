@@ -241,11 +241,11 @@ std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
   std::ostringstream os;
   int tzd = 0;
 
-  inetHelper.headers().insert(std::make_pair(
+  inetHelper.headers().emplace(
       "if-modified-since",
       Poco::DateTimeFormatter::format(
           Poco::DateTimeParser::parse(MantidVersion::releaseDate(), tzd),
-          Poco::DateTimeFormat::HTTP_FORMAT)));
+          Poco::DateTimeFormat::HTTP_FORMAT));
   inetHelper.sendRequest(url, os);
   std::string retVal = os.str();
 

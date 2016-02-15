@@ -5,7 +5,10 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include <boost/assign/list_of.hpp>
 
 using namespace Mantid::API;

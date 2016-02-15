@@ -163,9 +163,9 @@ private:
 	void previewTable();
 	void previewMatrix();
 
-	void closeEvent(QCloseEvent*);
-	//! Initialise #d_advanced_options and everything it contains.
-	void initAdvancedOptions();
+        void closeEvent(QCloseEvent *) override;
+        //! Initialise #d_advanced_options and everything it contains.
+        void initAdvancedOptions();
 	void setNewWindowsOnly(bool on);
 	void addColumnSeparators();
 	void addColumnSeparatorsforLoadAscii();

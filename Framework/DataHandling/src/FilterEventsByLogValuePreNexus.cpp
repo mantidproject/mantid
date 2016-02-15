@@ -1,41 +1,42 @@
 #include "MantidDataHandling/FilterEventsByLogValuePreNexus.h"
-#include <algorithm>
-#include <sstream>
-#include <stdexcept>
-#include <functional>
-#include <set>
-#include <vector>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <boost/timer.hpp>
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileValidator.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Glob.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Glob.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
+
+#include <boost/timer.hpp>
+
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <algorithm>
+#include <functional>
+#include <set>
 #include <sstream>
-#include "MantidAPI/MemoryManager.h"
+#include <stdexcept>
+#include <vector>
 
 // #define DBOUT
 
@@ -199,16 +200,16 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
 /** Constructor
 */
 FilterEventsByLogValuePreNexus::FilterEventsByLogValuePreNexus()
-    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), m_prog(NULL),
-      m_protonChargeTot(0), m_detid_max(0), m_eventFile(NULL), m_numEvents(0),
-      m_numPulses(0), m_numPixel(0), m_numGoodEvents(0), m_numErrorEvents(0),
-      m_numBadEvents(0), m_numWrongdetidEvents(0), m_numIgnoredEvents(0),
-      m_firstEvent(0), m_maxNumEvents(0), m_usingMappingFile(false),
-      m_loadOnlySomeSpectra(false), m_longestTof(0.0), m_shortestTof(0.0),
-      m_parallelProcessing(false), m_pulseTimesIncreasing(false),
-      m_throwError(true), m_examEventLog(false), m_pixelid2exam(0),
-      m_numevents2write(0), m_freqHz(0), m_istep(0), m_dbPixelID(0),
-      m_useDBOutput(false), m_corretctTOF(false) {}
+    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), m_prog(nullptr),
+      m_protonChargeTot(0), m_detid_max(0), m_eventFile(nullptr),
+      m_numEvents(0), m_numPulses(0), m_numPixel(0), m_numGoodEvents(0),
+      m_numErrorEvents(0), m_numBadEvents(0), m_numWrongdetidEvents(0),
+      m_numIgnoredEvents(0), m_firstEvent(0), m_maxNumEvents(0),
+      m_usingMappingFile(false), m_loadOnlySomeSpectra(false),
+      m_longestTof(0.0), m_shortestTof(0.0), m_parallelProcessing(false),
+      m_pulseTimesIncreasing(false), m_throwError(true), m_examEventLog(false),
+      m_pixelid2exam(0), m_numevents2write(0), m_freqHz(0), m_istep(0),
+      m_dbPixelID(0), m_useDBOutput(false), m_corretctTOF(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Desctructor
@@ -289,10 +290,7 @@ void FilterEventsByLogValuePreNexus::init() {
                       new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
 
   // Loading option
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Auto");
-  propOptions.push_back("Serial");
-  propOptions.push_back("Parallel");
+  std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"
@@ -314,10 +312,7 @@ void FilterEventsByLogValuePreNexus::init() {
                   "(pixel) information. ");
 
   //
-  std::vector<std::string> vecfunmode;
-  vecfunmode.push_back("LoadData");
-  vecfunmode.push_back("Filter");
-  vecfunmode.push_back("ExamineEventLog");
+  std::vector<std::string> vecfunmode{"LoadData", "Filter", "ExamineEventLog"};
   declareProperty("FunctionMode", "LoadData",
                   boost::make_shared<StringListValidator>(vecfunmode),
                   "Function mode for different purpose. ");

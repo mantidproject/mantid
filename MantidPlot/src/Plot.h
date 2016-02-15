@@ -44,7 +44,8 @@ class Grid;
 struct Detacher : public QObject
 {
   explicit Detacher(QwtPlotItem *plotItem);
-  ~Detacher();
+  ~Detacher() override;
+
 private:
   Detacher();
   QwtPlotItem *m_plotItem;
@@ -97,8 +98,10 @@ public:
     const QColor & paletteBackgroundColor() const;
 
     using QwtPlot::print; // Avoid Intel compiler warning
-    void print(QPainter *, const QRect &rect, const QwtPlotPrintFilter & = QwtPlotPrintFilter()) const;
-    void updateLayout();
+    void
+    print(QPainter *, const QRect &rect,
+          const QwtPlotPrintFilter & = QwtPlotPrintFilter()) const override;
+    void updateLayout() override;
 
     void updateCurveLabels();
     // pass through method that is public on the base class in later qwt versions
@@ -112,23 +115,26 @@ signals:
   void dragMouseMove(QPoint);
 
 protected:
-    void showEvent (QShowEvent * event);
+  void showEvent(QShowEvent *event) override;
     void printFrame(QPainter *painter, const QRect &rect) const;
     // 'Dummy' QRect argument inserted into printCanvas method to avoid Intel
     // compiler warning (about printCanvas signature not matching that in base class)
-    void printCanvas(QPainter *painter, const QRect&, const QRect &canvasRect,
-   			 const QwtScaleMap map[axisCnt], const QwtPlotPrintFilter &pfilter) const;
-	virtual void drawItems (QPainter *painter, const QRect &rect,
-			const QwtScaleMap map[axisCnt], const QwtPlotPrintFilter &pfilter) const;
+    void printCanvas(QPainter *painter, const QRect &, const QRect &canvasRect,
+                     const QwtScaleMap map[axisCnt],
+                     const QwtPlotPrintFilter &pfilter) const override;
+    void drawItems(QPainter *painter, const QRect &rect,
+                   const QwtScaleMap map[axisCnt],
+                   const QwtPlotPrintFilter &pfilter) const override;
 
-	void drawInwardTicks(QPainter *painter, const QRect &rect,
-							const QwtScaleMap&map, int axis, bool min, bool maj) const;
+    void drawInwardTicks(QPainter *painter, const QRect &rect,
+                         const QwtScaleMap &map, int axis, bool min,
+                         bool maj) const;
     void drawBreak(QPainter *painter, const QRect &rect, const QwtScaleMap &map, int axis) const;
 
-  bool eventFilter(QObject *obj, QEvent *ev);
+    bool eventFilter(QObject *obj, QEvent *ev) override;
 
-	Grid *d_grid;
-	QMap<int, QwtPlotItem*> d_curves;
+    Grid *d_grid;
+        QMap<int, QwtPlotItem*> d_curves;
 	QMap<int, QwtPlotMarker*> d_markers;
 
 	int minTickLength, majTickLength;

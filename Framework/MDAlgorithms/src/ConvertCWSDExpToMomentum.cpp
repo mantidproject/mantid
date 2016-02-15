@@ -280,7 +280,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
         throw std::runtime_error("Unable to cast to MDBox");
       mdbox->setExtents(dim, -10, 10);
       mdbox->calcVolume();
-      mdbox->refreshCache(NULL);
+      mdbox->refreshCache(nullptr);
     }
   }
 

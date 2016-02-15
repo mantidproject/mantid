@@ -79,9 +79,9 @@ protected slots:
 	void raiseWidget(int index);
 
 public slots:
-	void accept();
-	void acceptFunction();
-	void acceptParametric();
+  void accept() override;
+  void acceptFunction();
+        void acceptParametric();
 	void acceptPolar();
 	void setCurveToModify(Graph *g, int curve);
 	void insertParamFunctionsList(const QStringList& xList, const QStringList& yList);

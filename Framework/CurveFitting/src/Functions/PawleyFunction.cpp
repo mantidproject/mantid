@@ -1,5 +1,6 @@
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 

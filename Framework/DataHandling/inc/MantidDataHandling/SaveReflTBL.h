@@ -41,24 +41,24 @@ public:
   /// Default constructor
   SaveReflTBL();
   /// Destructor
-  ~SaveReflTBL() {}
+  ~SaveReflTBL() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveReflTBL"; }
+  const std::string name() const override { return "SaveReflTBL"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves a table workspace to a reflectometry tbl format ascii file.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Text"; }
+  const std::string category() const override { return "DataHandling\\Text"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   /// Writes a value to the file
   void writeVal(std::string &val, std::ofstream &file, bool endsep = true,
                 bool endline = false);

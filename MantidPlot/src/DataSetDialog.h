@@ -48,8 +48,8 @@ public:
     DataSetDialog( const QString& text, ApplicationWindow* app, Graph* g = NULL, Qt::WFlags fl = 0 );
 
 public slots:
-	void accept();
-	void setCurveNames(const QStringList& names);
+  void accept() override;
+  void setCurveNames(const QStringList &names);
   void setOperationType(ApplicationWindow::Analysis operation){d_operation = operation;}
 	void setCurentDataSet(const QString& s);
 

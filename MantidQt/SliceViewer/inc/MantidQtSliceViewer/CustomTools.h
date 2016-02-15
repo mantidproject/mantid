@@ -25,9 +25,8 @@ namespace SliceViewer
 class PickerMachine : public QwtPickerMachine
 {
 public:
-  virtual QwtPickerMachine::CommandList transition(
-      const QwtEventPattern &, const QEvent *e)
-  {
+  QwtPickerMachine::CommandList transition(const QwtEventPattern &,
+                                           const QEvent *e) override {
     QwtPickerMachine::CommandList cmdList;
     if ( e->type() == QEvent::MouseMove )
     cmdList += Move;
@@ -50,7 +49,7 @@ signals:
   void rescaled(double factor) const;  
 protected:
   /** Method to flip the way the wheel operates */
-  virtual void rescale(double factor);
+  void rescale(double factor) override;
 };
 
 
@@ -61,11 +60,10 @@ class CustomPicker : public QwtPlotPicker
 
 public:
   CustomPicker(int xAxis, int yAxis, QwtPlotCanvas* canvas);
-  void widgetMouseMoveEvent(QMouseEvent *e);
-  void widgetLeaveEvent(QEvent *);
+  void widgetMouseMoveEvent(QMouseEvent *e) override;
+  void widgetLeaveEvent(QEvent *) override;
 
-  virtual QwtPickerMachine *stateMachine(int) const
-  {
+  QwtPickerMachine *stateMachine(int) const override {
     return new PickerMachine;
   }
 
@@ -75,7 +73,7 @@ signals:
 protected:
   // Unhide base class method (avoids Intel compiler warning)
   using QwtPlotPicker::trackerText;
-  QwtText trackerText (const QwtDoublePoint & pos) const;
+  QwtText trackerText(const QwtDoublePoint &pos) const override;
 };
 
 
@@ -93,8 +91,7 @@ public:
 protected:
   // Unhide base class method (avoids Intel compiler warning)
   using QwtPlotZoomer::trackerText;
-  virtual QwtText trackerText( const QwtDoublePoint& p ) const
-  {
+  QwtText trackerText(const QwtDoublePoint &p) const override {
     QwtText t( QwtPlotPicker::trackerText( p ));
     QColor c(Qt::white);
     c.setAlpha(120);
