@@ -24,7 +24,7 @@ public:
   }
 
   void test_constructor() {
-    TS_ASSERT_THROWS_NOTHING(BasicInstrumentInfo(*workspace));
+    TS_ASSERT_THROWS_NOTHING(BasicInstrumentInfo info(*workspace));
   }
 
   void test_getInstrument() {
