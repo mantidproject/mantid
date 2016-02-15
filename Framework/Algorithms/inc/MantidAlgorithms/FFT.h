@@ -56,8 +56,8 @@ public:
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   /// Perform validation of inputs
   std::map<std::string, std::string> validateInputs() override;
   /// Check whether supplied values are evenly spaced
