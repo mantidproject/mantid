@@ -62,9 +62,9 @@ namespace MantidQt
                         void loadSettings(const QSettings &settings) override;
                         bool addToDisplayContextMenu(QMenu &) const override;
                         void selectTool(const ToolType tool);
-			boost::shared_ptr<ProjectionSurface> getSurface() const;
+                        boost::shared_ptr<ProjectionSurface> getSurface() const;
 
-			public slots:
+                        public slots:
 			void setTubeXUnits(int units);
 			void changedIntegrationRange(double, double);
 			private slots:
@@ -83,10 +83,10 @@ namespace MantidQt
 			void savePlotToWorkspace();
 		private:
                   void showEvent(QShowEvent *) override;
-                        QColor getShapeBorderColor() const;
+                  QColor getShapeBorderColor() const;
 
-			/* Pick tab controls */
-			OneCurvePlot* m_plot; ///< Miniplot to display data in the detectors
+                  /* Pick tab controls */
+                        OneCurvePlot* m_plot; ///< Miniplot to display data in the detectors
 			QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
 			QPushButton *m_zoom;  ///< Button switching on navigation mode
 			QPushButton *m_one;   ///< Button switching on single detector selection mode

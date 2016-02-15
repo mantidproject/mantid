@@ -57,8 +57,8 @@ namespace MantidQt
                         } ///< Type of the GL object
                         void draw(bool picking = false)
                             const override; ///< Method that defines
-                                            ///ObjComponent geometry. Calls
-                                            ///ObjComponent draw method
+                        /// ObjComponent geometry. Calls
+                        /// ObjComponent draw method
                         // virtual void getBoundingBox(Mantid::Kernel::V3D&
                         // minBound,Mantid::Kernel::V3D& maxBound)const;
                         void setColors() override;
@@ -68,9 +68,11 @@ namespace MantidQt
                             GLActorConstVisitor &visitor,
                             VisitorAcceptRule rule = VisitAll) const override;
 
-                private:
-			void setDetectorColor(unsigned char* data, size_t i, GLColor c)const; ///< set colour to a detector
-			void setDataColors() const;
+                      private:
+                        void setDetectorColor(
+                            unsigned char *data, size_t i,
+                            GLColor c) const; ///< set colour to a detector
+                        void setDataColors() const;
 			void setPickColors() const;
 			void generateTexture(unsigned char* data, unsigned int& id) const;
 			/// Swap between drawing counts and drawing detector code colours

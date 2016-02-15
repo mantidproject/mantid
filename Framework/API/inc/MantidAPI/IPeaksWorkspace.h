@@ -53,8 +53,6 @@ public:
     convention = Kernel::ConfigService::Instance().getString("Q.convention");
   }
 
-
-
   /// Returns a clone of the workspace
   IPeaksWorkspace_uptr clone() const { return IPeaksWorkspace_uptr(doClone()); }
 

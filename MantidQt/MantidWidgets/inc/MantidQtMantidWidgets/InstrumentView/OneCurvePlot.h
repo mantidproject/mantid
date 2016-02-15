@@ -27,9 +27,11 @@ namespace MantidQt
 		public:
 			explicit OneCurvePlot(QWidget *parent);
                         ~OneCurvePlot() override;
-                        void setData(const double* x, const double* y, int dataSize, const std::string& xUnits = "");
-			void setLabel(const QString& label);
-			QString label()const { return m_label; }
+                        void setData(const double *x, const double *y,
+                                     int dataSize,
+                                     const std::string &xUnits = "");
+                        void setLabel(const QString &label);
+                        QString label()const { return m_label; }
 			void setYAxisLabelRotation(double degrees);
 			void addPeakLabel(const PeakMarker2D*);
 			void clearPeakLabels();
@@ -61,8 +63,8 @@ namespace MantidQt
                   void mouseReleaseEvent(QMouseEvent *) override;
 
                 private:
-			QwtPlotCurve* m_curve;
-			QString m_label; ///< label to identify stored curve
+                  QwtPlotCurve *m_curve;
+                        QString m_label; ///< label to identify stored curve
 			QwtPlotZoomer* m_zoomer; ///< does zooming
 			int m_x0; ///< save x coord of last left mouse click
 			int m_y0; ///< save y coord of last left mouse click
@@ -84,9 +86,9 @@ namespace MantidQt
                                   const QwtScaleMap &yMap,
                                   const QRect &canvasRect) const override;
 
-                private:
-			const PeakMarker2D* m_marker;
-			const OneCurvePlot* m_plot;
+                      private:
+                        const PeakMarker2D *m_marker;
+                        const OneCurvePlot* m_plot;
 		};
 
 	}//MantidWidgets

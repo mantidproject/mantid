@@ -41,6 +41,7 @@ public:
   TimeAtSampleStrategyDirect(
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws, double ei);
   Correction calculate(const size_t &workspace_index) const override;
+
 private:
   /// Cached L1, Ei dependent const shift
   double m_constShift;

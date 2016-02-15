@@ -43,10 +43,10 @@ public:
 
         QwtDoubleRect boundingRect() const override;
 
-        BarStyle orientation(){return bar_style;};
+        BarStyle orientation() { return bar_style; };
 
-	void setGap (int gap);
-	int gap() const {return bar_gap;};
+        void setGap(int gap);
+        int gap() const {return bar_gap;};
 
 	void setOffset(int offset);
 	int offset() const {return bar_offset;};
@@ -59,7 +59,7 @@ private:
                   const QwtScaleMap &yMap, int from, int to) const override;
 
         int bar_gap, bar_offset;
-	BarStyle bar_style;
+        BarStyle bar_style;
 };
 
 #endif

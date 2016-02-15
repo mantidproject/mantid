@@ -76,6 +76,7 @@ public:
   std::string getExtension() const override;
   std::string getMangledName() const override;
   bool exists() const override;
+
 private:
   IDFObject(const IDFObject &);
   IDFObject &operator=(const IDFObject &);

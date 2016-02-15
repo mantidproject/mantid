@@ -192,15 +192,17 @@ namespace MantidQt
                         }
 
                         bool visit(const CompAssemblyActor *actor) override {
-                                m_surface.addObjCompAssemblies(actor->getComponent()->getComponentID());
-				return false;
-			}
+                          m_surface.addObjCompAssemblies(
+                              actor->getComponent()->getComponentID());
+                          return false;
+                        }
 
                         bool
                         visit(const RectangularDetectorActor *actor) override {
-                                m_surface.addRectangularDetector(actor->getComponent()->getComponentID());
-				return false;
-			}
+                          m_surface.addRectangularDetector(
+                              actor->getComponent()->getComponentID());
+                          return false;
+                        }
 		};
 
 		/**

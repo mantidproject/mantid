@@ -21,6 +21,7 @@ public:
   CoordTransformDistanceParser();
   Mantid::API::CoordTransform *
   createTransform(Poco::XML::Element *coordTransElement) const override;
+
 private:
   CoordTransformDistanceParser(const CoordTransformDistanceParser &);
   CoordTransformDistanceParser &operator=(const CoordTransformDistanceParser &);

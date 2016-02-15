@@ -63,11 +63,12 @@ public:
 private:
   void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
             const QRect &rect) const override;
-        void drawLines(QPainter *painter, const QRect &rect, Qt::Orientation orientation, const QwtScaleMap &map,
-    	const QwtValueList &values) const;
+  void drawLines(QPainter *painter, const QRect &rect,
+                 Qt::Orientation orientation, const QwtScaleMap &map,
+                 const QwtValueList &values) const;
 
-	QPen d_maj_pen_y;
-	QPen d_min_pen_y;
+  QPen d_maj_pen_y;
+        QPen d_min_pen_y;
 
 	int mrkX, mrkY;//x=0 et y=0 line markers keys
 };

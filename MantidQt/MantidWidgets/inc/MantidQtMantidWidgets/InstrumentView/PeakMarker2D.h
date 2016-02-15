@@ -38,9 +38,9 @@ namespace MantidQt
                         }
                         void addToPath(QPainterPath &path) const override;
                         /* --- Own public methods --- */
-			/// Set new marker size to s
-			void setMarkerSize(const int& s);
-			/// Get marker size
+                        /// Set new marker size to s
+                        void setMarkerSize(const int &s);
+                        /// Get marker size
 			int getMarkerSize()const { return m_markerSize; }
 			/// Get default marker size
 			static int getDefaultMarkerSize() { return g_defaultMarkerSize; }
@@ -64,9 +64,9 @@ namespace MantidQt
 			/* --- Implemented Shape2D protected virtual methods --- */
                   void drawShape(QPainter &painter) const override;
                   void refit() override {}
-                        /* --- Own protected methods --- */
-			void drawCircle(QPainter& painter)const;
-			void drawDiamond(QPainter& painter)const;
+                  /* --- Own protected methods --- */
+                  void drawCircle(QPainter &painter) const;
+                        void drawDiamond(QPainter& painter)const;
 			void drawSquare(QPainter& painter)const;
 		private:
 

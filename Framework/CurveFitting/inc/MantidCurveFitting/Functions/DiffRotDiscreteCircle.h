@@ -93,7 +93,6 @@ private:
  */
 class DLLExport DiffRotDiscreteCircle : public API::ImmutableCompositeFunction {
 public:
-
   std::string name() const override { return "DiffRotDiscreteCircle"; }
 
   const std::string category() const override { return "QuasiElastic"; }

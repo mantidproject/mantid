@@ -43,9 +43,9 @@ namespace MantidQt
                   void mousePressEvent(QMouseEvent *) override;
                   void mouseMoveEvent(QMouseEvent *) override;
                   void mouseReleaseEvent(QMouseEvent *) override;
-                        void updateScale();
-			void setMinValueText(double);
-			void setMaxValueText(double);
+                  void updateScale();
+                  void setMinValueText(double);
+                        void setMaxValueText(double);
 			private slots:
 			void scaleOptionsChanged(int);
 			void nPowerChanged(double);

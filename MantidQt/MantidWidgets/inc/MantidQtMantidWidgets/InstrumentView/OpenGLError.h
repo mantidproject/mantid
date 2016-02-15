@@ -19,9 +19,11 @@ namespace MantidQt
                         const char *what() const throw() override {
                           return m_msg.c_str();
                         }
-                        static bool check(const std::string& funName);
-			static bool hasError(const std::string& funName) { return check(funName); }
-			static std::ostream& log();
+                        static bool check(const std::string &funName);
+                        static bool hasError(const std::string &funName) {
+                          return check(funName);
+                        }
+                        static std::ostream& log();
 			static std::ostream& logDebug();
 
 		private:

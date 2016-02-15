@@ -55,7 +55,6 @@ public:
   @return True to keep going.
   */
   bool keepGoing() const override { return m_iterator->getIsMasked(); };
-
 };
 
 /// Policy that indicates no skipping should be applied.

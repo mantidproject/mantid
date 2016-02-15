@@ -71,12 +71,13 @@ class LineProfileTool : public QWidget, public PlotToolInterface
                   return PlotToolInterface::Rtti_LineProfileTool;
                 };
 
-        signals:
-		/** Emitted whenever a new message should be presented to the user.
-		 *
-		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
-		 */
-		void statusText(const QString&);
+signals:
+  /** Emitted whenever a new message should be presented to the user.
+   *
+   * You don't have to connect to this signal if you alreay specified a reciever
+   *during initialization.
+   */
+                void statusText(const QString&);
 
 	protected:
 		int averageImagePixel(const QImage &image, int px, int py, bool moreHorizontal);
@@ -85,18 +86,21 @@ class LineProfileTool : public QWidget, public PlotToolInterface
 		 */
                 void paintEvent(QPaintEvent *e) override;
                 /**\brief Pressing the left mouse button starts line selection.
-		 *
-		 * Clicks with anything else than the left button are propagated to the parent as usual.
-		 */
+                 *
+                 * Clicks with anything else than the left button are propagated
+                 *to the parent as usual.
+                 */
                 void mousePressEvent(QMouseEvent *e) override;
-                /**\brief Mouse movements need to be monitored for updating the line during operation.
-		 */
+                /**\brief Mouse movements need to be monitored for updating the
+                 * line during operation.
+                 */
                 void mouseMoveEvent(QMouseEvent *e) override;
-                /**\brief Mouse releases end line selection and cause the profile to be displayed.
-		 */
+                /**\brief Mouse releases end line selection and cause the
+                 * profile to be displayed.
+                 */
                 void mouseReleaseEvent(QMouseEvent *e) override;
 
-        private:
+              private:
         ApplicationWindow *d_app;
 		//! Number of image pixels over which to average.
 		int d_average_pixels;

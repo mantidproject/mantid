@@ -61,9 +61,12 @@ namespace MantidQt
                         void getBoundingBox(
                             Mantid::Kernel::V3D &minBound,
                             Mantid::Kernel::V3D &maxBound) const override;
-                        void setColor(const GLColor& c) { m_color = c; }
-			const ObjComponentActor* getSamplePosActor()const { return m_samplePosActor; }
-		protected:
+                        void setColor(const GLColor &c) { m_color = c; }
+                        const ObjComponentActor *getSamplePosActor() const {
+                          return m_samplePosActor;
+                        }
+
+                protected:
 			const InstrumentActor& m_instrActor;
 			const Mantid::API::Sample& m_sample;
 			const ObjComponentActor* m_samplePosActor;

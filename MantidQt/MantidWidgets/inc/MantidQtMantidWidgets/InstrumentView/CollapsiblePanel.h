@@ -17,9 +17,9 @@ namespace MantidQt
 			CaptionLabel(const QString& caption, QWidget* parent);
                         void mousePressEvent(QMouseEvent *e) override;
                         void paintEvent(QPaintEvent *event) override;
-                        bool isCollapsed()const { return m_collapsed; }
-			void collapse();
-			void expand();
+                        bool isCollapsed() const { return m_collapsed; }
+                        void collapse();
+                        void expand();
 		signals:
 			void collapseOrExpand(bool);
 		private:

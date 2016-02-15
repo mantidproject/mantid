@@ -44,21 +44,22 @@ public:
 				const QString& endCol1, const QString& endCol2, int startRow, int endRow);
         ~VectorCurve() override;
 
-        enum Position{Tail, Middle, Head};
+        enum Position { Tail, Middle, Head };
 
-	void copy(const VectorCurve *vc);
+        void copy(const VectorCurve *vc);
 
         QwtDoubleRect boundingRect() const override;
 
-        using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
+        using DataCurve::draw; // Unhide base class method (avoids Intel
+                               // compiler warning)
         void draw(QPainter *painter, const QwtScaleMap &xMap,
                   const QwtScaleMap &yMap, int from, int to) const override;
 
         void drawVector(QPainter *painter, const QwtScaleMap &xMap,
-		const QwtScaleMap &yMap, int from, int to) const;
+                        const QwtScaleMap &yMap, int from, int to) const;
 
-	void drawArrowHead(QPainter *p, int xs, int ys, int xe, int ye) const;
-	double theta(int x0, int y0, int x1, int y1) const;
+        void drawArrowHead(QPainter *p, int xs, int ys, int xe, int ye) const;
+        double theta(int x0, int y0, int x1, int y1) const;
 
 	QString vectorEndXAColName(){return d_end_x_a;};
 	QString vectorEndYMColName(){return d_end_y_m;};

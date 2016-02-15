@@ -996,7 +996,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__refresh() { ns1__refresh::soap_default(NULL);}
+  ns1__refresh() { ns1__refresh::soap_default(NULL); }
 };
 #endif
 
@@ -1859,7 +1859,6 @@ public:
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
   ns1__facility() { ns1__facility::soap_default(NULL); }
-
 };
 #endif
 

@@ -53,13 +53,15 @@ public:
   createUnwrapped(const std::string &processXML) const override;
 
   friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionFactoryImpl>;
-  private:
+
+private:
   /// Private Constructor for singleton class
   ImplicitFunctionFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
   ImplicitFunctionFactoryImpl(const ImplicitFunctionFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ImplicitFunctionFactoryImpl &operator=(const ImplicitFunctionFactoryImpl &) = delete;
+  ImplicitFunctionFactoryImpl &
+  operator=(const ImplicitFunctionFactoryImpl &) = delete;
   /// Private Destructor
   ~ImplicitFunctionFactoryImpl() override = default;
 };

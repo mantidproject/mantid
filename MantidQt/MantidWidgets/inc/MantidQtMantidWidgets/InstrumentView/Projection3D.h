@@ -31,9 +31,9 @@ namespace MantidQt
                         ~Projection3D() override;
                         RectF getSurfaceBounds() const override;
 
-                        void setViewDirection(const QString& vd);
-			void set3DAxesState(bool on);
-			void setWireframe(bool on);
+                        void setViewDirection(const QString &vd);
+                        void set3DAxesState(bool on);
+                        void setWireframe(bool on);
 
                         void componentSelected(
                             Mantid::Geometry::ComponentID = NULL) override;
@@ -44,9 +44,9 @@ namespace MantidQt
                         QString getInfoText() const override;
 
                 signals:
-			void finishedMove();
+                  void finishedMove();
 
-			protected slots:
+                        protected slots:
 			void initTranslation(int x, int y);
 			void translate(int x, int y);
 			void initZoom(int x, int y);
@@ -62,10 +62,10 @@ namespace MantidQt
                                    bool picking = false) const override;
                   void changeColorMap() override;
 
-                        void drawAxes(double axis_length = 100.0)const;
-			void setLightingModel(bool picking)const;
+                  void drawAxes(double axis_length = 100.0) const;
+                  void setLightingModel(bool picking) const;
 
-			bool m_drawAxes;
+                        bool m_drawAxes;
 			bool m_wireframe;
 
 			Viewport m_viewport;

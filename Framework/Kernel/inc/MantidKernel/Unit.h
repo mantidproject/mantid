@@ -398,7 +398,6 @@ public:
   /// Constructor
   dSpacing();
 
-
 protected:
   double factorTo;   ///< Constant factor for to conversion
   double factorFrom; ///< Constant factor for from conversion

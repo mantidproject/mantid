@@ -109,7 +109,7 @@ public:
   }
 
   ~ArrayProperty() override = default;
-  
+
   // Unhide the base class assignment operator
   using PropertyWithValue<std::vector<T>>::operator=;
 

@@ -359,7 +359,6 @@ private:
 
 class DLLExport ClientHelloPkt : public Packet {
 public:
-  ClientHelloPkt(const ClientHelloPkt &pkt);
 
   enum Flags {
     PAUSE_AGNOSTIC = 0x0000,

@@ -58,9 +58,9 @@ namespace MantidQt
                             GLActorConstVisitor &visitor,
                             VisitorAcceptRule rule = VisitAll) const override;
 
-                        void addActor(GLActor*);
-			void removeActor(GLActor*);
-			int  getNumberOfActors();
+                        void addActor(GLActor *);
+                        void removeActor(GLActor *);
+                        int  getNumberOfActors();
 			GLActor* getActor(int index);
 			void invalidateDisplayList()const;
 		private:

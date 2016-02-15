@@ -45,6 +45,7 @@ public:
       bool testFileExists = true, bool testCanWrite = false);
   std::vector<std::string> allowedValues() const override;
   IValidator_sptr clone() const override;
+
 protected:
   /// The list of permitted extensions
   std::vector<std::string> m_extensions;

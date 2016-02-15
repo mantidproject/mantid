@@ -66,9 +66,9 @@ namespace MantidQt
 			explicit InstrumentWidgetMaskTab(InstrumentWidget *instrWidget);
                         void initSurface() override;
                         void setMode(Mode mode);
-			void selectTool(Activity tool);
+                        void selectTool(Activity tool);
 
-		signals:
+                signals:
 			void executeAlgorithm(const QString&, const QString&);
 
 			public slots:
@@ -106,9 +106,9 @@ namespace MantidQt
 		protected:
                   void showEvent(QShowEvent *) override;
 
-                        void clearProperties();
-			void setProperties();
-			boost::shared_ptr<Mantid::API::MatrixWorkspace> createMaskWorkspace(bool invertMask, bool temp = false);
+                  void clearProperties();
+                  void setProperties();
+                        boost::shared_ptr<Mantid::API::MatrixWorkspace> createMaskWorkspace(bool invertMask, bool temp = false);
 			void saveMaskingToWorkspace(bool invertMask = false);
 			void saveMaskingToFile(bool invertMask = false);
 			void saveMaskingToCalFile(bool invertMask = false);

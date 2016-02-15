@@ -36,9 +36,10 @@ namespace MantidQt
                   void mouseMoveEvent(QMouseEvent *e) override;
                   void resizeEvent(QResizeEvent *e) override;
                   bool eventFilter(QObject *object, QEvent *e) override;
-                        void updateMinMax();
-		private:
-			int m_resizeMargin; ///< distance from the left (or right) end of the slider within which it can be resized
+                  void updateMinMax();
+
+                private:
+                        int m_resizeMargin; ///< distance from the left (or right) end of the slider within which it can be resized
 			bool m_init;
 			bool m_resizingLeft;    ///< the sider is in resizing mode
 			bool m_resizingRight;    ///< the sider is in resizing mode

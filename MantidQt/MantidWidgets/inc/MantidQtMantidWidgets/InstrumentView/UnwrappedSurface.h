@@ -95,26 +95,35 @@ namespace MantidQt
                         void getSelectedDetectors(QList<int> &dets) override;
                         void
                         getMaskedDetectors(QList<int> &dets) const override;
-                        void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
+                        void setPeaksWorkspace(boost::shared_ptr<
+                            Mantid::API::IPeaksWorkspace> pws);
                         QString getInfoText() const override;
                         RectF getSurfaceBounds() const override;
                         //@}
 
-			/** @name New public virtual methods */
-			//@{
-			/**
-			* Project a point in the 3D space onto the surface. The method returns the u- and v- coordinates of the projection
-			* as well as the scaling factors along the u and v axes. The scaling factors help to draw an approximate projection
-			* of a 3D object on the surface which is an orthographic projection of the object onto the tagent plane to the
-			* surface at point (uv) and scaled along u and v by the corresponding factor.
-			*
-			* @param pos :: A position of a 3D point.
-			* @param u (output) :: u-coordinate of the projection.
-			* @param v (output) :: v-coordinate of the projection.
-			* @param uscale (output) :: The scaling factor along the u-coordinate.
-			* @param vscale (output) :: The scaling factor along the v-coordinate.
-			*/
-			virtual void project(const Mantid::Kernel::V3D & pos, double & u, double & v, double & uscale, double & vscale) const = 0;
+                        /** @name New public virtual methods */
+                        //@{
+                        /**
+                        * Project a point in the 3D space onto the surface. The
+                        *method returns the u- and v- coordinates of the
+                        *projection
+                        * as well as the scaling factors along the u and v axes.
+                        *The scaling factors help to draw an approximate
+                        *projection
+                        * of a 3D object on the surface which is an orthographic
+                        *projection of the object onto the tagent plane to the
+                        * surface at point (uv) and scaled along u and v by the
+                        *corresponding factor.
+                        *
+                        * @param pos :: A position of a 3D point.
+                        * @param u (output) :: u-coordinate of the projection.
+                        * @param v (output) :: v-coordinate of the projection.
+                        * @param uscale (output) :: The scaling factor along the
+                        *u-coordinate.
+                        * @param vscale (output) :: The scaling factor along the
+                        *v-coordinate.
+                        */
+                        virtual void project(const Mantid::Kernel::V3D & pos, double & u, double & v, double & uscale, double & vscale) const = 0;
 			//@}
 
 			/** @name Public methods */
@@ -143,18 +152,20 @@ namespace MantidQt
                   void drawSimpleToImage(QImage *image,
                                          bool picking = false) const override;
                   void changeColorMap() override;
-                        //@}
+                  //@}
 
-			/** @name New protected virtual methods */
-			//@{
-			/**
-			* Calculate a rotation needed to see a detector from the correct angle on the surface.
-			* The rotation should be such that the detector is seen from the tip of the normal
-			* to the surface at the detector's position.
-			* @param udet :: A detector.
-			* @param R :: The result rotaion.
-			*/
-			virtual void rotate(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const = 0;
+                  /** @name New protected virtual methods */
+                  //@{
+                  /**
+                  * Calculate a rotation needed to see a detector from the
+                  * correct angle on the surface.
+                  * The rotation should be such that the detector is seen from
+                  * the tip of the normal
+                  * to the surface at the detector's position.
+                  * @param udet :: A detector.
+                  * @param R :: The result rotaion.
+                  */
+                        virtual void rotate(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const = 0;
 			virtual void calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos);
 			virtual void calcSize(UnwrappedDetector& udet);
 			virtual QString getDimInfo() const;

@@ -40,11 +40,13 @@ namespace MantidQt
 			Shape2DCollection();
                         ~Shape2DCollection() override;
                         Shape2D *clone() const override { return NULL; }
-                        void setWindow(const RectF& surface, const QRect& viewport) const;
+                        void setWindow(const RectF &surface,
+                                       const QRect &viewport) const;
                         void draw(QPainter &painter) const override;
-                        virtual void addShape(Shape2D*, bool slct = false);
-			virtual void removeShape(Shape2D*, bool sendSignal = true);
-			virtual void removeShapes(const QList<Shape2D*>&);
+                        virtual void addShape(Shape2D *, bool slct = false);
+                        virtual void removeShape(Shape2D *,
+                                                 bool sendSignal = true);
+                        virtual void removeShapes(const QList<Shape2D*>&);
 			virtual void clear();
 
 			void keyPressEvent(QKeyEvent*);
@@ -111,9 +113,9 @@ namespace MantidQt
                   void refit() override;
                   void resetBoundingRect() override;
 
-                        Shape2D* createShape(const QString& type, int x, int y)const;
-			bool selectControlPointAt(int x, int y);
-			void deselectControlPoint();
+                  Shape2D *createShape(const QString &type, int x, int y) const;
+                  bool selectControlPointAt(int x, int y);
+                        void deselectControlPoint();
 			bool isOverCurrentAt(int x, int y);
 			bool isOverSelectionAt(int x, int y);
 			void addToSelection(Shape2D* shape);

@@ -77,9 +77,10 @@ namespace MantidQt
 			/// Destructor
                         ~ProjectionSurface() override;
                         /// Resets the instrument actor.
-			void resetInstrumentActor(const InstrumentActor* rootActor);
+                        void
+                        resetInstrumentActor(const InstrumentActor *rootActor);
 
-			//-----------------------------------
+                        //-----------------------------------
 			//     Public virtual methods
 			//-----------------------------------
 

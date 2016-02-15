@@ -155,14 +155,15 @@ public slots:
 	void exportImage(const QString& fileName, int quality = 100, bool transparent = false);
 	void exportSVG(const QString& fname);
         void exportPDF(const QString &fname) override;
-        void exportVector(const QString& fileName, int res = 0, bool color = true,
-                    bool keepAspect = true, QPrinter::PageSize pageSize = QPrinter::Custom);
+        void exportVector(const QString &fileName, int res = 0,
+                          bool color = true, bool keepAspect = true,
+                          QPrinter::PageSize pageSize = QPrinter::Custom);
 
-	void copyAllLayers();
+        void copyAllLayers();
         void print() override;
         void printAllLayers(QPainter *painter);
-	void printActiveLayer();
-	//@}
+        void printActiveLayer();
+        //@}
 
 	void setFonts(const QFont& titleFnt, const QFont& scaleFnt,
 							const QFont& numbersFnt, const QFont& legendFnt);
@@ -221,8 +222,8 @@ private:
   void wheelEvent(QWheelEvent *) override;
   void keyPressEvent(QKeyEvent *) override;
   bool eventFilter(QObject *object, QEvent *) override;
-        void releaseLayer();
-	void resizeLayers(QResizeEvent *re);
+  void releaseLayer();
+  void resizeLayers(QResizeEvent *re);
         bool focusNextPrevChild(bool next) override;
         void dragEnterEvent(QDragEnterEvent *event) override;
         void dropEvent(QDropEvent *event) override;

@@ -77,8 +77,8 @@ namespace MantidQt
 			///< Virtual destructor
                         ~GLActor() override;
                         /// Toggle the visibility of the actor.
-			virtual void setVisibility(bool on) { m_visible = on; }
-			/// Toggle the visibility of the child actors (if exist).
+                        virtual void setVisibility(bool on) { m_visible = on; }
+                        /// Toggle the visibility of the child actors (if exist).
 			virtual void setChildVisibility(bool on) { setVisibility(on); }
 			/// Check if any child is visible
 			virtual bool hasChildVisible() const { return true; }

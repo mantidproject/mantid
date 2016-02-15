@@ -47,8 +47,8 @@ class LogisticFit : public Fit
                          par[1];
                 };
 
-        private:
-		void init();
+              private:
+                void init();
                 void calculateFitCurveData(double *X, double *Y) override;
 };
 

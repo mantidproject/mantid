@@ -52,18 +52,19 @@ class ScreenPickerTool : public QwtPlotPicker, public PlotToolInterface
 		ScreenPickerTool(Graph *graph, const QObject *status_target=NULL, const char *status_slot="");
                 ~ScreenPickerTool() override;
 
-        signals:
-		/** Emitted whenever a new message should be presented to the user.
-		 *
-		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
-		 */
-		void statusText(const QString&);
+signals:
+  /** Emitted whenever a new message should be presented to the user.
+   *
+   * You don't have to connect to this signal if you alreay specified a reciever
+   *during initialization.
+   */
+                void statusText(const QString&);
 	protected:
           bool eventFilter(QObject *obj, QEvent *event) override;
           void append(const QPoint &point) override;
           QwtText trackerText(const QPoint &) const override;
           QwtText trackerText(const QwtDoublePoint &) const override;
-                QwtPlotMarker d_selection_marker;
+          QwtPlotMarker d_selection_marker;
 };
 
 /**Plot tool for drawing arbitrary points.
@@ -77,9 +78,9 @@ class DrawPointTool : public ScreenPickerTool
 
 	protected:
           bool eventFilter(QObject *obj, QEvent *event) override;
-                void appendPoint(const QwtDoublePoint &point);
-		DataCurve *d_curve;
-		Table *d_table;
+          void appendPoint(const QwtDoublePoint &point);
+          DataCurve *d_curve;
+                Table *d_table;
 		ApplicationWindow *d_app;
 };
 

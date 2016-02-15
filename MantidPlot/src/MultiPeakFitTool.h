@@ -55,12 +55,13 @@ class MultiPeakFitTool : public QObject, public PlotToolInterface
                 int rtti() const override {
                   return PlotToolInterface::Rtti_MultiPeakFitTool;
                 };
-        signals:
-		/** Emitted whenever a new message should be presented to the user.
-		 *
-		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
-		 */
-		void statusText(const QString&);
+signals:
+  /** Emitted whenever a new message should be presented to the user.
+   *
+   * You don't have to connect to this signal if you alreay specified a reciever
+   *during initialization.
+   */
+                void statusText(const QString&);
 	protected slots:
 		void selectPeak(QwtPlotCurve *curve, int point_index);
 	private:

@@ -59,9 +59,9 @@ public:
           return new FunctionCurve(*this);
         }
 
-        double startRange(){return d_from;};
-	double endRange(){return d_to;};
-	void setRange(double from, double to);
+        double startRange() { return d_from; };
+        double endRange() { return d_to; };
+        void setRange(double from, double to);
 
 	QStringList formulas(){return d_formulas;};
 	void setFormulas(const QStringList& lst){d_formulas = lst;};

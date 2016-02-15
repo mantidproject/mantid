@@ -56,13 +56,13 @@ namespace MantidQt
                                      double &, double &,
                                      double &) const override;
 
-                protected:
-                  void rotate(const UnwrappedDetector &udet,
-                              Mantid::Kernel::Quat &R) const override;
-                        //void drawCustom(QPainter *painter) const;
+                      protected:
+                        void rotate(const UnwrappedDetector &udet,
+                                    Mantid::Kernel::Quat &R) const override;
+                        // void drawCustom(QPainter *painter) const;
 
-			// Setup the projection axes
-			void setupAxes();
+                        // Setup the projection axes
+                        void setupAxes();
 			// Setup the projection axes
 			void setupBasisAxes(const Mantid::Kernel::V3D &zaxis, Mantid::Kernel::V3D &xaxis, Mantid::Kernel::V3D &yaxis) const;
 			// Find all flat banks of detectors.

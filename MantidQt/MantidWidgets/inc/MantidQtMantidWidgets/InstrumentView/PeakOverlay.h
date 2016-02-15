@@ -127,8 +127,8 @@ namespace MantidQt
                         void clear() override;
 
                         /// Create the markers
-			void createMarkers(const PeakMarker2D::Style &style);
-			void addMarker(PeakMarker2D *m);
+                        void createMarkers(const PeakMarker2D::Style &style);
+                        void addMarker(PeakMarker2D *m);
 			QList<PeakMarker2D *> getMarkersWithID(int detID) const;
 			int getNumberPeaks() const;
 			Mantid::Geometry::IPeak &getPeak(int);
@@ -153,10 +153,10 @@ namespace MantidQt
                       const std::string &wsName,
                       const Mantid::API::Workspace_sptr ws) override;
 
-                        PeakMarker2D::Style getCurrentStyle() const;
-			void recreateMarkers(const PeakMarker2D::Style &style);
+                  PeakMarker2D::Style getCurrentStyle() const;
+                  void recreateMarkers(const PeakMarker2D::Style &style);
 
-			QMultiHash<int, PeakMarker2D *>
+                        QMultiHash<int, PeakMarker2D *>
 				m_det2marker; ///< detector ID to PeakMarker2D map
 			mutable QList<PeakHKL> m_labels;
 			boost::shared_ptr<Mantid::API::IPeaksWorkspace>

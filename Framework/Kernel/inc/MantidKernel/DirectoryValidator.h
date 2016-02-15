@@ -43,6 +43,7 @@ public:
   explicit DirectoryValidator(bool testDirectoryExists = true);
   std::vector<std::string> allowedValues() const override;
   IValidator_sptr clone() const override;
+
 private:
   std::string checkValidity(const std::string &value) const override;
 };

@@ -70,7 +70,6 @@ public:
 
   /// Virutal constructor
   PeakBackground *clone() const override;
-
 };
 
 } // namespace Crystal

@@ -60,24 +60,26 @@ class Fit : public Filter
 		Fit(ApplicationWindow *parent, Table *t, const QString& name = QString());
                 ~Fit() override;
 
-                //! Actually does the fit. Should be reimplemented in derived classes.
-		virtual void fit();
+                //! Actually does the fit. Should be reimplemented in derived
+                // classes.
+                virtual void fit();
                 bool run() override {
                   fit();
                   return true;
                 };
 
                 //! Sets the data set to be used for weighting
-		bool setWeightingData(WeightingMethod w, const QString& colName = QString::null);
+                bool setWeightingData(WeightingMethod w,
+                                      const QString &colName = QString::null);
 
                 void setDataCurve(int curve, double start, double end) override;
                 bool setDataFromTable(Table *t, const QString &xColName,
                                       const QString &yColName, int from = 1,
                                       int to = -1) override;
 
-                QString resultFormula(){return d_result_formula;};
-		QString formula(){return d_formula;};
-		virtual void setFormula(const QString&){};
+                QString resultFormula() { return d_result_formula; };
+                QString formula() { return d_formula; };
+                virtual void setFormula(const QString&){};
 
 		int numParameters(){return d_p;};
 		QStringList parameterNames(){return d_param_names;};
@@ -100,9 +102,9 @@ class Fit : public Filter
                 QString legendInfo() override;
 
                 //! Returns a vector with the fit results
-		double* results(){return d_results;};
+                double *results() { return d_results; };
 
-		//! Returns a vector with the standard deviations of the results
+                //! Returns a vector with the standard deviations of the results
 		double* errors();
 
 		//! Returns the sum of squares of the residuals from the best-fit line

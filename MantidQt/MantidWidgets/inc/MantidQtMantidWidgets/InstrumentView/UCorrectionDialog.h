@@ -20,9 +20,9 @@ namespace MantidQt
                         ~UCorrectionDialog() override;
 
                         bool applyCorrection() const;
-			QPointF getValue() const;
+                        QPointF getValue() const;
 
-		private:
+                private:
 			Ui::UCorrectionDialog *ui;
 		};
 

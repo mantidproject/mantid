@@ -126,15 +126,16 @@ protected:
                    const QwtScaleMap map[axisCnt],
                    const QwtPlotPrintFilter &pfilter) const override;
 
-        void drawInwardTicks(QPainter *painter, const QRect &rect,
-							const QwtScaleMap&map, int axis, bool min, bool maj) const;
+    void drawInwardTicks(QPainter *painter, const QRect &rect,
+                         const QwtScaleMap &map, int axis, bool min,
+                         bool maj) const;
     void drawBreak(QPainter *painter, const QRect &rect, const QwtScaleMap &map, int axis) const;
 
     bool eventFilter(QObject *obj, QEvent *ev) override;
 
-        Grid *d_grid;
-	QMap<int, QwtPlotItem*> d_curves;
-	QMap<int, QwtPlotMarker*> d_markers;
+    Grid *d_grid;
+    QMap<int, QwtPlotItem *> d_curves;
+        QMap<int, QwtPlotMarker*> d_markers;
 
 	int minTickLength, majTickLength;
 	int marker_key;
