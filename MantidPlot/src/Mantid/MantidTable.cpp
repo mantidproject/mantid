@@ -75,7 +75,7 @@ void MantidTable::updateTable()
  */
 void MantidTable::dealWithUnwantedResize()
 {
-  if (static_cast<int>(m_ws->rowCount()) != d_table->numRows() || static_cast<int>(m_ws->columnCount()) != d_table->numCols())
+  if (static_cast<int>(m_ws->rowCount()) != d_table->rowCount() || static_cast<int>(m_ws->columnCount()) != d_table->columnCount())
   {
     updateTable();
   }
@@ -157,8 +157,10 @@ void MantidTable::fillTable()
   if (m_ws->rowCount() < 1000)
   {
     // Note: This is very slow for some reason so it is only done for smallish tables.
-    for(int j=0; j < static_cast<int>(m_ws->rowCount()); j++)
-      d_table->verticalHeader()->setLabel(j,QString::number(j));
+    for(int j=0; j < static_cast<int>(m_ws->rowCount()); j++) {
+      auto item = new QTableWidgetItem(QString::number(j));
+      d_table->setHorizontalHeaderItem(j, item);
+    }
   }
 
   // block resizing
