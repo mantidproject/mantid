@@ -611,7 +611,7 @@ public:
   double throttle(uint32_t index) const {
     if (index < detBankSetCount()) {
       return *reinterpret_cast<const double *>(
-                  &m_fields[m_after_banks_offset[index] + 3]);
+                 &m_fields[m_after_banks_offset[index] + 3]);
     } else
       return (0.0);
   }
